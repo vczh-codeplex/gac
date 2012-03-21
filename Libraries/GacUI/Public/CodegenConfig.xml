@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<codegen>
+  <projects>
+    <project path="..\GacUISrc\GacUISrc\GacUISrc.vcxproj" />
+  </projects>
+  <categories>
+    <category name="vlpp" pattern="\Common\Source\"/>
+    <category name="gacui" pattern="\GacUI\Source\">
+      <except filename="GacUI_WinMain.cpp" />
+      <except filename="GuiTypeDescriptorImpHelper.cpp" />
+      <except filename="GuiTypeDescriptorImpProvider_codegen.cpp" />
+    </category>
+  </categories>
+  <output path="Source\">
+    <codepair category="vlpp" filename="Vlpp" />
+    <codepair category="gacui" filename="GacUI" />
+    <header source="..\Source\GacUI.h" filename="GacUIIncludes" />
+  </output>
+</codegen>
