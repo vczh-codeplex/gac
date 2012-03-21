@@ -3,15 +3,36 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacUISrc", "GacUISrc\GacUISrc.vcxproj", "{85807517-320F-43CD-BD53-93CED2EAED9E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Public", "Public", "{843780E4-7D2F-4955-B988-88325DFB6B9E}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\CodegenConfig.xml = ..\Public\CodegenConfig.xml
+		..\Public\Release.bat = ..\Public\Release.bat
+		..\Public\SuperUnicode.txt = ..\Public\SuperUnicode.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{695AA472-C40E-41C8-BDF9-9866F36C9AE3}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\Source\GacUI.cpp = ..\Public\Source\GacUI.cpp
+		..\Public\Source\GacUI.h = ..\Public\Source\GacUI.h
+		..\Public\Source\GacUIIncludes.h = ..\Public\Source\GacUIIncludes.h
+		..\Public\Source\Vlpp.cpp = ..\Public\Source\Vlpp.cpp
+		..\Public\Source\Vlpp.h = ..\Public\Source\Vlpp.h
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacUISrcCodepackedTest", "GacUISrcCodepackedTest\GacUISrcCodepackedTest.vcxproj", "{EB5A22FF-03D9-45A9-BF76-8083D46A643B}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 2
+		SccNumberOfProjects = 3
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = GacUISrc\\GacUISrc.vcxproj
 		SccProjectName1 = GacUISrc
 		SccLocalPath1 = GacUISrc
+		SccProjectUniqueName2 = GacUISrcCodepackedTest\\GacUISrcCodepackedTest.vcxproj
+		SccProjectName2 = GacUISrcCodepackedTest
+		SccLocalPath2 = GacUISrcCodepackedTest
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -22,8 +43,15 @@ Global
 		{85807517-320F-43CD-BD53-93CED2EAED9E}.Debug|Win32.Build.0 = Debug|Win32
 		{85807517-320F-43CD-BD53-93CED2EAED9E}.Release|Win32.ActiveCfg = Release|Win32
 		{85807517-320F-43CD-BD53-93CED2EAED9E}.Release|Win32.Build.0 = Release|Win32
+		{EB5A22FF-03D9-45A9-BF76-8083D46A643B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EB5A22FF-03D9-45A9-BF76-8083D46A643B}.Debug|Win32.Build.0 = Debug|Win32
+		{EB5A22FF-03D9-45A9-BF76-8083D46A643B}.Release|Win32.ActiveCfg = Release|Win32
+		{EB5A22FF-03D9-45A9-BF76-8083D46A643B}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{695AA472-C40E-41C8-BDF9-9866F36C9AE3} = {843780E4-7D2F-4955-B988-88325DFB6B9E}
 	EndGlobalSection
 EndGlobal
