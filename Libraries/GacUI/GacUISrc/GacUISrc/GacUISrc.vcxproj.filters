@@ -1,0 +1,402 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{057d088e-a1e3-4437-8e36-6df00acd456f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Basic">
+      <UniqueIdentifier>{1fa8b022-d3ec-4071-9aed-da5d5c6d9064}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Collections">
+      <UniqueIdentifier>{dc40a773-0d6a-4023-9117-ae1771af1060}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Stream">
+      <UniqueIdentifier>{40bc9a50-e23e-4fe3-87f3-9a447e75befe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI">
+      <UniqueIdentifier>{cd5550d6-cb37-4020-bc7e-36a6c8e23eb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI\Controls">
+      <UniqueIdentifier>{2bf46d7a-efcf-4656-a576-27e4438e2847}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI\GraphicsElement">
+      <UniqueIdentifier>{44d6e453-c1f4-4abc-8309-441db998975b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI\NativeWindow">
+      <UniqueIdentifier>{d431374b-430b-48f6-8897-587dd9d73ed3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI\Reflection">
+      <UniqueIdentifier>{6f847785-bccf-4050-82a0-0616d72714d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI\Controls\ExtendedControls">
+      <UniqueIdentifier>{5a42a659-890c-440f-ad26-f0a3ff0ee7e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI\Controls\Styles">
+      <UniqueIdentifier>{89ba437f-f3fa-4585-9765-9ae8f4604055}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI\GraphicsElement\WindowsDirect2D">
+      <UniqueIdentifier>{b5d5d768-2e61-47ea-a764-0b7907bc9492}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI\GraphicsElement\WindowsGDI">
+      <UniqueIdentifier>{cc990e71-5e5a-4802-8844-2f3cd17519d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI\NativeWindow\Windows">
+      <UniqueIdentifier>{df38fe5f-e54b-4bb1-a665-7ced4b034f64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI\NativeWindow\Windows\Direct2D">
+      <UniqueIdentifier>{9b70a5fa-9ce6-49d3-85e1-021406df1879}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI\NativeWindow\Windows\GDI">
+      <UniqueIdentifier>{eaf26748-f7da-4cfd-af89-44868c2bef82}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Exception.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\String.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Threading.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Collections\Operation.cpp">
+      <Filter>Common\Collections</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\Accessor.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\BroadcastStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\CacheStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\CharFormat.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\FileStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\MemoryStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\MemoryWrapperStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\RecorderStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GacUI_WinMain.cpp">
+      <Filter>GacUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\GuiApplication.cpp">
+      <Filter>GacUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\GuiBasicControls.cpp">
+      <Filter>GacUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\GuiListControls.cpp">
+      <Filter>GacUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\GuiTextControls.cpp">
+      <Filter>GacUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\GuiWindowControls.cpp">
+      <Filter>GacUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiComboControls.cpp">
+      <Filter>GacUI\Controls\ExtendedControls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiContainerControls.cpp">
+      <Filter>GacUI\Controls\ExtendedControls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiListViewControls.cpp">
+      <Filter>GacUI\Controls\ExtendedControls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiMenuControls.cpp">
+      <Filter>GacUI\Controls\ExtendedControls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiTextListControls.cpp">
+      <Filter>GacUI\Controls\ExtendedControls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiTreeViewControls.cpp">
+      <Filter>GacUI\Controls\ExtendedControls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\GuiCommonStyles.cpp">
+      <Filter>GacUI\Controls\Styles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\GuiWin7Styles.cpp">
+      <Filter>GacUI\Controls\Styles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.cpp">
+      <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.cpp">
+      <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsRenderersWindowsDirect2D.cpp">
+      <Filter>GacUI\GraphicsElement\WindowsDirect2D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.cpp">
+      <Filter>GacUI\GraphicsElement\WindowsDirect2D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsComposition.cpp">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsElement.cpp">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsEventReceiver.cpp">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsHost.cpp">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsTextElement.cpp">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\GuiNativeWindow.cpp">
+      <Filter>GacUI\NativeWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.cpp">
+      <Filter>GacUI\NativeWindow\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.cpp">
+      <Filter>GacUI\NativeWindow\Windows\Direct2D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\GDI\WinGDI.cpp">
+      <Filter>GacUI\NativeWindow\Windows\GDI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\GDI\WinGDIApplication.cpp">
+      <Filter>GacUI\NativeWindow\Windows\GDI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptor.cpp">
+      <Filter>GacUI\Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Event.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Exception.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Function.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Pointer.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\String.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Threading.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Tuple.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\Dictionary.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\DictionaryWrappers.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\Interfaces.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\List.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\ListWrappers.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\Operation.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationAggregate.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationConcat.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationCopyFrom.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationEnumerable.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationForEach.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationPair.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationSelect.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationSequence.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationSet.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationString.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationWhere.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\Pair.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\Accessor.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\BroadcastStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\CacheStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\CharFormat.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\FileStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\Interfaces.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\MemoryStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\MemoryWrapperStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\RecorderStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\StreamSerialization.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GacUI.h">
+      <Filter>GacUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GacVlppReferences.h">
+      <Filter>GacUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\GuiApplication.h">
+      <Filter>GacUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\GuiBasicControls.h">
+      <Filter>GacUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\GuiListControls.h">
+      <Filter>GacUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\GuiTextControls.h">
+      <Filter>GacUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\GuiWindowControls.h">
+      <Filter>GacUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiComboControls.h">
+      <Filter>GacUI\Controls\ExtendedControls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiContainerControls.h">
+      <Filter>GacUI\Controls\ExtendedControls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiListViewControls.h">
+      <Filter>GacUI\Controls\ExtendedControls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiMenuControls.h">
+      <Filter>GacUI\Controls\ExtendedControls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiTextListControls.h">
+      <Filter>GacUI\Controls\ExtendedControls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiTreeViewControls.h">
+      <Filter>GacUI\Controls\ExtendedControls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\GuiCommonStyles.h">
+      <Filter>GacUI\Controls\Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\GuiWin7Styles.h">
+      <Filter>GacUI\Controls\Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.h">
+      <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.h">
+      <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsRenderersWindowsDirect2D.h">
+      <Filter>GacUI\GraphicsElement\WindowsDirect2D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.h">
+      <Filter>GacUI\GraphicsElement\WindowsDirect2D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsComposition.h">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsElement.h">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsEventReceiver.h">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsHost.h">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsStyle.h">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsTextElement.h">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\GuiNativeWindow.h">
+      <Filter>GacUI\NativeWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\GuiTypes.h">
+      <Filter>GacUI\NativeWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.h">
+      <Filter>GacUI\NativeWindow\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.h">
+      <Filter>GacUI\NativeWindow\Windows\Direct2D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\GDI\WinGDI.h">
+      <Filter>GacUI\NativeWindow\Windows\GDI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\GDI\WinGDIApplication.h">
+      <Filter>GacUI\NativeWindow\Windows\GDI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptor.h">
+      <Filter>GacUI\Reflection</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{85807517-320F-43CD-BD53-93CED2EAED9E}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>GacUISrc</RootNamespace>
+    <SccProjectName>SAK</SccProjectName>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Collections\Operation.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Exception.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\Accessor.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\BroadcastStream.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\CacheStream.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\CharFormat.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\FileStream.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\MemoryStream.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\MemoryWrapperStream.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Stream\RecorderStream.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\String.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Threading.cpp" />
+    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiComboControls.cpp" />
+    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiContainerControls.cpp" />
+    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiListViewControls.cpp" />
+    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiMenuControls.cpp" />
+    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiTextListControls.cpp" />
+    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiTreeViewControls.cpp" />
+    <ClCompile Include="..\..\Source\Controls\GuiApplication.cpp" />
+    <ClCompile Include="..\..\Source\Controls\GuiBasicControls.cpp" />
+    <ClCompile Include="..\..\Source\Controls\GuiListControls.cpp" />
+    <ClCompile Include="..\..\Source\Controls\GuiTextControls.cpp" />
+    <ClCompile Include="..\..\Source\Controls\GuiWindowControls.cpp" />
+    <ClCompile Include="..\..\Source\Controls\Styles\GuiCommonStyles.cpp" />
+    <ClCompile Include="..\..\Source\Controls\Styles\GuiWin7Styles.cpp" />
+    <ClCompile Include="..\..\Source\GacUI_WinMain.cpp" />
+    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsComposition.cpp" />
+    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsElement.cpp" />
+    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsEventReceiver.cpp" />
+    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsHost.cpp" />
+    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsTextElement.cpp" />
+    <ClCompile Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsRenderersWindowsDirect2D.cpp" />
+    <ClCompile Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.cpp" />
+    <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.cpp" />
+    <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\GuiNativeWindow.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\GDI\WinGDI.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\GDI\WinGDIApplication.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptor.cpp" />
+    <ClCompile Include="Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\Common\Source\Basic.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\Dictionary.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\DictionaryWrappers.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\Interfaces.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\List.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\ListWrappers.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\Operation.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationAggregate.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationConcat.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationCopyFrom.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationEnumerable.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationForEach.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationPair.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationSelect.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationSequence.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationSet.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationString.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationWhere.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\Pair.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Event.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Exception.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Function.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Pointer.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\Accessor.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\BroadcastStream.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\CacheStream.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\CharFormat.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\FileStream.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\Interfaces.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\MemoryStream.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\MemoryWrapperStream.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\RecorderStream.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Stream\StreamSerialization.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\String.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Threading.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Tuple.h" />
+    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiComboControls.h" />
+    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiContainerControls.h" />
+    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiListViewControls.h" />
+    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiMenuControls.h" />
+    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiTextListControls.h" />
+    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiTreeViewControls.h" />
+    <ClInclude Include="..\..\Source\Controls\GuiApplication.h" />
+    <ClInclude Include="..\..\Source\Controls\GuiBasicControls.h" />
+    <ClInclude Include="..\..\Source\Controls\GuiListControls.h" />
+    <ClInclude Include="..\..\Source\Controls\GuiTextControls.h" />
+    <ClInclude Include="..\..\Source\Controls\GuiWindowControls.h" />
+    <ClInclude Include="..\..\Source\Controls\Styles\GuiCommonStyles.h" />
+    <ClInclude Include="..\..\Source\Controls\Styles\GuiWin7Styles.h" />
+    <ClInclude Include="..\..\Source\GacUI.h" />
+    <ClInclude Include="..\..\Source\GacVlppReferences.h" />
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsComposition.h" />
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsElement.h" />
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsEventReceiver.h" />
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsHost.h" />
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsStyle.h" />
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsTextElement.h" />
+    <ClInclude Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsRenderersWindowsDirect2D.h" />
+    <ClInclude Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.h" />
+    <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.h" />
+    <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\GuiNativeWindow.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\GuiTypes.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\GDI\WinGDI.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\GDI\WinGDIApplication.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.h" />
+    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptor.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

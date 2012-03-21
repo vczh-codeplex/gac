@@ -1,6 +1,6 @@
 #include "WinNativeWindow.h"
-#include "..\..\..\..\..\..\..\Library\Collections\OperationCopyFrom.h"
-#include "..\..\..\..\..\..\..\Library\Threading.h"
+#include "..\..\..\..\..\Common\Source\Collections\OperationCopyFrom.h"
+#include "..\..\..\..\..\Common\Source\Threading.h"
 
 #pragma comment(lib, "Imm32.lib")
 #pragma comment(lib, "WindowsCodecs.lib")

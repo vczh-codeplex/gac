@@ -9,11 +9,11 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_GACVLPPREFERENCES
 #define VCZH_PRESENTATION_GACVLPPREFERENCES
 
-#include "..\..\..\..\..\Library\Basic.h"
-#include "..\..\..\..\..\Library\String.h"
-#include "..\..\..\..\..\Library\Pointer.h"
-#include "..\..\..\..\..\Library\Function.h"
-#include "..\..\..\..\..\Library\Collections\List.h"
-#include "..\..\..\..\..\Library\Collections\Dictionary.h"
+#include "..\..\..\Common\Source\Basic.h"
+#include "..\..\..\Common\Source\String.h"
+#include "..\..\..\Common\Source\Pointer.h"
+#include "..\..\..\Common\Source\Function.h"
+#include "..\..\..\Common\Source\Collections\List.h"
+#include "..\..\..\Common\Source\Collections\Dictionary.h"
 
 #endif
