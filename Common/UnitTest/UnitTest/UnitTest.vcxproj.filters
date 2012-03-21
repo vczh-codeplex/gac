@@ -1,0 +1,392 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{f3779849-c949-4b60-8751-58f50e27be8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Basic">
+      <UniqueIdentifier>{42b60bd4-7164-4935-bf76-808ec5a1fc90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Collections">
+      <UniqueIdentifier>{04f34fd9-11ee-4e9b-92ae-13a0ee6bb4e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Combinator">
+      <UniqueIdentifier>{d9b25c89-6b57-4978-927f-23c9d08b6fcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Entity">
+      <UniqueIdentifier>{3284a2c5-100c-426a-8771-c9be9f0e91df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Regex">
+      <UniqueIdentifier>{4523f76a-a088-44c2-8446-3cd21c07ecb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Stream">
+      <UniqueIdentifier>{5d7b32ab-1fdf-4930-9223-3a5083c0a061}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\UnitTest">
+      <UniqueIdentifier>{4cee4ebe-34cf-4f3e-b531-1e809f809106}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Source\Basic.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Console.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Exception.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GlobalStorage.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\String.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Threading.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Collections\Operation.cpp">
+      <Filter>Common\Collections</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Combinator\StringCombinator.cpp">
+      <Filter>Common\Combinator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Combinator\TokenCombinator.cpp">
+      <Filter>Common\Combinator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Entity\BigObjectPoolEntity.cpp">
+      <Filter>Common\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Entity\GcSingleThreadEntity.cpp">
+      <Filter>Common\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Entity\GeneralObjectPoolEntity.cpp">
+      <Filter>Common\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Entity\SmallObjectPoolEntity.cpp">
+      <Filter>Common\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Entity\TaskEntity.cpp">
+      <Filter>Common\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Entity\TreeDoc.cpp">
+      <Filter>Common\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Entity\TreeJson.cpp">
+      <Filter>Common\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Entity\TreeQuery.cpp">
+      <Filter>Common\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Entity\TreeXml.cpp">
+      <Filter>Common\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\UnitTest\UnitTest.cpp">
+      <Filter>Common\UnitTest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Stream\Accessor.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Stream\BroadcastStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Stream\CacheStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Stream\CharFormat.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Stream\FileStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Stream\MemoryStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Stream\MemoryWrapperStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Stream\RecorderStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Regex\Regex.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Regex\RegexAutomaton.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Regex\RegexData.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Regex\RegexExpression.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Regex\RegexParser.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Regex\RegexPure.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Regex\RegexRich.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Regex\RegexWriter.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Source\Basic.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Console.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Event.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Exception.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Function.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GlobalStorage.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Lazy.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Pointer.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\String.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Threading.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Tuple.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\Dictionary.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\DictionaryWrappers.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\Interfaces.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\List.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\ListWrappers.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\Operation.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\OperationAggregate.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\OperationConcat.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\OperationCopyFrom.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\OperationEnumerable.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\OperationForEach.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\OperationPair.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\OperationSelect.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\OperationSequence.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\OperationSet.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\OperationString.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\OperationWhere.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\Pair.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\_Alt.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\_Binop.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\_Def.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\_Error.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\_Loop.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\_Pred.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\_Ref.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\_Seq.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\_Unit.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\_Using.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\Combinator.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\Expression.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\ParserInput.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\StringCombinator.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\TokenCombinator.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Combinator\TupleProcessor.h">
+      <Filter>Common\Combinator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Entity\BigObjectPoolEntity.h">
+      <Filter>Common\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Entity\BinaryBalanceTreeEntity.h">
+      <Filter>Common\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Entity\GcEntityCommon.h">
+      <Filter>Common\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Entity\GcSingleThreadEntity.h">
+      <Filter>Common\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Entity\GeneralObjectPoolEntity.h">
+      <Filter>Common\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Entity\Linear.h">
+      <Filter>Common\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Entity\SmallObjectPoolEntity.h">
+      <Filter>Common\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Entity\TaskEntity.h">
+      <Filter>Common\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Entity\TreeDoc.h">
+      <Filter>Common\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Entity\TreeJson.h">
+      <Filter>Common\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Entity\TreeQuery.h">
+      <Filter>Common\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Entity\TreeXml.h">
+      <Filter>Common\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\UnitTest\UnitTest.h">
+      <Filter>Common\UnitTest</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Stream\Accessor.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Stream\BroadcastStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Stream\CacheStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Stream\CharFormat.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Stream\FileStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Stream\Interfaces.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Stream\MemoryStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Stream\MemoryWrapperStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Stream\RecorderStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Stream\StreamSerialization.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Regex\Regex.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Regex\RegexAutomaton.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Regex\RegexData.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Regex\RegexExpression.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Regex\RegexPure.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Regex\RegexRich.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Regex\RegexWriter.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Source\Common.fpm">
+      <Filter>Common\Basic</Filter>
+    </None>
+    <None Include="..\..\Source\Event.h.fpm">
+      <Filter>Common\Basic</Filter>
+    </None>
+    <None Include="..\..\Source\Function.h.fpm">
+      <Filter>Common\Basic</Filter>
+    </None>
+    <None Include="..\..\Source\GenerateCode.bat">
+      <Filter>Common\Basic</Filter>
+    </None>
+    <None Include="..\..\Source\Tuple.h.fpm">
+      <Filter>Common\Basic</Filter>
+    </None>
+  </ItemGroup>
+</Project>
