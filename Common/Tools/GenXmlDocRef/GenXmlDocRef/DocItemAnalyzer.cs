@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using System.IO;
 
 namespace GenXmlDocRef
 {
@@ -288,12 +289,21 @@ namespace GenXmlDocRef
                 if (this.Name == null) throw new ArgumentException();
                 if (this.UniqueId == null) throw new ArgumentException();
                 if (this.Title == null) throw new ArgumentException();
+                if (this.Content == null) throw new ArgumentException();
                 uniqueIdItemMap.Add(this.UniqueId, this);
             }
             foreach (var item in this.SubItems)
             {
                 item.BuildIndex(uniqueIdItemMap);
             }
+        }
+
+        public void Write(TextWriter writer, DocItemWriterContext context)
+        {
+            int index = this.UniqueId.IndexOf(':');
+            string name = this.UniqueId.Substring(0, index);
+            var docItemWriter = DocItemWriter.CreateWriter(name);
+            docItemWriter.Write(this, writer, context);
         }
     }
 }
