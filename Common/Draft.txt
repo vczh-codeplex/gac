@@ -1,0 +1,28 @@
+/name:<name>
+/uniqueId:<uniqueId>
+/parentUniqueId:<parentUniqueId>
+/content
+
+/+b/ /-b/ // /crlf/ /para/ /nop/
+/img:"<path>"/ /color:FFFFFF/
+/+linkid:"<id>"/ /-linkid/
+/+linksymbol:"<id>"/ /-linksymbol/
+
+/+table/
+  /+row/
+    /+col/
+    /-col/
+  /-row/
+/-table/
+
+/codebegin:<language>
+/codeend
+========================================================
+parse intel manual 2A and 2B to get binary code table
+x86 and x64 assembler
+intermediate code
+enriched C language
+design a language for Calculation, AsyncIO, Server and GUI programming
+========================================================
+general type system library
+general syntax tree library (visitor pattern)
