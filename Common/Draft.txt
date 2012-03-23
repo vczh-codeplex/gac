@@ -3,16 +3,16 @@
 /parentUniqueId:<parentUniqueId>
 /content
 
-/+b/ /-b/ // /crlf/ /para/ /nop/
+/+b/ /-b/ // /crlf/ /para/ /nop/ /+h123/ /-h123/
 /img:"<path>"/ /color:FFFFFF/
 /+linkid:"<id>"/ /-linkid/
 /+linksymbol:"<id>"/ /-linksymbol/
 
 /+table/
-  /+row/
+  /+row//+rowheader/
     /+col/
     /-col/
-  /-row/
+  /-row//-rowheader/
 /-table/
 
 /codebegin:<language>

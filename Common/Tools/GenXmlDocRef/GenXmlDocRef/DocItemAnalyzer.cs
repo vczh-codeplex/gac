@@ -60,6 +60,7 @@ namespace GenXmlDocRef
                             UniqueId = "enum:" + fullName,
                             Title = "enum " + typeName,
                             Content = docXml,
+                            Document = docXml.Element("document"),
                         };
 
                         docItem.AddSymbolDocItem(typeItem, (lastNamespace == null ? null : lastNamespace.Item2), namespaceNames);
@@ -149,6 +150,7 @@ namespace GenXmlDocRef
                             UniqueId = "function:" + fullName,
                             Title = "function " + functionName,
                             Content = docXml,
+                            Document = docXml.Element("document"),
                         };
                         docItem.AddSymbolDocItem(functionItem, namespaces, namespaceNames);
                     }
