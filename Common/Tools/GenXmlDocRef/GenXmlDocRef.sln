@@ -3,6 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenXmlDocRef", "GenXmlDocRef\GenXmlDocRef.csproj", "{74EE4049-E871-4EF0-A93F-3F326238ED61}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AA48F713-65B8-4B67-A3A0-9466C1201492}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\Draft.txt = ..\..\Draft.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 2
