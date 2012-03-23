@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Xml.Linq;
+using System.Text.RegularExpressions;
 
 namespace GenXmlDocRef
 {
@@ -15,6 +16,8 @@ namespace GenXmlDocRef
 
     abstract class DocItemWriter
     {
+        public DocItem AssociatedDocItem { get; private set; }
+
         protected abstract void WriteContent(DocItem docItem, TextWriter writer, DocItemWriterContext context);
 
         public void Write(DocItem docItem, TextWriter writer, DocItemWriterContext context)
@@ -37,22 +40,66 @@ namespace GenXmlDocRef
             }
         }
 
-        public static DocItemWriter CreateWriter(string name)
+        public static DocItemWriter CreateWriter(string name, DocItem docItem)
         {
             switch (name)
             {
-                case "namespace": return new NamespaceDocItemWriter();
-                case "enum": return new EnumDocItemWriter();
-                case "type": return new TypeDocItemWriter();
-                case "functionGroup": return new FunctionGroupDocItemWriter();
-                case "function": return new FunctionDocItemWriter();
-                default: throw new ArgumentException();
+                case "namespace": return new NamespaceDocItemWriter() { AssociatedDocItem = docItem };
+                case "enum": return new EnumDocItemWriter() { AssociatedDocItem = docItem };
+                case "type": return new TypeDocItemWriter() { AssociatedDocItem = docItem };
+                case "functionGroup": return new FunctionGroupDocItemWriter() { AssociatedDocItem = docItem };
+                case "function": return new FunctionDocItemWriter() { AssociatedDocItem = docItem };
+                default: throw new ArgumentException(string.Format("Cannot create DocItemWriter for {0}.", name));
             }
+        }
+
+        private static Regex symbolRegex = new Regex(@"\[(?<cref>[A-Z]+:[a-zA-Z0-9_.]+)\]");
+
+        protected void WriteHyperlinkEnabledText(string text, TextWriter writer, DocItemWriterContext context)
+        {
+            int index = 0;
+            while (true)
+            {
+                Match match = symbolRegex.Match(text, index);
+                if (match.Success)
+                {
+                    writer.Write(text.Substring(index, match.Index - index));
+                    index = match.Index + match.Value.Length;
+                    string cref = match.Groups["cref"].Value;
+                    WriteHyperlinkSymbol(cref, "", writer, context);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            writer.Write(text.Substring(index));
         }
 
         protected void WriteNode(XNode node, TextWriter writer, DocItemWriterContext context)
         {
-            writer.Write(node);
+            if (node is XText || node is XCData)
+            {
+                WriteHyperlinkEnabledText(node.ToString(), writer, context);
+                return;
+            }
+
+            XElement element = node as XElement;
+            if (element != null)
+            {
+                switch (element.Name.ToString())
+                {
+                    case "see":
+                        {
+                            string cref = element.Attribute("cref").Value;
+                            string text = element.Value;
+                            WriteHyperlinkSymbol(cref, text, writer, context);
+                        }
+                        return;
+                }
+            }
+
+            throw new ArgumentException(string.Format("[{0}]: Don't know how to print {1}.", this.AssociatedDocItem.Name, node.GetType().Name));
         }
 
         protected void WriteNodes(IEnumerable<XNode> nodes, TextWriter writer, DocItemWriterContext context)
@@ -104,7 +151,81 @@ namespace GenXmlDocRef
 
         protected void WriteHyperlinkType(string type, TextWriter writer, DocItemWriterContext context)
         {
-            writer.Write(type);
+            var docItem = context
+                .MemberIdItemMap
+                .Where(p => p.Key.StartsWith("T:"))
+                .Where(p => p.Value.Content.Attribute("fullName").Value == type)
+                .Select(p => p.Value)
+                .FirstOrDefault();
+            if (docItem == null)
+            {
+                writer.Write(type);
+            }
+            else
+            {
+                writer.Write("/+linkid:{0}/{1}/-linkid/", docItem.UniqueId, GetReadableName(docItem));
+            }
+        }
+
+        protected void WriteHyperlinkSymbol(string cref, string text, TextWriter writer, DocItemWriterContext context)
+        {
+            if (text != "")
+            {
+                writer.Write("/+linksymbol:{0}/{1}/-linksymbol/", cref, text);
+            }
+            else
+            {
+                DocItem docItem = null;
+                if (!context.MemberIdItemMap.TryGetValue(cref, out docItem))
+                {
+                    if (cref.StartsWith("M:"))
+                    {
+                        var docItems = context
+                            .MemberIdItemMap
+                            .Where(p => p.Key.StartsWith(cref + "("))
+                            .Select(p => p.Value)
+                            .ToArray();
+                        if (docItems.Length == 1)
+                        {
+                            docItem = docItems[0];
+                        }
+                    }
+                }
+
+                if (docItem != null)
+                {
+                    writer.Write("/+linksymbol:{0}/{1}/-linksymbol/", cref, GetReadableName(docItem));
+                }
+                else
+                {
+                    throw new ArgumentException(string.Format("[{0}]: Cannot generate hyperlink text for symbol {1}", this.AssociatedDocItem.Name, cref));
+                }
+            }
+        }
+
+        protected string GetReadableName(DocItem item)
+        {
+            string name = item.Content.Attribute("name").Value;
+            if (item.UniqueId.StartsWith("enum:") && name == "Type" && item.Parent.UniqueId.StartsWith("namespace:"))
+            {
+                name = item.Parent.Content.Attribute("name").Value + "::" + name;
+            }
+            else
+            {
+                while (true)
+                {
+                    item = item.Parent;
+                    if (item == null || !item.UniqueId.StartsWith("type:"))
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        name = item.Content.Attribute("name").Value + "::" + name;
+                    }
+                }
+            }
+            return name;
         }
     }
 
@@ -150,6 +271,7 @@ namespace GenXmlDocRef
                 writer.WriteLine("/+b/Base Types:/-b//crlf/");
                 foreach (var baseType in baseTypes)
                 {
+                    writer.Write("/nop/    ");
                     WriteHyperlinkType(baseType.Attribute("fullName").Value, writer, context);
                     writer.WriteLine("/crlf/");
                 }

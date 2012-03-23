@@ -46,9 +46,9 @@ namespace GenXmlDocRef
                             docItem.Write(writer, context);
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        Console.WriteLine("Failed to open {0} to write.", fileName);
+                        Console.WriteLine(ex.Message);
                     }
                 }
                 Console.WriteLine("All document items of reference {0} generated.", rootUniqueId);

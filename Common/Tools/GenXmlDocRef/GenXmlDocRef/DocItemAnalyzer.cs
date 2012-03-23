@@ -58,7 +58,7 @@ namespace GenXmlDocRef
                         {
                             Name = "enum_" + fullName.Replace("::", "_"),
                             UniqueId = "enum:" + fullName,
-                            Title = "enum " + typeName,
+                            Title = typeName + " Enumeration",
                             Content = docXml,
                             Document = docXml.Element("document"),
                         };
@@ -76,7 +76,7 @@ namespace GenXmlDocRef
                         {
                             Name = "type_" + fullName.Replace("::", "_"),
                             UniqueId = "type:" + fullName,
-                            Title = "class " + typeName,
+                            Title = typeName + " Class",
                             Content = docXml,
                         };
 
@@ -124,7 +124,7 @@ namespace GenXmlDocRef
                             {
                                 Name = "functionGroup_" + nameBody + "_" + functionName,
                                 UniqueId = "functionGroup:" + uniqueIdBody + "::" + functionName,
-                                Title = "overloaded functions " + functionName,
+                                Title = functionName + " Functions(overloading)",
                                 Content = docXml,
                             };
                             docItem.AddSymbolDocItem(functionItem, namespaces, namespaceNames);
@@ -148,7 +148,7 @@ namespace GenXmlDocRef
                         {
                             Name = "function_" + fullName.Replace("::", "_"),
                             UniqueId = "function:" + fullName,
-                            Title = "function " + functionName,
+                            Title = functionName + " Function",
                             Content = docXml,
                             Document = docXml.Element("document"),
                         };
@@ -275,7 +275,7 @@ namespace GenXmlDocRef
                     {
                         Name = namespacePath,
                         UniqueId = "namespace:" + namespaceName,
-                        Title = "namespace " + namespaceName,
+                        Title = namespaceName + " Namespace",
                         Content = docXml,
                     };
                     AddDocItem(item);
@@ -304,7 +304,7 @@ namespace GenXmlDocRef
         {
             int index = this.UniqueId.IndexOf(':');
             string name = this.UniqueId.Substring(0, index);
-            var docItemWriter = DocItemWriter.CreateWriter(name);
+            var docItemWriter = DocItemWriter.CreateWriter(name, this);
             docItemWriter.Write(this, writer, context);
         }
     }
