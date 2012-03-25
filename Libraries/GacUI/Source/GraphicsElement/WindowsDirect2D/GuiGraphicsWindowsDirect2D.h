@@ -9,7 +9,9 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSWINDOWSDIRECT2D
 #define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSWINDOWSDIRECT2D
 
-#include "..\..\NativeWindow\Windows\Direct2D\WinDirect2DApplication.h"
+#include <D2D1.h>
+#include <DWrite.h>
+#include <wincodec.h>
 #include "..\GuiGraphicsElement.h"
 #include "..\GuiGraphicsComposition.h"
 
@@ -19,6 +21,11 @@ namespace vl
 	{
 		namespace elements_windows_d2d
 		{
+
+/***********************************************************************
+Functionality
+***********************************************************************/
+
 			class IWindowsDirect2DRenderTarget : public elements::IGuiGraphicsRenderTarget
 			{
 			public:
@@ -50,10 +57,31 @@ namespace vl
 			};
 
 			extern IWindowsDirect2DResourceManager*			GetWindowsDirect2DResourceManager();
-
 			extern D2D1::ColorF								GetD2DColor(Color color);
+
+/***********************************************************************
+OS Supporting
+***********************************************************************/
+
+			class IWindowsDirect2DObjectProvider : public Interface
+			{
+			public:
+				virtual ID2D1RenderTarget*					GetNativeWindowDirect2DRenderTarget(INativeWindow* window)=0;
+				virtual ID2D1Factory*						GetDirect2DFactory()=0;
+				virtual IDWriteFactory*						GetDirectWriteFactory()=0;
+				virtual IWindowsDirect2DRenderTarget*		GetBindedRenderTarget(INativeWindow* window)=0;
+				virtual void								SetBindedRenderTarget(INativeWindow* window, IWindowsDirect2DRenderTarget* renderTarget)=0;
+				virtual IWICImagingFactory*					GetWICImagingFactory()=0;
+				virtual IWICBitmapDecoder*					GetWICBitmapDecoder(INativeImage* image)=0;
+				virtual IWICBitmap*							GetWICBitmap(INativeImageFrame* frame)=0;
+			};
+
+			extern IWindowsDirect2DObjectProvider*			GetWindowsDirect2DObjectProvider();
+			extern void										SetWindowsDirect2DObjectProvider(IWindowsDirect2DObjectProvider* provider);
 		}
 	}
 }
+
+extern void RendererMainDirect2D();
 
 #endif

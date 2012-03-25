@@ -7,7 +7,6 @@ namespace vl
 	{
 		namespace elements_windows_d2d
 		{
-			using namespace windows;
 			using namespace collections;
 
 /***********************************************************************
@@ -448,7 +447,7 @@ GuiSolidLabelElementRenderer
 				if(renderTarget && !element->GetMultiline() && !element->GetWrapLine())
 				{
 					IDWriteTextLayout* textLayout=0;
-					HRESULT hr=GetDirectWriteFactory()->CreateTextLayout(
+					HRESULT hr=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory()->CreateTextLayout(
 						oldText.Buffer(),
 						oldText.Length(),
 						textFormat->textFormat.Obj(),
@@ -539,7 +538,7 @@ GuiSolidLabelElementRenderer
 				}
 				else
 				{
-					IDWriteFactory* dwriteFactory=GetDirectWriteFactory();
+					IDWriteFactory* dwriteFactory=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory();
 					DWRITE_WORD_WRAPPING wrapping=textFormat->textFormat->GetWordWrapping();
 					DWRITE_TEXT_ALIGNMENT textAlignment=textFormat->textFormat->GetTextAlignment();
 					DWRITE_PARAGRAPH_ALIGNMENT paragraphAlignment=textFormat->textFormat->GetParagraphAlignment();
@@ -752,7 +751,7 @@ GuiPolygonElementRenderer
 				if(oldPoints.Count()>=3)
 				{
 					ID2D1PathGeometry* pg=0;
-					GetDirect2DFactory()->CreatePathGeometry(&pg);
+					GetWindowsDirect2DObjectProvider()->GetDirect2DFactory()->CreatePathGeometry(&pg);
 					if(pg)
 					{
 						geometry=pg;

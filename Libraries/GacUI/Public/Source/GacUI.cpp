@@ -16193,7 +16193,6 @@ namespace vl
 	{
 		namespace elements_windows_d2d
 		{
-			using namespace windows;
 			using namespace collections;
 
 /***********************************************************************
@@ -16634,7 +16633,7 @@ GuiSolidLabelElementRenderer
 				if(renderTarget && !element->GetMultiline() && !element->GetWrapLine())
 				{
 					IDWriteTextLayout* textLayout=0;
-					HRESULT hr=GetDirectWriteFactory()->CreateTextLayout(
+					HRESULT hr=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory()->CreateTextLayout(
 						oldText.Buffer(),
 						oldText.Length(),
 						textFormat->textFormat.Obj(),
@@ -16725,7 +16724,7 @@ GuiSolidLabelElementRenderer
 				}
 				else
 				{
-					IDWriteFactory* dwriteFactory=GetDirectWriteFactory();
+					IDWriteFactory* dwriteFactory=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory();
 					DWRITE_WORD_WRAPPING wrapping=textFormat->textFormat->GetWordWrapping();
 					DWRITE_TEXT_ALIGNMENT textAlignment=textFormat->textFormat->GetTextAlignment();
 					DWRITE_PARAGRAPH_ALIGNMENT paragraphAlignment=textFormat->textFormat->GetParagraphAlignment();
@@ -16938,7 +16937,7 @@ GuiPolygonElementRenderer
 				if(oldPoints.Count()>=3)
 				{
 					ID2D1PathGeometry* pg=0;
-					GetDirect2DFactory()->CreatePathGeometry(&pg);
+					GetWindowsDirect2DObjectProvider()->GetDirect2DFactory()->CreatePathGeometry(&pg);
 					if(pg)
 					{
 						geometry=pg;
@@ -17330,7 +17329,6 @@ namespace vl
 	{
 		namespace elements_windows_d2d
 		{
-			using namespace windows;
 			using namespace elements;
 			using namespace collections;
 
@@ -17434,7 +17432,7 @@ CachedResourceAllocator
 
 				static ComPtr<IDWriteTextFormat> CreateDirect2DFont(const FontProperties& fontProperties)
 				{
-					IDWriteFactory* dwriteFactory=GetDirectWriteFactory();
+					IDWriteFactory* dwriteFactory=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory();
 					IDWriteTextFormat* format=0;
 					HRESULT hr=dwriteFactory->CreateTextFormat(
 						fontProperties.fontFamily.Buffer(),
@@ -17465,7 +17463,7 @@ CachedResourceAllocator
 					textFormat->trimming.delimiterCount=0;
 
 					IDWriteInlineObject* ellipseInlineObject=0;
-					GetDirectWriteFactory()->CreateEllipsisTrimmingSign(textFormat->textFormat.Obj(), &ellipseInlineObject);
+					GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory()->CreateEllipsisTrimmingSign(textFormat->textFormat.Obj(), &ellipseInlineObject);
 					textFormat->ellipseInlineObject=ellipseInlineObject;
 					return textFormat;
 				}
@@ -17486,7 +17484,7 @@ CachedResourceAllocator
 					{
 						Size charSize(0, 0);
 						IDWriteTextLayout* textLayout=0;
-						HRESULT hr=GetDirectWriteFactory()->CreateTextLayout(
+						HRESULT hr=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory()->CreateTextLayout(
 							&character,
 							1,
 							font.Obj(),
@@ -17555,7 +17553,7 @@ WindiwsGDIRenderTarget
 					cachedFrame=frame;
  					ID2D1Bitmap* d2dBitmap=0;
 					HRESULT hr=renderTarget->GetDirect2DRenderTarget()->CreateBitmapFromWicBitmap(
-						GetWICBitmap(frame),
+						GetWindowsDirect2DObjectProvider()->GetWICBitmap(frame),
 						&d2dBitmap
 						);
 					if(SUCCEEDED(hr))
@@ -17580,7 +17578,7 @@ WindiwsGDIRenderTarget
 				}
 			};
 
-			class WindowsDirect2DRenderTarget : public Object, public IWindowsDirect2DRenderTarget, public IWindowsFormGraphicsHandler
+			class WindowsDirect2DRenderTarget : public Object, public IWindowsDirect2DRenderTarget
 			{
 				typedef SortedList<Ptr<WindowsDirect2DImageFrameCache>> ImageCacheList;
 			protected:
@@ -17613,7 +17611,7 @@ WindiwsGDIRenderTarget
 
 				ID2D1RenderTarget* GetDirect2DRenderTarget()override
 				{
-					return d2dRenderTarget?d2dRenderTarget:GetNativeWindowDirect2DRenderTarget(window);
+					return d2dRenderTarget?d2dRenderTarget:GetWindowsDirect2DObjectProvider()->GetNativeWindowDirect2DRenderTarget(window);
 				}
 
 				ComPtr<ID2D1Bitmap> GetBitmap(INativeImageFrame* frame)override
@@ -17646,7 +17644,7 @@ WindiwsGDIRenderTarget
 
 				void StartRendering()override
 				{
-					d2dRenderTarget=GetNativeWindowDirect2DRenderTarget(window);
+					d2dRenderTarget=GetWindowsDirect2DObjectProvider()->GetNativeWindowDirect2DRenderTarget(window);
 					d2dRenderTarget->BeginDraw();
 					d2dRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Black));
 				}
@@ -17655,10 +17653,6 @@ WindiwsGDIRenderTarget
 				{
 					d2dRenderTarget->EndDraw();
 					d2dRenderTarget=0;
-				}
-
-				void RedrawContent()override
-				{
 				}
 
 				void PushClipper(Rect clipper)override
@@ -17760,21 +17754,20 @@ WindowsGDIResourceManager
 			public:
 				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)
 				{
-					return dynamic_cast<IGuiGraphicsRenderTarget*>(GetWindowsForm(window)->GetGraphicsHandler());
+					return GetWindowsDirect2DObjectProvider()->GetBindedRenderTarget(window);
 				}
 
 				void NativeWindowCreated(INativeWindow* window)override
 				{
 					WindowsDirect2DRenderTarget* renderTarget=new WindowsDirect2DRenderTarget(window);
 					renderTargets.Add(renderTarget);
-					GetWindowsForm(window)->SetGraphicsHandler(renderTarget);
+					GetWindowsDirect2DObjectProvider()->SetBindedRenderTarget(window, renderTarget);
 				}
 
 				void NativeWindowDestroying(INativeWindow* window)override
 				{
-					IWindowsForm* form=GetWindowsForm(window);
-					WindowsDirect2DRenderTarget* renderTarget=dynamic_cast<WindowsDirect2DRenderTarget*>(form->GetGraphicsHandler());
-					form->SetGraphicsHandler(0);
+					WindowsDirect2DRenderTarget* renderTarget=dynamic_cast<WindowsDirect2DRenderTarget*>(GetWindowsDirect2DObjectProvider()->GetBindedRenderTarget(window));
+					GetWindowsDirect2DObjectProvider()->SetBindedRenderTarget(window, 0);
 					renderTargets.Remove(renderTarget);
 				}
 
@@ -17813,6 +17806,22 @@ WindowsGDIResourceManager
 			{
 				windowsDirect2DResourceManager=resourceManager;
 			}
+
+/***********************************************************************
+OS Supporting
+***********************************************************************/
+
+			IWindowsDirect2DObjectProvider* windowsDirect2DObjectProvider=0;
+
+			IWindowsDirect2DObjectProvider* GetWindowsDirect2DObjectProvider()
+			{
+				return windowsDirect2DObjectProvider;
+			}
+
+			void SetWindowsDirect2DObjectProvider(IWindowsDirect2DObjectProvider* provider)
+			{
+				windowsDirect2DObjectProvider=provider;
+			}
 		}
 	}
 }
@@ -17845,12 +17854,6 @@ void RendererMainDirect2D()
 	GuiApplicationMain();
 	elements_windows_d2d::SetWindowsDirect2DResourceManager(0);
 	SetGuiGraphicsResourceManager(0);
-}
-
-int SetupWindowsDirect2DRenderer()
-{
-	HINSTANCE hInstance=(HINSTANCE)GetModuleHandle(NULL);
-	return WinMainDirect2D(hInstance, &RendererMainDirect2D);
 }
 
 /***********************************************************************
@@ -18798,7 +18801,7 @@ namespace vl
 WindiwsGDIRenderTarget
 ***********************************************************************/
 
-			class WindowsGDIRenderTarget : public Object, public IWindowsGDIRenderTarget, public IWindowsFormGraphicsHandler
+			class WindowsGDIRenderTarget : public Object, public IWindowsGDIRenderTarget
 			{
 			protected:
 				INativeWindow*				window;
@@ -18831,21 +18834,17 @@ WindiwsGDIRenderTarget
 
 				WinDC* GetDC()override
 				{
-					return dc?dc:GetNativeWindowDC(window);
+					return dc?dc:GetWindowsGDIObjectProvider()->GetNativeWindowDC(window);
 				}
 
 				void StartRendering()override
 				{
-					dc=GetNativeWindowDC(window);
+					dc=GetWindowsGDIObjectProvider()->GetNativeWindowDC(window);
 				}
 
 				void StopRendering()override
 				{
 					dc=0;
-				}
-
-				void RedrawContent()override
-				{
 				}
 
 				void PushClipper(Rect clipper)override
@@ -19034,7 +19033,7 @@ WindowsGDIResourceManager
 					Size size=frame->GetSize();
 					bitmap=new WinBitmap(size.x, size.y, WinBitmap::vbb32Bits, true);
 
-					IWICBitmap* wicBitmap=GetWICBitmap(frame);
+					IWICBitmap* wicBitmap=GetWindowsGDIObjectProvider()->GetWICBitmap(frame);
 					WICRect rect;
 					rect.X=0;
 					rect.Y=0;
@@ -19074,21 +19073,20 @@ WindowsGDIResourceManager
 			public:
 				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)
 				{
-					return dynamic_cast<IGuiGraphicsRenderTarget*>(GetWindowsForm(window)->GetGraphicsHandler());
+					return GetWindowsGDIObjectProvider()->GetBindedRenderTarget(window);
 				}
 
 				void NativeWindowCreated(INativeWindow* window)override
 				{
 					WindowsGDIRenderTarget* renderTarget=new WindowsGDIRenderTarget(window);
 					renderTargets.Add(renderTarget);
-					GetWindowsForm(window)->SetGraphicsHandler(renderTarget);
+					GetWindowsGDIObjectProvider()->SetBindedRenderTarget(window, renderTarget);
 				}
 
 				void NativeWindowDestroying(INativeWindow* window)override
 				{
-					IWindowsForm* form=GetWindowsForm(window);
-					WindowsGDIRenderTarget* renderTarget=dynamic_cast<WindowsGDIRenderTarget*>(form->GetGraphicsHandler());
-					form->SetGraphicsHandler(0);
+					WindowsGDIRenderTarget* renderTarget=dynamic_cast<WindowsGDIRenderTarget*>(GetWindowsGDIObjectProvider()->GetBindedRenderTarget(window));
+					GetWindowsGDIObjectProvider()->SetBindedRenderTarget(window, 0);
 					renderTargets.Remove(renderTarget);
 				}
 
@@ -19174,6 +19172,22 @@ WindowsGDIResourceManager
 			{
 				windowsGDIResourceManager=resourceManager;
 			}
+
+/***********************************************************************
+OS Supporting
+***********************************************************************/
+
+			IWindowsGDIObjectProvider* windowsGDIObjectProvider=0;
+
+			IWindowsGDIObjectProvider* GetWindowsGDIObjectProvider()
+			{
+				return windowsGDIObjectProvider;
+			}
+
+			void SetWindowsGDIObjectProvider(IWindowsGDIObjectProvider* provider)
+			{
+				windowsGDIObjectProvider=provider;
+			}
 		}
 	}
 }
@@ -19206,12 +19220,6 @@ void RendererMainGDI()
 	GuiApplicationMain();
 	elements_windows_gdi::SetWindowsGDIResourceManager(0);
 	SetGuiGraphicsResourceManager(0);
-}
-
-int SetupWindowsGDIRenderer()
-{
-	HINSTANCE hInstance=(HINSTANCE)GetModuleHandle(NULL);
-	return WinMainGDI(hInstance, &RendererMainGDI);
 }
 
 /***********************************************************************
@@ -19509,8 +19517,6 @@ namespace vl
 
 				void Paint()
 				{
-					IWindowsForm* form=GetWindowsForm(window);
-					form->GetGraphicsHandler()->RedrawContent();
 				}
 
 				ID2D1RenderTarget* GetDirect2DRenderTarget()
@@ -19580,12 +19586,64 @@ namespace vl
 				return direct2DListener->dwrite.Obj();
 			}
 		}
+
+		namespace elements_windows_d2d
+		{
+/***********************************************************************
+OS Supporting
+***********************************************************************/
+
+			class WinDirect2DApplicationDirect2DObjectProvider : public IWindowsDirect2DObjectProvider
+			{
+			public:
+				ID2D1RenderTarget* GetNativeWindowDirect2DRenderTarget(INativeWindow* window)
+				{
+					return vl::presentation::windows::GetNativeWindowDirect2DRenderTarget(window);
+				}
+
+				ID2D1Factory* GetDirect2DFactory()
+				{
+					return vl::presentation::windows::GetDirect2DFactory();
+				}
+
+				IDWriteFactory* GetDirectWriteFactory()
+				{
+					return vl::presentation::windows::GetDirectWriteFactory();
+				}
+
+				IWindowsDirect2DRenderTarget* GetBindedRenderTarget(INativeWindow* window)
+				{
+					return dynamic_cast<IWindowsDirect2DRenderTarget*>(vl::presentation::windows::GetWindowsForm(window)->GetGraphicsHandler());
+				}
+
+				void SetBindedRenderTarget(INativeWindow* window, IWindowsDirect2DRenderTarget* renderTarget)
+				{
+					vl::presentation::windows::GetWindowsForm(window)->SetGraphicsHandler(renderTarget);
+				}
+
+				IWICImagingFactory* GetWICImagingFactory()
+				{
+					return vl::presentation::windows::GetWICImagingFactory();
+				}
+
+				IWICBitmapDecoder* GetWICBitmapDecoder(INativeImage* image)
+				{
+					return vl::presentation::windows::GetWICBitmapDecoder(image);
+				}
+
+				IWICBitmap* GetWICBitmap(INativeImageFrame* frame)
+				{
+					return vl::presentation::windows::GetWICBitmap(frame);
+				}
+			};
+		}
 	}
 }
 
 using namespace vl;
 using namespace vl::presentation;
 using namespace vl::presentation::windows;
+using namespace vl::presentation::elements_windows_d2d;
 
 int WinMainDirect2D(HINSTANCE hInstance, void(*RendererMain)())
 {
@@ -19607,6 +19665,14 @@ int WinMainDirect2D(HINSTANCE hInstance, void(*RendererMain)())
 	// destroy controller
 	DestroyWindowsNativeController(controller);
 	return 0;
+}
+
+int SetupWindowsDirect2DRenderer()
+{
+	HINSTANCE hInstance=(HINSTANCE)GetModuleHandle(NULL);
+	WinDirect2DApplicationDirect2DObjectProvider objectProvider;
+	SetWindowsDirect2DObjectProvider(&objectProvider);
+	return WinMainDirect2D(hInstance, &RendererMainDirect2D);
 }
 
 /***********************************************************************
@@ -21615,12 +21681,54 @@ namespace vl
 				return dc?dc->GetHandle():NULL;
 			}
 		}
+
+		namespace elements_windows_gdi
+		{
+/***********************************************************************
+OS Supporting
+***********************************************************************/
+
+			class WinDirect2DApplicationGDIObjectProvider : public IWindowsGDIObjectProvider
+			{
+			public:
+				windows::WinDC* GetNativeWindowDC(INativeWindow* window)
+				{
+					return vl::presentation::windows::GetNativeWindowDC(window);
+				}
+
+				IWindowsGDIRenderTarget* GetBindedRenderTarget(INativeWindow* window)
+				{
+					return dynamic_cast<IWindowsGDIRenderTarget*>(vl::presentation::windows::GetWindowsForm(window)->GetGraphicsHandler());
+				}
+
+				void SetBindedRenderTarget(INativeWindow* window, IWindowsGDIRenderTarget* renderTarget)
+				{
+					vl::presentation::windows::GetWindowsForm(window)->SetGraphicsHandler(renderTarget);
+				}
+
+				IWICImagingFactory* GetWICImagingFactory()
+				{
+					return vl::presentation::windows::GetWICImagingFactory();
+				}
+
+				IWICBitmapDecoder* GetWICBitmapDecoder(INativeImage* image)
+				{
+					return vl::presentation::windows::GetWICBitmapDecoder(image);
+				}
+
+				IWICBitmap* GetWICBitmap(INativeImageFrame* frame)
+				{
+					return vl::presentation::windows::GetWICBitmap(frame);
+				}
+			};
+		}
 	}
 }
 
 using namespace vl;
 using namespace vl::presentation;
 using namespace vl::presentation::windows;
+using namespace vl::presentation::elements_windows_gdi;
 
 int WinMainGDI(HINSTANCE hInstance, void(*RendererMain)())
 {
@@ -21642,6 +21750,14 @@ int WinMainGDI(HINSTANCE hInstance, void(*RendererMain)())
 	// destroy controller
 	DestroyWindowsNativeController(controller);
 	return 0;
+}
+
+int SetupWindowsGDIRenderer()
+{
+	HINSTANCE hInstance=(HINSTANCE)GetModuleHandle(NULL);
+	WinDirect2DApplicationGDIObjectProvider objectProvider;
+	SetWindowsGDIObjectProvider(&objectProvider);
+	return WinMainGDI(hInstance, &RendererMainGDI);
 }
 
 /***********************************************************************
@@ -22918,7 +23034,7 @@ WindowsForm
 				int									mouseLastX;
 				int									mouseLastY;
 				int									mouseHoving;
-				IWindowsFormGraphicsHandler*		graphicsHandler;
+				Interface*							graphicsHandler;
 			public:
 				WindowsForm(HWND parent, WString className, HINSTANCE hInstance)
 					:cursor(0)
@@ -22967,12 +23083,12 @@ WindowsForm
 					return handle;
 				}
 
-				IWindowsFormGraphicsHandler* GetGraphicsHandler()
+				Interface* GetGraphicsHandler()
 				{
 					return graphicsHandler;
 				}
 
-				void SetGraphicsHandler(IWindowsFormGraphicsHandler* handler)
+				void SetGraphicsHandler(Interface* handler)
 				{
 					graphicsHandler=handler;
 				}
@@ -23311,7 +23427,6 @@ WindowsForm
 				{
 					if(graphicsHandler)
 					{
-						graphicsHandler->RedrawContent();
 						SendMessage(this->handle, WM_PAINT, NULL, NULL);
 					}
 				}

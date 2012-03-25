@@ -2,6 +2,7 @@
 #pragma comment(lib, "dwrite.lib")
 
 #include "WinDirect2DApplication.h"
+#include "..\..\..\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.h"
 
 namespace vl
 {
@@ -88,8 +89,6 @@ namespace vl
 
 				void Paint()
 				{
-					IWindowsForm* form=GetWindowsForm(window);
-					form->GetGraphicsHandler()->RedrawContent();
 				}
 
 				ID2D1RenderTarget* GetDirect2DRenderTarget()
@@ -159,12 +158,64 @@ namespace vl
 				return direct2DListener->dwrite.Obj();
 			}
 		}
+
+		namespace elements_windows_d2d
+		{
+/***********************************************************************
+OS Supporting
+***********************************************************************/
+
+			class WinDirect2DApplicationDirect2DObjectProvider : public IWindowsDirect2DObjectProvider
+			{
+			public:
+				ID2D1RenderTarget* GetNativeWindowDirect2DRenderTarget(INativeWindow* window)
+				{
+					return vl::presentation::windows::GetNativeWindowDirect2DRenderTarget(window);
+				}
+
+				ID2D1Factory* GetDirect2DFactory()
+				{
+					return vl::presentation::windows::GetDirect2DFactory();
+				}
+
+				IDWriteFactory* GetDirectWriteFactory()
+				{
+					return vl::presentation::windows::GetDirectWriteFactory();
+				}
+
+				IWindowsDirect2DRenderTarget* GetBindedRenderTarget(INativeWindow* window)
+				{
+					return dynamic_cast<IWindowsDirect2DRenderTarget*>(vl::presentation::windows::GetWindowsForm(window)->GetGraphicsHandler());
+				}
+
+				void SetBindedRenderTarget(INativeWindow* window, IWindowsDirect2DRenderTarget* renderTarget)
+				{
+					vl::presentation::windows::GetWindowsForm(window)->SetGraphicsHandler(renderTarget);
+				}
+
+				IWICImagingFactory* GetWICImagingFactory()
+				{
+					return vl::presentation::windows::GetWICImagingFactory();
+				}
+
+				IWICBitmapDecoder* GetWICBitmapDecoder(INativeImage* image)
+				{
+					return vl::presentation::windows::GetWICBitmapDecoder(image);
+				}
+
+				IWICBitmap* GetWICBitmap(INativeImageFrame* frame)
+				{
+					return vl::presentation::windows::GetWICBitmap(frame);
+				}
+			};
+		}
 	}
 }
 
 using namespace vl;
 using namespace vl::presentation;
 using namespace vl::presentation::windows;
+using namespace vl::presentation::elements_windows_d2d;
 
 int WinMainDirect2D(HINSTANCE hInstance, void(*RendererMain)())
 {
@@ -186,4 +237,12 @@ int WinMainDirect2D(HINSTANCE hInstance, void(*RendererMain)())
 	// destroy controller
 	DestroyWindowsNativeController(controller);
 	return 0;
+}
+
+int SetupWindowsDirect2DRenderer()
+{
+	HINSTANCE hInstance=(HINSTANCE)GetModuleHandle(NULL);
+	WinDirect2DApplicationDirect2DObjectProvider objectProvider;
+	SetWindowsDirect2DObjectProvider(&objectProvider);
+	return WinMainDirect2D(hInstance, &RendererMainDirect2D);
 }

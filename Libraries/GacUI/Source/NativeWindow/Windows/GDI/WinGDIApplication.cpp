@@ -1,4 +1,5 @@
-#include"WinGDIApplication.h"
+#include "WinGDIApplication.h"
+#include "..\..\..\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.h"
 
 namespace vl
 {
@@ -113,12 +114,54 @@ namespace vl
 				return dc?dc->GetHandle():NULL;
 			}
 		}
+
+		namespace elements_windows_gdi
+		{
+/***********************************************************************
+OS Supporting
+***********************************************************************/
+
+			class WinDirect2DApplicationGDIObjectProvider : public IWindowsGDIObjectProvider
+			{
+			public:
+				windows::WinDC* GetNativeWindowDC(INativeWindow* window)
+				{
+					return vl::presentation::windows::GetNativeWindowDC(window);
+				}
+
+				IWindowsGDIRenderTarget* GetBindedRenderTarget(INativeWindow* window)
+				{
+					return dynamic_cast<IWindowsGDIRenderTarget*>(vl::presentation::windows::GetWindowsForm(window)->GetGraphicsHandler());
+				}
+
+				void SetBindedRenderTarget(INativeWindow* window, IWindowsGDIRenderTarget* renderTarget)
+				{
+					vl::presentation::windows::GetWindowsForm(window)->SetGraphicsHandler(renderTarget);
+				}
+
+				IWICImagingFactory* GetWICImagingFactory()
+				{
+					return vl::presentation::windows::GetWICImagingFactory();
+				}
+
+				IWICBitmapDecoder* GetWICBitmapDecoder(INativeImage* image)
+				{
+					return vl::presentation::windows::GetWICBitmapDecoder(image);
+				}
+
+				IWICBitmap* GetWICBitmap(INativeImageFrame* frame)
+				{
+					return vl::presentation::windows::GetWICBitmap(frame);
+				}
+			};
+		}
 	}
 }
 
 using namespace vl;
 using namespace vl::presentation;
 using namespace vl::presentation::windows;
+using namespace vl::presentation::elements_windows_gdi;
 
 int WinMainGDI(HINSTANCE hInstance, void(*RendererMain)())
 {
@@ -140,4 +183,12 @@ int WinMainGDI(HINSTANCE hInstance, void(*RendererMain)())
 	// destroy controller
 	DestroyWindowsNativeController(controller);
 	return 0;
+}
+
+int SetupWindowsGDIRenderer()
+{
+	HINSTANCE hInstance=(HINSTANCE)GetModuleHandle(NULL);
+	WinDirect2DApplicationGDIObjectProvider objectProvider;
+	SetWindowsGDIObjectProvider(&objectProvider);
+	return WinMainGDI(hInstance, &RendererMainGDI);
 }

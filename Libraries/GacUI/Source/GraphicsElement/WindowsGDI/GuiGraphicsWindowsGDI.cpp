@@ -16,7 +16,7 @@ namespace vl
 WindiwsGDIRenderTarget
 ***********************************************************************/
 
-			class WindowsGDIRenderTarget : public Object, public IWindowsGDIRenderTarget, public IWindowsFormGraphicsHandler
+			class WindowsGDIRenderTarget : public Object, public IWindowsGDIRenderTarget
 			{
 			protected:
 				INativeWindow*				window;
@@ -49,21 +49,17 @@ WindiwsGDIRenderTarget
 
 				WinDC* GetDC()override
 				{
-					return dc?dc:GetNativeWindowDC(window);
+					return dc?dc:GetWindowsGDIObjectProvider()->GetNativeWindowDC(window);
 				}
 
 				void StartRendering()override
 				{
-					dc=GetNativeWindowDC(window);
+					dc=GetWindowsGDIObjectProvider()->GetNativeWindowDC(window);
 				}
 
 				void StopRendering()override
 				{
 					dc=0;
-				}
-
-				void RedrawContent()override
-				{
 				}
 
 				void PushClipper(Rect clipper)override
@@ -252,7 +248,7 @@ WindowsGDIResourceManager
 					Size size=frame->GetSize();
 					bitmap=new WinBitmap(size.x, size.y, WinBitmap::vbb32Bits, true);
 
-					IWICBitmap* wicBitmap=GetWICBitmap(frame);
+					IWICBitmap* wicBitmap=GetWindowsGDIObjectProvider()->GetWICBitmap(frame);
 					WICRect rect;
 					rect.X=0;
 					rect.Y=0;
@@ -292,21 +288,20 @@ WindowsGDIResourceManager
 			public:
 				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)
 				{
-					return dynamic_cast<IGuiGraphicsRenderTarget*>(GetWindowsForm(window)->GetGraphicsHandler());
+					return GetWindowsGDIObjectProvider()->GetBindedRenderTarget(window);
 				}
 
 				void NativeWindowCreated(INativeWindow* window)override
 				{
 					WindowsGDIRenderTarget* renderTarget=new WindowsGDIRenderTarget(window);
 					renderTargets.Add(renderTarget);
-					GetWindowsForm(window)->SetGraphicsHandler(renderTarget);
+					GetWindowsGDIObjectProvider()->SetBindedRenderTarget(window, renderTarget);
 				}
 
 				void NativeWindowDestroying(INativeWindow* window)override
 				{
-					IWindowsForm* form=GetWindowsForm(window);
-					WindowsGDIRenderTarget* renderTarget=dynamic_cast<WindowsGDIRenderTarget*>(form->GetGraphicsHandler());
-					form->SetGraphicsHandler(0);
+					WindowsGDIRenderTarget* renderTarget=dynamic_cast<WindowsGDIRenderTarget*>(GetWindowsGDIObjectProvider()->GetBindedRenderTarget(window));
+					GetWindowsGDIObjectProvider()->SetBindedRenderTarget(window, 0);
 					renderTargets.Remove(renderTarget);
 				}
 
@@ -392,6 +387,22 @@ WindowsGDIResourceManager
 			{
 				windowsGDIResourceManager=resourceManager;
 			}
+
+/***********************************************************************
+OS Supporting
+***********************************************************************/
+
+			IWindowsGDIObjectProvider* windowsGDIObjectProvider=0;
+
+			IWindowsGDIObjectProvider* GetWindowsGDIObjectProvider()
+			{
+				return windowsGDIObjectProvider;
+			}
+
+			void SetWindowsGDIObjectProvider(IWindowsGDIObjectProvider* provider)
+			{
+				windowsGDIObjectProvider=provider;
+			}
 		}
 	}
 }
@@ -424,10 +435,4 @@ void RendererMainGDI()
 	GuiApplicationMain();
 	elements_windows_gdi::SetWindowsGDIResourceManager(0);
 	SetGuiGraphicsResourceManager(0);
-}
-
-int SetupWindowsGDIRenderer()
-{
-	HINSTANCE hInstance=(HINSTANCE)GetModuleHandle(NULL);
-	return WinMainGDI(hInstance, &RendererMainGDI);
 }
