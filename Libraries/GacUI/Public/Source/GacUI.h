@@ -7518,94 +7518,6 @@ extern int SetupWindowsDirect2DRenderer();
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\WINNATIVEWINDOW.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: ³Âè÷å«(vczh)
-GacUI::Native Window::Windows Implementation
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_WINDOWS_WINNATIVEWINDOW
-#define VCZH_PRESENTATION_WINDOWS_WINNATIVEWINDOW
-
-#include <windows.h>
-#include <wincodec.h>
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace windows
-		{
-
-/***********************************************************************
-Windows Platform Native Controller
-***********************************************************************/
-
-			class IWindowsFormGraphicsHandler : public Interface
-			{
-			public:
-				virtual void								RedrawContent()=0;
-			};
-
-			class IWindowsForm : public Interface
-			{
-			public:
-				virtual HWND								GetWindowHandle()=0;
-				virtual IWindowsFormGraphicsHandler*		GetGraphicsHandler()=0;
-				virtual void								SetGraphicsHandler(IWindowsFormGraphicsHandler* handler)=0;
-			};
-
-			extern INativeController*						CreateWindowsNativeController(HINSTANCE hInstance);
-			extern IWindowsForm*							GetWindowsForm(INativeWindow* window);
-			extern void										DestroyWindowsNativeController(INativeController* controller);
-
-			extern IWICImagingFactory*						GetWICImagingFactory();
-			extern IWICBitmapDecoder*						GetWICBitmapDecoder(INativeImage* image);
-			extern IWICBitmap*								GetWICBitmap(INativeImageFrame* frame);
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\DIRECT2D\WINDIRECT2DAPPLICATION.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: ³Âè÷å«(vczh)
-GacUI::Native Window::Direct2D Provider for Windows Implementation
-
-Interfaces:
-***********************************************************************/
-#ifndef VCZH_PRESENTATION_WINDOWS_GDI_WINDIRECT2DAPPLICATION
-#define VCZH_PRESENTATION_WINDOWS_GDI_WINDIRECT2DAPPLICATION
-
-#include <D2D1.h>
-#include <DWrite.h>
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace windows
-		{
-			extern ID2D1RenderTarget*					GetNativeWindowDirect2DRenderTarget(INativeWindow* window);
-			extern ID2D1Factory*						GetDirect2DFactory();
-			extern IDWriteFactory*						GetDirectWriteFactory();
-		}
-	}
-}
-
-extern int WinMainDirect2D(HINSTANCE hInstance, void(*RendererMain)());
-
-#endif
-
-/***********************************************************************
 E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSWINDOWSDIRECT2D.H
 ***********************************************************************/
 /***********************************************************************
@@ -7619,6 +7531,9 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSWINDOWSDIRECT2D
 #define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSWINDOWSDIRECT2D
 
+#include <D2D1.h>
+#include <DWrite.h>
+#include <wincodec.h>
 
 namespace vl
 {
@@ -7626,6 +7541,11 @@ namespace vl
 	{
 		namespace elements_windows_d2d
 		{
+
+/***********************************************************************
+Functionality
+***********************************************************************/
+
 			class IWindowsDirect2DRenderTarget : public elements::IGuiGraphicsRenderTarget
 			{
 			public:
@@ -7657,11 +7577,32 @@ namespace vl
 			};
 
 			extern IWindowsDirect2DResourceManager*			GetWindowsDirect2DResourceManager();
-
 			extern D2D1::ColorF								GetD2DColor(Color color);
+
+/***********************************************************************
+OS Supporting
+***********************************************************************/
+
+			class IWindowsDirect2DObjectProvider : public Interface
+			{
+			public:
+				virtual ID2D1RenderTarget*					GetNativeWindowDirect2DRenderTarget(INativeWindow* window)=0;
+				virtual ID2D1Factory*						GetDirect2DFactory()=0;
+				virtual IDWriteFactory*						GetDirectWriteFactory()=0;
+				virtual IWindowsDirect2DRenderTarget*		GetBindedRenderTarget(INativeWindow* window)=0;
+				virtual void								SetBindedRenderTarget(INativeWindow* window, IWindowsDirect2DRenderTarget* renderTarget)=0;
+				virtual IWICImagingFactory*					GetWICImagingFactory()=0;
+				virtual IWICBitmapDecoder*					GetWICBitmapDecoder(INativeImage* image)=0;
+				virtual IWICBitmap*							GetWICBitmap(INativeImageFrame* frame)=0;
+			};
+
+			extern IWindowsDirect2DObjectProvider*			GetWindowsDirect2DObjectProvider();
+			extern void										SetWindowsDirect2DObjectProvider(IWindowsDirect2DObjectProvider* provider);
 		}
 	}
 }
+
+extern void RendererMainDirect2D();
 
 #endif
 
@@ -7953,6 +7894,7 @@ Comments:
 #ifndef VCZH_PRESENTATION_WINDOWS_GDI_WINGDI
 #define VCZH_PRESENTATION_WINDOWS_GDI_WINGDI
 
+#include<windows.h>
 
 namespace vl
 {
@@ -8356,36 +8298,6 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\GDI\WINGDIAPPLICATION.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: ³Âè÷å«(vczh)
-GacUI::Native Window::GDI Provider for Windows Implementation
-
-Interfaces:
-***********************************************************************/
-#ifndef VCZH_PRESENTATION_WINDOWS_GDI_WINGDIAPPLICATION
-#define VCZH_PRESENTATION_WINDOWS_GDI_WINGDIAPPLICATION
-
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace windows
-		{
-			extern WinDC*									GetNativeWindowDC(INativeWindow* window);
-			extern HDC										GetNativeWindowHDC(INativeWindow* window);
-		}
-	}
-}
-
-extern int WinMainGDI(HINSTANCE hInstance, void(*RendererMain)());
-
-#endif
-
-/***********************************************************************
 E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSWINDOWSGDI.H
 ***********************************************************************/
 /***********************************************************************
@@ -8406,6 +8318,11 @@ namespace vl
 	{
 		namespace elements_windows_gdi
 		{
+
+/***********************************************************************
+Functionality
+***********************************************************************/
+
 			class IWindowsGDIRenderTarget : public elements::IGuiGraphicsRenderTarget
 			{
 			public:
@@ -8429,9 +8346,29 @@ namespace vl
 			};
 
 			extern IWindowsGDIResourceManager*			GetWindowsGDIResourceManager();
+
+/***********************************************************************
+OS Supporting
+***********************************************************************/
+
+			class IWindowsGDIObjectProvider : public Interface
+			{
+			public:
+				virtual windows::WinDC*						GetNativeWindowDC(INativeWindow* window)=0;
+				virtual IWindowsGDIRenderTarget*			GetBindedRenderTarget(INativeWindow* window)=0;
+				virtual void								SetBindedRenderTarget(INativeWindow* window, IWindowsGDIRenderTarget* renderTarget)=0;
+				virtual IWICImagingFactory*					GetWICImagingFactory()=0;
+				virtual IWICBitmapDecoder*					GetWICBitmapDecoder(INativeImage* image)=0;
+				virtual IWICBitmap*							GetWICBitmap(INativeImageFrame* frame)=0;
+			};
+
+			extern IWindowsGDIObjectProvider*				GetWindowsGDIObjectProvider();
+			extern void										SetWindowsGDIObjectProvider(IWindowsGDIObjectProvider* provider);
 		}
 	}
 }
+
+extern void RendererMainGDI();
 
 #endif
 
@@ -8657,5 +8594,113 @@ Renderers
 		}
 	}
 }
+
+#endif
+
+/***********************************************************************
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\WINNATIVEWINDOW.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: ³Âè÷å«(vczh)
+GacUI::Native Window::Windows Implementation
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_WINDOWS_WINNATIVEWINDOW
+#define VCZH_PRESENTATION_WINDOWS_WINNATIVEWINDOW
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+
+/***********************************************************************
+Windows Platform Native Controller
+***********************************************************************/
+
+			class IWindowsForm : public Interface
+			{
+			public:
+				virtual HWND								GetWindowHandle()=0;
+				virtual Interface*							GetGraphicsHandler()=0;
+				virtual void								SetGraphicsHandler(Interface* handler)=0;
+			};
+
+			extern INativeController*						CreateWindowsNativeController(HINSTANCE hInstance);
+			extern IWindowsForm*							GetWindowsForm(INativeWindow* window);
+			extern void										DestroyWindowsNativeController(INativeController* controller);
+
+			extern IWICImagingFactory*						GetWICImagingFactory();
+			extern IWICBitmapDecoder*						GetWICBitmapDecoder(INativeImage* image);
+			extern IWICBitmap*								GetWICBitmap(INativeImageFrame* frame);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\DIRECT2D\WINDIRECT2DAPPLICATION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: ³Âè÷å«(vczh)
+GacUI::Native Window::Direct2D Provider for Windows Implementation
+
+Interfaces:
+***********************************************************************/
+#ifndef VCZH_PRESENTATION_WINDOWS_GDI_WINDIRECT2DAPPLICATION
+#define VCZH_PRESENTATION_WINDOWS_GDI_WINDIRECT2DAPPLICATION
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+			extern ID2D1RenderTarget*					GetNativeWindowDirect2DRenderTarget(INativeWindow* window);
+			extern ID2D1Factory*						GetDirect2DFactory();
+			extern IDWriteFactory*						GetDirectWriteFactory();
+		}
+	}
+}
+
+extern int WinMainDirect2D(HINSTANCE hInstance, void(*RendererMain)());
+
+#endif
+
+/***********************************************************************
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\GDI\WINGDIAPPLICATION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: ³Âè÷å«(vczh)
+GacUI::Native Window::GDI Provider for Windows Implementation
+
+Interfaces:
+***********************************************************************/
+#ifndef VCZH_PRESENTATION_WINDOWS_GDI_WINGDIAPPLICATION
+#define VCZH_PRESENTATION_WINDOWS_GDI_WINGDIAPPLICATION
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+			extern WinDC*									GetNativeWindowDC(INativeWindow* window);
+			extern HDC										GetNativeWindowHDC(INativeWindow* window);
+		}
+	}
+}
+
+extern int WinMainGDI(HINSTANCE hInstance, void(*RendererMain)());
 
 #endif

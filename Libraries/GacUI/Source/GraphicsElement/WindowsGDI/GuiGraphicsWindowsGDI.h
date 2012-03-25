@@ -9,7 +9,8 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSWINDOWSGDI
 #define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSWINDOWSGDI
 
-#include "..\..\NativeWindow\Windows\GDI\WinGDIApplication.h"
+#include <wincodec.h>
+#include "..\..\NativeWindow\Windows\GDI\WinGDI.h"
 #include "..\GuiGraphicsElement.h"
 #include "..\GuiGraphicsTextElement.h"
 #include "..\GuiGraphicsComposition.h"
@@ -20,6 +21,11 @@ namespace vl
 	{
 		namespace elements_windows_gdi
 		{
+
+/***********************************************************************
+Functionality
+***********************************************************************/
+
 			class IWindowsGDIRenderTarget : public elements::IGuiGraphicsRenderTarget
 			{
 			public:
@@ -43,8 +49,28 @@ namespace vl
 			};
 
 			extern IWindowsGDIResourceManager*			GetWindowsGDIResourceManager();
+
+/***********************************************************************
+OS Supporting
+***********************************************************************/
+
+			class IWindowsGDIObjectProvider : public Interface
+			{
+			public:
+				virtual windows::WinDC*						GetNativeWindowDC(INativeWindow* window)=0;
+				virtual IWindowsGDIRenderTarget*			GetBindedRenderTarget(INativeWindow* window)=0;
+				virtual void								SetBindedRenderTarget(INativeWindow* window, IWindowsGDIRenderTarget* renderTarget)=0;
+				virtual IWICImagingFactory*					GetWICImagingFactory()=0;
+				virtual IWICBitmapDecoder*					GetWICBitmapDecoder(INativeImage* image)=0;
+				virtual IWICBitmap*							GetWICBitmap(INativeImageFrame* frame)=0;
+			};
+
+			extern IWindowsGDIObjectProvider*				GetWindowsGDIObjectProvider();
+			extern void										SetWindowsGDIObjectProvider(IWindowsGDIObjectProvider* provider);
 		}
 	}
 }
+
+extern void RendererMainGDI();
 
 #endif

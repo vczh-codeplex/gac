@@ -24,18 +24,12 @@ namespace vl
 Windows Platform Native Controller
 ***********************************************************************/
 
-			class IWindowsFormGraphicsHandler : public Interface
-			{
-			public:
-				virtual void								RedrawContent()=0;
-			};
-
 			class IWindowsForm : public Interface
 			{
 			public:
 				virtual HWND								GetWindowHandle()=0;
-				virtual IWindowsFormGraphicsHandler*		GetGraphicsHandler()=0;
-				virtual void								SetGraphicsHandler(IWindowsFormGraphicsHandler* handler)=0;
+				virtual Interface*							GetGraphicsHandler()=0;
+				virtual void								SetGraphicsHandler(Interface* handler)=0;
 			};
 
 			extern INativeController*						CreateWindowsNativeController(HINSTANCE hInstance);

@@ -9,7 +9,6 @@ namespace vl
 	{
 		namespace elements_windows_d2d
 		{
-			using namespace windows;
 			using namespace elements;
 			using namespace collections;
 
@@ -113,7 +112,7 @@ CachedResourceAllocator
 
 				static ComPtr<IDWriteTextFormat> CreateDirect2DFont(const FontProperties& fontProperties)
 				{
-					IDWriteFactory* dwriteFactory=GetDirectWriteFactory();
+					IDWriteFactory* dwriteFactory=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory();
 					IDWriteTextFormat* format=0;
 					HRESULT hr=dwriteFactory->CreateTextFormat(
 						fontProperties.fontFamily.Buffer(),
@@ -144,7 +143,7 @@ CachedResourceAllocator
 					textFormat->trimming.delimiterCount=0;
 
 					IDWriteInlineObject* ellipseInlineObject=0;
-					GetDirectWriteFactory()->CreateEllipsisTrimmingSign(textFormat->textFormat.Obj(), &ellipseInlineObject);
+					GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory()->CreateEllipsisTrimmingSign(textFormat->textFormat.Obj(), &ellipseInlineObject);
 					textFormat->ellipseInlineObject=ellipseInlineObject;
 					return textFormat;
 				}
@@ -165,7 +164,7 @@ CachedResourceAllocator
 					{
 						Size charSize(0, 0);
 						IDWriteTextLayout* textLayout=0;
-						HRESULT hr=GetDirectWriteFactory()->CreateTextLayout(
+						HRESULT hr=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory()->CreateTextLayout(
 							&character,
 							1,
 							font.Obj(),
@@ -234,7 +233,7 @@ WindiwsGDIRenderTarget
 					cachedFrame=frame;
  					ID2D1Bitmap* d2dBitmap=0;
 					HRESULT hr=renderTarget->GetDirect2DRenderTarget()->CreateBitmapFromWicBitmap(
-						GetWICBitmap(frame),
+						GetWindowsDirect2DObjectProvider()->GetWICBitmap(frame),
 						&d2dBitmap
 						);
 					if(SUCCEEDED(hr))
@@ -259,7 +258,7 @@ WindiwsGDIRenderTarget
 				}
 			};
 
-			class WindowsDirect2DRenderTarget : public Object, public IWindowsDirect2DRenderTarget, public IWindowsFormGraphicsHandler
+			class WindowsDirect2DRenderTarget : public Object, public IWindowsDirect2DRenderTarget
 			{
 				typedef SortedList<Ptr<WindowsDirect2DImageFrameCache>> ImageCacheList;
 			protected:
@@ -292,7 +291,7 @@ WindiwsGDIRenderTarget
 
 				ID2D1RenderTarget* GetDirect2DRenderTarget()override
 				{
-					return d2dRenderTarget?d2dRenderTarget:GetNativeWindowDirect2DRenderTarget(window);
+					return d2dRenderTarget?d2dRenderTarget:GetWindowsDirect2DObjectProvider()->GetNativeWindowDirect2DRenderTarget(window);
 				}
 
 				ComPtr<ID2D1Bitmap> GetBitmap(INativeImageFrame* frame)override
@@ -325,7 +324,7 @@ WindiwsGDIRenderTarget
 
 				void StartRendering()override
 				{
-					d2dRenderTarget=GetNativeWindowDirect2DRenderTarget(window);
+					d2dRenderTarget=GetWindowsDirect2DObjectProvider()->GetNativeWindowDirect2DRenderTarget(window);
 					d2dRenderTarget->BeginDraw();
 					d2dRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Black));
 				}
@@ -334,10 +333,6 @@ WindiwsGDIRenderTarget
 				{
 					d2dRenderTarget->EndDraw();
 					d2dRenderTarget=0;
-				}
-
-				void RedrawContent()override
-				{
 				}
 
 				void PushClipper(Rect clipper)override
@@ -439,21 +434,20 @@ WindowsGDIResourceManager
 			public:
 				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)
 				{
-					return dynamic_cast<IGuiGraphicsRenderTarget*>(GetWindowsForm(window)->GetGraphicsHandler());
+					return GetWindowsDirect2DObjectProvider()->GetBindedRenderTarget(window);
 				}
 
 				void NativeWindowCreated(INativeWindow* window)override
 				{
 					WindowsDirect2DRenderTarget* renderTarget=new WindowsDirect2DRenderTarget(window);
 					renderTargets.Add(renderTarget);
-					GetWindowsForm(window)->SetGraphicsHandler(renderTarget);
+					GetWindowsDirect2DObjectProvider()->SetBindedRenderTarget(window, renderTarget);
 				}
 
 				void NativeWindowDestroying(INativeWindow* window)override
 				{
-					IWindowsForm* form=GetWindowsForm(window);
-					WindowsDirect2DRenderTarget* renderTarget=dynamic_cast<WindowsDirect2DRenderTarget*>(form->GetGraphicsHandler());
-					form->SetGraphicsHandler(0);
+					WindowsDirect2DRenderTarget* renderTarget=dynamic_cast<WindowsDirect2DRenderTarget*>(GetWindowsDirect2DObjectProvider()->GetBindedRenderTarget(window));
+					GetWindowsDirect2DObjectProvider()->SetBindedRenderTarget(window, 0);
 					renderTargets.Remove(renderTarget);
 				}
 
@@ -492,6 +486,22 @@ WindowsGDIResourceManager
 			{
 				windowsDirect2DResourceManager=resourceManager;
 			}
+
+/***********************************************************************
+OS Supporting
+***********************************************************************/
+
+			IWindowsDirect2DObjectProvider* windowsDirect2DObjectProvider=0;
+
+			IWindowsDirect2DObjectProvider* GetWindowsDirect2DObjectProvider()
+			{
+				return windowsDirect2DObjectProvider;
+			}
+
+			void SetWindowsDirect2DObjectProvider(IWindowsDirect2DObjectProvider* provider)
+			{
+				windowsDirect2DObjectProvider=provider;
+			}
 		}
 	}
 }
@@ -524,10 +534,4 @@ void RendererMainDirect2D()
 	GuiApplicationMain();
 	elements_windows_d2d::SetWindowsDirect2DResourceManager(0);
 	SetGuiGraphicsResourceManager(0);
-}
-
-int SetupWindowsDirect2DRenderer()
-{
-	HINSTANCE hInstance=(HINSTANCE)GetModuleHandle(NULL);
-	return WinMainDirect2D(hInstance, &RendererMainDirect2D);
 }

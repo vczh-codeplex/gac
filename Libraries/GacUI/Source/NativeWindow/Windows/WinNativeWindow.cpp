@@ -1272,7 +1272,7 @@ WindowsForm
 				int									mouseLastX;
 				int									mouseLastY;
 				int									mouseHoving;
-				IWindowsFormGraphicsHandler*		graphicsHandler;
+				Interface*							graphicsHandler;
 			public:
 				WindowsForm(HWND parent, WString className, HINSTANCE hInstance)
 					:cursor(0)
@@ -1321,12 +1321,12 @@ WindowsForm
 					return handle;
 				}
 
-				IWindowsFormGraphicsHandler* GetGraphicsHandler()
+				Interface* GetGraphicsHandler()
 				{
 					return graphicsHandler;
 				}
 
-				void SetGraphicsHandler(IWindowsFormGraphicsHandler* handler)
+				void SetGraphicsHandler(Interface* handler)
 				{
 					graphicsHandler=handler;
 				}
@@ -1665,7 +1665,6 @@ WindowsForm
 				{
 					if(graphicsHandler)
 					{
-						graphicsHandler->RedrawContent();
 						SendMessage(this->handle, WM_PAINT, NULL, NULL);
 					}
 				}
