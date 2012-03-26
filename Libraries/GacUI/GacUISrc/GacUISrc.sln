@@ -21,6 +21,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{695AA4
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacUISrcCodepackedTest", "GacUISrcCodepackedTest\GacUISrcCodepackedTest.vcxproj", "{EB5A22FF-03D9-45A9-BF76-8083D46A643B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DocumentRawItems", "DocumentRawItems", "{80361AFE-C424-451B-BBDD-637AD16274C0}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\DocumentRawItems\reference_gacui.txt = ..\Public\DocumentRawItems\reference_gacui.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 3
@@ -53,5 +58,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{695AA472-C40E-41C8-BDF9-9866F36C9AE3} = {843780E4-7D2F-4955-B988-88325DFB6B9E}
+		{80361AFE-C424-451B-BBDD-637AD16274C0} = {843780E4-7D2F-4955-B988-88325DFB6B9E}
 	EndGlobalSection
 EndGlobal
