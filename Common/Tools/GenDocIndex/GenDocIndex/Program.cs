@@ -25,7 +25,17 @@ namespace GenDocIndex
                         {
                             try
                             {
-                                return DocItemParser.LoadDocItem(f);
+                                List<string> errorLines = new List<string>();
+                                DocItem result = DocItemParser.LoadDocItem(f, errorLines);
+                                if (errorLines.Count > 0)
+                                {
+                                    Console.WriteLine("[{0}]:", f);
+                                    foreach (var error in errorLines)
+                                    {
+                                        Console.WriteLine(error);
+                                    }
+                                }
+                                return result;
                             }
                             catch (ArgumentException ex)
                             {

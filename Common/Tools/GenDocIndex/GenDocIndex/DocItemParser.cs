@@ -6,10 +6,6 @@ using System.IO;
 
 namespace GenDocIndex
 {
-    class DocNode
-    {
-    }
-
     class DocItem
     {
         public string Title { get; set; }
@@ -33,12 +29,13 @@ namespace GenDocIndex
 
     static class DocItemParser
     {
-        public static DocItem LoadDocItem(string fileName)
+        public static DocItem LoadDocItem(string fileName, List<string> errorLines)
         {
             using (StreamReader reader = new StreamReader(fileName))
             {
                 DocItem docItem = new DocItem();
                 bool enterContentMode = false;
+                List<string> contentLines = new List<string>();
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
@@ -70,8 +67,17 @@ namespace GenDocIndex
                         {
                             throw new ArgumentException("Don't know how to parse " + line);
                         }
+                        else
+                        {
+                            line = line.Trim();
+                            if (line != "")
+                            {
+                                contentLines.Add(line);
+                            }
+                        }
                     }
                 }
+                docItem.Content = DocContentParser.Parse(contentLines, errorLines);
                 return docItem;
             }
         }
