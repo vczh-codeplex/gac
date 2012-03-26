@@ -190,6 +190,7 @@ namespace GenXmlDocRef
         public DocItem Parent { get; private set; }
         public string Name { get; set; }
         public string UniqueId { get; set; }
+        public string Symbol { get; set; }
 
         public string Title { get; set; }
         public XElement Content { get; set; }

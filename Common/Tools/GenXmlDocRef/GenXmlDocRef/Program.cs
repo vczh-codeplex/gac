@@ -28,6 +28,7 @@ namespace GenXmlDocRef
                     if (docItem.Document != null)
                     {
                         string memberId = docItem.Document.Element("member").Attribute("name").Value;
+                        docItem.Symbol = memberId;
                         memberIdItemMap.Add(memberId, docItem);
                     }
                 }

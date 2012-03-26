@@ -48,6 +48,15 @@ namespace GenDocIndex
                     .ToArray();
                 var mappedDocItems = DocItemSorter.MapItems(docItems);
                 var rootItems = DocItemSorter.SortAndGetRootItems(mappedDocItems);
+                try
+                {
+                    var validationResult = DocItemValidator.Validate(docItems);
+                }
+                catch (ArgumentException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    Console.WriteLine("Errors cause the index generatiing to stop.");
+                }
             }
             else
             {
