@@ -7,10 +7,10 @@ namespace GenDocIndex
 {
     static class DocItemSorter
     {
-        public static Dictionary<string,DocItem> MapItems(DocItem[] inputItems)
+        public static Dictionary<string, DocItem> MapItems(DocItem[] inputItems)
         {
             Dictionary<string, DocItem> items = new Dictionary<string, DocItem>();
-            string errorLines="";
+            string errorLines = "";
 
             foreach (var item in inputItems)
             {
@@ -27,9 +27,9 @@ namespace GenDocIndex
             return items;
         }
 
-        public static DocItem[] SortAndGetRootItems(Dictionary<string,DocItem> inputItems)
+        public static DocItem[] SortAndGetRootItems(Dictionary<string, DocItem> inputItems)
         {
-            string errorLines="";
+            string errorLines = "";
 
             DocItem[] rootItems = inputItems.Values.Where(i => i.ParentUniqueId == "").ToArray();
             foreach (var item in inputItems.Values)

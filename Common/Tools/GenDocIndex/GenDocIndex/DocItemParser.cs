@@ -11,6 +11,7 @@ namespace GenDocIndex
         public string Title { get; set; }
         public string UniqueId { get; set; }
         public string ParentUniqueId { get; set; }
+        public string Symbol { get; set; }
         public DocNode Content { get; set; }
 
         public DocItem Parent { get; set; }
@@ -53,6 +54,11 @@ namespace GenDocIndex
                     {
                         int index = line.IndexOf(':');
                         docItem.ParentUniqueId = line.Substring(index + 1);
+                    }
+                    else if (line.StartsWith("/symbol:"))
+                    {
+                        int index = line.IndexOf(':');
+                        docItem.Symbol = line.Substring(index + 1);
                     }
                     else if (line == "/content")
                     {

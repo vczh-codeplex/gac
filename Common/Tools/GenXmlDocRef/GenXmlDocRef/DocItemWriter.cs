@@ -25,6 +25,10 @@ namespace GenXmlDocRef
             writer.WriteLine("/title:{0}", docItem.Title);
             writer.WriteLine("/uniqueId:{0}", docItem.UniqueId);
             writer.WriteLine("/parentUniqueId:{0}", docItem.Parent.UniqueId);
+            if (!string.IsNullOrWhiteSpace(docItem.Symbol))
+            {
+                writer.WriteLine("/symbol:{0}", docItem.Symbol);
+            }
             writer.WriteLine("/content");
             writer.WriteLine("/+h1/{0}/-h1//para/", docItem.Title);
             WriteContent(docItem, writer, context);
@@ -32,7 +36,7 @@ namespace GenXmlDocRef
             {
                 writer.WriteLine("/+b/Contents under this category:/-b//para/");
                 foreach (var item in docItem.SubItems
-                    .OrderBy(x => x.UniqueId.StartsWith("functionGroup:") ? "function:" + x.UniqueIdBody : x.UniqueId)
+                    .OrderBy(x => x.Title)
                     )
                 {
                     writer.WriteLine("/nop/    /+linkid:{0}/{1}/-linkid//crlf/", item.UniqueId, item.Title);
