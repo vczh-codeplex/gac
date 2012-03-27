@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Web;
 
 namespace GenDocIndex
 {
@@ -15,7 +16,7 @@ namespace GenDocIndex
 
         static void GenerateText(TextWriter writer, string content)
         {
-            writer.Write(content);
+            HttpUtility.HtmlEncode(content, writer);
         }
 
         static void GenerateIndexTree(TextWriter writer, IEnumerable<DocItem> docItemSiblings, List<DocItem> parentList, int parentIndex, int level)
