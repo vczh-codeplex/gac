@@ -8,12 +8,14 @@ namespace GenDocIndex
     class DocItemValidationResult
     {
         public DocItem[] DocItems { get; private set; }
+        public DocItem[] RootItems { get; private set; }
         public Dictionary<string, DocItem> UniqueIdItemMap { get; private set; }
         public Dictionary<string, DocItem> MemberIdItemMap { get; private set; }
 
         public DocItemValidationResult(DocItem[] docItems)
         {
             this.DocItems = docItems;
+            this.RootItems = docItems.Where(i => i.Parent == null).ToArray();
             this.UniqueIdItemMap = docItems
                 .Where(d => !string.IsNullOrWhiteSpace(d.UniqueId))
                 .ToDictionary(d => d.UniqueId, d => d);

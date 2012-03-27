@@ -55,7 +55,7 @@ namespace GenDocIndex
                     switch (outputMethod.ToUpper())
                     {
                         case "HTML":
-                            StaticHtmlDocGenerator.GenerateStaticHtmlDocument(rootItems, outputTarget, validationResult);
+                            StaticHtmlDocGenerator.GenerateStaticHtmlDocument(outputTarget, validationResult);
                             break;
                         default:
                             throw new ArgumentException(string.Format("Don't understand output method {0}.", outputMethod));
