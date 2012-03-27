@@ -18,153 +18,201 @@ namespace GenDocIndex
             writer.Write(content);
         }
 
-        static void GenerateContent(TextWriter writer, DocItem docItem, DocItemValidationResult validationResult)
+        static void GenerateIndexTree(TextWriter writer, IEnumerable<DocItem> docItemSiblings, List<DocItem> parentList, int parentIndex, int level)
         {
-            string currentColor = "000000";
-            writer.Write("<p><font color=\"{0}\">", currentColor);
-            foreach (var docEntity in docItem.Content.Entities)
+            foreach (var sibling in docItemSiblings)
             {
-                switch (docEntity.Type)
+                bool needHyperlink =
+                    !(
+                        parentIndex < parentList.Count &&
+                        sibling == parentList[parentIndex] &&
+                        parentIndex == parentList.Count - 1
+                    );
+                for (int i = 0; i < level; i++)
                 {
-                    case DocEntityType.Bold:
-                        switch (docEntity.State)
-                        {
-                            case DocEntityState.Open:
-                                writer.Write("<b>");
-                                break;
-                            case DocEntityState.Close:
-                                writer.Write("</b>");
-                                break;
-                        }
-                        break;
-                    case DocEntityType.Header1:
-                        switch (docEntity.State)
-                        {
-                            case DocEntityState.Open:
-                                writer.Write("<h1>");
-                                break;
-                            case DocEntityState.Close:
-                                writer.Write("</h1>");
-                                break;
-                        }
-                        break;
-                    case DocEntityType.Header2:
-                        switch (docEntity.State)
-                        {
-                            case DocEntityState.Open:
-                                writer.Write("<h2>");
-                                break;
-                            case DocEntityState.Close:
-                                writer.Write("</h2>");
-                                break;
-                        }
-                        break;
-                    case DocEntityType.Header3:
-                        switch (docEntity.State)
-                        {
-                            case DocEntityState.Open:
-                                writer.Write("<h3>");
-                                break;
-                            case DocEntityState.Close:
-                                writer.Write("</h3>");
-                                break;
-                        }
-                        break;
-                    case DocEntityType.LinkId:
-                        switch (docEntity.State)
-                        {
-                            case DocEntityState.Open:
-                                writer.Write("<a href=\"{0}\">", Path.GetFileName(GetFileName(validationResult.UniqueIdItemMap[docEntity.Argument])));
-                                break;
-                            case DocEntityState.Close:
-                                writer.Write("</a>");
-                                break;
-                        }
-                        break;
-                    case DocEntityType.LinkSymbol:
-                        switch (docEntity.State)
-                        {
-                            case DocEntityState.Open:
-                                writer.Write("<a href=\"{0}\">", Path.GetFileName(GetFileName(validationResult.MemberIdItemMap[docEntity.Argument])));
-                                break;
-                            case DocEntityState.Close:
-                                writer.Write("</a>");
-                                break;
-                        }
-                        break;
-                    case DocEntityType.Table:
-                        switch (docEntity.State)
-                        {
-                            case DocEntityState.Open:
-                                writer.Write("<table>");
-                                break;
-                            case DocEntityState.Close:
-                                writer.Write("</table>");
-                                break;
-                        }
-                        break;
-                    case DocEntityType.RowHeader:
-                        switch (docEntity.State)
-                        {
-                            case DocEntityState.Open:
-                                writer.Write("<tr>");
-                                break;
-                            case DocEntityState.Close:
-                                writer.Write("</tr>");
-                                break;
-                        }
-                        break;
-                    case DocEntityType.Row:
-                        switch (docEntity.State)
-                        {
-                            case DocEntityState.Open:
-                                writer.Write("<tr>");
-                                break;
-                            case DocEntityState.Close:
-                                writer.Write("</tr>");
-                                break;
-                        }
-                        break;
-                    case DocEntityType.Col:
-                        switch (docEntity.State)
-                        {
-                            case DocEntityState.Open:
-                                writer.Write("<td>");
-                                break;
-                            case DocEntityState.Close:
-                                writer.Write("</td>");
-                                break;
-                        }
-                        break;
-                    case DocEntityType.Code:
-                        writer.Write("<table><tr><td>");
-                        GenerateText(writer, docEntity.Argument);
-                        writer.Write("</td></tr></table>");
-                        break;
-                    case DocEntityType.Slash:
-                        GenerateText(writer, "/");
-                        break;
-                    case DocEntityType.Crlf:
-                        writer.Write("<br/>");
-                        break;
-                    case DocEntityType.Para:
-                        writer.Write("</font></p><p><font color=\"{0}\">", currentColor);
-                        break;
-                    case DocEntityType.Nop:
-                        break;
-                    case DocEntityType.Img:
-                        writer.Write("<img src=\"{0}\"/>", docEntity.Argument);
-                        break;
-                    case DocEntityType.Color:
-                        currentColor = docEntity.Argument;
-                        writer.Write("</font><font color=\"{0}\">", currentColor);
-                        break;
-                    case DocEntityType.Text:
-                        GenerateText(writer, docEntity.Argument);
-                        break;
+                    writer.Write("&nbsp;&nbsp;&nbsp;&nbsp;");
+                }
+                if (needHyperlink)
+                {
+                    writer.Write("<a href=\"{0}\">", GetFileName(sibling));
+                }
+                GenerateText(writer, sibling.Title);
+                if (needHyperlink)
+                {
+                    writer.Write("</a>");
+                }
+                writer.WriteLine();
+                if (parentIndex < parentList.Count && sibling == parentList[parentIndex])
+                {
+                    GenerateIndexTree(writer, sibling.SubItems, parentList, parentIndex + 1, level + 1);
                 }
             }
-            writer.Write("</font></p>");
+        }
+
+        static void GenerateContent(TextWriter writer, DocItem docItem, DocItemValidationResult validationResult)
+        {
+            writer.Write("<table><col width=\"20%\"/><col width=\"80%\"/><tr><td valign=\"top\">");
+            {
+                List<DocItem> parentList = new List<DocItem>();
+                {
+                    DocItem currentItem = docItem;
+                    while (currentItem != null)
+                    {
+                        parentList.Insert(0, currentItem);
+                        currentItem = currentItem.Parent;
+                    }
+                }
+                GenerateIndexTree(writer, validationResult.RootItems, parentList, 0, 0);
+            }
+            writer.Write("</td><td valign=\"top\">");
+            {
+                string currentColor = "000000";
+                writer.Write("<p><font color=\"{0}\">", currentColor);
+                foreach (var docEntity in docItem.Content.Entities)
+                {
+                    switch (docEntity.Type)
+                    {
+                        case DocEntityType.Bold:
+                            switch (docEntity.State)
+                            {
+                                case DocEntityState.Open:
+                                    writer.Write("<b>");
+                                    break;
+                                case DocEntityState.Close:
+                                    writer.Write("</b>");
+                                    break;
+                            }
+                            break;
+                        case DocEntityType.Header1:
+                            switch (docEntity.State)
+                            {
+                                case DocEntityState.Open:
+                                    writer.Write("<h1>");
+                                    break;
+                                case DocEntityState.Close:
+                                    writer.Write("</h1>");
+                                    break;
+                            }
+                            break;
+                        case DocEntityType.Header2:
+                            switch (docEntity.State)
+                            {
+                                case DocEntityState.Open:
+                                    writer.Write("<h2>");
+                                    break;
+                                case DocEntityState.Close:
+                                    writer.Write("</h2>");
+                                    break;
+                            }
+                            break;
+                        case DocEntityType.Header3:
+                            switch (docEntity.State)
+                            {
+                                case DocEntityState.Open:
+                                    writer.Write("<h3>");
+                                    break;
+                                case DocEntityState.Close:
+                                    writer.Write("</h3>");
+                                    break;
+                            }
+                            break;
+                        case DocEntityType.LinkId:
+                            switch (docEntity.State)
+                            {
+                                case DocEntityState.Open:
+                                    writer.Write("<a href=\"{0}\">", Path.GetFileName(GetFileName(validationResult.UniqueIdItemMap[docEntity.Argument])));
+                                    break;
+                                case DocEntityState.Close:
+                                    writer.Write("</a>");
+                                    break;
+                            }
+                            break;
+                        case DocEntityType.LinkSymbol:
+                            switch (docEntity.State)
+                            {
+                                case DocEntityState.Open:
+                                    writer.Write("<a href=\"{0}\">", Path.GetFileName(GetFileName(validationResult.MemberIdItemMap[docEntity.Argument])));
+                                    break;
+                                case DocEntityState.Close:
+                                    writer.Write("</a>");
+                                    break;
+                            }
+                            break;
+                        case DocEntityType.Table:
+                            switch (docEntity.State)
+                            {
+                                case DocEntityState.Open:
+                                    writer.Write("<table>");
+                                    break;
+                                case DocEntityState.Close:
+                                    writer.Write("</table>");
+                                    break;
+                            }
+                            break;
+                        case DocEntityType.RowHeader:
+                            switch (docEntity.State)
+                            {
+                                case DocEntityState.Open:
+                                    writer.Write("<tr>");
+                                    break;
+                                case DocEntityState.Close:
+                                    writer.Write("</tr>");
+                                    break;
+                            }
+                            break;
+                        case DocEntityType.Row:
+                            switch (docEntity.State)
+                            {
+                                case DocEntityState.Open:
+                                    writer.Write("<tr>");
+                                    break;
+                                case DocEntityState.Close:
+                                    writer.Write("</tr>");
+                                    break;
+                            }
+                            break;
+                        case DocEntityType.Col:
+                            switch (docEntity.State)
+                            {
+                                case DocEntityState.Open:
+                                    writer.Write("<td>");
+                                    break;
+                                case DocEntityState.Close:
+                                    writer.Write("</td>");
+                                    break;
+                            }
+                            break;
+                        case DocEntityType.Code:
+                            writer.Write("<table><tr><td>");
+                            GenerateText(writer, docEntity.Argument);
+                            writer.Write("</td></tr></table>");
+                            break;
+                        case DocEntityType.Slash:
+                            GenerateText(writer, "/");
+                            break;
+                        case DocEntityType.Crlf:
+                            writer.Write("<br/>");
+                            break;
+                        case DocEntityType.Para:
+                            writer.Write("</font></p><p><font color=\"{0}\">", currentColor);
+                            break;
+                        case DocEntityType.Nop:
+                            break;
+                        case DocEntityType.Img:
+                            writer.Write("<img src=\"{0}\"/>", docEntity.Argument);
+                            break;
+                        case DocEntityType.Color:
+                            currentColor = docEntity.Argument;
+                            writer.Write("</font><font color=\"{0}\">", currentColor);
+                            break;
+                        case DocEntityType.Text:
+                            GenerateText(writer, docEntity.Argument);
+                            break;
+                    }
+                }
+                writer.Write("</font></p>");
+            }
+            writer.Write("</td></tr></table>");
         }
 
         static void GenerateFile(DocItem docItem, string outputFolder, DocItemValidationResult validationResult)
@@ -190,9 +238,9 @@ namespace GenDocIndex
             }
         }
 
-        public static void GenerateStaticHtmlDocument(DocItem[] rootItems, string outputFolder, DocItemValidationResult validationResult)
+        public static void GenerateStaticHtmlDocument(string outputFolder, DocItemValidationResult validationResult)
         {
-            GenerateFiles(rootItems, outputFolder, validationResult);
+            GenerateFiles(validationResult.RootItems, outputFolder, validationResult);
         }
     }
 }
