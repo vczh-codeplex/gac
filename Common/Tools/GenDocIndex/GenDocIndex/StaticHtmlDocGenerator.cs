@@ -41,7 +41,7 @@ namespace GenDocIndex
                 {
                     writer.Write("</a>");
                 }
-                writer.WriteLine();
+                writer.Write("<br/>");
                 if (parentIndex < parentList.Count && sibling == parentList[parentIndex])
                 {
                     GenerateIndexTree(writer, sibling.SubItems, parentList, parentIndex + 1, level + 1);
@@ -51,7 +51,7 @@ namespace GenDocIndex
 
         static void GenerateContent(TextWriter writer, DocItem docItem, DocItemValidationResult validationResult)
         {
-            writer.Write("<table><col width=\"20%\"/><col width=\"80%\"/><tr><td valign=\"top\">");
+            writer.Write("<table width=\"100%\"><col width=\"20%\"/><col width=\"80%\"/><tr><td valign=\"top\">");
             {
                 List<DocItem> parentList = new List<DocItem>();
                 {
