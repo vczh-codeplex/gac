@@ -12,8 +12,9 @@ namespace GenDocIndex
         {
             if (args.Length >= 2)
             {
-                string outputIndexFile = Path.GetFullPath(args[0]);
-                string[] inputFiles = args.Skip(1)
+                string outputMethod = args[0];
+                string outputTarget = Path.GetFullPath(args[1]) + "\\";
+                string[] inputFiles = args.Skip(2)
                     .SelectMany(d => Directory.GetFiles(d))
                     .Select(f => Path.GetFullPath(f).ToUpper())
                     .Where(f => f.EndsWith(".DOCITEM.TXT"))
@@ -46,11 +47,19 @@ namespace GenDocIndex
                     )
                     .Where(i => i != null)
                     .ToArray();
-                var mappedDocItems = DocItemSorter.MapItems(docItems);
-                var rootItems = DocItemSorter.SortAndGetRootItems(mappedDocItems);
                 try
                 {
+                    var mappedDocItems = DocItemSorter.MapItems(docItems);
+                    var rootItems = DocItemSorter.SortAndGetRootItems(mappedDocItems);
                     var validationResult = DocItemValidator.Validate(docItems);
+                    switch (outputMethod.ToUpper())
+                    {
+                        case "HTML":
+                            StaticHtmlDocGenerator.GenerateStaticHtmlDocument(rootItems, outputTarget, validationResult);
+                            break;
+                        default:
+                            throw new ArgumentException(string.Format("Don't understand output method {0}.", outputMethod));
+                    }
                 }
                 catch (ArgumentException ex)
                 {
@@ -60,7 +69,7 @@ namespace GenDocIndex
             }
             else
             {
-                Console.WriteLine("GenDocIndex.exe <output-index-file> <input-.docitem.txt-folder> ...");
+                Console.WriteLine("GenDocIndex.exe html <output-folder> <input-.docitem.txt-folder> ...");
             }
         }
     }
