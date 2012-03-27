@@ -1,6 +1,7 @@
 ..\..\..\Common\Tools\Codepack.exe CodegenConfig.xml
 mkdir Temp
 cd Temp
+mkdir StaticHtmlDoc
 del *.* /Q
 copy ..\..\GacUISrc\Debug\GacUISrc.xml GacUISrc.xml
 copy ..\..\GacUISrc\Debug\GacUISrc.pdb GacUISrc.pdb
