@@ -210,9 +210,10 @@ namespace GenXmlDocRef
         protected string GetReadableName(DocItem item)
         {
             string name = item.Content.Attribute("name").Value;
-            if (item.UniqueId.StartsWith("enum:") && name == "Type" && item.Parent.UniqueId.StartsWith("namespace:"))
+            if (item.UniqueId.StartsWith("enum:"))
             {
-                name = item.Parent.Content.Attribute("name").Value + "::" + name;
+                int index = item.Title.LastIndexOf(' ');
+                return item.Title.Substring(0, index);
             }
             else
             {
