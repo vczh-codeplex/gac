@@ -34,7 +34,7 @@ namespace GenXmlDocRef
             WriteContent(docItem, writer, context);
             if (docItem.SubItems.Count > 0)
             {
-                writer.WriteLine("/+b/Contents under this category:/-b//para/");
+                writer.WriteLine("/+b/In This Section:/-b//crlf/");
                 foreach (var item in docItem.SubItems
                     .OrderBy(x => x.Title)
                     )
@@ -231,12 +231,76 @@ namespace GenXmlDocRef
             }
             return name;
         }
+
+        protected void WriteSubItemTable(Dictionary<string, XElement> describedSubItems, string tableName, TextWriter writer, DocItemWriterContext context)
+        {
+            if (describedSubItems.Count > 0)
+            {
+                writer.WriteLine("/+b/{0}:/-b//crlf/", tableName);
+                writer.WriteLine("/+table/");
+                writer.WriteLine("    /+rowheader//+col/Name/-col//+col/Description/-col//-rowheader/");
+                foreach (var name in describedSubItems.Keys.OrderBy(s => s))
+                {
+                    var memberElement = describedSubItems[name];
+                    writer.WriteLine("    /+row/");
+                    writer.WriteLine("        /+col//+linksymbol:{0}/{1}/-linksymbol//-col/", memberElement.Attribute("name").Value, name);
+                    writer.Write("        /+col/");
+                    WriteSummary(memberElement, writer, context);
+                    writer.WriteLine("/-col/");
+                    writer.WriteLine("    /-row/");
+                }
+                writer.WriteLine("/-table//para/");
+            }
+        }
+
+        protected void WriteSubItemTable(XElement[] subItems, string tableName, TextWriter writer, DocItemWriterContext context)
+        {
+            var describedSubItems = subItems
+                .ToDictionary(
+                    x => x.Attribute("name").Value,
+                    x => x.Element("document").Element("member")
+                    );
+            WriteSubItemTable(describedSubItems, tableName, writer, context);
+        }
     }
 
     class NamespaceDocItemWriter : DocItemWriter
     {
         protected override void WriteContent(DocItem docItem, TextWriter writer, DocItemWriterContext context)
         {
+            {
+                var describedFunctions = docItem
+                    .SubItems
+                    .Where(i => i.UniqueId.StartsWith("function:"))
+                    .Concat(docItem
+                        .SubItems
+                        .Where(i => i.UniqueId.StartsWith("functionGroup:"))
+                        .SelectMany(i => i.SubItems)
+                        )
+                    .ToDictionary(
+                        x => x.Content.Attribute("name").Value,
+                        x => x.Content.Element("document").Element("member")
+                        );
+                WriteSubItemTable(describedFunctions, "Functions", writer, context);
+            }
+            {
+                var describedTypes = docItem
+                    .SubItems
+                    .Where(i => i.UniqueId.StartsWith("type:"))
+                    .Concat(docItem
+                        .SubItems
+                        .Where(i => i.UniqueId.StartsWith("enum:"))
+                        )
+                    .ToDictionary(
+                        x =>
+                        {
+                            int index = x.Title.LastIndexOf(' ');
+                            return x.Title.Substring(0, index).Trim();
+                        },
+                        x => x.Content.Element("document").Element("member")
+                        );
+                WriteSubItemTable(describedTypes, "Types", writer, context);
+            }
         }
     }
 
@@ -279,7 +343,18 @@ namespace GenXmlDocRef
                     WriteHyperlinkType(baseType.Attribute("fullName").Value, writer, context);
                     writer.WriteLine("/crlf/");
                 }
+                writer.WriteLine("/para/");
             }
+
+            XElement[] subTypes = docItem.Content.Elements("enum").Concat(docItem.Content.Elements("type")).ToArray();
+            XElement[] subFunctions = docItem.Content.Elements("function")
+                .Concat(
+                    docItem.Content.Elements("functionGroup")
+                        .SelectMany(e => e.Elements("function"))
+                    )
+                .ToArray();
+            WriteSubItemTable(subTypes, "Sub Types", writer, context);
+            WriteSubItemTable(subFunctions, "Member Functions", writer, context);
         }
     }
 
