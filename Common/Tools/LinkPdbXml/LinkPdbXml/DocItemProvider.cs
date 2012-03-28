@@ -13,13 +13,75 @@ namespace LinkPdbXml
             return name.Replace(".", "::");
         }
 
+        static string[] SplitParameters(string methodParameters)
+        {
+            List<int> indices = new List<int>();
+            indices.Add(-1);
+            {
+                int templates = 0;
+                for (int i = 0; i < methodParameters.Length; i++)
+                {
+                    switch (methodParameters[i])
+                    {
+                        case '<':
+                            templates++;
+                            break;
+                        case '>':
+                            templates--;
+                            break;
+                        case ',':
+                            if (templates == 0) indices.Add(i);
+                            break;
+                    }
+                }
+            }
+            indices.Add(methodParameters.Length);
+            var pairs = indices.Take(indices.Count - 1).Zip(indices.Skip(1), (a, b) => Tuple.Create(a, b)).ToArray();
+            var rawParameterTypes = pairs.Select(p => methodParameters.Substring(p.Item1 + 1, p.Item2 - p.Item1 - 1)).ToArray();
+
+            return rawParameterTypes
+                .Select(s => s
+                    .Replace("!System.Runtime.CompilerServices.IsConst", " const")
+                    .Replace("*!System.Runtime.CompilerServices.IsImplicitlyDereferenced", "&")
+                    .Replace("System.Boolean", "bool")
+                    .Replace("System.Char", "wchar_t")
+                    .Replace("System.Single", "float")
+                    .Replace("System.Double", "double")
+                    .Replace("System.SByte", "signed __int8")
+                    .Replace("System.Int16", "signed __int16")
+                    .Replace("System.Int32", "signed __int32")
+                    .Replace("System.Int64", "signed __int64")
+                    .Replace("System.Byte", "signed __int8")
+                    .Replace("System.UInt16", "unsigned __int16")
+                    .Replace("System.UInt32", "unsigned __int32")
+                    .Replace("System.UInt64", "unsigned __int64")
+                    .Replace(".", "::")
+                    )
+                .ToArray();
+        }
+
+        // methodParameters can be
+        // (vl.presentation.TextPos,vl.presentation.TextPos,vl.ObjectString<System.Char>!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)
         static GacMethod TryPickFunction(GacMethod[] funcs, string methodParameters)
         {
-            if (funcs.Length != 1)
+            switch (funcs.Length)
             {
-                return null;
+                case 0: return null;
+                case 1: return funcs[0];
+                default:
+                    {
+                        var parameters = 
+                            methodParameters == ""
+                            ? new string[0]
+                            : SplitParameters(methodParameters.Substring(1, methodParameters.Length - 2))
+                            ;
+                        var selectableFuncs = funcs
+                            .Where(f => f.Type.ParameterTypes.Length == parameters.Length)
+                            .Where(f => f.Type.ParameterTypes.Select((t, i) => t.Name == parameters[i]).All(t => t))
+                            .ToArray();
+                        return selectableFuncs.Length == 1 ? selectableFuncs[0] : null;
+                    }
             }
-            return funcs[0];
         }
 
         static GacMethod PickFunction(GacMethod[] funcs, string methodParameters)
