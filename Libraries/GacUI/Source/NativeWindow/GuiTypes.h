@@ -19,15 +19,23 @@ namespace vl
 /***********************************************************************
 Enumerations
 ***********************************************************************/
-
+		
 		namespace Alignment
 		{
+			/// <summary>
+			/// Defines an alignment direction.
+			/// </summary>
 			enum Type
 			{
+				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the left side.</summary>
 				Left=0,
+				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the top side.</summary>
 				Top=0,
+				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the center.</summary>
 				Center=1,
+				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the right side.</summary>
 				Right=2,
+				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the bottom side.</summary>
 				Bottom=2,
 			};
 		}
@@ -35,10 +43,19 @@ Enumerations
 /***********************************************************************
 TextPos
 ***********************************************************************/
-
+		
+		/// <summary>
+		/// Represents the position in multiple lines of text.
+		/// </summary>
 		struct TextPos
 		{
+			/// <summary>
+			/// Row number.
+			/// </summary>
 			int			row;
+			/// <summary>
+			/// Column number. If a line has 4 characters, there are 5 available column numbers(from 0 to 4) in this line.
+			/// </summary>
 			int			column;
 
 			TextPos()

@@ -53,6 +53,7 @@ namespace GenXmlDocRef
                 case "type": return new TypeDocItemWriter() { AssociatedDocItem = docItem };
                 case "functionGroup": return new FunctionGroupDocItemWriter() { AssociatedDocItem = docItem };
                 case "function": return new FunctionDocItemWriter() { AssociatedDocItem = docItem };
+                case "field": return new FieldDocItemWriter() { AssociatedDocItem = docItem };
                 default: throw new ArgumentException(string.Format("Cannot create DocItemWriter for {0}.", name));
             }
         }
@@ -348,6 +349,7 @@ namespace GenXmlDocRef
             }
 
             XElement[] subTypes = docItem.Content.Elements("enum").Concat(docItem.Content.Elements("type")).ToArray();
+            XElement[] subFields = docItem.Content.Elements("field").ToArray();
             XElement[] subFunctions = docItem.Content.Elements("function")
                 .Concat(
                     docItem.Content.Elements("functionGroup")
@@ -355,6 +357,7 @@ namespace GenXmlDocRef
                     )
                 .ToArray();
             WriteSubItemTable(subTypes, "Sub Types", writer, context);
+            WriteSubItemTable(subFields, "Fields", writer, context);
             WriteSubItemTable(subFunctions, "Member Functions", writer, context);
         }
     }
@@ -420,6 +423,14 @@ namespace GenXmlDocRef
                 writer.WriteLine("    /-row/");
             }
             writer.WriteLine("/-table//para/");
+        }
+    }
+
+    class FieldDocItemWriter : DocItemWriter
+    {
+        protected override void WriteContent(DocItem docItem, TextWriter writer, DocItemWriterContext context)
+        {
+            WriteSummaryInDocItem(docItem, writer, context);
         }
     }
 }
