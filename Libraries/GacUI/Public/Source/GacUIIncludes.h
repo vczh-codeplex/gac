@@ -11876,7 +11876,10 @@ ColorizedText
 					bool							operator!=(const ColorEntry& value){return true;}
 				};
 			}
-
+			
+			/// <summary>
+			/// Defines a text element with separate color configuration for each character.
+			/// </summary>
 			class GuiColorizedTextElement : public Object, public IGuiGraphicsElement, public Description<GuiColorizedTextElement>
 			{
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiColorizedTextElement, L"ColorizedText");
@@ -11884,10 +11887,19 @@ ColorizedText
 				typedef collections::Array<text::ColorEntry>			ColorArray;
 				typedef collections::IReadonlyList<text::ColorEntry>	IColorArray;
 			public:
+				/// <summary>
+				/// An callback interface. Member functions will be called when colors or fonts of a <see cref="GuiColorizedTextElement"/> changed.
+				/// </summary>
 				class ICallback : public virtual IDescriptable, public Description<ICallback>
 				{
 				public:
+					/// <summary>
+					/// Called when the color table of a <see cref="GuiColorizedTextElement"/> changed.
+					/// </summary>
 					virtual void					ColorChanged()=0;
+					/// <summary>
+					/// Called when the font configuration of a <see cref="GuiColorizedTextElement"/> changed.
+					/// </summary>
 					virtual void					FontChanged()=0;
 				};
 			protected:
@@ -11909,28 +11921,112 @@ ColorizedText
 			public:
 				~GuiColorizedTextElement();
 
+				/// <summary>
+				/// Get the internal <see cref="text::TextLines"/> object that stores all characters and colors.
+				/// </summary>
+				/// <returns>The internal <see cref="text::TextLines"/> object.</returns>
 				text::TextLines&					GetLines();
+				/// <summary>
+				/// Get the binded callback object.
+				/// </summary>
+				/// <returns>The binded callback object.</returns>
 				ICallback*							GetCallback();
+				/// <summary>
+				/// Bind a callback object.
+				/// </summary>
+				/// <param name="value">The callback object to bind.</param>
 				void								SetCallback(ICallback* value);
-
+				
+				/// <summary>
+				/// Get the binded color table. Use <see cref="text::CharAtt::colorIndex"/> to use colors in this color table.
+				/// </summary>
+				/// <returns>The binded color table.</returns>
 				const IColorArray&					GetColors();
+				/// <summary>
+				/// Bind a color table. Use <see cref="text::CharAtt::colorIndex"/> to use colors in this color table. <see cref="ICallback::ColorChanged"/> will be called.
+				/// </summary>
+				/// <param name="value">The color table to bind.</param>
 				void								SetColors(const ColorArray& value);
+				/// <summary>
+				/// Get the font configuration for all characters.
+				/// </summary>
+				/// <returns>The font configuration.</returns>
 				const FontProperties&				GetFont();
+				/// <summary>
+				/// Set the font configuration for all characters. <see cref="ICallback::FontChanged"/> will be called.
+				/// </summary>
+				/// <param name="value">The font configuration.</param>
 				void								SetFont(const FontProperties& value);
+				/// <summary>
+				/// Get the left-top position of the visible bounds of characters.
+				/// </summary>
+				/// <returns>The left-top position of the visible bounds of characters.</returns>
 				Point								GetViewPosition();
+				/// <summary>
+				/// Set the left-top position of the visible bounds of characters.
+				/// </summary>
+				/// <param name="value">The left-top position of the visible bounds of characters.</param>
 				void								SetViewPosition(Point value);
+				/// <summary>
+				/// Get the enabling state.
+				/// </summary>
+				/// <returns>Returns true if the element will be rendered as an enabled element.</returns>
 				bool								GetVisuallyEnabled();
+				/// <summary>
+				/// Set the enabling state.
+				/// </summary>
+				/// <param name="value">True if the element will be rendered as an enabled element.</param>
 				void								SetVisuallyEnabled(bool value);
+				/// <summary>
+				/// Get the focused state.
+				/// </summary>
+				/// <returns>Returns true if the element will be rendered as a focused element.</returns>
 				bool								GetFocused();
+				/// <summary>
+				/// Set the focused state.
+				/// </summary>
+				/// <param name="value">True if the element will be rendered as a focused element.</param>
 				void								SetFocused(bool value);
-
+				
+				/// <summary>
+				/// Get the begin position of the selection area.
+				/// </summary>
+				/// <returns>The begin position of the selection area.</returns>
 				TextPos								GetCaretBegin();
+				/// <summary>
+				/// Set the begin position of the selection area.
+				/// </summary>
+				/// <param name="value">The begin position of the selection area.</param>
 				void								SetCaretBegin(TextPos value);
+				/// <summary>
+				/// Get the end position of the selection area.
+				/// </summary>
+				/// <returns>The end position of the selection area.</returns>
 				TextPos								GetCaretEnd();
+				/// <summary>
+				/// Set the end position of the selection area.
+				/// </summary>
+				/// <param name="value">The end position of the selection area.</param>
 				void								SetCaretEnd(TextPos value);
+				/// <summary>
+				/// Get the caret visibility.
+				/// </summary>
+				/// <returns>Returns true if characters in the selection range will be rendered using <see cref="text::ColorEntry::selectedFocused"/> or <see cref="text::ColorEntry::selectedUnfocused"/>.</returns>
 				bool								GetCaretVisible();
+				/// <summary>
+				/// Set the caret visibility.
+				/// </summary>
+				/// <param name="value">True if characters in the selection range will be rendered using <see cref="text::ColorEntry::selectedFocused"/> or <see cref="text::ColorEntry::selectedUnfocused"/>.</param>
 				void								SetCaretVisible(bool value);
+				/// <summary>
+				/// Get the color of the caret.
+				/// </summary>
+				/// <returns>The color of the caret.</returns>
 				Color								GetCaretColor();
+				/// <summary>
+				/// Set the color of the caret.
+				/// </summary>
+				/// <param name="value">The color of the caret.</param>
 				void								SetCaretColor(Color value);
 			};
 		}
