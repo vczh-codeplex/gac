@@ -234,7 +234,7 @@ namespace GenXmlDocRef
             return name;
         }
 
-        protected void WriteSubItemTable(Dictionary<string, XElement> describedSubItems, string tableName, TextWriter writer, DocItemWriterContext context)
+        protected void WriteSubItemTable(Dictionary<string, XElement[]> describedSubItems, string tableName, TextWriter writer, DocItemWriterContext context)
         {
             if (describedSubItems.Count > 0)
             {
@@ -243,13 +243,16 @@ namespace GenXmlDocRef
                 writer.WriteLine("    /+rowheader//+col/Name/-col//+col/Description/-col//-rowheader/");
                 foreach (var name in describedSubItems.Keys.OrderBy(s => s))
                 {
-                    var memberElement = describedSubItems[name];
-                    writer.WriteLine("    /+row/");
-                    writer.WriteLine("        /+col//+linksymbol:{0}/{1}/-linksymbol//-col/", memberElement.Attribute("name").Value, name);
-                    writer.Write("        /+col/");
-                    WriteSummary(memberElement, writer, context);
-                    writer.WriteLine("/-col/");
-                    writer.WriteLine("    /-row/");
+                    var memberElements = describedSubItems[name];
+                    foreach (var memberElement in memberElements)
+                    {
+                        writer.WriteLine("    /+row/");
+                        writer.WriteLine("        /+col//+linksymbol:{0}/{1}/-linksymbol//-col/", memberElement.Attribute("name").Value, name);
+                        writer.Write("        /+col/");
+                        WriteSummary(memberElement, writer, context);
+                        writer.WriteLine("/-col/");
+                        writer.WriteLine("    /-row/");
+                    }
                 }
                 writer.WriteLine("/-table//para/");
             }
@@ -258,9 +261,10 @@ namespace GenXmlDocRef
         protected void WriteSubItemTable(XElement[] subItems, string tableName, TextWriter writer, DocItemWriterContext context)
         {
             var describedSubItems = subItems
+                .GroupBy(x => x.Attribute("name").Value)
                 .ToDictionary(
-                    x => x.Attribute("name").Value,
-                    x => x.Element("document").Element("member")
+                    g => g.Key,
+                    g => g.Select(x => x.Element("document").Element("member")).ToArray()
                     );
             WriteSubItemTable(describedSubItems, tableName, writer, context);
         }
@@ -281,7 +285,7 @@ namespace GenXmlDocRef
                         )
                     .ToDictionary(
                         x => x.Content.Attribute("name").Value,
-                        x => x.Content.Element("document").Element("member")
+                        x => new XElement[] { x.Content.Element("document").Element("member") }
                         );
                 WriteSubItemTable(describedFunctions, "Functions", writer, context);
             }
@@ -299,7 +303,7 @@ namespace GenXmlDocRef
                             int index = x.Title.LastIndexOf(' ');
                             return x.Title.Substring(0, index).Trim();
                         },
-                        x => x.Content.Element("document").Element("member")
+                        x => new XElement[] { x.Content.Element("document").Element("member") }
                         );
                 WriteSubItemTable(describedTypes, "Types", writer, context);
             }
@@ -366,6 +370,8 @@ namespace GenXmlDocRef
     {
         protected override void WriteContent(DocItem docItem, TextWriter writer, DocItemWriterContext context)
         {
+            XElement[] subFunctions = docItem.Content.Elements("function").ToArray();
+            WriteSubItemTable(subFunctions, "Overloading Functions", writer, context);
         }
     }
 

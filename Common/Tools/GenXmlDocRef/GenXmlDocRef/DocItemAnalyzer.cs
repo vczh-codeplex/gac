@@ -144,6 +144,10 @@ namespace GenXmlDocRef
                         {
                             fullName = docItem.UniqueIdBody + "::" + functionName;
                         }
+                        if (docItem.UniqueId != null && docItem.UniqueId.StartsWith("functionGroup:"))
+                        {
+                            fullName += "[" + docItem.SubItems.Count.ToString() + "]";
+                        }
                         DocItem functionItem = new DocItem()
                         {
                             Name = "function_" + fullName.Replace("::", "_"),
