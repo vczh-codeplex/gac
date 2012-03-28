@@ -5,7 +5,7 @@ DEVELOPER: ³Âè÷å«(vczh)
 #include "Vlpp.h"
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GACVLPPREFERENCES.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GACVLPPREFERENCES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -22,7 +22,7 @@ Interfaces:
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUITYPES.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUITYPES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -44,15 +44,23 @@ namespace vl
 /***********************************************************************
 Enumerations
 ***********************************************************************/
-
+		
 		namespace Alignment
 		{
+			/// <summary>
+			/// Defines an alignment direction.
+			/// </summary>
 			enum Type
 			{
+				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the left side.</summary>
 				Left=0,
+				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the top side.</summary>
 				Top=0,
+				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the center.</summary>
 				Center=1,
+				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the right side.</summary>
 				Right=2,
+				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the bottom side.</summary>
 				Bottom=2,
 			};
 		}
@@ -60,10 +68,19 @@ Enumerations
 /***********************************************************************
 TextPos
 ***********************************************************************/
-
+		
+		/// <summary>
+		/// Represents the position in multiple lines of text.
+		/// </summary>
 		struct TextPos
 		{
+			/// <summary>
+			/// Row number.
+			/// </summary>
 			int			row;
+			/// <summary>
+			/// Column number. If a line has 4 characters, there are 5 available column numbers(from 0 to 4) in this line.
+			/// </summary>
 			int			column;
 
 			TextPos()
@@ -476,7 +493,7 @@ Resources
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUINATIVEWINDOW.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUINATIVEWINDOW.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -1108,7 +1125,7 @@ Native Window Provider
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\REFLECTION\GUITYPEDESCRIPTOR.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\REFLECTION\GUITYPEDESCRIPTOR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -1395,7 +1412,7 @@ Helper Functions
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -2312,7 +2329,7 @@ Elements
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSTEXTELEMENT.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSTEXTELEMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -2339,21 +2356,48 @@ ColorizedText
 
 			namespace text
 			{
+				/// <summary>
+				/// Represents the extra information of a character to display.
+				/// </summary>
 				struct CharAtt
 				{
+					/// <summary>
+					/// The distance from the head of the line to the right side of this character in pixel.
+					/// </summary>
 					unsigned __int32				rightOffset;
+					/// <summary>
+					/// The color index of the character. Use [M:vl.presentation.elements.GuiColorizedTextElement.GetColors] and [M:vl.presentation.elements.GuiColorizedTextElement.SetColors] to access the color table.
+					/// </summary>
 					unsigned __int32				colorIndex;
 				};
-
+				
+				/// <summary>
+				/// Represents a line of characters.
+				/// </summary>
 				struct TextLine
 				{
 					static const int				BlockSize=32;
 					static const int				MaxWidth=0xFFFF;
-
+					
+					/// <summary>
+					/// A character buffer starts from the first character of this line.
+					/// </summary>
 					wchar_t*						text;
+					/// <summary>
+					/// A extra information buffer starts from the first character of this line.
+					/// </summary>
 					CharAtt*						att;
+					/// <summary>
+					/// The number of available <see cref="CharAtt::rightOffset"/> in the buffer.
+					/// </summary>
 					int								availableOffsetCount;
+					/// <summary>
+					/// The number of elements in the allocated buffer memory.
+					/// </summary>
 					int								bufferLength;
+					/// <summary>
+					/// The number of available characters in the buffer.
+					/// </summary>
 					int								dataLength;
 
 					TextLine();
@@ -2363,14 +2407,44 @@ ColorizedText
 					bool							operator==(const TextLine& value)const{return false;}
 					bool							operator!=(const TextLine& value)const{return true;}
 
+					/// <summary>
+					/// Initialize the <see cref="TextLine"/> instance to be an empty line.
+					/// </summary>
 					void							Initialize();
+					/// <summary>
+					/// Release all resources used in this line.
+					/// </summary>
 					void							Finalize();
+					/// <summary>
+					/// Test is the line initialized.
+					/// </summary>
+					/// <returns>Returns true if the line is initialized.</returns>
 					bool							IsReady();
+					/// <summary>
+					/// Modify the characters in the line by replacing characters.
+					/// </summary>
+					/// <returns>Returns true if the modification succeeded.</returns>
+					/// <param name="start">The position of the first character to be replaced.</param>
+					/// <param name="count">The number of characters to be replaced.</param>
+					/// <param name="input">The buffer to the characters to write into this line.</param>
+					/// <param name="inputCount">The numbers of the characters to write into this line.</param>
 					bool							Modify(int start, int count, const wchar_t* input, int inputCount);
+					/// <summary>
+					/// Split a text line into two by the position. The current line contains characters before this position. This function returns a new text line contains characters after this position.
+					/// </summary>
+					/// <returns>The new text line.</returns>
+					/// <param name="index">.</param>
 					TextLine						Split(int index);
+					/// <summary>
+					/// Append a text line after the this text line, and finalize the input text line.
+					/// </summary>
+					/// <param name="line">The text line that contains all characters and color indices to append and be finalized.</param>
 					void							AppendAndFinalize(TextLine& line);
 				};
 
+				/// <summary>
+				/// An abstract class for character size measuring in differect rendering technology.
+				/// </summary>
 				class CharMeasurer : public virtual IDescriptable
 				{
 				protected:
@@ -2378,17 +2452,49 @@ ColorizedText
 					int								rowHeight;
 					int								widths[65536];
 					
+					/// <summary>
+					/// Measure the width of a character.
+					/// </summary>
+					/// <returns>The width in pixel.</returns>
+					/// <param name="character">The character to measure. This is a pure virtual member function to be overrided.</param>
+					/// <param name="renderTarget">The render target which the character is going to be rendered. This is a pure virtual member function to be overrided.</param>
 					virtual int						MeasureWidthInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)=0;
+					/// <summary>
+					/// Measure the height of a character.
+					/// </summary>
+					/// <returns>The height in pixel.</returns>
+					/// <param name="renderTarget">The render target which the character is going to be rendered.</param>
 					virtual int						GetRowHeightInternal(IGuiGraphicsRenderTarget* renderTarget)=0;
 				public:
+
+					/// <summary>
+					/// Initialize a character measurer.
+					/// </summary>
+					/// <param name="_rowHeight">The default character height in pixel before the character measurer is binded to a render target.</param>
 					CharMeasurer(int _rowHeight);
 					~CharMeasurer();
 
+					/// <summary>
+					/// Bind a render target to this character measurer.
+					/// </summary>
+					/// <param name="value">The render target to bind.</param>
 					void							SetRenderTarget(IGuiGraphicsRenderTarget* value);
+					/// <summary>
+					/// Measure the width of a character using the binded render target.
+					/// </summary>
+					/// <returns>The width of a character, in pixel.</returns>
+					/// <param name="character">The character to measure.</param>
 					int								MeasureWidth(wchar_t character);
+					/// <summary>
+					/// Measure the height of a character.
+					/// </summary>
+					/// <returns>The height of a character, in pixel.</returns>
 					int								GetRowHeight();
 				};
 
+				/// <summary>
+				/// A class to maintain multiple lines of text buffer.
+				/// </summary>
 				struct TextLines
 				{
 					typedef collections::List<TextLine>		TextLineList;
@@ -2402,48 +2508,205 @@ ColorizedText
 					TextLines();
 					~TextLines();
 
+					/// <summary>
+					/// Returns the number of text lines.
+					/// </summary>
+					/// <returns>The number of text lines.</returns>
 					int								GetCount();
+					/// <summary>
+					/// Returns the text line of a specified row number.
+					/// </summary>
+					/// <returns>The related text line object.</returns>
+					/// <param name="row">The specified row number.</param>
 					TextLine&						GetLine(int row);
+					/// <summary>
+					/// Returns the binded <see cref="CharMeasurer"/>.
+					/// </summary>
+					/// <returns>The binded <see cref="CharMeasurer"/>.</returns>
 					CharMeasurer*					GetCharMeasurer();
+					/// <summary>
+					/// Binded a <see cref="CharMeasurer"/>.
+					/// </summary>
+					/// <param name="value">The <see cref="CharMeasurer"/> to bind.</param>
 					void							SetCharMeasurer(CharMeasurer* value);
+					/// <summary>
+					/// Returns the binded <see cref="IGuiGraphicsRenderTarget"/>.
+					/// </summary>
+					/// <returns>The binded <see cref="IGuiGraphicsRenderTarget"/>.</returns>
 					IGuiGraphicsRenderTarget*		GetRenderTarget();
+					/// <summary>
+					/// Binded a <see cref="IGuiGraphicsRenderTarget"/>.
+					/// </summary>
+					/// <param name="value">The <see cref="IGuiGraphicsRenderTarget"/> to bind.</param>
 					void							SetRenderTarget(IGuiGraphicsRenderTarget* value);
+					/// <summary>
+					/// Returns a string from a specified range of the text lines.
+					/// </summary>
+					/// <returns>The string.</returns>
+					/// <param name="start">The start position.</param>
+					/// <param name="end">The end position.</param>
 					WString							GetText(TextPos start, TextPos end);
+					/// <summary>
+					/// Returns the whole string in the text lines.
+					/// </summary>
+					/// <returns>The string.</returns>
 					WString							GetText();
+					/// <summary>
+					/// Set the string to the text lines. This operation will modified every <see cref="TextLine"/> objects.
+					/// </summary>
+					/// <param name="value">The string to set into the text lines.</param>
 					void							SetText(const WString& value);
-
+					
+					/// <summary>
+					/// Remove text lines in a specified range.
+					/// </summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="start">The first row number.</param>
+					/// <param name="count">The number of text lines to be removed.</param>
 					bool							RemoveLines(int start, int count);
+					/// <summary>
+					/// Test is a text position available in the text lines.
+					/// </summary>
+					/// <returns>Returns true if this position is available.</returns>
+					/// <param name="pos">The text position to test.</param>
 					bool							IsAvailable(TextPos pos);
+					/// <summary>
+					/// Normalize a text position to be available.
+					/// </summary>
+					/// <returns>The normalized text position.</returns>
+					/// <param name="pos">The text position to normalize.</param>
 					TextPos							Normalize(TextPos pos);
+					/// <summary>
+					/// Modify some text lines by replacing characters.
+					/// </summary>
+					/// <returns>The new end position.</returns>
+					/// <param name="start">The start position of the range of characters to be replaced.</param>
+					/// <param name="end">The end position of the range of characters to be replaced.</param>
+					/// <param name="inputs">The buffer to the string buffers to replace into the text lines.</param>
+					/// <param name="inputCounts">The numbers of characters for each string buffer.</param>
+					/// <param name="rows">The number of string buffers.</param>
 					TextPos							Modify(TextPos start, TextPos end, const wchar_t** inputs, int* inputCounts, int rows);
+					/// <summary>
+					/// Modify some text lines by replacing characters.
+					/// </summary>
+					/// <returns>The new end position.</returns>
+					/// <param name="start">The start position of the range of characters to be replaced.</param>
+					/// <param name="end">The end position of the range of characters to be replaced.</param>
+					/// <param name="input">The buffer to the string to replace into the text lines.</param>
+					/// <param name="inputCount">The number of characters to replace into the text lines.</param>
 					TextPos							Modify(TextPos start, TextPos end, const wchar_t* input, int inputCount);
+					/// <summary>
+					/// Modify some text lines by replacing characters.
+					/// </summary>
+					/// <returns>The new end position.</returns>
+					/// <param name="start">The start position of the range of characters to be replaced.</param>
+					/// <param name="end">The end position of the range of characters to be replaced.</param>
+					/// <param name="input">The string to replace into the text lines.</param>
 					TextPos							Modify(TextPos start, TextPos end, const wchar_t* input);
+					/// <summary>
+					/// Modify some text lines by replacing characters.
+					/// </summary>
+					/// <returns>The new end position.</returns>
+					/// <param name="start">The start position of the range of characters to be replaced.</param>
+					/// <param name="end">The end position of the range of characters to be replaced.</param>
+					/// <param name="input">The string to replace into the text lines.</param>
 					TextPos							Modify(TextPos start, TextPos end, const WString& input);
+					/// <summary>
+					/// Remove every text lines.
+					/// </summary>
 					void							Clear();
-
+					
+					/// <summary>
+					/// Clear all cached <see cref="CharAtt::rightOffset"/>.
+					/// </summary>
 					void							ClearMeasurement();
+					/// <summary>
+					/// Returns the number of spaces to replace a tab character for rendering.
+					/// </summary>
+					/// <returns>The number of spaces to replace a tab character for rendering.</returns>
 					int								GetTabSpaceCount();
+					/// <summary>
+					/// Set the number of spaces to replace a tab character for rendering.
+					/// </summary>
+					/// <param name="value">The number of spaces to replace a tab character for rendering.</param>
 					void							SetTabSpaceCount(int value);
+					/// <summary>
+					/// Measure all characters in a specified row.
+					/// </summary>
+					/// <param name="row">The specified row number.</param>
 					void							MeasureRow(int row);
+					/// <summary>
+					/// Returns the width of a specified row.
+					/// </summary>
+					/// <returns>The width of a specified row, in pixel.</returns>
+					/// <param name="row">The specified row number.</param>
 					int								GetRowWidth(int row);
+					/// <summary>
+					/// Returns the height of a row.
+					/// </summary>
+					/// <returns>The height of a row, in pixel.</returns>
 					int								GetRowHeight();
+					/// <summary>
+					/// Returns the total width of the text lines.
+					/// </summary>
+					/// <returns>The width of the text lines, in pixel.</returns>
 					int								GetMaxWidth();
+					/// <summary>
+					/// Returns the total height of the text lines.
+					/// </summary>
+					/// <returns>The height of the text lines, in pixel.</returns>
 					int								GetMaxHeight();
+					/// <summary>
+					/// Get the text position near to specified point.
+					/// </summary>
+					/// <returns>The text position.</returns>
+					/// <param name="row">The specified point, in pixel.</param>
 					TextPos							GetTextPosFromPoint(Point point);
+					/// <summary>
+					/// Get the point of a specified text position.
+					/// </summary>
+					/// <returns>The point, in pixel. Returns (-1, -1) if the text position is not available.</returns>
+					/// <param name="pos">The specified text position.</param>
 					Point							GetPointFromTextPos(TextPos pos);
+					/// <summary>
+					/// Get the bounds of a specified text position.
+					/// </summary>
+					/// <returns>The bounds, in pixel. Returns (-1, -1, -1, -1) if the text position is not available.</returns>
+					/// <param name="pos">The specified text position.</param>
 					Rect							GetRectFromTextPos(TextPos pos);
 				};
-
+				
+				/// <summary>
+				/// Represents colors of a character.
+				/// </summary>
 				struct ColorItem
 				{
+					/// <summary>
+					/// Text color.
+					/// </summary>
 					Color							text;
+					/// <summary>
+					/// Background color.
+					/// </summary>
 					Color							background;
 				};
-
+				
+				/// <summary>
+				/// Represents color entry in a color table. Use [M:vl.presentation.elements.GuiColorizedTextElement.GetColors] and [M:vl.presentation.elements.GuiColorizedTextElement.SetColors] to access the color table.
+				/// </summary>
 				struct ColorEntry
 				{
+					/// <summary>
+					/// Colors in normal state.
+					/// </summary>
 					ColorItem						normal;
+					/// <summary>
+					/// Colors in focused and selected state.
+					/// </summary>
 					ColorItem						selectedFocused;
+					/// <summary>
+					/// Colors in not focused and selected state.
+					/// </summary>
 					ColorItem						selectedUnfocused;
 
 					bool							operator==(const ColorEntry& value){return false;}
@@ -2514,7 +2777,7 @@ ColorizedText
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSEVENTRECEIVER.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSEVENTRECEIVER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -2799,7 +3062,7 @@ Event Receiver
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSCOMPOSITION.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSCOMPOSITION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -3284,7 +3547,7 @@ Specialized Compositions
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSHOST.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSHOST.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -3428,7 +3691,7 @@ Helpers
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIBASICCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIBASICCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -3860,7 +4123,7 @@ Scrolls
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIWINDOWCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIWINDOWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -4003,7 +4266,7 @@ Window
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUILISTCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUILISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -4618,7 +4881,7 @@ Predefined ItemProvider
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITEXTLISTCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITEXTLISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -4782,7 +5045,7 @@ TextList Control
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUILISTVIEWCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUILISTVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5332,7 +5595,7 @@ ListView
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITREEVIEWCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITREEVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5768,7 +6031,7 @@ TreeView
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICOMBOCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICOMBOCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5881,7 +6144,7 @@ ComboBox with GuiListControl
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICONTAINERCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICONTAINERCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5989,7 +6252,7 @@ Tab Control
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -6131,7 +6394,7 @@ MenuButton
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIAPPLICATION.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIAPPLICATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -6205,7 +6468,7 @@ extern void GuiApplicationMain();
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUITEXTCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUITEXTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -6501,7 +6764,7 @@ TextBox
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUICOMMONSTYLES.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUICOMMONSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -6630,7 +6893,7 @@ Scrolls
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUIWIN7STYLES.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUIWIN7STYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7492,7 +7755,7 @@ List
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GACUI.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GACUI.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7518,7 +7781,7 @@ extern int SetupWindowsDirect2DRenderer();
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSWINDOWSDIRECT2D.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSWINDOWSDIRECT2D.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7607,7 +7870,7 @@ extern void RendererMainDirect2D();
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSRENDERERSWINDOWSDIRECT2D.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSRENDERERSWINDOWSDIRECT2D.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7835,7 +8098,7 @@ Renderers
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\GDI\WINGDI.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\GDI\WINGDI.H
 ***********************************************************************/
 /*******************************************************************************
 Vczh Library++ 3.0
@@ -8298,7 +8561,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSWINDOWSGDI.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSWINDOWSGDI.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8373,7 +8636,7 @@ extern void RendererMainGDI();
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSRENDERERSWINDOWSGDI.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSRENDERERSWINDOWSGDI.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8598,7 +8861,7 @@ Renderers
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\WINNATIVEWINDOW.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\WINNATIVEWINDOW.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8645,7 +8908,7 @@ Windows Platform Native Controller
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\DIRECT2D\WINDIRECT2DAPPLICATION.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\DIRECT2D\WINDIRECT2DAPPLICATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8676,7 +8939,7 @@ extern int WinMainDirect2D(HINSTANCE hInstance, void(*RendererMain)());
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\GDI\WINGDIAPPLICATION.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\GDI\WINGDIAPPLICATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0

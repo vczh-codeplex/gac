@@ -155,6 +155,22 @@ namespace GenXmlDocRef
                         docItem.AddSymbolDocItem(functionItem, namespaces, namespaceNames);
                     }
                     break;
+                case "field":
+                    {
+                        string fieldName = docXml.Attribute("name").Value;
+                        string fullName = docItem.UniqueIdBody + "::" + fieldName;
+                        string[] namespaceNames = namespaces.Select(t => t.Item1).ToArray();
+                        DocItem fieldItem = new DocItem()
+                        {
+                            Name = "field_" + fullName.Replace("::", "_"),
+                            UniqueId = "field:" + fullName,
+                            Title = fieldName + " Field",
+                            Content = docXml,
+                            Document = docXml.Element("document"),
+                        };
+                        docItem.AddSymbolDocItem(fieldItem, namespaces, namespaceNames);
+                    }
+                    break;
                 case "document":
                     {
                         if (docItem.Document != null)
