@@ -32,38 +32,107 @@ namespace vl
 System Object
 ***********************************************************************/
 
+		/// <summary>
+		/// Represents a screen.
+		/// </summary>
 		class INativeScreen : public Interface
 		{
 		public:
+			/// <summary>
+			/// Get the bounds of the screen.
+			/// </summary>
+			/// <returns>The bounds of the screen.</returns>
 			virtual Rect				GetBounds()=0;
+			/// <summary>
+			/// Get the bounds of the screen client area.
+			/// </summary>
+			/// <returns>The bounds of the screen client area.</returns>
 			virtual Rect				GetClientBounds()=0;
+			/// <summary>
+			/// Get the name of the screen.
+			/// </summary>
+			/// <returns>The name of the screen.</returns>
 			virtual WString				GetName()=0;
+			/// <summary>
+			/// Test is the screen is a primary screen.
+			/// </summary>
+			/// <returns>Returns true if the screen is a primary screen.</returns>
 			virtual bool				IsPrimary()=0;
 		};
-
+		
+		/// <summary>
+		/// Represents a cursor.
+		/// </summary>
 		class INativeCursor : public Interface
 		{
 		public:
+			/// <summary>
+			/// Represents a predefined cursor type.
+			/// </summary>
 			enum SystemCursorType
 			{
+				/// <summary>
+				/// [T:vl.presentation.INativeCursor.SystemCursorType]Small waiting cursor.
+				/// </summary>
 				SmallWaiting,
+				/// <summary>
+				/// [T:vl.presentation.INativeCursor.SystemCursorType]large waiting cursor.
+				/// </summary>
 				LargeWaiting,
+				/// <summary>
+				/// [T:vl.presentation.INativeCursor.SystemCursorType]Arrow cursor.
+				/// </summary>
 				Arrow,
+				/// <summary>
+				/// [T:vl.presentation.INativeCursor.SystemCursorType]Cross cursor.
+				/// </summary>
 				Cross,
+				/// <summary>
+				/// [T:vl.presentation.INativeCursor.SystemCursorType]Hand cursor.
+				/// </summary>
 				Hand,
+				/// <summary>
+				/// [T:vl.presentation.INativeCursor.SystemCursorType]Help cursor.
+				/// </summary>
 				Help,
+				/// <summary>
+				/// [T:vl.presentation.INativeCursor.SystemCursorType]I beam cursor.
+				/// </summary>
 				IBeam,
+				/// <summary>
+				/// [T:vl.presentation.INativeCursor.SystemCursorType]Sizing in all direction cursor.
+				/// </summary>
 				SizeAll,
+				/// <summary>
+				/// [T:vl.presentation.INativeCursor.SystemCursorType]Sizing NE-SW cursor.
+				/// </summary>
 				SizeNESW,
+				/// <summary>
+				/// [T:vl.presentation.INativeCursor.SystemCursorType]Sizing N-S cursor.
+				/// </summary>
 				SizeNS,
+				/// <summary>
+				/// [T:vl.presentation.INativeCursor.SystemCursorType]Sizing NW-SE cursor.
+				/// </summary>
 				SizeNWSE,
+				/// <summary>
+				/// [T:vl.presentation.INativeCursor.SystemCursorType]Sizing W-E cursor.
+				/// </summary>
 				SizeWE,
 				LastSystemCursor=SizeWE,
 			};
 
 			static const int			SystemCursorCount=LastSystemCursor+1;
 		public:
+			/// <summary>
+			/// Test is the cursor a system provided cursor.
+			/// </summary>
+			/// <returns>Returns true if the cursor a system provided cursor.</returns>
 			virtual bool				IsSystemCursor()=0;
+			/// <summary>
+			/// Get the cursor type if the cursor a system provided cursor.
+			/// </summary>
+			/// <returns>The cursor type.</returns>
 			virtual SystemCursorType	GetSystemCursorType()=0;
 		};
 
@@ -74,49 +143,142 @@ Image Object
 		class INativeImageService;
 		class INativeImage;
 		class INativeImageFrame;
-
+		
+		/// <summary>
+		/// Represents a customized cache object for an image frame.
+		/// </summary>
 		class INativeImageFrameCache : public Interface
 		{
 		public:
+			/// <summary>
+			/// Called when this cache object is attached to an image frame.
+			/// </summary>
+			/// <param name="frame">The image frame that attached to.</param>
 			virtual void						OnAttach(INativeImageFrame* frame)=0;
+			/// <summary>
+			/// Called when this cache object is detached to an image frame.
+			/// </summary>
+			/// <param name="frame">The image frame that detached from.</param>
 			virtual void						OnDetach(INativeImageFrame* frame)=0;
 		};
 
+		/// <summary>
+		/// Represents an image frame.
+		/// </summary>
 		class INativeImageFrame : public Interface
 		{
 		public:
+			/// <summary>
+			/// Get the image that owns this frame.
+			/// </summary>
+			/// <returns>The image that owns this frame.</returns>
 			virtual INativeImage*				GetImage()=0;
+			/// <summary>
+			/// Get the size of this frame.
+			/// </summary>
+			/// <returns>The size of this frame.</returns>
 			virtual Size						GetSize()=0;
 
+			/// <summary>
+			/// Attach a customized cache object to this image frame and bind to a key.
+			/// </summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
+			/// <param name="key">The key binded with the customized cache object.</param>
+			/// <param name="cache">The customized cache object.</param>
 			virtual bool						SetCache(void* key, Ptr<INativeImageFrameCache> cache)=0;
+			/// <summary>
+			/// Get the attached customized cache object that is already binded to a key.
+			/// </summary>
+			/// <returns>The attached customized cache object.</returns>
+			/// <param name="key">The key binded with the customized cache object.</param>
 			virtual Ptr<INativeImageFrameCache>	GetCache(void* key)=0;
+			/// <summary>
+			/// Get the attached customized cache object that is already binded to a key, and then detach it.
+			/// </summary>
+			/// <returns>The detached customized cache object.</returns>
+			/// <param name="key">The key binded with the customized cache object.</param>
 			virtual Ptr<INativeImageFrameCache>	RemoveCache(void* key)=0;
 		};
-
+		
+		/// <summary>
+		/// Represents an image.
+		/// </summary>
 		class INativeImage : public Interface
 		{
 		public:
+			/// <summary>
+			/// Represents an image format.
+			/// </summary>
 			enum FormatType
 			{
+				/// <summary>
+				/// [T:vl.presentation.INativeImage.FormatType]Bitmap format.
+				/// </summary>
 				Bmp,
+				/// <summary>
+				/// [T:vl.presentation.INativeImage.FormatType]GIF format.
+				/// </summary>
 				Gif,
+				/// <summary>
+				/// [T:vl.presentation.INativeImage.FormatType]Icon format.
+				/// </summary>
 				Icon,
+				/// <summary>
+				/// [T:vl.presentation.INativeImage.FormatType]JPEG format.
+				/// </summary>
 				Jpeg,
+				/// <summary>
+				/// [T:vl.presentation.INativeImage.FormatType]PNG format.
+				/// </summary>
 				Png,
+				/// <summary>
+				/// [T:vl.presentation.INativeImage.FormatType]TIFF format.
+				/// </summary>
 				Tiff,
+				/// <summary>
+				/// [T:vl.presentation.INativeImage.FormatType]WMP format.
+				/// </summary>
 				Wmp,
+				/// <summary>
+				/// [T:vl.presentation.INativeImage.FormatType]Unknown format.
+				/// </summary>
 				Unknown,
 			};
-
+			
+			/// <summary>
+			/// Get the image service that creates this image.
+			/// </summary>
+			/// <returns>The image service that creates this image.</returns>
 			virtual INativeImageService*		GetImageService()=0;
+			/// <summary>
+			/// Get the image format.
+			/// </summary>
+			/// <returns>The image format.</returns>
 			virtual FormatType					GetFormat()=0;
+			/// <summary>
+			/// Get the number of frames in this image.
+			/// </summary>
+			/// <returns>The number of frames in this image.</returns>
 			virtual int							GetFrameCount()=0;
+			/// <summary>
+			/// Get the frame in this image by a specified frame index.
+			/// </summary>
+			/// <returns>The frame in this image by a specified frame index.</returns>
+			/// <param name="index">The specified frame index.</param>
 			virtual INativeImageFrame*			GetFrame(int index)=0;
 		};
-
+		
+		/// <summary>
+		/// Image service.
+		/// </summary>
 		class INativeImageService : public Interface
 		{
 		public:
+			/// <summary>
+			/// Create an image from file.
+			/// </summary>
+			/// <returns>The created image.</returns>
+			/// <param name="path">The file path.</param>
 			virtual Ptr<INativeImage>			CreateImageFromFile(const WString& path)=0;
 		};
 

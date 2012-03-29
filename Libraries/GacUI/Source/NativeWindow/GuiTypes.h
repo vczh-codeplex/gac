@@ -88,10 +88,19 @@ TextPos
 /***********************************************************************
 Point
 ***********************************************************************/
-
+		
+		/// <summary>
+		/// Represents a position in a two dimensions space.
+		/// </summary>
 		struct Point
 		{
+			/// <summary>
+			/// Position in x dimension.
+			/// </summary>
 			int			x;
+			/// <summary>
+			/// Position in y dimension.
+			/// </summary>
 			int			y;
 
 			Point()
@@ -118,10 +127,19 @@ Point
 /***********************************************************************
 Size
 ***********************************************************************/
-
+		
+		/// <summary>
+		/// Represents a size in a two dimensions space.
+		/// </summary>
 		struct Size
 		{
+			/// <summary>
+			/// Size in x dimension.
+			/// </summary>
 			int			x;
+			/// <summary>
+			/// Size in y dimension.
+			/// </summary>
 			int			y;
 
 			Size()
@@ -148,10 +166,28 @@ Size
 /***********************************************************************
 Rectangle
 ***********************************************************************/
-
+		
+		/// <summary>
+		/// Represents a bounds in a two dimensions space.
+		/// </summary>
 		struct Rect
 		{
-			int		x1, y1, x2, y2;
+			/// <summary>
+			/// Left.
+			/// </summary>
+			int		x1;
+			/// <summary>
+			/// Top.
+			/// </summary>
+			int		y1;
+			/// <summary>
+			/// Left + Width.
+			/// </summary>
+			int		x2;
+			/// <summary>
+			/// Top + Height.
+			/// </summary>
+			int		y2;
 
 			Rect()
 				:x1(0), y1(0), x2(0), y2(0)
@@ -336,7 +372,7 @@ Rectangle
 /***********************************************************************
 Color
 ***********************************************************************/
-
+		
 		struct Color
 		{
 			union
@@ -377,10 +413,28 @@ Color
 /***********************************************************************
 Margin
 ***********************************************************************/
-
+		
+		/// <summary>
+		/// Represents a margin in a two dimensions space.
+		/// </summary>
 		struct Margin
 		{
-			int		left, top, right, bottom;
+			/// <summary>
+			/// The left margin.
+			/// </summary>
+			int		left;
+			/// <summary>
+			/// The top margin.
+			/// </summary>
+			int		top;
+			/// <summary>
+			/// The right margin.
+			/// </summary>
+			int		right;
+			/// <summary>
+			/// The bottom margin.
+			/// </summary>
+			int		bottom;
 
 			Margin()
 				:left(0), top(0), right(0), bottom(0)
@@ -406,16 +460,44 @@ Margin
 /***********************************************************************
 Resources
 ***********************************************************************/
-
+		
+		/// <summary>
+		/// Represents a font configuration.
+		/// </summary>
 		struct FontProperties
 		{
+			/// <summary>
+			/// Font family (or font name, usually).
+			/// </summary>
 			WString				fontFamily;
+			/// <summary>
+			/// Font size in pixel.
+			/// </summary>
 			int					size;
+			/// <summary>
+			/// True if the font is bold.
+			/// </summary>
 			bool				bold;
+			/// <summary>
+			/// True if the font is italic.
+			/// </summary>
 			bool				italic;
+			/// <summary>
+			/// True if the font has a underline.
+			/// </summary>
 			bool				underline;
+			/// <summary>
+			/// True if the font has a strikeline.
+			/// </summary>
 			bool				strikeline;
+			/// <summary>
+			/// True if the font has anti alias rendering.
+			/// </summary>
 			bool				antialias;
+			/// <summary>
+			/// True if the font has anti alias rendering in vertical direction.
+			/// </summary>
+			bool				verticalAntialias;
 
 			FontProperties()
 				:size(0)
@@ -424,6 +506,7 @@ Resources
 				,underline(false)
 				,strikeline(false)
 				,antialias(true)
+				,verticalAntialias(false)
 			{
 			}
 			

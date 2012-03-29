@@ -14,14 +14,14 @@ namespace LinkPdbXml
             if (name.StartsWith("F:"))
             {
                 XElement[] summaries = docItem.Elements("summary").ToArray();
-                if (summaries.Length != 1 || summaries[0].Value.StartsWith("[T:"))
+                if (summaries.Length != 1 || summaries[0].Value.Trim().StartsWith("[T:"))
                 {
                     string fieldName = name.Substring(2);
                     XElement[] results = new XElement[summaries.Length];
                     for(int i=0;i<summaries.Length;i++)
                     {
                         var summary = summaries[i];
-                        string text = summary.Value;
+                        string text = summary.Value.Trim();
                         int index = text.IndexOf(']');
                         string type = text.Substring(3, index - 3);
 

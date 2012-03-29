@@ -183,14 +183,14 @@ Resource Manager
 				/// Register a <see cref="IGuiGraphicsElementFactory"></see> using the element type from <see cref="IGuiGraphicsElementFactory::GetElementTypeName"></see>.
 				/// </summary>
 				/// <param name="factory">The instance of the graphics element factory to register.</param>
-				/// <returns>Returns true if this operations succeeded.</returns>
+				/// <returns>Returns true if this operation succeeded.</returns>
 				virtual bool							RegisterElementFactory(IGuiGraphicsElementFactory* factory);
 				/// <summary>
 				/// Register a <see cref="IGuiGraphicsRendererFactory"></see> and bind it to a registered <see cref="IGuiGraphicsElementFactory"></see>.
 				/// </summary>
 				/// <param name="elementTypeName">The element type to represent a graphics element factory.</param>
 				/// <param name="factory">The instance of the graphics renderer factory to register.</param>
-				/// <returns>Returns true if this operations succeeded.</returns>
+				/// <returns>Returns true if this operation succeeded.</returns>
 				virtual bool							RegisterRendererFactory(const WString& elementTypeName, IGuiGraphicsRendererFactory* factory);
 				/// <summary>
 				/// Get the instance of a registered <see cref="IGuiGraphicsElementFactory"></see> that is binded to a specified element type.
@@ -221,7 +221,7 @@ Resource Manager
 			/// <summary>
 			/// Helper function to register a <see cref="IGuiGraphicsElementFactory"></see> with a <see cref="IGuiGraphicsRendererFactory"></see> and bind them together.
 			/// </summary>
-			/// <returns>Returns true if this operations succeeded.</returns>
+			/// <returns>Returns true if this operation succeeded.</returns>
 			extern bool									RegisterFactories(IGuiGraphicsElementFactory* elementFactory, IGuiGraphicsRendererFactory* rendererFactory);
 
 /***********************************************************************
