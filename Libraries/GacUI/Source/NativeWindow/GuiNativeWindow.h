@@ -285,143 +285,498 @@ Image Object
 /***********************************************************************
 Native Window
 ***********************************************************************/
-
+		
+		/// <summary>
+		/// Represents a window.
+		/// </summary>
 		class INativeWindow : public Interface
 		{
 		public:
+			/// <summary>
+			/// Get the bounds of the window.
+			/// </summary>
+			/// <returns>The bounds of the window.</returns>
 			virtual Rect				GetBounds()=0;
+			/// <summary>
+			/// Set the bounds of the window.
+			/// </summary>
+			/// <param name="bounds">The bounds of the window.</param>
 			virtual void				SetBounds(const Rect& bounds)=0;
+			/// <summary>
+			/// Get the client size of the window.
+			/// </summary>
+			/// <returns>The client size of the window.</returns>
 			virtual Size				GetClientSize()=0;
+			/// <summary>
+			/// Set the client size of the window.
+			/// </summary>
+			/// <param name="size">The client size of the window.</param>
 			virtual void				SetClientSize(Size size)=0;
+			/// <summary>
+			/// Get the client bounds in screen space.
+			/// </summary>
+			/// <returns>The client bounds in screen space.</returns>
 			virtual Rect				GetClientBoundsInScreen()=0;
-
+			
+			/// <summary>
+			/// Get the title of the window. A title will be displayed as a name of this window.
+			/// </summary>
+			/// <returns>The title of the window.</returns>
 			virtual WString				GetTitle()=0;
+			/// <summary>
+			/// Set the title of the window. A title will be displayed as a name of this window.
+			/// </summary>
+			/// <param name="title">The title of the window.</param>
 			virtual void				SetTitle(WString title)=0;
+			/// <summary>
+			/// Get the mouse cursor of the window. When the mouse is on the window, the mouse cursor will be rendered.
+			/// </summary>
+			/// <returns>The mouse cursor of the window.</returns>
 			virtual INativeCursor*		GetWindowCursor()=0;
+			/// <summary>
+			/// Set the mouse cursor of the window. When the mouse is on the window, the mouse cursor will be rendered.
+			/// </summary>
+			/// <param name="cursor">The mouse cursor of the window.</param>
 			virtual void				SetWindowCursor(INativeCursor* cursor)=0;
+			/// <summary>
+			/// Get the caret point of the window. When an input method editor is opened, the input text box will be located to the caret point.
+			/// </summary>
+			/// <returns>The caret point of the window.</returns>
 			virtual Point				GetCaretPoint()=0;
+			/// <summary>
+			/// Set the caret point of the window. When an input method editor is opened, the input text box will be located to the caret point.
+			/// </summary>
+			/// <param name="point">The caret point of the window.</param>
 			virtual void				SetCaretPoint(Point point)=0;
-
+			
+			/// <summary>
+			/// Get the parent window. A parent window doesn't contain a child window. It always displayed below the child windows. When a parent window is minimized or restored, so as its child windows.
+			/// </summary>
+			/// <returns>The parent window.</returns>
 			virtual INativeWindow*		GetParent()=0;
+			/// <summary>
+			/// Set the parent window. A parent window doesn't contain a child window. It always displayed below the child windows. When a parent window is minimized or restored, so as its child windows.
+			/// </summary>
+			/// <param name="parent">The parent window.</param>
 			virtual void				SetParent(INativeWindow* parent)=0;
+			/// <summary>
+			/// Test is the window always pass the focus to its parent window.
+			/// </summary>
+			/// <returns>Returns true if the window always pass the focus to its parent window.</returns>
 			virtual bool				GetAlwaysPassFocusToParent()=0;
+			/// <summary>
+			/// Enable or disble always passing the focus to its parent window.
+			/// </summary>
+			/// <param name="value">True to enable always passing the focus to its parent window.</param>
 			virtual void				SetAlwaysPassFocusToParent(bool value)=0;
 
+			/// <summary>
+			/// Show the window.
+			/// </summary>
 			virtual void				Show()=0;
+			/// <summary>
+			/// Show the window without activation.
+			/// </summary>
 			virtual void				ShowDeactivated()=0;
+			/// <summary>
+			/// Restore the window.
+			/// </summary>
 			virtual void				ShowRestored()=0;
+			/// <summary>
+			/// Maximize the window.
+			/// </summary>
 			virtual void				ShowMaximized()=0;
+			/// <summary>
+			/// Minimize the window.
+			/// </summary>
 			virtual void				ShowMinimized()=0;
+			/// <summary>
+			/// Hide the window.
+			/// </summary>
 			virtual void				Hide()=0;
+			/// <summary>
+			/// Test is the window visible.
+			/// </summary>
+			/// <returns>Returns true if the window is visible.</returns>
 			virtual bool				IsVisible()=0;
 
+			/// <summary>
+			/// Enable the window.
+			/// </summary>
 			virtual void				Enable()=0;
+			/// <summary>
+			/// Disable the window.
+			/// </summary>
 			virtual void				Disable()=0;
+			/// <summary>
+			/// Test is the window enabled.
+			/// </summary>
+			/// <returns>Returns true if the window is enabled.</returns>
 			virtual bool				IsEnabled()=0;
-
+			
+			/// <summary>
+			/// Set focus to the window.
+			/// </summary>
 			virtual void				SetFocus()=0;
+			/// <summary>
+			/// Test is the window focused.
+			/// </summary>
+			/// <returns>Returns true if the window is focused.</returns>
 			virtual bool				IsFocused()=0;
+			/// <summary>
+			/// Activate to the window.
+			/// </summary>
 			virtual void				SetActivate()=0;
+			/// <summary>
+			/// Test is the window activated.
+			/// </summary>
+			/// <returns>Returns true if the window is activated.</returns>
 			virtual bool				IsActivated()=0;
-
+			
+			/// <summary>
+			/// Show the icon in the task bar.
+			/// </summary>
 			virtual void				ShowInTaskBar()=0;
+			/// <summary>
+			/// Hide the icon in the task bar.
+			/// </summary>
 			virtual void				HideInTaskBar()=0;
+			/// <summary>
+			/// Test is the window icon appeared in the task bar.
+			/// </summary>
+			/// <returns>Returns true if the window icon appears in the task bar.</returns>
 			virtual bool				IsAppearedInTaskBar()=0;
-
+			
+			/// <summary>
+			/// Enable activation to the window.
+			/// </summary>
 			virtual void				EnableActivate()=0;
+			/// <summary>
+			/// Disable activation to the window.
+			/// </summary>
 			virtual void				DisableActivate()=0;
+			/// <summary>
+			/// Test is the window allowed to be activated.
+			/// </summary>
+			/// <returns>Returns true if the window is allowed to be activated.</returns>
 			virtual bool				IsEnabledActivate()=0;
-
+			
+			/// <summary>
+			/// Require mouse message capturing to this window. If the capture is required, all mouse message will be send to this window.
+			/// </summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
 			virtual bool				RequireCapture()=0;
+			/// <summary>
+			/// Release mouse message capturing to this window. If the capture is required, all mouse message will be send to this window.
+			/// </summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
 			virtual bool				ReleaseCapture()=0;
 
+			/// <summary>
+			/// Test is the maximize box visible.
+			/// </summary>
+			/// <returns>Returns true if the maximize box is visible.</returns>
 			virtual bool				GetMaximizedBox()=0;
+			/// <summary>
+			/// Make the maximize box visible or invisible.
+			/// </summary>
+			/// <param name="visible">True to make the maximize box visible.</param>
 			virtual void				SetMaximizedBox(bool visible)=0;
+			/// <summary>
+			/// Test is the minimize box visible.
+			/// </summary>
+			/// <returns>Returns true if the minimize box is visible.</returns>
 			virtual bool				GetMinimizedBox()=0;
+			/// <summary>
+			/// Make the minimize box visible or invisible.
+			/// </summary>
+			/// <param name="visible">True to make the minimize box visible.</param>
 			virtual void				SetMinimizedBox(bool visible)=0;
+			/// <summary>
+			/// Test is the border visible.
+			/// </summary>
+			/// <returns>Returns true if the border is visible.</returns>
 			virtual bool				GetBorder()=0;
+			/// <summary>
+			/// Make the border visible or invisible.
+			/// </summary>
+			/// <param name="visible">True to make the border visible.</param>
 			virtual void				SetBorder(bool visible)=0;
+			/// <summary>
+			/// Test is the size box visible.
+			/// </summary>
+			/// <returns>Returns true if the size box is visible.</returns>
 			virtual bool				GetSizeBox()=0;
+			/// <summary>
+			/// Make the size box visible or invisible.
+			/// </summary>
+			/// <param name="visible">True to make the size box visible.</param>
 			virtual void				SetSizeBox(bool visible)=0;
+			/// <summary>
+			/// Test is the icon visible.
+			/// </summary>
+			/// <returns>Returns true if the icon is visible.</returns>
 			virtual bool				GetIconVisible()=0;
+			/// <summary>
+			/// Make the icon visible or invisible.
+			/// </summary>
+			/// <param name="visible">True to make the icon visible.</param>
 			virtual void				SetIconVisible(bool visible)=0;
+			/// <summary>
+			/// Test is the title bar visible.
+			/// </summary>
+			/// <returns>Returns true if the title bar is visible.</returns>
 			virtual bool				GetTitleBar()=0;
+			/// <summary>
+			/// Make the title bar visible or invisible.
+			/// </summary>
+			/// <param name="visible">True to make the title bar visible.</param>
 			virtual void				SetTitleBar(bool visible)=0;
+			/// <summary>
+			/// Test is the window always on top of the desktop.
+			/// </summary>
+			/// <returns>Returns true if the window is always on top of the desktop.</returns>
 			virtual bool				GetTopMost()=0;
+			/// <summary>
+			/// Make the window always or never on top of the desktop.
+			/// </summary>
+			/// <param name="topmost">True to make the window always  on top of the desktop.</param>
 			virtual void				SetTopMost(bool topmost)=0;
-
+			
+			/// <summary>
+			/// Install an message listener.
+			/// </summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
+			/// <param name="listener">The listener to install.</param>
 			virtual bool				InstallListener(INativeWindowListener* listener)=0;
+			/// <summary>
+			/// Uninstall an message listener.
+			/// </summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
+			/// <param name="listener">The listener to uninstall.</param>
 			virtual bool				UninstallListener(INativeWindowListener* listener)=0;
+			/// <summary>
+			/// Redraw the content of the window.
+			/// </summary>
 			virtual void				RedrawContent()=0;
 		};
 
+		/// <summary>
+		/// Mouse message information.
+		/// </summary>
 		struct NativeWindowMouseInfo
 		{
+			/// <summary>True if the control button is pressed.</summary>
 			bool						ctrl;
+			/// <summary>True if the shift button is pressed.</summary>
 			bool						shift;
+			/// <summary>True if the left mouse button is pressed.</summary>
 			bool						left;
+			/// <summary>True if the middle mouse button is pressed.</summary>
 			bool						middle;
+			/// <summary>True if the right mouse button is pressed.</summary>
 			bool						right;
+			/// <summary>The mouse position of x dimension.</summary>
 			int							x;
+			/// <summary>The mouse position of y dimension.</summary>
 			int							y;
+			/// <summary>The delta of the wheel.</summary>
 			int							wheel;
 		};
-
+		
+		/// <summary>
+		/// Key message information.
+		/// </summary>
 		struct NativeWindowKeyInfo
 		{
+			/// <summary>Key code of the key that sends this message.</summary>
 			int							code;
+			/// <summary>True if the control button is pressed.</summary>
 			bool						ctrl;
+			/// <summary>True if the shift button is pressed.</summary>
 			bool						shift;
+			/// <summary>True if the alt button is pressed.</summary>
 			bool						alt;
+			/// <summary>True if the capslock button is pressed.</summary>
 			bool						capslock;
 		};
-
+		
+		/// <summary>
+		/// Character message information.
+		/// </summary>
 		struct NativeWindowCharInfo
 		{
+			/// <summary>Character that sends this message.</summary>
 			wchar_t						code;
+			/// <summary>True if the control button is pressed.</summary>
 			bool						ctrl;
+			/// <summary>True if the shift button is pressed.</summary>
 			bool						shift;
+			/// <summary>True if the alt button is pressed.</summary>
 			bool						alt;
+			/// <summary>True if the capslock button is pressed.</summary>
 			bool						capslock;
 		};
-
+		
+		/// <summary>
+		/// Represents a message listener to an <see cref="INativeWindow"/>..
+		/// </summary>
 		class INativeWindowListener : public Interface
 		{
 		public:
+			/// <summary>
+			/// Called when the window is moving.
+			/// </summary>
+			/// <param name="bounds">The bounds. Message handler can change the bounds.</param>
+			/// <param name="fixSizeOnly">True if the message raise only want the message handler to change the size.</param>
 			virtual void				Moving(Rect& bounds, bool fixSizeOnly);
+			/// <summary>
+			/// Called when the window is moved.
+			/// </summary>
 			virtual void				Moved();
+			/// <summary>
+			/// Called when the window is enabled.
+			/// </summary>
 			virtual void				Enabled();
+			/// <summary>
+			/// Called when the window is disabled.
+			/// </summary>
 			virtual void				Disabled();
+			/// <summary>
+			/// Called when the window got the focus.
+			/// </summary>
 			virtual void				GotFocus();
+			/// <summary>
+			/// Called when the window lost the focus.
+			/// </summary>
 			virtual void				LostFocus();
+			/// <summary>
+			/// Called when the window is activated.
+			/// </summary>
 			virtual void				Activated();
+			/// <summary>
+			/// Called when the window is deactivated.
+			/// </summary>
 			virtual void				Deactivated();
+			/// <summary>
+			/// Called when the window is opened.
+			/// </summary>
 			virtual void				Opened();
+			/// <summary>
+			/// Called when the window is closing.
+			/// </summary>
+			/// <param name="cancel">Change the value to true to prevent the windows from being closed.</param>
 			virtual void				Closing(bool& cancel);
+			/// <summary>
+			/// Called when the window is closed.
+			/// </summary>
 			virtual void				Closed();
+			/// <summary>
+			/// Called when the window is painting.
+			/// </summary>
 			virtual void				Paint();
+			/// <summary>
+			/// Called when the window is destroying.
+			/// </summary>
 			virtual void				Destroying();
+			/// <summary>
+			/// Called when the window is destroyed.
+			/// </summary>
 			virtual void				Destroyed();
-
+			
+			/// <summary>
+			/// Called when the left mouse button is pressed.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				LeftButtonDown(const NativeWindowMouseInfo& info);
+			/// <summary>
+			/// Called when the left mouse button is released.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				LeftButtonUp(const NativeWindowMouseInfo& info);
+			/// <summary>
+			/// Called when the left mouse button performed a double click.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				LeftButtonDoubleClick(const NativeWindowMouseInfo& info);
+			/// <summary>
+			/// Called when the right mouse button is pressed.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				RightButtonDown(const NativeWindowMouseInfo& info);
+			/// <summary>
+			/// Called when the right mouse button is released.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				RightButtonUp(const NativeWindowMouseInfo& info);
+			/// <summary>
+			/// Called when the right mouse button performed a double click.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				RightButtonDoubleClick(const NativeWindowMouseInfo& info);
+			/// <summary>
+			/// Called when the middle mouse button is pressed.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				MiddleButtonDown(const NativeWindowMouseInfo& info);
+			/// <summary>
+			/// Called when the middle mouse button is released.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				MiddleButtonUp(const NativeWindowMouseInfo& info);
+			/// <summary>
+			/// Called when the middle mouse button performed a double click.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				MiddleButtonDoubleClick(const NativeWindowMouseInfo& info);
+			/// <summary>
+			/// Called when the horizontal mouse wheel scrolls.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				HorizontalWheel(const NativeWindowMouseInfo& info);
+			/// <summary>
+			/// Called when the horizontal vertical wheel scrolls.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				VerticalWheel(const NativeWindowMouseInfo& info);
+			/// <summary>
+			/// Called when the mouse is moving on the window.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				MouseMoving(const NativeWindowMouseInfo& info);
+			/// <summary>
+			/// Called when the mouse entered the window.
+			/// </summary>
 			virtual void				MouseEntered();
+			/// <summary>
+			/// Called when the mouse leaved the window.
+			/// </summary>
 			virtual void				MouseLeaved();
-
+			
+			/// <summary>
+			/// Called a key is pressed.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				KeyDown(const NativeWindowKeyInfo& info);
+			/// <summary>
+			/// Called a key is released.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				KeyUp(const NativeWindowKeyInfo& info);
+			/// <summary>
+			/// Called a system key is pressed.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				SysKeyDown(const NativeWindowKeyInfo& info);
+			/// <summary>
+			/// Called a system key is released.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				SysKeyUp(const NativeWindowKeyInfo& info);
+			/// <summary>
+			/// Called an input character is generated.
+			/// </summary>
+			/// <param name="info">Detailed information to this message.</param>
 			virtual void				Char(const NativeWindowCharInfo& info);
 		};
 
@@ -429,67 +784,197 @@ Native Window
 Native Window Services
 ***********************************************************************/
 
+		/// <summary>
+		/// System resource service.
+		/// </summary>
 		class INativeResourceService : public virtual Interface
 		{
 		public:
+			/// <summary>
+			/// Get a cached cursor object using a predefined system cursor type;
+			/// </summary>
+			/// <returns>The cached cursor object.</returns>
+			/// <param name="type">The predefined system cursor type.</param>
 			virtual INativeCursor*			GetSystemCursor(INativeCursor::SystemCursorType type)=0;
+			/// <summary>
+			/// Get a cached cursor object using a default system cursor type;
+			/// </summary>
+			/// <returns>The cached cursor object.</returns>
 			virtual INativeCursor*			GetDefaultSystemCursor()=0;
 
+			/// <summary>
+			/// Get the default font configuration of the system.
+			/// </summary>
+			/// <returns>The default font configuration of the system.</returns>
 			virtual FontProperties			GetDefaultFont()=0;
+			/// <summary>
+			/// Override the default font configuration for the current process, only available GacUI library.
+			/// </summary>
+			/// <param name="value">The font configuration to override.</param>
 			virtual void					SetDefaultFont(const FontProperties& value)=0;
 		};
-
+		
+		/// <summary>
+		/// Asynchronized operation service. GacUI is not a thread safe library except for this service.
+		/// </summary>
 		class INativeAsyncService : public virtual Interface
 		{
 		public:
 			typedef void (AsyncTaskProc)(void* arguments);
 
+			/// <summary>
+			/// Test is the current thread the main thread.
+			/// </summary>
+			/// <returns>Returns true if the current thread is the main thread.</returns>
 			virtual bool					IsInMainThread()=0;
+			/// <summary>
+			/// Invoke a specified function with an specified argument in the main thread.
+			/// </summary>
+			/// <param name="proc">The specified function.</param>
+			/// <param name="argument">The specified argument.</param>
 			virtual void					InvokeInMainThread(AsyncTaskProc* proc, void* argument)=0;
+			/// <summary>
+			/// Invoke a specified function with an specified argument in the main thread and wait for the function to complete or timeout.
+			/// </summary>
+			/// <returns>Return true if the function complete. Return false if the function has not completed during a specified period of time.</returns>
+			/// <param name="proc">The specified function.</param>
+			/// <param name="argument">The specified argument.</param>
+			/// <param name="milliseconds">The specified period of time to wait. Set to -1 (default value) to wait forever until the function completed.</param>
 			virtual bool					InvokeInMainThreadAndWait(AsyncTaskProc* proc, void* argument, int milliseconds=-1)=0;
 		};
-
+		
+		/// <summary>
+		/// Clipboard service.
+		/// </summary>
 		class INativeClipboardService : public virtual Interface
 		{
 		public:
+			/// <summary>
+			/// Test is there a text in the clipboard.
+			/// </summary>
+			/// <returns>Returns true if there is a text in the clipboard.</returns>
 			virtual bool					ContainsText()=0;
+			/// <summary>
+			/// Get the text in the clipboard.
+			/// </summary>
+			/// <returns>The text in the clipboard.</returns>
 			virtual WString					GetText()=0;
+			/// <summary>
+			/// Copy the text to the clipboard.
+			/// </summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
+			/// <param name="value">The text to copy to the clipboard.</param>
 			virtual bool					SetText(const WString& value)=0;
 		};
-
+		
+		/// <summary>
+		/// Screen information service.
+		/// </summary>
 		class INativeScreenService : public virtual Interface
 		{
 		public:
+			/// <summary>
+			/// Get the number of all available screens.
+			/// </summary>
+			///  <returns>The number of all available screens.</returns>
 			virtual int						GetScreenCount()=0;
+			/// <summary>
+			/// Get the screen object by a specified screen index.
+			/// </summary>
+			/// <returns>The screen object.</returns>
+			/// <param name="index">The specified screen index.</param>
 			virtual INativeScreen*			GetScreen(int index)=0;
+			/// <summary>
+			/// Get the screen object where the main part of the specified window is inside.
+			/// </summary>
+			/// <returns>The screen object.</returns>
+			/// <param name="index">The specified window.</param>
 			virtual INativeScreen*			GetScreen(INativeWindow* window)=0;
 		};
-
+		
+		/// <summary>
+		/// Window service.
+		/// </summary>
 		class INativeWindowService : public virtual Interface
 		{
 		public:
+			/// <summary>
+			/// Create a window.
+			/// </summary>
+			/// <returns>The created window.</returns>
 			virtual INativeWindow*			CreateNativeWindow()=0;
+			/// <summary>
+			/// Destroy a window.
+			/// </summary>
+			/// <param name="window">The window to destroy.</param>
 			virtual void					DestroyNativeWindow(INativeWindow* window)=0;
+			/// <summary>
+			/// Get the main window.
+			/// </summary>
+			/// <returns>The main window.</returns>
 			virtual INativeWindow*			GetMainWindow()=0;
+			/// <summary>
+			/// Get the window that under a specified position in screen space.
+			/// </summary>
+			/// <returns>The window that under a specified position in screen space.</returns>
+			/// <param name="location">The specified position in screen space.</param>
 			virtual INativeWindow*			GetWindow(Point location)=0;
+			/// <summary>
+			/// Make the specified window a main window, show that window, and wait until the windows is closed.
+			/// </summary>
+			/// <param name="window">The specified window.</param>
 			virtual void					Run(INativeWindow* window)=0;
 		};
-
+		
+		/// <summary>
+		/// User input service.
+		/// </summary>
 		class INativeInputService : public virtual Interface
 		{
 		public:
+			/// <summary>
+			/// Start to reveive global mouse message.
+			/// </summary>
 			virtual void					StartHookMouse()=0;
+			/// <summary>
+			/// Stop to receive global mouse message.
+			/// </summary>
 			virtual void					StopHookMouse()=0;
+			/// <summary>
+			/// Test is the global mouse message receiving enabled.
+			/// </summary>
+			/// <returns>Returns true if the global mouse message receiving is enabled.</returns>
 			virtual bool					IsHookingMouse()=0;
-
+			
+			/// <summary>
+			/// Start to reveive global timer message.
+			/// </summary>
 			virtual void					StartTimer()=0;
+			/// <summary>
+			/// Stop to receive global timer message.
+			/// </summary>
 			virtual void					StopTimer()=0;
+			/// <summary>
+			/// Test is the global timer message receiving enabled.
+			/// </summary>
+			/// <returns>Returns true if the global timer message receiving is enabled.</returns>
 			virtual bool					IsTimerEnabled()=0;
-
+			
+			/// <summary>
+			/// Test is the specified key pressing.
+			/// </summary>
+			/// <returns>Returns true if the specified key is pressing.</returns>
 			virtual bool					IsKeyPressing(int code)=0;
+			/// <summary>
+			/// Test is the specified key toggled.
+			/// </summary>
+			/// <returns>Returns true if the specified key is toggled.</returns>
 			virtual bool					IsKeyToggled(int code)=0;
 		};
-
+		
+		/// <summary>
+		/// Callback service.
+		/// </summary>
 		class INativeCallbackService : public virtual Interface
 		{
 		public:
