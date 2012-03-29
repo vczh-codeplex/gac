@@ -269,7 +269,7 @@ Image Object
 		};
 		
 		/// <summary>
-		/// Image service.
+		/// Image service. To access this service, use [M:vl.presentation.INativeController.ImageService].
 		/// </summary>
 		class INativeImageService : public Interface
 		{
@@ -619,7 +619,7 @@ Native Window
 		};
 		
 		/// <summary>
-		/// Represents a message listener to an <see cref="INativeWindow"/>..
+		/// Represents a message listener to an <see cref="INativeWindow"/>.
 		/// </summary>
 		class INativeWindowListener : public Interface
 		{
@@ -785,7 +785,7 @@ Native Window Services
 ***********************************************************************/
 
 		/// <summary>
-		/// System resource service.
+		/// System resource service. To access this service, use [M:vl.presentation.INativeController.ResourceService].
 		/// </summary>
 		class INativeResourceService : public virtual Interface
 		{
@@ -815,7 +815,7 @@ Native Window Services
 		};
 		
 		/// <summary>
-		/// Asynchronized operation service. GacUI is not a thread safe library except for this service.
+		/// Asynchronized operation service. GacUI is not a thread safe library except for this service. To access this service, use [M:vl.presentation.INativeController.AsyncService].
 		/// </summary>
 		class INativeAsyncService : public virtual Interface
 		{
@@ -844,7 +844,7 @@ Native Window Services
 		};
 		
 		/// <summary>
-		/// Clipboard service.
+		/// Clipboard service. To access this service, use [M:vl.presentation.INativeController.ClipboardService].
 		/// </summary>
 		class INativeClipboardService : public virtual Interface
 		{
@@ -868,7 +868,7 @@ Native Window Services
 		};
 		
 		/// <summary>
-		/// Screen information service.
+		/// Screen information service. To access this service, use [M:vl.presentation.INativeController.ScreenService].
 		/// </summary>
 		class INativeScreenService : public virtual Interface
 		{
@@ -893,7 +893,7 @@ Native Window Services
 		};
 		
 		/// <summary>
-		/// Window service.
+		/// Window service. To access this service, use [M:vl.presentation.INativeController.WindowService].
 		/// </summary>
 		class INativeWindowService : public virtual Interface
 		{
@@ -927,7 +927,7 @@ Native Window Services
 		};
 		
 		/// <summary>
-		/// User input service.
+		/// User input service. To access this service, use [M:vl.presentation.INativeController.InputService].
 		/// </summary>
 		class INativeInputService : public virtual Interface
 		{
@@ -973,12 +973,22 @@ Native Window Services
 		};
 		
 		/// <summary>
-		/// Callback service.
+		/// Callback service. To access this service, use [M:vl.presentation.INativeController.CallbackService].
 		/// </summary>
 		class INativeCallbackService : public virtual Interface
 		{
 		public:
+			/// <summary>
+			/// Install a global message listener.
+			/// </summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
+			/// <param name="listener">The global message listener to install.</param>
 			virtual bool					InstallListener(INativeControllerListener* listener)=0;
+			/// <summary>
+			/// Uninstall a global message listener.
+			/// </summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
+			/// <param name="listener">The global message listener to uninstall.</param>
 			virtual bool					UninstallListener(INativeControllerListener* listener)=0;
 		};
 
@@ -986,34 +996,113 @@ Native Window Services
 Native Window Controller
 ***********************************************************************/
 
+		/// <summary>
+		/// Global native system service controller. Use [M:vl.presentation.GetCurrentController] to access this controller.
+		/// </summary>
 		class INativeController : public virtual Interface
 		{
 		public:
+			/// <summary>
+			/// Get the callback service.
+			/// </summary>
+			/// <returns>The callback service</returns>
 			virtual INativeCallbackService*			CallbackService()=0;
+			/// <summary>
+			/// Get the system resource service.
+			/// </summary>
+			/// <returns>The system resource service</returns>
 			virtual INativeResourceService*			ResourceService()=0;
+			/// <summary>
+			/// Get the asynchronized operation service.
+			/// </summary>
+			/// <returns>The asynchronized operation service</returns>
 			virtual INativeAsyncService*			AsyncService()=0;
+			/// <summary>
+			/// Get the clipboard service.
+			/// </summary>
+			/// <returns>The clipboard service</returns>
 			virtual INativeClipboardService*		ClipboardService()=0;
+			/// <summary>
+			/// Get the image service.
+			/// </summary>
+			/// <returns>The image service</returns>
 			virtual INativeImageService*			ImageService()=0;
+			/// <summary>
+			/// Get the screen information service.
+			/// </summary>
+			/// <returns>The screen information service</returns>
 			virtual INativeScreenService*			ScreenService()=0;
+			/// <summary>
+			/// Get the window service.
+			/// </summary>
+			/// <returns>The window service</returns>
 			virtual INativeWindowService*			WindowService()=0;
+			/// <summary>
+			/// Get the user input service.
+			/// </summary>
+			/// <returns>The user input service</returns>
 			virtual INativeInputService*			InputService()=0;
 		};
-
+		
+		/// <summary>
+		/// Represents a global message listener to an <see cref="INativeController"/>.
+		/// </summary>
 		class INativeControllerListener : public Interface
 		{
 		public:
+			/// <summary>
+			/// Called when the left mouse button is pressed. To receive or not receive this message, use <see cref="INativeInputService::StartHookMouse"/> or <see cref="INativeInputService::StopHookMouse"/>.
+			/// </summary>
+			/// <param name="position">The mouse position in the screen space.</param>
 			virtual void					LeftButtonDown(Point position);
+			/// <summary>
+			/// Called when the left mouse button is released. To receive or not receive this message, use <see cref="INativeInputService::StartHookMouse"/> or <see cref="INativeInputService::StopHookMouse"/>
+			/// </summary>
+			/// <param name="position">The mouse position in the screen space.</param>
 			virtual void					LeftButtonUp(Point position);
+			/// <summary>
+			/// Called when the right mouse button is pressed. To receive or not receive this message, use <see cref="INativeInputService::StartHookMouse"/> or <see cref="INativeInputService::StopHookMouse"/>
+			/// </summary>
+			/// <param name="position">The mouse position in the screen space.</param>
 			virtual void					RightButtonDown(Point position);
+			/// <summary>
+			/// Called when the right mouse button is released. To receive or not receive this message, use <see cref="INativeInputService::StartHookMouse"/> or <see cref="INativeInputService::StopHookMouse"/>
+			/// </summary>
+			/// <param name="position">The mouse position in the screen space.</param>
 			virtual void					RightButtonUp(Point position);
+			/// <summary>
+			/// Called when the mouse is moving. To receive or not receive this message, use <see cref="INativeInputService::StartHookMouse"/> or <see cref="INativeInputService::StopHookMouse"/>
+			/// </summary>
 			virtual void					MouseMoving(Point position);
+			/// <summary>
+			/// Called when the global timer message raised. To receive or not receive this message, use <see cref="INativeInputService::StartTimer"/> or <see cref="INativeInputService::StopTimer"/>
+			/// </summary>
 			virtual void					GlobalTimer();
+			/// <summary>
+			/// Called when the content of the clipboard is updated.
+			/// </summary>
 			virtual void					ClipboardUpdated();
+			/// <summary>
+			/// Called when a window is created.
+			/// </summary>
+			/// <param name="window">The created window.</param>
 			virtual void					NativeWindowCreated(INativeWindow* window);
+			/// <summary>
+			/// Called when a window is destroying.
+			/// </summary>
+			/// <param name="window">The destroying window.</param>
 			virtual void					NativeWindowDestroying(INativeWindow* window);
 		};
 
+		/// <summary>
+		/// Get the global native system service controller.
+		/// </summary>
+		/// <returns>The global native system service controller.</returns>
 		extern								INativeController* GetCurrentController();
+		/// <summary>
+		/// Set the global native system service controller.
+		/// </summary>
+		/// <param name="controller">The global native system service controller.</param>
 		extern void							SetCurrentController(INativeController* controller);
 	}
 }
