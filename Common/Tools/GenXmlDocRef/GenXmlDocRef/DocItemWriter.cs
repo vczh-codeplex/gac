@@ -234,28 +234,51 @@ namespace GenXmlDocRef
             return name;
         }
 
-        protected void WriteSubItemTable(Dictionary<string, XElement[]> describedSubItems, string tableName, TextWriter writer, DocItemWriterContext context)
+        protected void WriteTypedSubItemTable(Dictionary<string, Tuple<XElement, string>[]> describedTypedSubItems, string tableName, TextWriter writer, DocItemWriterContext context, bool writeType)
         {
-            if (describedSubItems.Count > 0)
+            if (describedTypedSubItems.Count > 0)
             {
                 writer.WriteLine("/+b/{0}:/-b//crlf/", tableName);
                 writer.WriteLine("/+table/");
-                writer.WriteLine("    /+rowheader//+col/Name/-col//+col/Description/-col//-rowheader/");
-                foreach (var name in describedSubItems.Keys.OrderBy(s => s))
+                if (writeType)
                 {
-                    var memberElements = describedSubItems[name];
+                    writer.WriteLine("    /+rowheader//+col/Name/-col//+col/Type/-col//+col/Description/-col//-rowheader/");
+                }
+                else
+                {
+                    writer.WriteLine("    /+rowheader//+col/Name/-col//+col/Description/-col//-rowheader/");
+                }
+                foreach (var name in describedTypedSubItems.Keys.OrderBy(s => s))
+                {
+                    var memberElements = describedTypedSubItems[name];
                     foreach (var memberElement in memberElements)
                     {
                         writer.WriteLine("    /+row/");
-                        writer.WriteLine("        /+col//+linksymbol:{0}/{1}/-linksymbol//-col/", memberElement.Attribute("name").Value, name);
+                        writer.WriteLine("        /+col//+linksymbol:{0}/{1}/-linksymbol//-col/", memberElement.Item1.Attribute("name").Value, name);
+                        if (writeType)
+                        {
+                            writer.Write("        /+col/");
+                            WriteHyperlinkType(memberElement.Item2, writer, context);
+                            writer.WriteLine("/-col/");
+                        }
                         writer.Write("        /+col/");
-                        WriteSummary(memberElement, writer, context);
+                        WriteSummary(memberElement.Item1, writer, context);
                         writer.WriteLine("/-col/");
                         writer.WriteLine("    /-row/");
                     }
                 }
                 writer.WriteLine("/-table//para/");
             }
+        }
+
+        protected void WriteSubItemTable(Dictionary<string, XElement[]> describedSubItems, string tableName, TextWriter writer, DocItemWriterContext context)
+        {
+            WriteTypedSubItemTable(
+                describedSubItems.ToDictionary(p => p.Key, p => p.Value.Select(v => Tuple.Create(v, null as string)).ToArray()),
+                tableName,
+                writer,
+                context,
+                false);
         }
 
         protected void WriteSubItemTable(XElement[] subItems, string tableName, TextWriter writer, DocItemWriterContext context)
@@ -267,6 +290,22 @@ namespace GenXmlDocRef
                     g => g.Select(x => x.Element("document").Element("member")).ToArray()
                     );
             WriteSubItemTable(describedSubItems, tableName, writer, context);
+        }
+
+        protected void WriteTypedSubItemTable(XElement[] subItems, string tableName, TextWriter writer, DocItemWriterContext context)
+        {
+            var describedSubItems = subItems
+                .GroupBy(x => x.Attribute("name").Value)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => 
+                        Tuple.Create(
+                            x.Element("document").Element("member"),
+                            x.Element("type").Value
+                            )
+                        ).ToArray()
+                    );
+            WriteTypedSubItemTable(describedSubItems, tableName, writer, context, true);
         }
     }
 
@@ -361,7 +400,7 @@ namespace GenXmlDocRef
                     )
                 .ToArray();
             WriteSubItemTable(subTypes, "Sub Types", writer, context);
-            WriteSubItemTable(subFields, "Fields", writer, context);
+            WriteTypedSubItemTable(subFields, "Fields", writer, context);
             WriteSubItemTable(subFunctions, "Member Functions", writer, context);
         }
     }
@@ -437,6 +476,9 @@ namespace GenXmlDocRef
         protected override void WriteContent(DocItem docItem, TextWriter writer, DocItemWriterContext context)
         {
             WriteSummaryInDocItem(docItem, writer, context);
+            writer.WriteLine("/para//+b/Type:/-b//crlf/");
+            WriteHyperlinkType(docItem.Content.Element("type").Value, writer, context);
+            writer.WriteLine("/para/");
         }
     }
 }
