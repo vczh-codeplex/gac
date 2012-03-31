@@ -37,7 +37,7 @@ Tab Control
 
 				bool											AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController);
 			public:
-				elements::GuiNotifyEvent						TextChanged;
+				compositions::GuiNotifyEvent					TextChanged;
 
 				GuiControl*										GetContainer();
 				GuiTab*											GetOwnerTab();
@@ -87,7 +87,7 @@ Tab Control
 				GuiTab(IStyleController* _styleController);
 				~GuiTab();
 
-				elements::GuiNotifyEvent						SelectedPageChanged;
+				compositions::GuiNotifyEvent					SelectedPageChanged;
 
 				GuiTabPage*										CreatePage(int index=-1);
 				bool											CreatePage(GuiTabPage* page, int index=-1);

@@ -5,7 +5,7 @@ DEVELOPER: ³Âè÷å«(vczh)
 #include "GacUI.h"
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiComboControls.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Controls\ExtendedControls\GuiComboControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -49,18 +49,18 @@ GuiComboBoxBase
 				ItemSelected.Execute(GetNotifyEventArguments());
 			}
 
-			void GuiComboBoxBase::OnClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiComboBoxBase::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				styleController->OnClicked();
 			}
 
-			void GuiComboBoxBase::OnPopupOpened(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiComboBoxBase::OnPopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				styleController->OnPopupOpened();
 				PopupOpened.Execute(arguments);
 			}
 
-			void GuiComboBoxBase::OnPopupClosed(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiComboBoxBase::OnPopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				styleController->OnPopupClosed();
 				PopupClosed.Execute(arguments);
@@ -128,7 +128,7 @@ GuiComboBoxListControl
 				}
 			}
 
-			void GuiComboBoxListControl::OnListControlSelectionChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiComboBoxListControl::OnListControlSelectionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				DisplaySelectedContent(GetSelectedIndex());
 				SelectedIndexChanged.Execute(GetNotifyEventArguments());
@@ -196,7 +196,7 @@ GuiComboBoxListControl
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiContainerControls.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Controls\ExtendedControls\GuiContainerControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -424,7 +424,7 @@ GuiTab
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiListViewControls.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Controls\ExtendedControls\GuiListViewControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -434,6 +434,7 @@ namespace vl
 		namespace controls
 		{
 			using namespace elements;
+			using namespace compositions;
 
 			namespace list
 			{
@@ -685,12 +686,12 @@ ListViewBigIconContentProvider
 				{
 				}
 
-				elements::GuiBoundsComposition* ListViewBigIconContentProvider::ItemContent::GetContentComposition()
+				compositions::GuiBoundsComposition* ListViewBigIconContentProvider::ItemContent::GetContentComposition()
 				{
 					return contentComposition;
 				}
 
-				elements::GuiBoundsComposition* ListViewBigIconContentProvider::ItemContent::GetBackgroundDecorator()
+				compositions::GuiBoundsComposition* ListViewBigIconContentProvider::ItemContent::GetBackgroundDecorator()
 				{
 					return 0;
 				}
@@ -790,12 +791,12 @@ ListViewSmallIconContentProvider
 				{
 				}
 
-				elements::GuiBoundsComposition* ListViewSmallIconContentProvider::ItemContent::GetContentComposition()
+				compositions::GuiBoundsComposition* ListViewSmallIconContentProvider::ItemContent::GetContentComposition()
 				{
 					return contentComposition;
 				}
 
-				elements::GuiBoundsComposition* ListViewSmallIconContentProvider::ItemContent::GetBackgroundDecorator()
+				compositions::GuiBoundsComposition* ListViewSmallIconContentProvider::ItemContent::GetBackgroundDecorator()
 				{
 					return 0;
 				}
@@ -894,12 +895,12 @@ ListViewListContentProvider
 				{
 				}
 
-				elements::GuiBoundsComposition* ListViewListContentProvider::ItemContent::GetContentComposition()
+				compositions::GuiBoundsComposition* ListViewListContentProvider::ItemContent::GetContentComposition()
 				{
 					return contentComposition;
 				}
 
-				elements::GuiBoundsComposition* ListViewListContentProvider::ItemContent::GetBackgroundDecorator()
+				compositions::GuiBoundsComposition* ListViewListContentProvider::ItemContent::GetBackgroundDecorator()
 				{
 					return 0;
 				}
@@ -1035,12 +1036,12 @@ ListViewTileContentProvider
 				{
 				}
 
-				elements::GuiBoundsComposition* ListViewTileContentProvider::ItemContent::GetContentComposition()
+				compositions::GuiBoundsComposition* ListViewTileContentProvider::ItemContent::GetContentComposition()
 				{
 					return contentComposition;
 				}
 
-				elements::GuiBoundsComposition* ListViewTileContentProvider::ItemContent::GetBackgroundDecorator()
+				compositions::GuiBoundsComposition* ListViewTileContentProvider::ItemContent::GetBackgroundDecorator()
 				{
 					return 0;
 				}
@@ -1175,12 +1176,12 @@ ListViewInformationContentProvider
 				{
 				}
 
-				elements::GuiBoundsComposition* ListViewInformationContentProvider::ItemContent::GetContentComposition()
+				compositions::GuiBoundsComposition* ListViewInformationContentProvider::ItemContent::GetContentComposition()
 				{
 					return contentComposition;
 				}
 
-				elements::GuiBoundsComposition* ListViewInformationContentProvider::ItemContent::GetBackgroundDecorator()
+				compositions::GuiBoundsComposition* ListViewInformationContentProvider::ItemContent::GetBackgroundDecorator()
 				{
 					return bottomLineComposition;
 				}
@@ -1316,7 +1317,7 @@ ListViewColumnItemArranger
 
 				const wchar_t* const ListViewColumnItemArranger::IColumnItemView::Identifier = L"vl::presentation::controls::list::ListViewColumnItemArranger::IColumnItemView";
 
-				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
 					if(listView->GetVisuallyEnabled())
 					{
@@ -1326,7 +1327,7 @@ ListViewColumnItemArranger
 					}
 				}
 
-				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonUp(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
 					if(listView->GetVisuallyEnabled())
 					{
@@ -1336,7 +1337,7 @@ ListViewColumnItemArranger
 					}
 				}
 
-				void ListViewColumnItemArranger::ColumnHeaderSplitterMouseMove(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+				void ListViewColumnItemArranger::ColumnHeaderSplitterMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
 					if(splitterDragging)
 					{
@@ -1584,12 +1585,12 @@ ListViewDetailContentProvider
 					}
 				}
 
-				elements::GuiBoundsComposition* ListViewDetailContentProvider::ItemContent::GetContentComposition()
+				compositions::GuiBoundsComposition* ListViewDetailContentProvider::ItemContent::GetContentComposition()
 				{
 					return contentComposition;
 				}
 
-				elements::GuiBoundsComposition* ListViewDetailContentProvider::ItemContent::GetBackgroundDecorator()
+				compositions::GuiBoundsComposition* ListViewDetailContentProvider::ItemContent::GetBackgroundDecorator()
 				{
 					return 0;
 				}
@@ -1946,7 +1947,7 @@ GuiListView
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiMenuControls.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Controls\ExtendedControls\GuiMenuControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -2020,7 +2021,7 @@ GuiMenu
 				return true;
 			}
 
-			void GuiMenu::OnWindowOpened(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiMenu::OnWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(parentMenuService)
 				{
@@ -2037,7 +2038,7 @@ GuiMenu
 				}
 			}
 
-			void GuiMenu::OnWindowClosed(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiMenu::OnWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(parentMenuService)
 				{
@@ -2155,19 +2156,19 @@ GuiMenuButton
 				}
 			}
 
-			void GuiMenuButton::OnSubMenuWindowOpened(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiMenuButton::OnSubMenuWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				SubMenuOpeningChanged.Execute(GetNotifyEventArguments());
 				styleController->SetSubMenuOpening(true);
 			}
 
-			void GuiMenuButton::OnSubMenuWindowClosed(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiMenuButton::OnSubMenuWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				SubMenuOpeningChanged.Execute(GetNotifyEventArguments());
 				styleController->SetSubMenuOpening(false);
 			}
 
-			void GuiMenuButton::OnLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiMenuButton::OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(!GetSubMenu() && GetVisuallyEnabled())
 				{
@@ -2178,7 +2179,7 @@ GuiMenuButton
 				}
 			}
 
-			void GuiMenuButton::OnMouseEnter(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiMenuButton::OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(GetVisuallyEnabled())
 				{
@@ -2189,7 +2190,7 @@ GuiMenuButton
 				}
 			}
 
-			void GuiMenuButton::OnClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiMenuButton::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(GetSubMenu())
 				{
@@ -2291,7 +2292,7 @@ GuiMenuButton
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiTextListControls.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Controls\ExtendedControls\GuiTextListControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -2302,6 +2303,7 @@ namespace vl
 		{
 			using namespace collections;
 			using namespace elements;
+			using namespace compositions;
 
 			namespace list
 			{
@@ -2310,7 +2312,7 @@ namespace vl
 TextItemStyleProvider::TextItemStyleController
 ***********************************************************************/
 
-				void TextItemStyleProvider::TextItemStyleController::OnBulletSelectedChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+				void TextItemStyleProvider::TextItemStyleController::OnBulletSelectedChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 				{
 					textItemStyleProvider->OnStyleCheckedChanged(this);
 				}
@@ -2654,7 +2656,7 @@ GuiTextList
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiTreeViewControls.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Controls\ExtendedControls\GuiTreeViewControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -2664,6 +2666,7 @@ namespace vl
 		namespace controls
 		{
 			using namespace elements;
+			using namespace compositions;
 
 			namespace tree
 			{
@@ -3608,7 +3611,7 @@ TreeViewNodeItemStyleProvider::ItemController
 					}
 				}
 
-				void TreeViewNodeItemStyleProvider::ItemController::OnBackgroundButtonDoubleClick(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+				void TreeViewNodeItemStyleProvider::ItemController::OnBackgroundButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
 					if(backgroundButton->GetVisuallyEnabled())
 					{
@@ -3616,12 +3619,12 @@ TreeViewNodeItemStyleProvider::ItemController
 					}
 				}
 
-				void TreeViewNodeItemStyleProvider::ItemController::OnExpandingButtonDoubleClick(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+				void TreeViewNodeItemStyleProvider::ItemController::OnExpandingButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
 					arguments.handled=true;
 				}
 
-				void TreeViewNodeItemStyleProvider::ItemController::OnExpandingButtonClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+				void TreeViewNodeItemStyleProvider::ItemController::OnExpandingButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 				{
 					if(expandingButton->GetVisuallyEnabled())
 					{
@@ -3899,7 +3902,7 @@ GuiTreeView
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\GuiApplication.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Controls\GuiApplication.cpp
 ***********************************************************************/
 
 extern void GuiMain();
@@ -4062,7 +4065,7 @@ void GuiApplicationMain()
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\GuiBasicControls.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Controls\GuiBasicControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -4072,6 +4075,7 @@ namespace vl
 		namespace controls
 		{
 			using namespace elements;
+			using namespace compositions;
 
 /***********************************************************************
 GuiControl
@@ -4135,7 +4139,7 @@ GuiControl
 				}
 			}
 
-			void GuiControl::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void GuiControl::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				if(focusableComposition!=value)
 				{
@@ -4188,7 +4192,7 @@ GuiControl
 				}
 			}
 
-			elements::GuiEventArgs GuiControl::GetNotifyEventArguments()
+			compositions::GuiEventArgs GuiControl::GetNotifyEventArguments()
 			{
 				return GuiEventArgs(boundsComposition);
 			}
@@ -4198,22 +4202,22 @@ GuiControl
 				return styleController.Obj();
 			}
 
-			elements::GuiBoundsComposition* GuiControl::GetBoundsComposition()
+			compositions::GuiBoundsComposition* GuiControl::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* GuiControl::GetContainerComposition()
+			compositions::GuiGraphicsComposition* GuiControl::GetContainerComposition()
 			{
 				return styleController->GetContainerComposition();
 			}
 
-			elements::GuiGraphicsComposition* GuiControl::GetFocusableComposition()
+			compositions::GuiGraphicsComposition* GuiControl::GetFocusableComposition()
 			{
 				return focusableComposition;
 			}
 
-			elements::GuiGraphicsEventReceiver* GuiControl::GetEventReceiver()
+			compositions::GuiGraphicsEventReceiver* GuiControl::GetEventReceiver()
 			{
 				return eventReceiver;
 			}
@@ -4414,7 +4418,7 @@ GuiButton
 				}
 			}
 
-			void GuiButton::OnLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiButton::OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(arguments.eventSource==boundsComposition)
 				{
@@ -4424,7 +4428,7 @@ GuiButton
 				}
 			}
 
-			void GuiButton::OnLeftButtonUp(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiButton::OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(arguments.eventSource==boundsComposition)
 				{
@@ -4440,7 +4444,7 @@ GuiButton
 				}
 			}
 
-			void GuiButton::OnMouseEnter(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiButton::OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(arguments.eventSource==boundsComposition)
 				{
@@ -4449,7 +4453,7 @@ GuiButton
 				}
 			}
 
-			void GuiButton::OnMouseLeave(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiButton::OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(arguments.eventSource==boundsComposition)
 				{
@@ -4534,7 +4538,7 @@ GuiSelectableButton::MutexGroupController
 GuiSelectableButton
 ***********************************************************************/
 
-			void GuiSelectableButton::OnClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiSelectableButton::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(autoSelection)
 				{
@@ -4916,12 +4920,12 @@ GuiScrollView::StyleController
 				return verticalScroll;
 			}
 
-			elements::GuiTableComposition* GuiScrollView::StyleController::GetInternalTableComposition()
+			compositions::GuiTableComposition* GuiScrollView::StyleController::GetInternalTableComposition()
 			{
 				return tableComposition;
 			}
 
-			elements::GuiBoundsComposition* GuiScrollView::StyleController::GetInternalContainerComposition()
+			compositions::GuiBoundsComposition* GuiScrollView::StyleController::GetInternalContainerComposition()
 			{
 				return containerComposition;
 			}
@@ -4954,17 +4958,17 @@ GuiScrollView::StyleController
 				}
 			}
 
-			elements::GuiBoundsComposition* GuiScrollView::StyleController::GetBoundsComposition()
+			compositions::GuiBoundsComposition* GuiScrollView::StyleController::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* GuiScrollView::StyleController::GetContainerComposition()
+			compositions::GuiGraphicsComposition* GuiScrollView::StyleController::GetContainerComposition()
 			{
 				return containerComposition;
 			}
 
-			void GuiScrollView::StyleController::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void GuiScrollView::StyleController::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				styleProvider->SetFocusableComposition(value);
 			}
@@ -4988,12 +4992,12 @@ GuiScrollView::StyleController
 GuiScrollView
 ***********************************************************************/
 
-			void GuiScrollView::OnContainerBoundsChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiScrollView::OnContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				CalculateView();
 			}
 
-			void GuiScrollView::OnHorizontalScroll(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiScrollView::OnHorizontalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(!supressScrolling)
 				{
@@ -5001,7 +5005,7 @@ GuiScrollView
 				}
 			}
 
-			void GuiScrollView::OnVerticalScroll(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiScrollView::OnVerticalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(!supressScrolling)
 				{
@@ -5132,7 +5136,7 @@ GuiScrollContainer::StyleController
 			{
 			}
 
-			elements::GuiGraphicsComposition* GuiScrollContainer::StyleController::GetContainerComposition()
+			compositions::GuiGraphicsComposition* GuiScrollContainer::StyleController::GetContainerComposition()
 			{
 				return controlContainerComposition;
 			}
@@ -5146,7 +5150,7 @@ GuiScrollContainer::StyleController
 GuiScrollContainer
 ***********************************************************************/
 
-			void GuiScrollContainer::OnControlContainerBoundsChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiScrollContainer::OnControlContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				CalculateView();
 			}
@@ -5178,7 +5182,7 @@ GuiScrollContainer
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\GuiListControls.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Controls\GuiListControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -5189,6 +5193,7 @@ namespace vl
 		{
 			using namespace collections;
 			using namespace elements;
+			using namespace compositions;
 
 			const wchar_t* const GuiListControl::IItemPrimaryTextView::Identifier = L"vl::presnetation::controls::GuiListControl::IItemPrimaryTextView";
 
@@ -5301,7 +5306,7 @@ GuiListControl::ItemCallback
 				return style->GetBoundsComposition()->SetBounds(newRect);
 			}
 
-			elements::GuiGraphicsComposition* GuiListControl::ItemCallback::GetContainerComposition()
+			compositions::GuiGraphicsComposition* GuiListControl::ItemCallback::GetContainerComposition()
 			{
 				return listControl->GetContainerComposition();
 			}
@@ -5355,7 +5360,7 @@ GuiListControl
 				}
 			}
 
-			void GuiListControl::OnBoundsMouseButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiListControl::OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(GetVisuallyEnabled())
 				{
@@ -5476,7 +5481,7 @@ GuiListControl
 GuiSelectableListControl::StyleEvents
 ***********************************************************************/
 
-			void GuiSelectableListControl::StyleEvents::OnBoundsLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiSelectableListControl::StyleEvents::OnBoundsLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(listControl->GetVisuallyEnabled())
 				{
@@ -6466,7 +6471,7 @@ FixedHeightMultiColumnItemArranger
 ItemStyleControllerBase
 ***********************************************************************/
 
-				void ItemStyleControllerBase::Initialize(elements::GuiBoundsComposition* _boundsComposition, GuiControl* _associatedControl)
+				void ItemStyleControllerBase::Initialize(compositions::GuiBoundsComposition* _boundsComposition, GuiControl* _associatedControl)
 				{
 					boundsComposition=_boundsComposition;
 					associatedControl=_associatedControl;
@@ -6513,7 +6518,7 @@ ItemStyleControllerBase
 					return styleId;
 				}
 
-				elements::GuiBoundsComposition* ItemStyleControllerBase::GetBoundsComposition()
+				compositions::GuiBoundsComposition* ItemStyleControllerBase::GetBoundsComposition()
 				{
 					return boundsComposition;
 				}
@@ -6596,7 +6601,7 @@ ItemProviderBase
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\GuiTextControls.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Controls\GuiTextControls.cpp
 ***********************************************************************/
 #include <math.h>
 
@@ -6607,12 +6612,13 @@ namespace vl
 		namespace controls
 		{
 			using namespace elements;
+			using namespace compositions;
 
 /***********************************************************************
 GuiTextElementOperator::DefaultCallback
 ***********************************************************************/
 
-			GuiTextElementOperator::DefaultCallback::DefaultCallback(elements::GuiColorizedTextElement* _textElement, elements::GuiGraphicsComposition* _textComposition)
+			GuiTextElementOperator::DefaultCallback::DefaultCallback(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition)
 				:textElement(_textElement)
 				,textComposition(_textComposition)
 			{
@@ -6899,25 +6905,25 @@ GuiTextElementOperator
 				}
 			}
 
-			void GuiTextElementOperator::OnGotFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiTextElementOperator::OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				textElement->SetFocused(true);
 				textElement->SetCaretVisible(true);
 				UpdateCaretPoint();
 			}
 
-			void GuiTextElementOperator::OnLostFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiTextElementOperator::OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				textElement->SetFocused(false);
 				textElement->SetCaretVisible(false);
 			}
 
-			void GuiTextElementOperator::OnCaretNotify(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiTextElementOperator::OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				textElement->SetCaretVisible(!textElement->GetCaretVisible());
 			}
 
-			void GuiTextElementOperator::OnLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiTextElementOperator::OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
@@ -6927,7 +6933,7 @@ GuiTextElementOperator
 				}
 			}
 
-			void GuiTextElementOperator::OnLeftButtonUp(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiTextElementOperator::OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
@@ -6935,7 +6941,7 @@ GuiTextElementOperator
 				}
 			}
 
-			void GuiTextElementOperator::OnMouseMove(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiTextElementOperator::OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
@@ -6947,7 +6953,7 @@ GuiTextElementOperator
 				}
 			}
 
-			void GuiTextElementOperator::OnKeyDown(elements::GuiGraphicsComposition* sender, elements::GuiKeyEventArgs& arguments)
+			void GuiTextElementOperator::OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments)
 			{
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
@@ -6955,7 +6961,7 @@ GuiTextElementOperator
 				}
 			}
 
-			void GuiTextElementOperator::OnCharInput(elements::GuiGraphicsComposition* sender, elements::GuiCharEventArgs& arguments)
+			void GuiTextElementOperator::OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments)
 			{
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
@@ -6980,7 +6986,7 @@ GuiTextElementOperator
 			{
 			}
 
-			void GuiTextElementOperator::Install(elements::GuiColorizedTextElement* _textElement, elements::GuiGraphicsComposition* _textComposition, GuiControl* _textControl)
+			void GuiTextElementOperator::Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl)
 			{
 				textElement=_textElement;
 				textComposition=_textComposition;
@@ -7023,7 +7029,7 @@ GuiTextElementOperator
 				return textElement;
 			}
 
-			elements::GuiGraphicsComposition* GuiTextElementOperator::GetTextComposition()
+			compositions::GuiGraphicsComposition* GuiTextElementOperator::GetTextComposition()
 			{
 				return textComposition;
 			}
@@ -7156,7 +7162,7 @@ GuiTextElementOperator
 			{
 			}
 
-			elements::GuiGraphicsComposition* GuiTextBoxCommonInterface::GetTextComposition()
+			compositions::GuiGraphicsComposition* GuiTextBoxCommonInterface::GetTextComposition()
 			{
 				return textElementOperator->GetTextComposition();
 			}
@@ -7320,7 +7326,7 @@ GuiMultilineTextBox::StyleController
 				return textElement;
 			}
 
-			elements::GuiGraphicsComposition* GuiMultilineTextBox::StyleController::GetTextComposition()
+			compositions::GuiGraphicsComposition* GuiMultilineTextBox::StyleController::GetTextComposition()
 			{
 				return textComposition;
 			}
@@ -7335,7 +7341,7 @@ GuiMultilineTextBox::StyleController
 				textElement->SetViewPosition(value);
 			}
 
-			void GuiMultilineTextBox::StyleController::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void GuiMultilineTextBox::StyleController::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				GuiScrollView::StyleController::SetFocusableComposition(value);
 				textElementOperator.Install(textElement, textComposition, scrollView);
@@ -7457,7 +7463,7 @@ GuiMultilineTextBox
 				styleController->SetViewPosition(viewBounds.LeftTop()-Size(TextMargin, TextMargin));
 			}
 
-			void GuiMultilineTextBox::OnBoundsMouseButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiMultilineTextBox::OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(GetVisuallyEnabled())
 				{
@@ -7550,17 +7556,17 @@ GuiSinglelineTextBox::StyleController
 				textCompositionTable->SetRowOption(1, GuiCellOption::AbsoluteOption(textElement->GetLines().GetRowHeight()+2*TextMargin));
 			}
 
-			elements::GuiBoundsComposition* GuiSinglelineTextBox::StyleController::GetBoundsComposition()
+			compositions::GuiBoundsComposition* GuiSinglelineTextBox::StyleController::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* GuiSinglelineTextBox::StyleController::GetContainerComposition()
+			compositions::GuiGraphicsComposition* GuiSinglelineTextBox::StyleController::GetContainerComposition()
 			{
 				return containerComposition;
 			}
 
-			void GuiSinglelineTextBox::StyleController::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void GuiSinglelineTextBox::StyleController::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				styleProvider->SetFocusableComposition(value);
 				textElementOperator.Install(textElement, textComposition, textBox);
@@ -7604,7 +7610,7 @@ GuiSinglelineTextBox::StyleController
 				return textElement;
 			}
 
-			elements::GuiGraphicsComposition* GuiSinglelineTextBox::StyleController::GetTextComposition()
+			compositions::GuiGraphicsComposition* GuiSinglelineTextBox::StyleController::GetTextComposition()
 			{
 				return textComposition;
 			}
@@ -7699,7 +7705,7 @@ GuiSinglelineTextBox
 				GuiControl::OnRenderTargetChanged(renderTarget);
 			}
 
-			void GuiSinglelineTextBox::OnBoundsMouseButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiSinglelineTextBox::OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(GetVisuallyEnabled())
 				{
@@ -7747,7 +7753,7 @@ GuiSinglelineTextBox
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\GuiWindowControls.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Controls\GuiWindowControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -7757,6 +7763,7 @@ namespace vl
 		namespace controls
 		{
 			using namespace elements;
+			using namespace compositions;
 
 /***********************************************************************
 GuiControlHost
@@ -7848,12 +7855,12 @@ GuiControlHost
 				delete host;
 			}
 
-			elements::GuiGraphicsHost* GuiControlHost::GetGraphicsHost()
+			compositions::GuiGraphicsHost* GuiControlHost::GetGraphicsHost()
 			{
 				return host;
 			}
 
-			elements::GuiGraphicsComposition* GuiControlHost::GetMainComposition()
+			compositions::GuiGraphicsComposition* GuiControlHost::GetMainComposition()
 			{
 				return host->GetMainComposition();
 			}
@@ -8478,7 +8485,7 @@ GuiPopup
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\Styles\GuiCommonStyles.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Controls\Styles\GuiCommonStyles.cpp
 ***********************************************************************/
 
 namespace vl
@@ -8488,6 +8495,7 @@ namespace vl
 		namespace common_styles
 		{
 			using namespace elements;
+			using namespace compositions;
 			using namespace controls;
 
 /***********************************************************************
@@ -8511,7 +8519,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::OnDecreaseButtonClicked(elements::GuiGraphicsComposition* sender,elements::GuiEventArgs& arguments)
+			void CommonScrollStyle::OnDecreaseButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(commandExecutor)
 				{
@@ -8519,7 +8527,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::OnIncreaseButtonClicked(elements::GuiGraphicsComposition* sender,elements::GuiEventArgs& arguments)
+			void CommonScrollStyle::OnIncreaseButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(commandExecutor)
 				{
@@ -8527,7 +8535,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::OnHandleMouseDown(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonScrollStyle::OnHandleMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(commandExecutor && handleButton->GetVisuallyEnabled())
 				{
@@ -8536,7 +8544,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::OnHandleMouseMove(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonScrollStyle::OnHandleMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(draggingHandle)
 				{
@@ -8575,12 +8583,12 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::OnHandleMouseUp(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonScrollStyle::OnHandleMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				draggingHandle=false;
 			}
 
-			void CommonScrollStyle::OnBigMoveMouseDown(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonScrollStyle::OnBigMoveMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(commandExecutor && handleButton->GetVisuallyEnabled())
 				{
@@ -8713,17 +8721,17 @@ CommonScrollStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* CommonScrollStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* CommonScrollStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* CommonScrollStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* CommonScrollStyle::GetContainerComposition()
 			{
 				return boundsComposition;
 			}
 
-			void CommonScrollStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void CommonScrollStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -8794,7 +8802,7 @@ CommonTrackStyle
 				handleComposition->UpdateCellBounds();
 			}
 
-			void CommonTrackStyle::OnHandleMouseDown(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonTrackStyle::OnHandleMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(commandExecutor && handleButton->GetVisuallyEnabled())
 				{
@@ -8803,7 +8811,7 @@ CommonTrackStyle
 				}
 			}
 
-			void CommonTrackStyle::OnHandleMouseMove(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonTrackStyle::OnHandleMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(draggingHandle)
 				{
@@ -8847,7 +8855,7 @@ CommonTrackStyle
 				}
 			}
 
-			void CommonTrackStyle::OnHandleMouseUp(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonTrackStyle::OnHandleMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				draggingHandle=false;
 			}
@@ -8962,17 +8970,17 @@ CommonTrackStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* CommonTrackStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* CommonTrackStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* CommonTrackStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* CommonTrackStyle::GetContainerComposition()
 			{
 				return boundsComposition;
 			}
 
-			void CommonTrackStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void CommonTrackStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -9028,7 +9036,7 @@ CommonTrackStyle
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\Styles\GuiWin7Styles.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Controls\Styles\GuiWin7Styles.cpp
 ***********************************************************************/
 
 namespace vl
@@ -9039,6 +9047,7 @@ namespace vl
 		{
 			using namespace collections;
 			using namespace elements;
+			using namespace compositions;
 			using namespace controls;
 
 			unsigned char IntToColor(int color)
@@ -10123,17 +10132,17 @@ Win7EmptyStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7EmptyStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7EmptyStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7EmptyStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7EmptyStyle::GetContainerComposition()
 			{
 				return boundsComposition;
 			}
 
-			void Win7EmptyStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7EmptyStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -10197,17 +10206,17 @@ Win7MenuStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7MenuStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7MenuStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7MenuStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7MenuStyle::GetContainerComposition()
 			{
 				return containerComposition;
 			}
 
-			void Win7MenuStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7MenuStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -10269,17 +10278,17 @@ Win7MenuBarStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7MenuBarStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7MenuBarStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7MenuBarStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7MenuBarStyle::GetContainerComposition()
 			{
 				return boundsComposition;
 			}
 
-			void Win7MenuBarStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7MenuBarStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -10380,17 +10389,17 @@ Win7GroupBoxStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7GroupBoxStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7GroupBoxStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7GroupBoxStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7GroupBoxStyle::GetContainerComposition()
 			{
 				return containerComposition;
 			}
 
-			void Win7GroupBoxStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7GroupBoxStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -10421,7 +10430,7 @@ Win7GroupBoxStyle
 Win7TabStyle
 ***********************************************************************/
 
-			void Win7TabStyle::OnHeaderButtonClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void Win7TabStyle::OnHeaderButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(commandExecutor)
 				{
@@ -10511,17 +10520,17 @@ Win7TabStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7TabStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7TabStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7TabStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7TabStyle::GetContainerComposition()
 			{
 				return containerComposition;
 			}
 
-			void Win7TabStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7TabStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -10628,17 +10637,17 @@ Win7ButtonStyleBase
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7ButtonStyleBase::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7ButtonStyleBase::GetBoundsComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7ButtonStyleBase::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7ButtonStyleBase::GetContainerComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			void Win7ButtonStyleBase::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7ButtonStyleBase::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -10861,17 +10870,17 @@ Win7CheckBoxStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7CheckBoxStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7CheckBoxStyle::GetBoundsComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7CheckBoxStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7CheckBoxStyle::GetContainerComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			void Win7CheckBoxStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7CheckBoxStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -11091,17 +11100,17 @@ Win7ListViewColumnDropDownStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7ListViewColumnDropDownStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7ListViewColumnDropDownStyle::GetBoundsComposition()
 			{
 				return mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7ListViewColumnDropDownStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7ListViewColumnDropDownStyle::GetContainerComposition()
 			{
 				return mainComposition;
 			}
 
-			void Win7ListViewColumnDropDownStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7ListViewColumnDropDownStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -11233,17 +11242,17 @@ Win7ListViewColumnHeaderStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7ListViewColumnHeaderStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7ListViewColumnHeaderStyle::GetBoundsComposition()
 			{
 				return mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7ListViewColumnHeaderStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7ListViewColumnHeaderStyle::GetContainerComposition()
 			{
 				return mainComposition;
 			}
 
-			void Win7ListViewColumnHeaderStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7ListViewColumnHeaderStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -11349,17 +11358,17 @@ Win7TreeViewExpandingButtonStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7TreeViewExpandingButtonStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7TreeViewExpandingButtonStyle::GetBoundsComposition()
 			{
 				return mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7TreeViewExpandingButtonStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7TreeViewExpandingButtonStyle::GetContainerComposition()
 			{
 				return mainComposition;
 			}
 
-			void Win7TreeViewExpandingButtonStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7TreeViewExpandingButtonStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -11449,17 +11458,17 @@ Win7MenuBarButtonStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7MenuBarButtonStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7MenuBarButtonStyle::GetBoundsComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7MenuBarButtonStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7MenuBarButtonStyle::GetContainerComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			void Win7MenuBarButtonStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7MenuBarButtonStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -11574,17 +11583,17 @@ Win7MenuItemButtonStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7MenuItemButtonStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7MenuItemButtonStyle::GetBoundsComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7MenuItemButtonStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7MenuItemButtonStyle::GetContainerComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			void Win7MenuItemButtonStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7MenuItemButtonStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -11681,17 +11690,17 @@ Win7MenuSplitterStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7MenuSplitterStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7MenuSplitterStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7MenuSplitterStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7MenuSplitterStyle::GetContainerComposition()
 			{
 				return boundsComposition;
 			}
 
-			void Win7MenuSplitterStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7MenuSplitterStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -11784,7 +11793,7 @@ Win7DropDownComboBoxStyle
 			{
 			}
 
-			elements::GuiGraphicsComposition* Win7DropDownComboBoxStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7DropDownComboBoxStyle::GetContainerComposition()
 			{
 				return textComposition;
 			}
@@ -11845,7 +11854,7 @@ Win7ScrollStyle
 				return handleButtonStyle;
 			}
 
-			void Win7ScrollStyle::InstallBackground(elements::GuiGraphicsComposition* boundsComposition, Direction direction)
+			void Win7ScrollStyle::InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)
 			{
 				Color sinkColor(227, 227, 227);
 				GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
@@ -11927,14 +11936,14 @@ Win7TrackStyle
 				return handleButtonStyle;
 			}
 
-			void Win7TrackStyle::InstallBackground(elements::GuiGraphicsComposition* boundsComposition, Direction direction)
+			void Win7TrackStyle::InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)
 			{
 				GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
 				element->SetColor(Win7GetSystemWindowColor());
 				boundsComposition->SetOwnedElement(element);
 			}
 
-			void Win7TrackStyle::InstallTrack(elements::GuiGraphicsComposition* trackComposition, Direction direction)
+			void Win7TrackStyle::InstallTrack(compositions::GuiGraphicsComposition* trackComposition, Direction direction)
 			{
 				Gui3DBorderElement* element=Gui3DBorderElement::Create();
 				element->SetColors(Color(176, 176, 176), Color(252, 252, 252));
@@ -11959,7 +11968,7 @@ Win7ScrollViewProvider
 			{
 			}
 			
-			void Win7ScrollViewProvider::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7ScrollViewProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -11990,7 +11999,7 @@ Win7ScrollViewProvider
 				return Win7ScrollStyle::DefaultSize;
 			}
 
-			elements::GuiGraphicsComposition* Win7ScrollViewProvider::InstallBackground(elements::GuiBoundsComposition* boundsComposition)
+			compositions::GuiGraphicsComposition* Win7ScrollViewProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
 			{
 				GuiSolidBorderElement* border=GuiSolidBorderElement::Create();
 				border->SetColor(Win7GetSystemBorderColor());
@@ -12046,25 +12055,25 @@ Win7TextBoxBackground
 				backgroundElement->SetColor(colors.backgroundColor);
 			}
 
-			void Win7TextBoxBackground::OnBoundsMouseEnter(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void Win7TextBoxBackground::OnBoundsMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				isMouseEnter=true;
 				UpdateStyle();
 			}
 
-			void Win7TextBoxBackground::OnBoundsMouseLeave(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void Win7TextBoxBackground::OnBoundsMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				isMouseEnter=false;
 				UpdateStyle();
 			}
 
-			void Win7TextBoxBackground::OnBoundsGotFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void Win7TextBoxBackground::OnBoundsGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				isFocused=true;
 				UpdateStyle();
 			}
 
-			void Win7TextBoxBackground::OnBoundsLostFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void Win7TextBoxBackground::OnBoundsLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				isFocused=false;
 				UpdateStyle();
@@ -12092,7 +12101,7 @@ Win7TextBoxBackground
 				styleController=controller;
 			}
 			
-			void Win7TextBoxBackground::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7TextBoxBackground::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				focusableComposition=value;
 				focusableComposition->GetEventReceiver()->mouseEnter.AttachMethod(this, &Win7TextBoxBackground::OnBoundsMouseEnter);
@@ -12107,7 +12116,7 @@ Win7TextBoxBackground
 				UpdateStyle();
 			}
 
-			elements::GuiGraphicsComposition* Win7TextBoxBackground::InstallBackground(elements::GuiBoundsComposition* boundsComposition)
+			compositions::GuiGraphicsComposition* Win7TextBoxBackground::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
 			{
 				{
 					GuiSolidBackgroundElement* background=GuiSolidBackgroundElement::Create();
@@ -12178,7 +12187,7 @@ Win7MultilineTextBoxProvider
 				background.AssociateStyleController(controller);
 			}
 			
-			void Win7MultilineTextBoxProvider::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7MultilineTextBoxProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				background.SetFocusableComposition(value);
 				GuiMultilineTextBox::StyleController* textBoxController=dynamic_cast<GuiMultilineTextBox::StyleController*>(styleController);
@@ -12193,7 +12202,7 @@ Win7MultilineTextBoxProvider
 				background.SetVisuallyEnabled(value);
 			}
 
-			elements::GuiGraphicsComposition* Win7MultilineTextBoxProvider::InstallBackground(elements::GuiBoundsComposition* boundsComposition)
+			compositions::GuiGraphicsComposition* Win7MultilineTextBoxProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
 			{
 				return background.InstallBackground(boundsComposition);
 			}
@@ -12217,7 +12226,7 @@ Win7SinglelineTextBoxProvider
 				background.AssociateStyleController(controller);
 			}
 			
-			void Win7SinglelineTextBoxProvider::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7SinglelineTextBoxProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				background.SetFocusableComposition(value);
 				GuiSinglelineTextBox::StyleController* textBoxController=dynamic_cast<GuiSinglelineTextBox::StyleController*>(styleController);
@@ -12237,7 +12246,7 @@ Win7SinglelineTextBoxProvider
 				background.SetVisuallyEnabled(value);
 			}
 
-			elements::GuiGraphicsComposition* Win7SinglelineTextBoxProvider::InstallBackground(elements::GuiBoundsComposition* boundsComposition)
+			compositions::GuiGraphicsComposition* Win7SinglelineTextBoxProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
 			{
 				return background.InstallBackground(boundsComposition);
 			}
@@ -12366,17 +12375,18 @@ Win7TreeViewProvider
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsComposition.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsComposition.cpp
 ***********************************************************************/
 
 namespace vl
 {
 	namespace presentation
 	{
-		namespace elements
+		namespace compositions
 		{
 			using namespace collections;
 			using namespace controls;
+			using namespace elements;
 
 /***********************************************************************
 GuiGraphicsComposition
@@ -14100,7 +14110,7 @@ GuiPartialViewComposition
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsElement.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsElement.cpp
 ***********************************************************************/
 
 namespace vl
@@ -14723,14 +14733,14 @@ GuiPolygonElement
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsEventReceiver.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsEventReceiver.cpp
 ***********************************************************************/
 
 namespace vl
 {
 	namespace presentation
 	{
-		namespace elements
+		namespace compositions
 		{
 
 /***********************************************************************
@@ -14779,14 +14789,14 @@ Event Receiver
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsHost.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsHost.cpp
 ***********************************************************************/
 
 namespace vl
 {
 	namespace presentation
 	{
-		namespace elements
+		namespace compositions
 		{
 			using namespace collections;
 			using namespace controls;
@@ -15394,7 +15404,7 @@ GuiTimeBasedAnimation
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsTextElement.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsTextElement.cpp
 ***********************************************************************/
 
 namespace vl
@@ -16184,7 +16194,7 @@ GuiColorizedTextElement
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsRenderersWindowsDirect2D.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsRenderersWindowsDirect2D.cpp
 ***********************************************************************/
 
 namespace vl
@@ -17320,7 +17330,7 @@ GuiColorizedTextElementRenderer
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.cpp
 ***********************************************************************/
 
 namespace vl
@@ -17857,7 +17867,7 @@ void RendererMainDirect2D()
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.cpp
 ***********************************************************************/
 
 namespace vl
@@ -18784,7 +18794,7 @@ GuiColorizedTextElementRenderer
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.cpp
 ***********************************************************************/
 
 namespace vl
@@ -19223,7 +19233,7 @@ void RendererMainGDI()
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\NativeWindow\GuiNativeWindow.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\NativeWindow\GuiNativeWindow.cpp
 ***********************************************************************/
 
 namespace vl
@@ -19426,7 +19436,7 @@ Native Window Provider
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.cpp
 ***********************************************************************/
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
@@ -19676,7 +19686,7 @@ int SetupWindowsDirect2DRenderer()
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\NativeWindow\Windows\GDI\WinGDI.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\NativeWindow\Windows\GDI\WinGDI.cpp
 ***********************************************************************/
 
 using namespace vl::stream;
@@ -21565,7 +21575,7 @@ WinImageDC
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\NativeWindow\Windows\GDI\WinGDIApplication.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\NativeWindow\Windows\GDI\WinGDIApplication.cpp
 ***********************************************************************/
 
 namespace vl
@@ -21761,7 +21771,7 @@ int SetupWindowsGDIRenderer()
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\NativeWindow\Windows\WinNativeWindow.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\NativeWindow\Windows\WinNativeWindow.cpp
 ***********************************************************************/
 
 #pragma comment(lib, "Imm32.lib")
@@ -23918,7 +23928,7 @@ Windows Platform Native Controller
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Reflection\GuiTypeDescriptor.cpp
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\Reflection\GuiTypeDescriptor.cpp
 ***********************************************************************/
 
 namespace vl

@@ -379,14 +379,14 @@ TreeView
 						TreeViewNodeItemStyleProvider*		styleProvider;
 						GuiSelectableButton*				backgroundButton;
 						GuiSelectableButton*				expandingButton;
-						elements::GuiTableComposition*		table;
+						compositions::GuiTableComposition*	table;
 						elements::GuiImageFrameElement*		image;
 						elements::GuiSolidLabelElement*		text;
 
 						void								SwitchNodeExpanding();
-						void								OnBackgroundButtonDoubleClick(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-						void								OnExpandingButtonDoubleClick(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-						void								OnExpandingButtonClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+						void								OnBackgroundButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+						void								OnExpandingButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+						void								OnExpandingButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					public:
 						ItemController(TreeViewNodeItemStyleProvider* _styleProvider);
 

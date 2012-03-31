@@ -8,12 +8,13 @@ namespace vl
 		namespace controls
 		{
 			using namespace elements;
+			using namespace compositions;
 
 /***********************************************************************
 GuiTextElementOperator::DefaultCallback
 ***********************************************************************/
 
-			GuiTextElementOperator::DefaultCallback::DefaultCallback(elements::GuiColorizedTextElement* _textElement, elements::GuiGraphicsComposition* _textComposition)
+			GuiTextElementOperator::DefaultCallback::DefaultCallback(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition)
 				:textElement(_textElement)
 				,textComposition(_textComposition)
 			{
@@ -300,25 +301,25 @@ GuiTextElementOperator
 				}
 			}
 
-			void GuiTextElementOperator::OnGotFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiTextElementOperator::OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				textElement->SetFocused(true);
 				textElement->SetCaretVisible(true);
 				UpdateCaretPoint();
 			}
 
-			void GuiTextElementOperator::OnLostFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiTextElementOperator::OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				textElement->SetFocused(false);
 				textElement->SetCaretVisible(false);
 			}
 
-			void GuiTextElementOperator::OnCaretNotify(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiTextElementOperator::OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				textElement->SetCaretVisible(!textElement->GetCaretVisible());
 			}
 
-			void GuiTextElementOperator::OnLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiTextElementOperator::OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
@@ -328,7 +329,7 @@ GuiTextElementOperator
 				}
 			}
 
-			void GuiTextElementOperator::OnLeftButtonUp(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiTextElementOperator::OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
@@ -336,7 +337,7 @@ GuiTextElementOperator
 				}
 			}
 
-			void GuiTextElementOperator::OnMouseMove(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiTextElementOperator::OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
@@ -348,7 +349,7 @@ GuiTextElementOperator
 				}
 			}
 
-			void GuiTextElementOperator::OnKeyDown(elements::GuiGraphicsComposition* sender, elements::GuiKeyEventArgs& arguments)
+			void GuiTextElementOperator::OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments)
 			{
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
@@ -356,7 +357,7 @@ GuiTextElementOperator
 				}
 			}
 
-			void GuiTextElementOperator::OnCharInput(elements::GuiGraphicsComposition* sender, elements::GuiCharEventArgs& arguments)
+			void GuiTextElementOperator::OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments)
 			{
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
@@ -381,7 +382,7 @@ GuiTextElementOperator
 			{
 			}
 
-			void GuiTextElementOperator::Install(elements::GuiColorizedTextElement* _textElement, elements::GuiGraphicsComposition* _textComposition, GuiControl* _textControl)
+			void GuiTextElementOperator::Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl)
 			{
 				textElement=_textElement;
 				textComposition=_textComposition;
@@ -424,7 +425,7 @@ GuiTextElementOperator
 				return textElement;
 			}
 
-			elements::GuiGraphicsComposition* GuiTextElementOperator::GetTextComposition()
+			compositions::GuiGraphicsComposition* GuiTextElementOperator::GetTextComposition()
 			{
 				return textComposition;
 			}
@@ -557,7 +558,7 @@ GuiTextElementOperator
 			{
 			}
 
-			elements::GuiGraphicsComposition* GuiTextBoxCommonInterface::GetTextComposition()
+			compositions::GuiGraphicsComposition* GuiTextBoxCommonInterface::GetTextComposition()
 			{
 				return textElementOperator->GetTextComposition();
 			}
@@ -721,7 +722,7 @@ GuiMultilineTextBox::StyleController
 				return textElement;
 			}
 
-			elements::GuiGraphicsComposition* GuiMultilineTextBox::StyleController::GetTextComposition()
+			compositions::GuiGraphicsComposition* GuiMultilineTextBox::StyleController::GetTextComposition()
 			{
 				return textComposition;
 			}
@@ -736,7 +737,7 @@ GuiMultilineTextBox::StyleController
 				textElement->SetViewPosition(value);
 			}
 
-			void GuiMultilineTextBox::StyleController::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void GuiMultilineTextBox::StyleController::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				GuiScrollView::StyleController::SetFocusableComposition(value);
 				textElementOperator.Install(textElement, textComposition, scrollView);
@@ -858,7 +859,7 @@ GuiMultilineTextBox
 				styleController->SetViewPosition(viewBounds.LeftTop()-Size(TextMargin, TextMargin));
 			}
 
-			void GuiMultilineTextBox::OnBoundsMouseButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiMultilineTextBox::OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(GetVisuallyEnabled())
 				{
@@ -951,17 +952,17 @@ GuiSinglelineTextBox::StyleController
 				textCompositionTable->SetRowOption(1, GuiCellOption::AbsoluteOption(textElement->GetLines().GetRowHeight()+2*TextMargin));
 			}
 
-			elements::GuiBoundsComposition* GuiSinglelineTextBox::StyleController::GetBoundsComposition()
+			compositions::GuiBoundsComposition* GuiSinglelineTextBox::StyleController::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* GuiSinglelineTextBox::StyleController::GetContainerComposition()
+			compositions::GuiGraphicsComposition* GuiSinglelineTextBox::StyleController::GetContainerComposition()
 			{
 				return containerComposition;
 			}
 
-			void GuiSinglelineTextBox::StyleController::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void GuiSinglelineTextBox::StyleController::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				styleProvider->SetFocusableComposition(value);
 				textElementOperator.Install(textElement, textComposition, textBox);
@@ -1005,7 +1006,7 @@ GuiSinglelineTextBox::StyleController
 				return textElement;
 			}
 
-			elements::GuiGraphicsComposition* GuiSinglelineTextBox::StyleController::GetTextComposition()
+			compositions::GuiGraphicsComposition* GuiSinglelineTextBox::StyleController::GetTextComposition()
 			{
 				return textComposition;
 			}
@@ -1100,7 +1101,7 @@ GuiSinglelineTextBox
 				GuiControl::OnRenderTargetChanged(renderTarget);
 			}
 
-			void GuiSinglelineTextBox::OnBoundsMouseButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiSinglelineTextBox::OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(GetVisuallyEnabled())
 				{

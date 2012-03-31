@@ -8,6 +8,7 @@ namespace vl
 		{
 			using namespace collections;
 			using namespace elements;
+			using namespace compositions;
 
 			const wchar_t* const GuiListControl::IItemPrimaryTextView::Identifier = L"vl::presnetation::controls::GuiListControl::IItemPrimaryTextView";
 
@@ -120,7 +121,7 @@ GuiListControl::ItemCallback
 				return style->GetBoundsComposition()->SetBounds(newRect);
 			}
 
-			elements::GuiGraphicsComposition* GuiListControl::ItemCallback::GetContainerComposition()
+			compositions::GuiGraphicsComposition* GuiListControl::ItemCallback::GetContainerComposition()
 			{
 				return listControl->GetContainerComposition();
 			}
@@ -174,7 +175,7 @@ GuiListControl
 				}
 			}
 
-			void GuiListControl::OnBoundsMouseButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiListControl::OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(GetVisuallyEnabled())
 				{
@@ -295,7 +296,7 @@ GuiListControl
 GuiSelectableListControl::StyleEvents
 ***********************************************************************/
 
-			void GuiSelectableListControl::StyleEvents::OnBoundsLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiSelectableListControl::StyleEvents::OnBoundsLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(listControl->GetVisuallyEnabled())
 				{
@@ -1285,7 +1286,7 @@ FixedHeightMultiColumnItemArranger
 ItemStyleControllerBase
 ***********************************************************************/
 
-				void ItemStyleControllerBase::Initialize(elements::GuiBoundsComposition* _boundsComposition, GuiControl* _associatedControl)
+				void ItemStyleControllerBase::Initialize(compositions::GuiBoundsComposition* _boundsComposition, GuiControl* _associatedControl)
 				{
 					boundsComposition=_boundsComposition;
 					associatedControl=_associatedControl;
@@ -1332,7 +1333,7 @@ ItemStyleControllerBase
 					return styleId;
 				}
 
-				elements::GuiBoundsComposition* ItemStyleControllerBase::GetBoundsComposition()
+				compositions::GuiBoundsComposition* ItemStyleControllerBase::GetBoundsComposition()
 				{
 					return boundsComposition;
 				}

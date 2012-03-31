@@ -45,8 +45,8 @@ Scrolls
 				controls::GuiButton*								decreaseButton;
 				controls::GuiButton*								increaseButton;
 				controls::GuiButton*								handleButton;
-				elements::GuiPartialViewComposition*				handleComposition;
-				elements::GuiBoundsComposition*						boundsComposition;
+				compositions::GuiPartialViewComposition*			handleComposition;
+				compositions::GuiBoundsComposition*					boundsComposition;
 
 				int													totalSize;
 				int													pageSize;
@@ -55,25 +55,25 @@ Scrolls
 				bool												draggingHandle;
 
 				void												UpdateHandle();
-				void												OnDecreaseButtonClicked(elements::GuiGraphicsComposition* sender,elements::GuiEventArgs& arguments);
-				void												OnIncreaseButtonClicked(elements::GuiGraphicsComposition* sender,elements::GuiEventArgs& arguments);
-				void												OnHandleMouseDown(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);
-				void												OnHandleMouseMove(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);
-				void												OnHandleMouseUp(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);;
-				void												OnBigMoveMouseDown(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);
+				void												OnDecreaseButtonClicked(compositions::GuiGraphicsComposition* sender,compositions::GuiEventArgs& arguments);
+				void												OnIncreaseButtonClicked(compositions::GuiGraphicsComposition* sender,compositions::GuiEventArgs& arguments);
+				void												OnHandleMouseDown(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
+				void												OnHandleMouseMove(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
+				void												OnHandleMouseUp(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);;
+				void												OnBigMoveMouseDown(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
 
 				virtual controls::GuiButton::IStyleController*		CreateDecreaseButtonStyle(Direction direction)=0;
 				virtual controls::GuiButton::IStyleController*		CreateIncreaseButtonStyle(Direction direction)=0;
 				virtual controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction)=0;
-				virtual void										InstallBackground(elements::GuiGraphicsComposition* boundsComposition, Direction direction)=0;
+				virtual void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)=0;
 				void												BuildStyle(int defaultSize, int arrowSize);
 			public:
 				CommonScrollStyle(Direction _direction);
 				~CommonScrollStyle();
 
-				elements::GuiBoundsComposition*						GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*					GetContainerComposition()override;
-				void												SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*					GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*				GetContainerComposition()override;
+				void												SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void												SetText(const WString& value)override;
 				void												SetFont(const FontProperties& value)override;
 				void												SetVisuallyEnabled(bool value)override;
@@ -94,9 +94,9 @@ Scrolls
 			protected:
 				Direction											direction;
 				controls::GuiScroll::ICommandExecutor*				commandExecutor;
-				elements::GuiBoundsComposition*						boundsComposition;
+				compositions::GuiBoundsComposition*					boundsComposition;
 				controls::GuiButton*								handleButton;
-				elements::GuiTableComposition*						handleComposition;
+				compositions::GuiTableComposition*					handleComposition;
 
 				int													totalSize;
 				int													pageSize;
@@ -105,21 +105,21 @@ Scrolls
 				bool												draggingHandle;
 
 				void												UpdateHandle();
-				void												OnHandleMouseDown(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);
-				void												OnHandleMouseMove(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);
-				void												OnHandleMouseUp(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);
+				void												OnHandleMouseDown(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
+				void												OnHandleMouseMove(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
+				void												OnHandleMouseUp(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
 				
 				virtual controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction)=0;
-				virtual void										InstallBackground(elements::GuiGraphicsComposition* boundsComposition, Direction direction)=0;
-				virtual void										InstallTrack(elements::GuiGraphicsComposition* trackComposition, Direction direction)=0;
+				virtual void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)=0;
+				virtual void										InstallTrack(compositions::GuiGraphicsComposition* trackComposition, Direction direction)=0;
 				void												BuildStyle(int trackThickness, int trackPadding, int handleLong, int handleShort);
 			public:
 				CommonTrackStyle(Direction _direction);
 				~CommonTrackStyle();
 
-				elements::GuiBoundsComposition*						GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*					GetContainerComposition()override;
-				void												SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*					GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*				GetContainerComposition()override;
+				void												SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void												SetText(const WString& value)override;
 				void												SetFont(const FontProperties& value)override;
 				void												SetVisuallyEnabled(bool value)override;

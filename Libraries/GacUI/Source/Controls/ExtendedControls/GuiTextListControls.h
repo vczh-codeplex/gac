@@ -54,7 +54,7 @@ TextList Style Provider
 						elements::GuiSolidLabelElement*			textElement;
 						TextItemStyleProvider*					textItemStyleProvider;
 
-						void									OnBulletSelectedChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+						void									OnBulletSelectedChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					public:
 						TextItemStyleController(TextItemStyleProvider* provider);
 						~TextItemStyleController();

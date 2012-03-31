@@ -7,6 +7,7 @@ namespace vl
 		namespace controls
 		{
 			using namespace elements;
+			using namespace compositions;
 
 			namespace tree
 			{
@@ -951,7 +952,7 @@ TreeViewNodeItemStyleProvider::ItemController
 					}
 				}
 
-				void TreeViewNodeItemStyleProvider::ItemController::OnBackgroundButtonDoubleClick(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+				void TreeViewNodeItemStyleProvider::ItemController::OnBackgroundButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
 					if(backgroundButton->GetVisuallyEnabled())
 					{
@@ -959,12 +960,12 @@ TreeViewNodeItemStyleProvider::ItemController
 					}
 				}
 
-				void TreeViewNodeItemStyleProvider::ItemController::OnExpandingButtonDoubleClick(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+				void TreeViewNodeItemStyleProvider::ItemController::OnExpandingButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
 					arguments.handled=true;
 				}
 
-				void TreeViewNodeItemStyleProvider::ItemController::OnExpandingButtonClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+				void TreeViewNodeItemStyleProvider::ItemController::OnExpandingButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 				{
 					if(expandingButton->GetVisuallyEnabled())
 					{

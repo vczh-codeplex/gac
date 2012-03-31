@@ -8,6 +8,7 @@ namespace vl
 		namespace common_styles
 		{
 			using namespace elements;
+			using namespace compositions;
 			using namespace controls;
 
 /***********************************************************************
@@ -31,7 +32,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::OnDecreaseButtonClicked(elements::GuiGraphicsComposition* sender,elements::GuiEventArgs& arguments)
+			void CommonScrollStyle::OnDecreaseButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(commandExecutor)
 				{
@@ -39,7 +40,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::OnIncreaseButtonClicked(elements::GuiGraphicsComposition* sender,elements::GuiEventArgs& arguments)
+			void CommonScrollStyle::OnIncreaseButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(commandExecutor)
 				{
@@ -47,7 +48,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::OnHandleMouseDown(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonScrollStyle::OnHandleMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(commandExecutor && handleButton->GetVisuallyEnabled())
 				{
@@ -56,7 +57,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::OnHandleMouseMove(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonScrollStyle::OnHandleMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(draggingHandle)
 				{
@@ -95,12 +96,12 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::OnHandleMouseUp(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonScrollStyle::OnHandleMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				draggingHandle=false;
 			}
 
-			void CommonScrollStyle::OnBigMoveMouseDown(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonScrollStyle::OnBigMoveMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(commandExecutor && handleButton->GetVisuallyEnabled())
 				{
@@ -233,17 +234,17 @@ CommonScrollStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* CommonScrollStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* CommonScrollStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* CommonScrollStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* CommonScrollStyle::GetContainerComposition()
 			{
 				return boundsComposition;
 			}
 
-			void CommonScrollStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void CommonScrollStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -314,7 +315,7 @@ CommonTrackStyle
 				handleComposition->UpdateCellBounds();
 			}
 
-			void CommonTrackStyle::OnHandleMouseDown(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonTrackStyle::OnHandleMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(commandExecutor && handleButton->GetVisuallyEnabled())
 				{
@@ -323,7 +324,7 @@ CommonTrackStyle
 				}
 			}
 
-			void CommonTrackStyle::OnHandleMouseMove(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonTrackStyle::OnHandleMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(draggingHandle)
 				{
@@ -367,7 +368,7 @@ CommonTrackStyle
 				}
 			}
 
-			void CommonTrackStyle::OnHandleMouseUp(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments)
+			void CommonTrackStyle::OnHandleMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				draggingHandle=false;
 			}
@@ -482,17 +483,17 @@ CommonTrackStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* CommonTrackStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* CommonTrackStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* CommonTrackStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* CommonTrackStyle::GetContainerComposition()
 			{
 				return boundsComposition;
 			}
 
-			void CommonTrackStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void CommonTrackStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 

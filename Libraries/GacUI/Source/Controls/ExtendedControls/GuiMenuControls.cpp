@@ -71,7 +71,7 @@ GuiMenu
 				return true;
 			}
 
-			void GuiMenu::OnWindowOpened(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiMenu::OnWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(parentMenuService)
 				{
@@ -88,7 +88,7 @@ GuiMenu
 				}
 			}
 
-			void GuiMenu::OnWindowClosed(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiMenu::OnWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(parentMenuService)
 				{
@@ -206,19 +206,19 @@ GuiMenuButton
 				}
 			}
 
-			void GuiMenuButton::OnSubMenuWindowOpened(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiMenuButton::OnSubMenuWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				SubMenuOpeningChanged.Execute(GetNotifyEventArguments());
 				styleController->SetSubMenuOpening(true);
 			}
 
-			void GuiMenuButton::OnSubMenuWindowClosed(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiMenuButton::OnSubMenuWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				SubMenuOpeningChanged.Execute(GetNotifyEventArguments());
 				styleController->SetSubMenuOpening(false);
 			}
 
-			void GuiMenuButton::OnLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiMenuButton::OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(!GetSubMenu() && GetVisuallyEnabled())
 				{
@@ -229,7 +229,7 @@ GuiMenuButton
 				}
 			}
 
-			void GuiMenuButton::OnMouseEnter(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiMenuButton::OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(GetVisuallyEnabled())
 				{
@@ -240,7 +240,7 @@ GuiMenuButton
 				}
 			}
 
-			void GuiMenuButton::OnClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiMenuButton::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(GetSubMenu())
 				{

@@ -24,15 +24,15 @@ Basic Construction
 
 			class GuiControl : public Object, public Description<GuiControl>
 			{
-				friend class elements::GuiGraphicsComposition;
+				friend class compositions::GuiGraphicsComposition;
 				typedef collections::List<GuiControl*>		ControlList;
 			public:
 				class IStyleController : public virtual IDescriptable, public Description<IStyleController>
 				{
 				public:
-					virtual elements::GuiBoundsComposition*		GetBoundsComposition()=0;
-					virtual elements::GuiGraphicsComposition*	GetContainerComposition()=0;
-					virtual void								SetFocusableComposition(elements::GuiGraphicsComposition* value)=0;
+					virtual compositions::GuiBoundsComposition*	GetBoundsComposition()=0;
+					virtual compositions::GuiGraphicsComposition*	GetContainerComposition()=0;
+					virtual void								SetFocusableComposition(compositions::GuiGraphicsComposition* value)=0;
 					virtual void								SetText(const WString& value)=0;
 					virtual void								SetFont(const FontProperties& value)=0;
 					virtual void								SetVisuallyEnabled(bool value)=0;
@@ -42,16 +42,16 @@ Basic Construction
 				{
 				public:
 					virtual void								AssociateStyleController(IStyleController* controller)=0;
-					virtual void								SetFocusableComposition(elements::GuiGraphicsComposition* value)=0;
+					virtual void								SetFocusableComposition(compositions::GuiGraphicsComposition* value)=0;
 					virtual void								SetText(const WString& value)=0;
 					virtual void								SetFont(const FontProperties& value)=0;
 					virtual void								SetVisuallyEnabled(bool value)=0;
 				};
 			protected:
-				Ptr<IStyleController>					styleController;
-				elements::GuiBoundsComposition*			boundsComposition;
-				elements::GuiGraphicsComposition*		focusableComposition;
-				elements::GuiGraphicsEventReceiver*		eventReceiver;
+				Ptr<IStyleController>							styleController;
+				compositions::GuiBoundsComposition*				boundsComposition;
+				compositions::GuiGraphicsComposition*			focusableComposition;
+				compositions::GuiGraphicsEventReceiver*			eventReceiver;
 
 				bool									isEnabled;
 				bool									isVisuallyEnabled;
@@ -69,23 +69,23 @@ Basic Construction
 				virtual void							OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget);
 				virtual void							OnBeforeReleaseGraphicsHost();
 				virtual void							UpdateVisuallyEnabled();
-				void									SetFocusableComposition(elements::GuiGraphicsComposition* value);
+				void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
 			public:
 				GuiControl(IStyleController* _styleController);
 				~GuiControl();
 
-				elements::GuiNotifyEvent				VisibleChanged;
-				elements::GuiNotifyEvent				EnabledChanged;
-				elements::GuiNotifyEvent				VisuallyEnabledChanged;
-				elements::GuiNotifyEvent				TextChanged;
-				elements::GuiNotifyEvent				FontChanged;
+				compositions::GuiNotifyEvent			VisibleChanged;
+				compositions::GuiNotifyEvent			EnabledChanged;
+				compositions::GuiNotifyEvent			VisuallyEnabledChanged;
+				compositions::GuiNotifyEvent			TextChanged;
+				compositions::GuiNotifyEvent			FontChanged;
 
-				elements::GuiEventArgs					GetNotifyEventArguments();
+				compositions::GuiEventArgs				GetNotifyEventArguments();
 				IStyleController*						GetStyleController();
-				elements::GuiBoundsComposition*			GetBoundsComposition();
-				elements::GuiGraphicsComposition*		GetContainerComposition();
-				elements::GuiGraphicsComposition*		GetFocusableComposition();
-				elements::GuiGraphicsEventReceiver*		GetEventReceiver();
+				compositions::GuiBoundsComposition*		GetBoundsComposition();
+				compositions::GuiGraphicsComposition*	GetContainerComposition();
+				compositions::GuiGraphicsComposition*	GetFocusableComposition();
+				compositions::GuiGraphicsEventReceiver*	GetEventReceiver();
 				GuiControl*								GetParent();
 				int										GetChildrenCount();
 				GuiControl*								GetChild(int index);
@@ -166,15 +166,15 @@ Buttons
 				
 				void									OnParentLineChanged()override;
 				void									UpdateControlState();
-				void									OnLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-				void									OnLeftButtonUp(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-				void									OnMouseEnter(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnMouseLeave(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void									OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void									OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void									OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiButton(IStyleController* _styleController);
 				~GuiButton();
 
-				elements::GuiNotifyEvent				Clicked;
+				compositions::GuiNotifyEvent			Clicked;
 			};
 
 			class GuiSelectableButton : public GuiButton, public Description<GuiSelectableButton>
@@ -216,14 +216,14 @@ Buttons
 				bool									autoSelection;
 				bool									isSelected;
 
-				void									OnClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void									OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiSelectableButton(IStyleController* _styleController);
 				~GuiSelectableButton();
 
-				elements::GuiNotifyEvent				GroupControllerChanged;
-				elements::GuiNotifyEvent				AutoSelectionChanged;
-				elements::GuiNotifyEvent				SelectedChanged;
+				compositions::GuiNotifyEvent			GroupControllerChanged;
+				compositions::GuiNotifyEvent			AutoSelectionChanged;
+				compositions::GuiNotifyEvent			SelectedChanged;
 
 				virtual GroupController*				GetGroupController();
 				virtual void							SetGroupController(GroupController* value);
@@ -293,11 +293,11 @@ Scrolls
 				GuiScroll(IStyleController* _styleController);
 				~GuiScroll();
 				
-				elements::GuiNotifyEvent				TotalSizeChanged;
-				elements::GuiNotifyEvent				PageSizeChanged;
-				elements::GuiNotifyEvent				PositionChanged;
-				elements::GuiNotifyEvent				SmallMoveChanged;
-				elements::GuiNotifyEvent				BigMoveChanged;
+				compositions::GuiNotifyEvent			TotalSizeChanged;
+				compositions::GuiNotifyEvent			PageSizeChanged;
+				compositions::GuiNotifyEvent			PositionChanged;
+				compositions::GuiNotifyEvent			SmallMoveChanged;
+				compositions::GuiNotifyEvent			BigMoveChanged;
 
 				virtual int								GetTotalSize();
 				virtual void							SetTotalSize(int value);
@@ -320,60 +320,60 @@ Scrolls
 				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
 				{
 				public:
-					virtual GuiScroll::IStyleController*		CreateHorizontalScrollStyle()=0;
-					virtual GuiScroll::IStyleController*		CreateVerticalScrollStyle()=0;
-					virtual int									GetDefaultScrollSize()=0;
-					virtual elements::GuiGraphicsComposition*	InstallBackground(elements::GuiBoundsComposition* boundsComposition)=0;
+					virtual GuiScroll::IStyleController*			CreateHorizontalScrollStyle()=0;
+					virtual GuiScroll::IStyleController*			CreateVerticalScrollStyle()=0;
+					virtual int										GetDefaultScrollSize()=0;
+					virtual compositions::GuiGraphicsComposition*	InstallBackground(compositions::GuiBoundsComposition* boundsComposition)=0;
 				};
 
 				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
 				{
 				protected:
-					Ptr<IStyleProvider>					styleProvider;
-					GuiScrollView*						scrollView;
-					GuiScroll*							horizontalScroll;
-					GuiScroll*							verticalScroll;
-					elements::GuiBoundsComposition*		boundsComposition;
-					elements::GuiTableComposition*		tableComposition;
-					elements::GuiCellComposition*		containerCellComposition;
-					elements::GuiBoundsComposition*		containerComposition;
-					bool								horizontalAlwaysVisible;
-					bool								verticalAlwaysVisible;
+					Ptr<IStyleProvider>						styleProvider;
+					GuiScrollView*							scrollView;
+					GuiScroll*								horizontalScroll;
+					GuiScroll*								verticalScroll;
+					compositions::GuiBoundsComposition*		boundsComposition;
+					compositions::GuiTableComposition*		tableComposition;
+					compositions::GuiCellComposition*		containerCellComposition;
+					compositions::GuiBoundsComposition*		containerComposition;
+					bool									horizontalAlwaysVisible;
+					bool									verticalAlwaysVisible;
 
-					void								UpdateTable();
+					void									UpdateTable();
 				public:
 					StyleController(IStyleProvider* _styleProvider);
 					~StyleController();
 
-					void								SetScrollView(GuiScrollView* _scrollView);
-					void								AdjustView(Size fullSize);
-					IStyleProvider*						GetStyleProvider();
+					void									SetScrollView(GuiScrollView* _scrollView);
+					void									AdjustView(Size fullSize);
+					IStyleProvider*							GetStyleProvider();
 
-					GuiScroll*							GetHorizontalScroll();
-					GuiScroll*							GetVerticalScroll();
-					elements::GuiTableComposition*		GetInternalTableComposition();
-					elements::GuiBoundsComposition*		GetInternalContainerComposition();
+					GuiScroll*								GetHorizontalScroll();
+					GuiScroll*								GetVerticalScroll();
+					compositions::GuiTableComposition*		GetInternalTableComposition();
+					compositions::GuiBoundsComposition*		GetInternalContainerComposition();
 
-					bool								GetHorizontalAlwaysVisible();
-					void								SetHorizontalAlwaysVisible(bool value);
-					bool								GetVerticalAlwaysVisible();
-					void								SetVerticalAlwaysVisible(bool value);
+					bool									GetHorizontalAlwaysVisible();
+					void									SetHorizontalAlwaysVisible(bool value);
+					bool									GetVerticalAlwaysVisible();
+					void									SetVerticalAlwaysVisible(bool value);
 
-					elements::GuiBoundsComposition*		GetBoundsComposition()override;
-					elements::GuiGraphicsComposition*	GetContainerComposition()override;
-					void								SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
-					void								SetText(const WString& value)override;
-					void								SetFont(const FontProperties& value)override;
-					void								SetVisuallyEnabled(bool value)override;
+					compositions::GuiBoundsComposition*		GetBoundsComposition()override;
+					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
+					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+					void									SetText(const WString& value)override;
+					void									SetFont(const FontProperties& value)override;
+					void									SetVisuallyEnabled(bool value)override;
 				};
 			protected:
 
 				StyleController*						styleController;
 				bool									supressScrolling;
 
-				void									OnContainerBoundsChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnHorizontalScroll(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnVerticalScroll(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void									OnContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnHorizontalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnVerticalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									CallUpdateView();
 				void									Initialize();
 
@@ -403,19 +403,19 @@ Scrolls
 				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
 				{
 				protected:
-					elements::GuiBoundsComposition*		controlContainerComposition;
+					compositions::GuiBoundsComposition*		controlContainerComposition;
 				public:
 					StyleController(GuiScrollView::IStyleProvider* styleProvider);
 					~StyleController();
 
-					elements::GuiGraphicsComposition*	GetContainerComposition()override;
-					void								MoveContainer(Point leftTop);
+					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
+					void									MoveContainer(Point leftTop);
 				};
 
 			protected:
 				StyleController*						styleController;
 
-				void									OnControlContainerBoundsChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void									OnControlContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				Size									QueryFullSize()override;
 				void									UpdateView(Rect viewBounds)override;
 			public:

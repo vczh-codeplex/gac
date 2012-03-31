@@ -65,17 +65,17 @@ ComboBox Base
 				GuiPopup*									popup;
 
 				virtual void								SelectItem();
-				void										OnClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void										OnPopupOpened(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void										OnPopupClosed(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void										OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnPopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnPopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiComboBoxBase(IStyleController* _styleController);
 				~GuiComboBoxBase();
 
-				elements::GuiNotifyEvent					PopupOpened;
-				elements::GuiNotifyEvent					PopupClosed;
-				elements::GuiNotifyEvent					ItemSelecting;
-				elements::GuiNotifyEvent					ItemSelected;
+				compositions::GuiNotifyEvent				PopupOpened;
+				compositions::GuiNotifyEvent				PopupClosed;
+				compositions::GuiNotifyEvent				ItemSelecting;
+				compositions::GuiNotifyEvent				ItemSelected;
 
 				void										ShowPopup();
 				GuiPopup*									GetPopup();
@@ -92,12 +92,12 @@ ComboBox with GuiListControl
 				GuiListControl::IItemPrimaryTextView*		primaryTextView;
 
 				virtual void								DisplaySelectedContent(int itemIndex);
-				void										OnListControlSelectionChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void										OnListControlSelectionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiComboBoxListControl(IStyleController* _styleController, GuiSelectableListControl* _containedListControl);
 				~GuiComboBoxListControl();
 
-				elements::GuiNotifyEvent					SelectedIndexChanged;
+				compositions::GuiNotifyEvent				SelectedIndexChanged;
 				
 				void										SetFont(const FontProperties& value)override;
 				GuiSelectableListControl*					GetContainedListControl();

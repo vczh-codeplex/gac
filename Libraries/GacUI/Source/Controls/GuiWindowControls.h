@@ -25,7 +25,7 @@ Control Host
 			class GuiControlHost : public GuiControl, private INativeWindowListener, public Description<GuiControlHost>
 			{
 			protected:
-				elements::GuiGraphicsHost*				host;
+				compositions::GuiGraphicsHost*			host;
 				collections::List<GuiComponent*>		components;
 
 			private:
@@ -43,17 +43,17 @@ Control Host
 				GuiControlHost(GuiControl::IStyleController* _styleController);
 				~GuiControlHost();
 				
-				elements::GuiNotifyEvent				WindowGotFocus;
-				elements::GuiNotifyEvent				WindowLostFocus;
-				elements::GuiNotifyEvent				WindowActivated;
-				elements::GuiNotifyEvent				WindowDeactivated;
-				elements::GuiNotifyEvent				WindowOpened;
-				elements::GuiRequestEvent				WindowClosing;
-				elements::GuiNotifyEvent				WindowClosed;
-				elements::GuiNotifyEvent				WindowDestroying;
+				compositions::GuiNotifyEvent			WindowGotFocus;
+				compositions::GuiNotifyEvent			WindowLostFocus;
+				compositions::GuiNotifyEvent			WindowActivated;
+				compositions::GuiNotifyEvent			WindowDeactivated;
+				compositions::GuiNotifyEvent			WindowOpened;
+				compositions::GuiRequestEvent			WindowClosing;
+				compositions::GuiNotifyEvent			WindowClosed;
+				compositions::GuiNotifyEvent			WindowDestroying;
 
-				elements::GuiGraphicsHost*				GetGraphicsHost();
-				elements::GuiGraphicsComposition*		GetMainComposition();
+				compositions::GuiGraphicsHost*			GetGraphicsHost();
+				compositions::GuiGraphicsComposition*	GetMainComposition();
 				INativeWindow*							GetNativeWindow();
 				void									SetNativeWindow(INativeWindow* window);
 				void									Render();

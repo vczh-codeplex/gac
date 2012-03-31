@@ -9,6 +9,7 @@ namespace vl
 		{
 			using namespace collections;
 			using namespace elements;
+			using namespace compositions;
 			using namespace controls;
 
 			unsigned char IntToColor(int color)
@@ -1093,17 +1094,17 @@ Win7EmptyStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7EmptyStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7EmptyStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7EmptyStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7EmptyStyle::GetContainerComposition()
 			{
 				return boundsComposition;
 			}
 
-			void Win7EmptyStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7EmptyStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -1167,17 +1168,17 @@ Win7MenuStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7MenuStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7MenuStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7MenuStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7MenuStyle::GetContainerComposition()
 			{
 				return containerComposition;
 			}
 
-			void Win7MenuStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7MenuStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -1239,17 +1240,17 @@ Win7MenuBarStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7MenuBarStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7MenuBarStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7MenuBarStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7MenuBarStyle::GetContainerComposition()
 			{
 				return boundsComposition;
 			}
 
-			void Win7MenuBarStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7MenuBarStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -1350,17 +1351,17 @@ Win7GroupBoxStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7GroupBoxStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7GroupBoxStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7GroupBoxStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7GroupBoxStyle::GetContainerComposition()
 			{
 				return containerComposition;
 			}
 
-			void Win7GroupBoxStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7GroupBoxStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -1391,7 +1392,7 @@ Win7GroupBoxStyle
 Win7TabStyle
 ***********************************************************************/
 
-			void Win7TabStyle::OnHeaderButtonClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void Win7TabStyle::OnHeaderButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(commandExecutor)
 				{
@@ -1481,17 +1482,17 @@ Win7TabStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7TabStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7TabStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7TabStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7TabStyle::GetContainerComposition()
 			{
 				return containerComposition;
 			}
 
-			void Win7TabStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7TabStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -1598,17 +1599,17 @@ Win7ButtonStyleBase
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7ButtonStyleBase::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7ButtonStyleBase::GetBoundsComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7ButtonStyleBase::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7ButtonStyleBase::GetContainerComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			void Win7ButtonStyleBase::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7ButtonStyleBase::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -1831,17 +1832,17 @@ Win7CheckBoxStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7CheckBoxStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7CheckBoxStyle::GetBoundsComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7CheckBoxStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7CheckBoxStyle::GetContainerComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			void Win7CheckBoxStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7CheckBoxStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -2061,17 +2062,17 @@ Win7ListViewColumnDropDownStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7ListViewColumnDropDownStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7ListViewColumnDropDownStyle::GetBoundsComposition()
 			{
 				return mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7ListViewColumnDropDownStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7ListViewColumnDropDownStyle::GetContainerComposition()
 			{
 				return mainComposition;
 			}
 
-			void Win7ListViewColumnDropDownStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7ListViewColumnDropDownStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -2203,17 +2204,17 @@ Win7ListViewColumnHeaderStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7ListViewColumnHeaderStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7ListViewColumnHeaderStyle::GetBoundsComposition()
 			{
 				return mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7ListViewColumnHeaderStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7ListViewColumnHeaderStyle::GetContainerComposition()
 			{
 				return mainComposition;
 			}
 
-			void Win7ListViewColumnHeaderStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7ListViewColumnHeaderStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -2319,17 +2320,17 @@ Win7TreeViewExpandingButtonStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7TreeViewExpandingButtonStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7TreeViewExpandingButtonStyle::GetBoundsComposition()
 			{
 				return mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7TreeViewExpandingButtonStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7TreeViewExpandingButtonStyle::GetContainerComposition()
 			{
 				return mainComposition;
 			}
 
-			void Win7TreeViewExpandingButtonStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7TreeViewExpandingButtonStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -2419,17 +2420,17 @@ Win7MenuBarButtonStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7MenuBarButtonStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7MenuBarButtonStyle::GetBoundsComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7MenuBarButtonStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7MenuBarButtonStyle::GetContainerComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			void Win7MenuBarButtonStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7MenuBarButtonStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -2544,17 +2545,17 @@ Win7MenuItemButtonStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7MenuItemButtonStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7MenuItemButtonStyle::GetBoundsComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7MenuItemButtonStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7MenuItemButtonStyle::GetContainerComposition()
 			{
 				return elements.mainComposition;
 			}
 
-			void Win7MenuItemButtonStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7MenuItemButtonStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -2651,17 +2652,17 @@ Win7MenuSplitterStyle
 			{
 			}
 
-			elements::GuiBoundsComposition* Win7MenuSplitterStyle::GetBoundsComposition()
+			compositions::GuiBoundsComposition* Win7MenuSplitterStyle::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* Win7MenuSplitterStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7MenuSplitterStyle::GetContainerComposition()
 			{
 				return boundsComposition;
 			}
 
-			void Win7MenuSplitterStyle::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7MenuSplitterStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -2754,7 +2755,7 @@ Win7DropDownComboBoxStyle
 			{
 			}
 
-			elements::GuiGraphicsComposition* Win7DropDownComboBoxStyle::GetContainerComposition()
+			compositions::GuiGraphicsComposition* Win7DropDownComboBoxStyle::GetContainerComposition()
 			{
 				return textComposition;
 			}
@@ -2815,7 +2816,7 @@ Win7ScrollStyle
 				return handleButtonStyle;
 			}
 
-			void Win7ScrollStyle::InstallBackground(elements::GuiGraphicsComposition* boundsComposition, Direction direction)
+			void Win7ScrollStyle::InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)
 			{
 				Color sinkColor(227, 227, 227);
 				GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
@@ -2897,14 +2898,14 @@ Win7TrackStyle
 				return handleButtonStyle;
 			}
 
-			void Win7TrackStyle::InstallBackground(elements::GuiGraphicsComposition* boundsComposition, Direction direction)
+			void Win7TrackStyle::InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)
 			{
 				GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
 				element->SetColor(Win7GetSystemWindowColor());
 				boundsComposition->SetOwnedElement(element);
 			}
 
-			void Win7TrackStyle::InstallTrack(elements::GuiGraphicsComposition* trackComposition, Direction direction)
+			void Win7TrackStyle::InstallTrack(compositions::GuiGraphicsComposition* trackComposition, Direction direction)
 			{
 				Gui3DBorderElement* element=Gui3DBorderElement::Create();
 				element->SetColors(Color(176, 176, 176), Color(252, 252, 252));
@@ -2929,7 +2930,7 @@ Win7ScrollViewProvider
 			{
 			}
 			
-			void Win7ScrollViewProvider::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7ScrollViewProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 			}
 
@@ -2960,7 +2961,7 @@ Win7ScrollViewProvider
 				return Win7ScrollStyle::DefaultSize;
 			}
 
-			elements::GuiGraphicsComposition* Win7ScrollViewProvider::InstallBackground(elements::GuiBoundsComposition* boundsComposition)
+			compositions::GuiGraphicsComposition* Win7ScrollViewProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
 			{
 				GuiSolidBorderElement* border=GuiSolidBorderElement::Create();
 				border->SetColor(Win7GetSystemBorderColor());
@@ -3016,25 +3017,25 @@ Win7TextBoxBackground
 				backgroundElement->SetColor(colors.backgroundColor);
 			}
 
-			void Win7TextBoxBackground::OnBoundsMouseEnter(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void Win7TextBoxBackground::OnBoundsMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				isMouseEnter=true;
 				UpdateStyle();
 			}
 
-			void Win7TextBoxBackground::OnBoundsMouseLeave(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void Win7TextBoxBackground::OnBoundsMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				isMouseEnter=false;
 				UpdateStyle();
 			}
 
-			void Win7TextBoxBackground::OnBoundsGotFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void Win7TextBoxBackground::OnBoundsGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				isFocused=true;
 				UpdateStyle();
 			}
 
-			void Win7TextBoxBackground::OnBoundsLostFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void Win7TextBoxBackground::OnBoundsLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				isFocused=false;
 				UpdateStyle();
@@ -3062,7 +3063,7 @@ Win7TextBoxBackground
 				styleController=controller;
 			}
 			
-			void Win7TextBoxBackground::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7TextBoxBackground::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				focusableComposition=value;
 				focusableComposition->GetEventReceiver()->mouseEnter.AttachMethod(this, &Win7TextBoxBackground::OnBoundsMouseEnter);
@@ -3077,7 +3078,7 @@ Win7TextBoxBackground
 				UpdateStyle();
 			}
 
-			elements::GuiGraphicsComposition* Win7TextBoxBackground::InstallBackground(elements::GuiBoundsComposition* boundsComposition)
+			compositions::GuiGraphicsComposition* Win7TextBoxBackground::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
 			{
 				{
 					GuiSolidBackgroundElement* background=GuiSolidBackgroundElement::Create();
@@ -3148,7 +3149,7 @@ Win7MultilineTextBoxProvider
 				background.AssociateStyleController(controller);
 			}
 			
-			void Win7MultilineTextBoxProvider::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7MultilineTextBoxProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				background.SetFocusableComposition(value);
 				GuiMultilineTextBox::StyleController* textBoxController=dynamic_cast<GuiMultilineTextBox::StyleController*>(styleController);
@@ -3163,7 +3164,7 @@ Win7MultilineTextBoxProvider
 				background.SetVisuallyEnabled(value);
 			}
 
-			elements::GuiGraphicsComposition* Win7MultilineTextBoxProvider::InstallBackground(elements::GuiBoundsComposition* boundsComposition)
+			compositions::GuiGraphicsComposition* Win7MultilineTextBoxProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
 			{
 				return background.InstallBackground(boundsComposition);
 			}
@@ -3187,7 +3188,7 @@ Win7SinglelineTextBoxProvider
 				background.AssociateStyleController(controller);
 			}
 			
-			void Win7SinglelineTextBoxProvider::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void Win7SinglelineTextBoxProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				background.SetFocusableComposition(value);
 				GuiSinglelineTextBox::StyleController* textBoxController=dynamic_cast<GuiSinglelineTextBox::StyleController*>(styleController);
@@ -3207,7 +3208,7 @@ Win7SinglelineTextBoxProvider
 				background.SetVisuallyEnabled(value);
 			}
 
-			elements::GuiGraphicsComposition* Win7SinglelineTextBoxProvider::InstallBackground(elements::GuiBoundsComposition* boundsComposition)
+			compositions::GuiGraphicsComposition* Win7SinglelineTextBoxProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
 			{
 				return background.InstallBackground(boundsComposition);
 			}

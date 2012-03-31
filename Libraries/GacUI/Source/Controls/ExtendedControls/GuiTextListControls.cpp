@@ -8,6 +8,7 @@ namespace vl
 		{
 			using namespace collections;
 			using namespace elements;
+			using namespace compositions;
 
 			namespace list
 			{
@@ -16,7 +17,7 @@ namespace vl
 TextItemStyleProvider::TextItemStyleController
 ***********************************************************************/
 
-				void TextItemStyleProvider::TextItemStyleController::OnBulletSelectedChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+				void TextItemStyleProvider::TextItemStyleController::OnBulletSelectedChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 				{
 					textItemStyleProvider->OnStyleCheckedChanged(this);
 				}

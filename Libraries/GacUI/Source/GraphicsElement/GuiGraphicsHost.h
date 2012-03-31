@@ -15,7 +15,7 @@ namespace vl
 {
 	namespace presentation
 	{
-		namespace elements
+		namespace compositions
 		{
 
 /***********************************************************************

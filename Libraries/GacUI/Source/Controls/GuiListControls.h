@@ -43,14 +43,14 @@ List Control
 				class IItemArrangerCallback : public virtual IDescriptable, public Description<IItemArrangerCallback>
 				{
 				public:
-					virtual IItemStyleController*				RequestItem(int itemIndex)=0;
-					virtual void								ReleaseItem(IItemStyleController* style)=0;
-					virtual void								SetViewLocation(Point value)=0;
-					virtual Size								GetStylePreferredSize(IItemStyleController* style)=0;
-					virtual void								SetStyleAlignmentToParent(IItemStyleController* style, Margin margin)=0;
-					virtual void								SetStyleBounds(IItemStyleController* style, Rect bounds)=0;
-					virtual elements::GuiGraphicsComposition*	GetContainerComposition()=0;
-					virtual void								OnTotalSizeChanged()=0;
+					virtual IItemStyleController*					RequestItem(int itemIndex)=0;
+					virtual void									ReleaseItem(IItemStyleController* style)=0;
+					virtual void									SetViewLocation(Point value)=0;
+					virtual Size									GetStylePreferredSize(IItemStyleController* style)=0;
+					virtual void									SetStyleAlignmentToParent(IItemStyleController* style, Margin margin)=0;
+					virtual void									SetStyleBounds(IItemStyleController* style, Rect bounds)=0;
+					virtual compositions::GuiGraphicsComposition*	GetContainerComposition()=0;
+					virtual void									OnTotalSizeChanged()=0;
 				};
 
 				//-----------------------------------------------------------
@@ -85,7 +85,7 @@ List Control
 				public:
 					virtual IItemStyleProvider*					GetStyleProvider()=0;
 					virtual int									GetItemStyleId()=0;
-					virtual elements::GuiBoundsComposition*		GetBoundsComposition()=0;
+					virtual compositions::GuiBoundsComposition*	GetBoundsComposition()=0;
 					virtual bool								IsCacheable()=0;
 					virtual bool								IsInstalled()=0;
 					virtual void								OnInstalled()=0;
@@ -153,7 +153,7 @@ List Control
 					Size										GetStylePreferredSize(IItemStyleController* style);
 					void										SetStyleAlignmentToParent(IItemStyleController* style, Margin margin);
 					void										SetStyleBounds(IItemStyleController* style, Rect bounds);
-					elements::GuiGraphicsComposition*			GetContainerComposition()override;
+					compositions::GuiGraphicsComposition*		GetContainerComposition()override;
 					void										OnTotalSizeChanged()override;
 				};
 
@@ -173,15 +173,15 @@ List Control
 				Size											QueryFullSize()override;
 				void											UpdateView(Rect viewBounds)override;
 				
-				void											OnBoundsMouseButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
+				void											OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void											SetStyleProviderAndArranger(Ptr<IItemStyleProvider> styleProvider, Ptr<IItemArranger> arranger);
 			public:
 				GuiListControl(IStyleProvider* _styleProvider, IItemProvider* _itemProvider, bool acceptFocus=false);
 				~GuiListControl();
 
-				elements::GuiNotifyEvent						StyleProviderChanged;
-				elements::GuiNotifyEvent						ArrangerChanged;
-				elements::GuiNotifyEvent						CoordinateTransformerChanged;
+				compositions::GuiNotifyEvent					StyleProviderChanged;
+				compositions::GuiNotifyEvent					ArrangerChanged;
+				compositions::GuiNotifyEvent					CoordinateTransformerChanged;
 
 				virtual IItemProvider*							GetItemProvider();
 				virtual IItemStyleProvider*						GetStyleProvider();
@@ -211,9 +211,9 @@ Selectable List Control
 				protected:
 					GuiSelectableListControl*					listControl;
 					IItemStyleController*						style;
-					Ptr<elements::GuiMouseEvent::IHandler>		leftButtonDownHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>	leftButtonDownHandler;
 
-					void										OnBoundsLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
+					void										OnBoundsLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				public:
 					StyleEvents(GuiSelectableListControl* _listControl, IItemStyleController* _style);
 					~StyleEvents();
@@ -241,7 +241,7 @@ Selectable List Control
 				GuiSelectableListControl(IStyleProvider* _styleProvider, IItemProvider* _itemProvider);
 				~GuiSelectableListControl();
 
-				elements::GuiNotifyEvent						SelectionChanged;
+				compositions::GuiNotifyEvent					SelectionChanged;
 
 				Ptr<GuiListControl::IItemStyleProvider>			SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)override;
 
@@ -406,11 +406,11 @@ Predefined ItemStyleController
 				protected:
 					GuiListControl::IItemStyleProvider*			provider;
 					int											styleId;
-					elements::GuiBoundsComposition*				boundsComposition;
+					compositions::GuiBoundsComposition*			boundsComposition;
 					GuiControl*									associatedControl;
 					bool										isInstalled;
 
-					void										Initialize(elements::GuiBoundsComposition* _boundsComposition, GuiControl* _associatedControl);
+					void										Initialize(compositions::GuiBoundsComposition* _boundsComposition, GuiControl* _associatedControl);
 					void										Finalize();
 
 					ItemStyleControllerBase(GuiListControl::IItemStyleProvider* _provider, int _styleId);
@@ -419,7 +419,7 @@ Predefined ItemStyleController
 					
 					GuiListControl::IItemStyleProvider*			GetStyleProvider()override;
 					int											GetItemStyleId()override;
-					elements::GuiBoundsComposition*				GetBoundsComposition()override;
+					compositions::GuiBoundsComposition*			GetBoundsComposition()override;
 					bool										IsCacheable()override;
 					bool										IsInstalled()override;
 					void										OnInstalled()override;

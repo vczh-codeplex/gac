@@ -7,6 +7,7 @@ namespace vl
 		namespace controls
 		{
 			using namespace elements;
+			using namespace compositions;
 
 /***********************************************************************
 GuiControl
@@ -70,7 +71,7 @@ GuiControl
 				}
 			}
 
-			void GuiControl::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void GuiControl::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				if(focusableComposition!=value)
 				{
@@ -123,7 +124,7 @@ GuiControl
 				}
 			}
 
-			elements::GuiEventArgs GuiControl::GetNotifyEventArguments()
+			compositions::GuiEventArgs GuiControl::GetNotifyEventArguments()
 			{
 				return GuiEventArgs(boundsComposition);
 			}
@@ -133,22 +134,22 @@ GuiControl
 				return styleController.Obj();
 			}
 
-			elements::GuiBoundsComposition* GuiControl::GetBoundsComposition()
+			compositions::GuiBoundsComposition* GuiControl::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* GuiControl::GetContainerComposition()
+			compositions::GuiGraphicsComposition* GuiControl::GetContainerComposition()
 			{
 				return styleController->GetContainerComposition();
 			}
 
-			elements::GuiGraphicsComposition* GuiControl::GetFocusableComposition()
+			compositions::GuiGraphicsComposition* GuiControl::GetFocusableComposition()
 			{
 				return focusableComposition;
 			}
 
-			elements::GuiGraphicsEventReceiver* GuiControl::GetEventReceiver()
+			compositions::GuiGraphicsEventReceiver* GuiControl::GetEventReceiver()
 			{
 				return eventReceiver;
 			}
@@ -349,7 +350,7 @@ GuiButton
 				}
 			}
 
-			void GuiButton::OnLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiButton::OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(arguments.eventSource==boundsComposition)
 				{
@@ -359,7 +360,7 @@ GuiButton
 				}
 			}
 
-			void GuiButton::OnLeftButtonUp(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+			void GuiButton::OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				if(arguments.eventSource==boundsComposition)
 				{
@@ -375,7 +376,7 @@ GuiButton
 				}
 			}
 
-			void GuiButton::OnMouseEnter(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiButton::OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(arguments.eventSource==boundsComposition)
 				{
@@ -384,7 +385,7 @@ GuiButton
 				}
 			}
 
-			void GuiButton::OnMouseLeave(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiButton::OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(arguments.eventSource==boundsComposition)
 				{
@@ -469,7 +470,7 @@ GuiSelectableButton::MutexGroupController
 GuiSelectableButton
 ***********************************************************************/
 
-			void GuiSelectableButton::OnClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiSelectableButton::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(autoSelection)
 				{
@@ -851,12 +852,12 @@ GuiScrollView::StyleController
 				return verticalScroll;
 			}
 
-			elements::GuiTableComposition* GuiScrollView::StyleController::GetInternalTableComposition()
+			compositions::GuiTableComposition* GuiScrollView::StyleController::GetInternalTableComposition()
 			{
 				return tableComposition;
 			}
 
-			elements::GuiBoundsComposition* GuiScrollView::StyleController::GetInternalContainerComposition()
+			compositions::GuiBoundsComposition* GuiScrollView::StyleController::GetInternalContainerComposition()
 			{
 				return containerComposition;
 			}
@@ -889,17 +890,17 @@ GuiScrollView::StyleController
 				}
 			}
 
-			elements::GuiBoundsComposition* GuiScrollView::StyleController::GetBoundsComposition()
+			compositions::GuiBoundsComposition* GuiScrollView::StyleController::GetBoundsComposition()
 			{
 				return boundsComposition;
 			}
 
-			elements::GuiGraphicsComposition* GuiScrollView::StyleController::GetContainerComposition()
+			compositions::GuiGraphicsComposition* GuiScrollView::StyleController::GetContainerComposition()
 			{
 				return containerComposition;
 			}
 
-			void GuiScrollView::StyleController::SetFocusableComposition(elements::GuiGraphicsComposition* value)
+			void GuiScrollView::StyleController::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
 			{
 				styleProvider->SetFocusableComposition(value);
 			}
@@ -923,12 +924,12 @@ GuiScrollView::StyleController
 GuiScrollView
 ***********************************************************************/
 
-			void GuiScrollView::OnContainerBoundsChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiScrollView::OnContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				CalculateView();
 			}
 
-			void GuiScrollView::OnHorizontalScroll(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiScrollView::OnHorizontalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(!supressScrolling)
 				{
@@ -936,7 +937,7 @@ GuiScrollView
 				}
 			}
 
-			void GuiScrollView::OnVerticalScroll(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiScrollView::OnVerticalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(!supressScrolling)
 				{
@@ -1067,7 +1068,7 @@ GuiScrollContainer::StyleController
 			{
 			}
 
-			elements::GuiGraphicsComposition* GuiScrollContainer::StyleController::GetContainerComposition()
+			compositions::GuiGraphicsComposition* GuiScrollContainer::StyleController::GetContainerComposition()
 			{
 				return controlContainerComposition;
 			}
@@ -1081,7 +1082,7 @@ GuiScrollContainer::StyleController
 GuiScrollContainer
 ***********************************************************************/
 
-			void GuiScrollContainer::OnControlContainerBoundsChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiScrollContainer::OnControlContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				CalculateView();
 			}
