@@ -110,9 +110,9 @@ ListView ItemStyleProvider
 					class IListViewItemContent : public virtual IDescriptable, public Description<IListViewItemContent>
 					{
 					public:
-						virtual elements::GuiBoundsComposition*	GetContentComposition()=0;
-						virtual elements::GuiBoundsComposition*	GetBackgroundDecorator()=0;
-						virtual void							Install(GuiListViewBase::IStyleProvider* styleProvider, IListViewItemView* view, int itemIndex)=0;
+						virtual compositions::GuiBoundsComposition*	GetContentComposition()=0;
+						virtual compositions::GuiBoundsComposition*	GetBackgroundDecorator()=0;
+						virtual void								Install(GuiListViewBase::IStyleProvider* styleProvider, IListViewItemView* view, int itemIndex)=0;
 					};
 
 					class IListViewItemContentProvider : public virtual IDescriptable, public Description<IListViewItemContentProvider>
@@ -173,7 +173,7 @@ ListView ItemContentProvider
 					class ItemContent : public Object, public virtual ListViewItemStyleProvider::IListViewItemContent
 					{
 					protected:
-						elements::GuiBoundsComposition*					contentComposition;
+						compositions::GuiBoundsComposition*				contentComposition;
 						elements::GuiImageFrameElement*					image;
 						elements::GuiSolidLabelElement*					text;
 
@@ -181,8 +181,8 @@ ListView ItemContentProvider
 						ItemContent(Size iconSize, const FontProperties& font);
 						~ItemContent();
 
-						elements::GuiBoundsComposition*					GetContentComposition()override;
-						elements::GuiBoundsComposition*					GetBackgroundDecorator()override;
+						compositions::GuiBoundsComposition*				GetContentComposition()override;
+						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
 					};
 
@@ -204,7 +204,7 @@ ListView ItemContentProvider
 					class ItemContent : public Object, public virtual ListViewItemStyleProvider::IListViewItemContent
 					{
 					protected:
-						elements::GuiBoundsComposition*					contentComposition;
+						compositions::GuiBoundsComposition*				contentComposition;
 						elements::GuiImageFrameElement*					image;
 						elements::GuiSolidLabelElement*					text;
 
@@ -212,8 +212,8 @@ ListView ItemContentProvider
 						ItemContent(Size iconSize, const FontProperties& font);
 						~ItemContent();
 
-						elements::GuiBoundsComposition*					GetContentComposition()override;
-						elements::GuiBoundsComposition*					GetBackgroundDecorator()override;
+						compositions::GuiBoundsComposition*				GetContentComposition()override;
+						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
 					};
 
@@ -235,7 +235,7 @@ ListView ItemContentProvider
 					class ItemContent : public Object, public virtual ListViewItemStyleProvider::IListViewItemContent
 					{
 					protected:
-						elements::GuiBoundsComposition*					contentComposition;
+						compositions::GuiBoundsComposition*				contentComposition;
 						elements::GuiImageFrameElement*					image;
 						elements::GuiSolidLabelElement*					text;
 
@@ -243,8 +243,8 @@ ListView ItemContentProvider
 						ItemContent(Size iconSize, const FontProperties& font);
 						~ItemContent();
 
-						elements::GuiBoundsComposition*					GetContentComposition()override;
-						elements::GuiBoundsComposition*					GetBackgroundDecorator()override;
+						compositions::GuiBoundsComposition*				GetContentComposition()override;
+						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
 					};
 
@@ -267,10 +267,10 @@ ListView ItemContentProvider
 					{
 						typedef collections::Array<elements::GuiSolidLabelElement*>		DataTextElementArray;
 					protected:
-						elements::GuiBoundsComposition*					contentComposition;
+						compositions::GuiBoundsComposition*				contentComposition;
 						elements::GuiImageFrameElement*					image;
 						elements::GuiSolidLabelElement*					text;
-						elements::GuiTableComposition*					textTable;
+						compositions::GuiTableComposition*				textTable;
 						DataTextElementArray							dataTexts;
 
 						void											RemoveTextElement(int textRow);
@@ -280,8 +280,8 @@ ListView ItemContentProvider
 						ItemContent(Size iconSize, const FontProperties& font);
 						~ItemContent();
 
-						elements::GuiBoundsComposition*					GetContentComposition()override;
-						elements::GuiBoundsComposition*					GetBackgroundDecorator()override;
+						compositions::GuiBoundsComposition*				GetContentComposition()override;
+						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
 					};
 
@@ -305,21 +305,21 @@ ListView ItemContentProvider
 						typedef collections::Array<elements::GuiSolidLabelElement*>		DataTextElementArray;
 					protected:
 						FontProperties									baselineFont;
-						elements::GuiBoundsComposition*					contentComposition;
+						compositions::GuiBoundsComposition*				contentComposition;
 						elements::GuiImageFrameElement*					image;
 						elements::GuiSolidLabelElement*					text;
-						elements::GuiTableComposition*					textTable;
+						compositions::GuiTableComposition*				textTable;
 						DataTextElementArray							dataTexts;
 
 						elements::GuiSolidBackgroundElement*			bottomLine;
-						elements::GuiBoundsComposition*					bottomLineComposition;
+						compositions::GuiBoundsComposition*				bottomLineComposition;
 
 					public:
 						ItemContent(Size iconSize, const FontProperties& font);
 						~ItemContent();
 
-						elements::GuiBoundsComposition*					GetContentComposition()override;
-						elements::GuiBoundsComposition*					GetBackgroundDecorator()override;
+						compositions::GuiBoundsComposition*				GetContentComposition()override;
+						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
 					};
 
@@ -341,8 +341,8 @@ ListView ItemContentProvider(Detailed)
 
 				class ListViewColumnItemArranger : public FixedHeightItemArranger, public Description<ListViewColumnItemArranger>
 				{
-					typedef collections::List<GuiButton*>							ColumnHeaderButtonList;
-					typedef collections::List<elements::GuiBoundsComposition*>		ColumnHeaderSplitterList;
+					typedef collections::List<GuiButton*>								ColumnHeaderButtonList;
+					typedef collections::List<compositions::GuiBoundsComposition*>		ColumnHeaderSplitterList;
 				public:
 					static const int							SplitterWidth=8;
 
@@ -382,15 +382,15 @@ ListView ItemContentProvider(Detailed)
 					GuiListViewBase::IStyleProvider*			styleProvider;
 					IColumnItemView*							columnItemView;
 					Ptr<ColumnItemViewCallback>					columnItemViewCallback;
-					elements::GuiStackComposition*				columnHeaders;
+					compositions::GuiStackComposition*			columnHeaders;
 					ColumnHeaderButtonList						columnHeaderButtons;
 					ColumnHeaderSplitterList					columnHeaderSplitters;
 					bool										splitterDragging;
 					int											splitterLatestX;
 
-					void										ColumnHeaderSplitterLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-					void										ColumnHeaderSplitterLeftButtonUp(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-					void										ColumnHeaderSplitterMouseMove(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
+					void										ColumnHeaderSplitterLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+					void										ColumnHeaderSplitterLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+					void										ColumnHeaderSplitterMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 
 					void										RearrangeItemBounds()override;
 					int											GetWidth()override;
@@ -418,10 +418,10 @@ ListView ItemContentProvider(Detailed)
 					{
 						typedef collections::List<elements::GuiSolidLabelElement*>		SubItemList;
 					protected:
-						elements::GuiBoundsComposition*					contentComposition;
+						compositions::GuiBoundsComposition*				contentComposition;
 						elements::GuiImageFrameElement*					image;
 						elements::GuiSolidLabelElement*					text;
-						elements::GuiTableComposition*					textTable;
+						compositions::GuiTableComposition*				textTable;
 						SubItemList										subItems;
 
 						GuiListControl::IItemProvider*					itemProvider;
@@ -431,8 +431,8 @@ ListView ItemContentProvider(Detailed)
 						ItemContent(Size iconSize, const FontProperties& font, GuiListControl::IItemProvider* _itemProvider);
 						~ItemContent();
 
-						elements::GuiBoundsComposition*					GetContentComposition()override;
-						elements::GuiBoundsComposition*					GetBackgroundDecorator()override;
+						compositions::GuiBoundsComposition*				GetContentComposition()override;
+						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											UpdateSubItemSize();
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
 					};

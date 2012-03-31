@@ -44,10 +44,10 @@ Common Operations
 				{
 				protected:
 					elements::GuiColorizedTextElement*		textElement;
-					elements::GuiGraphicsComposition*		textComposition;
+					compositions::GuiGraphicsComposition*	textComposition;
 					bool									readonly;
 				public:
-					DefaultCallback(elements::GuiColorizedTextElement* _textElement, elements::GuiGraphicsComposition* _textComposition);
+					DefaultCallback(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition);
 					~DefaultCallback();
 
 					TextPos									GetLeftWord(TextPos pos)override;
@@ -58,7 +58,7 @@ Common Operations
 				};
 			protected:
 				elements::GuiColorizedTextElement*			textElement;
-				elements::GuiGraphicsComposition*			textComposition;
+				compositions::GuiGraphicsComposition*		textComposition;
 				GuiControl*									textControl;
 				GuiTextBoxCommonInterface*					textBoxCommonInterface;
 				ICallback*									callback;
@@ -69,27 +69,27 @@ Common Operations
 				void										Modify(TextPos start, TextPos end, const WString& input);
 				void										ProcessKey(int code, bool shift, bool ctrl);
 					
-				void										OnGotFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void										OnLostFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void										OnCaretNotify(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void										OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 
-				void										OnLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-				void										OnLeftButtonUp(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-				void										OnMouseMove(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-				void										OnKeyDown(elements::GuiGraphicsComposition* sender, elements::GuiKeyEventArgs& arguments);
-				void										OnCharInput(elements::GuiGraphicsComposition* sender, elements::GuiCharEventArgs& arguments);
+				void										OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments);
+				void										OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments);
 			public:
 				GuiTextElementOperator();
 				~GuiTextElementOperator();
 
-				void										Install(elements::GuiColorizedTextElement* _textElement, elements::GuiGraphicsComposition* _textComposition, GuiControl* _textControl);
+				void										Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl);
 				ICallback*									GetCallback();
 				void										SetCallback(ICallback* value);
 				GuiTextBoxCommonInterface*					GetTextBoxCommonInterface();
 				void										SetTextBoxCommonInterface(GuiTextBoxCommonInterface* value);
 
 				elements::GuiColorizedTextElement*			GetTextElement();
-				elements::GuiGraphicsComposition*			GetTextComposition();
+				compositions::GuiGraphicsComposition*		GetTextComposition();
 				TextPos										GetNearestTextPos(Point point);
 				void										Select(TextPos begin, TextPos end);
 				WString										GetSelectionText();
@@ -118,9 +118,9 @@ Common Operations
 				GuiTextBoxCommonInterface();
 				~GuiTextBoxCommonInterface();
 
-				elements::GuiNotifyEvent					SelectionChanged;
+				compositions::GuiNotifyEvent				SelectionChanged;
 
-				elements::GuiGraphicsComposition*			GetTextComposition();
+				compositions::GuiGraphicsComposition*		GetTextComposition();
 
 				bool										CanCut();
 				bool										CanCopy();
@@ -164,7 +164,7 @@ TextBox
 				{
 				protected:
 					elements::GuiColorizedTextElement*		textElement;
-					elements::GuiBoundsComposition*			textComposition;
+					compositions::GuiBoundsComposition*		textComposition;
 					GuiTextElementOperator					textElementOperator;
 					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
 
@@ -173,10 +173,10 @@ TextBox
 					~StyleController();
 
 					elements::GuiColorizedTextElement*		GetTextElement();
-					elements::GuiGraphicsComposition*		GetTextComposition();
+					compositions::GuiGraphicsComposition*	GetTextComposition();
 					GuiTextElementOperator*					GetTextElementOperator();
 					void									SetViewPosition(Point value);
-					void									SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 
 					WString									GetText();
 					void									SetText(const WString& value)override;
@@ -204,7 +204,7 @@ TextBox
 				void										OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)override;
 				Size										QueryFullSize()override;
 				void										UpdateView(Rect viewBounds)override;
-				void										OnBoundsMouseButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
+				void										OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 			public:
 				GuiMultilineTextBox(GuiMultilineTextBox::IStyleProvider* styleProvider);
 				~GuiMultilineTextBox();
@@ -222,20 +222,20 @@ TextBox
 				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
 				{
 				public:
-					virtual elements::GuiGraphicsComposition*		InstallBackground(elements::GuiBoundsComposition* background)=0;
+					virtual compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* background)=0;
 				};
 
 				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
 				{
 				protected:
 					Ptr<IStyleProvider>						styleProvider;
-					elements::GuiBoundsComposition*			boundsComposition;
-					elements::GuiGraphicsComposition*		containerComposition;
+					compositions::GuiBoundsComposition*		boundsComposition;
+					compositions::GuiGraphicsComposition*	containerComposition;
 
 					GuiSinglelineTextBox*					textBox;
 					elements::GuiColorizedTextElement*		textElement;
-					elements::GuiTableComposition*			textCompositionTable;
-					elements::GuiCellComposition*			textComposition;
+					compositions::GuiTableComposition*		textCompositionTable;
+					compositions::GuiCellComposition*		textComposition;
 					GuiTextElementOperator					textElementOperator;
 					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
 
@@ -245,9 +245,9 @@ TextBox
 
 					void									SetTextBox(GuiSinglelineTextBox* value);
 					void									RearrangeTextElement();
-					elements::GuiBoundsComposition*			GetBoundsComposition();
-					elements::GuiGraphicsComposition*		GetContainerComposition();
-					void									SetFocusableComposition(elements::GuiGraphicsComposition* value);
+					compositions::GuiBoundsComposition*		GetBoundsComposition();
+					compositions::GuiGraphicsComposition*	GetContainerComposition();
+					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
 
 					WString									GetText();
 					void									SetText(const WString& value);
@@ -255,7 +255,7 @@ TextBox
 					void									SetVisuallyEnabled(bool value);
 
 					elements::GuiColorizedTextElement*		GetTextElement();
-					elements::GuiGraphicsComposition*		GetTextComposition();
+					compositions::GuiGraphicsComposition*	GetTextComposition();
 					GuiTextElementOperator*					GetTextElementOperator();
 					void									SetViewPosition(Point value);
 				};
@@ -277,7 +277,7 @@ TextBox
 				StyleController*							styleController;
 				
 				void										OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)override;
-				void										OnBoundsMouseButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
+				void										OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 			public:
 				GuiSinglelineTextBox(GuiSinglelineTextBox::IStyleProvider* styleProvider);
 				~GuiSinglelineTextBox();

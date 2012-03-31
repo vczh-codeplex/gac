@@ -4,7 +4,7 @@ DEVELOPER: ³Âè÷å«(vczh)
 ***********************************************************************/
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\BASIC.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\BASIC.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -209,7 +209,7 @@ typedef signed __int64	pos_t;
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\PAIR.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\PAIR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -317,7 +317,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\INTERFACES.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\INTERFACES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -456,7 +456,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\OPERATIONCOPYFROM.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\OPERATIONCOPYFROM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -658,7 +658,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\POINTER.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\POINTER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -1104,7 +1104,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\OPERATIONENUMERABLE.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\OPERATIONENUMERABLE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -1332,7 +1332,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\FUNCTION.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\FUNCTION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7390,7 +7390,7 @@ vl::function_combining::Combining<R1(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9), R2(T0,T1,T2
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\OPERATIONSELECT.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\OPERATIONSELECT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7525,7 +7525,7 @@ Select
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\OPERATIONWHERE.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\OPERATIONWHERE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7668,7 +7668,7 @@ Where
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\OPERATIONFOREACH.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\OPERATIONFOREACH.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7774,7 +7774,7 @@ ForEachºê
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\OPERATIONAGGREGATE.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\OPERATIONAGGREGATE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8100,7 +8100,7 @@ IsEmpty
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\OPERATIONCONCAT.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\OPERATIONCONCAT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8241,7 +8241,7 @@ Concat
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\LISTWRAPPERS.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\LISTWRAPPERS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8665,7 +8665,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\LIST.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\LIST.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -9216,7 +9216,7 @@ SORTED_LIST_INSERT:
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\OPERATIONSEQUENCE.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\OPERATIONSEQUENCE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -9751,7 +9751,7 @@ Distinct
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\OPERATIONSET.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\OPERATIONSET.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -9929,7 +9929,7 @@ Union
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\OPERATIONPAIR.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\OPERATIONPAIR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -10069,7 +10069,7 @@ Pairwise
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\STRING.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\STRING.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -10518,7 +10518,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\OPERATIONSTRING.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\OPERATIONSTRING.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -10646,7 +10646,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\OPERATION.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\OPERATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -10688,7 +10688,7 @@ FOREACH_INDEXER(X, a, index, XList.Wrap())
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\EXCEPTION.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\EXCEPTION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -10747,7 +10747,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\STREAM\INTERFACES.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\STREAM\INTERFACES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -10807,7 +10807,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\STREAM\ACCESSOR.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\STREAM\ACCESSOR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -10964,7 +10964,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\STREAM\BROADCASTSTREAM.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\STREAM\BROADCASTSTREAM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -11018,7 +11018,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\STREAM\CACHESTREAM.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\STREAM\CACHESTREAM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -11081,7 +11081,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\STREAM\CHARFORMAT.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\STREAM\CHARFORMAT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -11300,7 +11300,7 @@ Bom
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\STREAM\FILESTREAM.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\STREAM\FILESTREAM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -11358,7 +11358,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\STREAM\MEMORYSTREAM.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\STREAM\MEMORYSTREAM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -11413,7 +11413,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\STREAM\MEMORYWRAPPERSTREAM.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\STREAM\MEMORYWRAPPERSTREAM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -11464,7 +11464,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\STREAM\RECORDERSTREAM.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\STREAM\RECORDERSTREAM.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -11514,7 +11514,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\THREADING.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\THREADING.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -11794,7 +11794,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\DICTIONARYWRAPPERS.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\DICTIONARYWRAPPERS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -12265,7 +12265,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\DICTIONARY.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\DICTIONARY.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0

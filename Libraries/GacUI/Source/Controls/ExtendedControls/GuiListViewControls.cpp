@@ -7,6 +7,7 @@ namespace vl
 		namespace controls
 		{
 			using namespace elements;
+			using namespace compositions;
 
 			namespace list
 			{
@@ -258,12 +259,12 @@ ListViewBigIconContentProvider
 				{
 				}
 
-				elements::GuiBoundsComposition* ListViewBigIconContentProvider::ItemContent::GetContentComposition()
+				compositions::GuiBoundsComposition* ListViewBigIconContentProvider::ItemContent::GetContentComposition()
 				{
 					return contentComposition;
 				}
 
-				elements::GuiBoundsComposition* ListViewBigIconContentProvider::ItemContent::GetBackgroundDecorator()
+				compositions::GuiBoundsComposition* ListViewBigIconContentProvider::ItemContent::GetBackgroundDecorator()
 				{
 					return 0;
 				}
@@ -363,12 +364,12 @@ ListViewSmallIconContentProvider
 				{
 				}
 
-				elements::GuiBoundsComposition* ListViewSmallIconContentProvider::ItemContent::GetContentComposition()
+				compositions::GuiBoundsComposition* ListViewSmallIconContentProvider::ItemContent::GetContentComposition()
 				{
 					return contentComposition;
 				}
 
-				elements::GuiBoundsComposition* ListViewSmallIconContentProvider::ItemContent::GetBackgroundDecorator()
+				compositions::GuiBoundsComposition* ListViewSmallIconContentProvider::ItemContent::GetBackgroundDecorator()
 				{
 					return 0;
 				}
@@ -467,12 +468,12 @@ ListViewListContentProvider
 				{
 				}
 
-				elements::GuiBoundsComposition* ListViewListContentProvider::ItemContent::GetContentComposition()
+				compositions::GuiBoundsComposition* ListViewListContentProvider::ItemContent::GetContentComposition()
 				{
 					return contentComposition;
 				}
 
-				elements::GuiBoundsComposition* ListViewListContentProvider::ItemContent::GetBackgroundDecorator()
+				compositions::GuiBoundsComposition* ListViewListContentProvider::ItemContent::GetBackgroundDecorator()
 				{
 					return 0;
 				}
@@ -608,12 +609,12 @@ ListViewTileContentProvider
 				{
 				}
 
-				elements::GuiBoundsComposition* ListViewTileContentProvider::ItemContent::GetContentComposition()
+				compositions::GuiBoundsComposition* ListViewTileContentProvider::ItemContent::GetContentComposition()
 				{
 					return contentComposition;
 				}
 
-				elements::GuiBoundsComposition* ListViewTileContentProvider::ItemContent::GetBackgroundDecorator()
+				compositions::GuiBoundsComposition* ListViewTileContentProvider::ItemContent::GetBackgroundDecorator()
 				{
 					return 0;
 				}
@@ -748,12 +749,12 @@ ListViewInformationContentProvider
 				{
 				}
 
-				elements::GuiBoundsComposition* ListViewInformationContentProvider::ItemContent::GetContentComposition()
+				compositions::GuiBoundsComposition* ListViewInformationContentProvider::ItemContent::GetContentComposition()
 				{
 					return contentComposition;
 				}
 
-				elements::GuiBoundsComposition* ListViewInformationContentProvider::ItemContent::GetBackgroundDecorator()
+				compositions::GuiBoundsComposition* ListViewInformationContentProvider::ItemContent::GetBackgroundDecorator()
 				{
 					return bottomLineComposition;
 				}
@@ -889,7 +890,7 @@ ListViewColumnItemArranger
 
 				const wchar_t* const ListViewColumnItemArranger::IColumnItemView::Identifier = L"vl::presentation::controls::list::ListViewColumnItemArranger::IColumnItemView";
 
-				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
 					if(listView->GetVisuallyEnabled())
 					{
@@ -899,7 +900,7 @@ ListViewColumnItemArranger
 					}
 				}
 
-				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonUp(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
 					if(listView->GetVisuallyEnabled())
 					{
@@ -909,7 +910,7 @@ ListViewColumnItemArranger
 					}
 				}
 
-				void ListViewColumnItemArranger::ColumnHeaderSplitterMouseMove(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments)
+				void ListViewColumnItemArranger::ColumnHeaderSplitterMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
 					if(splitterDragging)
 					{
@@ -1157,12 +1158,12 @@ ListViewDetailContentProvider
 					}
 				}
 
-				elements::GuiBoundsComposition* ListViewDetailContentProvider::ItemContent::GetContentComposition()
+				compositions::GuiBoundsComposition* ListViewDetailContentProvider::ItemContent::GetContentComposition()
 				{
 					return contentComposition;
 				}
 
-				elements::GuiBoundsComposition* ListViewDetailContentProvider::ItemContent::GetBackgroundDecorator()
+				compositions::GuiBoundsComposition* ListViewDetailContentProvider::ItemContent::GetBackgroundDecorator()
 				{
 					return 0;
 				}

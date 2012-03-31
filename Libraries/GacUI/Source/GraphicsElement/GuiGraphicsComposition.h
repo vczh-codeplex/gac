@@ -24,7 +24,7 @@ namespace vl
 			class GuiControlHost;
 		}
 
-		namespace elements
+		namespace compositions
 		{
 			class GuiGraphicsHost;
 
@@ -33,7 +33,7 @@ Basic Construction
 ***********************************************************************/
 
 			/// <summary>
-			/// Represents a composition for <see cref="IGuiGraphicsElement"/>. A composition is a way to define the size and the position using the information from graphics elements and sub compositions.
+			/// Represents a composition for <see cref="elements::IGuiGraphicsElement"/>. A composition is a way to define the size and the position using the information from graphics elements and sub compositions.
 			/// When a graphics composition is destroyed, all sub composition will be destroyed. The life cycle of the contained graphics element is partially controlled by the smart pointer to the graphics element inside the composition.
 			/// </summary>
 			class GuiGraphicsComposition : public Object, public Description<GuiGraphicsComposition>
@@ -70,170 +70,176 @@ Basic Construction
 					TotallyDecidedByParent,
 				};
 			protected:
-				CompositionList						children;
-				GuiGraphicsComposition*				parent;
-				Ptr<IGuiGraphicsElement>			ownedElement;
-				bool								visible;
-				IGuiGraphicsRenderTarget*			renderTarget;
-				MinSizeLimitation					minSizeLimitation;
+				CompositionList								children;
+				GuiGraphicsComposition*						parent;
+				Ptr<elements::IGuiGraphicsElement>			ownedElement;
+				bool										visible;
+				elements::IGuiGraphicsRenderTarget*			renderTarget;
+				MinSizeLimitation							minSizeLimitation;
 
-				Ptr<GuiGraphicsEventReceiver>		eventReceiver;
-				controls::GuiControl*				associatedControl;
-				GuiGraphicsHost*					associatedHost;
-				INativeCursor*						associatedCursor;
+				Ptr<compositions::GuiGraphicsEventReceiver>	eventReceiver;
+				controls::GuiControl*						associatedControl;
+				GuiGraphicsHost*							associatedHost;
+				INativeCursor*								associatedCursor;
 
-				Margin								margin;
-				Margin								internalMargin;
-				Size								preferredMinSize;
+				Margin										margin;
+				Margin										internalMargin;
+				Size										preferredMinSize;
 
-				virtual void						OnControlParentChanged(controls::GuiControl* control);
-				virtual void						OnChildInserted(GuiGraphicsComposition* child);
-				virtual void						OnChildRemoved(GuiGraphicsComposition* child);
-				virtual void						OnParentChanged(GuiGraphicsComposition* oldParent, GuiGraphicsComposition* newParent);
-				virtual void						OnRenderTargetChanged();
+				virtual void								OnControlParentChanged(controls::GuiControl* control);
+				virtual void								OnChildInserted(GuiGraphicsComposition* child);
+				virtual void								OnChildRemoved(GuiGraphicsComposition* child);
+				virtual void								OnParentChanged(GuiGraphicsComposition* oldParent, GuiGraphicsComposition* newParent);
+				virtual void								OnRenderTargetChanged();
 				
-				virtual void						SetAssociatedControl(controls::GuiControl* control);
-				virtual void						SetAssociatedHost(GuiGraphicsHost* host);
+				virtual void								SetAssociatedControl(controls::GuiControl* control);
+				virtual void								SetAssociatedHost(GuiGraphicsHost* host);
 			public:
 				GuiGraphicsComposition();
 				~GuiGraphicsComposition();
 
 				/// <summary>Get the parent composition.</summary>
 				/// <returns>The parent composition.</returns>
-				GuiGraphicsComposition*				GetParent();
+				GuiGraphicsComposition*						GetParent();
 				/// <summary>Get all child compositions ordered by z-order from low to high.</summary>
 				/// <returns>Child compositions.</returns>
-				const ICompositionList&				Children();
+				const ICompositionList&						Children();
 				/// <summary>Add a composition as a child.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="child">The child composition to add.</param>
-				bool								AddChild(GuiGraphicsComposition* child);
+				bool										AddChild(GuiGraphicsComposition* child);
 				/// <summary>Add a composition as a child with a specified z-order.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="index">The z-order. 0 means the lowest position.</param>
 				/// <param name="child">The child composition to add.</param>
-				bool								InsertChild(int index, GuiGraphicsComposition* child);
+				bool										InsertChild(int index, GuiGraphicsComposition* child);
 				/// <summary>Remove a child composition.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="child">The child composition to remove.</param>
-				bool								RemoveChild(GuiGraphicsComposition* child);
+				bool										RemoveChild(GuiGraphicsComposition* child);
 				/// <summary>Move a child composition to a new z-order.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="child">The child composition to move.</param>
 				/// <param name="newIndex">The new z-order. 0 means the lowest position.</param>
-				bool								MoveChild(GuiGraphicsComposition* child, int newIndex);
+				bool										MoveChild(GuiGraphicsComposition* child, int newIndex);
 
 				/// <summary>Get the contained graphics element.</summary>
 				/// <returns>The contained graphics element.</returns>
-				Ptr<IGuiGraphicsElement>			GetOwnedElement();
+				Ptr<elements::IGuiGraphicsElement>			GetOwnedElement();
 				/// <summary>Set the contained graphics element.</summary>
 				/// <param name="element">The new graphics element to set.</param>
-				void								SetOwnedElement(Ptr<IGuiGraphicsElement> element);
+				void										SetOwnedElement(Ptr<elements::IGuiGraphicsElement> element);
 				/// <summary>Get the visibility of the composition.</summary>
 				/// <returns>Returns true if the composition is visible.</returns>
-				bool								GetVisible();
+				bool										GetVisible();
 				/// <summary>Set the visibility of the composition.</summary>
 				/// <param name="value">Set to true to make the composition visible.</param>
-				void								SetVisible(bool value);
+				void										SetVisible(bool value);
 				/// <summary>Get the minimum size limitation of the composition.</summary>
 				/// <returns>The minimum size limitation of the composition.</returns>
-				MinSizeLimitation					GetMinSizeLimitation();
+				MinSizeLimitation							GetMinSizeLimitation();
 				/// <summary>Set the minimum size limitation of the composition.</summary>
 				/// <param name="value">The minimum size limitation of the composition.</param>
-				void								SetMinSizeLimitation(MinSizeLimitation value);
+				void										SetMinSizeLimitation(MinSizeLimitation value);
 				/// <summary>Get the binded render target.</summary>
 				/// <returns>The binded render target.</returns>
-				IGuiGraphicsRenderTarget*			GetRenderTarget();
+				elements::IGuiGraphicsRenderTarget*			GetRenderTarget();
 				/// <summary>Set the binded render target. This function is designed for internal usage. Users are not suggested to call this function directly.</summary>
 				/// <param name="value">The binded render target.</param>
-				void								SetRenderTarget(IGuiGraphicsRenderTarget* value);
+				void										SetRenderTarget(elements::IGuiGraphicsRenderTarget* value);
 
 				/// <summary>Render the composition using an offset.</summary>
 				/// <param name="offset">The offset.</param>
-				void								Render(Size offset);
+				void										Render(Size offset);
 				/// <summary>Get the event receiver object. All user input events can be found in this object. If an event receiver is never been requested from the composition, the event receiver will not be created, and all route events will not pass through this event receiver(performance will be better).</summary>
 				/// <returns>The event receiver.</returns>
-				GuiGraphicsEventReceiver*			GetEventReceiver();
+				compositions::GuiGraphicsEventReceiver*		GetEventReceiver();
 				/// <summary>Test if any event receiver has already been requested.</summary>
 				/// <returns>Returns true if any event receiver has already been requested.</returns>
-				bool								HasEventReceiver();
+				bool										HasEventReceiver();
 				/// <summary>Find a deepest composition that under a specified location. If the location is inside a compsition but not hit any sub composition, this function will return this composition.</summary>
 				/// <returns>The deepest composition that under a specified location.</returns>
 				/// <param name="location">The specified location.</param>
-				GuiGraphicsComposition*				FindComposition(Point location);
+				GuiGraphicsComposition*						FindComposition(Point location);
 				/// <summary>Get the bounds in the top composition space.</summary>
 				/// <returns>The bounds in the top composition space.</returns>
-				Rect								GetGlobalBounds();
+				Rect										GetGlobalBounds();
 
 				/// <summary>Get the associated control. A control is associated to a composition only when the composition represents the bounds of this control. Such a composition usually comes from a control template.</summary>
 				/// <returns>The associated control.</returns>
-				controls::GuiControl*				GetAssociatedControl();
+				controls::GuiControl*						GetAssociatedControl();
 				/// <summary>Get the associated graphics host. A graphics host is associated to a composition only when the composition becomes the bounds of the graphics host.</summary>
 				/// <returns>The associated graphics host.</returns>
-				GuiGraphicsHost*					GetAssociatedHost();
+				GuiGraphicsHost*							GetAssociatedHost();
 				/// <summary>Get the associated cursor.</summary>
 				/// <returns>The associated cursor.</returns>
-				INativeCursor*						GetAssociatedCursor();
+				INativeCursor*								GetAssociatedCursor();
 				/// <summary>Set the associated cursor.</summary>
 				/// <param name="cursor">The associated cursor.</param>
-				void								SetAssociatedCursor(INativeCursor* cursor);
+				void										SetAssociatedCursor(INativeCursor* cursor);
 				
 				/// <summary>Get the related control. A related control is the deepest control that contains this composition.</summary>
 				/// <returns>The related control.</returns>
-				controls::GuiControl*				GetRelatedControl();
+				controls::GuiControl*						GetRelatedControl();
 				/// <summary>Get the related graphics host. A related graphics host is the graphics host that contains this composition.</summary>
 				/// <returns>The related graphics host.</returns>
-				GuiGraphicsHost*					GetRelatedGraphicsHost();
+				GuiGraphicsHost*							GetRelatedGraphicsHost();
 				/// <summary>Get the related control host. A related control host is the control host that contains this composition.</summary>
 				/// <returns>The related control host.</returns>
-				controls::GuiControlHost*			GetRelatedControlHost();
+				controls::GuiControlHost*					GetRelatedControlHost();
 				/// <summary>Get the related cursor. A related cursor is from the deepest composition that contains this composition and associated with a cursor.</summary>
 				/// <returns>The related cursor.</returns>
-				INativeCursor*						GetRelatedCursor();
+				INativeCursor*								GetRelatedCursor();
 				
 				/// <summary>Get the margin.</summary>
 				/// <returns>The margin.</returns>
-				virtual Margin						GetMargin();
+				virtual Margin								GetMargin();
 				/// <summary>Set the margin.</summary>
 				/// <param name="value">The margin.</param>
-				virtual void						SetMargin(Margin value);
+				virtual void								SetMargin(Margin value);
 				/// <summary>Get the internal margin.</summary>
 				/// <returns>The internal margin.</returns>
-				virtual Margin						GetInternalMargin();
+				virtual Margin								GetInternalMargin();
 				/// <summary>Set the internal margin.</summary>
 				/// <param name="value">The internal margin.</param>
-				virtual void						SetInternalMargin(Margin value);
+				virtual void								SetInternalMargin(Margin value);
 				/// <summary>Get the preferred minimum size.</summary>
 				/// <returns>The preferred minimum size.</returns>
-				virtual Size						GetPreferredMinSize();
+				virtual Size								GetPreferredMinSize();
 				/// <summary>Set the preferred minimum size.</summary>
 				/// <param name="value">The preferred minimum size.</param>
-				virtual void						SetPreferredMinSize(Size value);
+				virtual void								SetPreferredMinSize(Size value);
 				/// <summary>Get the client area.</summary>
 				/// <returns>The client area.</returns>
-				virtual Rect						GetClientArea();
+				virtual Rect								GetClientArea();
 				
 				/// <summary>Get the parent size affection.</summary>
 				/// <returns>The parent size affection.</returns>
-				virtual ParentSizeAffection			GetAffectionFromParent()=0;
+				virtual ParentSizeAffection					GetAffectionFromParent()=0;
 				/// <summary>Test is the size calculation affected by the parent.</summary>
 				/// <returns>Returns true if the size calculation is affected by the parent.</returns>
-				virtual bool						IsSizeAffectParent()=0;
+				virtual bool								IsSizeAffectParent()=0;
 				/// <summary>Get the preferred minimum client size.</summary>
 				/// <returns>The preferred minimum client size.</returns>
-				virtual Size						GetMinPreferredClientSize()=0;
+				virtual Size								GetMinPreferredClientSize()=0;
 				/// <summary>Get the preferred bounds.</summary>
 				/// <returns>The preferred bounds.</returns>
-				virtual Rect						GetPreferredBounds()=0;
+				virtual Rect								GetPreferredBounds()=0;
 				/// <summary>Get the bounds.</summary>
 				/// <returns>The bounds.</returns>
-				virtual Rect						GetBounds()=0;
+				virtual Rect								GetBounds()=0;
 			};
 
+			/// <summary>
+			/// A general implementation for <see cref="GuiGraphicsComposition"/>.
+			/// </summary>
 			class GuiGraphicsSite : public GuiGraphicsComposition, public Description<GuiGraphicsSite>
 			{
 			protected:
 
+				/// <summary>Calculate the final bounds from an expected bounds.</summary>
+				/// <returns>The final bounds according to some configuration like margin, minimum size, etc..</returns>
+				/// <param name="expectedBounds">The expected bounds.</param>
 				virtual Rect						GetBoundsInternal(Rect expectedBounds);
 			public:
 				GuiGraphicsSite();
@@ -248,7 +254,10 @@ Basic Construction
 /***********************************************************************
 Basic Compositions
 ***********************************************************************/
-
+			
+			/// <summary>
+			/// Represents a composition for the client area in an <see cref="INativeWindow"/>.
+			/// </summary>
 			class GuiWindowComposition : public GuiGraphicsSite, public Description<GuiWindowComposition>
 			{
 			protected:
@@ -256,14 +265,21 @@ Basic Compositions
 			public:
 				GuiWindowComposition();
 				~GuiWindowComposition();
-
+				
+				/// <summary>Get the attached native window object.</summary>
+				/// <returns>The attached native window object.</returns>
 				INativeWindow*						GetAttachedWindow();
+				/// <summary>Attached a native window object.</summary>
+				/// <param name="window">The native window object to attach.</param>
 				void								SetAttachedWindow(INativeWindow* window);
 
 				Rect								GetBounds()override;
 				void								SetMargin(Margin value)override;
 			};
 
+			/// <summary>
+			/// Represents a composition that is free to change the expected bounds.
+			/// </summary>
 			class GuiBoundsComposition : public GuiGraphicsSite, public Description<GuiBoundsComposition>
 			{
 			protected:
@@ -275,16 +291,26 @@ Basic Compositions
 				GuiBoundsComposition();
 				~GuiBoundsComposition();
 
-				GuiNotifyEvent						BoundsChanged;
+				/// <summary>Event that will be raised when the final bounds is changed.</summary>
+				compositions::GuiNotifyEvent		BoundsChanged;
 				
 				ParentSizeAffection					GetAffectionFromParent()override;
 				Rect								GetPreferredBounds()override;
 				Rect								GetBounds()override;
+				/// <summary>Set the expected bounds.</summary>
+				/// <param name="value">The expected bounds.</param>
 				void								SetBounds(Rect value);
 
+				/// <summary>Make the composition not aligned to its parent.</summary>
 				void								ClearAlignmentToParent();
+				/// <summary>Get the alignment to its parent. -1 in each alignment component means that the corressponding side is not aligned to its parent.</summary>
+				/// <returns>The alignment to its parent.</returns>
 				Margin								GetAlignmentToParent();
+				/// <summary>Set the alignment to its parent. -1 in each alignment component means that the corressponding side is not aligned to its parent.</summary>
+				/// <param name="value">The alignment to its parent.</param>
 				void								SetAlignmentToParent(Margin value);
+				/// <summary>Test is the composition aligned to its parent.</summary>
+				/// <returns>Returns true if the composition is aligned to its parent.</returns>
 				bool								IsAlignedToParent();
 			};
 

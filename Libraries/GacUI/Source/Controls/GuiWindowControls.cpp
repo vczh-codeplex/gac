@@ -8,6 +8,7 @@ namespace vl
 		namespace controls
 		{
 			using namespace elements;
+			using namespace compositions;
 
 /***********************************************************************
 GuiControlHost
@@ -99,12 +100,12 @@ GuiControlHost
 				delete host;
 			}
 
-			elements::GuiGraphicsHost* GuiControlHost::GetGraphicsHost()
+			compositions::GuiGraphicsHost* GuiControlHost::GetGraphicsHost()
 			{
 				return host;
 			}
 
-			elements::GuiGraphicsComposition* GuiControlHost::GetMainComposition()
+			compositions::GuiGraphicsComposition* GuiControlHost::GetMainComposition()
 			{
 				return host->GetMainComposition();
 			}

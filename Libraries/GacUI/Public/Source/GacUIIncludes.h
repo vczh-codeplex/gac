@@ -4,7 +4,7 @@ DEVELOPER: ³Âè÷å«(vczh)
 ***********************************************************************/
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\BASIC.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\BASIC.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -209,7 +209,7 @@ typedef signed __int64	pos_t;
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\STRING.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\STRING.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -659,7 +659,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\POINTER.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\POINTER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -1105,7 +1105,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\FUNCTION.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\FUNCTION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7162,7 +7162,7 @@ vl::function_combining::Combining<R1(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9), R2(T0,T1,T2
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\PAIR.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\PAIR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7270,7 +7270,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\INTERFACES.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\INTERFACES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7409,7 +7409,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\LISTWRAPPERS.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\LISTWRAPPERS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7833,7 +7833,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\LIST.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\LIST.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8384,7 +8384,7 @@ SORTED_LIST_INSERT:
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\DICTIONARYWRAPPERS.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\DICTIONARYWRAPPERS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8855,7 +8855,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\DICTIONARY.H
+E:\CODEPLEX\GAC\WORKSPACE\COMMON\SOURCE\COLLECTIONS\DICTIONARY.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -9168,7 +9168,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GACVLPPREFERENCES.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GACVLPPREFERENCES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -9185,7 +9185,7 @@ Interfaces:
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUITYPES.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUITYPES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -9739,7 +9739,7 @@ Resources
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUINATIVEWINDOW.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUINATIVEWINDOW.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -11107,7 +11107,7 @@ Native Window Provider
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\REFLECTION\GUITYPEDESCRIPTOR.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\REFLECTION\GUITYPEDESCRIPTOR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -11394,7 +11394,7 @@ Helper Functions
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -12311,7 +12311,7 @@ Elements
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSTEXTELEMENT.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSTEXTELEMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -12855,7 +12855,7 @@ ColorizedText
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSEVENTRECEIVER.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSEVENTRECEIVER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -12873,7 +12873,7 @@ namespace vl
 {
 	namespace presentation
 	{
-		namespace elements
+		namespace compositions
 		{
 			class GuiGraphicsComposition;
 
@@ -13140,7 +13140,7 @@ Event Receiver
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSCOMPOSITION.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSCOMPOSITION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -13165,7 +13165,7 @@ namespace vl
 			class GuiControlHost;
 		}
 
-		namespace elements
+		namespace compositions
 		{
 			class GuiGraphicsHost;
 
@@ -13174,7 +13174,7 @@ Basic Construction
 ***********************************************************************/
 
 			/// <summary>
-			/// Represents a composition for <see cref="IGuiGraphicsElement"/>. A composition is a way to define the size and the position using the information from graphics elements and sub compositions.
+			/// Represents a composition for <see cref="elements::IGuiGraphicsElement"/>. A composition is a way to define the size and the position using the information from graphics elements and sub compositions.
 			/// When a graphics composition is destroyed, all sub composition will be destroyed. The life cycle of the contained graphics element is partially controlled by the smart pointer to the graphics element inside the composition.
 			/// </summary>
 			class GuiGraphicsComposition : public Object, public Description<GuiGraphicsComposition>
@@ -13211,170 +13211,176 @@ Basic Construction
 					TotallyDecidedByParent,
 				};
 			protected:
-				CompositionList						children;
-				GuiGraphicsComposition*				parent;
-				Ptr<IGuiGraphicsElement>			ownedElement;
-				bool								visible;
-				IGuiGraphicsRenderTarget*			renderTarget;
-				MinSizeLimitation					minSizeLimitation;
+				CompositionList								children;
+				GuiGraphicsComposition*						parent;
+				Ptr<elements::IGuiGraphicsElement>			ownedElement;
+				bool										visible;
+				elements::IGuiGraphicsRenderTarget*			renderTarget;
+				MinSizeLimitation							minSizeLimitation;
 
-				Ptr<GuiGraphicsEventReceiver>		eventReceiver;
-				controls::GuiControl*				associatedControl;
-				GuiGraphicsHost*					associatedHost;
-				INativeCursor*						associatedCursor;
+				Ptr<compositions::GuiGraphicsEventReceiver>	eventReceiver;
+				controls::GuiControl*						associatedControl;
+				GuiGraphicsHost*							associatedHost;
+				INativeCursor*								associatedCursor;
 
-				Margin								margin;
-				Margin								internalMargin;
-				Size								preferredMinSize;
+				Margin										margin;
+				Margin										internalMargin;
+				Size										preferredMinSize;
 
-				virtual void						OnControlParentChanged(controls::GuiControl* control);
-				virtual void						OnChildInserted(GuiGraphicsComposition* child);
-				virtual void						OnChildRemoved(GuiGraphicsComposition* child);
-				virtual void						OnParentChanged(GuiGraphicsComposition* oldParent, GuiGraphicsComposition* newParent);
-				virtual void						OnRenderTargetChanged();
+				virtual void								OnControlParentChanged(controls::GuiControl* control);
+				virtual void								OnChildInserted(GuiGraphicsComposition* child);
+				virtual void								OnChildRemoved(GuiGraphicsComposition* child);
+				virtual void								OnParentChanged(GuiGraphicsComposition* oldParent, GuiGraphicsComposition* newParent);
+				virtual void								OnRenderTargetChanged();
 				
-				virtual void						SetAssociatedControl(controls::GuiControl* control);
-				virtual void						SetAssociatedHost(GuiGraphicsHost* host);
+				virtual void								SetAssociatedControl(controls::GuiControl* control);
+				virtual void								SetAssociatedHost(GuiGraphicsHost* host);
 			public:
 				GuiGraphicsComposition();
 				~GuiGraphicsComposition();
 
 				/// <summary>Get the parent composition.</summary>
 				/// <returns>The parent composition.</returns>
-				GuiGraphicsComposition*				GetParent();
+				GuiGraphicsComposition*						GetParent();
 				/// <summary>Get all child compositions ordered by z-order from low to high.</summary>
 				/// <returns>Child compositions.</returns>
-				const ICompositionList&				Children();
+				const ICompositionList&						Children();
 				/// <summary>Add a composition as a child.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="child">The child composition to add.</param>
-				bool								AddChild(GuiGraphicsComposition* child);
+				bool										AddChild(GuiGraphicsComposition* child);
 				/// <summary>Add a composition as a child with a specified z-order.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="index">The z-order. 0 means the lowest position.</param>
 				/// <param name="child">The child composition to add.</param>
-				bool								InsertChild(int index, GuiGraphicsComposition* child);
+				bool										InsertChild(int index, GuiGraphicsComposition* child);
 				/// <summary>Remove a child composition.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="child">The child composition to remove.</param>
-				bool								RemoveChild(GuiGraphicsComposition* child);
+				bool										RemoveChild(GuiGraphicsComposition* child);
 				/// <summary>Move a child composition to a new z-order.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="child">The child composition to move.</param>
 				/// <param name="newIndex">The new z-order. 0 means the lowest position.</param>
-				bool								MoveChild(GuiGraphicsComposition* child, int newIndex);
+				bool										MoveChild(GuiGraphicsComposition* child, int newIndex);
 
 				/// <summary>Get the contained graphics element.</summary>
 				/// <returns>The contained graphics element.</returns>
-				Ptr<IGuiGraphicsElement>			GetOwnedElement();
+				Ptr<elements::IGuiGraphicsElement>			GetOwnedElement();
 				/// <summary>Set the contained graphics element.</summary>
 				/// <param name="element">The new graphics element to set.</param>
-				void								SetOwnedElement(Ptr<IGuiGraphicsElement> element);
+				void										SetOwnedElement(Ptr<elements::IGuiGraphicsElement> element);
 				/// <summary>Get the visibility of the composition.</summary>
 				/// <returns>Returns true if the composition is visible.</returns>
-				bool								GetVisible();
+				bool										GetVisible();
 				/// <summary>Set the visibility of the composition.</summary>
 				/// <param name="value">Set to true to make the composition visible.</param>
-				void								SetVisible(bool value);
+				void										SetVisible(bool value);
 				/// <summary>Get the minimum size limitation of the composition.</summary>
 				/// <returns>The minimum size limitation of the composition.</returns>
-				MinSizeLimitation					GetMinSizeLimitation();
+				MinSizeLimitation							GetMinSizeLimitation();
 				/// <summary>Set the minimum size limitation of the composition.</summary>
 				/// <param name="value">The minimum size limitation of the composition.</param>
-				void								SetMinSizeLimitation(MinSizeLimitation value);
+				void										SetMinSizeLimitation(MinSizeLimitation value);
 				/// <summary>Get the binded render target.</summary>
 				/// <returns>The binded render target.</returns>
-				IGuiGraphicsRenderTarget*			GetRenderTarget();
+				elements::IGuiGraphicsRenderTarget*			GetRenderTarget();
 				/// <summary>Set the binded render target. This function is designed for internal usage. Users are not suggested to call this function directly.</summary>
 				/// <param name="value">The binded render target.</param>
-				void								SetRenderTarget(IGuiGraphicsRenderTarget* value);
+				void										SetRenderTarget(elements::IGuiGraphicsRenderTarget* value);
 
 				/// <summary>Render the composition using an offset.</summary>
 				/// <param name="offset">The offset.</param>
-				void								Render(Size offset);
+				void										Render(Size offset);
 				/// <summary>Get the event receiver object. All user input events can be found in this object. If an event receiver is never been requested from the composition, the event receiver will not be created, and all route events will not pass through this event receiver(performance will be better).</summary>
 				/// <returns>The event receiver.</returns>
-				GuiGraphicsEventReceiver*			GetEventReceiver();
+				compositions::GuiGraphicsEventReceiver*		GetEventReceiver();
 				/// <summary>Test if any event receiver has already been requested.</summary>
 				/// <returns>Returns true if any event receiver has already been requested.</returns>
-				bool								HasEventReceiver();
+				bool										HasEventReceiver();
 				/// <summary>Find a deepest composition that under a specified location. If the location is inside a compsition but not hit any sub composition, this function will return this composition.</summary>
 				/// <returns>The deepest composition that under a specified location.</returns>
 				/// <param name="location">The specified location.</param>
-				GuiGraphicsComposition*				FindComposition(Point location);
+				GuiGraphicsComposition*						FindComposition(Point location);
 				/// <summary>Get the bounds in the top composition space.</summary>
 				/// <returns>The bounds in the top composition space.</returns>
-				Rect								GetGlobalBounds();
+				Rect										GetGlobalBounds();
 
 				/// <summary>Get the associated control. A control is associated to a composition only when the composition represents the bounds of this control. Such a composition usually comes from a control template.</summary>
 				/// <returns>The associated control.</returns>
-				controls::GuiControl*				GetAssociatedControl();
+				controls::GuiControl*						GetAssociatedControl();
 				/// <summary>Get the associated graphics host. A graphics host is associated to a composition only when the composition becomes the bounds of the graphics host.</summary>
 				/// <returns>The associated graphics host.</returns>
-				GuiGraphicsHost*					GetAssociatedHost();
+				GuiGraphicsHost*							GetAssociatedHost();
 				/// <summary>Get the associated cursor.</summary>
 				/// <returns>The associated cursor.</returns>
-				INativeCursor*						GetAssociatedCursor();
+				INativeCursor*								GetAssociatedCursor();
 				/// <summary>Set the associated cursor.</summary>
 				/// <param name="cursor">The associated cursor.</param>
-				void								SetAssociatedCursor(INativeCursor* cursor);
+				void										SetAssociatedCursor(INativeCursor* cursor);
 				
 				/// <summary>Get the related control. A related control is the deepest control that contains this composition.</summary>
 				/// <returns>The related control.</returns>
-				controls::GuiControl*				GetRelatedControl();
+				controls::GuiControl*						GetRelatedControl();
 				/// <summary>Get the related graphics host. A related graphics host is the graphics host that contains this composition.</summary>
 				/// <returns>The related graphics host.</returns>
-				GuiGraphicsHost*					GetRelatedGraphicsHost();
+				GuiGraphicsHost*							GetRelatedGraphicsHost();
 				/// <summary>Get the related control host. A related control host is the control host that contains this composition.</summary>
 				/// <returns>The related control host.</returns>
-				controls::GuiControlHost*			GetRelatedControlHost();
+				controls::GuiControlHost*					GetRelatedControlHost();
 				/// <summary>Get the related cursor. A related cursor is from the deepest composition that contains this composition and associated with a cursor.</summary>
 				/// <returns>The related cursor.</returns>
-				INativeCursor*						GetRelatedCursor();
+				INativeCursor*								GetRelatedCursor();
 				
 				/// <summary>Get the margin.</summary>
 				/// <returns>The margin.</returns>
-				virtual Margin						GetMargin();
+				virtual Margin								GetMargin();
 				/// <summary>Set the margin.</summary>
 				/// <param name="value">The margin.</param>
-				virtual void						SetMargin(Margin value);
+				virtual void								SetMargin(Margin value);
 				/// <summary>Get the internal margin.</summary>
 				/// <returns>The internal margin.</returns>
-				virtual Margin						GetInternalMargin();
+				virtual Margin								GetInternalMargin();
 				/// <summary>Set the internal margin.</summary>
 				/// <param name="value">The internal margin.</param>
-				virtual void						SetInternalMargin(Margin value);
+				virtual void								SetInternalMargin(Margin value);
 				/// <summary>Get the preferred minimum size.</summary>
 				/// <returns>The preferred minimum size.</returns>
-				virtual Size						GetPreferredMinSize();
+				virtual Size								GetPreferredMinSize();
 				/// <summary>Set the preferred minimum size.</summary>
 				/// <param name="value">The preferred minimum size.</param>
-				virtual void						SetPreferredMinSize(Size value);
+				virtual void								SetPreferredMinSize(Size value);
 				/// <summary>Get the client area.</summary>
 				/// <returns>The client area.</returns>
-				virtual Rect						GetClientArea();
+				virtual Rect								GetClientArea();
 				
 				/// <summary>Get the parent size affection.</summary>
 				/// <returns>The parent size affection.</returns>
-				virtual ParentSizeAffection			GetAffectionFromParent()=0;
+				virtual ParentSizeAffection					GetAffectionFromParent()=0;
 				/// <summary>Test is the size calculation affected by the parent.</summary>
 				/// <returns>Returns true if the size calculation is affected by the parent.</returns>
-				virtual bool						IsSizeAffectParent()=0;
+				virtual bool								IsSizeAffectParent()=0;
 				/// <summary>Get the preferred minimum client size.</summary>
 				/// <returns>The preferred minimum client size.</returns>
-				virtual Size						GetMinPreferredClientSize()=0;
+				virtual Size								GetMinPreferredClientSize()=0;
 				/// <summary>Get the preferred bounds.</summary>
 				/// <returns>The preferred bounds.</returns>
-				virtual Rect						GetPreferredBounds()=0;
+				virtual Rect								GetPreferredBounds()=0;
 				/// <summary>Get the bounds.</summary>
 				/// <returns>The bounds.</returns>
-				virtual Rect						GetBounds()=0;
+				virtual Rect								GetBounds()=0;
 			};
 
+			/// <summary>
+			/// A general implementation for <see cref="GuiGraphicsComposition"/>.
+			/// </summary>
 			class GuiGraphicsSite : public GuiGraphicsComposition, public Description<GuiGraphicsSite>
 			{
 			protected:
 
+				/// <summary>Calculate the final bounds from an expected bounds.</summary>
+				/// <returns>The final bounds according to some configuration like margin, minimum size, etc..</returns>
+				/// <param name="expectedBounds">The expected bounds.</param>
 				virtual Rect						GetBoundsInternal(Rect expectedBounds);
 			public:
 				GuiGraphicsSite();
@@ -13389,7 +13395,10 @@ Basic Construction
 /***********************************************************************
 Basic Compositions
 ***********************************************************************/
-
+			
+			/// <summary>
+			/// Represents a composition for the client area in an <see cref="INativeWindow"/>.
+			/// </summary>
 			class GuiWindowComposition : public GuiGraphicsSite, public Description<GuiWindowComposition>
 			{
 			protected:
@@ -13397,14 +13406,21 @@ Basic Compositions
 			public:
 				GuiWindowComposition();
 				~GuiWindowComposition();
-
+				
+				/// <summary>Get the attached native window object.</summary>
+				/// <returns>The attached native window object.</returns>
 				INativeWindow*						GetAttachedWindow();
+				/// <summary>Attached a native window object.</summary>
+				/// <param name="window">The native window object to attach.</param>
 				void								SetAttachedWindow(INativeWindow* window);
 
 				Rect								GetBounds()override;
 				void								SetMargin(Margin value)override;
 			};
 
+			/// <summary>
+			/// Represents a composition that is free to change the expected bounds.
+			/// </summary>
 			class GuiBoundsComposition : public GuiGraphicsSite, public Description<GuiBoundsComposition>
 			{
 			protected:
@@ -13416,16 +13432,26 @@ Basic Compositions
 				GuiBoundsComposition();
 				~GuiBoundsComposition();
 
-				GuiNotifyEvent						BoundsChanged;
+				/// <summary>Event that will be raised when the final bounds is changed.</summary>
+				compositions::GuiNotifyEvent		BoundsChanged;
 				
 				ParentSizeAffection					GetAffectionFromParent()override;
 				Rect								GetPreferredBounds()override;
 				Rect								GetBounds()override;
+				/// <summary>Set the expected bounds.</summary>
+				/// <param name="value">The expected bounds.</param>
 				void								SetBounds(Rect value);
 
+				/// <summary>Make the composition not aligned to its parent.</summary>
 				void								ClearAlignmentToParent();
+				/// <summary>Get the alignment to its parent. -1 in each alignment component means that the corressponding side is not aligned to its parent.</summary>
+				/// <returns>The alignment to its parent.</returns>
 				Margin								GetAlignmentToParent();
+				/// <summary>Set the alignment to its parent. -1 in each alignment component means that the corressponding side is not aligned to its parent.</summary>
+				/// <param name="value">The alignment to its parent.</param>
 				void								SetAlignmentToParent(Margin value);
+				/// <summary>Test is the composition aligned to its parent.</summary>
+				/// <returns>Returns true if the composition is aligned to its parent.</returns>
 				bool								IsAlignedToParent();
 			};
 
@@ -13726,7 +13752,7 @@ Specialized Compositions
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSHOST.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSHOST.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -13744,7 +13770,7 @@ namespace vl
 {
 	namespace presentation
 	{
-		namespace elements
+		namespace compositions
 		{
 
 /***********************************************************************
@@ -13870,7 +13896,7 @@ Helpers
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIBASICCONTROLS.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIBASICCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -13897,15 +13923,15 @@ Basic Construction
 
 			class GuiControl : public Object, public Description<GuiControl>
 			{
-				friend class elements::GuiGraphicsComposition;
+				friend class compositions::GuiGraphicsComposition;
 				typedef collections::List<GuiControl*>		ControlList;
 			public:
 				class IStyleController : public virtual IDescriptable, public Description<IStyleController>
 				{
 				public:
-					virtual elements::GuiBoundsComposition*		GetBoundsComposition()=0;
-					virtual elements::GuiGraphicsComposition*	GetContainerComposition()=0;
-					virtual void								SetFocusableComposition(elements::GuiGraphicsComposition* value)=0;
+					virtual compositions::GuiBoundsComposition*	GetBoundsComposition()=0;
+					virtual compositions::GuiGraphicsComposition*	GetContainerComposition()=0;
+					virtual void								SetFocusableComposition(compositions::GuiGraphicsComposition* value)=0;
 					virtual void								SetText(const WString& value)=0;
 					virtual void								SetFont(const FontProperties& value)=0;
 					virtual void								SetVisuallyEnabled(bool value)=0;
@@ -13915,16 +13941,16 @@ Basic Construction
 				{
 				public:
 					virtual void								AssociateStyleController(IStyleController* controller)=0;
-					virtual void								SetFocusableComposition(elements::GuiGraphicsComposition* value)=0;
+					virtual void								SetFocusableComposition(compositions::GuiGraphicsComposition* value)=0;
 					virtual void								SetText(const WString& value)=0;
 					virtual void								SetFont(const FontProperties& value)=0;
 					virtual void								SetVisuallyEnabled(bool value)=0;
 				};
 			protected:
-				Ptr<IStyleController>					styleController;
-				elements::GuiBoundsComposition*			boundsComposition;
-				elements::GuiGraphicsComposition*		focusableComposition;
-				elements::GuiGraphicsEventReceiver*		eventReceiver;
+				Ptr<IStyleController>							styleController;
+				compositions::GuiBoundsComposition*				boundsComposition;
+				compositions::GuiGraphicsComposition*			focusableComposition;
+				compositions::GuiGraphicsEventReceiver*			eventReceiver;
 
 				bool									isEnabled;
 				bool									isVisuallyEnabled;
@@ -13942,23 +13968,23 @@ Basic Construction
 				virtual void							OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget);
 				virtual void							OnBeforeReleaseGraphicsHost();
 				virtual void							UpdateVisuallyEnabled();
-				void									SetFocusableComposition(elements::GuiGraphicsComposition* value);
+				void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
 			public:
 				GuiControl(IStyleController* _styleController);
 				~GuiControl();
 
-				elements::GuiNotifyEvent				VisibleChanged;
-				elements::GuiNotifyEvent				EnabledChanged;
-				elements::GuiNotifyEvent				VisuallyEnabledChanged;
-				elements::GuiNotifyEvent				TextChanged;
-				elements::GuiNotifyEvent				FontChanged;
+				compositions::GuiNotifyEvent			VisibleChanged;
+				compositions::GuiNotifyEvent			EnabledChanged;
+				compositions::GuiNotifyEvent			VisuallyEnabledChanged;
+				compositions::GuiNotifyEvent			TextChanged;
+				compositions::GuiNotifyEvent			FontChanged;
 
-				elements::GuiEventArgs					GetNotifyEventArguments();
+				compositions::GuiEventArgs				GetNotifyEventArguments();
 				IStyleController*						GetStyleController();
-				elements::GuiBoundsComposition*			GetBoundsComposition();
-				elements::GuiGraphicsComposition*		GetContainerComposition();
-				elements::GuiGraphicsComposition*		GetFocusableComposition();
-				elements::GuiGraphicsEventReceiver*		GetEventReceiver();
+				compositions::GuiBoundsComposition*		GetBoundsComposition();
+				compositions::GuiGraphicsComposition*	GetContainerComposition();
+				compositions::GuiGraphicsComposition*	GetFocusableComposition();
+				compositions::GuiGraphicsEventReceiver*	GetEventReceiver();
 				GuiControl*								GetParent();
 				int										GetChildrenCount();
 				GuiControl*								GetChild(int index);
@@ -14039,15 +14065,15 @@ Buttons
 				
 				void									OnParentLineChanged()override;
 				void									UpdateControlState();
-				void									OnLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-				void									OnLeftButtonUp(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-				void									OnMouseEnter(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnMouseLeave(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void									OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void									OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void									OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiButton(IStyleController* _styleController);
 				~GuiButton();
 
-				elements::GuiNotifyEvent				Clicked;
+				compositions::GuiNotifyEvent			Clicked;
 			};
 
 			class GuiSelectableButton : public GuiButton, public Description<GuiSelectableButton>
@@ -14089,14 +14115,14 @@ Buttons
 				bool									autoSelection;
 				bool									isSelected;
 
-				void									OnClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void									OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiSelectableButton(IStyleController* _styleController);
 				~GuiSelectableButton();
 
-				elements::GuiNotifyEvent				GroupControllerChanged;
-				elements::GuiNotifyEvent				AutoSelectionChanged;
-				elements::GuiNotifyEvent				SelectedChanged;
+				compositions::GuiNotifyEvent			GroupControllerChanged;
+				compositions::GuiNotifyEvent			AutoSelectionChanged;
+				compositions::GuiNotifyEvent			SelectedChanged;
 
 				virtual GroupController*				GetGroupController();
 				virtual void							SetGroupController(GroupController* value);
@@ -14166,11 +14192,11 @@ Scrolls
 				GuiScroll(IStyleController* _styleController);
 				~GuiScroll();
 				
-				elements::GuiNotifyEvent				TotalSizeChanged;
-				elements::GuiNotifyEvent				PageSizeChanged;
-				elements::GuiNotifyEvent				PositionChanged;
-				elements::GuiNotifyEvent				SmallMoveChanged;
-				elements::GuiNotifyEvent				BigMoveChanged;
+				compositions::GuiNotifyEvent			TotalSizeChanged;
+				compositions::GuiNotifyEvent			PageSizeChanged;
+				compositions::GuiNotifyEvent			PositionChanged;
+				compositions::GuiNotifyEvent			SmallMoveChanged;
+				compositions::GuiNotifyEvent			BigMoveChanged;
 
 				virtual int								GetTotalSize();
 				virtual void							SetTotalSize(int value);
@@ -14193,60 +14219,60 @@ Scrolls
 				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
 				{
 				public:
-					virtual GuiScroll::IStyleController*		CreateHorizontalScrollStyle()=0;
-					virtual GuiScroll::IStyleController*		CreateVerticalScrollStyle()=0;
-					virtual int									GetDefaultScrollSize()=0;
-					virtual elements::GuiGraphicsComposition*	InstallBackground(elements::GuiBoundsComposition* boundsComposition)=0;
+					virtual GuiScroll::IStyleController*			CreateHorizontalScrollStyle()=0;
+					virtual GuiScroll::IStyleController*			CreateVerticalScrollStyle()=0;
+					virtual int										GetDefaultScrollSize()=0;
+					virtual compositions::GuiGraphicsComposition*	InstallBackground(compositions::GuiBoundsComposition* boundsComposition)=0;
 				};
 
 				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
 				{
 				protected:
-					Ptr<IStyleProvider>					styleProvider;
-					GuiScrollView*						scrollView;
-					GuiScroll*							horizontalScroll;
-					GuiScroll*							verticalScroll;
-					elements::GuiBoundsComposition*		boundsComposition;
-					elements::GuiTableComposition*		tableComposition;
-					elements::GuiCellComposition*		containerCellComposition;
-					elements::GuiBoundsComposition*		containerComposition;
-					bool								horizontalAlwaysVisible;
-					bool								verticalAlwaysVisible;
+					Ptr<IStyleProvider>						styleProvider;
+					GuiScrollView*							scrollView;
+					GuiScroll*								horizontalScroll;
+					GuiScroll*								verticalScroll;
+					compositions::GuiBoundsComposition*		boundsComposition;
+					compositions::GuiTableComposition*		tableComposition;
+					compositions::GuiCellComposition*		containerCellComposition;
+					compositions::GuiBoundsComposition*		containerComposition;
+					bool									horizontalAlwaysVisible;
+					bool									verticalAlwaysVisible;
 
-					void								UpdateTable();
+					void									UpdateTable();
 				public:
 					StyleController(IStyleProvider* _styleProvider);
 					~StyleController();
 
-					void								SetScrollView(GuiScrollView* _scrollView);
-					void								AdjustView(Size fullSize);
-					IStyleProvider*						GetStyleProvider();
+					void									SetScrollView(GuiScrollView* _scrollView);
+					void									AdjustView(Size fullSize);
+					IStyleProvider*							GetStyleProvider();
 
-					GuiScroll*							GetHorizontalScroll();
-					GuiScroll*							GetVerticalScroll();
-					elements::GuiTableComposition*		GetInternalTableComposition();
-					elements::GuiBoundsComposition*		GetInternalContainerComposition();
+					GuiScroll*								GetHorizontalScroll();
+					GuiScroll*								GetVerticalScroll();
+					compositions::GuiTableComposition*		GetInternalTableComposition();
+					compositions::GuiBoundsComposition*		GetInternalContainerComposition();
 
-					bool								GetHorizontalAlwaysVisible();
-					void								SetHorizontalAlwaysVisible(bool value);
-					bool								GetVerticalAlwaysVisible();
-					void								SetVerticalAlwaysVisible(bool value);
+					bool									GetHorizontalAlwaysVisible();
+					void									SetHorizontalAlwaysVisible(bool value);
+					bool									GetVerticalAlwaysVisible();
+					void									SetVerticalAlwaysVisible(bool value);
 
-					elements::GuiBoundsComposition*		GetBoundsComposition()override;
-					elements::GuiGraphicsComposition*	GetContainerComposition()override;
-					void								SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
-					void								SetText(const WString& value)override;
-					void								SetFont(const FontProperties& value)override;
-					void								SetVisuallyEnabled(bool value)override;
+					compositions::GuiBoundsComposition*		GetBoundsComposition()override;
+					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
+					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+					void									SetText(const WString& value)override;
+					void									SetFont(const FontProperties& value)override;
+					void									SetVisuallyEnabled(bool value)override;
 				};
 			protected:
 
 				StyleController*						styleController;
 				bool									supressScrolling;
 
-				void									OnContainerBoundsChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnHorizontalScroll(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnVerticalScroll(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void									OnContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnHorizontalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnVerticalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									CallUpdateView();
 				void									Initialize();
 
@@ -14276,19 +14302,19 @@ Scrolls
 				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
 				{
 				protected:
-					elements::GuiBoundsComposition*		controlContainerComposition;
+					compositions::GuiBoundsComposition*		controlContainerComposition;
 				public:
 					StyleController(GuiScrollView::IStyleProvider* styleProvider);
 					~StyleController();
 
-					elements::GuiGraphicsComposition*	GetContainerComposition()override;
-					void								MoveContainer(Point leftTop);
+					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
+					void									MoveContainer(Point leftTop);
 				};
 
 			protected:
 				StyleController*						styleController;
 
-				void									OnControlContainerBoundsChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void									OnControlContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				Size									QueryFullSize()override;
 				void									UpdateView(Rect viewBounds)override;
 			public:
@@ -14302,7 +14328,7 @@ Scrolls
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIWINDOWCONTROLS.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIWINDOWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -14330,7 +14356,7 @@ Control Host
 			class GuiControlHost : public GuiControl, private INativeWindowListener, public Description<GuiControlHost>
 			{
 			protected:
-				elements::GuiGraphicsHost*				host;
+				compositions::GuiGraphicsHost*			host;
 				collections::List<GuiComponent*>		components;
 
 			private:
@@ -14348,17 +14374,17 @@ Control Host
 				GuiControlHost(GuiControl::IStyleController* _styleController);
 				~GuiControlHost();
 				
-				elements::GuiNotifyEvent				WindowGotFocus;
-				elements::GuiNotifyEvent				WindowLostFocus;
-				elements::GuiNotifyEvent				WindowActivated;
-				elements::GuiNotifyEvent				WindowDeactivated;
-				elements::GuiNotifyEvent				WindowOpened;
-				elements::GuiRequestEvent				WindowClosing;
-				elements::GuiNotifyEvent				WindowClosed;
-				elements::GuiNotifyEvent				WindowDestroying;
+				compositions::GuiNotifyEvent			WindowGotFocus;
+				compositions::GuiNotifyEvent			WindowLostFocus;
+				compositions::GuiNotifyEvent			WindowActivated;
+				compositions::GuiNotifyEvent			WindowDeactivated;
+				compositions::GuiNotifyEvent			WindowOpened;
+				compositions::GuiRequestEvent			WindowClosing;
+				compositions::GuiNotifyEvent			WindowClosed;
+				compositions::GuiNotifyEvent			WindowDestroying;
 
-				elements::GuiGraphicsHost*				GetGraphicsHost();
-				elements::GuiGraphicsComposition*		GetMainComposition();
+				compositions::GuiGraphicsHost*			GetGraphicsHost();
+				compositions::GuiGraphicsComposition*	GetMainComposition();
 				INativeWindow*							GetNativeWindow();
 				void									SetNativeWindow(INativeWindow* window);
 				void									Render();
@@ -14445,7 +14471,7 @@ Window
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUITEXTCONTROLS.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUITEXTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -14492,10 +14518,10 @@ Common Operations
 				{
 				protected:
 					elements::GuiColorizedTextElement*		textElement;
-					elements::GuiGraphicsComposition*		textComposition;
+					compositions::GuiGraphicsComposition*	textComposition;
 					bool									readonly;
 				public:
-					DefaultCallback(elements::GuiColorizedTextElement* _textElement, elements::GuiGraphicsComposition* _textComposition);
+					DefaultCallback(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition);
 					~DefaultCallback();
 
 					TextPos									GetLeftWord(TextPos pos)override;
@@ -14506,7 +14532,7 @@ Common Operations
 				};
 			protected:
 				elements::GuiColorizedTextElement*			textElement;
-				elements::GuiGraphicsComposition*			textComposition;
+				compositions::GuiGraphicsComposition*		textComposition;
 				GuiControl*									textControl;
 				GuiTextBoxCommonInterface*					textBoxCommonInterface;
 				ICallback*									callback;
@@ -14517,27 +14543,27 @@ Common Operations
 				void										Modify(TextPos start, TextPos end, const WString& input);
 				void										ProcessKey(int code, bool shift, bool ctrl);
 					
-				void										OnGotFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void										OnLostFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void										OnCaretNotify(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void										OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 
-				void										OnLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-				void										OnLeftButtonUp(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-				void										OnMouseMove(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-				void										OnKeyDown(elements::GuiGraphicsComposition* sender, elements::GuiKeyEventArgs& arguments);
-				void										OnCharInput(elements::GuiGraphicsComposition* sender, elements::GuiCharEventArgs& arguments);
+				void										OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments);
+				void										OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments);
 			public:
 				GuiTextElementOperator();
 				~GuiTextElementOperator();
 
-				void										Install(elements::GuiColorizedTextElement* _textElement, elements::GuiGraphicsComposition* _textComposition, GuiControl* _textControl);
+				void										Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl);
 				ICallback*									GetCallback();
 				void										SetCallback(ICallback* value);
 				GuiTextBoxCommonInterface*					GetTextBoxCommonInterface();
 				void										SetTextBoxCommonInterface(GuiTextBoxCommonInterface* value);
 
 				elements::GuiColorizedTextElement*			GetTextElement();
-				elements::GuiGraphicsComposition*			GetTextComposition();
+				compositions::GuiGraphicsComposition*		GetTextComposition();
 				TextPos										GetNearestTextPos(Point point);
 				void										Select(TextPos begin, TextPos end);
 				WString										GetSelectionText();
@@ -14566,9 +14592,9 @@ Common Operations
 				GuiTextBoxCommonInterface();
 				~GuiTextBoxCommonInterface();
 
-				elements::GuiNotifyEvent					SelectionChanged;
+				compositions::GuiNotifyEvent				SelectionChanged;
 
-				elements::GuiGraphicsComposition*			GetTextComposition();
+				compositions::GuiGraphicsComposition*		GetTextComposition();
 
 				bool										CanCut();
 				bool										CanCopy();
@@ -14612,7 +14638,7 @@ TextBox
 				{
 				protected:
 					elements::GuiColorizedTextElement*		textElement;
-					elements::GuiBoundsComposition*			textComposition;
+					compositions::GuiBoundsComposition*		textComposition;
 					GuiTextElementOperator					textElementOperator;
 					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
 
@@ -14621,10 +14647,10 @@ TextBox
 					~StyleController();
 
 					elements::GuiColorizedTextElement*		GetTextElement();
-					elements::GuiGraphicsComposition*		GetTextComposition();
+					compositions::GuiGraphicsComposition*	GetTextComposition();
 					GuiTextElementOperator*					GetTextElementOperator();
 					void									SetViewPosition(Point value);
-					void									SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 
 					WString									GetText();
 					void									SetText(const WString& value)override;
@@ -14652,7 +14678,7 @@ TextBox
 				void										OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)override;
 				Size										QueryFullSize()override;
 				void										UpdateView(Rect viewBounds)override;
-				void										OnBoundsMouseButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
+				void										OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 			public:
 				GuiMultilineTextBox(GuiMultilineTextBox::IStyleProvider* styleProvider);
 				~GuiMultilineTextBox();
@@ -14670,20 +14696,20 @@ TextBox
 				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
 				{
 				public:
-					virtual elements::GuiGraphicsComposition*		InstallBackground(elements::GuiBoundsComposition* background)=0;
+					virtual compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* background)=0;
 				};
 
 				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
 				{
 				protected:
 					Ptr<IStyleProvider>						styleProvider;
-					elements::GuiBoundsComposition*			boundsComposition;
-					elements::GuiGraphicsComposition*		containerComposition;
+					compositions::GuiBoundsComposition*		boundsComposition;
+					compositions::GuiGraphicsComposition*	containerComposition;
 
 					GuiSinglelineTextBox*					textBox;
 					elements::GuiColorizedTextElement*		textElement;
-					elements::GuiTableComposition*			textCompositionTable;
-					elements::GuiCellComposition*			textComposition;
+					compositions::GuiTableComposition*		textCompositionTable;
+					compositions::GuiCellComposition*		textComposition;
 					GuiTextElementOperator					textElementOperator;
 					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
 
@@ -14693,9 +14719,9 @@ TextBox
 
 					void									SetTextBox(GuiSinglelineTextBox* value);
 					void									RearrangeTextElement();
-					elements::GuiBoundsComposition*			GetBoundsComposition();
-					elements::GuiGraphicsComposition*		GetContainerComposition();
-					void									SetFocusableComposition(elements::GuiGraphicsComposition* value);
+					compositions::GuiBoundsComposition*		GetBoundsComposition();
+					compositions::GuiGraphicsComposition*	GetContainerComposition();
+					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
 
 					WString									GetText();
 					void									SetText(const WString& value);
@@ -14703,7 +14729,7 @@ TextBox
 					void									SetVisuallyEnabled(bool value);
 
 					elements::GuiColorizedTextElement*		GetTextElement();
-					elements::GuiGraphicsComposition*		GetTextComposition();
+					compositions::GuiGraphicsComposition*	GetTextComposition();
 					GuiTextElementOperator*					GetTextElementOperator();
 					void									SetViewPosition(Point value);
 				};
@@ -14725,7 +14751,7 @@ TextBox
 				StyleController*							styleController;
 				
 				void										OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)override;
-				void										OnBoundsMouseButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
+				void										OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 			public:
 				GuiSinglelineTextBox(GuiSinglelineTextBox::IStyleProvider* styleProvider);
 				~GuiSinglelineTextBox();
@@ -14741,7 +14767,7 @@ TextBox
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUILISTCONTROLS.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUILISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -14787,14 +14813,14 @@ List Control
 				class IItemArrangerCallback : public virtual IDescriptable, public Description<IItemArrangerCallback>
 				{
 				public:
-					virtual IItemStyleController*				RequestItem(int itemIndex)=0;
-					virtual void								ReleaseItem(IItemStyleController* style)=0;
-					virtual void								SetViewLocation(Point value)=0;
-					virtual Size								GetStylePreferredSize(IItemStyleController* style)=0;
-					virtual void								SetStyleAlignmentToParent(IItemStyleController* style, Margin margin)=0;
-					virtual void								SetStyleBounds(IItemStyleController* style, Rect bounds)=0;
-					virtual elements::GuiGraphicsComposition*	GetContainerComposition()=0;
-					virtual void								OnTotalSizeChanged()=0;
+					virtual IItemStyleController*					RequestItem(int itemIndex)=0;
+					virtual void									ReleaseItem(IItemStyleController* style)=0;
+					virtual void									SetViewLocation(Point value)=0;
+					virtual Size									GetStylePreferredSize(IItemStyleController* style)=0;
+					virtual void									SetStyleAlignmentToParent(IItemStyleController* style, Margin margin)=0;
+					virtual void									SetStyleBounds(IItemStyleController* style, Rect bounds)=0;
+					virtual compositions::GuiGraphicsComposition*	GetContainerComposition()=0;
+					virtual void									OnTotalSizeChanged()=0;
 				};
 
 				//-----------------------------------------------------------
@@ -14829,7 +14855,7 @@ List Control
 				public:
 					virtual IItemStyleProvider*					GetStyleProvider()=0;
 					virtual int									GetItemStyleId()=0;
-					virtual elements::GuiBoundsComposition*		GetBoundsComposition()=0;
+					virtual compositions::GuiBoundsComposition*	GetBoundsComposition()=0;
 					virtual bool								IsCacheable()=0;
 					virtual bool								IsInstalled()=0;
 					virtual void								OnInstalled()=0;
@@ -14897,7 +14923,7 @@ List Control
 					Size										GetStylePreferredSize(IItemStyleController* style);
 					void										SetStyleAlignmentToParent(IItemStyleController* style, Margin margin);
 					void										SetStyleBounds(IItemStyleController* style, Rect bounds);
-					elements::GuiGraphicsComposition*			GetContainerComposition()override;
+					compositions::GuiGraphicsComposition*		GetContainerComposition()override;
 					void										OnTotalSizeChanged()override;
 				};
 
@@ -14917,15 +14943,15 @@ List Control
 				Size											QueryFullSize()override;
 				void											UpdateView(Rect viewBounds)override;
 				
-				void											OnBoundsMouseButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
+				void											OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void											SetStyleProviderAndArranger(Ptr<IItemStyleProvider> styleProvider, Ptr<IItemArranger> arranger);
 			public:
 				GuiListControl(IStyleProvider* _styleProvider, IItemProvider* _itemProvider, bool acceptFocus=false);
 				~GuiListControl();
 
-				elements::GuiNotifyEvent						StyleProviderChanged;
-				elements::GuiNotifyEvent						ArrangerChanged;
-				elements::GuiNotifyEvent						CoordinateTransformerChanged;
+				compositions::GuiNotifyEvent					StyleProviderChanged;
+				compositions::GuiNotifyEvent					ArrangerChanged;
+				compositions::GuiNotifyEvent					CoordinateTransformerChanged;
 
 				virtual IItemProvider*							GetItemProvider();
 				virtual IItemStyleProvider*						GetStyleProvider();
@@ -14955,9 +14981,9 @@ Selectable List Control
 				protected:
 					GuiSelectableListControl*					listControl;
 					IItemStyleController*						style;
-					Ptr<elements::GuiMouseEvent::IHandler>		leftButtonDownHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>	leftButtonDownHandler;
 
-					void										OnBoundsLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
+					void										OnBoundsLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				public:
 					StyleEvents(GuiSelectableListControl* _listControl, IItemStyleController* _style);
 					~StyleEvents();
@@ -14985,7 +15011,7 @@ Selectable List Control
 				GuiSelectableListControl(IStyleProvider* _styleProvider, IItemProvider* _itemProvider);
 				~GuiSelectableListControl();
 
-				elements::GuiNotifyEvent						SelectionChanged;
+				compositions::GuiNotifyEvent					SelectionChanged;
 
 				Ptr<GuiListControl::IItemStyleProvider>			SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)override;
 
@@ -15150,11 +15176,11 @@ Predefined ItemStyleController
 				protected:
 					GuiListControl::IItemStyleProvider*			provider;
 					int											styleId;
-					elements::GuiBoundsComposition*				boundsComposition;
+					compositions::GuiBoundsComposition*			boundsComposition;
 					GuiControl*									associatedControl;
 					bool										isInstalled;
 
-					void										Initialize(elements::GuiBoundsComposition* _boundsComposition, GuiControl* _associatedControl);
+					void										Initialize(compositions::GuiBoundsComposition* _boundsComposition, GuiControl* _associatedControl);
 					void										Finalize();
 
 					ItemStyleControllerBase(GuiListControl::IItemStyleProvider* _provider, int _styleId);
@@ -15163,7 +15189,7 @@ Predefined ItemStyleController
 					
 					GuiListControl::IItemStyleProvider*			GetStyleProvider()override;
 					int											GetItemStyleId()override;
-					elements::GuiBoundsComposition*				GetBoundsComposition()override;
+					compositions::GuiBoundsComposition*			GetBoundsComposition()override;
 					bool										IsCacheable()override;
 					bool										IsInstalled()override;
 					void										OnInstalled()override;
@@ -15356,7 +15382,7 @@ Predefined ItemProvider
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICONTAINERCONTROLS.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICONTAINERCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -15396,7 +15422,7 @@ Tab Control
 
 				bool											AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController);
 			public:
-				elements::GuiNotifyEvent						TextChanged;
+				compositions::GuiNotifyEvent					TextChanged;
 
 				GuiControl*										GetContainer();
 				GuiTab*											GetOwnerTab();
@@ -15446,7 +15472,7 @@ Tab Control
 				GuiTab(IStyleController* _styleController);
 				~GuiTab();
 
-				elements::GuiNotifyEvent						SelectedPageChanged;
+				compositions::GuiNotifyEvent					SelectedPageChanged;
 
 				GuiTabPage*										CreatePage(int index=-1);
 				bool											CreatePage(GuiTabPage* page, int index=-1);
@@ -15464,7 +15490,7 @@ Tab Control
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITEXTLISTCONTROLS.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITEXTLISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -15521,7 +15547,7 @@ TextList Style Provider
 						elements::GuiSolidLabelElement*			textElement;
 						TextItemStyleProvider*					textItemStyleProvider;
 
-						void									OnBulletSelectedChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+						void									OnBulletSelectedChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					public:
 						TextItemStyleController(TextItemStyleProvider* provider);
 						~TextItemStyleController();
@@ -15628,7 +15654,7 @@ TextList Control
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUILISTVIEWCONTROLS.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUILISTVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -15741,9 +15767,9 @@ ListView ItemStyleProvider
 					class IListViewItemContent : public virtual IDescriptable, public Description<IListViewItemContent>
 					{
 					public:
-						virtual elements::GuiBoundsComposition*	GetContentComposition()=0;
-						virtual elements::GuiBoundsComposition*	GetBackgroundDecorator()=0;
-						virtual void							Install(GuiListViewBase::IStyleProvider* styleProvider, IListViewItemView* view, int itemIndex)=0;
+						virtual compositions::GuiBoundsComposition*	GetContentComposition()=0;
+						virtual compositions::GuiBoundsComposition*	GetBackgroundDecorator()=0;
+						virtual void								Install(GuiListViewBase::IStyleProvider* styleProvider, IListViewItemView* view, int itemIndex)=0;
 					};
 
 					class IListViewItemContentProvider : public virtual IDescriptable, public Description<IListViewItemContentProvider>
@@ -15804,7 +15830,7 @@ ListView ItemContentProvider
 					class ItemContent : public Object, public virtual ListViewItemStyleProvider::IListViewItemContent
 					{
 					protected:
-						elements::GuiBoundsComposition*					contentComposition;
+						compositions::GuiBoundsComposition*				contentComposition;
 						elements::GuiImageFrameElement*					image;
 						elements::GuiSolidLabelElement*					text;
 
@@ -15812,8 +15838,8 @@ ListView ItemContentProvider
 						ItemContent(Size iconSize, const FontProperties& font);
 						~ItemContent();
 
-						elements::GuiBoundsComposition*					GetContentComposition()override;
-						elements::GuiBoundsComposition*					GetBackgroundDecorator()override;
+						compositions::GuiBoundsComposition*				GetContentComposition()override;
+						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
 					};
 
@@ -15835,7 +15861,7 @@ ListView ItemContentProvider
 					class ItemContent : public Object, public virtual ListViewItemStyleProvider::IListViewItemContent
 					{
 					protected:
-						elements::GuiBoundsComposition*					contentComposition;
+						compositions::GuiBoundsComposition*				contentComposition;
 						elements::GuiImageFrameElement*					image;
 						elements::GuiSolidLabelElement*					text;
 
@@ -15843,8 +15869,8 @@ ListView ItemContentProvider
 						ItemContent(Size iconSize, const FontProperties& font);
 						~ItemContent();
 
-						elements::GuiBoundsComposition*					GetContentComposition()override;
-						elements::GuiBoundsComposition*					GetBackgroundDecorator()override;
+						compositions::GuiBoundsComposition*				GetContentComposition()override;
+						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
 					};
 
@@ -15866,7 +15892,7 @@ ListView ItemContentProvider
 					class ItemContent : public Object, public virtual ListViewItemStyleProvider::IListViewItemContent
 					{
 					protected:
-						elements::GuiBoundsComposition*					contentComposition;
+						compositions::GuiBoundsComposition*				contentComposition;
 						elements::GuiImageFrameElement*					image;
 						elements::GuiSolidLabelElement*					text;
 
@@ -15874,8 +15900,8 @@ ListView ItemContentProvider
 						ItemContent(Size iconSize, const FontProperties& font);
 						~ItemContent();
 
-						elements::GuiBoundsComposition*					GetContentComposition()override;
-						elements::GuiBoundsComposition*					GetBackgroundDecorator()override;
+						compositions::GuiBoundsComposition*				GetContentComposition()override;
+						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
 					};
 
@@ -15898,10 +15924,10 @@ ListView ItemContentProvider
 					{
 						typedef collections::Array<elements::GuiSolidLabelElement*>		DataTextElementArray;
 					protected:
-						elements::GuiBoundsComposition*					contentComposition;
+						compositions::GuiBoundsComposition*				contentComposition;
 						elements::GuiImageFrameElement*					image;
 						elements::GuiSolidLabelElement*					text;
-						elements::GuiTableComposition*					textTable;
+						compositions::GuiTableComposition*				textTable;
 						DataTextElementArray							dataTexts;
 
 						void											RemoveTextElement(int textRow);
@@ -15911,8 +15937,8 @@ ListView ItemContentProvider
 						ItemContent(Size iconSize, const FontProperties& font);
 						~ItemContent();
 
-						elements::GuiBoundsComposition*					GetContentComposition()override;
-						elements::GuiBoundsComposition*					GetBackgroundDecorator()override;
+						compositions::GuiBoundsComposition*				GetContentComposition()override;
+						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
 					};
 
@@ -15936,21 +15962,21 @@ ListView ItemContentProvider
 						typedef collections::Array<elements::GuiSolidLabelElement*>		DataTextElementArray;
 					protected:
 						FontProperties									baselineFont;
-						elements::GuiBoundsComposition*					contentComposition;
+						compositions::GuiBoundsComposition*				contentComposition;
 						elements::GuiImageFrameElement*					image;
 						elements::GuiSolidLabelElement*					text;
-						elements::GuiTableComposition*					textTable;
+						compositions::GuiTableComposition*				textTable;
 						DataTextElementArray							dataTexts;
 
 						elements::GuiSolidBackgroundElement*			bottomLine;
-						elements::GuiBoundsComposition*					bottomLineComposition;
+						compositions::GuiBoundsComposition*				bottomLineComposition;
 
 					public:
 						ItemContent(Size iconSize, const FontProperties& font);
 						~ItemContent();
 
-						elements::GuiBoundsComposition*					GetContentComposition()override;
-						elements::GuiBoundsComposition*					GetBackgroundDecorator()override;
+						compositions::GuiBoundsComposition*				GetContentComposition()override;
+						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
 					};
 
@@ -15972,8 +15998,8 @@ ListView ItemContentProvider(Detailed)
 
 				class ListViewColumnItemArranger : public FixedHeightItemArranger, public Description<ListViewColumnItemArranger>
 				{
-					typedef collections::List<GuiButton*>							ColumnHeaderButtonList;
-					typedef collections::List<elements::GuiBoundsComposition*>		ColumnHeaderSplitterList;
+					typedef collections::List<GuiButton*>								ColumnHeaderButtonList;
+					typedef collections::List<compositions::GuiBoundsComposition*>		ColumnHeaderSplitterList;
 				public:
 					static const int							SplitterWidth=8;
 
@@ -16013,15 +16039,15 @@ ListView ItemContentProvider(Detailed)
 					GuiListViewBase::IStyleProvider*			styleProvider;
 					IColumnItemView*							columnItemView;
 					Ptr<ColumnItemViewCallback>					columnItemViewCallback;
-					elements::GuiStackComposition*				columnHeaders;
+					compositions::GuiStackComposition*			columnHeaders;
 					ColumnHeaderButtonList						columnHeaderButtons;
 					ColumnHeaderSplitterList					columnHeaderSplitters;
 					bool										splitterDragging;
 					int											splitterLatestX;
 
-					void										ColumnHeaderSplitterLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-					void										ColumnHeaderSplitterLeftButtonUp(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-					void										ColumnHeaderSplitterMouseMove(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
+					void										ColumnHeaderSplitterLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+					void										ColumnHeaderSplitterLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+					void										ColumnHeaderSplitterMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 
 					void										RearrangeItemBounds()override;
 					int											GetWidth()override;
@@ -16049,10 +16075,10 @@ ListView ItemContentProvider(Detailed)
 					{
 						typedef collections::List<elements::GuiSolidLabelElement*>		SubItemList;
 					protected:
-						elements::GuiBoundsComposition*					contentComposition;
+						compositions::GuiBoundsComposition*				contentComposition;
 						elements::GuiImageFrameElement*					image;
 						elements::GuiSolidLabelElement*					text;
-						elements::GuiTableComposition*					textTable;
+						compositions::GuiTableComposition*				textTable;
 						SubItemList										subItems;
 
 						GuiListControl::IItemProvider*					itemProvider;
@@ -16062,8 +16088,8 @@ ListView ItemContentProvider(Detailed)
 						ItemContent(Size iconSize, const FontProperties& font, GuiListControl::IItemProvider* _itemProvider);
 						~ItemContent();
 
-						elements::GuiBoundsComposition*					GetContentComposition()override;
-						elements::GuiBoundsComposition*					GetBackgroundDecorator()override;
+						compositions::GuiBoundsComposition*				GetContentComposition()override;
+						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											UpdateSubItemSize();
 						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
 					};
@@ -16178,7 +16204,7 @@ ListView
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITREEVIEWCONTROLS.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITREEVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -16560,14 +16586,14 @@ TreeView
 						TreeViewNodeItemStyleProvider*		styleProvider;
 						GuiSelectableButton*				backgroundButton;
 						GuiSelectableButton*				expandingButton;
-						elements::GuiTableComposition*		table;
+						compositions::GuiTableComposition*	table;
 						elements::GuiImageFrameElement*		image;
 						elements::GuiSolidLabelElement*		text;
 
 						void								SwitchNodeExpanding();
-						void								OnBackgroundButtonDoubleClick(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-						void								OnExpandingButtonDoubleClick(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-						void								OnExpandingButtonClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+						void								OnBackgroundButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+						void								OnExpandingButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+						void								OnExpandingButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					public:
 						ItemController(TreeViewNodeItemStyleProvider* _styleProvider);
 
@@ -16614,7 +16640,7 @@ TreeView
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -16682,8 +16708,8 @@ Menu
 				GuiControl*								owner;
 
 				void									MouseClickedOnOtherWindow(GuiWindow* window)override;
-				void									OnWindowOpened(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnWindowClosed(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void									OnWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiMenu(GuiControl::IStyleController* _styleController, GuiControl* _owner);
 				~GuiMenu();
@@ -16727,16 +16753,16 @@ MenuButton
 
 				void									OpenSubMenuInternal();
 				void									OnParentLineChanged()override;
-				void									OnSubMenuWindowOpened(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnSubMenuWindowClosed(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-				void									OnMouseEnter(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void									OnSubMenuWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnSubMenuWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void									OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiMenuButton(IStyleController* _styleController);
 				~GuiMenuButton();
 
-				elements::GuiNotifyEvent				SubMenuOpeningChanged;
+				compositions::GuiNotifyEvent			SubMenuOpeningChanged;
 
 				bool									IsSubMenuExists();
 				GuiMenu*								GetSubMenu();
@@ -16756,7 +16782,7 @@ MenuButton
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICOMBOCONTROLS.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICOMBOCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -16821,17 +16847,17 @@ ComboBox Base
 				GuiPopup*									popup;
 
 				virtual void								SelectItem();
-				void										OnClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void										OnPopupOpened(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void										OnPopupClosed(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void										OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnPopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnPopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiComboBoxBase(IStyleController* _styleController);
 				~GuiComboBoxBase();
 
-				elements::GuiNotifyEvent					PopupOpened;
-				elements::GuiNotifyEvent					PopupClosed;
-				elements::GuiNotifyEvent					ItemSelecting;
-				elements::GuiNotifyEvent					ItemSelected;
+				compositions::GuiNotifyEvent				PopupOpened;
+				compositions::GuiNotifyEvent				PopupClosed;
+				compositions::GuiNotifyEvent				ItemSelecting;
+				compositions::GuiNotifyEvent				ItemSelected;
 
 				void										ShowPopup();
 				GuiPopup*									GetPopup();
@@ -16848,12 +16874,12 @@ ComboBox with GuiListControl
 				GuiListControl::IItemPrimaryTextView*		primaryTextView;
 
 				virtual void								DisplaySelectedContent(int itemIndex);
-				void										OnListControlSelectionChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void										OnListControlSelectionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiComboBoxListControl(IStyleController* _styleController, GuiSelectableListControl* _containedListControl);
 				~GuiComboBoxListControl();
 
-				elements::GuiNotifyEvent					SelectedIndexChanged;
+				compositions::GuiNotifyEvent				SelectedIndexChanged;
 				
 				void										SetFont(const FontProperties& value)override;
 				GuiSelectableListControl*					GetContainedListControl();
@@ -16869,7 +16895,7 @@ ComboBox with GuiListControl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIAPPLICATION.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIAPPLICATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -16943,7 +16969,7 @@ extern void GuiApplicationMain();
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUICOMMONSTYLES.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUICOMMONSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -16982,8 +17008,8 @@ Scrolls
 				controls::GuiButton*								decreaseButton;
 				controls::GuiButton*								increaseButton;
 				controls::GuiButton*								handleButton;
-				elements::GuiPartialViewComposition*				handleComposition;
-				elements::GuiBoundsComposition*						boundsComposition;
+				compositions::GuiPartialViewComposition*			handleComposition;
+				compositions::GuiBoundsComposition*					boundsComposition;
 
 				int													totalSize;
 				int													pageSize;
@@ -16992,25 +17018,25 @@ Scrolls
 				bool												draggingHandle;
 
 				void												UpdateHandle();
-				void												OnDecreaseButtonClicked(elements::GuiGraphicsComposition* sender,elements::GuiEventArgs& arguments);
-				void												OnIncreaseButtonClicked(elements::GuiGraphicsComposition* sender,elements::GuiEventArgs& arguments);
-				void												OnHandleMouseDown(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);
-				void												OnHandleMouseMove(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);
-				void												OnHandleMouseUp(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);;
-				void												OnBigMoveMouseDown(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);
+				void												OnDecreaseButtonClicked(compositions::GuiGraphicsComposition* sender,compositions::GuiEventArgs& arguments);
+				void												OnIncreaseButtonClicked(compositions::GuiGraphicsComposition* sender,compositions::GuiEventArgs& arguments);
+				void												OnHandleMouseDown(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
+				void												OnHandleMouseMove(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
+				void												OnHandleMouseUp(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);;
+				void												OnBigMoveMouseDown(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
 
 				virtual controls::GuiButton::IStyleController*		CreateDecreaseButtonStyle(Direction direction)=0;
 				virtual controls::GuiButton::IStyleController*		CreateIncreaseButtonStyle(Direction direction)=0;
 				virtual controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction)=0;
-				virtual void										InstallBackground(elements::GuiGraphicsComposition* boundsComposition, Direction direction)=0;
+				virtual void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)=0;
 				void												BuildStyle(int defaultSize, int arrowSize);
 			public:
 				CommonScrollStyle(Direction _direction);
 				~CommonScrollStyle();
 
-				elements::GuiBoundsComposition*						GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*					GetContainerComposition()override;
-				void												SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*					GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*				GetContainerComposition()override;
+				void												SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void												SetText(const WString& value)override;
 				void												SetFont(const FontProperties& value)override;
 				void												SetVisuallyEnabled(bool value)override;
@@ -17031,9 +17057,9 @@ Scrolls
 			protected:
 				Direction											direction;
 				controls::GuiScroll::ICommandExecutor*				commandExecutor;
-				elements::GuiBoundsComposition*						boundsComposition;
+				compositions::GuiBoundsComposition*					boundsComposition;
 				controls::GuiButton*								handleButton;
-				elements::GuiTableComposition*						handleComposition;
+				compositions::GuiTableComposition*					handleComposition;
 
 				int													totalSize;
 				int													pageSize;
@@ -17042,21 +17068,21 @@ Scrolls
 				bool												draggingHandle;
 
 				void												UpdateHandle();
-				void												OnHandleMouseDown(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);
-				void												OnHandleMouseMove(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);
-				void												OnHandleMouseUp(elements::GuiGraphicsComposition* sender,elements::GuiMouseEventArgs& arguments);
+				void												OnHandleMouseDown(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
+				void												OnHandleMouseMove(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
+				void												OnHandleMouseUp(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
 				
 				virtual controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction)=0;
-				virtual void										InstallBackground(elements::GuiGraphicsComposition* boundsComposition, Direction direction)=0;
-				virtual void										InstallTrack(elements::GuiGraphicsComposition* trackComposition, Direction direction)=0;
+				virtual void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)=0;
+				virtual void										InstallTrack(compositions::GuiGraphicsComposition* trackComposition, Direction direction)=0;
 				void												BuildStyle(int trackThickness, int trackPadding, int handleLong, int handleShort);
 			public:
 				CommonTrackStyle(Direction _direction);
 				~CommonTrackStyle();
 
-				elements::GuiBoundsComposition*						GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*					GetContainerComposition()override;
-				void												SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*					GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*				GetContainerComposition()override;
+				void												SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void												SetText(const WString& value)override;
 				void												SetFont(const FontProperties& value)override;
 				void												SetVisuallyEnabled(bool value)override;
@@ -17072,7 +17098,7 @@ Scrolls
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUIWIN7STYLES.H
+E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUIWIN7STYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -17213,10 +17239,10 @@ Button Configuration
 				elements::GuiGradientBackgroundElement*		topGradientElement;
 				elements::GuiGradientBackgroundElement*		bottomGradientElement;
 				elements::GuiSolidLabelElement*				textElement;
-				elements::GuiBoundsComposition*				textComposition;
-				elements::GuiBoundsComposition*				mainComposition;
-				elements::GuiBoundsComposition*				backgroundComposition;
-				elements::GuiTableComposition*				gradientComposition;
+				compositions::GuiBoundsComposition*			textComposition;
+				compositions::GuiBoundsComposition*			mainComposition;
+				compositions::GuiBoundsComposition*			backgroundComposition;
+				compositions::GuiTableComposition*			gradientComposition;
 
 				static Win7ButtonElements					Create(bool verticalGradient, bool roundBorder, Alignment::Type horizontal=Alignment::Center, Alignment::Type vertical=Alignment::Center);
 				void										Apply(const Win7ButtonColors& colors);
@@ -17231,8 +17257,8 @@ Button Configuration
 				elements::GuiSolidLabelElement*				textElement;
 				elements::GuiSolidLabelElement*				bulletTextElement;
 				elements::GuiSolidBackgroundElement*		bulletBackgroundElement;
-				elements::GuiBoundsComposition*				textComposition;
-				elements::GuiBoundsComposition*				mainComposition;
+				compositions::GuiBoundsComposition*			textComposition;
+				compositions::GuiBoundsComposition*			mainComposition;
 
 				static Win7CheckedButtonElements			Create(elements::ElementShape::Type shape, bool backgroundVisible);
 				void										Apply(const Win7ButtonColors& colors);
@@ -17244,12 +17270,12 @@ Button Configuration
 				elements::GuiSolidBackgroundElement*		backgroundElement;
 				elements::GuiGradientBackgroundElement*		gradientElement;
 				elements::Gui3DSplitterElement*				splitterElement;
-				elements::GuiCellComposition*				splitterComposition;
+				compositions::GuiCellComposition*			splitterComposition;
 				elements::GuiSolidLabelElement*				textElement;
-				elements::GuiBoundsComposition*				textComposition;
+				compositions::GuiBoundsComposition*			textComposition;
 				elements::GuiSolidLabelElement*				subMenuTextElement;
-				elements::GuiGraphicsComposition*			subMenuTextComposition;
-				elements::GuiBoundsComposition*				mainComposition;
+				compositions::GuiGraphicsComposition*		subMenuTextComposition;
+				compositions::GuiBoundsComposition*			mainComposition;
 
 				static Win7MenuItemButtonElements			Create();
 				void										Apply(const Win7ButtonColors& colors);
@@ -17291,15 +17317,15 @@ Helper Functions
 			extern Color									Win7GetSystemTabContentColor();
 			extern Color									Win7GetSystemBorderColor();
 			extern Color									Win7GetSystemTextColor(bool enabled);
-			extern void										Win7SetFont(elements::GuiSolidLabelElement* element, elements::GuiBoundsComposition* composition, const FontProperties& fontProperties);
-			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, elements::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
+			extern void										Win7SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
+			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
 
 /***********************************************************************
 Animation
 ***********************************************************************/
 
 #define DEFINE_TRANSFERRING_ANIMATION(TSTATE, TSTYLECONTROLLER)\
-				class TransferringAnimation : public elements::GuiTimeBasedAnimation\
+				class TransferringAnimation : public compositions::GuiTimeBasedAnimation\
 				{\
 				protected:\
 					TSTATE									colorBegin;\
@@ -17324,14 +17350,14 @@ Container
 			class Win7EmptyStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7EmptyStyle>
 			{
 			protected:
-				elements::GuiBoundsComposition*				boundsComposition;
+				compositions::GuiBoundsComposition*			boundsComposition;
 			public:
 				Win7EmptyStyle(Color color);
 				~Win7EmptyStyle();
 
-				elements::GuiBoundsComposition*				GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*			GetContainerComposition()override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17347,15 +17373,15 @@ Container
 			class Win7MenuStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuStyle>
 			{
 			protected:
-				elements::GuiBoundsComposition*				boundsComposition;
-				elements::GuiBoundsComposition*				containerComposition;
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
 			public:
 				Win7MenuStyle();
 				~Win7MenuStyle();
 
-				elements::GuiBoundsComposition*				GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*			GetContainerComposition()override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17364,14 +17390,14 @@ Container
 			class Win7MenuBarStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuBarStyle>
 			{
 			protected:
-				elements::GuiBoundsComposition*				boundsComposition;
+				compositions::GuiBoundsComposition*			boundsComposition;
 			public:
 				Win7MenuBarStyle();
 				~Win7MenuBarStyle();
 
-				elements::GuiBoundsComposition*				GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*			GetContainerComposition()override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17382,12 +17408,12 @@ Container
 			protected:
 				DEFINE_TRANSFERRING_ANIMATION(Color, Win7GroupBoxStyle)
 
-				elements::GuiBoundsComposition*				boundsComposition;
-				elements::GuiBoundsComposition*				sinkBorderComposition;
-				elements::GuiBoundsComposition*				raisedBorderComposition;
-				elements::GuiBoundsComposition*				textComposition;
-				elements::GuiBoundsComposition*				textBackgroundComposition;
-				elements::GuiBoundsComposition*				containerComposition;
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			sinkBorderComposition;
+				compositions::GuiBoundsComposition*			raisedBorderComposition;
+				compositions::GuiBoundsComposition*			textComposition;
+				compositions::GuiBoundsComposition*			textBackgroundComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
 				elements::GuiSolidLabelElement*				textElement;
 				Ptr<TransferringAnimation>					transferringAnimation;
 
@@ -17396,9 +17422,9 @@ Container
 				Win7GroupBoxStyle();
 				~Win7GroupBoxStyle();
 
-				elements::GuiBoundsComposition*				GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*			GetContainerComposition()override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17407,25 +17433,25 @@ Container
 			class Win7TabStyle : public Object, public virtual controls::GuiTab::IStyleController, public Description<Win7TabStyle>
 			{
 			protected:
-				elements::GuiTableComposition*				boundsComposition;
-				elements::GuiBoundsComposition*				containerComposition;
-				elements::GuiStackComposition*				tabHeaderComposition;
-				elements::GuiBoundsComposition*				tabContentTopLineComposition;
+				compositions::GuiTableComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+				compositions::GuiStackComposition*			tabHeaderComposition;
+				compositions::GuiBoundsComposition*			tabContentTopLineComposition;
 				FontProperties								headerFont;
 				controls::GuiTab::ICommandExecutor*			commandExecutor;
 
 				Ptr<controls::GuiSelectableButton::MutexGroupController>	headerController;
 				collections::List<controls::GuiSelectableButton*>			headerButtons;
 
-				void										OnHeaderButtonClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void										OnHeaderButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										UpdateHeaderZOrder();
 			public:
 				Win7TabStyle();
 				~Win7TabStyle();
 
-				elements::GuiBoundsComposition*				GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*			GetContainerComposition()override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17461,9 +17487,9 @@ Button
 				Win7ButtonStyleBase(bool verticalGradient, bool roundBorder, const Win7ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical);
 				~Win7ButtonStyleBase();
 
-				elements::GuiBoundsComposition*				GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*			GetContainerComposition()override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17518,9 +17544,9 @@ Button
 				Win7CheckBoxStyle(BulletStyle bulletStyle, bool backgroundVisible=true);
 				~Win7CheckBoxStyle();
 
-				elements::GuiBoundsComposition*				GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*			GetContainerComposition()override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17559,11 +17585,11 @@ Misc Buttons
 				bool										isVisuallyEnabled;
 				bool										isSelected;
 
-				elements::GuiBoundsComposition*				mainComposition;
-				elements::GuiBoundsComposition*				leftBorderComposition;
-				elements::GuiBoundsComposition*				borderComposition;
-				elements::GuiBoundsComposition*				gradientComposition;
-				elements::GuiBoundsComposition*				textComposition;
+				compositions::GuiBoundsComposition*			mainComposition;
+				compositions::GuiBoundsComposition*			leftBorderComposition;
+				compositions::GuiBoundsComposition*			borderComposition;
+				compositions::GuiBoundsComposition*			gradientComposition;
+				compositions::GuiBoundsComposition*			textComposition;
 
 				elements::GuiGradientBackgroundElement*		leftBorderElement;
 				elements::GuiSolidBorderElement*			borderElement;
@@ -17575,9 +17601,9 @@ Misc Buttons
 				Win7ListViewColumnDropDownStyle();
 				~Win7ListViewColumnDropDownStyle();
 
-				elements::GuiBoundsComposition*				GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*			GetContainerComposition()override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17592,11 +17618,11 @@ Misc Buttons
 				bool										isVisuallyEnabled;
 				bool										isSelected;
 
-				elements::GuiBoundsComposition*				mainComposition;
-				elements::GuiBoundsComposition*				rightBorderComposition;
-				elements::GuiBoundsComposition*				borderComposition;
-				elements::GuiBoundsComposition*				gradientComposition;
-				elements::GuiBoundsComposition*				textComposition;
+				compositions::GuiBoundsComposition*			mainComposition;
+				compositions::GuiBoundsComposition*			rightBorderComposition;
+				compositions::GuiBoundsComposition*			borderComposition;
+				compositions::GuiBoundsComposition*			gradientComposition;
+				compositions::GuiBoundsComposition*			textComposition;
 
 				elements::GuiSolidBackgroundElement*		backgroundElement;
 				elements::GuiGradientBackgroundElement*		rightBorderElement;
@@ -17609,9 +17635,9 @@ Misc Buttons
 				Win7ListViewColumnHeaderStyle();
 				~Win7ListViewColumnHeaderStyle();
 
-				elements::GuiBoundsComposition*				GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*			GetContainerComposition()override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17626,7 +17652,7 @@ Misc Buttons
 				bool										isVisuallyEnabled;
 				bool										isSelected;
 
-				elements::GuiBoundsComposition*				mainComposition;
+				compositions::GuiBoundsComposition*			mainComposition;
 				elements::GuiPolygonElement*				polygonElement;
 
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected);
@@ -17634,9 +17660,9 @@ Misc Buttons
 				Win7TreeViewExpandingButtonStyle();
 				~Win7TreeViewExpandingButtonStyle();
 
-				elements::GuiBoundsComposition*				GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*			GetContainerComposition()override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17661,9 +17687,9 @@ Menu Button
 				Win7MenuBarButtonStyle();
 				~Win7MenuBarButtonStyle();
 
-				elements::GuiBoundsComposition*				GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*			GetContainerComposition()override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17686,9 +17712,9 @@ Menu Button
 				Win7MenuItemButtonStyle();
 				~Win7MenuItemButtonStyle();
 
-				elements::GuiBoundsComposition*				GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*			GetContainerComposition()override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17701,14 +17727,14 @@ Menu Button
 			class Win7MenuSplitterStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuSplitterStyle>
 			{
 			protected:
-				elements::GuiBoundsComposition*				boundsComposition;
+				compositions::GuiBoundsComposition*			boundsComposition;
 			public:
 				Win7MenuSplitterStyle();
 				~Win7MenuSplitterStyle();
 
-				elements::GuiBoundsComposition*				GetBoundsComposition()override;
-				elements::GuiGraphicsComposition*			GetContainerComposition()override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17724,9 +17750,9 @@ ComboBox
 			{
 			protected:
 				controls::GuiComboBoxBase::ICommandExecutor*	commandExecutor;
-				elements::GuiTableComposition*					table;
-				elements::GuiCellComposition*					textComposition;
-				elements::GuiCellComposition*					dropDownComposition;
+				compositions::GuiTableComposition*				table;
+				compositions::GuiCellComposition*				textComposition;
+				compositions::GuiCellComposition*				dropDownComposition;
 				elements::GuiSolidLabelElement*					dropDownElement;
 
 				void											TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
@@ -17734,7 +17760,7 @@ ComboBox
 				Win7DropDownComboBoxStyle();
 				~Win7DropDownComboBoxStyle();
 				
-				elements::GuiGraphicsComposition*				GetContainerComposition()override;
+				compositions::GuiGraphicsComposition*			GetContainerComposition()override;
 
 				void											SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
 				void											OnClicked()override;
@@ -17758,7 +17784,7 @@ Scroll
 				controls::GuiButton::IStyleController*		CreateDecreaseButtonStyle(Direction direction);
 				controls::GuiButton::IStyleController*		CreateIncreaseButtonStyle(Direction direction);
 				controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction);
-				void										InstallBackground(elements::GuiGraphicsComposition* boundsComposition, Direction direction)override;
+				void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)override;
 			public:
 				Win7ScrollStyle(Direction _direction);
 				~Win7ScrollStyle();
@@ -17774,8 +17800,8 @@ Scroll
 
 			protected:
 				controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction)override;
-				void										InstallBackground(elements::GuiGraphicsComposition* boundsComposition, Direction direction)override;
-				void										InstallTrack(elements::GuiGraphicsComposition* trackComposition, Direction direction)override;
+				void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)override;
+				void										InstallTrack(compositions::GuiGraphicsComposition* trackComposition, Direction direction)override;
 			public:
 				Win7TrackStyle(Direction _direction);
 				~Win7TrackStyle();
@@ -17789,7 +17815,7 @@ ScrollView
 			{
 			public:
 				void										AssociateStyleController(controls::GuiControl::IStyleController* controller)override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
@@ -17797,7 +17823,7 @@ ScrollView
 				controls::GuiScroll::IStyleController*		CreateHorizontalScrollStyle()override;
 				controls::GuiScroll::IStyleController*		CreateVerticalScrollStyle()override;
 				int											GetDefaultScrollSize()override;
-				elements::GuiGraphicsComposition*			InstallBackground(elements::GuiBoundsComposition* boundsComposition)override;
+				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 
 /***********************************************************************
@@ -17811,7 +17837,7 @@ TextBox
 					
 				elements::GuiRoundBorderElement*			borderElement;
 				elements::GuiSolidBackgroundElement*		backgroundElement;
-				elements::GuiGraphicsComposition*			focusableComposition;
+				compositions::GuiGraphicsComposition*		focusableComposition;
 				bool										isMouseEnter;
 				bool										isFocused;
 				bool										isVisuallyEnabled;
@@ -17822,18 +17848,18 @@ TextBox
 				void										UpdateStyle();
 				void										Apply(const Win7TextBoxColors& colors);
 
-				void										OnBoundsMouseEnter(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void										OnBoundsMouseLeave(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void										OnBoundsGotFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void										OnBoundsLostFocus(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void										OnBoundsMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnBoundsMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnBoundsGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnBoundsLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				Win7TextBoxBackground();
 				~Win7TextBoxBackground();
 				
 				void										AssociateStyleController(controls::GuiControl::IStyleController* controller);
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value);
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value);
 				void										SetVisuallyEnabled(bool value);
-				elements::GuiGraphicsComposition*			InstallBackground(elements::GuiBoundsComposition* boundsComposition);
+				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition);
 				void										InitializeTextElement(elements::GuiColorizedTextElement* _textElement);
 			};
 
@@ -17847,9 +17873,9 @@ TextBox
 				~Win7MultilineTextBoxProvider();
 				
 				void										AssociateStyleController(controls::GuiControl::IStyleController* controller)override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetVisuallyEnabled(bool value)override;
-				elements::GuiGraphicsComposition*			InstallBackground(elements::GuiBoundsComposition* boundsComposition)override;
+				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 
 			class Win7SinglelineTextBoxProvider : public Object, public virtual controls::GuiSinglelineTextBox::IStyleProvider, public Description<Win7SinglelineTextBoxProvider>
@@ -17862,11 +17888,11 @@ TextBox
 				~Win7SinglelineTextBoxProvider();
 
 				void										AssociateStyleController(controls::GuiControl::IStyleController* controller)override;
-				void										SetFocusableComposition(elements::GuiGraphicsComposition* value)override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
-				elements::GuiGraphicsComposition*			InstallBackground(elements::GuiBoundsComposition* boundsComposition)override;
+				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 
 /***********************************************************************
@@ -17934,7 +17960,7 @@ List
 #endif
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GacUI.h
+E:\Codeplex\Gac\Workspace\Libraries\GacUI\Source\GacUI.h
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -17952,6 +17978,7 @@ Interfaces:
 using namespace vl;
 using namespace vl::presentation;
 using namespace vl::presentation::elements;
+using namespace vl::presentation::compositions;
 using namespace vl::presentation::controls;
 
 extern int SetupWindowsGDIRenderer();

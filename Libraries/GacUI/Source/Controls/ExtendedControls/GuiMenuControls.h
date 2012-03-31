@@ -65,8 +65,8 @@ Menu
 				GuiControl*								owner;
 
 				void									MouseClickedOnOtherWindow(GuiWindow* window)override;
-				void									OnWindowOpened(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnWindowClosed(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void									OnWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiMenu(GuiControl::IStyleController* _styleController, GuiControl* _owner);
 				~GuiMenu();
@@ -110,16 +110,16 @@ MenuButton
 
 				void									OpenSubMenuInternal();
 				void									OnParentLineChanged()override;
-				void									OnSubMenuWindowOpened(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnSubMenuWindowClosed(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnLeftButtonDown(elements::GuiGraphicsComposition* sender, elements::GuiMouseEventArgs& arguments);
-				void									OnMouseEnter(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
-				void									OnClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments);
+				void									OnSubMenuWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnSubMenuWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void									OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiMenuButton(IStyleController* _styleController);
 				~GuiMenuButton();
 
-				elements::GuiNotifyEvent				SubMenuOpeningChanged;
+				compositions::GuiNotifyEvent			SubMenuOpeningChanged;
 
 				bool									IsSubMenuExists();
 				GuiMenu*								GetSubMenu();

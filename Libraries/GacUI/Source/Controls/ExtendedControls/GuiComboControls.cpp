@@ -41,18 +41,18 @@ GuiComboBoxBase
 				ItemSelected.Execute(GetNotifyEventArguments());
 			}
 
-			void GuiComboBoxBase::OnClicked(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiComboBoxBase::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				styleController->OnClicked();
 			}
 
-			void GuiComboBoxBase::OnPopupOpened(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiComboBoxBase::OnPopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				styleController->OnPopupOpened();
 				PopupOpened.Execute(arguments);
 			}
 
-			void GuiComboBoxBase::OnPopupClosed(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiComboBoxBase::OnPopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				styleController->OnPopupClosed();
 				PopupClosed.Execute(arguments);
@@ -120,7 +120,7 @@ GuiComboBoxListControl
 				}
 			}
 
-			void GuiComboBoxListControl::OnListControlSelectionChanged(elements::GuiGraphicsComposition* sender, elements::GuiEventArgs& arguments)
+			void GuiComboBoxListControl::OnListControlSelectionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				DisplaySelectedContent(GetSelectedIndex());
 				SelectedIndexChanged.Execute(GetNotifyEventArguments());
