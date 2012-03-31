@@ -371,9 +371,6 @@
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsHost.h">
       <Filter>GacUI\GraphicsElement</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsStyle.h">
-      <Filter>GacUI\GraphicsElement</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsTextElement.h">
       <Filter>GacUI\GraphicsElement</Filter>
     </ClInclude>

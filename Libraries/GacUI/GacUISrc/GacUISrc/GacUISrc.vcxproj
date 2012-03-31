@@ -182,7 +182,6 @@
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsElement.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsEventReceiver.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsHost.h" />
-    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsStyle.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsTextElement.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsRenderersWindowsDirect2D.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.h" />
