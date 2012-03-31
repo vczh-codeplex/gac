@@ -21,7 +21,7 @@ namespace GenDocIndex
 
         static void GenerateIndexTree(TextWriter writer, IEnumerable<DocItem> docItemSiblings, List<DocItem> parentList, int parentIndex, int level)
         {
-            foreach (var sibling in docItemSiblings)
+            foreach (var sibling in docItemSiblings.OrderBy(d => d.Title))
             {
                 bool needHyperlink =
                     !(
