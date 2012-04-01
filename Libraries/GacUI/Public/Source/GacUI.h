@@ -4027,11 +4027,11 @@ Basic Construction
 				/// </summary>
 				enum MinSizeLimitation
 				{
-					/// <summary>[T:vl.presentation.elements.GuiGraphicsComposition.MinSizeLimitation]No limitation for the minimum size.</summary>
+					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.MinSizeLimitation]No limitation for the minimum size.</summary>
 					NoLimit,
-					/// <summary>[T:vl.presentation.elements.GuiGraphicsComposition.MinSizeLimitation]Minimum size of this composition is the minimum size of the contained graphics element.</summary>
+					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.MinSizeLimitation]Minimum size of this composition is the minimum size of the contained graphics element.</summary>
 					LimitToElement,
-					/// <summary>[T:vl.presentation.elements.GuiGraphicsComposition.MinSizeLimitation]Minimum size of this composition is combiniation of sub compositions and the minimum size of the contained graphics element.</summary>
+					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.MinSizeLimitation]Minimum size of this composition is combiniation of sub compositions and the minimum size of the contained graphics element.</summary>
 					LimitToElementAndChildren,
 				};
 				
@@ -4040,11 +4040,11 @@ Basic Construction
 				/// </summary>
 				enum ParentSizeAffection
 				{
-					/// <summary>[T:vl.presentation.elements.GuiGraphicsComposition.ParentSizeAffection]The size doesn't aware of the parent composition.</summary>
+					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.ParentSizeAffection]The size doesn't aware of the parent composition.</summary>
 					NotAffectedByParent,
-					/// <summary>[T:vl.presentation.elements.GuiGraphicsComposition.ParentSizeAffection]The size partially limited by the parent composition.</summary>
+					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.ParentSizeAffection]The size partially limited by the parent composition.</summary>
 					AffectedByParent,
-					/// <summary>[T:vl.presentation.elements.GuiGraphicsComposition.ParentSizeAffection]The size is decided by the parent composition.</summary>
+					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.ParentSizeAffection]The size is decided by the parent composition.</summary>
 					TotallyDecidedByParent,
 				};
 			protected:
@@ -4299,17 +4299,27 @@ Table Compositions
 			class GuiTableComposition;
 			class GuiCellComposition;
 
+			/// <summary>
+			/// Represnets a sizing configuration for a row or a column.
+			/// </summary>
 			struct GuiCellOption
 			{
+				/// <summary>Sizing algorithm</summary>
 				enum ComposeType
 				{
+					/// <summary>[T:vl.presentation.compositions.GuiCellOption.ComposeType]Set the size to an absolute value.</summary>
 					Absolute,
+					/// <summary>[T:vl.presentation.compositions.GuiCellOption.ComposeType]Set the size to a percentage number of the whole table.</summary>
 					Percentage,
+					/// <summary>[T:vl.presentation.compositions.GuiCellOption.ComposeType]Set the size to the minimum size of the cell element.</summary>
 					MinSize,
 				};
 
+				/// <summary>Sizing algorithm</summary>
 				ComposeType		composeType;
+				/// <summary>The absolute size when <see cref="GuiCellOption::composeType"/> is <see cref="ComposeType"/>::Absolute.</summary>
 				int				absolute;
+				/// <summary>The percentage number when <see cref="GuiCellOption::composeType"/> is <see cref="ComposeType"/>::Percentage.</summary>
 				double			percentage;
 
 				GuiCellOption()
@@ -4322,6 +4332,9 @@ Table Compositions
 				bool operator==(const GuiCellOption& value){return false;}
 				bool operator!=(const GuiCellOption& value){return true;}
 
+				/// <summary>Creates an absolute sizing option</summary>
+				/// <returns>The created option.</returns>
+				/// <param name="value">The absolute size.</param>
 				static GuiCellOption AbsoluteOption(int value)
 				{
 					GuiCellOption option;
@@ -4329,7 +4342,10 @@ Table Compositions
 					option.absolute=value;
 					return option;
 				}
-
+				
+				/// <summary>Creates an percantage sizing option</summary>
+				/// <returns>The created option.</returns>
+				/// <param name="value">The percentage number.</param>
 				static GuiCellOption PercentageOption(double value)
 				{
 					GuiCellOption option;
@@ -4337,7 +4353,9 @@ Table Compositions
 					option.percentage=value;
 					return option;
 				}
-
+				
+				/// <summary>Creates an minimum sizing option</summary>
+				/// <returns>The created option.</returns>
 				static GuiCellOption MinSizeOption()
 				{
 					GuiCellOption option;
@@ -4346,6 +4364,9 @@ Table Compositions
 				}
 			};
 
+			/// <summary>
+			/// Represents a table composition.
+			/// </summary>
 			class GuiTableComposition : public GuiBoundsComposition, public Description<GuiTableComposition>
 			{
 				friend class GuiCellComposition;
@@ -4399,25 +4420,59 @@ Table Compositions
 				GuiTableComposition();
 				~GuiTableComposition();
 
+				/// <summary>Get the number of rows.</summary>
+				/// <returns>The number of rows.</returns>
 				int									GetRows();
+				/// <summary>Get the number of columns.</summary>
+				/// <returns>The number of columns.</returns>
 				int									GetColumns();
+				/// <summary>Change the number of rows and columns.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="_rows">The number of rows.</param>
+				/// <param name="_columns">The number of columns.</param>
 				bool								SetRowsAndColumns(int _rows, int _columns);
+				/// <summary>Get the cell composition that covers the specified cell location.</summary>
+				/// <returns>The cell composition that covers the specified cell location.</returns>
+				/// <param name="_rows">The number of rows.</param>
+				/// <param name="_columns">The number of columns.</param>
 				GuiCellComposition*					GetSitedCell(int _row, int _column);
 
+				/// <summary>Get the sizing option of the specified row.</summary>
+				/// <returns>The sizing option of the specified row.</returns>
+				/// <param name="_rows">The specified row number.</param>
 				GuiCellOption						GetRowOption(int _row);
+				/// <summary>Set the sizing option of the specified row.</summary>
+				/// <param name="_rows">The specified row number.</param>
+				/// <param name="option">The sizing option of the specified row.</param>
 				void								SetRowOption(int _row, GuiCellOption option);
+				/// <summary>Get the sizing option of the specified column.</summary>
+				/// <returns>The sizing option of the specified column.</returns>
+				/// <param name="_column">The specified column number.</param>
 				GuiCellOption						GetColumnOption(int _column);
+				/// <summary>Set the sizing option of the specified column.</summary>
+				/// <param name="_column">The specified column number.</param>
+				/// <param name="option">The sizing option of the specified column.</param>
 				void								SetColumnOption(int _column, GuiCellOption option);
 
+				/// <summary>Get the cell padding. A cell padding is the distance between a table client area and a cell, or between two cells.</summary>
+				/// <returns>The cell padding.</returns>
 				int									GetCellPadding();
+				/// <summary>Set the cell padding. A cell padding is the distance between a table client area and a cell, or between two cells.</summary>
+				/// <param name="_column">The cell padding.</param>
 				void								SetCellPadding(int value);
+				/// <summary>Get the cell area in the space of the table's parent composition's client area.</summary>
+				/// <returns>The cell area.</returns>
 				Rect								GetCellArea();
+				/// <summary>Update the sizing of the table and cells after all rows' and columns' sizing options are prepared.</summary>
 				void								UpdateCellBounds();
 				
 				Size								GetMinPreferredClientSize()override;
 				Rect								GetBounds()override;
 			};
 
+			/// <summary>
+			/// Represents a cell composition of a <see cref="GuiTableComposition"/>.
+			/// </summary>
 			class GuiCellComposition : public GuiGraphicsSite, public Description<GuiCellComposition>
 			{
 				friend class GuiTableComposition;
@@ -4438,12 +4493,28 @@ Table Compositions
 				GuiCellComposition();
 				~GuiCellComposition();
 
+				/// <summary>Get the owner table composition.</summary>
+				/// <returns>The owner table composition.</returns>
 				GuiTableComposition*				GetTableParent();
 
+				/// <summary>Get the row number for this cell composition.</summary>
+				/// <returns>The row number for this cell composition.</returns>
 				int									GetRow();
+				/// <summary>Get the total numbers of acrossed rows for this cell composition.</summary>
+				/// <returns>The total numbers of acrossed rows for this cell composition.</returns>
 				int									GetRowSpan();
+				/// <summary>Get the column number for this cell composition.</summary>
+				/// <returns>The column number for this cell composition.</returns>
 				int									GetColumn();
+				/// <summary>Get the total numbers of acrossed columns for this cell composition.</summary>
+				/// <returns>The total numbers of acrossed columns for this cell composition.</returns>
 				int									GetColumnSpan();
+				/// <summary>Set the position for this cell composition in the table.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="_row">The row number for this cell composition.</param>
+				/// <param name="_column">The column number for this cell composition.</param>
+				/// <param name="_rowSpan">The total numbers of acrossed rows for this cell composition.</param>
+				/// <param name="_columnSpan">The total numbers of acrossed columns for this cell composition.</param>
 				bool								SetSite(int _row, int _column, int _rowSpan, int _columnSpan);
 
 				Rect								GetBounds()override;
@@ -4456,6 +4527,9 @@ Stack Compositions
 			class GuiStackComposition;
 			class GuiStackItemComposition;
 
+			/// <summary>
+			/// Represents a stack composition.
+			/// </summary>
 			class GuiStackComposition : public GuiBoundsComposition, public Description<GuiStackComposition>
 			{
 				friend class GuiStackItemComposition;
@@ -4463,9 +4537,12 @@ Stack Compositions
 				typedef collections::List<GuiStackItemComposition*>				ItemCompositionList;
 				typedef collections::IReadonlyList<GuiStackItemComposition*>	IItemCompositionList;
 			public:
+				/// <summary>Stack item layout direction.</summary>
 				enum Direction
 				{
+					/// <summary>[T:vl.presentation.compositions.GuiStackComposition.Direction]Stack items is layouted horizontally.</summary>
 					Horizontal,
+					/// <summary>[T:vl.presentation.compositions.GuiStackComposition.Direction]Stack items is layouted vertically.</summary>
 					Vertical,
 				};
 			protected:
@@ -4485,21 +4562,42 @@ Stack Compositions
 				GuiStackComposition();
 				~GuiStackComposition();
 
+				/// <summary>Get all stack items inside the stack composition.</summary>
+				/// <returns>All stack items inside the stack composition.</returns>
 				const IItemCompositionList&			GetStackItems();
+				/// <summary>Insert an stack item at a specified position.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="index">The position.</param>
+				/// <param name="item">The statck item to insert.</param>
 				bool								InsertStackItem(int index, GuiStackItemComposition* item);
-
+				
+				/// <summary>Get the stack item layout direction.</summary>
+				/// <returns>The stack item layout direction.</returns>
 				Direction							GetDirection();
+				/// <summary>Set the stack item layout direction.</summary>
+				/// <param name="value">The stack item layout direction.</param>
 				void								SetDirection(Direction value);
+				/// <summary>Get the stack item padding.</summary>
+				/// <returns>The stack item padding.</returns>
 				int									GetPadding();
+				/// <summary>Set the stack item padding.</summary>
+				/// <param name="value">The stack item padding.</param>
 				void								SetPadding(int value);
 
 				Size								GetMinPreferredClientSize()override;
 				Rect								GetBounds()override;
-
+				
+				/// <summary>Get the extra margin inside the stack composition.</summary>
+				/// <returns>The extra margin inside the stack composition.</returns>
 				Margin								GetExtraMargin();
+				/// <summary>Set the extra margin inside the stack composition.</summary>
+				/// <param name="value">The extra margin inside the stack composition.</param>
 				void								SetExtraMargin(Margin value);
 			};
-
+			
+			/// <summary>
+			/// Represents a stack item composition of a <see cref="GuiStackComposition"/>.
+			/// </summary>
 			class GuiStackItemComposition : public GuiGraphicsSite, public Description<GuiStackItemComposition>
 			{
 				friend class GuiStackComposition;
@@ -4517,9 +4615,15 @@ Stack Compositions
 				ParentSizeAffection					GetAffectionFromParent()override;
 				bool								IsSizeAffectParent()override;
 				Rect								GetBounds()override;
+				/// <summary>Set the expected bounds of a stack item. In most of the cases only the size of the bounds is used.</summary>
+				/// <param name="value">The expected bounds of a stack item.</param>
 				void								SetBounds(Rect value);
-
+				
+				/// <summary>Get the extra margin for this stack item. An extra margin is used to enlarge the bounds of the stack item, but only the non-extra part will be used for decide the stack item layout.</summary>
+				/// <returns>The extra margin for this stack item.</returns>
 				Margin								GetExtraMargin();
+				/// <summary>Set the extra margin for this stack item. An extra margin is used to enlarge the bounds of the stack item, but only the non-extra part will be used for decide the stack item layout.</summary>
+				/// <param name="value">The extra margin for this stack item.</param>
 				void								SetExtraMargin(Margin value);
 			};
 
@@ -4527,14 +4631,22 @@ Stack Compositions
 Specialized Compositions
 ***********************************************************************/
 
+			/// <summary>
+			/// Represents a composition that is aligned to one border of the parent composition.
+			/// </summary>
 			class GuiSideAlignedComposition : public GuiGraphicsSite, public Description<GuiSideAlignedComposition>
 			{
 			public:
+				/// <summary>The border to align.</summary>
 				enum Direction
 				{
+					/// <summary>[T:vl.presentation.compositions.GuiSideAlignedComposition.Direction]The left border.</summary>
 					Left,
+					/// <summary>[T:vl.presentation.compositions.GuiSideAlignedComposition.Direction]The top border.</summary>
 					Top,
+					/// <summary>[T:vl.presentation.compositions.GuiSideAlignedComposition.Direction]The right border.</summary>
 					Right,
+					/// <summary>[T:vl.presentation.compositions.GuiSideAlignedComposition.Direction]The bottom border.</summary>
 					Bottom,
 				};
 			protected:
@@ -4544,12 +4656,24 @@ Specialized Compositions
 			public:
 				GuiSideAlignedComposition();
 				~GuiSideAlignedComposition();
-
+				
+				/// <summary>Get the border to align.</summary>
+				/// <returns>The border to align.</returns>
 				Direction							GetDirection();
+				/// <summary>Set the border to align.</summary>
+				/// <param name="value">The border to align.</param>
 				void								SetDirection(Direction value);
+				/// <summary>Get the maximum length of this composition.</summary>
+				/// <returns>The maximum length of this composition.</returns>
 				int									GetMaxLength();
+				/// <summary>Set the maximum length of this composition.</summary>
+				/// <param name="value">The maximum length of this composition.</param>
 				void								SetMaxLength(int value);
+				/// <summary>Get the maximum ratio to limit the size according to the size of the parent.</summary>
+				/// <returns>The maximum ratio to limit the size according to the size of the parent.</returns>
 				double								GetMaxRatio();
+				/// <summary>Set the maximum ratio to limit the size according to the size of the parent.</summary>
+				/// <param name="value">The maximum ratio to limit the size according to the size of the parent.</param>
 				void								SetMaxRatio(double value);
 				
 				ParentSizeAffection					GetAffectionFromParent()override;
@@ -4557,6 +4681,9 @@ Specialized Compositions
 				Rect								GetBounds()override;
 			};
 
+			/// <summary>
+			/// Represents a composition that its location and size are decided by the client area of the parent composition by setting ratios.
+			/// </summary>
 			class GuiPartialViewComposition : public GuiGraphicsSite, public Description<GuiPartialViewComposition>
 			{
 			protected:
@@ -4568,14 +4695,30 @@ Specialized Compositions
 			public:
 				GuiPartialViewComposition();
 				~GuiPartialViewComposition();
-
+				
+				/// <summary>Get the width ratio to decided the horizontal location. Value in [0, 1-pageSize].</summary>
+				/// <returns>The width ratio to decided the horizontal location.</returns>
 				double								GetWidthRatio();
+				/// <summary>Get the page size to decide the horizontal size. Value in [0, 1].</summary>
+				/// <returns>The page size to decide the horizontal size.</returns>
 				double								GetWidthPageSize();
+				/// <summary>Get the height ratio to decided the vertical location. Value in [0, 1-pageSize].</summary>
+				/// <returns>The height ratio to decided the vertical location.</returns>
 				double								GetHeightRatio();
+				/// <summary>Get the page size to decide the vertical size. Value in [0, 1].</summary>
+				/// <returns>The page size to decide the vertical size.</returns>
 				double								GetHeightPageSize();
+				/// <summary>Set the width ratio to decided the horizontal location. Value in [0, 1-pageSize].</summary>
+				/// <param name="value">The width ratio to decided the horizontal location.</param>
 				void								SetWidthRatio(double value);
+				/// <summary>Set the page size to decide the horizontal size. Value in [0, 1].</summary>
+				/// <param name="value">The page size to decide the horizontal size.</param>
 				void								SetWidthPageSize(double value);
+				/// <summary>Set the height ratio to decided the vertical location. Value in [0, 1-pageSize].</summary>
+				/// <param name="value">The height ratio to decided the vertical location.</param>
 				void								SetHeightRatio(double value);
+				/// <summary>Set the page size to decide the vertical size. Value in [0, 1].</summary>
+				/// <param name="value">The page size to decide the vertical size.</param>
 				void								SetHeightPageSize(double value);
 				
 				ParentSizeAffection					GetAffectionFromParent()override;
