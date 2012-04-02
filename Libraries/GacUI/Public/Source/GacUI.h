@@ -3851,73 +3851,97 @@ Event
 Predefined Events
 ***********************************************************************/
 
+			/// <summary>Notify event arguments.</summary>
 			struct GuiEventArgs
 			{
-				GuiGraphicsComposition*		compositionSource;	// the deepest composition
-				GuiGraphicsComposition*		eventSource;		// the deepest composition that contains an event receiver
+				/// <summary>The event raiser composition.</summary>
+				GuiGraphicsComposition*		compositionSource;
+				/// <summary>The nearest parent of the event raiser composition that contains an event receiver. If the event raiser composition contains an event receiver, it will be the event raiser composition.</summary>
+				GuiGraphicsComposition*		eventSource;
+				/// <summary>Set this field to true will stop the event routing. This is a signal that the event is properly handeled, and the event handler want to override the default behavior.</summary>
 				bool						handled;
 
-				GuiEventArgs(GuiGraphicsComposition* composition)
-					:compositionSource(composition)
-					,eventSource(composition)
-					,handled(false)
-				{
-				}
-
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to null.</summary>
 				GuiEventArgs()
 					:compositionSource(0)
 					,eventSource(0)
 					,handled(false)
 				{
 				}
-			};
 
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
+				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
+				GuiEventArgs(GuiGraphicsComposition* composition)
+					:compositionSource(composition)
+					,eventSource(composition)
+					,handled(false)
+				{
+				}
+			};
+			
+			/// <summary>Request event arguments.</summary>
 			struct GuiRequestEventArgs : public GuiEventArgs
 			{
+				/// <summary>Set this field to false in event handlers will stop the corresponding action.</summary>
 				bool		cancel;
-
+				
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to null.</summary>
 				GuiRequestEventArgs()
 					:cancel(false)
 				{
 				}
-
+				
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
+				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
 				GuiRequestEventArgs(GuiGraphicsComposition* composition)
 					:GuiEventArgs(composition)
 					,cancel(false)
 				{
 				}
 			};
-
+			
+			/// <summary>Keyboard event arguments.</summary>
 			struct GuiKeyEventArgs : public GuiEventArgs, public NativeWindowKeyInfo
 			{
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to null.</summary>
 				GuiKeyEventArgs()
 				{
 				}
-
+				
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
+				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
 				GuiKeyEventArgs(GuiGraphicsComposition* composition)
 					:GuiEventArgs(composition)
 				{
 				}
 			};
-
+			
+			/// <summary>Char input event arguments.</summary>
 			struct GuiCharEventArgs : public GuiEventArgs, public NativeWindowCharInfo
 			{
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to null.</summary>
 				GuiCharEventArgs()
 				{
 				}
-
+				
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
+				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
 				GuiCharEventArgs(GuiGraphicsComposition* composition)
 					:GuiEventArgs(composition)
 				{
 				}
 			};
-
+			
+			/// <summary>Mouse event arguments.</summary>
 			struct GuiMouseEventArgs : public GuiEventArgs, public NativeWindowMouseInfo
 			{
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to null.</summary>
 				GuiMouseEventArgs()
 				{
 				}
-
+				
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
+				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
 				GuiMouseEventArgs(GuiGraphicsComposition* composition)
 					:GuiEventArgs(composition)
 				{
@@ -3934,6 +3958,9 @@ Predefined Events
 Event Receiver
 ***********************************************************************/
 
+			/// <summary>
+			/// Contains all available user input events for a <see cref="GuiGraphicsComposition"/>. Almost all events are routed events. Routed events means, not only the activated composition receives the event, all it direct or indirect parents receives the event. The argument(all derives from <see cref="GuiEventArgs"/>) for the event will store the original event raiser composition.
+			/// </summary>
 			class GuiGraphicsEventReceiver : public Object
 			{
 			protected:
@@ -3944,30 +3971,54 @@ Event Receiver
 
 				GuiGraphicsComposition*			GetAssociatedComposition();
 
+				/// <summary>Left mouse button down event.</summary>
 				GuiMouseEvent					leftButtonDown;
+				/// <summary>Left mouse button up event.</summary>
 				GuiMouseEvent					leftButtonUp;
+				/// <summary>Left mouse button double click event.</summary>
 				GuiMouseEvent					leftButtonDoubleClick;
+				/// <summary>Middle mouse button down event.</summary>
 				GuiMouseEvent					middleButtonDown;
+				/// <summary>Middle mouse button up event.</summary>
 				GuiMouseEvent					middleButtonUp;
+				/// <summary>Middle mouse button double click event.</summary>
 				GuiMouseEvent					middleButtonDoubleClick;
+				/// <summary>Right mouse button down event.</summary>
 				GuiMouseEvent					rightButtonDown;
+				/// <summary>Right mouse button up event.</summary>
 				GuiMouseEvent					rightButtonUp;
+				/// <summary>Right mouse button double click event.</summary>
 				GuiMouseEvent					rightButtonDoubleClick;
+				/// <summary>Horizontal wheel scrolling event.</summary>
 				GuiMouseEvent					horizontalWheel;
+				/// <summary>Vertical wheel scrolling event.</summary>
 				GuiMouseEvent					verticalWheel;
+				/// <summary>Mouse move event.</summary>
 				GuiMouseEvent					mouseMove;
+				/// <summary>Mouse enter event.</summary>
 				GuiNotifyEvent					mouseEnter;
+				/// <summary>Mouse leave event.</summary>
 				GuiNotifyEvent					mouseLeave;
-
+				
+				/// <summary>Preview key event.</summary>
 				GuiKeyEvent						previewKey;
+				/// <summary>Key down event.</summary>
 				GuiKeyEvent						keyDown;
+				/// <summary>Key up event.</summary>
 				GuiKeyEvent						keyUp;
+				/// <summary>System key down event.</summary>
 				GuiKeyEvent						systemKeyDown;
+				/// <summary>System key up event.</summary>
 				GuiKeyEvent						systemKeyUp;
+				/// <summary>Preview char input event.</summary>
 				GuiCharEvent					previewCharInput;
+				/// <summary>Char input event.</summary>
 				GuiCharEvent					charInput;
+				/// <summary>Got focus event.</summary>
 				GuiNotifyEvent					gotFocus;
+				/// <summary>Lost focus event.</summary>
 				GuiNotifyEvent					lostFocus;
+				/// <summary>Caret notify event. This event is raised when a caret graph need to change the visibility state.</summary>
 				GuiNotifyEvent					caretNotify;
 			};
 		}
@@ -4757,15 +4808,29 @@ namespace vl
 Animation
 ***********************************************************************/
 
+			/// <summary>
+			/// Represents an animation. Use [M:vl.presentation.compositions.GuiGraphicsHost.GetAnimationManager] to access this object.
+			/// </summary>
 			class IGuiGraphicsAnimation : public virtual IDescriptable, public Description<IGuiGraphicsAnimation>
 			{
 			public:
+				/// <summary>Get the total length.</summary>
+				/// <returns>The total length.</returns>
 				virtual int						GetTotalLength()=0;
+				/// <summary>Get the current position. Value in [0, TotalLength-1]. This function doesn't return a internal state. It return the suggested current position at the moment this function is called.</summary>
+				/// <returns>The current position.</returns>
 				virtual int						GetCurrentPosition()=0;
+				/// <summary>Display a state in the animation with the specified current position and the specified total length.</summary>
+				/// <param name="currentPosition">The current position. When this function is called by [T:vl.presentation.compositions.GuiGraphicsAnimationManager], this value comes from <see cref="IGuiGraphicsAnimation::GetCurrentPosition"/>.</param>
+				/// <param name="totalLength">The total length. When this function is called by [T:vl.presentation.compositions.GuiGraphicsAnimationManager], this value comes from <see cref="IGuiGraphicsAnimation::GetTotalLength"/>.</param>
 				virtual void					Play(int currentPosition, int totalLength)=0;
+				/// <summary>Stop the animation.</summary>
 				virtual void					Stop()=0;
 			};
 
+			/// <summary>
+			/// Animation manager.
+			/// </summary>
 			class GuiGraphicsAnimationManager : public Object
 			{
 				typedef collections::List<Ptr<IGuiGraphicsAnimation>>		AnimationList;
@@ -4775,8 +4840,13 @@ Animation
 				GuiGraphicsAnimationManager();
 				~GuiGraphicsAnimationManager();
 
+				/// <summary>Add a new animation.</summary>
+				/// <param name="animation">The new animation to add.</param>
 				void							AddAnimation(Ptr<IGuiGraphicsAnimation> animation);
+				/// <summary>Test is the animation manager contains any alive animation.</summary>
+				/// <returns>Returns true if the animation manager contains any alive animation.</returns>
 				bool							HasAnimation();
+				/// <summary>Play all alive animations. Any animation that comes to the end will be removed.</summary>
 				void							Play();
 			};
 
@@ -4784,6 +4854,9 @@ Animation
 Host
 ***********************************************************************/
 
+			/// <summary>
+			/// GuiGraphicsHost hosts an <see cref="GuiWindowComposition"/> in an <see cref="INativeWindow"/>. The composition will fill the whole window.
+			/// </summary>
 			class GuiGraphicsHost : public Object, private INativeWindowListener, private INativeControllerListener, public Description<GuiGraphicsHost>
 			{
 				typedef collections::List<GuiGraphicsComposition*>		CompositionList;
@@ -4839,32 +4912,58 @@ Host
 				GuiGraphicsHost();
 				~GuiGraphicsHost();
 
+				/// <summary>Get the associated window.</summary>
+				/// <returns>The associated window.</returns>
 				INativeWindow*					GetNativeWindow();
+				/// <summary>Associate a window. A <see cref="GuiWindowComposition"/> will fill and appear in the window.</summary>
+				/// <param name="_nativeWindow">The window to associated.</param>
 				void							SetNativeWindow(INativeWindow* _nativeWindow);
+				/// <summary>Get the main <see cref="GuiWindowComposition"/>. If a window is associated, everything that put into the main composition will be shown in the window.</summary>
+				/// <returns>The main compositoin.</returns>
 				GuiGraphicsComposition*			GetMainComposition();
+				/// <summary>Render the main composition and all content to the associated window.</summary>
 				void							Render();
 
+				/// <summary>Set the focus composition. A focused composition will receive keyboard messages.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="composition">The composition to set focus. This composition should be or in the main composition.</param>
 				bool							SetFocus(GuiGraphicsComposition* composition);
+				/// <summary>Get the focus composition. A focused composition will receive keyboard messages.</summary>
+				/// <returns>The focus composition.</returns>
 				GuiGraphicsComposition*			GetFocusedComposition();
+				/// <summary>Get the caret point. A caret point is the position to place the edit box of the activated input method editor.</summary>
+				/// <returns>The caret point.</returns>
 				Point							GetCaretPoint();
+				/// <summary>Set the caret point. A caret point is the position to place the edit box of the activated input method editor.</summary>
+				/// <param name="value">The caret point.</param>
+				/// <param name="referenceComposition">The point space. If this argument is null, the "value" argument will use the point space of the client area in the main composition.</param>
 				void							SetCaretPoint(Point value, GuiGraphicsComposition* referenceComposition=0);
 
+				/// <summary>Get the animation manager.</summary>
+				/// <returns>The animation manager.</returns>
 				GuiGraphicsAnimationManager*	GetAnimationManager();
 			};
 
 /***********************************************************************
 Helpers
 ***********************************************************************/
-
+			
+			/// <summary>
+			/// Represents a time based animation.
+			/// </summary>
 			class GuiTimeBasedAnimation : public IGuiGraphicsAnimation, public Description<GuiTimeBasedAnimation>
 			{
 			protected:
 				unsigned __int64				startTime;
 				int								length;
 			public:
+				/// <summary>Create an animation with a specified length in milliseconds.</summary>
+				/// <param name="totalMilliseconds">The specified length in milliseconds.</param>
 				GuiTimeBasedAnimation(int totalMilliseconds);
 				~GuiTimeBasedAnimation();
 
+				/// <summary>Restart an animation with a specified length in milliseconds.</summary>
+				/// <param name="totalMilliseconds">The specified length in milliseconds. If the value is -1, it will use the previous length.</param>
 				void							Restart(int totalMilliseconds=-1);
 				int								GetTotalLength()override;
 				int								GetCurrentPosition()override;
