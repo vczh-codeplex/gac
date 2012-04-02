@@ -70,7 +70,7 @@ namespace LinkPdbXml
                 case 1: return funcs[0];
                 default:
                     {
-                        var parameters = 
+                        var parameters =
                             methodParameters == ""
                             ? new string[0]
                             : SplitParameters(methodParameters.Substring(1, methodParameters.Length - 2))
@@ -98,9 +98,8 @@ namespace LinkPdbXml
         {
             var candidates1 = methods.Where(m => m.Name == udt.Name + "::" + methodLocalName).ToArray();
             var candidates2 = methods.Where(m => m.Name == methodLocalName).ToArray();
-            var m1 = TryPickFunction(candidates1, methodParameters);
-            var m2 = TryPickFunction(candidates2, methodParameters);
-            return m1 ?? m2;
+            var result = TryPickFunction(candidates1.Concat(candidates2).ToArray(), methodParameters);
+            return result;
         }
 
         static GacMethod PickFunction(GacUDT udt, string methodLocalName, string methodParameters)
