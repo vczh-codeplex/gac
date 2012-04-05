@@ -13211,7 +13211,6 @@ namespace vl
 	{
 		namespace controls
 		{
-			class IGuiStyleController;
 			class GuiControl;
 			class GuiControlHost;
 		}
