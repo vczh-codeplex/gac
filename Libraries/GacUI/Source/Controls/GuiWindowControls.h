@@ -22,6 +22,9 @@ namespace vl
 Control Host
 ***********************************************************************/
 
+			/// <summary>
+			/// Represents a control that host by a <see cref="INativeWindow"/>.
+			/// </summary>
 			class GuiControlHost : public GuiControl, private INativeWindowListener, public Description<GuiControlHost>
 			{
 			protected:

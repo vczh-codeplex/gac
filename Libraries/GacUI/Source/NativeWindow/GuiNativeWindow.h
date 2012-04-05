@@ -360,14 +360,14 @@ Native Window
 			/// <param name="parent">The parent window.</param>
 			virtual void				SetParent(INativeWindow* parent)=0;
 			/// <summary>
-			/// Test is the window always pass the focus to its parent window.
+			/// Test is the window always pass the focus to it's parent window.
 			/// </summary>
-			/// <returns>Returns true if the window always pass the focus to its parent window.</returns>
+			/// <returns>Returns true if the window always pass the focus to it's parent window.</returns>
 			virtual bool				GetAlwaysPassFocusToParent()=0;
 			/// <summary>
-			/// Enable or disble always passing the focus to its parent window.
+			/// Enable or disble always passing the focus to it's parent window.
 			/// </summary>
-			/// <param name="value">True to enable always passing the focus to its parent window.</param>
+			/// <param name="value">True to enable always passing the focus to it's parent window.</param>
 			virtual void				SetAlwaysPassFocusToParent(bool value)=0;
 
 			/// <summary>

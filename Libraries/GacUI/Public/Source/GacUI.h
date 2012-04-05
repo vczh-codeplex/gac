@@ -5,7 +5,7 @@ DEVELOPER: ³Âè÷å«(vczh)
 #include "Vlpp.h"
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GACVLPPREFERENCES.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GACVLPPREFERENCES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -22,7 +22,7 @@ Interfaces:
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUITYPES.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUITYPES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -576,7 +576,7 @@ Resources
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUINATIVEWINDOW.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUINATIVEWINDOW.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -939,14 +939,14 @@ Native Window
 			/// <param name="parent">The parent window.</param>
 			virtual void				SetParent(INativeWindow* parent)=0;
 			/// <summary>
-			/// Test is the window always pass the focus to its parent window.
+			/// Test is the window always pass the focus to it's parent window.
 			/// </summary>
-			/// <returns>Returns true if the window always pass the focus to its parent window.</returns>
+			/// <returns>Returns true if the window always pass the focus to it's parent window.</returns>
 			virtual bool				GetAlwaysPassFocusToParent()=0;
 			/// <summary>
-			/// Enable or disble always passing the focus to its parent window.
+			/// Enable or disble always passing the focus to it's parent window.
 			/// </summary>
-			/// <param name="value">True to enable always passing the focus to its parent window.</param>
+			/// <param name="value">True to enable always passing the focus to it's parent window.</param>
 			virtual void				SetAlwaysPassFocusToParent(bool value)=0;
 
 			/// <summary>
@@ -1944,7 +1944,7 @@ Native Window Provider
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\REFLECTION\GUITYPEDESCRIPTOR.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\REFLECTION\GUITYPEDESCRIPTOR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -2231,7 +2231,7 @@ Helper Functions
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -2336,7 +2336,7 @@ Basic Construction
 				/// </summary>
 				virtual void							OnElementStateChanged()=0;
 				/// <summary>
-				/// Calculate the minimum size using the binded graphics element and its state.
+				/// Calculate the minimum size using the binded graphics element and it's state.
 				/// </summary>
 				/// <returns>The minimum size.</returns>
 				virtual Size							GetMinSize()=0;
@@ -3148,7 +3148,7 @@ Elements
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSTEXTELEMENT.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSTEXTELEMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -3692,7 +3692,7 @@ ColorizedText
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSEVENTRECEIVER.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSEVENTRECEIVER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -4028,7 +4028,7 @@ Event Receiver
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSCOMPOSITION.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSCOMPOSITION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -4330,16 +4330,16 @@ Basic Compositions
 				/// <param name="value">The expected bounds.</param>
 				void								SetBounds(Rect value);
 
-				/// <summary>Make the composition not aligned to its parent.</summary>
+				/// <summary>Make the composition not aligned to it's parent.</summary>
 				void								ClearAlignmentToParent();
-				/// <summary>Get the alignment to its parent. -1 in each alignment component means that the corressponding side is not aligned to its parent.</summary>
-				/// <returns>The alignment to its parent.</returns>
+				/// <summary>Get the alignment to it's parent. -1 in each alignment component means that the corressponding side is not aligned to it's parent.</summary>
+				/// <returns>The alignment to it's parent.</returns>
 				Margin								GetAlignmentToParent();
-				/// <summary>Set the alignment to its parent. -1 in each alignment component means that the corressponding side is not aligned to its parent.</summary>
-				/// <param name="value">The alignment to its parent.</param>
+				/// <summary>Set the alignment to it's parent. -1 in each alignment component means that the corressponding side is not aligned to it's parent.</summary>
+				/// <param name="value">The alignment to it's parent.</param>
 				void								SetAlignmentToParent(Margin value);
-				/// <summary>Test is the composition aligned to its parent.</summary>
-				/// <returns>Returns true if the composition is aligned to its parent.</returns>
+				/// <summary>Test is the composition aligned to it's parent.</summary>
+				/// <returns>Returns true if the composition is aligned to it's parent.</returns>
 				bool								IsAlignedToParent();
 			};
 
@@ -4733,7 +4733,7 @@ Specialized Compositions
 			};
 
 			/// <summary>
-			/// Represents a composition that its location and size are decided by the client area of the parent composition by setting ratios.
+			/// Represents a composition that it's location and size are decided by the client area of the parent composition by setting ratios.
 			/// </summary>
 			class GuiPartialViewComposition : public GuiGraphicsSite, public Description<GuiPartialViewComposition>
 			{
@@ -4783,7 +4783,7 @@ Specialized Compositions
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSHOST.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSHOST.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -4975,7 +4975,7 @@ Helpers
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIBASICCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIBASICCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5000,29 +5000,63 @@ namespace vl
 Basic Construction
 ***********************************************************************/
 
+			/// <summary>
+			/// The base class of all controls.
+			/// When the control is destroyed, it automatically destroys sub controls, and the bounds composition from the style controller.
+			/// If you want to manually destroy a control, you should first remove it from it's parent.
+			/// The only way to remove a control from a parent control, is to remove the bounds composition from it's parent composition. The same to inserting a control.
+			/// </summary>
 			class GuiControl : public Object, public Description<GuiControl>
 			{
 				friend class compositions::GuiGraphicsComposition;
 				typedef collections::List<GuiControl*>		ControlList;
 			public:
+				/// <summary>
+				/// Represents a style for a control. A style is something like a skin, but contains some default action handlers.
+				/// </summary>
 				class IStyleController : public virtual IDescriptable, public Description<IStyleController>
 				{
 				public:
-					virtual compositions::GuiBoundsComposition*	GetBoundsComposition()=0;
+					/// <summary>Get the bounds composition. A bounds composition represents all visible contents of a control.</summary>
+					/// <returns>The bounds composition.</returns>
+					virtual compositions::GuiBoundsComposition*		GetBoundsComposition()=0;
+					/// <summary>Get the container composition. A container composition is where to place all bounds compositions for child controls.</summary>
+					/// <returns>The container composition.</returns>
 					virtual compositions::GuiGraphicsComposition*	GetContainerComposition()=0;
-					virtual void								SetFocusableComposition(compositions::GuiGraphicsComposition* value)=0;
-					virtual void								SetText(const WString& value)=0;
-					virtual void								SetFont(const FontProperties& value)=0;
-					virtual void								SetVisuallyEnabled(bool value)=0;
+					/// <summary>Set the focusable composition. A focusable composition is the composition to be focused when the control is focused.</summary>
+					/// <param name="value">The focusable composition.</param>
+					virtual void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)=0;
+					/// <summary>Set the text to display on the control.</summary>
+					/// <param name="value">The text to display.</param>
+					virtual void									SetText(const WString& value)=0;
+					/// <summary>Set the font to render the text.</summary>
+					/// <param name="value">The font to render the text.</param>
+					virtual void									SetFont(const FontProperties& value)=0;
+					/// <summary>Set the enableing state to affect the rendering of the control.</summary>
+					/// <param name="value">The enableing state.</param>
+					virtual void									SetVisuallyEnabled(bool value)=0;
 				};
 
+				/// <summary>
+				/// A style provider is a callback interface for some control that already provides a style controller, but the controller need callbacks to create sub compositions or handle actions.
+				/// </summary>
 				class IStyleProvider : public virtual IDescriptable, public Description<IStyleProvider>
 				{
 				public:
+					/// <summary>Called when a style provider is associated with a style controller.</summary>
+					/// <param name="controller">The style controller that is associated.</param>
 					virtual void								AssociateStyleController(IStyleController* controller)=0;
+					/// <summary>Set the focusable composition. A focusable composition is the composition to be focused when the control is focused.</summary>
+					/// <param name="value">The focusable composition.</param>
 					virtual void								SetFocusableComposition(compositions::GuiGraphicsComposition* value)=0;
+					/// <summary>Set the text to display on the control.</summary>
+					/// <param name="value">The text to display.</param>
 					virtual void								SetText(const WString& value)=0;
+					/// <summary>Set the font to render the text.</summary>
+					/// <param name="value">The font to render the text.</param>
 					virtual void								SetFont(const FontProperties& value)=0;
+					/// <summary>Set the enableing state to affect the rendering of the control.</summary>
+					/// <param name="value">The enableing state.</param>
 					virtual void								SetVisuallyEnabled(bool value)=0;
 				};
 			protected:
@@ -5049,36 +5083,86 @@ Basic Construction
 				virtual void							UpdateVisuallyEnabled();
 				void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
 			public:
+				/// <summary>Create a control with a specified style controller.</summary>
 				GuiControl(IStyleController* _styleController);
 				~GuiControl();
 
+				/// <summary>Visible event. This event will be raised when the visibility state of the control is changed.</summary>
 				compositions::GuiNotifyEvent			VisibleChanged;
+				/// <summary>Enabled event. This event will be raised when the enabling state of the control is changed.</summary>
 				compositions::GuiNotifyEvent			EnabledChanged;
+				/// <summary>
+				/// Enabled event. This event will be raised when the visually enabling state of the control is changed. A visually enabling is combined by the enabling state and the parent's visually enabling state.
+				/// A control is rendered as disabled, not only when the control itself is disabled, but also when the parent control is rendered as disabled.
+				/// </summary>
 				compositions::GuiNotifyEvent			VisuallyEnabledChanged;
+				/// <summary>Text changed event. This event will be raised when the text of the control is changed.</summary>
 				compositions::GuiNotifyEvent			TextChanged;
+				/// <summary>Font changed event. This event will be raised when the font of the control is changed.</summary>
 				compositions::GuiNotifyEvent			FontChanged;
 
+				/// <summary>A function to create the argument for notify events that raised by itself.</summary>
+				/// <returns>The created argument.</returns>
 				compositions::GuiEventArgs				GetNotifyEventArguments();
+				/// <summary>Get the associated style controller.</summary>
+				/// <returns>The associated style controller.</returns>
 				IStyleController*						GetStyleController();
+				/// <summary>Get the bounds composition for the control. The value is from <see cref="IStyleController::GetBoundsComposition"/>.</summary>
+				/// <returns>The bounds composition.</returns>
 				compositions::GuiBoundsComposition*		GetBoundsComposition();
+				/// <summary>Get the container composition for the control. The value is from <see cref="IStyleController::GetContainerComposition"/>.</summary>
+				/// <returns>The container composition.</returns>
 				compositions::GuiGraphicsComposition*	GetContainerComposition();
+				/// <summary>Get the focusable composition for the control. A focusable composition is the composition to be focused when the control is focused.</summary>
+				/// <returns>The focusable composition.</returns>
 				compositions::GuiGraphicsComposition*	GetFocusableComposition();
+				/// <summary>Get the event receiver from the bounds composition.</summary>
+				/// <returns>The event receiver.</returns>
 				compositions::GuiGraphicsEventReceiver*	GetEventReceiver();
+				/// <summary>Get the parent control.</summary>
+				/// <returns>The parent control.</returns>
 				GuiControl*								GetParent();
+				/// <summary>Get the number of child controls.</summary>
+				/// <returns>The number of child controls.</returns>
 				int										GetChildrenCount();
+				/// <summary>Get the child control using a specified index.</summary>
+				/// <returns>The child control.</returns>
+				/// <param name="index">The specified index.</param>
 				GuiControl*								GetChild(int index);
 				
+				/// <summary>Get the <see cref="GuiControlHost"/> that contains this control.</summary>
+				/// <returns>The <see cref="GuiControlHost"/> that contains this control.</returns>
 				virtual GuiControlHost*					GetRelatedControlHost();
+				/// <summary>Test if this control is rendered as enabled.</summary>
+				/// <returns>Returns true if this control is rendered as enabled.</returns>
 				virtual bool							GetVisuallyEnabled();
+				/// <summary>Test if this control is enabled.</summary>
+				/// <returns>Returns true if this control is enabled.</returns>
 				virtual bool							GetEnabled();
+				/// <summary>Make the control enabled or disabled.</summary>
+				/// <param name="value">Set to true to make the control enabled.</param>
 				virtual void							SetEnabled(bool value);
+				/// <summary>Test if this visible or invisible.</summary>
+				/// <returns>Returns true if this control is visible.</returns>
 				virtual bool							GetVisible();
+				/// <summary>Make the control visible or invisible.</summary>
+				/// <param name="value">Set to true to make the visible enabled.</param>
 				virtual void							SetVisible(bool value);
+				/// <summary>Get the text to display on the control.</summary>
+				/// <returns>The text to display on the control.</returns>
 				virtual const WString&					GetText();
+				/// <summary>Set the text to display on the control.</summary>
+				/// <param name="value">The text to display on the control.</param>
 				virtual void							SetText(const WString& value);
+				/// <summary>Get the font to render the text.</summary>
+				/// <returns>The font to render the text.</returns>
 				virtual const FontProperties&			GetFont();
+				/// <summary>Set the font to render the text.</summary>
+				/// <param name="value">The font to render the text.</param>
 				virtual void							SetFont(const FontProperties& value);
 
+				/// <summary>Query a service using an identifier. If you want to get a service of type IXXX, use IXXX::Identifier as the identifier.</summary>
+				/// <returns>The requested service. If the control doesn't support this service, it will be null.</returns>
 				virtual IDescriptable*					QueryService(const WString& identifier);
 
 				template<typename T>
@@ -5088,20 +5172,19 @@ Basic Construction
 				}
 			};
 
+			/// <summary>
+			/// Represnets a component.
+			/// </summary>
 			class GuiComponent : public Object, public Description<GuiComponent>
 			{
-				friend class GuiControlHost;
-			private:
-				GuiControlHost*							controlHost;
-
-				void									SetControlHost(GuiControlHost* value);
 			public:
 				GuiComponent();
 				~GuiComponent();
-
-				GuiControlHost*							GetControlHost();
 			};
-
+			
+			/// <summary>
+			/// Represnets an image to display.
+			/// </summary>
 			class GuiImageData
 			{
 			protected:
@@ -5109,11 +5192,19 @@ Basic Construction
 				int								frameIndex;
 
 			public:
+				/// <summary>Create an empty image data.</summary>
 				GuiImageData();
+				/// <summary>Create an image data with a specified image and a frame index.</summary>
+				/// <param name="_image">The specified image.</param>
+				/// <param name="_frameIndex">The specified frame index.</param>
 				GuiImageData(Ptr<INativeImage> _image, int _frameIndex);
 				~GuiImageData();
 
+				/// <summary>Get the specified image.</summary>
+				/// <returns>The specified image.</returns>
 				Ptr<INativeImage>				GetImage();
+				/// <summary>Get the specified frame index.</summary>
+				/// <returns>The specified frame index.</returns>
 				int								GetFrameIndex();
 			};
 
@@ -5407,7 +5498,7 @@ Scrolls
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIWINDOWCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIWINDOWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5432,6 +5523,9 @@ namespace vl
 Control Host
 ***********************************************************************/
 
+			/// <summary>
+			/// Represents a control that host by a <see cref="INativeWindow"/>.
+			/// </summary>
 			class GuiControlHost : public GuiControl, private INativeWindowListener, public Description<GuiControlHost>
 			{
 			protected:
@@ -5550,7 +5644,7 @@ Window
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUILISTCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUILISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -6165,7 +6259,7 @@ Predefined ItemProvider
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITEXTLISTCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITEXTLISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -6329,7 +6423,7 @@ TextList Control
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUILISTVIEWCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUILISTVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -6879,7 +6973,7 @@ ListView
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITREEVIEWCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITREEVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7315,7 +7409,7 @@ TreeView
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICOMBOCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICOMBOCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7428,7 +7522,7 @@ ComboBox with GuiListControl
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICONTAINERCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICONTAINERCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7536,7 +7630,7 @@ Tab Control
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7678,7 +7772,7 @@ MenuButton
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIAPPLICATION.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIAPPLICATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7752,7 +7846,7 @@ extern void GuiApplicationMain();
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\GUITEXTCONTROLS.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUITEXTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8048,7 +8142,7 @@ TextBox
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUICOMMONSTYLES.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUICOMMONSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8177,7 +8271,7 @@ Scrolls
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUIWIN7STYLES.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUIWIN7STYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8192,6 +8286,7 @@ Clases:
 		Win7MenuBarStyle
 		Win7MenuSplitterStyle
 		Win7GroupBoxStyle
+	GuiTab::IStyleController
 		Win7TabStyle
 	GuiSelectableButton::IStyleController
 		Win7ButtonStyle(vertical|horizontal)
@@ -9039,7 +9134,7 @@ List
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GACUI.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GACUI.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -9066,7 +9161,7 @@ extern int SetupWindowsDirect2DRenderer();
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSWINDOWSDIRECT2D.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSWINDOWSDIRECT2D.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -9155,7 +9250,7 @@ extern void RendererMainDirect2D();
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSRENDERERSWINDOWSDIRECT2D.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSRENDERERSWINDOWSDIRECT2D.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -9383,7 +9478,7 @@ Renderers
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\GDI\WINGDI.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\GDI\WINGDI.H
 ***********************************************************************/
 /*******************************************************************************
 Vczh Library++ 3.0
@@ -9846,7 +9941,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSWINDOWSGDI.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSWINDOWSGDI.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -9921,7 +10016,7 @@ extern void RendererMainGDI();
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSRENDERERSWINDOWSGDI.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSRENDERERSWINDOWSGDI.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -10146,7 +10241,7 @@ Renderers
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\WINNATIVEWINDOW.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\WINNATIVEWINDOW.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -10193,7 +10288,7 @@ Windows Platform Native Controller
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\DIRECT2D\WINDIRECT2DAPPLICATION.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\DIRECT2D\WINDIRECT2DAPPLICATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -10224,7 +10319,7 @@ extern int WinMainDirect2D(HINSTANCE hInstance, void(*RendererMain)());
 #endif
 
 /***********************************************************************
-E:\CODEPLEX\GAC\WORKSPACE\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\GDI\WINGDIAPPLICATION.H
+E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\GDI\WINGDIAPPLICATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0

@@ -11,6 +11,7 @@ Clases:
 		Win7MenuBarStyle
 		Win7MenuSplitterStyle
 		Win7GroupBoxStyle
+	GuiTab::IStyleController
 		Win7TabStyle
 	GuiSelectableButton::IStyleController
 		Win7ButtonStyle(vertical|horizontal)

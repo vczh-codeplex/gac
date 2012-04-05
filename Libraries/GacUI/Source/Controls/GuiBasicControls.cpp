@@ -256,22 +256,11 @@ GuiComponent
 ***********************************************************************/
 			
 			GuiComponent::GuiComponent()
-				:controlHost(0)
 			{
 			}
 
 			GuiComponent::~GuiComponent()
 			{
-			}
-
-			GuiControlHost* GuiComponent::GetControlHost()
-			{
-				return controlHost;
-			}
-
-			void GuiComponent::SetControlHost(GuiControlHost* value)
-			{
-				controlHost=value;
 			}
 
 /***********************************************************************

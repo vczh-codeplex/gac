@@ -22,29 +22,63 @@ namespace vl
 Basic Construction
 ***********************************************************************/
 
+			/// <summary>
+			/// The base class of all controls.
+			/// When the control is destroyed, it automatically destroys sub controls, and the bounds composition from the style controller.
+			/// If you want to manually destroy a control, you should first remove it from it's parent.
+			/// The only way to remove a control from a parent control, is to remove the bounds composition from it's parent composition. The same to inserting a control.
+			/// </summary>
 			class GuiControl : public Object, public Description<GuiControl>
 			{
 				friend class compositions::GuiGraphicsComposition;
 				typedef collections::List<GuiControl*>		ControlList;
 			public:
+				/// <summary>
+				/// Represents a style for a control. A style is something like a skin, but contains some default action handlers.
+				/// </summary>
 				class IStyleController : public virtual IDescriptable, public Description<IStyleController>
 				{
 				public:
-					virtual compositions::GuiBoundsComposition*	GetBoundsComposition()=0;
+					/// <summary>Get the bounds composition. A bounds composition represents all visible contents of a control.</summary>
+					/// <returns>The bounds composition.</returns>
+					virtual compositions::GuiBoundsComposition*		GetBoundsComposition()=0;
+					/// <summary>Get the container composition. A container composition is where to place all bounds compositions for child controls.</summary>
+					/// <returns>The container composition.</returns>
 					virtual compositions::GuiGraphicsComposition*	GetContainerComposition()=0;
-					virtual void								SetFocusableComposition(compositions::GuiGraphicsComposition* value)=0;
-					virtual void								SetText(const WString& value)=0;
-					virtual void								SetFont(const FontProperties& value)=0;
-					virtual void								SetVisuallyEnabled(bool value)=0;
+					/// <summary>Set the focusable composition. A focusable composition is the composition to be focused when the control is focused.</summary>
+					/// <param name="value">The focusable composition.</param>
+					virtual void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)=0;
+					/// <summary>Set the text to display on the control.</summary>
+					/// <param name="value">The text to display.</param>
+					virtual void									SetText(const WString& value)=0;
+					/// <summary>Set the font to render the text.</summary>
+					/// <param name="value">The font to render the text.</param>
+					virtual void									SetFont(const FontProperties& value)=0;
+					/// <summary>Set the enableing state to affect the rendering of the control.</summary>
+					/// <param name="value">The enableing state.</param>
+					virtual void									SetVisuallyEnabled(bool value)=0;
 				};
 
+				/// <summary>
+				/// A style provider is a callback interface for some control that already provides a style controller, but the controller need callbacks to create sub compositions or handle actions.
+				/// </summary>
 				class IStyleProvider : public virtual IDescriptable, public Description<IStyleProvider>
 				{
 				public:
+					/// <summary>Called when a style provider is associated with a style controller.</summary>
+					/// <param name="controller">The style controller that is associated.</param>
 					virtual void								AssociateStyleController(IStyleController* controller)=0;
+					/// <summary>Set the focusable composition. A focusable composition is the composition to be focused when the control is focused.</summary>
+					/// <param name="value">The focusable composition.</param>
 					virtual void								SetFocusableComposition(compositions::GuiGraphicsComposition* value)=0;
+					/// <summary>Set the text to display on the control.</summary>
+					/// <param name="value">The text to display.</param>
 					virtual void								SetText(const WString& value)=0;
+					/// <summary>Set the font to render the text.</summary>
+					/// <param name="value">The font to render the text.</param>
 					virtual void								SetFont(const FontProperties& value)=0;
+					/// <summary>Set the enableing state to affect the rendering of the control.</summary>
+					/// <param name="value">The enableing state.</param>
 					virtual void								SetVisuallyEnabled(bool value)=0;
 				};
 			protected:
@@ -71,36 +105,86 @@ Basic Construction
 				virtual void							UpdateVisuallyEnabled();
 				void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
 			public:
+				/// <summary>Create a control with a specified style controller.</summary>
 				GuiControl(IStyleController* _styleController);
 				~GuiControl();
 
+				/// <summary>Visible event. This event will be raised when the visibility state of the control is changed.</summary>
 				compositions::GuiNotifyEvent			VisibleChanged;
+				/// <summary>Enabled event. This event will be raised when the enabling state of the control is changed.</summary>
 				compositions::GuiNotifyEvent			EnabledChanged;
+				/// <summary>
+				/// Enabled event. This event will be raised when the visually enabling state of the control is changed. A visually enabling is combined by the enabling state and the parent's visually enabling state.
+				/// A control is rendered as disabled, not only when the control itself is disabled, but also when the parent control is rendered as disabled.
+				/// </summary>
 				compositions::GuiNotifyEvent			VisuallyEnabledChanged;
+				/// <summary>Text changed event. This event will be raised when the text of the control is changed.</summary>
 				compositions::GuiNotifyEvent			TextChanged;
+				/// <summary>Font changed event. This event will be raised when the font of the control is changed.</summary>
 				compositions::GuiNotifyEvent			FontChanged;
 
+				/// <summary>A function to create the argument for notify events that raised by itself.</summary>
+				/// <returns>The created argument.</returns>
 				compositions::GuiEventArgs				GetNotifyEventArguments();
+				/// <summary>Get the associated style controller.</summary>
+				/// <returns>The associated style controller.</returns>
 				IStyleController*						GetStyleController();
+				/// <summary>Get the bounds composition for the control. The value is from <see cref="IStyleController::GetBoundsComposition"/>.</summary>
+				/// <returns>The bounds composition.</returns>
 				compositions::GuiBoundsComposition*		GetBoundsComposition();
+				/// <summary>Get the container composition for the control. The value is from <see cref="IStyleController::GetContainerComposition"/>.</summary>
+				/// <returns>The container composition.</returns>
 				compositions::GuiGraphicsComposition*	GetContainerComposition();
+				/// <summary>Get the focusable composition for the control. A focusable composition is the composition to be focused when the control is focused.</summary>
+				/// <returns>The focusable composition.</returns>
 				compositions::GuiGraphicsComposition*	GetFocusableComposition();
+				/// <summary>Get the event receiver from the bounds composition.</summary>
+				/// <returns>The event receiver.</returns>
 				compositions::GuiGraphicsEventReceiver*	GetEventReceiver();
+				/// <summary>Get the parent control.</summary>
+				/// <returns>The parent control.</returns>
 				GuiControl*								GetParent();
+				/// <summary>Get the number of child controls.</summary>
+				/// <returns>The number of child controls.</returns>
 				int										GetChildrenCount();
+				/// <summary>Get the child control using a specified index.</summary>
+				/// <returns>The child control.</returns>
+				/// <param name="index">The specified index.</param>
 				GuiControl*								GetChild(int index);
 				
+				/// <summary>Get the <see cref="GuiControlHost"/> that contains this control.</summary>
+				/// <returns>The <see cref="GuiControlHost"/> that contains this control.</returns>
 				virtual GuiControlHost*					GetRelatedControlHost();
+				/// <summary>Test if this control is rendered as enabled.</summary>
+				/// <returns>Returns true if this control is rendered as enabled.</returns>
 				virtual bool							GetVisuallyEnabled();
+				/// <summary>Test if this control is enabled.</summary>
+				/// <returns>Returns true if this control is enabled.</returns>
 				virtual bool							GetEnabled();
+				/// <summary>Make the control enabled or disabled.</summary>
+				/// <param name="value">Set to true to make the control enabled.</param>
 				virtual void							SetEnabled(bool value);
+				/// <summary>Test if this visible or invisible.</summary>
+				/// <returns>Returns true if this control is visible.</returns>
 				virtual bool							GetVisible();
+				/// <summary>Make the control visible or invisible.</summary>
+				/// <param name="value">Set to true to make the visible enabled.</param>
 				virtual void							SetVisible(bool value);
+				/// <summary>Get the text to display on the control.</summary>
+				/// <returns>The text to display on the control.</returns>
 				virtual const WString&					GetText();
+				/// <summary>Set the text to display on the control.</summary>
+				/// <param name="value">The text to display on the control.</param>
 				virtual void							SetText(const WString& value);
+				/// <summary>Get the font to render the text.</summary>
+				/// <returns>The font to render the text.</returns>
 				virtual const FontProperties&			GetFont();
+				/// <summary>Set the font to render the text.</summary>
+				/// <param name="value">The font to render the text.</param>
 				virtual void							SetFont(const FontProperties& value);
 
+				/// <summary>Query a service using an identifier. If you want to get a service of type IXXX, use IXXX::Identifier as the identifier.</summary>
+				/// <returns>The requested service. If the control doesn't support this service, it will be null.</returns>
 				virtual IDescriptable*					QueryService(const WString& identifier);
 
 				template<typename T>
@@ -110,20 +194,19 @@ Basic Construction
 				}
 			};
 
+			/// <summary>
+			/// Represnets a component.
+			/// </summary>
 			class GuiComponent : public Object, public Description<GuiComponent>
 			{
-				friend class GuiControlHost;
-			private:
-				GuiControlHost*							controlHost;
-
-				void									SetControlHost(GuiControlHost* value);
 			public:
 				GuiComponent();
 				~GuiComponent();
-
-				GuiControlHost*							GetControlHost();
 			};
-
+			
+			/// <summary>
+			/// Represnets an image to display.
+			/// </summary>
 			class GuiImageData
 			{
 			protected:
@@ -131,11 +214,19 @@ Basic Construction
 				int								frameIndex;
 
 			public:
+				/// <summary>Create an empty image data.</summary>
 				GuiImageData();
+				/// <summary>Create an image data with a specified image and a frame index.</summary>
+				/// <param name="_image">The specified image.</param>
+				/// <param name="_frameIndex">The specified frame index.</param>
 				GuiImageData(Ptr<INativeImage> _image, int _frameIndex);
 				~GuiImageData();
 
+				/// <summary>Get the specified image.</summary>
+				/// <returns>The specified image.</returns>
 				Ptr<INativeImage>				GetImage();
+				/// <summary>Get the specified frame index.</summary>
+				/// <returns>The specified frame index.</returns>
 				int								GetFrameIndex();
 			};
 
