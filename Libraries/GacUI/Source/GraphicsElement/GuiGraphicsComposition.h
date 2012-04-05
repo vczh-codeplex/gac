@@ -301,16 +301,16 @@ Basic Compositions
 				/// <param name="value">The expected bounds.</param>
 				void								SetBounds(Rect value);
 
-				/// <summary>Make the composition not aligned to its parent.</summary>
+				/// <summary>Make the composition not aligned to it's parent.</summary>
 				void								ClearAlignmentToParent();
-				/// <summary>Get the alignment to its parent. -1 in each alignment component means that the corressponding side is not aligned to its parent.</summary>
-				/// <returns>The alignment to its parent.</returns>
+				/// <summary>Get the alignment to it's parent. -1 in each alignment component means that the corressponding side is not aligned to it's parent.</summary>
+				/// <returns>The alignment to it's parent.</returns>
 				Margin								GetAlignmentToParent();
-				/// <summary>Set the alignment to its parent. -1 in each alignment component means that the corressponding side is not aligned to its parent.</summary>
-				/// <param name="value">The alignment to its parent.</param>
+				/// <summary>Set the alignment to it's parent. -1 in each alignment component means that the corressponding side is not aligned to it's parent.</summary>
+				/// <param name="value">The alignment to it's parent.</param>
 				void								SetAlignmentToParent(Margin value);
-				/// <summary>Test is the composition aligned to its parent.</summary>
-				/// <returns>Returns true if the composition is aligned to its parent.</returns>
+				/// <summary>Test is the composition aligned to it's parent.</summary>
+				/// <returns>Returns true if the composition is aligned to it's parent.</returns>
 				bool								IsAlignedToParent();
 			};
 
@@ -704,7 +704,7 @@ Specialized Compositions
 			};
 
 			/// <summary>
-			/// Represents a composition that its location and size are decided by the client area of the parent composition by setting ratios.
+			/// Represents a composition that it's location and size are decided by the client area of the parent composition by setting ratios.
 			/// </summary>
 			class GuiPartialViewComposition : public GuiGraphicsSite, public Description<GuiPartialViewComposition>
 			{
