@@ -1269,6 +1269,10 @@ vl::Func<R()>
 		Func()
 		{
 		}
+		Func(const Func<R()>& function)
+		{
+			invoker=function.invoker;
+		}
 		Func(R(*function)())
 		{
 			invoker=new StaticInvoker(function);
@@ -1489,6 +1493,10 @@ vl::Func<void()>
 		typedef void ResultType;
 		Func()
 		{
+		}
+		Func(const Func<void()>& function)
+		{
+			invoker=function.invoker;
 		}
 		Func(void(*function)())
 		{
@@ -1711,6 +1719,10 @@ vl::Func<R(T0)>
 		Func()
 		{
 		}
+		Func(const Func<R(T0)>& function)
+		{
+			invoker=function.invoker;
+		}
 		Func(R(*function)(T0))
 		{
 			invoker=new StaticInvoker(function);
@@ -1931,6 +1943,10 @@ vl::Func<void(T0)>
 		typedef void ResultType;
 		Func()
 		{
+		}
+		Func(const Func<void(T0)>& function)
+		{
+			invoker=function.invoker;
 		}
 		Func(void(*function)(T0))
 		{
@@ -2153,6 +2169,10 @@ vl::Func<R(T0,T1)>
 		Func()
 		{
 		}
+		Func(const Func<R(T0,T1)>& function)
+		{
+			invoker=function.invoker;
+		}
 		Func(R(*function)(T0,T1))
 		{
 			invoker=new StaticInvoker(function);
@@ -2373,6 +2393,10 @@ vl::Func<void(T0,T1)>
 		typedef void ResultType;
 		Func()
 		{
+		}
+		Func(const Func<void(T0,T1)>& function)
+		{
+			invoker=function.invoker;
 		}
 		Func(void(*function)(T0,T1))
 		{
@@ -2595,6 +2619,10 @@ vl::Func<R(T0,T1,T2)>
 		Func()
 		{
 		}
+		Func(const Func<R(T0,T1,T2)>& function)
+		{
+			invoker=function.invoker;
+		}
 		Func(R(*function)(T0,T1,T2))
 		{
 			invoker=new StaticInvoker(function);
@@ -2815,6 +2843,10 @@ vl::Func<void(T0,T1,T2)>
 		typedef void ResultType;
 		Func()
 		{
+		}
+		Func(const Func<void(T0,T1,T2)>& function)
+		{
+			invoker=function.invoker;
 		}
 		Func(void(*function)(T0,T1,T2))
 		{
@@ -3037,6 +3069,10 @@ vl::Func<R(T0,T1,T2,T3)>
 		Func()
 		{
 		}
+		Func(const Func<R(T0,T1,T2,T3)>& function)
+		{
+			invoker=function.invoker;
+		}
 		Func(R(*function)(T0,T1,T2,T3))
 		{
 			invoker=new StaticInvoker(function);
@@ -3257,6 +3293,10 @@ vl::Func<void(T0,T1,T2,T3)>
 		typedef void ResultType;
 		Func()
 		{
+		}
+		Func(const Func<void(T0,T1,T2,T3)>& function)
+		{
+			invoker=function.invoker;
 		}
 		Func(void(*function)(T0,T1,T2,T3))
 		{
@@ -3479,6 +3519,10 @@ vl::Func<R(T0,T1,T2,T3,T4)>
 		Func()
 		{
 		}
+		Func(const Func<R(T0,T1,T2,T3,T4)>& function)
+		{
+			invoker=function.invoker;
+		}
 		Func(R(*function)(T0,T1,T2,T3,T4))
 		{
 			invoker=new StaticInvoker(function);
@@ -3699,6 +3743,10 @@ vl::Func<void(T0,T1,T2,T3,T4)>
 		typedef void ResultType;
 		Func()
 		{
+		}
+		Func(const Func<void(T0,T1,T2,T3,T4)>& function)
+		{
+			invoker=function.invoker;
 		}
 		Func(void(*function)(T0,T1,T2,T3,T4))
 		{
@@ -3921,6 +3969,10 @@ vl::Func<R(T0,T1,T2,T3,T4,T5)>
 		Func()
 		{
 		}
+		Func(const Func<R(T0,T1,T2,T3,T4,T5)>& function)
+		{
+			invoker=function.invoker;
+		}
 		Func(R(*function)(T0,T1,T2,T3,T4,T5))
 		{
 			invoker=new StaticInvoker(function);
@@ -4141,6 +4193,10 @@ vl::Func<void(T0,T1,T2,T3,T4,T5)>
 		typedef void ResultType;
 		Func()
 		{
+		}
+		Func(const Func<void(T0,T1,T2,T3,T4,T5)>& function)
+		{
+			invoker=function.invoker;
 		}
 		Func(void(*function)(T0,T1,T2,T3,T4,T5))
 		{
@@ -4363,6 +4419,10 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6)>
 		Func()
 		{
 		}
+		Func(const Func<R(T0,T1,T2,T3,T4,T5,T6)>& function)
+		{
+			invoker=function.invoker;
+		}
 		Func(R(*function)(T0,T1,T2,T3,T4,T5,T6))
 		{
 			invoker=new StaticInvoker(function);
@@ -4583,6 +4643,10 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6)>
 		typedef void ResultType;
 		Func()
 		{
+		}
+		Func(const Func<void(T0,T1,T2,T3,T4,T5,T6)>& function)
+		{
+			invoker=function.invoker;
 		}
 		Func(void(*function)(T0,T1,T2,T3,T4,T5,T6))
 		{
@@ -4805,6 +4869,10 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>
 		Func()
 		{
 		}
+		Func(const Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>& function)
+		{
+			invoker=function.invoker;
+		}
 		Func(R(*function)(T0,T1,T2,T3,T4,T5,T6,T7))
 		{
 			invoker=new StaticInvoker(function);
@@ -5025,6 +5093,10 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>
 		typedef void ResultType;
 		Func()
 		{
+		}
+		Func(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>& function)
+		{
+			invoker=function.invoker;
 		}
 		Func(void(*function)(T0,T1,T2,T3,T4,T5,T6,T7))
 		{
@@ -5247,6 +5319,10 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 		Func()
 		{
 		}
+		Func(const Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>& function)
+		{
+			invoker=function.invoker;
+		}
 		Func(R(*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8))
 		{
 			invoker=new StaticInvoker(function);
@@ -5467,6 +5543,10 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 		typedef void ResultType;
 		Func()
 		{
+		}
+		Func(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>& function)
+		{
+			invoker=function.invoker;
 		}
 		Func(void(*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8))
 		{
@@ -5689,6 +5769,10 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		Func()
 		{
 		}
+		Func(const Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>& function)
+		{
+			invoker=function.invoker;
+		}
 		Func(R(*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9))
 		{
 			invoker=new StaticInvoker(function);
@@ -5909,6 +5993,10 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		typedef void ResultType;
 		Func()
 		{
+		}
+		Func(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>& function)
+		{
+			invoker=function.invoker;
 		}
 		Func(void(*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9))
 		{
