@@ -57,7 +57,7 @@ namespace vl
 				template<typename T>
 				bool InvokeLambdaInMainThreadAndWait(const T& proc, int milliseconds=-1)
 				{
-					return InvokeInMainThreadAndWait(Func<void()>(proc));
+					return InvokeInMainThreadAndWait(Func<void()>(proc), milliseconds);
 				}
 			};
 
