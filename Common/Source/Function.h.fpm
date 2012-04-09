@@ -158,6 +158,11 @@ vl::Func<$FUNCTION_TYPE($count,$function)>
 		{
 		}
 
+		Func(const Func<$FUNCTION_TYPE($count,$function)>& function)
+		{
+			invoker=function.invoker;
+		}
+
 		Func($FUNCTION_DECL($count,$function,*function))
 		{
 			invoker=new StaticInvoker(function);
