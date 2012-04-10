@@ -47,20 +47,12 @@ Enumerations
 		
 		namespace Alignment
 		{
-			/// <summary>
-			/// Defines an alignment direction.
-			/// </summary>
 			enum Type
 			{
-				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the left side.</summary>
 				Left=0,
-				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the top side.</summary>
 				Top=0,
-				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the center.</summary>
 				Center=1,
-				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the right side.</summary>
 				Right=2,
-				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the bottom side.</summary>
 				Bottom=2,
 			};
 		}
@@ -69,18 +61,9 @@ Enumerations
 TextPos
 ***********************************************************************/
 		
-		/// <summary>
-		/// Represents the position in multiple lines of text.
-		/// </summary>
 		struct TextPos
 		{
-			/// <summary>
-			/// Row number.
-			/// </summary>
 			int			row;
-			/// <summary>
-			/// Column number. If a line has 4 characters, there are 5 available column numbers(from 0 to 4) in this line.
-			/// </summary>
 			int			column;
 
 			TextPos()
@@ -114,18 +97,9 @@ TextPos
 Point
 ***********************************************************************/
 		
-		/// <summary>
-		/// Represents a position in a two dimensions space.
-		/// </summary>
 		struct Point
 		{
-			/// <summary>
-			/// Position in x dimension.
-			/// </summary>
 			int			x;
-			/// <summary>
-			/// Position in y dimension.
-			/// </summary>
 			int			y;
 
 			Point()
@@ -153,18 +127,9 @@ Point
 Size
 ***********************************************************************/
 		
-		/// <summary>
-		/// Represents a size in a two dimensions space.
-		/// </summary>
 		struct Size
 		{
-			/// <summary>
-			/// Size in x dimension.
-			/// </summary>
 			int			x;
-			/// <summary>
-			/// Size in y dimension.
-			/// </summary>
 			int			y;
 
 			Size()
@@ -192,26 +157,11 @@ Size
 Rectangle
 ***********************************************************************/
 		
-		/// <summary>
-		/// Represents a bounds in a two dimensions space.
-		/// </summary>
 		struct Rect
 		{
-			/// <summary>
-			/// Left.
-			/// </summary>
 			int		x1;
-			/// <summary>
-			/// Top.
-			/// </summary>
 			int		y1;
-			/// <summary>
-			/// Left + Width.
-			/// </summary>
 			int		x2;
-			/// <summary>
-			/// Top + Height.
-			/// </summary>
 			int		y2;
 
 			Rect()
@@ -439,26 +389,11 @@ Color
 Margin
 ***********************************************************************/
 		
-		/// <summary>
-		/// Represents a margin in a two dimensions space.
-		/// </summary>
 		struct Margin
 		{
-			/// <summary>
-			/// The left margin.
-			/// </summary>
 			int		left;
-			/// <summary>
-			/// The top margin.
-			/// </summary>
 			int		top;
-			/// <summary>
-			/// The right margin.
-			/// </summary>
 			int		right;
-			/// <summary>
-			/// The bottom margin.
-			/// </summary>
 			int		bottom;
 
 			Margin()
@@ -486,42 +421,15 @@ Margin
 Resources
 ***********************************************************************/
 		
-		/// <summary>
-		/// Represents a font configuration.
-		/// </summary>
 		struct FontProperties
 		{
-			/// <summary>
-			/// Font family (or font name, usually).
-			/// </summary>
 			WString				fontFamily;
-			/// <summary>
-			/// Font size in pixel.
-			/// </summary>
 			int					size;
-			/// <summary>
-			/// True if the font is bold.
-			/// </summary>
 			bool				bold;
-			/// <summary>
-			/// True if the font is italic.
-			/// </summary>
 			bool				italic;
-			/// <summary>
-			/// True if the font has a underline.
-			/// </summary>
 			bool				underline;
-			/// <summary>
-			/// True if the font has a strikeline.
-			/// </summary>
 			bool				strikeline;
-			/// <summary>
-			/// True if the font has anti alias rendering.
-			/// </summary>
 			bool				antialias;
-			/// <summary>
-			/// True if the font has anti alias rendering in vertical direction.
-			/// </summary>
 			bool				verticalAntialias;
 
 			FontProperties()
@@ -611,107 +519,38 @@ namespace vl
 System Object
 ***********************************************************************/
 
-		/// <summary>
-		/// Represents a screen.
-		/// </summary>
 		class INativeScreen : public Interface
 		{
 		public:
-			/// <summary>
-			/// Get the bounds of the screen.
-			/// </summary>
-			/// <returns>The bounds of the screen.</returns>
 			virtual Rect				GetBounds()=0;
-			/// <summary>
-			/// Get the bounds of the screen client area.
-			/// </summary>
-			/// <returns>The bounds of the screen client area.</returns>
 			virtual Rect				GetClientBounds()=0;
-			/// <summary>
-			/// Get the name of the screen.
-			/// </summary>
-			/// <returns>The name of the screen.</returns>
 			virtual WString				GetName()=0;
-			/// <summary>
-			/// Test is the screen is a primary screen.
-			/// </summary>
-			/// <returns>Returns true if the screen is a primary screen.</returns>
 			virtual bool				IsPrimary()=0;
 		};
 		
-		/// <summary>
-		/// Represents a cursor.
-		/// </summary>
 		class INativeCursor : public Interface
 		{
 		public:
-			/// <summary>
-			/// Represents a predefined cursor type.
-			/// </summary>
 			enum SystemCursorType
 			{
-				/// <summary>
-				/// [T:vl.presentation.INativeCursor.SystemCursorType]Small waiting cursor.
-				/// </summary>
 				SmallWaiting,
-				/// <summary>
-				/// [T:vl.presentation.INativeCursor.SystemCursorType]large waiting cursor.
-				/// </summary>
 				LargeWaiting,
-				/// <summary>
-				/// [T:vl.presentation.INativeCursor.SystemCursorType]Arrow cursor.
-				/// </summary>
 				Arrow,
-				/// <summary>
-				/// [T:vl.presentation.INativeCursor.SystemCursorType]Cross cursor.
-				/// </summary>
 				Cross,
-				/// <summary>
-				/// [T:vl.presentation.INativeCursor.SystemCursorType]Hand cursor.
-				/// </summary>
 				Hand,
-				/// <summary>
-				/// [T:vl.presentation.INativeCursor.SystemCursorType]Help cursor.
-				/// </summary>
 				Help,
-				/// <summary>
-				/// [T:vl.presentation.INativeCursor.SystemCursorType]I beam cursor.
-				/// </summary>
 				IBeam,
-				/// <summary>
-				/// [T:vl.presentation.INativeCursor.SystemCursorType]Sizing in all direction cursor.
-				/// </summary>
 				SizeAll,
-				/// <summary>
-				/// [T:vl.presentation.INativeCursor.SystemCursorType]Sizing NE-SW cursor.
-				/// </summary>
 				SizeNESW,
-				/// <summary>
-				/// [T:vl.presentation.INativeCursor.SystemCursorType]Sizing N-S cursor.
-				/// </summary>
 				SizeNS,
-				/// <summary>
-				/// [T:vl.presentation.INativeCursor.SystemCursorType]Sizing NW-SE cursor.
-				/// </summary>
 				SizeNWSE,
-				/// <summary>
-				/// [T:vl.presentation.INativeCursor.SystemCursorType]Sizing W-E cursor.
-				/// </summary>
 				SizeWE,
 				LastSystemCursor=SizeWE,
 			};
 
 			static const int			SystemCursorCount=LastSystemCursor+1;
 		public:
-			/// <summary>
-			/// Test is the cursor a system provided cursor.
-			/// </summary>
-			/// <returns>Returns true if the cursor a system provided cursor.</returns>
 			virtual bool				IsSystemCursor()=0;
-			/// <summary>
-			/// Get the cursor type if the cursor a system provided cursor.
-			/// </summary>
-			/// <returns>The cursor type.</returns>
 			virtual SystemCursorType	GetSystemCursorType()=0;
 		};
 
@@ -723,141 +562,48 @@ Image Object
 		class INativeImage;
 		class INativeImageFrame;
 		
-		/// <summary>
-		/// Represents a customized cache object for an image frame.
-		/// </summary>
 		class INativeImageFrameCache : public Interface
 		{
 		public:
-			/// <summary>
-			/// Called when this cache object is attached to an image frame.
-			/// </summary>
-			/// <param name="frame">The image frame that attached to.</param>
 			virtual void						OnAttach(INativeImageFrame* frame)=0;
-			/// <summary>
-			/// Called when this cache object is detached to an image frame.
-			/// </summary>
-			/// <param name="frame">The image frame that detached from.</param>
 			virtual void						OnDetach(INativeImageFrame* frame)=0;
 		};
 
-		/// <summary>
-		/// Represents an image frame.
-		/// </summary>
 		class INativeImageFrame : public Interface
 		{
 		public:
-			/// <summary>
-			/// Get the image that owns this frame.
-			/// </summary>
-			/// <returns>The image that owns this frame.</returns>
 			virtual INativeImage*				GetImage()=0;
-			/// <summary>
-			/// Get the size of this frame.
-			/// </summary>
-			/// <returns>The size of this frame.</returns>
 			virtual Size						GetSize()=0;
 
-			/// <summary>
-			/// Attach a customized cache object to this image frame and bind to a key.
-			/// </summary>
-			/// <returns>Returns true if this operation succeeded.</returns>
-			/// <param name="key">The key binded with the customized cache object.</param>
-			/// <param name="cache">The customized cache object.</param>
 			virtual bool						SetCache(void* key, Ptr<INativeImageFrameCache> cache)=0;
-			/// <summary>
-			/// Get the attached customized cache object that is already binded to a key.
-			/// </summary>
-			/// <returns>The attached customized cache object.</returns>
-			/// <param name="key">The key binded with the customized cache object.</param>
 			virtual Ptr<INativeImageFrameCache>	GetCache(void* key)=0;
-			/// <summary>
-			/// Get the attached customized cache object that is already binded to a key, and then detach it.
-			/// </summary>
-			/// <returns>The detached customized cache object.</returns>
-			/// <param name="key">The key binded with the customized cache object.</param>
 			virtual Ptr<INativeImageFrameCache>	RemoveCache(void* key)=0;
 		};
 		
-		/// <summary>
-		/// Represents an image.
-		/// </summary>
 		class INativeImage : public Interface
 		{
 		public:
-			/// <summary>
-			/// Represents an image format.
-			/// </summary>
 			enum FormatType
 			{
-				/// <summary>
-				/// [T:vl.presentation.INativeImage.FormatType]Bitmap format.
-				/// </summary>
 				Bmp,
-				/// <summary>
-				/// [T:vl.presentation.INativeImage.FormatType]GIF format.
-				/// </summary>
 				Gif,
-				/// <summary>
-				/// [T:vl.presentation.INativeImage.FormatType]Icon format.
-				/// </summary>
 				Icon,
-				/// <summary>
-				/// [T:vl.presentation.INativeImage.FormatType]JPEG format.
-				/// </summary>
 				Jpeg,
-				/// <summary>
-				/// [T:vl.presentation.INativeImage.FormatType]PNG format.
-				/// </summary>
 				Png,
-				/// <summary>
-				/// [T:vl.presentation.INativeImage.FormatType]TIFF format.
-				/// </summary>
 				Tiff,
-				/// <summary>
-				/// [T:vl.presentation.INativeImage.FormatType]WMP format.
-				/// </summary>
 				Wmp,
-				/// <summary>
-				/// [T:vl.presentation.INativeImage.FormatType]Unknown format.
-				/// </summary>
 				Unknown,
 			};
 			
-			/// <summary>
-			/// Get the image service that creates this image.
-			/// </summary>
-			/// <returns>The image service that creates this image.</returns>
 			virtual INativeImageService*		GetImageService()=0;
-			/// <summary>
-			/// Get the image format.
-			/// </summary>
-			/// <returns>The image format.</returns>
 			virtual FormatType					GetFormat()=0;
-			/// <summary>
-			/// Get the number of frames in this image.
-			/// </summary>
-			/// <returns>The number of frames in this image.</returns>
 			virtual int							GetFrameCount()=0;
-			/// <summary>
-			/// Get the frame in this image by a specified frame index.
-			/// </summary>
-			/// <returns>The frame in this image by a specified frame index.</returns>
-			/// <param name="index">The specified frame index.</param>
 			virtual INativeImageFrame*			GetFrame(int index)=0;
 		};
 		
-		/// <summary>
-		/// Image service. To access this service, use [M:vl.presentation.INativeController.ImageService].
-		/// </summary>
 		class INativeImageService : public Interface
 		{
 		public:
-			/// <summary>
-			/// Create an image from file.
-			/// </summary>
-			/// <returns>The created image.</returns>
-			/// <param name="path">The file path.</param>
 			virtual Ptr<INativeImage>			CreateImageFromFile(const WString& path)=0;
 		};
 
@@ -865,497 +611,142 @@ Image Object
 Native Window
 ***********************************************************************/
 		
-		/// <summary>
-		/// Represents a window.
-		/// </summary>
 		class INativeWindow : public Interface
 		{
 		public:
-			/// <summary>
-			/// Get the bounds of the window.
-			/// </summary>
-			/// <returns>The bounds of the window.</returns>
 			virtual Rect				GetBounds()=0;
-			/// <summary>
-			/// Set the bounds of the window.
-			/// </summary>
-			/// <param name="bounds">The bounds of the window.</param>
 			virtual void				SetBounds(const Rect& bounds)=0;
-			/// <summary>
-			/// Get the client size of the window.
-			/// </summary>
-			/// <returns>The client size of the window.</returns>
 			virtual Size				GetClientSize()=0;
-			/// <summary>
-			/// Set the client size of the window.
-			/// </summary>
-			/// <param name="size">The client size of the window.</param>
 			virtual void				SetClientSize(Size size)=0;
-			/// <summary>
-			/// Get the client bounds in screen space.
-			/// </summary>
-			/// <returns>The client bounds in screen space.</returns>
 			virtual Rect				GetClientBoundsInScreen()=0;
 			
-			/// <summary>
-			/// Get the title of the window. A title will be displayed as a name of this window.
-			/// </summary>
-			/// <returns>The title of the window.</returns>
 			virtual WString				GetTitle()=0;
-			/// <summary>
-			/// Set the title of the window. A title will be displayed as a name of this window.
-			/// </summary>
-			/// <param name="title">The title of the window.</param>
 			virtual void				SetTitle(WString title)=0;
-			/// <summary>
-			/// Get the mouse cursor of the window. When the mouse is on the window, the mouse cursor will be rendered.
-			/// </summary>
-			/// <returns>The mouse cursor of the window.</returns>
 			virtual INativeCursor*		GetWindowCursor()=0;
-			/// <summary>
-			/// Set the mouse cursor of the window. When the mouse is on the window, the mouse cursor will be rendered.
-			/// </summary>
-			/// <param name="cursor">The mouse cursor of the window.</param>
 			virtual void				SetWindowCursor(INativeCursor* cursor)=0;
-			/// <summary>
-			/// Get the caret point of the window. When an input method editor is opened, the input text box will be located to the caret point.
-			/// </summary>
-			/// <returns>The caret point of the window.</returns>
 			virtual Point				GetCaretPoint()=0;
-			/// <summary>
-			/// Set the caret point of the window. When an input method editor is opened, the input text box will be located to the caret point.
-			/// </summary>
-			/// <param name="point">The caret point of the window.</param>
 			virtual void				SetCaretPoint(Point point)=0;
 			
-			/// <summary>
-			/// Get the parent window. A parent window doesn't contain a child window. It always displayed below the child windows. When a parent window is minimized or restored, so as its child windows.
-			/// </summary>
-			/// <returns>The parent window.</returns>
 			virtual INativeWindow*		GetParent()=0;
-			/// <summary>
-			/// Set the parent window. A parent window doesn't contain a child window. It always displayed below the child windows. When a parent window is minimized or restored, so as its child windows.
-			/// </summary>
-			/// <param name="parent">The parent window.</param>
 			virtual void				SetParent(INativeWindow* parent)=0;
-			/// <summary>
-			/// Test is the window always pass the focus to it's parent window.
-			/// </summary>
-			/// <returns>Returns true if the window always pass the focus to it's parent window.</returns>
 			virtual bool				GetAlwaysPassFocusToParent()=0;
-			/// <summary>
-			/// Enable or disble always passing the focus to it's parent window.
-			/// </summary>
-			/// <param name="value">True to enable always passing the focus to it's parent window.</param>
 			virtual void				SetAlwaysPassFocusToParent(bool value)=0;
 
-			/// <summary>
-			/// Show the window.
-			/// </summary>
 			virtual void				Show()=0;
-			/// <summary>
-			/// Show the window without activation.
-			/// </summary>
 			virtual void				ShowDeactivated()=0;
-			/// <summary>
-			/// Restore the window.
-			/// </summary>
 			virtual void				ShowRestored()=0;
-			/// <summary>
-			/// Maximize the window.
-			/// </summary>
 			virtual void				ShowMaximized()=0;
-			/// <summary>
-			/// Minimize the window.
-			/// </summary>
 			virtual void				ShowMinimized()=0;
-			/// <summary>
-			/// Hide the window.
-			/// </summary>
 			virtual void				Hide()=0;
-			/// <summary>
-			/// Test is the window visible.
-			/// </summary>
-			/// <returns>Returns true if the window is visible.</returns>
 			virtual bool				IsVisible()=0;
 
-			/// <summary>
-			/// Enable the window.
-			/// </summary>
 			virtual void				Enable()=0;
-			/// <summary>
-			/// Disable the window.
-			/// </summary>
 			virtual void				Disable()=0;
-			/// <summary>
-			/// Test is the window enabled.
-			/// </summary>
-			/// <returns>Returns true if the window is enabled.</returns>
 			virtual bool				IsEnabled()=0;
 			
-			/// <summary>
-			/// Set focus to the window.
-			/// </summary>
 			virtual void				SetFocus()=0;
-			/// <summary>
-			/// Test is the window focused.
-			/// </summary>
-			/// <returns>Returns true if the window is focused.</returns>
 			virtual bool				IsFocused()=0;
-			/// <summary>
-			/// Activate to the window.
-			/// </summary>
 			virtual void				SetActivate()=0;
-			/// <summary>
-			/// Test is the window activated.
-			/// </summary>
-			/// <returns>Returns true if the window is activated.</returns>
 			virtual bool				IsActivated()=0;
 			
-			/// <summary>
-			/// Show the icon in the task bar.
-			/// </summary>
 			virtual void				ShowInTaskBar()=0;
-			/// <summary>
-			/// Hide the icon in the task bar.
-			/// </summary>
 			virtual void				HideInTaskBar()=0;
-			/// <summary>
-			/// Test is the window icon appeared in the task bar.
-			/// </summary>
-			/// <returns>Returns true if the window icon appears in the task bar.</returns>
 			virtual bool				IsAppearedInTaskBar()=0;
 			
-			/// <summary>
-			/// Enable activation to the window.
-			/// </summary>
 			virtual void				EnableActivate()=0;
-			/// <summary>
-			/// Disable activation to the window.
-			/// </summary>
 			virtual void				DisableActivate()=0;
-			/// <summary>
-			/// Test is the window allowed to be activated.
-			/// </summary>
-			/// <returns>Returns true if the window is allowed to be activated.</returns>
 			virtual bool				IsEnabledActivate()=0;
 			
-			/// <summary>
-			/// Require mouse message capturing to this window. If the capture is required, all mouse message will be send to this window.
-			/// </summary>
-			/// <returns>Returns true if this operation succeeded.</returns>
 			virtual bool				RequireCapture()=0;
-			/// <summary>
-			/// Release mouse message capturing to this window. If the capture is required, all mouse message will be send to this window.
-			/// </summary>
-			/// <returns>Returns true if this operation succeeded.</returns>
 			virtual bool				ReleaseCapture()=0;
 
-			/// <summary>
-			/// Test is the maximize box visible.
-			/// </summary>
-			/// <returns>Returns true if the maximize box is visible.</returns>
 			virtual bool				GetMaximizedBox()=0;
-			/// <summary>
-			/// Make the maximize box visible or invisible.
-			/// </summary>
-			/// <param name="visible">True to make the maximize box visible.</param>
 			virtual void				SetMaximizedBox(bool visible)=0;
-			/// <summary>
-			/// Test is the minimize box visible.
-			/// </summary>
-			/// <returns>Returns true if the minimize box is visible.</returns>
 			virtual bool				GetMinimizedBox()=0;
-			/// <summary>
-			/// Make the minimize box visible or invisible.
-			/// </summary>
-			/// <param name="visible">True to make the minimize box visible.</param>
 			virtual void				SetMinimizedBox(bool visible)=0;
-			/// <summary>
-			/// Test is the border visible.
-			/// </summary>
-			/// <returns>Returns true if the border is visible.</returns>
 			virtual bool				GetBorder()=0;
-			/// <summary>
-			/// Make the border visible or invisible.
-			/// </summary>
-			/// <param name="visible">True to make the border visible.</param>
 			virtual void				SetBorder(bool visible)=0;
-			/// <summary>
-			/// Test is the size box visible.
-			/// </summary>
-			/// <returns>Returns true if the size box is visible.</returns>
 			virtual bool				GetSizeBox()=0;
-			/// <summary>
-			/// Make the size box visible or invisible.
-			/// </summary>
-			/// <param name="visible">True to make the size box visible.</param>
 			virtual void				SetSizeBox(bool visible)=0;
-			/// <summary>
-			/// Test is the icon visible.
-			/// </summary>
-			/// <returns>Returns true if the icon is visible.</returns>
 			virtual bool				GetIconVisible()=0;
-			/// <summary>
-			/// Make the icon visible or invisible.
-			/// </summary>
-			/// <param name="visible">True to make the icon visible.</param>
 			virtual void				SetIconVisible(bool visible)=0;
-			/// <summary>
-			/// Test is the title bar visible.
-			/// </summary>
-			/// <returns>Returns true if the title bar is visible.</returns>
 			virtual bool				GetTitleBar()=0;
-			/// <summary>
-			/// Make the title bar visible or invisible.
-			/// </summary>
-			/// <param name="visible">True to make the title bar visible.</param>
 			virtual void				SetTitleBar(bool visible)=0;
-			/// <summary>
-			/// Test is the window always on top of the desktop.
-			/// </summary>
-			/// <returns>Returns true if the window is always on top of the desktop.</returns>
 			virtual bool				GetTopMost()=0;
-			/// <summary>
-			/// Make the window always or never on top of the desktop.
-			/// </summary>
-			/// <param name="topmost">True to make the window always  on top of the desktop.</param>
 			virtual void				SetTopMost(bool topmost)=0;
 			
-			/// <summary>
-			/// Install an message listener.
-			/// </summary>
-			/// <returns>Returns true if this operation succeeded.</returns>
-			/// <param name="listener">The listener to install.</param>
 			virtual bool				InstallListener(INativeWindowListener* listener)=0;
-			/// <summary>
-			/// Uninstall an message listener.
-			/// </summary>
-			/// <returns>Returns true if this operation succeeded.</returns>
-			/// <param name="listener">The listener to uninstall.</param>
 			virtual bool				UninstallListener(INativeWindowListener* listener)=0;
-			/// <summary>
-			/// Redraw the content of the window.
-			/// </summary>
 			virtual void				RedrawContent()=0;
 		};
 
-		/// <summary>
-		/// Mouse message information.
-		/// </summary>
 		struct NativeWindowMouseInfo
 		{
-			/// <summary>True if the control button is pressed.</summary>
 			bool						ctrl;
-			/// <summary>True if the shift button is pressed.</summary>
 			bool						shift;
-			/// <summary>True if the left mouse button is pressed.</summary>
 			bool						left;
-			/// <summary>True if the middle mouse button is pressed.</summary>
 			bool						middle;
-			/// <summary>True if the right mouse button is pressed.</summary>
 			bool						right;
-			/// <summary>The mouse position of x dimension.</summary>
 			int							x;
-			/// <summary>The mouse position of y dimension.</summary>
 			int							y;
-			/// <summary>The delta of the wheel.</summary>
 			int							wheel;
 		};
 		
-		/// <summary>
-		/// Key message information.
-		/// </summary>
 		struct NativeWindowKeyInfo
 		{
-			/// <summary>Key code of the key that sends this message.</summary>
 			int							code;
-			/// <summary>True if the control button is pressed.</summary>
 			bool						ctrl;
-			/// <summary>True if the shift button is pressed.</summary>
 			bool						shift;
-			/// <summary>True if the alt button is pressed.</summary>
 			bool						alt;
-			/// <summary>True if the capslock button is pressed.</summary>
 			bool						capslock;
 		};
 		
-		/// <summary>
-		/// Character message information.
-		/// </summary>
 		struct NativeWindowCharInfo
 		{
-			/// <summary>Character that sends this message.</summary>
 			wchar_t						code;
-			/// <summary>True if the control button is pressed.</summary>
 			bool						ctrl;
-			/// <summary>True if the shift button is pressed.</summary>
 			bool						shift;
-			/// <summary>True if the alt button is pressed.</summary>
 			bool						alt;
-			/// <summary>True if the capslock button is pressed.</summary>
 			bool						capslock;
 		};
 		
-		/// <summary>
-		/// Represents a message listener to an <see cref="INativeWindow"/>.
-		/// </summary>
 		class INativeWindowListener : public Interface
 		{
 		public:
-			/// <summary>
-			/// Called when the window is moving.
-			/// </summary>
-			/// <param name="bounds">The bounds. Message handler can change the bounds.</param>
-			/// <param name="fixSizeOnly">True if the message raise only want the message handler to change the size.</param>
 			virtual void				Moving(Rect& bounds, bool fixSizeOnly);
-			/// <summary>
-			/// Called when the window is moved.
-			/// </summary>
 			virtual void				Moved();
-			/// <summary>
-			/// Called when the window is enabled.
-			/// </summary>
 			virtual void				Enabled();
-			/// <summary>
-			/// Called when the window is disabled.
-			/// </summary>
 			virtual void				Disabled();
-			/// <summary>
-			/// Called when the window got the focus.
-			/// </summary>
 			virtual void				GotFocus();
-			/// <summary>
-			/// Called when the window lost the focus.
-			/// </summary>
 			virtual void				LostFocus();
-			/// <summary>
-			/// Called when the window is activated.
-			/// </summary>
 			virtual void				Activated();
-			/// <summary>
-			/// Called when the window is deactivated.
-			/// </summary>
 			virtual void				Deactivated();
-			/// <summary>
-			/// Called when the window is opened.
-			/// </summary>
 			virtual void				Opened();
-			/// <summary>
-			/// Called when the window is closing.
-			/// </summary>
-			/// <param name="cancel">Change the value to true to prevent the windows from being closed.</param>
 			virtual void				Closing(bool& cancel);
-			/// <summary>
-			/// Called when the window is closed.
-			/// </summary>
 			virtual void				Closed();
-			/// <summary>
-			/// Called when the window is painting.
-			/// </summary>
 			virtual void				Paint();
-			/// <summary>
-			/// Called when the window is destroying.
-			/// </summary>
 			virtual void				Destroying();
-			/// <summary>
-			/// Called when the window is destroyed.
-			/// </summary>
 			virtual void				Destroyed();
 			
-			/// <summary>
-			/// Called when the left mouse button is pressed.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				LeftButtonDown(const NativeWindowMouseInfo& info);
-			/// <summary>
-			/// Called when the left mouse button is released.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				LeftButtonUp(const NativeWindowMouseInfo& info);
-			/// <summary>
-			/// Called when the left mouse button performed a double click.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				LeftButtonDoubleClick(const NativeWindowMouseInfo& info);
-			/// <summary>
-			/// Called when the right mouse button is pressed.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				RightButtonDown(const NativeWindowMouseInfo& info);
-			/// <summary>
-			/// Called when the right mouse button is released.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				RightButtonUp(const NativeWindowMouseInfo& info);
-			/// <summary>
-			/// Called when the right mouse button performed a double click.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				RightButtonDoubleClick(const NativeWindowMouseInfo& info);
-			/// <summary>
-			/// Called when the middle mouse button is pressed.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				MiddleButtonDown(const NativeWindowMouseInfo& info);
-			/// <summary>
-			/// Called when the middle mouse button is released.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				MiddleButtonUp(const NativeWindowMouseInfo& info);
-			/// <summary>
-			/// Called when the middle mouse button performed a double click.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				MiddleButtonDoubleClick(const NativeWindowMouseInfo& info);
-			/// <summary>
-			/// Called when the horizontal mouse wheel scrolls.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				HorizontalWheel(const NativeWindowMouseInfo& info);
-			/// <summary>
-			/// Called when the horizontal vertical wheel scrolls.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				VerticalWheel(const NativeWindowMouseInfo& info);
-			/// <summary>
-			/// Called when the mouse is moving on the window.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				MouseMoving(const NativeWindowMouseInfo& info);
-			/// <summary>
-			/// Called when the mouse entered the window.
-			/// </summary>
 			virtual void				MouseEntered();
-			/// <summary>
-			/// Called when the mouse leaved the window.
-			/// </summary>
 			virtual void				MouseLeaved();
 			
-			/// <summary>
-			/// Called a key is pressed.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				KeyDown(const NativeWindowKeyInfo& info);
-			/// <summary>
-			/// Called a key is released.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				KeyUp(const NativeWindowKeyInfo& info);
-			/// <summary>
-			/// Called a system key is pressed.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				SysKeyDown(const NativeWindowKeyInfo& info);
-			/// <summary>
-			/// Called a system key is released.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				SysKeyUp(const NativeWindowKeyInfo& info);
-			/// <summary>
-			/// Called an input character is generated.
-			/// </summary>
-			/// <param name="info">Detailed information to this message.</param>
 			virtual void				Char(const NativeWindowCharInfo& info);
 		};
 
@@ -1363,211 +754,71 @@ Native Window
 Native Window Services
 ***********************************************************************/
 
-		/// <summary>
-		/// System resource service. To access this service, use [M:vl.presentation.INativeController.ResourceService].
-		/// </summary>
 		class INativeResourceService : public virtual Interface
 		{
 		public:
-			/// <summary>
-			/// Get a cached cursor object using a predefined system cursor type;
-			/// </summary>
-			/// <returns>The cached cursor object.</returns>
-			/// <param name="type">The predefined system cursor type.</param>
 			virtual INativeCursor*			GetSystemCursor(INativeCursor::SystemCursorType type)=0;
-			/// <summary>
-			/// Get a cached cursor object using a default system cursor type;
-			/// </summary>
-			/// <returns>The cached cursor object.</returns>
 			virtual INativeCursor*			GetDefaultSystemCursor()=0;
 
-			/// <summary>
-			/// Get the default font configuration of the system.
-			/// </summary>
-			/// <returns>The default font configuration of the system.</returns>
 			virtual FontProperties			GetDefaultFont()=0;
-			/// <summary>
-			/// Override the default font configuration for the current process, only available GacUI library.
-			/// </summary>
-			/// <param name="value">The font configuration to override.</param>
 			virtual void					SetDefaultFont(const FontProperties& value)=0;
 		};
 		
-		/// <summary>
-		/// Asynchronized operation service. GacUI is not a thread safe library except for this service. To access this service, use [M:vl.presentation.INativeController.AsyncService].
-		/// </summary>
 		class INativeAsyncService : public virtual Interface
 		{
 		public:
 			typedef void (AsyncTaskProc)(void* arguments);
 
-			/// <summary>
-			/// Test is the current thread the main thread.
-			/// </summary>
-			/// <returns>Returns true if the current thread is the main thread.</returns>
 			virtual bool					IsInMainThread()=0;
-			/// <summary>
-			/// Invoke a specified function with an specified argument in the main thread.
-			/// </summary>
-			/// <param name="proc">The specified function.</param>
-			/// <param name="argument">The specified argument.</param>
 			virtual void					InvokeInMainThread(AsyncTaskProc* proc, void* argument)=0;
-			/// <summary>
-			/// Invoke a specified function with an specified argument in the main thread and wait for the function to complete or timeout.
-			/// </summary>
-			/// <returns>Return true if the function complete. Return false if the function has not completed during a specified period of time.</returns>
-			/// <param name="proc">The specified function.</param>
-			/// <param name="argument">The specified argument.</param>
-			/// <param name="milliseconds">The specified period of time to wait. Set to -1 (default value) to wait forever until the function completed.</param>
 			virtual bool					InvokeInMainThreadAndWait(AsyncTaskProc* proc, void* argument, int milliseconds=-1)=0;
 		};
 		
-		/// <summary>
-		/// Clipboard service. To access this service, use [M:vl.presentation.INativeController.ClipboardService].
-		/// </summary>
 		class INativeClipboardService : public virtual Interface
 		{
 		public:
-			/// <summary>
-			/// Test is there a text in the clipboard.
-			/// </summary>
-			/// <returns>Returns true if there is a text in the clipboard.</returns>
 			virtual bool					ContainsText()=0;
-			/// <summary>
-			/// Get the text in the clipboard.
-			/// </summary>
-			/// <returns>The text in the clipboard.</returns>
 			virtual WString					GetText()=0;
-			/// <summary>
-			/// Copy the text to the clipboard.
-			/// </summary>
-			/// <returns>Returns true if this operation succeeded.</returns>
-			/// <param name="value">The text to copy to the clipboard.</param>
 			virtual bool					SetText(const WString& value)=0;
 		};
 		
-		/// <summary>
-		/// Screen information service. To access this service, use [M:vl.presentation.INativeController.ScreenService].
-		/// </summary>
 		class INativeScreenService : public virtual Interface
 		{
 		public:
-			/// <summary>
-			/// Get the number of all available screens.
-			/// </summary>
-			///  <returns>The number of all available screens.</returns>
 			virtual int						GetScreenCount()=0;
-			/// <summary>
-			/// Get the screen object by a specified screen index.
-			/// </summary>
-			/// <returns>The screen object.</returns>
-			/// <param name="index">The specified screen index.</param>
 			virtual INativeScreen*			GetScreen(int index)=0;
-			/// <summary>
-			/// Get the screen object where the main part of the specified window is inside.
-			/// </summary>
-			/// <returns>The screen object.</returns>
-			/// <param name="index">The specified window.</param>
 			virtual INativeScreen*			GetScreen(INativeWindow* window)=0;
 		};
 		
-		/// <summary>
-		/// Window service. To access this service, use [M:vl.presentation.INativeController.WindowService].
-		/// </summary>
 		class INativeWindowService : public virtual Interface
 		{
 		public:
-			/// <summary>
-			/// Create a window.
-			/// </summary>
-			/// <returns>The created window.</returns>
 			virtual INativeWindow*			CreateNativeWindow()=0;
-			/// <summary>
-			/// Destroy a window.
-			/// </summary>
-			/// <param name="window">The window to destroy.</param>
 			virtual void					DestroyNativeWindow(INativeWindow* window)=0;
-			/// <summary>
-			/// Get the main window.
-			/// </summary>
-			/// <returns>The main window.</returns>
 			virtual INativeWindow*			GetMainWindow()=0;
-			/// <summary>
-			/// Get the window that under a specified position in screen space.
-			/// </summary>
-			/// <returns>The window that under a specified position in screen space.</returns>
-			/// <param name="location">The specified position in screen space.</param>
 			virtual INativeWindow*			GetWindow(Point location)=0;
-			/// <summary>
-			/// Make the specified window a main window, show that window, and wait until the windows is closed.
-			/// </summary>
-			/// <param name="window">The specified window.</param>
 			virtual void					Run(INativeWindow* window)=0;
 		};
 		
-		/// <summary>
-		/// User input service. To access this service, use [M:vl.presentation.INativeController.InputService].
-		/// </summary>
 		class INativeInputService : public virtual Interface
 		{
 		public:
-			/// <summary>
-			/// Start to reveive global mouse message.
-			/// </summary>
 			virtual void					StartHookMouse()=0;
-			/// <summary>
-			/// Stop to receive global mouse message.
-			/// </summary>
 			virtual void					StopHookMouse()=0;
-			/// <summary>
-			/// Test is the global mouse message receiving enabled.
-			/// </summary>
-			/// <returns>Returns true if the global mouse message receiving is enabled.</returns>
 			virtual bool					IsHookingMouse()=0;
 			
-			/// <summary>
-			/// Start to reveive global timer message.
-			/// </summary>
 			virtual void					StartTimer()=0;
-			/// <summary>
-			/// Stop to receive global timer message.
-			/// </summary>
 			virtual void					StopTimer()=0;
-			/// <summary>
-			/// Test is the global timer message receiving enabled.
-			/// </summary>
-			/// <returns>Returns true if the global timer message receiving is enabled.</returns>
 			virtual bool					IsTimerEnabled()=0;
 			
-			/// <summary>
-			/// Test is the specified key pressing.
-			/// </summary>
-			/// <returns>Returns true if the specified key is pressing.</returns>
 			virtual bool					IsKeyPressing(int code)=0;
-			/// <summary>
-			/// Test is the specified key toggled.
-			/// </summary>
-			/// <returns>Returns true if the specified key is toggled.</returns>
 			virtual bool					IsKeyToggled(int code)=0;
 		};
 		
-		/// <summary>
-		/// Callback service. To access this service, use [M:vl.presentation.INativeController.CallbackService].
-		/// </summary>
 		class INativeCallbackService : public virtual Interface
 		{
 		public:
-			/// <summary>
-			/// Install a global message listener.
-			/// </summary>
-			/// <returns>Returns true if this operation succeeded.</returns>
-			/// <param name="listener">The global message listener to install.</param>
 			virtual bool					InstallListener(INativeControllerListener* listener)=0;
-			/// <summary>
-			/// Uninstall a global message listener.
-			/// </summary>
-			/// <returns>Returns true if this operation succeeded.</returns>
-			/// <param name="listener">The global message listener to uninstall.</param>
 			virtual bool					UninstallListener(INativeControllerListener* listener)=0;
 		};
 
@@ -1575,113 +826,34 @@ Native Window Services
 Native Window Controller
 ***********************************************************************/
 
-		/// <summary>
-		/// Global native system service controller. Use [M:vl.presentation.GetCurrentController] to access this controller.
-		/// </summary>
 		class INativeController : public virtual Interface
 		{
 		public:
-			/// <summary>
-			/// Get the callback service.
-			/// </summary>
-			/// <returns>The callback service</returns>
 			virtual INativeCallbackService*			CallbackService()=0;
-			/// <summary>
-			/// Get the system resource service.
-			/// </summary>
-			/// <returns>The system resource service</returns>
 			virtual INativeResourceService*			ResourceService()=0;
-			/// <summary>
-			/// Get the asynchronized operation service.
-			/// </summary>
-			/// <returns>The asynchronized operation service</returns>
 			virtual INativeAsyncService*			AsyncService()=0;
-			/// <summary>
-			/// Get the clipboard service.
-			/// </summary>
-			/// <returns>The clipboard service</returns>
 			virtual INativeClipboardService*		ClipboardService()=0;
-			/// <summary>
-			/// Get the image service.
-			/// </summary>
-			/// <returns>The image service</returns>
 			virtual INativeImageService*			ImageService()=0;
-			/// <summary>
-			/// Get the screen information service.
-			/// </summary>
-			/// <returns>The screen information service</returns>
 			virtual INativeScreenService*			ScreenService()=0;
-			/// <summary>
-			/// Get the window service.
-			/// </summary>
-			/// <returns>The window service</returns>
 			virtual INativeWindowService*			WindowService()=0;
-			/// <summary>
-			/// Get the user input service.
-			/// </summary>
-			/// <returns>The user input service</returns>
 			virtual INativeInputService*			InputService()=0;
 		};
 		
-		/// <summary>
-		/// Represents a global message listener to an <see cref="INativeController"/>.
-		/// </summary>
 		class INativeControllerListener : public Interface
 		{
 		public:
-			/// <summary>
-			/// Called when the left mouse button is pressed. To receive or not receive this message, use <see cref="INativeInputService::StartHookMouse"/> or <see cref="INativeInputService::StopHookMouse"/>.
-			/// </summary>
-			/// <param name="position">The mouse position in the screen space.</param>
 			virtual void					LeftButtonDown(Point position);
-			/// <summary>
-			/// Called when the left mouse button is released. To receive or not receive this message, use <see cref="INativeInputService::StartHookMouse"/> or <see cref="INativeInputService::StopHookMouse"/>
-			/// </summary>
-			/// <param name="position">The mouse position in the screen space.</param>
 			virtual void					LeftButtonUp(Point position);
-			/// <summary>
-			/// Called when the right mouse button is pressed. To receive or not receive this message, use <see cref="INativeInputService::StartHookMouse"/> or <see cref="INativeInputService::StopHookMouse"/>
-			/// </summary>
-			/// <param name="position">The mouse position in the screen space.</param>
 			virtual void					RightButtonDown(Point position);
-			/// <summary>
-			/// Called when the right mouse button is released. To receive or not receive this message, use <see cref="INativeInputService::StartHookMouse"/> or <see cref="INativeInputService::StopHookMouse"/>
-			/// </summary>
-			/// <param name="position">The mouse position in the screen space.</param>
 			virtual void					RightButtonUp(Point position);
-			/// <summary>
-			/// Called when the mouse is moving. To receive or not receive this message, use <see cref="INativeInputService::StartHookMouse"/> or <see cref="INativeInputService::StopHookMouse"/>
-			/// </summary>
 			virtual void					MouseMoving(Point position);
-			/// <summary>
-			/// Called when the global timer message raised. To receive or not receive this message, use <see cref="INativeInputService::StartTimer"/> or <see cref="INativeInputService::StopTimer"/>
-			/// </summary>
 			virtual void					GlobalTimer();
-			/// <summary>
-			/// Called when the content of the clipboard is updated.
-			/// </summary>
 			virtual void					ClipboardUpdated();
-			/// <summary>
-			/// Called when a window is created.
-			/// </summary>
-			/// <param name="window">The created window.</param>
 			virtual void					NativeWindowCreated(INativeWindow* window);
-			/// <summary>
-			/// Called when a window is destroying.
-			/// </summary>
-			/// <param name="window">The destroying window.</param>
 			virtual void					NativeWindowDestroying(INativeWindow* window);
 		};
 
-		/// <summary>
-		/// Get the global native system service controller.
-		/// </summary>
-		/// <returns>The global native system service controller.</returns>
 		extern								INativeController* GetCurrentController();
-		/// <summary>
-		/// Set the global native system service controller.
-		/// </summary>
-		/// <param name="controller">The global native system service controller.</param>
 		extern void							SetCurrentController(INativeController* controller);
 	}
 }
@@ -2261,133 +1433,47 @@ namespace vl
 Basic Construction
 ***********************************************************************/
 
-			/// <summary>
-			/// This is the interface for graphics elements.
-			/// Graphics elements usually contains some information and helper functions for visible things.
-			/// An graphics elements should be created using ElementType::Create.
-			/// </summary>
 			class IGuiGraphicsElement : public virtual IDescriptable, public Description<IGuiGraphicsElement>
 			{
 			public:
-				/// <summary>
-				/// Access the <see cref="IGuiGraphicsElementFactory"></see> that is used to create this graphics elements.
-				/// </summary>
-				/// <returns>Returns the related factory.</returns>
 				virtual IGuiGraphicsElementFactory*		GetFactory()=0;
-				/// <summary>
-				/// Access the associated <see cref="IGuiGraphicsRenderer"></see> for this graphics element.
-				/// </summary>
-				/// <returns>Returns the related renderer.</returns>
 				virtual IGuiGraphicsRenderer*			GetRenderer()=0;
 			};
 
-			/// <summary>
-			/// This is the interface for graphics element factories.
-			/// Graphics element factories should be registered using [M:vl.presentation.elements.GuiGraphicsResourceManager.RegisterElementFactory].
-			/// </summary>
 			class IGuiGraphicsElementFactory : public Interface
 			{
 			public:
-				/// <summary>
-				/// Get the name representing the kind of graphics element to be created.
-				/// </summary>
-				/// <returns>Returns the name of graphics elements.</returns>
 				virtual WString							GetElementTypeName()=0;
-				/// <summary>
-				/// Create a <see cref="IGuiGraphicsElement"></see>.
-				/// </summary>
-				/// <returns>Returns the created graphics elements.</returns>
 				virtual IGuiGraphicsElement*			Create()=0;
 			};
 
-			/// <summary>
-			/// This is the interface for graphics renderers.
-			/// </summary>
 			class IGuiGraphicsRenderer : public Interface
 			{
 			public:
-				/// <summary>
-				/// Access the graphics <see cref="IGuiGraphicsRendererFactory"></see> that is used to create this graphics renderer.
-				/// </summary>
-				/// <returns>Returns the related factory.</returns>
 				virtual IGuiGraphicsRendererFactory*	GetFactory()=0;
 
-				/// <summary>
-				/// Initialize the grpahics renderer by binding a <see cref="IGuiGraphicsElement"></see> to it.
-				/// </summary>
-				/// <param name="element">The graphics element to bind.</param>
 				virtual void							Initialize(IGuiGraphicsElement* element)=0;
-				/// <summary>
-				/// Release all resources that used by this renderer.
-				/// </summary>
 				virtual void							Finalize()=0;
-				/// <summary>
-				/// Set a <see cref="IGuiGraphicsRenderTarget"></see> to this element.
-				/// </summary>
-				/// <param name="renderTarget">The graphics render target. It can be NULL.</param>
 				virtual void							SetRenderTarget(IGuiGraphicsRenderTarget* renderTarget)=0;
-				/// <summary>
-				/// Render the graphics element using a specified bounds.
-				/// </summary>
-				/// <param name="bounds">Bounds to decide the size and position of the binded graphics element.</param>
 				virtual void							Render(Rect bounds)=0;
-				/// <summary>
-				/// Notify that the state in the binded graphics element is changed. This function is usually called by the element itself.
-				/// </summary>
 				virtual void							OnElementStateChanged()=0;
-				/// <summary>
-				/// Calculate the minimum size using the binded graphics element and it's state.
-				/// </summary>
-				/// <returns>The minimum size.</returns>
 				virtual Size							GetMinSize()=0;
 			};
 
-			/// <summary>
-			/// This is the interface for graphics renderer factories.
-			/// Graphics renderers should be registered using [M:vl.presentation.elements.GuiGraphicsResourceManager.RegisterRendererFactory]. 
-			/// </summary>
 			class IGuiGraphicsRendererFactory : public Interface
 			{
 			public:
-				/// <summary>
-				/// Create a <see cref="IGuiGraphicsRenderer"></see>.
-				/// </summary>
-				/// <returns>Returns the created graphics renderer.</returns>
 				virtual IGuiGraphicsRenderer*			Create()=0;
 			};
 
-			/// <summary>
-			/// This is the interface for graphics renderer targets.
-			/// </summary>
 			class IGuiGraphicsRenderTarget : public Interface
 			{
 			public:
-				/// <summary>
-				/// Notify the target to prepare for rendering.
-				/// </summary>
 				virtual void							StartRendering()=0;
-				/// <summary>
-				/// Notify the target to stop rendering.
-				/// </summary>
 				virtual void							StopRendering()=0;
-				/// <summary>
-				/// Apply a clipper to the render target.
-				/// The result clipper is combined by all clippers in the clipper stack maintained by the render target.
-				/// </summary>
 				virtual void							PushClipper(Rect clipper)=0;
-				/// <summary>
-				/// Remove the last pushed clipper from the clipper stack.
-				/// </summary>
 				virtual void							PopClipper()=0;
-				/// <summary>
-				/// Get the combined clipper
-				/// </summary>
-				/// <returns>The combined clipper</returns>
 				virtual Rect							GetClipper()=0;
-				/// <summary>
-				/// Test is the combined clipper is as large as the render target.
-				/// </summary>
-				/// <returns>Return true if the combined clipper is as large as the render target.</returns>
 				virtual bool							IsClipperCoverWholeTarget()=0;
 			};
 
@@ -2395,9 +1481,6 @@ Basic Construction
 Resource Manager
 ***********************************************************************/
 
-			/// <summary>
-			/// This is a class for managing grpahics element factories and graphics renderer factories
-			/// </summary>
 			class GuiGraphicsResourceManager : public Object
 			{
 				typedef collections::Dictionary<WString, Ptr<IGuiGraphicsElementFactory>>		elementFactoryMap;
@@ -2406,55 +1489,18 @@ Resource Manager
 				elementFactoryMap						elementFactories;
 				rendererFactoryMap						rendererFactories;
 			public:
-				/// <summary>
-				/// Create a graphics resource manager without any predefined factories
-				/// </summary>
 				GuiGraphicsResourceManager();
 				~GuiGraphicsResourceManager();
 
-				/// <summary>
-				/// Register a <see cref="IGuiGraphicsElementFactory"></see> using the element type from <see cref="IGuiGraphicsElementFactory::GetElementTypeName"></see>.
-				/// </summary>
-				/// <param name="factory">The instance of the graphics element factory to register.</param>
-				/// <returns>Returns true if this operation succeeded.</returns>
 				virtual bool							RegisterElementFactory(IGuiGraphicsElementFactory* factory);
-				/// <summary>
-				/// Register a <see cref="IGuiGraphicsRendererFactory"></see> and bind it to a registered <see cref="IGuiGraphicsElementFactory"></see>.
-				/// </summary>
-				/// <param name="elementTypeName">The element type to represent a graphics element factory.</param>
-				/// <param name="factory">The instance of the graphics renderer factory to register.</param>
-				/// <returns>Returns true if this operation succeeded.</returns>
 				virtual bool							RegisterRendererFactory(const WString& elementTypeName, IGuiGraphicsRendererFactory* factory);
-				/// <summary>
-				/// Get the instance of a registered <see cref="IGuiGraphicsElementFactory"></see> that is binded to a specified element type.
-				/// </summary>
-				/// <param name="elementTypeName">The element type to get a corresponding graphics element factory.</param>
 				virtual IGuiGraphicsElementFactory*		GetElementFactory(const WString& elementTypeName);
-				/// <summary>
-				/// Get the instance of a registered <see cref="IGuiGraphicsRendererFactory"></see> that is binded to a specified element type.
-				/// </summary>
-				/// <param name="elementTypeName">The element type to get a corresponding graphics renderer factory.</param>
 				virtual IGuiGraphicsRendererFactory*	GetRendererFactory(const WString& elementTypeName);
-				/// <summary>
-				/// Get the instance of a <see cref="IGuiGraphicsRenderTarget"></see> that is binded to an <see cref="INativeWindow"></see>.
-				/// </summary>
 				virtual IGuiGraphicsRenderTarget*		GetRenderTarget(INativeWindow* window)=0;
 			};
 
-			/// <summary>
-			/// Get the current <see cref="GuiGraphicsResourceManager"></see>.
-			/// </summary>
-			/// <returns>Returns the current resource manager.</returns>
 			extern GuiGraphicsResourceManager*			GetGuiGraphicsResourceManager();
-			/// <summary>
-			/// Set the current <see cref="GuiGraphicsResourceManager"></see>.
-			/// </summary>
-			/// <params name="resourceManager">The resource manager to set.</params>
 			extern void									SetGuiGraphicsResourceManager(GuiGraphicsResourceManager* resourceManager);
-			/// <summary>
-			/// Helper function to register a <see cref="IGuiGraphicsElementFactory"></see> with a <see cref="IGuiGraphicsRendererFactory"></see> and bind them together.
-			/// </summary>
-			/// <returns>Returns true if this operation succeeded.</returns>
 			extern bool									RegisterFactories(IGuiGraphicsElementFactory* elementFactory, IGuiGraphicsRendererFactory* rendererFactory);
 
 /***********************************************************************
@@ -2631,21 +1677,13 @@ Elements
 
 			namespace ElementShape
 			{
-				/// <summary>
-				/// Defines an shape for some <see cref="IGuiGraphicsElement"></see>.
-				/// </summary>
 				enum Type
 				{
-					/// <summary>[T:vl.presentation.elements.ElementShape.Type]Rectangle shape.</summary>
 					Rectangle,
-					/// <summary>[T:vl.presentation.elements.ElementShape.Type]Ellipse shape.</summary>
 					Ellipse,
 				};
 			};
 
-			/// <summary>
-			/// Defines a border element with a thickness of one pixel.
-			/// </summary>
 			class GuiSolidBorderElement : public Object, public IGuiGraphicsElement, public Description<GuiSolidBorderElement>
 			{
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiSolidBorderElement, L"SolidBorder")
@@ -2657,31 +1695,12 @@ Elements
 			public:
 				~GuiSolidBorderElement();
 
-				/// <summary>
-				/// Get the border color.
-				/// </summary>
-				/// <returns>The border color.</returns>
 				Color					GetColor();
-				/// <summary>
-				/// Set the border color.
-				/// </summary>
-				/// <param name="value">The new border color.</param>
 				void					SetColor(Color value);
-				/// <summary>
-				/// Get the shape.
-				/// </summary>
-				/// <returns>The shape.</returns>
 				ElementShape::Type		GetShape();
-				/// <summary>
-				/// Set the shape.
-				/// </summary>
-				/// <param name="value">The new shape.</param>
 				void					SetShape(ElementShape::Type value);
 			};
 			
-			/// <summary>
-			/// Defines a rectangle border element with round corners and a thickness of one pixel.
-			/// </summary>
 			class GuiRoundBorderElement : public Object, public IGuiGraphicsElement, public Description<GuiRoundBorderElement>
 			{
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiRoundBorderElement, L"RoundBorder")
@@ -2693,32 +1712,13 @@ Elements
 			public:
 				~GuiRoundBorderElement();
 				
-				/// <summary>
-				/// Get the border color.
-				/// </summary>
-				/// <returns>The border color.</returns>
 				Color					GetColor();
-				/// <summary>
-				/// Set the border color.
-				/// </summary>
-				/// <param name="value">The new border color.</param>
 				void					SetColor(Color value);
 				
-				/// <summary>
-				/// Get the radius of round corners.
-				/// </summary>
-				/// <returns>The radius.</returns>
 				int						GetRadius();
-				/// <summary>
-				/// Set the radius of round corners.
-				/// </summary>
-				/// <param name="value">The new radius.</param>
 				void					SetRadius(int value);
 			};
 			
-			/// <summary>
-			/// Defines a 3D-like rectangle element with a thickness of two pixels.
-			/// </summary>
 			class Gui3DBorderElement : public Object, public IGuiGraphicsElement, public Description<Gui3DBorderElement>
 			{
 				DEFINE_GUI_GRAPHICS_ELEMENT(Gui3DBorderElement, L"3DBorder")
@@ -2730,39 +1730,18 @@ Elements
 			public:
 				~Gui3DBorderElement();
 				
-				/// <summary>
-				/// Get the left-top color.
-				/// </summary>
-				/// <returns>The left-top color.</returns>
 				Color					GetColor1();
-				/// <summary>
-				/// Get the right-bottom color.
-				/// </summary>
-				/// <returns>The right-bottom color.</returns>
 				Color					GetColor2();
-				/// <summary>
-				/// Set colors of the element.
-				/// </summary>
-				/// <param name="value1">The new left-top color.</param>
-				/// <param name="value2">The new right bottom color.</param>
 				void					SetColors(Color value1, Color value2);
 			};
 			
-			/// <summary>
-			/// Defines a 3D-like splitter element with a thickness of two pixels.
-			/// </summary>
 			class Gui3DSplitterElement : public Object, public IGuiGraphicsElement, public Description<Gui3DSplitterElement>
 			{
 				DEFINE_GUI_GRAPHICS_ELEMENT(Gui3DSplitterElement, L"3DSplitter")
 			public:
-				/// <summary>
-				/// Defines a direction of the <see cref="Gui3DSplitterElement"></see>.
-				/// </summary>
 				enum Direction
 				{
-					/// <summary>[T:vl.presentation.elements.Gui3DSplitterElement.Direction]Horizontal direction.</summary>
 					Horizontal,
-					/// <summary>[T:vl.presentation.elements.Gui3DSplitterElement.Direction]Vertical direction.</summary>
 					Vertical,
 				};
 			protected:
@@ -2774,38 +1753,14 @@ Elements
 			public:
 				~Gui3DSplitterElement();
 				
-				/// <summary>
-				/// Get the left-top color.
-				/// </summary>
-				/// <returns>The left-top color.</returns>
 				Color					GetColor1();
-				/// <summary>
-				/// Get the right-bottom color.
-				/// </summary>
-				/// <returns>The right-bottom color.</returns>
 				Color					GetColor2();
-				/// <summary>
-				/// Set colors of the element.
-				/// </summary>
-				/// <param name="value1">The new left-top color.</param>
-				/// <param name="value2">The new right bottom color.</param>
 				void					SetColors(Color value1, Color value2);
 				
-				/// <summary>
-				/// Get the direction.
-				/// </summary>
-				/// <returns>The direction.</returns>
 				Direction				GetDirection();
-				/// <summary>
-				/// Set the direction.
-				/// </summary>
-				/// <param name="value">The new direction.</param>
 				void					SetDirection(Direction value);
 			};
 
-			/// <summary>
-			/// Defines a color-filled element without border.
-			/// </summary>
 			class GuiSolidBackgroundElement : public Object, public IGuiGraphicsElement, public Description<GuiSolidBackgroundElement>
 			{
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiSolidBackgroundElement, L"SolidBackground")
@@ -2817,47 +1772,21 @@ Elements
 			public:
 				~GuiSolidBackgroundElement();
 				
-				/// <summary>
-				/// Get the border color.
-				/// </summary>
-				/// <returns>The border color.</returns>
 				Color					GetColor();
-				/// <summary>
-				/// Set the border color.
-				/// </summary>
-				/// <param name="value">The new border color.</param>
 				void					SetColor(Color value);
-				/// <summary>
-				/// Get the shape.
-				/// </summary>
-				/// <returns>The shape.</returns>
 				ElementShape::Type		GetShape();
-				/// <summary>
-				/// Set the shape.
-				/// </summary>
-				/// <param name="value">The new shape.</param>
 				void					SetShape(ElementShape::Type value);
 			};
 			
-			/// <summary>
-			/// Defines a color-filled gradient element without border.
-			/// </summary>
 			class GuiGradientBackgroundElement : public Object, public IGuiGraphicsElement, public Description<GuiGradientBackgroundElement>
 			{
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiGradientBackgroundElement, L"GradientBackground")
 			public:
-				/// <summary>
-				/// Defines a direction of the <see cref="Gui3DSplitterElement"></see>.
-				/// </summary>
 				enum Direction
 				{
-					/// <summary>[T:vl.presentation.elements.GuiGradientBackgroundElement.Direction]Horizontal direction.</summary>
 					Horizontal,
-					/// <summary>[T:vl.presentation.elements.GuiGradientBackgroundElement.Direction]vertical direction.</summary>
 					Vertical,
-					/// <summary>[T:vl.presentation.elements.GuiGradientBackgroundElement.Direction]Slash direction.</summary>
 					Slash,
-					/// <summary>[T:vl.presentation.elements.GuiGradientBackgroundElement.Direction]Back slash direction.</summary>
 					Backslash,
 				};
 			protected:
@@ -2869,48 +1798,16 @@ Elements
 			public:
 				~GuiGradientBackgroundElement();
 				
-				/// <summary>
-				/// Get the left-top color.
-				/// </summary>
-				/// <returns>The left-top color.</returns>
 				Color					GetColor1();
-				/// <summary>
-				/// Get the right bottom color.
-				/// </summary>
-				/// <returns>The right-bottom color.</returns>
 				Color					GetColor2();
-				/// <summary>
-				/// Set colors of the element.
-				/// </summary>
-				/// <param name="value1">The new left-top color.</param>
-				/// <param name="value2">The new right bottom color.</param>
 				void					SetColors(Color value1, Color value2);
 				
-				/// <summary>
-				/// Get the direction.
-				/// </summary>
-				/// <returns>The direction.</returns>
 				Direction				GetDirection();
-				/// <summary>
-				/// Set the direction.
-				/// </summary>
-				/// <param name="value">The new direction.</param>
 				void					SetDirection(Direction value);
-				/// <summary>
-				/// Get the shape.
-				/// </summary>
-				/// <returns>The shape.</returns>
 				ElementShape::Type		GetShape();
-				/// <summary>
-				/// Set the shape.
-				/// </summary>
-				/// <param name="value">The new shape.</param>
 				void					SetShape(ElementShape::Type value);
 			};
 			
-			/// <summary>
-			/// Defines an element of a plain text.
-			/// </summary>
 			class GuiSolidLabelElement : public Object, public IGuiGraphicsElement, public Description<GuiSolidLabelElement>
 			{
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiSolidLabelElement, L"SolidLabel");
@@ -2928,93 +1825,29 @@ Elements
 			public:
 				~GuiSolidLabelElement();
 				
-				/// <summary>
-				/// Get the text color.
-				/// </summary>
-				/// <returns>The text color.</returns>
 				Color					GetColor();
-				/// <summary>
-				/// Set the text color.
-				/// </summary>
-				/// <param name="value">The new text color.</param>
 				void					SetColor(Color value);
 				
-				/// <summary>
-				/// Get the text font.
-				/// </summary>
-				/// <returns>The text font.</returns>
 				const FontProperties&	GetFont();
-				/// <summary>
-				/// Set the text font.
-				/// </summary>
-				/// <param name="value">The new text font.</param>
 				void					SetFont(const FontProperties& value);
 				
-				/// <summary>
-				/// Get the text.
-				/// </summary>
-				/// <returns>The text.</returns>
 				const WString&			GetText();
-				/// <summary>
-				/// Set the text.
-				/// </summary>
-				/// <param name="value">The new text.</param>
 				void					SetText(const WString& value);
 				
-				/// <summary>
-				/// Get the horizontal alignment of the text.
-				/// </summary>
-				/// <returns>The horizontal alignment of the text.</returns>
 				Alignment::Type			GetHorizontalAlignment();
-				/// <summary>
-				/// Get the vertical alignment of the text.
-				/// </summary>
-				/// <returns>The vertical alignment of the text.</returns>
 				Alignment::Type			GetVerticalAlignment();
-				/// <summary>
-				/// Set alignments in both directions of the text.
-				/// </summary>
-				/// <param name="horizontal">The new horizontal alignment of the text.</param>
-				/// <param name="vertical">The vertical alignment of the text.</param>
 				void					SetAlignments(Alignment::Type horizontal, Alignment::Type vertical);
 				
-				/// <summary>
-				/// Get if line auto-wrapping is enabled for this text.
-				/// </summary>
-				/// <returns>Return true if line auto-wrapping is enabled for this text.</returns>
 				bool					GetWrapLine();
-				/// <summary>
-				/// Set if line auto-wrapping is enabled for this text.
-				/// </summary>
-				/// <param name="value">True if line auto-wrapping is enabled for this text.</param>
 				void					SetWrapLine(bool value);
 				
-				/// <summary>
-				/// Get if ellipse is enabled for this text. Ellipse will appear when the text is clipped.
-				/// </summary>
-				/// <returns>Return true if ellipse is enabled for this text.</returns>
 				bool					GetEllipse();
-				/// <summary>
-				/// Set if ellipse is enabled for this text. Ellipse will appear when the text is clipped.
-				/// </summary>
-				/// <param name="value">True if ellipse is enabled for this text.</param>
 				void					SetEllipse(bool value);
 				
-				/// <summary>
-				/// Get if multiple lines is enabled for this text.
-				/// </summary>
-				/// <returns>Return true if multiple lines is enabled for this text.</returns>
 				bool					GetMultiline();
-				/// <summary>
-				/// Set if multiple lines is enabled for this text.
-				/// </summary>
-				/// <param name="value">True if multiple lines is enabled for this text.</param>
 				void					SetMultiline(bool value);
 			};
 
-			/// <summary>
-			/// Defines an element containing an image.
-			/// </summary>
 			class GuiImageFrameElement : public Object, public IGuiGraphicsElement, public Description<GuiImageFrameElement>
 			{
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiImageFrameElement, L"ImageFrame");
@@ -3029,55 +1862,18 @@ Elements
 			public:
 				~GuiImageFrameElement();
 
-				/// <summary>
-				/// Get the containing image.
-				/// </summary>
-				/// <returns>The contining picture.</returns>
 				Ptr<INativeImage>		GetImage();
-				/// <summary>
-				/// Get the index of the frame in the containing image.
-				/// </summary>
-				/// <returns>The index of the frame in the containing image</returns>
 				int						GetFrameIndex();
-				/// <summary>
-				/// Set the containing image and the frame index.
-				/// </summary>
-				/// <param name="_image">The new containing image.</param>
-				/// <param name="_frameIndex">The new frameIndex.</param>
 				void					SetImage(Ptr<INativeImage> _image, int _frameIndex=0);
 				
-				/// <summary>
-				/// Get the horizontal alignment of the image.
-				/// </summary>
-				/// <returns>The horizontal alignment of the image.</returns>
 				Alignment::Type			GetHorizontalAlignment();
-				/// <summary>
-				/// Get the vertical alignment of the image.
-				/// </summary>
-				/// <returns>The vertical alignment of the image.</returns>
 				Alignment::Type			GetVerticalAlignment();
-				/// <summary>
-				/// Set alignments in both directions of the image.
-				/// </summary>
-				/// <param name="horizontal">The new horizontal alignment of the image.</param>
-				/// <param name="vertical">The vertical alignment of the image.</param>
 				void					SetAlignments(Alignment::Type horizontal, Alignment::Type vertical);
 
-				/// <summary>
-				/// Get if stretching is enabled for this image.
-				/// </summary>
-				/// <returns>Return true if stretching is enabled for this image.</returns>
 				bool					GetStretch();
-				/// <summary>
-				/// Set if stretching is enabled for this image.
-				/// </summary>
-				/// <param name="value">True if stretching is enabled for this image.</param>
 				void					SetStretch(bool value);
 			};
 
-			/// <summary>
-			/// Defines a polygon element with a thickness of one pixel.
-			/// </summary>
 			class GuiPolygonElement : public Object, public IGuiGraphicsElement, public Description<GuiPolygonElement>
 			{
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiPolygonElement, L"Polygon");
@@ -3091,54 +1887,16 @@ Elements
 			public:
 				~GuiPolygonElement();
 
-				/// <summary>
-				/// Get a suggested size. The polygon element will be layouted to the center of the required bounds using this size.
-				/// </summary>
-				/// <returns>The suggested size.</returns>
 				Size					GetSize();
-				/// <summary>
-				/// Set a suggested size. The polygon element will be layouted to the center of the required bounds using this size.
-				/// </summary>
-				/// <param name="value">The new size.</param>
 				void					SetSize(Size value);
 
-				/// <summary>
-				/// Get a point of the polygon element using an index.
-				/// </summary>
-				/// <param name="index">The index to access a point.</param>
-				/// <returns>The point of the polygon element associated with the index.</returns>
 				const Point&			GetPoint(int index);
-				/// <summary>
-				/// Get the number of points
-				/// </summary>
-				/// <returns>The number of points.</returns>
 				int						GetPointCount();
-				/// <summary>
-				/// Set all points to the polygon element.
-				/// </summary>
-				/// <param name="p">A pointer to a buffer that stores all points.</param>
-				/// <param name="index">The number of points.</param>
 				void					SetPoints(const Point* p, int count);
 				
-				/// <summary>
-				/// Get the border color.
-				/// </summary>
-				/// <returns>The border color.</returns>
 				Color					GetBorderColor();
-				/// <summary>
-				/// Set the border color.
-				/// </summary>
-				/// <param name="value">The new border color.</param>
 				void					SetBorderColor(Color value);
-				/// <summary>
-				/// Get the background color.
-				/// </summary>
-				/// <returns>The background color.</returns>
 				Color					GetBackgroundColor();
-				/// <summary>
-				/// Set the background color.
-				/// </summary>
-				/// <param name="value">The new background color.</param>
 				void					SetBackgroundColor(Color value);
 			};
 		}
@@ -3175,48 +1933,21 @@ ColorizedText
 
 			namespace text
 			{
-				/// <summary>
-				/// Represents the extra information of a character to display.
-				/// </summary>
 				struct CharAtt
 				{
-					/// <summary>
-					/// The distance from the head of the line to the right side of this character in pixel.
-					/// </summary>
 					unsigned __int32				rightOffset;
-					/// <summary>
-					/// The color index of the character. Use [M:vl.presentation.elements.GuiColorizedTextElement.GetColors] and [M:vl.presentation.elements.GuiColorizedTextElement.SetColors] to access the color table.
-					/// </summary>
 					unsigned __int32				colorIndex;
 				};
 				
-				/// <summary>
-				/// Represents a line of characters.
-				/// </summary>
 				struct TextLine
 				{
 					static const int				BlockSize=32;
 					static const int				MaxWidth=0xFFFF;
 					
-					/// <summary>
-					/// A character buffer starts from the first character of this line.
-					/// </summary>
 					wchar_t*						text;
-					/// <summary>
-					/// A extra information buffer starts from the first character of this line.
-					/// </summary>
 					CharAtt*						att;
-					/// <summary>
-					/// The number of available <see cref="CharAtt::rightOffset"/> in the buffer.
-					/// </summary>
 					int								availableOffsetCount;
-					/// <summary>
-					/// The number of elements in the allocated buffer memory.
-					/// </summary>
 					int								bufferLength;
-					/// <summary>
-					/// The number of available characters in the buffer.
-					/// </summary>
 					int								dataLength;
 
 					TextLine();
@@ -3226,44 +1957,14 @@ ColorizedText
 					bool							operator==(const TextLine& value)const{return false;}
 					bool							operator!=(const TextLine& value)const{return true;}
 
-					/// <summary>
-					/// Initialize the <see cref="TextLine"/> instance to be an empty line.
-					/// </summary>
 					void							Initialize();
-					/// <summary>
-					/// Release all resources used in this line.
-					/// </summary>
 					void							Finalize();
-					/// <summary>
-					/// Test is the line initialized.
-					/// </summary>
-					/// <returns>Returns true if the line is initialized.</returns>
 					bool							IsReady();
-					/// <summary>
-					/// Modify the characters in the line by replacing characters.
-					/// </summary>
-					/// <returns>Returns true if the modification succeeded.</returns>
-					/// <param name="start">The position of the first character to be replaced.</param>
-					/// <param name="count">The number of characters to be replaced.</param>
-					/// <param name="input">The buffer to the characters to write into this line.</param>
-					/// <param name="inputCount">The numbers of the characters to write into this line.</param>
 					bool							Modify(int start, int count, const wchar_t* input, int inputCount);
-					/// <summary>
-					/// Split a text line into two by the position. The current line contains characters before this position. This function returns a new text line contains characters after this position.
-					/// </summary>
-					/// <returns>The new text line.</returns>
-					/// <param name="index">.</param>
 					TextLine						Split(int index);
-					/// <summary>
-					/// Append a text line after the this text line, and finalize the input text line.
-					/// </summary>
-					/// <param name="line">The text line that contains all characters and color indices to append and be finalized.</param>
 					void							AppendAndFinalize(TextLine& line);
 				};
 
-				/// <summary>
-				/// An abstract class for character size measuring in differect rendering technology.
-				/// </summary>
 				class CharMeasurer : public virtual IDescriptable
 				{
 				protected:
@@ -3271,49 +1972,18 @@ ColorizedText
 					int								rowHeight;
 					int								widths[65536];
 					
-					/// <summary>
-					/// Measure the width of a character.
-					/// </summary>
-					/// <returns>The width in pixel.</returns>
-					/// <param name="character">The character to measure. This is a pure virtual member function to be overrided.</param>
-					/// <param name="renderTarget">The render target which the character is going to be rendered. This is a pure virtual member function to be overrided.</param>
 					virtual int						MeasureWidthInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)=0;
-					/// <summary>
-					/// Measure the height of a character.
-					/// </summary>
-					/// <returns>The height in pixel.</returns>
-					/// <param name="renderTarget">The render target which the character is going to be rendered.</param>
 					virtual int						GetRowHeightInternal(IGuiGraphicsRenderTarget* renderTarget)=0;
 				public:
 
-					/// <summary>
-					/// Initialize a character measurer.
-					/// </summary>
-					/// <param name="_rowHeight">The default character height in pixel before the character measurer is binded to a render target.</param>
 					CharMeasurer(int _rowHeight);
 					~CharMeasurer();
 
-					/// <summary>
-					/// Bind a render target to this character measurer.
-					/// </summary>
-					/// <param name="value">The render target to bind.</param>
 					void							SetRenderTarget(IGuiGraphicsRenderTarget* value);
-					/// <summary>
-					/// Measure the width of a character using the binded render target.
-					/// </summary>
-					/// <returns>The width of a character, in pixel.</returns>
-					/// <param name="character">The character to measure.</param>
 					int								MeasureWidth(wchar_t character);
-					/// <summary>
-					/// Measure the height of a character.
-					/// </summary>
-					/// <returns>The height of a character, in pixel.</returns>
 					int								GetRowHeight();
 				};
 
-				/// <summary>
-				/// A class to maintain multiple lines of text buffer.
-				/// </summary>
 				struct TextLines
 				{
 					typedef collections::List<TextLine>		TextLineList;
@@ -3327,205 +1997,48 @@ ColorizedText
 					TextLines();
 					~TextLines();
 
-					/// <summary>
-					/// Returns the number of text lines.
-					/// </summary>
-					/// <returns>The number of text lines.</returns>
 					int								GetCount();
-					/// <summary>
-					/// Returns the text line of a specified row number.
-					/// </summary>
-					/// <returns>The related text line object.</returns>
-					/// <param name="row">The specified row number.</param>
 					TextLine&						GetLine(int row);
-					/// <summary>
-					/// Returns the binded <see cref="CharMeasurer"/>.
-					/// </summary>
-					/// <returns>The binded <see cref="CharMeasurer"/>.</returns>
 					CharMeasurer*					GetCharMeasurer();
-					/// <summary>
-					/// Binded a <see cref="CharMeasurer"/>.
-					/// </summary>
-					/// <param name="value">The <see cref="CharMeasurer"/> to bind.</param>
 					void							SetCharMeasurer(CharMeasurer* value);
-					/// <summary>
-					/// Returns the binded <see cref="IGuiGraphicsRenderTarget"/>.
-					/// </summary>
-					/// <returns>The binded <see cref="IGuiGraphicsRenderTarget"/>.</returns>
 					IGuiGraphicsRenderTarget*		GetRenderTarget();
-					/// <summary>
-					/// Binded a <see cref="IGuiGraphicsRenderTarget"/>.
-					/// </summary>
-					/// <param name="value">The <see cref="IGuiGraphicsRenderTarget"/> to bind.</param>
 					void							SetRenderTarget(IGuiGraphicsRenderTarget* value);
-					/// <summary>
-					/// Returns a string from a specified range of the text lines.
-					/// </summary>
-					/// <returns>The string.</returns>
-					/// <param name="start">The start position.</param>
-					/// <param name="end">The end position.</param>
 					WString							GetText(TextPos start, TextPos end);
-					/// <summary>
-					/// Returns the whole string in the text lines.
-					/// </summary>
-					/// <returns>The string.</returns>
 					WString							GetText();
-					/// <summary>
-					/// Set the string to the text lines. This operation will modified every <see cref="TextLine"/> objects.
-					/// </summary>
-					/// <param name="value">The string to set into the text lines.</param>
 					void							SetText(const WString& value);
 					
-					/// <summary>
-					/// Remove text lines in a specified range.
-					/// </summary>
-					/// <returns>Returns true if this operation succeeded.</returns>
-					/// <param name="start">The first row number.</param>
-					/// <param name="count">The number of text lines to be removed.</param>
 					bool							RemoveLines(int start, int count);
-					/// <summary>
-					/// Test is a text position available in the text lines.
-					/// </summary>
-					/// <returns>Returns true if this position is available.</returns>
-					/// <param name="pos">The text position to test.</param>
 					bool							IsAvailable(TextPos pos);
-					/// <summary>
-					/// Normalize a text position to be available.
-					/// </summary>
-					/// <returns>The normalized text position.</returns>
-					/// <param name="pos">The text position to normalize.</param>
 					TextPos							Normalize(TextPos pos);
-					/// <summary>
-					/// Modify some text lines by replacing characters.
-					/// </summary>
-					/// <returns>The new end position.</returns>
-					/// <param name="start">The start position of the range of characters to be replaced.</param>
-					/// <param name="end">The end position of the range of characters to be replaced.</param>
-					/// <param name="inputs">The buffer to the string buffers to replace into the text lines.</param>
-					/// <param name="inputCounts">The numbers of characters for each string buffer.</param>
-					/// <param name="rows">The number of string buffers.</param>
 					TextPos							Modify(TextPos start, TextPos end, const wchar_t** inputs, int* inputCounts, int rows);
-					/// <summary>
-					/// Modify some text lines by replacing characters.
-					/// </summary>
-					/// <returns>The new end position.</returns>
-					/// <param name="start">The start position of the range of characters to be replaced.</param>
-					/// <param name="end">The end position of the range of characters to be replaced.</param>
-					/// <param name="input">The buffer to the string to replace into the text lines.</param>
-					/// <param name="inputCount">The number of characters to replace into the text lines.</param>
 					TextPos							Modify(TextPos start, TextPos end, const wchar_t* input, int inputCount);
-					/// <summary>
-					/// Modify some text lines by replacing characters.
-					/// </summary>
-					/// <returns>The new end position.</returns>
-					/// <param name="start">The start position of the range of characters to be replaced.</param>
-					/// <param name="end">The end position of the range of characters to be replaced.</param>
-					/// <param name="input">The string to replace into the text lines.</param>
 					TextPos							Modify(TextPos start, TextPos end, const wchar_t* input);
-					/// <summary>
-					/// Modify some text lines by replacing characters.
-					/// </summary>
-					/// <returns>The new end position.</returns>
-					/// <param name="start">The start position of the range of characters to be replaced.</param>
-					/// <param name="end">The end position of the range of characters to be replaced.</param>
-					/// <param name="input">The string to replace into the text lines.</param>
 					TextPos							Modify(TextPos start, TextPos end, const WString& input);
-					/// <summary>
-					/// Remove every text lines.
-					/// </summary>
 					void							Clear();
 					
-					/// <summary>
-					/// Clear all cached <see cref="CharAtt::rightOffset"/>.
-					/// </summary>
 					void							ClearMeasurement();
-					/// <summary>
-					/// Returns the number of spaces to replace a tab character for rendering.
-					/// </summary>
-					/// <returns>The number of spaces to replace a tab character for rendering.</returns>
 					int								GetTabSpaceCount();
-					/// <summary>
-					/// Set the number of spaces to replace a tab character for rendering.
-					/// </summary>
-					/// <param name="value">The number of spaces to replace a tab character for rendering.</param>
 					void							SetTabSpaceCount(int value);
-					/// <summary>
-					/// Measure all characters in a specified row.
-					/// </summary>
-					/// <param name="row">The specified row number.</param>
 					void							MeasureRow(int row);
-					/// <summary>
-					/// Returns the width of a specified row.
-					/// </summary>
-					/// <returns>The width of a specified row, in pixel.</returns>
-					/// <param name="row">The specified row number.</param>
 					int								GetRowWidth(int row);
-					/// <summary>
-					/// Returns the height of a row.
-					/// </summary>
-					/// <returns>The height of a row, in pixel.</returns>
 					int								GetRowHeight();
-					/// <summary>
-					/// Returns the total width of the text lines.
-					/// </summary>
-					/// <returns>The width of the text lines, in pixel.</returns>
 					int								GetMaxWidth();
-					/// <summary>
-					/// Returns the total height of the text lines.
-					/// </summary>
-					/// <returns>The height of the text lines, in pixel.</returns>
 					int								GetMaxHeight();
-					/// <summary>
-					/// Get the text position near to specified point.
-					/// </summary>
-					/// <returns>The text position.</returns>
-					/// <param name="row">The specified point, in pixel.</param>
 					TextPos							GetTextPosFromPoint(Point point);
-					/// <summary>
-					/// Get the point of a specified text position.
-					/// </summary>
-					/// <returns>The point, in pixel. Returns (-1, -1) if the text position is not available.</returns>
-					/// <param name="pos">The specified text position.</param>
 					Point							GetPointFromTextPos(TextPos pos);
-					/// <summary>
-					/// Get the bounds of a specified text position.
-					/// </summary>
-					/// <returns>The bounds, in pixel. Returns (-1, -1, -1, -1) if the text position is not available.</returns>
-					/// <param name="pos">The specified text position.</param>
 					Rect							GetRectFromTextPos(TextPos pos);
 				};
 				
-				/// <summary>
-				/// Represents colors of a character.
-				/// </summary>
 				struct ColorItem
 				{
-					/// <summary>
-					/// Text color.
-					/// </summary>
 					Color							text;
-					/// <summary>
-					/// Background color.
-					/// </summary>
 					Color							background;
 				};
 				
-				/// <summary>
-				/// Represents color entry in a color table. Use [M:vl.presentation.elements.GuiColorizedTextElement.GetColors] and [M:vl.presentation.elements.GuiColorizedTextElement.SetColors] to access the color table.
-				/// </summary>
 				struct ColorEntry
 				{
-					/// <summary>
-					/// Colors in normal state.
-					/// </summary>
 					ColorItem						normal;
-					/// <summary>
-					/// Colors in focused and selected state.
-					/// </summary>
 					ColorItem						selectedFocused;
-					/// <summary>
-					/// Colors in not focused and selected state.
-					/// </summary>
 					ColorItem						selectedUnfocused;
 
 					bool							operator==(const ColorEntry& value){return false;}
@@ -3533,9 +2046,6 @@ ColorizedText
 				};
 			}
 			
-			/// <summary>
-			/// Defines a text element with separate color configuration for each character.
-			/// </summary>
 			class GuiColorizedTextElement : public Object, public IGuiGraphicsElement, public Description<GuiColorizedTextElement>
 			{
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiColorizedTextElement, L"ColorizedText");
@@ -3543,19 +2053,10 @@ ColorizedText
 				typedef collections::Array<text::ColorEntry>			ColorArray;
 				typedef collections::IReadonlyList<text::ColorEntry>	IColorArray;
 			public:
-				/// <summary>
-				/// An callback interface. Member functions will be called when colors or fonts of a <see cref="GuiColorizedTextElement"/> changed.
-				/// </summary>
 				class ICallback : public virtual IDescriptable, public Description<ICallback>
 				{
 				public:
-					/// <summary>
-					/// Called when the color table of a <see cref="GuiColorizedTextElement"/> changed.
-					/// </summary>
 					virtual void					ColorChanged()=0;
-					/// <summary>
-					/// Called when the font configuration of a <see cref="GuiColorizedTextElement"/> changed.
-					/// </summary>
 					virtual void					FontChanged()=0;
 				};
 			protected:
@@ -3577,112 +2078,28 @@ ColorizedText
 			public:
 				~GuiColorizedTextElement();
 
-				/// <summary>
-				/// Get the internal <see cref="text::TextLines"/> object that stores all characters and colors.
-				/// </summary>
-				/// <returns>The internal <see cref="text::TextLines"/> object.</returns>
 				text::TextLines&					GetLines();
-				/// <summary>
-				/// Get the binded callback object.
-				/// </summary>
-				/// <returns>The binded callback object.</returns>
 				ICallback*							GetCallback();
-				/// <summary>
-				/// Bind a callback object.
-				/// </summary>
-				/// <param name="value">The callback object to bind.</param>
 				void								SetCallback(ICallback* value);
 				
-				/// <summary>
-				/// Get the binded color table. Use <see cref="text::CharAtt::colorIndex"/> to use colors in this color table.
-				/// </summary>
-				/// <returns>The binded color table.</returns>
 				const IColorArray&					GetColors();
-				/// <summary>
-				/// Bind a color table. Use <see cref="text::CharAtt::colorIndex"/> to use colors in this color table. <see cref="ICallback::ColorChanged"/> will be called.
-				/// </summary>
-				/// <param name="value">The color table to bind.</param>
 				void								SetColors(const ColorArray& value);
-				/// <summary>
-				/// Get the font configuration for all characters.
-				/// </summary>
-				/// <returns>The font configuration.</returns>
 				const FontProperties&				GetFont();
-				/// <summary>
-				/// Set the font configuration for all characters. <see cref="ICallback::FontChanged"/> will be called.
-				/// </summary>
-				/// <param name="value">The font configuration.</param>
 				void								SetFont(const FontProperties& value);
-				/// <summary>
-				/// Get the left-top position of the visible bounds of characters.
-				/// </summary>
-				/// <returns>The left-top position of the visible bounds of characters.</returns>
 				Point								GetViewPosition();
-				/// <summary>
-				/// Set the left-top position of the visible bounds of characters.
-				/// </summary>
-				/// <param name="value">The left-top position of the visible bounds of characters.</param>
 				void								SetViewPosition(Point value);
-				/// <summary>
-				/// Get the enabling state.
-				/// </summary>
-				/// <returns>Returns true if the element will be rendered as an enabled element.</returns>
 				bool								GetVisuallyEnabled();
-				/// <summary>
-				/// Set the enabling state.
-				/// </summary>
-				/// <param name="value">True if the element will be rendered as an enabled element.</param>
 				void								SetVisuallyEnabled(bool value);
-				/// <summary>
-				/// Get the focused state.
-				/// </summary>
-				/// <returns>Returns true if the element will be rendered as a focused element.</returns>
 				bool								GetFocused();
-				/// <summary>
-				/// Set the focused state.
-				/// </summary>
-				/// <param name="value">True if the element will be rendered as a focused element.</param>
 				void								SetFocused(bool value);
 				
-				/// <summary>
-				/// Get the begin position of the selection area.
-				/// </summary>
-				/// <returns>The begin position of the selection area.</returns>
 				TextPos								GetCaretBegin();
-				/// <summary>
-				/// Set the begin position of the selection area.
-				/// </summary>
-				/// <param name="value">The begin position of the selection area.</param>
 				void								SetCaretBegin(TextPos value);
-				/// <summary>
-				/// Get the end position of the selection area.
-				/// </summary>
-				/// <returns>The end position of the selection area.</returns>
 				TextPos								GetCaretEnd();
-				/// <summary>
-				/// Set the end position of the selection area.
-				/// </summary>
-				/// <param name="value">The end position of the selection area.</param>
 				void								SetCaretEnd(TextPos value);
-				/// <summary>
-				/// Get the caret visibility.
-				/// </summary>
-				/// <returns>Returns true if characters in the selection range will be rendered using <see cref="text::ColorEntry::selectedFocused"/> or <see cref="text::ColorEntry::selectedUnfocused"/>.</returns>
 				bool								GetCaretVisible();
-				/// <summary>
-				/// Set the caret visibility.
-				/// </summary>
-				/// <param name="value">True if characters in the selection range will be rendered using <see cref="text::ColorEntry::selectedFocused"/> or <see cref="text::ColorEntry::selectedUnfocused"/>.</param>
 				void								SetCaretVisible(bool value);
-				/// <summary>
-				/// Get the color of the caret.
-				/// </summary>
-				/// <returns>The color of the caret.</returns>
 				Color								GetCaretColor();
-				/// <summary>
-				/// Set the color of the caret.
-				/// </summary>
-				/// <param name="value">The color of the caret.</param>
 				void								SetCaretColor(Color value);
 			};
 		}
@@ -3851,17 +2268,12 @@ Event
 Predefined Events
 ***********************************************************************/
 
-			/// <summary>Notify event arguments.</summary>
 			struct GuiEventArgs
 			{
-				/// <summary>The event raiser composition.</summary>
 				GuiGraphicsComposition*		compositionSource;
-				/// <summary>The nearest parent of the event raiser composition that contains an event receiver. If the event raiser composition contains an event receiver, it will be the event raiser composition.</summary>
 				GuiGraphicsComposition*		eventSource;
-				/// <summary>Set this field to true will stop the event routing. This is a signal that the event is properly handeled, and the event handler want to override the default behavior.</summary>
 				bool						handled;
 
-				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to null.</summary>
 				GuiEventArgs()
 					:compositionSource(0)
 					,eventSource(0)
@@ -3869,8 +2281,6 @@ Predefined Events
 				{
 				}
 
-				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
-				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
 				GuiEventArgs(GuiGraphicsComposition* composition)
 					:compositionSource(composition)
 					,eventSource(composition)
@@ -3879,20 +2289,15 @@ Predefined Events
 				}
 			};
 			
-			/// <summary>Request event arguments.</summary>
 			struct GuiRequestEventArgs : public GuiEventArgs
 			{
-				/// <summary>Set this field to false in event handlers will stop the corresponding action.</summary>
 				bool		cancel;
 				
-				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to null.</summary>
 				GuiRequestEventArgs()
 					:cancel(false)
 				{
 				}
 				
-				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
-				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
 				GuiRequestEventArgs(GuiGraphicsComposition* composition)
 					:GuiEventArgs(composition)
 					,cancel(false)
@@ -3900,48 +2305,36 @@ Predefined Events
 				}
 			};
 			
-			/// <summary>Keyboard event arguments.</summary>
 			struct GuiKeyEventArgs : public GuiEventArgs, public NativeWindowKeyInfo
 			{
-				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to null.</summary>
 				GuiKeyEventArgs()
 				{
 				}
 				
-				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
-				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
 				GuiKeyEventArgs(GuiGraphicsComposition* composition)
 					:GuiEventArgs(composition)
 				{
 				}
 			};
 			
-			/// <summary>Char input event arguments.</summary>
 			struct GuiCharEventArgs : public GuiEventArgs, public NativeWindowCharInfo
 			{
-				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to null.</summary>
 				GuiCharEventArgs()
 				{
 				}
 				
-				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
-				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
 				GuiCharEventArgs(GuiGraphicsComposition* composition)
 					:GuiEventArgs(composition)
 				{
 				}
 			};
 			
-			/// <summary>Mouse event arguments.</summary>
 			struct GuiMouseEventArgs : public GuiEventArgs, public NativeWindowMouseInfo
 			{
-				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to null.</summary>
 				GuiMouseEventArgs()
 				{
 				}
 				
-				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
-				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
 				GuiMouseEventArgs(GuiGraphicsComposition* composition)
 					:GuiEventArgs(composition)
 				{
@@ -3958,9 +2351,6 @@ Predefined Events
 Event Receiver
 ***********************************************************************/
 
-			/// <summary>
-			/// Contains all available user input events for a <see cref="GuiGraphicsComposition"/>. Almost all events are routed events. Routed events means, not only the activated composition receives the event, all it direct or indirect parents receives the event. The argument(all derives from <see cref="GuiEventArgs"/>) for the event will store the original event raiser composition.
-			/// </summary>
 			class GuiGraphicsEventReceiver : public Object
 			{
 			protected:
@@ -3971,54 +2361,30 @@ Event Receiver
 
 				GuiGraphicsComposition*			GetAssociatedComposition();
 
-				/// <summary>Left mouse button down event.</summary>
 				GuiMouseEvent					leftButtonDown;
-				/// <summary>Left mouse button up event.</summary>
 				GuiMouseEvent					leftButtonUp;
-				/// <summary>Left mouse button double click event.</summary>
 				GuiMouseEvent					leftButtonDoubleClick;
-				/// <summary>Middle mouse button down event.</summary>
 				GuiMouseEvent					middleButtonDown;
-				/// <summary>Middle mouse button up event.</summary>
 				GuiMouseEvent					middleButtonUp;
-				/// <summary>Middle mouse button double click event.</summary>
 				GuiMouseEvent					middleButtonDoubleClick;
-				/// <summary>Right mouse button down event.</summary>
 				GuiMouseEvent					rightButtonDown;
-				/// <summary>Right mouse button up event.</summary>
 				GuiMouseEvent					rightButtonUp;
-				/// <summary>Right mouse button double click event.</summary>
 				GuiMouseEvent					rightButtonDoubleClick;
-				/// <summary>Horizontal wheel scrolling event.</summary>
 				GuiMouseEvent					horizontalWheel;
-				/// <summary>Vertical wheel scrolling event.</summary>
 				GuiMouseEvent					verticalWheel;
-				/// <summary>Mouse move event.</summary>
 				GuiMouseEvent					mouseMove;
-				/// <summary>Mouse enter event.</summary>
 				GuiNotifyEvent					mouseEnter;
-				/// <summary>Mouse leave event.</summary>
 				GuiNotifyEvent					mouseLeave;
 				
-				/// <summary>Preview key event.</summary>
 				GuiKeyEvent						previewKey;
-				/// <summary>Key down event.</summary>
 				GuiKeyEvent						keyDown;
-				/// <summary>Key up event.</summary>
 				GuiKeyEvent						keyUp;
-				/// <summary>System key down event.</summary>
 				GuiKeyEvent						systemKeyDown;
-				/// <summary>System key up event.</summary>
 				GuiKeyEvent						systemKeyUp;
-				/// <summary>Preview char input event.</summary>
 				GuiCharEvent					previewCharInput;
-				/// <summary>Char input event.</summary>
 				GuiCharEvent					charInput;
-				/// <summary>Got focus event.</summary>
 				GuiNotifyEvent					gotFocus;
-				/// <summary>Lost focus event.</summary>
 				GuiNotifyEvent					lostFocus;
-				/// <summary>Caret notify event. This event is raised when a caret graph need to change the visibility state.</summary>
 				GuiNotifyEvent					caretNotify;
 			};
 		}
@@ -4060,10 +2426,6 @@ namespace vl
 Basic Construction
 ***********************************************************************/
 
-			/// <summary>
-			/// Represents a composition for <see cref="elements::IGuiGraphicsElement"/>. A composition is a way to define the size and the position using the information from graphics elements and sub compositions.
-			/// When a graphics composition is destroyed, all sub composition will be destroyed. The life cycle of the contained graphics element is partially controlled by the smart pointer to the graphics element inside the composition.
-			/// </summary>
 			class GuiGraphicsComposition : public Object, public Description<GuiGraphicsComposition>
 			{
 				typedef collections::IReadonlyList<GuiGraphicsComposition*> ICompositionList;
@@ -4072,29 +2434,17 @@ Basic Construction
 				friend class controls::GuiControl;
 				friend class GuiGraphicsHost;
 			public:
-				/// <summary>
-				/// Minimum size limitation.
-				/// </summary>
 				enum MinSizeLimitation
 				{
-					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.MinSizeLimitation]No limitation for the minimum size.</summary>
 					NoLimit,
-					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.MinSizeLimitation]Minimum size of this composition is the minimum size of the contained graphics element.</summary>
 					LimitToElement,
-					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.MinSizeLimitation]Minimum size of this composition is combiniation of sub compositions and the minimum size of the contained graphics element.</summary>
 					LimitToElementAndChildren,
 				};
 				
-				/// <summary>
-				/// Relation between the composition size and the parent composition.
-				/// </summary>
 				enum ParentSizeAffection
 				{
-					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.ParentSizeAffection]The size doesn't aware of the parent composition.</summary>
 					NotAffectedByParent,
-					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.ParentSizeAffection]The size partially limited by the parent composition.</summary>
 					AffectedByParent,
-					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.ParentSizeAffection]The size is decided by the parent composition.</summary>
 					TotallyDecidedByParent,
 				};
 			protected:
@@ -4126,148 +2476,57 @@ Basic Construction
 				GuiGraphicsComposition();
 				~GuiGraphicsComposition();
 
-				/// <summary>Get the parent composition.</summary>
-				/// <returns>The parent composition.</returns>
 				GuiGraphicsComposition*						GetParent();
-				/// <summary>Get all child compositions ordered by z-order from low to high.</summary>
-				/// <returns>Child compositions.</returns>
 				const ICompositionList&						Children();
-				/// <summary>Add a composition as a child.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				/// <param name="child">The child composition to add.</param>
 				bool										AddChild(GuiGraphicsComposition* child);
-				/// <summary>Add a composition as a child with a specified z-order.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				/// <param name="index">The z-order. 0 means the lowest position.</param>
-				/// <param name="child">The child composition to add.</param>
 				bool										InsertChild(int index, GuiGraphicsComposition* child);
-				/// <summary>Remove a child composition.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				/// <param name="child">The child composition to remove.</param>
 				bool										RemoveChild(GuiGraphicsComposition* child);
-				/// <summary>Move a child composition to a new z-order.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				/// <param name="child">The child composition to move.</param>
-				/// <param name="newIndex">The new z-order. 0 means the lowest position.</param>
 				bool										MoveChild(GuiGraphicsComposition* child, int newIndex);
 
-				/// <summary>Get the contained graphics element.</summary>
-				/// <returns>The contained graphics element.</returns>
 				Ptr<elements::IGuiGraphicsElement>			GetOwnedElement();
-				/// <summary>Set the contained graphics element.</summary>
-				/// <param name="element">The new graphics element to set.</param>
 				void										SetOwnedElement(Ptr<elements::IGuiGraphicsElement> element);
-				/// <summary>Get the visibility of the composition.</summary>
-				/// <returns>Returns true if the composition is visible.</returns>
 				bool										GetVisible();
-				/// <summary>Set the visibility of the composition.</summary>
-				/// <param name="value">Set to true to make the composition visible.</param>
 				void										SetVisible(bool value);
-				/// <summary>Get the minimum size limitation of the composition.</summary>
-				/// <returns>The minimum size limitation of the composition.</returns>
 				MinSizeLimitation							GetMinSizeLimitation();
-				/// <summary>Set the minimum size limitation of the composition.</summary>
-				/// <param name="value">The minimum size limitation of the composition.</param>
 				void										SetMinSizeLimitation(MinSizeLimitation value);
-				/// <summary>Get the binded render target.</summary>
-				/// <returns>The binded render target.</returns>
 				elements::IGuiGraphicsRenderTarget*			GetRenderTarget();
-				/// <summary>Set the binded render target. This function is designed for internal usage. Users are not suggested to call this function directly.</summary>
-				/// <param name="value">The binded render target.</param>
 				void										SetRenderTarget(elements::IGuiGraphicsRenderTarget* value);
 
-				/// <summary>Render the composition using an offset.</summary>
-				/// <param name="offset">The offset.</param>
 				void										Render(Size offset);
-				/// <summary>Get the event receiver object. All user input events can be found in this object. If an event receiver is never been requested from the composition, the event receiver will not be created, and all route events will not pass through this event receiver(performance will be better).</summary>
-				/// <returns>The event receiver.</returns>
 				compositions::GuiGraphicsEventReceiver*		GetEventReceiver();
-				/// <summary>Test if any event receiver has already been requested.</summary>
-				/// <returns>Returns true if any event receiver has already been requested.</returns>
 				bool										HasEventReceiver();
-				/// <summary>Find a deepest composition that under a specified location. If the location is inside a compsition but not hit any sub composition, this function will return this composition.</summary>
-				/// <returns>The deepest composition that under a specified location.</returns>
-				/// <param name="location">The specified location.</param>
 				GuiGraphicsComposition*						FindComposition(Point location);
-				/// <summary>Get the bounds in the top composition space.</summary>
-				/// <returns>The bounds in the top composition space.</returns>
 				Rect										GetGlobalBounds();
 
-				/// <summary>Get the associated control. A control is associated to a composition only when the composition represents the bounds of this control. Such a composition usually comes from a control template.</summary>
-				/// <returns>The associated control.</returns>
 				controls::GuiControl*						GetAssociatedControl();
-				/// <summary>Get the associated graphics host. A graphics host is associated to a composition only when the composition becomes the bounds of the graphics host.</summary>
-				/// <returns>The associated graphics host.</returns>
 				GuiGraphicsHost*							GetAssociatedHost();
-				/// <summary>Get the associated cursor.</summary>
-				/// <returns>The associated cursor.</returns>
 				INativeCursor*								GetAssociatedCursor();
-				/// <summary>Set the associated cursor.</summary>
-				/// <param name="cursor">The associated cursor.</param>
 				void										SetAssociatedCursor(INativeCursor* cursor);
 				
-				/// <summary>Get the related control. A related control is the deepest control that contains this composition.</summary>
-				/// <returns>The related control.</returns>
 				controls::GuiControl*						GetRelatedControl();
-				/// <summary>Get the related graphics host. A related graphics host is the graphics host that contains this composition.</summary>
-				/// <returns>The related graphics host.</returns>
 				GuiGraphicsHost*							GetRelatedGraphicsHost();
-				/// <summary>Get the related control host. A related control host is the control host that contains this composition.</summary>
-				/// <returns>The related control host.</returns>
 				controls::GuiControlHost*					GetRelatedControlHost();
-				/// <summary>Get the related cursor. A related cursor is from the deepest composition that contains this composition and associated with a cursor.</summary>
-				/// <returns>The related cursor.</returns>
 				INativeCursor*								GetRelatedCursor();
 				
-				/// <summary>Get the margin.</summary>
-				/// <returns>The margin.</returns>
 				virtual Margin								GetMargin();
-				/// <summary>Set the margin.</summary>
-				/// <param name="value">The margin.</param>
 				virtual void								SetMargin(Margin value);
-				/// <summary>Get the internal margin.</summary>
-				/// <returns>The internal margin.</returns>
 				virtual Margin								GetInternalMargin();
-				/// <summary>Set the internal margin.</summary>
-				/// <param name="value">The internal margin.</param>
 				virtual void								SetInternalMargin(Margin value);
-				/// <summary>Get the preferred minimum size.</summary>
-				/// <returns>The preferred minimum size.</returns>
 				virtual Size								GetPreferredMinSize();
-				/// <summary>Set the preferred minimum size.</summary>
-				/// <param name="value">The preferred minimum size.</param>
 				virtual void								SetPreferredMinSize(Size value);
-				/// <summary>Get the client area.</summary>
-				/// <returns>The client area.</returns>
 				virtual Rect								GetClientArea();
 				
-				/// <summary>Get the parent size affection.</summary>
-				/// <returns>The parent size affection.</returns>
 				virtual ParentSizeAffection					GetAffectionFromParent()=0;
-				/// <summary>Test is the size calculation affected by the parent.</summary>
-				/// <returns>Returns true if the size calculation is affected by the parent.</returns>
 				virtual bool								IsSizeAffectParent()=0;
-				/// <summary>Get the preferred minimum client size.</summary>
-				/// <returns>The preferred minimum client size.</returns>
 				virtual Size								GetMinPreferredClientSize()=0;
-				/// <summary>Get the preferred bounds.</summary>
-				/// <returns>The preferred bounds.</returns>
 				virtual Rect								GetPreferredBounds()=0;
-				/// <summary>Get the bounds.</summary>
-				/// <returns>The bounds.</returns>
 				virtual Rect								GetBounds()=0;
 			};
 
-			/// <summary>
-			/// A general implementation for <see cref="GuiGraphicsComposition"/>.
-			/// </summary>
 			class GuiGraphicsSite : public GuiGraphicsComposition, public Description<GuiGraphicsSite>
 			{
 			protected:
 
-				/// <summary>Calculate the final bounds from an expected bounds.</summary>
-				/// <returns>The final bounds according to some configuration like margin, minimum size, etc..</returns>
-				/// <param name="expectedBounds">The expected bounds.</param>
 				virtual Rect						GetBoundsInternal(Rect expectedBounds);
 			public:
 				GuiGraphicsSite();
@@ -4283,9 +2542,6 @@ Basic Construction
 Basic Compositions
 ***********************************************************************/
 			
-			/// <summary>
-			/// Represents a composition for the client area in an <see cref="INativeWindow"/>.
-			/// </summary>
 			class GuiWindowComposition : public GuiGraphicsSite, public Description<GuiWindowComposition>
 			{
 			protected:
@@ -4294,20 +2550,13 @@ Basic Compositions
 				GuiWindowComposition();
 				~GuiWindowComposition();
 				
-				/// <summary>Get the attached native window object.</summary>
-				/// <returns>The attached native window object.</returns>
 				INativeWindow*						GetAttachedWindow();
-				/// <summary>Attached a native window object.</summary>
-				/// <param name="window">The native window object to attach.</param>
 				void								SetAttachedWindow(INativeWindow* window);
 
 				Rect								GetBounds()override;
 				void								SetMargin(Margin value)override;
 			};
 
-			/// <summary>
-			/// Represents a composition that is free to change the expected bounds.
-			/// </summary>
 			class GuiBoundsComposition : public GuiGraphicsSite, public Description<GuiBoundsComposition>
 			{
 			protected:
@@ -4319,26 +2568,16 @@ Basic Compositions
 				GuiBoundsComposition();
 				~GuiBoundsComposition();
 
-				/// <summary>Event that will be raised when the final bounds is changed.</summary>
 				compositions::GuiNotifyEvent		BoundsChanged;
 				
 				ParentSizeAffection					GetAffectionFromParent()override;
 				Rect								GetPreferredBounds()override;
 				Rect								GetBounds()override;
-				/// <summary>Set the expected bounds.</summary>
-				/// <param name="value">The expected bounds.</param>
 				void								SetBounds(Rect value);
 
-				/// <summary>Make the composition not aligned to it's parent.</summary>
 				void								ClearAlignmentToParent();
-				/// <summary>Get the alignment to it's parent. -1 in each alignment component means that the corressponding side is not aligned to it's parent.</summary>
-				/// <returns>The alignment to it's parent.</returns>
 				Margin								GetAlignmentToParent();
-				/// <summary>Set the alignment to it's parent. -1 in each alignment component means that the corressponding side is not aligned to it's parent.</summary>
-				/// <param name="value">The alignment to it's parent.</param>
 				void								SetAlignmentToParent(Margin value);
-				/// <summary>Test is the composition aligned to it's parent.</summary>
-				/// <returns>Returns true if the composition is aligned to it's parent.</returns>
 				bool								IsAlignedToParent();
 			};
 
@@ -4349,27 +2588,17 @@ Table Compositions
 			class GuiTableComposition;
 			class GuiCellComposition;
 
-			/// <summary>
-			/// Represnets a sizing configuration for a row or a column.
-			/// </summary>
 			struct GuiCellOption
 			{
-				/// <summary>Sizing algorithm</summary>
 				enum ComposeType
 				{
-					/// <summary>[T:vl.presentation.compositions.GuiCellOption.ComposeType]Set the size to an absolute value.</summary>
 					Absolute,
-					/// <summary>[T:vl.presentation.compositions.GuiCellOption.ComposeType]Set the size to a percentage number of the whole table.</summary>
 					Percentage,
-					/// <summary>[T:vl.presentation.compositions.GuiCellOption.ComposeType]Set the size to the minimum size of the cell element.</summary>
 					MinSize,
 				};
 
-				/// <summary>Sizing algorithm</summary>
 				ComposeType		composeType;
-				/// <summary>The absolute size when <see cref="GuiCellOption::composeType"/> is <see cref="ComposeType"/>::Absolute.</summary>
 				int				absolute;
-				/// <summary>The percentage number when <see cref="GuiCellOption::composeType"/> is <see cref="ComposeType"/>::Percentage.</summary>
 				double			percentage;
 
 				GuiCellOption()
@@ -4382,9 +2611,6 @@ Table Compositions
 				bool operator==(const GuiCellOption& value){return false;}
 				bool operator!=(const GuiCellOption& value){return true;}
 
-				/// <summary>Creates an absolute sizing option</summary>
-				/// <returns>The created option.</returns>
-				/// <param name="value">The absolute size.</param>
 				static GuiCellOption AbsoluteOption(int value)
 				{
 					GuiCellOption option;
@@ -4393,9 +2619,6 @@ Table Compositions
 					return option;
 				}
 				
-				/// <summary>Creates an percantage sizing option</summary>
-				/// <returns>The created option.</returns>
-				/// <param name="value">The percentage number.</param>
 				static GuiCellOption PercentageOption(double value)
 				{
 					GuiCellOption option;
@@ -4404,8 +2627,6 @@ Table Compositions
 					return option;
 				}
 				
-				/// <summary>Creates an minimum sizing option</summary>
-				/// <returns>The created option.</returns>
 				static GuiCellOption MinSizeOption()
 				{
 					GuiCellOption option;
@@ -4414,9 +2635,6 @@ Table Compositions
 				}
 			};
 
-			/// <summary>
-			/// Represents a table composition.
-			/// </summary>
 			class GuiTableComposition : public GuiBoundsComposition, public Description<GuiTableComposition>
 			{
 				friend class GuiCellComposition;
@@ -4470,59 +2688,25 @@ Table Compositions
 				GuiTableComposition();
 				~GuiTableComposition();
 
-				/// <summary>Get the number of rows.</summary>
-				/// <returns>The number of rows.</returns>
 				int									GetRows();
-				/// <summary>Get the number of columns.</summary>
-				/// <returns>The number of columns.</returns>
 				int									GetColumns();
-				/// <summary>Change the number of rows and columns.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				/// <param name="_rows">The number of rows.</param>
-				/// <param name="_columns">The number of columns.</param>
 				bool								SetRowsAndColumns(int _rows, int _columns);
-				/// <summary>Get the cell composition that covers the specified cell location.</summary>
-				/// <returns>The cell composition that covers the specified cell location.</returns>
-				/// <param name="_rows">The number of rows.</param>
-				/// <param name="_columns">The number of columns.</param>
 				GuiCellComposition*					GetSitedCell(int _row, int _column);
 
-				/// <summary>Get the sizing option of the specified row.</summary>
-				/// <returns>The sizing option of the specified row.</returns>
-				/// <param name="_rows">The specified row number.</param>
 				GuiCellOption						GetRowOption(int _row);
-				/// <summary>Set the sizing option of the specified row.</summary>
-				/// <param name="_rows">The specified row number.</param>
-				/// <param name="option">The sizing option of the specified row.</param>
 				void								SetRowOption(int _row, GuiCellOption option);
-				/// <summary>Get the sizing option of the specified column.</summary>
-				/// <returns>The sizing option of the specified column.</returns>
-				/// <param name="_column">The specified column number.</param>
 				GuiCellOption						GetColumnOption(int _column);
-				/// <summary>Set the sizing option of the specified column.</summary>
-				/// <param name="_column">The specified column number.</param>
-				/// <param name="option">The sizing option of the specified column.</param>
 				void								SetColumnOption(int _column, GuiCellOption option);
 
-				/// <summary>Get the cell padding. A cell padding is the distance between a table client area and a cell, or between two cells.</summary>
-				/// <returns>The cell padding.</returns>
 				int									GetCellPadding();
-				/// <summary>Set the cell padding. A cell padding is the distance between a table client area and a cell, or between two cells.</summary>
-				/// <param name="_column">The cell padding.</param>
 				void								SetCellPadding(int value);
-				/// <summary>Get the cell area in the space of the table's parent composition's client area.</summary>
-				/// <returns>The cell area.</returns>
 				Rect								GetCellArea();
-				/// <summary>Update the sizing of the table and cells after all rows' and columns' sizing options are prepared.</summary>
 				void								UpdateCellBounds();
 				
 				Size								GetMinPreferredClientSize()override;
 				Rect								GetBounds()override;
 			};
 
-			/// <summary>
-			/// Represents a cell composition of a <see cref="GuiTableComposition"/>.
-			/// </summary>
 			class GuiCellComposition : public GuiGraphicsSite, public Description<GuiCellComposition>
 			{
 				friend class GuiTableComposition;
@@ -4543,28 +2727,12 @@ Table Compositions
 				GuiCellComposition();
 				~GuiCellComposition();
 
-				/// <summary>Get the owner table composition.</summary>
-				/// <returns>The owner table composition.</returns>
 				GuiTableComposition*				GetTableParent();
 
-				/// <summary>Get the row number for this cell composition.</summary>
-				/// <returns>The row number for this cell composition.</returns>
 				int									GetRow();
-				/// <summary>Get the total numbers of acrossed rows for this cell composition.</summary>
-				/// <returns>The total numbers of acrossed rows for this cell composition.</returns>
 				int									GetRowSpan();
-				/// <summary>Get the column number for this cell composition.</summary>
-				/// <returns>The column number for this cell composition.</returns>
 				int									GetColumn();
-				/// <summary>Get the total numbers of acrossed columns for this cell composition.</summary>
-				/// <returns>The total numbers of acrossed columns for this cell composition.</returns>
 				int									GetColumnSpan();
-				/// <summary>Set the position for this cell composition in the table.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				/// <param name="_row">The row number for this cell composition.</param>
-				/// <param name="_column">The column number for this cell composition.</param>
-				/// <param name="_rowSpan">The total numbers of acrossed rows for this cell composition.</param>
-				/// <param name="_columnSpan">The total numbers of acrossed columns for this cell composition.</param>
 				bool								SetSite(int _row, int _column, int _rowSpan, int _columnSpan);
 
 				Rect								GetBounds()override;
@@ -4577,9 +2745,6 @@ Stack Compositions
 			class GuiStackComposition;
 			class GuiStackItemComposition;
 
-			/// <summary>
-			/// Represents a stack composition.
-			/// </summary>
 			class GuiStackComposition : public GuiBoundsComposition, public Description<GuiStackComposition>
 			{
 				friend class GuiStackItemComposition;
@@ -4587,12 +2752,9 @@ Stack Compositions
 				typedef collections::List<GuiStackItemComposition*>				ItemCompositionList;
 				typedef collections::IReadonlyList<GuiStackItemComposition*>	IItemCompositionList;
 			public:
-				/// <summary>Stack item layout direction.</summary>
 				enum Direction
 				{
-					/// <summary>[T:vl.presentation.compositions.GuiStackComposition.Direction]Stack items is layouted horizontally.</summary>
 					Horizontal,
-					/// <summary>[T:vl.presentation.compositions.GuiStackComposition.Direction]Stack items is layouted vertically.</summary>
 					Vertical,
 				};
 			protected:
@@ -4612,42 +2774,21 @@ Stack Compositions
 				GuiStackComposition();
 				~GuiStackComposition();
 
-				/// <summary>Get all stack items inside the stack composition.</summary>
-				/// <returns>All stack items inside the stack composition.</returns>
 				const IItemCompositionList&			GetStackItems();
-				/// <summary>Insert an stack item at a specified position.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				/// <param name="index">The position.</param>
-				/// <param name="item">The statck item to insert.</param>
 				bool								InsertStackItem(int index, GuiStackItemComposition* item);
 				
-				/// <summary>Get the stack item layout direction.</summary>
-				/// <returns>The stack item layout direction.</returns>
 				Direction							GetDirection();
-				/// <summary>Set the stack item layout direction.</summary>
-				/// <param name="value">The stack item layout direction.</param>
 				void								SetDirection(Direction value);
-				/// <summary>Get the stack item padding.</summary>
-				/// <returns>The stack item padding.</returns>
 				int									GetPadding();
-				/// <summary>Set the stack item padding.</summary>
-				/// <param name="value">The stack item padding.</param>
 				void								SetPadding(int value);
 
 				Size								GetMinPreferredClientSize()override;
 				Rect								GetBounds()override;
 				
-				/// <summary>Get the extra margin inside the stack composition.</summary>
-				/// <returns>The extra margin inside the stack composition.</returns>
 				Margin								GetExtraMargin();
-				/// <summary>Set the extra margin inside the stack composition.</summary>
-				/// <param name="value">The extra margin inside the stack composition.</param>
 				void								SetExtraMargin(Margin value);
 			};
 			
-			/// <summary>
-			/// Represents a stack item composition of a <see cref="GuiStackComposition"/>.
-			/// </summary>
 			class GuiStackItemComposition : public GuiGraphicsSite, public Description<GuiStackItemComposition>
 			{
 				friend class GuiStackComposition;
@@ -4665,15 +2806,9 @@ Stack Compositions
 				ParentSizeAffection					GetAffectionFromParent()override;
 				bool								IsSizeAffectParent()override;
 				Rect								GetBounds()override;
-				/// <summary>Set the expected bounds of a stack item. In most of the cases only the size of the bounds is used.</summary>
-				/// <param name="value">The expected bounds of a stack item.</param>
 				void								SetBounds(Rect value);
 				
-				/// <summary>Get the extra margin for this stack item. An extra margin is used to enlarge the bounds of the stack item, but only the non-extra part will be used for decide the stack item layout.</summary>
-				/// <returns>The extra margin for this stack item.</returns>
 				Margin								GetExtraMargin();
-				/// <summary>Set the extra margin for this stack item. An extra margin is used to enlarge the bounds of the stack item, but only the non-extra part will be used for decide the stack item layout.</summary>
-				/// <param name="value">The extra margin for this stack item.</param>
 				void								SetExtraMargin(Margin value);
 			};
 
@@ -4681,22 +2816,14 @@ Stack Compositions
 Specialized Compositions
 ***********************************************************************/
 
-			/// <summary>
-			/// Represents a composition that is aligned to one border of the parent composition.
-			/// </summary>
 			class GuiSideAlignedComposition : public GuiGraphicsSite, public Description<GuiSideAlignedComposition>
 			{
 			public:
-				/// <summary>The border to align.</summary>
 				enum Direction
 				{
-					/// <summary>[T:vl.presentation.compositions.GuiSideAlignedComposition.Direction]The left border.</summary>
 					Left,
-					/// <summary>[T:vl.presentation.compositions.GuiSideAlignedComposition.Direction]The top border.</summary>
 					Top,
-					/// <summary>[T:vl.presentation.compositions.GuiSideAlignedComposition.Direction]The right border.</summary>
 					Right,
-					/// <summary>[T:vl.presentation.compositions.GuiSideAlignedComposition.Direction]The bottom border.</summary>
 					Bottom,
 				};
 			protected:
@@ -4707,23 +2834,11 @@ Specialized Compositions
 				GuiSideAlignedComposition();
 				~GuiSideAlignedComposition();
 				
-				/// <summary>Get the border to align.</summary>
-				/// <returns>The border to align.</returns>
 				Direction							GetDirection();
-				/// <summary>Set the border to align.</summary>
-				/// <param name="value">The border to align.</param>
 				void								SetDirection(Direction value);
-				/// <summary>Get the maximum length of this composition.</summary>
-				/// <returns>The maximum length of this composition.</returns>
 				int									GetMaxLength();
-				/// <summary>Set the maximum length of this composition.</summary>
-				/// <param name="value">The maximum length of this composition.</param>
 				void								SetMaxLength(int value);
-				/// <summary>Get the maximum ratio to limit the size according to the size of the parent.</summary>
-				/// <returns>The maximum ratio to limit the size according to the size of the parent.</returns>
 				double								GetMaxRatio();
-				/// <summary>Set the maximum ratio to limit the size according to the size of the parent.</summary>
-				/// <param name="value">The maximum ratio to limit the size according to the size of the parent.</param>
 				void								SetMaxRatio(double value);
 				
 				ParentSizeAffection					GetAffectionFromParent()override;
@@ -4731,9 +2846,6 @@ Specialized Compositions
 				Rect								GetBounds()override;
 			};
 
-			/// <summary>
-			/// Represents a composition that it's location and size are decided by the client area of the parent composition by setting ratios.
-			/// </summary>
 			class GuiPartialViewComposition : public GuiGraphicsSite, public Description<GuiPartialViewComposition>
 			{
 			protected:
@@ -4746,29 +2858,13 @@ Specialized Compositions
 				GuiPartialViewComposition();
 				~GuiPartialViewComposition();
 				
-				/// <summary>Get the width ratio to decided the horizontal location. Value in [0, 1-pageSize].</summary>
-				/// <returns>The width ratio to decided the horizontal location.</returns>
 				double								GetWidthRatio();
-				/// <summary>Get the page size to decide the horizontal size. Value in [0, 1].</summary>
-				/// <returns>The page size to decide the horizontal size.</returns>
 				double								GetWidthPageSize();
-				/// <summary>Get the height ratio to decided the vertical location. Value in [0, 1-pageSize].</summary>
-				/// <returns>The height ratio to decided the vertical location.</returns>
 				double								GetHeightRatio();
-				/// <summary>Get the page size to decide the vertical size. Value in [0, 1].</summary>
-				/// <returns>The page size to decide the vertical size.</returns>
 				double								GetHeightPageSize();
-				/// <summary>Set the width ratio to decided the horizontal location. Value in [0, 1-pageSize].</summary>
-				/// <param name="value">The width ratio to decided the horizontal location.</param>
 				void								SetWidthRatio(double value);
-				/// <summary>Set the page size to decide the horizontal size. Value in [0, 1].</summary>
-				/// <param name="value">The page size to decide the horizontal size.</param>
 				void								SetWidthPageSize(double value);
-				/// <summary>Set the height ratio to decided the vertical location. Value in [0, 1-pageSize].</summary>
-				/// <param name="value">The height ratio to decided the vertical location.</param>
 				void								SetHeightRatio(double value);
-				/// <summary>Set the page size to decide the vertical size. Value in [0, 1].</summary>
-				/// <param name="value">The page size to decide the vertical size.</param>
 				void								SetHeightPageSize(double value);
 				
 				ParentSizeAffection					GetAffectionFromParent()override;
@@ -4807,29 +2903,15 @@ namespace vl
 Animation
 ***********************************************************************/
 
-			/// <summary>
-			/// Represents an animation. Use [M:vl.presentation.compositions.GuiGraphicsHost.GetAnimationManager] to access this object.
-			/// </summary>
 			class IGuiGraphicsAnimation : public virtual IDescriptable, public Description<IGuiGraphicsAnimation>
 			{
 			public:
-				/// <summary>Get the total length.</summary>
-				/// <returns>The total length.</returns>
 				virtual int						GetTotalLength()=0;
-				/// <summary>Get the current position. Value in [0, TotalLength-1]. This function doesn't return a internal state. It return the suggested current position at the moment this function is called.</summary>
-				/// <returns>The current position.</returns>
 				virtual int						GetCurrentPosition()=0;
-				/// <summary>Display a state in the animation with the specified current position and the specified total length.</summary>
-				/// <param name="currentPosition">The current position. When this function is called by [T:vl.presentation.compositions.GuiGraphicsAnimationManager], this value comes from <see cref="IGuiGraphicsAnimation::GetCurrentPosition"/>.</param>
-				/// <param name="totalLength">The total length. When this function is called by [T:vl.presentation.compositions.GuiGraphicsAnimationManager], this value comes from <see cref="IGuiGraphicsAnimation::GetTotalLength"/>.</param>
 				virtual void					Play(int currentPosition, int totalLength)=0;
-				/// <summary>Stop the animation.</summary>
 				virtual void					Stop()=0;
 			};
 
-			/// <summary>
-			/// Animation manager.
-			/// </summary>
 			class GuiGraphicsAnimationManager : public Object
 			{
 				typedef collections::List<Ptr<IGuiGraphicsAnimation>>		AnimationList;
@@ -4839,13 +2921,8 @@ Animation
 				GuiGraphicsAnimationManager();
 				~GuiGraphicsAnimationManager();
 
-				/// <summary>Add a new animation.</summary>
-				/// <param name="animation">The new animation to add.</param>
 				void							AddAnimation(Ptr<IGuiGraphicsAnimation> animation);
-				/// <summary>Test is the animation manager contains any alive animation.</summary>
-				/// <returns>Returns true if the animation manager contains any alive animation.</returns>
 				bool							HasAnimation();
-				/// <summary>Play all alive animations. Any animation that comes to the end will be removed.</summary>
 				void							Play();
 			};
 
@@ -4853,9 +2930,6 @@ Animation
 Host
 ***********************************************************************/
 
-			/// <summary>
-			/// GuiGraphicsHost hosts an <see cref="GuiWindowComposition"/> in an <see cref="INativeWindow"/>. The composition will fill the whole window.
-			/// </summary>
 			class GuiGraphicsHost : public Object, private INativeWindowListener, private INativeControllerListener, public Description<GuiGraphicsHost>
 			{
 				typedef collections::List<GuiGraphicsComposition*>		CompositionList;
@@ -4911,35 +2985,16 @@ Host
 				GuiGraphicsHost();
 				~GuiGraphicsHost();
 
-				/// <summary>Get the associated window.</summary>
-				/// <returns>The associated window.</returns>
 				INativeWindow*					GetNativeWindow();
-				/// <summary>Associate a window. A <see cref="GuiWindowComposition"/> will fill and appear in the window.</summary>
-				/// <param name="_nativeWindow">The window to associated.</param>
 				void							SetNativeWindow(INativeWindow* _nativeWindow);
-				/// <summary>Get the main <see cref="GuiWindowComposition"/>. If a window is associated, everything that put into the main composition will be shown in the window.</summary>
-				/// <returns>The main compositoin.</returns>
 				GuiGraphicsComposition*			GetMainComposition();
-				/// <summary>Render the main composition and all content to the associated window.</summary>
 				void							Render();
 
-				/// <summary>Set the focus composition. A focused composition will receive keyboard messages.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				/// <param name="composition">The composition to set focus. This composition should be or in the main composition.</param>
 				bool							SetFocus(GuiGraphicsComposition* composition);
-				/// <summary>Get the focus composition. A focused composition will receive keyboard messages.</summary>
-				/// <returns>The focus composition.</returns>
 				GuiGraphicsComposition*			GetFocusedComposition();
-				/// <summary>Get the caret point. A caret point is the position to place the edit box of the activated input method editor.</summary>
-				/// <returns>The caret point.</returns>
 				Point							GetCaretPoint();
-				/// <summary>Set the caret point. A caret point is the position to place the edit box of the activated input method editor.</summary>
-				/// <param name="value">The caret point.</param>
-				/// <param name="referenceComposition">The point space. If this argument is null, the "value" argument will use the point space of the client area in the main composition.</param>
 				void							SetCaretPoint(Point value, GuiGraphicsComposition* referenceComposition=0);
 
-				/// <summary>Get the animation manager.</summary>
-				/// <returns>The animation manager.</returns>
 				GuiGraphicsAnimationManager*	GetAnimationManager();
 			};
 
@@ -4947,22 +3002,15 @@ Host
 Helpers
 ***********************************************************************/
 			
-			/// <summary>
-			/// Represents a time based animation.
-			/// </summary>
 			class GuiTimeBasedAnimation : public IGuiGraphicsAnimation, public Description<GuiTimeBasedAnimation>
 			{
 			protected:
 				unsigned __int64				startTime;
 				int								length;
 			public:
-				/// <summary>Create an animation with a specified length in milliseconds.</summary>
-				/// <param name="totalMilliseconds">The specified length in milliseconds.</param>
 				GuiTimeBasedAnimation(int totalMilliseconds);
 				~GuiTimeBasedAnimation();
 
-				/// <summary>Restart an animation with a specified length in milliseconds.</summary>
-				/// <param name="totalMilliseconds">The specified length in milliseconds. If the value is -1, it will use the previous length.</param>
 				void							Restart(int totalMilliseconds=-1);
 				int								GetTotalLength()override;
 				int								GetCurrentPosition()override;
@@ -4999,63 +3047,29 @@ namespace vl
 Basic Construction
 ***********************************************************************/
 
-			/// <summary>
-			/// The base class of all controls.
-			/// When the control is destroyed, it automatically destroys sub controls, and the bounds composition from the style controller.
-			/// If you want to manually destroy a control, you should first remove it from it's parent.
-			/// The only way to remove a control from a parent control, is to remove the bounds composition from it's parent composition. The same to inserting a control.
-			/// </summary>
 			class GuiControl : public Object, public Description<GuiControl>
 			{
 				friend class compositions::GuiGraphicsComposition;
 				typedef collections::List<GuiControl*>		ControlList;
 			public:
-				/// <summary>
-				/// Represents a style for a control. A style is something like a skin, but contains some default action handlers.
-				/// </summary>
 				class IStyleController : public virtual IDescriptable, public Description<IStyleController>
 				{
 				public:
-					/// <summary>Get the bounds composition. A bounds composition represents all visible contents of a control.</summary>
-					/// <returns>The bounds composition.</returns>
 					virtual compositions::GuiBoundsComposition*		GetBoundsComposition()=0;
-					/// <summary>Get the container composition. A container composition is where to place all bounds compositions for child controls.</summary>
-					/// <returns>The container composition.</returns>
 					virtual compositions::GuiGraphicsComposition*	GetContainerComposition()=0;
-					/// <summary>Set the focusable composition. A focusable composition is the composition to be focused when the control is focused.</summary>
-					/// <param name="value">The focusable composition.</param>
 					virtual void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)=0;
-					/// <summary>Set the text to display on the control.</summary>
-					/// <param name="value">The text to display.</param>
 					virtual void									SetText(const WString& value)=0;
-					/// <summary>Set the font to render the text.</summary>
-					/// <param name="value">The font to render the text.</param>
 					virtual void									SetFont(const FontProperties& value)=0;
-					/// <summary>Set the enableing state to affect the rendering of the control.</summary>
-					/// <param name="value">The enableing state.</param>
 					virtual void									SetVisuallyEnabled(bool value)=0;
 				};
 
-				/// <summary>
-				/// A style provider is a callback interface for some control that already provides a style controller, but the controller need callbacks to create sub compositions or handle actions.
-				/// </summary>
 				class IStyleProvider : public virtual IDescriptable, public Description<IStyleProvider>
 				{
 				public:
-					/// <summary>Called when a style provider is associated with a style controller.</summary>
-					/// <param name="controller">The style controller that is associated.</param>
 					virtual void								AssociateStyleController(IStyleController* controller)=0;
-					/// <summary>Set the focusable composition. A focusable composition is the composition to be focused when the control is focused.</summary>
-					/// <param name="value">The focusable composition.</param>
 					virtual void								SetFocusableComposition(compositions::GuiGraphicsComposition* value)=0;
-					/// <summary>Set the text to display on the control.</summary>
-					/// <param name="value">The text to display.</param>
 					virtual void								SetText(const WString& value)=0;
-					/// <summary>Set the font to render the text.</summary>
-					/// <param name="value">The font to render the text.</param>
 					virtual void								SetFont(const FontProperties& value)=0;
-					/// <summary>Set the enableing state to affect the rendering of the control.</summary>
-					/// <param name="value">The enableing state.</param>
 					virtual void								SetVisuallyEnabled(bool value)=0;
 				};
 			protected:
@@ -5082,87 +3096,36 @@ Basic Construction
 				virtual void							UpdateVisuallyEnabled();
 				void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
 			public:
-				/// <summary>Create a control with a specified style controller.</summary>
-				/// <param name="_styleController">The style controller.</param>
 				GuiControl(IStyleController* _styleController);
 				~GuiControl();
 
-				/// <summary>Visible event. This event will be raised when the visibility state of the control is changed.</summary>
 				compositions::GuiNotifyEvent			VisibleChanged;
-				/// <summary>Enabled event. This event will be raised when the enabling state of the control is changed.</summary>
 				compositions::GuiNotifyEvent			EnabledChanged;
-				/// <summary>
-				/// Enabled event. This event will be raised when the visually enabling state of the control is changed. A visually enabling is combined by the enabling state and the parent's visually enabling state.
-				/// A control is rendered as disabled, not only when the control itself is disabled, but also when the parent control is rendered as disabled.
-				/// </summary>
 				compositions::GuiNotifyEvent			VisuallyEnabledChanged;
-				/// <summary>Text changed event. This event will be raised when the text of the control is changed.</summary>
 				compositions::GuiNotifyEvent			TextChanged;
-				/// <summary>Font changed event. This event will be raised when the font of the control is changed.</summary>
 				compositions::GuiNotifyEvent			FontChanged;
 
-				/// <summary>A function to create the argument for notify events that raised by itself.</summary>
-				/// <returns>The created argument.</returns>
 				compositions::GuiEventArgs				GetNotifyEventArguments();
-				/// <summary>Get the associated style controller.</summary>
-				/// <returns>The associated style controller.</returns>
 				IStyleController*						GetStyleController();
-				/// <summary>Get the bounds composition for the control. The value is from <see cref="IStyleController::GetBoundsComposition"/>.</summary>
-				/// <returns>The bounds composition.</returns>
 				compositions::GuiBoundsComposition*		GetBoundsComposition();
-				/// <summary>Get the container composition for the control. The value is from <see cref="IStyleController::GetContainerComposition"/>.</summary>
-				/// <returns>The container composition.</returns>
 				compositions::GuiGraphicsComposition*	GetContainerComposition();
-				/// <summary>Get the focusable composition for the control. A focusable composition is the composition to be focused when the control is focused.</summary>
-				/// <returns>The focusable composition.</returns>
 				compositions::GuiGraphicsComposition*	GetFocusableComposition();
-				/// <summary>Get the event receiver from the bounds composition.</summary>
-				/// <returns>The event receiver.</returns>
 				compositions::GuiGraphicsEventReceiver*	GetEventReceiver();
-				/// <summary>Get the parent control.</summary>
-				/// <returns>The parent control.</returns>
 				GuiControl*								GetParent();
-				/// <summary>Get the number of child controls.</summary>
-				/// <returns>The number of child controls.</returns>
 				int										GetChildrenCount();
-				/// <summary>Get the child control using a specified index.</summary>
-				/// <returns>The child control.</returns>
-				/// <param name="index">The specified index.</param>
 				GuiControl*								GetChild(int index);
 				
-				/// <summary>Get the <see cref="GuiControlHost"/> that contains this control.</summary>
-				/// <returns>The <see cref="GuiControlHost"/> that contains this control.</returns>
 				virtual GuiControlHost*					GetRelatedControlHost();
-				/// <summary>Test if this control is rendered as enabled.</summary>
-				/// <returns>Returns true if this control is rendered as enabled.</returns>
 				virtual bool							GetVisuallyEnabled();
-				/// <summary>Test if this control is enabled.</summary>
-				/// <returns>Returns true if this control is enabled.</returns>
 				virtual bool							GetEnabled();
-				/// <summary>Make the control enabled or disabled.</summary>
-				/// <param name="value">Set to true to make the control enabled.</param>
 				virtual void							SetEnabled(bool value);
-				/// <summary>Test if this visible or invisible.</summary>
-				/// <returns>Returns true if this control is visible.</returns>
 				virtual bool							GetVisible();
-				/// <summary>Make the control visible or invisible.</summary>
-				/// <param name="value">Set to true to make the visible enabled.</param>
 				virtual void							SetVisible(bool value);
-				/// <summary>Get the text to display on the control.</summary>
-				/// <returns>The text to display on the control.</returns>
 				virtual const WString&					GetText();
-				/// <summary>Set the text to display on the control.</summary>
-				/// <param name="value">The text to display on the control.</param>
 				virtual void							SetText(const WString& value);
-				/// <summary>Get the font to render the text.</summary>
-				/// <returns>The font to render the text.</returns>
 				virtual const FontProperties&			GetFont();
-				/// <summary>Set the font to render the text.</summary>
-				/// <param name="value">The font to render the text.</param>
 				virtual void							SetFont(const FontProperties& value);
 
-				/// <summary>Query a service using an identifier. If you want to get a service of type IXXX, use IXXX::Identifier as the identifier.</summary>
-				/// <returns>The requested service. If the control doesn't support this service, it will be null.</returns>
 				virtual IDescriptable*					QueryService(const WString& identifier);
 
 				template<typename T>
@@ -5172,9 +3135,6 @@ Basic Construction
 				}
 			};
 
-			/// <summary>
-			/// Represnets a component.
-			/// </summary>
 			class GuiComponent : public Object, public Description<GuiComponent>
 			{
 			public:
@@ -5182,9 +3142,6 @@ Basic Construction
 				~GuiComponent();
 			};
 			
-			/// <summary>
-			/// Represnets an image to display.
-			/// </summary>
 			class GuiImageData
 			{
 			protected:
@@ -5192,19 +3149,11 @@ Basic Construction
 				int								frameIndex;
 
 			public:
-				/// <summary>Create an empty image data.</summary>
 				GuiImageData();
-				/// <summary>Create an image data with a specified image and a frame index.</summary>
-				/// <param name="_image">The specified image.</param>
-				/// <param name="_frameIndex">The specified frame index.</param>
 				GuiImageData(Ptr<INativeImage> _image, int _frameIndex);
 				~GuiImageData();
 
-				/// <summary>Get the specified image.</summary>
-				/// <returns>The specified image.</returns>
 				Ptr<INativeImage>				GetImage();
-				/// <summary>Get the specified frame index.</summary>
-				/// <returns>The specified frame index.</returns>
 				int								GetFrameIndex();
 			};
 
@@ -5212,27 +3161,19 @@ Basic Construction
 Buttons
 ***********************************************************************/
 
-			/// <summary>A control with 3 phases state transffering when mouse click happens.</summary>
 			class GuiButton : public GuiControl, public Description<GuiButton>
 			{
 			public:
-				/// <summary>The visual state.</summary>
 				enum ControlState
 				{
-					/// <summary>[T:vl.presentation.controls.GuiButton.ControlState]Normal state.</summary>
 					Normal,
-					/// <summary>[T:vl.presentation.controls.GuiButton.ControlState]Active state.</summary>
 					Active,
-					/// <summary>[T:vl.presentation.controls.GuiButton.ControlState]Pressed state.</summary>
 					Pressed,
 				};
 
-				/// <summary>Style controller interface for <see cref="GuiButton"/>.</summary>
 				class IStyleController : virtual public GuiControl::IStyleController, public Description<IStyleController>
 				{
 				public:
-					/// <summary>Called when the control state changed.</summary>
-					/// <param name="value">The new control state.</param>
 					virtual void						Transfer(ControlState value)=0;
 				};
 			protected:
@@ -5248,29 +3189,21 @@ Buttons
 				void									OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
-				/// <summary>Create a control with a specified style controller.</summary>
-				/// <param name="_styleController">The style controller.</param>
 				GuiButton(IStyleController* _styleController);
 				~GuiButton();
 
-				/// <summary>Mouse click event.</summary>
 				compositions::GuiNotifyEvent			Clicked;
 			};
 
-			/// <summary>A <see cref="GuiButton"/> with a selection state.</summary>
 			class GuiSelectableButton : public GuiButton, public Description<GuiSelectableButton>
 			{
 			public:
-				/// <summary>Style controller interface for <see cref="GuiSelectableButton"/>.</summary>
 				class IStyleController : public virtual GuiButton::IStyleController, public Description<IStyleController>
 				{
 				public:
-					/// <summary>Called when the selection state changed.</summary>
-					/// <param name="value">The new control state.</param>
 					virtual void						SetSelected(bool value)=0;
 				};
 
-				/// <summary>Selection group controller. Control the selection state of all attached button.</summary>
 				class GroupController : public GuiComponent, public Description<GroupController>
 				{
 				protected:
@@ -5279,15 +3212,11 @@ Buttons
 					GroupController();
 					~GroupController();
 
-					/// <summary>Called when the group controller is attached to a <see cref="GuiSelectableButton"/>. use [M:vl.presentation.controls.GuiSelectableButton.SetGroupController] to attach or detach a group controller to or from a selectable button.</summary>
 					virtual void						Attach(GuiSelectableButton* button);
-					/// <summary>Called when the group controller is deteched to a <see cref="GuiSelectableButton"/>. use [M:vl.presentation.controls.GuiSelectableButton.SetGroupController] to attach or detach a group controller to or from a selectable button.</summary>
 					virtual void						Detach(GuiSelectableButton* button);
-					/// <summary>Called when the selection state of any <see cref="GuiSelectableButton"/> changed.</summary>
 					virtual void						OnSelectedChanged(GuiSelectableButton* button)=0;
 				};
 
-				/// <summary>A mutex group controller, usually for radio buttons.</summary>
 				class MutexGroupController : public GroupController, public Description<MutexGroupController>
 				{
 				protected:
@@ -5307,37 +3236,20 @@ Buttons
 
 				void									OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
-				/// <summary>Create a control with a specified style controller.</summary>
-				/// <param name="_styleController">The style controller.</param>
 				GuiSelectableButton(IStyleController* _styleController);
 				~GuiSelectableButton();
 
-				/// <summary>Group controller changed event.</summary>
 				compositions::GuiNotifyEvent			GroupControllerChanged;
-				/// <summary>Auto selection changed event.</summary>
 				compositions::GuiNotifyEvent			AutoSelectionChanged;
-				/// <summary>Selected changed event.</summary>
 				compositions::GuiNotifyEvent			SelectedChanged;
 
-				/// <summary>Get the attached group controller.</summary>
-				/// <returns>The attached group controller.</returns>
 				virtual GroupController*				GetGroupController();
-				/// <summary>Set the attached group controller.</summary>
-				/// <param name="value">The attached group controller.</param>
 				virtual void							SetGroupController(GroupController* value);
 				
-				/// <summary>Get the auto selection state. True if the button is automatically selected or unselected when the button is clicked.</summary>
-				/// <returns>The auto selection state.</returns>
 				virtual bool							GetAutoSelection();
-				/// <summary>Set the auto selection state. True if the button is automatically selected or unselected when the button is clicked.</summary>
-				/// <param name="value">The auto selection state.</param>
 				virtual void							SetAutoSelection(bool value);
 				
-				/// <summary>Get the selected state.</summary>
-				/// <returns>The selected state.</returns>
 				virtual bool							GetSelected();
-				/// <summary>Set the selected state.</summary>
-				/// <param name="value">The selected state.</param>
 				virtual void							SetSelected(bool value);
 			};
 
@@ -5345,49 +3257,28 @@ Buttons
 Scrolls
 ***********************************************************************/
 
-			/// <summary>A scroll control, which represents a one dimension sub range of a whole range.</summary>
 			class GuiScroll : public GuiControl, public Description<GuiScroll>
 			{
 			public:
-				/// <summary>A command executor for the style controller to change the control state.</summary>
 				class ICommandExecutor : public virtual IDescriptable, public Description<ICommandExecutor>
 				{
 				public:
-					/// <summary>Do small decrement.</summary>
 					virtual void						SmallDecrease()=0;
-					/// <summary>Do small increment.</summary>
 					virtual void						SmallIncrease()=0;
-					/// <summary>Do big decrement.</summary>
 					virtual void						BigDecrease()=0;
-					/// <summary>Do big increment.</summary>
 					virtual void						BigIncrease()=0;
 
-					/// <summary>Change to total size of the scroll.</summary>
-					/// <param name="value">The total size.</param>
 					virtual void						SetTotalSize(int value)=0;
-					/// <summary>Change to page size of the scroll.</summary>
-					/// <param name="value">The page size.</param>
 					virtual void						SetPageSize(int value)=0;
-					/// <summary>Change to position of the scroll.</summary>
-					/// <param name="value">The position.</param>
 					virtual void						SetPosition(int value)=0;
 				};
 				
-				/// <summary>Style controller interface for <see cref="GuiScroll"/>.</summary>
 				class IStyleController : public virtual GuiControl::IStyleController, public Description<IStyleController>
 				{
 				public:
-					/// <summary>Called when the command executor is changed.</summary>
-					/// <param name="value">The command executor.</param>
 					virtual void						SetCommandExecutor(ICommandExecutor* value)=0;
-					/// <summary>Called when the total size is changed.</summary>
-					/// <param name="value">The total size.</param>
 					virtual void						SetTotalSize(int value)=0;
-					/// <summary>Called when the page size is changed.</summary>
-					/// <param name="value">The page size.</param>
 					virtual void						SetPageSize(int value)=0;
-					/// <summary>Called when the position is changed.</summary>
-					/// <param name="value">The position.</param>
 					virtual void						SetPosition(int value)=0;
 				};
 			protected:
@@ -5417,85 +3308,42 @@ Scrolls
 				int										smallMove;
 				int										bigMove;
 			public:
-				/// <summary>Create a control with a specified style controller.</summary>
-				/// <param name="_styleController">The style controller.</param>
 				GuiScroll(IStyleController* _styleController);
 				~GuiScroll();
 				
-				/// <summary>Total size changed event.</summary>
 				compositions::GuiNotifyEvent			TotalSizeChanged;
-				/// <summary>Page size changed event.</summary>
 				compositions::GuiNotifyEvent			PageSizeChanged;
-				/// <summary>Position changed event.</summary>
 				compositions::GuiNotifyEvent			PositionChanged;
-				/// <summary>Small move changed event.</summary>
 				compositions::GuiNotifyEvent			SmallMoveChanged;
-				/// <summary>Big move changed event.</summary>
 				compositions::GuiNotifyEvent			BigMoveChanged;
 				
-				/// <summary>Get the total size.</summary>
-				/// <returns>The total size.</returns>
 				virtual int								GetTotalSize();
-				/// <summary>Set the total size.</summary>
-				/// <param name="value">The total size.</param>
 				virtual void							SetTotalSize(int value);
-				/// <summary>Get the page size.</summary>
-				/// <returns>The page size.</returns>
 				virtual int								GetPageSize();
-				/// <summary>Set the page size.</summary>
-				/// <param name="value">The page size.</param>
 				virtual void							SetPageSize(int value);
-				/// <summary>Get the position.</summary>
-				/// <returns>The position.</returns>
 				virtual int								GetPosition();
-				/// <summary>Set the position.</summary>
-				/// <param name="value">The position.</param>
 				virtual void							SetPosition(int value);
-				/// <summary>Get the small move.</summary>
-				/// <returns>The small move.</returns>
 				virtual int								GetSmallMove();
-				/// <summary>Set the small move.</summary>
-				/// <param name="value">The small move.</param>
 				virtual void							SetSmallMove(int value);
-				/// <summary>Get the big move.</summary>
-				/// <returns>The big move.</returns>
 				virtual int								GetBigMove();
-				/// <summary>Set the big move.</summary>
-				/// <param name="value">The big move.</param>
 				virtual void							SetBigMove(int value);
 				
-				/// <summary>Get the minimum possible position.</summary>
-				/// <returns>The minimum possible position.</returns>
 				int										GetMinPosition();
-				/// <summary>Get the maximum possible position.</summary>
-				/// <returns>The maximum possible position.</returns>
 				int										GetMaxPosition();
 			};
 
-			/// <summary>A control with a vertical scroll bar and a horizontal scroll bar to perform partial viewing.</summary>
 			class GuiScrollView : public GuiControl, public Description<GuiScrollView>
 			{
 			public:
-				/// <summary>Style provider interface for <see cref="GuiScrollView"/>.</summary>
 				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
 				{
 				public:
-					/// <summary>Create a control style for the horizontal scroll bar.</summary>
-					/// <returns>The created control style for the horizontal scroll bar.</returns>
 					virtual GuiScroll::IStyleController*			CreateHorizontalScrollStyle()=0;
-					/// <summary>Create a control style for the vertical scroll bar.</summary>
-					/// <returns>The created control style for the vertical scroll bar.</returns>
 					virtual GuiScroll::IStyleController*			CreateVerticalScrollStyle()=0;
-					/// <summary>Get the default scroll size for scroll bars, width for vertical, height for horizontal.</summary>
-					/// <returns>The default scroll size.</returns>
 					virtual int										GetDefaultScrollSize()=0;
-					/// <summary>Called when the control begins to initialize. The control pass the bounds composition, and the style provider can put background compositions and elements on it, and return a container composition to contain content and scroll bars.</summary>
-					/// <returns>A container composition to contain content and scroll bars</returns>
-					/// <param name="boundsComposition">The bounds composition to install background.</param>
 					virtual compositions::GuiGraphicsComposition*	InstallBackground(compositions::GuiBoundsComposition* boundsComposition)=0;
 				};
 				
-				/// <summary>Style controller for <see cref="GuiScrollView"/>.</summary>
 				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
 				{
 				protected:
@@ -5512,41 +3360,21 @@ Scrolls
 
 					void									UpdateTable();
 				public:
-					/// <summary>Create a style controller with a specified style provider.</summary>
-					/// <param name="_styleProvider">The style provider.</param>
 					StyleController(IStyleProvider* _styleProvider);
 					~StyleController();
 
-					/// <summary>Called when the style controller is attched to a <see cref="GuiScrollView"/>.</summary>
-					/// <param name="_scrollView">The scroll view control that attached to.</param>
 					void									SetScrollView(GuiScrollView* _scrollView);
-					/// <summary>Called when the view size of the scroll view changed. Scroll bars will be adjusted.</summary>
-					/// <param name="fullSize">The view size.</param>
 					void									AdjustView(Size fullSize);
-					/// <summary>Get the attached style provider.</summary>
-					/// <returns>The attached style provider.</returns>
 					IStyleProvider*							GetStyleProvider();
 
-					/// <summary>Get the horizontal scroll control.</summary>
-					/// <returns>The horizontal scroll control.</returns>
 					GuiScroll*								GetHorizontalScroll();
-					/// <summary>Get the vertical scroll control.</summary>
-					/// <returns>The vertical scroll control.</returns>
 					GuiScroll*								GetVerticalScroll();
 					compositions::GuiTableComposition*		GetInternalTableComposition();
 					compositions::GuiBoundsComposition*		GetInternalContainerComposition();
 
-					/// <summary>Test is the horizontal scroll bar always visible even the content doesn't exceed the view bounds.</summary>
-					/// <returns>Returns true if the horizontal scroll bar always visible even the content doesn't exceed the view bounds</returns>
 					bool									GetHorizontalAlwaysVisible();
-					/// <summary>Set is the horizontal scroll bar always visible even the content doesn't exceed the view bounds.</summary>
-					/// <param name="value">Set to true if the horizontal scroll bar always visible even the content doesn't exceed the view bounds</param>
 					void									SetHorizontalAlwaysVisible(bool value);
-					/// <summary>Test is the vertical scroll bar always visible even the content doesn't exceed the view bounds.</summary>
-					/// <returns>Returns true if the vertical scroll bar always visible even the content doesn't exceed the view bounds</returns>
 					bool									GetVerticalAlwaysVisible();
-					/// <summary>Set is the vertical scroll bar always visible even the content doesn't exceed the view bounds.</summary>
-					/// <param name="value">Set to true if the vertical scroll bar always visible even the content doesn't exceed the view bounds</param>
 					void									SetVerticalAlwaysVisible(bool value);
 
 					compositions::GuiBoundsComposition*		GetBoundsComposition()override;
@@ -5567,69 +3395,38 @@ Scrolls
 				void									CallUpdateView();
 				void									Initialize();
 
-				/// <summary>Calculate the full size of the content.</summary>
-				/// <returns>The full size of the content.</returns>
 				virtual Size							QueryFullSize()=0;
-				/// <summary>Update the visible content using a view bounds. The view bounds is in the space from (0,0) to full size.</summary>
-				/// <param name="viewBounds">The view bounds.</param>
 				virtual void							UpdateView(Rect viewBounds)=0;
 				
-				/// <summary>Create a control with a specified style controller.</summary>
-				/// <param name="_styleController">The style controller.</param>
 				GuiScrollView(StyleController* _styleController);
 			public:
-				/// <summary>Create a control with a specified style provider.</summary>
-				/// <param name="styleProvider">The style provider.</param>
 				GuiScrollView(IStyleProvider* styleProvider);
 				~GuiScrollView();
 
-				/// <summary>Force to update contents and scroll bars.</summary>
 				void									CalculateView();
-				/// <summary>Get the view size.</summary>
-				/// <returns>The view size.</returns>
 				Size									GetViewSize();
-				/// <summary>Get the view bounds.</summary>
-				/// <returns>The view bounds.</returns>
 				Rect									GetViewBounds();
 				
-				/// <summary>Get the horizontal scroll control.</summary>
-				/// <returns>The horizontal scroll control.</returns>
 				GuiScroll*								GetHorizontalScroll();
-				/// <summary>Get the vertical scroll control.</summary>
-				/// <returns>The vertical scroll control.</returns>
 				GuiScroll*								GetVerticalScroll();
-				/// <summary>Test is the horizontal scroll bar always visible even the content doesn't exceed the view bounds.</summary>
-				/// <returns>Returns true if the horizontal scroll bar always visible even the content doesn't exceed the view bounds</returns>
 				bool									GetHorizontalAlwaysVisible();
-				/// <summary>Set is the horizontal scroll bar always visible even the content doesn't exceed the view bounds.</summary>
-				/// <param name="value">Set to true if the horizontal scroll bar always visible even the content doesn't exceed the view bounds</param>
 				void									SetHorizontalAlwaysVisible(bool value);
-				/// <summary>Test is the vertical scroll bar always visible even the content doesn't exceed the view bounds.</summary>
-				/// <returns>Returns true if the vertical scroll bar always visible even the content doesn't exceed the view bounds</returns>
 				bool									GetVerticalAlwaysVisible();
-				/// <summary>Set is the vertical scroll bar always visible even the content doesn't exceed the view bounds.</summary>
-				/// <param name="value">Set to true if the vertical scroll bar always visible even the content doesn't exceed the view bounds</param>
 				void									SetVerticalAlwaysVisible(bool value);
 			};
 			
-			/// <summary>A control container with a vertical scroll bar and a horizontal scroll bar to perform partial viewing. When controls are added, removed, moved or resized, the scroll bars will adjust automatically.</summary>
 			class GuiScrollContainer : public GuiScrollView, public Description<GuiScrollContainer>
 			{
 			public:
-				/// <summary>Style controller for <see cref="GuiScrollContainer"/>.</summary>
 				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
 				{
 				protected:
 					compositions::GuiBoundsComposition*		controlContainerComposition;
 				public:
-					/// <summary>Create a style controller with a specified style provider.</summary>
-					/// <param name="_styleProvider">The style provider.</param>
 					StyleController(GuiScrollView::IStyleProvider* styleProvider);
 					~StyleController();
 
 					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
-					/// <summary>Update sub controls using a specified left-top position of the view bounds.</summary>
-					/// <param name="leftTop">The specified left-top position of the view bounds.</param>
 					void									MoveContainer(Point leftTop);
 				};
 
@@ -5640,8 +3437,6 @@ Scrolls
 				Size									QueryFullSize()override;
 				void									UpdateView(Rect viewBounds)override;
 			public:
-				/// <summary>Create a control with a specified style provider.</summary>
-				/// <param name="styleProvider">The style provider.</param>
 				GuiScrollContainer(GuiScrollContainer::IStyleProvider* styleProvider);
 				~GuiScrollContainer();
 			};
@@ -5677,9 +3472,6 @@ namespace vl
 Control Host
 ***********************************************************************/
 
-			/// <summary>
-			/// Represents a control that host by a <see cref="INativeWindow"/>.
-			/// </summary>
 			class GuiControlHost : public GuiControl, private INativeWindowListener, public Description<GuiControlHost>
 			{
 			protected:
@@ -5698,203 +3490,70 @@ Control Host
 				void									Closed()override;
 				void									Destroying()override;
 			public:
-				/// <summary>Create a control with a specified style controller.</summary>
-				/// <param name="_styleController">The style controller.</param>
 				GuiControlHost(GuiControl::IStyleController* _styleController);
 				~GuiControlHost();
 				
-				/// <summary>Window got focus event.</summary>
 				compositions::GuiNotifyEvent			WindowGotFocus;
-				/// <summary>Window lost focus event.</summary>
 				compositions::GuiNotifyEvent			WindowLostFocus;
-				/// <summary>Window activated event.</summary>
 				compositions::GuiNotifyEvent			WindowActivated;
-				/// <summary>Window deactivated event.</summary>
 				compositions::GuiNotifyEvent			WindowDeactivated;
-				/// <summary>Window opened event.</summary>
 				compositions::GuiNotifyEvent			WindowOpened;
-				/// <summary>Window closing event.</summary>
 				compositions::GuiRequestEvent			WindowClosing;
-				/// <summary>Window closed event.</summary>
 				compositions::GuiNotifyEvent			WindowClosed;
-				/// <summary>Window destroying event.</summary>
 				compositions::GuiNotifyEvent			WindowDestroying;
 
-				/// <summary>Get the internal <see cref="compositions::GuiGraphicsHost"/> object to host the window content.</summary>
-				/// <returns>The internal <see cref="compositions::GuiGraphicsHost"/> object to host the window content.</returns>
 				compositions::GuiGraphicsHost*			GetGraphicsHost();
-				/// <summary>Get the main composition to host the window content.</summary>
-				/// <returns>The main composition to host the window content.</returns>
 				compositions::GuiGraphicsComposition*	GetMainComposition();
-				/// <summary>Get the internal <see cref="INativeWindow"/> object to host the content.</summary>
-				/// <returns>The the internal <see cref="INativeWindow"/> object to host the content.</returns>
 				INativeWindow*							GetNativeWindow();
-				/// <summary>Set the internal <see cref="INativeWindow"/> object to host the content.</summary>
-				/// <param name="window">The the internal <see cref="INativeWindow"/> object to host the content.</param>
 				void									SetNativeWindow(INativeWindow* window);
-				/// <summary>Render the window content.</summary>
 				void									Render();
 				
-				/// <summary>Test is the window enabled.</summary>
-				/// <returns>Returns true if the window is enabled.</returns>
 				bool									GetEnabled()override;
-				/// <summary>Enable or disable the window.</summary>
-				/// <param name="value">Set to true to enable the window.</param>
 				void									SetEnabled(bool value)override;
-				/// <summary>Test is the window focused.</summary>
-				/// <returns>Returns true if the window is focused.</returns>
 				bool									GetFocused();
-				/// <summary>Focus the window.</summary>
 				void									SetFocused();
-				/// <summary>Test is the window activated.</summary>
-				/// <returns>Returns true if the window is activated.</returns>
 				bool									GetActivated();
-				/// <summary>Activate the window.</summary>
 				void									SetActivated();
-				/// <summary>Test is the window icon shown in the task bar.</summary>
-				/// <returns>Returns true if the window is icon shown in the task bar.</returns>
 				bool									GetShowInTaskBar();
-				/// <summary>Show or hide the window icon in the task bar.</summary>
-				/// <param name="value">Set to true to show the window icon in the task bar.</param>
 				void									SetShowInTaskBar(bool value);
-				/// <summary>Test is the window allowed to be activated.</summary>
-				/// <returns>Returns true if the window is allowed to be activated.</returns>
 				bool									GetEnabledActivate();
-				/// <summary>Allow or forbid the window to be activated.</summary>
-				/// <param name="value">Set to true to allow the window to be activated.</param>
 				void									SetEnabledActivate(bool value);
 				
-				/// <summary>
-				/// Test is the maximize box visible.
-				/// </summary>
-				/// <returns>Returns true if the maximize box is visible.</returns>
 				bool									GetMaximizedBox();
-				/// <summary>
-				/// Make the maximize box visible or invisible.
-				/// </summary>
-				/// <param name="visible">True to make the maximize box visible.</param>
 				void									SetMaximizedBox(bool visible);
-				/// <summary>
-				/// Test is the minimize box visible.
-				/// </summary>
-				/// <returns>Returns true if the minimize box is visible.</returns>
 				bool									GetMinimizedBox();
-				/// <summary>
-				/// Make the minimize box visible or invisible.
-				/// </summary>
-				/// <param name="visible">True to make the minimize box visible.</param>
 				void									SetMinimizedBox(bool visible);
-				/// <summary>
-				/// Test is the border visible.
-				/// </summary>
-				/// <returns>Returns true if the border is visible.</returns>
 				bool									GetBorder();
-				/// <summary>
-				/// Make the border visible or invisible.
-				/// </summary>
-				/// <param name="visible">True to make the border visible.</param>
 				void									SetBorder(bool visible);
-				/// <summary>
-				/// Test is the size box visible.
-				/// </summary>
-				/// <returns>Returns true if the size box is visible.</returns>
 				bool									GetSizeBox();
-				/// <summary>
-				/// Make the size box visible or invisible.
-				/// </summary>
-				/// <param name="visible">True to make the size box visible.</param>
 				void									SetSizeBox(bool visible);
-				/// <summary>
-				/// Test is the icon visible.
-				/// </summary>
-				/// <returns>Returns true if the icon is visible.</returns>
 				bool									GetIconVisible();
-				/// <summary>
-				/// Make the icon visible or invisible.
-				/// </summary>
-				/// <param name="visible">True to make the icon visible.</param>
 				void									SetIconVisible(bool visible);
-				/// <summary>
-				/// Test is the title bar visible.
-				/// </summary>
-				/// <returns>Returns true if the title bar is visible.</returns>
 				bool									GetTitleBar();
-				/// <summary>
-				/// Make the title bar visible or invisible.
-				/// </summary>
-				/// <param name="visible">True to make the title bar visible.</param>
 				void									SetTitleBar(bool visible);
-				/// <summary>
-				/// Test is the window always on top of the desktop.
-				/// </summary>
-				/// <returns>Returns true if the window is always on top of the desktop.</returns>
 				bool									GetTopMost();
-				/// <summary>
-				/// Make the window always or never on top of the desktop.
-				/// </summary>
-				/// <param name="topmost">True to make the window always  on top of the desktop.</param>
 				void									SetTopMost(bool topmost);
 
-				/// <summary>Add a component.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
 				bool									AddComponent(GuiComponent* component);
-				/// <summary>Remove a component.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
 				bool									RemoveComponent(GuiComponent* component);
-				/// <summary>Test does the window contain the component.</summary>
-				/// <returns>Returns true if the window contains the component.</returns>
-				/// <param name="component">The component to test.</param>
 				bool									ContainsComponent(GuiComponent* component);
 
-				/// <summary>Get the client size of the window.</summary>
-				/// <returns>The client size of the window.</returns>
 				Size									GetClientSize();
-				/// <summary>Set the client size of the window.</summary>
-				/// <param name="value">The client size of the window.</param>
 				void									SetClientSize(Size value);
-				/// <summary>Get the bounds of the window in screen space.</summary>
-				/// <returns>The bounds of the window.</returns>
 				Rect									GetBounds();
-				/// <summary>Set the bounds of the window in screen space.</summary>
-				/// <param name="value">The bounds of the window.</param>
 				void									SetBounds(Rect value);
 				GuiControlHost*							GetRelatedControlHost()override;
 				const WString&							GetText()override;
 				void									SetText(const WString& value)override;
 
-				/// <summary>Get the screen that contains the window.</summary>
-				/// <returns>The screen that contains the window.</returns>
 				INativeScreen*							GetRelatedScreen();
-				/// <summary>
-				/// Show the window.
-				/// </summary>
 				void									Show();
-				/// <summary>
-				/// Show the window without activation.
-				/// </summary>
 				void									ShowDeactivated();
-				/// <summary>
-				/// Restore the window.
-				/// </summary>
 				void									ShowRestored();
-				/// <summary>
-				/// Maximize the window.
-				/// </summary>
 				void									ShowMaximized();
-				/// <summary>
-				/// Minimize the window.
-				/// </summary>
 				void									ShowMinimized();
-				/// <summary>
-				/// Hide the window.
-				/// </summary>
 				void									Hide();
-				/// <summary>
-				/// Close the window and destroy the internal <see cref="INativeWindow"/> object.
-				/// </summary>
 				void									Close();
-				/// <summary>Test is the window opened.</summary>
-				/// <returns>Returns true if the window is opened.</returns>
 				bool									GetOpening();
 			};
 
@@ -5902,43 +3561,26 @@ Control Host
 Window
 ***********************************************************************/
 
-			/// <summary>
-			/// Represents a normal window.
-			/// </summary>
 			class GuiWindow : public GuiControlHost, public Description<GuiWindow>
 			{
 				friend class GuiApplication;
 			protected:
 				virtual void							MouseClickedOnOtherWindow(GuiWindow* window);
 			public:
-				/// <summary>Create a control with a specified style controller.</summary>
-				/// <param name="_styleController">The style controller.</param>
 				GuiWindow(GuiControl::IStyleController* _styleController);
 				~GuiWindow();
 			};
 			
-			/// <summary>
-			/// Represents a popup window. When the mouse click on other window or the desktop, the popup window will be closed automatically.
-			/// </summary>
 			class GuiPopup : public GuiWindow, public Description<GuiPopup>
 			{
 			protected:
 				void									MouseClickedOnOtherWindow(GuiWindow* window)override;
 			public:
-				/// <summary>Create a control with a specified style controller.</summary>
-				/// <param name="_styleController">The style controller.</param>
 				GuiPopup(GuiControl::IStyleController* _styleController);
 				~GuiPopup();
 
-				/// <summary>Test will the whole popup window be in the screen if the popup's left-top position is set to a specified value.</summary>
-				/// <returns>Returns true if the whole popup window will be in the screen.</returns>
-				/// <param name="location">The specified left-top position.</param>
 				bool									IsClippedByScreen(Point location);
-				/// <summary>Show the popup window with the left-top position set to a specified value. The position of the popup window will be adjusted to make it totally inside the screen if possible.</summary>
-				/// <param name="location">The specified left-top position.</param>
 				void									ShowPopup(Point location);
-				/// <summary>Show the popup window aligned with a specified control. The position of the popup window will be adjusted to make it totally inside the screen if possible.</summary>
-				/// <param name="preferredTopBottomSide">Set to true if the popup window is expected to be opened at the top or bottom side of that control.</param>
 				void									ShowPopup(GuiControl* control, bool preferredTopBottomSide);
 			};
 		}
@@ -8096,7 +5738,6 @@ namespace vl
 	{
 		namespace controls
 		{
-			/// <summary>Represents an GacUI application, for window management and asynchronized operation supporting. Use [M:vl.presentation.controls.GetApplication] to access the instance of this class.</summary>
 			class GuiApplication : public Object, private INativeControllerListener
 			{
 				friend void GuiApplicationInitialize();
@@ -8118,37 +5759,14 @@ namespace vl
 				void											UnregisterWindow(GuiWindow* window);
 				void											OnMouseDown(Point location);
 			public:
-				/// <summary>Run a <see cref="GuiWindow"/> as the main window and show it. This function can only be called once in the entry point. When the main window is closed or hiden, the Run function will finished, and the application should prepare for finalization.</summary>
-				/// <param name="_mainWindow">The main window.</param>
 				void											Run(GuiWindow* _mainWindow);
-				/// <summary>Get all created <see cref="GuiWindow"/> instances. This contains normal windows, popup windows, menus, or other types of windows that inherits from <see cref="GuiWindow"/>.</summary>
-				/// <returns>All created <see cref="GuiWindow"/> instances.</returns>
 				const collections::IReadonlyList<GuiWindow*>&	GetWindows();
-				/// <summary>Get the <see cref="GuiWindow"/> instance that the mouse cursor are directly in.</summary>
-				/// <returns>The <see cref="GuiWindow"/> instance that the mouse cursor are directly in.</returns>
-				/// <param name="location">The mouse cursor.</param>
 				GuiWindow*										GetWindow(Point location);
 
-				/// <summary>Test is the current thread the main thread for GUI.</summary>
-				/// <returns>Returns true if the current thread is the main thread for GUI.</returns>
 				bool											IsInMainThread();
-				/// <summary>Invoke a specified function with an specified argument in the main thread.</summary>
-				/// <param name="proc">The specified function.</param>
-				/// <param name="argument">The specified argument.</param>
 				void											InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument);
-				/// <summary>Invoke a specified function with an specified argument in the main thread and wait for the function to complete or timeout.</summary>
-				/// <returns>Return true if the function complete. Return false if the function has not completed during a specified period of time.</returns>
-				/// <param name="proc">The specified function.</param>
-				/// <param name="argument">The specified argument.</param>
-				/// <param name="milliseconds">The specified period of time to wait. Set to -1 (default value) to wait forever until the function completed.</param>
 				bool											InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds=-1);
-				/// <summary>Invoke a specified function in the main thread.</summary>
-				/// <param name="proc">The specified function.</param>
 				void											InvokeInMainThread(const Func<void()>& proc);
-				/// <summary>Invoke a specified function in the main thread and wait for the function to complete or timeout.</summary>
-				/// <returns>Return true if the function complete. Return false if the function has not completed during a specified period of time.</returns>
-				/// <param name="proc">The specified function.</param>
-				/// <param name="milliseconds">The specified period of time to wait. Set to -1 (default value) to wait forever until the function completed.</param>
 				bool											InvokeInMainThreadAndWait(const Func<void()>& proc, int milliseconds=-1);
 
 				template<typename T>
@@ -8164,8 +5782,6 @@ namespace vl
 				}
 			};
 
-			/// <summary>Get the global <see cref="GuiApplication"/> object.</summary>
-			/// <returns>The global <see cref="GuiApplication"/> object.</returns>
 			extern GuiApplication*								GetApplication();
 		}
 	}

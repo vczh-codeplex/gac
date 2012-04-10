@@ -151,7 +151,7 @@ namespace Codepack
                                     writer.WriteLine(line);
                                 }
                             }
-                            else
+                            else if (!line.Trim().StartsWith("///"))
                             {
                                 match = IncludeRegex.Match(line);
                                 if (!match.Success)
