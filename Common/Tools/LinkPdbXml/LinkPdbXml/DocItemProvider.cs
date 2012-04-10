@@ -77,8 +77,13 @@ namespace LinkPdbXml
                             ;
                         var selectableFuncs = funcs
                             .Where(f => f.Type.ParameterTypes.Length == parameters.Length)
-                            .Where(f => f.Type.ParameterTypes.Select((t, i) => t.Name == parameters[i]).All(t => t))
                             .ToArray();
+                        if (selectableFuncs.Length != 1)
+                        {
+                            selectableFuncs = selectableFuncs
+                                .Where(f => f.Type.ParameterTypes.Select((t, i) => t.Name == parameters[i]).All(t => t))
+                                .ToArray();
+                        }
                         return selectableFuncs.Length == 1 ? selectableFuncs[0] : null;
                     }
             }
