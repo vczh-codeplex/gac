@@ -5,7 +5,7 @@ DEVELOPER: ³Âè÷å«(vczh)
 #include "GacUI.h"
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiComboControls.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiComboControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -196,7 +196,7 @@ GuiComboBoxListControl
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiContainerControls.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiContainerControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -424,7 +424,7 @@ GuiTab
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiListViewControls.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiListViewControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -1947,7 +1947,7 @@ GuiListView
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiMenuControls.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiMenuControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -2292,7 +2292,7 @@ GuiMenuButton
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiTextListControls.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiTextListControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -2656,7 +2656,7 @@ GuiTextList
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiTreeViewControls.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\ExtendedControls\GuiTreeViewControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -3902,7 +3902,7 @@ GuiTreeView
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Controls\GuiApplication.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\GuiApplication.cpp
 ***********************************************************************/
 
 extern void GuiMain();
@@ -4065,7 +4065,7 @@ void GuiApplicationMain()
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Controls\GuiBasicControls.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\GuiBasicControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -5171,7 +5171,7 @@ GuiScrollContainer
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Controls\GuiListControls.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\GuiListControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -6590,7 +6590,7 @@ ItemProviderBase
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Controls\GuiTextControls.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\GuiTextControls.cpp
 ***********************************************************************/
 #include <math.h>
 
@@ -7742,7 +7742,7 @@ GuiSinglelineTextBox
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Controls\GuiWindowControls.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\GuiWindowControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -8474,7 +8474,7 @@ GuiPopup
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Controls\Styles\GuiCommonStyles.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\Styles\GuiCommonStyles.cpp
 ***********************************************************************/
 
 namespace vl
@@ -9025,7 +9025,7 @@ CommonTrackStyle
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Controls\Styles\GuiWin7Styles.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Controls\Styles\GuiWin7Styles.cpp
 ***********************************************************************/
 
 namespace vl
@@ -12364,7 +12364,7 @@ Win7TreeViewProvider
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsComposition.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsComposition.cpp
 ***********************************************************************/
 
 namespace vl
@@ -14099,7 +14099,7 @@ GuiPartialViewComposition
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsElement.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsElement.cpp
 ***********************************************************************/
 
 namespace vl
@@ -14722,7 +14722,7 @@ GuiPolygonElement
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsEventReceiver.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsEventReceiver.cpp
 ***********************************************************************/
 
 namespace vl
@@ -14778,7 +14778,7 @@ Event Receiver
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsHost.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsHost.cpp
 ***********************************************************************/
 
 namespace vl
@@ -15393,7 +15393,7 @@ GuiTimeBasedAnimation
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsTextElement.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\GuiGraphicsTextElement.cpp
 ***********************************************************************/
 
 namespace vl
@@ -16183,7 +16183,7 @@ GuiColorizedTextElement
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsRenderersWindowsDirect2D.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsRenderersWindowsDirect2D.cpp
 ***********************************************************************/
 
 namespace vl
@@ -17319,7 +17319,7 @@ GuiColorizedTextElementRenderer
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.cpp
 ***********************************************************************/
 
 namespace vl
@@ -17856,7 +17856,7 @@ void RendererMainDirect2D()
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.cpp
 ***********************************************************************/
 
 namespace vl
@@ -18783,7 +18783,7 @@ GuiColorizedTextElementRenderer
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.cpp
 ***********************************************************************/
 
 namespace vl
@@ -19222,7 +19222,7 @@ void RendererMainGDI()
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\NativeWindow\GuiNativeWindow.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\NativeWindow\GuiNativeWindow.cpp
 ***********************************************************************/
 
 namespace vl
@@ -19425,7 +19425,7 @@ Native Window Provider
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.cpp
 ***********************************************************************/
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
@@ -19675,7 +19675,7 @@ int SetupWindowsDirect2DRenderer()
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\NativeWindow\Windows\GDI\WinGDI.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\NativeWindow\Windows\GDI\WinGDI.cpp
 ***********************************************************************/
 
 using namespace vl::stream;
@@ -21564,7 +21564,7 @@ WinImageDC
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\NativeWindow\Windows\GDI\WinGDIApplication.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\NativeWindow\Windows\GDI\WinGDIApplication.cpp
 ***********************************************************************/
 
 namespace vl
@@ -21760,7 +21760,7 @@ int SetupWindowsGDIRenderer()
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\NativeWindow\Windows\WinNativeWindow.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\NativeWindow\Windows\WinNativeWindow.cpp
 ***********************************************************************/
 
 #pragma comment(lib, "Imm32.lib")
@@ -23917,7 +23917,7 @@ Windows Platform Native Controller
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Libraries\GacUI\Source\Reflection\GuiTypeDescriptor.cpp
+E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\Reflection\GuiTypeDescriptor.cpp
 ***********************************************************************/
 
 namespace vl
