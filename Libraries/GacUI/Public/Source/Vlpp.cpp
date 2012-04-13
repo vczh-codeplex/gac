@@ -5,7 +5,7 @@ DEVELOPER: ³Âè÷å«(vczh)
 #include "Vlpp.h"
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Common\Source\Basic.cpp
+E:\Vczh_Shared\Code\Others\gac\Common\Source\Basic.cpp
 ***********************************************************************/
 #include <Windows.h>
 
@@ -131,7 +131,7 @@ Interface
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Common\Source\Collections\Operation.cpp
+E:\Vczh_Shared\Code\Others\gac\Common\Source\Collections\Operation.cpp
 ***********************************************************************/
 
 namespace vl
@@ -191,7 +191,7 @@ namespace vl
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Common\Source\Exception.cpp
+E:\Vczh_Shared\Code\Others\gac\Common\Source\Exception.cpp
 ***********************************************************************/
 
 namespace vl
@@ -254,7 +254,7 @@ ParsingException
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Common\Source\Stream\Accessor.cpp
+E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\Accessor.cpp
 ***********************************************************************/
 
 namespace vl
@@ -736,7 +736,7 @@ DecoderStream
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Common\Source\Stream\BroadcastStream.cpp
+E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\BroadcastStream.cpp
 ***********************************************************************/
 
 namespace vl
@@ -846,7 +846,7 @@ BroadcastStream
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Common\Source\Stream\CacheStream.cpp
+E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\CacheStream.cpp
 ***********************************************************************/
 
 namespace vl
@@ -1150,7 +1150,7 @@ CacheStream
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Common\Source\Stream\CharFormat.cpp
+E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\CharFormat.cpp
 ***********************************************************************/
 
 namespace vl
@@ -1659,7 +1659,7 @@ BomDecoder
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Common\Source\Stream\FileStream.cpp
+E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\FileStream.cpp
 ***********************************************************************/
 
 namespace vl
@@ -1851,7 +1851,7 @@ FileStream
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Common\Source\Stream\MemoryStream.cpp
+E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\MemoryStream.cpp
 ***********************************************************************/
 
 namespace vl
@@ -2021,7 +2021,7 @@ MemoryStream
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Common\Source\Stream\MemoryWrapperStream.cpp
+E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\MemoryWrapperStream.cpp
 ***********************************************************************/
 
 namespace vl
@@ -2167,7 +2167,7 @@ MemoryWrapperStream
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Common\Source\Stream\RecorderStream.cpp
+E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\RecorderStream.cpp
 ***********************************************************************/
 
 namespace vl
@@ -2269,7 +2269,7 @@ RecorderStream
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Common\Source\String.cpp
+E:\Vczh_Shared\Code\Others\gac\Common\Source\String.cpp
 ***********************************************************************/
 #include <stdlib.h>
 
@@ -2468,7 +2468,7 @@ namespace vl
 }
 
 /***********************************************************************
-C:\Code\Codeplex\Gac\Common\Source\Threading.cpp
+E:\Vczh_Shared\Code\Others\gac\Common\Source\Threading.cpp
 ***********************************************************************/
 #include <intrin.h>
 
