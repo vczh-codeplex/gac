@@ -344,12 +344,17 @@ List Control
 Selectable List Control
 ***********************************************************************/
 
+			/// <summary>Represents a list control that each item is selectable.</summary>
 			class GuiSelectableListControl : public GuiListControl, public Description<GuiSelectableListControl>
 			{
 			public:
+				/// <summary>Item style provider for <see cref="GuiSelectableListControl"/>.</summary>
 				class IItemStyleProvider : public virtual GuiListControl::IItemStyleProvider, public Description<IItemStyleProvider>
 				{
 				public:
+					/// <summary>Change the visual affect of an item style controller to be selected or unselected.</summary>
+					/// <param name="style">The item style controller.</param>
+					/// <param name="value">Set to true if the item is expected to be rendered as selected.</param>
 					virtual void								SetStyleSelected(IItemStyleController* style, bool value)=0;
 				};
 
@@ -386,19 +391,36 @@ Selectable List Control
 				virtual void									OnItemSelectionChanged(int itemIndex, bool value);
 				virtual void									OnItemSelectionCleared();
 			public:
+				/// <summary>Create a control with a specified style provider.</summary>
+				/// <param name="styleProvider">The style provider.</param>
+				/// <param name="_itemProvider">The item provider as a data source.</param>
 				GuiSelectableListControl(IStyleProvider* _styleProvider, IItemProvider* _itemProvider);
 				~GuiSelectableListControl();
 
+				/// <summary>Selection changed event.</summary>
 				compositions::GuiNotifyEvent					SelectionChanged;
 
 				Ptr<GuiListControl::IItemStyleProvider>			SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)override;
 
+				/// <summary>Get the multiple selection mode.</summary>
+				/// <returns>Returns true if multiple selection is enabled.</returns>
 				bool											GetMultiSelect();
+				/// <summary>Set the multiple selection mode.</summary>
+				/// <param name="value">Set to true to enable multiple selection.</param>
 				void											SetMultiSelect(bool value);
 				
+				/// <summary>Get indices of all selected items.</summary>
+				/// <returns>Indices of all selected items.</returns>
 				const collections::IReadonlyList<int>&			GetSelectedItems();
+				/// <summary>Get the selection status of an item.</summary>
+				/// <returns>The selection status of an item.</returns>
+				/// <param name="itemIndex">The index of the item.</param>
 				bool											GetSelected(int itemIndex);
+				/// <summary>Set the selection status of an item.</summary>
+				/// <param name="itemIndex">The index of the item.</param>
+				/// <param name="value">Set to true to select the item.</param>
 				void											SetSelected(int itemIndex, bool value);
+				/// <summary>Unselect all items.</summary>
 				void											ClearSelection();
 			};
 
@@ -408,9 +430,11 @@ Predefined ItemCoordinateTransformer
 
 			namespace list
 			{
+				/// <summary>Default item coordinate transformer. This transformer doesn't transform any coordinate.</summary>
 				class DefaultItemCoordinateTransformer : public Object, virtual public GuiListControl::IItemCoordinateTransformer, public Description<DefaultItemCoordinateTransformer>
 				{
 				public:
+					/// <summary>Create the transformer.</summary>
 					DefaultItemCoordinateTransformer();
 					~DefaultItemCoordinateTransformer();
 
@@ -423,28 +447,42 @@ Predefined ItemCoordinateTransformer
 					Margin										RealMarginToVirtualMargin(Margin margin)override;
 					Margin										VirtualMarginToRealMargin(Margin margin)override;
 				};
-
+				
+				/// <summary>Axis aligned item coordinate transformer. This transformer transforms coordinates by changing the axis direction.</summary>
 				class AxisAlignedItemCoordinateTransformer : public Object, virtual public GuiListControl::IItemCoordinateTransformer, public Description<AxisAlignedItemCoordinateTransformer>
 				{
 				public:
+					/// <summary>Axis direction.</summary>
 					enum Alignment
 					{
+						/// <summary>[T:vl.presentation.controls.list.AxisAlignedItemCoordinateTransformer.Alignment]X:left, Y:down.</summary>
 						LeftDown,
+						/// <summary>[T:vl.presentation.controls.list.AxisAlignedItemCoordinateTransformer.Alignment]X:right, Y:down.</summary>
 						RightDown,
+						/// <summary>[T:vl.presentation.controls.list.AxisAlignedItemCoordinateTransformer.Alignment]X:left, Y:up.</summary>
 						LeftUp,
+						/// <summary>[T:vl.presentation.controls.list.AxisAlignedItemCoordinateTransformer.Alignment]X:right, Y:up.</summary>
 						RightUp,
+						/// <summary>[T:vl.presentation.controls.list.AxisAlignedItemCoordinateTransformer.Alignment]X:down, Y:left.</summary>
 						DownLeft,
+						/// <summary>[T:vl.presentation.controls.list.AxisAlignedItemCoordinateTransformer.Alignment]X:down, Y:right.</summary>
 						DownRight,
+						/// <summary>[T:vl.presentation.controls.list.AxisAlignedItemCoordinateTransformer.Alignment]X:up, Y:left.</summary>
 						UpLeft,
+						/// <summary>[T:vl.presentation.controls.list.AxisAlignedItemCoordinateTransformer.Alignment]X:up, Y:right.</summary>
 						UpRight,
 					};
 				protected:
 					Alignment									alignment;
 
 				public:
+					/// <summary>Create the transformer with a specified axis direction.</summary>
+					/// <param name="_alignment">The specified axis direction.</param>
 					AxisAlignedItemCoordinateTransformer(Alignment _alignment);
 					~AxisAlignedItemCoordinateTransformer();
 
+					/// <summary>Get the specified axis direction.</summary>
+					/// <returns>The specified axis direction.</returns>
 					Alignment									GetAlignment();
 					Size										RealSizeToVirtualSize(Size size)override;
 					Size										VirtualSizeToRealSize(Size size)override;
@@ -463,6 +501,7 @@ Predefined ItemArranger
 
 			namespace list
 			{
+				/// <summary>Ranged item arranger. This arranger implements most of the common functionality for those arrangers that display a continuing subset of item at a time.</summary>
 				class RangedItemArrangerBase : public Object, virtual public GuiListControl::IItemArranger, public Description<RangedItemArrangerBase>
 				{
 					typedef collections::List<GuiListControl::IItemStyleController*>		StyleList;
@@ -478,6 +517,7 @@ Predefined ItemArranger
 					virtual Size								OnCalculateTotalSize()=0;
 					virtual void								OnViewChangedInternal(Rect oldBounds, Rect newBounds)=0;
 				public:
+					/// <summary>Create the arranger.</summary>
 					RangedItemArrangerBase();
 					~RangedItemArrangerBase();
 
@@ -492,7 +532,8 @@ Predefined ItemArranger
 					int											GetVisibleIndex(GuiListControl::IItemStyleController* style)override;
 					void										OnViewChanged(Rect bounds)override;
 				};
-
+				
+				/// <summary>Fixed height item arranger. This arranger lists all item with the same height value. This value is the maximum height of all minimum heights of displayed items.</summary>
 				class FixedHeightItemArranger : public RangedItemArrangerBase, public Description<FixedHeightItemArranger>
 				{
 				protected:
@@ -506,10 +547,12 @@ Predefined ItemArranger
 					Size										OnCalculateTotalSize()override;
 					void										OnViewChangedInternal(Rect oldBounds, Rect newBounds)override;
 				public:
+					/// <summary>Create the arranger.</summary>
 					FixedHeightItemArranger();
 					~FixedHeightItemArranger();
 				};
 
+				/// <summary>Fixed size multiple columns item arranger. This arranger adjust all items in multiple lines with the same size. The width is the maximum width of all minimum widths of displayed items. The same to height.</summary>
 				class FixedSizeMultiColumnItemArranger : public RangedItemArrangerBase, public Description<FixedSizeMultiColumnItemArranger>
 				{
 				protected:
@@ -522,10 +565,12 @@ Predefined ItemArranger
 					Size										OnCalculateTotalSize()override;
 					void										OnViewChangedInternal(Rect oldBounds, Rect newBounds)override;
 				public:
+					/// <summary>Create the arranger.</summary>
 					FixedSizeMultiColumnItemArranger();
 					~FixedSizeMultiColumnItemArranger();
 				};
-
+				
+				/// <summary>Fixed size multiple columns item arranger. This arranger adjust all items in multiple columns with the same height. The height is the maximum width of all minimum height of displayed items. Each item will displayed using its minimum width.</summary>
 				class FixedHeightMultiColumnItemArranger : public RangedItemArrangerBase, public Description<FixedHeightMultiColumnItemArranger>
 				{
 				protected:
@@ -538,6 +583,7 @@ Predefined ItemArranger
 					Size										OnCalculateTotalSize()override;
 					void										OnViewChangedInternal(Rect oldBounds, Rect newBounds)override;
 				public:
+					/// <summary>Create the arranger.</summary>
 					FixedHeightMultiColumnItemArranger();
 					~FixedHeightMultiColumnItemArranger();
 				};
@@ -549,6 +595,7 @@ Predefined ItemStyleController
 
 			namespace list
 			{
+				/// <summary>Item style controller base. This class provides common functionalities item style controllers.</summary>
 				class ItemStyleControllerBase : public Object, public virtual GuiListControl::IItemStyleController, public Description<ItemStyleControllerBase>
 				{
 				protected:
@@ -561,6 +608,9 @@ Predefined ItemStyleController
 					void										Initialize(compositions::GuiBoundsComposition* _boundsComposition, GuiControl* _associatedControl);
 					void										Finalize();
 
+					/// <summary>Create the item style controller with a specified item style provider and a specified item style id.</summary>
+					/// <param name="_provider">The specified item style provider.</param>
+					/// <param name="_styleId">The specified item style id.</param>
 					ItemStyleControllerBase(GuiListControl::IItemStyleProvider* _provider, int _styleId);
 				public:
 					~ItemStyleControllerBase();
@@ -581,6 +631,7 @@ Predefined ItemProvider
 
 			namespace list
 			{
+				/// <summary>Item provider base. This class provider common functionalities for item providers.</summary>
 				class ItemProviderBase : public Object, public virtual GuiListControl::IItemProvider, public Description<ItemProviderBase>
 				{
 				protected:
@@ -588,6 +639,7 @@ Predefined ItemProvider
 
 					virtual void								InvokeOnItemModified(int start, int count, int newCount);
 				public:
+					/// <summary>Create the item provider.</summary>
 					ItemProviderBase();
 					~ItemProviderBase();
 
