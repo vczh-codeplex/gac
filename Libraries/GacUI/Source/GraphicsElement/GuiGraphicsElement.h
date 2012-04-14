@@ -103,7 +103,7 @@ Basic Construction
 				/// </summary>
 				virtual void							OnElementStateChanged()=0;
 				/// <summary>
-				/// Calculate the minimum size using the binded graphics element and it's state.
+				/// Calculate the minimum size using the binded graphics element and its state.
 				/// </summary>
 				/// <returns>The minimum size.</returns>
 				virtual Size							GetMinSize()=0;

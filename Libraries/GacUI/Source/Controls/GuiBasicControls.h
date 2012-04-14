@@ -25,8 +25,8 @@ Basic Construction
 			/// <summary>
 			/// The base class of all controls.
 			/// When the control is destroyed, it automatically destroys sub controls, and the bounds composition from the style controller.
-			/// If you want to manually destroy a control, you should first remove it from it's parent.
-			/// The only way to remove a control from a parent control, is to remove the bounds composition from it's parent composition. The same to inserting a control.
+			/// If you want to manually destroy a control, you should first remove it from its parent.
+			/// The only way to remove a control from a parent control, is to remove the bounds composition from its parent composition. The same to inserting a control.
 			/// </summary>
 			class GuiControl : public Object, public Description<GuiControl>
 			{
