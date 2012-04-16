@@ -4,7 +4,7 @@ DEVELOPER: ³Âè÷å«(vczh)
 ***********************************************************************/
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\BASIC.H
+COMMON\SOURCE\BASIC.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -209,7 +209,7 @@ typedef signed __int64	pos_t;
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\STRING.H
+COMMON\SOURCE\STRING.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -659,7 +659,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\POINTER.H
+COMMON\SOURCE\POINTER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -1105,7 +1105,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\FUNCTION.H
+COMMON\SOURCE\FUNCTION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7250,7 +7250,7 @@ vl::function_combining::Combining<R1(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9), R2(T0,T1,T2
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\PAIR.H
+COMMON\SOURCE\COLLECTIONS\PAIR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7358,7 +7358,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\INTERFACES.H
+COMMON\SOURCE\COLLECTIONS\INTERFACES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7497,7 +7497,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\LISTWRAPPERS.H
+COMMON\SOURCE\COLLECTIONS\LISTWRAPPERS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7921,7 +7921,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\LIST.H
+COMMON\SOURCE\COLLECTIONS\LIST.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8472,7 +8472,7 @@ SORTED_LIST_INSERT:
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\DICTIONARYWRAPPERS.H
+COMMON\SOURCE\COLLECTIONS\DICTIONARYWRAPPERS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8943,7 +8943,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\COMMON\SOURCE\COLLECTIONS\DICTIONARY.H
+COMMON\SOURCE\COLLECTIONS\DICTIONARY.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -9256,7 +9256,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GACVLPPREFERENCES.H
+LIBRARIES\GACUI\SOURCE\GACVLPPREFERENCES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -9273,7 +9273,7 @@ Interfaces:
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUITYPES.H
+LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUITYPES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -9735,7 +9735,7 @@ Resources
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUINATIVEWINDOW.H
+LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUINATIVEWINDOW.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -10367,7 +10367,7 @@ Native Window Provider
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\REFLECTION\GUITYPEDESCRIPTOR.H
+LIBRARIES\GACUI\SOURCE\REFLECTION\GUITYPEDESCRIPTOR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -10654,7 +10654,7 @@ Helper Functions
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
+LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -11157,7 +11157,7 @@ Elements
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSTEXTELEMENT.H
+LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSTEXTELEMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -11360,7 +11360,7 @@ ColorizedText
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSEVENTRECEIVER.H
+LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSEVENTRECEIVER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -11645,7 +11645,7 @@ Event Receiver
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSCOMPOSITION.H
+LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSCOMPOSITION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -12129,7 +12129,7 @@ Specialized Compositions
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSHOST.H
+LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSHOST.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -12273,7 +12273,7 @@ Helpers
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIBASICCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\GUIBASICCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -12698,7 +12698,7 @@ Scrolls
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIWINDOWCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\GUIWINDOWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -12841,7 +12841,7 @@ Window
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUITEXTCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\GUITEXTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -13137,7 +13137,7 @@ TextBox
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUILISTCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\GUILISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -13219,7 +13219,7 @@ List Control
 					virtual IDescriptable*						RequestView(const WString& identifier)=0;
 					virtual void								ReleaseView(IDescriptable* view)=0;
 				};
-
+				
 				class IItemStyleController : public virtual IDescriptable, public Description<IItemStyleController>
 				{
 				public:
@@ -13231,7 +13231,7 @@ List Control
 					virtual void								OnInstalled()=0;
 					virtual void								OnUninstalled()=0;
 				};
-
+				
 				class IItemStyleProvider : public virtual IDescriptable, public Description<IItemStyleProvider>
 				{
 				public:
@@ -13242,7 +13242,7 @@ List Control
 					virtual void								DestroyItemStyle(IItemStyleController* style)=0;
 					virtual void								Install(IItemStyleController* style, int itemIndex)=0;
 				};
-
+				
 				class IItemArranger : public virtual IItemProviderCallback, public Description<IItemArranger>
 				{
 				public:
@@ -13255,7 +13255,7 @@ List Control
 					virtual int									GetVisibleIndex(IItemStyleController* style)=0;
 					virtual void								OnViewChanged(Rect bounds)=0;
 				};
-
+				
 				class IItemCoordinateTransformer : public virtual IDescriptable, public Description<IItemCoordinateTransformer>
 				{
 				public:
@@ -13415,7 +13415,7 @@ Predefined ItemCoordinateTransformer
 					Margin										RealMarginToVirtualMargin(Margin margin)override;
 					Margin										VirtualMarginToRealMargin(Margin margin)override;
 				};
-
+				
 				class AxisAlignedItemCoordinateTransformer : public Object, virtual public GuiListControl::IItemCoordinateTransformer, public Description<AxisAlignedItemCoordinateTransformer>
 				{
 				public:
@@ -13484,7 +13484,7 @@ Predefined ItemArranger
 					int											GetVisibleIndex(GuiListControl::IItemStyleController* style)override;
 					void										OnViewChanged(Rect bounds)override;
 				};
-
+				
 				class FixedHeightItemArranger : public RangedItemArrangerBase, public Description<FixedHeightItemArranger>
 				{
 				protected:
@@ -13517,7 +13517,7 @@ Predefined ItemArranger
 					FixedSizeMultiColumnItemArranger();
 					~FixedSizeMultiColumnItemArranger();
 				};
-
+				
 				class FixedHeightMultiColumnItemArranger : public RangedItemArrangerBase, public Description<FixedHeightMultiColumnItemArranger>
 				{
 				protected:
@@ -13752,7 +13752,7 @@ Predefined ItemProvider
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICONTAINERCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICONTAINERCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -13860,7 +13860,7 @@ Tab Control
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITEXTLISTCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITEXTLISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -14024,7 +14024,7 @@ TextList Control
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUILISTVIEWCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUILISTVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -14574,7 +14574,7 @@ ListView
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITREEVIEWCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITREEVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -15010,7 +15010,7 @@ TreeView
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -15087,7 +15087,7 @@ Menu
 				void									UpdateMenuService();
 				IDescriptable*							QueryService(const WString& identifier)override;
 			};
-
+			
 			class GuiMenuBar : public GuiControl, private IGuiMenuService, public Description<GuiMenuBar>
 			{
 			private:
@@ -15152,7 +15152,7 @@ MenuButton
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICOMBOCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICOMBOCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -15265,7 +15265,7 @@ ComboBox with GuiListControl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIAPPLICATION.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\GUIAPPLICATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -15339,7 +15339,7 @@ extern void GuiApplicationMain();
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUICOMMONSTYLES.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUICOMMONSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -15468,7 +15468,7 @@ Scrolls
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUIWIN7STYLES.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUIWIN7STYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -16331,7 +16331,7 @@ List
 #endif
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Libraries\GacUI\Source\GacUI.h
+Libraries\GacUI\Source\GacUI.h
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0

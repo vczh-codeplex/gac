@@ -118,10 +118,26 @@ namespace Codepack
             return sorted.ToArray();
         }
 
+        static string GetLongestCommonPrefix(string[] strings)
+        {
+            if (strings.Length == 0) return "";
+            int shortestLength = strings.Select(s => s.Length).Min();
+            return Enumerable.Range(0, shortestLength + 1)
+                .Reverse()
+                .Select(i => strings[0].Substring(0, i))
+                .Where(s => strings.Skip(1).All(t => t.StartsWith(s)))
+                .First();
+        }
+
         static void Combine(string[] files, string outputFilename, HashSet<string> systemIncludes, params string[] externalIncludes)
         {
             try
             {
+                string prefix = GetLongestCommonPrefix(files.Select(s => s.ToUpper()).ToArray());
+                {
+                    int index = prefix.LastIndexOf('/');
+                    prefix = prefix.Substring(index + 1);
+                }
                 using (StreamWriter writer = new StreamWriter(new FileStream(outputFilename, FileMode.Create), Encoding.Default))
                 {
                     writer.WriteLine("/***********************************************************************");
@@ -137,7 +153,7 @@ namespace Codepack
                     {
                         writer.WriteLine("");
                         writer.WriteLine("/***********************************************************************");
-                        writer.WriteLine(file);
+                        writer.WriteLine(file.Substring(prefix.Length));
                         writer.WriteLine("***********************************************************************/");
                         foreach (var line in File.ReadAllLines(file, Encoding.Default))
                         {

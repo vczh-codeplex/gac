@@ -5,7 +5,7 @@ DEVELOPER: ³Âè÷å«(vczh)
 #include "Vlpp.h"
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GACVLPPREFERENCES.H
+GACVLPPREFERENCES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -22,7 +22,7 @@ Interfaces:
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUITYPES.H
+NATIVEWINDOW\GUITYPES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -484,7 +484,7 @@ Resources
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\GUINATIVEWINDOW.H
+NATIVEWINDOW\GUINATIVEWINDOW.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -1116,7 +1116,7 @@ Native Window Provider
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\REFLECTION\GUITYPEDESCRIPTOR.H
+REFLECTION\GUITYPEDESCRIPTOR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -1403,7 +1403,7 @@ Helper Functions
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
+GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -1906,7 +1906,7 @@ Elements
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSTEXTELEMENT.H
+GRAPHICSELEMENT\GUIGRAPHICSTEXTELEMENT.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -2109,7 +2109,7 @@ ColorizedText
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSEVENTRECEIVER.H
+GRAPHICSELEMENT\GUIGRAPHICSEVENTRECEIVER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -2394,7 +2394,7 @@ Event Receiver
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSCOMPOSITION.H
+GRAPHICSELEMENT\GUIGRAPHICSCOMPOSITION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -2878,7 +2878,7 @@ Specialized Compositions
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSHOST.H
+GRAPHICSELEMENT\GUIGRAPHICSHOST.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -3022,7 +3022,7 @@ Helpers
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIBASICCONTROLS.H
+CONTROLS\GUIBASICCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -3447,7 +3447,7 @@ Scrolls
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIWINDOWCONTROLS.H
+CONTROLS\GUIWINDOWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -3590,7 +3590,7 @@ Window
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUILISTCONTROLS.H
+CONTROLS\GUILISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -3672,7 +3672,7 @@ List Control
 					virtual IDescriptable*						RequestView(const WString& identifier)=0;
 					virtual void								ReleaseView(IDescriptable* view)=0;
 				};
-
+				
 				class IItemStyleController : public virtual IDescriptable, public Description<IItemStyleController>
 				{
 				public:
@@ -3684,7 +3684,7 @@ List Control
 					virtual void								OnInstalled()=0;
 					virtual void								OnUninstalled()=0;
 				};
-
+				
 				class IItemStyleProvider : public virtual IDescriptable, public Description<IItemStyleProvider>
 				{
 				public:
@@ -3695,7 +3695,7 @@ List Control
 					virtual void								DestroyItemStyle(IItemStyleController* style)=0;
 					virtual void								Install(IItemStyleController* style, int itemIndex)=0;
 				};
-
+				
 				class IItemArranger : public virtual IItemProviderCallback, public Description<IItemArranger>
 				{
 				public:
@@ -3708,7 +3708,7 @@ List Control
 					virtual int									GetVisibleIndex(IItemStyleController* style)=0;
 					virtual void								OnViewChanged(Rect bounds)=0;
 				};
-
+				
 				class IItemCoordinateTransformer : public virtual IDescriptable, public Description<IItemCoordinateTransformer>
 				{
 				public:
@@ -3868,7 +3868,7 @@ Predefined ItemCoordinateTransformer
 					Margin										RealMarginToVirtualMargin(Margin margin)override;
 					Margin										VirtualMarginToRealMargin(Margin margin)override;
 				};
-
+				
 				class AxisAlignedItemCoordinateTransformer : public Object, virtual public GuiListControl::IItemCoordinateTransformer, public Description<AxisAlignedItemCoordinateTransformer>
 				{
 				public:
@@ -3937,7 +3937,7 @@ Predefined ItemArranger
 					int											GetVisibleIndex(GuiListControl::IItemStyleController* style)override;
 					void										OnViewChanged(Rect bounds)override;
 				};
-
+				
 				class FixedHeightItemArranger : public RangedItemArrangerBase, public Description<FixedHeightItemArranger>
 				{
 				protected:
@@ -3970,7 +3970,7 @@ Predefined ItemArranger
 					FixedSizeMultiColumnItemArranger();
 					~FixedSizeMultiColumnItemArranger();
 				};
-
+				
 				class FixedHeightMultiColumnItemArranger : public RangedItemArrangerBase, public Description<FixedHeightMultiColumnItemArranger>
 				{
 				protected:
@@ -4205,7 +4205,7 @@ Predefined ItemProvider
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITEXTLISTCONTROLS.H
+CONTROLS\EXTENDEDCONTROLS\GUITEXTLISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -4369,7 +4369,7 @@ TextList Control
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUILISTVIEWCONTROLS.H
+CONTROLS\EXTENDEDCONTROLS\GUILISTVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -4919,7 +4919,7 @@ ListView
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITREEVIEWCONTROLS.H
+CONTROLS\EXTENDEDCONTROLS\GUITREEVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5355,7 +5355,7 @@ TreeView
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICOMBOCONTROLS.H
+CONTROLS\EXTENDEDCONTROLS\GUICOMBOCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5468,7 +5468,7 @@ ComboBox with GuiListControl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICONTAINERCONTROLS.H
+CONTROLS\EXTENDEDCONTROLS\GUICONTAINERCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5576,7 +5576,7 @@ Tab Control
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
+CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5653,7 +5653,7 @@ Menu
 				void									UpdateMenuService();
 				IDescriptable*							QueryService(const WString& identifier)override;
 			};
-
+			
 			class GuiMenuBar : public GuiControl, private IGuiMenuService, public Description<GuiMenuBar>
 			{
 			private:
@@ -5718,7 +5718,7 @@ MenuButton
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUIAPPLICATION.H
+CONTROLS\GUIAPPLICATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5792,7 +5792,7 @@ extern void GuiApplicationMain();
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\GUITEXTCONTROLS.H
+CONTROLS\GUITEXTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -6088,7 +6088,7 @@ TextBox
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUICOMMONSTYLES.H
+CONTROLS\STYLES\GUICOMMONSTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -6217,7 +6217,7 @@ Scrolls
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\CONTROLS\STYLES\GUIWIN7STYLES.H
+CONTROLS\STYLES\GUIWIN7STYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7080,7 +7080,7 @@ List
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GACUI.H
+GACUI.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7107,7 +7107,7 @@ extern int SetupWindowsDirect2DRenderer();
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSWINDOWSDIRECT2D.H
+GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSWINDOWSDIRECT2D.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7196,7 +7196,7 @@ extern void RendererMainDirect2D();
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSRENDERERSWINDOWSDIRECT2D.H
+GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSRENDERERSWINDOWSDIRECT2D.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7424,7 +7424,7 @@ Renderers
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\GDI\WINGDI.H
+NATIVEWINDOW\WINDOWS\GDI\WINGDI.H
 ***********************************************************************/
 /*******************************************************************************
 Vczh Library++ 3.0
@@ -7887,7 +7887,7 @@ namespace vl
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSWINDOWSGDI.H
+GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSWINDOWSGDI.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -7962,7 +7962,7 @@ extern void RendererMainGDI();
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSRENDERERSWINDOWSGDI.H
+GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSRENDERERSWINDOWSGDI.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8187,7 +8187,7 @@ Renderers
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\WINNATIVEWINDOW.H
+NATIVEWINDOW\WINDOWS\WINNATIVEWINDOW.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8234,7 +8234,7 @@ Windows Platform Native Controller
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\DIRECT2D\WINDIRECT2DAPPLICATION.H
+NATIVEWINDOW\WINDOWS\DIRECT2D\WINDIRECT2DAPPLICATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -8265,7 +8265,7 @@ extern int WinMainDirect2D(HINSTANCE hInstance, void(*RendererMain)());
 #endif
 
 /***********************************************************************
-E:\VCZH_SHARED\CODE\OTHERS\GAC\LIBRARIES\GACUI\SOURCE\NATIVEWINDOW\WINDOWS\GDI\WINGDIAPPLICATION.H
+NATIVEWINDOW\WINDOWS\GDI\WINGDIAPPLICATION.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
