@@ -5,7 +5,7 @@ DEVELOPER: ³Âè÷å«(vczh)
 #include "Vlpp.h"
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Common\Source\Basic.cpp
+Basic.cpp
 ***********************************************************************/
 #include <Windows.h>
 
@@ -131,7 +131,7 @@ Interface
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Common\Source\Collections\Operation.cpp
+Collections\Operation.cpp
 ***********************************************************************/
 
 namespace vl
@@ -191,7 +191,7 @@ namespace vl
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Common\Source\Exception.cpp
+Exception.cpp
 ***********************************************************************/
 
 namespace vl
@@ -254,7 +254,7 @@ ParsingException
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\Accessor.cpp
+Stream\Accessor.cpp
 ***********************************************************************/
 
 namespace vl
@@ -736,7 +736,7 @@ DecoderStream
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\BroadcastStream.cpp
+Stream\BroadcastStream.cpp
 ***********************************************************************/
 
 namespace vl
@@ -846,7 +846,7 @@ BroadcastStream
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\CacheStream.cpp
+Stream\CacheStream.cpp
 ***********************************************************************/
 
 namespace vl
@@ -1150,7 +1150,7 @@ CacheStream
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\CharFormat.cpp
+Stream\CharFormat.cpp
 ***********************************************************************/
 
 namespace vl
@@ -1659,7 +1659,7 @@ BomDecoder
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\FileStream.cpp
+Stream\FileStream.cpp
 ***********************************************************************/
 
 namespace vl
@@ -1851,7 +1851,7 @@ FileStream
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\MemoryStream.cpp
+Stream\MemoryStream.cpp
 ***********************************************************************/
 
 namespace vl
@@ -2021,7 +2021,7 @@ MemoryStream
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\MemoryWrapperStream.cpp
+Stream\MemoryWrapperStream.cpp
 ***********************************************************************/
 
 namespace vl
@@ -2167,7 +2167,7 @@ MemoryWrapperStream
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Common\Source\Stream\RecorderStream.cpp
+Stream\RecorderStream.cpp
 ***********************************************************************/
 
 namespace vl
@@ -2269,7 +2269,7 @@ RecorderStream
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Common\Source\String.cpp
+String.cpp
 ***********************************************************************/
 #include <stdlib.h>
 
@@ -2468,7 +2468,7 @@ namespace vl
 }
 
 /***********************************************************************
-E:\Vczh_Shared\Code\Others\gac\Common\Source\Threading.cpp
+Threading.cpp
 ***********************************************************************/
 #include <intrin.h>
 
