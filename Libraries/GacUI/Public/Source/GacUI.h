@@ -4266,7 +4266,7 @@ TextList Style Provider
 					public:
 						TextItemStyleController(TextItemStyleProvider* provider);
 						~TextItemStyleController();
-
+						
 						bool									GetSelected();
 						void									SetSelected(bool value);
 						bool									GetChecked();
@@ -4313,7 +4313,7 @@ TextList Data Source
 
 					bool										operator==(const TextItem& value)const;
 					bool										operator!=(const TextItem& value)const;
-
+					
 					const WString&								GetText()const;
 					bool										GetChecked()const;
 				};
@@ -4348,10 +4348,10 @@ TextList Control
 				GuiVirtualTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, GuiListControl::IItemProvider* _itemProvider);
 				~GuiVirtualTextList();
 				
-				Ptr<GuiListControl::IItemStyleProvider>			SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value);
+				Ptr<GuiListControl::IItemStyleProvider>			SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)override;
 				Ptr<GuiListControl::IItemStyleProvider>			ChangeItemStyle(list::TextItemStyleProvider::ITextItemStyleProvider* itemStyleProvider);
 			};
-
+			
 			class GuiTextList : public GuiVirtualTextList, public Description<GuiTextList>
 			{
 			protected:
@@ -5513,7 +5513,7 @@ Tab Control
 				GuiControl*										GetContainer();
 				GuiTab*											GetOwnerTab();
 				const WString&									GetText();
-				void											SetText(const WString& value);
+				void											SetText(const WString& param);
 				bool											GetSelected();
 			};
 
@@ -5526,7 +5526,7 @@ Tab Control
 				public:
 					virtual void								ShowTab(int index)=0;
 				};
-
+				
 				class IStyleController : public virtual GuiControl::IStyleController, public Description<IStyleController>
 				{
 				public:

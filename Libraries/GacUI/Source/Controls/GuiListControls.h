@@ -322,21 +322,21 @@ List Control
 				virtual IItemStyleProvider*						GetStyleProvider();
 				/// <summary>Set the item style provider</summary>
 				/// <returns>The old item style provider</returns>
-				/// <param name="acceptFocus">The new item style provider</param>
+				/// <param name="value">The new item style provider</param>
 				virtual Ptr<IItemStyleProvider>					SetStyleProvider(Ptr<IItemStyleProvider> value);
 				/// <summary>Get the item arranger.</summary>
 				/// <returns>The item arranger.</returns>
 				virtual IItemArranger*							GetArranger();
 				/// <summary>Set the item arranger</summary>
 				/// <returns>The old item arranger</returns>
-				/// <param name="acceptFocus">The new item arranger</param>
+				/// <param name="value">The new item arranger</param>
 				virtual Ptr<IItemArranger>						SetArranger(Ptr<IItemArranger> value);
 				/// <summary>Get the item coordinate transformer.</summary>
 				/// <returns>The item coordinate transformer.</returns>
 				virtual IItemCoordinateTransformer*				GetCoordinateTransformer();
 				/// <summary>Set the item coordinate transformer</summary>
 				/// <returns>The old item coordinate transformer</returns>
-				/// <param name="acceptFocus">The new item coordinate transformer</param>
+				/// <param name="value">The new item coordinate transformer</param>
 				virtual Ptr<IItemCoordinateTransformer>			SetCoordinateTransformer(Ptr<IItemCoordinateTransformer> value);
 			};
 
