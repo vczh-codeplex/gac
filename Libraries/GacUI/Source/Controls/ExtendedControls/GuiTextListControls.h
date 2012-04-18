@@ -196,14 +196,14 @@ TextList Control
 				/// <summary>Create a Text list control in virtual mode.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
 				/// <param name="_itemStyleProvider">The item style provider callback for this control.</param>
-				/// <param name="IStyleProvider">The item provider for this control.</param>
+				/// <param name="_itemProvider">The item provider for this control.</param>
 				GuiVirtualTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, GuiListControl::IItemProvider* _itemProvider);
 				~GuiVirtualTextList();
 				
 				Ptr<GuiListControl::IItemStyleProvider>			SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)override;
-				/// <summary>Set the item style provider callback.</summary>
+				/// <summary>Set the item style provider.</summary>
 				/// <returns>The old item style provider.</returns>
-				/// <param name="itemStyleProvider">The new item style provider callback.</param>
+				/// <param name="itemStyleProvider">The new item style provider.</param>
 				Ptr<GuiListControl::IItemStyleProvider>			ChangeItemStyle(list::TextItemStyleProvider::ITextItemStyleProvider* itemStyleProvider);
 			};
 			
