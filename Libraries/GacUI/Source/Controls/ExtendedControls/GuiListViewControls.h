@@ -586,24 +586,36 @@ ListView
 
 			namespace list
 			{
+				/// <summary>List view item.</summary>
 				class ListViewItem
 				{
 				public:
+					/// <summary>Small image.</summary>
 					Ptr<GuiImageData>							smallImage;
+					/// <summary>Large image.</summary>
 					Ptr<GuiImageData>							largeImage;
+					/// <summary>Item text.</summary>
 					WString										text;
+					/// <summary>Sub items.</summary>
 					collections::List<WString>					subItems;
 				};
-
+				
+				/// <summary>List view column.</summary>
 				class ListViewColumn
 				{
 				public:
+					/// <summary>Column text.</summary>
 					WString										text;
+					/// <summary>Column size.</summary>
 					int											size;
 
+					/// <summary>Create a column with the specified text and size.</summary>
+					/// <param name="_text">The specified text.</param>
+					/// <param name="_size">The specified size.</param>
 					ListViewColumn(const WString& _text=L"", int _size=160);
 				};
-
+				
+				/// <summary>Item provider for <see cref="GuiListViewBase"/> and <see cref="ListViewItemStyleProvider"/>.</summary>
 				class ListViewItemProvider
 					: public ListProvider<Ptr<ListViewItem>>
 					, protected virtual ListViewItemStyleProvider::IListViewItemView
@@ -638,9 +650,15 @@ ListView
 					IDescriptable*								RequestView(const WString& identifier)override;
 					void										ReleaseView(IDescriptable* view)override;
 
+					/// <summary>Get all data columns indices in columns.</summary>
+					/// <returns>All data columns indices in columns.</returns>
 					collections::IList<int>&					GetDataColumns();
+					/// <summary>Notify that indices in data columns are modified.</summary>
 					void										NotifyDataColumnsUpdated();
+					/// <summary>Get all columns.</summary>
+					/// <returns>All columns.</returns>
 					collections::IList<Ptr<ListViewColumn>>&	GetColumns();
+					/// <summary>Notify that columns.</summary>
 					void										NotifyColumnsUpdated();
 				};
 			}
