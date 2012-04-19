@@ -64,7 +64,7 @@ ListView Base
 				};
 			}
 
-			/// <summary>List view base control. All list view controls inherit from this class.</summary>
+			/// <summary>List view base control. All list view controls inherit from this class. <see cref="list::ListViewItemStyleProviderBase"/> is suggested to be the base class of item style providers for list view control.</summary>
 			class GuiListViewBase : public GuiSelectableListControl, public Description<GuiListViewBase>
 			{
 			public:
