@@ -100,9 +100,9 @@ GuiVirtualTreeListControl NodeProvider
 					/// <summary>Test does the provider provided an optimized algorithm to get an instance of a node by the index of all visible nodes. If this function returns true, [M:vl.presentation.controls.tree.INodeRootProvider.GetNodeByVisibleIndex] can be used.</summary>
 					/// <returns>Returns true if such an algorithm is provided.</returns>
 					virtual bool					CanGetNodeByVisibleIndex()=0;
-					/// <summary>Get a node by the index of all visible nodes. This requires [M:vl.presentation.controls.tree.INodeRootProvider.CanGetNodeByVisibleIndex] returning true. If the node is no longer needed, a call to it's parent's [M:vl.presentation.controls.tree.INodeProvider.ReleaseChild] is needed, unless this is a root node so that its parent is null.</summary>
-					/// <returns>The node for the index of all visible nodes.</returns>
-					/// <param name="index">The index of all visible nodes.</param>
+					/// <summary>Get a node by the index in all visible nodes. This requires [M:vl.presentation.controls.tree.INodeRootProvider.CanGetNodeByVisibleIndex] returning true. If the node is no longer needed, a call to the parent's [M:vl.presentation.controls.tree.INodeProvider.ReleaseChild] is needed, unless this is a root node so that its parent is null.</summary>
+					/// <returns>The node for the index in all visible nodes.</returns>
+					/// <param name="index">The index in all visible nodes.</param>
 					virtual INodeProvider*			GetNodeByVisibleIndex(int index)=0;
 					/// <summary>Attach an node provider callback to this node provider.</summary>
 					/// <returns>Returns true if this operation succeeded.</returns>
@@ -128,24 +128,40 @@ GuiVirtualTreeListControl NodeProvider
 				// Tree to ListControl (IItemProvider)
 				//-----------------------------------------------------------
 
+				/// <summary>The required <see cref="GuiListControl::IItemProvider"/> view for [T:vl.presentation.controls.tree.NodeItemStyleProvider]. [T:vl.presentation.controls.tree.NodeItemProvider] provides this view. In most of the cases, the NodeItemProvider class and this view is not required users to create, or even to touch. [T:vl.presentation.controls.GuiVirtualTreeListControl] and [T:vl.presentation.controls.GuiTreeView] already handled all of this.</summary>
 				class INodeItemView : public virtual GuiListControl::IItemPrimaryTextView, public Description<INodeItemView>
 				{
 				public:
+					/// <summary>The identifier of this view.</summary>
 					static const wchar_t* const		Identifier;
 
+					/// <summary>Get an instance of a node by the index in all visible nodes. If the node is no longer needed, a call to [M:vl.presentation.controls.tree.INodeItemView.ReleaseNode] is required.</summary>
+					/// <returns>The instance of a node by the index in all visible nodes.</returns>
+					/// <param name="index">The index in all visible nodes.</param>
 					virtual INodeProvider*			RequestNode(int index)=0;
+					/// <summary>Release an instance of a node.</summary>
+					/// <param name="node">The instance of a node.</param>
 					virtual void					ReleaseNode(INodeProvider* node)=0;
+					/// <summary>Get the index in all visible nodes of a node.</summary>
+					/// <returns>The index in all visible nodes of a node.</returns>
+					/// <param name="node">The node to calculate the index.</param>
 					virtual int						CalculateNodeVisibilityIndex(INodeProvider* node)=0;
 				};
 
+				/// <summary>The required <see cref="INodeRootProvider"/> view for [T:vl.presentation.controls.tree.NodeItemProvider]. This view is always needed to create any customized <see cref="INodeRootProvider"/> implementation.</summary>
 				class INodeItemPrimaryTextView : public virtual IDescriptable, public Description<INodeItemPrimaryTextView>
 				{
 				public:
+					/// <summary>The identifier of this view.</summary>
 					static const wchar_t* const		Identifier;
 					
+					/// <summary>Get the primary text of a node.</summary>
+					/// <returns>The primary text of a node.</returns>
+					/// <param name="node">The node.</param>
 					virtual WString					GetPrimaryTextViewText(INodeProvider* node)=0;
 				};
 
+				/// <summary>This is a general implementation to convert an <see cref="INodeRootProvider"/> to a <see cref="GuiListControl::IItemProvider"/>. It requires the <see cref="INodeItemPrimaryTextView"/> to provide a <see cref="GuiListControl::IItemPrimaryTextView"/>.</summary>
 				class NodeItemProvider
 					: public list::ItemProviderBase
 					, protected virtual INodeProviderCallback
@@ -171,9 +187,13 @@ GuiVirtualTreeListControl NodeProvider
 					INodeProvider*					RequestNode(int index)override;
 					void							ReleaseNode(INodeProvider* node)override;
 				public:
+					/// <summary>Create an item provider using a node root provider.</summary>
+					/// <param name="_root">The node root provider.</param>
 					NodeItemProvider(INodeRootProvider* _root);
 					~NodeItemProvider();
-
+					
+					/// <summary>Get the owned node root provider.</summary>
+					/// <returns>The node root provider.</returns>
 					Ptr<INodeRootProvider>			GetRoot();
 					int								Count()override;
 					IDescriptable*					RequestView(const WString& identifier)override;
@@ -206,6 +226,7 @@ GuiVirtualTreeListControl NodeProvider
 					virtual void									SetStyleSelected(INodeItemStyleController* style, bool value)=0;
 				};
 
+				/// <summary>x</summary>
 				class NodeItemStyleProvider : public Object, public virtual GuiSelectableListControl::IItemStyleProvider, public Description<NodeItemStyleProvider>
 				{
 				protected:
@@ -332,6 +353,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 GuiVirtualTreeListControl
 ***********************************************************************/
 
+			/// <summary>Tree view control in virtual node.</summary>
 			class GuiVirtualTreeListControl : public GuiSelectableListControl, public Description<GuiVirtualTreeListControl>
 			{
 			protected:
@@ -392,6 +414,7 @@ TreeView
 				};
 			}
 			
+			/// <summary>Tree view control.</summary>
 			class GuiTreeView : public GuiVirtualTreeListControl, public Description<GuiTreeView>
 			{
 			public:
