@@ -31,13 +31,30 @@ GuiVirtualTreeListControl NodeProvider
 				// Callback Interfaces
 				//-----------------------------------------------------------
 
+				/// <summary>Callback object for <see cref="INodeProvider"/>. A node will invoke this callback to notify any content modification.</summary>
 				class INodeProviderCallback : public virtual IDescriptable, public Description<INodeProviderCallback>
 				{
 				public:
+					/// <summary>Called when this callback is attached to a node root.</summary>
+					/// <param name="provider">The root node.</param>
 					virtual void					OnAttached(INodeRootProvider* provider)=0;
+					/// <summary>Called before sub items of a node are modified.</summary>
+					/// <param name="parentNode">The node containing modified sub items.</param>
+					/// <param name="start">The index of the first sub item.</param>
+					/// <param name="count">The number of sub items to be modified.</param>
+					/// <param name="newCount">The new number of modified sub items.</param>
 					virtual void					OnBeforeItemModified(INodeProvider* parentNode, int start, int count, int newCount)=0;
+					/// <summary>Called after sub items of a node are modified.</summary>
+					/// <param name="parentNode">The node containing modified sub items.</param>
+					/// <param name="start">The index of the first sub item.</param>
+					/// <param name="count">The number of sub items to be modified.</param>
+					/// <param name="newCount">The new number of modified sub items.</param>
 					virtual void					OnAfterItemModified(INodeProvider* parentNode, int start, int count, int newCount)=0;
+					/// <summary>Called when a node is expanded.</summary>
+					/// <param name="provider">The node.</param>
 					virtual void					OnItemExpanded(INodeProvider* node)=0;
+					/// <summary>Called when a node is collapsed.</summary>
+					/// <param name="provider">The node.</param>
 					virtual void					OnItemCollapsed(INodeProvider* node)=0;
 				};
 
@@ -45,28 +62,62 @@ GuiVirtualTreeListControl NodeProvider
 				// Provider Interfaces
 				//-----------------------------------------------------------
 
+				/// <summary>Represents a node.</summary>
 				class INodeProvider : public virtual IDescriptable, public Description<INodeProvider>
 				{
 				public:
+					/// <summary>Get the expanding state of this node.</summary>
+					/// <returns>Returns true if this node is expanded.</returns>
 					virtual bool					GetExpanding()=0;
+					/// <summary>Set the expanding state of this node.</summary>
+					/// <param name="value">Set to true to expand this node.</param>
 					virtual void					SetExpanding(bool value)=0;
+					/// <summary>Calculate the number of total visible nodes of this node. The number of total visible nodes includes the node itself, and all total visible nodes of all visible sub nodes. If this node is collapsed, this number will be 1.</summary>
+					/// <returns>The number of total visible nodes.</returns>
 					virtual int						CalculateTotalVisibleNodes()=0;
 
+					/// <summary>Get the number of all sub nodes.</summary>
+					/// <returns>The number of all sub nodes.</returns>
 					virtual int						GetChildCount()=0;
+					/// <summary>Get the parent node.</summary>
+					/// <returns>The parent node.</returns>
 					virtual INodeProvider*			GetParent()=0;
+					/// <summary>Request the instance of a specified sub node. If the sub node is not longer needed, a call to [M:vl.presentation.controls.tree.INodeProvider.ReleaseChild] is required.</summary>
+					/// <returns>The instance of a specified sub node.</returns>
+					/// <param name="index">The index of the sub node.</param>
 					virtual INodeProvider*			RequestChild(int index)=0;
+					/// <summary>Release an instance of a sub node.</summary>
+					/// <param name="node">The instance of a sub node.</param>
 					virtual void					ReleaseChild(INodeProvider* node)=0;
 				};
-
+				
+				/// <summary>Represents a root node provider.</summary>
 				class INodeRootProvider : public virtual IDescriptable, public Description<INodeRootProvider>
 				{
 				public:
+					/// <summary>Get the instance of the root node.</summary>
 					virtual INodeProvider*			GetRootNode()=0;
+					/// <summary>Test does the provider provided an optimized algorithm to get an instance of a node by the index of all visible nodes. If this function returns true, [M:vl.presentation.controls.tree.INodeRootProvider.GetNodeByVisibleIndex] can be used.</summary>
+					/// <returns>Returns true if such an algorithm is provided.</returns>
 					virtual bool					CanGetNodeByVisibleIndex()=0;
+					/// <summary>Get a node by the index of all visible nodes. This requires [M:vl.presentation.controls.tree.INodeRootProvider.CanGetNodeByVisibleIndex] returning true. If the node is no longer needed, a call to it's parent's [M:vl.presentation.controls.tree.INodeProvider.ReleaseChild] is needed, unless this is a root node so that its parent is null.</summary>
+					/// <returns>The node for the index of all visible nodes.</returns>
+					/// <param name="index">The index of all visible nodes.</param>
 					virtual INodeProvider*			GetNodeByVisibleIndex(int index)=0;
+					/// <summary>Attach an node provider callback to this node provider.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="value">The node provider callback.</param>
 					virtual bool					AttachCallback(INodeProviderCallback* value)=0;
+					/// <summary>Detach an node provider callback from this node provider.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="value">The node provider callback.</param>
 					virtual bool					DetachCallback(INodeProviderCallback* value)=0;
+					/// <summary>Request a view for this node provider. If the specified view is not supported, it returns null. If you want to get a view of type IXXX, use IXXX::Identifier as the identifier. When the view object is no longer needed, A call to the [M:vl.presentation.controls.tree.INodeRootProvider.ReleaseView] is needed.</summary>
+					/// <returns>The view object.</returns>
+					/// <param name="identifier">The identifier for the requested view.</param>
 					virtual IDescriptable*			RequestView(const WString& identifier)=0;
+					/// <summary>Release a requested view.</summary>
+					/// <param name="view">The view to release.</param>
 					virtual void					ReleaseView(IDescriptable* view)=0;
 				};
 			}
