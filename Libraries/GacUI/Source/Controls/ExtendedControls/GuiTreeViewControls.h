@@ -280,6 +280,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 
 			namespace tree
 			{
+				/// <summary>An in-memory <see cref="INodeProvider"/> implementation.</summary>
 				class MemoryNodeProvider
 					: public Object
 					, public virtual INodeProvider
@@ -321,13 +322,23 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					vint							Insert(vint index, const Ptr<MemoryNodeProvider>& item);
 					bool							Set(vint index, const Ptr<MemoryNodeProvider>& item);
 				public:
+					/// <summary>Create a node provider.</summary>
 					MemoryNodeProvider();
+					/// <summary>Create a node provider with a data object.</summary>
+					/// <param name="_data">The data object.</param>
 					MemoryNodeProvider(const Ptr<DescriptableObject>& _data);
 					~MemoryNodeProvider();
 
+					/// <summary>Get the data object.</summary>
+					/// <returns>The data object.</returns>
 					Ptr<DescriptableObject>			GetData();
+					/// <summary>Set the data object.</summary>
+					/// <param name="value">The data object.</param>
 					void							SetData(const Ptr<DescriptableObject>& value);
+					/// <summary>Notify that the state in the binded data object is modified.</summary>
 					void							NotifyDataModified();
+					/// <summary>Get all sub nodes.</summary>
+					/// <returns>All sub nodes.</returns>
 					IChildList&						Children();
 
 					bool							GetExpanding()override;
@@ -340,6 +351,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					void							ReleaseChild(INodeProvider* node)override;
 				};
 
+				/// <summary>A general implementation for <see cref="INodeRootProvider"/>.</summary>
 				class NodeRootProviderBase : public virtual INodeRootProvider, protected virtual INodeProviderCallback, public Description<NodeRootProviderBase>
 				{
 					collections::List<INodeProviderCallback*>			callbacks;
@@ -350,6 +362,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					void							OnItemExpanded(INodeProvider* node)override;
 					void							OnItemCollapsed(INodeProvider* node)override;
 				public:
+					/// <summary>Create a node root provider.</summary>
 					NodeRootProviderBase();
 					~NodeRootProviderBase();
 					
@@ -360,7 +373,8 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					IDescriptable*					RequestView(const WString& identifier)override;
 					void							ReleaseView(IDescriptable* view)override;
 				};
-
+				
+				/// <summary>An in-memory <see cref="INodeRootProvider"/> implementation.</summary>
 				class MemoryNodeRootProvider
 					: public MemoryNodeProvider
 					, public NodeRootProviderBase
@@ -369,6 +383,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 				protected:
 					INodeProviderCallback*			GetCallbackProxyInternal()override;
 				public:
+					/// <summary>Create a node root provider.</summary>
 					MemoryNodeRootProvider();
 					~MemoryNodeRootProvider();
 
@@ -380,7 +395,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 GuiVirtualTreeListControl
 ***********************************************************************/
 
-			/// <summary>Tree view control in virtual node.</summary>
+			/// <summary>Tree list control in virtual node.</summary>
 			class GuiVirtualTreeListControl : public GuiSelectableListControl, public Description<GuiVirtualTreeListControl>
 			{
 			protected:
@@ -388,12 +403,24 @@ GuiVirtualTreeListControl
 				tree::INodeItemView*				nodeItemView;
 				Ptr<tree::INodeItemStyleProvider>	nodeStyleProvider;
 			public:
+				/// <summary>Create a tree list control in virtual mode.</summary>
+				/// <param name="_styleProvider">The style provider for this control.</param>
+				/// <param name="_nodeRootProvider">The node root provider for this control.</param>
 				GuiVirtualTreeListControl(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider);
 				~GuiVirtualTreeListControl();
 
+				/// <summary>Get the <see cref="tree::INodeItemView"/> from the item provider.</summary>
+				/// <returns>The <see cref="tree::INodeItemView"/> from the item provider.</returns>
 				tree::INodeItemView*				GetNodeItemView();
+				/// <summary>Get the binded node root provider.</summary>
+				/// <returns>The binded node root provider.</returns>
 				tree::INodeRootProvider*			GetNodeRootProvider();
+				/// <summary>Get the node item style provider.</summary>
+				/// <returns>The node item style provider.</returns>
 				tree::INodeItemStyleProvider*		GetNodeStyleProvider();
+				/// <summary>Set the node item style provider.</summary>
+				/// <returns>The old node item style provider.</returns>
+				/// <param name="styleProvider">The new node item style provider.</param>
 				Ptr<tree::INodeItemStyleProvider>	SetNodeStyleProvider(Ptr<tree::INodeItemStyleProvider> styleProvider);
 			};
 
@@ -403,25 +430,41 @@ TreeView
 
 			namespace tree
 			{
+				/// <summary>The required <see cref="INodeRootProvider"/> view for [T:vl.presentation.controls.tree.TreeViewNodeItemStyleProvider].</summary>
 				class ITreeViewItemView : public virtual INodeItemPrimaryTextView, public Description<ITreeViewItemView>
 				{
 				public:
+					/// <summary>The identifier of this view.</summary>
 					static const wchar_t* const		Identifier;
 
+					/// <summary>Get the image of a node.</summary>
+					/// <returns>Get the image of a node.</returns>
+					/// <param name="node">The node.</param>
 					virtual Ptr<GuiImageData>		GetNodeImage(INodeProvider* node)=0;
+					/// <summary>Get the text of a node.</summary>
+					/// <returns>Get the text of a node.</returns>
+					/// <param name="node">The node.</param>
 					virtual WString					GetNodeText(INodeProvider* node)=0;
 				};
 
+				/// <summary>A tree view item. This data structure is used in [T:vl.presentation.controls.tree.TreeViewItemRootProvider].</summary>
 				class TreeViewItem : public Object, public Description<TreeViewItem>
 				{
 				public:
+					/// <summary>The image of this item.</summary>
 					Ptr<GuiImageData>				image;
+					/// <summary>The text of this item.</summary>
 					WString							text;
 
+					/// <summary>Create a tree view item.</summary>
 					TreeViewItem();
+					/// <summary>Create a tree view item with specified image and text.</summary>
+					/// <param name="_image">The specified image.</param>
+					/// <param name="_text">The specified text.</param>
 					TreeViewItem(const Ptr<GuiImageData>& _image, const WString& _text);
 				};
 
+				/// <summary>The default implementation of <see cref="INodeRootProvider"/> for [T:vl.presentation.controls.GuiTreeView].</summary>
 				class TreeViewItemRootProvider
 					: public MemoryNodeRootProvider
 					, protected virtual ITreeViewItemView
@@ -433,6 +476,7 @@ TreeView
 					Ptr<GuiImageData>				GetNodeImage(INodeProvider* node)override;
 					WString							GetNodeText(INodeProvider* node)override;
 				public:
+					/// <summary>Create a item root provider.</summary>
 					TreeViewItemRootProvider();
 					~TreeViewItemRootProvider();
 
@@ -445,26 +489,41 @@ TreeView
 			class GuiTreeView : public GuiVirtualTreeListControl, public Description<GuiTreeView>
 			{
 			public:
+				/// <summary>Style provider interface for <see cref="GuiTreeView"/>.</summary>
 				class IStyleProvider : public virtual GuiVirtualTreeListControl::IStyleProvider, public Description<IStyleProvider>
 				{
 				public:
+					/// <summary>Create a style controller for an item background. The selection state is used to render the selection state of a node.</summary>
+					/// <returns>The created style controller for an item background.</returns>
 					virtual GuiSelectableButton::IStyleController*		CreateItemBackground()=0;
+					/// <summary>Create a style controller for an item expanding decorator. The selection state is used to render the expanding state of a node</summary>
+					/// <returns>The created style controller for an item expanding decorator.</returns>
 					virtual GuiSelectableButton::IStyleController*		CreateItemExpandingDecorator()=0;
+					/// <summary>Get the text color.</summary>
+					/// <returns>The text color.</returns>
 					virtual Color										GetTextColor()=0;
 				};
 			protected:
 				IStyleProvider*								styleProvider;
 				Ptr<tree::TreeViewItemRootProvider>			nodes;
 			public:
+				/// <summary>Create a tree view control. If a node root provider is not provided, a <see cref="tree::TreeViewItemRootProvider"/> is created as a node root provider. A [T:vl.presentation.controls.tree.TreeViewNodeItemStyleProvider] is created as a node item style provider by default.</summary>
+				/// <param name="_styleProvider">The style provider for this control.</param>
+				/// <param name="_nodeRootProvider">The node root provider for this control.</param>
 				GuiTreeView(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider=0);
 				~GuiTreeView();
 
+				/// <summary>Get the style provider for this control.</summary>
+				/// <returns>The style provider for this control.</returns>
 				IStyleProvider*								GetTreeViewStyleProvider();
+				/// <summary>Get the <see cref="tree::TreeViewItemRootProvider"/> if a node root provider is not provided when creating this control.</summary>
+				/// <returns>The <see cref="tree::TreeViewItemRootProvider"/> as a node root provider.</returns>
 				Ptr<tree::TreeViewItemRootProvider>			Nodes();
 			};
 
 			namespace tree
 			{
+				/// <summary>The default <see cref="INodeItemStyleProvider"/> implementation for <see cref="GuiTreeView"/>.</summary>
 				class TreeViewNodeItemStyleProvider
 					: public Object
 					, public virtual INodeItemStyleProvider
@@ -513,6 +572,7 @@ TreeView
 					void									OnItemExpanded(INodeProvider* node)override;
 					void									OnItemCollapsed(INodeProvider* node)override;
 				public:
+					/// <summary>Create a node item style provider.</summary>
 					TreeViewNodeItemStyleProvider();
 					~TreeViewNodeItemStyleProvider();
 
