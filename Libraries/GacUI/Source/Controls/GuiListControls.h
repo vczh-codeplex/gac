@@ -170,7 +170,7 @@ List Control
 					virtual int									GetItemStyleId(int itemIndex)=0;
 					/// <summary>Create an item style controller from an item style id.</summary>
 					/// <returns>The created item style controller.</returns>
-					/// <param name="itemIndex">The item style id.</param>
+					/// <param name="styleId">The item style id.</param>
 					virtual IItemStyleController*				CreateItemStyle(int styleId)=0;
 					/// <summary>Destroy an item style controller.</summary>
 					/// <param name="style">The item style controller.</param>

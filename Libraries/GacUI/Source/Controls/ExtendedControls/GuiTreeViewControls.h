@@ -206,27 +206,52 @@ GuiVirtualTreeListControl NodeProvider
 
 				class INodeItemStyleProvider;
 
+				/// <summary>Node item style controller for a [T:vl.presentation.controls.GuiVirtualTreeListControl] to render a node.</summary>
 				class INodeItemStyleController : public virtual GuiListControl::IItemStyleController, public Description<INodeItemStyleController>
 				{
 				public:
+					/// <summary>Get the owner node style provider.</summary>
+					/// <returns>The owner node style provider.</returns>
 					virtual INodeItemStyleProvider*					GetNodeStyleProvider()=0;
 				};
-
+				
+				/// <summary>Node item style provider for a [T:vl.presentation.controls.GuiVirtualTreeListControl] to render visible nodes.</summary>
 				class INodeItemStyleProvider : public virtual IDescriptable, public Description<INodeItemStyleProvider>
 				{
 				public:
+					/// <summary>Bind a item style provider. Generally the item style provider will be used to create a item style controller for a list control, because a tree view control is implemented using a list control.</summary>
+					/// <param name="styleProvider">The item style provider.</param>
 					virtual void									BindItemStyleProvider(GuiListControl::IItemStyleProvider* styleProvider)=0;
+					/// <summary>Get the binded item style provider.</summary>
+					/// <returns>The binded item style provider.</returns>
 					virtual GuiListControl::IItemStyleProvider*		GetBindedItemStyleProvider()=0;
+					/// <summary>Called when a node item style provider in installed to a <see cref="GuiListControl"/>.</summary>
+					/// <param name="value">The list control.</param>
 					virtual void									AttachListControl(GuiListControl* value)=0;
+					/// <summary>Called when a node item style provider in uninstalled from a <see cref="GuiListControl"/>.</summary>
 					virtual void									DetachListControl()=0;
+					/// <summary>Get a node item style id from a node.</summary>
+					/// <returns>The node item style id.</returns>
+					/// <param name="node">The node.</param>
 					virtual int										GetItemStyleId(INodeProvider* node)=0;
+					/// <summary>Create a node item style controller from a node item style id.</summary>
+					/// <returns>The created node item style controller.</returns>
+					/// <param name="styleId">The node item style id.</param>
 					virtual INodeItemStyleController*				CreateItemStyle(int styleId)=0;
+					/// <summary>Destroy a node item style controller.</summary>
+					/// <param name="style">The node item style controller.</param>
 					virtual void									DestroyItemStyle(INodeItemStyleController* style)=0;
+					/// <summary>Bind a node to a node item style controller.</summary>
+					/// <param name="style">The node item style controller.</param>
+					/// <param name="node">The node item style id.</param>
 					virtual void									Install(INodeItemStyleController* style, INodeProvider* node)=0;
+					/// <summary>Change the visual affect of a node item style controller to be selected or unselected.</summary>
+					/// <param name="style">The node item style controller.</param>
+					/// <param name="value">Set to true if the node item is expected to be rendered as selected.</param>
 					virtual void									SetStyleSelected(INodeItemStyleController* style, bool value)=0;
 				};
-
-				/// <summary>x</summary>
+				
+				/// <summary>This is a general implementation to convert an <see cref="INodeItemStyleProvider"/> to a <see cref="GuiSelectableListControl::IItemStyleProvider"/>.</summary>
 				class NodeItemStyleProvider : public Object, public virtual GuiSelectableListControl::IItemStyleProvider, public Description<NodeItemStyleProvider>
 				{
 				protected:
@@ -234,6 +259,8 @@ GuiVirtualTreeListControl NodeProvider
 					GuiListControl*									listControl;
 					INodeItemView*									nodeItemView;
 				public:
+					/// <summary>Create an item style provider using a node item style provider.</summary>
+					/// <param name="provider">The node item style provider.</param>
 					NodeItemStyleProvider(Ptr<INodeItemStyleProvider> provider);
 					~NodeItemStyleProvider();
 
