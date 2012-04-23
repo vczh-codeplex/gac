@@ -247,11 +247,14 @@ Animation
 Container
 ***********************************************************************/
 
+			/// <summary>Empty style. Nothing but a color filled the whole control.</summary>
 			class Win7EmptyStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7EmptyStyle>
 			{
 			protected:
 				compositions::GuiBoundsComposition*			boundsComposition;
 			public:
+				/// <summary>Create the style with a specified color.</summary>
+				/// <param name="color">The specified color.</param>
 				Win7EmptyStyle(Color color);
 				~Win7EmptyStyle();
 
@@ -263,19 +266,23 @@ Container
 				void										SetVisuallyEnabled(bool value)override;
 			};
 
+			/// <summary>Window style (Windows 7). Using the Windows 7 window background color to fill the whold control</summary>
 			class Win7WindowStyle : public Win7EmptyStyle, public Description<Win7WindowStyle>
 			{
 			public:
+				/// <summary>Create the style.</summary>
 				Win7WindowStyle();
 				~Win7WindowStyle();
 			};
-
+			
+			/// <summary>Menu style (Windows 7). For the background of a popup menu.</summary>
 			class Win7MenuStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuStyle>
 			{
 			protected:
 				compositions::GuiBoundsComposition*			boundsComposition;
 				compositions::GuiBoundsComposition*			containerComposition;
 			public:
+				/// <summary>Create the style.</summary>
 				Win7MenuStyle();
 				~Win7MenuStyle();
 
@@ -286,12 +293,14 @@ Container
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
 			};
-
+			
+			/// <summary>Menu bar style (Windows 7). For the background of a menu bar.</summary>
 			class Win7MenuBarStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuBarStyle>
 			{
 			protected:
 				compositions::GuiBoundsComposition*			boundsComposition;
 			public:
+				/// <summary>Create the style.</summary>
 				Win7MenuBarStyle();
 				~Win7MenuBarStyle();
 
@@ -302,7 +311,8 @@ Container
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
 			};
-
+			
+			/// <summary>Group box style (Windows 7).</summary>
 			class Win7GroupBoxStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7GroupBoxStyle>
 			{
 			protected:
@@ -319,6 +329,7 @@ Container
 
 				void										SetMargins(int fontSize);
 			public:
+				/// <summary>Create the style.</summary>
 				Win7GroupBoxStyle();
 				~Win7GroupBoxStyle();
 
@@ -329,7 +340,8 @@ Container
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
 			};
-
+			
+			/// <summary>Tab control style (Windows 7).</summary>
 			class Win7TabStyle : public Object, public virtual controls::GuiTab::IStyleController, public Description<Win7TabStyle>
 			{
 			protected:
@@ -346,6 +358,7 @@ Container
 				void										OnHeaderButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										UpdateHeaderZOrder();
 			public:
+				/// <summary>Create the style.</summary>
 				Win7TabStyle();
 				~Win7TabStyle();
 
@@ -368,7 +381,8 @@ Container
 /***********************************************************************
 Button
 ***********************************************************************/
-
+			
+			/// <summary>The base class of all button style implementations. (Windows 7)</summary>
 			class Win7ButtonStyleBase : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7ButtonStyleBase>
 			{
 			protected:
@@ -384,6 +398,12 @@ Button
 
 				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)=0;
 			public:
+				/// <summary>Create the style.</summary>
+				/// <param name="verticalGradient">Set to true to have a vertical gradient background.</param>
+				/// <param name="roundBorder">Set to true to have a round border</param>
+				/// <param name="initialColor">Set to true to set the initial colors of all components for a button.</param>
+				/// <param name="horizontal">Horizontal alignment for text.</param>
+				/// <param name="vertical">Vertical alignment for text.</param>
 				Win7ButtonStyleBase(bool verticalGradient, bool roundBorder, const Win7ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical);
 				~Win7ButtonStyleBase();
 
@@ -396,38 +416,60 @@ Button
 				void										SetSelected(bool value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 
+				/// <summary>Get the transparent style for the inactive state.</summary>
+				/// <returns>Returns true if the background is not transparent for the inactive state.</returns>
 				bool										GetTransparentWhenInactive();
+				/// <summary>Set the transparent style for the inactive state.</summary>
+				/// <param name="value">Set to troe true to make the background not transparent for the inactive state.</param>
 				void										SetTransparentWhenInactive(bool value);
+				/// <summary>Get the transparent style for the disabled state.</summary>
+				/// <returns>Returns true if the background is not transparent for the disabled state.</returns>
 				bool										GetTransparentWhenDisabled();
+				/// <summary>Set the transparent style for the inactive state.</summary>
+				/// <param name="value">Set to troe true to make the background not transparent for the disabled state.</param>
 				void										SetTransparentWhenDisabled(bool value);
+				/// <summary>Get the automatically size changing state of the button.</summary>
+				/// <returns>Returns true if the style automatically changes its size if the text changed.</returns>
 				bool										GetAutoSizeForText();
+				/// <summary>Set the automatically size changing state of the button.</summary>
+				/// <param name="value">Set to true to make the style automatically changes its size if the text changed.</param>
 				void										SetAutoSizeForText(bool value);
 			};
-
+			
+			/// <summary>Button style (Windows 7).</summary>
 			class Win7ButtonStyle : public Win7ButtonStyleBase, public Description<Win7ButtonStyle>
 			{
 			protected:
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
 			public:
+				/// <summary>Create the style.</summary>
+				/// <param name="verticalGradient">Set to true to have a vertical gradient background.</param>
 				Win7ButtonStyle(bool verticalGradient=true);
 				~Win7ButtonStyle();
 			};
-
+			
+			/// <summary>Toolstrip button style (Windows 7).</summary>
 			class Win7ToolstripButtonStyle : public Win7ButtonStyleBase, public Description<Win7ToolstripButtonStyle>
 			{
 			protected:
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
 			public:
+				/// <summary>Create the style.</summary>
+				/// <param name="transparent">Set to true to make the background disappear when the button is not in an active state.</param>
 				Win7ToolstripButtonStyle(bool transparent);
 				~Win7ToolstripButtonStyle();
 			};
-
+			
+			/// <summary>Check box style (Windows 7).</summary>
 			class Win7CheckBoxStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7CheckBoxStyle>
 			{
 			public:
+				/// <summary>Bullet style.</summary>
 				enum BulletStyle
 				{
+					/// <summary>[T:vl.presentation.win7.Win7CheckBoxStyle.BulletStyle]Check box bullet.</summary>
 					CheckBox,
+					/// <summary>[T:vl.presentation.win7.Win7CheckBoxStyle.BulletStyle]Radio button bullet.</summary>
 					RadioButton,
 				};
 			protected:
@@ -441,6 +483,9 @@ Button
 
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected);
 			public:
+				/// <summary>Create the style.</summary>
+				/// <param name="bulletStyle">The bullet style.</param>
+				/// <param name="backgroundVisible">Set to true to make the background visible.</param>
 				Win7CheckBoxStyle(BulletStyle bulletStyle, bool backgroundVisible=true);
 				~Win7CheckBoxStyle();
 
@@ -457,27 +502,32 @@ Button
 /***********************************************************************
 Misc Buttons
 ***********************************************************************/
-
+			
+			/// <summary>Selectable item style (Windows 7). Generally for list box item background.</summary>
 			class Win7SelectableItemStyle : public Win7ButtonStyleBase, public Description<Win7SelectableItemStyle>
 			{
 			protected:
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
 			public:
+				/// <summary>Create the style.</summary>
 				Win7SelectableItemStyle();
 				~Win7SelectableItemStyle();
 			};
-
+			
+			/// <summary>Tab page header style (Windows 7).</summary>
 			class Win7TabPageHeaderStyle : public Win7ButtonStyleBase, public Description<Win7TabPageHeaderStyle>
 			{
 			protected:
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
 			public:
+				/// <summary>Create the style.</summary>
 				Win7TabPageHeaderStyle();
 				~Win7TabPageHeaderStyle();
 
 				void										SetFont(const FontProperties& value)override;
 			};
-
+			
+			/// <summary>List view column drop down button style (Windows 7).</summary>
 			class Win7ListViewColumnDropDownStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7ListViewColumnDropDownStyle>
 			{
 			protected:
@@ -498,6 +548,7 @@ Misc Buttons
 
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected);
 			public:
+				/// <summary>Create the style.</summary>
 				Win7ListViewColumnDropDownStyle();
 				~Win7ListViewColumnDropDownStyle();
 
@@ -510,7 +561,8 @@ Misc Buttons
 				void										SetSelected(bool value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
-
+			
+			/// <summary>List view column header style (Windows 7).</summary>
 			class Win7ListViewColumnHeaderStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7ListViewColumnHeaderStyle>
 			{
 			protected:
@@ -532,6 +584,7 @@ Misc Buttons
 
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected);
 			public:
+				/// <summary>Create the style.</summary>
 				Win7ListViewColumnHeaderStyle();
 				~Win7ListViewColumnHeaderStyle();
 
@@ -544,7 +597,8 @@ Misc Buttons
 				void										SetSelected(bool value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
-
+			
+			/// <summary>Tree view expanding button style (Windows 7). Show the triangle to indicate the expanding state of a tree view item.</summary>
 			class Win7TreeViewExpandingButtonStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7TreeViewExpandingButtonStyle>
 			{
 			protected:
@@ -557,6 +611,7 @@ Misc Buttons
 
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected);
 			public:
+				/// <summary>Create the style.</summary>
 				Win7TreeViewExpandingButtonStyle();
 				~Win7TreeViewExpandingButtonStyle();
 
@@ -573,7 +628,8 @@ Misc Buttons
 /***********************************************************************
 Menu Button
 ***********************************************************************/
-
+			
+			/// <summary>Menu bar button style (Windows 7). For menu buttons in a menu bar.</summary>
 			class Win7MenuBarButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7MenuBarButtonStyle>
 			{
 			protected:
@@ -584,6 +640,7 @@ Menu Button
 
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool opening);
 			public:
+				/// <summary>Create the style.</summary>
 				Win7MenuBarButtonStyle();
 				~Win7MenuBarButtonStyle();
 
@@ -598,7 +655,8 @@ Menu Button
 				void										SetSubMenuOpening(bool value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
-
+			
+			/// <summary>Menu item button style (Windows 7). For menu buttons in a popup menu.</summary>
 			class Win7MenuItemButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7MenuItemButtonStyle>
 			{
 			protected:
@@ -609,6 +667,7 @@ Menu Button
 
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool opening);
 			public:
+				/// <summary>Create the style.</summary>
 				Win7MenuItemButtonStyle();
 				~Win7MenuItemButtonStyle();
 
@@ -623,12 +682,14 @@ Menu Button
 				void										SetSubMenuOpening(bool value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
-
+			
+			/// <summary>Menu splitter style (Windows 7). For splitters in a popup menu.</summary>
 			class Win7MenuSplitterStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuSplitterStyle>
 			{
 			protected:
 				compositions::GuiBoundsComposition*			boundsComposition;
 			public:
+				/// <summary>Create the style.</summary>
 				Win7MenuSplitterStyle();
 				~Win7MenuSplitterStyle();
 
@@ -646,6 +707,7 @@ ComboBox
 			
 #pragma warning(push)
 #pragma warning(disable:4250)
+			/// <summary>Drop down combo box style (Windows 7).</summary>
 			class Win7DropDownComboBoxStyle : public Win7ButtonStyle, public virtual controls::GuiComboBoxBase::IStyleController, public Description<Win7DropDownComboBoxStyle>
 			{
 			protected:
@@ -657,6 +719,7 @@ ComboBox
 
 				void											TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
 			public:
+				/// <summary>Create the style.</summary>
 				Win7DropDownComboBoxStyle();
 				~Win7DropDownComboBoxStyle();
 				
@@ -674,7 +737,8 @@ ComboBox
 /***********************************************************************
 Scroll
 ***********************************************************************/
-
+			
+			/// <summary>Scroll bar style (Windows 7).</summary>
 			class Win7ScrollStyle : public common_styles::CommonScrollStyle, public Description<Win7ScrollStyle>
 			{
 			public:
@@ -686,10 +750,13 @@ Scroll
 				controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction);
 				void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)override;
 			public:
+				/// <summary>Create the style using a specified direction.</summary>
+				/// <param name="_direction">The specified direction</param>
 				Win7ScrollStyle(Direction _direction);
 				~Win7ScrollStyle();
 			};
-
+			
+			/// <summary>Tracker (slide bar) style (Windows 7).</summary>
 			class Win7TrackStyle : public common_styles::CommonTrackStyle, public Description<Win7TrackStyle>
 			{
 			public:
@@ -703,6 +770,8 @@ Scroll
 				void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)override;
 				void										InstallTrack(compositions::GuiGraphicsComposition* trackComposition, Direction direction)override;
 			public:
+				/// <summary>Create the style using a specified direction.</summary>
+				/// <param name="_direction">The specified direction</param>
 				Win7TrackStyle(Direction _direction);
 				~Win7TrackStyle();
 			};
@@ -710,10 +779,15 @@ Scroll
 /***********************************************************************
 ScrollView
 ***********************************************************************/
-
+			
+			/// <summary>Scroll view style (Windows 7).</summary>
 			class Win7ScrollViewProvider : public Object, public virtual controls::GuiScrollView::IStyleProvider, public Description<Win7ScrollViewProvider>
 			{
 			public:
+				/// <summary>Create the style.</summary>
+				Win7ScrollViewProvider();
+				~Win7ScrollViewProvider();
+
 				void										AssociateStyleController(controls::GuiControl::IStyleController* controller)override;
 				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
@@ -729,7 +803,7 @@ ScrollView
 /***********************************************************************
 TextBox
 ***********************************************************************/
-
+			
 			class Win7TextBoxBackground : public Object, public Description<Win7TextBoxBackground>
 			{
 			protected:
@@ -762,13 +836,15 @@ TextBox
 				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition);
 				void										InitializeTextElement(elements::GuiColorizedTextElement* _textElement);
 			};
-
+			
+			/// <summary>Multiline text box style (Windows 7).</summary>
 			class Win7MultilineTextBoxProvider : public Win7ScrollViewProvider, public Description<Win7MultilineTextBoxProvider>
 			{
 			protected:
 				Win7TextBoxBackground						background;
 				controls::GuiControl::IStyleController*		styleController;
 			public:
+				/// <summary>Create the style.</summary>
 				Win7MultilineTextBoxProvider();
 				~Win7MultilineTextBoxProvider();
 				
@@ -777,13 +853,15 @@ TextBox
 				void										SetVisuallyEnabled(bool value)override;
 				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
-
+			
+			/// <summary>Singleline text box style (Windows 7).</summary>
 			class Win7SinglelineTextBoxProvider : public Object, public virtual controls::GuiSinglelineTextBox::IStyleProvider, public Description<Win7SinglelineTextBoxProvider>
 			{
 			protected:
 				Win7TextBoxBackground						background;
 				controls::GuiControl::IStyleController*		styleController;
 			public:
+				/// <summary>Create the style.</summary>
 				Win7SinglelineTextBoxProvider();
 				~Win7SinglelineTextBoxProvider();
 
@@ -798,29 +876,35 @@ TextBox
 /***********************************************************************
 List
 ***********************************************************************/
-
+			
+			/// <summary>Text list style (Windows 7).</summary>
 			class Win7TextListProvider : public Object, public virtual controls::list::TextItemStyleProvider::ITextItemStyleProvider, public Description<Win7TextListProvider>
 			{
 			public:
+				/// <summary>Create the style.</summary>
 				Win7TextListProvider();
 				~Win7TextListProvider();
 
 				controls::GuiSelectableButton::IStyleController*		CreateBackgroundStyleController()override;
 				controls::GuiSelectableButton::IStyleController*		CreateBulletStyleController()override;
 			};
-
+			
+			/// <summary>Check box text list style (Windows 7).</summary>
 			class Win7CheckTextListProvider : public Win7TextListProvider, public Description<Win7CheckTextListProvider>
 			{
 			public:
+				/// <summary>Create the style.</summary>
 				Win7CheckTextListProvider();
 				~Win7CheckTextListProvider();
 
 				controls::GuiSelectableButton::IStyleController*		CreateBulletStyleController()override;
 			};
-
+			
+			/// <summary>Radio button text list style (Windows 7).</summary>
 			class Win7RadioTextListProvider : public Win7TextListProvider, public Description<Win7RadioTextListProvider>
 			{
 			public:
+				/// <summary>Create the style.</summary>
 				Win7RadioTextListProvider();
 				~Win7RadioTextListProvider();
 
@@ -829,9 +913,11 @@ List
 
 #pragma warning(push)
 #pragma warning(disable:4250)
+			/// <summary>List view style (Windows 7).</summary>
 			class Win7ListViewProvider : public Win7MultilineTextBoxProvider, public virtual controls::GuiListView::IStyleProvider, public Description<Win7ListViewProvider>
 			{
 			public:
+				/// <summary>Create the style.</summary>
 				Win7ListViewProvider();
 				~Win7ListViewProvider();
 
@@ -842,9 +928,11 @@ List
 				Color													GetItemSeparatorColor()override;
 			};
 			
+			/// <summary>Tree view style (Windows 7).</summary>
 			class Win7TreeViewProvider : public Win7MultilineTextBoxProvider, public virtual controls::GuiTreeView::IStyleProvider, public Description<Win7TreeViewProvider>
 			{
 			public:
+				/// <summary>Create the style.</summary>
 				Win7TreeViewProvider();
 				~Win7TreeViewProvider();
 
