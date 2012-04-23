@@ -107,6 +107,7 @@
     <ClCompile Include="..\..\Source\Controls\GuiTextControls.cpp" />
     <ClCompile Include="..\..\Source\Controls\GuiWindowControls.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\GuiCommonStyles.cpp" />
+    <ClCompile Include="..\..\Source\Controls\Styles\GuiThemeStyleFactory.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\GuiWin7Styles.cpp" />
     <ClCompile Include="..\..\Source\GacUI_WinMain.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsComposition.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="..\..\Source\Controls\GuiTextControls.h" />
     <ClInclude Include="..\..\Source\Controls\GuiWindowControls.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\GuiCommonStyles.h" />
+    <ClInclude Include="..\..\Source\Controls\Styles\GuiThemeStyleFactory.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\GuiWin7Styles.h" />
     <ClInclude Include="..\..\Source\GacUI.h" />
     <ClInclude Include="..\..\Source\GacVlppReferences.h" />

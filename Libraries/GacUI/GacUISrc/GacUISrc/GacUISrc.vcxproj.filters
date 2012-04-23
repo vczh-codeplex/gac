@@ -192,6 +192,9 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\GuiThemeStyleFactory.cpp">
+      <Filter>GacUI\Controls\Styles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -394,6 +397,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptor.h">
       <Filter>GacUI\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\GuiThemeStyleFactory.h">
+      <Filter>GacUI\Controls\Styles</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

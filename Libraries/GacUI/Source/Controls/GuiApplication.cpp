@@ -1,4 +1,5 @@
 #include "GuiApplication.h"
+#include "Styles\GuiWin7Styles.h"
 
 extern void GuiMain();
 
@@ -142,13 +143,16 @@ Helpers
 
 			void GuiApplicationInitialize()
 			{
+				win7::Win7Theme theme;
+				theme::SetCurrentTheme(&theme);
+
 				GetCurrentController()->InputService()->StartTimer();
 				GetCurrentController()->InputService()->StartHookMouse();
 				GuiApplication app;
 				application=&app;
 
 				GuiMain();
-				SetTypeProvider(0);
+				theme::SetCurrentTheme(0);
 			}
 		}
 	}

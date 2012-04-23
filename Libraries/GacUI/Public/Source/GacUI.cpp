@@ -4047,13 +4047,16 @@ Helpers
 
 			void GuiApplicationInitialize()
 			{
+				win7::Win7Theme theme;
+				theme::SetCurrentTheme(&theme);
+
 				GetCurrentController()->InputService()->StartTimer();
 				GetCurrentController()->InputService()->StartHookMouse();
 				GuiApplication app;
 				application=&app;
 
 				GuiMain();
-				SetTypeProvider(0);
+				theme::SetCurrentTheme(0);
 			}
 		}
 	}
@@ -9025,6 +9028,191 @@ CommonTrackStyle
 }
 
 /***********************************************************************
+Controls\Styles\GuiThemeStyleFactory.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace theme
+		{
+			ITheme* currentTheme=0;
+
+			ITheme* GetCurrentTheme()
+			{
+				return currentTheme;
+			}
+
+			void SetCurrentTheme(ITheme* theme)
+			{
+				currentTheme=theme;
+			}
+
+			namespace g
+			{
+				controls::GuiWindow* NewWindow()
+				{
+					return new controls::GuiWindow(GetCurrentTheme()->CreateWindowStyle());
+				}
+
+				controls::GuiControl* NewGroupBox()
+				{
+					return new controls::GuiControl(GetCurrentTheme()->CreateGroupBoxStyle());
+				}
+
+				controls::GuiTab* NewTab()
+				{
+					return new controls::GuiTab(GetCurrentTheme()->CreateTabStyle());
+				}
+
+				controls::GuiComboBoxListControl* NewComboBox(controls::GuiSelectableListControl* containedListControl)
+				{
+					return new controls::GuiComboBoxListControl(GetCurrentTheme()->CreateComboBoxStyle(), containedListControl);
+				}
+
+				controls::GuiMultilineTextBox* NewMultilineTextBox()
+				{
+					return new controls::GuiMultilineTextBox(GetCurrentTheme()->CreateMultilineTextBoxStyle());
+				}
+
+				controls::GuiSinglelineTextBox* NewTextBox()
+				{
+					return new controls::GuiSinglelineTextBox(GetCurrentTheme()->CreateTextBoxStyle());
+				}
+
+				controls::GuiListView* NewListViewBigIcon()
+				{
+					controls::GuiListView* listview=new controls::GuiListView(GetCurrentTheme()->CreateListViewStyle());
+					listview->ChangeItemStyle(new controls::list::ListViewBigIconContentProvider);
+					return listview;
+				}
+
+				controls::GuiListView* NewListViewSmallIcon()
+				{
+					controls::GuiListView* listview=new controls::GuiListView(GetCurrentTheme()->CreateListViewStyle());
+					listview->ChangeItemStyle(new controls::list::ListViewSmallIconContentProvider);
+					return listview;
+				}
+
+				controls::GuiListView* NewListViewList()
+				{
+					controls::GuiListView* listview=new controls::GuiListView(GetCurrentTheme()->CreateListViewStyle());
+					listview->ChangeItemStyle(new controls::list::ListViewListContentProvider);
+					return listview;
+				}
+
+				controls::GuiListView* NewListViewDetail()
+				{
+					controls::GuiListView* listview=new controls::GuiListView(GetCurrentTheme()->CreateListViewStyle());
+					listview->ChangeItemStyle(new controls::list::ListViewDetailContentProvider);
+					return listview;
+				}
+
+				controls::GuiListView* NewListViewTile()
+				{
+					controls::GuiListView* listview=new controls::GuiListView(GetCurrentTheme()->CreateListViewStyle());
+					listview->ChangeItemStyle(new controls::list::ListViewTileContentProvider);
+					return listview;
+				}
+
+				controls::GuiListView* NewListViewInformation()
+				{
+					controls::GuiListView* listview=new controls::GuiListView(GetCurrentTheme()->CreateListViewStyle());
+					listview->ChangeItemStyle(new controls::list::ListViewInformationContentProvider);
+					return listview;
+				}
+
+				controls::GuiTreeView* NewTreeView()
+				{
+					return new controls::GuiTreeView(GetCurrentTheme()->CreateTreeViewStyle());
+				}
+
+				controls::GuiMenu* NewMenu(controls::GuiControl* owner)
+				{
+					return new controls::GuiMenu(GetCurrentTheme()->CreateMenuStyle(), owner);
+				}
+
+				controls::GuiMenuBar* NewMenuBar()
+				{
+					return new controls::GuiMenuBar(GetCurrentTheme()->CreateMenuBarStyle());
+				}
+
+				controls::GuiControl* NewMenuSplitter()
+				{
+					return new controls::GuiControl(GetCurrentTheme()->CreateMenuSplitterStyle());
+				}
+
+				controls::GuiMenuButton* NewMenuBarButton()
+				{
+					return new controls::GuiMenuButton(GetCurrentTheme()->CreateMenuBarButtonStyle());
+				}
+
+				controls::GuiMenuButton* NewMenuItemButton()
+				{
+					return new controls::GuiMenuButton(GetCurrentTheme()->CreateMenuItemButtonStyle());
+				}
+
+				controls::GuiButton* NewButton()
+				{
+					return new controls::GuiButton(GetCurrentTheme()->CreateButtonStyle());
+				}
+
+				controls::GuiSelectableButton* NewToolstripButton()
+				{
+					return new controls::GuiSelectableButton(GetCurrentTheme()->CreateToolstripButtonStyle());
+				}
+
+				controls::GuiSelectableButton* NewCheckBox()
+				{
+					return new controls::GuiSelectableButton(GetCurrentTheme()->CreateCheckBoxStyle());
+				}
+
+				controls::GuiSelectableButton* NewRadioButton()
+				{
+					return new controls::GuiSelectableButton(GetCurrentTheme()->CreateRadioButtonStyle());
+				}
+
+				controls::GuiScroll* NewHScroll()
+				{
+					return new controls::GuiScroll(GetCurrentTheme()->CreateHScrollStyle());
+				}
+
+				controls::GuiScroll* NewVScroll()
+				{
+					return new controls::GuiScroll(GetCurrentTheme()->CreateVScrollStyle());
+				}
+
+				controls::GuiScroll* NewHTracker()
+				{
+					return new controls::GuiScroll(GetCurrentTheme()->CreateHTrackerStyle());
+				}
+
+				controls::GuiScroll* NewVTracker()
+				{
+					return new controls::GuiScroll(GetCurrentTheme()->CreateVTrackerStyle());
+				}
+
+				controls::GuiTextList* NewTextList()
+				{
+					return new controls::GuiTextList(GetCurrentTheme()->CreateTextListStyle(), GetCurrentTheme()->CreateTextListItemStyle());
+				}
+
+				controls::GuiTextList* NewCheckTextList()
+				{
+					return new controls::GuiTextList(GetCurrentTheme()->CreateTextListStyle(), GetCurrentTheme()->CreateCheckTextListItemStyle());
+				}
+
+				controls::GuiTextList* NewRadioTextList()
+				{
+					return new controls::GuiTextList(GetCurrentTheme()->CreateTextListStyle(), GetCurrentTheme()->CreateRadioTextListItemStyle());
+				}
+			}
+		}
+	}
+}
+
+/***********************************************************************
 Controls\Styles\GuiWin7Styles.cpp
 ***********************************************************************/
 
@@ -12366,6 +12554,143 @@ Win7TreeViewProvider
 			Color Win7TreeViewProvider::GetTextColor()
 			{
 				return Win7GetSystemTextColor(true);
+			}
+
+/***********************************************************************
+Win7Theme
+***********************************************************************/
+
+			Win7Theme::Win7Theme()
+			{
+			}
+
+			Win7Theme::~Win7Theme()
+			{
+			}
+
+			controls::GuiControl::IStyleController* Win7Theme::CreateWindowStyle()
+			{
+				return new Win7WindowStyle;
+			}
+
+			controls::GuiControl::IStyleController* Win7Theme::CreateGroupBoxStyle()
+			{
+				return new Win7GroupBoxStyle;
+			}
+
+			controls::GuiTab::IStyleController* Win7Theme::CreateTabStyle()
+			{
+				return new Win7TabStyle;
+			}
+
+			controls::GuiComboBoxBase::IStyleController* Win7Theme::CreateComboBoxStyle()
+			{
+				return new Win7DropDownComboBoxStyle;
+			}
+
+			controls::GuiScrollView::IStyleProvider* Win7Theme::CreateMultilineTextBoxStyle()
+			{
+				return new Win7MultilineTextBoxProvider;
+			}
+
+			controls::GuiSinglelineTextBox::IStyleProvider* Win7Theme::CreateTextBoxStyle()
+			{
+				return new Win7SinglelineTextBoxProvider;
+			}
+
+			controls::GuiListView::IStyleProvider* Win7Theme::CreateListViewStyle()
+			{
+				return new Win7ListViewProvider;
+			}
+
+			controls::GuiTreeView::IStyleProvider* Win7Theme::CreateTreeViewStyle()
+			{
+				return new Win7TreeViewProvider;
+			}
+
+			controls::GuiControl::IStyleController* Win7Theme::CreateMenuStyle()
+			{
+				return new Win7MenuStyle;
+			}
+
+			controls::GuiControl::IStyleController* Win7Theme::CreateMenuBarStyle()
+			{
+				return new Win7MenuBarStyle;
+			}
+
+			controls::GuiControl::IStyleController* Win7Theme::CreateMenuSplitterStyle()
+			{
+				return new Win7MenuSplitterStyle;
+			}
+
+			controls::GuiMenuButton::IStyleController* Win7Theme::CreateMenuBarButtonStyle()
+			{
+				return new Win7MenuBarButtonStyle;
+			}
+
+			controls::GuiMenuButton::IStyleController* Win7Theme::CreateMenuItemButtonStyle()
+			{
+				return new Win7MenuItemButtonStyle;
+			}
+
+			controls::GuiButton::IStyleController* Win7Theme::CreateButtonStyle()
+			{
+				return new Win7ButtonStyle;
+			}
+
+			controls::GuiSelectableButton::IStyleController* Win7Theme::CreateToolstripButtonStyle()
+			{
+				return new Win7ToolstripButtonStyle(false);
+			}
+
+			controls::GuiSelectableButton::IStyleController* Win7Theme::CreateCheckBoxStyle()
+			{
+				return new Win7CheckBoxStyle(Win7CheckBoxStyle::CheckBox);
+			}
+
+			controls::GuiSelectableButton::IStyleController* Win7Theme::CreateRadioButtonStyle()
+			{
+				return new Win7CheckBoxStyle(Win7CheckBoxStyle::RadioButton);
+			}
+
+			controls::GuiScroll::IStyleController* Win7Theme::CreateHScrollStyle()
+			{
+				return new Win7ScrollStyle(Win7ScrollStyle::Horizontal);
+			}
+
+			controls::GuiScroll::IStyleController* Win7Theme::CreateVScrollStyle()
+			{
+				return new Win7ScrollStyle(Win7ScrollStyle::Vertical);
+			}
+
+			controls::GuiScroll::IStyleController* Win7Theme::CreateHTrackerStyle()
+			{
+				return new Win7TrackStyle(Win7TrackStyle::Horizontal);
+			}
+
+			controls::GuiScroll::IStyleController* Win7Theme::CreateVTrackerStyle()
+			{
+				return new Win7TrackStyle(Win7TrackStyle::Vertical);
+			}
+
+			controls::GuiScrollView::IStyleProvider* Win7Theme::CreateTextListStyle()
+			{
+				return new Win7MultilineTextBoxProvider;
+			}
+
+			controls::list::TextItemStyleProvider::ITextItemStyleProvider* Win7Theme::CreateTextListItemStyle()
+			{
+				return new Win7TextListProvider;
+			}
+
+			controls::list::TextItemStyleProvider::ITextItemStyleProvider* Win7Theme::CreateCheckTextListItemStyle()
+			{
+				return new Win7CheckTextListProvider;
+			}
+
+			controls::list::TextItemStyleProvider::ITextItemStyleProvider* Win7Theme::CreateRadioTextListItemStyle()
+			{
+				return new Win7RadioTextListProvider;
 			}
 		}
 	}
@@ -23945,276 +24270,6 @@ DescriptableObject
 
 		DescriptableObject::~DescriptableObject()
 		{
-		}
-
-/***********************************************************************
-DescriptableValue
-***********************************************************************/
-
-		void DescriptableValue::Initialize()
-		{
-			type=0;
-			dataSInt=0;
-			dataUInt=0;
-			dataFloat=0;
-			dataBool=false;
-			dataChar=0;
-			dataDescriptableObjectPointer=0;
-			dataObjectPointer=0;
-			dataInterfacePointer=0;
-			dataRawPointer=0;
-		}
-
-		DescriptableValue::DescriptableValue()
-		{
-			Initialize();
-		}
-
-		DescriptableValue::DescriptableValue(IType* type, signed __int64 value)
-		{
-			Initialize();
-			type=type;
-			dataSInt=value;
-		}
-
-		DescriptableValue::DescriptableValue(signed __int64 value)
-		{
-			Initialize();
-			type=GetTypeProvider()->SInt64();
-			dataSInt=value;
-		}
-
-		DescriptableValue::DescriptableValue(unsigned __int64 value)
-		{
-			Initialize();
-			type=GetTypeProvider()->UInt64();
-			dataUInt=value;
-		}
-
-		DescriptableValue::DescriptableValue(double value)
-		{
-			Initialize();
-			type=GetTypeProvider()->Float();
-			dataFloat=value;
-		}
-
-		DescriptableValue::DescriptableValue(bool value)
-		{
-			Initialize();
-			type=GetTypeProvider()->Bool();
-			dataBool=value;
-		}
-
-		DescriptableValue::DescriptableValue(wchar_t value)
-		{
-			Initialize();
-			type=GetTypeProvider()->Char();
-			dataChar=value;
-		}
-
-		DescriptableValue::DescriptableValue(const WString& value)
-		{
-			Initialize();
-			type=GetTypeProvider()->String();
-			dataString=value;
-		}
-
-		DescriptableValue::DescriptableValue(Ptr<DescriptableObject> value)
-		{
-			Initialize();
-			if(value)
-			{
-				type=(*value->typeDescriptor)->GetType();
-				dataDescriptableObject=value;
-				dataDescriptableObjectPointer=value.Obj();
-			}
-		}
-
-		DescriptableValue::DescriptableValue(DescriptableObject* value)
-		{
-			Initialize();
-			if(value)
-			{
-				type=(*value->typeDescriptor)->GetType();
-				dataDescriptableObjectPointer=value;
-			}
-		}
-
-		DescriptableValue::DescriptableValue(IType* _type, Ptr<Object> value)
-		{
-			Initialize();
-			if(value)
-			{
-				type=_type;
-				dataObject=value;
-				dataObjectPointer=value.Obj();
-			}
-		}
-
-		DescriptableValue::DescriptableValue(IType* _type, Object* value)
-		{
-			Initialize();
-			if(value)
-			{
-				type=_type;
-				dataObjectPointer=value;
-			}
-		}
-
-		DescriptableValue::DescriptableValue(IType* _type, Ptr<Interface> value)
-		{
-			Initialize();
-			if(value)
-			{
-				type=_type;
-				dataInterface=value;
-				dataInterfacePointer=value.Obj();
-			}
-		}
-
-		DescriptableValue::DescriptableValue(IType* _type, Interface* value)
-		{
-			Initialize();
-			if(value)
-			{
-				type=_type;
-				dataInterfacePointer=value;
-			}
-		}
-
-		DescriptableValue::DescriptableValue(IType* _type, void* value)
-		{
-			Initialize();
-			if(value)
-			{
-				type=_type;
-				dataRawPointer=value;
-			}
-		}
-
-		DescriptableValue::DescriptableValue(const DescriptableValue& value)
-			:type(value.type)
-			,dataSInt(value.dataSInt)
-			,dataUInt(value.dataUInt)
-			,dataFloat(value.dataFloat)
-			,dataBool(value.dataBool)
-			,dataChar(value.dataChar)
-			,dataString(value.dataString)
-			,dataDescriptableObject(value.dataDescriptableObject)
-			,dataDescriptableObjectPointer(value.dataDescriptableObjectPointer)
-			,dataObject(value.dataObject)
-			,dataObjectPointer(value.dataObjectPointer)
-			,dataInterface(value.dataInterface)
-			,dataInterfacePointer(value.dataInterfacePointer)
-			,dataRawPointer(value.dataRawPointer)
-		{
-		}
-
-		IType* DescriptableValue::GetType()const
-		{
-			return type;
-		}
-
-		signed __int64 DescriptableValue::GetSInt()const
-		{
-			return dataSInt;
-		}
-
-		unsigned __int64 DescriptableValue::GetUInt()const
-		{
-			return dataUInt;
-		}
-
-		double DescriptableValue::GetFloat()const
-		{
-			return dataFloat;
-		}
-
-		bool DescriptableValue::GetBool()const
-		{
-			return dataBool;
-		}
-
-		wchar_t DescriptableValue::GetChar()const
-		{
-			return dataChar;
-		}
-
-		WString DescriptableValue::GetString()const
-		{
-			return dataString;
-		}
-			
-		Ptr<DescriptableObject> DescriptableValue::GetDescriptableObject()const
-		{
-			return dataDescriptableObject;
-		}
-
-		DescriptableObject* DescriptableValue::GetDescriptableObjectPoitner()const
-		{
-			return dataDescriptableObjectPointer;
-		}
-
-		Ptr<Object> DescriptableValue::GetRawObject()const
-		{
-			return dataObject;
-		}
-
-		Object* DescriptableValue::GetRawObjectPointer()const
-		{
-			return dataObjectPointer;
-		}
-
-		Ptr<Interface> DescriptableValue::GetInterface()const
-		{
-			return dataInterface;
-		}
-
-		Interface* DescriptableValue::GetInterfacePointer()const
-		{
-			return dataInterfacePointer;
-		}
-
-		void* DescriptableValue::GetRawPointer()const
-		{
-			return dataRawPointer;
-		}
-
-		bool DescriptableValue::CanDelete()const
-		{
-			return !(dataDescriptableObject || dataObject || dataInterface) && (dataDescriptableObjectPointer || dataObjectPointer || dataInterfacePointer);
-		}
-
-		void DescriptableValue::Delete()
-		{
-			if(dataDescriptableObjectPointer) delete dataDescriptableObjectPointer;
-			if(dataObjectPointer) delete dataObjectPointer;
-			if(dataInterfacePointer) delete dataInterfacePointer;
-			Initialize();
-		}
-
-/***********************************************************************
-Helper Functions
-***********************************************************************/
-
-		ITypeProvider* reflectionTypeProvider=0;
-
-		ITypeProvider* GetTypeProvider()
-		{
-			return reflectionTypeProvider;
-		}
-
-		void SetTypeProvider(ITypeProvider* value)
-		{
-			if(reflectionTypeProvider!=value)
-			{
-				if(reflectionTypeProvider)
-				{
-					delete reflectionTypeProvider;
-					reflectionTypeProvider=0;
-				}
-			}
-			reflectionTypeProvider=value;
 		}
 	}
 }
