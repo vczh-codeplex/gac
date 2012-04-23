@@ -2901,6 +2901,7 @@ Basic Construction
 				GuiControl*								GetParent();
 				int										GetChildrenCount();
 				GuiControl*								GetChild(int index);
+				bool									AddChild(GuiControl* control);
 				
 				virtual GuiControlHost*					GetRelatedControlHost();
 				virtual bool							GetVisuallyEnabled();

@@ -169,6 +169,11 @@ GuiControl
 				return children[index];
 			}
 
+			bool GuiControl::AddChild(GuiControl* control)
+			{
+				return GetContainerComposition()->AddChild(control->GetBoundsComposition());
+			}
+
 			GuiControlHost* GuiControl::GetRelatedControlHost()
 			{
 				return parent?parent->GetRelatedControlHost():0;
