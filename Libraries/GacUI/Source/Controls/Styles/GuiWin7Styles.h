@@ -7,6 +7,7 @@ Clases:
 	GuiControl::IStyleController
 		Win7EmptyStyle
 		Win7WindowStyle
+		Win7LabelStyle
 		Win7MenuStyle
 		Win7MenuBarStyle
 		Win7MenuSplitterStyle
@@ -273,6 +274,25 @@ Container
 				/// <summary>Create the style.</summary>
 				Win7WindowStyle();
 				~Win7WindowStyle();
+			};
+
+			/// <summary>Label style. A label contains a text, and the label will automatically resize to fit the text.</summary>
+			class Win7LabelStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7LabelStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				elements::GuiSolidLabelElement*				textElement;
+			public:
+				/// <summary>Create the style.</summary>
+				Win7LabelStyle();
+				~Win7LabelStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
 			};
 			
 			/// <summary>Menu style (Windows 7). For the background of a popup menu.</summary>
@@ -955,6 +975,7 @@ Theme
 				~Win7Theme();
 
 				controls::GuiControl::IStyleController*								CreateWindowStyle()override;
+				controls::GuiControl::IStyleController*								CreateLabelStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				controls::GuiTab::IStyleController*									CreateTabStyle()override;
 				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;

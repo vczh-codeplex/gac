@@ -3356,6 +3356,8 @@ Window
 			public:
 				GuiWindow(GuiControl::IStyleController* _styleController);
 				~GuiWindow();
+
+				void									MoveToScreenCenter();
 			};
 			
 			class GuiPopup : public GuiWindow, public Description<GuiPopup>
@@ -5899,6 +5901,7 @@ namespace vl
 			{
 			public:
 				virtual controls::GuiControl::IStyleController*								CreateWindowStyle()=0;
+				virtual controls::GuiControl::IStyleController*								CreateLabelStyle()=0;
 				virtual controls::GuiControl::IStyleController*								CreateGroupBoxStyle()=0;
 				virtual controls::GuiTab::IStyleController*									CreateTabStyle()=0;
 				virtual controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()=0;
@@ -5935,6 +5938,7 @@ namespace vl
 			namespace g
 			{
 				extern controls::GuiWindow*						NewWindow();
+				extern controls::GuiControl*					NewLabel();
 				extern controls::GuiControl*					NewGroupBox();
 				extern controls::GuiTab*						NewTab();
 				extern controls::GuiComboBoxListControl*		NewComboBox(controls::GuiSelectableListControl* containedListControl);
@@ -6111,6 +6115,7 @@ Clases:
 	GuiControl::IStyleController
 		Win7EmptyStyle
 		Win7WindowStyle
+		Win7LabelStyle
 		Win7MenuStyle
 		Win7MenuBarStyle
 		Win7MenuSplitterStyle
@@ -6371,6 +6376,23 @@ Container
 			public:
 				Win7WindowStyle();
 				~Win7WindowStyle();
+			};
+
+			class Win7LabelStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7LabelStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				elements::GuiSolidLabelElement*				textElement;
+			public:
+				Win7LabelStyle();
+				~Win7LabelStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
 			};
 			
 			class Win7MenuStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuStyle>
@@ -6971,6 +6993,7 @@ Theme
 				~Win7Theme();
 
 				controls::GuiControl::IStyleController*								CreateWindowStyle()override;
+				controls::GuiControl::IStyleController*								CreateLabelStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				controls::GuiTab::IStyleController*									CreateTabStyle()override;
 				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;

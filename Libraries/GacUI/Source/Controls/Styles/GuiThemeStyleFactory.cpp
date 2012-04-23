@@ -25,6 +25,11 @@ namespace vl
 					return new controls::GuiWindow(GetCurrentTheme()->CreateWindowStyle());
 				}
 
+				controls::GuiControl* NewLabel()
+				{
+					return new controls::GuiControl(GetCurrentTheme()->CreateLabelStyle());
+				}
+
 				controls::GuiControl* NewGroupBox()
 				{
 					return new controls::GuiControl(GetCurrentTheme()->CreateGroupBoxStyle());

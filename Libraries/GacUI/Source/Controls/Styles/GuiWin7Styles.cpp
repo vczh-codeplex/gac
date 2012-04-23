@@ -1134,6 +1134,51 @@ Win7WindowStyle
 			}
 
 /***********************************************************************
+Win7LabelStyle
+***********************************************************************/
+
+			Win7LabelStyle::Win7LabelStyle()
+			{
+				textElement=GuiSolidLabelElement::Create();
+				
+				boundsComposition=new GuiBoundsComposition;
+				boundsComposition->SetOwnedElement(textElement);
+				boundsComposition->SetMinSizeLimitation(GuiBoundsComposition::LimitToElement);
+			}
+
+			Win7LabelStyle::~Win7LabelStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win7LabelStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win7LabelStyle::GetContainerComposition()
+			{
+				return boundsComposition;
+			}
+
+			void Win7LabelStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win7LabelStyle::SetText(const WString& value)
+			{
+				textElement->SetText(value);
+			}
+
+			void Win7LabelStyle::SetFont(const FontProperties& value)
+			{
+				textElement->SetFont(value);
+			}
+
+			void Win7LabelStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+/***********************************************************************
 Win7MenuStyle
 ***********************************************************************/
 
@@ -3356,6 +3401,11 @@ Win7Theme
 			controls::GuiControl::IStyleController* Win7Theme::CreateWindowStyle()
 			{
 				return new Win7WindowStyle;
+			}
+
+			controls::GuiControl::IStyleController* Win7Theme::CreateLabelStyle()
+			{
+				return new Win7LabelStyle;
 			}
 
 			controls::GuiControl::IStyleController* Win7Theme::CreateGroupBoxStyle()

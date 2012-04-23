@@ -33,6 +33,9 @@ namespace vl
 				/// <summary>Create a style for window.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiControl::IStyleController*								CreateWindowStyle()=0;
+				/// <summary>Create a style for label.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiControl::IStyleController*								CreateLabelStyle()=0;
 				/// <summary>Create a style for group box.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiControl::IStyleController*								CreateGroupBoxStyle()=0;
@@ -123,6 +126,9 @@ namespace vl
 				/// <summary>Create a window.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiWindow*						NewWindow();
+				/// <summary>Create a label.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiControl*					NewLabel();
 				/// <summary>Create a group box.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiControl*					NewGroupBox();

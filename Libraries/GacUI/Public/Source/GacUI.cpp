@@ -8346,6 +8346,25 @@ GuiWindow
 				}
 			}
 
+			void GuiWindow::MoveToScreenCenter()
+			{
+				INativeScreen* screen=GetRelatedScreen();
+				if(screen)
+				{
+					Rect screenBounds=screen->GetClientBounds();
+					Rect windowBounds=GetBounds();
+					SetBounds(
+						Rect(
+							Point(
+								windowBounds.Left()+(screenBounds.Width()-windowBounds.Width())/2,
+								windowBounds.Top()+(screenBounds.Height()-windowBounds.Height())/2
+								),
+							windowBounds.GetSize()
+							)
+						);
+				}
+			}
+
 /***********************************************************************
 GuiPopup
 ***********************************************************************/
@@ -9054,6 +9073,11 @@ namespace vl
 				controls::GuiWindow* NewWindow()
 				{
 					return new controls::GuiWindow(GetCurrentTheme()->CreateWindowStyle());
+				}
+
+				controls::GuiControl* NewLabel()
+				{
+					return new controls::GuiControl(GetCurrentTheme()->CreateLabelStyle());
 				}
 
 				controls::GuiControl* NewGroupBox()
@@ -10345,6 +10369,51 @@ Win7WindowStyle
 			}
 
 			Win7WindowStyle::~Win7WindowStyle()
+			{
+			}
+
+/***********************************************************************
+Win7LabelStyle
+***********************************************************************/
+
+			Win7LabelStyle::Win7LabelStyle()
+			{
+				textElement=GuiSolidLabelElement::Create();
+				
+				boundsComposition=new GuiBoundsComposition;
+				boundsComposition->SetOwnedElement(textElement);
+				boundsComposition->SetMinSizeLimitation(GuiBoundsComposition::LimitToElement);
+			}
+
+			Win7LabelStyle::~Win7LabelStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win7LabelStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win7LabelStyle::GetContainerComposition()
+			{
+				return boundsComposition;
+			}
+
+			void Win7LabelStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win7LabelStyle::SetText(const WString& value)
+			{
+				textElement->SetText(value);
+			}
+
+			void Win7LabelStyle::SetFont(const FontProperties& value)
+			{
+				textElement->SetFont(value);
+			}
+
+			void Win7LabelStyle::SetVisuallyEnabled(bool value)
 			{
 			}
 
@@ -12571,6 +12640,11 @@ Win7Theme
 			controls::GuiControl::IStyleController* Win7Theme::CreateWindowStyle()
 			{
 				return new Win7WindowStyle;
+			}
+
+			controls::GuiControl::IStyleController* Win7Theme::CreateLabelStyle()
+			{
+				return new Win7LabelStyle;
 			}
 
 			controls::GuiControl::IStyleController* Win7Theme::CreateGroupBoxStyle()
