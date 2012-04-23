@@ -152,6 +152,10 @@ Basic Construction
 				/// <returns>The child control.</returns>
 				/// <param name="index">The specified index.</param>
 				GuiControl*								GetChild(int index);
+				/// <summary>Put another control in the container composition of this control.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="control">The control to put in this control.</param>
+				bool									AddChild(GuiControl* control);
 				
 				/// <summary>Get the <see cref="GuiControlHost"/> that contains this control.</summary>
 				/// <returns>The <see cref="GuiControlHost"/> that contains this control.</returns>

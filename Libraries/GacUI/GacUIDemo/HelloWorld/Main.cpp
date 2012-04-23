@@ -22,7 +22,7 @@ void GuiMain()
 		font.antialias=true;
 		label->SetFont(font);
 	}
-	window->GetContainerComposition()->AddChild(label->GetBoundsComposition());
+	window->AddChild(label);
 
 	GetApplication()->Run(window);
 	delete window;
