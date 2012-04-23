@@ -599,6 +599,25 @@ GuiWindow
 				}
 			}
 
+			void GuiWindow::MoveToScreenCenter()
+			{
+				INativeScreen* screen=GetRelatedScreen();
+				if(screen)
+				{
+					Rect screenBounds=screen->GetClientBounds();
+					Rect windowBounds=GetBounds();
+					SetBounds(
+						Rect(
+							Point(
+								windowBounds.Left()+(screenBounds.Width()-windowBounds.Width())/2,
+								windowBounds.Top()+(screenBounds.Height()-windowBounds.Height())/2
+								),
+							windowBounds.GetSize()
+							)
+						);
+				}
+			}
+
 /***********************************************************************
 GuiPopup
 ***********************************************************************/

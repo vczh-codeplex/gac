@@ -260,6 +260,9 @@ Window
 				/// <param name="_styleController">The style controller.</param>
 				GuiWindow(GuiControl::IStyleController* _styleController);
 				~GuiWindow();
+
+				/// <summary>Move the window to the center of the screen. If multiple screens exist, the window move to the screen that contains the biggest part of the window.</summary>
+				void									MoveToScreenCenter();
 			};
 			
 			/// <summary>
