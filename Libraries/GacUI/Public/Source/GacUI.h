@@ -4450,7 +4450,7 @@ ListView Base
 				~GuiListViewBase();
 				
 				IStyleProvider*									GetListViewStyleProvider();
-				Ptr<GuiListControl::IItemStyleProvider>			SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value);
+				Ptr<GuiListControl::IItemStyleProvider>			SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)override;
 			};
 
 /***********************************************************************
@@ -4482,9 +4482,9 @@ ListView ItemStyleProvider
 					class IListViewItemContent : public virtual IDescriptable, public Description<IListViewItemContent>
 					{
 					public:
-						virtual compositions::GuiBoundsComposition*	GetContentComposition()=0;
-						virtual compositions::GuiBoundsComposition*	GetBackgroundDecorator()=0;
-						virtual void								Install(GuiListViewBase::IStyleProvider* styleProvider, IListViewItemView* view, int itemIndex)=0;
+						virtual compositions::GuiBoundsComposition*				GetContentComposition()=0;
+						virtual compositions::GuiBoundsComposition*				GetBackgroundDecorator()=0;
+						virtual void											Install(GuiListViewBase::IStyleProvider* styleProvider, IListViewItemView* view, int itemIndex)=0;
 					};
 
 					class IListViewItemContentProvider : public virtual IDescriptable, public Description<IListViewItemContentProvider>
@@ -4717,14 +4717,14 @@ ListView ItemContentProvider(Detailed)
 					typedef collections::List<compositions::GuiBoundsComposition*>		ColumnHeaderSplitterList;
 				public:
 					static const int							SplitterWidth=8;
-
+					
 					class IColumnItemViewCallback : public virtual IDescriptable, public Description<IColumnItemViewCallback>
 					{
 					public:
 						virtual void							OnColumnChanged()=0;
 						virtual void							OnColumnSizeChanged(int index)=0;
 					};
-
+					
 					class IColumnItemView : public virtual IDescriptable, public Description<IColumnItemView>
 					{
 					public:
@@ -4842,7 +4842,7 @@ ListView
 					WString										text;
 					collections::List<WString>					subItems;
 				};
-
+				
 				class ListViewColumn
 				{
 				public:
@@ -4851,7 +4851,7 @@ ListView
 
 					ListViewColumn(const WString& _text=L"", int _size=160);
 				};
-
+				
 				class ListViewItemProvider
 					: public ListProvider<Ptr<ListViewItem>>
 					, protected virtual ListViewItemStyleProvider::IListViewItemView
@@ -4892,7 +4892,7 @@ ListView
 					void										NotifyColumnsUpdated();
 				};
 			}
-
+			
 			class GuiVirtualListView : public GuiListViewBase, public Description<GuiVirtualListView>
 			{
 			public:
@@ -4901,7 +4901,7 @@ ListView
 				
 				void											ChangeItemStyle(list::ListViewItemStyleProvider::IListViewItemContentProvider* contentProvider);
 			};
-
+			
 			class GuiListView : public GuiVirtualListView, public Description<GuiListView>
 			{
 			protected:
@@ -4979,7 +4979,7 @@ GuiVirtualTreeListControl NodeProvider
 					virtual INodeProvider*			RequestChild(int index)=0;
 					virtual void					ReleaseChild(INodeProvider* node)=0;
 				};
-
+				
 				class INodeRootProvider : public virtual IDescriptable, public Description<INodeRootProvider>
 				{
 				public:
@@ -5044,7 +5044,7 @@ GuiVirtualTreeListControl NodeProvider
 				public:
 					NodeItemProvider(INodeRootProvider* _root);
 					~NodeItemProvider();
-
+					
 					Ptr<INodeRootProvider>			GetRoot();
 					int								Count()override;
 					IDescriptable*					RequestView(const WString& identifier)override;
@@ -5062,7 +5062,7 @@ GuiVirtualTreeListControl NodeProvider
 				public:
 					virtual INodeItemStyleProvider*					GetNodeStyleProvider()=0;
 				};
-
+				
 				class INodeItemStyleProvider : public virtual IDescriptable, public Description<INodeItemStyleProvider>
 				{
 				public:
@@ -5076,7 +5076,7 @@ GuiVirtualTreeListControl NodeProvider
 					virtual void									Install(INodeItemStyleController* style, INodeProvider* node)=0;
 					virtual void									SetStyleSelected(INodeItemStyleController* style, bool value)=0;
 				};
-
+				
 				class NodeItemStyleProvider : public Object, public virtual GuiSelectableListControl::IItemStyleProvider, public Description<NodeItemStyleProvider>
 				{
 				protected:
@@ -5183,7 +5183,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					IDescriptable*					RequestView(const WString& identifier)override;
 					void							ReleaseView(IDescriptable* view)override;
 				};
-
+				
 				class MemoryNodeRootProvider
 					: public MemoryNodeProvider
 					, public NodeRootProviderBase
@@ -5389,7 +5389,7 @@ ComboBox Base
 					virtual void							ShowPopup()=0;
 					virtual void							SelectItem()=0;
 				};
-
+				
 				class IStyleController : public virtual GuiButton::IStyleController, public Description<IStyleController>
 				{
 				public:
@@ -5456,7 +5456,7 @@ ComboBox with GuiListControl
 				
 				void										SetFont(const FontProperties& value)override;
 				GuiSelectableListControl*					GetContainedListControl();
-
+				
 				int											GetSelectedIndex();
 				void										SetSelectedIndex(int value);
 				GuiListControl::IItemProvider*				GetItemProvider();
@@ -6164,7 +6164,7 @@ Scrolls
 				void												SetPageSize(int value)override;
 				void												SetPosition(int value)override;
 			};
-
+			
 			class CommonTrackStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<CommonTrackStyle>
 			{
 			public:
@@ -6489,7 +6489,7 @@ Container
 				Win7WindowStyle();
 				~Win7WindowStyle();
 			};
-
+			
 			class Win7MenuStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuStyle>
 			{
 			protected:
@@ -6506,7 +6506,7 @@ Container
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
 			};
-
+			
 			class Win7MenuBarStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuBarStyle>
 			{
 			protected:
@@ -6522,7 +6522,7 @@ Container
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
 			};
-
+			
 			class Win7GroupBoxStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7GroupBoxStyle>
 			{
 			protected:
@@ -6549,7 +6549,7 @@ Container
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
 			};
-
+			
 			class Win7TabStyle : public Object, public virtual controls::GuiTab::IStyleController, public Description<Win7TabStyle>
 			{
 			protected:
@@ -6588,7 +6588,7 @@ Container
 /***********************************************************************
 Button
 ***********************************************************************/
-
+			
 			class Win7ButtonStyleBase : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7ButtonStyleBase>
 			{
 			protected:
@@ -6623,7 +6623,7 @@ Button
 				bool										GetAutoSizeForText();
 				void										SetAutoSizeForText(bool value);
 			};
-
+			
 			class Win7ButtonStyle : public Win7ButtonStyleBase, public Description<Win7ButtonStyle>
 			{
 			protected:
@@ -6632,7 +6632,7 @@ Button
 				Win7ButtonStyle(bool verticalGradient=true);
 				~Win7ButtonStyle();
 			};
-
+			
 			class Win7ToolstripButtonStyle : public Win7ButtonStyleBase, public Description<Win7ToolstripButtonStyle>
 			{
 			protected:
@@ -6641,7 +6641,7 @@ Button
 				Win7ToolstripButtonStyle(bool transparent);
 				~Win7ToolstripButtonStyle();
 			};
-
+			
 			class Win7CheckBoxStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7CheckBoxStyle>
 			{
 			public:
@@ -6677,7 +6677,7 @@ Button
 /***********************************************************************
 Misc Buttons
 ***********************************************************************/
-
+			
 			class Win7SelectableItemStyle : public Win7ButtonStyleBase, public Description<Win7SelectableItemStyle>
 			{
 			protected:
@@ -6686,7 +6686,7 @@ Misc Buttons
 				Win7SelectableItemStyle();
 				~Win7SelectableItemStyle();
 			};
-
+			
 			class Win7TabPageHeaderStyle : public Win7ButtonStyleBase, public Description<Win7TabPageHeaderStyle>
 			{
 			protected:
@@ -6697,7 +6697,7 @@ Misc Buttons
 
 				void										SetFont(const FontProperties& value)override;
 			};
-
+			
 			class Win7ListViewColumnDropDownStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7ListViewColumnDropDownStyle>
 			{
 			protected:
@@ -6730,7 +6730,7 @@ Misc Buttons
 				void										SetSelected(bool value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
-
+			
 			class Win7ListViewColumnHeaderStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7ListViewColumnHeaderStyle>
 			{
 			protected:
@@ -6764,7 +6764,7 @@ Misc Buttons
 				void										SetSelected(bool value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
-
+			
 			class Win7TreeViewExpandingButtonStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7TreeViewExpandingButtonStyle>
 			{
 			protected:
@@ -6793,7 +6793,7 @@ Misc Buttons
 /***********************************************************************
 Menu Button
 ***********************************************************************/
-
+			
 			class Win7MenuBarButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7MenuBarButtonStyle>
 			{
 			protected:
@@ -6818,7 +6818,7 @@ Menu Button
 				void										SetSubMenuOpening(bool value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
-
+			
 			class Win7MenuItemButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7MenuItemButtonStyle>
 			{
 			protected:
@@ -6843,7 +6843,7 @@ Menu Button
 				void										SetSubMenuOpening(bool value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
-
+			
 			class Win7MenuSplitterStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuSplitterStyle>
 			{
 			protected:
@@ -6894,7 +6894,7 @@ ComboBox
 /***********************************************************************
 Scroll
 ***********************************************************************/
-
+			
 			class Win7ScrollStyle : public common_styles::CommonScrollStyle, public Description<Win7ScrollStyle>
 			{
 			public:
@@ -6909,7 +6909,7 @@ Scroll
 				Win7ScrollStyle(Direction _direction);
 				~Win7ScrollStyle();
 			};
-
+			
 			class Win7TrackStyle : public common_styles::CommonTrackStyle, public Description<Win7TrackStyle>
 			{
 			public:
@@ -6930,10 +6930,13 @@ Scroll
 /***********************************************************************
 ScrollView
 ***********************************************************************/
-
+			
 			class Win7ScrollViewProvider : public Object, public virtual controls::GuiScrollView::IStyleProvider, public Description<Win7ScrollViewProvider>
 			{
 			public:
+				Win7ScrollViewProvider();
+				~Win7ScrollViewProvider();
+
 				void										AssociateStyleController(controls::GuiControl::IStyleController* controller)override;
 				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
@@ -6949,7 +6952,7 @@ ScrollView
 /***********************************************************************
 TextBox
 ***********************************************************************/
-
+			
 			class Win7TextBoxBackground : public Object, public Description<Win7TextBoxBackground>
 			{
 			protected:
@@ -6982,7 +6985,7 @@ TextBox
 				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition);
 				void										InitializeTextElement(elements::GuiColorizedTextElement* _textElement);
 			};
-
+			
 			class Win7MultilineTextBoxProvider : public Win7ScrollViewProvider, public Description<Win7MultilineTextBoxProvider>
 			{
 			protected:
@@ -6997,7 +7000,7 @@ TextBox
 				void										SetVisuallyEnabled(bool value)override;
 				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
-
+			
 			class Win7SinglelineTextBoxProvider : public Object, public virtual controls::GuiSinglelineTextBox::IStyleProvider, public Description<Win7SinglelineTextBoxProvider>
 			{
 			protected:
@@ -7018,7 +7021,7 @@ TextBox
 /***********************************************************************
 List
 ***********************************************************************/
-
+			
 			class Win7TextListProvider : public Object, public virtual controls::list::TextItemStyleProvider::ITextItemStyleProvider, public Description<Win7TextListProvider>
 			{
 			public:
@@ -7028,7 +7031,7 @@ List
 				controls::GuiSelectableButton::IStyleController*		CreateBackgroundStyleController()override;
 				controls::GuiSelectableButton::IStyleController*		CreateBulletStyleController()override;
 			};
-
+			
 			class Win7CheckTextListProvider : public Win7TextListProvider, public Description<Win7CheckTextListProvider>
 			{
 			public:
@@ -7037,7 +7040,7 @@ List
 
 				controls::GuiSelectableButton::IStyleController*		CreateBulletStyleController()override;
 			};
-
+			
 			class Win7RadioTextListProvider : public Win7TextListProvider, public Description<Win7RadioTextListProvider>
 			{
 			public:

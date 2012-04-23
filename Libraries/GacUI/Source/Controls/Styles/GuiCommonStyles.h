@@ -31,12 +31,16 @@ namespace vl
 Scrolls
 ***********************************************************************/
 
+			/// <summary>A general implementation for <see cref="controls::GuiScroll::IStyleController"/> to make a scroll control.</summary>
 			class CommonScrollStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<CommonScrollStyle>
 			{
 			public:
+				/// <summary>Scroll direction.</summary>
 				enum Direction
 				{
+					/// <summary>[T:vl.presentation.common_styles.CommonScrollStyle.Direction]Horizontal scroll.</summary>
 					Horizontal,
+					/// <summary>[T:vl.presentation.common_styles.CommonScrollStyle.Direction]Vertical scroll.</summary>
 					Vertical,
 				};
 			protected:
@@ -62,12 +66,29 @@ Scrolls
 				void												OnHandleMouseUp(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);;
 				void												OnBigMoveMouseDown(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
 
+				/// <summary>Callback to create a style controller for the decrement button.</summary>
+				/// <returns>The created style controller.</returns>
+				/// <param name="direction">The direction of the scroll.</param>
 				virtual controls::GuiButton::IStyleController*		CreateDecreaseButtonStyle(Direction direction)=0;
+				/// <summary>Callback to create a style controller for the increment button.</summary>
+				/// <returns>The created style controller.</returns>
+				/// <param name="direction">The direction of the scroll.</param>
 				virtual controls::GuiButton::IStyleController*		CreateIncreaseButtonStyle(Direction direction)=0;
+				/// <summary>Callback to create a style controller for the handle button.</summary>
+				/// <returns>The created style controller.</returns>
+				/// <param name="direction">The direction of the scroll.</param>
 				virtual controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction)=0;
+				/// <summary>Install necessary compositions and elements to the background.</summary>
+				/// <param name="boundsComposition">The background composition.</param>
+				/// <param name="direction">The direction of the scroll.</param>
 				virtual void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)=0;
+				/// <summary>Build the style. This function is supposed to be called in the contructor of the sub class.</summary>
+				/// <param name="defaultSize">The size of the increment button and decrement button.</param>
+				/// <param name="arrowSize">The size of the arrows in the increment button and decrement button.</param>
 				void												BuildStyle(int defaultSize, int arrowSize);
 			public:
+				/// <summary>Create the style controller using a specified direction.</summary>
+				/// <param name="_direction">The specified direction</param>
 				CommonScrollStyle(Direction _direction);
 				~CommonScrollStyle();
 
@@ -82,7 +103,8 @@ Scrolls
 				void												SetPageSize(int value)override;
 				void												SetPosition(int value)override;
 			};
-
+			
+			/// <summary>A general implementation for <see cref="controls::GuiScroll::IStyleController"/> to make a tracker control (or a slide bar).</summary>
 			class CommonTrackStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<CommonTrackStyle>
 			{
 			public:
@@ -109,11 +131,27 @@ Scrolls
 				void												OnHandleMouseMove(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
 				void												OnHandleMouseUp(compositions::GuiGraphicsComposition* sender,compositions::GuiMouseEventArgs& arguments);
 				
+				/// <summary>Callback to create a style controller for the handle button.</summary>
+				/// <returns>The created style controller.</returns>
+				/// <param name="direction">The direction of the tracker.</param>
 				virtual controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction)=0;
+				/// <summary>Install necessary compositions and elements to the background.</summary>
+				/// <param name="boundsComposition">The background composition.</param>
+				/// <param name="direction">The direction of the tracker.</param>
 				virtual void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)=0;
+				/// <summary>Install necessary compositions and elements to the tracker groove.</summary>
+				/// <param name="boundsComposition">The tracker groove composition.</param>
+				/// <param name="direction">The direction of the tracker.</param>
 				virtual void										InstallTrack(compositions::GuiGraphicsComposition* trackComposition, Direction direction)=0;
+				/// <summary>Build the style. This function is supposed to be called in the contructor of the sub class.</summary>
+				/// <param name="trackThickness">The thickness of the tracker troove.</param>
+				/// <param name="trackPadding">The padding between the tracker groove to the control.</param>
+				/// <param name="handleLong">The size of the long size of the handle button. Horizontal: height; Vertical: width.</param>
+				/// <param name="handleShort">The size of the short size of the handle button. Horizontal: width; Vertical: height.</param>
 				void												BuildStyle(int trackThickness, int trackPadding, int handleLong, int handleShort);
 			public:
+				/// <summary>Create the style controller using a specified direction.</summary>
+				/// <param name="_direction">The specified direction</param>
 				CommonTrackStyle(Direction _direction);
 				~CommonTrackStyle();
 

@@ -11953,6 +11953,14 @@ Win7TrackStyle
 Win7ScrollViewProvider
 ***********************************************************************/
 
+			Win7ScrollViewProvider::Win7ScrollViewProvider()
+			{
+			}
+
+			Win7ScrollViewProvider::~Win7ScrollViewProvider()
+			{
+			}
+
 			void Win7ScrollViewProvider::AssociateStyleController(controls::GuiControl::IStyleController* controller)
 			{
 			}
