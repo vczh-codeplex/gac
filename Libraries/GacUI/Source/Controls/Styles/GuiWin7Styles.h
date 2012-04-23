@@ -941,6 +941,49 @@ List
 				Color													GetTextColor()override;
 			};
 #pragma warning(pop)
+
+/***********************************************************************
+Theme
+***********************************************************************/
+
+			/// <summary>Windows 7 theme.</summary>
+			class Win7Theme : public theme::ITheme
+			{
+			public:
+				/// <summary>Create the theme.</summary>
+				Win7Theme();
+				~Win7Theme();
+
+				controls::GuiControl::IStyleController*								CreateWindowStyle()override;
+				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
+				controls::GuiTab::IStyleController*									CreateTabStyle()override;
+				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
+				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
+				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
+				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
+				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
+				
+				controls::GuiControl::IStyleController*								CreateMenuStyle()override;
+				controls::GuiControl::IStyleController*								CreateMenuBarStyle()override;
+				controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
+				controls::GuiMenuButton::IStyleController*							CreateMenuBarButtonStyle()override;
+				controls::GuiMenuButton::IStyleController*							CreateMenuItemButtonStyle()override;
+
+				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
+				controls::GuiSelectableButton::IStyleController*					CreateToolstripButtonStyle()override;
+				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
+				controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
+				
+				controls::GuiScroll::IStyleController*								CreateHScrollStyle()override;
+				controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
+				controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
+				controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
+
+				controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
+				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;
+				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateCheckTextListItemStyle()override;
+				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateRadioTextListItemStyle()override;
+			};
 		}
 	}
 }
