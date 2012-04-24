@@ -277,7 +277,7 @@ Container
 			};
 
 			/// <summary>Label style. A label contains a text, and the label will automatically resize to fit the text.</summary>
-			class Win7LabelStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7LabelStyle>
+			class Win7LabelStyle : public Object, public virtual controls::GuiLabel::IStyleController, public Description<Win7LabelStyle>
 			{
 			protected:
 				compositions::GuiBoundsComposition*			boundsComposition;
@@ -293,6 +293,8 @@ Container
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
+				Color										GetDefaultTextColor()override;
+				void										SetTextColor(Color value)override;
 			};
 			
 			/// <summary>Menu style (Windows 7). For the background of a popup menu.</summary>
@@ -975,7 +977,7 @@ Theme
 				~Win7Theme();
 
 				controls::GuiControl::IStyleController*								CreateWindowStyle()override;
-				controls::GuiControl::IStyleController*								CreateLabelStyle()override;
+				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				controls::GuiTab::IStyleController*									CreateTabStyle()override;
 				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;

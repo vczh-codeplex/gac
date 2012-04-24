@@ -1140,6 +1140,7 @@ Win7LabelStyle
 			Win7LabelStyle::Win7LabelStyle()
 			{
 				textElement=GuiSolidLabelElement::Create();
+				textElement->SetColor(GetDefaultTextColor());
 				
 				boundsComposition=new GuiBoundsComposition;
 				boundsComposition->SetOwnedElement(textElement);
@@ -1176,6 +1177,16 @@ Win7LabelStyle
 
 			void Win7LabelStyle::SetVisuallyEnabled(bool value)
 			{
+			}
+
+			Color Win7LabelStyle::GetDefaultTextColor()
+			{
+				return Win7GetSystemTextColor(true);
+			}
+
+			void Win7LabelStyle::SetTextColor(Color value)
+			{
+				textElement->SetColor(value);
 			}
 
 /***********************************************************************
@@ -3403,7 +3414,7 @@ Win7Theme
 				return new Win7WindowStyle;
 			}
 
-			controls::GuiControl::IStyleController* Win7Theme::CreateLabelStyle()
+			controls::GuiLabel::IStyleController* Win7Theme::CreateLabelStyle()
 			{
 				return new Win7LabelStyle;
 			}

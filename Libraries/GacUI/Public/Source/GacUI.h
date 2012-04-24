@@ -2946,6 +2946,30 @@ Basic Construction
 			};
 
 /***********************************************************************
+Label
+***********************************************************************/
+
+			class GuiLabel : public GuiControl, public Description<GuiLabel>
+			{
+			public:
+				class IStyleController : virtual public GuiControl::IStyleController, public Description<IStyleController>
+				{
+				public:
+					virtual Color						GetDefaultTextColor()=0;
+					virtual void						SetTextColor(Color value)=0;
+				};
+			protected:
+				Color									textColor;
+				IStyleController*						styleController;
+			public:
+				GuiLabel(IStyleController* _styleController);
+				~GuiLabel();
+				
+				Color									GetTextColor();
+				void									SetTextColor(Color value);
+			};
+
+/***********************************************************************
 Buttons
 ***********************************************************************/
 
@@ -5902,7 +5926,7 @@ namespace vl
 			{
 			public:
 				virtual controls::GuiControl::IStyleController*								CreateWindowStyle()=0;
-				virtual controls::GuiControl::IStyleController*								CreateLabelStyle()=0;
+				virtual controls::GuiLabel::IStyleController*								CreateLabelStyle()=0;
 				virtual controls::GuiControl::IStyleController*								CreateGroupBoxStyle()=0;
 				virtual controls::GuiTab::IStyleController*									CreateTabStyle()=0;
 				virtual controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()=0;
@@ -5939,7 +5963,7 @@ namespace vl
 			namespace g
 			{
 				extern controls::GuiWindow*						NewWindow();
-				extern controls::GuiControl*					NewLabel();
+				extern controls::GuiLabel*						NewLabel();
 				extern controls::GuiControl*					NewGroupBox();
 				extern controls::GuiTab*						NewTab();
 				extern controls::GuiComboBoxListControl*		NewComboBox(controls::GuiSelectableListControl* containedListControl);
@@ -6379,7 +6403,7 @@ Container
 				~Win7WindowStyle();
 			};
 
-			class Win7LabelStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7LabelStyle>
+			class Win7LabelStyle : public Object, public virtual controls::GuiLabel::IStyleController, public Description<Win7LabelStyle>
 			{
 			protected:
 				compositions::GuiBoundsComposition*			boundsComposition;
@@ -6394,6 +6418,8 @@ Container
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
+				Color										GetDefaultTextColor()override;
+				void										SetTextColor(Color value)override;
 			};
 			
 			class Win7MenuStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuStyle>
@@ -6994,7 +7020,7 @@ Theme
 				~Win7Theme();
 
 				controls::GuiControl::IStyleController*								CreateWindowStyle()override;
-				controls::GuiControl::IStyleController*								CreateLabelStyle()override;
+				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				controls::GuiTab::IStyleController*									CreateTabStyle()override;
 				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;

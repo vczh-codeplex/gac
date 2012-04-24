@@ -4369,6 +4369,36 @@ GuiImageData
 			}
 
 /***********************************************************************
+GuiLabel
+***********************************************************************/
+
+			GuiLabel::GuiLabel(IStyleController* _styleController)
+				:GuiControl(_styleController)
+				,styleController(_styleController)
+			{
+				textColor=styleController->GetDefaultTextColor();
+				styleController->SetTextColor(textColor);
+			}
+
+			GuiLabel::~GuiLabel()
+			{
+			}
+
+			Color GuiLabel::GetTextColor()
+			{
+				return textColor;
+			}
+
+			void GuiLabel::SetTextColor(Color value)
+			{
+				if(textColor!=value)
+				{
+					textColor=value;
+					styleController->SetTextColor(textColor);
+				}
+			}
+
+/***********************************************************************
 GuiButton
 ***********************************************************************/
 
@@ -9080,9 +9110,9 @@ namespace vl
 					return new controls::GuiWindow(GetCurrentTheme()->CreateWindowStyle());
 				}
 
-				controls::GuiControl* NewLabel()
+				controls::GuiLabel* NewLabel()
 				{
-					return new controls::GuiControl(GetCurrentTheme()->CreateLabelStyle());
+					return new controls::GuiLabel(GetCurrentTheme()->CreateLabelStyle());
 				}
 
 				controls::GuiControl* NewGroupBox()
@@ -10384,6 +10414,7 @@ Win7LabelStyle
 			Win7LabelStyle::Win7LabelStyle()
 			{
 				textElement=GuiSolidLabelElement::Create();
+				textElement->SetColor(GetDefaultTextColor());
 				
 				boundsComposition=new GuiBoundsComposition;
 				boundsComposition->SetOwnedElement(textElement);
@@ -10420,6 +10451,16 @@ Win7LabelStyle
 
 			void Win7LabelStyle::SetVisuallyEnabled(bool value)
 			{
+			}
+
+			Color Win7LabelStyle::GetDefaultTextColor()
+			{
+				return Win7GetSystemTextColor(true);
+			}
+
+			void Win7LabelStyle::SetTextColor(Color value)
+			{
+				textElement->SetColor(value);
 			}
 
 /***********************************************************************
@@ -12647,7 +12688,7 @@ Win7Theme
 				return new Win7WindowStyle;
 			}
 
-			controls::GuiControl::IStyleController* Win7Theme::CreateLabelStyle()
+			controls::GuiLabel::IStyleController* Win7Theme::CreateLabelStyle()
 			{
 				return new Win7LabelStyle;
 			}

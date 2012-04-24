@@ -9,7 +9,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 class HyperlinkWindow : public GuiWindow
 {
 private:
-	GuiControl*				labelHyperlink;
+	GuiLabel*				labelHyperlink;
 
 	void labelHyperlink_OnMouseEnter(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
@@ -39,6 +39,7 @@ public:
 
 		labelHyperlink=g::NewLabel();
 		labelHyperlink->SetText(L"http://www.cppblog.com/vczh");
+		labelHyperlink->SetTextColor(Color(0, 0, 255));
 		{
 			FontProperties font;
 			font.fontFamily=L"Segoe UI";
@@ -46,11 +47,10 @@ public:
 			font.antialias=true;
 			labelHyperlink->SetFont(font);
 		}
-		labelHyperlink->GetBoundsComposition()->SetAssociatedCursor(
-			GetCurrentController()->ResourceService()->GetSystemCursor(
-				INativeCursor::Hand
-				)
-			);
+		{
+			INativeCursor* hand=GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand);
+			labelHyperlink->GetBoundsComposition()->SetAssociatedCursor(hand);
+		}
 		labelHyperlink->GetEventReceiver()->mouseEnter.AttachMethod(this, &HyperlinkWindow::labelHyperlink_OnMouseEnter);
 		labelHyperlink->GetEventReceiver()->mouseLeave.AttachMethod(this, &HyperlinkWindow::labelHyperlink_OnMouseLeave);
 		labelHyperlink->GetEventReceiver()->leftButtonDown.AttachMethod(this, &HyperlinkWindow::labelHyperlink_OnLeftButtonDown);
