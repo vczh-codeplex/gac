@@ -111,11 +111,14 @@ Renderers
 				WString							oldText;
 				ID2D1SolidColorBrush*			brush;
 				Direct2DTextFormatPackage*		textFormat;
+				IDWriteTextLayout*				textLayout;
 
 				void					CreateBrush(IWindowsDirect2DRenderTarget* _renderTarget);
 				void					DestroyBrush(IWindowsDirect2DRenderTarget* _renderTarget);
 				void					CreateTextFormat(IWindowsDirect2DRenderTarget* _renderTarget);
 				void					DestroyTextFormat(IWindowsDirect2DRenderTarget* _renderTarget);
+				void					CreateTextLayout();
+				void					DestroyTextLayout();
 				void					UpdateMinSize();
 
 				void					InitializeInternal();

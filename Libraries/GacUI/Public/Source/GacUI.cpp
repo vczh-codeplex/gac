@@ -17039,11 +17039,10 @@ GuiSolidLabelElementRenderer
 				}
 			}
 
-			void GuiSolidLabelElementRenderer::UpdateMinSize()
+			void GuiSolidLabelElementRenderer::CreateTextLayout()
 			{
-				if(renderTarget && !element->GetMultiline() && !element->GetWrapLine())
+				if(textFormat)
 				{
-					IDWriteTextLayout* textLayout=0;
 					HRESULT hr=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory()->CreateTextLayout(
 						oldText.Buffer(),
 						oldText.Length(),
@@ -17053,13 +17052,44 @@ GuiSolidLabelElementRenderer
 						&textLayout);
 					if(!FAILED(hr))
 					{
+						if(oldFont.underline)
+						{
+							DWRITE_TEXT_RANGE textRange;
+							textRange.startPosition=0;
+							textRange.length=oldText.Length();
+							textLayout->SetUnderline(TRUE, textRange);
+						}
+					}
+					else
+					{
+						textLayout=0;
+					}
+				}
+			}
+
+			void GuiSolidLabelElementRenderer::DestroyTextLayout()
+			{
+				if(textLayout)
+				{
+					textLayout->Release();
+					textLayout=0;
+				}
+			}
+
+			void GuiSolidLabelElementRenderer::UpdateMinSize()
+			{
+				DestroyTextLayout();
+				if(renderTarget && !element->GetMultiline() && !element->GetWrapLine())
+				{
+					CreateTextLayout();
+					if(textLayout)
+					{
 						DWRITE_TEXT_METRICS metrics;
-						hr=textLayout->GetMetrics(&metrics);
+						HRESULT hr=textLayout->GetMetrics(&metrics);
 						if(!FAILED(hr))
 						{
 							minSize=Size((element->GetEllipse()?0:(int)ceil(metrics.widthIncludingTrailingWhitespace)), (int)ceil(metrics.height));
 						}
-						textLayout->Release();
 						return;
 					}
 				}
@@ -17072,6 +17102,7 @@ GuiSolidLabelElementRenderer
 
 			void GuiSolidLabelElementRenderer::FinalizeInternal()
 			{
+				DestroyTextLayout();
 				DestroyBrush(renderTarget);
 				DestroyTextFormat(renderTarget);
 			}
@@ -17088,11 +17119,17 @@ GuiSolidLabelElementRenderer
 			GuiSolidLabelElementRenderer::GuiSolidLabelElementRenderer()
 				:brush(0)
 				,textFormat(0)
+				,textLayout(0)
 			{
 			}
 
 			void GuiSolidLabelElementRenderer::Render(Rect bounds)
 			{
+				if(!textLayout)
+				{
+					CreateTextLayout();
+				}
+
 				int x=0;
 				int y=0;
 				switch(element->GetHorizontalAlignment())
@@ -17123,44 +17160,35 @@ GuiSolidLabelElementRenderer
 				if(!element->GetEllipse() && !element->GetMultiline() && !element->GetWrapLine())
 				{
 					ID2D1RenderTarget* d2dRenderTarget=renderTarget->GetDirect2DRenderTarget();
-					d2dRenderTarget->DrawText(
-						oldText.Buffer(),
-						oldText.Length(),
-						textFormat->textFormat.Obj(),
-						D2D1::RectF((FLOAT)x, (FLOAT)y, (FLOAT)x+1, (FLOAT)y+1),
+					d2dRenderTarget->DrawTextLayout(
+						D2D1::Point2F((FLOAT)x, (FLOAT)y),
+						textLayout,
 						brush,
-						D2D1_DRAW_TEXT_OPTIONS_NO_SNAP,
-						DWRITE_MEASURING_MODE_GDI_NATURAL
+						D2D1_DRAW_TEXT_OPTIONS_NO_SNAP
 						);
 				}
 				else
 				{
 					IDWriteFactory* dwriteFactory=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory();
-					DWRITE_WORD_WRAPPING wrapping=textFormat->textFormat->GetWordWrapping();
-					DWRITE_TEXT_ALIGNMENT textAlignment=textFormat->textFormat->GetTextAlignment();
-					DWRITE_PARAGRAPH_ALIGNMENT paragraphAlignment=textFormat->textFormat->GetParagraphAlignment();
 					DWRITE_TRIMMING trimming;
 					IDWriteInlineObject* inlineObject;
-					textFormat->textFormat->GetTrimming(&trimming, &inlineObject);
+					textLayout->GetTrimming(&trimming, &inlineObject);
 
-					if(element->GetWrapLine())
-					{
-						textFormat->textFormat->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
-					}
+					textLayout->SetWordWrapping(element->GetWrapLine()?DWRITE_WORD_WRAPPING_WRAP:DWRITE_WORD_WRAPPING_NO_WRAP);
 					if(element->GetEllipse())
 					{
-						textFormat->textFormat->SetTrimming(&textFormat->trimming, textFormat->ellipseInlineObject.Obj());
+						textLayout->SetTrimming(&textFormat->trimming, textFormat->ellipseInlineObject.Obj());
 					}
 					switch(element->GetHorizontalAlignment())
 					{
 					case Alignment::Left:
-						textFormat->textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+						textLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
 						break;
 					case Alignment::Center:
-						textFormat->textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+						textLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 						break;
 					case Alignment::Right:
-						textFormat->textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
+						textLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
 						break;
 					}
 					if(!element->GetMultiline() && !element->GetWrapLine())
@@ -17168,13 +17196,13 @@ GuiSolidLabelElementRenderer
 						switch(element->GetVerticalAlignment())
 						{
 						case Alignment::Top:
-							textFormat->textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+							textLayout->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 							break;
 						case Alignment::Center:
-							textFormat->textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+							textLayout->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 							break;
 						case Alignment::Bottom:
-							textFormat->textFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+							textLayout->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
 							break;
 						}
 					}
@@ -17185,21 +17213,18 @@ GuiSolidLabelElementRenderer
 						textBounds=Rect(Point(textBounds.x1, y), Size(bounds.Width(), minSize.y));
 					}
 
+					textLayout->SetMaxWidth((FLOAT)textBounds.Width());
+					textLayout->SetMaxHeight((FLOAT)textBounds.Height());
+
 					ID2D1RenderTarget* d2dRenderTarget=renderTarget->GetDirect2DRenderTarget();
-					d2dRenderTarget->DrawText(
-						oldText.Buffer(),
-						oldText.Length(),
-						textFormat->textFormat.Obj(),
-						D2D1::RectF((FLOAT)textBounds.Left(), (FLOAT)textBounds.Top(), (FLOAT)textBounds.Right(), (FLOAT)textBounds.Bottom()),
+					d2dRenderTarget->DrawTextLayout(
+						D2D1::Point2F((FLOAT)textBounds.Left(), (FLOAT)textBounds.Top()),
+						textLayout,
 						brush,
-						D2D1_DRAW_TEXT_OPTIONS_NO_SNAP,
-						DWRITE_MEASURING_MODE_GDI_NATURAL
+						D2D1_DRAW_TEXT_OPTIONS_NO_SNAP
 						);
 
-					textFormat->textFormat->SetWordWrapping(wrapping);
-					textFormat->textFormat->SetTextAlignment(textAlignment);
-					textFormat->textFormat->SetParagraphAlignment(paragraphAlignment);
-					textFormat->textFormat->SetTrimming(&trimming, inlineObject);
+					textLayout->SetTrimming(&trimming, inlineObject);
 				}
 			}
 
