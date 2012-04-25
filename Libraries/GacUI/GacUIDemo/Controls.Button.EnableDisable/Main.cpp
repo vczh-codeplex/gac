@@ -39,7 +39,8 @@ public:
 		table->SetColumnOption(0, GuiCellOption::PercentageOption(0.5));
 		table->SetColumnOption(1, GuiCellOption::PercentageOption(0.5));
 		// dock the table to fill the window
-		table->SetAlignmentToParent(Margin(10, 10, 10, 10));
+		table->SetAlignmentToParent(Margin(4, 4, 4, 4));
+		table->SetCellPadding(6);
 		// add the table to the window;
 		this->GetContainerComposition()->AddChild(table);
 
@@ -55,7 +56,7 @@ public:
 			// ensure that the buttonTarget display the whole text
 			buttonTarget->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			// dock the button to fill the cell
-			buttonTarget->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 3));
+			buttonTarget->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			// add the button to the cell
 			cell->AddChild(buttonTarget->GetBoundsComposition());
 		}
@@ -70,7 +71,7 @@ public:
 			buttonEnable=g::NewButton();
 			buttonEnable->SetText(L"Enable");
 			buttonEnable->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-			buttonEnable->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 3, 3, 0));
+			buttonEnable->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			buttonEnable->Clicked.AttachMethod(this, &EnableDisableWindow::buttonEnable_OnClick);
 			cell->AddChild(buttonEnable->GetBoundsComposition());
 		}
@@ -85,7 +86,7 @@ public:
 			buttonDisable=g::NewButton();
 			buttonDisable->SetText(L"Disable");
 			buttonDisable->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-			buttonDisable->GetBoundsComposition()->SetAlignmentToParent(Margin(3, 3, 0, 0));
+			buttonDisable->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			buttonDisable->Clicked.AttachMethod(this, &EnableDisableWindow::buttonDisable_OnClick);
 			cell->AddChild(buttonDisable->GetBoundsComposition());
 		}
