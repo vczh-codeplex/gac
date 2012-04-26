@@ -15844,7 +15844,7 @@ Button
 
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected);
 			public:
-				Win7CheckBoxStyle(BulletStyle bulletStyle, bool backgroundVisible=true);
+				Win7CheckBoxStyle(BulletStyle bulletStyle, bool backgroundVisible=false);
 				~Win7CheckBoxStyle();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;

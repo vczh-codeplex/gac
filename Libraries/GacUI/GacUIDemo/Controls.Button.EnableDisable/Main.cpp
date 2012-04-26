@@ -53,8 +53,6 @@ public:
 
 			buttonTarget=g::NewButton();
 			buttonTarget->SetText(L"Enable or disable me using the buttons below!");
-			// ensure that the buttonTarget display the whole text
-			buttonTarget->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			// dock the button to fill the cell
 			buttonTarget->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			// add the button to the cell

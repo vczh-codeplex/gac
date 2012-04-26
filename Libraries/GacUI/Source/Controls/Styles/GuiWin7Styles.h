@@ -508,7 +508,7 @@ Button
 				/// <summary>Create the style.</summary>
 				/// <param name="bulletStyle">The bullet style.</param>
 				/// <param name="backgroundVisible">Set to true to make the background visible.</param>
-				Win7CheckBoxStyle(BulletStyle bulletStyle, bool backgroundVisible=true);
+				Win7CheckBoxStyle(BulletStyle bulletStyle, bool backgroundVisible=false);
 				~Win7CheckBoxStyle();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
