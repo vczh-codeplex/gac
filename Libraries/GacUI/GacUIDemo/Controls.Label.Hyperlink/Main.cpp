@@ -33,9 +33,9 @@ public:
 	HyperlinkWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 	{
-		SetText(L"Controls.Label.Hyperlink");
-		SetClientSize(Size(300, 200));
-		MoveToScreenCenter();
+		this->SetText(L"Controls.Label.Hyperlink");
+		this->SetClientSize(Size(300, 200));
+		this->MoveToScreenCenter();
 
 		labelHyperlink=g::NewLabel();
 		labelHyperlink->SetText(L"http://www.cppblog.com/vczh");
@@ -54,7 +54,7 @@ public:
 		labelHyperlink->GetEventReceiver()->mouseEnter.AttachMethod(this, &HyperlinkWindow::labelHyperlink_OnMouseEnter);
 		labelHyperlink->GetEventReceiver()->mouseLeave.AttachMethod(this, &HyperlinkWindow::labelHyperlink_OnMouseLeave);
 		labelHyperlink->GetEventReceiver()->leftButtonDown.AttachMethod(this, &HyperlinkWindow::labelHyperlink_OnLeftButtonDown);
-		AddChild(labelHyperlink);
+		this->AddChild(labelHyperlink);
 	}
 
 	~HyperlinkWindow()
