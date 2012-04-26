@@ -9,13 +9,48 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 class CheckAndRadioWindow : public GuiWindow
 {
 private:
-	GuiControl*										groupCheck;
-	GuiControl*										groupRadio;
 
-	GuiSelectableButton*							checkBoxes[3];
-	GuiSelectableButton*							radioButtons[3];
-	GuiSelectableButton::MutexGroupController*		radioButtonGroupController;
+	GuiCellComposition* CreateButtons(const WString& groupName, const WString& buttonName, bool checkBox, GuiSelectableButton::GroupController* groupController)
+	{
+		GuiCellComposition* cell=new GuiCellComposition;
 
+		GuiControl* groupBox=g::NewGroupBox();
+		groupBox->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+		groupBox->GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+		// all child controls should at least 10 pixels away from the group box
+		groupBox->GetContainerComposition()->SetInternalMargin(Margin(10, 10, 10, 10));
+		// dock the group box to fill the cell
+		groupBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		groupBox->SetText(groupName);
+		// add the button to the cell
+		cell->AddChild(groupBox->GetBoundsComposition());
+
+		// create a stack to layout the 3 buttons from top to bottom shown like a list
+		GuiStackComposition* stack=new GuiStackComposition;
+		stack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+		stack->SetDirection(GuiStackComposition::Vertical);
+		stack->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		stack->SetPadding(6);
+		groupBox->GetContainerComposition()->AddChild(stack);
+
+		// create buttons
+		for(int i=0;i<3;i++)
+		{
+			GuiSelectableButton* button=checkBox?g::NewCheckBox():g::NewRadioButton();
+			button->SetText(buttonName+itow(i+1));
+			button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			if(groupController)
+			{
+				button->SetGroupController(groupController);
+			}
+
+			GuiStackItemComposition* stackItem=new GuiStackItemComposition;
+			stack->AddChild(stackItem);
+			stackItem->AddChild(button->GetBoundsComposition());
+		}
+
+		return cell;
+	}
 public:
 	CheckAndRadioWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -39,82 +74,23 @@ public:
 
 		// add group box for check boxes
 		{
-			GuiCellComposition* cell=new GuiCellComposition;
+			GuiCellComposition* cell=CreateButtons(L"Check Boxes", L"This is a check box ", true, 0);
 			table->AddChild(cell);
 			// this cell is the left cell
 			cell->SetSite(0, 0, 1, 1);
-
-			groupCheck=g::NewGroupBox();
-			groupCheck->GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-			// all child controls should at least 10 pixels away from the group box
-			groupCheck->GetContainerComposition()->SetInternalMargin(Margin(10, 10, 10, 10));
-			// dock the group box to fill the cell
-			groupCheck->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			groupCheck->SetText(L"Check Boxes");
-			// add the button to the cell
-			cell->AddChild(groupCheck->GetBoundsComposition());
-
-			// create a stack to layout the 3 buttons from top to bottom shown like a list
-			GuiStackComposition* stack=new GuiStackComposition;
-			stack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-			stack->SetDirection(GuiStackComposition::Vertical);
-			stack->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			stack->SetPadding(6);
-			groupCheck->GetContainerComposition()->AddChild(stack);
-
-			// create check boxes
-			for(int i=0;i<3;i++)
-			{
-				GuiStackItemComposition* stackItem=new GuiStackItemComposition;
-				stack->AddChild(stackItem);
-
-				checkBoxes[i]=g::NewCheckBox();
-				checkBoxes[i]->SetText(L"This is a check box "+itow(i+1));
-				checkBoxes[i]->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				stackItem->AddChild(checkBoxes[i]->GetBoundsComposition());
-			}
 		}
 
 		// add group box for radio buttons
 		{
-			GuiCellComposition* cell=new GuiCellComposition;
+			// create a group controller to group those radio buttons together
+			// so that select a radio button will unselect the previous one automatically
+			GuiSelectableButton::GroupController* groupController=new GuiSelectableButton::MutexGroupController;
+			this->AddComponent(groupController);
+
+			GuiCellComposition* cell=CreateButtons(L"Radio buttons", L"This is a radio button ", false, groupController);
 			table->AddChild(cell);
 			// this cell is the right cell
 			cell->SetSite(0, 1, 1, 1);
-
-			groupRadio=g::NewGroupBox();
-			groupRadio->GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-			groupRadio->GetContainerComposition()->SetInternalMargin(Margin(10, 10, 10, 10));
-			groupRadio->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			groupRadio->SetText(L"Radio Buttons");
-			cell->AddChild(groupRadio->GetBoundsComposition());
-
-			// create a stack to layout the 3 buttons from top to bottom shown like a list
-			GuiStackComposition* stack=new GuiStackComposition;
-			stack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-			stack->SetDirection(GuiStackComposition::Vertical);
-			stack->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			stack->SetPadding(6);
-			groupRadio->GetContainerComposition()->AddChild(stack);
-			
-			// create a group controller to group those radio buttons together
-			// so that select a radio button will unselect the previous one automatically
-
-			radioButtonGroupController=new GuiSelectableButton::MutexGroupController;
-			this->AddComponent(radioButtonGroupController);
-
-			// create radio buttons
-			for(int i=0;i<3;i++)
-			{
-				GuiStackItemComposition* stackItem=new GuiStackItemComposition;
-				stack->AddChild(stackItem);
-
-				radioButtons[i]=g::NewRadioButton();
-				radioButtons[i]->SetText(L"This is a radio button "+itow(i+1));
-				radioButtons[i]->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				radioButtons[i]->SetGroupController(radioButtonGroupController);
-				stackItem->AddChild(radioButtons[i]->GetBoundsComposition());
-			}
 		}
 
 		// call this to calculate the size immediately if any indirect content in the table changes

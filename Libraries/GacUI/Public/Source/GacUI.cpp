@@ -10624,6 +10624,7 @@ Win7GroupBoxStyle
 					element->SetColor(Win7GetSystemWindowColor());
 
 					boundsComposition->SetOwnedElement(element);
+					boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				}
 
 				sinkBorderComposition=new GuiBoundsComposition;
