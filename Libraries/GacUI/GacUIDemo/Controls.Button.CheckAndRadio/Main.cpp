@@ -95,9 +95,7 @@ public:
 
 		// call this to calculate the size immediately if any indirect content in the table changes
 		// so that the window can calcaulte its correct size before calling the MoveToScreenCenter()
-		table->UpdateCellBounds();
-		// update the size
-		this->SetBounds(Rect());
+		this->ForceCalculateSizeImmediately();
 		// move to the screen center
 		this->MoveToScreenCenter();
 	}

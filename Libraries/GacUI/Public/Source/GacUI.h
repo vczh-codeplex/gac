@@ -2302,6 +2302,7 @@ Basic Construction
 				virtual Size								GetPreferredMinSize();
 				virtual void								SetPreferredMinSize(Size value);
 				virtual Rect								GetClientArea();
+				virtual void								ForceCalculateSizeImmediately();
 				
 				virtual ParentSizeAffection					GetAffectionFromParent()=0;
 				virtual bool								IsSizeAffectParent()=0;
@@ -2491,6 +2492,7 @@ Table Compositions
 				Rect								GetCellArea();
 				void								UpdateCellBounds();
 				
+				void								ForceCalculateSizeImmediately()override;
 				Size								GetMinPreferredClientSize()override;
 				Rect								GetBounds()override;
 			};
@@ -3319,6 +3321,7 @@ Control Host
 				compositions::GuiGraphicsComposition*	GetMainComposition();
 				INativeWindow*							GetNativeWindow();
 				void									SetNativeWindow(INativeWindow* window);
+				void									ForceCalculateSizeImmediately();
 				void									Render();
 				
 				bool									GetEnabled()override;

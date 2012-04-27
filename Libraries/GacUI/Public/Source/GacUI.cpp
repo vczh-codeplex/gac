@@ -7911,6 +7911,12 @@ GuiControlHost
 				}
 			}
 
+			void GuiControlHost::ForceCalculateSizeImmediately()
+			{
+				boundsComposition->ForceCalculateSizeImmediately();
+				SetBounds(GetBounds());
+			}
+
 			void GuiControlHost::Render()
 			{
 				host->Render();
@@ -13264,6 +13270,14 @@ GuiGraphicsComposition
 				return bounds;
 			}
 
+			void GuiGraphicsComposition::ForceCalculateSizeImmediately()
+			{
+				for(int i=0;i<children.Count();i++)
+				{
+					children[i]->ForceCalculateSizeImmediately();
+				}
+			}
+
 /***********************************************************************
 GuiGraphicsSite
 ***********************************************************************/
@@ -14013,6 +14027,12 @@ GuiTableComposition
 			{
 				UpdateCellBoundsInternal();
 				UpdateTableContentMinSize();
+			}
+
+			void GuiTableComposition::ForceCalculateSizeImmediately()
+			{
+				GuiBoundsComposition::ForceCalculateSizeImmediately();
+				UpdateCellBounds();
 			}
 
 			Size GuiTableComposition::GetMinPreferredClientSize()
