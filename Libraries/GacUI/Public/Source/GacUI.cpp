@@ -1570,6 +1570,7 @@ ListViewDetailContentProvider
 							cell->SetMargin(Margin(0, 0, 8, 0));
 
 							text=GuiSolidLabelElement::Create();
+							text->SetAlignments(Alignment::Left, Alignment::Center);
 							text->SetFont(font);
 							text->SetEllipse(true);
 							cell->SetOwnedElement(text);
