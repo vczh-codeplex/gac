@@ -37,9 +37,16 @@ Tab Control
 				~GuiTabPage();
 
 				bool											AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController);
+				bool											DeassociateTab(GuiTab* _owner);
 			public:
 				/// <summary>Text changed event.</summary>
 				compositions::GuiNotifyEvent					TextChanged;
+				/// <summary>Page installed event.</summary>
+				compositions::GuiNotifyEvent					PageInstalled;
+				/// <summary>Page installed event.</summary>
+				compositions::GuiNotifyEvent					PageUninstalled;
+				/// <summary>Page container ready event.</summary>
+				compositions::GuiNotifyEvent					PageContainerReady;
 
 				/// <summary>Get the container control to store all sub controls.</summary>
 				/// <returns>The container control to store all sub controls.</returns>
