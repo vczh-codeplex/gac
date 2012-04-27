@@ -17,9 +17,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Controls.Button.EnableDisab
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Controls.Button.CheckAndRadio", "Controls.Button.CheckAndRadio\Controls.Button.CheckAndRadio.vcxproj", "{EB8C3EC3-74BC-4A24-97E5-133904A7ACA8}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Controls.Tab.TextBoxPage", "Controls.Tab.TextBoxPage\Controls.Tab.TextBoxPage.vcxproj", "{683A5E34-D5CA-4CB8-93E6-42D1C41DEE4D}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 5
+		SccNumberOfProjects = 6
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
@@ -38,6 +40,10 @@ Global
 		SccProjectTopLevelParentUniqueName4 = GacUIDemo.sln
 		SccProjectName4 = Controls.Button.CheckAndRadio
 		SccLocalPath4 = Controls.Button.CheckAndRadio
+		SccProjectUniqueName5 = Controls.Tab.TextBoxPage\\Controls.Tab.TextBoxPage.vcxproj
+		SccProjectTopLevelParentUniqueName5 = GacUIDemo.sln
+		SccProjectName5 = Controls.Tab.TextBoxPage
+		SccLocalPath5 = Controls.Tab.TextBoxPage
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -60,6 +66,10 @@ Global
 		{EB8C3EC3-74BC-4A24-97E5-133904A7ACA8}.Debug|Win32.Build.0 = Debug|Win32
 		{EB8C3EC3-74BC-4A24-97E5-133904A7ACA8}.Release|Win32.ActiveCfg = Release|Win32
 		{EB8C3EC3-74BC-4A24-97E5-133904A7ACA8}.Release|Win32.Build.0 = Release|Win32
+		{683A5E34-D5CA-4CB8-93E6-42D1C41DEE4D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{683A5E34-D5CA-4CB8-93E6-42D1C41DEE4D}.Debug|Win32.Build.0 = Debug|Win32
+		{683A5E34-D5CA-4CB8-93E6-42D1C41DEE4D}.Release|Win32.ActiveCfg = Release|Win32
+		{683A5E34-D5CA-4CB8-93E6-42D1C41DEE4D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,5 +78,6 @@ Global
 		{E1BA59EE-79FF-4484-BDC7-DE42DDA1E975} = {4A1755E9-DB6D-4CD2-83FB-D8F2A18E0268}
 		{7573940E-5A1D-48A4-AAA1-BEF264D9B0C4} = {4A1755E9-DB6D-4CD2-83FB-D8F2A18E0268}
 		{EB8C3EC3-74BC-4A24-97E5-133904A7ACA8} = {4A1755E9-DB6D-4CD2-83FB-D8F2A18E0268}
+		{683A5E34-D5CA-4CB8-93E6-42D1C41DEE4D} = {4A1755E9-DB6D-4CD2-83FB-D8F2A18E0268}
 	EndGlobalSection
 EndGlobal

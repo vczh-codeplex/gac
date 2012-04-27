@@ -5325,8 +5325,12 @@ Tab Control
 				~GuiTabPage();
 
 				bool											AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController);
+				bool											DeassociateTab(GuiTab* _owner);
 			public:
 				compositions::GuiNotifyEvent					TextChanged;
+				compositions::GuiNotifyEvent					PageInstalled;
+				compositions::GuiNotifyEvent					PageUninstalled;
+				compositions::GuiNotifyEvent					PageContainerReady;
 
 				GuiControl*										GetContainer();
 				GuiTab*											GetOwnerTab();

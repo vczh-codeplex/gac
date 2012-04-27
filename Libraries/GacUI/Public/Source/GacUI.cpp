@@ -203,6 +203,8 @@ namespace vl
 {
 	namespace presentation
 	{
+		using namespace compositions;
+
 		namespace controls
 		{
 /***********************************************************************
@@ -231,10 +233,33 @@ GuiTabPage
 				}
 				else
 				{
-					container=new GuiControl(_styleController);
+					if(!container)
+					{
+						container=new GuiControl(_styleController);
+						TextChanged.SetAssociatedComposition(container->GetBoundsComposition());
+						PageInstalled.SetAssociatedComposition(container->GetBoundsComposition());
+						PageUninstalled.SetAssociatedComposition(container->GetBoundsComposition());
+						PageContainerReady.SetAssociatedComposition(container->GetBoundsComposition());
+
+						PageContainerReady.Execute(container->GetNotifyEventArguments());
+					}
 					owner=_owner;
-					TextChanged.SetAssociatedComposition(container->GetBoundsComposition());
+					PageInstalled.Execute(container->GetNotifyEventArguments());
 					return true;
+				}
+			}
+
+			bool GuiTabPage::DeassociateTab(GuiTab* _owner)
+			{
+				if(owner && owner==_owner)
+				{
+					PageUninstalled.Execute(container->GetNotifyEventArguments());
+					owner=0;
+					return true;
+				}
+				else
+				{
+					return false;
 				}
 			}
 
@@ -258,8 +283,19 @@ GuiTabPage
 				if(text!=value)
 				{
 					text=value;
-					owner->styleController->SetTabText(owner->tabPages.IndexOf(this), text);
-					TextChanged.Execute(container->GetNotifyEventArguments());
+					if(owner)
+					{
+						owner->styleController->SetTabText(owner->tabPages.IndexOf(this), text);
+					}
+					if(container)
+					{
+						TextChanged.Execute(container->GetNotifyEventArguments());
+					}
+					else
+					{
+						GuiEventArgs arguments;
+						TextChanged.Execute(arguments);
+					}
 				}
 			}
 
@@ -333,6 +369,7 @@ GuiTab
 					index=index==-1?tabPages.Add(page):tabPages.Insert(index, page);
 					GetContainerComposition()->AddChild(page->GetContainer()->GetBoundsComposition());
 					styleController->InsertTab(index);
+					styleController->SetTabText(index, page->GetText());
 				
 					if(!selectedPage)
 					{
@@ -349,7 +386,7 @@ GuiTab
 
 			bool GuiTab::RemovePage(GuiTabPage* value)
 			{
-				if(value->GetOwnerTab()==this)
+				if(value->GetOwnerTab()==this && value->DeassociateTab(this))
 				{
 					int index=tabPages.IndexOf(value);
 					styleController->RemoveTab(index);
