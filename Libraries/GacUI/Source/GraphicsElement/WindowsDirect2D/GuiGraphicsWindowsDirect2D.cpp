@@ -270,6 +270,34 @@ WindiwsGDIRenderTarget
 				CachedSolidBrushAllocator		solidBrushes;
 				CachedLinearBrushAllocator		linearBrushes;
 				ImageCacheList					imageCaches;
+
+				ComPtr<IDWriteRenderingParams>	noAntialiasParams;
+				ComPtr<IDWriteRenderingParams>	horizontalAntialiasParams;
+				ComPtr<IDWriteRenderingParams>	bidirectionalAntialiasParams;
+
+				ComPtr<IDWriteRenderingParams> CreateRenderingParams(DWRITE_RENDERING_MODE renderingMode, IDWriteRenderingParams* defaultParams, IDWriteFactory* dwriteFactory)
+				{
+					IDWriteRenderingParams* renderingParams=0;
+					FLOAT gamma=defaultParams->GetGamma();
+					FLOAT enhancedContrast=defaultParams->GetEnhancedContrast();
+					FLOAT clearTypeLevel=defaultParams->GetClearTypeLevel();
+					DWRITE_PIXEL_GEOMETRY pixelGeometry=defaultParams->GetPixelGeometry();
+					HRESULT hr=dwriteFactory->CreateCustomRenderingParams(
+						gamma,
+						enhancedContrast,
+						clearTypeLevel,
+						pixelGeometry,
+						renderingMode,
+						&renderingParams);
+					if(!FAILED(hr))
+					{
+						return renderingParams;
+					}
+					else
+					{
+						return 0;
+					}
+				}
 			public:
 				WindowsDirect2DRenderTarget(INativeWindow* _window)
 					:window(_window)
@@ -278,6 +306,17 @@ WindiwsGDIRenderTarget
 				{
 					solidBrushes.SetRenderTarget(this);
 					linearBrushes.SetRenderTarget(this);
+
+					IDWriteFactory* dwriteFactory=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory();
+					IDWriteRenderingParams* defaultParams=0;
+					HRESULT hr=dwriteFactory->CreateRenderingParams(&defaultParams);
+					if(!FAILED(hr))
+					{
+						noAntialiasParams=CreateRenderingParams(DWRITE_RENDERING_MODE_CLEARTYPE_GDI_NATURAL, defaultParams, dwriteFactory);
+						horizontalAntialiasParams=CreateRenderingParams(DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL, defaultParams, dwriteFactory);
+						bidirectionalAntialiasParams=CreateRenderingParams(DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL_SYMMETRIC, defaultParams, dwriteFactory);
+						defaultParams->Release();
+					}
 				}
 
 				~WindowsDirect2DRenderTarget()
@@ -320,6 +359,27 @@ WindiwsGDIRenderTarget
 				{
 					WindowsDirect2DImageFrameCache* cache=frame->GetCache(this).Cast<WindowsDirect2DImageFrameCache>().Obj();
 					imageCaches.Remove(cache);
+				}
+
+				void SetTextAntialias(bool antialias, bool verticalAntialias)override
+				{
+					ComPtr<IDWriteRenderingParams> params;
+					if(!antialias)
+					{
+						params=noAntialiasParams;
+					}
+					else if(!verticalAntialias)
+					{
+						params=horizontalAntialiasParams;
+					}
+					else
+					{
+						params=bidirectionalAntialiasParams;
+					}
+					if(params && d2dRenderTarget)
+					{
+						d2dRenderTarget->SetTextRenderingParams(params.Obj());
+					}
 				}
 
 				void StartRendering()override
