@@ -77,6 +77,8 @@ Control Host
 				/// <summary>Set the internal <see cref="INativeWindow"/> object to host the content.</summary>
 				/// <param name="window">The the internal <see cref="INativeWindow"/> object to host the content.</param>
 				void									SetNativeWindow(INativeWindow* window);
+				/// <summary>Force to calculate layout and size immediately</summary>
+				void									ForceCalculateSizeImmediately();
 				/// <summary>Render the window content.</summary>
 				void									Render();
 				

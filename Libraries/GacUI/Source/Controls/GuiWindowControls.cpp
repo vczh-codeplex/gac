@@ -128,6 +128,12 @@ GuiControlHost
 				}
 			}
 
+			void GuiControlHost::ForceCalculateSizeImmediately()
+			{
+				boundsComposition->ForceCalculateSizeImmediately();
+				SetBounds(GetBounds());
+			}
+
 			void GuiControlHost::Render()
 			{
 				host->Render();

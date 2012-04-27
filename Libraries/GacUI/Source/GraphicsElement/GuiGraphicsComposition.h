@@ -211,6 +211,8 @@ Basic Construction
 				/// <summary>Get the client area.</summary>
 				/// <returns>The client area.</returns>
 				virtual Rect								GetClientArea();
+				/// <summary>Force to calculate layout and size immediately</summary>
+				virtual void								ForceCalculateSizeImmediately();
 				
 				/// <summary>Get the parent size affection.</summary>
 				/// <returns>The parent size affection.</returns>
@@ -488,6 +490,7 @@ Table Compositions
 				/// <summary>Update the sizing of the table and cells after all rows' and columns' sizing options are prepared.</summary>
 				void								UpdateCellBounds();
 				
+				void								ForceCalculateSizeImmediately()override;
 				Size								GetMinPreferredClientSize()override;
 				Rect								GetBounds()override;
 			};
