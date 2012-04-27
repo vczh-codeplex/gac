@@ -2445,6 +2445,7 @@ Table Compositions
 				void								UpdateCellBoundsInternal(
 														collections::Array<int>& dimSizes,
 														int& dimSize, 
+														int& dimSizeWithPercentage,
 														collections::Array<GuiCellOption>& dimOptions,
 														int GuiTableComposition::* dim1,
 														int GuiTableComposition::* dim2,
