@@ -7127,6 +7127,7 @@ Functionality
 				virtual ID2D1RenderTarget*					GetDirect2DRenderTarget()=0;
 				virtual ComPtr<ID2D1Bitmap>					GetBitmap(INativeImageFrame* frame)=0;
 				virtual void								DestroyBitmapCache(INativeImageFrame* frame)=0;
+				virtual void								SetTextAntialias(bool antialias, bool verticalAntialias)=0;
 
 				virtual ID2D1SolidColorBrush*				CreateDirect2DBrush(Color color)=0;
 				virtual void								DestroyDirect2DBrush(Color color)=0;

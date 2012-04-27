@@ -560,6 +560,8 @@ GuiSolidLabelElementRenderer
 					break;
 				}
 
+				renderTarget->SetTextAntialias(oldFont.antialias, oldFont.verticalAntialias);
+
 				if(!element->GetEllipse() && !element->GetMultiline() && !element->GetWrapLine())
 				{
 					ID2D1RenderTarget* d2dRenderTarget=renderTarget->GetDirect2DRenderTarget();
@@ -1062,6 +1064,8 @@ GuiColorizedTextElementRenderer
 					TextPos selectionBegin=element->GetCaretBegin()<element->GetCaretEnd()?element->GetCaretBegin():element->GetCaretEnd();
 					TextPos selectionEnd=element->GetCaretBegin()>element->GetCaretEnd()?element->GetCaretBegin():element->GetCaretEnd();
 					bool focused=element->GetFocused();
+					
+					renderTarget->SetTextAntialias(oldFont.antialias, oldFont.verticalAntialias);
 
 					for(int row=startRow;row<=endRow;row++)
 					{
