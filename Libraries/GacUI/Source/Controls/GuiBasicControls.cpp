@@ -449,6 +449,10 @@ GuiSelectableButton::GroupController
 
 			GuiSelectableButton::GroupController::~GroupController()
 			{
+				for(int i=buttons.Count()-1;i>=0;i--)
+				{
+					buttons[i]->SetGroupController(0);
+				}
 			}
 
 			void GuiSelectableButton::GroupController::Attach(GuiSelectableButton* button)
@@ -519,6 +523,10 @@ GuiSelectableButton
 			
 			GuiSelectableButton::~GuiSelectableButton()
 			{
+				if(groupController)
+				{
+					groupController->Detach(this);
+				}
 			}
 
 			GuiSelectableButton::GroupController* GuiSelectableButton::GetGroupController()

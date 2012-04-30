@@ -4558,6 +4558,10 @@ GuiSelectableButton::GroupController
 
 			GuiSelectableButton::GroupController::~GroupController()
 			{
+				for(int i=buttons.Count()-1;i>=0;i--)
+				{
+					buttons[i]->SetGroupController(0);
+				}
 			}
 
 			void GuiSelectableButton::GroupController::Attach(GuiSelectableButton* button)
@@ -4628,6 +4632,10 @@ GuiSelectableButton
 			
 			GuiSelectableButton::~GuiSelectableButton()
 			{
+				if(groupController)
+				{
+					groupController->Detach(this);
+				}
 			}
 
 			GuiSelectableButton::GroupController* GuiSelectableButton::GetGroupController()
@@ -10348,6 +10356,13 @@ Animation
 				,enableAnimation(true)\
 			{\
 			}\
+			void TSTYLECONTROLLER::TransferringAnimation::Play(int currentPosition, int totalLength)\
+			{\
+				if(!stopped)\
+				{\
+					PlayInternal(currentPosition, totalLength);\
+				}\
+			}\
 			void TSTYLECONTROLLER::TransferringAnimation::Stop()\
 			{\
 				stopped=true;\
@@ -10390,7 +10405,7 @@ Animation
 					}\
 				}\
 			}\
-			void TSTYLECONTROLLER::TransferringAnimation::Play(int currentPosition, int totalLength)\
+			void TSTYLECONTROLLER::TransferringAnimation::PlayInternal(int currentPosition, int totalLength)\
 
 #define IMPLEMENT_TRANSFERRING_ANIMATION(TSTATE, TSTYLECONTROLLER)\
 	IMPLEMENT_TRANSFERRING_ANIMATION_BASE(TSTATE, TSTYLECONTROLLER, DEFAULT_TRANSFERRING_ANIMATION_HOST_GETTER)
@@ -10724,6 +10739,7 @@ Win7GroupBoxStyle
 
 			Win7GroupBoxStyle::~Win7GroupBoxStyle()
 			{
+				transferringAnimation->Stop();
 			}
 
 			compositions::GuiBoundsComposition* Win7GroupBoxStyle::GetBoundsComposition()
@@ -10972,6 +10988,7 @@ Win7ButtonStyleBase
 
 			Win7ButtonStyleBase::~Win7ButtonStyleBase()
 			{
+				transferringAnimation->Stop();
 			}
 
 			compositions::GuiBoundsComposition* Win7ButtonStyleBase::GetBoundsComposition()
@@ -11205,6 +11222,7 @@ Win7CheckBoxStyle
 
 			Win7CheckBoxStyle::~Win7CheckBoxStyle()
 			{
+				transferringAnimation->Stop();
 			}
 
 			compositions::GuiBoundsComposition* Win7CheckBoxStyle::GetBoundsComposition()
@@ -12439,6 +12457,7 @@ Win7TextBoxBackground
 
 			Win7TextBoxBackground::~Win7TextBoxBackground()
 			{
+				transferringAnimation->Stop();
 			}
 
 			void Win7TextBoxBackground::AssociateStyleController(controls::GuiControl::IStyleController* controller)
@@ -12978,6 +12997,11 @@ GuiGraphicsComposition
 				OnChildRemoved(child);
 				child->SetRenderTarget(0);
 				child->parent=0;
+				GuiGraphicsHost* host=GetRelatedGraphicsHost();
+				if(host)
+				{
+					host->DisconnectComposition(child);
+				}
 				children.RemoveAt(index);
 				return true;
 			}
@@ -15446,6 +15470,27 @@ GuiGraphicsAnimationManager
 GuiGraphicsHost
 ***********************************************************************/
 
+			void GuiGraphicsHost::DisconnectCompositionInternal(GuiGraphicsComposition* composition)
+			{
+				for(int i=0;i<composition->Children().Count();i++)
+				{
+					DisconnectCompositionInternal(composition->Children()[i]);
+				}
+				if(mouseCaptureComposition==composition)
+				{
+					if(nativeWindow)
+					{
+						nativeWindow->ReleaseCapture();
+					}
+					mouseCaptureComposition=0;
+				}
+				if(focusedComposition==composition)
+				{
+					focusedComposition=0;
+				}
+				mouseEnterCompositions.Remove(composition);
+			}
+
 			void GuiGraphicsHost::MouseCapture(const NativeWindowMouseInfo& info)
 			{
 				if(nativeWindow && !mouseCaptureComposition && (info.left || info.middle || info.right))
@@ -15967,6 +16012,11 @@ GuiGraphicsHost
 			GuiGraphicsAnimationManager* GuiGraphicsHost::GetAnimationManager()
 			{
 				return &animationManager;
+			}
+
+			void GuiGraphicsHost::DisconnectComposition(GuiGraphicsComposition* composition)
+			{
+				DisconnectCompositionInternal(composition);
 			}
 
 /***********************************************************************

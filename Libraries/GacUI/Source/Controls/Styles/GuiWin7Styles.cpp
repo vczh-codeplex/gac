@@ -1030,6 +1030,13 @@ Animation
 				,enableAnimation(true)\
 			{\
 			}\
+			void TSTYLECONTROLLER::TransferringAnimation::Play(int currentPosition, int totalLength)\
+			{\
+				if(!stopped)\
+				{\
+					PlayInternal(currentPosition, totalLength);\
+				}\
+			}\
 			void TSTYLECONTROLLER::TransferringAnimation::Stop()\
 			{\
 				stopped=true;\
@@ -1072,7 +1079,7 @@ Animation
 					}\
 				}\
 			}\
-			void TSTYLECONTROLLER::TransferringAnimation::Play(int currentPosition, int totalLength)\
+			void TSTYLECONTROLLER::TransferringAnimation::PlayInternal(int currentPosition, int totalLength)\
 
 #define IMPLEMENT_TRANSFERRING_ANIMATION(TSTATE, TSTYLECONTROLLER)\
 	IMPLEMENT_TRANSFERRING_ANIMATION_BASE(TSTATE, TSTYLECONTROLLER, DEFAULT_TRANSFERRING_ANIMATION_HOST_GETTER)
@@ -1406,6 +1413,7 @@ Win7GroupBoxStyle
 
 			Win7GroupBoxStyle::~Win7GroupBoxStyle()
 			{
+				transferringAnimation->Stop();
 			}
 
 			compositions::GuiBoundsComposition* Win7GroupBoxStyle::GetBoundsComposition()
@@ -1654,6 +1662,7 @@ Win7ButtonStyleBase
 
 			Win7ButtonStyleBase::~Win7ButtonStyleBase()
 			{
+				transferringAnimation->Stop();
 			}
 
 			compositions::GuiBoundsComposition* Win7ButtonStyleBase::GetBoundsComposition()
@@ -1887,6 +1896,7 @@ Win7CheckBoxStyle
 
 			Win7CheckBoxStyle::~Win7CheckBoxStyle()
 			{
+				transferringAnimation->Stop();
 			}
 
 			compositions::GuiBoundsComposition* Win7CheckBoxStyle::GetBoundsComposition()
@@ -3121,6 +3131,7 @@ Win7TextBoxBackground
 
 			Win7TextBoxBackground::~Win7TextBoxBackground()
 			{
+				transferringAnimation->Stop();
 			}
 
 			void Win7TextBoxBackground::AssociateStyleController(controls::GuiControl::IStyleController* controller)

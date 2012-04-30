@@ -52,6 +52,27 @@ GuiGraphicsAnimationManager
 GuiGraphicsHost
 ***********************************************************************/
 
+			void GuiGraphicsHost::DisconnectCompositionInternal(GuiGraphicsComposition* composition)
+			{
+				for(int i=0;i<composition->Children().Count();i++)
+				{
+					DisconnectCompositionInternal(composition->Children()[i]);
+				}
+				if(mouseCaptureComposition==composition)
+				{
+					if(nativeWindow)
+					{
+						nativeWindow->ReleaseCapture();
+					}
+					mouseCaptureComposition=0;
+				}
+				if(focusedComposition==composition)
+				{
+					focusedComposition=0;
+				}
+				mouseEnterCompositions.Remove(composition);
+			}
+
 			void GuiGraphicsHost::MouseCapture(const NativeWindowMouseInfo& info)
 			{
 				if(nativeWindow && !mouseCaptureComposition && (info.left || info.middle || info.right))
@@ -573,6 +594,11 @@ GuiGraphicsHost
 			GuiGraphicsAnimationManager* GuiGraphicsHost::GetAnimationManager()
 			{
 				return &animationManager;
+			}
+
+			void GuiGraphicsHost::DisconnectComposition(GuiGraphicsComposition* composition)
+			{
+				DisconnectCompositionInternal(composition);
 			}
 
 /***********************************************************************

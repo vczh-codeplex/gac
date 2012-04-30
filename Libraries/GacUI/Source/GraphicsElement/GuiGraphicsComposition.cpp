@@ -116,6 +116,11 @@ GuiGraphicsComposition
 				OnChildRemoved(child);
 				child->SetRenderTarget(0);
 				child->parent=0;
+				GuiGraphicsHost* host=GetRelatedGraphicsHost();
+				if(host)
+				{
+					host->DisconnectComposition(child);
+				}
 				children.RemoveAt(index);
 				return true;
 			}

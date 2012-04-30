@@ -14,6 +14,15 @@ private:
 	GuiButton*				closeButton;
 	GuiMultilineTextBox*	textBox;
 
+	void closeButton_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		GetApplication()->InvokeInMainThread([this]()
+		{
+			this->GetOwnerTab()->RemovePage(this);
+			delete this;
+		});
+	}
+
 	void OnPageContainerReady(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		GuiTableComposition* table=new GuiTableComposition;
@@ -31,6 +40,7 @@ private:
 			
 			closeButton=g::NewButton();
 			closeButton->SetText(L"Close Me!");
+			closeButton->Clicked.AttachMethod(this, &TextBoxPage::closeButton_Clicked);
 			cell->AddChild(closeButton->GetBoundsComposition());
 		}
 		
@@ -41,6 +51,7 @@ private:
 			
 			textBox=g::NewMultilineTextBox();
 			textBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			textBox->SetText(L"You can input several lines of text here.\r\nThis is a multiple line text box.");
 			cell->AddChild(textBox->GetBoundsComposition());
 		}
 
@@ -68,6 +79,14 @@ class TextBoxPageWindow : public GuiWindow
 private:
 	GuiTab*						tabControl;
 	GuiTabPage*					controlPanelPage;
+	GuiButton*					buttonAddPage;
+
+	void buttonAddPage_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		TextBoxPage* page=new TextBoxPage;
+		tabControl->CreatePage(page);
+		tabControl->SetSelectedPage(page);
+	}
 public:
 	TextBoxPageWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -82,11 +101,14 @@ public:
 		controlPanelPage=tabControl->CreatePage();
 		controlPanelPage->SetText(L"Control Panel");
 
+		buttonAddPage=g::NewButton();
+		buttonAddPage->SetText(L"Add a tab page");
+		buttonAddPage->Clicked.AttachMethod(this, &TextBoxPageWindow::buttonAddPage_Clicked);
+		controlPanelPage->GetContainer()->GetContainerComposition()->SetInternalMargin(Margin(2, 2, 2, 2));
+		controlPanelPage->GetContainer()->AddChild(buttonAddPage);
+
 		this->ForceCalculateSizeImmediately();
 		this->MoveToScreenCenter();
-
-		TextBoxPage* page=new TextBoxPage;
-		tabControl->CreatePage(page);
 	}
 
 	~TextBoxPageWindow()

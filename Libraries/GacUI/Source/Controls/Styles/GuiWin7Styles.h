@@ -235,6 +235,7 @@ Animation
 					TSTYLECONTROLLER*						style;\
 					bool									stopped;\
 					bool									enableAnimation;\
+					void									PlayInternal(int currentPosition, int totalLength);\
 				public:\
 					TransferringAnimation(TSTYLECONTROLLER* _style, const TSTATE& begin);\
 					void									Play(int currentPosition, int totalLength)override;\
