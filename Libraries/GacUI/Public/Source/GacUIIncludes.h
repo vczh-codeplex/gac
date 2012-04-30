@@ -11989,6 +11989,8 @@ Host
 				GuiGraphicsComposition*			mouseCaptureComposition;
 				CompositionList					mouseEnterCompositions;
 
+				void							DisconnectCompositionInternal(GuiGraphicsComposition* composition);
+
 				void							MouseCapture(const NativeWindowMouseInfo& info);
 				void							MouseUncapture(const NativeWindowMouseInfo& info);
 				void							OnCharInput(const NativeWindowCharInfo& info, GuiGraphicsComposition* composition, GuiCharEvent GuiGraphicsEventReceiver::* eventReceiverEvent);
@@ -12037,6 +12039,7 @@ Host
 				void							SetCaretPoint(Point value, GuiGraphicsComposition* referenceComposition=0);
 
 				GuiGraphicsAnimationManager*	GetAnimationManager();
+				void							DisconnectComposition(GuiGraphicsComposition* composition);
 			};
 
 /***********************************************************************
@@ -15626,6 +15629,7 @@ Animation
 					TSTYLECONTROLLER*						style;\
 					bool									stopped;\
 					bool									enableAnimation;\
+					void									PlayInternal(int currentPosition, int totalLength);\
 				public:\
 					TransferringAnimation(TSTYLECONTROLLER* _style, const TSTATE& begin);\
 					void									Play(int currentPosition, int totalLength)override;\

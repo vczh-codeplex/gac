@@ -89,6 +89,8 @@ Host
 				GuiGraphicsComposition*			mouseCaptureComposition;
 				CompositionList					mouseEnterCompositions;
 
+				void							DisconnectCompositionInternal(GuiGraphicsComposition* composition);
+
 				void							MouseCapture(const NativeWindowMouseInfo& info);
 				void							MouseUncapture(const NativeWindowMouseInfo& info);
 				void							OnCharInput(const NativeWindowCharInfo& info, GuiGraphicsComposition* composition, GuiCharEvent GuiGraphicsEventReceiver::* eventReceiverEvent);
@@ -156,6 +158,9 @@ Host
 				/// <summary>Get the animation manager.</summary>
 				/// <returns>The animation manager.</returns>
 				GuiGraphicsAnimationManager*	GetAnimationManager();
+				/// <summary>Notify that a composition is going to disconnect from this graphics host. Generally this happens when a composition's parent line changes.</summary>
+				/// <param name="composition">The composition to disconnect</param>
+				void							DisconnectComposition(GuiGraphicsComposition* composition);
 			};
 
 /***********************************************************************
