@@ -16,8 +16,16 @@ private:
 
 	void closeButton_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		// deleteing the tab page will also delete the button, because the button is in the page
+		// when an event is processing, the button is not going to be deleted
+		// because there are many works to do after this event
+		// and maybe someone has already added another event handler to this button
+		// so it use GetApplication()->InvokeInMainThread to send a function to the queue
+		// so that this function will be executed after this input message (an input message raises multiple events)
+		// to the user, this page is closed after cliking this button
 		GetApplication()->InvokeInMainThread([this]()
 		{
+			// remove the page and delete it
 			this->GetOwnerTab()->RemovePage(this);
 			delete this;
 		});
@@ -25,6 +33,7 @@ private:
 
 	void OnPageContainerReady(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		// create a table to place a button and a text box
 		GuiTableComposition* table=new GuiTableComposition;
 		table->SetRowsAndColumns(2, 1);
 		table->SetRowOption(0, GuiCellOption::MinSizeOption());
@@ -83,6 +92,7 @@ private:
 
 	void buttonAddPage_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		// when the button is clicked, it creates a new TextBoxPage and adds it to the tab control
 		TextBoxPage* page=new TextBoxPage;
 		tabControl->CreatePage(page);
 		tabControl->SetSelectedPage(page);
@@ -94,13 +104,16 @@ public:
 		this->SetText(L"Controls.Tab.TextBoxPage");
 		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
 
+		// create a tab control
 		tabControl=g::NewTab();
 		tabControl->GetBoundsComposition()->SetAlignmentToParent(Margin(2, 2, 2, 2));
 		this->AddChild(tabControl);
 
+		// the first page is a control panel
 		controlPanelPage=tabControl->CreatePage();
 		controlPanelPage->SetText(L"Control Panel");
 
+		// add a button to the control panel
 		buttonAddPage=g::NewButton();
 		buttonAddPage->SetText(L"Add a tab page");
 		buttonAddPage->Clicked.AttachMethod(this, &TextBoxPageWindow::buttonAddPage_Clicked);
