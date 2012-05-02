@@ -387,6 +387,8 @@ Container
 				void										OnTabHeaderBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnHeaderOverflowMenuButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+
+				void										UpdateHeaderOverflowButtonVisibility();
 				void										UpdateHeaderZOrder();
 			public:
 				/// <summary>Create the style.</summary>

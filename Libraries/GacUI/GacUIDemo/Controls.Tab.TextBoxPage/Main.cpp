@@ -73,7 +73,7 @@ public:
 		,textBox(0)
 	{
 		PageContainerReady.AttachMethod(this, &TextBoxPage::OnPageContainerReady);
-		this->SetText(L"Page "+itow(++pageCounter));
+		this->SetText(L"TextBoxPage Sample No."+itow(++pageCounter));
 	}
 
 	~TextBoxPage()

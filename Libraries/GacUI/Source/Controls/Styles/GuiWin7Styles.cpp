@@ -1478,6 +1478,7 @@ Win7TabStyle
 			{
 				int height=headerOverflowButton->GetBoundsComposition()->GetBounds().Height();
 				headerOverflowButton->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(height, 0)));
+				UpdateHeaderOverflowButtonVisibility();
 			}
 
 			void Win7TabStyle::OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
@@ -1505,6 +1506,7 @@ Win7TabStyle
 					item->AddChild(button->GetBoundsComposition());
 				}
 
+				headerOverflowMenu->SetClientSize(Size(0, 0));
 				headerOverflowMenu->ShowPopup(headerOverflowButton, true);
 			}
 
@@ -1515,6 +1517,11 @@ Win7TabStyle
 				{
 					commandExecutor->ShowTab(index);
 				}
+			}
+
+			void Win7TabStyle::UpdateHeaderOverflowButtonVisibility()
+			{
+				headerOverflowButton->SetVisible(tabHeaderComposition->IsStackItemClipped());
 			}
 
 			void Win7TabStyle::UpdateHeaderZOrder()
@@ -1564,6 +1571,7 @@ Win7TabStyle
 						font.size=10;
 						headerOverflowButton->SetFont(font);
 					}
+					headerOverflowButton->SetVisible(false);
 					headerOverflowButton->SetText((wchar_t)0xF080);
 					headerOverflowButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, 0, 0, 0));
 					headerOverflowButton->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowButtonClicked);
@@ -1668,6 +1676,7 @@ Win7TabStyle
 			void Win7TabStyle::SetTabText(int index, const WString& value)
 			{
 				headerButtons[index]->SetText(value);
+				UpdateHeaderOverflowButtonVisibility();
 			}
 
 			void Win7TabStyle::RemoveTab(int index)
@@ -1681,6 +1690,7 @@ Win7TabStyle
 
 				delete item;
 				delete button;
+				UpdateHeaderOverflowButtonVisibility();
 			}
 
 			void Win7TabStyle::MoveTab(int oldIndex, int newIndex)
@@ -1693,12 +1703,14 @@ Win7TabStyle
 				headerButtons.RemoveAt(oldIndex);
 				headerButtons.Insert(newIndex, button);
 				UpdateHeaderZOrder();
+				UpdateHeaderOverflowButtonVisibility();
 			}
 
 			void Win7TabStyle::SetSelectedTab(int index)
 			{
 				headerButtons[index]->SetSelected(true);
 				UpdateHeaderZOrder();
+				UpdateHeaderOverflowButtonVisibility();
 			}
 
 			controls::GuiControl::IStyleController* Win7TabStyle::CreateTabPageStyleController()
