@@ -260,6 +260,7 @@ GuiMenuButton
 				,subMenu(0)
 				,ownerMenuService(0)
 			{
+				SetClickOnMouseUp(false);
 				SubMenuOpeningChanged.SetAssociatedComposition(boundsComposition);
 				Clicked.AttachMethod(this, &GuiMenuButton::OnClicked);
 				GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiMenuButton::OnLeftButtonDown);

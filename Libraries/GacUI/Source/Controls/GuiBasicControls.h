@@ -300,6 +300,7 @@ Buttons
 				};
 			protected:
 				IStyleController*						styleController;
+				bool									clickOnMouseUp;
 				bool									mousePressing;
 				bool									mouseHoving;
 				ControlState							controlState;
@@ -318,6 +319,13 @@ Buttons
 
 				/// <summary>Mouse click event.</summary>
 				compositions::GuiNotifyEvent			Clicked;
+
+				/// <summary>Test is the <see cref="Clicked"/> event raised when left mouse button up.</summary>
+				/// <returns>Returns true if this event is raised when left mouse button up</returns>
+				bool									GetClickOnMouseUp();
+				/// <summary>Set is the <see cref="Clicked"/> event raised when left mouse button up or not.</summary>
+				/// <param name="value">Set to true to make this event raised when left mouse button up</param>
+				void									SetClickOnMouseUp(bool value);
 			};
 
 			/// <summary>A <see cref="GuiButton"/> with a selection state.</summary>

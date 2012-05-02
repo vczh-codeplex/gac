@@ -2997,6 +2997,7 @@ Buttons
 				};
 			protected:
 				IStyleController*						styleController;
+				bool									clickOnMouseUp;
 				bool									mousePressing;
 				bool									mouseHoving;
 				ControlState							controlState;
@@ -3012,6 +3013,9 @@ Buttons
 				~GuiButton();
 
 				compositions::GuiNotifyEvent			Clicked;
+
+				bool									GetClickOnMouseUp();
+				void									SetClickOnMouseUp(bool value);
 			};
 
 			class GuiSelectableButton : public GuiButton, public Description<GuiSelectableButton>
@@ -6518,6 +6522,8 @@ Container
 				void										OnTabHeaderBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnHeaderOverflowMenuButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+
+				void										UpdateHeaderOverflowButtonVisibility();
 				void										UpdateHeaderZOrder();
 			public:
 				Win7TabStyle();

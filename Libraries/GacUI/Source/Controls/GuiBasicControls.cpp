@@ -381,6 +381,10 @@ GuiButton
 					mousePressing=true;
 					boundsComposition->GetRelatedGraphicsHost()->SetFocus(boundsComposition);
 					UpdateControlState();
+					if(!clickOnMouseUp)
+					{
+						Clicked.Execute(GetNotifyEventArguments());
+					}
 				}
 			}
 
@@ -393,7 +397,7 @@ GuiButton
 				}
 				if(GetVisuallyEnabled())
 				{
-					if(mouseHoving)
+					if(mouseHoving && clickOnMouseUp)
 					{
 						Clicked.Execute(GetNotifyEventArguments());
 					}
@@ -421,6 +425,7 @@ GuiButton
 			GuiButton::GuiButton(IStyleController* _styleController)
 				:GuiControl(_styleController)
 				,styleController(_styleController)
+				,clickOnMouseUp(true)
 				,mousePressing(false)
 				,mouseHoving(false)
 				,controlState(Normal)
@@ -437,6 +442,16 @@ GuiButton
 
 			GuiButton::~GuiButton()
 			{
+			}
+
+			bool GuiButton::GetClickOnMouseUp()
+			{
+				return clickOnMouseUp;
+			}
+
+			void GuiButton::SetClickOnMouseUp(bool value)
+			{
+				clickOnMouseUp=value;
 			}
 
 /***********************************************************************
