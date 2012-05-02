@@ -618,6 +618,9 @@ Stack Compositions
 				/// <summary>Set the extra margin inside the stack composition.</summary>
 				/// <param name="value">The extra margin inside the stack composition.</param>
 				void								SetExtraMargin(Margin value);
+				/// <summary>Test is any stack item clipped in the stack direction.</summary>
+				/// <returns>Returns true if any stack item is clipped.</returns>
+				bool								IsStackItemClipped();
 			};
 			
 			/// <summary>

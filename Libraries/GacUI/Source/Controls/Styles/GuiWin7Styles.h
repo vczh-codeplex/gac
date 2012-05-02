@@ -234,10 +234,12 @@ Animation
 					TSTATE									colorCurrent;\
 					TSTYLECONTROLLER*						style;\
 					bool									stopped;\
+					bool									disabled;\
 					bool									enableAnimation;\
 					void									PlayInternal(int currentPosition, int totalLength);\
 				public:\
 					TransferringAnimation(TSTYLECONTROLLER* _style, const TSTATE& begin);\
+					void									Disable();\
 					void									Play(int currentPosition, int totalLength)override;\
 					void									Stop()override;\
 					bool									GetEnableAnimation();\
@@ -377,8 +379,14 @@ Container
 
 				Ptr<controls::GuiSelectableButton::MutexGroupController>	headerController;
 				collections::List<controls::GuiSelectableButton*>			headerButtons;
+				controls::GuiButton*										headerOverflowButton;
+				controls::GuiMenu*											headerOverflowMenu;
+				compositions::GuiStackComposition*							headerOverflowMenuStack;
 
 				void										OnHeaderButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnTabHeaderBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnHeaderOverflowMenuButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										UpdateHeaderZOrder();
 			public:
 				/// <summary>Create the style.</summary>

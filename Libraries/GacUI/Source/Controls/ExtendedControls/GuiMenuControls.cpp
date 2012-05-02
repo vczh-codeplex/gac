@@ -24,9 +24,9 @@ IGuiMenuService
 				{
 					openingMenu->Hide();
 				}
-				if(GetParent())
+				if(GetParentMenuService())
 				{
-					GetParent()->MenuItemExecuted();
+					GetParentMenuService()->MenuItemExecuted();
 				}
 			}
 
@@ -56,7 +56,7 @@ IGuiMenuService
 GuiMenu
 ***********************************************************************/
 
-			IGuiMenuService* GuiMenu::GetParent()
+			IGuiMenuService* GuiMenu::GetParentMenuService()
 			{
 				return parentMenuService;
 			}
@@ -69,6 +69,12 @@ GuiMenu
 			bool GuiMenu::IsActiveState()
 			{
 				return true;
+			}
+
+			void GuiMenu::MenuItemExecuted()
+			{
+				IGuiMenuService::MenuItemExecuted();
+				Hide();
 			}
 
 			void GuiMenu::OnWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
@@ -140,7 +146,7 @@ GuiMenu
 GuiMenuBar
 ***********************************************************************/
 
-			IGuiMenuService* GuiMenuBar::GetParent()
+			IGuiMenuService* GuiMenuBar::GetParentMenuService()
 			{
 				return 0;
 			}

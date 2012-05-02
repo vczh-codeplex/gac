@@ -1592,6 +1592,35 @@ GuiStackComposition
 				extraMargin=value;
 			}
 
+			bool GuiStackComposition::IsStackItemClipped()
+			{
+				Rect clientArea=GetClientArea();
+				for(int i=0;i<stackItems.Count();i++)
+				{
+					Rect stackItemBounds=stackItems[i]->GetBounds();
+					switch(direction)
+					{
+					case Horizontal:
+						{
+							if(stackItemBounds.Left()<0 || stackItemBounds.Right()>=clientArea.Width())
+							{
+								return true;
+							}
+						}
+						break;
+					case Vertical:
+						{
+							if(stackItemBounds.Top()<0 || stackItemBounds.Bottom()>=clientArea.Height())
+							{
+								return true;
+							}
+						}
+						break;
+					}
+				}
+				return false;
+			}
+
 /***********************************************************************
 GuiStackItemComposition
 ***********************************************************************/
