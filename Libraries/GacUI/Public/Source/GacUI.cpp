@@ -2012,9 +2012,9 @@ IGuiMenuService
 				{
 					openingMenu->Hide();
 				}
-				if(GetParent())
+				if(GetParentMenuService())
 				{
-					GetParent()->MenuItemExecuted();
+					GetParentMenuService()->MenuItemExecuted();
 				}
 			}
 
@@ -2044,7 +2044,7 @@ IGuiMenuService
 GuiMenu
 ***********************************************************************/
 
-			IGuiMenuService* GuiMenu::GetParent()
+			IGuiMenuService* GuiMenu::GetParentMenuService()
 			{
 				return parentMenuService;
 			}
@@ -2057,6 +2057,12 @@ GuiMenu
 			bool GuiMenu::IsActiveState()
 			{
 				return true;
+			}
+
+			void GuiMenu::MenuItemExecuted()
+			{
+				IGuiMenuService::MenuItemExecuted();
+				Hide();
 			}
 
 			void GuiMenu::OnWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
@@ -2128,7 +2134,7 @@ GuiMenu
 GuiMenuBar
 ***********************************************************************/
 
-			IGuiMenuService* GuiMenuBar::GetParent()
+			IGuiMenuService* GuiMenuBar::GetParentMenuService()
 			{
 				return 0;
 			}
@@ -10353,12 +10359,17 @@ Animation
 				,colorCurrent(begin)\
 				,style(_style)\
 				,stopped(true)\
+				,disabled(false)\
 				,enableAnimation(true)\
 			{\
 			}\
+			void TSTYLECONTROLLER::TransferringAnimation::Disable()\
+			{\
+				disabled=true;\
+			}\
 			void TSTYLECONTROLLER::TransferringAnimation::Play(int currentPosition, int totalLength)\
 			{\
-				if(!stopped)\
+				if(!disabled)\
 				{\
 					PlayInternal(currentPosition, totalLength);\
 				}\
@@ -10739,7 +10750,7 @@ Win7GroupBoxStyle
 
 			Win7GroupBoxStyle::~Win7GroupBoxStyle()
 			{
-				transferringAnimation->Stop();
+				transferringAnimation->Disable();
 			}
 
 			compositions::GuiBoundsComposition* Win7GroupBoxStyle::GetBoundsComposition()
@@ -10795,6 +10806,49 @@ Win7TabStyle
 				}
 			}
 
+			void Win7TabStyle::OnTabHeaderBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				int height=headerOverflowButton->GetBoundsComposition()->GetBounds().Height();
+				headerOverflowButton->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(height, 0)));
+			}
+
+			void Win7TabStyle::OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				for(int i=headerOverflowMenuStack->GetStackItems().Count()-1;i>=0;i--)
+				{
+					GuiStackItemComposition* item=headerOverflowMenuStack->GetStackItems()[i];
+					GuiControl* button=item->Children()[0]->GetAssociatedControl();
+
+					headerOverflowMenuStack->RemoveChild(item);
+					item->RemoveChild(button->GetBoundsComposition());
+					delete button;
+					delete item;
+				}
+
+				for(int i=0;i<headerButtons.Count();i++)
+				{
+					GuiStackItemComposition* item=new GuiStackItemComposition;
+					headerOverflowMenuStack->AddChild(item);
+
+					GuiMenuButton* button=new GuiMenuButton(new Win7MenuItemButtonStyle);
+					button->SetText(headerButtons[i]->GetText());
+					button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					button->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowMenuButtonClicked);
+					item->AddChild(button->GetBoundsComposition());
+				}
+
+				headerOverflowMenu->ShowPopup(headerOverflowButton, true);
+			}
+
+			void Win7TabStyle::OnHeaderOverflowMenuButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				int index=headerOverflowMenuStack->GetStackItems().IndexOf(dynamic_cast<GuiStackItemComposition*>(sender->GetParent()));
+				if(index!=-1)
+				{
+					commandExecutor->ShowTab(index);
+				}
+			}
+
 			void Win7TabStyle::UpdateHeaderZOrder()
 			{
 				int itemCount=tabHeaderComposition->GetStackItems().Count();
@@ -10832,7 +10886,20 @@ Win7TabStyle
 					tabHeaderComposition->SetExtraMargin(Margin(2, 2, 2, 0));
 					tabHeaderComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
 					tabHeaderComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+					tabHeaderComposition->BoundsChanged.AttachMethod(this, &Win7TabStyle::OnTabHeaderBoundsChanged);
 					cell->AddChild(tabHeaderComposition);
+
+					headerOverflowButton=new GuiButton(new Win7ButtonStyle);
+					{
+						FontProperties font;
+						font.fontFamily=L"Wingdings 3";
+						font.size=10;
+						headerOverflowButton->SetFont(font);
+					}
+					headerOverflowButton->SetText((wchar_t)0xF080);
+					headerOverflowButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, 0, 0, 0));
+					headerOverflowButton->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowButtonClicked);
+					cell->AddChild(headerOverflowButton->GetBoundsComposition());
 				}
 				{
 					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
@@ -10865,12 +10932,21 @@ Win7TabStyle
 						containerComposition->SetOwnedElement(element);
 					}
 				}
+				{
+					headerOverflowMenu=new GuiMenu(new Win7MenuStyle, 0);
+					headerOverflowMenuStack=new GuiStackComposition;
+					headerOverflowMenuStack->SetDirection(GuiStackComposition::Vertical);
+					headerOverflowMenuStack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+					headerOverflowMenuStack->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					headerOverflowMenu->GetContainerComposition()->AddChild(headerOverflowMenuStack);
+				}
 
 				headerController=new GuiSelectableButton::MutexGroupController;
 			}
 
 			Win7TabStyle::~Win7TabStyle()
 			{
+				delete headerOverflowMenu;
 			}
 
 			compositions::GuiBoundsComposition* Win7TabStyle::GetBoundsComposition()
@@ -10988,7 +11064,7 @@ Win7ButtonStyleBase
 
 			Win7ButtonStyleBase::~Win7ButtonStyleBase()
 			{
-				transferringAnimation->Stop();
+				transferringAnimation->Disable();
 			}
 
 			compositions::GuiBoundsComposition* Win7ButtonStyleBase::GetBoundsComposition()
@@ -11222,7 +11298,7 @@ Win7CheckBoxStyle
 
 			Win7CheckBoxStyle::~Win7CheckBoxStyle()
 			{
-				transferringAnimation->Stop();
+				transferringAnimation->Disable();
 			}
 
 			compositions::GuiBoundsComposition* Win7CheckBoxStyle::GetBoundsComposition()
@@ -12457,7 +12533,7 @@ Win7TextBoxBackground
 
 			Win7TextBoxBackground::~Win7TextBoxBackground()
 			{
-				transferringAnimation->Stop();
+				transferringAnimation->Disable();
 			}
 
 			void Win7TextBoxBackground::AssociateStyleController(controls::GuiControl::IStyleController* controller)
@@ -14471,6 +14547,35 @@ GuiStackComposition
 			void GuiStackComposition::SetExtraMargin(Margin value)
 			{
 				extraMargin=value;
+			}
+
+			bool GuiStackComposition::IsStackItemClipped()
+			{
+				Rect clientArea=GetClientArea();
+				for(int i=0;i<stackItems.Count();i++)
+				{
+					Rect stackItemBounds=stackItems[i]->GetBounds();
+					switch(direction)
+					{
+					case Horizontal:
+						{
+							if(stackItemBounds.Left()<0 || stackItemBounds.Right()>=clientArea.Width())
+							{
+								return true;
+							}
+						}
+						break;
+					case Vertical:
+						{
+							if(stackItemBounds.Top()<0 || stackItemBounds.Bottom()>=clientArea.Height())
+							{
+								return true;
+							}
+						}
+						break;
+					}
+				}
+				return false;
 			}
 
 /***********************************************************************

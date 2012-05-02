@@ -46,7 +46,7 @@ Menu Service
 
 				/// <summary>Get the parent service. This service represents the parent menu that host the menu item control that contains this menu.</summary>
 				/// <returns>The parent service.</returns>
-				virtual IGuiMenuService*				GetParent()=0;
+				virtual IGuiMenuService*				GetParentMenuService()=0;
 				/// <summary>Get the preferred direction to open the sub menu.</summary>
 				/// <returns>The preferred direction to open the sub menu.</returns>
 				virtual Direction						GetPreferredDirection()=0;
@@ -77,9 +77,10 @@ Menu
 			private:
 				IGuiMenuService*						parentMenuService;
 
-				IGuiMenuService*						GetParent();
-				Direction								GetPreferredDirection();
-				bool									IsActiveState();
+				IGuiMenuService*						GetParentMenuService()override;
+				Direction								GetPreferredDirection()override;
+				bool									IsActiveState()override;
+				void									MenuItemExecuted()override;
 			protected:
 				GuiControl*								owner;
 
@@ -102,9 +103,9 @@ Menu
 			class GuiMenuBar : public GuiControl, private IGuiMenuService, public Description<GuiMenuBar>
 			{
 			private:
-				IGuiMenuService*						GetParent();
-				Direction								GetPreferredDirection();
-				bool									IsActiveState();
+				IGuiMenuService*						GetParentMenuService()override;
+				Direction								GetPreferredDirection()override;
+				bool									IsActiveState()override;
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
