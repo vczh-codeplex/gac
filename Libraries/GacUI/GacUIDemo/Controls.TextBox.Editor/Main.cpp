@@ -21,29 +21,47 @@ private:
 	void buttonCut_OnClicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		textDocument->Cut();
+		textDocument->SetFocus();
 	}
 
 	void buttonCopy_OnClicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		textDocument->Copy();
+		textDocument->SetFocus();
 	}
 
 	void buttonPaste_OnClicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		textDocument->Paste();
+		textDocument->SetFocus();
 	}
 
 	void buttonSelectAll_OnClicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		textDocument->SelectAll();
+		textDocument->SetFocus();
 	}
 
 	void buttonGoto_OnClicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		int line=wtoi(textGoto->GetText())-1;
+		textDocument->Select(TextPos(line, 0), TextPos(line, 0));
+		textDocument->SetFocus();
 	}
 
 	void checkReadonly_OnSelectedChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+	}
+
+	void textGoto_TextChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		buttonGoto->SetEnabled(utow(wtou(textGoto->GetText()))==textGoto->GetText() && wtou(textGoto->GetText())!=0);
+	}
+
+	void textDocument_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		buttonCut->SetEnabled(textDocument->CanCut());
+		buttonCopy->SetEnabled(textDocument->CanCopy());
 	}
 public:
 	TextBoxEditorWindow()
@@ -142,6 +160,7 @@ public:
 				textGoto=g::NewTextBox();
 				textGoto->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(180, 0)));
 				textGoto->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				textGoto->TextChanged.AttachMethod(this, &TextBoxEditorWindow::textGoto_TextChanged);
 				item->AddChild(textGoto->GetBoundsComposition());
 			}
 			{
@@ -162,9 +181,15 @@ public:
 
 			textDocument=g::NewMultilineTextBox();
 			textDocument->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			textDocument->SelectionChanged.AttachMethod(this, &TextBoxEditorWindow::textDocument_SelectionChanged);
 			cell->AddChild(textDocument->GetBoundsComposition());
 		}
 
+		{
+			GuiEventArgs arguments;
+			textGoto->TextChanged.Execute(arguments);
+			textDocument->SelectionChanged.Execute(arguments);
+		}
 		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
 		this->ForceCalculateSizeImmediately();
 		this->MoveToScreenCenter();

@@ -244,6 +244,18 @@ GuiControl
 				}
 			}
 
+			void GuiControl::SetFocus()
+			{
+				if(focusableComposition)
+				{
+					GuiGraphicsHost* host=focusableComposition->GetRelatedGraphicsHost();
+					if(host)
+					{
+						host->SetFocus(focusableComposition);
+					}
+				}
+			}
+
 			IDescriptable* GuiControl::QueryService(const WString& identifier)
 			{
 				if(parent)

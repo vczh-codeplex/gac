@@ -4360,6 +4360,18 @@ GuiControl
 				}
 			}
 
+			void GuiControl::SetFocus()
+			{
+				if(focusableComposition)
+				{
+					GuiGraphicsHost* host=focusableComposition->GetRelatedGraphicsHost();
+					if(host)
+					{
+						host->SetFocus(focusableComposition);
+					}
+				}
+			}
+
 			IDescriptable* GuiControl::QueryService(const WString& identifier)
 			{
 				if(parent)
@@ -7382,6 +7394,9 @@ GuiTextElementOperator
 
 			void GuiTextBoxCommonInterface::Select(TextPos begin, TextPos end)
 			{
+				begin=textElementOperator->GetTextElement()->GetLines().Normalize(begin);
+				end=textElementOperator->GetTextElement()->GetLines().Normalize(end);
+				textElementOperator->Select(begin, end);
 			}
 
 			WString GuiTextBoxCommonInterface::GetSelectionText()
@@ -7677,7 +7692,7 @@ GuiSinglelineTextBox::StyleController
 
 			WString GuiSinglelineTextBox::StyleController::GetText()
 			{
-				return L"";
+				return textElement->GetLines().GetText();
 			}
 
 			void GuiSinglelineTextBox::StyleController::SetText(const WString& value)
