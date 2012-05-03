@@ -187,6 +187,8 @@ Basic Construction
 				/// <summary>Set the font to render the text.</summary>
 				/// <param name="value">The font to render the text.</param>
 				virtual void							SetFont(const FontProperties& value);
+				/// <summary>Focus this control.</summary>
+				virtual void							SetFocus();
 
 				/// <summary>Query a service using an identifier. If you want to get a service of type IXXX, use IXXX::Identifier as the identifier.</summary>
 				/// <returns>The requested service. If the control doesn't support this service, it will be null.</returns>

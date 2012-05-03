@@ -2920,6 +2920,7 @@ Basic Construction
 				virtual void							SetText(const WString& value);
 				virtual const FontProperties&			GetFont();
 				virtual void							SetFont(const FontProperties& value);
+				virtual void							SetFocus();
 
 				virtual IDescriptable*					QueryService(const WString& identifier);
 

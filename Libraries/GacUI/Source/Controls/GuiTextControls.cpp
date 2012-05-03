@@ -683,6 +683,9 @@ GuiTextElementOperator
 
 			void GuiTextBoxCommonInterface::Select(TextPos begin, TextPos end)
 			{
+				begin=textElementOperator->GetTextElement()->GetLines().Normalize(begin);
+				end=textElementOperator->GetTextElement()->GetLines().Normalize(end);
+				textElementOperator->Select(begin, end);
 			}
 
 			WString GuiTextBoxCommonInterface::GetSelectionText()
@@ -978,7 +981,7 @@ GuiSinglelineTextBox::StyleController
 
 			WString GuiSinglelineTextBox::StyleController::GetText()
 			{
-				return L"";
+				return textElement->GetLines().GetText();
 			}
 
 			void GuiSinglelineTextBox::StyleController::SetText(const WString& value)
