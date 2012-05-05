@@ -263,6 +263,9 @@ Window
 				GuiWindow(GuiControl::IStyleController* _styleController);
 				~GuiWindow();
 
+				/// <summary>Clipboard updated event.</summary>
+				compositions::GuiNotifyEvent			ClipboardUpdated;
+
 				/// <summary>Move the window to the center of the screen. If multiple screens exist, the window move to the screen that contains the biggest part of the window.</summary>
 				void									MoveToScreenCenter();
 			};

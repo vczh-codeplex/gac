@@ -589,6 +589,7 @@ GuiWindow
 			GuiWindow::GuiWindow(GuiControl::IStyleController* _styleController)
 				:GuiControlHost(_styleController)
 			{
+				ClipboardUpdated.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
 				INativeWindow* window=GetCurrentController()->WindowService()->CreateNativeWindow();
 				SetNativeWindow(window);
 				GetApplication()->RegisterWindow(this);

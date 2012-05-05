@@ -3959,6 +3959,7 @@ namespace vl
 		namespace controls
 		{
 			using namespace collections;
+			using namespace compositions;
 
 /***********************************************************************
 GuiApplication
@@ -3980,6 +3981,15 @@ GuiApplication
 
 			void GuiApplication::RightButtonUp(Point position)
 			{
+			}
+
+			void GuiApplication::ClipboardUpdated()
+			{
+				for(int i=0;i<windows.Count();i++)
+				{
+					GuiEventArgs arguments=windows[i]->GetNotifyEventArguments();
+					windows[i]->ClipboardUpdated.Execute(arguments);
+				}
 			}
 
 			GuiApplication::GuiApplication()
@@ -8454,6 +8464,7 @@ GuiWindow
 			GuiWindow::GuiWindow(GuiControl::IStyleController* _styleController)
 				:GuiControlHost(_styleController)
 			{
+				ClipboardUpdated.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
 				INativeWindow* window=GetCurrentController()->WindowService()->CreateNativeWindow();
 				SetNativeWindow(window);
 				GetApplication()->RegisterWindow(this);

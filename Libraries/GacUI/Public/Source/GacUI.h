@@ -3395,6 +3395,8 @@ Window
 				GuiWindow(GuiControl::IStyleController* _styleController);
 				~GuiWindow();
 
+				compositions::GuiNotifyEvent			ClipboardUpdated;
+
 				void									MoveToScreenCenter();
 			};
 			
@@ -5580,6 +5582,7 @@ namespace vl
 				void											LeftButtonUp(Point position)override;
 				void											RightButtonDown(Point position)override;
 				void											RightButtonUp(Point position)override;
+				void											ClipboardUpdated()override;
 			protected:
 				GuiWindow*										mainWindow;
 				collections::List<GuiWindow*>					windows;
