@@ -63,12 +63,18 @@ private:
 		buttonCut->SetEnabled(textDocument->CanCut());
 		buttonCopy->SetEnabled(textDocument->CanCopy());
 	}
+
+	void window_OnClipboardUpdated(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		buttonPaste->SetEnabled(textDocument->CanPaste());
+	}
 public:
 	TextBoxEditorWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 	{
 		this->SetText(L"Controls.TextBox.Editor");
 		this->GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+		this->ClipboardUpdated.AttachMethod(this, &TextBoxEditorWindow::window_OnClipboardUpdated);
 
 		GuiTableComposition* table=new GuiTableComposition;
 		table->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -189,6 +195,7 @@ public:
 			GuiEventArgs arguments;
 			textGoto->TextChanged.Execute(arguments);
 			textDocument->SelectionChanged.Execute(arguments);
+			this->ClipboardUpdated.Execute(arguments);
 		}
 		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
 		this->ForceCalculateSizeImmediately();
