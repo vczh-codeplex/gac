@@ -6976,6 +6976,7 @@ GuiTextElementOperator
 					}
 					break;
 				case VKEY_BACK:
+					if(!readonly)
 					{
 						if(ctrl && !shift)
 						{
@@ -6998,6 +6999,7 @@ GuiTextElementOperator
 					}
 					break;
 				case VKEY_DELETE:
+					if(!readonly)
 					{
 						if(ctrl && !shift)
 						{
@@ -7082,7 +7084,7 @@ GuiTextElementOperator
 			{
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
-					if(arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && !arguments.ctrl)
+					if(!readonly && arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && !arguments.ctrl)
 					{
 						SetSelectionText(WString(arguments.code));
 					}
@@ -7096,6 +7098,7 @@ GuiTextElementOperator
 				,textBoxCommonInterface(0)
 				,callback(0)
 				,dragging(false)
+				,readonly(false)
 			{
 			}
 
@@ -7187,7 +7190,7 @@ GuiTextElementOperator
 
 			bool GuiTextElementOperator::CanCut()
 			{
-				return textElement->GetCaretBegin()!=textElement->GetCaretEnd();
+				return !readonly && textElement->GetCaretBegin()!=textElement->GetCaretEnd();
 			}
 
 			bool GuiTextElementOperator::CanCopy()
@@ -7197,7 +7200,7 @@ GuiTextElementOperator
 
 			bool GuiTextElementOperator::CanPaste()
 			{
-				return GetCurrentController()->ClipboardService()->ContainsText();
+				return !readonly && GetCurrentController()->ClipboardService()->ContainsText();
 			}
 
 			void GuiTextElementOperator::SelectAll()
@@ -7245,6 +7248,16 @@ GuiTextElementOperator
 				{
 					return false;
 				}
+			}
+			
+			bool GuiTextElementOperator::GetReadonly()
+			{
+				return readonly;
+			}
+
+			void GuiTextElementOperator::SetReadonly(bool value)
+			{
+				readonly=value;
 			}
 
 /***********************************************************************
@@ -7417,6 +7430,16 @@ GuiTextElementOperator
 			void GuiTextBoxCommonInterface::SetSelectionText(const WString& value)
 			{
 				return textElementOperator->SetSelectionText(value);
+			}
+
+			bool GuiTextBoxCommonInterface::GetReadonly()
+			{
+				return textElementOperator->GetReadonly();
+			}
+
+			void GuiTextBoxCommonInterface::SetReadonly(bool value)
+			{
+				textElementOperator->SetReadonly(value);
 			}
 
 /***********************************************************************

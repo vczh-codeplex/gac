@@ -63,6 +63,7 @@ Common Operations
 				GuiTextBoxCommonInterface*					textBoxCommonInterface;
 				ICallback*									callback;
 				bool										dragging;
+				bool										readonly;
 
 				void										UpdateCaretPoint();
 				void										Move(TextPos pos, bool shift);
@@ -102,6 +103,9 @@ Common Operations
 				bool										Cut();
 				bool										Copy();
 				bool										Paste();
+
+				bool										GetReadonly();
+				void										SetReadonly(bool value);
 			};
 
 			/// <summary>Common interface for text box controls.</summary>
@@ -205,6 +209,13 @@ Common Operations
 				/// <summary>Set the selected text.</summary>
 				/// <param name="value">The selected text.</param>
 				void										SetSelectionText(const WString& value);
+
+				/// <summary>Get the readonly mode.</summary>
+				/// <returns>Returns true if the text box is readonly.</returns>
+				bool										GetReadonly();
+				/// <summary>Set the readonly mode.</summary>
+				/// <param name="value">Set to true to make the texg box readonly.</param>
+				void										SetReadonly(bool value);
 			};
 
 /***********************************************************************

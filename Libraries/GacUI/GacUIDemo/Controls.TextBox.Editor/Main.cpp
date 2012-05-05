@@ -18,6 +18,18 @@ private:
 	GuiButton*						buttonGoto;
 	GuiMultilineTextBox*			textDocument;
 
+	void UpdateEditButtonState()
+	{
+		buttonCut->SetEnabled(textDocument->CanCut());
+		buttonCopy->SetEnabled(textDocument->CanCopy());
+		buttonPaste->SetEnabled(textDocument->CanPaste());
+	}
+
+	void UpdateGotoButtonState()
+	{
+		buttonGoto->SetEnabled(utow(wtou(textGoto->GetText()))==textGoto->GetText() && wtou(textGoto->GetText())!=0);
+	}
+
 	void buttonCut_OnClicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		textDocument->Cut();
@@ -51,22 +63,23 @@ private:
 
 	void checkReadonly_OnSelectedChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		textDocument->SetReadonly(checkReadonly->GetSelected());
+		UpdateEditButtonState();
 	}
 
 	void textGoto_TextChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
-		buttonGoto->SetEnabled(utow(wtou(textGoto->GetText()))==textGoto->GetText() && wtou(textGoto->GetText())!=0);
+		UpdateGotoButtonState();
 	}
 
 	void textDocument_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
-		buttonCut->SetEnabled(textDocument->CanCut());
-		buttonCopy->SetEnabled(textDocument->CanCopy());
+		UpdateEditButtonState();
 	}
 
 	void window_OnClipboardUpdated(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
-		buttonPaste->SetEnabled(textDocument->CanPaste());
+		UpdateEditButtonState();
 	}
 public:
 	TextBoxEditorWindow()
@@ -191,12 +204,8 @@ public:
 			cell->AddChild(textDocument->GetBoundsComposition());
 		}
 
-		{
-			GuiEventArgs arguments;
-			textGoto->TextChanged.Execute(arguments);
-			textDocument->SelectionChanged.Execute(arguments);
-			this->ClipboardUpdated.Execute(arguments);
-		}
+		UpdateEditButtonState();
+		UpdateGotoButtonState();
 		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
 		this->ForceCalculateSizeImmediately();
 		this->MoveToScreenCenter();
