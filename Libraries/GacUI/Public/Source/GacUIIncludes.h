@@ -12736,6 +12736,7 @@ Common Operations
 				GuiTextBoxCommonInterface*					textBoxCommonInterface;
 				ICallback*									callback;
 				bool										dragging;
+				bool										readonly;
 
 				void										UpdateCaretPoint();
 				void										Move(TextPos pos, bool shift);
@@ -12775,6 +12776,9 @@ Common Operations
 				bool										Cut();
 				bool										Copy();
 				bool										Paste();
+
+				bool										GetReadonly();
+				void										SetReadonly(bool value);
 			};
 
 			class GuiTextBoxCommonInterface : public Description<GuiTextBoxCommonInterface>
@@ -12822,6 +12826,9 @@ Common Operations
 				
 				WString										GetSelectionText();
 				void										SetSelectionText(const WString& value);
+
+				bool										GetReadonly();
+				void										SetReadonly(bool value);
 			};
 
 /***********************************************************************
