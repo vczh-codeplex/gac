@@ -25,35 +25,41 @@ private:
 		buttonPaste->SetEnabled(textDocument->CanPaste());
 	}
 
+	// ensure that the buttonGoto is enabled only when textGoto's content is a positive number
 	void UpdateGotoButtonState()
 	{
 		buttonGoto->SetEnabled(utow(wtou(textGoto->GetText()))==textGoto->GetText() && wtou(textGoto->GetText())!=0);
 	}
 
+	// cut text box selection
 	void buttonCut_OnClicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		textDocument->Cut();
 		textDocument->SetFocus();
 	}
 
+	// copy text box selection
 	void buttonCopy_OnClicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		textDocument->Copy();
 		textDocument->SetFocus();
 	}
 
+	// paste text from clipboard
 	void buttonPaste_OnClicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		textDocument->Paste();
 		textDocument->SetFocus();
 	}
 
+	// select all text
 	void buttonSelectAll_OnClicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		textDocument->SelectAll();
 		textDocument->SetFocus();
 	}
 
+	// go to the specified line
 	void buttonGoto_OnClicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		int line=wtoi(textGoto->GetText())-1;
@@ -61,22 +67,26 @@ private:
 		textDocument->SetFocus();
 	}
 
+	// make the textbox readonly or not readonly
 	void checkReadonly_OnSelectedChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		textDocument->SetReadonly(checkReadonly->GetSelected());
 		UpdateEditButtonState();
 	}
 
+	// when textGoto changed, disable buttonGoto if the text in the textGoto is failed to pass the validation
 	void textGoto_TextChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		UpdateGotoButtonState();
 	}
 
+	// update the edit buttons when selection changed
 	void textDocument_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		UpdateEditButtonState();
 	}
-
+	
+	// update the edit buttons when clipboard changed changed
 	void window_OnClipboardUpdated(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		UpdateEditButtonState();
@@ -204,10 +214,15 @@ public:
 			cell->AddChild(textDocument->GetBoundsComposition());
 		}
 
+		// make some buttons enabled or disabled appropiately
 		UpdateEditButtonState();
 		UpdateGotoButtonState();
+		// set the preferred minimum client size
 		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
+		// call this to calculate the size immediately if any indirect content in the table changes
+		// so that the window can calcaulte its correct size before calling the MoveToScreenCenter()
 		this->ForceCalculateSizeImmediately();
+		// move to the screen center
 		this->MoveToScreenCenter();
 	}
 
