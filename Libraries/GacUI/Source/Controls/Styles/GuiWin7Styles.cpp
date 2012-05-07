@@ -2871,6 +2871,7 @@ Win7DropDownComboBoxStyle
 				table->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
 				table->SetColumnOption(1, GuiCellOption::MinSizeOption());
 				elements.textComposition->AddChild(table);
+				elements.textComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 
 				textComposition=new GuiCellComposition;
 				table->AddChild(textComposition);
