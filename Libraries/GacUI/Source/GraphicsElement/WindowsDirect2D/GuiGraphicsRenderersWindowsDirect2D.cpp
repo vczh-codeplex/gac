@@ -523,6 +523,7 @@ GuiSolidLabelElementRenderer
 				:brush(0)
 				,textFormat(0)
 				,textLayout(0)
+				,oldText(L"")
 			{
 			}
 
@@ -658,6 +659,10 @@ GuiSolidLabelElementRenderer
 				if(oldText!=element->GetText())
 				{
 					oldText=element->GetText();
+					if(oldText==L"")
+					{
+						oldText=L"";
+					}
 					textChanged=true;
 				}
 				if(fontChanged || textChanged)

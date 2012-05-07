@@ -12268,6 +12268,7 @@ Win7DropDownComboBoxStyle
 				table->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
 				table->SetColumnOption(1, GuiCellOption::MinSizeOption());
 				elements.textComposition->AddChild(table);
+				elements.textComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 
 				textComposition=new GuiCellComposition;
 				table->AddChild(textComposition);
@@ -17551,6 +17552,7 @@ GuiSolidLabelElementRenderer
 				:brush(0)
 				,textFormat(0)
 				,textLayout(0)
+				,oldText(L"")
 			{
 			}
 
@@ -17686,6 +17688,10 @@ GuiSolidLabelElementRenderer
 				if(oldText!=element->GetText())
 				{
 					oldText=element->GetText();
+					if(oldText==L"")
+					{
+						oldText=L"";
+					}
 					textChanged=true;
 				}
 				if(fontChanged || textChanged)
