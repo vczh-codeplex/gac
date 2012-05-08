@@ -115,5 +115,29 @@ PureInterpretor
 			}
 			return false;
 		}
+
+		vint PureInterpretor::GetStartState()
+		{
+			return startState;
+		}
+
+		vint PureInterpretor::Transit(wchar_t input, vint state)
+		{
+			if(0<=state && state<stateCount)
+			{
+				vint charIndex=charMap[input];
+				vint nextState=transition[state][charIndex];
+				return nextState;
+			}
+			else
+			{
+				return -1;
+			}
+		}
+
+		bool PureInterpretor::IsFinalState(vint state)
+		{
+			return 0<=state && state<stateCount && finalState[state];
+		}
 	}
 }

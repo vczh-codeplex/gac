@@ -1248,6 +1248,63 @@ TEST_CASE(TestRegexLexer4)
 }
 
 /***********************************************************************
+字符着色
+***********************************************************************/
+
+#define WALK(INPUT, TOKEN, STOP)\
+	do\
+	{\
+		bool result=walker.Walk((INPUT), state, token, previousTokenStop);\
+		if((TOKEN)==-1)\
+		{\
+			TEST_ASSERT(result==false);\
+		}\
+		else\
+		{\
+			TEST_ASSERT(result==true);\
+			TEST_ASSERT((TOKEN)==token);\
+		}\
+		TEST_ASSERT((STOP)==previousTokenStop);\
+	}while(0)\
+
+TEST_CASE(TestRegexLexerWalker)
+{
+	List<WString> codes;
+	codes.Add(L"/d+");
+	codes.Add(L"[a-zA-Z_]/w*");
+	codes.Add(L"\"[^\"]*\"");
+	RegexLexer lexer(codes.Wrap());
+	RegexLexerWalker walker=lexer.Walk();
+
+	vint state=-1;
+	vint token=-1;
+	bool previousTokenStop=false;
+
+	WALK(L'g', 1, false);
+	WALK(L'e', 1, false);
+	WALK(L'n', 1, false);
+	WALK(L'i', 1, false);
+	WALK(L'u', 1, false);
+	WALK(L's', 1, false);
+	WALK(L' ', -1, true);
+	WALK(L'1', 0, false);
+	WALK(L'0', 0, false);
+	WALK(L' ', -1, true);
+	WALK(L'\"', -1, false);
+	WALK(L'\"', 2, false);
+	WALK(L'\"', -1, true);
+	WALK(L'g', -1, false);
+	WALK(L'e', -1, false);
+	WALK(L'n', -1, false);
+	WALK(L'i', -1, false);
+	WALK(L'u', -1, false);
+	WALK(L's', -1, false);
+	WALK(L'\"', 2, false);
+}
+
+#undef WALK
+
+/***********************************************************************
 性能测试
 ***********************************************************************/
 

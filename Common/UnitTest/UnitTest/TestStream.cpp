@@ -673,7 +673,8 @@ void TestCharEncoderDecoderStream(vint mode, wchar_t* name)
 			FileStream file(path, FileStream::ReadOnly);
 			DecoderStream stream(file, decoder);
 			StreamReader reader(stream);
-			TEST_ASSERT(reader.ReadToEnd()==L"Vczh is genius!@我是天才！");
+			WString content=reader.ReadToEnd();
+			TEST_ASSERT(content==L"Vczh is genius!@我是天才！");
 		}
 	}
 	{
@@ -706,7 +707,8 @@ void TestCharEncoderDecoderStream(vint mode, wchar_t* name)
 			FileStream file(path, FileStream::ReadOnly);
 			DecoderStream stream(file, decoder);
 			StreamReader reader(stream);
-			TEST_ASSERT(reader.ReadToEnd()==L"Vczh is genius!@我是天才！");
+			WString content=reader.ReadToEnd();
+			TEST_ASSERT(content==L"Vczh is genius!@我是天才！");
 		}
 	}
 }

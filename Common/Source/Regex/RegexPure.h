@@ -27,18 +27,22 @@ namespace vl
 		class PureInterpretor : public Object
 		{
 		protected:
-			vint					charMap[1<<(8*sizeof(wchar_t))];	//char -> char set index
+			vint				charMap[1<<(8*sizeof(wchar_t))];	//char -> char set index
 			vint**				transition;							//(state * char set index) -> state*
 			bool*				finalState;							//state -> bool
-			vint					stateCount;
-			vint					charSetCount;
-			vint					startState;
+			vint				stateCount;
+			vint				charSetCount;
+			vint				startState;
 		public:
 			PureInterpretor(Automaton::Ref dfa, CharRange::List& subsets);
 			~PureInterpretor();
 
 			bool				MatchHead(const wchar_t* input, const wchar_t* start, PureResult& result);
 			bool				Match(const wchar_t* input, const wchar_t* start, PureResult& result);
+
+			vint				GetStartState();
+			vint				Transit(wchar_t input, vint state);
+			bool				IsFinalState(vint state);
 		};
 	}
 }

@@ -41,15 +41,15 @@ namespace vl
 		{
 		protected:
 			WString										value;
-			vint											start;
-			vint											length;
+			vint										start;
+			vint										length;
 
 		public:
 			RegexString(vint _start=0);
 			RegexString(const WString& _string, vint _start, vint _length);
 
-			vint											Start()const;
-			vint											Length()const;
+			vint										Start()const;
+			vint										Length()const;
 			const WString&								Value()const;
 			bool										operator==(const RegexString& string)const;
 		};
@@ -131,28 +131,44 @@ namespace vl
 			friend class RegexLexer;
 		protected:
 			regex_internal::PureInterpretor*			pure;
-			collections::Array<vint>&					stateTokens;
+			const collections::Array<vint>&				stateTokens;
 			WString										code;
-			vint											codeIndex;
+			vint										codeIndex;
 			
-			RegexTokens(regex_internal::PureInterpretor* _pure, collections::Array<vint>& _stateTokens, const WString& _code, vint _codeIndex);
+			RegexTokens(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens, const WString& _code, vint _codeIndex);
 		public:
 
 			collections::IEnumerator<RegexToken>*		CreateEnumerator()const;
 			void										ReadToEnd(collections::List<RegexToken>& tokens, bool(*discard)(vint)=0)const;
 		};
 
+		class RegexLexerWalker : public Object
+		{
+			friend class RegexLexer;
+		protected:
+			regex_internal::PureInterpretor*			pure;
+			const collections::Array<vint>&				stateTokens;
+			
+			RegexLexerWalker(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens);
+		public:
+			RegexLexerWalker(const RegexLexerWalker& walker);
+			~RegexLexerWalker();
+
+			bool										Walk(wchar_t input, vint& state, vint& token, bool& previousTokenStop)const;
+		};
+
 		class RegexLexer : public Object, private NotCopyable
 		{
 		protected:
 			regex_internal::PureInterpretor*			pure;
-			collections::Array<vint>						ids;
-			collections::Array<vint>						stateTokens;
+			collections::Array<vint>					ids;
+			collections::Array<vint>					stateTokens;
 		public:
 			RegexLexer(const collections::IEnumerable<WString>& tokens);
 			~RegexLexer();
 
-			RegexTokens									Parse(const WString& code, vint codeIndex=-1);
+			RegexTokens									Parse(const WString& code, vint codeIndex=-1)const;
+			RegexLexerWalker							Walk()const;
 		};
 	}
 }
