@@ -368,18 +368,18 @@ RegexTokens
 		class RegexTokenEnumerator : public Object, public IEnumerator<RegexToken>
 		{
 		protected:
-			bool				available;
-			RegexToken			token;
+			bool					available;
+			RegexToken				token;
 			vint					index;
-			PureInterpretor*	pure;
-			Array<vint>&			stateTokens;
-			const wchar_t*		reading;
-			const wchar_t*		start;
+			PureInterpretor*		pure;
+			const Array<vint>&		stateTokens;
+			const wchar_t*			reading;
+			const wchar_t*			start;
 			vint					lineIndex;
 			vint					lineStart;
 			vint					codeIndex;
-			bool				cacheAvailable;
-			RegexToken			cacheToken;
+			bool					cacheAvailable;
+			RegexToken				cacheToken;
 
 			void Read()
 			{
@@ -478,7 +478,7 @@ RegexTokens
 			{
 			}
 
-			RegexTokenEnumerator(PureInterpretor* _pure, Array<vint>& _stateTokens, const wchar_t* _start, vint _codeIndex)
+			RegexTokenEnumerator(PureInterpretor* _pure, const Array<vint>& _stateTokens, const wchar_t* _start, vint _codeIndex)
 				:available(true)
 				,index(-1)
 				,pure(_pure)
@@ -540,7 +540,7 @@ RegexTokens
 			}
 		};
 
-		RegexTokens::RegexTokens(PureInterpretor* _pure, Array<vint>& _stateTokens, const WString& _code, vint _codeIndex)
+		RegexTokens::RegexTokens(PureInterpretor* _pure, const Array<vint>& _stateTokens, const WString& _code, vint _codeIndex)
 			:pure(_pure)
 			,stateTokens(_stateTokens)
 			,code(_code)
@@ -565,6 +565,53 @@ RegexTokens
 				discard=&DefaultDiscard;
 			}
 			RegexTokenEnumerator(pure, stateTokens, code.Buffer(), codeIndex).ReadToEnd(tokens, discard);
+		}
+
+/***********************************************************************
+RegexLexerWalker
+***********************************************************************/
+
+		RegexLexerWalker::RegexLexerWalker(PureInterpretor* _pure, const Array<vint>& _stateTokens)
+			:pure(_pure)
+			,stateTokens(_stateTokens)
+		{
+		}
+
+		RegexLexerWalker::RegexLexerWalker(const RegexLexerWalker& walker)
+			:pure(walker.pure)
+			,stateTokens(walker.stateTokens)
+		{
+		}
+
+		RegexLexerWalker::~RegexLexerWalker()
+		{
+		}
+
+		bool RegexLexerWalker::Walk(wchar_t input, vint& state, vint& token, bool& previousTokenStop)const
+		{
+			bool previousStateIsFinalState=pure->IsFinalState(state);
+			if(state==-1)
+			{
+				state=pure->GetStartState();
+			}
+			token=-1;
+			previousTokenStop=false;
+
+			state=pure->Transit(input, state);
+			if(previousStateIsFinalState && state==-1)
+			{
+				state=pure->Transit(input, pure->GetStartState());
+				previousTokenStop=true;
+			}
+			if(pure->IsFinalState(state))
+			{
+				token=stateTokens[state];
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
 
 /***********************************************************************
@@ -670,9 +717,14 @@ RegexLexer
 			if(pure)delete pure;
 		}
 
-		RegexTokens RegexLexer::Parse(const WString& code, vint codeIndex)
+		RegexTokens RegexLexer::Parse(const WString& code, vint codeIndex)const
 		{
 			return RegexTokens(pure, stateTokens, code, codeIndex);
+		}
+
+		RegexLexerWalker RegexLexer::Walk()const
+		{
+			return RegexLexerWalker(pure, stateTokens);
 		}
 	}
 }
