@@ -15,5 +15,6 @@ Interfaces:
 #include "..\..\..\Common\Source\Function.h"
 #include "..\..\..\Common\Source\Collections\List.h"
 #include "..\..\..\Common\Source\Collections\Dictionary.h"
+#include "..\..\..\Common\Source\Threading.h"
 
 #endif
