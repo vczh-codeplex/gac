@@ -56,6 +56,15 @@ Common Operations
 					int										GetPageRows()override;
 					bool									BeforeModify(TextPos& start, TextPos& end, const WString& originalText, WString& inputText)override;
 				};
+
+				class ITextEditCallback : public virtual IDescriptable, public Description<ITextEditCallback>
+				{
+				public:
+					virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
+					virtual void							Detach()=0;
+					virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
+				};
+
 			protected:
 				elements::GuiColorizedTextElement*			textElement;
 				compositions::GuiGraphicsComposition*		textComposition;
@@ -64,6 +73,9 @@ Common Operations
 				ICallback*									callback;
 				bool										dragging;
 				bool										readonly;
+
+				SpinLock									elementModifyLock;
+				collections::List<Ptr<ITextEditCallback>>	textEditCallbacks;
 
 				void										UpdateCaretPoint();
 				void										Move(TextPos pos, bool shift);
@@ -86,6 +98,8 @@ Common Operations
 				void										Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl);
 				ICallback*									GetCallback();
 				void										SetCallback(ICallback* value);
+				bool										AttachTextEditCallback(Ptr<ITextEditCallback> value);
+				bool										DetachTextEditCallback(Ptr<ITextEditCallback> value);
 				GuiTextBoxCommonInterface*					GetTextBoxCommonInterface();
 				void										SetTextBoxCommonInterface(GuiTextBoxCommonInterface* value);
 
@@ -107,6 +121,10 @@ Common Operations
 				bool										GetReadonly();
 				void										SetReadonly(bool value);
 			};
+
+/***********************************************************************
+Common Interface
+***********************************************************************/
 
 			/// <summary>Common interface for text box controls.</summary>
 			class GuiTextBoxCommonInterface : public Description<GuiTextBoxCommonInterface>
@@ -201,6 +219,9 @@ Common Operations
 				/// <summary>Get the right-bottom text position of the selection.</summary>
 				/// <returns>The right-bottom text position of the selection.</returns>
 				TextPos										GetCaretLarge();
+				/// <summary>Select (highlight) a part of text.</summary>
+				/// <param name="begin">The begin position.</param>
+				/// <param name="end">The end position. This is also the caret position.</param>
 				void										Select(TextPos begin, TextPos end);
 				
 				/// <summary>Get the selected text.</summary>
@@ -219,7 +240,7 @@ Common Operations
 			};
 
 /***********************************************************************
-TextBox
+MultilineTextBox
 ***********************************************************************/
 
 			/// <summary>Multiline text box control.</summary>
@@ -283,6 +304,10 @@ TextBox
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 			};
+
+/***********************************************************************
+SinglelineTextBox
+***********************************************************************/
 			
 			/// <summary>Single text box control.</summary>
 			class GuiSinglelineTextBox : public GuiControl, public GuiTextBoxCommonInterface, public Description<GuiSinglelineTextBox>

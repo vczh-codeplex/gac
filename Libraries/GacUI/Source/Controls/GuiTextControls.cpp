@@ -129,8 +129,15 @@ GuiTextElementOperator
 				WString inputText=input;
 				if(callback->BeforeModify(start, end, originalText, inputText))
 				{
-					end=textElement->GetLines().Modify(start, end, inputText);
+					{
+						SpinLock::Scope scope(elementModifyLock);
+						end=textElement->GetLines().Modify(start, end, inputText);
+					}
 					callback->AfterModify(originalStart, originalEnd, originalText, start, end, inputText);
+					for(int i=0;i<textEditCallbacks.Count();i++)
+					{
+						textEditCallbacks[i]->TextEditNotify(originalStart, originalEnd, originalText, start, end, inputText);
+					}
 					Move(end, false);
 
 					if(textBoxCommonInterface)
@@ -383,6 +390,11 @@ GuiTextElementOperator
 
 			GuiTextElementOperator::~GuiTextElementOperator()
 			{
+				for(int i=0;i<textEditCallbacks.Count();i++)
+				{
+					textEditCallbacks[i]->Detach();
+				}
+				textEditCallbacks.Clear();
 			}
 
 			void GuiTextElementOperator::Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl)
@@ -401,6 +413,11 @@ GuiTextElementOperator
 				textComposition->GetEventReceiver()->mouseMove.AttachMethod(this, &GuiTextElementOperator::OnMouseMove);
 				focusableComposition->GetEventReceiver()->keyDown.AttachMethod(this, &GuiTextElementOperator::OnKeyDown);
 				focusableComposition->GetEventReceiver()->charInput.AttachMethod(this, &GuiTextElementOperator::OnCharInput);
+
+				for(int i=0;i<textEditCallbacks.Count();i++)
+				{
+					textEditCallbacks[i]->Attach(textElement, elementModifyLock);
+				}
 			}
 			
 			GuiTextElementOperator::ICallback* GuiTextElementOperator::GetCallback()
@@ -411,6 +428,36 @@ GuiTextElementOperator
 			void GuiTextElementOperator::SetCallback(ICallback* value)
 			{
 				callback=value;
+			}
+
+			bool GuiTextElementOperator::AttachTextEditCallback(Ptr<ITextEditCallback> value)
+			{
+				if(textEditCallbacks.Contains(value.Obj()))
+				{
+					return false;
+				}
+				else
+				{
+					textEditCallbacks.Add(value);
+					if(textElement)
+					{
+						value->Attach(textElement, elementModifyLock);
+					}
+					return true;
+				}
+			}
+
+			bool GuiTextElementOperator::DetachTextEditCallback(Ptr<ITextEditCallback> value)
+			{
+				if(textEditCallbacks.Remove(value.Obj()))
+				{
+					value->Detach();
+					return true;
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 			GuiTextBoxCommonInterface* GuiTextElementOperator::GetTextBoxCommonInterface()
