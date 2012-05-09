@@ -162,7 +162,7 @@ namespace LinkPdbXml
                         string name = typeElement.Attribute("name").Value;
                         if (name.StartsWith("vl::Ptr<"))
                         {
-                            string newName = name.Substring(8, name.Length - 9);
+                            string newName = name.Substring(8, name.Length - 9).Trim();
                             return new GacType
                             {
                                 Name = name,

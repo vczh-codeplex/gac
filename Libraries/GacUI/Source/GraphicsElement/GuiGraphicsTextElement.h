@@ -67,6 +67,10 @@ ColorizedText
 					/// The number of available characters in the buffer.
 					/// </summary>
 					int								dataLength;
+					/// <summary>
+					/// The internal state of a colorizer when it parses to the end of this line. -1 means that this state is not available.
+					/// </summary>
+					int								lexerFinalState;
 
 					TextLine();
 					~TextLine();
@@ -172,6 +176,7 @@ ColorizedText
 					IGuiGraphicsRenderTarget*		renderTarget;
 					int								tabWidth;
 					int								tabSpaceCount;
+					int								availableColorizedLines;
 				public:
 					TextLines();
 					~TextLines();
@@ -187,6 +192,16 @@ ColorizedText
 					/// <returns>The related text line object.</returns>
 					/// <param name="row">The specified row number.</param>
 					TextLine&						GetLine(int row);
+					/// <summary>
+					/// Returns the number of lines that are colorized.
+					/// </summary>
+					/// <returns>The number of lines that are colorized.</returns>
+					int								GetAvailableColorizedLines();
+					/// <summary>
+					/// Set the number of lines that are colorized.
+					/// </summary>
+					/// <param name="value">The number of lines that are colorized.</param>
+					void							SetAvailableColorizedLines(int value);
 					/// <summary>
 					/// Returns the binded <see cref="CharMeasurer"/>.
 					/// </summary>

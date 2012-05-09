@@ -61,6 +61,9 @@
     <Filter Include="GacUI\NativeWindow\Windows\GDI">
       <UniqueIdentifier>{eaf26748-f7da-4cfd-af89-44868c2bef82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Regex">
+      <UniqueIdentifier>{5779d63d-bbaa-4c7b-b55f-32ad8ddff339}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -194,6 +197,30 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Controls\Styles\GuiThemeStyleFactory.cpp">
       <Filter>GacUI\Controls\Styles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Regex\Regex.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Regex\RegexAutomaton.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Regex\RegexData.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Regex\RegexExpression.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Regex\RegexParser.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Regex\RegexPure.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Regex\RegexRich.cpp">
+      <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Regex\RegexWriter.cpp">
+      <Filter>Common\Regex</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -400,6 +427,27 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\Styles\GuiThemeStyleFactory.h">
       <Filter>GacUI\Controls\Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Regex\Regex.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Regex\RegexAutomaton.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Regex\RegexData.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Regex\RegexExpression.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Regex\RegexPure.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Regex\RegexRich.h">
+      <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Regex\RegexWriter.h">
+      <Filter>Common\Regex</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

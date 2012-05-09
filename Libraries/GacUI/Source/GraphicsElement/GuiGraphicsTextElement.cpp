@@ -22,6 +22,7 @@ text::TextLine
 					,availableOffsetCount(0)
 					,bufferLength(0)
 					,dataLength(0)
+					,lexerFinalState(-1)
 				{
 				}
 
