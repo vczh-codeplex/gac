@@ -644,6 +644,11 @@ WindowsAsyncService
 					return Thread::GetCurrentThreadId()==mainThreadId;
 				}
 
+				void InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument)
+				{
+					ThreadPoolLite::Queue(proc, argument);
+				}
+
 				void InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument)
 				{
 					SpinLock::Scope scope(taskListLock);
