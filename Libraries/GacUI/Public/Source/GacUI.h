@@ -1736,6 +1736,7 @@ ColorizedText
 					int								availableOffsetCount;
 					int								bufferLength;
 					int								dataLength;
+					int								lexerFinalState;
 
 					TextLine();
 					~TextLine();
@@ -1780,12 +1781,15 @@ ColorizedText
 					IGuiGraphicsRenderTarget*		renderTarget;
 					int								tabWidth;
 					int								tabSpaceCount;
+					int								availableColorizedLines;
 				public:
 					TextLines();
 					~TextLines();
 
 					int								GetCount();
 					TextLine&						GetLine(int row);
+					int								GetAvailableColorizedLines();
+					void							SetAvailableColorizedLines(int value);
 					CharMeasurer*					GetCharMeasurer();
 					void							SetCharMeasurer(CharMeasurer* value);
 					IGuiGraphicsRenderTarget*		GetRenderTarget();

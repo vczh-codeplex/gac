@@ -10835,6 +10835,1686 @@ namespace vl
 #endif
 
 /***********************************************************************
+COLLECTIONS\DICTIONARYWRAPPERS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Data Structure::Dictionary Wrappers
+
+Classes:
+	ReadonlyDictionaryWrapper<V,K>
+	DictionaryWrapper<V,K>
+	ReadonlyGroupWrapper<V,K>
+	GroupWrapper<V,K>
+***********************************************************************/
+
+#ifndef VCZH_COLLECTIONS_DICTIONARYWRAPPERS
+#define VCZH_COLLECTIONS_DICTIONARYWRAPPERS
+
+
+namespace vl
+{
+	namespace collections
+	{
+
+/***********************************************************************
+代理
+***********************************************************************/
+
+		template<typename C, typename KT, typename VT, typename KK, typename VK>
+		class DictionaryWrapper;
+		
+		template<typename C, typename KT, typename VT, typename KK, typename VK>
+		class GroupWrapper;
+
+		template<typename C, typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
+		class ReadonlyDictionaryWrapper : public Object, public virtual IReadonlyDictionary<KT, VT, KK, VK>
+		{
+			friend class DictionaryWrapper<C, KT, VT, KK, VK>;
+		private:
+			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
+			{
+			private:
+				const IReadonlyDictionary<KT, VT, KK, VK>*	container;
+				vint											index;
+				Pair<KT, VT>								current;
+
+				void UpdateCurrent()
+				{
+					if(index<container->Count())
+					{
+						current.key=container->Keys()[index];
+						current.value=container->Values()[index];
+					}
+				}
+			public:
+				Enumerator(const IReadonlyDictionary* _container, vint _index=0)
+				{
+					container=_container;
+					index=_index;
+					UpdateCurrent();
+				}
+				
+				IEnumerator<Pair<KT, VT>>* Clone()const
+				{
+					return new Enumerator(container, index);
+				}
+
+				const Pair<KT, VT>& Current()const
+				{
+					return current;
+				}
+
+				vint Index()const
+				{
+					return index;
+				}
+
+				bool Next()
+				{
+					index++;
+					UpdateCurrent();
+					return Available();
+				}
+
+				bool Available()const
+				{
+					return index>=0 && index<container->Count();
+				}
+
+				void Reset()
+				{
+					index=0;
+					UpdateCurrent();
+				}
+			};
+
+			C*						container;
+		public:
+			ReadonlyDictionaryWrapper(C* _container=0)
+			{
+				container=_container;
+			}
+
+			C* GetContainer()
+			{
+				return container;
+			}
+
+			void SetContainer(C* _container)
+			{
+				container=_container;
+			}
+
+			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
+			{
+				return new Enumerator(this);
+			}
+
+			const IReadonlyList<KT, KK>& Keys()const
+			{
+				return container->Keys();
+			}
+
+			const IReadonlyList<VT, VK>& Values()const
+			{
+				return container->Values();
+			}
+
+			vint Count()const
+			{
+				return container->Count();
+			}
+
+			const VT& Get(const KK& key)const
+			{
+				return container->Get(key);
+			}
+
+			const VT& operator[](const KK& key)const
+			{
+				return container->operator[](key);
+			}
+		};
+
+		template<typename C, typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
+		class DictionaryWrapper : public Object, public virtual IDictionary<KT, VT, KK, VK>
+		{
+		private:
+			C*						container;
+		public:
+			DictionaryWrapper(C* _container=0)
+			{
+				container=_container;
+			}
+
+			C* GetContainer()
+			{
+				return container;
+			}
+
+			void SetContainer(C* _container)
+			{
+				container=_container;
+			}
+
+			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
+			{
+				return new ReadonlyDictionaryWrapper<C, KT, VT, KK, VK>::Enumerator(this);
+			}
+
+			const IReadonlyList<KT, KK>& Keys()const
+			{
+				return container->Keys();
+			}
+
+			const IReadonlyList<VT, VK>& Values()const
+			{
+				return container->Values();
+			}
+
+			vint Count()const
+			{
+				return container->Count();
+			}
+
+			const VT& Get(const KK& key)const
+			{
+				return container->Get(key);
+			}
+
+			const VT& operator[](const KK& key)const
+			{
+				return container->operator[](key);
+			}
+
+			bool Set(const KK& key, const VT& value)
+			{
+				return container->Set(key, value);
+			}
+
+			bool Add(const KT& key, const VT& value)
+			{
+				return container->Add(key, value);
+			}
+
+			bool Remove(const KK& key)
+			{
+				return container->Remove(key);
+			}
+
+			bool Clear()
+			{
+				return container->Clear();
+			}
+		};
+
+		template<typename C, typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
+		class ReadonlyGroupWrapper : public Object, public virtual IReadonlyGroup<KT, VT, KK, VK>
+		{
+			friend class GroupWrapper<C, KT, VT, KK, VK>;
+		private:
+			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
+			{
+			private:
+				const IReadonlyGroup<KT, VT, KK, VK>*		container;
+				vint											keyIndex;
+				vint											valueIndex;
+				Pair<KT, VT>								current;
+
+				void UpdateCurrent()
+				{
+					if(keyIndex<container->Count())
+					{
+						const IReadonlyList<VT, VK>& values=container->GetByIndex(keyIndex);
+						if(valueIndex<values.Count())
+						{
+							current.key=container->Keys()[keyIndex];
+							current.value=values[valueIndex];
+						}
+					}
+				}
+			public:
+				Enumerator(const IReadonlyGroup* _container, vint _keyIndex=0, vint _valueIndex=0)
+				{
+					container=_container;
+					keyIndex=_keyIndex;
+					valueIndex=_valueIndex;
+					UpdateCurrent();
+				}
+				
+				IEnumerator<Pair<KT, VT>>* Clone()const
+				{
+					return new Enumerator(container, keyIndex, valueIndex);
+				}
+
+				const Pair<KT, VT>& Current()const
+				{
+					return current;
+				}
+
+				vint Index()const
+				{
+					if(Available())
+					{
+						vint index=0;
+						for(vint i=0;i<keyIndex;i++)
+						{
+							index+=container->GetByIndex(i).Count();
+						}
+						return index+valueIndex;
+					}
+					else
+					{
+						return -1;
+					}
+				}
+
+				bool Next()
+				{
+					if(keyIndex<container->Count())
+					{
+						const IReadonlyList<VT, VK>& values=container->GetByIndex(keyIndex);
+						valueIndex++;
+						if(valueIndex<values.Count())
+						{
+							UpdateCurrent();
+							return true;
+						}
+						else
+						{
+							keyIndex++;
+							valueIndex=0;
+							UpdateCurrent();
+							return keyIndex<container->Count();
+						}
+					}
+					else
+					{
+						return false;
+					}
+				}
+
+				bool Available()const
+				{
+					if(keyIndex<container->Count())
+					{
+						const IReadonlyList<VT, VK>& values=container->GetByIndex(keyIndex);
+						if(valueIndex<values.Count())
+						{
+							return true;
+						}
+					}
+					return false;
+				}
+
+				void Reset()
+				{
+					keyIndex=0;
+					valueIndex=0;
+					UpdateCurrent();
+				}
+			};
+
+			C*									container;
+		public:
+			ReadonlyGroupWrapper(C* _container=0)
+			{
+				container=_container;
+			}
+
+			C* GetContainer()
+			{
+				return container;
+			}
+
+			void SetContainer(C* _container)
+			{
+				container=_container;
+			}
+
+			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
+			{
+				return new Enumerator(this);
+			}
+
+			const IReadonlyList<KT, KK>& Keys()const
+			{
+				return container->Keys();
+			}
+
+			vint Count()const
+			{
+				return container->Count();
+			}
+
+			const IReadonlyList<VT, VK>& Get(const KK& key)const
+			{
+				return container->Get(key);
+			}
+
+			const IReadonlyList<VT, VK>& GetByIndex(vint index)const
+			{
+				return container->GetByIndex(index);
+			}
+
+			const IReadonlyList<VT, VK>& operator[](const KK& key)const
+			{
+				return container->operator[](key);
+			}
+
+			bool Contains(const KK& key)const
+			{
+				return container->Contains(key);
+			}
+
+			bool Contains(const KK& key, const VK& value)const
+			{
+				return container->Contains(key, value);
+			}
+		};
+
+		template<typename C, typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
+		class GroupWrapper : public Object, public virtual IGroup<KT, VT, KK, VK>
+		{
+		private:
+			C*									container;
+		public:
+			GroupWrapper(C* _container=0)
+			{
+				container=_container;
+			}
+
+			C* GetContainer()
+			{
+				return container;
+			}
+
+			void SetContainer(C* _container)
+			{
+				container=_container;
+			}
+
+			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
+			{
+				return new ReadonlyGroupWrapper<C, KT, VT, KK, VK>::Enumerator(this);
+			}
+
+			const IReadonlyList<KT, KK>& Keys()const
+			{
+				return container->Keys();
+			}
+
+			vint Count()const
+			{
+				return container->Count();
+			}
+
+			const IReadonlyList<VT, VK>& Get(const KK& key)const
+			{
+				return container->Get(key);
+			}
+
+			const IReadonlyList<VT, VK>& GetByIndex(vint index)const
+			{
+				return container->GetByIndex(index);
+			}
+
+			const IReadonlyList<VT, VK>& operator[](const KK& key)const
+			{
+				return container->operator[](key);
+			}
+
+			bool Contains(const KK& key)const
+			{
+				return container->Contains(key);
+			}
+
+			bool Contains(const KK& key, const VK& value)const
+			{
+				return container->Contains(key, value);
+			}
+
+			bool Add(const KT& key, const VT& value)
+			{
+				return container->Add(key, value);
+			}
+
+			bool Remove(const KK& key)
+			{
+				return container->Remove(key);
+			}
+
+			bool Remove(const KK& key, const VK& value)
+			{
+				return container->Remove(key, value);
+			}
+
+			bool Clear()
+			{
+				return container->Clear();
+			}
+		};
+
+/***********************************************************************
+类型转换代理
+***********************************************************************/
+	}
+}
+
+#endif
+
+/***********************************************************************
+COLLECTIONS\DICTIONARY.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Data Structure::Dictionary
+
+Classes:
+	Dictionary<KT, VT, KK, VK>					：映射
+	Group<KT, VT, KK, VK>						：多重映射
+***********************************************************************/
+
+#ifndef VCZH_COLLECTIONS_DICTIONARY
+#define VCZH_COLLECTIONS_DICTIONARY
+
+
+namespace vl
+{
+	namespace collections
+	{
+		template<
+			typename KT,
+			typename VT,
+			typename ValueContainer=List<VT, typename KeyType<VT>::Type>,
+			typename KK=typename KeyType<KT>::Type, 
+			typename VK=typename KeyType<VT>::Type
+		>
+		class Dictionary : public Object, private NotCopyable
+		{
+		protected:
+			SortedList<KT, KK>					keys;
+			ValueContainer						values;
+			mutable DictionaryWrapper<Dictionary<KT, VT, ValueContainer, KK, VK>, KT, VT, KK, VK>	wrapper;
+		public:
+			Dictionary()
+			{
+				wrapper.SetContainer(this);
+			}
+
+			void SetLessMemoryMode(bool mode)
+			{
+				keys.SetLessMemoryMode(mode);
+				values.SetLessMemoryMode(mode);
+			}
+
+			template<typename T>
+			void CopyKeysToCollection(T& dst, bool append=false)const
+			{
+				CopyToCollection(dst, keys, append);
+			}
+
+			template<typename T>
+			void CopyKeysToArray(T& dst, bool append=false)const
+			{
+				CopyToArray(dst, keys, append);
+			}
+
+			template<typename T>
+			void CopyValuesToCollection(T& dst, bool append=false)const
+			{
+				CopyToCollection(dst, values, append);
+			}
+
+			template<typename T>
+			void CopyValuesToArray(T& dst, bool append=false)const
+			{
+				CopyToArray(dst, values, append);
+			}
+
+			const IReadonlyList<KT, KK>& Keys()const
+			{
+				return keys.Wrap();
+			}
+
+			const IReadonlyList<VT, VK>& Values()const
+			{
+				return values.Wrap();
+			}
+
+			vint Count()const
+			{
+				return keys.Count();
+			}
+
+			const VT& Get(const KK& key)const
+			{
+				return values.Get(keys.IndexOf(key));
+			}
+
+			const VT& operator[](const KK& key)const
+			{
+				return values.Get(keys.IndexOf(key));
+			}
+
+			bool Set(const KK& key, const VT& value)
+			{
+				vint index=keys.IndexOf(key);
+				if(index==-1)
+				{
+					index=keys.Add(key);
+					values.Insert(index, value);
+				}
+				else
+				{
+					values[index]=value;
+				}
+				return true;
+			}
+
+			bool Add(const KT& key, const VT& value)
+			{
+				CHECK_ERROR(!keys.Contains(key), L"Dictionary<KT, KK, ValueContainer, VT, VK>::Add(const KT&, const VT&)#key已存在。");
+				vint index=keys.Add(key);
+				values.Insert(index, value);
+				return true;
+			}
+
+			bool Remove(const KK& key)
+			{
+				vint index=keys.IndexOf(key);
+				if(index!=-1)
+				{
+					keys.RemoveAt(index);
+					values.RemoveAt(index);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Clear()
+			{
+				keys.Clear();
+				values.Clear();
+				return true;
+			}
+
+			IDictionary<KT, VT, KK, VK>& Wrap()const
+			{
+				return wrapper;
+			}
+		};
+
+		template<
+			typename KT,
+			typename VT,
+			typename ValueContainer=List<VT, typename KeyType<VT>::Type>,
+			typename KK=typename KeyType<KT>::Type,
+			typename VK=typename KeyType<VT>::Type
+		>
+		class Group : public Object, private NotCopyable
+		{
+		protected:
+			SortedList<KT, KK>				keys;
+			List<ValueContainer*>			values;
+			mutable GroupWrapper<Group<KT, VT, ValueContainer, KK, VK>, KT, VT, KK, VK>	wrapper;
+		public:
+			Group()
+			{
+				wrapper.SetContainer(this);
+			}
+
+			~Group()
+			{
+				Clear();
+			}
+
+			template<typename T>
+			void CopyKeysToCollection(T& dst, bool append=false)const
+			{
+				CopyToCollection(dst, keys, append);
+			}
+
+			template<typename T>
+			void CopyKeysToArray(T& dst, bool append=false)const
+			{
+				CopyToArray(dst, keys, append);
+			}
+
+			template<typename T>
+			void CopyValuesToCollection(vint index, T& dst, bool append=false)const
+			{
+				CopyToCollection(dst, *(values.Get(index)), append);
+			}
+
+			template<typename T>
+			void CopyValuesToArray(vint index, T& dst, bool append=false)const
+			{
+				CopyToArray(dst, *(values.Get(index)), append);
+			}
+
+			const IReadonlyList<KT, KK>& Keys()const
+			{
+				return keys.Wrap();
+			}
+
+			vint Count()const
+			{
+				return keys.Count();
+			}
+
+			const IReadonlyList<VT, VK>& Get(const KK& key)const
+			{
+				return values.Get(keys.IndexOf(key))->Wrap();
+			}
+
+			const IReadonlyList<VT, VK>& GetByIndex(vint index)const
+			{
+				return values.Get(index)->Wrap();
+			}
+
+			const IReadonlyList<VT, VK>& operator[](const KK& key)const
+			{
+				return values.Get(keys.IndexOf(key))->Wrap();
+			}
+
+			bool Contains(const KK& key)const
+			{
+				return keys.Contains(key);
+			}
+
+			bool Contains(const KK& key, const VK& value)const
+			{
+				vint index=keys.IndexOf(key);
+				if(index!=-1)
+				{
+					return values.Get(index)->Contains(value);
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Add(const KT& key, const VT& value)
+			{
+				ValueContainer* target=0;
+				vint index=keys.IndexOf(key);
+				if(index==-1)
+				{
+					target=new ValueContainer;
+					values.Insert(keys.Add(key), target);
+				}
+				else
+				{
+					target=values[index];
+				}
+				target->Add(value);
+				return true;
+			}
+
+			bool Remove(const KK& key)
+			{
+				vint index=keys.IndexOf(key);
+				if(index!=-1)
+				{
+					keys.RemoveAt(index);
+					List<VT, VK>* target=values[index];
+					values.RemoveAt(index);
+					delete target;
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Remove(const KK& key, const VK& value)
+			{
+				vint index=keys.IndexOf(key);
+				if(index!=-1)
+				{
+					List<VT, VK>* target=values[index];
+					target->Remove(value);
+					if(target->Count()==0)
+					{
+						keys.RemoveAt(index);
+						values.RemoveAt(index);
+						delete target;
+					}
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Clear()
+			{
+				for(vint i=0;i<values.Count();i++)
+				{
+					delete values[i];
+				}
+				keys.Clear();
+				values.Clear();
+				return true;
+			}
+
+			IGroup<KT, VT, KK, VK>& Wrap()const
+			{
+				return wrapper;
+			}
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+REGEX\REGEX.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Regex::Regular Expression
+
+Classes:
+	RegexString						：字符串匹配结果
+	RegexMatch						：匹配结果
+	Regex							：正则表达式引擎
+	RegexToken						：词法记号
+	RegexTokens						：词法记号表
+	RegexLexer						：词法分析器
+***********************************************************************/
+
+#ifndef VCZH_REGEX_REGEX
+#define VCZH_REGEX_REGEX
+
+
+namespace vl
+{
+	namespace regex_internal
+	{
+		class PureResult;
+		class PureInterpretor;
+		class RichResult;
+		class RichInterpretor;
+	}
+
+	namespace regex
+	{
+
+/***********************************************************************
+正则表达式引擎数据结构
+***********************************************************************/
+
+		class RegexString : public Object
+		{
+		protected:
+			WString										value;
+			vint										start;
+			vint										length;
+
+		public:
+			RegexString(vint _start=0);
+			RegexString(const WString& _string, vint _start, vint _length);
+
+			vint										Start()const;
+			vint										Length()const;
+			const WString&								Value()const;
+			bool										operator==(const RegexString& string)const;
+		};
+
+		class RegexMatch : public Object, private NotCopyable
+		{
+			friend class Regex;
+		public:
+			typedef Ptr<RegexMatch>										Ref;
+			typedef collections::List<Ref>								List;
+			typedef collections::IReadonlyList<RegexString>				CaptureList;
+			typedef collections::IReadonlyGroup<WString, RegexString>	CaptureGroup;
+		protected:
+			collections::List<RegexString>				captures;
+			collections::Group<WString, RegexString>	groups;
+			bool										success;
+			RegexString									result;
+
+			RegexMatch(const WString& _string, regex_internal::PureResult* _result);
+			RegexMatch(const WString& _string, regex_internal::RichResult* _result, regex_internal::RichInterpretor* _rich);
+			RegexMatch(const RegexString& _result);
+		public:
+			
+			bool										Success()const;
+			const RegexString&							Result()const;
+			const CaptureList&							Captures()const;
+			const CaptureGroup&							Groups()const;
+		};
+
+/***********************************************************************
+正则表达式引擎
+***********************************************************************/
+
+		class Regex : public Object, private NotCopyable
+		{
+		protected:
+			regex_internal::PureInterpretor*			pure;
+			regex_internal::RichInterpretor*			rich;
+
+			void										Process(const WString& text, bool keepEmpty, bool keepSuccess, bool keepFail, RegexMatch::List& matches)const;
+		public:
+			Regex(const WString& code, bool preferPure=true);
+			~Regex();
+
+			bool										IsPureMatch()const;
+			bool										IsPureTest()const;
+
+			RegexMatch::Ref								MatchHead(const WString& text)const;
+			RegexMatch::Ref								Match(const WString& text)const;
+			bool										TestHead(const WString& text)const;
+			bool										Test(const WString& text)const;
+			void										Search(const WString& text, RegexMatch::List& matches)const;
+			void										Split(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
+			void										Cut(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
+		};
+
+/***********************************************************************
+正则表达式词法分析器
+***********************************************************************/
+
+		class RegexToken
+		{
+		public:
+			vint										start;
+			vint										length;
+			vint										token;
+			const wchar_t*								reading;
+
+			vint										lineIndex;
+			vint										lineStart;
+			vint										codeIndex;
+
+			bool										operator==(const RegexToken& _token)const;
+			bool										operator==(const wchar_t* _token)const;
+		};
+
+		class RegexTokens : public Object, public collections::IEnumerable<RegexToken>
+		{
+			friend class RegexLexer;
+		protected:
+			regex_internal::PureInterpretor*			pure;
+			const collections::Array<vint>&				stateTokens;
+			WString										code;
+			vint										codeIndex;
+			
+			RegexTokens(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens, const WString& _code, vint _codeIndex);
+		public:
+
+			collections::IEnumerator<RegexToken>*		CreateEnumerator()const;
+			void										ReadToEnd(collections::List<RegexToken>& tokens, bool(*discard)(vint)=0)const;
+		};
+
+		class RegexLexerWalker : public Object
+		{
+			friend class RegexLexer;
+		protected:
+			regex_internal::PureInterpretor*			pure;
+			const collections::Array<vint>&				stateTokens;
+			
+			RegexLexerWalker(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens);
+		public:
+			RegexLexerWalker(const RegexLexerWalker& walker);
+			~RegexLexerWalker();
+
+			bool										Walk(wchar_t input, vint& state, vint& token, bool& previousTokenStop)const;
+		};
+
+		class RegexLexer : public Object, private NotCopyable
+		{
+		protected:
+			regex_internal::PureInterpretor*			pure;
+			collections::Array<vint>					ids;
+			collections::Array<vint>					stateTokens;
+		public:
+			RegexLexer(const collections::IEnumerable<WString>& tokens);
+			~RegexLexer();
+
+			RegexTokens									Parse(const WString& code, vint codeIndex=-1)const;
+			RegexLexerWalker							Walk()const;
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+REGEX\REGEXDATA.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Regex::Basic Data Structure
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_REGEX_REGEXDATA
+#define VCZH_REGEX_REGEXDATA
+
+
+namespace vl
+{
+	namespace regex_internal
+	{
+		using namespace vl::collections;
+
+/***********************************************************************
+基础数据结构
+***********************************************************************/
+
+		class CharRange
+		{
+		public:
+			typedef SortedList<CharRange>			List;
+
+			wchar_t					begin;
+			wchar_t					end;
+
+			CharRange();
+			CharRange(wchar_t _begin, wchar_t _end);
+
+			bool					operator<(CharRange item)const;
+			bool					operator<=(CharRange item)const;
+			bool					operator>(CharRange item)const;
+			bool					operator>=(CharRange item)const;
+			bool					operator==(CharRange item)const;
+			bool					operator!=(CharRange item)const;
+
+			bool					operator<(wchar_t item)const;
+			bool					operator<=(wchar_t item)const;
+			bool					operator>(wchar_t item)const;
+			bool					operator>=(wchar_t item)const;
+			bool					operator==(wchar_t item)const;
+			bool					operator!=(wchar_t item)const;
+		};
+	}
+
+	template<>
+	struct POD<regex_internal::CharRange>
+	{
+		static const bool Result=true;
+	};
+}
+
+#endif
+
+/***********************************************************************
+REGEX\REGEXAUTOMATON.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Regex::RegexAutomaton
+
+Classes:
+	State						：状态
+	Transition					：转换
+	Automaton					：状态机
+
+Functions:
+	EpsilonNfaToNfa				：去Epsilon
+	NfaToDfa					：NFA转DFA
+***********************************************************************/
+
+#ifndef VCZH_REGEX_REGEXAUTOMATON
+#define VCZH_REGEX_REGEXAUTOMATON
+
+
+namespace vl
+{
+	namespace regex_internal
+	{
+		class State;
+		class Transition;
+
+		class Transition
+		{
+		public:
+			enum Type
+			{
+				Chars,				//range为字符范围
+				Epsilon,
+				BeginString,
+				EndString,
+				Nop,				//无动作（不可消除epsilon，用来控制优先级）
+				Capture,			//capture为捕获频道
+				Match,				//capture为捕获频道，index为匹配的位置，-1代表匹配频道下面的所有项目
+				Positive,			//正向匹配
+				Negative,			//反向匹配
+				NegativeFail,		//反向匹配失败
+				End					//Capture, Position, Negative
+			};
+
+			State*					source;
+			State*					target;
+			CharRange				range;
+			Type					type;
+			vint						capture;
+			vint						index;
+		};
+
+		class State
+		{
+		public:
+			List<Transition*>		transitions;
+			List<Transition*>		inputs;
+			bool					finalState;
+			void*					userData;
+		};
+
+		class Automaton
+		{
+		public:
+			typedef Ptr<Automaton>		Ref;
+
+			List<Ptr<State>>		states;
+			List<Ptr<Transition>>	transitions;
+			List<WString>			captureNames;
+			State*					startState;
+
+			Automaton();
+
+			State*					NewState();
+			Transition*				NewTransition(State* start, State* end);
+			Transition*				NewChars(State* start, State* end, CharRange range);
+			Transition*				NewEpsilon(State* start, State* end);
+			Transition*				NewBeginString(State* start, State* end);
+			Transition*				NewEndString(State* start, State* end);
+			Transition*				NewNop(State* start, State* end);
+			Transition*				NewCapture(State* start, State* end, vint capture);
+			Transition*				NewMatch(State* start, State* end, vint capture, vint index=-1);
+			Transition*				NewPositive(State* start, State* end);
+			Transition*				NewNegative(State* start, State* end);
+			Transition*				NewNegativeFail(State* start, State* end);
+			Transition*				NewEnd(State* start, State* end);
+		};
+
+		extern bool					PureEpsilonChecker(Transition* transition);
+		extern bool					RichEpsilonChecker(Transition* transition);
+		extern bool					AreEqual(Transition* transA, Transition* transB);
+		extern Automaton::Ref		EpsilonNfaToNfa(Automaton::Ref source, bool(*epsilonChecker)(Transition*), Dictionary<State*, State*>& nfaStateMap);
+		extern Automaton::Ref		NfaToDfa(Automaton::Ref source, Group<State*, State*>& dfaStateMap);
+	}
+}
+
+#endif
+
+/***********************************************************************
+REGEX\REGEXEXPRESSION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Regex::RegexExpression
+
+Classes:
+	Expression						：表达式基类				|
+	CharSetExpression				：字符集表达式				| a, [a-b], [^a-b0_9], \.rnt\/()+*?{}[]<>^$!=SsDdLlWw, [\rnt-[]\/^$]
+	LoopExpression					：循环表达式				| a{3}, a{3,}, a{1,3}, a+, a*, a?, LOOP?
+	SequenceExpression				：顺序表达式				| ab
+	AlternateExpression				：选择表达式				| a|b
+	BeginExpression					：【非纯】字符串起始表达式	| ^
+	EndExpression					：【非纯】字符串末尾表达式	| $
+	CaptureExpression				：【非纯】捕获表达式		| (<name>expr), (?expr)
+	MatchExpression					：【非纯】匹配表达式		| (<$name>), (<$name;i>), (<$i>)
+	PositiveExpression				：【非纯】正向预查表达式	| (=expr)
+	NegativeExpression				：【非纯】反向预查表达式	| (!expr)
+	UsingExpression					：引用表达式				| (<#name1>expr)...(<&name1>)...
+
+	RegexExpression					：正则表达式
+
+Functions:
+	ParseRegexExpression			：将字符串分析为RegexExpression对象，如果语法有问题则抛异常
+***********************************************************************/
+
+#ifndef VCZH_REGEX_REGEXEXPRESSION
+#define VCZH_REGEX_REGEXEXPRESSION
+
+
+namespace vl
+{
+	namespace regex_internal
+	{
+		class IRegexExpressionAlgorithm;
+
+/***********************************************************************
+正则表达式表达式树
+***********************************************************************/
+
+		class Expression : public Object, private NotCopyable
+		{
+		public:
+			typedef Ptr<Expression>								Ref;
+			typedef Dictionary<WString, Expression::Ref>		Map;
+
+			virtual void				Apply(IRegexExpressionAlgorithm& algorithm)=0;
+			bool						IsEqual(Expression* expression);
+			bool						HasNoExtension();
+			bool						CanTreatAsPure();
+			void						NormalizeCharSet(CharRange::List& subsets);
+			void						CollectCharSet(CharRange::List& subsets);
+			void						ApplyCharSet(CharRange::List& subsets);
+			Automaton::Ref				GenerateEpsilonNfa();
+		};
+
+		class CharSetExpression : public Expression
+		{
+		public:
+			CharRange::List				ranges;
+			bool						reverse;
+
+			bool						AddRangeWithConflict(CharRange range);
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class LoopExpression : public Expression
+		{
+		public:
+			Expression::Ref				expression;		//被循环表达式
+			vint							min;			//下限
+			vint							max;			//上限，-1代表无限
+			bool						preferLong;		//长匹配优先
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class SequenceExpression : public Expression
+		{
+		public:
+			Expression::Ref				left;			//左表达式
+			Expression::Ref				right;			//右表达式
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class AlternateExpression : public Expression
+		{
+		public:
+			Expression::Ref				left;			//左表达式
+			Expression::Ref				right;			//右表达式
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class BeginExpression: public Expression
+		{
+		public:
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class EndExpression : public Expression
+		{
+		public:
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class CaptureExpression : public Expression
+		{
+		public:
+			WString						name;			//捕获名，空代表缺省捕获
+			Expression::Ref				expression;		//被捕获表达式
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class MatchExpression : public Expression
+		{
+		public:
+			WString						name;			//捕获名，空代表缺省捕获
+			vint							index;			//捕获序号，-1代表非空捕获的所有项
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class PositiveExpression : public Expression
+		{
+		public:
+			Expression::Ref				expression;		//正向匹配表达式
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class NegativeExpression : public Expression
+		{
+		public:
+			Expression::Ref				expression;		//反向匹配表达式
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class UsingExpression : public Expression
+		{
+		public:
+			WString						name;			//引用名
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class RegexExpression : public Object, private NotCopyable
+		{
+		public:
+			typedef Ptr<RegexExpression>						Ref;
+
+			Expression::Map				definitions;	//命名子表达式
+			Expression::Ref				expression;		//主表达式
+
+			Expression::Ref				Merge();
+		};
+
+/***********************************************************************
+算法基类
+***********************************************************************/
+
+		class IRegexExpressionAlgorithm : public Interface
+		{
+		public:
+			virtual void				Visit(CharSetExpression* expression)=0;
+			virtual void				Visit(LoopExpression* expression)=0;
+			virtual void				Visit(SequenceExpression* expression)=0;
+			virtual void				Visit(AlternateExpression* expression)=0;
+			virtual void				Visit(BeginExpression* expression)=0;
+			virtual void				Visit(EndExpression* expression)=0;
+			virtual void				Visit(CaptureExpression* expression)=0;
+			virtual void				Visit(MatchExpression* expression)=0;
+			virtual void				Visit(PositiveExpression* expression)=0;
+			virtual void				Visit(NegativeExpression* expression)=0;
+			virtual void				Visit(UsingExpression* expression)=0;
+		};
+
+		template<typename ReturnType, typename ParameterType=void*>
+		class RegexExpressionAlgorithm : public Object, public IRegexExpressionAlgorithm
+		{
+		private:
+			ReturnType					returnValue;
+			void*						parameterValue;
+		public:
+
+			ReturnType Invoke(Expression* expression, ParameterType parameter)
+			{
+				parameterValue=(void*)&parameter;
+				expression->Apply(*this);
+				return returnValue;
+			}
+
+			ReturnType Invoke(Expression::Ref expression, ParameterType parameter)
+			{
+				parameterValue=(void*)&parameter;
+				expression->Apply(*this);
+				return returnValue;
+			}
+
+			virtual ReturnType			Apply(CharSetExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(LoopExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(SequenceExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(AlternateExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(BeginExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(EndExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(CaptureExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(MatchExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(PositiveExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(NegativeExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(UsingExpression* expression, ParameterType parameter)=0;
+		public:
+			void Visit(CharSetExpression* expression)
+			{
+				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(LoopExpression* expression)
+			{
+				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(SequenceExpression* expression)
+			{
+				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(AlternateExpression* expression)
+			{
+				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(BeginExpression* expression)
+			{
+				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(EndExpression* expression)
+			{
+				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(CaptureExpression* expression)
+			{
+				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(MatchExpression* expression)
+			{
+				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(PositiveExpression* expression)
+			{
+				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(NegativeExpression* expression)
+			{
+				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(UsingExpression* expression)
+			{
+				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+			}
+		};
+
+		template<typename ParameterType>
+		class RegexExpressionAlgorithm<void, ParameterType> : public Object, public IRegexExpressionAlgorithm
+		{
+		private:
+			void*						parameterValue;
+		public:
+
+			void Invoke(Expression* expression, ParameterType parameter)
+			{
+				parameterValue=(void*)&parameter;
+				expression->Apply(*this);
+			}
+
+			void Invoke(Expression::Ref expression, ParameterType parameter)
+			{
+				parameterValue=(void*)&parameter;
+				expression->Apply(*this);
+			}
+
+			virtual void				Apply(CharSetExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(LoopExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(SequenceExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(AlternateExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(BeginExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(EndExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(CaptureExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(MatchExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(PositiveExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(NegativeExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(UsingExpression* expression, ParameterType parameter)=0;
+		public:
+			void Visit(CharSetExpression* expression)
+			{
+				Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(LoopExpression* expression)
+			{
+				Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(SequenceExpression* expression)
+			{
+				Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(AlternateExpression* expression)
+			{
+				Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(BeginExpression* expression)
+			{
+				Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(EndExpression* expression)
+			{
+				Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(CaptureExpression* expression)
+			{
+				Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(MatchExpression* expression)
+			{
+				Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(PositiveExpression* expression)
+			{
+				Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(NegativeExpression* expression)
+			{
+				Apply(expression, *((ParameterType*)parameterValue));
+			}
+
+			void Visit(UsingExpression* expression)
+			{
+				Apply(expression, *((ParameterType*)parameterValue));
+			}
+		};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+		extern Ptr<LoopExpression>		ParseLoop(const wchar_t*& input);
+		extern Ptr<Expression>			ParseCharSet(const wchar_t*& input);
+		extern Ptr<Expression>			ParseFunction(const wchar_t*& input);
+		extern Ptr<Expression>			ParseUnit(const wchar_t*& input);
+		extern Ptr<Expression>			ParseJoin(const wchar_t*& input);
+		extern Ptr<Expression>			ParseAlt(const wchar_t*& input);
+		extern Ptr<Expression>			ParseExpression(const wchar_t*& input);
+		extern RegexExpression::Ref		ParseRegexExpression(const WString& code);
+	}
+}
+
+#endif
+
+/***********************************************************************
+REGEX\REGEXPURE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Regex::RegexInterpretor
+
+Classes:
+	PureInterpretor					：正则表达式纯模拟器
+***********************************************************************/
+
+#ifndef VCZH_REGEX_REGEXPURE
+#define VCZH_REGEX_REGEXPURE
+
+
+namespace vl
+{
+	namespace regex_internal
+	{
+		class PureResult
+		{
+		public:
+			vint				start;
+			vint				length;
+			vint				finalState;
+		};
+
+		class PureInterpretor : public Object
+		{
+		protected:
+			vint				charMap[1<<(8*sizeof(wchar_t))];	//char -> char set index
+			vint**				transition;							//(state * char set index) -> state*
+			bool*				finalState;							//state -> bool
+			vint				stateCount;
+			vint				charSetCount;
+			vint				startState;
+		public:
+			PureInterpretor(Automaton::Ref dfa, CharRange::List& subsets);
+			~PureInterpretor();
+
+			bool				MatchHead(const wchar_t* input, const wchar_t* start, PureResult& result);
+			bool				Match(const wchar_t* input, const wchar_t* start, PureResult& result);
+
+			vint				GetStartState();
+			vint				Transit(wchar_t input, vint state);
+			bool				IsFinalState(vint state);
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+REGEX\REGEXRICH.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Regex::RegexInterpretor
+
+Classes:
+	RichInterpretor					：正则表达式完全模拟器
+***********************************************************************/
+
+#ifndef VCZH_REGEX_REGEXRICH
+#define VCZH_REGEX_REGEXRICH
+
+
+namespace vl
+{
+	namespace regex_internal
+	{
+		class CaptureRecord
+		{
+		public:
+			vint								capture;
+			vint								start;
+			vint								length;
+
+			bool							operator==(const CaptureRecord& record)const;
+		};
+	}
+
+	template<>
+	struct POD<regex_internal::CaptureRecord>
+	{
+		static const bool Result=true;
+	};
+
+	namespace regex_internal
+	{
+		class RichResult
+		{
+		public:
+			vint							start;
+			vint							length;
+			List<CaptureRecord>			captures;
+		};
+
+		class RichInterpretor : public Object
+		{
+		public:
+		protected:
+			class UserData
+			{
+			public:
+				bool						NeedKeepState;
+			};
+
+			Automaton::Ref					dfa;
+			UserData*						datas;
+		public:
+			RichInterpretor(Automaton::Ref _dfa);
+			~RichInterpretor();
+
+			bool							MatchHead(const wchar_t* input, const wchar_t* start, RichResult& result);
+			bool							Match(const wchar_t* input, const wchar_t* start, RichResult& result);
+			const IReadonlyList<WString>&	CaptureNames();
+		};
+	};
+}
+
+#endif
+
+/***********************************************************************
+REGEX\REGEXWRITER.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Regex::RegexWriter
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_REGEX_REGEXWRITER
+#define VCZH_REGEX_REGEXWRITER
+
+
+namespace vl
+{
+	namespace regex
+	{
+		class RegexNode : public Object
+		{
+		public:
+			vl::regex_internal::Expression::Ref		expression;
+
+			RegexNode(vl::regex_internal::Expression::Ref _expression);
+
+			RegexNode					Some()const;
+			RegexNode					Any()const;
+			RegexNode					Opt()const;
+			RegexNode					Loop(vint min, vint max)const;
+			RegexNode					AtLeast(vint min)const;
+			RegexNode					operator+(const RegexNode& node)const;
+			RegexNode					operator|(const RegexNode& node)const;
+			RegexNode					operator+()const;
+			RegexNode					operator-()const;
+			RegexNode					operator!()const;
+			RegexNode					operator%(const RegexNode& node)const;
+		};
+
+		extern RegexNode				rCapture(const WString& name, const RegexNode& node);
+		extern RegexNode				rUsing(const WString& name);
+		extern RegexNode				rMatch(const WString& name, vint index=-1);
+		extern RegexNode				rMatch(vint index);
+		extern RegexNode				rBegin();
+		extern RegexNode				rEnd();
+		extern RegexNode				rC(wchar_t a, wchar_t b=L'\0');
+		extern RegexNode				r_d();
+		extern RegexNode				r_l();
+		extern RegexNode				r_w();
+		extern RegexNode				rAnyChar();
+	}
+}
+
+#endif
+
+/***********************************************************************
 STREAM\INTERFACES.H
 ***********************************************************************/
 /***********************************************************************
@@ -11877,790 +13557,6 @@ namespace vl
 			~Scope();
 		};
 	};
-}
-
-#endif
-
-/***********************************************************************
-COLLECTIONS\DICTIONARYWRAPPERS.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Dictionary Wrappers
-
-Classes:
-	ReadonlyDictionaryWrapper<V,K>
-	DictionaryWrapper<V,K>
-	ReadonlyGroupWrapper<V,K>
-	GroupWrapper<V,K>
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_DICTIONARYWRAPPERS
-#define VCZH_COLLECTIONS_DICTIONARYWRAPPERS
-
-
-namespace vl
-{
-	namespace collections
-	{
-
-/***********************************************************************
-代理
-***********************************************************************/
-
-		template<typename C, typename KT, typename VT, typename KK, typename VK>
-		class DictionaryWrapper;
-		
-		template<typename C, typename KT, typename VT, typename KK, typename VK>
-		class GroupWrapper;
-
-		template<typename C, typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
-		class ReadonlyDictionaryWrapper : public Object, public virtual IReadonlyDictionary<KT, VT, KK, VK>
-		{
-			friend class DictionaryWrapper<C, KT, VT, KK, VK>;
-		private:
-			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
-			{
-			private:
-				const IReadonlyDictionary<KT, VT, KK, VK>*	container;
-				vint											index;
-				Pair<KT, VT>								current;
-
-				void UpdateCurrent()
-				{
-					if(index<container->Count())
-					{
-						current.key=container->Keys()[index];
-						current.value=container->Values()[index];
-					}
-				}
-			public:
-				Enumerator(const IReadonlyDictionary* _container, vint _index=0)
-				{
-					container=_container;
-					index=_index;
-					UpdateCurrent();
-				}
-				
-				IEnumerator<Pair<KT, VT>>* Clone()const
-				{
-					return new Enumerator(container, index);
-				}
-
-				const Pair<KT, VT>& Current()const
-				{
-					return current;
-				}
-
-				vint Index()const
-				{
-					return index;
-				}
-
-				bool Next()
-				{
-					index++;
-					UpdateCurrent();
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return index>=0 && index<container->Count();
-				}
-
-				void Reset()
-				{
-					index=0;
-					UpdateCurrent();
-				}
-			};
-
-			C*						container;
-		public:
-			ReadonlyDictionaryWrapper(C* _container=0)
-			{
-				container=_container;
-			}
-
-			C* GetContainer()
-			{
-				return container;
-			}
-
-			void SetContainer(C* _container)
-			{
-				container=_container;
-			}
-
-			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
-			{
-				return new Enumerator(this);
-			}
-
-			const IReadonlyList<KT, KK>& Keys()const
-			{
-				return container->Keys();
-			}
-
-			const IReadonlyList<VT, VK>& Values()const
-			{
-				return container->Values();
-			}
-
-			vint Count()const
-			{
-				return container->Count();
-			}
-
-			const VT& Get(const KK& key)const
-			{
-				return container->Get(key);
-			}
-
-			const VT& operator[](const KK& key)const
-			{
-				return container->operator[](key);
-			}
-		};
-
-		template<typename C, typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
-		class DictionaryWrapper : public Object, public virtual IDictionary<KT, VT, KK, VK>
-		{
-		private:
-			C*						container;
-		public:
-			DictionaryWrapper(C* _container=0)
-			{
-				container=_container;
-			}
-
-			C* GetContainer()
-			{
-				return container;
-			}
-
-			void SetContainer(C* _container)
-			{
-				container=_container;
-			}
-
-			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
-			{
-				return new ReadonlyDictionaryWrapper<C, KT, VT, KK, VK>::Enumerator(this);
-			}
-
-			const IReadonlyList<KT, KK>& Keys()const
-			{
-				return container->Keys();
-			}
-
-			const IReadonlyList<VT, VK>& Values()const
-			{
-				return container->Values();
-			}
-
-			vint Count()const
-			{
-				return container->Count();
-			}
-
-			const VT& Get(const KK& key)const
-			{
-				return container->Get(key);
-			}
-
-			const VT& operator[](const KK& key)const
-			{
-				return container->operator[](key);
-			}
-
-			bool Set(const KK& key, const VT& value)
-			{
-				return container->Set(key, value);
-			}
-
-			bool Add(const KT& key, const VT& value)
-			{
-				return container->Add(key, value);
-			}
-
-			bool Remove(const KK& key)
-			{
-				return container->Remove(key);
-			}
-
-			bool Clear()
-			{
-				return container->Clear();
-			}
-		};
-
-		template<typename C, typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
-		class ReadonlyGroupWrapper : public Object, public virtual IReadonlyGroup<KT, VT, KK, VK>
-		{
-			friend class GroupWrapper<C, KT, VT, KK, VK>;
-		private:
-			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
-			{
-			private:
-				const IReadonlyGroup<KT, VT, KK, VK>*		container;
-				vint											keyIndex;
-				vint											valueIndex;
-				Pair<KT, VT>								current;
-
-				void UpdateCurrent()
-				{
-					if(keyIndex<container->Count())
-					{
-						const IReadonlyList<VT, VK>& values=container->GetByIndex(keyIndex);
-						if(valueIndex<values.Count())
-						{
-							current.key=container->Keys()[keyIndex];
-							current.value=values[valueIndex];
-						}
-					}
-				}
-			public:
-				Enumerator(const IReadonlyGroup* _container, vint _keyIndex=0, vint _valueIndex=0)
-				{
-					container=_container;
-					keyIndex=_keyIndex;
-					valueIndex=_valueIndex;
-					UpdateCurrent();
-				}
-				
-				IEnumerator<Pair<KT, VT>>* Clone()const
-				{
-					return new Enumerator(container, keyIndex, valueIndex);
-				}
-
-				const Pair<KT, VT>& Current()const
-				{
-					return current;
-				}
-
-				vint Index()const
-				{
-					if(Available())
-					{
-						vint index=0;
-						for(vint i=0;i<keyIndex;i++)
-						{
-							index+=container->GetByIndex(i).Count();
-						}
-						return index+valueIndex;
-					}
-					else
-					{
-						return -1;
-					}
-				}
-
-				bool Next()
-				{
-					if(keyIndex<container->Count())
-					{
-						const IReadonlyList<VT, VK>& values=container->GetByIndex(keyIndex);
-						valueIndex++;
-						if(valueIndex<values.Count())
-						{
-							UpdateCurrent();
-							return true;
-						}
-						else
-						{
-							keyIndex++;
-							valueIndex=0;
-							UpdateCurrent();
-							return keyIndex<container->Count();
-						}
-					}
-					else
-					{
-						return false;
-					}
-				}
-
-				bool Available()const
-				{
-					if(keyIndex<container->Count())
-					{
-						const IReadonlyList<VT, VK>& values=container->GetByIndex(keyIndex);
-						if(valueIndex<values.Count())
-						{
-							return true;
-						}
-					}
-					return false;
-				}
-
-				void Reset()
-				{
-					keyIndex=0;
-					valueIndex=0;
-					UpdateCurrent();
-				}
-			};
-
-			C*									container;
-		public:
-			ReadonlyGroupWrapper(C* _container=0)
-			{
-				container=_container;
-			}
-
-			C* GetContainer()
-			{
-				return container;
-			}
-
-			void SetContainer(C* _container)
-			{
-				container=_container;
-			}
-
-			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
-			{
-				return new Enumerator(this);
-			}
-
-			const IReadonlyList<KT, KK>& Keys()const
-			{
-				return container->Keys();
-			}
-
-			vint Count()const
-			{
-				return container->Count();
-			}
-
-			const IReadonlyList<VT, VK>& Get(const KK& key)const
-			{
-				return container->Get(key);
-			}
-
-			const IReadonlyList<VT, VK>& GetByIndex(vint index)const
-			{
-				return container->GetByIndex(index);
-			}
-
-			const IReadonlyList<VT, VK>& operator[](const KK& key)const
-			{
-				return container->operator[](key);
-			}
-
-			bool Contains(const KK& key)const
-			{
-				return container->Contains(key);
-			}
-
-			bool Contains(const KK& key, const VK& value)const
-			{
-				return container->Contains(key, value);
-			}
-		};
-
-		template<typename C, typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
-		class GroupWrapper : public Object, public virtual IGroup<KT, VT, KK, VK>
-		{
-		private:
-			C*									container;
-		public:
-			GroupWrapper(C* _container=0)
-			{
-				container=_container;
-			}
-
-			C* GetContainer()
-			{
-				return container;
-			}
-
-			void SetContainer(C* _container)
-			{
-				container=_container;
-			}
-
-			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
-			{
-				return new ReadonlyGroupWrapper<C, KT, VT, KK, VK>::Enumerator(this);
-			}
-
-			const IReadonlyList<KT, KK>& Keys()const
-			{
-				return container->Keys();
-			}
-
-			vint Count()const
-			{
-				return container->Count();
-			}
-
-			const IReadonlyList<VT, VK>& Get(const KK& key)const
-			{
-				return container->Get(key);
-			}
-
-			const IReadonlyList<VT, VK>& GetByIndex(vint index)const
-			{
-				return container->GetByIndex(index);
-			}
-
-			const IReadonlyList<VT, VK>& operator[](const KK& key)const
-			{
-				return container->operator[](key);
-			}
-
-			bool Contains(const KK& key)const
-			{
-				return container->Contains(key);
-			}
-
-			bool Contains(const KK& key, const VK& value)const
-			{
-				return container->Contains(key, value);
-			}
-
-			bool Add(const KT& key, const VT& value)
-			{
-				return container->Add(key, value);
-			}
-
-			bool Remove(const KK& key)
-			{
-				return container->Remove(key);
-			}
-
-			bool Remove(const KK& key, const VK& value)
-			{
-				return container->Remove(key, value);
-			}
-
-			bool Clear()
-			{
-				return container->Clear();
-			}
-		};
-
-/***********************************************************************
-类型转换代理
-***********************************************************************/
-	}
-}
-
-#endif
-
-/***********************************************************************
-COLLECTIONS\DICTIONARY.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Dictionary
-
-Classes:
-	Dictionary<KT, VT, KK, VK>					：映射
-	Group<KT, VT, KK, VK>						：多重映射
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_DICTIONARY
-#define VCZH_COLLECTIONS_DICTIONARY
-
-
-namespace vl
-{
-	namespace collections
-	{
-		template<
-			typename KT,
-			typename VT,
-			typename ValueContainer=List<VT, typename KeyType<VT>::Type>,
-			typename KK=typename KeyType<KT>::Type, 
-			typename VK=typename KeyType<VT>::Type
-		>
-		class Dictionary : public Object, private NotCopyable
-		{
-		protected:
-			SortedList<KT, KK>					keys;
-			ValueContainer						values;
-			mutable DictionaryWrapper<Dictionary<KT, VT, ValueContainer, KK, VK>, KT, VT, KK, VK>	wrapper;
-		public:
-			Dictionary()
-			{
-				wrapper.SetContainer(this);
-			}
-
-			void SetLessMemoryMode(bool mode)
-			{
-				keys.SetLessMemoryMode(mode);
-				values.SetLessMemoryMode(mode);
-			}
-
-			template<typename T>
-			void CopyKeysToCollection(T& dst, bool append=false)const
-			{
-				CopyToCollection(dst, keys, append);
-			}
-
-			template<typename T>
-			void CopyKeysToArray(T& dst, bool append=false)const
-			{
-				CopyToArray(dst, keys, append);
-			}
-
-			template<typename T>
-			void CopyValuesToCollection(T& dst, bool append=false)const
-			{
-				CopyToCollection(dst, values, append);
-			}
-
-			template<typename T>
-			void CopyValuesToArray(T& dst, bool append=false)const
-			{
-				CopyToArray(dst, values, append);
-			}
-
-			const IReadonlyList<KT, KK>& Keys()const
-			{
-				return keys.Wrap();
-			}
-
-			const IReadonlyList<VT, VK>& Values()const
-			{
-				return values.Wrap();
-			}
-
-			vint Count()const
-			{
-				return keys.Count();
-			}
-
-			const VT& Get(const KK& key)const
-			{
-				return values.Get(keys.IndexOf(key));
-			}
-
-			const VT& operator[](const KK& key)const
-			{
-				return values.Get(keys.IndexOf(key));
-			}
-
-			bool Set(const KK& key, const VT& value)
-			{
-				vint index=keys.IndexOf(key);
-				if(index==-1)
-				{
-					index=keys.Add(key);
-					values.Insert(index, value);
-				}
-				else
-				{
-					values[index]=value;
-				}
-				return true;
-			}
-
-			bool Add(const KT& key, const VT& value)
-			{
-				CHECK_ERROR(!keys.Contains(key), L"Dictionary<KT, KK, ValueContainer, VT, VK>::Add(const KT&, const VT&)#key已存在。");
-				vint index=keys.Add(key);
-				values.Insert(index, value);
-				return true;
-			}
-
-			bool Remove(const KK& key)
-			{
-				vint index=keys.IndexOf(key);
-				if(index!=-1)
-				{
-					keys.RemoveAt(index);
-					values.RemoveAt(index);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Clear()
-			{
-				keys.Clear();
-				values.Clear();
-				return true;
-			}
-
-			IDictionary<KT, VT, KK, VK>& Wrap()const
-			{
-				return wrapper;
-			}
-		};
-
-		template<
-			typename KT,
-			typename VT,
-			typename ValueContainer=List<VT, typename KeyType<VT>::Type>,
-			typename KK=typename KeyType<KT>::Type,
-			typename VK=typename KeyType<VT>::Type
-		>
-		class Group : public Object, private NotCopyable
-		{
-		protected:
-			SortedList<KT, KK>				keys;
-			List<ValueContainer*>			values;
-			mutable GroupWrapper<Group<KT, VT, ValueContainer, KK, VK>, KT, VT, KK, VK>	wrapper;
-		public:
-			Group()
-			{
-				wrapper.SetContainer(this);
-			}
-
-			~Group()
-			{
-				Clear();
-			}
-
-			template<typename T>
-			void CopyKeysToCollection(T& dst, bool append=false)const
-			{
-				CopyToCollection(dst, keys, append);
-			}
-
-			template<typename T>
-			void CopyKeysToArray(T& dst, bool append=false)const
-			{
-				CopyToArray(dst, keys, append);
-			}
-
-			template<typename T>
-			void CopyValuesToCollection(vint index, T& dst, bool append=false)const
-			{
-				CopyToCollection(dst, *(values.Get(index)), append);
-			}
-
-			template<typename T>
-			void CopyValuesToArray(vint index, T& dst, bool append=false)const
-			{
-				CopyToArray(dst, *(values.Get(index)), append);
-			}
-
-			const IReadonlyList<KT, KK>& Keys()const
-			{
-				return keys.Wrap();
-			}
-
-			vint Count()const
-			{
-				return keys.Count();
-			}
-
-			const IReadonlyList<VT, VK>& Get(const KK& key)const
-			{
-				return values.Get(keys.IndexOf(key))->Wrap();
-			}
-
-			const IReadonlyList<VT, VK>& GetByIndex(vint index)const
-			{
-				return values.Get(index)->Wrap();
-			}
-
-			const IReadonlyList<VT, VK>& operator[](const KK& key)const
-			{
-				return values.Get(keys.IndexOf(key))->Wrap();
-			}
-
-			bool Contains(const KK& key)const
-			{
-				return keys.Contains(key);
-			}
-
-			bool Contains(const KK& key, const VK& value)const
-			{
-				vint index=keys.IndexOf(key);
-				if(index!=-1)
-				{
-					return values.Get(index)->Contains(value);
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Add(const KT& key, const VT& value)
-			{
-				ValueContainer* target=0;
-				vint index=keys.IndexOf(key);
-				if(index==-1)
-				{
-					target=new ValueContainer;
-					values.Insert(keys.Add(key), target);
-				}
-				else
-				{
-					target=values[index];
-				}
-				target->Add(value);
-				return true;
-			}
-
-			bool Remove(const KK& key)
-			{
-				vint index=keys.IndexOf(key);
-				if(index!=-1)
-				{
-					keys.RemoveAt(index);
-					List<VT, VK>* target=values[index];
-					values.RemoveAt(index);
-					delete target;
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Remove(const KK& key, const VK& value)
-			{
-				vint index=keys.IndexOf(key);
-				if(index!=-1)
-				{
-					List<VT, VK>* target=values[index];
-					target->Remove(value);
-					if(target->Count()==0)
-					{
-						keys.RemoveAt(index);
-						values.RemoveAt(index);
-						delete target;
-					}
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Clear()
-			{
-				for(vint i=0;i<values.Count();i++)
-				{
-					delete values[i];
-				}
-				keys.Clear();
-				values.Clear();
-				return true;
-			}
-
-			IGroup<KT, VT, KK, VK>& Wrap()const
-			{
-				return wrapper;
-			}
-		};
-	}
 }
 
 #endif
