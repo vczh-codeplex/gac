@@ -770,6 +770,7 @@ Native Window Services
 			typedef void (AsyncTaskProc)(void* arguments);
 
 			virtual bool					IsInMainThread()=0;
+			virtual void					InvokeAsync(AsyncTaskProc* proc, void* argument)=0;
 			virtual void					InvokeInMainThread(AsyncTaskProc* proc, void* argument)=0;
 			virtual bool					InvokeInMainThreadAndWait(AsyncTaskProc* proc, void* argument, int milliseconds=-1)=0;
 		};
@@ -5603,8 +5604,10 @@ namespace vl
 				GuiWindow*										GetWindow(Point location);
 
 				bool											IsInMainThread();
+				void											InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument);
 				void											InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument);
 				bool											InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds=-1);
+				void											InvokeAsync(const Func<void()>& proc);
 				void											InvokeInMainThread(const Func<void()>& proc);
 				bool											InvokeInMainThreadAndWait(const Func<void()>& proc, int milliseconds=-1);
 

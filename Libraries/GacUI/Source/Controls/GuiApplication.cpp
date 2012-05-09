@@ -113,6 +113,11 @@ GuiApplication
 				return GetCurrentController()->AsyncService()->IsInMainThread();
 			}
 
+			void GuiApplication::InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument)
+			{
+				GetCurrentController()->AsyncService()->InvokeAsync(proc, argument);
+			}
+
 			void GuiApplication::InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument)
 			{
 				GetCurrentController()->AsyncService()->InvokeInMainThread(proc, argument);
@@ -128,6 +133,11 @@ GuiApplication
 				Func<void()>* proc=(Func<void()>*)argument;
 				(*proc)();
 				delete proc;
+			}
+
+			void GuiApplication::InvokeAsync(const Func<void()>& proc)
+			{
+				InvokeAsync(&InvokeInMainThreadProc, new Func<void()>(proc));
 			}
 
 			void GuiApplication::InvokeInMainThread(const Func<void()>& proc)

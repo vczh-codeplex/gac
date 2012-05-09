@@ -54,6 +54,10 @@ namespace vl
 				/// <summary>Test is the current thread the main thread for GUI.</summary>
 				/// <returns>Returns true if the current thread is the main thread for GUI.</returns>
 				bool											IsInMainThread();
+				/// <summary>Invoke a specified function with an specified argument asynchronously.</summary>
+				/// <param name="proc">The specified function.</param>
+				/// <param name="argument">The specified argument.</param>
+				void											InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument);
 				/// <summary>Invoke a specified function with an specified argument in the main thread.</summary>
 				/// <param name="proc">The specified function.</param>
 				/// <param name="argument">The specified argument.</param>
@@ -64,6 +68,9 @@ namespace vl
 				/// <param name="argument">The specified argument.</param>
 				/// <param name="milliseconds">The specified period of time to wait. Set to -1 (default value) to wait forever until the function completed.</param>
 				bool											InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds=-1);
+				/// <summary>Invoke a specified function asynchronously.</summary>
+				/// <param name="proc">The specified function.</param>
+				void											InvokeAsync(const Func<void()>& proc);
 				/// <summary>Invoke a specified function in the main thread.</summary>
 				/// <param name="proc">The specified function.</param>
 				void											InvokeInMainThread(const Func<void()>& proc);

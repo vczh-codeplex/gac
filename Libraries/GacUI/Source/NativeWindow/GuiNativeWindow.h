@@ -828,6 +828,12 @@ Native Window Services
 			/// <returns>Returns true if the current thread is the main thread.</returns>
 			virtual bool					IsInMainThread()=0;
 			/// <summary>
+			/// Invoke a specified function with an specified argument asynchronisly.
+			/// </summary>
+			/// <param name="proc">The specified function.</param>
+			/// <param name="argument">The specified argument.</param>
+			virtual void					InvokeAsync(AsyncTaskProc* proc, void* argument)=0;
+			/// <summary>
 			/// Invoke a specified function with an specified argument in the main thread.
 			/// </summary>
 			/// <param name="proc">The specified function.</param>
