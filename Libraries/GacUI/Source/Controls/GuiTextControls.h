@@ -34,7 +34,7 @@ Common Operations
 					virtual TextPos							GetRightWord(TextPos pos)=0;
 					virtual void							GetWord(TextPos pos, TextPos& begin, TextPos& end)=0;
 					virtual int								GetPageRows()=0;
-					virtual bool							BeforeModify(TextPos& start, TextPos& end, const WString& originalText, WString& inputText)=0;
+					virtual bool							BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)=0;
 					virtual void							AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
 					virtual void							ScrollToView(Point point)=0;
 					virtual int								GetTextMargin()=0;
@@ -54,7 +54,7 @@ Common Operations
 					TextPos									GetRightWord(TextPos pos)override;
 					void									GetWord(TextPos pos, TextPos& begin, TextPos& end)override;
 					int										GetPageRows()override;
-					bool									BeforeModify(TextPos& start, TextPos& end, const WString& originalText, WString& inputText)override;
+					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
 				};
 
 				class ITextEditCallback : public virtual IDescriptable, public Description<ITextEditCallback>
@@ -125,6 +125,23 @@ Common Operations
 /***********************************************************************
 Common Interface
 ***********************************************************************/
+
+			class GuiTextBoxColorizer : public Object, public GuiTextElementOperator::ITextEditCallback
+			{
+			protected:
+				elements::GuiColorizedTextElement*			element;
+				SpinLock*									elementModifyLock;
+			public:
+				GuiTextBoxColorizer();
+				~GuiTextBoxColorizer();
+
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void										Detach()override;
+				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+
+				virtual int									GetStartState()=0;
+				virtual int									ColorizeLine(elements::text::TextLine& line, int startState)=0;
+			};
 
 			/// <summary>Common interface for text box controls.</summary>
 			class GuiTextBoxCommonInterface : public Description<GuiTextBoxCommonInterface>
@@ -364,7 +381,7 @@ SinglelineTextBox
 				public:
 					TextElementOperatorCallback(GuiSinglelineTextBox* _textControl);
 
-					bool									BeforeModify(TextPos& start, TextPos& end, const WString& originalText, WString& inputText)override;
+					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
 					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
 					void									ScrollToView(Point point)override;
 					int										GetTextMargin()override;

@@ -45,9 +45,39 @@ GuiTextElementOperator::DefaultCallback
 				return textComposition->GetBounds().Height()/textElement->GetLines().GetRowHeight();
 			}
 
-			bool GuiTextElementOperator::DefaultCallback::BeforeModify(TextPos& start, TextPos& end, const WString& originalText, WString& inputText)
+			bool GuiTextElementOperator::DefaultCallback::BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)
 			{
 				return true;
+			}
+
+/***********************************************************************
+GuiTextBoxColorizer
+***********************************************************************/
+
+			GuiTextBoxColorizer::GuiTextBoxColorizer()
+				:element(0)
+				,elementModifyLock(0)
+			{
+			}
+
+			GuiTextBoxColorizer::~GuiTextBoxColorizer()
+			{
+			}
+
+			void GuiTextBoxColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			{
+				element=_element;
+				elementModifyLock=&_elementModifyLock;
+			}
+
+			void GuiTextBoxColorizer::Detach()
+			{
+				element=0;
+				elementModifyLock=0;
+			}
+
+			void GuiTextBoxColorizer::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			{
 			}
 
 /***********************************************************************
@@ -1108,7 +1138,7 @@ GuiSinglelineTextBox::DefaultTextElementOperatorCallback
 			{
 			}
 
-			bool GuiSinglelineTextBox::TextElementOperatorCallback::BeforeModify(TextPos& start, TextPos& end, const WString& originalText, WString& inputText)
+			bool GuiSinglelineTextBox::TextElementOperatorCallback::BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)
 			{
 				int length=inputText.Length();
 				const wchar_t* input=inputText.Buffer();
