@@ -164,7 +164,7 @@ GuiTextBoxColorizer
 				{
 					SpinLock::Scope scope(*elementModifyLock);
 					int line=originalStart.row<originalEnd.row?originalStart.row:originalEnd.row;
-					if(colorizedLineCount<line)
+					if(colorizedLineCount>line)
 					{
 						colorizedLineCount=line;
 					}
@@ -762,6 +762,7 @@ GuiTextElementOperator
 					if(colorizer)
 					{
 						textElementOperator->AttachTextEditCallback(colorizer);
+						textElementOperator->GetTextElement()->SetColors(colorizer->GetColors());
 					}
 				}
 			}
