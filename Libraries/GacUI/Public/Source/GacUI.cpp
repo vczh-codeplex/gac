@@ -6895,7 +6895,7 @@ GuiTextBoxColorizer
 				{
 					SpinLock::Scope scope(*elementModifyLock);
 					int line=originalStart.row<originalEnd.row?originalStart.row:originalEnd.row;
-					if(colorizedLineCount<line)
+					if(colorizedLineCount>line)
 					{
 						colorizedLineCount=line;
 					}
@@ -7493,6 +7493,7 @@ GuiTextElementOperator
 					if(colorizer)
 					{
 						textElementOperator->AttachTextEditCallback(colorizer);
+						textElementOperator->GetTextElement()->SetColors(colorizer->GetColors());
 					}
 				}
 			}
@@ -10610,6 +10611,18 @@ Helpers
 				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			}
 
+			elements::text::ColorEntry Win7GetTextBoxTextColor()
+			{
+				elements::text::ColorEntry entry;
+				entry.normal.text=Color(0, 0, 0);
+				entry.normal.background=Color(0, 0, 0, 0);
+				entry.selectedFocused.text=Color(255, 255, 255);
+				entry.selectedFocused.background=Color(51, 153, 255);
+				entry.selectedUnfocused.text=Color(255, 255, 255);
+				entry.selectedUnfocused.background=Color(51, 153, 255);
+				return entry;
+			}
+
 /***********************************************************************
 Animation
 ***********************************************************************/
@@ -12873,14 +12886,7 @@ Win7TextBoxBackground
 				Array<text::ColorEntry> colors;
 				colors.Resize(1);
 				{
-					text::ColorEntry entry;
-					entry.normal.text=Color(0, 0, 0);
-					entry.normal.background=Color(0, 0, 0, 0);
-					entry.selectedFocused.text=Color(255, 255, 255);
-					entry.selectedFocused.background=Color(51, 153, 255);
-					entry.selectedUnfocused.text=Color(255, 255, 255);
-					entry.selectedUnfocused.background=Color(51, 153, 255);
-					colors[0]=entry;
+					colors[0]=Win7GetTextBoxTextColor();
 				}
 				textElement->SetColors(colors);
 				textElement->SetCaretColor(Color(0, 0, 0));
