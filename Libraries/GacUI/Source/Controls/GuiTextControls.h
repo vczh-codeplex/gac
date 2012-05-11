@@ -128,6 +128,7 @@ Common Interface
 
 			class GuiTextBoxColorizer : public Object, public GuiTextElementOperator::ITextEditCallback
 			{
+				typedef collections::Array<elements::text::ColorEntry>			ColorArray;
 			protected:
 				elements::GuiColorizedTextElement*			element;
 				SpinLock*									elementModifyLock;
@@ -140,7 +141,8 @@ Common Interface
 				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
 
 				virtual int									GetStartState()=0;
-				virtual int									ColorizeLine(elements::text::TextLine& line, int startState)=0;
+				virtual int									ColorizeLine(const wchar_t* text, unsigned __int32* colors, int length, int startState)=0;
+				virtual const ColorArray&					GetColors()=0;
 			};
 
 			/// <summary>Common interface for text box controls.</summary>
