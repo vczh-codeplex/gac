@@ -66,14 +66,22 @@ GuiTextBoxColorizer
 
 			void GuiTextBoxColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
 			{
-				element=_element;
-				elementModifyLock=&_elementModifyLock;
+				if(_element)
+				{
+					SpinLock::Scope scope(_elementModifyLock);
+					element=_element;
+					elementModifyLock=&_elementModifyLock;
+				}
 			}
 
 			void GuiTextBoxColorizer::Detach()
 			{
-				element=0;
-				elementModifyLock=0;
+				if(element && elementModifyLock)
+				{
+					SpinLock::Scope scope(*elementModifyLock);
+					element=0;
+					elementModifyLock=0;
+				}
 			}
 
 			void GuiTextBoxColorizer::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
