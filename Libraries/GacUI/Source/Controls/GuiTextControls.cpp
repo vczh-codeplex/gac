@@ -8,6 +8,7 @@ namespace vl
 		namespace controls
 		{
 			using namespace elements;
+			using namespace elements::text;
 			using namespace compositions;
 
 /***********************************************************************
@@ -54,38 +55,121 @@ GuiTextElementOperator::DefaultCallback
 GuiTextBoxColorizer
 ***********************************************************************/
 
-			GuiTextBoxColorizer::GuiTextBoxColorizer()
+			void GuiTextBoxColorizerBase::ColorizerThreadProc(void* argument)
+			{
+				GuiTextBoxColorizerBase* colorizer=(GuiTextBoxColorizerBase*)argument;
+				while(!colorizer->isFinalizing)
+				{
+					int lineIndex=-1;
+					wchar_t* text=0;
+					unsigned __int32* colors=0;
+					int length=0;
+					int startState=-1;
+
+					{
+						SpinLock::Scope scope(*colorizer->elementModifyLock);
+						if(colorizer->colorizedLineCount>=colorizer->element->GetLines().GetCount())
+						{
+							colorizer->isColorizerRunning=false;
+							break;
+						}
+
+						lineIndex=colorizer->colorizedLineCount++;
+						TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
+						length=line.dataLength;
+						text=new wchar_t[length];
+						colors=new unsigned __int32[length];
+						memcpy(text, line.text, sizeof(wchar_t)*length);
+						startState=lineIndex==0?colorizer->GetStartState():colorizer->element->GetLines().GetLine(lineIndex-1).lexerFinalState;
+					}
+
+					int finalState=colorizer->ColorizeLine(text, colors, length, startState);
+
+					{
+						SpinLock::Scope scope(*colorizer->elementModifyLock);
+						if(lineIndex<colorizer->colorizedLineCount)
+						{
+							TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
+							line.lexerFinalState=finalState;
+							for(int i=0;i<length;i++)
+							{
+								line.att[i].colorIndex=colors[i];
+							}
+						}
+						delete[] text;
+						delete[] colors;
+					}
+				}
+				colorizer->colorizerRunningEvent.Leave();
+			}
+
+			void GuiTextBoxColorizerBase::StartColorizer()
+			{
+				if(!isColorizerRunning)
+				{
+					isColorizerRunning=true;
+					colorizerRunningEvent.Enter();
+					ThreadPoolLite::Queue(&GuiTextBoxColorizerBase::ColorizerThreadProc, this);
+				}
+			}
+
+			void GuiTextBoxColorizerBase::StopColorizer()
+			{
+				isFinalizing=true;
+				colorizerRunningEvent.Enter();
+				colorizerRunningEvent.Leave();
+				colorizedLineCount=0;
+				isFinalizing=false;
+			}
+
+			GuiTextBoxColorizerBase::GuiTextBoxColorizerBase()
 				:element(0)
 				,elementModifyLock(0)
+				,colorizedLineCount(0)
+				,isColorizerRunning(false)
+				,isFinalizing(false)
 			{
 			}
 
-			GuiTextBoxColorizer::~GuiTextBoxColorizer()
+			GuiTextBoxColorizerBase::~GuiTextBoxColorizerBase()
 			{
+				StopColorizer();
 			}
 
-			void GuiTextBoxColorizer::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			void GuiTextBoxColorizerBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
 			{
 				if(_element)
 				{
 					SpinLock::Scope scope(_elementModifyLock);
 					element=_element;
 					elementModifyLock=&_elementModifyLock;
+					StartColorizer();
 				}
 			}
 
-			void GuiTextBoxColorizer::Detach()
+			void GuiTextBoxColorizerBase::Detach()
 			{
 				if(element && elementModifyLock)
 				{
+					StopColorizer();
 					SpinLock::Scope scope(*elementModifyLock);
 					element=0;
 					elementModifyLock=0;
 				}
 			}
 
-			void GuiTextBoxColorizer::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			void GuiTextBoxColorizerBase::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
 			{
+				if(element && elementModifyLock)
+				{
+					SpinLock::Scope scope(*elementModifyLock);
+					int line=originalStart.row<originalEnd.row?originalStart.row:originalEnd.row;
+					if(colorizedLineCount<line)
+					{
+						colorizedLineCount=line;
+					}
+					StartColorizer();
+				}
 			}
 
 /***********************************************************************
@@ -659,6 +743,27 @@ GuiTextElementOperator
 			compositions::GuiGraphicsComposition* GuiTextBoxCommonInterface::GetTextComposition()
 			{
 				return textElementOperator->GetTextComposition();
+			}
+
+			Ptr<GuiTextBoxColorizerBase> GuiTextBoxCommonInterface::GetColorizer()
+			{
+				return colorizer;
+			}
+
+			void GuiTextBoxCommonInterface::SetColorizer(Ptr<GuiTextBoxColorizerBase> value)
+			{
+				if(textElementOperator)
+				{
+					if(colorizer)
+					{
+						textElementOperator->DetachTextEditCallback(colorizer);
+					}
+					colorizer=value;
+					if(colorizer)
+					{
+						textElementOperator->AttachTextEditCallback(colorizer);
+					}
+				}
 			}
 
 			bool GuiTextBoxCommonInterface::CanCut()

@@ -5671,7 +5671,7 @@ Common Operations
 					virtual TextPos							GetRightWord(TextPos pos)=0;
 					virtual void							GetWord(TextPos pos, TextPos& begin, TextPos& end)=0;
 					virtual int								GetPageRows()=0;
-					virtual bool							BeforeModify(TextPos& start, TextPos& end, const WString& originalText, WString& inputText)=0;
+					virtual bool							BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)=0;
 					virtual void							AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
 					virtual void							ScrollToView(Point point)=0;
 					virtual int								GetTextMargin()=0;
@@ -5691,8 +5691,17 @@ Common Operations
 					TextPos									GetRightWord(TextPos pos)override;
 					void									GetWord(TextPos pos, TextPos& begin, TextPos& end)override;
 					int										GetPageRows()override;
-					bool									BeforeModify(TextPos& start, TextPos& end, const WString& originalText, WString& inputText)override;
+					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
 				};
+
+				class ITextEditCallback : public virtual IDescriptable, public Description<ITextEditCallback>
+				{
+				public:
+					virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
+					virtual void							Detach()=0;
+					virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
+				};
+
 			protected:
 				elements::GuiColorizedTextElement*			textElement;
 				compositions::GuiGraphicsComposition*		textComposition;
@@ -5701,6 +5710,9 @@ Common Operations
 				ICallback*									callback;
 				bool										dragging;
 				bool										readonly;
+
+				SpinLock									elementModifyLock;
+				collections::List<Ptr<ITextEditCallback>>	textEditCallbacks;
 
 				void										UpdateCaretPoint();
 				void										Move(TextPos pos, bool shift);
@@ -5723,6 +5735,8 @@ Common Operations
 				void										Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl);
 				ICallback*									GetCallback();
 				void										SetCallback(ICallback* value);
+				bool										AttachTextEditCallback(Ptr<ITextEditCallback> value);
+				bool										DetachTextEditCallback(Ptr<ITextEditCallback> value);
 				GuiTextBoxCommonInterface*					GetTextBoxCommonInterface();
 				void										SetTextBoxCommonInterface(GuiTextBoxCommonInterface* value);
 
@@ -5745,12 +5759,45 @@ Common Operations
 				void										SetReadonly(bool value);
 			};
 
+/***********************************************************************
+Common Interface
+***********************************************************************/
+			
+			class GuiTextBoxColorizerBase : public Object, public GuiTextElementOperator::ITextEditCallback
+			{
+				typedef collections::Array<elements::text::ColorEntry>			ColorArray;
+			protected:
+				elements::GuiColorizedTextElement*			element;
+				SpinLock*									elementModifyLock;
+				volatile int								colorizedLineCount;
+				volatile bool								isColorizerRunning;
+				volatile bool								isFinalizing;
+				SpinLock									colorizerRunningEvent;
+
+				static void									ColorizerThreadProc(void* argument);
+
+				void										StartColorizer();
+				void										StopColorizer();
+			public:
+				GuiTextBoxColorizerBase();
+				~GuiTextBoxColorizerBase();
+
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void										Detach()override;
+				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+
+				virtual int									GetStartState()=0;
+				virtual int									ColorizeLine(const wchar_t* text, unsigned __int32* colors, int length, int startState)=0;
+				virtual const ColorArray&					GetColors()=0;
+			};
+
 			class GuiTextBoxCommonInterface : public Description<GuiTextBoxCommonInterface>
 			{
 				friend class GuiTextElementOperator;
 			protected:
 				GuiTextElementOperator*						textElementOperator;
 				GuiControl*									textControl;
+				Ptr<GuiTextBoxColorizerBase>				colorizer;
 
 				void										RaiseTextChanged();
 				void										RaiseSelectionChanged();
@@ -5762,6 +5809,9 @@ Common Operations
 				compositions::GuiNotifyEvent				SelectionChanged;
 
 				compositions::GuiGraphicsComposition*		GetTextComposition();
+
+				Ptr<GuiTextBoxColorizerBase>				GetColorizer();
+				void										SetColorizer(Ptr<GuiTextBoxColorizerBase> value);
 				
 				bool										CanCut();
 				bool										CanCopy();
@@ -5796,7 +5846,7 @@ Common Operations
 			};
 
 /***********************************************************************
-TextBox
+MultilineTextBox
 ***********************************************************************/
 
 			class GuiMultilineTextBox : public GuiScrollView, public GuiTextBoxCommonInterface, public Description<GuiMultilineTextBox>
@@ -5857,6 +5907,10 @@ TextBox
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 			};
+
+/***********************************************************************
+SinglelineTextBox
+***********************************************************************/
 			
 			class GuiSinglelineTextBox : public GuiControl, public GuiTextBoxCommonInterface, public Description<GuiSinglelineTextBox>
 			{
@@ -5912,7 +5966,7 @@ TextBox
 				public:
 					TextElementOperatorCallback(GuiSinglelineTextBox* _textControl);
 
-					bool									BeforeModify(TextPos& start, TextPos& end, const WString& originalText, WString& inputText)override;
+					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
 					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
 					void									ScrollToView(Point point)override;
 					int										GetTextMargin()override;

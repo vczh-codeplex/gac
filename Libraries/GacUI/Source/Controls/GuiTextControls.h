@@ -125,23 +125,43 @@ Common Operations
 /***********************************************************************
 Common Interface
 ***********************************************************************/
-
-			class GuiTextBoxColorizer : public Object, public GuiTextElementOperator::ITextEditCallback
+			
+			/// <summary>The base class of text box colorizer.</summary>
+			class GuiTextBoxColorizerBase : public Object, public GuiTextElementOperator::ITextEditCallback
 			{
 				typedef collections::Array<elements::text::ColorEntry>			ColorArray;
 			protected:
 				elements::GuiColorizedTextElement*			element;
 				SpinLock*									elementModifyLock;
+				volatile int								colorizedLineCount;
+				volatile bool								isColorizerRunning;
+				volatile bool								isFinalizing;
+				SpinLock									colorizerRunningEvent;
+
+				static void									ColorizerThreadProc(void* argument);
+
+				void										StartColorizer();
+				void										StopColorizer();
 			public:
-				GuiTextBoxColorizer();
-				~GuiTextBoxColorizer();
+				GuiTextBoxColorizerBase();
+				~GuiTextBoxColorizerBase();
 
 				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
 				void										Detach()override;
 				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
 
+				/// <summary>Get the start state for the first line.</summary>
+				/// <returns>The start state for the first line.</returns>
 				virtual int									GetStartState()=0;
+				/// <summary>Colorizer one line with a start state.</summary>
+				/// <returns>The start state for the next line.</returns>
+				/// <param name="text">Text buffer.</param>
+				/// <param name="colors">Color index buffer. The index should be in [0 .. [M:vl.presentation.controls.GuiTextBoxColorizerBase.GetColors]()-1].</param>
+				/// <param name="length">The length of the buffer.</param>
+				/// <param name="startState">The start state for this line.</param>
 				virtual int									ColorizeLine(const wchar_t* text, unsigned __int32* colors, int length, int startState)=0;
+				/// <summary>Get the supported colors ordered by their indices.</summary>
+				/// <returns>The supported colors ordered by their indices.</returns>
 				virtual const ColorArray&					GetColors()=0;
 			};
 
@@ -152,6 +172,7 @@ Common Interface
 			protected:
 				GuiTextElementOperator*						textElementOperator;
 				GuiControl*									textControl;
+				Ptr<GuiTextBoxColorizerBase>				colorizer;
 
 				void										RaiseTextChanged();
 				void										RaiseSelectionChanged();
@@ -165,6 +186,13 @@ Common Interface
 
 				/// <summary>Get a <see cref="compositions::GuiGraphicsComposition"/> that directly owns the <see cref="elements::GuiColorizedTextElement"/> instance.</summary>
 				compositions::GuiGraphicsComposition*		GetTextComposition();
+
+				/// <summary>Get the current colorizer.</summary>
+				/// <returns>The current colorizer.</returns>
+				Ptr<GuiTextBoxColorizerBase>				GetColorizer();
+				/// <summary>Set the current colorizer.</summary>
+				/// <param name="value">The current colorizer.</param>
+				void										SetColorizer(Ptr<GuiTextBoxColorizerBase> value);
 				
 				/// <summary>Test can the selection be cut.</summary>
 				/// <returns>Returns true if the selection can be cut.</returns>
