@@ -13067,6 +13067,7 @@ Common Operations
 				void										Select(TextPos begin, TextPos end);
 				WString										GetSelectionText();
 				void										SetSelectionText(const WString& value);
+				void										SetText(const WString& value);
 
 				bool										CanCut();
 				bool										CanCopy();

@@ -636,6 +636,20 @@ GuiTextElementOperator
 				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value);
 			}
 
+			void GuiTextElementOperator::SetText(const WString& value)
+			{
+				if(textElement)
+				{
+					TextPos end;
+					if(textElement->GetLines().GetCount()>0)
+					{
+						end.row=textElement->GetLines().GetCount()-1;
+						end.column=textElement->GetLines().GetLine(end.row).dataLength;
+					}
+					Modify(TextPos(), end, value);
+				}
+			}
+
 			bool GuiTextElementOperator::CanCut()
 			{
 				return !readonly && textElement->GetCaretBegin()!=textElement->GetCaretEnd();
@@ -975,7 +989,7 @@ GuiMultilineTextBox::StyleController
 
 			void GuiMultilineTextBox::StyleController::SetText(const WString& value)
 			{
-				textElement->GetLines().SetText(value);
+				textElementOperator.SetText(value);
 				textElement->SetCaretBegin(TextPos(0, 0));
 				textElement->SetCaretEnd(TextPos(0, 0));
 				GuiScrollView::StyleController::SetText(value);
@@ -1109,7 +1123,6 @@ GuiMultilineTextBox
 
 			void GuiMultilineTextBox::SetText(const WString& value)
 			{
-				styleController->SetText(value);
 				GuiScrollView::SetText(value);
 				CalculateView();
 			}
@@ -1200,7 +1213,7 @@ GuiSinglelineTextBox::StyleController
 
 			void GuiSinglelineTextBox::StyleController::SetText(const WString& value)
 			{
-				textElement->GetLines().SetText(value);
+				textElementOperator.SetText(value);
 				textElement->SetCaretBegin(TextPos(0, 0));
 				textElement->SetCaretEnd(TextPos(0, 0));
 				styleProvider->SetText(value);
@@ -1352,7 +1365,6 @@ GuiSinglelineTextBox
 
 			void GuiSinglelineTextBox::SetText(const WString& value)
 			{
-				styleController->SetText(value);
 				GuiControl::SetText(value);
 			}
 
