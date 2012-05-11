@@ -6739,6 +6739,7 @@ namespace vl
 		namespace controls
 		{
 			using namespace elements;
+			using namespace elements::text;
 			using namespace compositions;
 
 /***********************************************************************
@@ -6776,9 +6777,130 @@ GuiTextElementOperator::DefaultCallback
 				return textComposition->GetBounds().Height()/textElement->GetLines().GetRowHeight();
 			}
 
-			bool GuiTextElementOperator::DefaultCallback::BeforeModify(TextPos& start, TextPos& end, const WString& originalText, WString& inputText)
+			bool GuiTextElementOperator::DefaultCallback::BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)
 			{
 				return true;
+			}
+
+/***********************************************************************
+GuiTextBoxColorizer
+***********************************************************************/
+
+			void GuiTextBoxColorizerBase::ColorizerThreadProc(void* argument)
+			{
+				GuiTextBoxColorizerBase* colorizer=(GuiTextBoxColorizerBase*)argument;
+				while(!colorizer->isFinalizing)
+				{
+					int lineIndex=-1;
+					wchar_t* text=0;
+					unsigned __int32* colors=0;
+					int length=0;
+					int startState=-1;
+
+					{
+						SpinLock::Scope scope(*colorizer->elementModifyLock);
+						if(colorizer->colorizedLineCount>=colorizer->element->GetLines().GetCount())
+						{
+							colorizer->isColorizerRunning=false;
+							break;
+						}
+
+						lineIndex=colorizer->colorizedLineCount++;
+						TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
+						length=line.dataLength;
+						text=new wchar_t[length];
+						colors=new unsigned __int32[length];
+						memcpy(text, line.text, sizeof(wchar_t)*length);
+						startState=lineIndex==0?colorizer->GetStartState():colorizer->element->GetLines().GetLine(lineIndex-1).lexerFinalState;
+					}
+
+					int finalState=colorizer->ColorizeLine(text, colors, length, startState);
+
+					{
+						SpinLock::Scope scope(*colorizer->elementModifyLock);
+						if(lineIndex<colorizer->colorizedLineCount)
+						{
+							TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
+							line.lexerFinalState=finalState;
+							for(int i=0;i<length;i++)
+							{
+								line.att[i].colorIndex=colors[i];
+							}
+						}
+						delete[] text;
+						delete[] colors;
+					}
+				}
+				colorizer->colorizerRunningEvent.Leave();
+			}
+
+			void GuiTextBoxColorizerBase::StartColorizer()
+			{
+				if(!isColorizerRunning)
+				{
+					isColorizerRunning=true;
+					colorizerRunningEvent.Enter();
+					ThreadPoolLite::Queue(&GuiTextBoxColorizerBase::ColorizerThreadProc, this);
+				}
+			}
+
+			void GuiTextBoxColorizerBase::StopColorizer()
+			{
+				isFinalizing=true;
+				colorizerRunningEvent.Enter();
+				colorizerRunningEvent.Leave();
+				colorizedLineCount=0;
+				isFinalizing=false;
+			}
+
+			GuiTextBoxColorizerBase::GuiTextBoxColorizerBase()
+				:element(0)
+				,elementModifyLock(0)
+				,colorizedLineCount(0)
+				,isColorizerRunning(false)
+				,isFinalizing(false)
+			{
+			}
+
+			GuiTextBoxColorizerBase::~GuiTextBoxColorizerBase()
+			{
+				StopColorizer();
+			}
+
+			void GuiTextBoxColorizerBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			{
+				if(_element)
+				{
+					SpinLock::Scope scope(_elementModifyLock);
+					element=_element;
+					elementModifyLock=&_elementModifyLock;
+					StartColorizer();
+				}
+			}
+
+			void GuiTextBoxColorizerBase::Detach()
+			{
+				if(element && elementModifyLock)
+				{
+					StopColorizer();
+					SpinLock::Scope scope(*elementModifyLock);
+					element=0;
+					elementModifyLock=0;
+				}
+			}
+
+			void GuiTextBoxColorizerBase::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			{
+				if(element && elementModifyLock)
+				{
+					SpinLock::Scope scope(*elementModifyLock);
+					int line=originalStart.row<originalEnd.row?originalStart.row:originalEnd.row;
+					if(colorizedLineCount<line)
+					{
+						colorizedLineCount=line;
+					}
+					StartColorizer();
+				}
 			}
 
 /***********************************************************************
@@ -6860,8 +6982,15 @@ GuiTextElementOperator
 				WString inputText=input;
 				if(callback->BeforeModify(start, end, originalText, inputText))
 				{
-					end=textElement->GetLines().Modify(start, end, inputText);
+					{
+						SpinLock::Scope scope(elementModifyLock);
+						end=textElement->GetLines().Modify(start, end, inputText);
+					}
 					callback->AfterModify(originalStart, originalEnd, originalText, start, end, inputText);
+					for(int i=0;i<textEditCallbacks.Count();i++)
+					{
+						textEditCallbacks[i]->TextEditNotify(originalStart, originalEnd, originalText, start, end, inputText);
+					}
 					Move(end, false);
 
 					if(textBoxCommonInterface)
@@ -7114,6 +7243,11 @@ GuiTextElementOperator
 
 			GuiTextElementOperator::~GuiTextElementOperator()
 			{
+				for(int i=0;i<textEditCallbacks.Count();i++)
+				{
+					textEditCallbacks[i]->Detach();
+				}
+				textEditCallbacks.Clear();
 			}
 
 			void GuiTextElementOperator::Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl)
@@ -7132,6 +7266,11 @@ GuiTextElementOperator
 				textComposition->GetEventReceiver()->mouseMove.AttachMethod(this, &GuiTextElementOperator::OnMouseMove);
 				focusableComposition->GetEventReceiver()->keyDown.AttachMethod(this, &GuiTextElementOperator::OnKeyDown);
 				focusableComposition->GetEventReceiver()->charInput.AttachMethod(this, &GuiTextElementOperator::OnCharInput);
+
+				for(int i=0;i<textEditCallbacks.Count();i++)
+				{
+					textEditCallbacks[i]->Attach(textElement, elementModifyLock);
+				}
 			}
 			
 			GuiTextElementOperator::ICallback* GuiTextElementOperator::GetCallback()
@@ -7142,6 +7281,36 @@ GuiTextElementOperator
 			void GuiTextElementOperator::SetCallback(ICallback* value)
 			{
 				callback=value;
+			}
+
+			bool GuiTextElementOperator::AttachTextEditCallback(Ptr<ITextEditCallback> value)
+			{
+				if(textEditCallbacks.Contains(value.Obj()))
+				{
+					return false;
+				}
+				else
+				{
+					textEditCallbacks.Add(value);
+					if(textElement)
+					{
+						value->Attach(textElement, elementModifyLock);
+					}
+					return true;
+				}
+			}
+
+			bool GuiTextElementOperator::DetachTextEditCallback(Ptr<ITextEditCallback> value)
+			{
+				if(textEditCallbacks.Remove(value.Obj()))
+				{
+					value->Detach();
+					return true;
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 			GuiTextBoxCommonInterface* GuiTextElementOperator::GetTextBoxCommonInterface()
@@ -7305,6 +7474,27 @@ GuiTextElementOperator
 			compositions::GuiGraphicsComposition* GuiTextBoxCommonInterface::GetTextComposition()
 			{
 				return textElementOperator->GetTextComposition();
+			}
+
+			Ptr<GuiTextBoxColorizerBase> GuiTextBoxCommonInterface::GetColorizer()
+			{
+				return colorizer;
+			}
+
+			void GuiTextBoxCommonInterface::SetColorizer(Ptr<GuiTextBoxColorizerBase> value)
+			{
+				if(textElementOperator)
+				{
+					if(colorizer)
+					{
+						textElementOperator->DetachTextEditCallback(colorizer);
+					}
+					colorizer=value;
+					if(colorizer)
+					{
+						textElementOperator->AttachTextEditCallback(colorizer);
+					}
+				}
 			}
 
 			bool GuiTextBoxCommonInterface::CanCut()
@@ -7792,7 +7982,7 @@ GuiSinglelineTextBox::DefaultTextElementOperatorCallback
 			{
 			}
 
-			bool GuiSinglelineTextBox::TextElementOperatorCallback::BeforeModify(TextPos& start, TextPos& end, const WString& originalText, WString& inputText)
+			bool GuiSinglelineTextBox::TextElementOperatorCallback::BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)
 			{
 				int length=inputText.Length();
 				const wchar_t* input=inputText.Buffer();
@@ -18143,6 +18333,10 @@ GuiColorizedTextElementRenderer
 							
 							bool crlf=column==line.dataLength;
 							int colorIndex=crlf?0:line.att[column].colorIndex;
+							if(colorIndex>=colors.Count())
+							{
+								colorIndex=0;
+							}
 							ColorItemResource& color=
 								!inSelection?colors[colorIndex].normal:
 								focused?colors[colorIndex].selectedFocused:
@@ -19674,6 +19868,10 @@ GuiColorizedTextElementRenderer
 							
 							bool crlf=column==line.dataLength;
 							int colorIndex=crlf?0:line.att[column].colorIndex;
+							if(colorIndex>=colors.Count())
+							{
+								colorIndex=0;
+							}
 							ColorItemResource& color=
 								!inSelection?colors[colorIndex].normal:
 								focused?colors[colorIndex].selectedFocused:

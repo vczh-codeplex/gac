@@ -867,6 +867,10 @@ GuiColorizedTextElementRenderer
 							
 							bool crlf=column==line.dataLength;
 							int colorIndex=crlf?0:line.att[column].colorIndex;
+							if(colorIndex>=colors.Count())
+							{
+								colorIndex=0;
+							}
 							ColorItemResource& color=
 								!inSelection?colors[colorIndex].normal:
 								focused?colors[colorIndex].selectedFocused:
