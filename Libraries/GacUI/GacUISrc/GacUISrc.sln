@@ -26,6 +26,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DocumentRawItems", "Documen
 		..\Public\DocumentRawItems\reference_gacui.docitem.txt = ..\Public\DocumentRawItems\reference_gacui.docitem.txt
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{1F74B7A4-5D65-4F06-9DAA-2E66D7FBEC92}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\index.html = ..\Public\Web\index.html
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 3
@@ -59,5 +64,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{695AA472-C40E-41C8-BDF9-9866F36C9AE3} = {843780E4-7D2F-4955-B988-88325DFB6B9E}
 		{80361AFE-C424-451B-BBDD-637AD16274C0} = {843780E4-7D2F-4955-B988-88325DFB6B9E}
+		{1F74B7A4-5D65-4F06-9DAA-2E66D7FBEC92} = {843780E4-7D2F-4955-B988-88325DFB6B9E}
 	EndGlobalSection
 EndGlobal

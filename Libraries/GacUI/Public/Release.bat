@@ -10,4 +10,9 @@ copy ..\..\GacUISrc\Debug\GacUISrc.pdb GacUISrc.pdb
 ..\..\..\..\Common\Tools\GenXmlDocRef.exe GacUISrcDoc.xml . reference:gacui
 cd ..
 ..\..\..\Common\Tools\GenDocIndex.exe html Temp\StaticHtmlDoc Temp DocumentRawItems
+cd Web
+mkdir StaticHtmlDoc
+cd StaticHtmlDoc
+del *.* /Q
+copy ..\..\Temp\StaticHtmlDoc\*.* *.*
 pause
