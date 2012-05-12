@@ -2,7 +2,7 @@
 body
 {
     font-family: Segoe UI;
-    background-color: #EFE4B0;
+    background-color: #FFFFFF;
 }
 
 /*Table to center the content*/
@@ -49,79 +49,6 @@ body
     color: #0F0F0F;
 }
 
-/*Sub content button*/
-.NavigateButton
-{
-    font-family: Segoe UI;
-    font-size: 52px;
-    text-align: center;
-    width: 390px;
-    height: 135px;
-}
-
-/*Sub content link*/
-.NavigateLink
-{
-    display: block;
-    color: #0F0F0F;
-    width: 390px;
-    height: 135px;
-    line-height: 135px;
-    text-decoration: none;
-}
-
-/*Sub content link style*/
-.Red
-{
-    background-color: #ED4C24;
-}
-.Green
-{
-    background-color: #22B14C;
-}
-.Blue
-{
-    background-color: #00A2E8;
-}
-.Yellow
-{
-    background-color: #FFF200;
-}
-.Orange
-{
-    background-color: #FF7F27;
-}
-.Purble
-{
-    background-color: #A349A4;
-}
-
-/*Sub content link hover style*/
-.Red:hover
-{
-    background-color: #FD7C64;
-}
-.Green:hover
-{
-    background-color: #52E17C;
-}
-.Blue:hover
-{
-    background-color: #30D2F8;
-}
-.Yellow:hover
-{
-    background-color: #FFF290;
-}
-.Orange:hover
-{
-    background-color: #FFAF57;
-}
-.Purble:hover
-{
-    background-color: #D379D4;
-}
-
 /*Content table*/
 .ContentTable
 {
@@ -129,3 +56,97 @@ body
     font-size: 24px;
     border: 0px;
 }
+
+.MenuButton
+{
+    display: block;
+    width: 130px;
+    height: 32px;
+    line-height: 32px;
+    font-family: Segoe UI;
+    font-size: 16px;
+    background-color: #F0F1F4;
+    color: #000000;
+    text-decoration: none;
+    
+    border-style: solid;
+    border-top-width: 0px;
+    border-left-width: 0px;
+    border-right-width: 0px;
+    border-bottom-width: 3px;
+    border-bottom-color: #D8D9DC;
+}
+.MenuButton:hover.HomeButton
+{
+    border-bottom-color: #5EA8DE;
+}
+.MenuButton:hover.GettingStartButton
+{
+    border-bottom-color: #8DBF35;
+}
+.MenuButton:hover.DemosButton
+{
+    border-bottom-color: #F18A2B;
+}
+.MenuButton:hover.DownloadButton
+{
+    border-bottom-color: #F7866A;
+}
+.MenuButton:hover.DocumentButton
+{
+    border-bottom-color: #ED7099;
+}
+.MenuButton:hover.ContactButton
+{
+    border-bottom-color: #7B4F9D;
+}
+.MenuButton.HomeButtonSelected
+{
+    background-color: #5EA8DE;
+    border-bottom-color: #5EA8DE;
+    color: #FFFFFF;
+}
+.MenuButton.GettingStartButtonSelected
+{
+    background-color: #8DBF35;
+    border-bottom-color: #8DBF35;
+    color: #FFFFFF;
+}
+.MenuButton.DemosButtonSelected
+{
+    background-color: #F18A2B;
+    border-bottom-color: #F18A2B;
+    color: #FFFFFF;
+}
+.MenuButton.DownloadButtonSelected
+{
+    background-color: #F7866A;
+    border-bottom-color: #F7866A;
+    color: #FFFFFF;
+}
+.MenuButton.DocumentButtonSelected
+{
+    background-color: #ED7099;
+    border-bottom-color: #ED7099;
+    color: #FFFFFF;
+}
+.MenuButton.ContactButtonSelected
+{
+    background-color: #7B4F9D;
+    border-bottom-color: #7B4F9D;
+    color: #FFFFFF;
+}
+
+/*
+#5EA8DE
+#8DBF35
+#B8D544 ?
+#D8C967 ?
+#F18A2B
+#F7866A
+#ED7099
+#7B4F9D
+
+#F0F1F4
+#D8D9DC
+*/
