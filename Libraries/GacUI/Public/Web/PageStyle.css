@@ -121,3 +121,11 @@ body
 {
     background-color: #D379D4;
 }
+
+/*Content table*/
+.ContentTable
+{
+    font-family: Segoe UI;
+    font-size: 24px;
+    border: 0px;
+}

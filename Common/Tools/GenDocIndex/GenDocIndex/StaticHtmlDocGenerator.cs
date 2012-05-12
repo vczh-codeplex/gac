@@ -63,7 +63,7 @@ namespace GenDocIndex
         {
             writer.WriteLine("<table width=\"100%\"><col width=\"10%\"/><col width=\"90%\"/>");
             writer.WriteLine("<tr><td class=\"NavigateHeader\" colspan=\"2\" align=\"left\">");
-            writer.WriteLine("<a class=\"Title\" href=\"../index.html\">GacUI</a><br />");
+            writer.WriteLine("<a class=\"Title\" href=\"../index.html\">GacLib</a><br />");
             writer.WriteLine("<div class=\"SubTitle\">&nbsp;&nbsp;&nbsp;&nbsp;---- GPU Accelerated C++ User Interface</div>");
             writer.WriteLine("</td></tr>");
             writer.WriteLine("<tr><td class=\"frameTable indexPanel\" valign=\"top\">");
