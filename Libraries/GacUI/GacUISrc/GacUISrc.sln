@@ -28,8 +28,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DocumentRawItems", "Documen
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{1F74B7A4-5D65-4F06-9DAA-2E66D7FBEC92}"
 	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\Contact.html = ..\Public\Web\Contact.html
+		..\Public\Web\GettingStart.html = ..\Public\Web\GettingStart.html
 		..\Public\Web\index.html = ..\Public\Web\index.html
 		..\Public\Web\PageStyle.css = ..\Public\Web\PageStyle.css
+		..\Public\Web\Screenshots.html = ..\Public\Web\Screenshots.html
+		..\Public\Web\Tutorial.html = ..\Public\Web\Tutorial.html
 	EndProjectSection
 EndProject
 Global
