@@ -61,7 +61,12 @@ namespace GenDocIndex
 
         static void GenerateContent(TextWriter writer, DocItem docItem, DocItemValidationResult validationResult)
         {
-            writer.Write("<table class=\"frameTable\" width=\"100%\"><col width=\"10%\"/><col width=\"90%\"/><tr><td class=\"frameTable indexPanel\" valign=\"top\">");
+            writer.WriteLine("<table width=\"100%\"><col width=\"10%\"/><col width=\"90%\"/>");
+            writer.WriteLine("<tr><td class=\"NavigateHeader\" colspan=\"2\" align=\"left\">");
+            writer.WriteLine("<a class=\"Title\" href=\"../index.html\">GacUI</a><br />");
+            writer.WriteLine("<div class=\"SubTitle\">&nbsp;&nbsp;&nbsp;&nbsp;---- GPU Accelerated C++ User Interface</div>");
+            writer.WriteLine("</td></tr>");
+            writer.WriteLine("<tr><td class=\"frameTable indexPanel\" valign=\"top\">");
             {
                 List<DocItem> parentList = new List<DocItem>();
                 {
@@ -74,7 +79,7 @@ namespace GenDocIndex
                 }
                 GenerateIndexTree(writer, validationResult.RootItems, parentList, 0, 0);
             }
-            writer.Write("</td><td class=\"frameTable contentPanel\" valign=\"top\">");
+            writer.WriteLine("</td><td class=\"frameTable contentPanel\" valign=\"top\">");
             {
                 string currentColor = "000000";
                 writer.Write("<p><font color=\"{0}\">", currentColor);
@@ -222,7 +227,7 @@ namespace GenDocIndex
                 }
                 writer.Write("</font></p>");
             }
-            writer.Write("</td></tr></table>");
+            writer.WriteLine("</td></tr></table>");
         }
 
         static void GenerateFile(DocItem docItem, string outputFolder, DocItemValidationResult validationResult)
@@ -231,7 +236,12 @@ namespace GenDocIndex
             using (StreamWriter writer = new StreamWriter(new FileStream(fileName, FileMode.Create, FileAccess.Write), Encoding.UTF8))
             {
                 writer.WriteLine("<html>");
-                writer.WriteLine("<head><link rel=\"Stylesheet\" type=\"text/css\" href=\"DocStyle.css\" /><title>{0}</title></head>", docItem.Title);
+                writer.WriteLine("<head>");
+                writer.WriteLine("<meta http-equiv=\"X-UA-Compatible\" content=\"IE=8\" />");
+                writer.WriteLine("<link rel=\"Stylesheet\" type=\"text/css\" href=\"../DocStyle.css\" />");
+                writer.WriteLine("<link rel=\"Stylesheet\" type=\"text/css\" href=\"../PageStyle.css\" />");
+                writer.WriteLine("<title>{0}</title>", docItem.Title);
+                writer.WriteLine("</head>");
                 writer.WriteLine("<body>");
                 GenerateContent(writer, docItem, validationResult);
                 writer.WriteLine("</body>");
@@ -248,112 +258,8 @@ namespace GenDocIndex
             }
         }
 
-        static void GenerateCss(string outputFolder)
-        {
-            string fileName = outputFolder + "DocStyle.css";
-            using (StreamWriter writer = new StreamWriter(new FileStream(fileName, FileMode.Create, FileAccess.Write), Encoding.UTF8))
-            {
-                writer.Write(
-@"
-body
-{
-    font-family: Segoe UI;
-}
-
-.indexPanel a:link
-{
-    text-decoration: none;
-    color: #0050FF;
-}
-.indexPanel a:visited
-{
-    text-decoration: none;
-    color: #0050FF;
-}
-.indexPanel a:active
-{
-    text-decoration: none;
-    color: #0050FF;
-}
-.indexPanel a:hover
-{
-    text-decoration: underline;
-    color: #FF5000;
-}
-
-.contentPanel a:link
-{
-    text-decoration: underline;
-    color: #0050FF;
-}
-.contentPanel a:visited
-{
-    text-decoration: underline;
-    color: #0050FF;
-}
-.contentPanel a:active
-{
-    text-decoration: underline;
-    color: #0050FF;
-}
-.contentPanel a:hover
-{
-    text-decoration: underline;
-    color: #FF5000;
-}
-
-table.frameTable
-{
-    border-width: 1px;
-    border-spacing: 0px;
-    border-style: solid;
-    border-collapse: collapse;
-    border-top-color: #808080;
-    border-bottom-color: #808080;
-}
-td.frameTable
-{
-    border-width: 1px;
-    border-style: solid;
-    border-color: #808080;
-    padding: 10px;
-}
-
-td.indexPanel
-{
-    font-size: smaller;
-}
-
-.docTable table
-{
-    border-width: 1px;
-    border-spacing: 0px;
-    border-style: solid;
-    border-collapse: collapse;
-    border-color: #808080;
-}
-.docTable td
-{
-    border-width: 1px;
-    border-style: solid;
-    border-color: #808080;
-    padding: 3px;
-}
-.docTable thead
-{
-    background-color: #FFFF99;
-}
-.docTable tbody
-{
-    background-color: #FFFFFF;
-}
-");
-            }
-        }
-
         public static void GenerateStaticHtmlDocument(string outputFolder, DocItemValidationResult validationResult)
         {
-            GenerateCss(outputFolder);
             GenerateFiles(validationResult.RootItems, outputFolder, validationResult);
         }
     }
