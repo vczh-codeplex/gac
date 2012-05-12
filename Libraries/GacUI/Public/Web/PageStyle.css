@@ -1,8 +1,11 @@
+/*Body*/
 body
 {
     font-family: Segoe UI;
     background-color: #EFE4B0;
 }
+
+/*Table to center the content*/
 .ContainerTable
 {
     border: 0px;
@@ -10,55 +13,64 @@ body
     height: 100%;
 }
 
+/*Table for content*/
 .NavateTable
 {
     border: 0px;
-    width: 800px;
-    height: 600px;
 }
 
+/*Content header*/
 .NavigateHeader
 {
-    font-family: Segoe UI;
-    font-size: xx-large;
-    font-weight: bold;
-    font-style: italic;
-    text-align: left;
-}
-.NavigateSubHeader
-{
-    font-size: small;
-    font-weight: normal;
+    width: 800px;
+    height: 135px;
 }
 
+/*Content title*/
+.Title
+{
+    font-family: Segoe UI;
+    text-align: left;
+    font-style: italic;
+    font-weight: bold;
+    font-size: 64px;
+    color: #0F0F0F;
+    text-decoration: none;
+}
+
+/*Content sub title*/
+.SubTitle
+{
+    font-family: Segoe UI;
+    text-align: left;
+    font-style: italic;
+    font-weight: normal;
+    font-size: 16px;
+    color: #0F0F0F;
+}
+
+/*Sub content button*/
 .NavigateButton
 {
     font-family: Segoe UI;
-    font-size: xx-large;
+    font-size: 52px;
     text-align: center;
+    width: 390px;
+    height: 135px;
 }
 
+/*Sub content link*/
 .NavigateLink
 {
+    display: block;
     color: #0F0F0F;
-}
-.NavigateLink:link
-{
+    width: 390px;
+    height: 135px;
+    line-height: 135px;
     text-decoration: none;
-}
-.NavigateLink:visited
-{
-    text-decoration: none;
-}
-.NavigateLink:active
-{
-    text-decoration: none;
-}
-.NavigateLink:hover
-{
-    text-decoration: underline;
 }
 
+/*Sub content link style*/
 .Red
 {
     background-color: #ED4C24;
@@ -82,4 +94,30 @@ body
 .Purble
 {
     background-color: #A349A4;
+}
+
+/*Sub content link hover style*/
+.Red:hover
+{
+    background-color: #FD7C64;
+}
+.Green:hover
+{
+    background-color: #52E17C;
+}
+.Blue:hover
+{
+    background-color: #30D2F8;
+}
+.Yellow:hover
+{
+    background-color: #FFF290;
+}
+.Orange:hover
+{
+    background-color: #FFAF57;
+}
+.Purble:hover
+{
+    background-color: #D379D4;
 }
