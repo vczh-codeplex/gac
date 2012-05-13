@@ -17,12 +17,18 @@ body
 .NavigateTable
 {
     border: 0px;
+    width: 800px;
 }
+.NavigateTable td
+{
+    overflow: hidden;
+}
+
+/****************************************************/
 
 /*Content header*/
 .NavigateHeader
 {
-    width: 800px;
     height: 135px;
 }
 
@@ -57,6 +63,9 @@ body
     border: 0px;
 }
 
+/****************************************************/
+
+/*Navigation bar*/
 .MenuButton
 {
     display: block;
@@ -135,6 +144,51 @@ body
     background-color: #7B4F9D;
     border-bottom-color: #7B4F9D;
     color: #FFFFFF;
+}
+
+/****************************************************/
+
+.GuideTable
+{
+    width: 100%;
+    font-size: 12px;
+}
+
+.GuideTable thead td
+{
+    background-color: #5EA8DE;
+    color: #FFFFFF;
+    padding: 5px;
+}
+
+.GuideTable tbody td
+{
+    border-width: 1px;
+    border-style: solid;
+    border-color: #5EA8DE;
+    padding: 5px;
+}
+
+.GuideTable tbody td strong
+{
+    color: #7B4F9D;
+}
+
+.GuideTable tbody td p
+{
+    color: #404040;
+}
+
+.GuideTable tbody td a
+{
+    display: block;
+    color: #7B4F9D;
+    text-align: right;
+    text-decoration: none;
+}
+.GuideTable tbody td a:hover
+{
+    text-decoration: underline;
 }
 
 /*

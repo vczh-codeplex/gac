@@ -8,7 +8,7 @@
 <table class="ContainerTable">
     <tr>
         <td align="center" valign="top">
-            <table class="NavigateTable" cellpadding="0" cellspacing="4" >
+            <table class="NavigateTable" cellpadding="0" cellspacing="4">
                 <tr>
                     <td class="NavigateHeader" colspan="6" align="left">
                         <a class="Title" href="index.html">GacLib</a><br />
@@ -49,7 +49,88 @@
                     </td>
                 </tr>
                 <tr>
-                    <td align="left" valign="top" colspan="6">This page is under construction.</td>
+                    <td align="left" valign="top" colspan="6">
+                        <p>
+                            GacUI is a GPU accelerated user interface library for C++ programming language. It provide similar features as WPF, but some features is limited by C++, such as dependency properties. Here are main features:
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="left" valign="top" colspan="4">
+                        <ul>
+                            <li>
+                                <strong>Rich control library</strong>
+                                <p>GacUI provides all common controls, such as buttons, text boxes, list views and menus. Text boxes in GacUI supports customizer colorizers so that programmers can build code editor very easily.</p>
+                                <p>We plan to provide Ribbon library and dockable panel manager in the next release.</p>
+                            </li>
+                            <li>
+                                <strong>CPU acceleration</strong>
+                                <p>Currently GacUI provides two rendering engine: GDI and Direct2D. GacUI supports GDI to run itself on some operating system that doesn't have Direct2D, like Windows XP.</p>
+                            </li>
+                            <li>
+                                <strong>Customizable control styles</strong>
+                                <p>GacUI also provides control style technology. Controls appear like Windows 7 by default. But programmers can build a different style to customize the appearance for controls.</p>
+                            </li>
+                            <li>
+                                <strong>MVC concept supports</strong>
+                                <p>For some repeated items containers like list view, tree view or combo box, GacUI provides MVC supports to decouple data source, item style and item arranger.</p>
+                                <p>This features is important for displaying large data set. For example, if an item is displayed as a button, the list view control will only creates buttons for visible items. Invisible items doesn't really create buttons for displaying them. When user scrolls, data source, item style and item arranger will cooperate together to display correct items in correct positions.</p>
+                                <p>If the data is too large to store in the memory, this mechanism enables programmers to load necessary data only from files. The application can use only a little memory to show such large data smoothly. MVC supporting makes programmers very easy to do that.</p>
+                            </li>
+                            <li>
+                                <strong>GUI editor</strong>
+                                <p>The editor will be provided in the next release.</p>
+                            </li>
+                        </ul>
+                    </td>
+                    <td align="left" valign="top" colspan="2">
+                        <table class="GuideTable" cellpadding="0" cellspacing="4">
+                            <thead>
+                                <tr>
+                                    <td>
+                                        I want to:
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td align="left" valign="top">
+                                        <strong>Getting Start</strong>
+                                        <p>Here are instructions for how to download GacUI source code and build a hello world application.</p>
+                                        <a href="GettingStart.html">Read more...</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="left" valign="top">
+                                        <strong>Demoes</strong>
+                                        <p>Learning important GacUI features from demoes is much easier than reading document.</p>
+                                        <a href="Demoes.html">Read more...</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="left" valign="top">
+                                        <strong>Download</strong>
+                                        <p>Both latest release and latest source code are available. Programmers can choose which one to use.</p>
+                                        <a href="Download.html">Read more...</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="left" valign="top">
+                                        <strong>Document</strong>
+                                        <p>Online document for almost all classes in GacUI library. Offline document is included in GacUI releases.</p>
+                                        <a href="./StaticHtmlDoc/reference_gacui.html">Read more...</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="left" valign="top">
+                                        <strong>Contact</strong>
+                                        <p>Contact the developer to get help or provide advices.</p>
+                                        <a href="Contact.html">Read more...</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
                 </tr>
             </table>
         </td>
