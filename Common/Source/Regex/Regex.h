@@ -154,7 +154,31 @@ namespace vl
 			RegexLexerWalker(const RegexLexerWalker& walker);
 			~RegexLexerWalker();
 
-			bool										Walk(wchar_t input, vint& state, vint& token, bool& previousTokenStop)const;
+			int											GetStartState()const;
+			void										Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const;
+			vint										Walk(wchar_t input, vint state)const;
+		};
+
+		class RegexLexerColorizer : public Object
+		{
+			friend class RegexLexer;
+		public:
+			typedef void(*TokenProc)(void* argument, vint start, vint length, vint token);
+
+		protected:
+			RegexLexerWalker							walker;
+			vint										currentState;
+
+			RegexLexerColorizer(const RegexLexerWalker& _walker);
+		public:
+			RegexLexerColorizer(const RegexLexerColorizer& colorizer);
+			~RegexLexerColorizer();
+
+			void										Reset(vint state);
+			void										Pass(wchar_t input);
+			vint										GetStartState()const;
+			vint										GetCurrentState()const;
+			void										Colorize(const wchar_t* input, vint length, TokenProc tokenProc, void* tokenProcArgument);
 		};
 
 		class RegexLexer : public Object, private NotCopyable
@@ -169,6 +193,7 @@ namespace vl
 
 			RegexTokens									Parse(const WString& code, vint codeIndex=-1)const;
 			RegexLexerWalker							Walk()const;
+			RegexLexerColorizer							Colorize()const;
 		};
 	}
 }
