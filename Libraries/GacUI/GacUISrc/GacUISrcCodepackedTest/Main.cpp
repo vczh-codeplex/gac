@@ -507,6 +507,21 @@ public:
 	}
 };
 
+class CommentColorizer2 : public GuiTextBoxRegexColorizer
+{
+public:
+	CommentColorizer2()
+	{
+		text::ColorEntry defaultColor=win7::Win7GetTextBoxTextColor();
+		SetDefaultColor(defaultColor);
+
+		defaultColor.normal.text=Color(0, 192, 0);
+		AddToken(L"#[^\r\n]*", defaultColor);
+
+		Setup();
+	}
+};
+
 void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container)
 {
 	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
@@ -532,7 +547,7 @@ void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container)
 		controlHost->GetNativeWindow()->SetTitle(L"TextChanged["+itow(textBoxTextChangedCounter)+L"], SelectionChanged["+itow(textBoxSelectionChangedCounter)+L"]");
 	});
 
-	Ptr<CommentColorizer> colorizer=new CommentColorizer;
+	Ptr<GuiTextBoxColorizerBase> colorizer=new CommentColorizer2;
 	textBox->SetColorizer(colorizer);
 	textBox->SetText(L"# Comment\r\nNormal\r\n");
 }
