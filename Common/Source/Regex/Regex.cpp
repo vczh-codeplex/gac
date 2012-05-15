@@ -589,7 +589,7 @@ RegexLexerWalker
 
 		bool RegexLexerWalker::Walk(wchar_t input, vint& state, vint& token, bool& previousTokenStop)const
 		{
-			bool previousStateIsFinalState=pure->IsFinalState(state);
+			vint previousState=state;
 			if(state==-1)
 			{
 				state=pure->GetStartState();
@@ -598,10 +598,17 @@ RegexLexerWalker
 			previousTokenStop=false;
 
 			state=pure->Transit(input, state);
-			if(previousStateIsFinalState && state==-1)
+			if(state==-1)
 			{
-				state=pure->Transit(input, pure->GetStartState());
 				previousTokenStop=true;
+				if(previousState==-1)
+				{
+					return true;
+				}
+				else if(pure->IsFinalState(previousState))
+				{
+					state=pure->Transit(input, pure->GetStartState());
+				}
 			}
 			if(pure->IsFinalState(state))
 			{
@@ -610,7 +617,7 @@ RegexLexerWalker
 			}
 			else
 			{
-				return false;
+				return state==-1;
 			}
 		}
 

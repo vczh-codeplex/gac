@@ -1251,20 +1251,13 @@ TEST_CASE(TestRegexLexer4)
 ×Ö·û×ÅÉ«
 ***********************************************************************/
 
-#define WALK(INPUT, TOKEN, STOP)\
+#define WALK(INPUT, TOKEN, RESULT, STOP)\
 	do\
 	{\
 		bool result=walker.Walk((INPUT), state, token, previousTokenStop);\
-		if((TOKEN)==-1)\
-		{\
-			TEST_ASSERT(result==false);\
-		}\
-		else\
-		{\
-			TEST_ASSERT(result==true);\
-			TEST_ASSERT((TOKEN)==token);\
-		}\
-		TEST_ASSERT((STOP)==previousTokenStop);\
+		TEST_ASSERT((TOKEN)==token);\
+		TEST_ASSERT(RESULT==result);\
+		TEST_ASSERT(STOP==previousTokenStop);\
 	}while(0)\
 
 TEST_CASE(TestRegexLexerWalker)
@@ -1280,26 +1273,28 @@ TEST_CASE(TestRegexLexerWalker)
 	vint token=-1;
 	bool previousTokenStop=false;
 
-	WALK(L'g', 1, false);
-	WALK(L'e', 1, false);
-	WALK(L'n', 1, false);
-	WALK(L'i', 1, false);
-	WALK(L'u', 1, false);
-	WALK(L's', 1, false);
-	WALK(L' ', -1, true);
-	WALK(L'1', 0, false);
-	WALK(L'0', 0, false);
-	WALK(L' ', -1, true);
-	WALK(L'\"', -1, false);
-	WALK(L'\"', 2, false);
-	WALK(L'\"', -1, true);
-	WALK(L'g', -1, false);
-	WALK(L'e', -1, false);
-	WALK(L'n', -1, false);
-	WALK(L'i', -1, false);
-	WALK(L'u', -1, false);
-	WALK(L's', -1, false);
-	WALK(L'\"', 2, false);
+	WALK(L'g', 1,	true,	false);
+	WALK(L'e', 1,	true,	false);
+	WALK(L'n', 1,	true,	false);
+	WALK(L'i', 1,	true,	false);
+	WALK(L'u', 1,	true,	false);
+	WALK(L's', 1,	true,	false);
+	WALK(L' ', -1,	true,	true);
+	WALK(L'1', 0,	true,	false);
+	WALK(L'0', 0,	true,	false);
+	WALK(L' ', -1,	true,	true);
+	WALK(L'.', -1,	true,	true);
+	WALK(L' ', -1,	true,	true);
+	WALK(L'\"', -1,	false,	false);
+	WALK(L'\"', 2,	true,	false);
+	WALK(L'\"', -1,	false,	true);
+	WALK(L'g', -1,	false,	false);
+	WALK(L'e', -1,	false,	false);
+	WALK(L'n', -1,	false,	false);
+	WALK(L'i', -1,	false,	false);
+	WALK(L'u', -1,	false,	false);
+	WALK(L's', -1,	false,	false);
+	WALK(L'\"', 2,	true,	false);
 }
 
 #undef WALK
