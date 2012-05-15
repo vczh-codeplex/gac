@@ -6808,13 +6808,15 @@ GuiTextBoxColorizer
 						lineIndex=colorizer->colorizedLineCount++;
 						TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
 						length=line.dataLength;
-						text=new wchar_t[length];
-						colors=new unsigned __int32[length];
+						text=new wchar_t[length+2];
+						colors=new unsigned __int32[length+2];
 						memcpy(text, line.text, sizeof(wchar_t)*length);
+						text[length]=L'\r';
+						text[length+1]=L'\n';
 						startState=lineIndex==0?colorizer->GetStartState():colorizer->element->GetLines().GetLine(lineIndex-1).lexerFinalState;
 					}
 
-					int finalState=colorizer->ColorizeLine(text, colors, length, startState);
+					int finalState=colorizer->ColorizeLineWithCRLF(text, colors, length+2, startState);
 
 					{
 						SpinLock::Scope scope(*colorizer->elementModifyLock);
@@ -6901,6 +6903,113 @@ GuiTextBoxColorizer
 					}
 					StartColorizer();
 				}
+			}
+
+/***********************************************************************
+GuiTextBoxRegexColorizer
+***********************************************************************/
+
+			GuiTextBoxRegexColorizer::GuiTextBoxRegexColorizer()
+			{
+				colors.Resize(1);
+			}
+
+			GuiTextBoxRegexColorizer::~GuiTextBoxRegexColorizer()
+			{
+			}
+
+			elements::text::ColorEntry GuiTextBoxRegexColorizer::GetDefaultColor()
+			{
+				return defaultColor;
+			}
+
+			collections::IReadonlyList<WString>& GuiTextBoxRegexColorizer::GetTokenRegexes()
+			{
+				return tokenRegexes.Wrap();
+			}
+
+			collections::IReadonlyList<elements::text::ColorEntry>& GuiTextBoxRegexColorizer::GetTokenColors()
+			{
+				return tokenColors.Wrap();
+			}
+
+			bool GuiTextBoxRegexColorizer::SetDefaultColor(elements::text::ColorEntry value)
+			{
+				if(lexer)
+				{
+					return false;
+				}
+				else
+				{
+					defaultColor=value;
+					return true;
+				}
+			}
+
+			bool GuiTextBoxRegexColorizer::AddToken(const WString& regex, elements::text::ColorEntry color)
+			{
+				if(lexer)
+				{
+					return false;
+				}
+				else
+				{
+					tokenRegexes.Add(regex);
+					tokenColors.Add(color);
+					return true;
+				}
+			}
+
+			bool GuiTextBoxRegexColorizer::Setup()
+			{
+				if(lexer || tokenRegexes.Count()==0)
+				{
+					return false;
+				}
+				else
+				{
+					lexer=new regex::RegexLexer(tokenRegexes.Wrap());
+					colors.Resize(tokenRegexes.Count()+1);
+					colors[0]=defaultColor;
+					for(int i=0;i<tokenColors.Count();i++)
+					{
+						colors[i+1]=tokenColors[i];
+					}
+					return true;
+				}
+			}
+
+			int GuiTextBoxRegexColorizer::GetStartState()
+			{
+				return lexer?colorizer->GetStartState():-1;
+			}
+
+			void GuiTextBoxRegexColorizerProc(void* argument, vint start, vint length, vint token)
+			{
+				unsigned __int32* colors=(unsigned __int32*)argument;
+				for(int i=0;i<length;i++)
+				{
+					colors[i]=token+1;
+				}
+			}
+
+			int GuiTextBoxRegexColorizer::ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)
+			{
+				if(lexer)
+				{
+					colorizer->Reset(startState);
+					colorizer->Colorize(text, length, &GuiTextBoxRegexColorizerProc, colors);
+					return colorizer->GetCurrentState();
+				}
+				else
+				{
+					return -1;
+				}
+			}
+
+			const GuiTextBoxRegexColorizer::ColorArray& GuiTextBoxRegexColorizer::GetColors()
+			{
+				return colors;
 			}
 
 /***********************************************************************

@@ -48,7 +48,7 @@ public:
 		return 0;
 	}
 
-	int ColorizeLine(const wchar_t* text, unsigned __int32* colors, int length, int startState)
+	int ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)
 	{
 		if(length>0)
 		{
