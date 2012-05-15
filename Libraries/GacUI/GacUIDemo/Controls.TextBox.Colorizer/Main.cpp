@@ -96,8 +96,164 @@ class XmlColorizer : public GuiTextBoxColorizerBase
 {
 };
 
-class CppColorizer : public GuiTextBoxColorizerBase
+const wchar_t* CppKeywords=
+L"__abstract|"
+L"__alignof|"
+L"__asm|"
+L"__assume|"
+L"__based|"
+L"__box|"
+L"__cdecl|"
+L"__declspec|"
+L"__delegate|"
+L"__event|"
+L"__except|"
+L"__fastcall|"
+L"__finally|"
+L"__forceinline|"
+L"__gc|"
+L"__hook|"
+L"__identifier|"
+L"__if_exists|"
+L"__if_not_exists|"
+L"__inline|"
+L"__int16|"
+L"__int32|"
+L"__int64|"
+L"__int8|"
+L"__interface|"
+L"__leave|"
+L"__m128d|"
+L"__m128|"
+L"__m128i|"
+L"__m64|"
+L"__multiple_inheritance|"
+L"__nogc|"
+L"__noop|"
+L"__pin|"
+L"__property|"
+L"__raise|"
+L"__sealed|"
+L"__single_inheritance|"
+L"__stdcall|"
+L"__super|"
+L"__try|"
+L"__except|"
+L"__finally|"
+L"__try_cast|"
+L"__unaligned|"
+L"__unhook|"
+L"__uuidof|"
+L"__value|"
+L"__virtual_inheritance|"
+L"__w64|"
+L"__wchar_t|"
+L"wchar_t|"
+L"abstract|"
+L"array|"
+L"bool|"
+L"break|"
+L"case|"
+L"catch|"
+L"char|"
+L"class|"
+L"const_cast|"
+L"const|"
+L"continue|"
+L"decltype|"
+L"default|"
+L"delegate|"
+L"delete|"
+L"do|"
+L"double|"
+L"dynamic_cast|"
+L"else|"
+L"enum|"
+L"event|"
+L"explicit|"
+L"extern|"
+L"false|"
+L"finally|"
+L"float|"
+L"for|"
+L"friend|"
+L"gcnew|"
+L"generic|"
+L"goto|"
+L"if|"
+L"initonly|"
+L"inline|"
+L"int|"
+L"interface class|"
+L"interface struct|"
+L"interior_ptr|"
+L"literal|"
+L"long|"
+L"mutable|"
+L"namespace|"
+L"new|"
+L"new|"
+L"nullptr|"
+L"operator|"
+L"private|"
+L"property|"
+L"property|"
+L"protected|"
+L"public|"
+L"register|"
+L"reinterpret_cast|"
+L"return|"
+L"sealed|"
+L"short|"
+L"signed|"
+L"sizeof|"
+L"static_assert|"
+L"static_cast|"
+L"static|"
+L"struct|"
+L"switch|"
+L"template|"
+L"this|"
+L"__thiscall|"
+L"throw|"
+L"true|"
+L"try|"
+L"typedef|"
+L"typeid|"
+L"typeid|"
+L"typename|"
+L"union|"
+L"unsigned|"
+L"using|"
+L"virtual|"
+L"void|"
+L"volatile|"
+L"while";
+
+class CppColorizer : public GuiTextBoxRegexColorizer
 {
+public:
+	CppColorizer()
+	{
+		text::ColorEntry entry=win7::Win7GetTextBoxTextColor();
+		SetDefaultColor(entry);
+
+		entry.normal.text=Color(128, 0, 255);
+		AddToken(L"/d+(./d*)?([eE][+/-]?/d+)?", entry);
+
+		entry.normal.text=Color(163, 21, 21);
+		AddToken(L"\"([^\"]|\\\\/.)*\"", entry);
+
+		entry.normal.text=Color(0, 128, 0);
+		AddToken(L"////[^\r\n]*", entry);
+		AddToken(L"///*([^*\\\\]|\\*+[^//])*/*+//", entry);
+
+		entry.normal.text=Color(0, 0, 255);
+		AddToken(L"#[a-zA-Z0-9_]*", entry);
+		AddToken(CppKeywords, entry);
+
+		Setup();
+	}
 };
 
 class TextBoxColorizerWindow : public GuiWindow
@@ -121,6 +277,19 @@ private:
 				L"[Section2]\r\n"
 				L"Name=Kyon\r\n"
 				L"ID=009\r\n"
+				);
+			break;
+		case 2:
+			textBox->SetColorizer(new CppColorizer);
+			textBox->SetText(
+				L"#include <iostream>\r\n"
+				L"using namespace std;\r\n"
+				L"\r\n"
+				L"int main()\r\n"
+				L"{\r\n"
+				L"\tcout<<\"Hello, world!\"<<endl;\r\n"
+				L"\treturn 0;\r\n"
+				L"}\r\n"
 				);
 			break;
 		default:
