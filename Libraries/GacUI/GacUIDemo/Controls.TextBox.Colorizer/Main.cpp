@@ -184,8 +184,7 @@ L"if|"
 L"initonly|"
 L"inline|"
 L"int|"
-L"interface class|"
-L"interface struct|"
+L"interface|"
 L"interior_ptr|"
 L"literal|"
 L"long|"
@@ -251,6 +250,8 @@ public:
 		entry.normal.text=Color(0, 0, 255);
 		AddToken(L"#[a-zA-Z0-9_]*", entry);
 		AddToken(CppKeywords, entry);
+		
+		AddToken(L"[a-zA-Z0-9_]+", GetDefaultColor());
 
 		Setup();
 	}
