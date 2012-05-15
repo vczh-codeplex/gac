@@ -6820,7 +6820,7 @@ GuiTextBoxColorizer
 
 					{
 						SpinLock::Scope scope(*colorizer->elementModifyLock);
-						if(lineIndex<colorizer->colorizedLineCount)
+						if(lineIndex<colorizer->colorizedLineCount && lineIndex<colorizer->element->GetLines().GetCount())
 						{
 							TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
 							line.lexerFinalState=finalState;
