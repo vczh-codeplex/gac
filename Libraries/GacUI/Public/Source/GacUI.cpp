@@ -6975,6 +6975,7 @@ GuiTextBoxRegexColorizer
 					{
 						colors[i+1]=tokenColors[i];
 					}
+					colorizer=new regex::RegexLexerColorizer(lexer->Colorize());
 					return true;
 				}
 			}
@@ -6989,7 +6990,7 @@ GuiTextBoxRegexColorizer
 				unsigned __int32* colors=(unsigned __int32*)argument;
 				for(int i=0;i<length;i++)
 				{
-					colors[i]=token+1;
+					colors[start+i]=token+1;
 				}
 			}
 
@@ -6997,6 +6998,7 @@ GuiTextBoxRegexColorizer
 			{
 				if(lexer)
 				{
+					memset(colors, 0, sizeof(*colors)*length);
 					colorizer->Reset(startState);
 					colorizer->Colorize(text, length, &GuiTextBoxRegexColorizerProc, colors);
 					return colorizer->GetCurrentState();
