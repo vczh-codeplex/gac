@@ -5890,11 +5890,12 @@ Common Operations
 			};
 
 /***********************************************************************
-Common Interface
+Colorizer
 ***********************************************************************/
 			
 			class GuiTextBoxColorizerBase : public Object, public GuiTextElementOperator::ITextEditCallback
 			{
+			public:
 				typedef collections::Array<elements::text::ColorEntry>			ColorArray;
 			protected:
 				elements::GuiColorizedTextElement*			element;
@@ -5917,9 +5918,41 @@ Common Interface
 				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
 
 				virtual int									GetStartState()=0;
-				virtual int									ColorizeLine(const wchar_t* text, unsigned __int32* colors, int length, int startState)=0;
+				virtual int									ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)=0;
 				virtual const ColorArray&					GetColors()=0;
 			};
+
+			class GuiTextBoxRegexColorizer : public GuiTextBoxColorizerBase
+			{
+			protected:
+				Ptr<regex::RegexLexer>							lexer;
+				Ptr<regex::RegexLexerColorizer>					colorizer;
+				ColorArray										colors;
+
+				elements::text::ColorEntry						defaultColor;
+				collections::List<WString>						tokenRegexes;
+				collections::List<elements::text::ColorEntry>	tokenColors;
+			public:
+				GuiTextBoxRegexColorizer();
+				~GuiTextBoxRegexColorizer();
+
+				elements::text::ColorEntry									GetDefaultColor();
+				collections::IReadonlyList<WString>&						GetTokenRegexes();
+				collections::IReadonlyList<elements::text::ColorEntry>&		GetTokenColors();
+				
+				bool														SetDefaultColor(elements::text::ColorEntry value);
+				bool														AddToken(const WString& regex, elements::text::ColorEntry color);
+				bool														Setup();
+
+
+				int															GetStartState()override;
+				int															ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)override;
+				const ColorArray&											GetColors()override;
+			};
+
+/***********************************************************************
+Common Interface
+***********************************************************************/
 
 			class GuiTextBoxCommonInterface : public Description<GuiTextBoxCommonInterface>
 			{

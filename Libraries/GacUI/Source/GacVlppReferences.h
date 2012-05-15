@@ -16,5 +16,6 @@ Interfaces:
 #include "..\..\..\Common\Source\Collections\List.h"
 #include "..\..\..\Common\Source\Collections\Dictionary.h"
 #include "..\..\..\Common\Source\Threading.h"
+#include "..\..\..\Common\Source\Regex\Regex.h"
 
 #endif

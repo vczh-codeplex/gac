@@ -488,7 +488,7 @@ public:
 		return 0;
 	}
 
-	int ColorizeLine(const wchar_t* text, unsigned __int32* colors, int length, int startState)override
+	int ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)override
 	{
 		if(length>0)
 		{

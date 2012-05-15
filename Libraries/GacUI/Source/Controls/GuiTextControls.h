@@ -124,12 +124,13 @@ Common Operations
 			};
 
 /***********************************************************************
-Common Interface
+Colorizer
 ***********************************************************************/
 			
 			/// <summary>The base class of text box colorizer.</summary>
 			class GuiTextBoxColorizerBase : public Object, public GuiTextElementOperator::ITextEditCallback
 			{
+			public:
 				typedef collections::Array<elements::text::ColorEntry>			ColorArray;
 			protected:
 				elements::GuiColorizedTextElement*			element;
@@ -160,11 +161,59 @@ Common Interface
 				/// <param name="colors">Color index buffer. The index should be in [0 .. [M:vl.presentation.controls.GuiTextBoxColorizerBase.GetColors]()-1].</param>
 				/// <param name="length">The length of the buffer.</param>
 				/// <param name="startState">The start state for this line.</param>
-				virtual int									ColorizeLine(const wchar_t* text, unsigned __int32* colors, int length, int startState)=0;
+				virtual int									ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)=0;
 				/// <summary>Get the supported colors ordered by their indices.</summary>
 				/// <returns>The supported colors ordered by their indices.</returns>
 				virtual const ColorArray&					GetColors()=0;
 			};
+
+			/// <summary>Regex based colorizer.</summary>
+			class GuiTextBoxRegexColorizer : public GuiTextBoxColorizerBase
+			{
+			protected:
+				Ptr<regex::RegexLexer>							lexer;
+				Ptr<regex::RegexLexerColorizer>					colorizer;
+				ColorArray										colors;
+
+				elements::text::ColorEntry						defaultColor;
+				collections::List<WString>						tokenRegexes;
+				collections::List<elements::text::ColorEntry>	tokenColors;
+			public:
+				/// <summary>Create the colorizer.</summary>
+				GuiTextBoxRegexColorizer();
+				~GuiTextBoxRegexColorizer();
+
+				/// <summary>Get the default color.</summary>
+				/// <returns>The default color.</returns>
+				elements::text::ColorEntry									GetDefaultColor();
+				/// <summary>Get all regular expressions for tokens.</summary>
+				/// <returns>All regular expressions for tokens.</returns>
+				collections::IReadonlyList<WString>&						GetTokenRegexes();
+				/// <summary>Get all colors for tokens.</summary>
+				/// <returns>All colors for tokens.</returns>
+				collections::IReadonlyList<elements::text::ColorEntry>&		GetTokenColors();
+				
+				/// <summary>Set the default color. Call [M:vl.presentation.controls.GuiTextBoxRegexColorizer.Setup] after finishing all configuration.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="value">The default color.</param>
+				bool														SetDefaultColor(elements::text::ColorEntry value);
+				/// <summary>Add a token type. Call [M:vl.presentation.controls.GuiTextBoxRegexColorizer.Setup] after finishing all configuration.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="regex">The regular expression for this token type.</param>
+				/// <param name="color">The color for this token type.</param>
+				bool														AddToken(const WString& regex, elements::text::ColorEntry color);
+				/// <summary>Setup the colorizer. After that, the colorizer cannot be changed.</summary>
+				bool														Setup();
+
+
+				int															GetStartState()override;
+				int															ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)override;
+				const ColorArray&											GetColors()override;
+			};
+
+/***********************************************************************
+Common Interface
+***********************************************************************/
 
 			/// <summary>Common interface for text box controls.</summary>
 			class GuiTextBoxCommonInterface : public Description<GuiTextBoxCommonInterface>
