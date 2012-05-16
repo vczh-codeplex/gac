@@ -245,7 +245,8 @@ public:
 
 		entry.normal.text=Color(0, 128, 0);
 		AddToken(L"////[^\r\n]*", entry);
-		AddToken(L"///*([^*\\\\]|\\*+[^//])*/*+//", entry);
+		AddToken(L"///*(//|[*]*[^*//])*/*+//", entry);
+		// debug this: L"//[*]([^*]|[*]+[^//])*[*]+//"
 
 		entry.normal.text=Color(0, 0, 255);
 		AddToken(L"#[a-zA-Z0-9_]*", entry);
@@ -288,6 +289,9 @@ private:
 				L"\r\n"
 				L"int main()\r\n"
 				L"{\r\n"
+				L"\t//This is a comment\r\n"
+				L"\t/**This*is/another\r\n"
+				L"\tcomment**/\r\n"
 				L"\tcout<<\"Hello, world!\"<<endl;\r\n"
 				L"\treturn 0;\r\n"
 				L"}\r\n"
