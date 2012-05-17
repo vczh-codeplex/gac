@@ -92,8 +92,28 @@ public:
 	}
 };
 
-class XmlColorizer : public GuiTextBoxColorizerBase
+class XmlColorizer : public GuiTextBoxRegexColorizer
 {
+public:
+	XmlColorizer()
+	{
+		text::ColorEntry entry=win7::Win7GetTextBoxTextColor();
+		SetDefaultColor(entry);
+
+		entry.normal.text=Color(0, 128, 0);
+		AddToken(L"/<!--([^/-]|-[^/-]|--[^>])*--/>", entry);
+
+		entry.normal.text=Color(128, 0, 255);
+		AddToken(L"/<!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>", entry);
+
+		entry.normal.text=Color(163, 21, 21);
+		AddToken(L"\"[^\"]*\"", entry);
+
+		entry.normal.text=Color(0, 0, 255);
+		AddToken(L"[<>=]", entry);
+
+		Setup();
+	}
 };
 
 const wchar_t* CppKeywords=
@@ -279,6 +299,18 @@ private:
 				L"[Section2]\r\n"
 				L"Name=Kyon\r\n"
 				L"ID=009\r\n"
+				);
+			break;
+		case 1:
+			textBox->SetColorizer(new XmlColorizer);
+			textBox->SetText(
+				L"<books>\r\n"
+				L"\t<!--Comment-->\r\n"
+				L"\t<book name=\"C++Primer\">\r\n"
+				L"\t\tContent\r\n"
+				L"\t</book>\r\n"
+				L"\t<![CDATA[<xml/>]]>\r\n"
+				L"</books>\r\n"
 				);
 			break;
 		case 2:
