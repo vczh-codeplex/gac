@@ -1315,8 +1315,8 @@ TEST_CASE(TestRegexLexerWalker)
 
 void ColorizerProc(void* argument, vint start, vint length, vint token)
 {
-	int* colors=(int*)argument;
-	for(int i=0;i<length;i++)
+	vint* colors=(vint*)argument;
+	for(vint i=0;i<length;i++)
 	{
 		colors[start+i]=token;
 	}
@@ -1332,25 +1332,25 @@ TEST_CASE(TestRegexLexerColorizer)
 	RegexLexerColorizer colorizer=lexer.Colorize();
 
 	const wchar_t line1[]=L" genius 10..10.10   \"a";
-	int color1[]={-1, 1, 1, 1, 1, 1, 1, -1, 0, 0, -1, -1, 0, 0, 0, 0, 0, -1, -1, -1, 2, 2};
-	int length1=sizeof(color1)/sizeof(*color1);
+	vint color1[]={-1, 1, 1, 1, 1, 1, 1, -1, 0, 0, -1, -1, 0, 0, 0, 0, 0, -1, -1, -1, 2, 2};
+	vint length1=sizeof(color1)/sizeof(*color1);
 
 	const wchar_t line2[]=L"b\"\"genius\"";
-	int color2[]={2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
-	int length2=sizeof(color2)/sizeof(*color2);
+	vint color2[]={2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+	vint length2=sizeof(color2)/sizeof(*color2);
 
 	TEST_ASSERT(wcslen(line1)==length1);
 	TEST_ASSERT(wcslen(line2)==length2);
 
-	int colors[100];
+	vint colors[100];
 	{
-		for(int i=0;i<sizeof(colors)/sizeof(*colors);i++)
+		for(vint i=0;i<sizeof(colors)/sizeof(*colors);i++)
 		{
 			colors[i]=-2;
 		}
 		colorizer.Reset(colorizer.GetStartState());
 		colorizer.Colorize(line1, length1, &ColorizerProc, colors);
-		for(int i=0;i<length1;i++)
+		for(vint i=0;i<length1;i++)
 		{
 			TEST_ASSERT(color1[i]==colors[i]);
 		}
@@ -1358,13 +1358,13 @@ TEST_CASE(TestRegexLexerColorizer)
 	colorizer.Pass(L'\r');
 	colorizer.Pass(L'\n');
 	{
-		for(int i=0;i<sizeof(colors)/sizeof(*colors);i++)
+		for(vint i=0;i<sizeof(colors)/sizeof(*colors);i++)
 		{
 			colors[i]=-2;
 		}
 		colorizer.Reset(colorizer.GetCurrentState());
  		colorizer.Colorize(line2, length2, &ColorizerProc, colors);
-		for(int i=0;i<length2;i++)
+		for(vint i=0;i<length2;i++)
 		{
 			TEST_ASSERT(color2[i]==colors[i]);
 		}

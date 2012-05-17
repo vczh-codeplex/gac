@@ -8811,7 +8811,7 @@ namespace vl
 
 			static void ClearObjects(T* dest, vint count)
 			{
-				for(int i=0;i<count;i++)
+				for(vint i=0;i<count;i++)
 				{
 					dest[i]=T();
 				}
@@ -11773,7 +11773,8 @@ namespace vl
 			RegexLexerWalker(const RegexLexerWalker& walker);
 			~RegexLexerWalker();
 
-			int											GetStartState()const;
+			vint										GetStartState()const;
+			vint										GetRelatedToken(vint state)const;
 			void										Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const;
 			vint										Walk(wchar_t input, vint state)const;
 		};
@@ -12390,9 +12391,10 @@ namespace vl
 		class PureInterpretor : public Object
 		{
 		protected:
-			vint				charMap[1<<(8*sizeof(wchar_t))];	//char -> char set index
-			vint**				transition;							//(state * char set index) -> state*
-			bool*				finalState;							//state -> bool
+			vint				charMap[1<<(8*sizeof(wchar_t))];	// char -> char set index
+			vint**				transition;							// (state * char set index) -> state*
+			bool*				finalState;							// state -> bool
+			vint*				relatedFinalState;					// sate -> (finalState or -1)
 			vint				stateCount;
 			vint				charSetCount;
 			vint				startState;
@@ -12406,6 +12408,9 @@ namespace vl
 			vint				GetStartState();
 			vint				Transit(wchar_t input, vint state);
 			bool				IsFinalState(vint state);
+
+			void				PrepareForRelatedFinalStateTable();
+			vint				GetRelatedFinalState(vint state);
 		};
 	}
 }
