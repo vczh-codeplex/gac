@@ -23,6 +23,7 @@ text::TextLine
 					,bufferLength(0)
 					,dataLength(0)
 					,lexerFinalState(-1)
+					,contextFinalState(-1)
 				{
 				}
 

@@ -483,12 +483,17 @@ public:
 		colors[1]=defaultColor;
 	}
 
-	int GetStartState()override
+	int GetLexerStartState()override
 	{
 		return 0;
 	}
 
-	int ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)override
+	int GetContextStartState()override
+	{
+		return 0;
+	}
+
+	void ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override
 	{
 		if(length>0)
 		{
@@ -498,7 +503,6 @@ public:
 				colors[i]=color;
 			}
 		}
-		return 0;
 	}
 
 	const collections::Array<text::ColorEntry>& GetColors()

@@ -152,16 +152,19 @@ Colorizer
 				void										Detach()override;
 				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
 
-				/// <summary>Get the start state for the first line.</summary>
-				/// <returns>The start state for the first line.</returns>
-				virtual int									GetStartState()=0;
+				/// <summary>Get the lexical analyzer start state for the first line.</summary>
+				/// <returns>The lexical analyzer start state for the first line.</returns>
+				virtual int									GetLexerStartState()=0;
+				/// <summary>Get the context sensitive start state for the first line.</summary>
+				/// <returns>The context sensitive start state for the first line.</returns>
+				virtual int									GetContextStartState()=0;
 				/// <summary>Colorizer one line with a start state.</summary>
-				/// <returns>The start state for the next line.</returns>
 				/// <param name="text">Text buffer.</param>
 				/// <param name="colors">Color index buffer. The index should be in [0 .. [M:vl.presentation.controls.GuiTextBoxColorizerBase.GetColors]()-1].</param>
 				/// <param name="length">The length of the buffer.</param>
-				/// <param name="startState">The start state for this line.</param>
-				virtual int									ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)=0;
+				/// <param name="lexerState">The lexical analyzer state for this line. After executing this function, the new value of this argument indicates the new state.</param>
+				/// <param name="contextState">The context sensitive state for this line. After executing this function, the new value of this argument indicates the new state.</param>
+				virtual void								ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)=0;
 				/// <summary>Get the supported colors ordered by their indices.</summary>
 				/// <returns>The supported colors ordered by their indices.</returns>
 				virtual const ColorArray&					GetColors()=0;
@@ -178,6 +181,8 @@ Colorizer
 				elements::text::ColorEntry						defaultColor;
 				collections::List<WString>						tokenRegexes;
 				collections::List<elements::text::ColorEntry>	tokenColors;
+
+				static void													ColorizerProc(void* argument, vint start, vint length, vint token);
 			public:
 				/// <summary>Create the colorizer.</summary>
 				GuiTextBoxRegexColorizer();
@@ -206,8 +211,9 @@ Colorizer
 				bool														Setup();
 
 
-				int															GetStartState()override;
-				int															ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)override;
+				int															GetLexerStartState()override;
+				int															GetContextStartState()override;
+				void														ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override;
 				const ColorArray&											GetColors()override;
 			};
 

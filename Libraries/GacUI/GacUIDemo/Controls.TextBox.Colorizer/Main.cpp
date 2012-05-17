@@ -43,12 +43,17 @@ public:
 		colors[COMMENT_COLOR]=entry;
 	}
 
-	int GetStartState()
+	int GetLexerStartState()override
 	{
 		return 0;
 	}
 
-	int ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)
+	int GetContextStartState()override
+	{
+		return 0;
+	}
+
+	void ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override
 	{
 		if(length>0)
 		{
@@ -83,10 +88,9 @@ public:
 				}
 			}
 		}
-		return 0;
 	}
 
-	const ColorArray& GetColors()
+	const ColorArray& GetColors()override
 	{
 		return colors;
 	}
@@ -284,54 +288,89 @@ private:
 	GuiMultilineTextBox*				textBox;
 	GuiComboBoxListControl*				comboSelector;
 
+	void window_WindowClosing(GuiGraphicsComposition* sender, GuiRequestEventArgs& arguments)
+	{
+		arguments.cancel=!comboSelector->GetEnabled();
+	}
+
 	void comboSelector_SelectedIndexChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
-		switch(comboSelector->GetSelectedIndex())
+		comboSelector->SetEnabled(false);
+		this->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::LargeWaiting));
+
+		GetApplication()->InvokeAsync(Curry<void(TextBoxColorizerWindow*)>([](TextBoxColorizerWindow* window)
 		{
-		case 0:
-			textBox->SetColorizer(new IniColorizer);
-			textBox->SetText(
-				L";This is a comment\r\n"
-				L"[Section1]\r\n"
-				L"Name=John Smith\r\n"
-				L"ID=008\r\n"
-				L"\r\n"
-				L"[Section2]\r\n"
-				L"Name=Kyon\r\n"
-				L"ID=009\r\n"
-				);
-			break;
-		case 1:
-			textBox->SetColorizer(new XmlColorizer);
-			textBox->SetText(
-				L"<books>\r\n"
-				L"\t<!--Comment-->\r\n"
-				L"\t<book name=\"C++Primer\">\r\n"
-				L"\t\tContent\r\n"
-				L"\t</book>\r\n"
-				L"\t<![CDATA[<xml/>]]>\r\n"
-				L"</books>\r\n"
-				);
-			break;
-		case 2:
-			textBox->SetColorizer(new CppColorizer);
-			textBox->SetText(
-				L"#include <iostream>\r\n"
-				L"using namespace std;\r\n"
-				L"\r\n"
-				L"int main()\r\n"
-				L"{\r\n"
-				L"\t//This is a comment\r\n"
-				L"\t/**This*is/another\r\n"
-				L"\tcomment**/\r\n"
-				L"\tcout<<\"Hello, world!\"<<endl;\r\n"
-				L"\treturn 0;\r\n"
-				L"}\r\n"
-				);
-			break;
-		default:
-			textBox->SetColorizer(0);
-		}
+			Ptr<GuiTextBoxColorizerBase> colorizer;
+			WString text;
+
+			switch(window->comboSelector->GetSelectedIndex())
+			{
+			case 0:
+				text=
+					L";This is a comment\r\n"
+					L"[Section1]\r\n"
+					L"Name=John Smith\r\n"
+					L"ID=008\r\n"
+					L"\r\n"
+					L"[Section2]\r\n"
+					L"Name=Kyon\r\n"
+					L"ID=009\r\n"
+					;
+				break;
+			case 1:
+				text=
+					L"<books>\r\n"
+					L"\t<!--Comment-->\r\n"
+					L"\t<book name=\"C++Primer\">\r\n"
+					L"\t\tContent\r\n"
+					L"\t</book>\r\n"
+					L"\t<![CDATA[<xml/>]]>\r\n"
+					L"</books>\r\n"
+					;
+				break;
+			case 2:
+				text=
+					L"#include <iostream>\r\n"
+					L"using namespace std;\r\n"
+					L"\r\n"
+					L"int main()\r\n"
+					L"{\r\n"
+					L"\t//This is a comment\r\n"
+					L"\t/**This*is/another\r\n"
+					L"\tcomment**/\r\n"
+					L"\tcout<<\"Hello, world!\"<<endl;\r\n"
+					L"\treturn 0;\r\n"
+					L"}\r\n"
+					;
+				break;
+			}
+
+			GetApplication()->InvokeInMainThreadAndWait([text, window]()
+			{
+				window->textBox->SetColorizer(0);
+				window->textBox->SetText(text);
+			});
+
+			switch(window->comboSelector->GetSelectedIndex())
+			{
+			case 0:
+				colorizer=new IniColorizer;
+				break;
+			case 1:
+				colorizer=new XmlColorizer;
+				break;
+			case 2:
+				colorizer=new CppColorizer;
+				break;
+			}
+
+			GetApplication()->InvokeInMainThreadAndWait([colorizer, window]()
+			{
+				window->textBox->SetColorizer(colorizer);
+				window->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
+				window->comboSelector->SetEnabled(true);
+			});
+		})(this));
 	}
 public:
 	TextBoxColorizerWindow()
@@ -339,6 +378,7 @@ public:
 	{
 		this->SetText(L"Controls.TextBox.Colorizer");
 		this->GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+		this->WindowClosing.AttachMethod(this, &TextBoxColorizerWindow::window_WindowClosing);
 
 		GuiTableComposition* table=new GuiTableComposition;
 		table->SetAlignmentToParent(Margin(0, 0, 0, 0));

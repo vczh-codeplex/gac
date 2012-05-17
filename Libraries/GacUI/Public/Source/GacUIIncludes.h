@@ -11600,6 +11600,7 @@ ColorizedText
 					int								bufferLength;
 					int								dataLength;
 					int								lexerFinalState;
+					int								contextFinalState;
 
 					TextLine();
 					~TextLine();
@@ -13440,8 +13441,9 @@ Colorizer
 				void										Detach()override;
 				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
 
-				virtual int									GetStartState()=0;
-				virtual int									ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)=0;
+				virtual int									GetLexerStartState()=0;
+				virtual int									GetContextStartState()=0;
+				virtual void								ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)=0;
 				virtual const ColorArray&					GetColors()=0;
 			};
 
@@ -13455,6 +13457,8 @@ Colorizer
 				elements::text::ColorEntry						defaultColor;
 				collections::List<WString>						tokenRegexes;
 				collections::List<elements::text::ColorEntry>	tokenColors;
+
+				static void													ColorizerProc(void* argument, vint start, vint length, vint token);
 			public:
 				GuiTextBoxRegexColorizer();
 				~GuiTextBoxRegexColorizer();
@@ -13468,8 +13472,9 @@ Colorizer
 				bool														Setup();
 
 
-				int															GetStartState()override;
-				int															ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)override;
+				int															GetLexerStartState()override;
+				int															GetContextStartState()override;
+				void														ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override;
 				const ColorArray&											GetColors()override;
 			};
 
