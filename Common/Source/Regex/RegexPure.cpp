@@ -10,6 +10,9 @@ PureInterpretor
 ***********************************************************************/
 
 		PureInterpretor::PureInterpretor(Automaton::Ref dfa, CharRange::List& subsets)
+			:transition(0)
+			,finalState(0)
+			,relatedFinalState(0)
 		{
 			stateCount=dfa->states.Count();
 			charSetCount=subsets.Count()+1;
@@ -71,6 +74,7 @@ PureInterpretor
 
 		PureInterpretor::~PureInterpretor()
 		{
+			if(relatedFinalState) delete[] relatedFinalState;
 			delete[] finalState;
 			for(vint i=0;i<stateCount;i++)
 			{
@@ -142,11 +146,51 @@ PureInterpretor
 
 		void PureInterpretor::PrepareForRelatedFinalStateTable()
 		{
+			if(!relatedFinalState)
+			{
+				relatedFinalState=new vint[stateCount];
+				for(vint i=0;i<stateCount;i++)
+				{
+					relatedFinalState[i]=finalState[i]?i:-1;
+				}
+				while(true)
+				{
+					vint modifyCount=0;
+					for(vint i=0;i<stateCount;i++)
+					{
+						if(relatedFinalState[i]==-1)
+						{
+							vint state=-1;
+							for(vint j=0;j<charSetCount;j++)
+							{
+								vint nextState=transition[i][j];
+								if(nextState!=-1)
+								{
+									state=relatedFinalState[nextState];
+									if(state!=-1)
+									{
+										break;
+									}
+								}
+							}
+							if(state!=-1)
+							{
+								relatedFinalState[i]=state;
+								modifyCount++;
+							}
+						}
+					}
+					if(modifyCount==0)
+					{
+						break;
+					}
+				}
+			}
 		}
 
 		vint PureInterpretor::GetRelatedFinalState(vint state)
 		{
-			return -1;
+			return relatedFinalState?relatedFinalState[state]:-1;
 		}
 	}
 }

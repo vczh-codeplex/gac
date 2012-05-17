@@ -134,7 +134,7 @@ Json
 			WriterState							writerState;
 			collections::List<WriterObject>		writerObjects;
 
-			void								Indent(int deltaIndentation);
+			void								Indent(vint deltaIndentation);
 			void								WriteObjectPrefix();
 			void								WriteEncodedString(const WString& value);
 			void								CloseElement();

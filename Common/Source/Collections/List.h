@@ -56,7 +56,7 @@ namespace vl
 
 			static void ClearObjects(T* dest, vint count)
 			{
-				for(int i=0;i<count;i++)
+				for(vint i=0;i<count;i++)
 				{
 					dest[i]=T();
 				}
