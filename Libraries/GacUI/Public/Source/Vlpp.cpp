@@ -840,9 +840,15 @@ RegexLexerWalker
 		{
 		}
 
-		int RegexLexerWalker::GetStartState()const
+		vint RegexLexerWalker::GetStartState()const
 		{
 			return pure->GetStartState();
+		}
+
+		vint RegexLexerWalker::GetRelatedToken(vint state)const
+		{
+			vint finalState=pure->GetRelatedFinalState(state);
+			return finalState==-1?-1:stateTokens[finalState];
 		}
 
 		void RegexLexerWalker::Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const
@@ -983,9 +989,16 @@ RegexLexerColorizer
 
 				index++;
 			}
-			if(finalState && start<length)
+			if(start<length)
 			{
-				tokenProc(tokenProcArgument, start, length-start, token);
+				if(finalState)
+				{
+					tokenProc(tokenProcArgument, start, length-start, token);
+				}
+				else
+				{
+					tokenProc(tokenProcArgument, start, length-start, walker.GetRelatedToken(currentState));
+				}
 			}
 		}
 
@@ -1099,6 +1112,7 @@ RegexLexer
 
 		RegexLexerWalker RegexLexer::Walk()const
 		{
+			pure->PrepareForRelatedFinalStateTable();
 			return RegexLexerWalker(pure, stateTokens);
 		}
 
@@ -3093,6 +3107,9 @@ PureInterpretor
 ***********************************************************************/
 
 		PureInterpretor::PureInterpretor(Automaton::Ref dfa, CharRange::List& subsets)
+			:transition(0)
+			,finalState(0)
+			,relatedFinalState(0)
 		{
 			stateCount=dfa->states.Count();
 			charSetCount=subsets.Count()+1;
@@ -3154,6 +3171,7 @@ PureInterpretor
 
 		PureInterpretor::~PureInterpretor()
 		{
+			if(relatedFinalState) delete[] relatedFinalState;
 			delete[] finalState;
 			for(vint i=0;i<stateCount;i++)
 			{
@@ -3221,6 +3239,55 @@ PureInterpretor
 		bool PureInterpretor::IsFinalState(vint state)
 		{
 			return 0<=state && state<stateCount && finalState[state];
+		}
+
+		void PureInterpretor::PrepareForRelatedFinalStateTable()
+		{
+			if(!relatedFinalState)
+			{
+				relatedFinalState=new vint[stateCount];
+				for(vint i=0;i<stateCount;i++)
+				{
+					relatedFinalState[i]=finalState[i]?i:-1;
+				}
+				while(true)
+				{
+					vint modifyCount=0;
+					for(vint i=0;i<stateCount;i++)
+					{
+						if(relatedFinalState[i]==-1)
+						{
+							vint state=-1;
+							for(vint j=0;j<charSetCount;j++)
+							{
+								vint nextState=transition[i][j];
+								if(nextState!=-1)
+								{
+									state=relatedFinalState[nextState];
+									if(state!=-1)
+									{
+										break;
+									}
+								}
+							}
+							if(state!=-1)
+							{
+								relatedFinalState[i]=state;
+								modifyCount++;
+							}
+						}
+					}
+					if(modifyCount==0)
+					{
+						break;
+					}
+				}
+			}
+		}
+
+		vint PureInterpretor::GetRelatedFinalState(vint state)
+		{
+			return relatedFinalState?relatedFinalState[state]:-1;
 		}
 	}
 }

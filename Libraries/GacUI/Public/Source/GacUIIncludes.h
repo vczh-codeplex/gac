@@ -7979,7 +7979,7 @@ namespace vl
 
 			static void ClearObjects(T* dest, vint count)
 			{
-				for(int i=0;i<count;i++)
+				for(vint i=0;i<count;i++)
 				{
 					dest[i]=T();
 				}
@@ -9690,7 +9690,8 @@ namespace vl
 			RegexLexerWalker(const RegexLexerWalker& walker);
 			~RegexLexerWalker();
 
-			int											GetStartState()const;
+			vint										GetStartState()const;
+			vint										GetRelatedToken(vint state)const;
 			void										Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const;
 			vint										Walk(wchar_t input, vint state)const;
 		};
