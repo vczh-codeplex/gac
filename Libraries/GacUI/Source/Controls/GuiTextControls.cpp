@@ -64,7 +64,8 @@ GuiTextBoxColorizer
 					wchar_t* text=0;
 					unsigned __int32* colors=0;
 					int length=0;
-					int startState=-1;
+					int lexerState=-1;
+					int contextState=-1;
 
 					{
 						SpinLock::Scope scope(*colorizer->elementModifyLock);
@@ -82,17 +83,19 @@ GuiTextBoxColorizer
 						memcpy(text, line.text, sizeof(wchar_t)*length);
 						text[length]=L'\r';
 						text[length+1]=L'\n';
-						startState=lineIndex==0?colorizer->GetStartState():colorizer->element->GetLines().GetLine(lineIndex-1).lexerFinalState;
+						lexerState=lineIndex==0?colorizer->GetLexerStartState():colorizer->element->GetLines().GetLine(lineIndex-1).lexerFinalState;
+						contextState=lineIndex==0?colorizer->GetContextStartState():colorizer->element->GetLines().GetLine(lineIndex-1).contextFinalState;
 					}
 
-					int finalState=colorizer->ColorizeLineWithCRLF(text, colors, length+2, startState);
+					colorizer->ColorizeLineWithCRLF(text, colors, length+2, lexerState, contextState);
 
 					{
 						SpinLock::Scope scope(*colorizer->elementModifyLock);
 						if(lineIndex<colorizer->colorizedLineCount && lineIndex<colorizer->element->GetLines().GetCount())
 						{
 							TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
-							line.lexerFinalState=finalState;
+							line.lexerFinalState=lexerState;
+							line.contextFinalState=contextState;
 							for(int i=0;i<length;i++)
 							{
 								line.att[i].colorIndex=colors[i];
@@ -249,32 +252,54 @@ GuiTextBoxRegexColorizer
 				}
 			}
 
-			int GuiTextBoxRegexColorizer::GetStartState()
+			int GuiTextBoxRegexColorizer::GetLexerStartState()
 			{
 				return lexer?colorizer->GetStartState():-1;
 			}
 
-			void GuiTextBoxRegexColorizerProc(void* argument, vint start, vint length, vint token)
+			int GuiTextBoxRegexColorizer::GetContextStartState()
 			{
-				unsigned __int32* colors=(unsigned __int32*)argument;
+				return 0;
+			}
+
+			struct GuiTextBoxRegexColorizerProcData
+			{
+				GuiTextBoxRegexColorizer*		colorizer;
+				const wchar_t*					text;
+				unsigned __int32*				colors;
+				int								contextState;
+			};
+
+			void GuiTextBoxRegexColorizer::ColorizerProc(void* argument, vint start, vint length, vint token)
+			{
+				GuiTextBoxRegexColorizerProcData& data=*(GuiTextBoxRegexColorizerProcData*)argument;
 				for(int i=0;i<length;i++)
 				{
-					colors[start+i]=token+1;
+					data.colors[start+i]=token+1;
 				}
 			}
 
-			int GuiTextBoxRegexColorizer::ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int startState)
+			void GuiTextBoxRegexColorizer::ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)
 			{
 				if(lexer)
 				{
+					GuiTextBoxRegexColorizerProcData data;
+					data.colorizer=this;
+					data.text=text;
+					data.colors=colors;
+					data.contextState=contextState;
+
 					memset(colors, 0, sizeof(*colors)*length);
-					colorizer->Reset(startState);
-					colorizer->Colorize(text, length, &GuiTextBoxRegexColorizerProc, colors);
-					return colorizer->GetCurrentState();
+					colorizer->Reset(lexerState);
+					colorizer->Colorize(text, length, &GuiTextBoxRegexColorizer::ColorizerProc, &data);
+					lexerState=colorizer->GetCurrentState();
+
+					contextState=data.contextState;
 				}
 				else
 				{
-					return -1;
+					lexerState=-1;
+					contextState=-1;
 				}
 			}
 

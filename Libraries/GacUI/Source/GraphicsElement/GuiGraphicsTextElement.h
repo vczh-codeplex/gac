@@ -68,9 +68,13 @@ ColorizedText
 					/// </summary>
 					int								dataLength;
 					/// <summary>
-					/// The internal state of a colorizer when it parses to the end of this line. -1 means that this state is not available.
+					/// The internal lexical analyzer state of a colorizer when it parses to the end of this line. -1 means that this state is not available.
 					/// </summary>
 					int								lexerFinalState;
+					/// <summary>
+					/// The internal context sensitive state of a colorizer when it parses to the end of this line. -1 means that this state is not available.
+					/// </summary>
+					int								contextFinalState;
 
 					TextLine();
 					~TextLine();
