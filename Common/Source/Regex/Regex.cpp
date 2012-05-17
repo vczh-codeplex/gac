@@ -587,9 +587,15 @@ RegexLexerWalker
 		{
 		}
 
-		int RegexLexerWalker::GetStartState()const
+		vint RegexLexerWalker::GetStartState()const
 		{
 			return pure->GetStartState();
+		}
+
+		vint RegexLexerWalker::GetRelatedToken(vint state)const
+		{
+			vint finalState=pure->GetRelatedFinalState(state);
+			return finalState==-1?-1:stateTokens[finalState];
 		}
 
 		void RegexLexerWalker::Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const
@@ -730,9 +736,16 @@ RegexLexerColorizer
 
 				index++;
 			}
-			if(finalState && start<length)
+			if(start<length)
 			{
-				tokenProc(tokenProcArgument, start, length-start, token);
+				if(finalState)
+				{
+					tokenProc(tokenProcArgument, start, length-start, token);
+				}
+				else
+				{
+					tokenProc(tokenProcArgument, start, length-start, walker.GetRelatedToken(currentState));
+				}
 			}
 		}
 
@@ -846,6 +859,7 @@ RegexLexer
 
 		RegexLexerWalker RegexLexer::Walk()const
 		{
+			pure->PrepareForRelatedFinalStateTable();
 			return RegexLexerWalker(pure, stateTokens);
 		}
 

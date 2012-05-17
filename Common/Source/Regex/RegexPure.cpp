@@ -139,5 +139,14 @@ PureInterpretor
 		{
 			return 0<=state && state<stateCount && finalState[state];
 		}
+
+		void PureInterpretor::PrepareForRelatedFinalStateTable()
+		{
+		}
+
+		vint PureInterpretor::GetRelatedFinalState(vint state)
+		{
+			return -1;
+		}
 	}
 }
