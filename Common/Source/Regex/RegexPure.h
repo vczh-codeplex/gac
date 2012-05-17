@@ -27,9 +27,10 @@ namespace vl
 		class PureInterpretor : public Object
 		{
 		protected:
-			vint				charMap[1<<(8*sizeof(wchar_t))];	//char -> char set index
-			vint**				transition;							//(state * char set index) -> state*
-			bool*				finalState;							//state -> bool
+			vint				charMap[1<<(8*sizeof(wchar_t))];	// char -> char set index
+			vint**				transition;							// (state * char set index) -> state*
+			bool*				finalState;							// state -> bool
+			vint*				relatedFinalState;					// sate -> (finalState or -1)
 			vint				stateCount;
 			vint				charSetCount;
 			vint				startState;

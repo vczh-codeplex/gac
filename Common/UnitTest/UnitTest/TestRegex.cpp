@@ -1332,7 +1332,7 @@ TEST_CASE(TestRegexLexerColorizer)
 	RegexLexerColorizer colorizer=lexer.Colorize();
 
 	const wchar_t line1[]=L" genius 10..10.10   \"a";
-	int color1[]={-1, 1, 1, 1, 1, 1, 1, -1, 0, 0, -1, -1, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1};
+	int color1[]={-1, 1, 1, 1, 1, 1, 1, -1, 0, 0, -1, -1, 0, 0, 0, 0, 0, -1, -1, -1, 2, 2};
 	int length1=sizeof(color1)/sizeof(*color1);
 
 	const wchar_t line2[]=L"b\"\"genius\"";

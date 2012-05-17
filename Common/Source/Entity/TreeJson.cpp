@@ -473,7 +473,7 @@ JsonReader
 JsonWriter
 ***********************************************************************/
 
-		void JsonWriter::Indent(int deltaIndentation)
+		void JsonWriter::Indent(vint deltaIndentation)
 		{
 			if(autoNewLine)
 			{
