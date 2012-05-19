@@ -116,7 +116,52 @@ public:
 		entry.normal.text=Color(0, 0, 255);
 		AddToken(L"[<>=]", entry);
 
+		entry.normal.text=Color(255, 0, 0);
+		AddToken(L"[a-zA-Z0-9_/-:]", entry);
+
+		entry.normal.text=Color(163, 21, 21);
+		AddToken(L"[a-zA-Z0-9_/-:]", entry);
+
 		Setup();
+	}
+
+	void ColorizeTokenContextSensitive(const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
+	{
+		// 0 < 1 name 2 att > 0
+		switch(token)
+		{
+		case 3:
+			if(length==1)
+			{
+				switch(text[start])
+				{
+				case '<':
+					contextState=1;
+					break;
+				case '>':
+					contextState=0;
+					break;
+				}
+			}
+			break;
+		case 4:
+			switch(contextState)
+			{
+			case 0:
+				token=-1;
+				break;
+			case 1:
+				token=5;
+				contextState=2;
+				break;
+			}
+			break;
+		}
+	}
+
+	int GetContextStartState()override
+	{
+		return 0;
 	}
 };
 

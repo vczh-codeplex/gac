@@ -13457,6 +13457,7 @@ Colorizer
 				elements::text::ColorEntry						defaultColor;
 				collections::List<WString>						tokenRegexes;
 				collections::List<elements::text::ColorEntry>	tokenColors;
+				collections::List<elements::text::ColorEntry>	extraTokenColors;
 
 				static void													ColorizerProc(void* argument, vint start, vint length, vint token);
 			public:
@@ -13466,10 +13467,14 @@ Colorizer
 				elements::text::ColorEntry									GetDefaultColor();
 				collections::IReadonlyList<WString>&						GetTokenRegexes();
 				collections::IReadonlyList<elements::text::ColorEntry>&		GetTokenColors();
+				collections::IReadonlyList<elements::text::ColorEntry>&		GetExtraTokenColors();
+				int															GetExtraTokenIndexStart();
 				
 				bool														SetDefaultColor(elements::text::ColorEntry value);
-				bool														AddToken(const WString& regex, elements::text::ColorEntry color);
+				int															AddToken(const WString& regex, elements::text::ColorEntry color);
+				int															AddExtraToken(elements::text::ColorEntry color);
 				bool														Setup();
+				virtual void												ColorizeTokenContextSensitive(const wchar_t* text, vint start, vint length, vint& token, int& contextState);
 
 
 				int															GetLexerStartState()override;
