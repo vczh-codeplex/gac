@@ -110,17 +110,17 @@ public:
 		entry.normal.text=Color(128, 0, 255);
 		AddToken(L"/<!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>", entry);
 
-		entry.normal.text=Color(163, 21, 21);
+		entry.normal.text=Color(0, 0, 0);
 		AddToken(L"\"[^\"]*\"", entry);
 
 		entry.normal.text=Color(0, 0, 255);
 		AddToken(L"[<>=]", entry);
 
 		entry.normal.text=Color(255, 0, 0);
-		AddToken(L"[a-zA-Z0-9_/-:]", entry);
+		AddToken(L"[a-zA-Z0-9_/-:]+", entry);
 
 		entry.normal.text=Color(163, 21, 21);
-		AddToken(L"[a-zA-Z0-9_/-:]", entry);
+		AddExtraToken(entry);
 
 		Setup();
 	}
