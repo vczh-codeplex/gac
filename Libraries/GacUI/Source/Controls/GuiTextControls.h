@@ -181,6 +181,7 @@ Colorizer
 				elements::text::ColorEntry						defaultColor;
 				collections::List<WString>						tokenRegexes;
 				collections::List<elements::text::ColorEntry>	tokenColors;
+				collections::List<elements::text::ColorEntry>	extraTokenColors;
 
 				static void													ColorizerProc(void* argument, vint start, vint length, vint token);
 			public:
@@ -197,18 +198,35 @@ Colorizer
 				/// <summary>Get all colors for tokens.</summary>
 				/// <returns>All colors for tokens.</returns>
 				collections::IReadonlyList<elements::text::ColorEntry>&		GetTokenColors();
+				/// <summary>Get all colors for extra tokens.</summary>
+				/// <returns>All colors for extra tokens.</returns>
+				collections::IReadonlyList<elements::text::ColorEntry>&		GetExtraTokenColors();
+				/// <summary>Get the first token index for the first extra token.</summary>
+				/// <returns>The first token index for the first extra token. Returns -1 if this operation failed.</returns>
+				int															GetExtraTokenIndexStart();
 				
 				/// <summary>Set the default color. Call [M:vl.presentation.controls.GuiTextBoxRegexColorizer.Setup] after finishing all configuration.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <returns>Returns the token index of this token. Returns -1 if this operation failed.</returns>
 				/// <param name="value">The default color.</param>
 				bool														SetDefaultColor(elements::text::ColorEntry value);
 				/// <summary>Add a token type. Call [M:vl.presentation.controls.GuiTextBoxRegexColorizer.Setup] after finishing all configuration.</summary>
-				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <returns>Returns the token index of this token. Returns -1 if this operation failed.</returns>
 				/// <param name="regex">The regular expression for this token type.</param>
 				/// <param name="color">The color for this token type.</param>
-				bool														AddToken(const WString& regex, elements::text::ColorEntry color);
+				int															AddToken(const WString& regex, elements::text::ColorEntry color);
+				/// <summary>Add an extra  token type. Call [M:vl.presentation.controls.GuiTextBoxRegexColorizer.Setup] after finishing all configuration.</summary>
+				/// <returns>Returns the extra token index of this token. The token index for this token is regex-token-count + extra-token-index Returns -1 if this operation failed.</returns>
+				/// <param name="color">The color for this token type.</param>
+				int															AddExtraToken(elements::text::ColorEntry color);
 				/// <summary>Setup the colorizer. After that, the colorizer cannot be changed.</summary>
 				bool														Setup();
+				/// <summary>Callback function to set context sensitive state and change token accordingly.</summary>
+				/// <param name="text">Text buffer.</param>
+				/// <param name="start">The start position of the token.</param>
+				/// <param name="length">The length of the token.</param>
+				/// <param name="token">The token type. After executing this function, the new value of this argument indicates the new token type.</param>
+				/// <param name="contextState">The context sensitive state. After executing this function, the new value of this argument indicates the new state.</param>
+				virtual void												ColorizeTokenContextSensitive(const wchar_t* text, vint start, vint length, vint& token, int& contextState);
 
 
 				int															GetLexerStartState()override;
