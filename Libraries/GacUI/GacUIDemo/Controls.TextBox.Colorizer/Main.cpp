@@ -310,7 +310,7 @@ public:
 		AddToken(L"/d+(./d*)?([eE][+/-]?/d+)?", entry);
 
 		entry.normal.text=Color(163, 21, 21);
-		AddToken(L"\"([^\"]|\\\\/.)*\"", entry);
+		AddToken(L"\"([^\\\\\"]|\\\\/.)*\"", entry);
 
 		entry.normal.text=Color(0, 128, 0);
 		AddToken(L"////[^\r\n]*", entry);
