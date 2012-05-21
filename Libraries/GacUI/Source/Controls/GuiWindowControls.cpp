@@ -634,6 +634,16 @@ GuiPopup
 				Hide();
 			}
 
+			void GuiPopup::PopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				GetApplication()->RegisterPopupOpened(this);
+			}
+
+			void GuiPopup::PopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				GetApplication()->RegisterPopupClosed(this);
+			}
+
 			GuiPopup::GuiPopup(GuiControl::IStyleController* _styleController)
 				:GuiWindow(_styleController)
 			{
@@ -643,10 +653,14 @@ GuiPopup
 				SetTitleBar(false);
 				SetShowInTaskBar(false);
 				GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+
+				WindowOpened.AttachMethod(this, &GuiPopup::PopupOpened);
+				WindowClosed.AttachMethod(this, &GuiPopup::PopupClosed);
 			}
 
 			GuiPopup::~GuiPopup()
 			{
+				GetApplication()->RegisterPopupClosed(this);
 			}
 
 			bool GuiPopup::IsClippedByScreen(Point location)

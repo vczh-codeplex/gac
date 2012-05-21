@@ -15866,6 +15866,9 @@ Window
 			{
 			protected:
 				void									MouseClickedOnOtherWindow(GuiWindow* window)override;
+
+				void									PopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									PopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				GuiPopup(GuiControl::IStyleController* _styleController);
 				~GuiPopup();
@@ -18438,6 +18441,7 @@ namespace vl
 			{
 				friend void GuiApplicationInitialize();
 				friend class GuiWindow;
+				friend class GuiPopup;
 				friend class Ptr<GuiApplication>;
 			private:
 				void											LeftButtonDown(Point position)override;
@@ -18448,12 +18452,15 @@ namespace vl
 			protected:
 				GuiWindow*										mainWindow;
 				collections::List<GuiWindow*>					windows;
+				collections::SortedList<GuiPopup*>				openingPopups;
 
 				GuiApplication();
 				~GuiApplication();
 
 				void											RegisterWindow(GuiWindow* window);
 				void											UnregisterWindow(GuiWindow* window);
+				void											RegisterPopupOpened(GuiPopup* popup);
+				void											RegisterPopupClosed(GuiPopup* popup);
 				void											OnMouseDown(Point location);
 			public:
 				void											Run(GuiWindow* _mainWindow);
