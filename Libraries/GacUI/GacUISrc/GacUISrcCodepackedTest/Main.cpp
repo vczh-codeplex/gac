@@ -569,6 +569,7 @@ void SetupListControlWindow(GuiControlHost* controlHost, GuiControl* container)
 		listControl->GetBoundsComposition()->SetAlignmentToParent(Margin(200, 5, 5, 5));
 		listControl->GetBoundsComposition()->SetBounds(Rect(0, 0, 300, 200));
 		listControl->SetHorizontalAlwaysVisible(false);
+		listControl->SetMultiSelect(true);
 		container->GetBoundsComposition()->AddChild(listControl->GetBoundsComposition());
 
 		for(int i=0;i<30;i++)

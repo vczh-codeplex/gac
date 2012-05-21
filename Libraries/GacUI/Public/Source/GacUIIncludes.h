@@ -16518,12 +16518,16 @@ Selectable List Control
 				collections::SortedList<int>					selectedItems;
 				VisibleStyleMap									visibleStyles;
 				bool											multiSelect;
+				int												selectedItemIndexStart;
+				int												selectedItemIndexEnd;
 
 				void											OnItemModified(int start, int count, int newCount)override;
 				void											OnStyleInstalled(int itemIndex, IItemStyleController* style)override;
 				void											OnStyleUninstalled(IItemStyleController* style)override;
 				virtual void									OnItemSelectionChanged(int itemIndex, bool value);
 				virtual void									OnItemSelectionCleared();
+
+				void											SetMultipleItemsSelectedSilently(int start, int end, bool selected);
 			public:
 				GuiSelectableListControl(IStyleProvider* _styleProvider, IItemProvider* _itemProvider);
 				~GuiSelectableListControl();
@@ -16538,6 +16542,7 @@ Selectable List Control
 				const collections::IReadonlyList<int>&			GetSelectedItems();
 				bool											GetSelected(int itemIndex);
 				void											SetSelected(int itemIndex, bool value);
+				void											SelectSingleItem(int itemIndex, bool ctrl, bool shift);
 				void											ClearSelection();
 			};
 

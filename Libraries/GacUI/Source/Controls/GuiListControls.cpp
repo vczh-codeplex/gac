@@ -300,16 +300,10 @@ GuiSelectableListControl::StyleEvents
 			{
 				if(listControl->GetVisuallyEnabled())
 				{
-					if(listControl->multiSelect)
+					int index=listControl->GetArranger()->GetVisibleIndex(style);
+					if(index!=-1)
 					{
-					}
-					else
-					{
-						int index=listControl->GetArranger()->GetVisibleIndex(style);
-						if(index!=-1)
-						{
-							listControl->SetSelected(index, true);
-						}
+						listControl->SelectSingleItem(index, arguments.ctrl, arguments.shift);
 					}
 				}
 			}
@@ -388,9 +382,39 @@ GuiSelectableListControl
 				}
 			}
 
+			void GuiSelectableListControl::SetMultipleItemsSelectedSilently(int start, int end, bool selected)
+			{
+				if(start>end)
+				{
+					int temp=start;
+					start=end;
+					end=temp;
+				}
+				int count=itemProvider->Count();
+				if(start<0) start=0;
+				if(end>=count) end=count-1;
+				for(int i=start;i<=end;i++)
+				{
+					if(selected)
+					{
+						if(!selectedItems.Contains(i))
+						{
+							selectedItems.Add(i);
+						}
+					}
+					else
+					{
+						selectedItems.Remove(i);
+					}
+					OnItemSelectionChanged(i, selected);
+				}
+			}
+
 			GuiSelectableListControl::GuiSelectableListControl(IStyleProvider* _styleProvider, IItemProvider* _itemProvider)
 				:GuiListControl(_styleProvider, _itemProvider, true)
 				,multiSelect(false)
+				,selectedItemIndexStart(-1)
+				,selectedItemIndexEnd(-1)
 			{
 				SelectionChanged.SetAssociatedComposition(boundsComposition);
 			}
@@ -451,6 +475,58 @@ GuiSelectableListControl
 					{
 						OnItemSelectionChanged(itemIndex, value);
 						SelectionChanged.Execute(GetNotifyEventArguments());
+					}
+				}
+			}
+
+			void GuiSelectableListControl::SelectSingleItem(int itemIndex, bool ctrl, bool shift)
+			{
+				if(selectedItemIndexStart<0 || selectedItemIndexStart>=itemProvider->Count())
+				{
+					selectedItemIndexStart=0;
+				}
+				if(selectedItemIndexEnd<0 || selectedItemIndexEnd>=itemProvider->Count())
+				{
+					selectedItemIndexEnd=0;
+				}
+				if(0<=itemIndex && itemIndex<itemProvider->Count())
+				{
+					if(shift)
+					{
+						if(!ctrl)
+						{
+							SetMultipleItemsSelectedSilently(selectedItemIndexStart, selectedItemIndexEnd, false);
+						}
+						selectedItemIndexEnd=itemIndex;
+						SetMultipleItemsSelectedSilently(selectedItemIndexStart, selectedItemIndexEnd, true);
+						SelectionChanged.Execute(GetNotifyEventArguments());
+					}
+					else
+					{
+						if(ctrl)
+						{
+							int index=selectedItems.IndexOf(itemIndex);
+							if(index==-1)
+							{
+								selectedItems.Add(itemIndex);
+							}
+							else
+							{
+								selectedItems.RemoveAt(index);
+							}
+							OnItemSelectionChanged(itemIndex, index==-1);
+							SelectionChanged.Execute(GetNotifyEventArguments());
+						}
+						else
+						{
+							selectedItems.Clear();
+							OnItemSelectionCleared();
+							selectedItems.Add(itemIndex);
+							OnItemSelectionChanged(itemIndex, true);
+							SelectionChanged.Execute(GetNotifyEventArguments());
+						}
+						selectedItemIndexStart=itemIndex;
+						selectedItemIndexEnd=itemIndex;
 					}
 				}
 			}
