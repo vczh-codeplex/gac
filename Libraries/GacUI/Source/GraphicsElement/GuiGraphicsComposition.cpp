@@ -1,6 +1,5 @@
 #include "GuiGraphicsComposition.h"
 #include "..\Controls\GuiWindowControls.h"
-#include "..\..\..\..\Common\Source\Collections\OperationCopyFrom.h"
 #include <math.h>
 
 namespace vl

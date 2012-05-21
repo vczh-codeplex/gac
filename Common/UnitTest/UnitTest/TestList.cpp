@@ -391,6 +391,56 @@ TEST_CASE(TestListCopy)
 	CHECK_LIST_ITEMS(list.Wrap(), {6 _ 7 _ 8});
 }
 
+TEST_CASE(TestListCopyIterator)
+{
+	Array<vint> arr;
+	List<vint> list;
+	SortedList<vint> sortedList;
+	vint numbers[]={1, 2, 3, 4, 5};
+
+	CopyFrom(arr.Wrap(), &numbers[0], sizeof(numbers)/sizeof(*numbers), false);
+	CopyFrom(list.Wrap(), &numbers[0], sizeof(numbers)/sizeof(*numbers), false);
+	CopyFrom(sortedList.Wrap(), &numbers[0], sizeof(numbers)/sizeof(*numbers), false);
+	CHECK_LIST_ITEMS(arr.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+	CHECK_LIST_ITEMS(list.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+	CHECK_LIST_ITEMS(sortedList.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+
+	CopyFrom(arr.Wrap(), &numbers[0], sizeof(numbers)/sizeof(*numbers), false);
+	CopyFrom(list.Wrap(), &numbers[0], sizeof(numbers)/sizeof(*numbers), false);
+	CopyFrom(sortedList.Wrap(), &numbers[0], sizeof(numbers)/sizeof(*numbers), false);
+	CHECK_LIST_ITEMS(arr.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+	CHECK_LIST_ITEMS(list.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+	CHECK_LIST_ITEMS(sortedList.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+
+	CopyFrom(arr.Wrap(), &numbers[0], sizeof(numbers)/sizeof(*numbers), true);
+	CopyFrom(list.Wrap(), &numbers[0], sizeof(numbers)/sizeof(*numbers), true);
+	CopyFrom(sortedList.Wrap(), &numbers[0], sizeof(numbers)/sizeof(*numbers), true);
+	CHECK_LIST_ITEMS(arr.Wrap(), {1 _ 2 _ 3 _ 4 _ 5 _ 1 _ 2 _ 3 _ 4 _ 5});
+	CHECK_LIST_ITEMS(list.Wrap(), {1 _ 2 _ 3 _ 4 _ 5 _ 1 _ 2 _ 3 _ 4 _ 5});
+	CHECK_LIST_ITEMS(sortedList.Wrap(), {1 _ 1 _ 2 _ 2 _ 3 _ 3 _ 4 _ 4 _ 5 _ 5});
+
+	CopyFrom(arr.Wrap(), &numbers[0], &numbers[sizeof(numbers)/sizeof(*numbers)], false);
+	CopyFrom(list.Wrap(), &numbers[0], &numbers[sizeof(numbers)/sizeof(*numbers)], false);
+	CopyFrom(sortedList.Wrap(), &numbers[0], &numbers[sizeof(numbers)/sizeof(*numbers)], false);
+	CHECK_LIST_ITEMS(arr.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+	CHECK_LIST_ITEMS(list.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+	CHECK_LIST_ITEMS(sortedList.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+
+	CopyFrom(arr.Wrap(), &numbers[0], &numbers[sizeof(numbers)/sizeof(*numbers)], false);
+	CopyFrom(list.Wrap(), &numbers[0], &numbers[sizeof(numbers)/sizeof(*numbers)], false);
+	CopyFrom(sortedList.Wrap(), &numbers[0], &numbers[sizeof(numbers)/sizeof(*numbers)], false);
+	CHECK_LIST_ITEMS(arr.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+	CHECK_LIST_ITEMS(list.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+	CHECK_LIST_ITEMS(sortedList.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+
+	CopyFrom(arr.Wrap(), &numbers[0], &numbers[sizeof(numbers)/sizeof(*numbers)], true);
+	CopyFrom(list.Wrap(), &numbers[0], &numbers[sizeof(numbers)/sizeof(*numbers)], true);
+	CopyFrom(sortedList.Wrap(), &numbers[0], &numbers[sizeof(numbers)/sizeof(*numbers)], true);
+	CHECK_LIST_ITEMS(arr.Wrap(), {1 _ 2 _ 3 _ 4 _ 5 _ 1 _ 2 _ 3 _ 4 _ 5});
+	CHECK_LIST_ITEMS(list.Wrap(), {1 _ 2 _ 3 _ 4 _ 5 _ 1 _ 2 _ 3 _ 4 _ 5});
+	CHECK_LIST_ITEMS(sortedList.Wrap(), {1 _ 1 _ 2 _ 2 _ 3 _ 3 _ 4 _ 4 _ 5 _ 5});
+}
+
 TEST_CASE(TestDictionaryCopy)
 {
 	Array<Pair<vint, vint>> arr;
@@ -772,4 +822,32 @@ TEST_CASE(TestForEachWithIndexer)
 		b.Add(i, num);
 	}
 	CHECK_DICTIONARY_ITEMS(b.Wrap(), {0 _ 1 _ 2 _ 3 _ 4 _ 5 _ 6 _ 7 _ 8 _ 9}, {0 _ 1 _ 4 _ 9 _ 16 _ 25 _ 36 _ 49 _ 64 _ 81});
+}
+
+vint Compare(vint a, vint b)
+{
+	return a-b;
+}
+
+TEST_CASE(TestOrderBy)
+{
+	vint numbers[]={7, 1, 12, 2, 8, 3, 11, 4, 9, 5, 13, 6, 10};
+	List<vint> list;
+	CopyFrom(list.Wrap(), FromArray(numbers)>>OrderBy(Compare));
+	CHECK_LIST_ITEMS(list.Wrap(), {1 _ 2 _ 3 _ 4 _ 5 _ 6 _ 7 _ 8 _ 9 _ 10 _ 11 _ 12 _ 13});
+}
+
+TEST_CASE(TestFromIterator)
+{
+	vint numbers[]={1, 2, 3, 4, 5};
+	List<vint> list;
+
+	CopyFrom(list.Wrap(), FromIterator<vint>::Wrap(&numbers[0], &numbers[5]));
+	CHECK_LIST_ITEMS(list.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+
+	CopyFrom(list.Wrap(), FromPointer(&numbers[0], &numbers[5]));
+	CHECK_LIST_ITEMS(list.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
+
+	CopyFrom(list.Wrap(), FromArray(numbers));
+	CHECK_LIST_ITEMS(list.Wrap(), {1 _ 2 _ 3 _ 4 _ 5});
 }

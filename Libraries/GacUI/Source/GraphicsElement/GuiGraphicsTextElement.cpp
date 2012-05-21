@@ -1,5 +1,4 @@
 #include "GuiGraphicsTextElement.h"
-#include "..\..\..\..\Common\Source\Collections\OperationCopyFrom.h"
 
 namespace vl
 {

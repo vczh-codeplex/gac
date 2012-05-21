@@ -449,5 +449,8 @@
     <ClInclude Include="..\..\..\..\Common\Source\Regex\RegexWriter.h">
       <Filter>Common\Regex</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationOrderBy.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
