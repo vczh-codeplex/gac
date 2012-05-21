@@ -65,7 +65,7 @@ const wchar_t* DataSource[]=
 	L"Lipschiz",
 	L"Liouville",
 	L"Lindelof",
-	L"De Moivre",
+	L"de Moivre",
 	L"Klein",
 	L"Bessel",
 	L"Euclid",
@@ -169,16 +169,14 @@ public:
 		// Add names into listSource
 		{
 			// Use linq for C++ to create sorted TextItem(s) from DataSource
-			//CopyFrom(
-			//	listSource->GetItems(),
-			//	FromArray(DataSource)
-			//		>>OrderBy<const wchar_t*>(
-			//			[](const wchar_t* a, const wchar_t* b){return wcsicmp(a, b);}
-			//		)
-			//		>>Select<WString, list::TextItem>(
-			//			[](const wchar_t* name){return list::TextItem(name);}
-			//		)
-			//	);
+			CopyFrom(
+				listSource->GetItems(),
+				FromArray(DataSource)
+					>>OrderBy(_wcsicmp)
+					>>Select<const wchar_t*, list::TextItem>(
+						[](const wchar_t* name){return list::TextItem(name);}
+					)
+				);
 		}
 
 		// set the preferred minimum client size
