@@ -205,6 +205,7 @@
     <ClInclude Include="..\..\Source\Collections\OperationCopyFrom.h" />
     <ClInclude Include="..\..\Source\Collections\OperationEnumerable.h" />
     <ClInclude Include="..\..\Source\Collections\OperationForEach.h" />
+    <ClInclude Include="..\..\Source\Collections\OperationOrderBy.h" />
     <ClInclude Include="..\..\Source\Collections\OperationPair.h" />
     <ClInclude Include="..\..\Source\Collections\OperationSelect.h" />
     <ClInclude Include="..\..\Source\Collections\OperationSequence.h" />

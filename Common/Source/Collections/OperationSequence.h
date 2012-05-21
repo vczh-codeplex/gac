@@ -439,7 +439,7 @@ Distinct
 		extern DistinctProcessor Distinct();
 
 /***********************************************************************
-Distinct
+Reverse
 ***********************************************************************/
 
 		template<typename T>
@@ -528,6 +528,115 @@ Distinct
 		};
 
 		extern ReverseProcessor Reverse();
+
+/***********************************************************************
+FromIterator
+***********************************************************************/
+
+		template<typename T, typename I>
+		class FromIteratorEnumerable : public Object, public IEnumerable<T>
+		{
+			friend class Enumerable<T>;
+		private:
+			class Enumerator : public Object, public IEnumerator<T>
+			{
+			private:
+				I				begin;
+				I				end;
+				I				current;
+				vint			index;
+
+			public:
+				Enumerator(I _begin, I _end, I _current, vint _index)
+					:begin(_begin)
+					,end(_end)
+					,current(_current)
+					,index(_index)
+				{
+				}
+
+				IEnumerator<T>* Clone()const
+				{
+					return new Enumerator(begin, end, current, index);
+				}
+
+				const T& Current()const
+				{
+					return *current;
+				}
+
+				vint Index()const
+				{
+					return index;
+				}
+
+				bool Next()
+				{
+					if(current==end)
+					{
+						return false;
+					}
+					current++;
+					if(current==end)
+					{
+						return false;
+					}
+					else
+					{
+						index++;
+						return true;
+					}
+				}
+
+				bool Available()const
+				{
+					return current!=end;
+				}
+
+				void Reset()
+				{
+					current=begin;
+					index=0;
+				}
+			};
+		private:
+			I					begin;
+			I					end;
+		public:
+			IEnumerator<T>* CreateEnumerator()const
+			{
+				return new Enumerator(begin, end, begin, 0);
+			}
+
+			FromIteratorEnumerable(I _begin, I _end)
+				:begin(_begin)
+				,end(_end)
+			{
+			}
+		};
+
+		template<typename T>
+		class FromIterator
+		{
+		public:
+			template<typename I>
+			static FromIteratorEnumerable<T, I> Wrap(I begin, I end)
+			{
+				return FromIteratorEnumerable<T, I>(begin, end);
+			}
+		};
+
+		template<typename T>
+		FromIteratorEnumerable<T, T*> FromPointer(T* begin, T* end)
+		{
+			return FromIteratorEnumerable<T, T*>(begin, end);
+		}
+
+		template<typename T, int size>
+		FromIteratorEnumerable<T, T*> FromArray(T (&items)[size])
+		{
+			return FromIteratorEnumerable<T, T*>(&items[0], &items[size]);
+		}
 	}
 }
 

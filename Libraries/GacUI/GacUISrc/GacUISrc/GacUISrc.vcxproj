@@ -148,6 +148,7 @@
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationCopyFrom.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationEnumerable.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationForEach.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationOrderBy.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationPair.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationSelect.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationSequence.h" />

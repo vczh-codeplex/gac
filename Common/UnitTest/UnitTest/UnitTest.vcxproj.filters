@@ -410,6 +410,9 @@
     <ClInclude Include="..\..\Source\Regex\RegexWriter.h">
       <Filter>Common\Regex</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Collections\OperationOrderBy.h">
+      <Filter>Common\Collections</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Common.fpm">

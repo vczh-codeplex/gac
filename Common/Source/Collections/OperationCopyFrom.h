@@ -193,6 +193,67 @@ namespace vl
 				throw;
 			}
 		}
+
+		template<typename T, typename K, typename I>
+		void CopyFrom(IArray<T, K>& dst, I begin, vint length, bool append=false)
+		{
+			vint start=0;
+			if(append)
+			{
+				start=dst.Count();
+				dst.Resize(start+length);
+			}
+			else
+			{
+				dst.Resize(length);
+			}
+
+			for(vint i=0;i<length;i++)
+			{
+				dst.Set(start+i, *begin++);
+			}
+		}
+
+		template<typename T, typename K, typename I>
+		void CopyFrom(ICollection<T, K>& dst, I begin, vint length, bool append=false)
+		{
+			if(!append)
+			{
+				dst.Clear();
+			}
+
+			for(vint i=0;i<length;i++)
+			{
+				dst.Add(*begin++);
+			}
+		}
+
+		template<typename T, typename K, typename I>
+		void CopyFrom(IArray<T, K>& dst, I begin, I end, bool append=false)
+		{
+			vint length=0;
+			I current=begin;
+			while(current!=end)
+			{
+				length++;
+				current++;
+			}
+			CopyFrom(dst, begin, length, append);
+		}
+
+		template<typename T, typename K, typename I>
+		void CopyFrom(ICollection<T, K>& dst, I begin, I end, bool append=false)
+		{
+			if(!append)
+			{
+				dst.Clear();
+			}
+
+			while(begin!=end)
+			{
+				dst.Add(*begin++);
+			}
+		}
 	}
 }
 
