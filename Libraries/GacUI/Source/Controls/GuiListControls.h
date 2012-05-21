@@ -384,12 +384,16 @@ Selectable List Control
 				collections::SortedList<int>					selectedItems;
 				VisibleStyleMap									visibleStyles;
 				bool											multiSelect;
+				int												selectedItemIndexStart;
+				int												selectedItemIndexEnd;
 
 				void											OnItemModified(int start, int count, int newCount)override;
 				void											OnStyleInstalled(int itemIndex, IItemStyleController* style)override;
 				void											OnStyleUninstalled(IItemStyleController* style)override;
 				virtual void									OnItemSelectionChanged(int itemIndex, bool value);
 				virtual void									OnItemSelectionCleared();
+
+				void											SetMultipleItemsSelectedSilently(int start, int end, bool selected);
 			public:
 				/// <summary>Create a control with a specified style provider.</summary>
 				/// <param name="styleProvider">The style provider.</param>
@@ -420,6 +424,11 @@ Selectable List Control
 				/// <param name="itemIndex">The index of the item.</param>
 				/// <param name="value">Set to true to select the item.</param>
 				void											SetSelected(int itemIndex, bool value);
+				/// <summary>Set the selection status of an item, and affect other selected item according to key status.</summary>
+				/// <param name="itemIndex">The index of the item.</param>
+				/// <param name="ctrl">Set to true if the control key is pressing.</param>
+				/// <param name="shift">Set to true if the shift key is pressing.</param>
+				void											SelectSingleItem(int itemIndex, bool ctrl, bool shift);
 				/// <summary>Unselect all items.</summary>
 				void											ClearSelection();
 			};
