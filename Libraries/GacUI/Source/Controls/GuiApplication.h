@@ -22,6 +22,7 @@ namespace vl
 			{
 				friend void GuiApplicationInitialize();
 				friend class GuiWindow;
+				friend class GuiPopup;
 				friend class Ptr<GuiApplication>;
 			private:
 				void											LeftButtonDown(Point position)override;
@@ -32,12 +33,15 @@ namespace vl
 			protected:
 				GuiWindow*										mainWindow;
 				collections::List<GuiWindow*>					windows;
+				collections::SortedList<GuiPopup*>				openingPopups;
 
 				GuiApplication();
 				~GuiApplication();
 
 				void											RegisterWindow(GuiWindow* window);
 				void											UnregisterWindow(GuiWindow* window);
+				void											RegisterPopupOpened(GuiPopup* popup);
+				void											RegisterPopupClosed(GuiPopup* popup);
 				void											OnMouseDown(Point location);
 			public:
 				/// <summary>Run a <see cref="GuiWindow"/> as the main window and show it. This function can only be called once in the entry point. When the main window is closed or hiden, the Run function will finished, and the application should prepare for finalization.</summary>

@@ -64,6 +64,30 @@ GuiApplication
 				windows.Remove(window);
 			}
 
+			void GuiApplication::RegisterPopupOpened(GuiPopup* popup)
+			{
+				vint index=openingPopups.IndexOf(popup);
+				if(index==-1)
+				{
+					openingPopups.Add(popup);
+					if(openingPopups.Count()==1)
+					{
+						GetCurrentController()->InputService()->StartHookMouse();
+					}
+				}
+			}
+
+			void GuiApplication::RegisterPopupClosed(GuiPopup* popup)
+			{
+				if(openingPopups.Remove(popup))
+				{
+					if(openingPopups.Count()==0)
+					{
+						GetCurrentController()->InputService()->StopHookMouse();
+					}
+				}
+			}
+
 			void GuiApplication::OnMouseDown(Point location)
 			{
 				GuiWindow* window=GetWindow(location);
@@ -167,7 +191,6 @@ Helpers
 				theme::SetCurrentTheme(&theme);
 
 				GetCurrentController()->InputService()->StartTimer();
-				GetCurrentController()->InputService()->StartHookMouse();
 				GuiApplication app;
 				application=&app;
 

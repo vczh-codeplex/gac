@@ -4013,6 +4013,30 @@ GuiApplication
 				windows.Remove(window);
 			}
 
+			void GuiApplication::RegisterPopupOpened(GuiPopup* popup)
+			{
+				vint index=openingPopups.IndexOf(popup);
+				if(index==-1)
+				{
+					openingPopups.Add(popup);
+					if(openingPopups.Count()==1)
+					{
+						GetCurrentController()->InputService()->StartHookMouse();
+					}
+				}
+			}
+
+			void GuiApplication::RegisterPopupClosed(GuiPopup* popup)
+			{
+				if(openingPopups.Remove(popup))
+				{
+					if(openingPopups.Count()==0)
+					{
+						GetCurrentController()->InputService()->StopHookMouse();
+					}
+				}
+			}
+
 			void GuiApplication::OnMouseDown(Point location)
 			{
 				GuiWindow* window=GetWindow(location);
@@ -4116,7 +4140,6 @@ Helpers
 				theme::SetCurrentTheme(&theme);
 
 				GetCurrentController()->InputService()->StartTimer();
-				GetCurrentController()->InputService()->StartHookMouse();
 				GuiApplication app;
 				application=&app;
 
@@ -8920,6 +8943,16 @@ GuiPopup
 				Hide();
 			}
 
+			void GuiPopup::PopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				GetApplication()->RegisterPopupOpened(this);
+			}
+
+			void GuiPopup::PopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				GetApplication()->RegisterPopupClosed(this);
+			}
+
 			GuiPopup::GuiPopup(GuiControl::IStyleController* _styleController)
 				:GuiWindow(_styleController)
 			{
@@ -8929,10 +8962,14 @@ GuiPopup
 				SetTitleBar(false);
 				SetShowInTaskBar(false);
 				GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+
+				WindowOpened.AttachMethod(this, &GuiPopup::PopupOpened);
+				WindowClosed.AttachMethod(this, &GuiPopup::PopupClosed);
 			}
 
 			GuiPopup::~GuiPopup()
 			{
+				GetApplication()->RegisterPopupClosed(this);
 			}
 
 			bool GuiPopup::IsClippedByScreen(Point location)

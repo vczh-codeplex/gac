@@ -277,6 +277,9 @@ Window
 			{
 			protected:
 				void									MouseClickedOnOtherWindow(GuiWindow* window)override;
+
+				void									PopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									PopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
