@@ -10604,7 +10604,7 @@ Concat
 			protected:
 				IEnumerator<T>*					enumerator1;
 				IEnumerator<T>*					enumerator2;
-				vint								index;
+				vint							index;
 				bool							turned;
 			public:
 				Enumerator(IEnumerator<T>* _enumerator1, IEnumerator<T>* _enumerator2, vint _index=0, bool _turned=false)
@@ -10613,6 +10613,10 @@ Concat
 					,index(_index)
 					,turned(_turned)
 				{
+					if(turned==false && !enumerator1->Available())
+					{
+						turned=true;
+					}
 				}
 
 				~Enumerator()
