@@ -80,7 +80,7 @@ Common Operations
 				void										UpdateCaretPoint();
 				void										Move(TextPos pos, bool shift);
 				void										Modify(TextPos start, TextPos end, const WString& input);
-				void										ProcessKey(int code, bool shift, bool ctrl);
+				bool										ProcessKey(int code, bool shift, bool ctrl);
 					
 				void										OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
