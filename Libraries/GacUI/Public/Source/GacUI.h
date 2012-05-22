@@ -3630,6 +3630,20 @@ List Control
 				// Provider Interfaces
 				//-----------------------------------------------------------
 
+				enum KeyDirection
+				{
+					Up,
+					Down,
+					Left,
+					Right,
+					Home,
+					End,
+					PageUp,
+					PageDown,
+					PageLeft,
+					PageRight,
+				};
+
 				class IItemProvider : public virtual IDescriptable, public Description<IItemProvider>
 				{
 				public:
@@ -3674,6 +3688,7 @@ List Control
 					virtual IItemStyleController*				GetVisibleStyle(int itemIndex)=0;
 					virtual int									GetVisibleIndex(IItemStyleController* style)=0;
 					virtual void								OnViewChanged(Rect bounds)=0;
+					virtual int									FindItem(int itemIndex, KeyDirection key)=0;
 				};
 				
 				class IItemCoordinateTransformer : public virtual IDescriptable, public Description<IItemCoordinateTransformer>
@@ -3687,6 +3702,7 @@ List Control
 					virtual Rect								VirtualRectToRealRect(Size realFullSize, Rect rect)=0;
 					virtual Margin								RealMarginToVirtualMargin(Margin margin)=0;
 					virtual Margin								VirtualMarginToRealMargin(Margin margin)=0;
+					virtual KeyDirection						RealKeyDirectionToVirtualKeyDirection(KeyDirection key)=0;
 				};
 
 			protected:
@@ -3800,7 +3816,9 @@ Selectable List Control
 				virtual void									OnItemSelectionChanged(int itemIndex, bool value);
 				virtual void									OnItemSelectionCleared();
 
+				void											NormalizeSelectedItemIndexStartEnd();
 				void											SetMultipleItemsSelectedSilently(int start, int end, bool selected);
+				void											OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments);
 			public:
 				GuiSelectableListControl(IStyleProvider* _styleProvider, IItemProvider* _itemProvider);
 				~GuiSelectableListControl();
@@ -3815,7 +3833,8 @@ Selectable List Control
 				const collections::IReadonlyList<int>&			GetSelectedItems();
 				bool											GetSelected(int itemIndex);
 				void											SetSelected(int itemIndex, bool value);
-				void											SelectSingleItem(int itemIndex, bool ctrl, bool shift);
+				bool											SelectItemsByClick(int itemIndex, bool ctrl, bool shift);
+				bool											SelectItemsByKey(int code, bool ctrl, bool shift);
 				void											ClearSelection();
 			};
 
@@ -3839,6 +3858,7 @@ Predefined ItemCoordinateTransformer
 					Rect										VirtualRectToRealRect(Size realFullSize, Rect rect)override;
 					Margin										RealMarginToVirtualMargin(Margin margin)override;
 					Margin										VirtualMarginToRealMargin(Margin margin)override;
+					GuiListControl::KeyDirection				RealKeyDirectionToVirtualKeyDirection(GuiListControl::KeyDirection key)override;
 				};
 				
 				class AxisAlignedItemCoordinateTransformer : public Object, virtual public GuiListControl::IItemCoordinateTransformer, public Description<AxisAlignedItemCoordinateTransformer>
@@ -3871,6 +3891,7 @@ Predefined ItemCoordinateTransformer
 					Rect										VirtualRectToRealRect(Size realFullSize, Rect rect)override;
 					Margin										RealMarginToVirtualMargin(Margin margin)override;
 					Margin										VirtualMarginToRealMargin(Margin margin)override;
+					GuiListControl::KeyDirection				RealKeyDirectionToVirtualKeyDirection(GuiListControl::KeyDirection key)override;
 				};
 			};
 
@@ -3908,6 +3929,7 @@ Predefined ItemArranger
 					GuiListControl::IItemStyleController*		GetVisibleStyle(int itemIndex)override;
 					int											GetVisibleIndex(GuiListControl::IItemStyleController* style)override;
 					void										OnViewChanged(Rect bounds)override;
+					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
 				};
 				
 				class FixedHeightItemArranger : public RangedItemArrangerBase, public Description<FixedHeightItemArranger>
@@ -3941,6 +3963,8 @@ Predefined ItemArranger
 				public:
 					FixedSizeMultiColumnItemArranger();
 					~FixedSizeMultiColumnItemArranger();
+
+					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
 				};
 				
 				class FixedHeightMultiColumnItemArranger : public RangedItemArrangerBase, public Description<FixedHeightMultiColumnItemArranger>
@@ -3957,6 +3981,8 @@ Predefined ItemArranger
 				public:
 					FixedHeightMultiColumnItemArranger();
 					~FixedHeightMultiColumnItemArranger();
+
+					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
 				};
 			}
 
@@ -5859,7 +5885,7 @@ Common Operations
 				void										UpdateCaretPoint();
 				void										Move(TextPos pos, bool shift);
 				void										Modify(TextPos start, TextPos end, const WString& input);
-				void										ProcessKey(int code, bool shift, bool ctrl);
+				bool										ProcessKey(int code, bool shift, bool ctrl);
 					
 				void										OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);

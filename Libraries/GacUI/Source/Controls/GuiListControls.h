@@ -106,6 +106,31 @@ List Control
 				// Provider Interfaces
 				//-----------------------------------------------------------
 
+				/// <summary>Represents the four directions that is accessable by keyboard.</summary>
+				enum KeyDirection
+				{
+					/// <summary>[T:vl.presentation.controls.GuiListControl.KeyDirection]The up direction.</summary>
+					Up,
+					/// <summary>[T:vl.presentation.controls.GuiListControl.KeyDirection]The down direction.</summary>
+					Down,
+					/// <summary>[T:vl.presentation.controls.GuiListControl.KeyDirection]The left direction.</summary>
+					Left,
+					/// <summary>[T:vl.presentation.controls.GuiListControl.KeyDirection]The right direction.</summary>
+					Right,
+					/// <summary>[T:vl.presentation.controls.GuiListControl.KeyDirection]The home direction.</summary>
+					Home,
+					/// <summary>[T:vl.presentation.controls.GuiListControl.KeyDirection]The end direction.</summary>
+					End,
+					/// <summary>[T:vl.presentation.controls.GuiListControl.KeyDirection]The page up direction.</summary>
+					PageUp,
+					/// <summary>[T:vl.presentation.controls.GuiListControl.KeyDirection]The page down direction.</summary>
+					PageDown,
+					/// <summary>[T:vl.presentation.controls.GuiListControl.KeyDirection]The page left direction.</summary>
+					PageLeft,
+					/// <summary>[T:vl.presentation.controls.GuiListControl.KeyDirection]The page right direction.</summary>
+					PageRight,
+				};
+
 				/// <summary>Item provider for a <see cref="GuiListControl"/>.</summary>
 				class IItemProvider : public virtual IDescriptable, public Description<IItemProvider>
 				{
@@ -209,6 +234,11 @@ List Control
 					virtual int									GetVisibleIndex(IItemStyleController* style)=0;
 					/// <summary>Called when the visible area of item container is changed.</summary>
 					virtual void								OnViewChanged(Rect bounds)=0;
+					/// <summary>Find the item by an base item and a key direction.</summary>
+					/// <returns>The item index that is found. Returns -1 if this operation failed.</returns>
+					/// <param name="itemIndex">The base item index.</param>
+					/// <param name="key">The key direction.</param>
+					virtual int									FindItem(int itemIndex, KeyDirection key)=0;
 				};
 				
 				/// <summary>Item coordinate transformer for a <see cref="GuiListControl"/>. In all functions in this interface, real coordinate is in the list control's container space, virtual coordinate is in a space that the transformer created.</summary>
@@ -251,6 +281,10 @@ List Control
 					/// <returns>The real margin.</returns>
 					/// <param name="margin">The virtual margin.</param>
 					virtual Margin								VirtualMarginToRealMargin(Margin margin)=0;
+					/// <summary>Translate real key direction to virtual key direction.</summary>
+					/// <returns>The virtual key direction.</returns>
+					/// <param name="key">The real key direction.</param>
+					virtual KeyDirection						RealKeyDirectionToVirtualKeyDirection(KeyDirection key)=0;
 				};
 
 			protected:
@@ -393,7 +427,9 @@ Selectable List Control
 				virtual void									OnItemSelectionChanged(int itemIndex, bool value);
 				virtual void									OnItemSelectionCleared();
 
+				void											NormalizeSelectedItemIndexStartEnd();
 				void											SetMultipleItemsSelectedSilently(int start, int end, bool selected);
+				void											OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments);
 			public:
 				/// <summary>Create a control with a specified style provider.</summary>
 				/// <param name="styleProvider">The style provider.</param>
@@ -428,7 +464,12 @@ Selectable List Control
 				/// <param name="itemIndex">The index of the item.</param>
 				/// <param name="ctrl">Set to true if the control key is pressing.</param>
 				/// <param name="shift">Set to true if the shift key is pressing.</param>
-				void											SelectSingleItem(int itemIndex, bool ctrl, bool shift);
+				bool											SelectItemsByClick(int itemIndex, bool ctrl, bool shift);
+				/// <summary>Set the selection status using keys.</summary>
+				/// <param name="code">The key code that is pressing.</param>
+				/// <param name="ctrl">Set to true if the control key is pressing.</param>
+				/// <param name="shift">Set to true if the shift key is pressing.</param>
+				bool											SelectItemsByKey(int code, bool ctrl, bool shift);
 				/// <summary>Unselect all items.</summary>
 				void											ClearSelection();
 			};
@@ -455,6 +496,7 @@ Predefined ItemCoordinateTransformer
 					Rect										VirtualRectToRealRect(Size realFullSize, Rect rect)override;
 					Margin										RealMarginToVirtualMargin(Margin margin)override;
 					Margin										VirtualMarginToRealMargin(Margin margin)override;
+					GuiListControl::KeyDirection				RealKeyDirectionToVirtualKeyDirection(GuiListControl::KeyDirection key)override;
 				};
 				
 				/// <summary>Axis aligned item coordinate transformer. This transformer transforms coordinates by changing the axis direction.</summary>
@@ -501,6 +543,7 @@ Predefined ItemCoordinateTransformer
 					Rect										VirtualRectToRealRect(Size realFullSize, Rect rect)override;
 					Margin										RealMarginToVirtualMargin(Margin margin)override;
 					Margin										VirtualMarginToRealMargin(Margin margin)override;
+					GuiListControl::KeyDirection				RealKeyDirectionToVirtualKeyDirection(GuiListControl::KeyDirection key)override;
 				};
 			};
 
@@ -540,6 +583,7 @@ Predefined ItemArranger
 					GuiListControl::IItemStyleController*		GetVisibleStyle(int itemIndex)override;
 					int											GetVisibleIndex(GuiListControl::IItemStyleController* style)override;
 					void										OnViewChanged(Rect bounds)override;
+					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
 				};
 				
 				/// <summary>Fixed height item arranger. This arranger lists all item with the same height value. This value is the maximum height of all minimum heights of displayed items.</summary>
@@ -577,6 +621,8 @@ Predefined ItemArranger
 					/// <summary>Create the arranger.</summary>
 					FixedSizeMultiColumnItemArranger();
 					~FixedSizeMultiColumnItemArranger();
+
+					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
 				};
 				
 				/// <summary>Fixed size multiple columns item arranger. This arranger adjust all items in multiple columns with the same height. The height is the maximum width of all minimum height of displayed items. Each item will displayed using its minimum width.</summary>
@@ -595,6 +641,8 @@ Predefined ItemArranger
 					/// <summary>Create the arranger.</summary>
 					FixedHeightMultiColumnItemArranger();
 					~FixedHeightMultiColumnItemArranger();
+
+					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
 				};
 			}
 

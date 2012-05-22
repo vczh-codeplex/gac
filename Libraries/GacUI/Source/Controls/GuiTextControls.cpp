@@ -444,7 +444,7 @@ GuiTextElementOperator
 				}
 			}
 
-			void GuiTextElementOperator::ProcessKey(int code, bool shift, bool ctrl)
+			bool GuiTextElementOperator::ProcessKey(int code, bool shift, bool ctrl)
 			{
 				if(!shift && ctrl)
 				{
@@ -452,16 +452,16 @@ GuiTextElementOperator
 					{
 					case L'A':
 						SelectAll();
-						return;
+						return true;
 					case L'X':
 						Cut();
-						return;
+						return true;
 					case L'C':
 						Copy();
-						return;
+						return true;
 					case L'V':
 						Paste();
-						return;
+						return true;
 					}
 				}
 				TextPos begin=textElement->GetCaretBegin();
@@ -473,13 +473,13 @@ GuiTextElementOperator
 						end.row--;
 						Move(end, shift);
 					}
-					break;
+					return true;
 				case VKEY_DOWN:
 					{
 						end.row++;
 						Move(end, shift);
 					}
-					break;
+					return true;
 				case VKEY_LEFT:
 					{
 						if(ctrl)
@@ -501,7 +501,7 @@ GuiTextElementOperator
 							Move(end, shift);
 						}
 					}
-					break;
+					return true;
 				case VKEY_RIGHT:
 					{
 						if(ctrl)
@@ -522,7 +522,7 @@ GuiTextElementOperator
 							Move(end, shift);
 						}
 					}
-					break;
+					return true;
 				case VKEY_HOME:
 					{
 						if(ctrl)
@@ -535,7 +535,7 @@ GuiTextElementOperator
 							Move(end, shift);
 						}
 					}
-					break;
+					return true;
 				case VKEY_END:
 					{
 						if(ctrl)
@@ -545,19 +545,19 @@ GuiTextElementOperator
 						end.column=textElement->GetLines().GetLine(end.row).dataLength;
 						Move(end, shift);
 					}
-					break;
+					return true;
 				case VKEY_PRIOR:
 					{
 						end.row-=callback->GetPageRows();
 						Move(end, shift);
 					}
-					break;
+					return true;
 				case VKEY_NEXT:
 					{
 						end.row+=callback->GetPageRows();
 						Move(end, shift);
 					}
-					break;
+					return true;
 				case VKEY_BACK:
 					if(!readonly)
 					{
@@ -579,6 +579,7 @@ GuiTextElementOperator
 							}
 							SetSelectionText(L"");
 						}
+						return true;
 					}
 					break;
 				case VKEY_DELETE:
@@ -602,9 +603,11 @@ GuiTextElementOperator
 							}
 							SetSelectionText(L"");
 						}
+						return true;
 					}
 					break;
 				}
+				return false;
 			}
 
 			void GuiTextElementOperator::OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
@@ -659,7 +662,10 @@ GuiTextElementOperator
 			{
 				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
 				{
-					ProcessKey(arguments.code, arguments.shift, arguments.ctrl);
+					if(ProcessKey(arguments.code, arguments.shift, arguments.ctrl))
+					{
+						arguments.handled=true;
+					}
 				}
 			}
 

@@ -303,7 +303,7 @@ GuiSelectableListControl::StyleEvents
 					int index=listControl->GetArranger()->GetVisibleIndex(style);
 					if(index!=-1)
 					{
-						listControl->SelectSingleItem(index, arguments.ctrl, arguments.shift);
+						listControl->SelectItemsByClick(index, arguments.ctrl, arguments.shift);
 					}
 				}
 			}
@@ -382,6 +382,18 @@ GuiSelectableListControl
 				}
 			}
 
+			void GuiSelectableListControl::NormalizeSelectedItemIndexStartEnd()
+			{
+				if(selectedItemIndexStart<0 || selectedItemIndexStart>=itemProvider->Count())
+				{
+					selectedItemIndexStart=0;
+				}
+				if(selectedItemIndexEnd<0 || selectedItemIndexEnd>=itemProvider->Count())
+				{
+					selectedItemIndexEnd=0;
+				}
+			}
+
 			void GuiSelectableListControl::SetMultipleItemsSelectedSilently(int start, int end, bool selected)
 			{
 				if(start>end)
@@ -410,6 +422,17 @@ GuiSelectableListControl
 				}
 			}
 
+			void GuiSelectableListControl::OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments)
+			{
+				if(GetVisuallyEnabled())
+				{
+					if(SelectItemsByKey(arguments.code, arguments.ctrl, arguments.shift))
+					{
+						arguments.handled=true;
+					}
+				}
+			}
+
 			GuiSelectableListControl::GuiSelectableListControl(IStyleProvider* _styleProvider, IItemProvider* _itemProvider)
 				:GuiListControl(_styleProvider, _itemProvider, true)
 				,multiSelect(false)
@@ -417,6 +440,10 @@ GuiSelectableListControl
 				,selectedItemIndexEnd(-1)
 			{
 				SelectionChanged.SetAssociatedComposition(boundsComposition);
+				if(focusableComposition)
+				{
+					focusableComposition->GetEventReceiver()->keyDown.AttachMethod(this, &GuiSelectableListControl::OnKeyDown);
+				}
 			}
 
 			GuiSelectableListControl::~GuiSelectableListControl()
@@ -479,16 +506,9 @@ GuiSelectableListControl
 				}
 			}
 
-			void GuiSelectableListControl::SelectSingleItem(int itemIndex, bool ctrl, bool shift)
+			bool GuiSelectableListControl::SelectItemsByClick(int itemIndex, bool ctrl, bool shift)
 			{
-				if(selectedItemIndexStart<0 || selectedItemIndexStart>=itemProvider->Count())
-				{
-					selectedItemIndexStart=0;
-				}
-				if(selectedItemIndexEnd<0 || selectedItemIndexEnd>=itemProvider->Count())
-				{
-					selectedItemIndexEnd=0;
-				}
+				NormalizeSelectedItemIndexStartEnd();
 				if(0<=itemIndex && itemIndex<itemProvider->Count())
 				{
 					if(shift)
@@ -528,7 +548,53 @@ GuiSelectableListControl
 						selectedItemIndexStart=itemIndex;
 						selectedItemIndexEnd=itemIndex;
 					}
+					return true;
 				}
+				return false;
+			}
+
+			bool GuiSelectableListControl::SelectItemsByKey(int code, bool ctrl, bool shift)
+			{
+				if(!GetArranger()) return false;
+
+				NormalizeSelectedItemIndexStartEnd();
+				KeyDirection keyDirection=Up;
+				switch(code)
+				{
+				case VKEY_UP:
+					keyDirection=Up;
+					break;
+				case VKEY_DOWN:
+					keyDirection=Down;
+					break;
+				case VKEY_LEFT:
+					keyDirection=Left;
+					break;
+				case VKEY_RIGHT:
+					keyDirection=Right;
+					break;
+				case VKEY_HOME:
+					keyDirection=Home;
+					break;
+				case VKEY_END:
+					keyDirection=End;
+					break;
+				case VKEY_PRIOR:
+					keyDirection=PageUp;
+					break;
+				case VKEY_NEXT:
+					keyDirection=PageDown;
+					break;
+				default:
+					return false;
+				}
+
+				if(GetCoordinateTransformer())
+				{
+					keyDirection=GetCoordinateTransformer()->RealKeyDirectionToVirtualKeyDirection(keyDirection);
+				}
+				int itemIndex=GetArranger()->FindItem(selectedItemIndexEnd, keyDirection);
+				return SelectItemsByClick(itemIndex, ctrl, shift);
 			}
 
 			void GuiSelectableListControl::ClearSelection()
@@ -594,6 +660,11 @@ DefaultItemCoordinateTransformer
 				Margin DefaultItemCoordinateTransformer::VirtualMarginToRealMargin(Margin margin)
 				{
 					return margin;
+				}
+
+				GuiListControl::KeyDirection DefaultItemCoordinateTransformer::RealKeyDirectionToVirtualKeyDirection(GuiListControl::KeyDirection key)
+				{
+					return key;
 				}
 
 /***********************************************************************
@@ -766,6 +837,132 @@ AxisAlignedItemCoordinateTransformer
 					return margin;
 				}
 
+				GuiListControl::KeyDirection AxisAlignedItemCoordinateTransformer::RealKeyDirectionToVirtualKeyDirection(GuiListControl::KeyDirection key)
+				{
+					bool pageKey=false;
+					switch(key)
+					{
+					case GuiListControl::PageUp:
+						pageKey=true;
+						key=GuiListControl::Up;
+						break;
+					case GuiListControl::PageDown:
+						pageKey=true;
+						key=GuiListControl::Down;
+						break;
+					case GuiListControl::PageLeft:
+						pageKey=true;
+						key=GuiListControl::Left;
+						break;
+					case GuiListControl::PageRight:
+						pageKey=true;
+						key=GuiListControl::Right;
+						break;
+					}
+
+					switch(key)
+					{
+					case GuiListControl::Up:
+						switch(alignment)
+						{
+						case LeftDown:	key=GuiListControl::Up;		break;
+						case RightDown:	key=GuiListControl::Up;		break;
+						case LeftUp:	key=GuiListControl::Down;	break;
+						case RightUp:	key=GuiListControl::Down;	break;
+						case DownLeft:	key=GuiListControl::Left;	break;
+						case DownRight:	key=GuiListControl::Left;	break;
+						case UpLeft:	key=GuiListControl::Right;	break;
+						case UpRight:	key=GuiListControl::Right;	break;
+						}
+						break;
+					case GuiListControl::Down:
+						switch(alignment)
+						{
+						case LeftDown:	key=GuiListControl::Down;	break;
+						case RightDown:	key=GuiListControl::Down;	break;
+						case LeftUp:	key=GuiListControl::Up;		break;
+						case RightUp:	key=GuiListControl::Up;		break;
+						case DownLeft:	key=GuiListControl::Right;	break;
+						case DownRight:	key=GuiListControl::Right;	break;
+						case UpLeft:	key=GuiListControl::Left;	break;
+						case UpRight:	key=GuiListControl::Left;	break;
+						}
+						break;
+					case GuiListControl::Left:
+						switch(alignment)
+						{
+						case LeftDown:	key=GuiListControl::Right;	break;
+						case RightDown:	key=GuiListControl::Left;	break;
+						case LeftUp:	key=GuiListControl::Right;	break;
+						case RightUp:	key=GuiListControl::Left;	break;
+						case DownLeft:	key=GuiListControl::Down;	break;
+						case DownRight:	key=GuiListControl::Up;		break;
+						case UpLeft:	key=GuiListControl::Down;	break;
+						case UpRight:	key=GuiListControl::Up;		break;
+						}
+						break;
+					case GuiListControl::Right:
+						switch(alignment)
+						{
+						case LeftDown:	key=GuiListControl::Left;	break;
+						case RightDown:	key=GuiListControl::Right;	break;
+						case LeftUp:	key=GuiListControl::Left;	break;
+						case RightUp:	key=GuiListControl::Right;	break;
+						case DownLeft:	key=GuiListControl::Up;		break;
+						case DownRight:	key=GuiListControl::Down;	break;
+						case UpLeft:	key=GuiListControl::Up;		break;
+						case UpRight:	key=GuiListControl::Down;	break;
+						}
+						break;
+					case GuiListControl::Home:
+						switch(alignment)
+						{
+						case LeftDown:	key=GuiListControl::Home;	break;
+						case RightDown:	key=GuiListControl::Home;	break;
+						case LeftUp:	key=GuiListControl::End;	break;
+						case RightUp:	key=GuiListControl::End;	break;
+						case DownLeft:	key=GuiListControl::Home;	break;
+						case DownRight:	key=GuiListControl::Home;	break;
+						case UpLeft:	key=GuiListControl::End;	break;
+						case UpRight:	key=GuiListControl::End;	break;
+						}
+						break;
+					case GuiListControl::End:
+						switch(alignment)
+						{
+						case LeftDown:	key=GuiListControl::End;	break;
+						case RightDown:	key=GuiListControl::End;	break;
+						case LeftUp:	key=GuiListControl::Home;	break;
+						case RightUp:	key=GuiListControl::Home;	break;
+						case DownLeft:	key=GuiListControl::End;	break;
+						case DownRight:	key=GuiListControl::End;	break;
+						case UpLeft:	key=GuiListControl::Home;	break;
+						case UpRight:	key=GuiListControl::Home;	break;
+						}
+						break;
+					}
+
+					if(pageKey)
+					{
+						switch(key)
+						{
+						case GuiListControl::Up:
+							key=GuiListControl::PageUp;
+							break;
+						case GuiListControl::Down:
+							key=GuiListControl::PageDown;
+							break;
+						case GuiListControl::Left:
+							key=GuiListControl::PageLeft;
+							break;
+						case GuiListControl::Right:
+							key=GuiListControl::PageRight;
+							break;
+						}
+					}
+					return key;
+				}
+
 /***********************************************************************
 RangedItemArrangerBase
 ***********************************************************************/
@@ -917,6 +1114,31 @@ RangedItemArrangerBase
 					if(callback)
 					{
 						OnViewChangedInternal(oldBounds, viewBounds);
+					}
+				}
+
+				int RangedItemArrangerBase::FindItem(int itemIndex, GuiListControl::KeyDirection key)
+				{
+					int count=itemProvider->Count();
+					switch(key)
+					{
+					case GuiListControl::Up:
+						itemIndex--;
+						break;
+					case GuiListControl::Down:
+						itemIndex++;
+						break;
+					default:
+						return -1;
+					}
+					
+					if(0<=itemIndex && itemIndex<count)
+					{
+						return itemIndex;
+					}
+					else
+					{
+						return -1;
 					}
 				}
 
@@ -1195,6 +1417,39 @@ FixedSizeMultiColumnItemArranger
 				{
 				}
 
+				int FixedSizeMultiColumnItemArranger::FindItem(int itemIndex, GuiListControl::KeyDirection key)
+				{
+					int count=itemProvider->Count();
+					int groupCount=viewBounds.Width()/itemSize.x;
+					if(groupCount==0) groupCount=1;
+					switch(key)
+					{
+					case GuiListControl::Up:
+						itemIndex-=groupCount;
+						break;
+					case GuiListControl::Down:
+						itemIndex+=groupCount;
+						break;
+					case GuiListControl::Left:
+						itemIndex--;
+						break;
+					case GuiListControl::Right:
+						itemIndex++;
+						break;
+					default:
+						return -1;
+					}
+					
+					if(0<=itemIndex && itemIndex<count)
+					{
+						return itemIndex;
+					}
+					else
+					{
+						return -1;
+					}
+				}
+
 /***********************************************************************
 FixedHeightMultiColumnItemArranger
 ***********************************************************************/
@@ -1356,6 +1611,39 @@ FixedHeightMultiColumnItemArranger
 
 				FixedHeightMultiColumnItemArranger::~FixedHeightMultiColumnItemArranger()
 				{
+				}
+
+				int FixedHeightMultiColumnItemArranger::FindItem(int itemIndex, GuiListControl::KeyDirection key)
+				{
+					int count=itemProvider->Count();
+					int groupCount=viewBounds.Height()/itemHeight;
+					if(groupCount==0) groupCount=1;
+					switch(key)
+					{
+					case GuiListControl::Up:
+						itemIndex--;
+						break;
+					case GuiListControl::Down:
+						itemIndex++;
+						break;
+					case GuiListControl::Left:
+						itemIndex-=groupCount;
+						break;
+					case GuiListControl::Right:
+						itemIndex+=groupCount;
+						break;
+					default:
+						return -1;
+					}
+					
+					if(0<=itemIndex && itemIndex<count)
+					{
+						return itemIndex;
+					}
+					else
+					{
+						return -1;
+					}
 				}
 
 /***********************************************************************
