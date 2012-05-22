@@ -89,27 +89,37 @@ private:
 	GuiButton*						buttonAdd;
 	GuiButton*						buttonRemove;
 
+	static list::TextItem GetTextItem(GuiTextList* list, int index)
+	{
+		return list->GetItems()[index];
+	}
+
+	static int CompareTextItem(list::TextItem a, list::TextItem b)
+	{
+		return _wcsicmp(a.GetText().Buffer(), b.GetText().Buffer());
+	}
+
+	static int ReverseCompareInt(int a, int b)
+	{
+		return b-a;
+	}
+
 	void MoveNames(GuiTextList* from, GuiTextList* to)
 	{
 		CopyFrom(
 			to->GetItems(),
 			to->GetItems()
-				>>Concat<list::TextItem>(
-					from->GetSelectedItems()
-						>>Select<int, list::TextItem>([from](int index){return from->GetItems()[index];})
+				>>Concat(
+					from->GetSelectedItems()>>Select(Curry(GetTextItem)(from))
 					)
-				>>OrderBy<list::TextItem>(
-					[](list::TextItem a, list::TextItem b){return _wcsicmp(a.GetText().Buffer(), b.GetText().Buffer());}
-					)
+				>>OrderBy(CompareTextItem)
 			);
 
 		List<int> selectedItems;
 		CopyFrom(
 			selectedItems.Wrap(),
 			from->GetSelectedItems()
-				>>OrderBy<int>(
-					[](int a, int b){return b-a;}
-					)
+				>>OrderBy(ReverseCompareInt)
 			);
 		FOREACH(int, index, selectedItems.Wrap())
 		{
