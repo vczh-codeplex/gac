@@ -16660,7 +16660,6 @@ Predefined ItemArranger
 					GuiListControl::IItemStyleController*		GetVisibleStyle(int itemIndex)override;
 					int											GetVisibleIndex(GuiListControl::IItemStyleController* style)override;
 					void										OnViewChanged(Rect bounds)override;
-					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
 				};
 				
 				class FixedHeightItemArranger : public RangedItemArrangerBase, public Description<FixedHeightItemArranger>
@@ -16678,6 +16677,8 @@ Predefined ItemArranger
 				public:
 					FixedHeightItemArranger();
 					~FixedHeightItemArranger();
+
+					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
 				};
 
 				class FixedSizeMultiColumnItemArranger : public RangedItemArrangerBase, public Description<FixedSizeMultiColumnItemArranger>

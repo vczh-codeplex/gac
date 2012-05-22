@@ -583,7 +583,6 @@ Predefined ItemArranger
 					GuiListControl::IItemStyleController*		GetVisibleStyle(int itemIndex)override;
 					int											GetVisibleIndex(GuiListControl::IItemStyleController* style)override;
 					void										OnViewChanged(Rect bounds)override;
-					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
 				};
 				
 				/// <summary>Fixed height item arranger. This arranger lists all item with the same height value. This value is the maximum height of all minimum heights of displayed items.</summary>
@@ -603,6 +602,8 @@ Predefined ItemArranger
 					/// <summary>Create the arranger.</summary>
 					FixedHeightItemArranger();
 					~FixedHeightItemArranger();
+
+					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
 				};
 
 				/// <summary>Fixed size multiple columns item arranger. This arranger adjust all items in multiple lines with the same size. The width is the maximum width of all minimum widths of displayed items. The same to height.</summary>

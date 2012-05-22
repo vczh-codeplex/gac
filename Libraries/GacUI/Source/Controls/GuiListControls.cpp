@@ -1117,31 +1117,6 @@ RangedItemArrangerBase
 					}
 				}
 
-				int RangedItemArrangerBase::FindItem(int itemIndex, GuiListControl::KeyDirection key)
-				{
-					int count=itemProvider->Count();
-					switch(key)
-					{
-					case GuiListControl::Up:
-						itemIndex--;
-						break;
-					case GuiListControl::Down:
-						itemIndex++;
-						break;
-					default:
-						return -1;
-					}
-					
-					if(0<=itemIndex && itemIndex<count)
-					{
-						return itemIndex;
-					}
-					else
-					{
-						return -1;
-					}
-				}
-
 /***********************************************************************
 FixedHeightItemArranger
 ***********************************************************************/
@@ -1266,6 +1241,41 @@ FixedHeightItemArranger
 
 				FixedHeightItemArranger::~FixedHeightItemArranger()
 				{
+				}
+
+				int FixedHeightItemArranger::FindItem(int itemIndex, GuiListControl::KeyDirection key)
+				{
+					int count=itemProvider->Count();
+					if(count==0) return -1;
+					int groupCount=viewBounds.Height()/rowHeight;
+					if(groupCount==0) groupCount=1;
+					switch(key)
+					{
+					case GuiListControl::Up:
+						itemIndex--;
+						break;
+					case GuiListControl::Down:
+						itemIndex++;
+						break;
+					case GuiListControl::Home:
+						itemIndex=0;
+						break;
+					case GuiListControl::End:
+						itemIndex=count;
+						break;
+					case GuiListControl::PageUp:
+						itemIndex-=groupCount;
+						break;
+					case GuiListControl::PageDown:
+						itemIndex+=groupCount;
+						break;
+					default:
+						return -1;
+					}
+					
+					if(itemIndex<0) return 0;
+					else if(itemIndex>=count) return count-1;
+					else return itemIndex;
 				}
 
 /***********************************************************************
@@ -1420,15 +1430,18 @@ FixedSizeMultiColumnItemArranger
 				int FixedSizeMultiColumnItemArranger::FindItem(int itemIndex, GuiListControl::KeyDirection key)
 				{
 					int count=itemProvider->Count();
-					int groupCount=viewBounds.Width()/itemSize.x;
-					if(groupCount==0) groupCount=1;
+					int columnCount=viewBounds.Width()/itemSize.x;
+					if(columnCount==0) columnCount=1;
+					int rowCount=viewBounds.Height()/itemSize.y;
+					if(rowCount==0) rowCount=1;
+
 					switch(key)
 					{
 					case GuiListControl::Up:
-						itemIndex-=groupCount;
+						itemIndex-=columnCount;
 						break;
 					case GuiListControl::Down:
-						itemIndex+=groupCount;
+						itemIndex+=columnCount;
 						break;
 					case GuiListControl::Left:
 						itemIndex--;
@@ -1436,18 +1449,31 @@ FixedSizeMultiColumnItemArranger
 					case GuiListControl::Right:
 						itemIndex++;
 						break;
+					case GuiListControl::Home:
+						itemIndex=0;
+						break;
+					case GuiListControl::End:
+						itemIndex=count;
+						break;
+					case GuiListControl::PageUp:
+						itemIndex-=columnCount*rowCount;
+						break;
+					case GuiListControl::PageDown:
+						itemIndex+=columnCount*rowCount;
+						break;
+					case GuiListControl::PageLeft:
+						itemIndex-=itemIndex%columnCount;
+						break;
+					case GuiListControl::PageRight:
+						itemIndex+=columnCount-itemIndex%columnCount-1;
+						break;
 					default:
 						return -1;
 					}
 					
-					if(0<=itemIndex && itemIndex<count)
-					{
-						return itemIndex;
-					}
-					else
-					{
-						return -1;
-					}
+					if(itemIndex<0) return 0;
+					else if(itemIndex>=count) return count-1;
+					else return itemIndex;
 				}
 
 /***********************************************************************
@@ -1632,18 +1658,25 @@ FixedHeightMultiColumnItemArranger
 					case GuiListControl::Right:
 						itemIndex+=groupCount;
 						break;
+					case GuiListControl::Home:
+						itemIndex=0;
+						break;
+					case GuiListControl::End:
+						itemIndex=count;
+						break;
+					case GuiListControl::PageUp:
+						itemIndex-=itemIndex%groupCount;
+						break;
+					case GuiListControl::PageDown:
+						itemIndex+=groupCount-itemIndex%groupCount-1;
+						break;
 					default:
 						return -1;
 					}
 					
-					if(0<=itemIndex && itemIndex<count)
-					{
-						return itemIndex;
-					}
-					else
-					{
-						return -1;
-					}
+					if(itemIndex<0) return 0;
+					else if(itemIndex>=count) return count-1;
+					else return itemIndex;
 				}
 
 /***********************************************************************
