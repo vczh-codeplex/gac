@@ -89,12 +89,52 @@ private:
 	GuiButton*						buttonAdd;
 	GuiButton*						buttonRemove;
 
+	void MoveNames(GuiTextList* from, GuiTextList* to)
+	{
+		CopyFrom(
+			to->GetItems(),
+			to->GetItems()
+				>>Concat<list::TextItem>(
+					from->GetSelectedItems()
+						>>Select<int, list::TextItem>([from](int index){return from->GetItems()[index];})
+					)
+				>>OrderBy<list::TextItem>(
+					[](list::TextItem a, list::TextItem b){return _wcsicmp(a.GetText().Buffer(), b.GetText().Buffer());}
+					)
+			);
+
+		List<int> selectedItems;
+		CopyFrom(
+			selectedItems.Wrap(),
+			from->GetSelectedItems()
+				>>OrderBy<int>(
+					[](int a, int b){return b-a;}
+					)
+			);
+		FOREACH(int, index, selectedItems.Wrap())
+		{
+			from->GetItems().RemoveAt(index);
+		}
+	}
+
 	void buttonAdd_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		MoveNames(listSource, listDestination);
 	}
 
 	void buttonRemove_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		MoveNames(listDestination, listSource);
+	}
+
+	void listSource_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		buttonAdd->SetEnabled(listSource->GetSelectedItems().Count()>0);
+	}
+
+	void listDestination_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		buttonRemove->SetEnabled(listDestination->GetSelectedItems().Count()>0);
 	}
 public:
 	NameSelectorWindow()
@@ -128,6 +168,7 @@ public:
 			listSource->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			// make listSource's horizontal scroll bar disappeared when it is not needed.
 			listSource->SetHorizontalAlwaysVisible(false);
+			listSource->SelectionChanged.AttachMethod(this, &NameSelectorWindow::listSource_SelectionChanged);
 			cell->AddChild(listSource->GetBoundsComposition());
 		}
 		{
@@ -139,6 +180,7 @@ public:
 			listDestination->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			// make listSource's horizontal scroll bar disappeared when it is not needed.
 			listDestination->SetHorizontalAlwaysVisible(false);
+			listDestination->SelectionChanged.AttachMethod(this, &NameSelectorWindow::listDestination_SelectionChanged);
 			cell->AddChild(listDestination->GetBoundsComposition());
 		}
 		{
@@ -151,6 +193,7 @@ public:
 			buttonAdd->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			buttonAdd->GetBoundsComposition()->SetPreferredMinSize(Size(32, 32));
 			buttonAdd->Clicked.AttachMethod(this, &NameSelectorWindow::buttonAdd_Clicked);
+			buttonAdd->SetEnabled(false);
 			cell->AddChild(buttonAdd->GetBoundsComposition());
 		}
 		{
@@ -162,7 +205,8 @@ public:
 			buttonRemove->SetText(L"<<");
 			buttonRemove->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			buttonRemove->GetBoundsComposition()->SetPreferredMinSize(Size(32, 32));
-			buttonAdd->Clicked.AttachMethod(this, &NameSelectorWindow::buttonRemove_Clicked);
+			buttonRemove->Clicked.AttachMethod(this, &NameSelectorWindow::buttonRemove_Clicked);
+			buttonRemove->SetEnabled(false);
 			cell->AddChild(buttonRemove->GetBoundsComposition());
 		}
 
