@@ -557,20 +557,54 @@ TEST_CASE(TestAggregateOperation)
 
 TEST_CASE(TestConcatOperation)
 {
-	List<vint> first;
-	List<vint> second;
-	List<vint> result;
-	for(vint i=0;i<5;i++)
 	{
-		first.Add(i);
+		List<vint> first;
+		List<vint> second;
+		List<vint> result;
+		for(vint i=0;i<5;i++)
+		{
+			first.Add(i);
+		}
+		for(vint i=5;i<10;i++)
+		{
+			second.Add(i);
+		}
+		CopyFrom(result.Wrap(), first.Wrap()>>Concat(second.Wrap()));
+		CHECK_LIST_ITEMS(result.Wrap(), {0 _ 1 _ 2 _ 3 _ 4 _ 5 _ 6 _ 7 _ 8 _ 9});
+		CompareEnumerable(result.Wrap(), first.Wrap()>>Concat(second.Wrap()));
 	}
-	for(vint i=5;i<10;i++)
 	{
-		second.Add(i);
+		List<vint> first;
+		List<vint> second;
+		List<vint> result;
+		for(vint i=5;i<10;i++)
+		{
+			second.Add(i);
+		}
+		CopyFrom(result.Wrap(), first.Wrap()>>Concat(second.Wrap()));
+		CHECK_LIST_ITEMS(result.Wrap(), {5 _ 6 _ 7 _ 8 _ 9});
+		CompareEnumerable(result.Wrap(), first.Wrap()>>Concat(second.Wrap()));
 	}
-	CopyFrom(result.Wrap(), first.Wrap()>>Concat(second.Wrap()));
-	CHECK_LIST_ITEMS(result.Wrap(), {0 _ 1 _ 2 _ 3 _ 4 _ 5 _ 6 _ 7 _ 8 _ 9});
-	CompareEnumerable(result.Wrap(), first.Wrap()>>Concat(second.Wrap()));
+	{
+		List<vint> first;
+		List<vint> second;
+		List<vint> result;
+		for(vint i=0;i<5;i++)
+		{
+			first.Add(i);
+		}
+		CopyFrom(result.Wrap(), first.Wrap()>>Concat(second.Wrap()));
+		CHECK_LIST_ITEMS(result.Wrap(), {0 _ 1 _ 2 _ 3 _ 4});
+		CompareEnumerable(result.Wrap(), first.Wrap()>>Concat(second.Wrap()));
+	}
+	{
+		List<vint> first;
+		List<vint> second;
+		List<vint> result;
+		CopyFrom(result.Wrap(), first.Wrap()>>Concat(second.Wrap()));
+		TEST_ASSERT(result.Count()==0);
+		CompareEnumerable(result.Wrap(), first.Wrap()>>Concat(second.Wrap()));
+	}
 }
 
 TEST_CASE(TestSequenceOperation)
