@@ -178,6 +178,7 @@ public:
 			listSource->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			// make listSource's horizontal scroll bar disappeared when it is not needed.
 			listSource->SetHorizontalAlwaysVisible(false);
+			listSource->SetMultiSelect(true);
 			listSource->SelectionChanged.AttachMethod(this, &NameSelectorWindow::listSource_SelectionChanged);
 			cell->AddChild(listSource->GetBoundsComposition());
 		}
@@ -190,6 +191,7 @@ public:
 			listDestination->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			// make listSource's horizontal scroll bar disappeared when it is not needed.
 			listDestination->SetHorizontalAlwaysVisible(false);
+			listDestination->SetMultiSelect(true);
 			listDestination->SelectionChanged.AttachMethod(this, &NameSelectorWindow::listDestination_SelectionChanged);
 			cell->AddChild(listDestination->GetBoundsComposition());
 		}
