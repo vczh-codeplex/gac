@@ -3689,6 +3689,7 @@ List Control
 					virtual int									GetVisibleIndex(IItemStyleController* style)=0;
 					virtual void								OnViewChanged(Rect bounds)=0;
 					virtual int									FindItem(int itemIndex, KeyDirection key)=0;
+					virtual bool								EnsureItemVisible(int itemIndex)=0;
 				};
 				
 				class IItemCoordinateTransformer : public virtual IDescriptable, public Description<IItemCoordinateTransformer>
@@ -3766,6 +3767,7 @@ List Control
 				virtual Ptr<IItemArranger>						SetArranger(Ptr<IItemArranger> value);
 				virtual IItemCoordinateTransformer*				GetCoordinateTransformer();
 				virtual Ptr<IItemCoordinateTransformer>			SetCoordinateTransformer(Ptr<IItemCoordinateTransformer> value);
+				virtual bool									EnsureItemVisible(int itemIndex);
 			};
 
 /***********************************************************************
@@ -3948,6 +3950,7 @@ Predefined ItemArranger
 					~FixedHeightItemArranger();
 
 					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
+					bool										EnsureItemVisible(int itemIndex)override;
 				};
 
 				class FixedSizeMultiColumnItemArranger : public RangedItemArrangerBase, public Description<FixedSizeMultiColumnItemArranger>
@@ -3966,6 +3969,7 @@ Predefined ItemArranger
 					~FixedSizeMultiColumnItemArranger();
 
 					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
+					bool										EnsureItemVisible(int itemIndex)override;
 				};
 				
 				class FixedHeightMultiColumnItemArranger : public RangedItemArrangerBase, public Description<FixedHeightMultiColumnItemArranger>
@@ -3984,6 +3988,7 @@ Predefined ItemArranger
 					~FixedHeightMultiColumnItemArranger();
 
 					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
+					bool										EnsureItemVisible(int itemIndex)override;
 				};
 			}
 
