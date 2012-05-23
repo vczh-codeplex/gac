@@ -25,9 +25,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Controls.TextBox.Colorizer"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Controls.ListBox.NameSelector", "Controls.ListBox.NameSelector\Controls.ListBox.NameSelector.vcxproj", "{5B44540E-78B6-4355-AC15-4DE8B88F3781}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Controls.ListBox.VirtualMode", "Controls.ListBox.VirtualMode\Controls.ListBox.VirtualMode.vcxproj", "{0BFBD83F-961F-4A6E-A6D7-3B771B298D2E}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 9
+		SccNumberOfProjects = 10
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
@@ -62,6 +64,10 @@ Global
 		SccProjectTopLevelParentUniqueName8 = GacUIDemo.sln
 		SccProjectName8 = Controls.ListBox.NameSelector
 		SccLocalPath8 = Controls.ListBox.NameSelector
+		SccProjectUniqueName9 = Controls.ListBox.VirtualMode\\Controls.ListBox.VirtualMode.vcxproj
+		SccProjectTopLevelParentUniqueName9 = GacUIDemo.sln
+		SccProjectName9 = Controls.ListBox.VirtualMode
+		SccLocalPath9 = Controls.ListBox.VirtualMode
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -100,6 +106,10 @@ Global
 		{5B44540E-78B6-4355-AC15-4DE8B88F3781}.Debug|Win32.Build.0 = Debug|Win32
 		{5B44540E-78B6-4355-AC15-4DE8B88F3781}.Release|Win32.ActiveCfg = Release|Win32
 		{5B44540E-78B6-4355-AC15-4DE8B88F3781}.Release|Win32.Build.0 = Release|Win32
+		{0BFBD83F-961F-4A6E-A6D7-3B771B298D2E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0BFBD83F-961F-4A6E-A6D7-3B771B298D2E}.Debug|Win32.Build.0 = Debug|Win32
+		{0BFBD83F-961F-4A6E-A6D7-3B771B298D2E}.Release|Win32.ActiveCfg = Release|Win32
+		{0BFBD83F-961F-4A6E-A6D7-3B771B298D2E}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -112,5 +122,6 @@ Global
 		{12099554-E6D6-4F21-AB43-FEE67E3795A8} = {4A1755E9-DB6D-4CD2-83FB-D8F2A18E0268}
 		{A20933BA-12B8-4AA5-BDFC-B5CF2579E70E} = {4A1755E9-DB6D-4CD2-83FB-D8F2A18E0268}
 		{5B44540E-78B6-4355-AC15-4DE8B88F3781} = {4A1755E9-DB6D-4CD2-83FB-D8F2A18E0268}
+		{0BFBD83F-961F-4A6E-A6D7-3B771B298D2E} = {4A1755E9-DB6D-4CD2-83FB-D8F2A18E0268}
 	EndGlobalSection
 EndGlobal
