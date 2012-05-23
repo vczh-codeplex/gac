@@ -16339,6 +16339,7 @@ List Control
 					virtual void									SetViewLocation(Point value)=0;
 					virtual Size									GetStylePreferredSize(IItemStyleController* style)=0;
 					virtual void									SetStyleAlignmentToParent(IItemStyleController* style, Margin margin)=0;
+					virtual Rect									GetStyleBounds(IItemStyleController* style)=0;
 					virtual void									SetStyleBounds(IItemStyleController* style, Rect bounds)=0;
 					virtual compositions::GuiGraphicsComposition*	GetContainerComposition()=0;
 					virtual void									OnTotalSizeChanged()=0;
@@ -16458,9 +16459,10 @@ List Control
 					IItemStyleController*						RequestItem(int itemIndex)override;
 					void										ReleaseItem(IItemStyleController* style)override;
 					void										SetViewLocation(Point value)override;
-					Size										GetStylePreferredSize(IItemStyleController* style);
-					void										SetStyleAlignmentToParent(IItemStyleController* style, Margin margin);
-					void										SetStyleBounds(IItemStyleController* style, Rect bounds);
+					Size										GetStylePreferredSize(IItemStyleController* style)override;
+					void										SetStyleAlignmentToParent(IItemStyleController* style, Margin margin)override;
+					Rect										GetStyleBounds(IItemStyleController* style)override;
+					void										SetStyleBounds(IItemStyleController* style, Rect bounds)override;
 					compositions::GuiGraphicsComposition*		GetContainerComposition()override;
 					void										OnTotalSizeChanged()override;
 				};
