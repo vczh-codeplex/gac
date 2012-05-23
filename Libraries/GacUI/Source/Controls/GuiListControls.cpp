@@ -1807,59 +1807,37 @@ FixedHeightMultiColumnItemArranger
 							int rowCount=viewBounds.Height()/itemHeight;
 							if(rowCount==0) rowCount=1;
 							int columnIndex=itemIndex/rowCount;
-
 							int minIndex=startIndex;
 							int maxIndex=startIndex+visibleStyles.Count()-1;
+
+							Point location=viewBounds.LeftTop();
 							if(minIndex<=itemIndex && itemIndex<=maxIndex)
 							{
-								GuiListControl::IItemStyleController* style=visibleStyles[itemIndex-startIndex];
-								int styleWidth=callback->GetStyleBounds(style).Width();
-								if(viewBounds.Width()<styleWidth)
+								Rect bounds=callback->GetStyleBounds(visibleStyles[itemIndex-startIndex]);
+								if(0<bounds.Bottom() && bounds.Top()<viewBounds.Width() && bounds.Width()>viewBounds.Width())
+								{
+									break;
+								}
+								else if(bounds.Left()<0)
+								{
+									location.x-=viewBounds.Width();
+								}
+								else if(bounds.Right()>viewBounds.Width())
+								{
+									location.x+=viewBounds.Width();
+								}
+								else
 								{
 									break;
 								}
 							}
-
-							int minColumn=minIndex/rowCount;
-							int maxColumn=maxIndex/rowCount;
-							int maxColumnWidth=0;
-							int left=0;
-							int right=0;
-
-							for(int i=0;i<visibleStyles.Count();i++)
+							else if(columnIndex<minIndex/rowCount)
 							{
-								int styleWidth=callback->GetStyleBounds(visibleStyles[i]).Width();
-								if(maxColumnWidth<styleWidth)
-								{
-									maxColumnWidth=styleWidth;
-								}
+								location.x-=viewBounds.Width();
 							}
-
-							if(itemIndex<minIndex)
+							else if(columnIndex>=maxIndex/rowCount)
 							{
-								left=callback->GetStyleBounds(visibleStyles[0]).Left()-(minColumn-columnIndex)*maxColumnWidth;
-								right=left+maxColumnWidth;
-							}
-							else if(itemIndex>maxIndex)
-							{
-								left=callback->GetStyleBounds(visibleStyles[visibleStyles.Count()-1]).Left()+(columnIndex-maxColumn)*maxColumnWidth;
-								right=left+maxColumnWidth;
-							}
-							else
-							{
-								Rect bounds=callback->GetStyleBounds(visibleStyles[itemIndex-startIndex]);
-								left=bounds.Left();
-								right=bounds.Right();
-							}
-
-							Point location=viewBounds.LeftTop();
-							if(left<viewBounds.Left())
-							{
-								location.x=left;
-							}
-							else if(viewBounds.Right()<right)
-							{
-								location.x=right-viewBounds.Width();
+								location.x+=viewBounds.Width();
 							}
 							else
 							{
