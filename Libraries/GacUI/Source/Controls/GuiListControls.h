@@ -70,6 +70,10 @@ List Control
 					/// <param name="style">The item control.</param>
 					/// <param name="margin">The new alignment.</param>
 					virtual void									SetStyleAlignmentToParent(IItemStyleController* style, Margin margin)=0;
+					/// <summary>Get the bounds of an item control.</summary>
+					/// <returns>The bounds of an item control.</returns>
+					/// <param name="style">The item control.</param>
+					virtual Rect									GetStyleBounds(IItemStyleController* style)=0;
 					/// <summary>Set the bounds of an item control.</summary>
 					/// <param name="style">The item control.</param>
 					/// <param name="margin">The new bounds.</param>
@@ -312,9 +316,10 @@ List Control
 					IItemStyleController*						RequestItem(int itemIndex)override;
 					void										ReleaseItem(IItemStyleController* style)override;
 					void										SetViewLocation(Point value)override;
-					Size										GetStylePreferredSize(IItemStyleController* style);
-					void										SetStyleAlignmentToParent(IItemStyleController* style, Margin margin);
-					void										SetStyleBounds(IItemStyleController* style, Rect bounds);
+					Size										GetStylePreferredSize(IItemStyleController* style)override;
+					void										SetStyleAlignmentToParent(IItemStyleController* style, Margin margin)override;
+					Rect										GetStyleBounds(IItemStyleController* style)override;
+					void										SetStyleBounds(IItemStyleController* style, Rect bounds)override;
 					compositions::GuiGraphicsComposition*		GetContainerComposition()override;
 					void										OnTotalSizeChanged()override;
 				};

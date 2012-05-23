@@ -5450,10 +5450,16 @@ GuiListControl::ItemCallback
 				style->GetBoundsComposition()->SetAlignmentToParent(newMargin);
 			}
 
+			Rect GuiListControl::ItemCallback::GetStyleBounds(IItemStyleController* style)
+			{
+				Rect bounds=style->GetBoundsComposition()->GetBounds();
+				return listControl->itemCoordinateTransformer->RealRectToVirtualRect(listControl->GetViewSize(), bounds);
+			}
+
 			void GuiListControl::ItemCallback::SetStyleBounds(IItemStyleController* style, Rect bounds)
 			{
-				Rect newRect=listControl->itemCoordinateTransformer->VirtualRectToRealRect(listControl->GetViewSize(), bounds);
-				return style->GetBoundsComposition()->SetBounds(newRect);
+				Rect newBounds=listControl->itemCoordinateTransformer->VirtualRectToRealRect(listControl->GetViewSize(), bounds);
+				return style->GetBoundsComposition()->SetBounds(newBounds);
 			}
 
 			compositions::GuiGraphicsComposition* GuiListControl::ItemCallback::GetContainerComposition()
@@ -5629,6 +5635,10 @@ GuiListControl
 
 			bool GuiListControl::EnsureItemVisible(int itemIndex)
 			{
+				if(itemIndex<0 || itemIndex>=itemProvider->Count())
+				{
+					return false;
+				}
 				return itemArranger?itemArranger->EnsureItemVisible(itemIndex):false;
 			}
 
@@ -6634,10 +6644,15 @@ FixedHeightItemArranger
 				{
 					if(callback)
 					{
+						if(itemIndex<0 || itemIndex>=itemProvider->Count())
+						{
+							return false;
+						}
 						while(true)
 						{
+							int yOffset=GetYOffset();
 							int top=itemIndex*rowHeight;
-							int bottom=top+rowHeight;
+							int bottom=top+rowHeight+yOffset;
 
 							if(viewBounds.Height()<rowHeight)
 							{
@@ -6869,6 +6884,10 @@ FixedSizeMultiColumnItemArranger
 				{
 					if(callback)
 					{
+						if(itemIndex<0 || itemIndex>=itemProvider->Count())
+						{
+							return false;
+						}
 						while(true)
 						{
 							int rowHeight=itemSize.y;
@@ -7112,6 +7131,79 @@ FixedHeightMultiColumnItemArranger
 
 				bool FixedHeightMultiColumnItemArranger::EnsureItemVisible(int itemIndex)
 				{
+					if(callback)
+					{
+						if(itemIndex<0 || itemIndex>=itemProvider->Count())
+						{
+							return false;
+						}
+						while(true)
+						{
+							int rowCount=viewBounds.Height()/itemHeight;
+							if(rowCount==0) rowCount=1;
+							int columnIndex=itemIndex/rowCount;
+
+							int minIndex=startIndex;
+							int maxIndex=startIndex+visibleStyles.Count()-1;
+							if(minIndex<=itemIndex && itemIndex<=maxIndex)
+							{
+								GuiListControl::IItemStyleController* style=visibleStyles[itemIndex-startIndex];
+								int styleWidth=callback->GetStyleBounds(style).Width();
+								if(viewBounds.Width()<styleWidth)
+								{
+									break;
+								}
+							}
+
+							int minColumn=minIndex/rowCount;
+							int maxColumn=maxIndex/rowCount;
+							int maxColumnWidth=0;
+							int left=0;
+							int right=0;
+
+							for(int i=0;i<visibleStyles.Count();i++)
+							{
+								int styleWidth=callback->GetStyleBounds(visibleStyles[i]).Width();
+								if(maxColumnWidth<styleWidth)
+								{
+									maxColumnWidth=styleWidth;
+								}
+							}
+
+							if(itemIndex<minIndex)
+							{
+								left=callback->GetStyleBounds(visibleStyles[0]).Left()-(minColumn-columnIndex)*maxColumnWidth;
+								right=left+maxColumnWidth;
+							}
+							else if(itemIndex>maxIndex)
+							{
+								left=callback->GetStyleBounds(visibleStyles[visibleStyles.Count()-1]).Left()+(columnIndex-maxColumn)*maxColumnWidth;
+								right=left+maxColumnWidth;
+							}
+							else
+							{
+								Rect bounds=callback->GetStyleBounds(visibleStyles[itemIndex-startIndex]);
+								left=bounds.Left();
+								right=bounds.Right();
+							}
+
+							Point location=viewBounds.LeftTop();
+							if(left<viewBounds.Left())
+							{
+								location.x=left;
+							}
+							else if(viewBounds.Right()<right)
+							{
+								location.x=right-viewBounds.Width();
+							}
+							else
+							{
+								break;
+							}
+							callback->SetViewLocation(location);
+						}
+						return true;
+					}
 					return false;
 				}
 
