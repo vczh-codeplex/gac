@@ -239,6 +239,10 @@ List Control
 					/// <param name="itemIndex">The base item index.</param>
 					/// <param name="key">The key direction.</param>
 					virtual int									FindItem(int itemIndex, KeyDirection key)=0;
+					/// <summary>Adjust the view location to make an item visible.</summary>
+					/// <returns>Returns true if this operation succeeded.</returns>
+					/// <param name="itemIndex">The item index of the item to be made visible.</param>
+					virtual bool								EnsureItemVisible(int itemIndex)=0;
 				};
 				
 				/// <summary>Item coordinate transformer for a <see cref="GuiListControl"/>. In all functions in this interface, real coordinate is in the list control's container space, virtual coordinate is in a space that the transformer created.</summary>
@@ -372,6 +376,10 @@ List Control
 				/// <returns>The old item coordinate transformer</returns>
 				/// <param name="value">The new item coordinate transformer</param>
 				virtual Ptr<IItemCoordinateTransformer>			SetCoordinateTransformer(Ptr<IItemCoordinateTransformer> value);
+				/// <summary>Adjust the view location to make an item visible.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="itemIndex">The item index of the item to be made visible.</param>
+				virtual bool									EnsureItemVisible(int itemIndex);
 			};
 
 /***********************************************************************
@@ -604,6 +612,7 @@ Predefined ItemArranger
 					~FixedHeightItemArranger();
 
 					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
+					bool										EnsureItemVisible(int itemIndex)override;
 				};
 
 				/// <summary>Fixed size multiple columns item arranger. This arranger adjust all items in multiple lines with the same size. The width is the maximum width of all minimum widths of displayed items. The same to height.</summary>
@@ -624,6 +633,7 @@ Predefined ItemArranger
 					~FixedSizeMultiColumnItemArranger();
 
 					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
+					bool										EnsureItemVisible(int itemIndex)override;
 				};
 				
 				/// <summary>Fixed size multiple columns item arranger. This arranger adjust all items in multiple columns with the same height. The height is the maximum width of all minimum height of displayed items. Each item will displayed using its minimum width.</summary>
@@ -644,6 +654,7 @@ Predefined ItemArranger
 					~FixedHeightMultiColumnItemArranger();
 
 					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
+					bool										EnsureItemVisible(int itemIndex)override;
 				};
 			}
 

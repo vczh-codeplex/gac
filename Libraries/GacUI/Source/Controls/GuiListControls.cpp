@@ -292,6 +292,11 @@ GuiListControl
 				return old;
 			}
 
+			bool GuiListControl::EnsureItemVisible(int itemIndex)
+			{
+				return itemArranger?itemArranger->EnsureItemVisible(itemIndex):false;
+			}
+
 /***********************************************************************
 GuiSelectableListControl::StyleEvents
 ***********************************************************************/
@@ -511,6 +516,11 @@ GuiSelectableListControl
 				NormalizeSelectedItemIndexStartEnd();
 				if(0<=itemIndex && itemIndex<itemProvider->Count())
 				{
+					if(!multiSelect)
+					{
+						shift=false;
+						ctrl=false;
+					}
 					if(shift)
 					{
 						if(!ctrl)
@@ -594,7 +604,14 @@ GuiSelectableListControl
 					keyDirection=GetCoordinateTransformer()->RealKeyDirectionToVirtualKeyDirection(keyDirection);
 				}
 				int itemIndex=GetArranger()->FindItem(selectedItemIndexEnd, keyDirection);
-				return SelectItemsByClick(itemIndex, ctrl, shift);
+				if(SelectItemsByClick(itemIndex, ctrl, shift))
+				{
+					return EnsureItemVisible(itemIndex);
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 			void GuiSelectableListControl::ClearSelection()
@@ -1278,6 +1295,43 @@ FixedHeightItemArranger
 					else return itemIndex;
 				}
 
+				bool FixedHeightItemArranger::EnsureItemVisible(int itemIndex)
+				{
+					if(callback)
+					{
+						while(true)
+						{
+							int top=itemIndex*rowHeight;
+							int bottom=top+rowHeight;
+
+							if(viewBounds.Height()<rowHeight)
+							{
+								if(viewBounds.Top()<bottom && top<viewBounds.Bottom())
+								{
+									break;
+								}
+							}
+
+							Point location=viewBounds.LeftTop();
+							if(top<viewBounds.Top())
+							{
+								location.y=top;
+							}
+							else if(viewBounds.Bottom()<bottom)
+							{
+								location.y=bottom-viewBounds.Height();
+							}
+							else
+							{
+								break;
+							}
+							callback->SetViewLocation(location);
+						}
+						return true;
+					}
+					return false;
+				}
+
 /***********************************************************************
 FixedSizeMultiColumnItemArranger
 ***********************************************************************/
@@ -1474,6 +1528,48 @@ FixedSizeMultiColumnItemArranger
 					if(itemIndex<0) return 0;
 					else if(itemIndex>=count) return count-1;
 					else return itemIndex;
+				}
+
+				bool FixedSizeMultiColumnItemArranger::EnsureItemVisible(int itemIndex)
+				{
+					if(callback)
+					{
+						while(true)
+						{
+							int rowHeight=itemSize.y;
+							int columnCount=viewBounds.Width()/itemSize.x;
+							if(columnCount==0) columnCount=1;
+							int rowIndex=itemIndex/columnCount;
+
+							int top=rowIndex*rowHeight;
+							int bottom=top+rowHeight;
+
+							if(viewBounds.Height()<rowHeight)
+							{
+								if(viewBounds.Top()<bottom && top<viewBounds.Bottom())
+								{
+									break;
+								}
+							}
+
+							Point location=viewBounds.LeftTop();
+							if(top<viewBounds.Top())
+							{
+								location.y=top;
+							}
+							else if(viewBounds.Bottom()<bottom)
+							{
+								location.y=bottom-viewBounds.Height();
+							}
+							else
+							{
+								break;
+							}
+							callback->SetViewLocation(location);
+						}
+						return true;
+					}
+					return false;
 				}
 
 /***********************************************************************
@@ -1677,6 +1773,11 @@ FixedHeightMultiColumnItemArranger
 					if(itemIndex<0) return 0;
 					else if(itemIndex>=count) return count-1;
 					else return itemIndex;
+				}
+
+				bool FixedHeightMultiColumnItemArranger::EnsureItemVisible(int itemIndex)
+				{
+					return false;
 				}
 
 /***********************************************************************
