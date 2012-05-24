@@ -106,37 +106,35 @@
                             The following code shows how to write a hello world using GacUI.
                         </p>
                         <h2>Hello, world!</h2>
-                        <p class="CppCode">
-                            <nobr>#include "..\..\Public\Source\GacUIIncludes.h"</nobr><br />
-                            <nobr>#include &lt;Windows.h&gt;</nobr><br />
-                            <nobr></nobr><br />
-                            <nobr>int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)</nobr><br />
-                            <nobr>{</nobr><br />
-	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;return SetupWindowsDirect2DRenderer();</nobr><br />
-                            <nobr>}</nobr><br />
-                            <nobr></nobr><br />
-                            <nobr>void GuiMain()</nobr><br />
-                            <nobr>{</nobr><br />
-	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;GuiWindow* window=g::NewWindow();</nobr><br />
-	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;window->SetText(L"Hello, world!");</nobr><br />
-	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;window->SetClientSize(Size(640, 480));</nobr><br />
-	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;window->MoveToScreenCenter();</nobr><br />
-	                        <nobr></nobr><br />
-	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;GuiControl* label=g::NewLabel();</nobr><br />
-	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;label->SetText(L"Welcome to GacUI Library!");</nobr><br />
-	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;{</nobr><br />
-		                    <nobr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FontProperties font;</nobr><br />
-		                    <nobr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font.fontFamily=L"Segoe UI";</nobr><br />
-		                    <nobr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font.size=40;</nobr><br />
-		                    <nobr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font.antialias=true;</nobr><br />
-		                    <nobr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label->SetFont(font);</nobr><br />
-	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;}</nobr><br />
-	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;window->AddChild(label);</nobr><br />
-                            <nobr></nobr><br />
-	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;GetApplication()->Run(window);</nobr><br />
-	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;delete window;</nobr><br />
-                            <nobr>}</nobr><br />
-                        </p>
+                        <pre class="CppCode">
+#include "..\..\Public\Source\GacUIIncludes.h"
+#include &lt;Windows.h&gt;
+
+int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
+{
+    return SetupWindowsDirect2DRenderer();
+}
+
+void GuiMain()
+{
+    GuiWindow* window=g::NewWindow();
+    window->SetText(L"Hello, world!");
+    window->SetClientSize(Size(640, 480));
+    window->MoveToScreenCenter();
+    GuiControl* label=g::NewLabel();
+    label->SetText(L"Welcome to GacUI Library!");
+    {
+        FontProperties font;
+        font.fontFamily=L"Segoe UI";
+        font.size=40;
+        font.antialias=true;
+        label->SetFont(font);
+    }
+    window->AddChild(label);
+    GetApplication()->Run(window);
+    delete window;
+}
+                        </pre>
                         <h1 id="Build">Build and run!</h1>
                         <p>
                             Build the program and run!<br /><br />
