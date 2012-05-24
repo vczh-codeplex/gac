@@ -147,10 +147,12 @@ GuiListControl
 
 			void GuiListControl::OnStyleInstalled(int itemIndex, IItemStyleController* style)
 			{
+				AttachItemEvents(itemIndex, style);
 			}
 
 			void GuiListControl::OnStyleUninstalled(IItemStyleController* style)
 			{
+				DetachItemEvents(style);
 			}
 
 			void GuiListControl::OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)
@@ -221,6 +223,93 @@ GuiListControl
 				CalculateView();
 			}
 
+			void GuiListControl::OnItemMouseEvent(compositions::GuiItemMouseEvent& itemEvent, int itemIndex, compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			{
+				GuiItemMouseEventArgs redirectArguments;
+				(GuiMouseEventArgs&)redirectArguments=arguments;
+				redirectArguments.itemIndex=itemIndex;
+				itemEvent.Execute(redirectArguments);
+				arguments=redirectArguments;
+			}
+
+			void GuiListControl::OnItemNotifyEvent(compositions::GuiItemNotifyEvent& itemEvent, int itemIndex, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				GuiItemEventArgs redirectArguments;
+				(GuiEventArgs&)redirectArguments=arguments;
+				redirectArguments.itemIndex=itemIndex;
+				itemEvent.Execute(redirectArguments);
+				arguments=redirectArguments;
+			}
+
+#define ATTACH_ITEM_MOUSE_EVENT(EVENTNAME, ITEMEVENTNAME)\
+					{\
+						Func<void(GuiItemMouseEvent&, int, GuiGraphicsComposition*, GuiMouseEventArgs&)> func(this, &GuiListControl::OnItemMouseEvent);\
+						helper->EVENTNAME##Handler=style->GetBoundsComposition()->GetEventReceiver()->EVENTNAME.AttachFunction(\
+							Curry(Curry(func)(ITEMEVENTNAME))(itemIndex)\
+							);\
+					}\
+
+#define ATTACH_ITEM_NOTIFY_EVENT(EVENTNAME, ITEMEVENTNAME)\
+					{\
+						Func<void(GuiItemNotifyEvent&, int, GuiGraphicsComposition*, GuiEventArgs&)> func(this, &GuiListControl::OnItemNotifyEvent);\
+						helper->EVENTNAME##Handler=style->GetBoundsComposition()->GetEventReceiver()->EVENTNAME.AttachFunction(\
+							Curry(Curry(func)(ITEMEVENTNAME))(itemIndex)\
+							);\
+					}\
+
+			void GuiListControl::AttachItemEvents(int itemIndex, IItemStyleController* style)
+			{
+				int index=visibleStyles.Keys().IndexOf(style);
+				if(index==-1)
+				{
+					Ptr<VisibleStyleHelper> helper=new VisibleStyleHelper;
+					visibleStyles.Add(style, helper);
+
+					ATTACH_ITEM_MOUSE_EVENT(leftButtonDown, ItemLeftButtonDown);
+					ATTACH_ITEM_MOUSE_EVENT(leftButtonUp, ItemLeftButtonUp);
+					ATTACH_ITEM_MOUSE_EVENT(leftButtonDoubleClick, ItemLeftButtonDoubleClick);
+					ATTACH_ITEM_MOUSE_EVENT(middleButtonDown, ItemMiddleButtonDown);
+					ATTACH_ITEM_MOUSE_EVENT(middleButtonUp, ItemMiddleButtonUp);
+					ATTACH_ITEM_MOUSE_EVENT(middleButtonDoubleClick, ItemMiddleButtonDoubleClick);
+					ATTACH_ITEM_MOUSE_EVENT(rightButtonDown, ItemRightButtonDown);
+					ATTACH_ITEM_MOUSE_EVENT(rightButtonUp, ItemRightButtonUp);
+					ATTACH_ITEM_MOUSE_EVENT(rightButtonDoubleClick, ItemRightButtonDoubleClick);
+					ATTACH_ITEM_MOUSE_EVENT(mouseMove, ItemMouseMove);
+					ATTACH_ITEM_NOTIFY_EVENT(mouseEnter, ItemMouseEnter);
+					ATTACH_ITEM_NOTIFY_EVENT(mouseLeave, ItemMouseLeave);
+				}
+			}
+
+#undef ATTACH_ITEM_MOUSE_EVENT
+#undef ATTACH_ITEM_NOTIFY_EVENT
+
+#define DETACH_ITEM_EVENT(EVENTNAME) style->GetBoundsComposition()->GetEventReceiver()->EVENTNAME.Detach(helper->EVENTNAME##Handler)
+
+			void GuiListControl::DetachItemEvents(IItemStyleController* style)
+			{
+				int index=visibleStyles.Keys().IndexOf(style);
+				if(index!=-1)
+				{
+					Ptr<VisibleStyleHelper> helper=visibleStyles.Values()[index];
+					visibleStyles.Remove(style);
+					
+					DETACH_ITEM_EVENT(leftButtonDown);
+					DETACH_ITEM_EVENT(leftButtonUp);
+					DETACH_ITEM_EVENT(leftButtonDoubleClick);
+					DETACH_ITEM_EVENT(middleButtonDown);
+					DETACH_ITEM_EVENT(middleButtonUp);
+					DETACH_ITEM_EVENT(middleButtonDoubleClick);
+					DETACH_ITEM_EVENT(rightButtonDown);
+					DETACH_ITEM_EVENT(rightButtonUp);
+					DETACH_ITEM_EVENT(rightButtonDoubleClick);
+					DETACH_ITEM_EVENT(mouseMove);
+					DETACH_ITEM_EVENT(mouseEnter);
+					DETACH_ITEM_EVENT(mouseLeave);
+				}
+			}
+
+#undef DETACH_ITEM_EVENT
+
 			GuiListControl::GuiListControl(IStyleProvider* _styleProvider, IItemProvider* _itemProvider, bool acceptFocus)
 				:GuiScrollView(_styleProvider)
 				,itemProvider(_itemProvider)
@@ -228,6 +317,19 @@ GuiListControl
 				StyleProviderChanged.SetAssociatedComposition(boundsComposition);
 				ArrangerChanged.SetAssociatedComposition(boundsComposition);
 				CoordinateTransformerChanged.SetAssociatedComposition(boundsComposition);
+				
+				ItemLeftButtonDown.SetAssociatedComposition(boundsComposition);
+				ItemLeftButtonUp.SetAssociatedComposition(boundsComposition);
+				ItemLeftButtonDoubleClick.SetAssociatedComposition(boundsComposition);
+				ItemMiddleButtonDown.SetAssociatedComposition(boundsComposition);
+				ItemMiddleButtonUp.SetAssociatedComposition(boundsComposition);
+				ItemMiddleButtonDoubleClick.SetAssociatedComposition(boundsComposition);
+				ItemRightButtonDown.SetAssociatedComposition(boundsComposition);
+				ItemRightButtonUp.SetAssociatedComposition(boundsComposition);
+				ItemRightButtonDoubleClick.SetAssociatedComposition(boundsComposition);
+				ItemMouseMove.SetAssociatedComposition(boundsComposition);
+				ItemMouseEnter.SetAssociatedComposition(boundsComposition);
+				ItemMouseLeave.SetAssociatedComposition(boundsComposition);
 
 				callback=new ItemCallback(this);
 				itemProvider->AttachCallback(callback.Obj());
@@ -308,54 +410,12 @@ GuiListControl
 			}
 
 /***********************************************************************
-GuiSelectableListControl::StyleEvents
-***********************************************************************/
-
-			void GuiSelectableListControl::StyleEvents::OnBoundsLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-			{
-				if(listControl->GetVisuallyEnabled())
-				{
-					int index=listControl->GetArranger()->GetVisibleIndex(style);
-					if(index!=-1)
-					{
-						listControl->SelectItemsByClick(index, arguments.ctrl, arguments.shift);
-					}
-				}
-			}
-
-			GuiSelectableListControl::StyleEvents::StyleEvents(GuiSelectableListControl* _listControl, IItemStyleController* _style)
-				:listControl(_listControl)
-				,style(_style)
-			{
-			}
-
-			GuiSelectableListControl::StyleEvents::~StyleEvents()
-			{
-			}
-
-			void GuiSelectableListControl::StyleEvents::AttachEvents()
-			{
-				if(!leftButtonDownHandler)
-				{
-					leftButtonDownHandler=style->GetBoundsComposition()->GetEventReceiver()->leftButtonDown.AttachMethod(this, &StyleEvents::OnBoundsLeftButtonDown);
-				}
-			}
-
-			void GuiSelectableListControl::StyleEvents::DetachEvents()
-			{
-				if(leftButtonDownHandler)
-				{
-					style->GetBoundsComposition()->GetEventReceiver()->leftButtonDown.Detach(leftButtonDownHandler);
-					leftButtonDownHandler=0;
-				}
-			}
-
-/***********************************************************************
 GuiSelectableListControl
 ***********************************************************************/
 
 			void GuiSelectableListControl::OnItemModified(int start, int count, int newCount)
 			{
+				GuiListControl::OnItemModified(start, count, newCount);
 				if(count!=newCount)
 				{
 					ClearSelection();
@@ -364,20 +424,13 @@ GuiSelectableListControl
 
 			void GuiSelectableListControl::OnStyleInstalled(int itemIndex, IItemStyleController* style)
 			{
-				StyleEvents* styleEvents=new StyleEvents(this, style);
-				styleEvents->AttachEvents();
-				visibleStyles.Add(style, styleEvents);
+				GuiListControl::OnStyleInstalled(itemIndex, style);
 				selectableStyleProvider->SetStyleSelected(style, selectedItems.Contains(itemIndex));
 			}
 
 			void GuiSelectableListControl::OnStyleUninstalled(IItemStyleController* style)
 			{
-				int index=visibleStyles.Keys().IndexOf(style);
-				if(index!=-1)
-				{
-					visibleStyles.Values()[index]->DetachEvents();
-					visibleStyles.Remove(style);
-				}
+				GuiListControl::OnStyleUninstalled(style);
 			}
 
 			void GuiSelectableListControl::OnItemSelectionChanged(int itemIndex, bool value)
@@ -394,6 +447,14 @@ GuiSelectableListControl
 				for(int i=0;i<visibleStyles.Count();i++)
 				{
 					selectableStyleProvider->SetStyleSelected(visibleStyles.Keys()[i], false);
+				}
+			}
+
+			void GuiSelectableListControl::OnItemLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments)
+			{
+				if(GetVisuallyEnabled())
+				{
+					SelectItemsByClick(arguments.itemIndex, arguments.ctrl, arguments.shift);
 				}
 			}
 
@@ -455,6 +516,7 @@ GuiSelectableListControl
 				,selectedItemIndexEnd(-1)
 			{
 				SelectionChanged.SetAssociatedComposition(boundsComposition);
+				ItemLeftButtonDown.AttachMethod(this, &GuiSelectableListControl::OnItemLeftButtonDown);
 				if(focusableComposition)
 				{
 					focusableComposition->GetEventReceiver()->keyDown.AttachMethod(this, &GuiSelectableListControl::OnKeyDown);

@@ -2148,6 +2148,13 @@ Event
 					return handler;
 				}
 
+				Ptr<IHandler> AttachFunction(const FunctionType& function)
+				{
+					Ptr<IHandler> handler=new FunctionHandler(function);
+					Attach(handler);
+					return handler;
+				}
+
 				template<typename T>
 				Ptr<IHandler> AttachLambda(const T& lambda)
 				{
@@ -2268,6 +2275,43 @@ Predefined Events
 			typedef GuiGraphicsEvent<GuiKeyEventArgs>			GuiKeyEvent;
 			typedef GuiGraphicsEvent<GuiCharEventArgs>			GuiCharEvent;
 			typedef GuiGraphicsEvent<GuiMouseEventArgs>			GuiMouseEvent;
+
+/***********************************************************************
+Predefined Item Events
+***********************************************************************/
+			
+			struct GuiItemEventArgs : public GuiEventArgs
+			{
+				int			itemIndex;
+
+				GuiItemEventArgs()
+					:itemIndex(-1)
+				{
+				}
+				
+				GuiItemEventArgs(GuiGraphicsComposition* composition)
+					:GuiEventArgs(composition)
+				{
+				}
+			};
+			
+			struct GuiItemMouseEventArgs : public GuiMouseEventArgs
+			{
+				int			itemIndex;
+
+				GuiItemMouseEventArgs()
+					:itemIndex(-1)
+				{
+				}
+				
+				GuiItemMouseEventArgs(GuiGraphicsComposition* composition)
+					:GuiMouseEventArgs(composition)
+				{
+				}
+			};
+
+			typedef GuiGraphicsEvent<GuiItemEventArgs>			GuiItemNotifyEvent;
+			typedef GuiGraphicsEvent<GuiItemMouseEventArgs>		GuiItemMouseEvent;
 
 /***********************************************************************
 Event Receiver
@@ -3708,6 +3752,11 @@ List Control
 				};
 
 			protected:
+
+				//-----------------------------------------------------------
+				// ItemCallback
+				//-----------------------------------------------------------
+
 				class ItemCallback : public IItemProviderCallback, public IItemArrangerCallback
 				{
 					typedef collections::List<IItemStyleController*>			StyleList;
@@ -3736,6 +3785,10 @@ List Control
 					void										OnTotalSizeChanged()override;
 				};
 
+				//-----------------------------------------------------------
+				// State management
+				//-----------------------------------------------------------
+
 				Ptr<ItemCallback>								callback;
 				Ptr<IItemProvider>								itemProvider;
 				Ptr<IItemStyleProvider>							itemStyleProvider;
@@ -3754,6 +3807,35 @@ List Control
 				
 				void											OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void											SetStyleProviderAndArranger(Ptr<IItemStyleProvider> styleProvider, Ptr<IItemArranger> arranger);
+
+				//-----------------------------------------------------------
+				// Item event management
+				//-----------------------------------------------------------
+
+				class VisibleStyleHelper
+				{
+				public:
+					Ptr<compositions::GuiMouseEvent::IHandler>		leftButtonDownHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		leftButtonUpHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		leftButtonDoubleClickHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		middleButtonDownHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		middleButtonUpHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		middleButtonDoubleClickHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		rightButtonDownHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		rightButtonUpHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		rightButtonDoubleClickHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		mouseMoveHandler;
+					Ptr<compositions::GuiNotifyEvent::IHandler>		mouseEnterHandler;
+					Ptr<compositions::GuiNotifyEvent::IHandler>		mouseLeaveHandler;
+				};
+				
+				friend class collections::ReadonlyListEnumerator<Ptr<VisibleStyleHelper>>;
+				collections::Dictionary<IItemStyleController*, Ptr<VisibleStyleHelper>>		visibleStyles;
+
+				void											OnItemMouseEvent(compositions::GuiItemMouseEvent& itemEvent, int itemIndex, compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void											OnItemNotifyEvent(compositions::GuiItemNotifyEvent& itemEvent, int itemIndex, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void											AttachItemEvents(int itemIndex, IItemStyleController* style);
+				void											DetachItemEvents(IItemStyleController* style);
 			public:
 				GuiListControl(IStyleProvider* _styleProvider, IItemProvider* _itemProvider, bool acceptFocus=false);
 				~GuiListControl();
@@ -3761,6 +3843,19 @@ List Control
 				compositions::GuiNotifyEvent					StyleProviderChanged;
 				compositions::GuiNotifyEvent					ArrangerChanged;
 				compositions::GuiNotifyEvent					CoordinateTransformerChanged;
+
+				compositions::GuiItemMouseEvent					ItemLeftButtonDown;
+				compositions::GuiItemMouseEvent					ItemLeftButtonUp;
+				compositions::GuiItemMouseEvent					ItemLeftButtonDoubleClick;
+				compositions::GuiItemMouseEvent					ItemMiddleButtonDown;
+				compositions::GuiItemMouseEvent					ItemMiddleButtonUp;
+				compositions::GuiItemMouseEvent					ItemMiddleButtonDoubleClick;
+				compositions::GuiItemMouseEvent					ItemRightButtonDown;
+				compositions::GuiItemMouseEvent					ItemRightButtonUp;
+				compositions::GuiItemMouseEvent					ItemRightButtonDoubleClick;
+				compositions::GuiItemMouseEvent					ItemMouseMove;
+				compositions::GuiItemNotifyEvent				ItemMouseEnter;
+				compositions::GuiItemNotifyEvent				ItemMouseLeave;
 
 				virtual IItemProvider*							GetItemProvider();
 				virtual IItemStyleProvider*						GetStyleProvider();
@@ -3784,32 +3879,10 @@ Selectable List Control
 				public:
 					virtual void								SetStyleSelected(IItemStyleController* style, bool value)=0;
 				};
-
-			protected:
-				class StyleEvents
-				{
-				protected:
-					GuiSelectableListControl*					listControl;
-					IItemStyleController*						style;
-					Ptr<compositions::GuiMouseEvent::IHandler>	leftButtonDownHandler;
-
-					void										OnBoundsLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				public:
-					StyleEvents(GuiSelectableListControl* _listControl, IItemStyleController* _style);
-					~StyleEvents();
-
-					void										AttachEvents();
-					void										DetachEvents();
-				};
-
-				friend class collections::ReadonlyListEnumerator<Ptr<StyleEvents>>;
-				typedef collections::Dictionary<IItemStyleController*, Ptr<StyleEvents>>	VisibleStyleMap;
-
 			protected:
 
 				Ptr<IItemStyleProvider>							selectableStyleProvider;
 				collections::SortedList<int>					selectedItems;
-				VisibleStyleMap									visibleStyles;
 				bool											multiSelect;
 				int												selectedItemIndexStart;
 				int												selectedItemIndexEnd;
@@ -3819,6 +3892,7 @@ Selectable List Control
 				void											OnStyleUninstalled(IItemStyleController* style)override;
 				virtual void									OnItemSelectionChanged(int itemIndex, bool value);
 				virtual void									OnItemSelectionCleared();
+				void											OnItemLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments);
 
 				void											NormalizeSelectedItemIndexStartEnd();
 				void											SetMultipleItemsSelectedSilently(int start, int end, bool selected);

@@ -296,6 +296,11 @@ List Control
 				};
 
 			protected:
+
+				//-----------------------------------------------------------
+				// ItemCallback
+				//-----------------------------------------------------------
+
 				class ItemCallback : public IItemProviderCallback, public IItemArrangerCallback
 				{
 					typedef collections::List<IItemStyleController*>			StyleList;
@@ -324,6 +329,10 @@ List Control
 					void										OnTotalSizeChanged()override;
 				};
 
+				//-----------------------------------------------------------
+				// State management
+				//-----------------------------------------------------------
+
 				Ptr<ItemCallback>								callback;
 				Ptr<IItemProvider>								itemProvider;
 				Ptr<IItemStyleProvider>							itemStyleProvider;
@@ -342,6 +351,35 @@ List Control
 				
 				void											OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void											SetStyleProviderAndArranger(Ptr<IItemStyleProvider> styleProvider, Ptr<IItemArranger> arranger);
+
+				//-----------------------------------------------------------
+				// Item event management
+				//-----------------------------------------------------------
+
+				class VisibleStyleHelper
+				{
+				public:
+					Ptr<compositions::GuiMouseEvent::IHandler>		leftButtonDownHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		leftButtonUpHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		leftButtonDoubleClickHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		middleButtonDownHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		middleButtonUpHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		middleButtonDoubleClickHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		rightButtonDownHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		rightButtonUpHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		rightButtonDoubleClickHandler;
+					Ptr<compositions::GuiMouseEvent::IHandler>		mouseMoveHandler;
+					Ptr<compositions::GuiNotifyEvent::IHandler>		mouseEnterHandler;
+					Ptr<compositions::GuiNotifyEvent::IHandler>		mouseLeaveHandler;
+				};
+				
+				friend class collections::ReadonlyListEnumerator<Ptr<VisibleStyleHelper>>;
+				collections::Dictionary<IItemStyleController*, Ptr<VisibleStyleHelper>>		visibleStyles;
+
+				void											OnItemMouseEvent(compositions::GuiItemMouseEvent& itemEvent, int itemIndex, compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void											OnItemNotifyEvent(compositions::GuiItemNotifyEvent& itemEvent, int itemIndex, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void											AttachItemEvents(int itemIndex, IItemStyleController* style);
+				void											DetachItemEvents(IItemStyleController* style);
 			public:
 				/// <summary>Create a control with a specified style provider.</summary>
 				/// <param name="styleProvider">The style provider.</param>
@@ -356,6 +394,31 @@ List Control
 				compositions::GuiNotifyEvent					ArrangerChanged;
 				/// <summary>Coordinate transformer changed event.</summary>
 				compositions::GuiNotifyEvent					CoordinateTransformerChanged;
+
+				/// <summary>Item left mouse button down event.</summary>
+				compositions::GuiItemMouseEvent					ItemLeftButtonDown;
+				/// <summary>Item left mouse button up event.</summary>
+				compositions::GuiItemMouseEvent					ItemLeftButtonUp;
+				/// <summary>Item left mouse button double click event.</summary>
+				compositions::GuiItemMouseEvent					ItemLeftButtonDoubleClick;
+				/// <summary>Item middle mouse button down event.</summary>
+				compositions::GuiItemMouseEvent					ItemMiddleButtonDown;
+				/// <summary>Item middle mouse button up event.</summary>
+				compositions::GuiItemMouseEvent					ItemMiddleButtonUp;
+				/// <summary>Item middle mouse button double click event.</summary>
+				compositions::GuiItemMouseEvent					ItemMiddleButtonDoubleClick;
+				/// <summary>Item right mouse button down event.</summary>
+				compositions::GuiItemMouseEvent					ItemRightButtonDown;
+				/// <summary>Item right mouse button up event.</summary>
+				compositions::GuiItemMouseEvent					ItemRightButtonUp;
+				/// <summary>Item right mouse button double click event.</summary>
+				compositions::GuiItemMouseEvent					ItemRightButtonDoubleClick;
+				/// <summary>Item mouse move event.</summary>
+				compositions::GuiItemMouseEvent					ItemMouseMove;
+				/// <summary>Item mouse enter event.</summary>
+				compositions::GuiItemNotifyEvent				ItemMouseEnter;
+				/// <summary>Item mouse leave event.</summary>
+				compositions::GuiItemNotifyEvent				ItemMouseLeave;
 
 				/// <summary>Get the item provider.</summary>
 				/// <returns>The item provider.</returns>
@@ -404,32 +467,10 @@ Selectable List Control
 					/// <param name="value">Set to true if the item is expected to be rendered as selected.</param>
 					virtual void								SetStyleSelected(IItemStyleController* style, bool value)=0;
 				};
-
-			protected:
-				class StyleEvents
-				{
-				protected:
-					GuiSelectableListControl*					listControl;
-					IItemStyleController*						style;
-					Ptr<compositions::GuiMouseEvent::IHandler>	leftButtonDownHandler;
-
-					void										OnBoundsLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				public:
-					StyleEvents(GuiSelectableListControl* _listControl, IItemStyleController* _style);
-					~StyleEvents();
-
-					void										AttachEvents();
-					void										DetachEvents();
-				};
-
-				friend class collections::ReadonlyListEnumerator<Ptr<StyleEvents>>;
-				typedef collections::Dictionary<IItemStyleController*, Ptr<StyleEvents>>	VisibleStyleMap;
-
 			protected:
 
 				Ptr<IItemStyleProvider>							selectableStyleProvider;
 				collections::SortedList<int>					selectedItems;
-				VisibleStyleMap									visibleStyles;
 				bool											multiSelect;
 				int												selectedItemIndexStart;
 				int												selectedItemIndexEnd;
@@ -439,6 +480,7 @@ Selectable List Control
 				void											OnStyleUninstalled(IItemStyleController* style)override;
 				virtual void									OnItemSelectionChanged(int itemIndex, bool value);
 				virtual void									OnItemSelectionCleared();
+				void											OnItemLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments);
 
 				void											NormalizeSelectedItemIndexStartEnd();
 				void											SetMultipleItemsSelectedSilently(int start, int end, bool selected);

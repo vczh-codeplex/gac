@@ -115,6 +115,13 @@ Event
 					return handler;
 				}
 
+				Ptr<IHandler> AttachFunction(const FunctionType& function)
+				{
+					Ptr<IHandler> handler=new FunctionHandler(function);
+					Attach(handler);
+					return handler;
+				}
+
 				template<typename T>
 				Ptr<IHandler> AttachLambda(const T& lambda)
 				{
@@ -259,6 +266,51 @@ Predefined Events
 			typedef GuiGraphicsEvent<GuiKeyEventArgs>			GuiKeyEvent;
 			typedef GuiGraphicsEvent<GuiCharEventArgs>			GuiCharEvent;
 			typedef GuiGraphicsEvent<GuiMouseEventArgs>			GuiMouseEvent;
+
+/***********************************************************************
+Predefined Item Events
+***********************************************************************/
+			
+			/// <summary>Item event arguments.</summary>
+			struct GuiItemEventArgs : public GuiEventArgs
+			{
+				/// <summary>Item index.</summary>
+				int			itemIndex;
+
+				GuiItemEventArgs()
+					:itemIndex(-1)
+				{
+				}
+				
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
+				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
+				GuiItemEventArgs(GuiGraphicsComposition* composition)
+					:GuiEventArgs(composition)
+				{
+				}
+			};
+			
+			/// <summary>Item mouse event arguments.</summary>
+			struct GuiItemMouseEventArgs : public GuiMouseEventArgs
+			{
+				/// <summary>Item index.</summary>
+				int			itemIndex;
+
+				GuiItemMouseEventArgs()
+					:itemIndex(-1)
+				{
+				}
+				
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
+				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
+				GuiItemMouseEventArgs(GuiGraphicsComposition* composition)
+					:GuiMouseEventArgs(composition)
+				{
+				}
+			};
+
+			typedef GuiGraphicsEvent<GuiItemEventArgs>			GuiItemNotifyEvent;
+			typedef GuiGraphicsEvent<GuiItemMouseEventArgs>		GuiItemMouseEvent;
 
 /***********************************************************************
 Event Receiver
