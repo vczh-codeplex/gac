@@ -9,98 +9,107 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	return SetupWindowsDirect2DRenderer();
 }
 
+/***********************************************************************
+DataSource
+***********************************************************************/
+
+class DataSource : public list::ItemProviderBase, private list::TextItemStyleProvider::ITextItemView
+{
+protected:
+	int				count;
+public:
+	DataSource()
+		:count(100000)
+	{
+	}
+
+	void SetCount(int newCount)
+	{
+		if(0<=newCount)
+		{
+			int oldCount=count;
+			count=newCount;
+				
+			// this->InvokeOnItemModified(affected-items-start, affected-items-count, new-items-count);
+			// this function notifies the list control to update it's content and scroll bars
+			if(oldCount<newCount)
+			{
+				// insert
+				this->InvokeOnItemModified(oldCount, 0, newCount-oldCount);
+			}
+			else if(oldCount>newCount)
+			{
+				// delete
+				this->InvokeOnItemModified(newCount, oldCount-newCount, 0);
+			}
+		}
+	}
+
+	// GuiListControl::IItemProvider
+
+	int Count()
+	{
+		return count;
+	}
+
+	IDescriptable* RequestView(const WString& identifier)
+	{
+		if(identifier==list::TextItemStyleProvider::ITextItemView::Identifier)
+		{
+			return this;
+		}
+		else if(identifier==GuiListControl::IItemPrimaryTextView::Identifier)
+		{
+			return this;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	void ReleaseView(IDescriptable* view)
+	{
+	}
+
+	// list::TextItemStyleProvider::ITextItemView
+
+	WString GetText(int itemIndex)
+	{
+		return L"Item "+itow(itemIndex+1);
+	}
+
+	bool GetChecked(int itemIndex)
+	{
+		// DataSource don't support check state
+		return false;
+	}
+
+	void SetCheckedSilently(int itemIndex, bool value)
+	{
+		// DataSource don't support check state
+	}
+
+	// GuiListControl::IItemPrimaryTextView
+
+	WString GetPrimaryTextViewText(int itemIndex)
+	{
+		return GetText(itemIndex+1);
+	}
+
+	bool ContainsPrimaryText(int itemIndex)
+	{
+		return true;
+	}
+};
+
+/***********************************************************************
+VirtualModeWindow
+***********************************************************************/
+
 class VirtualModeWindow : public GuiWindow
 {
 private:
-	class DataSource : public list::ItemProviderBase, private list::TextItemStyleProvider::ITextItemView
-	{
-	protected:
-		int				count;
-	public:
-		DataSource()
-			:count(100000)
-		{
-		}
-
-		void SetCount(int newCount)
-		{
-			if(0<=newCount)
-			{
-				int oldCount=count;
-				count=newCount;
-				
-				// this->InvokeOnItemModified(affected-items-start, affected-items-count, new-items-count);
-				// this function notifies the list control to update it's content and scroll bars
-				if(oldCount<newCount)
-				{
-					// insert
-					this->InvokeOnItemModified(oldCount, 0, newCount-oldCount);
-				}
-				else if(oldCount>newCount)
-				{
-					// delete
-					this->InvokeOnItemModified(newCount, oldCount-newCount, 0);
-				}
-			}
-		}
-
-		// GuiListControl::IItemProvider
-
-		int Count()
-		{
-			return count;
-		}
-
-		IDescriptable* RequestView(const WString& identifier)
-		{
-			if(identifier==list::TextItemStyleProvider::ITextItemView::Identifier)
-			{
-				return this;
-			}
-			else if(identifier==GuiListControl::IItemPrimaryTextView::Identifier)
-			{
-				return this;
-			}
-			else
-			{
-				return 0;
-			}
-		}
-
-		void ReleaseView(IDescriptable* view)
-		{
-		}
-
-		// list::TextItemStyleProvider::ITextItemView
-
-		WString GetText(int itemIndex)
-		{
-			return L"Item "+itow(itemIndex+1);
-		}
-
-		bool GetChecked(int itemIndex)
-		{
-			// DataSource don't support check state
-			return false;
-		}
-
-		void SetCheckedSilently(int itemIndex, bool value)
-		{
-			// DataSource don't support check state
-		}
-
-		// GuiListControl::IItemPrimaryTextView
-
-		WString GetPrimaryTextViewText(int itemIndex)
-		{
-			return GetText(itemIndex+1);
-		}
-
-		bool ContainsPrimaryText(int itemIndex)
-		{
-			return true;
-		}
-	};
 private:
 	GuiVirtualTextList*					listBox;
 	GuiButton*							buttonIncrease;
