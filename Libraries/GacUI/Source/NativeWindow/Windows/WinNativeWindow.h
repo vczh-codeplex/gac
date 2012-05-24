@@ -37,8 +37,9 @@ Windows Platform Native Controller
 			extern void										DestroyWindowsNativeController(INativeController* controller);
 
 			extern IWICImagingFactory*						GetWICImagingFactory();
-			extern IWICBitmapDecoder*						GetWICBitmapDecoder(INativeImage* image);
 			extern IWICBitmap*								GetWICBitmap(INativeImageFrame* frame);
+			extern Ptr<INativeImage>						CreateImageFromHBITMAP(HBITMAP handle);
+			extern Ptr<INativeImage>						CreateImageFromHICON(HICON handle);
 		}
 	}
 }

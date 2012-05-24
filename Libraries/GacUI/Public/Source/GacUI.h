@@ -7554,7 +7554,6 @@ OS Supporting
 				virtual IWindowsDirect2DRenderTarget*		GetBindedRenderTarget(INativeWindow* window)=0;
 				virtual void								SetBindedRenderTarget(INativeWindow* window, IWindowsDirect2DRenderTarget* renderTarget)=0;
 				virtual IWICImagingFactory*					GetWICImagingFactory()=0;
-				virtual IWICBitmapDecoder*					GetWICBitmapDecoder(INativeImage* image)=0;
 				virtual IWICBitmap*							GetWICBitmap(INativeImageFrame* frame)=0;
 			};
 
@@ -8323,7 +8322,6 @@ OS Supporting
 				virtual IWindowsGDIRenderTarget*			GetBindedRenderTarget(INativeWindow* window)=0;
 				virtual void								SetBindedRenderTarget(INativeWindow* window, IWindowsGDIRenderTarget* renderTarget)=0;
 				virtual IWICImagingFactory*					GetWICImagingFactory()=0;
-				virtual IWICBitmapDecoder*					GetWICBitmapDecoder(INativeImage* image)=0;
 				virtual IWICBitmap*							GetWICBitmap(INativeImageFrame* frame)=0;
 			};
 
@@ -8601,8 +8599,9 @@ Windows Platform Native Controller
 			extern void										DestroyWindowsNativeController(INativeController* controller);
 
 			extern IWICImagingFactory*						GetWICImagingFactory();
-			extern IWICBitmapDecoder*						GetWICBitmapDecoder(INativeImage* image);
 			extern IWICBitmap*								GetWICBitmap(INativeImageFrame* frame);
+			extern Ptr<INativeImage>						CreateImageFromHBITMAP(HBITMAP handle);
+			extern Ptr<INativeImage>						CreateImageFromHICON(HICON handle);
 		}
 	}
 }

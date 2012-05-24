@@ -73,7 +73,6 @@ OS Supporting
 				virtual IWindowsDirect2DRenderTarget*		GetBindedRenderTarget(INativeWindow* window)=0;
 				virtual void								SetBindedRenderTarget(INativeWindow* window, IWindowsDirect2DRenderTarget* renderTarget)=0;
 				virtual IWICImagingFactory*					GetWICImagingFactory()=0;
-				virtual IWICBitmapDecoder*					GetWICBitmapDecoder(INativeImage* image)=0;
 				virtual IWICBitmap*							GetWICBitmap(INativeImageFrame* frame)=0;
 			};
 
