@@ -49,7 +49,100 @@
                     </td>
                 </tr>
                 <tr>
-                    <td align="left" valign="top" colspan="6">This page is under construction.</td>
+                    <td align="left" valign="top" colspan="6">
+                        <h1>Introduction</h1>
+                        <p>
+                            Create a GacUI program is pretty easy. GacUI is released by source code, what you need to do is adding these 5 source files into your project, and write WinMain and GuiMain, then it is done! If you are new to GacUI, we recommended you to follow the instructions below to build your first GacUI program:
+                        </p>
+                        <ul>
+                            <li>Step 1. <a href="#GetSourceCode">Get the GacUI source code.</a></li>
+                            <li>Step 2. <a href="#CreateProjcet">Create a Visual C++ Project.</a></li>
+                            <li>Step 3. <a href="#WriteProgram">Write your first GacUI program.</a></li>
+                            <li>Step 4. <a href="#Build">Build and run!</a></li>
+                        </ul>
+                        <h1 id="GetSourceCode">Get the GacUI source code.</h1>
+                        <p>
+                            GacUI provides two way to get the source code. The first one is to download the release. The second one is to download the latest source code. If you want to rely on a well tested and stablized GacUI version, use the release. If you want to try some unreleased feature, try the latest source code.
+                        </p>
+                        <p>
+                            The GacUI project hosts in <a href="http://gac.codeplex.com/" target="_blank">http://gac.codeplex.com/</a>. If you don't know how to download them, please go to the <a href="Download.html">DOWNLOAD</a> page.
+                        </p>
+                        <h1 id="CreateProjcet">Create a Visual C++ Project.</h1>
+                        <p>
+                            We recommend Visual Studio 2010 as the IDE to create a GacUI project. GacUI implementation doesn't use any C++11 feature, so Visual Studio 2008 is ok, but we have not spend enough time testing it yet.
+                        </p>
+                        <p>
+                            If you don't know how to create a Visual C++ project, please read <a href="http://msdn.microsoft.com/en-us/library/4457htyc.aspx" target="_blank">this MSDN article</a>.
+                        </p>
+                        <p>
+                            After a Visual C++ project is created, add these 5 source files to your project. If you still have trouble getting these files, please read the <a href="Download.html">DOWNLOAD</a> page again.
+                        </p>
+                        <ul>
+                            <li>GacUIIncludes.h</li>
+                            <li>GacUI.h</li>
+                            <li>GacUI.cpp</li>
+                            <li>Vlpp.h</li>
+                            <li>Vlpp.cpp</li>
+                        </ul>
+                        <p>
+                            Precompiled headers are recommended to use for a GacUI project. Adding GacUIIncludes.h or GacUI.h to your precompiled headers will speed up the compiling, especially for big projects. Remember disable precompiled headers for GacUI.cpp and Vlpp.cpp, or you have to add #include "stdafx.h" to these 2 cpp files yourself.
+                        </p>
+                        <h1 id="WriteProgram">Write your first GacUI program.</h1>
+                        <p>
+                            The following code can be found in <strong>Libraries\GacUI\GacUIDemo\HelloWorld\Main.cpp</strong> if you <a href="Download.html">DOWNLOAD</a> the latest source code.
+                        </p>
+                        <p>
+                            Even a shortest GacUI program should contains 2 functions: <strong>WinMain</strong> and <strong>GuiMain</strong>. If you don't know how to write a WinMain function for a Windows program, please read <a href="http://msdn.microsoft.com/en-us/library/ms633559(v=vs.85)" target="_blank">this MSDN article</a>.
+                        </p>
+                        <h2>WinMain</h2>
+                        <p>
+                            The only function you need to call in WinMain is <strong>SetupWindowsDirect2DRenderer</strong> or <strong>SetupWindowsGDIRenderer</strong>. This is the only chance to choose which renderer to use after a program is executed. If you want to use Direct2D which is a good solution to speed up your program using GPU, call <strong>SetupWindowsDirect2DRenderer</strong>. If you want to use GDI, which is only suggested to use in an environment that Direct2D is not available, call <strong>SetupWindowsGDIRenderer</strong>. If you want to make your program compatible with Windows XP operating system, you can test if the system supports Direct2D in <strong>WinMain</strong>, and then decide which function to call.
+                        </p>
+                        <h2>GuiMain</h2>
+                        <p>
+                            The other function is <strong>GuiMain</strong>. A GuiMain function is required to be a GacUI program. When the GacUI finishes all the initializations, GuiMain function will be called, and you can use <strong>GetApplication()->Run </strong> to run a main window. GacUI supports multiple windows at the same time, but you should have a main window. GacUI will start to do finalization when the main window is closed.
+                        </p>
+                        <p>
+                            The following code shows how to write a hello world using GacUI.
+                        </p>
+                        <h2>Hello, world!</h2>
+                        <p class="CppCode">
+                            <nobr>#include "..\..\Public\Source\GacUIIncludes.h"</nobr><br />
+                            <nobr>#include &lt;Windows.h&gt;</nobr><br />
+                            <nobr></nobr><br />
+                            <nobr>int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)</nobr><br />
+                            <nobr>{</nobr><br />
+	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;return SetupWindowsDirect2DRenderer();</nobr><br />
+                            <nobr>}</nobr><br />
+                            <nobr></nobr><br />
+                            <nobr>void GuiMain()</nobr><br />
+                            <nobr>{</nobr><br />
+	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;GuiWindow* window=g::NewWindow();</nobr><br />
+	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;window->SetText(L"Hello, world!");</nobr><br />
+	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;window->SetClientSize(Size(640, 480));</nobr><br />
+	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;window->MoveToScreenCenter();</nobr><br />
+	                        <nobr></nobr><br />
+	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;GuiControl* label=g::NewLabel();</nobr><br />
+	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;label->SetText(L"Welcome to GacUI Library!");</nobr><br />
+	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;{</nobr><br />
+		                    <nobr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FontProperties font;</nobr><br />
+		                    <nobr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font.fontFamily=L"Segoe UI";</nobr><br />
+		                    <nobr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font.size=40;</nobr><br />
+		                    <nobr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font.antialias=true;</nobr><br />
+		                    <nobr>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;label->SetFont(font);</nobr><br />
+	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;}</nobr><br />
+	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;window->AddChild(label);</nobr><br />
+                            <nobr></nobr><br />
+	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;GetApplication()->Run(window);</nobr><br />
+	                        <nobr>&nbsp;&nbsp;&nbsp;&nbsp;delete window;</nobr><br />
+                            <nobr>}</nobr><br />
+                        </p>
+                        <h1 id="Build">Build and run!</h1>
+                        <p>
+                            Build the program and run!<br /><br />
+                            <img src="Images\HelloWorld.jpg" alt="Hello, world!"/>
+                        </p>
+                    </td>
                 </tr>
             </table>
         </td>
