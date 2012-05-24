@@ -196,6 +196,8 @@ body
 {
     background-color: #EFFFE0;
     padding: 0.7em;
+    white-space:pre-wrap;
+    font-family: "CS Kirisame DL Mono", "Consolas", "DejaVu Sans Mono", monospace;
 }
 
 /*
