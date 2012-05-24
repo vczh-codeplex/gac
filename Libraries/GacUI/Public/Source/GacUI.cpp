@@ -21613,11 +21613,6 @@ OS Supporting
 					return vl::presentation::windows::GetWICImagingFactory();
 				}
 
-				IWICBitmapDecoder* GetWICBitmapDecoder(INativeImage* image)
-				{
-					return vl::presentation::windows::GetWICBitmapDecoder(image);
-				}
-
 				IWICBitmap* GetWICBitmap(INativeImageFrame* frame)
 				{
 					return vl::presentation::windows::GetWICBitmap(frame);
@@ -23698,11 +23693,6 @@ OS Supporting
 					return vl::presentation::windows::GetWICImagingFactory();
 				}
 
-				IWICBitmapDecoder* GetWICBitmapDecoder(INativeImage* image)
-				{
-					return vl::presentation::windows::GetWICBitmapDecoder(image);
-				}
-
 				IWICBitmap* GetWICBitmap(INativeImageFrame* frame)
 				{
 					return vl::presentation::windows::GetWICBitmap(frame);
@@ -24053,16 +24043,12 @@ WindowsImageService
 			{
 			protected:
 				INativeImage*									image;
-				ComPtr<IWICBitmapFrameDecode>					frameDecode;
 				ComPtr<IWICBitmap>								frameBitmap;
 				Dictionary<void*, Ptr<INativeImageFrameCache>>	caches;
-			public:
-				WindowsImageFrame(INativeImage* _image, IWICBitmapFrameDecode* _frameDecode)
-					:image(_image)
-					,frameDecode(_frameDecode)
+
+				void Initialize(IWICBitmapSource* bitmapSource)
 				{
 					IWICImagingFactory* factory=GetWICImagingFactory();
-
 					ComPtr<IWICFormatConverter> converter;
 					{
 						IWICFormatConverter* formatConverter=0;
@@ -24071,7 +24057,7 @@ WindowsImageService
 						{
 							converter=formatConverter;
 							converter->Initialize(
-								frameDecode.Obj(),
+								bitmapSource,
 								GUID_WICPixelFormat32bppPBGRA,
 								WICBitmapDitherTypeNone,
 								NULL,
@@ -24081,20 +24067,32 @@ WindowsImageService
 					}
 
 					IWICBitmap* bitmap=0;
-					IWICBitmapSource* bitmapSource=0;
+					IWICBitmapSource* convertedBitmapSource=0;
 					if(converter)
 					{
-						bitmapSource=converter.Obj();
+						convertedBitmapSource=converter.Obj();
 					}
 					else
 					{
-						bitmapSource=frameDecode.Obj();
+						convertedBitmapSource=bitmapSource;
 					}
-					HRESULT hr=factory->CreateBitmapFromSource(bitmapSource, WICBitmapCacheOnLoad, &bitmap);
+					HRESULT hr=factory->CreateBitmapFromSource(convertedBitmapSource, WICBitmapCacheOnLoad, &bitmap);
 					if(SUCCEEDED(hr))
 					{
 						frameBitmap=bitmap;
 					}
+				}
+			public:
+				WindowsImageFrame(INativeImage* _image, IWICBitmapFrameDecode* frameDecode)
+					:image(_image)
+				{
+					Initialize(frameDecode);
+				}
+
+				WindowsImageFrame(INativeImage* _image, IWICBitmap* sourceBitmap)
+					:image(_image)
+				{
+					Initialize(sourceBitmap);
 				}
 
 				~WindowsImageFrame()
@@ -24147,11 +24145,6 @@ WindowsImageService
 					cache->OnDetach(this);
 					caches.Remove(key);
 					return cache;
-				}
-
-				IWICBitmapFrameDecode* GetFrameDecode()
-				{
-					return frameDecode.Obj();
 				}
 
 				IWICBitmap* GetFrameBitmap()
@@ -24240,6 +24233,7 @@ WindowsImageService
 							if(SUCCEEDED(hr))
 							{
 								frame=new WindowsImageFrame(this, frameDecode);
+								frameDecode->Release();
 							}
 						}
 						return frame.Obj();
@@ -24249,10 +24243,44 @@ WindowsImageService
 						return 0;
 					}
 				}
+			};
 
-				IWICBitmapDecoder* GetBitmapDecoder()
+			class WindowsBitmapImage : public Object, public INativeImage
+			{
+			protected:
+				INativeImageService*					imageService;
+				Ptr<WindowsImageFrame>					frame;
+				FormatType								formatType;
+			public:
+				WindowsBitmapImage(INativeImageService* _imageService, IWICBitmap* sourceBitmap, FormatType _formatType)
+					:imageService(_imageService)
+					,formatType(_formatType)
 				{
-					return bitmapDecoder.Obj();
+					frame=new WindowsImageFrame(this, sourceBitmap);
+				}
+
+				~WindowsBitmapImage()
+				{
+				}
+
+				INativeImageService* GetImageService()
+				{
+					return imageService;
+				}
+
+				FormatType GetFormat()
+				{
+					return formatType;
+				}
+
+				int GetFrameCount()
+				{
+					return 1;
+				}
+
+				INativeImageFrame* GetFrame(int index)
+				{
+					return index==0?frame.Obj():0;
 				}
 			};
 
@@ -24300,6 +24328,38 @@ WindowsImageService
 					}
 				}
 
+				Ptr<INativeImage> CreateImageFromHBITMAP(HBITMAP handle)
+				{
+					IWICBitmap* bitmap=0;
+					HRESULT hr=imagingFactory->CreateBitmapFromHBITMAP(handle, NULL, WICBitmapUseAlpha, &bitmap);
+					if(SUCCEEDED(hr))
+					{
+						Ptr<INativeImage> image=new WindowsBitmapImage(this, bitmap, INativeImage::Bmp);
+						bitmap->Release();
+						return image;
+					}
+					else
+					{
+						return 0;
+					}
+				}
+
+				Ptr<INativeImage> CreateImageFromHICON(HICON handle)
+				{
+					IWICBitmap* bitmap=0;
+					HRESULT hr=imagingFactory->CreateBitmapFromHICON(handle, &bitmap);
+					if(SUCCEEDED(hr))
+					{
+						Ptr<INativeImage> image=new WindowsBitmapImage(this, bitmap, INativeImage::Icon);
+						bitmap->Release();
+						return image;
+					}
+					else
+					{
+						return 0;
+					}
+				}
+
 				IWICImagingFactory* GetImagingFactory()
 				{
 					return imagingFactory.Obj();
@@ -24311,14 +24371,19 @@ WindowsImageService
 				return dynamic_cast<WindowsImageService*>(GetCurrentController()->ImageService())->GetImagingFactory();
 			}
 
-			IWICBitmapDecoder* GetWICBitmapDecoder(INativeImage* image)
-			{
-				return dynamic_cast<WindowsImage*>(image)->GetBitmapDecoder();
-			}
-
 			IWICBitmap* GetWICBitmap(INativeImageFrame* frame)
 			{
 				return dynamic_cast<WindowsImageFrame*>(frame)->GetFrameBitmap();
+			}
+
+			Ptr<INativeImage> CreateImageFromHBITMAP(HBITMAP handle)
+			{
+				return dynamic_cast<WindowsImageService*>(GetCurrentController()->ImageService())->CreateImageFromHBITMAP(handle);
+			}
+
+			Ptr<INativeImage> CreateImageFromHICON(HICON handle)
+			{
+				return dynamic_cast<WindowsImageService*>(GetCurrentController()->ImageService())->CreateImageFromHICON(handle);
 			}
 
 /***********************************************************************

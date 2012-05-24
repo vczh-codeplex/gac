@@ -172,11 +172,6 @@ OS Supporting
 					return vl::presentation::windows::GetWICImagingFactory();
 				}
 
-				IWICBitmapDecoder* GetWICBitmapDecoder(INativeImage* image)
-				{
-					return vl::presentation::windows::GetWICBitmapDecoder(image);
-				}
-
 				IWICBitmap* GetWICBitmap(INativeImageFrame* frame)
 				{
 					return vl::presentation::windows::GetWICBitmap(frame);
