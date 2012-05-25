@@ -35,7 +35,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{1F74B7A4-5D6
 		..\Public\Web\GettingStart.html = ..\Public\Web\GettingStart.html
 		..\Public\Web\index.html = ..\Public\Web\index.html
 		..\Public\Web\PageStyle.css = ..\Public\Web\PageStyle.css
-		..\Public\Web\Screenshots.html = ..\Public\Web\Screenshots.html
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{BBA4C5F5-AB18-421B-A342-74A886A6DF59}"
