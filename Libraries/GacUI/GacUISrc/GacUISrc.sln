@@ -39,6 +39,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{1F74B7A4-5D6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{BBA4C5F5-AB18-421B-A342-74A886A6DF59}"
 	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\Images\Demos.Controls.Button.CheckAndRadio.jpg = ..\Public\Web\Images\Demos.Controls.Button.CheckAndRadio.jpg
+		..\Public\Web\Images\Demos.Controls.Button.EnableDisable.jpg = ..\Public\Web\Images\Demos.Controls.Button.EnableDisable.jpg
+		..\Public\Web\Images\Demos.Controls.Label.Hyperlink.jpg = ..\Public\Web\Images\Demos.Controls.Label.Hyperlink.jpg
+		..\Public\Web\Images\Demos.Controls.ListBox.NameEditor.jpg = ..\Public\Web\Images\Demos.Controls.ListBox.NameEditor.jpg
+		..\Public\Web\Images\Demos.Controls.ListBox.NameSelector.jpg = ..\Public\Web\Images\Demos.Controls.ListBox.NameSelector.jpg
+		..\Public\Web\Images\Demos.Controls.ListBox.VirtualMode.jpg = ..\Public\Web\Images\Demos.Controls.ListBox.VirtualMode.jpg
+		..\Public\Web\Images\Demos.Controls.Tab.TextBoxPage.jpg = ..\Public\Web\Images\Demos.Controls.Tab.TextBoxPage.jpg
+		..\Public\Web\Images\Demos.Controls.TextBox.Colorizer.jpg = ..\Public\Web\Images\Demos.Controls.TextBox.Colorizer.jpg
+		..\Public\Web\Images\Demos.Controls.TextBox.Editor.jpg = ..\Public\Web\Images\Demos.Controls.TextBox.Editor.jpg
 		..\Public\Web\Images\HelloWorld.jpg = ..\Public\Web\Images\HelloWorld.jpg
 	EndProjectSection
 EndProject
