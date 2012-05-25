@@ -171,7 +171,7 @@ body
 
 .GuideTable tbody td strong
 {
-    color: #7B4F9D;
+    color: #0072BC;
 }
 
 .GuideTable tbody td p
@@ -182,7 +182,7 @@ body
 .GuideTable tbody td a
 {
     display: block;
-    color: #7B4F9D;
+    color: #0072BC;
     text-align: right;
     text-decoration: none;
 }
