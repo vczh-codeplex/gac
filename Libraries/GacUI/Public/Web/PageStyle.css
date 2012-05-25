@@ -192,12 +192,55 @@ body
 }
 
 /****************************************************/
+
 .CppCode
 {
     background-color: #EFFFE0;
     padding: 0.7em;
     white-space:pre-wrap;
     font-family: "CS Kirisame DL Mono", "Consolas", "DejaVu Sans Mono", monospace;
+}
+
+/****************************************************/
+
+.DemoTable
+{
+    border-bottom-width: 0px;
+}
+
+.DemoTable td
+{
+    border-width: 1px;
+    border-style: solid;
+    border-color: #F9B074;
+}
+
+.DemoTable .DemoLink
+{
+    display: block;
+    width: 260px;
+    height: 260px;
+    text-decoration: none;
+}
+
+.DemoTable .DemoTitle
+{
+    color: #000000;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
+    background-color: #FDE4D0;
+    padding: 8px;
+}
+
+.DemoTable .DemoImage
+{
+    padding: 2px;
+}
+
+.DemoTable .DemoImage img
+{
+    border-style: none;
 }
 
 /*
