@@ -127,6 +127,19 @@ private:
 		}
 	}
 
+	void LoadNames(GuiTextList* list)
+	{
+		// Use linq for C++ to create sorted TextItem(s) from DataSource
+		CopyFrom(
+			list->GetItems(),
+			FromArray(DataSource)
+				>>OrderBy(_wcsicmp)
+				>>Select<const wchar_t*, list::TextItem>(
+					[](const wchar_t* name){return list::TextItem(name);}
+				)
+			);
+	}
+
 	void buttonAdd_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
 		MoveNames(listSource, listDestination);
@@ -223,17 +236,7 @@ public:
 		}
 
 		// Add names into listSource
-		{
-			// Use linq for C++ to create sorted TextItem(s) from DataSource
-			CopyFrom(
-				listSource->GetItems(),
-				FromArray(DataSource)
-					>>OrderBy(_wcsicmp)
-					>>Select<const wchar_t*, list::TextItem>(
-						[](const wchar_t* name){return list::TextItem(name);}
-					)
-				);
-		}
+		LoadNames(listSource);
 
 		// set the preferred minimum client size
 		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
