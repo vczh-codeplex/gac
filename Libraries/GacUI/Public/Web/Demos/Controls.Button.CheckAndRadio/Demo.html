@@ -49,8 +49,9 @@
                 </tr>
                 <tr>
                     <td align="left" valign="top" colspan="6">
-                        <h1>Label.Hyperlink</h1>
-                        <img src="DXGUI_27.jpg" />
+                        <h1>Button.CheckAndRadio</h1>
+                        <img src="DXGUI_30.jpg" />
+                        <img src="DXGUI_31.jpg" />
                         <pre class="CppCode">
 #include "..\..\Public\Source\GacUIIncludes.h"
 #include &lt;Windows.h&gt;
@@ -60,74 +61,113 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	return SetupWindowsDirect2DRenderer();
 }
 
-class HyperlinkWindow : public GuiWindow
+class CheckAndRadioWindow : public GuiWindow
 {
 private:
-	GuiLabel*				labelHyperlink;
 <strong>
-	void labelHyperlink_OnMouseEnter(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	GuiCellComposition* CreateButtons(
+		const WString& groupName,
+		const WString& buttonName,
+		bool checkBox,
+		GuiSelectableButton::GroupController* groupController
+		)</strong>
 	{
-		FontProperties font=labelHyperlink->GetFont();
-		font.underline=true;
-		labelHyperlink->SetFont(font);
-	}
+		GuiCellComposition* cell=new GuiCellComposition;
 
-	void labelHyperlink_OnMouseLeave(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-	{
-		FontProperties font=labelHyperlink->GetFont();
-		font.underline=false;
-		labelHyperlink->SetFont(font);
-	}
+		GuiControl* groupBox=g::NewGroupBox();
+		groupBox->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+		groupBox->GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+		// all child controls should at least 10 pixels away from the group box
+		groupBox->GetContainerComposition()->SetInternalMargin(Margin(10, 10, 10, 10));
+		// dock the group box to fill the cell
+		groupBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		groupBox->SetText(groupName);
+		// add the button to the cell
+		cell->AddChild(groupBox->GetBoundsComposition());
 
-	void labelHyperlink_OnLeftButtonDown(GuiGraphicsComposition* sender, GuiMouseEventArgs& arguments)
-	{
-		ShellExecute(NULL, L"OPEN", L"http://www.cppblog.com/vczh", NULL, NULL, SW_SHOWNORMAL);
+		// create a stack to layout the 3 buttons from top to bottom shown like a list
+		GuiStackComposition* stack=new GuiStackComposition;
+		stack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+		stack->SetDirection(GuiStackComposition::Vertical);
+		stack->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		stack->SetPadding(6);
+		groupBox->GetContainerComposition()->AddChild(stack);
+
+		// create buttons
+		for(int i=0;i<3;i++)
+		{
+			GuiSelectableButton* button=checkBox?g::NewCheckBox():g::NewRadioButton();
+			button->SetText(buttonName+itow(i+1));
+			button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			if(groupController)
+			{
+				button->SetGroupController(groupController);
+			}
+
+			GuiStackItemComposition* stackItem=new GuiStackItemComposition;
+			stack->AddChild(stackItem);
+			stackItem->AddChild(button->GetBoundsComposition());
+		}
+
+		return cell;
 	}
-</strong>
 public:
-	HyperlinkWindow()
+	CheckAndRadioWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 	{
-		this->SetText(L"Controls.Label.Hyperlink");
-		this->SetClientSize(Size(300, 200));
-		this->MoveToScreenCenter();
+		this->SetText(L"Controls.Button.CheckAndRadio");
+		// limit the size that the window should always show the whole content without cliping it
+		this->GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 
-		labelHyperlink=g::NewLabel();
-		labelHyperlink->SetText(L"http://www.cppblog.com/vczh");
-		labelHyperlink->SetTextColor(Color(0, 0, 255));
+		// create a table to layout the 2 group boxes
+		GuiTableComposition* table=new GuiTableComposition;
+		// make the table to have 2 rows
+		table->SetRowsAndColumns(1, 2);
+		table->SetRowOption(0, GuiCellOption::MinSizeOption());
+		table->SetColumnOption(0, GuiCellOption::PercentageOption(0.5));
+		table->SetColumnOption(1, GuiCellOption::PercentageOption(0.5));
+		// dock the table to fill the window
+		table->SetAlignmentToParent(Margin(4, 4, 4, 4));
+		table->SetCellPadding(6);
+		// add the table to the window;
+		this->GetContainerComposition()->AddChild(table);
+
+		// add group box for check boxes
 		{
-			FontProperties font;
-			font.fontFamily=L"Segoe UI";
-			font.size=18;
-			font.antialias=true;
-			labelHyperlink->SetFont(font);
+			GuiCellComposition* cell=<strong>CreateButtons(L"Check Boxes", L"This is a check box ", true, 0)</strong>;
+			table->AddChild(cell);
+			// this cell is the left cell
+			cell->SetSite(0, 0, 1, 1);
 		}
+
+		// add group box for radio buttons
 		{
-			INativeCursor* hand=GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand);
-			labelHyperlink->GetBoundsComposition()->SetAssociatedCursor(hand);
+			// create a group controller to group those radio buttons together
+			// so that select a radio button will unselect the previous one automatically
+			GuiSelectableButton::GroupController* groupController=new GuiSelectableButton::MutexGroupController;
+			this->AddComponent(groupController);
+
+			GuiCellComposition* cell=<strong>CreateButtons(L"Radio buttons", L"This is a radio button ", false, groupController)</strong>;
+			table->AddChild(cell);
+			// this cell is the right cell
+			cell->SetSite(0, 1, 1, 1);
 		}
-<strong>
-		labelHyperlink->GetEventReceiver()->mouseEnter.AttachMethod(
-			this, &HyperlinkWindow::labelHyperlink_OnMouseEnter
-			);
-		labelHyperlink->GetEventReceiver()->mouseLeave.AttachMethod(
-			this, &HyperlinkWindow::labelHyperlink_OnMouseLeave
-			);
-		labelHyperlink->GetEventReceiver()->leftButtonDown.AttachMethod(
-			this, &HyperlinkWindow::labelHyperlink_OnLeftButtonDown
-			);
-</strong>
-		this->AddChild(labelHyperlink);
+
+		// call this to calculate the size immediately if any indirect content in the table changes
+		// so that the window can calcaulte its correct size before calling the MoveToScreenCenter()
+		this->ForceCalculateSizeImmediately();
+		// move to the screen center
+		this->MoveToScreenCenter();
 	}
 
-	~HyperlinkWindow()
+	~CheckAndRadioWindow()
 	{
 	}
 };
 
 void GuiMain()
 {
-	GuiWindow* window=new HyperlinkWindow();
+	GuiWindow* window=new CheckAndRadioWindow();
 	GetApplication()->Run(window);
 	delete window;
 }
