@@ -201,6 +201,11 @@ body
     font-family: "CS Kirisame DL Mono", "Consolas", "DejaVu Sans Mono", monospace;
 }
 
+.CppCode strong
+{
+    color: #2536D3;
+}
+
 /****************************************************/
 
 .DemoTable
