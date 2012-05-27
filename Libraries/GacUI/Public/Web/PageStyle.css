@@ -32,6 +32,22 @@ body
     height: 135px;
 }
 
+.NavigateLogo.Left
+{
+    float: left;
+    padding-right: 16px;
+}
+
+.NavigateLogo.Right
+{
+    float: left;
+}
+
+.NavigateLogo.Clear
+{
+    clear: both;
+}
+
 /*Content title*/
 .Title
 {
