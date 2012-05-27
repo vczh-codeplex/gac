@@ -59,6 +59,59 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Controls.Label.Hyperlink", 
 		..\Public\Web\Demos\Controls.Label.Hyperlink\DXGUI_27.jpg = ..\Public\Web\Demos\Controls.Label.Hyperlink\DXGUI_27.jpg
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Controls.Button.CheckAndRadio", "Controls.Button.CheckAndRadio", "{911980A3-0D5B-403F-A622-D7C8621F1532}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\Demos\Controls.Button.CheckAndRadio\Demo.html = ..\Public\Web\Demos\Controls.Button.CheckAndRadio\Demo.html
+		..\Public\Web\Demos\Controls.Button.CheckAndRadio\DXGUI_30.jpg = ..\Public\Web\Demos\Controls.Button.CheckAndRadio\DXGUI_30.jpg
+		..\Public\Web\Demos\Controls.Button.CheckAndRadio\DXGUI_31.jpg = ..\Public\Web\Demos\Controls.Button.CheckAndRadio\DXGUI_31.jpg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Controls.Button.EnableDisable", "Controls.Button.EnableDisable", "{9D13D648-AD2B-4076-B7C3-FCF7FCE920A7}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\Demos\Controls.Button.EnableDisable\Demo.html = ..\Public\Web\Demos\Controls.Button.EnableDisable\Demo.html
+		..\Public\Web\Demos\Controls.Button.EnableDisable\DXGUI_28.jpg = ..\Public\Web\Demos\Controls.Button.EnableDisable\DXGUI_28.jpg
+		..\Public\Web\Demos\Controls.Button.EnableDisable\DXGUI_29.jpg = ..\Public\Web\Demos\Controls.Button.EnableDisable\DXGUI_29.jpg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ListBox.NameEditor", "ListBox.NameEditor", "{2E3AC607-BEFA-40EB-8BA0-7974496B71DE}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\Demos\ListBox.NameEditor\Demo.html = ..\Public\Web\Demos\ListBox.NameEditor\Demo.html
+		..\Public\Web\Demos\ListBox.NameEditor\DXGUI_38.jpg = ..\Public\Web\Demos\ListBox.NameEditor\DXGUI_38.jpg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ListBox.NameSelector", "ListBox.NameSelector", "{7242E412-AB42-40FF-AB08-A4723B40357A}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\Demos\ListBox.NameSelector\Demo.html = ..\Public\Web\Demos\ListBox.NameSelector\Demo.html
+		..\Public\Web\Demos\ListBox.NameSelector\DXGUI_39.jpg = ..\Public\Web\Demos\ListBox.NameSelector\DXGUI_39.jpg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ListBox.VirtualMode", "ListBox.VirtualMode", "{B5EA9260-902B-4C65-9AB8-7EDCDA3E4294}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\Demos\ListBox.VirtualMode\Demo.html = ..\Public\Web\Demos\ListBox.VirtualMode\Demo.html
+		..\Public\Web\Demos\ListBox.VirtualMode\DXGUI_40.jpg = ..\Public\Web\Demos\ListBox.VirtualMode\DXGUI_40.jpg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tab.TextBoxPage", "Tab.TextBoxPage", "{8D9163F0-50EB-4FDB-9BF4-79FE00D60B35}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\Demos\Tab.TextBoxPage\Demo.html = ..\Public\Web\Demos\Tab.TextBoxPage\Demo.html
+		..\Public\Web\Demos\Tab.TextBoxPage\DXGUI_32.jpg = ..\Public\Web\Demos\Tab.TextBoxPage\DXGUI_32.jpg
+		..\Public\Web\Demos\Tab.TextBoxPage\DXGUI_33.jpg = ..\Public\Web\Demos\Tab.TextBoxPage\DXGUI_33.jpg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TextBox.Colorizer", "TextBox.Colorizer", "{BACD5ECF-B12E-43B2-BEBB-42373248D450}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\Demos\TextBox.Colorizer\Demo.html = ..\Public\Web\Demos\TextBox.Colorizer\Demo.html
+		..\Public\Web\Demos\TextBox.Colorizer\DXGUI_35.jpg = ..\Public\Web\Demos\TextBox.Colorizer\DXGUI_35.jpg
+		..\Public\Web\Demos\TextBox.Colorizer\DXGUI_36.jpg = ..\Public\Web\Demos\TextBox.Colorizer\DXGUI_36.jpg
+		..\Public\Web\Demos\TextBox.Colorizer\DXGUI_37.jpg = ..\Public\Web\Demos\TextBox.Colorizer\DXGUI_37.jpg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TextBox.Editor", "TextBox.Editor", "{BFC63FCF-CE0A-4E66-BF7B-2510CD220465}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\Demos\TextBox.Editor\Demo.html = ..\Public\Web\Demos\TextBox.Editor\Demo.html
+		..\Public\Web\Demos\TextBox.Editor\DXGUI_34.jpg = ..\Public\Web\Demos\TextBox.Editor\DXGUI_34.jpg
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 3
@@ -96,5 +149,13 @@ Global
 		{BBA4C5F5-AB18-421B-A342-74A886A6DF59} = {1F74B7A4-5D65-4F06-9DAA-2E66D7FBEC92}
 		{CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B} = {1F74B7A4-5D65-4F06-9DAA-2E66D7FBEC92}
 		{B78E05EE-8C6F-444A-B8F0-E852D99A5CF1} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
+		{911980A3-0D5B-403F-A622-D7C8621F1532} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
+		{9D13D648-AD2B-4076-B7C3-FCF7FCE920A7} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
+		{2E3AC607-BEFA-40EB-8BA0-7974496B71DE} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
+		{7242E412-AB42-40FF-AB08-A4723B40357A} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
+		{B5EA9260-902B-4C65-9AB8-7EDCDA3E4294} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
+		{8D9163F0-50EB-4FDB-9BF4-79FE00D60B35} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
+		{BACD5ECF-B12E-43B2-BEBB-42373248D450} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
+		{BFC63FCF-CE0A-4E66-BF7B-2510CD220465} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
 	EndGlobalSection
 EndGlobal
