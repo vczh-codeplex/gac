@@ -206,6 +206,11 @@ body
     color: #2536D3;
 }
 
+.CppCode .ImportantCppCode
+{
+    color: #ED1C24;
+}
+
 /****************************************************/
 
 .DemoTable
