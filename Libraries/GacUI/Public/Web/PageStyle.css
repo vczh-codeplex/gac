@@ -48,6 +48,12 @@ body
     clear: both;
 }
 
+.NavigateLogo img
+{
+    width: 130px;
+    height: 130px;
+}
+
 /*Content title*/
 .Title
 {
@@ -180,6 +186,7 @@ body
 .GuideTable tbody td
 {
     border-width: 1px;
+    border-top-width: 0px;
     border-style: solid;
     border-color: #5EA8DE;
     padding: 5px;
@@ -195,11 +202,14 @@ body
     color: #404040;
 }
 
-.GuideTable tbody td a
+.GuideTable tbody td a.ReadMoreLink
 {
     display: block;
-    color: #0072BC;
     text-align: right;
+}
+.GuideTable tbody td a
+{
+    color: #0072BC;
     text-decoration: none;
 }
 .GuideTable tbody td a:hover
