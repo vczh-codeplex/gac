@@ -376,9 +376,9 @@ List Control
 				friend class collections::ReadonlyListEnumerator<Ptr<VisibleStyleHelper>>;
 				collections::Dictionary<IItemStyleController*, Ptr<VisibleStyleHelper>>		visibleStyles;
 
-				void											OnItemMouseEvent(compositions::GuiItemMouseEvent& itemEvent, int itemIndex, compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void											OnItemNotifyEvent(compositions::GuiItemNotifyEvent& itemEvent, int itemIndex, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void											AttachItemEvents(int itemIndex, IItemStyleController* style);
+				void											OnItemMouseEvent(compositions::GuiItemMouseEvent& itemEvent, IItemStyleController* style, compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void											OnItemNotifyEvent(compositions::GuiItemNotifyEvent& itemEvent, IItemStyleController* style, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void											AttachItemEvents(IItemStyleController* style);
 				void											DetachItemEvents(IItemStyleController* style);
 			public:
 				/// <summary>Create a control with a specified style provider.</summary>
