@@ -110,7 +110,6 @@ VirtualModeWindow
 class VirtualModeWindow : public GuiWindow
 {
 private:
-private:
 	GuiVirtualTextList*					listBox;
 	GuiButton*							buttonIncrease;
 	GuiButton*							buttonDecrease;
