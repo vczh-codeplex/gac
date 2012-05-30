@@ -109,6 +109,7 @@ FillData
 
 void SearchDirectoriesAndFiles(const WString& path, List<WString>& directories, List<WString>& files)
 {
+	// Use FindFirstFile, FindNextFile and FindClose to enumerate all directories and files
 	WIN32_FIND_DATA findData;
 	HANDLE findHandle=INVALID_HANDLE_VALUE;
 
@@ -153,6 +154,7 @@ void SearchDirectoriesAndFiles(const WString& path, List<WString>& directories, 
 
 Ptr<GuiImageData> GetFileIcon(const WString& fullPath, UINT uFlags)
 {
+	// Use SHGetFileInfo to get the correct icons for the specified directory or file.
 	SHFILEINFO info;
 	DWORD result=SHGetFileInfo(fullPath.Buffer(), 0, &info, sizeof(SHFILEINFO), uFlags);
 	Ptr<GuiImageData> imageData;
@@ -170,14 +172,103 @@ Ptr<GuiImageData> GetFileIcon(const WString& fullPath, UINT uFlags)
 
 void FillList(GuiListView* listView, const WString& path, List<WString>& files)
 {
+	// Fill all information about a directory or a file.
 	FOREACH(WString, file, files.Wrap())
 	{
 		Ptr<list::ListViewItem> item=new list::ListViewItem;
 		item->text=file;
 
 		WString fullPath=path+L"\\"+file;
-		item->largeImage=GetFileIcon(fullPath, SHGFI_LARGEICON | SHGFI_ICON);
-		item->smallImage=GetFileIcon(fullPath, SHGFI_SMALLICON | SHGFI_ICON);
+		{
+			// Get large icon.
+			item->largeImage=GetFileIcon(fullPath, SHGFI_LARGEICON | SHGFI_ICON);
+			// Get small icon.
+			item->smallImage=GetFileIcon(fullPath, SHGFI_SMALLICON | SHGFI_ICON);
+		}
+		{
+			// Get file type name.
+			SHFILEINFO info;
+			DWORD result=SHGetFileInfo(fullPath.Buffer(), 0, &info, sizeof(SHFILEINFO), SHGFI_TYPENAME);
+			WString type;
+			if(result)
+			{
+				type=info.szTypeName;
+			}
+			item->subItems.Add(type);
+		}
+		{
+			// Get file attributes.
+			WIN32_FILE_ATTRIBUTE_DATA info;
+			BOOL result=GetFileAttributesEx(fullPath.Buffer(), GetFileExInfoStandard, &info);
+			if(result)
+			{
+				{
+					// Get the localized string for the file last write date.
+					FILETIME localFileTime;
+					SYSTEMTIME localSystemTime;
+					FileTimeToLocalFileTime(&info.ftLastWriteTime, &localFileTime);
+					FileTimeToSystemTime(&localFileTime, &localSystemTime);
+
+					// Get the correct locale
+					wchar_t localeName[LOCALE_NAME_MAX_LENGTH]={0};
+					GetSystemDefaultLocaleName(localeName, sizeof(localeName)/sizeof(*localeName));
+
+					// Get the localized date string
+					wchar_t dateString[100]={0};
+					GetDateFormatEx(localeName, DATE_SHORTDATE, &localSystemTime, NULL, dateString, sizeof(dateString)/sizeof(*dateString), NULL);
+
+					// Get the localized time string
+					wchar_t timeString[100]={0};
+					GetTimeFormatEx(localeName, TIME_FORCE24HOURFORMAT | TIME_NOSECONDS, &localSystemTime, NULL, timeString, sizeof(timeString)/sizeof(*timeString));
+
+					// Write the Date column
+					item->subItems.Add(dateString+WString(L" ")+timeString);
+				}
+				{
+					// Get the string for file size
+					LARGE_INTEGER li;
+					li.HighPart=info.nFileSizeHigh;
+					li.LowPart=info.nFileSizeLow;
+
+					WString unit;
+					double size=0;
+					if(li.QuadPart>=1024*1024*1024)
+					{
+						unit=L" GB";
+						size=(double)li.QuadPart/(1024*1024*1024);
+					}
+					else if(li.QuadPart>=1024*1024)
+					{
+						unit=L" MB";
+						size=(double)li.QuadPart/(1024*1024);
+					}
+					else if(li.QuadPart>=1024)
+					{
+						unit=L" KB";
+						size=(double)li.QuadPart/1024;
+					}
+					else
+					{
+						unit=L" Bytes";
+						size=(double)li.QuadPart;
+					}
+
+					WString sizeString=ftow(size);
+					const wchar_t* reading=sizeString.Buffer();
+					const wchar_t* point=wcschr(sizeString.Buffer(), L'.');
+					if(point)
+					{
+						const wchar_t* max=reading+sizeString.Length();
+						point+=4;
+						if(point>max) point=max;
+						sizeString=sizeString.Left(point-reading);
+					}
+
+					// Write to the Size column
+					item->subItems.Add(sizeString+unit);
+				}
+			}
+		}
 
 		listView->GetItems().Add(item);
 	}
@@ -185,13 +276,31 @@ void FillList(GuiListView* listView, const WString& path, List<WString>& files)
 
 void FillData(GuiListView* listView)
 {
+	// Get the Windows directory, normally L"C:\Windows".
 	wchar_t folderPath[MAX_PATH]={0};
 	HRESULT hr=SHGetFolderPath(NULL, CSIDL_WINDOWS, NULL, 0, folderPath);
 	if(FAILED(hr)) return;
 
+	// Enumerate all directories and files in the Windows directory.
 	List<WString> directories;
 	List<WString> files;
 	SearchDirectoriesAndFiles(folderPath, directories, files);
+
+	// Set all columns. The first column is the primary column. All others are sub columns.
+	listView->GetItems().GetColumns().Add(new list::ListViewColumn(L"Name", 230));
+	listView->GetItems().GetColumns().Add(new list::ListViewColumn(L"Type", 120));
+	listView->GetItems().GetColumns().Add(new list::ListViewColumn(L"Date", 120));
+	listView->GetItems().GetColumns().Add(new list::ListViewColumn(L"Size", 120));
+	// Call this function after all columns are ready.
+	listView->GetItems().NotifyColumnsUpdated();
+
+	// Set all data columns (important sub solumns). The first sub item is 0. The primary column is not counted in.
+	listView->GetItems().GetDataColumns().Add(0);	// Type
+	listView->GetItems().GetDataColumns().Add(1);	// Data
+	// Call this function after all data columns are ready.
+	listView->GetItems().NotifyDataColumnsUpdated();
+
+	// Fill all directories and files into the list view
 	FillList(listView, folderPath, directories);
 	FillList(listView, folderPath, files);
 }
