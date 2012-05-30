@@ -147,7 +147,7 @@ GuiListControl
 
 			void GuiListControl::OnStyleInstalled(int itemIndex, IItemStyleController* style)
 			{
-				AttachItemEvents(itemIndex, style);
+				AttachItemEvents(style);
 			}
 
 			void GuiListControl::OnStyleUninstalled(IItemStyleController* style)
@@ -223,41 +223,55 @@ GuiListControl
 				CalculateView();
 			}
 
-			void GuiListControl::OnItemMouseEvent(compositions::GuiItemMouseEvent& itemEvent, int itemIndex, compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			void GuiListControl::OnItemMouseEvent(compositions::GuiItemMouseEvent& itemEvent, IItemStyleController* style, compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
-				GuiItemMouseEventArgs redirectArguments;
-				(GuiMouseEventArgs&)redirectArguments=arguments;
-				redirectArguments.itemIndex=itemIndex;
-				itemEvent.Execute(redirectArguments);
-				arguments=redirectArguments;
+				if(itemArranger)
+				{
+					int itemIndex=itemArranger->GetVisibleIndex(style);
+					if(itemIndex!=-1)
+					{
+						GuiItemMouseEventArgs redirectArguments;
+						(GuiMouseEventArgs&)redirectArguments=arguments;
+						redirectArguments.itemIndex=itemIndex;
+						itemEvent.Execute(redirectArguments);
+						arguments=redirectArguments;
+					}
+				}
 			}
 
-			void GuiListControl::OnItemNotifyEvent(compositions::GuiItemNotifyEvent& itemEvent, int itemIndex, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			void GuiListControl::OnItemNotifyEvent(compositions::GuiItemNotifyEvent& itemEvent, IItemStyleController* style, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				GuiItemEventArgs redirectArguments;
-				(GuiEventArgs&)redirectArguments=arguments;
-				redirectArguments.itemIndex=itemIndex;
-				itemEvent.Execute(redirectArguments);
-				arguments=redirectArguments;
+				if(itemArranger)
+				{
+					int itemIndex=itemArranger->GetVisibleIndex(style);
+					if(itemIndex!=-1)
+					{
+						GuiItemEventArgs redirectArguments;
+						(GuiEventArgs&)redirectArguments=arguments;
+						redirectArguments.itemIndex=itemIndex;
+						itemEvent.Execute(redirectArguments);
+						arguments=redirectArguments;
+					}
+				}
 			}
 
 #define ATTACH_ITEM_MOUSE_EVENT(EVENTNAME, ITEMEVENTNAME)\
 					{\
-						Func<void(GuiItemMouseEvent&, int, GuiGraphicsComposition*, GuiMouseEventArgs&)> func(this, &GuiListControl::OnItemMouseEvent);\
+						Func<void(GuiItemMouseEvent&, IItemStyleController*, GuiGraphicsComposition*, GuiMouseEventArgs&)> func(this, &GuiListControl::OnItemMouseEvent);\
 						helper->EVENTNAME##Handler=style->GetBoundsComposition()->GetEventReceiver()->EVENTNAME.AttachFunction(\
-							Curry(Curry(func)(ITEMEVENTNAME))(itemIndex)\
+							Curry(Curry(func)(ITEMEVENTNAME))(style)\
 							);\
 					}\
 
 #define ATTACH_ITEM_NOTIFY_EVENT(EVENTNAME, ITEMEVENTNAME)\
 					{\
-						Func<void(GuiItemNotifyEvent&, int, GuiGraphicsComposition*, GuiEventArgs&)> func(this, &GuiListControl::OnItemNotifyEvent);\
+						Func<void(GuiItemNotifyEvent&, IItemStyleController*, GuiGraphicsComposition*, GuiEventArgs&)> func(this, &GuiListControl::OnItemNotifyEvent);\
 						helper->EVENTNAME##Handler=style->GetBoundsComposition()->GetEventReceiver()->EVENTNAME.AttachFunction(\
-							Curry(Curry(func)(ITEMEVENTNAME))(itemIndex)\
+							Curry(Curry(func)(ITEMEVENTNAME))(style)\
 							);\
 					}\
 
-			void GuiListControl::AttachItemEvents(int itemIndex, IItemStyleController* style)
+			void GuiListControl::AttachItemEvents(IItemStyleController* style)
 			{
 				int index=visibleStyles.Keys().IndexOf(style);
 				if(index==-1)
