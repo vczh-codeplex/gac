@@ -170,106 +170,110 @@ Ptr<GuiImageData> GetFileIcon(const WString& fullPath, UINT uFlags)
 	return imageData;
 }
 
+void FillListViewItem(Ptr<list::ListViewItem> item, const WString& fullPath)
+{
+	{
+		// Get large icon.
+		item->largeImage=GetFileIcon(fullPath, SHGFI_LARGEICON | SHGFI_ICON);
+		// Get small icon.
+		item->smallImage=GetFileIcon(fullPath, SHGFI_SMALLICON | SHGFI_ICON);
+	}
+	{
+		// Get file type name and display name.
+		SHFILEINFO info;
+		DWORD result=SHGetFileInfo(fullPath.Buffer(), 0, &info, sizeof(SHFILEINFO), SHGFI_TYPENAME | SHGFI_DISPLAYNAME);
+		WString type;
+		WString displayName;
+		if(result)
+		{
+			displayName=info.szDisplayName;
+			type=info.szTypeName;
+		}
+		item->text=displayName;
+		item->subItems.Add(type);
+	}
+
+	// Get file attributes.
+	WIN32_FILE_ATTRIBUTE_DATA info;
+	BOOL result=GetFileAttributesEx(fullPath.Buffer(), GetFileExInfoStandard, &info);
+	if(result)
+	{
+		{
+			// Get the localized string for the file last write date.
+			FILETIME localFileTime;
+			SYSTEMTIME localSystemTime;
+			FileTimeToLocalFileTime(&info.ftLastWriteTime, &localFileTime);
+			FileTimeToSystemTime(&localFileTime, &localSystemTime);
+
+			// Get the correct locale
+			wchar_t localeName[LOCALE_NAME_MAX_LENGTH]={0};
+			GetSystemDefaultLocaleName(localeName, sizeof(localeName)/sizeof(*localeName));
+
+			// Get the localized date string
+			wchar_t dateString[100]={0};
+			GetDateFormatEx(localeName, DATE_SHORTDATE, &localSystemTime, NULL, dateString, sizeof(dateString)/sizeof(*dateString), NULL);
+
+			// Get the localized time string
+			wchar_t timeString[100]={0};
+			GetTimeFormatEx(localeName, TIME_FORCE24HOURFORMAT | TIME_NOSECONDS, &localSystemTime, NULL, timeString, sizeof(timeString)/sizeof(*timeString));
+
+			// Write the Date column
+			item->subItems.Add(dateString+WString(L" ")+timeString);
+		}
+		{
+			// Get the string for file size
+			LARGE_INTEGER li;
+			li.HighPart=info.nFileSizeHigh;
+			li.LowPart=info.nFileSizeLow;
+
+			WString unit;
+			double size=0;
+			if(li.QuadPart>=1024*1024*1024)
+			{
+				unit=L" GB";
+				size=(double)li.QuadPart/(1024*1024*1024);
+			}
+			else if(li.QuadPart>=1024*1024)
+			{
+				unit=L" MB";
+				size=(double)li.QuadPart/(1024*1024);
+			}
+			else if(li.QuadPart>=1024)
+			{
+				unit=L" KB";
+				size=(double)li.QuadPart/1024;
+			}
+			else
+			{
+				unit=L" Bytes";
+				size=(double)li.QuadPart;
+			}
+
+			WString sizeString=ftow(size);
+			const wchar_t* reading=sizeString.Buffer();
+			const wchar_t* point=wcschr(sizeString.Buffer(), L'.');
+			if(point)
+			{
+				const wchar_t* max=reading+sizeString.Length();
+				point+=4;
+				if(point>max) point=max;
+				sizeString=sizeString.Left(point-reading);
+			}
+
+			// Write to the Size column
+			item->subItems.Add(sizeString+unit);
+		}
+	}
+}
+
 void FillList(GuiListView* listView, const WString& path, List<WString>& files)
 {
 	// Fill all information about a directory or a file.
 	FOREACH(WString, file, files.Wrap())
 	{
 		Ptr<list::ListViewItem> item=new list::ListViewItem;
-		item->text=file;
-
 		WString fullPath=path+L"\\"+file;
-		{
-			// Get large icon.
-			item->largeImage=GetFileIcon(fullPath, SHGFI_LARGEICON | SHGFI_ICON);
-			// Get small icon.
-			item->smallImage=GetFileIcon(fullPath, SHGFI_SMALLICON | SHGFI_ICON);
-		}
-		{
-			// Get file type name.
-			SHFILEINFO info;
-			DWORD result=SHGetFileInfo(fullPath.Buffer(), 0, &info, sizeof(SHFILEINFO), SHGFI_TYPENAME);
-			WString type;
-			if(result)
-			{
-				type=info.szTypeName;
-			}
-			item->subItems.Add(type);
-		}
-		{
-			// Get file attributes.
-			WIN32_FILE_ATTRIBUTE_DATA info;
-			BOOL result=GetFileAttributesEx(fullPath.Buffer(), GetFileExInfoStandard, &info);
-			if(result)
-			{
-				{
-					// Get the localized string for the file last write date.
-					FILETIME localFileTime;
-					SYSTEMTIME localSystemTime;
-					FileTimeToLocalFileTime(&info.ftLastWriteTime, &localFileTime);
-					FileTimeToSystemTime(&localFileTime, &localSystemTime);
-
-					// Get the correct locale
-					wchar_t localeName[LOCALE_NAME_MAX_LENGTH]={0};
-					GetSystemDefaultLocaleName(localeName, sizeof(localeName)/sizeof(*localeName));
-
-					// Get the localized date string
-					wchar_t dateString[100]={0};
-					GetDateFormatEx(localeName, DATE_SHORTDATE, &localSystemTime, NULL, dateString, sizeof(dateString)/sizeof(*dateString), NULL);
-
-					// Get the localized time string
-					wchar_t timeString[100]={0};
-					GetTimeFormatEx(localeName, TIME_FORCE24HOURFORMAT | TIME_NOSECONDS, &localSystemTime, NULL, timeString, sizeof(timeString)/sizeof(*timeString));
-
-					// Write the Date column
-					item->subItems.Add(dateString+WString(L" ")+timeString);
-				}
-				{
-					// Get the string for file size
-					LARGE_INTEGER li;
-					li.HighPart=info.nFileSizeHigh;
-					li.LowPart=info.nFileSizeLow;
-
-					WString unit;
-					double size=0;
-					if(li.QuadPart>=1024*1024*1024)
-					{
-						unit=L" GB";
-						size=(double)li.QuadPart/(1024*1024*1024);
-					}
-					else if(li.QuadPart>=1024*1024)
-					{
-						unit=L" MB";
-						size=(double)li.QuadPart/(1024*1024);
-					}
-					else if(li.QuadPart>=1024)
-					{
-						unit=L" KB";
-						size=(double)li.QuadPart/1024;
-					}
-					else
-					{
-						unit=L" Bytes";
-						size=(double)li.QuadPart;
-					}
-
-					WString sizeString=ftow(size);
-					const wchar_t* reading=sizeString.Buffer();
-					const wchar_t* point=wcschr(sizeString.Buffer(), L'.');
-					if(point)
-					{
-						const wchar_t* max=reading+sizeString.Length();
-						point+=4;
-						if(point>max) point=max;
-						sizeString=sizeString.Left(point-reading);
-					}
-
-					// Write to the Size column
-					item->subItems.Add(sizeString+unit);
-				}
-			}
-		}
-
+		FillListViewItem(item, fullPath);
 		listView->GetItems().Add(item);
 	}
 }
