@@ -763,161 +763,18 @@ Predefined ItemProvider
 					bool										DetachCallback(GuiListControl::IItemProviderCallback* value);
 				};
 
-				template<typename T, typename K=typename KeyType<T>::Type>
-				class ListWrapperProvider : public ItemProviderBase, public collections::IList<T, K>
-				{
-				protected:
-					collections::IList<T, K>*			proxy;
-
-					ListWrapperProvider()
-						:proxy(0)
-					{
-					}
-				public:
-					ListWrapperProvider(collections::IList<T, K>* _proxy)
-						:proxy(_proxy)
-					{
-					}
-
-					~ListWrapperProvider()
-					{
-					}
-
-					bool NotifyUpdate(int start, int count=1)
-					{
-						if(start<0 || start>=proxy->Count() || count<=0 || start+count>proxy->Count())
-						{
-							return false;
-						}
-						else
-						{
-							InvokeOnItemModified(start, count, count);
-							return true;
-						}
-					}
-
-					collections::IEnumerator<T>* CreateEnumerator()const
-					{
-						return proxy->CreateEnumerator();
-					}
-
-					bool Contains(const K& item)const
-					{
-						return proxy->Contains(item);
-					}
-
-					vint Count()const
-					{
-						return proxy->Count();
-					}
-
-					vint Count()
-					{
-						return proxy->Count();
-					}
-
-					const T& Get(vint index)const
-					{
-						return proxy->Get(index);
-					}
-
-					const T& operator[](vint index)const
-					{
-						return (*proxy)[index];
-					}
-
-					vint IndexOf(const K& item)const
-					{
-						return proxy->IndexOf(item);
-					}
-
-					vint Add(const T& item)
-					{
-						return Insert(proxy->Count(), item);
-					}
-
-					bool Remove(const K& item)
-					{
-						vint index=proxy->IndexOf(item);
-						if(index==-1) return false;
-						return RemoveAt(index);
-					}
-
-					bool RemoveAt(vint index)
-					{
-						if(proxy->RemoveAt(index))
-						{
-							InvokeOnItemModified(index, 1, 0);
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					}
-
-					bool RemoveRange(vint index, vint count)
-					{
-						if(proxy->RemoveRange(index, count))
-						{
-							InvokeOnItemModified(index, count, 0);
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					}
-
-					bool Clear()
-					{
-						vint count=proxy->Count();
-						if(proxy->Clear())
-						{
-							InvokeOnItemModified(0, count, 0);
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					}
-
-					vint Insert(vint index, const T& item)
-					{
-						vint result=proxy->Insert(index, item);
-						InvokeOnItemModified(index, 0, 1);
-						return result;
-					}
-
-					bool Set(vint index, const T& item)
-					{
-						if(proxy->Set(index, item))
-						{
-							InvokeOnItemModified(index, 1, 1);
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					}
-				};
-
 				template<typename T>
-				class ListProvider : public ListWrapperProvider<T>
+				class ListProvider : public ItemProviderBase, public ItemsBase<T>
 				{
 				protected:
-					collections::List<T>		list;
-
-				public:
-					ListProvider()
+					void NotifyUpdateInternal(int start, int count, int newCount)
 					{
-						proxy=&list.Wrap();
+						InvokeOnItemModified(start, count, newCount);
 					}
-
-					~ListProvider()
+				public:
+					int Count()override
 					{
+						return items.Count();
 					}
 				};
 			}

@@ -1758,7 +1758,7 @@ ListViewDetailContentProvider
 				}
 
 /***********************************************************************
-ListViewItemProvider
+ListViewColumn
 ***********************************************************************/
 
 				ListViewColumn::ListViewColumn(const WString& _text, int _size)
@@ -1766,6 +1766,50 @@ ListViewItemProvider
 					,size(_size)
 				{
 				}
+
+/***********************************************************************
+ListViewDataColumns
+***********************************************************************/
+
+				void ListViewDataColumns::NotifyUpdateInternal(int start, int count, int newCount)
+				{
+					itemProvider->NotifyUpdate(0, itemProvider->Count());
+				}
+
+				ListViewDataColumns::ListViewDataColumns()
+					:itemProvider(0)
+				{
+				}
+
+				ListViewDataColumns::~ListViewDataColumns()
+				{
+				}
+
+/***********************************************************************
+ListViewColumns
+***********************************************************************/
+
+				void ListViewColumns::NotifyUpdateInternal(int start, int count, int newCount)
+				{
+					for(int i=0;i<itemProvider->columnItemViewCallbacks.Count();i++)
+					{
+						itemProvider->columnItemViewCallbacks[i]->OnColumnChanged();
+					}
+					itemProvider->NotifyUpdate(0, itemProvider->Count());
+				}
+
+				ListViewColumns::ListViewColumns()
+					:itemProvider(0)
+				{
+				}
+
+				ListViewColumns::~ListViewColumns()
+				{
+				}
+
+/***********************************************************************
+ListViewItemProvider
+***********************************************************************/
 
 				bool ListViewItemProvider::ContainsPrimaryText(int itemIndex)
 				{
@@ -1885,6 +1929,8 @@ ListViewItemProvider
 
 				ListViewItemProvider::ListViewItemProvider()
 				{
+					columns.itemProvider=this;
+					dataColumns.itemProvider=this;
 				}
 
 				ListViewItemProvider::~ListViewItemProvider()
@@ -1915,27 +1961,14 @@ ListViewItemProvider
 				{
 				}
 
-				collections::IList<int>& ListViewItemProvider::GetDataColumns()
+				ListViewDataColumns& ListViewItemProvider::GetDataColumns()
 				{
-					return dataColumns.Wrap();
+					return dataColumns;
 				}
 
-				void ListViewItemProvider::NotifyDataColumnsUpdated()
+				ListViewColumns& ListViewItemProvider::GetColumns()
 				{
-					NotifyUpdate(0, Count());
-				}
-
-				collections::IList<Ptr<ListViewColumn>>& ListViewItemProvider::GetColumns()
-				{
-					return columns.Wrap();
-				}
-
-				void ListViewItemProvider::NotifyColumnsUpdated()
-				{
-					for(int i=0;i<columnItemViewCallbacks.Count();i++)
-					{
-						columnItemViewCallbacks[i]->OnColumnChanged();
-					}
+					return columns;
 				}
 			}
 
@@ -2595,7 +2628,7 @@ TextItemProvider
 
 				void TextItemProvider::SetCheckedSilently(int itemIndex, bool value)
 				{
-					list[itemIndex].checked=value;
+					items[itemIndex].checked=value;
 				}
 
 				TextItemProvider::TextItemProvider()
@@ -2608,7 +2641,7 @@ TextItemProvider
 					
 				void TextItemProvider::SetText(int itemIndex, const WString& value)
 				{
-					list[itemIndex].text=value;
+					items[itemIndex].text=value;
 					InvokeOnItemModified(itemIndex, 1, 1);
 				}
 

@@ -15774,6 +15774,151 @@ Scrolls
 				GuiScrollContainer(GuiScrollContainer::IStyleProvider* styleProvider);
 				~GuiScrollContainer();
 			};
+			
+			namespace list
+			{
+/***********************************************************************
+List interface common implementation
+***********************************************************************/
+
+				template<typename T, typename K=typename KeyType<T>::Type>
+				class ItemsBase : public Object, public collections::IList<T, K>
+				{
+				protected:
+					collections::List<T, K>					items;
+
+					virtual void							NotifyUpdateInternal(int start, int count, int newCount)=0;
+					
+				public:
+					ItemsBase()
+					{
+					}
+
+					~ItemsBase()
+					{
+					}
+
+					bool NotifyUpdate(int start, int count=1)
+					{
+						if(start<0 || start>=items.Count() || count<=0 || start+count>items.Count())
+						{
+							return false;
+						}
+						else
+						{
+							NotifyUpdateInternal(start, count, count);
+							return true;
+						}
+					}
+
+					collections::IEnumerator<T>* CreateEnumerator()const
+					{
+						return items.Wrap().CreateEnumerator();
+					}
+
+					bool Contains(const K& item)const
+					{
+						return items.Contains(item);
+					}
+
+					vint Count()const
+					{
+						return items.Count();
+					}
+
+					vint Count()
+					{
+						return items.Count();
+					}
+
+					const T& Get(vint index)const
+					{
+						return items.Get(index);
+					}
+
+					const T& operator[](vint index)const
+					{
+						return items.Get(index);
+					}
+
+					vint IndexOf(const K& item)const
+					{
+						return items.IndexOf(item);
+					}
+
+					vint Add(const T& item)
+					{
+						return Insert(items.Count(), item);
+					}
+
+					bool Remove(const K& item)
+					{
+						vint index=items.IndexOf(item);
+						if(index==-1) return false;
+						return RemoveAt(index);
+					}
+
+					bool RemoveAt(vint index)
+					{
+						if(items.RemoveAt(index))
+						{
+							NotifyUpdateInternal(index, 1, 0);
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
+
+					bool RemoveRange(vint index, vint count)
+					{
+						if(items.RemoveRange(index, count))
+						{
+							NotifyUpdateInternal(index, count, 0);
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
+
+					bool Clear()
+					{
+						vint count=items.Count();
+						if(items.Clear())
+						{
+							NotifyUpdateInternal(0, count, 0);
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
+
+					vint Insert(vint index, const T& item)
+					{
+						vint result=items.Insert(index, item);
+						NotifyUpdateInternal(index, 0, 1);
+						return result;
+					}
+
+					bool Set(vint index, const T& item)
+					{
+						if(items.Set(index, item))
+						{
+							NotifyUpdateInternal(index, 1, 1);
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
+				};
+			}
 		}
 	}
 }
@@ -16851,161 +16996,18 @@ Predefined ItemProvider
 					bool										DetachCallback(GuiListControl::IItemProviderCallback* value);
 				};
 
-				template<typename T, typename K=typename KeyType<T>::Type>
-				class ListWrapperProvider : public ItemProviderBase, public collections::IList<T, K>
-				{
-				protected:
-					collections::IList<T, K>*			proxy;
-
-					ListWrapperProvider()
-						:proxy(0)
-					{
-					}
-				public:
-					ListWrapperProvider(collections::IList<T, K>* _proxy)
-						:proxy(_proxy)
-					{
-					}
-
-					~ListWrapperProvider()
-					{
-					}
-
-					bool NotifyUpdate(int start, int count=1)
-					{
-						if(start<0 || start>=proxy->Count() || count<=0 || start+count>proxy->Count())
-						{
-							return false;
-						}
-						else
-						{
-							InvokeOnItemModified(start, count, count);
-							return true;
-						}
-					}
-
-					collections::IEnumerator<T>* CreateEnumerator()const
-					{
-						return proxy->CreateEnumerator();
-					}
-
-					bool Contains(const K& item)const
-					{
-						return proxy->Contains(item);
-					}
-
-					vint Count()const
-					{
-						return proxy->Count();
-					}
-
-					vint Count()
-					{
-						return proxy->Count();
-					}
-
-					const T& Get(vint index)const
-					{
-						return proxy->Get(index);
-					}
-
-					const T& operator[](vint index)const
-					{
-						return (*proxy)[index];
-					}
-
-					vint IndexOf(const K& item)const
-					{
-						return proxy->IndexOf(item);
-					}
-
-					vint Add(const T& item)
-					{
-						return Insert(proxy->Count(), item);
-					}
-
-					bool Remove(const K& item)
-					{
-						vint index=proxy->IndexOf(item);
-						if(index==-1) return false;
-						return RemoveAt(index);
-					}
-
-					bool RemoveAt(vint index)
-					{
-						if(proxy->RemoveAt(index))
-						{
-							InvokeOnItemModified(index, 1, 0);
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					}
-
-					bool RemoveRange(vint index, vint count)
-					{
-						if(proxy->RemoveRange(index, count))
-						{
-							InvokeOnItemModified(index, count, 0);
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					}
-
-					bool Clear()
-					{
-						vint count=proxy->Count();
-						if(proxy->Clear())
-						{
-							InvokeOnItemModified(0, count, 0);
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					}
-
-					vint Insert(vint index, const T& item)
-					{
-						vint result=proxy->Insert(index, item);
-						InvokeOnItemModified(index, 0, 1);
-						return result;
-					}
-
-					bool Set(vint index, const T& item)
-					{
-						if(proxy->Set(index, item))
-						{
-							InvokeOnItemModified(index, 1, 1);
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					}
-				};
-
 				template<typename T>
-				class ListProvider : public ListWrapperProvider<T>
+				class ListProvider : public ItemProviderBase, public ItemsBase<T>
 				{
 				protected:
-					collections::List<T>		list;
-
-				public:
-					ListProvider()
+					void NotifyUpdateInternal(int start, int count, int newCount)
 					{
-						proxy=&list.Wrap();
+						InvokeOnItemModified(start, count, newCount);
 					}
-
-					~ListProvider()
+				public:
+					int Count()override
 					{
+						return items.Count();
 					}
 				};
 			}
@@ -17774,6 +17776,30 @@ ListView
 
 					ListViewColumn(const WString& _text=L"", int _size=160);
 				};
+
+				class ListViewDataColumns : public ItemsBase<int>
+				{
+					friend class ListViewItemProvider;
+				protected:
+					ListViewItemProvider*						itemProvider;
+
+					void NotifyUpdateInternal(int start, int count, int newCount)override;
+				public:
+					ListViewDataColumns();
+					~ListViewDataColumns();
+				};
+
+				class ListViewColumns : public ItemsBase<Ptr<ListViewColumn>>
+				{
+					friend class ListViewItemProvider;
+				protected:
+					ListViewItemProvider*						itemProvider;
+
+					void NotifyUpdateInternal(int start, int count, int newCount)override;
+				public:
+					ListViewColumns();
+					~ListViewColumns();
+				};
 				
 				class ListViewItemProvider
 					: public ListProvider<Ptr<ListViewItem>>
@@ -17781,10 +17807,12 @@ ListView
 					, protected virtual ListViewColumnItemArranger::IColumnItemView
 					, public Description<ListViewItemProvider>
 				{
+					friend class ListViewColumns;
+					friend class ListViewDataColumns;
 					typedef collections::List<ListViewColumnItemArranger::IColumnItemViewCallback*>		ColumnItemViewCallbackList;
 				protected:
-					collections::List<int>						dataColumns;
-					collections::List<Ptr<ListViewColumn>>		columns;
+					ListViewDataColumns							dataColumns;
+					ListViewColumns								columns;
 					ColumnItemViewCallbackList					columnItemViewCallbacks;
 
 					bool										ContainsPrimaryText(int itemIndex)override;
@@ -17809,10 +17837,8 @@ ListView
 					IDescriptable*								RequestView(const WString& identifier)override;
 					void										ReleaseView(IDescriptable* view)override;
 
-					collections::IList<int>&					GetDataColumns();
-					void										NotifyDataColumnsUpdated();
-					collections::IList<Ptr<ListViewColumn>>&	GetColumns();
-					void										NotifyColumnsUpdated();
+					ListViewDataColumns&						GetDataColumns();
+					ListViewColumns&							GetColumns();
 				};
 			}
 			
