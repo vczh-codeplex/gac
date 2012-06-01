@@ -295,14 +295,10 @@ void FillData(GuiListView* listView)
 	listView->GetItems().GetColumns().Add(new list::ListViewColumn(L"Type", 120));
 	listView->GetItems().GetColumns().Add(new list::ListViewColumn(L"Date", 120));
 	listView->GetItems().GetColumns().Add(new list::ListViewColumn(L"Size", 120));
-	// Call this function after all columns are ready.
-	listView->GetItems().NotifyColumnsUpdated();
 
 	// Set all data columns (important sub solumns). The first sub item is 0. The primary column is not counted in.
 	listView->GetItems().GetDataColumns().Add(0);	// Type
 	listView->GetItems().GetDataColumns().Add(1);	// Data
-	// Call this function after all data columns are ready.
-	listView->GetItems().NotifyDataColumnsUpdated();
 
 	// Fill all directories and files into the list view
 	FillList(listView, folderPath, directories);

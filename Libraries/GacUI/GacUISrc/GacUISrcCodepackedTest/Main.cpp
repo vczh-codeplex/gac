@@ -766,7 +766,6 @@ void SetupListviewWindow(GuiControlHost* controlHost, GuiControl* container)
 		listControl->GetItems().GetColumns().Add(new list::ListViewColumn(L"Description"));
 		listControl->GetItems().GetColumns().Add(new list::ListViewColumn(L"Index"));
 		listControl->GetItems().GetColumns().Add(new list::ListViewColumn(L"Type"));
-		listControl->GetItems().NotifyColumnsUpdated();
 	}
 	{
 		GuiTextList* typeList=new GuiTextList(new win7::Win7MultilineTextBoxProvider, new win7::Win7TextListProvider);
@@ -805,13 +804,11 @@ void SetupListviewWindow(GuiControlHost* controlHost, GuiControl* container)
 				case 4:
 					listControl->GetItems().GetDataColumns().Add(0);
 					listControl->GetItems().GetDataColumns().Add(2);
-					listControl->GetItems().NotifyDataColumnsUpdated();
 					listControl->ChangeItemStyle(new list::ListViewTileContentProvider);
 					break;
 				case 5:
 					listControl->GetItems().GetDataColumns().Add(1);
 					listControl->GetItems().GetDataColumns().Add(2);
-					listControl->GetItems().NotifyDataColumnsUpdated();
 					listControl->ChangeItemStyle(new list::ListViewInformationContentProvider);
 					break;
 				}

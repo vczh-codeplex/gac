@@ -255,7 +255,7 @@ TextItemProvider
 
 				void TextItemProvider::SetCheckedSilently(int itemIndex, bool value)
 				{
-					list[itemIndex].checked=value;
+					items[itemIndex].checked=value;
 				}
 
 				TextItemProvider::TextItemProvider()
@@ -268,7 +268,7 @@ TextItemProvider
 					
 				void TextItemProvider::SetText(int itemIndex, const WString& value)
 				{
-					list[itemIndex].text=value;
+					items[itemIndex].text=value;
 					InvokeOnItemModified(itemIndex, 1, 1);
 				}
 

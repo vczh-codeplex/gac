@@ -614,6 +614,30 @@ ListView
 					/// <param name="_size">The specified size.</param>
 					ListViewColumn(const WString& _text=L"", int _size=160);
 				};
+
+				class ListViewDataColumns : public ItemsBase<int>
+				{
+					friend class ListViewItemProvider;
+				protected:
+					ListViewItemProvider*						itemProvider;
+
+					void NotifyUpdateInternal(int start, int count, int newCount)override;
+				public:
+					ListViewDataColumns();
+					~ListViewDataColumns();
+				};
+
+				class ListViewColumns : public ItemsBase<Ptr<ListViewColumn>>
+				{
+					friend class ListViewItemProvider;
+				protected:
+					ListViewItemProvider*						itemProvider;
+
+					void NotifyUpdateInternal(int start, int count, int newCount)override;
+				public:
+					ListViewColumns();
+					~ListViewColumns();
+				};
 				
 				/// <summary>Item provider for <see cref="GuiListViewBase"/> and <see cref="ListViewItemStyleProvider"/>.</summary>
 				class ListViewItemProvider
@@ -622,10 +646,12 @@ ListView
 					, protected virtual ListViewColumnItemArranger::IColumnItemView
 					, public Description<ListViewItemProvider>
 				{
+					friend class ListViewColumns;
+					friend class ListViewDataColumns;
 					typedef collections::List<ListViewColumnItemArranger::IColumnItemViewCallback*>		ColumnItemViewCallbackList;
 				protected:
-					collections::List<int>						dataColumns;
-					collections::List<Ptr<ListViewColumn>>		columns;
+					ListViewDataColumns							dataColumns;
+					ListViewColumns								columns;
 					ColumnItemViewCallbackList					columnItemViewCallbacks;
 
 					bool										ContainsPrimaryText(int itemIndex)override;
@@ -652,14 +678,10 @@ ListView
 
 					/// <summary>Get all data columns indices in columns.</summary>
 					/// <returns>All data columns indices in columns.</returns>
-					collections::IList<int>&					GetDataColumns();
-					/// <summary>Notify that indices in data columns are modified.</summary>
-					void										NotifyDataColumnsUpdated();
+					ListViewDataColumns&						GetDataColumns();
 					/// <summary>Get all columns.</summary>
 					/// <returns>All columns.</returns>
-					collections::IList<Ptr<ListViewColumn>>&	GetColumns();
-					/// <summary>Notify that columns.</summary>
-					void										NotifyColumnsUpdated();
+					ListViewColumns&							GetColumns();
 				};
 			}
 			

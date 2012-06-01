@@ -718,6 +718,151 @@ Scrolls
 				GuiScrollContainer(GuiScrollContainer::IStyleProvider* styleProvider);
 				~GuiScrollContainer();
 			};
+			
+			namespace list
+			{
+/***********************************************************************
+List interface common implementation
+***********************************************************************/
+
+				template<typename T, typename K=typename KeyType<T>::Type>
+				class ItemsBase : public Object, public collections::IList<T, K>
+				{
+				protected:
+					collections::List<T, K>					items;
+
+					virtual void							NotifyUpdateInternal(int start, int count, int newCount)=0;
+					
+				public:
+					ItemsBase()
+					{
+					}
+
+					~ItemsBase()
+					{
+					}
+
+					bool NotifyUpdate(int start, int count=1)
+					{
+						if(start<0 || start>=items.Count() || count<=0 || start+count>items.Count())
+						{
+							return false;
+						}
+						else
+						{
+							NotifyUpdateInternal(start, count, count);
+							return true;
+						}
+					}
+
+					collections::IEnumerator<T>* CreateEnumerator()const
+					{
+						return items.Wrap().CreateEnumerator();
+					}
+
+					bool Contains(const K& item)const
+					{
+						return items.Contains(item);
+					}
+
+					vint Count()const
+					{
+						return items.Count();
+					}
+
+					vint Count()
+					{
+						return items.Count();
+					}
+
+					const T& Get(vint index)const
+					{
+						return items.Get(index);
+					}
+
+					const T& operator[](vint index)const
+					{
+						return items.Get(index);
+					}
+
+					vint IndexOf(const K& item)const
+					{
+						return items.IndexOf(item);
+					}
+
+					vint Add(const T& item)
+					{
+						return Insert(items.Count(), item);
+					}
+
+					bool Remove(const K& item)
+					{
+						vint index=items.IndexOf(item);
+						if(index==-1) return false;
+						return RemoveAt(index);
+					}
+
+					bool RemoveAt(vint index)
+					{
+						if(items.RemoveAt(index))
+						{
+							NotifyUpdateInternal(index, 1, 0);
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
+
+					bool RemoveRange(vint index, vint count)
+					{
+						if(items.RemoveRange(index, count))
+						{
+							NotifyUpdateInternal(index, count, 0);
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
+
+					bool Clear()
+					{
+						vint count=items.Count();
+						if(items.Clear())
+						{
+							NotifyUpdateInternal(0, count, 0);
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
+
+					vint Insert(vint index, const T& item)
+					{
+						vint result=items.Insert(index, item);
+						NotifyUpdateInternal(index, 0, 1);
+						return result;
+					}
+
+					bool Set(vint index, const T& item)
+					{
+						if(items.Set(index, item))
+						{
+							NotifyUpdateInternal(index, 1, 1);
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
+				};
+			}
 		}
 	}
 }
