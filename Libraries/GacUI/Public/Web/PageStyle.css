@@ -57,7 +57,7 @@ body
 /*Content title*/
 .Title
 {
-    font-family: Segoe UI;
+    /*font-family: Segoe UI;*/
     text-align: left;
     font-style: italic;
     font-weight: bold;
@@ -69,7 +69,7 @@ body
 /*Content sub title*/
 .SubTitle
 {
-    font-family: Segoe UI;
+    /*font-family: Segoe UI;*/
     text-align: left;
     font-style: italic;
     font-weight: normal;
@@ -80,7 +80,7 @@ body
 /*Content table*/
 .ContentTable
 {
-    font-family: Segoe UI;
+    /*font-family: Segoe UI;*/
     font-size: 24px;
     border: 0px;
 }
@@ -94,7 +94,7 @@ body
     width: 130px;
     height: 32px;
     line-height: 32px;
-    font-family: Segoe UI;
+    /*font-family: Segoe UI;*/
     font-size: 16px;
     background-color: #F0F1F4;
     color: #000000;
