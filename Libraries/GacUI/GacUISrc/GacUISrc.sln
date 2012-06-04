@@ -6,6 +6,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Public", "Public", "{843780E4-7D2F-4955-B988-88325DFB6B9E}"
 	ProjectSection(SolutionItems) = preProject
 		..\Public\CodegenConfig.xml = ..\Public\CodegenConfig.xml
+		..\Public\readlist-raw.txt = ..\Public\readlist-raw.txt
 		..\Public\Release.bat = ..\Public\Release.bat
 		..\Public\SuperUnicode.txt = ..\Public\SuperUnicode.txt
 	EndProjectSection
