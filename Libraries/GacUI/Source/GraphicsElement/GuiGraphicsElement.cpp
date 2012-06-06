@@ -502,12 +502,17 @@ GuiImageFrameElement
 			{
 				if(image!=_image || frameIndex!=_frameIndex)
 				{
-					if(0<=_frameIndex && _frameIndex<_image->GetFrameCount())
+					if(!_image)
+					{
+						image=0;
+						frameIndex=0;
+					}
+					else if(0<=_frameIndex && _frameIndex<_image->GetFrameCount())
 					{
 						image=_image;
 						frameIndex=_frameIndex;
-						renderer->OnElementStateChanged();
 					}
+					renderer->OnElementStateChanged();
 				}
 			}
 
