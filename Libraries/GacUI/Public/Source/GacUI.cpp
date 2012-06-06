@@ -5063,7 +5063,7 @@ GuiScrollView::StyleController
 			void GuiScrollView::StyleController::AdjustView(Size fullSize)
 			{
 				Size viewSize=containerComposition->GetBounds().GetSize();
-				if(fullSize.x<viewSize.x)
+				if(fullSize.x<=viewSize.x)
 				{
 					horizontalScroll->SetEnabled(false);
 					horizontalScroll->SetPosition(0);
@@ -5074,7 +5074,7 @@ GuiScrollView::StyleController
 					horizontalScroll->SetTotalSize(fullSize.x);
 					horizontalScroll->SetPageSize(viewSize.x);
 				}
-				if(fullSize.y<viewSize.y)
+				if(fullSize.y<=viewSize.y)
 				{
 					verticalScroll->SetEnabled(false);
 					verticalScroll->SetPosition(0);
