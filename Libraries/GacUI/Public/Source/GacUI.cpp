@@ -7807,28 +7807,40 @@ GuiTextElementOperator
 					textElement->SetCaretBegin(pos);
 				}
 				textElement->SetCaretEnd(pos);
-				textElement->SetCaretVisible(true);
+				if(textControl)
+				{
+					GuiGraphicsHost* host=textComposition->GetRelatedGraphicsHost();
+					if(host)
+					{
+						if(host->GetFocusedComposition()==textControl->GetFocusableComposition())
+						{
+							textElement->SetCaretVisible(true);
+						}
+					}
+				}
 
 				Rect bounds=textElement->GetLines().GetRectFromTextPos(pos);
 				Rect view=Rect(textElement->GetViewPosition(), textComposition->GetBounds().GetSize());
 				Point viewPoint=view.LeftTop();
-				int offsetX=textElement->GetLines().GetRowHeight()*5;
 
-				if(bounds.x1<view.x1)
+				if(view.x2>view.x1 && view.y2>view.y1)
 				{
-					viewPoint.x=bounds.x1-offsetX;
-				}
-				else if(bounds.x2>view.x2)
-				{
-					viewPoint.x=bounds.x2-view.Width()+offsetX;
-				}
-				if(bounds.y1<view.y1)
-				{
-					viewPoint.y=bounds.y1;
-				}
-				else if(bounds.y2>view.y2)
-				{
-					viewPoint.y=bounds.y2-view.Height();
+					if(bounds.x1<view.x1)
+					{
+						viewPoint.x=bounds.x1;
+					}
+					else if(bounds.x2>view.x2)
+					{
+						viewPoint.x=bounds.x2-view.Width();
+					}
+					if(bounds.y1<view.y1)
+					{
+						viewPoint.y=bounds.y1;
+					}
+					else if(bounds.y2>view.y2)
+					{
+						viewPoint.y=bounds.y2-view.Height();
+					}
 				}
 
 				callback->ScrollToView(viewPoint);
@@ -7921,9 +7933,12 @@ GuiTextElementOperator
 						{
 							if(end.column==0)
 							{
-								end.row--;
-								end=textElement->GetLines().Normalize(end);
-								end.column=textElement->GetLines().GetLine(end.row).dataLength;
+								if(end.row>0)
+								{
+									end.row--;
+									end=textElement->GetLines().Normalize(end);
+									end.column=textElement->GetLines().GetLine(end.row).dataLength;
+								}
 							}
 							else
 							{
@@ -7943,8 +7958,11 @@ GuiTextElementOperator
 						{
 							if(end.column==textElement->GetLines().GetLine(end.row).dataLength)
 							{
-								end.row++;
-								end.column=0;
+								if(end.row<textElement->GetLines().GetCount()-1)
+								{
+									end.row++;
+									end.column=0;
+								}
 							}
 							else
 							{
