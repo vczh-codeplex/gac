@@ -48,6 +48,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{BBA4C5
 		..\Public\Web\Images\Demos.Controls.ListBox.NameSelector.jpg = ..\Public\Web\Images\Demos.Controls.ListBox.NameSelector.jpg
 		..\Public\Web\Images\Demos.Controls.ListBox.VirtualMode.jpg = ..\Public\Web\Images\Demos.Controls.ListBox.VirtualMode.jpg
 		..\Public\Web\Images\Demos.Controls.ListView.ViewSwitching.jpg = ..\Public\Web\Images\Demos.Controls.ListView.ViewSwitching.jpg
+		..\Public\Web\Images\Demos.Controls.ListView.VirtualMode.jpg = ..\Public\Web\Images\Demos.Controls.ListView.VirtualMode.jpg
 		..\Public\Web\Images\Demos.Controls.Tab.TextBoxPage.jpg = ..\Public\Web\Images\Demos.Controls.Tab.TextBoxPage.jpg
 		..\Public\Web\Images\Demos.Controls.TextBox.Colorizer.jpg = ..\Public\Web\Images\Demos.Controls.TextBox.Colorizer.jpg
 		..\Public\Web\Images\Demos.Controls.TextBox.Editor.jpg = ..\Public\Web\Images\Demos.Controls.TextBox.Editor.jpg
@@ -126,6 +127,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Controls.ListView.ViewSwitc
 		..\Public\Web\Demos\Controls.ListView.ViewSwitching\DXGUI_46.jpg = ..\Public\Web\Demos\Controls.ListView.ViewSwitching\DXGUI_46.jpg
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Controls.ListView.VirtualMode", "Controls.ListView.VirtualMode", "{282AA4CD-4696-4653-8312-3E6E307D082E}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\Demos\Controls.ListView.VirtualMode\Demo.html = ..\Public\Web\Demos\Controls.ListView.VirtualMode\Demo.html
+		..\Public\Web\Demos\Controls.ListView.VirtualMode\DXGUI_47.jpg = ..\Public\Web\Demos\Controls.ListView.VirtualMode\DXGUI_47.jpg
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 3
@@ -172,5 +179,6 @@ Global
 		{BACD5ECF-B12E-43B2-BEBB-42373248D450} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
 		{BFC63FCF-CE0A-4E66-BF7B-2510CD220465} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
 		{E76DD49F-E23E-49D4-A1E9-A29AB0F9E2EE} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
+		{282AA4CD-4696-4653-8312-3E6E307D082E} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
 	EndGlobalSection
 EndGlobal
