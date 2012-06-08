@@ -131,6 +131,13 @@
     <ClCompile Include="..\..\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\GDI\WinGDI.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\GDI\WinGDIApplication.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsAsyncService.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsCallbackService.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsClipboardService.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsImageService.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsInputService.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsResourceService.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsScreenService.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptor.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -210,6 +217,13 @@
     <ClInclude Include="..\..\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\GDI\WinGDI.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\GDI\WinGDIApplication.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsAsyncService.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsCallbackService.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsClipboardService.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsImageService.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsInputService.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsResourceService.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsScreenService.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptor.h" />
   </ItemGroup>

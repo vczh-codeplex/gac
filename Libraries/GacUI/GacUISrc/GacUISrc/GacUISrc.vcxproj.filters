@@ -64,6 +64,9 @@
     <Filter Include="Common\Regex">
       <UniqueIdentifier>{5779d63d-bbaa-4c7b-b55f-32ad8ddff339}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GacUI\NativeWindow\Windows\ServicesImpl">
+      <UniqueIdentifier>{4d71365a-ac77-4f60-9e64-34fed5b06aac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -221,6 +224,27 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\Common\Source\Regex\RegexWriter.cpp">
       <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsResourceService.cpp">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsClipboardService.cpp">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsImageService.cpp">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsAsyncService.cpp">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsScreenService.cpp">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsCallbackService.cpp">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsInputService.cpp">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -451,6 +475,27 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationOrderBy.h">
       <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsResourceService.h">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsClipboardService.h">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsImageService.h">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsAsyncService.h">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsScreenService.h">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsCallbackService.h">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsInputService.h">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

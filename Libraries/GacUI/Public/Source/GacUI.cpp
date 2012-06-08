@@ -23808,10 +23808,333 @@ int SetupWindowsGDIRenderer()
 }
 
 /***********************************************************************
-NativeWindow\Windows\WinNativeWindow.cpp
+NativeWindow\Windows\ServicesImpl\WindowsAsyncService.cpp
 ***********************************************************************/
 
-#pragma comment(lib, "Imm32.lib")
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+			using namespace collections;
+
+/***********************************************************************
+WindowsAsyncService::TaskItem
+***********************************************************************/
+
+			WindowsAsyncService::TaskItem::TaskItem()
+				:semaphore(0)
+				,proc(0)
+				,argument(0)
+			{
+			}
+
+			WindowsAsyncService::TaskItem::TaskItem(Semaphore* _semaphore, INativeAsyncService::AsyncTaskProc* _proc, void* _argument)
+				:semaphore(_semaphore)
+				,proc(_proc)
+				,argument(_argument)
+			{
+			}
+
+			WindowsAsyncService::TaskItem::~TaskItem()
+			{
+			}
+
+/***********************************************************************
+WindowsAsyncService
+***********************************************************************/
+
+			WindowsAsyncService::WindowsAsyncService()
+				:mainThreadId(Thread::GetCurrentThreadId())
+			{
+			}
+
+			WindowsAsyncService::~WindowsAsyncService()
+			{
+			}
+
+			void WindowsAsyncService::ExecuteAsyncTasks()
+			{
+				Array<TaskItem> items;
+				{
+					SpinLock::Scope scope(taskListLock);
+					CopyFrom(items.Wrap(), taskItems.Wrap());
+					taskItems.RemoveRange(0, items.Count());
+				}
+				for(int i=0;i<items.Count();i++)
+				{
+					TaskItem taskItem=items[i];
+					taskItem.proc(taskItem.argument);
+					if(taskItem.semaphore)
+					{
+						taskItem.semaphore->Release();
+					}
+				}
+			}
+
+			bool WindowsAsyncService::IsInMainThread()
+			{
+				return Thread::GetCurrentThreadId()==mainThreadId;
+			}
+
+			void WindowsAsyncService::InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument)
+			{
+				ThreadPoolLite::Queue(proc, argument);
+			}
+
+			void WindowsAsyncService::InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument)
+			{
+				SpinLock::Scope scope(taskListLock);
+				TaskItem item(0, proc, argument);
+				taskItems.Add(item);
+			}
+
+			bool WindowsAsyncService::InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds)
+			{
+				Semaphore semaphore;
+				semaphore.Create(0, 1);
+				{
+					SpinLock::Scope scope(taskListLock);
+					TaskItem item(&semaphore, proc, argument);
+					taskItems.Add(item);
+				}
+				if(milliseconds<0)
+				{
+					return semaphore.Wait();
+				}
+				else
+				{
+					return semaphore.WaitForTime(milliseconds);
+				}
+			}
+		}
+	}
+}
+
+/***********************************************************************
+NativeWindow\Windows\ServicesImpl\WindowsCallbackService.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+
+/***********************************************************************
+WindowsCallbackService
+***********************************************************************/
+
+			WindowsCallbackService::WindowsCallbackService()
+			{
+			}
+
+			bool WindowsCallbackService::InstallListener(INativeControllerListener* listener)
+			{
+				if(listeners.Contains(listener))
+				{
+					return false;
+				}
+				else
+				{
+					listeners.Add(listener);
+					return true;
+				}
+			}
+
+			bool WindowsCallbackService::UninstallListener(INativeControllerListener* listener)
+			{
+				if(listeners.Contains(listener))
+				{
+					listeners.Remove(listener);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void WindowsCallbackService::InvokeMouseHook(WPARAM message, Point location)
+			{
+				switch(message)
+				{
+				case WM_LBUTTONDOWN:
+					{
+						for(int i=0;i<listeners.Count();i++)
+						{
+							listeners[i]->LeftButtonDown(location);
+						}
+					}
+					break;
+				case WM_LBUTTONUP:
+					{
+						for(int i=0;i<listeners.Count();i++)
+						{
+							listeners[i]->LeftButtonUp(location);
+						}
+					}
+					break;
+				case WM_RBUTTONDOWN:
+					{
+						for(int i=0;i<listeners.Count();i++)
+						{
+							listeners[i]->RightButtonDown(location);
+						}
+					}
+					break;
+				case WM_RBUTTONUP:
+					{
+						for(int i=0;i<listeners.Count();i++)
+						{
+							listeners[i]->RightButtonUp(location);
+						}
+					}
+					break;
+				case WM_MOUSEMOVE:
+					{
+						for(int i=0;i<listeners.Count();i++)
+						{
+							listeners[i]->MouseMoving(location);
+						}
+					}
+					break;
+				}
+			}
+
+			void WindowsCallbackService::InvokeGlobalTimer()
+			{
+				for(int i=0;i<listeners.Count();i++)
+				{
+					listeners[i]->GlobalTimer();
+				}
+			}
+
+			void WindowsCallbackService::InvokeClipboardUpdated()
+			{
+				for(int i=0;i<listeners.Count();i++)
+				{
+					listeners[i]->ClipboardUpdated();
+				}
+			}
+
+			void WindowsCallbackService::InvokeNativeWindowCreated(INativeWindow* window)
+			{
+				for(int i=0;i<listeners.Count();i++)
+				{
+					listeners[i]->NativeWindowCreated(window);
+				}
+			}
+
+			void WindowsCallbackService::InvokeNativeWindowDestroyed(INativeWindow* window)
+			{
+				for(int i=0;i<listeners.Count();i++)
+				{
+					listeners[i]->NativeWindowDestroying(window);
+				}
+			}
+		}
+	}
+}
+
+/***********************************************************************
+NativeWindow\Windows\ServicesImpl\WindowsClipboardService.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+
+/***********************************************************************
+WindowsClipboardService
+***********************************************************************/
+
+			WindowsClipboardService::WindowsClipboardService()
+				:ownerHandle(NULL)
+			{
+			}
+
+			void WindowsClipboardService::SetOwnerHandle(HWND handle)
+			{
+				HWND oldHandle=ownerHandle;
+				ownerHandle=handle;
+				if(handle==NULL)
+				{
+					RemoveClipboardFormatListener(oldHandle);
+				}
+				else
+				{
+					AddClipboardFormatListener(ownerHandle);
+				}
+			}
+
+			bool WindowsClipboardService::ContainsText()
+			{
+				if(OpenClipboard(ownerHandle))
+				{
+					UINT format=0;
+					bool contains=false;
+					while(format=EnumClipboardFormats(format))
+					{
+						if(format==CF_TEXT || format==CF_UNICODETEXT)
+						{
+							contains=true;
+							break;
+						}
+					}
+					CloseClipboard();
+					return contains;
+				}
+				return false;
+			}
+
+			WString WindowsClipboardService::GetText()
+			{
+				if(OpenClipboard(ownerHandle))
+				{
+					WString result;
+					HANDLE handle=GetClipboardData(CF_UNICODETEXT);
+					if(handle!=0)
+					{
+						wchar_t* buffer=(wchar_t*)GlobalLock(handle);
+						result=buffer;
+						GlobalUnlock(handle);
+					}
+					CloseClipboard();
+					return result;
+				}
+				return L"";
+			}
+
+			bool WindowsClipboardService::SetText(const WString& value)
+			{
+				if(OpenClipboard(ownerHandle))
+				{
+					EmptyClipboard();
+					int size=(value.Length()+1)*sizeof(wchar_t);
+					HGLOBAL data=GlobalAlloc(GMEM_MOVEABLE, size);
+					wchar_t* buffer=(wchar_t*)GlobalLock(data);
+					memcpy(buffer, value.Buffer(), size);
+					GlobalUnlock(data);
+					SetClipboardData(CF_UNICODETEXT, data);
+					CloseClipboard();
+					return true;
+				}
+				return false;
+			}
+		}
+	}
+}
+
+/***********************************************************************
+NativeWindow\Windows\ServicesImpl\WindowsImageService.cpp
+***********************************************************************/
+
 #pragma comment(lib, "WindowsCodecs.lib")
 
 namespace vl
@@ -23821,7 +24144,357 @@ namespace vl
 		namespace windows
 		{
 			using namespace collections;
-				
+
+/***********************************************************************
+WindowsImageFrame
+***********************************************************************/
+
+			void WindowsImageFrame::Initialize(IWICBitmapSource* bitmapSource)
+			{
+				IWICImagingFactory* factory=GetWICImagingFactory();
+				ComPtr<IWICFormatConverter> converter;
+				{
+					IWICFormatConverter* formatConverter=0;
+					HRESULT hr=factory->CreateFormatConverter(&formatConverter);
+					if(SUCCEEDED(hr))
+					{
+						converter=formatConverter;
+						converter->Initialize(
+							bitmapSource,
+							GUID_WICPixelFormat32bppPBGRA,
+							WICBitmapDitherTypeNone,
+							NULL,
+							0.0f,
+							WICBitmapPaletteTypeCustom);
+					}
+				}
+
+				IWICBitmap* bitmap=0;
+				IWICBitmapSource* convertedBitmapSource=0;
+				if(converter)
+				{
+					convertedBitmapSource=converter.Obj();
+				}
+				else
+				{
+					convertedBitmapSource=bitmapSource;
+				}
+				HRESULT hr=factory->CreateBitmapFromSource(convertedBitmapSource, WICBitmapCacheOnLoad, &bitmap);
+				if(SUCCEEDED(hr))
+				{
+					frameBitmap=bitmap;
+				}
+			}
+
+			WindowsImageFrame::WindowsImageFrame(INativeImage* _image, IWICBitmapFrameDecode* frameDecode)
+				:image(_image)
+			{
+				Initialize(frameDecode);
+			}
+
+			WindowsImageFrame::WindowsImageFrame(INativeImage* _image, IWICBitmap* sourceBitmap)
+				:image(_image)
+			{
+				Initialize(sourceBitmap);
+			}
+
+			WindowsImageFrame::~WindowsImageFrame()
+			{
+				for(int i=0;i<caches.Count();i++)
+				{
+					caches.Values()[i]->OnDetach(this);
+				}
+			}
+
+			INativeImage* WindowsImageFrame::GetImage()
+			{
+				return image;
+			}
+
+			Size WindowsImageFrame::GetSize()
+			{
+				UINT width=0;
+				UINT height=0;
+				frameBitmap->GetSize(&width, &height);
+				return Size(width, height);
+			}
+
+			bool WindowsImageFrame::SetCache(void* key, Ptr<INativeImageFrameCache> cache)
+			{
+				int index=caches.Keys().IndexOf(key);
+				if(index!=-1)
+				{
+					return false;
+				}
+				caches.Add(key, cache);
+				cache->OnAttach(this);
+				return true;
+			}
+
+			Ptr<INativeImageFrameCache> WindowsImageFrame::GetCache(void* key)
+			{
+				int index=caches.Keys().IndexOf(key);
+				return index==-1?0:caches.Values()[index];
+			}
+
+			Ptr<INativeImageFrameCache> WindowsImageFrame::RemoveCache(void* key)
+			{
+				int index=caches.Keys().IndexOf(key);
+				if(index==-1)
+				{
+					return 0;
+				}
+				Ptr<INativeImageFrameCache> cache=caches.Values()[index];
+				cache->OnDetach(this);
+				caches.Remove(key);
+				return cache;
+			}
+
+			IWICBitmap* WindowsImageFrame::GetFrameBitmap()
+			{
+				return frameBitmap.Obj();
+			}
+
+/***********************************************************************
+WindowsImage
+***********************************************************************/
+
+			WindowsImage::WindowsImage(INativeImageService* _imageService, IWICBitmapDecoder* _bitmapDecoder)
+				:imageService(_imageService)
+				,bitmapDecoder(_bitmapDecoder)
+			{
+				UINT count=0;
+				bitmapDecoder->GetFrameCount(&count);
+				frames.Resize(count);
+			}
+
+			WindowsImage::~WindowsImage()
+			{
+			}
+
+			INativeImageService* WindowsImage::GetImageService()
+			{
+				return imageService;
+			}
+
+			INativeImage::FormatType WindowsImage::GetFormat()
+			{
+				GUID formatGUID;
+				HRESULT hr=bitmapDecoder->GetContainerFormat(&formatGUID);
+				if(SUCCEEDED(hr))
+				{
+					if(formatGUID==GUID_ContainerFormatBmp)
+					{
+						return INativeImage::Bmp;
+					}
+					else if(formatGUID==GUID_ContainerFormatPng)
+					{
+						return INativeImage::Png;
+					}
+					else if(formatGUID==GUID_ContainerFormatGif)
+					{
+						return INativeImage::Gif;
+					}
+					else if(formatGUID==GUID_ContainerFormatJpeg)
+					{
+						return INativeImage::Jpeg;
+					}
+					else if(formatGUID==GUID_ContainerFormatIco)
+					{
+						return INativeImage::Icon;
+					}
+					else if(formatGUID==GUID_ContainerFormatTiff)
+					{
+						return INativeImage::Tiff;
+					}
+					else if(formatGUID==GUID_ContainerFormatWmp)
+					{
+						return INativeImage::Wmp;
+					}
+				}
+				return INativeImage::Unknown;
+			}
+
+			int WindowsImage::GetFrameCount()
+			{
+				return frames.Count();
+			}
+
+			INativeImageFrame* WindowsImage::GetFrame(int index)
+			{
+				if(0<=index && index<GetFrameCount())
+				{
+					Ptr<WindowsImageFrame>& frame=frames[index];
+					if(!frame)
+					{
+						IWICBitmapFrameDecode* frameDecode=0;
+						HRESULT hr=bitmapDecoder->GetFrame(index, &frameDecode);
+						if(SUCCEEDED(hr))
+						{
+							frame=new WindowsImageFrame(this, frameDecode);
+							frameDecode->Release();
+						}
+					}
+					return frame.Obj();
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+/***********************************************************************
+WindowsBitmapImage
+***********************************************************************/
+
+			WindowsBitmapImage::WindowsBitmapImage(INativeImageService* _imageService, IWICBitmap* sourceBitmap, FormatType _formatType)
+				:imageService(_imageService)
+				,formatType(_formatType)
+			{
+				frame=new WindowsImageFrame(this, sourceBitmap);
+			}
+
+			WindowsBitmapImage::~WindowsBitmapImage()
+			{
+			}
+
+			INativeImageService* WindowsBitmapImage::GetImageService()
+			{
+				return imageService;
+			}
+
+			INativeImage::FormatType WindowsBitmapImage::GetFormat()
+			{
+				return formatType;
+			}
+
+			int WindowsBitmapImage::GetFrameCount()
+			{
+				return 1;
+			}
+
+			INativeImageFrame* WindowsBitmapImage::GetFrame(int index)
+			{
+				return index==0?frame.Obj():0;
+			}
+
+/***********************************************************************
+WindowsImageService
+***********************************************************************/
+
+			WindowsImageService::WindowsImageService()
+			{
+				IWICImagingFactory* factory=0;
+				HRESULT hr = CoCreateInstance(
+					CLSID_WICImagingFactory,
+					NULL,
+					CLSCTX_INPROC_SERVER,
+					IID_IWICImagingFactory,
+					(LPVOID*)&factory
+					);
+				if(SUCCEEDED(hr))
+				{
+					imagingFactory=factory;
+				}
+			}
+
+			WindowsImageService::~WindowsImageService()
+			{
+			}
+
+			Ptr<INativeImage> WindowsImageService::CreateImageFromFile(const WString& path)
+			{
+				IWICBitmapDecoder* bitmapDecoder=0;
+				HRESULT hr=imagingFactory->CreateDecoderFromFilename(
+					path.Buffer(),
+					NULL,
+					GENERIC_READ,
+					WICDecodeMetadataCacheOnDemand,
+					&bitmapDecoder);
+				if(SUCCEEDED(hr))
+				{
+					return new WindowsImage(this, bitmapDecoder);
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+			Ptr<INativeImage> WindowsImageService::CreateImageFromHBITMAP(HBITMAP handle)
+			{
+				IWICBitmap* bitmap=0;
+				HRESULT hr=imagingFactory->CreateBitmapFromHBITMAP(handle, NULL, WICBitmapUseAlpha, &bitmap);
+				if(SUCCEEDED(hr))
+				{
+					Ptr<INativeImage> image=new WindowsBitmapImage(this, bitmap, INativeImage::Bmp);
+					bitmap->Release();
+					return image;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+			Ptr<INativeImage> WindowsImageService::CreateImageFromHICON(HICON handle)
+			{
+				IWICBitmap* bitmap=0;
+				HRESULT hr=imagingFactory->CreateBitmapFromHICON(handle, &bitmap);
+				if(SUCCEEDED(hr))
+				{
+					Ptr<INativeImage> image=new WindowsBitmapImage(this, bitmap, INativeImage::Icon);
+					bitmap->Release();
+					return image;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+			IWICImagingFactory* WindowsImageService::GetImagingFactory()
+			{
+				return imagingFactory.Obj();
+			}
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+
+			IWICImagingFactory* GetWICImagingFactory()
+			{
+				return dynamic_cast<WindowsImageService*>(GetCurrentController()->ImageService())->GetImagingFactory();
+			}
+
+			IWICBitmap* GetWICBitmap(INativeImageFrame* frame)
+			{
+				return dynamic_cast<WindowsImageFrame*>(frame)->GetFrameBitmap();
+			}
+
+			Ptr<INativeImage> CreateImageFromHBITMAP(HBITMAP handle)
+			{
+				return dynamic_cast<WindowsImageService*>(GetCurrentController()->ImageService())->CreateImageFromHBITMAP(handle);
+			}
+
+			Ptr<INativeImage> CreateImageFromHICON(HICON handle)
+			{
+				return dynamic_cast<WindowsImageService*>(GetCurrentController()->ImageService())->CreateImageFromHICON(handle);
+			}
+		}
+	}
+}
+
+/***********************************************************************
+NativeWindow\Windows\ServicesImpl\WindowsInputService.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
 			bool WinIsKeyPressing(int code)
 			{
 				return (GetKeyState(code)&0xF0)!=0;
@@ -23830,6 +24503,375 @@ namespace vl
 			bool WinIsKeyToggled(int code)
 			{
 				return (GetKeyState(code)&0x0F)!=0;
+			}
+
+/***********************************************************************
+WindowsInputService
+***********************************************************************/
+
+			WindowsInputService::WindowsInputService(HOOKPROC _mouseProc)
+				:ownerHandle(NULL)
+				,mouseHook(NULL)
+				,isTimerEnabled(false)
+				,mouseProc(_mouseProc)
+			{
+			}
+
+			void WindowsInputService::SetOwnerHandle(HWND handle)
+			{
+				ownerHandle=handle;
+			}
+
+			void WindowsInputService::StartHookMouse()
+			{
+				if(!IsHookingMouse())
+				{
+					mouseHook=SetWindowsHookEx(WH_MOUSE_LL, mouseProc, NULL, NULL);
+				}
+			}
+
+			void WindowsInputService::StopHookMouse()
+			{
+				if(IsHookingMouse())
+				{
+					UnhookWindowsHookEx(mouseHook);
+					mouseHook=NULL;
+				}
+			}
+
+			bool WindowsInputService::IsHookingMouse()
+			{
+				return mouseHook!=NULL;
+			}
+
+			void WindowsInputService::StartTimer()
+			{
+				if(!IsTimerEnabled())
+				{
+					SetTimer(ownerHandle, 1, 16, NULL);
+					isTimerEnabled=true;
+				}
+			}
+
+			void WindowsInputService::StopTimer()
+			{
+				if(IsTimerEnabled())
+				{
+					KillTimer(ownerHandle, 1);
+					isTimerEnabled=false;
+				}
+			}
+
+			bool WindowsInputService::IsTimerEnabled()
+			{
+				return isTimerEnabled;
+			}
+				
+			bool WindowsInputService::IsKeyPressing(int code)
+			{
+				return WinIsKeyPressing(code);
+			}
+
+			bool WindowsInputService::IsKeyToggled(int code)
+			{
+				return WinIsKeyToggled(code);
+			}
+		}
+	}
+}
+
+/***********************************************************************
+NativeWindow\Windows\ServicesImpl\WindowsResourceService.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+
+/***********************************************************************
+WindowsCursor
+***********************************************************************/
+
+			WindowsCursor::WindowsCursor(HCURSOR _handle)
+				:handle(_handle)
+				,isSystemCursor(false)
+				,systemCursorType(INativeCursor::Arrow)
+			{
+			}
+
+			WindowsCursor::WindowsCursor(SystemCursorType type)
+				:handle(NULL)
+				,isSystemCursor(true)
+				,systemCursorType(type)
+			{
+				LPWSTR id=NULL;
+				switch(type)
+				{
+				case SmallWaiting:
+					id=IDC_APPSTARTING;
+					break;
+				case LargeWaiting:
+					id=IDC_WAIT;
+					break;
+				case Arrow:
+					id=IDC_ARROW;
+					break;
+				case Cross:
+					id=IDC_CROSS;
+					break;
+				case Hand:
+					id=IDC_HAND;
+					break;
+				case Help:
+					id=IDC_HELP;
+					break;
+				case IBeam:
+					id=IDC_IBEAM;
+					break;
+				case SizeAll:
+					id=IDC_SIZEALL;
+					break;
+				case SizeNESW:
+					id=IDC_SIZENESW;
+					break;
+				case SizeNS:
+					id=IDC_SIZENS;
+					break;
+				case SizeNWSE:
+					id=IDC_SIZENWSE;
+					break;
+				case SizeWE:
+					id=IDC_SIZEWE;
+					break;
+				}
+				handle=(HCURSOR)LoadImage(NULL, id, IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE|LR_SHARED);
+			}
+				
+			bool WindowsCursor::IsSystemCursor()
+			{
+				return isSystemCursor;
+			}
+
+			INativeCursor::SystemCursorType WindowsCursor::GetSystemCursorType()
+			{
+				return systemCursorType;
+			}
+
+			HCURSOR WindowsCursor::GetCursorHandle()
+			{
+				return handle;
+			}
+
+/***********************************************************************
+WindowsResourceService
+***********************************************************************/
+
+			WindowsResourceService::WindowsResourceService()
+			{
+				{
+					systemCursors.Resize(INativeCursor::SystemCursorCount);
+					for(int i=0;i<systemCursors.Count();i++)
+					{
+						systemCursors[i]=new WindowsCursor((INativeCursor::SystemCursorType)i);
+					}
+				}
+				{
+					NONCLIENTMETRICS metrics;
+					metrics.cbSize=sizeof(NONCLIENTMETRICS);
+					SystemParametersInfo(SPI_GETNONCLIENTMETRICS, metrics.cbSize, &metrics, 0);
+					if(!*metrics.lfMessageFont.lfFaceName)
+					{
+						metrics.cbSize=sizeof(NONCLIENTMETRICS)-sizeof(metrics.iPaddedBorderWidth);
+						SystemParametersInfo(SPI_GETNONCLIENTMETRICS, metrics.cbSize, &metrics, 0);
+					}
+					defaultFont.fontFamily=metrics.lfMessageFont.lfFaceName;
+					defaultFont.size=metrics.lfMessageFont.lfHeight;
+					if(defaultFont.size<0)
+					{
+						defaultFont.size=-defaultFont.size;
+					}
+				}
+			}
+
+			INativeCursor* WindowsResourceService::GetSystemCursor(INativeCursor::SystemCursorType type)
+			{
+				int index=(int)type;
+				if(0<=index && index<systemCursors.Count())
+				{
+					return systemCursors[index].Obj();
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+			INativeCursor* WindowsResourceService::GetDefaultSystemCursor()
+			{
+				return GetSystemCursor(INativeCursor::Arrow);
+			}
+
+			FontProperties WindowsResourceService::GetDefaultFont()
+			{
+				return defaultFont;
+			}
+
+			void WindowsResourceService::SetDefaultFont(const FontProperties& value)
+			{
+				defaultFont=value;
+			}
+		}
+	}
+}
+
+/***********************************************************************
+NativeWindow\Windows\ServicesImpl\WindowsScreenService.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+
+/***********************************************************************
+WindowsScreen
+***********************************************************************/
+
+			WindowsScreen::WindowsScreen()
+			{
+				monitor=NULL;
+			}
+
+			Rect WindowsScreen::GetBounds()
+			{
+				MONITORINFOEX info;
+				info.cbSize=sizeof(MONITORINFOEX);
+				GetMonitorInfo(monitor, &info);
+				return Rect(info.rcMonitor.left, info.rcMonitor.top, info.rcMonitor.right, info.rcMonitor.bottom);
+			}
+
+			Rect WindowsScreen::GetClientBounds()
+			{
+				MONITORINFOEX info;
+				info.cbSize=sizeof(MONITORINFOEX);
+				GetMonitorInfo(monitor, &info);
+				return Rect(info.rcWork.left, info.rcWork.top, info.rcWork.right, info.rcWork.bottom);
+			}
+
+			WString WindowsScreen::GetName()
+			{
+				MONITORINFOEX info;
+				info.cbSize=sizeof(MONITORINFOEX);
+				GetMonitorInfo(monitor, &info);
+					
+				wchar_t buffer[sizeof(info.szDevice)/sizeof(*info.szDevice)+1];
+				memset(buffer, 0, sizeof(buffer));
+				memcpy(buffer, info.szDevice, sizeof(info.szDevice));
+				return buffer;
+			}
+
+			bool WindowsScreen::IsPrimary()
+			{
+				MONITORINFOEX info;
+				info.cbSize=sizeof(MONITORINFOEX);
+				GetMonitorInfo(monitor, &info);
+				return info.dwFlags==MONITORINFOF_PRIMARY;
+			}
+
+/***********************************************************************
+WindowsScreenService
+***********************************************************************/
+
+			WindowsScreenService::WindowsScreenService(HandleRetriver _handleRetriver)
+				:handleRetriver(_handleRetriver)
+			{
+			}
+
+			BOOL CALLBACK WindowsScreenService::MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+			{
+				MonitorEnumProcData* data=(MonitorEnumProcData*)dwData;
+				if(data->currentScreen==data->screenService->screens.Count())
+				{
+					data->screenService->screens.Add(new WindowsScreen());
+				}
+				data->screenService->screens[data->currentScreen]->monitor=hMonitor;
+				data->currentScreen++;
+				return TRUE;
+			}
+
+			void WindowsScreenService::RefreshScreenInformation()
+			{
+				for(int i=0;i<screens.Count();i++)
+				{
+					screens[i]->monitor=NULL;
+				}
+				MonitorEnumProcData data;
+				data.screenService=this;
+				data.currentScreen=0;
+				EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)(&data));
+			}
+				
+			int WindowsScreenService::GetScreenCount()
+			{
+				RefreshScreenInformation();
+				return GetSystemMetrics(SM_CMONITORS);
+			}
+
+			INativeScreen* WindowsScreenService::GetScreen(int index)
+			{
+				RefreshScreenInformation();
+				return screens[index].Obj();
+			}
+
+			INativeScreen* WindowsScreenService::GetScreen(INativeWindow* window)
+			{
+				RefreshScreenInformation();
+				HWND hwnd=handleRetriver(window);
+				if(hwnd)
+				{
+					HMONITOR monitor=MonitorFromWindow(hwnd, MONITOR_DEFAULTTONULL);
+					if(monitor!=NULL)
+					{
+						for(int i=0;i<screens.Count();i++)
+						{
+							if(screens[i]->monitor==monitor)
+							{
+								return screens[i].Obj();
+							}
+						}
+					}
+				}
+				return 0;
+			}
+		}
+	}
+}
+
+/***********************************************************************
+NativeWindow\Windows\WinNativeWindow.cpp
+***********************************************************************/
+
+#pragma comment(lib, "Imm32.lib")
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+			using namespace collections;
+
+			HWND GetHWNDFromNativeWindowHandle(INativeWindow* window)
+			{
+				if(!window) return NULL;
+				IWindowsForm* form=GetWindowsForm(window);
+				if(!form) return NULL;
+				return form->GetWindowHandle();
 			}
 
 /***********************************************************************
@@ -23874,816 +24916,6 @@ WindowsClass
 				ATOM GetClassAtom()
 				{
 					return windowAtom;
-				}
-			};
-
-/***********************************************************************
-WindowsResourceService
-***********************************************************************/
-
-			class WindowsCursor : public Object, public INativeCursor
-			{
-			protected:
-				HCURSOR								handle;
-				bool								isSystemCursor;
-				SystemCursorType					systemCursorType;
-			public:
-				WindowsCursor(HCURSOR _handle)
-					:handle(_handle)
-					,isSystemCursor(false)
-					,systemCursorType(INativeCursor::Arrow)
-				{
-				}
-
-				WindowsCursor(SystemCursorType type)
-					:handle(NULL)
-					,isSystemCursor(true)
-					,systemCursorType(type)
-				{
-					LPWSTR id=NULL;
-					switch(type)
-					{
-					case SmallWaiting:
-						id=IDC_APPSTARTING;
-						break;
-					case LargeWaiting:
-						id=IDC_WAIT;
-						break;
-					case Arrow:
-						id=IDC_ARROW;
-						break;
-					case Cross:
-						id=IDC_CROSS;
-						break;
-					case Hand:
-						id=IDC_HAND;
-						break;
-					case Help:
-						id=IDC_HELP;
-						break;
-					case IBeam:
-						id=IDC_IBEAM;
-						break;
-					case SizeAll:
-						id=IDC_SIZEALL;
-						break;
-					case SizeNESW:
-						id=IDC_SIZENESW;
-						break;
-					case SizeNS:
-						id=IDC_SIZENS;
-						break;
-					case SizeNWSE:
-						id=IDC_SIZENWSE;
-						break;
-					case SizeWE:
-						id=IDC_SIZEWE;
-						break;
-					}
-					handle=(HCURSOR)LoadImage(NULL, id, IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE|LR_SHARED);
-				}
-				
-				bool IsSystemCursor()
-				{
-					return isSystemCursor;
-				}
-
-				SystemCursorType GetSystemCursorType()
-				{
-					return systemCursorType;
-				}
-
-				HCURSOR GetCursorHandle()
-				{
-					return handle;
-				}
-			};
-
-			class WindowsResourceService : public Object, public INativeResourceService
-			{
-			protected:
-				Array<Ptr<WindowsCursor>>			systemCursors;
-				FontProperties						defaultFont;
-			public:
-				WindowsResourceService()
-				{
-					{
-						systemCursors.Resize(INativeCursor::SystemCursorCount);
-						for(int i=0;i<systemCursors.Count();i++)
-						{
-							systemCursors[i]=new WindowsCursor((INativeCursor::SystemCursorType)i);
-						}
-					}
-					{
-						NONCLIENTMETRICS metrics;
-						metrics.cbSize=sizeof(NONCLIENTMETRICS);
-						SystemParametersInfo(SPI_GETNONCLIENTMETRICS, metrics.cbSize, &metrics, 0);
-						if(!*metrics.lfMessageFont.lfFaceName)
-						{
-							metrics.cbSize=sizeof(NONCLIENTMETRICS)-sizeof(metrics.iPaddedBorderWidth);
-							SystemParametersInfo(SPI_GETNONCLIENTMETRICS, metrics.cbSize, &metrics, 0);
-						}
-						defaultFont.fontFamily=metrics.lfMessageFont.lfFaceName;
-						defaultFont.size=metrics.lfMessageFont.lfHeight;
-						if(defaultFont.size<0)
-						{
-							defaultFont.size=-defaultFont.size;
-						}
-					}
-				}
-
-				INativeCursor* GetSystemCursor(INativeCursor::SystemCursorType type)
-				{
-					int index=(int)type;
-					if(0<=index && index<systemCursors.Count())
-					{
-						return systemCursors[index].Obj();
-					}
-					else
-					{
-						return 0;
-					}
-				}
-
-				INativeCursor* GetDefaultSystemCursor()
-				{
-					return GetSystemCursor(INativeCursor::Arrow);
-				}
-
-				FontProperties GetDefaultFont()
-				{
-					return defaultFont;
-				}
-
-				void SetDefaultFont(const FontProperties& value)
-				{
-					defaultFont=value;
-				}
-			};
-
-/***********************************************************************
-WindowsClipboardService
-***********************************************************************/
-
-			class WindowsClipboardService : public Object, public INativeClipboardService
-			{
-			protected:
-				HWND			ownerHandle;
-			public:
-				WindowsClipboardService()
-					:ownerHandle(NULL)
-				{
-				}
-
-				void SetOwnerHandle(HWND handle)
-				{
-					HWND oldHandle=ownerHandle;
-					ownerHandle=handle;
-					if(handle==NULL)
-					{
-						RemoveClipboardFormatListener(oldHandle);
-					}
-					else
-					{
-						AddClipboardFormatListener(ownerHandle);
-					}
-				}
-
-				bool ContainsText()
-				{
-					if(OpenClipboard(ownerHandle))
-					{
-						UINT format=0;
-						bool contains=false;
-						while(format=EnumClipboardFormats(format))
-						{
-							if(format==CF_TEXT || format==CF_UNICODETEXT)
-							{
-								contains=true;
-								break;
-							}
-						}
-						CloseClipboard();
-						return contains;
-					}
-					return false;
-				}
-
-				WString GetText()
-				{
-					if(OpenClipboard(ownerHandle))
-					{
-						WString result;
-						HANDLE handle=GetClipboardData(CF_UNICODETEXT);
-						if(handle!=0)
-						{
-							wchar_t* buffer=(wchar_t*)GlobalLock(handle);
-							result=buffer;
-							GlobalUnlock(handle);
-						}
-						CloseClipboard();
-						return result;
-					}
-					return L"";
-				}
-
-				bool SetText(const WString& value)
-				{
-					if(OpenClipboard(ownerHandle))
-					{
-						EmptyClipboard();
-						int size=(value.Length()+1)*sizeof(wchar_t);
-						HGLOBAL data=GlobalAlloc(GMEM_MOVEABLE, size);
-						wchar_t* buffer=(wchar_t*)GlobalLock(data);
-						memcpy(buffer, value.Buffer(), size);
-						GlobalUnlock(data);
-						SetClipboardData(CF_UNICODETEXT, data);
-						CloseClipboard();
-						return true;
-					}
-					return false;
-				}
-			};
-
-/***********************************************************************
-WindowsImageService
-***********************************************************************/
-
-			class WindowsImageFrame : public Object, public INativeImageFrame
-			{
-			protected:
-				INativeImage*									image;
-				ComPtr<IWICBitmap>								frameBitmap;
-				Dictionary<void*, Ptr<INativeImageFrameCache>>	caches;
-
-				void Initialize(IWICBitmapSource* bitmapSource)
-				{
-					IWICImagingFactory* factory=GetWICImagingFactory();
-					ComPtr<IWICFormatConverter> converter;
-					{
-						IWICFormatConverter* formatConverter=0;
-						HRESULT hr=factory->CreateFormatConverter(&formatConverter);
-						if(SUCCEEDED(hr))
-						{
-							converter=formatConverter;
-							converter->Initialize(
-								bitmapSource,
-								GUID_WICPixelFormat32bppPBGRA,
-								WICBitmapDitherTypeNone,
-								NULL,
-								0.0f,
-								WICBitmapPaletteTypeCustom);
-						}
-					}
-
-					IWICBitmap* bitmap=0;
-					IWICBitmapSource* convertedBitmapSource=0;
-					if(converter)
-					{
-						convertedBitmapSource=converter.Obj();
-					}
-					else
-					{
-						convertedBitmapSource=bitmapSource;
-					}
-					HRESULT hr=factory->CreateBitmapFromSource(convertedBitmapSource, WICBitmapCacheOnLoad, &bitmap);
-					if(SUCCEEDED(hr))
-					{
-						frameBitmap=bitmap;
-					}
-				}
-			public:
-				WindowsImageFrame(INativeImage* _image, IWICBitmapFrameDecode* frameDecode)
-					:image(_image)
-				{
-					Initialize(frameDecode);
-				}
-
-				WindowsImageFrame(INativeImage* _image, IWICBitmap* sourceBitmap)
-					:image(_image)
-				{
-					Initialize(sourceBitmap);
-				}
-
-				~WindowsImageFrame()
-				{
-					for(int i=0;i<caches.Count();i++)
-					{
-						caches.Values()[i]->OnDetach(this);
-					}
-				}
-
-				INativeImage* GetImage()
-				{
-					return image;
-				}
-
-				Size GetSize()
-				{
-					UINT width=0;
-					UINT height=0;
-					frameBitmap->GetSize(&width, &height);
-					return Size(width, height);
-				}
-
-				bool SetCache(void* key, Ptr<INativeImageFrameCache> cache)
-				{
-					int index=caches.Keys().IndexOf(key);
-					if(index!=-1)
-					{
-						return false;
-					}
-					caches.Add(key, cache);
-					cache->OnAttach(this);
-					return true;
-				}
-
-				Ptr<INativeImageFrameCache> GetCache(void* key)
-				{
-					int index=caches.Keys().IndexOf(key);
-					return index==-1?0:caches.Values()[index];
-				}
-
-				Ptr<INativeImageFrameCache> RemoveCache(void* key)
-				{
-					int index=caches.Keys().IndexOf(key);
-					if(index==-1)
-					{
-						return 0;
-					}
-					Ptr<INativeImageFrameCache> cache=caches.Values()[index];
-					cache->OnDetach(this);
-					caches.Remove(key);
-					return cache;
-				}
-
-				IWICBitmap* GetFrameBitmap()
-				{
-					return frameBitmap.Obj();
-				}
-			};
-
-			class WindowsImage : public Object, public INativeImage
-			{
-			protected:
-				INativeImageService*					imageService;
-				ComPtr<IWICBitmapDecoder>				bitmapDecoder;
-				Array<Ptr<WindowsImageFrame>>			frames;
-			public:
-				WindowsImage(INativeImageService* _imageService, IWICBitmapDecoder* _bitmapDecoder)
-					:imageService(_imageService)
-					,bitmapDecoder(_bitmapDecoder)
-				{
-					UINT count=0;
-					bitmapDecoder->GetFrameCount(&count);
-					frames.Resize(count);
-				}
-
-				~WindowsImage()
-				{
-				}
-
-				INativeImageService* GetImageService()
-				{
-					return imageService;
-				}
-
-				FormatType GetFormat()
-				{
-					GUID formatGUID;
-					HRESULT hr=bitmapDecoder->GetContainerFormat(&formatGUID);
-					if(SUCCEEDED(hr))
-					{
-						if(formatGUID==GUID_ContainerFormatBmp)
-						{
-							return INativeImage::Bmp;
-						}
-						else if(formatGUID==GUID_ContainerFormatPng)
-						{
-							return INativeImage::Png;
-						}
-						else if(formatGUID==GUID_ContainerFormatGif)
-						{
-							return INativeImage::Gif;
-						}
-						else if(formatGUID==GUID_ContainerFormatJpeg)
-						{
-							return INativeImage::Jpeg;
-						}
-						else if(formatGUID==GUID_ContainerFormatIco)
-						{
-							return INativeImage::Icon;
-						}
-						else if(formatGUID==GUID_ContainerFormatTiff)
-						{
-							return INativeImage::Tiff;
-						}
-						else if(formatGUID==GUID_ContainerFormatWmp)
-						{
-							return INativeImage::Wmp;
-						}
-					}
-					return INativeImage::Unknown;
-				}
-
-				int GetFrameCount()
-				{
-					return frames.Count();
-				}
-
-				INativeImageFrame* GetFrame(int index)
-				{
-					if(0<=index && index<GetFrameCount())
-					{
-						Ptr<WindowsImageFrame>& frame=frames[index];
-						if(!frame)
-						{
-							IWICBitmapFrameDecode* frameDecode=0;
-							HRESULT hr=bitmapDecoder->GetFrame(index, &frameDecode);
-							if(SUCCEEDED(hr))
-							{
-								frame=new WindowsImageFrame(this, frameDecode);
-								frameDecode->Release();
-							}
-						}
-						return frame.Obj();
-					}
-					else
-					{
-						return 0;
-					}
-				}
-			};
-
-			class WindowsBitmapImage : public Object, public INativeImage
-			{
-			protected:
-				INativeImageService*					imageService;
-				Ptr<WindowsImageFrame>					frame;
-				FormatType								formatType;
-			public:
-				WindowsBitmapImage(INativeImageService* _imageService, IWICBitmap* sourceBitmap, FormatType _formatType)
-					:imageService(_imageService)
-					,formatType(_formatType)
-				{
-					frame=new WindowsImageFrame(this, sourceBitmap);
-				}
-
-				~WindowsBitmapImage()
-				{
-				}
-
-				INativeImageService* GetImageService()
-				{
-					return imageService;
-				}
-
-				FormatType GetFormat()
-				{
-					return formatType;
-				}
-
-				int GetFrameCount()
-				{
-					return 1;
-				}
-
-				INativeImageFrame* GetFrame(int index)
-				{
-					return index==0?frame.Obj():0;
-				}
-			};
-
-			class WindowsImageService : public Object, public INativeImageService
-			{
-			protected:
-				ComPtr<IWICImagingFactory>				imagingFactory;
-			public:
-				WindowsImageService()
-				{
-					IWICImagingFactory* factory=0;
-					HRESULT hr = CoCreateInstance(
-						CLSID_WICImagingFactory,
-						NULL,
-						CLSCTX_INPROC_SERVER,
-						IID_IWICImagingFactory,
-						(LPVOID*)&factory
-						);
-					if(SUCCEEDED(hr))
-					{
-						imagingFactory=factory;
-					}
-				}
-
-				~WindowsImageService()
-				{
-				}
-
-				Ptr<INativeImage> CreateImageFromFile(const WString& path)
-				{
-					IWICBitmapDecoder* bitmapDecoder=0;
-					HRESULT hr=imagingFactory->CreateDecoderFromFilename(
-						path.Buffer(),
-						NULL,
-						GENERIC_READ,
-						WICDecodeMetadataCacheOnDemand,
-						&bitmapDecoder);
-					if(SUCCEEDED(hr))
-					{
-						return new WindowsImage(this, bitmapDecoder);
-					}
-					else
-					{
-						return 0;
-					}
-				}
-
-				Ptr<INativeImage> CreateImageFromHBITMAP(HBITMAP handle)
-				{
-					IWICBitmap* bitmap=0;
-					HRESULT hr=imagingFactory->CreateBitmapFromHBITMAP(handle, NULL, WICBitmapUseAlpha, &bitmap);
-					if(SUCCEEDED(hr))
-					{
-						Ptr<INativeImage> image=new WindowsBitmapImage(this, bitmap, INativeImage::Bmp);
-						bitmap->Release();
-						return image;
-					}
-					else
-					{
-						return 0;
-					}
-				}
-
-				Ptr<INativeImage> CreateImageFromHICON(HICON handle)
-				{
-					IWICBitmap* bitmap=0;
-					HRESULT hr=imagingFactory->CreateBitmapFromHICON(handle, &bitmap);
-					if(SUCCEEDED(hr))
-					{
-						Ptr<INativeImage> image=new WindowsBitmapImage(this, bitmap, INativeImage::Icon);
-						bitmap->Release();
-						return image;
-					}
-					else
-					{
-						return 0;
-					}
-				}
-
-				IWICImagingFactory* GetImagingFactory()
-				{
-					return imagingFactory.Obj();
-				}
-			};
-
-			IWICImagingFactory* GetWICImagingFactory()
-			{
-				return dynamic_cast<WindowsImageService*>(GetCurrentController()->ImageService())->GetImagingFactory();
-			}
-
-			IWICBitmap* GetWICBitmap(INativeImageFrame* frame)
-			{
-				return dynamic_cast<WindowsImageFrame*>(frame)->GetFrameBitmap();
-			}
-
-			Ptr<INativeImage> CreateImageFromHBITMAP(HBITMAP handle)
-			{
-				return dynamic_cast<WindowsImageService*>(GetCurrentController()->ImageService())->CreateImageFromHBITMAP(handle);
-			}
-
-			Ptr<INativeImage> CreateImageFromHICON(HICON handle)
-			{
-				return dynamic_cast<WindowsImageService*>(GetCurrentController()->ImageService())->CreateImageFromHICON(handle);
-			}
-
-/***********************************************************************
-WindowsAsyncService
-***********************************************************************/
-
-			class WindowsAsyncService : public INativeAsyncService
-			{
-			public:
-				struct TaskItem
-				{
-					Semaphore*							semaphore;
-					INativeAsyncService::AsyncTaskProc*	proc;
-					void*								argument;
-
-					TaskItem()
-						:semaphore(0)
-						,proc(0)
-						,argument(0)
-					{
-					}
-
-					TaskItem(Semaphore* _semaphore, INativeAsyncService::AsyncTaskProc* _proc, void* _argument)
-						:semaphore(_semaphore)
-						,proc(_proc)
-						,argument(_argument)
-					{
-					}
-
-					~TaskItem()
-					{
-					}
-
-					bool operator==(const TaskItem& item)const{return false;}
-					bool operator!=(const TaskItem& item)const{return true;}
-				};
-			protected:
-				int								mainThreadId;
-				SpinLock						taskListLock;
-				List<TaskItem>					taskItems;
-			public:
-				WindowsAsyncService()
-					:mainThreadId(Thread::GetCurrentThreadId())
-				{
-				}
-
-				~WindowsAsyncService()
-				{
-				}
-
-				void ExecuteAsyncTasks()
-				{
-					Array<TaskItem> items;
-					{
-						SpinLock::Scope scope(taskListLock);
-						CopyFrom(items.Wrap(), taskItems.Wrap());
-						taskItems.RemoveRange(0, items.Count());
-					}
-					for(int i=0;i<items.Count();i++)
-					{
-						TaskItem taskItem=items[i];
-						taskItem.proc(taskItem.argument);
-						if(taskItem.semaphore)
-						{
-							taskItem.semaphore->Release();
-						}
-					}
-				}
-
-				bool IsInMainThread()
-				{
-					return Thread::GetCurrentThreadId()==mainThreadId;
-				}
-
-				void InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument)
-				{
-					ThreadPoolLite::Queue(proc, argument);
-				}
-
-				void InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument)
-				{
-					SpinLock::Scope scope(taskListLock);
-					TaskItem item(0, proc, argument);
-					taskItems.Add(item);
-				}
-
-				bool InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds)
-				{
-					Semaphore semaphore;
-					semaphore.Create(0, 1);
-					{
-						SpinLock::Scope scope(taskListLock);
-						TaskItem item(&semaphore, proc, argument);
-						taskItems.Add(item);
-					}
-					if(milliseconds<0)
-					{
-						return semaphore.Wait();
-					}
-					else
-					{
-						return semaphore.WaitForTime(milliseconds);
-					}
-				}
-			};
-
-/***********************************************************************
-WindowsScreenService
-***********************************************************************/
-
-			class WindowsScreen : public Object, public INativeScreen
-			{
-				friend class WindowsScreenService;
-			protected:
-				HMONITOR					monitor;
-			public:
-				WindowsScreen()
-				{
-					monitor=NULL;
-				}
-
-				Rect GetBounds()
-				{
-					MONITORINFOEX info;
-					info.cbSize=sizeof(MONITORINFOEX);
-					GetMonitorInfo(monitor, &info);
-					return Rect(info.rcMonitor.left, info.rcMonitor.top, info.rcMonitor.right, info.rcMonitor.bottom);
-				}
-
-				Rect GetClientBounds()
-				{
-					MONITORINFOEX info;
-					info.cbSize=sizeof(MONITORINFOEX);
-					GetMonitorInfo(monitor, &info);
-					return Rect(info.rcWork.left, info.rcWork.top, info.rcWork.right, info.rcWork.bottom);
-				}
-
-				WString GetName()
-				{
-					MONITORINFOEX info;
-					info.cbSize=sizeof(MONITORINFOEX);
-					GetMonitorInfo(monitor, &info);
-					
-					wchar_t buffer[sizeof(info.szDevice)/sizeof(*info.szDevice)+1];
-					memset(buffer, 0, sizeof(buffer));
-					memcpy(buffer, info.szDevice, sizeof(info.szDevice));
-					return buffer;
-				}
-
-				bool IsPrimary()
-				{
-					MONITORINFOEX info;
-					info.cbSize=sizeof(MONITORINFOEX);
-					GetMonitorInfo(monitor, &info);
-					return info.dwFlags==MONITORINFOF_PRIMARY;
-				}
-			};
-
-			class WindowsScreenService : public Object, public INativeScreenService
-			{
-			protected:
-				List<Ptr<WindowsScreen>>			screens;
-			public:
-
-				struct MonitorEnumProcData
-				{
-					WindowsScreenService*	screenService;
-					int						currentScreen;
-				};
-
-				static BOOL CALLBACK MonitorEnumProc(
-				  HMONITOR hMonitor,
-				  HDC hdcMonitor,
-				  LPRECT lprcMonitor,
-				  LPARAM dwData
-				)
-				{
-					MonitorEnumProcData* data=(MonitorEnumProcData*)dwData;
-					if(data->currentScreen==data->screenService->screens.Count())
-					{
-						data->screenService->screens.Add(new WindowsScreen());
-					}
-					data->screenService->screens[data->currentScreen]->monitor=hMonitor;
-					data->currentScreen++;
-					return TRUE;
-				}
-
-				void RefreshScreenInformation()
-				{
-					for(int i=0;i<screens.Count();i++)
-					{
-						screens[i]->monitor=NULL;
-					}
-					MonitorEnumProcData data;
-					data.screenService=this;
-					data.currentScreen=0;
-					EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)(&data));
-				}
-				
-				int GetScreenCount()
-				{
-					RefreshScreenInformation();
-					return GetSystemMetrics(SM_CMONITORS);
-				}
-
-				INativeScreen* GetScreen(int index)
-				{
-					RefreshScreenInformation();
-					return screens[index].Obj();
-				}
-
-				INativeScreen* GetScreen(INativeWindow* window)
-				{
-					RefreshScreenInformation();
-					IWindowsForm* windowsForm=GetWindowsForm(window);
-					if(windowsForm)
-					{
-						HMONITOR monitor=MonitorFromWindow(windowsForm->GetWindowHandle(), MONITOR_DEFAULTTONULL);
-						if(monitor!=NULL)
-						{
-							for(int i=0;i<screens.Count();i++)
-							{
-								if(screens[i]->monitor==monitor)
-								{
-									return screens[i].Obj();
-								}
-							}
-						}
-					}
-					return 0;
 				}
 			};
 
@@ -25560,220 +25792,12 @@ WindowsForm
 			};
 
 /***********************************************************************
-WindowsCallbackService
-***********************************************************************/
-
-			class WindowsCallbackService : public Object, public INativeCallbackService
-			{
-			protected:
-				List<INativeControllerListener*>	listeners;
-
-			public:
-				WindowsCallbackService()
-				{
-				}
-
-				bool InstallListener(INativeControllerListener* listener)
-				{
-					if(listeners.Contains(listener))
-					{
-						return false;
-					}
-					else
-					{
-						listeners.Add(listener);
-						return true;
-					}
-				}
-
-				bool UninstallListener(INativeControllerListener* listener)
-				{
-					if(listeners.Contains(listener))
-					{
-						listeners.Remove(listener);
-						return true;
-					}
-					else
-					{
-						return false;
-					}
-				}
-
-				//=======================================================================
-
-				void InvokeMouseHook(WPARAM message, Point location)
-				{
-					switch(message)
-					{
-					case WM_LBUTTONDOWN:
-						{
-							for(int i=0;i<listeners.Count();i++)
-							{
-								listeners[i]->LeftButtonDown(location);
-							}
-						}
-						break;
-					case WM_LBUTTONUP:
-						{
-							for(int i=0;i<listeners.Count();i++)
-							{
-								listeners[i]->LeftButtonUp(location);
-							}
-						}
-						break;
-					case WM_RBUTTONDOWN:
-						{
-							for(int i=0;i<listeners.Count();i++)
-							{
-								listeners[i]->RightButtonDown(location);
-							}
-						}
-						break;
-					case WM_RBUTTONUP:
-						{
-							for(int i=0;i<listeners.Count();i++)
-							{
-								listeners[i]->RightButtonUp(location);
-							}
-						}
-						break;
-					case WM_MOUSEMOVE:
-						{
-							for(int i=0;i<listeners.Count();i++)
-							{
-								listeners[i]->MouseMoving(location);
-							}
-						}
-						break;
-					}
-				}
-
-				void InvokeGlobalTimer()
-				{
-					for(int i=0;i<listeners.Count();i++)
-					{
-						listeners[i]->GlobalTimer();
-					}
-				}
-
-				void InvokeClipboardUpdated()
-				{
-					for(int i=0;i<listeners.Count();i++)
-					{
-						listeners[i]->ClipboardUpdated();
-					}
-				}
-
-				void InvokeNativeWindowCreated(INativeWindow* window)
-				{
-					for(int i=0;i<listeners.Count();i++)
-					{
-						listeners[i]->NativeWindowCreated(window);
-					}
-				}
-
-				void InvokeNativeWindowDestroyed(INativeWindow* window)
-				{
-					for(int i=0;i<listeners.Count();i++)
-					{
-						listeners[i]->NativeWindowDestroying(window);
-					}
-				}
-			};
-
-/***********************************************************************
-WindowsInputService
-***********************************************************************/
-
-			LRESULT CALLBACK MouseProc(int nCode , WPARAM wParam , LPARAM lParam);
-
-			class WindowsInputService : public Object, public INativeInputService
-			{
-			protected:
-				HWND								ownerHandle;
-				HHOOK								mouseHook;
-				bool								isTimerEnabled;
-			public:
-				WindowsInputService()
-					:ownerHandle(NULL)
-					,mouseHook(NULL)
-					,isTimerEnabled(false)
-				{
-				}
-
-				void SetOwnerHandle(HWND handle)
-				{
-					ownerHandle=handle;
-				}
-
-				//=======================================================================
-
-				void StartHookMouse()
-				{
-					if(!IsHookingMouse())
-					{
-						mouseHook=SetWindowsHookEx(WH_MOUSE_LL, MouseProc, NULL, NULL);
-					}
-				}
-
-				void StopHookMouse()
-				{
-					if(IsHookingMouse())
-					{
-						UnhookWindowsHookEx(mouseHook);
-						mouseHook=NULL;
-					}
-				}
-
-				bool IsHookingMouse()
-				{
-					return mouseHook!=NULL;
-				}
-
-				//=======================================================================
-
-				void StartTimer()
-				{
-					if(!IsTimerEnabled())
-					{
-						SetTimer(ownerHandle, 1, 16, NULL);
-						isTimerEnabled=true;
-					}
-				}
-
-				void StopTimer()
-				{
-					if(IsTimerEnabled())
-					{
-						KillTimer(ownerHandle, 1);
-						isTimerEnabled=false;
-					}
-				}
-
-				bool IsTimerEnabled()
-				{
-					return isTimerEnabled;
-				}
-
-				//=======================================================================
-				
-				bool IsKeyPressing(int code)
-				{
-					return WinIsKeyPressing(code);
-				}
-
-				bool IsKeyToggled(int code)
-				{
-					return WinIsKeyToggled(code);
-				}
-			};
-
-/***********************************************************************
 WindowsController
 ***********************************************************************/
 
 			LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 			LRESULT CALLBACK GodProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+			LRESULT CALLBACK MouseProc(int nCode , WPARAM wParam , LPARAM lParam);
 
 			class WindowsController : public Object, public virtual INativeController, public virtual INativeWindowService
 			{
@@ -25799,6 +25823,8 @@ WindowsController
 					,windowClass(L"VczhWindow", false, false, WndProc, _hInstance)
 					,godClass(L"GodWindow", false, false, GodProc, _hInstance)
 					,mainWindow(0)
+					,screenService(&GetHWNDFromNativeWindowHandle)
+					,inputService(&MouseProc)
 				{
 					godWindow=CreateWindowEx(WS_EX_CONTROLPARENT, godClass.GetName().Buffer(), L"GodWindow", WS_OVERLAPPEDWINDOW, 0, 0, 0, 0, NULL, NULL, hInstance, NULL);
 					clipboardService.SetOwnerHandle(godWindow);

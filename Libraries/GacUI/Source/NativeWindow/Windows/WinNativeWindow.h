@@ -10,8 +10,7 @@ Interfaces:
 #define VCZH_PRESENTATION_WINDOWS_WINNATIVEWINDOW
 
 #include "..\GuiNativeWindow.h"
-#include <windows.h>
-#include <wincodec.h>
+#include "ServicesImpl\WindowsImageService.h"
 
 namespace vl
 {
@@ -35,11 +34,6 @@ Windows Platform Native Controller
 			extern INativeController*						CreateWindowsNativeController(HINSTANCE hInstance);
 			extern IWindowsForm*							GetWindowsForm(INativeWindow* window);
 			extern void										DestroyWindowsNativeController(INativeController* controller);
-
-			extern IWICImagingFactory*						GetWICImagingFactory();
-			extern IWICBitmap*								GetWICBitmap(INativeImageFrame* frame);
-			extern Ptr<INativeImage>						CreateImageFromHBITMAP(HBITMAP handle);
-			extern Ptr<INativeImage>						CreateImageFromHICON(HICON handle);
 		}
 	}
 }
