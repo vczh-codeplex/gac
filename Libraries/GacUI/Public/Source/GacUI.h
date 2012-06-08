@@ -8587,6 +8587,100 @@ Renderers
 #endif
 
 /***********************************************************************
+NATIVEWINDOW\WINDOWS\SERVICESIMPL\WINDOWSIMAGESERVICE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: ³Âè÷å«(vczh)
+GacUI::Native Window::Windows Implementation
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSIMAGESERIVCE
+#define VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSIMAGESERIVCE
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+			class WindowsImageFrame : public Object, public INativeImageFrame
+			{
+			protected:
+				INativeImage*													image;
+				ComPtr<IWICBitmap>												frameBitmap;
+				collections::Dictionary<void*, Ptr<INativeImageFrameCache>>		caches;
+
+				void										Initialize(IWICBitmapSource* bitmapSource);
+			public:
+				WindowsImageFrame(INativeImage* _image, IWICBitmapFrameDecode* frameDecode);
+				WindowsImageFrame(INativeImage* _image, IWICBitmap* sourceBitmap);
+				~WindowsImageFrame();
+				INativeImage*								GetImage();
+				Size										GetSize();
+				bool										SetCache(void* key, Ptr<INativeImageFrameCache> cache);
+				Ptr<INativeImageFrameCache>					GetCache(void* key);
+				Ptr<INativeImageFrameCache>					RemoveCache(void* key);
+				IWICBitmap*									GetFrameBitmap();
+			};
+
+			class WindowsImage : public Object, public INativeImage
+			{
+			protected:
+				INativeImageService*						imageService;
+				ComPtr<IWICBitmapDecoder>					bitmapDecoder;
+				collections::Array<Ptr<WindowsImageFrame>>	frames;
+			public:
+				WindowsImage(INativeImageService* _imageService, IWICBitmapDecoder* _bitmapDecoder);
+				~WindowsImage();
+				INativeImageService*						GetImageService();
+				FormatType									GetFormat();
+				int											GetFrameCount();
+				INativeImageFrame*							GetFrame(int index);
+			};
+
+			class WindowsBitmapImage : public Object, public INativeImage
+			{
+			protected:
+				INativeImageService*						imageService;
+				Ptr<WindowsImageFrame>						frame;
+				FormatType									formatType;
+			public:
+				WindowsBitmapImage(INativeImageService* _imageService, IWICBitmap* sourceBitmap, FormatType _formatType);
+				~WindowsBitmapImage();
+				INativeImageService*						GetImageService();
+				FormatType									GetFormat();
+				int											GetFrameCount();
+				INativeImageFrame*							GetFrame(int index);
+			};
+
+			class WindowsImageService : public Object, public INativeImageService
+			{
+			protected:
+				ComPtr<IWICImagingFactory>					imagingFactory;
+			public:
+				WindowsImageService();
+				~WindowsImageService();
+				Ptr<INativeImage>							CreateImageFromFile(const WString& path);
+				Ptr<INativeImage>							CreateImageFromHBITMAP(HBITMAP handle);
+				Ptr<INativeImage>							CreateImageFromHICON(HICON handle);
+				IWICImagingFactory*							GetImagingFactory();
+			};
+
+			extern IWICImagingFactory*						GetWICImagingFactory();
+			extern IWICBitmap*								GetWICBitmap(INativeImageFrame* frame);
+			extern Ptr<INativeImage>						CreateImageFromHBITMAP(HBITMAP handle);
+			extern Ptr<INativeImage>						CreateImageFromHICON(HICON handle);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
 NATIVEWINDOW\WINDOWS\WINNATIVEWINDOW.H
 ***********************************************************************/
 /***********************************************************************
@@ -8623,11 +8717,6 @@ Windows Platform Native Controller
 			extern INativeController*						CreateWindowsNativeController(HINSTANCE hInstance);
 			extern IWindowsForm*							GetWindowsForm(INativeWindow* window);
 			extern void										DestroyWindowsNativeController(INativeController* controller);
-
-			extern IWICImagingFactory*						GetWICImagingFactory();
-			extern IWICBitmap*								GetWICBitmap(INativeImageFrame* frame);
-			extern Ptr<INativeImage>						CreateImageFromHBITMAP(HBITMAP handle);
-			extern Ptr<INativeImage>						CreateImageFromHICON(HICON handle);
 		}
 	}
 }
@@ -8692,5 +8781,307 @@ namespace vl
 }
 
 extern int WinMainGDI(HINSTANCE hInstance, void(*RendererMain)());
+
+#endif
+
+/***********************************************************************
+NATIVEWINDOW\WINDOWS\SERVICESIMPL\WINDOWSASYNCSERVICE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: ³Âè÷å«(vczh)
+GacUI::Native Window::Windows Implementation
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSASYNCSERVICE
+#define VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSASYNCSERVICE
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+			class WindowsAsyncService : public INativeAsyncService
+			{
+			public:
+				struct TaskItem
+				{
+					Semaphore*							semaphore;
+					INativeAsyncService::AsyncTaskProc*	proc;
+					void*								argument;
+
+					TaskItem();
+					TaskItem(Semaphore* _semaphore, INativeAsyncService::AsyncTaskProc* _proc, void* _argument);
+					~TaskItem();
+
+					bool operator==(const TaskItem& item)const{return false;}
+					bool operator!=(const TaskItem& item)const{return true;}
+				};
+			protected:
+				int								mainThreadId;
+				SpinLock						taskListLock;
+				collections::List<TaskItem>		taskItems;
+			public:
+				WindowsAsyncService();
+				~WindowsAsyncService();
+				void							ExecuteAsyncTasks();
+				bool							IsInMainThread();
+				void							InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument);
+				void							InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument);
+				bool							InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds);
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+NATIVEWINDOW\WINDOWS\SERVICESIMPL\WINDOWSCALLBACKSERVICE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: ³Âè÷å«(vczh)
+GacUI::Native Window::Windows Implementation
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSCALLBACKSERVICE
+#define VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSCALLBACKSERVICE
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+			class WindowsCallbackService : public Object, public INativeCallbackService
+			{
+			protected:
+				collections::List<INativeControllerListener*>	listeners;
+
+			public:
+				WindowsCallbackService();
+				bool											InstallListener(INativeControllerListener* listener);
+				bool											UninstallListener(INativeControllerListener* listener);
+
+				void											InvokeMouseHook(WPARAM message, Point location);
+				void											InvokeGlobalTimer();
+				void											InvokeClipboardUpdated();
+				void											InvokeNativeWindowCreated(INativeWindow* window);
+				void											InvokeNativeWindowDestroyed(INativeWindow* window);
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+NATIVEWINDOW\WINDOWS\SERVICESIMPL\WINDOWSCLIPBOARDSERVICE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: ³Âè÷å«(vczh)
+GacUI::Native Window::Windows Implementation
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSCLIPBOARDSERVICE
+#define VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSCLIPBOARDSERVICE
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+			class WindowsClipboardService : public Object, public INativeClipboardService
+			{
+			protected:
+				HWND					ownerHandle;
+			public:
+				WindowsClipboardService();
+				void					SetOwnerHandle(HWND handle);
+				bool					ContainsText();
+				WString					GetText();
+				bool					SetText(const WString& value);
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+NATIVEWINDOW\WINDOWS\SERVICESIMPL\WINDOWSINPUTSERVICE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: ³Âè÷å«(vczh)
+GacUI::Native Window::Windows Implementation
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSINPUTSERVICE
+#define VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSINPUTSERVICE
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+			class WindowsInputService : public Object, public INativeInputService
+			{
+			protected:
+				HWND								ownerHandle;
+				HHOOK								mouseHook;
+				bool								isTimerEnabled;
+				HOOKPROC							mouseProc;
+			public:
+				WindowsInputService(HOOKPROC _mouseProc);
+
+				void								SetOwnerHandle(HWND handle);
+				void								StartHookMouse();
+				void								StopHookMouse();
+				bool								IsHookingMouse();
+				void								StartTimer();
+				void								StopTimer();
+				bool								IsTimerEnabled();
+				bool								IsKeyPressing(int code);
+				bool								IsKeyToggled(int code);
+			};
+
+			extern bool								WinIsKeyPressing(int code);
+			extern bool								WinIsKeyToggled(int code);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+NATIVEWINDOW\WINDOWS\SERVICESIMPL\WINDOWSRESOURCESERVICE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: ³Âè÷å«(vczh)
+GacUI::Native Window::Windows Implementation
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSRESOURCESERVICE
+#define VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSRESOURCESERVICE
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+			class WindowsCursor : public Object, public INativeCursor
+			{
+			protected:
+				HCURSOR										handle;
+				bool										isSystemCursor;
+				SystemCursorType							systemCursorType;
+			public:
+				WindowsCursor(HCURSOR _handle);
+				WindowsCursor(SystemCursorType type);
+				bool										IsSystemCursor();
+				SystemCursorType							GetSystemCursorType();
+				HCURSOR										GetCursorHandle();
+			};
+
+			class WindowsResourceService : public Object, public INativeResourceService
+			{
+			protected:
+				collections::Array<Ptr<WindowsCursor>>		systemCursors;
+				FontProperties								defaultFont;
+			public:
+				WindowsResourceService();
+				INativeCursor*								GetSystemCursor(INativeCursor::SystemCursorType type);
+				INativeCursor*								GetDefaultSystemCursor();
+				FontProperties								GetDefaultFont();
+				void										SetDefaultFont(const FontProperties& value);
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+NATIVEWINDOW\WINDOWS\SERVICESIMPL\WINDOWSSCREENSERVICE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: ³Âè÷å«(vczh)
+GacUI::Native Window::Windows Implementation
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSSCREENSERVICE
+#define VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSSCREENSERVICE
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+			class WindowsScreen : public Object, public INativeScreen
+			{
+				friend class WindowsScreenService;
+			protected:
+				HMONITOR										monitor;
+			public:
+				WindowsScreen();
+				Rect											GetBounds();
+				Rect											GetClientBounds();
+				WString											GetName();
+				bool											IsPrimary();
+			};
+
+			class WindowsScreenService : public Object, public INativeScreenService
+			{
+				typedef HWND (*HandleRetriver)(INativeWindow*);
+			protected:
+				collections::List<Ptr<WindowsScreen>>			screens;
+				HandleRetriver									handleRetriver;
+			public:
+
+				struct MonitorEnumProcData
+				{
+					WindowsScreenService*	screenService;
+					int						currentScreen;
+				};
+
+				WindowsScreenService(HandleRetriver _handleRetriver);
+
+				static BOOL CALLBACK							MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
+				void											RefreshScreenInformation();
+				int												GetScreenCount();
+				INativeScreen*									GetScreen(int index);
+				INativeScreen*									GetScreen(INativeWindow* window);
+			};
+		}
+	}
+}
 
 #endif
