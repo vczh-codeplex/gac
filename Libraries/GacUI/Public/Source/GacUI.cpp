@@ -1342,11 +1342,6 @@ ListViewColumnItemArranger::ColumnItemViewCallback
 				{
 					arranger->RebuildColumns();
 				}
-
-				void ListViewColumnItemArranger::ColumnItemViewCallback::OnColumnSizeChanged(int index)
-				{
-					arranger->UpdateColumnSize(index);
-				}
 				
 /***********************************************************************
 ListViewColumnItemArranger
@@ -1688,26 +1683,6 @@ ListViewDetailContentProvider
 				{
 				}
 
-				void ListViewDetailContentProvider::OnColumnSizeChanged(int index)
-				{
-					int itemCount=listViewItemStyleProvider->GetCreatedItemStyles().Count();
-					for(int i=0;i<itemCount;i++)
-					{
-						ListViewItemStyleProvider::ListViewContentItemStyleController* itemStyle
-							=dynamic_cast<ListViewItemStyleProvider::ListViewContentItemStyleController*>(
-								listViewItemStyleProvider->GetCreatedItemStyles()[i]
-								);
-						if(itemStyle && listViewItemStyleProvider->IsItemStyleAttachedToListView(itemStyle))
-						{
-							ItemContent* itemContent=dynamic_cast<ItemContent*>(itemStyle->GetItemContent());
-							if(itemContent)
-							{
-								itemContent->UpdateSubItemSize();
-							}
-						}
-					}
-				}
-
 				ListViewDetailContentProvider::ListViewDetailContentProvider(Size _iconSize)
 					:iconSize(_iconSize)
 					,itemProvider(0)
@@ -1764,6 +1739,8 @@ ListViewColumn
 				ListViewColumn::ListViewColumn(const WString& _text, int _size)
 					:text(_text)
 					,size(_size)
+					,dropdownPopup(0)
+					,sortingState(ListViewColumnItemArranger::NotSorted)
 				{
 				}
 
@@ -1922,8 +1899,32 @@ ListViewItemProvider
 						columns[index]->size=value;
 						for(int i=0;i<columnItemViewCallbacks.Count();i++)
 						{
-							columnItemViewCallbacks[i]->OnColumnSizeChanged(index);
+							columnItemViewCallbacks[i]->OnColumnChanged();
 						}
+					}
+				}
+
+				GuiPopup* ListViewItemProvider::GetDropdownPopup(int index)
+				{
+					if(index<0 || index>=columns.Count())
+					{
+						return 0;
+					}
+					else
+					{
+						return columns[index]->dropdownPopup;
+					}
+				}
+
+				ListViewColumnItemArranger::ColumnSortingState ListViewItemProvider::GetSortingState(int index)
+				{
+					if(index<0 || index>=columns.Count())
+					{
+						return ListViewColumnItemArranger::NotSorted;
+					}
+					else
+					{
+						return columns[index]->sortingState;
 					}
 				}
 

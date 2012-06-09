@@ -293,9 +293,19 @@ public:
 			columnSizes[index]=value;
 			for(int i=0;i<columnItemViewCallbacks.Count();i++)
 			{
-				columnItemViewCallbacks[i]->OnColumnSizeChanged(index);
+				columnItemViewCallbacks[i]->OnColumnChanged();
 			}
 		}
+	}
+
+	GuiPopup* GetDropdownPopup(int index)
+	{
+		return 0;
+	}
+
+	list::ListViewColumnItemArranger::ColumnSortingState GetSortingState(int index)
+	{
+		return list::ListViewColumnItemArranger::NotSorted;
 	}
 };
 
