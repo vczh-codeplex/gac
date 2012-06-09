@@ -4799,12 +4799,18 @@ ListView ItemContentProvider(Detailed)
 					typedef collections::List<compositions::GuiBoundsComposition*>		ColumnHeaderSplitterList;
 				public:
 					static const int							SplitterWidth=8;
+
+					enum ColumnSortingState
+					{
+						NotSorted,
+						Ascending,
+						Descending,
+					};
 					
 					class IColumnItemViewCallback : public virtual IDescriptable, public Description<IColumnItemViewCallback>
 					{
 					public:
 						virtual void							OnColumnChanged()=0;
-						virtual void							OnColumnSizeChanged(int index)=0;
 					};
 					
 					class IColumnItemView : public virtual IDescriptable, public Description<IColumnItemView>
@@ -4818,6 +4824,8 @@ ListView ItemContentProvider(Detailed)
 						virtual WString							GetColumnText(int index)=0;
 						virtual int								GetColumnSize(int index)=0;
 						virtual void							SetColumnSize(int index, int value)=0;
+						virtual GuiPopup*						GetDropdownPopup(int index)=0;
+						virtual ColumnSortingState				GetSortingState(int index)=0;
 					};
 				protected:
 					class ColumnItemViewCallback : public Object, public virtual IColumnItemViewCallback
@@ -4829,7 +4837,6 @@ ListView ItemContentProvider(Detailed)
 						~ColumnItemViewCallback();
 
 						void									OnColumnChanged();
-						void									OnColumnSizeChanged(int index);
 					};
 
 					GuiListViewBase*							listView;
@@ -4897,7 +4904,6 @@ ListView ItemContentProvider(Detailed)
 					ListViewItemStyleProvider*							listViewItemStyleProvider;
 
 					void												OnColumnChanged()override;
-					void												OnColumnSizeChanged(int index)override;
 				public:
 					ListViewDetailContentProvider(Size _iconSize=Size(16, 16));
 					~ListViewDetailContentProvider();
@@ -4928,8 +4934,10 @@ ListView
 				class ListViewColumn
 				{
 				public:
-					WString										text;
-					int											size;
+					WString											text;
+					int												size;
+					GuiPopup*										dropdownPopup;
+					ListViewColumnItemArranger::ColumnSortingState	sortingState;
 
 					ListViewColumn(const WString& _text=L"", int _size=160);
 				};
@@ -4945,7 +4953,7 @@ ListView
 					ListViewDataColumns();
 					~ListViewDataColumns();
 				};
-
+				
 				class ListViewColumns : public ItemsBase<Ptr<ListViewColumn>>
 				{
 					friend class ListViewItemProvider;
@@ -4968,34 +4976,36 @@ ListView
 					friend class ListViewDataColumns;
 					typedef collections::List<ListViewColumnItemArranger::IColumnItemViewCallback*>		ColumnItemViewCallbackList;
 				protected:
-					ListViewDataColumns							dataColumns;
-					ListViewColumns								columns;
-					ColumnItemViewCallbackList					columnItemViewCallbacks;
+					ListViewDataColumns									dataColumns;
+					ListViewColumns										columns;
+					ColumnItemViewCallbackList							columnItemViewCallbacks;
 
-					bool										ContainsPrimaryText(int itemIndex)override;
-					WString										GetPrimaryTextViewText(int itemIndex)override;
-					Ptr<GuiImageData>							GetSmallImage(int itemIndex)override;
-					Ptr<GuiImageData>							GetLargeImage(int itemIndex)override;
-					WString										GetText(int itemIndex)override;
-					WString										GetSubItem(int itemIndex, int index)override;
-					int											GetDataColumnCount()override;
-					int											GetDataColumn(int index)override;
+					bool												ContainsPrimaryText(int itemIndex)override;
+					WString												GetPrimaryTextViewText(int itemIndex)override;
+					Ptr<GuiImageData>									GetSmallImage(int itemIndex)override;
+					Ptr<GuiImageData>									GetLargeImage(int itemIndex)override;
+					WString												GetText(int itemIndex)override;
+					WString												GetSubItem(int itemIndex, int index)override;
+					int													GetDataColumnCount()override;
+					int													GetDataColumn(int index)override;
 
-					bool										AttachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)override;
-					bool										DetachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)override;
-					int											GetColumnCount()override;
-					WString										GetColumnText(int index)override;
-					int											GetColumnSize(int index)override;
-					void										SetColumnSize(int index, int value)override;
+					bool												AttachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)override;
+					bool												DetachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)override;
+					int													GetColumnCount()override;
+					WString												GetColumnText(int index)override;
+					int													GetColumnSize(int index)override;
+					void												SetColumnSize(int index, int value)override;
+					GuiPopup*											GetDropdownPopup(int index)override;
+					ListViewColumnItemArranger::ColumnSortingState		GetSortingState(int index)override;
 				public:
 					ListViewItemProvider();
 					~ListViewItemProvider();
 
-					IDescriptable*								RequestView(const WString& identifier)override;
-					void										ReleaseView(IDescriptable* view)override;
+					IDescriptable*										RequestView(const WString& identifier)override;
+					void												ReleaseView(IDescriptable* view)override;
 
-					ListViewDataColumns&						GetDataColumns();
-					ListViewColumns&							GetColumns();
+					ListViewDataColumns&								GetDataColumns();
+					ListViewColumns&									GetColumns();
 				};
 			}
 			
