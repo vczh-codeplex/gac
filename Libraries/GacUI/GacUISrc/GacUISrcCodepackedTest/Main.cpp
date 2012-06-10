@@ -168,31 +168,35 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 			textBox->SetText(L"Singleline TextBox");
 		}
 		{
-			GuiButton* buttonHeader=new GuiButton(new win7::Win7ListViewColumnHeaderStyle());
+			GuiMenuButton* buttonHeader=new GuiMenuButton(new win7::Win7ListViewColumnHeaderStyle());
 			cell->AddChild(buttonHeader->GetBoundsComposition());
 			buttonHeader->GetBoundsComposition()->SetBounds(Rect(Point(210, 280), Size(200, 25)));
 			buttonHeader->SetText(L"ListView Header");
 		}
 		{
-			GuiButton* buttonHeader=new GuiButton(new win7::Win7ListViewColumnHeaderStyle());
+			GuiMenuButton* buttonHeader=new GuiMenuButton(new win7::Win7ListViewColumnHeaderStyle());
 			cell->AddChild(buttonHeader->GetBoundsComposition());
 			buttonHeader->GetBoundsComposition()->SetBounds(Rect(Point(210, 315), Size(200, 25)));
 			buttonHeader->SetText(L"ListView Header DropDown");
 
-			GuiButton* buttonDropDown=new GuiButton(new win7::Win7ListViewColumnDropDownStyle());
-			buttonDropDown->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, 0, 0, 0));
-			buttonDropDown->SetVisible(false);
-			buttonHeader->GetBoundsComposition()->AddChild(buttonDropDown->GetBoundsComposition());
+			buttonHeader->CreateSubMenu();
+			GuiMenu* dropdownMenu=buttonHeader->GetSubMenu();
+			GuiStackComposition* menuStack=new GuiStackComposition;
+			menuStack->SetDirection(GuiStackComposition::Vertical);
+			menuStack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+			menuStack->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			dropdownMenu->GetContainerComposition()->AddChild(menuStack);
 
-			buttonHeader->GetBoundsComposition()->GetEventReceiver()->mouseEnter.AttachLambda([buttonDropDown](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			for(int i=0;i<3;i++)
 			{
-				buttonDropDown->SetVisible(true);
-			});
+				GuiStackItemComposition* item=new GuiStackItemComposition;
+				menuStack->AddChild(item);
 
-			buttonHeader->GetBoundsComposition()->GetEventReceiver()->mouseLeave.AttachLambda([buttonDropDown](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-			{
-				buttonDropDown->SetVisible(false);
-			});
+				GuiMenuButton* button=new GuiMenuButton(new win7::Win7MenuItemButtonStyle);
+				button->SetText(L"MenuButton "+itow(i+1));
+				button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				item->AddChild(button->GetBoundsComposition());
+			}
 		}
 	}
 	{

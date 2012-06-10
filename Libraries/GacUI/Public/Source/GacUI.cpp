@@ -1457,9 +1457,10 @@ ListViewColumnItemArranger
 						}
 						for(int i=0;i<columnItemView->GetColumnCount();i++)
 						{
-							GuiButton* button=new GuiButton(styleProvider->CreateColumnStyle());
+							GuiMenuButton* button=new GuiMenuButton(styleProvider->CreateColumnStyle());
 							button->SetText(columnItemView->GetColumnText(i));
 							button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
+							button->SetSubMenu(columnItemView->GetDropdownPopup(i));
 							columnHeaderButtons.Add(button);
 							if(i>0)
 							{
@@ -1482,19 +1483,6 @@ ListViewColumnItemArranger
 						}
 					}
 					callback->OnTotalSizeChanged();
-				}
-
-				void ListViewColumnItemArranger::UpdateColumnSize(int index)
-				{
-					if(index>=0 && index<columnHeaderButtons.Count())
-					{
-						int size=columnItemView->GetColumnSize(index);
-						GuiBoundsComposition* buttonBounds=columnHeaderButtons[index]->GetBoundsComposition();
-						Rect bounds=buttonBounds->GetBounds();
-						Rect newBounds(bounds.LeftTop(), Size(size, bounds.Height()));
-						buttonBounds->SetBounds(newBounds);
-						callback->OnTotalSizeChanged();
-					}
 				}
 
 				ListViewColumnItemArranger::ListViewColumnItemArranger()
@@ -1904,7 +1892,7 @@ ListViewItemProvider
 					}
 				}
 
-				GuiPopup* ListViewItemProvider::GetDropdownPopup(int index)
+				GuiMenu* ListViewItemProvider::GetDropdownPopup(int index)
 				{
 					if(index<0 || index>=columns.Count())
 					{
@@ -2208,6 +2196,12 @@ GuiMenuBar
 GuiMenuButton
 ***********************************************************************/
 
+			GuiButton* GuiMenuButton::GetSubMenuHost()
+			{
+				GuiButton* button=styleController->GetSubMenuHost();
+				return button?button:this;
+			}
+
 			void GuiMenuButton::OpenSubMenuInternal()
 			{
 				if(!GetSubMenuOpening())
@@ -2280,18 +2274,19 @@ GuiMenuButton
 				:GuiButton(_styleController)
 				,styleController(_styleController)
 				,subMenu(0)
+				,ownedSubMenu(false)
 				,ownerMenuService(0)
 			{
 				SetClickOnMouseUp(false);
 				SubMenuOpeningChanged.SetAssociatedComposition(boundsComposition);
-				Clicked.AttachMethod(this, &GuiMenuButton::OnClicked);
-				GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiMenuButton::OnLeftButtonDown);
-				GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiMenuButton::OnMouseEnter);
+				GetSubMenuHost()->Clicked.AttachMethod(this, &GuiMenuButton::OnClicked);
+				GetSubMenuHost()->GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiMenuButton::OnLeftButtonDown);
+				GetSubMenuHost()->GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiMenuButton::OnMouseEnter);
 			}
 
 			GuiMenuButton::~GuiMenuButton()
 			{
-				if(subMenu)
+				if(subMenu && ownedSubMenu)
 				{
 					delete subMenu;
 				}
@@ -2315,6 +2310,17 @@ GuiMenuButton
 					subMenu->WindowOpened.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowOpened);
 					subMenu->WindowClosed.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowClosed);
 					styleController->SetSubMenuExisting(true);
+					ownedSubMenu=true;
+				}
+			}
+
+			void GuiMenuButton::SetSubMenu(GuiMenu* value)
+			{
+				if(!subMenu && value)
+				{
+					subMenu=value;
+					styleController->SetSubMenuExisting(true);
+					ownedSubMenu=false;
 				}
 			}
 
@@ -2322,10 +2328,19 @@ GuiMenuButton
 			{
 				if(subMenu)
 				{
-					delete subMenu;
+					if(ownedSubMenu)
+					{
+						delete subMenu;
+					}
 					subMenu=0;
+					ownedSubMenu=false;
 					styleController->SetSubMenuExisting(false);
 				}
+			}
+
+			bool GuiMenuButton::GetOwnedSubMenu()
+			{
+				return subMenu && ownedSubMenu;
 			}
 
 			bool GuiMenuButton::GetSubMenuOpening()
@@ -2348,7 +2363,7 @@ GuiMenuButton
 					{
 						subMenu->SetClientSize(preferredMenuClientSize);
 						IGuiMenuService::Direction direction=ownerMenuService?ownerMenuService->GetPreferredDirection():IGuiMenuService::Horizontal;
-						subMenu->ShowPopup(this, direction==IGuiMenuService::Horizontal);
+						subMenu->ShowPopup(GetSubMenuHost(), direction==IGuiMenuService::Horizontal);
 					}
 					else
 					{
@@ -12800,7 +12815,7 @@ Win7ListViewColumnDropDownStyle
 Win7ListViewColumnHeaderStyle
 ***********************************************************************/
 
-			void Win7ListViewColumnHeaderStyle::TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)
+			void Win7ListViewColumnHeaderStyle::TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool subMenuExisting, bool subMenuOpening)
 			{
 				if(!enabled) value=GuiButton::Normal;
 				switch(value)
@@ -12813,6 +12828,8 @@ Win7ListViewColumnHeaderStyle
 
 						backgroundElement->SetColor(Color(252, 252, 252));
 						rightBorderElement->SetColors(Color(223, 234, 247), Color(252, 252, 252));
+
+						dropdownButton->SetVisible(subMenuOpening);
 					}
 					break;
 				case GuiButton::Active:
@@ -12825,6 +12842,8 @@ Win7ListViewColumnHeaderStyle
 						backgroundElement->SetColor(Color(252, 252, 252));
 						borderElement->SetColor(Color(223, 233, 246));
 						gradientElement->SetColors(Color(243, 248, 253), Color(239, 243, 249));
+
+						dropdownButton->SetVisible(isSubMenuExisting);
 					}
 					break;
 				case GuiButton::Pressed:
@@ -12837,6 +12856,8 @@ Win7ListViewColumnHeaderStyle
 						backgroundElement->SetColor(Color(246, 247, 248));
 						borderElement->SetColor(Color(192, 203, 217));
 						gradientElement->SetColors(Color(193, 204, 218), Color(252, 252, 252));
+
+						dropdownButton->SetVisible(isSubMenuExisting);
 					}
 					break;
 				}
@@ -12845,7 +12866,8 @@ Win7ListViewColumnHeaderStyle
 			Win7ListViewColumnHeaderStyle::Win7ListViewColumnHeaderStyle()
 				:controlStyle(GuiButton::Normal)
 				,isVisuallyEnabled(true)
-				,isSelected(false)
+				,isSubMenuExisting(false)
+				,isSubMenuOpening(false)
 			{
 				backgroundElement=GuiSolidBackgroundElement::Create();
 				mainComposition=new GuiBoundsComposition;
@@ -12882,7 +12904,12 @@ Win7ListViewColumnHeaderStyle
 				textComposition->SetAlignmentToParent(Margin(15, 7, 18, 5));
 				mainComposition->AddChild(textComposition);
 
-				TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
+				dropdownButton=new GuiButton(new Win7ListViewColumnDropDownStyle);
+				dropdownButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, 0, 0, 0));
+				dropdownButton->SetVisible(false);
+				mainComposition->AddChild(dropdownButton->GetBoundsComposition());
+
+				TransferInternal(controlStyle, isVisuallyEnabled, isSubMenuExisting, isSubMenuOpening);
 			}
 
 			Win7ListViewColumnHeaderStyle::~Win7ListViewColumnHeaderStyle()
@@ -12918,16 +12945,7 @@ Win7ListViewColumnHeaderStyle
 				if(isVisuallyEnabled!=value)
 				{
 					isVisuallyEnabled=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
-				}
-			}
-
-			void Win7ListViewColumnHeaderStyle::SetSelected(bool value)
-			{
-				if(isSelected!=value)
-				{
-					isSelected=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSubMenuExisting, isSubMenuOpening);
 				}
 			}
 
@@ -12936,8 +12954,36 @@ Win7ListViewColumnHeaderStyle
 				if(controlStyle!=value)
 				{
 					controlStyle=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
+					TransferInternal(controlStyle, isVisuallyEnabled, isSubMenuExisting, isSubMenuOpening);
 				}
+			}
+
+			controls::GuiMenu::IStyleController* Win7ListViewColumnHeaderStyle::CreateSubMenuStyleController()
+			{
+				return new Win7MenuStyle;
+			}
+
+			void Win7ListViewColumnHeaderStyle::SetSubMenuExisting(bool value)
+			{
+				if(isSubMenuExisting!=value)
+				{
+					isSubMenuExisting=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isSubMenuExisting, isSubMenuOpening);
+				}
+			}
+
+			void Win7ListViewColumnHeaderStyle::SetSubMenuOpening(bool value)
+			{
+				if(isSubMenuOpening!=value)
+				{
+					isSubMenuOpening=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isSubMenuExisting, isSubMenuOpening);
+				}
+			}
+
+			controls::GuiButton* Win7ListViewColumnHeaderStyle::GetSubMenuHost()
+			{
+				return dropdownButton;
 			}
 
 /***********************************************************************
@@ -13160,6 +13206,11 @@ Win7MenuBarButtonStyle
 				}
 			}
 
+			controls::GuiButton* Win7MenuBarButtonStyle::GetSubMenuHost()
+			{
+				return 0;
+			}
+
 			void Win7MenuBarButtonStyle::Transfer(GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)
@@ -13280,6 +13331,11 @@ Win7MenuItemButtonStyle
 					isOpening=value;
 					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
 				}
+			}
+
+			controls::GuiButton* Win7MenuItemButtonStyle::GetSubMenuHost()
+			{
+				return 0;
 			}
 
 			void Win7MenuItemButtonStyle::Transfer(GuiButton::ControlState value)
@@ -13974,7 +14030,7 @@ Win7ListViewProvider
 				return new Win7SelectableItemStyle;
 			}
 
-			controls::GuiSelectableButton::IStyleController* Win7ListViewProvider::CreateColumnStyle()
+			controls::GuiMenuButton::IStyleController* Win7ListViewProvider::CreateColumnStyle()
 			{
 				return new Win7ListViewColumnHeaderStyle;
 			}

@@ -10,7 +10,7 @@ Interfaces:
 #define VCZH_PRESENTATION_CONTROLS_GUILISTVIEWCONTROLS
 
 #include "..\GuiListControls.h"
-#include "..\GuiWindowControls.h"
+#include "..\ExtendedControls\GuiMenuControls.h"
 
 namespace vl
 {
@@ -78,7 +78,7 @@ ListView Base
 					virtual GuiSelectableButton::IStyleController*		CreateItemBackground()=0;
 					/// <summary>Create a style controller for a column header.</summary>
 					/// <returns>The created style controller for a column header.</returns>
-					virtual GuiSelectableButton::IStyleController*		CreateColumnStyle()=0;
+					virtual GuiMenuButton::IStyleController*			CreateColumnStyle()=0;
 					/// <summary>Get the primary text color.</summary>
 					/// <returns>The primary text color.</returns>
 					virtual Color										GetPrimaryTextColor()=0;
@@ -441,7 +441,7 @@ ListView ItemContentProvider(Detailed)
 				/// <summary>List view column item arranger. This arranger contains column headers. When an column header is resized, all items will be notified via the [T:vl.presentation.controls.list.ListViewColumnItemArranger.IColumnItemView] for <see cref="GuiListControl::IItemProvider"/>.</summary>
 				class ListViewColumnItemArranger : public FixedHeightItemArranger, public Description<ListViewColumnItemArranger>
 				{
-					typedef collections::List<GuiButton*>								ColumnHeaderButtonList;
+					typedef collections::List<GuiMenuButton*>							ColumnHeaderButtonList;
 					typedef collections::List<compositions::GuiBoundsComposition*>		ColumnHeaderSplitterList;
 				public:
 					static const int							SplitterWidth=8;
@@ -498,7 +498,7 @@ ListView ItemContentProvider(Detailed)
 						/// <summary>Get the popup binded to the column.</summary>
 						/// <returns>The popup binded to the column.</returns>
 						/// <param name="index">The index of the column.</param>
-						virtual GuiPopup*						GetDropdownPopup(int index)=0;
+						virtual GuiMenu*						GetDropdownPopup(int index)=0;
 						/// <summary>Get the sorting state of the column.</summary>
 						/// <returns>The sorting state of the column.</returns>
 						/// <param name="index">The index of the column.</param>
@@ -536,7 +536,6 @@ ListView ItemContentProvider(Detailed)
 					Size										OnCalculateTotalSize()override;
 					void										DeleteColumnButtons();
 					void										RebuildColumns();
-					void										UpdateColumnSize(int index);
 				public:
 					ListViewColumnItemArranger();
 					~ListViewColumnItemArranger();
@@ -625,7 +624,7 @@ ListView
 					/// <summary>Column size.</summary>
 					int												size;
 					/// <summary>Column dropdown popup.</summary>
-					GuiPopup*										dropdownPopup;
+					GuiMenu*										dropdownPopup;
 					/// <summary>Column sorting state.</summary>
 					ListViewColumnItemArranger::ColumnSortingState	sortingState;
 
@@ -693,7 +692,7 @@ ListView
 					WString												GetColumnText(int index)override;
 					int													GetColumnSize(int index)override;
 					void												SetColumnSize(int index, int value)override;
-					GuiPopup*											GetDropdownPopup(int index)override;
+					GuiMenu*											GetDropdownPopup(int index)override;
 					ListViewColumnItemArranger::ColumnSortingState		GetSortingState(int index)override;
 				public:
 					ListViewItemProvider();
