@@ -186,6 +186,12 @@ GuiMenuBar
 GuiMenuButton
 ***********************************************************************/
 
+			GuiButton* GuiMenuButton::GetSubMenuHost()
+			{
+				GuiButton* button=styleController->GetSubMenuHost();
+				return button?button:this;
+			}
+
 			void GuiMenuButton::OpenSubMenuInternal()
 			{
 				if(!GetSubMenuOpening())
@@ -258,18 +264,19 @@ GuiMenuButton
 				:GuiButton(_styleController)
 				,styleController(_styleController)
 				,subMenu(0)
+				,ownedSubMenu(false)
 				,ownerMenuService(0)
 			{
 				SetClickOnMouseUp(false);
 				SubMenuOpeningChanged.SetAssociatedComposition(boundsComposition);
-				Clicked.AttachMethod(this, &GuiMenuButton::OnClicked);
-				GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiMenuButton::OnLeftButtonDown);
-				GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiMenuButton::OnMouseEnter);
+				GetSubMenuHost()->Clicked.AttachMethod(this, &GuiMenuButton::OnClicked);
+				GetSubMenuHost()->GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiMenuButton::OnLeftButtonDown);
+				GetSubMenuHost()->GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiMenuButton::OnMouseEnter);
 			}
 
 			GuiMenuButton::~GuiMenuButton()
 			{
-				if(subMenu)
+				if(subMenu && ownedSubMenu)
 				{
 					delete subMenu;
 				}
@@ -293,6 +300,17 @@ GuiMenuButton
 					subMenu->WindowOpened.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowOpened);
 					subMenu->WindowClosed.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowClosed);
 					styleController->SetSubMenuExisting(true);
+					ownedSubMenu=true;
+				}
+			}
+
+			void GuiMenuButton::SetSubMenu(GuiMenu* value)
+			{
+				if(!subMenu && value)
+				{
+					subMenu=value;
+					styleController->SetSubMenuExisting(true);
+					ownedSubMenu=false;
 				}
 			}
 
@@ -300,10 +318,19 @@ GuiMenuButton
 			{
 				if(subMenu)
 				{
-					delete subMenu;
+					if(ownedSubMenu)
+					{
+						delete subMenu;
+					}
 					subMenu=0;
+					ownedSubMenu=false;
 					styleController->SetSubMenuExisting(false);
 				}
+			}
+
+			bool GuiMenuButton::GetOwnedSubMenu()
+			{
+				return subMenu && ownedSubMenu;
 			}
 
 			bool GuiMenuButton::GetSubMenuOpening()
@@ -326,7 +353,7 @@ GuiMenuButton
 					{
 						subMenu->SetClientSize(preferredMenuClientSize);
 						IGuiMenuService::Direction direction=ownerMenuService?ownerMenuService->GetPreferredDirection():IGuiMenuService::Horizontal;
-						subMenu->ShowPopup(this, direction==IGuiMenuService::Horizontal);
+						subMenu->ShowPopup(GetSubMenuHost(), direction==IGuiMenuService::Horizontal);
 					}
 					else
 					{

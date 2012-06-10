@@ -597,12 +597,13 @@ Misc Buttons
 			};
 			
 			/// <summary>List view column header style (Windows 7).</summary>
-			class Win7ListViewColumnHeaderStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7ListViewColumnHeaderStyle>
+			class Win7ListViewColumnHeaderStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ListViewColumnHeaderStyle>
 			{
 			protected:
 				controls::GuiButton::ControlState			controlStyle;
 				bool										isVisuallyEnabled;
-				bool										isSelected;
+				bool										isSubMenuExisting;
+				bool										isSubMenuOpening;
 
 				compositions::GuiBoundsComposition*			mainComposition;
 				compositions::GuiBoundsComposition*			rightBorderComposition;
@@ -616,7 +617,9 @@ Misc Buttons
 				elements::GuiGradientBackgroundElement*		gradientElement;
 				elements::GuiSolidLabelElement*				textElement;
 
-				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected);
+				controls::GuiButton*						dropdownButton;
+
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool subMenuExisting, bool subMenuOpening);
 			public:
 				/// <summary>Create the style.</summary>
 				Win7ListViewColumnHeaderStyle();
@@ -628,8 +631,11 @@ Misc Buttons
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
-				void										SetSelected(bool value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
+				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
+				void										SetSubMenuExisting(bool value)override;
+				void										SetSubMenuOpening(bool value)override;
+				controls::GuiButton*						GetSubMenuHost()override;
 			};
 			
 			/// <summary>Tree view expanding button style (Windows 7). Show the triangle to indicate the expanding state of a tree view item.</summary>
@@ -687,6 +693,7 @@ Menu Button
 				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
+				controls::GuiButton*						GetSubMenuHost()override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
@@ -714,6 +721,7 @@ Menu Button
 				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
+				controls::GuiButton*						GetSubMenuHost()override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
@@ -956,7 +964,7 @@ List
 				~Win7ListViewProvider();
 
 				controls::GuiSelectableButton::IStyleController*		CreateItemBackground()override;
-				controls::GuiSelectableButton::IStyleController*		CreateColumnStyle()override;
+				controls::GuiMenuButton::IStyleController*				CreateColumnStyle()override;
 				Color													GetPrimaryTextColor()override;
 				Color													GetSecondaryTextColor()override;
 				Color													GetItemSeparatorColor()override;

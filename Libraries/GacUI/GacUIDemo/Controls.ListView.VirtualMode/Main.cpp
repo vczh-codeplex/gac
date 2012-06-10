@@ -298,7 +298,7 @@ public:
 		}
 	}
 
-	GuiPopup* GetDropdownPopup(int index)
+	GuiMenu* GetDropdownPopup(int index)
 	{
 		return 0;
 	}

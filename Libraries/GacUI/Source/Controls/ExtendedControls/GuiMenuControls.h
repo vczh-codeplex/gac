@@ -136,13 +136,18 @@ MenuButton
 					/// <summary>Notify that the sub menu is opened or closed.</summary>
 					/// <param name="value">Set to true if the sub menu is opened.</param>
 					virtual void						SetSubMenuOpening(bool value)=0;
+					/// <summary>Get the button control that is expected to be associated with a sub menu.</summary>
+					/// <returns>The button control that is expected to be associated with a sub menu. Returns null means that the sub menu will be directly associated to the menu button.</returns>
+					virtual GuiButton*					GetSubMenuHost()=0;
 				};
 			protected:
 				IStyleController*						styleController;
 				GuiMenu*								subMenu;
+				bool									ownedSubMenu;
 				Size									preferredMenuClientSize;
 				IGuiMenuService*						ownerMenuService;
 
+				GuiButton*								GetSubMenuHost();
 				void									OpenSubMenuInternal();
 				void									OnParentLineChanged()override;
 				void									OnSubMenuWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
@@ -165,11 +170,17 @@ MenuButton
 				/// <summary>Get the sub menu. If the sub menu is not created, it returns null.</summary>
 				/// <returns>The sub menu.</returns>
 				GuiMenu*								GetSubMenu();
-				/// <summary>Create the sub menu if necessary.</summary>
+				/// <summary>Create the sub menu if necessary. The created sub menu is owned by this menu button.</summary>
 				/// <param name="subMenuStyleController">The style controller for the sub menu. If this argument is null, it will call <see cref="IStyleController::CreateSubMenuStyleController"/> for a style controller.</param>
 				void									CreateSubMenu(GuiMenu::IStyleController* subMenuStyleController=0);
+				/// <summary>Associate a sub menu if there is no sub menu binded in this menu button. The associated sub menu is not owned by this menu button.</summary>
+				/// <param name="value">The sub menu to associate.</param>
+				void									SetSubMenu(GuiMenu* value);
 				/// <summary>Destroy the sub menu if necessary.</summary>
 				void									DestroySubMenu();
+				/// <summary>Test is the sub menu owned by this menu button. If the sub menu is owned, both deleting this menu button or calling <see cref="DestroySubMenu"/> will delete the sub menu.</summary>
+				/// <returns>Returns true if the sub menu is owned by this menu button.</returns>
+				bool									GetOwnedSubMenu();
 
 				/// <summary>Test is the sub menu opened.</summary>
 				/// <returns>Returns true if the sub menu is opened.</returns>

@@ -993,9 +993,10 @@ ListViewColumnItemArranger
 						}
 						for(int i=0;i<columnItemView->GetColumnCount();i++)
 						{
-							GuiButton* button=new GuiButton(styleProvider->CreateColumnStyle());
+							GuiMenuButton* button=new GuiMenuButton(styleProvider->CreateColumnStyle());
 							button->SetText(columnItemView->GetColumnText(i));
 							button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
+							button->SetSubMenu(columnItemView->GetDropdownPopup(i));
 							columnHeaderButtons.Add(button);
 							if(i>0)
 							{
@@ -1018,19 +1019,6 @@ ListViewColumnItemArranger
 						}
 					}
 					callback->OnTotalSizeChanged();
-				}
-
-				void ListViewColumnItemArranger::UpdateColumnSize(int index)
-				{
-					if(index>=0 && index<columnHeaderButtons.Count())
-					{
-						int size=columnItemView->GetColumnSize(index);
-						GuiBoundsComposition* buttonBounds=columnHeaderButtons[index]->GetBoundsComposition();
-						Rect bounds=buttonBounds->GetBounds();
-						Rect newBounds(bounds.LeftTop(), Size(size, bounds.Height()));
-						buttonBounds->SetBounds(newBounds);
-						callback->OnTotalSizeChanged();
-					}
 				}
 
 				ListViewColumnItemArranger::ListViewColumnItemArranger()
@@ -1440,7 +1428,7 @@ ListViewItemProvider
 					}
 				}
 
-				GuiPopup* ListViewItemProvider::GetDropdownPopup(int index)
+				GuiMenu* ListViewItemProvider::GetDropdownPopup(int index)
 				{
 					if(index<0 || index>=columns.Count())
 					{

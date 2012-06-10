@@ -4451,6 +4451,154 @@ TextList Control
 #endif
 
 /***********************************************************************
+CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: ³Âè÷å«(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUIMENUCONTROLS
+#define VCZH_PRESENTATION_CONTROLS_GUIMENUCONTROLS
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+
+/***********************************************************************
+Menu Service
+***********************************************************************/
+
+			class GuiMenu;
+
+			class IGuiMenuService : public virtual IDescriptable, public Description<IGuiMenuService>
+			{
+			public:
+				static const wchar_t* const				Identifier;
+
+				enum Direction
+				{
+					Horizontal,
+					Vertical,
+				};
+			protected:
+				GuiMenu*								openingMenu;
+			public:
+				IGuiMenuService();
+
+				virtual IGuiMenuService*				GetParentMenuService()=0;
+				virtual Direction						GetPreferredDirection()=0;
+				virtual bool							IsActiveState()=0;
+
+				virtual void							MenuItemExecuted();
+				virtual GuiMenu*						GetOpeningMenu();
+				virtual void							MenuOpened(GuiMenu* menu);
+				virtual void							MenuClosed(GuiMenu* menu);
+			};
+
+/***********************************************************************
+Menu
+***********************************************************************/
+
+			class GuiMenu : public GuiPopup, private IGuiMenuService, public Description<GuiMenu>
+			{
+			private:
+				IGuiMenuService*						parentMenuService;
+
+				IGuiMenuService*						GetParentMenuService()override;
+				Direction								GetPreferredDirection()override;
+				bool									IsActiveState()override;
+				void									MenuItemExecuted()override;
+			protected:
+				GuiControl*								owner;
+
+				void									MouseClickedOnOtherWindow(GuiWindow* window)override;
+				void									OnWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+			public:
+				GuiMenu(GuiControl::IStyleController* _styleController, GuiControl* _owner);
+				~GuiMenu();
+
+				void									UpdateMenuService();
+				IDescriptable*							QueryService(const WString& identifier)override;
+			};
+			
+			class GuiMenuBar : public GuiControl, private IGuiMenuService, public Description<GuiMenuBar>
+			{
+			private:
+				IGuiMenuService*						GetParentMenuService()override;
+				Direction								GetPreferredDirection()override;
+				bool									IsActiveState()override;
+			public:
+				GuiMenuBar(GuiControl::IStyleController* _styleController);
+				~GuiMenuBar();
+				
+				IDescriptable*							QueryService(const WString& identifier)override;
+			};
+
+/***********************************************************************
+MenuButton
+***********************************************************************/
+
+			class GuiMenuButton : public GuiButton, public Description<GuiMenuButton>
+			{
+			public:
+				class IStyleController : public GuiButton::IStyleController, public Description<IStyleController>
+				{
+				public:
+					virtual GuiMenu::IStyleController*	CreateSubMenuStyleController()=0;
+					virtual void						SetSubMenuExisting(bool value)=0;
+					virtual void						SetSubMenuOpening(bool value)=0;
+					virtual GuiButton*					GetSubMenuHost()=0;
+				};
+			protected:
+				IStyleController*						styleController;
+				GuiMenu*								subMenu;
+				bool									ownedSubMenu;
+				Size									preferredMenuClientSize;
+				IGuiMenuService*						ownerMenuService;
+
+				GuiButton*								GetSubMenuHost();
+				void									OpenSubMenuInternal();
+				void									OnParentLineChanged()override;
+				void									OnSubMenuWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnSubMenuWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void									OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+			public:
+				GuiMenuButton(IStyleController* _styleController);
+				~GuiMenuButton();
+
+				compositions::GuiNotifyEvent			SubMenuOpeningChanged;
+
+				bool									IsSubMenuExists();
+				GuiMenu*								GetSubMenu();
+				void									CreateSubMenu(GuiMenu::IStyleController* subMenuStyleController=0);
+				void									SetSubMenu(GuiMenu* value);
+				void									DestroySubMenu();
+				bool									GetOwnedSubMenu();
+
+				bool									GetSubMenuOpening();
+				void									SetSubMenuOpening(bool value);
+
+				Size									GetPreferredMenuClientSize();
+				void									SetPreferredMenuClientSize(Size value);
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
 CONTROLS\EXTENDEDCONTROLS\GUILISTVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
@@ -4518,7 +4666,7 @@ ListView Base
 				{
 				public:
 					virtual GuiSelectableButton::IStyleController*		CreateItemBackground()=0;
-					virtual GuiSelectableButton::IStyleController*		CreateColumnStyle()=0;
+					virtual GuiMenuButton::IStyleController*			CreateColumnStyle()=0;
 					virtual Color										GetPrimaryTextColor()=0;
 					virtual Color										GetSecondaryTextColor()=0;
 					virtual Color										GetItemSeparatorColor()=0;
@@ -4795,7 +4943,7 @@ ListView ItemContentProvider(Detailed)
 
 				class ListViewColumnItemArranger : public FixedHeightItemArranger, public Description<ListViewColumnItemArranger>
 				{
-					typedef collections::List<GuiButton*>								ColumnHeaderButtonList;
+					typedef collections::List<GuiMenuButton*>							ColumnHeaderButtonList;
 					typedef collections::List<compositions::GuiBoundsComposition*>		ColumnHeaderSplitterList;
 				public:
 					static const int							SplitterWidth=8;
@@ -4824,7 +4972,7 @@ ListView ItemContentProvider(Detailed)
 						virtual WString							GetColumnText(int index)=0;
 						virtual int								GetColumnSize(int index)=0;
 						virtual void							SetColumnSize(int index, int value)=0;
-						virtual GuiPopup*						GetDropdownPopup(int index)=0;
+						virtual GuiMenu*						GetDropdownPopup(int index)=0;
 						virtual ColumnSortingState				GetSortingState(int index)=0;
 					};
 				protected:
@@ -4859,7 +5007,6 @@ ListView ItemContentProvider(Detailed)
 					Size										OnCalculateTotalSize()override;
 					void										DeleteColumnButtons();
 					void										RebuildColumns();
-					void										UpdateColumnSize(int index);
 				public:
 					ListViewColumnItemArranger();
 					~ListViewColumnItemArranger();
@@ -4936,7 +5083,7 @@ ListView
 				public:
 					WString											text;
 					int												size;
-					GuiPopup*										dropdownPopup;
+					GuiMenu*										dropdownPopup;
 					ListViewColumnItemArranger::ColumnSortingState	sortingState;
 
 					ListViewColumn(const WString& _text=L"", int _size=160);
@@ -4995,7 +5142,7 @@ ListView
 					WString												GetColumnText(int index)override;
 					int													GetColumnSize(int index)override;
 					void												SetColumnSize(int index, int value)override;
-					GuiPopup*											GetDropdownPopup(int index)override;
+					GuiMenu*											GetDropdownPopup(int index)override;
 					ListViewColumnItemArranger::ColumnSortingState		GetSortingState(int index)override;
 				public:
 					ListViewItemProvider();
@@ -5688,149 +5835,6 @@ Tab Control
 
 				GuiTabPage*										GetSelectedPage();
 				bool											SetSelectedPage(GuiTabPage* value);
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: ³Âè÷å«(vczh)
-GacUI::Control System
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_CONTROLS_GUIMENUCONTROLS
-#define VCZH_PRESENTATION_CONTROLS_GUIMENUCONTROLS
-
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-
-/***********************************************************************
-Menu Service
-***********************************************************************/
-
-			class GuiMenu;
-
-			class IGuiMenuService : public virtual IDescriptable, public Description<IGuiMenuService>
-			{
-			public:
-				static const wchar_t* const				Identifier;
-
-				enum Direction
-				{
-					Horizontal,
-					Vertical,
-				};
-			protected:
-				GuiMenu*								openingMenu;
-			public:
-				IGuiMenuService();
-
-				virtual IGuiMenuService*				GetParentMenuService()=0;
-				virtual Direction						GetPreferredDirection()=0;
-				virtual bool							IsActiveState()=0;
-
-				virtual void							MenuItemExecuted();
-				virtual GuiMenu*						GetOpeningMenu();
-				virtual void							MenuOpened(GuiMenu* menu);
-				virtual void							MenuClosed(GuiMenu* menu);
-			};
-
-/***********************************************************************
-Menu
-***********************************************************************/
-
-			class GuiMenu : public GuiPopup, private IGuiMenuService, public Description<GuiMenu>
-			{
-			private:
-				IGuiMenuService*						parentMenuService;
-
-				IGuiMenuService*						GetParentMenuService()override;
-				Direction								GetPreferredDirection()override;
-				bool									IsActiveState()override;
-				void									MenuItemExecuted()override;
-			protected:
-				GuiControl*								owner;
-
-				void									MouseClickedOnOtherWindow(GuiWindow* window)override;
-				void									OnWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void									OnWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-			public:
-				GuiMenu(GuiControl::IStyleController* _styleController, GuiControl* _owner);
-				~GuiMenu();
-
-				void									UpdateMenuService();
-				IDescriptable*							QueryService(const WString& identifier)override;
-			};
-			
-			class GuiMenuBar : public GuiControl, private IGuiMenuService, public Description<GuiMenuBar>
-			{
-			private:
-				IGuiMenuService*						GetParentMenuService()override;
-				Direction								GetPreferredDirection()override;
-				bool									IsActiveState()override;
-			public:
-				GuiMenuBar(GuiControl::IStyleController* _styleController);
-				~GuiMenuBar();
-				
-				IDescriptable*							QueryService(const WString& identifier)override;
-			};
-
-/***********************************************************************
-MenuButton
-***********************************************************************/
-
-			class GuiMenuButton : public GuiButton, public Description<GuiMenuButton>
-			{
-			public:
-				class IStyleController : public GuiButton::IStyleController, public Description<IStyleController>
-				{
-				public:
-					virtual GuiMenu::IStyleController*	CreateSubMenuStyleController()=0;
-					virtual void						SetSubMenuExisting(bool value)=0;
-					virtual void						SetSubMenuOpening(bool value)=0;
-				};
-			protected:
-				IStyleController*						styleController;
-				GuiMenu*								subMenu;
-				Size									preferredMenuClientSize;
-				IGuiMenuService*						ownerMenuService;
-
-				void									OpenSubMenuInternal();
-				void									OnParentLineChanged()override;
-				void									OnSubMenuWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void									OnSubMenuWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void									OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void									OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void									OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-			public:
-				GuiMenuButton(IStyleController* _styleController);
-				~GuiMenuButton();
-
-				compositions::GuiNotifyEvent			SubMenuOpeningChanged;
-
-				bool									IsSubMenuExists();
-				GuiMenu*								GetSubMenu();
-				void									CreateSubMenu(GuiMenu::IStyleController* subMenuStyleController=0);
-				void									DestroySubMenu();
-
-				bool									GetSubMenuOpening();
-				void									SetSubMenuOpening(bool value);
-
-				Size									GetPreferredMenuClientSize();
-				void									SetPreferredMenuClientSize(Size value);
 			};
 		}
 	}
@@ -7093,12 +7097,13 @@ Misc Buttons
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
-			class Win7ListViewColumnHeaderStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7ListViewColumnHeaderStyle>
+			class Win7ListViewColumnHeaderStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ListViewColumnHeaderStyle>
 			{
 			protected:
 				controls::GuiButton::ControlState			controlStyle;
 				bool										isVisuallyEnabled;
-				bool										isSelected;
+				bool										isSubMenuExisting;
+				bool										isSubMenuOpening;
 
 				compositions::GuiBoundsComposition*			mainComposition;
 				compositions::GuiBoundsComposition*			rightBorderComposition;
@@ -7112,7 +7117,9 @@ Misc Buttons
 				elements::GuiGradientBackgroundElement*		gradientElement;
 				elements::GuiSolidLabelElement*				textElement;
 
-				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected);
+				controls::GuiButton*						dropdownButton;
+
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool subMenuExisting, bool subMenuOpening);
 			public:
 				Win7ListViewColumnHeaderStyle();
 				~Win7ListViewColumnHeaderStyle();
@@ -7123,8 +7130,11 @@ Misc Buttons
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
-				void										SetSelected(bool value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
+				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
+				void										SetSubMenuExisting(bool value)override;
+				void										SetSubMenuOpening(bool value)override;
+				controls::GuiButton*						GetSubMenuHost()override;
 			};
 			
 			class Win7TreeViewExpandingButtonStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7TreeViewExpandingButtonStyle>
@@ -7178,6 +7188,7 @@ Menu Button
 				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
+				controls::GuiButton*						GetSubMenuHost()override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
@@ -7203,6 +7214,7 @@ Menu Button
 				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
+				controls::GuiButton*						GetSubMenuHost()override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
@@ -7421,7 +7433,7 @@ List
 				~Win7ListViewProvider();
 
 				controls::GuiSelectableButton::IStyleController*		CreateItemBackground()override;
-				controls::GuiSelectableButton::IStyleController*		CreateColumnStyle()override;
+				controls::GuiMenuButton::IStyleController*				CreateColumnStyle()override;
 				Color													GetPrimaryTextColor()override;
 				Color													GetSecondaryTextColor()override;
 				Color													GetItemSeparatorColor()override;
