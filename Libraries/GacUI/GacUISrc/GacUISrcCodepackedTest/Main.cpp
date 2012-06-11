@@ -1137,18 +1137,10 @@ void SetupTabPageWindow(GuiControlHost* controlHost, GuiControl* container)
 }
 
 /***********************************************************************
-GuiMain
-
-ListView
-TreeView
 Ribbon
-Misc
-
-develop a tool to merge those files under Library\ to
-  vlpp_common.h/cpp
-  vlpp_gacui.h/cpp
-  vlpp_fs.h/cpp
-  vlpp_gacui_fs_plugin.h/cpp
+Dock
+Editor
+Scripting
 ***********************************************************************/
 
 void GuiMain()

@@ -540,6 +540,36 @@ ListViewItemStyleProviderBase
 			}
 
 /***********************************************************************
+GuiListViewColumnHeader
+***********************************************************************/
+			
+			GuiListViewColumnHeader::GuiListViewColumnHeader(IStyleController* _styleController)
+				:GuiMenuButton(_styleController)
+				,columnSortingState(NotSorted)
+				,styleController(_styleController)
+			{
+				styleController->SetColumnSortingState(columnSortingState);
+			}
+
+			GuiListViewColumnHeader::~GuiListViewColumnHeader()
+			{
+			}
+
+			GuiListViewColumnHeader::ColumnSortingState GuiListViewColumnHeader::GetColumnSortingState()
+			{
+				return columnSortingState;
+			}
+
+			void GuiListViewColumnHeader::SetColumnSortingState(ColumnSortingState value)
+			{
+				if(columnSortingState!=value)
+				{
+					columnSortingState=value;
+					styleController->SetColumnSortingState(columnSortingState);
+				}
+			}
+
+/***********************************************************************
 GuiListViewBase
 ***********************************************************************/
 
@@ -1728,7 +1758,7 @@ ListViewColumn
 					:text(_text)
 					,size(_size)
 					,dropdownPopup(0)
-					,sortingState(ListViewColumnItemArranger::NotSorted)
+					,sortingState(GuiListViewColumnHeader::NotSorted)
 				{
 				}
 
@@ -1904,11 +1934,11 @@ ListViewItemProvider
 					}
 				}
 
-				ListViewColumnItemArranger::ColumnSortingState ListViewItemProvider::GetSortingState(int index)
+				GuiListViewColumnHeader::ColumnSortingState ListViewItemProvider::GetSortingState(int index)
 				{
 					if(index<0 || index>=columns.Count())
 					{
-						return ListViewColumnItemArranger::NotSorted;
+						return GuiListViewColumnHeader::NotSorted;
 					}
 					else
 					{
@@ -12986,6 +13016,10 @@ Win7ListViewColumnHeaderStyle
 				return dropdownButton;
 			}
 
+			void Win7ListViewColumnHeaderStyle::SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)
+			{
+			}
+
 /***********************************************************************
 Win7TreeViewExpandingButtonStyle
 ***********************************************************************/
@@ -14030,7 +14064,7 @@ Win7ListViewProvider
 				return new Win7SelectableItemStyle;
 			}
 
-			controls::GuiMenuButton::IStyleController* Win7ListViewProvider::CreateColumnStyle()
+			controls::GuiListViewColumnHeader::IStyleController* Win7ListViewProvider::CreateColumnStyle()
 			{
 				return new Win7ListViewColumnHeaderStyle;
 			}

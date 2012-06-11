@@ -597,7 +597,7 @@ Misc Buttons
 			};
 			
 			/// <summary>List view column header style (Windows 7).</summary>
-			class Win7ListViewColumnHeaderStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ListViewColumnHeaderStyle>
+			class Win7ListViewColumnHeaderStyle : public Object, public virtual controls::GuiListViewColumnHeader::IStyleController, public Description<Win7ListViewColumnHeaderStyle>
 			{
 			protected:
 				controls::GuiButton::ControlState			controlStyle;
@@ -636,6 +636,7 @@ Misc Buttons
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
+				void										SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)override;
 			};
 			
 			/// <summary>Tree view expanding button style (Windows 7). Show the triangle to indicate the expanding state of a tree view item.</summary>
@@ -964,7 +965,7 @@ List
 				~Win7ListViewProvider();
 
 				controls::GuiSelectableButton::IStyleController*		CreateItemBackground()override;
-				controls::GuiMenuButton::IStyleController*				CreateColumnStyle()override;
+				controls::GuiListViewColumnHeader::IStyleController*	CreateColumnStyle()override;
 				Color													GetPrimaryTextColor()override;
 				Color													GetSecondaryTextColor()override;
 				Color													GetItemSeparatorColor()override;

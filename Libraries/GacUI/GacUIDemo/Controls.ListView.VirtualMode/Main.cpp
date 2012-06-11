@@ -303,9 +303,9 @@ public:
 		return 0;
 	}
 
-	list::ListViewColumnItemArranger::ColumnSortingState GetSortingState(int index)
+	GuiListViewColumnHeader::ColumnSortingState GetSortingState(int index)
 	{
-		return list::ListViewColumnItemArranger::NotSorted;
+		return GuiListViewColumnHeader::NotSorted;
 	}
 };
 

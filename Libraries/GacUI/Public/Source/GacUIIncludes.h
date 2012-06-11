@@ -17502,6 +17502,34 @@ ListView Base
 				};
 			}
 
+			class GuiListViewColumnHeader : public GuiMenuButton, public Description<GuiListViewColumnHeader>
+			{
+			public:
+				enum ColumnSortingState
+				{
+					NotSorted,
+					Ascending,
+					Descending,
+				};
+				
+				class IStyleController : public virtual GuiMenuButton::IStyleController, public Description<IStyleController>
+				{
+				public:
+					virtual void								SetColumnSortingState(ColumnSortingState value)=0;
+				};
+
+			protected:
+				IStyleController*								styleController;
+				ColumnSortingState								columnSortingState;
+
+			public:
+				GuiListViewColumnHeader(IStyleController* _styleController);
+				~GuiListViewColumnHeader();
+
+				ColumnSortingState								GetColumnSortingState();
+				void											SetColumnSortingState(ColumnSortingState value);
+			};
+
 			class GuiListViewBase : public GuiSelectableListControl, public Description<GuiListViewBase>
 			{
 			public:
@@ -17509,7 +17537,7 @@ ListView Base
 				{
 				public:
 					virtual GuiSelectableButton::IStyleController*		CreateItemBackground()=0;
-					virtual GuiMenuButton::IStyleController*			CreateColumnStyle()=0;
+					virtual GuiListViewColumnHeader::IStyleController*	CreateColumnStyle()=0;
 					virtual Color										GetPrimaryTextColor()=0;
 					virtual Color										GetSecondaryTextColor()=0;
 					virtual Color										GetItemSeparatorColor()=0;
@@ -17790,13 +17818,6 @@ ListView ItemContentProvider(Detailed)
 					typedef collections::List<compositions::GuiBoundsComposition*>		ColumnHeaderSplitterList;
 				public:
 					static const int							SplitterWidth=8;
-
-					enum ColumnSortingState
-					{
-						NotSorted,
-						Ascending,
-						Descending,
-					};
 					
 					class IColumnItemViewCallback : public virtual IDescriptable, public Description<IColumnItemViewCallback>
 					{
@@ -17807,16 +17828,16 @@ ListView ItemContentProvider(Detailed)
 					class IColumnItemView : public virtual IDescriptable, public Description<IColumnItemView>
 					{
 					public:
-						static const wchar_t* const				Identifier;
+						static const wchar_t* const								Identifier;
 						
-						virtual bool							AttachCallback(IColumnItemViewCallback* value)=0;
-						virtual bool							DetachCallback(IColumnItemViewCallback* value)=0;
-						virtual int								GetColumnCount()=0;
-						virtual WString							GetColumnText(int index)=0;
-						virtual int								GetColumnSize(int index)=0;
-						virtual void							SetColumnSize(int index, int value)=0;
-						virtual GuiMenu*						GetDropdownPopup(int index)=0;
-						virtual ColumnSortingState				GetSortingState(int index)=0;
+						virtual bool											AttachCallback(IColumnItemViewCallback* value)=0;
+						virtual bool											DetachCallback(IColumnItemViewCallback* value)=0;
+						virtual int												GetColumnCount()=0;
+						virtual WString											GetColumnText(int index)=0;
+						virtual int												GetColumnSize(int index)=0;
+						virtual void											SetColumnSize(int index, int value)=0;
+						virtual GuiMenu*										GetDropdownPopup(int index)=0;
+						virtual GuiListViewColumnHeader::ColumnSortingState		GetSortingState(int index)=0;
 					};
 				protected:
 					class ColumnItemViewCallback : public Object, public virtual IColumnItemViewCallback
@@ -17927,7 +17948,7 @@ ListView
 					WString											text;
 					int												size;
 					GuiMenu*										dropdownPopup;
-					ListViewColumnItemArranger::ColumnSortingState	sortingState;
+					GuiListViewColumnHeader::ColumnSortingState		sortingState;
 
 					ListViewColumn(const WString& _text=L"", int _size=160);
 				};
@@ -17986,7 +18007,7 @@ ListView
 					int													GetColumnSize(int index)override;
 					void												SetColumnSize(int index, int value)override;
 					GuiMenu*											GetDropdownPopup(int index)override;
-					ListViewColumnItemArranger::ColumnSortingState		GetSortingState(int index)override;
+					GuiListViewColumnHeader::ColumnSortingState			GetSortingState(int index)override;
 				public:
 					ListViewItemProvider();
 					~ListViewItemProvider();
@@ -19428,7 +19449,7 @@ Misc Buttons
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
-			class Win7ListViewColumnHeaderStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ListViewColumnHeaderStyle>
+			class Win7ListViewColumnHeaderStyle : public Object, public virtual controls::GuiListViewColumnHeader::IStyleController, public Description<Win7ListViewColumnHeaderStyle>
 			{
 			protected:
 				controls::GuiButton::ControlState			controlStyle;
@@ -19466,6 +19487,7 @@ Misc Buttons
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
+				void										SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)override;
 			};
 			
 			class Win7TreeViewExpandingButtonStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7TreeViewExpandingButtonStyle>
@@ -19764,7 +19786,7 @@ List
 				~Win7ListViewProvider();
 
 				controls::GuiSelectableButton::IStyleController*		CreateItemBackground()override;
-				controls::GuiMenuButton::IStyleController*				CreateColumnStyle()override;
+				controls::GuiListViewColumnHeader::IStyleController*	CreateColumnStyle()override;
 				Color													GetPrimaryTextColor()override;
 				Color													GetSecondaryTextColor()override;
 				Color													GetItemSeparatorColor()override;
