@@ -168,16 +168,32 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 			textBox->SetText(L"Singleline TextBox");
 		}
 		{
-			GuiMenuButton* buttonHeader=new GuiMenuButton(new win7::Win7ListViewColumnHeaderStyle());
+			GuiListViewColumnHeader* buttonHeader=new GuiListViewColumnHeader(new win7::Win7ListViewColumnHeaderStyle());
 			cell->AddChild(buttonHeader->GetBoundsComposition());
 			buttonHeader->GetBoundsComposition()->SetBounds(Rect(Point(210, 280), Size(200, 25)));
 			buttonHeader->SetText(L"ListView Header");
 		}
 		{
-			GuiMenuButton* buttonHeader=new GuiMenuButton(new win7::Win7ListViewColumnHeaderStyle());
+			GuiListViewColumnHeader* buttonHeader=new GuiListViewColumnHeader(new win7::Win7ListViewColumnHeaderStyle());
 			cell->AddChild(buttonHeader->GetBoundsComposition());
 			buttonHeader->GetBoundsComposition()->SetBounds(Rect(Point(210, 315), Size(200, 25)));
 			buttonHeader->SetText(L"ListView Header DropDown");
+
+			buttonHeader->Clicked.AttachLambda([buttonHeader](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				switch(buttonHeader->GetColumnSortingState())
+				{
+				case GuiListViewColumnHeader::NotSorted:
+					buttonHeader->SetColumnSortingState(GuiListViewColumnHeader::Ascending);
+					break;
+				case GuiListViewColumnHeader::Ascending:
+					buttonHeader->SetColumnSortingState(GuiListViewColumnHeader::Descending);
+					break;
+				case GuiListViewColumnHeader::Descending:
+					buttonHeader->SetColumnSortingState(GuiListViewColumnHeader::NotSorted);
+					break;
+				}
+			});
 
 			buttonHeader->CreateSubMenu();
 			GuiMenu* dropdownMenu=buttonHeader->GetSubMenu();

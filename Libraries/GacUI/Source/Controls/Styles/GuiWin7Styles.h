@@ -610,12 +610,14 @@ Misc Buttons
 				compositions::GuiBoundsComposition*			borderComposition;
 				compositions::GuiBoundsComposition*			gradientComposition;
 				compositions::GuiBoundsComposition*			textComposition;
+				compositions::GuiBoundsComposition*			arrowComposition;
 
 				elements::GuiSolidBackgroundElement*		backgroundElement;
 				elements::GuiGradientBackgroundElement*		rightBorderElement;
 				elements::GuiSolidBorderElement*			borderElement;
 				elements::GuiGradientBackgroundElement*		gradientElement;
 				elements::GuiSolidLabelElement*				textElement;
+				elements::GuiSolidLabelElement*				arrowElement;
 
 				controls::GuiButton*						dropdownButton;
 
