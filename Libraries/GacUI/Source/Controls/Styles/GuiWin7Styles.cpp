@@ -2447,6 +2447,10 @@ Win7ListViewColumnHeaderStyle
 				return dropdownButton;
 			}
 
+			void Win7ListViewColumnHeaderStyle::SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)
+			{
+			}
+
 /***********************************************************************
 Win7TreeViewExpandingButtonStyle
 ***********************************************************************/
@@ -3491,7 +3495,7 @@ Win7ListViewProvider
 				return new Win7SelectableItemStyle;
 			}
 
-			controls::GuiMenuButton::IStyleController* Win7ListViewProvider::CreateColumnStyle()
+			controls::GuiListViewColumnHeader::IStyleController* Win7ListViewProvider::CreateColumnStyle()
 			{
 				return new Win7ListViewColumnHeaderStyle;
 			}

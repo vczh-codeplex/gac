@@ -65,6 +65,48 @@ ListView Base
 				};
 			}
 
+			///<summary>List view column header control for detailed view.</summary>
+			class GuiListViewColumnHeader : public GuiMenuButton, public Description<GuiListViewColumnHeader>
+			{
+			public:
+				/// <summary>Represents the sorting state of list view items related to this column.</summary>
+				enum ColumnSortingState
+				{
+					/// <summary>[T:vl.presentation.controls.GuiListViewColumnHeader.ColumnSortingState]Nor sorted.</summary>
+					NotSorted,
+					/// <summary>[T:vl.presentation.controls.GuiListViewColumnHeader.ColumnSortingState]Ascending.</summary>
+					Ascending,
+					/// <summary>[T:vl.presentation.controls.GuiListViewColumnHeader.ColumnSortingState]Descending.</summary>
+					Descending,
+				};
+				
+				/// <summary>Style provider for <see cref="GuiListViewColumnHeader"/>.</summary>
+				class IStyleController : public virtual GuiMenuButton::IStyleController, public Description<IStyleController>
+				{
+				public:
+					/// <summary>Notify that the column sorting state is changed.</summary>
+					/// <param name="value">The new column sorting state.</param>
+					virtual void								SetColumnSortingState(ColumnSortingState value)=0;
+				};
+
+			protected:
+				IStyleController*								styleController;
+				ColumnSortingState								columnSortingState;
+
+			public:
+				/// <summary>Create a control with a specified style controller.</summary>
+				/// <param name="_styleController">The style controller.</param>
+				GuiListViewColumnHeader(IStyleController* _styleController);
+				~GuiListViewColumnHeader();
+
+				/// <summary>Get the column sorting state.</summary>
+				/// <returns>The column sorting state.</returns>
+				ColumnSortingState								GetColumnSortingState();
+				/// <summary>Set the column sorting state.</summary>
+				/// <param name="value">The new column sorting state.</param>
+				void											SetColumnSortingState(ColumnSortingState value);
+			};
+
 			/// <summary>List view base control. All list view controls inherit from this class. <see cref="list::ListViewItemStyleProviderBase"/> is suggested to be the base class of item style providers for list view control.</summary>
 			class GuiListViewBase : public GuiSelectableListControl, public Description<GuiListViewBase>
 			{
@@ -78,7 +120,7 @@ ListView Base
 					virtual GuiSelectableButton::IStyleController*		CreateItemBackground()=0;
 					/// <summary>Create a style controller for a column header.</summary>
 					/// <returns>The created style controller for a column header.</returns>
-					virtual GuiMenuButton::IStyleController*			CreateColumnStyle()=0;
+					virtual GuiListViewColumnHeader::IStyleController*	CreateColumnStyle()=0;
 					/// <summary>Get the primary text color.</summary>
 					/// <returns>The primary text color.</returns>
 					virtual Color										GetPrimaryTextColor()=0;
@@ -445,17 +487,6 @@ ListView ItemContentProvider(Detailed)
 					typedef collections::List<compositions::GuiBoundsComposition*>		ColumnHeaderSplitterList;
 				public:
 					static const int							SplitterWidth=8;
-
-					/// <summary>Represents the sorting state of list view items related to this column.</summary>
-					enum ColumnSortingState
-					{
-						/// <summary>[T:vl.presentation.controls.list.ListViewColumnItemArranger.ColumnSortingState]Nor sorted.</summary>
-						NotSorted,
-						/// <summary>[T:vl.presentation.controls.list.ListViewColumnItemArranger.ColumnSortingState]Ascending.</summary>
-						Ascending,
-						/// <summary>[T:vl.presentation.controls.list.ListViewColumnItemArranger.ColumnSortingState]Descending.</summary>
-						Descending,
-					};
 					
 					/// <summary>Callback for [T:vl.presentation.controls.list.ListViewColumnItemArranger.IColumnItemView]. Column item view use this interface to notify column related modification.</summary>
 					class IColumnItemViewCallback : public virtual IDescriptable, public Description<IColumnItemViewCallback>
@@ -470,39 +501,39 @@ ListView ItemContentProvider(Detailed)
 					{
 					public:
 						/// <summary>The identifier for this view.</summary>
-						static const wchar_t* const				Identifier;
+						static const wchar_t* const								Identifier;
 						
 						/// <summary>Attach an column item view callback to this view.</summary>
 						/// <returns>Returns true if this operation succeeded.</returns>
 						/// <param name="value">The column item view callback.</param>
-						virtual bool							AttachCallback(IColumnItemViewCallback* value)=0;
+						virtual bool											AttachCallback(IColumnItemViewCallback* value)=0;
 						/// <summary>Detach an column item view callback from this view.</summary>
 						/// <returns>Returns true if this operation succeeded.</returns>
 						/// <param name="value">The column item view callback.</param>
-						virtual bool							DetachCallback(IColumnItemViewCallback* value)=0;
+						virtual bool											DetachCallback(IColumnItemViewCallback* value)=0;
 						/// <summary>Get the number of all columns.</summary>
 						/// <returns>The number of all columns.</returns>
-						virtual int								GetColumnCount()=0;
+						virtual int												GetColumnCount()=0;
 						/// <summary>Get the text of the column.</summary>
 						/// <returns>The text of the column.</returns>
 						/// <param name="index">The index of the column.</param>
-						virtual WString							GetColumnText(int index)=0;
+						virtual WString											GetColumnText(int index)=0;
 						/// <summary>Get the size of the column.</summary>
 						/// <returns>The size of the column.</returns>
 						/// <param name="index">The index of the column.</param>
-						virtual int								GetColumnSize(int index)=0;
+						virtual int												GetColumnSize(int index)=0;
 						/// <summary>Set the size of the column.</summary>
 						/// <param name="index">The index of the column.</param>
 						/// <param name="value">The new size of the column.</param>
-						virtual void							SetColumnSize(int index, int value)=0;
+						virtual void											SetColumnSize(int index, int value)=0;
 						/// <summary>Get the popup binded to the column.</summary>
 						/// <returns>The popup binded to the column.</returns>
 						/// <param name="index">The index of the column.</param>
-						virtual GuiMenu*						GetDropdownPopup(int index)=0;
+						virtual GuiMenu*										GetDropdownPopup(int index)=0;
 						/// <summary>Get the sorting state of the column.</summary>
 						/// <returns>The sorting state of the column.</returns>
 						/// <param name="index">The index of the column.</param>
-						virtual ColumnSortingState				GetSortingState(int index)=0;
+						virtual GuiListViewColumnHeader::ColumnSortingState		GetSortingState(int index)=0;
 					};
 				protected:
 					class ColumnItemViewCallback : public Object, public virtual IColumnItemViewCallback
@@ -626,7 +657,7 @@ ListView
 					/// <summary>Column dropdown popup.</summary>
 					GuiMenu*										dropdownPopup;
 					/// <summary>Column sorting state.</summary>
-					ListViewColumnItemArranger::ColumnSortingState	sortingState;
+					GuiListViewColumnHeader::ColumnSortingState		sortingState;
 
 					/// <summary>Create a column with the specified text and size.</summary>
 					/// <param name="_text">The specified text.</param>
@@ -693,7 +724,7 @@ ListView
 					int													GetColumnSize(int index)override;
 					void												SetColumnSize(int index, int value)override;
 					GuiMenu*											GetDropdownPopup(int index)override;
-					ListViewColumnItemArranger::ColumnSortingState		GetSortingState(int index)override;
+					GuiListViewColumnHeader::ColumnSortingState			GetSortingState(int index)override;
 				public:
 					ListViewItemProvider();
 					~ListViewItemProvider();
