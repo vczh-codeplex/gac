@@ -12934,6 +12934,21 @@ Win7ListViewColumnHeaderStyle
 				textComposition->SetAlignmentToParent(Margin(15, 7, 18, 5));
 				mainComposition->AddChild(textComposition);
 
+				arrowElement=GuiSolidLabelElement::Create();
+				arrowElement->SetColor(Color(76, 96, 122));
+				arrowElement->SetAlignments(Alignment::Center, Alignment::Top);
+				{
+					FontProperties font;
+					font.fontFamily=L"Wingdings 3";
+					font.size=10;
+					arrowElement->SetFont(font);
+				}
+				arrowComposition=new GuiBoundsComposition;
+				arrowComposition->SetOwnedElement(arrowElement);
+				arrowComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				arrowComposition->SetAlignmentToParent(Margin(0, 2, 0, -1));
+				mainComposition->AddChild(arrowComposition);
+
 				dropdownButton=new GuiButton(new Win7ListViewColumnDropDownStyle);
 				dropdownButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, 0, 0, 0));
 				dropdownButton->SetVisible(false);
@@ -13018,6 +13033,23 @@ Win7ListViewColumnHeaderStyle
 
 			void Win7ListViewColumnHeaderStyle::SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)
 			{
+				Margin margin=arrowComposition->GetAlignmentToParent();
+				switch(value)
+				{
+				case controls::GuiListViewColumnHeader::NotSorted:
+					arrowElement->SetText(L"");
+					break;
+				case controls::GuiListViewColumnHeader::Ascending:
+					margin.top=0;
+					arrowComposition->SetAlignmentToParent(margin);
+					arrowElement->SetText((wchar_t)0x7E);
+					break;
+				case controls::GuiListViewColumnHeader::Descending:
+					margin.top=-7;
+					arrowComposition->SetAlignmentToParent(margin);
+					arrowElement->SetText((wchar_t)0xF080);
+					break;
+				}
 			}
 
 /***********************************************************************
