@@ -174,8 +174,8 @@ Button Configuration
 				compositions::GuiCellComposition*			splitterComposition;
 				elements::GuiSolidLabelElement*				textElement;
 				compositions::GuiBoundsComposition*			textComposition;
-				elements::GuiSolidLabelElement*				subMenuTextElement;
-				compositions::GuiGraphicsComposition*		subMenuTextComposition;
+				elements::GuiPolygonElement*				subMenuArrowElement;
+				compositions::GuiGraphicsComposition*		subMenuArrowComposition;
 				compositions::GuiBoundsComposition*			mainComposition;
 
 				static Win7MenuItemButtonElements			Create();
@@ -380,6 +380,7 @@ Container
 
 				Ptr<controls::GuiSelectableButton::MutexGroupController>	headerController;
 				collections::List<controls::GuiSelectableButton*>			headerButtons;
+				elements::GuiPolygonElement*								headerOverflowArrowElement;
 				controls::GuiButton*										headerOverflowButton;
 				controls::GuiMenu*											headerOverflowMenu;
 				compositions::GuiStackComposition*							headerOverflowMenuStack;
@@ -573,12 +574,12 @@ Misc Buttons
 				compositions::GuiBoundsComposition*			leftBorderComposition;
 				compositions::GuiBoundsComposition*			borderComposition;
 				compositions::GuiBoundsComposition*			gradientComposition;
-				compositions::GuiBoundsComposition*			textComposition;
+				compositions::GuiBoundsComposition*			arrowComposition;
 
 				elements::GuiGradientBackgroundElement*		leftBorderElement;
 				elements::GuiSolidBorderElement*			borderElement;
 				elements::GuiGradientBackgroundElement*		gradientElement;
-				elements::GuiSolidLabelElement*				textElement;
+				elements::GuiPolygonElement*				arrowElement;
 
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected);
 			public:
@@ -617,7 +618,7 @@ Misc Buttons
 				elements::GuiSolidBorderElement*			borderElement;
 				elements::GuiGradientBackgroundElement*		gradientElement;
 				elements::GuiSolidLabelElement*				textElement;
-				elements::GuiSolidLabelElement*				arrowElement;
+				elements::GuiPolygonElement*				arrowElement;
 
 				controls::GuiButton*						dropdownButton;
 
@@ -760,7 +761,7 @@ ComboBox
 				compositions::GuiTableComposition*				table;
 				compositions::GuiCellComposition*				textComposition;
 				compositions::GuiCellComposition*				dropDownComposition;
-				elements::GuiSolidLabelElement*					dropDownElement;
+				elements::GuiPolygonElement*					dropDownElement;
 
 				void											TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
 			public:

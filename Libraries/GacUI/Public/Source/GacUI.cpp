@@ -9996,19 +9996,13 @@ CommonScrollStyle
 					handleButton->GetBoundsComposition()->GetEventReceiver()->leftButtonUp.AttachMethod(this, &CommonScrollStyle::OnHandleMouseUp);
 				}
 				{
-					FontProperties font;
-					font.fontFamily=L"Wingdings 3";
-					font.size=arrowSize;
-
 					decreaseButton=new GuiButton(CreateDecreaseButtonStyle(direction));
 					decreaseButton->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 					decreaseButton->Clicked.AttachMethod(this, &CommonScrollStyle::OnDecreaseButtonClicked);
-					decreaseButton->SetFont(font);
 					
 					increaseButton=new GuiButton(CreateIncreaseButtonStyle(direction));
 					increaseButton->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 					increaseButton->Clicked.AttachMethod(this, &CommonScrollStyle::OnIncreaseButtonClicked);
-					increaseButton->SetFont(font);
 				}
 				{
 					GuiSideAlignedComposition* decreaseComposition=new GuiSideAlignedComposition;
@@ -10023,22 +10017,23 @@ CommonScrollStyle
 					increaseComposition->AddChild(increaseButton->GetBoundsComposition());
 					boundsComposition->AddChild(increaseComposition);
 
+					GuiPolygonElement* elementOut=0;
 					switch(direction)
 					{
 					case Horizontal:
 						{
 							decreaseComposition->SetDirection(GuiSideAlignedComposition::Left);
-							decreaseButton->SetText((wchar_t)0x7C);
+							decreaseButton->GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildLeftArrow(elementOut));
 							increaseComposition->SetDirection(GuiSideAlignedComposition::Right);
-							increaseButton->SetText((wchar_t)0x7D);
+							increaseButton->GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildRightArrow(elementOut));
 						}
 						break;
 					case Vertical:
 						{
 							decreaseComposition->SetDirection(GuiSideAlignedComposition::Top);
-							decreaseButton->SetText((wchar_t)0x7E);
+							decreaseButton->GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildUpArrow(elementOut));
 							increaseComposition->SetDirection(GuiSideAlignedComposition::Bottom);
-							increaseButton->SetText((wchar_t)0xF080);
+							increaseButton->GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildDownArrow(elementOut));
 						}
 						break;
 					}
@@ -10371,6 +10366,107 @@ CommonTrackStyle
 					position=value;
 					UpdateHandle();
 				}
+			}
+
+/***********************************************************************
+CommonFragmentBuilder
+***********************************************************************/
+
+			void CommonFragmentBuilder::FillUpArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(0, 3), Point(3, 0), Point(6, 3)};
+				element->SetSize(Size(7, 4));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			void CommonFragmentBuilder::FillDownArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(0, 0), Point(3, 3), Point(6, 0)};
+				element->SetSize(Size(7, 4));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			void CommonFragmentBuilder::FillLeftArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(3, 0), Point(0, 3), Point(3, 6)};
+				element->SetSize(Size(4, 7));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			void CommonFragmentBuilder::FillRightArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(0, 0), Point(3, 3), Point(0, 6)};
+				element->SetSize(Size(4, 7));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildUpArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillUpArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildDownArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillDownArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildLeftArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillLeftArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildRightArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillRightArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildDockedElementContainer(elements::IGuiGraphicsElement* element)
+			{
+				GuiBoundsComposition* composition=new GuiBoundsComposition;
+				composition->SetOwnedElement(element);
+				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				return composition;
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildUpArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildUpArrow();
+				return BuildDockedElementContainer(elementOut);
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildDownArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildDownArrow();
+				return BuildDockedElementContainer(elementOut);
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildLeftArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildLeftArrow();
+				return BuildDockedElementContainer(elementOut);
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildRightArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildRightArrow();
+				return BuildDockedElementContainer(elementOut);
 			}
 		}
 	}
@@ -11429,23 +11525,14 @@ Win7MenuItemButtonElements
 						cell->AddChild(button.textComposition);
 					}
 					{
-						GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
-						button.subMenuTextElement=element;
-						element->SetAlignments(Alignment::Center, Alignment::Center);
-						{
-							FontProperties font;
-							font.fontFamily=L"Wingdings 3";
-							font.size=10;
-							element->SetFont(font);
-						}
-						element->SetText((wchar_t)0x7D);
+						button.subMenuArrowElement=common_styles::CommonFragmentBuilder::BuildRightArrow();
 
 						GuiCellComposition* cell=new GuiCellComposition;
-						button.subMenuTextComposition=cell;
+						button.subMenuArrowComposition=cell;
 						cell->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
 						table->AddChild(cell);
 						cell->SetSite(0, 3, 1, 1);
-						cell->SetOwnedElement(element);
+						cell->SetOwnedElement(button.subMenuArrowElement);
 						cell->SetVisible(false);
 					}
 				}
@@ -11459,7 +11546,8 @@ Win7MenuItemButtonElements
 				gradientElement->SetColors(colors.g1, colors.g2);
 				splitterElement->SetColors(colors.g3, colors.g4);
 				textElement->SetColor(colors.textColor);
-				subMenuTextElement->SetColor(colors.textColor);
+				subMenuArrowElement->SetBackgroundColor(colors.textColor);
+				subMenuArrowElement->SetBorderColor(colors.textColor);
 			}
 
 			void Win7MenuItemButtonElements::SetActive(bool value)
@@ -11476,7 +11564,7 @@ Win7MenuItemButtonElements
 
 			void Win7MenuItemButtonElements::SetSubMenuExisting(bool value)
 			{
-				subMenuTextComposition->SetVisible(value);
+				subMenuArrowComposition->SetVisible(value);
 			}
 
 /***********************************************************************
@@ -12146,14 +12234,8 @@ Win7TabStyle
 					cell->AddChild(tabHeaderComposition);
 
 					headerOverflowButton=new GuiButton(new Win7ButtonStyle);
-					{
-						FontProperties font;
-						font.fontFamily=L"Wingdings 3";
-						font.size=10;
-						headerOverflowButton->SetFont(font);
-					}
+					headerOverflowButton->GetContainerComposition()->AddChild(common_styles::CommonFragmentBuilder::BuildDownArrow(headerOverflowArrowElement));
 					headerOverflowButton->SetVisible(false);
-					headerOverflowButton->SetText((wchar_t)0xF080);
 					headerOverflowButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, 0, 0, 0));
 					headerOverflowButton->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowButtonClicked);
 					cell->AddChild(headerOverflowButton->GetBoundsComposition());
@@ -12770,20 +12852,14 @@ Win7ListViewColumnDropDownStyle
 				gradientComposition->SetPreferredMinSize(Size(0, 4));
 				mainComposition->AddChild(gradientComposition);
 
-				textElement=GuiSolidLabelElement::Create();
-				textElement->SetColor(Color(76, 96, 122));
-				textElement->SetText((wchar_t)0xF080);
-				textElement->SetAlignments(Alignment::Center, Alignment::Center);
-				textComposition=new GuiBoundsComposition;
-				textComposition->SetOwnedElement(textElement);
-				textComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-				textComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
-				mainComposition->AddChild(textComposition);
-				
-				FontProperties font;
-				font.fontFamily=L"Wingdings 3";
-				font.size=Win7ScrollStyle::ArrowSize;
-				textElement->SetFont(font);
+				arrowElement=common_styles::CommonFragmentBuilder::BuildDownArrow();
+				arrowElement->SetBackgroundColor(Color(76, 96, 122));
+				arrowElement->SetBorderColor(Color(76, 96, 122));
+				arrowComposition=new GuiBoundsComposition;
+				arrowComposition->SetOwnedElement(arrowElement);
+				arrowComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				arrowComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
+				mainComposition->AddChild(arrowComposition);
 
 				TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
 			}
@@ -12934,15 +13010,9 @@ Win7ListViewColumnHeaderStyle
 				textComposition->SetAlignmentToParent(Margin(15, 7, 18, 5));
 				mainComposition->AddChild(textComposition);
 
-				arrowElement=GuiSolidLabelElement::Create();
-				arrowElement->SetColor(Color(76, 96, 122));
-				arrowElement->SetAlignments(Alignment::Center, Alignment::Top);
-				{
-					FontProperties font;
-					font.fontFamily=L"Wingdings 3";
-					font.size=10;
-					arrowElement->SetFont(font);
-				}
+				arrowElement=GuiPolygonElement::Create();
+				arrowElement->SetBackgroundColor(Color(76, 96, 122));
+				arrowElement->SetBorderColor(Color(76, 96, 122));
 				arrowComposition=new GuiBoundsComposition;
 				arrowComposition->SetOwnedElement(arrowElement);
 				arrowComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
@@ -13037,17 +13107,13 @@ Win7ListViewColumnHeaderStyle
 				switch(value)
 				{
 				case controls::GuiListViewColumnHeader::NotSorted:
-					arrowElement->SetText(L"");
+					arrowElement->SetPoints(0, 0);
 					break;
 				case controls::GuiListViewColumnHeader::Ascending:
-					margin.top=0;
-					arrowComposition->SetAlignmentToParent(margin);
-					arrowElement->SetText((wchar_t)0x7E);
+					common_styles::CommonFragmentBuilder::FillUpArrow(arrowElement);
 					break;
 				case controls::GuiListViewColumnHeader::Descending:
-					margin.top=-7;
-					arrowComposition->SetAlignmentToParent(margin);
-					arrowElement->SetText((wchar_t)0xF080);
+					common_styles::CommonFragmentBuilder::FillDownArrow(arrowElement);
 					break;
 				}
 			}
@@ -13541,15 +13607,7 @@ Win7DropDownComboBoxStyle
 				elements.textElement->SetEllipse(true);
 				elements.textElement->SetAlignments(Alignment::Left, Alignment::Center);
 
-				dropDownElement=GuiSolidLabelElement::Create();
-				{
-					FontProperties font;
-					font.fontFamily=L"Wingdings 3";
-					font.size=10;
-					dropDownElement->SetFont(font);
-				}
-				dropDownElement->SetText((wchar_t)0xF080);
-				dropDownElement->SetAlignments(Alignment::Center, Alignment::Center);
+				dropDownElement=common_styles::CommonFragmentBuilder::BuildDownArrow();
 
 				dropDownComposition=new GuiCellComposition;
 				table->AddChild(dropDownComposition);
@@ -16766,7 +16824,10 @@ GuiPolygonElement
 			void GuiPolygonElement::SetPoints(const Point* p, int count)
 			{
 				points.Resize(count);
-				memcpy(&points[0], p, sizeof(*p)*count);
+				if(count>0)
+				{
+					memcpy(&points[0], p, sizeof(*p)*count);
+				}
 				renderer->OnElementStateChanged();
 			}
 
