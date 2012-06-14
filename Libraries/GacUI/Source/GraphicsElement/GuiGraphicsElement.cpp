@@ -589,7 +589,10 @@ GuiPolygonElement
 			void GuiPolygonElement::SetPoints(const Point* p, int count)
 			{
 				points.Resize(count);
-				memcpy(&points[0], p, sizeof(*p)*count);
+				if(count>0)
+				{
+					memcpy(&points[0], p, sizeof(*p)*count);
+				}
 				renderer->OnElementStateChanged();
 			}
 

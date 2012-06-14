@@ -860,23 +860,14 @@ Win7MenuItemButtonElements
 						cell->AddChild(button.textComposition);
 					}
 					{
-						GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
-						button.subMenuTextElement=element;
-						element->SetAlignments(Alignment::Center, Alignment::Center);
-						{
-							FontProperties font;
-							font.fontFamily=L"Wingdings 3";
-							font.size=10;
-							element->SetFont(font);
-						}
-						element->SetText((wchar_t)0x7D);
+						button.subMenuArrowElement=common_styles::CommonFragmentBuilder::BuildRightArrow();
 
 						GuiCellComposition* cell=new GuiCellComposition;
-						button.subMenuTextComposition=cell;
+						button.subMenuArrowComposition=cell;
 						cell->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
 						table->AddChild(cell);
 						cell->SetSite(0, 3, 1, 1);
-						cell->SetOwnedElement(element);
+						cell->SetOwnedElement(button.subMenuArrowElement);
 						cell->SetVisible(false);
 					}
 				}
@@ -890,7 +881,8 @@ Win7MenuItemButtonElements
 				gradientElement->SetColors(colors.g1, colors.g2);
 				splitterElement->SetColors(colors.g3, colors.g4);
 				textElement->SetColor(colors.textColor);
-				subMenuTextElement->SetColor(colors.textColor);
+				subMenuArrowElement->SetBackgroundColor(colors.textColor);
+				subMenuArrowElement->SetBorderColor(colors.textColor);
 			}
 
 			void Win7MenuItemButtonElements::SetActive(bool value)
@@ -907,7 +899,7 @@ Win7MenuItemButtonElements
 
 			void Win7MenuItemButtonElements::SetSubMenuExisting(bool value)
 			{
-				subMenuTextComposition->SetVisible(value);
+				subMenuArrowComposition->SetVisible(value);
 			}
 
 /***********************************************************************
@@ -1577,14 +1569,8 @@ Win7TabStyle
 					cell->AddChild(tabHeaderComposition);
 
 					headerOverflowButton=new GuiButton(new Win7ButtonStyle);
-					{
-						FontProperties font;
-						font.fontFamily=L"Wingdings 3";
-						font.size=10;
-						headerOverflowButton->SetFont(font);
-					}
+					headerOverflowButton->GetContainerComposition()->AddChild(common_styles::CommonFragmentBuilder::BuildDownArrow(headerOverflowArrowElement));
 					headerOverflowButton->SetVisible(false);
-					headerOverflowButton->SetText((wchar_t)0xF080);
 					headerOverflowButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, 0, 0, 0));
 					headerOverflowButton->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowButtonClicked);
 					cell->AddChild(headerOverflowButton->GetBoundsComposition());
@@ -2201,20 +2187,14 @@ Win7ListViewColumnDropDownStyle
 				gradientComposition->SetPreferredMinSize(Size(0, 4));
 				mainComposition->AddChild(gradientComposition);
 
-				textElement=GuiSolidLabelElement::Create();
-				textElement->SetColor(Color(76, 96, 122));
-				textElement->SetText((wchar_t)0xF080);
-				textElement->SetAlignments(Alignment::Center, Alignment::Center);
-				textComposition=new GuiBoundsComposition;
-				textComposition->SetOwnedElement(textElement);
-				textComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-				textComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
-				mainComposition->AddChild(textComposition);
-				
-				FontProperties font;
-				font.fontFamily=L"Wingdings 3";
-				font.size=Win7ScrollStyle::ArrowSize;
-				textElement->SetFont(font);
+				arrowElement=common_styles::CommonFragmentBuilder::BuildDownArrow();
+				arrowElement->SetBackgroundColor(Color(76, 96, 122));
+				arrowElement->SetBorderColor(Color(76, 96, 122));
+				arrowComposition=new GuiBoundsComposition;
+				arrowComposition->SetOwnedElement(arrowElement);
+				arrowComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				arrowComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
+				mainComposition->AddChild(arrowComposition);
 
 				TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
 			}
@@ -2365,15 +2345,9 @@ Win7ListViewColumnHeaderStyle
 				textComposition->SetAlignmentToParent(Margin(15, 7, 18, 5));
 				mainComposition->AddChild(textComposition);
 
-				arrowElement=GuiSolidLabelElement::Create();
-				arrowElement->SetColor(Color(76, 96, 122));
-				arrowElement->SetAlignments(Alignment::Center, Alignment::Top);
-				{
-					FontProperties font;
-					font.fontFamily=L"Wingdings 3";
-					font.size=10;
-					arrowElement->SetFont(font);
-				}
+				arrowElement=GuiPolygonElement::Create();
+				arrowElement->SetBackgroundColor(Color(76, 96, 122));
+				arrowElement->SetBorderColor(Color(76, 96, 122));
 				arrowComposition=new GuiBoundsComposition;
 				arrowComposition->SetOwnedElement(arrowElement);
 				arrowComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
@@ -2468,17 +2442,13 @@ Win7ListViewColumnHeaderStyle
 				switch(value)
 				{
 				case controls::GuiListViewColumnHeader::NotSorted:
-					arrowElement->SetText(L"");
+					arrowElement->SetPoints(0, 0);
 					break;
 				case controls::GuiListViewColumnHeader::Ascending:
-					margin.top=0;
-					arrowComposition->SetAlignmentToParent(margin);
-					arrowElement->SetText((wchar_t)0x7E);
+					common_styles::CommonFragmentBuilder::FillUpArrow(arrowElement);
 					break;
 				case controls::GuiListViewColumnHeader::Descending:
-					margin.top=-7;
-					arrowComposition->SetAlignmentToParent(margin);
-					arrowElement->SetText((wchar_t)0xF080);
+					common_styles::CommonFragmentBuilder::FillDownArrow(arrowElement);
 					break;
 				}
 			}
@@ -2972,15 +2942,7 @@ Win7DropDownComboBoxStyle
 				elements.textElement->SetEllipse(true);
 				elements.textElement->SetAlignments(Alignment::Left, Alignment::Center);
 
-				dropDownElement=GuiSolidLabelElement::Create();
-				{
-					FontProperties font;
-					font.fontFamily=L"Wingdings 3";
-					font.size=10;
-					dropDownElement->SetFont(font);
-				}
-				dropDownElement->SetText((wchar_t)0xF080);
-				dropDownElement->SetAlignments(Alignment::Center, Alignment::Center);
+				dropDownElement=common_styles::CommonFragmentBuilder::BuildDownArrow();
 
 				dropDownComposition=new GuiCellComposition;
 				table->AddChild(dropDownComposition);
