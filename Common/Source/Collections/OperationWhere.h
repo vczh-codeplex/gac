@@ -90,6 +90,7 @@ Where
 				void Reset()
 				{
 					enumerator->Reset();
+					GoNearest();
 				}
 			};
 		protected:

@@ -99,6 +99,7 @@ Intersect/Except
 				{
 					enumerator->Reset();
 					index=0;
+					GoNearest();
 				}
 			};
 		protected:
