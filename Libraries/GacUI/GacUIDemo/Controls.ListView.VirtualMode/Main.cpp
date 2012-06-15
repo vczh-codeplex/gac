@@ -6,81 +6,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 }
 
 /***********************************************************************
-FileProperties
-***********************************************************************/
-
-class FileProperties
-{
-private:
-	Ptr<GuiImageData>	smallIcon;
-	Ptr<GuiImageData>	bigIcon;
-	WString				displayName;
-	WString				typeName;
-	WString				lastWriteTime;
-	WString				size;
-	WString				fullPath;
-public:
-	FileProperties(const WString& _fullPath)
-		:fullPath(_fullPath)
-	{
-	}
-
-	Ptr<GuiImageData> GetSmallIcon()
-	{
-		if(!smallIcon)
-		{
-			smallIcon=GetFileIcon(fullPath, SHGFI_SMALLICON | SHGFI_ICON);
-		}
-		return smallIcon;
-	}
-
-	Ptr<GuiImageData> GetBigIcon()
-	{
-		if(!bigIcon)
-		{
-			bigIcon=GetFileIcon(fullPath, SHGFI_LARGEICON | SHGFI_ICON);
-		}
-		return bigIcon;
-	}
-
-	WString GetDisplayName()
-	{
-		if(displayName==L"")
-		{
-			displayName=GetFileDisplayName(fullPath);
-		}
-		return displayName;
-	}
-
-	WString GetTypeName()
-	{
-		if(typeName==L"")
-		{
-			typeName=GetFileTypeName(fullPath);
-		}
-		return typeName;
-	}
-
-	WString GetLastWriteTime()
-	{
-		if(lastWriteTime==L"")
-		{
-			lastWriteTime=GetFileLastWriteTime(fullPath);
-		}
-		return lastWriteTime;
-	}
-
-	WString GetSize()
-	{
-		if(size==L"")
-		{
-			size=GetFileSize(fullPath);
-		}
-		return size;
-	}
-};
-
-/***********************************************************************
 DataSource
 ***********************************************************************/
 
@@ -194,9 +119,9 @@ public:
 			case 0:
 				return fileProperties[itemIndex]->GetTypeName();
 			case 1:
-				return fileProperties[itemIndex]->GetLastWriteTime();
+				return FileTimeToString(fileProperties[itemIndex]->GetLastWriteTime());
 			case 2:
-				return fileProperties[itemIndex]->GetSize();
+				return FileSizeToString(fileProperties[itemIndex]->GetSize());
 			}
 		}
 		return L"";
