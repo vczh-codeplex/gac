@@ -121,9 +121,9 @@ void FillList(GuiListView* listView, const WString& path, List<WString>& files)
 		// Get type name
 		item->subItems.Add(GetFileTypeName(fullPath));
 		// Get last write time
-		item->subItems.Add(GetFileLastWriteTime(fullPath));
+		item->subItems.Add(FileTimeToString(GetFileLastWriteTime(fullPath)));
 		// Get file size
-		item->subItems.Add(GetFileSize(fullPath));
+		item->subItems.Add(FileSizeToString(GetFileSize(fullPath)));
 
 		listView->GetItems().Add(item);
 	}

@@ -89,7 +89,7 @@ WString GetFileTypeName(const WString& fullPath)
 	return result?info.szTypeName:L"";
 }
 
-WString GetFileLastWriteTime(const WString& fullPath)
+FILETIME GetFileLastWriteTime(const WString& fullPath)
 {
 	// Get file attributes.
 	WIN32_FILE_ATTRIBUTE_DATA info;
@@ -97,9 +97,29 @@ WString GetFileLastWriteTime(const WString& fullPath)
 
 	// Get the localized string for the file last write date.
 	FILETIME localFileTime;
-	SYSTEMTIME localSystemTime;
 	FileTimeToLocalFileTime(&info.ftLastWriteTime, &localFileTime);
-	FileTimeToSystemTime(&localFileTime, &localSystemTime);
+
+	return localFileTime;
+}
+
+LARGE_INTEGER GetFileSize(const WString& fullPath)
+{
+	// Get file attributes.
+	WIN32_FILE_ATTRIBUTE_DATA info;
+	BOOL result=GetFileAttributesEx(fullPath.Buffer(), GetFileExInfoStandard, &info);
+
+	// Get the string for file size
+	LARGE_INTEGER li;
+	li.HighPart=info.nFileSizeHigh;
+	li.LowPart=info.nFileSizeLow;
+
+	return li;
+}
+
+WString FileTimeToString(const FILETIME& filetime)
+{
+	SYSTEMTIME localSystemTime;
+	FileTimeToSystemTime(&filetime, &localSystemTime);
 
 	// Get the correct locale
 	wchar_t localeName[LOCALE_NAME_MAX_LENGTH]={0};
@@ -116,38 +136,29 @@ WString GetFileLastWriteTime(const WString& fullPath)
 	return dateString+WString(L" ")+timeString;
 }
 
-WString GetFileSize(const WString& fullPath)
+WString FileSizeToString(LARGE_INTEGER filesize)
 {
-	// Get file attributes.
-	WIN32_FILE_ATTRIBUTE_DATA info;
-	BOOL result=GetFileAttributesEx(fullPath.Buffer(), GetFileExInfoStandard, &info);
-
-	// Get the string for file size
-	LARGE_INTEGER li;
-	li.HighPart=info.nFileSizeHigh;
-	li.LowPart=info.nFileSizeLow;
-
 	WString unit;
 	double size=0;
-	if(li.QuadPart>=1024*1024*1024)
+	if(filesize.QuadPart>=1024*1024*1024)
 	{
 		unit=L" GB";
-		size=(double)li.QuadPart/(1024*1024*1024);
+		size=(double)filesize.QuadPart/(1024*1024*1024);
 	}
-	else if(li.QuadPart>=1024*1024)
+	else if(filesize.QuadPart>=1024*1024)
 	{
 		unit=L" MB";
-		size=(double)li.QuadPart/(1024*1024);
+		size=(double)filesize.QuadPart/(1024*1024);
 	}
-	else if(li.QuadPart>=1024)
+	else if(filesize.QuadPart>=1024)
 	{
 		unit=L" KB";
-		size=(double)li.QuadPart/1024;
+		size=(double)filesize.QuadPart/1024;
 	}
 	else
 	{
 		unit=L" Bytes";
-		size=(double)li.QuadPart;
+		size=(double)filesize.QuadPart;
 	}
 
 	WString sizeString=ftow(size);
@@ -162,4 +173,64 @@ WString GetFileSize(const WString& fullPath)
 	}
 
 	return sizeString+unit;
+}
+
+/***********************************************************************
+FileProperties
+***********************************************************************/
+
+void FileProperties::Load()
+{
+	if(!loaded)
+	{
+		loaded=true;
+		smallIcon=GetFileIcon(fullPath, SHGFI_SMALLICON | SHGFI_ICON);
+		bigIcon=GetFileIcon(fullPath, SHGFI_LARGEICON | SHGFI_ICON);
+		displayName=GetFileDisplayName(fullPath);
+		typeName=GetFileTypeName(fullPath);
+		lastWriteTime=GetFileLastWriteTime(fullPath);
+		size=GetFileSize(fullPath);
+	}
+	}
+
+FileProperties::FileProperties(const WString& _fullPath)
+	:loaded(false)
+	,fullPath(_fullPath)
+{
+}
+
+Ptr<GuiImageData> FileProperties::GetSmallIcon()
+{
+	Load();
+	return smallIcon;
+}
+
+Ptr<GuiImageData> FileProperties::GetBigIcon()
+{
+	Load();
+	return bigIcon;
+}
+
+WString FileProperties::GetDisplayName()
+{
+	Load();
+	return displayName;
+}
+
+WString FileProperties::GetTypeName()
+{
+	Load();
+	return typeName;
+}
+
+FILETIME FileProperties::GetLastWriteTime()
+{
+	Load();
+	return lastWriteTime;
+}
+
+LARGE_INTEGER FileProperties::GetSize()
+{
+	Load();
+	return size;
 }
