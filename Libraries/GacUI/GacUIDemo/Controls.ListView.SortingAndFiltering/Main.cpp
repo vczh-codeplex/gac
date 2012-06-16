@@ -18,6 +18,55 @@ private:
 	GuiMenu*						fileTypeMenu;
 	List<Ptr<FileProperties>>		fileProperties;
 
+	int								sortingColumn;
+	bool							ascending;
+	WString							filteredFileType;
+
+	LARGE_INTEGER IntFromFileTime(FILETIME fileTime)
+	{
+		LARGE_INTEGER li;
+		li.HighPart=fileTime.dwHighDateTime;
+		li.LowPart=fileTime.dwLowDateTime;
+		return li;
+	}
+
+	vint ItemComparer(Ptr<FileProperties> a, Ptr<FileProperties> b)
+	{
+		int result=0;
+		switch(sortingColumn)
+		{
+		case -1:
+			return fileProperties.IndexOf(a.Obj())-fileProperties.IndexOf(b.Obj());
+		case 0:
+			result=_wcsicmp(a->GetDisplayName().Buffer(), b->GetDisplayName().Buffer());
+			break;
+		case 1:
+			result=_wcsicmp(a->GetTypeName().Buffer(), b->GetTypeName().Buffer());
+			break;
+		case 2:
+			{
+				LARGE_INTEGER la=IntFromFileTime(a->GetLastWriteTime());
+				LARGE_INTEGER lb=IntFromFileTime(b->GetLastWriteTime());
+				result=la.QuadPart>lb.QuadPart?1:la.QuadPart<lb.QuadPart?-1:0;
+			}
+			break;
+		case 3:
+			{
+				LARGE_INTEGER la=a->GetSize();
+				LARGE_INTEGER lb=b->GetSize();
+				result=la.QuadPart>lb.QuadPart?1:la.QuadPart<lb.QuadPart?-1:0;
+			}
+			break;
+		}
+		if(!ascending) result*=-1;
+		return result;
+	}
+
+	bool ItemFilter(Ptr<FileProperties> a)
+	{
+		return filteredFileType==L"" || a->GetTypeName()==filteredFileType;
+	}
+
 	Ptr<list::ListViewItem> CreateFileItem(Ptr<FileProperties> file)
 	{
 		Ptr<list::ListViewItem> item=new list::ListViewItem;
@@ -37,9 +86,33 @@ private:
 
 		return item;
 	}
+
+	void FillData()
+	{
+		Func<vint(Ptr<FileProperties>, Ptr<FileProperties>)> comparer(this, &SortingAndFilteringWindow::ItemComparer);
+		Func<bool(Ptr<FileProperties>)> filter(this, &SortingAndFilteringWindow::ItemFilter);
+		Func<Ptr<list::ListViewItem>(Ptr<FileProperties>)> converter(this, &SortingAndFilteringWindow::CreateFileItem);
+
+		listView->GetItems().Clear();
+		CopyFrom(listView->GetItems(), fileProperties.Wrap()>>Where(filter)>>OrderBy(comparer)>>Select(converter));
+	}
+
+	void ShowAllFileType_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		filteredFileType=L"";
+		FillData();
+	}
+
+	void ShowSingleFileType_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		filteredFileType=sender->GetRelatedControl()->GetText();
+		FillData();
+	}
 public:
 	SortingAndFilteringWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+		,sortingColumn(-1)
+		,ascending(true)
 	{
 		this->SetText(L"Controls.ListView.SortingAndFiltering");
 		
@@ -71,13 +144,6 @@ public:
 			}
 		}
 		{
-			// Fill data
-			FOREACH(Ptr<FileProperties>, file, fileProperties.Wrap())
-			{
-				listView->GetItems().Add(CreateFileItem(file));
-			}
-		}
-		{
 			// Create a popup menu
 			fileTypeMenu=g::NewMenu(0);
 			GuiStackComposition* menuStack=new GuiStackComposition;
@@ -85,6 +151,27 @@ public:
 			menuStack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			menuStack->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			fileTypeMenu->GetContainerComposition()->AddChild(menuStack);
+
+			{
+				// Create "Show all file types" menu
+				GuiStackItemComposition* item=new GuiStackItemComposition;
+				menuStack->AddChild(item);
+
+				GuiMenuButton* button=g::NewMenuItemButton();
+				button->SetText(L"Show all file types");
+				button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				button->Clicked.AttachMethod(this, &SortingAndFilteringWindow::ShowAllFileType_Clicked);
+				item->AddChild(button->GetBoundsComposition());
+			}
+			{
+				// Create menu separator
+				GuiStackItemComposition* item=new GuiStackItemComposition;
+				menuStack->AddChild(item);
+
+				GuiControl* separator=g::NewMenuSplitter();
+				separator->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				item->AddChild(separator->GetBoundsComposition());
+			}
 
 			// Added all existing file type in the folder as menu items
 			Array<WString> fileTypes;
@@ -94,15 +181,18 @@ public:
 				>>Select<Ptr<FileProperties>, WString>
 					([](Ptr<FileProperties> file){return file->GetTypeName();})
 				>>Distinct()
+				>>OrderBy<WString>([](WString a, WString b){return _wcsicmp(a.Buffer(), b.Buffer());})
 				);
 			FOREACH(WString, typeName, fileTypes.Wrap())
 			{
+				// Create menu button for each file type
 				GuiStackItemComposition* item=new GuiStackItemComposition;
 				menuStack->AddChild(item);
 
-				GuiMenuButton* button=new GuiMenuButton(new win7::Win7MenuItemButtonStyle);
+				GuiMenuButton* button=g::NewMenuItemButton();
 				button->SetText(typeName);
 				button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				button->Clicked.AttachMethod(this, &SortingAndFilteringWindow::ShowSingleFileType_Clicked);
 				item->AddChild(button->GetBoundsComposition());
 			}
 
@@ -110,6 +200,7 @@ public:
 			listView->GetItems().GetColumns()[1]->dropdownPopup=fileTypeMenu;
 			listView->GetItems().GetColumns().NotifyUpdate(1);
 		}
+		FillData();
 
 		// set the preferred minimum client size
 		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
