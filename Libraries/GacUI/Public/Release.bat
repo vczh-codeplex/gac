@@ -15,8 +15,10 @@ copy ..\..\GacUISrc\Debug\GacUISrc.pdb GacUISrc.pdb
 cd ..
 ..\..\..\Common\Tools\GenDocIndex.exe html Web\StaticHtmlDoc Temp DocumentRawItems
 echo MAKING RELEASE FOLDER...
-..\..\..\Common\Tools\Recurcpy.exe Source            Temp\ReleaseFolder\Public\Source  include cpp h
-..\..\..\Common\Tools\Recurcpy.exe Web\StaticHtmlDoc Temp\ReleaseFolder\Public\Doc     include html
-..\..\..\Common\Tools\Recurcpy.exe ..\GacUIDemo      Temp\ReleaseFolder\GacUIDemo      include sln vssscc vcxproj filters vspscc cpp h bmp jpg gif png ico
+..\..\..\Common\Tools\Recurcpy.exe Source				Temp\ReleaseFolder\Public\Source  include cpp h
+..\..\..\Common\Tools\Recurcpy.exe Web\StaticHtmlDoc	Temp\ReleaseFolder\Public\Doc     include html
+..\..\..\Common\Tools\Recurcpy.exe ..\GacUIDemo			Temp\ReleaseFolder\GacUIDemo      include sln vssscc vcxproj filters vspscc cpp h bmp jpg gif png ico
+copy Web\PageStyle.css									Temp\ReleaseFolder\Public\PageStyle.css
+copy Web\DocStyle.css									Temp\ReleaseFolder\Public\DocStyle.css
 echo RELEASE FOLDER: %CD%\Temp\ReleaseFolder\
 pause
