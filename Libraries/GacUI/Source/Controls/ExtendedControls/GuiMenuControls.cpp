@@ -306,12 +306,16 @@ GuiMenuButton
 
 			void GuiMenuButton::SetSubMenu(GuiMenu* value)
 			{
-				if(!subMenu && value)
+				if(subMenu)
 				{
-					subMenu=value;
-					styleController->SetSubMenuExisting(true);
-					ownedSubMenu=false;
+					if(ownedSubMenu)
+					{
+						delete subMenu;
+					}
 				}
+				subMenu=value;
+				ownedSubMenu=false;
+				styleController->SetSubMenuExisting(subMenu!=0);
 			}
 
 			void GuiMenuButton::DestroySubMenu()
