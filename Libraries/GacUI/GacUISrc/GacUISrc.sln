@@ -51,6 +51,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{BBA4C5
 		..\Public\Web\Images\Demos.Controls.ListBox.NameEditor.jpg = ..\Public\Web\Images\Demos.Controls.ListBox.NameEditor.jpg
 		..\Public\Web\Images\Demos.Controls.ListBox.NameSelector.jpg = ..\Public\Web\Images\Demos.Controls.ListBox.NameSelector.jpg
 		..\Public\Web\Images\Demos.Controls.ListBox.VirtualMode.jpg = ..\Public\Web\Images\Demos.Controls.ListBox.VirtualMode.jpg
+		..\Public\Web\Images\Demos.Controls.ListView.SortingAndFiltering.jpg = ..\Public\Web\Images\Demos.Controls.ListView.SortingAndFiltering.jpg
 		..\Public\Web\Images\Demos.Controls.ListView.ViewSwitching.jpg = ..\Public\Web\Images\Demos.Controls.ListView.ViewSwitching.jpg
 		..\Public\Web\Images\Demos.Controls.ListView.VirtualMode.jpg = ..\Public\Web\Images\Demos.Controls.ListView.VirtualMode.jpg
 		..\Public\Web\Images\Demos.Controls.Tab.TextBoxPage.jpg = ..\Public\Web\Images\Demos.Controls.Tab.TextBoxPage.jpg
@@ -137,6 +138,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Controls.ListView.VirtualMo
 		..\Public\Web\Demos\Controls.ListView.VirtualMode\DXGUI_47.jpg = ..\Public\Web\Demos\Controls.ListView.VirtualMode\DXGUI_47.jpg
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Controls.ListView.SortingAndFiltering", "Controls.ListView.SortingAndFiltering", "{43BD61C7-87F1-4B2B-A8D3-DFAC9CB4D963}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\Demos\Controls.ListView.SortingAndFiltering\Demo.html = ..\Public\Web\Demos\Controls.ListView.SortingAndFiltering\Demo.html
+		..\Public\Web\Demos\Controls.ListView.SortingAndFiltering\DXGUI_48.jpg = ..\Public\Web\Demos\Controls.ListView.SortingAndFiltering\DXGUI_48.jpg
+		..\Public\Web\Demos\Controls.ListView.SortingAndFiltering\DXGUI_49.jpg = ..\Public\Web\Demos\Controls.ListView.SortingAndFiltering\DXGUI_49.jpg
+		..\Public\Web\Demos\Controls.ListView.SortingAndFiltering\DXGUI_50.jpg = ..\Public\Web\Demos\Controls.ListView.SortingAndFiltering\DXGUI_50.jpg
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 3
@@ -184,5 +193,6 @@ Global
 		{BFC63FCF-CE0A-4E66-BF7B-2510CD220465} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
 		{E76DD49F-E23E-49D4-A1E9-A29AB0F9E2EE} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
 		{282AA4CD-4696-4653-8312-3E6E307D082E} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
+		{43BD61C7-87F1-4B2B-A8D3-DFAC9CB4D963} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
 	EndGlobalSection
 EndGlobal
