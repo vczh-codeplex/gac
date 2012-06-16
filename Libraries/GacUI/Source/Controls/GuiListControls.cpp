@@ -232,6 +232,8 @@ GuiListControl
 					{
 						GuiItemMouseEventArgs redirectArguments;
 						(GuiMouseEventArgs&)redirectArguments=arguments;
+						redirectArguments.compositionSource=GetBoundsComposition();
+						redirectArguments.eventSource=GetBoundsComposition();
 						redirectArguments.itemIndex=itemIndex;
 						itemEvent.Execute(redirectArguments);
 						arguments=redirectArguments;
@@ -248,6 +250,8 @@ GuiListControl
 					{
 						GuiItemEventArgs redirectArguments;
 						(GuiEventArgs&)redirectArguments=arguments;
+						redirectArguments.compositionSource=GetBoundsComposition();
+						redirectArguments.eventSource=GetBoundsComposition();
 						redirectArguments.itemIndex=itemIndex;
 						itemEvent.Execute(redirectArguments);
 						arguments=redirectArguments;

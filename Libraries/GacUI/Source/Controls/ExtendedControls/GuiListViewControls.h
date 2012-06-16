@@ -141,6 +141,9 @@ ListView Base
 				/// <param name="_itemProvider">The item provider for this control.</param>
 				GuiListViewBase(IStyleProvider* _styleProvider, GuiListControl::IItemProvider* _itemProvider);
 				~GuiListViewBase();
+
+				/// <summary>Column clicked event.</summary>
+				compositions::GuiItemNotifyEvent				ColumnClicked;
 				
 				/// <summary>Get the associated style provider.</summary>
 				/// <returns>The style provider.</returns>
@@ -557,6 +560,7 @@ ListView ItemContentProvider(Detailed)
 					bool										splitterDragging;
 					int											splitterLatestX;
 
+					void										ColumnClicked(int index, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					void										ColumnHeaderSplitterLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 					void										ColumnHeaderSplitterLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 					void										ColumnHeaderSplitterMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);

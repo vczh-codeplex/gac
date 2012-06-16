@@ -17554,6 +17554,8 @@ ListView Base
 			public:
 				GuiListViewBase(IStyleProvider* _styleProvider, GuiListControl::IItemProvider* _itemProvider);
 				~GuiListViewBase();
+
+				compositions::GuiItemNotifyEvent				ColumnClicked;
 				
 				IStyleProvider*									GetListViewStyleProvider();
 				Ptr<GuiListControl::IItemStyleProvider>			SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)override;
@@ -17819,7 +17821,7 @@ ListView ItemContentProvider(Detailed)
 
 				class ListViewColumnItemArranger : public FixedHeightItemArranger, public Description<ListViewColumnItemArranger>
 				{
-					typedef collections::List<GuiMenuButton*>							ColumnHeaderButtonList;
+					typedef collections::List<GuiListViewColumnHeader*>					ColumnHeaderButtonList;
 					typedef collections::List<compositions::GuiBoundsComposition*>		ColumnHeaderSplitterList;
 				public:
 					static const int							SplitterWidth=8;
@@ -17866,6 +17868,7 @@ ListView ItemContentProvider(Detailed)
 					bool										splitterDragging;
 					int											splitterLatestX;
 
+					void										ColumnClicked(int index, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					void										ColumnHeaderSplitterLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 					void										ColumnHeaderSplitterLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 					void										ColumnHeaderSplitterMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);

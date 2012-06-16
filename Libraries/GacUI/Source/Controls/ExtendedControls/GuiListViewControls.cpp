@@ -114,6 +114,7 @@ GuiListViewBase
 				,styleProvider(0)
 			{
 				styleProvider=dynamic_cast<IStyleProvider*>(styleController->GetStyleProvider());
+				ColumnClicked.SetAssociatedComposition(boundsComposition);
 			}
 
 			GuiListViewBase::~GuiListViewBase()
@@ -915,6 +916,13 @@ ListViewColumnItemArranger
 
 				const wchar_t* const ListViewColumnItemArranger::IColumnItemView::Identifier = L"vl::presentation::controls::list::ListViewColumnItemArranger::IColumnItemView";
 
+				void ListViewColumnItemArranger::ColumnClicked(int index, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+				{
+					GuiItemEventArgs args(listView->ColumnClicked.GetAssociatedComposition());
+					args.itemIndex=index;
+					listView->ColumnClicked.Execute(args);
+				}
+
 				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
 					if(listView->GetVisuallyEnabled())
@@ -1041,6 +1049,7 @@ ListViewColumnItemArranger
 								button->SetSubMenu(columnItemView->GetDropdownPopup(i));
 								button->SetColumnSortingState(columnItemView->GetSortingState(i));
 								button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
+								button->Clicked.AttachLambda(Curry(Func<void(int, GuiGraphicsComposition*, GuiEventArgs&)>(this, &ListViewColumnItemArranger::ColumnClicked))(i));
 								columnHeaderButtons.Add(button);
 								if(i>0)
 								{

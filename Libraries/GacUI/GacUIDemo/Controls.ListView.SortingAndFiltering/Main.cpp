@@ -108,6 +108,46 @@ private:
 		filteredFileType=sender->GetRelatedControl()->GetText();
 		FillData();
 	}
+
+	void Column_Clicked(GuiGraphicsComposition* sender, GuiItemEventArgs& arguments)
+	{
+		// Get the sorting state of the clicked column
+		GuiListViewColumnHeader::ColumnSortingState state=listView->GetItems().GetColumns()[arguments.itemIndex]->sortingState;
+
+		// Calculate the new sorting state
+		switch(state)
+		{
+		case GuiListViewColumnHeader::NotSorted:
+			sortingColumn=arguments.itemIndex;
+			ascending=true;
+			break;
+		case GuiListViewColumnHeader::Ascending:
+			sortingColumn=arguments.itemIndex;
+			ascending=false;
+			break;
+		case GuiListViewColumnHeader::Descending:
+			sortingColumn=-1;
+			break;
+		}
+
+		// Update all list view columns
+		for(int i=0;i<listView->GetItems().GetColumns().Count();i++)
+		{
+			Ptr<list::ListViewColumn> column=listView->GetItems().GetColumns()[i];
+			if(i==sortingColumn)
+			{
+				column->sortingState=ascending?GuiListViewColumnHeader::Ascending:GuiListViewColumnHeader::Descending;
+			}
+			else
+			{
+				column->sortingState=GuiListViewColumnHeader::NotSorted;
+			}
+		}
+		listView->GetItems().GetColumns().NotifyUpdate(0, listView->GetItems().GetColumns().Count());
+
+		// Refresh data;
+		FillData();
+	}
 public:
 	SortingAndFilteringWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -131,6 +171,8 @@ public:
 		listView->GetItems().GetColumns().Add(new list::ListViewColumn(L"Date", 120));
 		listView->GetItems().GetColumns().Add(new list::ListViewColumn(L"Size", 120));
 		listView->ChangeItemStyle(new list::ListViewDetailContentProvider);
+		// Register the column clicked event
+		listView->ColumnClicked.AttachMethod(this, &SortingAndFilteringWindow::Column_Clicked);
 		
 		{
 			// Enumerate all directories and files in the Windows directory.
