@@ -35,9 +35,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Controls.ListView.VirtualMo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Controls.ListView.SortingAndFiltering", "Controls.ListView.SortingAndFiltering\Controls.ListView.SortingAndFiltering.vcxproj", "{EFB47B32-B002-4B92-A313-ACA8D96B266B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Controls.TreeView.FileExplorer", "Controls.TreeView.FileExplorer\Controls.TreeView.FileExplorer.vcxproj", "{C390D034-C335-409E-92E6-41740D71349D}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 14
+		SccNumberOfProjects = 15
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
@@ -92,6 +94,10 @@ Global
 		SccProjectTopLevelParentUniqueName13 = GacUIDemo.sln
 		SccProjectName13 = Controls.ListView.SortingAndFiltering
 		SccLocalPath13 = Controls.ListView.SortingAndFiltering
+		SccProjectUniqueName14 = Controls.TreeView.FileExplorer\\Controls.TreeView.FileExplorer.vcxproj
+		SccProjectTopLevelParentUniqueName14 = GacUIDemo.sln
+		SccProjectName14 = Controls.TreeView.FileExplorer
+		SccLocalPath14 = Controls.TreeView.FileExplorer
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -150,6 +156,10 @@ Global
 		{EFB47B32-B002-4B92-A313-ACA8D96B266B}.Debug|Win32.Build.0 = Debug|Win32
 		{EFB47B32-B002-4B92-A313-ACA8D96B266B}.Release|Win32.ActiveCfg = Release|Win32
 		{EFB47B32-B002-4B92-A313-ACA8D96B266B}.Release|Win32.Build.0 = Release|Win32
+		{C390D034-C335-409E-92E6-41740D71349D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C390D034-C335-409E-92E6-41740D71349D}.Debug|Win32.Build.0 = Debug|Win32
+		{C390D034-C335-409E-92E6-41740D71349D}.Release|Win32.ActiveCfg = Release|Win32
+		{C390D034-C335-409E-92E6-41740D71349D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -167,5 +177,6 @@ Global
 		{88EA0F51-415E-4F4A-980D-5F6602903704} = {4A1755E9-DB6D-4CD2-83FB-D8F2A18E0268}
 		{978EB4E8-7462-40C5-9049-83FF9592BA75} = {4A1755E9-DB6D-4CD2-83FB-D8F2A18E0268}
 		{EFB47B32-B002-4B92-A313-ACA8D96B266B} = {4A1755E9-DB6D-4CD2-83FB-D8F2A18E0268}
+		{C390D034-C335-409E-92E6-41740D71349D} = {4A1755E9-DB6D-4CD2-83FB-D8F2A18E0268}
 	EndGlobalSection
 EndGlobal
