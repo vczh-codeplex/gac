@@ -54,7 +54,7 @@ public:
 	{
 		this->SetText(L"Controls.TreeView.FileExplorerWindow");
 		
-		// Create list view control to display a folder
+		// Create tree view control to display the local file system
 		treeView=g::NewTreeView();
 		treeView->SetHorizontalAlwaysVisible(false);
 		treeView->SetVerticalAlwaysVisible(false);
