@@ -16,6 +16,18 @@ class FileExplorerWindow : public GuiWindow
 private:
 	GuiTreeView*					treeView;
 
+	void AddFolder(Ptr<tree::MemoryNodeProvider> parent, const WString& path)
+	{
+		Ptr<tree::TreeViewItem> item=new tree::TreeViewItem;
+		item->text=GetFileDisplayName(path);
+		item->image=GetFileIcon(path, SHGFI_SMALLICON | SHGFI_ICON);
+		int index=parent->Children().Add(new tree::MemoryNodeProvider(item));
+
+		Ptr<tree::TreeViewItem> loading=new tree::TreeViewItem;
+		loading->text=L"Loading...";
+		parent->Children()[index]->Children().Add(new tree::MemoryNodeProvider(loading));
+	}
+
 	void InitializeFileSystem()
 	{
 		wchar_t drives[1024];
@@ -31,9 +43,7 @@ private:
 			}
 			else
 			{
-				Ptr<tree::TreeViewItem> item=new tree::TreeViewItem;
-				item->text=drive;
-				treeView->Nodes()->Children().Add(new tree::MemoryNodeProvider(item));
+				AddFolder(treeView->Nodes(), drive);
 				reading+=drive.Length()+1;
 			}
 		}
