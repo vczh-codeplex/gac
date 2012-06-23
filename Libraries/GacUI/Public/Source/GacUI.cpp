@@ -4636,6 +4636,16 @@ GuiControl
 				}
 			}
 
+			Ptr<Object> GuiControl::GetTag()
+			{
+				return tag;
+			}
+
+			void GuiControl::SetTag(Ptr<Object> value)
+			{
+				tag=value;
+			}
+
 			IDescriptable* GuiControl::QueryService(const WString& identifier)
 			{
 				if(parent)

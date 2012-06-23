@@ -19,8 +19,12 @@ private:
 	void AddFolder(Ptr<tree::MemoryNodeProvider> parent, const WString& path)
 	{
 		Ptr<tree::TreeViewItem> item=new tree::TreeViewItem;
+		// set the item text using the display name of the file
 		item->text=GetFileDisplayName(path);
+		// set the image using the file icon
 		item->image=GetFileIcon(path, SHGFI_SMALLICON | SHGFI_ICON);
+		// tag the full path to the item
+		item->tag=new ObjectBox<WString>(path);
 		int index=parent->Children().Add(new tree::MemoryNodeProvider(item));
 
 		Ptr<tree::TreeViewItem> loading=new tree::TreeViewItem;

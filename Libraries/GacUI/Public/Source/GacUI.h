@@ -3114,6 +3114,7 @@ Basic Construction
 
 				GuiControl*								parent;
 				ControlList								children;
+				Ptr<Object>								tag;
 
 				virtual void							OnChildInserted(GuiControl* control);
 				virtual void							OnChildRemoved(GuiControl* control);
@@ -3155,6 +3156,9 @@ Basic Construction
 				virtual const FontProperties&			GetFont();
 				virtual void							SetFont(const FontProperties& value);
 				virtual void							SetFocus();
+
+				Ptr<Object>								GetTag();
+				void									SetTag(Ptr<Object> value);
 
 				virtual IDescriptable*					QueryService(const WString& identifier);
 
@@ -5151,10 +5155,11 @@ ListView
 				class ListViewItem
 				{
 				public:
-					Ptr<GuiImageData>							smallImage;
-					Ptr<GuiImageData>							largeImage;
-					WString										text;
-					collections::List<WString>					subItems;
+					Ptr<GuiImageData>								smallImage;
+					Ptr<GuiImageData>								largeImage;
+					WString											text;
+					collections::List<WString>						subItems;
+					Ptr<Object>										tag;
 				};
 				
 				class ListViewColumn
@@ -5607,6 +5612,7 @@ TreeView
 				public:
 					Ptr<GuiImageData>				image;
 					WString							text;
+					Ptr<Object>						tag;
 
 					TreeViewItem();
 					TreeViewItem(const Ptr<GuiImageData>& _image, const WString& _text);

@@ -95,6 +95,7 @@ Basic Construction
 
 				GuiControl*								parent;
 				ControlList								children;
+				Ptr<Object>								tag;
 
 				virtual void							OnChildInserted(GuiControl* control);
 				virtual void							OnChildRemoved(GuiControl* control);
@@ -189,6 +190,13 @@ Basic Construction
 				virtual void							SetFont(const FontProperties& value);
 				/// <summary>Focus this control.</summary>
 				virtual void							SetFocus();
+
+				/// <summary>Get the tag object of the control.</summary>
+				/// <returns>The tag object of the control.</returns>
+				Ptr<Object>								GetTag();
+				/// <summary>Set the tag object of the control.</summary>
+				/// <param name="value">The tag object of the control.</param>
+				void									SetTag(Ptr<Object> value);
 
 				/// <summary>Query a service using an identifier. If you want to get a service of type IXXX, use IXXX::Identifier as the identifier.</summary>
 				/// <returns>The requested service. If the control doesn't support this service, it will be null.</returns>
