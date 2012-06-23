@@ -18,38 +18,47 @@ private:
 
 	void OnNodeExpanded(GuiGraphicsComposition* sender, GuiNodeEventArgs& arguments)
 	{
-		tree::MemoryNodeProvider* node=treeView->Nodes()->GetMemoryNode(arguments.node);
-		if(node->Children().Count()==1)
+		tree::MemoryNodeProvider* parent=treeView->Nodes()->GetMemoryNode(arguments.node);
+		if(parent->Children().Count()==1)
 		{
-			tree::MemoryNodeProvider* child=node->Children()[0].Obj();
+			tree::MemoryNodeProvider* child=parent->Children()[0].Obj();
 			Ptr<tree::TreeViewItem> childItem=child->GetData().Cast<tree::TreeViewItem>();
 			if(childItem->text==L"Loading..." && !childItem->tag)
 			{
-				// get back the full path from the item
-				Ptr<tree::TreeViewItem> item=node->GetData().Cast<tree::TreeViewItem>();
-				WString path=item->tag.Cast<ObjectBox<WString>>()->Unbox();
-				if(path[path.Length()-1]!=L'\\')
+				GetApplication()->InvokeAsync([parent]()
 				{
-					path+=L"\\";
-				}
+					// get back the full path from the item
+					Ptr<tree::TreeViewItem> item=parent->GetData().Cast<tree::TreeViewItem>();
+					WString path=item->tag.Cast<ObjectBox<WString>>()->Unbox();
+					if(path[path.Length()-1]!=L'\\')
+					{
+						path+=L"\\";
+					}
 
-				// add nodes
-				List<WString> directories, files;
-				SearchDirectoriesAndFiles(path, directories, files);
+					// add sub folders and sub files
+					List<WString> directories, files;
+					SearchDirectoriesAndFiles(path, directories, files);
 
-				FOREACH(WString, file, directories.Wrap())
-				{
-					AddFolder(node, path+file);
-				}
-				FOREACH(WString, file, files.Wrap())
-				{
-					AddFile(node, path+file);
-				}
+					tree::MemoryNodeProvider* directoryNode=parent;
+					GetApplication()->InvokeInMainThreadAndWait([directoryNode, path, &directories, &files]()
+					{
+						FOREACH(WString, file, directories.Wrap())
+						{
+							FileExplorerWindow::AddFolder(directoryNode, path+file);
+						}
+						FOREACH(WString, file, files.Wrap())
+						{
+							FileExplorerWindow::AddFile(directoryNode, path+file);
+						}
+						// remove the  "Loading..." node
+						directoryNode->Children().RemoveAt(0);
+					});
+				});
 			}
 		}
 	}
 
-	int AddFile(tree::MemoryNodeProvider* parent, const WString& path)
+	static int AddFile(tree::MemoryNodeProvider* parent, const WString& path)
 	{
 		Ptr<tree::TreeViewItem> item=new tree::TreeViewItem;
 		// set the item text using the display name of the file
@@ -63,7 +72,7 @@ private:
 		return index;
 	}
 
-	void AddFolder(tree::MemoryNodeProvider* parent, const WString& path)
+	static void AddFolder(tree::MemoryNodeProvider* parent, const WString& path)
 	{
 		int index=AddFile(parent, path);
 
