@@ -5263,8 +5263,9 @@ GuiVirtualTreeListControl NodeProvider
 
 					virtual int						GetChildCount()=0;
 					virtual INodeProvider*			GetParent()=0;
-					virtual INodeProvider*			RequestChild(int index)=0;
-					virtual void					ReleaseChild(INodeProvider* node)=0;
+					virtual INodeProvider*			GetChild(int index)=0;
+					virtual void					Increase()=0;
+					virtual void					Release()=0;
 				};
 				
 				class INodeRootProvider : public virtual IDescriptable, public Description<INodeRootProvider>
@@ -5446,8 +5447,9 @@ GuiVirtualTreeListControl Predefined NodeProvider
 
 					int								GetChildCount()override;
 					INodeProvider*					GetParent()override;
-					INodeProvider*					RequestChild(int index)override;
-					void							ReleaseChild(INodeProvider* node)override;
+					INodeProvider*					GetChild(int index)override;
+					void							Increase()override;
+					void							Release()override;
 				};
 
 				class NodeRootProviderBase : public virtual INodeRootProvider, protected virtual INodeProviderCallback, public Description<NodeRootProviderBase>
@@ -5550,7 +5552,7 @@ TreeView
 				};
 			}
 			
-			class GuiTreeView : public GuiVirtualTreeListControl, public Description<GuiTreeView>
+			class GuiVirtualTreeView : public GuiVirtualTreeListControl, public Description<GuiVirtualTreeView>
 			{
 			public:
 				class IStyleProvider : public virtual GuiVirtualTreeListControl::IStyleProvider, public Description<IStyleProvider>
@@ -5561,14 +5563,23 @@ TreeView
 					virtual Color										GetTextColor()=0;
 				};
 			protected:
-				IStyleProvider*								styleProvider;
-				Ptr<tree::TreeViewItemRootProvider>			nodes;
+				IStyleProvider*											styleProvider;
 			public:
-				GuiTreeView(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider=0);
+				GuiVirtualTreeView(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider);
+				~GuiVirtualTreeView();
+
+				IStyleProvider*											GetTreeViewStyleProvider();
+			};
+			
+			class GuiTreeView : public GuiVirtualTreeView, public Description<GuiTreeView>
+			{
+			protected:
+				Ptr<tree::TreeViewItemRootProvider>						nodes;
+			public:
+				GuiTreeView(IStyleProvider* _styleProvider);
 				~GuiTreeView();
 
-				IStyleProvider*								GetTreeViewStyleProvider();
-				Ptr<tree::TreeViewItemRootProvider>			Nodes();
+				Ptr<tree::TreeViewItemRootProvider>						Nodes();
 			};
 
 			namespace tree
@@ -5608,7 +5619,7 @@ TreeView
 					};
 #pragma warning(pop)
 
-					GuiTreeView*							treeControl;
+					GuiVirtualTreeView*						treeControl;
 					GuiListControl::IItemStyleProvider*		bindedItemStyleProvider;
 					ITreeViewItemView*						treeViewItemView;
 

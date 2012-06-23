@@ -2839,7 +2839,7 @@ NodeItemProvider
 						int count=provider->GetChildCount();
 						for(int i=0;(!result && i<count);i++)
 						{
-							INodeProvider* child=provider->RequestChild(i);
+							INodeProvider* child=provider->GetChild(i);
 							int visibleCount=child->CalculateTotalVisibleNodes();
 							if(offset<visibleCount)
 							{
@@ -2867,9 +2867,9 @@ NodeItemProvider
 					{
 						for(int i=0;i<count;i++)
 						{
-							INodeProvider* child=parentNode->RequestChild(start+i);
+							INodeProvider* child=parentNode->GetChild(start+i);
 							offsetBeforeChildModified+=child->CalculateTotalVisibleNodes();
-							parentNode->ReleaseChild(child);
+							child->Release();
 						}
 					}
 				}
@@ -2883,13 +2883,13 @@ NodeItemProvider
 						int firstChildStart=-1;
 						for(int i=0;i<newCount;i++)
 						{
-							INodeProvider* child=parentNode->RequestChild(start+i);
+							INodeProvider* child=parentNode->GetChild(start+i);
 							if(i==0)
 							{
 								firstChildStart=CalculateNodeVisibilityIndexInternal(child);
 							}
 							offset+=child->CalculateTotalVisibleNodes();
-							parentNode->ReleaseChild(child);
+							child->Release();
 						}
 
 						if(firstChildStart==-1)
@@ -2901,16 +2901,16 @@ NodeItemProvider
 							}
 							else if(start<childCount)
 							{
-								INodeProvider* child=parentNode->RequestChild(start);
+								INodeProvider* child=parentNode->GetChild(start);
 								firstChildStart=CalculateNodeVisibilityIndexInternal(child);
-								parentNode->ReleaseChild(child);
+								child->Release();
 							}
 							else
 							{
-								INodeProvider* child=parentNode->RequestChild(start-1);
+								INodeProvider* child=parentNode->GetChild(start-1);
 								firstChildStart=CalculateNodeVisibilityIndexInternal(child);
 								firstChildStart+=child->CalculateTotalVisibleNodes();
-								parentNode->ReleaseChild(child);
+								child->Release();
 							}
 						}
 						InvokeOnItemModified(firstChildStart, offsetBeforeChildModified, offset);
@@ -2936,9 +2936,9 @@ NodeItemProvider
 						int count=node->GetChildCount();
 						for(int i=0;i<count;i++)
 						{
-							INodeProvider* child=node->RequestChild(i);
+							INodeProvider* child=node->GetChild(i);
 							visibility+=child->CalculateTotalVisibleNodes();
-							node->ReleaseChild(child);
+							child->Release();
 						}
 						InvokeOnItemModified(base+1, visibility, 0);
 					}
@@ -2965,7 +2965,7 @@ NodeItemProvider
 					int count=parent->GetChildCount();
 					for(int i=0;i<count;i++)
 					{
-						INodeProvider* child=parent->RequestChild(i);
+						INodeProvider* child=parent->GetChild(i);
 						bool findResult=child==node;
 						if(findResult)
 						{
@@ -2975,7 +2975,7 @@ NodeItemProvider
 						{
 							index+=child->CalculateTotalVisibleNodes();
 						}
-						parent->ReleaseChild(child);
+						child->Release();
 						if(findResult)
 						{
 							return index;
@@ -3036,11 +3036,7 @@ NodeItemProvider
 				{
 					if(node)
 					{
-						INodeProvider* parent=node;
-						if(parent)
-						{
-							parent->ReleaseChild(node);
-						}
+						node->Release();
 					}
 				}
 
@@ -3366,7 +3362,7 @@ MemoryNodeProvider
 					return parent;
 				}
 
-				INodeProvider* MemoryNodeProvider::RequestChild(int index)
+				INodeProvider* MemoryNodeProvider::GetChild(int index)
 				{
 					if(0<=index && index<childCount)
 					{
@@ -3378,7 +3374,11 @@ MemoryNodeProvider
 					}
 				}
 
-				void MemoryNodeProvider::ReleaseChild(INodeProvider* node)
+				void MemoryNodeProvider::Increase()
+				{
+				}
+
+				void MemoryNodeProvider::Release()
 				{
 				}
 
@@ -3963,7 +3963,7 @@ TreeViewNodeItemStyleProvider
 
 				void TreeViewNodeItemStyleProvider::AttachListControl(GuiListControl* value)
 				{
-					treeControl=dynamic_cast<GuiTreeView*>(value);
+					treeControl=dynamic_cast<GuiVirtualTreeView*>(value);
 					if(treeControl)
 					{
 						treeViewItemView=dynamic_cast<ITreeViewItemView*>(treeControl->GetItemProvider()->RequestView(ITreeViewItemView::Identifier));
@@ -4024,16 +4024,34 @@ TreeViewNodeItemStyleProvider
 			}
 
 /***********************************************************************
+GuiVirtualTreeView
+***********************************************************************/
+
+			GuiVirtualTreeView::GuiVirtualTreeView(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider)
+				:GuiVirtualTreeListControl(_styleProvider, _nodeRootProvider)
+			{
+				styleProvider=dynamic_cast<IStyleProvider*>(styleController->GetStyleProvider());
+				SetNodeStyleProvider(new tree::TreeViewNodeItemStyleProvider);
+				SetArranger(new list::FixedHeightItemArranger);
+			}
+
+			GuiVirtualTreeView::~GuiVirtualTreeView()
+			{
+			}
+
+			GuiVirtualTreeView::IStyleProvider* GuiVirtualTreeView::GetTreeViewStyleProvider()
+			{
+				return styleProvider;
+			}
+
+/***********************************************************************
 GuiTreeView
 ***********************************************************************/
 
-			GuiTreeView::GuiTreeView(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider)
-				:GuiVirtualTreeListControl(_styleProvider, (_nodeRootProvider?_nodeRootProvider:new tree::TreeViewItemRootProvider))
+			GuiTreeView::GuiTreeView(IStyleProvider* _styleProvider)
+				:GuiVirtualTreeView(_styleProvider, new tree::TreeViewItemRootProvider)
 			{
-				styleProvider=dynamic_cast<IStyleProvider*>(styleController->GetStyleProvider());
 				nodes=nodeItemProvider->GetRoot().Cast<tree::TreeViewItemRootProvider>();
-				SetNodeStyleProvider(new tree::TreeViewNodeItemStyleProvider);
-				SetArranger(new list::FixedHeightItemArranger);
 			}
 
 			GuiTreeView::~GuiTreeView()
@@ -4043,11 +4061,6 @@ GuiTreeView
 			Ptr<tree::TreeViewItemRootProvider> GuiTreeView::Nodes()
 			{
 				return nodes;
-			}
-
-			GuiTreeView::IStyleProvider* GuiTreeView::GetTreeViewStyleProvider()
-			{
-				return styleProvider;
 			}
 		}
 	}
