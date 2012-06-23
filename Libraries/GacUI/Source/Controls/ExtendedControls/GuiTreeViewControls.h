@@ -79,16 +79,17 @@ GuiVirtualTreeListControl NodeProvider
 					/// <summary>Get the number of all sub nodes.</summary>
 					/// <returns>The number of all sub nodes.</returns>
 					virtual int						GetChildCount()=0;
-					/// <summary>Get the parent node.</summary>
+					/// <summary>Get the parent node. This function increases the reference counter to the result node. If the sub node is not longer needed, a call to [M:vl.presentation.controls.tree.INodeProvider.Release] is required.</summary>
 					/// <returns>The parent node.</returns>
 					virtual INodeProvider*			GetParent()=0;
-					/// <summary>Request the instance of a specified sub node. If the sub node is not longer needed, a call to [M:vl.presentation.controls.tree.INodeProvider.ReleaseChild] is required.</summary>
+					/// <summary>Get the instance of a specified sub node. This function increases the reference counter to the result node. If the sub node is not longer needed, a call to [M:vl.presentation.controls.tree.INodeProvider.Release] is required.</summary>
 					/// <returns>The instance of a specified sub node.</returns>
 					/// <param name="index">The index of the sub node.</param>
-					virtual INodeProvider*			RequestChild(int index)=0;
-					/// <summary>Release an instance of a sub node.</summary>
-					/// <param name="node">The instance of a sub node.</param>
-					virtual void					ReleaseChild(INodeProvider* node)=0;
+					virtual INodeProvider*			GetChild(int index)=0;
+					/// <summary>Increase the reference counter. Use [M:vl.presentation.controls.tree.INodeProvider.Release] to decrease the reference counter.</summary>
+					virtual void					Increase()=0;
+					/// <summary>Decrease the reference counter. If the counter is zero, the node will be deleted.use [M:vl.presentation.controls.tree.INodeProvider.Increase] to increase the reference counter.</summary>
+					virtual void					Release()=0;
 				};
 				
 				/// <summary>Represents a root node provider.</summary>
@@ -100,7 +101,7 @@ GuiVirtualTreeListControl NodeProvider
 					/// <summary>Test does the provider provided an optimized algorithm to get an instance of a node by the index of all visible nodes. If this function returns true, [M:vl.presentation.controls.tree.INodeRootProvider.GetNodeByVisibleIndex] can be used.</summary>
 					/// <returns>Returns true if such an algorithm is provided.</returns>
 					virtual bool					CanGetNodeByVisibleIndex()=0;
-					/// <summary>Get a node by the index in all visible nodes. This requires [M:vl.presentation.controls.tree.INodeRootProvider.CanGetNodeByVisibleIndex] returning true. If the node is no longer needed, a call to the parent's [M:vl.presentation.controls.tree.INodeProvider.ReleaseChild] is needed, unless this is a root node so that its parent is null.</summary>
+					/// <summary>Get a node by the index in all visible nodes. This requires [M:vl.presentation.controls.tree.INodeRootProvider.CanGetNodeByVisibleIndex] returning true. If the node is no longer needed, a call to the [M:vl.presentation.controls.tree.INodeProvider.Release] is needed, unless this is a root node so that its parent is null.</summary>
 					/// <returns>The node for the index in all visible nodes.</returns>
 					/// <param name="index">The index in all visible nodes.</param>
 					virtual INodeProvider*			GetNodeByVisibleIndex(int index)=0;
@@ -128,7 +129,7 @@ GuiVirtualTreeListControl NodeProvider
 				// Tree to ListControl (IItemProvider)
 				//-----------------------------------------------------------
 
-				/// <summary>The required <see cref="GuiListControl::IItemProvider"/> view for [T:vl.presentation.controls.tree.NodeItemStyleProvider]. [T:vl.presentation.controls.tree.NodeItemProvider] provides this view. In most of the cases, the NodeItemProvider class and this view is not required users to create, or even to touch. [T:vl.presentation.controls.GuiVirtualTreeListControl] and [T:vl.presentation.controls.GuiTreeView] already handled all of this.</summary>
+				/// <summary>The required <see cref="GuiListControl::IItemProvider"/> view for [T:vl.presentation.controls.tree.NodeItemStyleProvider]. [T:vl.presentation.controls.tree.NodeItemProvider] provides this view. In most of the cases, the NodeItemProvider class and this view is not required users to create, or even to touch. [T:vl.presentation.controls.GuiVirtualTreeListControl] already handled all of this.</summary>
 				class INodeItemView : public virtual GuiListControl::IItemPrimaryTextView, public Description<INodeItemView>
 				{
 				public:
@@ -347,8 +348,9 @@ GuiVirtualTreeListControl Predefined NodeProvider
 
 					int								GetChildCount()override;
 					INodeProvider*					GetParent()override;
-					INodeProvider*					RequestChild(int index)override;
-					void							ReleaseChild(INodeProvider* node)override;
+					INodeProvider*					GetChild(int index)override;
+					void							Increase()override;
+					void							Release()override;
 				};
 
 				/// <summary>A general implementation for <see cref="INodeRootProvider"/>.</summary>
@@ -464,7 +466,7 @@ TreeView
 					TreeViewItem(const Ptr<GuiImageData>& _image, const WString& _text);
 				};
 
-				/// <summary>The default implementation of <see cref="INodeRootProvider"/> for [T:vl.presentation.controls.GuiTreeView].</summary>
+				/// <summary>The default implementation of <see cref="INodeRootProvider"/> for [T:vl.presentation.controls.GuiVirtualTreeView].</summary>
 				class TreeViewItemRootProvider
 					: public MemoryNodeRootProvider
 					, protected virtual ITreeViewItemView
@@ -485,11 +487,11 @@ TreeView
 				};
 			}
 			
-			/// <summary>Tree view control.</summary>
-			class GuiTreeView : public GuiVirtualTreeListControl, public Description<GuiTreeView>
+			/// <summary>Tree view control in virtual mode.</summary>
+			class GuiVirtualTreeView : public GuiVirtualTreeListControl, public Description<GuiVirtualTreeView>
 			{
 			public:
-				/// <summary>Style provider interface for <see cref="GuiTreeView"/>.</summary>
+				/// <summary>Style provider interface for <see cref="GuiVirtualTreeView"/>.</summary>
 				class IStyleProvider : public virtual GuiVirtualTreeListControl::IStyleProvider, public Description<IStyleProvider>
 				{
 				public:
@@ -504,26 +506,38 @@ TreeView
 					virtual Color										GetTextColor()=0;
 				};
 			protected:
-				IStyleProvider*								styleProvider;
-				Ptr<tree::TreeViewItemRootProvider>			nodes;
+				IStyleProvider*											styleProvider;
 			public:
-				/// <summary>Create a tree view control. If a node root provider is not provided, a <see cref="tree::TreeViewItemRootProvider"/> is created as a node root provider. A [T:vl.presentation.controls.tree.TreeViewNodeItemStyleProvider] is created as a node item style provider by default.</summary>
+				/// <summary>Create a tree view control in virtual mode. A [T:vl.presentation.controls.tree.TreeViewNodeItemStyleProvider] is created as a node item style provider by default.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
 				/// <param name="_nodeRootProvider">The node root provider for this control.</param>
-				GuiTreeView(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider=0);
-				~GuiTreeView();
+				GuiVirtualTreeView(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider);
+				~GuiVirtualTreeView();
 
 				/// <summary>Get the style provider for this control.</summary>
 				/// <returns>The style provider for this control.</returns>
-				IStyleProvider*								GetTreeViewStyleProvider();
-				/// <summary>Get the <see cref="tree::TreeViewItemRootProvider"/> if a node root provider is not provided when creating this control.</summary>
+				IStyleProvider*											GetTreeViewStyleProvider();
+			};
+			
+			/// <summary>Tree view control.</summary>
+			class GuiTreeView : public GuiVirtualTreeView, public Description<GuiTreeView>
+			{
+			protected:
+				Ptr<tree::TreeViewItemRootProvider>						nodes;
+			public:
+				/// <summary>Create a tree view control.</summary>
+				/// <param name="_styleProvider">The style provider for this control.</param>
+				GuiTreeView(IStyleProvider* _styleProvider);
+				~GuiTreeView();
+
+				/// <summary>Get the <see cref="tree::TreeViewItemRootProvider"/> as a node root providerl.</summary>
 				/// <returns>The <see cref="tree::TreeViewItemRootProvider"/> as a node root provider.</returns>
-				Ptr<tree::TreeViewItemRootProvider>			Nodes();
+				Ptr<tree::TreeViewItemRootProvider>						Nodes();
 			};
 
 			namespace tree
 			{
-				/// <summary>The default <see cref="INodeItemStyleProvider"/> implementation for <see cref="GuiTreeView"/>.</summary>
+				/// <summary>The default <see cref="INodeItemStyleProvider"/> implementation for <see cref="GuiVirtualTreeView"/>.</summary>
 				class TreeViewNodeItemStyleProvider
 					: public Object
 					, public virtual INodeItemStyleProvider
@@ -559,7 +573,7 @@ TreeView
 					};
 #pragma warning(pop)
 
-					GuiTreeView*							treeControl;
+					GuiVirtualTreeView*						treeControl;
 					GuiListControl::IItemStyleProvider*		bindedItemStyleProvider;
 					ITreeViewItemView*						treeViewItemView;
 
