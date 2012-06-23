@@ -3613,6 +3613,11 @@ MemoryNodeRootProvider
 				{
 					return this;
 				}
+
+				MemoryNodeProvider* MemoryNodeRootProvider::GetMemoryNode(INodeProvider* node)
+				{
+					return dynamic_cast<MemoryNodeProvider*>(node);
+				}
 			}
 
 /***********************************************************************
@@ -3838,6 +3843,37 @@ TreeViewItemRootProvider
 				void TreeViewItemRootProvider::ReleaseView(IDescriptable* view)
 				{
 					return MemoryNodeRootProvider::ReleaseView(view);
+				}
+
+				Ptr<TreeViewItem> TreeViewItemRootProvider::GetTreeViewData(INodeProvider* node)
+				{
+					Ptr<MemoryNodeProvider> memoryNode=GetMemoryNode(node);
+					if(memoryNode)
+					{
+						return memoryNode->GetData().Cast<TreeViewItem>();
+					}
+					else
+					{
+						return 0;
+					}
+				}
+
+				void TreeViewItemRootProvider::SetTreeViewData(INodeProvider* node, Ptr<TreeViewItem> value)
+				{
+					Ptr<MemoryNodeProvider> memoryNode=GetMemoryNode(node);
+					if(memoryNode)
+					{
+						memoryNode->SetData(value);
+					}
+				}
+				
+				void TreeViewItemRootProvider::UpdateTreeViewData(INodeProvider* node)
+				{
+					Ptr<MemoryNodeProvider> memoryNode=GetMemoryNode(node);
+					if(memoryNode)
+					{
+						memoryNode->NotifyDataModified();
+					}
 				}
 
 /***********************************************************************

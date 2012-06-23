@@ -18393,6 +18393,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					~MemoryNodeRootProvider();
 
 					INodeProvider*					GetRootNode()override;
+					MemoryNodeProvider*				GetMemoryNode(INodeProvider* node);
 				};
 			}
 
@@ -18482,6 +18483,10 @@ TreeView
 
 					IDescriptable*					RequestView(const WString& identifier)override;
 					void							ReleaseView(IDescriptable* view)override;
+
+					Ptr<TreeViewItem>				GetTreeViewData(INodeProvider* node);
+					void							SetTreeViewData(INodeProvider* node, Ptr<TreeViewItem> value);
+					void							UpdateTreeViewData(INodeProvider* node);
 				};
 			}
 			

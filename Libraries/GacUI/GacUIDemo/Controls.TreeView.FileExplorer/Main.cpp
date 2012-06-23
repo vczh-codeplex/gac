@@ -16,7 +16,40 @@ class FileExplorerWindow : public GuiWindow
 private:
 	GuiTreeView*					treeView;
 
-	void AddFolder(Ptr<tree::MemoryNodeProvider> parent, const WString& path)
+	void OnNodeExpanded(GuiGraphicsComposition* sender, GuiNodeEventArgs& arguments)
+	{
+		tree::MemoryNodeProvider* node=treeView->Nodes()->GetMemoryNode(arguments.node);
+		if(node->Children().Count()==1)
+		{
+			tree::MemoryNodeProvider* child=node->Children()[0].Obj();
+			Ptr<tree::TreeViewItem> childItem=child->GetData().Cast<tree::TreeViewItem>();
+			if(childItem->text==L"Loading..." && !childItem->tag)
+			{
+				// get back the full path from the item
+				Ptr<tree::TreeViewItem> item=node->GetData().Cast<tree::TreeViewItem>();
+				WString path=item->tag.Cast<ObjectBox<WString>>()->Unbox();
+				if(path[path.Length()-1]!=L'\\')
+				{
+					path+=L"\\";
+				}
+
+				// add nodes
+				List<WString> directories, files;
+				SearchDirectoriesAndFiles(path, directories, files);
+
+				FOREACH(WString, file, directories.Wrap())
+				{
+					AddFolder(node, path+file);
+				}
+				FOREACH(WString, file, files.Wrap())
+				{
+					AddFile(node, path+file);
+				}
+			}
+		}
+	}
+
+	int AddFile(tree::MemoryNodeProvider* parent, const WString& path)
 	{
 		Ptr<tree::TreeViewItem> item=new tree::TreeViewItem;
 		// set the item text using the display name of the file
@@ -25,8 +58,16 @@ private:
 		item->image=GetFileIcon(path, SHGFI_SMALLICON | SHGFI_ICON);
 		// tag the full path to the item
 		item->tag=new ObjectBox<WString>(path);
-		int index=parent->Children().Add(new tree::MemoryNodeProvider(item));
 
+		int index=parent->Children().Add(new tree::MemoryNodeProvider(item));
+		return index;
+	}
+
+	void AddFolder(tree::MemoryNodeProvider* parent, const WString& path)
+	{
+		int index=AddFile(parent, path);
+
+		// Add the "loading" item under a folder
 		Ptr<tree::TreeViewItem> loading=new tree::TreeViewItem;
 		loading->text=L"Loading...";
 		parent->Children()[index]->Children().Add(new tree::MemoryNodeProvider(loading));
@@ -47,7 +88,7 @@ private:
 			}
 			else
 			{
-				AddFolder(treeView->Nodes(), drive);
+				AddFolder(treeView->Nodes().Obj(), drive);
 				reading+=drive.Length()+1;
 			}
 		}
@@ -58,11 +99,13 @@ public:
 	{
 		this->SetText(L"Controls.TreeView.FileExplorerWindow");
 		
-		// Create tree view control to display the local file system
+		// create tree view control to display the local file system
 		treeView=g::NewTreeView();
 		treeView->SetHorizontalAlwaysVisible(false);
 		treeView->SetVerticalAlwaysVisible(false);
 		treeView->GetBoundsComposition()->SetAlignmentToParent(Margin(4, 4, 4, 4));
+		// listen to the NodeExpanded event to load the folder content when a folder node is opened
+		treeView->NodeExpanded.AttachMethod(this, &FileExplorerWindow::OnNodeExpanded);
 		this->AddChild(treeView);
 
 		InitializeFileSystem();
