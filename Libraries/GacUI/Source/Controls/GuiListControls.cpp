@@ -225,7 +225,7 @@ GuiListControl
 
 			void GuiListControl::OnItemMouseEvent(compositions::GuiItemMouseEvent& itemEvent, IItemStyleController* style, compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
-				if(itemArranger)
+				if(itemArranger && GetVisuallyEnabled())
 				{
 					int itemIndex=itemArranger->GetVisibleIndex(style);
 					if(itemIndex!=-1)
@@ -243,7 +243,7 @@ GuiListControl
 
 			void GuiListControl::OnItemNotifyEvent(compositions::GuiItemNotifyEvent& itemEvent, IItemStyleController* style, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				if(itemArranger)
+				if(itemArranger && GetVisuallyEnabled())
 				{
 					int itemIndex=itemArranger->GetVisibleIndex(style);
 					if(itemIndex!=-1)
