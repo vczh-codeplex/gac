@@ -398,18 +398,56 @@ GuiVirtualTreeListControl
 ***********************************************************************/
 
 			/// <summary>Tree list control in virtual node.</summary>
-			class GuiVirtualTreeListControl : public GuiSelectableListControl, public Description<GuiVirtualTreeListControl>
+			class GuiVirtualTreeListControl : public GuiSelectableListControl, private virtual tree::INodeProviderCallback, public Description<GuiVirtualTreeListControl>
 			{
+			private:
+				void								OnAttached(tree::INodeRootProvider* provider)override;
+				void								OnBeforeItemModified(tree::INodeProvider* parentNode, int start, int count, int newCount)override;
+				void								OnAfterItemModified(tree::INodeProvider* parentNode, int start, int count, int newCount)override;
+				void								OnItemExpanded(tree::INodeProvider* node)override;
+				void								OnItemCollapsed(tree::INodeProvider* node)override;
 			protected:
 				tree::NodeItemProvider*				nodeItemProvider;
 				tree::INodeItemView*				nodeItemView;
 				Ptr<tree::INodeItemStyleProvider>	nodeStyleProvider;
+
+				void								OnItemMouseEvent(compositions::GuiNodeMouseEvent& nodeEvent, compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments);
+				void								OnItemNotifyEvent(compositions::GuiNodeNotifyEvent& nodeEvent, compositions::GuiGraphicsComposition* sender, compositions::GuiItemEventArgs& arguments);
 			public:
 				/// <summary>Create a tree list control in virtual mode.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
 				/// <param name="_nodeRootProvider">The node root provider for this control.</param>
 				GuiVirtualTreeListControl(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider);
 				~GuiVirtualTreeListControl();
+
+				/// <summary>Node left mouse button down event.</summary>
+				compositions::GuiNodeMouseEvent		NodeLeftButtonDown;
+				/// <summary>Node left mouse button up event.</summary>
+				compositions::GuiNodeMouseEvent		NodeLeftButtonUp;
+				/// <summary>Node left mouse button double click event.</summary>
+				compositions::GuiNodeMouseEvent		NodeLeftButtonDoubleClick;
+				/// <summary>Node middle mouse button down event.</summary>
+				compositions::GuiNodeMouseEvent		NodeMiddleButtonDown;
+				/// <summary>Node middle mouse button up event.</summary>
+				compositions::GuiNodeMouseEvent		NodeMiddleButtonUp;
+				/// <summary>Node middle mouse button double click event.</summary>
+				compositions::GuiNodeMouseEvent		NodeMiddleButtonDoubleClick;
+				/// <summary>Node right mouse button down event.</summary>
+				compositions::GuiNodeMouseEvent		NodeRightButtonDown;
+				/// <summary>Node right mouse button up event.</summary>
+				compositions::GuiNodeMouseEvent		NodeRightButtonUp;
+				/// <summary>Node right mouse button double click event.</summary>
+				compositions::GuiNodeMouseEvent		NodeRightButtonDoubleClick;
+				/// <summary>Node mouse move event.</summary>
+				compositions::GuiNodeMouseEvent		NodeMouseMove;
+				/// <summary>Node mouse enter event.</summary>
+				compositions::GuiNodeNotifyEvent	NodeMouseEnter;
+				/// <summary>Node mouse leave event.</summary>
+				compositions::GuiNodeNotifyEvent	NodeMouseLeave;
+				/// <summary>Node expanded event.</summary>
+				compositions::GuiNodeNotifyEvent	NodeExpanded;
+				/// <summary>Node collapsed event.</summary>
+				compositions::GuiNodeNotifyEvent	NodeCollapsed;
 
 				/// <summary>Get the <see cref="tree::INodeItemView"/> from the item provider.</summary>
 				/// <returns>The <see cref="tree::INodeItemView"/> from the item provider.</returns>
