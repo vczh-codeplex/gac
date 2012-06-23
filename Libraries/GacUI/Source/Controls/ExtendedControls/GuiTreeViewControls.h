@@ -390,6 +390,9 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					~MemoryNodeRootProvider();
 
 					INodeProvider*					GetRootNode()override;
+					/// <summary>Get the <see cref="MemoryNodeProvider"/> object from an <see cref="INodeProvider"/> object.</summary>
+					/// <returns>The corresponding <see cref="MemoryNodeProvider"/> object.</returns>
+					MemoryNodeProvider*				GetMemoryNode(INodeProvider* node);
 				};
 			}
 
@@ -524,6 +527,17 @@ TreeView
 
 					IDescriptable*					RequestView(const WString& identifier)override;
 					void							ReleaseView(IDescriptable* view)override;
+
+					/// <summary>Get the <see cref="TreeViewItem"/> object from a node.</summary>
+					/// <returns>The <see cref="TreeViewItem"/> object.</returns>
+					Ptr<TreeViewItem>				GetTreeViewData(INodeProvider* node);
+					/// <summary>Set the <see cref="TreeViewItem"/> object to a node.</summary>
+					/// <param name="node">The node.</param>
+					/// <param name="value">The <see cref="TreeViewItem"/> object.</param>
+					void							SetTreeViewData(INodeProvider* node, Ptr<TreeViewItem> value);
+					/// <summary>Notify the tree view control that the node is changed. This is required when content in a <see cref="TreeViewItem"/> is modified, but both <see cref="SetTreeViewData"/> or [M:vl.presentation.controls.tree.MemoryNodeProvider.SetData] are not called.</summary>
+					/// <param name="node">The node.</param>
+					void							UpdateTreeViewData(INodeProvider* node);
 				};
 			}
 			
