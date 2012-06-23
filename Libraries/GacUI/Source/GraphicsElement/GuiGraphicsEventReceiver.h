@@ -16,6 +16,20 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace controls
+		{
+			namespace tree
+			{
+				class INodeProvider;
+			}
+		}
+	}
+}
+
+namespace vl
+{
+	namespace presentation
+	{
 		namespace compositions
 		{
 			class GuiGraphicsComposition;
@@ -286,6 +300,7 @@ Predefined Item Events
 				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
 				GuiItemEventArgs(GuiGraphicsComposition* composition)
 					:GuiEventArgs(composition)
+					,itemIndex(-1)
 				{
 				}
 			};
@@ -305,12 +320,60 @@ Predefined Item Events
 				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
 				GuiItemMouseEventArgs(GuiGraphicsComposition* composition)
 					:GuiMouseEventArgs(composition)
+					,itemIndex(-1)
 				{
 				}
 			};
 
 			typedef GuiGraphicsEvent<GuiItemEventArgs>			GuiItemNotifyEvent;
 			typedef GuiGraphicsEvent<GuiItemMouseEventArgs>		GuiItemMouseEvent;
+
+/***********************************************************************
+Predefined Node Events
+***********************************************************************/
+			
+			/// <summary>Node event arguments.</summary>
+			struct GuiNodeEventArgs : public GuiEventArgs
+			{
+				/// <summary>Tree node.</summary>
+				controls::tree::INodeProvider*		node;
+
+				GuiNodeEventArgs()
+					:node(0)
+				{
+				}
+				
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
+				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
+				GuiNodeEventArgs(GuiGraphicsComposition* composition)
+					:GuiEventArgs(composition)
+					,node(0)
+				{
+				}
+			};
+			
+			/// <summary>Node mouse event arguments.</summary>
+			struct GuiNodeMouseEventArgs : public GuiMouseEventArgs
+			{
+				/// <summary>Tree node.</summary>
+				controls::tree::INodeProvider*		node;
+
+				GuiNodeMouseEventArgs()
+					:node(0)
+				{
+				}
+				
+				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to a specified value.</summary>
+				/// <param name="composition">The speciied value to set <see cref="compositionSource"/> and <see cref="eventSource"/>.</param>
+				GuiNodeMouseEventArgs(GuiGraphicsComposition* composition)
+					:GuiMouseEventArgs(composition)
+					,node(0)
+				{
+				}
+			};
+
+			typedef GuiGraphicsEvent<GuiNodeEventArgs>			GuiNodeNotifyEvent;
+			typedef GuiGraphicsEvent<GuiNodeMouseEventArgs>		GuiNodeMouseEvent;
 
 /***********************************************************************
 Event Receiver

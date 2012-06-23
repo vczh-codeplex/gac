@@ -14385,6 +14385,20 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace controls
+		{
+			namespace tree
+			{
+				class INodeProvider;
+			}
+		}
+	}
+}
+
+namespace vl
+{
+	namespace presentation
+	{
 		namespace compositions
 		{
 			class GuiGraphicsComposition;
@@ -14627,6 +14641,7 @@ Predefined Item Events
 				
 				GuiItemEventArgs(GuiGraphicsComposition* composition)
 					:GuiEventArgs(composition)
+					,itemIndex(-1)
 				{
 				}
 			};
@@ -14642,12 +14657,52 @@ Predefined Item Events
 				
 				GuiItemMouseEventArgs(GuiGraphicsComposition* composition)
 					:GuiMouseEventArgs(composition)
+					,itemIndex(-1)
 				{
 				}
 			};
 
 			typedef GuiGraphicsEvent<GuiItemEventArgs>			GuiItemNotifyEvent;
 			typedef GuiGraphicsEvent<GuiItemMouseEventArgs>		GuiItemMouseEvent;
+
+/***********************************************************************
+Predefined Node Events
+***********************************************************************/
+			
+			struct GuiNodeEventArgs : public GuiEventArgs
+			{
+				controls::tree::INodeProvider*		node;
+
+				GuiNodeEventArgs()
+					:node(0)
+				{
+				}
+				
+				GuiNodeEventArgs(GuiGraphicsComposition* composition)
+					:GuiEventArgs(composition)
+					,node(0)
+				{
+				}
+			};
+			
+			struct GuiNodeMouseEventArgs : public GuiMouseEventArgs
+			{
+				controls::tree::INodeProvider*		node;
+
+				GuiNodeMouseEventArgs()
+					:node(0)
+				{
+				}
+				
+				GuiNodeMouseEventArgs(GuiGraphicsComposition* composition)
+					:GuiMouseEventArgs(composition)
+					,node(0)
+				{
+				}
+			};
+
+			typedef GuiGraphicsEvent<GuiNodeEventArgs>			GuiNodeNotifyEvent;
+			typedef GuiGraphicsEvent<GuiNodeMouseEventArgs>		GuiNodeMouseEvent;
 
 /***********************************************************************
 Event Receiver
@@ -18340,15 +18395,39 @@ GuiVirtualTreeListControl Predefined NodeProvider
 GuiVirtualTreeListControl
 ***********************************************************************/
 
-			class GuiVirtualTreeListControl : public GuiSelectableListControl, public Description<GuiVirtualTreeListControl>
+			class GuiVirtualTreeListControl : public GuiSelectableListControl, private virtual tree::INodeProviderCallback, public Description<GuiVirtualTreeListControl>
 			{
+			private:
+				void								OnAttached(tree::INodeRootProvider* provider)override;
+				void								OnBeforeItemModified(tree::INodeProvider* parentNode, int start, int count, int newCount)override;
+				void								OnAfterItemModified(tree::INodeProvider* parentNode, int start, int count, int newCount)override;
+				void								OnItemExpanded(tree::INodeProvider* node)override;
+				void								OnItemCollapsed(tree::INodeProvider* node)override;
 			protected:
 				tree::NodeItemProvider*				nodeItemProvider;
 				tree::INodeItemView*				nodeItemView;
 				Ptr<tree::INodeItemStyleProvider>	nodeStyleProvider;
+
+				void								OnItemMouseEvent(compositions::GuiNodeMouseEvent& nodeEvent, compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments);
+				void								OnItemNotifyEvent(compositions::GuiNodeNotifyEvent& nodeEvent, compositions::GuiGraphicsComposition* sender, compositions::GuiItemEventArgs& arguments);
 			public:
 				GuiVirtualTreeListControl(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider);
 				~GuiVirtualTreeListControl();
+
+				compositions::GuiNodeMouseEvent		NodeLeftButtonDown;
+				compositions::GuiNodeMouseEvent		NodeLeftButtonUp;
+				compositions::GuiNodeMouseEvent		NodeLeftButtonDoubleClick;
+				compositions::GuiNodeMouseEvent		NodeMiddleButtonDown;
+				compositions::GuiNodeMouseEvent		NodeMiddleButtonUp;
+				compositions::GuiNodeMouseEvent		NodeMiddleButtonDoubleClick;
+				compositions::GuiNodeMouseEvent		NodeRightButtonDown;
+				compositions::GuiNodeMouseEvent		NodeRightButtonUp;
+				compositions::GuiNodeMouseEvent		NodeRightButtonDoubleClick;
+				compositions::GuiNodeMouseEvent		NodeMouseMove;
+				compositions::GuiNodeNotifyEvent	NodeMouseEnter;
+				compositions::GuiNodeNotifyEvent	NodeMouseLeave;
+				compositions::GuiNodeNotifyEvent	NodeExpanded;
+				compositions::GuiNodeNotifyEvent	NodeCollapsed;
 
 				tree::INodeItemView*				GetNodeItemView();
 				tree::INodeRootProvider*			GetNodeRootProvider();

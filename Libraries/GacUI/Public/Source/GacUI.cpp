@@ -3619,12 +3619,113 @@ MemoryNodeRootProvider
 GuiVirtualTreeListControl
 ***********************************************************************/
 
+			void GuiVirtualTreeListControl::OnAttached(tree::INodeRootProvider* provider)
+			{
+			}
+
+			void GuiVirtualTreeListControl::OnBeforeItemModified(tree::INodeProvider* parentNode, int start, int count, int newCount)
+			{
+			}
+
+			void GuiVirtualTreeListControl::OnAfterItemModified(tree::INodeProvider* parentNode, int start, int count, int newCount)
+			{
+			}
+
+			void GuiVirtualTreeListControl::OnItemExpanded(tree::INodeProvider* node)
+			{
+				GuiNodeEventArgs arguments;
+				(GuiEventArgs&)arguments=GetNotifyEventArguments();
+				arguments.node=node;
+				NodeExpanded.Execute(arguments);
+			}
+
+			void GuiVirtualTreeListControl::OnItemCollapsed(tree::INodeProvider* node)
+			{
+				GuiNodeEventArgs arguments;
+				(GuiEventArgs&)arguments=GetNotifyEventArguments();
+				arguments.node=node;
+				NodeCollapsed.Execute(arguments);
+			}
+
+			void GuiVirtualTreeListControl::OnItemMouseEvent(compositions::GuiNodeMouseEvent& nodeEvent, compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments)
+			{
+				tree::INodeProvider* node=GetNodeItemView()->RequestNode(arguments.itemIndex);
+				if(node)
+				{
+					GuiNodeMouseEventArgs redirectArguments;
+					(GuiMouseEventArgs&)redirectArguments=arguments;
+					redirectArguments.node=node;
+					nodeEvent.Execute(redirectArguments);
+					(GuiMouseEventArgs&)arguments=redirectArguments;
+					GetNodeItemView()->ReleaseNode(node);
+				}
+			}
+
+			void GuiVirtualTreeListControl::OnItemNotifyEvent(compositions::GuiNodeNotifyEvent& nodeEvent, compositions::GuiGraphicsComposition* sender, compositions::GuiItemEventArgs& arguments)
+			{
+				tree::INodeProvider* node=GetNodeItemView()->RequestNode(arguments.itemIndex);
+				if(node)
+				{
+					GuiNodeEventArgs redirectArguments;
+					(GuiEventArgs&)redirectArguments=arguments;
+					redirectArguments.node=node;
+					nodeEvent.Execute(redirectArguments);
+					(GuiEventArgs&)arguments=redirectArguments;
+					GetNodeItemView()->ReleaseNode(node);
+				}
+			}
+
+#define ATTACH_ITEM_MOUSE_EVENT(NODEEVENTNAME, ITEMEVENTNAME)\
+					{\
+						Func<void(GuiNodeMouseEvent&, GuiGraphicsComposition*, GuiItemMouseEventArgs&)> func(this, &GuiVirtualTreeListControl::OnItemMouseEvent);\
+						ITEMEVENTNAME.AttachFunction(Curry(func)(NODEEVENTNAME));\
+					}\
+
+#define ATTACH_ITEM_NOTIFY_EVENT(NODEEVENTNAME, ITEMEVENTNAME)\
+					{\
+						Func<void(GuiNodeNotifyEvent&, GuiGraphicsComposition*, GuiItemEventArgs&)> func(this, &GuiVirtualTreeListControl::OnItemNotifyEvent);\
+						ITEMEVENTNAME.AttachFunction(Curry(func)(NODEEVENTNAME));\
+					}\
+
 			GuiVirtualTreeListControl::GuiVirtualTreeListControl(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider)
 				:GuiSelectableListControl(_styleProvider, new tree::NodeItemProvider(_nodeRootProvider))
 			{
 				nodeItemProvider=dynamic_cast<tree::NodeItemProvider*>(GetItemProvider());
 				nodeItemView=dynamic_cast<tree::INodeItemView*>(GetItemProvider()->RequestView(tree::INodeItemView::Identifier));
+				
+				NodeLeftButtonDown.SetAssociatedComposition(boundsComposition);
+				NodeLeftButtonUp.SetAssociatedComposition(boundsComposition);
+				NodeLeftButtonDoubleClick.SetAssociatedComposition(boundsComposition);
+				NodeMiddleButtonDown.SetAssociatedComposition(boundsComposition);
+				NodeMiddleButtonUp.SetAssociatedComposition(boundsComposition);
+				NodeMiddleButtonDoubleClick.SetAssociatedComposition(boundsComposition);
+				NodeRightButtonDown.SetAssociatedComposition(boundsComposition);
+				NodeRightButtonUp.SetAssociatedComposition(boundsComposition);
+				NodeRightButtonDoubleClick.SetAssociatedComposition(boundsComposition);
+				NodeMouseMove.SetAssociatedComposition(boundsComposition);
+				NodeMouseEnter.SetAssociatedComposition(boundsComposition);
+				NodeMouseLeave.SetAssociatedComposition(boundsComposition);
+				NodeExpanded.SetAssociatedComposition(boundsComposition);
+				NodeCollapsed.SetAssociatedComposition(boundsComposition);
+
+				ATTACH_ITEM_MOUSE_EVENT(NodeLeftButtonDown, ItemLeftButtonDown);
+				ATTACH_ITEM_MOUSE_EVENT(NodeLeftButtonUp, ItemLeftButtonUp);
+				ATTACH_ITEM_MOUSE_EVENT(NodeLeftButtonDoubleClick, ItemLeftButtonDoubleClick);
+				ATTACH_ITEM_MOUSE_EVENT(NodeMiddleButtonDown, ItemMiddleButtonDown);
+				ATTACH_ITEM_MOUSE_EVENT(NodeMiddleButtonUp, ItemMiddleButtonUp);
+				ATTACH_ITEM_MOUSE_EVENT(NodeMiddleButtonDoubleClick, ItemMiddleButtonDoubleClick);
+				ATTACH_ITEM_MOUSE_EVENT(NodeRightButtonDown, ItemRightButtonDown);
+				ATTACH_ITEM_MOUSE_EVENT(NodeRightButtonUp, ItemRightButtonUp);
+				ATTACH_ITEM_MOUSE_EVENT(NodeRightButtonDoubleClick, ItemRightButtonDoubleClick);
+				ATTACH_ITEM_MOUSE_EVENT(NodeMouseMove, ItemMouseMove);
+				ATTACH_ITEM_NOTIFY_EVENT(NodeMouseEnter, ItemMouseEnter);
+				ATTACH_ITEM_NOTIFY_EVENT(NodeMouseLeave, ItemMouseLeave);
+
+				nodeItemProvider->GetRoot()->AttachCallback(this);
 			}
+
+#undef ATTACH_ITEM_MOUSE_EVENT
+#undef ATTACH_ITEM_NOTIFY_EVENT
 
 			GuiVirtualTreeListControl::~GuiVirtualTreeListControl()
 			{
@@ -5680,7 +5781,7 @@ GuiListControl
 
 			void GuiListControl::OnItemMouseEvent(compositions::GuiItemMouseEvent& itemEvent, IItemStyleController* style, compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
-				if(itemArranger)
+				if(itemArranger && GetVisuallyEnabled())
 				{
 					int itemIndex=itemArranger->GetVisibleIndex(style);
 					if(itemIndex!=-1)
@@ -5698,7 +5799,7 @@ GuiListControl
 
 			void GuiListControl::OnItemNotifyEvent(compositions::GuiItemNotifyEvent& itemEvent, IItemStyleController* style, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				if(itemArranger)
+				if(itemArranger && GetVisuallyEnabled())
 				{
 					int itemIndex=itemArranger->GetVisibleIndex(style);
 					if(itemIndex!=-1)
