@@ -641,13 +641,15 @@ ListView
 				{
 				public:
 					/// <summary>Small image.</summary>
-					Ptr<GuiImageData>							smallImage;
+					Ptr<GuiImageData>								smallImage;
 					/// <summary>Large image.</summary>
-					Ptr<GuiImageData>							largeImage;
+					Ptr<GuiImageData>								largeImage;
 					/// <summary>Item text.</summary>
-					WString										text;
+					WString											text;
 					/// <summary>Sub items.</summary>
-					collections::List<WString>					subItems;
+					collections::List<WString>						subItems;
+					/// <summary>Tag object.</summary>
+					Ptr<Object>										tag;
 				};
 				
 				/// <summary>List view column.</summary>
