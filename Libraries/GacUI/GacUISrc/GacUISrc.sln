@@ -57,6 +57,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{BBA4C5
 		..\Public\Web\Images\Demos.Controls.Tab.TextBoxPage.jpg = ..\Public\Web\Images\Demos.Controls.Tab.TextBoxPage.jpg
 		..\Public\Web\Images\Demos.Controls.TextBox.Colorizer.jpg = ..\Public\Web\Images\Demos.Controls.TextBox.Colorizer.jpg
 		..\Public\Web\Images\Demos.Controls.TextBox.Editor.jpg = ..\Public\Web\Images\Demos.Controls.TextBox.Editor.jpg
+		..\Public\Web\Images\Demos.Controls.TreeView.FileExplorer.jpg = ..\Public\Web\Images\Demos.Controls.TreeView.FileExplorer.jpg
 		..\Public\Web\Images\HelloWorld.jpg = ..\Public\Web\Images\HelloWorld.jpg
 	EndProjectSection
 EndProject
@@ -146,6 +147,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Controls.ListView.SortingAn
 		..\Public\Web\Demos\Controls.ListView.SortingAndFiltering\DXGUI_50.jpg = ..\Public\Web\Demos\Controls.ListView.SortingAndFiltering\DXGUI_50.jpg
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Controls.TreeView.FileExplorer", "Controls.TreeView.FileExplorer", "{0C4C44EE-A228-4D3F-B502-2EFDBAACFCEF}"
+	ProjectSection(SolutionItems) = preProject
+		..\Public\Web\Demos\Controls.TreeView.FileExplorer\Demo.html = ..\Public\Web\Demos\Controls.TreeView.FileExplorer\Demo.html
+		..\Public\Web\Demos\Controls.TreeView.FileExplorer\DXGUI_51.jpg = ..\Public\Web\Demos\Controls.TreeView.FileExplorer\DXGUI_51.jpg
+		..\Public\Web\Demos\Controls.TreeView.FileExplorer\DXGUI_52.jpg = ..\Public\Web\Demos\Controls.TreeView.FileExplorer\DXGUI_52.jpg
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 3
@@ -194,5 +202,6 @@ Global
 		{E76DD49F-E23E-49D4-A1E9-A29AB0F9E2EE} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
 		{282AA4CD-4696-4653-8312-3E6E307D082E} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
 		{43BD61C7-87F1-4B2B-A8D3-DFAC9CB4D963} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
+		{0C4C44EE-A228-4D3F-B502-2EFDBAACFCEF} = {CF7DE031-BDA8-4D3E-93FE-E71C51EFAC9B}
 	EndGlobalSection
 EndGlobal
