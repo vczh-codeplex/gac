@@ -170,14 +170,21 @@ body
     font-size: 12px;
 }
 
-.GuideTable thead td
+.GuideTable tr.GuideTableHeader td
 {
     background-color: #5EA8DE;
     color: #FFFFFF;
     padding: 5px;
 }
 
-.GuideTable tbody td
+.GuideTable tr.GuideTableSeparator td
+{
+    background-color: #FFFFFF;
+    color: #FFFFFF;
+    padding: 5px;
+}
+
+.GuideTable tr.GuideTableBody td
 {
     border-width: 1px;
     border-top-width: 0px;
@@ -186,27 +193,27 @@ body
     padding: 5px;
 }
 
-.GuideTable tbody td strong
+.GuideTable tr.GuideTableBody td strong
 {
     color: #0072BC;
 }
 
-.GuideTable tbody td p
+.GuideTable tr.GuideTableBody td p
 {
     color: #404040;
 }
 
-.GuideTable tbody td a.ReadMoreLink
+.GuideTable tr.GuideTableBody td a.ReadMoreLink
 {
     display: block;
     text-align: right;
 }
-.GuideTable tbody td a
+.GuideTable tr.GuideTableBody td a
 {
     color: #0072BC;
     text-decoration: none;
 }
-.GuideTable tbody td a:hover
+.GuideTable tr.GuideTableBody td a:hover
 {
     text-decoration: underline;
 }
