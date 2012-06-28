@@ -225,6 +225,8 @@ body
     background-color: #EFFFE0;
     padding: 0.7em;
     white-space:pre-wrap;
+    max-width: 780px;
+    font-size: 12px;
     font-family: "CS Kirisame DL Mono", "Consolas", "DejaVu Sans Mono", monospace;
 }
 
