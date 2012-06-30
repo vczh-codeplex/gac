@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="TabPages">
+      <UniqueIdentifier>{088c0e6b-577e-425a-bd87-fecede3f9617}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Public\Source\GacUI.cpp">
@@ -23,6 +26,36 @@
     </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupMainPanel.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupTextBoxWindow.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupListControlWindow.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupListDirectionWindow.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupListviewWindow.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupTreeviewWindow.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupToolstripWindow.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupRibbonWindow.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupBasicWindow.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupTabPageListControlWindow.cpp">
+      <Filter>TabPages</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

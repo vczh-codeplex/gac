@@ -83,6 +83,16 @@
     <ClCompile Include="..\..\Public\Source\GacUI.cpp" />
     <ClCompile Include="..\..\Public\Source\Vlpp.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="SetupBasicWindow.cpp" />
+    <ClCompile Include="SetupListControlWindow.cpp" />
+    <ClCompile Include="SetupListDirectionWindow.cpp" />
+    <ClCompile Include="SetupListviewWindow.cpp" />
+    <ClCompile Include="SetupMainPanel.cpp" />
+    <ClCompile Include="SetupRibbonWindow.cpp" />
+    <ClCompile Include="SetupTabPageListControlWindow.cpp" />
+    <ClCompile Include="SetupTextBoxWindow.cpp" />
+    <ClCompile Include="SetupToolstripWindow.cpp" />
+    <ClCompile Include="SetupTreeviewWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h" />
