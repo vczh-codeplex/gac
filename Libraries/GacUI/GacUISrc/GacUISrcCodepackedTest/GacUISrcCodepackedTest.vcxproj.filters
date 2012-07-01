@@ -57,6 +57,9 @@
     <ClCompile Include="SetupTabPageListControlWindow.cpp">
       <Filter>TabPages</Filter>
     </ClCompile>
+    <ClCompile Include="SetupDialogWindow.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
