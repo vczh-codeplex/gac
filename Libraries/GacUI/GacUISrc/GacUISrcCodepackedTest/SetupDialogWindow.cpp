@@ -32,14 +32,14 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		GuiComboBoxListControl* comboIcons=CreateComboBox(icons, sizeof(icons)/sizeof(*icons));
 		GuiComboBoxListControl* comboModal=CreateComboBox(modal, sizeof(modal)/sizeof(*modal));
 
-		comboInput->GetBoundsComposition()->SetBounds(Rect(10, 10, 240, 30));
-		comboDefault->GetBoundsComposition()->SetBounds(Rect(10, 40, 240, 30));
-		comboIcons->GetBoundsComposition()->SetBounds(Rect(10, 70, 240, 30));
-		comboModal->GetBoundsComposition()->SetBounds(Rect(10, 100, 240, 30));
+		comboInput->GetBoundsComposition()->SetBounds(Rect(Point(10, 10), Size(200, 0)));
+		comboDefault->GetBoundsComposition()->SetBounds(Rect(Point(10, 40), Size(200, 0)));
+		comboIcons->GetBoundsComposition()->SetBounds(Rect(Point(10, 70), Size(200, 0)));
+		comboModal->GetBoundsComposition()->SetBounds(Rect(Point(10, 100), Size(200, 0)));
 
 		GuiButton* buttonMessageBox=new GuiButton(new win7::Win7ButtonStyle);
 		buttonMessageBox->SetText(L"ShowMessageBox");
-		buttonMessageBox->GetBoundsComposition()->SetBounds(Rect(10, 130, 0, 0));
+		buttonMessageBox->GetBoundsComposition()->SetBounds(Rect(Point(10, 130), Size(0, 0)));
 
 		container->AddChild(comboInput);
 		container->AddChild(comboDefault);
