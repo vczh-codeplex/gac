@@ -4,6 +4,8 @@
 #include <crtdbg.h>
 #endif
 
+#pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
 #include "..\..\Public\Source\GacUIIncludes.h"
 #include <Windows.h>
 
@@ -27,6 +29,7 @@ extern void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container)
 extern void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupTabPageListControlWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container);
+extern void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupRibbonWindow(GuiControlHost* controlHost, GuiControl* container);
 
 /***********************************************************************
@@ -57,6 +60,11 @@ void SetupTabPageWindow(GuiControlHost* controlHost, GuiControl* container)
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"Toolstrip");
 		SetupToolstripWindow(controlHost, page->GetContainer());
+	}
+	{
+		GuiTabPage* page=tab->CreatePage();
+		page->SetText(L"Dialogs");
+		SetupDialogWindow(controlHost, page->GetContainer());
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();

@@ -13159,6 +13159,60 @@ Native Window Services
 			virtual bool					UninstallListener(INativeControllerListener* listener)=0;
 		};
 
+
+		class INativeDialogService : public virtual Interface
+		{
+		public:
+			enum MessageBoxButtonsInput
+			{
+				DisplayOK,
+				DisplayOKCancel,
+				DisplayYesNo,
+				DisplayYesNoCancel,
+				DisplayRetryCancel,
+				DisplayAbortRetryIgnore,
+				DisplayCancelTryAgainContinue,
+			};
+
+			enum MessageBoxButtonsOutput
+			{
+				SelectOK,
+				SelectCancel,
+				SelectYes,
+				SelectNo,
+				SelectRetry,
+				SelectAbort,
+				SelectIgnore,
+				SelectTryAgain,
+				SelectContinue,
+			};
+
+			enum MessageBoxDefaultButton
+			{
+				DefaultFirst,
+				DefaultSecond,
+				DefaultThird,
+			};
+
+			enum MessageBoxIcons
+			{
+				IconNone,
+				IconError,
+				IconQuestion,
+				IconWarning,
+				IconInformation,
+			};
+
+			enum MessageBoxModalOptions
+			{
+				ModalWindow,
+				ModalTask,
+				ModalSystem,
+			};
+
+			virtual MessageBoxButtonsOutput			ShowMessageBox(INativeWindow* window, const WString& text, const WString& title=L"", MessageBoxButtonsInput buttons=DisplayOK, MessageBoxDefaultButton defaultButton=DefaultFirst, MessageBoxIcons icon=IconNone, MessageBoxModalOptions modal=ModalWindow)=0;
+		};
+
 /***********************************************************************
 Native Window Controller
 ***********************************************************************/
@@ -13174,6 +13228,7 @@ Native Window Controller
 			virtual INativeScreenService*			ScreenService()=0;
 			virtual INativeWindowService*			WindowService()=0;
 			virtual INativeInputService*			InputService()=0;
+			virtual INativeDialogService*			DialogService()=0;
 		};
 		
 		class INativeControllerListener : public Interface

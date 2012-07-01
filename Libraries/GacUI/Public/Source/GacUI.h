@@ -823,6 +823,60 @@ Native Window Services
 			virtual bool					UninstallListener(INativeControllerListener* listener)=0;
 		};
 
+
+		class INativeDialogService : public virtual Interface
+		{
+		public:
+			enum MessageBoxButtonsInput
+			{
+				DisplayOK,
+				DisplayOKCancel,
+				DisplayYesNo,
+				DisplayYesNoCancel,
+				DisplayRetryCancel,
+				DisplayAbortRetryIgnore,
+				DisplayCancelTryAgainContinue,
+			};
+
+			enum MessageBoxButtonsOutput
+			{
+				SelectOK,
+				SelectCancel,
+				SelectYes,
+				SelectNo,
+				SelectRetry,
+				SelectAbort,
+				SelectIgnore,
+				SelectTryAgain,
+				SelectContinue,
+			};
+
+			enum MessageBoxDefaultButton
+			{
+				DefaultFirst,
+				DefaultSecond,
+				DefaultThird,
+			};
+
+			enum MessageBoxIcons
+			{
+				IconNone,
+				IconError,
+				IconQuestion,
+				IconWarning,
+				IconInformation,
+			};
+
+			enum MessageBoxModalOptions
+			{
+				ModalWindow,
+				ModalTask,
+				ModalSystem,
+			};
+
+			virtual MessageBoxButtonsOutput			ShowMessageBox(INativeWindow* window, const WString& text, const WString& title=L"", MessageBoxButtonsInput buttons=DisplayOK, MessageBoxDefaultButton defaultButton=DefaultFirst, MessageBoxIcons icon=IconNone, MessageBoxModalOptions modal=ModalWindow)=0;
+		};
+
 /***********************************************************************
 Native Window Controller
 ***********************************************************************/
@@ -838,6 +892,7 @@ Native Window Controller
 			virtual INativeScreenService*			ScreenService()=0;
 			virtual INativeWindowService*			WindowService()=0;
 			virtual INativeInputService*			InputService()=0;
+			virtual INativeDialogService*			DialogService()=0;
 		};
 		
 		class INativeControllerListener : public Interface
@@ -8791,11 +8846,12 @@ namespace vl
 				WindowsImageFrame(INativeImage* _image, IWICBitmapFrameDecode* frameDecode);
 				WindowsImageFrame(INativeImage* _image, IWICBitmap* sourceBitmap);
 				~WindowsImageFrame();
-				INativeImage*								GetImage();
-				Size										GetSize();
-				bool										SetCache(void* key, Ptr<INativeImageFrameCache> cache);
-				Ptr<INativeImageFrameCache>					GetCache(void* key);
-				Ptr<INativeImageFrameCache>					RemoveCache(void* key);
+
+				INativeImage*								GetImage()override;
+				Size										GetSize()override;
+				bool										SetCache(void* key, Ptr<INativeImageFrameCache> cache)override;
+				Ptr<INativeImageFrameCache>					GetCache(void* key)override;
+				Ptr<INativeImageFrameCache>					RemoveCache(void* key)override;
 				IWICBitmap*									GetFrameBitmap();
 			};
 
@@ -8808,10 +8864,11 @@ namespace vl
 			public:
 				WindowsImage(INativeImageService* _imageService, IWICBitmapDecoder* _bitmapDecoder);
 				~WindowsImage();
-				INativeImageService*						GetImageService();
-				FormatType									GetFormat();
-				int											GetFrameCount();
-				INativeImageFrame*							GetFrame(int index);
+
+				INativeImageService*						GetImageService()override;
+				FormatType									GetFormat()override;
+				int											GetFrameCount()override;
+				INativeImageFrame*							GetFrame(int index)override;
 			};
 
 			class WindowsBitmapImage : public Object, public INativeImage
@@ -8823,10 +8880,11 @@ namespace vl
 			public:
 				WindowsBitmapImage(INativeImageService* _imageService, IWICBitmap* sourceBitmap, FormatType _formatType);
 				~WindowsBitmapImage();
-				INativeImageService*						GetImageService();
-				FormatType									GetFormat();
-				int											GetFrameCount();
-				INativeImageFrame*							GetFrame(int index);
+
+				INativeImageService*						GetImageService()override;
+				FormatType									GetFormat()override;
+				int											GetFrameCount()override;
+				INativeImageFrame*							GetFrame(int index)override;
 			};
 
 			class WindowsImageService : public Object, public INativeImageService
@@ -8836,6 +8894,7 @@ namespace vl
 			public:
 				WindowsImageService();
 				~WindowsImageService();
+
 				Ptr<INativeImage>							CreateImageFromFile(const WString& path);
 				Ptr<INativeImage>							CreateImageFromHBITMAP(HBITMAP handle);
 				Ptr<INativeImage>							CreateImageFromHICON(HICON handle);
@@ -9000,11 +9059,12 @@ namespace vl
 			public:
 				WindowsAsyncService();
 				~WindowsAsyncService();
+
 				void							ExecuteAsyncTasks();
-				bool							IsInMainThread();
-				void							InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument);
-				void							InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument);
-				bool							InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds);
+				bool							IsInMainThread()override;
+				void							InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument)override;
+				void							InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument)override;
+				bool							InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds)override;
 			};
 		}
 	}
@@ -9040,8 +9100,9 @@ namespace vl
 
 			public:
 				WindowsCallbackService();
-				bool											InstallListener(INativeControllerListener* listener);
-				bool											UninstallListener(INativeControllerListener* listener);
+
+				bool											InstallListener(INativeControllerListener* listener)override;
+				bool											UninstallListener(INativeControllerListener* listener)override;
 
 				void											InvokeMouseHook(WPARAM message, Point location);
 				void											InvokeGlobalTimer();
@@ -9082,10 +9143,49 @@ namespace vl
 				HWND					ownerHandle;
 			public:
 				WindowsClipboardService();
+
 				void					SetOwnerHandle(HWND handle);
-				bool					ContainsText();
-				WString					GetText();
-				bool					SetText(const WString& value);
+				bool					ContainsText()override;
+				WString					GetText()override;
+				bool					SetText(const WString& value)override;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+NATIVEWINDOW\WINDOWS\SERVICESIMPL\WINDOWSDIALOGSERVICE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Native Window::Windows Implementation
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSDIALOGSERVICE
+#define VCZH_PRESENTATION_WINDOWS_SERVICESIMPL_WINDOWSDIALOGSERVICE
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace windows
+		{
+			class WindowsDialogService : public INativeDialogService
+			{
+				typedef HWND (*HandleRetriver)(INativeWindow*);
+			protected:
+				HandleRetriver									handleRetriver;
+
+			public:
+				WindowsDialogService(HandleRetriver _handleRetriver);
+
+				MessageBoxButtonsOutput			ShowMessageBox(INativeWindow* window, const WString& text, const WString& title, MessageBoxButtonsInput buttons, MessageBoxDefaultButton defaultButton, MessageBoxIcons icon, MessageBoxModalOptions modal)override;
 			};
 		}
 	}
@@ -9125,14 +9225,14 @@ namespace vl
 				WindowsInputService(HOOKPROC _mouseProc);
 
 				void								SetOwnerHandle(HWND handle);
-				void								StartHookMouse();
-				void								StopHookMouse();
-				bool								IsHookingMouse();
-				void								StartTimer();
-				void								StopTimer();
-				bool								IsTimerEnabled();
-				bool								IsKeyPressing(int code);
-				bool								IsKeyToggled(int code);
+				void								StartHookMouse()override;
+				void								StopHookMouse()override;
+				bool								IsHookingMouse()override;
+				void								StartTimer()override;
+				void								StopTimer()override;
+				bool								IsTimerEnabled()override;
+				bool								IsKeyPressing(int code)override;
+				bool								IsKeyToggled(int code)override;
 			};
 
 			extern bool								WinIsKeyPressing(int code);
@@ -9173,8 +9273,9 @@ namespace vl
 			public:
 				WindowsCursor(HCURSOR _handle);
 				WindowsCursor(SystemCursorType type);
-				bool										IsSystemCursor();
-				SystemCursorType							GetSystemCursorType();
+
+				bool										IsSystemCursor()override;
+				SystemCursorType							GetSystemCursorType()override;
 				HCURSOR										GetCursorHandle();
 			};
 
@@ -9185,10 +9286,11 @@ namespace vl
 				FontProperties								defaultFont;
 			public:
 				WindowsResourceService();
-				INativeCursor*								GetSystemCursor(INativeCursor::SystemCursorType type);
-				INativeCursor*								GetDefaultSystemCursor();
-				FontProperties								GetDefaultFont();
-				void										SetDefaultFont(const FontProperties& value);
+
+				INativeCursor*								GetSystemCursor(INativeCursor::SystemCursorType type)override;
+				INativeCursor*								GetDefaultSystemCursor()override;
+				FontProperties								GetDefaultFont()override;
+				void										SetDefaultFont(const FontProperties& value)override;
 			};
 		}
 	}
@@ -9224,10 +9326,11 @@ namespace vl
 				HMONITOR										monitor;
 			public:
 				WindowsScreen();
-				Rect											GetBounds();
-				Rect											GetClientBounds();
-				WString											GetName();
-				bool											IsPrimary();
+
+				Rect											GetBounds()override;
+				Rect											GetClientBounds()override;
+				WString											GetName()override;
+				bool											IsPrimary()override;
 			};
 
 			class WindowsScreenService : public Object, public INativeScreenService
@@ -9248,9 +9351,9 @@ namespace vl
 
 				static BOOL CALLBACK							MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 				void											RefreshScreenInformation();
-				int												GetScreenCount();
-				INativeScreen*									GetScreen(int index);
-				INativeScreen*									GetScreen(INativeWindow* window);
+				int												GetScreenCount()override;
+				INativeScreen*									GetScreen(int index)override;
+				INativeScreen*									GetScreen(INativeWindow* window)override;
 			};
 		}
 	}
