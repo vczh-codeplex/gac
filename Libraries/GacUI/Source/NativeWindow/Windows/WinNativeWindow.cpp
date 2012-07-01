@@ -978,6 +978,7 @@ WindowsController
 					,mainWindow(0)
 					,screenService(&GetHWNDFromNativeWindowHandle)
 					,inputService(&MouseProc)
+					,dialogService(&GetHWNDFromNativeWindowHandle)
 				{
 					godWindow=CreateWindowEx(WS_EX_CONTROLPARENT, godClass.GetName().Buffer(), L"GodWindow", WS_OVERLAPPEDWINDOW, 0, 0, 0, 0, NULL, NULL, hInstance, NULL);
 					clipboardService.SetOwnerHandle(godWindow);

@@ -1014,8 +1014,6 @@ Native Window Services
 				DisplayOK,
 				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsInput]Display OK, Cancel.</summary>
 				DisplayOKCancel,
-				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsInput]Display Yes.</summary>
-				DisplayYes,
 				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsInput]Display Yes, No.</summary>
 				DisplayYesNo,
 				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsInput]Display Yes, No, Cancel.</summary>
@@ -1086,14 +1084,14 @@ Native Window Services
 			/// <summary>
 			/// Message box model options.
 			/// </summary>
-			enum MessageBoxModelOptions
+			enum MessageBoxModalOptions
 			{
-				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxModelOptions]Disable the current window.</summary>
-				ModelWindow,
-				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxModelOptions]Disable all windows in the application.</summary>
-				ModelTask,
-				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxModelOptions]Top most message box in the whole system.</summary>
-				ModelSystem,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxModalOptions]Disable the current window.</summary>
+				ModalWindow,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxModalOptions]Disable all windows in the application.</summary>
+				ModalTask,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxModalOptions]Top most message box in the whole system.</summary>
+				ModalSystem,
 			};
 
 			/// <summary>Show a message box.</summary>
@@ -1104,8 +1102,8 @@ Native Window Services
 			/// <param name="buttons">The display button combination of the message box.</param>
 			/// <param name="defaultButton">The default button of the message box.</param>
 			/// <param name="icon">The icon of the message box.</param>
-			/// <param name="model">The model option of the message box.</param>
-			virtual MessageBoxButtonsOutput			ShowMessageBox(INativeWindow* window, const WString& text, const WString& title=L"", MessageBoxButtonsInput buttons=DisplayOK, MessageBoxDefaultButton defaultButton=DefaultFirst, MessageBoxIcons icon=IconNone, MessageBoxModelOptions model=ModelWindow)=0;
+			/// <param name="modal">The modal option of the message box.</param>
+			virtual MessageBoxButtonsOutput			ShowMessageBox(INativeWindow* window, const WString& text, const WString& title=L"", MessageBoxButtonsInput buttons=DisplayOK, MessageBoxDefaultButton defaultButton=DefaultFirst, MessageBoxIcons icon=IconNone, MessageBoxModalOptions modal=ModalWindow)=0;
 		};
 
 /***********************************************************************
