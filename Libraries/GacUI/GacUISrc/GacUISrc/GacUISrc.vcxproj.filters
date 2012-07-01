@@ -246,6 +246,9 @@
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsInputService.cpp">
       <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsDialogService.cpp">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -495,6 +498,9 @@
       <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsInputService.h">
+      <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsDialogService.h">
       <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
     </ClInclude>
   </ItemGroup>

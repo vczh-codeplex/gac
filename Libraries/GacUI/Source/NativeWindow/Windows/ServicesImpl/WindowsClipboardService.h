@@ -24,10 +24,11 @@ namespace vl
 				HWND					ownerHandle;
 			public:
 				WindowsClipboardService();
+
 				void					SetOwnerHandle(HWND handle);
-				bool					ContainsText();
-				WString					GetText();
-				bool					SetText(const WString& value);
+				bool					ContainsText()override;
+				WString					GetText()override;
+				bool					SetText(const WString& value)override;
 			};
 		}
 	}

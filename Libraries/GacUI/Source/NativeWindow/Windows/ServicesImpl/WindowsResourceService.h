@@ -27,8 +27,9 @@ namespace vl
 			public:
 				WindowsCursor(HCURSOR _handle);
 				WindowsCursor(SystemCursorType type);
-				bool										IsSystemCursor();
-				SystemCursorType							GetSystemCursorType();
+
+				bool										IsSystemCursor()override;
+				SystemCursorType							GetSystemCursorType()override;
 				HCURSOR										GetCursorHandle();
 			};
 
@@ -39,10 +40,11 @@ namespace vl
 				FontProperties								defaultFont;
 			public:
 				WindowsResourceService();
-				INativeCursor*								GetSystemCursor(INativeCursor::SystemCursorType type);
-				INativeCursor*								GetDefaultSystemCursor();
-				FontProperties								GetDefaultFont();
-				void										SetDefaultFont(const FontProperties& value);
+
+				INativeCursor*								GetSystemCursor(INativeCursor::SystemCursorType type)override;
+				INativeCursor*								GetDefaultSystemCursor()override;
+				FontProperties								GetDefaultFont()override;
+				void										SetDefaultFont(const FontProperties& value)override;
 			};
 		}
 	}

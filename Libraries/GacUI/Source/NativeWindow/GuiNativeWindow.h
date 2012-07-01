@@ -998,6 +998,116 @@ Native Window Services
 			virtual bool					UninstallListener(INativeControllerListener* listener)=0;
 		};
 
+
+		/// <summary>
+		/// Dialog service. To access this service, use [M:vl.presentation.INativeController.DialogService].
+		/// </summary>
+		class INativeDialogService : public virtual Interface
+		{
+		public:
+			/// <summary>
+			/// Message box button combination for displaying a message box.
+			/// </summary>
+			enum MessageBoxButtonsInput
+			{
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsInput]Display OK.</summary>
+				DisplayOK,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsInput]Display OK, Cancel.</summary>
+				DisplayOKCancel,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsInput]Display Yes.</summary>
+				DisplayYes,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsInput]Display Yes, No.</summary>
+				DisplayYesNo,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsInput]Display Yes, No, Cancel.</summary>
+				DisplayYesNoCancel,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsInput]Display Retry, Cancel.</summary>
+				DisplayRetryCancel,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsInput]Display Abort, Retry, Ignore.</summary>
+				DisplayAbortRetryIgnore,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsInput]Display Cancel, TryAgain, Continue.</summary>
+				DisplayCancelTryAgainContinue,
+			};
+
+			/// <summary>
+			/// Message box button to indicate what the user selected.
+			/// </summary>
+			enum MessageBoxButtonsOutput
+			{
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsOutput]Select OK.</summary>
+				SelectOK,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsOutput]Select Cancel.</summary>
+				SelectCancel,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsOutput]Select Yes.</summary>
+				SelectYes,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsOutput]Select No.</summary>
+				SelectNo,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsOutput]Select Retry.</summary>
+				SelectRetry,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsOutput]Select Abort.</summary>
+				SelectAbort,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsOutput]Select Ignore.</summary>
+				SelectIgnore,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsOutput]Select TryAgain.</summary>
+				SelectTryAgain,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxButtonsOutput]Select Continue.</summary>
+				SelectContinue,
+			};
+
+			/// <summary>
+			/// Message box default button.
+			/// </summary>
+			enum MessageBoxDefaultButton
+			{
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxDefaultButton]First.</summary>
+				DefaultFirst,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxDefaultButton]Second.</summary>
+				DefaultSecond,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxDefaultButton]Third.</summary>
+				DefaultThird,
+			};
+
+			/// <summary>
+			/// Message box icons.
+			/// </summary>
+			enum MessageBoxIcons
+			{
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxIcons]No icon.</summary>
+				IconNone,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxIcons]Error icon.</summary>
+				IconError,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxIcons]Question icon.</summary>
+				IconQuestion,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxIcons]Warning icon.</summary>
+				IconWarning,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxIcons]Information icon.</summary>
+				IconInformation,
+			};
+
+			/// <summary>
+			/// Message box model options.
+			/// </summary>
+			enum MessageBoxModelOptions
+			{
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxModelOptions]Disable the current window.</summary>
+				ModelWindow,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxModelOptions]Disable all windows in the application.</summary>
+				ModelTask,
+				/// <summary>[T:vl.presentation.INativeDialogService.MessageBoxModelOptions]Top most message box in the whole system.</summary>
+				ModelSystem,
+			};
+
+			/// <summary>Show a message box.</summary>
+			/// <returns>Returns the user selected button.</returns>
+			/// <param name="window">The current window. This argument can be null.</param>
+			/// <param name="text">The content of the message box.</param>
+			/// <param name="title">The title of the message box.</param>
+			/// <param name="buttons">The display button combination of the message box.</param>
+			/// <param name="defaultButton">The default button of the message box.</param>
+			/// <param name="icon">The icon of the message box.</param>
+			/// <param name="model">The model option of the message box.</param>
+			virtual MessageBoxButtonsOutput			ShowMessageBox(INativeWindow* window, const WString& text, const WString& title=L"", MessageBoxButtonsInput buttons=DisplayOK, MessageBoxDefaultButton defaultButton=DefaultFirst, MessageBoxIcons icon=IconNone, MessageBoxModelOptions model=ModelWindow)=0;
+		};
+
 /***********************************************************************
 Native Window Controller
 ***********************************************************************/
@@ -1048,6 +1158,10 @@ Native Window Controller
 			/// </summary>
 			/// <returns>The user input service</returns>
 			virtual INativeInputService*			InputService()=0;
+			/// <summary>
+			/// Get the dialog service.
+			/// </summary>
+			virtual INativeDialogService*			DialogService()=0;
 		};
 		
 		/// <summary>

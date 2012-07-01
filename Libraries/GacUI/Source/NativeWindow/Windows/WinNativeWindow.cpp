@@ -6,6 +6,7 @@
 #include "ServicesImpl\WindowsScreenService.h"
 #include "ServicesImpl\WindowsCallbackService.h"
 #include "ServicesImpl\WindowsInputService.h"
+#include "ServicesImpl\WindowsDialogService.h"
 
 #pragma comment(lib, "Imm32.lib")
 
@@ -967,6 +968,7 @@ WindowsController
 				WindowsImageService					imageService;
 				WindowsScreenService				screenService;
 				WindowsInputService					inputService;
+				WindowsDialogService				dialogService;
 
 			public:
 				WindowsController(HINSTANCE _hInstance)
@@ -1131,6 +1133,11 @@ WindowsController
 				INativeInputService* InputService()
 				{
 					return &inputService;
+				}
+
+				INativeDialogService* DialogService()
+				{
+					return &dialogService;
 				}
 
 				//=======================================================================
