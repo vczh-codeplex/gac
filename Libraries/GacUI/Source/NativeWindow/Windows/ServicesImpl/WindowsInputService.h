@@ -29,14 +29,14 @@ namespace vl
 				WindowsInputService(HOOKPROC _mouseProc);
 
 				void								SetOwnerHandle(HWND handle);
-				void								StartHookMouse();
-				void								StopHookMouse();
-				bool								IsHookingMouse();
-				void								StartTimer();
-				void								StopTimer();
-				bool								IsTimerEnabled();
-				bool								IsKeyPressing(int code);
-				bool								IsKeyToggled(int code);
+				void								StartHookMouse()override;
+				void								StopHookMouse()override;
+				bool								IsHookingMouse()override;
+				void								StartTimer()override;
+				void								StopTimer()override;
+				bool								IsTimerEnabled()override;
+				bool								IsKeyPressing(int code)override;
+				bool								IsKeyToggled(int code)override;
 			};
 
 			extern bool								WinIsKeyPressing(int code);

@@ -25,8 +25,9 @@ namespace vl
 
 			public:
 				WindowsCallbackService();
-				bool											InstallListener(INativeControllerListener* listener);
-				bool											UninstallListener(INativeControllerListener* listener);
+
+				bool											InstallListener(INativeControllerListener* listener)override;
+				bool											UninstallListener(INativeControllerListener* listener)override;
 
 				void											InvokeMouseHook(WPARAM message, Point location);
 				void											InvokeGlobalTimer();

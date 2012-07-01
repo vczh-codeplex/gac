@@ -25,10 +25,11 @@ namespace vl
 				HMONITOR										monitor;
 			public:
 				WindowsScreen();
-				Rect											GetBounds();
-				Rect											GetClientBounds();
-				WString											GetName();
-				bool											IsPrimary();
+
+				Rect											GetBounds()override;
+				Rect											GetClientBounds()override;
+				WString											GetName()override;
+				bool											IsPrimary()override;
 			};
 
 			class WindowsScreenService : public Object, public INativeScreenService
@@ -49,9 +50,9 @@ namespace vl
 
 				static BOOL CALLBACK							MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 				void											RefreshScreenInformation();
-				int												GetScreenCount();
-				INativeScreen*									GetScreen(int index);
-				INativeScreen*									GetScreen(INativeWindow* window);
+				int												GetScreenCount()override;
+				INativeScreen*									GetScreen(int index)override;
+				INativeScreen*									GetScreen(INativeWindow* window)override;
 			};
 		}
 	}

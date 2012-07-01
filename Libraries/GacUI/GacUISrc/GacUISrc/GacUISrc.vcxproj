@@ -134,6 +134,7 @@
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsAsyncService.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsCallbackService.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsClipboardService.cpp" />
+    <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsDialogService.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsImageService.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsInputService.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsResourceService.cpp" />
@@ -220,6 +221,7 @@
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsAsyncService.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsCallbackService.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsClipboardService.h" />
+    <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsDialogService.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsImageService.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsInputService.h" />
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsResourceService.h" />

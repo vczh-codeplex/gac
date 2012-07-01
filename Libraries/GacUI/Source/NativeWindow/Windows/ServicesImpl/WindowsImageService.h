@@ -31,11 +31,12 @@ namespace vl
 				WindowsImageFrame(INativeImage* _image, IWICBitmapFrameDecode* frameDecode);
 				WindowsImageFrame(INativeImage* _image, IWICBitmap* sourceBitmap);
 				~WindowsImageFrame();
-				INativeImage*								GetImage();
-				Size										GetSize();
-				bool										SetCache(void* key, Ptr<INativeImageFrameCache> cache);
-				Ptr<INativeImageFrameCache>					GetCache(void* key);
-				Ptr<INativeImageFrameCache>					RemoveCache(void* key);
+
+				INativeImage*								GetImage()override;
+				Size										GetSize()override;
+				bool										SetCache(void* key, Ptr<INativeImageFrameCache> cache)override;
+				Ptr<INativeImageFrameCache>					GetCache(void* key)override;
+				Ptr<INativeImageFrameCache>					RemoveCache(void* key)override;
 				IWICBitmap*									GetFrameBitmap();
 			};
 
@@ -48,10 +49,11 @@ namespace vl
 			public:
 				WindowsImage(INativeImageService* _imageService, IWICBitmapDecoder* _bitmapDecoder);
 				~WindowsImage();
-				INativeImageService*						GetImageService();
-				FormatType									GetFormat();
-				int											GetFrameCount();
-				INativeImageFrame*							GetFrame(int index);
+
+				INativeImageService*						GetImageService()override;
+				FormatType									GetFormat()override;
+				int											GetFrameCount()override;
+				INativeImageFrame*							GetFrame(int index)override;
 			};
 
 			class WindowsBitmapImage : public Object, public INativeImage
@@ -63,10 +65,11 @@ namespace vl
 			public:
 				WindowsBitmapImage(INativeImageService* _imageService, IWICBitmap* sourceBitmap, FormatType _formatType);
 				~WindowsBitmapImage();
-				INativeImageService*						GetImageService();
-				FormatType									GetFormat();
-				int											GetFrameCount();
-				INativeImageFrame*							GetFrame(int index);
+
+				INativeImageService*						GetImageService()override;
+				FormatType									GetFormat()override;
+				int											GetFrameCount()override;
+				INativeImageFrame*							GetFrame(int index)override;
 			};
 
 			class WindowsImageService : public Object, public INativeImageService
@@ -76,6 +79,7 @@ namespace vl
 			public:
 				WindowsImageService();
 				~WindowsImageService();
+
 				Ptr<INativeImage>							CreateImageFromFile(const WString& path);
 				Ptr<INativeImage>							CreateImageFromHBITMAP(HBITMAP handle);
 				Ptr<INativeImage>							CreateImageFromHICON(HICON handle);

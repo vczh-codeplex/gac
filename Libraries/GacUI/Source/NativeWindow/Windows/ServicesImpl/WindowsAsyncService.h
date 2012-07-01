@@ -40,11 +40,12 @@ namespace vl
 			public:
 				WindowsAsyncService();
 				~WindowsAsyncService();
+
 				void							ExecuteAsyncTasks();
-				bool							IsInMainThread();
-				void							InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument);
-				void							InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument);
-				bool							InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds);
+				bool							IsInMainThread()override;
+				void							InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument)override;
+				void							InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument)override;
+				bool							InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds)override;
 			};
 		}
 	}
