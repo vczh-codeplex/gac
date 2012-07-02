@@ -24640,6 +24640,41 @@ WindowsDialogService
 				}
 				return result!=FALSE;
 			}
+
+			bool WindowsDialogService::ShowFontDialog(INativeWindow* window, FontProperties& selectionFont, Color& selectionColor, bool selected, bool showEffect, bool forceFontExist)
+			{
+				LOGFONT logFont;
+				ZeroMemory(&logFont, sizeof(logFont));
+				logFont.lfHeight=-selectionFont.size;
+				logFont.lfWeight=selectionFont.bold?FW_BOLD:FW_REGULAR;
+				logFont.lfItalic=selectionFont.italic?TRUE:FALSE;
+				logFont.lfUnderline=selectionFont.underline?TRUE:FALSE;
+				logFont.lfStrikeOut=selectionFont.strikeline?TRUE:FALSE;
+				wcscpy_s(logFont.lfFaceName, selectionFont.fontFamily.Buffer());
+
+				CHOOSEFONT chooseFont;
+				ZeroMemory(&chooseFont, sizeof(chooseFont));
+				chooseFont.lStructSize=sizeof(chooseFont);
+				chooseFont.hwndOwner=handleRetriver(window);
+				chooseFont.lpLogFont=&logFont;
+				chooseFont.iPointSize=0;
+				chooseFont.Flags=(showEffect?CF_EFFECTS:0) | (forceFontExist?CF_FORCEFONTEXIST:0) | (selected?CF_INITTOLOGFONTSTRUCT:0);
+				chooseFont.rgbColors=RGB(selectionColor.r, selectionColor.g, selectionColor.b);
+
+				BOOL result=ChooseFont(&chooseFont);
+				if(result)
+				{
+					selectionFont.fontFamily=logFont.lfFaceName;
+					selectionFont.bold=logFont.lfWeight>FW_REGULAR;
+					selectionFont.italic=logFont.lfItalic!=FALSE;
+					selectionFont.underline=logFont.lfUnderline!=FALSE;
+					selectionFont.strikeline=logFont.lfStrikeOut!=FALSE;
+					selectionFont.size=-logFont.lfHeight;
+
+					selectionColor=Color(GetRValue(chooseFont.rgbColors), GetGValue(chooseFont.rgbColors), GetBValue(chooseFont.rgbColors));
+				}
+				return result!=FALSE;
+			}
 		}
 	}
 }
