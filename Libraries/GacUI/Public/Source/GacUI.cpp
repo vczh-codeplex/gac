@@ -24546,7 +24546,6 @@ WindowsDialogService
 				LPCTSTR lpCaption=realTitle.Buffer();
 				UINT uType=0;
 				
-
 #define MAP(A, B) case A: uType|=(B); break
 				switch(buttons)
 				{
@@ -24593,6 +24592,53 @@ WindowsDialogService
 				case IDYES: return SelectYes;
 				default: return SelectOK;
 				}
+			}
+
+			bool WindowsDialogService::ShowColorDialog(INativeWindow* window, Color& selection, bool selected, ColorDialogCustomColorOptions customColorOptions, Color* customColors)
+			{
+				CHOOSECOLOR chooseColor;
+				ZeroMemory(&chooseColor, sizeof(chooseColor));
+				COLORREF customColorsBuffer[16]={0};
+				if(customColors)
+				{
+					for(int i=0;i<sizeof(customColorsBuffer)/sizeof(*customColorsBuffer);i++)
+					{
+						customColorsBuffer[i]=RGB(customColors[i].r, customColors[i].g, customColors[i].b);
+					}
+				}
+
+				chooseColor.lStructSize=sizeof(chooseColor);
+				chooseColor.hwndOwner=handleRetriver(window);
+				chooseColor.rgbResult=RGB(selection.r, selection.g, selection.b);
+				chooseColor.lpCustColors=customColorsBuffer;
+				chooseColor.Flags=CC_ANYCOLOR;
+				
+#define MAP(A, B) case A: chooseColor.Flags|=(B); break
+				switch(customColorOptions)
+				{
+					MAP(CustomColorDisabled, CC_PREVENTFULLOPEN);
+					MAP(CustomColorOpened, CC_FULLOPEN);
+				}
+#undef MAP
+				if(selected)
+				{
+					chooseColor.Flags|=CC_RGBINIT;
+				}
+
+				BOOL result=ChooseColor(&chooseColor);
+				if(result)
+				{
+					selection=Color(GetRValue(chooseColor.rgbResult), GetGValue(chooseColor.rgbResult), GetBValue(chooseColor.rgbResult));
+					if(customColors)
+					{
+						for(int i=0;i<sizeof(customColorsBuffer)/sizeof(*customColorsBuffer);i++)
+						{
+							COLORREF color=customColorsBuffer[i];
+							customColors[i]=Color(GetRValue(color), GetGValue(color), GetBValue(color));
+						}
+					}
+				}
+				return result!=FALSE;
 			}
 		}
 	}

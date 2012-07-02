@@ -28,6 +28,7 @@ namespace vl
 				WindowsDialogService(HandleRetriver _handleRetriver);
 
 				MessageBoxButtonsOutput			ShowMessageBox(INativeWindow* window, const WString& text, const WString& title, MessageBoxButtonsInput buttons, MessageBoxDefaultButton defaultButton, MessageBoxIcons icon, MessageBoxModalOptions modal)override;
+				bool							ShowColorDialog(INativeWindow* window, Color& selection, bool selected, ColorDialogCustomColorOptions customColorOptions, Color* customColors)override;
 			};
 		}
 	}

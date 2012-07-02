@@ -875,6 +875,15 @@ Native Window Services
 			};
 
 			virtual MessageBoxButtonsOutput			ShowMessageBox(INativeWindow* window, const WString& text, const WString& title=L"", MessageBoxButtonsInput buttons=DisplayOK, MessageBoxDefaultButton defaultButton=DefaultFirst, MessageBoxIcons icon=IconNone, MessageBoxModalOptions modal=ModalWindow)=0;
+
+			enum ColorDialogCustomColorOptions
+			{
+				CustomColorDisabled,
+				CustomColorEnabled,
+				CustomColorOpened,
+			};
+
+			virtual bool							ShowColorDialog(INativeWindow* window, Color& selection, bool selected=false, ColorDialogCustomColorOptions customColorOptions=CustomColorEnabled, Color* customColors=0)=0;
 		};
 
 /***********************************************************************
@@ -9186,6 +9195,7 @@ namespace vl
 				WindowsDialogService(HandleRetriver _handleRetriver);
 
 				MessageBoxButtonsOutput			ShowMessageBox(INativeWindow* window, const WString& text, const WString& title, MessageBoxButtonsInput buttons, MessageBoxDefaultButton defaultButton, MessageBoxIcons icon, MessageBoxModalOptions modal)override;
+				bool							ShowColorDialog(INativeWindow* window, Color& selection, bool selected, ColorDialogCustomColorOptions customColorOptions, Color* customColors)override;
 			};
 		}
 	}

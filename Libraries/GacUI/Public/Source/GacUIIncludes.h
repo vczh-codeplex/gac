@@ -13211,6 +13211,15 @@ Native Window Services
 			};
 
 			virtual MessageBoxButtonsOutput			ShowMessageBox(INativeWindow* window, const WString& text, const WString& title=L"", MessageBoxButtonsInput buttons=DisplayOK, MessageBoxDefaultButton defaultButton=DefaultFirst, MessageBoxIcons icon=IconNone, MessageBoxModalOptions modal=ModalWindow)=0;
+
+			enum ColorDialogCustomColorOptions
+			{
+				CustomColorDisabled,
+				CustomColorEnabled,
+				CustomColorOpened,
+			};
+
+			virtual bool							ShowColorDialog(INativeWindow* window, Color& selection, bool selected=false, ColorDialogCustomColorOptions customColorOptions=CustomColorEnabled, Color* customColors=0)=0;
 		};
 
 /***********************************************************************
