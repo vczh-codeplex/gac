@@ -1126,6 +1126,16 @@ Native Window Services
 			/// <param name="customColorOptions">Custom color panel options.</param>
 			/// <param name="customColors">The initial 16 colors in custom color boxes. This argument can be null.</param>
 			virtual bool							ShowColorDialog(INativeWindow* window, Color& selection, bool selected=false, ColorDialogCustomColorOptions customColorOptions=CustomColorEnabled, Color* customColors=0)=0;
+
+			/// <summary>Show a font dialog.</summary>
+			/// <returns>Returns true if the user selected the OK button.</returns>
+			/// <param name="window">The current window.</param>
+			/// <param name="selectionFont">The font that the user selected.</param>
+			/// <param name="selectionColor">The color that the user selected.</param>
+			/// <param name="selected">Make the font dialog selected the font specified in the "selectionFont" and "selectionColor" parameters at the beginning.</param>
+			/// <param name="showEffect">Enable the user to edit some extended font properties.</param>
+			/// <param name="forceFontExist">Force the user to select existing font.</param>
+			virtual bool							ShowFontDialog(INativeWindow* window, FontProperties& selectionFont, Color& selectionColor, bool selected=false, bool showEffect=true, bool forceFontExist=true)=0;
 		};
 
 /***********************************************************************

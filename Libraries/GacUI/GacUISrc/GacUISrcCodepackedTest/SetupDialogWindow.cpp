@@ -123,4 +123,37 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 			}
 		});
 	}
+	{
+		GuiButton* buttonFontDialog1=new GuiButton(new win7::Win7ButtonStyle);
+		buttonFontDialog1->SetText(L"SimpleFontDialog");
+		buttonFontDialog1->GetBoundsComposition()->SetBounds(Rect(Point(10, 220), Size(0, 0)));
+		container->AddChild(buttonFontDialog1);
+
+		buttonFontDialog1->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			FontProperties font;
+			Color color;
+			if(GetCurrentController()->DialogService()->ShowFontDialog(controlHost->GetNativeWindow(), font, color, false, false, true))
+			{
+				WString selected=font.fontFamily+L" "+itow(font.size)+(font.bold?L" bold":L"")+(font.italic?L" italic":L"")+(font.underline?L" underline":L"")+(font.strikeline?L" strikeline":L"");
+				GetCurrentController()->DialogService()->ShowMessageBox(controlHost->GetNativeWindow(), L"You selected the \""+selected+L"\" font.", L"Result");
+			}
+		});
+
+		GuiButton* buttonFontDialog2=new GuiButton(new win7::Win7ButtonStyle);
+		buttonFontDialog2->SetText(L"RichFontDialog");
+		buttonFontDialog2->GetBoundsComposition()->SetBounds(Rect(Point(10, 250), Size(0, 0)));
+		container->AddChild(buttonFontDialog2);
+
+		buttonFontDialog2->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			FontProperties font=GetCurrentController()->ResourceService()->GetDefaultFont();
+			Color color(255, 0, 0);
+			if(GetCurrentController()->DialogService()->ShowFontDialog(controlHost->GetNativeWindow(), font, color, true, true, true))
+			{
+				WString selected=font.fontFamily+L" "+itow(font.size)+(font.bold?L" bold":L"")+(font.italic?L" italic":L"")+(font.underline?L" underline":L"")+(font.strikeline?L" strikeline":L"");
+				GetCurrentController()->DialogService()->ShowMessageBox(controlHost->GetNativeWindow(), L"You selected the \""+selected+L"\" font.", L"Result");
+			}
+		});
+	}
 }
