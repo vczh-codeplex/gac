@@ -1104,6 +1104,28 @@ Native Window Services
 			/// <param name="icon">The icon of the message box.</param>
 			/// <param name="modal">The modal option of the message box.</param>
 			virtual MessageBoxButtonsOutput			ShowMessageBox(INativeWindow* window, const WString& text, const WString& title=L"", MessageBoxButtonsInput buttons=DisplayOK, MessageBoxDefaultButton defaultButton=DefaultFirst, MessageBoxIcons icon=IconNone, MessageBoxModalOptions modal=ModalWindow)=0;
+
+			/// <summary>
+			/// Color dialog custom color options
+			/// </summary>
+			enum ColorDialogCustomColorOptions
+			{
+				/// <summary>[T:vl.presentation.INativeDialogService.ColorDialogCustomColorOptions]Disable the custom color panel.</summary>
+				CustomColorDisabled,
+				/// <summary>[T:vl.presentation.INativeDialogService.ColorDialogCustomColorOptions]Enable the custom color panel.</summary>
+				CustomColorEnabled,
+				/// <summary>[T:vl.presentation.INativeDialogService.ColorDialogCustomColorOptions]Open the custom color panel at the beginning.</summary>
+				CustomColorOpened,
+			};
+
+			/// <summary>Show a color dialog.</summary>
+			/// <returns>Returns true if the user selected the OK button.</returns>
+			/// <param name="window">The current window.</param>
+			/// <param name="selection">The color that the user selected.</param>
+			/// <param name="selected">Make the color dialog selected the color specified in the "selection" parameter at the beginning.</param>
+			/// <param name="customColorOptions">Custom color panel options.</param>
+			/// <param name="customColors">The initial 16 colors in custom color boxes. This argument can be null.</param>
+			virtual bool							ShowColorDialog(INativeWindow* window, Color& selection, bool selected=false, ColorDialogCustomColorOptions customColorOptions=CustomColorEnabled, Color* customColors=0)=0;
 		};
 
 /***********************************************************************

@@ -73,4 +73,54 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 			GetCurrentController()->DialogService()->ShowMessageBox(controlHost->GetNativeWindow(), L"You selected the \""+selected+L"\" button.", L"Result");
 		});
 	}
+	{
+		GuiButton* buttonColorDialog1=new GuiButton(new win7::Win7ButtonStyle);
+		buttonColorDialog1->SetText(L"SimpleCustomColor");
+		buttonColorDialog1->GetBoundsComposition()->SetBounds(Rect(Point(10, 160), Size(0, 0)));
+		container->AddChild(buttonColorDialog1);
+
+		buttonColorDialog1->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			Color selection;
+			if(GetCurrentController()->DialogService()->ShowColorDialog(controlHost->GetNativeWindow(), selection, false, INativeDialogService::CustomColorDisabled, 0))
+			{
+				WString selected=L"("+itow(selection.r)+L", "+itow(selection.g)+L", "+itow(selection.b)+L")";
+				GetCurrentController()->DialogService()->ShowMessageBox(controlHost->GetNativeWindow(), L"You selected the \""+selected+L"\" color.", L"Result");
+			}
+		});
+
+		GuiButton* buttonColorDialog2=new GuiButton(new win7::Win7ButtonStyle);
+		buttonColorDialog2->SetText(L"RichCustomColor");
+		buttonColorDialog2->GetBoundsComposition()->SetBounds(Rect(Point(10, 190), Size(0, 0)));
+		container->AddChild(buttonColorDialog2);
+
+		buttonColorDialog2->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			Color selection(255, 0, 0);
+			Color customColors[]=
+			{
+				Color(0, 0, 0),
+				Color(128, 0, 0),
+				Color(0, 128, 0),
+				Color(0, 0, 128),
+				Color(128, 128, 0),
+				Color(0, 128, 128),
+				Color(128, 0, 128),
+				Color(192, 192, 192),
+				Color(128, 128, 128),
+				Color(255, 0, 0),
+				Color(0, 255, 0),
+				Color(0, 0, 255),
+				Color(255, 255, 0),
+				Color(0, 255, 255),
+				Color(255, 0, 255),
+				Color(255, 255, 255),
+			};
+			if(GetCurrentController()->DialogService()->ShowColorDialog(controlHost->GetNativeWindow(), selection, true, INativeDialogService::CustomColorOpened, customColors))
+			{
+				WString selected=L"("+itow(selection.r)+L", "+itow(selection.g)+L", "+itow(selection.b)+L")";
+				GetCurrentController()->DialogService()->ShowMessageBox(controlHost->GetNativeWindow(), L"You selected the \""+selected+L"\" color.", L"Result");
+			}
+		});
+	}
 }
