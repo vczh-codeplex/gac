@@ -1,5 +1,5 @@
 ﻿@model GaclibWebPage.Models.DemoPageModel
-
+           
 @{
     ViewBag.Title = "GacLib - Demos - " + Model.Title;
 }
@@ -11,8 +11,22 @@
         {
             <img src="@Url.Content(string.Format("~/Content/Demos/{0}/{1}", Model.Name, image))" />
         }
-        <pre class="CppCode">
-            C++
-        </pre>
+        <p>
+            <strong>This demo contains the following code files:</strong></p>
+        <ul>
+            @foreach (var cppName in Model.CppCodes.Keys)
+            {
+                string fileName = Path.GetFileName(cppName);
+                string anchorName = fileName.ToUpper().Replace('.', '_');
+                <li><a href="#@anchorName">@fileName</a></li>
+            }
+        </ul>
+        @foreach (var cppName in Model.CppCodes.Keys)
+        {
+            string fileName = Path.GetFileName(cppName);
+            string anchorName = fileName.ToUpper().Replace('.', '_');
+            <strong><a name="@anchorName">@fileName</a></strong>
+            <pre class="CppCode">@Model.CppCodes[cppName]</pre>
+        }
     </td>
 </tr>
