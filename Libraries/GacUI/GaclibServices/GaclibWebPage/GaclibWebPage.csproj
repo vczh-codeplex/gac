@@ -100,16 +100,31 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\DemoListModel.cs" />
     <Compile Include="Models\NavigationBarModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebRole.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Demos\Demos.Controls.Button.CheckAndRadio.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.Button.EnableDisable.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.Label.Hyperlink.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.ListBox.NameEditor.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.ListBox.NameSelector.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.ListBox.VirtualMode.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.ListView.SortingAndFiltering.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.ListView.ViewSwitching.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.ListView.VirtualMode.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.Tab.TextBoxPage.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.TextBox.Colorizer.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.TextBox.Editor.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.TreeView.FileExplorer.jpg" />
     <Content Include="Content\favicon.ico" />
     <Content Include="Content\GacLib.png" />
     <Content Include="Content\GacLib_Logo.gif" />
     <Content Include="Content\GacLib_LogoAndTitle.gif" />
     <Content Include="Content\GacLib_LogoAndTitle_Large.png" />
+    <Content Include="Content\GettingStart\HelloWorld.jpg" />
     <Content Include="Content\PageStyle.css" />
     <Content Include="Global.asax" />
     <Content Include="Content\DocStyle.css" />
