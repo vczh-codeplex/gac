@@ -33,6 +33,7 @@ namespace GenDocIndex
                 yield return new XElement(
                     "indexNode",
                     new XElement("level", level),
+                    new XElement("title", sibling.Title),
                     new XElement("uniqueId", GetKey(sibling)),
                     new XElement("link", needHyperlink)
                     );
