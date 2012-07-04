@@ -38,7 +38,7 @@
                         </a>
                     </td>
                     <td align="center" valign="middle">
-                        <a class="MenuButton DocumentButton@(Model.ActiveButton.ToString() == "Document" ? "Selected" : "")" href="@Url.Action("Document", "Home")">
+                        <a class="MenuButton DocumentButton@(Model.ActiveButton.ToString() == "Document" ? "Selected" : "")" href="@Url.Action("ShowDocument", "DocumentPage", new { uniqueId = "reference_gacui" })">
                             DOCUMENT
                         </a>
                     </td>
