@@ -1,0 +1,18 @@
+﻿@model GaclibWebPage.Models.DemoPageModel
+
+@{
+    ViewBag.Title = "GacLib - Demos - " + Model.Title;
+}
+
+<tr>
+    <td align="left" valign="top" colspan="6">
+        <h1>@Model.Title</h1>
+        @foreach (var image in Model.Images)
+        {
+            <img src="@Url.Content(string.Format("~/Content/Demos/{0}/{1}", Model.Name, image))" />
+        }
+        <pre class="CppCode">
+            C++
+        </pre>
+    </td>
+</tr>

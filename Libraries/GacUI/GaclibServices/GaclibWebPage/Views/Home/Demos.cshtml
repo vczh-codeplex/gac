@@ -12,13 +12,15 @@
         </p>
         <h1>Demo Index</h1>
         <table class="DemoTable" cellspacing="2" >
-            @for (int i = 0; i < Model.DemoDescriptions.Length; i++) {
-                var demo = Model.DemoDescriptions[i];
-                if (i % 3 == 0) {
+            @for (int i = 0; i < Model.DemoPages.Length; i++)
+            {
+                var demo = Model.DemoPages[i];
+                if (i % 3 == 0)
+                {
                     @:<tr>
                 }
                 <td>
-                    <a class="DemoLink" href="./Demos/Controls.Button.CheckAndRadio/Demo.html">
+                    <a class="DemoLink" href="@Url.Action("ShowDemo", "DemoPage", new { demoId = demo.Name })" >
                         <div class="DemoTitle">
                             @demo.Title
                         </div>
@@ -27,7 +29,8 @@
                         </div>
                     </a>
                 </td>
-                if (i % 3 == 2 || i == Model.DemoDescriptions.Length - 1) {
+                if (i % 3 == 2 || i == Model.DemoPages.Length - 1)
+                {
                     @:</tr>
                 }
             }
