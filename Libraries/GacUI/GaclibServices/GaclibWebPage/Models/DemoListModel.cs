@@ -2,83 +2,55 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Xml.Linq;
+using System.IO;
 
 namespace GaclibWebPage.Models
 {
     public class DemoListModel : NavigationBarModel
     {
-        private class DemoMeta
+        public static DemoPageModel[] LoadPages(string xmlIndexPath)
         {
-            public string Title { get; set; }
-            public int MinImage { get; set; }
-            public int MaxImage { get; set; }
+            XDocument xmlIndex = XDocument.Load(xmlIndexPath);
+            List<DemoPageModel> pages = new List<DemoPageModel>();
+            foreach (var xmlCategory in xmlIndex.Root.Elements("category"))
+            {
+                string category = xmlCategory.Attribute("name").Value;
+                foreach (var xmlDemo in xmlCategory.Elements("demo"))
+                {
+                    string title = xmlDemo.Attribute("name").Value;
+                    DemoPageModel page = new DemoPageModel
+                    {
+                        Title = title,
+                        Name = category + "." + title,
+                        Images = xmlDemo.Elements("image").Select(e => e.Attribute("src").Value).ToArray(),
+                        CppCodes = xmlDemo.Elements("cpp").Select(e => e.Attribute("src").Value).ToDictionary(s => s, s => ""),
+                    };
+                    pages.Add(page);
+                }
+            }
+            return pages.ToArray();
         }
 
-        private static DemoMeta[] demoControls = new DemoMeta[]
+        public static DemoPageModel LoadPage(string xmlIndexPath, string name)
         {
-            new DemoMeta { Title = "Label.Hyperlink",               MinImage = 27, MaxImage = 27},
-            new DemoMeta { Title = "Button.EnableDisable",          MinImage = 28, MaxImage = 29},
-            new DemoMeta { Title = "Button.CheckAndRadio",          MinImage = 30, MaxImage = 31},
-            new DemoMeta { Title = "Tab.TextBoxPage",               MinImage = 32, MaxImage = 33},
-            new DemoMeta { Title = "TextBox.Editor",                MinImage = 34, MaxImage = 34},
-            new DemoMeta { Title = "TextBox.Colorizer",             MinImage = 35, MaxImage = 37},
-            new DemoMeta { Title = "ListBox.NameEditor",            MinImage = 38, MaxImage = 38},
-            new DemoMeta { Title = "ListBox.NameSelector",          MinImage = 39, MaxImage = 39},
-            new DemoMeta { Title = "ListBox.VirtualMode",           MinImage = 40, MaxImage = 40},
-            new DemoMeta { Title = "ListView.ViewSwitching",        MinImage = 41, MaxImage = 46},
-            new DemoMeta { Title = "ListView.VirtualMode",          MinImage = 47, MaxImage = 47},
-            new DemoMeta { Title = "ListView.SortingAndFiltering",  MinImage = 48, MaxImage = 50},
-            new DemoMeta { Title = "TreeView.FileExplorer",         MinImage = 51, MaxImage = 52},
-        };
-
-        private static string[] demoCategories = new string[]
-        {
-            "Controls",
-        };
-
-        private static Dictionary<string, DemoPageModel[]> categoryIndexedDemos = null;
-        private static Dictionary<string, DemoPageModel> nameIndexedDemos = null;
-
-        static DemoListModel()
-        {
-            categoryIndexedDemos = new Dictionary<string, DemoPageModel[]>();
-            foreach (var category in demoCategories)
-            {
-                var categorizedDemos = (DemoMeta[])typeof(DemoListModel)
-                    .GetField("demo" + category, System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)
-                    .GetValue(null);
-                categoryIndexedDemos.Add(
-                    category,
-                    categorizedDemos
-                        .Select(name => new DemoPageModel
-                        {
-                            Name = "Controls." + name.Title,
-                            Title = name.Title,
-                            Images = Enumerable
-                                .Range(name.MinImage, name.MaxImage - name.MinImage + 1)
-                                .Select(i => string.Format("DXGUI_{0}.jpg", i))
-                                .ToArray(),
-                        })
-                        .ToArray()
+            DemoPageModel page = LoadPages(xmlIndexPath)
+                .Where(d => d.Name == name)
+                .First();
+            string[] cppFiles = page.CppCodes.Keys.ToArray();
+            page.CppCodes = cppFiles
+                .ToDictionary(
+                    s => s,
+                    s => File.ReadAllText(string.Format("{0}/{1}/{2}", Path.GetDirectoryName(xmlIndexPath), page.Name, s))
                     );
-            }
-
-            nameIndexedDemos = categoryIndexedDemos
-                .Values
-                .SelectMany(v => v)
-                .ToDictionary(d => d.Name, d => d);
+            return page;
         }
 
         public DemoPageModel[] DemoPages { get; set; }
 
-        public DemoListModel()
+        public DemoListModel(string xmlIndexPath)
         {
-            this.DemoPages = demoCategories.SelectMany(c => categoryIndexedDemos[c]).ToArray();
-        }
-
-        public static DemoPageModel GetPage(string name)
-        {
-            return nameIndexedDemos[name];
+            this.DemoPages = LoadPages(xmlIndexPath);
         }
     }
 }

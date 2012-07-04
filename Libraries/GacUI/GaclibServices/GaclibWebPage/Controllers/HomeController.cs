@@ -21,8 +21,9 @@ namespace GaclibWebPage.Controllers
             return View(model);
         }
 
-        public ActionResult Demos(DemoListModel model)
+        public ActionResult Demos()
         {
+            DemoListModel model = new DemoListModel(Server.MapPath("~/Content/Demos/Index.xml"));
             model.ActiveButton = NavigationButtons.Demos;
             return View(model);
         }
