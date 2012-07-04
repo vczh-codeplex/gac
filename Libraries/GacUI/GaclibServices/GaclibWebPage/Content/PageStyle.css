@@ -54,27 +54,9 @@ body
     clear: both;
 }
 
-/*Content title*/
-.Title
+.LogoLink img
 {
-    /*font-family: Segoe UI;*/
-    text-align: left;
-    font-style: italic;
-    font-weight: bold;
-    font-size: 64px;
-    color: #0F0F0F;
-    text-decoration: none;
-}
-
-/*Content sub title*/
-.SubTitle
-{
-    /*font-family: Segoe UI;*/
-    text-align: left;
-    font-style: italic;
-    font-weight: normal;
-    font-size: 16px;
-    color: #0F0F0F;
+    border: 0px;
 }
 
 /*Content table*/
