@@ -15,7 +15,7 @@ namespace GaclibDataUploader
         static void Main(string[] args)
         {
             string metaDocFolder = @"..\..\..\..\Public\Temp\StaticMetaDoc";
-            string[] files = Directory.GetFiles(metaDocFolder).OrderBy(s => s.ToUpper()).ToArray();
+            string[] files = Directory.GetFiles(metaDocFolder).OrderBy(s => s.ToUpper()).Select(p => Path.GetFullPath(p)).ToArray();
 
             string key = Clipboard.GetText();
             Console.WriteLine("Your key is: " + key);
@@ -27,6 +27,27 @@ namespace GaclibDataUploader
             Console.WriteLine("Creating container...");
             var container = blobClient.GetContainerReference("gaclib-meta-doc");
             container.CreateIfNotExist();
+
+            Console.WriteLine("Clearning container...");
+            var blobs = container.ListBlobs().ToArray();
+            foreach (var blob in blobs)
+            {
+                var blobRef = container.GetBlobReference(blob.Uri.ToString());
+                blobRef.Delete();
+            }
+
+            Console.WriteLine("Uploading files...");
+            int index = 0;
+            foreach (var file in files)
+            {
+                string blobKey = Path.GetFileNameWithoutExtension(file);
+                var blobRef = container.GetBlobReference(blobKey);
+                blobRef.UploadFile(file);
+                Console.WriteLine("{0}/{1}", ++index, files.Length);
+            }
+
+            Console.WriteLine("Checking files...");
+            string[] urls = container.ListBlobs().Select(b => b.Uri.ToString()).ToArray();
 
             Console.WriteLine("Writing data...");
             Console.WriteLine("Done!");
