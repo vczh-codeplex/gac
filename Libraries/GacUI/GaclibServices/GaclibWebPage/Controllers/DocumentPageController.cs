@@ -11,8 +11,8 @@ namespace GaclibWebPage.Controllers
     {
         public ActionResult ShowDocument()
         {
-            DocumentPageModel model = new DocumentPageModel();
-            model.Title = this.RouteData.Values["uniqueId"].ToString();
+            string uniqueId = this.RouteData.Values["uniqueId"].ToString();
+            DocumentPageModel model = new DocumentPageModel(uniqueId);
             return View(model);
         }
     }

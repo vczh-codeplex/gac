@@ -3,4 +3,21 @@
     ViewBag.Title = @Model.Title;
     Layout = "~/Views/Shared/_DocumentPageLayout.cshtml";
 }
-<h2>@Model.Title</h2>
+<td class="frameTable indexPanel" valign="top">
+    @foreach (var node in Model.IndexTree)
+    {
+        @:<nobr>@(Url.Encode(Enumerable.Range(0,@node.Level).Select(i=>"    ").Aggregate("",(a,b)=>a+b)))
+        if (node.Link)
+        {
+            <a href="@Url.Action("ShowDocument", "DocumentPage", new { uniqueId = @node.UniqueId })">@node.Title</a>
+        }
+        else
+        {
+            <b>@node.Title</b>
+        }
+        @:</nobr><br/>
+    }
+</td>
+<td class="frameTable contentPanel" valign="top">
+    @Model.Content
+</td>
