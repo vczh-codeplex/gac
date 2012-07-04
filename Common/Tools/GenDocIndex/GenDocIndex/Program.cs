@@ -57,6 +57,9 @@ namespace GenDocIndex
                         case "HTML":
                             StaticHtmlDocGenerator.GenerateStaticHtmlDocument(outputTarget, validationResult);
                             break;
+                        case "META":
+                            StaticMetaDocGenerator.GenerateStaticHtmlDocument(outputTarget, validationResult);
+                            break;
                         default:
                             throw new ArgumentException(string.Format("Don't understand output method {0}.", outputMethod));
                     }
