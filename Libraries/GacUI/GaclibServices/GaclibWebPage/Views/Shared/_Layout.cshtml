@@ -18,32 +18,32 @@
                 </tr>
                 <tr>
                     <td align="center" valign="middle">
-                        <a class="MenuButton HomeButtonSelected" href="@Url.Action("Index")">
+                        <a class="MenuButton HomeButton@(Model.ActiveButton.ToString()=="Home"?"Selected":"")" href="@Url.Action("Index")">
                             HOME
                         </a>
                     </td>
                     <td align="center" valign="middle">
-                        <a class="MenuButton GettingStartButton" href="@Url.Action("GettingStart")">
+                        <a class="MenuButton GettingStartButton@(Model.ActiveButton.ToString() == "GettingStart" ? "Selected" : "")" href="@Url.Action("GettingStart")">
                             GETTING START
                         </a>
                     </td>
                     <td align="center" valign="middle">
-                        <a class="MenuButton DemosButton" href="@Url.Action("Demos")">
+                        <a class="MenuButton DemosButton@(Model.ActiveButton.ToString() == "Demos" ? "Selected" : "")" href="@Url.Action("Demos")">
                             DEMOS
                         </a>
                     </td>
                     <td align="center" valign="middle">
-                        <a class="MenuButton DownloadButton" href="@Url.Action("Download")">
+                        <a class="MenuButton DownloadButton@(Model.ActiveButton.ToString() == "Download" ? "Selected" : "")" href="@Url.Action("Download")">
                             DOWNLOAD
                         </a>
                     </td>
                     <td align="center" valign="middle">
-                        <a class="MenuButton DocumentButton" href="./StaticHtmlDoc/reference_gacui.html">
+                        <a class="MenuButton DocumentButton@(Model.ActiveButton.ToString() == "Document" ? "Selected" : "")" href="@Url.Action("Document")">
                             DOCUMENT
                         </a>
                     </td>
                     <td align="center" valign="middle">
-                        <a class="MenuButton ContactButton" href="@Url.Action("Contact")">
+                        <a class="MenuButton ContactButton@(Model.ActiveButton.ToString() == "Contact" ? "Selected" : "")" href="@Url.Action("Contact")">
                             CONTACT
                         </a>
                     </td>
