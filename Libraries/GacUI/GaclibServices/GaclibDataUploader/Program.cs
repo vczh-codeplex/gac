@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace GaclibDataUploader
 {
@@ -24,16 +25,29 @@ namespace GaclibDataUploader
             var account = new CloudStorageAccount(new StorageCredentialsAccountAndKey("gaclibservicesasia", key), true);
             var blobClient = new CloudBlobClient(account.BlobEndpoint.AbsoluteUri, account.Credentials);
 
-            Console.WriteLine("Creating container...");
-            var container = blobClient.GetContainerReference("gaclib-meta-doc");
-            container.CreateIfNotExist();
-
             Console.WriteLine("Clearning container...");
-            var blobs = container.ListBlobs().ToArray();
-            foreach (var blob in blobs)
+            var container = blobClient.GetContainerReference("gaclib-meta-doc");
+            try
             {
-                var blobRef = container.GetBlobReference(blob.Uri.ToString());
-                blobRef.Delete();
+                container.Delete();
+            }
+            catch (Exception)
+            {
+            }
+
+            Console.WriteLine("Creating container...");
+            while (true)
+            {
+                try
+                {
+                    container = blobClient.GetContainerReference("gaclib-meta-doc");
+                    container.CreateIfNotExist();
+                    break;
+                }
+                catch (Exception)
+                {
+                    Thread.Sleep(1000);
+                }
             }
 
             Console.WriteLine("Uploading files...");
