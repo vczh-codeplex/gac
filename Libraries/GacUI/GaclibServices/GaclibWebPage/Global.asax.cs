@@ -38,6 +38,12 @@ namespace GaclibWebPage
                 "Demos/{demoId}/Demo.html",
                 new { controller = "DemoPage", action = "ShowDemo" }
             );
+
+            routes.MapRoute(
+                "DocumentPage",
+                "Document/{uniqueId}.html",
+                new { controller = "DocumentPage", action = "ShowDocument" }
+            );
         }
 
         protected void Application_Start()
