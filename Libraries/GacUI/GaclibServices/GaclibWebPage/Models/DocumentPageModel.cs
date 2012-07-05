@@ -6,6 +6,8 @@ using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 using System.Xml.Linq;
 using System.IO;
+using System.Web.Mvc;
+using System.Text.RegularExpressions;
 
 namespace GaclibWebPage.Models
 {
@@ -19,9 +21,17 @@ namespace GaclibWebPage.Models
             public bool Link { get; set; }
         };
 
+        public class ContentFragment
+        {
+            public string Text { get; set; }
+            public bool IsUniqueId { get; set; }
+        }
+
         public string Title { get; set; }
         public IndexNode[] IndexTree { get; set; }
-        public string Content { get; set; }
+        public ContentFragment[] Content { get; set; }
+
+        private static Regex regexUniqueId = new Regex(@"\$UNIQUEIDLINK\((?<id>\w+)\)");
 
         public DocumentPageModel(string uniqueId)
         {
@@ -46,7 +56,37 @@ namespace GaclibWebPage.Models
                 })
                 .ToArray();
 
-            this.Content = xmlDocument.Root.Element("content").Value;
+            string contentString = xmlDocument.Root.Element("content").Value;
+            var matches = regexUniqueId.Matches(contentString);
+            List<ContentFragment> content = new List<ContentFragment>();
+
+            int index = 0;
+            foreach (Match match in matches)
+            {
+                if (index < match.Index)
+                {
+                    content.Add(new ContentFragment
+                    {
+                        Text = contentString.Substring(index, match.Index - index),
+                        IsUniqueId = false,
+                    });
+                }
+                content.Add(new ContentFragment
+                {
+                    Text = match.Groups["id"].Value,
+                    IsUniqueId = true,
+                });
+                index = match.Index + match.Length;
+            }
+            if (index < contentString.Length)
+            {
+                content.Add(new ContentFragment
+                {
+                    Text = contentString.Substring(index, contentString.Length - index),
+                    IsUniqueId = false,
+                });
+            }
+            this.Content = content.ToArray();
         }
     }
 }
