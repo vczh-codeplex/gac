@@ -3,7 +3,9 @@
   <Role name="GaclibWebPage">
     <Instances count="2" />
     <ConfigurationSettings>
-      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=gaclibservicesasia;AccountKey=UPA5L4x3XNoKin4o/erF3IdhO+zBDS4vBw/3lkuc2clHEwpejX+nmsDiF8d2FQcyewgCZHYGW7SP/rQZFn6qdA==" />
+      <!--DefaultEndpointsProtocol=https;AccountName=gaclibservicesasia;AccountKey=-->
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="UseDevelopmentStorage=true" />
+      <Setting name="DocumentConnectionString" value="UseDevelopmentStorage=true" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

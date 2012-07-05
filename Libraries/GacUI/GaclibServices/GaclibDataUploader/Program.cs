@@ -22,7 +22,12 @@ namespace GaclibDataUploader
             Console.WriteLine("Your key is: " + key);
             Console.Write("Press enter to continue:");
             Console.ReadLine();
-            var account = new CloudStorageAccount(new StorageCredentialsAccountAndKey("gaclibservicesasia", key), true);
+
+            if (key != "UseDevelopmentStorage=true")
+            {
+                key = "DefaultEndpointsProtocol=https;AccountName=gaclibservicesasia;AccountKey=" + key;
+            }
+            var account = CloudStorageAccount.Parse(key);
             var blobClient = new CloudBlobClient(account.BlobEndpoint.AbsoluteUri, account.Credentials);
 
             Console.WriteLine("Clearning container...");

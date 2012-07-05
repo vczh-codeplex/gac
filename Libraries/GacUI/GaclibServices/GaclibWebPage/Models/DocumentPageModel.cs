@@ -35,9 +35,8 @@ namespace GaclibWebPage.Models
 
         public DocumentPageModel(string uniqueId)
         {
-            string serviceName = "gaclibservicesasia";
-            string accessKey = "";
-            var account = new CloudStorageAccount(new StorageCredentialsAccountAndKey(serviceName, accessKey), true);
+            var connectionString = CloudConfigurationManager.GetSetting("DocumentConnectionString");
+            var account = CloudStorageAccount.Parse(connectionString);
             var blobClient = new CloudBlobClient(account.BlobEndpoint.AbsoluteUri, account.Credentials);
             var container = blobClient.GetContainerReference("gaclib-meta-doc");
             var blobRef = container.GetBlobReference(uniqueId);
