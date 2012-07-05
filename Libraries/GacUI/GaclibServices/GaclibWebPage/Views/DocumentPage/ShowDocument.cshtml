@@ -6,10 +6,14 @@
 <td class="frameTable indexPanel" valign="top">
     @foreach (var node in Model.IndexTree)
     {
-        @:<nobr>@(Url.Encode(Enumerable.Range(0,@node.Level).Select(i=>"    ").Aggregate("",(a,b)=>a+b)))
+        @:<nobr>
+        for (int i = 0; i < node.Level; i++)
+        {
+            @:&nbsp;&nbsp;&nbsp;&nbsp;
+        }
         if (node.Link)
         {
-            <a href="@Url.Action("ShowDocument", "DocumentPage", new { uniqueId = @node.UniqueId })">@node.Title</a>
+            <a href="@Url.Action("ShowDocument", "DocumentPage", new { uniqueId = node.UniqueId })">@node.Title</a>
         }
         else
         {
@@ -19,5 +23,15 @@
     }
 </td>
 <td class="frameTable contentPanel" valign="top">
-    @Model.Content
+    @foreach (var fragment in Model.Content)
+    {
+        if (fragment.IsUniqueId)
+        {
+            @(Url.Action("ShowDocument", "DocumentPage", new { uniqueId = fragment.Text }))
+        }
+        else
+        {
+            @(new MvcHtmlString(fragment.Text))
+        }
+    }
 </td>
