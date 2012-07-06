@@ -184,7 +184,16 @@ namespace AzureStorageFacadeLibrary
         {
             get
             {
-                return this.RawDirectory.Uri.ToString();
+                string name = "";
+                if (this.Directory != null)
+                {
+                    name = this.RawDirectory.Uri.ToString().Substring(this.Directory.Uri.ToString().Length);
+                }
+                else
+                {
+                    name = this.RawDirectory.Uri.ToString().Substring(this.Container.Uri.ToString().Length + 1);
+                }
+                return name.Substring(0, name.Length - this.Container.Server.RawContainerClient.DefaultDelimiter.Length);
             }
         }
 
@@ -252,7 +261,14 @@ namespace AzureStorageFacadeLibrary
         {
             get
             {
-                return this.RawBlob.Name;
+                if (this.Directory != null)
+                {
+                    return this.RawBlob.Uri.ToString().Substring(this.Directory.Uri.ToString().Length);
+                }
+                else
+                {
+                    return this.RawBlob.Uri.ToString().Substring(this.Container.Uri.ToString().Length + 1);
+                }
             }
         }
 
