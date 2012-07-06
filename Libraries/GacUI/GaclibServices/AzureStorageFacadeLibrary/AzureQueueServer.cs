@@ -20,7 +20,7 @@ namespace AzureStorageFacadeLibrary
         {
             get
             {
-                throw new NotImplementedException();
+                return this.RawQueueClient.ListQueues().Select(q => new AzureQueue(this, q));
             }
         }
 
@@ -28,7 +28,7 @@ namespace AzureStorageFacadeLibrary
         {
             get
             {
-                return new AzureQueue(this, name);
+                return new AzureQueue(this, this.RawQueueClient.GetQueueReference(name));
             }
         }
     }
@@ -38,15 +38,28 @@ namespace AzureStorageFacadeLibrary
         public AzureQueueServer Server { get; private set; }
         public CloudQueue RawQueue { get; private set; }
 
-        internal AzureQueue(AzureQueueServer server, string name)
+        private AzureQueueMessage CreateMessage(CloudQueueMessage message)
+        {
+            return message == null ? null : new AzureQueueMessage(this, message);
+        }
+
+        internal AzureQueue(AzureQueueServer server, CloudQueue rawQueue)
         {
             this.Server = server;
-            this.RawQueue = server.RawQueueClient.GetQueueReference(name);
+            this.RawQueue = rawQueue;
         }
 
         public AzureLazy CreateQueue()
         {
             return new AzureLazy(this.RawQueue.Create, this.RawQueue.BeginCreate, this.RawQueue.EndCreate);
+        }
+
+        public string Name
+        {
+            get
+            {
+                return this.RawQueue.Name;
+            }
         }
 
         public AzureLazy<bool> CreateQueueIfNotExist()
@@ -90,36 +103,36 @@ namespace AzureStorageFacadeLibrary
         public AzureLazy<AzureQueueMessage> PopMessage()
         {
             return new AzureLazy<AzureQueueMessage>(
-                () => new AzureQueueMessage(this, this.RawQueue.GetMessage()),
+                () => CreateMessage(this.RawQueue.GetMessage()),
                 this.RawQueue.BeginGetMessage,
-                ar => new AzureQueueMessage(this, this.RawQueue.EndGetMessage(ar))
+                ar => CreateMessage(this.RawQueue.EndGetMessage(ar))
                 );
         }
 
         public AzureLazy<IEnumerable<AzureQueueMessage>> PopMessages(int messageCount)
         {
             return new AzureLazy<IEnumerable<AzureQueueMessage>>(
-                () => this.RawQueue.GetMessages(messageCount).Select(m => new AzureQueueMessage(this, m)),
+                () => this.RawQueue.GetMessages(messageCount).Select(m => CreateMessage(m)),
                 (ac, st) => this.RawQueue.BeginGetMessages(messageCount, ac, st),
-                ar => this.RawQueue.EndGetMessages(ar).Select(m => new AzureQueueMessage(this, m))
+                ar => this.RawQueue.EndGetMessages(ar).Select(m => CreateMessage(m))
                 );
         }
 
         public AzureLazy<AzureQueueMessage> PeekMessage()
         {
             return new AzureLazy<AzureQueueMessage>(
-                () => new AzureQueueMessage(this, this.RawQueue.PeekMessage()),
+                () => CreateMessage(this.RawQueue.PeekMessage()),
                 this.RawQueue.BeginPeekMessage,
-                ar => new AzureQueueMessage(this, this.RawQueue.EndPeekMessage(ar))
+                ar => CreateMessage(this.RawQueue.EndPeekMessage(ar))
                 );
         }
 
         public AzureLazy<IEnumerable<AzureQueueMessage>> PeekMessages(int messageCount)
         {
             return new AzureLazy<IEnumerable<AzureQueueMessage>>(
-                () => this.RawQueue.PeekMessages(messageCount).Select(m => new AzureQueueMessage(this, m)),
+                () => this.RawQueue.PeekMessages(messageCount).Select(m => CreateMessage(m)),
                 (ac, st) => this.RawQueue.BeginPeekMessages(messageCount, ac, st),
-                ar => this.RawQueue.EndPeekMessages(ar).Select(m => new AzureQueueMessage(this, m))
+                ar => this.RawQueue.EndPeekMessages(ar).Select(m => CreateMessage(m))
                 );
         }
 
@@ -151,6 +164,99 @@ namespace AzureStorageFacadeLibrary
         {
             this.Queue = queue;
             this.RawMessage = message;
+        }
+
+        public byte[] AsBytes
+        {
+            get
+            {
+                return this.RawMessage.AsBytes;
+            }
+        }
+
+        public string AsString
+        {
+            get
+            {
+                return this.RawMessage.AsString;
+            }
+        }
+
+        public int DequeueCount
+        {
+            get
+            {
+                return this.RawMessage.DequeueCount;
+            }
+        }
+
+        public DateTime? ExpirationTime
+        {
+            get
+            {
+                return this.RawMessage.ExpirationTime;
+            }
+        }
+
+        public DateTime? InsertionTime
+        {
+            get
+            {
+                return this.RawMessage.InsertionTime;
+            }
+        }
+
+        public DateTime? NextVisibleTime
+        {
+            get
+            {
+                return this.RawMessage.NextVisibleTime;
+            }
+        }
+
+        public string Id
+        {
+            get
+            {
+                return this.RawMessage.Id;
+            }
+        }
+
+        public string PopReceipt
+        {
+            get
+            {
+                return this.RawMessage.PopReceipt;
+            }
+        }
+
+        public AzureLazy UpdateMessage(TimeSpan visibilityTimeout)
+        {
+            return new AzureLazy(
+                () => this.Queue.RawQueue.UpdateMessage(this.RawMessage, visibilityTimeout, MessageUpdateFields.Visibility),
+                (ac, st) => this.Queue.RawQueue.BeginUpdateMessage(this.RawMessage, visibilityTimeout, MessageUpdateFields.Visibility, ac, st),
+                this.Queue.RawQueue.EndUpdateMessage
+                );
+        }
+
+        public AzureLazy UpdateMessage(TimeSpan visibilityTimeout, string message)
+        {
+            this.RawMessage.SetMessageContent(message);
+            return new AzureLazy(
+                () => this.Queue.RawQueue.UpdateMessage(this.RawMessage, visibilityTimeout, MessageUpdateFields.Visibility | MessageUpdateFields.Content),
+                (ac, st) => this.Queue.RawQueue.BeginUpdateMessage(this.RawMessage, visibilityTimeout, MessageUpdateFields.Visibility, ac, st),
+                this.Queue.RawQueue.EndUpdateMessage
+                );
+        }
+
+        public AzureLazy UpdateMessage(TimeSpan visibilityTimeout, byte[] message)
+        {
+            this.RawMessage.SetMessageContent(message);
+            return new AzureLazy(
+                () => this.Queue.RawQueue.UpdateMessage(this.RawMessage, visibilityTimeout, MessageUpdateFields.Visibility | MessageUpdateFields.Content),
+                (ac, st) => this.Queue.RawQueue.BeginUpdateMessage(this.RawMessage, visibilityTimeout, MessageUpdateFields.Visibility, ac, st),
+                this.Queue.RawQueue.EndUpdateMessage
+                );
         }
     }
 }
