@@ -47,9 +47,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AzureBlobServer.cs" />
+    <Compile Include="AzureLazy.cs" />
     <Compile Include="AzureQueueServer.cs" />
     <Compile Include="AzureStorageFacade.cs" />
     <Compile Include="AzureTableServer.cs" />
+    <Compile Include="FakeAsyncResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

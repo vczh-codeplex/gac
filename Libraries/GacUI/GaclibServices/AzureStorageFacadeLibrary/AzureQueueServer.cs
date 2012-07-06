@@ -49,17 +49,17 @@ namespace AzureStorageFacadeLibrary
             this.RawQueue = rawQueue;
         }
 
-        public AzureLazy CreateQueue()
-        {
-            return new AzureLazy(this.RawQueue.Create, this.RawQueue.BeginCreate, this.RawQueue.EndCreate);
-        }
-
         public string Name
         {
             get
             {
                 return this.RawQueue.Name;
             }
+        }
+
+        public AzureLazy CreateQueue()
+        {
+            return new AzureLazy(this.RawQueue.Create, this.RawQueue.BeginCreate, this.RawQueue.EndCreate);
         }
 
         public AzureLazy<bool> CreateQueueIfNotExist()
