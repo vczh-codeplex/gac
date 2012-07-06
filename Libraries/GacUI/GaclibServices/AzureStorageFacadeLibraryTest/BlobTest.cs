@@ -53,5 +53,37 @@ namespace AzureStorageFacadeLibraryTest
                 Assert.AreEqual(i < 5, this.blobServer["container-" + i.ToString()].CreateContainerIfNotExist().Sync());
             }
         }
+
+        [TestMethod]
+        public void TestUploadText()
+        {
+            var container = this.blobServer["azure-storage-facade-library-test"];
+            Assert.IsFalse(container.IsContainerExists().Sync());
+            container.CreateContainer().Sync();
+            Assert.IsTrue(container.IsContainerExists().Sync());
+
+            Assert.AreEqual(0, container.Directories.Count());
+            Assert.AreEqual(0, container.Blobs.Count());
+            Assert.AreEqual(0, container.FlatBlobs.Count());
+
+            var blob = container.GetBlob("vczh");
+            Assert.IsFalse(blob.IsBlobExists().Sync());
+            blob.AsString = "genius";
+            Assert.IsTrue(blob.IsBlobExists().Sync());
+            Assert.AreEqual("genius", blob.AsString);
+
+            Assert.AreEqual(0, container.Directories.Count());
+            Assert.AreEqual(1, container.Blobs.Count());
+            Assert.AreEqual(1, container.FlatBlobs.Count());
+            Assert.AreEqual("vczh", container.Blobs.First().Name);
+            Assert.AreEqual("vczh", container.FlatBlobs.First().Name);
+
+            blob.Delete().Sync();
+            Assert.IsFalse(blob.DeleteIfExists().Sync());
+
+            Assert.AreEqual(0, container.Directories.Count());
+            Assert.AreEqual(0, container.Blobs.Count());
+            Assert.AreEqual(0, container.FlatBlobs.Count());
+        }
     }
 }
