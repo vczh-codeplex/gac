@@ -9,9 +9,20 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaclibDataUploader", "Gacli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaclibDataViewer", "GaclibDataViewer\GaclibDataViewer.csproj", "{13E838D9-21F9-4D3C-A9BC-222148986663}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureStorageFacadeLibrary", "AzureStorageFacadeLibrary\AzureStorageFacadeLibrary.csproj", "{17116ED4-93B7-436F-8A99-B70627E2097A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureStorageFacadeLibraryTest", "AzureStorageFacadeLibraryTest\AzureStorageFacadeLibraryTest.csproj", "{E63078B5-5CD6-4460-9416-859AF348DFAF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B03B7B16-8C61-440D-8133-C83AE1D8CA02}"
+	ProjectSection(SolutionItems) = preProject
+		GaclibServices.vsmdi = GaclibServices.vsmdi
+		Local.testsettings = Local.testsettings
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 5
+		SccNumberOfProjects = 7
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
@@ -27,6 +38,15 @@ Global
 		SccProjectUniqueName4 = GaclibDataViewer\\GaclibDataViewer.csproj
 		SccProjectName4 = GaclibDataViewer
 		SccLocalPath4 = GaclibDataViewer
+		SccProjectUniqueName5 = AzureStorageFacadeLibrary\\AzureStorageFacadeLibrary.csproj
+		SccProjectName5 = AzureStorageFacadeLibrary
+		SccLocalPath5 = AzureStorageFacadeLibrary
+		SccProjectUniqueName6 = AzureStorageFacadeLibraryTest\\AzureStorageFacadeLibraryTest.csproj
+		SccProjectName6 = AzureStorageFacadeLibraryTest
+		SccLocalPath6 = AzureStorageFacadeLibraryTest
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = GaclibServices.vsmdi
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +97,26 @@ Global
 		{13E838D9-21F9-4D3C-A9BC-222148986663}.Release|Mixed Platforms.Build.0 = Release|x86
 		{13E838D9-21F9-4D3C-A9BC-222148986663}.Release|x86.ActiveCfg = Release|x86
 		{13E838D9-21F9-4D3C-A9BC-222148986663}.Release|x86.Build.0 = Release|x86
+		{17116ED4-93B7-436F-8A99-B70627E2097A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17116ED4-93B7-436F-8A99-B70627E2097A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17116ED4-93B7-436F-8A99-B70627E2097A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{17116ED4-93B7-436F-8A99-B70627E2097A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{17116ED4-93B7-436F-8A99-B70627E2097A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{17116ED4-93B7-436F-8A99-B70627E2097A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17116ED4-93B7-436F-8A99-B70627E2097A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17116ED4-93B7-436F-8A99-B70627E2097A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{17116ED4-93B7-436F-8A99-B70627E2097A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{17116ED4-93B7-436F-8A99-B70627E2097A}.Release|x86.ActiveCfg = Release|Any CPU
+		{E63078B5-5CD6-4460-9416-859AF348DFAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E63078B5-5CD6-4460-9416-859AF348DFAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E63078B5-5CD6-4460-9416-859AF348DFAF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{E63078B5-5CD6-4460-9416-859AF348DFAF}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{E63078B5-5CD6-4460-9416-859AF348DFAF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E63078B5-5CD6-4460-9416-859AF348DFAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E63078B5-5CD6-4460-9416-859AF348DFAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E63078B5-5CD6-4460-9416-859AF348DFAF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{E63078B5-5CD6-4460-9416-859AF348DFAF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{E63078B5-5CD6-4460-9416-859AF348DFAF}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
