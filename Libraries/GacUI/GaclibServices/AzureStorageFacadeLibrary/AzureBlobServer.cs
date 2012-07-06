@@ -37,6 +37,7 @@ namespace AzureStorageFacadeLibrary
     public abstract class AzureBlobDirectoryBase
     {
         public abstract Uri Uri { get; }
+        public abstract string Name { get; }
         public abstract IEnumerable<AzureBlobDirectory> Directories { get; }
         public abstract IEnumerable<AzureBlob> Blobs { get; }
         public abstract IEnumerable<AzureBlob> FlatBlobs { get; }
@@ -53,14 +54,6 @@ namespace AzureStorageFacadeLibrary
         {
             this.Server = server;
             this.RawContainer = rawContainer;
-        }
-
-        public string Name
-        {
-            get
-            {
-                return this.RawContainer.Name;
-            }
         }
 
         public AzureLazy CreateContainer()
@@ -101,6 +94,14 @@ namespace AzureStorageFacadeLibrary
                     }
                 }
                 );
+        }
+
+        public override string Name
+        {
+            get
+            {
+                return this.RawContainer.Name;
+            }
         }
 
         public override Uri Uri
@@ -179,6 +180,14 @@ namespace AzureStorageFacadeLibrary
             }
         }
 
+        public override string Name
+        {
+            get
+            {
+                return this.RawDirectory.Uri.ToString();
+            }
+        }
+
         public override IEnumerable<AzureBlobDirectory> Directories
         {
             get
@@ -237,6 +246,14 @@ namespace AzureStorageFacadeLibrary
             this.Container = container;
             this.Directory = directory;
             this.RawBlob = rawBlob;
+        }
+
+        public string Name
+        {
+            get
+            {
+                return this.RawBlob.Name;
+            }
         }
 
         public AzureLazy<bool> IsBlobExists()
