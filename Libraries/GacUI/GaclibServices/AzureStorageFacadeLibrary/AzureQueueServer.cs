@@ -57,6 +57,14 @@ namespace AzureStorageFacadeLibrary
             }
         }
 
+        public Uri Uri
+        {
+            get
+            {
+                return this.RawQueue.Uri;
+            }
+        }
+
         public AzureLazy CreateQueue()
         {
             return new AzureLazy(this.RawQueue.Create, this.RawQueue.BeginCreate, this.RawQueue.EndCreate);
