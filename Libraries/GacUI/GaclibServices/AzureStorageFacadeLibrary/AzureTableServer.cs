@@ -4,16 +4,19 @@ using System.Linq;
 using System.Text;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
+using System.Data.Services.Client;
 
 namespace AzureStorageFacadeLibrary
 {
     public class AzureTableServer
     {
-        public CloudTableClient RawQueueClient { get; protected set; }
+        public CloudTableClient RawQueueClient { get; private set; }
+        public TableServiceContext RawContext { get; private set; }
 
         protected internal AzureTableServer(CloudStorageAccount account)
         {
             this.RawQueueClient = new CloudTableClient(account.TableEndpoint.AbsoluteUri, account.Credentials);
+            this.RawContext = this.RawQueueClient.GetDataServiceContext();
         }
 
         public IEnumerable<AzureTable> Tables
@@ -31,12 +34,21 @@ namespace AzureStorageFacadeLibrary
                 return new AzureTable(this, name);
             }
         }
+
+        public AzureLazy<DataServiceResponse> SaveChanges()
+        {
+            return new AzureLazy<DataServiceResponse>(
+                this.RawContext.SaveChanges,
+                this.RawContext.BeginSaveChanges,
+                this.RawContext.EndSaveChanges
+                );
+        }
     }
 
     public class AzureTable
     {
         public AzureTableServer Server { get; private set; }
-        public string Name { get; set; }
+        public string Name { get; private set; }
 
         internal AzureTable(AzureTableServer server, string name)
         {
@@ -86,6 +98,39 @@ namespace AzureStorageFacadeLibrary
                 () => this.Server.RawQueueClient.DoesTableExist(this.Name),
                 (ac, st) => this.Server.RawQueueClient.BeginDoesTableExist(this.Name, ac, st),
                 this.Server.RawQueueClient.EndDoesTableExist
+                );
+        }
+
+        public void AddEntity(TableServiceEntity entity)
+        {
+            this.Server.RawContext.AddObject(this.Name, entity);
+        }
+
+        public void DeleteEntity(TableServiceEntity entity)
+        {
+            this.Server.RawContext.DeleteObject(entity);
+        }
+
+        public void UpdateEntity(TableServiceEntity entity)
+        {
+            this.Server.RawContext.UpdateObject(entity);
+        }
+
+        public DataServiceQuery<T> Query<T>()
+            where T : TableServiceEntity
+        {
+            return this.Server.RawContext.CreateQuery<T>(this.Name);
+        }
+
+        public AzureLazy<IEnumerable<U>> Query<T, U>(Func<DataServiceQuery<T>, DataServiceQuery<U>> query)
+            where T : TableServiceEntity
+            where U : TableServiceEntity
+        {
+            var result = query(Query<T>());
+            return new AzureLazy<IEnumerable<U>>(
+                result.Execute,
+                result.BeginExecute,
+                result.EndExecute
                 );
         }
     }
