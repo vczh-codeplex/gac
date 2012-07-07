@@ -18,16 +18,12 @@ namespace GaclibDataUploader
             string metaDocFolder = @"..\..\..\..\Public\Temp\StaticMetaDoc";
             string[] files = Directory.GetFiles(metaDocFolder).OrderBy(s => s.ToUpper()).Select(p => Path.GetFullPath(p)).ToArray();
 
-            string key = Clipboard.GetText();
-            Console.WriteLine("Your key is: " + key);
+            string connectinString = Clipboard.GetText();
+            Console.WriteLine("Your key is: " + connectinString);
             Console.Write("Press enter to continue:");
             Console.ReadLine();
 
-            if (key != "UseDevelopmentStorage=true")
-            {
-                key = "DefaultEndpointsProtocol=https;AccountName=gaclibservicesasia;AccountKey=" + key;
-            }
-            var account = CloudStorageAccount.Parse(key);
+            var account = CloudStorageAccount.Parse(connectinString);
             var blobClient = new CloudBlobClient(account.BlobEndpoint.AbsoluteUri, account.Credentials);
 
             Console.WriteLine("Clearning container...");
