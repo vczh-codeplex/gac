@@ -80,7 +80,7 @@ namespace AzureStorageFacadeLibrary
             return new AzureLazy(this.RawQueue.Delete, this.RawQueue.BeginDelete, this.RawQueue.EndDelete);
         }
 
-        public AzureLazy<bool> IsQueueExists()
+        public AzureLazy<bool> DoesQueueExist()
         {
             return new AzureLazy<bool>(this.RawQueue.Exists, this.RawQueue.BeginExists, this.RawQueue.EndExists);
         }
