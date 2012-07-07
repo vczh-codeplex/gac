@@ -10,7 +10,7 @@ namespace AzureStorageFacadeLibrary
 {
     public class AzureBlobServer
     {
-        public CloudBlobClient RawContainerClient { get; protected set; }
+        public CloudBlobClient RawContainerClient { get; private set; }
 
         protected internal AzureBlobServer(CloudStorageAccount account)
         {
