@@ -71,7 +71,7 @@ namespace AzureStorageFacadeLibrary
             return new AzureLazy(this.RawContainer.Delete, this.RawContainer.BeginDelete, this.RawContainer.EndDelete);
         }
 
-        public AzureLazy<bool> IsContainerExists()
+        public AzureLazy<bool> DoesContainerExist()
         {
             return new AzureLazy<bool>(
                 () =>
@@ -272,7 +272,7 @@ namespace AzureStorageFacadeLibrary
             }
         }
 
-        public AzureLazy<bool> IsBlobExists()
+        public AzureLazy<bool> DoesBlobExist()
         {
             return new AzureLazy<bool>(
                 () =>

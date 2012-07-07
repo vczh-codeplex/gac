@@ -46,7 +46,7 @@ namespace AzureStorageFacadeLibraryTest
             }
             for (int i = 0; i < 10; i++)
             {
-                Assert.AreEqual(i >= 5, this.blobServer["container-" + i.ToString()].IsContainerExists().Sync());
+                Assert.AreEqual(i >= 5, this.blobServer["container-" + i.ToString()].DoesContainerExist().Sync());
             }
             for (int i = 0; i < 10; i++)
             {
@@ -58,18 +58,18 @@ namespace AzureStorageFacadeLibraryTest
         public void TestUploadText()
         {
             var container = this.blobServer["azure-storage-facade-library-test"];
-            Assert.IsFalse(container.IsContainerExists().Sync());
+            Assert.IsFalse(container.DoesContainerExist().Sync());
             container.CreateContainer().Sync();
-            Assert.IsTrue(container.IsContainerExists().Sync());
+            Assert.IsTrue(container.DoesContainerExist().Sync());
 
             Assert.AreEqual(0, container.Directories.Count());
             Assert.AreEqual(0, container.Blobs.Count());
             Assert.AreEqual(0, container.FlatBlobs.Count());
 
             var blob = container.GetBlob("vczh");
-            Assert.IsFalse(blob.IsBlobExists().Sync());
+            Assert.IsFalse(blob.DoesBlobExist().Sync());
             blob.AsString = "genius";
-            Assert.IsTrue(blob.IsBlobExists().Sync());
+            Assert.IsTrue(blob.DoesBlobExist().Sync());
             Assert.AreEqual("genius", blob.AsString);
 
             Assert.AreEqual(0, container.Directories.Count());
@@ -90,9 +90,9 @@ namespace AzureStorageFacadeLibraryTest
         public void TestDirectory()
         {
             var container = this.blobServer["azure-storage-facade-library-test"];
-            Assert.IsFalse(container.IsContainerExists().Sync());
+            Assert.IsFalse(container.DoesContainerExist().Sync());
             container.CreateContainer().Sync();
-            Assert.IsTrue(container.IsContainerExists().Sync());
+            Assert.IsTrue(container.DoesContainerExist().Sync());
 
             Assert.AreEqual(0, container.Directories.Count());
             Assert.AreEqual(0, container.Blobs.Count());

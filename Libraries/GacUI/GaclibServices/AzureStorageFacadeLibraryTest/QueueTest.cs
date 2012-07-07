@@ -45,7 +45,7 @@ namespace AzureStorageFacadeLibraryTest
             }
             for (int i = 0; i < 10; i++)
             {
-                Assert.AreEqual(i >= 5, this.queueServer["queue-" + i.ToString()].IsQueueExists().Sync());
+                Assert.AreEqual(i >= 5, this.queueServer["queue-" + i.ToString()].DoesQueueExist().Sync());
             }
             for (int i = 0; i < 10; i++)
             {
