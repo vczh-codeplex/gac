@@ -1,4 +1,4 @@
-﻿@model GaclibWebPage.Models.NavigationBarModel
+﻿@model GaclibWebPage.Models.IndexPageModel
 
 @{
     ViewBag.Title = "GacLib - Home";
@@ -44,23 +44,25 @@
             <!--Latest Update-->
             <tr class="GuideTableHeader">
                 <td>
-                    Latest Updates: (2012/6/24)
+                    Latest Updates: (@Model.LatestUpdateDemo.UpdateDate.ToString("yyyy/mm/dd"))
                 </td>
             </tr>
             <tr class="GuideTableBody">
                 <td align="left" valign="top">
-                    <strong>Controls.TreeView.FileExplorer</strong>
-                    <p>This demo shows how to build an application to browse the local file system using a GuiTreeView control.</p>
-                    <a class="ReadMoreLink" href="@Url.Action("ShowDemo", "DemoPage", new { demoId = "Controls.TreeView.FileExplorer" })">Read more...</a>
+                    <strong>@Model.LatestUpdateDemo.Name</strong>
+                    <p>@Model.LatestUpdateDemo.Description</p>
+                    <a class="ReadMoreLink" href="@Url.Action("ShowDemo", "DemoPage", new { demoId = @Model.LatestUpdateDemo.Name })">Read more...</a>
                 </td>
             </tr>
             <tr class="GuideTableBody">
                 <td align="left" valign="top">
                     <strong>We provide mirror sites for people in different regions.</strong>
                     <p>
-                    <a href="http://www.gaclib.net/" target="_blank">http://www.gaclib.net/</a><br />&nbsp;&nbsp;&nbsp;&nbsp;(Hosted in China Mainland)<br />
-                    <a href="http://asia.gaclib.net/" target="_blank">http://asia.gaclib.net/</a><br />&nbsp;&nbsp;&nbsp;&nbsp;(Hosted in Hong Kong)<br />
-                    <a href="http://us.gaclib.net/" target="_blank">http://us.gaclib.net/</a><br />&nbsp;&nbsp;&nbsp;&nbsp;(Hosted in West US)<br />
+                    @foreach(var site in Model.MirrorSites)
+                    {
+                        <a href="@site.Url" target="_blank">@site.Url</a><br />
+                        @:&nbsp;&nbsp;&nbsp;&nbsp;(@site.Description)<br />
+                    }
                     </p>
                 </td>
             </tr>

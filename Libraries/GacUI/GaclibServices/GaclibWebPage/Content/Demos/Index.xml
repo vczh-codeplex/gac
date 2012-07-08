@@ -2,47 +2,66 @@
 <demos>
   <category name="Controls">
     <demo name="Label.Hyperlink">
+      <date>2012/5/4</date>
       <image src="DXGUI_27.jpg" />
       <cpp src="Main.cpp" />
+      <description>This demo shows how to build a hyperlink using a GuiLabel.</description>
     </demo>
     <demo name="Button.EnableDisable">
+      <date>2012/4/25</date>
       <image src="DXGUI_28.jpg" />
       <image src="DXGUI_29.jpg" />
       <cpp src="Main.cpp" />
+      <description>This demo shows how to layout, enable and disable a GuiButton.</description>
     </demo>
     <demo name="Button.CheckAndRadio">
+      <date>2012/4/27</date>
       <image src="DXGUI_30.jpg" />
       <image src="DXGUI_31.jpg" />
       <cpp src="Main.cpp" />
+      <description>This demo shows how to layout and use GuiSelectableButton with check box and radio button styles.</description>
     </demo>
     <demo name="Tab.TextBoxPage">
+      <date>2012/5/1</date>
       <image src="DXGUI_32.jpg" />
       <image src="DXGUI_33.jpg" />
       <cpp src="Main.cpp" />
+      <description>This demo shows how add and remove tabs in a GuiTab dynamically.</description>
     </demo>
     <demo name="TextBox.Editor">
+      <date>2012/5/5</date>
       <image src="DXGUI_34.jpg" />
       <cpp src="Main.cpp" />
+      <description>This demo shows how to use GuiSinglineTextBox and GuiMultilineTextBox.</description>
     </demo>
     <demo name="TextBox.Colorizer">
+      <date>2012/5/20</date>
       <image src="DXGUI_35.jpg" />
       <image src="DXGUI_36.jpg" />
       <image src="DXGUI_37.jpg" />
       <cpp src="Main.cpp" />
+      <description>This demo shows how to colorize the text in a GuiMultilineTextBox just like other IDEs do.</description>
     </demo>
     <demo name="ListBox.NameEditor">
+      <date>2012/5/23</date>
       <image src="DXGUI_38.jpg" />
       <cpp src="Main.cpp" />
+      <description>This demo shows how to add and remove items in a GuiTextList.</description>
     </demo>
     <demo name="ListBox.NameSelector">
+      <date>2012/5/26</date>
       <image src="DXGUI_39.jpg" />
       <cpp src="Main.cpp" />
+      <description>This demo shows how to use Linq for C++ with a GuiTextList.</description>
     </demo>
     <demo name="ListBox.VirtualMode">
+      <date>2012/5/27</date>
       <image src="DXGUI_40.jpg" />
       <cpp src="Main.cpp" />
+      <description>This demo shows how to use the virtual mode of a GuiTextList to implemente delay loading.</description>
     </demo>
     <demo name="ListView.ViewSwitching">
+      <date>2012/5/30</date>
       <image src="DXGUI_41.jpg" />
       <image src="DXGUI_42.jpg" />
       <image src="DXGUI_43.jpg" />
@@ -52,27 +71,34 @@
       <cpp src="Main.cpp" />
       <cpp src="../CommonLibrary/FileSystemInformation.h" />
       <cpp src="../CommonLibrary/FileSystemInformation.cpp" />
+      <description>This demo shows how to use different predefined views of a GuiListView.</description>
     </demo>
     <demo name="ListView.VirtualMode">
+      <date>2012/6/6</date>
       <image src="DXGUI_47.jpg" />
       <cpp src="Main.cpp" />
       <cpp src="../CommonLibrary/FileSystemInformation.h" />
       <cpp src="../CommonLibrary/FileSystemInformation.cpp" />
+      <description>This demo shows how to use the virtual mode of a GuiListView to implemente delay loading.</description>
     </demo>
     <demo name="ListView.SortingAndFiltering">
+      <date>2012/6/16</date>
       <image src="DXGUI_48.jpg" />
       <image src="DXGUI_49.jpg" />
       <image src="DXGUI_50.jpg" />
       <cpp src="Main.cpp" />
       <cpp src="../CommonLibrary/FileSystemInformation.h" />
       <cpp src="../CommonLibrary/FileSystemInformation.cpp" />
+      <description>This demo shows how to use a GuiListView column sorting state and dropdown menu to process the data.</description>
     </demo>
     <demo name="TreeView.FileExplorer">
+      <date>2012/6/24</date>
       <image src="DXGUI_51.jpg" />
       <image src="DXGUI_52.jpg" />
       <cpp src="Main.cpp" />
       <cpp src="../CommonLibrary/FileSystemInformation.h" />
       <cpp src="../CommonLibrary/FileSystemInformation.cpp" />
+      <description>This demo shows how to build an application to browse the local file system using a GuiTreeView control.</description>
     </demo>
   </category>
 </demos>
