@@ -102,9 +102,10 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\DemoListModel.cs" />
     <Compile Include="Models\DemoPageModel.cs" />
+    <Compile Include="Models\IndividualDemoPageModel.cs" />
     <Compile Include="Models\DocumentPageModel.cs" />
+    <Compile Include="Models\IndexPageModel.cs" />
     <Compile Include="Models\NavigationBarModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebRole.cs" />

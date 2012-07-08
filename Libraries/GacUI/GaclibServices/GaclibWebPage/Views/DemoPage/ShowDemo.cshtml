@@ -1,4 +1,4 @@
-﻿@model GaclibWebPage.Models.DemoPageModel
+﻿@model GaclibWebPage.Models.IndividualDemoPageModel
            
 @{
     ViewBag.Title = "GacLib - Demos - " + Model.Title;
@@ -7,12 +7,13 @@
 <tr>
     <td align="left" valign="top" colspan="6">
         <h1>@Model.Title</h1>
+        <p>@Model.Description</p>
+        <p><strong>This demo contains the following screenshots:</strong></p>
         @foreach (var image in Model.Images)
         {
             <img src="@Url.Content(string.Format("~/Content/Demos/{0}/{1}", Model.Name, image))" />
         }
-        <p>
-            <strong>This demo contains the following code files:</strong></p>
+        <p><strong>This demo contains the following code files:</strong></p>
         <ul>
             @foreach (var cppName in Model.CppCodes.Keys)
             {

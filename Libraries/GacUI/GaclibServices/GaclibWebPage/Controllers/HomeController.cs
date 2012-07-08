@@ -9,8 +9,9 @@ namespace GaclibWebPage.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Index(NavigationBarModel model)
+        public ActionResult Index()
         {
+            IndexPageModel model = new IndexPageModel(Server.MapPath(DemoPageModel.DefaultXmlIndexPath));
             model.ActiveButton = NavigationButtons.Home;
             return View(model);
         }
@@ -23,7 +24,7 @@ namespace GaclibWebPage.Controllers
 
         public ActionResult Demos()
         {
-            DemoListModel model = new DemoListModel(Server.MapPath("~/Content/Demos/Index.xml"));
+            DemoPageModel model = new DemoPageModel(Server.MapPath(DemoPageModel.DefaultXmlIndexPath));
             model.ActiveButton = NavigationButtons.Demos;
             return View(model);
         }
