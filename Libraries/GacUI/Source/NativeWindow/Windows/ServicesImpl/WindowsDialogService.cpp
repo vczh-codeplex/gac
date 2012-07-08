@@ -164,6 +164,11 @@ WindowsDialogService
 				}
 				return result!=FALSE;
 			}
+
+			bool WindowsDialogService::ShowFileDialog(INativeWindow* window, collections::List<WString>& selection, FileDialogTypes dialogType, const WString& title, const WString& initialFileName, const WString& initialDirectory, const WString& defaultExtension, const WString& filter, FileDialogOptions options)
+			{
+				return false;
+			}
 		}
 	}
 }
