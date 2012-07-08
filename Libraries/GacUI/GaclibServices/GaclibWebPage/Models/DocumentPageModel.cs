@@ -28,6 +28,7 @@ namespace GaclibWebPage.Models
         }
 
         public string Title { get; set; }
+        public string UniqueId { get; set; }
         public IndexNode[] IndexTree { get; set; }
         public ContentFragment[] Content { get; set; }
 
@@ -43,6 +44,9 @@ namespace GaclibWebPage.Models
             string xmlText = blobRef.DownloadText();
             xmlText = xmlText.Substring(xmlText.IndexOf("<metaDoc>"));
             XDocument xmlDocument = XDocument.Parse(xmlText);
+
+            this.Title = xmlDocument.Root.Element("title").Value;
+            this.UniqueId = xmlDocument.Root.Element("uniqueId").Value;
 
             var indexNodes = xmlDocument.Root.Element("indexTree").Elements("indexNode").ToArray();
             this.IndexTree = indexNodes
