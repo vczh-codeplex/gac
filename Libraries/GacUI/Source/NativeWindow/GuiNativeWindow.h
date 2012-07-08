@@ -1136,6 +1136,57 @@ Native Window Services
 			/// <param name="showEffect">Enable the user to edit some extended font properties.</param>
 			/// <param name="forceFontExist">Force the user to select existing font.</param>
 			virtual bool							ShowFontDialog(INativeWindow* window, FontProperties& selectionFont, Color& selectionColor, bool selected=false, bool showEffect=true, bool forceFontExist=true)=0;
+			
+			/// <summary>
+			/// File dialog type.
+			/// </summary>
+			enum FileDialogTypes
+			{
+				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogTypes]Open file dialog.</summary>
+				FileDialogOpen,
+				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogTypes]Open file dialog with preview.</summary>
+				FileDialogOpenPreview,
+				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogTypes]Save file dialog.</summary>
+				FileDialogSave,
+				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogTypes]Save file dialog with preview.</summary>
+				FileDialogSavePreview,
+			};
+
+			/// <summary>
+			/// File dialog options.
+			/// </summary>
+			enum FileDialogOptions
+			{
+				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogOptions]Allow multiple selection.</summary>
+				FileDialogAllowMultipleSelection = 1,
+				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogOptions]Prevent the user to select unexisting files.</summary>
+				FileDialogFileMustExist = 2,
+				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogOptions]Show the "Read Only" check box.</summary>
+				FileDialogShowReadOnlyCheckBox = 4,
+				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogOptions]Dereference link files.</summary>
+				FileDialogDereferenceLinks = 8,
+				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogOptions]Show the "Network" button.</summary>
+				FileDialogShowNetworkButton = 16,
+				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogOptions]Prompt if a new file is going to be created.</summary>
+				FileDialogPromptCreateFile = 32,
+				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogOptions]Promt if a existing file is going to be overwritten.</summary>
+				FileDialogPromptOverwriteFile = 64,
+				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogOptions]Prevent the user to select an unexisting directory.</summary>
+				FileDialogDirectoryMustExist = 128,
+			};
+
+			/// <summary>Show a file dialog.</summary>
+			/// <returns>Returns true if the user selected the OK button.</returns>
+			/// <param name="window">The current window.</param>
+			/// <param name="selection">The file names that the user selected.</param>
+			/// <param name="dialogType">The type of the file dialog.</param>
+			/// <param name="title">The title of the file dialog.</param>
+			/// <param name="initialFileName">The initial file name.</param>
+			/// <param name="initialDirectory">The initial directory.</param>
+			/// <param name="defaultExtension">The default file extension.</param>
+			/// <param name="filter">The file name filter like L"Text Files|*.txt|All Files|*.*".</param>
+			/// <param name="options">File dialog options. Multiple options can be combined using the "|" operator.</param>
+			virtual bool							ShowFileDialog(INativeWindow* window, collections::List<WString>& selection, FileDialogTypes dialogType, const WString& title, const WString& initialFileName, const WString& initialDirectory, const WString& defaultExtension, const WString& filter, FileDialogOptions options)=0;
 		};
 
 /***********************************************************************
