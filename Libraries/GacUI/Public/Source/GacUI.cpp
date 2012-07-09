@@ -24510,6 +24510,9 @@ WindowsClipboardService
 /***********************************************************************
 NativeWindow\Windows\ServicesImpl\WindowsDialogService.cpp
 ***********************************************************************/
+#include <Vfw.h>
+
+#pragma comment(lib, "Vfw32.lib")
 
 namespace vl
 {
@@ -24517,6 +24520,7 @@ namespace vl
 	{
 		namespace windows
 		{
+			using namespace collections;
 
 /***********************************************************************
 WindowsDialogService
@@ -24672,6 +24676,94 @@ WindowsDialogService
 					selectionFont.size=-logFont.lfHeight;
 
 					selectionColor=Color(GetRValue(chooseFont.rgbColors), GetGValue(chooseFont.rgbColors), GetBValue(chooseFont.rgbColors));
+				}
+				return result!=FALSE;
+			}
+
+			bool WindowsDialogService::ShowFileDialog(INativeWindow* window, collections::List<WString>& selectionFileNames, int& selectionFilterIndex, FileDialogTypes dialogType, const WString& title, const WString& initialFileName, const WString& initialDirectory, const WString& defaultExtension, const WString& filter, FileDialogOptions options)
+			{
+				Array<wchar_t> fileNamesBuffer(65536>initialFileName.Length()+1?65536:initialFileName.Length()+1);
+				wcscpy_s(&fileNamesBuffer[0], fileNamesBuffer.Count(), initialFileName.Buffer());
+
+				OPENFILENAME ofn;
+				ZeroMemory(&ofn, sizeof(ofn));
+				ofn.lStructSize=sizeof(ofn);
+				ofn.hwndOwner=handleRetriver(window);
+				ofn.hInstance=NULL;
+				ofn.lpstrCustomFilter=NULL;
+				ofn.nMaxCustFilter=0;
+				ofn.nFilterIndex=selectionFilterIndex+1;
+				ofn.lpstrFile=&fileNamesBuffer[0];
+				ofn.nMaxFile=fileNamesBuffer.Count();
+				ofn.lpstrFileTitle=NULL;
+				ofn.nMaxFileTitle=0;
+				ofn.lpstrInitialDir=initialDirectory==L""?NULL:initialDirectory.Buffer();
+				ofn.lpstrTitle=title==L""?NULL:title.Buffer();
+				ofn.lpstrDefExt=defaultExtension==L""?NULL:defaultExtension.Buffer();
+
+				List<int> filterSeparators;
+				for(int i=0;i<filter.Length();i++)
+				{
+					if(filter[i]==L'|')
+					{
+						filterSeparators.Add(i);
+					}
+				}
+				if(filterSeparators.Count()%2==1)
+				{
+					filterSeparators.Add(filter.Length());
+				}
+
+				Array<wchar_t> filterBuffer(filter.Length()+2);
+				int index=0;
+				for(int i=0;i<filterSeparators.Count();i++)
+				{
+					int end=filterSeparators[i];
+					wcsncpy_s(&filterBuffer[index], filterBuffer.Count()-index, filter.Buffer()+index, end-index-1);
+					filterBuffer[end]=0;
+					index=end+1;
+				}
+				filterBuffer[index]=0;
+				ofn.lpstrFilter=&filterBuffer[0];
+
+				ofn.Flags=OFN_ENABLESIZING | OFN_EXPLORER | OFN_LONGNAMES;
+				if(options&FileDialogAllowMultipleSelection)	ofn.Flags|=OFN_ALLOWMULTISELECT;
+				if(options&FileDialogFileMustExist)				ofn.Flags|=OFN_FILEMUSTEXIST;
+				if(!(options&FileDialogShowReadOnlyCheckBox))	ofn.Flags|=OFN_HIDEREADONLY;
+				if(!(options&FileDialogDereferenceLinks))		ofn.Flags|=OFN_NODEREFERENCELINKS;
+				if(!(options&FileDialogShowNetworkButton))		ofn.Flags|=OFN_NONETWORKBUTTON;
+				if(options&FileDialogPromptCreateFile)			ofn.Flags|=OFN_CREATEPROMPT;
+				if(options&FileDialogPromptOverwriteFile)		ofn.Flags|=OFN_OVERWRITEPROMPT;
+				if(options&FileDialogDirectoryMustExist)		ofn.Flags|=OFN_PATHMUSTEXIST;
+				if(!(options&FileDialogAddToRecent))			ofn.Flags|=OFN_DONTADDTORECENT;
+
+				BOOL result=FALSE;
+				switch(dialogType)
+				{
+				case FileDialogOpen:
+					result=GetOpenFileName(&ofn);
+					break;
+				case FileDialogOpenPreview:
+					result=GetOpenFileNamePreview(&ofn);
+					break;
+				case FileDialogSave:
+					result=GetSaveFileName(&ofn);
+					break;
+				case FileDialogSavePreview:
+					result=GetSaveFileNamePreview(&ofn);
+					break;
+				}
+				if(result)
+				{
+					selectionFilterIndex=ofn.nFilterIndex-1;
+					selectionFileNames.Clear();
+					if(options&FileDialogAllowMultipleSelection)
+					{
+					}
+					else
+					{
+						selectionFileNames.Add(&fileNamesBuffer[0]);
+					}
 				}
 				return result!=FALSE;
 			}

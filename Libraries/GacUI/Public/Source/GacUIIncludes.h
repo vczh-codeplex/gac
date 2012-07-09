@@ -13222,6 +13222,29 @@ Native Window Services
 			virtual bool							ShowColorDialog(INativeWindow* window, Color& selection, bool selected=false, ColorDialogCustomColorOptions customColorOptions=CustomColorEnabled, Color* customColors=0)=0;
 
 			virtual bool							ShowFontDialog(INativeWindow* window, FontProperties& selectionFont, Color& selectionColor, bool selected=false, bool showEffect=true, bool forceFontExist=true)=0;
+			
+			enum FileDialogTypes
+			{
+				FileDialogOpen,
+				FileDialogOpenPreview,
+				FileDialogSave,
+				FileDialogSavePreview,
+			};
+
+			enum FileDialogOptions
+			{
+				FileDialogAllowMultipleSelection = 1,
+				FileDialogFileMustExist = 2,
+				FileDialogShowReadOnlyCheckBox = 4,
+				FileDialogDereferenceLinks = 8,
+				FileDialogShowNetworkButton = 16,
+				FileDialogPromptCreateFile = 32,
+				FileDialogPromptOverwriteFile = 64,
+				FileDialogDirectoryMustExist = 128,
+				FileDialogAddToRecent = 256,
+			};
+
+			virtual bool							ShowFileDialog(INativeWindow* window, collections::List<WString>& selectionFileNames, int& selectionFilterIndex, FileDialogTypes dialogType, const WString& title, const WString& initialFileName, const WString& initialDirectory, const WString& defaultExtension, const WString& filter, FileDialogOptions options)=0;
 		};
 
 /***********************************************************************
