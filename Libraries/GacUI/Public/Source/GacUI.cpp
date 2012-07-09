@@ -24719,7 +24719,7 @@ WindowsDialogService
 				for(int i=0;i<filterSeparators.Count();i++)
 				{
 					int end=filterSeparators[i];
-					wcsncpy_s(&filterBuffer[index], filterBuffer.Count()-index, filter.Buffer()+index, end-index-1);
+					wcsncpy_s(&filterBuffer[index], filterBuffer.Count()-index, filter.Buffer()+index, end-index);
 					filterBuffer[end]=0;
 					index=end+1;
 				}
@@ -24759,6 +24759,19 @@ WindowsDialogService
 					selectionFileNames.Clear();
 					if(options&FileDialogAllowMultipleSelection)
 					{
+						const wchar_t* reading=&fileNamesBuffer[0];
+						WString directory=reading;
+						reading+=directory.Length()+1;
+						while(*reading)
+						{
+							WString fileName=reading;
+							reading+=fileName.Length()+1;
+							selectionFileNames.Add(directory+L"\\"+fileName);
+						}
+						if(selectionFileNames.Count()==0)
+						{
+							selectionFileNames.Add(directory);
+						}
 					}
 					else
 					{
