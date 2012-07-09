@@ -44,19 +44,37 @@ namespace CopyWebsite
                 if (queriedRelativeUrls.Add(url.ToUpper()))
                 {
                     Console.WriteLine("Downloading \"{0}\"...", url);
-                    string file = Path.GetFullPath(outputPath + url.Replace('/', '\\'));
-                    if (!file.StartsWith(outputPath))
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(rootUrl + url);
+                    request.Method = "GET";
+                    HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                    if (response.StatusCode != HttpStatusCode.OK)
                     {
-                        Console.WriteLine("This file cannot be downloaded into the specified output directory.");
+                        Console.WriteLine("This web page cannot be found.");
                     }
                     else
                     {
-                        if (file == outputPath + "\\")
+                        string file = Path.GetFullPath(outputPath + url.Replace('/', '\\'));
+                        if (!file.StartsWith(outputPath))
                         {
-                            file += defaultFileName;
+                            Console.WriteLine("This file cannot be downloaded into the specified output directory.");
                         }
-                        Console.WriteLine("Writing to \"{0}\"...", file.Substring(outputPath.Length));
+                        else
+                        {
+                            if (file == outputPath + "\\")
+                            {
+                                file += defaultFileName;
+                            }
+                            Console.WriteLine("Writing to \"{0}\"...", file.Substring(outputPath.Length));
+
+                            using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                            using (StreamWriter writer = new StreamWriter(file, false, Encoding.UTF8))
+                            {
+                                string text = reader.ReadToEnd();
+                                writer.Write(text);
+                            }
+                        }
                     }
+                    response.Close();
                 }
             }
         }
