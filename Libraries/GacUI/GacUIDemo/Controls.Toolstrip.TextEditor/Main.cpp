@@ -1,5 +1,10 @@
-#include "..\..\Public\Source\GacUIIncludes.h"
+#include "..\..\Public\Source\GacUI.h"
 #include <Windows.h>
+
+using namespace vl::collections;
+using namespace vl::stream;
+
+#pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
 {
@@ -270,20 +275,183 @@ private:
 		}
 	}
 
+private:
+	WString							fileName;
+	bool							enableModifyFlag;
+	bool							modified;
+
+	void UpdateWindowTitle()
+	{
+		if(fileName==L"")
+		{
+			this->SetText(L"Controls.Toolstrip.TextEditor[UNTITLED]");
+		}
+		else
+		{
+			this->SetText(L"Controls.Toolstrip.TextEditor["+fileName+L"]");
+		}
+	}
+
+	bool TryOpen()
+	{
+		if(PromptSaveUnchanged())
+		{
+			List<WString> selectionFileNames;
+			int selectionFilterIndex=0;
+			if(GetCurrentController()->DialogService()->ShowFileDialog(
+				this->GetNativeWindow(),
+				selectionFileNames,
+				selectionFilterIndex,
+				INativeDialogService::FileDialogOpen,
+				L"Open a text document",
+				L"",
+				L"",
+				L".txt",
+				L"Text Files(*.txt)|*.txt|All Files(*.*)|*.*",
+				(INativeDialogService::FileDialogOptions)
+					( INativeDialogService::FileDialogAddToRecent
+					| INativeDialogService::FileDialogDereferenceLinks
+					| INativeDialogService::FileDialogDirectoryMustExist
+					| INativeDialogService::FileDialogFileMustExist
+					)
+				))
+			{
+				fileName=selectionFileNames[0];
+				FileStream fileStream(fileName, FileStream::ReadOnly);
+				BomDecoder decoder;
+				DecoderStream decoderStream(fileStream, decoder);
+				StreamReader reader(decoderStream);
+				textBox->SetText(reader.ReadToEnd());
+				textBox->Select(TextPos(0, 0), TextPos(0, 0));
+				modified=false;
+				UpdateWindowTitle();
+				return true;
+			}
+		}
+		return true;
+	}
+
+	bool TrySave(bool ignoreCurrentFileName)
+	{
+		if(fileName==L"" || ignoreCurrentFileName)
+		{
+			List<WString> selectionFileNames;
+			int selectionFilterIndex=0;
+			if(GetCurrentController()->DialogService()->ShowFileDialog(
+				this->GetNativeWindow(),
+				selectionFileNames,
+				selectionFilterIndex,
+				INativeDialogService::FileDialogSave,
+				L"Save a text document",
+				L"",
+				L"",
+				L".txt",
+				L"Text Files(*.txt)|*.txt|All Files(*.*)|*.*",
+				(INativeDialogService::FileDialogOptions)
+					( INativeDialogService::FileDialogAddToRecent
+					| INativeDialogService::FileDialogDereferenceLinks
+					| INativeDialogService::FileDialogDirectoryMustExist
+					| INativeDialogService::FileDialogPromptOverwriteFile
+					)
+				))
+			{
+				fileName=selectionFileNames[0];
+			}
+			else
+			{
+				return false;
+			}
+		}
+		{
+			FileStream fileStream(fileName, FileStream::WriteOnly);
+			BomEncoder encoder(BomEncoder::Utf8);
+			EncoderStream encoderStream(fileStream, encoder);
+			StreamWriter writer(encoderStream);
+			writer.WriteString(textBox->GetText());
+			modified=false;
+			UpdateWindowTitle();
+		}
+		return true;
+	}
+
+	bool TryNew()
+	{
+		if(PromptSaveUnchanged())
+		{
+			fileName=L"";
+			textBox->SetText(L"");
+			modified=false;
+			UpdateWindowTitle();
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	bool PromptSaveUnchanged()
+	{
+		if(modified)
+		{
+			INativeDialogService::MessageBoxButtonsOutput result=GetCurrentController()->DialogService()->ShowMessageBox(
+				this->GetNativeWindow(),
+				L"The document is modified. Do you want to save it before continue?",
+				this->GetText(),
+				INativeDialogService::DisplayYesNoCancel,
+				INativeDialogService::DefaultFirst,
+				INativeDialogService::IconQuestion
+				);
+			switch(result)
+			{
+			case INativeDialogService::SelectYes:
+				return TrySave(false);
+			case INativeDialogService::SelectNo:
+				return true;
+			default:
+				return false;
+			}
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	void window_WindowClosing(GuiGraphicsComposition* sender, GuiRequestEventArgs& arguments)
+	{
+		if(!PromptSaveUnchanged())
+		{
+			arguments.cancel=true;
+		}
+	}
+
+	void textBox_TextChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		if(enableModifyFlag)
+		{
+			modified=true;
+		}
+	}
+
 	void menuFileNew_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		TryNew();
 	}
 
 	void menuFileOpen_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		TryOpen();
 	}
 
 	void menuFileSave_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		TrySave(false);
 	}
 
 	void menuFileSaveAs_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		TrySave(true);
 	}
 
 	void menuFilePrint_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
@@ -337,8 +505,12 @@ private:
 public:
 	TextEditorWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+		,enableModifyFlag(true)
+		,modified(false)
 	{
-		this->SetText(L"Controls.Toolstrip.TextEditor");
+		UpdateWindowTitle();
+
+		this->WindowClosing.AttachMethod(this, &TextEditorWindow::window_WindowClosing);
 
 		// create a table to place a menu bar and a text box
 		GuiTableComposition* table=new GuiTableComposition;
@@ -388,6 +560,7 @@ public:
 			// create the menu bar
 			textBox=g::NewMultilineTextBox();
 			textBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			textBox->TextChanged.AttachMethod(this, &TextEditorWindow::textBox_TextChanged);
 			cell->AddChild(textBox->GetBoundsComposition());
 		}
 
