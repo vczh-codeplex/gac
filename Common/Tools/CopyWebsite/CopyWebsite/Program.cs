@@ -9,6 +9,42 @@ namespace CopyWebsite
 {
     class Program
     {
+        static void SearchForUrls(string text, List<string> urls)
+        {
+            const int PLANTEXT = 0;
+            const int WAITFORTAGNAME = 1;
+            const int TAGNAME = 2;
+            const int WAITFORATTNAME = 3;
+            const int ATTNAME = 4;
+            const int WAITFORQUOT = 5;
+            const int ATTVALUE = 6;
+            /*
+             * abc< link    href="x.html"   alt=hi>text</a>
+             * 00011222233334444566666663333444566000001120
+             */
+            int state = 0;
+            foreach (var c in text)
+            {
+                switch (state)
+                {
+                    case PLANTEXT:
+                        break;
+                    case WAITFORTAGNAME:
+                        break;
+                    case TAGNAME:
+                        break;
+                    case WAITFORATTNAME:
+                        break;
+                    case ATTNAME:
+                        break;
+                    case WAITFORQUOT:
+                        break;
+                    case ATTVALUE:
+                        break;
+                }
+            }
+        }
+
         static void Main(string[] args)
         {
             if (args.Length != 3)
@@ -18,7 +54,7 @@ namespace CopyWebsite
             }
 
             List<string> relativeUrls = new List<string>() { "/" };
-            HashSet<string> queriedRelativeUrls = new HashSet<string>();
+            HashSet<string> writtenFiles = new HashSet<string>();
             int currentUrlIndex = 0;
 
             string rootUrl = args[0];
@@ -41,7 +77,14 @@ namespace CopyWebsite
                 {
                     url = '/' + url;
                 }
-                if (queriedRelativeUrls.Add(url.ToUpper()))
+
+                string file = Path.GetFullPath(outputPath + url.Replace('/', '\\'));
+                if (file == outputPath + "\\")
+                {
+                    file += defaultFileName;
+                }
+
+                if (writtenFiles.Add(file.ToUpper()))
                 {
                     Console.WriteLine("Downloading \"{0}\"...", url);
                     HttpWebRequest request = (HttpWebRequest)WebRequest.Create(rootUrl + url);
@@ -53,17 +96,12 @@ namespace CopyWebsite
                     }
                     else
                     {
-                        string file = Path.GetFullPath(outputPath + url.Replace('/', '\\'));
                         if (!file.StartsWith(outputPath))
                         {
                             Console.WriteLine("This file cannot be downloaded into the specified output directory.");
                         }
                         else
                         {
-                            if (file == outputPath + "\\")
-                            {
-                                file += defaultFileName;
-                            }
                             Console.WriteLine("Writing to \"{0}\"...", file.Substring(outputPath.Length));
 
                             using (StreamReader reader = new StreamReader(response.GetResponseStream()))
@@ -71,6 +109,7 @@ namespace CopyWebsite
                             {
                                 string text = reader.ReadToEnd();
                                 writer.Write(text);
+                                SearchForUrls(text, relativeUrls);
                             }
                         }
                     }
