@@ -32,7 +32,7 @@ namespace GaclibWebPage.Models
         public IndexNode[] IndexTree { get; set; }
         public ContentFragment[] Content { get; set; }
 
-        private static Regex regexUniqueId = new Regex(@"\$UNIQUEIDLINK\((?<id>\w+)\)");
+        private static Regex regexUniqueId = new Regex(@"\$UNIQUEIDLINK\((?<id>[^)]+)\)");
 
         public DocumentPageModel(string uniqueId)
         {
