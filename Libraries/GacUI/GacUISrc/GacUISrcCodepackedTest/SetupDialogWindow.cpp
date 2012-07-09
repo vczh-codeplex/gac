@@ -1,5 +1,7 @@
 #include "..\..\Public\Source\GacUIIncludes.h"
 
+using namespace collections;
+
 namespace SetupDialogWindowHelper
 {
 	GuiComboBoxListControl* CreateComboBox(const wchar_t** items, int count)
@@ -153,6 +155,154 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 			{
 				WString selected=font.fontFamily+L" "+itow(font.size)+(font.bold?L" bold":L"")+(font.italic?L" italic":L"")+(font.underline?L" underline":L"")+(font.strikeline?L" strikeline":L"");
 				GetCurrentController()->DialogService()->ShowMessageBox(controlHost->GetNativeWindow(), L"You selected the \""+selected+L"\" font.", L"Result");
+			}
+		});
+	}
+	{
+		GuiButton* buttonFileDialog1=new GuiButton(new win7::Win7ButtonStyle);
+		buttonFileDialog1->SetText(L"OpenFileDialog");
+		buttonFileDialog1->GetBoundsComposition()->SetBounds(Rect(Point(10, 280), Size(0, 0)));
+		container->AddChild(buttonFileDialog1);
+		
+		GuiButton* buttonFileDialog2=new GuiButton(new win7::Win7ButtonStyle);
+		buttonFileDialog2->SetText(L"OpenFileDialogPreview");
+		buttonFileDialog2->GetBoundsComposition()->SetBounds(Rect(Point(10, 310), Size(0, 0)));
+		container->AddChild(buttonFileDialog2);
+		
+		GuiButton* buttonFileDialog3=new GuiButton(new win7::Win7ButtonStyle);
+		buttonFileDialog3->SetText(L"SaveFileDialog");
+		buttonFileDialog3->GetBoundsComposition()->SetBounds(Rect(Point(10, 340), Size(0, 0)));
+		container->AddChild(buttonFileDialog3);
+		
+		GuiButton* buttonFileDialog4=new GuiButton(new win7::Win7ButtonStyle);
+		buttonFileDialog4->SetText(L"SaveFileDialogPreview");
+		buttonFileDialog4->GetBoundsComposition()->SetBounds(Rect(Point(10, 370), Size(0, 0)));
+		container->AddChild(buttonFileDialog4);
+
+		buttonFileDialog1->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			List<WString> selectionFileNames;
+			int selectionFilterIndex=0;
+			if(GetCurrentController()->DialogService()->ShowFileDialog(
+				controlHost->GetNativeWindow(),
+				selectionFileNames,
+				selectionFilterIndex,
+				INativeDialogService::FileDialogOpen,
+				L"",
+				L"MyFile.txt",
+				L"C:\\Windows",
+				L".txt",
+				L"Text Files(*.txt)|*.txt|All Files(*.*)|*.*",
+				(INativeDialogService::FileDialogOptions)
+				( INativeDialogService::FileDialogDereferenceLinks
+				| INativeDialogService::FileDialogDirectoryMustExist
+				| INativeDialogService::FileDialogFileMustExist
+				| INativeDialogService::FileDialogPromptOverwriteFile
+				| INativeDialogService::FileDialogShowReadOnlyCheckBox
+				)
+				))
+			{
+				WString message=L"Filter Index: "+itow(selectionFilterIndex);
+				for(int i=0;i<selectionFileNames.Count();i++)
+				{
+					message+=L"\r\nFile: "+selectionFileNames[i];
+				}
+				GetCurrentController()->DialogService()->ShowMessageBox(controlHost->GetNativeWindow(), message, L"Result");
+			}
+		});
+
+		buttonFileDialog2->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			List<WString> selectionFileNames;
+			int selectionFilterIndex=0;
+			if(GetCurrentController()->DialogService()->ShowFileDialog(
+				controlHost->GetNativeWindow(),
+				selectionFileNames,
+				selectionFilterIndex,
+				INativeDialogService::FileDialogOpenPreview,
+				L"",
+				L"MyFile.txt",
+				L"C:\\Windows",
+				L".txt",
+				L"Text Files(*.txt)|*.txt|All Files(*.*)|*.*",
+				(INativeDialogService::FileDialogOptions)
+				( INativeDialogService::FileDialogDereferenceLinks
+				| INativeDialogService::FileDialogDirectoryMustExist
+				| INativeDialogService::FileDialogFileMustExist
+				| INativeDialogService::FileDialogPromptOverwriteFile
+				| INativeDialogService::FileDialogShowNetworkButton
+				| INativeDialogService::FileDialogShowReadOnlyCheckBox
+				| INativeDialogService::FileDialogAllowMultipleSelection
+				)
+				))
+			{
+				WString message=L"Filter Index: "+itow(selectionFilterIndex);
+				for(int i=0;i<selectionFileNames.Count();i++)
+				{
+					message+=L"\r\nFile: "+selectionFileNames[i];
+				}
+				GetCurrentController()->DialogService()->ShowMessageBox(controlHost->GetNativeWindow(), message, L"Result");
+			}
+		});
+
+		buttonFileDialog3->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			List<WString> selectionFileNames;
+			int selectionFilterIndex=0;
+			if(GetCurrentController()->DialogService()->ShowFileDialog(
+				controlHost->GetNativeWindow(),
+				selectionFileNames,
+				selectionFilterIndex,
+				INativeDialogService::FileDialogSave,
+				L"",
+				L"MyFile.txt",
+				L"C:\\Windows",
+				L".txt",
+				L"Text Files(*.txt)|*.txt|All Files(*.*)|*.*",
+				(INativeDialogService::FileDialogOptions)
+				( INativeDialogService::FileDialogDereferenceLinks
+				| INativeDialogService::FileDialogDirectoryMustExist
+				| INativeDialogService::FileDialogPromptCreateFile
+				)
+				))
+			{
+				WString message=L"Filter Index: "+itow(selectionFilterIndex);
+				for(int i=0;i<selectionFileNames.Count();i++)
+				{
+					message+=L"\r\nFile: "+selectionFileNames[i];
+				}
+				GetCurrentController()->DialogService()->ShowMessageBox(controlHost->GetNativeWindow(), message, L"Result");
+			}
+		});
+
+		buttonFileDialog4->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			List<WString> selectionFileNames;
+			int selectionFilterIndex=0;
+			if(GetCurrentController()->DialogService()->ShowFileDialog(
+				controlHost->GetNativeWindow(),
+				selectionFileNames,
+				selectionFilterIndex,
+				INativeDialogService::FileDialogSavePreview,
+				L"",
+				L"MyFile.txt",
+				L"C:\\Windows",
+				L".txt",
+				L"Text Files(*.txt)|*.txt|All Files(*.*)|*.*",
+				(INativeDialogService::FileDialogOptions)
+				( INativeDialogService::FileDialogDereferenceLinks
+				| INativeDialogService::FileDialogDirectoryMustExist
+				| INativeDialogService::FileDialogPromptCreateFile
+				| INativeDialogService::FileDialogShowNetworkButton
+				)
+				))
+			{
+				WString message=L"Filter Index: "+itow(selectionFilterIndex);
+				for(int i=0;i<selectionFileNames.Count();i++)
+				{
+					message+=L"\r\nFile: "+selectionFileNames[i];
+				}
+				GetCurrentController()->DialogService()->ShowMessageBox(controlHost->GetNativeWindow(), message, L"Result");
 			}
 		});
 	}

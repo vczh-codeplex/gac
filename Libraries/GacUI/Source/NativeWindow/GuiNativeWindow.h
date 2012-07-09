@@ -1173,12 +1173,15 @@ Native Window Services
 				FileDialogPromptOverwriteFile = 64,
 				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogOptions]Prevent the user to select an unexisting directory.</summary>
 				FileDialogDirectoryMustExist = 128,
+				/// <summary>[T:vl.presentation.INativeDialogService.FileDialogOptions]Add user selected files to "Recent" directory.</summary>
+				FileDialogAddToRecent = 256,
 			};
 
 			/// <summary>Show a file dialog.</summary>
 			/// <returns>Returns true if the user selected the OK button.</returns>
 			/// <param name="window">The current window.</param>
-			/// <param name="selection">The file names that the user selected.</param>
+			/// <param name="selectionFileNames">The file names that the user selected.</param>
+			/// <param name="selectionFilterIndex">The filter that the user selected.</param>
 			/// <param name="dialogType">The type of the file dialog.</param>
 			/// <param name="title">The title of the file dialog.</param>
 			/// <param name="initialFileName">The initial file name.</param>
@@ -1186,7 +1189,7 @@ Native Window Services
 			/// <param name="defaultExtension">The default file extension.</param>
 			/// <param name="filter">The file name filter like L"Text Files|*.txt|All Files|*.*".</param>
 			/// <param name="options">File dialog options. Multiple options can be combined using the "|" operator.</param>
-			virtual bool							ShowFileDialog(INativeWindow* window, collections::List<WString>& selection, FileDialogTypes dialogType, const WString& title, const WString& initialFileName, const WString& initialDirectory, const WString& defaultExtension, const WString& filter, FileDialogOptions options)=0;
+			virtual bool							ShowFileDialog(INativeWindow* window, collections::List<WString>& selectionFileNames, int& selectionFilterIndex, FileDialogTypes dialogType, const WString& title, const WString& initialFileName, const WString& initialDirectory, const WString& defaultExtension, const WString& filter, FileDialogOptions options)=0;
 		};
 
 /***********************************************************************
