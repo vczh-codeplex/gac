@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.IO;
+using System.Web;
 
 namespace CopyWebsite
 {
@@ -161,6 +162,7 @@ namespace CopyWebsite
                             {
                                 attValue = url.Substring(0, url.LastIndexOf('/') + 1) + attValue;
                             }
+                            attValue = Uri.UnescapeDataString(attValue);
                             if (urlsHash.Add(attValue.ToUpper()))
                             {
                                 urls.Add(attValue);
