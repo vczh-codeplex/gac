@@ -270,6 +270,7 @@ Undo Redo
 				collections::List<Ptr<IEditStep>>			steps;
 				int											firstFutureStep;
 				int											savedStep;
+				bool										performingUndoRedo;
 
 				void										PushStep(Ptr<IEditStep> step);
 			public:
@@ -291,6 +292,7 @@ Undo Redo
 				class EditStep : public Object, public IEditStep
 				{
 				public:
+					GuiTextBoxUndoRedoProcessor*			processor;
 					TextPos									originalStart;
 					TextPos									originalEnd;
 					WString									originalText;
@@ -302,8 +304,9 @@ Undo Redo
 					void									Redo();
 				};
 
+				GuiTextElementOperator*						textElementOperator;
 			public:
-				GuiTextBoxUndoRedoProcessor();
+				GuiTextBoxUndoRedoProcessor(GuiTextElementOperator* _textElementOperator);
 				~GuiTextBoxUndoRedoProcessor();
 
 				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock);
