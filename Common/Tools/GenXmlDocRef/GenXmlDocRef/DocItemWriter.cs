@@ -12,6 +12,7 @@ namespace GenXmlDocRef
     {
         public Dictionary<string, DocItem> UniqueIdItemMap { get; set; }
         public Dictionary<string, DocItem> MemberIdItemMap { get; set; }
+        public HashSet<string> UnknownPrimitiveTypes { get; set; }
     }
 
     abstract class DocItemWriter
@@ -59,6 +60,8 @@ namespace GenXmlDocRef
         }
 
         private static Regex symbolRegex = new Regex(@"\[(?<cref>[A-Z]+:[a-zA-Z0-9_.]+)\]");
+
+        #region Write Node
 
         protected void WriteHyperlinkEnabledText(string text, TextWriter writer, DocItemWriterContext context)
         {
@@ -115,6 +118,10 @@ namespace GenXmlDocRef
             }
         }
 
+        #endregion
+
+        #region Write Summary
+
         protected void WriteSummary(XElement memberElement, TextWriter writer, DocItemWriterContext context)
         {
             XElement summary = memberElement.Element("summary");
@@ -154,7 +161,37 @@ namespace GenXmlDocRef
             return null;
         }
 
-        protected void WriteHyperlinkType(string type, TextWriter writer, DocItemWriterContext context)
+        #endregion
+
+        #region Write Hyperlink
+
+        protected string GetReadableName(DocItem item)
+        {
+            string name = item.Content.Attribute("name").Value;
+            if (item.UniqueId.StartsWith("enum:"))
+            {
+                int index = item.Title.LastIndexOf(' ');
+                return item.Title.Substring(0, index);
+            }
+            else
+            {
+                while (true)
+                {
+                    item = item.Parent;
+                    if (item == null || !item.UniqueId.StartsWith("type:"))
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        name = item.Content.Attribute("name").Value + "::" + name;
+                    }
+                }
+            }
+            return name;
+        }
+
+        protected void WriteHyperlinkPrimitiveType(string type, TextWriter writer, DocItemWriterContext context)
         {
             var docItem = context
                 .MemberIdItemMap
@@ -164,12 +201,73 @@ namespace GenXmlDocRef
                 .FirstOrDefault();
             if (docItem == null)
             {
+                context.UnknownPrimitiveTypes.Add(type);
                 writer.Write(type);
             }
             else
             {
                 writer.Write("/+linkid:{0}/{1}/-linkid/", docItem.UniqueId, GetReadableName(docItem));
             }
+        }
+
+        protected void WriteHyperlinkType(CppType type, TextWriter writer, DocItemWriterContext context)
+        {
+            switch (type.Decoration)
+            {
+                case CppDecoration.None:
+                    {
+                        WriteHyperlinkPrimitiveType(type.Name, writer, context);
+                    }
+                    break;
+                case CppDecoration.Decoration:
+                    {
+                        WriteHyperlinkType(type.Arguments[0], writer, context);
+                        writer.Write(" " + type.Name);
+                    }
+                    break;
+                case CppDecoration.Template:
+                    {
+                        WriteHyperlinkPrimitiveType(type.Name, writer, context);
+                        writer.Write("<");
+                        for (int i = 0; i < type.Arguments.Length; i++)
+                        {
+                            WriteHyperlinkType(type.Arguments[i], writer, context);
+                            if (i == type.Arguments.Length - 1)
+                            {
+                                writer.Write(">");
+                            }
+                            else
+                            {
+                                writer.Write(", ");
+                            }
+                        }
+                    }
+                    break;
+                case CppDecoration.Function:
+                    {
+                        WriteHyperlinkPrimitiveType(type.Name, writer, context);
+                        writer.Write(" " + type.CallingConversion + "(");
+                        for (int i = 0; i < type.Arguments.Length; i++)
+                        {
+                            WriteHyperlinkType(type.Arguments[i], writer, context);
+                            if (i == type.Arguments.Length - 1)
+                            {
+                                writer.Write(")");
+                            }
+                            else
+                            {
+                                writer.Write(", ");
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+
+        protected void WriteHyperlinkType(string type, TextWriter writer, DocItemWriterContext context)
+        {
+            CppType cppType = CppType.Parse(type);
+            WriteHyperlinkType(cppType, writer, context);
         }
 
         protected void WriteHyperlinkSymbol(string cref, string text, TextWriter writer, DocItemWriterContext context)
@@ -208,31 +306,9 @@ namespace GenXmlDocRef
             }
         }
 
-        protected string GetReadableName(DocItem item)
-        {
-            string name = item.Content.Attribute("name").Value;
-            if (item.UniqueId.StartsWith("enum:"))
-            {
-                int index = item.Title.LastIndexOf(' ');
-                return item.Title.Substring(0, index);
-            }
-            else
-            {
-                while (true)
-                {
-                    item = item.Parent;
-                    if (item == null || !item.UniqueId.StartsWith("type:"))
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        name = item.Content.Attribute("name").Value + "::" + name;
-                    }
-                }
-            }
-            return name;
-        }
+        #endregion
+
+        #region Write Table
 
         // describedTypedSubItems: name => tuple<XML, summary, inheritsFrom>[]
         protected void WriteTypedSubItemTable(Dictionary<string, Tuple<XElement, string, string>[]> describedTypedSubItems, string tableName, TextWriter writer, DocItemWriterContext context, bool writeType)
@@ -345,6 +421,8 @@ namespace GenXmlDocRef
         {
             WriteSubItemTable(subItems.Select(x => Tuple.Create(x, null as string)).ToArray(), tableName, writer, context);
         }
+
+        #endregion
     }
 
     class NamespaceDocItemWriter : DocItemWriter

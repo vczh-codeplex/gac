@@ -36,6 +36,7 @@ namespace GenXmlDocRef
                 DocItemWriterContext context = new DocItemWriterContext();
                 context.UniqueIdItemMap = uniqueIdItemMap;
                 context.MemberIdItemMap = memberIdItemMap;
+                context.UnknownPrimitiveTypes = new HashSet<string>();
 
                 foreach (var docItem in uniqueIdItemMap.Values)
                 {
@@ -52,7 +53,16 @@ namespace GenXmlDocRef
                         Console.WriteLine(ex.Message);
                     }
                 }
+
+                using (StreamWriter writer = new StreamWriter(outputFolder + "_UnknownPrimitiveTypes.txt"))
+                {
+                    foreach (var type in context.UnknownPrimitiveTypes.OrderBy(s => s))
+                    {
+                        writer.WriteLine(type);
+                    }
+                }
                 Console.WriteLine("All document items of reference {0} generated.", rootUniqueId);
+                Console.WriteLine("All unknown primitive types are logged in \"_UnknownPrimitiveTypes.txt\".");
             }
             else
             {
