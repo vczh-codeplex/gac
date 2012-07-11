@@ -32,8 +32,9 @@ namespace GaclibDataUploader
             {
                 container.Delete();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
             }
 
             Console.WriteLine("Creating container...");
@@ -45,8 +46,9 @@ namespace GaclibDataUploader
                     container.CreateIfNotExist();
                     break;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     Thread.Sleep(1000);
                 }
             }
