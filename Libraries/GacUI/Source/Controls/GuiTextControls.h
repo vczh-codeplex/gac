@@ -174,14 +174,14 @@ Colorizer
 			class GuiTextBoxRegexColorizer : public GuiTextBoxColorizerBase
 			{
 			protected:
-				Ptr<regex::RegexLexer>							lexer;
-				Ptr<regex::RegexLexerColorizer>					colorizer;
-				ColorArray										colors;
+				Ptr<regex::RegexLexer>										lexer;
+				Ptr<regex::RegexLexerColorizer>								colorizer;
+				ColorArray													colors;
 
-				elements::text::ColorEntry						defaultColor;
-				collections::List<WString>						tokenRegexes;
-				collections::List<elements::text::ColorEntry>	tokenColors;
-				collections::List<elements::text::ColorEntry>	extraTokenColors;
+				elements::text::ColorEntry									defaultColor;
+				collections::List<WString>									tokenRegexes;
+				collections::List<elements::text::ColorEntry>				tokenColors;
+				collections::List<elements::text::ColorEntry>				extraTokenColors;
 
 				static void													ColorizerProc(void* argument, vint start, vint length, vint token);
 			public:
@@ -228,11 +228,68 @@ Colorizer
 				/// <param name="contextState">The context sensitive state. After executing this function, the new value of this argument indicates the new state.</param>
 				virtual void												ColorizeTokenContextSensitive(const wchar_t* text, vint start, vint length, vint& token, int& contextState);
 
-
 				int															GetLexerStartState()override;
 				int															GetContextStartState()override;
 				void														ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override;
 				const ColorArray&											GetColors()override;
+			};
+
+/***********************************************************************
+Undo Redo
+***********************************************************************/
+
+			class GuiGeneralUndoRedoProcessor : public Object
+			{
+			protected:
+				class IEditStep
+				{
+				public:
+					virtual void							Undo()=0;
+					virtual void							Redo()=0;
+				};
+				friend class collections::ReadonlyListEnumerator<Ptr<IEditStep>>;
+
+			protected:
+				collections::List<Ptr<IEditStep>>			steps;
+				int											firstFutureStep;
+				int											savedStep;
+
+				void										PushStep(Ptr<IEditStep> step);
+			public:
+				GuiGeneralUndoRedoProcessor();
+				~GuiGeneralUndoRedoProcessor();
+
+				bool										CanUndo();
+				bool										CanRedo();
+				void										ClearUndoRedo();
+				bool										GetModified();
+				void										NotifyModificationSaved();
+			};
+
+			class GuiTextBoxUndoRedoProcessor : public GuiGeneralUndoRedoProcessor, public GuiTextElementOperator::ITextEditCallback
+			{
+			protected:
+				class EditStep : public Object, public IEditStep
+				{
+				public:
+					TextPos									originalStart;
+					TextPos									originalEnd;
+					WString									originalText;
+					TextPos									inputStart;
+					TextPos									inputEnd;
+					WString									inputText;
+					
+					void									Undo();
+					void									Redo();
+				};
+
+			public:
+				GuiTextBoxUndoRedoProcessor();
+				~GuiTextBoxUndoRedoProcessor();
+
+				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock);
+				void										Detach();
+				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText);
 			};
 
 /***********************************************************************
@@ -247,6 +304,7 @@ Common Interface
 				GuiTextElementOperator*						textElementOperator;
 				GuiControl*									textControl;
 				Ptr<GuiTextBoxColorizerBase>				colorizer;
+				Ptr<GuiTextBoxUndoRedoProcessor>			undoRedoProcessor;
 
 				void										RaiseTextChanged();
 				void										RaiseSelectionChanged();
@@ -267,6 +325,20 @@ Common Interface
 				/// <summary>Set the current colorizer.</summary>
 				/// <param name="value">The current colorizer.</param>
 				void										SetColorizer(Ptr<GuiTextBoxColorizerBase> value);
+
+				/// <summary>Test can undo.</summary>
+				/// <returns>Returns true if this action can be performed.</returns>
+				bool										CanUndo();
+				/// <summary>Test can redo.</summary>
+				/// <returns>Returns true if this action can be performed.</returns>
+				bool										CanRedo();
+				/// <summary>Clear all undo and redo information.</summary>
+				void										ClearUndoRedo();
+				/// <summary>Test is the text box modified.</summary>
+				/// <returns>Returns true if the text box is modified.</returns>
+				bool										GetModified();
+				/// <summary>Notify the text box that the current status is considered saved.</summary>
+				void										NotifyModificationSaved();
 				
 				/// <summary>Test can the selection be cut.</summary>
 				/// <returns>Returns true if the selection can be cut.</returns>
