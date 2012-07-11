@@ -949,6 +949,7 @@ GuiGeneralUndoRedoProcessor
 			GuiGeneralUndoRedoProcessor::GuiGeneralUndoRedoProcessor()
 				:firstFutureStep(0)
 				,savedStep(-1)
+				,performingUndoRedo(false)
 			{
 			}
 
@@ -958,19 +959,22 @@ GuiGeneralUndoRedoProcessor
 
 			void GuiGeneralUndoRedoProcessor::PushStep(Ptr<IEditStep> step)
 			{
-				if(firstFutureStep<savedStep)
+				if(!performingUndoRedo)
 				{
-					savedStep=-1;
-				}
+					if(firstFutureStep<savedStep)
+					{
+						savedStep=-1;
+					}
 
-				int count=steps.Count()-firstFutureStep;
-				if(count>0)
-				{
-					steps.RemoveRange(firstFutureStep, count);
-				}
+					int count=steps.Count()-firstFutureStep;
+					if(count>0)
+					{
+						steps.RemoveRange(firstFutureStep, count);
+					}
 				
-				steps.Add(step);
-				firstFutureStep=steps.Count();
+					steps.Add(step);
+					firstFutureStep=steps.Count();
+				}
 			}
 
 			bool GuiGeneralUndoRedoProcessor::CanUndo()
@@ -985,9 +989,12 @@ GuiGeneralUndoRedoProcessor
 
 			void GuiGeneralUndoRedoProcessor::ClearUndoRedo()
 			{
-				steps.Clear();
-				firstFutureStep=0;
-				savedStep=-1;
+				if(!performingUndoRedo)
+				{
+					steps.Clear();
+					firstFutureStep=0;
+					savedStep=-1;
+				}
 			}
 
 			bool GuiGeneralUndoRedoProcessor::GetModified()
@@ -997,22 +1004,29 @@ GuiGeneralUndoRedoProcessor
 
 			void GuiGeneralUndoRedoProcessor::NotifyModificationSaved()
 			{
-				savedStep=firstFutureStep;
+				if(!performingUndoRedo)
+				{
+					savedStep=firstFutureStep;
+				}
 			}
 
 			bool GuiGeneralUndoRedoProcessor::Undo()
 			{
 				if(!CanUndo()) return false;
+				performingUndoRedo=true;
 				firstFutureStep--;
 				steps[firstFutureStep]->Undo();
+				performingUndoRedo=false;
 				return true;
 			}
 
 			bool GuiGeneralUndoRedoProcessor::Redo()
 			{
 				if(!CanRedo()) return false;
+				performingUndoRedo=true;
 				steps[firstFutureStep]->Redo();
 				firstFutureStep++;
+				performingUndoRedo=false;
 				return true;
 			}
 
@@ -1022,17 +1036,24 @@ GuiTextBoxUndoRedoProcessor::EditStep
 
 			void GuiTextBoxUndoRedoProcessor::EditStep::Undo()
 			{
+				processor->textElementOperator->Select(inputStart, inputEnd);
+				processor->textElementOperator->SetSelectionText(originalText);
+				processor->textElementOperator->Select(originalStart, originalEnd);
 			}
 
 			void GuiTextBoxUndoRedoProcessor::EditStep::Redo()
 			{
+				processor->textElementOperator->Select(originalStart, originalEnd);
+				processor->textElementOperator->SetSelectionText(inputText);
+				processor->textElementOperator->Select(inputStart, inputEnd);
 			}
 
 /***********************************************************************
 GuiTextBoxUndoRedoProcessor
 ***********************************************************************/
 
-			GuiTextBoxUndoRedoProcessor::GuiTextBoxUndoRedoProcessor()
+			GuiTextBoxUndoRedoProcessor::GuiTextBoxUndoRedoProcessor(GuiTextElementOperator* _textElementOperator)
+				:textElementOperator(_textElementOperator)
 			{
 			}
 
@@ -1052,6 +1073,7 @@ GuiTextBoxUndoRedoProcessor
 			void GuiTextBoxUndoRedoProcessor::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
 			{
 				Ptr<EditStep> step=new EditStep;
+				step->processor=this;
 				step->originalStart=originalStart;
 				step->originalEnd=originalEnd;
 				step->originalText=originalText;
@@ -1081,6 +1103,8 @@ GuiTextBoxCommonInterface
 				textControl=_textControl;
 				SelectionChanged.SetAssociatedComposition(textControl->GetBoundsComposition());
 				textElementOperator->SetTextBoxCommonInterface(this);
+
+				undoRedoProcessor=new GuiTextBoxUndoRedoProcessor(textElementOperator);
 				textElementOperator->AttachTextEditCallback(undoRedoProcessor);
 
 				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'A', Func<void()>(this, &GuiTextBoxCommonInterface::SelectAll)));
@@ -1095,7 +1119,6 @@ GuiTextBoxCommonInterface
 				:textElementOperator(0)
 				,textControl(0)
 			{
-				undoRedoProcessor=new GuiTextBoxUndoRedoProcessor;
 			}
 
 			GuiTextBoxCommonInterface::~GuiTextBoxCommonInterface()
