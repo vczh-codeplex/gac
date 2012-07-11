@@ -7859,7 +7859,7 @@ GuiTextElementOperator
 			{
 				for(int i=0;i<shortcutCommands.Count();i++)
 				{
-					if(shortcutCommands[i]->IsTheRightKey(shift, ctrl, code))
+					if(shortcutCommands[i]->IsTheRightKey(ctrl, shift, code))
 					{
 						shortcutCommands[i]->Execute();
 						return true;
@@ -8792,6 +8792,16 @@ GuiTextBoxCommonInterface
 
 			GuiTextBoxCommonInterface::~GuiTextBoxCommonInterface()
 			{
+				if(colorizer)
+				{
+					textElementOperator->DetachTextEditCallback(colorizer);
+					colorizer=0;
+				}
+				if(undoRedoProcessor)
+				{
+					textElementOperator->DetachTextEditCallback(undoRedoProcessor);
+					undoRedoProcessor=0;
+				}
 			}
 
 			compositions::GuiGraphicsComposition* GuiTextBoxCommonInterface::GetTextComposition()

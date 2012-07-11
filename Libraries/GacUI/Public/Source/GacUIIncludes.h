@@ -16449,7 +16449,7 @@ Undo Redo
 			class GuiGeneralUndoRedoProcessor : public Object
 			{
 			protected:
-				class IEditStep
+				class IEditStep : public Interface
 				{
 				public:
 					virtual void							Undo()=0;
