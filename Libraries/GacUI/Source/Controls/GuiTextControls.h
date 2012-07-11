@@ -65,6 +65,21 @@ Common Operations
 					virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
 				};
 
+				class ShortcutCommand
+				{
+				protected:
+					bool									ctrl;
+					bool									shift;
+					int										key;
+					Func<void()>							action;
+				public:
+					ShortcutCommand(bool _ctrl, bool _shift, int _key, const Func<void()> _action);
+					~ShortcutCommand();
+
+					bool									IsTheRightKey(bool _ctrl, bool _shift, int _key);
+					void									Execute();
+				};
+
 			protected:
 				elements::GuiColorizedTextElement*			textElement;
 				compositions::GuiGraphicsComposition*		textComposition;
@@ -76,6 +91,7 @@ Common Operations
 
 				SpinLock									elementModifyLock;
 				collections::List<Ptr<ITextEditCallback>>	textEditCallbacks;
+				collections::List<Ptr<ShortcutCommand>>		shortcutCommands;
 
 				void										UpdateCaretPoint();
 				void										Move(TextPos pos, bool shift);
@@ -102,6 +118,7 @@ Common Operations
 				bool										DetachTextEditCallback(Ptr<ITextEditCallback> value);
 				GuiTextBoxCommonInterface*					GetTextBoxCommonInterface();
 				void										SetTextBoxCommonInterface(GuiTextBoxCommonInterface* value);
+				void										AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand);
 
 				elements::GuiColorizedTextElement*			GetTextElement();
 				compositions::GuiGraphicsComposition*		GetTextComposition();
@@ -264,6 +281,8 @@ Undo Redo
 				void										ClearUndoRedo();
 				bool										GetModified();
 				void										NotifyModificationSaved();
+				bool										Undo();
+				bool										Redo();
 			};
 
 			class GuiTextBoxUndoRedoProcessor : public GuiGeneralUndoRedoProcessor, public GuiTextElementOperator::ITextEditCallback
@@ -339,6 +358,12 @@ Common Interface
 				bool										GetModified();
 				/// <summary>Notify the text box that the current status is considered saved.</summary>
 				void										NotifyModificationSaved();
+				/// <summary>Perform the undo action.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				bool										Undo();
+				/// <summary>Perform the redo action.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				bool										Redo();
 				
 				/// <summary>Test can the selection be cut.</summary>
 				/// <returns>Returns true if the selection can be cut.</returns>
