@@ -234,7 +234,8 @@ namespace GenXmlDocRef
             return name;
         }
 
-        protected void WriteTypedSubItemTable(Dictionary<string, Tuple<XElement, string>[]> describedTypedSubItems, string tableName, TextWriter writer, DocItemWriterContext context, bool writeType)
+        // describedTypedSubItems: name => tuple<XML, summary, inheritsFrom>[]
+        protected void WriteTypedSubItemTable(Dictionary<string, Tuple<XElement, string, string>[]> describedTypedSubItems, string tableName, TextWriter writer, DocItemWriterContext context, bool writeType)
         {
             if (describedTypedSubItems.Count > 0)
             {
@@ -263,6 +264,12 @@ namespace GenXmlDocRef
                         }
                         writer.Write("        /+col/");
                         WriteSummary(memberElement.Item1, writer, context);
+                        if (memberElement.Item3 != null)
+                        {
+                            writer.Write(" (Inherits from ");
+                            WriteHyperlinkType(memberElement.Item3, writer, context);
+                            writer.Write(".)");
+                        }
                         writer.WriteLine("/-col/");
                         writer.WriteLine("    /-row/");
                     }
@@ -271,41 +278,72 @@ namespace GenXmlDocRef
             }
         }
 
-        protected void WriteSubItemTable(Dictionary<string, XElement[]> describedSubItems, string tableName, TextWriter writer, DocItemWriterContext context)
+        // subItems: tuple<XML, inheritsFrom>[]
+        protected void WriteTypedSubItemTable(Tuple<XElement, string>[] subItems, string tableName, TextWriter writer, DocItemWriterContext context)
+        {
+            var describedSubItems = subItems
+                .GroupBy(x => x.Item1.Attribute("name").Value)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x =>
+                        Tuple.Create(
+                            x.Item1.Element("document").Element("member"),
+                            x.Item1.Element("type").Value,
+                            x.Item2
+                            )
+                        ).ToArray()
+                    );
+            WriteTypedSubItemTable(describedSubItems, tableName, writer, context, true);
+        }
+
+        // describedSubItems: name => tuple<XML, inheritsFrom>[]
+        protected void WriteSubItemTable(Dictionary<string, Tuple<XElement, string>[]> describedSubItems, string tableName, TextWriter writer, DocItemWriterContext context)
         {
             WriteTypedSubItemTable(
-                describedSubItems.ToDictionary(p => p.Key, p => p.Value.Select(v => Tuple.Create(v, null as string)).ToArray()),
+                describedSubItems
+                    .ToDictionary(
+                        p => p.Key,
+                        p => p.Value.Select(v => Tuple.Create(v.Item1, null as string, v.Item2)).ToArray()
+                        ),
                 tableName,
                 writer,
                 context,
                 false);
         }
 
-        protected void WriteSubItemTable(XElement[] subItems, string tableName, TextWriter writer, DocItemWriterContext context)
+        // describedSubItems: name => XML[]
+        protected void WriteSubItemTable(Dictionary<string, XElement[]> describedSubItems, string tableName, TextWriter writer, DocItemWriterContext context)
+        {
+            WriteSubItemTable(
+                describedSubItems
+                    .ToDictionary(
+                        p => p.Key,
+                        p => p.Value
+                            .Select(x => Tuple.Create(x, null as string))
+                            .ToArray()
+                        ),
+                tableName,
+                writer,
+                context
+                );
+        }
+
+        // subItems: tuple<XML, inheritsFrom>[]
+        protected void WriteSubItemTable(Tuple<XElement, string>[] subItems, string tableName, TextWriter writer, DocItemWriterContext context)
         {
             var describedSubItems = subItems
-                .GroupBy(x => x.Attribute("name").Value)
+                .GroupBy(x => x.Item1.Attribute("name").Value)
                 .ToDictionary(
                     g => g.Key,
-                    g => g.Select(x => x.Element("document").Element("member")).ToArray()
+                    g => g.Select(x => Tuple.Create(x.Item1.Element("document").Element("member"), x.Item2)).ToArray()
                     );
             WriteSubItemTable(describedSubItems, tableName, writer, context);
         }
 
-        protected void WriteTypedSubItemTable(XElement[] subItems, string tableName, TextWriter writer, DocItemWriterContext context)
+        // subItems: XML[]
+        protected void WriteSubItemTable(XElement[] subItems, string tableName, TextWriter writer, DocItemWriterContext context)
         {
-            var describedSubItems = subItems
-                .GroupBy(x => x.Attribute("name").Value)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(x => 
-                        Tuple.Create(
-                            x.Element("document").Element("member"),
-                            x.Element("type").Value
-                            )
-                        ).ToArray()
-                    );
-            WriteTypedSubItemTable(describedSubItems, tableName, writer, context, true);
+            WriteSubItemTable(subItems.Select(x => Tuple.Create(x, null as string)).ToArray(), tableName, writer, context);
         }
     }
 
@@ -374,10 +412,48 @@ namespace GenXmlDocRef
 
     class TypeDocItemWriter : DocItemWriter
     {
+        private XElement[] GetBaseTypeElements(DocItem docItem)
+        {
+            return docItem.Content.Elements("baseType").ToArray();
+        }
+
+        private DocItem[] GetDirectAndIndirectBaseTypes(DocItem docItem, DocItemWriterContext context)
+        {
+            var baseTypeNames = GetBaseTypeElements(docItem)
+                .Select(t => t.Attribute("fullName").Value)
+                .ToArray();
+            DocItem[] directBaseTypes = baseTypeNames
+                .Where(t => context.UniqueIdItemMap.ContainsKey("type:" + t))
+                .Select(t => context.UniqueIdItemMap["type:" + t])
+                .ToArray();
+            return directBaseTypes.Concat(directBaseTypes.SelectMany(t => GetDirectAndIndirectBaseTypes(t, context))).ToArray();
+        }
+
+        private XElement[] GetSubTypes(DocItem docItem)
+        {
+            return docItem.Content.Elements("enum").Concat(docItem.Content.Elements("type")).ToArray();
+        }
+
+        private XElement[] GetSubFields(DocItem docItem)
+        {
+            return docItem.Content.Elements("field").ToArray();
+        }
+
+        private XElement[] GetSubFunctions(DocItem docItem)
+        {
+            return docItem.Content.Elements("function")
+                .Concat(
+                    docItem.Content.Elements("functionGroup")
+                        .SelectMany(e => e.Elements("function"))
+                    )
+                .ToArray();
+        }
+
         protected override void WriteContent(DocItem docItem, TextWriter writer, DocItemWriterContext context)
         {
             WriteSummaryInDocItem(docItem, writer, context);
             writer.WriteLine("/para/");
+
             var baseTypes = docItem.Content.Elements("baseType").ToArray();
             if (baseTypes.Length > 0)
             {
@@ -391,12 +467,26 @@ namespace GenXmlDocRef
                 writer.WriteLine("/para/");
             }
 
-            XElement[] subTypes = docItem.Content.Elements("enum").Concat(docItem.Content.Elements("type")).ToArray();
-            XElement[] subFields = docItem.Content.Elements("field").ToArray();
-            XElement[] subFunctions = docItem.Content.Elements("function")
-                .Concat(
-                    docItem.Content.Elements("functionGroup")
-                        .SelectMany(e => e.Elements("function"))
+            DocItem[] baseTypeDocItems = GetDirectAndIndirectBaseTypes(docItem, context);
+            var subTypes = GetSubTypes(docItem)
+                .Select(x => Tuple.Create(x, null as string))
+                .Concat(baseTypeDocItems
+                    .SelectMany(d => GetSubTypes(d)
+                        .Select(x => Tuple.Create(x, d.UniqueId.Substring(5))))
+                    )
+                .ToArray();
+            var subFields = GetSubFields(docItem)
+                .Select(x => Tuple.Create(x, null as string))
+                .Concat(baseTypeDocItems
+                    .SelectMany(d => GetSubFields(d)
+                        .Select(x => Tuple.Create(x, d.UniqueId.Substring(5))))
+                    )
+                .ToArray();
+            var subFunctions = GetSubFunctions(docItem)
+                .Select(x => Tuple.Create(x, null as string))
+                .Concat(baseTypeDocItems
+                    .SelectMany(d => GetSubFunctions(d)
+                        .Select(x => Tuple.Create(x, d.UniqueId.Substring(5))))
                     )
                 .ToArray();
             WriteSubItemTable(subTypes, "Sub Types", writer, context);
