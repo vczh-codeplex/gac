@@ -52,6 +52,32 @@ GuiTextElementOperator::DefaultCallback
 			}
 
 /***********************************************************************
+GuiTextElementOperator::ShortcutCommand
+***********************************************************************/
+
+			GuiTextElementOperator::ShortcutCommand::ShortcutCommand(bool _ctrl, bool _shift, int _key, const Func<void()> _action)
+				:ctrl(_ctrl)
+				,shift(_shift)
+				,key(_key)
+				,action(_action)
+			{
+			}
+
+			GuiTextElementOperator::ShortcutCommand::~ShortcutCommand()
+			{
+			}
+
+			bool GuiTextElementOperator::ShortcutCommand::IsTheRightKey(bool _ctrl, bool _shift, int _key)
+			{
+				return _ctrl==ctrl && _shift==shift && _key==key;
+			}
+
+			void GuiTextElementOperator::ShortcutCommand::Execute()
+			{
+				action();
+			}
+
+/***********************************************************************
 GuiTextElementOperator
 ***********************************************************************/
 
@@ -162,21 +188,11 @@ GuiTextElementOperator
 
 			bool GuiTextElementOperator::ProcessKey(int code, bool shift, bool ctrl)
 			{
-				if(!shift && ctrl)
+				for(int i=0;i<shortcutCommands.Count();i++)
 				{
-					switch(code)
+					if(shortcutCommands[i]->IsTheRightKey(shift, ctrl, code))
 					{
-					case L'A':
-						SelectAll();
-						return true;
-					case L'X':
-						Cut();
-						return true;
-					case L'C':
-						Copy();
-						return true;
-					case L'V':
-						Paste();
+						shortcutCommands[i]->Execute();
 						return true;
 					}
 				}
@@ -493,6 +509,11 @@ GuiTextElementOperator
 			void GuiTextElementOperator::SetTextBoxCommonInterface(GuiTextBoxCommonInterface* value)
 			{
 				textBoxCommonInterface=value;
+			}
+
+			void GuiTextElementOperator::AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand)
+			{
+				shortcutCommands.Add(shortcutCommand);
 			}
 
 			elements::GuiColorizedTextElement* GuiTextElementOperator::GetTextElement()
@@ -979,6 +1000,22 @@ GuiGeneralUndoRedoProcessor
 				savedStep=firstFutureStep;
 			}
 
+			bool GuiGeneralUndoRedoProcessor::Undo()
+			{
+				if(!CanUndo()) return false;
+				firstFutureStep--;
+				steps[firstFutureStep]->Undo();
+				return true;
+			}
+
+			bool GuiGeneralUndoRedoProcessor::Redo()
+			{
+				if(!CanRedo()) return false;
+				steps[firstFutureStep]->Redo();
+				firstFutureStep++;
+				return true;
+			}
+
 /***********************************************************************
 GuiTextBoxUndoRedoProcessor::EditStep
 ***********************************************************************/
@@ -1045,6 +1082,13 @@ GuiTextBoxCommonInterface
 				SelectionChanged.SetAssociatedComposition(textControl->GetBoundsComposition());
 				textElementOperator->SetTextBoxCommonInterface(this);
 				textElementOperator->AttachTextEditCallback(undoRedoProcessor);
+
+				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'A', Func<void()>(this, &GuiTextBoxCommonInterface::SelectAll)));
+				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'Z', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Undo))));
+				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'Y', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Redo))));
+				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'X', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Cut))));
+				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'C', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Copy))));
+				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'V', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Paste))));
 			}
 
 			GuiTextBoxCommonInterface::GuiTextBoxCommonInterface()
@@ -1108,6 +1152,16 @@ GuiTextBoxCommonInterface
 			void GuiTextBoxCommonInterface::NotifyModificationSaved()
 			{
 				undoRedoProcessor->NotifyModificationSaved();
+			}
+
+			bool GuiTextBoxCommonInterface::Undo()
+			{
+				return undoRedoProcessor->Undo();
+			}
+
+			bool GuiTextBoxCommonInterface::Redo()
+			{
+				return undoRedoProcessor->Redo();
 			}
 
 			bool GuiTextBoxCommonInterface::CanCut()
