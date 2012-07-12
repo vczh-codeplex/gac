@@ -230,17 +230,6 @@ GuiMenuButton
 				styleController->SetSubMenuOpening(false);
 			}
 
-			void GuiMenuButton::OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-			{
-				if(!GetSubMenu() && GetVisuallyEnabled())
-				{
-					if(ownerMenuService)
-					{
-						ownerMenuService->MenuItemExecuted();
-					}
-				}
-			}
-
 			void GuiMenuButton::OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				if(GetVisuallyEnabled())
@@ -258,6 +247,13 @@ GuiMenuButton
 				{
 					OpenSubMenuInternal();
 				}
+				else if(GetVisuallyEnabled())
+				{
+					if(ownerMenuService)
+					{
+						ownerMenuService->MenuItemExecuted();
+					}
+				}
 			}
 
 			GuiMenuButton::GuiMenuButton(IStyleController* _styleController)
@@ -270,7 +266,6 @@ GuiMenuButton
 				SetClickOnMouseUp(false);
 				SubMenuOpeningChanged.SetAssociatedComposition(boundsComposition);
 				GetSubMenuHost()->Clicked.AttachMethod(this, &GuiMenuButton::OnClicked);
-				GetSubMenuHost()->GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiMenuButton::OnLeftButtonDown);
 				GetSubMenuHost()->GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiMenuButton::OnMouseEnter);
 			}
 

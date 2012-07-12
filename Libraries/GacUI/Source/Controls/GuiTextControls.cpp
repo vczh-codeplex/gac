@@ -948,7 +948,7 @@ GuiGeneralUndoRedoProcessor
 
 			GuiGeneralUndoRedoProcessor::GuiGeneralUndoRedoProcessor()
 				:firstFutureStep(0)
-				,savedStep(-1)
+				,savedStep(0)
 				,performingUndoRedo(false)
 			{
 			}
@@ -1024,8 +1024,8 @@ GuiGeneralUndoRedoProcessor
 			{
 				if(!CanRedo()) return false;
 				performingUndoRedo=true;
-				steps[firstFutureStep]->Redo();
 				firstFutureStep++;
+				steps[firstFutureStep-1]->Redo();
 				performingUndoRedo=false;
 				return true;
 			}
@@ -1539,6 +1539,7 @@ GuiMultilineTextBox
 
 			void GuiMultilineTextBox::SetText(const WString& value)
 			{
+				text=GetText();
 				GuiScrollView::SetText(value);
 				CalculateView();
 			}
