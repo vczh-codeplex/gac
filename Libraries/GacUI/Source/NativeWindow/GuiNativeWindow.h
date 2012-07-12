@@ -471,6 +471,11 @@ Native Window
 			/// </summary>
 			/// <returns>Returns true if this operation succeeded.</returns>
 			virtual bool				ReleaseCapture()=0;
+			/// <summary>
+			/// Test if the window is capturing mouse messages.
+			/// </summary>
+			/// <returns>Returns true if the window is capturing mouse messages.</returns>
+			virtual bool				IsCapturing()=0;
 
 			/// <summary>
 			/// Test is the maximize box visible.

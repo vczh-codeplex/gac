@@ -659,6 +659,7 @@ Native Window
 			
 			virtual bool				RequireCapture()=0;
 			virtual bool				ReleaseCapture()=0;
+			virtual bool				IsCapturing()=0;
 
 			virtual bool				GetMaximizedBox()=0;
 			virtual void				SetMaximizedBox(bool visible)=0;
