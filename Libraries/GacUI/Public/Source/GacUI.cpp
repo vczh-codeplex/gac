@@ -2135,6 +2135,11 @@ GuiMenu
 				return true;
 			}
 
+			bool GuiMenu::IsSubMenuActivatedByMouseDown()
+			{
+				return false;
+			}
+
 			void GuiMenu::MenuItemExecuted()
 			{
 				IGuiMenuService::MenuItemExecuted();
@@ -2225,6 +2230,11 @@ GuiMenuBar
 				return GetOpeningMenu()!=0;
 			}
 
+			bool GuiMenuBar::IsSubMenuActivatedByMouseDown()
+			{
+				return true;
+			}
+
 			GuiMenuBar::GuiMenuBar(GuiControl::IStyleController* _styleController)
 				:GuiControl(_styleController)
 			{
@@ -2276,6 +2286,10 @@ GuiMenuButton
 			{
 				GuiButton::OnParentLineChanged();
 				ownerMenuService=QueryService<IGuiMenuService>();
+				if(ownerMenuService)
+				{
+					SetClickOnMouseUp(!ownerMenuService->IsSubMenuActivatedByMouseDown());
+				}
 				if(subMenu)
 				{
 					subMenu->UpdateMenuService();
@@ -2327,7 +2341,6 @@ GuiMenuButton
 				,ownedSubMenu(false)
 				,ownerMenuService(0)
 			{
-				SetClickOnMouseUp(false);
 				SubMenuOpeningChanged.SetAssociatedComposition(boundsComposition);
 				GetSubMenuHost()->Clicked.AttachMethod(this, &GuiMenuButton::OnClicked);
 				GetSubMenuHost()->GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiMenuButton::OnMouseEnter);

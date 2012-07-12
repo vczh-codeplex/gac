@@ -17581,6 +17581,7 @@ Menu Service
 				virtual IGuiMenuService*				GetParentMenuService()=0;
 				virtual Direction						GetPreferredDirection()=0;
 				virtual bool							IsActiveState()=0;
+				virtual bool							IsSubMenuActivatedByMouseDown()=0;
 
 				virtual void							MenuItemExecuted();
 				virtual GuiMenu*						GetOpeningMenu();
@@ -17600,6 +17601,7 @@ Menu
 				IGuiMenuService*						GetParentMenuService()override;
 				Direction								GetPreferredDirection()override;
 				bool									IsActiveState()override;
+				bool									IsSubMenuActivatedByMouseDown()override;
 				void									MenuItemExecuted()override;
 			protected:
 				GuiControl*								owner;
@@ -17621,6 +17623,7 @@ Menu
 				IGuiMenuService*						GetParentMenuService()override;
 				Direction								GetPreferredDirection()override;
 				bool									IsActiveState()override;
+				bool									IsSubMenuActivatedByMouseDown()override;
 			public:
 				GuiMenuBar(GuiControl::IStyleController* _styleController);
 				~GuiMenuBar();
