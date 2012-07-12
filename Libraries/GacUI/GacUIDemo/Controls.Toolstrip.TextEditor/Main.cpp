@@ -276,9 +276,12 @@ private:
 	}
 
 private:
+
+/******************************************************************************
+File Operation
+******************************************************************************/
+
 	WString							fileName;
-	bool							enableModifyFlag;
-	bool							modified;
 
 	void UpdateWindowTitle()
 	{
@@ -323,7 +326,8 @@ private:
 				StreamReader reader(decoderStream);
 				textBox->SetText(reader.ReadToEnd());
 				textBox->Select(TextPos(0, 0), TextPos(0, 0));
-				modified=false;
+				textBox->ClearUndoRedo();
+				textBox->NotifyModificationSaved();
 				UpdateWindowTitle();
 				return true;
 			}
@@ -368,7 +372,7 @@ private:
 			EncoderStream encoderStream(fileStream, encoder);
 			StreamWriter writer(encoderStream);
 			writer.WriteString(textBox->GetText());
-			modified=false;
+			textBox->NotifyModificationSaved();
 			UpdateWindowTitle();
 		}
 		return true;
@@ -380,7 +384,8 @@ private:
 		{
 			fileName=L"";
 			textBox->SetText(L"");
-			modified=false;
+			textBox->ClearUndoRedo();
+			textBox->NotifyModificationSaved();
 			UpdateWindowTitle();
 			return true;
 		}
@@ -392,7 +397,7 @@ private:
 
 	bool PromptSaveUnchanged()
 	{
-		if(modified)
+		if(textBox->GetModified())
 		{
 			INativeDialogService::MessageBoxButtonsOutput result=GetCurrentController()->DialogService()->ShowMessageBox(
 				this->GetNativeWindow(),
@@ -426,13 +431,52 @@ private:
 		}
 	}
 
-	void textBox_TextChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+/******************************************************************************
+Command Updating
+******************************************************************************/
+
+	static const int ClipboardCommands=1;
+	static const int SelectionCommands=2;
+	static const int UndoRedoCommands=4;
+	static const int AllCommands=7;
+
+	void UpdateMenuItems(int commands)
 	{
-		if(enableModifyFlag)
+		if(commands & ClipboardCommands)
 		{
-			modified=true;
+			menuEditPaste->SetEnabled(GetCurrentController()->ClipboardService()->ContainsText());
+		}
+		if(commands & SelectionCommands)
+		{
+			menuEditCut->SetEnabled(textBox->CanCut());
+			menuEditCopy->SetEnabled(textBox->CanCopy());
+			menuEditDelete->SetEnabled(textBox->GetCaretBegin()!=textBox->GetCaretEnd());
+		}
+		if(commands & UndoRedoCommands)
+		{
+			menuEditUndo->SetEnabled(textBox->CanUndo());
+			menuEditRedo->SetEnabled(textBox->CanRedo());
 		}
 	}
+
+	void window_ClipboardUpdated(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		UpdateMenuItems(ClipboardCommands);
+	}
+
+	void textBox_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		UpdateMenuItems(SelectionCommands);
+	}
+
+	void textBox_TextChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		UpdateMenuItems(UndoRedoCommands);
+	}
+
+/******************************************************************************
+Menu Handlers
+******************************************************************************/
 
 	void menuFileNew_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
@@ -465,30 +509,37 @@ private:
 
 	void menuEditUndo_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		textBox->Undo();
 	}
 
 	void menuEditRedo_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		textBox->Redo();
 	}
 
 	void menuEditCut_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		textBox->Cut();
 	}
 
 	void menuEditCopy_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		textBox->Copy();
 	}
 
 	void menuEditPaste_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		textBox->Paste();
 	}
 
 	void menuEditDelete_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		textBox->SetSelectionText(L"");
 	}
 
 	void menuEditSelect_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
+		textBox->SelectAll();
 	}
 
 	void menuEditGoto_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
@@ -505,12 +556,11 @@ private:
 public:
 	TextEditorWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
-		,enableModifyFlag(true)
-		,modified(false)
 	{
 		UpdateWindowTitle();
 
 		this->WindowClosing.AttachMethod(this, &TextEditorWindow::window_WindowClosing);
+		this->ClipboardUpdated.AttachMethod(this, &TextEditorWindow::window_ClipboardUpdated);
 
 		// create a table to place a menu bar and a text box
 		GuiTableComposition* table=new GuiTableComposition;
@@ -561,8 +611,10 @@ public:
 			textBox=g::NewMultilineTextBox();
 			textBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			textBox->TextChanged.AttachMethod(this, &TextEditorWindow::textBox_TextChanged);
+			textBox->SelectionChanged.AttachMethod(this, &TextEditorWindow::textBox_SelectionChanged);
 			cell->AddChild(textBox->GetBoundsComposition());
 		}
+		UpdateMenuItems(AllCommands);
 
 		// set the preferred minimum client size
 		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
