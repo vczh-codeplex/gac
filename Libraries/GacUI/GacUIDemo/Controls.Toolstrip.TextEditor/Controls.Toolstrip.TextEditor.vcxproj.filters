@@ -13,10 +13,19 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="TextEditorWindow">
+      <UniqueIdentifier>{b5d7ad0f-ea8b-478b-a985-b86ceab3635f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEditorWindow.cpp">
+      <Filter>TextEditorWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEditorWindow_Initialization.cpp">
+      <Filter>TextEditorWindow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -28,6 +37,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Public\Source\Vlpp.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEditorWindow.h">
+      <Filter>TextEditorWindow</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
