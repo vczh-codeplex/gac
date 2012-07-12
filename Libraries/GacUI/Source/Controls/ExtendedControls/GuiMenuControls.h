@@ -53,6 +53,9 @@ Menu Service
 				/// <summary>Test is this menu is active. When an menu is active, the sub menu is automatically opened when the corresponding menu item is opened.</summary>
 				/// <returns>Returns true if this menu is active.</returns>
 				virtual bool							IsActiveState()=0;
+				/// <summary>Test all sub menu items are actived by mouse down.</summary>
+				/// <returns>Returns true if all sub menu items are actived by mouse down.</returns>
+				virtual bool							IsSubMenuActivatedByMouseDown()=0;
 
 				/// <summary>Called when the menu item is executed.</summary>
 				virtual void							MenuItemExecuted();
@@ -80,6 +83,7 @@ Menu
 				IGuiMenuService*						GetParentMenuService()override;
 				Direction								GetPreferredDirection()override;
 				bool									IsActiveState()override;
+				bool									IsSubMenuActivatedByMouseDown()override;
 				void									MenuItemExecuted()override;
 			protected:
 				GuiControl*								owner;
@@ -106,6 +110,7 @@ Menu
 				IGuiMenuService*						GetParentMenuService()override;
 				Direction								GetPreferredDirection()override;
 				bool									IsActiveState()override;
+				bool									IsSubMenuActivatedByMouseDown()override;
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
