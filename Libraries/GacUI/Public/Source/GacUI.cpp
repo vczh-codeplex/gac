@@ -17401,16 +17401,19 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::MouseCapture(const NativeWindowMouseInfo& info)
 			{
-				if(nativeWindow && !mouseCaptureComposition && (info.left || info.middle || info.right))
+				if(nativeWindow && (info.left || info.middle || info.right))
 				{
-					nativeWindow->RequireCapture();
-					mouseCaptureComposition=windowComposition->FindComposition(Point(info.x, info.y));
+					if(!nativeWindow->IsCapturing())
+					{
+						nativeWindow->RequireCapture();
+						mouseCaptureComposition=windowComposition->FindComposition(Point(info.x, info.y));
+					}
 				}
 			}
 
 			void GuiGraphicsHost::MouseUncapture(const NativeWindowMouseInfo& info)
 			{
-				if(nativeWindow && mouseCaptureComposition && !(info.left || info.middle || info.right))
+				if(nativeWindow && !(info.left || info.middle || info.right))
 				{
 					nativeWindow->ReleaseCapture();
 					mouseCaptureComposition=0;
@@ -26550,6 +26553,11 @@ WindowsForm
 				{
 					::ReleaseCapture();
 					return true;
+				}
+
+				bool IsCapturing()
+				{
+					return GetCapture()==handle;
 				}
 
 				bool GetMaximizedBox()

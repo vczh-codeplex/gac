@@ -838,6 +838,11 @@ WindowsForm
 					return true;
 				}
 
+				bool IsCapturing()
+				{
+					return GetCapture()==handle;
+				}
+
 				bool GetMaximizedBox()
 				{
 					return GetStyle(WS_MAXIMIZEBOX);
