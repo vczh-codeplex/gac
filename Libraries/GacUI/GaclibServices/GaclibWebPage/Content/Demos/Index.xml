@@ -100,5 +100,15 @@
       <cpp src="../CommonLibrary/FileSystemInformation.cpp" />
       <description>This demo shows how to build an application to browse the local file system using a GuiTreeView control.</description>
     </demo>
+    <demo name="Toolstrip.TextEditor">
+      <date>2012/7/13</date>
+      <image src="DXGUI_53.jpg" />
+      <image src="DXGUI_54.jpg" />
+      <cpp src="Main.cpp" />
+      <cpp src="TextEditorWindow.h" />
+      <cpp src="TextEditorWindow.cpp" />
+      <cpp src="TextEditorWindow_Initialization.cpp" />
+      <description>This demo shows how to build Notepad with functionalities like new/open/save, or undo/redo/clipboard operations.</description>
+    </demo>
   </category>
 </demos>
