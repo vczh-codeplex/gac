@@ -22,9 +22,6 @@
     <Filter Include="Common\Collections">
       <UniqueIdentifier>{04f34fd9-11ee-4e9b-92ae-13a0ee6bb4e4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\Entity">
-      <UniqueIdentifier>{3284a2c5-100c-426a-8771-c9be9f0e91df}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Common\Regex">
       <UniqueIdentifier>{4523f76a-a088-44c2-8446-3cd21c07ecb0}</UniqueIdentifier>
     </Filter>
@@ -56,33 +53,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Collections\Operation.cpp">
       <Filter>Common\Collections</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Entity\BigObjectPoolEntity.cpp">
-      <Filter>Common\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Entity\GcSingleThreadEntity.cpp">
-      <Filter>Common\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Entity\GeneralObjectPoolEntity.cpp">
-      <Filter>Common\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Entity\SmallObjectPoolEntity.cpp">
-      <Filter>Common\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Entity\TaskEntity.cpp">
-      <Filter>Common\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Entity\TreeDoc.cpp">
-      <Filter>Common\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Entity\TreeJson.cpp">
-      <Filter>Common\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Entity\TreeQuery.cpp">
-      <Filter>Common\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Entity\TreeXml.cpp">
-      <Filter>Common\Entity</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\UnitTest\UnitTest.cpp">
       <Filter>Common\UnitTest</Filter>
@@ -139,15 +109,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestBasic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TestEntity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TestEntityTask.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TestEntityTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestFunction.cpp">
@@ -259,42 +220,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Collections\Pair.h">
       <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Entity\BigObjectPoolEntity.h">
-      <Filter>Common\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Entity\BinaryBalanceTreeEntity.h">
-      <Filter>Common\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Entity\GcEntityCommon.h">
-      <Filter>Common\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Entity\GcSingleThreadEntity.h">
-      <Filter>Common\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Entity\GeneralObjectPoolEntity.h">
-      <Filter>Common\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Entity\Linear.h">
-      <Filter>Common\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Entity\SmallObjectPoolEntity.h">
-      <Filter>Common\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Entity\TaskEntity.h">
-      <Filter>Common\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Entity\TreeDoc.h">
-      <Filter>Common\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Entity\TreeJson.h">
-      <Filter>Common\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Entity\TreeQuery.h">
-      <Filter>Common\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Entity\TreeXml.h">
-      <Filter>Common\Entity</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\UnitTest\UnitTest.h">
       <Filter>Common\UnitTest</Filter>
