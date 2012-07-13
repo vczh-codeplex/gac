@@ -169,6 +169,7 @@
     <ClCompile Include="..\..\Source\UnitTest\UnitTest.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="TestBasic.cpp" />
+    <ClCompile Include="TestParserCombinator.cpp" />
     <ClCompile Include="TestFunction.cpp" />
     <ClCompile Include="TestGlobalStorage.cpp" />
     <ClCompile Include="TestList.cpp" />
