@@ -74,22 +74,6 @@ void TextEditorWindow::InitializeMenuBar()
 			GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 			menuStack->AddChild(stackItem);
 
-			menuFilePrint=g::NewMenuItemButton();
-			menuFilePrint->SetText(L"Print...");
-			menuFilePrint->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			stackItem->AddChild(menuFilePrint->GetBoundsComposition());
-		}
-		{
-			GuiStackItemComposition* stackItem=new GuiStackItemComposition;
-			menuStack->AddChild(stackItem);
-
-			GuiControl* separator=g::NewMenuSplitter();
-			stackItem->AddChild(separator->GetBoundsComposition());
-		}
-		{
-			GuiStackItemComposition* stackItem=new GuiStackItemComposition;
-			menuStack->AddChild(stackItem);
-
 			menuFileExit=g::NewMenuItemButton();
 			menuFileExit->SetText(L"Exit");
 			menuFileExit->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -187,22 +171,6 @@ void TextEditorWindow::InitializeMenuBar()
 			menuEditSelect->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			stackItem->AddChild(menuEditSelect->GetBoundsComposition());
 		}
-		{
-			GuiStackItemComposition* stackItem=new GuiStackItemComposition;
-			menuStack->AddChild(stackItem);
-
-			GuiControl* separator=g::NewMenuSplitter();
-			stackItem->AddChild(separator->GetBoundsComposition());
-		}
-		{
-			GuiStackItemComposition* stackItem=new GuiStackItemComposition;
-			menuStack->AddChild(stackItem);
-
-			menuEditGoto=g::NewMenuItemButton();
-			menuEditGoto->SetText(L"Go To...");
-			menuEditGoto->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			stackItem->AddChild(menuEditGoto->GetBoundsComposition());
-		}
 	}
 	{
 		GuiStackItemComposition* stackItem=new GuiStackItemComposition;
@@ -226,15 +194,6 @@ void TextEditorWindow::InitializeMenuBar()
 			menuFormatFont->SetText(L"Font...");
 			menuFormatFont->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			stackItem->AddChild(menuFormatFont->GetBoundsComposition());
-		}
-		{
-			GuiStackItemComposition* stackItem=new GuiStackItemComposition;
-			menuStack->AddChild(stackItem);
-
-			menuFormatColor=g::NewMenuItemButton();
-			menuFormatColor->SetText(L"Color...");
-			menuFormatColor->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			stackItem->AddChild(menuFormatColor->GetBoundsComposition());
 		}
 	}
 }

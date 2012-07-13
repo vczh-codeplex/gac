@@ -13,7 +13,6 @@ private:
 	GuiMenuButton*					menuFileOpen;
 	GuiMenuButton*					menuFileSave;
 	GuiMenuButton*					menuFileSaveAs;
-	GuiMenuButton*					menuFilePrint;
 	GuiMenuButton*					menuFileExit;
 	GuiMenuButton*					menuEdit;
 	GuiMenuButton*					menuEditUndo;
@@ -23,10 +22,8 @@ private:
 	GuiMenuButton*					menuEditPaste;
 	GuiMenuButton*					menuEditDelete;
 	GuiMenuButton*					menuEditSelect;
-	GuiMenuButton*					menuEditGoto;
 	GuiMenuButton*					menuFormat;
 	GuiMenuButton*					menuFormatFont;
-	GuiMenuButton*					menuFormatColor;
 
 	void							InitializeMenuBar();
 	void							InitializeComponents();
@@ -67,7 +64,6 @@ Menu Handlers
 	void							menuFileOpen_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 	void							menuFileSave_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 	void							menuFileSaveAs_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
-	void							menuFilePrint_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 	void							menuFileExit_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 	void							menuEditUndo_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 	void							menuEditRedo_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
@@ -78,7 +74,6 @@ Menu Handlers
 	void							menuEditSelect_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 	void							menuEditGoto_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 	void							menuFormatFont_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
-	void							menuFormatColor_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 public:
 	TextEditorWindow();
 	~TextEditorWindow();
