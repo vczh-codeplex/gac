@@ -217,10 +217,6 @@ void TextEditorWindow::menuFileSaveAs_Clicked(GuiGraphicsComposition* sender, Gu
 	TrySave(true);
 }
 
-void TextEditorWindow::menuFilePrint_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-{
-}
-
 void TextEditorWindow::menuFileExit_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
 	this->Close();
@@ -261,16 +257,20 @@ void TextEditorWindow::menuEditSelect_Clicked(GuiGraphicsComposition* sender, Gu
 	textBox->SelectAll();
 }
 
-void TextEditorWindow::menuEditGoto_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-{
-}
-
 void TextEditorWindow::menuFormatFont_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
-}
-
-void TextEditorWindow::menuFormatColor_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-{
+	FontProperties font=textBox->GetFont();
+	Color color;
+	if(GetCurrentController()->DialogService()->ShowFontDialog(
+		this->GetNativeWindow(),
+		font,
+		color,
+		true,
+		false,
+		true))
+	{
+		textBox->SetFont(font);
+	}
 }
 
 TextEditorWindow::TextEditorWindow()
@@ -290,7 +290,6 @@ TextEditorWindow::TextEditorWindow()
 	menuFileOpen->Clicked.AttachMethod(this, &TextEditorWindow::menuFileOpen_Clicked);
 	menuFileSave->Clicked.AttachMethod(this, &TextEditorWindow::menuFileSave_Clicked);
 	menuFileSaveAs->Clicked.AttachMethod(this, &TextEditorWindow::menuFileSaveAs_Clicked);
-	menuFilePrint->Clicked.AttachMethod(this, &TextEditorWindow::menuFilePrint_Clicked);
 	menuFileExit->Clicked.AttachMethod(this, &TextEditorWindow::menuFileExit_Clicked);
 	menuEditUndo->Clicked.AttachMethod(this, &TextEditorWindow::menuEditUndo_Clicked);
 	menuEditRedo->Clicked.AttachMethod(this, &TextEditorWindow::menuEditRedo_Clicked);
@@ -299,9 +298,7 @@ TextEditorWindow::TextEditorWindow()
 	menuEditPaste->Clicked.AttachMethod(this, &TextEditorWindow::menuEditPaste_Clicked);
 	menuEditDelete->Clicked.AttachMethod(this, &TextEditorWindow::menuEditDelete_Clicked);
 	menuEditSelect->Clicked.AttachMethod(this, &TextEditorWindow::menuEditSelect_Clicked);
-	menuEditGoto->Clicked.AttachMethod(this, &TextEditorWindow::menuEditGoto_Clicked);
 	menuFormatFont->Clicked.AttachMethod(this, &TextEditorWindow::menuFormatFont_Clicked);
-	menuFormatColor->Clicked.AttachMethod(this, &TextEditorWindow::menuFormatColor_Clicked);
 }
 
 TextEditorWindow::~TextEditorWindow()
