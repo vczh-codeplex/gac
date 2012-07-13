@@ -149,6 +149,12 @@
     <Content Include="Content\Demos\Controls.TextBox.Colorizer\Main.cpp" />
     <Content Include="Content\Demos\Controls.TextBox.Editor\DXGUI_34.jpg" />
     <Content Include="Content\Demos\Controls.TextBox.Editor\Main.cpp" />
+    <Content Include="Content\Demos\Controls.Toolstrip.TextEditor\DXGUI_53.jpg" />
+    <Content Include="Content\Demos\Controls.Toolstrip.TextEditor\DXGUI_54.jpg" />
+    <Content Include="Content\Demos\Controls.Toolstrip.TextEditor\Main.cpp" />
+    <Content Include="Content\Demos\Controls.Toolstrip.TextEditor\TextEditorWindow.cpp" />
+    <Content Include="Content\Demos\Controls.Toolstrip.TextEditor\TextEditorWindow.h" />
+    <Content Include="Content\Demos\Controls.Toolstrip.TextEditor\TextEditorWindow_Initialization.cpp" />
     <Content Include="Content\Demos\Controls.TreeView.FileExplorer\DXGUI_51.jpg" />
     <Content Include="Content\Demos\Controls.TreeView.FileExplorer\DXGUI_52.jpg" />
     <Content Include="Content\Demos\Controls.TreeView.FileExplorer\Main.cpp" />
@@ -164,6 +170,7 @@
     <Content Include="Content\Demos\Demos.Controls.Tab.TextBoxPage.jpg" />
     <Content Include="Content\Demos\Demos.Controls.TextBox.Colorizer.jpg" />
     <Content Include="Content\Demos\Demos.Controls.TextBox.Editor.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.Toolstrip.TextEditor.jpg" />
     <Content Include="Content\Demos\Demos.Controls.TreeView.FileExplorer.jpg" />
     <Content Include="Content\Demos\Index.xml" />
     <Content Include="Content\favicon.ico" />
