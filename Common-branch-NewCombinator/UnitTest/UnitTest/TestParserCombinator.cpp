@@ -4,18 +4,18 @@
 Rule<Expression> Factor(L"Value"), Term(L"Term"), Exp(L"Exp")
 
 Factor
-	= tok(NUMBER)[&ValueExpression::Number])
-	| tok(L"(") >> Exp << tok(L")")
+	= create<ValueExpression, Expression>(tok(NUMBER)[&ValueExpression::Number]))
+	| tok(L"(") + use(Exp) + tok(L")")
 	;
 
 Term
-	= Factor
-	| Term[&ValueExpression::Left] + (tok(L"*")|tok(K"/"))[&ValueExpression::Operator] + Factor[&ValueExpression::Right]
+	= use(Factor)
+	| create<BinaryExpression, Expression>(Term[&BinaryExpression::Left] + (tok(L"*")|tok(K"/"))[&BinaryExpression::Operator] + Factor[&BinaryExpression::Right])
 	;
 
 Exp
-	= Term
-	| Exp[&ValueExpression::Left] + (tok(L"*")|tok(K"/"))[&ValueExpression::Operator] + Term[&ValueExpression::Right]
+	= use(Term)
+	| create<BinaryExpression, Expression>(Exp[&BinaryExpression::Left] + (tok(L"+")|tok(K"-"))[&BinaryExpression::Operator] + Term[&BinaryExpression::Right])
 	;
 */
 
