@@ -1,0 +1,283 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{9A2AEA9C-C98D-4B87-9EFB-25B221D6DF01}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>UnitTest</RootNamespace>
+    <SccProjectName>SAK</SccProjectName>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Source\Basic.cpp" />
+    <ClCompile Include="..\..\Source\Collections\Operation.cpp" />
+    <ClCompile Include="..\..\Source\Combinator\StringCombinator.cpp" />
+    <ClCompile Include="..\..\Source\Combinator\TokenCombinator.cpp" />
+    <ClCompile Include="..\..\Source\Console.cpp" />
+    <ClCompile Include="..\..\Source\Entity\BigObjectPoolEntity.cpp" />
+    <ClCompile Include="..\..\Source\Entity\GcSingleThreadEntity.cpp" />
+    <ClCompile Include="..\..\Source\Entity\GeneralObjectPoolEntity.cpp" />
+    <ClCompile Include="..\..\Source\Entity\SmallObjectPoolEntity.cpp" />
+    <ClCompile Include="..\..\Source\Entity\TaskEntity.cpp" />
+    <ClCompile Include="..\..\Source\Entity\TreeDoc.cpp" />
+    <ClCompile Include="..\..\Source\Entity\TreeJson.cpp" />
+    <ClCompile Include="..\..\Source\Entity\TreeQuery.cpp" />
+    <ClCompile Include="..\..\Source\Entity\TreeXml.cpp" />
+    <ClCompile Include="..\..\Source\Exception.cpp" />
+    <ClCompile Include="..\..\Source\GlobalStorage.cpp" />
+    <ClCompile Include="..\..\Source\Regex\Regex.cpp" />
+    <ClCompile Include="..\..\Source\Regex\RegexAutomaton.cpp" />
+    <ClCompile Include="..\..\Source\Regex\RegexData.cpp" />
+    <ClCompile Include="..\..\Source\Regex\RegexExpression.cpp" />
+    <ClCompile Include="..\..\Source\Regex\RegexParser.cpp" />
+    <ClCompile Include="..\..\Source\Regex\RegexPure.cpp" />
+    <ClCompile Include="..\..\Source\Regex\RegexRich.cpp" />
+    <ClCompile Include="..\..\Source\Regex\RegexWriter.cpp" />
+    <ClCompile Include="..\..\Source\Stream\Accessor.cpp" />
+    <ClCompile Include="..\..\Source\Stream\BroadcastStream.cpp" />
+    <ClCompile Include="..\..\Source\Stream\CacheStream.cpp" />
+    <ClCompile Include="..\..\Source\Stream\CharFormat.cpp" />
+    <ClCompile Include="..\..\Source\Stream\FileStream.cpp" />
+    <ClCompile Include="..\..\Source\Stream\MemoryStream.cpp" />
+    <ClCompile Include="..\..\Source\Stream\MemoryWrapperStream.cpp" />
+    <ClCompile Include="..\..\Source\Stream\RecorderStream.cpp" />
+    <ClCompile Include="..\..\Source\String.cpp" />
+    <ClCompile Include="..\..\Source\Threading.cpp" />
+    <ClCompile Include="..\..\Source\UnitTest\UnitTest.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="TestBasic.cpp" />
+    <ClCompile Include="TestCombinator.cpp" />
+    <ClCompile Include="TestEntity.cpp" />
+    <ClCompile Include="TestEntityTask.cpp" />
+    <ClCompile Include="TestEntityTree.cpp" />
+    <ClCompile Include="TestFunction.cpp" />
+    <ClCompile Include="TestGlobalStorage.cpp" />
+    <ClCompile Include="TestList.cpp" />
+    <ClCompile Include="TestRegex.cpp" />
+    <ClCompile Include="TestStream.cpp" />
+    <ClCompile Include="TestString.cpp" />
+    <ClCompile Include="TestThread.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Source\Basic.h" />
+    <ClInclude Include="..\..\Source\Collections\Dictionary.h" />
+    <ClInclude Include="..\..\Source\Collections\DictionaryWrappers.h" />
+    <ClInclude Include="..\..\Source\Collections\Interfaces.h" />
+    <ClInclude Include="..\..\Source\Collections\List.h" />
+    <ClInclude Include="..\..\Source\Collections\ListWrappers.h" />
+    <ClInclude Include="..\..\Source\Collections\Operation.h" />
+    <ClInclude Include="..\..\Source\Collections\OperationAggregate.h" />
+    <ClInclude Include="..\..\Source\Collections\OperationConcat.h" />
+    <ClInclude Include="..\..\Source\Collections\OperationCopyFrom.h" />
+    <ClInclude Include="..\..\Source\Collections\OperationEnumerable.h" />
+    <ClInclude Include="..\..\Source\Collections\OperationForEach.h" />
+    <ClInclude Include="..\..\Source\Collections\OperationOrderBy.h" />
+    <ClInclude Include="..\..\Source\Collections\OperationPair.h" />
+    <ClInclude Include="..\..\Source\Collections\OperationSelect.h" />
+    <ClInclude Include="..\..\Source\Collections\OperationSequence.h" />
+    <ClInclude Include="..\..\Source\Collections\OperationSet.h" />
+    <ClInclude Include="..\..\Source\Collections\OperationString.h" />
+    <ClInclude Include="..\..\Source\Collections\OperationWhere.h" />
+    <ClInclude Include="..\..\Source\Collections\Pair.h" />
+    <ClInclude Include="..\..\Source\Combinator\Combinator.h" />
+    <ClInclude Include="..\..\Source\Combinator\Expression.h" />
+    <ClInclude Include="..\..\Source\Combinator\ParserInput.h" />
+    <ClInclude Include="..\..\Source\Combinator\StringCombinator.h" />
+    <ClInclude Include="..\..\Source\Combinator\TokenCombinator.h" />
+    <ClInclude Include="..\..\Source\Combinator\TupleProcessor.h" />
+    <ClInclude Include="..\..\Source\Combinator\_Alt.h" />
+    <ClInclude Include="..\..\Source\Combinator\_Binop.h" />
+    <ClInclude Include="..\..\Source\Combinator\_Def.h" />
+    <ClInclude Include="..\..\Source\Combinator\_Error.h" />
+    <ClInclude Include="..\..\Source\Combinator\_Loop.h" />
+    <ClInclude Include="..\..\Source\Combinator\_Pred.h" />
+    <ClInclude Include="..\..\Source\Combinator\_Ref.h" />
+    <ClInclude Include="..\..\Source\Combinator\_Seq.h" />
+    <ClInclude Include="..\..\Source\Combinator\_Unit.h" />
+    <ClInclude Include="..\..\Source\Combinator\_Using.h" />
+    <ClInclude Include="..\..\Source\Console.h" />
+    <ClInclude Include="..\..\Source\Entity\BigObjectPoolEntity.h" />
+    <ClInclude Include="..\..\Source\Entity\BinaryBalanceTreeEntity.h" />
+    <ClInclude Include="..\..\Source\Entity\GcEntityCommon.h" />
+    <ClInclude Include="..\..\Source\Entity\GcSingleThreadEntity.h" />
+    <ClInclude Include="..\..\Source\Entity\GeneralObjectPoolEntity.h" />
+    <ClInclude Include="..\..\Source\Entity\Linear.h" />
+    <ClInclude Include="..\..\Source\Entity\SmallObjectPoolEntity.h" />
+    <ClInclude Include="..\..\Source\Entity\TaskEntity.h" />
+    <ClInclude Include="..\..\Source\Entity\TreeDoc.h" />
+    <ClInclude Include="..\..\Source\Entity\TreeJson.h" />
+    <ClInclude Include="..\..\Source\Entity\TreeQuery.h" />
+    <ClInclude Include="..\..\Source\Entity\TreeXml.h" />
+    <ClInclude Include="..\..\Source\Event.h" />
+    <ClInclude Include="..\..\Source\Exception.h" />
+    <ClInclude Include="..\..\Source\Function.h" />
+    <ClInclude Include="..\..\Source\GlobalStorage.h" />
+    <ClInclude Include="..\..\Source\Lazy.h" />
+    <ClInclude Include="..\..\Source\Pointer.h" />
+    <ClInclude Include="..\..\Source\Regex\Regex.h" />
+    <ClInclude Include="..\..\Source\Regex\RegexAutomaton.h" />
+    <ClInclude Include="..\..\Source\Regex\RegexData.h" />
+    <ClInclude Include="..\..\Source\Regex\RegexExpression.h" />
+    <ClInclude Include="..\..\Source\Regex\RegexPure.h" />
+    <ClInclude Include="..\..\Source\Regex\RegexRich.h" />
+    <ClInclude Include="..\..\Source\Regex\RegexWriter.h" />
+    <ClInclude Include="..\..\Source\Stream\Accessor.h" />
+    <ClInclude Include="..\..\Source\Stream\BroadcastStream.h" />
+    <ClInclude Include="..\..\Source\Stream\CacheStream.h" />
+    <ClInclude Include="..\..\Source\Stream\CharFormat.h" />
+    <ClInclude Include="..\..\Source\Stream\FileStream.h" />
+    <ClInclude Include="..\..\Source\Stream\Interfaces.h" />
+    <ClInclude Include="..\..\Source\Stream\MemoryStream.h" />
+    <ClInclude Include="..\..\Source\Stream\MemoryWrapperStream.h" />
+    <ClInclude Include="..\..\Source\Stream\RecorderStream.h" />
+    <ClInclude Include="..\..\Source\Stream\StreamSerialization.h" />
+    <ClInclude Include="..\..\Source\String.h" />
+    <ClInclude Include="..\..\Source\Threading.h" />
+    <ClInclude Include="..\..\Source\Tuple.h" />
+    <ClInclude Include="..\..\Source\UnitTest\UnitTest.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Source\Common.fpm" />
+    <None Include="..\..\Source\Event.h.fpm" />
+    <None Include="..\..\Source\Function.h.fpm" />
+    <None Include="..\..\Source\GenerateCode.bat" />
+    <None Include="..\..\Source\Tuple.h.fpm" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
