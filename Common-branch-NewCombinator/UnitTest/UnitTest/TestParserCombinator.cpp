@@ -46,13 +46,13 @@ namespace TestParsing_Expression_Helper
 	public:
 		ExpressionGrammar()
 		{
-			vint LBRACKET	=CreateToken(L"(",			L"/(");
-			vint RBRACKET	=CreateToken(L"R",			L"/R");
-			vint ADD		=CreateToken(L"+",			L"/+");
-			vint SUB		=CreateToken(L"-",			L"-");
-			vint MUL		=CreateToken(L"*",			L"/*");
-			vint DIV		=CreateToken(L"/",			L"//");
-			vint NUMBER		=CreateToken(L"NUMBER",		L"/d+(./d+)?");
+			vint LBRACKET	=CreateToken(L"\"(\"",			L"/(");
+			vint RBRACKET	=CreateToken(L"\")\"",			L"/)");
+			vint ADD		=CreateToken(L"\"+\"",			L"/+");
+			vint SUB		=CreateToken(L"\"-\"",			L"-");
+			vint MUL		=CreateToken(L"\"*\"",			L"/*");
+			vint DIV		=CreateToken(L"\"/\"",			L"//");
+			vint NUMBER		=CreateToken(L"NUMBER",			L"/d+(./d+)?");
 
 			Rule<Ptr<Expression>>	Exp(L"Exp"), Term(L"Term"), Factor(L"Factor");
 
@@ -82,7 +82,10 @@ namespace TestParsing_Expression_Helper
 				BomEncoder encoder(BomEncoder::Utf16);
 				EncoderStream encoderStream(fileStream, encoder);
 				StreamWriter writer(encoderStream);
-				LogGrammarFromRule(Exp.GetRuleNode(), writer);
+
+				LogGrammarFromRule(Exp.GetRuleNode(), false, writer);
+				writer.WriteLine(L"============================================");
+				LogGrammarFromRule(Exp.GetRuleNode(), true, writer);
 			}
 		}
 	};
