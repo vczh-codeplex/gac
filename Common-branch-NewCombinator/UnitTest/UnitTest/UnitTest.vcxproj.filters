@@ -141,6 +141,9 @@
     <ClCompile Include="..\..\Source\Parsing\Parsing.cpp">
       <Filter>Common\Parsing</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\ParsingGrammarRegex.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
@@ -288,6 +291,9 @@
       <Filter>Common\Collections</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Parsing\Parsing.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Parsing\ParsingGrammarRegex.h">
       <Filter>Common\Parsing</Filter>
     </ClInclude>
   </ItemGroup>
