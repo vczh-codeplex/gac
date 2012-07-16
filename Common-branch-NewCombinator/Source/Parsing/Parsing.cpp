@@ -35,27 +35,7 @@ namespace vl
 				visitor->Visit(this);
 			}
 			
-			void _Create::Accept(IParserNodeVisitor* visitor)
-			{
-				visitor->Visit(this);
-			}
-			
-			void _Assign::Accept(IParserNodeVisitor* visitor)
-			{
-				visitor->Visit(this);
-			}
-			
-			void _Cast::Accept(IParserNodeVisitor* visitor)
-			{
-				visitor->Visit(this);
-			}
-			
-			void _Use::Accept(IParserNodeVisitor* visitor)
-			{
-				visitor->Visit(this);
-			}
-			
-			void _Transform::Accept(IParserNodeVisitor* visitor)
+			void _Action::Accept(IParserNodeVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
