@@ -31,7 +31,7 @@ namespace TestParsing_Expression_Helper
 		return wtof(WString(token.reading, token.length));
 	}
 
-	wchar_t ToOp(const RegexToken& token)
+	wchar_t ToOp(RegexToken token)
 	{
 		return *token.reading;
 	}

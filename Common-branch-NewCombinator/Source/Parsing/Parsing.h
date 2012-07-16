@@ -33,11 +33,7 @@ namespace vl
 			class _Loop;
 			class _Token;
 			class _Rule;
-			class _Create;
-			class _Assign;
-			class _Cast;
-			class _Use;
-			class _Transform;
+			class _Action;
 		}
 
 		class IParserNodeVisitor : public Interface
@@ -48,17 +44,19 @@ namespace vl
 			virtual void				Visit(parsing_internal::_Loop* node)=0;
 			virtual void				Visit(parsing_internal::_Token* node)=0;
 			virtual void				Visit(parsing_internal::_Rule* node)=0;
-			virtual void				Visit(parsing_internal::_Create* node)=0;
-			virtual void				Visit(parsing_internal::_Assign* node)=0;
-			virtual void				Visit(parsing_internal::_Cast* node)=0;
-			virtual void				Visit(parsing_internal::_Use* node)=0;
-			virtual void				Visit(parsing_internal::_Transform* node)=0;
+			virtual void				Visit(parsing_internal::_Action* node)=0;
 		};
 
 		class ParserNode : public Object
 		{
 		public:
 			virtual void				Accept(IParserNodeVisitor* visitor)=0;
+		};
+
+		class IParserNodeAction : public Interface
+		{
+		public:
+			virtual WString				GetName()=0;
 		};
 
 		class RuleNode : public Object
@@ -117,44 +115,84 @@ namespace vl
 				void					Accept(IParserNodeVisitor* visitor)override;
 			};
 
-			class _Create : public ParserNode
+			class _Action : public ParserNode
 			{
 			public:
 				Ptr<ParserNode>			node;
+				Ptr<IParserNodeAction>	action;
 
 				void					Accept(IParserNodeVisitor* visitor)override;
 			};
+		}
 
-			class _Assign : public ParserNode
+/***********************************************************************
+语法分析器行为
+***********************************************************************/
+
+		namespace parsing_internal
+		{
+			template<typename TSource, typename TCast>
+			class _CreateAction : public Object, public IParserNodeAction
 			{
 			public:
-				Ptr<ParserNode>			node;
-
-				void					Accept(IParserNodeVisitor* visitor)override;
+				WString GetName()
+				{
+					return L"Create";
+				}
 			};
 
-			class _Cast : public ParserNode
+			template<typename TSource, typename TMember>
+			class _AssignAction : public Object, public IParserNodeAction
 			{
 			public:
-				Ptr<ParserNode>			node;
+				TMember TSource::*		member;
 
-				void					Accept(IParserNodeVisitor* visitor)override;
+				_AssignAction(TMember TSource::* _member)
+					:member(_member)
+				{
+				}
+
+				WString GetName()
+				{
+					return L"Assign";
+				}
+			};
+			
+			template<typename TSource, typename TCast>
+			class _CastAction : public Object, public IParserNodeAction
+			{
+			public:
+				WString GetName()
+				{
+					return L"Cast";
+				}
 			};
 
-			class _Use : public ParserNode
+			template<typename TSource>
+			class _UseAction : public Object, public IParserNodeAction
 			{
 			public:
-				Ptr<ParserNode>			node;
-
-				void					Accept(IParserNodeVisitor* visitor)override;
+				WString GetName()
+				{
+					return L"Use";
+				}
 			};
 
-			class _Transform : public ParserNode
+			template<typename TSource, typename TDestination>
+			class _TransformAction : public Object, public IParserNodeAction
 			{
 			public:
-				Ptr<ParserNode>			node;
+				Func<TDestination(const TSource&)>	transformation;
 
-				void					Accept(IParserNodeVisitor* visitor)override;
+				_TransformAction(const Func<TDestination(const TSource&)>& _transformation)
+					:transformation(_transformation)
+				{
+				}
+
+				WString GetName()
+				{
+					return L"Transform";
+				}
 			};
 		}
 
@@ -294,72 +332,81 @@ namespace vl
 		template<typename TSource>
 		Node<Ptr<TSource>> create(const Node<Ptr<TSource>>& t)
 		{
-			Ptr<parsing_internal::_Create> result=new parsing_internal::_Create;
+			Ptr<parsing_internal::_Action> result=new parsing_internal::_Action;
 			result->node=t.GetNode();
+			result->action=new parsing_internal::_CreateAction<TSource, TSource>;
 			return result;
 		}
 
 		template<typename TSource, typename TCast>
 		Node<Ptr<TCast>> create(const Node<Ptr<TSource>>& t)
 		{
-			Ptr<parsing_internal::_Create> result=new parsing_internal::_Create;
+			Ptr<parsing_internal::_Action> result=new parsing_internal::_Action;
 			result->node=t.GetNode();
+			result->action=new parsing_internal::_CreateAction<TSource, TCast>;
 			return result;
 		}
 
 		template<typename TSource, typename TMember>
 		Node<Ptr<TSource>> assign(const Node<TMember>& t, TMember TSource::* member)
 		{
-			Ptr<parsing_internal::_Assign> result=new parsing_internal::_Assign;
+			Ptr<parsing_internal::_Action> result=new parsing_internal::_Action;
 			result->node=t.GetNode();
+			result->action=new parsing_internal::_AssignAction<TSource, TMember>(member);
 			return result;
 		}
 
 		template<typename TSource, typename TCast>
 		Node<Ptr<TCast>> cast(const Node<Ptr<TSource>>& t)
 		{
-			Ptr<parsing_internal::_Cast> result=new parsing_internal::_Cast;
+			Ptr<parsing_internal::_Action> result=new parsing_internal::_Action;
 			result->node=t.GetNode();
+			result->action=new parsing_internal::_CastAction<TSource, TCast>;
 			return result;
 		}
 
 		template<typename TSource>
 		Node<Ptr<TSource>> use(const Node<Ptr<TSource>>& t)
 		{
-			Ptr<parsing_internal::_Use> result=new parsing_internal::_Use;
+			Ptr<parsing_internal::_Action> result=new parsing_internal::_Action;
 			result->node=t.GetNode();
+			result->action=new parsing_internal::_UseAction<TSource>;
 			return result;
 		}
 
 		template<typename TSource, typename TDestination>
 		Node<TDestination> transform(const Node<TSource>& t, TDestination(*transformation)(const TSource&))
 		{
-			Ptr<parsing_internal::_Transform> result=new parsing_internal::_Transform;
+			Ptr<parsing_internal::_Action> result=new parsing_internal::_Action;
 			result->node=t.GetNode();
+			result->action=new parsing_internal::_TransformAction<TSource, TDestination>(transformation);
 			return result;
 		}
 
 		template<typename TSource, typename TDestination>
 		Node<TDestination> transform(const Node<TSource>& t, TDestination(*transformation)(TSource))
 		{
-			Ptr<parsing_internal::_Transform> result=new parsing_internal::_Transform;
+			Ptr<parsing_internal::_Action> result=new parsing_internal::_Action;
 			result->node=t.GetNode();
+			result->action=new parsing_internal::_TransformAction<TSource, TDestination>(Func<TDestination(TSource)>(transformation));
 			return result;
 		}
 
 		template<typename TSource, typename TDestination>
 		Node<TDestination> transform(const Node<TSource>& t, const Func<TDestination(const TSource&)>& transformation)
 		{
-			Ptr<parsing_internal::_Transform> result=new parsing_internal::_Transform;
+			Ptr<parsing_internal::_Action> result=new parsing_internal::_Action;
 			result->node=t.GetNode();
+			result->action=new parsing_internal::_TransformAction<TSource, TDestination>(transformation);
 			return result;
 		}
 
 		template<typename TSource, typename TDestination>
 		Node<TDestination> transform(const Node<TSource>& t, const Func<TDestination(TSource)>& transformation)
 		{
-			Ptr<parsing_internal::_Transform> result=new parsing_internal::_Transform;
+			Ptr<parsing_internal::_Action> result=new parsing_internal::_Action;
 			result->node=t.GetNode();
+			result->action=new parsing_internal::_TransformAction<TSource, TDestination>(transformation);
 			return result;
 		}
 
@@ -423,6 +470,10 @@ public:
 		{
 		public:
 		};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
 	}
 }
 
