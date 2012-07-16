@@ -432,6 +432,11 @@ namespace vl
 				node=ruleObject;
 			}
 
+			const RuleNode* GetRuleNode()const
+			{
+				return &ruleNode;
+			}
+
 			void operator=(const Node<T>& ruleDefinition)
 			{
 				if(ruleNode.node)
@@ -459,6 +464,13 @@ namespace vl
 		};
 
 /***********************************************************************
+¸¨Öúº¯Êý
+***********************************************************************/
+
+		extern void SearchRulesFromRule(const RuleNode* rootRule, collections::List<const RuleNode*>& rules);
+		extern void LogGrammarFromRule(const RuleNode* rootRule, stream::TextWriter& writer);
+
+/***********************************************************************
 Óï·¨·ÖÎöÆ÷
 
 class TokenHelper
@@ -473,13 +485,6 @@ public:
 		{
 		public:
 		};
-
-/***********************************************************************
-¸¨Öúº¯Êý
-***********************************************************************/
-
-		extern void SearchRulesFromRule(RuleNode* rootRule, collections::List<RuleNode*>& rules);
-		extern void LogGrammarFromRule(RuleNode* rootRule, stream::TextWriter& writer);
 	}
 }
 

@@ -1,9 +1,14 @@
 #include "..\..\Source\UnitTest\UnitTest.h"
 #include "..\..\Source\Parsing\ParsingGrammarRegex.h"
+#include "..\..\Source\Stream\FileStream.h"
+#include "..\..\Source\Stream\CharFormat.h"
 
 using namespace vl;
-using namespace regex;
-using namespace parsing;
+using namespace vl::regex;
+using namespace vl::parsing;
+using namespace vl::stream;
+
+extern WString GetPath();
 
 namespace TestParsing_Expression_Helper
 {
@@ -44,9 +49,9 @@ namespace TestParsing_Expression_Helper
 			vint LBRACKET	=CreateToken(L"(",			L"/(");
 			vint RBRACKET	=CreateToken(L"R",			L"/R");
 			vint ADD		=CreateToken(L"+",			L"/+");
-			vint SUB		=CreateToken(L"+",			L"-");
-			vint MUL		=CreateToken(L"+",			L"/*");
-			vint DIV		=CreateToken(L"+",			L"//");
+			vint SUB		=CreateToken(L"-",			L"-");
+			vint MUL		=CreateToken(L"*",			L"/*");
+			vint DIV		=CreateToken(L"/",			L"//");
 			vint NUMBER		=CreateToken(L"NUMBER",		L"/d+(./d+)?");
 
 			Rule<Ptr<Expression>>	Exp(L"Exp"), Term(L"Term"), Factor(L"Factor");
@@ -71,6 +76,14 @@ namespace TestParsing_Expression_Helper
 						assign(Exp, &Operator::left) + assign(transform(tok(ADD) | tok(SUB), &ToOp), &Operator::op) + assign(Term, &Operator::right)
 						)
 					;
+
+			{
+				FileStream fileStream(GetPath()+L"Grammar_Expression_Log.txt", FileStream::WriteOnly);
+				BomEncoder encoder(BomEncoder::Utf16);
+				EncoderStream encoderStream(fileStream, encoder);
+				StreamWriter writer(encoderStream);
+				LogGrammarFromRule(Exp.GetRuleNode(), writer);
+			}
 		}
 	};
 }
@@ -78,4 +91,5 @@ using namespace TestParsing_Expression_Helper;
 
 TEST_CASE(TestParsing_Expression)
 {
+	ExpressionGrammar grammar;
 }
