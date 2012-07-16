@@ -12,6 +12,8 @@ Classes:
 #include "..\String.h"
 #include "..\Pointer.h"
 #include "..\Function.h"
+#include "..\Collections\List.h"
+#include "..\Stream\Accessor.h"
 
 namespace vl
 {
@@ -24,7 +26,7 @@ namespace vl
 
 		namespace parsing_internal
 		{
-			struct NullParserType
+			struct NullParsingType
 			{
 			};
 
@@ -36,34 +38,34 @@ namespace vl
 			class _Action;
 		}
 
-		class IParserNodeVisitor : public Interface
+		class IParsingNodeVisitor : public Interface
 		{
 		public:
-			virtual void				Visit(parsing_internal::_Seq* node)=0;
-			virtual void				Visit(parsing_internal::_Alt* node)=0;
-			virtual void				Visit(parsing_internal::_Loop* node)=0;
-			virtual void				Visit(parsing_internal::_Token* node)=0;
-			virtual void				Visit(parsing_internal::_Rule* node)=0;
-			virtual void				Visit(parsing_internal::_Action* node)=0;
+			virtual void					Visit(parsing_internal::_Seq* node)=0;
+			virtual void					Visit(parsing_internal::_Alt* node)=0;
+			virtual void					Visit(parsing_internal::_Loop* node)=0;
+			virtual void					Visit(parsing_internal::_Token* node)=0;
+			virtual void					Visit(parsing_internal::_Rule* node)=0;
+			virtual void					Visit(parsing_internal::_Action* node)=0;
 		};
 
-		class ParserNode : public Object
+		class ParsingNode : public Object
 		{
 		public:
-			virtual void				Accept(IParserNodeVisitor* visitor)=0;
+			virtual void					Accept(IParsingNodeVisitor* visitor)=0;
 		};
 
-		class IParserNodeAction : public Interface
+		class IParsingNodeAction : public Interface
 		{
 		public:
-			virtual WString				GetName()=0;
+			virtual WString					GetName()=0;
 		};
 
 		class RuleNode : public Object
 		{
 		public:
-			WString						name;
-			Ptr<ParserNode>				node;
+			WString							name;
+			Ptr<ParsingNode>				node;
 		};
 
 /***********************************************************************
@@ -72,56 +74,56 @@ namespace vl
 
 		namespace parsing_internal
 		{
-			class _Seq : public ParserNode
+			class _Seq : public ParsingNode
 			{
 			public:
-				Ptr<ParserNode>			first;
-				Ptr<ParserNode>			second;
+				Ptr<ParsingNode>			first;
+				Ptr<ParsingNode>			second;
 
-				void					Accept(IParserNodeVisitor* visitor)override;
+				void						Accept(IParsingNodeVisitor* visitor)override;
 			};
 			
-			class _Alt : public ParserNode
+			class _Alt : public ParsingNode
 			{
 			public:
-				Ptr<ParserNode>			first;
-				Ptr<ParserNode>			second;
+				Ptr<ParsingNode>			first;
+				Ptr<ParsingNode>			second;
 
-				void					Accept(IParserNodeVisitor* visitor)override;
+				void						Accept(IParsingNodeVisitor* visitor)override;
 			};
 
-			class _Loop : public ParserNode
+			class _Loop : public ParsingNode
 			{
 			public:
-				Ptr<ParserNode>			node;
+				Ptr<ParsingNode>			node;
 
-				void					Accept(IParserNodeVisitor* visitor)override;
+				void						Accept(IParsingNodeVisitor* visitor)override;
 			};
 
-			class _Token : public ParserNode
+			class _Token : public ParsingNode
 			{
 			public:
-				vint					token;
-				WString					name;
+				vint						token;
+				WString						name;
 
-				void					Accept(IParserNodeVisitor* visitor)override;
+				void						Accept(IParsingNodeVisitor* visitor)override;
 			};
 
-			class _Rule : public ParserNode
+			class _Rule : public ParsingNode
 			{
 			public:
-				RuleNode*				rule;
+				RuleNode*					rule;
 
-				void					Accept(IParserNodeVisitor* visitor)override;
+				void						Accept(IParsingNodeVisitor* visitor)override;
 			};
 
-			class _Action : public ParserNode
+			class _Action : public ParsingNode
 			{
 			public:
-				Ptr<ParserNode>			node;
-				Ptr<IParserNodeAction>	action;
+				Ptr<ParsingNode>			node;
+				Ptr<IParsingNodeAction>		action;
 
-				void					Accept(IParserNodeVisitor* visitor)override;
+				void						Accept(IParsingNodeVisitor* visitor)override;
 			};
 		}
 
@@ -132,7 +134,7 @@ namespace vl
 		namespace parsing_internal
 		{
 			template<typename TSource, typename TCast>
-			class _CreateAction : public Object, public IParserNodeAction
+			class _CreateAction : public Object, public IParsingNodeAction
 			{
 			public:
 				WString GetName()
@@ -142,7 +144,7 @@ namespace vl
 			};
 
 			template<typename TSource, typename TMember>
-			class _AssignAction : public Object, public IParserNodeAction
+			class _AssignAction : public Object, public IParsingNodeAction
 			{
 			public:
 				TMember TSource::*		member;
@@ -159,7 +161,7 @@ namespace vl
 			};
 			
 			template<typename TSource, typename TCast>
-			class _CastAction : public Object, public IParserNodeAction
+			class _CastAction : public Object, public IParsingNodeAction
 			{
 			public:
 				WString GetName()
@@ -169,7 +171,7 @@ namespace vl
 			};
 
 			template<typename TSource>
-			class _UseAction : public Object, public IParserNodeAction
+			class _UseAction : public Object, public IParsingNodeAction
 			{
 			public:
 				WString GetName()
@@ -179,7 +181,7 @@ namespace vl
 			};
 
 			template<typename TSource, typename TDestination>
-			class _TransformAction : public Object, public IParserNodeAction
+			class _TransformAction : public Object, public IParsingNodeAction
 			{
 			public:
 				Func<TDestination(const TSource&)>	transformation;
@@ -201,68 +203,68 @@ namespace vl
 ***********************************************************************/
 
 		template<typename T, typename U>
-		struct ParserNodeTypeMergerInternal
+		struct ParsingNodeTypeMergerInternal
 		{
 		};
 
 		template<typename T>
-		struct ParserNodeTypeDowngrader
+		struct ParsingNodeTypeDowngrader
 		{
 			typedef T									Type;
 		};
 
 		template<>
-		struct ParserNodeTypeDowngrader<parsing_internal::NullParserType>
+		struct ParsingNodeTypeDowngrader<parsing_internal::NullParsingType>
 		{
-			typedef parsing_internal::NullParserType	Type;
+			typedef parsing_internal::NullParsingType	Type;
 		};
 
 		template<>
-		struct ParserNodeTypeMergerInternal<parsing_internal::NullParserType, parsing_internal::NullParserType>
+		struct ParsingNodeTypeMergerInternal<parsing_internal::NullParsingType, parsing_internal::NullParsingType>
 		{
-			typedef parsing_internal::NullParserType	Type;
+			typedef parsing_internal::NullParsingType	Type;
 		};
 
 		template<typename T>
-		struct ParserNodeTypeMergerInternal<parsing_internal::NullParserType, T>
-		{
-			typedef T									Type;
-		};
-
-		template<typename T>
-		struct ParserNodeTypeMergerInternal<T, parsing_internal::NullParserType>
+		struct ParsingNodeTypeMergerInternal<parsing_internal::NullParsingType, T>
 		{
 			typedef T									Type;
 		};
 
 		template<typename T>
-		struct ParserNodeTypeMergerInternal<T, T>
+		struct ParsingNodeTypeMergerInternal<T, parsing_internal::NullParsingType>
+		{
+			typedef T									Type;
+		};
+
+		template<typename T>
+		struct ParsingNodeTypeMergerInternal<T, T>
 		{
 			typedef T									Type;
 		};
 
 		template<typename T, typename U>
-		struct ParserNodeTypeMerger
+		struct ParsingNodeTypeMerger
 		{
-			typedef typename ParserNodeTypeMergerInternal<
-				typename ParserNodeTypeDowngrader<T>::Type,
-				typename ParserNodeTypeDowngrader<U>::Type
+			typedef typename ParsingNodeTypeMergerInternal<
+				typename ParsingNodeTypeDowngrader<T>::Type,
+				typename ParsingNodeTypeDowngrader<U>::Type
 				>::Type									Type;
 		};
 
 		template<typename T>
-		struct ParserNodeTypeMerger<T, T>
+		struct ParsingNodeTypeMerger<T, T>
 		{
 			typedef T									Type;
 		};
 
 		template<typename T>
-		struct ParserNodeGetPtrElement
+		struct ParsingNodeGetPtrElement
 		{
 		};
 
 		template<typename T>
-		struct ParserNodeGetPtrElement<Ptr<T>>
+		struct ParsingNodeGetPtrElement<Ptr<T>>
 		{
 			typedef T									Type;
 		};
@@ -275,19 +277,19 @@ namespace vl
 		class Node : public Object
 		{
 		protected:
-			Ptr<ParserNode>				node;
+			Ptr<ParsingNode>				node;
 
 		public:
 			Node()
 			{
 			}
 
-			Node(Ptr<ParserNode> _node)
+			Node(Ptr<ParsingNode> _node)
 				:node(_node)
 			{
 			}
 
-			Ptr<ParserNode> GetNode()const
+			Ptr<ParsingNode> GetNode()const
 			{
 				return node;
 			}
@@ -298,7 +300,7 @@ namespace vl
 ***********************************************************************/
 
 		template<typename T, typename U>
-		Node<typename ParserNodeTypeMerger<T, U>::Type> operator+(const Node<T>& t, const Node<U>& u)
+		Node<typename ParsingNodeTypeMerger<T, U>::Type> operator+(const Node<T>& t, const Node<U>& u)
 		{
 			Ptr<parsing_internal::_Seq> result=new parsing_internal::_Seq;
 			result->first=t.GetNode();
@@ -307,7 +309,7 @@ namespace vl
 		}
 
 		template<typename T, typename U>
-		Node<typename ParserNodeTypeMerger<T, U>::Type> operator|(const Node<T>& t, const Node<U>& u)
+		Node<typename ParsingNodeTypeMerger<T, U>::Type> operator|(const Node<T>& t, const Node<U>& u)
 		{
 			Ptr<parsing_internal::_Alt> result=new parsing_internal::_Alt;
 			result->first=t.GetNode();
@@ -324,7 +326,7 @@ namespace vl
 		}
 
 		template<typename T>
-		Node<parsing_internal::NullParserType> operator~(const Node<T>& t)
+		Node<parsing_internal::NullParsingType> operator~(const Node<T>& t)
 		{
 			return t.GetNode();
 		}
@@ -420,6 +422,7 @@ namespace vl
 		protected:
 			RuleNode						ruleNode;
 			Ptr<parsing_internal::_Rule>	ruleObject;
+
 		public:
 			Rule(const WString& name=L"")
 			{
@@ -446,11 +449,11 @@ namespace vl
 			{
 				if(ruleNode.node)
 				{
-					ruleNode.node=(Node<T>(ruleNode.node) | cast<typename ParserNodeGetPtrElement<U>::Type, typename ParserNodeGetPtrElement<T>::Type>(ruleDefinition)).GetNode();
+					ruleNode.node=(Node<T>(ruleNode.node) | cast<typename ParsingNodeGetPtrElement<U>::Type, typename ParsingNodeGetPtrElement<T>::Type>(ruleDefinition)).GetNode();
 				}
 				else
 				{
-					ruleNode.node=cast<typename ParserNodeGetPtrElement<U>::Type, typename ParserNodeGetPtrElement<T>::Type>(ruleDefinition).GetNode();
+					ruleNode.node=cast<typename ParsingNodeGetPtrElement<U>::Type, typename ParsingNodeGetPtrElement<T>::Type>(ruleDefinition).GetNode();
 				}
 			}
 		};
@@ -474,6 +477,9 @@ public:
 /***********************************************************************
 ¸¨Öúº¯Êý
 ***********************************************************************/
+
+		extern void SearchRulesFromRule(RuleNode* rootRule, collections::List<RuleNode*>& rules);
+		extern void LogGrammarFromRule(RuleNode* rootRule, stream::TextWriter& writer);
 	}
 }
 
