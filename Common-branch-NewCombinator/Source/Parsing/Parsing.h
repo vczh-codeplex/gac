@@ -103,6 +103,9 @@ namespace vl
 			class _Token : public ParserNode
 			{
 			public:
+				vint					token;
+				WString					name;
+
 				void					Accept(IParserNodeVisitor* visitor)override;
 			};
 
@@ -160,26 +163,53 @@ namespace vl
 ***********************************************************************/
 
 		template<typename T, typename U>
-		struct ParserNodeTypeMerger
+		struct ParserNodeTypeMergerInternal
 		{
 		};
 
+		template<typename T>
+		struct ParserNodeTypeDowngrader
+		{
+			typedef T									Type;
+		};
+
 		template<>
-		struct ParserNodeTypeMerger<parsing_internal::NullParserType, parsing_internal::NullParserType>
+		struct ParserNodeTypeDowngrader<parsing_internal::NullParserType>
+		{
+			typedef parsing_internal::NullParserType	Type;
+		};
+
+		template<>
+		struct ParserNodeTypeMergerInternal<parsing_internal::NullParserType, parsing_internal::NullParserType>
 		{
 			typedef parsing_internal::NullParserType	Type;
 		};
 
 		template<typename T>
-		struct ParserNodeTypeMerger<parsing_internal::NullParserType, T>
+		struct ParserNodeTypeMergerInternal<parsing_internal::NullParserType, T>
 		{
 			typedef T									Type;
 		};
 
 		template<typename T>
-		struct ParserNodeTypeMerger<T, parsing_internal::NullParserType>
+		struct ParserNodeTypeMergerInternal<T, parsing_internal::NullParserType>
 		{
 			typedef T									Type;
+		};
+
+		template<typename T>
+		struct ParserNodeTypeMergerInternal<T, T>
+		{
+			typedef T									Type;
+		};
+
+		template<typename T, typename U>
+		struct ParserNodeTypeMerger
+		{
+			typedef typename ParserNodeTypeMergerInternal<
+				typename ParserNodeTypeDowngrader<T>::Type,
+				typename ParserNodeTypeDowngrader<U>::Type
+				>::Type									Type;
 		};
 
 		template<typename T>
@@ -208,7 +238,7 @@ namespace vl
 			{
 			}
 
-			Ptr<Node> GetNode()const
+			Ptr<ParserNode> GetNode()const
 			{
 				return node;
 			}
@@ -240,7 +270,7 @@ namespace vl
 ***********************************************************************/
 
 		template<typename T, typename U>
-		Node<typename ParserNodeTypeMerger<T, U>::Type> operator+(const Node<T>& t, const Node<T>& u)
+		Node<typename ParserNodeTypeMerger<T, U>::Type> operator+(const Node<T>& t, const Node<U>& u)
 		{
 			Ptr<parsing_internal::_Seq> result=new parsing_internal::_Seq;
 			result->first=t.GetNode();
@@ -249,7 +279,7 @@ namespace vl
 		}
 
 		template<typename T, typename U>
-		Node<typename ParserNodeTypeMerger<T, U>::Type> operator|(const Node<T>& t, const Node<T>& u)
+		Node<typename ParserNodeTypeMerger<T, U>::Type> operator|(const Node<T>& t, const Node<U>& u)
 		{
 			Ptr<parsing_internal::_Alt> result=new parsing_internal::_Alt;
 			result->first=t.GetNode();
@@ -263,6 +293,12 @@ namespace vl
 			Ptr<parsing_internal::_Loop> result=new parsing_internal::_Loop;
 			result->node=t.GetNode();
 			return result;
+		}
+
+		template<typename T>
+		Node<parsing_internal::NullParserType> operator~(const Node<T>& t)
+		{
+			return t.GetNode();
 		}
 
 		template<typename TSource, typename TCast>
@@ -298,6 +334,22 @@ namespace vl
 		}
 
 		template<typename TSource, typename TDestination>
+		Node<TDestination> transform(const Node<TSource>& t, TDestination(*transformation)(const TSource&))
+		{
+			Ptr<parsing_internal::_Transform> result=new parsing_internal::_Transform;
+			result->node=t.GetNode();
+			return result;
+		}
+
+		template<typename TSource, typename TDestination>
+		Node<TDestination> transform(const Node<TSource>& t, TDestination(*transformation)(TSource))
+		{
+			Ptr<parsing_internal::_Transform> result=new parsing_internal::_Transform;
+			result->node=t.GetNode();
+			return result;
+		}
+
+		template<typename TSource, typename TDestination>
 		Node<TDestination> transform(const Node<TSource>& t, const Func<TDestination(const TSource&)>& transformation)
 		{
 			Ptr<parsing_internal::_Transform> result=new parsing_internal::_Transform;
@@ -312,6 +364,22 @@ namespace vl
 			result->node=t.GetNode();
 			return result;
 		}
+
+/***********************************************************************
+Óï·¨·ÖÎöÆ÷
+
+class TokenHelper
+{
+public:
+		static vint Id(const TokenElement& element);
+};
+***********************************************************************/
+
+		template<typename TTokenElement, typename TTokenHelper>
+		class Grammar : public NotCopyable
+		{
+		public:
+		};
 	}
 }
 
