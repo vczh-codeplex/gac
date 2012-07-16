@@ -51,20 +51,23 @@ namespace TestParsing_Expression_Helper
 
 			Rule<Ptr<Expression>>	Exp(L"Exp"), Term(L"Term"), Factor(L"Factor");
 
-			Factor	= create<Value, Expression>(
+			Factor	= create<Value>(
 						assign(transform(tok(NUMBER), &ToId), &Value::number)
 						)
-					| tok(LBRACKET) + use(Exp) + tok(RBRACKET)
+					;
+			Factor	= tok(LBRACKET) + use(Exp) + tok(RBRACKET)
 					;
 
 			Term	= use(Factor)
-					| create<Operator, Expression>(
+					;
+			Term	= create<Operator, Expression>(
 						assign(Term, &Operator::left) + assign(transform(tok(MUL) | tok(DIV), &ToOp), &Operator::op) + assign(Factor, &Operator::right)
 						)
 					;
 
 			Exp		= use(Term)
-					| create<Operator, Expression>(
+					;
+			Exp		= create<Operator, Expression>(
 						assign(Exp, &Operator::left) + assign(transform(tok(ADD) | tok(SUB), &ToOp), &Operator::op) + assign(Term, &Operator::right)
 						)
 					;

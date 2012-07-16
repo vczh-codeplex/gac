@@ -218,8 +218,19 @@ namespace vl
 			typedef T									Type;
 		};
 
+		template<typename T>
+		struct ParserNodeGetPtrElement
+		{
+		};
+
+		template<typename T>
+		struct ParserNodeGetPtrElement<Ptr<T>>
+		{
+			typedef T									Type;
+		};
+
 /***********************************************************************
-语法分析器构造器
+语法分析器基础节点构造器
 ***********************************************************************/
 
 		template<typename T>
@@ -241,27 +252,6 @@ namespace vl
 			Ptr<ParserNode> GetNode()const
 			{
 				return node;
-			}
-		};
-
-		template<typename T>
-		class Rule : public Node<T>
-		{
-		protected:
-			RuleNode						ruleNode;
-			Ptr<parsing_internal::_Rule>	ruleObject;
-		public:
-			Rule(const WString& name=L"")
-			{
-				ruleNode.name=name;
-				ruleObject=new parsing_internal::_Rule;
-				ruleObject->rule=&ruleNode;
-				node=ruleObject;
-			}
-
-			void operator=(const Node<T>& ruleDefinition)
-			{
-				ruleNode.node=ruleDefinition.GetNode();
 			}
 		};
 
@@ -299,6 +289,14 @@ namespace vl
 		Node<parsing_internal::NullParserType> operator~(const Node<T>& t)
 		{
 			return t.GetNode();
+		}
+
+		template<typename TSource>
+		Node<Ptr<TSource>> create(const Node<Ptr<TSource>>& t)
+		{
+			Ptr<parsing_internal::_Create> result=new parsing_internal::_Create;
+			result->node=t.GetNode();
+			return result;
 		}
 
 		template<typename TSource, typename TCast>
@@ -364,6 +362,51 @@ namespace vl
 			result->node=t.GetNode();
 			return result;
 		}
+
+/***********************************************************************
+语法分析器规则构造器
+***********************************************************************/
+
+		template<typename T>
+		class Rule : public Node<T>
+		{
+		protected:
+			RuleNode						ruleNode;
+			Ptr<parsing_internal::_Rule>	ruleObject;
+		public:
+			Rule(const WString& name=L"")
+			{
+				ruleNode.name=name;
+				ruleObject=new parsing_internal::_Rule;
+				ruleObject->rule=&ruleNode;
+				node=ruleObject;
+			}
+
+			void operator=(const Node<T>& ruleDefinition)
+			{
+				if(ruleNode.node)
+				{
+					ruleNode.node=(Node<T>(ruleNode.node) | ruleDefinition).GetNode();
+				}
+				else
+				{
+					ruleNode.node=ruleDefinition.GetNode();
+				}
+			}
+
+			template<typename U>
+			void operator=(const Node<U>& ruleDefinition)
+			{
+				if(ruleNode.node)
+				{
+					ruleNode.node=(Node<T>(ruleNode.node) | cast<typename ParserNodeGetPtrElement<U>::Type, typename ParserNodeGetPtrElement<T>::Type>(ruleDefinition)).GetNode();
+				}
+				else
+				{
+					ruleNode.node=cast<typename ParserNodeGetPtrElement<U>::Type, typename ParserNodeGetPtrElement<T>::Type>(ruleDefinition).GetNode();
+				}
+			}
+		};
 
 /***********************************************************************
 语法分析器
