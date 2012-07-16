@@ -10,32 +10,32 @@ namespace vl
 ***********************************************************************/
 		namespace parsing_internal
 		{
-			void _Seq::Accept(IParserNodeVisitor* visitor)
+			void _Seq::Accept(IParsingNodeVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 			
-			void _Alt::Accept(IParserNodeVisitor* visitor)
+			void _Alt::Accept(IParsingNodeVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 			
-			void _Loop::Accept(IParserNodeVisitor* visitor)
+			void _Loop::Accept(IParsingNodeVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 			
-			void _Token::Accept(IParserNodeVisitor* visitor)
+			void _Token::Accept(IParsingNodeVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 			
-			void _Rule::Accept(IParserNodeVisitor* visitor)
+			void _Rule::Accept(IParsingNodeVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}
 			
-			void _Action::Accept(IParserNodeVisitor* visitor)
+			void _Action::Accept(IParsingNodeVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}

@@ -25,9 +25,9 @@ namespace vl
 		};
 
 		template<>
-		struct ParserNodeTypeDowngrader<regex::RegexToken>
+		struct ParsingNodeTypeDowngrader<regex::RegexToken>
 		{
-			typedef parsing_internal::NullParserType	Type;
+			typedef parsing_internal::NullParsingType	Type;
 		};
 
 		class RegexGrammar : public Grammar<regex::RegexToken, RegexTokenHelper>
