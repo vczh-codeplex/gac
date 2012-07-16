@@ -4,15 +4,6 @@ Developer: 陈梓瀚(vczh)
 Parsing::Interface
 
 Classes:
-	a + b
-	a | b
-	*a
-	token
-	rule_reference
-	create<source, cast_as>
-	assign<source, member>
-	use<source, cast_as>
-	transform<source, destination>
 ***********************************************************************/
 
 #ifndef VCZH_PARSING_PARSING
@@ -20,8 +11,7 @@ Classes:
 
 #include "..\String.h"
 #include "..\Pointer.h"
-#include "..\Collections\List.h"
-#include "..\Collections\Dictionary.h"
+#include "..\Function.h"
 
 namespace vl
 {
@@ -45,6 +35,7 @@ namespace vl
 			class _Rule;
 			class _Create;
 			class _Assign;
+			class _Cast;
 			class _Use;
 			class _Transform;
 		}
@@ -59,6 +50,7 @@ namespace vl
 			virtual void				Visit(parsing_internal::_Rule* node)=0;
 			virtual void				Visit(parsing_internal::_Create* node)=0;
 			virtual void				Visit(parsing_internal::_Assign* node)=0;
+			virtual void				Visit(parsing_internal::_Cast* node)=0;
 			virtual void				Visit(parsing_internal::_Use* node)=0;
 			virtual void				Visit(parsing_internal::_Transform* node)=0;
 		};
@@ -67,6 +59,13 @@ namespace vl
 		{
 		public:
 			virtual void				Accept(IParserNodeVisitor* visitor)=0;
+		};
+
+		class RuleNode : public Object
+		{
+		public:
+			WString						name;
+			Ptr<ParserNode>				node;
 		};
 
 /***********************************************************************
@@ -104,15 +103,13 @@ namespace vl
 			class _Token : public ParserNode
 			{
 			public:
-				vint					token;
-
 				void					Accept(IParserNodeVisitor* visitor)override;
 			};
 
 			class _Rule : public ParserNode
 			{
 			public:
-				vint					rule;
+				RuleNode*				rule;
 
 				void					Accept(IParserNodeVisitor* visitor)override;
 			};
@@ -126,6 +123,14 @@ namespace vl
 			};
 
 			class _Assign : public ParserNode
+			{
+			public:
+				Ptr<ParserNode>			node;
+
+				void					Accept(IParserNodeVisitor* visitor)override;
+			};
+
+			class _Cast : public ParserNode
 			{
 			public:
 				Ptr<ParserNode>			node;
@@ -188,10 +193,125 @@ namespace vl
 ***********************************************************************/
 
 		template<typename T>
-		class ParserBuilder : public Object
+		class Node : public Object
 		{
+		protected:
+			Ptr<ParserNode>				node;
+
 		public:
+			Node()
+			{
+			}
+
+			Node(Ptr<ParserNode> _node)
+				:node(_node)
+			{
+			}
+
+			Ptr<Node> GetNode()const
+			{
+				return node;
+			}
 		};
+
+		template<typename T>
+		class Rule : public Node<T>
+		{
+		protected:
+			RuleNode						ruleNode;
+			Ptr<parsing_internal::_Rule>	ruleObject;
+		public:
+			Rule(const WString& name=L"")
+			{
+				ruleNode.name=name;
+				ruleObject=new parsing_internal::_Rule;
+				ruleObject->rule=&ruleNode;
+				node=ruleObject;
+			}
+
+			void operator=(const Node<T>& ruleDefinition)
+			{
+				ruleNode.node=ruleDefinition.GetNode();
+			}
+		};
+
+/***********************************************************************
+语法分析器构造函数
+***********************************************************************/
+
+		template<typename T, typename U>
+		Node<typename ParserNodeTypeMerger<T, U>::Type> operator+(const Node<T>& t, const Node<T>& u)
+		{
+			Ptr<parsing_internal::_Seq> result=new parsing_internal::_Seq;
+			result->first=t.GetNode();
+			result->second=u.GetNode();
+			return result;
+		}
+
+		template<typename T, typename U>
+		Node<typename ParserNodeTypeMerger<T, U>::Type> operator|(const Node<T>& t, const Node<T>& u)
+		{
+			Ptr<parsing_internal::_Alt> result=new parsing_internal::_Alt;
+			result->first=t.GetNode();
+			result->second=u.GetNode();
+			return result;
+		}
+
+		template<typename T>
+		Node<T> operator*(const Node<T>& t)
+		{
+			Ptr<parsing_internal::_Loop> result=new parsing_internal::_Loop;
+			result->node=t.GetNode();
+			return result;
+		}
+
+		template<typename TSource, typename TCast>
+		Node<Ptr<TCast>> create(const Node<Ptr<TSource>>& t)
+		{
+			Ptr<parsing_internal::_Create> result=new parsing_internal::_Create;
+			result->node=t.GetNode();
+			return result;
+		}
+
+		template<typename TSource, typename TMember>
+		Node<Ptr<TSource>> assign(const Node<TMember>& t, TMember TSource::* member)
+		{
+			Ptr<parsing_internal::_Assign> result=new parsing_internal::_Assign;
+			result->node=t.GetNode();
+			return result;
+		}
+
+		template<typename TSource, typename TCast>
+		Node<Ptr<TCast>> cast(const Node<Ptr<TSource>>& t)
+		{
+			Ptr<parsing_internal::_Cast> result=new parsing_internal::_Cast;
+			result->node=t.GetNode();
+			return result;
+		}
+
+		template<typename TSource>
+		Node<Ptr<TSource>> use(const Node<Ptr<TSource>>& t)
+		{
+			Ptr<parsing_internal::_Use> result=new parsing_internal::_Use;
+			result->node=t.GetNode();
+			return result;
+		}
+
+		template<typename TSource, typename TDestination>
+		Node<TDestination> transform(const Node<TSource>& t, const Func<TDestination(const TSource&)>& transformation)
+		{
+			Ptr<parsing_internal::_Transform> result=new parsing_internal::_Transform;
+			result->node=t.GetNode();
+			return result;
+		}
+
+		template<typename TSource, typename TDestination>
+		Node<TDestination> transform(const Node<TSource>& t, const Func<TDestination(TSource)>& transformation)
+		{
+			Ptr<parsing_internal::_Transform> result=new parsing_internal::_Transform;
+			result->node=t.GetNode();
+			return result;
+		}
 	}
 }
 

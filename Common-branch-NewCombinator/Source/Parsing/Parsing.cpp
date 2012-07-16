@@ -45,6 +45,11 @@ namespace vl
 				visitor->Visit(this);
 			}
 			
+			void _Cast::Accept(IParserNodeVisitor* visitor)
+			{
+				visitor->Visit(this);
+			}
+			
 			void _Use::Accept(IParserNodeVisitor* visitor)
 			{
 				visitor->Visit(this);
