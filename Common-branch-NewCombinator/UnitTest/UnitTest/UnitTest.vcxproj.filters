@@ -31,6 +31,9 @@
     <Filter Include="Common\UnitTest">
       <UniqueIdentifier>{4cee4ebe-34cf-4f3e-b531-1e809f809106}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Parsing">
+      <UniqueIdentifier>{db3d1b18-b7ce-4866-b335-e834e8865d1a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Basic.cpp">
@@ -134,6 +137,9 @@
     </ClCompile>
     <ClCompile Include="TestParserCombinator.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\Parsing.cpp">
+      <Filter>Common\Parsing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -280,6 +286,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Collections\OperationOrderBy.h">
       <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Parsing\Parsing.h">
+      <Filter>Common\Parsing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
