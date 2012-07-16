@@ -10,15 +10,15 @@ namespace vl
 		class RuleCollector : public Object, public IParsingNodeVisitor
 		{
 		protected:
-			SortedList<RuleNode*>		rules;
+			SortedList<const RuleNode*>		rules;
 
 		public:
-			void Copy(collections::ICollection<RuleNode*>& outputRules)
+			void Copy(collections::ICollection<const RuleNode*>& outputRules)
 			{
 				CopyFrom(outputRules, rules.Wrap());
 			}
 
-			void Collect(RuleNode* rootRule)
+			void Collect(const RuleNode* rootRule)
 			{
 				vint index=rules.IndexOf(rootRule);
 				if(index==-1)
@@ -28,39 +28,39 @@ namespace vl
 				}
 			}
 
-			void Visit(parsing_internal::_Seq* node)
+			void Visit(parsing_internal::_Seq* node)override
 			{
 				node->first->Accept(this);
 				node->second->Accept(this);
 			}
 
-			void Visit(parsing_internal::_Alt* node)
+			void Visit(parsing_internal::_Alt* node)override
 			{
 				node->first->Accept(this);
 				node->second->Accept(this);
 			}
 
-			void Visit(parsing_internal::_Loop* node)
+			void Visit(parsing_internal::_Loop* node)override
 			{
 				node->node->Accept(this);
 			}
 
-			void Visit(parsing_internal::_Token* node)
+			void Visit(parsing_internal::_Token* node)override
 			{
 			}
 
-			void Visit(parsing_internal::_Rule* node)
+			void Visit(parsing_internal::_Rule* node)override
 			{
 				Collect(node->rule);
 			}
 
-			void Visit(parsing_internal::_Action* node)
+			void Visit(parsing_internal::_Action* node)override
 			{
 				node->node->Accept(this);
 			}
 		};
 
-		void SearchRulesFromRule(RuleNode* rootRule, collections::List<RuleNode*>& rules)
+		void SearchRulesFromRule(const RuleNode* rootRule, collections::List<const RuleNode*>& rules)
 		{
 			RuleCollector ruleCollector;
 			ruleCollector.Collect(rootRule);
