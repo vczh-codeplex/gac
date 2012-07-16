@@ -468,7 +468,7 @@ namespace vl
 ***********************************************************************/
 
 		extern void SearchRulesFromRule(const RuleNode* rootRule, collections::List<const RuleNode*>& rules);
-		extern void LogGrammarFromRule(const RuleNode* rootRule, stream::TextWriter& writer);
+		extern void LogGrammarFromRule(const RuleNode* rootRule, bool logAction, stream::TextWriter& writer);
 
 /***********************************************************************
 Óï·¨·ÖÎöÆ÷
