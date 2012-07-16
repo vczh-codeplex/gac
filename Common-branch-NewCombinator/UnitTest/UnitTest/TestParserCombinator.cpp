@@ -1,4 +1,8 @@
 #include "..\..\Source\UnitTest\UnitTest.h"
+#include "..\..\Source\Parsing\Parsing.h"
+
+using namespace vl;
+using namespace parsing;
 
 /*
 Rule<Expression> Factor(L"Value"), Term(L"Term"), Exp(L"Exp")

@@ -148,6 +148,7 @@
     <ClCompile Include="..\..\Source\Console.cpp" />
     <ClCompile Include="..\..\Source\Exception.cpp" />
     <ClCompile Include="..\..\Source\GlobalStorage.cpp" />
+    <ClCompile Include="..\..\Source\Parsing\Parsing.cpp" />
     <ClCompile Include="..\..\Source\Regex\Regex.cpp" />
     <ClCompile Include="..\..\Source\Regex\RegexAutomaton.cpp" />
     <ClCompile Include="..\..\Source\Regex\RegexData.cpp" />
@@ -205,6 +206,7 @@
     <ClInclude Include="..\..\Source\Function.h" />
     <ClInclude Include="..\..\Source\GlobalStorage.h" />
     <ClInclude Include="..\..\Source\Lazy.h" />
+    <ClInclude Include="..\..\Source\Parsing\Parsing.h" />
     <ClInclude Include="..\..\Source\Pointer.h" />
     <ClInclude Include="..\..\Source\Regex\Regex.h" />
     <ClInclude Include="..\..\Source\Regex\RegexAutomaton.h" />
