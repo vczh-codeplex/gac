@@ -88,9 +88,7 @@ namespace TestParsing_Expression_Helper
 				EncoderStream encoderStream(fileStream, encoder);
 				StreamWriter writer(encoderStream);
 
-				LogGrammarFromRule(Exp.GetRuleNode().Obj(), false, writer);
-				writer.WriteLine(L"============================================");
-				LogGrammarFromRule(Exp.GetRuleNode().Obj(), true, writer);
+				BuildParser(Exp.GetRuleNode().Obj(), &writer);
 			}
 		}
 	};
@@ -183,7 +181,7 @@ namespace TestParsing_Type_Helper
 
 			SubableType	= create<PrimitiveType>(assign(transform(tok(NAME), &ToName), &PrimitiveType::name));
 			SubableType	= create<GenericType>(
-							assign(Type, &GenericType::type) +
+							assign(SubableType, &GenericType::type) +
 							tok(GOPEN) +
 							assign(Type, &GenericType::arguments) + *(tok(COMMA) + assign(Type, &GenericType::arguments)) +
 							tok(GCLOSE)
@@ -207,9 +205,7 @@ namespace TestParsing_Type_Helper
 				EncoderStream encoderStream(fileStream, encoder);
 				StreamWriter writer(encoderStream);
 
-				LogGrammarFromRule(Type.GetRuleNode().Obj(), false, writer);
-				writer.WriteLine(L"============================================");
-				LogGrammarFromRule(Type.GetRuleNode().Obj(), true, writer);
+				BuildParser(Type.GetRuleNode().Obj(), &writer);
 			}
 		}
 	};
