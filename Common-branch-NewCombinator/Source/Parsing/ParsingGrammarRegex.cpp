@@ -9,12 +9,9 @@ namespace vl
 RegexGrammar
 ***********************************************************************/
 
-		RegexGrammar::RegexGrammar()
+		WString RegexGrammar::GetTokenName(vint token)
 		{
-		}
-
-		RegexGrammar::~RegexGrammar()
-		{
+			return tokenNames[token];
 		}
 			
 		Node<regex::RegexToken> RegexGrammar::tok(vint id)
@@ -29,6 +26,14 @@ RegexGrammar
 		{
 			tokenNames.Add(name);
 			return tokenDefinitions.Add(token);
+		}
+
+		RegexGrammar::RegexGrammar()
+		{
+		}
+
+		RegexGrammar::~RegexGrammar()
+		{
 		}
 	}
 }

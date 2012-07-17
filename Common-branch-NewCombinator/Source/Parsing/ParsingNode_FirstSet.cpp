@@ -7,23 +7,32 @@ namespace vl
 
 	namespace parsing
 	{
-		class RuleCollector : public Object, public IParsingNodeVisitor
+		class FirstSetCalculator : public Object, public IParsingNodeVisitor
 		{
 		protected:
-			SortedList<const RuleNode*>		rules;
+			SortedList<vint>					tokens;
+			SortedList<const RuleNode*>			visitedRules;
 
-		public:
-			void Copy(collections::ICollection<const RuleNode*>& outputRules)
+			void AddToken(vint token)
 			{
-				CopyFrom(outputRules, rules.Wrap());
-			}
-
-			void Collect(const RuleNode* rootRule)
-			{
-				vint index=rules.IndexOf(rootRule);
+				vint index=tokens.IndexOf(token);
 				if(index==-1)
 				{
-					rules.Add(rootRule);
+					tokens.Add(token);
+				}
+			}
+		public:
+			void Copy(ICollection<vint>& outputTokens)
+			{
+				CopyFrom(outputTokens, tokens.Wrap());
+			}
+
+			void CalculateFirstSet(const RuleNode* rootRule)
+			{
+				vint index=visitedRules.IndexOf(rootRule);
+				if(index==-1)
+				{
+					visitedRules.Add(rootRule);
 					rootRule->node->Accept(this);
 				}
 			}
@@ -31,7 +40,6 @@ namespace vl
 			void Visit(parsing_internal::_Seq* node)override
 			{
 				node->first->Accept(this);
-				node->second->Accept(this);
 			}
 
 			void Visit(parsing_internal::_Alt* node)override
@@ -47,11 +55,12 @@ namespace vl
 
 			void Visit(parsing_internal::_Token* node)override
 			{
+				AddToken(node->token);
 			}
 
 			void Visit(parsing_internal::_Rule* node)override
 			{
-				Collect(node->rule);
+				CalculateFirstSet(node->rule);
 			}
 
 			void Visit(parsing_internal::_Action* node)override
@@ -60,11 +69,11 @@ namespace vl
 			}
 		};
 
-		void SearchRulesFromRule(const RuleNode* rootRule, collections::List<const RuleNode*>& rules)
+		void CalculateFirstSet(const RuleNode* rootRule, collections::List<vint>& tokens)
 		{
-			RuleCollector ruleCollector;
-			ruleCollector.Collect(rootRule);
-			ruleCollector.Copy(rules.Wrap());
+			FirstSetCalculator firstSetCalculator;
+			firstSetCalculator.CalculateFirstSet(rootRule);
+			firstSetCalculator.Copy(tokens.Wrap());
 		}
 	}
 }
