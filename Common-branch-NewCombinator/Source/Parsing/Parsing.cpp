@@ -6,38 +6,17 @@ namespace vl
 	{
 
 /***********************************************************************
-语法分析器扩展结构
+GrammarBase
 ***********************************************************************/
-		namespace parsing_internal
+
+		void GrammarBase::BuildParser(const RuleNode* rootRule, stream::TextWriter* logWriter)
 		{
-			void _Seq::Accept(IParsingNodeVisitor* visitor)
+			if(logWriter)
 			{
-				visitor->Visit(this);
-			}
-			
-			void _Alt::Accept(IParsingNodeVisitor* visitor)
-			{
-				visitor->Visit(this);
-			}
-			
-			void _Loop::Accept(IParsingNodeVisitor* visitor)
-			{
-				visitor->Visit(this);
-			}
-			
-			void _Token::Accept(IParsingNodeVisitor* visitor)
-			{
-				visitor->Visit(this);
-			}
-			
-			void _Rule::Accept(IParsingNodeVisitor* visitor)
-			{
-				visitor->Visit(this);
-			}
-			
-			void _Action::Accept(IParsingNodeVisitor* visitor)
-			{
-				visitor->Visit(this);
+				logWriter->WriteLine(L"[SIMPLIFIED GRAMMAR]");
+				LogGrammarFromRule(rootRule, false, *logWriter);
+				logWriter->WriteLine(L"[FULL GRAMMAR]");
+				LogGrammarFromRule(rootRule, true, *logWriter);
 			}
 		}
 	}
