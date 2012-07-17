@@ -477,10 +477,11 @@ namespace vl
 		template<typename T>
 		class Rule : public Node<T>
 		{
+		private:
+			void operator=(const Rule<T>& rule);
 		protected:
 			Ptr<RuleNode>					ruleNode;
 			Ptr<parsing_internal::_Rule>	ruleObject;
-
 		public:
 			Rule(const WString& name=L"")
 			{

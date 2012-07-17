@@ -124,6 +124,12 @@ namespace TestParsing_Type_Helper
 		Ptr<Type>			elementType;
 	};
 
+	class ArrayType : public Type
+	{
+	public:
+		Ptr<Type>			elementType;
+	};
+
 	class PrimitiveType : public Type
 	{
 	public:
@@ -144,6 +150,13 @@ namespace TestParsing_Type_Helper
 		WString				name;
 	};
 
+	class FunctionType : public Type
+	{
+	public:
+		Ptr<Type>			returnType;
+		List<Ptr<Type>>		arguments;
+	};
+
 	WString ToName(const RegexToken& token)
 	{
 		return WString(token.reading, token.length);
@@ -154,25 +167,38 @@ namespace TestParsing_Type_Helper
 	public:
 		TypeGrammar()
 		{
-			vint OPEN		=CreateToken(L"\"<\"",			L"<");
-			vint CLOSE		=CreateToken(L"\">\"",			L">");
+			vint GOPEN		=CreateToken(L"\"<\"",			L"<");
+			vint GCLOSE		=CreateToken(L"\">\"",			L">");
+			vint AOPEN		=CreateToken(L"\"[\"",			L"/[");
+			vint ACLOSE		=CreateToken(L"\"]\"",			L"/]");
+			vint FOPEN		=CreateToken(L"\"(\"",			L"/(");
+			vint FCLOSE		=CreateToken(L"\")\"",			L"/)");
 			vint NAME		=CreateToken(L"NAME",			L"[a-zA-Z_]/w*");
 			vint COMMA		=CreateToken(L"\",\"",			L",");
 			vint SUB		=CreateToken(L"\"::\"",			L"::");
 			vint POINTER	=CreateToken(L"\"*\"",			L"/*");
 			vint REFERENCE	=CreateToken(L"\"&\"",			L"&");
 
-			Rule<Ptr<Type>> Type(L"Type");
+			Rule<Ptr<Type>> Type(L"Type"), SubableType(L"SubableType");
 
-			Type		= create<PrimitiveType>(assign(transform(tok(NAME), &ToName), &PrimitiveType::name));
-			Type		= create<SubType>(assign(Type, &SubType::type) + tok(SUB) + assign(transform(tok(NAME), &ToName), &SubType::name));
+			SubableType	= create<PrimitiveType>(assign(transform(tok(NAME), &ToName), &PrimitiveType::name));
+			SubableType	= create<GenericType>(
+							assign(Type, &GenericType::type) +
+							tok(GOPEN) +
+							assign(Type, &GenericType::arguments) + *(tok(COMMA) + assign(Type, &GenericType::arguments)) +
+							tok(GCLOSE)
+							);
+			SubableType	= create<SubType>(assign(SubableType, &SubType::type) + tok(SUB) + assign(transform(tok(NAME), &ToName), &SubType::name));
+
+			Type		= use(SubableType);
 			Type		= create<PointerType>(assign(Type, &PointerType::elementType) + tok(POINTER));
 			Type		= create<ReferenceType>(assign(Type, &ReferenceType::elementType) + tok(REFERENCE));
-			Type		= create<GenericType>(
-							assign(Type, &GenericType::type) +
-							tok(OPEN) +
-							assign(Type, &GenericType::arguments) + *(tok(COMMA) + assign(Type, &GenericType::arguments)) +
-							tok(CLOSE)
+			Type		= create<ArrayType>(assign(Type, &ArrayType::elementType) + tok(AOPEN) + tok(ACLOSE));
+			Type		= create<FunctionType>(
+							assign(Type, &FunctionType::returnType) +
+							tok(FOPEN) +
+							assign(Type, &FunctionType::arguments) + *(tok(COMMA) + assign(Type, &FunctionType::arguments)) +
+							tok(FCLOSE)
 							);
 
 			{
