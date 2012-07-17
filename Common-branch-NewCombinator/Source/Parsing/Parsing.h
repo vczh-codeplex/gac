@@ -159,6 +159,23 @@ namespace vl
 					return L"Assign";
 				}
 			};
+
+			template<typename TSource, typename TMember>
+			class _AssignAction<TSource, collections::List<TMember>> : public Object, public IParsingNodeAction
+			{
+			public:
+				collections::List<TMember> TSource::*		member;
+
+				_AssignAction(collections::List<TMember> TSource::* _member)
+					:member(_member)
+				{
+				}
+
+				WString GetName()
+				{
+					return L"Push";
+				}
+			};
 			
 			template<typename TSource, typename TCast>
 			class _CastAction : public Object, public IParsingNodeAction
@@ -296,7 +313,7 @@ namespace vl
 		};
 
 /***********************************************************************
-语法分析器构造函数
+语法分析器构造函数(+)
 ***********************************************************************/
 
 		template<typename T, typename U>
@@ -308,6 +325,10 @@ namespace vl
 			return result;
 		}
 
+/***********************************************************************
+语法分析器构造函数(|)
+***********************************************************************/
+
 		template<typename T, typename U>
 		Node<typename ParsingNodeTypeMerger<T, U>::Type> operator|(const Node<T>& t, const Node<U>& u)
 		{
@@ -317,6 +338,10 @@ namespace vl
 			return result;
 		}
 
+/***********************************************************************
+语法分析器构造函数(*)
+***********************************************************************/
+
 		template<typename T>
 		Node<T> operator*(const Node<T>& t)
 		{
@@ -325,11 +350,19 @@ namespace vl
 			return result;
 		}
 
+/***********************************************************************
+语法分析器构造函数(~)
+***********************************************************************/
+
 		template<typename T>
 		Node<parsing_internal::NullParsingType> operator~(const Node<T>& t)
 		{
 			return t.GetNode();
 		}
+
+/***********************************************************************
+语法分析器构造函数(create)
+***********************************************************************/
 
 		template<typename TSource>
 		Node<Ptr<TSource>> create(const Node<Ptr<TSource>>& t)
@@ -349,6 +382,10 @@ namespace vl
 			return result;
 		}
 
+/***********************************************************************
+语法分析器构造函数(assign)
+***********************************************************************/
+
 		template<typename TSource, typename TMember>
 		Node<Ptr<TSource>> assign(const Node<TMember>& t, TMember TSource::* member)
 		{
@@ -357,6 +394,19 @@ namespace vl
 			result->action=new parsing_internal::_AssignAction<TSource, TMember>(member);
 			return result;
 		}
+
+		template<typename TSource, typename TMember>
+		Node<Ptr<TSource>> assign(const Node<TMember>& t, collections::List<TMember> TSource::* member)
+		{
+			Ptr<parsing_internal::_Action> result=new parsing_internal::_Action;
+			result->node=t.GetNode();
+			result->action=new parsing_internal::_AssignAction<TSource, collections::List<TMember>>(member);
+			return result;
+		}
+
+/***********************************************************************
+语法分析器构造函数(cast)
+***********************************************************************/
 
 		template<typename TSource, typename TCast>
 		Node<Ptr<TCast>> cast(const Node<Ptr<TSource>>& t)
@@ -367,6 +417,10 @@ namespace vl
 			return result;
 		}
 
+/***********************************************************************
+语法分析器构造函数(use)
+***********************************************************************/
+
 		template<typename TSource>
 		Node<Ptr<TSource>> use(const Node<Ptr<TSource>>& t)
 		{
@@ -375,6 +429,10 @@ namespace vl
 			result->action=new parsing_internal::_UseAction<TSource>;
 			return result;
 		}
+
+/***********************************************************************
+语法分析器构造函数(transform)
+***********************************************************************/
 
 		template<typename TSource, typename TDestination>
 		Node<TDestination> transform(const Node<TSource>& t, TDestination(*transformation)(const TSource&))
@@ -420,45 +478,47 @@ namespace vl
 		class Rule : public Node<T>
 		{
 		protected:
-			RuleNode						ruleNode;
+			Ptr<RuleNode>					ruleNode;
 			Ptr<parsing_internal::_Rule>	ruleObject;
 
 		public:
 			Rule(const WString& name=L"")
 			{
-				ruleNode.name=name;
+				ruleNode=new RuleNode;
+				ruleNode->name=name;
+
 				ruleObject=new parsing_internal::_Rule;
-				ruleObject->rule=&ruleNode;
+				ruleObject->rule=ruleNode.Obj();
 				node=ruleObject;
 			}
 
-			const RuleNode* GetRuleNode()const
+			Ptr<RuleNode> GetRuleNode()const
 			{
-				return &ruleNode;
+				return ruleNode;
 			}
 
 			void operator=(const Node<T>& ruleDefinition)
 			{
-				if(ruleNode.node)
+				if(ruleNode->node)
 				{
-					ruleNode.node=(Node<T>(ruleNode.node) | ruleDefinition).GetNode();
+					ruleNode->node=(Node<T>(ruleNode->node) | ruleDefinition).GetNode();
 				}
 				else
 				{
-					ruleNode.node=ruleDefinition.GetNode();
+					ruleNode->node=ruleDefinition.GetNode();
 				}
 			}
 
 			template<typename U>
 			void operator=(const Node<U>& ruleDefinition)
 			{
-				if(ruleNode.node)
+				if(ruleNode->node)
 				{
-					ruleNode.node=(Node<T>(ruleNode.node) | cast<typename ParsingNodeGetPtrElement<U>::Type, typename ParsingNodeGetPtrElement<T>::Type>(ruleDefinition)).GetNode();
+					ruleNode->node=(Node<T>(ruleNode->node) | cast<typename ParsingNodeGetPtrElement<U>::Type, typename ParsingNodeGetPtrElement<T>::Type>(ruleDefinition)).GetNode();
 				}
 				else
 				{
-					ruleNode.node=cast<typename ParsingNodeGetPtrElement<U>::Type, typename ParsingNodeGetPtrElement<T>::Type>(ruleDefinition).GetNode();
+					ruleNode->node=cast<typename ParsingNodeGetPtrElement<U>::Type, typename ParsingNodeGetPtrElement<T>::Type>(ruleDefinition).GetNode();
 				}
 			}
 		};
