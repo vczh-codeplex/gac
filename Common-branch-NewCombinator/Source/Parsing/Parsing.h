@@ -337,7 +337,8 @@ public:
 
 		class GrammarBase : public NotCopyable
 		{
-		public:
+		protected:
+			virtual WString					GetTokenName(vint token)=0;
 			void							BuildParser(const RuleNode* rootRule, stream::TextWriter* logWriter=0);
 		};
 

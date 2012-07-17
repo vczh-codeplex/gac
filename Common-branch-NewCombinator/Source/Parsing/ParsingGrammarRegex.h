@@ -35,12 +35,13 @@ namespace vl
 		protected:
 			collections::List<WString>			tokenDefinitions;
 			collections::List<WString>			tokenNames;
+
+			WString								GetTokenName(vint token)override;
+			Node<regex::RegexToken>				tok(vint id);
+			vint								CreateToken(const WString& name, const WString& token);
 		public:
 			RegexGrammar();
 			~RegexGrammar();
-			
-			Node<regex::RegexToken>				tok(vint id);
-			vint								CreateToken(const WString& name, const WString& token);
 		};
 	}
 }
