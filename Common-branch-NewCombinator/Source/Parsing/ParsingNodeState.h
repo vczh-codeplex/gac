@@ -45,6 +45,19 @@ namespace vl
 				~ParsingNodeState();
 			};
 
+			class ParsingNodeAction : public Object
+			{
+			public:
+				enum ReferencePosition
+				{
+					Before,
+					After,
+				};
+				
+				ReferencePosition								referencePosition;
+				IParsingNodeAction*								action;
+			};
+
 			class ParsingNodeTransition : public Object
 			{
 			public:
@@ -58,11 +71,15 @@ namespace vl
 				ParsingNodeState*								stateIn;
 				ParsingNodeState*								stateOut;
 				TransitionCondition								transitionCondition;
-				RuleNode*										transitionRule;
-				vint											transitionToken;
+				_Rule*											transitionRule;
+				_Token*											transitionToken;
+				collections::List<Ptr<ParsingNodeAction>>		actions;
 
 				ParsingNodeTransition();
 				~ParsingNodeTransition();
+
+				void											AddBeforeAction(IParsingNodeAction* action);
+				void											AddAfterAction(IParsingNodeAction* action);
 			};
 
 			class ParsingNodeRuleInfo : public Object
@@ -87,8 +104,8 @@ namespace vl
 				ParsingNodeState*								NewState(const RuleNode* rule, ParsingNode* referenceNode, ParsingNodeState::ReferencePosition referencePosition);
 				void											SetBeginState(ParsingNodeState* state);
 				void											SetFinalState(ParsingNodeState* state);
-				ParsingNodeTransition*							NewRule(ParsingNodeState* stateFrom, ParsingNodeState* stateTo, RuleNode* transitionRule);
-				ParsingNodeTransition*							NewToken(ParsingNodeState* stateFrom, ParsingNodeState* stateTo, vint transitionToken);
+				ParsingNodeTransition*							NewRule(ParsingNodeState* stateFrom, ParsingNodeState* stateTo, _Rule* transitionRule);
+				ParsingNodeTransition*							NewToken(ParsingNodeState* stateFrom, ParsingNodeState* stateTo, _Token* transitionToken);
 				ParsingNodeTransition*							NewEpsilon(ParsingNodeState* stateFrom, ParsingNodeState* stateTo);
 			};
 
@@ -97,6 +114,8 @@ namespace vl
 ***********************************************************************/
 
 			extern void CreateAutomaton(const RuleNode* rootRule, ParsingNodeAutomaton& automaton);
+			extern void CompressAutomaton(ParsingNodeAutomaton& automatonIn, ParsingNodeAutomaton& automatonOut);
+			extern void LogAutomaton(ParsingNodeAutomaton& automaton, stream::TextWriter& writer);
 		}
 	}
 }

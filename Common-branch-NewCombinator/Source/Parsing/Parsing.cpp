@@ -40,12 +40,22 @@ GrammarBase
 					}
 					logWriter->WriteLine(L"");
 				}
+			}
 
-				logWriter->WriteLine(L"==================================[NODE NON-DETERMINISTIC AUTOMATON]");
-				ParsingNodeAutomaton na;
-				CreateAutomaton(rootRule, na);
+			ParsingNodeAutomaton na;
+			CreateAutomaton(rootRule, na);
+			if(logWriter)
+			{
+				logWriter->WriteLine(L"==================================[NODE AUTOMATON]");
+				LogAutomaton(na, *logWriter);
+			}
 
-				logWriter->WriteLine(L"==================================[NODE DETERMINISTIC AUTOMATON]");
+			ParsingNodeAutomaton ca;
+			CompressAutomaton(na, ca);
+			if(logWriter)
+			{
+				logWriter->WriteLine(L"==================================[NODE COMPRESSED AUTOMATON]");
+				LogAutomaton(ca, *logWriter);
 			}
 		}
 	}
