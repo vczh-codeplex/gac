@@ -35,12 +35,28 @@ ParsingNodeTransition
 				,stateOut(0)
 				,transitionCondition(Epsilon)
 				,transitionRule(0)
-				,transitionToken(-1)
+				,transitionToken(0)
 			{
 			}
 
 			ParsingNodeTransition::~ParsingNodeTransition()
 			{
+			}
+
+			void ParsingNodeTransition::AddBeforeAction(IParsingNodeAction* action)
+			{
+				ParsingNodeAction* nodeAction=new ParsingNodeAction;
+				nodeAction->referencePosition=ParsingNodeAction::Before;
+				nodeAction->action=action;
+				actions.Add(nodeAction);
+			}
+
+			void ParsingNodeTransition::AddAfterAction(IParsingNodeAction* action)
+			{
+				ParsingNodeAction* nodeAction=new ParsingNodeAction;
+				nodeAction->referencePosition=ParsingNodeAction::After;
+				nodeAction->action=action;
+				actions.Add(nodeAction);
 			}
 
 /***********************************************************************
@@ -88,7 +104,7 @@ ParsingNodeAutomaton
 				ruleInfo->finalStates.Add(state);
 			}
 
-			ParsingNodeTransition* ParsingNodeAutomaton::NewRule(ParsingNodeState* stateFrom, ParsingNodeState* stateTo, RuleNode* transitionRule)
+			ParsingNodeTransition* ParsingNodeAutomaton::NewRule(ParsingNodeState* stateFrom, ParsingNodeState* stateTo, _Rule* transitionRule)
 			{
 				ParsingNodeTransition* transition=new ParsingNodeTransition;
 				transitions.Add(transition);
@@ -103,7 +119,7 @@ ParsingNodeAutomaton
 				return transition;
 			}
 
-			ParsingNodeTransition* ParsingNodeAutomaton::NewToken(ParsingNodeState* stateFrom, ParsingNodeState* stateTo, vint transitionToken)
+			ParsingNodeTransition* ParsingNodeAutomaton::NewToken(ParsingNodeState* stateFrom, ParsingNodeState* stateTo, _Token* transitionToken)
 			{
 				ParsingNodeTransition* transition=new ParsingNodeTransition;
 				transitions.Add(transition);
@@ -207,7 +223,6 @@ CreateAutomaton
 					Call(node->node, b1, e1);
 					automaton.NewEpsilon(b, b1);
 					automaton.NewEpsilon(e1, e);
-					automaton.NewEpsilon(e1, b1);
 					SetResult(b, e);
 				}
 
@@ -215,7 +230,7 @@ CreateAutomaton
 				{
 					ParsingNodeState *b=automaton.NewState(currentRule, node, ParsingNodeState::Before);
 					ParsingNodeState *e=automaton.NewState(currentRule, node, ParsingNodeState::After);
-					automaton.NewToken(b, e, node->token);
+					automaton.NewToken(b, e, node);
 					SetResult(b, e);
 				}
 
@@ -223,13 +238,19 @@ CreateAutomaton
 				{
 					ParsingNodeState *b=automaton.NewState(currentRule, node, ParsingNodeState::Before);
 					ParsingNodeState *e=automaton.NewState(currentRule, node, ParsingNodeState::After);
-					automaton.NewRule(b, e, node->rule);
+					automaton.NewRule(b, e, node);
 					SetResult(b, e);
 				}
 
 				void Visit(parsing_internal::_Action* node)override
 				{
-					node->node->Accept(this);
+					ParsingNodeState *b1=0, *e1=0;
+					ParsingNodeState *b=automaton.NewState(currentRule, node, ParsingNodeState::Before);
+					ParsingNodeState *e=automaton.NewState(currentRule, node, ParsingNodeState::After);
+					Call(node->node, b1, e1);
+					automaton.NewEpsilon(b, b1)->AddBeforeAction(node->action.Obj());
+					automaton.NewEpsilon(e1, e)->AddAfterAction(node->action.Obj());
+					SetResult(b, e);
 				}
 			};
 
@@ -243,6 +264,22 @@ CreateAutomaton
 				{
 					ruleAutomatonBuilder.ProcessRule(rule);
 				}
+			}
+			
+/***********************************************************************
+CompressAutomaton
+***********************************************************************/
+
+			void CompressAutomaton(ParsingNodeAutomaton& automatonIn, ParsingNodeAutomaton& automatonOut)
+			{
+			}
+			
+/***********************************************************************
+LogAutomaton
+***********************************************************************/
+
+			void LogAutomaton(ParsingNodeAutomaton& automaton, stream::TextWriter& writer)
+			{
 			}
 		}
 	}
