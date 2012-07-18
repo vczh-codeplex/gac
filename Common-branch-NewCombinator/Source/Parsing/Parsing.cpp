@@ -42,6 +42,8 @@ GrammarBase
 				}
 
 				logWriter->WriteLine(L"==================================[NODE NON-DETERMINISTIC AUTOMATON]");
+				ParsingNodeAutomaton na;
+				CreateAutomaton(rootRule, na);
 
 				logWriter->WriteLine(L"==================================[NODE DETERMINISTIC AUTOMATON]");
 			}

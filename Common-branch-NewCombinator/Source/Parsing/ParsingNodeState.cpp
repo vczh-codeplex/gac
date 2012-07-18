@@ -1,4 +1,5 @@
 #include "ParsingNodeState.h"
+#include "..\Collections\OperationForEach.h"
 
 namespace vl
 {
@@ -139,42 +140,109 @@ CreateAutomaton
 			{
 			protected:
 				ParsingNodeAutomaton&					automaton;
+				const RuleNode*							currentRule;
+				ParsingNodeState*						resultBeginState;
+				ParsingNodeState*						resultEndState;
 
+				void SetResult(ParsingNodeState* beginState, ParsingNodeState* endState)
+				{
+					resultBeginState=beginState;
+					resultEndState=endState;
+				}
+
+				void Call(Ptr<ParsingNode> node, ParsingNodeState*& beginState, ParsingNodeState*& endState)
+				{
+					resultBeginState=0;
+					resultEndState=0;
+					node->Accept(this);
+					beginState=resultBeginState;
+					endState=resultEndState;
+				}
 			public:
 				RuleAutomatonBuilder(ParsingNodeAutomaton& _automaton)
 					:automaton(_automaton)
+					,resultBeginState(0)
+					,resultEndState(0)
 				{
+				}
+
+				void ProcessRule(const RuleNode* rule)
+				{
+					currentRule=rule;
+					ParsingNodeState* beginState=0;
+					ParsingNodeState* endState=0;
+					Call(rule->node, beginState, endState);
+					automaton.SetBeginState(beginState);
+					automaton.SetFinalState(endState);
 				}
 
 				void Visit(parsing_internal::_Seq* node)override
 				{
+					ParsingNodeState *b1=0, *e1=0, *b2=0, *e2=0;
+					Call(node->first, b1, e1);
+					Call(node->second, b2, e2);
+					automaton.NewEpsilon(e1, b2);
+					SetResult(b1, e2);
 				}
 
 				void Visit(parsing_internal::_Alt* node)override
 				{
+					ParsingNodeState *b1=0, *e1=0, *b2=0, *e2=0;
+					ParsingNodeState *b=automaton.NewState(currentRule, node, ParsingNodeState::Before);
+					ParsingNodeState *e=automaton.NewState(currentRule, node, ParsingNodeState::After);
+					Call(node->first, b1, e1);
+					Call(node->second, b2, e2);
+					automaton.NewEpsilon(b, b1);
+					automaton.NewEpsilon(b, b2);
+					automaton.NewEpsilon(e1, e);
+					automaton.NewEpsilon(e2, e);
+					SetResult(b, e);
 				}
 
 				void Visit(parsing_internal::_Loop* node)override
 				{
+					ParsingNodeState *b1=0, *e1=0;
+					ParsingNodeState *b=automaton.NewState(currentRule, node, ParsingNodeState::Before);
+					ParsingNodeState *e=automaton.NewState(currentRule, node, ParsingNodeState::After);
+					Call(node->node, b1, e1);
+					automaton.NewEpsilon(b, b1);
+					automaton.NewEpsilon(e1, e);
+					automaton.NewEpsilon(e1, b1);
+					SetResult(b, e);
 				}
 
 				void Visit(parsing_internal::_Token* node)override
 				{
+					ParsingNodeState *b=automaton.NewState(currentRule, node, ParsingNodeState::Before);
+					ParsingNodeState *e=automaton.NewState(currentRule, node, ParsingNodeState::After);
+					automaton.NewToken(b, e, node->token);
+					SetResult(b, e);
 				}
 
 				void Visit(parsing_internal::_Rule* node)override
 				{
+					ParsingNodeState *b=automaton.NewState(currentRule, node, ParsingNodeState::Before);
+					ParsingNodeState *e=automaton.NewState(currentRule, node, ParsingNodeState::After);
+					automaton.NewRule(b, e, node->rule);
+					SetResult(b, e);
 				}
 
 				void Visit(parsing_internal::_Action* node)override
 				{
+					node->node->Accept(this);
 				}
 			};
 
-			void CreateAutomaton(RuleNode* rootRule, ParsingNodeAutomaton& automaton)
+			void CreateAutomaton(const RuleNode* rootRule, ParsingNodeAutomaton& automaton)
 			{
 				List<const RuleNode*> rules;
 				SearchRulesFromRule(rootRule, rules);
+
+				RuleAutomatonBuilder ruleAutomatonBuilder(automaton);
+				FOREACH(const RuleNode*, rule, rules.Wrap())
+				{
+					ruleAutomatonBuilder.ProcessRule(rule);
+				}
 			}
 		}
 	}
