@@ -20,72 +20,79 @@ namespace vl
 语法分析器类型规则
 ***********************************************************************/
 
-		template<typename T, typename U>
-		struct ParsingNodeTypeMergerInternal
+		namespace parsing_internal
 		{
-		};
+			struct NullParsingType
+			{
+			};
 
-		template<typename T>
-		struct ParsingNodeTypeDowngrader
-		{
-			typedef T									Type;
-		};
+			template<typename T, typename U>
+			struct ParsingNodeTypeMergerInternal
+			{
+			};
 
-		template<>
-		struct ParsingNodeTypeDowngrader<parsing_internal::NullParsingType>
-		{
-			typedef parsing_internal::NullParsingType	Type;
-		};
+			template<typename T>
+			struct ParsingNodeTypeDowngrader
+			{
+				typedef T				Type;
+			};
 
-		template<>
-		struct ParsingNodeTypeMergerInternal<parsing_internal::NullParsingType, parsing_internal::NullParsingType>
-		{
-			typedef parsing_internal::NullParsingType	Type;
-		};
+			template<>
+			struct ParsingNodeTypeDowngrader<NullParsingType>
+			{
+				typedef NullParsingType	Type;
+			};
 
-		template<typename T>
-		struct ParsingNodeTypeMergerInternal<parsing_internal::NullParsingType, T>
-		{
-			typedef T									Type;
-		};
+			template<>
+			struct ParsingNodeTypeMergerInternal<NullParsingType, NullParsingType>
+			{
+				typedef NullParsingType	Type;
+			};
 
-		template<typename T>
-		struct ParsingNodeTypeMergerInternal<T, parsing_internal::NullParsingType>
-		{
-			typedef T									Type;
-		};
+			template<typename T>
+			struct ParsingNodeTypeMergerInternal<NullParsingType, T>
+			{
+				typedef T				Type;
+			};
 
-		template<typename T>
-		struct ParsingNodeTypeMergerInternal<T, T>
-		{
-			typedef T									Type;
-		};
+			template<typename T>
+			struct ParsingNodeTypeMergerInternal<T, NullParsingType>
+			{
+				typedef T				Type;
+			};
 
-		template<typename T, typename U>
-		struct ParsingNodeTypeMerger
-		{
-			typedef typename ParsingNodeTypeMergerInternal<
-				typename ParsingNodeTypeDowngrader<T>::Type,
-				typename ParsingNodeTypeDowngrader<U>::Type
-				>::Type									Type;
-		};
+			template<typename T>
+			struct ParsingNodeTypeMergerInternal<T, T>
+			{
+				typedef T				Type;
+			};
 
-		template<typename T>
-		struct ParsingNodeTypeMerger<T, T>
-		{
-			typedef T									Type;
-		};
+			template<typename T, typename U>
+			struct ParsingNodeTypeMerger
+			{
+				typedef typename ParsingNodeTypeMergerInternal<
+					typename ParsingNodeTypeDowngrader<T>::Type,
+					typename ParsingNodeTypeDowngrader<U>::Type
+					>::Type				Type;
+			};
 
-		template<typename T>
-		struct ParsingNodeGetPtrElement
-		{
-		};
+			template<typename T>
+			struct ParsingNodeTypeMerger<T, T>
+			{
+				typedef T				Type;
+			};
 
-		template<typename T>
-		struct ParsingNodeGetPtrElement<Ptr<T>>
-		{
-			typedef T									Type;
-		};
+			template<typename T>
+			struct ParsingNodeGetPtrElement
+			{
+			};
+
+			template<typename T>
+			struct ParsingNodeGetPtrElement<Ptr<T>>
+			{
+				typedef T				Type;
+			};
+		}
 
 /***********************************************************************
 语法分析器基础节点构造器
@@ -118,7 +125,7 @@ namespace vl
 ***********************************************************************/
 
 		template<typename T, typename U>
-		Node<typename ParsingNodeTypeMerger<T, U>::Type> operator+(const Node<T>& t, const Node<U>& u)
+		Node<typename parsing_internal::ParsingNodeTypeMerger<T, U>::Type> operator+(const Node<T>& t, const Node<U>& u)
 		{
 			Ptr<parsing_internal::_Seq> result=new parsing_internal::_Seq;
 			result->first=t.GetNode();
@@ -131,7 +138,7 @@ namespace vl
 ***********************************************************************/
 
 		template<typename T, typename U>
-		Node<typename ParsingNodeTypeMerger<T, U>::Type> operator|(const Node<T>& t, const Node<U>& u)
+		Node<typename parsing_internal::ParsingNodeTypeMerger<T, U>::Type> operator|(const Node<T>& t, const Node<U>& u)
 		{
 			Ptr<parsing_internal::_Alt> result=new parsing_internal::_Alt;
 			result->first=t.GetNode();
@@ -314,13 +321,15 @@ namespace vl
 			template<typename U>
 			void operator=(const Node<U>& ruleDefinition)
 			{
+				typedef typename parsing_internal::ParsingNodeGetPtrElement<T>::Type TElement;
+				typedef typename parsing_internal::ParsingNodeGetPtrElement<U>::Type UElement;
 				if(ruleNode->node)
 				{
-					ruleNode->node=(Node<T>(ruleNode->node) | cast<typename ParsingNodeGetPtrElement<U>::Type, typename ParsingNodeGetPtrElement<T>::Type>(ruleDefinition)).GetNode();
+					ruleNode->node=(Node<T>(ruleNode->node) | cast<UElement, TElement>(ruleDefinition)).GetNode();
 				}
 				else
 				{
-					ruleNode->node=cast<typename ParsingNodeGetPtrElement<U>::Type, typename ParsingNodeGetPtrElement<T>::Type>(ruleDefinition).GetNode();
+					ruleNode->node=cast<UElement, TElement>(ruleDefinition).GetNode();
 				}
 			}
 		};
