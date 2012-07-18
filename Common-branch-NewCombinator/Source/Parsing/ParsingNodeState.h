@@ -96,7 +96,7 @@ namespace vl
 ¸¨Öúº¯Êý
 ***********************************************************************/
 
-			extern void CreateAutomaton(RuleNode* rootRule, ParsingNodeAutomaton& automaton);
+			extern void CreateAutomaton(const RuleNode* rootRule, ParsingNodeAutomaton& automaton);
 		}
 	}
 }
