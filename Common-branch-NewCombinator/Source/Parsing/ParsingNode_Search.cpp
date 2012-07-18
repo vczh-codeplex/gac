@@ -7,64 +7,67 @@ namespace vl
 
 	namespace parsing
 	{
-		class RuleCollector : public Object, public IParsingNodeVisitor
+		namespace parsing_internal
 		{
-		protected:
-			SortedList<const RuleNode*>		rules;
-
-		public:
-			void Copy(collections::ICollection<const RuleNode*>& outputRules)
+			class RuleCollector : public Object, public IParsingNodeVisitor
 			{
-				CopyFrom(outputRules, rules.Wrap());
-			}
+			protected:
+				SortedList<const RuleNode*>		rules;
 
-			void Collect(const RuleNode* rootRule)
-			{
-				vint index=rules.IndexOf(rootRule);
-				if(index==-1)
+			public:
+				void Copy(collections::ICollection<const RuleNode*>& outputRules)
 				{
-					rules.Add(rootRule);
-					rootRule->node->Accept(this);
+					CopyFrom(outputRules, rules.Wrap());
 				}
-			}
 
-			void Visit(parsing_internal::_Seq* node)override
+				void Collect(const RuleNode* rootRule)
+				{
+					vint index=rules.IndexOf(rootRule);
+					if(index==-1)
+					{
+						rules.Add(rootRule);
+						rootRule->node->Accept(this);
+					}
+				}
+
+				void Visit(parsing_internal::_Seq* node)override
+				{
+					node->first->Accept(this);
+					node->second->Accept(this);
+				}
+
+				void Visit(parsing_internal::_Alt* node)override
+				{
+					node->first->Accept(this);
+					node->second->Accept(this);
+				}
+
+				void Visit(parsing_internal::_Loop* node)override
+				{
+					node->node->Accept(this);
+				}
+
+				void Visit(parsing_internal::_Token* node)override
+				{
+				}
+
+				void Visit(parsing_internal::_Rule* node)override
+				{
+					Collect(node->rule);
+				}
+
+				void Visit(parsing_internal::_Action* node)override
+				{
+					node->node->Accept(this);
+				}
+			};
+
+			void SearchRulesFromRule(const RuleNode* rootRule, collections::List<const RuleNode*>& rules)
 			{
-				node->first->Accept(this);
-				node->second->Accept(this);
+				RuleCollector ruleCollector;
+				ruleCollector.Collect(rootRule);
+				ruleCollector.Copy(rules.Wrap());
 			}
-
-			void Visit(parsing_internal::_Alt* node)override
-			{
-				node->first->Accept(this);
-				node->second->Accept(this);
-			}
-
-			void Visit(parsing_internal::_Loop* node)override
-			{
-				node->node->Accept(this);
-			}
-
-			void Visit(parsing_internal::_Token* node)override
-			{
-			}
-
-			void Visit(parsing_internal::_Rule* node)override
-			{
-				Collect(node->rule);
-			}
-
-			void Visit(parsing_internal::_Action* node)override
-			{
-				node->node->Accept(this);
-			}
-		};
-
-		void SearchRulesFromRule(const RuleNode* rootRule, collections::List<const RuleNode*>& rules)
-		{
-			RuleCollector ruleCollector;
-			ruleCollector.Collect(rootRule);
-			ruleCollector.Copy(rules.Wrap());
 		}
 	}
 }

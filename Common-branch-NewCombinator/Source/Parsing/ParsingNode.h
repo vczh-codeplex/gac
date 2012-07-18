@@ -215,12 +215,12 @@ namespace vl
 ¸¨Öúº¯Êý
 ***********************************************************************/
 
-		// ParsingNode_Search.cpp
-		extern void SearchRulesFromRule(const RuleNode* rootRule, collections::List<const RuleNode*>& rules);
-		// ParsingNode_Log.cpp
-		extern void LogGrammarFromRule(const RuleNode* rootRule, bool logAction, stream::TextWriter& writer);
-		// ParsingNode_FirstSet.cpp
-		extern void CalculateFirstSet(const RuleNode* rootRule, collections::List<vint>& tokens);
+		namespace parsing_internal
+		{
+			extern void SearchRulesFromRule(const RuleNode* rootRule, collections::List<const RuleNode*>& rules);
+			extern void LogGrammarFromRule(const RuleNode* rootRule, bool logAction, stream::TextWriter& writer);
+			extern void CalculateFirstSet(const RuleNode* rootRule, collections::List<vint>& tokens);
+		}
 	}
 }
 
