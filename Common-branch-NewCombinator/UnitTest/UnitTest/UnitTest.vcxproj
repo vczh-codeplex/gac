@@ -151,6 +151,7 @@
     <ClCompile Include="..\..\Source\Parsing\Parsing.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingGrammarRegex.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingNode.cpp" />
+    <ClCompile Include="..\..\Source\Parsing\ParsingNodeState.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingNode_FirstSet.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingNode_Log.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingNode_Search.cpp" />
@@ -214,6 +215,7 @@
     <ClInclude Include="..\..\Source\Parsing\Parsing.h" />
     <ClInclude Include="..\..\Source\Parsing\ParsingGrammarRegex.h" />
     <ClInclude Include="..\..\Source\Parsing\ParsingNode.h" />
+    <ClInclude Include="..\..\Source\Parsing\ParsingNodeState.h" />
     <ClInclude Include="..\..\Source\Pointer.h" />
     <ClInclude Include="..\..\Source\Regex\Regex.h" />
     <ClInclude Include="..\..\Source\Regex\RegexAutomaton.h" />

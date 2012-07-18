@@ -26,10 +26,6 @@ namespace vl
 
 		namespace parsing_internal
 		{
-			struct NullParsingType
-			{
-			};
-
 			class _Seq;
 			class _Alt;
 			class _Loop;

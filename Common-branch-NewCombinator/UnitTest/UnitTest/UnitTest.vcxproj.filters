@@ -156,6 +156,9 @@
     <ClCompile Include="..\..\Source\Parsing\ParsingNode_FirstSet.cpp">
       <Filter>Common\Parsing</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\ParsingNodeState.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
@@ -309,6 +312,9 @@
       <Filter>Common\Parsing</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Parsing\ParsingNode.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Parsing\ParsingNodeState.h">
       <Filter>Common\Parsing</Filter>
     </ClInclude>
   </ItemGroup>

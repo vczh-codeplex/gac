@@ -24,11 +24,14 @@ namespace vl
 			}
 		};
 
-		template<>
-		struct ParsingNodeTypeDowngrader<regex::RegexToken>
+		namespace parsing_internal
 		{
-			typedef parsing_internal::NullParsingType	Type;
-		};
+			template<>
+			struct ParsingNodeTypeDowngrader<regex::RegexToken>
+			{
+				typedef parsing_internal::NullParsingType	Type;
+			};
+		}
 
 		class RegexGrammar : public Grammar<regex::RegexToken, RegexTokenHelper>
 		{

@@ -1,4 +1,5 @@
 #include "Parsing.h"
+#include "ParsingNodeState.h"
 #include "..\Collections\OperationForEach.h"
 
 namespace vl
