@@ -8,6 +8,7 @@ namespace vl
 
 	namespace parsing
 	{
+		using namespace parsing_internal;
 
 /***********************************************************************
 GrammarBase
@@ -39,6 +40,10 @@ GrammarBase
 					}
 					logWriter->WriteLine(L"");
 				}
+
+				logWriter->WriteLine(L"==================================[NODE NON-DETERMINISTIC AUTOMATON]");
+
+				logWriter->WriteLine(L"==================================[NODE DETERMINISTIC AUTOMATON]");
 			}
 		}
 	}
