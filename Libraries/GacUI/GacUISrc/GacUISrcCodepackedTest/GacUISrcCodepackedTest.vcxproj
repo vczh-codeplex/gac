@@ -101,12 +101,23 @@
     <ClInclude Include="..\..\Public\Source\Vlpp.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\BigDoc.png" />
     <None Include="Resources\Gif.gif" />
     <None Include="Resources\New.png" />
-    <None Include="Resources\NewSmall.png" />
     <None Include="Resources\Open.png" />
     <None Include="Resources\Save.png" />
-    <None Include="Resources\SaveSmall.png" />
+    <None Include="Resources\SmallDoc.png" />
+    <None Include="Resources\_Copy.png" />
+    <None Include="Resources\_Cut.png" />
+    <None Include="Resources\_Delete.png" />
+    <None Include="Resources\_New.png" />
+    <None Include="Resources\_Open.png" />
+    <None Include="Resources\_Paste.png" />
+    <None Include="Resources\_Print.png" />
+    <None Include="Resources\_Redo.png" />
+    <None Include="Resources\_Save.png" />
+    <None Include="Resources\_SaveAs.png" />
+    <None Include="Resources\_Undo.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

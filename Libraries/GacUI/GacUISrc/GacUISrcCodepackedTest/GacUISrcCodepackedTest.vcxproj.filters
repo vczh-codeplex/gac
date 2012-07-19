@@ -79,16 +79,49 @@
     <None Include="Resources\New.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Resources\NewSmall.png">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="Resources\Open.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Resources\Save.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Resources\SaveSmall.png">
+    <None Include="Resources\_Copy.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\_Cut.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\_Delete.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\_New.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\_Open.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\_Paste.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\_Print.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\_Redo.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\_Save.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\_SaveAs.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\_Undo.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\BigDoc.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\SmallDoc.png">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

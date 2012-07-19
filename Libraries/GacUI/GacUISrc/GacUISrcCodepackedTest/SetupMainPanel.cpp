@@ -282,9 +282,9 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 				listControl->SetVerticalAlwaysVisible(false);
 		
 				INativeImageService* imageService=GetCurrentController()->ImageService();
-				Ptr<INativeImage> largeImage=imageService->CreateImageFromFile(L"Resources\\New.png");
+				Ptr<INativeImage> largeImage=imageService->CreateImageFromFile(L"Resources\\BigDoc.png");
 				Ptr<GuiImageData> largeImageData=new GuiImageData(largeImage, 0);
-				Ptr<INativeImage> smallImage=imageService->CreateImageFromFile(L"Resources\\NewSmall.png");
+				Ptr<INativeImage> smallImage=imageService->CreateImageFromFile(L"Resources\\SmallDoc.png");
 				Ptr<GuiImageData> smallImageData=new GuiImageData(smallImage, 0);
 
 				for(int i=0;i<100;i++)
@@ -309,7 +309,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 				treeControl->SetVerticalAlwaysVisible(false);
 		
 				INativeImageService* imageService=GetCurrentController()->ImageService();
-				Ptr<INativeImage> image=imageService->CreateImageFromFile(L"Resources\\NewSmall.png");
+				Ptr<INativeImage> image=imageService->CreateImageFromFile(L"Resources\\SmallDoc.png");
 				Ptr<GuiImageData> imageData=new GuiImageData(image, 0);
 
 				treeControl->Nodes()->Children().Add(new tree::MemoryNodeProvider(new tree::TreeViewItem(imageData, L"Microsoft")));

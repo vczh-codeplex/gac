@@ -11,7 +11,7 @@ void SetupTreeviewWindow(GuiControlHost* controlHost, GuiControl* container)
 	container->GetBoundsComposition()->AddChild(treeControl->GetBoundsComposition());
 		
 	INativeImageService* imageService=GetCurrentController()->ImageService();
-	Ptr<INativeImage> image=imageService->CreateImageFromFile(L"Resources\\NewSmall.png");
+	Ptr<INativeImage> image=imageService->CreateImageFromFile(L"Resources\\SmallDoc.png");
 	Ptr<GuiImageData> imageData=new GuiImageData(image, 0);
 
 	treeControl->Nodes()->Children().Add(new tree::MemoryNodeProvider(new tree::TreeViewItem(imageData, L"Microsoft")));
