@@ -13,9 +13,9 @@ void SetupListDirectionWindow(GuiControlHost* controlHost, GuiControl* container
 		container->GetBoundsComposition()->AddChild(listControl->GetBoundsComposition());
 		
 		INativeImageService* imageService=GetCurrentController()->ImageService();
-		Ptr<INativeImage> largeImage=imageService->CreateImageFromFile(L"Resources\\New.png");
+		Ptr<INativeImage> largeImage=imageService->CreateImageFromFile(L"Resources\\BigDoc.png");
 		Ptr<GuiImageData> largeImageData=new GuiImageData(largeImage, 0);
-		Ptr<INativeImage> smallImage=imageService->CreateImageFromFile(L"Resources\\NewSmall.png");
+		Ptr<INativeImage> smallImage=imageService->CreateImageFromFile(L"Resources\\SmallDoc.png");
 		Ptr<GuiImageData> smallImageData=new GuiImageData(smallImage, 0);
 
 		for(int i=0;i<100;i++)

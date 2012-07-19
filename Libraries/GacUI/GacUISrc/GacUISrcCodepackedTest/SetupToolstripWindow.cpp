@@ -96,7 +96,7 @@ void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 	const wchar_t* fileNewMenuText[]={L"Project...", L"Web Site...", L"Team Project...", L"File...", L"Project From Existing Code..."};
 	const wchar_t* fileOpenMenuText[]={L"Project/Solution...", L"Web Site...", L"Team Project...", L"File...", L"Convert..."};
 	const wchar_t* filePrintMenuText[]={L"Print", L"Don't Print"};
-	const wchar_t* editMenuText[]={L"Undo", L"-", L"Cut", L"Copy", L"Paste", L"Delete", L"-", L"Find...", L"Find Next", L"Replace...", L"Go to...", L"-", L"Select All", L"Time/Date"};
+	const wchar_t* editMenuText[]={L"Undo", L"Redo", L"-", L"Cut", L"Copy", L"Paste", L"Delete", L"-", L"Find...", L"Find Next", L"Replace...", L"Go to...", L"-", L"Select All", L"Time/Date"};
 	const wchar_t* formatMenuText[]={L"Wrap Text", L"Font..."};
 	const wchar_t* viewMenuText[]={L"Status Bar"};
 	const wchar_t* helpMenuText[]={L"View Help", L"About Notepad"};
