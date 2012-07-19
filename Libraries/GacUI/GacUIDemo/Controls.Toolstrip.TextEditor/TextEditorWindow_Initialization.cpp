@@ -1,7 +1,22 @@
 #include "TextEditorWindow.h"
 
+void SetImage(GuiMenuButton* menuItem, const WString& imagePath)
+{
+	menuItem->SetImage(new GuiImageData(GetCurrentController()->ImageService()->CreateImageFromFile(imagePath), 0));
+}
+
 void TextEditorWindow::InitializeMenuBar()
 {
+	WString resourceFolder;
+	{
+		wchar_t exePath[1024]={0};
+		DWORD len=GetModuleFileName(NULL, exePath, 1024);
+		while(exePath[--len]!=L'\\');
+		exePath[len+1]=0;
+		wcscat_s(exePath, L"..\\Resources\\");
+		resourceFolder=exePath;
+	}
+
 	menuBar=g::NewMenuBar();
 	menuBar->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	menuBar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -33,6 +48,7 @@ void TextEditorWindow::InitializeMenuBar()
 
 			menuFileNew=g::NewMenuItemButton();
 			menuFileNew->SetText(L"New");
+			SetImage(menuFileNew, resourceFolder+L"_New.png");
 			menuFileNew->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			stackItem->AddChild(menuFileNew->GetBoundsComposition());
 		}
@@ -42,6 +58,7 @@ void TextEditorWindow::InitializeMenuBar()
 
 			menuFileOpen=g::NewMenuItemButton();
 			menuFileOpen->SetText(L"Open...");
+			SetImage(menuFileOpen, resourceFolder+L"_Open.png");
 			menuFileOpen->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			stackItem->AddChild(menuFileOpen->GetBoundsComposition());
 		}
@@ -51,6 +68,7 @@ void TextEditorWindow::InitializeMenuBar()
 
 			menuFileSave=g::NewMenuItemButton();
 			menuFileSave->SetText(L"Save");
+			SetImage(menuFileSave, resourceFolder+L"_Save.png");
 			menuFileSave->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			stackItem->AddChild(menuFileSave->GetBoundsComposition());
 		}
@@ -60,6 +78,7 @@ void TextEditorWindow::InitializeMenuBar()
 
 			menuFileSaveAs=g::NewMenuItemButton();
 			menuFileSaveAs->SetText(L"Save As...");
+			SetImage(menuFileSaveAs, resourceFolder+L"_SaveAs.png");
 			menuFileSaveAs->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			stackItem->AddChild(menuFileSaveAs->GetBoundsComposition());
 		}
@@ -100,6 +119,7 @@ void TextEditorWindow::InitializeMenuBar()
 
 			menuEditUndo=g::NewMenuItemButton();
 			menuEditUndo->SetText(L"Undo");
+			SetImage(menuEditUndo, resourceFolder+L"_Undo.png");
 			menuEditUndo->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			stackItem->AddChild(menuEditUndo->GetBoundsComposition());
 		}
@@ -109,6 +129,7 @@ void TextEditorWindow::InitializeMenuBar()
 
 			menuEditRedo=g::NewMenuItemButton();
 			menuEditRedo->SetText(L"Redo");
+			SetImage(menuEditRedo, resourceFolder+L"_Redo.png");
 			menuEditRedo->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			stackItem->AddChild(menuEditRedo->GetBoundsComposition());
 		}
@@ -125,6 +146,7 @@ void TextEditorWindow::InitializeMenuBar()
 
 			menuEditCut=g::NewMenuItemButton();
 			menuEditCut->SetText(L"Cut");
+			SetImage(menuEditCut, resourceFolder+L"_Cut.png");
 			menuEditCut->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			stackItem->AddChild(menuEditCut->GetBoundsComposition());
 		}
@@ -134,6 +156,7 @@ void TextEditorWindow::InitializeMenuBar()
 
 			menuEditCopy=g::NewMenuItemButton();
 			menuEditCopy->SetText(L"Copy");
+			SetImage(menuEditCopy, resourceFolder+L"_Copy.png");
 			menuEditCopy->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			stackItem->AddChild(menuEditCopy->GetBoundsComposition());
 		}
@@ -143,6 +166,7 @@ void TextEditorWindow::InitializeMenuBar()
 
 			menuEditPaste=g::NewMenuItemButton();
 			menuEditPaste->SetText(L"Paste");
+			SetImage(menuEditPaste, resourceFolder+L"_Paste.png");
 			menuEditPaste->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			stackItem->AddChild(menuEditPaste->GetBoundsComposition());
 		}
@@ -152,6 +176,7 @@ void TextEditorWindow::InitializeMenuBar()
 
 			menuEditDelete=g::NewMenuItemButton();
 			menuEditDelete->SetText(L"Delete");
+			SetImage(menuEditDelete, resourceFolder+L"_Delete.png");
 			menuEditDelete->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			stackItem->AddChild(menuEditDelete->GetBoundsComposition());
 		}

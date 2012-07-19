@@ -67,7 +67,7 @@ GuiStackComposition* CreateSubMenuInternal(int count, const wchar_t** menuText, 
 			GuiMenuButton* button=new GuiMenuButton(new win7::Win7MenuItemButtonStyle);
 			button->SetText(menuText[i]);
 			button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			button->SetEnabled(i<4);
+			button->SetEnabled(i<6);
 			if(menuImage && menuImage[i])
 			{
 				Ptr<INativeImage> image=imageService->CreateImageFromFile(WString(L"Resources\\")+menuImage[i]);
