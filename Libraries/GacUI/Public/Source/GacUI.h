@@ -4709,9 +4709,11 @@ MenuButton
 					virtual void						SetSubMenuExisting(bool value)=0;
 					virtual void						SetSubMenuOpening(bool value)=0;
 					virtual GuiButton*					GetSubMenuHost()=0;
+					virtual void						SetImage(Ptr<GuiImageData> value)=0;
 				};
 			protected:
 				IStyleController*						styleController;
+				Ptr<GuiImageData>						image;
 				GuiMenu*								subMenu;
 				bool									ownedSubMenu;
 				Size									preferredMenuClientSize;
@@ -4729,6 +4731,9 @@ MenuButton
 				~GuiMenuButton();
 
 				compositions::GuiNotifyEvent			SubMenuOpeningChanged;
+
+				Ptr<GuiImageData>						GetImage();
+				void									SetImage(Ptr<GuiImageData> value);
 
 				bool									IsSubMenuExists();
 				GuiMenu*								GetSubMenu();
@@ -7464,6 +7469,7 @@ Misc Buttons
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
+				void										SetImage(Ptr<controls::GuiImageData> value)override;
 				void										SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)override;
 			};
 			
@@ -7519,6 +7525,7 @@ Menu Button
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
+				void										SetImage(Ptr<controls::GuiImageData> value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
@@ -7545,6 +7552,7 @@ Menu Button
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
+				void										SetImage(Ptr<controls::GuiImageData> value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			

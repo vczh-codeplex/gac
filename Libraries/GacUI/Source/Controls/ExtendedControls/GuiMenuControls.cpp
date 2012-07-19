@@ -290,6 +290,20 @@ GuiMenuButton
 				}
 			}
 
+			Ptr<GuiImageData> GuiMenuButton::GetImage()
+			{
+				return image;
+			}
+
+			void GuiMenuButton::SetImage(Ptr<GuiImageData> value)
+			{
+				if(image!=value)
+				{
+					image=value;
+					styleController->SetImage(image);
+				}
+			}
+
 			bool GuiMenuButton::IsSubMenuExists()
 			{
 				return subMenu!=0;

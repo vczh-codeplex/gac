@@ -639,6 +639,7 @@ Misc Buttons
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
+				void										SetImage(Ptr<controls::GuiImageData> value)override;
 				void										SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)override;
 			};
 			
@@ -698,6 +699,7 @@ Menu Button
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
+				void										SetImage(Ptr<controls::GuiImageData> value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
@@ -726,6 +728,7 @@ Menu Button
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
+				void										SetImage(Ptr<controls::GuiImageData> value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
