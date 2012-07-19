@@ -172,6 +172,7 @@ Button Configuration
 				elements::GuiGradientBackgroundElement*		gradientElement;
 				elements::Gui3DSplitterElement*				splitterElement;
 				compositions::GuiCellComposition*			splitterComposition;
+				elements::GuiImageFrameElement*				imageElement;
 				elements::GuiSolidLabelElement*				textElement;
 				compositions::GuiBoundsComposition*			textComposition;
 				elements::GuiPolygonElement*				subMenuArrowElement;

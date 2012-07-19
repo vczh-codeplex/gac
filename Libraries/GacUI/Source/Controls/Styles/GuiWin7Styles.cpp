@@ -839,7 +839,19 @@ Win7MenuItemButtonElements
 					table->SetColumnOption(1, GuiCellOption::AbsoluteOption(2));
 					table->SetColumnOption(2, GuiCellOption::PercentageOption(1.0));
 					table->SetColumnOption(3, GuiCellOption::AbsoluteOption(10));
+					
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 0, 1, 1);
+						button.splitterComposition=cell;
 
+						GuiImageFrameElement* element=GuiImageFrameElement::Create();
+						button.imageElement=element;
+						element->SetStretch(false);
+						element->SetAlignments(Alignment::Center, Alignment::Center);
+						cell->SetOwnedElement(element);
+					}
 					{
 						GuiCellComposition* cell=new GuiCellComposition;
 						table->AddChild(cell);
@@ -2815,6 +2827,7 @@ Win7MenuItemButtonStyle
 
 			void Win7MenuItemButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
 			{
+				elements.imageElement->SetImage(value->GetImage(), value->GetFrameIndex());
 			}
 
 			void Win7MenuItemButtonStyle::Transfer(GuiButton::ControlState value)
