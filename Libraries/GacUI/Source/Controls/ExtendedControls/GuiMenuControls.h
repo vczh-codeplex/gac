@@ -144,9 +144,13 @@ MenuButton
 					/// <summary>Get the button control that is expected to be associated with a sub menu.</summary>
 					/// <returns>The button control that is expected to be associated with a sub menu. Returns null means that the sub menu will be directly associated to the menu button.</returns>
 					virtual GuiButton*					GetSubMenuHost()=0;
+					/// <summary>Notify that the image for the menu button is changed.</summary>
+					/// <param name="value">The image for the menu button.</param>
+					virtual void						SetImage(Ptr<GuiImageData> value)=0;
 				};
 			protected:
 				IStyleController*						styleController;
+				Ptr<GuiImageData>						image;
 				GuiMenu*								subMenu;
 				bool									ownedSubMenu;
 				Size									preferredMenuClientSize;
@@ -167,6 +171,13 @@ MenuButton
 
 				/// <summary>Sub menu opening changed event.</summary>
 				compositions::GuiNotifyEvent			SubMenuOpeningChanged;
+
+				/// <summary>Get the image for the menu button.</summary>
+				/// <returns>The image for the menu button.</returns>
+				Ptr<GuiImageData>						GetImage();
+				/// <summary>Set the image for the menu button.</summary>
+				/// <param name="value">The image for the menu button.</param>
+				void									SetImage(Ptr<GuiImageData> value);
 
 				/// <summary>Test does the sub menu exist.</summary>
 				/// <returns>Returns true if the sub menu exists.</returns>

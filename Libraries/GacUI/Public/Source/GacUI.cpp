@@ -2354,6 +2354,20 @@ GuiMenuButton
 				}
 			}
 
+			Ptr<GuiImageData> GuiMenuButton::GetImage()
+			{
+				return image;
+			}
+
+			void GuiMenuButton::SetImage(Ptr<GuiImageData> value)
+			{
+				if(image!=value)
+				{
+					image=value;
+					styleController->SetImage(image);
+				}
+			}
+
 			bool GuiMenuButton::IsSubMenuExists()
 			{
 				return subMenu!=0;
@@ -13519,6 +13533,10 @@ Win7ListViewColumnHeaderStyle
 				return dropdownButton;
 			}
 
+			void Win7ListViewColumnHeaderStyle::SetImage(Ptr<controls::GuiImageData> value)
+			{
+			}
+
 			void Win7ListViewColumnHeaderStyle::SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)
 			{
 				Margin margin=arrowComposition->GetAlignmentToParent();
@@ -13761,6 +13779,10 @@ Win7MenuBarButtonStyle
 				return 0;
 			}
 
+			void Win7MenuBarButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
+			{
+			}
+
 			void Win7MenuBarButtonStyle::Transfer(GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)
@@ -13886,6 +13908,10 @@ Win7MenuItemButtonStyle
 			controls::GuiButton* Win7MenuItemButtonStyle::GetSubMenuHost()
 			{
 				return 0;
+			}
+
+			void Win7MenuItemButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
+			{
 			}
 
 			void Win7MenuItemButtonStyle::Transfer(GuiButton::ControlState value)
