@@ -105,6 +105,64 @@ void CreateSubMenu(GuiMenu* menu, int index, GuiStackComposition* subMenu)
 	}
 }
 
+template<int count>
+void CreateToolbar(Ptr<INativeImage> (&imageButtons)[count], GuiStackComposition* toolStack)
+{
+	const wchar_t* fileMenuText[]={L"New", L"Open", L"Save", L"Save As...", L"-", L"Page Setting...", L"Print...", L"-", L"Exit"};
+	const wchar_t* fileMenuImage[]={L"_New.png", L"_Open.png", L"_Save.png", L"_SaveAs.png", 0, 0, L"_Print.png", 0, 0};
+	const wchar_t* editMenuText[]={L"Undo", L"Redo", L"-", L"Cut", L"Copy", L"Paste", L"Delete", L"-", L"Find...", L"Find Next", L"Replace...", L"Go to...", L"-", L"Select All", L"Time/Date"};
+	const wchar_t* editMenuImage[]={L"_Undo.png", L"_Redo.png", 0, L"_Cut.png", L"_Copy.png", L"_Paste.png", L"_Delete.png", 0, 0, 0, 0, 0, 0, 0, 0};
+
+	for(int i=0;i<sizeof(imageButtons)/sizeof(*imageButtons);i++)
+	{
+		if(imageButtons[i])
+		{
+			GuiButton* button=0;
+			switch(i)
+			{
+			case 0:
+				{
+					GuiMenuButton* menuButton=new GuiMenuButton(new win7::Win7ToolstripDropdownButtonStyle);
+					menuButton->SetImage(new GuiImageData(imageButtons[i], 0));
+					menuButton->CreateSubMenu();
+					menuButton->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(fileMenuText, fileMenuImage));
+					button=menuButton;
+				}
+				break;
+			case 1:
+				{
+					GuiMenuButton* menuButton=new GuiMenuButton(new win7::Win7ToolstripSplitButtonStyle);
+					menuButton->SetImage(new GuiImageData(imageButtons[i], 0));
+					menuButton->CreateSubMenu();
+					menuButton->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(editMenuText, editMenuImage));
+					button=menuButton;
+				}
+				break;
+			default:
+				{
+					GuiBoundsComposition* imageComposition=CreateImageFrame(imageButtons[i]);
+					imageComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
+
+					button=new GuiButton(new win7::Win7ToolstripButtonStyle(false));
+					button->GetContainerComposition()->AddChild(imageComposition);
+				}
+			}
+
+			GuiStackItemComposition* item=new GuiStackItemComposition;
+			item->AddChild(button->GetBoundsComposition());
+			toolStack->AddChild(item);
+		}
+		else
+		{
+			GuiControl* splitter=new GuiControl(new win7::Win7ToolstripSplitterStyle);
+
+			GuiStackItemComposition* item=new GuiStackItemComposition;
+			item->AddChild(splitter->GetBoundsComposition());
+			toolStack->AddChild(item);
+		}
+	}
+}
+
 void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 {
 	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
@@ -165,6 +223,9 @@ void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 		smallToolStack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 		Ptr<INativeImage> imageButtons[]=
 		{
+			imageService->CreateImageFromFile(L"Resources\\SmallDoc.png"),
+			imageService->CreateImageFromFile(L"Resources\\SmallDoc.png"),
+			0,
 			imageService->CreateImageFromFile(L"Resources\\_New.png"),
 			imageService->CreateImageFromFile(L"Resources\\_Open.png"),
 			imageService->CreateImageFromFile(L"Resources\\_Save.png"),
@@ -180,28 +241,7 @@ void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 			imageService->CreateImageFromFile(L"Resources\\_Paste.png"),
 			imageService->CreateImageFromFile(L"Resources\\_Delete.png"),
 		};
-		for(int i=0;i<sizeof(imageButtons)/sizeof(*imageButtons);i++)
-		{
-			if(imageButtons[i])
-			{
-				GuiBoundsComposition* imageComposition=CreateImageFrame(imageButtons[i]);
-				imageComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
-				GuiButton* button=new GuiButton(new win7::Win7ToolstripButtonStyle(false));
-				button->GetContainerComposition()->AddChild(imageComposition);
-
-				GuiStackItemComposition* item=new GuiStackItemComposition;
-				item->AddChild(button->GetBoundsComposition());
-				smallToolStack->AddChild(item);
-			}
-			else
-			{
-				GuiControl* splitter=new GuiControl(new win7::Win7ToolstripSplitterStyle);
-
-				GuiStackItemComposition* item=new GuiStackItemComposition;
-				item->AddChild(splitter->GetBoundsComposition());
-				smallToolStack->AddChild(item);
-			}
-		}
+		CreateToolbar(imageButtons, smallToolStack);
 	}
 
 	GuiStackComposition* bigToolStack=new GuiStackComposition;
@@ -209,21 +249,14 @@ void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 		bigToolStack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 		Ptr<INativeImage> imageButtons[]=
 		{
+			imageService->CreateImageFromFile(L"Resources\\BigDoc.png"),
+			imageService->CreateImageFromFile(L"Resources\\BigDoc.png"),
+			0,
 			imageService->CreateImageFromFile(L"Resources\\New.png"),
 			imageService->CreateImageFromFile(L"Resources\\Open.png"),
 			imageService->CreateImageFromFile(L"Resources\\Save.png"),
 		};
-		for(int i=0;i<sizeof(imageButtons)/sizeof(*imageButtons);i++)
-		{
-			GuiBoundsComposition* imageComposition=CreateImageFrame(imageButtons[i]);
-			imageComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
-			GuiButton* button=new GuiButton(new win7::Win7ToolstripButtonStyle(false));
-			button->GetContainerComposition()->AddChild(imageComposition);
-
-			GuiStackItemComposition* item=new GuiStackItemComposition;
-			item->AddChild(button->GetBoundsComposition());
-			bigToolStack->AddChild(item);
-		}
+		CreateToolbar(imageButtons, bigToolStack);
 	}
 	
 	GuiBoundsComposition* picGif=0;
