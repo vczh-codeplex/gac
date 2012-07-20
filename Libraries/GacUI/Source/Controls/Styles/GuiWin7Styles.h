@@ -56,7 +56,7 @@ Theme
 				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
-				controls::GuiSelectableButton::IStyleController*					CreateToolstripButtonStyle()override;
+				controls::GuiMenuButton::IStyleController*							CreateToolstripButtonStyle()override;
 				controls::GuiMenuButton::IStyleController*							CreateToolstripDropdownButtonStyle()override;
 				controls::GuiMenuButton::IStyleController*							CreateToolstripSplitButtonStyle()override;
 				controls::GuiControl::IStyleController*								CreateToolstripSplitterStyle()override;
