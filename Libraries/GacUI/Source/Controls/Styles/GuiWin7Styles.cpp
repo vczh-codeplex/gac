@@ -116,12 +116,12 @@ Win7Theme
 
 			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripDropdownButtonStyle()
 			{
-				return new Win7ToolstripDropdownButtonStyle;
+				return new Win7ToolstripDropdownButtonStyle(false);
 			}
 
 			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripSplitButtonStyle()
 			{
-				return new Win7ToolstripSplitButtonStyle;
+				return new Win7ToolstripSplitButtonStyle(false);
 			}
 
 			controls::GuiControl::IStyleController* Win7Theme::CreateToolstripSplitterStyle()

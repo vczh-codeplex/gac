@@ -19981,69 +19981,41 @@ namespace vl
 /***********************************************************************
 Toolstrip Button
 ***********************************************************************/
-			
-			class Win7ToolstripButtonStyle : public Win7ButtonStyleBase, public Description<Win7ToolstripButtonStyle>
+
+#pragma warning(push)
+#pragma warning(disable:4250)
+			class Win7ToolstripButtonStyle : public Win7ButtonStyleBase, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ToolstripButtonStyle>
 			{
 			protected:
+				bool										isOpening;
+
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
 			public:
 				Win7ToolstripButtonStyle(bool transparent);
 				~Win7ToolstripButtonStyle();
-			};
-			
-			class Win7ToolstripDropdownButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ToolstripDropdownButtonStyle>
-			{
-			protected:
-				Win7MenuItemButtonElements					elements;
-				controls::GuiButton::ControlState			controlStyle;
-				bool										isVisuallyEnabled;
-				bool										isOpening;
 
-				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool opening);
+				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
+				void										SetSubMenuExisting(bool value)override;
+				void										SetSubMenuOpening(bool value)override;
+				controls::GuiButton*						GetSubMenuHost()override;
+				void										SetImage(Ptr<controls::GuiImageData> value)override;
+				void										Transfer(controls::GuiButton::ControlState value)override;
+			};
+
+			class Win7ToolstripDropdownButtonStyle : public Win7ToolstripButtonStyle, public Description<Win7ToolstripDropdownButtonStyle>
+			{
 			public:
-				Win7ToolstripDropdownButtonStyle();
+				Win7ToolstripDropdownButtonStyle(bool transparent);
 				~Win7ToolstripDropdownButtonStyle();
-
-				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
-				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
-				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-				void										SetVisuallyEnabled(bool value)override;
-				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
-				void										SetSubMenuExisting(bool value)override;
-				void										SetSubMenuOpening(bool value)override;
-				controls::GuiButton*						GetSubMenuHost()override;
-				void										SetImage(Ptr<controls::GuiImageData> value)override;
-				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
-			class Win7ToolstripSplitButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ToolstripSplitButtonStyle>
+			class Win7ToolstripSplitButtonStyle : public Win7ToolstripButtonStyle, public Description<Win7ToolstripSplitButtonStyle>
 			{
-			protected:
-				Win7MenuItemButtonElements					elements;
-				controls::GuiButton::ControlState			controlStyle;
-				bool										isVisuallyEnabled;
-				bool										isOpening;
-
-				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool opening);
 			public:
-				Win7ToolstripSplitButtonStyle();
+				Win7ToolstripSplitButtonStyle(bool transparent);
 				~Win7ToolstripSplitButtonStyle();
-
-				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
-				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
-				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-				void										SetVisuallyEnabled(bool value)override;
-				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
-				void										SetSubMenuExisting(bool value)override;
-				void										SetSubMenuOpening(bool value)override;
-				controls::GuiButton*						GetSubMenuHost()override;
-				void										SetImage(Ptr<controls::GuiImageData> value)override;
-				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
+#pragma warning(pop)
 
 			class Win7ToolstripSplitterStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7ToolstripSplitterStyle>
 			{
