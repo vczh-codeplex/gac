@@ -117,36 +117,32 @@ void CreateToolbar(Ptr<INativeImage> (&imageButtons)[count], GuiStackComposition
 	{
 		if(imageButtons[i])
 		{
-			GuiButton* button=0;
+			GuiMenuButton* button=0;
 			switch(i)
 			{
 			case 0:
 				{
-					GuiMenuButton* menuButton=new GuiMenuButton(new win7::Win7ToolstripDropdownButtonStyle);
-					menuButton->SetImage(new GuiImageData(imageButtons[i], 0));
-					menuButton->CreateSubMenu();
-					menuButton->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(fileMenuText, fileMenuImage));
-					button=menuButton;
+					button=new GuiMenuButton(new win7::Win7ToolstripDropdownButtonStyle(false));
+					button->CreateSubMenu();
+					button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(fileMenuText, fileMenuImage));
 				}
 				break;
 			case 1:
 				{
-					GuiMenuButton* menuButton=new GuiMenuButton(new win7::Win7ToolstripSplitButtonStyle);
-					menuButton->SetImage(new GuiImageData(imageButtons[i], 0));
-					menuButton->CreateSubMenu();
-					menuButton->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(editMenuText, editMenuImage));
-					button=menuButton;
+					button=new GuiMenuButton(new win7::Win7ToolstripSplitButtonStyle(false));
+					button->CreateSubMenu();
+					button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(editMenuText, editMenuImage));
 				}
 				break;
 			default:
 				{
-					GuiBoundsComposition* imageComposition=CreateImageFrame(imageButtons[i]);
-					imageComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
-
-					button=new GuiButton(new win7::Win7ToolstripButtonStyle(false));
-					button->GetContainerComposition()->AddChild(imageComposition);
+					button=new GuiMenuButton(new win7::Win7ToolstripButtonStyle(false));
 				}
 			}
+			GuiBoundsComposition* imageComposition=CreateImageFrame(imageButtons[i]);
+			imageComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
+			button->GetContainerComposition()->AddChild(imageComposition);
+			//button->SetImage(new GuiImageData(imageButtons[i], 0));
 
 			GuiStackItemComposition* item=new GuiStackItemComposition;
 			item->AddChild(button->GetBoundsComposition());
