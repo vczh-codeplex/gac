@@ -86,6 +86,12 @@ namespace vl
 				/// <summary>Create a style for toolstrip button.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiSelectableButton::IStyleController*					CreateToolstripButtonStyle()=0;
+				/// <summary>Create a style for toolstrip dropdown button.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiMenuButton::IStyleController*							CreateToolstripDropdownButtonStyle()=0;
+				/// <summary>Create a style for toolstrip split button.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiMenuButton::IStyleController*							CreateToolstripSplitButtonStyle()=0;
 				/// <summary>Create a style for toolstrip.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiControl::IStyleController*								CreateToolstripSplitterStyle()=0;
@@ -169,6 +175,7 @@ namespace vl
 				/// <summary>Create a tree view.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiTreeView*					NewTreeView();
+
 				/// <summary>Create a menu.</summary>
 				/// <returns>The created control.</returns>
 				/// <param name="owner">The owner menu item of the parent menu.</param>
@@ -185,18 +192,29 @@ namespace vl
 				/// <summary>Create a menu item button.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiMenuButton*					NewMenuItemButton();
+
 				/// <summary>Create a button.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiButton*						NewButton();
-				/// <summary>Create a toolstrip button.</summary>
-				/// <returns>The created control.</returns>
-				extern controls::GuiSelectableButton*			NewToolstripButton();
 				/// <summary>Create a check box.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiSelectableButton*			NewCheckBox();
 				/// <summary>Create a radio box.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiSelectableButton*			NewRadioButton();
+				/// <summary>Create a toolstrip button.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiSelectableButton*			NewToolstripButton();
+				/// <summary>Create a toolstrip dropdown button.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiMenuButton*					NewToolstripDropdownButton();
+				/// <summary>Create a toolstrip split button.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiMenuButton*					NewToolstripSplitButton();
+				/// <summary>Create a toolstrip splitter.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiControl*					NewToolstripSplitter();
+
 				/// <summary>Create a horizontal scroll.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiScroll*						NewHScroll();
@@ -209,6 +227,7 @@ namespace vl
 				/// <summary>Create a vertical tracker (slide bar).</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiScroll*						NewVTracker();
+
 				/// <summary>Create a text list.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiTextList*					NewTextList();
