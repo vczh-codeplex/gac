@@ -66,7 +66,6 @@ GuiStackComposition* CreateSubMenuInternal(int count, const wchar_t** menuText, 
 		{
 			GuiMenuButton* button=new GuiMenuButton(new win7::Win7MenuItemButtonStyle);
 			button->SetText(menuText[i]);
-			button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			button->SetEnabled(i<6);
 			if(menuImage && menuImage[i])
 			{
@@ -75,6 +74,8 @@ GuiStackComposition* CreateSubMenuInternal(int count, const wchar_t** menuText, 
 			}
 			menuItem=button;
 		}
+		menuItem->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+
 		GuiStackItemComposition* item=new GuiStackItemComposition;
 		item->AddChild(menuItem->GetBoundsComposition());
 		menuStack->AddChild(item);
@@ -140,6 +141,7 @@ void CreateToolbar(Ptr<INativeImage> (&imageButtons)[count], GuiStackComposition
 				}
 			}
 			button->SetImage(new GuiImageData(imageButtons[i], 0));
+			button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 
 			GuiStackItemComposition* item=new GuiStackItemComposition;
 			item->AddChild(button->GetBoundsComposition());
@@ -148,6 +150,7 @@ void CreateToolbar(Ptr<INativeImage> (&imageButtons)[count], GuiStackComposition
 		else
 		{
 			GuiControl* splitter=new GuiControl(new win7::Win7ToolstripSplitterStyle);
+			splitter->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 
 			GuiStackItemComposition* item=new GuiStackItemComposition;
 			item->AddChild(splitter->GetBoundsComposition());
