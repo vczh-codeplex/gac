@@ -1,16 +1,5 @@
 #include "..\..\Public\Source\GacUIIncludes.h"
 
-GuiBoundsComposition* CreateImageFrame(Ptr<INativeImage> image, int frameIndex=0)
-{
-	GuiImageFrameElement* element=GuiImageFrameElement::Create();
-	element->SetImage(image, frameIndex);
-
-	GuiBoundsComposition* composition=new GuiBoundsComposition;
-	composition->SetOwnedElement(element);
-	composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
-	return composition;
-}
-
 class GifAnimation : public Object, public IGuiGraphicsAnimation
 {
 protected:
@@ -44,6 +33,17 @@ public:
 	{
 	}
 };
+
+GuiBoundsComposition* CreateImageFrame(Ptr<INativeImage> image, int frameIndex=0)
+{
+	GuiImageFrameElement* element=GuiImageFrameElement::Create();
+	element->SetImage(image, frameIndex);
+
+	GuiBoundsComposition* composition=new GuiBoundsComposition;
+	composition->SetOwnedElement(element);
+	composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+	return composition;
+}
 
 GuiStackComposition* CreateSubMenuInternal(int count, const wchar_t** menuText, const wchar_t** menuImage)
 {
@@ -139,10 +139,7 @@ void CreateToolbar(Ptr<INativeImage> (&imageButtons)[count], GuiStackComposition
 					button=new GuiMenuButton(new win7::Win7ToolstripButtonStyle(false));
 				}
 			}
-			GuiBoundsComposition* imageComposition=CreateImageFrame(imageButtons[i]);
-			imageComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
-			button->GetContainerComposition()->AddChild(imageComposition);
-			//button->SetImage(new GuiImageData(imageButtons[i], 0));
+			button->SetImage(new GuiImageData(imageButtons[i], 0));
 
 			GuiStackItemComposition* item=new GuiStackItemComposition;
 			item->AddChild(button->GetBoundsComposition());

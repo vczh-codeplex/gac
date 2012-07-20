@@ -30,6 +30,8 @@ Toolstrip Button
 			{
 			protected:
 				bool										isOpening;
+				elements::GuiImageFrameElement*				imageElement;
+				compositions::GuiBoundsComposition*			imageComposition;
 
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
 			public:
@@ -37,7 +39,8 @@ Toolstrip Button
 				/// <param name="transparent">Set to true to make the background disappear when the button is not in an active state.</param>
 				Win7ToolstripButtonStyle(bool transparent);
 				~Win7ToolstripButtonStyle();
-
+				
+				void										SetText(const WString& value)override;
 				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;

@@ -19988,12 +19988,15 @@ Toolstrip Button
 			{
 			protected:
 				bool										isOpening;
+				elements::GuiImageFrameElement*				imageElement;
+				compositions::GuiBoundsComposition*			imageComposition;
 
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
 			public:
 				Win7ToolstripButtonStyle(bool transparent);
 				~Win7ToolstripButtonStyle();
-
+				
+				void										SetText(const WString& value)override;
 				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
