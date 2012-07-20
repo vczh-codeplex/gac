@@ -12090,6 +12090,16 @@ Helpers
 				return Color(100, 100, 100);
 			}
 
+			Color Win7GetSystemBorderSinkColor()
+			{
+				return Color(227, 227, 227);
+			}
+
+			Color Win7GetSystemBorderRaiseColor()
+			{
+				return Color(255, 255, 255);
+			}
+
 			Color Win7GetSystemTextColor(bool enabled)
 			{
 				return enabled?Color(0, 0, 0):Color(131, 131, 131);
@@ -12987,55 +12997,6 @@ Win7ButtonStyle
 			}
 
 			Win7ButtonStyle::~Win7ButtonStyle()
-			{
-			}
-
-/***********************************************************************
-Win7ToolstripButtonStyle
-***********************************************************************/
-
-			void Win7ToolstripButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected)
-			{
-				Win7ButtonColors targetColor;
-				if(enabled)
-				{
-					switch(value)
-					{
-					case GuiButton::Normal:
-						targetColor=Win7ButtonColors::ToolstripButtonNormal();
-						if(transparentWhenInactive)
-						{
-							targetColor.SetAlphaWithoutText(0);
-						}
-						break;
-					case GuiButton::Active:
-						targetColor=Win7ButtonColors::ToolstripButtonActive();
-						break;
-					case GuiButton::Pressed:
-						targetColor=Win7ButtonColors::ToolstripButtonPressed();
-						break;
-					}
-				}
-				else
-				{
-					targetColor=Win7ButtonColors::ToolstripButtonDisabled();
-					if(transparentWhenDisabled)
-					{
-						targetColor.SetAlphaWithoutText(0);
-					}
-				}
-				transferringAnimation->Transfer(targetColor);
-			}
-
-			Win7ToolstripButtonStyle::Win7ToolstripButtonStyle(bool transparent)
-				:Win7ButtonStyleBase(true, true, Win7ButtonColors::ToolstripButtonNormal(), Alignment::Center, Alignment::Center)
-			{
-				SetAutoSizeForText(false);
-				SetTransparentWhenInactive(transparent);
-				SetTransparentWhenDisabled(transparent);
-			}
-
-			Win7ToolstripButtonStyle::~Win7ToolstripButtonStyle()
 			{
 			}
 
@@ -13942,8 +13903,8 @@ Win7MenuSplitterStyle
 
 			Win7MenuSplitterStyle::Win7MenuSplitterStyle()
 			{
-				Color dark=Win7ButtonColors::MenuItemButtonNormal().g3;
-				Color bright=Win7ButtonColors::MenuItemButtonNormal().g4;
+				Color dark=Win7GetSystemBorderSinkColor();
+				Color bright=Win7GetSystemBorderRaiseColor();
 
 				GuiTableComposition* table=new GuiTableComposition;
 				table->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -14005,6 +13966,113 @@ Win7MenuSplitterStyle
 			}
 
 			void Win7MenuSplitterStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+/***********************************************************************
+Win7ToolstripButtonStyle
+***********************************************************************/
+
+			void Win7ToolstripButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected)
+			{
+				Win7ButtonColors targetColor;
+				if(enabled)
+				{
+					switch(value)
+					{
+					case GuiButton::Normal:
+						targetColor=Win7ButtonColors::ToolstripButtonNormal();
+						if(transparentWhenInactive)
+						{
+							targetColor.SetAlphaWithoutText(0);
+						}
+						break;
+					case GuiButton::Active:
+						targetColor=Win7ButtonColors::ToolstripButtonActive();
+						break;
+					case GuiButton::Pressed:
+						targetColor=Win7ButtonColors::ToolstripButtonPressed();
+						break;
+					}
+				}
+				else
+				{
+					targetColor=Win7ButtonColors::ToolstripButtonDisabled();
+					if(transparentWhenDisabled)
+					{
+						targetColor.SetAlphaWithoutText(0);
+					}
+				}
+				transferringAnimation->Transfer(targetColor);
+			}
+
+			Win7ToolstripButtonStyle::Win7ToolstripButtonStyle(bool transparent)
+				:Win7ButtonStyleBase(true, true, Win7ButtonColors::ToolstripButtonNormal(), Alignment::Center, Alignment::Center)
+			{
+				SetAutoSizeForText(false);
+				SetTransparentWhenInactive(transparent);
+				SetTransparentWhenDisabled(transparent);
+			}
+
+			Win7ToolstripButtonStyle::~Win7ToolstripButtonStyle()
+			{
+			}
+
+/***********************************************************************
+Win7ToolstripSplitterStyle
+***********************************************************************/
+
+			Win7ToolstripSplitterStyle::Win7ToolstripSplitterStyle()
+			{
+				Color dark=Win7GetSystemBorderSinkColor();
+				Color bright=Win7GetSystemBorderRaiseColor();
+
+				GuiBoundsComposition* bounds=new GuiBoundsComposition;
+				bounds->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				bounds->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				boundsComposition=bounds;
+
+				GuiSolidBackgroundElement* backgroundElement=GuiSolidBackgroundElement::Create();
+				bounds->SetOwnedElement(backgroundElement);
+				backgroundElement->SetColor(Win7GetSystemWindowColor());
+
+				GuiBoundsComposition* splitterComposition=new GuiBoundsComposition;
+				bounds->AddChild(splitterComposition);
+				splitterComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
+
+				Gui3DSplitterElement* splitterElement=Gui3DSplitterElement::Create();
+				splitterComposition->SetOwnedElement(splitterElement);
+				splitterElement->SetColors(dark, bright);
+				splitterElement->SetDirection(Gui3DSplitterElement::Vertical);
+			}
+
+			Win7ToolstripSplitterStyle::~Win7ToolstripSplitterStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win7ToolstripSplitterStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win7ToolstripSplitterStyle::GetContainerComposition()
+			{
+				return boundsComposition;
+			}
+
+			void Win7ToolstripSplitterStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win7ToolstripSplitterStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win7ToolstripSplitterStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win7ToolstripSplitterStyle::SetVisuallyEnabled(bool value)
 			{
 			}
 
@@ -14141,7 +14209,7 @@ Win7ScrollStyle
 
 			void Win7ScrollStyle::InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)
 			{
-				Color sinkColor(227, 227, 227);
+				Color sinkColor=Win7GetSystemBorderSinkColor();
 				GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
 				element->SetColor(Win7GetSystemWindowColor());
 				boundsComposition->SetOwnedElement(element);
@@ -14745,11 +14813,6 @@ Win7Theme
 				return new Win7ButtonStyle;
 			}
 
-			controls::GuiSelectableButton::IStyleController* Win7Theme::CreateToolstripButtonStyle()
-			{
-				return new Win7ToolstripButtonStyle(false);
-			}
-
 			controls::GuiSelectableButton::IStyleController* Win7Theme::CreateCheckBoxStyle()
 			{
 				return new Win7CheckBoxStyle(Win7CheckBoxStyle::CheckBox);
@@ -14758,6 +14821,16 @@ Win7Theme
 			controls::GuiSelectableButton::IStyleController* Win7Theme::CreateRadioButtonStyle()
 			{
 				return new Win7CheckBoxStyle(Win7CheckBoxStyle::RadioButton);
+			}
+
+			controls::GuiSelectableButton::IStyleController* Win7Theme::CreateToolstripButtonStyle()
+			{
+				return new Win7ToolstripButtonStyle(false);
+			}
+
+			controls::GuiControl::IStyleController* Win7Theme::CreateToolstripSplitterStyle()
+			{
+				return new Win7ToolstripSplitterStyle;
 			}
 
 			controls::GuiScroll::IStyleController* Win7Theme::CreateHScrollStyle()

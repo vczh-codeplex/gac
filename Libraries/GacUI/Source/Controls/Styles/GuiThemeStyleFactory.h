@@ -77,15 +77,18 @@ namespace vl
 				/// <summary>Create a style for button.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiButton::IStyleController*								CreateButtonStyle()=0;
-				/// <summary>Create a style for toolstrip button.</summary>
-				/// <returns>The created style.</returns>
-				virtual controls::GuiSelectableButton::IStyleController*					CreateToolstripButtonStyle()=0;
 				/// <summary>Create a style for check box.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()=0;
 				/// <summary>Create a style for radio button.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()=0;
+				/// <summary>Create a style for toolstrip button.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiSelectableButton::IStyleController*					CreateToolstripButtonStyle()=0;
+				/// <summary>Create a style for toolstrip.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiControl::IStyleController*								CreateToolstripSplitterStyle()=0;
 				
 				/// <summary>Create a style for horizontal scroll.</summary>
 				/// <returns>The created style.</returns>
