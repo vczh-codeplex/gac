@@ -6674,9 +6674,10 @@ namespace vl
 				virtual controls::GuiMenuButton::IStyleController*							CreateMenuItemButtonStyle()=0;
 				
 				virtual controls::GuiButton::IStyleController*								CreateButtonStyle()=0;
-				virtual controls::GuiSelectableButton::IStyleController*					CreateToolstripButtonStyle()=0;
 				virtual controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()=0;
 				virtual controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()=0;
+				virtual controls::GuiSelectableButton::IStyleController*					CreateToolstripButtonStyle()=0;
+				virtual controls::GuiControl::IStyleController*								CreateToolstripSplitterStyle()=0;
 				
 				virtual controls::GuiScroll::IStyleController*								CreateHScrollStyle()=0;
 				virtual controls::GuiScroll::IStyleController*								CreateVScrollStyle()=0;
@@ -7103,6 +7104,8 @@ Helper Functions
 			extern Color									Win7GetSystemWindowColor();
 			extern Color									Win7GetSystemTabContentColor();
 			extern Color									Win7GetSystemBorderColor();
+			extern Color									Win7GetSystemBorderSinkColor();
+			extern Color									Win7GetSystemBorderRaiseColor();
 			extern Color									Win7GetSystemTextColor(bool enabled);
 			extern void										Win7SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
@@ -7332,15 +7335,6 @@ Button
 				~Win7ButtonStyle();
 			};
 			
-			class Win7ToolstripButtonStyle : public Win7ButtonStyleBase, public Description<Win7ToolstripButtonStyle>
-			{
-			protected:
-				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
-			public:
-				Win7ToolstripButtonStyle(bool transparent);
-				~Win7ToolstripButtonStyle();
-			};
-			
 			class Win7CheckBoxStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7CheckBoxStyle>
 			{
 			public:
@@ -7564,6 +7558,35 @@ Menu Button
 			public:
 				Win7MenuSplitterStyle();
 				~Win7MenuSplitterStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+			};
+
+/***********************************************************************
+Toolstrip Button
+***********************************************************************/
+			
+			class Win7ToolstripButtonStyle : public Win7ButtonStyleBase, public Description<Win7ToolstripButtonStyle>
+			{
+			protected:
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+			public:
+				Win7ToolstripButtonStyle(bool transparent);
+				~Win7ToolstripButtonStyle();
+			};
+
+			class Win7ToolstripSplitterStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7ToolstripSplitterStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+			public:
+				Win7ToolstripSplitterStyle();
+				~Win7ToolstripSplitterStyle();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
 				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
@@ -7817,9 +7840,10 @@ Theme
 				controls::GuiMenuButton::IStyleController*							CreateMenuItemButtonStyle()override;
 
 				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
-				controls::GuiSelectableButton::IStyleController*					CreateToolstripButtonStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
+				controls::GuiSelectableButton::IStyleController*					CreateToolstripButtonStyle()override;
+				controls::GuiControl::IStyleController*								CreateToolstripSplitterStyle()override;
 				
 				controls::GuiScroll::IStyleController*								CreateHScrollStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
