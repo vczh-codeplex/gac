@@ -20,7 +20,7 @@ Win7ToolstripButtonStyle
 				Win7ButtonColors targetColor;
 				if(enabled)
 				{
-					if(isOpening)
+					if(selected || isOpening)
 					{
 						value=GuiButton::Pressed;
 					}
@@ -59,9 +59,20 @@ Win7ToolstripButtonStyle
 				SetAutoSizeForText(false);
 				SetTransparentWhenInactive(transparent);
 				SetTransparentWhenDisabled(transparent);
+
+				imageElement=GuiImageFrameElement::Create();
+				imageComposition=new GuiBoundsComposition;
+				imageComposition->SetOwnedElement(imageElement);
+				imageComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				imageComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
+				GetContainerComposition()->AddChild(imageComposition);
 			}
 
 			Win7ToolstripButtonStyle::~Win7ToolstripButtonStyle()
+			{
+			}
+
+			void Win7ToolstripButtonStyle::SetText(const WString& value)
 			{
 			}
 
@@ -90,6 +101,14 @@ Win7ToolstripButtonStyle
 
 			void Win7ToolstripButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
 			{
+				if(value)
+				{
+					imageElement->SetImage(value->GetImage(), value->GetFrameIndex());
+				}
+				else
+				{
+					imageElement->SetImage(0, 0);
+				}
 			}
 
 			void Win7ToolstripButtonStyle::Transfer(controls::GuiButton::ControlState value)

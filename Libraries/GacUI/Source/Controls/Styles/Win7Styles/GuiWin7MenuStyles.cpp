@@ -388,7 +388,14 @@ Win7MenuItemButtonStyle
 
 			void Win7MenuItemButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
 			{
-				elements.imageElement->SetImage(value->GetImage(), value->GetFrameIndex());
+				if(value)
+				{
+					elements.imageElement->SetImage(value->GetImage(), value->GetFrameIndex());
+				}
+				else
+				{
+					elements.imageElement->SetImage(0, 0);
+				}
 			}
 
 			void Win7MenuItemButtonStyle::Transfer(GuiButton::ControlState value)
