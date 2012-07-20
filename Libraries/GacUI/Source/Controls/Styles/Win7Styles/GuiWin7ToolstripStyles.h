@@ -35,7 +35,6 @@ Toolstrip Button
 				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled);
 			public:
 				/// <summary>Create the style.</summary>
-				/// <param name="transparent">Set to true to make the background disappear when the button is not in an active state.</param>
 				Win7ToolstripButtonDropdownStyle();
 				~Win7ToolstripButtonDropdownStyle();
 				
@@ -52,10 +51,14 @@ Toolstrip Button
 			class Win7ToolstripButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ToolstripButtonStyle>
 			{
 			public:
+				/// <summary>Sub menu dropdown arrow style.</summary>
 				enum ButtonStyle
 				{
+					/// <summary>[T:vl.presentation.win7.Win7ToolstripButtonStyle.ButtonStyle]No dropdown.</summary>
 					CommandButton,
+					/// <summary>[T:vl.presentation.win7.Win7ToolstripButtonStyle.ButtonStyle]The whole button is a dropdown.</summary>
 					DropdownButton,
+					/// <summary>[T:vl.presentation.win7.Win7ToolstripButtonStyle.ButtonStyle]The button and the dropdown is splitted.</summary>
 					SplitButton,
 				};
 			protected:
@@ -74,7 +77,7 @@ Toolstrip Button
 				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool menuOpening);
 			public:
 				/// <summary>Create the style.</summary>
-				/// <param name="transparent">Set to true to make the background disappear when the button is not in an active state.</param>
+				/// <param name="_buttonStyle">Defines the sub menu dropdown arrow style.</param>
 				Win7ToolstripButtonStyle(ButtonStyle _buttonStyle);
 				~Win7ToolstripButtonStyle();
 				
