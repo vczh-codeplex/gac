@@ -164,17 +164,23 @@ void TextEditorWindow::UpdateMenuItems(int commands)
 	if(commands & ClipboardCommands)
 	{
 		menuEditPaste->SetEnabled(GetCurrentController()->ClipboardService()->ContainsText());
+		toolbarPaste->SetEnabled(GetCurrentController()->ClipboardService()->ContainsText());
 	}
 	if(commands & SelectionCommands)
 	{
 		menuEditCut->SetEnabled(textBox->CanCut());
 		menuEditCopy->SetEnabled(textBox->CanCopy());
 		menuEditDelete->SetEnabled(textBox->GetCaretBegin()!=textBox->GetCaretEnd());
+		toolbarCut->SetEnabled(textBox->CanCut());
+		toolbarCopy->SetEnabled(textBox->CanCopy());
+		toolbarDelete->SetEnabled(textBox->GetCaretBegin()!=textBox->GetCaretEnd());
 	}
 	if(commands & UndoRedoCommands)
 	{
 		menuEditUndo->SetEnabled(textBox->CanUndo());
 		menuEditRedo->SetEnabled(textBox->CanRedo());
+		toolbarUndo->SetEnabled(textBox->CanUndo());
+		toolbarRedo->SetEnabled(textBox->CanRedo());
 	}
 }
 
@@ -299,6 +305,17 @@ TextEditorWindow::TextEditorWindow()
 	menuEditDelete->Clicked.AttachMethod(this, &TextEditorWindow::menuEditDelete_Clicked);
 	menuEditSelect->Clicked.AttachMethod(this, &TextEditorWindow::menuEditSelect_Clicked);
 	menuFormatFont->Clicked.AttachMethod(this, &TextEditorWindow::menuFormatFont_Clicked);
+
+	toolbarNew->Clicked.AttachMethod(this, &TextEditorWindow::menuFileNew_Clicked);
+	toolbarOpen->Clicked.AttachMethod(this, &TextEditorWindow::menuFileOpen_Clicked);
+	toolbarSave->Clicked.AttachMethod(this, &TextEditorWindow::menuFileSave_Clicked);
+	toolbarSaveAs->Clicked.AttachMethod(this, &TextEditorWindow::menuFileSaveAs_Clicked);
+	toolbarUndo->Clicked.AttachMethod(this, &TextEditorWindow::menuEditUndo_Clicked);
+	toolbarRedo->Clicked.AttachMethod(this, &TextEditorWindow::menuEditRedo_Clicked);
+	toolbarCut->Clicked.AttachMethod(this, &TextEditorWindow::menuEditCut_Clicked);
+	toolbarCopy->Clicked.AttachMethod(this, &TextEditorWindow::menuEditCopy_Clicked);
+	toolbarPaste->Clicked.AttachMethod(this, &TextEditorWindow::menuEditPaste_Clicked);
+	toolbarDelete->Clicked.AttachMethod(this, &TextEditorWindow::menuEditDelete_Clicked);
 }
 
 TextEditorWindow::~TextEditorWindow()
