@@ -122,21 +122,21 @@ void CreateToolbar(Ptr<INativeImage> (&imageButtons)[count], GuiStackComposition
 			{
 			case 0:
 				{
-					button=new GuiMenuButton(new win7::Win7ToolstripButtonStyle(false, win7::Win7ToolstripButtonStyle::DropdownButton));
+					button=new GuiMenuButton(new win7::Win7ToolstripButtonStyle(win7::Win7ToolstripButtonStyle::DropdownButton));
 					button->CreateSubMenu();
 					button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(fileMenuText, fileMenuImage));
 				}
 				break;
 			case 1:
 				{
-					button=new GuiMenuButton(new win7::Win7ToolstripButtonStyle(false, win7::Win7ToolstripButtonStyle::SplitButton));
+					button=new GuiMenuButton(new win7::Win7ToolstripButtonStyle(win7::Win7ToolstripButtonStyle::SplitButton));
 					button->CreateSubMenu();
 					button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(editMenuText, editMenuImage));
 				}
 				break;
 			default:
 				{
-					button=new GuiMenuButton(new win7::Win7ToolstripButtonStyle(false, win7::Win7ToolstripButtonStyle::CommandButton));
+					button=new GuiMenuButton(new win7::Win7ToolstripButtonStyle(win7::Win7ToolstripButtonStyle::CommandButton));
 				}
 			}
 			button->SetImage(new GuiImageData(imageButtons[i], 0));

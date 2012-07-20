@@ -22,6 +22,32 @@ namespace vl
 Toolstrip Button
 ***********************************************************************/
 
+			/// <summary>Toolstrip split button dropdown style (Windows 7).</summary>
+			class Win7ToolstripButtonDropdownStyle : public Object, public virtual controls::GuiButton::IStyleController, public Description<Win7ToolstripButtonDropdownStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			splitterComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+				bool										isVisuallyEnabled;
+				controls::GuiButton::ControlState			controlState;
+
+				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled);
+			public:
+				/// <summary>Create the style.</summary>
+				/// <param name="transparent">Set to true to make the background disappear when the button is not in an active state.</param>
+				Win7ToolstripButtonDropdownStyle();
+				~Win7ToolstripButtonDropdownStyle();
+				
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+				void										Transfer(controls::GuiButton::ControlState value)override;
+			};
+
 			/// <summary>Toolstrip button style (Windows 7).</summary>
 			class Win7ToolstripButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ToolstripButtonStyle>
 			{
@@ -43,12 +69,13 @@ Toolstrip Button
 				elements::GuiImageFrameElement*				imageElement;
 				compositions::GuiBoundsComposition*			imageComposition;
 				ButtonStyle									buttonStyle;
+				controls::GuiButton*						subMenuHost;
 
 				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool menuOpening);
 			public:
 				/// <summary>Create the style.</summary>
 				/// <param name="transparent">Set to true to make the background disappear when the button is not in an active state.</param>
-				Win7ToolstripButtonStyle(bool transparent, ButtonStyle _buttonStyle);
+				Win7ToolstripButtonStyle(ButtonStyle _buttonStyle);
 				~Win7ToolstripButtonStyle();
 				
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
