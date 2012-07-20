@@ -290,7 +290,6 @@ Win7ToolstripSplitterStyle
 
 				GuiBoundsComposition* bounds=new GuiBoundsComposition;
 				bounds->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-				bounds->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				boundsComposition=bounds;
 
 				GuiSolidBackgroundElement* backgroundElement=GuiSolidBackgroundElement::Create();
