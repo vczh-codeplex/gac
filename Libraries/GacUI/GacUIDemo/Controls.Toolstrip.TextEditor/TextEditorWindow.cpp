@@ -206,16 +206,19 @@ Menu Handlers
 void TextEditorWindow::menuFileNew_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
 	TryNew();
+	UpdateMenuItems(AllCommands);
 }
 
 void TextEditorWindow::menuFileOpen_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
 	TryOpen();
+	UpdateMenuItems(AllCommands);
 }
 
 void TextEditorWindow::menuFileSave_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
 	TrySave(false);
+	UpdateMenuItems(AllCommands);
 }
 
 void TextEditorWindow::menuFileSaveAs_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
