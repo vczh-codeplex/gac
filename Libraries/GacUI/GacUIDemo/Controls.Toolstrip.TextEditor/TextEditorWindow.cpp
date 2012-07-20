@@ -52,7 +52,6 @@ bool TextEditorWindow::TryOpen()
 			textBox->Select(TextPos(0, 0), TextPos(0, 0));
 			textBox->ClearUndoRedo();
 			textBox->NotifyModificationSaved();
-			UpdateWindowTitle();
 			return true;
 		}
 	}
@@ -97,7 +96,6 @@ bool TextEditorWindow::TrySave(bool ignoreCurrentFileName)
 		StreamWriter writer(encoderStream);
 		writer.WriteString(textBox->GetText());
 		textBox->NotifyModificationSaved();
-		UpdateWindowTitle();
 	}
 	return true;
 }
@@ -110,7 +108,6 @@ bool TextEditorWindow::TryNew()
 		textBox->SetText(L"");
 		textBox->ClearUndoRedo();
 		textBox->NotifyModificationSaved();
-		UpdateWindowTitle();
 		return true;
 	}
 	else
@@ -207,23 +204,28 @@ void TextEditorWindow::menuFileNew_Clicked(GuiGraphicsComposition* sender, GuiEv
 {
 	TryNew();
 	UpdateMenuItems(AllCommands);
+	UpdateWindowTitle();
 }
 
 void TextEditorWindow::menuFileOpen_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
 	TryOpen();
 	UpdateMenuItems(AllCommands);
+	UpdateWindowTitle();
 }
 
 void TextEditorWindow::menuFileSave_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
 	TrySave(false);
 	UpdateMenuItems(AllCommands);
+	UpdateWindowTitle();
 }
 
 void TextEditorWindow::menuFileSaveAs_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
 	TrySave(true);
+	UpdateMenuItems(AllCommands);
+	UpdateWindowTitle();
 }
 
 void TextEditorWindow::menuFileExit_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
