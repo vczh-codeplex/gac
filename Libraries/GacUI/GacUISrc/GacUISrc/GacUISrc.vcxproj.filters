@@ -67,6 +67,9 @@
     <Filter Include="GacUI\NativeWindow\Windows\ServicesImpl">
       <UniqueIdentifier>{4d71365a-ac77-4f60-9e64-34fed5b06aac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GacUI\Controls\Styles\Win7Styles">
+      <UniqueIdentifier>{59cd6cd3-0525-4c83-aa81-a1c33b8e2081}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -248,6 +251,30 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsDialogService.cpp">
       <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7StylesCommon.cpp">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ControlStyles.cpp">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ButtonStyles.cpp">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7TabStyles.cpp">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7MenuStyles.cpp">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ToolstripStyles.cpp">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ScrollableStyles.cpp">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ListStyles.cpp">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -502,6 +529,30 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsDialogService.h">
       <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7StylesCommon.h">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ControlStyles.h">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ButtonStyles.h">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7TabStyles.h">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7MenuStyles.h">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ToolstripStyles.h">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ScrollableStyles.h">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ListStyles.h">
+      <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
