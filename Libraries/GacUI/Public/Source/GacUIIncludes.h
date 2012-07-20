@@ -19982,8 +19982,29 @@ namespace vl
 Toolstrip Button
 ***********************************************************************/
 
-#pragma warning(push)
-#pragma warning(disable:4250)
+			class Win7ToolstripButtonDropdownStyle : public Object, public virtual controls::GuiButton::IStyleController, public Description<Win7ToolstripButtonDropdownStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			splitterComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+				bool										isVisuallyEnabled;
+				controls::GuiButton::ControlState			controlState;
+
+				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled);
+			public:
+				Win7ToolstripButtonDropdownStyle();
+				~Win7ToolstripButtonDropdownStyle();
+				
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+				void										Transfer(controls::GuiButton::ControlState value)override;
+			};
+
 			class Win7ToolstripButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ToolstripButtonStyle>
 			{
 			public:
@@ -20004,10 +20025,11 @@ Toolstrip Button
 				elements::GuiImageFrameElement*				imageElement;
 				compositions::GuiBoundsComposition*			imageComposition;
 				ButtonStyle									buttonStyle;
+				controls::GuiButton*						subMenuHost;
 
 				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool menuOpening);
 			public:
-				Win7ToolstripButtonStyle(bool transparent, ButtonStyle _buttonStyle);
+				Win7ToolstripButtonStyle(ButtonStyle _buttonStyle);
 				~Win7ToolstripButtonStyle();
 				
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
@@ -20023,7 +20045,6 @@ Toolstrip Button
 				void										SetImage(Ptr<controls::GuiImageData> value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
-#pragma warning(pop)
 
 			class Win7ToolstripSplitterStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7ToolstripSplitterStyle>
 			{

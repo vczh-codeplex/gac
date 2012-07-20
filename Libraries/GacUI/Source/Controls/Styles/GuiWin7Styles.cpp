@@ -111,17 +111,17 @@ Win7Theme
 
 			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripButtonStyle()
 			{
-				return new Win7ToolstripButtonStyle(false, Win7ToolstripButtonStyle::CommandButton);
+				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::CommandButton);
 			}
 
 			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripDropdownButtonStyle()
 			{
-				return new Win7ToolstripButtonStyle(false, Win7ToolstripButtonStyle::DropdownButton);
+				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::DropdownButton);
 			}
 
 			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripSplitButtonStyle()
 			{
-				return new Win7ToolstripButtonStyle(false, Win7ToolstripButtonStyle::SplitButton);
+				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::SplitButton);
 			}
 
 			controls::GuiControl::IStyleController* Win7Theme::CreateToolstripSplitterStyle()

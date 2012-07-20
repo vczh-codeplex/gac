@@ -11223,17 +11223,17 @@ Win7Theme
 
 			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripButtonStyle()
 			{
-				return new Win7ToolstripButtonStyle(false, Win7ToolstripButtonStyle::CommandButton);
+				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::CommandButton);
 			}
 
 			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripDropdownButtonStyle()
 			{
-				return new Win7ToolstripButtonStyle(false, Win7ToolstripButtonStyle::DropdownButton);
+				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::DropdownButton);
 			}
 
 			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripSplitButtonStyle()
 			{
-				return new Win7ToolstripButtonStyle(false, Win7ToolstripButtonStyle::SplitButton);
+				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::SplitButton);
 			}
 
 			controls::GuiControl::IStyleController* Win7Theme::CreateToolstripSplitterStyle()
@@ -14868,6 +14868,86 @@ namespace vl
 			using namespace controls;
 
 /***********************************************************************
+Win7ToolstripButtonDropdownStyle
+***********************************************************************/
+
+			void Win7ToolstripButtonDropdownStyle::TransferInternal(controls::GuiButton::ControlState value, bool enabled)
+			{
+				splitterComposition->SetVisible(value!=GuiButton::Normal && enabled);
+			}
+
+			Win7ToolstripButtonDropdownStyle::Win7ToolstripButtonDropdownStyle()
+				:isVisuallyEnabled(false)
+				,controlState(GuiButton::Normal)
+			{
+				boundsComposition=new GuiBoundsComposition;
+				boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				{
+					Gui3DSplitterElement* splitterElement=Gui3DSplitterElement::Create();
+					splitterElement->SetColors(Win7GetSystemBorderSinkColor(), Win7GetSystemBorderRaiseColor());
+					splitterElement->SetDirection(Gui3DSplitterElement::Vertical);
+
+					splitterComposition=new GuiBoundsComposition;
+					splitterComposition->SetAlignmentToParent(Margin(0, 3, -1, 3));
+					splitterComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+					splitterComposition->SetOwnedElement(splitterElement);
+					splitterComposition->SetPreferredMinSize(Size(2, 0));
+					splitterComposition->SetVisible(false);
+					boundsComposition->AddChild(splitterComposition);
+				}
+				{
+					containerComposition=new GuiBoundsComposition;
+					containerComposition->SetAlignmentToParent(Margin(4, 0, 4, 0));
+					containerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+					boundsComposition->AddChild(containerComposition);
+				}
+			}
+
+			Win7ToolstripButtonDropdownStyle::~Win7ToolstripButtonDropdownStyle()
+			{
+			}
+				
+			compositions::GuiBoundsComposition* Win7ToolstripButtonDropdownStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win7ToolstripButtonDropdownStyle::GetContainerComposition()
+			{
+				return containerComposition;
+			}
+
+			void Win7ToolstripButtonDropdownStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win7ToolstripButtonDropdownStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win7ToolstripButtonDropdownStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win7ToolstripButtonDropdownStyle::SetVisuallyEnabled(bool value)
+			{
+				if(isVisuallyEnabled!=value)
+				{
+					isVisuallyEnabled=value;
+					TransferInternal(controlState, isVisuallyEnabled);
+				}
+			}
+
+			void Win7ToolstripButtonDropdownStyle::Transfer(controls::GuiButton::ControlState value)
+			{
+				if(controlState!=value)
+				{
+					controlState=value;
+					TransferInternal(controlState, isVisuallyEnabled);
+				}
+			}
+
+/***********************************************************************
 Win7ToolstripButtonStyle
 ***********************************************************************/
 
@@ -14906,10 +14986,12 @@ Win7ToolstripButtonStyle
 				transferringAnimation->Transfer(targetColor);
 			}
 
-			Win7ToolstripButtonStyle::Win7ToolstripButtonStyle(bool transparent, ButtonStyle _buttonStyle)
+			Win7ToolstripButtonStyle::Win7ToolstripButtonStyle(ButtonStyle _buttonStyle)
 				:controlStyle(GuiButton::Normal)
 				,isVisuallyEnabled(true)
 				,isOpening(false)
+				,buttonStyle(_buttonStyle)
+				,subMenuHost(0)
 			{
 				elements=Win7ButtonElements::Create(true, true, Alignment::Center, Alignment::Center);
 				elements.Apply(Win7ButtonColors::ToolstripButtonNormal());
@@ -14920,8 +15002,56 @@ Win7ToolstripButtonStyle
 				imageComposition=new GuiBoundsComposition;
 				imageComposition->SetOwnedElement(imageElement);
 				imageComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
-				imageComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
-				GetContainerComposition()->AddChild(imageComposition);
+				imageComposition->SetAlignmentToParent(Margin(4, 4, 4, 4));
+
+				if(_buttonStyle==CommandButton)
+				{
+					GetContainerComposition()->AddChild(imageComposition);
+				}
+				else
+				{
+					GuiTableComposition* table=new GuiTableComposition;
+					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					table->SetRowsAndColumns(1, 2);
+					table->SetRowOption(0, GuiCellOption::PercentageOption(1.0));
+					table->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
+					table->SetColumnOption(1, GuiCellOption::MinSizeOption());
+
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 0, 1, 1);
+
+						cell->AddChild(imageComposition);
+					}
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 1, 1, 1);
+						GuiPolygonElement* arrow=0;
+						GuiBoundsComposition* arrowComposition=common_styles::CommonFragmentBuilder::BuildDownArrow(arrow);
+
+						switch(_buttonStyle)
+						{
+						case DropdownButton:
+							{
+								arrowComposition->SetAlignmentToParent(Margin(0, 0, 4, 0));
+								cell->AddChild(arrowComposition);
+							}
+							break;
+						case SplitButton:
+							{
+
+								subMenuHost=new GuiButton(new Win7ToolstripButtonDropdownStyle);
+								subMenuHost->GetContainerComposition()->AddChild(arrowComposition);
+								subMenuHost->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+								cell->AddChild(subMenuHost->GetBoundsComposition());
+							}
+							break;
+						}
+					}
+					GetContainerComposition()->AddChild(table);
+				}
 			}
 
 			Win7ToolstripButtonStyle::~Win7ToolstripButtonStyle()
@@ -14981,7 +15111,7 @@ Win7ToolstripButtonStyle
 
 			controls::GuiButton* Win7ToolstripButtonStyle::GetSubMenuHost()
 			{
-				return 0;
+				return subMenuHost;
 			}
 
 			void Win7ToolstripButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
