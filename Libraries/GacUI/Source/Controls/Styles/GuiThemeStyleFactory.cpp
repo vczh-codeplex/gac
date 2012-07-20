@@ -132,11 +132,6 @@ namespace vl
 					return new controls::GuiButton(GetCurrentTheme()->CreateButtonStyle());
 				}
 
-				controls::GuiSelectableButton* NewToolstripButton()
-				{
-					return new controls::GuiSelectableButton(GetCurrentTheme()->CreateToolstripButtonStyle());
-				}
-
 				controls::GuiSelectableButton* NewCheckBox()
 				{
 					return new controls::GuiSelectableButton(GetCurrentTheme()->CreateCheckBoxStyle());
@@ -145,6 +140,26 @@ namespace vl
 				controls::GuiSelectableButton* NewRadioButton()
 				{
 					return new controls::GuiSelectableButton(GetCurrentTheme()->CreateRadioButtonStyle());
+				}
+
+				controls::GuiSelectableButton* NewToolstripButton()
+				{
+					return new controls::GuiSelectableButton(GetCurrentTheme()->CreateToolstripButtonStyle());
+				}
+
+				controls::GuiMenuButton* NewToolstripDropdownButton()
+				{
+					return new controls::GuiMenuButton(GetCurrentTheme()->CreateToolstripDropdownButtonStyle());
+				}
+
+				controls::GuiMenuButton* NewToolstripSplitButton()
+				{
+					return new controls::GuiMenuButton(GetCurrentTheme()->CreateToolstripSplitButtonStyle());
+				}
+
+				controls::GuiControl* NewToolstripSplitter()
+				{
+					return new controls::GuiControl(GetCurrentTheme()->CreateToolstripSplitterStyle());
 				}
 
 				controls::GuiScroll* NewHScroll()
