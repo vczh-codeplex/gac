@@ -142,9 +142,9 @@ namespace vl
 					return new controls::GuiSelectableButton(GetCurrentTheme()->CreateRadioButtonStyle());
 				}
 
-				controls::GuiSelectableButton* NewToolstripButton()
+				controls::GuiMenuButton* NewToolstripButton()
 				{
-					return new controls::GuiSelectableButton(GetCurrentTheme()->CreateToolstripButtonStyle());
+					return new controls::GuiMenuButton(GetCurrentTheme()->CreateToolstripButtonStyle());
 				}
 
 				controls::GuiMenuButton* NewToolstripDropdownButton()

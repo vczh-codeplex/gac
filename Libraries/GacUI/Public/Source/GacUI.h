@@ -6676,7 +6676,7 @@ namespace vl
 				virtual controls::GuiButton::IStyleController*								CreateButtonStyle()=0;
 				virtual controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()=0;
 				virtual controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()=0;
-				virtual controls::GuiSelectableButton::IStyleController*					CreateToolstripButtonStyle()=0;
+				virtual controls::GuiMenuButton::IStyleController*							CreateToolstripButtonStyle()=0;
 				virtual controls::GuiMenuButton::IStyleController*							CreateToolstripDropdownButtonStyle()=0;
 				virtual controls::GuiMenuButton::IStyleController*							CreateToolstripSplitButtonStyle()=0;
 				virtual controls::GuiControl::IStyleController*								CreateToolstripSplitterStyle()=0;
@@ -6721,7 +6721,7 @@ namespace vl
 				extern controls::GuiButton*						NewButton();
 				extern controls::GuiSelectableButton*			NewCheckBox();
 				extern controls::GuiSelectableButton*			NewRadioButton();
-				extern controls::GuiSelectableButton*			NewToolstripButton();
+				extern controls::GuiMenuButton*					NewToolstripButton();
 				extern controls::GuiMenuButton*					NewToolstripDropdownButton();
 				extern controls::GuiMenuButton*					NewToolstripSplitButton();
 				extern controls::GuiControl*					NewToolstripSplitter();
@@ -7648,39 +7648,44 @@ Toolstrip Button
 
 #pragma warning(push)
 #pragma warning(disable:4250)
-			class Win7ToolstripButtonStyle : public Win7ButtonStyleBase, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ToolstripButtonStyle>
+			class Win7ToolstripButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ToolstripButtonStyle>
 			{
+			public:
+				enum ButtonStyle
+				{
+					CommandButton,
+					DropdownButton,
+					SplitButton,
+				};
 			protected:
+				DEFINE_TRANSFERRING_ANIMATION(Win7ButtonColors, Win7ToolstripButtonStyle)
+
+				Win7ButtonElements							elements;
+				Ptr<TransferringAnimation>					transferringAnimation;
+				controls::GuiButton::ControlState			controlStyle;
+				bool										isVisuallyEnabled;
 				bool										isOpening;
 				elements::GuiImageFrameElement*				imageElement;
 				compositions::GuiBoundsComposition*			imageComposition;
+				ButtonStyle									buttonStyle;
 
-				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool menuOpening);
 			public:
-				Win7ToolstripButtonStyle(bool transparent);
+				Win7ToolstripButtonStyle(bool transparent, ButtonStyle _buttonStyle);
 				~Win7ToolstripButtonStyle();
 				
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
 				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
 				void										SetImage(Ptr<controls::GuiImageData> value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
-			};
-
-			class Win7ToolstripDropdownButtonStyle : public Win7ToolstripButtonStyle, public Description<Win7ToolstripDropdownButtonStyle>
-			{
-			public:
-				Win7ToolstripDropdownButtonStyle(bool transparent);
-				~Win7ToolstripDropdownButtonStyle();
-			};
-			
-			class Win7ToolstripSplitButtonStyle : public Win7ToolstripButtonStyle, public Description<Win7ToolstripSplitButtonStyle>
-			{
-			public:
-				Win7ToolstripSplitButtonStyle(bool transparent);
-				~Win7ToolstripSplitButtonStyle();
 			};
 #pragma warning(pop)
 
@@ -8142,7 +8147,7 @@ Theme
 				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
-				controls::GuiSelectableButton::IStyleController*					CreateToolstripButtonStyle()override;
+				controls::GuiMenuButton::IStyleController*							CreateToolstripButtonStyle()override;
 				controls::GuiMenuButton::IStyleController*							CreateToolstripDropdownButtonStyle()override;
 				controls::GuiMenuButton::IStyleController*							CreateToolstripSplitButtonStyle()override;
 				controls::GuiControl::IStyleController*								CreateToolstripSplitterStyle()override;

@@ -85,7 +85,7 @@ namespace vl
 				virtual controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()=0;
 				/// <summary>Create a style for toolstrip button.</summary>
 				/// <returns>The created style.</returns>
-				virtual controls::GuiSelectableButton::IStyleController*					CreateToolstripButtonStyle()=0;
+				virtual controls::GuiMenuButton::IStyleController*							CreateToolstripButtonStyle()=0;
 				/// <summary>Create a style for toolstrip dropdown button.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiMenuButton::IStyleController*							CreateToolstripDropdownButtonStyle()=0;
@@ -204,7 +204,7 @@ namespace vl
 				extern controls::GuiSelectableButton*			NewRadioButton();
 				/// <summary>Create a toolstrip button.</summary>
 				/// <returns>The created control.</returns>
-				extern controls::GuiSelectableButton*			NewToolstripButton();
+				extern controls::GuiMenuButton*					NewToolstripButton();
 				/// <summary>Create a toolstrip dropdown button.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiMenuButton*					NewToolstripDropdownButton();

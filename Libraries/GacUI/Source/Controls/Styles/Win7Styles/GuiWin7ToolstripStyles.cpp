@@ -15,12 +15,18 @@ namespace vl
 Win7ToolstripButtonStyle
 ***********************************************************************/
 
-			void Win7ToolstripButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected)
+			IMPLEMENT_TRANSFERRING_ANIMATION(Win7ButtonColors, Win7ToolstripButtonStyle)
+			{
+				colorCurrent=Win7ButtonColors::Blend(colorBegin, colorEnd, currentPosition, totalLength);
+				style->elements.Apply(colorCurrent);
+			}
+
+			void Win7ToolstripButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool menuOpening)
 			{
 				Win7ButtonColors targetColor;
 				if(enabled)
 				{
-					if(selected || isOpening)
+					if(menuOpening)
 					{
 						value=GuiButton::Pressed;
 					}
@@ -28,10 +34,6 @@ Win7ToolstripButtonStyle
 					{
 					case GuiButton::Normal:
 						targetColor=Win7ButtonColors::ToolstripButtonNormal();
-						if(transparentWhenInactive)
-						{
-							targetColor.SetAlphaWithoutText(0);
-						}
 						break;
 					case GuiButton::Active:
 						targetColor=Win7ButtonColors::ToolstripButtonActive();
@@ -44,22 +46,20 @@ Win7ToolstripButtonStyle
 				else
 				{
 					targetColor=Win7ButtonColors::ToolstripButtonDisabled();
-					if(transparentWhenDisabled)
-					{
-						targetColor.SetAlphaWithoutText(0);
-					}
 				}
 				transferringAnimation->Transfer(targetColor);
 			}
 
-			Win7ToolstripButtonStyle::Win7ToolstripButtonStyle(bool transparent)
-				:Win7ButtonStyleBase(true, true, Win7ButtonColors::ToolstripButtonNormal(), Alignment::Center, Alignment::Center)
+			Win7ToolstripButtonStyle::Win7ToolstripButtonStyle(bool transparent, ButtonStyle _buttonStyle)
+				:controlStyle(GuiButton::Normal)
+				,isVisuallyEnabled(true)
 				,isOpening(false)
 			{
-				SetAutoSizeForText(false);
-				SetTransparentWhenInactive(transparent);
-				SetTransparentWhenDisabled(transparent);
+				elements=Win7ButtonElements::Create(true, true, Alignment::Center, Alignment::Center);
+				elements.Apply(Win7ButtonColors::ToolstripButtonNormal());
+				transferringAnimation=new TransferringAnimation(this, Win7ButtonColors::ToolstripButtonNormal());
 
+				elements.textComposition->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
 				imageElement=GuiImageFrameElement::Create();
 				imageComposition=new GuiBoundsComposition;
 				imageComposition->SetOwnedElement(imageElement);
@@ -70,10 +70,39 @@ Win7ToolstripButtonStyle
 
 			Win7ToolstripButtonStyle::~Win7ToolstripButtonStyle()
 			{
+				transferringAnimation->Disable();
+			}
+
+			compositions::GuiBoundsComposition* Win7ToolstripButtonStyle::GetBoundsComposition()
+			{
+				return elements.mainComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win7ToolstripButtonStyle::GetContainerComposition()
+			{
+				return elements.mainComposition;
+			}
+
+			void Win7ToolstripButtonStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
 			}
 
 			void Win7ToolstripButtonStyle::SetText(const WString& value)
 			{
+			}
+
+			void Win7ToolstripButtonStyle::SetFont(const FontProperties& value)
+			{
+				Win7SetFont(elements.textElement, elements.textComposition, value);
+			}
+
+			void Win7ToolstripButtonStyle::SetVisuallyEnabled(bool value)
+			{
+				if(isVisuallyEnabled!=value)
+				{
+					isVisuallyEnabled=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+				}
 			}
 
 			controls::GuiMenu::IStyleController* Win7ToolstripButtonStyle::CreateSubMenuStyleController()
@@ -90,7 +119,7 @@ Win7ToolstripButtonStyle
 				if(isOpening!=value)
 				{
 					isOpening=value;
-					TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
+					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
 				}
 			}
 
@@ -113,33 +142,11 @@ Win7ToolstripButtonStyle
 
 			void Win7ToolstripButtonStyle::Transfer(controls::GuiButton::ControlState value)
 			{
-				Win7ButtonStyleBase::Transfer(value);
-			}
-
-/***********************************************************************
-Win7ToolstripDropdownButtonStyle
-***********************************************************************/
-
-			Win7ToolstripDropdownButtonStyle::Win7ToolstripDropdownButtonStyle(bool transparent)
-				:Win7ToolstripButtonStyle(transparent)
-			{
-			}
-
-			Win7ToolstripDropdownButtonStyle::~Win7ToolstripDropdownButtonStyle()
-			{
-			}
-
-/***********************************************************************
-Win7ToolstripSplitButtonStyle
-***********************************************************************/
-
-			Win7ToolstripSplitButtonStyle::Win7ToolstripSplitButtonStyle(bool transparent)
-				:Win7ToolstripButtonStyle(transparent)
-			{
-			}
-
-			Win7ToolstripSplitButtonStyle::~Win7ToolstripSplitButtonStyle()
-			{
+				if(controlStyle!=value)
+				{
+					controlStyle=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+				}
 			}
 
 /***********************************************************************

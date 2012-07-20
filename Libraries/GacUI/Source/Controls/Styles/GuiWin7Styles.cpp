@@ -109,19 +109,19 @@ Win7Theme
 				return new Win7CheckBoxStyle(Win7CheckBoxStyle::RadioButton);
 			}
 
-			controls::GuiSelectableButton::IStyleController* Win7Theme::CreateToolstripButtonStyle()
+			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripButtonStyle()
 			{
-				return new Win7ToolstripButtonStyle(false);
+				return new Win7ToolstripButtonStyle(false, Win7ToolstripButtonStyle::CommandButton);
 			}
 
 			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripDropdownButtonStyle()
 			{
-				return new Win7ToolstripDropdownButtonStyle(false);
+				return new Win7ToolstripButtonStyle(false, Win7ToolstripButtonStyle::DropdownButton);
 			}
 
 			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripSplitButtonStyle()
 			{
-				return new Win7ToolstripSplitButtonStyle(false);
+				return new Win7ToolstripButtonStyle(false, Win7ToolstripButtonStyle::SplitButton);
 			}
 
 			controls::GuiControl::IStyleController* Win7Theme::CreateToolstripSplitterStyle()

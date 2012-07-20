@@ -9,7 +9,6 @@ Clases:
 #ifndef VCZH_PRESENTATION_CONTROLS_WIN7STYLES_GUIWIN7TOOLSTRIPSTYLES
 #define VCZH_PRESENTATION_CONTROLS_WIN7STYLES_GUIWIN7TOOLSTRIPSTYLES
 
-#include "GuiWin7ButtonStyles.h"
 #include "GuiWin7MenuStyles.h"
 
 namespace vl
@@ -23,24 +22,41 @@ namespace vl
 Toolstrip Button
 ***********************************************************************/
 
-#pragma warning(push)
-#pragma warning(disable:4250)
 			/// <summary>Toolstrip button style (Windows 7).</summary>
-			class Win7ToolstripButtonStyle : public Win7ButtonStyleBase, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ToolstripButtonStyle>
+			class Win7ToolstripButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7ToolstripButtonStyle>
 			{
+			public:
+				enum ButtonStyle
+				{
+					CommandButton,
+					DropdownButton,
+					SplitButton,
+				};
 			protected:
+				DEFINE_TRANSFERRING_ANIMATION(Win7ButtonColors, Win7ToolstripButtonStyle)
+
+				Win7ButtonElements							elements;
+				Ptr<TransferringAnimation>					transferringAnimation;
+				controls::GuiButton::ControlState			controlStyle;
+				bool										isVisuallyEnabled;
 				bool										isOpening;
 				elements::GuiImageFrameElement*				imageElement;
 				compositions::GuiBoundsComposition*			imageComposition;
+				ButtonStyle									buttonStyle;
 
-				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool menuOpening);
 			public:
 				/// <summary>Create the style.</summary>
 				/// <param name="transparent">Set to true to make the background disappear when the button is not in an active state.</param>
-				Win7ToolstripButtonStyle(bool transparent);
+				Win7ToolstripButtonStyle(bool transparent, ButtonStyle _buttonStyle);
 				~Win7ToolstripButtonStyle();
 				
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
 				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
 				void										SetSubMenuExisting(bool value)override;
 				void										SetSubMenuOpening(bool value)override;
@@ -48,25 +64,6 @@ Toolstrip Button
 				void										SetImage(Ptr<controls::GuiImageData> value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
-
-			/// <summary>Toolstrip dropdown button style (Windows 7).</summary>
-			class Win7ToolstripDropdownButtonStyle : public Win7ToolstripButtonStyle, public Description<Win7ToolstripDropdownButtonStyle>
-			{
-			public:
-				/// <summary>Create the style.</summary>
-				Win7ToolstripDropdownButtonStyle(bool transparent);
-				~Win7ToolstripDropdownButtonStyle();
-			};
-			
-			/// <summary>Toolstrip split button style (Windows 7).</summary>
-			class Win7ToolstripSplitButtonStyle : public Win7ToolstripButtonStyle, public Description<Win7ToolstripSplitButtonStyle>
-			{
-			public:
-				/// <summary>Create the style.</summary>
-				Win7ToolstripSplitButtonStyle(bool transparent);
-				~Win7ToolstripSplitButtonStyle();
-			};
-#pragma warning(pop)
 
 			/// <summary>Toolstrip splitter style (Windows 7).</summary>
 			class Win7ToolstripSplitterStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7ToolstripSplitterStyle>
