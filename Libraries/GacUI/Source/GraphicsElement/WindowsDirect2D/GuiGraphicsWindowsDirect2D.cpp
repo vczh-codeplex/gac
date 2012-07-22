@@ -218,6 +218,7 @@ WindiwsGDIRenderTarget
 				IWindowsDirect2DRenderTarget*	renderTarget;
 				INativeImageFrame*				cachedFrame;
 				ComPtr<ID2D1Bitmap>				bitmap;
+				ComPtr<ID2D1Bitmap>				disabledBitmap;
 			public:
 				WindowsDirect2DImageFrameCache(IWindowsDirect2DRenderTarget* _renderTarget)
 					:renderTarget(_renderTarget)
@@ -252,9 +253,28 @@ WindiwsGDIRenderTarget
 					return cachedFrame;
 				}
 
-				ComPtr<ID2D1Bitmap> GetBitmap()
+				ComPtr<ID2D1Bitmap> GetBitmap(bool enabled)
 				{
-					return bitmap;
+					if(enabled)
+					{
+						return bitmap;
+					}
+					else
+					{
+						if(!disabledBitmap)
+						{
+ 							ID2D1Bitmap* d2dBitmap=0;
+							HRESULT hr=renderTarget->GetDirect2DRenderTarget()->CreateBitmapFromWicBitmap(
+								GetWindowsDirect2DObjectProvider()->GetWICBitmap(cachedFrame),
+								&d2dBitmap
+								);
+							if(SUCCEEDED(hr))
+							{
+								disabledBitmap=d2dBitmap;
+							}
+						}
+						return disabledBitmap;
+					}
 				}
 			};
 
@@ -338,7 +358,7 @@ WindiwsGDIRenderTarget
 					Ptr<INativeImageFrameCache> cache=frame->GetCache(this);
 					if(cache)
 					{
-						return cache.Cast<WindowsDirect2DImageFrameCache>()->GetBitmap();
+						return cache.Cast<WindowsDirect2DImageFrameCache>()->GetBitmap(enabled);
 					}
 					else
 					{
@@ -346,7 +366,7 @@ WindiwsGDIRenderTarget
 						if(frame->SetCache(this, d2dCache))
 						{
 							imageCaches.Add(d2dCache);
-							return d2dCache->GetBitmap();
+							return d2dCache->GetBitmap(enabled);
 						}
 						else
 						{
