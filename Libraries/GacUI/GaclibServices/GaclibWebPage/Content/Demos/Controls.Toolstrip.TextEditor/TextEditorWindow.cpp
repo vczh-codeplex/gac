@@ -52,7 +52,6 @@ bool TextEditorWindow::TryOpen()
 			textBox->Select(TextPos(0, 0), TextPos(0, 0));
 			textBox->ClearUndoRedo();
 			textBox->NotifyModificationSaved();
-			UpdateWindowTitle();
 			return true;
 		}
 	}
@@ -97,7 +96,6 @@ bool TextEditorWindow::TrySave(bool ignoreCurrentFileName)
 		StreamWriter writer(encoderStream);
 		writer.WriteString(textBox->GetText());
 		textBox->NotifyModificationSaved();
-		UpdateWindowTitle();
 	}
 	return true;
 }
@@ -110,7 +108,6 @@ bool TextEditorWindow::TryNew()
 		textBox->SetText(L"");
 		textBox->ClearUndoRedo();
 		textBox->NotifyModificationSaved();
-		UpdateWindowTitle();
 		return true;
 	}
 	else
@@ -164,17 +161,23 @@ void TextEditorWindow::UpdateMenuItems(int commands)
 	if(commands & ClipboardCommands)
 	{
 		menuEditPaste->SetEnabled(GetCurrentController()->ClipboardService()->ContainsText());
+		toolbarPaste->SetEnabled(GetCurrentController()->ClipboardService()->ContainsText());
 	}
 	if(commands & SelectionCommands)
 	{
 		menuEditCut->SetEnabled(textBox->CanCut());
 		menuEditCopy->SetEnabled(textBox->CanCopy());
 		menuEditDelete->SetEnabled(textBox->GetCaretBegin()!=textBox->GetCaretEnd());
+		toolbarCut->SetEnabled(textBox->CanCut());
+		toolbarCopy->SetEnabled(textBox->CanCopy());
+		toolbarDelete->SetEnabled(textBox->GetCaretBegin()!=textBox->GetCaretEnd());
 	}
 	if(commands & UndoRedoCommands)
 	{
 		menuEditUndo->SetEnabled(textBox->CanUndo());
 		menuEditRedo->SetEnabled(textBox->CanRedo());
+		toolbarUndo->SetEnabled(textBox->CanUndo());
+		toolbarRedo->SetEnabled(textBox->CanRedo());
 	}
 }
 
@@ -200,21 +203,29 @@ Menu Handlers
 void TextEditorWindow::menuFileNew_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
 	TryNew();
+	UpdateMenuItems(AllCommands);
+	UpdateWindowTitle();
 }
 
 void TextEditorWindow::menuFileOpen_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
 	TryOpen();
+	UpdateMenuItems(AllCommands);
+	UpdateWindowTitle();
 }
 
 void TextEditorWindow::menuFileSave_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
 	TrySave(false);
+	UpdateMenuItems(AllCommands);
+	UpdateWindowTitle();
 }
 
 void TextEditorWindow::menuFileSaveAs_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
 	TrySave(true);
+	UpdateMenuItems(AllCommands);
+	UpdateWindowTitle();
 }
 
 void TextEditorWindow::menuFileExit_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
@@ -299,6 +310,17 @@ TextEditorWindow::TextEditorWindow()
 	menuEditDelete->Clicked.AttachMethod(this, &TextEditorWindow::menuEditDelete_Clicked);
 	menuEditSelect->Clicked.AttachMethod(this, &TextEditorWindow::menuEditSelect_Clicked);
 	menuFormatFont->Clicked.AttachMethod(this, &TextEditorWindow::menuFormatFont_Clicked);
+
+	toolbarNew->Clicked.AttachMethod(this, &TextEditorWindow::menuFileNew_Clicked);
+	toolbarOpen->Clicked.AttachMethod(this, &TextEditorWindow::menuFileOpen_Clicked);
+	toolbarSave->Clicked.AttachMethod(this, &TextEditorWindow::menuFileSave_Clicked);
+	toolbarSaveAs->Clicked.AttachMethod(this, &TextEditorWindow::menuFileSaveAs_Clicked);
+	toolbarUndo->Clicked.AttachMethod(this, &TextEditorWindow::menuEditUndo_Clicked);
+	toolbarRedo->Clicked.AttachMethod(this, &TextEditorWindow::menuEditRedo_Clicked);
+	toolbarCut->Clicked.AttachMethod(this, &TextEditorWindow::menuEditCut_Clicked);
+	toolbarCopy->Clicked.AttachMethod(this, &TextEditorWindow::menuEditCopy_Clicked);
+	toolbarPaste->Clicked.AttachMethod(this, &TextEditorWindow::menuEditPaste_Clicked);
+	toolbarDelete->Clicked.AttachMethod(this, &TextEditorWindow::menuEditDelete_Clicked);
 }
 
 TextEditorWindow::~TextEditorWindow()
