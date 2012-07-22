@@ -232,6 +232,7 @@ WindowsGDIResourceManager
 				IWindowsGDIResourceManager*			resourceManager;
 				INativeImageFrame*					cachedFrame;
 				Ptr<WinBitmap>						bitmap;
+				Ptr<WinBitmap>						disabledBitmap;
 			public:
 				WindowsGDIImageFrameCache(IWindowsGDIResourceManager* _resourceManager)
 					:resourceManager(_resourceManager)
@@ -269,9 +270,38 @@ WindowsGDIResourceManager
 					return cachedFrame;
 				}
 
-				Ptr<WinBitmap> GetBitmap()
+				Ptr<WinBitmap> GetBitmap(bool enabled)
 				{
-					return bitmap;
+					if(enabled)
+					{
+						return bitmap;
+					}
+					else
+					{
+						if(!disabledBitmap)
+						{
+							int w=bitmap->GetWidth();
+							int h=bitmap->GetHeight();
+							disabledBitmap=new WinBitmap(w, h, WinBitmap::vbb32Bits, true);
+							for(int y=0;y<h;y++)
+							{
+								BYTE* read=bitmap->GetScanLines()[y];
+								BYTE* write=disabledBitmap->GetScanLines()[y];
+								for(int x=0;x<w;x++)
+								{
+									BYTE g=(read[0]+read[1]+read[2])/6+read[3]/2;
+									write[0]=g;
+									write[1]=g;
+									write[2]=g;
+									write[3]=read[3];
+									read+=4;
+									write+=4;
+								}
+							}
+							disabledBitmap->BuildAlphaChannel(false);
+						}
+						return disabledBitmap;
+					}
 				}
 			};
 
@@ -350,14 +380,14 @@ WindowsGDIResourceManager
 					Ptr<INativeImageFrameCache> cache=frame->GetCache(this);
 					if(cache)
 					{
-						return cache.Cast<WindowsGDIImageFrameCache>()->GetBitmap();
+						return cache.Cast<WindowsGDIImageFrameCache>()->GetBitmap(enabled);
 					}
 					else
 					{
 						WindowsGDIImageFrameCache* gdiCache=new WindowsGDIImageFrameCache(this);
 						if(frame->SetCache(this, gdiCache))
 						{
-							return gdiCache->GetBitmap();
+							return gdiCache->GetBitmap(enabled);
 						}
 						else
 						{
