@@ -358,6 +358,7 @@ Win7MenuItemButtonStyle
 				if(isVisuallyEnabled!=value)
 				{
 					isVisuallyEnabled=value;
+					elements.imageElement->SetEnabled(value);
 					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
 				}
 			}

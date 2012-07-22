@@ -480,6 +480,7 @@ GuiImageFrameElement
 				,hAlignment(Alignment::Left)
 				,vAlignment(Alignment::Top)
 				,stretch(false)
+				,enabled(true)
 			{
 			}
 
@@ -546,6 +547,20 @@ GuiImageFrameElement
 				if(stretch!=value)
 				{
 					stretch=value;
+					renderer->OnElementStateChanged();
+				}
+			}
+
+			bool GuiImageFrameElement::GetEnabled()
+			{
+				return enabled;
+			}
+
+			void GuiImageFrameElement::SetEnabled(bool value)
+			{
+				if(enabled!=value)
+				{
+					enabled=value;
 					renderer->OnElementStateChanged();
 				}
 			}

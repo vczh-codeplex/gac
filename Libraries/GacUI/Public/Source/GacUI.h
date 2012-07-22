@@ -1864,6 +1864,7 @@ Elements
 				Alignment::Type			hAlignment;
 				Alignment::Type			vAlignment;
 				bool					stretch;
+				bool					enabled;
 
 				GuiImageFrameElement();
 			public:
@@ -1879,6 +1880,9 @@ Elements
 
 				bool					GetStretch();
 				void					SetStretch(bool value);
+
+				bool					GetEnabled();
+				void					SetEnabled(bool value);
 			};
 
 			class GuiPolygonElement : public Object, public IGuiGraphicsElement, public Description<GuiPolygonElement>
@@ -8250,7 +8254,7 @@ Functionality
 			{
 			public:
 				virtual ID2D1RenderTarget*					GetDirect2DRenderTarget()=0;
-				virtual ComPtr<ID2D1Bitmap>					GetBitmap(INativeImageFrame* frame)=0;
+				virtual ComPtr<ID2D1Bitmap>					GetBitmap(INativeImageFrame* frame, bool enabled)=0;
 				virtual void								DestroyBitmapCache(INativeImageFrame* frame)=0;
 				virtual void								SetTextAntialias(bool antialias, bool verticalAntialias)=0;
 
@@ -9044,7 +9048,7 @@ Functionality
 				virtual Ptr<elements::text::CharMeasurer>	CreateCharMeasurer(const FontProperties& fontProperties)=0;
 				virtual void								DestroyCharMeasurer(const FontProperties& fontProperties)=0;
 
-				virtual Ptr<windows::WinBitmap>				GetBitmap(INativeImageFrame* frame)=0;
+				virtual Ptr<windows::WinBitmap>				GetBitmap(INativeImageFrame* frame, bool enabled)=0;
 				virtual void								DestroyBitmapCache(INativeImageFrame* frame)=0;
 			};
 

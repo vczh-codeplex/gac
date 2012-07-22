@@ -231,6 +231,7 @@ Win7ToolstripButtonStyle
 				if(isVisuallyEnabled!=value)
 				{
 					isVisuallyEnabled=value;
+					imageElement->SetEnabled(value);
 					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
 				}
 			}

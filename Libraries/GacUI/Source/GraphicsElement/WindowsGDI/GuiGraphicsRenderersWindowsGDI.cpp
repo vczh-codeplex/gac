@@ -546,7 +546,7 @@ GuiImageFrameElementRenderer
 				{
 					IWindowsGDIResourceManager* resourceManager=GetWindowsGDIResourceManager();
 					INativeImageFrame* frame=element->GetImage()->GetFrame(element->GetFrameIndex());
-					bitmap=resourceManager->GetBitmap(frame);
+					bitmap=resourceManager->GetBitmap(frame, element->GetEnabled());
 					minSize=frame->GetSize();
 				}
 				else
@@ -620,7 +620,7 @@ GuiImageFrameElementRenderer
 						int max=element->GetFrameIndex();
 						for(int i=0;i<=max;i++)
 						{
-							Ptr<WinBitmap> frameBitmap=resourceManager->GetBitmap(element->GetImage()->GetFrame(i));
+							Ptr<WinBitmap> frameBitmap=resourceManager->GetBitmap(element->GetImage()->GetFrame(i), element->GetEnabled());
 							dc->Draw(
 								destination.Left(), destination.Top(), destination.Width(), destination.Height(),
 								frameBitmap,

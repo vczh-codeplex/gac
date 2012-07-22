@@ -680,7 +680,7 @@ GuiImageFrameElementRenderer
 				if(renderTarget && element->GetImage())
 				{
 					INativeImageFrame* frame=element->GetImage()->GetFrame(element->GetFrameIndex());
-					bitmap=renderTarget->GetBitmap(frame);
+					bitmap=renderTarget->GetBitmap(frame, element->GetEnabled());
 					minSize=frame->GetSize();
 				}
 				else
@@ -753,7 +753,7 @@ GuiImageFrameElementRenderer
 						int max=element->GetFrameIndex();
 						for(int i=0;i<=max;i++)
 						{
-							ComPtr<ID2D1Bitmap> frameBitmap=renderTarget->GetBitmap(element->GetImage()->GetFrame(i));
+							ComPtr<ID2D1Bitmap> frameBitmap=renderTarget->GetBitmap(element->GetImage()->GetFrame(i), element->GetEnabled());
 							d2dRenderTarget->DrawBitmap(frameBitmap.Obj(), destination, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, source);
 						}
 					}

@@ -12910,6 +12910,7 @@ Win7MenuItemButtonStyle
 				if(isVisuallyEnabled!=value)
 				{
 					isVisuallyEnabled=value;
+					elements.imageElement->SetEnabled(value);
 					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
 				}
 			}
@@ -15087,6 +15088,7 @@ Win7ToolstripButtonStyle
 				if(isVisuallyEnabled!=value)
 				{
 					isVisuallyEnabled=value;
+					imageElement->SetEnabled(value);
 					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
 				}
 			}
@@ -17564,6 +17566,7 @@ GuiImageFrameElement
 				,hAlignment(Alignment::Left)
 				,vAlignment(Alignment::Top)
 				,stretch(false)
+				,enabled(true)
 			{
 			}
 
@@ -17630,6 +17633,20 @@ GuiImageFrameElement
 				if(stretch!=value)
 				{
 					stretch=value;
+					renderer->OnElementStateChanged();
+				}
+			}
+
+			bool GuiImageFrameElement::GetEnabled()
+			{
+				return enabled;
+			}
+
+			void GuiImageFrameElement::SetEnabled(bool value)
+			{
+				if(enabled!=value)
+				{
+					enabled=value;
 					renderer->OnElementStateChanged();
 				}
 			}
@@ -19883,7 +19900,7 @@ GuiImageFrameElementRenderer
 				if(renderTarget && element->GetImage())
 				{
 					INativeImageFrame* frame=element->GetImage()->GetFrame(element->GetFrameIndex());
-					bitmap=renderTarget->GetBitmap(frame);
+					bitmap=renderTarget->GetBitmap(frame, element->GetEnabled());
 					minSize=frame->GetSize();
 				}
 				else
@@ -19956,7 +19973,7 @@ GuiImageFrameElementRenderer
 						int max=element->GetFrameIndex();
 						for(int i=0;i<=max;i++)
 						{
-							ComPtr<ID2D1Bitmap> frameBitmap=renderTarget->GetBitmap(element->GetImage()->GetFrame(i));
+							ComPtr<ID2D1Bitmap> frameBitmap=renderTarget->GetBitmap(element->GetImage()->GetFrame(i), element->GetEnabled());
 							d2dRenderTarget->DrawBitmap(frameBitmap.Obj(), destination, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, source);
 						}
 					}
@@ -20708,7 +20725,7 @@ WindiwsGDIRenderTarget
 					return d2dRenderTarget?d2dRenderTarget:GetWindowsDirect2DObjectProvider()->GetNativeWindowDirect2DRenderTarget(window);
 				}
 
-				ComPtr<ID2D1Bitmap> GetBitmap(INativeImageFrame* frame)override
+				ComPtr<ID2D1Bitmap> GetBitmap(INativeImageFrame* frame, bool enabled)override
 				{
 					Ptr<INativeImageFrameCache> cache=frame->GetCache(this);
 					if(cache)
@@ -21521,7 +21538,7 @@ GuiImageFrameElementRenderer
 				{
 					IWindowsGDIResourceManager* resourceManager=GetWindowsGDIResourceManager();
 					INativeImageFrame* frame=element->GetImage()->GetFrame(element->GetFrameIndex());
-					bitmap=resourceManager->GetBitmap(frame);
+					bitmap=resourceManager->GetBitmap(frame, element->GetEnabled());
 					minSize=frame->GetSize();
 				}
 				else
@@ -21595,7 +21612,7 @@ GuiImageFrameElementRenderer
 						int max=element->GetFrameIndex();
 						for(int i=0;i<=max;i++)
 						{
-							Ptr<WinBitmap> frameBitmap=resourceManager->GetBitmap(element->GetImage()->GetFrame(i));
+							Ptr<WinBitmap> frameBitmap=resourceManager->GetBitmap(element->GetImage()->GetFrame(i), element->GetEnabled());
 							dc->Draw(
 								destination.Left(), destination.Top(), destination.Width(), destination.Height(),
 								frameBitmap,
@@ -22249,7 +22266,7 @@ WindowsGDIResourceManager
 					charMeasurers.Destroy(fontProperties);
 				}
 
-				Ptr<windows::WinBitmap> GetBitmap(INativeImageFrame* frame)override
+				Ptr<windows::WinBitmap> GetBitmap(INativeImageFrame* frame, bool enabled)override
 				{
 					Ptr<INativeImageFrameCache> cache=frame->GetCache(this);
 					if(cache)

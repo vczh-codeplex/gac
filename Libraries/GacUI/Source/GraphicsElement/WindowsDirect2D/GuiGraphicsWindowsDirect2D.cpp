@@ -333,7 +333,7 @@ WindiwsGDIRenderTarget
 					return d2dRenderTarget?d2dRenderTarget:GetWindowsDirect2DObjectProvider()->GetNativeWindowDirect2DRenderTarget(window);
 				}
 
-				ComPtr<ID2D1Bitmap> GetBitmap(INativeImageFrame* frame)override
+				ComPtr<ID2D1Bitmap> GetBitmap(INativeImageFrame* frame, bool enabled)override
 				{
 					Ptr<INativeImageFrameCache> cache=frame->GetCache(this);
 					if(cache)

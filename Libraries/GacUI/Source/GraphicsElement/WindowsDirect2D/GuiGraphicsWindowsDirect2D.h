@@ -30,7 +30,7 @@ Functionality
 			{
 			public:
 				virtual ID2D1RenderTarget*					GetDirect2DRenderTarget()=0;
-				virtual ComPtr<ID2D1Bitmap>					GetBitmap(INativeImageFrame* frame)=0;
+				virtual ComPtr<ID2D1Bitmap>					GetBitmap(INativeImageFrame* frame, bool enabled)=0;
 				virtual void								DestroyBitmapCache(INativeImageFrame* frame)=0;
 				virtual void								SetTextAntialias(bool antialias, bool verticalAntialias)=0;
 
