@@ -25,7 +25,20 @@ private:
 	GuiMenuButton*					menuFormat;
 	GuiMenuButton*					menuFormatFont;
 
+	GuiStackComposition*			toolbarStack;
+	GuiMenuButton*					toolbarNew;
+	GuiMenuButton*					toolbarOpen;
+	GuiMenuButton*					toolbarSave;
+	GuiMenuButton*					toolbarSaveAs;
+	GuiMenuButton*					toolbarUndo;
+	GuiMenuButton*					toolbarRedo;
+	GuiMenuButton*					toolbarCut;
+	GuiMenuButton*					toolbarCopy;
+	GuiMenuButton*					toolbarPaste;
+	GuiMenuButton*					toolbarDelete;
+
 	void							InitializeMenuBar();
+	void							InitializeToolBar();
 	void							InitializeComponents();
 private:
 

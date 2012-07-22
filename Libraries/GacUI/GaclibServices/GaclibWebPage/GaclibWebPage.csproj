@@ -151,6 +151,7 @@
     <Content Include="Content\Demos\Controls.TextBox.Editor\Main.cpp" />
     <Content Include="Content\Demos\Controls.Toolstrip.TextEditor\DXGUI_53.jpg" />
     <Content Include="Content\Demos\Controls.Toolstrip.TextEditor\DXGUI_54.jpg" />
+    <Content Include="Content\Demos\Controls.Toolstrip.TextEditor\DXGUI_55.jpg" />
     <Content Include="Content\Demos\Controls.Toolstrip.TextEditor\Main.cpp" />
     <Content Include="Content\Demos\Controls.Toolstrip.TextEditor\TextEditorWindow.cpp" />
     <Content Include="Content\Demos\Controls.Toolstrip.TextEditor\TextEditorWindow.h" />
