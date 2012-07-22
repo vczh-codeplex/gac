@@ -263,14 +263,43 @@ WindiwsGDIRenderTarget
 					{
 						if(!disabledBitmap)
 						{
+							IWICBitmap* frameBitmap=GetWindowsDirect2DObjectProvider()->GetWICBitmap(cachedFrame);
  							ID2D1Bitmap* d2dBitmap=0;
 							HRESULT hr=renderTarget->GetDirect2DRenderTarget()->CreateBitmapFromWicBitmap(
-								GetWindowsDirect2DObjectProvider()->GetWICBitmap(cachedFrame),
+								frameBitmap,
 								&d2dBitmap
 								);
 							if(SUCCEEDED(hr))
 							{
 								disabledBitmap=d2dBitmap;
+
+								WICRect rect;
+								rect.X=0;
+								rect.Y=0;
+								rect.Width=bitmap->GetPixelSize().width;
+								rect.Height=bitmap->GetPixelSize().height;
+								BYTE* buffer=new BYTE[rect.Width*rect.Height*4];
+								hr=frameBitmap->CopyPixels(&rect, rect.Width*4, rect.Width*rect.Height*4, buffer);
+								if(SUCCEEDED(hr))
+								{
+									int count=rect.Width*rect.Height;
+									BYTE* read=buffer;
+									for(int i=0;i<count;i++)
+									{
+										BYTE g=(read[0]+read[1]+read[2])/6+read[3]/2;
+										read[0]=g;
+										read[1]=g;
+										read[2]=g;
+										read+=4;
+									}
+									D2D1_RECT_U d2dRect;
+									d2dRect.left=0;
+									d2dRect.top=0;
+									d2dRect.right=rect.Width;
+									d2dRect.bottom=rect.Height;
+									d2dBitmap->CopyFromMemory(&d2dRect, buffer, rect.Width*4);
+								}
+								delete[] buffer;
 							}
 						}
 						return disabledBitmap;
