@@ -791,6 +791,7 @@ Elements
 				Alignment::Type			hAlignment;
 				Alignment::Type			vAlignment;
 				bool					stretch;
+				bool					enabled;
 
 				GuiImageFrameElement();
 			public:
@@ -840,6 +841,17 @@ Elements
 				/// </summary>
 				/// <param name="value">True if stretching is enabled for this image.</param>
 				void					SetStretch(bool value);
+
+				/// <summary>
+				/// Get if the image is rendered as enabled.
+				/// </summary>
+				/// <returns>Return true if the image is rendered as enabled.</returns>
+				bool					GetEnabled();
+				/// <summary>
+				/// Set if the image is rendered as enabled.
+				/// </summary>
+				/// <param name="value">True if the image is rendered as enabled.</param>
+				void					SetEnabled(bool value);
 			};
 
 			/// <summary>

@@ -345,7 +345,7 @@ WindowsGDIResourceManager
 					charMeasurers.Destroy(fontProperties);
 				}
 
-				Ptr<windows::WinBitmap> GetBitmap(INativeImageFrame* frame)override
+				Ptr<windows::WinBitmap> GetBitmap(INativeImageFrame* frame, bool enabled)override
 				{
 					Ptr<INativeImageFrameCache> cache=frame->GetCache(this);
 					if(cache)

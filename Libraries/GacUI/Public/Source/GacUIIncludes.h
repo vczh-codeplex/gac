@@ -14200,6 +14200,7 @@ Elements
 				Alignment::Type			hAlignment;
 				Alignment::Type			vAlignment;
 				bool					stretch;
+				bool					enabled;
 
 				GuiImageFrameElement();
 			public:
@@ -14215,6 +14216,9 @@ Elements
 
 				bool					GetStretch();
 				void					SetStretch(bool value);
+
+				bool					GetEnabled();
+				void					SetEnabled(bool value);
 			};
 
 			class GuiPolygonElement : public Object, public IGuiGraphicsElement, public Description<GuiPolygonElement>
