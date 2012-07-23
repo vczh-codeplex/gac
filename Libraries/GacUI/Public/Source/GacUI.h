@@ -5089,6 +5089,21 @@ ListView ItemStyleProvider
 
 					const IItemStyleList&						GetCreatedItemStyles();
 					bool										IsItemStyleAttachedToListView(GuiListControl::IItemStyleController* itemStyle);
+
+					template<typename T>
+					T* GetItemContent(GuiListControl::IItemStyleController* itemStyleController)
+					{
+						if(itemStyleController)
+						{
+							ListViewContentItemStyleController* item=dynamic_cast<ListViewContentItemStyleController*>(itemStyleController);
+							if(item)
+							{
+								IListViewItemContent* itemContent=item->GetItemContent();
+								return dynamic_cast<T*>(itemContent);
+							}
+						}
+						return 0;
+					}
 				};
 			}
 

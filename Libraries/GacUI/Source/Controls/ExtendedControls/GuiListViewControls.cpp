@@ -1259,6 +1259,16 @@ ListViewDetailContentProvider
 
 				void ListViewDetailContentProvider::OnColumnChanged()
 				{
+					int count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
+					for(int i=0;i<count;i++)
+					{
+						GuiListControl::IItemStyleController* itemStyleController=listViewItemStyleProvider->GetCreatedItemStyles()[i];
+						ItemContent* itemContent=listViewItemStyleProvider->GetItemContent<ItemContent>(itemStyleController);
+						if(itemContent)
+						{
+							itemContent->UpdateSubItemSize();
+						}
+					}
 				}
 
 				ListViewDetailContentProvider::ListViewDetailContentProvider(Size _iconSize)
