@@ -116,9 +116,9 @@ void CreateToolbar(Ptr<INativeImage> (&imageButtons)[count], GuiStackComposition
 	const wchar_t* fileMenuText[]={L"New", L"Open", L"Save", L"Save As...", L"-", L"Page Setting...", L"Print...", L"-", L"Exit"};
 	const wchar_t* fileMenuImage[]={L"_New.png", L"_Open.png", L"_Save.png", L"_SaveAs.png", 0, 0, L"_Print.png", 0, 0};
 	const wchar_t* fileMenuShortcut[]={L"Ctrl+N", L"Ctrl+O", L"Ctrl+S", 0, 0, 0, 0, 0, 0};
-	const wchar_t* editMenuText[]={L"Undo", L"Redo", L"-", L"Cut", L"Copy", L"Paste", L"Delete", L"-", L"Find...", L"Find Next", L"Replace...", L"Go to...", L"-", L"Select All", L"Time/Date"};
-	const wchar_t* editMenuShortcut[]={L"Ctrl+Z", L"Ctrl+Y", 0, L"Ctrl+X", L"Ctrl+C", L"Ctrl+V", L"Del", 0, L"Ctrl+F", L"F3", L"Ctrl+H", 0, 0, L"Ctrl+A", 0};
-	const wchar_t* editMenuImage[]={L"_Undo.png", L"_Redo.png", 0, L"_Cut.png", L"_Copy.png", L"_Paste.png", L"_Delete.png", 0, 0, 0, 0, 0, 0, 0, 0};
+	const wchar_t* editMenuText[]={L"Undo", L"Redo", L"-", L"Short Menu Text", L"Very Very Long Long Menu Test", L"-", L"Cut", L"Copy", L"Paste", L"Delete", L"-", L"Find...", L"Find Next", L"Replace...", L"Go to...", L"-", L"Select All", L"Time/Date"};
+	const wchar_t* editMenuImage[]={L"_Undo.png", L"_Redo.png", 0, 0, 0, 0, L"_Cut.png", L"_Copy.png", L"_Paste.png", L"_Delete.png", 0, 0, 0, 0, 0, 0, 0, 0};
+	const wchar_t* editMenuShortcut[]={L"Ctrl+Z", L"Ctrl+Y", 0, L"[Very Very long Long Shortcut Text]", L"[Short Shortcut Text]", 0, L"Ctrl+X", L"Ctrl+C", L"Ctrl+V", L"Del", 0, L"Ctrl+F", L"F3", L"Ctrl+H", 0, 0, L"Ctrl+A", 0};
 
 	for(int i=0;i<sizeof(imageButtons)/sizeof(*imageButtons);i++)
 	{
@@ -176,9 +176,9 @@ void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 	const wchar_t* fileNewMenuText[]={L"Project...", L"Web Site...", L"Team Project...", L"File...", L"Project From Existing Code..."};
 	const wchar_t* fileOpenMenuText[]={L"Project/Solution...", L"Web Site...", L"Team Project...", L"File...", L"Convert..."};
 	const wchar_t* filePrintMenuText[]={L"Print", L"Don't Print"};
-	const wchar_t* editMenuText[]={L"Undo", L"Redo", L"-", L"Cut", L"Copy", L"Paste", L"Delete", L"-", L"Find...", L"Find Next", L"Replace...", L"Go to...", L"-", L"Select All", L"Time/Date"};
-	const wchar_t* editMenuShortcut[]={L"Ctrl+Z", L"Ctrl+Y", 0, L"Ctrl+X", L"Ctrl+C", L"Ctrl+V", L"Del", 0, L"Ctrl+F", L"F3", L"Ctrl+H", 0, 0, L"Ctrl+A", 0};
-	const wchar_t* editMenuImage[]={L"_Undo.png", L"_Redo.png", 0, L"_Cut.png", L"_Copy.png", L"_Paste.png", L"_Delete.png", 0, 0, 0, 0, 0, 0, 0, 0};
+	const wchar_t* editMenuText[]={L"Undo", L"Redo", L"-", L"Short Menu Text", L"Very Very Long Long Menu Test", L"-", L"Cut", L"Copy", L"Paste", L"Delete", L"-", L"Find...", L"Find Next", L"Replace...", L"Go to...", L"-", L"Select All", L"Time/Date"};
+	const wchar_t* editMenuImage[]={L"_Undo.png", L"_Redo.png", 0, 0, 0, 0, L"_Cut.png", L"_Copy.png", L"_Paste.png", L"_Delete.png", 0, 0, 0, 0, 0, 0, 0, 0};
+	const wchar_t* editMenuShortcut[]={L"Ctrl+Z", L"Ctrl+Y", 0, L"[Very Very long Long Shortcut Text]", L"[Short Shortcut Text]", 0, L"Ctrl+X", L"Ctrl+C", L"Ctrl+V", L"Del", 0, L"Ctrl+F", L"F3", L"Ctrl+H", 0, 0, L"Ctrl+A", 0};
 	const wchar_t* formatMenuText[]={L"Wrap Text", L"Font..."};
 	const wchar_t* viewMenuText[]={L"Status Bar"};
 	const wchar_t* helpMenuText[]={L"View Help", L"About Notepad"};
