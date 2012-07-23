@@ -371,6 +371,11 @@ Win7ListViewColumnHeaderStyle
 			{
 			}
 
+			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7ListViewColumnHeaderStyle::GetMeasuringSource()
+			{
+				return 0;
+			}
+
 			void Win7ListViewColumnHeaderStyle::SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)
 			{
 				Margin margin=arrowComposition->GetAlignmentToParent();

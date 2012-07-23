@@ -196,6 +196,8 @@ GuiMenuBar
 GuiMenuButton
 ***********************************************************************/
 
+			const wchar_t* const GuiMenuButton::MenuItemSubComponentMeasuringCategoryName=L"MenuItem";
+
 			GuiButton* GuiMenuButton::GetSubMenuHost()
 			{
 				GuiButton* button=styleController->GetSubMenuHost();
