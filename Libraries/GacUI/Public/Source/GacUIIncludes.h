@@ -15461,6 +15461,67 @@ namespace vl
 	{
 		namespace compositions
 		{
+			class GuiSubComponentMeasurer : public Object, public Description<GuiSubComponentMeasurer>
+			{
+			public:
+				class IMeasuringSource : public Interface
+				{
+				public:
+					virtual void						AttachMeasurer(GuiSubComponentMeasurer* value)=0;
+					virtual void						DetachMeasurer(GuiSubComponentMeasurer* value)=0;
+					virtual GuiSubComponentMeasurer*	GetAttachedMeasurer()=0;
+					virtual WString						GetMeasuringCategory()=0;
+					virtual int							GetSubComponentCount()=0;
+					virtual WString						GetSubComponentName(int index)=0;
+					virtual GuiGraphicsComposition*		GetSubComponentComposition(int index)=0;
+					virtual GuiGraphicsComposition*		GetSubComponentComposition(const WString& name)=0;
+					virtual GuiGraphicsComposition*		GetMainComposition()=0;
+					virtual void						SubComponentPreferredMinSizeUpdated()=0;
+				};
+				
+				enum Direction
+				{
+					Horizontal,
+					Vertical,
+				};
+
+				class MeasuringSource : public Object, public IMeasuringSource
+				{
+					typedef collections::Dictionary<WString, GuiGraphicsComposition*>	SubComponentMap;
+				protected:
+					GuiSubComponentMeasurer*			measurer;
+					WString								measuringCategory;
+					GuiGraphicsComposition*				mainComposition;
+					SubComponentMap						subComponents;
+
+				public:
+					MeasuringSource(const WString& _measuringCategory, GuiGraphicsComposition* _mainComposition);
+					~MeasuringSource();
+
+					bool								AddSubComponent(const WString& name, GuiGraphicsComposition* composition);
+					void								AttachMeasurer(GuiSubComponentMeasurer* value)override;
+					void								DetachMeasurer(GuiSubComponentMeasurer* value)override;
+					GuiSubComponentMeasurer*			GetAttachedMeasurer()override;
+					WString								GetMeasuringCategory()override;
+					int									GetSubComponentCount()override;
+					WString								GetSubComponentName(int index)override;
+					GuiGraphicsComposition*				GetSubComponentComposition(int index)override;
+					GuiGraphicsComposition*				GetSubComponentComposition(const WString& name)override;
+					GuiGraphicsComposition*				GetMainComposition()override;
+					void								SubComponentPreferredMinSizeUpdated()override;
+				};
+			protected:
+				typedef collections::List<IMeasuringSource*>	MeasuringSourceList;
+
+				MeasuringSourceList						measuringSources;
+			public:
+				GuiSubComponentMeasurer();
+				~GuiSubComponentMeasurer();
+
+				bool									AttachMeasuringSource(IMeasuringSource* value);
+				bool									DetachMeasuringSource(IMeasuringSource* value);
+				void									MeasureAndUpdate(const WString& measuringCategory, Direction direction);
+			};
 		}
 	}
 }
@@ -17777,6 +17838,7 @@ MenuButton
 			class GuiMenuButton : public GuiButton, public Description<GuiMenuButton>
 			{
 			public:
+				static const wchar_t* const				MenuItemSubComponentMeasuringCategoryName;
 				class IStyleController : public GuiButton::IStyleController, public Description<IStyleController>
 				{
 				public:
@@ -17786,6 +17848,7 @@ MenuButton
 					virtual GuiButton*					GetSubMenuHost()=0;
 					virtual void						SetImage(Ptr<GuiImageData> value)=0;
 					virtual void						SetShortcutText(const WString& value)=0;
+					virtual compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()=0;
 				};
 			protected:
 				IStyleController*						styleController;
@@ -19968,25 +20031,38 @@ Menu Button
 				Win7MenuBarButtonStyle();
 				~Win7MenuBarButtonStyle();
 
-				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
-				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
-				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-				void										SetVisuallyEnabled(bool value)override;
-				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
-				void										SetSubMenuExisting(bool value)override;
-				void										SetSubMenuOpening(bool value)override;
-				controls::GuiButton*						GetSubMenuHost()override;
-				void										SetImage(Ptr<controls::GuiImageData> value)override;
-				void										SetShortcutText(const WString& value)override;
-				void										Transfer(controls::GuiButton::ControlState value)override;
+				compositions::GuiBoundsComposition*							GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				void														SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void														SetText(const WString& value)override;
+				void														SetFont(const FontProperties& value)override;
+				void														SetVisuallyEnabled(bool value)override;
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
 			class Win7MenuItemButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7MenuItemButtonStyle>
 			{
 			protected:
+				class MeasuringSource : public compositions::GuiSubComponentMeasurer::MeasuringSource
+				{
+				protected:
+					Win7MenuItemButtonStyle*				style;
+				public:
+					MeasuringSource(Win7MenuItemButtonStyle* _style);
+					~MeasuringSource();
+
+					void									SubComponentPreferredMinSizeUpdated()override;
+				};
+
 				Win7MenuItemButtonElements					elements;
+				Ptr<MeasuringSource>						measuringSource;
 				controls::GuiButton::ControlState			controlStyle;
 				bool										isVisuallyEnabled;
 				bool										isOpening;
@@ -19996,19 +20072,20 @@ Menu Button
 				Win7MenuItemButtonStyle();
 				~Win7MenuItemButtonStyle();
 
-				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
-				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
-				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-				void										SetVisuallyEnabled(bool value)override;
-				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
-				void										SetSubMenuExisting(bool value)override;
-				void										SetSubMenuOpening(bool value)override;
-				controls::GuiButton*						GetSubMenuHost()override;
-				void										SetImage(Ptr<controls::GuiImageData> value)override;
-				void										SetShortcutText(const WString& value)override;
-				void										Transfer(controls::GuiButton::ControlState value)override;
+				compositions::GuiBoundsComposition*							GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				void														SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void														SetText(const WString& value)override;
+				void														SetFont(const FontProperties& value)override;
+				void														SetVisuallyEnabled(bool value)override;
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
 			class Win7MenuSplitterStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuSplitterStyle>
@@ -20194,19 +20271,20 @@ Toolstrip Button
 				Win7ToolstripButtonStyle(ButtonStyle _buttonStyle);
 				~Win7ToolstripButtonStyle();
 				
-				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
-				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
-				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-				void										SetVisuallyEnabled(bool value)override;
-				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
-				void										SetSubMenuExisting(bool value)override;
-				void										SetSubMenuOpening(bool value)override;
-				controls::GuiButton*						GetSubMenuHost()override;
-				void										SetImage(Ptr<controls::GuiImageData> value)override;
-				void										SetShortcutText(const WString& value)override;
-				void										Transfer(controls::GuiButton::ControlState value)override;
+				compositions::GuiBoundsComposition*							GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				void														SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void														SetText(const WString& value)override;
+				void														SetFont(const FontProperties& value)override;
+				void														SetVisuallyEnabled(bool value)override;
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 
 			class Win7ToolstripSplitterStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7ToolstripSplitterStyle>
@@ -20481,20 +20559,21 @@ List Control Buttons
 				Win7ListViewColumnHeaderStyle();
 				~Win7ListViewColumnHeaderStyle();
 
-				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
-				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
-				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-				void										SetVisuallyEnabled(bool value)override;
-				void										Transfer(controls::GuiButton::ControlState value)override;
-				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
-				void										SetSubMenuExisting(bool value)override;
-				void										SetSubMenuOpening(bool value)override;
-				controls::GuiButton*						GetSubMenuHost()override;
-				void										SetImage(Ptr<controls::GuiImageData> value)override;
-				void										SetShortcutText(const WString& value)override;
-				void										SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)override;
+				compositions::GuiBoundsComposition*							GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				void														SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void														SetText(const WString& value)override;
+				void														SetFont(const FontProperties& value)override;
+				void														SetVisuallyEnabled(bool value)override;
+				void														Transfer(controls::GuiButton::ControlState value)override;
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				void														SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)override;
 			};
 			
 			class Win7TreeViewExpandingButtonStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win7TreeViewExpandingButtonStyle>

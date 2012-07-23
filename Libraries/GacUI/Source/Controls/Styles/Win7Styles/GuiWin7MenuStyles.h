@@ -78,26 +78,39 @@ Menu Button
 				Win7MenuBarButtonStyle();
 				~Win7MenuBarButtonStyle();
 
-				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
-				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
-				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-				void										SetVisuallyEnabled(bool value)override;
-				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
-				void										SetSubMenuExisting(bool value)override;
-				void										SetSubMenuOpening(bool value)override;
-				controls::GuiButton*						GetSubMenuHost()override;
-				void										SetImage(Ptr<controls::GuiImageData> value)override;
-				void										SetShortcutText(const WString& value)override;
-				void										Transfer(controls::GuiButton::ControlState value)override;
+				compositions::GuiBoundsComposition*							GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				void														SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void														SetText(const WString& value)override;
+				void														SetFont(const FontProperties& value)override;
+				void														SetVisuallyEnabled(bool value)override;
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
 			/// <summary>Menu item button style (Windows 7). For menu buttons in a popup menu.</summary>
 			class Win7MenuItemButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win7MenuItemButtonStyle>
 			{
 			protected:
+				class MeasuringSource : public compositions::GuiSubComponentMeasurer::MeasuringSource
+				{
+				protected:
+					Win7MenuItemButtonStyle*				style;
+				public:
+					MeasuringSource(Win7MenuItemButtonStyle* _style);
+					~MeasuringSource();
+
+					void									SubComponentPreferredMinSizeUpdated()override;
+				};
+
 				Win7MenuItemButtonElements					elements;
+				Ptr<MeasuringSource>						measuringSource;
 				controls::GuiButton::ControlState			controlStyle;
 				bool										isVisuallyEnabled;
 				bool										isOpening;
@@ -108,19 +121,20 @@ Menu Button
 				Win7MenuItemButtonStyle();
 				~Win7MenuItemButtonStyle();
 
-				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
-				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
-				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-				void										SetVisuallyEnabled(bool value)override;
-				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
-				void										SetSubMenuExisting(bool value)override;
-				void										SetSubMenuOpening(bool value)override;
-				controls::GuiButton*						GetSubMenuHost()override;
-				void										SetImage(Ptr<controls::GuiImageData> value)override;
-				void										SetShortcutText(const WString& value)override;
-				void										Transfer(controls::GuiButton::ControlState value)override;
+				compositions::GuiBoundsComposition*							GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				void														SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void														SetText(const WString& value)override;
+				void														SetFont(const FontProperties& value)override;
+				void														SetVisuallyEnabled(bool value)override;
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
 			/// <summary>Menu splitter style (Windows 7). For splitters in a popup menu.</summary>

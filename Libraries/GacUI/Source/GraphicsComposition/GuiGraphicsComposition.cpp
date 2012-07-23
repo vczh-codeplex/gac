@@ -83,6 +83,10 @@ GuiSubComponentMeasurer::MeasuringSource
 				return mainComposition;
 			}
 
+			void GuiSubComponentMeasurer::MeasuringSource::SubComponentPreferredMinSizeUpdated()
+			{
+			}
+
 /***********************************************************************
 GuiSubComponentMeasurer
 ***********************************************************************/

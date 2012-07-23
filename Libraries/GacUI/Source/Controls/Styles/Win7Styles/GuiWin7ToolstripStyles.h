@@ -81,19 +81,20 @@ Toolstrip Button
 				Win7ToolstripButtonStyle(ButtonStyle _buttonStyle);
 				~Win7ToolstripButtonStyle();
 				
-				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
-				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
-				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-				void										SetVisuallyEnabled(bool value)override;
-				controls::GuiMenu::IStyleController*		CreateSubMenuStyleController()override;
-				void										SetSubMenuExisting(bool value)override;
-				void										SetSubMenuOpening(bool value)override;
-				controls::GuiButton*						GetSubMenuHost()override;
-				void										SetImage(Ptr<controls::GuiImageData> value)override;
-				void										SetShortcutText(const WString& value)override;
-				void										Transfer(controls::GuiButton::ControlState value)override;
+				compositions::GuiBoundsComposition*							GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				void														SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void														SetText(const WString& value)override;
+				void														SetFont(const FontProperties& value)override;
+				void														SetVisuallyEnabled(bool value)override;
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				void														Transfer(controls::GuiButton::ControlState value)override;
 			};
 
 			/// <summary>Toolstrip splitter style (Windows 7).</summary>

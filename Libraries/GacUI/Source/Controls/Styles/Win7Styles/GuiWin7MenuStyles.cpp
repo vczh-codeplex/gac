@@ -263,6 +263,11 @@ Win7MenuBarButtonStyle
 			{
 			}
 
+			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7MenuBarButtonStyle::GetMeasuringSource()
+			{
+				return 0;
+			}
+
 			void Win7MenuBarButtonStyle::Transfer(GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)
@@ -270,6 +275,27 @@ Win7MenuBarButtonStyle
 					controlStyle=value;
 					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
 				}
+			}
+
+/***********************************************************************
+Win7MenuItemButtonStyle::MeasuringSource
+***********************************************************************/
+
+			Win7MenuItemButtonStyle::MeasuringSource::MeasuringSource(Win7MenuItemButtonStyle* _style)
+				:GuiSubComponentMeasurer::MeasuringSource(GuiMenuButton::MenuItemSubComponentMeasuringCategoryName, _style->elements.mainComposition)
+				,style(_style)
+			{
+				AddSubComponent(L"text", style->elements.textComposition);
+				AddSubComponent(L"shortcut", style->elements.shortcutComposition);
+			}
+
+			Win7MenuItemButtonStyle::MeasuringSource::~MeasuringSource()
+			{
+			}
+
+			void Win7MenuItemButtonStyle::MeasuringSource::SubComponentPreferredMinSizeUpdated()
+			{
+				GetMainComposition()->ForceCalculateSizeImmediately();
 			}
 
 /***********************************************************************
@@ -327,6 +353,7 @@ Win7MenuItemButtonStyle
 			{
 				elements=Win7MenuItemButtonElements::Create();
 				elements.Apply(Win7ButtonColors::MenuItemButtonNormal());
+				measuringSource=new MeasuringSource(this);
 			}
 
 			Win7MenuItemButtonStyle::~Win7MenuItemButtonStyle()
@@ -407,6 +434,11 @@ Win7MenuItemButtonStyle
 			void Win7MenuItemButtonStyle::SetShortcutText(const WString& value)
 			{
 				elements.shortcutElement->SetText(value);
+			}
+
+			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7MenuItemButtonStyle::GetMeasuringSource()
+			{
+				return 0;
 			}
 
 			void Win7MenuItemButtonStyle::Transfer(GuiButton::ControlState value)
