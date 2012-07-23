@@ -259,6 +259,10 @@ Win7MenuBarButtonStyle
 			{
 			}
 
+			void Win7MenuBarButtonStyle::SetShortcutText(const WString& value)
+			{
+			}
+
 			void Win7MenuBarButtonStyle::Transfer(GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)
@@ -351,6 +355,7 @@ Win7MenuItemButtonStyle
 			void Win7MenuItemButtonStyle::SetFont(const FontProperties& value)
 			{
 				Win7SetFont(elements.textElement, elements.textComposition, value);
+				Win7SetFont(elements.shortcutElement, elements.shortcutComposition, value);
 			}
 
 			void Win7MenuItemButtonStyle::SetVisuallyEnabled(bool value)
@@ -397,6 +402,11 @@ Win7MenuItemButtonStyle
 				{
 					elements.imageElement->SetImage(0, 0);
 				}
+			}
+
+			void Win7MenuItemButtonStyle::SetShortcutText(const WString& value)
+			{
+				elements.shortcutElement->SetText(value);
 			}
 
 			void Win7MenuItemButtonStyle::Transfer(GuiButton::ControlState value)

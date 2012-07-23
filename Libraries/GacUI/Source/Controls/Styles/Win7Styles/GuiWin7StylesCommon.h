@@ -135,6 +135,8 @@ Button Configuration
 				elements::GuiImageFrameElement*				imageElement;
 				elements::GuiSolidLabelElement*				textElement;
 				compositions::GuiBoundsComposition*			textComposition;
+				elements::GuiSolidLabelElement*				shortcutElement;
+				compositions::GuiBoundsComposition*			shortcutComposition;
 				elements::GuiPolygonElement*				subMenuArrowElement;
 				compositions::GuiGraphicsComposition*		subMenuArrowComposition;
 				compositions::GuiBoundsComposition*			mainComposition;

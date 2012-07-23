@@ -45,7 +45,7 @@ GuiBoundsComposition* CreateImageFrame(Ptr<INativeImage> image, int frameIndex=0
 	return composition;
 }
 
-GuiStackComposition* CreateSubMenuInternal(int count, const wchar_t** menuText, const wchar_t** menuImage)
+GuiStackComposition* CreateSubMenuInternal(int count, const wchar_t** menuText, const wchar_t** menuImage, const wchar_t** menuShortcut)
 {
 	INativeImageService* imageService=GetCurrentController()->ImageService();
 
@@ -72,6 +72,10 @@ GuiStackComposition* CreateSubMenuInternal(int count, const wchar_t** menuText, 
 				Ptr<INativeImage> image=imageService->CreateImageFromFile(WString(L"Resources\\")+menuImage[i]);
 				button->SetImage(new GuiImageData(image, 0));
 			}
+			if(menuShortcut && menuShortcut[i])
+			{
+				button->SetShortcutText(menuShortcut[i]);
+			}
 			menuItem=button;
 		}
 		menuItem->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -86,13 +90,13 @@ GuiStackComposition* CreateSubMenuInternal(int count, const wchar_t** menuText, 
 template<int count>
 GuiStackComposition* CreateSubMenu(const wchar_t* (&menuText)[count])
 {
-	return CreateSubMenuInternal(count, menuText, 0);
+	return CreateSubMenuInternal(count, menuText, 0, 0);
 }
 
 template<int count>
-GuiStackComposition* CreateSubMenu(const wchar_t* (&menuText)[count], const wchar_t* (&menuImage)[count])
+GuiStackComposition* CreateSubMenu(const wchar_t* (&menuText)[count], const wchar_t* (&menuImage)[count], const wchar_t* (&menuShortcut)[count])
 {
-	return CreateSubMenuInternal(count, menuText, menuImage);
+	return CreateSubMenuInternal(count, menuText, menuImage, menuShortcut);
 }
 
 void CreateSubMenu(GuiMenu* menu, int index, GuiStackComposition* subMenu)
@@ -111,7 +115,9 @@ void CreateToolbar(Ptr<INativeImage> (&imageButtons)[count], GuiStackComposition
 {
 	const wchar_t* fileMenuText[]={L"New", L"Open", L"Save", L"Save As...", L"-", L"Page Setting...", L"Print...", L"-", L"Exit"};
 	const wchar_t* fileMenuImage[]={L"_New.png", L"_Open.png", L"_Save.png", L"_SaveAs.png", 0, 0, L"_Print.png", 0, 0};
+	const wchar_t* fileMenuShortcut[]={L"Ctrl+N", L"Ctrl+O", L"Ctrl+S", 0, 0, 0, 0, 0, 0};
 	const wchar_t* editMenuText[]={L"Undo", L"Redo", L"-", L"Cut", L"Copy", L"Paste", L"Delete", L"-", L"Find...", L"Find Next", L"Replace...", L"Go to...", L"-", L"Select All", L"Time/Date"};
+	const wchar_t* editMenuShortcut[]={L"Ctrl+Z", L"Ctrl+Y", 0, L"Ctrl+X", L"Ctrl+C", L"Ctrl+V", L"Del", 0, L"Ctrl+F", L"F3", L"Ctrl+H", 0, 0, L"Ctrl+A", 0};
 	const wchar_t* editMenuImage[]={L"_Undo.png", L"_Redo.png", 0, L"_Cut.png", L"_Copy.png", L"_Paste.png", L"_Delete.png", 0, 0, 0, 0, 0, 0, 0, 0};
 
 	for(int i=0;i<sizeof(imageButtons)/sizeof(*imageButtons);i++)
@@ -125,14 +131,14 @@ void CreateToolbar(Ptr<INativeImage> (&imageButtons)[count], GuiStackComposition
 				{
 					button=new GuiMenuButton(new win7::Win7ToolstripButtonStyle(win7::Win7ToolstripButtonStyle::DropdownButton));
 					button->CreateSubMenu();
-					button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(fileMenuText, fileMenuImage));
+					button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(fileMenuText, fileMenuImage, fileMenuShortcut));
 				}
 				break;
 			case 1:
 				{
 					button=new GuiMenuButton(new win7::Win7ToolstripButtonStyle(win7::Win7ToolstripButtonStyle::SplitButton));
 					button->CreateSubMenu();
-					button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(editMenuText, editMenuImage));
+					button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(editMenuText, editMenuImage, editMenuShortcut));
 				}
 				break;
 			default:
@@ -166,10 +172,12 @@ void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 
 	const wchar_t* fileMenuText[]={L"New", L"Open", L"Save", L"Save As...", L"-", L"Page Setting...", L"Print...", L"-", L"Exit"};
 	const wchar_t* fileMenuImage[]={L"_New.png", L"_Open.png", L"_Save.png", L"_SaveAs.png", 0, 0, L"_Print.png", 0, 0};
+	const wchar_t* fileMenuShortcut[]={L"Ctrl+N", L"Ctrl+O", L"Ctrl+S", 0, 0, 0, 0, 0, 0};
 	const wchar_t* fileNewMenuText[]={L"Project...", L"Web Site...", L"Team Project...", L"File...", L"Project From Existing Code..."};
 	const wchar_t* fileOpenMenuText[]={L"Project/Solution...", L"Web Site...", L"Team Project...", L"File...", L"Convert..."};
 	const wchar_t* filePrintMenuText[]={L"Print", L"Don't Print"};
 	const wchar_t* editMenuText[]={L"Undo", L"Redo", L"-", L"Cut", L"Copy", L"Paste", L"Delete", L"-", L"Find...", L"Find Next", L"Replace...", L"Go to...", L"-", L"Select All", L"Time/Date"};
+	const wchar_t* editMenuShortcut[]={L"Ctrl+Z", L"Ctrl+Y", 0, L"Ctrl+X", L"Ctrl+C", L"Ctrl+V", L"Del", 0, L"Ctrl+F", L"F3", L"Ctrl+H", 0, 0, L"Ctrl+A", 0};
 	const wchar_t* editMenuImage[]={L"_Undo.png", L"_Redo.png", 0, L"_Cut.png", L"_Copy.png", L"_Paste.png", L"_Delete.png", 0, 0, 0, 0, 0, 0, 0, 0};
 	const wchar_t* formatMenuText[]={L"Wrap Text", L"Font..."};
 	const wchar_t* viewMenuText[]={L"Status Bar"};
@@ -193,13 +201,13 @@ void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 			switch(i)
 			{
 			case 0:
-				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(fileMenuText, fileMenuImage));
+				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(fileMenuText, fileMenuImage, fileMenuShortcut));
 				CreateSubMenu(button->GetSubMenu(), 0, CreateSubMenu(fileNewMenuText));
 				CreateSubMenu(button->GetSubMenu(), 1, CreateSubMenu(fileOpenMenuText));
 				CreateSubMenu(button->GetSubMenu(), 6, CreateSubMenu(filePrintMenuText));
 				break;
 			case 1:
-				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(editMenuText, editMenuImage));
+				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(editMenuText, editMenuImage, editMenuShortcut));
 				break;
 			case 2:
 				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(formatMenuText));
