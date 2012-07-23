@@ -147,10 +147,14 @@ MenuButton
 					/// <summary>Notify that the image for the menu button is changed.</summary>
 					/// <param name="value">The image for the menu button.</param>
 					virtual void						SetImage(Ptr<GuiImageData> value)=0;
+					/// <summary>Notify that the shortcut key text for the menu button is changed.</summary>
+					/// <param name="value">The shortcut key text for the menu button.</param>
+					virtual void						SetShortcutText(const WString& value)=0;
 				};
 			protected:
 				IStyleController*						styleController;
 				Ptr<GuiImageData>						image;
+				WString									shortcutText;
 				GuiMenu*								subMenu;
 				bool									ownedSubMenu;
 				Size									preferredMenuClientSize;
@@ -178,6 +182,12 @@ MenuButton
 				/// <summary>Set the image for the menu button.</summary>
 				/// <param name="value">The image for the menu button.</param>
 				void									SetImage(Ptr<GuiImageData> value);
+				/// <summary>Get the shortcut key text for the menu button.</summary>
+				/// <returns>The shortcut key text for the menu button.</returns>
+				const WString&							GetShortcutText();
+				/// <summary>Set the shortcut key text for the menu button.</summary>
+				/// <param name="value">The shortcut key text for the menu button.</param>
+				void									SetShortcutText(const WString& value);
 
 				/// <summary>Test does the sub menu exist.</summary>
 				/// <returns>Returns true if the sub menu exists.</returns>

@@ -304,6 +304,20 @@ GuiMenuButton
 				}
 			}
 
+			const WString& GuiMenuButton::GetShortcutText()
+			{
+				return shortcutText;
+			}
+
+			void GuiMenuButton::SetShortcutText(const WString& value)
+			{
+				if(shortcutText!=value)
+				{
+					shortcutText=value;
+					styleController->SetShortcutText(shortcutText);
+				}
+			}
+
 			bool GuiMenuButton::IsSubMenuExists()
 			{
 				return subMenu!=0;

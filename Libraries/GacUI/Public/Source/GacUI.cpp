@@ -2368,6 +2368,20 @@ GuiMenuButton
 				}
 			}
 
+			const WString& GuiMenuButton::GetShortcutText()
+			{
+				return shortcutText;
+			}
+
+			void GuiMenuButton::SetShortcutText(const WString& value)
+			{
+				if(shortcutText!=value)
+				{
+					shortcutText=value;
+					styleController->SetShortcutText(shortcutText);
+				}
+			}
+
 			bool GuiMenuButton::IsSubMenuExists()
 			{
 				return subMenu!=0;
@@ -12190,6 +12204,10 @@ Win7ListViewColumnHeaderStyle
 			{
 			}
 
+			void Win7ListViewColumnHeaderStyle::SetShortcutText(const WString& value)
+			{
+			}
+
 			void Win7ListViewColumnHeaderStyle::SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)
 			{
 				Margin margin=arrowComposition->GetAlignmentToParent();
@@ -12811,6 +12829,10 @@ Win7MenuBarButtonStyle
 			{
 			}
 
+			void Win7MenuBarButtonStyle::SetShortcutText(const WString& value)
+			{
+			}
+
 			void Win7MenuBarButtonStyle::Transfer(GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)
@@ -12903,6 +12925,7 @@ Win7MenuItemButtonStyle
 			void Win7MenuItemButtonStyle::SetFont(const FontProperties& value)
 			{
 				Win7SetFont(elements.textElement, elements.textComposition, value);
+				Win7SetFont(elements.shortcutElement, elements.shortcutComposition, value);
 			}
 
 			void Win7MenuItemButtonStyle::SetVisuallyEnabled(bool value)
@@ -12949,6 +12972,11 @@ Win7MenuItemButtonStyle
 				{
 					elements.imageElement->SetImage(0, 0);
 				}
+			}
+
+			void Win7MenuItemButtonStyle::SetShortcutText(const WString& value)
+			{
+				elements.shortcutElement->SetText(value);
 			}
 
 			void Win7MenuItemButtonStyle::Transfer(GuiButton::ControlState value)
@@ -14314,13 +14342,14 @@ Win7MenuItemButtonElements
 					GuiTableComposition* table=new GuiTableComposition;
 					button.mainComposition->AddChild(table);
 					table->SetAlignmentToParent(Margin(2, 0, 2, 0));
-					table->SetRowsAndColumns(1, 4);
+					table->SetRowsAndColumns(1, 5);
 
 					table->SetRowOption(0, GuiCellOption::PercentageOption(1.0));
 					table->SetColumnOption(0, GuiCellOption::AbsoluteOption(24));
 					table->SetColumnOption(1, GuiCellOption::AbsoluteOption(2));
 					table->SetColumnOption(2, GuiCellOption::PercentageOption(1.0));
-					table->SetColumnOption(3, GuiCellOption::AbsoluteOption(10));
+					table->SetColumnOption(3, GuiCellOption::MinSizeOption());
+					table->SetColumnOption(4, GuiCellOption::AbsoluteOption(10));
 					
 					{
 						GuiCellComposition* cell=new GuiCellComposition;
@@ -14354,13 +14383,21 @@ Win7MenuItemButtonElements
 						cell->AddChild(button.textComposition);
 					}
 					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 3, 1, 1);
+
+						Win7CreateSolidLabelElement(button.shortcutElement, button.shortcutComposition, Alignment::Right, Alignment::Center);
+						cell->AddChild(button.shortcutComposition);
+					}
+					{
 						button.subMenuArrowElement=common_styles::CommonFragmentBuilder::BuildRightArrow();
 
 						GuiCellComposition* cell=new GuiCellComposition;
 						button.subMenuArrowComposition=cell;
 						cell->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
 						table->AddChild(cell);
-						cell->SetSite(0, 3, 1, 1);
+						cell->SetSite(0, 4, 1, 1);
 						cell->SetOwnedElement(button.subMenuArrowElement);
 						cell->SetVisible(false);
 					}
@@ -15126,6 +15163,10 @@ Win7ToolstripButtonStyle
 				{
 					imageElement->SetImage(0, 0);
 				}
+			}
+
+			void Win7ToolstripButtonStyle::SetShortcutText(const WString& value)
+			{
 			}
 
 			void Win7ToolstripButtonStyle::Transfer(controls::GuiButton::ControlState value)

@@ -271,6 +271,10 @@ Win7ToolstripButtonStyle
 				}
 			}
 
+			void Win7ToolstripButtonStyle::SetShortcutText(const WString& value)
+			{
+			}
+
 			void Win7ToolstripButtonStyle::Transfer(controls::GuiButton::ControlState value)
 			{
 				if(controlStyle!=value)

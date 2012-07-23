@@ -115,6 +115,7 @@ List Control Buttons
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
 				void										SetImage(Ptr<controls::GuiImageData> value)override;
+				void										SetShortcutText(const WString& value)override;
 				void										SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)override;
 			};
 			

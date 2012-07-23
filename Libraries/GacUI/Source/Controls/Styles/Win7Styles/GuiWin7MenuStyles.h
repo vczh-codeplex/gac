@@ -89,6 +89,7 @@ Menu Button
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
 				void										SetImage(Ptr<controls::GuiImageData> value)override;
+				void										SetShortcutText(const WString& value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
@@ -118,6 +119,7 @@ Menu Button
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
 				void										SetImage(Ptr<controls::GuiImageData> value)override;
+				void										SetShortcutText(const WString& value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			

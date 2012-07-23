@@ -17650,10 +17650,12 @@ MenuButton
 					virtual void						SetSubMenuOpening(bool value)=0;
 					virtual GuiButton*					GetSubMenuHost()=0;
 					virtual void						SetImage(Ptr<GuiImageData> value)=0;
+					virtual void						SetShortcutText(const WString& value)=0;
 				};
 			protected:
 				IStyleController*						styleController;
 				Ptr<GuiImageData>						image;
+				WString									shortcutText;
 				GuiMenu*								subMenu;
 				bool									ownedSubMenu;
 				Size									preferredMenuClientSize;
@@ -17674,6 +17676,8 @@ MenuButton
 
 				Ptr<GuiImageData>						GetImage();
 				void									SetImage(Ptr<GuiImageData> value);
+				const WString&							GetShortcutText();
+				void									SetShortcutText(const WString& value);
 
 				bool									IsSubMenuExists();
 				GuiMenu*								GetSubMenu();
@@ -19370,6 +19374,8 @@ Button Configuration
 				elements::GuiImageFrameElement*				imageElement;
 				elements::GuiSolidLabelElement*				textElement;
 				compositions::GuiBoundsComposition*			textComposition;
+				elements::GuiSolidLabelElement*				shortcutElement;
+				compositions::GuiBoundsComposition*			shortcutComposition;
 				elements::GuiPolygonElement*				subMenuArrowElement;
 				compositions::GuiGraphicsComposition*		subMenuArrowComposition;
 				compositions::GuiBoundsComposition*			mainComposition;
@@ -19823,6 +19829,7 @@ Menu Button
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
 				void										SetImage(Ptr<controls::GuiImageData> value)override;
+				void										SetShortcutText(const WString& value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
@@ -19850,6 +19857,7 @@ Menu Button
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
 				void										SetImage(Ptr<controls::GuiImageData> value)override;
+				void										SetShortcutText(const WString& value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 			
@@ -20047,6 +20055,7 @@ Toolstrip Button
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
 				void										SetImage(Ptr<controls::GuiImageData> value)override;
+				void										SetShortcutText(const WString& value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 
@@ -20334,6 +20343,7 @@ List Control Buttons
 				void										SetSubMenuOpening(bool value)override;
 				controls::GuiButton*						GetSubMenuHost()override;
 				void										SetImage(Ptr<controls::GuiImageData> value)override;
+				void										SetShortcutText(const WString& value)override;
 				void										SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)override;
 			};
 			
