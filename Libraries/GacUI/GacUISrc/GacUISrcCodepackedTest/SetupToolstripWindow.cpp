@@ -45,8 +45,10 @@ GuiBoundsComposition* CreateImageFrame(Ptr<INativeImage> image, int frameIndex=0
 	return composition;
 }
 
-GuiStackComposition* CreateSubMenuInternal(int count, const wchar_t** menuText, const wchar_t** menuImage, const wchar_t** menuShortcut)
+GuiStackComposition* CreateSubMenuInternal(GuiControlHost* controlHost, int count, const wchar_t** menuText, const wchar_t** menuImage, const wchar_t** menuShortcut)
 {
+	Ptr<GuiSubComponentMeasurer> measurer=new GuiSubComponentMeasurer;
+	controlHost->AddComponent(new GuiObjectComponent<GuiSubComponentMeasurer>(measurer));
 	INativeImageService* imageService=GetCurrentController()->ImageService();
 
 	GuiStackComposition* menuStack=new GuiStackComposition;
@@ -77,6 +79,7 @@ GuiStackComposition* CreateSubMenuInternal(int count, const wchar_t** menuText, 
 				button->SetShortcutText(menuShortcut[i]);
 			}
 			menuItem=button;
+			measurer->AttachMeasuringSource(dynamic_cast<GuiMenuButton::IStyleController*>(button->GetStyleController())->GetMeasuringSource());
 		}
 		menuItem->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 
@@ -84,19 +87,20 @@ GuiStackComposition* CreateSubMenuInternal(int count, const wchar_t** menuText, 
 		item->AddChild(menuItem->GetBoundsComposition());
 		menuStack->AddChild(item);
 	}
+	measurer->MeasureAndUpdate(GuiMenuButton::MenuItemSubComponentMeasuringCategoryName, GuiSubComponentMeasurer::Horizontal);
 	return menuStack;
 }
 
 template<int count>
-GuiStackComposition* CreateSubMenu(const wchar_t* (&menuText)[count])
+GuiStackComposition* CreateSubMenu(GuiControlHost* controlHost, const wchar_t* (&menuText)[count])
 {
-	return CreateSubMenuInternal(count, menuText, 0, 0);
+	return CreateSubMenuInternal(controlHost, count, menuText, 0, 0);
 }
 
 template<int count>
-GuiStackComposition* CreateSubMenu(const wchar_t* (&menuText)[count], const wchar_t* (&menuImage)[count], const wchar_t* (&menuShortcut)[count])
+GuiStackComposition* CreateSubMenu(GuiControlHost* controlHost, const wchar_t* (&menuText)[count], const wchar_t* (&menuImage)[count], const wchar_t* (&menuShortcut)[count])
 {
-	return CreateSubMenuInternal(count, menuText, menuImage, menuShortcut);
+	return CreateSubMenuInternal(controlHost, count, menuText, menuImage, menuShortcut);
 }
 
 void CreateSubMenu(GuiMenu* menu, int index, GuiStackComposition* subMenu)
@@ -111,7 +115,7 @@ void CreateSubMenu(GuiMenu* menu, int index, GuiStackComposition* subMenu)
 }
 
 template<int count>
-void CreateToolbar(Ptr<INativeImage> (&imageButtons)[count], GuiStackComposition* toolStack)
+void CreateToolbar(GuiControlHost* controlHost, Ptr<INativeImage> (&imageButtons)[count], GuiStackComposition* toolStack)
 {
 	const wchar_t* fileMenuText[]={L"New", L"Open", L"Save", L"Save As...", L"-", L"Page Setting...", L"Print...", L"-", L"Exit"};
 	const wchar_t* fileMenuImage[]={L"_New.png", L"_Open.png", L"_Save.png", L"_SaveAs.png", 0, 0, L"_Print.png", 0, 0};
@@ -131,14 +135,14 @@ void CreateToolbar(Ptr<INativeImage> (&imageButtons)[count], GuiStackComposition
 				{
 					button=new GuiMenuButton(new win7::Win7ToolstripButtonStyle(win7::Win7ToolstripButtonStyle::DropdownButton));
 					button->CreateSubMenu();
-					button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(fileMenuText, fileMenuImage, fileMenuShortcut));
+					button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(controlHost, fileMenuText, fileMenuImage, fileMenuShortcut));
 				}
 				break;
 			case 1:
 				{
 					button=new GuiMenuButton(new win7::Win7ToolstripButtonStyle(win7::Win7ToolstripButtonStyle::SplitButton));
 					button->CreateSubMenu();
-					button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(editMenuText, editMenuImage, editMenuShortcut));
+					button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(controlHost, editMenuText, editMenuImage, editMenuShortcut));
 				}
 				break;
 			default:
@@ -201,22 +205,22 @@ void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 			switch(i)
 			{
 			case 0:
-				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(fileMenuText, fileMenuImage, fileMenuShortcut));
-				CreateSubMenu(button->GetSubMenu(), 0, CreateSubMenu(fileNewMenuText));
-				CreateSubMenu(button->GetSubMenu(), 1, CreateSubMenu(fileOpenMenuText));
-				CreateSubMenu(button->GetSubMenu(), 6, CreateSubMenu(filePrintMenuText));
+				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(controlHost, fileMenuText, fileMenuImage, fileMenuShortcut));
+				CreateSubMenu(button->GetSubMenu(), 0, CreateSubMenu(controlHost, fileNewMenuText));
+				CreateSubMenu(button->GetSubMenu(), 1, CreateSubMenu(controlHost, fileOpenMenuText));
+				CreateSubMenu(button->GetSubMenu(), 6, CreateSubMenu(controlHost, filePrintMenuText));
 				break;
 			case 1:
-				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(editMenuText, editMenuImage, editMenuShortcut));
+				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(controlHost, editMenuText, editMenuImage, editMenuShortcut));
 				break;
 			case 2:
-				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(formatMenuText));
+				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(controlHost, formatMenuText));
 				break;
 			case 3:
-				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(viewMenuText));
+				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(controlHost, viewMenuText));
 				break;
 			case 4:
-				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(helpMenuText));
+				button->GetSubMenu()->GetContainerComposition()->AddChild(CreateSubMenu(controlHost, helpMenuText));
 				break;
 			}
 		}
@@ -245,7 +249,7 @@ void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 			imageService->CreateImageFromFile(L"Resources\\_Paste.png"),
 			imageService->CreateImageFromFile(L"Resources\\_Delete.png"),
 		};
-		CreateToolbar(imageButtons, smallToolStack);
+		CreateToolbar(controlHost, imageButtons, smallToolStack);
 	}
 
 	GuiStackComposition* bigToolStack=new GuiStackComposition;
@@ -260,7 +264,7 @@ void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 			imageService->CreateImageFromFile(L"Resources\\Open.png"),
 			imageService->CreateImageFromFile(L"Resources\\Save.png"),
 		};
-		CreateToolbar(imageButtons, bigToolStack);
+		CreateToolbar(controlHost, imageButtons, bigToolStack);
 	}
 	
 	GuiBoundsComposition* picGif=0;

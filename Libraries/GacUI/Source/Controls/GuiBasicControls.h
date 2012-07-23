@@ -218,6 +218,22 @@ Basic Construction
 				GuiComponent();
 				~GuiComponent();
 			};
+
+			template<typename T>
+			class GuiObjectComponent : public GuiComponent
+			{
+			public:
+				Ptr<T>				object;
+
+				GuiObjectComponent()
+				{
+				}
+
+				GuiObjectComponent(Ptr<T> _object)
+					:object(_object)
+				{
+				}
+			};
 			
 			/// <summary>
 			/// Represnets an image to display.

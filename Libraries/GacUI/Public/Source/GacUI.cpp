@@ -13025,7 +13025,7 @@ Win7MenuItemButtonStyle
 
 			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win7MenuItemButtonStyle::GetMeasuringSource()
 			{
-				return 0;
+				return measuringSource.Obj();
 			}
 
 			void Win7MenuItemButtonStyle::Transfer(GuiButton::ControlState value)
