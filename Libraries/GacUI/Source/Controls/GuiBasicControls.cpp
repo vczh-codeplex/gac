@@ -403,7 +403,7 @@ GuiButton
 					mousePressing=true;
 					boundsComposition->GetRelatedGraphicsHost()->SetFocus(boundsComposition);
 					UpdateControlState();
-					if(!clickOnMouseUp)
+					if(!clickOnMouseUp && arguments.eventSource->GetAssociatedControl()==this)
 					{
 						Clicked.Execute(GetNotifyEventArguments());
 					}
@@ -419,7 +419,7 @@ GuiButton
 				}
 				if(GetVisuallyEnabled())
 				{
-					if(mouseHoving && clickOnMouseUp)
+					if(mouseHoving && clickOnMouseUp && arguments.eventSource->GetAssociatedControl()==this)
 					{
 						Clicked.Execute(GetNotifyEventArguments());
 					}
