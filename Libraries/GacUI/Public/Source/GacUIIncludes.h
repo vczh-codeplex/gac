@@ -14461,7 +14461,7 @@ ColorizedText
 #endif
 
 /***********************************************************************
-LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSEVENTRECEIVER.H
+LIBRARIES\GACUI\SOURCE\GRAPHICSCOMPOSITION\GUIGRAPHICSEVENTRECEIVER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -14845,7 +14845,7 @@ Event Receiver
 #endif
 
 /***********************************************************************
-LIBRARIES\GACUI\SOURCE\GRAPHICSELEMENT\GUIGRAPHICSCOMPOSITION.H
+LIBRARIES\GACUI\SOURCE\GRAPHICSCOMPOSITION\GUIGRAPHICSCOMPOSITIONBASE.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -14855,8 +14855,8 @@ GacUI::Composition System
 Interfaces:
 ***********************************************************************/
 
-#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSCOMPOSITION
-#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSCOMPOSITION
+#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSCOMPOSITIONBASE
+#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSCOMPOSITIONBASE
 
 
 namespace vl
@@ -14989,6 +14989,33 @@ Basic Construction
 				Size								GetMinPreferredClientSize()override;
 				Rect								GetPreferredBounds()override;
 			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+LIBRARIES\GACUI\SOURCE\GRAPHICSCOMPOSITION\GUIGRAPHICSBASICCOMPOSITION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Composition System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSBASICCOMPOSITION
+#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSBASICCOMPOSITION
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace compositions
+		{
 
 /***********************************************************************
 Basic Compositions
@@ -15032,6 +15059,33 @@ Basic Compositions
 				void								SetAlignmentToParent(Margin value);
 				bool								IsAlignedToParent();
 			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+LIBRARIES\GACUI\SOURCE\GRAPHICSCOMPOSITION\GUIGRAPHICSTABLECOMPOSITION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Composition System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSTABLECOMPOSITION
+#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSTABLECOMPOSITION
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace compositions
+		{
 
 /***********************************************************************
 Table Compositions
@@ -15191,6 +15245,33 @@ Table Compositions
 
 				Rect								GetBounds()override;
 			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+LIBRARIES\GACUI\SOURCE\GRAPHICSCOMPOSITION\GUIGRAPHICSSTACKCOMPOSITION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Composition System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSSTACKCOMPOSITION
+#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSSTACKCOMPOSITION
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace compositions
+		{
 
 /***********************************************************************
 Stack Compositions
@@ -15266,6 +15347,33 @@ Stack Compositions
 				Margin								GetExtraMargin();
 				void								SetExtraMargin(Margin value);
 			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+LIBRARIES\GACUI\SOURCE\GRAPHICSCOMPOSITION\GUIGRAPHICSSPECIALIZEDCOMPOSITION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Composition System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSSPECIALIZEDCOMPOSITION
+#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSSPECIALIZEDCOMPOSITION
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace compositions
+		{
 
 /***********************************************************************
 Specialized Compositions
@@ -15326,6 +15434,33 @@ Specialized Compositions
 				bool								IsSizeAffectParent()override;
 				Rect								GetBounds()override;
 			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+LIBRARIES\GACUI\SOURCE\GRAPHICSCOMPOSITION\GUIGRAPHICSCOMPOSITION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Composition System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSCOMPOSITION
+#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSCOMPOSITION
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace compositions
+		{
 		}
 	}
 }

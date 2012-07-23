@@ -15239,7 +15239,208 @@ Win7ToolstripSplitterStyle
 }
 
 /***********************************************************************
-GraphicsElement\GuiGraphicsComposition.cpp
+GraphicsComposition\GuiGraphicsBasicComposition.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace compositions
+		{
+			using namespace collections;
+			using namespace controls;
+			using namespace elements;
+
+/***********************************************************************
+GuiWindowComposition
+***********************************************************************/
+
+			GuiWindowComposition::GuiWindowComposition()
+				:attachedWindow(0)
+			{
+			}
+
+			GuiWindowComposition::~GuiWindowComposition()
+			{
+			}
+
+			INativeWindow* GuiWindowComposition::GetAttachedWindow()
+			{
+				return attachedWindow;
+			}
+
+			void GuiWindowComposition::SetAttachedWindow(INativeWindow* window)
+			{
+				attachedWindow=window;
+				SetRenderTarget(attachedWindow?GetGuiGraphicsResourceManager()->GetRenderTarget(attachedWindow):0);
+			}
+
+			Rect GuiWindowComposition::GetBounds()
+			{
+				return attachedWindow?Rect(Point(0, 0), attachedWindow->GetClientSize()):Rect();
+			}
+
+			void GuiWindowComposition::SetMargin(Margin value)
+			{
+			}
+
+/***********************************************************************
+GuiBoundsComposition
+***********************************************************************/
+
+			GuiBoundsComposition::GuiBoundsComposition()
+			{
+				BoundsChanged.SetAssociatedComposition(this);
+				ClearAlignmentToParent();
+			}
+
+			GuiBoundsComposition::~GuiBoundsComposition()
+			{
+			}
+
+			GuiGraphicsComposition::ParentSizeAffection GuiBoundsComposition::GetAffectionFromParent()
+			{
+				if(alignmentToParent==Margin(-1, -1, -1, -1))
+				{
+					return GuiGraphicsComposition::NotAffectedByParent;
+				}
+				else if(alignmentToParent.left!=-1 || alignmentToParent.top!=-1 || alignmentToParent.right!=-1 || alignmentToParent.bottom!=-1)
+				{
+					return GuiGraphicsComposition::TotallyDecidedByParent;
+				}
+				else
+				{
+					return GuiGraphicsComposition::AffectedByParent;
+				}
+			}
+
+			Rect GuiBoundsComposition::GetPreferredBounds()
+			{
+				Rect result=GetBoundsInternal(compositionBounds);
+				if(GetParent() && IsAlignedToParent())
+				{
+					if(alignmentToParent.left>=0)
+					{
+						int offset=alignmentToParent.left-result.x1;
+						result.x1+=offset;
+						result.x2+=offset;
+					}
+					if(alignmentToParent.top>=0)
+					{
+						int offset=alignmentToParent.top-result.y1;
+						result.y1+=offset;
+						result.y2+=offset;
+					}
+					if(alignmentToParent.right>=0)
+					{
+						result.x2+=alignmentToParent.right;
+					}
+					if(alignmentToParent.bottom>=0)
+					{
+						result.y2+=alignmentToParent.bottom;
+					}
+				}
+				return result;
+			}
+
+			Rect GuiBoundsComposition::GetBounds()
+			{
+				Rect result=GetPreferredBounds();
+				if(GetParent() && IsAlignedToParent())
+				{
+					Size clientSize=GetParent()->GetClientArea().GetSize();
+					if(alignmentToParent.left>=0 && alignmentToParent.right>=0)
+					{
+						result.x1=alignmentToParent.left;
+						result.x2=clientSize.x-alignmentToParent.right;
+					}
+					else if(alignmentToParent.left>=0)
+					{
+						int width=result.Width();
+						result.x1=alignmentToParent.left;
+						result.x2=result.x1+width;
+					}
+					else if(alignmentToParent.right>=0)
+					{
+						int width=result.Width();
+						result.x2=clientSize.x-alignmentToParent.right;
+						result.x1=result.x2-width;
+					}
+
+					if(alignmentToParent.top>=0 && alignmentToParent.bottom>=0)
+					{
+						result.y1=alignmentToParent.top;
+						result.y2=clientSize.y-alignmentToParent.bottom;
+					}
+					else if(alignmentToParent.top>=0)
+					{
+						int height=result.Height();
+						result.y1=alignmentToParent.top;
+						result.y2=result.y1+height;
+					}
+					else if(alignmentToParent.bottom>=0)
+					{
+						int height=result.Height();
+						result.y2=clientSize.y-alignmentToParent.bottom;
+						result.y1=result.y2-height;
+					}
+				}
+				if(previousBounds!=result)
+				{
+					previousBounds=result;
+					BoundsChanged.Execute(GuiEventArgs(this));
+				}
+				return result;
+			}
+
+			void GuiBoundsComposition::SetBounds(Rect value)
+			{
+				compositionBounds=value;
+			}
+
+			void GuiBoundsComposition::ClearAlignmentToParent()
+			{
+				alignmentToParent=Margin(-1, -1, -1, -1);
+			}
+
+			Margin GuiBoundsComposition::GetAlignmentToParent()
+			{
+				return alignmentToParent;
+			}
+
+			void GuiBoundsComposition::SetAlignmentToParent(Margin value)
+			{
+				alignmentToParent=value;
+			}
+
+			bool GuiBoundsComposition::IsAlignedToParent()
+			{
+				return alignmentToParent!=Margin(-1, -1, -1, -1);
+			}
+		}
+	}
+}
+
+/***********************************************************************
+GraphicsComposition\GuiGraphicsComposition.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace compositions
+		{
+			using namespace collections;
+			using namespace controls;
+			using namespace elements;
+		}
+	}
+}
+
+/***********************************************************************
+GraphicsComposition\GuiGraphicsCompositionBase.cpp
 ***********************************************************************/
 
 namespace vl
@@ -15765,173 +15966,577 @@ GuiGraphicsSite
 			{
 				return GetBoundsInternal(Rect(Point(0, 0), GetMinPreferredClientSize()));
 			}
+		}
+	}
+}
 
 /***********************************************************************
-GuiWindowComposition
+GraphicsComposition\GuiGraphicsEventReceiver.cpp
 ***********************************************************************/
 
-			GuiWindowComposition::GuiWindowComposition()
-				:attachedWindow(0)
-			{
-			}
-
-			GuiWindowComposition::~GuiWindowComposition()
-			{
-			}
-
-			INativeWindow* GuiWindowComposition::GetAttachedWindow()
-			{
-				return attachedWindow;
-			}
-
-			void GuiWindowComposition::SetAttachedWindow(INativeWindow* window)
-			{
-				attachedWindow=window;
-				SetRenderTarget(attachedWindow?GetGuiGraphicsResourceManager()->GetRenderTarget(attachedWindow):0);
-			}
-
-			Rect GuiWindowComposition::GetBounds()
-			{
-				return attachedWindow?Rect(Point(0, 0), attachedWindow->GetClientSize()):Rect();
-			}
-
-			void GuiWindowComposition::SetMargin(Margin value)
-			{
-			}
+namespace vl
+{
+	namespace presentation
+	{
+		namespace compositions
+		{
 
 /***********************************************************************
-GuiBoundsComposition
+Event Receiver
 ***********************************************************************/
 
-			GuiBoundsComposition::GuiBoundsComposition()
+			GuiGraphicsEventReceiver::GuiGraphicsEventReceiver(GuiGraphicsComposition* _sender)
+				:sender(_sender)
+				,leftButtonDown(_sender)
+				,leftButtonUp(_sender)
+				,leftButtonDoubleClick(_sender)
+				,middleButtonDown(_sender)
+				,middleButtonUp(_sender)
+				,middleButtonDoubleClick(_sender)
+				,rightButtonDown(_sender)
+				,rightButtonUp(_sender)
+				,rightButtonDoubleClick(_sender)
+				,horizontalWheel(_sender)
+				,verticalWheel(_sender)
+				,mouseMove(_sender)
+				,mouseEnter(_sender)
+				,mouseLeave(_sender)
+				,previewKey(_sender)
+				,keyDown(_sender)
+				,keyUp(_sender)
+				,systemKeyDown(_sender)
+				,systemKeyUp(_sender)
+				,previewCharInput(_sender)
+				,charInput(_sender)
+				,gotFocus(_sender)
+				,lostFocus(_sender)
+				,caretNotify(_sender)
 			{
-				BoundsChanged.SetAssociatedComposition(this);
-				ClearAlignmentToParent();
 			}
 
-			GuiBoundsComposition::~GuiBoundsComposition()
+			GuiGraphicsEventReceiver::~GuiGraphicsEventReceiver()
 			{
 			}
 
-			GuiGraphicsComposition::ParentSizeAffection GuiBoundsComposition::GetAffectionFromParent()
+			GuiGraphicsComposition* GuiGraphicsEventReceiver::GetAssociatedComposition()
 			{
-				if(alignmentToParent==Margin(-1, -1, -1, -1))
+				return sender;
+			}
+		}
+	}
+}
+
+/***********************************************************************
+GraphicsComposition\GuiGraphicsSpecializedComposition.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace compositions
+		{
+
+/***********************************************************************
+GuiSideAlignedComposition
+***********************************************************************/
+
+			GuiSideAlignedComposition::GuiSideAlignedComposition()
+				:direction(Top)
+				,maxLength(10)
+				,maxRatio(1.0)
+			{
+			}
+
+			GuiSideAlignedComposition::~GuiSideAlignedComposition()
+			{
+			}
+
+			GuiSideAlignedComposition::Direction GuiSideAlignedComposition::GetDirection()
+			{
+				return direction;
+			}
+
+			void GuiSideAlignedComposition::SetDirection(Direction value)
+			{
+				direction=value;
+			}
+
+			int GuiSideAlignedComposition::GetMaxLength()
+			{
+				return maxLength;
+			}
+
+			void GuiSideAlignedComposition::SetMaxLength(int value)
+			{
+				if(value<0) value=0;
+				maxLength=value;
+			}
+
+			double GuiSideAlignedComposition::GetMaxRatio()
+			{
+				return maxRatio;
+			}
+
+			void GuiSideAlignedComposition::SetMaxRatio(double value)
+			{
+				maxRatio=
+					value<0?0:
+					value>1?1:
+					value;
+			}
+
+			GuiGraphicsComposition::ParentSizeAffection GuiSideAlignedComposition::GetAffectionFromParent()
+			{
+				return GuiGraphicsComposition::TotallyDecidedByParent;
+			}
+
+			bool GuiSideAlignedComposition::IsSizeAffectParent()
+			{
+				return false;
+			}
+
+			Rect GuiSideAlignedComposition::GetBounds()
+			{
+				GuiGraphicsComposition* parent=GetParent();
+				if(parent)
 				{
-					return GuiGraphicsComposition::NotAffectedByParent;
+					Rect bounds=parent->GetBounds();
+					int w=(int)(bounds.Width()*maxRatio);
+					int h=(int)(bounds.Height()*maxRatio);
+					if(w>maxLength) w=maxLength;
+					if(h>maxLength) h=maxLength;
+					switch(direction)
+					{
+					case Left:
+						{
+							bounds.x2=bounds.x1+w;
+						}
+						break;
+					case Top:
+						{
+							bounds.y2=bounds.y1+h;
+						}
+						break;
+					case Right:
+						{
+							bounds.x1=bounds.x2-w;
+						}
+						break;
+					case Bottom:
+						{
+							bounds.y1=bounds.y2-h;
+						}
+						break;
+					}
+					return bounds;
 				}
-				else if(alignmentToParent.left!=-1 || alignmentToParent.top!=-1 || alignmentToParent.right!=-1 || alignmentToParent.bottom!=-1)
+				return Rect();
+			}
+
+/***********************************************************************
+GuiPartialViewComposition
+***********************************************************************/
+
+			GuiPartialViewComposition::GuiPartialViewComposition()
+				:wRatio(0.0)
+				,wPageSize(1.0)
+				,hRatio(0.0)
+				,hPageSize(1.0)
+			{
+			}
+
+			GuiPartialViewComposition::~GuiPartialViewComposition()
+			{
+			}
+
+			double GuiPartialViewComposition::GetWidthRatio()
+			{
+				return wRatio;
+			}
+
+			double GuiPartialViewComposition::GetWidthPageSize()
+			{
+				return wPageSize;
+			}
+
+			double GuiPartialViewComposition::GetHeightRatio()
+			{
+				return hRatio;
+			}
+
+			double GuiPartialViewComposition::GetHeightPageSize()
+			{
+				return hPageSize;
+			}
+
+			void GuiPartialViewComposition::SetWidthRatio(double value)
+			{
+				wRatio=value;
+			}
+
+			void GuiPartialViewComposition::SetWidthPageSize(double value)
+			{
+				wPageSize=value;
+			}
+
+			void GuiPartialViewComposition::SetHeightRatio(double value)
+			{
+				hRatio=value;
+			}
+
+			void GuiPartialViewComposition::SetHeightPageSize(double value)
+			{
+				hPageSize=value;
+			}
+
+			GuiGraphicsComposition::ParentSizeAffection GuiPartialViewComposition::GetAffectionFromParent()
+			{
+				return GuiGraphicsComposition::TotallyDecidedByParent;
+			}
+
+			bool GuiPartialViewComposition::IsSizeAffectParent()
+			{
+				return false;
+			}
+
+			Rect GuiPartialViewComposition::GetBounds()
+			{
+				GuiGraphicsComposition* parent=GetParent();
+				if(parent)
 				{
-					return GuiGraphicsComposition::TotallyDecidedByParent;
+					Rect bounds=parent->GetBounds();
+					int w=bounds.Width();
+					int h=bounds.Height();
+					int pw=(int)(wPageSize*w);
+					int ph=(int)(hPageSize*h);
+
+					int ow=preferredMinSize.x-pw;
+					if(ow<0) ow=0;
+					int oh=preferredMinSize.y-ph;
+					if(oh<0) oh=0;
+
+					w-=ow;
+					h-=oh;
+					pw+=ow;
+					ph+=oh;
+
+					return Rect(Point((int)(wRatio*w), (int)(hRatio*h)), Size(pw, ph));
+				}
+				return Rect();
+			}
+		}
+	}
+}
+
+/***********************************************************************
+GraphicsComposition\GuiGraphicsStackComposition.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace compositions
+		{
+
+/***********************************************************************
+GuiStackComposition
+***********************************************************************/
+
+			void GuiStackComposition::UpdateStackItemBounds()
+			{
+				if(stackItemBounds.Count()!=stackItems.Count())
+				{
+					stackItemBounds.Resize(stackItems.Count());
+				}
+
+				stackItemTotalSize=Size(0, 0);
+				int x=extraMargin.left?extraMargin.left:0;
+				int y=extraMargin.top?extraMargin.top:0;
+				switch(direction)
+				{
+				case GuiStackComposition::Horizontal:
+					{
+						for(int i=0;i<stackItems.Count();i++)
+						{
+							Size itemSize=stackItems[i]->GetMinSize();
+							if(i>0) stackItemTotalSize.x+=padding;
+							if(stackItemTotalSize.y<itemSize.y) stackItemTotalSize.y=itemSize.y;
+							stackItemBounds[i]=Rect(Point(stackItemTotalSize.x+x, y), Size(itemSize.x, 0));
+							stackItemTotalSize.x+=itemSize.x;
+						}
+					}
+					break;
+				case GuiStackComposition::Vertical:
+					{
+						for(int i=0;i<stackItems.Count();i++)
+						{
+							Size itemSize=stackItems[i]->GetMinSize();
+							if(i>0) stackItemTotalSize.y+=padding;
+							if(stackItemTotalSize.x<itemSize.x) stackItemTotalSize.x=itemSize.x;
+							stackItemBounds[i]=Rect(Point(x, stackItemTotalSize.y+y), Size(0, itemSize.y));
+							stackItemTotalSize.y+=itemSize.y;
+						}
+					}
+					break;
+				}
+
+				FixStackItemSizes();
+			}
+
+			void GuiStackComposition::FixStackItemSizes()
+			{
+				switch(direction)
+				{
+				case Horizontal:
+					{
+						int y=0;
+						if(extraMargin.top>0) y+=extraMargin.top;
+						if(extraMargin.bottom>0) y+=extraMargin.bottom;
+
+						for(int i=0;i<stackItemBounds.Count();i++)
+						{
+							stackItemBounds[i].y2=stackItemBounds[i].y1+previousBounds.Height()-y;
+						}
+					}
+					break;
+				case Vertical:
+					{
+						int x=0;
+						if(extraMargin.left>0) x+=extraMargin.left;
+						if(extraMargin.right>0) x+=extraMargin.right;
+
+						for(int i=0;i<stackItemBounds.Count();i++)
+						{
+							stackItemBounds[i].x2=stackItemBounds[i].x1+previousBounds.Width()-x;
+						}
+					}
+					break;
+				}
+			}
+
+			void GuiStackComposition::OnChildInserted(GuiGraphicsComposition* child)
+			{
+				GuiBoundsComposition::OnChildInserted(child);
+				GuiStackItemComposition* item=dynamic_cast<GuiStackItemComposition*>(child);
+				if(item && !stackItems.Contains(item))
+				{
+					stackItems.Add(item);
+				}
+			}
+
+			void GuiStackComposition::OnChildRemoved(GuiGraphicsComposition* child)
+			{
+				GuiBoundsComposition::OnChildRemoved(child);
+				GuiStackItemComposition* item=dynamic_cast<GuiStackItemComposition*>(child);
+				if(item)
+				{
+					stackItems.Remove(item);
+				}
+			}
+
+			GuiStackComposition::GuiStackComposition()
+				:direction(Horizontal)
+				,padding(0)
+			{
+			}
+
+			GuiStackComposition::~GuiStackComposition()
+			{
+			}
+
+			const GuiStackComposition::IItemCompositionList& GuiStackComposition::GetStackItems()
+			{
+				return stackItems.Wrap();
+			}
+
+			bool GuiStackComposition::InsertStackItem(int index, GuiStackItemComposition* item)
+			{
+				index=stackItems.Insert(index, item);
+				if(!AddChild(item))
+				{
+					stackItems.RemoveAt(index);
+					return false;
 				}
 				else
 				{
-					return GuiGraphicsComposition::AffectedByParent;
+					return true;
 				}
 			}
 
-			Rect GuiBoundsComposition::GetPreferredBounds()
+			GuiStackComposition::Direction GuiStackComposition::GetDirection()
 			{
-				Rect result=GetBoundsInternal(compositionBounds);
-				if(GetParent() && IsAlignedToParent())
+				return direction;
+			}
+
+			void GuiStackComposition::SetDirection(Direction value)
+			{
+				direction=value;
+			}
+
+			int GuiStackComposition::GetPadding()
+			{
+				return padding;
+			}
+
+			void GuiStackComposition::SetPadding(int value)
+			{
+				padding=value;
+			}
+			
+			Size GuiStackComposition::GetMinPreferredClientSize()
+			{
+				Size minSize=GuiBoundsComposition::GetMinPreferredClientSize();
+				UpdateStackItemBounds();
+				if(GetMinSizeLimitation()==GuiGraphicsComposition::LimitToElementAndChildren)
 				{
-					if(alignmentToParent.left>=0)
+					if(minSize.x<stackItemTotalSize.x) minSize.x=stackItemTotalSize.x;
+					if(minSize.y<stackItemTotalSize.y) minSize.y=stackItemTotalSize.y;
+				}
+				int x=0;
+				int y=0;
+				if(extraMargin.left>0) x+=extraMargin.left;
+				if(extraMargin.right>0) x+=extraMargin.right;
+				if(extraMargin.top>0) y+=extraMargin.top;
+				if(extraMargin.bottom>0) y+=extraMargin.bottom;
+				return minSize+Size(x, y);
+			}
+
+			Rect GuiStackComposition::GetBounds()
+			{
+				Rect bounds=GuiBoundsComposition::GetBounds();
+				previousBounds=bounds;
+				FixStackItemSizes();
+				return bounds;
+			}
+
+			Margin GuiStackComposition::GetExtraMargin()
+			{
+				return extraMargin;
+			}
+
+			void GuiStackComposition::SetExtraMargin(Margin value)
+			{
+				extraMargin=value;
+			}
+
+			bool GuiStackComposition::IsStackItemClipped()
+			{
+				Rect clientArea=GetClientArea();
+				for(int i=0;i<stackItems.Count();i++)
+				{
+					Rect stackItemBounds=stackItems[i]->GetBounds();
+					switch(direction)
 					{
-						int offset=alignmentToParent.left-result.x1;
-						result.x1+=offset;
-						result.x2+=offset;
-					}
-					if(alignmentToParent.top>=0)
-					{
-						int offset=alignmentToParent.top-result.y1;
-						result.y1+=offset;
-						result.y2+=offset;
-					}
-					if(alignmentToParent.right>=0)
-					{
-						result.x2+=alignmentToParent.right;
-					}
-					if(alignmentToParent.bottom>=0)
-					{
-						result.y2+=alignmentToParent.bottom;
+					case Horizontal:
+						{
+							if(stackItemBounds.Left()<0 || stackItemBounds.Right()>=clientArea.Width())
+							{
+								return true;
+							}
+						}
+						break;
+					case Vertical:
+						{
+							if(stackItemBounds.Top()<0 || stackItemBounds.Bottom()>=clientArea.Height())
+							{
+								return true;
+							}
+						}
+						break;
 					}
 				}
+				return false;
+			}
+
+/***********************************************************************
+GuiStackItemComposition
+***********************************************************************/
+
+			void GuiStackItemComposition::OnParentChanged(GuiGraphicsComposition* oldParent, GuiGraphicsComposition* newParent)
+			{
+				GuiGraphicsSite::OnParentChanged(oldParent, newParent);
+				stackParent=newParent==0?0:dynamic_cast<GuiStackComposition*>(newParent);
+			}
+
+			Size GuiStackItemComposition::GetMinSize()
+			{
+				return GetBoundsInternal(bounds).GetSize();
+			}
+
+			GuiStackItemComposition::GuiStackItemComposition()
+			{
+				SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+			}
+
+			GuiStackItemComposition::~GuiStackItemComposition()
+			{
+			}
+
+			GuiGraphicsComposition::ParentSizeAffection GuiStackItemComposition::GetAffectionFromParent()
+			{
+				return GuiGraphicsComposition::AffectedByParent;
+			}
+
+			bool GuiStackItemComposition::IsSizeAffectParent()
+			{
+				return false;
+			}
+
+			Rect GuiStackItemComposition::GetBounds()
+			{
+				Rect result=bounds;
+				if(stackParent)
+				{
+					int index=stackParent->stackItems.IndexOf(this);
+					if(index!=-1)
+					{
+						if(stackParent->stackItemBounds.Count()!=stackParent->stackItems.Count())
+						{
+							stackParent->UpdateStackItemBounds();
+						}
+						result=stackParent->stackItemBounds[index];
+					}
+				}
+				result.x1-=extraMargin.left;
+				result.y1-=extraMargin.top;
+				result.x2+=extraMargin.right;
+				result.y2+=extraMargin.bottom;
 				return result;
 			}
 
-			Rect GuiBoundsComposition::GetBounds()
+			void GuiStackItemComposition::SetBounds(Rect value)
 			{
-				Rect result=GetPreferredBounds();
-				if(GetParent() && IsAlignedToParent())
-				{
-					Size clientSize=GetParent()->GetClientArea().GetSize();
-					if(alignmentToParent.left>=0 && alignmentToParent.right>=0)
-					{
-						result.x1=alignmentToParent.left;
-						result.x2=clientSize.x-alignmentToParent.right;
-					}
-					else if(alignmentToParent.left>=0)
-					{
-						int width=result.Width();
-						result.x1=alignmentToParent.left;
-						result.x2=result.x1+width;
-					}
-					else if(alignmentToParent.right>=0)
-					{
-						int width=result.Width();
-						result.x2=clientSize.x-alignmentToParent.right;
-						result.x1=result.x2-width;
-					}
-
-					if(alignmentToParent.top>=0 && alignmentToParent.bottom>=0)
-					{
-						result.y1=alignmentToParent.top;
-						result.y2=clientSize.y-alignmentToParent.bottom;
-					}
-					else if(alignmentToParent.top>=0)
-					{
-						int height=result.Height();
-						result.y1=alignmentToParent.top;
-						result.y2=result.y1+height;
-					}
-					else if(alignmentToParent.bottom>=0)
-					{
-						int height=result.Height();
-						result.y2=clientSize.y-alignmentToParent.bottom;
-						result.y1=result.y2-height;
-					}
-				}
-				if(previousBounds!=result)
-				{
-					previousBounds=result;
-					BoundsChanged.Execute(GuiEventArgs(this));
-				}
-				return result;
+				bounds=value;
 			}
 
-			void GuiBoundsComposition::SetBounds(Rect value)
+			Margin GuiStackItemComposition::GetExtraMargin()
 			{
-				compositionBounds=value;
+				return extraMargin;
 			}
 
-			void GuiBoundsComposition::ClearAlignmentToParent()
+			void GuiStackItemComposition::SetExtraMargin(Margin value)
 			{
-				alignmentToParent=Margin(-1, -1, -1, -1);
+				extraMargin=value;
 			}
+		}
+	}
+}
 
-			Margin GuiBoundsComposition::GetAlignmentToParent()
-			{
-				return alignmentToParent;
-			}
+/***********************************************************************
+GraphicsComposition\GuiGraphicsTableComposition.cpp
+***********************************************************************/
 
-			void GuiBoundsComposition::SetAlignmentToParent(Margin value)
-			{
-				alignmentToParent=value;
-			}
-
-			bool GuiBoundsComposition::IsAlignedToParent()
-			{
-				return alignmentToParent!=Margin(-1, -1, -1, -1);
-			}
+namespace vl
+{
+	namespace presentation
+	{
+		namespace compositions
+		{
+			using namespace collections;
+			using namespace controls;
+			using namespace elements;
 
 /***********************************************************************
 GuiTableComposition
@@ -16649,476 +17254,6 @@ GuiCellComposition
 					return Rect();
 				}
 			}
-
-/***********************************************************************
-GuiStackComposition
-***********************************************************************/
-
-			void GuiStackComposition::UpdateStackItemBounds()
-			{
-				if(stackItemBounds.Count()!=stackItems.Count())
-				{
-					stackItemBounds.Resize(stackItems.Count());
-				}
-
-				stackItemTotalSize=Size(0, 0);
-				int x=extraMargin.left?extraMargin.left:0;
-				int y=extraMargin.top?extraMargin.top:0;
-				switch(direction)
-				{
-				case GuiStackComposition::Horizontal:
-					{
-						for(int i=0;i<stackItems.Count();i++)
-						{
-							Size itemSize=stackItems[i]->GetMinSize();
-							if(i>0) stackItemTotalSize.x+=padding;
-							if(stackItemTotalSize.y<itemSize.y) stackItemTotalSize.y=itemSize.y;
-							stackItemBounds[i]=Rect(Point(stackItemTotalSize.x+x, y), Size(itemSize.x, 0));
-							stackItemTotalSize.x+=itemSize.x;
-						}
-					}
-					break;
-				case GuiStackComposition::Vertical:
-					{
-						for(int i=0;i<stackItems.Count();i++)
-						{
-							Size itemSize=stackItems[i]->GetMinSize();
-							if(i>0) stackItemTotalSize.y+=padding;
-							if(stackItemTotalSize.x<itemSize.x) stackItemTotalSize.x=itemSize.x;
-							stackItemBounds[i]=Rect(Point(x, stackItemTotalSize.y+y), Size(0, itemSize.y));
-							stackItemTotalSize.y+=itemSize.y;
-						}
-					}
-					break;
-				}
-
-				FixStackItemSizes();
-			}
-
-			void GuiStackComposition::FixStackItemSizes()
-			{
-				switch(direction)
-				{
-				case Horizontal:
-					{
-						int y=0;
-						if(extraMargin.top>0) y+=extraMargin.top;
-						if(extraMargin.bottom>0) y+=extraMargin.bottom;
-
-						for(int i=0;i<stackItemBounds.Count();i++)
-						{
-							stackItemBounds[i].y2=stackItemBounds[i].y1+previousBounds.Height()-y;
-						}
-					}
-					break;
-				case Vertical:
-					{
-						int x=0;
-						if(extraMargin.left>0) x+=extraMargin.left;
-						if(extraMargin.right>0) x+=extraMargin.right;
-
-						for(int i=0;i<stackItemBounds.Count();i++)
-						{
-							stackItemBounds[i].x2=stackItemBounds[i].x1+previousBounds.Width()-x;
-						}
-					}
-					break;
-				}
-			}
-
-			void GuiStackComposition::OnChildInserted(GuiGraphicsComposition* child)
-			{
-				GuiBoundsComposition::OnChildInserted(child);
-				GuiStackItemComposition* item=dynamic_cast<GuiStackItemComposition*>(child);
-				if(item && !stackItems.Contains(item))
-				{
-					stackItems.Add(item);
-				}
-			}
-
-			void GuiStackComposition::OnChildRemoved(GuiGraphicsComposition* child)
-			{
-				GuiBoundsComposition::OnChildRemoved(child);
-				GuiStackItemComposition* item=dynamic_cast<GuiStackItemComposition*>(child);
-				if(item)
-				{
-					stackItems.Remove(item);
-				}
-			}
-
-			GuiStackComposition::GuiStackComposition()
-				:direction(Horizontal)
-				,padding(0)
-			{
-			}
-
-			GuiStackComposition::~GuiStackComposition()
-			{
-			}
-
-			const GuiStackComposition::IItemCompositionList& GuiStackComposition::GetStackItems()
-			{
-				return stackItems.Wrap();
-			}
-
-			bool GuiStackComposition::InsertStackItem(int index, GuiStackItemComposition* item)
-			{
-				index=stackItems.Insert(index, item);
-				if(!AddChild(item))
-				{
-					stackItems.RemoveAt(index);
-					return false;
-				}
-				else
-				{
-					return true;
-				}
-			}
-
-			GuiStackComposition::Direction GuiStackComposition::GetDirection()
-			{
-				return direction;
-			}
-
-			void GuiStackComposition::SetDirection(Direction value)
-			{
-				direction=value;
-			}
-
-			int GuiStackComposition::GetPadding()
-			{
-				return padding;
-			}
-
-			void GuiStackComposition::SetPadding(int value)
-			{
-				padding=value;
-			}
-			
-			Size GuiStackComposition::GetMinPreferredClientSize()
-			{
-				Size minSize=GuiBoundsComposition::GetMinPreferredClientSize();
-				UpdateStackItemBounds();
-				if(GetMinSizeLimitation()==GuiGraphicsComposition::LimitToElementAndChildren)
-				{
-					if(minSize.x<stackItemTotalSize.x) minSize.x=stackItemTotalSize.x;
-					if(minSize.y<stackItemTotalSize.y) minSize.y=stackItemTotalSize.y;
-				}
-				int x=0;
-				int y=0;
-				if(extraMargin.left>0) x+=extraMargin.left;
-				if(extraMargin.right>0) x+=extraMargin.right;
-				if(extraMargin.top>0) y+=extraMargin.top;
-				if(extraMargin.bottom>0) y+=extraMargin.bottom;
-				return minSize+Size(x, y);
-			}
-
-			Rect GuiStackComposition::GetBounds()
-			{
-				Rect bounds=GuiBoundsComposition::GetBounds();
-				previousBounds=bounds;
-				FixStackItemSizes();
-				return bounds;
-			}
-
-			Margin GuiStackComposition::GetExtraMargin()
-			{
-				return extraMargin;
-			}
-
-			void GuiStackComposition::SetExtraMargin(Margin value)
-			{
-				extraMargin=value;
-			}
-
-			bool GuiStackComposition::IsStackItemClipped()
-			{
-				Rect clientArea=GetClientArea();
-				for(int i=0;i<stackItems.Count();i++)
-				{
-					Rect stackItemBounds=stackItems[i]->GetBounds();
-					switch(direction)
-					{
-					case Horizontal:
-						{
-							if(stackItemBounds.Left()<0 || stackItemBounds.Right()>=clientArea.Width())
-							{
-								return true;
-							}
-						}
-						break;
-					case Vertical:
-						{
-							if(stackItemBounds.Top()<0 || stackItemBounds.Bottom()>=clientArea.Height())
-							{
-								return true;
-							}
-						}
-						break;
-					}
-				}
-				return false;
-			}
-
-/***********************************************************************
-GuiStackItemComposition
-***********************************************************************/
-
-			void GuiStackItemComposition::OnParentChanged(GuiGraphicsComposition* oldParent, GuiGraphicsComposition* newParent)
-			{
-				GuiGraphicsSite::OnParentChanged(oldParent, newParent);
-				stackParent=newParent==0?0:dynamic_cast<GuiStackComposition*>(newParent);
-			}
-
-			Size GuiStackItemComposition::GetMinSize()
-			{
-				return GetBoundsInternal(bounds).GetSize();
-			}
-
-			GuiStackItemComposition::GuiStackItemComposition()
-			{
-				SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-			}
-
-			GuiStackItemComposition::~GuiStackItemComposition()
-			{
-			}
-
-			GuiGraphicsComposition::ParentSizeAffection GuiStackItemComposition::GetAffectionFromParent()
-			{
-				return GuiGraphicsComposition::AffectedByParent;
-			}
-
-			bool GuiStackItemComposition::IsSizeAffectParent()
-			{
-				return false;
-			}
-
-			Rect GuiStackItemComposition::GetBounds()
-			{
-				Rect result=bounds;
-				if(stackParent)
-				{
-					int index=stackParent->stackItems.IndexOf(this);
-					if(index!=-1)
-					{
-						if(stackParent->stackItemBounds.Count()!=stackParent->stackItems.Count())
-						{
-							stackParent->UpdateStackItemBounds();
-						}
-						result=stackParent->stackItemBounds[index];
-					}
-				}
-				result.x1-=extraMargin.left;
-				result.y1-=extraMargin.top;
-				result.x2+=extraMargin.right;
-				result.y2+=extraMargin.bottom;
-				return result;
-			}
-
-			void GuiStackItemComposition::SetBounds(Rect value)
-			{
-				bounds=value;
-			}
-
-			Margin GuiStackItemComposition::GetExtraMargin()
-			{
-				return extraMargin;
-			}
-
-			void GuiStackItemComposition::SetExtraMargin(Margin value)
-			{
-				extraMargin=value;
-			}
-
-/***********************************************************************
-GuiSideAlignedComposition
-***********************************************************************/
-
-			GuiSideAlignedComposition::GuiSideAlignedComposition()
-				:direction(Top)
-				,maxLength(10)
-				,maxRatio(1.0)
-			{
-			}
-
-			GuiSideAlignedComposition::~GuiSideAlignedComposition()
-			{
-			}
-
-			GuiSideAlignedComposition::Direction GuiSideAlignedComposition::GetDirection()
-			{
-				return direction;
-			}
-
-			void GuiSideAlignedComposition::SetDirection(Direction value)
-			{
-				direction=value;
-			}
-
-			int GuiSideAlignedComposition::GetMaxLength()
-			{
-				return maxLength;
-			}
-
-			void GuiSideAlignedComposition::SetMaxLength(int value)
-			{
-				if(value<0) value=0;
-				maxLength=value;
-			}
-
-			double GuiSideAlignedComposition::GetMaxRatio()
-			{
-				return maxRatio;
-			}
-
-			void GuiSideAlignedComposition::SetMaxRatio(double value)
-			{
-				maxRatio=
-					value<0?0:
-					value>1?1:
-					value;
-			}
-
-			GuiGraphicsComposition::ParentSizeAffection GuiSideAlignedComposition::GetAffectionFromParent()
-			{
-				return GuiGraphicsComposition::TotallyDecidedByParent;
-			}
-
-			bool GuiSideAlignedComposition::IsSizeAffectParent()
-			{
-				return false;
-			}
-
-			Rect GuiSideAlignedComposition::GetBounds()
-			{
-				GuiGraphicsComposition* parent=GetParent();
-				if(parent)
-				{
-					Rect bounds=parent->GetBounds();
-					int w=(int)(bounds.Width()*maxRatio);
-					int h=(int)(bounds.Height()*maxRatio);
-					if(w>maxLength) w=maxLength;
-					if(h>maxLength) h=maxLength;
-					switch(direction)
-					{
-					case Left:
-						{
-							bounds.x2=bounds.x1+w;
-						}
-						break;
-					case Top:
-						{
-							bounds.y2=bounds.y1+h;
-						}
-						break;
-					case Right:
-						{
-							bounds.x1=bounds.x2-w;
-						}
-						break;
-					case Bottom:
-						{
-							bounds.y1=bounds.y2-h;
-						}
-						break;
-					}
-					return bounds;
-				}
-				return Rect();
-			}
-
-/***********************************************************************
-GuiPartialViewComposition
-***********************************************************************/
-
-			GuiPartialViewComposition::GuiPartialViewComposition()
-				:wRatio(0.0)
-				,wPageSize(1.0)
-				,hRatio(0.0)
-				,hPageSize(1.0)
-			{
-			}
-
-			GuiPartialViewComposition::~GuiPartialViewComposition()
-			{
-			}
-
-			double GuiPartialViewComposition::GetWidthRatio()
-			{
-				return wRatio;
-			}
-
-			double GuiPartialViewComposition::GetWidthPageSize()
-			{
-				return wPageSize;
-			}
-
-			double GuiPartialViewComposition::GetHeightRatio()
-			{
-				return hRatio;
-			}
-
-			double GuiPartialViewComposition::GetHeightPageSize()
-			{
-				return hPageSize;
-			}
-
-			void GuiPartialViewComposition::SetWidthRatio(double value)
-			{
-				wRatio=value;
-			}
-
-			void GuiPartialViewComposition::SetWidthPageSize(double value)
-			{
-				wPageSize=value;
-			}
-
-			void GuiPartialViewComposition::SetHeightRatio(double value)
-			{
-				hRatio=value;
-			}
-
-			void GuiPartialViewComposition::SetHeightPageSize(double value)
-			{
-				hPageSize=value;
-			}
-
-			GuiGraphicsComposition::ParentSizeAffection GuiPartialViewComposition::GetAffectionFromParent()
-			{
-				return GuiGraphicsComposition::TotallyDecidedByParent;
-			}
-
-			bool GuiPartialViewComposition::IsSizeAffectParent()
-			{
-				return false;
-			}
-
-			Rect GuiPartialViewComposition::GetBounds()
-			{
-				GuiGraphicsComposition* parent=GetParent();
-				if(parent)
-				{
-					Rect bounds=parent->GetBounds();
-					int w=bounds.Width();
-					int h=bounds.Height();
-					int pw=(int)(wPageSize*w);
-					int ph=(int)(hPageSize*h);
-
-					int ow=preferredMinSize.x-pw;
-					if(ow<0) ow=0;
-					int oh=preferredMinSize.y-ph;
-					if(oh<0) oh=0;
-
-					w-=ow;
-					h-=oh;
-					pw+=ow;
-					ph+=oh;
-
-					return Rect(Point((int)(wRatio*w), (int)(hRatio*h)), Size(pw, ph));
-				}
-				return Rect();
-			}
 		}
 	}
 }
@@ -17764,62 +17899,6 @@ GuiPolygonElement
 					backgroundColor=value;
 					renderer->OnElementStateChanged();
 				}
-			}
-		}
-	}
-}
-
-/***********************************************************************
-GraphicsElement\GuiGraphicsEventReceiver.cpp
-***********************************************************************/
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace compositions
-		{
-
-/***********************************************************************
-Event Receiver
-***********************************************************************/
-
-			GuiGraphicsEventReceiver::GuiGraphicsEventReceiver(GuiGraphicsComposition* _sender)
-				:sender(_sender)
-				,leftButtonDown(_sender)
-				,leftButtonUp(_sender)
-				,leftButtonDoubleClick(_sender)
-				,middleButtonDown(_sender)
-				,middleButtonUp(_sender)
-				,middleButtonDoubleClick(_sender)
-				,rightButtonDown(_sender)
-				,rightButtonUp(_sender)
-				,rightButtonDoubleClick(_sender)
-				,horizontalWheel(_sender)
-				,verticalWheel(_sender)
-				,mouseMove(_sender)
-				,mouseEnter(_sender)
-				,mouseLeave(_sender)
-				,previewKey(_sender)
-				,keyDown(_sender)
-				,keyUp(_sender)
-				,systemKeyDown(_sender)
-				,systemKeyUp(_sender)
-				,previewCharInput(_sender)
-				,charInput(_sender)
-				,gotFocus(_sender)
-				,lostFocus(_sender)
-				,caretNotify(_sender)
-			{
-			}
-
-			GuiGraphicsEventReceiver::~GuiGraphicsEventReceiver()
-			{
-			}
-
-			GuiGraphicsComposition* GuiGraphicsEventReceiver::GetAssociatedComposition()
-			{
-				return sender;
 			}
 		}
 	}
