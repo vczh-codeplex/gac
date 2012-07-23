@@ -15627,7 +15627,7 @@ GuiSubComponentMeasurer
 						WString name=source->GetSubComponentName(i);
 						GuiGraphicsComposition* composition=source->GetSubComponentComposition(i);
 						composition->SetPreferredMinSize(Size(0, 0));
-						Size size=composition->GetPreferredMinSize();
+						Size size=composition->GetBounds().GetSize();
 						int sizeComponent=direction==Horizontal?size.x:size.y;
 
 						int index=sizes.Keys().IndexOf(name);
