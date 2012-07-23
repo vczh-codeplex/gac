@@ -70,6 +70,9 @@
     <Filter Include="GacUI\Controls\Styles\Win7Styles">
       <UniqueIdentifier>{59cd6cd3-0525-4c83-aa81-a1c33b8e2081}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GacUI\GraphicsComposition">
+      <UniqueIdentifier>{e0a66ea4-12a4-42ac-b31a-a9bf58e079af}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -165,13 +168,7 @@
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.cpp">
       <Filter>GacUI\GraphicsElement\WindowsDirect2D</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsComposition.cpp">
-      <Filter>GacUI\GraphicsElement</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsElement.cpp">
-      <Filter>GacUI\GraphicsElement</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsEventReceiver.cpp">
       <Filter>GacUI\GraphicsElement</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsHost.cpp">
@@ -275,6 +272,12 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ListStyles.cpp">
       <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsComposition\GuiGraphicsEventReceiver.cpp">
+      <Filter>GacUI\GraphicsComposition</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsComposition\GuiGraphicsComposition.cpp">
+      <Filter>GacUI\GraphicsComposition</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -443,13 +446,7 @@
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.h">
       <Filter>GacUI\GraphicsElement\WindowsDirect2D</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsComposition.h">
-      <Filter>GacUI\GraphicsElement</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsElement.h">
-      <Filter>GacUI\GraphicsElement</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsEventReceiver.h">
       <Filter>GacUI\GraphicsElement</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsHost.h">
@@ -553,6 +550,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ListStyles.h">
       <Filter>GacUI\Controls\Styles\Win7Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsComposition\GuiGraphicsEventReceiver.h">
+      <Filter>GacUI\GraphicsComposition</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsComposition\GuiGraphicsComposition.h">
+      <Filter>GacUI\GraphicsComposition</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

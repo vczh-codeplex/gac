@@ -13,7 +13,7 @@ Interfaces:
 #include <DWrite.h>
 #include <wincodec.h>
 #include "..\GuiGraphicsElement.h"
-#include "..\GuiGraphicsComposition.h"
+#include "..\..\GraphicsComposition\GuiGraphicsComposition.h"
 
 namespace vl
 {
