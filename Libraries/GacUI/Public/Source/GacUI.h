@@ -815,6 +815,8 @@ Native Window Services
 			
 			virtual bool					IsKeyPressing(int code)=0;
 			virtual bool					IsKeyToggled(int code)=0;
+
+			virtual WString					GetKeyName(int code)=0;
 		};
 		
 		class INativeCallbackService : public virtual Interface
@@ -3242,6 +3244,29 @@ Animation
 			};
 
 /***********************************************************************
+Shortcut Key Manager
+***********************************************************************/
+
+			class IGuiShortcutKeyManager;
+
+			class IGuiShortcutKeyItem : public Interface
+			{
+			public:
+				GuiGraphicsEvent<GuiEventArgs>			Executed;
+
+				virtual IGuiShortcutKeyManager*			GetManager()=0;
+				virtual WString							GetName()=0;
+			};
+			
+			class IGuiShortcutKeyManager : public Interface
+			{
+			public:
+				virtual int								GetItemCount()=0;
+				virtual IGuiShortcutKeyItem*			GetItem(int index)=0;
+				virtual bool							Execute(const NativeWindowKeyInfo& info)=0;
+			};
+
+/***********************************************************************
 Host
 ***********************************************************************/
 
@@ -3252,6 +3277,7 @@ Host
 				static const unsigned __int64	CaretInterval=500;
 			protected:
 				INativeWindow*					nativeWindow;
+				IGuiShortcutKeyManager*			shortcutKeyManager;
 				GuiWindowComposition*			windowComposition;
 				GuiGraphicsComposition*			focusedComposition;
 				Size							previousClientSize;
@@ -3307,6 +3333,9 @@ Host
 				GuiGraphicsComposition*			GetMainComposition();
 				void							Render();
 
+				IGuiShortcutKeyManager*			GetShortcutKeyManager();
+				void							SetShortcutKeyManager(IGuiShortcutKeyManager* value);
+
 				bool							SetFocus(GuiGraphicsComposition* composition);
 				GuiGraphicsComposition*			GetFocusedComposition();
 				Point							GetCaretPoint();
@@ -3317,7 +3346,7 @@ Host
 			};
 
 /***********************************************************************
-Helpers
+Animation Helpers
 ***********************************************************************/
 			
 			class GuiTimeBasedAnimation : public IGuiGraphicsAnimation, public Description<GuiTimeBasedAnimation>
@@ -3332,6 +3361,52 @@ Helpers
 				void							Restart(int totalMilliseconds=-1);
 				int								GetTotalLength()override;
 				int								GetCurrentPosition()override;
+			};
+
+/***********************************************************************
+Shortcut Key Manager Helpers
+***********************************************************************/
+
+			class GuiShortcutKeyManager;
+
+			class GuiShortcutKeyItem : public Object, public IGuiShortcutKeyItem
+			{
+			protected:
+				GuiShortcutKeyManager*			shortcutKeyManager;
+				bool							ctrl;
+				bool							shift;
+				bool							alt;
+				int								key;
+
+				void							AttachManager(GuiShortcutKeyManager* manager);
+				void							DetachManager(GuiShortcutKeyManager* manager);
+			public:
+				GuiShortcutKeyItem(GuiShortcutKeyManager* _shortcutKeyManager, bool _ctrl, bool _shift, bool _alt, int _key);
+				~GuiShortcutKeyItem();
+
+				IGuiShortcutKeyManager*			GetManager()override;
+				WString							GetName()override;
+				bool							CanActivate(const NativeWindowKeyInfo& info);
+				bool							CanActivate(bool _ctrl, bool _shift, bool _alt, int _key);
+			};
+
+			class GuiShortcutKeyManager : public Object, public IGuiShortcutKeyManager
+			{
+				typedef collections::List<Ptr<GuiShortcutKeyItem>>		ShortcutKeyItemList;
+			protected:
+				ShortcutKeyItemList				shortcutKeyItems;
+
+			public:
+				GuiShortcutKeyManager();
+				~GuiShortcutKeyManager();
+
+				int								GetItemCount()override;
+				IGuiShortcutKeyItem*			GetItem(int index)override;
+				bool							Execute(const NativeWindowKeyInfo& info)override;
+
+				IGuiShortcutKeyItem*			CreateShortcut(bool ctrl, bool shift, bool alt, int key);
+				bool							DestroyShortcut(bool ctrl, bool shift, bool alt, int key);
+				IGuiShortcutKeyItem*			TryGetShortcut(bool ctrl, bool shift, bool alt, int key);
 			};
 		}
 	}
@@ -9969,6 +10044,7 @@ namespace vl
 				HHOOK								mouseHook;
 				bool								isTimerEnabled;
 				HOOKPROC							mouseProc;
+				HKL									keyboardLayout;
 			public:
 				WindowsInputService(HOOKPROC _mouseProc);
 
@@ -9981,6 +10057,7 @@ namespace vl
 				bool								IsTimerEnabled()override;
 				bool								IsKeyPressing(int code)override;
 				bool								IsKeyToggled(int code)override;
+				WString								GetKeyName(int code)override;
 			};
 
 			extern bool								WinIsKeyPressing(int code);

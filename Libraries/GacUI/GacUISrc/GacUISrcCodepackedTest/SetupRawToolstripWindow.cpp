@@ -171,7 +171,7 @@ void CreateToolbar(GuiControlHost* controlHost, List<GuiSubComponentMeasurer*>& 
 	}
 }
 
-void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupRawToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 {
 	List<GuiSubComponentMeasurer*> measurers;
 	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);

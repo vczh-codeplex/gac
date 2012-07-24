@@ -981,6 +981,13 @@ Native Window Services
 			/// </summary>
 			/// <returns>Returns true if the specified key is toggled.</returns>
 			virtual bool					IsKeyToggled(int code)=0;
+
+			/// <summary>
+			/// Get the name of a key.
+			/// </summary>
+			/// <returns>The name of a key.</returns>
+			/// <param name="key">Key code</param>
+			virtual WString					GetKeyName(int code)=0;
 		};
 		
 		/// <summary>

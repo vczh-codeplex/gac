@@ -45,9 +45,6 @@
     <ClCompile Include="SetupTreeviewWindow.cpp">
       <Filter>TabPages</Filter>
     </ClCompile>
-    <ClCompile Include="SetupToolstripWindow.cpp">
-      <Filter>TabPages</Filter>
-    </ClCompile>
     <ClCompile Include="SetupRibbonWindow.cpp">
       <Filter>TabPages</Filter>
     </ClCompile>
@@ -58,6 +55,15 @@
       <Filter>TabPages</Filter>
     </ClCompile>
     <ClCompile Include="SetupDialogWindow.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupTabPageToolstripWindow.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupRawToolstripWindow.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupManagedToolstripWindow.cpp">
       <Filter>TabPages</Filter>
     </ClCompile>
   </ItemGroup>
