@@ -18550,6 +18550,10 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::KeyDown(const NativeWindowKeyInfo& info)
 			{
+				if(shortcutKeyManager && shortcutKeyManager->Execute(info))
+				{
+					return;
+				}
 				if(focusedComposition && focusedComposition->HasEventReceiver())
 				{
 					OnKeyInput(info, focusedComposition, &GuiGraphicsEventReceiver::keyDown);
@@ -18610,6 +18614,7 @@ GuiGraphicsHost
 
 			GuiGraphicsHost::GuiGraphicsHost()
 				:nativeWindow(0)
+				,shortcutKeyManager(0)
 				,windowComposition(0)
 				,focusedComposition(0)
 				,mouseCaptureComposition(0)
@@ -18666,6 +18671,16 @@ GuiGraphicsHost
 					windowComposition->GetRenderTarget()->StopRendering();
 					nativeWindow->RedrawContent();
 				}
+			}
+
+			IGuiShortcutKeyManager* GuiGraphicsHost::GetShortcutKeyManager()
+			{
+				return shortcutKeyManager;
+			}
+
+			void GuiGraphicsHost::SetShortcutKeyManager(IGuiShortcutKeyManager* value)
+			{
+				shortcutKeyManager=value;
 			}
 
 			bool GuiGraphicsHost::SetFocus(GuiGraphicsComposition* composition)
@@ -18760,6 +18775,132 @@ GuiTimeBasedAnimation
 			int GuiTimeBasedAnimation::GetCurrentPosition()
 			{
 				return (int)(DateTime::LocalTime().totalMilliseconds-startTime);
+			}
+
+/***********************************************************************
+GuiShortcutKeyItem
+***********************************************************************/
+
+			GuiShortcutKeyItem::GuiShortcutKeyItem(GuiShortcutKeyManager* _shortcutKeyManager, bool _ctrl, bool _shift, bool _alt, int _key)
+				:shortcutKeyManager(_shortcutKeyManager)
+				,ctrl(_ctrl)
+				,shift(_shift)
+				,alt(_alt)
+				,key(_key)
+			{
+			}
+
+			GuiShortcutKeyItem::~GuiShortcutKeyItem()
+			{
+			}
+
+			IGuiShortcutKeyManager* GuiShortcutKeyItem::GetManager()
+			{
+				return shortcutKeyManager;
+			}
+
+			WString GuiShortcutKeyItem::GetName()
+			{
+				WString name;
+				if(ctrl) name+=L"Ctrl+";
+				if(shift) name+=L"Shift+";
+				if(alt) name+=L"Alt+";
+				name+=GetCurrentController()->InputService()->GetKeyName(key);
+				return name;
+			}
+
+			bool GuiShortcutKeyItem::CanActivate(const NativeWindowKeyInfo& info)
+			{
+				return
+					info.ctrl==ctrl &&
+					info.shift==shift &&
+					info.alt==alt &&
+					info.code==key;
+			}
+
+			bool GuiShortcutKeyItem::CanActivate(bool _ctrl, bool _shift, bool _alt, int _key)
+			{
+				return
+					_ctrl==ctrl &&
+					_shift==shift &&
+					_alt==alt &&
+					_key==key;
+			}
+
+/***********************************************************************
+GuiShortcutKeyManager
+***********************************************************************/
+
+			GuiShortcutKeyManager::GuiShortcutKeyManager()
+			{
+			}
+
+			GuiShortcutKeyManager::~GuiShortcutKeyManager()
+			{
+			}
+
+			int GuiShortcutKeyManager::GetItemCount()
+			{
+				return shortcutKeyItems.Count();
+			}
+
+			IGuiShortcutKeyItem* GuiShortcutKeyManager::GetItem(int index)
+			{
+				return shortcutKeyItems[index].Obj();
+			}
+
+			bool GuiShortcutKeyManager::Execute(const NativeWindowKeyInfo& info)
+			{
+				bool executed=false;
+				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems.Wrap())
+				{
+					if(item->CanActivate(info))
+					{
+						GuiEventArgs arguments;
+						item->Executed.Execute(arguments);
+						executed=true;
+					}
+				}
+				return executed;
+			}
+
+			IGuiShortcutKeyItem* GuiShortcutKeyManager::CreateShortcut(bool ctrl, bool shift, bool alt, int key)
+			{
+				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems.Wrap())
+				{
+					if(item->CanActivate(ctrl, shift, alt, key))
+					{
+						return item.Obj();
+					}
+				}
+				Ptr<GuiShortcutKeyItem> item=new GuiShortcutKeyItem(this, ctrl, shift, alt, key);
+				shortcutKeyItems.Add(item);
+				return item.Obj();
+			}
+
+			bool GuiShortcutKeyManager::DestroyShortcut(bool ctrl, bool shift, bool alt, int key)
+			{
+				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems.Wrap())
+				{
+					if(item->CanActivate(ctrl, shift, alt, key))
+					{
+						shortcutKeyItems.Remove(item.Obj());
+						return true;
+					}
+				}
+				return false;
+			}
+
+			IGuiShortcutKeyItem* GuiShortcutKeyManager::TryGetShortcut(bool ctrl, bool shift, bool alt, int key)
+			{
+				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems.Wrap())
+				{
+					if(item->CanActivate(ctrl, shift, alt, key))
+					{
+						return item.Obj();
+					}
+				}
+				return 0;
 			}
 		}
 	}
@@ -26263,6 +26404,7 @@ WindowsInputService
 				,mouseHook(NULL)
 				,isTimerEnabled(false)
 				,mouseProc(_mouseProc)
+				,keyboardLayout(GetKeyboardLayout(0))
 			{
 			}
 
@@ -26324,6 +26466,14 @@ WindowsInputService
 			bool WindowsInputService::IsKeyToggled(int code)
 			{
 				return WinIsKeyToggled(code);
+			}
+
+			WString WindowsInputService::GetKeyName(int code)
+			{
+				wchar_t name[256]={0};
+				int scanCode=MapVirtualKeyEx(code, MAPVK_VK_TO_VSC_EX, keyboardLayout);
+				GetKeyNameText(scanCode<<16, name, sizeof(name)/sizeof(*name));
+				return name[0]?name:L"?";
 			}
 		}
 	}

@@ -25,6 +25,7 @@ namespace vl
 				HHOOK								mouseHook;
 				bool								isTimerEnabled;
 				HOOKPROC							mouseProc;
+				HKL									keyboardLayout;
 			public:
 				WindowsInputService(HOOKPROC _mouseProc);
 
@@ -37,6 +38,7 @@ namespace vl
 				bool								IsTimerEnabled()override;
 				bool								IsKeyPressing(int code)override;
 				bool								IsKeyToggled(int code)override;
+				WString								GetKeyName(int code)override;
 			};
 
 			extern bool								WinIsKeyPressing(int code);

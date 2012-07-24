@@ -25,6 +25,7 @@ WindowsInputService
 				,mouseHook(NULL)
 				,isTimerEnabled(false)
 				,mouseProc(_mouseProc)
+				,keyboardLayout(GetKeyboardLayout(0))
 			{
 			}
 
@@ -86,6 +87,14 @@ WindowsInputService
 			bool WindowsInputService::IsKeyToggled(int code)
 			{
 				return WinIsKeyToggled(code);
+			}
+
+			WString WindowsInputService::GetKeyName(int code)
+			{
+				wchar_t name[256]={0};
+				int scanCode=MapVirtualKeyEx(code, MAPVK_VK_TO_VSC_EX, keyboardLayout);
+				GetKeyNameText(scanCode<<16, name, sizeof(name)/sizeof(*name));
+				return name[0]?name:L"?";
 			}
 		}
 	}

@@ -674,7 +674,12 @@ GuiShortcutKeyItem
 
 			WString GuiShortcutKeyItem::GetName()
 			{
-				return L"";
+				WString name;
+				if(ctrl) name+=L"Ctrl+";
+				if(shift) name+=L"Shift+";
+				if(alt) name+=L"Alt+";
+				name+=GetCurrentController()->InputService()->GetKeyName(key);
+				return name;
 			}
 
 			bool GuiShortcutKeyItem::CanActivate(const NativeWindowKeyInfo& info)
@@ -724,6 +729,8 @@ GuiShortcutKeyManager
 				{
 					if(item->CanActivate(info))
 					{
+						GuiEventArgs arguments;
+						item->Executed.Execute(arguments);
 						executed=true;
 					}
 				}

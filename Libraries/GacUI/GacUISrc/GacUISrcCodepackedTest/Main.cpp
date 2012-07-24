@@ -28,7 +28,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 extern void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupTabPageListControlWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupToolstripWindow(GuiControlHost* controlHost, GuiControl* container);
+extern void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupRibbonWindow(GuiControlHost* controlHost, GuiControl* container);
 
@@ -59,7 +59,7 @@ void SetupTabPageWindow(GuiControlHost* controlHost, GuiControl* container)
 	{
 		GuiTabPage* page=tab->CreatePage();
 		page->SetText(L"Toolstrip");
-		SetupToolstripWindow(controlHost, page->GetContainer());
+		SetupTabPageToolstripWindow(controlHost, page->GetContainer());
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
