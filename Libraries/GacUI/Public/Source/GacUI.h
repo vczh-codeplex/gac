@@ -10044,7 +10044,6 @@ namespace vl
 				HHOOK								mouseHook;
 				bool								isTimerEnabled;
 				HOOKPROC							mouseProc;
-				HKL									keyboardLayout;
 			public:
 				WindowsInputService(HOOKPROC _mouseProc);
 

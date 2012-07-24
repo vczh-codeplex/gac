@@ -25,7 +25,6 @@ WindowsInputService
 				,mouseHook(NULL)
 				,isTimerEnabled(false)
 				,mouseProc(_mouseProc)
-				,keyboardLayout(GetKeyboardLayout(0))
 			{
 			}
 
@@ -92,8 +91,23 @@ WindowsInputService
 			WString WindowsInputService::GetKeyName(int code)
 			{
 				wchar_t name[256]={0};
-				int scanCode=MapVirtualKeyEx(code, MAPVK_VK_TO_VSC_EX, keyboardLayout);
-				GetKeyNameText(scanCode<<16, name, sizeof(name)/sizeof(*name));
+				int scanCode=MapVirtualKey(code, MAPVK_VK_TO_VSC)<<16;
+				switch(code)
+				{
+				case VK_INSERT:
+				case VK_DELETE:
+				case VK_HOME:
+				case VK_END:
+				case VK_PRIOR:
+				case VK_NEXT:
+				case VK_LEFT:
+				case VK_RIGHT:
+				case VK_UP:
+				case VK_DOWN:
+					scanCode|=1<<24;
+					break;
+				}
+				GetKeyNameText(scanCode, name, sizeof(name)/sizeof(*name));
 				return name[0]?name:L"?";
 			}
 		}
