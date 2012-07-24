@@ -65,6 +65,44 @@ Animation
 			};
 
 /***********************************************************************
+Shortcut Key Manager
+***********************************************************************/
+
+			class IGuiShortcutKeyManager;
+
+			/// <summary>Shortcut key item.</summary>
+			class IGuiShortcutKeyItem : public Interface
+			{
+			public:
+				/// <summary>Shortcut key executed event.</summary>
+				GuiGraphicsEvent<GuiEventArgs>			Executed;
+
+				/// <summary>Get the associated <see cref="IGuiShortcutKeyManager"/> object.</summary>
+				/// <returns>The associated shortcut key manager.</returns>
+				virtual IGuiShortcutKeyManager*			GetManager()=0;
+				/// <summary>Get the name represents the shortcut key combination for this item.</summary>
+				/// <returns>The name represents the shortcut key combination for this item.</returns>
+				virtual WString							GetName()=0;
+			};
+			
+			/// <summary>Shortcut key manager item.</summary>
+			class IGuiShortcutKeyManager : public Interface
+			{
+			public:
+				/// <summary>Get the number of shortcut key items that already attached to the manager.</summary>
+				/// <returns>T number of shortcut key items that already attached to the manager.</returns>
+				virtual int								GetItemCount()=0;
+				/// <summary>Get the <see cref="IGuiShortcutKeyItem"/> associated with the index.</summary>
+				/// <returns>The shortcut key item.</returns>
+				/// <param name="index">The index.</param>
+				virtual IGuiShortcutKeyItem*			GetItem(int index)=0;
+				/// <summary>Execute shortcut key items using a key event info.</summary>
+				/// <returns>Returns true if at least one shortcut key item is executed.</returns>
+				/// <param name="info">The key event info.</param>
+				virtual bool							Execute(const NativeWindowKeyInfo& info)=0;
+			};
+
+/***********************************************************************
 Host
 ***********************************************************************/
 
@@ -78,6 +116,7 @@ Host
 				static const unsigned __int64	CaretInterval=500;
 			protected:
 				INativeWindow*					nativeWindow;
+				IGuiShortcutKeyManager*			shortcutKeyManager;
 				GuiWindowComposition*			windowComposition;
 				GuiGraphicsComposition*			focusedComposition;
 				Size							previousClientSize;
@@ -140,6 +179,13 @@ Host
 				/// <summary>Render the main composition and all content to the associated window.</summary>
 				void							Render();
 
+				/// <summary>Get the <see cref="IGuiShortcutKeyManager"/> attached with this graphics host.</summary>
+				/// <returns>The shortcut key manager.</returns>
+				IGuiShortcutKeyManager*			GetShortcutKeyManager();
+				/// <summary>Attach or detach the <see cref="IGuiShortcutKeyManager"/> associated with this graphics host.</summary>
+				/// <param name="value">The shortcut key manager. Set to null to detach the previous shortcut key manager from this graphics host.</param>
+				void							SetShortcutKeyManager(IGuiShortcutKeyManager* value);
+
 				/// <summary>Set the focus composition. A focused composition will receive keyboard messages.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="composition">The composition to set focus. This composition should be or in the main composition.</param>
@@ -164,7 +210,7 @@ Host
 			};
 
 /***********************************************************************
-Helpers
+Animation Helpers
 ***********************************************************************/
 			
 			/// <summary>
@@ -186,6 +232,72 @@ Helpers
 				void							Restart(int totalMilliseconds=-1);
 				int								GetTotalLength()override;
 				int								GetCurrentPosition()override;
+			};
+
+/***********************************************************************
+Shortcut Key Manager Helpers
+***********************************************************************/
+
+			class GuiShortcutKeyManager;
+
+			class GuiShortcutKeyItem : public Object, public IGuiShortcutKeyItem
+			{
+			protected:
+				GuiShortcutKeyManager*			shortcutKeyManager;
+				bool							ctrl;
+				bool							shift;
+				bool							alt;
+				int								key;
+
+				void							AttachManager(GuiShortcutKeyManager* manager);
+				void							DetachManager(GuiShortcutKeyManager* manager);
+			public:
+				GuiShortcutKeyItem(GuiShortcutKeyManager* _shortcutKeyManager, bool _ctrl, bool _shift, bool _alt, int _key);
+				~GuiShortcutKeyItem();
+
+				IGuiShortcutKeyManager*			GetManager()override;
+				WString							GetName()override;
+				bool							CanActivate(const NativeWindowKeyInfo& info);
+				bool							CanActivate(bool _ctrl, bool _shift, bool _alt, int _key);
+			};
+
+			/// <summary>A default implementation for <see cref="IGuiShortcutKeyManager"/>.</summary>
+			class GuiShortcutKeyManager : public Object, public IGuiShortcutKeyManager
+			{
+				typedef collections::List<Ptr<GuiShortcutKeyItem>>		ShortcutKeyItemList;
+			protected:
+				ShortcutKeyItemList				shortcutKeyItems;
+
+			public:
+				/// <summary>Create the shortcut key manager.</summary>
+				GuiShortcutKeyManager();
+				~GuiShortcutKeyManager();
+
+				int								GetItemCount()override;
+				IGuiShortcutKeyItem*			GetItem(int index)override;
+				bool							Execute(const NativeWindowKeyInfo& info)override;
+
+				/// <summary>Create a shortcut key item using a key combination. If the item for the key combination exists, this function returns the item that is created before.</summary>
+				/// <returns>The created shortcut key item.</returns>
+				/// <param name="ctrl">Set to true if the CTRL key is required.</param>
+				/// <param name="shift">Set to true if the SHIFT key is required.</param>
+				/// <param name="alt">Set to true if the ALT key is required.</param>
+				/// <param name="key">The non-control key.</param>
+				IGuiShortcutKeyItem*			CreateShortcut(bool ctrl, bool shift, bool alt, int key);
+				/// <summary>Destroy a shortcut key item using a key combination</summary>
+				/// <returns>Returns true if the manager destroyed a existing shortcut key item.</returns>
+				/// <param name="ctrl">Set to true if the CTRL key is required.</param>
+				/// <param name="shift">Set to true if the SHIFT key is required.</param>
+				/// <param name="alt">Set to true if the ALT key is required.</param>
+				/// <param name="key">The non-control key.</param>
+				bool							DestroyShortcut(bool ctrl, bool shift, bool alt, int key);
+				/// <summary>Get a shortcut key item using a key combination. If the item for the key combination does not exist, this function returns null.</summary>
+				/// <returns>The shortcut key item.</returns>
+				/// <param name="ctrl">Set to true if the CTRL key is required.</param>
+				/// <param name="shift">Set to true if the SHIFT key is required.</param>
+				/// <param name="alt">Set to true if the ALT key is required.</param>
+				/// <param name="key">The non-control key.</param>
+				IGuiShortcutKeyItem*			TryGetShortcut(bool ctrl, bool shift, bool alt, int key);
 			};
 		}
 	}
