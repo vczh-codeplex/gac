@@ -163,14 +163,19 @@ Event
 					return false;
 				}
 
-				void Execute(T& argument)
+				void ExecuteWithNewSender(T& argument, GuiGraphicsComposition* newSender)
 				{
 					Ptr<HandlerNode>* currentHandler=&handlers;
 					while(*currentHandler)
 					{
-						(*currentHandler)->handler->Execute(sender, argument);
+									(*currentHandler)->handler->Execute(newSender?newSender:sender, argument);
 						currentHandler=&(*currentHandler)->next;
 					}
+				}
+
+				void Execute(T& argument)
+				{
+					ExecuteWithNewSender(argument, 0);
 				}
 			};
 

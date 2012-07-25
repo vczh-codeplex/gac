@@ -73,6 +73,9 @@
     <Filter Include="GacUI\GraphicsComposition">
       <UniqueIdentifier>{e0a66ea4-12a4-42ac-b31a-a9bf58e079af}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GacUI\Controls\ToolstripPackage">
+      <UniqueIdentifier>{9924ac3c-9a11-44ce-8042-2ee7502c2bbd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -293,6 +296,12 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\GraphicsComposition\GuiGraphicsSpecializedComposition.cpp">
       <Filter>GacUI\GraphicsComposition</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripCommand.cpp">
+      <Filter>GacUI\Controls\ToolstripPackage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripMenu.cpp">
+      <Filter>GacUI\Controls\ToolstripPackage</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -586,6 +595,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\GraphicsComposition\GuiGraphicsSpecializedComposition.h">
       <Filter>GacUI\GraphicsComposition</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripCommand.h">
+      <Filter>GacUI\Controls\ToolstripPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripMenu.h">
+      <Filter>GacUI\Controls\ToolstripPackage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
