@@ -75,7 +75,7 @@ Shortcut Key Manager
 			{
 			public:
 				/// <summary>Shortcut key executed event.</summary>
-				GuiGraphicsEvent<GuiEventArgs>			Executed;
+				GuiNotifyEvent							Executed;
 
 				/// <summary>Get the associated <see cref="IGuiShortcutKeyManager"/> object.</summary>
 				/// <returns>The associated shortcut key manager.</returns>
