@@ -26,13 +26,16 @@ GuiToolstripCollection
 				if(subComponentMeasurer)
 				{
 					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(control);
-					GuiSubComponentMeasurer::IMeasuringSource* measuringSource=
-						dynamic_cast<GuiMenuButton::IStyleController*>(
-							menuButton->GetStyleController()
-							)->GetMeasuringSource();
-					if(measuringSource)
+					if(menuButton)
 					{
-						subComponentMeasurer->DetachMeasuringSource(measuringSource);
+						GuiSubComponentMeasurer::IMeasuringSource* measuringSource=
+							dynamic_cast<GuiMenuButton::IStyleController*>(
+								menuButton->GetStyleController()
+								)->GetMeasuringSource();
+						if(measuringSource)
+						{
+							subComponentMeasurer->DetachMeasuringSource(measuringSource);
+						}
 					}
 				}
 				delete control;
@@ -40,6 +43,7 @@ GuiToolstripCollection
 
 			void GuiToolstripCollection::InsertInternal(vint index, GuiControl* control)
 			{
+				items.Insert(index, control);
 				GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 				control->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				stackItem->AddChild(control->GetBoundsComposition());
@@ -48,13 +52,16 @@ GuiToolstripCollection
 				if(subComponentMeasurer)
 				{
 					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(control);
-					GuiSubComponentMeasurer::IMeasuringSource* measuringSource=
-						dynamic_cast<GuiMenuButton::IStyleController*>(
-							menuButton->GetStyleController()
-							)->GetMeasuringSource();
-					if(measuringSource)
+					if(menuButton)
 					{
-						subComponentMeasurer->AttachMeasuringSource(measuringSource);
+						GuiSubComponentMeasurer::IMeasuringSource* measuringSource=
+							dynamic_cast<GuiMenuButton::IStyleController*>(
+								menuButton->GetStyleController()
+								)->GetMeasuringSource();
+						if(measuringSource)
+						{
+							subComponentMeasurer->AttachMeasuringSource(measuringSource);
+						}
 					}
 				}
 			}
@@ -150,7 +157,7 @@ GuiToolstripCollection
 
 			vint GuiToolstripCollection::Insert(vint index, GuiControl* const& item)
 			{
-				if(index<=0 && index<=items.Count() && item && !item->GetBoundsComposition()->GetParent())
+				if(0<=index && index<=items.Count() && item && !item->GetBoundsComposition()->GetParent())
 				{
 					InsertInternal(index, item);
 					return index;
@@ -163,7 +170,7 @@ GuiToolstripCollection
 
 			bool GuiToolstripCollection::Set(vint index, GuiControl* const& item)
 			{
-				if(index<=0 && index<items.Count() && item && !item->GetBoundsComposition()->GetParent())
+				if(0<=index && index<items.Count() && item && !item->GetBoundsComposition()->GetParent())
 				{
 					RemoveAtInternal(index);
 					InsertInternal(index, item);

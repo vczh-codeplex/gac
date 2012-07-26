@@ -233,6 +233,7 @@ GuiStackItemComposition
 			}
 
 			GuiStackItemComposition::GuiStackItemComposition()
+				:stackParent(0)
 			{
 				SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			}
