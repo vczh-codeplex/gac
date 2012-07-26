@@ -69,12 +69,12 @@ Win7Theme
 				return new Win7TreeViewProvider;
 			}
 
-			controls::GuiControl::IStyleController* Win7Theme::CreateMenuStyle()
+			controls::GuiToolstripMenu::IStyleController* Win7Theme::CreateMenuStyle()
 			{
 				return new Win7MenuStyle;
 			}
 
-			controls::GuiControl::IStyleController* Win7Theme::CreateMenuBarStyle()
+			controls::GuiToolstripMenuBar::IStyleController* Win7Theme::CreateMenuBarStyle()
 			{
 				return new Win7MenuBarStyle;
 			}
@@ -84,14 +84,39 @@ Win7Theme
 				return new Win7MenuSplitterStyle;
 			}
 
-			controls::GuiMenuButton::IStyleController* Win7Theme::CreateMenuBarButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateMenuBarButtonStyle()
 			{
 				return new Win7MenuBarButtonStyle;
 			}
 
-			controls::GuiMenuButton::IStyleController* Win7Theme::CreateMenuItemButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateMenuItemButtonStyle()
 			{
 				return new Win7MenuItemButtonStyle;
+			}
+
+			controls::GuiControl::IStyleController* Win7Theme::CreateToolbarStyle()
+			{
+				return new Win7WindowStyle;
+			}
+
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarButtonStyle()
+			{
+				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::CommandButton);
+			}
+
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarDropdownButtonStyle()
+			{
+				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::DropdownButton);
+			}
+
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarSplitButtonStyle()
+			{
+				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::SplitButton);
+			}
+
+			controls::GuiControl::IStyleController* Win7Theme::CreateToolbarSplitterStyle()
+			{
+				return new Win7ToolstripSplitterStyle;
 			}
 
 			controls::GuiButton::IStyleController* Win7Theme::CreateButtonStyle()
@@ -107,26 +132,6 @@ Win7Theme
 			controls::GuiSelectableButton::IStyleController* Win7Theme::CreateRadioButtonStyle()
 			{
 				return new Win7CheckBoxStyle(Win7CheckBoxStyle::RadioButton);
-			}
-
-			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripButtonStyle()
-			{
-				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::CommandButton);
-			}
-
-			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripDropdownButtonStyle()
-			{
-				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::DropdownButton);
-			}
-
-			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripSplitButtonStyle()
-			{
-				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::SplitButton);
-			}
-
-			controls::GuiControl::IStyleController* Win7Theme::CreateToolstripSplitterStyle()
-			{
-				return new Win7ToolstripSplitterStyle;
 			}
 
 			controls::GuiScroll::IStyleController* Win7Theme::CreateHScrollStyle()

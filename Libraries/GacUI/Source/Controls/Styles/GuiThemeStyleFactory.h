@@ -19,6 +19,7 @@ Interfaces:
 #include "..\ExtendedControls\GuiTreeViewControls.h"
 #include "..\ExtendedControls\GuiMenuControls.h"
 #include "..\ExtendedControls\GuiComboControls.h"
+#include "..\ToolstripPackage\GuiToolstripMenu.h"
 
 namespace vl
 {
@@ -60,19 +61,34 @@ namespace vl
 				
 				/// <summary>Create a style for menu.</summary>
 				/// <returns>The created style.</returns>
-				virtual controls::GuiControl::IStyleController*								CreateMenuStyle()=0;
+				virtual controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()=0;
 				/// <summary>Create a style for menu bar.</summary>
 				/// <returns>The created style.</returns>
-				virtual controls::GuiControl::IStyleController*								CreateMenuBarStyle()=0;
+				virtual controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()=0;
 				/// <summary>Create a style for menu splitter.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()=0;
 				/// <summary>Create a style for menu bar button.</summary>
 				/// <returns>The created style.</returns>
-				virtual controls::GuiMenuButton::IStyleController*							CreateMenuBarButtonStyle()=0;
+				virtual controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()=0;
 				/// <summary>Create a style for menu button.</summary>
 				/// <returns>The created style.</returns>
-				virtual controls::GuiMenuButton::IStyleController*							CreateMenuItemButtonStyle()=0;
+				virtual controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()=0;
+				/// <summary>Create a style for toolbar.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()=0;
+				/// <summary>Create a style for toolbar button.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()=0;
+				/// <summary>Create a style for toolbar dropdown button.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()=0;
+				/// <summary>Create a style for toolbar split button.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()=0;
+				/// <summary>Create a style for toolbar.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()=0;
 				
 				/// <summary>Create a style for button.</summary>
 				/// <returns>The created style.</returns>
@@ -83,18 +99,6 @@ namespace vl
 				/// <summary>Create a style for radio button.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()=0;
-				/// <summary>Create a style for toolstrip button.</summary>
-				/// <returns>The created style.</returns>
-				virtual controls::GuiMenuButton::IStyleController*							CreateToolstripButtonStyle()=0;
-				/// <summary>Create a style for toolstrip dropdown button.</summary>
-				/// <returns>The created style.</returns>
-				virtual controls::GuiMenuButton::IStyleController*							CreateToolstripDropdownButtonStyle()=0;
-				/// <summary>Create a style for toolstrip split button.</summary>
-				/// <returns>The created style.</returns>
-				virtual controls::GuiMenuButton::IStyleController*							CreateToolstripSplitButtonStyle()=0;
-				/// <summary>Create a style for toolstrip.</summary>
-				/// <returns>The created style.</returns>
-				virtual controls::GuiControl::IStyleController*								CreateToolstripSplitterStyle()=0;
 				
 				/// <summary>Create a style for horizontal scroll.</summary>
 				/// <returns>The created style.</returns>
@@ -179,19 +183,34 @@ namespace vl
 				/// <summary>Create a menu.</summary>
 				/// <returns>The created control.</returns>
 				/// <param name="owner">The owner menu item of the parent menu.</param>
-				extern controls::GuiMenu*						NewMenu(controls::GuiControl* owner);
+				extern controls::GuiToolstripMenu*				NewMenu(controls::GuiControl* owner);
 				/// <summary>Create a menu bar.</summary>
 				/// <returns>The created control.</returns>
-				extern controls::GuiMenuBar*					NewMenuBar();
+				extern controls::GuiToolstripMenuBar*			NewMenuBar();
 				/// <summary>Create a menu splitter.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiControl*					NewMenuSplitter();
 				/// <summary>Create a menu bar button.</summary>
 				/// <returns>The created control.</returns>
-				extern controls::GuiMenuButton*					NewMenuBarButton();
+				extern controls::GuiToolstripButton*			NewMenuBarButton();
 				/// <summary>Create a menu item button.</summary>
 				/// <returns>The created control.</returns>
-				extern controls::GuiMenuButton*					NewMenuItemButton();
+				extern controls::GuiToolstripButton*			NewMenuItemButton();
+				/// <summary>Create a toolbar.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiToolstripToolbar*			NewToolbar();
+				/// <summary>Create a toolbar button.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiToolstripButton*			NewToolbarButton();
+				/// <summary>Create a toolbar dropdown button.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiToolstripButton*			NewToolbarDropdownButton();
+				/// <summary>Create a toolbar split button.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiToolstripButton*			NewToolbarSplitButton();
+				/// <summary>Create a toolbar splitter.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiControl*					NewToolbarSplitter();
 
 				/// <summary>Create a button.</summary>
 				/// <returns>The created control.</returns>
@@ -202,18 +221,6 @@ namespace vl
 				/// <summary>Create a radio box.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiSelectableButton*			NewRadioButton();
-				/// <summary>Create a toolstrip button.</summary>
-				/// <returns>The created control.</returns>
-				extern controls::GuiMenuButton*					NewToolstripButton();
-				/// <summary>Create a toolstrip dropdown button.</summary>
-				/// <returns>The created control.</returns>
-				extern controls::GuiMenuButton*					NewToolstripDropdownButton();
-				/// <summary>Create a toolstrip split button.</summary>
-				/// <returns>The created control.</returns>
-				extern controls::GuiMenuButton*					NewToolstripSplitButton();
-				/// <summary>Create a toolstrip splitter.</summary>
-				/// <returns>The created control.</returns>
-				extern controls::GuiControl*					NewToolstripSplitter();
 
 				/// <summary>Create a horizontal scroll.</summary>
 				/// <returns>The created control.</returns>
