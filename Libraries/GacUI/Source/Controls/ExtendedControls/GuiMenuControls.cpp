@@ -342,7 +342,7 @@ GuiMenuButton
 				}
 			}
 
-			void GuiMenuButton::SetSubMenu(GuiMenu* value)
+			void GuiMenuButton::SetSubMenu(GuiMenu* value, bool owned)
 			{
 				if(subMenu)
 				{
@@ -352,7 +352,7 @@ GuiMenuButton
 					}
 				}
 				subMenu=value;
-				ownedSubMenu=false;
+				ownedSubMenu=owned;
 				styleController->SetSubMenuExisting(subMenu!=0);
 			}
 

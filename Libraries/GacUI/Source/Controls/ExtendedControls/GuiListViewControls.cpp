@@ -1019,7 +1019,7 @@ ListViewColumnItemArranger
 						{
 							GuiListViewColumnHeader* button=columnHeaderButtons[i];
 							button->SetText(columnItemView->GetColumnText(i));
-							button->SetSubMenu(columnItemView->GetDropdownPopup(i));
+							button->SetSubMenu(columnItemView->GetDropdownPopup(i), false);
 							button->SetColumnSortingState(columnItemView->GetSortingState(i));
 							button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
 						}
@@ -1046,7 +1046,7 @@ ListViewColumnItemArranger
 							{
 								GuiListViewColumnHeader* button=new GuiListViewColumnHeader(styleProvider->CreateColumnStyle());
 								button->SetText(columnItemView->GetColumnText(i));
-								button->SetSubMenu(columnItemView->GetDropdownPopup(i));
+								button->SetSubMenu(columnItemView->GetDropdownPopup(i), false);
 								button->SetColumnSortingState(columnItemView->GetSortingState(i));
 								button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
 								button->Clicked.AttachLambda(Curry(Func<void(int, GuiGraphicsComposition*, GuiEventArgs&)>(this, &ListViewColumnItemArranger::ColumnClicked))(i));
