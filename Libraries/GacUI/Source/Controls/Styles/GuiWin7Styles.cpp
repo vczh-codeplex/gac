@@ -96,7 +96,7 @@ Win7Theme
 
 			controls::GuiControl::IStyleController* Win7Theme::CreateToolbarStyle()
 			{
-				return new Win7WindowStyle;
+				return new Win7ToolstripToolbarStyle;
 			}
 
 			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarButtonStyle()

@@ -110,6 +110,7 @@ Win7MenuBarStyle
 					GuiSolidBackgroundElement* solid=GuiSolidBackgroundElement::Create();
 					solid->SetColor(Color(182, 188, 204));
 					boundsComposition->SetOwnedElement(solid);
+					boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				}
 				boundsComposition->AddChild(table);
 			}

@@ -12,6 +12,20 @@ namespace vl
 			using namespace controls;
 
 /***********************************************************************
+Win7WindowStyle
+***********************************************************************/
+
+			Win7ToolstripToolbarStyle::Win7ToolstripToolbarStyle()
+				:Win7EmptyStyle(Win7GetSystemWindowColor())
+			{
+				boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+			}
+
+			Win7ToolstripToolbarStyle::~Win7ToolstripToolbarStyle()
+			{
+			}
+
+/***********************************************************************
 Win7ToolstripButtonDropdownStyle
 ***********************************************************************/
 

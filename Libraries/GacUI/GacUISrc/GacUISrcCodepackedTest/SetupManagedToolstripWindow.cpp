@@ -143,7 +143,7 @@ void SetupManagedToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 		}
 	}
 
-	GuiToolstripToolbar* smallToolbar=new GuiToolstripToolbar(new win7::Win7WindowStyle);
+	GuiToolstripToolbar* smallToolbar=new GuiToolstripToolbar(new win7::Win7ToolstripToolbarStyle);
 	{
 		Ptr<INativeImage> imageButtons[]=
 		{
@@ -168,7 +168,7 @@ void SetupManagedToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 		CreateToolbar(controlHost, imageButtons, smallToolbar);
 	}
 	
-	GuiToolstripToolbar* bigToolbar=new GuiToolstripToolbar(new win7::Win7WindowStyle);
+	GuiToolstripToolbar* bigToolbar=new GuiToolstripToolbar(new win7::Win7ToolstripToolbarStyle);
 	{
 		Ptr<INativeImage> imageButtons[]=
 		{
