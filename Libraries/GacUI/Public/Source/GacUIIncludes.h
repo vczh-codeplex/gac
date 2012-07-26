@@ -20483,6 +20483,13 @@ namespace vl
 Toolstrip Button
 ***********************************************************************/
 
+			class Win7ToolstripToolbarStyle : public Win7EmptyStyle, public Description<Win7ToolstripToolbarStyle>
+			{
+			public:
+				Win7ToolstripToolbarStyle();
+				~Win7ToolstripToolbarStyle();
+			};
+
 			class Win7ToolstripButtonDropdownStyle : public Object, public virtual controls::GuiButton::IStyleController, public Description<Win7ToolstripButtonDropdownStyle>
 			{
 			protected:

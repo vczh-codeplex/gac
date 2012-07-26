@@ -10,6 +10,7 @@ Clases:
 #define VCZH_PRESENTATION_CONTROLS_WIN7STYLES_GUIWIN7TOOLSTRIPSTYLES
 
 #include "GuiWin7MenuStyles.h"
+#include "GuiWin7ControlStyles.h"
 
 namespace vl
 {
@@ -21,6 +22,15 @@ namespace vl
 /***********************************************************************
 Toolstrip Button
 ***********************************************************************/
+
+			/// <summary>Toolstrip toolbar style (Windows 7). Using the Windows 7 window background color to fill the whold control</summary>
+			class Win7ToolstripToolbarStyle : public Win7EmptyStyle, public Description<Win7ToolstripToolbarStyle>
+			{
+			public:
+				/// <summary>Create the style.</summary>
+				Win7ToolstripToolbarStyle();
+				~Win7ToolstripToolbarStyle();
+			};
 
 			/// <summary>Toolstrip split button dropdown style (Windows 7).</summary>
 			class Win7ToolstripButtonDropdownStyle : public Object, public virtual controls::GuiButton::IStyleController, public Description<Win7ToolstripButtonDropdownStyle>

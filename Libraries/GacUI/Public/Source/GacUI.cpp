@@ -11241,7 +11241,7 @@ Win7Theme
 
 			controls::GuiControl::IStyleController* Win7Theme::CreateToolbarStyle()
 			{
-				return new Win7WindowStyle;
+				return new Win7ToolstripToolbarStyle;
 			}
 
 			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarButtonStyle()
@@ -12709,6 +12709,7 @@ Win7MenuBarStyle
 					GuiSolidBackgroundElement* solid=GuiSolidBackgroundElement::Create();
 					solid->SetColor(Color(182, 188, 204));
 					boundsComposition->SetOwnedElement(solid);
+					boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				}
 				boundsComposition->AddChild(table);
 			}
@@ -14965,6 +14966,20 @@ namespace vl
 			using namespace elements;
 			using namespace compositions;
 			using namespace controls;
+
+/***********************************************************************
+Win7WindowStyle
+***********************************************************************/
+
+			Win7ToolstripToolbarStyle::Win7ToolstripToolbarStyle()
+				:Win7EmptyStyle(Win7GetSystemWindowColor())
+			{
+				boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+			}
+
+			Win7ToolstripToolbarStyle::~Win7ToolstripToolbarStyle()
+			{
+			}
 
 /***********************************************************************
 Win7ToolstripButtonDropdownStyle
