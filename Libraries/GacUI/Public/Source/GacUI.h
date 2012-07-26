@@ -2292,14 +2292,19 @@ Event
 					return false;
 				}
 
-				void Execute(T& argument)
+				void ExecuteWithNewSender(T& argument, GuiGraphicsComposition* newSender)
 				{
 					Ptr<HandlerNode>* currentHandler=&handlers;
 					while(*currentHandler)
 					{
-						(*currentHandler)->handler->Execute(sender, argument);
+									(*currentHandler)->handler->Execute(newSender?newSender:sender, argument);
 						currentHandler=&(*currentHandler)->next;
 					}
+				}
+
+				void Execute(T& argument)
+				{
+					ExecuteWithNewSender(argument, 0);
 				}
 			};
 
@@ -3252,7 +3257,7 @@ Shortcut Key Manager
 			class IGuiShortcutKeyItem : public Interface
 			{
 			public:
-				GuiGraphicsEvent<GuiEventArgs>			Executed;
+				GuiNotifyEvent							Executed;
 
 				virtual IGuiShortcutKeyManager*			GetManager()=0;
 				virtual WString							GetName()=0;
@@ -4965,7 +4970,7 @@ Menu
 				void									OnWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									OnWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
-				GuiMenu(GuiControl::IStyleController* _styleController, GuiControl* _owner);
+				GuiMenu(IStyleController* _styleController, GuiControl* _owner);
 				~GuiMenu();
 
 				void									UpdateMenuService();
@@ -5035,7 +5040,7 @@ MenuButton
 				bool									IsSubMenuExists();
 				GuiMenu*								GetSubMenu();
 				void									CreateSubMenu(GuiMenu::IStyleController* subMenuStyleController=0);
-				void									SetSubMenu(GuiMenu* value);
+				void									SetSubMenu(GuiMenu* value, bool owned);
 				void									DestroySubMenu();
 				bool									GetOwnedSubMenu();
 
@@ -6946,6 +6951,170 @@ SinglelineTextBox
 #endif
 
 /***********************************************************************
+CONTROLS\TOOLSTRIPPACKAGE\GUITOOLSTRIPCOMMAND.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITOOLSTRIPCOMMAND
+#define VCZH_PRESENTATION_CONTROLS_GUITOOLSTRIPCOMMAND
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+			class GuiToolstripCommand : public GuiComponent, public Description<GuiToolstripCommand>
+			{
+			protected:
+				Ptr<GuiImageData>						image;
+				WString									text;
+				compositions::IGuiShortcutKeyItem*		shortcutKeyItem;
+				bool									enabled;
+
+				void									InvokeDescriptionChanged();
+			public:
+				GuiToolstripCommand();
+				~GuiToolstripCommand();
+
+				compositions::GuiNotifyEvent			Executed;
+
+				compositions::GuiNotifyEvent			DescriptionChanged;
+
+				Ptr<GuiImageData>						GetImage();
+				void									SetImage(Ptr<GuiImageData> value);
+				const WString&							GetText();
+				void									SetText(const WString& value);
+				compositions::IGuiShortcutKeyItem*		GetShortcut();
+				void									SetShortcut(compositions::IGuiShortcutKeyItem* value);
+				bool									GetEnabled();
+				void									SetEnabled(bool value);
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TOOLSTRIPPACKAGE\GUITOOLSTRIPMENU.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITOOLSTRIPMENU
+#define VCZH_PRESENTATION_CONTROLS_GUITOOLSTRIPMENU
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+			class GuiToolstripCollection : public Object, public collections::IList<GuiControl*>
+			{
+			protected:
+				compositions::GuiStackComposition*			stackComposition;
+				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
+				collections::List<GuiControl*>				items;
+
+				void										RemoveAtInternal(vint index);
+				void										InsertInternal(vint index, GuiControl* control);
+			public:
+				GuiToolstripCollection(compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer);
+				~GuiToolstripCollection();
+
+				collections::IEnumerator<GuiControl*>*		CreateEnumerator()const override;
+				bool										Contains(GuiControl* const& item)const override;
+				vint										Count()const override;
+				GuiControl* const&							Get(vint index)const override;
+				GuiControl* const&							operator[](vint index)const override;
+				vint										IndexOf(GuiControl* const& item)const override;
+				vint										Add(GuiControl* const& item)override;
+				bool										Remove(GuiControl* const& item)override;
+				bool										RemoveAt(vint index)override;
+				bool										RemoveRange(vint index, vint count)override;
+				bool										Clear()override;
+				vint										Insert(vint index, GuiControl* const& item)override;
+				bool										Set(vint index, GuiControl* const& item)override;
+			};
+
+			class GuiToolstripMenu : public GuiMenu, public Description<GuiToolstripMenu>
+			{
+			protected:
+				compositions::GuiStackComposition*			stackComposition;
+				Ptr<GuiToolstripCollection>					toolstripItems;
+				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
+			public:
+				GuiToolstripMenu(IStyleController* _styleController, GuiControl* _owner);
+				~GuiToolstripMenu();
+				
+				GuiToolstripCollection&						GetToolstripItems();
+			};
+
+			class GuiToolstripMenuBar : public GuiMenuBar, public Description<GuiToolstripMenuBar>
+			{
+			protected:
+				compositions::GuiStackComposition*			stackComposition;
+				Ptr<GuiToolstripCollection>					toolstripItems;
+			public:
+				GuiToolstripMenuBar(IStyleController* _styleController);
+				~GuiToolstripMenuBar();
+				
+				GuiToolstripCollection&						GetToolstripItems();
+			};
+
+			class GuiToolstripToolbar : public GuiControl, public Description<GuiToolstripToolbar>
+			{
+			protected:
+				compositions::GuiStackComposition*			stackComposition;
+				Ptr<GuiToolstripCollection>					toolstripItems;
+			public:
+				GuiToolstripToolbar(IStyleController* _styleController);
+				~GuiToolstripToolbar();
+				
+				GuiToolstripCollection&						GetToolstripItems();
+			};
+
+			class GuiToolstripButton : public GuiMenuButton, public Description<GuiToolstripButton>
+			{
+			protected:
+				Ptr<GuiToolstripCommand>						command;
+				Ptr<compositions::GuiNotifyEvent::IHandler>		descriptionChangedHandler;
+
+				void											UpdateCommandContent();
+				void											OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void											OnCommandDescriptionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+			public:
+				GuiToolstripButton(IStyleController* _styleController);
+				~GuiToolstripButton();
+
+				Ptr<GuiToolstripCommand>						GetCommand();
+				void											SetCommand(Ptr<GuiToolstripCommand> value);
+
+				GuiToolstripMenu*								GetToolstripSubMenu();
+				void											CreateToolstripSubMenu(GuiToolstripMenu::IStyleController* subMenuStyleController=0);
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
 CONTROLS\STYLES\GUITHEMESTYLEFACTORY.H
 ***********************************************************************/
 /***********************************************************************
@@ -6979,19 +7148,20 @@ namespace vl
 				virtual controls::GuiListView::IStyleProvider*								CreateListViewStyle()=0;
 				virtual controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()=0;
 				
-				virtual controls::GuiControl::IStyleController*								CreateMenuStyle()=0;
-				virtual controls::GuiControl::IStyleController*								CreateMenuBarStyle()=0;
+				virtual controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()=0;
+				virtual controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()=0;
 				virtual controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()=0;
-				virtual controls::GuiMenuButton::IStyleController*							CreateMenuBarButtonStyle()=0;
-				virtual controls::GuiMenuButton::IStyleController*							CreateMenuItemButtonStyle()=0;
+				virtual controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()=0;
+				virtual controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()=0;
+				virtual controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()=0;
+				virtual controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()=0;
+				virtual controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()=0;
+				virtual controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()=0;
+				virtual controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()=0;
 				
 				virtual controls::GuiButton::IStyleController*								CreateButtonStyle()=0;
 				virtual controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()=0;
 				virtual controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()=0;
-				virtual controls::GuiMenuButton::IStyleController*							CreateToolstripButtonStyle()=0;
-				virtual controls::GuiMenuButton::IStyleController*							CreateToolstripDropdownButtonStyle()=0;
-				virtual controls::GuiMenuButton::IStyleController*							CreateToolstripSplitButtonStyle()=0;
-				virtual controls::GuiControl::IStyleController*								CreateToolstripSplitterStyle()=0;
 				
 				virtual controls::GuiScroll::IStyleController*								CreateHScrollStyle()=0;
 				virtual controls::GuiScroll::IStyleController*								CreateVScrollStyle()=0;
@@ -7024,19 +7194,20 @@ namespace vl
 				extern controls::GuiListView*					NewListViewInformation();
 				extern controls::GuiTreeView*					NewTreeView();
 
-				extern controls::GuiMenu*						NewMenu(controls::GuiControl* owner);
-				extern controls::GuiMenuBar*					NewMenuBar();
+				extern controls::GuiToolstripMenu*				NewMenu(controls::GuiControl* owner);
+				extern controls::GuiToolstripMenuBar*			NewMenuBar();
 				extern controls::GuiControl*					NewMenuSplitter();
-				extern controls::GuiMenuButton*					NewMenuBarButton();
-				extern controls::GuiMenuButton*					NewMenuItemButton();
+				extern controls::GuiToolstripButton*			NewMenuBarButton();
+				extern controls::GuiToolstripButton*			NewMenuItemButton();
+				extern controls::GuiToolstripToolbar*			NewToolbar();
+				extern controls::GuiToolstripButton*			NewToolbarButton();
+				extern controls::GuiToolstripButton*			NewToolbarDropdownButton();
+				extern controls::GuiToolstripButton*			NewToolbarSplitButton();
+				extern controls::GuiControl*					NewToolbarSplitter();
 
 				extern controls::GuiButton*						NewButton();
 				extern controls::GuiSelectableButton*			NewCheckBox();
 				extern controls::GuiSelectableButton*			NewRadioButton();
-				extern controls::GuiMenuButton*					NewToolstripButton();
-				extern controls::GuiMenuButton*					NewToolstripDropdownButton();
-				extern controls::GuiMenuButton*					NewToolstripSplitButton();
-				extern controls::GuiControl*					NewToolstripSplitter();
 
 				extern controls::GuiScroll*						NewHScroll();
 				extern controls::GuiScroll*						NewVScroll();
@@ -8493,19 +8664,20 @@ Theme
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
 				
-				controls::GuiControl::IStyleController*								CreateMenuStyle()override;
-				controls::GuiControl::IStyleController*								CreateMenuBarStyle()override;
+				controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
+				controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
 				controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
-				controls::GuiMenuButton::IStyleController*							CreateMenuBarButtonStyle()override;
-				controls::GuiMenuButton::IStyleController*							CreateMenuItemButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()override;
+				controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()override;
+				controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
 
 				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
-				controls::GuiMenuButton::IStyleController*							CreateToolstripButtonStyle()override;
-				controls::GuiMenuButton::IStyleController*							CreateToolstripDropdownButtonStyle()override;
-				controls::GuiMenuButton::IStyleController*							CreateToolstripSplitButtonStyle()override;
-				controls::GuiControl::IStyleController*								CreateToolstripSplitterStyle()override;
 				
 				controls::GuiScroll::IStyleController*								CreateHScrollStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
@@ -8536,7 +8708,6 @@ Interfaces:
 
 #ifndef VCZH_PRESENTATION_GACUI
 #define VCZH_PRESENTATION_GACUI
-
 
 
 using namespace vl;

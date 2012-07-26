@@ -1483,7 +1483,7 @@ ListViewColumnItemArranger
 						{
 							GuiListViewColumnHeader* button=columnHeaderButtons[i];
 							button->SetText(columnItemView->GetColumnText(i));
-							button->SetSubMenu(columnItemView->GetDropdownPopup(i));
+							button->SetSubMenu(columnItemView->GetDropdownPopup(i), false);
 							button->SetColumnSortingState(columnItemView->GetSortingState(i));
 							button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
 						}
@@ -1510,7 +1510,7 @@ ListViewColumnItemArranger
 							{
 								GuiListViewColumnHeader* button=new GuiListViewColumnHeader(styleProvider->CreateColumnStyle());
 								button->SetText(columnItemView->GetColumnText(i));
-								button->SetSubMenu(columnItemView->GetDropdownPopup(i));
+								button->SetSubMenu(columnItemView->GetDropdownPopup(i), false);
 								button->SetColumnSortingState(columnItemView->GetSortingState(i));
 								button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
 								button->Clicked.AttachLambda(Curry(Func<void(int, GuiGraphicsComposition*, GuiEventArgs&)>(this, &ListViewColumnItemArranger::ColumnClicked))(i));
@@ -2408,15 +2408,12 @@ GuiMenuButton
 			{
 				if(!subMenu)
 				{
-					subMenu=new GuiMenu(subMenuStyleController?subMenuStyleController:styleController->CreateSubMenuStyleController(), this);
-					subMenu->WindowOpened.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowOpened);
-					subMenu->WindowClosed.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowClosed);
-					styleController->SetSubMenuExisting(true);
-					ownedSubMenu=true;
+					GuiMenu* newSubMenu=new GuiMenu(subMenuStyleController?subMenuStyleController:styleController->CreateSubMenuStyleController(), this);
+					SetSubMenu(newSubMenu, true);
 				}
 			}
 
-			void GuiMenuButton::SetSubMenu(GuiMenu* value)
+			void GuiMenuButton::SetSubMenu(GuiMenu* value, bool owned)
 			{
 				if(subMenu)
 				{
@@ -2426,7 +2423,12 @@ GuiMenuButton
 					}
 				}
 				subMenu=value;
-				ownedSubMenu=false;
+				ownedSubMenu=owned;
+				if(subMenu)
+				{
+					subMenu->WindowOpened.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowOpened);
+					subMenu->WindowClosed.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowClosed);
+				}
 				styleController->SetSubMenuExisting(subMenu!=0);
 			}
 
@@ -11036,14 +11038,14 @@ namespace vl
 					return new controls::GuiTreeView(GetCurrentTheme()->CreateTreeViewStyle());
 				}
 
-				controls::GuiMenu* NewMenu(controls::GuiControl* owner)
+				controls::GuiToolstripMenu* NewMenu(controls::GuiControl* owner)
 				{
-					return new controls::GuiMenu(GetCurrentTheme()->CreateMenuStyle(), owner);
+					return new controls::GuiToolstripMenu(GetCurrentTheme()->CreateMenuStyle(), owner);
 				}
 
-				controls::GuiMenuBar* NewMenuBar()
+				controls::GuiToolstripMenuBar* NewMenuBar()
 				{
-					return new controls::GuiMenuBar(GetCurrentTheme()->CreateMenuBarStyle());
+					return new controls::GuiToolstripMenuBar(GetCurrentTheme()->CreateMenuBarStyle());
 				}
 
 				controls::GuiControl* NewMenuSplitter()
@@ -11051,14 +11053,39 @@ namespace vl
 					return new controls::GuiControl(GetCurrentTheme()->CreateMenuSplitterStyle());
 				}
 
-				controls::GuiMenuButton* NewMenuBarButton()
+				controls::GuiToolstripButton* NewMenuBarButton()
 				{
-					return new controls::GuiMenuButton(GetCurrentTheme()->CreateMenuBarButtonStyle());
+					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateMenuBarButtonStyle());
 				}
 
-				controls::GuiMenuButton* NewMenuItemButton()
+				controls::GuiToolstripButton* NewMenuItemButton()
 				{
-					return new controls::GuiMenuButton(GetCurrentTheme()->CreateMenuItemButtonStyle());
+					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateMenuItemButtonStyle());
+				}
+
+				controls::GuiToolstripToolbar* NewToolbar()
+				{
+					return new controls::GuiToolstripToolbar(GetCurrentTheme()->CreateToolbarStyle());
+				}
+
+				controls::GuiToolstripButton* NewToolbarButton()
+				{
+					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateToolbarButtonStyle());
+				}
+
+				controls::GuiToolstripButton* NewToolbarDropdownButton()
+				{
+					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateToolbarDropdownButtonStyle());
+				}
+
+				controls::GuiToolstripButton* NewToolbarSplitButton()
+				{
+					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateToolbarSplitButtonStyle());
+				}
+
+				controls::GuiControl* NewToolbarSplitter()
+				{
+					return new controls::GuiControl(GetCurrentTheme()->CreateToolbarSplitterStyle());
 				}
 
 				controls::GuiButton* NewButton()
@@ -11074,26 +11101,6 @@ namespace vl
 				controls::GuiSelectableButton* NewRadioButton()
 				{
 					return new controls::GuiSelectableButton(GetCurrentTheme()->CreateRadioButtonStyle());
-				}
-
-				controls::GuiMenuButton* NewToolstripButton()
-				{
-					return new controls::GuiMenuButton(GetCurrentTheme()->CreateToolstripButtonStyle());
-				}
-
-				controls::GuiMenuButton* NewToolstripDropdownButton()
-				{
-					return new controls::GuiMenuButton(GetCurrentTheme()->CreateToolstripDropdownButtonStyle());
-				}
-
-				controls::GuiMenuButton* NewToolstripSplitButton()
-				{
-					return new controls::GuiMenuButton(GetCurrentTheme()->CreateToolstripSplitButtonStyle());
-				}
-
-				controls::GuiControl* NewToolstripSplitter()
-				{
-					return new controls::GuiControl(GetCurrentTheme()->CreateToolstripSplitterStyle());
 				}
 
 				controls::GuiScroll* NewHScroll()
@@ -11207,12 +11214,12 @@ Win7Theme
 				return new Win7TreeViewProvider;
 			}
 
-			controls::GuiControl::IStyleController* Win7Theme::CreateMenuStyle()
+			controls::GuiToolstripMenu::IStyleController* Win7Theme::CreateMenuStyle()
 			{
 				return new Win7MenuStyle;
 			}
 
-			controls::GuiControl::IStyleController* Win7Theme::CreateMenuBarStyle()
+			controls::GuiToolstripMenuBar::IStyleController* Win7Theme::CreateMenuBarStyle()
 			{
 				return new Win7MenuBarStyle;
 			}
@@ -11222,14 +11229,39 @@ Win7Theme
 				return new Win7MenuSplitterStyle;
 			}
 
-			controls::GuiMenuButton::IStyleController* Win7Theme::CreateMenuBarButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateMenuBarButtonStyle()
 			{
 				return new Win7MenuBarButtonStyle;
 			}
 
-			controls::GuiMenuButton::IStyleController* Win7Theme::CreateMenuItemButtonStyle()
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateMenuItemButtonStyle()
 			{
 				return new Win7MenuItemButtonStyle;
+			}
+
+			controls::GuiControl::IStyleController* Win7Theme::CreateToolbarStyle()
+			{
+				return new Win7WindowStyle;
+			}
+
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarButtonStyle()
+			{
+				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::CommandButton);
+			}
+
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarDropdownButtonStyle()
+			{
+				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::DropdownButton);
+			}
+
+			controls::GuiToolstripButton::IStyleController* Win7Theme::CreateToolbarSplitButtonStyle()
+			{
+				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::SplitButton);
+			}
+
+			controls::GuiControl::IStyleController* Win7Theme::CreateToolbarSplitterStyle()
+			{
+				return new Win7ToolstripSplitterStyle;
 			}
 
 			controls::GuiButton::IStyleController* Win7Theme::CreateButtonStyle()
@@ -11245,26 +11277,6 @@ Win7Theme
 			controls::GuiSelectableButton::IStyleController* Win7Theme::CreateRadioButtonStyle()
 			{
 				return new Win7CheckBoxStyle(Win7CheckBoxStyle::RadioButton);
-			}
-
-			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripButtonStyle()
-			{
-				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::CommandButton);
-			}
-
-			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripDropdownButtonStyle()
-			{
-				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::DropdownButton);
-			}
-
-			controls::GuiMenuButton::IStyleController* Win7Theme::CreateToolstripSplitButtonStyle()
-			{
-				return new Win7ToolstripButtonStyle(Win7ToolstripButtonStyle::SplitButton);
-			}
-
-			controls::GuiControl::IStyleController* Win7Theme::CreateToolstripSplitterStyle()
-			{
-				return new Win7ToolstripSplitterStyle;
 			}
 
 			controls::GuiScroll::IStyleController* Win7Theme::CreateHScrollStyle()
@@ -15293,6 +15305,448 @@ Win7ToolstripSplitterStyle
 }
 
 /***********************************************************************
+Controls\ToolstripPackage\GuiToolstripCommand.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+			using namespace compositions;
+
+/***********************************************************************
+GuiToolstripCommand
+***********************************************************************/
+
+			void GuiToolstripCommand::InvokeDescriptionChanged()
+			{
+				GuiEventArgs arguments;
+				DescriptionChanged.Execute(arguments);
+			}
+
+			GuiToolstripCommand::GuiToolstripCommand()
+				:shortcutKeyItem(0)
+				,enabled(true)
+			{
+			}
+
+			GuiToolstripCommand::~GuiToolstripCommand()
+			{
+			}
+
+			Ptr<GuiImageData> GuiToolstripCommand::GetImage()
+			{
+				return image;
+			}
+
+			void GuiToolstripCommand::SetImage(Ptr<GuiImageData> value)
+			{
+				if(image!=value)
+				{
+					image=value;
+					InvokeDescriptionChanged();
+				}
+			}
+
+			const WString& GuiToolstripCommand::GetText()
+			{
+				return text;
+			}
+
+			void GuiToolstripCommand::SetText(const WString& value)
+			{
+				if(text!=value)
+				{
+					text=value;
+					InvokeDescriptionChanged();
+				}
+			}
+
+			compositions::IGuiShortcutKeyItem* GuiToolstripCommand::GetShortcut()
+			{
+				return shortcutKeyItem;
+			}
+
+			void GuiToolstripCommand::SetShortcut(compositions::IGuiShortcutKeyItem* value)
+			{
+				if(shortcutKeyItem!=value)
+				{
+					shortcutKeyItem=value;
+					InvokeDescriptionChanged();
+				}
+			}
+
+			bool GuiToolstripCommand::GetEnabled()
+			{
+				return enabled;
+			}
+
+			void GuiToolstripCommand::SetEnabled(bool value)
+			{
+				if(enabled!=value)
+				{
+					enabled=value;
+					InvokeDescriptionChanged();
+				}
+			}
+		}
+	}
+}
+
+/***********************************************************************
+Controls\ToolstripPackage\GuiToolstripMenu.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+			using namespace collections;
+			using namespace compositions;
+
+/***********************************************************************
+GuiToolstripCollection
+***********************************************************************/
+
+			void GuiToolstripCollection::RemoveAtInternal(vint index)
+			{
+				GuiControl* control=items[index];
+				items.RemoveAt(index);
+				GuiStackItemComposition* stackItem=stackComposition->GetStackItems()[index];
+
+				stackComposition->RemoveChild(stackItem);
+				stackItem->RemoveChild(control->GetBoundsComposition());
+				delete stackItem;
+
+				if(subComponentMeasurer)
+				{
+					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(control);
+					if(menuButton)
+					{
+						GuiSubComponentMeasurer::IMeasuringSource* measuringSource=
+							dynamic_cast<GuiMenuButton::IStyleController*>(
+								menuButton->GetStyleController()
+								)->GetMeasuringSource();
+						if(measuringSource)
+						{
+							subComponentMeasurer->DetachMeasuringSource(measuringSource);
+						}
+					}
+				}
+				delete control;
+			}
+
+			void GuiToolstripCollection::InsertInternal(vint index, GuiControl* control)
+			{
+				items.Insert(index, control);
+				GuiStackItemComposition* stackItem=new GuiStackItemComposition;
+				control->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				stackItem->AddChild(control->GetBoundsComposition());
+				stackComposition->InsertChild(index, stackItem);
+
+				if(subComponentMeasurer)
+				{
+					GuiMenuButton* menuButton=dynamic_cast<GuiMenuButton*>(control);
+					if(menuButton)
+					{
+						GuiSubComponentMeasurer::IMeasuringSource* measuringSource=
+							dynamic_cast<GuiMenuButton::IStyleController*>(
+								menuButton->GetStyleController()
+								)->GetMeasuringSource();
+						if(measuringSource)
+						{
+							subComponentMeasurer->AttachMeasuringSource(measuringSource);
+						}
+					}
+				}
+			}
+
+			GuiToolstripCollection::GuiToolstripCollection(compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer)
+				:stackComposition(_stackComposition)
+				,subComponentMeasurer(_subComponentMeasurer)
+			{
+			}
+
+			GuiToolstripCollection::~GuiToolstripCollection()
+			{
+			}
+
+			collections::IEnumerator<GuiControl*>* GuiToolstripCollection::CreateEnumerator()const
+			{
+				return items.Wrap().CreateEnumerator();
+			}
+
+			bool GuiToolstripCollection::Contains(GuiControl* const& item)const
+			{
+				return items.Contains(item);
+			}
+
+			vint GuiToolstripCollection::Count()const
+			{
+				return items.Count();
+			}
+
+			GuiControl* const& GuiToolstripCollection::Get(vint index)const
+			{
+				return items.Get(index);
+			}
+
+			GuiControl* const& GuiToolstripCollection::operator[](vint index)const
+			{
+				return items.Get(index);
+			}
+
+			vint GuiToolstripCollection::IndexOf(GuiControl* const& item)const
+			{
+				return items.IndexOf(item);
+			}
+
+			vint GuiToolstripCollection::Add(GuiControl* const& item)
+			{
+				return Insert(items.Count(), item);
+			}
+
+			bool GuiToolstripCollection::Remove(GuiControl* const& item)
+			{
+				return RemoveAt(items.IndexOf(item));
+			}
+
+			bool GuiToolstripCollection::RemoveAt(vint index)
+			{
+				if(0<=index && index<items.Count())
+				{
+					RemoveAtInternal(index);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool GuiToolstripCollection::RemoveRange(vint index, vint count)
+			{
+				if(count<=0) return false;
+				if(0<=index && index<items.Count() && index+count<=items.Count())
+				{
+					while(count-->0)
+					{
+						RemoveAt(index+count);
+					}
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool GuiToolstripCollection::Clear()
+			{
+				while(items.Count()>0)
+				{
+					RemoveAt(items.Count()-1);
+				}
+				return true;
+			}
+
+			vint GuiToolstripCollection::Insert(vint index, GuiControl* const& item)
+			{
+				if(0<=index && index<=items.Count() && item && !item->GetBoundsComposition()->GetParent())
+				{
+					InsertInternal(index, item);
+					return index;
+				}
+				else
+				{
+					return -1;
+				}
+			}
+
+			bool GuiToolstripCollection::Set(vint index, GuiControl* const& item)
+			{
+				if(0<=index && index<items.Count() && item && !item->GetBoundsComposition()->GetParent())
+				{
+					RemoveAtInternal(index);
+					InsertInternal(index, item);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+/***********************************************************************
+GuiToolstripMenu
+***********************************************************************/
+
+			GuiToolstripMenu::GuiToolstripMenu(IStyleController* _styleController, GuiControl* _owner)
+				:GuiMenu(_styleController, _owner)
+			{
+				stackComposition=new GuiStackComposition;
+				stackComposition->SetDirection(GuiStackComposition::Vertical);
+				stackComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				GetContainerComposition()->AddChild(stackComposition);
+
+				subComponentMeasurer=new GuiSubComponentMeasurer;
+				toolstripItems=new GuiToolstripCollection(stackComposition, subComponentMeasurer);
+			}
+
+			GuiToolstripMenu::~GuiToolstripMenu()
+			{
+			}
+
+			GuiToolstripCollection& GuiToolstripMenu::GetToolstripItems()
+			{
+				return *toolstripItems.Obj();
+			}
+
+/***********************************************************************
+GuiToolstripMenuBar
+***********************************************************************/
+			
+			GuiToolstripMenuBar::GuiToolstripMenuBar(IStyleController* _styleController)
+				:GuiMenuBar(_styleController)
+			{
+				stackComposition=new GuiStackComposition;
+				stackComposition->SetDirection(GuiStackComposition::Horizontal);
+				stackComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				GetContainerComposition()->AddChild(stackComposition);
+
+				toolstripItems=new GuiToolstripCollection(stackComposition, 0);
+			}
+
+			GuiToolstripMenuBar::~GuiToolstripMenuBar()
+			{
+			}
+
+			GuiToolstripCollection& GuiToolstripMenuBar::GetToolstripItems()
+			{
+				return *toolstripItems.Obj();
+			}
+
+/***********************************************************************
+GuiToolstripToolbar
+***********************************************************************/
+				
+			GuiToolstripToolbar::GuiToolstripToolbar(IStyleController* _styleController)
+				:GuiControl(_styleController)
+			{
+				stackComposition=new GuiStackComposition;
+				stackComposition->SetDirection(GuiStackComposition::Horizontal);
+				stackComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				GetContainerComposition()->AddChild(stackComposition);
+
+				toolstripItems=new GuiToolstripCollection(stackComposition, 0);
+			}
+
+			GuiToolstripToolbar::~GuiToolstripToolbar()
+			{
+			}
+
+			GuiToolstripCollection& GuiToolstripToolbar::GetToolstripItems()
+			{
+				return *toolstripItems.Obj();
+			}
+
+/***********************************************************************
+GuiToolstripButton
+***********************************************************************/
+
+			void GuiToolstripButton::UpdateCommandContent()
+			{
+				if(command)
+				{
+					SetImage(command->GetImage());
+					SetText(command->GetText());
+					SetEnabled(command->GetEnabled());
+					if(command->GetShortcut())
+					{
+						SetShortcutText(command->GetShortcut()->GetName());
+					}
+					else
+					{
+						SetShortcutText(L"");
+					}
+				}
+				else
+				{
+					SetImage(0);
+					SetText(L"");
+					SetEnabled(true);
+					SetShortcutText(L"");
+				}
+			}
+
+			void GuiToolstripButton::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if(command)
+				{
+					command->Executed.ExecuteWithNewSender(arguments, sender);
+				}
+			}
+
+			void GuiToolstripButton::OnCommandDescriptionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				UpdateCommandContent();
+			}
+
+			GuiToolstripButton::GuiToolstripButton(IStyleController* _styleController)
+				:GuiMenuButton(_styleController)
+			{
+			}
+
+			GuiToolstripButton::~GuiToolstripButton()
+			{
+			}
+
+			Ptr<GuiToolstripCommand> GuiToolstripButton::GetCommand()
+			{
+				return command;
+			}
+
+			void GuiToolstripButton::SetCommand(Ptr<GuiToolstripCommand> value)
+			{
+				if(command)
+				{
+					command->DescriptionChanged.Detach(descriptionChangedHandler);
+				}
+				command=0;
+				descriptionChangedHandler=0;
+				if(value)
+				{
+					command=value;
+					descriptionChangedHandler=command->DescriptionChanged.AttachMethod(this, &GuiToolstripButton::OnCommandDescriptionChanged);
+				}
+				UpdateCommandContent();
+			}
+
+			GuiToolstripMenu* GuiToolstripButton::GetToolstripSubMenu()
+			{
+				return dynamic_cast<GuiToolstripMenu*>(GetSubMenu());
+			}
+
+			void GuiToolstripButton::CreateToolstripSubMenu(GuiToolstripMenu::IStyleController* subMenuStyleController)
+			{
+				if(!subMenu)
+				{
+					GuiToolstripMenu* newSubMenu=new GuiToolstripMenu(subMenuStyleController?subMenuStyleController:styleController->CreateSubMenuStyleController(), this);
+					SetSubMenu(newSubMenu, true);
+				}
+			}
+		}
+	}
+}
+
+/***********************************************************************
 GraphicsComposition\GuiGraphicsBasicComposition.cpp
 ***********************************************************************/
 
@@ -16686,6 +17140,7 @@ GuiStackItemComposition
 			}
 
 			GuiStackItemComposition::GuiStackItemComposition()
+				:stackParent(0)
 			{
 				SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			}
