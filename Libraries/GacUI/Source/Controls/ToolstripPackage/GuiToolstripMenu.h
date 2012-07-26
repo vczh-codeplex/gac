@@ -18,30 +18,6 @@ namespace vl
 	{
 		namespace controls
 		{
-			/// <summary>Toolstrip button that can connect with a <see cref="GuiToolstripCommand"/>.</summary>
-			class GuiToolstripButton : public GuiMenuButton, public Description<GuiToolstripButton>
-			{
-			protected:
-				Ptr<GuiToolstripCommand>						command;
-				Ptr<compositions::GuiNotifyEvent::IHandler>		descriptionChangedHandler;
-
-				void											UpdateCommandContent();
-				void											OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void											OnCommandDescriptionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-			public:
-				/// <summary>Create a control with a specified style controller.</summary>
-				/// <param name="_styleController">The style controller.</param>
-				GuiToolstripButton(IStyleController* _styleController);
-				~GuiToolstripButton();
-
-				/// <summary>Get the attached <see cref="GuiToolstripCommand"/>.</summary>
-				/// <returns>The attached toolstrip command.</returns>
-				Ptr<GuiToolstripCommand>						GetCommand();
-				/// <summary>Detach from the previous <see cref="GuiToolstripCommand"/> and attach to a new one. If the command is null, this function only do detaching.</summary>
-				/// <param name="value">The new toolstrip command.</param>
-				void											SetCommand(Ptr<GuiToolstripCommand> value);
-			};
-
 			/// <summary>Toolstrip item collection.</summary>
 			class GuiToolstripCollection : public Object, public collections::IList<GuiControl*>
 			{
@@ -74,32 +50,85 @@ namespace vl
 			/// <summary>Toolstrip menu.</summary>
 			class GuiToolstripMenu : public GuiMenu, public Description<GuiToolstripMenu>
 			{
+			protected:
+				compositions::GuiStackComposition*			stackComposition;
+				Ptr<GuiToolstripCollection>					toolstripItems;
+				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
 				/// <param name="_owner">The owner menu item of the parent menu.</param>
 				GuiToolstripMenu(IStyleController* _styleController, GuiControl* _owner);
 				~GuiToolstripMenu();
+				
+				/// <summary>Get all managed child controls ordered by their positions.</summary>
+				/// <returns>All managed child controls.</returns>
+				GuiToolstripCollection&						GetToolstripItems();
 			};
 
 			/// <summary>Toolstrip menu bar.</summary>
 			class GuiToolstripMenuBar : public GuiMenuBar, public Description<GuiToolstripMenuBar>
 			{
+			protected:
+				compositions::GuiStackComposition*			stackComposition;
+				Ptr<GuiToolstripCollection>					toolstripItems;
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
 				GuiToolstripMenuBar(IStyleController* _styleController);
 				~GuiToolstripMenuBar();
+				
+				/// <summary>Get all managed child controls ordered by their positions.</summary>
+				/// <returns>All managed child controls.</returns>
+				GuiToolstripCollection&						GetToolstripItems();
 			};
 
 			/// <summary>Toolstrip tool bar.</summary>
 			class GuiToolstripToolbar : public GuiControl, public Description<GuiToolstripToolbar>
 			{
+			protected:
+				compositions::GuiStackComposition*			stackComposition;
+				Ptr<GuiToolstripCollection>					toolstripItems;
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
 				GuiToolstripToolbar(IStyleController* _styleController);
 				~GuiToolstripToolbar();
+				
+				/// <summary>Get all managed child controls ordered by their positions.</summary>
+				/// <returns>All managed child controls.</returns>
+				GuiToolstripCollection&						GetToolstripItems();
+			};
+
+			/// <summary>Toolstrip button that can connect with a <see cref="GuiToolstripCommand"/>.</summary>
+			class GuiToolstripButton : public GuiMenuButton, public Description<GuiToolstripButton>
+			{
+			protected:
+				Ptr<GuiToolstripCommand>						command;
+				Ptr<compositions::GuiNotifyEvent::IHandler>		descriptionChangedHandler;
+
+				void											UpdateCommandContent();
+				void											OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void											OnCommandDescriptionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+			public:
+				/// <summary>Create a control with a specified style controller.</summary>
+				/// <param name="_styleController">The style controller.</param>
+				GuiToolstripButton(IStyleController* _styleController);
+				~GuiToolstripButton();
+
+				/// <summary>Get the attached <see cref="GuiToolstripCommand"/>.</summary>
+				/// <returns>The attached toolstrip command.</returns>
+				Ptr<GuiToolstripCommand>						GetCommand();
+				/// <summary>Detach from the previous <see cref="GuiToolstripCommand"/> and attach to a new one. If the command is null, this function only do detaching.</summary>
+				/// <param name="value">The new toolstrip command.</param>
+				void											SetCommand(Ptr<GuiToolstripCommand> value);
+
+				/// <summary>Get the toolstrip sub menu. If the sub menu is not created, it returns null.</summary>
+				/// <returns>The toolstrip sub menu.</returns>
+				GuiToolstripMenu*								GetToolstripSubMenu();
+				/// <summary>Create the toolstrip sub menu if necessary. The created toolstrip sub menu is owned by this menu button.</summary>
+				/// <param name="subMenuStyleController">The style controller for the toolstrip sub menu. If this argument is null, it will call <see cref="IStyleController::CreateSubMenuStyleController"/> for a style controller.</param>
+				void											CreateToolstripSubMenu(GuiToolstripMenu::IStyleController* subMenuStyleController=0);
 			};
 		}
 	}

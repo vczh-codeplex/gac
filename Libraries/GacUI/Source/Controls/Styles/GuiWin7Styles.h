@@ -47,19 +47,20 @@ Theme
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
 				
-				controls::GuiControl::IStyleController*								CreateMenuStyle()override;
-				controls::GuiControl::IStyleController*								CreateMenuBarStyle()override;
+				controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
+				controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
 				controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
-				controls::GuiMenuButton::IStyleController*							CreateMenuBarButtonStyle()override;
-				controls::GuiMenuButton::IStyleController*							CreateMenuItemButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()override;
+				controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()override;
+				controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
 
 				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
-				controls::GuiMenuButton::IStyleController*							CreateToolstripButtonStyle()override;
-				controls::GuiMenuButton::IStyleController*							CreateToolstripDropdownButtonStyle()override;
-				controls::GuiMenuButton::IStyleController*							CreateToolstripSplitButtonStyle()override;
-				controls::GuiControl::IStyleController*								CreateToolstripSplitterStyle()override;
 				
 				controls::GuiScroll::IStyleController*								CreateHScrollStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;

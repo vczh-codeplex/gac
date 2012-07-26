@@ -334,11 +334,8 @@ GuiMenuButton
 			{
 				if(!subMenu)
 				{
-					subMenu=new GuiMenu(subMenuStyleController?subMenuStyleController:styleController->CreateSubMenuStyleController(), this);
-					subMenu->WindowOpened.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowOpened);
-					subMenu->WindowClosed.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowClosed);
-					styleController->SetSubMenuExisting(true);
-					ownedSubMenu=true;
+					GuiMenu* newSubMenu=new GuiMenu(subMenuStyleController?subMenuStyleController:styleController->CreateSubMenuStyleController(), this);
+					SetSubMenu(newSubMenu, true);
 				}
 			}
 
@@ -353,6 +350,11 @@ GuiMenuButton
 				}
 				subMenu=value;
 				ownedSubMenu=owned;
+				if(subMenu)
+				{
+					subMenu->WindowOpened.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowOpened);
+					subMenu->WindowClosed.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowClosed);
+				}
 				styleController->SetSubMenuExisting(subMenu!=0);
 			}
 

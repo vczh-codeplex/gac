@@ -10,78 +10,6 @@ namespace vl
 			using namespace compositions;
 
 /***********************************************************************
-GuiToolstripButton
-***********************************************************************/
-
-			void GuiToolstripButton::UpdateCommandContent()
-			{
-				if(command)
-				{
-					SetImage(command->GetImage());
-					SetText(command->GetText());
-					SetEnabled(command->GetEnabled());
-					if(command->GetShortcut())
-					{
-						SetShortcutText(command->GetShortcut()->GetName());
-					}
-					else
-					{
-						SetShortcutText(L"");
-					}
-				}
-				else
-				{
-					SetImage(0);
-					SetText(L"");
-					SetEnabled(true);
-					SetShortcutText(L"");
-				}
-			}
-
-			void GuiToolstripButton::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				if(command)
-				{
-					command->Executed.ExecuteWithNewSender(arguments, sender);
-				}
-			}
-
-			void GuiToolstripButton::OnCommandDescriptionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				UpdateCommandContent();
-			}
-
-			GuiToolstripButton::GuiToolstripButton(IStyleController* _styleController)
-				:GuiMenuButton(_styleController)
-			{
-			}
-
-			GuiToolstripButton::~GuiToolstripButton()
-			{
-			}
-
-			Ptr<GuiToolstripCommand> GuiToolstripButton::GetCommand()
-			{
-				return command;
-			}
-
-			void GuiToolstripButton::SetCommand(Ptr<GuiToolstripCommand> value)
-			{
-				if(command)
-				{
-					command->DescriptionChanged.Detach(descriptionChangedHandler);
-				}
-				command=0;
-				descriptionChangedHandler=0;
-				if(value)
-				{
-					command=value;
-					descriptionChangedHandler=command->DescriptionChanged.AttachMethod(this, &GuiToolstripButton::OnCommandDescriptionChanged);
-				}
-				UpdateCommandContent();
-			}
-
-/***********************************************************************
 GuiToolstripCollection
 ***********************************************************************/
 
@@ -254,10 +182,23 @@ GuiToolstripMenu
 			GuiToolstripMenu::GuiToolstripMenu(IStyleController* _styleController, GuiControl* _owner)
 				:GuiMenu(_styleController, _owner)
 			{
+				stackComposition=new GuiStackComposition;
+				stackComposition->SetDirection(GuiStackComposition::Vertical);
+				stackComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				GetContainerComposition()->AddChild(stackComposition);
+
+				subComponentMeasurer=new GuiSubComponentMeasurer;
+				toolstripItems=new GuiToolstripCollection(stackComposition, subComponentMeasurer);
 			}
 
 			GuiToolstripMenu::~GuiToolstripMenu()
 			{
+			}
+
+			GuiToolstripCollection& GuiToolstripMenu::GetToolstripItems()
+			{
+				return *toolstripItems.Obj();
 			}
 
 /***********************************************************************
@@ -267,10 +208,22 @@ GuiToolstripMenuBar
 			GuiToolstripMenuBar::GuiToolstripMenuBar(IStyleController* _styleController)
 				:GuiMenuBar(_styleController)
 			{
+				stackComposition=new GuiStackComposition;
+				stackComposition->SetDirection(GuiStackComposition::Horizontal);
+				stackComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				GetContainerComposition()->AddChild(stackComposition);
+
+				toolstripItems=new GuiToolstripCollection(stackComposition, 0);
 			}
 
 			GuiToolstripMenuBar::~GuiToolstripMenuBar()
 			{
+			}
+
+			GuiToolstripCollection& GuiToolstripMenuBar::GetToolstripItems()
+			{
+				return *toolstripItems.Obj();
 			}
 
 /***********************************************************************
@@ -280,10 +233,108 @@ GuiToolstripToolbar
 			GuiToolstripToolbar::GuiToolstripToolbar(IStyleController* _styleController)
 				:GuiControl(_styleController)
 			{
+				stackComposition=new GuiStackComposition;
+				stackComposition->SetDirection(GuiStackComposition::Horizontal);
+				stackComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				GetContainerComposition()->AddChild(stackComposition);
+
+				toolstripItems=new GuiToolstripCollection(stackComposition, 0);
 			}
 
 			GuiToolstripToolbar::~GuiToolstripToolbar()
 			{
+			}
+
+			GuiToolstripCollection& GuiToolstripToolbar::GetToolstripItems()
+			{
+				return *toolstripItems.Obj();
+			}
+
+/***********************************************************************
+GuiToolstripButton
+***********************************************************************/
+
+			void GuiToolstripButton::UpdateCommandContent()
+			{
+				if(command)
+				{
+					SetImage(command->GetImage());
+					SetText(command->GetText());
+					SetEnabled(command->GetEnabled());
+					if(command->GetShortcut())
+					{
+						SetShortcutText(command->GetShortcut()->GetName());
+					}
+					else
+					{
+						SetShortcutText(L"");
+					}
+				}
+				else
+				{
+					SetImage(0);
+					SetText(L"");
+					SetEnabled(true);
+					SetShortcutText(L"");
+				}
+			}
+
+			void GuiToolstripButton::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if(command)
+				{
+					command->Executed.ExecuteWithNewSender(arguments, sender);
+				}
+			}
+
+			void GuiToolstripButton::OnCommandDescriptionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				UpdateCommandContent();
+			}
+
+			GuiToolstripButton::GuiToolstripButton(IStyleController* _styleController)
+				:GuiMenuButton(_styleController)
+			{
+			}
+
+			GuiToolstripButton::~GuiToolstripButton()
+			{
+			}
+
+			Ptr<GuiToolstripCommand> GuiToolstripButton::GetCommand()
+			{
+				return command;
+			}
+
+			void GuiToolstripButton::SetCommand(Ptr<GuiToolstripCommand> value)
+			{
+				if(command)
+				{
+					command->DescriptionChanged.Detach(descriptionChangedHandler);
+				}
+				command=0;
+				descriptionChangedHandler=0;
+				if(value)
+				{
+					command=value;
+					descriptionChangedHandler=command->DescriptionChanged.AttachMethod(this, &GuiToolstripButton::OnCommandDescriptionChanged);
+				}
+				UpdateCommandContent();
+			}
+
+			GuiToolstripMenu* GuiToolstripButton::GetToolstripSubMenu()
+			{
+				return dynamic_cast<GuiToolstripMenu*>(GetSubMenu());
+			}
+
+			void GuiToolstripButton::CreateToolstripSubMenu(GuiToolstripMenu::IStyleController* subMenuStyleController)
+			{
+				if(!subMenu)
+				{
+					GuiToolstripMenu* newSubMenu=new GuiToolstripMenu(subMenuStyleController?subMenuStyleController:styleController->CreateSubMenuStyleController(), this);
+					SetSubMenu(newSubMenu, true);
+				}
 			}
 		}
 	}

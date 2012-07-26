@@ -102,14 +102,14 @@ namespace vl
 					return new controls::GuiTreeView(GetCurrentTheme()->CreateTreeViewStyle());
 				}
 
-				controls::GuiMenu* NewMenu(controls::GuiControl* owner)
+				controls::GuiToolstripMenu* NewMenu(controls::GuiControl* owner)
 				{
-					return new controls::GuiMenu(GetCurrentTheme()->CreateMenuStyle(), owner);
+					return new controls::GuiToolstripMenu(GetCurrentTheme()->CreateMenuStyle(), owner);
 				}
 
-				controls::GuiMenuBar* NewMenuBar()
+				controls::GuiToolstripMenuBar* NewMenuBar()
 				{
-					return new controls::GuiMenuBar(GetCurrentTheme()->CreateMenuBarStyle());
+					return new controls::GuiToolstripMenuBar(GetCurrentTheme()->CreateMenuBarStyle());
 				}
 
 				controls::GuiControl* NewMenuSplitter()
@@ -117,14 +117,39 @@ namespace vl
 					return new controls::GuiControl(GetCurrentTheme()->CreateMenuSplitterStyle());
 				}
 
-				controls::GuiMenuButton* NewMenuBarButton()
+				controls::GuiToolstripButton* NewMenuBarButton()
 				{
-					return new controls::GuiMenuButton(GetCurrentTheme()->CreateMenuBarButtonStyle());
+					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateMenuBarButtonStyle());
 				}
 
-				controls::GuiMenuButton* NewMenuItemButton()
+				controls::GuiToolstripButton* NewMenuItemButton()
 				{
-					return new controls::GuiMenuButton(GetCurrentTheme()->CreateMenuItemButtonStyle());
+					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateMenuItemButtonStyle());
+				}
+
+				controls::GuiToolstripToolbar* NewToolbar()
+				{
+					return new controls::GuiToolstripToolbar(GetCurrentTheme()->CreateToolbarStyle());
+				}
+
+				controls::GuiToolstripButton* NewToolbarButton()
+				{
+					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateToolbarButtonStyle());
+				}
+
+				controls::GuiToolstripButton* NewToolbarDropdownButton()
+				{
+					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateToolbarDropdownButtonStyle());
+				}
+
+				controls::GuiToolstripButton* NewToolbarSplitButton()
+				{
+					return new controls::GuiToolstripButton(GetCurrentTheme()->CreateToolbarSplitButtonStyle());
+				}
+
+				controls::GuiControl* NewToolbarSplitter()
+				{
+					return new controls::GuiControl(GetCurrentTheme()->CreateToolbarSplitterStyle());
 				}
 
 				controls::GuiButton* NewButton()
@@ -140,26 +165,6 @@ namespace vl
 				controls::GuiSelectableButton* NewRadioButton()
 				{
 					return new controls::GuiSelectableButton(GetCurrentTheme()->CreateRadioButtonStyle());
-				}
-
-				controls::GuiMenuButton* NewToolstripButton()
-				{
-					return new controls::GuiMenuButton(GetCurrentTheme()->CreateToolstripButtonStyle());
-				}
-
-				controls::GuiMenuButton* NewToolstripDropdownButton()
-				{
-					return new controls::GuiMenuButton(GetCurrentTheme()->CreateToolstripDropdownButtonStyle());
-				}
-
-				controls::GuiMenuButton* NewToolstripSplitButton()
-				{
-					return new controls::GuiMenuButton(GetCurrentTheme()->CreateToolstripSplitButtonStyle());
-				}
-
-				controls::GuiControl* NewToolstripSplitter()
-				{
-					return new controls::GuiControl(GetCurrentTheme()->CreateToolstripSplitterStyle());
 				}
 
 				controls::GuiScroll* NewHScroll()
