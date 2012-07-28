@@ -434,7 +434,7 @@ GuiToolstripMenu
 
 			GuiToolstripBuilder* GuiToolstripMenu::GetBuilder(theme::ITheme* themeObject)
 			{
-				builder->theme=themeObject;
+				builder->theme=themeObject?themeObject:theme::GetCurrentTheme();
 				return builder.Obj();
 			}
 
@@ -452,7 +452,7 @@ GuiToolstripMenuBar
 				GetContainerComposition()->AddChild(stackComposition);
 
 				toolstripItems=new GuiToolstripCollection(0, stackComposition, 0);
-				builder=new GuiToolstripBuilder(GuiToolstripBuilder::Menu, toolstripItems.Obj());
+				builder=new GuiToolstripBuilder(GuiToolstripBuilder::MenuBar, toolstripItems.Obj());
 			}
 
 			GuiToolstripMenuBar::~GuiToolstripMenuBar()
@@ -466,7 +466,7 @@ GuiToolstripMenuBar
 
 			GuiToolstripBuilder* GuiToolstripMenuBar::GetBuilder(theme::ITheme* themeObject)
 			{
-				builder->theme=themeObject;
+				builder->theme=themeObject?themeObject:theme::GetCurrentTheme();
 				return builder.Obj();
 			}
 
@@ -484,7 +484,7 @@ GuiToolstripToolbar
 				GetContainerComposition()->AddChild(stackComposition);
 
 				toolstripItems=new GuiToolstripCollection(0, stackComposition, 0);
-				builder=new GuiToolstripBuilder(GuiToolstripBuilder::Menu, toolstripItems.Obj());
+				builder=new GuiToolstripBuilder(GuiToolstripBuilder::Toolbar, toolstripItems.Obj());
 			}
 
 			GuiToolstripToolbar::~GuiToolstripToolbar()
@@ -498,7 +498,7 @@ GuiToolstripToolbar
 
 			GuiToolstripBuilder* GuiToolstripToolbar::GetBuilder(theme::ITheme* themeObject)
 			{
-				builder->theme=themeObject;
+				builder->theme=themeObject?themeObject:theme::GetCurrentTheme();
 				return builder.Obj();
 			}
 

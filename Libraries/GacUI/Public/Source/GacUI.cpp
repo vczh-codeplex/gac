@@ -15851,7 +15851,7 @@ GuiToolstripMenu
 
 			GuiToolstripBuilder* GuiToolstripMenu::GetBuilder(theme::ITheme* themeObject)
 			{
-				builder->theme=themeObject;
+				builder->theme=themeObject?themeObject:theme::GetCurrentTheme();
 				return builder.Obj();
 			}
 
@@ -15883,7 +15883,7 @@ GuiToolstripMenuBar
 
 			GuiToolstripBuilder* GuiToolstripMenuBar::GetBuilder(theme::ITheme* themeObject)
 			{
-				builder->theme=themeObject;
+				builder->theme=themeObject?themeObject:theme::GetCurrentTheme();
 				return builder.Obj();
 			}
 
@@ -15915,7 +15915,7 @@ GuiToolstripToolbar
 
 			GuiToolstripBuilder* GuiToolstripToolbar::GetBuilder(theme::ITheme* themeObject)
 			{
-				builder->theme=themeObject;
+				builder->theme=themeObject?themeObject:theme::GetCurrentTheme();
 				return builder.Obj();
 			}
 
