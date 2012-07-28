@@ -237,7 +237,7 @@ void TextEditorWindow::InitializeToolBar()
 		GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 		toolbarStack->AddChild(stackItem);
 
-		toolbarNew=g::NewToolstripButton();
+		toolbarNew=g::NewToolbarButton();
 		SetImage(toolbarNew, resourceFolder+L"_New.png");
 		toolbarNew->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		stackItem->AddChild(toolbarNew->GetBoundsComposition());
@@ -246,7 +246,7 @@ void TextEditorWindow::InitializeToolBar()
 		GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 		toolbarStack->AddChild(stackItem);
 
-		toolbarOpen=g::NewToolstripButton();
+		toolbarOpen=g::NewToolbarButton();
 		SetImage(toolbarOpen, resourceFolder+L"_Open.png");
 		toolbarOpen->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		stackItem->AddChild(toolbarOpen->GetBoundsComposition());
@@ -255,7 +255,7 @@ void TextEditorWindow::InitializeToolBar()
 		GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 		toolbarStack->AddChild(stackItem);
 
-		toolbarSave=g::NewToolstripButton();
+		toolbarSave=g::NewToolbarButton();
 		SetImage(toolbarSave, resourceFolder+L"_Save.png");
 		toolbarSave->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		stackItem->AddChild(toolbarSave->GetBoundsComposition());
@@ -264,7 +264,7 @@ void TextEditorWindow::InitializeToolBar()
 		GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 		toolbarStack->AddChild(stackItem);
 
-		toolbarSaveAs=g::NewToolstripButton();
+		toolbarSaveAs=g::NewToolbarButton();
 		SetImage(toolbarSaveAs, resourceFolder+L"_SaveAs.png");
 		toolbarSaveAs->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		stackItem->AddChild(toolbarSaveAs->GetBoundsComposition());
@@ -273,7 +273,7 @@ void TextEditorWindow::InitializeToolBar()
 		GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 		toolbarStack->AddChild(stackItem);
 
-		GuiControl* splitter=g::NewToolstripSplitter();
+		GuiControl* splitter=g::NewToolbarSplitter();
 		splitter->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		stackItem->AddChild(splitter->GetBoundsComposition());
 	}
@@ -281,7 +281,7 @@ void TextEditorWindow::InitializeToolBar()
 		GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 		toolbarStack->AddChild(stackItem);
 
-		toolbarUndo=g::NewToolstripButton();
+		toolbarUndo=g::NewToolbarButton();
 		SetImage(toolbarUndo, resourceFolder+L"_Undo.png");
 		toolbarUndo->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		stackItem->AddChild(toolbarUndo->GetBoundsComposition());
@@ -290,7 +290,7 @@ void TextEditorWindow::InitializeToolBar()
 		GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 		toolbarStack->AddChild(stackItem);
 
-		toolbarRedo=g::NewToolstripButton();
+		toolbarRedo=g::NewToolbarButton();
 		SetImage(toolbarRedo, resourceFolder+L"_Redo.png");
 		toolbarRedo->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		stackItem->AddChild(toolbarRedo->GetBoundsComposition());
@@ -299,7 +299,7 @@ void TextEditorWindow::InitializeToolBar()
 		GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 		toolbarStack->AddChild(stackItem);
 
-		GuiControl* splitter=g::NewToolstripSplitter();
+		GuiControl* splitter=g::NewToolbarSplitter();
 		splitter->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		stackItem->AddChild(splitter->GetBoundsComposition());
 	}
@@ -307,7 +307,7 @@ void TextEditorWindow::InitializeToolBar()
 		GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 		toolbarStack->AddChild(stackItem);
 
-		toolbarCut=g::NewToolstripButton();
+		toolbarCut=g::NewToolbarButton();
 		SetImage(toolbarCut, resourceFolder+L"_Cut.png");
 		toolbarCut->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		stackItem->AddChild(toolbarCut->GetBoundsComposition());
@@ -316,7 +316,7 @@ void TextEditorWindow::InitializeToolBar()
 		GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 		toolbarStack->AddChild(stackItem);
 
-		toolbarCopy=g::NewToolstripButton();
+		toolbarCopy=g::NewToolbarButton();
 		SetImage(toolbarCopy, resourceFolder+L"_Copy.png");
 		toolbarCopy->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		stackItem->AddChild(toolbarCopy->GetBoundsComposition());
@@ -325,7 +325,7 @@ void TextEditorWindow::InitializeToolBar()
 		GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 		toolbarStack->AddChild(stackItem);
 
-		toolbarPaste=g::NewToolstripButton();
+		toolbarPaste=g::NewToolbarButton();
 		SetImage(toolbarPaste, resourceFolder+L"_Paste.png");
 		toolbarPaste->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		stackItem->AddChild(toolbarPaste->GetBoundsComposition());
@@ -334,7 +334,7 @@ void TextEditorWindow::InitializeToolBar()
 		GuiStackItemComposition* stackItem=new GuiStackItemComposition;
 		toolbarStack->AddChild(stackItem);
 
-		toolbarDelete=g::NewToolstripButton();
+		toolbarDelete=g::NewToolbarButton();
 		SetImage(toolbarDelete, resourceFolder+L"_Delete.png");
 		toolbarDelete->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		stackItem->AddChild(toolbarDelete->GetBoundsComposition());
