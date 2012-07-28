@@ -21,15 +21,24 @@ namespace vl
 			/// <summary>Toolstrip item collection.</summary>
 			class GuiToolstripCollection : public Object, public collections::IList<GuiControl*>
 			{
+			public:
+				class IContentCallback : public Interface
+				{
+				public:
+					virtual void							UpdateLayout()=0;
+				};
 			protected:
+				IContentCallback*							contentCallback;
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
 				collections::List<GuiControl*>				items;
 
+				void										InvokeUpdateLayout();
+				void										OnInterestingMenuButtonPropertyChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										RemoveAtInternal(vint index);
 				void										InsertInternal(vint index, GuiControl* control);
 			public:
-				GuiToolstripCollection(compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer);
+				GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer);
 				~GuiToolstripCollection();
 
 				collections::IEnumerator<GuiControl*>*		CreateEnumerator()const override;
@@ -48,12 +57,14 @@ namespace vl
 			};
 
 			/// <summary>Toolstrip menu.</summary>
-			class GuiToolstripMenu : public GuiMenu, public Description<GuiToolstripMenu>
+			class GuiToolstripMenu : public GuiMenu, protected GuiToolstripCollection::IContentCallback,  Description<GuiToolstripMenu>
 			{
 			protected:
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<GuiToolstripCollection>					toolstripItems;
 				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
+
+				void										UpdateLayout()override;
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
