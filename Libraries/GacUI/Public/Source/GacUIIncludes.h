@@ -19360,8 +19360,18 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace theme
+		{
+			class ITheme;
+		}
+
 		namespace controls
 		{
+
+/***********************************************************************
+Toolstrip Item Collection
+***********************************************************************/
+
 			class GuiToolstripCollection : public Object, public collections::IList<GuiControl*>
 			{
 			public:
@@ -19399,12 +19409,58 @@ namespace vl
 				bool										Set(vint index, GuiControl* const& item)override;
 			};
 
+/***********************************************************************
+Toolstrip Builder Facade
+***********************************************************************/
+
+			class GuiToolstripButton;
+
+			class GuiToolstripBuilder : public Object
+			{
+				friend class GuiToolstripMenu;
+				friend class GuiToolstripMenuBar;
+				friend class GuiToolstripToolbar;
+			protected:
+				enum Environment
+				{
+					Menu,
+					MenuBar,
+					Toolbar,
+				};
+
+				Environment									environment;
+				GuiToolstripCollection*						toolstripItems;
+				GuiToolstripBuilder*						previousBuilder;
+				theme::ITheme*								theme;
+				GuiToolstripButton*							lastCreatedButton;
+				
+				GuiToolstripBuilder(Environment _environment, GuiToolstripCollection* _toolstripItems);
+			public:
+				~GuiToolstripBuilder();
+
+				GuiToolstripBuilder*						Button(Ptr<GuiImageData> image, const WString& text, GuiToolstripButton** result=0);
+				GuiToolstripBuilder*						Button(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result=0);
+				GuiToolstripBuilder*						DropdownButton(Ptr<GuiImageData> image, const WString& text, GuiToolstripButton** result=0);
+				GuiToolstripBuilder*						DropdownButton(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result=0);
+				GuiToolstripBuilder*						SplitButton(Ptr<GuiImageData> image, const WString& text, GuiToolstripButton** result=0);
+				GuiToolstripBuilder*						SplitButton(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result=0);
+				GuiToolstripBuilder*						Splitter();
+				GuiToolstripBuilder*						Control(GuiControl* control);
+				GuiToolstripBuilder*						BeginSubMenu();
+				GuiToolstripBuilder*						EndSubMenu();
+			};
+
+/***********************************************************************
+Toolstrip Container
+***********************************************************************/
+
 			class GuiToolstripMenu : public GuiMenu, protected GuiToolstripCollection::IContentCallback,  Description<GuiToolstripMenu>
 			{
 			protected:
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<GuiToolstripCollection>					toolstripItems;
 				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
+				Ptr<GuiToolstripBuilder>					builder;
 
 				void										UpdateLayout()override;
 			public:
@@ -19412,6 +19468,7 @@ namespace vl
 				~GuiToolstripMenu();
 				
 				GuiToolstripCollection&						GetToolstripItems();
+				GuiToolstripBuilder*						GetBuilder(theme::ITheme* themeObject=0);
 			};
 
 			class GuiToolstripMenuBar : public GuiMenuBar, public Description<GuiToolstripMenuBar>
@@ -19419,11 +19476,14 @@ namespace vl
 			protected:
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<GuiToolstripCollection>					toolstripItems;
+				Ptr<GuiToolstripBuilder>					builder;
+
 			public:
 				GuiToolstripMenuBar(IStyleController* _styleController);
 				~GuiToolstripMenuBar();
 				
 				GuiToolstripCollection&						GetToolstripItems();
+				GuiToolstripBuilder*						GetBuilder(theme::ITheme* themeObject=0);
 			};
 
 			class GuiToolstripToolbar : public GuiControl, public Description<GuiToolstripToolbar>
@@ -19431,12 +19491,19 @@ namespace vl
 			protected:
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<GuiToolstripCollection>					toolstripItems;
+				Ptr<GuiToolstripBuilder>					builder;
+
 			public:
 				GuiToolstripToolbar(IStyleController* _styleController);
 				~GuiToolstripToolbar();
 				
 				GuiToolstripCollection&						GetToolstripItems();
+				GuiToolstripBuilder*						GetBuilder(theme::ITheme* themeObject=0);
 			};
+
+/***********************************************************************
+Toolstrip Component
+***********************************************************************/
 
 			class GuiToolstripButton : public GuiMenuButton, public Description<GuiToolstripButton>
 			{

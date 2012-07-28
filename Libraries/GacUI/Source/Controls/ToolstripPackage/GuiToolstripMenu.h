@@ -16,8 +16,18 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace theme
+		{
+			class ITheme;
+		}
+
 		namespace controls
 		{
+
+/***********************************************************************
+Toolstrip Item Collection
+***********************************************************************/
+
 			/// <summary>Toolstrip item collection.</summary>
 			class GuiToolstripCollection : public Object, public collections::IList<GuiControl*>
 			{
@@ -56,6 +66,81 @@ namespace vl
 				bool										Set(vint index, GuiControl* const& item)override;
 			};
 
+/***********************************************************************
+Toolstrip Builder Facade
+***********************************************************************/
+
+			class GuiToolstripButton;
+
+			/// <summary>Toolstrip builder.</summary>
+			class GuiToolstripBuilder : public Object
+			{
+				friend class GuiToolstripMenu;
+				friend class GuiToolstripMenuBar;
+				friend class GuiToolstripToolbar;
+			protected:
+				enum Environment
+				{
+					Menu,
+					MenuBar,
+					Toolbar,
+				};
+
+				Environment									environment;
+				GuiToolstripCollection*						toolstripItems;
+				GuiToolstripBuilder*						previousBuilder;
+				theme::ITheme*								theme;
+				GuiToolstripButton*							lastCreatedButton;
+				
+				GuiToolstripBuilder(Environment _environment, GuiToolstripCollection* _toolstripItems);
+			public:
+				~GuiToolstripBuilder();
+
+				/// <summary>Create a button.</summary>
+				/// <returns>The current builder for continuing builder actions.</returns>
+				/// <param name="image">The image for the created control.</param>
+				/// <param name="text">The text for the created control.</param>
+				GuiToolstripBuilder*						Button(Ptr<GuiImageData> image, const WString& text, GuiToolstripButton** result=0);
+				/// <summary>Create a button.</summary>
+				/// <returns>The current builder for continuing builder actions.</returns>
+				/// <param name="command">The command for the created control.</param>
+				GuiToolstripBuilder*						Button(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result=0);
+				/// <summary>Create a dropdown button.</summary>
+				/// <returns>The current builder for continuing builder actions.</returns>
+				/// <param name="image">The image for the created control.</param>
+				/// <param name="text">The text for the created control.</param>
+				GuiToolstripBuilder*						DropdownButton(Ptr<GuiImageData> image, const WString& text, GuiToolstripButton** result=0);
+				/// <summary>Create a dropdown button.</summary>
+				/// <returns>The current builder for continuing builder actions.</returns>
+				/// <param name="command">The command for the created control.</param>
+				GuiToolstripBuilder*						DropdownButton(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result=0);
+				/// <summary>Create a split button.</summary>
+				/// <returns>The current builder for continuing builder actions.</returns>
+				/// <param name="image">The image for the created control.</param>
+				/// <param name="text">The text for the created control.</param>
+				GuiToolstripBuilder*						SplitButton(Ptr<GuiImageData> image, const WString& text, GuiToolstripButton** result=0);
+				/// <summary>Create a split button.</summary>
+				/// <returns>The current builder for continuing builder actions.</returns>
+				/// <param name="command">The command for the created control.</param>
+				GuiToolstripBuilder*						SplitButton(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result=0);
+				/// <summary>Create a splitter.</summary>
+				/// <returns>The current builder for continuing builder actions.</returns>
+				GuiToolstripBuilder*						Splitter();
+				/// <summary>Install a control.</summary>
+				/// <returns>The current builder for continuing builder actions.</returns>
+				GuiToolstripBuilder*						Control(GuiControl* control);
+				/// <summary>Begin create sub menu.</summary>
+				/// <returns>The builder of the last created control's sub menu for continuing builder actions.</returns>
+				GuiToolstripBuilder*						BeginSubMenu();
+				/// <summary>End create sub menu.</summary>
+				/// <returns>The parent builder for continuing builder actions.</returns>
+				GuiToolstripBuilder*						EndSubMenu();
+			};
+
+/***********************************************************************
+Toolstrip Container
+***********************************************************************/
+
 			/// <summary>Toolstrip menu.</summary>
 			class GuiToolstripMenu : public GuiMenu, protected GuiToolstripCollection::IContentCallback,  Description<GuiToolstripMenu>
 			{
@@ -63,6 +148,7 @@ namespace vl
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<GuiToolstripCollection>					toolstripItems;
 				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
+				Ptr<GuiToolstripBuilder>					builder;
 
 				void										UpdateLayout()override;
 			public:
@@ -75,6 +161,10 @@ namespace vl
 				/// <summary>Get all managed child controls ordered by their positions.</summary>
 				/// <returns>All managed child controls.</returns>
 				GuiToolstripCollection&						GetToolstripItems();
+				/// <summary>Get the builder facade.</summary>
+				/// <returns>The builder facade.</returns>
+				/// <param name="themeObject">The theme to use. If this argument is null, the current theme will be used.</param>
+				GuiToolstripBuilder*						GetBuilder(theme::ITheme* themeObject=0);
 			};
 
 			/// <summary>Toolstrip menu bar.</summary>
@@ -83,6 +173,8 @@ namespace vl
 			protected:
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<GuiToolstripCollection>					toolstripItems;
+				Ptr<GuiToolstripBuilder>					builder;
+
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
@@ -92,6 +184,10 @@ namespace vl
 				/// <summary>Get all managed child controls ordered by their positions.</summary>
 				/// <returns>All managed child controls.</returns>
 				GuiToolstripCollection&						GetToolstripItems();
+				/// <summary>Get the builder facade.</summary>
+				/// <returns>The builder facade.</returns>
+				/// <param name="themeObject">The theme to use. If this argument is null, the current theme will be used.</param>
+				GuiToolstripBuilder*						GetBuilder(theme::ITheme* themeObject=0);
 			};
 
 			/// <summary>Toolstrip tool bar.</summary>
@@ -100,6 +196,8 @@ namespace vl
 			protected:
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<GuiToolstripCollection>					toolstripItems;
+				Ptr<GuiToolstripBuilder>					builder;
+
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
@@ -109,7 +207,15 @@ namespace vl
 				/// <summary>Get all managed child controls ordered by their positions.</summary>
 				/// <returns>All managed child controls.</returns>
 				GuiToolstripCollection&						GetToolstripItems();
+				/// <summary>Get the builder facade.</summary>
+				/// <returns>The builder facade.</returns>
+				/// <param name="themeObject">The theme to use. If this argument is null, the current theme will be used.</param>
+				GuiToolstripBuilder*						GetBuilder(theme::ITheme* themeObject=0);
 			};
+
+/***********************************************************************
+Toolstrip Component
+***********************************************************************/
 
 			/// <summary>Toolstrip button that can connect with a <see cref="GuiToolstripCommand"/>.</summary>
 			class GuiToolstripButton : public GuiMenuButton, public Description<GuiToolstripButton>

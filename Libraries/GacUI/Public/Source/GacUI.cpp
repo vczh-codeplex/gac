@@ -15619,6 +15619,205 @@ GuiToolstripCollection
 			}
 
 /***********************************************************************
+GuiToolstripBuilder
+***********************************************************************/
+
+			GuiToolstripBuilder::GuiToolstripBuilder(Environment _environment, GuiToolstripCollection* _toolstripItems)
+				:environment(_environment)
+				,toolstripItems(_toolstripItems)
+				,previousBuilder(0)
+				,theme(0)
+				,lastCreatedButton(0)
+			{
+			}
+
+			GuiToolstripBuilder::~GuiToolstripBuilder()
+			{
+			}
+
+			GuiToolstripBuilder* GuiToolstripBuilder::Button(Ptr<GuiImageData> image, const WString& text, GuiToolstripButton** result)
+			{
+				lastCreatedButton=0;
+				switch(environment)
+				{
+				case Menu:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateMenuItemButtonStyle());
+					break;
+				case MenuBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateMenuBarButtonStyle());
+					break;
+				case Toolbar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarButtonStyle());
+					break;
+				}
+				if(lastCreatedButton)
+				{
+					lastCreatedButton->SetImage(image);
+					lastCreatedButton->SetText(text);
+					if(result)
+					{
+						*result=lastCreatedButton;
+					}
+					toolstripItems->Add(lastCreatedButton);
+				}
+				return this;
+			}
+
+			GuiToolstripBuilder* GuiToolstripBuilder::Button(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result)
+			{
+				lastCreatedButton=0;
+				switch(environment)
+				{
+				case Menu:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateMenuItemButtonStyle());
+					break;
+				case MenuBar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateMenuBarButtonStyle());
+					break;
+				case Toolbar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarButtonStyle());
+					break;
+				}
+				if(lastCreatedButton)
+				{
+					lastCreatedButton->SetCommand(command);
+					if(result)
+					{
+						*result=lastCreatedButton;
+					}
+					toolstripItems->Add(lastCreatedButton);
+				}
+				return this;
+			}
+
+			GuiToolstripBuilder* GuiToolstripBuilder::DropdownButton(Ptr<GuiImageData> image, const WString& text, GuiToolstripButton** result)
+			{
+				lastCreatedButton=0;
+				switch(environment)
+				{
+				case Toolbar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarDropdownButtonStyle());
+					break;
+				}
+				if(lastCreatedButton)
+				{
+					lastCreatedButton->SetImage(image);
+					lastCreatedButton->SetText(text);
+					if(result)
+					{
+						*result=lastCreatedButton;
+					}
+					toolstripItems->Add(lastCreatedButton);
+				}
+				return this;
+			}
+
+			GuiToolstripBuilder* GuiToolstripBuilder::DropdownButton(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result)
+			{
+				lastCreatedButton=0;
+				switch(environment)
+				{
+				case Toolbar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarDropdownButtonStyle());
+					break;
+				}
+				if(lastCreatedButton)
+				{
+					lastCreatedButton->SetCommand(command);
+					if(result)
+					{
+						*result=lastCreatedButton;
+					}
+					toolstripItems->Add(lastCreatedButton);
+				}
+				return this;
+			}
+
+			GuiToolstripBuilder* GuiToolstripBuilder::SplitButton(Ptr<GuiImageData> image, const WString& text, GuiToolstripButton** result)
+			{
+				lastCreatedButton=0;
+				switch(environment)
+				{
+				case Toolbar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarSplitButtonStyle());
+					break;
+				}
+				if(lastCreatedButton)
+				{
+					lastCreatedButton->SetImage(image);
+					lastCreatedButton->SetText(text);
+					if(result)
+					{
+						*result=lastCreatedButton;
+					}
+					toolstripItems->Add(lastCreatedButton);
+				}
+				return this;
+			}
+
+			GuiToolstripBuilder* GuiToolstripBuilder::SplitButton(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result)
+			{
+				lastCreatedButton=0;
+				switch(environment)
+				{
+				case Toolbar:
+					lastCreatedButton=new GuiToolstripButton(theme->CreateToolbarSplitButtonStyle());
+					break;
+				}
+				if(lastCreatedButton)
+				{
+					lastCreatedButton->SetCommand(command);
+					if(result)
+					{
+						*result=lastCreatedButton;
+					}
+					toolstripItems->Add(lastCreatedButton);
+				}
+				return this;
+			}
+
+			GuiToolstripBuilder* GuiToolstripBuilder::Splitter()
+			{
+				lastCreatedButton=0;
+				switch(environment)
+				{
+				case Menu:
+					toolstripItems->Add(new GuiControl(theme->CreateMenuSplitterStyle()));
+					break;
+				case Toolbar:
+					toolstripItems->Add(new GuiControl(theme->CreateToolbarSplitterStyle()));
+					break;
+				}
+				return this;
+			}
+
+			GuiToolstripBuilder* GuiToolstripBuilder::Control(GuiControl* control)
+			{
+				toolstripItems->Add(control);
+				return this;
+			}
+
+			GuiToolstripBuilder* GuiToolstripBuilder::BeginSubMenu()
+			{
+				if(lastCreatedButton)
+				{
+					lastCreatedButton->CreateToolstripSubMenu();
+					GuiToolstripMenu* menu=lastCreatedButton->GetToolstripSubMenu();
+					if(menu)
+					{
+						menu->GetBuilder()->previousBuilder=this;
+						return menu->GetBuilder();
+					}
+				}
+				return 0;
+			}
+
+			GuiToolstripBuilder* GuiToolstripBuilder::EndSubMenu()
+			{
+				return previousBuilder;
+			}
+
+/***********************************************************************
 GuiToolstripMenu
 ***********************************************************************/
 
@@ -15638,6 +15837,7 @@ GuiToolstripMenu
 
 				subComponentMeasurer=new GuiSubComponentMeasurer;
 				toolstripItems=new GuiToolstripCollection(this, stackComposition, subComponentMeasurer);
+				builder=new GuiToolstripBuilder(GuiToolstripBuilder::Menu, toolstripItems.Obj());
 			}
 
 			GuiToolstripMenu::~GuiToolstripMenu()
@@ -15647,6 +15847,12 @@ GuiToolstripMenu
 			GuiToolstripCollection& GuiToolstripMenu::GetToolstripItems()
 			{
 				return *toolstripItems.Obj();
+			}
+
+			GuiToolstripBuilder* GuiToolstripMenu::GetBuilder(theme::ITheme* themeObject)
+			{
+				builder->theme=themeObject;
+				return builder.Obj();
 			}
 
 /***********************************************************************
@@ -15663,6 +15869,7 @@ GuiToolstripMenuBar
 				GetContainerComposition()->AddChild(stackComposition);
 
 				toolstripItems=new GuiToolstripCollection(0, stackComposition, 0);
+				builder=new GuiToolstripBuilder(GuiToolstripBuilder::Menu, toolstripItems.Obj());
 			}
 
 			GuiToolstripMenuBar::~GuiToolstripMenuBar()
@@ -15672,6 +15879,12 @@ GuiToolstripMenuBar
 			GuiToolstripCollection& GuiToolstripMenuBar::GetToolstripItems()
 			{
 				return *toolstripItems.Obj();
+			}
+
+			GuiToolstripBuilder* GuiToolstripMenuBar::GetBuilder(theme::ITheme* themeObject)
+			{
+				builder->theme=themeObject;
+				return builder.Obj();
 			}
 
 /***********************************************************************
@@ -15688,6 +15901,7 @@ GuiToolstripToolbar
 				GetContainerComposition()->AddChild(stackComposition);
 
 				toolstripItems=new GuiToolstripCollection(0, stackComposition, 0);
+				builder=new GuiToolstripBuilder(GuiToolstripBuilder::Menu, toolstripItems.Obj());
 			}
 
 			GuiToolstripToolbar::~GuiToolstripToolbar()
@@ -15697,6 +15911,12 @@ GuiToolstripToolbar
 			GuiToolstripCollection& GuiToolstripToolbar::GetToolstripItems()
 			{
 				return *toolstripItems.Obj();
+			}
+
+			GuiToolstripBuilder* GuiToolstripToolbar::GetBuilder(theme::ITheme* themeObject)
+			{
+				builder->theme=themeObject;
+				return builder.Obj();
 			}
 
 /***********************************************************************
