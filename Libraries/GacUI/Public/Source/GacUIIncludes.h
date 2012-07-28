@@ -18048,6 +18048,8 @@ MenuButton
 				~GuiMenuButton();
 
 				compositions::GuiNotifyEvent			SubMenuOpeningChanged;
+				compositions::GuiNotifyEvent			ImageChanged;
+				compositions::GuiNotifyEvent			ShortcutTextChanged;
 
 				Ptr<GuiImageData>						GetImage();
 				void									SetImage(Ptr<GuiImageData> value);
@@ -19362,15 +19364,24 @@ namespace vl
 		{
 			class GuiToolstripCollection : public Object, public collections::IList<GuiControl*>
 			{
+			public:
+				class IContentCallback : public Interface
+				{
+				public:
+					virtual void							UpdateLayout()=0;
+				};
 			protected:
+				IContentCallback*							contentCallback;
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
 				collections::List<GuiControl*>				items;
 
+				void										InvokeUpdateLayout();
+				void										OnInterestingMenuButtonPropertyChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										RemoveAtInternal(vint index);
 				void										InsertInternal(vint index, GuiControl* control);
 			public:
-				GuiToolstripCollection(compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer);
+				GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer);
 				~GuiToolstripCollection();
 
 				collections::IEnumerator<GuiControl*>*		CreateEnumerator()const override;
@@ -19388,12 +19399,14 @@ namespace vl
 				bool										Set(vint index, GuiControl* const& item)override;
 			};
 
-			class GuiToolstripMenu : public GuiMenu, public Description<GuiToolstripMenu>
+			class GuiToolstripMenu : public GuiMenu, protected GuiToolstripCollection::IContentCallback,  Description<GuiToolstripMenu>
 			{
 			protected:
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<GuiToolstripCollection>					toolstripItems;
 				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
+
+				void										UpdateLayout()override;
 			public:
 				GuiToolstripMenu(IStyleController* _styleController, GuiControl* _owner);
 				~GuiToolstripMenu();

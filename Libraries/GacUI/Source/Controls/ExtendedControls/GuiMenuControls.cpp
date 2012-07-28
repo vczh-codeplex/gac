@@ -280,6 +280,8 @@ GuiMenuButton
 				,ownerMenuService(0)
 			{
 				SubMenuOpeningChanged.SetAssociatedComposition(boundsComposition);
+				ImageChanged.SetAssociatedComposition(boundsComposition);
+				ShortcutTextChanged.SetAssociatedComposition(boundsComposition);
 				GetSubMenuHost()->Clicked.AttachMethod(this, &GuiMenuButton::OnClicked);
 				GetSubMenuHost()->GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiMenuButton::OnMouseEnter);
 			}
@@ -303,6 +305,7 @@ GuiMenuButton
 				{
 					image=value;
 					styleController->SetImage(image);
+					ImageChanged.Execute(GetNotifyEventArguments());
 				}
 			}
 
@@ -317,6 +320,7 @@ GuiMenuButton
 				{
 					shortcutText=value;
 					styleController->SetShortcutText(shortcutText);
+					ShortcutTextChanged.Execute(GetNotifyEventArguments());
 				}
 			}
 

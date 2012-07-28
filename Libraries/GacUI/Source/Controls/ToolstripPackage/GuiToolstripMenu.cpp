@@ -13,6 +13,19 @@ namespace vl
 GuiToolstripCollection
 ***********************************************************************/
 
+			void GuiToolstripCollection::InvokeUpdateLayout()
+			{
+				if(contentCallback)
+				{
+					contentCallback->UpdateLayout();
+				}
+			}
+
+			void GuiToolstripCollection::OnInterestingMenuButtonPropertyChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				InvokeUpdateLayout();
+			}
+
 			void GuiToolstripCollection::RemoveAtInternal(vint index)
 			{
 				GuiControl* control=items[index];
@@ -39,6 +52,7 @@ GuiToolstripCollection
 					}
 				}
 				delete control;
+				InvokeUpdateLayout();
 			}
 
 			void GuiToolstripCollection::InsertInternal(vint index, GuiControl* control)
@@ -62,12 +76,16 @@ GuiToolstripCollection
 						{
 							subComponentMeasurer->AttachMeasuringSource(measuringSource);
 						}
+						menuButton->TextChanged.AttachMethod(this, &GuiToolstripCollection::OnInterestingMenuButtonPropertyChanged);
+						menuButton->ShortcutTextChanged.AttachMethod(this, &GuiToolstripCollection::OnInterestingMenuButtonPropertyChanged);
 					}
 				}
+				InvokeUpdateLayout();
 			}
 
-			GuiToolstripCollection::GuiToolstripCollection(compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer)
-				:stackComposition(_stackComposition)
+			GuiToolstripCollection::GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer)
+				:contentCallback(_contentCallback)
+				,stackComposition(_stackComposition)
 				,subComponentMeasurer(_subComponentMeasurer)
 			{
 			}
@@ -186,6 +204,11 @@ GuiToolstripCollection
 GuiToolstripMenu
 ***********************************************************************/
 
+			void GuiToolstripMenu::UpdateLayout()
+			{
+				subComponentMeasurer->MeasureAndUpdate(GuiMenuButton::MenuItemSubComponentMeasuringCategoryName, GuiSubComponentMeasurer::Horizontal);
+			}
+
 			GuiToolstripMenu::GuiToolstripMenu(IStyleController* _styleController, GuiControl* _owner)
 				:GuiMenu(_styleController, _owner)
 			{
@@ -196,7 +219,7 @@ GuiToolstripMenu
 				GetContainerComposition()->AddChild(stackComposition);
 
 				subComponentMeasurer=new GuiSubComponentMeasurer;
-				toolstripItems=new GuiToolstripCollection(stackComposition, subComponentMeasurer);
+				toolstripItems=new GuiToolstripCollection(this, stackComposition, subComponentMeasurer);
 			}
 
 			GuiToolstripMenu::~GuiToolstripMenu()
@@ -221,7 +244,7 @@ GuiToolstripMenuBar
 				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				GetContainerComposition()->AddChild(stackComposition);
 
-				toolstripItems=new GuiToolstripCollection(stackComposition, 0);
+				toolstripItems=new GuiToolstripCollection(0, stackComposition, 0);
 			}
 
 			GuiToolstripMenuBar::~GuiToolstripMenuBar()
@@ -246,7 +269,7 @@ GuiToolstripToolbar
 				stackComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				GetContainerComposition()->AddChild(stackComposition);
 
-				toolstripItems=new GuiToolstripCollection(stackComposition, 0);
+				toolstripItems=new GuiToolstripCollection(0, stackComposition, 0);
 			}
 
 			GuiToolstripToolbar::~GuiToolstripToolbar()

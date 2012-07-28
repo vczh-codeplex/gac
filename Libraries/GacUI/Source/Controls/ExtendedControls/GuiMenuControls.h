@@ -179,6 +179,10 @@ MenuButton
 
 				/// <summary>Sub menu opening changed event.</summary>
 				compositions::GuiNotifyEvent			SubMenuOpeningChanged;
+				/// <summary>Image changed event.</summary>
+				compositions::GuiNotifyEvent			ImageChanged;
+				/// <summary>Shortcut text changed event.</summary>
+				compositions::GuiNotifyEvent			ShortcutTextChanged;
 
 				/// <summary>Get the image for the menu button.</summary>
 				/// <returns>The image for the menu button.</returns>
