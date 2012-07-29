@@ -15965,6 +15965,7 @@ GuiToolstripButton
 				:GuiMenuButton(_styleController)
 				,command(0)
 			{
+				Clicked.AttachMethod(this, &GuiToolstripButton::OnClicked);
 			}
 
 			GuiToolstripButton::~GuiToolstripButton()
