@@ -21,47 +21,49 @@ namespace vl
 			class GuiToolstripCommand : public GuiComponent, public Description<GuiToolstripCommand>
 			{
 			protected:
-				Ptr<GuiImageData>						image;
-				WString									text;
-				compositions::IGuiShortcutKeyItem*		shortcutKeyItem;
-				bool									enabled;
+				Ptr<GuiImageData>							image;
+				WString										text;
+				compositions::IGuiShortcutKeyItem*			shortcutKeyItem;
+				bool										enabled;
+				Ptr<compositions::GuiNotifyEvent::IHandler>	shortcutKeyItemExecutedHandler;
 
-				void									InvokeDescriptionChanged();
+				void										OnShortcutKeyItemExecuted(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										InvokeDescriptionChanged();
 			public:
 				/// <summary>Create the command.</summary>
 				GuiToolstripCommand();
 				~GuiToolstripCommand();
 
 				/// <summary>Executed event.</summary>
-				compositions::GuiNotifyEvent			Executed;
+				compositions::GuiNotifyEvent				Executed;
 
 				/// <summary>Description changed event, raised when any description property is modified.</summary>
-				compositions::GuiNotifyEvent			DescriptionChanged;
+				compositions::GuiNotifyEvent				DescriptionChanged;
 
 				/// <summary>Get the image for this command.</summary>
 				/// <returns>The image for this command.</returns>
-				Ptr<GuiImageData>						GetImage();
+				Ptr<GuiImageData>							GetImage();
 				/// <summary>Set the image for this command.</summary>
 				/// <param name="value">The image for this command.</param>
-				void									SetImage(Ptr<GuiImageData> value);
+				void										SetImage(Ptr<GuiImageData> value);
 				/// <summary>Get the text for this command.</summary>
 				/// <returns>The text for this command.</returns>
-				const WString&							GetText();
+				const WString&								GetText();
 				/// <summary>Set the text for this command.</summary>
 				/// <param name="value">The text for this command.</param>
-				void									SetText(const WString& value);
+				void										SetText(const WString& value);
 				/// <summary>Get the shortcut key item for this command.</summary>
 				/// <returns>The shortcut key item for this command.</returns>
-				compositions::IGuiShortcutKeyItem*		GetShortcut();
+				compositions::IGuiShortcutKeyItem*			GetShortcut();
 				/// <summary>Set the shortcut key item for this command.</summary>
 				/// <param name="value">The shortcut key item for this command.</param>
-				void									SetShortcut(compositions::IGuiShortcutKeyItem* value);
+				void										SetShortcut(compositions::IGuiShortcutKeyItem* value);
 				/// <summary>Get the enablility for this command.</summary>
 				/// <returns>The enablility for this command.</returns>
-				bool									GetEnabled();
+				bool										GetEnabled();
 				/// <summary>Set the enablility for this command.</summary>
 				/// <param name="value">The enablility for this command.</param>
-				void									SetEnabled(bool value);
+				void										SetEnabled(bool value);
 			};
 		}
 	}

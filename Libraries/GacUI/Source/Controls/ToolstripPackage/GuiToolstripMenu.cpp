@@ -562,18 +562,21 @@ GuiToolstripButton
 
 			void GuiToolstripButton::SetCommand(GuiToolstripCommand* value)
 			{
-				if(command)
+				if(command!=value)
 				{
-					command->DescriptionChanged.Detach(descriptionChangedHandler);
+					if(command)
+					{
+						command->DescriptionChanged.Detach(descriptionChangedHandler);
+					}
+					command=0;
+					descriptionChangedHandler=0;
+					if(value)
+					{
+						command=value;
+						descriptionChangedHandler=command->DescriptionChanged.AttachMethod(this, &GuiToolstripButton::OnCommandDescriptionChanged);
+					}
+					UpdateCommandContent();
 				}
-				command=0;
-				descriptionChangedHandler=0;
-				if(value)
-				{
-					command=value;
-					descriptionChangedHandler=command->DescriptionChanged.AttachMethod(this, &GuiToolstripButton::OnCommandDescriptionChanged);
-				}
-				UpdateCommandContent();
 			}
 
 			GuiToolstripMenu* GuiToolstripButton::GetToolstripSubMenu()
