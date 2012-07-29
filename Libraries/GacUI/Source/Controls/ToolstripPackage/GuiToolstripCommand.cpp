@@ -12,6 +12,11 @@ namespace vl
 GuiToolstripCommand
 ***********************************************************************/
 
+			void GuiToolstripCommand::OnShortcutKeyItemExecuted(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				Executed.ExecuteWithNewSender(arguments, sender);
+			}
+
 			void GuiToolstripCommand::InvokeDescriptionChanged()
 			{
 				GuiEventArgs arguments;
@@ -65,7 +70,17 @@ GuiToolstripCommand
 			{
 				if(shortcutKeyItem!=value)
 				{
-					shortcutKeyItem=value;
+					if(shortcutKeyItem)
+					{
+						shortcutKeyItem->Executed.Detach(shortcutKeyItemExecutedHandler);
+					}
+					shortcutKeyItem=0;
+					shortcutKeyItemExecutedHandler=0;
+					if(value)
+					{
+						shortcutKeyItem=value;
+						shortcutKeyItemExecutedHandler=shortcutKeyItem->Executed.AttachMethod(this, &GuiToolstripCommand::OnShortcutKeyItemExecuted);
+					}
 					InvokeDescriptionChanged();
 				}
 			}

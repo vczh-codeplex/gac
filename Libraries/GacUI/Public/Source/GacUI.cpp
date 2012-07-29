@@ -15350,6 +15350,11 @@ namespace vl
 GuiToolstripCommand
 ***********************************************************************/
 
+			void GuiToolstripCommand::OnShortcutKeyItemExecuted(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				Executed.ExecuteWithNewSender(arguments, sender);
+			}
+
 			void GuiToolstripCommand::InvokeDescriptionChanged()
 			{
 				GuiEventArgs arguments;
@@ -15403,7 +15408,17 @@ GuiToolstripCommand
 			{
 				if(shortcutKeyItem!=value)
 				{
-					shortcutKeyItem=value;
+					if(shortcutKeyItem)
+					{
+						shortcutKeyItem->Executed.Detach(shortcutKeyItemExecutedHandler);
+					}
+					shortcutKeyItem=0;
+					shortcutKeyItemExecutedHandler=0;
+					if(value)
+					{
+						shortcutKeyItem=value;
+						shortcutKeyItemExecutedHandler=shortcutKeyItem->Executed.AttachMethod(this, &GuiToolstripCommand::OnShortcutKeyItemExecuted);
+					}
 					InvokeDescriptionChanged();
 				}
 			}
@@ -15990,18 +16005,21 @@ GuiToolstripButton
 
 			void GuiToolstripButton::SetCommand(GuiToolstripCommand* value)
 			{
-				if(command)
+				if(command!=value)
 				{
-					command->DescriptionChanged.Detach(descriptionChangedHandler);
+					if(command)
+					{
+						command->DescriptionChanged.Detach(descriptionChangedHandler);
+					}
+					command=0;
+					descriptionChangedHandler=0;
+					if(value)
+					{
+						command=value;
+						descriptionChangedHandler=command->DescriptionChanged.AttachMethod(this, &GuiToolstripButton::OnCommandDescriptionChanged);
+					}
+					UpdateCommandContent();
 				}
-				command=0;
-				descriptionChangedHandler=0;
-				if(value)
-				{
-					command=value;
-					descriptionChangedHandler=command->DescriptionChanged.AttachMethod(this, &GuiToolstripButton::OnCommandDescriptionChanged);
-				}
-				UpdateCommandContent();
 			}
 
 			GuiToolstripMenu* GuiToolstripButton::GetToolstripSubMenu()

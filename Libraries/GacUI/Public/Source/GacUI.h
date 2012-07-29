@@ -6978,28 +6978,30 @@ namespace vl
 			class GuiToolstripCommand : public GuiComponent, public Description<GuiToolstripCommand>
 			{
 			protected:
-				Ptr<GuiImageData>						image;
-				WString									text;
-				compositions::IGuiShortcutKeyItem*		shortcutKeyItem;
-				bool									enabled;
+				Ptr<GuiImageData>							image;
+				WString										text;
+				compositions::IGuiShortcutKeyItem*			shortcutKeyItem;
+				bool										enabled;
+				Ptr<compositions::GuiNotifyEvent::IHandler>	shortcutKeyItemExecutedHandler;
 
-				void									InvokeDescriptionChanged();
+				void										OnShortcutKeyItemExecuted(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										InvokeDescriptionChanged();
 			public:
 				GuiToolstripCommand();
 				~GuiToolstripCommand();
 
-				compositions::GuiNotifyEvent			Executed;
+				compositions::GuiNotifyEvent				Executed;
 
-				compositions::GuiNotifyEvent			DescriptionChanged;
+				compositions::GuiNotifyEvent				DescriptionChanged;
 
-				Ptr<GuiImageData>						GetImage();
-				void									SetImage(Ptr<GuiImageData> value);
-				const WString&							GetText();
-				void									SetText(const WString& value);
-				compositions::IGuiShortcutKeyItem*		GetShortcut();
-				void									SetShortcut(compositions::IGuiShortcutKeyItem* value);
-				bool									GetEnabled();
-				void									SetEnabled(bool value);
+				Ptr<GuiImageData>							GetImage();
+				void										SetImage(Ptr<GuiImageData> value);
+				const WString&								GetText();
+				void										SetText(const WString& value);
+				compositions::IGuiShortcutKeyItem*			GetShortcut();
+				void										SetShortcut(compositions::IGuiShortcutKeyItem* value);
+				bool										GetEnabled();
+				void										SetEnabled(bool value);
 			};
 		}
 	}
