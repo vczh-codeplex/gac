@@ -19439,11 +19439,11 @@ Toolstrip Builder Facade
 				~GuiToolstripBuilder();
 
 				GuiToolstripBuilder*						Button(Ptr<GuiImageData> image, const WString& text, GuiToolstripButton** result=0);
-				GuiToolstripBuilder*						Button(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result=0);
+				GuiToolstripBuilder*						Button(GuiToolstripCommand* command, GuiToolstripButton** result=0);
 				GuiToolstripBuilder*						DropdownButton(Ptr<GuiImageData> image, const WString& text, GuiToolstripButton** result=0);
-				GuiToolstripBuilder*						DropdownButton(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result=0);
+				GuiToolstripBuilder*						DropdownButton(GuiToolstripCommand* command, GuiToolstripButton** result=0);
 				GuiToolstripBuilder*						SplitButton(Ptr<GuiImageData> image, const WString& text, GuiToolstripButton** result=0);
-				GuiToolstripBuilder*						SplitButton(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result=0);
+				GuiToolstripBuilder*						SplitButton(GuiToolstripCommand* command, GuiToolstripButton** result=0);
 				GuiToolstripBuilder*						Splitter();
 				GuiToolstripBuilder*						Control(GuiControl* control);
 				GuiToolstripBuilder*						BeginSubMenu();
@@ -19508,7 +19508,7 @@ Toolstrip Component
 			class GuiToolstripButton : public GuiMenuButton, public Description<GuiToolstripButton>
 			{
 			protected:
-				Ptr<GuiToolstripCommand>						command;
+				GuiToolstripCommand*							command;
 				Ptr<compositions::GuiNotifyEvent::IHandler>		descriptionChangedHandler;
 
 				void											UpdateCommandContent();
@@ -19518,8 +19518,8 @@ Toolstrip Component
 				GuiToolstripButton(IStyleController* _styleController);
 				~GuiToolstripButton();
 
-				Ptr<GuiToolstripCommand>						GetCommand();
-				void											SetCommand(Ptr<GuiToolstripCommand> value);
+				GuiToolstripCommand*							GetCommand();
+				void											SetCommand(GuiToolstripCommand* value);
 
 				GuiToolstripMenu*								GetToolstripSubMenu();
 				void											CreateToolstripSubMenu(GuiToolstripMenu::IStyleController* subMenuStyleController=0);

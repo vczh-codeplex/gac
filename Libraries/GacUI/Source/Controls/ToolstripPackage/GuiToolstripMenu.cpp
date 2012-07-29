@@ -246,7 +246,7 @@ GuiToolstripBuilder
 				return this;
 			}
 
-			GuiToolstripBuilder* GuiToolstripBuilder::Button(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result)
+			GuiToolstripBuilder* GuiToolstripBuilder::Button(GuiToolstripCommand* command, GuiToolstripButton** result)
 			{
 				lastCreatedButton=0;
 				switch(environment)
@@ -295,7 +295,7 @@ GuiToolstripBuilder
 				return this;
 			}
 
-			GuiToolstripBuilder* GuiToolstripBuilder::DropdownButton(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result)
+			GuiToolstripBuilder* GuiToolstripBuilder::DropdownButton(GuiToolstripCommand* command, GuiToolstripButton** result)
 			{
 				lastCreatedButton=0;
 				switch(environment)
@@ -338,7 +338,7 @@ GuiToolstripBuilder
 				return this;
 			}
 
-			GuiToolstripBuilder* GuiToolstripBuilder::SplitButton(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result)
+			GuiToolstripBuilder* GuiToolstripBuilder::SplitButton(GuiToolstripCommand* command, GuiToolstripButton** result)
 			{
 				lastCreatedButton=0;
 				switch(environment)
@@ -546,6 +546,7 @@ GuiToolstripButton
 
 			GuiToolstripButton::GuiToolstripButton(IStyleController* _styleController)
 				:GuiMenuButton(_styleController)
+				,command(0)
 			{
 			}
 
@@ -553,12 +554,12 @@ GuiToolstripButton
 			{
 			}
 
-			Ptr<GuiToolstripCommand> GuiToolstripButton::GetCommand()
+			GuiToolstripCommand* GuiToolstripButton::GetCommand()
 			{
 				return command;
 			}
 
-			void GuiToolstripButton::SetCommand(Ptr<GuiToolstripCommand> value)
+			void GuiToolstripButton::SetCommand(GuiToolstripCommand* value)
 			{
 				if(command)
 				{
