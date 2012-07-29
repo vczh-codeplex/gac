@@ -22,18 +22,21 @@ void TextEditorWindow::InitializeCommand()
 		commandFileNew=new GuiToolstripCommand;;
 		commandFileNew->SetText(L"New");
 		SetImage(commandFileNew, resourceFolder+L"_New.png");
+		commandFileNew->SetShortcut(shortcutKeyManager->CreateShortcut(true, false, false, L'N'));
 		this->AddComponent(commandFileNew);
 	}
 	{
 		commandFileOpen=new GuiToolstripCommand;;
 		commandFileOpen->SetText(L"Open...");
 		SetImage(commandFileOpen, resourceFolder+L"_Open.png");
+		commandFileOpen->SetShortcut(shortcutKeyManager->CreateShortcut(true, false, false, L'O'));
 		this->AddComponent(commandFileOpen);
 	}
 	{
 		commandFileSave=new GuiToolstripCommand;;
 		commandFileSave->SetText(L"Save");
 		SetImage(commandFileSave, resourceFolder+L"_Save.png");
+		commandFileSave->SetShortcut(shortcutKeyManager->CreateShortcut(true, false, false, L'S'));
 		this->AddComponent(commandFileSave);
 	}
 	{
@@ -51,30 +54,35 @@ void TextEditorWindow::InitializeCommand()
 		commandEditUndo=new GuiToolstripCommand;;
 		commandEditUndo->SetText(L"Undo");
 		SetImage(commandEditUndo, resourceFolder+L"_Undo.png");
+		commandEditUndo->SetShortcut(shortcutKeyManager->CreateShortcut(true, false, false, L'Z'));
 		this->AddComponent(commandEditUndo);
 	}
 	{
 		commandEditRedo=new GuiToolstripCommand;;
 		commandEditRedo->SetText(L"Redo");
 		SetImage(commandEditRedo, resourceFolder+L"_Redo.png");
+		commandEditRedo->SetShortcut(shortcutKeyManager->CreateShortcut(true, false, false, L'Y'));
 		this->AddComponent(commandEditRedo);
 	}
 	{
 		commandEditCut=new GuiToolstripCommand;;
 		commandEditCut->SetText(L"Cut");
 		SetImage(commandEditCut, resourceFolder+L"_Cut.png");
+		commandEditCut->SetShortcut(shortcutKeyManager->CreateShortcut(true, false, false, L'X'));
 		this->AddComponent(commandEditCut);
 	}
 	{
 		commandEditCopy=new GuiToolstripCommand;;
 		commandEditCopy->SetText(L"Copy");
 		SetImage(commandEditCopy, resourceFolder+L"_Copy.png");
+		commandEditCopy->SetShortcut(shortcutKeyManager->CreateShortcut(true, false, false, L'C'));
 		this->AddComponent(commandEditCopy);
 	}
 	{
 		commandEditPaste=new GuiToolstripCommand;;
 		commandEditPaste->SetText(L"Paste");
 		SetImage(commandEditPaste, resourceFolder+L"_Paste.png");
+		commandEditPaste->SetShortcut(shortcutKeyManager->CreateShortcut(true, false, false, L'V'));
 		this->AddComponent(commandEditPaste);
 	}
 	{
@@ -87,6 +95,7 @@ void TextEditorWindow::InitializeCommand()
 		commandEditSelect=new GuiToolstripCommand;;
 		commandEditSelect->SetText(L"Select All");
 		this->AddComponent(commandEditSelect);
+		commandEditDelete->SetShortcut(shortcutKeyManager->CreateShortcut(true, false, false, L'A'));
 	}
 	{
 		commandFormatFont=new GuiToolstripCommand;;
@@ -154,6 +163,9 @@ void TextEditorWindow::InitializeToolBar()
 
 void TextEditorWindow::InitializeComponents()
 {
+	shortcutKeyManager=new GuiShortcutKeyManager();
+	this->SetShortcutKeyManager(shortcutKeyManager);
+
 	InitializeCommand();
 	// create a table to place a menu bar and a text box
 	GuiTableComposition* table=new GuiTableComposition;

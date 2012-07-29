@@ -901,6 +901,7 @@ Win7MenuItemButtonElements
 				gradientElement->SetColors(colors.g1, colors.g2);
 				splitterElement->SetColors(colors.g3, colors.g4);
 				textElement->SetColor(colors.textColor);
+				shortcutElement->SetColor(colors.textColor);
 				subMenuArrowElement->SetBackgroundColor(colors.textColor);
 				subMenuArrowElement->SetBorderColor(colors.textColor);
 			}

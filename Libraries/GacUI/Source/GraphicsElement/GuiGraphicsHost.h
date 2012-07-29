@@ -71,7 +71,7 @@ Shortcut Key Manager
 			class IGuiShortcutKeyManager;
 
 			/// <summary>Shortcut key item.</summary>
-			class IGuiShortcutKeyItem : public Interface
+			class IGuiShortcutKeyItem : public Interface, public Description<IGuiShortcutKeyItem>
 			{
 			public:
 				/// <summary>Shortcut key executed event.</summary>
@@ -86,7 +86,7 @@ Shortcut Key Manager
 			};
 			
 			/// <summary>Shortcut key manager item.</summary>
-			class IGuiShortcutKeyManager : public Interface
+			class IGuiShortcutKeyManager : public Interface, public Description<IGuiShortcutKeyManager>
 			{
 			public:
 				/// <summary>Get the number of shortcut key items that already attached to the manager.</summary>
@@ -182,7 +182,7 @@ Host
 				/// <summary>Get the <see cref="IGuiShortcutKeyManager"/> attached with this graphics host.</summary>
 				/// <returns>The shortcut key manager.</returns>
 				IGuiShortcutKeyManager*			GetShortcutKeyManager();
-				/// <summary>Attach or detach the <see cref="IGuiShortcutKeyManager"/> associated with this graphics host.</summary>
+				/// <summary>Attach or detach the <see cref="IGuiShortcutKeyManager"/> associated with this graphics host. When this graphics host is disposing, the associated shortcut key manager will be deleted if exists.</summary>
 				/// <param name="value">The shortcut key manager. Set to null to detach the previous shortcut key manager from this graphics host.</param>
 				void							SetShortcutKeyManager(IGuiShortcutKeyManager* value);
 
@@ -262,7 +262,7 @@ Shortcut Key Manager Helpers
 			};
 
 			/// <summary>A default implementation for <see cref="IGuiShortcutKeyManager"/>.</summary>
-			class GuiShortcutKeyManager : public Object, public IGuiShortcutKeyManager
+			class GuiShortcutKeyManager : public Object, public IGuiShortcutKeyManager, public Description<GuiShortcutKeyManager>
 			{
 				typedef collections::List<Ptr<GuiShortcutKeyItem>>		ShortcutKeyItemList;
 			protected:

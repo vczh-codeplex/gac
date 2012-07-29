@@ -9,6 +9,7 @@ private:
 	GuiToolstripMenuBar*			menuBar;
 	GuiToolstripToolbar*			toolbar;
 	GuiMultilineTextBox*			textBox;
+	GuiShortcutKeyManager*			shortcutKeyManager;
 
 	GuiToolstripCommand*			commandFileNew;
 	GuiToolstripCommand*			commandFileOpen;
