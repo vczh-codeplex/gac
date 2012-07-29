@@ -182,7 +182,7 @@ Control Host
 				/// <param name="topmost">True to make the window always  on top of the desktop.</param>
 				void									SetTopMost(bool topmost);
 
-				/// <summary>Add a component.</summary>
+				/// <summary>Add a component. When this control host is disposing, all attached components will be deleted.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				bool									AddComponent(GuiComponent* component);
 				/// <summary>Remove a component.</summary>
@@ -192,6 +192,12 @@ Control Host
 				/// <returns>Returns true if the window contains the component.</returns>
 				/// <param name="component">The component to test.</param>
 				bool									ContainsComponent(GuiComponent* component);
+				/// <summary>Get the <see cref="compositions::IGuiShortcutKeyManager"/> attached with this control host.</summary>
+				/// <returns>The shortcut key manager.</returns>
+				compositions::IGuiShortcutKeyManager*	GetShortcutKeyManager();
+				/// <summary>Attach or detach the <see cref="compositions::IGuiShortcutKeyManager"/> associated with this control host. When this control host is disposing, the associated shortcut key manager will be deleted if exists.</summary>
+				/// <param name="value">The shortcut key manager. Set to null to detach the previous shortcut key manager from this control host.</param>
+				void									SetShortcutKeyManager(compositions::IGuiShortcutKeyManager* value);
 
 				/// <summary>Get the client size of the window.</summary>
 				/// <returns>The client size of the window.</returns>

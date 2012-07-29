@@ -3254,7 +3254,7 @@ Shortcut Key Manager
 
 			class IGuiShortcutKeyManager;
 
-			class IGuiShortcutKeyItem : public Interface
+			class IGuiShortcutKeyItem : public Interface, public Description<IGuiShortcutKeyItem>
 			{
 			public:
 				GuiNotifyEvent							Executed;
@@ -3263,7 +3263,7 @@ Shortcut Key Manager
 				virtual WString							GetName()=0;
 			};
 			
-			class IGuiShortcutKeyManager : public Interface
+			class IGuiShortcutKeyManager : public Interface, public Description<IGuiShortcutKeyManager>
 			{
 			public:
 				virtual int								GetItemCount()=0;
@@ -3395,7 +3395,7 @@ Shortcut Key Manager Helpers
 				bool							CanActivate(bool _ctrl, bool _shift, bool _alt, int _key);
 			};
 
-			class GuiShortcutKeyManager : public Object, public IGuiShortcutKeyManager
+			class GuiShortcutKeyManager : public Object, public IGuiShortcutKeyManager, public Description<GuiShortcutKeyManager>
 			{
 				typedef collections::List<Ptr<GuiShortcutKeyItem>>		ShortcutKeyItemList;
 			protected:
@@ -4131,6 +4131,8 @@ Control Host
 				bool									AddComponent(GuiComponent* component);
 				bool									RemoveComponent(GuiComponent* component);
 				bool									ContainsComponent(GuiComponent* component);
+				compositions::IGuiShortcutKeyManager*	GetShortcutKeyManager();
+				void									SetShortcutKeyManager(compositions::IGuiShortcutKeyManager* value);
 
 				Size									GetClientSize();
 				void									SetClientSize(Size value);

@@ -423,6 +423,16 @@ GuiControlHost
 				return components.Contains(component);
 			}
 
+			compositions::IGuiShortcutKeyManager* GuiControlHost::GetShortcutKeyManager()
+			{
+				return host->GetShortcutKeyManager();
+			}
+
+			void GuiControlHost::SetShortcutKeyManager(compositions::IGuiShortcutKeyManager* value)
+			{
+				host->SetShortcutKeyManager(value);
+			}
+
 			Size GuiControlHost::GetClientSize()
 			{
 				if(host->GetNativeWindow())

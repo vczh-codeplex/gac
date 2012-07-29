@@ -9943,6 +9943,16 @@ GuiControlHost
 				return components.Contains(component);
 			}
 
+			compositions::IGuiShortcutKeyManager* GuiControlHost::GetShortcutKeyManager()
+			{
+				return host->GetShortcutKeyManager();
+			}
+
+			void GuiControlHost::SetShortcutKeyManager(compositions::IGuiShortcutKeyManager* value)
+			{
+				host->SetShortcutKeyManager(value);
+			}
+
 			Size GuiControlHost::GetClientSize()
 			{
 				if(host->GetNativeWindow())
@@ -14478,6 +14488,7 @@ Win7MenuItemButtonElements
 				gradientElement->SetColors(colors.g1, colors.g2);
 				splitterElement->SetColors(colors.g3, colors.g4);
 				textElement->SetColor(colors.textColor);
+				shortcutElement->SetColor(colors.textColor);
 				subMenuArrowElement->SetBackgroundColor(colors.textColor);
 				subMenuArrowElement->SetBorderColor(colors.textColor);
 			}
@@ -19346,6 +19357,11 @@ GuiGraphicsHost
 
 			GuiGraphicsHost::~GuiGraphicsHost()
 			{
+				if(shortcutKeyManager)
+				{
+					delete shortcutKeyManager;
+					shortcutKeyManager=0;
+				}
 				delete windowComposition;
 			}
 

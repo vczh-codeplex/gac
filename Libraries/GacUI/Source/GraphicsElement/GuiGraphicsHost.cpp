@@ -500,6 +500,11 @@ GuiGraphicsHost
 
 			GuiGraphicsHost::~GuiGraphicsHost()
 			{
+				if(shortcutKeyManager)
+				{
+					delete shortcutKeyManager;
+					shortcutKeyManager=0;
+				}
 				delete windowComposition;
 			}
 
