@@ -104,7 +104,7 @@ Toolstrip Builder Facade
 				/// <summary>Create a button.</summary>
 				/// <returns>The current builder for continuing builder actions.</returns>
 				/// <param name="command">The command for the created control.</param>
-				GuiToolstripBuilder*						Button(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result=0);
+				GuiToolstripBuilder*						Button(GuiToolstripCommand* command, GuiToolstripButton** result=0);
 				/// <summary>Create a dropdown button.</summary>
 				/// <returns>The current builder for continuing builder actions.</returns>
 				/// <param name="image">The image for the created control.</param>
@@ -113,7 +113,7 @@ Toolstrip Builder Facade
 				/// <summary>Create a dropdown button.</summary>
 				/// <returns>The current builder for continuing builder actions.</returns>
 				/// <param name="command">The command for the created control.</param>
-				GuiToolstripBuilder*						DropdownButton(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result=0);
+				GuiToolstripBuilder*						DropdownButton(GuiToolstripCommand* command, GuiToolstripButton** result=0);
 				/// <summary>Create a split button.</summary>
 				/// <returns>The current builder for continuing builder actions.</returns>
 				/// <param name="image">The image for the created control.</param>
@@ -122,7 +122,7 @@ Toolstrip Builder Facade
 				/// <summary>Create a split button.</summary>
 				/// <returns>The current builder for continuing builder actions.</returns>
 				/// <param name="command">The command for the created control.</param>
-				GuiToolstripBuilder*						SplitButton(Ptr<GuiToolstripCommand> command, GuiToolstripButton** result=0);
+				GuiToolstripBuilder*						SplitButton(GuiToolstripCommand* command, GuiToolstripButton** result=0);
 				/// <summary>Create a splitter.</summary>
 				/// <returns>The current builder for continuing builder actions.</returns>
 				GuiToolstripBuilder*						Splitter();
@@ -221,7 +221,7 @@ Toolstrip Component
 			class GuiToolstripButton : public GuiMenuButton, public Description<GuiToolstripButton>
 			{
 			protected:
-				Ptr<GuiToolstripCommand>						command;
+				GuiToolstripCommand*							command;
 				Ptr<compositions::GuiNotifyEvent::IHandler>		descriptionChangedHandler;
 
 				void											UpdateCommandContent();
@@ -235,10 +235,10 @@ Toolstrip Component
 
 				/// <summary>Get the attached <see cref="GuiToolstripCommand"/>.</summary>
 				/// <returns>The attached toolstrip command.</returns>
-				Ptr<GuiToolstripCommand>						GetCommand();
+				GuiToolstripCommand*							GetCommand();
 				/// <summary>Detach from the previous <see cref="GuiToolstripCommand"/> and attach to a new one. If the command is null, this function only do detaching.</summary>
 				/// <param name="value">The new toolstrip command.</param>
-				void											SetCommand(Ptr<GuiToolstripCommand> value);
+				void											SetCommand(GuiToolstripCommand* value);
 
 				/// <summary>Get the toolstrip sub menu. If the sub menu is not created, it returns null.</summary>
 				/// <returns>The toolstrip sub menu.</returns>
