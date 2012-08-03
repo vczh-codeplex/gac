@@ -19587,6 +19587,7 @@ namespace vl
 				virtual controls::GuiScroll::IStyleController*								CreateVScrollStyle()=0;
 				virtual controls::GuiScroll::IStyleController*								CreateHTrackerStyle()=0;
 				virtual controls::GuiScroll::IStyleController*								CreateVTrackerStyle()=0;
+				virtual controls::GuiScroll::IStyleController*								CreateProgressBarStyle()=0;
 				
 				virtual controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()=0;
 				virtual controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()=0;
@@ -19633,6 +19634,7 @@ namespace vl
 				extern controls::GuiScroll*						NewVScroll();
 				extern controls::GuiScroll*						NewHTracker();
 				extern controls::GuiScroll*						NewVTracker();
+				extern controls::GuiScroll*						NewProgressBar();
 
 				extern controls::GuiTextList*					NewTextList();
 				extern controls::GuiTextList*					NewCheckTextList();
@@ -20719,6 +20721,27 @@ Scroll
 				~Win7TrackStyle();
 			};
 
+			class Win7ProgressBarStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<Win7ProgressBarStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+			public:
+				Win7ProgressBarStyle();
+				~Win7ProgressBarStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+				void										SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)override;
+				void										SetTotalSize(int value)override;
+				void										SetPageSize(int value)override;
+				void										SetPosition(int value)override;
+			};
+
 /***********************************************************************
 ScrollView
 ***********************************************************************/
@@ -21110,6 +21133,7 @@ Theme
 				controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
 				controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
+				controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
 
 				controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
 				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;

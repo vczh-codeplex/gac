@@ -150,6 +150,18 @@ Win7ProgressBarStyle
 
 			Win7ProgressBarStyle::Win7ProgressBarStyle()
 			{
+				{
+					GuiRoundBorderElement* element=GuiRoundBorderElement::Create();
+					element->SetColor(Color(178, 178, 178));
+
+					boundsComposition=new GuiBoundsComposition;
+					boundsComposition->SetOwnedElement(element);
+				}
+				{
+					containerComposition=new GuiBoundsComposition;
+					containerComposition->SetAlignmentToParent(Margin(1, 1, 1, 1));
+					boundsComposition->AddChild(containerComposition);
+				}
 			}
 
 			Win7ProgressBarStyle::~Win7ProgressBarStyle()
@@ -158,12 +170,12 @@ Win7ProgressBarStyle
 
 			compositions::GuiBoundsComposition* Win7ProgressBarStyle::GetBoundsComposition()
 			{
-				return 0;
+				return boundsComposition;
 			}
 
 			compositions::GuiGraphicsComposition* Win7ProgressBarStyle::GetContainerComposition()
 			{
-				return 0;
+				return containerComposition;
 			}
 
 			void Win7ProgressBarStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)

@@ -64,6 +64,9 @@ Scroll
 			/// <summary>Progress bar style (Windows 7).</summary>
 			class Win7ProgressBarStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<Win7ProgressBarStyle>
 			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
 			public:
 				Win7ProgressBarStyle();
 				~Win7ProgressBarStyle();
