@@ -13371,7 +13371,7 @@ Win7ProgressBarStyle
 				{
 					GuiRoundBorderElement* element=GuiRoundBorderElement::Create();
 					element->SetColor(Color(178, 178, 178));
-					element->SetRadius(1);
+					element->SetRadius(2);
 
 					GuiBoundsComposition* borderComposition=new GuiBoundsComposition;
 					borderComposition->SetOwnedElement(element);
