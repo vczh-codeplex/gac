@@ -148,20 +148,92 @@ Win7TrackStyle
 Win7ProgressBarStyle
 ***********************************************************************/
 
-			Win7ProgressBarStyle::Win7ProgressBarStyle()
+			void Win7ProgressBarStyle::UpdateProgressBar()
+			{
+				int max=totalSize-pageSize;
+				if(position<0)
+				{
+					progressComposition->SetWidthPageSize(0);
+				}
+				else if(position>=max)
+				{
+					progressComposition->SetWidthPageSize(1);
+				}
+				else
+				{
+					progressComposition->SetWidthPageSize((double)position/max);
+				}
+			}
+
+			void Win7ProgressBarStyle::FillProgressColors(compositions::GuiGraphicsComposition* parent, Color g1, Color g2, Color g3, Color g4, Color g5)
 			{
 				{
-					GuiRoundBorderElement* element=GuiRoundBorderElement::Create();
-					element->SetColor(Color(178, 178, 178));
+					GuiGradientBackgroundElement* element=GuiGradientBackgroundElement::Create();
+					element->SetDirection(GuiGradientBackgroundElement::Vertical);
+					element->SetColors(g1, g2);
 
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					composition->SetAlignmentToParent(Margin(0, 0, 0, -1));
+					composition->SetPreferredMinSize(Size(0, 6));
+					composition->SetOwnedElement(element);
+					parent->AddChild(composition);
+				}
+				{
+					GuiGradientBackgroundElement* element=GuiGradientBackgroundElement::Create();
+					element->SetDirection(GuiGradientBackgroundElement::Vertical);
+					element->SetColors(g3, g4);
+
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					composition->SetAlignmentToParent(Margin(0, 6, 0, 6));
+					composition->SetOwnedElement(element);
+					parent->AddChild(composition);
+				}
+				{
+					GuiGradientBackgroundElement* element=GuiGradientBackgroundElement::Create();
+					element->SetDirection(GuiGradientBackgroundElement::Vertical);
+					element->SetColors(g4, g5);
+
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					composition->SetAlignmentToParent(Margin(0, -1, 0, 0));
+					composition->SetPreferredMinSize(Size(0, 6));
+					composition->SetOwnedElement(element);
+					parent->AddChild(composition);
+				}
+			}
+
+			Win7ProgressBarStyle::Win7ProgressBarStyle()
+				:totalSize(1)
+				,pageSize(0)
+				,position(0)
+			{
+				{
 					boundsComposition=new GuiBoundsComposition;
-					boundsComposition->SetOwnedElement(element);
 				}
 				{
 					containerComposition=new GuiBoundsComposition;
 					containerComposition->SetAlignmentToParent(Margin(1, 1, 1, 1));
 					boundsComposition->AddChild(containerComposition);
 				}
+				{
+					GuiRoundBorderElement* element=GuiRoundBorderElement::Create();
+					element->SetColor(Color(178, 178, 178));
+					element->SetRadius(1);
+
+					GuiBoundsComposition* borderComposition=new GuiBoundsComposition;
+					borderComposition->SetOwnedElement(element);
+					borderComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					boundsComposition->AddChild(borderComposition);
+				}
+				{
+					progressComposition=new GuiPartialViewComposition;
+					progressComposition->SetWidthRatio(0);
+					progressComposition->SetWidthPageSize(0);
+					progressComposition->SetHeightRatio(0);
+					progressComposition->SetHeightPageSize(1);
+					containerComposition->AddChild(progressComposition);
+				}
+				FillProgressColors(containerComposition, Color(239, 239, 239), Color(218, 218, 218), Color(201, 201, 201), Color(203, 203, 203), Color(213, 213, 213));
+				FillProgressColors(progressComposition, Color(205, 255, 205), Color(156, 238, 172), Color(0, 211, 40), Color(0, 213, 47), Color(74, 232, 93));
 			}
 
 			Win7ProgressBarStyle::~Win7ProgressBarStyle()
@@ -200,14 +272,20 @@ Win7ProgressBarStyle
 
 			void Win7ProgressBarStyle::SetTotalSize(int value)
 			{
+				totalSize=value;
+				UpdateProgressBar();
 			}
 
 			void Win7ProgressBarStyle::SetPageSize(int value)
 			{
+				pageSize=value;
+				UpdateProgressBar();
 			}
 
 			void Win7ProgressBarStyle::SetPosition(int value)
 			{
+				position=value;
+				UpdateProgressBar();
 			}
 
 /***********************************************************************

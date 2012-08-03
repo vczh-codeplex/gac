@@ -65,8 +65,15 @@ Scroll
 			class Win7ProgressBarStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<Win7ProgressBarStyle>
 			{
 			protected:
+				int											totalSize;
+				int											pageSize;
+				int											position;
 				compositions::GuiBoundsComposition*			boundsComposition;
 				compositions::GuiBoundsComposition*			containerComposition;
+				compositions::GuiPartialViewComposition*	progressComposition;
+
+				void										UpdateProgressBar();
+				void										FillProgressColors(compositions::GuiGraphicsComposition* parent, Color g1, Color g2, Color g3, Color g4, Color g5);
 			public:
 				Win7ProgressBarStyle();
 				~Win7ProgressBarStyle();
