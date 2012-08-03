@@ -76,6 +76,7 @@ void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container)
 				GuiScroll* scroll=new GuiScroll(new win7::Win7ProgressBarStyle);
 				scroll->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				scroll->SetTotalSize(10);
+				scroll->SetPageSize(4);
 				cell->AddChild(scroll->GetBoundsComposition());
 				progressBar=scroll;
 			}

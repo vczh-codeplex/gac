@@ -13366,6 +13366,7 @@ Win7ProgressBarStyle
 					containerComposition=new GuiBoundsComposition;
 					containerComposition->SetAlignmentToParent(Margin(1, 1, 1, 1));
 					boundsComposition->AddChild(containerComposition);
+					FillProgressColors(containerComposition, Color(239, 239, 239), Color(218, 218, 218), Color(201, 201, 201), Color(203, 203, 203), Color(213, 213, 213));
 				}
 				{
 					GuiRoundBorderElement* element=GuiRoundBorderElement::Create();
@@ -13384,9 +13385,8 @@ Win7ProgressBarStyle
 					progressComposition->SetHeightRatio(0);
 					progressComposition->SetHeightPageSize(1);
 					containerComposition->AddChild(progressComposition);
+					FillProgressColors(progressComposition, Color(205, 255, 205), Color(156, 238, 172), Color(0, 211, 40), Color(0, 213, 47), Color(74, 232, 93));
 				}
-				FillProgressColors(containerComposition, Color(239, 239, 239), Color(218, 218, 218), Color(201, 201, 201), Color(203, 203, 203), Color(213, 213, 213));
-				FillProgressColors(progressComposition, Color(205, 255, 205), Color(156, 238, 172), Color(0, 211, 40), Color(0, 213, 47), Color(74, 232, 93));
 			}
 
 			Win7ProgressBarStyle::~Win7ProgressBarStyle()
