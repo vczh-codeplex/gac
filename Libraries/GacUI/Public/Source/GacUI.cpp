@@ -11136,6 +11136,11 @@ namespace vl
 				{
 					return new controls::GuiScroll(GetCurrentTheme()->CreateVTrackerStyle());
 				}
+				
+				controls::GuiScroll* NewProgressBar()
+				{
+					return new controls::GuiScroll(GetCurrentTheme()->CreateProgressBarStyle());
+				}
 
 				controls::GuiTextList* NewTextList()
 				{
@@ -11311,6 +11316,11 @@ Win7Theme
 			controls::GuiScroll::IStyleController* Win7Theme::CreateVTrackerStyle()
 			{
 				return new Win7TrackStyle(Win7TrackStyle::Vertical);
+			}
+
+			controls::GuiScroll::IStyleController* Win7Theme::CreateProgressBarStyle()
+			{
+				return new Win7ProgressBarStyle;
 			}
 
 			controls::GuiScrollView::IStyleProvider* Win7Theme::CreateTextListStyle()
@@ -13284,6 +13294,72 @@ Win7TrackStyle
 			}
 
 			Win7TrackStyle::~Win7TrackStyle()
+			{
+			}
+
+/***********************************************************************
+Win7ProgressBarStyle
+***********************************************************************/
+
+			Win7ProgressBarStyle::Win7ProgressBarStyle()
+			{
+				{
+					GuiRoundBorderElement* element=GuiRoundBorderElement::Create();
+					element->SetColor(Color(178, 178, 178));
+
+					boundsComposition=new GuiBoundsComposition;
+					boundsComposition->SetOwnedElement(element);
+				}
+				{
+					containerComposition=new GuiBoundsComposition;
+					containerComposition->SetAlignmentToParent(Margin(1, 1, 1, 1));
+					boundsComposition->AddChild(containerComposition);
+				}
+			}
+
+			Win7ProgressBarStyle::~Win7ProgressBarStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win7ProgressBarStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win7ProgressBarStyle::GetContainerComposition()
+			{
+				return containerComposition;
+			}
+
+			void Win7ProgressBarStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetTotalSize(int value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetPageSize(int value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetPosition(int value)
 			{
 			}
 
