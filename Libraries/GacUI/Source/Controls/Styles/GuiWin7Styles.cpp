@@ -154,6 +154,11 @@ Win7Theme
 				return new Win7TrackStyle(Win7TrackStyle::Vertical);
 			}
 
+			controls::GuiScroll::IStyleController* Win7Theme::CreateProgressBarStyle()
+			{
+				return new Win7ProgressBarStyle;
+			}
+
 			controls::GuiScrollView::IStyleProvider* Win7Theme::CreateTextListStyle()
 			{
 				return new Win7MultilineTextBoxProvider;

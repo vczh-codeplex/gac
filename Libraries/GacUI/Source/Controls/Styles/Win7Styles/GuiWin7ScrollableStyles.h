@@ -61,6 +61,25 @@ Scroll
 				~Win7TrackStyle();
 			};
 
+			/// <summary>Progress bar style (Windows 7).</summary>
+			class Win7ProgressBarStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<Win7ProgressBarStyle>
+			{
+			public:
+				Win7ProgressBarStyle();
+				~Win7ProgressBarStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+				void										SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)override;
+				void										SetTotalSize(int value)override;
+				void										SetPageSize(int value)override;
+				void										SetPosition(int value)override;
+			};
+
 /***********************************************************************
 ScrollView
 ***********************************************************************/

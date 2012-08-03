@@ -112,6 +112,9 @@ namespace vl
 				/// <summary>Create a style for vertical tracker.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiScroll::IStyleController*								CreateVTrackerStyle()=0;
+				/// <summary>Create a style for progress bar.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiScroll::IStyleController*								CreateProgressBarStyle()=0;
 				
 				/// <summary>Create a style for text list.</summary>
 				/// <returns>The created style.</returns>
@@ -234,6 +237,9 @@ namespace vl
 				/// <summary>Create a vertical tracker (slide bar).</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiScroll*						NewVTracker();
+				/// <summary>Create a progress bar.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiScroll*						NewProgressBar();
 
 				/// <summary>Create a text list.</summary>
 				/// <returns>The created control.</returns>
