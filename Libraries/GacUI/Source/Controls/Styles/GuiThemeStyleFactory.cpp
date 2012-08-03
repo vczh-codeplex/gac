@@ -186,6 +186,11 @@ namespace vl
 				{
 					return new controls::GuiScroll(GetCurrentTheme()->CreateVTrackerStyle());
 				}
+				
+				controls::GuiScroll* NewProgressBar()
+				{
+					return new controls::GuiScroll(GetCurrentTheme()->CreateProgressBarStyle());
+				}
 
 				controls::GuiTextList* NewTextList()
 				{

@@ -145,6 +145,60 @@ Win7TrackStyle
 			}
 
 /***********************************************************************
+Win7ProgressBarStyle
+***********************************************************************/
+
+			Win7ProgressBarStyle::Win7ProgressBarStyle()
+			{
+			}
+
+			Win7ProgressBarStyle::~Win7ProgressBarStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win7ProgressBarStyle::GetBoundsComposition()
+			{
+				return 0;
+			}
+
+			compositions::GuiGraphicsComposition* Win7ProgressBarStyle::GetContainerComposition()
+			{
+				return 0;
+			}
+
+			void Win7ProgressBarStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetTotalSize(int value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetPageSize(int value)
+			{
+			}
+
+			void Win7ProgressBarStyle::SetPosition(int value)
+			{
+			}
+
+/***********************************************************************
 Win7ScrollViewProvider
 ***********************************************************************/
 
