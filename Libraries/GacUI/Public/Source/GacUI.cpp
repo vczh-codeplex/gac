@@ -10454,10 +10454,12 @@ CommonScrollStyle
 					case Horizontal:
 						handleBoundsComposition->SetAlignmentToParent(Margin(defaultSize, 0, defaultSize, 0));
 						handleComposition->SetPreferredMinSize(Size(defaultSize, 0));
+						boundsComposition->SetPreferredMinSize(Size(0, defaultSize));
 						break;
 					case Vertical:
 						handleBoundsComposition->SetAlignmentToParent(Margin(0, defaultSize, 0, defaultSize));
 						handleComposition->SetPreferredMinSize(Size(0, defaultSize));
+						boundsComposition->SetPreferredMinSize(Size(defaultSize, 0));
 						break;
 					}
 					
@@ -10677,6 +10679,7 @@ CommonTrackStyle
 				{
 					GuiTableComposition* table=new GuiTableComposition;
 					boundsComposition->AddChild(table);
+					boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
 					table->SetRowsAndColumns(3, 3);
 					table->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
