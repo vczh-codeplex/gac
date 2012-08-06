@@ -109,7 +109,13 @@
       <cpp src="TextEditorWindow.h" />
       <cpp src="TextEditorWindow.cpp" />
       <cpp src="TextEditorWindow_Initialization.cpp" />
-      <description>This demo shows how to build Notepad with functionalities like new/open/save, or undo/redo/clipboard operations, using menus and toolbars.</description>
+      <description>This demo shows how to build Notepad with functionalities like new/open/save, or undo/redo/clipboard operations, using menus and toolbars in the toolstrip control package.</description>
+    </demo>
+    <demo name="Scroll.ColorPicker">
+      <date>2012/8/6</date>
+      <image src="DXGUI_56.jpg" />
+      <cpp src="Main.cpp" />
+      <description>This demo shows how to build a color picker using tracker control.</description>
     </demo>
   </category>
 </demos>

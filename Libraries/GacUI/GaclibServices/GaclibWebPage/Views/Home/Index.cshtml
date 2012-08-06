@@ -29,7 +29,8 @@
             </li>
             <li>
                 <strong>MVC concept supports</strong>
-                <p>For some repeated items containers like list view, tree view or combo box, GacUI provides MVC supports to decouple data source, item style and item arranger.</p>
+                <p>GacUI is built with the MVC pattern, from the control framework to specific controls. MVC decouples controls from styles. And for controls in the toolstrip control package, like menu, menubar and toolbar, MVC decouples controls from command states.</p>
+                <p>For some repeated items containers like list view, tree view or combo box, GacUI provides specific MVC supports to decouple data source, item style and item arranger.</p>
                 <p>This features is important for displaying large data set. For example, if an item is displayed as a button, the list view control will only creates buttons for visible items. Invisible items doesn't really create buttons for displaying them. When user scrolls, data source, item style and item arranger will cooperate together to display correct items in correct positions.</p>
                 <p>If the data is too large to store in the memory, this mechanism enables programmers to load necessary data only from files. The application can use only a little memory to show such large data smoothly. MVC supporting makes programmers very easy to do that.</p>
             </li>

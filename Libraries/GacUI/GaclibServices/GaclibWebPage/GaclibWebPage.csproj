@@ -140,6 +140,8 @@
     <Content Include="Content\Demos\Controls.ListView.ViewSwitching\Main.cpp" />
     <Content Include="Content\Demos\Controls.ListView.VirtualMode\DXGUI_47.jpg" />
     <Content Include="Content\Demos\Controls.ListView.VirtualMode\Main.cpp" />
+    <Content Include="Content\Demos\Controls.Scroll.ColorPicker\DXGUI_56.jpg" />
+    <Content Include="Content\Demos\Controls.Scroll.ColorPicker\Main.cpp" />
     <Content Include="Content\Demos\Controls.Tab.TextBoxPage\DXGUI_32.jpg" />
     <Content Include="Content\Demos\Controls.Tab.TextBoxPage\DXGUI_33.jpg" />
     <Content Include="Content\Demos\Controls.Tab.TextBoxPage\Main.cpp" />
@@ -168,6 +170,7 @@
     <Content Include="Content\Demos\Demos.Controls.ListView.SortingAndFiltering.jpg" />
     <Content Include="Content\Demos\Demos.Controls.ListView.ViewSwitching.jpg" />
     <Content Include="Content\Demos\Demos.Controls.ListView.VirtualMode.jpg" />
+    <Content Include="Content\Demos\Demos.Controls.Scroll.ColorPicker.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Tab.TextBoxPage.jpg" />
     <Content Include="Content\Demos\Demos.Controls.TextBox.Colorizer.jpg" />
     <Content Include="Content\Demos\Demos.Controls.TextBox.Editor.jpg" />
