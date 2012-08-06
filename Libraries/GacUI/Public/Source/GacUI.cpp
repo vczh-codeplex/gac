@@ -11129,17 +11129,23 @@ namespace vl
 
 				controls::GuiScroll* NewHTracker()
 				{
-					return new controls::GuiScroll(GetCurrentTheme()->CreateHTrackerStyle());
+					controls::GuiScroll* scroll=new controls::GuiScroll(GetCurrentTheme()->CreateHTrackerStyle());
+					scroll->SetPageSize(0);
+					return scroll;
 				}
 
 				controls::GuiScroll* NewVTracker()
 				{
-					return new controls::GuiScroll(GetCurrentTheme()->CreateVTrackerStyle());
+					controls::GuiScroll* scroll=new controls::GuiScroll(GetCurrentTheme()->CreateVTrackerStyle());
+					scroll->SetPageSize(0);
+					return scroll;
 				}
 				
 				controls::GuiScroll* NewProgressBar()
 				{
-					return new controls::GuiScroll(GetCurrentTheme()->CreateProgressBarStyle());
+					controls::GuiScroll* scroll=new controls::GuiScroll(GetCurrentTheme()->CreateProgressBarStyle());
+					scroll->SetPageSize(0);
+					return scroll;
 				}
 
 				controls::GuiTextList* NewTextList()
