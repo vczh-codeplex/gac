@@ -95,7 +95,7 @@ void TextEditorWindow::InitializeCommand()
 		commandEditSelect=new GuiToolstripCommand;;
 		commandEditSelect->SetText(L"Select All");
 		this->AddComponent(commandEditSelect);
-		commandEditDelete->SetShortcut(shortcutKeyManager->CreateShortcut(true, false, false, L'A'));
+		commandEditSelect->SetShortcut(shortcutKeyManager->CreateShortcut(true, false, false, L'A'));
 	}
 	{
 		commandFormatFont=new GuiToolstripCommand;;
