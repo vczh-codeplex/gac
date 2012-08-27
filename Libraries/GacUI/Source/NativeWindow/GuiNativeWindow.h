@@ -629,6 +629,47 @@ Native Window
 		class INativeWindowListener : public Interface
 		{
 		public:
+			/// <summary>Hit test result for a native window.</summary>
+			enum HitTestResult
+			{
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Border that doesn't contain sizing functionalitiy.</summary>
+				BorderNoSizing,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Left border.</summary>
+				BorderLeft,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Right border.</summary>
+				BorderRight,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Top border.</summary>
+				BorderTop,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Bottom border.</summary>
+				BorderBottom,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Left top border.</summary>
+				BorderLeftTop,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Right top border.</summary>
+				BorderRightTop,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Left bottom border.</summary>
+				BorderLeftButtom,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Right bottom border.</summary>
+				BorderRightBottom,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Title</summary>
+				Title,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Minimum button.</summary>
+				ButtonMinimum,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Maximum button.</summary>
+				ButtonMaximum,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Close button.</summary>
+				ButtonClose,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Client button.</summary>
+				Client,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Let the OS window layer decide.</summary>
+				NoDecision,
+			};
+
+			/// <summary>
+			/// Perform a hit test.
+			/// </summary>
+			/// <returns>Returns the hit test result. If "NoDecision" is returned, the native window provider should call the OS window layer to do the hit test.</returns>
+			/// <param name="location">The location to do the hit test. This location is in the window space (not the client space).</param>
+			virtual HitTestResult		HitTest(Point location);
 			/// <summary>
 			/// Called when the window is moving.
 			/// </summary>

@@ -223,6 +223,27 @@ GuiGraphicsHost
 				}
 			}
 
+			INativeWindowListener::HitTestResult GuiGraphicsHost::HitTest(Point location)
+			{
+				Rect bounds=nativeWindow->GetBounds();
+				Rect clientBounds=nativeWindow->GetClientBoundsInScreen();
+				Point clientLocation(location.x+clientBounds.x1-bounds.x1, location.y+clientBounds.y1-bounds.y1);
+				GuiGraphicsComposition* hitComposition=windowComposition->FindComposition(clientLocation);
+				while(hitComposition)
+				{
+					INativeWindowListener::HitTestResult result=hitComposition->GetAssociatedHitTestResult();
+					if(result==INativeWindowListener::NoDecision)
+					{
+						hitComposition=hitComposition->GetParent();
+					}
+					else
+					{
+						return result;
+					}
+				}
+				return INativeWindowListener::NoDecision;
+			}
+
 			void GuiGraphicsHost::Moving(Rect& bounds, bool fixSizeOnly)
 			{
 				Rect oldBounds=nativeWindow->GetBounds();

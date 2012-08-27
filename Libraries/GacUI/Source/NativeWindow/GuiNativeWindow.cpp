@@ -9,6 +9,11 @@ namespace vl
 INativeWindowListener
 ***********************************************************************/
 
+		INativeWindowListener::HitTestResult INativeWindowListener::HitTest(Point location)
+		{
+			return INativeWindowListener::NoDecision;
+		}
+
 		void INativeWindowListener::Moving(Rect& bounds, bool fixSizeOnly)
 		{
 		}
