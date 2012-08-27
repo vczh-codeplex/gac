@@ -67,6 +67,7 @@ GuiGraphicsComposition
 				,associatedControl(0)
 				,associatedHost(0)
 				,associatedCursor(0)
+				,associatedHitTestResult(INativeWindowListener::NoDecision)
 			{
 			}
 
@@ -337,6 +338,16 @@ GuiGraphicsComposition
 			void GuiGraphicsComposition::SetAssociatedCursor(INativeCursor* cursor)
 			{
 				associatedCursor=cursor;
+			}
+
+			INativeWindowListener::HitTestResult GuiGraphicsComposition::GetAssociatedHitTestResult()
+			{
+				return associatedHitTestResult;
+			}
+
+			void GuiGraphicsComposition::SetAssociatedHitTestResult(INativeWindowListener::HitTestResult value)
+			{
+				associatedHitTestResult=value;
 			}
 
 			controls::GuiControl* GuiGraphicsComposition::GetRelatedControl()

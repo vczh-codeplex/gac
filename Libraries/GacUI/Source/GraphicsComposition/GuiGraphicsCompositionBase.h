@@ -80,6 +80,7 @@ Basic Construction
 				controls::GuiControl*						associatedControl;
 				GuiGraphicsHost*							associatedHost;
 				INativeCursor*								associatedCursor;
+				INativeWindowListener::HitTestResult		associatedHitTestResult;
 
 				Margin										margin;
 				Margin										internalMargin;
@@ -176,6 +177,12 @@ Basic Construction
 				/// <summary>Set the associated cursor.</summary>
 				/// <param name="cursor">The associated cursor.</param>
 				void										SetAssociatedCursor(INativeCursor* cursor);
+				/// <summary>Get the associated hit test result.</summary>
+				/// <returns>The associated hit test result.</returns>
+				INativeWindowListener::HitTestResult		GetAssociatedHitTestResult();
+				/// <summary>Set the associated hit test result.</summary>
+				/// <param name="cursor">The associated hit test result.</param>
+				void										SetAssociatedHitTestResult(INativeWindowListener::HitTestResult value);
 				
 				/// <summary>Get the related control. A related control is the deepest control that contains this composition.</summary>
 				/// <returns>The related control.</returns>

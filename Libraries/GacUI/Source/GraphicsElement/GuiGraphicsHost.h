@@ -115,98 +115,98 @@ Host
 			public:
 				static const unsigned __int64	CaretInterval=500;
 			protected:
-				INativeWindow*					nativeWindow;
-				IGuiShortcutKeyManager*			shortcutKeyManager;
-				GuiWindowComposition*			windowComposition;
-				GuiGraphicsComposition*			focusedComposition;
-				Size							previousClientSize;
-				Size							minSize;
-				Point							caretPoint;
-				unsigned __int64				lastCaretTime;
+				INativeWindow*							nativeWindow;
+				IGuiShortcutKeyManager*					shortcutKeyManager;
+				GuiWindowComposition*					windowComposition;
+				GuiGraphicsComposition*					focusedComposition;
+				Size									previousClientSize;
+				Size									minSize;
+				Point									caretPoint;
+				unsigned __int64						lastCaretTime;
 
-				GuiGraphicsAnimationManager		animationManager;
-				GuiGraphicsComposition*			mouseCaptureComposition;
-				CompositionList					mouseEnterCompositions;
+				GuiGraphicsAnimationManager				animationManager;
+				GuiGraphicsComposition*					mouseCaptureComposition;
+				CompositionList							mouseEnterCompositions;
 
-				void							DisconnectCompositionInternal(GuiGraphicsComposition* composition);
-
-				void							MouseCapture(const NativeWindowMouseInfo& info);
-				void							MouseUncapture(const NativeWindowMouseInfo& info);
-				void							OnCharInput(const NativeWindowCharInfo& info, GuiGraphicsComposition* composition, GuiCharEvent GuiGraphicsEventReceiver::* eventReceiverEvent);
-				void							OnKeyInput(const NativeWindowKeyInfo& info, GuiGraphicsComposition* composition, GuiKeyEvent GuiGraphicsEventReceiver::* eventReceiverEvent);
-				void							RaiseMouseEvent(GuiMouseEventArgs& arguments, GuiGraphicsComposition* composition, GuiMouseEvent GuiGraphicsEventReceiver::* eventReceiverEvent);
-				void							OnMouseInput(const NativeWindowMouseInfo& info, GuiMouseEvent GuiGraphicsEventReceiver::* eventReceiverEvent);
+				void									DisconnectCompositionInternal(GuiGraphicsComposition* composition);
+				void									MouseCapture(const NativeWindowMouseInfo& info);
+				void									MouseUncapture(const NativeWindowMouseInfo& info);
+				void									OnCharInput(const NativeWindowCharInfo& info, GuiGraphicsComposition* composition, GuiCharEvent GuiGraphicsEventReceiver::* eventReceiverEvent);
+				void									OnKeyInput(const NativeWindowKeyInfo& info, GuiGraphicsComposition* composition, GuiKeyEvent GuiGraphicsEventReceiver::* eventReceiverEvent);
+				void									RaiseMouseEvent(GuiMouseEventArgs& arguments, GuiGraphicsComposition* composition, GuiMouseEvent GuiGraphicsEventReceiver::* eventReceiverEvent);
+				void									OnMouseInput(const NativeWindowMouseInfo& info, GuiMouseEvent GuiGraphicsEventReceiver::* eventReceiverEvent);
 				
 			private:
-				void							Moving(Rect& bounds, bool fixSizeOnly)override;
-				void							Moved()override;
+				INativeWindowListener::HitTestResult	HitTest(Point location)override;
+				void									Moving(Rect& bounds, bool fixSizeOnly)override;
+				void									Moved()override;
 
-				void							LeftButtonDown(const NativeWindowMouseInfo& info)override;
-				void							LeftButtonUp(const NativeWindowMouseInfo& info)override;
-				void							LeftButtonDoubleClick(const NativeWindowMouseInfo& info)override;
-				void							RightButtonDown(const NativeWindowMouseInfo& info)override;
-				void							RightButtonUp(const NativeWindowMouseInfo& info)override;
-				void							RightButtonDoubleClick(const NativeWindowMouseInfo& info)override;
-				void							MiddleButtonDown(const NativeWindowMouseInfo& info)override;
-				void							MiddleButtonUp(const NativeWindowMouseInfo& info)override;
-				void							MiddleButtonDoubleClick(const NativeWindowMouseInfo& info)override;
-				void							HorizontalWheel(const NativeWindowMouseInfo& info)override;
-				void							VerticalWheel(const NativeWindowMouseInfo& info)override;
-				void							MouseMoving(const NativeWindowMouseInfo& info)override;
-				void							MouseEntered()override;
-				void							MouseLeaved()override;
+				void									LeftButtonDown(const NativeWindowMouseInfo& info)override;
+				void									LeftButtonUp(const NativeWindowMouseInfo& info)override;
+				void									LeftButtonDoubleClick(const NativeWindowMouseInfo& info)override;
+				void									RightButtonDown(const NativeWindowMouseInfo& info)override;
+				void									RightButtonUp(const NativeWindowMouseInfo& info)override;
+				void									RightButtonDoubleClick(const NativeWindowMouseInfo& info)override;
+				void									MiddleButtonDown(const NativeWindowMouseInfo& info)override;
+				void									MiddleButtonUp(const NativeWindowMouseInfo& info)override;
+				void									MiddleButtonDoubleClick(const NativeWindowMouseInfo& info)override;
+				void									HorizontalWheel(const NativeWindowMouseInfo& info)override;
+				void									VerticalWheel(const NativeWindowMouseInfo& info)override;
+				void									MouseMoving(const NativeWindowMouseInfo& info)override;
+				void									MouseEntered()override;
+				void									MouseLeaved()override;
 
-				void							KeyDown(const NativeWindowKeyInfo& info)override;
-				void							KeyUp(const NativeWindowKeyInfo& info)override;
-				void							SysKeyDown(const NativeWindowKeyInfo& info)override;
-				void							SysKeyUp(const NativeWindowKeyInfo& info)override;
-				void							Char(const NativeWindowCharInfo& info)override;
+				void									KeyDown(const NativeWindowKeyInfo& info)override;
+				void									KeyUp(const NativeWindowKeyInfo& info)override;
+				void									SysKeyDown(const NativeWindowKeyInfo& info)override;
+				void									SysKeyUp(const NativeWindowKeyInfo& info)override;
+				void									Char(const NativeWindowCharInfo& info)override;
 
-				void							GlobalTimer()override;
+				void									GlobalTimer()override;
 			public:
 				GuiGraphicsHost();
 				~GuiGraphicsHost();
 
 				/// <summary>Get the associated window.</summary>
 				/// <returns>The associated window.</returns>
-				INativeWindow*					GetNativeWindow();
+				INativeWindow*							GetNativeWindow();
 				/// <summary>Associate a window. A <see cref="GuiWindowComposition"/> will fill and appear in the window.</summary>
 				/// <param name="_nativeWindow">The window to associated.</param>
-				void							SetNativeWindow(INativeWindow* _nativeWindow);
+				void									SetNativeWindow(INativeWindow* _nativeWindow);
 				/// <summary>Get the main <see cref="GuiWindowComposition"/>. If a window is associated, everything that put into the main composition will be shown in the window.</summary>
 				/// <returns>The main compositoin.</returns>
-				GuiGraphicsComposition*			GetMainComposition();
+				GuiGraphicsComposition*					GetMainComposition();
 				/// <summary>Render the main composition and all content to the associated window.</summary>
-				void							Render();
+				void									Render();
 
 				/// <summary>Get the <see cref="IGuiShortcutKeyManager"/> attached with this graphics host.</summary>
 				/// <returns>The shortcut key manager.</returns>
-				IGuiShortcutKeyManager*			GetShortcutKeyManager();
+				IGuiShortcutKeyManager*					GetShortcutKeyManager();
 				/// <summary>Attach or detach the <see cref="IGuiShortcutKeyManager"/> associated with this graphics host. When this graphics host is disposing, the associated shortcut key manager will be deleted if exists.</summary>
 				/// <param name="value">The shortcut key manager. Set to null to detach the previous shortcut key manager from this graphics host.</param>
-				void							SetShortcutKeyManager(IGuiShortcutKeyManager* value);
+				void									SetShortcutKeyManager(IGuiShortcutKeyManager* value);
 
 				/// <summary>Set the focus composition. A focused composition will receive keyboard messages.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="composition">The composition to set focus. This composition should be or in the main composition.</param>
-				bool							SetFocus(GuiGraphicsComposition* composition);
+				bool									SetFocus(GuiGraphicsComposition* composition);
 				/// <summary>Get the focus composition. A focused composition will receive keyboard messages.</summary>
 				/// <returns>The focus composition.</returns>
-				GuiGraphicsComposition*			GetFocusedComposition();
+				GuiGraphicsComposition*					GetFocusedComposition();
 				/// <summary>Get the caret point. A caret point is the position to place the edit box of the activated input method editor.</summary>
 				/// <returns>The caret point.</returns>
-				Point							GetCaretPoint();
+				Point									GetCaretPoint();
 				/// <summary>Set the caret point. A caret point is the position to place the edit box of the activated input method editor.</summary>
 				/// <param name="value">The caret point.</param>
 				/// <param name="referenceComposition">The point space. If this argument is null, the "value" argument will use the point space of the client area in the main composition.</param>
-				void							SetCaretPoint(Point value, GuiGraphicsComposition* referenceComposition=0);
+				void									SetCaretPoint(Point value, GuiGraphicsComposition* referenceComposition=0);
 
 				/// <summary>Get the animation manager.</summary>
 				/// <returns>The animation manager.</returns>
-				GuiGraphicsAnimationManager*	GetAnimationManager();
+				GuiGraphicsAnimationManager*			GetAnimationManager();
 				/// <summary>Notify that a composition is going to disconnect from this graphics host. Generally this happens when a composition's parent line changes.</summary>
 				/// <param name="composition">The composition to disconnect</param>
-				void							DisconnectComposition(GuiGraphicsComposition* composition);
+				void									DisconnectComposition(GuiGraphicsComposition* composition);
 			};
 
 /***********************************************************************
