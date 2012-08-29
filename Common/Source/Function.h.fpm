@@ -274,35 +274,6 @@ vl::function_combining::Combining<R1($TYPE_LIST($count)), R2($TYPE_LIST($count))
 		};
 $$end
 
-$$define $FUNCTION_TYPE_RETRIVER_DECLARATION($count,$function) $$begin
-$(/)***********************************************************************
-vl::function_type_retriver::Retriver for $FUNCTION_TYPE($count,$function)
-***********************************************************************$(/)
-		template<$TYPENAME_LIST($count,$function)>
-		struct Retriver<$if($function,R,void)(*)($TYPE_LIST($count))>
-		{
-			typedef $if($function,R,void) Type($TYPE_LIST($count));
-		};
-$( )
-		template<$TYPENAME_LIST($count,$function)>
-		struct Retriver<Func<$FUNCTION_TYPE($count,$function)>>
-		{
-			typedef $if($function,R,void) Type($TYPE_LIST($count));
-		};
-$( )
-		template<$METHOD_TYPENAME_LIST($count,$function,C)>
-		struct Retriver<$if($function,R,void)(__thiscall C::*)($TYPE_LIST($count))>
-		{
-			typedef $if($function,R,void) Type($TYPE_LIST($count));
-		};
-$( )
-		template<$METHOD_TYPENAME_LIST($count,$function,C)>
-		struct Retriver<$if($function,R,void)(__thiscall C::*)($TYPE_LIST($count))const>
-		{
-			typedef $if($function,R,void) Type($TYPE_LIST($count));
-		};
-$$end
-
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: ³Âè÷å«(vczh)
@@ -374,22 +345,6 @@ $BINDING_DECLARATION($index,0)
 $( )
 $$end
 $loop($sub($MAX_FUNCTION_NUMBER(),1),1,$BINDING_APPLY)
-	}
-$( )
-	namespace function_type_retriver
-	{
-		template<typename T>
-		struct Retriver
-		{
-		};
-$$define $FUNCTION_TYPE_RETRIVER_APPLY($index) $$begin
-$( )
-$FUNCTION_TYPE_RETRIVER_DECLARATION($index,1)
-$( )
-$FUNCTION_TYPE_RETRIVER_DECLARATION($index,0)
-$( )
-$$end
-$loop($MAX_FUNCTION_NUMBER(),0,$FUNCTION_TYPE_RETRIVER_APPLY)
 	}
 $( )
 	template<typename T>

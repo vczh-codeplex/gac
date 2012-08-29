@@ -343,7 +343,7 @@ private:
 		comboSelector->SetEnabled(false);
 		this->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::LargeWaiting));
 
-		GetApplication()->InvokeAsync(Curry<void(TextBoxColorizerWindow*)>([](TextBoxColorizerWindow* window)
+		GetApplication()->InvokeAsync(Curry(Func<void(TextBoxColorizerWindow*)>([](TextBoxColorizerWindow* window)
 		{
 			Ptr<GuiTextBoxColorizerBase> colorizer;
 			WString text;
@@ -415,7 +415,7 @@ private:
 				window->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
 				window->comboSelector->SetEnabled(true);
 			});
-		})(this));
+		}))(this));
 	}
 public:
 	TextBoxColorizerWindow()

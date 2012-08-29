@@ -250,19 +250,6 @@ Func<T> LambdaChooser(const Func<T>& function)
 	return Func<T>();
 }
 
-template<typename T>
-struct OperatorTypeRetriver
-{
-	typedef vl::function_type_retriver::Retriver<decltype(&(T::operator()))> RetriverType;
-};
-
-template<typename T>
-auto LambdaChooser2(T function)->Func<typename vl::function_type_retriver::Retriver<decltype(&(T::operator()))>::Type>
-{
-	Func<typename vl::function_type_retriver::Retriver<decltype(&(T::operator()))>::Type> x;
-	return x;
-}
-
 TEST_CASE(TestLambdaChooser)
 {
 	void(*f1)()=0;
@@ -274,45 +261,45 @@ TEST_CASE(TestLambdaChooser)
 
 	auto t1=LambdaChooser(f1);
 	auto t2=LambdaChooser(f2);
-	auto t3=LambdaChooser2(f3);
+	auto t3=LambdaChooser(Func<void()>(f3));
 }
 
 TEST_CASE(TestCurryingWithLambda)
 {
-	//auto add=[](int a, int b, int c){return a+b+c;};
-	//auto add_1=Curry<int(int,int,int)>(add)(1);
-	//auto add_1_2=Curry(add_1)(2);
-	//auto add_1_2_3=Curry(add_1_2)(3);
+	Func<int(int,int,int)> add=[](int a, int b, int c){return a+b+c;};
+	auto add_1=Curry<int(int,int,int)>(add)(1);
+	auto add_1_2=Curry(add_1)(2);
+	auto add_1_2_3=Curry(add_1_2)(3);
 
-	//TEST_ASSERT(add(1,2,3)==6);
-	//TEST_ASSERT(add_1(2,3)==6);
-	//TEST_ASSERT(add_1_2(3)==6);
-	//TEST_ASSERT(add_1_2_3()==6);
+	TEST_ASSERT(add(1,2,3)==6);
+	TEST_ASSERT(add_1(2,3)==6);
+	TEST_ASSERT(add_1_2(3)==6);
+	TEST_ASSERT(add_1_2_3()==6);
 
-	//vint r=0;
-	//auto addr=[](int a, int b, int c, int& r){r=a+b+c;};
-	//auto addr_1=Curry<void(int,int,int,int&)>(addr)(1);
-	//auto addr_1_2=Curry(addr_1)(2);
-	//auto addr_1_2_3=Curry(addr_1_2)(3);
-	//auto addr_1_2_3_4=Curry(addr_1_2_3)(r);
+	vint r=0;
+	Func<void(int,int,int,int&)> addr=[](int a, int b, int c, int& r){r=a+b+c;};
+	auto addr_1=Curry<void(int,int,int,int&)>(addr)(1);
+	auto addr_1_2=Curry(addr_1)(2);
+	auto addr_1_2_3=Curry(addr_1_2)(3);
+	auto addr_1_2_3_4=Curry(addr_1_2_3)(r);
 
-	//r=0;
-	//addr(1,2,3,r);
-	//TEST_ASSERT(r==6);
-	//
-	//r=0;
-	//addr_1(2,3,r);
-	//TEST_ASSERT(r==6);
+	r=0;
+	addr(1,2,3,r);
+	TEST_ASSERT(r==6);
+	
+	r=0;
+	addr_1(2,3,r);
+	TEST_ASSERT(r==6);
 
-	//r=0;
-	//addr_1_2(3,r);
-	//TEST_ASSERT(r==6);
+	r=0;
+	addr_1_2(3,r);
+	TEST_ASSERT(r==6);
 
-	//r=0;
-	//addr_1_2_3(r);
-	//TEST_ASSERT(r==6);
+	r=0;
+	addr_1_2_3(r);
+	TEST_ASSERT(r==6);
 
-	//r=0;
-	//addr_1_2_3_4();
-	//TEST_ASSERT(r==6);
+	r=0;
+	addr_1_2_3_4();
+	TEST_ASSERT(r==6);
 }
