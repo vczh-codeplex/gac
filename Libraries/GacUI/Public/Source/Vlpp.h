@@ -1276,7 +1276,7 @@ namespace vl
 		};
 
 		template<typename T, typename P>
-		typename P::ResultTypeRetriver<T>::ResultType operator>>(const IEnumerable<T>& enumerable, const P& processor)
+		typename P::template ResultTypeRetriver<T>::ResultType operator>>(const IEnumerable<T>& enumerable, const P& processor)
 		{
 			return processor(enumerable);
 		}

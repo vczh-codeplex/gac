@@ -16639,6 +16639,7 @@ GuiGraphicsComposition
 				,associatedControl(0)
 				,associatedHost(0)
 				,associatedCursor(0)
+				,associatedHitTestResult(INativeWindowListener::NoDecision)
 			{
 			}
 
@@ -16909,6 +16910,16 @@ GuiGraphicsComposition
 			void GuiGraphicsComposition::SetAssociatedCursor(INativeCursor* cursor)
 			{
 				associatedCursor=cursor;
+			}
+
+			INativeWindowListener::HitTestResult GuiGraphicsComposition::GetAssociatedHitTestResult()
+			{
+				return associatedHitTestResult;
+			}
+
+			void GuiGraphicsComposition::SetAssociatedHitTestResult(INativeWindowListener::HitTestResult value)
+			{
+				associatedHitTestResult=value;
 			}
 
 			controls::GuiControl* GuiGraphicsComposition::GetRelatedControl()
@@ -19259,6 +19270,27 @@ GuiGraphicsHost
 					arguments.y-=bounds.y1;
 					RaiseMouseEvent(arguments, composition, eventReceiverEvent);
 				}
+			}
+
+			INativeWindowListener::HitTestResult GuiGraphicsHost::HitTest(Point location)
+			{
+				Rect bounds=nativeWindow->GetBounds();
+				Rect clientBounds=nativeWindow->GetClientBoundsInScreen();
+				Point clientLocation(location.x+clientBounds.x1-bounds.x1, location.y+clientBounds.y1-bounds.y1);
+				GuiGraphicsComposition* hitComposition=windowComposition->FindComposition(clientLocation);
+				while(hitComposition)
+				{
+					INativeWindowListener::HitTestResult result=hitComposition->GetAssociatedHitTestResult();
+					if(result==INativeWindowListener::NoDecision)
+					{
+						hitComposition=hitComposition->GetParent();
+					}
+					else
+					{
+						return result;
+					}
+				}
+				return INativeWindowListener::NoDecision;
 			}
 
 			void GuiGraphicsHost::Moving(Rect& bounds, bool fixSizeOnly)
@@ -23847,6 +23879,11 @@ namespace vl
 INativeWindowListener
 ***********************************************************************/
 
+		INativeWindowListener::HitTestResult INativeWindowListener::HitTest(Point location)
+		{
+			return INativeWindowListener::NoDecision;
+		}
+
 		void INativeWindowListener::Moving(Rect& bounds, bool fixSizeOnly)
 		{
 		}
@@ -27892,6 +27929,59 @@ WindowsForm
 					}
 					switch(uMsg)
 					{
+					case WM_NCHITTEST:
+						{
+							POINTS location=MAKEPOINTS(lParam);
+							for(int i=0;i<listeners.Count();i++)
+							{
+								switch(listeners[i]->HitTest(Point(location.x, location.y)))
+								{
+								case INativeWindowListener::BorderNoSizing:
+									result=HTBORDER;
+									return true;
+								case INativeWindowListener::BorderLeft:
+									result=HTLEFT;
+									return true;
+								case INativeWindowListener::BorderRight:
+									result=HTRIGHT;
+									return true;
+								case INativeWindowListener::BorderTop:
+									result=HTTOP;
+									return true;
+								case INativeWindowListener::BorderBottom:
+									result=HTBOTTOM;
+									return true;
+								case INativeWindowListener::BorderLeftTop:
+									result=HTTOPLEFT;
+									return true;
+								case INativeWindowListener::BorderRightTop:
+									result=HTTOPRIGHT;
+									return true;
+								case INativeWindowListener::BorderLeftButtom:
+									result=HTBOTTOMLEFT;
+									return true;
+								case INativeWindowListener::BorderRightBottom:
+									result=HTBOTTOMRIGHT;
+									return true;
+								case INativeWindowListener::Title:
+									result=HTCAPTION;
+									return true;
+								case INativeWindowListener::ButtonMinimum:
+									result=HTMINBUTTON;
+									return true;
+								case INativeWindowListener::ButtonMaximum:
+									result=HTMAXBUTTON;
+									return true;
+								case INativeWindowListener::ButtonClose:
+									result=HTCLOSE;
+									return true;
+								case INativeWindowListener::Client:
+									result=HTCLIENT;
+									return true;
+								}
+							}
+						}
+						break;
 					case WM_MOVING:case WM_SIZING:
 						{
 							LPRECT rawBounds=(LPRECT)lParam;
