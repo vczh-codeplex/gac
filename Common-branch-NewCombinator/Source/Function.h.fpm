@@ -75,56 +75,6 @@ vl::Func<$FUNCTION_TYPE($count,$function)>
 		};
 
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-
-			virtual $if($function,R,void) Invoke($PARAMETER_LIST($count))
-			{
-				$if($function,return, ) function->operator()($ARGUMENT_LIST($count));
-			}
-
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-
-			virtual $if($function,R,void) Invoke($PARAMETER_LIST($count))
-			{
-				$if($function,return, ) function->operator()($ARGUMENT_LIST($count));
-			}
-
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -172,18 +122,6 @@ vl::Func<$FUNCTION_TYPE($count,$function)>
 		Func(C* sender, $FUNCTION_DECL($count,$function,C::*function))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 
 		template<typename C>
@@ -299,7 +237,7 @@ vl::function_binding::Binding<$FUNCTION_TYPE($count,$function)>
 
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -408,27 +346,27 @@ $( )
 $$end
 $loop($sub($MAX_FUNCTION_NUMBER(),1),1,$BINDING_APPLY)
 	}
-
+$( )
 	template<typename T>
 	Func<Func<typename function_binding::Binding<T>::CurriedType>(typename function_binding::Binding<T>::ParameterType)>
 	Curry(T* function)
 	{
-		return Ptr<typename function_binding::Binding<T>::Currier>(new typename function_binding::Binding<T>::Currier(function));
+		return typename function_binding::Binding<T>::Currier(function);
 	}
-
+$( )
 	template<typename T>
 	Func<Func<typename function_binding::Binding<T>::CurriedType>(typename function_binding::Binding<T>::ParameterType)>
 	Curry(const Func<T>& function)
 	{
-		return Ptr<typename function_binding::Binding<T>::Currier>(new typename function_binding::Binding<T>::Currier(function));
+		return typename function_binding::Binding<T>::Currier(function);
 	}
+$( )
 	namespace function_combining
 	{
 		template<typename A, typename B, typename C>
 		class Combining
 		{
 		};
-		
 $$define $COMBINDING_APPLY($index) $$begin
 $( )
 $COMBINDING_DECLARATION($index)
@@ -440,7 +378,7 @@ $loop($MAX_FUNCTION_NUMBER(),0,$COMBINDING_APPLY)
 	Func<typename function_combining::Combining<F1, F2, C>::FinalFunctionType>
 	Combine(Func<C> converter, Func<F1> function1, Func<F2> function2)
 	{
-		return Ptr<function_combining::Combining<F1, F2, C>>(new function_combining::Combining<F1, F2, C>(function1, function2, converter));
+		return function_combining::Combining<F1, F2, C>(function1, function2, converter);
 	}
 
 	template<typename T>

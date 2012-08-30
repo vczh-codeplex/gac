@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9279535F-D195-42D0-9D3B-F072B469F5E4}</ProjectGuid>
+    <ProjectGuid>{06A5B663-83ED-42C3-AAA7-AD536555D0FC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Fpmacro</RootNamespace>
+    <RootNamespace>NestleConsole</RootNamespace>
     <SccProjectName>SAK</SccProjectName>
     <SccAuxPath>SAK</SccAuxPath>
     <SccLocalPath>SAK</SccLocalPath>
@@ -24,14 +24,12 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -56,7 +54,6 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -72,7 +69,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -83,76 +79,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Source\Basic.cpp" />
-    <ClCompile Include="..\..\..\Source\Collections\Operation.cpp" />
-    <ClCompile Include="..\..\..\Source\Combinator\StringCombinator.cpp" />
-    <ClCompile Include="..\..\..\Source\Combinator\TokenCombinator.cpp" />
     <ClCompile Include="..\..\..\Source\Console.cpp" />
     <ClCompile Include="..\..\..\Source\Exception.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\Regex.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\RegexAutomaton.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\RegexData.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\RegexExpression.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\RegexParser.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\RegexPure.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\RegexRich.cpp" />
-    <ClCompile Include="..\..\..\Source\Regex\RegexWriter.cpp" />
-    <ClCompile Include="..\..\..\Source\Stream\Accessor.cpp" />
-    <ClCompile Include="..\..\..\Source\Stream\CharFormat.cpp" />
-    <ClCompile Include="..\..\..\Source\Stream\FileStream.cpp" />
+    <ClCompile Include="..\..\..\Source\HttpUtility.cpp" />
     <ClCompile Include="..\..\..\Source\String.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\Basic.h" />
-    <ClInclude Include="..\..\..\Source\Collections\Dictionary.h" />
-    <ClInclude Include="..\..\..\Source\Collections\DictionaryWrappers.h" />
-    <ClInclude Include="..\..\..\Source\Collections\Interfaces.h" />
-    <ClInclude Include="..\..\..\Source\Collections\List.h" />
-    <ClInclude Include="..\..\..\Source\Collections\ListWrappers.h" />
-    <ClInclude Include="..\..\..\Source\Collections\Operation.h" />
-    <ClInclude Include="..\..\..\Source\Collections\OperationAggregate.h" />
-    <ClInclude Include="..\..\..\Source\Collections\OperationConcat.h" />
-    <ClInclude Include="..\..\..\Source\Collections\OperationCopyFrom.h" />
-    <ClInclude Include="..\..\..\Source\Collections\OperationEnumerable.h" />
-    <ClInclude Include="..\..\..\Source\Collections\OperationForEach.h" />
-    <ClInclude Include="..\..\..\Source\Collections\OperationPair.h" />
-    <ClInclude Include="..\..\..\Source\Collections\OperationSelect.h" />
-    <ClInclude Include="..\..\..\Source\Collections\OperationSequence.h" />
-    <ClInclude Include="..\..\..\Source\Collections\OperationSet.h" />
-    <ClInclude Include="..\..\..\Source\Collections\OperationString.h" />
-    <ClInclude Include="..\..\..\Source\Collections\OperationWhere.h" />
-    <ClInclude Include="..\..\..\Source\Collections\Pair.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\Combinator.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\Expression.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\ParserInput.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\StringCombinator.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\TokenCombinator.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\TupleProcessor.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Alt.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Binop.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Def.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Error.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Loop.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Pred.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Ref.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Seq.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Unit.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Using.h" />
     <ClInclude Include="..\..\..\Source\Console.h" />
     <ClInclude Include="..\..\..\Source\Exception.h" />
-    <ClInclude Include="..\..\..\Source\Function.h" />
+    <ClInclude Include="..\..\..\Source\HttpUtility.h" />
     <ClInclude Include="..\..\..\Source\Pointer.h" />
-    <ClInclude Include="..\..\..\Source\Regex\Regex.h" />
-    <ClInclude Include="..\..\..\Source\Regex\RegexAutomaton.h" />
-    <ClInclude Include="..\..\..\Source\Regex\RegexData.h" />
-    <ClInclude Include="..\..\..\Source\Regex\RegexExpression.h" />
-    <ClInclude Include="..\..\..\Source\Regex\RegexPure.h" />
-    <ClInclude Include="..\..\..\Source\Regex\RegexRich.h" />
-    <ClInclude Include="..\..\..\Source\Regex\RegexWriter.h" />
-    <ClInclude Include="..\..\..\Source\Stream\Accessor.h" />
-    <ClInclude Include="..\..\..\Source\Stream\CharFormat.h" />
-    <ClInclude Include="..\..\..\Source\Stream\FileStream.h" />
-    <ClInclude Include="..\..\..\Source\Stream\Interfaces.h" />
     <ClInclude Include="..\..\..\Source\String.h" />
     <ClInclude Include="..\..\..\Source\Tuple.h" />
   </ItemGroup>
