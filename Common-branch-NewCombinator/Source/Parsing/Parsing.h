@@ -114,7 +114,7 @@ namespace vl
 			{
 			}
 
-			Ptr<ParsingNode> GetNode()const
+			virtual Ptr<ParsingNode> GetNode()const
 			{
 				return node;
 			}
@@ -289,16 +289,18 @@ namespace vl
 			void operator=(const Rule<T>& rule);
 		protected:
 			Ptr<RuleNode>					ruleNode;
-			Ptr<parsing_internal::_Rule>	ruleObject;
 		public:
 			Rule(const WString& name=L"")
 			{
 				ruleNode=new RuleNode;
 				ruleNode->name=name;
+			}
 
-				ruleObject=new parsing_internal::_Rule;
+			Ptr<ParsingNode> GetNode()const override
+			{
+				Ptr<parsing_internal::_Rule> ruleObject=new parsing_internal::_Rule;
 				ruleObject->rule=ruleNode.Obj();
-				node=ruleObject;
+				return ruleObject;
 			}
 
 			Ptr<RuleNode> GetRuleNode()const
