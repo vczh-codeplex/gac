@@ -1196,50 +1196,6 @@ vl::Func<R()>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke()
-			{
-				return function->operator()();
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke()
-			{
-				return function->operator()();
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -1281,16 +1237,6 @@ vl::Func<R()>
 		Func(C* sender, R(C::*function)())
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -1421,50 +1367,6 @@ vl::Func<void()>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke()
-			{
-				  function->operator()();
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke()
-			{
-				  function->operator()();
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -1506,16 +1408,6 @@ vl::Func<void()>
 		Func(C* sender, void(C::*function)())
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -1646,50 +1538,6 @@ vl::Func<R(T0)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0)
-			{
-				return function->operator()(p0);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0)
-			{
-				return function->operator()(p0);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -1731,16 +1579,6 @@ vl::Func<R(T0)>
 		Func(C* sender, R(C::*function)(T0))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -1871,50 +1709,6 @@ vl::Func<void(T0)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0)
-			{
-				  function->operator()(p0);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0)
-			{
-				  function->operator()(p0);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -1956,16 +1750,6 @@ vl::Func<void(T0)>
 		Func(C* sender, void(C::*function)(T0))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -2096,50 +1880,6 @@ vl::Func<R(T0,T1)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1)
-			{
-				return function->operator()(p0,p1);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1)
-			{
-				return function->operator()(p0,p1);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -2181,16 +1921,6 @@ vl::Func<R(T0,T1)>
 		Func(C* sender, R(C::*function)(T0,T1))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -2321,50 +2051,6 @@ vl::Func<void(T0,T1)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1)
-			{
-				  function->operator()(p0,p1);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1)
-			{
-				  function->operator()(p0,p1);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -2406,16 +2092,6 @@ vl::Func<void(T0,T1)>
 		Func(C* sender, void(C::*function)(T0,T1))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -2546,50 +2222,6 @@ vl::Func<R(T0,T1,T2)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2)
-			{
-				return function->operator()(p0,p1,p2);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2)
-			{
-				return function->operator()(p0,p1,p2);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -2631,16 +2263,6 @@ vl::Func<R(T0,T1,T2)>
 		Func(C* sender, R(C::*function)(T0,T1,T2))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -2771,50 +2393,6 @@ vl::Func<void(T0,T1,T2)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2)
-			{
-				  function->operator()(p0,p1,p2);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2)
-			{
-				  function->operator()(p0,p1,p2);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -2856,16 +2434,6 @@ vl::Func<void(T0,T1,T2)>
 		Func(C* sender, void(C::*function)(T0,T1,T2))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -2996,50 +2564,6 @@ vl::Func<R(T0,T1,T2,T3)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3)
-			{
-				return function->operator()(p0,p1,p2,p3);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3)
-			{
-				return function->operator()(p0,p1,p2,p3);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -3081,16 +2605,6 @@ vl::Func<R(T0,T1,T2,T3)>
 		Func(C* sender, R(C::*function)(T0,T1,T2,T3))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -3221,50 +2735,6 @@ vl::Func<void(T0,T1,T2,T3)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3)
-			{
-				  function->operator()(p0,p1,p2,p3);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3)
-			{
-				  function->operator()(p0,p1,p2,p3);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -3306,16 +2776,6 @@ vl::Func<void(T0,T1,T2,T3)>
 		Func(C* sender, void(C::*function)(T0,T1,T2,T3))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -3446,50 +2906,6 @@ vl::Func<R(T0,T1,T2,T3,T4)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4)
-			{
-				return function->operator()(p0,p1,p2,p3,p4);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4)
-			{
-				return function->operator()(p0,p1,p2,p3,p4);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -3531,16 +2947,6 @@ vl::Func<R(T0,T1,T2,T3,T4)>
 		Func(C* sender, R(C::*function)(T0,T1,T2,T3,T4))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -3671,50 +3077,6 @@ vl::Func<void(T0,T1,T2,T3,T4)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4)
-			{
-				  function->operator()(p0,p1,p2,p3,p4);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4)
-			{
-				  function->operator()(p0,p1,p2,p3,p4);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -3756,16 +3118,6 @@ vl::Func<void(T0,T1,T2,T3,T4)>
 		Func(C* sender, void(C::*function)(T0,T1,T2,T3,T4))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -3896,50 +3248,6 @@ vl::Func<R(T0,T1,T2,T3,T4,T5)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5)
-			{
-				return function->operator()(p0,p1,p2,p3,p4,p5);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5)
-			{
-				return function->operator()(p0,p1,p2,p3,p4,p5);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -3981,16 +3289,6 @@ vl::Func<R(T0,T1,T2,T3,T4,T5)>
 		Func(C* sender, R(C::*function)(T0,T1,T2,T3,T4,T5))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -4121,50 +3419,6 @@ vl::Func<void(T0,T1,T2,T3,T4,T5)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5)
-			{
-				  function->operator()(p0,p1,p2,p3,p4,p5);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5)
-			{
-				  function->operator()(p0,p1,p2,p3,p4,p5);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -4206,16 +3460,6 @@ vl::Func<void(T0,T1,T2,T3,T4,T5)>
 		Func(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -4346,50 +3590,6 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6)
-			{
-				return function->operator()(p0,p1,p2,p3,p4,p5,p6);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6)
-			{
-				return function->operator()(p0,p1,p2,p3,p4,p5,p6);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -4431,16 +3631,6 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6)>
 		Func(C* sender, R(C::*function)(T0,T1,T2,T3,T4,T5,T6))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -4571,50 +3761,6 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6)
-			{
-				  function->operator()(p0,p1,p2,p3,p4,p5,p6);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6)
-			{
-				  function->operator()(p0,p1,p2,p3,p4,p5,p6);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -4656,16 +3802,6 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6)>
 		Func(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -4796,50 +3932,6 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7)
-			{
-				return function->operator()(p0,p1,p2,p3,p4,p5,p6,p7);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7)
-			{
-				return function->operator()(p0,p1,p2,p3,p4,p5,p6,p7);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -4881,16 +3973,6 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>
 		Func(C* sender, R(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -5021,50 +4103,6 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7)
-			{
-				  function->operator()(p0,p1,p2,p3,p4,p5,p6,p7);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7)
-			{
-				  function->operator()(p0,p1,p2,p3,p4,p5,p6,p7);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -5106,16 +4144,6 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>
 		Func(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -5246,50 +4274,6 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8)
-			{
-				return function->operator()(p0,p1,p2,p3,p4,p5,p6,p7,p8);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8)
-			{
-				return function->operator()(p0,p1,p2,p3,p4,p5,p6,p7,p8);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -5331,16 +4315,6 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 		Func(C* sender, R(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -5471,50 +4445,6 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8)
-			{
-				  function->operator()(p0,p1,p2,p3,p4,p5,p6,p7,p8);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8)
-			{
-				  function->operator()(p0,p1,p2,p3,p4,p5,p6,p7,p8);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -5556,16 +4486,6 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 		Func(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -5696,50 +4616,6 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8,T9 p9)
-			{
-				return function->operator()(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual R Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8,T9 p9)
-			{
-				return function->operator()(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -5781,16 +4657,6 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		Func(C* sender, R(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -5921,50 +4787,6 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 			}
 		};
 		template<typename C>
-		class PointerInvoker : public Invoker
-		{
-		protected:
-			C*			function;
-		public:
-			PointerInvoker(C* _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8,T9 p9)
-			{
-				  function->operator()(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function;
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
-		class SmartPointerInvoker : public Invoker
-		{
-		protected:
-			Ptr<C>		function;
-		public:
-			SmartPointerInvoker(const Ptr<C>& _function)
-				:function(_function)
-			{
-			}
-			virtual void Invoke(T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8,T9 p9)
-			{
-				  function->operator()(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
-			}
-			virtual void RetriveBinary(char* binary)
-			{
-				BinaryRetriver<C*, BinarySize> retriver;
-				memset(retriver.binary, 0, BinarySize);
-				retriver.t=function.Obj();
-				memcpy(binary, retriver.binary, BinarySize);
-			}
-		};
-		template<typename C>
 		class ObjectInvoker : public Invoker
 		{
 		protected:
@@ -6006,16 +4828,6 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		Func(C* sender, void(C::*function)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9))
 		{
 			invoker=new MemberInvoker<C>(sender, function);
-		}
-		template<typename C>
-		Func(C* function)
-		{
-			invoker=new PointerInvoker<C>(function);
-		}
-		template<typename C>
-		Func(const Ptr<C>& function)
-		{
-			invoker=new SmartPointerInvoker<C>(function);
 		}
 		template<typename C>
 		Func(const C& function)
@@ -6142,7 +4954,7 @@ vl::function_binding::Binding<R(T0)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6183,7 +4995,7 @@ vl::function_binding::Binding<void(T0)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6224,7 +5036,7 @@ vl::function_binding::Binding<R(T0,T1)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6265,7 +5077,7 @@ vl::function_binding::Binding<void(T0,T1)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6306,7 +5118,7 @@ vl::function_binding::Binding<R(T0,T1,T2)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6347,7 +5159,7 @@ vl::function_binding::Binding<void(T0,T1,T2)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6388,7 +5200,7 @@ vl::function_binding::Binding<R(T0,T1,T2,T3)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6429,7 +5241,7 @@ vl::function_binding::Binding<void(T0,T1,T2,T3)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6470,7 +5282,7 @@ vl::function_binding::Binding<R(T0,T1,T2,T3,T4)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6511,7 +5323,7 @@ vl::function_binding::Binding<void(T0,T1,T2,T3,T4)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6552,7 +5364,7 @@ vl::function_binding::Binding<R(T0,T1,T2,T3,T4,T5)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6593,7 +5405,7 @@ vl::function_binding::Binding<void(T0,T1,T2,T3,T4,T5)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6634,7 +5446,7 @@ vl::function_binding::Binding<R(T0,T1,T2,T3,T4,T5,T6)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6675,7 +5487,7 @@ vl::function_binding::Binding<void(T0,T1,T2,T3,T4,T5,T6)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6716,7 +5528,7 @@ vl::function_binding::Binding<R(T0,T1,T2,T3,T4,T5,T6,T7)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6757,7 +5569,7 @@ vl::function_binding::Binding<void(T0,T1,T2,T3,T4,T5,T6,T7)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6798,7 +5610,7 @@ vl::function_binding::Binding<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6839,7 +5651,7 @@ vl::function_binding::Binding<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6880,7 +5692,7 @@ vl::function_binding::Binding<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
@@ -6921,31 +5733,33 @@ vl::function_binding::Binding<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 				}
 				Func<CurriedType> operator()(typename CR<T0>::Type argument)const
 				{
-					return Ptr<Binder>(new Binder(target, argument));
+					return Binder(target, argument);
 				}
 			};
 		};
  
 	}
+ 
 	template<typename T>
 	Func<Func<typename function_binding::Binding<T>::CurriedType>(typename function_binding::Binding<T>::ParameterType)>
 	Curry(T* function)
 	{
-		return Ptr<typename function_binding::Binding<T>::Currier>(new typename function_binding::Binding<T>::Currier(function));
+		return typename function_binding::Binding<T>::Currier(function);
 	}
+ 
 	template<typename T>
 	Func<Func<typename function_binding::Binding<T>::CurriedType>(typename function_binding::Binding<T>::ParameterType)>
 	Curry(const Func<T>& function)
 	{
-		return Ptr<typename function_binding::Binding<T>::Currier>(new typename function_binding::Binding<T>::Currier(function));
+		return typename function_binding::Binding<T>::Currier(function);
 	}
+ 
 	namespace function_combining
 	{
 		template<typename A, typename B, typename C>
 		class Combining
 		{
 		};
-		
  
 /***********************************************************************
 vl::function_combining::Combining<R1(), R2(), R(R1,R2)>
@@ -7238,7 +6052,7 @@ vl::function_combining::Combining<R1(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9), R2(T0,T1,T2
 	Func<typename function_combining::Combining<F1, F2, C>::FinalFunctionType>
 	Combine(Func<C> converter, Func<F1> function1, Func<F2> function2)
 	{
-		return Ptr<function_combining::Combining<F1, F2, C>>(new function_combining::Combining<F1, F2, C>(function1, function2, converter));
+		return function_combining::Combining<F1, F2, C>(function1, function2, converter);
 	}
 	template<typename T>
 	Func<Func<T>(Func<T>,Func<T>)> Combiner(const Func<typename Func<T>::ResultType(typename Func<T>::ResultType,typename Func<T>::ResultType)>& converter)

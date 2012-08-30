@@ -251,7 +251,11 @@ WindowsImageService
 			{
 				IWICImagingFactory* factory=0;
 				HRESULT hr = CoCreateInstance(
+#if defined(WINCODEC_SDK_VERSION2)
+					CLSID_WICImagingFactory1,
+#else
 					CLSID_WICImagingFactory,
+#endif
 					NULL,
 					CLSCTX_INPROC_SERVER,
 					IID_IWICImagingFactory,
