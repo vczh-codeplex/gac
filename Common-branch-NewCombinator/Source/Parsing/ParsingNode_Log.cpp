@@ -176,6 +176,13 @@ namespace vl
 
 				void VisitOther(ParsingNode* node)
 				{
+					if(referenceNode)
+					{
+						if(!IsNodeContained(node, referenceNode))
+						{
+							return;
+						}
+					}
 					writer.WriteString(currentRule->name);
 					writer.WriteString(L" ::= ");
 					RuleFragmentLogger ruleFragmentLogger(writer, logAction, referenceNode, referenceBefore);
@@ -215,20 +222,23 @@ namespace vl
 				}
 			};
 
-			void LogGrammarFromRule(const RuleNode* rootRule, bool logAction, ParsingNode* referenceNode, bool referenceBefore, stream::TextWriter& writer)
+			void LogGrammarFromRule(const RuleNode* rootRule, bool logAction, stream::TextWriter& writer)
 			{
 				List<const RuleNode*> rules;
-				SearchRulesFromRule(rootRule, rules, referenceNode);
+				SearchRulesFromRule(rootRule, rules);
 
-				RuleLogger ruleLogger(writer, logAction, referenceNode, referenceBefore);
+				RuleLogger ruleLogger(writer, logAction, 0, false);
 				FOREACH(const RuleNode*, rule, rules.Wrap())
 				{
 					ruleLogger.Log(rule);
-					if(!referenceNode)
-					{
-						writer.WriteLine(L"");
-					}
+					writer.WriteLine(L"");
 				}
+			}
+
+			void LogGrammarFromReferencedRule(const RuleNode* rootRule, bool logAction, ParsingNode* referenceNode, bool referenceBefore, stream::TextWriter& writer)
+			{
+				RuleLogger ruleLogger(writer, logAction, referenceNode, referenceBefore);
+				ruleLogger.Log(rootRule);
 			}
 		}
 	}
