@@ -217,8 +217,10 @@ namespace vl
 
 		namespace parsing_internal
 		{
-			extern void SearchRulesFromRule(const RuleNode* rootRule, collections::List<const RuleNode*>& rules, ParsingNode* referenceNode);
-			extern void LogGrammarFromRule(const RuleNode* rootRule, bool logAction, ParsingNode* referenceNode, bool referenceBefore, stream::TextWriter& writer);
+			extern bool IsNodeContained(ParsingNode* containerNode, ParsingNode* referenceNode);
+			extern void SearchRulesFromRule(const RuleNode* rootRule, collections::List<const RuleNode*>& rules);
+			extern void LogGrammarFromRule(const RuleNode* rootRule, bool logAction, stream::TextWriter& writer);
+			extern void LogGrammarFromReferencedRule(const RuleNode* rootRule, bool logAction, ParsingNode* referenceNode, bool referenceBefore, stream::TextWriter& writer);
 			extern void CalculateFirstSet(const RuleNode* rootRule, collections::List<vint>& tokens);
 		}
 	}

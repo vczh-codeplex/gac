@@ -257,7 +257,7 @@ CreateAutomaton
 			void CreateAutomaton(const RuleNode* rootRule, ParsingNodeAutomaton& automaton)
 			{
 				List<const RuleNode*> rules;
-				SearchRulesFromRule(rootRule, rules, 0);
+				SearchRulesFromRule(rootRule, rules);
 
 				RuleAutomatonBuilder ruleAutomatonBuilder(automaton);
 				FOREACH(const RuleNode*, rule, rules.Wrap())
@@ -295,7 +295,7 @@ LogAutomaton
 				}
 				else
 				{
-					LogGrammarFromRule(state->rule, false, state->referenceNode, state->referencePosition==ParsingNodeState::Before, writer);
+					LogGrammarFromReferencedRule(state->rule, false, state->referenceNode, state->referencePosition==ParsingNodeState::Before, writer);
 				}
 			}
 
@@ -322,7 +322,7 @@ LogAutomaton
 							break;
 						}
 						writer.WriteString(L" => ");
-						LogParsingNodeStateForAutomaton(transition->stateIn, writer);
+						LogParsingNodeStateForAutomaton(transition->stateOut, writer);
 						FOREACH(Ptr<ParsingNodeAction>, action, transition->actions.Wrap())
 						{
 							writer.WriteString(L"        ");

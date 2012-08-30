@@ -62,46 +62,46 @@ namespace vl
 				}
 			};
 			
-			class RuleReferenceNodeChecker : public Object, public IParsingNodeVisitor
+			class ContaineredNodeChecker : public Object, public IParsingNodeVisitor
 			{
 			protected:
 				ParsingNode*					referenceNode;
 				bool							found;
 
-				void Search(Ptr<ParsingNode> node)
+				void Search(ParsingNode* node)
 				{
 					found|=node==referenceNode;
 					node->Accept(this);
 				}
 			public:
-				RuleReferenceNodeChecker(ParsingNode* _referenceNode)
+				ContaineredNodeChecker(ParsingNode* _referenceNode)
 					:referenceNode(_referenceNode)
 					,found(false)
 				{
 				}
 
-				bool Check(const RuleNode* rootRule)
+				bool Check(ParsingNode* containerNode)
 				{
 					found=false;
-					Search(rootRule->node);
+					Search(containerNode);
 					return found;
 				}
 
 				void Visit(parsing_internal::_Seq* node)override
 				{
-					Search(node->first);
-					Search(node->second);
+					Search(node->first.Obj());
+					Search(node->second.Obj());
 				}
 
 				void Visit(parsing_internal::_Alt* node)override
 				{
-					Search(node->first);
-					Search(node->second);
+					Search(node->first.Obj());
+					Search(node->second.Obj());
 				}
 
 				void Visit(parsing_internal::_Loop* node)override
 				{
-					Search(node->node);
+					Search(node->node.Obj());
 				}
 
 				void Visit(parsing_internal::_Token* node)override
@@ -114,26 +114,21 @@ namespace vl
 
 				void Visit(parsing_internal::_Action* node)override
 				{
-					Search(node->node);
+					Search(node->node.Obj());
 				}
 			};
 
-			void SearchRulesFromRule(const RuleNode* rootRule, collections::List<const RuleNode*>& rules, ParsingNode* referenceNode)
+			bool IsNodeContained(ParsingNode* containerNode, ParsingNode* referenceNode)
+			{
+				ContaineredNodeChecker checker(referenceNode);
+				return checker.Check(containerNode);
+			}
+
+			void SearchRulesFromRule(const RuleNode* rootRule, collections::List<const RuleNode*>& rules)
 			{
 				RuleCollector ruleCollector;
 				ruleCollector.Collect(rootRule);
 				ruleCollector.Copy(rules.Wrap());
-				if(referenceNode)
-				{
-					RuleReferenceNodeChecker checker(referenceNode);
-					for(vint i=rules.Count()-1;i>=0;i--)
-					{
-						if(!checker.Check(rules[i]))
-						{
-							rules.RemoveAt(i);
-						}
-					}
-				}
 			}
 		}
 	}
