@@ -19,14 +19,14 @@ GrammarBase
 			if(logWriter)
 			{
 				logWriter->WriteLine(L"==================================[SIMPLIFIED GRAMMAR]");
-				LogGrammarFromRule(rootRule, false, *logWriter);
+				LogGrammarFromRule(rootRule, false, 0, false, *logWriter);
 
 				logWriter->WriteLine(L"==================================[FULL GRAMMAR]");
-				LogGrammarFromRule(rootRule, true, *logWriter);
+				LogGrammarFromRule(rootRule, true, 0, false, *logWriter);
 
 				logWriter->WriteLine(L"==================================[FIRST SET]");
 				List<const RuleNode*> rules;
-				SearchRulesFromRule(rootRule, rules);
+				SearchRulesFromRule(rootRule, rules, 0);
 				FOREACH(const RuleNode*, rule, rules.Wrap())
 				{
 					List<vint> tokens;

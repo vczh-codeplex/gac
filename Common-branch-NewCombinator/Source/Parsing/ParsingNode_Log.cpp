@@ -17,18 +17,40 @@ namespace vl
 			protected:
 				stream::TextWriter&				writer;
 				bool							logAction;
+				ParsingNode*					referenceNode;
+				bool							referenceBefore;
 				vint							level;
+
+				void BuildReferenceBefore(ParsingNode* currentNode)
+				{
+					if(currentNode==referenceNode && referenceBefore)
+					{
+						writer.WriteString(L"$ ");
+					}
+				}
+
+				void BuildReferenceAfter(ParsingNode* currentNode)
+				{
+					if(currentNode==referenceNode && !referenceBefore)
+					{
+						writer.WriteString(L" $");
+					}
+				}
 			public:
-				RuleFragmentLogger(stream::TextWriter& _writer, bool _logAction)
+				RuleFragmentLogger(stream::TextWriter& _writer, bool _logAction, ParsingNode* _referenceNode, bool _referenceBefore)
 					:writer(_writer)
 					,logAction(_logAction)
+					,referenceNode(_referenceNode)
+					,referenceBefore(_referenceBefore)
 					,level(LevelAlt)
 				{
 				}
 
 				void Log(ParsingNode* node)
 				{
+					BuildReferenceBefore(node);
 					node->Accept(this);
+					BuildReferenceAfter(node);
 				}
 
 				void Visit(parsing_internal::_Seq* node)override
@@ -133,11 +155,15 @@ namespace vl
 			protected:
 				stream::TextWriter&				writer;
 				bool							logAction;
+				ParsingNode*					referenceNode;
+				bool							referenceBefore;
 				const RuleNode*					currentRule;
 			public:
-				RuleLogger(stream::TextWriter& _writer, bool _logAction)
+				RuleLogger(stream::TextWriter& _writer, bool _logAction, ParsingNode* _referenceNode, bool _referenceBefore)
 					:writer(_writer)
 					,logAction(_logAction)
+					,referenceNode(_referenceNode)
+					,referenceBefore(_referenceBefore)
 					,currentRule(0)
 				{
 				}
@@ -152,8 +178,8 @@ namespace vl
 				{
 					writer.WriteString(currentRule->name);
 					writer.WriteString(L" ::= ");
-					RuleFragmentLogger ruleFragmentLogger(writer, logAction);
-					node->Accept(&ruleFragmentLogger);
+					RuleFragmentLogger ruleFragmentLogger(writer, logAction, referenceNode, referenceBefore);
+					ruleFragmentLogger.Log(node);
 					writer.WriteLine(L"");
 				}
 
@@ -189,16 +215,19 @@ namespace vl
 				}
 			};
 
-			void LogGrammarFromRule(const RuleNode* rootRule, bool logAction, stream::TextWriter& writer)
+			void LogGrammarFromRule(const RuleNode* rootRule, bool logAction, ParsingNode* referenceNode, bool referenceBefore, stream::TextWriter& writer)
 			{
 				List<const RuleNode*> rules;
-				SearchRulesFromRule(rootRule, rules);
+				SearchRulesFromRule(rootRule, rules, referenceNode);
 
-				RuleLogger ruleLogger(writer, logAction);
+				RuleLogger ruleLogger(writer, logAction, referenceNode, referenceBefore);
 				FOREACH(const RuleNode*, rule, rules.Wrap())
 				{
 					ruleLogger.Log(rule);
-					writer.WriteLine(L"");
+					if(!referenceNode)
+					{
+						writer.WriteLine(L"");
+					}
 				}
 			}
 		}

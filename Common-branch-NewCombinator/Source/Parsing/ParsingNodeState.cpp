@@ -257,7 +257,7 @@ CreateAutomaton
 			void CreateAutomaton(const RuleNode* rootRule, ParsingNodeAutomaton& automaton)
 			{
 				List<const RuleNode*> rules;
-				SearchRulesFromRule(rootRule, rules);
+				SearchRulesFromRule(rootRule, rules, 0);
 
 				RuleAutomatonBuilder ruleAutomatonBuilder(automaton);
 				FOREACH(const RuleNode*, rule, rules.Wrap())
@@ -278,8 +278,69 @@ CompressAutomaton
 LogAutomaton
 ***********************************************************************/
 
+			void LogParsingNodeStateForAutomaton(ParsingNodeState* state, stream::TextWriter& writer)
+			{
+				if(state->referenceNode==state->rule->node.Obj())
+				{
+					if(state->referencePosition==ParsingNodeState::Before)
+					{
+						writer.WriteString(L"$ ");
+					}
+					writer.WriteString(state->rule->name);
+					if(state->referencePosition==ParsingNodeState::After)
+					{
+						writer.WriteString(L" $");
+					}
+					writer.WriteLine(L"");
+				}
+				else
+				{
+					LogGrammarFromRule(state->rule, false, state->referenceNode, state->referencePosition==ParsingNodeState::Before, writer);
+				}
+			}
+
 			void LogAutomaton(ParsingNodeAutomaton& automaton, stream::TextWriter& writer)
 			{
+				FOREACH(Ptr<ParsingNodeState>, state, automaton.states.Wrap())
+				{
+					LogParsingNodeStateForAutomaton(state.Obj(), writer);
+					FOREACH(ParsingNodeTransition*, transition, state->transitionOuts.Wrap())
+					{
+						writer.WriteString(L"    ");
+						switch(transition->transitionCondition)
+						{
+						case ParsingNodeTransition::Rule:
+							writer.WriteString(L"<RULE>");
+							writer.WriteString(transition->transitionRule->rule->name);
+							break;
+						case ParsingNodeTransition::Token:
+							writer.WriteString(L"<TOKEN>");
+							writer.WriteString(transition->transitionToken->name);
+							break;
+						case ParsingNodeTransition::Epsilon:
+							writer.WriteString(L"<EPSILON>");
+							break;
+						}
+						writer.WriteString(L" => ");
+						LogParsingNodeStateForAutomaton(transition->stateIn, writer);
+						FOREACH(Ptr<ParsingNodeAction>, action, transition->actions.Wrap())
+						{
+							writer.WriteString(L"        ");
+							switch(action->referencePosition)
+							{
+							case ParsingNodeAction::Before:
+								writer.WriteString(L"<BEFORE>");
+								break;
+							case ParsingNodeAction::After:
+								writer.WriteString(L"<AFTER>");
+								break;
+							}
+							writer.WriteString(action->action->GetName());
+							writer.WriteLine(L"");
+						}
+					}
+					writer.WriteLine(L"");
+				}
 			}
 		}
 	}
