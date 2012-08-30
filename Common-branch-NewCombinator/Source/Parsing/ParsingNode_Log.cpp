@@ -59,16 +59,16 @@ namespace vl
 					level=LevelSeq;
 					if(oldLevel<=LevelSeq)
 					{
-						node->first->Accept(this);
+						Log(node->first.Obj());
 						writer.WriteString(L" ");
-						node->second->Accept(this);
+						Log(node->second.Obj());
 					}
 					else
 					{
 						writer.WriteString(L"(");
-						node->first->Accept(this);
+						Log(node->first.Obj());
 						writer.WriteString(L" ");
-						node->second->Accept(this);
+						Log(node->second.Obj());
 						writer.WriteString(L")");
 					}
 					level=oldLevel;
@@ -80,16 +80,16 @@ namespace vl
 					level=LevelAlt;
 					if(oldLevel<=LevelAlt)
 					{
-						node->first->Accept(this);
+						Log(node->first.Obj());
 						writer.WriteString(L" | ");
-						node->second->Accept(this);
+						Log(node->second.Obj());
 					}
 					else
 					{
 						writer.WriteString(L"(");
-						node->first->Accept(this);
+						Log(node->first.Obj());
 						writer.WriteString(L" | ");
-						node->second->Accept(this);
+						Log(node->second.Obj());
 						writer.WriteString(L")");
 					}
 					level=oldLevel;
@@ -101,13 +101,13 @@ namespace vl
 					level=LevelLoop;
 					if(oldLevel<=LevelLoop)
 					{
-						node->node->Accept(this);
+						Log(node->node.Obj());
 						writer.WriteString(L"*");
 					}
 					else
 					{
 						writer.WriteString(L"(");
-						node->node->Accept(this);
+						Log(node->node.Obj());
 						writer.WriteString(L")*");
 					}
 					level=oldLevel;
@@ -131,12 +131,12 @@ namespace vl
 						level=LevelLoop;
 						if(oldLevel<=LevelLoop)
 						{
-							node->node->Accept(this);
+							Log(node->node.Obj());
 						}
 						else
 						{
 							writer.WriteString(L"(");
-							node->node->Accept(this);
+							Log(node->node.Obj());
 							writer.WriteString(L")");
 						}
 						writer.WriteString(L"#");
@@ -145,7 +145,7 @@ namespace vl
 					}
 					else
 					{
-						node->node->Accept(this);
+						Log(node->node.Obj());
 					}
 				}
 			};
