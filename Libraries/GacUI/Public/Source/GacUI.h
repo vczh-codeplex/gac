@@ -4186,7 +4186,13 @@ Window
 			protected:
 				virtual void							MouseClickedOnOtherWindow(GuiWindow* window);
 			public:
-				GuiWindow(GuiControl::IStyleController* _styleController);
+				class IStyleController : virtual public GuiControl::IStyleController, public Description<IStyleController>
+				{
+				public:
+					virtual void						InitializeNativeWindowProperties(GuiWindow* window)=0;
+				};
+			public:
+				GuiWindow(IStyleController* _styleController);
 				~GuiWindow();
 
 				compositions::GuiNotifyEvent			ClipboardUpdated;
@@ -4202,7 +4208,7 @@ Window
 				void									PopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									PopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
-				GuiPopup(GuiControl::IStyleController* _styleController);
+				GuiPopup(IStyleController* _styleController);
 				~GuiPopup();
 
 				bool									IsClippedByScreen(Point location);
@@ -6227,7 +6233,7 @@ ComboBox Base
 					virtual void							OnPopupOpened()=0;
 					virtual void							OnPopupClosed()=0;
 					virtual void							OnItemSelected()=0;
-					virtual GuiControl::IStyleController*	CreatePopupStyle()=0;
+					virtual GuiWindow::IStyleController*	CreatePopupStyle()=0;
 				};
 			protected:
 
@@ -7245,7 +7251,7 @@ namespace vl
 			class ITheme : public IDescriptable, public Description<ITheme>
 			{
 			public:
-				virtual controls::GuiControl::IStyleController*								CreateWindowStyle()=0;
+				virtual controls::GuiWindow::IStyleController*								CreateWindowStyle()=0;
 				virtual controls::GuiLabel::IStyleController*								CreateLabelStyle()=0;
 				virtual controls::GuiControl::IStyleController*								CreateGroupBoxStyle()=0;
 				virtual controls::GuiTab::IStyleController*									CreateTabStyle()=0;
@@ -7825,11 +7831,21 @@ Container
 				void										SetVisuallyEnabled(bool value)override;
 			};
 
-			class Win7WindowStyle : public Win7EmptyStyle, public Description<Win7WindowStyle>
+			class Win7WindowStyle : public virtual controls::GuiWindow::IStyleController, public Description<Win7WindowStyle>
 			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
 			public:
 				Win7WindowStyle();
 				~Win7WindowStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+				void										InitializeNativeWindowProperties(controls::GuiWindow* window)override;
 			};
 
 			class Win7LabelStyle : public Object, public virtual controls::GuiLabel::IStyleController, public Description<Win7LabelStyle>
@@ -8016,7 +8032,7 @@ namespace vl
 Menu Container
 ***********************************************************************/
 			
-			class Win7MenuStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuStyle>
+			class Win7MenuStyle : public Object, public virtual controls::GuiWindow::IStyleController, public Description<Win7MenuStyle>
 			{
 			protected:
 				compositions::GuiBoundsComposition*			boundsComposition;
@@ -8031,6 +8047,7 @@ Menu Container
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
+				void										InitializeNativeWindowProperties(controls::GuiWindow* window)override;
 			};
 			
 			class Win7MenuBarStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuBarStyle>
@@ -8698,7 +8715,7 @@ ComboBox
 				void											OnPopupOpened()override;
 				void											OnPopupClosed()override;
 				void											OnItemSelected()override;
-				controls::GuiControl::IStyleController*			CreatePopupStyle()override;
+				controls::GuiWindow::IStyleController*			CreatePopupStyle()override;
 			};
 #pragma warning(pop)
 
@@ -8798,7 +8815,7 @@ Theme
 				Win7Theme();
 				~Win7Theme();
 
-				controls::GuiControl::IStyleController*								CreateWindowStyle()override;
+				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				controls::GuiTab::IStyleController*									CreateTabStyle()override;

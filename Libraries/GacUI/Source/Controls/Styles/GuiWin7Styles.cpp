@@ -24,7 +24,7 @@ Win7Theme
 			{
 			}
 
-			controls::GuiControl::IStyleController* Win7Theme::CreateWindowStyle()
+			controls::GuiWindow::IStyleController* Win7Theme::CreateWindowStyle()
 			{
 				return new Win7WindowStyle;
 			}

@@ -112,7 +112,7 @@ GuiMenu
 				}
 			}
 
-			GuiMenu::GuiMenu(GuiControl::IStyleController* _styleController, GuiControl* _owner)
+			GuiMenu::GuiMenu(IStyleController* _styleController, GuiControl* _owner)
 				:GuiPopup(_styleController)
 				,owner(_owner)
 				,parentMenuService(0)
