@@ -606,7 +606,7 @@ Win7DropDownComboBoxStyle
 			{
 			}
 
-			controls::GuiControl::IStyleController* Win7DropDownComboBoxStyle::CreatePopupStyle()
+			controls::GuiWindow::IStyleController* Win7DropDownComboBoxStyle::CreatePopupStyle()
 			{
 				return new Win7WindowStyle;
 			}

@@ -56,7 +56,7 @@ ComboBox Base
 					virtual void							OnItemSelected()=0;
 					/// <summary>Create a style controller for the popup.</summary>
 					/// <returns>The created style controller for the popup.</returns>
-					virtual GuiControl::IStyleController*	CreatePopupStyle()=0;
+					virtual GuiWindow::IStyleController*	CreatePopupStyle()=0;
 				};
 			protected:
 

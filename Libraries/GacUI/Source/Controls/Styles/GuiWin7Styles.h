@@ -37,7 +37,7 @@ Theme
 				Win7Theme();
 				~Win7Theme();
 
-				controls::GuiControl::IStyleController*								CreateWindowStyle()override;
+				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				controls::GuiTab::IStyleController*									CreateTabStyle()override;

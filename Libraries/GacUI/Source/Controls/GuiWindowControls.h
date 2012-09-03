@@ -264,9 +264,18 @@ Window
 			protected:
 				virtual void							MouseClickedOnOtherWindow(GuiWindow* window);
 			public:
+				/// <summary>Style controller interface for <see cref="GuiWindow"/>.</summary>
+				class IStyleController : virtual public GuiControl::IStyleController, public Description<IStyleController>
+				{
+				public:
+					/// <summary>Initialize visual properties of the window. This callback is for some window template that don't need the standard window border.</summary>
+					/// <param name="window">The window to set visual properties.</param>
+					virtual void						InitializeNativeWindowProperties(GuiWindow* window)=0;
+				};
+			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
-				GuiWindow(GuiControl::IStyleController* _styleController);
+				GuiWindow(IStyleController* _styleController);
 				~GuiWindow();
 
 				/// <summary>Clipboard updated event.</summary>
@@ -289,7 +298,7 @@ Window
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
-				GuiPopup(GuiControl::IStyleController* _styleController);
+				GuiPopup(IStyleController* _styleController);
 				~GuiPopup();
 
 				/// <summary>Test will the whole popup window be in the screen if the popup's left-top position is set to a specified value.</summary>

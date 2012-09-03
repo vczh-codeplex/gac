@@ -72,6 +72,10 @@ Win7MenuStyle
 			{
 			}
 
+			void Win7MenuStyle::InitializeNativeWindowProperties(controls::GuiWindow* window)
+			{
+			}
+
 /***********************************************************************
 Win7MenuBarStyle
 ***********************************************************************/

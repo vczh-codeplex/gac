@@ -33,7 +33,7 @@ namespace vl
 			public:
 				/// <summary>Create a style for window.</summary>
 				/// <returns>The created style.</returns>
-				virtual controls::GuiControl::IStyleController*								CreateWindowStyle()=0;
+				virtual controls::GuiWindow::IStyleController*								CreateWindowStyle()=0;
 				/// <summary>Create a style for label.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiLabel::IStyleController*								CreateLabelStyle()=0;

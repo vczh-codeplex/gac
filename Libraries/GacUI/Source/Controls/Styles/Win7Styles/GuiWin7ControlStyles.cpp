@@ -59,11 +59,45 @@ Win7WindowStyle
 ***********************************************************************/
 
 			Win7WindowStyle::Win7WindowStyle()
-				:Win7EmptyStyle(Win7GetSystemWindowColor())
 			{
+				GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+				element->SetColor(Win7GetSystemWindowColor());
+				
+				boundsComposition=new GuiBoundsComposition;
+				boundsComposition->SetOwnedElement(element);
 			}
 
 			Win7WindowStyle::~Win7WindowStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win7WindowStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win7WindowStyle::GetContainerComposition()
+			{
+				return boundsComposition;
+			}
+
+			void Win7WindowStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win7WindowStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win7WindowStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win7WindowStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+			void Win7WindowStyle::InitializeNativeWindowProperties(controls::GuiWindow* window)
 			{
 			}
 

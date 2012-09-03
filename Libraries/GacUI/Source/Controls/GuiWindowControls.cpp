@@ -596,13 +596,14 @@ GuiWindow
 			{
 			}
 
-			GuiWindow::GuiWindow(GuiControl::IStyleController* _styleController)
+			GuiWindow::GuiWindow(IStyleController* _styleController)
 				:GuiControlHost(_styleController)
 			{
 				ClipboardUpdated.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
 				INativeWindow* window=GetCurrentController()->WindowService()->CreateNativeWindow();
 				SetNativeWindow(window);
 				GetApplication()->RegisterWindow(this);
+				_styleController->InitializeNativeWindowProperties(this);
 			}
 
 			GuiWindow::~GuiWindow()
@@ -654,7 +655,7 @@ GuiPopup
 				GetApplication()->RegisterPopupClosed(this);
 			}
 
-			GuiPopup::GuiPopup(GuiControl::IStyleController* _styleController)
+			GuiPopup::GuiPopup(IStyleController* _styleController)
 				:GuiWindow(_styleController)
 			{
 				SetMinimizedBox(false);

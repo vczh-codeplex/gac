@@ -7,6 +7,49 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 }
 
 /***********************************************************************
+CustomTemplateWindowStyle
+***********************************************************************/
+
+class CustomTemplateWindowStyle : public GuiWindow::IStyleController
+{
+public:
+	GuiBoundsComposition* GetBoundsComposition()override
+	{
+		return 0;
+	}
+
+	GuiGraphicsComposition* GetContainerComposition()override
+	{
+		return 0;
+	}
+
+	void SetFocusableComposition(compositions::GuiGraphicsComposition* value)override
+	{
+	}
+
+	void SetText(const WString& value)override
+	{
+	}
+
+	void SetFont(const FontProperties& value)override
+	{
+	}
+
+	void SetVisuallyEnabled(bool value)override
+	{
+	}
+
+	void InitializeNativeWindowProperties(GuiWindow* window)override
+	{
+		// remove all native windows features
+		window->SetMinimizedBox(false);
+		window->SetMaximizedBox(false);
+		window->SetTitleBar(false);
+		window->SetSizeBox(false);
+	}
+};
+
+/***********************************************************************
 CustomTemplateWindow
 ***********************************************************************/
 

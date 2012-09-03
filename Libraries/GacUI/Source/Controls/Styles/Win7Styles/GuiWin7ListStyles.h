@@ -176,7 +176,7 @@ ComboBox
 				void											OnPopupOpened()override;
 				void											OnPopupClosed()override;
 				void											OnItemSelected()override;
-				controls::GuiControl::IStyleController*			CreatePopupStyle()override;
+				controls::GuiWindow::IStyleController*			CreatePopupStyle()override;
 			};
 #pragma warning(pop)
 

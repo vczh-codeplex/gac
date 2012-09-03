@@ -2186,7 +2186,7 @@ GuiMenu
 				}
 			}
 
-			GuiMenu::GuiMenu(GuiControl::IStyleController* _styleController, GuiControl* _owner)
+			GuiMenu::GuiMenu(IStyleController* _styleController, GuiControl* _owner)
 				:GuiPopup(_styleController)
 				,owner(_owner)
 				,parentMenuService(0)
@@ -10116,13 +10116,14 @@ GuiWindow
 			{
 			}
 
-			GuiWindow::GuiWindow(GuiControl::IStyleController* _styleController)
+			GuiWindow::GuiWindow(IStyleController* _styleController)
 				:GuiControlHost(_styleController)
 			{
 				ClipboardUpdated.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
 				INativeWindow* window=GetCurrentController()->WindowService()->CreateNativeWindow();
 				SetNativeWindow(window);
 				GetApplication()->RegisterWindow(this);
+				_styleController->InitializeNativeWindowProperties(this);
 			}
 
 			GuiWindow::~GuiWindow()
@@ -10174,7 +10175,7 @@ GuiPopup
 				GetApplication()->RegisterPopupClosed(this);
 			}
 
-			GuiPopup::GuiPopup(GuiControl::IStyleController* _styleController)
+			GuiPopup::GuiPopup(IStyleController* _styleController)
 				:GuiWindow(_styleController)
 			{
 				SetMinimizedBox(false);
@@ -11197,7 +11198,7 @@ Win7Theme
 			{
 			}
 
-			controls::GuiControl::IStyleController* Win7Theme::CreateWindowStyle()
+			controls::GuiWindow::IStyleController* Win7Theme::CreateWindowStyle()
 			{
 				return new Win7WindowStyle;
 			}
@@ -11699,11 +11700,45 @@ Win7WindowStyle
 ***********************************************************************/
 
 			Win7WindowStyle::Win7WindowStyle()
-				:Win7EmptyStyle(Win7GetSystemWindowColor())
 			{
+				GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+				element->SetColor(Win7GetSystemWindowColor());
+				
+				boundsComposition=new GuiBoundsComposition;
+				boundsComposition->SetOwnedElement(element);
 			}
 
 			Win7WindowStyle::~Win7WindowStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win7WindowStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win7WindowStyle::GetContainerComposition()
+			{
+				return boundsComposition;
+			}
+
+			void Win7WindowStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win7WindowStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win7WindowStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win7WindowStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+			void Win7WindowStyle::InitializeNativeWindowProperties(controls::GuiWindow* window)
 			{
 			}
 
@@ -12500,7 +12535,7 @@ Win7DropDownComboBoxStyle
 			{
 			}
 
-			controls::GuiControl::IStyleController* Win7DropDownComboBoxStyle::CreatePopupStyle()
+			controls::GuiWindow::IStyleController* Win7DropDownComboBoxStyle::CreatePopupStyle()
 			{
 				return new Win7WindowStyle;
 			}
@@ -12701,6 +12736,10 @@ Win7MenuStyle
 			}
 
 			void Win7MenuStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+			void Win7MenuStyle::InitializeNativeWindowProperties(controls::GuiWindow* window)
 			{
 			}
 
