@@ -135,6 +135,7 @@ public:
 		// remove all native windows features
 		if(window->GetNativeWindow())
 		{
+			window->GetNativeWindow()->EnableCustomFrameMode();
 			window->GetNativeWindow()->SetMinimizedBox(false);
 			window->GetNativeWindow()->SetMaximizedBox(false);
 			window->GetNativeWindow()->SetTitleBar(false);

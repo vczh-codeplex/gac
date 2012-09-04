@@ -11782,6 +11782,10 @@ Native Window
 			virtual bool				GetAlwaysPassFocusToParent()=0;
 			virtual void				SetAlwaysPassFocusToParent(bool value)=0;
 
+			virtual void				EnableCustomFrameMode()=0;
+			virtual void				DisableCustomFrameMode()=0;
+			virtual bool				IsCustomFrameModeEnabled()=0;
+
 			virtual void				Show()=0;
 			virtual void				ShowDeactivated()=0;
 			virtual void				ShowRestored()=0;

@@ -371,6 +371,20 @@ Native Window
 			virtual void				SetAlwaysPassFocusToParent(bool value)=0;
 
 			/// <summary>
+			/// Enable the window customized frame mode.
+			/// </summary>
+			virtual void				EnableCustomFrameMode()=0;
+			/// <summary>
+			/// Disable the window customized frame mode.
+			/// </summary>
+			virtual void				DisableCustomFrameMode()=0;
+			/// <summary>
+			/// Test is the window customized frame mode enabled.
+			/// </summary>
+			/// <returns>Returns true if the window customized frame mode is enabled.</returns>
+			virtual bool				IsCustomFrameModeEnabled()=0;
+
+			/// <summary>
 			/// Show the window.
 			/// </summary>
 			virtual void				Show()=0;

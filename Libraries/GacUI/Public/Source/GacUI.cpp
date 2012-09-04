@@ -28355,10 +28355,6 @@ WindowsForm
 									listeners[i]->MouseMoving(info);
 								}
 							}
-							if(GetCursor()!=cursor->GetCursorHandle())
-							{
-								SetCursor(cursor->GetCursorHandle());
-							}
 						}
 						break;
 					case WM_MOUSELEAVE:
@@ -28435,6 +28431,80 @@ WindowsForm
 					case WM_IME_STARTCOMPOSITION:
 						UpdateCompositionForContent();
 						break;
+					case WM_NCLBUTTONDOWN:
+						if(customFrameMode)
+						{
+							DWORD hitTestResult=LOWORD(wParam);
+							switch(hitTestResult)
+							{
+							case HTTOP:
+								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_TOP, lParam);
+								break;
+							case HTBOTTOM:
+								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_BOTTOM, lParam);
+								break;
+							case HTLEFT:
+								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_LEFT, lParam);
+								break;
+							case HTRIGHT:
+								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_RIGHT, lParam);
+								break;
+							case HTTOPLEFT:
+								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_TOPLEFT, lParam);
+								break;
+							case HTTOPRIGHT:
+								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_TOPRIGHT, lParam);
+								break;
+							case HTBOTTOMLEFT:
+								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_BOTTOMLEFT, lParam);
+								break;
+							case HTBOTTOMRIGHT:
+								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_BOTTOMRIGHT, lParam);
+								break;
+							}
+						}
+						break;
+					case WM_SETCURSOR:
+						{
+							HCURSOR cursorHandle=GetCursor();
+							DWORD hitTestResult=LOWORD(lParam);
+							if(hitTestResult==HTCLIENT)
+							{
+								cursorHandle=cursor->GetCursorHandle();
+							}
+							else if(customFrameMode)
+							{
+								switch(hitTestResult)
+								{
+								case HTTOP:
+								case HTBOTTOM:
+									cursorHandle=dynamic_cast<WindowsCursor*>(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::SizeNS))->GetCursorHandle();
+									break;
+								case HTLEFT:
+								case HTRIGHT:
+									cursorHandle=dynamic_cast<WindowsCursor*>(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::SizeWE))->GetCursorHandle();
+									break;
+								case HTTOPLEFT:
+								case HTBOTTOMRIGHT:
+									cursorHandle=dynamic_cast<WindowsCursor*>(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::SizeNWSE))->GetCursorHandle();
+									break;
+								case HTTOPRIGHT:
+								case HTBOTTOMLEFT:
+									cursorHandle=dynamic_cast<WindowsCursor*>(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::SizeNESW))->GetCursorHandle();
+									break;
+								case HTCLIENT:
+									break;
+								default:
+									cursorHandle=dynamic_cast<WindowsCursor*>(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Arrow))->GetCursorHandle();
+								}
+							}
+							if(GetCursor()!=cursorHandle)
+							{
+								SetCursor(cursorHandle);
+							}
+						}
+						result=TRUE;
+						return true;
 					}
 					if(IsWindow(hwnd)!=0)
 					{
@@ -28465,6 +28535,7 @@ WindowsForm
 				int									mouseLastY;
 				int									mouseHoving;
 				Interface*							graphicsHandler;
+				bool								customFrameMode;
 			public:
 				WindowsForm(HWND parent, WString className, HINSTANCE hInstance)
 					:cursor(0)
@@ -28474,6 +28545,7 @@ WindowsForm
 					,mouseLastY(-1)
 					,mouseHoving(false)
 					,graphicsHandler(0)
+					,customFrameMode(false)
 				{
 					DWORD exStyle=WS_EX_APPWINDOW | WS_EX_CONTROLPARENT;
 					DWORD style=WS_BORDER | WS_CAPTION | WS_SIZEBOX | WS_SYSMENU | WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
@@ -28642,6 +28714,21 @@ WindowsForm
 				void SetAlwaysPassFocusToParent(bool value)
 				{
 					alwaysPassFocusToParent=value;
+				}
+
+				void EnableCustomFrameMode()
+				{
+					customFrameMode=true;
+				}
+
+				void DisableCustomFrameMode()
+				{
+					customFrameMode=false;
+				}
+
+				bool IsCustomFrameModeEnabled()
+				{
+					return customFrameMode;
 				}
 
 				void Show()
