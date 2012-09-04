@@ -28000,7 +28000,7 @@ WindowsForm
 								case INativeWindowListener::BorderRightTop:
 									result=HTTOPRIGHT;
 									return true;
-								case INativeWindowListener::BorderLeftButtom:
+								case INativeWindowListener::BorderLeftBottom:
 									result=HTBOTTOMLEFT;
 									return true;
 								case INativeWindowListener::BorderRightBottom:

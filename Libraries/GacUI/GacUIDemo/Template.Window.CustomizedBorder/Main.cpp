@@ -12,15 +12,96 @@ CustomTemplateWindowStyle
 
 class CustomTemplateWindowStyle : public GuiWindow::IStyleController
 {
+protected:
+	GuiTableComposition*				boundsComposition;
+	GuiBoundsComposition*				titleComposition;
+	GuiSolidLabelElement*				titleElement;
+	GuiBoundsComposition*				containerComposition;
+
+	void AddBorderCell(int row, int column, int rowSpan, int columnSpan, INativeWindowListener::HitTestResult hitTestResult, Color borderColor)
+	{
+		GuiCellComposition* cell=new GuiCellComposition;
+		boundsComposition->AddChild(cell);
+		cell->SetSite(row, column, rowSpan, columnSpan);
+		cell->SetAssociatedHitTestResult(hitTestResult);
+
+		GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+		element->SetColor(borderColor);
+		cell->SetOwnedElement(element);
+	}
 public:
+	CustomTemplateWindowStyle()
+	{
+		Color borderColor(0, 122, 204);
+		Color backgroundColor(45, 45, 48);
+		Color clientColor(30, 30, 30);
+		Color titleColor(153, 153, 153);
+
+		boundsComposition=new GuiTableComposition;
+		boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+		boundsComposition->SetRowsAndColumns(4, 3);
+		boundsComposition->SetRowOption(0, GuiCellOption::AbsoluteOption(3));
+		boundsComposition->SetRowOption(1, GuiCellOption::MinSizeOption());
+		boundsComposition->SetRowOption(2, GuiCellOption::PercentageOption(1.0));
+		boundsComposition->SetRowOption(3, GuiCellOption::AbsoluteOption(3));
+		boundsComposition->SetColumnOption(0, GuiCellOption::AbsoluteOption(3));
+		boundsComposition->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
+		boundsComposition->SetColumnOption(2, GuiCellOption::AbsoluteOption(3));
+		{
+			GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+			element->SetColor(backgroundColor);
+			boundsComposition->SetOwnedElement(element);
+		}
+		AddBorderCell(0, 0, 1, 1, INativeWindowListener::BorderLeftTop, borderColor);
+		AddBorderCell(0, 2, 1, 1, INativeWindowListener::BorderRightTop, borderColor);
+		AddBorderCell(3, 0, 1, 1, INativeWindowListener::BorderLeftBottom, borderColor);
+		AddBorderCell(3, 2, 1, 1, INativeWindowListener::BorderRightBottom, borderColor);
+		AddBorderCell(1, 0, 2, 1, INativeWindowListener::BorderLeft, borderColor);
+		AddBorderCell(1, 2, 2, 1, INativeWindowListener::BorderRight, borderColor);
+		AddBorderCell(0, 1, 1, 1, INativeWindowListener::BorderTop, borderColor);
+		AddBorderCell(3, 1, 1, 1, INativeWindowListener::BorderBottom, borderColor);
+		{
+			GuiCellComposition* cell=new GuiCellComposition;
+			boundsComposition->AddChild(cell);
+			cell->SetSite(1, 1, 1, 1);
+			cell->SetAssociatedHitTestResult(INativeWindowListener::Title);
+
+			titleComposition=new GuiBoundsComposition;
+			titleComposition->SetAlignmentToParent(Margin(5, 5, 5, 5));
+			titleComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+			cell->AddChild(titleComposition);
+
+			titleElement=GuiSolidLabelElement::Create();
+			titleElement->SetColor(titleColor);
+			titleComposition->SetOwnedElement(titleElement);
+
+			FontProperties font=GetCurrentController()->ResourceService()->GetDefaultFont();
+			titleElement->SetFont(font);
+		}
+		{
+			GuiCellComposition* cell=new GuiCellComposition;
+			boundsComposition->AddChild(cell);
+			cell->SetSite(2, 1, 1, 1);
+			cell->SetAssociatedHitTestResult(INativeWindowListener::Client);
+
+			containerComposition=new GuiBoundsComposition;
+			containerComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			cell->AddChild(containerComposition);
+
+			GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+			element->SetColor(clientColor);
+			containerComposition->SetOwnedElement(element);
+		}
+	}
+
 	GuiBoundsComposition* GetBoundsComposition()override
 	{
-		return 0;
+		return boundsComposition;
 	}
 
 	GuiGraphicsComposition* GetContainerComposition()override
 	{
-		return 0;
+		return containerComposition;
 	}
 
 	void SetFocusableComposition(compositions::GuiGraphicsComposition* value)override
@@ -29,6 +110,8 @@ public:
 
 	void SetText(const WString& value)override
 	{
+		titleElement->SetText(value);
+		boundsComposition->ForceCalculateSizeImmediately();
 	}
 
 	void SetFont(const FontProperties& value)override
@@ -58,7 +141,7 @@ class CustomTemplateWindow : public GuiWindow
 private:
 public:
 	CustomTemplateWindow()
-		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+		:GuiWindow(new CustomTemplateWindowStyle)
 	{
 		this->SetText(L"Template.Window.CustomizedBorder");
 

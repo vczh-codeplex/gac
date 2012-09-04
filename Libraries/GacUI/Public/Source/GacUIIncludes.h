@@ -11873,7 +11873,7 @@ Native Window
 				BorderBottom,
 				BorderLeftTop,
 				BorderRightTop,
-				BorderLeftButtom,
+				BorderLeftBottom,
 				BorderRightBottom,
 				Title,
 				ButtonMinimum,
