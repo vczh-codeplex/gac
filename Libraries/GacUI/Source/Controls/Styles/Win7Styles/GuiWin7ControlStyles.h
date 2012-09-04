@@ -42,7 +42,7 @@ Container
 			};
 
 			/// <summary>Window style (Windows 7). Using the Windows 7 window background color to fill the whold control</summary>
-			class Win7WindowStyle : public virtual controls::GuiWindow::IStyleController, public Description<Win7WindowStyle>
+			class Win7WindowStyle : public virtual controls::GuiWindow::DefaultBehaviorStyleController, public Description<Win7WindowStyle>
 			{
 			protected:
 				compositions::GuiBoundsComposition*			boundsComposition;
@@ -57,7 +57,6 @@ Container
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
-				void										InitializeNativeWindowProperties(controls::GuiWindow* window)override;
 			};
 
 			/// <summary>Label style. A label contains a text, and the label will automatically resize to fit the text.</summary>

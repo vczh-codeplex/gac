@@ -23,7 +23,7 @@ Menu Container
 ***********************************************************************/
 			
 			/// <summary>Menu style (Windows 7). For the background of a popup menu.</summary>
-			class Win7MenuStyle : public Object, public virtual controls::GuiWindow::IStyleController, public Description<Win7MenuStyle>
+			class Win7MenuStyle : public Object, public virtual controls::GuiWindow::DefaultBehaviorStyleController, public Description<Win7MenuStyle>
 			{
 			protected:
 				compositions::GuiBoundsComposition*			boundsComposition;
@@ -39,7 +39,6 @@ Menu Container
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
-				void										InitializeNativeWindowProperties(controls::GuiWindow* window)override;
 			};
 			
 			/// <summary>Menu bar style (Windows 7). For the background of a menu bar.</summary>

@@ -97,10 +97,6 @@ Win7WindowStyle
 			{
 			}
 
-			void Win7WindowStyle::InitializeNativeWindowProperties(controls::GuiWindow* window)
-			{
-			}
-
 /***********************************************************************
 Win7LabelStyle
 ***********************************************************************/
