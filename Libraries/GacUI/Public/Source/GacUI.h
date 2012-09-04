@@ -4094,7 +4094,11 @@ Control Host
 				compositions::GuiGraphicsHost*			host;
 				collections::List<GuiComponent*>		components;
 
+				virtual void							OnNativeWindowChanged();
+				virtual void							OnVisualStatusChanged();
 			private:
+				
+				void									Moved()override;
 				void									Enabled()override;
 				void									Disabled()override;
 				void									GotFocus()override;
@@ -4135,19 +4139,6 @@ Control Host
 				void									SetShowInTaskBar(bool value);
 				bool									GetEnabledActivate();
 				void									SetEnabledActivate(bool value);
-				
-				bool									GetMaximizedBox();
-				void									SetMaximizedBox(bool visible);
-				bool									GetMinimizedBox();
-				void									SetMinimizedBox(bool visible);
-				bool									GetBorder();
-				void									SetBorder(bool visible);
-				bool									GetSizeBox();
-				void									SetSizeBox(bool visible);
-				bool									GetIconVisible();
-				void									SetIconVisible(bool visible);
-				bool									GetTitleBar();
-				void									SetTitleBar(bool visible);
 				bool									GetTopMost();
 				void									SetTopMost(bool topmost);
 
@@ -4183,14 +4174,55 @@ Window
 			class GuiWindow : public GuiControlHost, public Description<GuiWindow>
 			{
 				friend class GuiApplication;
-			protected:
-				virtual void							MouseClickedOnOtherWindow(GuiWindow* window);
 			public:
 				class IStyleController : virtual public GuiControl::IStyleController, public Description<IStyleController>
 				{
 				public:
-					virtual void						InitializeNativeWindowProperties(GuiWindow* window)=0;
+					virtual void						AttachWindow(GuiWindow* _window)=0;
+					virtual void						InitializeNativeWindowProperties()=0;
+					virtual bool						GetMaximizedBox()=0;
+					virtual void						SetMaximizedBox(bool visible)=0;
+					virtual bool						GetMinimizedBox()=0;
+					virtual void						SetMinimizedBox(bool visible)=0;
+					virtual bool						GetBorder()=0;
+					virtual void						SetBorder(bool visible)=0;
+					virtual bool						GetSizeBox()=0;
+					virtual void						SetSizeBox(bool visible)=0;
+					virtual bool						GetIconVisible()=0;
+					virtual void						SetIconVisible(bool visible)=0;
+					virtual bool						GetTitleBar()=0;
+					virtual void						SetTitleBar(bool visible)=0;
 				};
+				
+				class DefaultBehaviorStyleController : virtual public IStyleController
+				{
+				protected:
+					GuiWindow*							window;
+				public:
+					DefaultBehaviorStyleController();
+					~DefaultBehaviorStyleController();
+
+					void								AttachWindow(GuiWindow* _window)override;
+					void								InitializeNativeWindowProperties()override;
+					bool								GetMaximizedBox()override;
+					void								SetMaximizedBox(bool visible)override;
+					bool								GetMinimizedBox()override;
+					void								SetMinimizedBox(bool visible)override;
+					bool								GetBorder()override;
+					void								SetBorder(bool visible)override;
+					bool								GetSizeBox()override;
+					void								SetSizeBox(bool visible)override;
+					bool								GetIconVisible()override;
+					void								SetIconVisible(bool visible)override;
+					bool								GetTitleBar()override;
+					void								SetTitleBar(bool visible)override;
+				};
+			protected:
+				IStyleController*						styleController;
+
+				void									OnNativeWindowChanged()override;
+				void									OnVisualStatusChanged()override;
+				virtual void							MouseClickedOnOtherWindow(GuiWindow* window);
 			public:
 				GuiWindow(IStyleController* _styleController);
 				~GuiWindow();
@@ -4198,6 +4230,19 @@ Window
 				compositions::GuiNotifyEvent			ClipboardUpdated;
 
 				void									MoveToScreenCenter();
+				
+				bool									GetMaximizedBox();
+				void									SetMaximizedBox(bool visible);
+				bool									GetMinimizedBox();
+				void									SetMinimizedBox(bool visible);
+				bool									GetBorder();
+				void									SetBorder(bool visible);
+				bool									GetSizeBox();
+				void									SetSizeBox(bool visible);
+				bool									GetIconVisible();
+				void									SetIconVisible(bool visible);
+				bool									GetTitleBar();
+				void									SetTitleBar(bool visible);
 			};
 			
 			class GuiPopup : public GuiWindow, public Description<GuiPopup>
@@ -7831,7 +7876,7 @@ Container
 				void										SetVisuallyEnabled(bool value)override;
 			};
 
-			class Win7WindowStyle : public virtual controls::GuiWindow::IStyleController, public Description<Win7WindowStyle>
+			class Win7WindowStyle : public virtual controls::GuiWindow::DefaultBehaviorStyleController, public Description<Win7WindowStyle>
 			{
 			protected:
 				compositions::GuiBoundsComposition*			boundsComposition;
@@ -7845,7 +7890,6 @@ Container
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
-				void										InitializeNativeWindowProperties(controls::GuiWindow* window)override;
 			};
 
 			class Win7LabelStyle : public Object, public virtual controls::GuiLabel::IStyleController, public Description<Win7LabelStyle>
@@ -8032,7 +8076,7 @@ namespace vl
 Menu Container
 ***********************************************************************/
 			
-			class Win7MenuStyle : public Object, public virtual controls::GuiWindow::IStyleController, public Description<Win7MenuStyle>
+			class Win7MenuStyle : public Object, public virtual controls::GuiWindow::DefaultBehaviorStyleController, public Description<Win7MenuStyle>
 			{
 			protected:
 				compositions::GuiBoundsComposition*			boundsComposition;
@@ -8047,7 +8091,6 @@ Menu Container
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
-				void										InitializeNativeWindowProperties(controls::GuiWindow* window)override;
 			};
 			
 			class Win7MenuBarStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win7MenuBarStyle>

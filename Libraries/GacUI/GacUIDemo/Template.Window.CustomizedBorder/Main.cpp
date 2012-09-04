@@ -13,6 +13,7 @@ CustomTemplateWindowStyle
 class CustomTemplateWindowStyle : public GuiWindow::IStyleController
 {
 protected:
+	GuiWindow*							window;
 	GuiTableComposition*				boundsComposition;
 	GuiBoundsComposition*				titleComposition;
 	GuiSolidLabelElement*				titleElement;
@@ -27,6 +28,7 @@ protected:
 	}
 public:
 	CustomTemplateWindowStyle()
+		:window(0)
 	{
 		Color borderColor(0, 122, 204);
 		Color titleBackgroundColor(45, 45, 48);
@@ -123,13 +125,75 @@ public:
 	{
 	}
 
-	void InitializeNativeWindowProperties(GuiWindow* window)override
+	void AttachWindow(GuiWindow* _window)override
+	{
+		window=_window;
+	}
+
+	void InitializeNativeWindowProperties()override
 	{
 		// remove all native windows features
-		window->SetMinimizedBox(false);
-		window->SetMaximizedBox(false);
-		window->SetTitleBar(false);
-		window->SetSizeBox(false);
+		if(window->GetNativeWindow())
+		{
+			window->GetNativeWindow()->SetMinimizedBox(false);
+			window->GetNativeWindow()->SetMaximizedBox(false);
+			window->GetNativeWindow()->SetTitleBar(false);
+			window->GetNativeWindow()->SetSizeBox(false);
+		}
+	}
+
+	bool GetMaximizedBox()override
+	{
+		return true;
+	}
+
+	void SetMaximizedBox(bool visible)override
+	{
+	}
+
+	bool GetMinimizedBox()override
+	{
+		return true;
+	}
+
+	void SetMinimizedBox(bool visible)override
+	{
+	}
+
+	bool GetBorder()override
+	{
+		return true;
+	}
+
+	void SetBorder(bool visible)override
+	{
+	}
+
+	bool GetSizeBox()override
+	{
+		return true;
+	}
+
+	void SetSizeBox(bool visible)override
+	{
+	}
+
+	bool GetIconVisible()override
+	{
+		return true;
+	}
+
+	void SetIconVisible(bool visible)override
+	{
+	}
+
+	bool GetTitleBar()override
+	{
+		return true;
+	}
+
+	void SetTitleBar(bool visible)override
+	{
 	}
 };
 

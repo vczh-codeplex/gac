@@ -31,7 +31,11 @@ Control Host
 				compositions::GuiGraphicsHost*			host;
 				collections::List<GuiComponent*>		components;
 
+				virtual void							OnNativeWindowChanged();
+				virtual void							OnVisualStatusChanged();
 			private:
+				
+				void									Moved()override;
 				void									Enabled()override;
 				void									Disabled()override;
 				void									GotFocus()override;
@@ -110,67 +114,6 @@ Control Host
 				/// <summary>Allow or forbid the window to be activated.</summary>
 				/// <param name="value">Set to true to allow the window to be activated.</param>
 				void									SetEnabledActivate(bool value);
-				
-				/// <summary>
-				/// Test is the maximize box visible.
-				/// </summary>
-				/// <returns>Returns true if the maximize box is visible.</returns>
-				bool									GetMaximizedBox();
-				/// <summary>
-				/// Make the maximize box visible or invisible.
-				/// </summary>
-				/// <param name="visible">True to make the maximize box visible.</param>
-				void									SetMaximizedBox(bool visible);
-				/// <summary>
-				/// Test is the minimize box visible.
-				/// </summary>
-				/// <returns>Returns true if the minimize box is visible.</returns>
-				bool									GetMinimizedBox();
-				/// <summary>
-				/// Make the minimize box visible or invisible.
-				/// </summary>
-				/// <param name="visible">True to make the minimize box visible.</param>
-				void									SetMinimizedBox(bool visible);
-				/// <summary>
-				/// Test is the border visible.
-				/// </summary>
-				/// <returns>Returns true if the border is visible.</returns>
-				bool									GetBorder();
-				/// <summary>
-				/// Make the border visible or invisible.
-				/// </summary>
-				/// <param name="visible">True to make the border visible.</param>
-				void									SetBorder(bool visible);
-				/// <summary>
-				/// Test is the size box visible.
-				/// </summary>
-				/// <returns>Returns true if the size box is visible.</returns>
-				bool									GetSizeBox();
-				/// <summary>
-				/// Make the size box visible or invisible.
-				/// </summary>
-				/// <param name="visible">True to make the size box visible.</param>
-				void									SetSizeBox(bool visible);
-				/// <summary>
-				/// Test is the icon visible.
-				/// </summary>
-				/// <returns>Returns true if the icon is visible.</returns>
-				bool									GetIconVisible();
-				/// <summary>
-				/// Make the icon visible or invisible.
-				/// </summary>
-				/// <param name="visible">True to make the icon visible.</param>
-				void									SetIconVisible(bool visible);
-				/// <summary>
-				/// Test is the title bar visible.
-				/// </summary>
-				/// <returns>Returns true if the title bar is visible.</returns>
-				bool									GetTitleBar();
-				/// <summary>
-				/// Make the title bar visible or invisible.
-				/// </summary>
-				/// <param name="visible">True to make the title bar visible.</param>
-				void									SetTitleBar(bool visible);
 				/// <summary>
 				/// Test is the window always on top of the desktop.
 				/// </summary>
@@ -261,17 +204,108 @@ Window
 			class GuiWindow : public GuiControlHost, public Description<GuiWindow>
 			{
 				friend class GuiApplication;
-			protected:
-				virtual void							MouseClickedOnOtherWindow(GuiWindow* window);
 			public:
 				/// <summary>Style controller interface for <see cref="GuiWindow"/>.</summary>
 				class IStyleController : virtual public GuiControl::IStyleController, public Description<IStyleController>
 				{
 				public:
+					/// <summary>Called when the style controller is attached to the window.</summary>
+					/// <param name="_window">The window.</param>
+					virtual void						AttachWindow(GuiWindow* _window)=0;
 					/// <summary>Initialize visual properties of the window. This callback is for some window template that don't need the standard window border.</summary>
-					/// <param name="window">The window to set visual properties.</param>
-					virtual void						InitializeNativeWindowProperties(GuiWindow* window)=0;
+					virtual void						InitializeNativeWindowProperties()=0;
+					/// <summary>
+					/// Test is the maximize box visible.
+					/// </summary>
+					/// <returns>Returns true if the maximize box is visible.</returns>
+					virtual bool						GetMaximizedBox()=0;
+					/// <summary>
+					/// Make the maximize box visible or invisible.
+					/// </summary>
+					/// <param name="visible">True to make the maximize box visible.</param>
+					virtual void						SetMaximizedBox(bool visible)=0;
+					/// <summary>
+					/// Test is the minimize box visible.
+					/// </summary>
+					/// <returns>Returns true if the minimize box is visible.</returns>
+					virtual bool						GetMinimizedBox()=0;
+					/// <summary>
+					/// Make the minimize box visible or invisible.
+					/// </summary>
+					/// <param name="visible">True to make the minimize box visible.</param>
+					virtual void						SetMinimizedBox(bool visible)=0;
+					/// <summary>
+					/// Test is the border visible.
+					/// </summary>
+					/// <returns>Returns true if the border is visible.</returns>
+					virtual bool						GetBorder()=0;
+					/// <summary>
+					/// Make the border visible or invisible.
+					/// </summary>
+					/// <param name="visible">True to make the border visible.</param>
+					virtual void						SetBorder(bool visible)=0;
+					/// <summary>
+					/// Test is the size box visible.
+					/// </summary>
+					/// <returns>Returns true if the size box is visible.</returns>
+					virtual bool						GetSizeBox()=0;
+					/// <summary>
+					/// Make the size box visible or invisible.
+					/// </summary>
+					/// <param name="visible">True to make the size box visible.</param>
+					virtual void						SetSizeBox(bool visible)=0;
+					/// <summary>
+					/// Test is the icon visible.
+					/// </summary>
+					/// <returns>Returns true if the icon is visible.</returns>
+					virtual bool						GetIconVisible()=0;
+					/// <summary>
+					/// Make the icon visible or invisible.
+					/// </summary>
+					/// <param name="visible">True to make the icon visible.</param>
+					virtual void						SetIconVisible(bool visible)=0;
+					/// <summary>
+					/// Test is the title bar visible.
+					/// </summary>
+					/// <returns>Returns true if the title bar is visible.</returns>
+					virtual bool						GetTitleBar()=0;
+					/// <summary>
+					/// Make the title bar visible or invisible.
+					/// </summary>
+					/// <param name="visible">True to make the title bar visible.</param>
+					virtual void						SetTitleBar(bool visible)=0;
 				};
+				
+				/// <summary>Style controller with default behavior for <see cref="GuiWindow"/>.</summary>
+				class DefaultBehaviorStyleController : virtual public IStyleController
+				{
+				protected:
+					GuiWindow*							window;
+				public:
+					DefaultBehaviorStyleController();
+					~DefaultBehaviorStyleController();
+
+					void								AttachWindow(GuiWindow* _window)override;
+					void								InitializeNativeWindowProperties()override;
+					bool								GetMaximizedBox()override;
+					void								SetMaximizedBox(bool visible)override;
+					bool								GetMinimizedBox()override;
+					void								SetMinimizedBox(bool visible)override;
+					bool								GetBorder()override;
+					void								SetBorder(bool visible)override;
+					bool								GetSizeBox()override;
+					void								SetSizeBox(bool visible)override;
+					bool								GetIconVisible()override;
+					void								SetIconVisible(bool visible)override;
+					bool								GetTitleBar()override;
+					void								SetTitleBar(bool visible)override;
+				};
+			protected:
+				IStyleController*						styleController;
+
+				void									OnNativeWindowChanged()override;
+				void									OnVisualStatusChanged()override;
+				virtual void							MouseClickedOnOtherWindow(GuiWindow* window);
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
@@ -283,6 +317,67 @@ Window
 
 				/// <summary>Move the window to the center of the screen. If multiple screens exist, the window move to the screen that contains the biggest part of the window.</summary>
 				void									MoveToScreenCenter();
+				
+				/// <summary>
+				/// Test is the maximize box visible.
+				/// </summary>
+				/// <returns>Returns true if the maximize box is visible.</returns>
+				bool									GetMaximizedBox();
+				/// <summary>
+				/// Make the maximize box visible or invisible.
+				/// </summary>
+				/// <param name="visible">True to make the maximize box visible.</param>
+				void									SetMaximizedBox(bool visible);
+				/// <summary>
+				/// Test is the minimize box visible.
+				/// </summary>
+				/// <returns>Returns true if the minimize box is visible.</returns>
+				bool									GetMinimizedBox();
+				/// <summary>
+				/// Make the minimize box visible or invisible.
+				/// </summary>
+				/// <param name="visible">True to make the minimize box visible.</param>
+				void									SetMinimizedBox(bool visible);
+				/// <summary>
+				/// Test is the border visible.
+				/// </summary>
+				/// <returns>Returns true if the border is visible.</returns>
+				bool									GetBorder();
+				/// <summary>
+				/// Make the border visible or invisible.
+				/// </summary>
+				/// <param name="visible">True to make the border visible.</param>
+				void									SetBorder(bool visible);
+				/// <summary>
+				/// Test is the size box visible.
+				/// </summary>
+				/// <returns>Returns true if the size box is visible.</returns>
+				bool									GetSizeBox();
+				/// <summary>
+				/// Make the size box visible or invisible.
+				/// </summary>
+				/// <param name="visible">True to make the size box visible.</param>
+				void									SetSizeBox(bool visible);
+				/// <summary>
+				/// Test is the icon visible.
+				/// </summary>
+				/// <returns>Returns true if the icon is visible.</returns>
+				bool									GetIconVisible();
+				/// <summary>
+				/// Make the icon visible or invisible.
+				/// </summary>
+				/// <param name="visible">True to make the icon visible.</param>
+				void									SetIconVisible(bool visible);
+				/// <summary>
+				/// Test is the title bar visible.
+				/// </summary>
+				/// <returns>Returns true if the title bar is visible.</returns>
+				bool									GetTitleBar();
+				/// <summary>
+				/// Make the title bar visible or invisible.
+				/// </summary>
+				/// <param name="visible">True to make the title bar visible.</param>
+				void									SetTitleBar(bool visible);
 			};
 			
 			/// <summary>
