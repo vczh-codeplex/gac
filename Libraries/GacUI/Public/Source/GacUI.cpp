@@ -19315,7 +19315,7 @@ GuiGraphicsHost
 			{
 				Rect bounds=nativeWindow->GetBounds();
 				Rect clientBounds=nativeWindow->GetClientBoundsInScreen();
-				Point clientLocation(location.x+clientBounds.x1-bounds.x1, location.y+clientBounds.y1-bounds.y1);
+				Point clientLocation(location.x+bounds.x1-clientBounds.x1, location.y+bounds.y1-clientBounds.y1);
 				GuiGraphicsComposition* hitComposition=windowComposition->FindComposition(clientLocation);
 				while(hitComposition)
 				{
@@ -27975,6 +27975,9 @@ WindowsForm
 					case WM_NCHITTEST:
 						{
 							POINTS location=MAKEPOINTS(lParam);
+							Point windowLocation=GetBounds().LeftTop();
+							location.x-=windowLocation.x;
+							location.y-=windowLocation.y;
 							for(int i=0;i<listeners.Count();i++)
 							{
 								switch(listeners[i]->HitTest(Point(location.x, location.y)))

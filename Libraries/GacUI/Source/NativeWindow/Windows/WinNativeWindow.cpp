@@ -218,6 +218,9 @@ WindowsForm
 					case WM_NCHITTEST:
 						{
 							POINTS location=MAKEPOINTS(lParam);
+							Point windowLocation=GetBounds().LeftTop();
+							location.x-=windowLocation.x;
+							location.y-=windowLocation.y;
 							for(int i=0;i<listeners.Count();i++)
 							{
 								switch(listeners[i]->HitTest(Point(location.x, location.y)))
