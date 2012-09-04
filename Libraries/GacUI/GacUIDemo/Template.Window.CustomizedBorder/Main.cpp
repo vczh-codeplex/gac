@@ -18,23 +18,19 @@ protected:
 	GuiSolidLabelElement*				titleElement;
 	GuiBoundsComposition*				containerComposition;
 
-	void AddBorderCell(int row, int column, int rowSpan, int columnSpan, INativeWindowListener::HitTestResult hitTestResult, Color borderColor)
+	void AddBorderCell(int row, int column, int rowSpan, int columnSpan, INativeWindowListener::HitTestResult hitTestResult)
 	{
 		GuiCellComposition* cell=new GuiCellComposition;
 		boundsComposition->AddChild(cell);
 		cell->SetSite(row, column, rowSpan, columnSpan);
 		cell->SetAssociatedHitTestResult(hitTestResult);
-
-		GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
-		element->SetColor(borderColor);
-		cell->SetOwnedElement(element);
 	}
 public:
 	CustomTemplateWindowStyle()
 	{
 		Color borderColor(0, 122, 204);
-		Color backgroundColor(45, 45, 48);
-		Color clientColor(30, 30, 30);
+		Color titleBackgroundColor(45, 45, 48);
+		Color backgroundColor(30, 30, 30);
 		Color titleColor(153, 153, 153);
 
 		boundsComposition=new GuiTableComposition;
@@ -49,22 +45,27 @@ public:
 		boundsComposition->SetColumnOption(2, GuiCellOption::AbsoluteOption(3));
 		{
 			GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
-			element->SetColor(backgroundColor);
+			element->SetColor(borderColor);
 			boundsComposition->SetOwnedElement(element);
 		}
-		AddBorderCell(0, 0, 1, 1, INativeWindowListener::BorderLeftTop, borderColor);
-		AddBorderCell(0, 2, 1, 1, INativeWindowListener::BorderRightTop, borderColor);
-		AddBorderCell(3, 0, 1, 1, INativeWindowListener::BorderLeftBottom, borderColor);
-		AddBorderCell(3, 2, 1, 1, INativeWindowListener::BorderRightBottom, borderColor);
-		AddBorderCell(1, 0, 2, 1, INativeWindowListener::BorderLeft, borderColor);
-		AddBorderCell(1, 2, 2, 1, INativeWindowListener::BorderRight, borderColor);
-		AddBorderCell(0, 1, 1, 1, INativeWindowListener::BorderTop, borderColor);
-		AddBorderCell(3, 1, 1, 1, INativeWindowListener::BorderBottom, borderColor);
+		AddBorderCell(0, 0, 1, 1, INativeWindowListener::BorderLeftTop);
+		AddBorderCell(0, 2, 1, 1, INativeWindowListener::BorderRightTop);
+		AddBorderCell(3, 0, 1, 1, INativeWindowListener::BorderLeftBottom);
+		AddBorderCell(3, 2, 1, 1, INativeWindowListener::BorderRightBottom);
+		AddBorderCell(1, 0, 2, 1, INativeWindowListener::BorderLeft);
+		AddBorderCell(1, 2, 2, 1, INativeWindowListener::BorderRight);
+		AddBorderCell(0, 1, 1, 1, INativeWindowListener::BorderTop);
+		AddBorderCell(3, 1, 1, 1, INativeWindowListener::BorderBottom);
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			boundsComposition->AddChild(cell);
 			cell->SetSite(1, 1, 1, 1);
 			cell->SetAssociatedHitTestResult(INativeWindowListener::Title);
+			{
+				GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+				element->SetColor(titleBackgroundColor);
+				cell->SetOwnedElement(element);
+			}
 
 			titleComposition=new GuiBoundsComposition;
 			titleComposition->SetAlignmentToParent(Margin(5, 5, 5, 5));
@@ -89,7 +90,7 @@ public:
 			cell->AddChild(containerComposition);
 
 			GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
-			element->SetColor(clientColor);
+			element->SetColor(backgroundColor);
 			containerComposition->SetOwnedElement(element);
 		}
 	}
