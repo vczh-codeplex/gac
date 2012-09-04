@@ -647,7 +647,7 @@ Native Window
 				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Right top border.</summary>
 				BorderRightTop,
 				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Left bottom border.</summary>
-				BorderLeftButtom,
+				BorderLeftBottom,
 				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Right bottom border.</summary>
 				BorderRightBottom,
 				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Title</summary>
