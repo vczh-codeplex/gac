@@ -215,62 +215,6 @@ WindowsForm
 					}
 					switch(uMsg)
 					{
-					case WM_NCHITTEST:
-						{
-							POINTS location=MAKEPOINTS(lParam);
-							Point windowLocation=GetBounds().LeftTop();
-							location.x-=windowLocation.x;
-							location.y-=windowLocation.y;
-							for(int i=0;i<listeners.Count();i++)
-							{
-								switch(listeners[i]->HitTest(Point(location.x, location.y)))
-								{
-								case INativeWindowListener::BorderNoSizing:
-									result=HTBORDER;
-									return true;
-								case INativeWindowListener::BorderLeft:
-									result=HTLEFT;
-									return true;
-								case INativeWindowListener::BorderRight:
-									result=HTRIGHT;
-									return true;
-								case INativeWindowListener::BorderTop:
-									result=HTTOP;
-									return true;
-								case INativeWindowListener::BorderBottom:
-									result=HTBOTTOM;
-									return true;
-								case INativeWindowListener::BorderLeftTop:
-									result=HTTOPLEFT;
-									return true;
-								case INativeWindowListener::BorderRightTop:
-									result=HTTOPRIGHT;
-									return true;
-								case INativeWindowListener::BorderLeftBottom:
-									result=HTBOTTOMLEFT;
-									return true;
-								case INativeWindowListener::BorderRightBottom:
-									result=HTBOTTOMRIGHT;
-									return true;
-								case INativeWindowListener::Title:
-									result=HTCAPTION;
-									return true;
-								case INativeWindowListener::ButtonMinimum:
-									result=HTMINBUTTON;
-									return true;
-								case INativeWindowListener::ButtonMaximum:
-									result=HTMAXBUTTON;
-									return true;
-								case INativeWindowListener::ButtonClose:
-									result=HTCLOSE;
-									return true;
-								case INativeWindowListener::Client:
-									result=HTCLIENT;
-									return true;
-								}
-							}
-						}
-						break;
 					case WM_MOVING:case WM_SIZING:
 						{
 							LPRECT rawBounds=(LPRECT)lParam;
@@ -568,80 +512,97 @@ WindowsForm
 					case WM_IME_STARTCOMPOSITION:
 						UpdateCompositionForContent();
 						break;
-					case WM_NCLBUTTONDOWN:
-						if(customFrameMode)
+					case WM_NCHITTEST:
 						{
-							DWORD hitTestResult=LOWORD(wParam);
-							switch(hitTestResult)
+							POINTS location=MAKEPOINTS(lParam);
+							Point windowLocation=GetBounds().LeftTop();
+							location.x-=windowLocation.x;
+							location.y-=windowLocation.y;
+							for(int i=0;i<listeners.Count();i++)
 							{
-							case HTTOP:
-								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_TOP, lParam);
-								break;
-							case HTBOTTOM:
-								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_BOTTOM, lParam);
-								break;
-							case HTLEFT:
-								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_LEFT, lParam);
-								break;
-							case HTRIGHT:
-								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_RIGHT, lParam);
-								break;
-							case HTTOPLEFT:
-								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_TOPLEFT, lParam);
-								break;
-							case HTTOPRIGHT:
-								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_TOPRIGHT, lParam);
-								break;
-							case HTBOTTOMLEFT:
-								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_BOTTOMLEFT, lParam);
-								break;
-							case HTBOTTOMRIGHT:
-								SendMessage(hwnd, WM_SYSCOMMAND, SC_SIZE|WMSZ_BOTTOMRIGHT, lParam);
-								break;
+								switch(listeners[i]->HitTest(Point(location.x, location.y)))
+								{
+								case INativeWindowListener::BorderNoSizing:
+									result=HTBORDER;
+									return true;
+								case INativeWindowListener::BorderLeft:
+									result=HTLEFT;
+									return true;
+								case INativeWindowListener::BorderRight:
+									result=HTRIGHT;
+									return true;
+								case INativeWindowListener::BorderTop:
+									result=HTTOP;
+									return true;
+								case INativeWindowListener::BorderBottom:
+									result=HTBOTTOM;
+									return true;
+								case INativeWindowListener::BorderLeftTop:
+									result=HTTOPLEFT;
+									return true;
+								case INativeWindowListener::BorderRightTop:
+									result=HTTOPRIGHT;
+									return true;
+								case INativeWindowListener::BorderLeftBottom:
+									result=HTBOTTOMLEFT;
+									return true;
+								case INativeWindowListener::BorderRightBottom:
+									result=HTBOTTOMRIGHT;
+									return true;
+								case INativeWindowListener::Title:
+									result=HTCAPTION;
+									return true;
+								case INativeWindowListener::ButtonMinimum:
+									result=HTMINBUTTON;
+									return true;
+								case INativeWindowListener::ButtonMaximum:
+									result=HTMAXBUTTON;
+									return true;
+								case INativeWindowListener::ButtonClose:
+									result=HTCLOSE;
+									return true;
+								case INativeWindowListener::Client:
+									result=HTCLIENT;
+									return true;
+								case INativeWindowListener::Icon:
+									result=HTSYSMENU;
+									return true;
+								}
 							}
 						}
 						break;
 					case WM_SETCURSOR:
 						{
-							HCURSOR cursorHandle=GetCursor();
 							DWORD hitTestResult=LOWORD(lParam);
 							if(hitTestResult==HTCLIENT)
 							{
-								cursorHandle=cursor->GetCursorHandle();
-							}
-							else if(customFrameMode)
-							{
-								switch(hitTestResult)
+								HCURSOR cursorHandle=cursor->GetCursorHandle();
+								if(GetCursor()!=cursorHandle)
 								{
-								case HTTOP:
-								case HTBOTTOM:
-									cursorHandle=dynamic_cast<WindowsCursor*>(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::SizeNS))->GetCursorHandle();
-									break;
-								case HTLEFT:
-								case HTRIGHT:
-									cursorHandle=dynamic_cast<WindowsCursor*>(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::SizeWE))->GetCursorHandle();
-									break;
-								case HTTOPLEFT:
-								case HTBOTTOMRIGHT:
-									cursorHandle=dynamic_cast<WindowsCursor*>(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::SizeNWSE))->GetCursorHandle();
-									break;
-								case HTTOPRIGHT:
-								case HTBOTTOMLEFT:
-									cursorHandle=dynamic_cast<WindowsCursor*>(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::SizeNESW))->GetCursorHandle();
-									break;
-								case HTCLIENT:
-									break;
-								default:
-									cursorHandle=dynamic_cast<WindowsCursor*>(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Arrow))->GetCursorHandle();
+									SetCursor(cursorHandle);
 								}
-							}
-							if(GetCursor()!=cursorHandle)
-							{
-								SetCursor(cursorHandle);
+								result=TRUE;
+								return true;
 							}
 						}
-						result=TRUE;
-						return true;
+						break;
+					case WM_NCCALCSIZE:
+						if((BOOL)wParam && customFrameMode)
+						{
+							NCCALCSIZE_PARAMS* params=(NCCALCSIZE_PARAMS*)lParam;
+							params->rgrc[2]=params->rgrc[1];
+							params->rgrc[1]=params->rgrc[0];
+							result=WVR_REDRAW;
+							return true;
+						}
+						break;
+					case WM_NCPAINT:
+						if(customFrameMode)
+						{
+							result=0;
+							return true;
+						}
+						break;
 					}
 					if(IsWindow(hwnd)!=0)
 					{
@@ -765,20 +726,27 @@ WindowsForm
 
 				Rect GetClientBoundsInScreen()
 				{
-					RECT required={0,0,0,0};
-					RECT bounds;
-					GetWindowRect(handle, &bounds);
-					AdjustWindowRect(&required, GetWindowLongPtr(handle, GWL_STYLE), FALSE);
-					return Rect(
-						Point(
-							(bounds.left-required.left),
-							(bounds.top-required.top)
-							),
-						Size(
-							(bounds.right-bounds.left)-(required.right-required.left),
-							(bounds.bottom-bounds.top)-(required.bottom-required.top)
-							)
-						);
+					if(customFrameMode)
+					{
+						return GetBounds();
+					}
+					else
+					{
+						RECT required={0,0,0,0};
+						RECT bounds;
+						GetWindowRect(handle, &bounds);
+						AdjustWindowRect(&required, GetWindowLongPtr(handle, GWL_STYLE), FALSE);
+						return Rect(
+							Point(
+								(bounds.left-required.left),
+								(bounds.top-required.top)
+								),
+							Size(
+								(bounds.right-bounds.left)-(required.right-required.left),
+								(bounds.bottom-bounds.top)-(required.bottom-required.top)
+								)
+							);
+					}
 				}
 
 				WString GetTitle()

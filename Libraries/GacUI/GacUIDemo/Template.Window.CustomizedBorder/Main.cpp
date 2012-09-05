@@ -15,8 +15,13 @@ class CustomTemplateWindowStyle : public GuiWindow::IStyleController
 protected:
 	GuiWindow*							window;
 	GuiTableComposition*				boundsComposition;
+	GuiBoundsComposition*				iconComposition;
+	GuiSolidBorderElement*				iconElement;
 	GuiBoundsComposition*				titleComposition;
 	GuiSolidLabelElement*				titleElement;
+	GuiBoundsComposition*				minimumComposition;
+	GuiBoundsComposition*				maximumComposition;
+	GuiBoundsComposition*				closeComposition;
 	GuiBoundsComposition*				containerComposition;
 
 	void AddBorderCell(int row, int column, int rowSpan, int columnSpan, INativeWindowListener::HitTestResult hitTestResult)
@@ -25,6 +30,21 @@ protected:
 		boundsComposition->AddChild(cell);
 		cell->SetSite(row, column, rowSpan, columnSpan);
 		cell->SetAssociatedHitTestResult(hitTestResult);
+	}
+
+	GuiBoundsComposition* AddTitleCell(int column, INativeWindowListener::HitTestResult hitTestResult)
+	{
+		GuiCellComposition* cell=new GuiCellComposition;
+		boundsComposition->AddChild(cell);
+		cell->SetSite(1, column, 1, 1);
+
+		GuiBoundsComposition* composition=new GuiBoundsComposition;
+		composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		composition->SetPreferredMinSize(Size(16, 16));
+		composition->SetAssociatedHitTestResult(hitTestResult);
+		cell->AddChild(composition);
+
+		return composition;
 	}
 public:
 	CustomTemplateWindowStyle()
@@ -37,54 +57,78 @@ public:
 
 		boundsComposition=new GuiTableComposition;
 		boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-		boundsComposition->SetRowsAndColumns(4, 3);
-		boundsComposition->SetRowOption(0, GuiCellOption::AbsoluteOption(3));
+		boundsComposition->SetRowsAndColumns(4, 7);
+		boundsComposition->SetRowOption(0, GuiCellOption::AbsoluteOption(5));
 		boundsComposition->SetRowOption(1, GuiCellOption::MinSizeOption());
 		boundsComposition->SetRowOption(2, GuiCellOption::PercentageOption(1.0));
-		boundsComposition->SetRowOption(3, GuiCellOption::AbsoluteOption(3));
-		boundsComposition->SetColumnOption(0, GuiCellOption::AbsoluteOption(3));
-		boundsComposition->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
-		boundsComposition->SetColumnOption(2, GuiCellOption::AbsoluteOption(3));
+		boundsComposition->SetRowOption(3, GuiCellOption::AbsoluteOption(5));
+		boundsComposition->SetColumnOption(0, GuiCellOption::AbsoluteOption(5));
+		boundsComposition->SetColumnOption(1, GuiCellOption::MinSizeOption());
+		boundsComposition->SetColumnOption(2, GuiCellOption::PercentageOption(1.0));
+		boundsComposition->SetColumnOption(3, GuiCellOption::MinSizeOption());
+		boundsComposition->SetColumnOption(4, GuiCellOption::MinSizeOption());
+		boundsComposition->SetColumnOption(5, GuiCellOption::MinSizeOption());
+		boundsComposition->SetColumnOption(6, GuiCellOption::AbsoluteOption(5));
 		{
 			GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
 			element->SetColor(borderColor);
 			boundsComposition->SetOwnedElement(element);
 		}
 		AddBorderCell(0, 0, 1, 1, INativeWindowListener::BorderLeftTop);
-		AddBorderCell(0, 2, 1, 1, INativeWindowListener::BorderRightTop);
+		AddBorderCell(0, 6, 1, 1, INativeWindowListener::BorderRightTop);
 		AddBorderCell(3, 0, 1, 1, INativeWindowListener::BorderLeftBottom);
-		AddBorderCell(3, 2, 1, 1, INativeWindowListener::BorderRightBottom);
+		AddBorderCell(3, 6, 1, 1, INativeWindowListener::BorderRightBottom);
 		AddBorderCell(1, 0, 2, 1, INativeWindowListener::BorderLeft);
-		AddBorderCell(1, 2, 2, 1, INativeWindowListener::BorderRight);
-		AddBorderCell(0, 1, 1, 1, INativeWindowListener::BorderTop);
-		AddBorderCell(3, 1, 1, 1, INativeWindowListener::BorderBottom);
+		AddBorderCell(1, 6, 2, 1, INativeWindowListener::BorderRight);
+		AddBorderCell(0, 1, 1, 5, INativeWindowListener::BorderTop);
+		AddBorderCell(3, 1, 1, 5, INativeWindowListener::BorderBottom);
 		{
-			GuiCellComposition* cell=new GuiCellComposition;
-			boundsComposition->AddChild(cell);
-			cell->SetSite(1, 1, 1, 1);
-			cell->SetAssociatedHitTestResult(INativeWindowListener::Title);
 			{
-				GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
-				element->SetColor(titleBackgroundColor);
-				cell->SetOwnedElement(element);
+				iconComposition=AddTitleCell(1, INativeWindowListener::Icon);
+				iconComposition->SetAlignmentToParent(Margin(0, 3, 3, 3));
+
+				iconElement=GuiSolidBorderElement::Create();
+				iconElement->SetColor(titleColor);
+				iconComposition->SetOwnedElement(iconElement);
 			}
+			{
+				titleComposition=AddTitleCell(2, INativeWindowListener::Title);
+				titleComposition->SetAlignmentToParent(Margin(0, 3, 3, 3));
 
-			titleComposition=new GuiBoundsComposition;
-			titleComposition->SetAlignmentToParent(Margin(5, 5, 5, 5));
-			titleComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
-			cell->AddChild(titleComposition);
+				titleElement=GuiSolidLabelElement::Create();
+				titleElement->SetColor(titleColor);
+				titleElement->SetAlignments(Alignment::Left, Alignment::Center);
+				titleComposition->SetOwnedElement(titleElement);
+			}
+			{
+				minimumComposition=AddTitleCell(3, INativeWindowListener::ButtonMinimum);
+				minimumComposition->SetAlignmentToParent(Margin(0, 3, 3, 3));
 
-			titleElement=GuiSolidLabelElement::Create();
-			titleElement->SetColor(titleColor);
-			titleComposition->SetOwnedElement(titleElement);
+				GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+				element->SetColor(titleColor);
+				minimumComposition->SetOwnedElement(element);
+			}
+			{
+				maximumComposition=AddTitleCell(4, INativeWindowListener::ButtonMaximum);
+				maximumComposition->SetAlignmentToParent(Margin(0, 3, 3, 3));
 
-			FontProperties font=GetCurrentController()->ResourceService()->GetDefaultFont();
-			titleElement->SetFont(font);
+				GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+				element->SetColor(titleColor);
+				maximumComposition->SetOwnedElement(element);
+			}
+			{
+				closeComposition=AddTitleCell(5, INativeWindowListener::ButtonClose);
+				closeComposition->SetAlignmentToParent(Margin(0, 3, 0, 3));
+
+				GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+				element->SetColor(titleColor);
+				closeComposition->SetOwnedElement(element);
+			}
 		}
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			boundsComposition->AddChild(cell);
-			cell->SetSite(2, 1, 1, 1);
+			cell->SetSite(2, 1, 1, 5);
 			cell->SetAssociatedHitTestResult(INativeWindowListener::Client);
 
 			containerComposition=new GuiBoundsComposition;
@@ -136,10 +180,6 @@ public:
 		if(window->GetNativeWindow())
 		{
 			window->GetNativeWindow()->EnableCustomFrameMode();
-			window->GetNativeWindow()->SetMinimizedBox(false);
-			window->GetNativeWindow()->SetMaximizedBox(false);
-			window->GetNativeWindow()->SetTitleBar(false);
-			window->GetNativeWindow()->SetSizeBox(false);
 		}
 	}
 
