@@ -32,11 +32,15 @@ protected:
 		cell->SetAssociatedHitTestResult(hitTestResult);
 	}
 
-	GuiBoundsComposition* AddTitleCell(int column, INativeWindowListener::HitTestResult hitTestResult)
+	GuiBoundsComposition* AddTitleCell(int column, INativeWindowListener::HitTestResult hitTestResult, Color titleBackgroundColor)
 	{
 		GuiCellComposition* cell=new GuiCellComposition;
 		boundsComposition->AddChild(cell);
 		cell->SetSite(1, column, 1, 1);
+
+		GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+		element->SetColor(titleBackgroundColor);
+		cell->SetOwnedElement(element);
 
 		GuiBoundsComposition* composition=new GuiBoundsComposition;
 		composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -84,15 +88,15 @@ public:
 		AddBorderCell(3, 1, 1, 5, INativeWindowListener::BorderBottom);
 		{
 			{
-				iconComposition=AddTitleCell(1, INativeWindowListener::Icon);
-				iconComposition->SetAlignmentToParent(Margin(0, 3, 3, 3));
+				iconComposition=AddTitleCell(1, INativeWindowListener::Icon, titleBackgroundColor);
+				iconComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
 
 				iconElement=GuiSolidBorderElement::Create();
 				iconElement->SetColor(titleColor);
 				iconComposition->SetOwnedElement(iconElement);
 			}
 			{
-				titleComposition=AddTitleCell(2, INativeWindowListener::Title);
+				titleComposition=AddTitleCell(2, INativeWindowListener::Title, titleBackgroundColor);
 				titleComposition->SetAlignmentToParent(Margin(0, 3, 3, 3));
 
 				titleElement=GuiSolidLabelElement::Create();
@@ -101,7 +105,7 @@ public:
 				titleComposition->SetOwnedElement(titleElement);
 			}
 			{
-				minimumComposition=AddTitleCell(3, INativeWindowListener::ButtonMinimum);
+				minimumComposition=AddTitleCell(3, INativeWindowListener::ButtonMinimum, titleBackgroundColor);
 				minimumComposition->SetAlignmentToParent(Margin(0, 3, 3, 3));
 
 				GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
@@ -109,7 +113,7 @@ public:
 				minimumComposition->SetOwnedElement(element);
 			}
 			{
-				maximumComposition=AddTitleCell(4, INativeWindowListener::ButtonMaximum);
+				maximumComposition=AddTitleCell(4, INativeWindowListener::ButtonMaximum, titleBackgroundColor);
 				maximumComposition->SetAlignmentToParent(Margin(0, 3, 3, 3));
 
 				GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
@@ -117,8 +121,8 @@ public:
 				maximumComposition->SetOwnedElement(element);
 			}
 			{
-				closeComposition=AddTitleCell(5, INativeWindowListener::ButtonClose);
-				closeComposition->SetAlignmentToParent(Margin(0, 3, 0, 3));
+				closeComposition=AddTitleCell(5, INativeWindowListener::ButtonClose, titleBackgroundColor);
+				closeComposition->SetAlignmentToParent(Margin(0, 3, 3, 3));
 
 				GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
 				element->SetColor(titleColor);
