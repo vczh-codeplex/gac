@@ -674,6 +674,8 @@ Native Window
 				ButtonClose,
 				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Client button.</summary>
 				Client,
+				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Icon.</summary>
+				Icon,
 				/// <summary>[T:vl.presentation.INativeWindowListener.HitTestResult]Let the OS window layer decide.</summary>
 				NoDecision,
 			};

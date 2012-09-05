@@ -11884,6 +11884,7 @@ Native Window
 				ButtonMaximum,
 				ButtonClose,
 				Client,
+				Icon,
 				NoDecision,
 			};
 
