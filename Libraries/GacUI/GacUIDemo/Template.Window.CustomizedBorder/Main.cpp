@@ -7,6 +7,61 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 }
 
 /***********************************************************************
+CustomTemplateWindowButtonStyle
+***********************************************************************/
+
+class CustomTemplateWindowButtonStyle : public GuiButton::IStyleController
+{
+protected:
+	GuiBoundsComposition*				boundsComposition;
+public:
+	CustomTemplateWindowButtonStyle(Color borderColor)
+	{
+		boundsComposition=new GuiBoundsComposition;
+		boundsComposition->SetAssociatedHitTestResult(INativeWindowListener::Client);
+		boundsComposition->SetPreferredMinSize(Size(16, 16));
+
+		GuiSolidBorderElement* borderElement=GuiSolidBorderElement::Create();
+		borderElement->SetColor(borderColor);
+		boundsComposition->SetOwnedElement(borderElement);
+	}
+
+	~CustomTemplateWindowButtonStyle()
+	{
+	}
+
+	compositions::GuiBoundsComposition* GetBoundsComposition()
+	{
+		return boundsComposition;
+	}
+
+	compositions::GuiGraphicsComposition* GetContainerComposition()
+	{
+		return boundsComposition;
+	}
+
+	void SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+	{
+	}
+
+	void SetText(const WString& value)
+	{
+	}
+
+	void SetFont(const FontProperties& value)
+	{
+	}
+
+	void SetVisuallyEnabled(bool value)
+	{
+	}
+
+	void Transfer(GuiButton::ControlState value)
+	{
+	}
+};
+
+/***********************************************************************
 CustomTemplateWindowStyle
 ***********************************************************************/
 
@@ -19,10 +74,10 @@ protected:
 	GuiSolidBorderElement*				iconElement;
 	GuiBoundsComposition*				titleComposition;
 	GuiSolidLabelElement*				titleElement;
-	GuiBoundsComposition*				minimumComposition;
-	GuiBoundsComposition*				maximumComposition;
-	GuiBoundsComposition*				closeComposition;
 	GuiBoundsComposition*				containerComposition;
+	GuiButton*							minimumButton;
+	GuiButton*							maximumButton;
+	GuiButton*							closeButton;
 
 	void AddBorderCell(int row, int column, int rowSpan, int columnSpan, INativeWindowListener::HitTestResult hitTestResult)
 	{
@@ -49,6 +104,44 @@ protected:
 		cell->AddChild(composition);
 
 		return composition;
+	}
+
+	GuiButton* AddTitleButton(int column, Color titleBackgroundColor, Color titleForegroundColor)
+	{
+		GuiCellComposition* cell=new GuiCellComposition;
+		boundsComposition->AddChild(cell);
+		cell->SetSite(1, column, 1, 1);
+
+		GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+		element->SetColor(titleBackgroundColor);
+		cell->SetOwnedElement(element);
+
+		GuiButton* button=new GuiButton(new CustomTemplateWindowButtonStyle(titleForegroundColor));
+		button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 3, 3, 3));
+		cell->AddChild(button->GetBoundsComposition());
+		return button;
+	}
+
+	void minimumButton_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		window->GetNativeWindow()->ShowMinimized();
+	}
+
+	void maximumButton_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		if(window->GetNativeWindow()->GetSizeState()==INativeWindow::Restored)
+		{
+			window->GetNativeWindow()->ShowMaximized();
+		}
+		else
+		{
+			window->GetNativeWindow()->ShowRestored();
+		}
+	}
+
+	void closeButton_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		window->GetNativeWindow()->Hide();
 	}
 public:
 	CustomTemplateWindowStyle()
@@ -105,28 +198,19 @@ public:
 				titleComposition->SetOwnedElement(titleElement);
 			}
 			{
-				minimumComposition=AddTitleCell(3, INativeWindowListener::ButtonMinimum, titleBackgroundColor);
-				minimumComposition->SetAlignmentToParent(Margin(0, 3, 3, 3));
-
-				GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
-				element->SetColor(titleColor);
-				minimumComposition->SetOwnedElement(element);
+				minimumButton=AddTitleButton(3, titleBackgroundColor, titleColor);
+				minimumButton->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 3, 3, 3));
+				minimumButton->Clicked.AttachMethod(this, &CustomTemplateWindowStyle::minimumButton_Clicked);
 			}
 			{
-				maximumComposition=AddTitleCell(4, INativeWindowListener::ButtonMaximum, titleBackgroundColor);
-				maximumComposition->SetAlignmentToParent(Margin(0, 3, 3, 3));
-
-				GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
-				element->SetColor(titleColor);
-				maximumComposition->SetOwnedElement(element);
+				maximumButton=AddTitleButton(4, titleBackgroundColor, titleColor);
+				maximumButton->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 3, 3, 3));
+				maximumButton->Clicked.AttachMethod(this, &CustomTemplateWindowStyle::maximumButton_Clicked);
 			}
 			{
-				closeComposition=AddTitleCell(5, INativeWindowListener::ButtonClose, titleBackgroundColor);
-				closeComposition->SetAlignmentToParent(Margin(0, 3, 3, 3));
-
-				GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
-				element->SetColor(titleColor);
-				closeComposition->SetOwnedElement(element);
+				closeButton=AddTitleButton(5, titleBackgroundColor, titleColor);
+				closeButton->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 3, 3, 3));
+				closeButton->Clicked.AttachMethod(this, &CustomTemplateWindowStyle::closeButton_Clicked);
 			}
 		}
 		{

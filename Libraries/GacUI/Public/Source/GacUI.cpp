@@ -28460,6 +28460,7 @@ WindowsForm
 						}
 						break;
 					case WM_NCPAINT:
+					case WM_SYNCPAINT:
 						if(customFrameMode)
 						{
 							result=0;
@@ -28697,6 +28698,22 @@ WindowsForm
 				bool IsCustomFrameModeEnabled()
 				{
 					return customFrameMode;
+				}
+
+				WindowSizeState GetSizeState()
+				{
+					if(IsIconic(handle))
+					{
+						return INativeWindow::Minimized;
+					}
+					else if(IsZoomed(handle))
+					{
+						return INativeWindow::Maximized;
+					}
+					else
+					{
+						return INativeWindow::Restored;
+					}
 				}
 
 				void Show()
