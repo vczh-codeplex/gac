@@ -50,9 +50,13 @@
             </tr>
             <tr class="GuideTableBody">
                 <td align="left" valign="top">
+                @{
+                    string url = Url.Action("ShowDemo", "DemoPage", new { demoId = @Model.LatestUpdateDemo.Name });
                     <strong>@Model.LatestUpdateDemo.Name</strong>
+                    <p><a href="@url"><img src="@Url.Content(string.Format("~/Content/Demos/Demos.{0}.jpg", Model.LatestUpdateDemo.Name))" /></a></p>
                     <p>@Model.LatestUpdateDemo.Description</p>
-                    <a class="ReadMoreLink" href="@Url.Action("ShowDemo", "DemoPage", new { demoId = @Model.LatestUpdateDemo.Name })">Read more...</a>
+                    <a class="ReadMoreLink" href="@url">Read more...</a>
+                }
                 </td>
             </tr>
             <tr class="GuideTableBody">

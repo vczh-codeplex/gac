@@ -176,7 +176,10 @@
     <Content Include="Content\Demos\Demos.Controls.TextBox.Editor.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Toolstrip.TextEditor.jpg" />
     <Content Include="Content\Demos\Demos.Controls.TreeView.FileExplorer.jpg" />
+    <Content Include="Content\Demos\Demos.Template.Window.CustomizedBorder.jpg" />
     <Content Include="Content\Demos\Index.xml" />
+    <Content Include="Content\Demos\Template.Window.CustomizedBorder\DXGUI_57.jpg" />
+    <Content Include="Content\Demos\Template.Window.CustomizedBorder\Main.cpp" />
     <Content Include="Content\favicon.ico" />
     <Content Include="Content\GacLib.png" />
     <Content Include="Content\GacLib_Logo.gif" />

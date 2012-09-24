@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <demos>
   <category name="Controls">
+    <description>The &quot;Controls&quot; category contains demos that show how to use individual controls.</description>
     <demo name="Label.Hyperlink">
       <date>2012/5/4</date>
       <image src="DXGUI_27.jpg" />
@@ -116,6 +117,15 @@
       <image src="DXGUI_56.jpg" />
       <cpp src="Main.cpp" />
       <description>This demo shows how to build a color picker using tracker control.</description>
+    </demo>
+  </category>
+  <category name="Template">
+    <description>The &quot;Template&quot; category contains demos that show how to build template or skin for each type of controls.</description>
+    <demo name="Window.CustomizedBorder">
+      <date>2012/9/24</date>
+      <image src="DXGUI_57.jpg" />
+      <cpp src="Main.cpp" />
+      <description>This demo shows how to build a window with a customized border and a skin.</description>
     </demo>
   </category>
 </demos>
