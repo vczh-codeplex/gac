@@ -12,7 +12,7 @@ namespace GaclibWebPage.Controllers
         public ActionResult ShowDemo()
         {
             string name = this.RouteData.Values["demoId"].ToString();
-            IndividualDemoPageModel model = DemoPageModel.LoadPage(Server.MapPath(DemoPageModel.DefaultXmlIndexPath), name);
+            IndividualDemoModel model = DemoPageModel.LoadDemo(Server.MapPath(DemoPageModel.DefaultXmlIndexPath), name);
             model.ActiveButton = NavigationButtons.Demos;
             return View(model);
         }

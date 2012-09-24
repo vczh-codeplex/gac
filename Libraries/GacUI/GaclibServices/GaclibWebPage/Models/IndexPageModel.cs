@@ -8,7 +8,7 @@ namespace GaclibWebPage.Models
     public class IndexPageModel : NavigationBarModel
     {
         public IndexPageMirrorSite[] MirrorSites { get; set; }
-        public IndividualDemoPageModel LatestUpdateDemo { get; set; }
+        public IndividualDemoModel LatestUpdateDemo { get; set; }
 
         public IndexPageModel(string xmlIndexPath)
         {
@@ -19,7 +19,8 @@ namespace GaclibWebPage.Models
                 new IndexPageMirrorSite(){ Url = "http://us.gaclib.net", Description = "Hosted in West US" },
             };
             this.LatestUpdateDemo = new DemoPageModel(xmlIndexPath)
-                .DemoPages
+                .DemoCategories
+                .SelectMany(c=>c.Demos)
                 .OrderBy(d => d.UpdateDate)
                 .Last();
         }

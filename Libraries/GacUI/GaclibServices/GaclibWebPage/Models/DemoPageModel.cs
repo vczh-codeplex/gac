@@ -11,17 +11,18 @@ namespace GaclibWebPage.Models
     {
         public const string DefaultXmlIndexPath = "~/Content/Demos/Index.xml";
 
-        public static IndividualDemoPageModel[] LoadPages(string xmlIndexPath)
+        public static IndividualDemoCategoryModel[] LoadCategories(string xmlIndexPath)
         {
             XDocument xmlIndex = XDocument.Load(xmlIndexPath);
-            List<IndividualDemoPageModel> pages = new List<IndividualDemoPageModel>();
+            List<IndividualDemoCategoryModel> categories = new List<IndividualDemoCategoryModel>();
             foreach (var xmlCategory in xmlIndex.Root.Elements("category"))
             {
+                List<IndividualDemoModel> demos = new List<IndividualDemoModel>();
                 string category = xmlCategory.Attribute("name").Value;
                 foreach (var xmlDemo in xmlCategory.Elements("demo"))
                 {
                     string title = xmlDemo.Attribute("name").Value;
-                    IndividualDemoPageModel page = new IndividualDemoPageModel
+                    IndividualDemoModel demo = new IndividualDemoModel
                     {
                         Title = title,
                         Name = category + "." + title,
@@ -30,15 +31,22 @@ namespace GaclibWebPage.Models
                         Description = xmlDemo.Element("description").Value,
                         CppCodes = xmlDemo.Elements("cpp").Select(e => e.Attribute("src").Value).ToDictionary(s => s, s => ""),
                     };
-                    pages.Add(page);
+                    demos.Add(demo);
                 }
+                categories.Add(new IndividualDemoCategoryModel
+                {
+                    Name = category,
+                    Description = xmlCategory.Element("description").Value,
+                    Demos = demos.ToArray(),
+                });
             }
-            return pages.ToArray();
+            return categories.ToArray();
         }
 
-        public static IndividualDemoPageModel LoadPage(string xmlIndexPath, string name)
+        public static IndividualDemoModel LoadDemo(string xmlIndexPath, string name)
         {
-            IndividualDemoPageModel page = LoadPages(xmlIndexPath)
+            IndividualDemoModel page = LoadCategories(xmlIndexPath)
+                .SelectMany(c => c.Demos)
                 .Where(d => d.Name == name)
                 .First();
             string[] cppFiles = page.CppCodes.Keys.ToArray();
@@ -50,11 +58,11 @@ namespace GaclibWebPage.Models
             return page;
         }
 
-        public IndividualDemoPageModel[] DemoPages { get; set; }
+        public IndividualDemoCategoryModel[] DemoCategories { get; set; }
 
         public DemoPageModel(string xmlIndexPath)
         {
-            this.DemoPages = LoadPages(xmlIndexPath);
+            this.DemoCategories = LoadCategories(xmlIndexPath);
         }
     }
 }
