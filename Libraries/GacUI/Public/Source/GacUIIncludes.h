@@ -11786,6 +11786,14 @@ Native Window
 			virtual void				DisableCustomFrameMode()=0;
 			virtual bool				IsCustomFrameModeEnabled()=0;
 
+			enum WindowSizeState
+			{
+				Minimized,
+				Restored,
+				Maximized,
+			};
+
+			virtual WindowSizeState		GetSizeState()=0;
 			virtual void				Show()=0;
 			virtual void				ShowDeactivated()=0;
 			virtual void				ShowRestored()=0;

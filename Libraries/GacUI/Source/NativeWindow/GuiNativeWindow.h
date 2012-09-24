@@ -384,6 +384,22 @@ Native Window
 			/// <returns>Returns true if the window customized frame mode is enabled.</returns>
 			virtual bool				IsCustomFrameModeEnabled()=0;
 
+			/// <summary>Window size state.</summary>
+			enum WindowSizeState
+			{
+				/// <summary>[T:vl.presentation.INativeWindow.WindowSizeState]Minimized.</summary>
+				Minimized,
+				/// <summary>[T:vl.presentation.INativeWindow.WindowSizeState]Restored.</summary>
+				Restored,
+				/// <summary>[T:vl.presentation.INativeWindow.WindowSizeState]Maximized.</summary>
+				Maximized,
+			};
+
+			/// <summary>
+			/// Get the window size state.
+			/// </summary>
+			/// <returns>Returns the window size state.</returns>
+			virtual WindowSizeState		GetSizeState()=0;
 			/// <summary>
 			/// Show the window.
 			/// </summary>
