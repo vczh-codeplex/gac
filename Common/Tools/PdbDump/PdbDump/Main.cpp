@@ -25,7 +25,7 @@ IDiaSymbol* CreateDiaSymbol(const wchar_t* pdbPath)
     //    (void**) &pSource
     //    );
 	HRESULT hr = NoRegCoCreate(
-		L"msdia100.dll",
+		L"msdia110.dll",
 		CLSID_DiaSource,
 		IID_IDiaDataSource,
         (void**) &pSource

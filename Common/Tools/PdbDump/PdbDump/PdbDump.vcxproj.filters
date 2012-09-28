@@ -160,6 +160,6 @@
     <Library Include="diaguids.lib" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="msdia100.dll" />
+    <None Include="msdia110.dll" />
   </ItemGroup>
 </Project>
