@@ -36,7 +36,8 @@ typedef enum CV_call_e {
     CV_CALL_SH5CALL     = 0x14, // Hitachi SuperH-5 call
     CV_CALL_M32RCALL    = 0x15, // M32R Call
     CV_CALL_CLRCALL     = 0x16, // clr call
-    CV_CALL_RESERVED    = 0x17  // first unused call enumeration
+    CV_CALL_INLINE      = 0x17, // Marker for routines always inlined and thus lacking a convention
+    CV_CALL_RESERVED    = 0x18  // first unused call enumeration
 
     // Do NOT add any more machine specific conventions.  This is to be used for
     // calling conventions in the source only (e.g. __cdecl, __stdcall).
@@ -111,6 +112,11 @@ enum SymTagEnum
     SymTagManagedType,
     SymTagDimension,
     SymTagCallSite,
+    SymTagInlineSite,
+    SymTagBaseInterface,
+    SymTagVectorType,
+    SymTagMatrixType,
+    SymTagHLSLType,
     SymTagMax
 };
 
@@ -148,7 +154,8 @@ enum UdtKind
 {
     UdtStruct,
     UdtClass,
-    UdtUnion
+    UdtUnion,
+    UdtInterface
 };
 
 enum BasicType
@@ -174,6 +181,94 @@ enum BasicType
 };
 
 
+//      enumeration for type modifier values
+
+typedef enum CV_modifier_e {
+    // 0x0000 - 0x01ff - Reserved.
+
+    CV_MOD_INVALID                      = 0x0000,
+
+    // Standard modifiers.
+
+    CV_MOD_CONST                        = 0x0001,
+    CV_MOD_VOLATILE                     = 0x0002,
+    CV_MOD_UNALIGNED                    = 0x0003,
+    
+    // 0x0200 - 0x03ff - HLSL modifiers.
+
+    CV_MOD_HLSL_UNIFORM                 = 0x0200,
+    CV_MOD_HLSL_LINE                    = 0x0201,
+    CV_MOD_HLSL_TRIANGLE                = 0x0202,
+    CV_MOD_HLSL_LINEADJ                 = 0x0203,
+    CV_MOD_HLSL_TRIANGLEADJ             = 0x0204,
+    CV_MOD_HLSL_LINEAR                  = 0x0205,
+    CV_MOD_HLSL_CENTROID                = 0x0206,
+    CV_MOD_HLSL_CONSTINTERP             = 0x0207,
+    CV_MOD_HLSL_NOPERSPECTIVE           = 0x0208,
+    CV_MOD_HLSL_SAMPLE                  = 0x0209,
+    CV_MOD_HLSL_CENTER                  = 0x020a,
+    CV_MOD_HLSL_SNORM                   = 0x020b,
+    CV_MOD_HLSL_UNORM                   = 0x020c,
+    CV_MOD_HLSL_PRECISE                 = 0x020d,
+    CV_MOD_HLSL_UAV_GLOBALLY_COHERENT   = 0x020e,
+
+    // 0x0400 - 0xffff - Unused.
+    
+} CV_modifier_e;
+
+
+//      built-in type kinds
+
+
+typedef enum CV_builtin_e {
+
+    // 0x0000 - 0x01ff - Reserved.
+    CV_BI_INVALID                       = 0x0000,
+    
+    // 0x0200 - 0x03ff - HLSL types.
+
+    CV_BI_HLSL_INTERFACE_POINTER        = 0x0200,
+    CV_BI_HLSL_TEXTURE1D                = 0x0201,
+    CV_BI_HLSL_TEXTURE1D_ARRAY          = 0x0202,
+    CV_BI_HLSL_TEXTURE2D                = 0x0203,
+    CV_BI_HLSL_TEXTURE2D_ARRAY          = 0x0204,
+    CV_BI_HLSL_TEXTURE3D                = 0x0205,
+    CV_BI_HLSL_TEXTURECUBE              = 0x0206,
+    CV_BI_HLSL_TEXTURECUBE_ARRAY        = 0x0207,
+    CV_BI_HLSL_TEXTURE2DMS              = 0x0208,
+    CV_BI_HLSL_TEXTURE2DMS_ARRAY        = 0x0209,
+    CV_BI_HLSL_SAMPLER                  = 0x020a,
+    CV_BI_HLSL_SAMPLERCOMPARISON        = 0x020b,
+    CV_BI_HLSL_BUFFER                   = 0x020c,
+    CV_BI_HLSL_POINTSTREAM              = 0x020d,
+    CV_BI_HLSL_LINESTREAM               = 0x020e,
+    CV_BI_HLSL_TRIANGLESTREAM           = 0x020f,
+    CV_BI_HLSL_INPUTPATCH               = 0x0210,
+    CV_BI_HLSL_OUTPUTPATCH              = 0x0211,
+    CV_BI_HLSL_RWTEXTURE1D              = 0x0212,
+    CV_BI_HLSL_RWTEXTURE1D_ARRAY        = 0x0213,
+    CV_BI_HLSL_RWTEXTURE2D              = 0x0214,
+    CV_BI_HLSL_RWTEXTURE2D_ARRAY        = 0x0215,
+    CV_BI_HLSL_RWTEXTURE3D              = 0x0216,
+    CV_BI_HLSL_RWBUFFER                 = 0x0217,
+    CV_BI_HLSL_BYTEADDRESS_BUFFER       = 0x0218,
+    CV_BI_HLSL_RWBYTEADDRESS_BUFFER     = 0x0219,
+    CV_BI_HLSL_STRUCTURED_BUFFER        = 0x021a,
+    CV_BI_HLSL_RWSTRUCTURED_BUFFER      = 0x021b,
+    CV_BI_HLSL_APPEND_STRUCTURED_BUFFER = 0x021c,
+    CV_BI_HLSL_CONSUME_STRUCTURED_BUFFER= 0x021d,
+    CV_BI_HLSL_MIN8FLOAT                = 0x021e,
+    CV_BI_HLSL_MIN10FLOAT               = 0x021f,
+    CV_BI_HLSL_MIN16FLOAT               = 0x0220,
+    CV_BI_HLSL_MIN12INT                 = 0x0221,
+    CV_BI_HLSL_MIN16INT                 = 0x0222,
+    CV_BI_HLSL_MIN16UINT                = 0x0223,
+
+    // 0x0400 - 0xffff - Unused.
+    
+} CV_builtin_e;
+
+
 //  enum describing the compile flag source language
 
 
@@ -194,6 +289,7 @@ typedef enum CV_CFL_LANG {
     CV_CFL_JAVA     = 0x0D,
     CV_CFL_JSCRIPT  = 0x0E,
     CV_CFL_MSIL     = 0x0F,  // Unknown MSIL (LTCG of .NETMODULE)
+    CV_CFL_HLSL     = 0x10,  // High Level Shader Language
 } CV_CFL_LANG;
 
 
@@ -263,6 +359,8 @@ typedef enum CV_CPU_TYPE_e {
     CV_CFL_AMD64        = CV_CFL_X64,
     CV_CFL_EBC          = 0xE0,
     CV_CFL_THUMB        = 0xF0,
+    CV_CFL_ARMNT        = 0xF4,
+    CV_CFL_D3D11_SHADER = 0x100,
 } CV_CPU_TYPE_e;
 
 typedef enum CV_HREG_e {
@@ -1205,6 +1303,188 @@ typedef enum CV_HREG_e {
     CV_ARM_LR       =   24, // Link Register
     CV_ARM_PC       =   25, // Program counter
     CV_ARM_CPSR     =   26, // Current program status register
+
+    CV_ARM_ACC0     =   27, // DSP co-processor 0 40 bit accumulator
+
+    //
+    // Registers for ARM VFP10 support
+    //
+    
+    CV_ARM_FPSCR    =   40,
+    CV_ARM_FPEXC    =   41,
+    
+    CV_ARM_FS0      =   50,
+    CV_ARM_FS1      =   51,
+    CV_ARM_FS2      =   52,
+    CV_ARM_FS3      =   53,
+    CV_ARM_FS4      =   54,
+    CV_ARM_FS5      =   55,
+    CV_ARM_FS6      =   56,
+    CV_ARM_FS7      =   57,
+    CV_ARM_FS8      =   58,
+    CV_ARM_FS9      =   59,
+    CV_ARM_FS10     =   60,
+    CV_ARM_FS11     =   61,
+    CV_ARM_FS12     =   62,
+    CV_ARM_FS13     =   63,
+    CV_ARM_FS14     =   64,
+    CV_ARM_FS15     =   65,
+    CV_ARM_FS16     =   66,
+    CV_ARM_FS17     =   67,
+    CV_ARM_FS18     =   68,
+    CV_ARM_FS19     =   69,
+    CV_ARM_FS20     =   70,
+    CV_ARM_FS21     =   71,
+    CV_ARM_FS22     =   72,
+    CV_ARM_FS23     =   73,
+    CV_ARM_FS24     =   74,
+    CV_ARM_FS25     =   75,
+    CV_ARM_FS26     =   76,
+    CV_ARM_FS27     =   77,
+    CV_ARM_FS28     =   78,
+    CV_ARM_FS29     =   79,
+    CV_ARM_FS30     =   80,
+    CV_ARM_FS31     =   81,
+
+    //
+    // ARM VFP Floating Point Extra control registers
+    //
+    
+    CV_ARM_FPEXTRA0 =   90,
+    CV_ARM_FPEXTRA1 =   91,
+    CV_ARM_FPEXTRA2 =   92,
+    CV_ARM_FPEXTRA3 =   93,
+    CV_ARM_FPEXTRA4 =   94,
+    CV_ARM_FPEXTRA5 =   95,
+    CV_ARM_FPEXTRA6 =   96,
+    CV_ARM_FPEXTRA7 =   97,
+
+    // XSCALE Concan co-processor registers
+    CV_ARM_WR0      =   128, 
+    CV_ARM_WR1      =   129, 
+    CV_ARM_WR2      =   130, 
+    CV_ARM_WR3      =   131, 
+    CV_ARM_WR4      =   132, 
+    CV_ARM_WR5      =   133, 
+    CV_ARM_WR6      =   134, 
+    CV_ARM_WR7      =   135, 
+    CV_ARM_WR8      =   136, 
+    CV_ARM_WR9      =   137, 
+    CV_ARM_WR10     =   138, 
+    CV_ARM_WR11     =   139, 
+    CV_ARM_WR12     =   140, 
+    CV_ARM_WR13     =   141, 
+    CV_ARM_WR14     =   142, 
+    CV_ARM_WR15     =   143, 
+    
+    // XSCALE Concan co-processor control registers
+    CV_ARM_WCID     =   144,
+    CV_ARM_WCON     =   145,
+    CV_ARM_WCSSF    =   146,
+    CV_ARM_WCASF    =   147,
+    CV_ARM_WC4      =   148,
+    CV_ARM_WC5      =   149,
+    CV_ARM_WC6      =   150,
+    CV_ARM_WC7      =   151,
+    CV_ARM_WCGR0    =   152,
+    CV_ARM_WCGR1    =   153,
+    CV_ARM_WCGR2    =   154,
+    CV_ARM_WCGR3    =   155,
+    CV_ARM_WC12     =   156,
+    CV_ARM_WC13     =   157,
+    CV_ARM_WC14     =   158,
+    CV_ARM_WC15     =   159,
+
+    //
+    // ARM VFPv3/Neon extended floating Point
+    //
+    
+    CV_ARM_FS32     =   200,
+    CV_ARM_FS33     =   201,
+    CV_ARM_FS34     =   202,
+    CV_ARM_FS35     =   203,
+    CV_ARM_FS36     =   204,
+    CV_ARM_FS37     =   205,
+    CV_ARM_FS38     =   206,
+    CV_ARM_FS39     =   207,
+    CV_ARM_FS40     =   208,
+    CV_ARM_FS41     =   209,
+    CV_ARM_FS42     =   210,
+    CV_ARM_FS43     =   211,
+    CV_ARM_FS44     =   212,
+    CV_ARM_FS45     =   213,
+    CV_ARM_FS46     =   214,
+    CV_ARM_FS47     =   215,
+    CV_ARM_FS48     =   216,
+    CV_ARM_FS49     =   217,
+    CV_ARM_FS50     =   218,
+    CV_ARM_FS51     =   219,
+    CV_ARM_FS52     =   220,
+    CV_ARM_FS53     =   221,
+    CV_ARM_FS54     =   222,
+    CV_ARM_FS55     =   223,
+    CV_ARM_FS56     =   224,
+    CV_ARM_FS57     =   225,
+    CV_ARM_FS58     =   226,
+    CV_ARM_FS59     =   227,
+    CV_ARM_FS60     =   228,
+    CV_ARM_FS61     =   229,
+    CV_ARM_FS62     =   230,
+    CV_ARM_FS63     =   231,
+
+    // ARM double-precision floating point
+
+    CV_ARM_ND0 = 300, 
+    CV_ARM_ND1 = 301, 
+    CV_ARM_ND2 = 302, 
+    CV_ARM_ND3 = 303, 
+    CV_ARM_ND4 = 304, 
+    CV_ARM_ND5 = 305,
+    CV_ARM_ND6 = 306, 
+    CV_ARM_ND7 = 307, 
+    CV_ARM_ND8 = 308, 
+    CV_ARM_ND9 = 309, 
+    CV_ARM_ND10 = 310, 
+    CV_ARM_ND11 = 311,
+    CV_ARM_ND12 = 312, 
+    CV_ARM_ND13 = 313, 
+    CV_ARM_ND14 = 314, 
+    CV_ARM_ND15 = 315, 
+    CV_ARM_ND16 = 316,
+    CV_ARM_ND17 = 317, 
+    CV_ARM_ND18 = 318, 
+    CV_ARM_ND19 = 319, 
+    CV_ARM_ND20 = 320, 
+    CV_ARM_ND21 = 321,
+    CV_ARM_ND22 = 322, 
+    CV_ARM_ND23 = 323, 
+    CV_ARM_ND24 = 324, 
+    CV_ARM_ND25 = 325, 
+    CV_ARM_ND26 = 326,
+    CV_ARM_ND27 = 327, 
+    CV_ARM_ND28 = 328, 
+    CV_ARM_ND29 = 329, 
+    CV_ARM_ND30 = 330, 
+    CV_ARM_ND31 = 331,
+
+    // ARM extended precision floating point
+
+    CV_ARM_NQ0 = 400, 
+    CV_ARM_NQ1 = 401, 
+    CV_ARM_NQ2 = 402, 
+    CV_ARM_NQ3 = 403, 
+    CV_ARM_NQ4 = 404, 
+    CV_ARM_NQ5 = 405,
+    CV_ARM_NQ6 = 406, 
+    CV_ARM_NQ7 = 407, 
+    CV_ARM_NQ8 = 408, 
+    CV_ARM_NQ9 = 409, 
+    CV_ARM_NQ10 = 410, 
+    CV_ARM_NQ11 = 411,
+    CV_ARM_NQ12 = 412, 
+    CV_ARM_NQ13 = 413, 
+    CV_ARM_NQ14 = 414, 
+    CV_ARM_NQ15 = 415, 
 
     //
     // Register set for Intel IA64
@@ -3159,6 +3439,50 @@ typedef enum CV_HREG_e {
 
 } CV_HREG_e;
 
+typedef enum CV_HLSLREG_e {
+    CV_HLSLREG_TEMP                                = 0,  
+    CV_HLSLREG_INPUT                               = 1,  
+    CV_HLSLREG_OUTPUT                              = 2,  
+    CV_HLSLREG_INDEXABLE_TEMP                      = 3,  
+    CV_HLSLREG_IMMEDIATE32                         = 4,  
+    CV_HLSLREG_IMMEDIATE64                         = 5,  
+    CV_HLSLREG_SAMPLER                             = 6,  
+    CV_HLSLREG_RESOURCE                            = 7,  
+    CV_HLSLREG_CONSTANT_BUFFER                     = 8,  
+    CV_HLSLREG_IMMEDIATE_CONSTANT_BUFFER           = 9,  
+    CV_HLSLREG_LABEL                               = 10, 
+    CV_HLSLREG_INPUT_PRIMITIVEID                   = 11, 
+    CV_HLSLREG_OUTPUT_DEPTH                        = 12, 
+    CV_HLSLREG_NULL                                = 13, 
+    CV_HLSLREG_RASTERIZER                          = 14, 
+    CV_HLSLREG_OUTPUT_COVERAGE_MASK                = 15, 
+    CV_HLSLREG_STREAM                              = 16, 
+    CV_HLSLREG_FUNCTION_BODY                       = 17, 
+    CV_HLSLREG_FUNCTION_TABLE                      = 18, 
+    CV_HLSLREG_INTERFACE                           = 19, 
+    CV_HLSLREG_FUNCTION_INPUT                      = 20, 
+    CV_HLSLREG_FUNCTION_OUTPUT                     = 21, 
+    CV_HLSLREG_OUTPUT_CONTROL_POINT_ID             = 22, 
+    CV_HLSLREG_INPUT_FORK_INSTANCE_ID              = 23, 
+    CV_HLSLREG_INPUT_JOIN_INSTANCE_ID              = 24, 
+    CV_HLSLREG_INPUT_CONTROL_POINT                 = 25, 
+    CV_HLSLREG_OUTPUT_CONTROL_POINT                = 26, 
+    CV_HLSLREG_INPUT_PATCH_CONSTANT                = 27, 
+    CV_HLSLREG_INPUT_DOMAIN_POINT                  = 28, 
+    CV_HLSLREG_THIS_POINTER                        = 29, 
+    CV_HLSLREG_UNORDERED_ACCESS_VIEW               = 30, 
+    CV_HLSLREG_THREAD_GROUP_SHARED_MEMORY          = 31, 
+    CV_HLSLREG_INPUT_THREAD_ID                     = 32, 
+    CV_HLSLREG_INPUT_THREAD_GROUP_ID               = 33, 
+    CV_HLSLREG_INPUT_THREAD_ID_IN_GROUP            = 34, 
+    CV_HLSLREG_INPUT_COVERAGE_MASK                 = 35, 
+    CV_HLSLREG_INPUT_THREAD_ID_IN_GROUP_FLATTENED  = 36,
+    CV_HLSLREG_INPUT_GS_INSTANCE_ID                = 37, 
+    CV_HLSLREG_OUTPUT_DEPTH_GREATER_EQUAL          = 38, 
+    CV_HLSLREG_OUTPUT_DEPTH_LESS_EQUAL             = 39, 
+    CV_HLSLREG_CYCLE_COUNTER                       = 40, 
+} CV_HLSLREG_e;
+
 enum StackFrameTypeEnum
 {
     FrameTypeFPO,                   // Frame pointer omitted, FPO info available
@@ -3175,8 +3499,21 @@ enum MemoryTypeEnum
     MemTypeCode,                    // Read only code memory
     MemTypeData,                    // Read only data/stack memory
     MemTypeStack,                   // Read only stack memory
+    MemTypeCodeOnHeap,              // Read only memory for code generated on heap by runtime
 
     MemTypeAny = -1,
 };
+
+typedef enum CV_HLSLMemorySpace_e
+{
+    // HLSL specific memory spaces
+
+    CV_HLSL_MEMSPACE_DATA         = 0x00,
+    CV_HLSL_MEMSPACE_SAMPLER      = 0x01,
+    CV_HLSL_MEMSPACE_RESOURCE     = 0x02,
+    CV_HLSL_MEMSPACE_RWRESOURCE   = 0x03,
+
+    CV_HLSL_MEMSPACE_MAX          = 0x0F,
+} CV_HLSLMemorySpace_e;
 
 #endif
