@@ -37,6 +37,9 @@
     <Filter Include="Common\UnitTest">
       <UniqueIdentifier>{4cee4ebe-34cf-4f3e-b531-1e809f809106}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Reflection">
+      <UniqueIdentifier>{11397095-5fca-4107-b756-59b53eebb209}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Basic.cpp">
@@ -182,6 +185,9 @@
     </ClCompile>
     <ClCompile Include="TestThread.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptor.cpp">
+      <Filter>Common\Reflection</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -412,6 +418,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Collections\OperationOrderBy.h">
       <Filter>Common\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptor.h">
+      <Filter>Common\Reflection</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

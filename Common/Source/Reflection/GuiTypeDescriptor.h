@@ -1,7 +1,7 @@
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: ³Âè÷å«(vczh)
-GacUI::Reflection
+Framework::Reflection
 
 Interfaces:
 ***********************************************************************/
@@ -9,11 +9,14 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_REFLECTION_GUITYPEDESCRIPTOR
 #define VCZH_PRESENTATION_REFLECTION_GUITYPEDESCRIPTOR
 
-#include "..\NativeWindow\GuiTypes.h"
+#include "..\Basic.h"
+#include "..\Pointer.h"
+#include "..\String.h"
+#include "..\Collections\Interfaces.h"
 
 namespace vl
 {
-	namespace presentation
+	namespace reflection
 	{
 
 /***********************************************************************

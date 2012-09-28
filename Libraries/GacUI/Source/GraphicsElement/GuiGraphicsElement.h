@@ -10,12 +10,13 @@ Interfaces:
 #define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSELEMENT
 
 #include "..\NativeWindow\GuiNativeWindow.h"
-#include "..\Reflection\GuiTypeDescriptor.h"
 
 namespace vl
 {
 	namespace presentation
 	{
+		using namespace reflection;
+
 		namespace elements
 		{
 			class IGuiGraphicsElement;

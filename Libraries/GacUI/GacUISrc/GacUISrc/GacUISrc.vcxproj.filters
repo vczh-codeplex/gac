@@ -37,9 +37,6 @@
     <Filter Include="GacUI\NativeWindow">
       <UniqueIdentifier>{d431374b-430b-48f6-8897-587dd9d73ed3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GacUI\Reflection">
-      <UniqueIdentifier>{6f847785-bccf-4050-82a0-0616d72714d4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GacUI\Controls\ExtendedControls">
       <UniqueIdentifier>{5a42a659-890c-440f-ad26-f0a3ff0ee7e9}</UniqueIdentifier>
     </Filter>
@@ -75,6 +72,9 @@
     </Filter>
     <Filter Include="GacUI\Controls\ToolstripPackage">
       <UniqueIdentifier>{9924ac3c-9a11-44ce-8042-2ee7502c2bbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Reflection">
+      <UniqueIdentifier>{47fbdd49-49f4-46b2-8ded-4f7e56ba046f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -195,9 +195,6 @@
     <ClCompile Include="..\..\Source\NativeWindow\Windows\GDI\WinGDIApplication.cpp">
       <Filter>GacUI\NativeWindow\Windows\GDI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptor.cpp">
-      <Filter>GacUI\Reflection</Filter>
-    </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -302,6 +299,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripMenu.cpp">
       <Filter>GacUI\Controls\ToolstripPackage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.cpp">
+      <Filter>Common\Reflection</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -497,9 +497,6 @@
     <ClInclude Include="..\..\Source\NativeWindow\Windows\GDI\WinGDIApplication.h">
       <Filter>GacUI\NativeWindow\Windows\GDI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptor.h">
-      <Filter>GacUI\Reflection</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Controls\Styles\GuiThemeStyleFactory.h">
       <Filter>GacUI\Controls\Styles</Filter>
     </ClInclude>
@@ -601,6 +598,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripMenu.h">
       <Filter>GacUI\Controls\ToolstripPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.h">
+      <Filter>Common\Reflection</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

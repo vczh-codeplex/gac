@@ -2,7 +2,7 @@
 
 namespace vl
 {
-	namespace presentation
+	namespace reflection
 	{
 
 /***********************************************************************
