@@ -19,6 +19,15 @@ DescriptableObject
 		{
 		}
 
+		description::ITypeDescriptor* DescriptableObject::GetTypeDescriptor()
+		{
+			return typeDescriptor?*typeDescriptor:0;
+		}
+
+/***********************************************************************
+DescriptableObject
+***********************************************************************/
+
 		namespace description
 		{
 			Value::Value()
