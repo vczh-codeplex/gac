@@ -3,7 +3,7 @@ Vczh Library++ 3.0
 Developer: ³Âè÷å«(vczh)
 Framework::Reflection
 
-Interfaces:
+XML Representation for Code Generation:
 ***********************************************************************/
 
 #ifndef VCZH_PRESENTATION_REFLECTION_GUITYPEDESCRIPTOR
@@ -12,6 +12,7 @@ Interfaces:
 #include "..\Basic.h"
 #include "..\Pointer.h"
 #include "..\String.h"
+#include "..\Function.h"
 #include "..\Collections\Interfaces.h"
 
 namespace vl
@@ -39,6 +40,8 @@ Attribute
 		public:
 			DescriptableObject();
 			virtual ~DescriptableObject();
+
+			description::ITypeDescriptor*			GetTypeDescriptor();
 		};
 
 		class IDescriptable : public virtual Interface, public virtual DescriptableObject
@@ -62,7 +65,12 @@ Attribute
 				}
 			}
 
-			static void SetTypeDescroptor(description::ITypeDescriptor* typeDescroptor)
+			static description::ITypeDescriptor* GetAssociatedTypeDescriptor()
+			{
+				return associatedTypeDescriptor;
+			}
+
+			static void SetAssociatedTypeDescroptor(description::ITypeDescriptor* typeDescroptor)
 			{
 				if(!associatedTypeDescriptor)
 				{
@@ -125,11 +133,8 @@ Value
 			};
 
 /***********************************************************************
-ITypeDescriptor
+ITypeDescriptor (basic)
 ***********************************************************************/
-
-			class IMethodInfo;
-			class IMethodGroupInfo;
 
 			class IMemberInfo : public Interface
 			{
@@ -147,12 +152,23 @@ ITypeDescriptor
 				virtual bool					CanBeNull()=0;
 			};
 
+/***********************************************************************
+ITypeDescriptor (property)
+***********************************************************************/
+
 			class IPropertyInfo : public IMemberInfo, public IValueInfo
 			{
 			public:
 				virtual Value					GetValue(Value thisObject)=0;
 				virtual void					SetValue(Value thisObject, Value newValue)=0;
 			};
+
+/***********************************************************************
+ITypeDescriptor (method)
+***********************************************************************/
+
+			class IMethodInfo;
+			class IMethodGroupInfo;
 
 			class IParameterInfo : public IMemberInfo, public IValueInfo
 			{
@@ -174,10 +190,32 @@ ITypeDescriptor
 			class IMethodGroupInfo : public IMemberInfo
 			{
 			public:
-				virtual const WString&			GetName()=0;
 				virtual int						GetMethodCount()=0;
 				virtual IMethodInfo*			GetMethod(int index)=0;
 			};
+
+/***********************************************************************
+ITypeDescriptor (event)
+***********************************************************************/
+
+			class IEventInfo;
+
+			class IEventHandler : public Interface
+			{
+			public:
+				virtual IEventInfo*				GetOwnerEvent();
+			};
+
+			class IEventInfo : public IMemberInfo
+			{
+			public:
+				virtual IEventHandler*			Attach(const Func<void(const Value&, const Value&)>& handler)=0;
+				virtual bool					Detach(IEventHandler* handler)=0;
+			};
+
+/***********************************************************************
+ITypeDescriptor
+***********************************************************************/
 
 			class ITypeDescriptor : public Interface
 			{
@@ -189,6 +227,11 @@ ITypeDescriptor
 				virtual IPropertyInfo*			GetProperty(int index)=0;
 				virtual bool					IsPropertyExists(const WString& name, bool inheritance)=0;
 				virtual IPropertyInfo*			GetPropertyByName(const WString& name, bool inheritance)=0;
+
+				virtual int						GetEventCount()=0;
+				virtual IEventInfo*				GetEvent(int index)=0;
+				virtual bool					IsEventExists(const WString& name, bool inheritance)=0;
+				virtual IEventInfo*				GetEventByName(const WString& name, bool inheritance)=0;
 
 				virtual int						GetMethodGroupCount()=0;
 				virtual IMethodGroupInfo*		GetMethodGroup(int index)=0;
