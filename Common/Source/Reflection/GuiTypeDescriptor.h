@@ -159,8 +159,8 @@ ITypeDescriptor (property)
 			class IPropertyInfo : public IMemberInfo, public IValueInfo
 			{
 			public:
-				virtual Value					GetValue(Value thisObject)=0;
-				virtual void					SetValue(Value thisObject, Value newValue)=0;
+				virtual Value					GetValue(const Value& thisObject)=0;
+				virtual void					SetValue(const Value& thisObject, Value newValue)=0;
 			};
 
 /***********************************************************************
@@ -184,7 +184,7 @@ ITypeDescriptor (method)
 				virtual int						GetParameterCount()=0;
 				virtual IParameterInfo*			GetParameter(int index)=0;
 				virtual IValueInfo*				GetReturn()=0;
-				virtual Value					Invoke(Value thisObject, const collections::IReadonlyList<Value>& arguments)=0;
+				virtual Value					Invoke(const Value& thisObject, const collections::IReadonlyList<Value>& arguments)=0;
 			};
 
 			class IMethodGroupInfo : public IMemberInfo
@@ -203,14 +203,17 @@ ITypeDescriptor (event)
 			class IEventHandler : public Interface
 			{
 			public:
-				virtual IEventInfo*				GetOwnerEvent();
+				virtual IEventInfo*				GetOwnerEvent()=0;
+				virtual Value					GetOwnerObject()=0;
+				virtual bool					IsAttached()=0;
+				virtual bool					Detach()=0;
 			};
 
 			class IEventInfo : public IMemberInfo
 			{
 			public:
-				virtual IEventHandler*			Attach(const Func<void(const Value&, const Value&)>& handler)=0;
-				virtual bool					Detach(IEventHandler* handler)=0;
+				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, const Func<void(const Value&, const Value&)>& handler)=0;
+				virtual void					Invoke(const Value& thisObject, const Value& arguments)=0;
 			};
 
 /***********************************************************************
