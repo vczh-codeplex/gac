@@ -1,5 +1,6 @@
 #include "GuiApplication.h"
 #include "Styles\GuiWin7Styles.h"
+#include "Styles\GuiWin8Styles.h"
 
 extern void GuiMain();
 

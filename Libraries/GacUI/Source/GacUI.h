@@ -11,6 +11,7 @@ Interfaces:
 
 #include "Controls\GuiApplication.h"
 #include "Controls\Styles\GuiWin7Styles.h"
+#include "Controls\Styles\GuiWin8Styles.h"
 
 using namespace vl;
 using namespace vl::presentation;

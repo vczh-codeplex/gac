@@ -120,6 +120,7 @@
     <ClCompile Include="..\..\Source\Controls\Styles\GuiCommonStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\GuiThemeStyleFactory.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\GuiWin7Styles.cpp" />
+    <ClCompile Include="..\..\Source\Controls\Styles\GuiWin8Styles.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ButtonStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ControlStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ListStyles.cpp" />
@@ -220,6 +221,7 @@
     <ClInclude Include="..\..\Source\Controls\Styles\GuiCommonStyles.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\GuiThemeStyleFactory.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\GuiWin7Styles.h" />
+    <ClInclude Include="..\..\Source\Controls\Styles\GuiWin8Styles.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ButtonStyles.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ControlStyles.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ListStyles.h" />

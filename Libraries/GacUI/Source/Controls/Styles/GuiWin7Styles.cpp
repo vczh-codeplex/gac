@@ -1,6 +1,15 @@
 #include <math.h>
 #include "GuiWin7Styles.h"
 
+#include "Win7Styles\GuiWin7StylesCommon.h"
+#include "Win7Styles\GuiWin7ControlStyles.h"
+#include "Win7Styles\GuiWin7ButtonStyles.h"
+#include "Win7Styles\GuiWin7TabStyles.h"
+#include "Win7Styles\GuiWin7MenuStyles.h"
+#include "Win7Styles\GuiWin7ToolstripStyles.h"
+#include "Win7Styles\GuiWin7ScrollableStyles.h"
+#include "Win7Styles\GuiWin7ListStyles.h"
+
 namespace vl
 {
 	namespace presentation

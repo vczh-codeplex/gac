@@ -1,4 +1,4 @@
-#include "..\..\Public\Source\GacUIIncludes.h"
+#include "..\..\Public\Source\GacUI.h"
 
 extern void SetupRawToolstripWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupManagedToolstripWindow(GuiControlHost* controlHost, GuiControl* container);
