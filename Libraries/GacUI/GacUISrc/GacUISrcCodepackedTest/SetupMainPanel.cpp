@@ -1,4 +1,4 @@
-#include "..\..\Public\Source\GacUIIncludes.h"
+#include "..\..\Public\Source\GacUI.h"
 
 void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellComposition* cell)
 {

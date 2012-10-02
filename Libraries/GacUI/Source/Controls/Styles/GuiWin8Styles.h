@@ -6,8 +6,8 @@ GacUI::Control Styles::Windows7 Styles
 Clases:
 ***********************************************************************/
 
-#ifndef VCZH_PRESENTATION_CONTROLS_GUIWIN7STYLES
-#define VCZH_PRESENTATION_CONTROLS_GUIWIN7STYLES
+#ifndef VCZH_PRESENTATION_CONTROLS_GUIWIN8STYLES
+#define VCZH_PRESENTATION_CONTROLS_GUIWIN8STYLES
 
 #include "GuiThemeStyleFactory.h"
 
@@ -15,7 +15,7 @@ namespace vl
 {
 	namespace presentation
 	{
-		namespace win7
+		namespace win8
 		{
 
 /***********************************************************************
@@ -23,12 +23,12 @@ Theme
 ***********************************************************************/
 
 			/// <summary>Windows 7 theme.</summary>
-			class Win7Theme : public theme::ITheme
+			class Win8Theme : public theme::ITheme
 			{
 			public:
 				/// <summary>Create the theme.</summary>
-				Win7Theme();
-				~Win7Theme();
+				Win8Theme();
+				~Win8Theme();
 
 				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;

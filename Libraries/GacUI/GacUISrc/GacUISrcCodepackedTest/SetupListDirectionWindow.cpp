@@ -1,4 +1,4 @@
-#include "..\..\Public\Source\GacUIIncludes.h"
+#include "..\..\Public\Source\GacUI.h"
 
 void SetupListDirectionWindow(GuiControlHost* controlHost, GuiControl* container)
 {

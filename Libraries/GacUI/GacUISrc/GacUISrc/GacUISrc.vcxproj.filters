@@ -76,6 +76,9 @@
     <Filter Include="Common\Reflection">
       <UniqueIdentifier>{47fbdd49-49f4-46b2-8ded-4f7e56ba046f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GacUI\Controls\Styles\Win8Styles">
+      <UniqueIdentifier>{c5bd68a8-d5ed-446f-99f9-7fdfed4c9665}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -302,6 +305,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.cpp">
       <Filter>Common\Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\GuiWin8Styles.cpp">
+      <Filter>GacUI\Controls\Styles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -601,6 +607,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.h">
       <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\GuiWin8Styles.h">
+      <Filter>GacUI\Controls\Styles</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
