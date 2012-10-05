@@ -1,19 +1,19 @@
-#include "..\..\Public\Source\GacUI.h"
+#include "..\..\Public\Source\GacUIIncludes.h"
 
 void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellComposition* cell)
 {
 	{
-		GuiControl* groupBox=new GuiControl(new win7::Win7GroupBoxStyle);
+		GuiControl* groupBox=g::NewGroupBox();
 		cell->AddChild(groupBox->GetBoundsComposition());
 		groupBox->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(200, 200)));
 		groupBox->SetText(L"GroupBox1");
 
-		GuiButton* buttonBig=new GuiButton(new win7::Win7ButtonStyle());
+		GuiButton* buttonBig=g::NewButton();
 		groupBox->GetContainerComposition()->AddChild(buttonBig->GetBoundsComposition());
 		buttonBig->GetBoundsComposition()->SetAlignmentToParent(Margin(10, 10, 10, 10));
 		buttonBig->SetText(L"I am a big button!");
 		{
-			GuiButton* buttonEnabling=new GuiButton(new win7::Win7ButtonStyle());
+			GuiButton* buttonEnabling=g::NewButton();
 			cell->AddChild(buttonEnabling->GetBoundsComposition());
 			buttonEnabling->GetBoundsComposition()->SetBounds(Rect(Point(0, 210), Size(200, 25)));
 			buttonEnabling->SetText(L"Disable GroupBox1");
@@ -32,7 +32,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 			});
 		}
 		{
-			GuiButton* buttonEnabling=new GuiButton(new win7::Win7ButtonStyle());
+			GuiButton* buttonEnabling=g::NewButton();
 			cell->AddChild(buttonEnabling->GetBoundsComposition());
 			buttonEnabling->GetBoundsComposition()->SetBounds(Rect(Point(0, 245), Size(200, 25)));
 			buttonEnabling->SetText(L"Disable big button");
@@ -51,7 +51,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 			});
 		}
 		{
-			GuiMultilineTextBox* textBox=new GuiMultilineTextBox(new win7::Win7MultilineTextBoxProvider);
+			GuiMultilineTextBox* textBox=g::NewMultilineTextBox();
 			cell->AddChild(textBox->GetBoundsComposition());
 			textBox->GetBoundsComposition()->SetBounds(Rect(Point(0, 280), Size(200, 180)));
 
@@ -66,7 +66,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 				;
 			textBox->SetText(text);
 
-			GuiButton* buttonEnabling=new GuiButton(new win7::Win7ButtonStyle());
+			GuiButton* buttonEnabling=g::NewButton();
 			cell->AddChild(buttonEnabling->GetBoundsComposition());
 			buttonEnabling->GetBoundsComposition()->SetBounds(Rect(Point(0, 470), Size(200, 25)));
 			buttonEnabling->SetText(L"Disable TextBox");
@@ -86,18 +86,18 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 		}
 	}
 	{
-		GuiControl* groupBox=new GuiControl(new win7::Win7GroupBoxStyle);
+		GuiControl* groupBox=g::NewGroupBox();
 		cell->AddChild(groupBox->GetBoundsComposition());
 		groupBox->GetBoundsComposition()->SetBounds(Rect(Point(210, 0), Size(200, 200)));
 		groupBox->SetText(L"GroupBox2");
 		{
-			GuiSelectableButton* checkBox=new GuiSelectableButton(new win7::Win7CheckBoxStyle(win7::Win7CheckBoxStyle::CheckBox));
+			GuiSelectableButton* checkBox=g::NewCheckBox();
 			groupBox->GetContainerComposition()->AddChild(checkBox->GetBoundsComposition());
 			checkBox->GetBoundsComposition()->SetAlignmentToParent(Margin(10, 5, 10, -1));
 			checkBox->SetText(L"CheckBox 1");
 		}
 		{
-			GuiSelectableButton* checkBox=new GuiSelectableButton(new win7::Win7SelectableItemStyle());
+			GuiSelectableButton* checkBox=g::NewCheckBox();
 			groupBox->GetContainerComposition()->AddChild(checkBox->GetBoundsComposition());
 			checkBox->GetBoundsComposition()->SetAlignmentToParent(Margin(10, 40, 10, -1));
 			checkBox->SetText(L"CheckBox 2");
@@ -108,7 +108,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 
 			for(int i=0;i<3;i++)
 			{
-				GuiSelectableButton* radioButton=new GuiSelectableButton(new win7::Win7CheckBoxStyle(win7::Win7CheckBoxStyle::RadioButton));
+				GuiSelectableButton* radioButton=g::NewRadioButton();
 				groupBox->GetContainerComposition()->AddChild(radioButton->GetBoundsComposition());
 				radioButton->GetBoundsComposition()->SetBounds(Rect(Point(10, 75+i*35), Size(200, 25)));
 				radioButton->SetText(L"RadioButton "+itow(i+1));
@@ -116,7 +116,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 			}
 		}
 		{
-			GuiButton* buttonEnabling=new GuiButton(new win7::Win7ButtonStyle());
+			GuiButton* buttonEnabling=g::NewButton();
 			cell->AddChild(buttonEnabling->GetBoundsComposition());
 			buttonEnabling->GetBoundsComposition()->SetBounds(Rect(Point(210, 210), Size(200, 25)));
 			buttonEnabling->SetText(L"Disable GroupBox2");
@@ -135,65 +135,18 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 			});
 		}
 		{
-			GuiSinglelineTextBox* textBox=new GuiSinglelineTextBox(new win7::Win7SinglelineTextBoxProvider);
+			GuiSinglelineTextBox* textBox=g::NewTextBox();
 			cell->AddChild(textBox->GetBoundsComposition());
 			textBox->GetBoundsComposition()->SetBounds(Rect(Point(210, 245), Size(200, 27)));
 			textBox->SetText(L"Singleline TextBox");
 		}
-		{
-			GuiListViewColumnHeader* buttonHeader=new GuiListViewColumnHeader(new win7::Win7ListViewColumnHeaderStyle());
-			cell->AddChild(buttonHeader->GetBoundsComposition());
-			buttonHeader->GetBoundsComposition()->SetBounds(Rect(Point(210, 280), Size(200, 25)));
-			buttonHeader->SetText(L"ListView Header");
-		}
-		{
-			GuiListViewColumnHeader* buttonHeader=new GuiListViewColumnHeader(new win7::Win7ListViewColumnHeaderStyle());
-			cell->AddChild(buttonHeader->GetBoundsComposition());
-			buttonHeader->GetBoundsComposition()->SetBounds(Rect(Point(210, 315), Size(200, 25)));
-			buttonHeader->SetText(L"ListView Header DropDown");
-
-			buttonHeader->Clicked.AttachLambda([buttonHeader](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-			{
-				switch(buttonHeader->GetColumnSortingState())
-				{
-				case GuiListViewColumnHeader::NotSorted:
-					buttonHeader->SetColumnSortingState(GuiListViewColumnHeader::Ascending);
-					break;
-				case GuiListViewColumnHeader::Ascending:
-					buttonHeader->SetColumnSortingState(GuiListViewColumnHeader::Descending);
-					break;
-				case GuiListViewColumnHeader::Descending:
-					buttonHeader->SetColumnSortingState(GuiListViewColumnHeader::NotSorted);
-					break;
-				}
-			});
-
-			buttonHeader->CreateSubMenu();
-			GuiMenu* dropdownMenu=buttonHeader->GetSubMenu();
-			GuiStackComposition* menuStack=new GuiStackComposition;
-			menuStack->SetDirection(GuiStackComposition::Vertical);
-			menuStack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-			menuStack->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			dropdownMenu->GetContainerComposition()->AddChild(menuStack);
-
-			for(int i=0;i<3;i++)
-			{
-				GuiStackItemComposition* item=new GuiStackItemComposition;
-				menuStack->AddChild(item);
-
-				GuiMenuButton* button=new GuiMenuButton(new win7::Win7MenuItemButtonStyle);
-				button->SetText(L"MenuButton "+itow(i+1));
-				button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				item->AddChild(button->GetBoundsComposition());
-			}
-		}
 	}
 	{
-		GuiScrollContainer* scrollView=new GuiScrollContainer(new win7::Win7ScrollViewProvider);
+		GuiScrollContainer* scrollView=g::NewScrollContainer();
 		cell->AddChild(scrollView->GetBoundsComposition());
 		scrollView->GetBoundsComposition()->SetBounds(Rect(Point(420, 0), Size(200, 200)));
 		{
-			GuiButton* buttonAdd=new GuiButton(new win7::Win7ButtonStyle());
+			GuiButton* buttonAdd=g::NewButton();
 			cell->AddChild(buttonAdd->GetBoundsComposition());
 			buttonAdd->GetBoundsComposition()->SetBounds(Rect(Point(420, 210), Size(200, 25)));
 			buttonAdd->SetText(L"Add Button");
@@ -208,14 +161,14 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 						count++;
 					}
 				}
-				GuiButton* child=new GuiButton(new win7::Win7ButtonStyle);
+				GuiButton* child=g::NewButton();
 				child->GetBoundsComposition()->SetBounds(Rect(Point(0, count*40), Size(200, 30)));
 				child->SetText(L"Button "+itow(count+1));
 				scrollView->GetContainerComposition()->AddChild(child->GetBoundsComposition());
 			});
 		}
 		{
-			GuiButton* buttonClear=new GuiButton(new win7::Win7ButtonStyle());
+			GuiButton* buttonClear=g::NewButton();
 			cell->AddChild(buttonClear->GetBoundsComposition());
 			buttonClear->GetBoundsComposition()->SetBounds(Rect(Point(420, 245), Size(200, 25)));
 			buttonClear->SetText(L"Clear Buttons");
@@ -234,7 +187,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 			});
 		}
 		{
-			GuiButton* buttonHorizontal=new GuiButton(new win7::Win7ButtonStyle());
+			GuiButton* buttonHorizontal=g::NewButton();
 			cell->AddChild(buttonHorizontal->GetBoundsComposition());
 			buttonHorizontal->GetBoundsComposition()->SetBounds(Rect(Point(420, 280), Size(200, 25)));
 			buttonHorizontal->SetText(L"Horizontal Scroll Bar");
@@ -245,7 +198,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 			});
 		}
 		{
-			GuiButton* buttonVertical=new GuiButton(new win7::Win7ButtonStyle());
+			GuiButton* buttonVertical=g::NewButton();
 			cell->AddChild(buttonVertical->GetBoundsComposition());
 			buttonVertical->GetBoundsComposition()->SetBounds(Rect(Point(420, 315), Size(200, 25)));
 			buttonVertical->SetText(L"Vertical Scroll Bar");
@@ -258,7 +211,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 		{
 			GuiTextList* listControl=0;
 			{
-				listControl=new GuiTextList(new win7::Win7MultilineTextBoxProvider, new win7::Win7TextListProvider);
+				listControl=g::NewTextList();
 				listControl->GetBoundsComposition()->SetAlignmentToParent(Margin(200, 5, 5, 5));
 				listControl->SetHorizontalAlwaysVisible(false);
 
@@ -268,7 +221,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 					listControl->GetItems().SetChecked(i, i%2==0);
 				}
 			}
-			GuiComboBoxListControl* comboBox=new GuiComboBoxListControl(new win7::Win7DropDownComboBoxStyle(), listControl);
+			GuiComboBoxListControl* comboBox=g::NewComboBox(listControl);
 			comboBox->GetBoundsComposition()->SetBounds(Rect(Point(420, 350), Size(200, 25)));
 			comboBox->SetSelectedIndex(0);
 			cell->AddChild(comboBox->GetBoundsComposition());
@@ -276,7 +229,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 		{
 			GuiListView* listControl=0;
 			{
-				listControl=new GuiListView(new win7::Win7ListViewProvider);
+				listControl=g::NewListViewBigIcon();
 				listControl->GetBoundsComposition()->SetAlignmentToParent(Margin(200, 5, 5, 5));
 				listControl->SetHorizontalAlwaysVisible(false);
 				listControl->SetVerticalAlwaysVisible(false);
@@ -295,7 +248,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 					listControl->GetItems().Add(item);
 				}
 			}
-			GuiComboBoxListControl* comboBox=new GuiComboBoxListControl(new win7::Win7DropDownComboBoxStyle(), listControl);
+			GuiComboBoxListControl* comboBox=g::NewComboBox(listControl);
 			comboBox->GetBoundsComposition()->SetBounds(Rect(Point(420, 385), Size(200, 25)));
 			comboBox->SetSelectedIndex(0);
 			cell->AddChild(comboBox->GetBoundsComposition());
@@ -303,7 +256,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 		{
 			GuiTreeView* treeControl=0;
 			{
-				treeControl=new GuiTreeView(new win7::Win7TreeViewProvider);
+				treeControl=g::NewTreeView();
 				treeControl->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
 				treeControl->SetHorizontalAlwaysVisible(false);
 				treeControl->SetVerticalAlwaysVisible(false);
@@ -333,7 +286,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 					node->Children().Add(new tree::MemoryNodeProvider(new tree::TreeViewItem(imageData, L"JBuilder")));
 				}
 			}
-			GuiComboBoxListControl* comboBox=new GuiComboBoxListControl(new win7::Win7DropDownComboBoxStyle(), treeControl);
+			GuiComboBoxListControl* comboBox=g::NewComboBox(treeControl);
 			comboBox->GetBoundsComposition()->SetBounds(Rect(Point(420, 420), Size(200, 25)));
 			cell->AddChild(comboBox->GetBoundsComposition());
 		}

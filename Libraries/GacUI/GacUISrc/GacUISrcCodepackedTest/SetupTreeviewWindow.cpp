@@ -1,9 +1,9 @@
-#include "..\..\Public\Source\GacUI.h"
+#include "..\..\Public\Source\GacUIIncludes.h"
 
 void SetupTreeviewWindow(GuiControlHost* controlHost, GuiControl* container)
 {
 	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-	GuiTreeView* treeControl=new GuiTreeView(new win7::Win7TreeViewProvider);
+	GuiTreeView* treeControl=g::NewTreeView();
 	treeControl->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
 	treeControl->GetBoundsComposition()->SetBounds(Rect(0, 0, 300, 200));
 	treeControl->SetHorizontalAlwaysVisible(false);

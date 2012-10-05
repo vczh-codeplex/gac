@@ -1,4 +1,4 @@
-#include "..\..\Public\Source\GacUI.h"
+#include "..\..\Public\Source\GacUIIncludes.h"
 
 extern void SetupListControlWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupListDirectionWindow(GuiControlHost* controlHost, GuiControl* container);
@@ -8,7 +8,7 @@ extern void SetupTreeviewWindow(GuiControlHost* controlHost, GuiControl* contain
 void SetupTabPageListControlWindow(GuiControlHost* controlHost, GuiControl* container)
 {
 	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-	GuiTab* tab=new GuiTab(new win7::Win7TabStyle);
+	GuiTab* tab=g::NewTab();
 	tab->GetBoundsComposition()->SetAlignmentToParent(Margin(6, 6, 6, 6));
 	{
 		GuiTabPage* page=tab->CreatePage();

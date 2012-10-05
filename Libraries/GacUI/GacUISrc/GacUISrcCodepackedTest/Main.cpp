@@ -6,7 +6,7 @@
 
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-#include "..\..\Public\Source\GacUI.h"
+#include "..\..\Public\Source\GacUIIncludes.h"
 #include <Windows.h>
 
 #define GUI_GRAPHICS_RENDERER_DIRECT2D
@@ -39,7 +39,7 @@ SetupWindow
 void SetupTabPageWindow(GuiControlHost* controlHost, GuiControl* container)
 {
 	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-	GuiTab* tab=new GuiTab(new win7::Win7TabStyle);
+	GuiTab* tab=g::NewTab();
 	tab->GetBoundsComposition()->SetAlignmentToParent(Margin(6, 6, 6, 6));
 	{
 		GuiTabPage* page=tab->CreatePage();
@@ -77,7 +77,7 @@ void SetupTabPageWindow(GuiControlHost* controlHost, GuiControl* container)
 
 void GuiMain()
 {
-	GuiWindow window(new win7::Win7WindowStyle);
+	GuiWindow window(GetCurrentTheme()->CreateWindowStyle());
 #ifdef GUI_GRAPHICS_RENDERER_GDI
 	window.SetText(L"Vczh GUI Demo (GDI)");
 #endif

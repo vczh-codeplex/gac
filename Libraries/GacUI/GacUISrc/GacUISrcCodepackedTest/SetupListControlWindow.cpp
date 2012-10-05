@@ -1,11 +1,11 @@
-#include "..\..\Public\Source\GacUI.h"
+#include "..\..\Public\Source\GacUIIncludes.h"
 
 void SetupListControlWindow(GuiControlHost* controlHost, GuiControl* container)
 {
 	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	GuiTextList* listControl=0;
 	{
-		listControl=new GuiTextList(new win7::Win7MultilineTextBoxProvider, new win7::Win7TextListProvider);
+		listControl=g::NewTextList();
 		listControl->GetBoundsComposition()->SetAlignmentToParent(Margin(200, 5, 5, 5));
 		listControl->GetBoundsComposition()->SetBounds(Rect(0, 0, 300, 200));
 		listControl->SetHorizontalAlwaysVisible(false);
@@ -19,7 +19,7 @@ void SetupListControlWindow(GuiControlHost* controlHost, GuiControl* container)
 		}
 	}
 	{
-		GuiTextList* typeList=new GuiTextList(new win7::Win7MultilineTextBoxProvider, new win7::Win7TextListProvider);
+		GuiTextList* typeList=g::NewTextList();
 		typeList->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, -1, 5));
 		typeList->GetBoundsComposition()->SetBounds(Rect(0, 0, 190, 200));
 		typeList->SetHorizontalAlwaysVisible(false);
@@ -37,13 +37,13 @@ void SetupListControlWindow(GuiControlHost* controlHost, GuiControl* container)
 				switch(typeList->GetSelectedItems()[0])
 				{
 				case 0:
-					listControl->ChangeItemStyle(new win7::Win7TextListProvider);
+					listControl->ChangeItemStyle(GetCurrentTheme()->CreateTextListItemStyle());
 					break;
 				case 1:
-					listControl->ChangeItemStyle(new win7::Win7CheckTextListProvider);
+					listControl->ChangeItemStyle(GetCurrentTheme()->CreateCheckTextListItemStyle());
 					break;
 				case 2:
-					listControl->ChangeItemStyle(new win7::Win7RadioTextListProvider);
+					listControl->ChangeItemStyle(GetCurrentTheme()->CreateRadioTextListItemStyle());
 					break;
 				}
 			}

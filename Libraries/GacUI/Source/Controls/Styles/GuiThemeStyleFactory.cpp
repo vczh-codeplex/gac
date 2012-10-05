@@ -30,6 +30,11 @@ namespace vl
 					return new controls::GuiLabel(GetCurrentTheme()->CreateLabelStyle());
 				}
 
+				controls::GuiScrollContainer* NewScrollContainer()
+				{
+					return new controls::GuiScrollContainer(GetCurrentTheme()->CreateScrollContainerStyle());
+				}
+
 				controls::GuiControl* NewGroupBox()
 				{
 					return new controls::GuiControl(GetCurrentTheme()->CreateGroupBoxStyle());

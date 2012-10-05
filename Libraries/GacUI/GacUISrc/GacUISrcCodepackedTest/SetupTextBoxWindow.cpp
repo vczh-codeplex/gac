@@ -1,4 +1,4 @@
-#include "..\..\Public\Source\GacUI.h"
+#include "..\..\Public\Source\GacUIIncludes.h"
 
 int textBoxTextChangedCounter=0;
 int textBoxSelectionChangedCounter=0;
@@ -10,7 +10,7 @@ private:
 public:
 	CommentColorizer()
 	{
-		text::ColorEntry defaultColor=win7::Win7GetTextBoxTextColor();
+		text::ColorEntry defaultColor=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
 		colors.Resize(2);
 		colors[0]=defaultColor;
 		defaultColor.normal.text=Color(0, 192, 0);
@@ -50,7 +50,7 @@ class CommentColorizer2 : public GuiTextBoxRegexColorizer
 public:
 	CommentColorizer2()
 	{
-		text::ColorEntry defaultColor=win7::Win7GetTextBoxTextColor();
+		text::ColorEntry defaultColor=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
 		SetDefaultColor(defaultColor);
 
 		defaultColor.normal.text=Color(0, 192, 0);
@@ -63,7 +63,7 @@ public:
 void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container)
 {
 	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-	GuiMultilineTextBox* textBox=new GuiMultilineTextBox(new win7::Win7MultilineTextBoxProvider);
+	GuiMultilineTextBox* textBox=g::NewMultilineTextBox();
 	textBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 	textBox->GetBoundsComposition()->SetBounds(Rect(0, 0, 300, 200));
 	container->GetBoundsComposition()->AddChild(textBox->GetBoundsComposition());

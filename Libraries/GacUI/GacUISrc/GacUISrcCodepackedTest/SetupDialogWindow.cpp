@@ -1,4 +1,4 @@
-#include "..\..\Public\Source\GacUI.h"
+#include "..\..\Public\Source\GacUIIncludes.h"
 
 using namespace collections;
 
@@ -6,7 +6,7 @@ namespace SetupDialogWindowHelper
 {
 	GuiComboBoxListControl* CreateComboBox(const wchar_t** items, int count)
 	{
-		GuiTextList* listControl=new GuiTextList(new win7::Win7MultilineTextBoxProvider, new win7::Win7TextListProvider);
+		GuiTextList* listControl=g::NewTextList();
 		listControl->SetHorizontalAlwaysVisible(false);
 		listControl->SetVerticalAlwaysVisible(true);
 		for(int i=0;i<count;i++)
@@ -14,7 +14,7 @@ namespace SetupDialogWindowHelper
 			listControl->GetItems().Add(list::TextItem(items[i]));
 		}
 
-		GuiComboBoxListControl* comboBox=new GuiComboBoxListControl(new win7::Win7DropDownComboBoxStyle, listControl);
+		GuiComboBoxListControl* comboBox=g::NewComboBox(listControl);
 		comboBox->SetSelectedIndex(0);
 		return comboBox;
 	}
@@ -39,7 +39,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		comboIcons->GetBoundsComposition()->SetBounds(Rect(Point(10, 70), Size(200, 0)));
 		comboModal->GetBoundsComposition()->SetBounds(Rect(Point(10, 100), Size(200, 0)));
 
-		GuiButton* buttonMessageBox=new GuiButton(new win7::Win7ButtonStyle);
+		GuiButton* buttonMessageBox=g::NewButton();
 		buttonMessageBox->SetText(L"ShowMessageBox");
 		buttonMessageBox->GetBoundsComposition()->SetBounds(Rect(Point(10, 130), Size(0, 0)));
 
@@ -76,7 +76,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		});
 	}
 	{
-		GuiButton* buttonColorDialog1=new GuiButton(new win7::Win7ButtonStyle);
+		GuiButton* buttonColorDialog1=g::NewButton();
 		buttonColorDialog1->SetText(L"SimpleCustomColor");
 		buttonColorDialog1->GetBoundsComposition()->SetBounds(Rect(Point(10, 160), Size(0, 0)));
 		container->AddChild(buttonColorDialog1);
@@ -91,7 +91,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 			}
 		});
 
-		GuiButton* buttonColorDialog2=new GuiButton(new win7::Win7ButtonStyle);
+		GuiButton* buttonColorDialog2=g::NewButton();
 		buttonColorDialog2->SetText(L"RichCustomColor");
 		buttonColorDialog2->GetBoundsComposition()->SetBounds(Rect(Point(10, 190), Size(0, 0)));
 		container->AddChild(buttonColorDialog2);
@@ -126,7 +126,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		});
 	}
 	{
-		GuiButton* buttonFontDialog1=new GuiButton(new win7::Win7ButtonStyle);
+		GuiButton* buttonFontDialog1=g::NewButton();
 		buttonFontDialog1->SetText(L"SimpleFontDialog");
 		buttonFontDialog1->GetBoundsComposition()->SetBounds(Rect(Point(10, 220), Size(0, 0)));
 		container->AddChild(buttonFontDialog1);
@@ -142,7 +142,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 			}
 		});
 
-		GuiButton* buttonFontDialog2=new GuiButton(new win7::Win7ButtonStyle);
+		GuiButton* buttonFontDialog2=g::NewButton();
 		buttonFontDialog2->SetText(L"RichFontDialog");
 		buttonFontDialog2->GetBoundsComposition()->SetBounds(Rect(Point(10, 250), Size(0, 0)));
 		container->AddChild(buttonFontDialog2);
@@ -159,22 +159,22 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		});
 	}
 	{
-		GuiButton* buttonFileDialog1=new GuiButton(new win7::Win7ButtonStyle);
+		GuiButton* buttonFileDialog1=g::NewButton();
 		buttonFileDialog1->SetText(L"OpenFileDialog");
 		buttonFileDialog1->GetBoundsComposition()->SetBounds(Rect(Point(10, 280), Size(0, 0)));
 		container->AddChild(buttonFileDialog1);
 		
-		GuiButton* buttonFileDialog2=new GuiButton(new win7::Win7ButtonStyle);
+		GuiButton* buttonFileDialog2=g::NewButton();
 		buttonFileDialog2->SetText(L"OpenFileDialogPreview");
 		buttonFileDialog2->GetBoundsComposition()->SetBounds(Rect(Point(10, 310), Size(0, 0)));
 		container->AddChild(buttonFileDialog2);
 		
-		GuiButton* buttonFileDialog3=new GuiButton(new win7::Win7ButtonStyle);
+		GuiButton* buttonFileDialog3=g::NewButton();
 		buttonFileDialog3->SetText(L"SaveFileDialog");
 		buttonFileDialog3->GetBoundsComposition()->SetBounds(Rect(Point(10, 340), Size(0, 0)));
 		container->AddChild(buttonFileDialog3);
 		
-		GuiButton* buttonFileDialog4=new GuiButton(new win7::Win7ButtonStyle);
+		GuiButton* buttonFileDialog4=g::NewButton();
 		buttonFileDialog4->SetText(L"SaveFileDialogPreview");
 		buttonFileDialog4->GetBoundsComposition()->SetBounds(Rect(Point(10, 370), Size(0, 0)));
 		container->AddChild(buttonFileDialog4);
