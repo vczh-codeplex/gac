@@ -1,4 +1,4 @@
-#include "..\..\Public\Source\GacUI.h"
+#include "..\..\Public\Source\GacUIIncludes.h"
 #include <Windows.h>
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
@@ -20,7 +20,7 @@ private:
 public:
 	IniColorizer()
 	{
-		text::ColorEntry entry=win7::Win7GetTextBoxTextColor();
+		text::ColorEntry entry=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
 		colors.Resize(5);
 		
 		// text color
@@ -101,7 +101,7 @@ class XmlColorizer : public GuiTextBoxRegexColorizer
 public:
 	XmlColorizer()
 	{
-		text::ColorEntry entry=win7::Win7GetTextBoxTextColor();
+		text::ColorEntry entry=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
 		SetDefaultColor(entry);
 
 		entry.normal.text=Color(0, 128, 0);
@@ -303,7 +303,7 @@ class CppColorizer : public GuiTextBoxRegexColorizer
 public:
 	CppColorizer()
 	{
-		text::ColorEntry entry=win7::Win7GetTextBoxTextColor();
+		text::ColorEntry entry=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
 		SetDefaultColor(entry);
 
 		entry.normal.text=Color(128, 0, 255);

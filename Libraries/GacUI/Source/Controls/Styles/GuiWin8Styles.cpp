@@ -34,6 +34,11 @@ Win8Theme
 				throw 0;
 			}
 
+			controls::GuiScrollContainer::IStyleProvider* Win8Theme::CreateScrollContainerStyle()
+			{
+				throw 0;
+			}
+
 			controls::GuiControl::IStyleController* Win8Theme::CreateGroupBoxStyle()
 			{
 				throw 0;
@@ -65,6 +70,11 @@ Win8Theme
 			}
 
 			controls::GuiTreeView::IStyleProvider* Win8Theme::CreateTreeViewStyle()
+			{
+				throw 0;
+			}
+
+			elements::text::ColorEntry Win8Theme::GetDefaultTextBoxColorEntry()
 			{
 				throw 0;
 			}
@@ -155,6 +165,16 @@ Win8Theme
 			}
 
 			controls::GuiScroll::IStyleController* Win8Theme::CreateProgressBarStyle()
+			{
+				throw 0;
+			}
+
+			int Win8Theme::GetScrollDefaultSize()
+			{
+				throw 0;
+			}
+
+			int Win8Theme::GetTrackerDefaultSize()
 			{
 				throw 0;
 			}

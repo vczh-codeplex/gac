@@ -57,12 +57,6 @@
     <ClCompile Include="SetupDialogWindow.cpp">
       <Filter>TabPages</Filter>
     </ClCompile>
-    <ClCompile Include="SetupTabPageToolstripWindow.cpp">
-      <Filter>TabPages</Filter>
-    </ClCompile>
-    <ClCompile Include="SetupRawToolstripWindow.cpp">
-      <Filter>TabPages</Filter>
-    </ClCompile>
     <ClCompile Include="SetupManagedToolstripWindow.cpp">
       <Filter>TabPages</Filter>
     </ClCompile>

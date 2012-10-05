@@ -18510,11 +18510,13 @@ namespace vl
 			public:
 				virtual controls::GuiWindow::IStyleController*								CreateWindowStyle()=0;
 				virtual controls::GuiLabel::IStyleController*								CreateLabelStyle()=0;
+				virtual controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()=0;
 				virtual controls::GuiControl::IStyleController*								CreateGroupBoxStyle()=0;
 				virtual controls::GuiTab::IStyleController*									CreateTabStyle()=0;
 				virtual controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()=0;
 				virtual controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()=0;
 				virtual controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()=0;
+				virtual elements::text::ColorEntry											GetDefaultTextBoxColorEntry()=0;
 				virtual controls::GuiListView::IStyleProvider*								CreateListViewStyle()=0;
 				virtual controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()=0;
 				
@@ -18538,6 +18540,8 @@ namespace vl
 				virtual controls::GuiScroll::IStyleController*								CreateHTrackerStyle()=0;
 				virtual controls::GuiScroll::IStyleController*								CreateVTrackerStyle()=0;
 				virtual controls::GuiScroll::IStyleController*								CreateProgressBarStyle()=0;
+				virtual int																	GetScrollDefaultSize()=0;
+				virtual int																	GetTrackerDefaultSize()=0;
 				
 				virtual controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()=0;
 				virtual controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()=0;
@@ -18552,6 +18556,7 @@ namespace vl
 			{
 				extern controls::GuiWindow*						NewWindow();
 				extern controls::GuiLabel*						NewLabel();
+				extern controls::GuiScrollContainer*			NewScrollContainer();
 				extern controls::GuiControl*					NewGroupBox();
 				extern controls::GuiTab*						NewTab();
 				extern controls::GuiComboBoxListControl*		NewComboBox(controls::GuiSelectableListControl* containedListControl);
@@ -18630,6 +18635,7 @@ Theme
 
 				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
+				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				controls::GuiTab::IStyleController*									CreateTabStyle()override;
 				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
@@ -18637,6 +18643,7 @@ Theme
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
+				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
 				
 				controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
 				controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
@@ -18658,6 +18665,8 @@ Theme
 				controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
 				controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
+				int																	GetScrollDefaultSize()override;
+				int																	GetTrackerDefaultSize()override;
 
 				controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
 				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;
@@ -18704,6 +18713,7 @@ Theme
 
 				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
+				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				controls::GuiTab::IStyleController*									CreateTabStyle()override;
 				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
@@ -18711,6 +18721,7 @@ Theme
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
+				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
 				
 				controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
 				controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
@@ -18732,6 +18743,8 @@ Theme
 				controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
 				controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
+				int																	GetScrollDefaultSize()override;
+				int																	GetTrackerDefaultSize()override;
 
 				controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
 				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;

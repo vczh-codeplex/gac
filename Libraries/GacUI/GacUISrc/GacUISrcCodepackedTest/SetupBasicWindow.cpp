@@ -1,4 +1,4 @@
-#include "..\..\Public\Source\GacUI.h"
+#include "..\..\Public\Source\GacUIIncludes.h"
 
 extern void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellComposition* cell);
 
@@ -34,11 +34,11 @@ void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container)
 
 			mainTable->SetRowOption(0, GuiCellOption::PercentageOption(1.0));
 			mainTable->SetRowOption(1, GuiCellOption::AbsoluteOption(30));
-			mainTable->SetRowOption(2, GuiCellOption::AbsoluteOption(win7::Win7TrackStyle::HandleLong));
-			mainTable->SetRowOption(3, GuiCellOption::AbsoluteOption(win7::Win7ScrollStyle::DefaultSize));
+			mainTable->SetRowOption(2, GuiCellOption::AbsoluteOption(GetCurrentTheme()->GetTrackerDefaultSize()));
+			mainTable->SetRowOption(3, GuiCellOption::AbsoluteOption(GetCurrentTheme()->GetScrollDefaultSize()));
 			mainTable->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
-			mainTable->SetColumnOption(1, GuiCellOption::AbsoluteOption(win7::Win7TrackStyle::HandleLong));
-			mainTable->SetColumnOption(2, GuiCellOption::AbsoluteOption(win7::Win7ScrollStyle::DefaultSize));
+			mainTable->SetColumnOption(1, GuiCellOption::AbsoluteOption(GetCurrentTheme()->GetTrackerDefaultSize()));
+			mainTable->SetColumnOption(2, GuiCellOption::AbsoluteOption(GetCurrentTheme()->GetScrollDefaultSize()));
 			{
 				GuiCellComposition* cell=new GuiCellComposition;
 				mainTable->AddChild(cell);
@@ -50,7 +50,7 @@ void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container)
 				mainTable->AddChild(cell);
 				cell->SetSite(0, 1, 1, 1);
 
-				GuiScroll* scroll=new GuiScroll(new win7::Win7TrackStyle(win7::Win7TrackStyle::Vertical));
+				GuiScroll* scroll=g::NewVTracker();
 				scroll->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				scroll->SetTotalSize(10);
 				cell->AddChild(scroll->GetBoundsComposition());
@@ -60,7 +60,7 @@ void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container)
 				mainTable->AddChild(cell);
 				cell->SetSite(0, 2, 2, 1);
 
-				GuiScroll* scroll=new GuiScroll(new win7::Win7ScrollStyle(win7::Win7ScrollStyle::Vertical));
+				GuiScroll* scroll=g::NewVScroll();
 				scroll->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				scroll->SetTotalSize(10);
 				scroll->SetPageSize(6);
@@ -73,7 +73,7 @@ void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container)
 				mainTable->AddChild(cell);
 				cell->SetSite(1, 0, 1, 1);
 
-				GuiScroll* scroll=new GuiScroll(new win7::Win7ProgressBarStyle);
+				GuiScroll* scroll=g::NewProgressBar();
 				scroll->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				scroll->SetTotalSize(10);
 				scroll->SetPageSize(4);
@@ -85,7 +85,7 @@ void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container)
 				mainTable->AddChild(cell);
 				cell->SetSite(2, 0, 1, 1);
 
-				GuiScroll* scroll=new GuiScroll(new win7::Win7TrackStyle(win7::Win7TrackStyle::Horizontal));
+				GuiScroll* scroll=g::NewHTracker();
 				scroll->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				scroll->SetTotalSize(10);
 				scroll->SetPageSize(4);
@@ -101,7 +101,7 @@ void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container)
 				mainTable->AddChild(cell);
 				cell->SetSite(3, 0, 1, 2);
 
-				GuiScroll* scroll=new GuiScroll(new win7::Win7ScrollStyle(win7::Win7ScrollStyle::Horizontal));
+				GuiScroll* scroll=g::NewHScroll();
 				scroll->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				scroll->SetTotalSize(10);
 				scroll->SetPageSize(6);
@@ -120,7 +120,7 @@ void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container)
 		cell->SetSite(1, i+1, 1, 1);
 		cell->SetPreferredMinSize(Size(100, 0));
 
-		GuiButton* button=new GuiButton(new win7::Win7ButtonStyle());
+		GuiButton* button=g::NewButton();
 		cell->AddChild(button->GetBoundsComposition());
 		button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		button->SetText(buttonTexts[i]);

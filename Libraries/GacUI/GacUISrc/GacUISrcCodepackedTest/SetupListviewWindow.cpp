@@ -1,11 +1,11 @@
-#include "..\..\Public\Source\GacUI.h"
+#include "..\..\Public\Source\GacUIIncludes.h"
 
 void SetupListviewWindow(GuiControlHost* controlHost, GuiControl* container)
 {
 	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	GuiListView* listControl=0;
 	{
-		listControl=new GuiListView(new win7::Win7ListViewProvider);
+		listControl=g::NewListViewBigIcon();
 		listControl->GetBoundsComposition()->SetAlignmentToParent(Margin(200, 5, 5, 5));
 		listControl->GetBoundsComposition()->SetBounds(Rect(0, 0, 300, 200));
 		listControl->SetHorizontalAlwaysVisible(false);
@@ -43,7 +43,7 @@ void SetupListviewWindow(GuiControlHost* controlHost, GuiControl* container)
 		listControl->GetItems().GetColumns().Add(new list::ListViewColumn(L"Type"));
 	}
 	{
-		GuiTextList* typeList=new GuiTextList(new win7::Win7MultilineTextBoxProvider, new win7::Win7TextListProvider);
+		GuiTextList* typeList=g::NewTextList();
 		typeList->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, -1, 5));
 		typeList->GetBoundsComposition()->SetBounds(Rect(0, 0, 190, 200));
 		typeList->SetHorizontalAlwaysVisible(false);

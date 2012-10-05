@@ -1,4 +1,4 @@
-#include "..\..\Public\Source\GacUI.h"
+#include "..\..\Public\Source\GacUIIncludes.h"
 
 using namespace collections;
 
@@ -12,12 +12,12 @@ void CreateSubMenuInternal(GuiControlHost* controlHost, GuiToolstripButton* pare
 		GuiControl* menuItem=0;
 		if(wcscmp(menuText[i], L"-")==0)
 		{
-			GuiControl* splitter=new GuiControl(new win7::Win7MenuSplitterStyle);
+			GuiControl* splitter=g::NewMenuSplitter();
 			menuItem=splitter;
 		}
 		else
 		{
-			GuiToolstripButton* button=new GuiToolstripButton(new win7::Win7MenuItemButtonStyle);
+			GuiToolstripButton* button=g::NewMenuItemButton();
 			button->SetText(menuText[i]);
 			button->SetEnabled(i<6);
 			if(menuImage && menuImage[i])
@@ -66,19 +66,19 @@ void CreateToolbar(GuiControlHost* controlHost, Ptr<INativeImage> (&imageButtons
 			{
 			case 0:
 				{
-					button=new GuiToolstripButton(new win7::Win7ToolstripButtonStyle(win7::Win7ToolstripButtonStyle::DropdownButton));
+					button=g::NewToolbarDropdownButton();
 					CreateSubMenu(controlHost, button, fileMenuText, fileMenuImage, fileMenuShortcut);
 				}
 				break;
 			case 1:
 				{
-					button=new GuiToolstripButton(new win7::Win7ToolstripButtonStyle(win7::Win7ToolstripButtonStyle::SplitButton));
+					button=g::NewToolbarSplitButton();
 					CreateSubMenu(controlHost, button, editMenuText, editMenuImage, editMenuShortcut);
 				}
 				break;
 			default:
 				{
-					button=new GuiToolstripButton(new win7::Win7ToolstripButtonStyle(win7::Win7ToolstripButtonStyle::CommandButton));
+					button=g::NewToolbarButton();
 				}
 			}
 			button->SetImage(new GuiImageData(imageButtons[i], 0));
@@ -86,13 +86,13 @@ void CreateToolbar(GuiControlHost* controlHost, Ptr<INativeImage> (&imageButtons
 		}
 		else
 		{
-			GuiControl* splitter=new GuiControl(new win7::Win7ToolstripSplitterStyle);
+			GuiControl* splitter=g::NewToolbarSplitter();
 			toolbar->GetToolstripItems().Add(splitter);
 		}
 	}
 }
 
-void SetupManagedToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
+void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 {
 	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	INativeImageService* imageService=GetCurrentController()->ImageService();
@@ -110,12 +110,12 @@ void SetupManagedToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 	const wchar_t* viewMenuText[]={L"Status Bar"};
 	const wchar_t* helpMenuText[]={L"View Help", L"About Notepad"};
 
-	GuiToolstripMenuBar* menuBar=new GuiToolstripMenuBar(new win7::Win7MenuBarStyle);
+	GuiToolstripMenuBar* menuBar=g::NewMenuBar();
 	{
 		const wchar_t* menuText[]={L"File", L"Edit", L"Format", L"View", L"Help"};
 		for(int i=0;i<sizeof(menuText)/sizeof(*menuText);i++)
 		{
-			GuiToolstripButton* button=new GuiToolstripButton(new win7::Win7MenuBarButtonStyle);
+			GuiToolstripButton* button=g::NewMenuBarButton();
 			button->SetText(menuText[i]);
 			menuBar->GetToolstripItems().Add(button);
 			
@@ -143,7 +143,7 @@ void SetupManagedToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 		}
 	}
 
-	GuiToolstripToolbar* smallToolbar=new GuiToolstripToolbar(new win7::Win7ToolstripToolbarStyle);
+	GuiToolstripToolbar* smallToolbar=g::NewToolbar();
 	{
 		Ptr<INativeImage> imageButtons[]=
 		{
@@ -168,7 +168,7 @@ void SetupManagedToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 		CreateToolbar(controlHost, imageButtons, smallToolbar);
 	}
 	
-	GuiToolstripToolbar* bigToolbar=new GuiToolstripToolbar(new win7::Win7ToolstripToolbarStyle);
+	GuiToolstripToolbar* bigToolbar=g::NewToolbar();
 	{
 		Ptr<INativeImage> imageButtons[]=
 		{

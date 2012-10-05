@@ -37,6 +37,9 @@ namespace vl
 				/// <summary>Create a style for label.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiLabel::IStyleController*								CreateLabelStyle()=0;
+				/// <summary>Create a style for scrollable control containers.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()=0;
 				/// <summary>Create a style for group box.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiControl::IStyleController*								CreateGroupBoxStyle()=0;
@@ -52,6 +55,9 @@ namespace vl
 				/// <summary>Create a style for singleline text box.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()=0;
+				/// <summary>Get the default color configuration for text box characters.</summary>
+				/// <returns>The default color configuration.</returns>
+				virtual elements::text::ColorEntry											GetDefaultTextBoxColorEntry()=0;
 				/// <summary>Create a style for list view.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiListView::IStyleProvider*								CreateListViewStyle()=0;
@@ -115,6 +121,12 @@ namespace vl
 				/// <summary>Create a style for progress bar.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiScroll::IStyleController*								CreateProgressBarStyle()=0;
+				/// <summary>Get the default size for scrolls.</summary>
+				/// <returns>The default size for scrolls.</returns>
+				virtual int																	GetScrollDefaultSize()=0;
+				/// <summary>Get the default size for trackers.</summary>
+				/// <returns>The default size for trackers.</returns>
+				virtual int																	GetTrackerDefaultSize()=0;
 				
 				/// <summary>Create a style for text list.</summary>
 				/// <returns>The created style.</returns>
@@ -145,6 +157,9 @@ namespace vl
 				/// <summary>Create a label.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiLabel*						NewLabel();
+				/// <summary>Create a scroll container.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiScrollContainer*			NewScrollContainer();
 				/// <summary>Create a group box.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiControl*					NewGroupBox();

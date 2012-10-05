@@ -11098,6 +11098,11 @@ namespace vl
 					return new controls::GuiLabel(GetCurrentTheme()->CreateLabelStyle());
 				}
 
+				controls::GuiScrollContainer* NewScrollContainer()
+				{
+					return new controls::GuiScrollContainer(GetCurrentTheme()->CreateScrollContainerStyle());
+				}
+
 				controls::GuiControl* NewGroupBox()
 				{
 					return new controls::GuiControl(GetCurrentTheme()->CreateGroupBoxStyle());
@@ -11323,6 +11328,11 @@ Win7Theme
 				return new Win7LabelStyle;
 			}
 
+			controls::GuiScrollContainer::IStyleProvider* Win7Theme::CreateScrollContainerStyle()
+			{
+				return new Win7ScrollViewProvider;
+			}
+
 			controls::GuiControl::IStyleController* Win7Theme::CreateGroupBoxStyle()
 			{
 				return new Win7GroupBoxStyle;
@@ -11356,6 +11366,11 @@ Win7Theme
 			controls::GuiTreeView::IStyleProvider* Win7Theme::CreateTreeViewStyle()
 			{
 				return new Win7TreeViewProvider;
+			}
+
+			elements::text::ColorEntry Win7Theme::GetDefaultTextBoxColorEntry()
+			{
+				return Win7GetTextBoxTextColor();
 			}
 
 			controls::GuiToolstripMenu::IStyleController* Win7Theme::CreateMenuStyle()
@@ -11448,6 +11463,16 @@ Win7Theme
 				return new Win7ProgressBarStyle;
 			}
 
+			int Win7Theme::GetScrollDefaultSize()
+			{
+				return Win7ScrollStyle::DefaultSize;
+			}
+
+			int Win7Theme::GetTrackerDefaultSize()
+			{
+				return Win7TrackStyle::HandleLong;
+			}
+
 			controls::GuiScrollView::IStyleProvider* Win7Theme::CreateTextListStyle()
 			{
 				return new Win7MultilineTextBoxProvider;
@@ -11508,6 +11533,11 @@ Win8Theme
 				throw 0;
 			}
 
+			controls::GuiScrollContainer::IStyleProvider* Win8Theme::CreateScrollContainerStyle()
+			{
+				throw 0;
+			}
+
 			controls::GuiControl::IStyleController* Win8Theme::CreateGroupBoxStyle()
 			{
 				throw 0;
@@ -11539,6 +11569,11 @@ Win8Theme
 			}
 
 			controls::GuiTreeView::IStyleProvider* Win8Theme::CreateTreeViewStyle()
+			{
+				throw 0;
+			}
+
+			elements::text::ColorEntry Win8Theme::GetDefaultTextBoxColorEntry()
 			{
 				throw 0;
 			}
@@ -11629,6 +11664,16 @@ Win8Theme
 			}
 
 			controls::GuiScroll::IStyleController* Win8Theme::CreateProgressBarStyle()
+			{
+				throw 0;
+			}
+
+			int Win8Theme::GetScrollDefaultSize()
+			{
+				throw 0;
+			}
+
+			int Win8Theme::GetTrackerDefaultSize()
 			{
 				throw 0;
 			}

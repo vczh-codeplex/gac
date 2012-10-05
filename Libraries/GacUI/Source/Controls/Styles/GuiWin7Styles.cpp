@@ -43,6 +43,11 @@ Win7Theme
 				return new Win7LabelStyle;
 			}
 
+			controls::GuiScrollContainer::IStyleProvider* Win7Theme::CreateScrollContainerStyle()
+			{
+				return new Win7ScrollViewProvider;
+			}
+
 			controls::GuiControl::IStyleController* Win7Theme::CreateGroupBoxStyle()
 			{
 				return new Win7GroupBoxStyle;
@@ -76,6 +81,11 @@ Win7Theme
 			controls::GuiTreeView::IStyleProvider* Win7Theme::CreateTreeViewStyle()
 			{
 				return new Win7TreeViewProvider;
+			}
+
+			elements::text::ColorEntry Win7Theme::GetDefaultTextBoxColorEntry()
+			{
+				return Win7GetTextBoxTextColor();
 			}
 
 			controls::GuiToolstripMenu::IStyleController* Win7Theme::CreateMenuStyle()
@@ -166,6 +176,16 @@ Win7Theme
 			controls::GuiScroll::IStyleController* Win7Theme::CreateProgressBarStyle()
 			{
 				return new Win7ProgressBarStyle;
+			}
+
+			int Win7Theme::GetScrollDefaultSize()
+			{
+				return Win7ScrollStyle::DefaultSize;
+			}
+
+			int Win7Theme::GetTrackerDefaultSize()
+			{
+				return Win7TrackStyle::HandleLong;
 			}
 
 			controls::GuiScrollView::IStyleProvider* Win7Theme::CreateTextListStyle()
