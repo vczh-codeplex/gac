@@ -7287,7 +7287,7 @@ CONTROLS\STYLES\GUIWIN8STYLES.H
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: 陈梓瀚(vczh)
-GacUI::Control Styles::Windows7 Styles
+GacUI::Control Styles::Windows8 Styles
 
 Clases:
 ***********************************************************************/
@@ -7307,51 +7307,51 @@ namespace vl
 Theme
 ***********************************************************************/
 
-			class Win8Theme : public theme::ITheme
+			class Win8Theme : public /*theme::ITheme*/ win7::Win7Theme
 			{
 			public:
 				Win8Theme();
 				~Win8Theme();
 
 				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
-				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
-				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
-				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
-				controls::GuiTab::IStyleController*									CreateTabStyle()override;
-				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
-				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
-				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
-				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
-				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
-				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
-				
-				controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
-				controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
-				controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
-				controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()override;
-				controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()override;
-				controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()override;
-				controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()override;
-				controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()override;
-				controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()override;
-				controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
+				//controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
+				//controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
+				//controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
+				//controls::GuiTab::IStyleController*									CreateTabStyle()override;
+				//controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
+				//controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
+				//controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
+				//controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
+				//controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
+				//elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
+				//
+				//controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
+				//controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
+				//controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
+				//controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()override;
+				//controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()override;
+				//controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()override;
+				//controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()override;
+				//controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()override;
+				//controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()override;
+				//controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
 
-				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
-				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
-				controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
-				
-				controls::GuiScroll::IStyleController*								CreateHScrollStyle()override;
-				controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
-				controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
-				controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
-				controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
-				int																	GetScrollDefaultSize()override;
-				int																	GetTrackerDefaultSize()override;
+				//controls::GuiButton::IStyleController*								CreateButtonStyle()override;
+				//controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
+				//controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
+				//
+				//controls::GuiScroll::IStyleController*								CreateHScrollStyle()override;
+				//controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
+				//controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
+				//controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
+				//controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
+				//int																	GetScrollDefaultSize()override;
+				//int																	GetTrackerDefaultSize()override;
 
-				controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
-				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;
-				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateCheckTextListItemStyle()override;
-				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateRadioTextListItemStyle()override;
+				//controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
+				//controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;
+				//controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateCheckTextListItemStyle()override;
+				//controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateRadioTextListItemStyle()override;
 			};
 		}
 	}
@@ -7504,6 +7504,115 @@ Scrolls
 				static compositions::GuiBoundsComposition*			BuildRightArrow(elements::GuiPolygonElement*& elementOut);
 			};
 		}
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+			
+		extern unsigned char							IntToColor(int color);
+		extern Color									BlendColor(Color c1, Color c2, int currentPosition, int totalLength);
+
+/***********************************************************************
+Animation
+***********************************************************************/
+
+#define DEFINE_TRANSFERRING_ANIMATION(TSTATE, TSTYLECONTROLLER)\
+				class TransferringAnimation : public compositions::GuiTimeBasedAnimation\
+				{\
+				protected:\
+					TSTATE									colorBegin;\
+					TSTATE									colorEnd;\
+					TSTATE									colorCurrent;\
+					TSTYLECONTROLLER*						style;\
+					bool									stopped;\
+					bool									disabled;\
+					bool									enableAnimation;\
+					void									PlayInternal(int currentPosition, int totalLength);\
+				public:\
+					TransferringAnimation(TSTYLECONTROLLER* _style, const TSTATE& begin);\
+					void									Disable();\
+					void									Play(int currentPosition, int totalLength)override;\
+					void									Stop()override;\
+					bool									GetEnableAnimation();\
+					void									SetEnableAnimation(bool value);\
+					void									Transfer(const TSTATE& end);\
+				};\
+
+/***********************************************************************
+Animation Implementation
+***********************************************************************/
+
+#define DEFAULT_TRANSFERRING_ANIMATION_HOST_GETTER(STYLE) (STYLE->GetBoundsComposition()->GetRelatedGraphicsHost())
+
+#define IMPLEMENT_TRANSFERRING_ANIMATION_BASE(TSTATE, TSTYLECONTROLLER, HOST_GETTER)\
+			TSTYLECONTROLLER::TransferringAnimation::TransferringAnimation(TSTYLECONTROLLER* _style, const TSTATE& begin)\
+				:GuiTimeBasedAnimation(0)\
+				,colorBegin(begin)\
+				,colorEnd(begin)\
+				,colorCurrent(begin)\
+				,style(_style)\
+				,stopped(true)\
+				,disabled(false)\
+				,enableAnimation(true)\
+			{\
+			}\
+			void TSTYLECONTROLLER::TransferringAnimation::Disable()\
+			{\
+				disabled=true;\
+			}\
+			void TSTYLECONTROLLER::TransferringAnimation::Play(int currentPosition, int totalLength)\
+			{\
+				if(!disabled)\
+				{\
+					PlayInternal(currentPosition, totalLength);\
+				}\
+			}\
+			void TSTYLECONTROLLER::TransferringAnimation::Stop()\
+			{\
+				stopped=true;\
+			}\
+			bool TSTYLECONTROLLER::TransferringAnimation::GetEnableAnimation()\
+			{\
+				return enableAnimation;\
+			}\
+			void TSTYLECONTROLLER::TransferringAnimation::SetEnableAnimation(bool value)\
+			{\
+				enableAnimation=value;\
+			}\
+			void TSTYLECONTROLLER::TransferringAnimation::Transfer(const TSTATE& end)\
+			{\
+				if(colorEnd!=end)\
+				{\
+					GuiGraphicsHost* host=HOST_GETTER(style);\
+					if(enableAnimation && host)\
+					{\
+						Restart(Win7GetColorAnimationLength());\
+						if(stopped)\
+						{\
+							colorBegin=colorEnd;\
+							colorEnd=end;\
+							host->GetAnimationManager()->AddAnimation(style->transferringAnimation);\
+							stopped=false;\
+						}\
+						else\
+						{\
+							colorBegin=colorCurrent;\
+							colorEnd=end;\
+						}\
+					}\
+					else\
+					{\
+						colorBegin=end;\
+						colorEnd=end;\
+						colorCurrent=end;\
+						Play(1, 1);\
+					}\
+				}\
+			}\
+			void TSTYLECONTROLLER::TransferringAnimation::PlayInternal(int currentPosition, int totalLength)\
+
+#define IMPLEMENT_TRANSFERRING_ANIMATION(TSTATE, TSTYLECONTROLLER)\
+	IMPLEMENT_TRANSFERRING_ANIMATION_BASE(TSTATE, TSTYLECONTROLLER, DEFAULT_TRANSFERRING_ANIMATION_HOST_GETTER)
 	}
 }
 
@@ -7689,7 +7798,6 @@ Button Configuration
 Helper Functions
 ***********************************************************************/
 			
-			extern Color									BlendColor(Color c1, Color c2, int currentPosition, int totalLength);
 			extern int										Win7GetColorAnimationLength();
 			extern Color									Win7GetSystemWindowColor();
 			extern Color									Win7GetSystemTabContentColor();
@@ -7700,108 +7808,6 @@ Helper Functions
 			extern void										Win7SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
 			extern elements::text::ColorEntry				Win7GetTextBoxTextColor();
-
-/***********************************************************************
-Animation
-***********************************************************************/
-
-#define DEFINE_TRANSFERRING_ANIMATION(TSTATE, TSTYLECONTROLLER)\
-				class TransferringAnimation : public compositions::GuiTimeBasedAnimation\
-				{\
-				protected:\
-					TSTATE									colorBegin;\
-					TSTATE									colorEnd;\
-					TSTATE									colorCurrent;\
-					TSTYLECONTROLLER*						style;\
-					bool									stopped;\
-					bool									disabled;\
-					bool									enableAnimation;\
-					void									PlayInternal(int currentPosition, int totalLength);\
-				public:\
-					TransferringAnimation(TSTYLECONTROLLER* _style, const TSTATE& begin);\
-					void									Disable();\
-					void									Play(int currentPosition, int totalLength)override;\
-					void									Stop()override;\
-					bool									GetEnableAnimation();\
-					void									SetEnableAnimation(bool value);\
-					void									Transfer(const TSTATE& end);\
-				};\
-
-/***********************************************************************
-Animation Implementation
-***********************************************************************/
-
-#define DEFAULT_TRANSFERRING_ANIMATION_HOST_GETTER(STYLE) (STYLE->GetBoundsComposition()->GetRelatedGraphicsHost())
-
-#define IMPLEMENT_TRANSFERRING_ANIMATION_BASE(TSTATE, TSTYLECONTROLLER, HOST_GETTER)\
-			TSTYLECONTROLLER::TransferringAnimation::TransferringAnimation(TSTYLECONTROLLER* _style, const TSTATE& begin)\
-				:GuiTimeBasedAnimation(0)\
-				,colorBegin(begin)\
-				,colorEnd(begin)\
-				,colorCurrent(begin)\
-				,style(_style)\
-				,stopped(true)\
-				,disabled(false)\
-				,enableAnimation(true)\
-			{\
-			}\
-			void TSTYLECONTROLLER::TransferringAnimation::Disable()\
-			{\
-				disabled=true;\
-			}\
-			void TSTYLECONTROLLER::TransferringAnimation::Play(int currentPosition, int totalLength)\
-			{\
-				if(!disabled)\
-				{\
-					PlayInternal(currentPosition, totalLength);\
-				}\
-			}\
-			void TSTYLECONTROLLER::TransferringAnimation::Stop()\
-			{\
-				stopped=true;\
-			}\
-			bool TSTYLECONTROLLER::TransferringAnimation::GetEnableAnimation()\
-			{\
-				return enableAnimation;\
-			}\
-			void TSTYLECONTROLLER::TransferringAnimation::SetEnableAnimation(bool value)\
-			{\
-				enableAnimation=value;\
-			}\
-			void TSTYLECONTROLLER::TransferringAnimation::Transfer(const TSTATE& end)\
-			{\
-				if(colorEnd!=end)\
-				{\
-					GuiGraphicsHost* host=HOST_GETTER(style);\
-					if(enableAnimation && host)\
-					{\
-						Restart(Win7GetColorAnimationLength());\
-						if(stopped)\
-						{\
-							colorBegin=colorEnd;\
-							colorEnd=end;\
-							host->GetAnimationManager()->AddAnimation(style->transferringAnimation);\
-							stopped=false;\
-						}\
-						else\
-						{\
-							colorBegin=colorCurrent;\
-							colorEnd=end;\
-						}\
-					}\
-					else\
-					{\
-						colorBegin=end;\
-						colorEnd=end;\
-						colorCurrent=end;\
-						Play(1, 1);\
-					}\
-				}\
-			}\
-			void TSTYLECONTROLLER::TransferringAnimation::PlayInternal(int currentPosition, int totalLength)\
-
-#define IMPLEMENT_TRANSFERRING_ANIMATION(TSTATE, TSTYLECONTROLLER)\
-	IMPLEMENT_TRANSFERRING_ANIMATION_BASE(TSTATE, TSTYLECONTROLLER, DEFAULT_TRANSFERRING_ANIMATION_HOST_GETTER)
 
 		}
 	}
@@ -8795,6 +8801,103 @@ List
 				Color													GetTextColor()override;
 			};
 #pragma warning(pop)
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\STYLES\WIN8STYLES\GUIWIN8STYLESCOMMON.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control Styles::Windows8 Styles
+
+Clases:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN7STYLESCOMMON
+#define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN7STYLESCOMMON
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace win8
+		{
+
+/***********************************************************************
+Helper Functions
+***********************************************************************/
+			
+			extern int										Win8GetColorAnimationLength();
+			extern Color									Win8GetSystemWindowColor();
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\STYLES\WIN8STYLES\GUIWIN8CONTROLSTYLES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control Styles::Windows8 Styles
+
+Clases:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWin8CONTROLSTYLES
+#define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWin8CONTROLSTYLES
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace win8
+		{
+
+/***********************************************************************
+Container
+***********************************************************************/
+
+			class Win8EmptyStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win8EmptyStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+			public:
+				Win8EmptyStyle(Color color);
+				~Win8EmptyStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+			};
+
+			class Win8WindowStyle : public virtual controls::GuiWindow::DefaultBehaviorStyleController, public Description<Win8WindowStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+			public:
+				Win8WindowStyle();
+				~Win8WindowStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+			};
 		}
 	}
 }

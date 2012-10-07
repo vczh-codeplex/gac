@@ -129,6 +129,8 @@
     <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7StylesCommon.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7TabStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ToolstripStyles.cpp" />
+    <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ControlStyles.cpp" />
+    <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8StylesCommon.cpp" />
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripCommand.cpp" />
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripMenu.cpp" />
     <ClCompile Include="..\..\Source\GacUI_WinMain.cpp" />
@@ -230,6 +232,8 @@
     <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7StylesCommon.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7TabStyles.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ToolstripStyles.h" />
+    <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ControlStyles.h" />
+    <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8StylesCommon.h" />
     <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripCommand.h" />
     <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripMenu.h" />
     <ClInclude Include="..\..\Source\GacUI.h" />
