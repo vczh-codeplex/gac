@@ -11,21 +11,6 @@ namespace vl
 			using namespace compositions;
 			using namespace controls;
 
-			unsigned char IntToColor(int color)
-			{
-				return color<0?0:color>255?255:(unsigned char)color;
-			}
-
-			Color BlendColor(Color c1, Color c2, int currentPosition, int totalLength)
-			{
-				return Color(
-					(unsigned char)IntToColor((c2.r*currentPosition+c1.r*(totalLength-currentPosition))/totalLength),
-					(unsigned char)IntToColor((c2.g*currentPosition+c1.g*(totalLength-currentPosition))/totalLength),
-					(unsigned char)IntToColor((c2.b*currentPosition+c1.b*(totalLength-currentPosition))/totalLength),
-					(unsigned char)IntToColor((c2.a*currentPosition+c1.a*(totalLength-currentPosition))/totalLength)
-					);
-			}
-
 /***********************************************************************
 Win7ButtonColors
 ***********************************************************************/
