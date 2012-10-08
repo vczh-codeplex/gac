@@ -164,6 +164,7 @@
     <ClCompile Include="..\..\Source\Exception.cpp" />
     <ClCompile Include="..\..\Source\GlobalStorage.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptor.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder.cpp" />
     <ClCompile Include="..\..\Source\Regex\Regex.cpp" />
     <ClCompile Include="..\..\Source\Regex\RegexAutomaton.cpp" />
     <ClCompile Include="..\..\Source\Regex\RegexData.cpp" />
@@ -254,6 +255,7 @@
     <ClInclude Include="..\..\Source\Lazy.h" />
     <ClInclude Include="..\..\Source\Pointer.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptor.h" />
+    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder.h" />
     <ClInclude Include="..\..\Source\Regex\Regex.h" />
     <ClInclude Include="..\..\Source\Regex\RegexAutomaton.h" />
     <ClInclude Include="..\..\Source\Regex\RegexData.h" />

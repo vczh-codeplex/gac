@@ -189,6 +189,9 @@
     <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptor.cpp">
       <Filter>Common\Reflection</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder.cpp">
+      <Filter>Common\Reflection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
@@ -420,6 +423,9 @@
       <Filter>Common\Collections</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptor.h">
+      <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder.h">
       <Filter>Common\Reflection</Filter>
     </ClInclude>
   </ItemGroup>
