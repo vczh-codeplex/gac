@@ -197,6 +197,7 @@ Helpers
 
 				GuiMain();
 				theme::SetCurrentTheme(0);
+				description::DestroyGlobalTypeManager();
 			}
 		}
 	}
