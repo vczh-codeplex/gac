@@ -140,6 +140,16 @@ description::TypeManager
 					Unload();
 				}
 
+				vint GetValueSerializerCount()
+				{
+					return valueSerializers.Values().Count();
+				}
+
+				IValueSerializer* GetValueSerializer(vint index)
+				{
+					return valueSerializers.Values()[index].Obj();
+				}
+
 				IValueSerializer* GetValueSerializer(const WString& name)
 				{
 					vint index=valueSerializers.Keys().IndexOf(name);
@@ -165,6 +175,16 @@ description::TypeManager
 						}
 					}
 					return false;
+				}
+
+				vint GetTypeDescriptorCount()
+				{
+					return typeDescriptors.Values().Count();
+				}
+
+				ITypeDescriptor* GetTypeDescriptor(vint index)
+				{
+					return typeDescriptors.Values()[index].Obj();
 				}
 
 				ITypeDescriptor* GetTypeDescriptor(const WString& name)
