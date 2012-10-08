@@ -2,6 +2,7 @@ Codepack.exe		<configuration-xml>
 CopyWebsite.exe		<url>		<root-default-file-name>	<output-folder (out)>
 Fpmacro.exe		<fpm-file-1> <fpm-file-2> ...
 Recurcpy.exe		<source-folder>	<destination-folder>		include|exclude		<ext1> <ext2> ...
+TypeDescGen.exe		<configuration-xml>
 
 PdbDump.exe		<pdb-file>	<xml-pdb-file (out)>
 LinkPdbXml.exe		<xml-pdb-file>	<xml-comment-file>		<xml-doc-file (out)>
