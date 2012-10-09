@@ -54,8 +54,8 @@ Exceptions
 			class ParameterAlreadyExistsException : public TypeDescriptorBuilderException
 			{
 			public:
-				ParameterAlreadyExistsException(ITypeDescriptor* typeDescriptor, IMethodInfo* method,  const WString& parameterName)
-					:TypeDescriptorBuilderException(L"Parameter \""+parameterName+L"\" already exists in method \""+method->GetName()+L"\" in type \""+typeDescriptor->GetTypeName()+L"\".")
+				ParameterAlreadyExistsException(IMethodInfo* method,  const WString& parameterName)
+					:TypeDescriptorBuilderException(L"Parameter \""+parameterName+L"\" already exists in method \""+method->GetName()+L"\" in type \""+method->GetOwnerTypeDescriptor()->GetTypeName()+L"\".")
 				{
 				}
 			};
@@ -103,8 +103,8 @@ GeneralTypeDescriptor
 						MethodBuilder&			Parameter(
 													const WString&									_name,
 													ITypeDescriptor*								_type,
-													bool											_canOutput,
-													bool											_nullable
+													bool											_nullable,
+													bool											_canOutput
 													);
 						MethodBuilder&			Return(
 													ITypeDescriptor*								_type,
@@ -161,6 +161,8 @@ GeneralTypeDescriptor
 			public:
 				GeneralTypeDescriptor(const Func<void(PropertyGroup*)>& loaderProcedure);
 				~GeneralTypeDescriptor();
+
+				PropertyGroup&				Operations();
 
 				const WString&				GetTypeName()override;
 				IValueSerializer*			GetValueSerializer()override;

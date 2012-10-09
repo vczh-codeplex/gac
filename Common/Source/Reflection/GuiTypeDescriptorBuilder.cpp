@@ -2,6 +2,8 @@
 
 namespace vl
 {
+	using namespace collections;
+
 	namespace reflection
 	{
 		namespace description
@@ -94,6 +96,218 @@ description::PropertyInfoImpl
 			};
 
 /***********************************************************************
+description::ParameterInfoImpl
+***********************************************************************/
+
+			class ParameterInfoImpl : public Object, public IParameterInfo
+			{
+			protected:
+				IMethodInfo*							ownerMethod;
+				WString									name;
+				ITypeDescriptor*						type;
+				bool									nullable;
+				bool									canOutput;
+			public:
+				ParameterInfoImpl(IMethodInfo* _ownerMethod, const WString& _name, ITypeDescriptor* _type, bool _nullable, bool _canOutput)
+					:ownerMethod(_ownerMethod)
+					,name(_name)
+					,type(_type)
+					,nullable(_nullable)
+					,canOutput(_canOutput)
+				{
+				}
+
+				ITypeDescriptor* GetOwnerTypeDescriptor()override
+				{
+					return ownerMethod->GetOwnerTypeDescriptor();
+				}
+
+				const WString& GetName()override
+				{
+					return name;
+				}
+
+				ITypeDescriptor* GetValueTypeDescriptor()override
+				{
+					return type;
+				}
+
+				bool CanBeNull()override
+				{
+					return nullable;
+				}
+
+				IMethodInfo* GetOwnerMethod()override
+				{
+					return ownerMethod;
+				}
+
+				bool CanOutput()override
+				{
+					return canOutput;
+				}
+			};
+
+/***********************************************************************
+description::MethodReturnImpl
+***********************************************************************/
+
+			class MethodReturnImpl : public Object, public IValueInfo
+			{
+			protected:
+				ITypeDescriptor*						type;
+				bool									nullable;
+			public:
+				MethodReturnImpl(ITypeDescriptor* _type, bool _nullable)
+					:type(_type)
+					,nullable(_nullable)
+				{
+				}
+
+				ITypeDescriptor* GetValueTypeDescriptor()override
+				{
+					return type;
+				}
+
+				bool CanBeNull()override
+				{
+					return nullable;
+				}
+			};
+
+/***********************************************************************
+description::MethodInfoImpl
+***********************************************************************/
+
+			class MethodInfoImpl : public Object, public IMethodInfo
+			{
+			protected:
+				IMethodGroupInfo*											ownerMethodGroup;
+				List<Ptr<ParameterInfoImpl>>									parameters;
+				Ptr<MethodReturnImpl>										returnInfo;
+				Func<Value(const Value&, collections::IArray<Value>&)>		invoker;
+			public:
+				MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup)
+					:ownerMethodGroup(_ownerMethodGroup)
+				{
+				}
+
+				ITypeDescriptor* GetOwnerTypeDescriptor()override
+				{
+					return ownerMethodGroup->GetOwnerTypeDescriptor();
+				}
+
+				const WString& GetName()override
+				{
+					return ownerMethodGroup->GetName();
+				}
+
+				IMethodGroupInfo* GetOwnerMethodGroup()override
+				{
+					return ownerMethodGroup;
+				}
+
+				vint GetParameterCount()override
+				{
+					return parameters.Count();
+				}
+
+				IParameterInfo* GetParameter(vint index)override
+				{
+					if(0<=index && index<parameters.Count())
+					{
+						return parameters[index].Obj();
+					}
+					else
+					{
+						return 0;
+					}
+				}
+
+				IValueInfo* GetReturn()override
+				{
+					return returnInfo.Obj();
+				}
+
+				Value Invoke(const Value& thisObject, collections::IArray<Value>& arguments)override
+				{
+					return invoker(thisObject, arguments);
+				}
+
+				void BuilderSetParameter(const WString& _name, ITypeDescriptor* _type, bool _nullable, bool _canOutput)
+				{
+					for(vint i=0;i<parameters.Count();i++)
+					{
+						if(parameters[i]->GetName()==_name)
+						{
+							throw ParameterAlreadyExistsException(this, _name);
+						}
+					}
+					parameters.Add(new ParameterInfoImpl(this, _name, _type, _nullable, _canOutput));
+				}
+
+				void BuilderSetReturn(ITypeDescriptor* _type, bool _nullable)
+				{
+					returnInfo=new MethodReturnImpl(_type, _nullable);
+				}
+
+				void BuilderSetInvoker(const Func<Value(const Value&, collections::IArray<Value>&)>& _invoker)
+				{
+					invoker=_invoker;
+				}
+			};
+
+/***********************************************************************
+description::MethodGroupInfoImpl
+***********************************************************************/
+
+			class MethodGroupInfoImpl : public Object, public IMethodGroupInfo
+			{
+			protected:
+				ITypeDescriptor*						ownerTypeDescriptor;
+				WString									name;
+				List<Ptr<MethodInfoImpl>>				methods;
+			public:
+				MethodGroupInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name)
+					:ownerTypeDescriptor(_ownerTypeDescriptor)
+					,name(_name)
+				{
+				}
+
+				ITypeDescriptor* GetOwnerTypeDescriptor()override
+				{
+					return ownerTypeDescriptor;
+				}
+
+				const WString& GetName()override
+				{
+					return name;
+				}
+
+				vint GetMethodCount()
+				{
+					return methods.Count();
+				}
+
+				IMethodInfo* GetMethod(vint index)
+				{
+					if(0<=index && index<methods.Count())
+					{
+						return methods[index].Obj();
+					}
+					else
+					{
+						return 0;
+					}
+				}
+
+				void BuilderSetMethod(Ptr<MethodInfoImpl> _method)
+				{
+					methods.Add(_method);
+				}
+			};
+
+/***********************************************************************
 description::GeneralTypeDescriptor::PropertyGroup
 ***********************************************************************/
 
@@ -122,20 +336,40 @@ description::GeneralTypeDescriptor::PropertyGroup
 			GeneralTypeDescriptor::PropertyGroup::MethodBuilder::MethodBuilder(PropertyGroup& _propertyGroup, const WString& _name)
 				:propertyGroup(_propertyGroup)
 			{
+				vint index=propertyGroup.methodGroups.Keys().IndexOf(_name);
+				Ptr<MethodGroupInfoImpl> methodGroup;
+				if(index==-1)
+				{
+					methodGroup=new MethodGroupInfoImpl(propertyGroup.ownerTypeDescriptor, _name);
+					buildingMethodGroup=methodGroup;
+					propertyGroup.methodGroups.Add(_name, buildingMethodGroup);
+				}
+				else
+				{
+					buildingMethodGroup=propertyGroup.methodGroups.Values()[index];
+					methodGroup=buildingMethodGroup.Cast<MethodGroupInfoImpl>();
+				}
+
+				Ptr<MethodInfoImpl> method=new MethodInfoImpl(buildingMethodGroup.Obj());
+				methodGroup->BuilderSetMethod(method);
+				buildingMethod=method;
 			}
 
-			GeneralTypeDescriptor::PropertyGroup::MethodBuilder& GeneralTypeDescriptor::PropertyGroup::MethodBuilder::Parameter(const WString& _name, ITypeDescriptor* _type, bool _canOutput, bool _nullable)
+			GeneralTypeDescriptor::PropertyGroup::MethodBuilder& GeneralTypeDescriptor::PropertyGroup::MethodBuilder::Parameter(const WString& _name, ITypeDescriptor* _type, bool _nullable, bool _canOutput)
 			{
+				dynamic_cast<MethodInfoImpl*>(buildingMethod.Obj())->BuilderSetParameter(_name, _type, _nullable, _canOutput);
 				return *this;
 			}
 
 			GeneralTypeDescriptor::PropertyGroup::MethodBuilder& GeneralTypeDescriptor::PropertyGroup::MethodBuilder::Return(ITypeDescriptor* _type, bool _nullable)
 			{
+				dynamic_cast<MethodInfoImpl*>(buildingMethod.Obj())->BuilderSetReturn(_type, _nullable);
 				return *this;
 			}
 
 			GeneralTypeDescriptor::PropertyGroup::MethodBuilder& GeneralTypeDescriptor::PropertyGroup::MethodBuilder::Invoker(const Func<Value(const Value&, collections::IArray<Value>&)>& _invoker)
 			{
+				dynamic_cast<MethodInfoImpl*>(buildingMethod.Obj())->BuilderSetInvoker(_invoker);
 				return *this;
 			}
 
@@ -209,6 +443,11 @@ description::GeneralTypeDescriptor
 
 			GeneralTypeDescriptor::~GeneralTypeDescriptor()
 			{
+			}
+
+			GeneralTypeDescriptor::PropertyGroup& GeneralTypeDescriptor::Operations()
+			{
+				return propertyGroup;
 			}
 
 			const WString& GeneralTypeDescriptor::GetTypeName()
