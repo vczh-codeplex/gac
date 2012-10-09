@@ -548,7 +548,7 @@ MergeAlgorithm
 					}
 					else
 					{
-						throw ArgumentException(L"正则表达式语法错误：引用表达式\""+expression->name+L"\"发生引用循环。", L"vl::regex_internal::RegexExpression::Merge", L"");
+						throw ArgumentException(L"Regular expression syntax error: Found reference loops in\""+expression->name+L"\".", L"vl::regex_internal::RegexExpression::Merge", L"");
 					}
 				}
 				else if(target->regex->definitions.Keys().Contains(expression->name))
@@ -560,7 +560,7 @@ MergeAlgorithm
 				}
 				else
 				{
-					throw ArgumentException(L"正则表达式语法错误：找不到引用表达式\""+expression->name+L"\"。", L"vl::regex_internal::RegexExpression::Merge", L"");
+					throw ArgumentException(L"Regular expression syntax error: Cannot find sub expression reference\""+expression->name+L"\".", L"vl::regex_internal::RegexExpression::Merge", L"");
 				}
 			}
 		};

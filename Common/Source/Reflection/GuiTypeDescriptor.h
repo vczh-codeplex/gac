@@ -12,6 +12,7 @@ XML Representation for Code Generation:
 #include "..\Basic.h"
 #include "..\Pointer.h"
 #include "..\String.h"
+#include "..\Exception.h"
 #include "..\Function.h"
 #include "..\Collections\Interfaces.h"
 
@@ -23,6 +24,7 @@ namespace vl
 /***********************************************************************
 Attribute
 ***********************************************************************/
+
 		namespace description
 		{
 			class ITypeDescriptor;
@@ -288,6 +290,37 @@ ITypeManager
 			extern bool							DestroyGlobalTypeManager();
 			extern IValueSerializer*			GetValueSerializer(const WString& name);
 			extern ITypeDescriptor*				GetTypeDescriptor(const WString& name);
+
+/***********************************************************************
+Exceptions
+***********************************************************************/
+
+			class TypeDescriptorException : public Exception
+			{
+			public:
+				TypeDescriptorException(const WString& message)
+					:Exception(message)
+				{
+				}
+			};
+
+			class PropertyIsNotReadableException : public TypeDescriptorException
+			{
+			public:
+				PropertyIsNotReadableException(IPropertyInfo* propertyInfo)
+					:TypeDescriptorException(L"Cannot read value from a property \""+propertyInfo->GetName()+L"\" that is not readable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\"/")
+				{
+				}
+			};
+
+			class PropertyIsNotWritableException : public TypeDescriptorException
+			{
+			public:
+				PropertyIsNotWritableException(IPropertyInfo* propertyInfo)
+					:TypeDescriptorException(L"Cannot write value to a property \""+propertyInfo->GetName()+L"\" that is not writable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\"/")
+				{
+				}
+			};
 		}
 	}
 }

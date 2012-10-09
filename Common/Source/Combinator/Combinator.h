@@ -62,7 +62,7 @@ Exception
 			typename Types<I>::GlobalInfo		globalInfo;
 		public:
 			CombinatorException(const I& _input, const typename Types<I>::GlobalInfo& _globalInfo)
-				:Exception(L"发生Combinator语法分析错误。")
+				:Exception(L"Error occurred when parsing.")
 				,input(_input)
 			{
 				globalInfo.Append(_globalInfo);

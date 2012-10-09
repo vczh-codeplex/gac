@@ -150,7 +150,7 @@ namespace vl
 			expression->preferLong=!IsChar(input, L'?');
 			return expression;
 		THROW_EXCEPTION:
-				throw ArgumentException(L"正则表达式语法错误，循环格式不合法。", L"vl::regex_internal::ParseLoop", L"input");
+				throw ArgumentException(L"Regular expression syntax error: Illegal loop expression.", L"vl::regex_internal::ParseLoop", L"input");
 		}
 
 		Ptr<Expression> ParseCharSet(const wchar_t*& input)
@@ -219,7 +219,7 @@ namespace vl
 					expression->ranges.Add(CharRange(L'a', L'z'));
 					break;
 				default:
-					throw ArgumentException(L"正则表达式语法错误：非法转义符。", L"vl::regex_internal::ParseCharSet", L"input");
+					throw ArgumentException(L"Regular expression syntax error: Illegal character escaping.", L"vl::regex_internal::ParseCharSet", L"input");
 				}
 				input++;
 				return expression;
@@ -258,7 +258,7 @@ namespace vl
 							c=*input;
 							break;
 						default:
-							throw ArgumentException(L"正则表达式语法错误：在[]内部能使用的转义符只有\"rnt-[]\\/\"。", L"vl::regex_internal::ParseCharSet", L"input");
+							throw ArgumentException(L"Regular expression syntax error: Illegal character escaping, only \"rnt-[]\\/\" are legal escaped characters in [].", L"vl::regex_internal::ParseCharSet", L"input");
 						}
 						input++;
 						midState?b=c:a=c;
@@ -314,7 +314,7 @@ namespace vl
 				}
 				return expression;
 		THROW_EXCEPTION:
-				throw ArgumentException(L"正则表达式语法错误：字符集格式不合法。");
+				throw ArgumentException(L"Regular expression syntax error: Illegal character set definition.");
 			}
 			else if(IsChars(input, L"()+*?{}|"))
 			{
@@ -451,13 +451,13 @@ namespace vl
 				return 0;
 			}
 		NEED_RIGHT_BRACKET:
-			throw ArgumentException(L"正则表达式语法错误：缺少右小括号\")\"。", L"vl::regex_internal::ParseFunction", L"input");
+			throw ArgumentException(L"Regular expression syntax error: \")\" expected.", L"vl::regex_internal::ParseFunction", L"input");
 		NEED_GREATER:
-			throw ArgumentException(L"正则表达式语法错误：缺少右尖括号\">\"。", L"vl::regex_internal::ParseFunction", L"input");
+			throw ArgumentException(L"Regular expression syntax error: \">\" expected.", L"vl::regex_internal::ParseFunction", L"input");
 		NEED_NAME:
-			throw ArgumentException(L"正则表达式语法错误：缺少标识符。", L"vl::regex_internal::ParseFunction", L"input");
+			throw ArgumentException(L"Regular expression syntax error: Identifier expected.", L"vl::regex_internal::ParseFunction", L"input");
 		NEED_NUMBER:
-			throw ArgumentException(L"正则表达式语法错误：缺少数字。", L"vl::regex_internal::ParseFunction", L"input");
+			throw ArgumentException(L"Regular expression syntax error: Number expected.", L"vl::regex_internal::ParseFunction", L"input");
 		}
 
 		Ptr<Expression> ParseUnit(const wchar_t*& input)
@@ -518,7 +518,7 @@ namespace vl
 					}
 					else
 					{
-						throw ArgumentException(L"正则表达式语法错误：缺少表达式。", L"vl::regex_internal::ParseAlt", L"input");
+						throw ArgumentException(L"Regular expression syntax error: Expression expected.", L"vl::regex_internal::ParseAlt", L"input");
 					}
 				}
 				else
@@ -546,20 +546,20 @@ namespace vl
 					WString name;
 					if(!IsName(input, name))
 					{
-						throw ArgumentException(L"正则表达式语法错误：缺少标识符。", L"vl::regex_internal::ParseRegexExpression", L"code");
+						throw ArgumentException(L"Regular expression syntax error: Identifier expected.", L"vl::regex_internal::ParseRegexExpression", L"code");
 					}
 					if(!IsChar(input, L'>'))
 					{
-						throw ArgumentException(L"正则表达式语法错误：缺少右尖括号\">\"。", L"vl::regex_internal::ParseFunction", L"input");
+						throw ArgumentException(L"Regular expression syntax error: \">\" expected.", L"vl::regex_internal::ParseFunction", L"input");
 					}
 					Ptr<Expression> sub=ParseExpression(input);
 					if(!IsChar(input, L')'))
 					{
-						throw ArgumentException(L"正则表达式语法错误：缺少右小括号\")\"。", L"vl::regex_internal::ParseFunction", L"input");
+						throw ArgumentException(L"Regular expression syntax error: \")\" expected.", L"vl::regex_internal::ParseFunction", L"input");
 					}
 					if(regex->definitions.Keys().Contains(name))
 					{
-						throw ArgumentException(L"正则表达式语法错误：子表达式名称("+name+L")重复定义。", L"vl::regex_internal::ParseFunction", L"input");
+						throw ArgumentException(L"Regular expression syntax error: Found duplicated sub expression name: \""+name+L"\". ", L"vl::regex_internal::ParseFunction", L"input");
 					}
 					else
 					{
@@ -569,11 +569,11 @@ namespace vl
 				regex->expression=ParseExpression(input);
 				if(!regex->expression)
 				{
-					throw ArgumentException(L"正则表达式语法错误：缺少表达式。", L"vl::regex_internal::ParseUnit", L"input");
+					throw ArgumentException(L"Regular expression syntax error: Expression expected.", L"vl::regex_internal::ParseUnit", L"input");
 				}
 				if(*input)
 				{
-					throw ArgumentException(L"正则表达式语法错误：遇到多余的符号。", L"vl::regex_internal::ParseUnit", L"input");
+					throw ArgumentException(L"Regular expression syntax error: Found unnecessary tokens.", L"vl::regex_internal::ParseUnit", L"input");
 				}
 				return regex;
 			}
