@@ -169,12 +169,13 @@ ITypeDescriptor (event)
 				virtual Value					GetOwnerObject()=0;
 				virtual bool					IsAttached()=0;
 				virtual bool					Detach()=0;
+				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
 			};
 
 			class IEventInfo : public IMemberInfo
 			{
 			public:
-				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, const Func<void(const Value&, const Value&)>& handler)=0;
+				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)=0;
 				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
 			};
 

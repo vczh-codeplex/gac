@@ -126,8 +126,11 @@ GeneralTypeDescriptor
 					public:
 						EventBuilder(PropertyGroup& _propertyGroup, const WString& _name);
 
-						EventBuilder&			TriggerInstaller(
-													const Func<void(const Value&, IEventInfo*)>&	_triggerInstaller
+						EventBuilder&			Attacher(
+													const Func<void(DescriptableObject*, IEventHandler*)>&	_attacher
+													);
+						EventBuilder&			Detacher(
+													const Func<void(DescriptableObject*, IEventHandler*)>&	_detacher
 													);
 						EventBuilder&			Invoker(
 													const Func<Value(const Value&, Value&)>&		_invoker
