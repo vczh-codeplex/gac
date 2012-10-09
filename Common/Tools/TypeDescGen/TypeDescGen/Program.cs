@@ -12,7 +12,7 @@ namespace TypeDescGen
         {
             if (args.Length != 1)
             {
-                Console.WriteLine("TypeDescGen.exe <config-xml>");
+                Console.WriteLine("TypeDescGen.exe <config-xml> <pdb-xml>");
                 return;
             }
         }

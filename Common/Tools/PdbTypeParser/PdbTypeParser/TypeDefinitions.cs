@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-namespace LinkPdbXml
+namespace PdbTypeParser
 {
-    enum GacUDTKind
+    public enum GacUDTKind
     {
         Class,
         Enum,
     }
 
-    enum GacTypeKind
+    public enum GacTypeKind
     {
         Primitive,
         SmartPointer,
@@ -26,26 +26,26 @@ namespace LinkPdbXml
         UDT,
     }
 
-    enum GacAccess
+    public enum GacAccess
     {
         Private,
         Protected,
         Public,
     }
 
-    enum GacMethodKind
+    public enum GacMethodKind
     {
         Abstract,
         Virtual,
         Normal,
     }
 
-    class GacSymbol
+    public class GacSymbol
     {
         public string Name { get; set; }
     }
 
-    class GacUDT : GacSymbol
+    public class GacUDT : GacSymbol
     {
         public bool IsAbstract { get; set; }
         public GacUDTKind Kind { get; set; }
@@ -62,7 +62,7 @@ namespace LinkPdbXml
         }
     }
 
-    class GacType
+    public class GacType
     {
         public string Name { get; set; }
         public GacTypeKind Kind { get; set; }
@@ -79,13 +79,13 @@ namespace LinkPdbXml
         }
     }
 
-    class GacBaseClass
+    public class GacBaseClass
     {
         public GacAccess Access { get; set; }
         public GacUDT UDT { get; set; }
     }
 
-    class GacField : GacSymbol
+    public class GacField : GacSymbol
     {
         public GacAccess Access { get; set; }
         public GacType Type { get; set; }
@@ -97,7 +97,7 @@ namespace LinkPdbXml
         }
     }
 
-    class GacConst : GacField
+    public class GacConst : GacField
     {
         public int EnumItemValue { get; set; }
 
@@ -107,7 +107,7 @@ namespace LinkPdbXml
         }
     }
 
-    class GacMethod : GacSymbol
+    public class GacMethod : GacSymbol
     {
         public GacMethodKind Kind { get; set; }
         public GacAccess Access { get; set; }
@@ -121,7 +121,7 @@ namespace LinkPdbXml
         }
     }
 
-    static class TypeDefinitions
+    public static class TypeDefinitions
     {
         static GacType DecorateType(GacType type, XElement typeElement)
         {

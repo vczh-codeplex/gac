@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace LinkPdbXml
+namespace PdbTypeParser
 {
-    class CppName
+    public class CppName
     {
         public string Name { get; set; }
         public CppName[] Parameters { get; set; }
