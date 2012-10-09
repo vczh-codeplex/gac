@@ -308,6 +308,139 @@ description::MethodGroupInfoImpl
 			};
 
 /***********************************************************************
+description::EventInfoImpl
+***********************************************************************/
+
+			class EventInfoImpl : public Object, public IEventInfo
+			{
+			protected:
+				class EventHandlerImpl : public Object, public IEventHandler
+				{
+				protected:
+					EventInfoImpl*							ownerEvent;
+					DescriptableObject*						ownerObject;
+					Func<void(const Value&, Value&)>		handler;
+					bool									attached;
+				public:
+					EventHandlerImpl(EventInfoImpl* _ownerEvent, DescriptableObject* ownerObject, const Func<void(const Value&, Value&)>& _handler)
+						:ownerEvent(_ownerEvent)
+						,handler(_handler)
+					{
+					}
+
+					IEventInfo* GetOwnerEvent()
+					{
+						return ownerEvent;
+					}
+
+					Value GetOwnerObject()
+					{
+						return ownerObject;
+					}
+
+					bool IsAttached()
+					{
+						return attached;
+					}
+
+					bool Detach()
+					{
+						if(attached)
+						{
+							attached=false;
+							ownerEvent->DetachEventHandler(ownerObject, this);
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
+
+					void Invoke(const Value& thisObject, Value& arguments)
+					{
+						handler(thisObject, arguments);
+					}
+				};
+			protected:
+				ITypeDescriptor*									ownerTypeDescriptor;
+				WString												name;
+				Func<Value(const Value&, Value&)>					invoker;
+				Func<void(DescriptableObject*, IEventHandler*)>		attacher;
+				Func<void(DescriptableObject*, IEventHandler*)>		detacher;
+
+				void AttachEventHandler(DescriptableObject* thisObject, Ptr<EventHandlerImpl> eventHandler)
+				{
+					attacher(thisObject, eventHandler.Obj());
+				}
+
+				void DetachEventHandler(DescriptableObject* thisObject, EventHandlerImpl* eventHandler)
+				{
+					detacher(thisObject, eventHandler);
+				}
+			public:
+				EventInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name)
+					:ownerTypeDescriptor(_ownerTypeDescriptor)
+					,name(_name)
+				{
+				}
+
+				ITypeDescriptor* GetOwnerTypeDescriptor()override
+				{
+					return ownerTypeDescriptor;
+				}
+
+				const WString& GetName()override
+				{
+					return name;
+				}
+
+				Ptr<IEventHandler> Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)
+				{
+					DescriptableObject* rawThisObject=0;
+					switch(thisObject.GetValueType())
+					{
+					case Value::DescriptableObjectRef:
+						rawThisObject=thisObject.GetDescriptableObjectRef();
+						break;
+					case Value::DescriptableObjectPtr:
+						rawThisObject=thisObject.GetDescriptableObjectPtr().Obj();
+						break;
+					}
+					if(rawThisObject)
+					{
+						Ptr<EventHandlerImpl> eventHandler=new EventHandlerImpl(this, rawThisObject, handler);
+						AttachEventHandler(rawThisObject, eventHandler);
+						return eventHandler;
+					}
+					else
+					{
+						return 0;
+					}
+				}
+
+				void Invoke(const Value& thisObject, Value& arguments)
+				{
+					invoker(thisObject, arguments);
+				}
+
+				void BuilderSetInvoker(const Func<Value(const Value&, Value&)>& _invoker)
+				{
+					invoker=_invoker;
+				}
+
+				void BuilderSetAttacher(const Func<void(DescriptableObject*, IEventHandler*)>& _attacher)
+				{
+					attacher=_attacher;
+				}
+
+				void BuilderSetDetacher(const Func<void(DescriptableObject*, IEventHandler*)>& _detacher)
+				{
+					detacher=_detacher;
+				}
+			};
+
+/***********************************************************************
 description::GeneralTypeDescriptor::PropertyGroup
 ***********************************************************************/
 
@@ -383,15 +516,26 @@ description::GeneralTypeDescriptor::PropertyGroup
 			GeneralTypeDescriptor::PropertyGroup::EventBuilder::EventBuilder(PropertyGroup& _propertyGroup, const WString& _name)
 				:propertyGroup(_propertyGroup)
 			{
+				Ptr<EventInfoImpl> eventInfo=new EventInfoImpl(propertyGroup.ownerTypeDescriptor, _name);
+				buildingEvent=eventInfo;
+				propertyGroup.events.Add(_name, buildingEvent);
 			}
 
-			GeneralTypeDescriptor::PropertyGroup::EventBuilder& GeneralTypeDescriptor::PropertyGroup::EventBuilder::TriggerInstaller(const Func<void(const Value&, IEventInfo*)>& _triggerInstaller)
+			GeneralTypeDescriptor::PropertyGroup::EventBuilder& GeneralTypeDescriptor::PropertyGroup::EventBuilder::Attacher(const Func<void(DescriptableObject*, IEventHandler*)>& _attacher)
 			{
+				dynamic_cast<EventInfoImpl*>(buildingEvent.Obj())->BuilderSetAttacher(_attacher);
+				return *this;
+			}
+
+			GeneralTypeDescriptor::PropertyGroup::EventBuilder& GeneralTypeDescriptor::PropertyGroup::EventBuilder::Detacher(const Func<void(DescriptableObject*, IEventHandler*)>& _detacher)
+			{
+				dynamic_cast<EventInfoImpl*>(buildingEvent.Obj())->BuilderSetDetacher(_detacher);
 				return *this;
 			}
 
 			GeneralTypeDescriptor::PropertyGroup::EventBuilder& GeneralTypeDescriptor::PropertyGroup::EventBuilder::Invoker(const Func<Value(const Value&, Value&)>& _invoker)
 			{
+				dynamic_cast<EventInfoImpl*>(buildingEvent.Obj())->BuilderSetInvoker(_invoker);
 				return *this;
 			}
 
@@ -428,7 +572,14 @@ description::GeneralTypeDescriptor::PropertyGroup
 
 			GeneralTypeDescriptor::PropertyGroup::EventBuilder GeneralTypeDescriptor::PropertyGroup::Event(const WString& _name)
 			{
-				return EventBuilder(*this, _name);
+				if(!events.Keys().Contains(_name))
+				{
+					return EventBuilder(*this, _name);
+				}
+				else
+				{
+					throw EventAlreadyExistsException(ownerTypeDescriptor, _name);
+				}
 			}
 
 /***********************************************************************

@@ -70,12 +70,13 @@ Event
 			protected:
 				struct HandlerNode
 				{
-					Ptr<IHandler>					handler;
-					Ptr<HandlerNode>				next;
+					Ptr<IHandler>										handler;
+					Ptr<HandlerNode>									next;
 				};
 
-				GuiGraphicsComposition*				sender;
-				Ptr<HandlerNode>					handlers;
+				GuiGraphicsComposition*									sender;
+				Ptr<HandlerNode>										handlers;
+				collections::List<Ptr<description::IEventHandler>>		reflectionEventHandlers;
 			public:
 				GuiGraphicsEvent(GuiGraphicsComposition* _sender=0)
 					:sender(_sender)
@@ -84,6 +85,21 @@ Event
 
 				~GuiGraphicsEvent()
 				{
+					for(vint i=reflectionEventHandlers.Count()-1;i>=0;i--)
+					{
+						Ptr<description::IEventHandler> eventHandler=reflectionEventHandlers[i];
+						eventHandler->Detach();
+					}
+				}
+
+				void ReflectionAddEventHandler(Ptr<description::IEventHandler> eventHandler)
+				{
+					reflectionEventHandlers.Add(eventHandler);
+				}
+
+				void ReflectionRemoveEventHandler(description::IEventHandler* eventHandler)
+				{
+					reflectionEventHandlers.Remove(eventHandler);
 				}
 
 				GuiGraphicsComposition* GetAssociatedComposition()
