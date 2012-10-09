@@ -19,6 +19,51 @@ namespace vl
 	{
 		namespace description
 		{
+
+/***********************************************************************
+Exceptions
+***********************************************************************/
+
+			class TypeDescriptorBuilderException : public Exception
+			{
+			public:
+				TypeDescriptorBuilderException(const WString& message)
+					:Exception(message)
+				{
+				}
+			};
+
+			class PropertyAlreadyExistsException : public TypeDescriptorBuilderException
+			{
+			public:
+				PropertyAlreadyExistsException(ITypeDescriptor* typeDescriptor, const WString& propertyName)
+					:TypeDescriptorBuilderException(L"Property \""+propertyName+L"\" already exists in type \""+typeDescriptor->GetTypeName()+L"\".")
+				{
+				}
+			};
+
+			class EventAlreadyExistsException : public TypeDescriptorBuilderException
+			{
+			public:
+				EventAlreadyExistsException(ITypeDescriptor* typeDescriptor, const WString& eventName)
+					:TypeDescriptorBuilderException(L"Event \""+eventName+L"\" already exists in type \""+typeDescriptor->GetTypeName()+L"\".")
+				{
+				}
+			};
+
+			class ParameterAlreadyExistsException : public TypeDescriptorBuilderException
+			{
+			public:
+				ParameterAlreadyExistsException(ITypeDescriptor* typeDescriptor, IMethodInfo* method,  const WString& parameterName)
+					:TypeDescriptorBuilderException(L"Parameter \""+parameterName+L"\" already exists in method \""+method->GetName()+L"\" in type \""+typeDescriptor->GetTypeName()+L"\".")
+				{
+				}
+			};
+
+/***********************************************************************
+GeneralTypeDescriptor
+***********************************************************************/
+
 			class GeneralTypeDescriptor : public Object, public ITypeDescriptor
 			{
 			public:
@@ -53,7 +98,7 @@ namespace vl
 						Ptr<IMethodGroupInfo>	buildingMethodGroup;
 						Ptr<IMethodInfo>		buildingMethod;
 					public:
-						MethodBuilder(PropertyGroup& _propertyGroup);
+						MethodBuilder(PropertyGroup& _propertyGroup, const WString& _name);
 
 						MethodBuilder&			Parameter(
 													const WString&									_name,
@@ -79,6 +124,8 @@ namespace vl
 						PropertyGroup&			propertyGroup;
 						Ptr<IEventInfo>			buildingEvent;
 					public:
+						EventBuilder(PropertyGroup& _propertyGroup, const WString& _name);
+
 						EventBuilder&			TriggerInstaller(
 													const Func<void(const Value&, IEventInfo*)>&	_triggerInstaller
 													);
@@ -99,12 +146,12 @@ namespace vl
 													bool											_nullable,
 													const Func<Value(const Value&)>&				_getter,
 													const Func<void(const Value&, const Value&)>&	_setter,
-													const WString& _valueChangedEventName
+													const WString&									_valueChangedEventName
 													);
-					MethodBuilder&				Method(
+					MethodBuilder				Method(
 													const WString&									_name
 													);
-					EventBuilder&				Event(
+					EventBuilder				Event(
 													const WString&									_name
 													);
 				};
