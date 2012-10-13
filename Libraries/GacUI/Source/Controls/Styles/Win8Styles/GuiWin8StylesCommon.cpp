@@ -18,7 +18,8 @@ Win8ButtonColors
 			void Win8ButtonColors::SetAlphaWithoutText(unsigned char a)
 			{
 				borderColor.a=a;
-				backgroundColor.a=a;
+				g1.a=a;
+				g2.a=a;
 			}
 
 			Win8ButtonColors Win8ButtonColors::Blend(const Win8ButtonColors& c1, const Win8ButtonColors& c2, int ratio, int total)
@@ -28,7 +29,8 @@ Win8ButtonColors
 
 				Win8ButtonColors result;
 				result.borderColor=BlendColor(c1.borderColor, c2.borderColor, ratio, total);
-				result.backgroundColor=BlendColor(c1.backgroundColor, c2.backgroundColor, ratio, total);
+				result.g1=BlendColor(c1.g1, c2.g1, ratio, total);
+				result.g2=BlendColor(c1.g2, c2.g2, ratio, total);
 				result.textColor=BlendColor(c1.textColor, c2.textColor, ratio, total);
 				result.bulletLight=BlendColor(c1.bulletLight, c2.bulletLight, ratio, total);
 				result.bulletDark=BlendColor(c1.bulletDark, c2.bulletDark, ratio, total);
@@ -42,7 +44,8 @@ Win8ButtonColors
 				Win8ButtonColors colors=
 				{
 					Color(172, 172, 172),
-					Color(232, 232, 232),
+					Color(239, 239, 239),
+					Color(229, 229, 229),
 					Win8GetSystemTextColor(true),
 				};
 				return colors;
@@ -53,7 +56,8 @@ Win8ButtonColors
 				Win8ButtonColors colors=
 				{
 					Color(126, 180, 234),
-					Color(232, 242, 252),
+					Color(235, 244, 252),
+					Color(220, 236, 252),
 					Win8GetSystemTextColor(true),
 				};
 				return colors;
@@ -63,8 +67,9 @@ Win8ButtonColors
 			{
 				Win8ButtonColors colors=
 				{
-					Color(217, 217, 217),
-					Color(239, 239, 239),
+					Color(86, 157, 229),
+					Color(218, 236, 252),
+					Color(196, 224, 252),
 					Win8GetSystemTextColor(true),
 				};
 				return colors;
@@ -75,6 +80,7 @@ Win8ButtonColors
 				Win8ButtonColors colors=
 				{
 					Color(173, 178, 181),
+					Color(252, 252, 252),
 					Color(252, 252, 252),
 					Win8GetSystemTextColor(false),
 				};
@@ -102,8 +108,10 @@ Win8ButtonElements
 					composition->SetOwnedElement(element);
 				}
 				{
-					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					GuiGradientBackgroundElement* element=GuiGradientBackgroundElement::Create();
 					button.backgroundElement=element;
+					element->SetDirection(GuiGradientBackgroundElement::Vertical);
+					element->SetShape(ElementShape::Rectangle);
 
 					GuiBoundsComposition* composition=new GuiBoundsComposition;
 					button.backgroundComposition=composition;
@@ -124,7 +132,7 @@ Win8ButtonElements
 				{
 					rectBorderElement->SetColor(colors.borderColor);
 				}
-				backgroundElement->SetColor(colors.backgroundColor);
+				backgroundElement->SetColors(colors.g1, colors.g2);
 				textElement->SetColor(colors.textColor);
 			}
 

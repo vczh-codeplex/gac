@@ -25,7 +25,8 @@ Button Configuration
 			struct Win8ButtonColors
 			{
 				Color										borderColor;
-				Color										backgroundColor;
+				Color										g1;
+				Color										g2;
 				Color										textColor;
 				Color										bulletLight;
 				Color										bulletDark;
@@ -34,7 +35,8 @@ Button Configuration
 				{
 					return
 						borderColor == colors.borderColor &&
-						backgroundColor == colors.backgroundColor &&
+						g1 == colors.g1 &&
+						g2 == colors.g2 &&
 						textColor == colors.textColor &&
 						bulletLight == colors.bulletLight &&
 						bulletDark == colors.bulletDark;
@@ -58,7 +60,7 @@ Button Configuration
 			struct Win8ButtonElements
 			{
 				elements::GuiSolidBorderElement*			rectBorderElement;
-				elements::GuiSolidBackgroundElement*		backgroundElement;
+				elements::GuiGradientBackgroundElement*		backgroundElement;
 				elements::GuiSolidLabelElement*				textElement;
 				compositions::GuiBoundsComposition*			textComposition;
 				compositions::GuiBoundsComposition*			mainComposition;
