@@ -967,11 +967,6 @@ Win7TextBoxColors
 Helpers
 ***********************************************************************/
 
-			int Win7GetColorAnimationLength()
-			{
-				return 120;
-			}
-
 			Color Win7GetSystemWindowColor()
 			{
 				return Color(240, 240, 240);

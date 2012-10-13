@@ -2032,12 +2032,13 @@ Event
 			protected:
 				struct HandlerNode
 				{
-					Ptr<IHandler>					handler;
-					Ptr<HandlerNode>				next;
+					Ptr<IHandler>										handler;
+					Ptr<HandlerNode>									next;
 				};
 
-				GuiGraphicsComposition*				sender;
-				Ptr<HandlerNode>					handlers;
+				GuiGraphicsComposition*									sender;
+				Ptr<HandlerNode>										handlers;
+				collections::List<Ptr<description::IEventHandler>>		reflectionEventHandlers;
 			public:
 				GuiGraphicsEvent(GuiGraphicsComposition* _sender=0)
 					:sender(_sender)
@@ -2046,6 +2047,21 @@ Event
 
 				~GuiGraphicsEvent()
 				{
+					for(vint i=reflectionEventHandlers.Count()-1;i>=0;i--)
+					{
+						Ptr<description::IEventHandler> eventHandler=reflectionEventHandlers[i];
+						eventHandler->Detach();
+					}
+				}
+
+				void ReflectionAddEventHandler(Ptr<description::IEventHandler> eventHandler)
+				{
+					reflectionEventHandlers.Add(eventHandler);
+				}
+
+				void ReflectionRemoveEventHandler(description::IEventHandler* eventHandler)
+				{
+					reflectionEventHandlers.Remove(eventHandler);
 				}
 
 				GuiGraphicsComposition* GetAssociatedComposition()
@@ -7336,7 +7352,7 @@ Theme
 				//controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()override;
 				//controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
 
-				//controls::GuiButton::IStyleController*								CreateButtonStyle()override;
+				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				//controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
 				//controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
 				//
@@ -7586,7 +7602,7 @@ Animation Implementation
 					GuiGraphicsHost* host=HOST_GETTER(style);\
 					if(enableAnimation && host)\
 					{\
-						Restart(Win7GetColorAnimationLength());\
+						Restart(120);\
 						if(stopped)\
 						{\
 							colorBegin=colorEnd;\
@@ -7798,7 +7814,6 @@ Button Configuration
 Helper Functions
 ***********************************************************************/
 			
-			extern int										Win7GetColorAnimationLength();
 			extern Color									Win7GetSystemWindowColor();
 			extern Color									Win7GetSystemTabContentColor();
 			extern Color									Win7GetSystemBorderColor();
@@ -8830,11 +8845,63 @@ namespace vl
 		{
 
 /***********************************************************************
+Button Configuration
+***********************************************************************/
+			
+			struct Win8ButtonColors
+			{
+				Color										borderColor;
+				Color										backgroundColor;
+				Color										textColor;
+				Color										bulletLight;
+				Color										bulletDark;
+
+				bool operator==(const Win8ButtonColors& colors)
+				{
+					return
+						borderColor == colors.borderColor &&
+						backgroundColor == colors.backgroundColor &&
+						textColor == colors.textColor &&
+						bulletLight == colors.bulletLight &&
+						bulletDark == colors.bulletDark;
+				}
+
+				bool operator!=(const Win8ButtonColors& colors)
+				{
+					return !(*this==colors);
+				}
+
+				void										SetAlphaWithoutText(unsigned char a);
+
+				static Win8ButtonColors						Blend(const Win8ButtonColors& c1, const Win8ButtonColors& c2, int ratio, int total);
+
+				static Win8ButtonColors						ButtonNormal();
+				static Win8ButtonColors						ButtonActive();
+				static Win8ButtonColors						ButtonPressed();
+				static Win8ButtonColors						ButtonDisabled();
+			};
+
+			struct Win8ButtonElements
+			{
+				elements::GuiSolidBorderElement*			rectBorderElement;
+				elements::GuiSolidBackgroundElement*		backgroundElement;
+				elements::GuiSolidLabelElement*				textElement;
+				compositions::GuiBoundsComposition*			textComposition;
+				compositions::GuiBoundsComposition*			mainComposition;
+				compositions::GuiBoundsComposition*			backgroundComposition;
+
+				static Win8ButtonElements					Create(Alignment::Type horizontal=Alignment::Center, Alignment::Type vertical=Alignment::Center);
+				void										Apply(const Win8ButtonColors& colors);
+			};
+
+/***********************************************************************
 Helper Functions
 ***********************************************************************/
 			
-			extern int										Win8GetColorAnimationLength();
 			extern Color									Win8GetSystemWindowColor();
+			extern Color									Win8GetSystemTextColor(bool enabled);
+			extern void										Win8SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
+			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
 		}
 	}
 }
@@ -8897,6 +8964,81 @@ Container
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\STYLES\WIN8STYLES\GUIWIN8BUTTONSTYLES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control Styles::Windows7 Styles
+
+Clases:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_WIN7STYLES_GUIWIN8BUTTONSTYLES
+#define VCZH_PRESENTATION_CONTROLS_WIN7STYLES_GUIWIN8BUTTONSTYLES
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace win8
+		{
+
+/***********************************************************************
+Button
+***********************************************************************/
+			
+			class Win8ButtonStyleBase : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win8ButtonStyleBase>
+			{
+			protected:
+				DEFINE_TRANSFERRING_ANIMATION(Win8ButtonColors, Win8ButtonStyleBase)
+
+				Win8ButtonElements							elements;
+				Ptr<TransferringAnimation>					transferringAnimation;
+				controls::GuiButton::ControlState			controlStyle;
+				bool										isVisuallyEnabled;
+				bool										isSelected;
+				bool										transparentWhenInactive;
+				bool										transparentWhenDisabled;
+
+				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)=0;
+			public:
+				Win8ButtonStyleBase(const Win8ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical);
+				~Win8ButtonStyleBase();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+				void										SetSelected(bool value)override;
+				void										Transfer(controls::GuiButton::ControlState value)override;
+
+				bool										GetTransparentWhenInactive();
+				void										SetTransparentWhenInactive(bool value);
+				bool										GetTransparentWhenDisabled();
+				void										SetTransparentWhenDisabled(bool value);
+				bool										GetAutoSizeForText();
+				void										SetAutoSizeForText(bool value);
+			};
+			
+			class Win8ButtonStyle : public Win8ButtonStyleBase, public Description<Win8ButtonStyle>
+			{
+			protected:
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+			public:
+				Win8ButtonStyle();
+				~Win8ButtonStyle();
 			};
 		}
 	}

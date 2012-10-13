@@ -261,7 +261,7 @@ Animation Implementation
 					GuiGraphicsHost* host=HOST_GETTER(style);\
 					if(enableAnimation && host)\
 					{\
-						Restart(Win7GetColorAnimationLength());\
+						Restart(120);\
 						if(stopped)\
 						{\
 							colorBegin=colorEnd;\

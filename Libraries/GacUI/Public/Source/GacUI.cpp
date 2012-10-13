@@ -4456,6 +4456,7 @@ Helpers
 
 				GuiMain();
 				theme::SetCurrentTheme(0);
+				description::DestroyGlobalTypeManager();
 			}
 		}
 	}
@@ -11518,6 +11519,11 @@ Win7Theme
 /***********************************************************************
 Controls\Styles\GuiWin8Styles.cpp
 ***********************************************************************/
+//#include "Win8Styles\GuiWin8TabStyles.h"
+//#include "Win8Styles\GuiWin8MenuStyles.h"
+//#include "Win8Styles\GuiWin8ToolstripStyles.h"
+//#include "Win8Styles\GuiWin8ScrollableStyles.h"
+//#include "Win8Styles\GuiWin8ListStyles.h"
 
 namespace vl
 {
@@ -11647,10 +11653,10 @@ Win8Theme
 			//	throw 0;
 			//}
 
-			//controls::GuiButton::IStyleController* Win8Theme::CreateButtonStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiButton::IStyleController* Win8Theme::CreateButtonStyle()
+			{
+				return new Win8ButtonStyle;
+			}
 
 			//controls::GuiSelectableButton::IStyleController* Win8Theme::CreateCheckBoxStyle()
 			//{
@@ -15112,11 +15118,6 @@ Win7TextBoxColors
 Helpers
 ***********************************************************************/
 
-			int Win7GetColorAnimationLength()
-			{
-				return 120;
-			}
-
 			Color Win7GetSystemWindowColor()
 			{
 				return Color(240, 240, 240);
@@ -15878,6 +15879,187 @@ Win7ToolstripSplitterStyle
 }
 
 /***********************************************************************
+Controls\Styles\Win8Styles\GuiWin8ButtonStyles.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace win8
+		{
+			using namespace collections;
+			using namespace elements;
+			using namespace compositions;
+			using namespace controls;
+
+/***********************************************************************
+Win8ButtonStyleBase
+***********************************************************************/
+
+			IMPLEMENT_TRANSFERRING_ANIMATION(Win8ButtonColors, Win8ButtonStyleBase)
+			{
+				colorCurrent=Win8ButtonColors::Blend(colorBegin, colorEnd, currentPosition, totalLength);
+				style->elements.Apply(colorCurrent);
+			}
+
+			Win8ButtonStyleBase::Win8ButtonStyleBase(const Win8ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical)
+				:controlStyle(GuiButton::Normal)
+				,isVisuallyEnabled(true)
+				,isSelected(false)
+				,transparentWhenInactive(false)
+				,transparentWhenDisabled(false)
+			{
+				elements=Win8ButtonElements::Create(horizontal, vertical);
+				elements.Apply(initialColor);
+				transferringAnimation=new TransferringAnimation(this, initialColor);
+			}
+
+			Win8ButtonStyleBase::~Win8ButtonStyleBase()
+			{
+				transferringAnimation->Disable();
+			}
+
+			compositions::GuiBoundsComposition* Win8ButtonStyleBase::GetBoundsComposition()
+			{
+				return elements.mainComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win8ButtonStyleBase::GetContainerComposition()
+			{
+				return elements.mainComposition;
+			}
+
+			void Win8ButtonStyleBase::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8ButtonStyleBase::SetText(const WString& value)
+			{
+				elements.textElement->SetText(value);
+			}
+
+			void Win8ButtonStyleBase::SetFont(const FontProperties& value)
+			{
+				Win8SetFont(elements.textElement, elements.textComposition, value);
+			}
+
+			void Win8ButtonStyleBase::SetVisuallyEnabled(bool value)
+			{
+				if(isVisuallyEnabled!=value)
+				{
+					isVisuallyEnabled=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
+				}
+			}
+
+			void Win8ButtonStyleBase::SetSelected(bool value)
+			{
+				if(isSelected!=value)
+				{
+					isSelected=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
+				}
+			}
+
+			void Win8ButtonStyleBase::Transfer(GuiButton::ControlState value)
+			{
+				if(controlStyle!=value)
+				{
+					controlStyle=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
+				}
+			}
+
+			bool Win8ButtonStyleBase::GetTransparentWhenInactive()
+			{
+				return transparentWhenInactive;
+			}
+
+			void Win8ButtonStyleBase::SetTransparentWhenInactive(bool value)
+			{
+				transparentWhenInactive=value;
+				TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
+			}
+
+			bool Win8ButtonStyleBase::GetTransparentWhenDisabled()
+			{
+				return transparentWhenDisabled;
+			}
+
+			void Win8ButtonStyleBase::SetTransparentWhenDisabled(bool value)
+			{
+				transparentWhenDisabled=value;
+				TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
+			}
+
+			bool Win8ButtonStyleBase::GetAutoSizeForText()
+			{
+				return elements.textComposition->GetMinSizeLimitation()!=GuiGraphicsComposition::NoLimit;
+			}
+
+			void Win8ButtonStyleBase::SetAutoSizeForText(bool value)
+			{
+				if(value)
+				{
+					elements.textComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				}
+				else
+				{
+					elements.textComposition->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+				}
+			}
+
+/***********************************************************************
+Win8ButtonStyle
+***********************************************************************/
+
+			void Win8ButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected)
+			{
+				Win8ButtonColors targetColor;
+				if(enabled)
+				{
+					switch(value)
+					{
+					case GuiButton::Normal:
+						targetColor=Win8ButtonColors::ButtonNormal();
+						if(transparentWhenInactive)
+						{
+							targetColor.SetAlphaWithoutText(0);
+						}
+						break;
+					case GuiButton::Active:
+						targetColor=Win8ButtonColors::ButtonActive();
+						break;
+					case GuiButton::Pressed:
+						targetColor=Win8ButtonColors::ButtonPressed();
+						break;
+					}
+				}
+				else
+				{
+					targetColor=Win8ButtonColors::ButtonDisabled();
+					if(transparentWhenDisabled)
+					{
+						targetColor.SetAlphaWithoutText(0);
+					}
+				}
+				transferringAnimation->Transfer(targetColor);
+			}
+
+			Win8ButtonStyle::Win8ButtonStyle()
+				:Win8ButtonStyleBase(Win8ButtonColors::ButtonNormal(), Alignment::Center, Alignment::Center)
+			{
+			}
+
+			Win8ButtonStyle::~Win8ButtonStyle()
+			{
+			}
+		}
+	}
+}
+
+/***********************************************************************
 Controls\Styles\Win8Styles\GuiWin8ControlStyles.cpp
 ***********************************************************************/
 
@@ -15997,17 +16179,153 @@ namespace vl
 			using namespace controls;
 
 /***********************************************************************
-Helpers
+Win8ButtonColors
 ***********************************************************************/
 
-			int Win8GetColorAnimationLength()
+			void Win8ButtonColors::SetAlphaWithoutText(unsigned char a)
 			{
-				return 120;
+				borderColor.a=a;
+				backgroundColor.a=a;
 			}
+
+			Win8ButtonColors Win8ButtonColors::Blend(const Win8ButtonColors& c1, const Win8ButtonColors& c2, int ratio, int total)
+			{
+				if(ratio<0) ratio=0;
+				else if(ratio>total) ratio=total;
+
+				Win8ButtonColors result;
+				result.borderColor=BlendColor(c1.borderColor, c2.borderColor, ratio, total);
+				result.backgroundColor=BlendColor(c1.backgroundColor, c2.backgroundColor, ratio, total);
+				result.textColor=BlendColor(c1.textColor, c2.textColor, ratio, total);
+				result.bulletLight=BlendColor(c1.bulletLight, c2.bulletLight, ratio, total);
+				result.bulletDark=BlendColor(c1.bulletDark, c2.bulletDark, ratio, total);
+				return result;
+			}
+
+			//---------------------------------------------------------
+
+			Win8ButtonColors Win8ButtonColors::ButtonNormal()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(172, 172, 172),
+					Color(232, 232, 232),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ButtonActive()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(126, 180, 234),
+					Color(232, 242, 252),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ButtonPressed()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(217, 217, 217),
+					Color(239, 239, 239),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ButtonDisabled()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(173, 178, 181),
+					Color(252, 252, 252),
+					Win8GetSystemTextColor(false),
+				};
+				return colors;
+			}
+
+/***********************************************************************
+Win8ButtonElements
+***********************************************************************/
+
+			Win8ButtonElements Win8ButtonElements::Create(Alignment::Type horizontal, Alignment::Type vertical)
+			{
+				Win8ButtonElements button;
+				{
+					button.mainComposition=new GuiBoundsComposition;
+					button.mainComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				}
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					button.rectBorderElement=element;
+
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					button.mainComposition->AddChild(composition);
+					composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					composition->SetOwnedElement(element);
+				}
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					button.backgroundElement=element;
+
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					button.backgroundComposition=composition;
+					button.mainComposition->AddChild(composition);
+					composition->SetAlignmentToParent(Margin(1, 1, 1, 1));
+					composition->SetOwnedElement(element);
+				}
+				{
+					Win8CreateSolidLabelElement(button.textElement, button.textComposition, horizontal, vertical);
+					button.mainComposition->AddChild(button.textComposition);
+				}
+				return button;
+			}
+
+			void Win8ButtonElements::Apply(const Win8ButtonColors& colors)
+			{
+				if(rectBorderElement)
+				{
+					rectBorderElement->SetColor(colors.borderColor);
+				}
+				backgroundElement->SetColor(colors.backgroundColor);
+				textElement->SetColor(colors.textColor);
+			}
+
+/***********************************************************************
+Helpers
+***********************************************************************/
 
 			Color Win8GetSystemWindowColor()
 			{
 				return Color(240, 240, 240);
+			}
+
+			Color Win8GetSystemTextColor(bool enabled)
+			{
+				return enabled?Color(0, 0, 0):Color(131, 131, 131);
+			}
+
+			void Win8SetFont(GuiSolidLabelElement* element, GuiBoundsComposition* composition, const FontProperties& fontProperties)
+			{
+				int margin=3;
+				element->SetFont(fontProperties);
+				composition->SetMargin(Margin(margin, margin, margin, margin));
+			}
+
+			void Win8CreateSolidLabelElement(GuiSolidLabelElement*& element, GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical)
+			{
+				element=GuiSolidLabelElement::Create();
+				element->SetAlignments(horizontal, vertical);
+
+				composition=new GuiBoundsComposition;
+				composition->SetOwnedElement(element);
+				composition->SetMargin(Margin(0, 0, 0, 0));
+				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			}
 		}
 	}
