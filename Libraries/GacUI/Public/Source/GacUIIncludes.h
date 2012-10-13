@@ -11155,6 +11155,65 @@ namespace vl
 #endif
 
 /***********************************************************************
+COMMON\SOURCE\EXCEPTION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Framework::Exception
+
+Classes:
+	Exception									：异常
+	ArgumentException							：预料的的参数错误
+***********************************************************************/
+
+#ifndef VCZH_EXCEPTION
+#define VCZH_EXCEPTION
+
+
+namespace vl
+{
+	class Exception : public Object
+	{
+	protected:
+		WString						message;
+
+	public:
+		Exception(const WString& _message=WString::Empty);
+
+		const WString&				Message()const;
+	};
+
+	class ArgumentException : public Exception
+	{
+	protected:
+		WString						function;
+		WString						name;
+
+	public:
+		ArgumentException(const WString& _message=WString::Empty, const WString& _function=WString::Empty, const WString& _name=WString::Empty);
+
+		const WString&				GetFunction()const;
+		const WString&				GetName()const;
+	};
+
+	class ParsingException : public Exception
+	{
+	protected:
+		vint							position;
+		WString						expression;
+
+	public:
+		ParsingException(const WString& _message, const WString& _expression, vint _position);
+
+		const WString&				GetExpression()const;
+		vint							GetPosition()const;
+	};
+}
+
+#endif
+
+/***********************************************************************
 COMMON\SOURCE\REFLECTION\GUITYPEDESCRIPTOR.H
 ***********************************************************************/
 /***********************************************************************
@@ -11165,8 +11224,8 @@ Framework::Reflection
 XML Representation for Code Generation:
 ***********************************************************************/
 
-#ifndef VCZH_PRESENTATION_REFLECTION_GUITYPEDESCRIPTOR
-#define VCZH_PRESENTATION_REFLECTION_GUITYPEDESCRIPTOR
+#ifndef VCZH_REFLECTION_GUITYPEDESCRIPTOR
+#define VCZH_REFLECTION_GUITYPEDESCRIPTOR
 
 
 namespace vl
@@ -11177,6 +11236,7 @@ namespace vl
 /***********************************************************************
 Attribute
 ***********************************************************************/
+
 		namespace description
 		{
 			class ITypeDescriptor;
@@ -11257,11 +11317,12 @@ Value
 				DescriptableObject*				descriptableObjectRef;
 				Ptr<DescriptableObject>			descriptableObjectPtr;
 				WString							text;
+				ITypeDescriptor*				typeDescriptor;
 			public:
 				Value();
 				Value(DescriptableObject* value);
 				Value(Ptr<DescriptableObject> value);
-				Value(const WString& value);
+				Value(const WString& value, ITypeDescriptor* associatedTypeDescriptor);
 				Value(const Value& value);
 
 				Value&							operator=(const Value& value);
@@ -11270,40 +11331,64 @@ Value
 				DescriptableObject*				GetDescriptableObjectRef()const;
 				Ptr<DescriptableObject>			GetDescriptableObjectPtr()const;
 				const WString&					GetText()const;
+				ITypeDescriptor*				GetTypeDescriptor()const;
 			};
 
 			class IValueSerializer : public Interface
 			{
 			public:
 				virtual WString					GetName()=0;
-				virtual bool					Validate(const Value& value)=0;
+				virtual ITypeDescriptor*		GetOwnerTypeDescriptor()=0;
+				virtual bool					Validate(const WString& text)=0;
+				virtual bool					Parse(const WString& input, Value& output)=0;
 			};
 
 			template<typename T>
 			class ITypedValueSerializer : public IValueSerializer
 			{
-				virtual bool					Serialize(const T& input, Value& value)=0;
-				virtual bool					Deserialize(T& output, const Value& value)=0;
+				virtual bool					Serialize(const T& input, Value& output)=0;
+				virtual bool					Deserialize(const Value& input, T& output)=0;
 			};
 
 /***********************************************************************
 ITypeDescriptor (basic)
 ***********************************************************************/
 
-			class IMemberInfo : public Interface
+			class IMemberInfo : public virtual Interface
 			{
 			public:
 				virtual ITypeDescriptor*		GetOwnerTypeDescriptor()=0;
 				virtual const WString&			GetName()=0;
 			};
 
-			class IValueInfo : public Interface
+			class IValueInfo : public virtual Interface
 			{
 			public:
-				virtual Value::ValueType		GetExpectedValueType()=0;
-				virtual IValueSerializer*		GetExpectedValueSerializer()=0;
-				virtual ITypeDescriptor*		GetExpectedTypeDescriptor()=0;
+				virtual ITypeDescriptor*		GetValueTypeDescriptor()=0;
 				virtual bool					CanBeNull()=0;
+			};
+
+/***********************************************************************
+ITypeDescriptor (event)
+***********************************************************************/
+
+			class IEventInfo;
+
+			class IEventHandler : public Interface
+			{
+			public:
+				virtual IEventInfo*				GetOwnerEvent()=0;
+				virtual Value					GetOwnerObject()=0;
+				virtual bool					IsAttached()=0;
+				virtual bool					Detach()=0;
+				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
+			};
+
+			class IEventInfo : public IMemberInfo
+			{
+			public:
+				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)=0;
+				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
 			};
 
 /***********************************************************************
@@ -11313,6 +11398,9 @@ ITypeDescriptor (property)
 			class IPropertyInfo : public IMemberInfo, public IValueInfo
 			{
 			public:
+				virtual bool					IsReadable()=0;
+				virtual bool					IsWritable()=0;
+				virtual IEventInfo*				GetValueChangedEvent()=0;
 				virtual Value					GetValue(const Value& thisObject)=0;
 				virtual void					SetValue(const Value& thisObject, Value newValue)=0;
 			};
@@ -11335,39 +11423,17 @@ ITypeDescriptor (method)
 			{
 			public:
 				virtual IMethodGroupInfo*		GetOwnerMethodGroup()=0;
-				virtual int						GetParameterCount()=0;
-				virtual IParameterInfo*			GetParameter(int index)=0;
+				virtual vint					GetParameterCount()=0;
+				virtual IParameterInfo*			GetParameter(vint index)=0;
 				virtual IValueInfo*				GetReturn()=0;
-				virtual Value					Invoke(const Value& thisObject, const collections::IReadonlyList<Value>& arguments)=0;
+				virtual Value					Invoke(const Value& thisObject, collections::IArray<Value>& arguments)=0;
 			};
 
 			class IMethodGroupInfo : public IMemberInfo
 			{
 			public:
-				virtual int						GetMethodCount()=0;
-				virtual IMethodInfo*			GetMethod(int index)=0;
-			};
-
-/***********************************************************************
-ITypeDescriptor (event)
-***********************************************************************/
-
-			class IEventInfo;
-
-			class IEventHandler : public Interface
-			{
-			public:
-				virtual IEventInfo*				GetOwnerEvent()=0;
-				virtual Value					GetOwnerObject()=0;
-				virtual bool					IsAttached()=0;
-				virtual bool					Detach()=0;
-			};
-
-			class IEventInfo : public IMemberInfo
-			{
-			public:
-				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, const Func<void(const Value&, const Value&)>& handler)=0;
-				virtual void					Invoke(const Value& thisObject, const Value& arguments)=0;
+				virtual vint					GetMethodCount()=0;
+				virtual IMethodInfo*			GetMethod(vint index)=0;
 			};
 
 /***********************************************************************
@@ -11377,24 +11443,96 @@ ITypeDescriptor
 			class ITypeDescriptor : public Interface
 			{
 			public:
-				virtual int						GetBaseTypeDescriptorCount()=0;
-				virtual ITypeDescriptor*		GetBaseTypeDescriptor(int index)=0;
+				virtual const WString&			GetTypeName()=0;
+				virtual IValueSerializer*		GetValueSerializer()=0;
+				virtual vint					GetBaseTypeDescriptorCount()=0;
+				virtual ITypeDescriptor*		GetBaseTypeDescriptor(vint index)=0;
 
-				virtual int						GetPropertyCount()=0;
-				virtual IPropertyInfo*			GetProperty(int index)=0;
-				virtual bool					IsPropertyExists(const WString& name, bool inheritance)=0;
-				virtual IPropertyInfo*			GetPropertyByName(const WString& name, bool inheritance)=0;
+				virtual vint					GetPropertyCount()=0;
+				virtual IPropertyInfo*			GetProperty(vint index)=0;
+				virtual bool					IsPropertyExists(const WString& name, bool inheritable)=0;
+				virtual IPropertyInfo*			GetPropertyByName(const WString& name, bool inheritable)=0;
 
-				virtual int						GetEventCount()=0;
-				virtual IEventInfo*				GetEvent(int index)=0;
-				virtual bool					IsEventExists(const WString& name, bool inheritance)=0;
-				virtual IEventInfo*				GetEventByName(const WString& name, bool inheritance)=0;
+				virtual vint					GetEventCount()=0;
+				virtual IEventInfo*				GetEvent(vint index)=0;
+				virtual bool					IsEventExists(const WString& name, bool inheritable)=0;
+				virtual IEventInfo*				GetEventByName(const WString& name, bool inheritable)=0;
 
-				virtual int						GetMethodGroupCount()=0;
-				virtual IMethodGroupInfo*		GetMethodGroup(int index)=0;
-				virtual bool					IsMethodGroupExists(const WString& name, bool inheritance)=0;
-				virtual IMethodGroupInfo*		GetMethodGroupByName(const WString& name, bool inheritance)=0;
+				virtual vint					GetMethodGroupCount()=0;
+				virtual IMethodGroupInfo*		GetMethodGroup(vint index)=0;
+				virtual bool					IsMethodGroupExists(const WString& name, bool inheritable)=0;
+				virtual IMethodGroupInfo*		GetMethodGroupByName(const WString& name, bool inheritable)=0;
 				virtual IMethodGroupInfo*		GetConstructorGroup()=0;
+			};
+
+/***********************************************************************
+ITypeManager
+***********************************************************************/
+
+			class ITypeManager;
+
+			class ITypeLoader : public Interface
+			{
+			public:
+				virtual void					Load(ITypeManager* manager)=0;
+				virtual void					Unload(ITypeManager* manager)=0;
+			};
+
+			class ITypeManager : public Interface
+			{
+			public:
+				virtual vint					GetValueSerializerCount()=0;
+				virtual IValueSerializer*		GetValueSerializer(vint index)=0;
+				virtual IValueSerializer*		GetValueSerializer(const WString& name)=0;
+				virtual bool					SetValueSerializer(const WString& name, Ptr<IValueSerializer> valueSerializer)=0;
+				
+				virtual vint					GetTypeDescriptorCount()=0;
+				virtual ITypeDescriptor*		GetTypeDescriptor(vint index)=0;
+				virtual ITypeDescriptor*		GetTypeDescriptor(const WString& name)=0;
+				virtual bool					SetTypeDescriptor(const WString& name, Ptr<ITypeDescriptor> typeDescriptor)=0;
+
+				virtual bool					AddTypeLoader(Ptr<ITypeLoader> typeLoader)=0;
+				virtual bool					RemoveTypeLoader(Ptr<ITypeLoader> typeLoader)=0;
+				virtual bool					Load()=0;
+				virtual bool					Unload()=0;
+				virtual bool					Reload()=0;
+				virtual bool					IsLoaded()=0;
+			};
+
+			extern ITypeManager*				GetGlobalTypeManager();
+			extern bool							DestroyGlobalTypeManager();
+			extern IValueSerializer*			GetValueSerializer(const WString& name);
+			extern ITypeDescriptor*				GetTypeDescriptor(const WString& name);
+
+/***********************************************************************
+Exceptions
+***********************************************************************/
+
+			class TypeDescriptorException : public Exception
+			{
+			public:
+				TypeDescriptorException(const WString& message)
+					:Exception(message)
+				{
+				}
+			};
+
+			class PropertyIsNotReadableException : public TypeDescriptorException
+			{
+			public:
+				PropertyIsNotReadableException(IPropertyInfo* propertyInfo)
+					:TypeDescriptorException(L"Cannot read value from a property \""+propertyInfo->GetName()+L"\" that is not readable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\"/")
+				{
+				}
+			};
+
+			class PropertyIsNotWritableException : public TypeDescriptorException
+			{
+			public:
+				PropertyIsNotWritableException(IPropertyInfo* propertyInfo)
+					:TypeDescriptorException(L"Cannot write value to a property \""+propertyInfo->GetName()+L"\" that is not writable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\"/")
+				{
+				}
 			};
 		}
 	}
@@ -13430,12 +13568,13 @@ Event
 			protected:
 				struct HandlerNode
 				{
-					Ptr<IHandler>					handler;
-					Ptr<HandlerNode>				next;
+					Ptr<IHandler>										handler;
+					Ptr<HandlerNode>									next;
 				};
 
-				GuiGraphicsComposition*				sender;
-				Ptr<HandlerNode>					handlers;
+				GuiGraphicsComposition*									sender;
+				Ptr<HandlerNode>										handlers;
+				collections::List<Ptr<description::IEventHandler>>		reflectionEventHandlers;
 			public:
 				GuiGraphicsEvent(GuiGraphicsComposition* _sender=0)
 					:sender(_sender)
@@ -13444,6 +13583,21 @@ Event
 
 				~GuiGraphicsEvent()
 				{
+					for(vint i=reflectionEventHandlers.Count()-1;i>=0;i--)
+					{
+						Ptr<description::IEventHandler> eventHandler=reflectionEventHandlers[i];
+						eventHandler->Detach();
+					}
+				}
+
+				void ReflectionAddEventHandler(Ptr<description::IEventHandler> eventHandler)
+				{
+					reflectionEventHandlers.Add(eventHandler);
+				}
+
+				void ReflectionRemoveEventHandler(description::IEventHandler* eventHandler)
+				{
+					reflectionEventHandlers.Remove(eventHandler);
 				}
 
 				GuiGraphicsComposition* GetAssociatedComposition()
@@ -18734,7 +18888,7 @@ Theme
 				//controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()override;
 				//controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
 
-				//controls::GuiButton::IStyleController*								CreateButtonStyle()override;
+				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				//controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
 				//controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
 				//

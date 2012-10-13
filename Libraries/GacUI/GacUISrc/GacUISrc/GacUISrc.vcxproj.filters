@@ -318,6 +318,9 @@
     <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.cpp">
       <Filter>Common\Reflection</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ButtonStyles.cpp">
+      <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -628,6 +631,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.h">
       <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ButtonStyles.h">
+      <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

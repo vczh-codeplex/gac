@@ -54,7 +54,7 @@ Theme
 				//controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()override;
 				//controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
 
-				//controls::GuiButton::IStyleController*								CreateButtonStyle()override;
+				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				//controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
 				//controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
 				//

@@ -176,7 +176,6 @@ Button Configuration
 Helper Functions
 ***********************************************************************/
 			
-			extern int										Win7GetColorAnimationLength();
 			extern Color									Win7GetSystemWindowColor();
 			extern Color									Win7GetSystemTabContentColor();
 			extern Color									Win7GetSystemBorderColor();
