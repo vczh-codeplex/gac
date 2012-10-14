@@ -7353,8 +7353,8 @@ Theme
 				//controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
 
 				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
-				//controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
-				//controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
+				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
+				controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
 				//
 				//controls::GuiScroll::IStyleController*								CreateHScrollStyle()override;
 				//controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
@@ -7754,8 +7754,8 @@ Button Configuration
 				elements::GuiGradientBackgroundElement*		outerGradientElement;
 				elements::GuiGradientBackgroundElement*		innerGradientElement;
 				elements::GuiSolidLabelElement*				textElement;
-				elements::GuiSolidLabelElement*				bulletTextElement;
-				elements::GuiSolidBackgroundElement*		bulletBackgroundElement;
+				elements::GuiSolidLabelElement*				bulletCheckElement;
+				elements::GuiSolidBackgroundElement*		bulletRadioElement;
 				compositions::GuiBoundsComposition*			textComposition;
 				compositions::GuiBoundsComposition*			mainComposition;
 
@@ -8854,8 +8854,7 @@ Button Configuration
 				Color										g1;
 				Color										g2;
 				Color										textColor;
-				Color										bulletLight;
-				Color										bulletDark;
+				Color										bullet;
 
 				bool operator==(const Win8ButtonColors& colors)
 				{
@@ -8864,8 +8863,7 @@ Button Configuration
 						g1 == colors.g1 &&
 						g2 == colors.g2 &&
 						textColor == colors.textColor &&
-						bulletLight == colors.bulletLight &&
-						bulletDark == colors.bulletDark;
+						bullet == colors.bullet;
 				}
 
 				bool operator!=(const Win8ButtonColors& colors)
@@ -8881,6 +8879,11 @@ Button Configuration
 				static Win8ButtonColors						ButtonActive();
 				static Win8ButtonColors						ButtonPressed();
 				static Win8ButtonColors						ButtonDisabled();
+				
+				static Win8ButtonColors						CheckedNormal(bool selected);
+				static Win8ButtonColors						CheckedActive(bool selected);
+				static Win8ButtonColors						CheckedPressed(bool selected);
+				static Win8ButtonColors						CheckedDisabled(bool selected);
 			};
 
 			struct Win8ButtonElements
@@ -8893,6 +8896,20 @@ Button Configuration
 				compositions::GuiBoundsComposition*			backgroundComposition;
 
 				static Win8ButtonElements					Create(Alignment::Type horizontal=Alignment::Center, Alignment::Type vertical=Alignment::Center);
+				void										Apply(const Win8ButtonColors& colors);
+			};
+
+			struct Win8CheckedButtonElements
+			{
+				elements::GuiSolidBorderElement*			bulletBorderElement;
+				elements::GuiGradientBackgroundElement*		bulletBackgroundElement;
+				elements::GuiSolidLabelElement*				bulletCheckElement;
+				elements::GuiSolidBackgroundElement*		bulletRadioElement;
+				elements::GuiSolidLabelElement*				textElement;
+				compositions::GuiBoundsComposition*			textComposition;
+				compositions::GuiBoundsComposition*			mainComposition;
+
+				static Win8CheckedButtonElements			Create(elements::ElementShape::Type shape, bool backgroundVisible);
 				void										Apply(const Win8ButtonColors& colors);
 			};
 
@@ -9041,6 +9058,38 @@ Button
 			public:
 				Win8ButtonStyle();
 				~Win8ButtonStyle();
+			};
+			
+			class Win8CheckBoxStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win8CheckBoxStyle>
+			{
+			public:
+				enum BulletStyle
+				{
+					CheckBox,
+					RadioButton,
+				};
+			protected:
+				DEFINE_TRANSFERRING_ANIMATION(Win8ButtonColors, Win8CheckBoxStyle)
+
+				Win8CheckedButtonElements					elements;
+				Ptr<TransferringAnimation>					transferringAnimation;
+				controls::GuiButton::ControlState			controlStyle;
+				bool										isVisuallyEnabled;
+				bool										isSelected;
+
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected);
+			public:
+				Win8CheckBoxStyle(BulletStyle bulletStyle, bool backgroundVisible=false);
+				~Win8CheckBoxStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+				void										SetSelected(bool value)override;
+				void										Transfer(controls::GuiButton::ControlState value)override;
 			};
 		}
 	}

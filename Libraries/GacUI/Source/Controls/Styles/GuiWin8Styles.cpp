@@ -142,15 +142,15 @@ Win8Theme
 				return new Win8ButtonStyle;
 			}
 
-			//controls::GuiSelectableButton::IStyleController* Win8Theme::CreateCheckBoxStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiSelectableButton::IStyleController* Win8Theme::CreateCheckBoxStyle()
+			{
+				return new Win8CheckBoxStyle(Win8CheckBoxStyle::CheckBox);
+			}
 
-			//controls::GuiSelectableButton::IStyleController* Win8Theme::CreateRadioButtonStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiSelectableButton::IStyleController* Win8Theme::CreateRadioButtonStyle()
+			{
+				return new Win8CheckBoxStyle(Win8CheckBoxStyle::RadioButton);
+			}
 
 			//controls::GuiScroll::IStyleController* Win8Theme::CreateHScrollStyle()
 			//{

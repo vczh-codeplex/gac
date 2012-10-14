@@ -84,6 +84,45 @@ Button
 				Win8ButtonStyle();
 				~Win8ButtonStyle();
 			};
+			
+			/// <summary>Check box style (Windows 8).</summary>
+			class Win8CheckBoxStyle : public Object, public virtual controls::GuiSelectableButton::IStyleController, public Description<Win8CheckBoxStyle>
+			{
+			public:
+				/// <summary>Bullet style.</summary>
+				enum BulletStyle
+				{
+					/// <summary>[T:vl.presentation.win8.Win8CheckBoxStyle.BulletStyle]Check box bullet.</summary>
+					CheckBox,
+					/// <summary>[T:vl.presentation.win8.Win8CheckBoxStyle.BulletStyle]Radio button bullet.</summary>
+					RadioButton,
+				};
+			protected:
+				DEFINE_TRANSFERRING_ANIMATION(Win8ButtonColors, Win8CheckBoxStyle)
+
+				Win8CheckedButtonElements					elements;
+				Ptr<TransferringAnimation>					transferringAnimation;
+				controls::GuiButton::ControlState			controlStyle;
+				bool										isVisuallyEnabled;
+				bool										isSelected;
+
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected);
+			public:
+				/// <summary>Create the style.</summary>
+				/// <param name="bulletStyle">The bullet style.</param>
+				/// <param name="backgroundVisible">Set to true to make the background visible.</param>
+				Win8CheckBoxStyle(BulletStyle bulletStyle, bool backgroundVisible=false);
+				~Win8CheckBoxStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+				void										SetSelected(bool value)override;
+				void										Transfer(controls::GuiButton::ControlState value)override;
+			};
 		}
 	}
 }

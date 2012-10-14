@@ -709,33 +709,33 @@ Win7CheckedButtonElements
 								}
 							}
 
-							button.bulletTextElement=0;
-							button.bulletBackgroundElement=0;
+							button.bulletCheckElement=0;
+							button.bulletRadioElement=0;
 							if(shape==ElementShape::Rectangle)
 							{
-								button.bulletTextElement=GuiSolidLabelElement::Create();
+								button.bulletCheckElement=GuiSolidLabelElement::Create();
 								{
 									FontProperties font;
 									font.fontFamily=L"Wingdings 2";
 									font.size=16;
 									font.bold=true;
-									button.bulletTextElement->SetFont(font);
+									button.bulletCheckElement->SetFont(font);
 								}
-								button.bulletTextElement->SetText(L"P");
-								button.bulletTextElement->SetAlignments(Alignment::Center, Alignment::Center);
+								button.bulletCheckElement->SetText(L"P");
+								button.bulletCheckElement->SetAlignments(Alignment::Center, Alignment::Center);
 
 								GuiBoundsComposition* composition=new GuiBoundsComposition;
-								composition->SetOwnedElement(button.bulletTextElement);
+								composition->SetOwnedElement(button.bulletCheckElement);
 								composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
 								checkCell->AddChild(composition);
 							}
 							else
 							{
-								button.bulletBackgroundElement=GuiSolidBackgroundElement::Create();
-								button.bulletBackgroundElement->SetShape(ElementShape::Ellipse);
+								button.bulletRadioElement=GuiSolidBackgroundElement::Create();
+								button.bulletRadioElement->SetShape(ElementShape::Ellipse);
 
 								GuiBoundsComposition* composition=new GuiBoundsComposition;
-								composition->SetOwnedElement(button.bulletBackgroundElement);
+								composition->SetOwnedElement(button.bulletRadioElement);
 								composition->SetAlignmentToParent(Margin(checkPadding+3, 3, checkPadding+3, 3));
 								checkCell->AddChild(composition);
 							}
@@ -762,13 +762,13 @@ Win7CheckedButtonElements
 				outerGradientElement->SetColors(colors.g1, colors.g2);
 				innerGradientElement->SetColors(colors.g3, colors.g4);
 				textElement->SetColor(colors.textColor);
-				if(bulletTextElement)
+				if(bulletCheckElement)
 				{
-					bulletTextElement->SetColor(colors.bulletDark);
+					bulletCheckElement->SetColor(colors.bulletDark);
 				}
-				if(bulletBackgroundElement)
+				if(bulletRadioElement)
 				{
-					bulletBackgroundElement->SetColor(colors.bulletDark);
+					bulletRadioElement->SetColor(colors.bulletDark);
 				}
 			}
 
