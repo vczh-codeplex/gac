@@ -116,8 +116,8 @@ Button Configuration
 				elements::GuiGradientBackgroundElement*		outerGradientElement;
 				elements::GuiGradientBackgroundElement*		innerGradientElement;
 				elements::GuiSolidLabelElement*				textElement;
-				elements::GuiSolidLabelElement*				bulletTextElement;
-				elements::GuiSolidBackgroundElement*		bulletBackgroundElement;
+				elements::GuiSolidLabelElement*				bulletCheckElement;
+				elements::GuiSolidBackgroundElement*		bulletRadioElement;
 				compositions::GuiBoundsComposition*			textComposition;
 				compositions::GuiBoundsComposition*			mainComposition;
 

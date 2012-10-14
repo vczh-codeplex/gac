@@ -11658,15 +11658,15 @@ Win8Theme
 				return new Win8ButtonStyle;
 			}
 
-			//controls::GuiSelectableButton::IStyleController* Win8Theme::CreateCheckBoxStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiSelectableButton::IStyleController* Win8Theme::CreateCheckBoxStyle()
+			{
+				return new Win8CheckBoxStyle(Win8CheckBoxStyle::CheckBox);
+			}
 
-			//controls::GuiSelectableButton::IStyleController* Win8Theme::CreateRadioButtonStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiSelectableButton::IStyleController* Win8Theme::CreateRadioButtonStyle()
+			{
+				return new Win8CheckBoxStyle(Win8CheckBoxStyle::RadioButton);
+			}
 
 			//controls::GuiScroll::IStyleController* Win8Theme::CreateHScrollStyle()
 			//{
@@ -14860,33 +14860,33 @@ Win7CheckedButtonElements
 								}
 							}
 
-							button.bulletTextElement=0;
-							button.bulletBackgroundElement=0;
+							button.bulletCheckElement=0;
+							button.bulletRadioElement=0;
 							if(shape==ElementShape::Rectangle)
 							{
-								button.bulletTextElement=GuiSolidLabelElement::Create();
+								button.bulletCheckElement=GuiSolidLabelElement::Create();
 								{
 									FontProperties font;
 									font.fontFamily=L"Wingdings 2";
 									font.size=16;
 									font.bold=true;
-									button.bulletTextElement->SetFont(font);
+									button.bulletCheckElement->SetFont(font);
 								}
-								button.bulletTextElement->SetText(L"P");
-								button.bulletTextElement->SetAlignments(Alignment::Center, Alignment::Center);
+								button.bulletCheckElement->SetText(L"P");
+								button.bulletCheckElement->SetAlignments(Alignment::Center, Alignment::Center);
 
 								GuiBoundsComposition* composition=new GuiBoundsComposition;
-								composition->SetOwnedElement(button.bulletTextElement);
+								composition->SetOwnedElement(button.bulletCheckElement);
 								composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
 								checkCell->AddChild(composition);
 							}
 							else
 							{
-								button.bulletBackgroundElement=GuiSolidBackgroundElement::Create();
-								button.bulletBackgroundElement->SetShape(ElementShape::Ellipse);
+								button.bulletRadioElement=GuiSolidBackgroundElement::Create();
+								button.bulletRadioElement->SetShape(ElementShape::Ellipse);
 
 								GuiBoundsComposition* composition=new GuiBoundsComposition;
-								composition->SetOwnedElement(button.bulletBackgroundElement);
+								composition->SetOwnedElement(button.bulletRadioElement);
 								composition->SetAlignmentToParent(Margin(checkPadding+3, 3, checkPadding+3, 3));
 								checkCell->AddChild(composition);
 							}
@@ -14913,13 +14913,13 @@ Win7CheckedButtonElements
 				outerGradientElement->SetColors(colors.g1, colors.g2);
 				innerGradientElement->SetColors(colors.g3, colors.g4);
 				textElement->SetColor(colors.textColor);
-				if(bulletTextElement)
+				if(bulletCheckElement)
 				{
-					bulletTextElement->SetColor(colors.bulletDark);
+					bulletCheckElement->SetColor(colors.bulletDark);
 				}
-				if(bulletBackgroundElement)
+				if(bulletRadioElement)
 				{
-					bulletBackgroundElement->SetColor(colors.bulletDark);
+					bulletRadioElement->SetColor(colors.bulletDark);
 				}
 			}
 
@@ -16055,6 +16055,106 @@ Win8ButtonStyle
 			Win8ButtonStyle::~Win8ButtonStyle()
 			{
 			}
+
+/***********************************************************************
+Win7CheckBoxStyle
+***********************************************************************/
+
+			IMPLEMENT_TRANSFERRING_ANIMATION(Win8ButtonColors, Win8CheckBoxStyle)
+			{
+				colorCurrent=Win8ButtonColors::Blend(colorBegin, colorEnd, currentPosition, totalLength);
+				style->elements.Apply(colorCurrent);
+			}
+
+			void Win8CheckBoxStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected)
+			{
+				if(enabled)
+				{
+					switch(value)
+					{
+					case GuiButton::Normal:
+						transferringAnimation->Transfer(Win8ButtonColors::CheckedNormal(selected));
+						break;
+					case GuiButton::Active:
+						transferringAnimation->Transfer(Win8ButtonColors::CheckedActive(selected));
+						break;
+					case GuiButton::Pressed:
+						transferringAnimation->Transfer(Win8ButtonColors::CheckedPressed(selected));
+						break;
+					}
+				}
+				else
+				{
+					transferringAnimation->Transfer(Win8ButtonColors::CheckedDisabled(selected));
+				}
+			}
+
+			Win8CheckBoxStyle::Win8CheckBoxStyle(BulletStyle bulletStyle, bool backgroundVisible)
+				:controlStyle(GuiButton::Normal)
+				,isVisuallyEnabled(true)
+				,isSelected(false)
+			{
+				Win8ButtonColors initialColor=Win8ButtonColors::CheckedNormal(isSelected);
+				elements=Win8CheckedButtonElements::Create(bulletStyle==CheckBox?ElementShape::Rectangle:ElementShape::Ellipse, backgroundVisible);
+				elements.Apply(initialColor);
+				transferringAnimation=new TransferringAnimation(this, initialColor);
+			}
+
+			Win8CheckBoxStyle::~Win8CheckBoxStyle()
+			{
+				transferringAnimation->Disable();
+			}
+
+			compositions::GuiBoundsComposition* Win8CheckBoxStyle::GetBoundsComposition()
+			{
+				return elements.mainComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win8CheckBoxStyle::GetContainerComposition()
+			{
+				return elements.mainComposition;
+			}
+
+			void Win8CheckBoxStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8CheckBoxStyle::SetText(const WString& value)
+			{
+				elements.textElement->SetText(value);
+			}
+
+			void Win8CheckBoxStyle::SetFont(const FontProperties& value)
+			{
+				Win8SetFont(elements.textElement, elements.textComposition, value);
+			}
+
+			void Win8CheckBoxStyle::SetVisuallyEnabled(bool value)
+			{
+				if(isVisuallyEnabled!=value)
+				{
+					isVisuallyEnabled=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
+				}
+			}
+
+			void Win8CheckBoxStyle::SetSelected(bool value)
+			{
+				if(isSelected!=value)
+				{
+					isSelected=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
+				}
+			}
+
+			void Win8CheckBoxStyle::Transfer(GuiButton::ControlState value)
+			{
+				if(controlStyle!=value)
+				{
+					controlStyle=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isSelected);
+				}
+			}
 		}
 	}
 }
@@ -16199,8 +16299,7 @@ Win8ButtonColors
 				result.g1=BlendColor(c1.g1, c2.g1, ratio, total);
 				result.g2=BlendColor(c1.g2, c2.g2, ratio, total);
 				result.textColor=BlendColor(c1.textColor, c2.textColor, ratio, total);
-				result.bulletLight=BlendColor(c1.bulletLight, c2.bulletLight, ratio, total);
-				result.bulletDark=BlendColor(c1.bulletDark, c2.bulletDark, ratio, total);
+				result.bullet=BlendColor(c1.bullet, c2.bullet, ratio, total);
 				return result;
 			}
 
@@ -16254,6 +16353,76 @@ Win8ButtonColors
 				return colors;
 			}
 
+			//---------------------------------------------------------
+
+			Win8ButtonColors Win8ButtonColors::CheckedNormal(bool selected)
+			{
+				Win8ButtonColors colors=
+				{
+					Color(112, 112, 112),
+					Color(255, 255, 255),
+					Color(255, 255, 255),
+					Win8GetSystemTextColor(true),
+					Color(0, 0, 0),
+				};
+				if(!selected)
+				{
+					colors.bullet.a=0;
+				}
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::CheckedActive(bool selected)
+			{
+				Win8ButtonColors colors=
+				{
+					Color(51, 153, 255),
+					Color(243, 249, 255),
+					Color(243, 249, 255),
+					Win8GetSystemTextColor(true),
+					Color(33, 33, 33),
+				};
+				if(!selected)
+				{
+					colors.bullet.a=0;
+				}
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::CheckedPressed(bool selected)
+			{
+				Win8ButtonColors colors=
+				{
+					Color(0, 124, 222),
+					Color(217, 236, 255),
+					Color(217, 236, 255),
+					Win8GetSystemTextColor(true),
+					Color(0, 0, 0),
+				};
+				if(!selected)
+				{
+					colors.bullet.a=0;
+				}
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::CheckedDisabled(bool selected)
+			{
+				Win8ButtonColors colors=
+				{
+					Color(188, 188, 188),
+					Color(230, 230, 230),
+					Color(230, 230, 230),
+					Win8GetSystemTextColor(false),
+					Color(112, 112, 112),
+				};
+				if(!selected)
+				{
+					colors.bullet.a=0;
+				}
+				return colors;
+			}
+
 /***********************************************************************
 Win8ButtonElements
 ***********************************************************************/
@@ -16301,6 +16470,142 @@ Win8ButtonElements
 				}
 				backgroundElement->SetColors(colors.g1, colors.g2);
 				textElement->SetColor(colors.textColor);
+			}
+
+/***********************************************************************
+Win8CheckedButtonElements
+***********************************************************************/
+
+			Win8CheckedButtonElements Win8CheckedButtonElements::Create(elements::ElementShape::Type shape, bool backgroundVisible)
+			{
+				const int checkSize=13;
+				const int checkPadding=2;
+
+				Win8CheckedButtonElements button;
+				{
+					button.mainComposition=new GuiBoundsComposition;
+					button.mainComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				}
+				{
+					GuiTableComposition* mainTable=new GuiTableComposition;
+					button.mainComposition->AddChild(mainTable);
+					if(backgroundVisible)
+					{
+						GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+						element->SetColor(Win8GetSystemWindowColor());
+						mainTable->SetOwnedElement(element);
+					}
+					mainTable->SetRowsAndColumns(1, 2);
+					mainTable->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					mainTable->SetRowOption(0, GuiCellOption::PercentageOption(1.0));
+					mainTable->SetColumnOption(0, GuiCellOption::AbsoluteOption(checkSize+2*checkPadding));
+					mainTable->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
+					
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						mainTable->AddChild(cell);
+						cell->SetSite(0, 0, 1, 1);
+
+						GuiTableComposition* table=new GuiTableComposition;
+						cell->AddChild(table);
+						table->SetRowsAndColumns(3, 1);
+						table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+						table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
+						table->SetRowOption(1, GuiCellOption::MinSizeOption());
+						table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
+
+						{
+							GuiCellComposition* checkCell=new GuiCellComposition;
+							table->AddChild(checkCell);
+							checkCell->SetSite(1, 0, 1, 1);
+							{
+								GuiBoundsComposition* borderBounds=new GuiBoundsComposition;
+								checkCell->AddChild(borderBounds);
+								borderBounds->SetAlignmentToParent(Margin(checkPadding, -1, checkPadding, -1));
+								borderBounds->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+								{
+									GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+									button.bulletBorderElement=element;
+									element->SetShape(shape);
+
+									GuiBoundsComposition* bounds=new GuiBoundsComposition;
+									borderBounds->AddChild(bounds);
+									bounds->SetOwnedElement(element);
+									bounds->SetAlignmentToParent(Margin(0, 0, 0, 0));
+									bounds->SetBounds(Rect(Point(0, 0), Size(checkSize, checkSize)));
+								}
+								{
+									GuiGradientBackgroundElement* element=GuiGradientBackgroundElement::Create();
+									button.bulletBackgroundElement=element;
+									element->SetShape(shape);
+									element->SetDirection(GuiGradientBackgroundElement::Vertical);
+
+									GuiBoundsComposition* bounds=new GuiBoundsComposition;
+									borderBounds->AddChild(bounds);
+									bounds->SetOwnedElement(element);
+									bounds->SetAlignmentToParent(Margin(1, 1, 1, 1));
+								}
+							}
+
+							button.bulletCheckElement=0;
+							button.bulletRadioElement=0;
+							if(shape==ElementShape::Rectangle)
+							{
+								button.bulletCheckElement=GuiSolidLabelElement::Create();
+								{
+									FontProperties font;
+									font.fontFamily=L"Wingdings 2";
+									font.size=16;
+									font.bold=true;
+									button.bulletCheckElement->SetFont(font);
+								}
+								button.bulletCheckElement->SetText(L"P");
+								button.bulletCheckElement->SetAlignments(Alignment::Center, Alignment::Center);
+
+								GuiBoundsComposition* composition=new GuiBoundsComposition;
+								composition->SetOwnedElement(button.bulletCheckElement);
+								composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+								checkCell->AddChild(composition);
+							}
+							else
+							{
+								button.bulletRadioElement=GuiSolidBackgroundElement::Create();
+								button.bulletRadioElement->SetShape(ElementShape::Ellipse);
+
+								GuiBoundsComposition* composition=new GuiBoundsComposition;
+								composition->SetOwnedElement(button.bulletRadioElement);
+								composition->SetAlignmentToParent(Margin(checkPadding+3, 3, checkPadding+3, 3));
+								checkCell->AddChild(composition);
+							}
+						}
+					}
+
+					{
+						GuiCellComposition* textCell=new GuiCellComposition;
+						mainTable->AddChild(textCell);
+						textCell->SetSite(0, 1, 1, 1);
+						{
+							Win8CreateSolidLabelElement(button.textElement, button.textComposition, Alignment::Left, Alignment::Center);
+							textCell->AddChild(button.textComposition);
+						}
+					}
+				}
+				return button;
+			}
+
+			void Win8CheckedButtonElements::Apply(const Win8ButtonColors& colors)
+			{
+				bulletBorderElement->SetColor(colors.borderColor);
+				bulletBackgroundElement->SetColors(colors.g1, colors.g2);
+				textElement->SetColor(colors.textColor);
+				if(bulletCheckElement)
+				{
+					bulletCheckElement->SetColor(colors.bullet);
+				}
+				if(bulletRadioElement)
+				{
+					bulletRadioElement->SetColor(colors.bullet);
+				}
 			}
 
 /***********************************************************************
