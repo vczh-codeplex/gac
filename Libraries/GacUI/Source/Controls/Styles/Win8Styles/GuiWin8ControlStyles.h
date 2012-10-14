@@ -41,7 +41,7 @@ Container
 				void										SetVisuallyEnabled(bool value)override;
 			};
 
-			/// <summary>Window style (Windows 7). Using the Windows 8 window background color to fill the whold control</summary>
+			/// <summary>Window style (Windows 8). Using the Windows 8 window background color to fill the whold control</summary>
 			class Win8WindowStyle : public virtual controls::GuiWindow::DefaultBehaviorStyleController, public Description<Win8WindowStyle>
 			{
 			protected:
