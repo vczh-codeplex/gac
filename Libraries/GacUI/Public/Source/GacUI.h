@@ -7335,8 +7335,8 @@ Theme
 				//controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				//controls::GuiTab::IStyleController*									CreateTabStyle()override;
 				//controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
-				//controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
-				//controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
+				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
+				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
 				//controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				//controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
 				//elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
@@ -8923,6 +8923,31 @@ Button Configuration
 				void										Apply(const Win8ButtonColors& colors);
 			};
 
+			struct Win8TextBoxColors
+			{
+				Color										borderColor;
+				Color										backgroundColor;
+
+				bool operator==(const Win8TextBoxColors& colors)
+				{
+					return
+						borderColor == colors.borderColor &&
+						backgroundColor == colors.backgroundColor;
+				}
+
+				bool operator!=(const Win8TextBoxColors& colors)
+				{
+					return !(*this==colors);
+				}
+
+				static Win8TextBoxColors					Blend(const Win8TextBoxColors& c1, const Win8TextBoxColors& c2, int ratio, int total);
+
+				static Win8TextBoxColors					Normal();
+				static Win8TextBoxColors					Active();
+				static Win8TextBoxColors					Focused();
+				static Win8TextBoxColors					Disabled();
+			};
+
 /***********************************************************************
 Helper Functions
 ***********************************************************************/
@@ -8932,6 +8957,7 @@ Helper Functions
 			extern Color									Win8GetSystemTextColor(bool enabled);
 			extern void										Win8SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
+			extern elements::text::ColorEntry				Win8GetTextBoxTextColor();
 		}
 	}
 }
@@ -9138,8 +9164,8 @@ GacUI::Control Styles::Windows7 Styles
 Clases:
 ***********************************************************************/
 
-#ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN7SCROLLABLESTYLES
-#define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN7SCROLLABLESTYLES
+#ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWin8SCROLLABLESTYLES
+#define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWin8SCROLLABLESTYLES
 
 
 namespace vl
@@ -9205,6 +9231,75 @@ ScrollView
 				controls::GuiScroll::IStyleController*		CreateHorizontalScrollStyle()override;
 				controls::GuiScroll::IStyleController*		CreateVerticalScrollStyle()override;
 				int											GetDefaultScrollSize()override;
+				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
+			};
+
+/***********************************************************************
+TextBox
+***********************************************************************/
+			
+			class Win8TextBoxBackground : public Object, public Description<Win8TextBoxBackground>
+			{
+			protected:
+				DEFINE_TRANSFERRING_ANIMATION(Win8TextBoxColors, Win8TextBoxBackground)
+					
+				elements::GuiSolidBorderElement*			borderElement;
+				elements::GuiSolidBackgroundElement*		backgroundElement;
+				compositions::GuiGraphicsComposition*		focusableComposition;
+				bool										isMouseEnter;
+				bool										isFocused;
+				bool										isVisuallyEnabled;
+				Ptr<TransferringAnimation>					transferringAnimation;
+				controls::GuiControl::IStyleController*		styleController;
+				elements::GuiColorizedTextElement*			textElement;
+
+				void										UpdateStyle();
+				void										Apply(const Win8TextBoxColors& colors);
+
+				void										OnBoundsMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnBoundsMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnBoundsGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnBoundsLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+			public:
+				Win8TextBoxBackground();
+				~Win8TextBoxBackground();
+				
+				void										AssociateStyleController(controls::GuiControl::IStyleController* controller);
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value);
+				void										SetVisuallyEnabled(bool value);
+				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition);
+				void										InitializeTextElement(elements::GuiColorizedTextElement* _textElement);
+			};
+			
+			class Win8MultilineTextBoxProvider : public Win8ScrollViewProvider, public Description<Win8MultilineTextBoxProvider>
+			{
+			protected:
+				Win8TextBoxBackground						background;
+				controls::GuiControl::IStyleController*		styleController;
+			public:
+				Win8MultilineTextBoxProvider();
+				~Win8MultilineTextBoxProvider();
+				
+				void										AssociateStyleController(controls::GuiControl::IStyleController* controller)override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetVisuallyEnabled(bool value)override;
+				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
+			};
+			
+			class Win8SinglelineTextBoxProvider : public Object, public virtual controls::GuiSinglelineTextBox::IStyleProvider, public Description<Win8SinglelineTextBoxProvider>
+			{
+			protected:
+				Win8TextBoxBackground						background;
+				controls::GuiControl::IStyleController*		styleController;
+			public:
+				Win8SinglelineTextBoxProvider();
+				~Win8SinglelineTextBoxProvider();
+
+				void										AssociateStyleController(controls::GuiControl::IStyleController* controller)override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
 				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 		}

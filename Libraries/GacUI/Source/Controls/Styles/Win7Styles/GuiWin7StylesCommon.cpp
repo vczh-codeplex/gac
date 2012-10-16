@@ -1027,7 +1027,6 @@ Helpers
 				entry.selectedUnfocused.background=Color(51, 153, 255);
 				return entry;
 			}
-
 		}
 	}
 }
