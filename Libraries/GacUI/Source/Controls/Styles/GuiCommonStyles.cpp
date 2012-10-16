@@ -138,10 +138,10 @@ CommonScrollStyle
 			void CommonScrollStyle::BuildStyle(int defaultSize, int arrowSize)
 			{
 				boundsComposition=new GuiBoundsComposition;
-				InstallBackground(boundsComposition, direction);
+				containerComposition=InstallBackground(boundsComposition, direction);
 				{
 					GuiBoundsComposition* handleBoundsComposition=new GuiBoundsComposition;
-					boundsComposition->AddChild(handleBoundsComposition);
+					containerComposition->AddChild(handleBoundsComposition);
 
 					handleComposition=new GuiPartialViewComposition;
 					handleBoundsComposition->AddChild(handleComposition);
@@ -183,13 +183,13 @@ CommonScrollStyle
 					decreaseComposition->SetMaxLength(defaultSize);
 					decreaseComposition->SetMaxRatio(0.5);
 					decreaseComposition->AddChild(decreaseButton->GetBoundsComposition());
-					boundsComposition->AddChild(decreaseComposition);
+					containerComposition->AddChild(decreaseComposition);
 
 					GuiSideAlignedComposition* increaseComposition=new GuiSideAlignedComposition;
 					increaseComposition->SetMaxLength(defaultSize);
 					increaseComposition->SetMaxRatio(0.5);
 					increaseComposition->AddChild(increaseButton->GetBoundsComposition());
-					boundsComposition->AddChild(increaseComposition);
+					containerComposition->AddChild(increaseComposition);
 
 					GuiPolygonElement* elementOut=0;
 					switch(direction)
@@ -220,6 +220,7 @@ CommonScrollStyle
 				,decreaseButton(0)
 				,increaseButton(0)
 				,boundsComposition(0)
+				,containerComposition(0)
 				,totalSize(1)
 				,pageSize(1)
 				,position(0)
@@ -238,7 +239,7 @@ CommonScrollStyle
 
 			compositions::GuiGraphicsComposition* CommonScrollStyle::GetContainerComposition()
 			{
-				return boundsComposition;
+				return containerComposition;
 			}
 
 			void CommonScrollStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)

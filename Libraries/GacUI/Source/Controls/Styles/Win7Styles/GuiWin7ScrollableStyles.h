@@ -30,10 +30,10 @@ Scroll
 				static const int							DefaultSize=18;
 				static const int							ArrowSize=10;
 			protected:
-				controls::GuiButton::IStyleController*		CreateDecreaseButtonStyle(Direction direction);
-				controls::GuiButton::IStyleController*		CreateIncreaseButtonStyle(Direction direction);
-				controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction);
-				void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)override;
+				controls::GuiButton::IStyleController*		CreateDecreaseButtonStyle(Direction direction)override;
+				controls::GuiButton::IStyleController*		CreateIncreaseButtonStyle(Direction direction)override;
+				controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction)override;
+				compositions::GuiBoundsComposition*			InstallBackground(compositions::GuiBoundsComposition* boundsComposition, Direction direction)override;
 			public:
 				/// <summary>Create the style using a specified direction.</summary>
 				/// <param name="_direction">The specified direction</param>

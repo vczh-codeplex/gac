@@ -156,6 +156,100 @@ Win8ButtonColors
 				return colors;
 			}
 
+			//---------------------------------------------------------
+
+			Win8ButtonColors Win8ButtonColors::ScrollHandleNormal()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(205, 205, 205),
+					Color(205, 205, 205),
+					Color(205, 205, 205),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollHandleActive()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(166, 166, 166),
+					Color(166, 166, 166),
+					Color(166, 166, 166),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollHandlePressed()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(166, 166, 166),
+					Color(166, 166, 166),
+					Color(166, 166, 166),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollHandleDisabled()
+			{
+				Win8ButtonColors colors=
+				{
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollArrowNormal()
+			{
+				Win8ButtonColors colors=
+				{
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Color(96, 96, 96),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollArrowActive()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(218, 218, 218),
+					Color(218, 218, 218),
+					Color(218, 218, 218),
+					Color(0, 0, 0),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollArrowPressed()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(96, 96, 96),
+					Color(96, 96, 96),
+					Color(96, 96, 96),
+					Color(255, 255, 255),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollArrowDisabled()
+			{
+				Win8ButtonColors colors=
+				{
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Color(191, 191, 191),
+				};
+				return colors;
+			}
+
 /***********************************************************************
 Win8ButtonElements
 ***********************************************************************/
@@ -348,6 +442,11 @@ Helpers
 			Color Win8GetSystemWindowColor()
 			{
 				return Color(240, 240, 240);
+			}
+
+			Color Win8GetSystemBorderColor()
+			{
+				return Color(100, 100, 100);
 			}
 
 			Color Win8GetSystemTextColor(bool enabled)

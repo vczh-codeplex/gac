@@ -6,7 +6,7 @@
 //#include "Win8Styles\GuiWin8TabStyles.h"
 //#include "Win8Styles\GuiWin8MenuStyles.h"
 //#include "Win8Styles\GuiWin8ToolstripStyles.h"
-//#include "Win8Styles\GuiWin8ScrollableStyles.h"
+#include "Win8Styles\GuiWin8ScrollableStyles.h"
 //#include "Win8Styles\GuiWin8ListStyles.h"
 
 namespace vl
@@ -37,15 +37,15 @@ Win8Theme
 				return new Win8WindowStyle;
 			}
 
-			//controls::GuiLabel::IStyleController* Win8Theme::CreateLabelStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiLabel::IStyleController* Win8Theme::CreateLabelStyle()
+			{
+				return new Win8LabelStyle;
+			}
 
-			//controls::GuiScrollContainer::IStyleProvider* Win8Theme::CreateScrollContainerStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiScrollContainer::IStyleProvider* Win8Theme::CreateScrollContainerStyle()
+			{
+				return new Win8ScrollViewProvider;
+			}
 
 			//controls::GuiControl::IStyleController* Win8Theme::CreateGroupBoxStyle()
 			//{
@@ -152,15 +152,15 @@ Win8Theme
 				return new Win8CheckBoxStyle(Win8CheckBoxStyle::RadioButton);
 			}
 
-			//controls::GuiScroll::IStyleController* Win8Theme::CreateHScrollStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiScroll::IStyleController* Win8Theme::CreateHScrollStyle()
+			{
+				return new Win8ScrollStyle(common_styles::CommonScrollStyle::Horizontal);
+			}
 
-			//controls::GuiScroll::IStyleController* Win8Theme::CreateVScrollStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiScroll::IStyleController* Win8Theme::CreateVScrollStyle()
+			{
+				return new Win8ScrollStyle(common_styles::CommonScrollStyle::Vertical);
+			}
 
 			//controls::GuiScroll::IStyleController* Win8Theme::CreateHTrackerStyle()
 			//{
@@ -177,10 +177,10 @@ Win8Theme
 			//	throw 0;
 			//}
 
-			//int Win8Theme::GetScrollDefaultSize()
-			//{
-			//	throw 0;
-			//}
+			int Win8Theme::GetScrollDefaultSize()
+			{
+				return 16;
+			}
 
 			//int Win8Theme::GetTrackerDefaultSize()
 			//{

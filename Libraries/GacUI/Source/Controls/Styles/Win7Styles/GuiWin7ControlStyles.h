@@ -59,7 +59,7 @@ Container
 				void										SetVisuallyEnabled(bool value)override;
 			};
 
-			/// <summary>Label style. A label contains a text, and the label will automatically resize to fit the text.</summary>
+			/// <summary>Label style (Windows 7). A label contains a text, and the label will automatically resize to fit the text.</summary>
 			class Win7LabelStyle : public Object, public virtual controls::GuiLabel::IStyleController, public Description<Win7LabelStyle>
 			{
 			protected:

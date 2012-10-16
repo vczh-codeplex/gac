@@ -58,6 +58,27 @@ Container
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
 			};
+
+			/// <summary>Label style (Windows 8). A label contains a text, and the label will automatically resize to fit the text.</summary>
+			class Win8LabelStyle : public Object, public virtual controls::GuiLabel::IStyleController, public Description<Win8LabelStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				elements::GuiSolidLabelElement*				textElement;
+			public:
+				/// <summary>Create the style.</summary>
+				Win8LabelStyle();
+				~Win8LabelStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+				Color										GetDefaultTextColor()override;
+				void										SetTextColor(Color value)override;
+			};
 		}
 	}
 }

@@ -7330,8 +7330,8 @@ Theme
 				~Win8Theme();
 
 				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
-				//controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
-				//controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
+				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
+				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
 				//controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				//controls::GuiTab::IStyleController*									CreateTabStyle()override;
 				//controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
@@ -7355,13 +7355,13 @@ Theme
 				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateRadioButtonStyle()override;
-				//
-				//controls::GuiScroll::IStyleController*								CreateHScrollStyle()override;
-				//controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
+
+				controls::GuiScroll::IStyleController*								CreateHScrollStyle()override;
+				controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
 				//controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
 				//controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
 				//controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
-				//int																	GetScrollDefaultSize()override;
+				int																	GetScrollDefaultSize()override;
 				//int																	GetTrackerDefaultSize()override;
 
 				//controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
@@ -7417,6 +7417,7 @@ Scrolls
 				controls::GuiButton*								handleButton;
 				compositions::GuiPartialViewComposition*			handleComposition;
 				compositions::GuiBoundsComposition*					boundsComposition;
+				compositions::GuiBoundsComposition*					containerComposition;
 
 				int													totalSize;
 				int													pageSize;
@@ -7435,7 +7436,7 @@ Scrolls
 				virtual controls::GuiButton::IStyleController*		CreateDecreaseButtonStyle(Direction direction)=0;
 				virtual controls::GuiButton::IStyleController*		CreateIncreaseButtonStyle(Direction direction)=0;
 				virtual controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction)=0;
-				virtual void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)=0;
+				virtual compositions::GuiBoundsComposition*			InstallBackground(compositions::GuiBoundsComposition* boundsComposition, Direction direction)=0;
 				void												BuildStyle(int defaultSize, int arrowSize);
 			public:
 				CommonScrollStyle(Direction _direction);
@@ -8438,10 +8439,10 @@ Scroll
 				static const int							DefaultSize=18;
 				static const int							ArrowSize=10;
 			protected:
-				controls::GuiButton::IStyleController*		CreateDecreaseButtonStyle(Direction direction);
-				controls::GuiButton::IStyleController*		CreateIncreaseButtonStyle(Direction direction);
-				controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction);
-				void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)override;
+				controls::GuiButton::IStyleController*		CreateDecreaseButtonStyle(Direction direction)override;
+				controls::GuiButton::IStyleController*		CreateIncreaseButtonStyle(Direction direction)override;
+				controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction)override;
+				compositions::GuiBoundsComposition*			InstallBackground(compositions::GuiBoundsComposition* boundsComposition, Direction direction)override;
 			public:
 				Win7ScrollStyle(Direction _direction);
 				~Win7ScrollStyle();
@@ -8884,6 +8885,15 @@ Button Configuration
 				static Win8ButtonColors						CheckedActive(bool selected);
 				static Win8ButtonColors						CheckedPressed(bool selected);
 				static Win8ButtonColors						CheckedDisabled(bool selected);
+
+				static Win8ButtonColors						ScrollHandleNormal();
+				static Win8ButtonColors						ScrollHandleActive();
+				static Win8ButtonColors						ScrollHandlePressed();
+				static Win8ButtonColors						ScrollHandleDisabled();
+				static Win8ButtonColors						ScrollArrowNormal();
+				static Win8ButtonColors						ScrollArrowActive();
+				static Win8ButtonColors						ScrollArrowPressed();
+				static Win8ButtonColors						ScrollArrowDisabled();
 			};
 
 			struct Win8ButtonElements
@@ -8918,6 +8928,7 @@ Helper Functions
 ***********************************************************************/
 			
 			extern Color									Win8GetSystemWindowColor();
+			extern Color									Win8GetSystemBorderColor();
 			extern Color									Win8GetSystemTextColor(bool enabled);
 			extern void										Win8SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
@@ -8983,6 +8994,25 @@ Container
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
+			};
+
+			class Win8LabelStyle : public Object, public virtual controls::GuiLabel::IStyleController, public Description<Win8LabelStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				elements::GuiSolidLabelElement*				textElement;
+			public:
+				Win8LabelStyle();
+				~Win8LabelStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+				Color										GetDefaultTextColor()override;
+				void										SetTextColor(Color value)override;
 			};
 		}
 	}
@@ -9090,6 +9120,92 @@ Button
 				void										SetVisuallyEnabled(bool value)override;
 				void										SetSelected(bool value)override;
 				void										Transfer(controls::GuiButton::ControlState value)override;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\STYLES\WIN8STYLES\GUIWIN8SCROLLABLESTYLES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control Styles::Windows7 Styles
+
+Clases:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN7SCROLLABLESTYLES
+#define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN7SCROLLABLESTYLES
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace win8
+		{
+
+/***********************************************************************
+Scroll
+***********************************************************************/
+			
+			class Win8ScrollHandleButtonStyle : public Win8ButtonStyleBase, public Description<Win8ScrollHandleButtonStyle>
+			{
+			protected:
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+			public:
+				Win8ScrollHandleButtonStyle();
+				~Win8ScrollHandleButtonStyle();
+			};
+			
+			class Win8ScrollArrowButtonStyle : public Win8ButtonStyleBase, public Description<Win8ScrollArrowButtonStyle>
+			{
+			protected:
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+			public:
+				Win8ScrollArrowButtonStyle();
+				~Win8ScrollArrowButtonStyle();
+			};
+			
+			class Win8ScrollStyle : public common_styles::CommonScrollStyle, public Description<Win8ScrollStyle>
+			{
+			public:
+				static const int							DefaultSize=15;
+				static const int							ArrowSize=8;
+			protected:
+				controls::GuiButton::IStyleController*		CreateDecreaseButtonStyle(Direction direction)override;
+				controls::GuiButton::IStyleController*		CreateIncreaseButtonStyle(Direction direction)override;
+				controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction)override;
+				compositions::GuiBoundsComposition*			InstallBackground(compositions::GuiBoundsComposition* boundsComposition, Direction direction)override;
+			public:
+				Win8ScrollStyle(Direction _direction);
+				~Win8ScrollStyle();
+			};
+
+/***********************************************************************
+ScrollView
+***********************************************************************/
+			
+			class Win8ScrollViewProvider : public Object, public virtual controls::GuiScrollView::IStyleProvider, public Description<Win8ScrollViewProvider>
+			{
+			public:
+				Win8ScrollViewProvider();
+				~Win8ScrollViewProvider();
+
+				void										AssociateStyleController(controls::GuiControl::IStyleController* controller)override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+
+				controls::GuiScroll::IStyleController*		CreateHorizontalScrollStyle()override;
+				controls::GuiScroll::IStyleController*		CreateVerticalScrollStyle()override;
+				int											GetDefaultScrollSize()override;
+				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 		}
 	}

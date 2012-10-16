@@ -38,7 +38,7 @@ Win7ScrollStyle
 				return handleButtonStyle;
 			}
 
-			void Win7ScrollStyle::InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)
+			compositions::GuiBoundsComposition* Win7ScrollStyle::InstallBackground(compositions::GuiBoundsComposition* boundsComposition, Direction direction)
 			{
 				Color sinkColor=Win7GetSystemBorderSinkColor();
 				GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
@@ -98,6 +98,8 @@ Win7ScrollStyle
 					composition->SetOwnedElement(element);
 					boundsComposition->AddChild(composition);
 				}
+
+				return boundsComposition;
 			}
 
 			Win7ScrollStyle::Win7ScrollStyle(Direction _direction)
