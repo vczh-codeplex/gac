@@ -131,6 +131,27 @@ Helper Functions
 			extern void										Win8SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
 			extern elements::text::ColorEntry				Win8GetTextBoxTextColor();
+
+			class CommonFragmentBuilder
+			{
+			private:
+				static compositions::GuiBoundsComposition*			BuildDockedElementContainer(elements::IGuiGraphicsElement* element);
+			public:
+				static void											FillUpArrow(elements::GuiPolygonElement* element);
+				static void											FillDownArrow(elements::GuiPolygonElement* element);
+				static void											FillLeftArrow(elements::GuiPolygonElement* element);
+				static void											FillRightArrow(elements::GuiPolygonElement* element);
+
+				static elements::GuiPolygonElement*					BuildUpArrow();
+				static elements::GuiPolygonElement*					BuildDownArrow();
+				static elements::GuiPolygonElement*					BuildLeftArrow();
+				static elements::GuiPolygonElement*					BuildRightArrow();
+
+				static compositions::GuiBoundsComposition*			BuildUpArrow(elements::GuiPolygonElement*& elementOut);
+				static compositions::GuiBoundsComposition*			BuildDownArrow(elements::GuiPolygonElement*& elementOut);
+				static compositions::GuiBoundsComposition*			BuildLeftArrow(elements::GuiPolygonElement*& elementOut);
+				static compositions::GuiBoundsComposition*			BuildRightArrow(elements::GuiPolygonElement*& elementOut);
+			};
 		}
 	}
 }

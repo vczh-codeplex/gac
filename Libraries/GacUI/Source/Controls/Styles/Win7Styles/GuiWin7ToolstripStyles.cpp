@@ -187,7 +187,7 @@ Win7ToolstripButtonStyle
 						table->AddChild(cell);
 						cell->SetSite(0, 1, 1, 1);
 						GuiPolygonElement* arrow=0;
-						GuiBoundsComposition* arrowComposition=common_styles::CommonFragmentBuilder::BuildDownArrow(arrow);
+						GuiBoundsComposition* arrowComposition=CommonFragmentBuilder::BuildDownArrow(arrow);
 
 						switch(_buttonStyle)
 						{

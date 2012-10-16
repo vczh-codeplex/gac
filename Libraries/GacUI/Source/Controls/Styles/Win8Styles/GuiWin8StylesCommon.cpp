@@ -539,6 +539,107 @@ Helpers
 				entry.selectedUnfocused.background=Color(51, 153, 255);
 				return entry;
 			}
+
+/***********************************************************************
+CommonFragmentBuilder
+***********************************************************************/
+
+			void CommonFragmentBuilder::FillUpArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(0, 3), Point(3, 0), Point(6, 3)};
+				element->SetSize(Size(7, 4));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			void CommonFragmentBuilder::FillDownArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(0, 0), Point(3, 3), Point(6, 0)};
+				element->SetSize(Size(7, 4));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			void CommonFragmentBuilder::FillLeftArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(3, 0), Point(0, 3), Point(3, 6)};
+				element->SetSize(Size(4, 7));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			void CommonFragmentBuilder::FillRightArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(0, 0), Point(3, 3), Point(0, 6)};
+				element->SetSize(Size(4, 7));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildUpArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillUpArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildDownArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillDownArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildLeftArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillLeftArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildRightArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillRightArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildDockedElementContainer(elements::IGuiGraphicsElement* element)
+			{
+				GuiBoundsComposition* composition=new GuiBoundsComposition;
+				composition->SetOwnedElement(element);
+				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				return composition;
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildUpArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildUpArrow();
+				return BuildDockedElementContainer(elementOut);
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildDownArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildDownArrow();
+				return BuildDockedElementContainer(elementOut);
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildLeftArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildLeftArrow();
+				return BuildDockedElementContainer(elementOut);
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildRightArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildRightArrow();
+				return BuildDockedElementContainer(elementOut);
+			}
 		}
 	}
 }

@@ -12,12 +12,80 @@ namespace vl
 			using namespace controls;
 
 /***********************************************************************
+Win7ButtonStyle
+***********************************************************************/
+
+			void Win7ScrollArrowButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected)
+			{
+				Win7ButtonColors targetColor;
+				if(enabled)
+				{
+					switch(value)
+					{
+					case GuiButton::Normal:
+						targetColor=Win7ButtonColors::ButtonNormal();
+						break;
+					case GuiButton::Active:
+						targetColor=Win7ButtonColors::ButtonActive();
+						break;
+					case GuiButton::Pressed:
+						targetColor=Win7ButtonColors::ButtonPressed();
+						break;
+					}
+				}
+				else
+				{
+					targetColor=Win7ButtonColors::ButtonDisabled();
+				}
+				transferringAnimation->Transfer(targetColor);
+			}
+
+			void Win7ScrollArrowButtonStyle::AfterApplyColors(const Win7ButtonColors& colors)
+			{
+				Win7ButtonStyleBase::AfterApplyColors(colors);
+				arrowElement->SetBorderColor(colors.textColor);
+				arrowElement->SetBackgroundColor(colors.textColor);
+			}
+
+			Win7ScrollArrowButtonStyle::Win7ScrollArrowButtonStyle(common_styles::CommonScrollStyle::Direction direction, bool increaseButton)
+				:Win7ButtonStyleBase(direction==common_styles::CommonScrollStyle::Horizontal, true, Win7ButtonColors::ButtonNormal(), Alignment::Center, Alignment::Center)
+			{
+				switch(direction)
+				{
+				case common_styles::CommonScrollStyle::Horizontal:
+					if(increaseButton)
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildRightArrow(arrowElement));
+					}
+					else
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildLeftArrow(arrowElement));
+					}
+					break;
+				case common_styles::CommonScrollStyle::Vertical:
+					if(increaseButton)
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildDownArrow(arrowElement));
+					}
+					else
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildUpArrow(arrowElement));
+					}
+					break;
+				}
+			}
+
+			Win7ScrollArrowButtonStyle::~Win7ScrollArrowButtonStyle()
+			{
+			}
+
+/***********************************************************************
 Win7ScrollStyle
 ***********************************************************************/
 
 			controls::GuiButton::IStyleController* Win7ScrollStyle::CreateDecreaseButtonStyle(Direction direction)
 			{
-				Win7ButtonStyle* decreaseButtonStyle=new Win7ButtonStyle(direction==Horizontal);
+				Win7ScrollArrowButtonStyle* decreaseButtonStyle=new Win7ScrollArrowButtonStyle(direction, false);
 				decreaseButtonStyle->SetTransparentWhenInactive(true);
 				decreaseButtonStyle->SetTransparentWhenDisabled(true);
 				return decreaseButtonStyle;
@@ -25,7 +93,7 @@ Win7ScrollStyle
 
 			controls::GuiButton::IStyleController* Win7ScrollStyle::CreateIncreaseButtonStyle(Direction direction)
 			{
-				Win7ButtonStyle* increaseButtonStyle=new Win7ButtonStyle(direction==Horizontal);
+				Win7ScrollArrowButtonStyle* increaseButtonStyle=new Win7ScrollArrowButtonStyle(direction, true);
 				increaseButtonStyle->SetTransparentWhenInactive(true);
 				increaseButtonStyle->SetTransparentWhenDisabled(true);
 				return increaseButtonStyle;

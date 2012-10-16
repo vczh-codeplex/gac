@@ -19,6 +19,11 @@ Win8ButtonStyleBase
 			{
 				colorCurrent=Win8ButtonColors::Blend(colorBegin, colorEnd, currentPosition, totalLength);
 				style->elements.Apply(colorCurrent);
+				style->AfterApplyColors(colorCurrent);
+			}
+
+			void Win8ButtonStyleBase::AfterApplyColors(const Win8ButtonColors& colors)
+			{
 			}
 
 			Win8ButtonStyleBase::Win8ButtonStyleBase(const Win8ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical)
