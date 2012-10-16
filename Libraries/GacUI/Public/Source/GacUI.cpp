@@ -5314,7 +5314,9 @@ GuiScrollView::StyleController
 				tableComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				tableComposition->SetRowsAndColumns(2, 2);
 				tableComposition->SetRowOption(0, GuiCellOption::PercentageOption(1.0));
+				tableComposition->SetRowOption(1, GuiCellOption::MinSizeOption());
 				tableComposition->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
+				tableComposition->SetColumnOption(1, GuiCellOption::MinSizeOption());
 				UpdateTable();
 				{
 					GuiCellComposition* cell=new GuiCellComposition;
@@ -10556,10 +10558,10 @@ CommonScrollStyle
 			void CommonScrollStyle::BuildStyle(int defaultSize, int arrowSize)
 			{
 				boundsComposition=new GuiBoundsComposition;
-				InstallBackground(boundsComposition, direction);
+				containerComposition=InstallBackground(boundsComposition, direction);
 				{
 					GuiBoundsComposition* handleBoundsComposition=new GuiBoundsComposition;
-					boundsComposition->AddChild(handleBoundsComposition);
+					containerComposition->AddChild(handleBoundsComposition);
 
 					handleComposition=new GuiPartialViewComposition;
 					handleBoundsComposition->AddChild(handleComposition);
@@ -10601,13 +10603,13 @@ CommonScrollStyle
 					decreaseComposition->SetMaxLength(defaultSize);
 					decreaseComposition->SetMaxRatio(0.5);
 					decreaseComposition->AddChild(decreaseButton->GetBoundsComposition());
-					boundsComposition->AddChild(decreaseComposition);
+					containerComposition->AddChild(decreaseComposition);
 
 					GuiSideAlignedComposition* increaseComposition=new GuiSideAlignedComposition;
 					increaseComposition->SetMaxLength(defaultSize);
 					increaseComposition->SetMaxRatio(0.5);
 					increaseComposition->AddChild(increaseButton->GetBoundsComposition());
-					boundsComposition->AddChild(increaseComposition);
+					containerComposition->AddChild(increaseComposition);
 
 					GuiPolygonElement* elementOut=0;
 					switch(direction)
@@ -10638,6 +10640,7 @@ CommonScrollStyle
 				,decreaseButton(0)
 				,increaseButton(0)
 				,boundsComposition(0)
+				,containerComposition(0)
 				,totalSize(1)
 				,pageSize(1)
 				,position(0)
@@ -10656,7 +10659,7 @@ CommonScrollStyle
 
 			compositions::GuiGraphicsComposition* CommonScrollStyle::GetContainerComposition()
 			{
-				return boundsComposition;
+				return containerComposition;
 			}
 
 			void CommonScrollStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
@@ -11522,7 +11525,6 @@ Controls\Styles\GuiWin8Styles.cpp
 //#include "Win8Styles\GuiWin8TabStyles.h"
 //#include "Win8Styles\GuiWin8MenuStyles.h"
 //#include "Win8Styles\GuiWin8ToolstripStyles.h"
-//#include "Win8Styles\GuiWin8ScrollableStyles.h"
 //#include "Win8Styles\GuiWin8ListStyles.h"
 
 namespace vl
@@ -11553,15 +11555,15 @@ Win8Theme
 				return new Win8WindowStyle;
 			}
 
-			//controls::GuiLabel::IStyleController* Win8Theme::CreateLabelStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiLabel::IStyleController* Win8Theme::CreateLabelStyle()
+			{
+				return new Win8LabelStyle;
+			}
 
-			//controls::GuiScrollContainer::IStyleProvider* Win8Theme::CreateScrollContainerStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiScrollContainer::IStyleProvider* Win8Theme::CreateScrollContainerStyle()
+			{
+				return new Win8ScrollViewProvider;
+			}
 
 			//controls::GuiControl::IStyleController* Win8Theme::CreateGroupBoxStyle()
 			//{
@@ -11668,15 +11670,15 @@ Win8Theme
 				return new Win8CheckBoxStyle(Win8CheckBoxStyle::RadioButton);
 			}
 
-			//controls::GuiScroll::IStyleController* Win8Theme::CreateHScrollStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiScroll::IStyleController* Win8Theme::CreateHScrollStyle()
+			{
+				return new Win8ScrollStyle(common_styles::CommonScrollStyle::Horizontal);
+			}
 
-			//controls::GuiScroll::IStyleController* Win8Theme::CreateVScrollStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiScroll::IStyleController* Win8Theme::CreateVScrollStyle()
+			{
+				return new Win8ScrollStyle(common_styles::CommonScrollStyle::Vertical);
+			}
 
 			//controls::GuiScroll::IStyleController* Win8Theme::CreateHTrackerStyle()
 			//{
@@ -11693,10 +11695,10 @@ Win8Theme
 			//	throw 0;
 			//}
 
-			//int Win8Theme::GetScrollDefaultSize()
-			//{
-			//	throw 0;
-			//}
+			int Win8Theme::GetScrollDefaultSize()
+			{
+				return 16;
+			}
 
 			//int Win8Theme::GetTrackerDefaultSize()
 			//{
@@ -13601,7 +13603,7 @@ Win7ScrollStyle
 				return handleButtonStyle;
 			}
 
-			void Win7ScrollStyle::InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)
+			compositions::GuiBoundsComposition* Win7ScrollStyle::InstallBackground(compositions::GuiBoundsComposition* boundsComposition, Direction direction)
 			{
 				Color sinkColor=Win7GetSystemBorderSinkColor();
 				GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
@@ -13661,6 +13663,8 @@ Win7ScrollStyle
 					composition->SetOwnedElement(element);
 					boundsComposition->AddChild(composition);
 				}
+
+				return boundsComposition;
 			}
 
 			Win7ScrollStyle::Win7ScrollStyle(Direction _direction)
@@ -16259,6 +16263,305 @@ Win8WindowStyle
 			void Win8WindowStyle::SetVisuallyEnabled(bool value)
 			{
 			}
+
+/***********************************************************************
+Win8LabelStyle
+***********************************************************************/
+
+			Win8LabelStyle::Win8LabelStyle()
+			{
+				textElement=GuiSolidLabelElement::Create();
+				textElement->SetColor(GetDefaultTextColor());
+				
+				boundsComposition=new GuiBoundsComposition;
+				boundsComposition->SetOwnedElement(textElement);
+				boundsComposition->SetMinSizeLimitation(GuiBoundsComposition::LimitToElement);
+			}
+
+			Win8LabelStyle::~Win8LabelStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win8LabelStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win8LabelStyle::GetContainerComposition()
+			{
+				return boundsComposition;
+			}
+
+			void Win8LabelStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8LabelStyle::SetText(const WString& value)
+			{
+				textElement->SetText(value);
+			}
+
+			void Win8LabelStyle::SetFont(const FontProperties& value)
+			{
+				textElement->SetFont(value);
+			}
+
+			void Win8LabelStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+			Color Win8LabelStyle::GetDefaultTextColor()
+			{
+				return Win8GetSystemTextColor(true);
+			}
+
+			void Win8LabelStyle::SetTextColor(Color value)
+			{
+				textElement->SetColor(value);
+			}
+		}
+	}
+}
+
+/***********************************************************************
+Controls\Styles\Win8Styles\GuiWin8ScrollableStyles.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace win8
+		{
+			using namespace collections;
+			using namespace elements;
+			using namespace compositions;
+			using namespace controls;
+
+/***********************************************************************
+Win8ScrollHandleButtonStyle
+***********************************************************************/
+
+			void Win8ScrollHandleButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected)
+			{
+				Win8ButtonColors targetColor;
+				if(enabled)
+				{
+					switch(value)
+					{
+					case GuiButton::Normal:
+						targetColor=Win8ButtonColors::ScrollHandleNormal();
+						break;
+					case GuiButton::Active:
+						targetColor=Win8ButtonColors::ScrollHandleActive();
+						break;
+					case GuiButton::Pressed:
+						targetColor=Win8ButtonColors::ScrollHandlePressed();
+						break;
+					}
+				}
+				else
+				{
+					targetColor=Win8ButtonColors::ScrollHandleDisabled();
+				}
+				transferringAnimation->Transfer(targetColor);
+			}
+
+			Win8ScrollHandleButtonStyle::Win8ScrollHandleButtonStyle()
+				:Win8ButtonStyleBase(Win8ButtonColors::ScrollHandleNormal(), Alignment::Center, Alignment::Center)
+			{
+			}
+
+			Win8ScrollHandleButtonStyle::~Win8ScrollHandleButtonStyle()
+			{
+			}
+
+/***********************************************************************
+Win8ScrollArrowButtonStyle
+***********************************************************************/
+
+			void Win8ScrollArrowButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected)
+			{
+				Win8ButtonColors targetColor;
+				if(enabled)
+				{
+					switch(value)
+					{
+					case GuiButton::Normal:
+						targetColor=Win8ButtonColors::ScrollArrowNormal();
+						break;
+					case GuiButton::Active:
+						targetColor=Win8ButtonColors::ScrollArrowActive();
+						break;
+					case GuiButton::Pressed:
+						targetColor=Win8ButtonColors::ScrollArrowPressed();
+						break;
+					}
+				}
+				else
+				{
+					targetColor=Win8ButtonColors::ScrollArrowDisabled();
+				}
+				transferringAnimation->Transfer(targetColor);
+			}
+
+			Win8ScrollArrowButtonStyle::Win8ScrollArrowButtonStyle()
+				:Win8ButtonStyleBase(Win8ButtonColors::ScrollArrowNormal(), Alignment::Center, Alignment::Center)
+			{
+			}
+
+			Win8ScrollArrowButtonStyle::~Win8ScrollArrowButtonStyle()
+			{
+			}
+
+/***********************************************************************
+Win8ScrollStyle
+***********************************************************************/
+
+			controls::GuiButton::IStyleController* Win8ScrollStyle::CreateDecreaseButtonStyle(Direction direction)
+			{
+				Win8ScrollArrowButtonStyle* decreaseButtonStyle=new Win8ScrollArrowButtonStyle;
+				return decreaseButtonStyle;
+			}
+
+			controls::GuiButton::IStyleController* Win8ScrollStyle::CreateIncreaseButtonStyle(Direction direction)
+			{
+				Win8ScrollArrowButtonStyle* increaseButtonStyle=new Win8ScrollArrowButtonStyle;
+				return increaseButtonStyle;
+			}
+
+			controls::GuiButton::IStyleController* Win8ScrollStyle::CreateHandleButtonStyle(Direction direction)
+			{
+				Win8ScrollHandleButtonStyle* handleButtonStyle=new Win8ScrollHandleButtonStyle;
+				return handleButtonStyle;
+			}
+
+			compositions::GuiBoundsComposition* Win8ScrollStyle::InstallBackground(compositions::GuiBoundsComposition* boundsComposition, Direction direction)
+			{
+				GuiBoundsComposition* containerComposition=0;
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(Color(255, 255, 255));
+					
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					switch(direction)
+					{
+					case Horizontal:
+						{
+							composition->SetPreferredMinSize(Size(0, 1));
+							composition->SetAlignmentToParent(Margin(0, 0, 0, -1));
+						}
+						break;
+					case Vertical:
+						{
+							composition->SetPreferredMinSize(Size(1, 0));
+							composition->SetAlignmentToParent(Margin(0, 0, -1, 0));
+						}
+						break;
+					}
+					composition->SetOwnedElement(element);
+					boundsComposition->AddChild(composition);
+				}
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(Win8GetSystemWindowColor());
+					
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					switch(direction)
+					{
+					case Horizontal:
+						{
+							composition->SetAlignmentToParent(Margin(0, 1, 0, 0));
+						}
+						break;
+					case Vertical:
+						{
+							composition->SetAlignmentToParent(Margin(1, 0, 0, 0));
+						}
+						break;
+					}
+					composition->SetOwnedElement(element);
+					boundsComposition->AddChild(composition);
+					containerComposition=composition;
+				}
+
+				return containerComposition;
+			}
+
+			Win8ScrollStyle::Win8ScrollStyle(Direction _direction)
+				:CommonScrollStyle(_direction)
+			{
+				BuildStyle(DefaultSize, ArrowSize);
+			}
+
+			Win8ScrollStyle::~Win8ScrollStyle()
+			{
+			}
+
+/***********************************************************************
+Win8ScrollViewProvider
+***********************************************************************/
+
+			Win8ScrollViewProvider::Win8ScrollViewProvider()
+			{
+			}
+
+			Win8ScrollViewProvider::~Win8ScrollViewProvider()
+			{
+			}
+
+			void Win8ScrollViewProvider::AssociateStyleController(controls::GuiControl::IStyleController* controller)
+			{
+			}
+			
+			void Win8ScrollViewProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8ScrollViewProvider::SetText(const WString& value)
+			{
+			}
+
+			void Win8ScrollViewProvider::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win8ScrollViewProvider::SetVisuallyEnabled(bool value)
+			{
+			}
+
+			controls::GuiScroll::IStyleController* Win8ScrollViewProvider::CreateHorizontalScrollStyle()
+			{
+				return new Win8ScrollStyle(Win8ScrollStyle::Horizontal);
+			}
+
+			controls::GuiScroll::IStyleController* Win8ScrollViewProvider::CreateVerticalScrollStyle()
+			{
+				return new Win8ScrollStyle(Win8ScrollStyle::Vertical);
+			}
+
+			int Win8ScrollViewProvider::GetDefaultScrollSize()
+			{
+				return Win8ScrollStyle::DefaultSize;
+			}
+
+			compositions::GuiGraphicsComposition* Win8ScrollViewProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
+			{
+				GuiSolidBorderElement* border=GuiSolidBorderElement::Create();
+				border->SetColor(Win8GetSystemBorderColor());
+				boundsComposition->SetOwnedElement(border);
+				boundsComposition->SetInternalMargin(Margin(1, 1, 1, 1));
+				
+				GuiSolidBackgroundElement* background=GuiSolidBackgroundElement::Create();
+				background->SetColor(Win8GetSystemWindowColor());
+
+				GuiBoundsComposition* backgroundComposition=new GuiBoundsComposition;
+				boundsComposition->AddChild(backgroundComposition);
+				backgroundComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				backgroundComposition->SetOwnedElement(background);
+
+				return boundsComposition;
+			}
 		}
 	}
 }
@@ -16420,6 +16723,100 @@ Win8ButtonColors
 				{
 					colors.bullet.a=0;
 				}
+				return colors;
+			}
+
+			//---------------------------------------------------------
+
+			Win8ButtonColors Win8ButtonColors::ScrollHandleNormal()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(205, 205, 205),
+					Color(205, 205, 205),
+					Color(205, 205, 205),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollHandleActive()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(166, 166, 166),
+					Color(166, 166, 166),
+					Color(166, 166, 166),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollHandlePressed()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(166, 166, 166),
+					Color(166, 166, 166),
+					Color(166, 166, 166),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollHandleDisabled()
+			{
+				Win8ButtonColors colors=
+				{
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollArrowNormal()
+			{
+				Win8ButtonColors colors=
+				{
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Color(96, 96, 96),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollArrowActive()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(218, 218, 218),
+					Color(218, 218, 218),
+					Color(218, 218, 218),
+					Color(0, 0, 0),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollArrowPressed()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(96, 96, 96),
+					Color(96, 96, 96),
+					Color(96, 96, 96),
+					Color(255, 255, 255),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ScrollArrowDisabled()
+			{
+				Win8ButtonColors colors=
+				{
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Color(191, 191, 191),
+				};
 				return colors;
 			}
 
@@ -16615,6 +17012,11 @@ Helpers
 			Color Win8GetSystemWindowColor()
 			{
 				return Color(240, 240, 240);
+			}
+
+			Color Win8GetSystemBorderColor()
+			{
+				return Color(100, 100, 100);
 			}
 
 			Color Win8GetSystemTextColor(bool enabled)

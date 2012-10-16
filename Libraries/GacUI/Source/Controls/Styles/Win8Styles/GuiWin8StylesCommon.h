@@ -58,6 +58,15 @@ Button Configuration
 				static Win8ButtonColors						CheckedActive(bool selected);
 				static Win8ButtonColors						CheckedPressed(bool selected);
 				static Win8ButtonColors						CheckedDisabled(bool selected);
+
+				static Win8ButtonColors						ScrollHandleNormal();
+				static Win8ButtonColors						ScrollHandleActive();
+				static Win8ButtonColors						ScrollHandlePressed();
+				static Win8ButtonColors						ScrollHandleDisabled();
+				static Win8ButtonColors						ScrollArrowNormal();
+				static Win8ButtonColors						ScrollArrowActive();
+				static Win8ButtonColors						ScrollArrowPressed();
+				static Win8ButtonColors						ScrollArrowDisabled();
 			};
 
 			struct Win8ButtonElements
@@ -92,6 +101,7 @@ Helper Functions
 ***********************************************************************/
 			
 			extern Color									Win8GetSystemWindowColor();
+			extern Color									Win8GetSystemBorderColor();
 			extern Color									Win8GetSystemTextColor(bool enabled);
 			extern void										Win8SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);

@@ -96,6 +96,62 @@ Win8WindowStyle
 			void Win8WindowStyle::SetVisuallyEnabled(bool value)
 			{
 			}
+
+/***********************************************************************
+Win8LabelStyle
+***********************************************************************/
+
+			Win8LabelStyle::Win8LabelStyle()
+			{
+				textElement=GuiSolidLabelElement::Create();
+				textElement->SetColor(GetDefaultTextColor());
+				
+				boundsComposition=new GuiBoundsComposition;
+				boundsComposition->SetOwnedElement(textElement);
+				boundsComposition->SetMinSizeLimitation(GuiBoundsComposition::LimitToElement);
+			}
+
+			Win8LabelStyle::~Win8LabelStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win8LabelStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win8LabelStyle::GetContainerComposition()
+			{
+				return boundsComposition;
+			}
+
+			void Win8LabelStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8LabelStyle::SetText(const WString& value)
+			{
+				textElement->SetText(value);
+			}
+
+			void Win8LabelStyle::SetFont(const FontProperties& value)
+			{
+				textElement->SetFont(value);
+			}
+
+			void Win8LabelStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+			Color Win8LabelStyle::GetDefaultTextColor()
+			{
+				return Win8GetSystemTextColor(true);
+			}
+
+			void Win8LabelStyle::SetTextColor(Color value)
+			{
+				textElement->SetColor(value);
+			}
 		}
 	}
 }
