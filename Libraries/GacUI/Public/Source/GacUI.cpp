@@ -10611,7 +10611,6 @@ CommonScrollStyle
 					increaseComposition->AddChild(increaseButton->GetBoundsComposition());
 					containerComposition->AddChild(increaseComposition);
 
-					GuiPolygonElement* elementOut=0;
 					switch(direction)
 					{
 					case Horizontal:
@@ -16541,54 +16540,14 @@ Win8ScrollStyle
 
 			compositions::GuiBoundsComposition* Win8ScrollStyle::InstallBackground(compositions::GuiBoundsComposition* boundsComposition, Direction direction)
 			{
-				GuiBoundsComposition* containerComposition=0;
-				{
-					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
-					element->SetColor(Color(255, 255, 255));
-					
-					GuiBoundsComposition* composition=new GuiBoundsComposition;
-					switch(direction)
-					{
-					case Horizontal:
-						{
-							composition->SetPreferredMinSize(Size(0, 1));
-							composition->SetAlignmentToParent(Margin(0, 0, 0, -1));
-						}
-						break;
-					case Vertical:
-						{
-							composition->SetPreferredMinSize(Size(1, 0));
-							composition->SetAlignmentToParent(Margin(0, 0, -1, 0));
-						}
-						break;
-					}
-					composition->SetOwnedElement(element);
-					boundsComposition->AddChild(composition);
-				}
 				{
 					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
 					element->SetColor(Win8GetSystemWindowColor());
 					
-					GuiBoundsComposition* composition=new GuiBoundsComposition;
-					switch(direction)
-					{
-					case Horizontal:
-						{
-							composition->SetAlignmentToParent(Margin(0, 1, 0, 0));
-						}
-						break;
-					case Vertical:
-						{
-							composition->SetAlignmentToParent(Margin(1, 0, 0, 0));
-						}
-						break;
-					}
-					composition->SetOwnedElement(element);
-					boundsComposition->AddChild(composition);
-					containerComposition=composition;
+					boundsComposition->SetOwnedElement(element);
 				}
 
-				return containerComposition;
+				return boundsComposition;
 			}
 
 			Win8ScrollStyle::Win8ScrollStyle(Direction _direction)
