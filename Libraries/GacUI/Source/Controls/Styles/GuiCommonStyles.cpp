@@ -191,7 +191,6 @@ CommonScrollStyle
 					increaseComposition->AddChild(increaseButton->GetBoundsComposition());
 					containerComposition->AddChild(increaseComposition);
 
-					GuiPolygonElement* elementOut=0;
 					switch(direction)
 					{
 					case Horizontal:
