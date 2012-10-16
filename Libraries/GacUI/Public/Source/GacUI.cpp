@@ -11580,15 +11580,15 @@ Win8Theme
 			//	throw 0;
 			//}
 
-			//controls::GuiScrollView::IStyleProvider* Win8Theme::CreateMultilineTextBoxStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiScrollView::IStyleProvider* Win8Theme::CreateMultilineTextBoxStyle()
+			{
+				return new Win8MultilineTextBoxProvider;
+			}
 
-			//controls::GuiSinglelineTextBox::IStyleProvider* Win8Theme::CreateTextBoxStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiSinglelineTextBox::IStyleProvider* Win8Theme::CreateTextBoxStyle()
+			{
+				return new Win8SinglelineTextBoxProvider;
+			}
 
 			//controls::GuiListView::IStyleProvider* Win8Theme::CreateListViewStyle()
 			//{
@@ -15182,7 +15182,6 @@ Helpers
 				entry.selectedUnfocused.background=Color(51, 153, 255);
 				return entry;
 			}
-
 		}
 	}
 }
@@ -16562,6 +16561,242 @@ Win8ScrollViewProvider
 
 				return boundsComposition;
 			}
+
+/***********************************************************************
+Win8TextBoxBackground
+***********************************************************************/
+
+#define HOST_GETTER_BY_FOCUSABLE_COMPOSITION(STYLE) (style->focusableComposition->GetRelatedGraphicsHost())
+
+			IMPLEMENT_TRANSFERRING_ANIMATION_BASE(Win8TextBoxColors, Win8TextBoxBackground, HOST_GETTER_BY_FOCUSABLE_COMPOSITION)
+			{
+				colorCurrent=Win8TextBoxColors::Blend(colorBegin, colorEnd, currentPosition, totalLength);
+				style->Apply(colorCurrent);
+			}
+
+			void Win8TextBoxBackground::UpdateStyle()
+			{
+				if(!isVisuallyEnabled)
+				{
+					transferringAnimation->Transfer(Win8TextBoxColors::Disabled());
+				}
+				else if(isFocused)
+				{
+					transferringAnimation->Transfer(Win8TextBoxColors::Focused());
+				}
+				else if(isMouseEnter)
+				{
+					transferringAnimation->Transfer(Win8TextBoxColors::Active());
+				}
+				else
+				{
+					transferringAnimation->Transfer(Win8TextBoxColors::Normal());
+				}
+			}
+
+			void Win8TextBoxBackground::Apply(const Win8TextBoxColors& colors)
+			{
+				borderElement->SetColor(colors.borderColor);
+				backgroundElement->SetColor(colors.backgroundColor);
+			}
+
+			void Win8TextBoxBackground::OnBoundsMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				isMouseEnter=true;
+				UpdateStyle();
+			}
+
+			void Win8TextBoxBackground::OnBoundsMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				isMouseEnter=false;
+				UpdateStyle();
+			}
+
+			void Win8TextBoxBackground::OnBoundsGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				isFocused=true;
+				UpdateStyle();
+			}
+
+			void Win8TextBoxBackground::OnBoundsLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				isFocused=false;
+				UpdateStyle();
+			}
+
+			Win8TextBoxBackground::Win8TextBoxBackground()
+				:backgroundElement(0)
+				,borderElement(0)
+				,focusableComposition(0)
+				,isMouseEnter(false)
+				,isFocused(false)
+				,isVisuallyEnabled(false)
+				,styleController(0)
+				,textElement(0)
+			{
+				transferringAnimation=new TransferringAnimation(this, Win8TextBoxColors::Normal());
+			}
+
+			Win8TextBoxBackground::~Win8TextBoxBackground()
+			{
+				transferringAnimation->Disable();
+			}
+
+			void Win8TextBoxBackground::AssociateStyleController(controls::GuiControl::IStyleController* controller)
+			{
+				styleController=controller;
+			}
+			
+			void Win8TextBoxBackground::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+				focusableComposition=value;
+				focusableComposition->GetEventReceiver()->mouseEnter.AttachMethod(this, &Win8TextBoxBackground::OnBoundsMouseEnter);
+				focusableComposition->GetEventReceiver()->mouseLeave.AttachMethod(this, &Win8TextBoxBackground::OnBoundsMouseLeave);
+				focusableComposition->GetEventReceiver()->gotFocus.AttachMethod(this, &Win8TextBoxBackground::OnBoundsGotFocus);
+				focusableComposition->GetEventReceiver()->lostFocus.AttachMethod(this, &Win8TextBoxBackground::OnBoundsLostFocus);
+			}
+
+			void Win8TextBoxBackground::SetVisuallyEnabled(bool value)
+			{
+				isVisuallyEnabled=value;
+				UpdateStyle();
+			}
+
+			compositions::GuiGraphicsComposition* Win8TextBoxBackground::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
+			{
+				{
+					GuiSolidBackgroundElement* background=GuiSolidBackgroundElement::Create();
+					background->SetColor(Color(255, 255, 255));
+
+					GuiBoundsComposition* backgroundComposition=new GuiBoundsComposition;
+					boundsComposition->AddChild(backgroundComposition);
+					backgroundComposition->SetAlignmentToParent(Margin(1, 1, 1, 1));
+					backgroundComposition->SetOwnedElement(background);
+				}
+				{
+					GuiSolidBackgroundElement* background=GuiSolidBackgroundElement::Create();
+					background->SetColor(Color(255, 255, 255));
+
+					GuiBoundsComposition* backgroundComposition=new GuiBoundsComposition;
+					boundsComposition->AddChild(backgroundComposition);
+					backgroundComposition->SetAlignmentToParent(Margin(2, 2, 2, 2));
+					backgroundComposition->SetOwnedElement(background);
+					backgroundElement=background;
+				}
+				{
+					GuiSolidBorderElement* border=GuiSolidBorderElement::Create();
+					border->SetColor(Win8GetSystemBorderColor());
+					borderElement=border;
+
+					GuiBoundsComposition* borderComposition=new GuiBoundsComposition;
+					boundsComposition->AddChild(borderComposition);
+					borderComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					borderComposition->SetOwnedElement(border);
+				}
+				Apply(Win8TextBoxColors::Normal());
+				{
+					GuiBoundsComposition* containerComposition=new GuiBoundsComposition;
+					boundsComposition->AddChild(containerComposition);
+					containerComposition->SetAlignmentToParent(Margin(2, 2, 2, 2));
+					return containerComposition;
+				}
+			}
+
+			void Win8TextBoxBackground::InitializeTextElement(elements::GuiColorizedTextElement* _textElement)
+			{
+				textElement=_textElement;
+
+				Array<text::ColorEntry> colors;
+				colors.Resize(1);
+				{
+					colors[0]=Win8GetTextBoxTextColor();
+				}
+				textElement->SetColors(colors);
+				textElement->SetCaretColor(Color(0, 0, 0));
+			}
+
+/***********************************************************************
+Win8MultilineTextBoxProvider
+***********************************************************************/
+
+			Win8MultilineTextBoxProvider::Win8MultilineTextBoxProvider()
+				:styleController(0)
+			{
+			}
+
+			Win8MultilineTextBoxProvider::~Win8MultilineTextBoxProvider()
+			{
+			}
+
+			void Win8MultilineTextBoxProvider::AssociateStyleController(controls::GuiControl::IStyleController* controller)
+			{
+				styleController=controller;
+				background.AssociateStyleController(controller);
+			}
+			
+			void Win8MultilineTextBoxProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+				background.SetFocusableComposition(value);
+				GuiMultilineTextBox::StyleController* textBoxController=dynamic_cast<GuiMultilineTextBox::StyleController*>(styleController);
+				if(textBoxController)
+				{
+					background.InitializeTextElement(textBoxController->GetTextElement());
+				}
+			}
+
+			void Win8MultilineTextBoxProvider::SetVisuallyEnabled(bool value)
+			{
+				background.SetVisuallyEnabled(value);
+			}
+
+			compositions::GuiGraphicsComposition* Win8MultilineTextBoxProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
+			{
+				return background.InstallBackground(boundsComposition);
+			}
+
+/***********************************************************************
+Win8SinglelineTextBoxProvider
+***********************************************************************/
+
+			Win8SinglelineTextBoxProvider::Win8SinglelineTextBoxProvider()
+				:styleController(0)
+			{
+			}
+
+			Win8SinglelineTextBoxProvider::~Win8SinglelineTextBoxProvider()
+			{
+			}
+
+			void Win8SinglelineTextBoxProvider::AssociateStyleController(controls::GuiControl::IStyleController* controller)
+			{
+				styleController=controller;
+				background.AssociateStyleController(controller);
+			}
+			
+			void Win8SinglelineTextBoxProvider::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+				background.SetFocusableComposition(value);
+				GuiSinglelineTextBox::StyleController* textBoxController=dynamic_cast<GuiSinglelineTextBox::StyleController*>(styleController);
+				background.InitializeTextElement(textBoxController->GetTextElement());
+			}
+
+			void Win8SinglelineTextBoxProvider::SetText(const WString& value)
+			{
+			}
+
+			void Win8SinglelineTextBoxProvider::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win8SinglelineTextBoxProvider::SetVisuallyEnabled(bool value)
+			{
+				background.SetVisuallyEnabled(value);
+			}
+
+			compositions::GuiGraphicsComposition* Win8SinglelineTextBoxProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
+			{
+				return background.InstallBackground(boundsComposition);
+			}
 		}
 	}
 }
@@ -17006,6 +17241,61 @@ Win8CheckedButtonElements
 			}
 
 /***********************************************************************
+Win8TextBoxColors
+***********************************************************************/
+
+			Win8TextBoxColors Win8TextBoxColors::Blend(const Win8TextBoxColors& c1, const Win8TextBoxColors& c2, int ratio, int total)
+			{
+				if(ratio<0) ratio=0;
+				else if(ratio>total) ratio=total;
+
+				Win8TextBoxColors result;
+				result.borderColor=BlendColor(c1.borderColor, c2.borderColor, ratio, total);
+				result.backgroundColor=BlendColor(c1.backgroundColor, c2.backgroundColor, ratio, total);
+				return result;
+			}
+			
+			Win8TextBoxColors Win8TextBoxColors::Normal()
+			{
+				Win8TextBoxColors result=
+				{
+					Color(171, 173, 179),
+					Color(255, 255, 255),
+				};
+				return result;
+			}
+
+			Win8TextBoxColors Win8TextBoxColors::Active()
+			{
+				Win8TextBoxColors result=
+				{
+					Color(126, 180, 234),
+					Color(255, 255, 255),
+				};
+				return result;
+			}
+
+			Win8TextBoxColors Win8TextBoxColors::Focused()
+			{
+				Win8TextBoxColors result=
+				{
+					Color(86, 157, 229),
+					Color(255, 255, 255),
+				};
+				return result;
+			}
+
+			Win8TextBoxColors Win8TextBoxColors::Disabled()
+			{
+				Win8TextBoxColors result=
+				{
+					Color(217, 217, 217),
+					Win8GetSystemWindowColor(),
+				};
+				return result;
+			}
+
+/***********************************************************************
 Helpers
 ***********************************************************************/
 
@@ -17016,7 +17306,7 @@ Helpers
 
 			Color Win8GetSystemBorderColor()
 			{
-				return Color(100, 100, 100);
+				return Color(171, 173, 179);
 			}
 
 			Color Win8GetSystemTextColor(bool enabled)
@@ -17041,6 +17331,18 @@ Helpers
 				composition->SetMargin(Margin(0, 0, 0, 0));
 				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
 				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			}
+
+			elements::text::ColorEntry Win8GetTextBoxTextColor()
+			{
+				elements::text::ColorEntry entry;
+				entry.normal.text=Color(0, 0, 0);
+				entry.normal.background=Color(0, 0, 0, 0);
+				entry.selectedFocused.text=Color(255, 255, 255);
+				entry.selectedFocused.background=Color(51, 153, 255);
+				entry.selectedUnfocused.text=Color(255, 255, 255);
+				entry.selectedUnfocused.background=Color(51, 153, 255);
+				return entry;
 			}
 		}
 	}

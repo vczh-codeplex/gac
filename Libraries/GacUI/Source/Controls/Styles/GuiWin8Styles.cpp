@@ -62,15 +62,15 @@ Win8Theme
 			//	throw 0;
 			//}
 
-			//controls::GuiScrollView::IStyleProvider* Win8Theme::CreateMultilineTextBoxStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiScrollView::IStyleProvider* Win8Theme::CreateMultilineTextBoxStyle()
+			{
+				return new Win8MultilineTextBoxProvider;
+			}
 
-			//controls::GuiSinglelineTextBox::IStyleProvider* Win8Theme::CreateTextBoxStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiSinglelineTextBox::IStyleProvider* Win8Theme::CreateTextBoxStyle()
+			{
+				return new Win8SinglelineTextBoxProvider;
+			}
 
 			//controls::GuiListView::IStyleProvider* Win8Theme::CreateListViewStyle()
 			//{

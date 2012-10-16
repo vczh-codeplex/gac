@@ -18871,8 +18871,8 @@ Theme
 				//controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				//controls::GuiTab::IStyleController*									CreateTabStyle()override;
 				//controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
-				//controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
-				//controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
+				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
+				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
 				//controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				//controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
 				//elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;

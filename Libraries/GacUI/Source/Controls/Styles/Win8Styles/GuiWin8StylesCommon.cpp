@@ -436,6 +436,61 @@ Win8CheckedButtonElements
 			}
 
 /***********************************************************************
+Win8TextBoxColors
+***********************************************************************/
+
+			Win8TextBoxColors Win8TextBoxColors::Blend(const Win8TextBoxColors& c1, const Win8TextBoxColors& c2, int ratio, int total)
+			{
+				if(ratio<0) ratio=0;
+				else if(ratio>total) ratio=total;
+
+				Win8TextBoxColors result;
+				result.borderColor=BlendColor(c1.borderColor, c2.borderColor, ratio, total);
+				result.backgroundColor=BlendColor(c1.backgroundColor, c2.backgroundColor, ratio, total);
+				return result;
+			}
+			
+			Win8TextBoxColors Win8TextBoxColors::Normal()
+			{
+				Win8TextBoxColors result=
+				{
+					Color(171, 173, 179),
+					Color(255, 255, 255),
+				};
+				return result;
+			}
+
+			Win8TextBoxColors Win8TextBoxColors::Active()
+			{
+				Win8TextBoxColors result=
+				{
+					Color(126, 180, 234),
+					Color(255, 255, 255),
+				};
+				return result;
+			}
+
+			Win8TextBoxColors Win8TextBoxColors::Focused()
+			{
+				Win8TextBoxColors result=
+				{
+					Color(86, 157, 229),
+					Color(255, 255, 255),
+				};
+				return result;
+			}
+
+			Win8TextBoxColors Win8TextBoxColors::Disabled()
+			{
+				Win8TextBoxColors result=
+				{
+					Color(217, 217, 217),
+					Win8GetSystemWindowColor(),
+				};
+				return result;
+			}
+
+/***********************************************************************
 Helpers
 ***********************************************************************/
 
@@ -446,7 +501,7 @@ Helpers
 
 			Color Win8GetSystemBorderColor()
 			{
-				return Color(100, 100, 100);
+				return Color(171, 173, 179);
 			}
 
 			Color Win8GetSystemTextColor(bool enabled)
@@ -471,6 +526,18 @@ Helpers
 				composition->SetMargin(Margin(0, 0, 0, 0));
 				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
 				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			}
+
+			elements::text::ColorEntry Win8GetTextBoxTextColor()
+			{
+				elements::text::ColorEntry entry;
+				entry.normal.text=Color(0, 0, 0);
+				entry.normal.background=Color(0, 0, 0, 0);
+				entry.selectedFocused.text=Color(255, 255, 255);
+				entry.selectedFocused.background=Color(51, 153, 255);
+				entry.selectedUnfocused.text=Color(255, 255, 255);
+				entry.selectedUnfocused.background=Color(51, 153, 255);
+				return entry;
 			}
 		}
 	}

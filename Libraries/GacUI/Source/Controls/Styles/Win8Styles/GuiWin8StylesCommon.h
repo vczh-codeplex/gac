@@ -96,6 +96,31 @@ Button Configuration
 				void										Apply(const Win8ButtonColors& colors);
 			};
 
+			struct Win8TextBoxColors
+			{
+				Color										borderColor;
+				Color										backgroundColor;
+
+				bool operator==(const Win8TextBoxColors& colors)
+				{
+					return
+						borderColor == colors.borderColor &&
+						backgroundColor == colors.backgroundColor;
+				}
+
+				bool operator!=(const Win8TextBoxColors& colors)
+				{
+					return !(*this==colors);
+				}
+
+				static Win8TextBoxColors					Blend(const Win8TextBoxColors& c1, const Win8TextBoxColors& c2, int ratio, int total);
+
+				static Win8TextBoxColors					Normal();
+				static Win8TextBoxColors					Active();
+				static Win8TextBoxColors					Focused();
+				static Win8TextBoxColors					Disabled();
+			};
+
 /***********************************************************************
 Helper Functions
 ***********************************************************************/
@@ -105,6 +130,7 @@ Helper Functions
 			extern Color									Win8GetSystemTextColor(bool enabled);
 			extern void										Win8SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
+			extern elements::text::ColorEntry				Win8GetTextBoxTextColor();
 		}
 	}
 }
