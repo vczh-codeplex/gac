@@ -7499,27 +7499,6 @@ Scrolls
 				void												SetPageSize(int value)override;
 				void												SetPosition(int value)override;
 			};
-
-			class CommonFragmentBuilder
-			{
-			private:
-				static compositions::GuiBoundsComposition*			BuildDockedElementContainer(elements::IGuiGraphicsElement* element);
-			public:
-				static void											FillUpArrow(elements::GuiPolygonElement* element);
-				static void											FillDownArrow(elements::GuiPolygonElement* element);
-				static void											FillLeftArrow(elements::GuiPolygonElement* element);
-				static void											FillRightArrow(elements::GuiPolygonElement* element);
-
-				static elements::GuiPolygonElement*					BuildUpArrow();
-				static elements::GuiPolygonElement*					BuildDownArrow();
-				static elements::GuiPolygonElement*					BuildLeftArrow();
-				static elements::GuiPolygonElement*					BuildRightArrow();
-
-				static compositions::GuiBoundsComposition*			BuildUpArrow(elements::GuiPolygonElement*& elementOut);
-				static compositions::GuiBoundsComposition*			BuildDownArrow(elements::GuiPolygonElement*& elementOut);
-				static compositions::GuiBoundsComposition*			BuildLeftArrow(elements::GuiPolygonElement*& elementOut);
-				static compositions::GuiBoundsComposition*			BuildRightArrow(elements::GuiPolygonElement*& elementOut);
-			};
 		}
 
 /***********************************************************************
@@ -7825,6 +7804,26 @@ Helper Functions
 			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
 			extern elements::text::ColorEntry				Win7GetTextBoxTextColor();
 
+			class CommonFragmentBuilder
+			{
+			private:
+				static compositions::GuiBoundsComposition*			BuildDockedElementContainer(elements::IGuiGraphicsElement* element);
+			public:
+				static void											FillUpArrow(elements::GuiPolygonElement* element);
+				static void											FillDownArrow(elements::GuiPolygonElement* element);
+				static void											FillLeftArrow(elements::GuiPolygonElement* element);
+				static void											FillRightArrow(elements::GuiPolygonElement* element);
+
+				static elements::GuiPolygonElement*					BuildUpArrow();
+				static elements::GuiPolygonElement*					BuildDownArrow();
+				static elements::GuiPolygonElement*					BuildLeftArrow();
+				static elements::GuiPolygonElement*					BuildRightArrow();
+
+				static compositions::GuiBoundsComposition*			BuildUpArrow(elements::GuiPolygonElement*& elementOut);
+				static compositions::GuiBoundsComposition*			BuildDownArrow(elements::GuiPolygonElement*& elementOut);
+				static compositions::GuiBoundsComposition*			BuildLeftArrow(elements::GuiPolygonElement*& elementOut);
+				static compositions::GuiBoundsComposition*			BuildRightArrow(elements::GuiPolygonElement*& elementOut);
+			};
 		}
 	}
 }
@@ -7980,6 +7979,7 @@ Button
 				bool										transparentWhenDisabled;
 
 				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)=0;
+				virtual void								AfterApplyColors(const Win7ButtonColors& colors);
 			public:
 				Win7ButtonStyleBase(bool verticalGradient, bool roundBorder, const Win7ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical);
 				~Win7ButtonStyleBase();
@@ -8432,6 +8432,18 @@ namespace vl
 /***********************************************************************
 Scroll
 ***********************************************************************/
+			
+			class Win7ScrollArrowButtonStyle : public Win7ButtonStyleBase, public Description<Win7ButtonStyle>
+			{
+			protected:
+				elements::GuiPolygonElement*				arrowElement;
+
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+				void										AfterApplyColors(const Win7ButtonColors& colors)override;
+			public:
+				Win7ScrollArrowButtonStyle(common_styles::CommonScrollStyle::Direction direction, bool increaseButton);
+				~Win7ScrollArrowButtonStyle();
+			};
 			
 			class Win7ScrollStyle : public common_styles::CommonScrollStyle, public Description<Win7ScrollStyle>
 			{
@@ -8958,6 +8970,27 @@ Helper Functions
 			extern void										Win8SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
 			extern elements::text::ColorEntry				Win8GetTextBoxTextColor();
+
+			class CommonFragmentBuilder
+			{
+			private:
+				static compositions::GuiBoundsComposition*			BuildDockedElementContainer(elements::IGuiGraphicsElement* element);
+			public:
+				static void											FillUpArrow(elements::GuiPolygonElement* element);
+				static void											FillDownArrow(elements::GuiPolygonElement* element);
+				static void											FillLeftArrow(elements::GuiPolygonElement* element);
+				static void											FillRightArrow(elements::GuiPolygonElement* element);
+
+				static elements::GuiPolygonElement*					BuildUpArrow();
+				static elements::GuiPolygonElement*					BuildDownArrow();
+				static elements::GuiPolygonElement*					BuildLeftArrow();
+				static elements::GuiPolygonElement*					BuildRightArrow();
+
+				static compositions::GuiBoundsComposition*			BuildUpArrow(elements::GuiPolygonElement*& elementOut);
+				static compositions::GuiBoundsComposition*			BuildDownArrow(elements::GuiPolygonElement*& elementOut);
+				static compositions::GuiBoundsComposition*			BuildLeftArrow(elements::GuiPolygonElement*& elementOut);
+				static compositions::GuiBoundsComposition*			BuildRightArrow(elements::GuiPolygonElement*& elementOut);
+			};
 		}
 	}
 }
@@ -9086,6 +9119,7 @@ Button
 				bool										transparentWhenDisabled;
 
 				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)=0;
+				virtual void								AfterApplyColors(const Win8ButtonColors& colors);
 			public:
 				Win8ButtonStyleBase(const Win8ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical);
 				~Win8ButtonStyleBase();
@@ -9191,9 +9225,12 @@ Scroll
 			class Win8ScrollArrowButtonStyle : public Win8ButtonStyleBase, public Description<Win8ScrollArrowButtonStyle>
 			{
 			protected:
+				elements::GuiPolygonElement*				arrowElement;
+
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+				void										AfterApplyColors(const Win8ButtonColors& colors)override;
 			public:
-				Win8ScrollArrowButtonStyle();
+				Win8ScrollArrowButtonStyle(common_styles::CommonScrollStyle::Direction direction, bool increaseButton);
 				~Win8ScrollArrowButtonStyle();
 			};
 			

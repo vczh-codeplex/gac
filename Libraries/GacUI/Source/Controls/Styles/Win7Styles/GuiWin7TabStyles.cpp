@@ -172,7 +172,7 @@ Win7TabStyle
 					cell->AddChild(tabHeaderComposition);
 
 					headerOverflowButton=new GuiButton(new Win7ButtonStyle);
-					headerOverflowButton->GetContainerComposition()->AddChild(common_styles::CommonFragmentBuilder::BuildDownArrow(headerOverflowArrowElement));
+					headerOverflowButton->GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildDownArrow(headerOverflowArrowElement));
 					headerOverflowButton->SetVisible(false);
 					headerOverflowButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, 0, 0, 0));
 					headerOverflowButton->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowButtonClicked);

@@ -38,10 +38,13 @@ Scroll
 			class Win8ScrollArrowButtonStyle : public Win8ButtonStyleBase, public Description<Win8ScrollArrowButtonStyle>
 			{
 			protected:
+				elements::GuiPolygonElement*				arrowElement;
+
 				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+				void										AfterApplyColors(const Win8ButtonColors& colors)override;
 			public:
 				/// <summary>Create the style.</summary>
-				Win8ScrollArrowButtonStyle();
+				Win8ScrollArrowButtonStyle(common_styles::CommonScrollStyle::Direction direction, bool increaseButton);
 				~Win8ScrollArrowButtonStyle();
 			};
 			

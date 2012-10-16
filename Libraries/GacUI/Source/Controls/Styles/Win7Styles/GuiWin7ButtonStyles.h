@@ -37,6 +37,7 @@ Button
 				bool										transparentWhenDisabled;
 
 				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)=0;
+				virtual void								AfterApplyColors(const Win7ButtonColors& colors);
 			public:
 				/// <summary>Create the style.</summary>
 				/// <param name="verticalGradient">Set to true to have a vertical gradient background.</param>

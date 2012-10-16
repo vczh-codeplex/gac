@@ -10617,17 +10617,13 @@ CommonScrollStyle
 					case Horizontal:
 						{
 							decreaseComposition->SetDirection(GuiSideAlignedComposition::Left);
-							decreaseButton->GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildLeftArrow(elementOut));
 							increaseComposition->SetDirection(GuiSideAlignedComposition::Right);
-							increaseButton->GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildRightArrow(elementOut));
 						}
 						break;
 					case Vertical:
 						{
 							decreaseComposition->SetDirection(GuiSideAlignedComposition::Top);
-							decreaseButton->GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildUpArrow(elementOut));
 							increaseComposition->SetDirection(GuiSideAlignedComposition::Bottom);
-							increaseButton->GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildDownArrow(elementOut));
 						}
 						break;
 					}
@@ -10962,107 +10958,6 @@ CommonTrackStyle
 					position=value;
 					UpdateHandle();
 				}
-			}
-
-/***********************************************************************
-CommonFragmentBuilder
-***********************************************************************/
-
-			void CommonFragmentBuilder::FillUpArrow(elements::GuiPolygonElement* element)
-			{
-				Point points[]={Point(0, 3), Point(3, 0), Point(6, 3)};
-				element->SetSize(Size(7, 4));
-				element->SetPoints(points, sizeof(points)/sizeof(*points));
-			}
-
-			void CommonFragmentBuilder::FillDownArrow(elements::GuiPolygonElement* element)
-			{
-				Point points[]={Point(0, 0), Point(3, 3), Point(6, 0)};
-				element->SetSize(Size(7, 4));
-				element->SetPoints(points, sizeof(points)/sizeof(*points));
-			}
-
-			void CommonFragmentBuilder::FillLeftArrow(elements::GuiPolygonElement* element)
-			{
-				Point points[]={Point(3, 0), Point(0, 3), Point(3, 6)};
-				element->SetSize(Size(4, 7));
-				element->SetPoints(points, sizeof(points)/sizeof(*points));
-			}
-
-			void CommonFragmentBuilder::FillRightArrow(elements::GuiPolygonElement* element)
-			{
-				Point points[]={Point(0, 0), Point(3, 3), Point(0, 6)};
-				element->SetSize(Size(4, 7));
-				element->SetPoints(points, sizeof(points)/sizeof(*points));
-			}
-
-			elements::GuiPolygonElement* CommonFragmentBuilder::BuildUpArrow()
-			{
-				GuiPolygonElement* element=GuiPolygonElement::Create();
-				FillUpArrow(element);
-				element->SetBorderColor(Color(0, 0, 0));
-				element->SetBackgroundColor(Color(0, 0, 0));
-				return element;
-			}
-
-			elements::GuiPolygonElement* CommonFragmentBuilder::BuildDownArrow()
-			{
-				GuiPolygonElement* element=GuiPolygonElement::Create();
-				FillDownArrow(element);
-				element->SetBorderColor(Color(0, 0, 0));
-				element->SetBackgroundColor(Color(0, 0, 0));
-				return element;
-			}
-
-			elements::GuiPolygonElement* CommonFragmentBuilder::BuildLeftArrow()
-			{
-				GuiPolygonElement* element=GuiPolygonElement::Create();
-				FillLeftArrow(element);
-				element->SetBorderColor(Color(0, 0, 0));
-				element->SetBackgroundColor(Color(0, 0, 0));
-				return element;
-			}
-
-			elements::GuiPolygonElement* CommonFragmentBuilder::BuildRightArrow()
-			{
-				GuiPolygonElement* element=GuiPolygonElement::Create();
-				FillRightArrow(element);
-				element->SetBorderColor(Color(0, 0, 0));
-				element->SetBackgroundColor(Color(0, 0, 0));
-				return element;
-			}
-
-			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildDockedElementContainer(elements::IGuiGraphicsElement* element)
-			{
-				GuiBoundsComposition* composition=new GuiBoundsComposition;
-				composition->SetOwnedElement(element);
-				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
-				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				return composition;
-			}
-
-			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildUpArrow(elements::GuiPolygonElement*& elementOut)
-			{
-				elementOut=BuildUpArrow();
-				return BuildDockedElementContainer(elementOut);
-			}
-
-			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildDownArrow(elements::GuiPolygonElement*& elementOut)
-			{
-				elementOut=BuildDownArrow();
-				return BuildDockedElementContainer(elementOut);
-			}
-
-			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildLeftArrow(elements::GuiPolygonElement*& elementOut)
-			{
-				elementOut=BuildLeftArrow();
-				return BuildDockedElementContainer(elementOut);
-			}
-
-			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildRightArrow(elements::GuiPolygonElement*& elementOut)
-			{
-				elementOut=BuildRightArrow();
-				return BuildDockedElementContainer(elementOut);
 			}
 		}
 
@@ -11751,6 +11646,11 @@ Win7ButtonStyleBase
 			{
 				colorCurrent=Win7ButtonColors::Blend(colorBegin, colorEnd, currentPosition, totalLength);
 				style->elements.Apply(colorCurrent);
+				style->AfterApplyColors(colorCurrent);
+			}
+
+			void Win7ButtonStyleBase::AfterApplyColors(const Win7ButtonColors& colors)
+			{
 			}
 
 			Win7ButtonStyleBase::Win7ButtonStyleBase(bool verticalGradient, bool roundBorder, const Win7ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical)
@@ -12411,7 +12311,7 @@ Win7ListViewColumnDropDownStyle
 				gradientComposition->SetPreferredMinSize(Size(0, 4));
 				mainComposition->AddChild(gradientComposition);
 
-				arrowElement=common_styles::CommonFragmentBuilder::BuildDownArrow();
+				arrowElement=CommonFragmentBuilder::BuildDownArrow();
 				arrowElement->SetBackgroundColor(Color(76, 96, 122));
 				arrowElement->SetBorderColor(Color(76, 96, 122));
 				arrowComposition=new GuiBoundsComposition;
@@ -12682,10 +12582,10 @@ Win7ListViewColumnHeaderStyle
 					arrowElement->SetPoints(0, 0);
 					break;
 				case controls::GuiListViewColumnHeader::Ascending:
-					common_styles::CommonFragmentBuilder::FillUpArrow(arrowElement);
+					CommonFragmentBuilder::FillUpArrow(arrowElement);
 					break;
 				case controls::GuiListViewColumnHeader::Descending:
-					common_styles::CommonFragmentBuilder::FillDownArrow(arrowElement);
+					CommonFragmentBuilder::FillDownArrow(arrowElement);
 					break;
 				}
 			}
@@ -12860,7 +12760,7 @@ Win7DropDownComboBoxStyle
 				elements.textElement->SetEllipse(true);
 				elements.textElement->SetAlignments(Alignment::Left, Alignment::Center);
 
-				dropDownElement=common_styles::CommonFragmentBuilder::BuildDownArrow();
+				dropDownElement=CommonFragmentBuilder::BuildDownArrow();
 
 				dropDownComposition=new GuiCellComposition;
 				table->AddChild(dropDownComposition);
@@ -13577,12 +13477,80 @@ namespace vl
 			using namespace controls;
 
 /***********************************************************************
+Win7ButtonStyle
+***********************************************************************/
+
+			void Win7ScrollArrowButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected)
+			{
+				Win7ButtonColors targetColor;
+				if(enabled)
+				{
+					switch(value)
+					{
+					case GuiButton::Normal:
+						targetColor=Win7ButtonColors::ButtonNormal();
+						break;
+					case GuiButton::Active:
+						targetColor=Win7ButtonColors::ButtonActive();
+						break;
+					case GuiButton::Pressed:
+						targetColor=Win7ButtonColors::ButtonPressed();
+						break;
+					}
+				}
+				else
+				{
+					targetColor=Win7ButtonColors::ButtonDisabled();
+				}
+				transferringAnimation->Transfer(targetColor);
+			}
+
+			void Win7ScrollArrowButtonStyle::AfterApplyColors(const Win7ButtonColors& colors)
+			{
+				Win7ButtonStyleBase::AfterApplyColors(colors);
+				arrowElement->SetBorderColor(colors.textColor);
+				arrowElement->SetBackgroundColor(colors.textColor);
+			}
+
+			Win7ScrollArrowButtonStyle::Win7ScrollArrowButtonStyle(common_styles::CommonScrollStyle::Direction direction, bool increaseButton)
+				:Win7ButtonStyleBase(direction==common_styles::CommonScrollStyle::Horizontal, true, Win7ButtonColors::ButtonNormal(), Alignment::Center, Alignment::Center)
+			{
+				switch(direction)
+				{
+				case common_styles::CommonScrollStyle::Horizontal:
+					if(increaseButton)
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildRightArrow(arrowElement));
+					}
+					else
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildLeftArrow(arrowElement));
+					}
+					break;
+				case common_styles::CommonScrollStyle::Vertical:
+					if(increaseButton)
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildDownArrow(arrowElement));
+					}
+					else
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildUpArrow(arrowElement));
+					}
+					break;
+				}
+			}
+
+			Win7ScrollArrowButtonStyle::~Win7ScrollArrowButtonStyle()
+			{
+			}
+
+/***********************************************************************
 Win7ScrollStyle
 ***********************************************************************/
 
 			controls::GuiButton::IStyleController* Win7ScrollStyle::CreateDecreaseButtonStyle(Direction direction)
 			{
-				Win7ButtonStyle* decreaseButtonStyle=new Win7ButtonStyle(direction==Horizontal);
+				Win7ScrollArrowButtonStyle* decreaseButtonStyle=new Win7ScrollArrowButtonStyle(direction, false);
 				decreaseButtonStyle->SetTransparentWhenInactive(true);
 				decreaseButtonStyle->SetTransparentWhenDisabled(true);
 				return decreaseButtonStyle;
@@ -13590,7 +13558,7 @@ Win7ScrollStyle
 
 			controls::GuiButton::IStyleController* Win7ScrollStyle::CreateIncreaseButtonStyle(Direction direction)
 			{
-				Win7ButtonStyle* increaseButtonStyle=new Win7ButtonStyle(direction==Horizontal);
+				Win7ScrollArrowButtonStyle* increaseButtonStyle=new Win7ScrollArrowButtonStyle(direction, true);
 				increaseButtonStyle->SetTransparentWhenInactive(true);
 				increaseButtonStyle->SetTransparentWhenDisabled(true);
 				return increaseButtonStyle;
@@ -15020,7 +14988,7 @@ Win7MenuItemButtonElements
 						cell->AddChild(button.shortcutComposition);
 					}
 					{
-						button.subMenuArrowElement=common_styles::CommonFragmentBuilder::BuildRightArrow();
+						button.subMenuArrowElement=CommonFragmentBuilder::BuildRightArrow();
 
 						GuiCellComposition* cell=new GuiCellComposition;
 						button.subMenuArrowComposition=cell;
@@ -15181,6 +15149,107 @@ Helpers
 				entry.selectedUnfocused.text=Color(255, 255, 255);
 				entry.selectedUnfocused.background=Color(51, 153, 255);
 				return entry;
+			}
+
+/***********************************************************************
+CommonFragmentBuilder
+***********************************************************************/
+
+			void CommonFragmentBuilder::FillUpArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(0, 3), Point(3, 0), Point(6, 3)};
+				element->SetSize(Size(7, 4));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			void CommonFragmentBuilder::FillDownArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(0, 0), Point(3, 3), Point(6, 0)};
+				element->SetSize(Size(7, 4));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			void CommonFragmentBuilder::FillLeftArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(3, 0), Point(0, 3), Point(3, 6)};
+				element->SetSize(Size(4, 7));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			void CommonFragmentBuilder::FillRightArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(0, 0), Point(3, 3), Point(0, 6)};
+				element->SetSize(Size(4, 7));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildUpArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillUpArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildDownArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillDownArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildLeftArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillLeftArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildRightArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillRightArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildDockedElementContainer(elements::IGuiGraphicsElement* element)
+			{
+				GuiBoundsComposition* composition=new GuiBoundsComposition;
+				composition->SetOwnedElement(element);
+				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				return composition;
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildUpArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildUpArrow();
+				return BuildDockedElementContainer(elementOut);
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildDownArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildDownArrow();
+				return BuildDockedElementContainer(elementOut);
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildLeftArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildLeftArrow();
+				return BuildDockedElementContainer(elementOut);
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildRightArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildRightArrow();
+				return BuildDockedElementContainer(elementOut);
 			}
 		}
 	}
@@ -15362,7 +15431,7 @@ Win7TabStyle
 					cell->AddChild(tabHeaderComposition);
 
 					headerOverflowButton=new GuiButton(new Win7ButtonStyle);
-					headerOverflowButton->GetContainerComposition()->AddChild(common_styles::CommonFragmentBuilder::BuildDownArrow(headerOverflowArrowElement));
+					headerOverflowButton->GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildDownArrow(headerOverflowArrowElement));
 					headerOverflowButton->SetVisible(false);
 					headerOverflowButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, 0, 0, 0));
 					headerOverflowButton->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowButtonClicked);
@@ -15705,7 +15774,7 @@ Win7ToolstripButtonStyle
 						table->AddChild(cell);
 						cell->SetSite(0, 1, 1, 1);
 						GuiPolygonElement* arrow=0;
-						GuiBoundsComposition* arrowComposition=common_styles::CommonFragmentBuilder::BuildDownArrow(arrow);
+						GuiBoundsComposition* arrowComposition=CommonFragmentBuilder::BuildDownArrow(arrow);
 
 						switch(_buttonStyle)
 						{
@@ -15904,6 +15973,11 @@ Win8ButtonStyleBase
 			{
 				colorCurrent=Win8ButtonColors::Blend(colorBegin, colorEnd, currentPosition, totalLength);
 				style->elements.Apply(colorCurrent);
+				style->AfterApplyColors(colorCurrent);
+			}
+
+			void Win8ButtonStyleBase::AfterApplyColors(const Win8ButtonColors& colors)
+			{
 			}
 
 			Win8ButtonStyleBase::Win8ButtonStyleBase(const Win8ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical)
@@ -16404,9 +16478,39 @@ Win8ScrollArrowButtonStyle
 				transferringAnimation->Transfer(targetColor);
 			}
 
-			Win8ScrollArrowButtonStyle::Win8ScrollArrowButtonStyle()
+			void Win8ScrollArrowButtonStyle::AfterApplyColors(const Win8ButtonColors& colors)
+			{
+				Win8ButtonStyleBase::AfterApplyColors(colors);
+				arrowElement->SetBorderColor(colors.textColor);
+				arrowElement->SetBackgroundColor(colors.textColor);
+			}
+
+			Win8ScrollArrowButtonStyle::Win8ScrollArrowButtonStyle(common_styles::CommonScrollStyle::Direction direction, bool increaseButton)
 				:Win8ButtonStyleBase(Win8ButtonColors::ScrollArrowNormal(), Alignment::Center, Alignment::Center)
 			{
+				switch(direction)
+				{
+				case common_styles::CommonScrollStyle::Horizontal:
+					if(increaseButton)
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildRightArrow(arrowElement));
+					}
+					else
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildLeftArrow(arrowElement));
+					}
+					break;
+				case common_styles::CommonScrollStyle::Vertical:
+					if(increaseButton)
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildDownArrow(arrowElement));
+					}
+					else
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildUpArrow(arrowElement));
+					}
+					break;
+				}
 			}
 
 			Win8ScrollArrowButtonStyle::~Win8ScrollArrowButtonStyle()
@@ -16419,13 +16523,13 @@ Win8ScrollStyle
 
 			controls::GuiButton::IStyleController* Win8ScrollStyle::CreateDecreaseButtonStyle(Direction direction)
 			{
-				Win8ScrollArrowButtonStyle* decreaseButtonStyle=new Win8ScrollArrowButtonStyle;
+				Win8ScrollArrowButtonStyle* decreaseButtonStyle=new Win8ScrollArrowButtonStyle(direction, false);
 				return decreaseButtonStyle;
 			}
 
 			controls::GuiButton::IStyleController* Win8ScrollStyle::CreateIncreaseButtonStyle(Direction direction)
 			{
-				Win8ScrollArrowButtonStyle* increaseButtonStyle=new Win8ScrollArrowButtonStyle;
+				Win8ScrollArrowButtonStyle* increaseButtonStyle=new Win8ScrollArrowButtonStyle(direction, true);
 				return increaseButtonStyle;
 			}
 
@@ -17343,6 +17447,107 @@ Helpers
 				entry.selectedUnfocused.text=Color(255, 255, 255);
 				entry.selectedUnfocused.background=Color(51, 153, 255);
 				return entry;
+			}
+
+/***********************************************************************
+CommonFragmentBuilder
+***********************************************************************/
+
+			void CommonFragmentBuilder::FillUpArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(0, 3), Point(3, 0), Point(6, 3)};
+				element->SetSize(Size(7, 4));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			void CommonFragmentBuilder::FillDownArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(0, 0), Point(3, 3), Point(6, 0)};
+				element->SetSize(Size(7, 4));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			void CommonFragmentBuilder::FillLeftArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(3, 0), Point(0, 3), Point(3, 6)};
+				element->SetSize(Size(4, 7));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			void CommonFragmentBuilder::FillRightArrow(elements::GuiPolygonElement* element)
+			{
+				Point points[]={Point(0, 0), Point(3, 3), Point(0, 6)};
+				element->SetSize(Size(4, 7));
+				element->SetPoints(points, sizeof(points)/sizeof(*points));
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildUpArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillUpArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildDownArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillDownArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildLeftArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillLeftArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			elements::GuiPolygonElement* CommonFragmentBuilder::BuildRightArrow()
+			{
+				GuiPolygonElement* element=GuiPolygonElement::Create();
+				FillRightArrow(element);
+				element->SetBorderColor(Color(0, 0, 0));
+				element->SetBackgroundColor(Color(0, 0, 0));
+				return element;
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildDockedElementContainer(elements::IGuiGraphicsElement* element)
+			{
+				GuiBoundsComposition* composition=new GuiBoundsComposition;
+				composition->SetOwnedElement(element);
+				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				return composition;
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildUpArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildUpArrow();
+				return BuildDockedElementContainer(elementOut);
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildDownArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildDownArrow();
+				return BuildDockedElementContainer(elementOut);
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildLeftArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildLeftArrow();
+				return BuildDockedElementContainer(elementOut);
+			}
+
+			compositions::GuiBoundsComposition* CommonFragmentBuilder::BuildRightArrow(elements::GuiPolygonElement*& elementOut)
+			{
+				elementOut=BuildRightArrow();
+				return BuildDockedElementContainer(elementOut);
 			}
 		}
 	}

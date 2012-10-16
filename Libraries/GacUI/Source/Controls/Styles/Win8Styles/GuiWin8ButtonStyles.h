@@ -37,6 +37,7 @@ Button
 				bool										transparentWhenDisabled;
 
 				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)=0;
+				virtual void								AfterApplyColors(const Win8ButtonColors& colors);
 			public:
 				/// <summary>Create the style.</summary>
 				/// <param name="initialColor">Set to true to set the initial colors of all components for a button.</param>

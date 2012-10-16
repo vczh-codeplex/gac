@@ -23,6 +23,21 @@ namespace vl
 Scroll
 ***********************************************************************/
 			
+			/// <summary>Scroll bar arrow button style (Windows 7).</summary>
+			class Win7ScrollArrowButtonStyle : public Win7ButtonStyleBase, public Description<Win7ButtonStyle>
+			{
+			protected:
+				elements::GuiPolygonElement*				arrowElement;
+
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+				void										AfterApplyColors(const Win7ButtonColors& colors)override;
+			public:
+				/// <summary>Create the style.</summary>
+				/// <param name="verticalGradient">Set to true to have a vertical gradient background.</param>
+				Win7ScrollArrowButtonStyle(common_styles::CommonScrollStyle::Direction direction, bool increaseButton);
+				~Win7ScrollArrowButtonStyle();
+			};
+			
 			/// <summary>Scroll bar style (Windows 7).</summary>
 			class Win7ScrollStyle : public common_styles::CommonScrollStyle, public Description<Win7ScrollStyle>
 			{

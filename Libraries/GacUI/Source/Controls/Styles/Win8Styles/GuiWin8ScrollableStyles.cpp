@@ -78,9 +78,39 @@ Win8ScrollArrowButtonStyle
 				transferringAnimation->Transfer(targetColor);
 			}
 
-			Win8ScrollArrowButtonStyle::Win8ScrollArrowButtonStyle()
+			void Win8ScrollArrowButtonStyle::AfterApplyColors(const Win8ButtonColors& colors)
+			{
+				Win8ButtonStyleBase::AfterApplyColors(colors);
+				arrowElement->SetBorderColor(colors.textColor);
+				arrowElement->SetBackgroundColor(colors.textColor);
+			}
+
+			Win8ScrollArrowButtonStyle::Win8ScrollArrowButtonStyle(common_styles::CommonScrollStyle::Direction direction, bool increaseButton)
 				:Win8ButtonStyleBase(Win8ButtonColors::ScrollArrowNormal(), Alignment::Center, Alignment::Center)
 			{
+				switch(direction)
+				{
+				case common_styles::CommonScrollStyle::Horizontal:
+					if(increaseButton)
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildRightArrow(arrowElement));
+					}
+					else
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildLeftArrow(arrowElement));
+					}
+					break;
+				case common_styles::CommonScrollStyle::Vertical:
+					if(increaseButton)
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildDownArrow(arrowElement));
+					}
+					else
+					{
+						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildUpArrow(arrowElement));
+					}
+					break;
+				}
 			}
 
 			Win8ScrollArrowButtonStyle::~Win8ScrollArrowButtonStyle()
@@ -93,13 +123,13 @@ Win8ScrollStyle
 
 			controls::GuiButton::IStyleController* Win8ScrollStyle::CreateDecreaseButtonStyle(Direction direction)
 			{
-				Win8ScrollArrowButtonStyle* decreaseButtonStyle=new Win8ScrollArrowButtonStyle;
+				Win8ScrollArrowButtonStyle* decreaseButtonStyle=new Win8ScrollArrowButtonStyle(direction, false);
 				return decreaseButtonStyle;
 			}
 
 			controls::GuiButton::IStyleController* Win8ScrollStyle::CreateIncreaseButtonStyle(Direction direction)
 			{
-				Win8ScrollArrowButtonStyle* increaseButtonStyle=new Win8ScrollArrowButtonStyle;
+				Win8ScrollArrowButtonStyle* increaseButtonStyle=new Win8ScrollArrowButtonStyle(direction, true);
 				return increaseButtonStyle;
 			}
 

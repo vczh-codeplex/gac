@@ -19,6 +19,11 @@ Win7ButtonStyleBase
 			{
 				colorCurrent=Win7ButtonColors::Blend(colorBegin, colorEnd, currentPosition, totalLength);
 				style->elements.Apply(colorCurrent);
+				style->AfterApplyColors(colorCurrent);
+			}
+
+			void Win7ButtonStyleBase::AfterApplyColors(const Win7ButtonColors& colors)
+			{
 			}
 
 			Win7ButtonStyleBase::Win7ButtonStyleBase(bool verticalGradient, bool roundBorder, const Win7ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical)
