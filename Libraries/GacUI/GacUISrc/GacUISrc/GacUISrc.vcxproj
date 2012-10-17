@@ -132,6 +132,7 @@
     <ClCompile Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ToolstripStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ButtonStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ControlStyles.cpp" />
+    <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ListStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ScrollableStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8StylesCommon.cpp" />
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripCommand.cpp" />
@@ -238,6 +239,7 @@
     <ClInclude Include="..\..\Source\Controls\Styles\Win7Styles\GuiWin7ToolstripStyles.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ButtonStyles.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ControlStyles.h" />
+    <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ListStyles.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ScrollableStyles.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8StylesCommon.h" />
     <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripCommand.h" />

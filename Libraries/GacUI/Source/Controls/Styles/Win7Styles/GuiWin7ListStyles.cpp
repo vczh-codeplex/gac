@@ -114,7 +114,7 @@ Win7ListViewColumnDropDownStyle
 				gradientComposition->SetPreferredMinSize(Size(0, 4));
 				mainComposition->AddChild(gradientComposition);
 
-				arrowElement=CommonFragmentBuilder::BuildDownArrow();
+				arrowElement=common_styles::CommonFragmentBuilder::BuildDownArrow();
 				arrowElement->SetBackgroundColor(Color(76, 96, 122));
 				arrowElement->SetBorderColor(Color(76, 96, 122));
 				arrowComposition=new GuiBoundsComposition;
@@ -385,10 +385,10 @@ Win7ListViewColumnHeaderStyle
 					arrowElement->SetPoints(0, 0);
 					break;
 				case controls::GuiListViewColumnHeader::Ascending:
-					CommonFragmentBuilder::FillUpArrow(arrowElement);
+					common_styles::CommonFragmentBuilder::FillUpArrow(arrowElement);
 					break;
 				case controls::GuiListViewColumnHeader::Descending:
-					CommonFragmentBuilder::FillDownArrow(arrowElement);
+					common_styles::CommonFragmentBuilder::FillDownArrow(arrowElement);
 					break;
 				}
 			}
@@ -563,7 +563,7 @@ Win7DropDownComboBoxStyle
 				elements.textElement->SetEllipse(true);
 				elements.textElement->SetAlignments(Alignment::Left, Alignment::Center);
 
-				dropDownElement=CommonFragmentBuilder::BuildDownArrow();
+				dropDownElement=common_styles::CommonFragmentBuilder::BuildDownArrow();
 
 				dropDownComposition=new GuiCellComposition;
 				table->AddChild(dropDownComposition);

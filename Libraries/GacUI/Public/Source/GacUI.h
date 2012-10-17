@@ -7337,9 +7337,9 @@ Theme
 				//controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
 				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
-				//controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
-				//controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
-				//elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
+				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
+				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
+				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
 				//
 				//controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
 				//controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
@@ -7364,10 +7364,10 @@ Theme
 				int																	GetScrollDefaultSize()override;
 				//int																	GetTrackerDefaultSize()override;
 
-				//controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
-				//controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;
-				//controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateCheckTextListItemStyle()override;
-				//controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateRadioTextListItemStyle()override;
+				controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
+				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;
+				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateCheckTextListItemStyle()override;
+				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateRadioTextListItemStyle()override;
 			};
 		}
 	}
@@ -7498,6 +7498,27 @@ Scrolls
 				void												SetTotalSize(int value)override;
 				void												SetPageSize(int value)override;
 				void												SetPosition(int value)override;
+			};
+
+			class CommonFragmentBuilder
+			{
+			private:
+				static compositions::GuiBoundsComposition*			BuildDockedElementContainer(elements::IGuiGraphicsElement* element);
+			public:
+				static void											FillUpArrow(elements::GuiPolygonElement* element);
+				static void											FillDownArrow(elements::GuiPolygonElement* element);
+				static void											FillLeftArrow(elements::GuiPolygonElement* element);
+				static void											FillRightArrow(elements::GuiPolygonElement* element);
+
+				static elements::GuiPolygonElement*					BuildUpArrow();
+				static elements::GuiPolygonElement*					BuildDownArrow();
+				static elements::GuiPolygonElement*					BuildLeftArrow();
+				static elements::GuiPolygonElement*					BuildRightArrow();
+
+				static compositions::GuiBoundsComposition*			BuildUpArrow(elements::GuiPolygonElement*& elementOut);
+				static compositions::GuiBoundsComposition*			BuildDownArrow(elements::GuiPolygonElement*& elementOut);
+				static compositions::GuiBoundsComposition*			BuildLeftArrow(elements::GuiPolygonElement*& elementOut);
+				static compositions::GuiBoundsComposition*			BuildRightArrow(elements::GuiPolygonElement*& elementOut);
 			};
 		}
 
@@ -7803,27 +7824,6 @@ Helper Functions
 			extern void										Win7SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
 			extern elements::text::ColorEntry				Win7GetTextBoxTextColor();
-
-			class CommonFragmentBuilder
-			{
-			private:
-				static compositions::GuiBoundsComposition*			BuildDockedElementContainer(elements::IGuiGraphicsElement* element);
-			public:
-				static void											FillUpArrow(elements::GuiPolygonElement* element);
-				static void											FillDownArrow(elements::GuiPolygonElement* element);
-				static void											FillLeftArrow(elements::GuiPolygonElement* element);
-				static void											FillRightArrow(elements::GuiPolygonElement* element);
-
-				static elements::GuiPolygonElement*					BuildUpArrow();
-				static elements::GuiPolygonElement*					BuildDownArrow();
-				static elements::GuiPolygonElement*					BuildLeftArrow();
-				static elements::GuiPolygonElement*					BuildRightArrow();
-
-				static compositions::GuiBoundsComposition*			BuildUpArrow(elements::GuiPolygonElement*& elementOut);
-				static compositions::GuiBoundsComposition*			BuildDownArrow(elements::GuiPolygonElement*& elementOut);
-				static compositions::GuiBoundsComposition*			BuildLeftArrow(elements::GuiPolygonElement*& elementOut);
-				static compositions::GuiBoundsComposition*			BuildRightArrow(elements::GuiPolygonElement*& elementOut);
-			};
 		}
 	}
 }
@@ -8893,6 +8893,11 @@ Button Configuration
 				static Win8ButtonColors						ButtonPressed();
 				static Win8ButtonColors						ButtonDisabled();
 				
+				static Win8ButtonColors						ItemNormal();
+				static Win8ButtonColors						ItemActive();
+				static Win8ButtonColors						ItemSelected();
+				static Win8ButtonColors						ItemDisabled();
+				
 				static Win8ButtonColors						CheckedNormal(bool selected);
 				static Win8ButtonColors						CheckedActive(bool selected);
 				static Win8ButtonColors						CheckedPressed(bool selected);
@@ -8970,27 +8975,6 @@ Helper Functions
 			extern void										Win8SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
 			extern elements::text::ColorEntry				Win8GetTextBoxTextColor();
-
-			class CommonFragmentBuilder
-			{
-			private:
-				static compositions::GuiBoundsComposition*			BuildDockedElementContainer(elements::IGuiGraphicsElement* element);
-			public:
-				static void											FillUpArrow(elements::GuiPolygonElement* element);
-				static void											FillDownArrow(elements::GuiPolygonElement* element);
-				static void											FillLeftArrow(elements::GuiPolygonElement* element);
-				static void											FillRightArrow(elements::GuiPolygonElement* element);
-
-				static elements::GuiPolygonElement*					BuildUpArrow();
-				static elements::GuiPolygonElement*					BuildDownArrow();
-				static elements::GuiPolygonElement*					BuildLeftArrow();
-				static elements::GuiPolygonElement*					BuildRightArrow();
-
-				static compositions::GuiBoundsComposition*			BuildUpArrow(elements::GuiPolygonElement*& elementOut);
-				static compositions::GuiBoundsComposition*			BuildDownArrow(elements::GuiPolygonElement*& elementOut);
-				static compositions::GuiBoundsComposition*			BuildLeftArrow(elements::GuiPolygonElement*& elementOut);
-				static compositions::GuiBoundsComposition*			BuildRightArrow(elements::GuiPolygonElement*& elementOut);
-			};
 		}
 	}
 }
@@ -9339,6 +9323,106 @@ TextBox
 				void										SetVisuallyEnabled(bool value)override;
 				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\STYLES\WIN8STYLES\GUIWIN8LISTSTYLES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control Styles::Windows7 Styles
+
+Clases:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWin8LISTSTYLES
+#define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWin8LISTSTYLES
+
+//#include "GuiWin8MenuStyles.h"
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace win8
+		{
+
+/***********************************************************************
+List Control Buttons
+***********************************************************************/
+			
+			class Win8SelectableItemStyle : public Win8ButtonStyleBase, public Description<Win8SelectableItemStyle>
+			{
+			protected:
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+			public:
+				Win8SelectableItemStyle();
+				~Win8SelectableItemStyle();
+			};
+
+/***********************************************************************
+List
+***********************************************************************/
+			
+			class Win8TextListProvider : public Object, public virtual controls::list::TextItemStyleProvider::ITextItemStyleProvider, public Description<Win8TextListProvider>
+			{
+			public:
+				Win8TextListProvider();
+				~Win8TextListProvider();
+
+				controls::GuiSelectableButton::IStyleController*		CreateBackgroundStyleController()override;
+				controls::GuiSelectableButton::IStyleController*		CreateBulletStyleController()override;
+			};
+			
+			class Win8CheckTextListProvider : public Win8TextListProvider, public Description<Win8CheckTextListProvider>
+			{
+			public:
+				Win8CheckTextListProvider();
+				~Win8CheckTextListProvider();
+
+				controls::GuiSelectableButton::IStyleController*		CreateBulletStyleController()override;
+			};
+			
+			class Win8RadioTextListProvider : public Win8TextListProvider, public Description<Win8RadioTextListProvider>
+			{
+			public:
+				Win8RadioTextListProvider();
+				~Win8RadioTextListProvider();
+
+				controls::GuiSelectableButton::IStyleController*		CreateBulletStyleController()override;
+			};
+
+#pragma warning(push)
+#pragma warning(disable:4250)
+			class Win8ListViewProvider : public Win8MultilineTextBoxProvider, public virtual controls::GuiListView::IStyleProvider, public Description<Win8ListViewProvider>
+			{
+			public:
+				Win8ListViewProvider();
+				~Win8ListViewProvider();
+
+				controls::GuiSelectableButton::IStyleController*		CreateItemBackground()override;
+				controls::GuiListViewColumnHeader::IStyleController*	CreateColumnStyle()override;
+				Color													GetPrimaryTextColor()override;
+				Color													GetSecondaryTextColor()override;
+				Color													GetItemSeparatorColor()override;
+			};
+			
+			class Win8TreeViewProvider : public Win8MultilineTextBoxProvider, public virtual controls::GuiTreeView::IStyleProvider, public Description<Win8TreeViewProvider>
+			{
+			public:
+				Win8TreeViewProvider();
+				~Win8TreeViewProvider();
+
+				controls::GuiSelectableButton::IStyleController*		CreateItemBackground()override;
+				controls::GuiSelectableButton::IStyleController*		CreateItemExpandingDecorator()override;
+				Color													GetTextColor()override;
+			};
+#pragma warning(pop)
 		}
 	}
 }

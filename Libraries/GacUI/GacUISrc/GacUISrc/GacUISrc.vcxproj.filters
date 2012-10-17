@@ -324,6 +324,9 @@
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ScrollableStyles.cpp">
       <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ListStyles.cpp">
+      <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -639,6 +642,9 @@
       <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ScrollableStyles.h">
+      <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ListStyles.h">
       <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
     </ClInclude>
   </ItemGroup>
