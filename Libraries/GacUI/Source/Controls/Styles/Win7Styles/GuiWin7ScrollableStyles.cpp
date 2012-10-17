@@ -55,21 +55,21 @@ Win7ButtonStyle
 				case common_styles::CommonScrollStyle::Horizontal:
 					if(increaseButton)
 					{
-						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildRightArrow(arrowElement));
+						GetContainerComposition()->AddChild(common_styles::CommonFragmentBuilder::BuildRightArrow(arrowElement));
 					}
 					else
 					{
-						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildLeftArrow(arrowElement));
+						GetContainerComposition()->AddChild(common_styles::CommonFragmentBuilder::BuildLeftArrow(arrowElement));
 					}
 					break;
 				case common_styles::CommonScrollStyle::Vertical:
 					if(increaseButton)
 					{
-						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildDownArrow(arrowElement));
+						GetContainerComposition()->AddChild(common_styles::CommonFragmentBuilder::BuildDownArrow(arrowElement));
 					}
 					else
 					{
-						GetContainerComposition()->AddChild(CommonFragmentBuilder::BuildUpArrow(arrowElement));
+						GetContainerComposition()->AddChild(common_styles::CommonFragmentBuilder::BuildUpArrow(arrowElement));
 					}
 					break;
 				}

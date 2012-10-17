@@ -39,9 +39,9 @@ Theme
 				//controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
 				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
-				//controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
-				//controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
-				//elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
+				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
+				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
+				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
 				//
 				//controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
 				//controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
@@ -66,10 +66,10 @@ Theme
 				int																	GetScrollDefaultSize()override;
 				//int																	GetTrackerDefaultSize()override;
 
-				//controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
-				//controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;
-				//controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateCheckTextListItemStyle()override;
-				//controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateRadioTextListItemStyle()override;
+				controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
+				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;
+				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateCheckTextListItemStyle()override;
+				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateRadioTextListItemStyle()override;
 			};
 		}
 	}

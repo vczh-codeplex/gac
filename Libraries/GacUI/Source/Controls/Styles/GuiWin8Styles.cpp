@@ -7,7 +7,7 @@
 //#include "Win8Styles\GuiWin8MenuStyles.h"
 //#include "Win8Styles\GuiWin8ToolstripStyles.h"
 #include "Win8Styles\GuiWin8ScrollableStyles.h"
-//#include "Win8Styles\GuiWin8ListStyles.h"
+#include "Win8Styles\GuiWin8ListStyles.h"
 
 namespace vl
 {
@@ -72,20 +72,20 @@ Win8Theme
 				return new Win8SinglelineTextBoxProvider;
 			}
 
-			//controls::GuiListView::IStyleProvider* Win8Theme::CreateListViewStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiListView::IStyleProvider* Win8Theme::CreateListViewStyle()
+			{
+				return new Win8ListViewProvider;
+			}
 
-			//controls::GuiTreeView::IStyleProvider* Win8Theme::CreateTreeViewStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiTreeView::IStyleProvider* Win8Theme::CreateTreeViewStyle()
+			{
+				return new Win8TreeViewProvider;
+			}
 
-			//elements::text::ColorEntry Win8Theme::GetDefaultTextBoxColorEntry()
-			//{
-			//	throw 0;
-			//}
+			elements::text::ColorEntry Win8Theme::GetDefaultTextBoxColorEntry()
+			{
+				return Win8GetTextBoxTextColor();
+			}
 
 			//controls::GuiToolstripMenu::IStyleController* Win8Theme::CreateMenuStyle()
 			//{
@@ -187,25 +187,25 @@ Win8Theme
 			//	throw 0;
 			//}
 
-			//controls::GuiScrollView::IStyleProvider* Win8Theme::CreateTextListStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiScrollView::IStyleProvider* Win8Theme::CreateTextListStyle()
+			{
+				return new Win8MultilineTextBoxProvider;
+			}
 
-			//controls::list::TextItemStyleProvider::ITextItemStyleProvider* Win8Theme::CreateTextListItemStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::list::TextItemStyleProvider::ITextItemStyleProvider* Win8Theme::CreateTextListItemStyle()
+			{
+				return new Win8TextListProvider;
+			}
 
-			//controls::list::TextItemStyleProvider::ITextItemStyleProvider* Win8Theme::CreateCheckTextListItemStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::list::TextItemStyleProvider::ITextItemStyleProvider* Win8Theme::CreateCheckTextListItemStyle()
+			{
+				return new Win8CheckTextListProvider;
+			}
 
-			//controls::list::TextItemStyleProvider::ITextItemStyleProvider* Win8Theme::CreateRadioTextListItemStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::list::TextItemStyleProvider::ITextItemStyleProvider* Win8Theme::CreateRadioTextListItemStyle()
+			{
+				return new Win8RadioTextListProvider;
+			}
 		}
 	}
 }
