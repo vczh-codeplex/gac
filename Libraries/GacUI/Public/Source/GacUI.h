@@ -7358,11 +7358,11 @@ Theme
 
 				controls::GuiScroll::IStyleController*								CreateHScrollStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
-				//controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
-				//controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
+				controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
+				controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
 				//controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
 				int																	GetScrollDefaultSize()override;
-				//int																	GetTrackerDefaultSize()override;
+				int																	GetTrackerDefaultSize()override;
 
 				controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
 				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;
@@ -9572,7 +9572,7 @@ Scroll
 			class Win8ScrollStyle : public common_styles::CommonScrollStyle, public Description<Win8ScrollStyle>
 			{
 			public:
-				static const int							DefaultSize=15;
+				static const int							DefaultSize=16;
 				static const int							ArrowSize=8;
 			protected:
 				controls::GuiButton::IStyleController*		CreateDecreaseButtonStyle(Direction direction)override;
@@ -9582,6 +9582,23 @@ Scroll
 			public:
 				Win8ScrollStyle(Direction _direction);
 				~Win8ScrollStyle();
+			};
+			
+			class Win8TrackStyle : public common_styles::CommonTrackStyle, public Description<Win8TrackStyle>
+			{
+			public:
+				static const int							TrackThickness=4;
+				static const int							TrackPadding=6;
+				static const int							HandleLong=16;
+				static const int							HandleShort=10;
+
+			protected:
+				controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction)override;
+				void										InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)override;
+				void										InstallTrack(compositions::GuiGraphicsComposition* trackComposition, Direction direction)override;
+			public:
+				Win8TrackStyle(Direction _direction);
+				~Win8TrackStyle();
 			};
 
 /***********************************************************************

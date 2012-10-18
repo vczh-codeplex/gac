@@ -60,11 +60,11 @@ Theme
 
 				controls::GuiScroll::IStyleController*								CreateHScrollStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
-				//controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
-				//controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
+				controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
+				controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
 				//controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
 				int																	GetScrollDefaultSize()override;
-				//int																	GetTrackerDefaultSize()override;
+				int																	GetTrackerDefaultSize()override;
 
 				controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
 				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;
