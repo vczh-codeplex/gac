@@ -3,9 +3,9 @@
 #include "Win8Styles\GuiWin8StylesCommon.h"
 #include "Win8Styles\GuiWin8ControlStyles.h"
 #include "Win8Styles\GuiWin8ButtonStyles.h"
-//#include "Win8Styles\GuiWin8TabStyles.h"
-//#include "Win8Styles\GuiWin8MenuStyles.h"
-//#include "Win8Styles\GuiWin8ToolstripStyles.h"
+#include "Win8Styles\GuiWin8TabStyles.h"
+#include "Win8Styles\GuiWin8MenuStyles.h"
+#include "Win8Styles\GuiWin8ToolstripStyles.h"
 #include "Win8Styles\GuiWin8ScrollableStyles.h"
 #include "Win8Styles\GuiWin8ListStyles.h"
 

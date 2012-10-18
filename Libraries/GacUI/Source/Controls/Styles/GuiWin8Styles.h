@@ -42,7 +42,7 @@ Theme
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
 				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
-				//
+
 				//controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
 				//controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
 				//controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
