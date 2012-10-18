@@ -193,7 +193,7 @@ void TextEditorWindow::InitializeComponents()
 		GuiCellComposition* cell=new GuiCellComposition;
 		table->AddChild(cell);
 		cell->SetSite(1, 0, 1, 1);
-		cell->SetInternalMargin(Margin(2, 2, 2, 0));
+		cell->SetInternalMargin(Margin(1, 0, 1, 0));
 		
 		InitializeToolBar();
 		cell->AddChild(toolbar->GetBoundsComposition());
@@ -204,7 +204,7 @@ void TextEditorWindow::InitializeComponents()
 		GuiCellComposition* cell=new GuiCellComposition;
 		table->AddChild(cell);
 		cell->SetSite(2, 0, 1, 1);
-		cell->SetInternalMargin(Margin(2, 2, 2, 2));
+		cell->SetInternalMargin(Margin(1, 1, 1, 1));
 
 		// create the menu bar
 		textBox=g::NewMultilineTextBox();

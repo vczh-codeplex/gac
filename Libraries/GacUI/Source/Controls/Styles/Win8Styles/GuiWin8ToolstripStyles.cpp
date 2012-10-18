@@ -26,22 +26,13 @@ Win8WindowStyle
 					boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				}
 				{
-					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
-					element->SetColor(Color(160, 160, 160));
+					Gui3DSplitterElement* element=Gui3DSplitterElement::Create();
+					element->SetColors(Color(160, 160, 160), Color(255, 255, 255));
+					element->SetDirection(Gui3DSplitterElement::Horizontal);
 
 					GuiBoundsComposition* composition=new GuiBoundsComposition;
-					composition->SetPreferredMinSize(Size(0, 1));
+					composition->SetPreferredMinSize(Size(0, 2));
 					composition->SetAlignmentToParent(Margin(0, 0, 0, -1));
-					composition->SetOwnedElement(element);
-					boundsComposition->AddChild(composition);
-				}
-				{
-					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
-					element->SetColor(Color(255, 255, 255));
-
-					GuiBoundsComposition* composition=new GuiBoundsComposition;
-					composition->SetPreferredMinSize(Size(0, 1));
-					composition->SetAlignmentToParent(Margin(0, 1, 0, -1));
 					composition->SetOwnedElement(element);
 					boundsComposition->AddChild(composition);
 				}
