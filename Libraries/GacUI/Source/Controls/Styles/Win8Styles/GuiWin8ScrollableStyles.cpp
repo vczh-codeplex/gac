@@ -207,6 +207,119 @@ Win8TrackStyle
 			}
 
 /***********************************************************************
+Win8ProgressBarStyle
+***********************************************************************/
+
+			void Win8ProgressBarStyle::UpdateProgressBar()
+			{
+				int max=totalSize-pageSize;
+				if(position<0)
+				{
+					progressComposition->SetWidthPageSize(0);
+				}
+				else if(position>=max)
+				{
+					progressComposition->SetWidthPageSize(1);
+				}
+				else
+				{
+					progressComposition->SetWidthPageSize((double)position/max);
+				}
+			}
+
+			Win8ProgressBarStyle::Win8ProgressBarStyle()
+				:totalSize(1)
+				,pageSize(0)
+				,position(0)
+			{
+				{
+					boundsComposition=new GuiBoundsComposition;
+				}
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(Color(230, 230, 230));
+
+					containerComposition=new GuiBoundsComposition;
+					containerComposition->SetAlignmentToParent(Margin(1, 1, 1, 1));
+					containerComposition->SetOwnedElement(element);
+					boundsComposition->AddChild(containerComposition);
+				}
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					element->SetColor(Color(188, 188, 188));
+
+					GuiBoundsComposition* borderComposition=new GuiBoundsComposition;
+					borderComposition->SetOwnedElement(element);
+					borderComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					boundsComposition->AddChild(borderComposition);
+				}
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(Color(6, 176, 37));
+
+					progressComposition=new GuiPartialViewComposition;
+					progressComposition->SetWidthRatio(0);
+					progressComposition->SetWidthPageSize(0);
+					progressComposition->SetHeightRatio(0);
+					progressComposition->SetHeightPageSize(1);
+					progressComposition->SetOwnedElement(element);
+					containerComposition->AddChild(progressComposition);
+				}
+			}
+
+			Win8ProgressBarStyle::~Win8ProgressBarStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win8ProgressBarStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win8ProgressBarStyle::GetContainerComposition()
+			{
+				return containerComposition;
+			}
+
+			void Win8ProgressBarStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8ProgressBarStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win8ProgressBarStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win8ProgressBarStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+			void Win8ProgressBarStyle::SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)
+			{
+			}
+
+			void Win8ProgressBarStyle::SetTotalSize(int value)
+			{
+				totalSize=value;
+				UpdateProgressBar();
+			}
+
+			void Win8ProgressBarStyle::SetPageSize(int value)
+			{
+				pageSize=value;
+				UpdateProgressBar();
+			}
+
+			void Win8ProgressBarStyle::SetPosition(int value)
+			{
+				position=value;
+				UpdateProgressBar();
+			}
+
+/***********************************************************************
 Win8ScrollViewProvider
 ***********************************************************************/
 
