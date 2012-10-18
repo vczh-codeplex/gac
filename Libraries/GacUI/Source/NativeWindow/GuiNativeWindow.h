@@ -1330,7 +1330,13 @@ Native Window Controller
 			/// <summary>
 			/// Get the dialog service.
 			/// </summary>
+			/// <returns>The user dialog service</returns>
 			virtual INativeDialogService*			DialogService()=0;
+			/// <summary>
+			/// Get the operating system's version display string.
+			/// </summary>
+			/// <returns>The version string. In Windows implementation, the version string formats like "MAIN-VERSION;CSD-VERSION, e.g. "Windows XP;Service Pack 3". The ";" always exists, but the CSD version can be empty.</returns>
+			virtual WString							GetOSVersion()=0;
 		};
 		
 		/// <summary>

@@ -1,8 +1,5 @@
 #include "..\..\Public\Source\GacUIIncludes.h"
 
-int textBoxTextChangedCounter=0;
-int textBoxSelectionChangedCounter=0;
-
 class CommentColorizer : public GuiTextBoxColorizerBase
 {
 private:
@@ -72,18 +69,6 @@ void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container)
 	//font.fontFamily=L"·½Õý¾§ËÎ";
 	//font.size=16;
 	//textBox->SetFont(font);
-
-	textBox->TextChanged.AttachLambda([controlHost](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-	{
-		textBoxTextChangedCounter++;
-		controlHost->GetNativeWindow()->SetTitle(L"TextChanged["+itow(textBoxTextChangedCounter)+L"], SelectionChanged["+itow(textBoxSelectionChangedCounter)+L"]");
-	});
-
-	textBox->SelectionChanged.AttachLambda([controlHost](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-	{
-		textBoxSelectionChangedCounter++;
-		controlHost->GetNativeWindow()->SetTitle(L"TextChanged["+itow(textBoxTextChangedCounter)+L"], SelectionChanged["+itow(textBoxSelectionChangedCounter)+L"]");
-	});
 
 	Ptr<GuiTextBoxColorizerBase> colorizer=new CommentColorizer2;
 	textBox->SetColorizer(colorizer);

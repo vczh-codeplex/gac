@@ -79,10 +79,10 @@ void GuiMain()
 {
 	GuiWindow window(GetCurrentTheme()->CreateWindowStyle());
 #ifdef GUI_GRAPHICS_RENDERER_GDI
-	window.SetText(L"Vczh GUI Demo (GDI)");
+	window.SetText(L"Vczh GUI Demo (GDI): "+GetCurrentController()->GetOSVersion());
 #endif
 #ifdef GUI_GRAPHICS_RENDERER_DIRECT2D
-	window.SetText(L"Vczh GUI Demo (Direct2D)");
+	window.SetText(L"Vczh GUI Demo (Direct2D): "+GetCurrentController()->GetOSVersion());
 #endif
 	SetupTabPageWindow(&window, &window);
 

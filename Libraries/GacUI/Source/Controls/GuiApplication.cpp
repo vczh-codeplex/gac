@@ -188,8 +188,21 @@ Helpers
 
 			void GuiApplicationInitialize()
 			{
-				win8::Win8Theme theme;
-				theme::SetCurrentTheme(&theme);
+				Ptr<theme::ITheme> theme;
+				{
+					WString osVersion=GetCurrentController()->GetOSVersion();
+					int index=osVersion.IndexOf(L';');
+					WString osMainVersion=osVersion.Sub(0, index);
+					if(osMainVersion==L"Windows 8" || osMainVersion==L"Windows Server 2012")
+					{
+						theme=new win8::Win8Theme;
+					}
+					else
+					{
+						theme=new win7::Win7Theme;
+					}
+				}
+				theme::SetCurrentTheme(theme.Obj());
 
 				GetCurrentController()->InputService()->StartTimer();
 				GuiApplication app;
