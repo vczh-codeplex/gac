@@ -1,7 +1,7 @@
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: ³Âè÷å«(vczh)
-GacUI::Control Styles::Windows7 Styles
+GacUI::Control Styles::Windows8 Styles
 
 Clases:
 ***********************************************************************/
@@ -13,7 +13,7 @@ Clases:
 #include "GuiWin8ButtonStyles.h"
 #include "GuiWin8ScrollableStyles.h"
 #include "GuiWin8ControlStyles.h"
-//#include "GuiWin8MenuStyles.h"
+#include "GuiWin8MenuStyles.h"
 
 namespace vl
 {

@@ -327,6 +327,15 @@
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ListStyles.cpp">
       <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8MenuStyles.cpp">
+      <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ToolstripStyles.cpp">
+      <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8TabStyles.cpp">
+      <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -645,6 +654,15 @@
       <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ListStyles.h">
+      <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8MenuStyles.h">
+      <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ToolstripStyles.h">
+      <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8TabStyles.h">
       <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
     </ClInclude>
   </ItemGroup>
