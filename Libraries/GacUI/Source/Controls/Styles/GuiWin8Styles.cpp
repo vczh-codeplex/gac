@@ -172,10 +172,10 @@ Win8Theme
 				return new Win8TrackStyle(common_styles::CommonTrackStyle::Vertical);
 			}
 
-			//controls::GuiScroll::IStyleController* Win8Theme::CreateProgressBarStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiScroll::IStyleController* Win8Theme::CreateProgressBarStyle()
+			{
+				return new Win8ProgressBarStyle;
+			}
 
 			int Win8Theme::GetScrollDefaultSize()
 			{

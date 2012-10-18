@@ -62,7 +62,7 @@ Theme
 				controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
 				controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
-				//controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
+				controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
 				int																	GetScrollDefaultSize()override;
 				int																	GetTrackerDefaultSize()override;
 

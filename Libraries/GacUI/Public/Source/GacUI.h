@@ -7360,7 +7360,7 @@ Theme
 				controls::GuiScroll::IStyleController*								CreateVScrollStyle()override;
 				controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
-				//controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
+				controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
 				int																	GetScrollDefaultSize()override;
 				int																	GetTrackerDefaultSize()override;
 
@@ -9599,6 +9599,33 @@ Scroll
 			public:
 				Win8TrackStyle(Direction _direction);
 				~Win8TrackStyle();
+			};
+
+			class Win8ProgressBarStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<Win8ProgressBarStyle>
+			{
+			protected:
+				int											totalSize;
+				int											pageSize;
+				int											position;
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+				compositions::GuiPartialViewComposition*	progressComposition;
+
+				void										UpdateProgressBar();
+			public:
+				Win8ProgressBarStyle();
+				~Win8ProgressBarStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+				void										SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)override;
+				void										SetTotalSize(int value)override;
+				void										SetPageSize(int value)override;
+				void										SetPosition(int value)override;
 			};
 
 /***********************************************************************
