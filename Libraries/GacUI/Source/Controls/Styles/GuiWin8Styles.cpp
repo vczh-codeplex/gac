@@ -47,10 +47,10 @@ Win8Theme
 				return new Win8ScrollViewProvider;
 			}
 
-			//controls::GuiControl::IStyleController* Win8Theme::CreateGroupBoxStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiControl::IStyleController* Win8Theme::CreateGroupBoxStyle()
+			{
+				return new Win8GroupBoxStyle;
+			}
 
 			//controls::GuiTab::IStyleController* Win8Theme::CreateTabStyle()
 			//{

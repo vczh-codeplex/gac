@@ -11556,10 +11556,10 @@ Win8Theme
 				return new Win8ScrollViewProvider;
 			}
 
-			//controls::GuiControl::IStyleController* Win8Theme::CreateGroupBoxStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiControl::IStyleController* Win8Theme::CreateGroupBoxStyle()
+			{
+				return new Win8GroupBoxStyle;
+			}
 
 			//controls::GuiTab::IStyleController* Win8Theme::CreateTabStyle()
 			//{
@@ -16393,6 +16393,118 @@ Win8LabelStyle
 			void Win8LabelStyle::SetTextColor(Color value)
 			{
 				textElement->SetColor(value);
+			}
+
+/***********************************************************************
+Win8GroupBoxStyle
+***********************************************************************/
+			
+			IMPLEMENT_TRANSFERRING_ANIMATION(Color, Win8GroupBoxStyle)
+			{
+				colorCurrent=BlendColor(colorBegin, colorEnd, currentPosition, totalLength);
+				style->textElement->SetColor(colorCurrent);
+			}
+
+			void Win8GroupBoxStyle::SetMargins(int fontSize)
+			{
+				fontSize+=4;
+				int half=fontSize/2;
+				borderComposition->SetAlignmentToParent(Margin(0, half, 0, 0));
+				containerComposition->SetAlignmentToParent(Margin(1, fontSize, 1, 1));
+				textBackgroundComposition->SetAlignmentToParent(Margin(half, 2, -1, -1));
+			}
+
+			Win8GroupBoxStyle::Win8GroupBoxStyle()
+			{
+				boundsComposition=new GuiBoundsComposition;
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(Win8GetSystemWindowColor());
+
+					boundsComposition->SetOwnedElement(element);
+					boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				}
+
+				borderComposition=new GuiBoundsComposition;
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					element->SetColor(Color(221, 221, 221));
+
+					borderComposition->SetOwnedElement(element);
+					boundsComposition->AddChild(borderComposition);
+				}
+
+				textBackgroundComposition=new GuiBoundsComposition;
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(Win8GetSystemWindowColor());
+
+					textBackgroundComposition->SetOwnedElement(element);
+					textBackgroundComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+					boundsComposition->AddChild(textBackgroundComposition);
+				}
+
+				textComposition=new GuiBoundsComposition;
+				{
+					GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
+					element->SetColor(Win8GetSystemTextColor(true));
+					textElement=element;
+
+					textComposition->SetOwnedElement(element);
+					textComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					textComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+					textBackgroundComposition->AddChild(textComposition);
+				}
+
+				containerComposition=new GuiBoundsComposition;
+				{
+					boundsComposition->AddChild(containerComposition);
+				}
+
+				SetMargins(0);
+				transferringAnimation=new TransferringAnimation(this, Win8GetSystemTextColor(true));
+			}
+
+			Win8GroupBoxStyle::~Win8GroupBoxStyle()
+			{
+				transferringAnimation->Disable();
+			}
+
+			compositions::GuiBoundsComposition* Win8GroupBoxStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win8GroupBoxStyle::GetContainerComposition()
+			{
+				return containerComposition;
+			}
+
+			void Win8GroupBoxStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8GroupBoxStyle::SetText(const WString& value)
+			{
+				textElement->SetText(value);
+			}
+
+			void Win8GroupBoxStyle::SetFont(const FontProperties& value)
+			{
+				textElement->SetFont(value);
+				SetMargins(value.size);
+			}
+
+			void Win8GroupBoxStyle::SetVisuallyEnabled(bool value)
+			{
+				if(value)
+				{
+					transferringAnimation->Transfer(Win8GetSystemTextColor(true));
+				}
+				else
+				{
+					transferringAnimation->Transfer(Win8GetSystemTextColor(false));
+				}
 			}
 		}
 	}

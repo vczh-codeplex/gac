@@ -7332,7 +7332,7 @@ Theme
 				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
 				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
-				//controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
+				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				//controls::GuiTab::IStyleController*									CreateTabStyle()override;
 				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
 				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
@@ -9095,6 +9095,32 @@ Container
 				void										SetVisuallyEnabled(bool value)override;
 				Color										GetDefaultTextColor()override;
 				void										SetTextColor(Color value)override;
+			};
+			
+			class Win8GroupBoxStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win8GroupBoxStyle>
+			{
+			protected:
+				DEFINE_TRANSFERRING_ANIMATION(Color, Win8GroupBoxStyle)
+
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			borderComposition;
+				compositions::GuiBoundsComposition*			textComposition;
+				compositions::GuiBoundsComposition*			textBackgroundComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+				elements::GuiSolidLabelElement*				textElement;
+				Ptr<TransferringAnimation>					transferringAnimation;
+
+				void										SetMargins(int fontSize);
+			public:
+				Win8GroupBoxStyle();
+				~Win8GroupBoxStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
 			};
 		}
 	}
