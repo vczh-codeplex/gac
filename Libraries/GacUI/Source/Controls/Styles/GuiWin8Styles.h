@@ -48,11 +48,11 @@ Theme
 				controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
 				controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()override;
 				controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()override;
-				//controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()override;
-				//controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()override;
-				//controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()override;
-				//controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()override;
-				//controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
+				controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()override;
+				controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
 
 				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
