@@ -7340,12 +7340,12 @@ Theme
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
 				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
-				//
-				//controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
-				//controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
-				//controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
-				//controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()override;
-				//controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()override;
+
+				controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
+				controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
+				controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()override;
 				//controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()override;
 				//controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()override;
 				//controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()override;
@@ -8846,8 +8846,8 @@ GacUI::Control Styles::Windows8 Styles
 Clases:
 ***********************************************************************/
 
-#ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN7STYLESCOMMON
-#define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN7STYLESCOMMON
+#ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN8STYLESCOMMON
+#define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN8STYLESCOMMON
 
 
 namespace vl
@@ -8911,6 +8911,16 @@ Button Configuration
 				static Win8ButtonColors						ScrollArrowActive();
 				static Win8ButtonColors						ScrollArrowPressed();
 				static Win8ButtonColors						ScrollArrowDisabled();
+
+				static Win8ButtonColors						MenuBarButtonNormal();
+				static Win8ButtonColors						MenuBarButtonActive();
+				static Win8ButtonColors						MenuBarButtonPressed();
+				static Win8ButtonColors						MenuBarButtonDisabled();
+
+				static Win8ButtonColors						MenuItemButtonNormal();
+				static Win8ButtonColors						MenuItemButtonNormalActive();
+				static Win8ButtonColors						MenuItemButtonDisabled();
+				static Win8ButtonColors						MenuItemButtonDisabledActive();
 			};
 
 			struct Win8ButtonElements
@@ -8938,6 +8948,27 @@ Button Configuration
 
 				static Win8CheckedButtonElements			Create(elements::ElementShape::Type shape, bool backgroundVisible);
 				void										Apply(const Win8ButtonColors& colors);
+			};
+
+			struct Win8MenuItemButtonElements
+			{
+				elements::GuiSolidBorderElement*			borderElement;
+				elements::GuiGradientBackgroundElement*		backgroundElement;
+				elements::GuiSolidBorderElement*			splitterElement;
+				compositions::GuiCellComposition*			splitterComposition;
+				elements::GuiImageFrameElement*				imageElement;
+				elements::GuiSolidLabelElement*				textElement;
+				compositions::GuiBoundsComposition*			textComposition;
+				elements::GuiSolidLabelElement*				shortcutElement;
+				compositions::GuiBoundsComposition*			shortcutComposition;
+				elements::GuiPolygonElement*				subMenuArrowElement;
+				compositions::GuiGraphicsComposition*		subMenuArrowComposition;
+				compositions::GuiBoundsComposition*			mainComposition;
+
+				static Win8MenuItemButtonElements			Create();
+				void										Apply(const Win8ButtonColors& colors);
+				void										SetActive(bool value);
+				void										SetSubMenuExisting(bool value);
 			};
 
 			struct Win8TextBoxColors
@@ -8972,6 +9003,8 @@ Helper Functions
 			extern Color									Win8GetSystemWindowColor();
 			extern Color									Win8GetSystemBorderColor();
 			extern Color									Win8GetSystemTextColor(bool enabled);
+			extern Color									Win8GetMenuBorderColor();
+			extern Color									Win8GetMenuSplitterColor();
 			extern void										Win8SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
 			extern elements::text::ColorEntry				Win8GetTextBoxTextColor();
@@ -9069,7 +9102,7 @@ CONTROLS\STYLES\WIN8STYLES\GUIWIN8BUTTONSTYLES.H
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: 陈梓瀚(vczh)
-GacUI::Control Styles::Windows7 Styles
+GacUI::Control Styles::Windows8 Styles
 
 Clases:
 ***********************************************************************/
@@ -9172,12 +9205,221 @@ Button
 #endif
 
 /***********************************************************************
+CONTROLS\STYLES\WIN8STYLES\GUIWIN8MENUSTYLES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control Styles::Windows8 Styles
+
+Clases:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN8MENUSTYLES
+#define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN8MENUSTYLES
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace win8
+		{
+
+/***********************************************************************
+Menu Container
+***********************************************************************/
+			
+			class Win8MenuStyle : public Object, public virtual controls::GuiWindow::DefaultBehaviorStyleController, public Description<Win8MenuStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+			public:
+				Win8MenuStyle();
+				~Win8MenuStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+			};
+			
+			class Win8MenuBarStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win8MenuBarStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+			public:
+				Win8MenuBarStyle();
+				~Win8MenuBarStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+			};
+
+/***********************************************************************
+Menu Button
+***********************************************************************/
+			
+			class Win8MenuBarButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win8MenuBarButtonStyle>
+			{
+			protected:
+				Win8ButtonElements							elements;
+				controls::GuiButton::ControlState			controlStyle;
+				bool										isVisuallyEnabled;
+				bool										isOpening;
+
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool opening);
+			public:
+				Win8MenuBarButtonStyle();
+				~Win8MenuBarButtonStyle();
+
+				compositions::GuiBoundsComposition*							GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				void														SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void														SetText(const WString& value)override;
+				void														SetFont(const FontProperties& value)override;
+				void														SetVisuallyEnabled(bool value)override;
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				void														Transfer(controls::GuiButton::ControlState value)override;
+			};
+			
+			class Win8MenuItemButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win8MenuItemButtonStyle>
+			{
+			protected:
+				class MeasuringSource : public compositions::GuiSubComponentMeasurer::MeasuringSource
+				{
+				protected:
+					Win8MenuItemButtonStyle*				style;
+				public:
+					MeasuringSource(Win8MenuItemButtonStyle* _style);
+					~MeasuringSource();
+
+					void									SubComponentPreferredMinSizeUpdated()override;
+				};
+
+				Win8MenuItemButtonElements					elements;
+				Ptr<MeasuringSource>						measuringSource;
+				controls::GuiButton::ControlState			controlStyle;
+				bool										isVisuallyEnabled;
+				bool										isOpening;
+
+				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool opening);
+			public:
+				Win8MenuItemButtonStyle();
+				~Win8MenuItemButtonStyle();
+
+				compositions::GuiBoundsComposition*							GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				void														SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void														SetText(const WString& value)override;
+				void														SetFont(const FontProperties& value)override;
+				void														SetVisuallyEnabled(bool value)override;
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				void														Transfer(controls::GuiButton::ControlState value)override;
+			};
+			
+			class Win8MenuSplitterStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win8MenuSplitterStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+			public:
+				Win8MenuSplitterStyle();
+				~Win8MenuSplitterStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\STYLES\WIN8STYLES\GUIWIN8TABSTYLES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control Styles::Windows8 Styles
+
+Clases:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN8TABSTYLES
+#define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN8TABSTYLES
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace win8
+		{
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\STYLES\WIN8STYLES\GUIWIN8TOOLSTRIPSTYLES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control Styles::Windows8 Styles
+
+Clases:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN8TOOLSTRIPSTYLES
+#define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN8TOOLSTRIPSTYLES
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace win8
+		{
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
 CONTROLS\STYLES\WIN8STYLES\GUIWIN8SCROLLABLESTYLES.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: 陈梓瀚(vczh)
-GacUI::Control Styles::Windows7 Styles
+GacUI::Control Styles::Windows8 Styles
 
 Clases:
 ***********************************************************************/
@@ -9335,7 +9577,7 @@ CONTROLS\STYLES\WIN8STYLES\GUIWIN8LISTSTYLES.H
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: 陈梓瀚(vczh)
-GacUI::Control Styles::Windows7 Styles
+GacUI::Control Styles::Windows8 Styles
 
 Clases:
 ***********************************************************************/
@@ -9343,7 +9585,6 @@ Clases:
 #ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWin8LISTSTYLES
 #define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWin8LISTSTYLES
 
-//#include "GuiWin8MenuStyles.h"
 
 namespace vl
 {

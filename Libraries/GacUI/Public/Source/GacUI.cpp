@@ -11517,9 +11517,6 @@ Win7Theme
 /***********************************************************************
 Controls\Styles\GuiWin8Styles.cpp
 ***********************************************************************/
-//#include "Win8Styles\GuiWin8TabStyles.h"
-//#include "Win8Styles\GuiWin8MenuStyles.h"
-//#include "Win8Styles\GuiWin8ToolstripStyles.h"
 
 namespace vl
 {
@@ -11599,30 +11596,30 @@ Win8Theme
 				return Win8GetTextBoxTextColor();
 			}
 
-			//controls::GuiToolstripMenu::IStyleController* Win8Theme::CreateMenuStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiToolstripMenu::IStyleController* Win8Theme::CreateMenuStyle()
+			{
+				return new Win8MenuStyle;
+			}
 
-			//controls::GuiToolstripMenuBar::IStyleController* Win8Theme::CreateMenuBarStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiToolstripMenuBar::IStyleController* Win8Theme::CreateMenuBarStyle()
+			{
+				return new Win8MenuBarStyle;
+			}
 
-			//controls::GuiControl::IStyleController* Win8Theme::CreateMenuSplitterStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiControl::IStyleController* Win8Theme::CreateMenuSplitterStyle()
+			{
+				return new Win8MenuSplitterStyle;
+			}
 
-			//controls::GuiToolstripButton::IStyleController* Win8Theme::CreateMenuBarButtonStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateMenuBarButtonStyle()
+			{
+				return new Win8MenuBarButtonStyle;
+			}
 
-			//controls::GuiToolstripButton::IStyleController* Win8Theme::CreateMenuItemButtonStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateMenuItemButtonStyle()
+			{
+				return new Win8MenuItemButtonStyle;
+			}
 
 			//controls::GuiControl::IStyleController* Win8Theme::CreateToolbarStyle()
 			//{
@@ -16574,6 +16571,522 @@ Win8TreeViewProvider
 }
 
 /***********************************************************************
+Controls\Styles\Win8Styles\GuiWin8MenuStyles.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace win8
+		{
+			using namespace collections;
+			using namespace elements;
+			using namespace compositions;
+			using namespace controls;
+
+/***********************************************************************
+Win8MenuStyle
+***********************************************************************/
+
+			Win8MenuStyle::Win8MenuStyle()
+			{
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					element->SetColor(Win8GetMenuBorderColor());
+					boundsComposition=new GuiBoundsComposition;
+					boundsComposition->SetOwnedElement(element);
+				}
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(Win8GetSystemWindowColor());
+					GuiBoundsComposition* subBorder=new GuiBoundsComposition;
+					subBorder->SetOwnedElement(element);
+					subBorder->SetAlignmentToParent(Margin(1, 1, 1, 1));
+					boundsComposition->AddChild(subBorder);
+				}
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(Win8GetSystemWindowColor());
+					containerComposition=new GuiBoundsComposition;
+					containerComposition->SetOwnedElement(element);
+					containerComposition->SetAlignmentToParent(Margin(3, 3, 3, 3));
+					containerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+					boundsComposition->AddChild(containerComposition);
+				}
+			}
+
+			Win8MenuStyle::~Win8MenuStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win8MenuStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win8MenuStyle::GetContainerComposition()
+			{
+				return containerComposition;
+			}
+
+			void Win8MenuStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8MenuStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win8MenuStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win8MenuStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+/***********************************************************************
+Win8MenuBarStyle
+***********************************************************************/
+
+			Win8MenuBarStyle::Win8MenuBarStyle()
+			{
+				boundsComposition=new GuiBoundsComposition;
+				{
+					GuiSolidBackgroundElement* solid=GuiSolidBackgroundElement::Create();
+					solid->SetColor(Color(245, 246, 247));
+					boundsComposition->SetOwnedElement(solid);
+					boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				}
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					element->SetColor(Color(232, 233, 234));
+
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					composition->SetOwnedElement(element);
+					composition->SetPreferredMinSize(Size(0, 1));
+					composition->SetAlignmentToParent(Margin(0, -1, 0, 1));
+					boundsComposition->AddChild(composition);
+				}
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					element->SetColor(Color(240, 240, 240));
+
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					composition->SetOwnedElement(element);
+					composition->SetPreferredMinSize(Size(0, 1));
+					composition->SetAlignmentToParent(Margin(0, -1, 0, 0));
+					boundsComposition->AddChild(composition);
+				}
+				containerComposition=new GuiBoundsComposition;
+				{
+					containerComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					containerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+					boundsComposition->AddChild(containerComposition);
+				}
+			}
+
+			Win8MenuBarStyle::~Win8MenuBarStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win8MenuBarStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win8MenuBarStyle::GetContainerComposition()
+			{
+				return containerComposition;
+			}
+
+			void Win8MenuBarStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8MenuBarStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win8MenuBarStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win8MenuBarStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+/***********************************************************************
+Win8MenuBarButtonStyle
+***********************************************************************/
+
+			void Win8MenuBarButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool opening)
+			{
+				Win8ButtonColors targetColor;
+				if(!enabled)
+				{
+					targetColor=Win8ButtonColors::MenuBarButtonDisabled();
+					targetColor.SetAlphaWithoutText(0);
+				}
+				else if(opening)
+				{
+					targetColor=Win8ButtonColors::MenuBarButtonPressed();
+				}
+				else
+				{
+					switch(value)
+					{
+					case GuiButton::Normal:
+						targetColor=Win8ButtonColors::MenuBarButtonNormal();
+						targetColor.SetAlphaWithoutText(0);
+						break;
+					case GuiButton::Active:
+						targetColor=Win8ButtonColors::MenuBarButtonActive();
+						break;
+					case GuiButton::Pressed:
+						targetColor=Win8ButtonColors::MenuBarButtonPressed();
+						break;
+					}
+				}
+				elements.Apply(targetColor);
+			}
+
+			Win8MenuBarButtonStyle::Win8MenuBarButtonStyle()
+				:controlStyle(GuiButton::Normal)
+				,isVisuallyEnabled(true)
+				,isOpening(false)
+			{
+				Win8ButtonColors initialColor=Win8ButtonColors::MenuBarButtonNormal();
+				initialColor.SetAlphaWithoutText(0);
+
+				elements=Win8ButtonElements::Create(Alignment::Center, Alignment::Center);
+				elements.Apply(initialColor);
+			}
+
+			Win8MenuBarButtonStyle::~Win8MenuBarButtonStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win8MenuBarButtonStyle::GetBoundsComposition()
+			{
+				return elements.mainComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win8MenuBarButtonStyle::GetContainerComposition()
+			{
+				return elements.mainComposition;
+			}
+
+			void Win8MenuBarButtonStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8MenuBarButtonStyle::SetText(const WString& value)
+			{
+				elements.textElement->SetText(value);
+			}
+
+			void Win8MenuBarButtonStyle::SetFont(const FontProperties& value)
+			{
+				Win8SetFont(elements.textElement, elements.textComposition, value);
+				Margin margin=elements.textComposition->GetMargin();
+				margin.left*=3;
+				margin.right*=3;
+				elements.textComposition->SetMargin(margin);
+			}
+
+			void Win8MenuBarButtonStyle::SetVisuallyEnabled(bool value)
+			{
+				if(isVisuallyEnabled!=value)
+				{
+					isVisuallyEnabled=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+				}
+			}
+
+			controls::GuiMenu::IStyleController* Win8MenuBarButtonStyle::CreateSubMenuStyleController()
+			{
+				return new Win8MenuStyle;
+			}
+
+			void Win8MenuBarButtonStyle::SetSubMenuExisting(bool value)
+			{
+			}
+
+			void Win8MenuBarButtonStyle::SetSubMenuOpening(bool value)
+			{
+				if(isOpening!=value)
+				{
+					isOpening=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+				}
+			}
+
+			controls::GuiButton* Win8MenuBarButtonStyle::GetSubMenuHost()
+			{
+				return 0;
+			}
+
+			void Win8MenuBarButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
+			{
+			}
+
+			void Win8MenuBarButtonStyle::SetShortcutText(const WString& value)
+			{
+			}
+
+			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win8MenuBarButtonStyle::GetMeasuringSource()
+			{
+				return 0;
+			}
+
+			void Win8MenuBarButtonStyle::Transfer(GuiButton::ControlState value)
+			{
+				if(controlStyle!=value)
+				{
+					controlStyle=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+				}
+			}
+
+/***********************************************************************
+Win8MenuItemButtonStyle::MeasuringSource
+***********************************************************************/
+
+			Win8MenuItemButtonStyle::MeasuringSource::MeasuringSource(Win8MenuItemButtonStyle* _style)
+				:GuiSubComponentMeasurer::MeasuringSource(GuiMenuButton::MenuItemSubComponentMeasuringCategoryName, _style->elements.mainComposition)
+				,style(_style)
+			{
+				AddSubComponent(L"text", style->elements.textComposition);
+				AddSubComponent(L"shortcut", style->elements.shortcutComposition);
+			}
+
+			Win8MenuItemButtonStyle::MeasuringSource::~MeasuringSource()
+			{
+			}
+
+			void Win8MenuItemButtonStyle::MeasuringSource::SubComponentPreferredMinSizeUpdated()
+			{
+				GetMainComposition()->ForceCalculateSizeImmediately();
+			}
+
+/***********************************************************************
+Win8MenuItemButtonStyle
+***********************************************************************/
+
+			void Win8MenuItemButtonStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool opening)
+			{
+				Win8ButtonColors targetColor;
+				bool active=false;
+				if(enabled)
+				{
+					if(opening)
+					{
+						targetColor=Win8ButtonColors::MenuItemButtonNormalActive();
+						active=true;
+					}
+					else
+					{
+						switch(value)
+						{
+						case GuiButton::Normal:
+							targetColor=Win8ButtonColors::MenuItemButtonNormal();
+							break;
+						case GuiButton::Active:
+						case GuiButton::Pressed:
+							targetColor=Win8ButtonColors::MenuItemButtonNormalActive();
+							active=true;
+							break;
+						}
+					}
+				}
+				else
+				{
+					switch(value)
+					{
+					case GuiButton::Normal:
+						targetColor=Win8ButtonColors::MenuItemButtonDisabled();
+						break;
+					case GuiButton::Active:
+					case GuiButton::Pressed:
+						targetColor=Win8ButtonColors::MenuItemButtonDisabledActive();
+						active=true;
+						break;
+					}
+				}
+				elements.Apply(targetColor);
+				elements.SetActive(active);
+			}
+
+			Win8MenuItemButtonStyle::Win8MenuItemButtonStyle()
+				:controlStyle(GuiButton::Normal)
+				,isVisuallyEnabled(true)
+				,isOpening(false)
+			{
+				elements=Win8MenuItemButtonElements::Create();
+				elements.Apply(Win8ButtonColors::MenuItemButtonNormal());
+				measuringSource=new MeasuringSource(this);
+			}
+
+			Win8MenuItemButtonStyle::~Win8MenuItemButtonStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win8MenuItemButtonStyle::GetBoundsComposition()
+			{
+				return elements.mainComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win8MenuItemButtonStyle::GetContainerComposition()
+			{
+				return elements.mainComposition;
+			}
+
+			void Win8MenuItemButtonStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8MenuItemButtonStyle::SetText(const WString& value)
+			{
+				elements.textElement->SetText(value);
+			}
+
+			void Win8MenuItemButtonStyle::SetFont(const FontProperties& value)
+			{
+				Win8SetFont(elements.textElement, elements.textComposition, value);
+				Win8SetFont(elements.shortcutElement, elements.shortcutComposition, value);
+			}
+
+			void Win8MenuItemButtonStyle::SetVisuallyEnabled(bool value)
+			{
+				if(isVisuallyEnabled!=value)
+				{
+					isVisuallyEnabled=value;
+					elements.imageElement->SetEnabled(value);
+					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+				}
+			}
+
+			controls::GuiMenu::IStyleController* Win8MenuItemButtonStyle::CreateSubMenuStyleController()
+			{
+				return new Win8MenuStyle;
+			}
+
+			void Win8MenuItemButtonStyle::SetSubMenuExisting(bool value)
+			{
+				elements.SetSubMenuExisting(value);
+			}
+
+			void Win8MenuItemButtonStyle::SetSubMenuOpening(bool value)
+			{
+				if(isOpening!=value)
+				{
+					isOpening=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+				}
+			}
+
+			controls::GuiButton* Win8MenuItemButtonStyle::GetSubMenuHost()
+			{
+				return 0;
+			}
+
+			void Win8MenuItemButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
+			{
+				if(value)
+				{
+					elements.imageElement->SetImage(value->GetImage(), value->GetFrameIndex());
+				}
+				else
+				{
+					elements.imageElement->SetImage(0, 0);
+				}
+			}
+
+			void Win8MenuItemButtonStyle::SetShortcutText(const WString& value)
+			{
+				elements.shortcutElement->SetText(value);
+			}
+
+			compositions::GuiSubComponentMeasurer::IMeasuringSource* Win8MenuItemButtonStyle::GetMeasuringSource()
+			{
+				return measuringSource.Obj();
+			}
+
+			void Win8MenuItemButtonStyle::Transfer(GuiButton::ControlState value)
+			{
+				if(controlStyle!=value)
+				{
+					controlStyle=value;
+					TransferInternal(controlStyle, isVisuallyEnabled, isOpening);
+				}
+			}
+
+/***********************************************************************
+Win8MenuSplitterStyle
+***********************************************************************/
+
+			Win8MenuSplitterStyle::Win8MenuSplitterStyle()
+			{
+				boundsComposition=new GuiBoundsComposition;
+				boundsComposition->SetPreferredMinSize(Size(26, 5));
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					element->SetColor(Win8GetMenuSplitterColor());
+
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					composition->SetPreferredMinSize(Size(1, 0));
+					composition->SetOwnedElement(element);
+					composition->SetAlignmentToParent(Margin(26, 0, -1, 0));
+					boundsComposition->AddChild(composition);
+				}
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					element->SetColor(Win8GetMenuSplitterColor());
+
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					composition->SetPreferredMinSize(Size(0, 1));
+					composition->SetOwnedElement(element);
+					composition->SetAlignmentToParent(Margin(27, 2, 0, 2));
+					boundsComposition->AddChild(composition);
+				}
+			}
+
+			Win8MenuSplitterStyle::~Win8MenuSplitterStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win8MenuSplitterStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win8MenuSplitterStyle::GetContainerComposition()
+			{
+				return boundsComposition;
+			}
+
+			void Win8MenuSplitterStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8MenuSplitterStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win8MenuSplitterStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win8MenuSplitterStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+		}
+	}
+}
+
+/***********************************************************************
 Controls\Styles\Win8Styles\GuiWin8ScrollableStyles.cpp
 ***********************************************************************/
 
@@ -17346,6 +17859,110 @@ Win8ButtonColors
 				return colors;
 			}
 
+			//---------------------------------------------------------
+
+			Win8ButtonColors Win8ButtonColors::MenuBarButtonNormal()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(245, 246, 247),
+					Color(245, 246, 247),
+					Color(245, 246, 247),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::MenuBarButtonActive()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(122, 177, 232),
+					Color(213, 231, 248),
+					Color(213, 231, 248),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::MenuBarButtonPressed()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(98, 163, 229),
+					Color(184, 216, 249),
+					Color(184, 216, 249),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::MenuBarButtonDisabled()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(245, 246, 247),
+					Color(245, 246, 247),
+					Color(245, 246, 247),
+					Win8GetSystemTextColor(false),
+				};
+				return colors;
+			}
+
+			//---------------------------------------------------------
+
+			Win8ButtonColors Win8ButtonColors::MenuItemButtonNormal()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(240, 240, 240),
+					Color(240, 240, 240),
+					Color(240, 240, 240),
+					Win8GetSystemTextColor(true),
+					Win8GetMenuSplitterColor(),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::MenuItemButtonNormalActive()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(120, 174, 229),
+					Color(209, 226, 242),
+					Color(209, 226, 242),
+					Win8GetSystemTextColor(true),
+					Color(187, 204, 220),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::MenuItemButtonDisabled()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(240, 240, 240),
+					Color(240, 240, 240),
+					Color(240, 240, 240),
+					Win8GetSystemTextColor(false),
+					Win8GetMenuSplitterColor(),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::MenuItemButtonDisabledActive()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(120, 174, 229),
+					Color(209, 226, 242),
+					Color(209, 226, 242),
+					Win8GetSystemTextColor(false),
+					Win8GetMenuSplitterColor(),
+				};
+				return colors;
+			}
+
 /***********************************************************************
 Win8ButtonElements
 ***********************************************************************/
@@ -17532,6 +18149,130 @@ Win8CheckedButtonElements
 			}
 
 /***********************************************************************
+Win8MenuItemButtonElements
+***********************************************************************/
+
+			Win8MenuItemButtonElements Win8MenuItemButtonElements::Create()
+			{
+				Win8MenuItemButtonElements button;
+				{
+					button.mainComposition=new GuiBoundsComposition;
+					button.mainComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				}
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					button.borderElement=element;
+
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					button.mainComposition->AddChild(composition);
+					composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					composition->SetOwnedElement(element);
+				}
+				{
+					GuiGradientBackgroundElement* element=GuiGradientBackgroundElement::Create();
+					button.backgroundElement=element;
+					element->SetDirection(GuiGradientBackgroundElement::Vertical);
+
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					button.mainComposition->AddChild(composition);
+					composition->SetAlignmentToParent(Margin(1, 1, 1, 1));
+					composition->SetOwnedElement(element);
+				}
+				{
+					GuiTableComposition* table=new GuiTableComposition;
+					button.mainComposition->AddChild(table);
+					table->SetAlignmentToParent(Margin(2, 0, 2, 0));
+					table->SetRowsAndColumns(1, 5);
+
+					table->SetRowOption(0, GuiCellOption::PercentageOption(1.0));
+					table->SetColumnOption(0, GuiCellOption::AbsoluteOption(24));
+					table->SetColumnOption(1, GuiCellOption::AbsoluteOption(1));
+					table->SetColumnOption(2, GuiCellOption::PercentageOption(1.0));
+					table->SetColumnOption(3, GuiCellOption::MinSizeOption());
+					table->SetColumnOption(4, GuiCellOption::AbsoluteOption(10));
+					
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 0, 1, 1);
+						button.splitterComposition=cell;
+
+						GuiImageFrameElement* element=GuiImageFrameElement::Create();
+						button.imageElement=element;
+						element->SetStretch(false);
+						element->SetAlignments(Alignment::Center, Alignment::Center);
+						cell->SetOwnedElement(element);
+					}
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 1, 1, 1);
+						button.splitterComposition=cell;
+
+						GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+						button.splitterElement=element;
+						cell->SetOwnedElement(element);
+					}
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 2, 1, 1);
+
+						Win8CreateSolidLabelElement(button.textElement, button.textComposition, Alignment::Left, Alignment::Center);
+						cell->AddChild(button.textComposition);
+					}
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 3, 1, 1);
+
+						Win8CreateSolidLabelElement(button.shortcutElement, button.shortcutComposition, Alignment::Right, Alignment::Center);
+						cell->AddChild(button.shortcutComposition);
+					}
+					{
+						button.subMenuArrowElement=common_styles::CommonFragmentBuilder::BuildRightArrow();
+
+						GuiCellComposition* cell=new GuiCellComposition;
+						button.subMenuArrowComposition=cell;
+						cell->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+						table->AddChild(cell);
+						cell->SetSite(0, 4, 1, 1);
+						cell->SetOwnedElement(button.subMenuArrowElement);
+						cell->SetVisible(false);
+					}
+				}
+				return button;
+			}
+
+			void Win8MenuItemButtonElements::Apply(const Win8ButtonColors& colors)
+			{
+				borderElement->SetColor(colors.borderColor);
+				backgroundElement->SetColors(colors.g1, colors.g2);
+				splitterElement->SetColor(colors.bullet);
+				textElement->SetColor(colors.textColor);
+				shortcutElement->SetColor(colors.textColor);
+				subMenuArrowElement->SetBackgroundColor(colors.textColor);
+				subMenuArrowElement->SetBorderColor(colors.textColor);
+			}
+
+			void Win8MenuItemButtonElements::SetActive(bool value)
+			{
+				if(value)
+				{
+					splitterComposition->SetMargin(Margin(0, 1, 0, 2));
+				}
+				else
+				{
+					splitterComposition->SetMargin(Margin(0, 0, 0, 0));
+				}
+			}
+
+			void Win8MenuItemButtonElements::SetSubMenuExisting(bool value)
+			{
+				subMenuArrowComposition->SetVisible(value);
+			}
+
+/***********************************************************************
 Win8TextBoxColors
 ***********************************************************************/
 
@@ -17605,6 +18346,16 @@ Helpers
 				return enabled?Color(0, 0, 0):Color(131, 131, 131);
 			}
 
+			Color Win8GetMenuBorderColor()
+			{
+				return Color(151, 151, 151);
+			}
+
+			Color Win8GetMenuSplitterColor()
+			{
+				return Color(215, 215, 215);
+			}
+
 			void Win8SetFont(GuiSolidLabelElement* element, GuiBoundsComposition* composition, const FontProperties& fontProperties)
 			{
 				int margin=3;
@@ -17635,6 +18386,34 @@ Helpers
 				entry.selectedUnfocused.background=Color(51, 153, 255);
 				return entry;
 			}
+		}
+	}
+}
+
+/***********************************************************************
+Controls\Styles\Win8Styles\GuiWin8TabStyles.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace win8
+		{
+		}
+	}
+}
+
+/***********************************************************************
+Controls\Styles\Win8Styles\GuiWin8ToolstripStyles.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace win8
+		{
 		}
 	}
 }
