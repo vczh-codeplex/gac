@@ -162,6 +162,51 @@ Win8ScrollStyle
 			}
 
 /***********************************************************************
+Win8TrackStyle
+***********************************************************************/
+
+			controls::GuiButton::IStyleController* Win8TrackStyle::CreateHandleButtonStyle(Direction direction)
+			{
+				Win8ButtonStyle* handleButtonStyle=new Win8ButtonStyle;
+				return handleButtonStyle;
+			}
+
+			void Win8TrackStyle::InstallBackground(compositions::GuiGraphicsComposition* boundsComposition, Direction direction)
+			{
+				GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+				element->SetColor(Win8GetSystemWindowColor());
+				boundsComposition->SetOwnedElement(element);
+			}
+
+			void Win8TrackStyle::InstallTrack(compositions::GuiGraphicsComposition* trackComposition, Direction direction)
+			{
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(Color(231, 234, 234));
+					trackComposition->SetOwnedElement(element);
+				}
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					element->SetColor(Color(214, 214, 214));
+					
+					GuiBoundsComposition* composition=new GuiBoundsComposition;
+					composition->SetOwnedElement(element);
+					composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					trackComposition->AddChild(composition);
+				}
+			}
+
+			Win8TrackStyle::Win8TrackStyle(Direction _direction)
+				:CommonTrackStyle(_direction)
+			{
+				BuildStyle(TrackThickness, TrackPadding, HandleLong, HandleShort);
+			}
+
+			Win8TrackStyle::~Win8TrackStyle()
+			{
+			}
+
+/***********************************************************************
 Win8ScrollViewProvider
 ***********************************************************************/
 

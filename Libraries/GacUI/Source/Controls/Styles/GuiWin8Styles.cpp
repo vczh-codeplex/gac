@@ -162,15 +162,15 @@ Win8Theme
 				return new Win8ScrollStyle(common_styles::CommonScrollStyle::Vertical);
 			}
 
-			//controls::GuiScroll::IStyleController* Win8Theme::CreateHTrackerStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiScroll::IStyleController* Win8Theme::CreateHTrackerStyle()
+			{
+				return new Win8TrackStyle(common_styles::CommonTrackStyle::Horizontal);
+			}
 
-			//controls::GuiScroll::IStyleController* Win8Theme::CreateVTrackerStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiScroll::IStyleController* Win8Theme::CreateVTrackerStyle()
+			{
+				return new Win8TrackStyle(common_styles::CommonTrackStyle::Vertical);
+			}
 
 			//controls::GuiScroll::IStyleController* Win8Theme::CreateProgressBarStyle()
 			//{
@@ -179,13 +179,13 @@ Win8Theme
 
 			int Win8Theme::GetScrollDefaultSize()
 			{
-				return 16;
+				return Win8ScrollStyle::DefaultSize;
 			}
 
-			//int Win8Theme::GetTrackerDefaultSize()
-			//{
-			//	throw 0;
-			//}
+			int Win8Theme::GetTrackerDefaultSize()
+			{
+				return Win8TrackStyle::HandleLong;
+			}
 
 			controls::GuiScrollView::IStyleProvider* Win8Theme::CreateTextListStyle()
 			{
