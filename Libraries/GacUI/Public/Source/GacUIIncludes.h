@@ -18868,7 +18868,7 @@ Theme
 				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
 				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
-				//controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
+				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				//controls::GuiTab::IStyleController*									CreateTabStyle()override;
 				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
 				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;

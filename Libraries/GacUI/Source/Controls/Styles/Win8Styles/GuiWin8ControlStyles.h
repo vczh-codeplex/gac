@@ -79,6 +79,34 @@ Container
 				Color										GetDefaultTextColor()override;
 				void										SetTextColor(Color value)override;
 			};
+			
+			/// <summary>Group box style (Windows 8).</summary>
+			class Win8GroupBoxStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win8GroupBoxStyle>
+			{
+			protected:
+				DEFINE_TRANSFERRING_ANIMATION(Color, Win8GroupBoxStyle)
+
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			borderComposition;
+				compositions::GuiBoundsComposition*			textComposition;
+				compositions::GuiBoundsComposition*			textBackgroundComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+				elements::GuiSolidLabelElement*				textElement;
+				Ptr<TransferringAnimation>					transferringAnimation;
+
+				void										SetMargins(int fontSize);
+			public:
+				/// <summary>Create the style.</summary>
+				Win8GroupBoxStyle();
+				~Win8GroupBoxStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+			};
 		}
 	}
 }
