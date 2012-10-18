@@ -64,6 +64,11 @@ Button Configuration
 				static Win8ButtonColors						CheckedPressed(bool selected);
 				static Win8ButtonColors						CheckedDisabled(bool selected);
 
+				static Win8ButtonColors						ToolstripButtonNormal();
+				static Win8ButtonColors						ToolstripButtonActive();
+				static Win8ButtonColors						ToolstripButtonPressed();
+				static Win8ButtonColors						ToolstripButtonDisabled();
+
 				static Win8ButtonColors						ScrollHandleNormal();
 				static Win8ButtonColors						ScrollHandleActive();
 				static Win8ButtonColors						ScrollHandlePressed();

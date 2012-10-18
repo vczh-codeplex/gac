@@ -208,6 +208,56 @@ Win8ButtonColors
 
 			//---------------------------------------------------------
 
+			Win8ButtonColors Win8ButtonColors::ToolstripButtonNormal()
+			{
+				Win8ButtonColors colors=
+				{
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ToolstripButtonActive()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(120, 174, 229),
+					Color(209, 226, 242),
+					Color(209, 226, 242),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ToolstripButtonPressed()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(96, 161, 226),
+					Color(180, 212, 244),
+					Color(180, 212, 244),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::ToolstripButtonDisabled()
+			{
+				Win8ButtonColors colors=
+				{
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Win8GetSystemWindowColor(),
+					Win8GetSystemTextColor(false),
+				};
+				return colors;
+			}
+
+			//---------------------------------------------------------
+
 			Win8ButtonColors Win8ButtonColors::ScrollHandleNormal()
 			{
 				Win8ButtonColors colors=

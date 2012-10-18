@@ -127,7 +127,7 @@ TextBox
 				void										InitializeTextElement(elements::GuiColorizedTextElement* _textElement);
 			};
 			
-			/// <summary>Multiline text box style (Windows 7).</summary>
+			/// <summary>Multiline text box style (Windows 8).</summary>
 			class Win8MultilineTextBoxProvider : public Win8ScrollViewProvider, public Description<Win8MultilineTextBoxProvider>
 			{
 			protected:
@@ -144,7 +144,7 @@ TextBox
 				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 			
-			/// <summary>Singleline text box style (Windows 7).</summary>
+			/// <summary>Singleline text box style (Windows 8).</summary>
 			class Win8SinglelineTextBoxProvider : public Object, public virtual controls::GuiSinglelineTextBox::IStyleProvider, public Description<Win8SinglelineTextBoxProvider>
 			{
 			protected:

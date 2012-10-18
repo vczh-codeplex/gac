@@ -7346,11 +7346,11 @@ Theme
 				controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
 				controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()override;
 				controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()override;
-				//controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()override;
-				//controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()override;
-				//controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()override;
-				//controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()override;
-				//controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
+				controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateToolbarSplitButtonStyle()override;
+				controls::GuiControl::IStyleController*								CreateToolbarSplitterStyle()override;
 
 				controls::GuiButton::IStyleController*								CreateButtonStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateCheckBoxStyle()override;
@@ -8903,6 +8903,11 @@ Button Configuration
 				static Win8ButtonColors						CheckedPressed(bool selected);
 				static Win8ButtonColors						CheckedDisabled(bool selected);
 
+				static Win8ButtonColors						ToolstripButtonNormal();
+				static Win8ButtonColors						ToolstripButtonActive();
+				static Win8ButtonColors						ToolstripButtonPressed();
+				static Win8ButtonColors						ToolstripButtonDisabled();
+
 				static Win8ButtonColors						ScrollHandleNormal();
 				static Win8ButtonColors						ScrollHandleActive();
 				static Win8ButtonColors						ScrollHandlePressed();
@@ -9407,6 +9412,109 @@ namespace vl
 	{
 		namespace win8
 		{
+
+/***********************************************************************
+Toolstrip Button
+***********************************************************************/
+
+			class Win8ToolstripToolbarStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win8ToolstripToolbarStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+			public:
+				Win8ToolstripToolbarStyle();
+				~Win8ToolstripToolbarStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+			};
+
+			class Win8ToolstripButtonDropdownStyle : public Object, public virtual controls::GuiButton::IStyleController, public Description<Win8ToolstripButtonDropdownStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			splitterComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+				bool										isVisuallyEnabled;
+				controls::GuiButton::ControlState			controlState;
+
+				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled);
+			public:
+				Win8ToolstripButtonDropdownStyle();
+				~Win8ToolstripButtonDropdownStyle();
+				
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+				void										Transfer(controls::GuiButton::ControlState value)override;
+			};
+
+			class Win8ToolstripButtonStyle : public Object, public virtual controls::GuiMenuButton::IStyleController, public Description<Win8ToolstripButtonStyle>
+			{
+			public:
+				enum ButtonStyle
+				{
+					CommandButton,
+					DropdownButton,
+					SplitButton,
+				};
+			protected:
+				DEFINE_TRANSFERRING_ANIMATION(Win8ButtonColors, Win8ToolstripButtonStyle)
+
+				Win8ButtonElements							elements;
+				Ptr<TransferringAnimation>					transferringAnimation;
+				controls::GuiButton::ControlState			controlStyle;
+				bool										isVisuallyEnabled;
+				bool										isOpening;
+				elements::GuiImageFrameElement*				imageElement;
+				compositions::GuiBoundsComposition*			imageComposition;
+				ButtonStyle									buttonStyle;
+				controls::GuiButton*						subMenuHost;
+
+				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool menuOpening);
+			public:
+				Win8ToolstripButtonStyle(ButtonStyle _buttonStyle);
+				~Win8ToolstripButtonStyle();
+				
+				compositions::GuiBoundsComposition*							GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				void														SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void														SetText(const WString& value)override;
+				void														SetFont(const FontProperties& value)override;
+				void														SetVisuallyEnabled(bool value)override;
+				controls::GuiMenu::IStyleController*						CreateSubMenuStyleController()override;
+				void														SetSubMenuExisting(bool value)override;
+				void														SetSubMenuOpening(bool value)override;
+				controls::GuiButton*										GetSubMenuHost()override;
+				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetShortcutText(const WString& value)override;
+				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
+				void														Transfer(controls::GuiButton::ControlState value)override;
+			};
+
+			class Win8ToolstripSplitterStyle : public Object, public virtual controls::GuiControl::IStyleController, public Description<Win8ToolstripSplitterStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+			public:
+				Win8ToolstripSplitterStyle();
+				~Win8ToolstripSplitterStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+			};
 		}
 	}
 }

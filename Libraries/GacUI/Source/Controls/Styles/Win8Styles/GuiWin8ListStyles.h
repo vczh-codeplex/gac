@@ -77,7 +77,7 @@ List
 
 #pragma warning(push)
 #pragma warning(disable:4250)
-			/// <summary>List view style (Windows 7).</summary>
+			/// <summary>List view style (Windows 8).</summary>
 			class Win8ListViewProvider : public Win8MultilineTextBoxProvider, public virtual controls::GuiListView::IStyleProvider, public Description<Win8ListViewProvider>
 			{
 			public:
@@ -92,7 +92,7 @@ List
 				Color													GetItemSeparatorColor()override;
 			};
 			
-			/// <summary>Tree view style (Windows 7).</summary>
+			/// <summary>Tree view style (Windows 8).</summary>
 			class Win8TreeViewProvider : public Win8MultilineTextBoxProvider, public virtual controls::GuiTreeView::IStyleProvider, public Description<Win8TreeViewProvider>
 			{
 			public:

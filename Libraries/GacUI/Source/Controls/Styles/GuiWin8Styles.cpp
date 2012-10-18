@@ -112,30 +112,30 @@ Win8Theme
 				return new Win8MenuItemButtonStyle;
 			}
 
-			//controls::GuiControl::IStyleController* Win8Theme::CreateToolbarStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiControl::IStyleController* Win8Theme::CreateToolbarStyle()
+			{
+				return new Win8ToolstripToolbarStyle;
+			}
 
-			//controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolbarButtonStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolbarButtonStyle()
+			{
+				return new Win8ToolstripButtonStyle(Win8ToolstripButtonStyle::CommandButton);
+			}
 
-			//controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolbarDropdownButtonStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolbarDropdownButtonStyle()
+			{
+				return new Win8ToolstripButtonStyle(Win8ToolstripButtonStyle::DropdownButton);
+			}
 
-			//controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolbarSplitButtonStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateToolbarSplitButtonStyle()
+			{
+				return new Win8ToolstripButtonStyle(Win8ToolstripButtonStyle::SplitButton);
+			}
 
-			//controls::GuiControl::IStyleController* Win8Theme::CreateToolbarSplitterStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiControl::IStyleController* Win8Theme::CreateToolbarSplitterStyle()
+			{
+				return new Win8ToolstripSplitterStyle;
+			}
 
 			controls::GuiButton::IStyleController* Win8Theme::CreateButtonStyle()
 			{
