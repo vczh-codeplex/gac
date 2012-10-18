@@ -164,6 +164,7 @@ ComboBox
 				elements::GuiPolygonElement*					dropDownElement;
 
 				void											TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+				void											AfterApplyColors(const Win7ButtonColors& colors)override;
 			public:
 				/// <summary>Create the style.</summary>
 				Win7DropDownComboBoxStyle();

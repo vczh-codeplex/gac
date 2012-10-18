@@ -537,6 +537,13 @@ Win7DropDownComboBoxStyle
 				transferringAnimation->Transfer(targetColor);
 			}
 
+			void Win7DropDownComboBoxStyle::AfterApplyColors(const Win7ButtonColors& colors)
+			{
+				Win7ButtonStyle::AfterApplyColors(colors);
+				dropDownElement->SetBorderColor(colors.textColor);
+				dropDownElement->SetBackgroundColor(colors.textColor);
+			}
+
 			Win7DropDownComboBoxStyle::Win7DropDownComboBoxStyle()
 				:Win7ButtonStyle(true)
 				,commandExecutor(0)
