@@ -57,10 +57,10 @@ Win8Theme
 			//	throw 0;
 			//}
 
-			//controls::GuiComboBoxBase::IStyleController* Win8Theme::CreateComboBoxStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiComboBoxBase::IStyleController* Win8Theme::CreateComboBoxStyle()
+			{
+				return new Win8DropDownComboBoxStyle;
+			}
 
 			controls::GuiScrollView::IStyleProvider* Win8Theme::CreateMultilineTextBoxStyle()
 			{

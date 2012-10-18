@@ -54,6 +54,116 @@ Win8SelectableItemStyle
 			}
 
 /***********************************************************************
+Win8DropDownComboBoxStyle
+***********************************************************************/
+
+			void Win8DropDownComboBoxStyle::TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)
+			{
+				Win8ButtonColors targetColor;
+				if(enabled)
+				{
+					if(selected) value=GuiButton::Pressed;
+					switch(value)
+					{
+					case GuiButton::Normal:
+						targetColor=Win8ButtonColors::ButtonNormal();
+						break;
+					case GuiButton::Active:
+						targetColor=Win8ButtonColors::ButtonActive();
+						break;
+					case GuiButton::Pressed:
+						targetColor=Win8ButtonColors::ButtonPressed();
+						break;
+					}
+				}
+				else
+				{
+					targetColor=Win8ButtonColors::ButtonDisabled();
+				}
+				transferringAnimation->Transfer(targetColor);
+			}
+
+			void Win8DropDownComboBoxStyle::AfterApplyColors(const Win8ButtonColors& colors)
+			{
+				Win8ButtonStyle::AfterApplyColors(colors);
+				dropDownElement->SetBorderColor(colors.textColor);
+				dropDownElement->SetBackgroundColor(colors.textColor);
+			}
+
+			Win8DropDownComboBoxStyle::Win8DropDownComboBoxStyle()
+				:commandExecutor(0)
+			{
+				table=new GuiTableComposition;
+				table->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				table->SetRowsAndColumns(3, 2);
+				table->SetRowOption(0, GuiCellOption::PercentageOption(1.0));
+				table->SetRowOption(1, GuiCellOption::MinSizeOption());
+				table->SetRowOption(2, GuiCellOption::PercentageOption(1.0));
+				table->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
+				table->SetColumnOption(1, GuiCellOption::MinSizeOption());
+				elements.textComposition->AddChild(table);
+				elements.textComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+
+				textComposition=new GuiCellComposition;
+				table->AddChild(textComposition);
+				textComposition->SetSite(1, 0, 1, 1);
+
+				Ptr<IGuiGraphicsElement> element=elements.textComposition->GetOwnedElement();
+				elements.textComposition->SetOwnedElement(0);
+				textComposition->SetOwnedElement(element);
+				elements.textElement->SetEllipse(true);
+				elements.textElement->SetAlignments(Alignment::Left, Alignment::Center);
+
+				dropDownElement=common_styles::CommonFragmentBuilder::BuildDownArrow();
+
+				dropDownComposition=new GuiCellComposition;
+				table->AddChild(dropDownComposition);
+				dropDownComposition->SetSite(1, 1, 1, 1);
+				dropDownComposition->SetOwnedElement(dropDownElement);
+				dropDownComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				dropDownComposition->SetMargin(Margin(3, 0, 3, 0));
+			}
+
+			Win8DropDownComboBoxStyle::~Win8DropDownComboBoxStyle()
+			{
+			}
+
+			compositions::GuiGraphicsComposition* Win8DropDownComboBoxStyle::GetContainerComposition()
+			{
+				return textComposition;
+			}
+
+			void Win8DropDownComboBoxStyle::SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)
+			{
+				commandExecutor=value;
+			}
+
+			void Win8DropDownComboBoxStyle::OnClicked()
+			{
+				commandExecutor->ShowPopup();
+			}
+
+			void Win8DropDownComboBoxStyle::OnPopupOpened()
+			{
+				SetSelected(true);
+			}
+
+			void Win8DropDownComboBoxStyle::OnPopupClosed()
+			{
+				SetSelected(false);
+			}
+
+			void Win8DropDownComboBoxStyle::OnItemSelected()
+			{
+			}
+
+			controls::GuiWindow::IStyleController* Win8DropDownComboBoxStyle::CreatePopupStyle()
+			{
+				return new Win8WindowStyle;
+			}
+
+/***********************************************************************
 Win8TextListProvider
 ***********************************************************************/
 			

@@ -38,6 +38,40 @@ List Control Buttons
 			};
 
 /***********************************************************************
+ComboBox
+***********************************************************************/
+			
+#pragma warning(push)
+#pragma warning(disable:4250)
+			/// <summary>Drop down combo box style (Windows 8).</summary>
+			class Win8DropDownComboBoxStyle : public Win8ButtonStyle, public virtual controls::GuiComboBoxBase::IStyleController, public Description<Win8DropDownComboBoxStyle>
+			{
+			protected:
+				controls::GuiComboBoxBase::ICommandExecutor*	commandExecutor;
+				compositions::GuiTableComposition*				table;
+				compositions::GuiCellComposition*				textComposition;
+				compositions::GuiCellComposition*				dropDownComposition;
+				elements::GuiPolygonElement*					dropDownElement;
+
+				void											TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+				void											AfterApplyColors(const Win8ButtonColors& colors)override;
+			public:
+				/// <summary>Create the style.</summary>
+				Win8DropDownComboBoxStyle();
+				~Win8DropDownComboBoxStyle();
+				
+				compositions::GuiGraphicsComposition*			GetContainerComposition()override;
+
+				void											SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
+				void											OnClicked()override;
+				void											OnPopupOpened()override;
+				void											OnPopupClosed()override;
+				void											OnItemSelected()override;
+				controls::GuiWindow::IStyleController*			CreatePopupStyle()override;
+			};
+#pragma warning(pop)
+
+/***********************************************************************
 List
 ***********************************************************************/
 			

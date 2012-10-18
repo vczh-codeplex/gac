@@ -7334,7 +7334,7 @@ Theme
 				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
 				//controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				//controls::GuiTab::IStyleController*									CreateTabStyle()override;
-				//controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
+				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
 				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
@@ -8756,6 +8756,7 @@ ComboBox
 				elements::GuiPolygonElement*					dropDownElement;
 
 				void											TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+				void											AfterApplyColors(const Win7ButtonColors& colors)override;
 			public:
 				Win7DropDownComboBoxStyle();
 				~Win7DropDownComboBoxStyle();
@@ -9713,6 +9714,38 @@ List Control Buttons
 				Win8SelectableItemStyle();
 				~Win8SelectableItemStyle();
 			};
+
+/***********************************************************************
+ComboBox
+***********************************************************************/
+			
+#pragma warning(push)
+#pragma warning(disable:4250)
+			class Win8DropDownComboBoxStyle : public Win8ButtonStyle, public virtual controls::GuiComboBoxBase::IStyleController, public Description<Win8DropDownComboBoxStyle>
+			{
+			protected:
+				controls::GuiComboBoxBase::ICommandExecutor*	commandExecutor;
+				compositions::GuiTableComposition*				table;
+				compositions::GuiCellComposition*				textComposition;
+				compositions::GuiCellComposition*				dropDownComposition;
+				elements::GuiPolygonElement*					dropDownElement;
+
+				void											TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+				void											AfterApplyColors(const Win8ButtonColors& colors)override;
+			public:
+				Win8DropDownComboBoxStyle();
+				~Win8DropDownComboBoxStyle();
+				
+				compositions::GuiGraphicsComposition*			GetContainerComposition()override;
+
+				void											SetCommandExecutor(controls::GuiComboBoxBase::ICommandExecutor* value)override;
+				void											OnClicked()override;
+				void											OnPopupOpened()override;
+				void											OnPopupClosed()override;
+				void											OnItemSelected()override;
+				controls::GuiWindow::IStyleController*			CreatePopupStyle()override;
+			};
+#pragma warning(pop)
 
 /***********************************************************************
 List
