@@ -1274,6 +1274,67 @@ WindowsController
 					return &dialogService;
 				}
 
+				WString GetOSVersionMainPart()
+				{
+					OSVERSIONINFOEX info;
+					ZeroMemory(&info, sizeof(info));
+					info.dwOSVersionInfoSize=sizeof(info);
+					GetVersionEx((OSVERSIONINFO*)&info);
+					switch(info.dwMajorVersion)
+					{
+					case 5:
+						switch(info.dwMinorVersion)
+						{
+						case 0:
+							return L"Windows 2000";
+						case 1:
+							return L"Windows XP";
+						case 2:
+							return GetSystemMetrics(SM_SERVERR2)==0?L"Windows Server 2003":L"Windows Server 2003 R2";
+						}
+					case 6:
+						if(info.wProductType==VER_NT_WORKSTATION)
+						{
+							switch(info.dwMinorVersion)
+							{
+							case 0:
+								return L"Windows Vista";
+							case 1:
+								return L"Windows 7";
+							case 2:
+								return L"Windows 8";
+							}
+						}
+						else
+						{
+							switch(info.dwMinorVersion)
+							{
+							case 0:
+								return L"Windows Server 2008";
+							case 1:
+								return L"Windows Server 2008 R2";
+							case 2:
+								return L"Windows Server 2012";
+							}
+						}
+					}
+					return L"Windows<Unknown Version>";
+				}
+
+				WString GetOSVersionCSDPart()
+				{
+					OSVERSIONINFOEX info;
+					ZeroMemory(&info, sizeof(info));
+					info.dwOSVersionInfoSize=sizeof(info);
+					GetVersionEx((OSVERSIONINFO*)&info);
+					return info.szCSDVersion;
+				}
+
+				WString GetOSVersion()
+				{
+					return GetOSVersionMainPart()+L";"+GetOSVersionCSDPart();
+				}
+
 				//=======================================================================
 
 				void InvokeMouseHook(WPARAM message, Point location)

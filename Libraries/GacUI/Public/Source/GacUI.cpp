@@ -4447,8 +4447,21 @@ Helpers
 
 			void GuiApplicationInitialize()
 			{
-				win8::Win8Theme theme;
-				theme::SetCurrentTheme(&theme);
+				Ptr<theme::ITheme> theme;
+				{
+					WString osVersion=GetCurrentController()->GetOSVersion();
+					int index=osVersion.IndexOf(L';');
+					WString osMainVersion=osVersion.Sub(0, index);
+					if(osMainVersion==L"Windows 8" || osMainVersion==L"Windows Server 2012")
+					{
+						theme=new win8::Win8Theme;
+					}
+					else
+					{
+						theme=new win7::Win7Theme;
+					}
+				}
+				theme::SetCurrentTheme(theme.Obj());
 
 				GetCurrentController()->InputService()->StartTimer();
 				GuiApplication app;
@@ -32737,6 +32750,67 @@ WindowsController
 				INativeDialogService* DialogService()
 				{
 					return &dialogService;
+				}
+
+				WString GetOSVersionMainPart()
+				{
+					OSVERSIONINFOEX info;
+					ZeroMemory(&info, sizeof(info));
+					info.dwOSVersionInfoSize=sizeof(info);
+					GetVersionEx((OSVERSIONINFO*)&info);
+					switch(info.dwMajorVersion)
+					{
+					case 5:
+						switch(info.dwMinorVersion)
+						{
+						case 0:
+							return L"Windows 2000";
+						case 1:
+							return L"Windows XP";
+						case 2:
+							return GetSystemMetrics(SM_SERVERR2)==0?L"Windows Server 2003":L"Windows Server 2003 R2";
+						}
+					case 6:
+						if(info.wProductType==VER_NT_WORKSTATION)
+						{
+							switch(info.dwMinorVersion)
+							{
+							case 0:
+								return L"Windows Vista";
+							case 1:
+								return L"Windows 7";
+							case 2:
+								return L"Windows 8";
+							}
+						}
+						else
+						{
+							switch(info.dwMinorVersion)
+							{
+							case 0:
+								return L"Windows Server 2008";
+							case 1:
+								return L"Windows Server 2008 R2";
+							case 2:
+								return L"Windows Server 2012";
+							}
+						}
+					}
+					return L"Windows<Unknown Version>";
+				}
+
+				WString GetOSVersionCSDPart()
+				{
+					OSVERSIONINFOEX info;
+					ZeroMemory(&info, sizeof(info));
+					info.dwOSVersionInfoSize=sizeof(info);
+					GetVersionEx((OSVERSIONINFO*)&info);
+					return info.szCSDVersion;
+				}
+
+				WString GetOSVersion()
+				{
+					return GetOSVersionMainPart()+L";"+GetOSVersionCSDPart();
 				}
 
 				//=======================================================================

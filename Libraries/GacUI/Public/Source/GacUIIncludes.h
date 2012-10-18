@@ -12499,6 +12499,7 @@ Native Window Controller
 			virtual INativeWindowService*			WindowService()=0;
 			virtual INativeInputService*			InputService()=0;
 			virtual INativeDialogService*			DialogService()=0;
+			virtual WString							GetOSVersion()=0;
 		};
 		
 		class INativeControllerListener : public Interface
