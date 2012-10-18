@@ -72,6 +72,16 @@ Button Configuration
 				static Win8ButtonColors						ScrollArrowActive();
 				static Win8ButtonColors						ScrollArrowPressed();
 				static Win8ButtonColors						ScrollArrowDisabled();
+
+				static Win8ButtonColors						MenuBarButtonNormal();
+				static Win8ButtonColors						MenuBarButtonActive();
+				static Win8ButtonColors						MenuBarButtonPressed();
+				static Win8ButtonColors						MenuBarButtonDisabled();
+
+				static Win8ButtonColors						MenuItemButtonNormal();
+				static Win8ButtonColors						MenuItemButtonNormalActive();
+				static Win8ButtonColors						MenuItemButtonDisabled();
+				static Win8ButtonColors						MenuItemButtonDisabledActive();
 			};
 
 			struct Win8ButtonElements
@@ -99,6 +109,27 @@ Button Configuration
 
 				static Win8CheckedButtonElements			Create(elements::ElementShape::Type shape, bool backgroundVisible);
 				void										Apply(const Win8ButtonColors& colors);
+			};
+
+			struct Win8MenuItemButtonElements
+			{
+				elements::GuiSolidBorderElement*			borderElement;
+				elements::GuiGradientBackgroundElement*		backgroundElement;
+				elements::GuiSolidBorderElement*			splitterElement;
+				compositions::GuiCellComposition*			splitterComposition;
+				elements::GuiImageFrameElement*				imageElement;
+				elements::GuiSolidLabelElement*				textElement;
+				compositions::GuiBoundsComposition*			textComposition;
+				elements::GuiSolidLabelElement*				shortcutElement;
+				compositions::GuiBoundsComposition*			shortcutComposition;
+				elements::GuiPolygonElement*				subMenuArrowElement;
+				compositions::GuiGraphicsComposition*		subMenuArrowComposition;
+				compositions::GuiBoundsComposition*			mainComposition;
+
+				static Win8MenuItemButtonElements			Create();
+				void										Apply(const Win8ButtonColors& colors);
+				void										SetActive(bool value);
+				void										SetSubMenuExisting(bool value);
 			};
 
 			struct Win8TextBoxColors
@@ -133,6 +164,8 @@ Helper Functions
 			extern Color									Win8GetSystemWindowColor();
 			extern Color									Win8GetSystemBorderColor();
 			extern Color									Win8GetSystemTextColor(bool enabled);
+			extern Color									Win8GetMenuBorderColor();
+			extern Color									Win8GetMenuSplitterColor();
 			extern void										Win8SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
 			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
 			extern elements::text::ColorEntry				Win8GetTextBoxTextColor();

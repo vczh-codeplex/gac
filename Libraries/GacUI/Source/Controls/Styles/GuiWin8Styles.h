@@ -43,11 +43,11 @@ Theme
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
 				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
 
-				//controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
-				//controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
-				//controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
-				//controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()override;
-				//controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()override;
+				controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
+				controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
+				controls::GuiControl::IStyleController*								CreateMenuSplitterStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateMenuBarButtonStyle()override;
+				controls::GuiToolstripButton::IStyleController*						CreateMenuItemButtonStyle()override;
 				//controls::GuiToolstripToolbar::IStyleController*					CreateToolbarStyle()override;
 				//controls::GuiToolstripButton::IStyleController*						CreateToolbarButtonStyle()override;
 				//controls::GuiToolstripButton::IStyleController*						CreateToolbarDropdownButtonStyle()override;

@@ -87,30 +87,30 @@ Win8Theme
 				return Win8GetTextBoxTextColor();
 			}
 
-			//controls::GuiToolstripMenu::IStyleController* Win8Theme::CreateMenuStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiToolstripMenu::IStyleController* Win8Theme::CreateMenuStyle()
+			{
+				return new Win8MenuStyle;
+			}
 
-			//controls::GuiToolstripMenuBar::IStyleController* Win8Theme::CreateMenuBarStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiToolstripMenuBar::IStyleController* Win8Theme::CreateMenuBarStyle()
+			{
+				return new Win8MenuBarStyle;
+			}
 
-			//controls::GuiControl::IStyleController* Win8Theme::CreateMenuSplitterStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiControl::IStyleController* Win8Theme::CreateMenuSplitterStyle()
+			{
+				return new Win8MenuSplitterStyle;
+			}
 
-			//controls::GuiToolstripButton::IStyleController* Win8Theme::CreateMenuBarButtonStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateMenuBarButtonStyle()
+			{
+				return new Win8MenuBarButtonStyle;
+			}
 
-			//controls::GuiToolstripButton::IStyleController* Win8Theme::CreateMenuItemButtonStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiToolstripButton::IStyleController* Win8Theme::CreateMenuItemButtonStyle()
+			{
+				return new Win8MenuItemButtonStyle;
+			}
 
 			//controls::GuiControl::IStyleController* Win8Theme::CreateToolbarStyle()
 			//{
