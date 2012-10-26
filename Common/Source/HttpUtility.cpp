@@ -269,17 +269,20 @@ Utilities
 		{
 			totalSize+=p.length;
 		}
-		char* utf8=new char[totalSize];
-		{
-			char* temp=utf8;
-			FOREACH(BufferPair, p, availableBuffers.Wrap())
-			{
-				memcpy(temp, p.buffer, p.length);
-				temp+=p.length;
-			}
-		}
 		response.body.Resize(totalSize);
-		memcpy(&response.body[0], utf8, totalSize);
+		if(totalSize>0)
+		{
+			char* utf8=new char[totalSize];
+			{
+				char* temp=utf8;
+				FOREACH(BufferPair, p, availableBuffers.Wrap())
+				{
+					memcpy(temp, p.buffer, p.length);
+					temp+=p.length;
+				}
+			}
+			memcpy(&response.body[0], utf8, totalSize);
+		}
 		FOREACH(BufferPair, p, availableBuffers.Wrap())
 		{
 			delete[] p.buffer;

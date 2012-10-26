@@ -143,7 +143,7 @@ Nestle Utility
 			HttpRequest request;
 			HttpResponse response;
 
-			request.SetHost(L"https://niaowo.me/account/token/");
+			request.SetHost(L"https://www.niaowo.me/account/token/");
 			request.method=L"POST";
 			request.contentType=L"application/x-www-form-urlencoded";
 			request.SetBodyUtf8(body);
@@ -164,7 +164,7 @@ Nestle Utility
 			HttpRequest request;
 			HttpResponse response;
 
-			request.SetHost(L"https://niaowo.me"+path+L".xml");
+			request.SetHost(L"https://www.niaowo.me"+path+L".xml");
 			request.method=L"GET";
 			request.cookie=cookie;
 			request.acceptTypes.Add(L"application/xml");
@@ -179,6 +179,20 @@ Nestle Utility
 			{
 				return L"";
 			}
+		}
+
+		bool NestlePostData(const WString& path, const WString& cookie, const WString& body)
+		{
+			HttpRequest request;
+			HttpResponse response;
+
+			request.SetHost(L"https://www.niaowo.me"+path);
+			request.method=L"POST";
+			request.contentType=L"application/x-www-form-urlencoded";
+			request.SetBodyUtf8(body);
+			HttpQuery(request, response);
+
+			return response.statusCode==200;
 		}
 
 /***********************************************************************
@@ -296,6 +310,20 @@ NestleServer
 				}
 			}
 			return false;
+		}
+
+		bool NestleServer::PostTopic(const WString& title, const WString& content)
+		{
+			WString url=L"/topics";
+			WString body=L"title="+UrlEncodeQuery(title)+L"&editor="+UrlEncodeQuery(content);
+			return NestlePostData(url, cookie, body);
+		}
+
+		bool NestleServer::PostComment(int postId, const WString& content)
+		{
+			WString url=L"/topics";
+			WString body=L"topic="+itow(postId)+L"&editor="+UrlEncodeQuery(content);
+			return NestlePostData(url, cookie, body);
 		}
 	}
 }

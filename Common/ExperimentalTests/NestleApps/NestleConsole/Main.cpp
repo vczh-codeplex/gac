@@ -54,6 +54,28 @@ int main(int argc, wchar_t* argv[])
 	Console::WriteLine(L"==============================================================");
 	Console::WriteLine(firstPost.body);
 
+	if(!server.PostTopic(L"这是vczh写的程序发的贴，不要理我。", L"都说了不要理了><"))
+	{
+		Console::WriteLine(L"PostTopic() failed.");
+		return 0;
+	}
+	if(!server.GetTopics(0, posts))
+	{
+		Console::WriteLine(L"GetTopics() failed.");
+		return 0;
+	}
+	FOREACH(NestlePost, post, posts.Wrap())
+	{
+		if(post.title==L"这是vczh写的程序发的贴，不要理我。")
+		{
+			if(!server.PostComment(post.id, L"这是vczh写的程序发的回帖，不要理我。"))
+			{
+				Console::WriteLine(L"PostComment() failed.");
+				return 0;
+			}
+		}
+	}
+
 	CoUninitialize();
 	return 0;
 }
