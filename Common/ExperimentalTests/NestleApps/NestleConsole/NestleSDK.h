@@ -32,6 +32,7 @@ Nestle Utility
 
 		WString						NestleGetSession(const WString& username, const WString& password, const WString& apiKey, const WString& apiSecret);
 		WString						NestleGetXml(const WString& path, const WString& cookie);
+		bool						NestlePostData(const WString& path, const WString& cookie, const WString& body);
 
 /***********************************************************************
 Nestle Data Structure
@@ -69,6 +70,8 @@ Nestle Data Structure
 			bool					IsLoginSuccess();
 			bool					GetTopics(int page, List<NestlePost>& posts);
 			bool					GetTopic(int id, NestlePost& post);
+			bool					PostTopic(const WString& title, const WString& content);
+			bool					PostComment(int postId, const WString& content);
 		};
 	}
 }
