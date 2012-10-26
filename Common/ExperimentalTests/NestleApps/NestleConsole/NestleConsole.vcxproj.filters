@@ -39,6 +39,9 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NestleSDK.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\String.h">
@@ -61,6 +64,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\Source\Tuple.h">
       <Filter>Library\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="NestleSDK.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
