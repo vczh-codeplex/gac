@@ -321,7 +321,7 @@ NestleServer
 
 		bool NestleServer::PostComment(int postId, const WString& content)
 		{
-			WString url=L"/topics";
+			WString url=L"/comments";
 			WString body=L"topic="+itow(postId)+L"&editor="+UrlEncodeQuery(content);
 			return NestlePostData(url, cookie, body);
 		}

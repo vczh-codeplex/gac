@@ -187,6 +187,7 @@ Utilities
 		{
 			WinHttpAddRequestHeaders(requestInternet, (L"Cookie:"+request.cookie).Buffer(), -1, WINHTTP_ADDREQ_FLAG_REPLACE|WINHTTP_ADDREQ_FLAG_ADD);
 		}
+
 		if(request.body.Count()>0)
 		{
 			httpResult=WinHttpSendRequest(requestInternet, WINHTTP_NO_ADDITIONAL_HEADERS, 0, (LPVOID)&request.body[0], request.body.Count(), request.body.Count(), NULL);
