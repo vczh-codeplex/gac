@@ -148,6 +148,8 @@ int main(int argc, wchar_t* argv[])
 	{
 		WString username;
 		WString password;
+		// geniusvczh_apptest
+		// fuckkula
 		Console::Write(L"Username: ");
 		username=Console::Read();
 		Console::Write(L"Password: ");
