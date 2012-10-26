@@ -28,14 +28,14 @@ int main(int argc, wchar_t* argv[])
 	if(!server.IsLoginSuccess())
 	{
 		Console::WriteLine(L"Login failed.");
-		return 0;
+		goto EXIT;
 	}
 
 	List<NestlePost> posts;
 	if(!server.GetTopics(0, posts))
 	{
 		Console::WriteLine(L"GetTopics() failed.");
-		return 0;
+		goto EXIT;
 	}
 
 	FOREACH(NestlePost, post, posts.Wrap())
@@ -47,7 +47,7 @@ int main(int argc, wchar_t* argv[])
 	if(!server.GetTopic(posts[0].id, firstPost))
 	{
 		Console::WriteLine(L"GetTopic() failed.");
-		return 0;
+		goto EXIT;
 	}
 	Console::WriteLine(L"==============================================================");
 	Console::WriteLine(firstPost.title+L" -- "+firstPost.createDateTime+L" -- "+firstPost.updateDateTime);
@@ -57,12 +57,12 @@ int main(int argc, wchar_t* argv[])
 	if(!server.PostTopic(L"这是vczh写的程序发的贴，不要理我。", L"都说了不要理了><"))
 	{
 		Console::WriteLine(L"PostTopic() failed.");
-		return 0;
+		goto EXIT;
 	}
 	if(!server.GetTopics(0, posts))
 	{
 		Console::WriteLine(L"GetTopics() failed.");
-		return 0;
+		goto EXIT;
 	}
 	FOREACH(NestlePost, post, posts.Wrap())
 	{
@@ -71,11 +71,14 @@ int main(int argc, wchar_t* argv[])
 			if(!server.PostComment(post.id, L"这是vczh写的程序发的回帖，不要理我。"))
 			{
 				Console::WriteLine(L"PostComment() failed.");
-				return 0;
+				goto EXIT;
 			}
 		}
 	}
 
+EXIT:
+	Console::WriteLine(L"Press [ENTER] to exit.");
+	Console::Read();
 	CoUninitialize();
 	return 0;
 }
