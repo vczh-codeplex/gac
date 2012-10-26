@@ -36,6 +36,40 @@ Nestle Utility
 /***********************************************************************
 Nestle Data Structure
 ***********************************************************************/
+
+		class NestlePost : public Object
+		{
+		public:
+			NestlePost(IXMLDOMNode* topicElement=0);
+			~NestlePost();
+
+			bool					operator==(const NestlePost&){return false;}
+			bool					operator!=(const NestlePost&){return true;}
+
+			WString					title;
+			WString					body;
+			WString					createDateTime;
+			WString					updateDateTime;
+			bool					deleted;
+			int						id;
+		};
+
+		class NestleServer : public Object
+		{
+		protected:
+			WString					username;
+			WString					password;
+			WString					apiKey;
+			WString					apiSecret;
+			WString					cookie;
+		public:
+			NestleServer(const WString& _username, const WString& _password, const WString& _apiKey, const WString& _apiSecret);
+			~NestleServer();
+
+			bool					IsLoginSuccess();
+			bool					GetTopics(int page, List<NestlePost>& posts);
+			bool					GetTopic(int id, NestlePost& post);
+		};
 	}
 }
 
