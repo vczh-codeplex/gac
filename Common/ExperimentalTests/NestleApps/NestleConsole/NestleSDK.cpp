@@ -180,5 +180,122 @@ Nestle Utility
 				return L"";
 			}
 		}
+
+/***********************************************************************
+NestlePost
+
+<topic>
+  <body></body>
+  <title>ÄñÎÑapiÎÄµµ£¨²Ý¸å£©</title>
+  <created-at type="datetime">2012-09-16T10:57:46+08:00</created-at>
+  <updated-at type="datetime">2012-10-26T15:26:28+08:00</updated-at>
+  <deleted type="boolean">false</deleted>
+  <id type="integer">972</id>
+
+  <member-id type="integer">1</member-id>
+  <message-id type="integer" nil="true"/>
+  <sort-at type="datetime">2012-10-26T15:26:28+08:00</sort-at>
+  <viewpoint type="integer">0</viewpoint>
+</topic>
+***********************************************************************/
+
+		NestlePost::NestlePost(IXMLDOMNode* topicElement)
+		{
+			if(topicElement)
+			{
+				body=XmlQueryString(topicElement, L"./body/text()");
+				title=XmlQueryString(topicElement, L"./title/text()");
+				createDateTime=XmlQueryString(topicElement, L"./created-at/text()");
+				updateDateTime=XmlQueryString(topicElement, L"./updated-at/text()");
+				deleted=XmlQueryString(topicElement, L"./deleted/text()")==L"true";
+				id=wtoi(XmlQueryString(topicElement, L"./id/text()"));
+			}
+		}
+
+		NestlePost::~NestlePost()
+		{
+		}
+
+/***********************************************************************
+NestleServer
+***********************************************************************/
+
+		NestleServer::NestleServer(const WString& _username, const WString& _password, const WString& _apiKey, const WString& _apiSecret)
+			:username(_username)
+			,password(_password)
+			,apiKey(_apiKey)
+			,apiSecret(_apiSecret)
+		{
+			cookie=NestleGetSession(username, password, apiKey, apiSecret);
+		}
+
+		NestleServer::~NestleServer()
+		{
+		}
+
+		bool NestleServer::IsLoginSuccess()
+		{
+			return cookie!=L"";
+		}
+
+		bool NestleServer::GetTopics(int page, List<NestlePost>& posts)
+		{
+			WString url;
+			if(page==0)
+			{
+				url=L"/topics";
+			}
+			else
+			{
+				url=L"/topics/page/"+itow(page+1);
+			}
+			WString xml=NestleGetXml(url, cookie);
+			if(xml!=L"")
+			{	
+				IXMLDOMDocument2* pDom=XmlLoad(xml);
+				if(pDom)
+				{
+					IXMLDOMNodeList* nodeList=XmlQuery(pDom, L"/topics/topic");
+					posts.Clear();
+					while(true)
+					{
+						IXMLDOMNode* node=0;
+						HRESULT hr=nodeList->nextNode(&node);
+						if(hr==S_OK)
+						{
+							posts.Add(NestlePost(node));
+							node->Release();
+						}
+						else
+						{
+							break;
+						}
+					}
+					nodeList->Release();
+					pDom->Release();
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool NestleServer::GetTopic(int id, NestlePost& post)
+		{
+			WString url=L"/topics/"+itow(id);
+			WString xml=NestleGetXml(url, cookie);
+			if(xml!=L"")
+			{	
+				IXMLDOMDocument2* pDom=XmlLoad(xml);
+				if(pDom)
+				{
+					IXMLDOMNode* node=XmlQuerySingleNode(pDom, L"/topic");
+					post=NestlePost(node);
+					node->Release();
+					pDom->Release();
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 }
