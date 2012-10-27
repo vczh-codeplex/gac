@@ -3,6 +3,7 @@
 
 #include "..\..\..\Source\HttpUtility.h"
 #include "..\..\..\Source\Collections\OperationForEach.h"
+#include "..\..\..\Source\Collections\OperationCopyFrom.h"
 
 #include <Windows.h>
 #include <msxml6.h>
@@ -38,14 +39,31 @@ Nestle Utility
 Nestle Data Structure
 ***********************************************************************/
 
+		class NestleComment : public Object
+		{
+		public:
+			NestleComment(IXMLDOMNode* commentElement=0);
+			~NestleComment();
+
+			bool					operator==(const NestleComment&)const{return false;}
+			bool					operator!=(const NestleComment&)const{return true;}
+
+			WString					body;
+			WString					createDateTime;
+			WString					author;
+			int						id;
+		};
+
 		class NestlePost : public Object
 		{
 		public:
-			NestlePost(IXMLDOMNode* topicElement=0);
+			NestlePost(IXMLDOMNode* topicElement=0, IXMLDOMNodeList* commentElements=0);
+			NestlePost(const NestlePost& post);
 			~NestlePost();
 
-			bool					operator==(const NestlePost&){return false;}
-			bool					operator!=(const NestlePost&){return true;}
+			bool					operator==(const NestlePost&)const{return false;}
+			bool					operator!=(const NestlePost&)const{return true;}
+			NestlePost&				operator=(const NestlePost& post);
 
 			WString					title;
 			WString					description;
@@ -53,6 +71,23 @@ Nestle Data Structure
 			WString					createDateTime;
 			WString					author;
 			int						id;
+			List<NestleComment>		comments;
+		};
+
+		class NestleTopicsPage
+		{
+		public:
+			NestleTopicsPage(IXMLDOMNode* rootElement=0);
+			NestleTopicsPage(const NestleTopicsPage& page);
+			~NestleTopicsPage();
+
+			bool					operator==(const NestleTopicsPage&)const{return false;}
+			bool					operator!=(const NestleTopicsPage&)const{return true;}
+			NestleTopicsPage&		operator=(const NestleTopicsPage& page);
+
+			List<NestlePost>		posts;
+			int						totalPages;
+			int						currentPage;
 		};
 
 		class NestleServer : public Object
@@ -68,7 +103,7 @@ Nestle Data Structure
 			~NestleServer();
 
 			bool					IsLoginSuccess();
-			bool					GetTopics(int page, List<NestlePost>& posts);
+			bool					GetTopics(int pageIndex, NestleTopicsPage& page);
 			bool					GetTopic(int id, NestlePost& post);
 			bool					PostTopic(const WString& title, const WString& content);
 			bool					PostComment(int postId, const WString& content);
