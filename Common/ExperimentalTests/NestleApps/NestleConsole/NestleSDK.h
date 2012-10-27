@@ -48,10 +48,10 @@ Nestle Data Structure
 			bool					operator!=(const NestlePost&){return true;}
 
 			WString					title;
+			WString					description;
 			WString					body;
 			WString					createDateTime;
-			WString					updateDateTime;
-			bool					deleted;
+			WString					author;
 			int						id;
 		};
 

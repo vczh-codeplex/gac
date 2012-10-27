@@ -51,7 +51,7 @@ int main(int argc, wchar_t* argv[])
 		goto EXIT;
 	}
 	Console::WriteLine(L"==============================================================");
-	Console::WriteLine(firstPost.title+L" -- "+firstPost.createDateTime+L" -- "+firstPost.updateDateTime);
+	Console::WriteLine(firstPost.title+L" -- "+firstPost.createDateTime+L" -- "+firstPost.author);
 	Console::WriteLine(L"==============================================================");
 	Console::WriteLine(firstPost.body);
 
