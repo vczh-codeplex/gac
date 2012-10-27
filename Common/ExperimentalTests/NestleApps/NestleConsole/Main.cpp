@@ -26,66 +26,47 @@ int main(int argc, wchar_t* argv[])
 	username=Console::Read();
 	Console::Write(L"Password: ");
 	password=Console::Read();
-
 	NestleServer server(username, password, apiKey, apiSecret);
 	if(!server.IsLoginSuccess())
 	{
 		Console::WriteLine(L"Login failed.");
+		Console::WriteLine(L"Press [ENTER] to exit.");
+		Console::Read();
 		goto EXIT;
 	}
+	
+	Console::WriteLine(L"+----------------------------------------------");
+	Console::WriteLine(L"Welcome to Vczh Console Nestle Client 1.0");
+	Console::WriteLine(L"Enter \"help\" for all commands, commands are all case sensitive.");
+	Console::WriteLine(L"Author: vczh@163.com");
+	Console::WriteLine(L"+----------------------------------------------");
 
-	if(!server.GetTopics(0, page))
+	while(true)
 	{
-		Console::WriteLine(L"GetTopics() failed.");
-		goto EXIT;
+		Console::Write(username+L">");
+		WString command=Console::Read();
+		if(command==L"exit")
+		{
+			break;
+		}
+		else if(command==L"help")
+		{
+			Console::WriteLine(L"+----------------------------------------------");
+			Console::WriteLine(L"exit                : Close the client.");
+			Console::WriteLine(L"help                : Show help.");
+			Console::WriteLine(L"pages               : Get total page count.");
+			Console::WriteLine(L"topics [page index] : Get all topics of the specified page. Page index starts from 1, default is 1.");
+			Console::WriteLine(L"topic <id>          : Open a topic.");
+			Console::WriteLine(L"comments            : Show all comments of the current topic.");
+			Console::WriteLine(L"comment <content>   : Post a comment in the current topic.");
+			Console::WriteLine(L"post <title>        : Begin a new post with a specified title. Then enter content, until one of the following commands are used.");
+			Console::WriteLine(L"send post           : Send out the new post.");
+			Console::WriteLine(L"cancel post         : Cancel the new post.");
+			Console::WriteLine(L"+----------------------------------------------");
+		}
 	}
-
-	FOREACH(NestlePost, post, page.posts.Wrap())
-	{
-		Console::WriteLine(post.title);
-	}
-
-	if(!server.GetTopic(page.posts[0].id, firstPost))
-	{
-		Console::WriteLine(L"GetTopic() failed.");
-		goto EXIT;
-	}
-	Console::WriteLine(L"==============================================================");
-	Console::WriteLine(firstPost.title+L" -- "+firstPost.createDateTime+L" -- "+firstPost.author);
-	Console::WriteLine(L"==============================================================");
-	Console::WriteLine(firstPost.body);
-	FOREACH(NestleComment, comment, firstPost.comments.Wrap())
-	{
-		Console::WriteLine(L"");
-		Console::WriteLine(L"Comment by "+comment.author+L" :");
-		Console::WriteLine(comment.body);
-	}
-
-	//if(!server.PostTopic(L"这是vczh写的程序发的贴，不要理我。", L"都说了不要理了><"))
-	//{
-	//	Console::WriteLine(L"PostTopic() failed.");
-	//	goto EXIT;
-	//}
-	//if(!server.GetTopics(0, posts))
-	//{
-	//	Console::WriteLine(L"GetTopics() failed.");
-	//	goto EXIT;
-	//}
-	//FOREACH(NestlePost, post, posts.Wrap())
-	//{
-	//	if(post.title==L"这是vczh写的程序发的贴，不要理我。")
-	//	{
-	//		if(!server.PostComment(post.id, L"这是vczh写的程序发的回帖，不要理我。"))
-	//		{
-	//			Console::WriteLine(L"PostComment() failed.");
-	//			goto EXIT;
-	//		}
-	//	}
-	//}
 
 EXIT:
-	Console::WriteLine(L"Press [ENTER] to exit.");
-	Console::Read();
 	CoUninitialize();
 	return 0;
 }
