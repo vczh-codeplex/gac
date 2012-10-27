@@ -188,6 +188,7 @@ Nestle Utility
 
 			request.SetHost(L"https://www.niaowo.me"+path);
 			request.method=L"POST";
+			request.cookie=cookie;
 			request.contentType=L"application/x-www-form-urlencoded";
 			request.SetBodyUtf8(body);
 			HttpQuery(request, response);
@@ -197,7 +198,7 @@ Nestle Utility
 
 /***********************************************************************
 NestlePost
-
+ 
 <topic>
   <body></body>
   <title>ÄñÎÑapiÎÄµµ£¨²Ý¸å£©</title>

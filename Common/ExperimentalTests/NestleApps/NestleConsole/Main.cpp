@@ -17,6 +17,9 @@ int main(int argc, wchar_t* argv[])
 	WString apiSecret=L"9814021f20054b558105fca1df6559a7";
 	WString username;
 	WString password;
+	List<NestlePost> posts;
+	NestlePost firstPost;
+
 	// geniusvczh_apptest
 	// fuckkula
 	Console::Write(L"Username: ");
@@ -31,7 +34,6 @@ int main(int argc, wchar_t* argv[])
 		goto EXIT;
 	}
 
-	List<NestlePost> posts;
 	if(!server.GetTopics(0, posts))
 	{
 		Console::WriteLine(L"GetTopics() failed.");
@@ -43,7 +45,6 @@ int main(int argc, wchar_t* argv[])
 		Console::WriteLine(post.title);
 	}
 
-	NestlePost firstPost;
 	if(!server.GetTopic(posts[0].id, firstPost))
 	{
 		Console::WriteLine(L"GetTopic() failed.");
