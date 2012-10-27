@@ -193,36 +193,32 @@ Nestle Utility
 			request.SetBodyUtf8(body);
 			HttpQuery(request, response);
 
-			return response.statusCode==200;
+			return response.statusCode==200||response.statusCode==302;
 		}
 
 /***********************************************************************
 NestlePost
  
 <topic>
-  <body></body>
-  <title>鸟窝api文档（草稿）</title>
-  <created-at type="datetime">2012-09-16T10:57:46+08:00</created-at>
-  <updated-at type="datetime">2012-10-26T15:26:28+08:00</updated-at>
-  <deleted type="boolean">false</deleted>
-  <id type="integer">972</id>
-
-  <member-id type="integer">1</member-id>
-  <message-id type="integer" nil="true"/>
-  <sort-at type="datetime">2012-10-26T15:26:28+08:00</sort-at>
-  <viewpoint type="integer">0</viewpoint>
+	<body></body>
+	<title>斗智斗勇斗粗口，40天血泪买房路</title>
+	<viewpoint type="integer">279</viewpoint>
+	<desc>时间过去几个月了，现在有时间静下来回顾一下这次的买房经历了。...</desc>
+	<created type="datetime">2012-10-14T20:41:59+08:00</created>
+	<author>左右</author>
 </topic>
 ***********************************************************************/
 
 		NestlePost::NestlePost(IXMLDOMNode* topicElement)
+			:id(-1)
 		{
 			if(topicElement)
 			{
 				body=XmlQueryString(topicElement, L"./body/text()");
 				title=XmlQueryString(topicElement, L"./title/text()");
-				createDateTime=XmlQueryString(topicElement, L"./created-at/text()");
-				updateDateTime=XmlQueryString(topicElement, L"./updated-at/text()");
-				deleted=XmlQueryString(topicElement, L"./deleted/text()")==L"true";
+				description=XmlQueryString(topicElement, L"./desc/text()");
+				createDateTime=XmlQueryString(topicElement, L"./created/text()");
+				author=XmlQueryString(topicElement, L"./author/text()");
 				id=wtoi(XmlQueryString(topicElement, L"./id/text()"));
 			}
 		}
@@ -270,7 +266,7 @@ NestleServer
 				IXMLDOMDocument2* pDom=XmlLoad(xml);
 				if(pDom)
 				{
-					IXMLDOMNodeList* nodeList=XmlQuery(pDom, L"/topics/topic");
+					IXMLDOMNodeList* nodeList=XmlQuery(pDom, L"/hash/topics/topic");
 					posts.Clear();
 					while(true)
 					{
@@ -303,7 +299,7 @@ NestleServer
 				IXMLDOMDocument2* pDom=XmlLoad(xml);
 				if(pDom)
 				{
-					IXMLDOMNode* node=XmlQuerySingleNode(pDom, L"/topic");
+					IXMLDOMNode* node=XmlQuerySingleNode(pDom, L"/hash/topic");
 					post=NestlePost(node);
 					node->Release();
 					pDom->Release();
@@ -316,14 +312,14 @@ NestleServer
 		bool NestleServer::PostTopic(const WString& title, const WString& content)
 		{
 			WString url=L"/topics";
-			WString body=L"title="+UrlEncodeQuery(title)+L"&editor="+UrlEncodeQuery(content);
+			WString body=L"title="+UrlEncodeQuery(title)+L"&body="+UrlEncodeQuery(content);
 			return NestlePostData(url, cookie, body);
 		}
 
 		bool NestleServer::PostComment(int postId, const WString& content)
 		{
 			WString url=L"/comments";
-			WString body=L"topic="+itow(postId)+L"&editor="+UrlEncodeQuery(content);
+			WString body=L"topic="+itow(postId)+L"&body="+UrlEncodeQuery(content);
 			return NestlePostData(url, cookie, body);
 		}
 	}
