@@ -17,8 +17,11 @@ int main(int argc, wchar_t* argv[])
 	WString apiSecret=L"9814021f20054b558105fca1df6559a7";
 	WString username;
 	WString password;
-	NestleTopicsPage page;
-	NestlePost firstPost;
+
+	int currentPostId=-1;
+	bool editingPost=false;
+	WString editingPostTitle;
+	WString editingPostContent;
 
 	// geniusvczh_apptest
 	// fuckkula
@@ -29,7 +32,9 @@ int main(int argc, wchar_t* argv[])
 	NestleServer server(username, password, apiKey, apiSecret);
 	if(!server.IsLoginSuccess())
 	{
+		Console::SetColor(true, false, false, true);
 		Console::WriteLine(L"Login failed.");
+		Console::SetColor(true, true, true, false);
 		Console::WriteLine(L"Press [ENTER] to exit.");
 		Console::Read();
 		goto EXIT;
@@ -43,26 +48,226 @@ int main(int argc, wchar_t* argv[])
 
 	while(true)
 	{
-		Console::Write(username+L">");
+		Console::SetColor(false, true, false, true);
+		if(editingPost)
+		{
+			Console::Write(L"New Post>");
+		}
+		else if(currentPostId==-1)
+		{
+			Console::Write(username+L">");
+		}
+		else
+		{
+			Console::Write(L"Topic "+itow(currentPostId)+L">");
+		}
+		Console::SetColor(true, true, true, false);
 		WString command=Console::Read();
-		if(command==L"exit")
+
+		if(command.Length()>=5 && command.Sub(0, 5)==L"post ")
+		{
+			currentPostId=-1;
+			if(command==L"post ")
+			{
+				Console::SetColor(true, false, false, true);
+				Console::WriteLine(L"<TITLE CANNOT BE EMPTY>");
+				Console::SetColor(true, true, true, false);
+			}
+			else
+			{
+				editingPost=true;
+				editingPostTitle=command.Sub(5, command.Length()-5);
+				editingPostContent=L"";
+				Console::SetColor(false, true, false, true);
+				Console::WriteLine(L"<TITLE>: "+editingPostTitle);
+				Console::WriteLine(L"<PLEASE ENTER CONTENT, OR USING send post/cancel post TO FINISH>");
+				Console::SetColor(true, true, true, false);
+			}
+		}
+		else if(command==L"send post")
+		{
+			currentPostId=-1;
+			if(editingPost)
+			{
+				if(server.PostTopic(editingPostTitle, editingPostContent))
+				{
+					Console::SetColor(false, true, false, true);
+					Console::WriteLine(L"<SUCCESS>");
+					Console::SetColor(true, true, true, false);
+					editingPost=false;
+				}
+				else
+				{
+					Console::SetColor(true, false, false, true);
+					Console::WriteLine(L"<OPERATION FAILED>");
+					Console::SetColor(true, true, true, false);
+				}
+			}
+			else
+			{
+				Console::SetColor(true, false, false, true);
+				Console::WriteLine(L"<SHOULD USE post COMMAND TO ENTER EDITING MODE FIRST>");
+				Console::SetColor(true, true, true, false);
+			}
+		}
+		else if(command==L"cancel post")
+		{
+			currentPostId=-1;
+			if(editingPost)
+			{
+				editingPost=false;
+			}
+		}
+		else if(command==L"exit")
 		{
 			break;
 		}
-		else if(command==L"help")
+		else
 		{
-			Console::WriteLine(L"+----------------------------------------------");
-			Console::WriteLine(L"exit                : Close the client.");
-			Console::WriteLine(L"help                : Show help.");
-			Console::WriteLine(L"pages               : Get total page count.");
-			Console::WriteLine(L"topics [page index] : Get all topics of the specified page. Page index starts from 1, default is 1.");
-			Console::WriteLine(L"topic <id>          : Open a topic.");
-			Console::WriteLine(L"comments            : Show all comments of the current topic.");
-			Console::WriteLine(L"comment <content>   : Post a comment in the current topic.");
-			Console::WriteLine(L"post <title>        : Begin a new post with a specified title. Then enter content, until one of the following commands are used.");
-			Console::WriteLine(L"send post           : Send out the new post.");
-			Console::WriteLine(L"cancel post         : Cancel the new post.");
-			Console::WriteLine(L"+----------------------------------------------");
+			if(editingPost)
+			{
+				editingPostContent+=command+L"\r\n";
+			}
+			else if(command==L"help")
+			{
+				Console::WriteLine(L"+----------------------------------------------");
+				Console::WriteLine(L"exit                : Close the client.");
+				Console::WriteLine(L"help                : Show help.");
+				Console::WriteLine(L"topics [page index] : Get all topics of the specified page. Page index starts from 1, default is 1.");
+				Console::WriteLine(L"topic <id>          : Open a topic.");
+				Console::WriteLine(L"comments            : Show all comments of the current topic.");
+				Console::WriteLine(L"comment <content>   : Post a comment in the current topic.");
+				Console::WriteLine(L"post <title>        : Begin a new post with a specified title. Then enter content, until one of the following commands are used.");
+				Console::WriteLine(L"send post           : Send out the new post.");
+				Console::WriteLine(L"cancel post         : Cancel the new post.");
+				Console::WriteLine(L"+----------------------------------------------");
+			}
+			else if(command.Length()>=6 && command.Sub(0, 6)==L"topics")
+			{
+				currentPostId=-1;
+				int pageIndex=command==L"topics"?0:wtoi(command.Sub(6, command.Length()-6))-1;
+				NestleTopicsPage page;
+				if(server.GetTopics(pageIndex, page))
+				{
+					Console::WriteLine(L"+----------------------------------------------");
+					Console::WriteLine(L"Total pages  : "+itow(page.totalPages));
+					Console::WriteLine(L"Current page : "+itow(page.currentPage));
+					Console::WriteLine(L"+----------------------------------------------");
+					FOREACH(NestlePost, post, page.posts.Wrap())
+					{
+						Console::WriteLine(L"Author : "+post.author);
+						Console::WriteLine(L"Id     : "+itow(post.id));
+						Console::WriteLine(L"");
+						Console::WriteLine(post.title);
+						Console::WriteLine(L"+----------------------------------------------");
+					}
+				}
+				else
+				{
+					Console::SetColor(true, false, false, true);
+					Console::WriteLine(L"<OPERATION FAILED>");
+					Console::SetColor(true, true, true, false);
+				}
+			}
+			else if(command.Length()>=6 && command.Sub(0, 6)==L"topic ")
+			{
+				currentPostId=command==L"topic "?-1:wtoi(command.Sub(6, command.Length()-6));
+				if(currentPostId==-1)
+				{
+					Console::SetColor(true, false, false, true);
+					Console::WriteLine(L"<WRONG POST ID>");
+					Console::SetColor(true, true, true, false);
+				}
+				else
+				{
+					NestlePost post;
+					if(server.GetTopic(currentPostId, post))
+					{
+						Console::WriteLine(L"+----------------------------------------------");
+						Console::WriteLine(L"Author     : "+post.author);
+						Console::WriteLine(L"Id         : "+itow(post.id));
+						Console::WriteLine(L"Created At : "+post.createDateTime);
+						Console::WriteLine(L"+----------------------------------------------");
+						Console::WriteLine(post.body);
+						Console::WriteLine(L"+----------------------------------------------");
+					}
+					else
+					{
+						currentPostId=-1;
+						Console::SetColor(true, false, false, true);
+						Console::WriteLine(L"<OPERATION FAILED>");
+						Console::SetColor(true, true, true, false);
+					}
+				}
+			}
+			else if(command==L"comments")
+			{
+				if(currentPostId==-1)
+				{
+					Console::SetColor(true, false, false, true);
+					Console::WriteLine(L"<SHOULD USE topic TO OPEN TOPIC FIRST>");
+					Console::SetColor(true, true, true, false);
+				}
+				else
+				{
+					NestlePost post;
+					if(server.GetTopic(currentPostId, post))
+					{
+						Console::WriteLine(L"+----------------------------------------------");
+						FOREACH(NestleComment, comment, post.comments.Wrap())
+						{
+							Console::WriteLine(L"Author : "+comment.author);
+							Console::WriteLine(L"Id     : "+itow(comment.id));
+							Console::WriteLine(L"");
+							Console::WriteLine(comment.body);
+							Console::WriteLine(L"+----------------------------------------------");
+						}
+					}
+					else
+					{
+						currentPostId=-1;
+						Console::SetColor(true, false, false, true);
+						Console::WriteLine(L"<OPERATION FAILED>");
+						Console::SetColor(true, true, true, false);
+					}
+				}
+			}
+			else if(command.Length()>=8 && command.Sub(0, 8)==L"comment ")
+			{
+				if(currentPostId==-1)
+				{
+					Console::SetColor(true, false, false, true);
+					Console::WriteLine(L"<SHOULD USE topic TO OPEN TOPIC FIRST>");
+					Console::SetColor(true, true, true, false);
+				}
+				else if(command==L"comment ")
+				{
+					Console::SetColor(true, false, false, true);
+					Console::WriteLine(L"<COMMENT CANNOT BE EMPTY>");
+					Console::SetColor(true, true, true, false);
+				}
+				else
+				{
+					WString content=command.Sub(8, command.Length()-8);
+					if(server.PostComment(currentPostId, content))
+					{
+						Console::SetColor(false, true, false, true);
+						Console::WriteLine(L"<SUCCESS>");
+						Console::SetColor(true, true, true, false);
+					}
+					else
+					{
+						Console::SetColor(true, false, false, true);
+						Console::WriteLine(L"<OPERATION FAILED>");
+						Console::SetColor(true, true, true, false);
+					}
+				}
+			}
+			else
+			{
+				currentPostId=-1;
+				Console::WriteLine(L"<WRONG COMMAND>: "+command);
+			}
 		}
 	}
 
