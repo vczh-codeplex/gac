@@ -197,34 +197,162 @@ Nestle Utility
 		}
 
 /***********************************************************************
-NestlePost
- 
-<topic>
-	<body></body>
-	<title>斗智斗勇斗粗口，40天血泪买房路</title>
-	<viewpoint type="integer">279</viewpoint>
-	<desc>时间过去几个月了，现在有时间静下来回顾一下这次的买房经历了。...</desc>
-	<created type="datetime">2012-10-14T20:41:59+08:00</created>
-	<author>左右</author>
-</topic>
+<?xml version="1.0" encoding="UTF-8"?>
+<hash>
+  <topic>
+    <id type="integer">1042</id>
+    <title>这是vczh写的程序发的贴，不要理我。</title>
+    <viewpoint type="integer">306</viewpoint>
+    <desc>都说了不要理了&gt;&amp;LT;...</desc>
+    <body>&lt;p&gt;都说了不要理了&gt;&amp;LT;&lt;/p&gt;
+</body>
+    <created type="datetime">2012-10-27T14:00:59+08:00</created>
+    <author>geniusvczh_apptest</author>
+  </topic>
+  <comments type="array">
+    <comment>
+      <id type="integer">3329</id>
+      <body>&lt;p&gt;这是vczh写的程序发的回帖，不要理我。&lt;/p&gt;
+</body>
+      <author>geniusvczh_apptest</author>
+      <created type="datetime">2012-10-27T14:08:05+08:00</created>
+    </comment>
+  </comments>
+</hash>
 ***********************************************************************/
 
-		NestlePost::NestlePost(IXMLDOMNode* topicElement)
+/***********************************************************************
+NestleComment
+***********************************************************************/
+
+		NestleComment::NestleComment(IXMLDOMNode* commentElement)
+			:id(-1)
+		{
+			if(commentElement)
+			{
+				body=XmlQueryString(commentElement, L"./body/text()");
+				createDateTime=XmlQueryString(commentElement, L"./created/text()");
+				author=XmlQueryString(commentElement, L"./author/text()");
+				id=wtoi(XmlQueryString(commentElement, L"./id/text()"));
+			}
+		}
+
+		NestleComment::~NestleComment()
+		{
+		}
+
+/***********************************************************************
+NestlePost
+***********************************************************************/
+
+		NestlePost::NestlePost(IXMLDOMNode* topicElement, IXMLDOMNodeList* commentElements)
 			:id(-1)
 		{
 			if(topicElement)
 			{
-				body=XmlQueryString(topicElement, L"./body/text()");
 				title=XmlQueryString(topicElement, L"./title/text()");
 				description=XmlQueryString(topicElement, L"./desc/text()");
+				body=XmlQueryString(topicElement, L"./body/text()");
 				createDateTime=XmlQueryString(topicElement, L"./created/text()");
 				author=XmlQueryString(topicElement, L"./author/text()");
 				id=wtoi(XmlQueryString(topicElement, L"./id/text()"));
+
+				if(commentElements)
+				{
+					while(true)
+					{
+						IXMLDOMNode* comment=0;
+						HRESULT hr=commentElements->nextNode(&comment);
+						if(hr==S_OK)
+						{
+							comments.Add(NestleComment(comment));
+							comment->Release();
+						}
+						else
+						{
+							break;
+						}
+					}
+				}
 			}
+		}
+
+		NestlePost::NestlePost(const NestlePost& post)
+			:title(post.title)
+			,description(post.description)
+			,body(post.body)
+			,createDateTime(post.createDateTime)
+			,author(post.author)
+			,id(post.id)
+		{
+			CopyFrom(comments.Wrap(), post.comments.Wrap());
 		}
 
 		NestlePost::~NestlePost()
 		{
+		}
+
+		NestlePost& NestlePost::operator=(const NestlePost& post)
+		{
+			title=post.title;
+			description=post.description;
+			body=post.body;
+			createDateTime=post.createDateTime;
+			author=post.author;
+			id=post.id;
+			CopyFrom(comments.Wrap(), post.comments.Wrap());
+			return *this;
+		}
+
+/***********************************************************************
+NestleTopicsPage
+***********************************************************************/
+
+		NestleTopicsPage::NestleTopicsPage(IXMLDOMNode* rootElement)
+			:totalPages(-1)
+			,currentPage(-1)
+		{
+			if(rootElement)
+			{
+				IXMLDOMNodeList* nodeList=XmlQuery(rootElement, L"/hash/topics/topic");
+				while(true)
+				{
+					IXMLDOMNode* node=0;
+					HRESULT hr=nodeList->nextNode(&node);
+					if(hr==S_OK)
+					{
+						posts.Add(NestlePost(node));
+						node->Release();
+					}
+					else
+					{
+						break;
+					}
+				}
+				nodeList->Release();
+
+				totalPages=wtoi(XmlQueryString(rootElement, L"/hash/page/total-pages/text()"));
+				currentPage=wtoi(XmlQueryString(rootElement, L"/hash/page/current-page/text()"))-1;
+			}
+		}
+
+		NestleTopicsPage::NestleTopicsPage(const NestleTopicsPage& page)
+			:totalPages(page.totalPages)
+			,currentPage(page.currentPage)
+		{
+			CopyFrom(posts.Wrap(), page.posts.Wrap());
+		}
+
+		NestleTopicsPage::~NestleTopicsPage()
+		{
+		}
+
+		NestleTopicsPage& NestleTopicsPage::operator=(const NestleTopicsPage& post)
+		{
+			totalPages=post.totalPages;
+			currentPage=post.currentPage;
+			CopyFrom(posts.Wrap(), post.posts.Wrap());
+			return *this;
 		}
 
 /***********************************************************************
@@ -249,16 +377,16 @@ NestleServer
 			return cookie!=L"";
 		}
 
-		bool NestleServer::GetTopics(int page, List<NestlePost>& posts)
+		bool NestleServer::GetTopics(int pageIndex, NestleTopicsPage& page)
 		{
 			WString url;
-			if(page==0)
+			if(pageIndex==0)
 			{
 				url=L"/topics";
 			}
 			else
 			{
-				url=L"/topics/page/"+itow(page+1);
+				url=L"/topics/page/"+itow(pageIndex+1);
 			}
 			WString xml=NestleGetXml(url, cookie);
 			if(xml!=L"")
@@ -266,23 +394,7 @@ NestleServer
 				IXMLDOMDocument2* pDom=XmlLoad(xml);
 				if(pDom)
 				{
-					IXMLDOMNodeList* nodeList=XmlQuery(pDom, L"/hash/topics/topic");
-					posts.Clear();
-					while(true)
-					{
-						IXMLDOMNode* node=0;
-						HRESULT hr=nodeList->nextNode(&node);
-						if(hr==S_OK)
-						{
-							posts.Add(NestlePost(node));
-							node->Release();
-						}
-						else
-						{
-							break;
-						}
-					}
-					nodeList->Release();
+					page=NestleTopicsPage(pDom);
 					pDom->Release();
 					return true;
 				}
@@ -300,7 +412,9 @@ NestleServer
 				if(pDom)
 				{
 					IXMLDOMNode* node=XmlQuerySingleNode(pDom, L"/hash/topic");
-					post=NestlePost(node);
+					IXMLDOMNodeList* nodeList=XmlQuery(pDom, L"/hash/comments/comment");
+					post=NestlePost(node, nodeList);
+					nodeList->Release();
 					node->Release();
 					pDom->Release();
 					return true;

@@ -17,7 +17,7 @@ int main(int argc, wchar_t* argv[])
 	WString apiSecret=L"9814021f20054b558105fca1df6559a7";
 	WString username;
 	WString password;
-	List<NestlePost> posts;
+	NestleTopicsPage page;
 	NestlePost firstPost;
 
 	// geniusvczh_apptest
@@ -34,18 +34,18 @@ int main(int argc, wchar_t* argv[])
 		goto EXIT;
 	}
 
-	if(!server.GetTopics(0, posts))
+	if(!server.GetTopics(0, page))
 	{
 		Console::WriteLine(L"GetTopics() failed.");
 		goto EXIT;
 	}
 
-	FOREACH(NestlePost, post, posts.Wrap())
+	FOREACH(NestlePost, post, page.posts.Wrap())
 	{
 		Console::WriteLine(post.title);
 	}
 
-	if(!server.GetTopic(posts[0].id, firstPost))
+	if(!server.GetTopic(page.posts[0].id, firstPost))
 	{
 		Console::WriteLine(L"GetTopic() failed.");
 		goto EXIT;
@@ -54,28 +54,34 @@ int main(int argc, wchar_t* argv[])
 	Console::WriteLine(firstPost.title+L" -- "+firstPost.createDateTime+L" -- "+firstPost.author);
 	Console::WriteLine(L"==============================================================");
 	Console::WriteLine(firstPost.body);
+	FOREACH(NestleComment, comment, firstPost.comments.Wrap())
+	{
+		Console::WriteLine(L"");
+		Console::WriteLine(L"Comment by "+comment.author+L" :");
+		Console::WriteLine(comment.body);
+	}
 
-	if(!server.PostTopic(L"这是vczh写的程序发的贴，不要理我。", L"都说了不要理了><"))
-	{
-		Console::WriteLine(L"PostTopic() failed.");
-		goto EXIT;
-	}
-	if(!server.GetTopics(0, posts))
-	{
-		Console::WriteLine(L"GetTopics() failed.");
-		goto EXIT;
-	}
-	FOREACH(NestlePost, post, posts.Wrap())
-	{
-		if(post.title==L"这是vczh写的程序发的贴，不要理我。")
-		{
-			if(!server.PostComment(post.id, L"这是vczh写的程序发的回帖，不要理我。"))
-			{
-				Console::WriteLine(L"PostComment() failed.");
-				goto EXIT;
-			}
-		}
-	}
+	//if(!server.PostTopic(L"这是vczh写的程序发的贴，不要理我。", L"都说了不要理了><"))
+	//{
+	//	Console::WriteLine(L"PostTopic() failed.");
+	//	goto EXIT;
+	//}
+	//if(!server.GetTopics(0, posts))
+	//{
+	//	Console::WriteLine(L"GetTopics() failed.");
+	//	goto EXIT;
+	//}
+	//FOREACH(NestlePost, post, posts.Wrap())
+	//{
+	//	if(post.title==L"这是vczh写的程序发的贴，不要理我。")
+	//	{
+	//		if(!server.PostComment(post.id, L"这是vczh写的程序发的回帖，不要理我。"))
+	//		{
+	//			Console::WriteLine(L"PostComment() failed.");
+	//			goto EXIT;
+	//		}
+	//	}
+	//}
 
 EXIT:
 	Console::WriteLine(L"Press [ENTER] to exit.");
