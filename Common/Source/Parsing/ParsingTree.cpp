@@ -13,11 +13,123 @@ namespace vl
 		}
 
 /***********************************************************************
+ParsingTreeNode::TraversalVisitor
+***********************************************************************/
+
+		ParsingTreeNode::TraversalVisitor::TraversalVisitor(TraverseDirection _direction)
+			:direction(_direction)
+		{
+		}
+
+		void ParsingTreeNode::TraversalVisitor::BeforeVisit(ParsingTreeToken* node)
+		{
+		}
+
+		void ParsingTreeNode::TraversalVisitor::AfterVisit(ParsingTreeToken* node)
+		{
+		}
+
+		void ParsingTreeNode::TraversalVisitor::BeforeVisit(ParsingTreeObject* node)
+		{
+		}
+
+		void ParsingTreeNode::TraversalVisitor::AfterVisit(ParsingTreeObject* node)
+		{
+		}
+
+		void ParsingTreeNode::TraversalVisitor::BeforeVisit(ParsingTreeArray* node)
+		{
+		}
+
+		void ParsingTreeNode::TraversalVisitor::AfterVisit(ParsingTreeArray* node)
+		{
+		}
+
+		void ParsingTreeNode::TraversalVisitor::Visit(ParsingTreeToken* node)
+		{
+			BeforeVisit(node);
+			AfterVisit(node);
+		}
+
+		void ParsingTreeNode::TraversalVisitor::Visit(ParsingTreeObject* node)
+		{
+			BeforeVisit(node);
+			switch(direction)
+			{
+			case TraverseDirection::ByTextPosition:
+				{
+					FOREACH(Ptr<ParsingTreeNode>, node, node->GetSubNodes())
+					{
+						node->Accept(this);
+					}
+				}
+				break;
+			case TraverseDirection::ByStorePosition:
+				{
+					FOREACH(Ptr<ParsingTreeNode>, node, node->GetMembers().Values())
+					{
+						node->Accept(this);
+					}
+				}
+				break;
+			}
+			AfterVisit(node);
+		}
+
+		void ParsingTreeNode::TraversalVisitor::Visit(ParsingTreeArray* node)
+		{
+			BeforeVisit(node);
+			switch(direction)
+			{
+			case TraverseDirection::ByTextPosition:
+				{
+					FOREACH(Ptr<ParsingTreeNode>, node, node->GetSubNodes())
+					{
+						node->Accept(this);
+					}
+				}
+				break;
+			case TraverseDirection::ByStorePosition:
+				{
+					FOREACH(Ptr<ParsingTreeNode>, node, node->GetItems())
+					{
+						node->Accept(this);
+					}
+				}
+				break;
+			}
+			AfterVisit(node);
+		}
+
+/***********************************************************************
 ParsingTreeNode
 ***********************************************************************/
 
+		bool ParsingTreeNode::BeforeAddChild(Ptr<ParsingTreeNode> node)
+		{
+			return node->parent==0;
+		}
+
+		void ParsingTreeNode::AfterAddChild(Ptr<ParsingTreeNode> node)
+		{
+			node->parent=this;
+			ClearQueryCache();
+		}
+
+		bool ParsingTreeNode::BeforeRemoveChild(Ptr<ParsingTreeNode> node)
+		{
+			return node->parent!=0;
+		}
+
+		void ParsingTreeNode::AfterRemoveChild(Ptr<ParsingTreeNode> node)
+		{
+			node->parent=0;
+			ClearQueryCache();
+		}
+
 		ParsingTreeNode::ParsingTreeNode(const ParsingTextRange& _codeRange)
 			:codeRange(_codeRange)
+			,parent(0)
 		{
 		}
 
@@ -30,12 +142,36 @@ ParsingTreeNode
 			return codeRange;
 		}
 
-		void ParsingTreeNode::InitializeQueryCache()
+		void ParsingTreeNode::SetCodeRange(const ParsingTextRange& range)
 		{
-			CopyFrom(cachedOrderedSubNodes.Wrap(), GetSubNodesInternal()>>OrderBy(&CompareTextRange));
+			codeRange=range;
 		}
 
-		const ParsingTreeNode::INodeList& ParsingTreeNode::SubNodes()
+		void ParsingTreeNode::InitializeQueryCache()
+		{
+			const INodeList& subNodes=GetSubNodesInternal();
+			ClearQueryCache();
+			if(&subNodes)
+			{
+				CopyFrom(cachedOrderedSubNodes.Wrap(), subNodes>>OrderBy(&CompareTextRange));
+				FOREACH(Ptr<ParsingTreeNode>, node, cachedOrderedSubNodes.Wrap())
+				{
+					node->InitializeQueryCache();
+				}
+			}
+		}
+
+		void ParsingTreeNode::ClearQueryCache()
+		{
+			cachedOrderedSubNodes.Clear();
+		}
+
+		ParsingTreeNode* ParsingTreeNode::GetParent()
+		{
+			return parent;
+		}
+
+		const ParsingTreeNode::INodeList& ParsingTreeNode::GetSubNodes()
 		{
 			return cachedOrderedSubNodes.Wrap();
 		}
@@ -65,6 +201,40 @@ ParsingTreeNode
 		}
 
 /***********************************************************************
+ParsingTreeToken
+***********************************************************************/
+
+		const ParsingTreeToken::INodeList& ParsingTreeToken::GetSubNodesInternal()
+		{
+			return *(INodeList*)0;
+		}
+
+		ParsingTreeToken::ParsingTreeToken(vint _tokenIndex, const ParsingTextRange& _codeRange)
+			:ParsingTreeNode(_codeRange)
+			,tokenIndex(_tokenIndex)
+		{
+		}
+
+		ParsingTreeToken::~ParsingTreeToken()
+		{
+		}
+
+		void ParsingTreeToken::Accept(IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
+		vint ParsingTreeToken::GetTokenIndex()
+		{
+			return tokenIndex;
+		}
+
+		void ParsingTreeToken::SetTokenIndex(vint _tokenIndex)
+		{
+			tokenIndex=_tokenIndex;
+		}
+
+/***********************************************************************
 ParsingTreeObject
 ***********************************************************************/
 
@@ -73,13 +243,29 @@ ParsingTreeObject
 			return members.Values();
 		}
 
-		ParsingTreeObject::ParsingTreeObject(const ParsingTextRange& _codeRange)
+		ParsingTreeObject::ParsingTreeObject(const WString& _type, const ParsingTextRange& _codeRange)
 			:ParsingTreeNode(_codeRange)
+			,type(_type)
 		{
 		}
 
 		ParsingTreeObject::~ParsingTreeObject()
 		{
+		}
+
+		void ParsingTreeObject::Accept(IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
+		const WString& ParsingTreeObject::GetType()
+		{
+			return type;
+		}
+
+		void ParsingTreeObject::SetType(const WString& _type)
+		{
+			type=_type;
 		}
 
 		ParsingTreeObject::INodeMap& ParsingTreeObject::GetMembers()
@@ -93,21 +279,36 @@ ParsingTreeObject
 			return index==-1?0:members.Values()[index];
 		}
 
-		void ParsingTreeObject::SetMember(const WString& name, Ptr<ParsingTreeNode> node)
+		bool ParsingTreeObject::SetMember(const WString& name, Ptr<ParsingTreeNode> node)
 		{
-			if(node)
+			vint index=members.Keys().IndexOf(name);
+			if(index!=-1)
 			{
-				members.Set(name, node);
-			}
-			else
-			{
+				Ptr<ParsingTreeNode> previous=members.Values()[index];
+				if(previous==node) return true;
+				if(!BeforeRemoveChild(previous) || !BeforeAddChild(node)) return false;
 				members.Remove(name);
+				AfterRemoveChild(previous);
 			}
+			members.Add(name, node);
+			AfterAddChild(node);
+			return true;
 		}
 
-		void ParsingTreeObject::RemoveMember(const WString& name)
+		bool ParsingTreeObject::RemoveMember(const WString& name)
 		{
-			members.Remove(name);
+			vint index=members.Keys().IndexOf(name);
+			if(index!=-1)
+			{
+				Ptr<ParsingTreeNode> previous=members.Values()[index];
+				if(BeforeRemoveChild(previous))
+				{
+					members.Remove(name);
+					AfterRemoveChild(previous);
+					return true;
+				}
+			}
+			return false;
 		}
 
 		const ParsingTreeObject::INameList& ParsingTreeObject::GetMemberNames()
@@ -124,13 +325,29 @@ ParsingTreeArray
 			return items.Wrap();
 		}
 
-		ParsingTreeArray::ParsingTreeArray(const ParsingTextRange& _codeRange)
+		ParsingTreeArray::ParsingTreeArray(const WString& _elementType, const ParsingTextRange& _codeRange)
 			:ParsingTreeNode(_codeRange)
+			,elementType(_elementType)
 		{
 		}
 
 		ParsingTreeArray::~ParsingTreeArray()
 		{
+		}
+
+		void ParsingTreeArray::Accept(IVisitor* visitor)
+		{
+			visitor->Visit(this);
+		}
+
+		const WString& ParsingTreeArray::GetElementType()
+		{
+			return elementType;
+		}
+
+		void ParsingTreeArray::SetElementType(const WString& _elementType)
+		{
+			elementType=_elementType;
 		}
 
 		ParsingTreeArray::INodeArray& ParsingTreeArray::GetItems()
@@ -165,39 +382,41 @@ ParsingTreeArray
 
 		bool ParsingTreeArray::AddItem(Ptr<ParsingTreeNode> node)
 		{
-			items.Add(node);
-			return true;
+			return InsertItem(items.Count(), node);
 		}
 
 		bool ParsingTreeArray::InsertItem(vint index, Ptr<ParsingTreeNode> node)
 		{
 			if(0<=index && index<=items.Count())
 			{
-				items.Insert(index, node);
-				return true;
+				if(BeforeAddChild(node))
+				{
+					items.Insert(index, node);
+					AfterAddChild(node);
+					return true;
+				}
 			}
-			else
-			{
-				return false;
-			}
+			return false;
 		}
 
 		bool ParsingTreeArray::RemoveItem(vint index)
 		{
 			if(0<=index && index<items.Count())
 			{
-				items.RemoveAt(index);
-				return true;
+				Ptr<ParsingTreeNode> previous=items[index];
+				if(BeforeRemoveChild(previous))
+				{
+					items.RemoveAt(index);
+					AfterRemoveChild(previous);
+					return true;
+				}
 			}
-			else
-			{
-				return false;
-			}
+			return false;
 		}
 
 		bool ParsingTreeArray::RemoveItem(Ptr<ParsingTreeNode> node)
 		{
-			return items.Remove(node.Obj());
+			return RemoveItem(items.IndexOf(node.Obj()));
 		}
 
 		vint ParsingTreeArray::IndexOfItem(Ptr<ParsingTreeNode> node)
@@ -213,6 +432,20 @@ ParsingTreeArray
 		vint ParsingTreeArray::Count()
 		{
 			return items.Count();
+		}
+
+		bool ParsingTreeArray::Clear()
+		{
+			FOREACH(Ptr<ParsingTreeNode>, node, items.Wrap())
+			{
+				if(!BeforeRemoveChild(node)) return false;
+			}
+			FOREACH(Ptr<ParsingTreeNode>, node, items.Wrap())
+			{
+				AfterRemoveChild(node);
+			}
+			items.Clear();
+			return true;
 		}
 	}
 }

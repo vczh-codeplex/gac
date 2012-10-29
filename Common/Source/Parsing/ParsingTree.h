@@ -73,60 +73,131 @@ namespace vl
 Õ®”√”Ô∑® ˜
 ***********************************************************************/
 
+		class ParsingTreeNode;
+		class ParsingTreeToken;
+		class ParsingTreeObject;
+		class ParsingTreeArray;
+
 		class ParsingTreeNode : public Object
 		{
+		public:
+			class IVisitor : public Interface
+			{
+			public:
+				virtual void			Visit(ParsingTreeToken* node)=0;
+				virtual void			Visit(ParsingTreeObject* node)=0;
+				virtual void			Visit(ParsingTreeArray* node)=0;
+			};
+
+			class TraversalVisitor : public Object, public IVisitor
+			{
+			public:
+				enum TraverseDirection
+				{
+					ByTextPosition,
+					ByStorePosition
+				};
+			protected:
+				TraverseDirection		direction;
+			public:
+				TraversalVisitor(TraverseDirection _direction);
+
+				virtual void			BeforeVisit(ParsingTreeToken* node);
+				virtual void			AfterVisit(ParsingTreeToken* node);
+				virtual void			BeforeVisit(ParsingTreeObject* node);
+				virtual void			AfterVisit(ParsingTreeObject* node);
+				virtual void			BeforeVisit(ParsingTreeArray* node);
+				virtual void			AfterVisit(ParsingTreeArray* node);
+
+				virtual void			Visit(ParsingTreeToken* node)override;
+				virtual void			Visit(ParsingTreeObject* node)override;
+				virtual void			Visit(ParsingTreeArray* node)override;
+			};
 		protected:
 			typedef collections::List<Ptr<ParsingTreeNode>>				NodeList;
 			typedef collections::IReadonlyList<Ptr<ParsingTreeNode>>	INodeList;
 
 			ParsingTextRange			codeRange;
+			ParsingTreeNode*			parent;
 			NodeList					cachedOrderedSubNodes;
 
 			virtual const INodeList&	GetSubNodesInternal()=0;
+			bool						BeforeAddChild(Ptr<ParsingTreeNode> node);
+			void						AfterAddChild(Ptr<ParsingTreeNode> node);
+			bool						BeforeRemoveChild(Ptr<ParsingTreeNode> node);
+			void						AfterRemoveChild(Ptr<ParsingTreeNode> node);
 		public:
 			ParsingTreeNode(const ParsingTextRange& _codeRange);
 			~ParsingTreeNode();
 
+			virtual void				Accept(IVisitor* visitor)=0;
 			ParsingTextRange			GetCodeRange();
+			void						SetCodeRange(const ParsingTextRange& range);
+
 			void						InitializeQueryCache();
-			const INodeList&			SubNodes();
+			void						ClearQueryCache();
+			ParsingTreeNode*			GetParent();
+			const INodeList&			GetSubNodes();
 			Ptr<ParsingTreeNode>		FindNode(const ParsingTextPos& position);
+		};
+
+		class ParsingTreeToken : public ParsingTreeNode
+		{
+		protected:
+			vint						tokenIndex;
+
+			const INodeList&			GetSubNodesInternal()override;
+		public:
+			ParsingTreeToken(vint _tokenIndex=-1, const ParsingTextRange& _codeRange=ParsingTextRange());
+			~ParsingTreeToken();
+
+			void						Accept(IVisitor* visitor)override;
+			vint						GetTokenIndex();
+			void						SetTokenIndex(vint _tokenIndex);
 		};
 
 		class ParsingTreeObject : public ParsingTreeNode
 		{
 		protected:
-			typedef collections::Dictionary<WString, Ptr<ParsingTreeNode>>		NodeMap;
-			typedef collections::IDictionary<WString, Ptr<ParsingTreeNode>>		INodeMap;
-			typedef collections::IReadonlyList<WString>							INameList;
+			typedef collections::Dictionary<WString, Ptr<ParsingTreeNode>>				NodeMap;
+			typedef collections::IReadonlyDictionary<WString, Ptr<ParsingTreeNode>>		INodeMap;
+			typedef collections::IReadonlyList<WString>									INameList;
 
+			WString						type;
 			NodeMap						members;
 
 			const INodeList&			GetSubNodesInternal()override;
 		public:
-			ParsingTreeObject(const ParsingTextRange& _codeRange);
+			ParsingTreeObject(const WString& _type=L"", const ParsingTextRange& _codeRange=ParsingTextRange());
 			~ParsingTreeObject();
 
+			void						Accept(IVisitor* visitor)override;
+			const WString&				GetType();
+			void						SetType(const WString& _type);
 			INodeMap&					GetMembers();
 			Ptr<ParsingTreeNode>		GetMember(const WString& name);
-			void						SetMember(const WString& name, Ptr<ParsingTreeNode> node);
-			void						RemoveMember(const WString& name);
+			bool						SetMember(const WString& name, Ptr<ParsingTreeNode> node);
+			bool						RemoveMember(const WString& name);
 			const INameList&			GetMemberNames();
 		};
 
 		class ParsingTreeArray : public ParsingTreeNode
 		{
 		protected:
-			typedef collections::List<Ptr<ParsingTreeNode>>		NodeArray;
-			typedef collections::IList<Ptr<ParsingTreeNode>>	INodeArray;
+			typedef collections::List<Ptr<ParsingTreeNode>>								NodeArray;
+			typedef collections::IReadonlyList<Ptr<ParsingTreeNode>>					INodeArray;
 
+			WString						elementType;
 			NodeArray					items;
 
 			const INodeList&			GetSubNodesInternal()override;
 		public:
-			ParsingTreeArray(const ParsingTextRange& _codeRange);
+			ParsingTreeArray(const WString& _elementType=L"", const ParsingTextRange& _codeRange=ParsingTextRange());
 			~ParsingTreeArray();
 
+			void						Accept(IVisitor* visitor)override;
+			const WString&				GetElementType();
+			void						SetElementType(const WString& _elementType);
 			INodeArray&					GetItems();
 			Ptr<ParsingTreeNode>		GetItem(vint index);
 			bool						SetItem(vint index, Ptr<ParsingTreeNode> node);
@@ -137,6 +208,7 @@ namespace vl
 			vint						IndexOfItem(Ptr<ParsingTreeNode> node);
 			bool						ContainsItem(Ptr<ParsingTreeNode> node);
 			vint						Count();
+			bool						Clear();
 		};
 
 /***********************************************************************
