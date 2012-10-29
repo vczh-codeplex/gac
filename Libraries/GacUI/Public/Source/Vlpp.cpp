@@ -1813,13 +1813,15 @@ RegexTokens
 			bool					available;
 			RegexToken				token;
 			vint					index;
+
 			PureInterpretor*		pure;
 			const Array<vint>&		stateTokens;
-			const wchar_t*			reading;
 			const wchar_t*			start;
-			vint					lineIndex;
-			vint					lineStart;
 			vint					codeIndex;
+
+			const wchar_t*			reading;
+			vint					rowStart;
+			vint					columnStart;
 			bool					cacheAvailable;
 			RegexToken				cacheToken;
 
@@ -1839,8 +1841,10 @@ RegexTokens
 						token.length=0;
 						token.token=-2;
 					}
-					token.lineIndex=lineIndex;
-					token.lineStart=lineStart;
+					token.rowStart=rowStart;
+					token.columnStart=columnStart;
+					token.rowEnd=rowStart;
+					token.columnEnd=columnStart;
 					token.codeIndex=codeIndex;
 
 					PureResult result;
@@ -1887,14 +1891,16 @@ RegexTokens
 
 					for(vint i=0;i<token.length;i++)
 					{
+						token.rowEnd=rowStart;
+						token.columnEnd=columnStart;
 						if(token.reading[i]==L'\n')
 						{
-							lineIndex++;
-							lineStart=0;
+							rowStart++;
+							columnStart=0;
 						}
 						else
 						{
-							lineStart++;
+							columnStart++;
 						}
 					}
 				}
@@ -1912,8 +1918,8 @@ RegexTokens
 				,stateTokens(enumerator.stateTokens)
 				,reading(enumerator.reading)
 				,start(enumerator.start)
-				,lineIndex(enumerator.lineIndex)
-				,lineStart(enumerator.lineStart)
+				,rowStart(enumerator.rowStart)
+				,columnStart(enumerator.columnStart)
 				,codeIndex(enumerator.codeIndex)
 				,cacheAvailable(enumerator.cacheAvailable)
 				,cacheToken(enumerator.cacheToken)
@@ -1927,8 +1933,8 @@ RegexTokens
 				,stateTokens(_stateTokens)
 				,reading(_start)
 				,start(_start)
-				,lineIndex(0)
-				,lineStart(0)
+				,rowStart(0)
+				,columnStart(0)
 				,codeIndex(_codeIndex)
 				,cacheAvailable(false)
 			{

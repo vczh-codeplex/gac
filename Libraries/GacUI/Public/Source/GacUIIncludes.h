@@ -11070,10 +11070,12 @@ namespace vl
 			vint										length;
 			vint										token;
 			const wchar_t*								reading;
-
-			vint										lineIndex;
-			vint										lineStart;
 			vint										codeIndex;
+
+			vint										rowStart;
+			vint										columnStart;
+			vint										rowEnd;
+			vint										columnEnd;
 
 			bool										operator==(const RegexToken& _token)const;
 			bool										operator==(const wchar_t* _token)const;
