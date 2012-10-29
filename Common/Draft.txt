@@ -9,6 +9,7 @@ Generated C++ Data Structure + Visitor Pattern <--> In-Memory Data Structure
 
 XML/JSON in-memory parser / C++ parser
 ========================================================
+
 class Type{}
 
 class DecoratedType : Type
@@ -49,32 +50,35 @@ class FunctionType : Type
 token SYMBOL		= <|>|\[|\]|\(|\)|,|::|\*|&
 token NAME			= [a-zA-Z_]\w*
 
-Type SubableType	= new PrimitiveType(
-						name(NAME)
-						)
-					= new GenericType(
-						type(SubableType) '<' arguments(Type) { ',' arguments(Type) } '>'
-						)
-					= new SubType(
-						type(SubableType) '::' name(NAME)
-						)
+========================================================
+
+Type SubableType	= NAME[name] as PrimitiveType
+					= SubableType[type] '<' Type[arguments] { ',' Type[arguments] } '>' as GenericType
+					= SubableType[type] '::' NAME[name] as SubType
 
 Type Type			= @SubableType
-					= new DecoratedType(
-						elementType(Type) '*'
-						)
-						{decoration = DecoratedType::Pointer}
-					= new DecoratedType(
-						elementType(Type) '&'
-						)
-						{decoration = DecoratedType::Reference}
-					= new DecoratedType(
-						elementType(Type) '[' ']'
-						)
-						{decoration = ecoratedType::Array}
-					= new FunctionType(
-						returnType(Type) '(' arguments(Type) { ',' arguments(Type) } ')'
-						)
+					= Type[elementType](
+							( '*' {decoration = DecoratedType::Pointer}
+							| '&' {decoration = DecoratedType::Reference}
+							| '[' ']' {decoration = ecoratedType::Array}
+							)
+						) as DecoratedType
+					= Type[returnType] '(' Type[arguments] { ',' Type[arguments] } ')' as FunctionType
+
+========================================================
+
+rule PrimitiveType	PrimitiveType	= NAME[name]
+rule GenericType	GenericType		= SubableType[type] '<' Type[arguments] { ',' Type[arguments] } '>'
+rule SubType		SubType			= SubableType[type] :: NAME[name]
+rule Type			SubableType		= @PrimitiveType | @GenericType | @SubType
+
+rule DecoratedType	DecoratedType	= Type[elementType] '*' {decoration = DecoratedType::Pointer}
+									= Type[elementType] '&' {decoration = DecoratedType::Reference}
+									= Type[elementType] '[' ']' {decoration = DecoratedType::Array}
+rule FunctionType	FunctionType	= Type[returnType] '(' Type[arguments] { ',' Type[arguments] } ')'
+rule Type			Type			= @SubableType | @DecoratedType | @FunctionType
+
+========================================================
 
 _Seq	: a b
 _Alt	: a | b // cast a and b to the nearest common parent type
@@ -85,6 +89,12 @@ _Rule	: Type
 _Create	: new PrimitiveType ( GRAMMAR ) { FIELD = VALUE, ... }
 _Assign	: FIELD(GRAMMAR)
 _Use	: @RULE
+
+In a rule, any possible matching path should only contains one _Create or one _Use exclusively.
+If a rule contains _Create or _Use, all possible matching path that doesn't contains any _Create or _Use is considered returning null.
+If a rule doesn't contains any _Create or _Use, it is treated as always uses _Create(rule type).
+If a rule doesn't contains any _Create or _Use, and it doesn't contains any _Assign, it is treated as a wrong rule.
+
 ========================================================
 parse intel manual 2A and 2B to get binary code table
 x86 and x64 assembler
