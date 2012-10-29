@@ -52,31 +52,31 @@ token NAME			= [a-zA-Z_]\w*
 
 ========================================================
 
-Type SubableType	= NAME[name] as PrimitiveType
-					= SubableType[type] '<' Type[arguments] { ',' Type[arguments] } '>' as GenericType
-					= SubableType[type] '::' NAME[name] as SubType
+rule Type SubableType	= NAME[name] as PrimitiveType
+						= SubableType[type] '<' Type[arguments] { ',' Type[arguments] } '>' as GenericType
+						= SubableType[type] '::' NAME[name] as SubType
 
-Type Type			= @SubableType
-					= Type[elementType](
-							( '*' {decoration = DecoratedType::Pointer}
-							| '&' {decoration = DecoratedType::Reference}
-							| '[' ']' {decoration = ecoratedType::Array}
-							)
-						) as DecoratedType
-					= Type[returnType] '(' Type[arguments] { ',' Type[arguments] } ')' as FunctionType
+rule Type Type			= use SubableType
+						= Type[elementType](
+								( '*' {decoration = DecoratedType::Pointer}
+								| '&' {decoration = DecoratedType::Reference}
+								| '[' ']' {decoration = ecoratedType::Array}
+								)
+							) as DecoratedType
+						= Type[returnType] '(' Type[arguments] { ',' Type[arguments] } ')' as FunctionType
 
 ========================================================
 
 rule PrimitiveType	PrimitiveType	= NAME[name]
 rule GenericType	GenericType		= SubableType[type] '<' Type[arguments] { ',' Type[arguments] } '>'
 rule SubType		SubType			= SubableType[type] :: NAME[name]
-rule Type			SubableType		= @PrimitiveType | @GenericType | @SubType
+rule Type			SubableType		= use PrimitiveType | use GenericType | use SubType
 
 rule DecoratedType	DecoratedType	= Type[elementType] '*' {decoration = DecoratedType::Pointer}
 									= Type[elementType] '&' {decoration = DecoratedType::Reference}
 									= Type[elementType] '[' ']' {decoration = DecoratedType::Array}
 rule FunctionType	FunctionType	= Type[returnType] '(' Type[arguments] { ',' Type[arguments] } ')'
-rule Type			Type			= @SubableType | @DecoratedType | @FunctionType
+rule Type			Type			= use SubableType | use DecoratedType | use FunctionType
 
 ========================================================
 
@@ -86,9 +86,12 @@ _Loop	: { a }
 _Opt	: [ a ]
 _Token	: NAME
 _Rule	: Type
-_Create	: new PrimitiveType ( GRAMMAR ) { FIELD = VALUE, ... }
-_Assign	: FIELD(GRAMMAR)
-_Use	: @RULE
+_Create	: GRAMMAR as Type
+_Assign	: RULE[name] / token[name]
+_Use	: use RULE
+
+Priority:
+	_Use/_Assign > _Seq > _Create > _Alt
 
 In a rule, any possible matching path should only contains one _Create or one _Use exclusively.
 If a rule contains _Create or _Use, all possible matching path that doesn't contains any _Create or _Use is considered returning null.
