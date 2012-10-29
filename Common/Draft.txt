@@ -9,6 +9,83 @@ Generated C++ Data Structure + Visitor Pattern <--> In-Memory Data Structure
 
 XML/JSON in-memory parser / C++ parser
 ========================================================
+class Type{}
+
+class DecoratedType : Type
+{
+	enum Decoration
+	{
+		Pointer,
+		Reference,
+		Array,
+	}
+	Decoration		decoration;
+	Type			elementType;
+}
+
+class PrimitiveType : Type
+{
+	token			name;
+}
+
+class GenericType : Type
+{
+	Type			type;
+	Type[]			arguments;
+}
+
+class SubType : Type
+{
+	Type			type;
+	token			name;
+}
+
+class FunctionType : Type
+{
+	Type			returnType;
+	Type[]			arguments;
+}
+
+token SYMBOL		= <|>|\[|\]|\(|\)|,|::|\*|&
+token NAME			= [a-zA-Z_]\w*
+
+Type SubableType	= new PrimitiveType(
+						name(NAME)
+						)
+					= new GenericType(
+						type(SubableType) '<' arguments(Type) { ',' arguments(Type) } '>'
+						)
+					= new SubType(
+						type(SubableType) '::' name(NAME)
+						)
+
+Type Type			= @SubableType
+					= new DecoratedType(
+						elementType(Type) '*'
+						)
+						{decoration = DecoratedType::Pointer}
+					= new DecoratedType(
+						elementType(Type) '&'
+						)
+						{decoration = DecoratedType::Reference}
+					= new DecoratedType(
+						elementType(Type) '[' ']'
+						)
+						{decoration = ecoratedType::Array}
+					= new FunctionType(
+						returnType(Type) '(' arguments(Type) { ',' arguments(Type) } ')'
+						)
+
+_Seq	: a b
+_Alt	: a | b // cast a and b to the nearest common parent type
+_Loop	: { a }
+_Opt	: [ a ]
+_Token	: NAME
+_Rule	: Type
+_Create	: new PrimitiveType ( GRAMMAR ) { FIELD = VALUE, ... }
+_Assign	: FIELD(GRAMMAR)
+_Use	: @RULE
+========================================================
 parse intel manual 2A and 2B to get binary code table
 x86 and x64 assembler
 intermediate code
