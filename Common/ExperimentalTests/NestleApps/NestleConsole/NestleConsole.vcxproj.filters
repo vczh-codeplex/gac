@@ -16,57 +16,24 @@
     <Filter Include="Library">
       <UniqueIdentifier>{d7fc710d-8e23-4c74-8f75-82533eaeee8c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Library\Basic">
-      <UniqueIdentifier>{f0739c44-265e-4659-a2c8-8dad4ecc2b4a}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Source\Basic.cpp">
-      <Filter>Library\Basic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Console.cpp">
-      <Filter>Library\Basic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Exception.cpp">
-      <Filter>Library\Basic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\String.cpp">
-      <Filter>Library\Basic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\HttpUtility.cpp">
-      <Filter>Library\Basic</Filter>
-    </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NestleSDK.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.cpp">
+      <Filter>Library</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Source\String.h">
-      <Filter>Library\Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Basic.h">
-      <Filter>Library\Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Console.h">
-      <Filter>Library\Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Exception.h">
-      <Filter>Library\Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Pointer.h">
-      <Filter>Library\Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\HttpUtility.h">
-      <Filter>Library\Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Tuple.h">
-      <Filter>Library\Basic</Filter>
-    </ClInclude>
     <ClInclude Include="NestleSDK.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h">
+      <Filter>Library</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -80,22 +80,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Source\Basic.cpp" />
-    <ClCompile Include="..\..\..\Source\Console.cpp" />
-    <ClCompile Include="..\..\..\Source\Exception.cpp" />
-    <ClCompile Include="..\..\..\Source\HttpUtility.cpp" />
-    <ClCompile Include="..\..\..\Source\String.cpp" />
+    <ClCompile Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="NestleSDK.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Source\Basic.h" />
-    <ClInclude Include="..\..\..\Source\Console.h" />
-    <ClInclude Include="..\..\..\Source\Exception.h" />
-    <ClInclude Include="..\..\..\Source\HttpUtility.h" />
-    <ClInclude Include="..\..\..\Source\Pointer.h" />
-    <ClInclude Include="..\..\..\Source\String.h" />
-    <ClInclude Include="..\..\..\Source\Tuple.h" />
+    <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h" />
     <ClInclude Include="NestleSDK.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

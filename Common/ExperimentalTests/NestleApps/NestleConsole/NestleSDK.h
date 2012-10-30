@@ -1,9 +1,7 @@
 #ifndef VCZH_NESTLESDK
 #define VCZH_NESTLESDK
 
-#include "..\..\..\Source\HttpUtility.h"
-#include "..\..\..\Source\Collections\OperationForEach.h"
-#include "..\..\..\Source\Collections\OperationCopyFrom.h"
+#include "..\..\..\..\Libraries\GacUI\Public\Source\vlpp.h"
 
 #include <Windows.h>
 #include <msxml6.h>

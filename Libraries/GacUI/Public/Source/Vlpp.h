@@ -9889,6 +9889,38 @@ FOREACH_INDEXER(X, a, index, XList.Wrap())
 #endif
 
 /***********************************************************************
+CONSOLE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+UI::Console
+
+***********************************************************************/
+
+#ifndef VCZH_CONSOLE
+#define VCZH_CONSOLE
+
+
+namespace vl
+{
+	namespace console
+	{
+		class Console abstract
+		{
+		public:
+			static void Write(const WString& string);
+			static void WriteLine(const WString& string);
+			static WString Read();
+			static void SetColor(bool red, bool green, bool blue, bool light);
+			static void SetTitle(const WString& string);
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
 EXCEPTION.H
 ***********************************************************************/
 /***********************************************************************
@@ -9943,6 +9975,60 @@ namespace vl
 		const WString&				GetExpression()const;
 		vint							GetPosition()const;
 	};
+}
+
+#endif
+
+/***********************************************************************
+HTTPUTILITY.H
+***********************************************************************/
+#ifndef VCZH_HTTPUTILITY
+#define VCZH_HTTPUTILITY
+
+
+namespace vl
+{
+
+/***********************************************************************
+HTTP Utility
+***********************************************************************/
+
+	class HttpRequest
+	{
+		typedef collections::Array<char>		BodyBuffer;
+		typedef collections::List<WString>		StringList;
+	public:
+		WString				server;
+		vint				port;
+		WString				query;
+		bool				secure;
+		WString				username;
+		WString				password;
+		WString				method;
+		WString				cookie;
+		BodyBuffer			body;
+		WString				contentType;
+		StringList			acceptTypes;
+
+		HttpRequest();
+		bool				SetHost(const WString& inputQuery);
+		void				SetBodyUtf8(const WString& bodyString);
+	};
+
+	class HttpResponse
+	{
+		typedef collections::Array<char>		BodyBuffer;
+	public:
+		vint				statusCode;
+		BodyBuffer			body;
+		WString				cookie;
+
+		HttpResponse();
+		WString				GetBodyUtf8();
+	};
+
+	extern bool				HttpQuery(const HttpRequest& request, HttpResponse& response);
+	extern WString			UrlEncodeQuery(const WString& query);
 }
 
 #endif

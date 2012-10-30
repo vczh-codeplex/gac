@@ -1,4 +1,3 @@
-#include "..\..\..\Source\Console.h"
 #include "NestleSDK.h"
 
 using namespace vl;
