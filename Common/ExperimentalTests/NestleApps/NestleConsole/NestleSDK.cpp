@@ -159,12 +159,12 @@ Nestle Utility
 			}
 		}
 
-		WString NestleGetXml(const WString& path, const WString& cookie)
+		WString NestleGetXml(const WString& path, const WString& query, const WString& cookie)
 		{
 			HttpRequest request;
 			HttpResponse response;
 
-			request.SetHost(L"https://www.niaowo.me"+path+L".xml");
+			request.SetHost(L"https://www.niaowo.me"+path+L".xml"+(query==L""?WString(L""):L"?"+query));
 			request.method=L"GET";
 			request.cookie=cookie;
 			request.acceptTypes.Add(L"application/xml");
@@ -181,19 +181,26 @@ Nestle Utility
 			}
 		}
 
-		bool NestlePostData(const WString& path, const WString& cookie, const WString& body)
+		WString NestlePostXml(const WString& path, const WString& query, const WString& cookie, const WString& body)
 		{
 			HttpRequest request;
 			HttpResponse response;
 
-			request.SetHost(L"https://www.niaowo.me"+path);
+			request.SetHost(L"https://www.niaowo.me"+path+L".xml"+(query==L""?WString(L""):L"?"+query));
 			request.method=L"POST";
 			request.cookie=cookie;
 			request.contentType=L"application/x-www-form-urlencoded";
 			request.SetBodyUtf8(body);
 			HttpQuery(request, response);
 
-			return response.statusCode==200||response.statusCode==302;
+			if(response.statusCode==200||response.statusCode==302)
+			{
+				return response.GetBodyUtf8();
+			}
+			else
+			{
+				return L"";
+			}
 		}
 
 /***********************************************************************
@@ -377,7 +384,7 @@ NestleServer
 			return cookie!=L"";
 		}
 
-		bool NestleServer::GetTopics(int pageIndex, NestleTopicsPage& page)
+		Ptr<NestleTopicsPage> NestleServer::GetTopics(int pageIndex)
 		{
 			WString url;
 			if(pageIndex==0)
@@ -388,53 +395,77 @@ NestleServer
 			{
 				url=L"/topics/page/"+itow(pageIndex+1);
 			}
-			WString xml=NestleGetXml(url, cookie);
+			WString xml=NestleGetXml(url, L"", cookie);
 			if(xml!=L"")
 			{	
 				IXMLDOMDocument2* pDom=XmlLoad(xml);
 				if(pDom)
 				{
-					page=NestleTopicsPage(pDom);
+					Ptr<NestleTopicsPage> page=new NestleTopicsPage(pDom);
 					pDom->Release();
-					return true;
+					return page;
 				}
 			}
-			return false;
+			return 0;
 		}
 
-		bool NestleServer::GetTopic(int id, NestlePost& post)
+		Ptr<NestlePost> NestleServer::GetTopic(int id)
 		{
 			WString url=L"/topics/"+itow(id);
-			WString xml=NestleGetXml(url, cookie);
+			WString xml=NestleGetXml(url, L"output=markdown", cookie);
 			if(xml!=L"")
-			{	
+			{
 				IXMLDOMDocument2* pDom=XmlLoad(xml);
 				if(pDom)
 				{
 					IXMLDOMNode* node=XmlQuerySingleNode(pDom, L"/hash/topic");
 					IXMLDOMNodeList* nodeList=XmlQuery(pDom, L"/hash/comments/comment");
-					post=NestlePost(node, nodeList);
+					Ptr<NestlePost> post=new NestlePost(node, nodeList);
 					nodeList->Release();
 					node->Release();
 					pDom->Release();
-					return true;
+					return post;
 				}
 			}
-			return false;
+			return 0;
 		}
 
-		bool NestleServer::PostTopic(const WString& title, const WString& content)
+		Ptr<NestlePost> NestleServer::PostTopic(const WString& title, const WString& content)
 		{
 			WString url=L"/topics";
 			WString body=L"title="+UrlEncodeQuery(title)+L"&body="+UrlEncodeQuery(content);
-			return NestlePostData(url, cookie, body);
+			WString xml=NestlePostXml(url, L"", cookie, body);
+			if(xml!=L"")
+			{
+				IXMLDOMDocument2* pDom=XmlLoad(xml);
+				if(pDom)
+				{
+					IXMLDOMNode* node=XmlQuerySingleNode(pDom, L"/hash");
+					Ptr<NestlePost> post=new NestlePost(node);
+					pDom->Release();
+					return post;
+				}
+			}
+			return 0;
 		}
 
-		bool NestleServer::PostComment(int postId, const WString& content)
+		Ptr<NestleComment> NestleServer::PostComment(int postId, const WString& content)
 		{
 			WString url=L"/comments";
 			WString body=L"topic="+itow(postId)+L"&body="+UrlEncodeQuery(content);
-			return NestlePostData(url, cookie, body);
+			WString xml=NestlePostXml(url, L"output=markdown", cookie, body);
+			if(xml!=L"")
+			{
+				IXMLDOMDocument2* pDom=XmlLoad(xml);
+				if(pDom)
+				{
+					IXMLDOMNode* node=XmlQuerySingleNode(pDom, L"/hash");
+					Ptr<NestleComment> comment=new NestleComment(node);
+					pDom->Release();
+					return comment;
+				}
+			}
+			return 0;
 		}
 	}
 }

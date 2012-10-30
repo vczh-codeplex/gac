@@ -209,8 +209,9 @@ ParsingTreeToken
 			return *(INodeList*)0;
 		}
 
-		ParsingTreeToken::ParsingTreeToken(vint _tokenIndex, const ParsingTextRange& _codeRange)
+		ParsingTreeToken::ParsingTreeToken(const WString& _value, vint _tokenIndex, const ParsingTextRange& _codeRange)
 			:ParsingTreeNode(_codeRange)
+			,value(_value)
 			,tokenIndex(_tokenIndex)
 		{
 		}
@@ -232,6 +233,16 @@ ParsingTreeToken
 		void ParsingTreeToken::SetTokenIndex(vint _tokenIndex)
 		{
 			tokenIndex=_tokenIndex;
+		}
+
+		const WString& ParsingTreeToken::GetValue()
+		{
+			return value;
+		}
+
+		void ParsingTreeToken::SetValue(const WString& _value)
+		{
+			value=_value;
 		}
 
 /***********************************************************************
