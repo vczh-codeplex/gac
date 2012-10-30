@@ -86,7 +86,9 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Collections\Operation.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Console.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Exception.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\HttpUtility.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Regex\Regex.cpp" />
@@ -191,9 +193,11 @@
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationString.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationWhere.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\Pair.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Console.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Event.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Exception.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Function.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\HttpUtility.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Pointer.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.h" />

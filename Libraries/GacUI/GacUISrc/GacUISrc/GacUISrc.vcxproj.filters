@@ -336,6 +336,12 @@
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8TabStyles.cpp">
       <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Console.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\HttpUtility.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -664,6 +670,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8TabStyles.h">
       <Filter>GacUI\Controls\Styles\Win8Styles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Console.h">
+      <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\HttpUtility.h">
+      <Filter>Common\Basic</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
