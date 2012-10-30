@@ -144,16 +144,19 @@ namespace vl
 		class ParsingTreeToken : public ParsingTreeNode
 		{
 		protected:
+			WString						value;
 			vint						tokenIndex;
 
 			const INodeList&			GetSubNodesInternal()override;
 		public:
-			ParsingTreeToken(vint _tokenIndex=-1, const ParsingTextRange& _codeRange=ParsingTextRange());
+			ParsingTreeToken(const WString& _value, vint _tokenIndex=-1, const ParsingTextRange& _codeRange=ParsingTextRange());
 			~ParsingTreeToken();
 
 			void						Accept(IVisitor* visitor)override;
 			vint						GetTokenIndex();
 			void						SetTokenIndex(vint _tokenIndex);
+			const WString&				GetValue();
+			void						SetValue(const WString& _value);
 		};
 
 		class ParsingTreeObject : public ParsingTreeNode
@@ -210,10 +213,6 @@ namespace vl
 			vint						Count();
 			bool						Clear();
 		};
-
-/***********************************************************************
-基本数据结构
-***********************************************************************/
 	}
 }
 

@@ -89,10 +89,11 @@ int main(int argc, wchar_t* argv[])
 			currentPostId=-1;
 			if(editingPost)
 			{
-				if(server.PostTopic(editingPostTitle, editingPostContent))
+				Ptr<NestlePost> post=server.PostTopic(editingPostTitle, editingPostContent);
+				if(post)
 				{
 					Console::SetColor(false, true, false, true);
-					Console::WriteLine(L"<SUCCESS>");
+					Console::WriteLine(L"<SUCCESS> Topic ID = "+itow(post->id));
 					Console::SetColor(true, true, true, false);
 					editingPost=false;
 				}
@@ -146,14 +147,14 @@ int main(int argc, wchar_t* argv[])
 			{
 				currentPostId=-1;
 				int pageIndex=command==L"topics"?0:wtoi(command.Sub(6, command.Length()-6))-1;
-				NestleTopicsPage page;
-				if(server.GetTopics(pageIndex, page))
+				Ptr<NestleTopicsPage> page=server.GetTopics(pageIndex);
+				if(page)
 				{
 					Console::WriteLine(L"+----------------------------------------------");
-					Console::WriteLine(L"Total pages  : "+itow(page.totalPages));
-					Console::WriteLine(L"Current page : "+itow(page.currentPage));
+					Console::WriteLine(L"Total pages  : "+itow(page->totalPages));
+					Console::WriteLine(L"Current page : "+itow(page->currentPage));
 					Console::WriteLine(L"+----------------------------------------------");
-					FOREACH(NestlePost, post, page.posts.Wrap())
+					FOREACH(NestlePost, post, page->posts.Wrap())
 					{
 						Console::WriteLine(L"Author : "+post.author);
 						Console::WriteLine(L"Id     : "+itow(post.id));
@@ -180,15 +181,17 @@ int main(int argc, wchar_t* argv[])
 				}
 				else
 				{
-					NestlePost post;
-					if(server.GetTopic(currentPostId, post))
+					Ptr<NestlePost> post=server.GetTopic(currentPostId);
+					if(post)
 					{
 						Console::WriteLine(L"+----------------------------------------------");
-						Console::WriteLine(L"Author     : "+post.author);
-						Console::WriteLine(L"Id         : "+itow(post.id));
-						Console::WriteLine(L"Created At : "+post.createDateTime);
+						Console::WriteLine(post->title);
 						Console::WriteLine(L"+----------------------------------------------");
-						Console::WriteLine(post.body);
+						Console::WriteLine(L"Author     : "+post->author);
+						Console::WriteLine(L"Id         : "+itow(post->id));
+						Console::WriteLine(L"Created At : "+post->createDateTime);
+						Console::WriteLine(L"+----------------------------------------------");
+						Console::WriteLine(post->body);
 						Console::WriteLine(L"+----------------------------------------------");
 					}
 					else
@@ -210,11 +213,11 @@ int main(int argc, wchar_t* argv[])
 				}
 				else
 				{
-					NestlePost post;
-					if(server.GetTopic(currentPostId, post))
+					Ptr<NestlePost> post=server.GetTopic(currentPostId);
+					if(post)
 					{
 						Console::WriteLine(L"+----------------------------------------------");
-						FOREACH(NestleComment, comment, post.comments.Wrap())
+						FOREACH(NestleComment, comment, post->comments.Wrap())
 						{
 							Console::WriteLine(L"Author : "+comment.author);
 							Console::WriteLine(L"Id     : "+itow(comment.id));

@@ -32,8 +32,8 @@ Nestle Utility
 ***********************************************************************/
 
 		WString						NestleGetSession(const WString& username, const WString& password, const WString& apiKey, const WString& apiSecret);
-		WString						NestleGetXml(const WString& path, const WString& cookie);
-		bool						NestlePostData(const WString& path, const WString& cookie, const WString& body);
+		WString						NestleGetXml(const WString& path, const WString& query, const WString& cookie);
+		WString						NestlePostXml(const WString& path, const WString& query, const WString& cookie, const WString& body);
 
 /***********************************************************************
 Nestle Data Structure
@@ -103,10 +103,10 @@ Nestle Data Structure
 			~NestleServer();
 
 			bool					IsLoginSuccess();
-			bool					GetTopics(int pageIndex, NestleTopicsPage& page);
-			bool					GetTopic(int id, NestlePost& post);
-			bool					PostTopic(const WString& title, const WString& content);
-			bool					PostComment(int postId, const WString& content);
+			Ptr<NestleTopicsPage>	GetTopics(int pageIndex);
+			Ptr<NestlePost>			GetTopic(int id);
+			Ptr<NestlePost>			PostTopic(const WString& title, const WString& content);
+			Ptr<NestleComment>		PostComment(int postId, const WString& content);
 		};
 	}
 }
