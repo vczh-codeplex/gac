@@ -153,12 +153,12 @@ int main(int argc, wchar_t* argv[])
 					Console::WriteLine(L"Total pages  : "+itow(page->totalPages));
 					Console::WriteLine(L"Current page : "+itow(page->currentPage));
 					Console::WriteLine(L"+----------------------------------------------");
-					FOREACH(NestlePost, post, page->posts.Wrap())
+					FOREACH(Ptr<NestlePost>, post, page->posts.Wrap())
 					{
-						Console::WriteLine(L"Author : "+post.author);
-						Console::WriteLine(L"Id     : "+itow(post.id));
+						Console::WriteLine(L"Author : "+post->author);
+						Console::WriteLine(L"Id     : "+itow(post->id));
 						Console::WriteLine(L"");
-						Console::WriteLine(post.title);
+						Console::WriteLine(post->title);
 						Console::WriteLine(L"+----------------------------------------------");
 					}
 				}

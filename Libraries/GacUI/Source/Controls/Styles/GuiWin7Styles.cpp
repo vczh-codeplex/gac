@@ -83,6 +83,11 @@ Win7Theme
 				return new Win7TreeViewProvider;
 			}
 
+			controls::GuiSelectableButton::IStyleController* Win7Theme::CreateListItemBackgroundStyle()
+			{
+				return new Win7SelectableItemStyle();
+			}
+
 			elements::text::ColorEntry Win7Theme::GetDefaultTextBoxColorEntry()
 			{
 				return Win7GetTextBoxTextColor();

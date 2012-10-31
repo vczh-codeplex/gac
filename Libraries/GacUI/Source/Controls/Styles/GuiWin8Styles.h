@@ -39,9 +39,10 @@ Theme
 				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
 				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
+				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
-				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
+				controls::GuiSelectableButton::IStyleController*					CreateListItemBackgroundStyle()override;
 
 				controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
 				controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;

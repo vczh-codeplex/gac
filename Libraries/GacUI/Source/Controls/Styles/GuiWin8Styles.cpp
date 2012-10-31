@@ -82,6 +82,11 @@ Win8Theme
 				return new Win8TreeViewProvider;
 			}
 
+			controls::GuiSelectableButton::IStyleController* Win8Theme::CreateListItemBackgroundStyle()
+			{
+				return new Win8SelectableItemStyle();
+			}
+
 			elements::text::ColorEntry Win8Theme::GetDefaultTextBoxColorEntry()
 			{
 				return Win8GetTextBoxTextColor();
