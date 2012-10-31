@@ -58,6 +58,8 @@ void NestleWindow::DelayDelete(Ptr<NestlePage> page)
 	GetApplication()->InvokeInMainThread([page](){});
 }
 
+//--------------------------------------------------------------
+
 void NestleWindow::LoginPage_Logined(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
 	Ptr<LoginPage> loginPage=currentPage.Cast<LoginPage>();
@@ -65,7 +67,9 @@ void NestleWindow::LoginPage_Logined(GuiGraphicsComposition* sender, GuiEventArg
 	{
 		Ptr<NestleServer> server=loginPage->CreatedNestleServer();
 		PageClear();
-		PageForward(new TopicListPage(server));
+		TopicListPage* topicListPage=new TopicListPage(server);
+		topicListPage->PostOpenRequested.AttachMethod(this, &NestleWindow::TopicListPage_PostOpenRequested);
+		PageForward(topicListPage);
 		DelayDelete(loginPage);
 	}
 	else
@@ -87,6 +91,14 @@ void NestleWindow::LoginPage_Canceled_NonInitialLogin(GuiGraphicsComposition* se
 	PageBackward();
 }
 
+//--------------------------------------------------------------
+
+void NestleWindow::TopicListPage_PostOpenRequested(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+{
+}
+
+//--------------------------------------------------------------
+
 void NestleWindow::ShowLoginPage(bool initialLogin)
 {
 	LoginPage* loginPage=new LoginPage;
@@ -101,6 +113,7 @@ void NestleWindow::ShowLoginPage(bool initialLogin)
 	}
 	PageForward(loginPage);
 }
+
 NestleWindow::NestleWindow()
 	:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 	,pageContainerComposition(0)

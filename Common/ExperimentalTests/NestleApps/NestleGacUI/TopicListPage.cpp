@@ -72,6 +72,7 @@ protected:
 	GuiControl*								backgroundControl;
 	GuiLabel*								labelRead;
 	Ptr<NestlePost>							post;
+	TopicListPage*							topicListPage;
 
 	void backgroundControl_OnMouseEnter(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
@@ -99,6 +100,7 @@ protected:
 
 	void labelRead_OnLeftButtonDown(GuiGraphicsComposition* sender, GuiMouseEventArgs& arguments)
 	{
+		topicListPage->InvokePostOpenRequested(post);
 	}
 protected:
 	void InitializeComponents()
@@ -240,8 +242,9 @@ protected:
 		}
 	}
 public:
-	TopicItemStyleController(GuiListControl::IItemStyleProvider* _styleProvider)
+	TopicItemStyleController(GuiListControl::IItemStyleProvider* _styleProvider, TopicListPage* _topicListPage)
 		:ItemStyleControllerBase(_styleProvider, 0)
+		,topicListPage(_topicListPage)
 	{
 		InitializeComponents();
 		Initialize(backgroundControl->GetBoundsComposition(), backgroundControl);
@@ -265,9 +268,11 @@ class TopicItemStyleProvider : public Object, public GuiListControl::IItemStyleP
 {
 protected:
 	ITopicItemView*					topicItemView;
+	TopicListPage*					topicListPage;
 public:
-	TopicItemStyleProvider()
+	TopicItemStyleProvider(TopicListPage* _topicListPage)
 		:topicItemView(0)
+		,topicListPage(_topicListPage)
 	{
 	}
 		
@@ -287,7 +292,7 @@ public:
 
 	GuiListControl::IItemStyleController* CreateItemStyle(int styleId)
 	{
-		return new TopicItemStyleController(this);
+		return new TopicItemStyleController(this, topicListPage);
 	}
 
 	void DestroyItemStyle(GuiListControl::IItemStyleController* style)
@@ -312,6 +317,7 @@ TopicListPage::TopicListPage(Ptr<NestleServer> _nestleServer)
 	,topicList(0)
 {
 	GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::LargeWaiting));
+	PostOpenRequested.SetAssociatedComposition(GetBoundsComposition());
 	GetApplication()->InvokeAsync([=]()
 	{
 		Ptr<NestleTopicsPage> page=nestleServer->GetTopics(0);
@@ -321,11 +327,23 @@ TopicListPage::TopicListPage(Ptr<NestleServer> _nestleServer)
 			TopicItemProvider* itemProvider=new TopicItemProvider(page);
 			topicList=new GuiListControl(new TransparentListBoxStyle(), itemProvider);
 			topicList->SetArranger(new list::FixedHeightItemArranger);
-			topicList->SetStyleProvider(new TopicItemStyleProvider);
+			topicList->SetStyleProvider(new TopicItemStyleProvider(this));
 			topicList->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			topicList->SetHorizontalAlwaysVisible(false);
 			GetContainerComposition()->AddChild(topicList->GetBoundsComposition());
 			GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
 		});
 	});
+}
+
+Ptr<NestlePost> TopicListPage::GetSelectedPost()
+{
+	return selectedPost;
+}
+
+void TopicListPage::InvokePostOpenRequested(Ptr<NestlePost> post)
+{
+	selectedPost=post;
+	GuiEventArgs arguments;
+	PostOpenRequested.Execute(arguments);
 }

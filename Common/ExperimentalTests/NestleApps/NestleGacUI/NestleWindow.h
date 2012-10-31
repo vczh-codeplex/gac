@@ -24,6 +24,8 @@ protected:
 	void							LoginPage_Logined(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 	void							LoginPage_Canceled_InitialLogin(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 	void							LoginPage_Canceled_NonInitialLogin(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+	void							TopicListPage_PostOpenRequested(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+
 	void							ShowLoginPage(bool initialLogin);
 protected:
 	void							InitializeComponents();
