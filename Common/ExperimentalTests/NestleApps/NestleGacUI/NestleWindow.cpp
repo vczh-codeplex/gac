@@ -67,10 +67,7 @@ void NestleWindow::LoginPage_Logined(GuiGraphicsComposition* sender, GuiEventArg
 	if(loginPage)
 	{
 		Ptr<NestleServer> server=loginPage->CreatedNestleServer();
-		PageClear();
-		Ptr<TopicListPage> topicListPage=new TopicListPage(server);
-		topicListPage->PostOpenRequested.AttachMethod(this, &NestleWindow::TopicListPage_PostOpenRequested);
-		PageForward(topicListPage);
+		ShowTopicListPage(server);
 		DelayDelete(loginPage);
 	}
 	else
@@ -131,6 +128,20 @@ void NestleWindow::ShowLoginPage(bool initialLogin)
 		loginPage->Canceled.AttachMethod(this, &NestleWindow::LoginPage_Canceled_NonInitialLogin);
 	}
 	PageForward(loginPage);
+
+	pageContainerElement->SetColor(Color(255, 255, 255, 128));
+	pageContainerComposition->SetAlignmentToParent(Margin(0, 0, 0, 32));
+}
+
+void NestleWindow::ShowTopicListPage(Ptr<NestleServer> server)
+{
+	PageClear();
+	Ptr<TopicListPage> topicListPage=new TopicListPage(server);
+	topicListPage->PostOpenRequested.AttachMethod(this, &NestleWindow::TopicListPage_PostOpenRequested);
+	PageForward(topicListPage);
+
+	pageContainerElement->SetColor(Color(0, 0, 0, 0));
+	pageContainerComposition->SetAlignmentToParent(Margin(10, 10, 10, 32));
 }
 
 NestleWindow::NestleWindow()
@@ -159,13 +170,16 @@ NestleWindow::InitializeComponents
 void NestleWindow::InitializeComponents()
 {
 	{
-		Ptr<INativeImage> image=GetCurrentController()
-			->ImageService()
-			->CreateImageFromFile(L"..\\Resources\\Background.jpg");
+		//Ptr<INativeImage> image=GetCurrentController()
+		//	->ImageService()
+		//	->CreateImageFromFile(L"..\\Resources\\Background.jpg");
 
-		GuiImageFrameElement* element=GuiImageFrameElement::Create();
-		element->SetImage(image);
-		element->SetStretch(true);
+		//GuiImageFrameElement* element=GuiImageFrameElement::Create();
+		//element->SetImage(image);
+		//element->SetStretch(true);
+
+		GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+		element->SetColor(Color(51, 51, 55));
 
 		GuiBoundsComposition* composition=new GuiBoundsComposition();
 		composition->SetOwnedElement(element);
@@ -174,11 +188,12 @@ void NestleWindow::InitializeComponents()
 	}
 	{
 		GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
-		element->SetColor(Color(255, 255, 255, 224));
+		element->SetColor(Color(255, 255, 255, 128));
+		pageContainerElement=element;
 
 		GuiBoundsComposition* composition=new GuiBoundsComposition();
 		composition->SetOwnedElement(element);
-		composition->SetAlignmentToParent(Margin(24, 24, 24, 32));
+		composition->SetAlignmentToParent(Margin(0, 0, 0, 32));
 		composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 		GetContainerComposition()->AddChild(composition);
 

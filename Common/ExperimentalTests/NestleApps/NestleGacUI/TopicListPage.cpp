@@ -82,16 +82,21 @@ protected:
 	void InitializeComponents()
 	{
 		backgroundElement=GuiSolidBackgroundElement::Create();
-		if(GetItemStyleId()==1)
+		if(GetItemStyleId()==0)
 		{
-			backgroundElement->SetColor(Color(126, 180, 234, 96));
+			backgroundElement->SetColor(Color(255, 255, 255, 192));
 		}
 		else
 		{
-			backgroundElement->SetColor(Color(0, 0, 0, 0));
+			backgroundElement->SetColor(Color(255, 255, 255, 192));
 		}
 		backgroundControl=new GuiControl(new ContainerControlStyle);
-		backgroundControl->GetBoundsComposition()->SetOwnedElement(backgroundElement);
+		{
+			GuiBoundsComposition* composition=new GuiBoundsComposition;
+			composition->SetOwnedElement(backgroundElement);
+			composition->SetAlignmentToParent(Margin(0, 0, 10, 10));
+			backgroundControl->GetBoundsComposition()->AddChild(composition);
+		}
 
 		FontProperties titleFont=backgroundControl->GetFont();
 		titleFont.size=28;
@@ -101,19 +106,19 @@ protected:
 		FontProperties buttonFont=backgroundControl->GetFont();
 		titleFont.size=22;
 
-		Color titleColor(63, 72, 204);
+		Color titleColor(0, 0, 0);
 		Color frameColor(128, 128, 128);
 		Color bodyColor(64, 64, 64);
 
 		GuiTableComposition* table=new GuiTableComposition;
 		backgroundControl->GetContainerComposition()->AddChild(table);
-		table->SetAlignmentToParent(Margin(4, 4, 4, 4));
+		table->SetAlignmentToParent(Margin(30, 4, 30, 4));
 		table->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 		table->SetRowsAndColumns(4, 4);
 		table->SetCellPadding(4);
 		table->SetRowOption(0, GuiCellOption::MinSizeOption());
 		table->SetRowOption(1, GuiCellOption::MinSizeOption());
-		table->SetRowOption(2, GuiCellOption::AbsoluteOption(52));
+		table->SetRowOption(2, GuiCellOption::AbsoluteOption(60));
 		table->SetRowOption(3, GuiCellOption::MinSizeOption());
 		table->SetColumnOption(0, GuiCellOption::MinSizeOption());
 		table->SetColumnOption(1, GuiCellOption::PercentageOption(0.5));
@@ -179,17 +184,36 @@ protected:
 			cell->SetSite(1, 3, 1, 1);
 		}
 		{
-			GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
-			element->SetFont(bodyFont);
-			element->SetWrapLine(true);
-			element->SetEllipse(true);
-			element->SetText(L"Description");
-			element->SetColor(bodyColor);
-			descriptionElement=element;
+			GuiBoundsComposition* descriptionComposition=0;
+			{
+				GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
+				element->SetFont(bodyFont);
+				element->SetWrapLine(true);
+				element->SetEllipse(true);
+				element->SetText(L"Description");
+				element->SetColor(bodyColor);
+				descriptionElement=element;
+
+				GuiBoundsComposition* composition=new GuiBoundsComposition;
+				composition->SetOwnedElement(element);
+				composition->SetAlignmentToParent(Margin(3, 3, 3, 3));
+				descriptionComposition=composition;
+			}
+
+			GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+			if(GetItemStyleId()==0)
+			{
+				element->SetColor(Color(128, 128, 128));
+			}
+			else
+			{
+				element->SetColor(Color(63, 90, 117));
+			}
 
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
 			cell->SetOwnedElement(element);
+			cell->AddChild(descriptionComposition);
 			cell->SetInternalMargin(Margin(3, 3, 3, 3));
 			cell->SetSite(2, 0, 1, 4);
 		}
@@ -198,7 +222,7 @@ protected:
 			buttonRead->SetFont(buttonFont);
 			buttonRead->SetText(L"¡­¡­¡­¡­¡­¡­  Ç¿ÊÆ¡á²åÈë  ¡­¡­¡­¡­¡­¡­");
 			buttonRead->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand));
-			buttonRead->GetBoundsComposition()->SetAlignmentToParent(Margin(2, 2, 2, 5));
+			buttonRead->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 2, 0, 10));
 			buttonRead->Clicked.AttachMethod(this, &TopicItemStyleController::buttonRead_Clicked);
 
 			GuiCellComposition* cell=new GuiCellComposition;
@@ -222,7 +246,7 @@ public:
 		titleElement->SetText(L"¡ó "+post->title);
 		authorElement->SetText(post->author);
 		dateTimeElement->SetText(post->createDateTime);
-		descriptionElement->SetText(post->description);
+		descriptionElement->SetText(L"    "+post->description);
 	}
 };
 

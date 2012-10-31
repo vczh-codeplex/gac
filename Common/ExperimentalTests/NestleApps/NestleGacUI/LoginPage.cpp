@@ -123,8 +123,8 @@ void LoginPage::InitializeComponents()
 		cell->SetSite(3, 3, 1, 1);
 
 		buttonLogin=g::NewButton();
-		buttonLogin->GetBoundsComposition()->SetPreferredMinSize(Size(80, 0));
-		buttonLogin->SetText(L"Ç¿ÊÆµÇÂ¼ÄñÎÑ");
+		buttonLogin->GetBoundsComposition()->SetPreferredMinSize(Size(80, 36));
+		buttonLogin->SetText(L"  Ç¿ÊÆµÇÂ¼ÄñÎÑ  ");
 		buttonLogin->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		buttonLogin->Clicked.AttachMethod(this, &LoginPage::buttonLogin_Clicked);
 		cell->AddChild(buttonLogin->GetBoundsComposition());
@@ -135,8 +135,8 @@ void LoginPage::InitializeComponents()
 		cell->SetSite(3, 4, 1, 1);
 
 		buttonCancel=g::NewButton();
-		buttonCancel->GetBoundsComposition()->SetPreferredMinSize(Size(80, 0));
-		buttonCancel->SetText(L"ÎÒÅÞ£¡");
+		buttonCancel->GetBoundsComposition()->SetPreferredMinSize(Size(80, 36));
+		buttonCancel->SetText(L"  ÎÒÅÞ£¡  ");
 		buttonCancel->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		buttonCancel->Clicked.AttachMethod(this, &LoginPage::buttonCancel_Clicked);
 		cell->AddChild(buttonCancel->GetBoundsComposition());

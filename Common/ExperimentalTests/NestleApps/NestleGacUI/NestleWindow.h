@@ -10,6 +10,7 @@ Main Window
 class NestleWindow : public GuiWindow
 {
 protected:
+	GuiSolidBackgroundElement*		pageContainerElement;
 	GuiBoundsComposition*			pageContainerComposition;
 	Ptr<NestlePage>					currentPage;
 	List<Ptr<NestlePage>>			availableHistoryPages;
@@ -27,6 +28,7 @@ protected:
 	void							TopicListPage_PostOpenRequested(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 
 	void							ShowLoginPage(bool initialLogin);
+	void							ShowTopicListPage(Ptr<NestleServer> server);
 protected:
 	void							InitializeComponents();
 public:
