@@ -142,7 +142,7 @@ void NestleWindow::InitializeComponents()
 	}
 	{
 		GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
-		element->SetColor(Color(255, 255, 255, 192));
+		element->SetColor(Color(255, 255, 255, 224));
 
 		GuiBoundsComposition* composition=new GuiBoundsComposition();
 		composition->SetOwnedElement(element);

@@ -121,7 +121,7 @@ protected:
 		Color titleColor(63, 72, 204);
 		Color frameColor(136, 0, 21);
 		Color bodyColor(64, 64, 64);
-		Color buttonColor(237, 28, 36);
+		Color buttonColor(191, 15, 23);
 
 		GuiTableComposition* table=new GuiTableComposition;
 		backgroundControl->GetContainerComposition()->AddChild(table);
