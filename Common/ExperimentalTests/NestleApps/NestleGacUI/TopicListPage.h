@@ -11,7 +11,7 @@ class TopicListPage : public NestlePage
 {
 protected:
 	Ptr<NestleServer>					nestleServer;
-	GuiSelectableListControl*			topicList;
+	GuiListControl*						topicList;
 
 public:
 	TopicListPage(Ptr<NestleServer> _nestleServer);

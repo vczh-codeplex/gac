@@ -85,6 +85,7 @@
     <ClCompile Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUI.cpp" />
     <ClCompile Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.cpp" />
     <ClCompile Include="..\NestleConsole\NestleSDK.cpp" />
+    <ClCompile Include="ControlStyles.cpp" />
     <ClCompile Include="LoginPage.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="NestlePage.cpp" />
@@ -95,6 +96,7 @@
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUI.h" />
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h" />
     <ClInclude Include="..\NestleConsole\NestleSDK.h" />
+    <ClInclude Include="ControlStyles.h" />
     <ClInclude Include="LoginPage.h" />
     <ClInclude Include="NestlePage.h" />
     <ClInclude Include="NestleWindow.h" />
