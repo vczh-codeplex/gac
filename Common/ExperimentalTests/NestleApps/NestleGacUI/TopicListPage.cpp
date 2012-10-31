@@ -82,14 +82,7 @@ protected:
 	void InitializeComponents()
 	{
 		backgroundElement=GuiSolidBackgroundElement::Create();
-		if(GetItemStyleId()==0)
-		{
-			backgroundElement->SetColor(Color(255, 255, 255, 192));
-		}
-		else
-		{
-			backgroundElement->SetColor(Color(255, 255, 255, 192));
-		}
+		backgroundElement->SetColor(Color(255, 255, 255, 192));
 		backgroundControl=new GuiControl(new ContainerControlStyle);
 		{
 			GuiBoundsComposition* composition=new GuiBoundsComposition;
@@ -201,14 +194,7 @@ protected:
 			}
 
 			GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
-			if(GetItemStyleId()==0)
-			{
-				element->SetColor(Color(128, 128, 128));
-			}
-			else
-			{
-				element->SetColor(Color(63, 90, 117));
-			}
+			element->SetColor(Color(128, 128, 128));
 
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
@@ -232,8 +218,8 @@ protected:
 		}
 	}
 public:
-	TopicItemStyleController(GuiListControl::IItemStyleProvider* _styleProvider, TopicListPage* _topicListPage, int styleId)
-		:ItemStyleControllerBase(_styleProvider, styleId)
+	TopicItemStyleController(GuiListControl::IItemStyleProvider* _styleProvider, TopicListPage* _topicListPage)
+		:ItemStyleControllerBase(_styleProvider, 0)
 		,topicListPage(_topicListPage)
 	{
 		InitializeComponents();
@@ -277,12 +263,12 @@ public:
 
 	int GetItemStyleId(int itemIndex)
 	{
-		return itemIndex%2;
+		return itemIndex;
 	}
 
 	GuiListControl::IItemStyleController* CreateItemStyle(int styleId)
 	{
-		return new TopicItemStyleController(this, topicListPage, styleId);
+		return new TopicItemStyleController(this, topicListPage);
 	}
 
 	void DestroyItemStyle(GuiListControl::IItemStyleController* style)

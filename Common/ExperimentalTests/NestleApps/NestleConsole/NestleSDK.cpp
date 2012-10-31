@@ -271,7 +271,7 @@ NestlePost
 						HRESULT hr=commentElements->nextNode(&comment);
 						if(hr==S_OK)
 						{
-							comments.Add(NestleComment(comment));
+							comments.Add(new NestleComment(comment));
 							comment->Release();
 						}
 						else
