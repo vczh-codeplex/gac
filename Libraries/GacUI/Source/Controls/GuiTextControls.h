@@ -604,6 +604,16 @@ SinglelineTextBox
 				const WString&								GetText()override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
+				/// <summary>
+				/// Get the password mode displaying character.
+				/// </summary>
+				/// <returns>The password mode displaying character. Returns L'\0' means the password mode is not activated.</returns>
+				wchar_t										GetPasswordChar();
+				/// <summary>
+				/// Set the password mode displaying character.
+				/// </summary>
+				/// <param name="value">The password mode displaying character. Set to L'\0' to deactivate the password mode.</param>
+				void										SetPasswordChar(wchar_t value);
 			};
 		}
 	}

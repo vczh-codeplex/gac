@@ -13380,6 +13380,7 @@ ColorizedText
 					int								tabWidth;
 					int								tabSpaceCount;
 					int								availableColorizedLines;
+					wchar_t							passwordChar;
 				public:
 					TextLines();
 					~TextLines();
@@ -13416,6 +13417,8 @@ ColorizedText
 					TextPos							GetTextPosFromPoint(Point point);
 					Point							GetPointFromTextPos(TextPos pos);
 					Rect							GetRectFromTextPos(TextPos pos);
+					wchar_t							GetPasswordChar();
+					void							SetPasswordChar(wchar_t value);
 				};
 				
 				struct ColorItem
@@ -13475,6 +13478,8 @@ ColorizedText
 				void								SetColors(const ColorArray& value);
 				const FontProperties&				GetFont();
 				void								SetFont(const FontProperties& value);
+				wchar_t								GetPasswordChar();
+				void								SetPasswordChar(wchar_t value);
 				Point								GetViewPosition();
 				void								SetViewPosition(Point value);
 				bool								GetVisuallyEnabled();
@@ -16197,6 +16202,8 @@ SinglelineTextBox
 				const WString&								GetText()override;
 				void										SetText(const WString& value)override;
 				void										SetFont(const FontProperties& value)override;
+				wchar_t										GetPasswordChar();
+				void										SetPasswordChar(wchar_t value);
 			};
 		}
 	}

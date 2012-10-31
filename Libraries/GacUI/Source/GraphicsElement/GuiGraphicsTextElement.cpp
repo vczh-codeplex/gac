@@ -183,6 +183,7 @@ text::TextLines
 					,renderTarget(0)
 					,tabWidth(1)
 					,tabSpaceCount(4)
+					,passwordChar(L'\0')
 				{
 					TextLine line;
 					line.Initialize();
@@ -488,7 +489,11 @@ text::TextLines
 						CharAtt& att=line.att[i];
 						wchar_t c=line.text[i];
 						int width=0;
-						if(c==L'\t')
+						if(passwordChar)
+						{
+							width=charMeasurer->MeasureWidth(passwordChar);
+						}
+						else if(c==L'\t')
 						{
 							width=tabWidth-offset%tabWidth;
 						}
@@ -629,6 +634,17 @@ text::TextLines
 				}
 
 				//--------------------------------------------------------
+
+				wchar_t TextLines::GetPasswordChar()
+				{
+					return passwordChar;
+				}
+
+				void TextLines::SetPasswordChar(wchar_t value)
+				{
+					passwordChar=value;
+					ClearMeasurement();
+				}
 			}
 
 			using namespace text;
@@ -695,6 +711,20 @@ GuiColorizedTextElement
 					{
 						callback->FontChanged();
 					}
+					renderer->OnElementStateChanged();
+				}
+			}
+
+			wchar_t GuiColorizedTextElement::GetPasswordChar()
+			{
+				return lines.GetPasswordChar();
+			}
+
+			void GuiColorizedTextElement::SetPasswordChar(wchar_t value)
+			{
+				if(lines.GetPasswordChar()!=value)
+				{
+					lines.SetPasswordChar(value);
 					renderer->OnElementStateChanged();
 				}
 			}

@@ -825,7 +825,8 @@ GuiColorizedTextElementRenderer
 				{
 					WinDC* dc=renderTarget->GetDC();
 					dc->SetFont(font);
-
+					
+					wchar_t passwordChar=element->GetPasswordChar();
 					Point viewPosition=element->GetViewPosition();
 					Rect viewBounds(viewPosition, bounds.GetSize());
 					int startRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, viewBounds.y1)).row;
@@ -892,7 +893,7 @@ GuiColorizedTextElementRenderer
 								if(color.text.a)
 								{
 									dc->SetTextColor(RGB(color.text.r, color.text.g, color.text.b));
-									dc->DrawBuffer(tx, ty, &line.text[column], 1);
+									dc->DrawBuffer(tx, ty, (passwordChar?&passwordChar:&line.text[column]), 1);
 								}
 							}
 							x=x2;

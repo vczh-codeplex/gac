@@ -181,6 +181,7 @@ ColorizedText
 					int								tabWidth;
 					int								tabSpaceCount;
 					int								availableColorizedLines;
+					wchar_t							passwordChar;
 				public:
 					TextLines();
 					~TextLines();
@@ -361,6 +362,16 @@ ColorizedText
 					/// <returns>The bounds, in pixel. Returns (-1, -1, -1, -1) if the text position is not available.</returns>
 					/// <param name="pos">The specified text position.</param>
 					Rect							GetRectFromTextPos(TextPos pos);
+					/// <summary>
+					/// Get the password mode displaying character.
+					/// </summary>
+					/// <returns>The password mode displaying character. Returns L'\0' means the password mode is not activated.</returns>
+					wchar_t							GetPasswordChar();
+					/// <summary>
+					/// Set the password mode displaying character.
+					/// </summary>
+					/// <param name="value">The password mode displaying character. Set to L'\0' to deactivate the password mode.</param>
+					void							SetPasswordChar(wchar_t value);
 				};
 				
 				/// <summary>
@@ -481,6 +492,16 @@ ColorizedText
 				/// </summary>
 				/// <param name="value">The font configuration.</param>
 				void								SetFont(const FontProperties& value);
+				/// <summary>
+				/// Get the password mode displaying character.
+				/// </summary>
+				/// <returns>The password mode displaying character. Returns L'\0' means the password mode is not activated.</returns>
+				wchar_t								GetPasswordChar();
+				/// <summary>
+				/// Set the password mode displaying character.
+				/// </summary>
+				/// <param name="value">The password mode displaying character. Set to L'\0' to deactivate the password mode.</param>
+				void								SetPasswordChar(wchar_t value);
 				/// <summary>
 				/// Get the left-top position of the visible bounds of characters.
 				/// </summary>

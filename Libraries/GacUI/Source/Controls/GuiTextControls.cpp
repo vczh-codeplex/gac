@@ -576,17 +576,17 @@ GuiTextElementOperator
 
 			bool GuiTextElementOperator::CanCut()
 			{
-				return !readonly && textElement->GetCaretBegin()!=textElement->GetCaretEnd();
+				return !readonly && textElement->GetCaretBegin()!=textElement->GetCaretEnd() && textElement->GetPasswordChar()==L'\0';
 			}
 
 			bool GuiTextElementOperator::CanCopy()
 			{
-				return textElement->GetCaretBegin()!=textElement->GetCaretEnd();
+				return textElement->GetCaretBegin()!=textElement->GetCaretEnd() && textElement->GetPasswordChar()==L'\0';
 			}
 
 			bool GuiTextElementOperator::CanPaste()
 			{
-				return !readonly && GetCurrentController()->ClipboardService()->ContainsText();
+				return !readonly && GetCurrentController()->ClipboardService()->ContainsText() && textElement->GetPasswordChar()==L'\0';
 			}
 
 			void GuiTextElementOperator::SelectAll()
@@ -1789,6 +1789,16 @@ GuiSinglelineTextBox
 			{
 				GuiControl::SetFont(value);
 				styleController->RearrangeTextElement();
+			}
+
+			wchar_t GuiSinglelineTextBox::GetPasswordChar()
+			{
+				return styleController->GetTextElement()->GetPasswordChar();
+			}
+
+			void GuiSinglelineTextBox::SetPasswordChar(wchar_t value)
+			{
+				styleController->GetTextElement()->SetPasswordChar(value);
 			}
 		}
 	}
