@@ -151,8 +151,9 @@ public:
 			cell->SetSite(3, 3, 1, 1);
 
 			buttonLogin=g::NewButton();
-			buttonLogin->GetBoundsComposition()->SetPreferredMinSize(Size(80, 27));
-			buttonLogin->SetText(L"登陆");
+			buttonLogin->GetBoundsComposition()->SetPreferredMinSize(Size(80, 0));
+			buttonLogin->SetText(L"强势登录鸟窝");
+			buttonLogin->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			cell->AddChild(buttonLogin->GetBoundsComposition());
 		}
 		{
@@ -161,9 +162,22 @@ public:
 			cell->SetSite(3, 4, 1, 1);
 
 			buttonCancel=g::NewButton();
-			buttonCancel->GetBoundsComposition()->SetPreferredMinSize(Size(80, 27));
-			buttonCancel->SetText(L"取消");
+			buttonCancel->GetBoundsComposition()->SetPreferredMinSize(Size(80, 0));
+			buttonCancel->SetText(L"我呸！");
+			buttonCancel->SetEnabled(false);
+			buttonCancel->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			cell->AddChild(buttonCancel->GetBoundsComposition());
+		}
+		{
+			GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
+			element->SetFont(GetFont());
+			element->SetWrapLine(true);
+			element->SetText(L"点击登录，畅游@Kula的傻逼鸟窝网站，放松身心与鸟人们进行激情互动！");
+
+			GuiCellComposition* cell=new GuiCellComposition;
+			table->AddChild(cell);
+			cell->SetOwnedElement(element);
+			cell->SetSite(4, 1, 1, 4);
 		}
 	}
 };
@@ -199,20 +213,38 @@ protected:
 
 			GuiBoundsComposition* composition=new GuiBoundsComposition();
 			composition->SetOwnedElement(element);
-			composition->SetAlignmentToParent(Margin(24, 24, 24, 24));
+			composition->SetAlignmentToParent(Margin(24, 24, 24, 32));
+			composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			GetContainerComposition()->AddChild(composition);
 
 			pageContainerComposition=composition;
 		}
+		{
+			FontProperties font=GetFont();
+			font.bold=true;
+			GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
+			element->SetFont(font);
+			element->SetColor(Color(255, 255, 255));
+			element->SetAlignments(Alignment::Center, Alignment::Center);
+			element->SetText(L"算法就是构造一个数据结构，把数据插入到数据结构的指定位置 ---- @Kula");
+
+			GuiBoundsComposition* composition=new GuiBoundsComposition();
+			composition->SetOwnedElement(element);
+			composition->SetAlignmentToParent(Margin(2, -1, 2, 2));
+			composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+			GetContainerComposition()->AddChild(composition);
+		}
 		pageContainerComposition->AddChild((new LoginPage)->GetBoundsComposition());
 	}
 public:
+	//
 	NestleWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 	{
 		SetText(L"Vczh 鸟窝客户端 v1.0 (https://niaowo.me)");
 		SetClientSize(Size(800, 600));
 		GetBoundsComposition()->SetPreferredMinSize(Size(400, 300));
+		GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 		InitializeComponents();
 		MoveToScreenCenter();
 	}
