@@ -36,6 +36,8 @@ GuiMain
 
 void GuiMain()
 {
+	win8::Win8Theme theme;
+	SetCurrentTheme(&theme);
 	{
 		FontProperties font=GetCurrentController()->ResourceService()->GetDefaultFont();
 		font.size=16;

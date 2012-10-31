@@ -48,6 +48,9 @@
     <ClCompile Include="NestleWindow.cpp">
       <Filter>Controls</Filter>
     </ClCompile>
+    <ClCompile Include="ControlStyles.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h">
@@ -69,6 +72,9 @@
       <Filter>Pages</Filter>
     </ClInclude>
     <ClInclude Include="NestleWindow.h">
+      <Filter>Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ControlStyles.h">
       <Filter>Controls</Filter>
     </ClInclude>
   </ItemGroup>

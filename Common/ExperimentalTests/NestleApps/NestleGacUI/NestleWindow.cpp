@@ -142,7 +142,7 @@ void NestleWindow::InitializeComponents()
 	}
 	{
 		GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
-		element->SetColor(Color(255, 255, 255, 128));
+		element->SetColor(Color(255, 255, 255, 192));
 
 		GuiBoundsComposition* composition=new GuiBoundsComposition();
 		composition->SetOwnedElement(element);
@@ -159,7 +159,7 @@ void NestleWindow::InitializeComponents()
 		element->SetFont(font);
 		element->SetColor(Color(255, 255, 255));
 		element->SetAlignments(Alignment::Center, Alignment::Center);
-		element->SetText(L"算法就是构造一个数据结构，把数据插入到数据结构的指定位置 ---- @Kula");
+		element->SetText(L"算法就是构造一个数据结构，把数据插入到数据结构的指定位置。 ---- @Kula");
 
 		GuiBoundsComposition* composition=new GuiBoundsComposition();
 		composition->SetOwnedElement(element);
