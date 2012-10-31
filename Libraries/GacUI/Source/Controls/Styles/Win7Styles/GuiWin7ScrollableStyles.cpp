@@ -24,6 +24,7 @@ Win7ButtonStyle
 					{
 					case GuiButton::Normal:
 						targetColor=Win7ButtonColors::ButtonNormal();
+						targetColor.SetAlphaWithoutText(0);
 						break;
 					case GuiButton::Active:
 						targetColor=Win7ButtonColors::ButtonActive();
@@ -36,6 +37,7 @@ Win7ButtonStyle
 				else
 				{
 					targetColor=Win7ButtonColors::ButtonDisabled();
+					targetColor.SetAlphaWithoutText(0);
 				}
 				transferringAnimation->Transfer(targetColor);
 			}
@@ -86,16 +88,12 @@ Win7ScrollStyle
 			controls::GuiButton::IStyleController* Win7ScrollStyle::CreateDecreaseButtonStyle(Direction direction)
 			{
 				Win7ScrollArrowButtonStyle* decreaseButtonStyle=new Win7ScrollArrowButtonStyle(direction, false);
-				decreaseButtonStyle->SetTransparentWhenInactive(true);
-				decreaseButtonStyle->SetTransparentWhenDisabled(true);
 				return decreaseButtonStyle;
 			}
 
 			controls::GuiButton::IStyleController* Win7ScrollStyle::CreateIncreaseButtonStyle(Direction direction)
 			{
 				Win7ScrollArrowButtonStyle* increaseButtonStyle=new Win7ScrollArrowButtonStyle(direction, true);
-				increaseButtonStyle->SetTransparentWhenInactive(true);
-				increaseButtonStyle->SetTransparentWhenDisabled(true);
 				return increaseButtonStyle;
 			}
 
