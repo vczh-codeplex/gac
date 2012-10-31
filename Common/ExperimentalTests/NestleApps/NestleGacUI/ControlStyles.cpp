@@ -86,9 +86,5 @@ int TransparentListBoxStyle::GetDefaultScrollSize()
 
 compositions::GuiGraphicsComposition* TransparentListBoxStyle::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
 {
-	GuiSolidBorderElement* border=GuiSolidBorderElement::Create();
-	border->SetColor(Color(126, 180, 234));
-	boundsComposition->SetOwnedElement(border);
-	boundsComposition->SetInternalMargin(Margin(3, 3, 3, 3));
 	return boundsComposition;
 }
