@@ -63,13 +63,13 @@ Nestle Data Structure
 			bool					operator!=(const NestlePost&)const{return true;}
 			NestlePost&				operator=(const NestlePost& post);
 
-			WString					title;
-			WString					description;
-			WString					body;
-			WString					createDateTime;
-			WString					author;
-			int						id;
-			List<NestleComment>		comments;
+			WString						title;
+			WString						description;
+			WString						body;
+			WString						createDateTime;
+			WString						author;
+			int							id;
+			List<Ptr<NestleComment>>	comments;
 		};
 
 		class NestleTopicsPage

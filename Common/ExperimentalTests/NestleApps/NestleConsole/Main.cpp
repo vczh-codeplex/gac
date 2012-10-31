@@ -216,12 +216,12 @@ int main(int argc, wchar_t* argv[])
 					if(post)
 					{
 						Console::WriteLine(L"+----------------------------------------------");
-						FOREACH(NestleComment, comment, post->comments.Wrap())
+						FOREACH(Ptr<NestleComment>, comment, post->comments.Wrap())
 						{
-							Console::WriteLine(L"Author : "+comment.author);
-							Console::WriteLine(L"Id     : "+itow(comment.id));
+							Console::WriteLine(L"Author : "+comment->author);
+							Console::WriteLine(L"Id     : "+itow(comment->id));
 							Console::WriteLine(L"");
-							Console::WriteLine(comment.body);
+							Console::WriteLine(comment->body);
 							Console::WriteLine(L"+----------------------------------------------");
 						}
 					}

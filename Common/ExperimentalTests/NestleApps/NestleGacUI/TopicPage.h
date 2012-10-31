@@ -9,6 +9,9 @@ protected:
 	Ptr<NestleServer>					nestleServer;
 	Ptr<NestlePost>						post;
 
+	GuiMultilineTextBox*				textPost;
+	GuiListControl*						listComments;
+	GuiMultilineTextBox*				textComment;
 	GuiButton*							buttonComment;
 	GuiButton*							buttonBack;
 protected:
