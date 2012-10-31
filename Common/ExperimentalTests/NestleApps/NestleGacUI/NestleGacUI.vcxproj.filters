@@ -51,6 +51,9 @@
     <ClCompile Include="ControlStyles.cpp">
       <Filter>Controls</Filter>
     </ClCompile>
+    <ClCompile Include="TopicPage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h">
@@ -76,6 +79,9 @@
     </ClInclude>
     <ClInclude Include="ControlStyles.h">
       <Filter>Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="TopicPage.h">
+      <Filter>Pages</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

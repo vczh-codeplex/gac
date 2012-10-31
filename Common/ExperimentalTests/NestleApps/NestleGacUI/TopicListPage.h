@@ -3,10 +3,6 @@
 
 #include "NestlePage.h"
 
-/***********************************************************************
-Topic List Page
-***********************************************************************/
-
 class TopicListPage : public NestlePage
 {
 protected:
@@ -19,6 +15,7 @@ public:
 
 	GuiNotifyEvent						PostOpenRequested;
 
+	Ptr<NestleServer>					GetServer();
 	Ptr<NestlePost>						GetSelectedPost();
 	void								InvokePostOpenRequested(Ptr<NestlePost> post);
 };

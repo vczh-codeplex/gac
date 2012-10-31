@@ -1,6 +1,7 @@
 #include "NestleWindow.h"
 #include "LoginPage.h"
 #include "TopicListPage.h"
+#include "TopicPage.h"
 
 /***********************************************************************
 NestleWindow
@@ -67,7 +68,7 @@ void NestleWindow::LoginPage_Logined(GuiGraphicsComposition* sender, GuiEventArg
 	{
 		Ptr<NestleServer> server=loginPage->CreatedNestleServer();
 		PageClear();
-		TopicListPage* topicListPage=new TopicListPage(server);
+		Ptr<TopicListPage> topicListPage=new TopicListPage(server);
 		topicListPage->PostOpenRequested.AttachMethod(this, &NestleWindow::TopicListPage_PostOpenRequested);
 		PageForward(topicListPage);
 		DelayDelete(loginPage);
@@ -95,6 +96,24 @@ void NestleWindow::LoginPage_Canceled_NonInitialLogin(GuiGraphicsComposition* se
 
 void NestleWindow::TopicListPage_PostOpenRequested(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
+	Ptr<TopicListPage> topicListPage=currentPage.Cast<TopicListPage>();
+	if(topicListPage)
+	{
+		Ptr<NestleServer> server=topicListPage->GetServer();
+		Ptr<NestlePost> post=topicListPage->GetSelectedPost();
+		Ptr<TopicPage> topicPage=new TopicPage(server, post);
+		GetApplication()->InvokeInMainThread([=]()
+		{
+			PageForward(topicPage);
+		});
+	}
+	else
+	{
+		GetCurrentController()->DialogService()->ShowMessageBox(
+			GetNativeWindow(),
+			L"发生内部错误。"
+			);
+	}
 }
 
 //--------------------------------------------------------------

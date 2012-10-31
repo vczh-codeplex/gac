@@ -336,6 +336,11 @@ TopicListPage::TopicListPage(Ptr<NestleServer> _nestleServer)
 	});
 }
 
+Ptr<NestleServer> TopicListPage::GetServer()
+{
+	return nestleServer;
+}
+
 Ptr<NestlePost> TopicListPage::GetSelectedPost()
 {
 	return selectedPost;

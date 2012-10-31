@@ -91,6 +91,7 @@
     <ClCompile Include="NestlePage.cpp" />
     <ClCompile Include="NestleWindow.cpp" />
     <ClCompile Include="TopicListPage.cpp" />
+    <ClCompile Include="TopicPage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUI.h" />
@@ -101,6 +102,7 @@
     <ClInclude Include="NestlePage.h" />
     <ClInclude Include="NestleWindow.h" />
     <ClInclude Include="TopicListPage.h" />
+    <ClInclude Include="TopicPage.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Resources\Background.jpg" />
