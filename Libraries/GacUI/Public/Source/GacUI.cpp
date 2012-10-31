@@ -8315,17 +8315,17 @@ GuiTextElementOperator
 
 			bool GuiTextElementOperator::CanCut()
 			{
-				return !readonly && textElement->GetCaretBegin()!=textElement->GetCaretEnd();
+				return !readonly && textElement->GetCaretBegin()!=textElement->GetCaretEnd() && textElement->GetPasswordChar()==L'\0';
 			}
 
 			bool GuiTextElementOperator::CanCopy()
 			{
-				return textElement->GetCaretBegin()!=textElement->GetCaretEnd();
+				return textElement->GetCaretBegin()!=textElement->GetCaretEnd() && textElement->GetPasswordChar()==L'\0';
 			}
 
 			bool GuiTextElementOperator::CanPaste()
 			{
-				return !readonly && GetCurrentController()->ClipboardService()->ContainsText();
+				return !readonly && GetCurrentController()->ClipboardService()->ContainsText() && textElement->GetPasswordChar()==L'\0';
 			}
 
 			void GuiTextElementOperator::SelectAll()
@@ -9528,6 +9528,16 @@ GuiSinglelineTextBox
 			{
 				GuiControl::SetFont(value);
 				styleController->RearrangeTextElement();
+			}
+
+			wchar_t GuiSinglelineTextBox::GetPasswordChar()
+			{
+				return styleController->GetTextElement()->GetPasswordChar();
+			}
+
+			void GuiSinglelineTextBox::SetPasswordChar(wchar_t value)
+			{
+				styleController->GetTextElement()->SetPasswordChar(value);
 			}
 		}
 	}
@@ -23799,6 +23809,7 @@ text::TextLines
 					,renderTarget(0)
 					,tabWidth(1)
 					,tabSpaceCount(4)
+					,passwordChar(L'\0')
 				{
 					TextLine line;
 					line.Initialize();
@@ -24104,7 +24115,11 @@ text::TextLines
 						CharAtt& att=line.att[i];
 						wchar_t c=line.text[i];
 						int width=0;
-						if(c==L'\t')
+						if(passwordChar)
+						{
+							width=charMeasurer->MeasureWidth(passwordChar);
+						}
+						else if(c==L'\t')
 						{
 							width=tabWidth-offset%tabWidth;
 						}
@@ -24245,6 +24260,17 @@ text::TextLines
 				}
 
 				//--------------------------------------------------------
+
+				wchar_t TextLines::GetPasswordChar()
+				{
+					return passwordChar;
+				}
+
+				void TextLines::SetPasswordChar(wchar_t value)
+				{
+					passwordChar=value;
+					ClearMeasurement();
+				}
 			}
 
 			using namespace text;
@@ -24311,6 +24337,20 @@ GuiColorizedTextElement
 					{
 						callback->FontChanged();
 					}
+					renderer->OnElementStateChanged();
+				}
+			}
+
+			wchar_t GuiColorizedTextElement::GetPasswordChar()
+			{
+				return lines.GetPasswordChar();
+			}
+
+			void GuiColorizedTextElement::SetPasswordChar(wchar_t value)
+			{
+				if(lines.GetPasswordChar()!=value)
+				{
+					lines.SetPasswordChar(value);
 					renderer->OnElementStateChanged();
 				}
 			}
@@ -25469,6 +25509,7 @@ GuiColorizedTextElementRenderer
 				if(renderTarget)
 				{
 					ID2D1RenderTarget* d2dRenderTarget=renderTarget->GetDirect2DRenderTarget();
+					wchar_t passwordChar=element->GetPasswordChar();
 					Point viewPosition=element->GetViewPosition();
 					Rect viewBounds(viewPosition, bounds.GetSize());
 					int startRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, viewBounds.y1)).row;
@@ -25529,7 +25570,7 @@ GuiColorizedTextElementRenderer
 							if(!crlf)
 							{
 								d2dRenderTarget->DrawText(
-									&line.text[column],
+									(passwordChar?&passwordChar:&line.text[column]),
 									1,
 									textFormat->textFormat.Obj(),
 									D2D1::RectF((FLOAT)tx, (FLOAT)ty, (FLOAT)tx+1, (FLOAT)ty+1),
@@ -27053,7 +27094,8 @@ GuiColorizedTextElementRenderer
 				{
 					WinDC* dc=renderTarget->GetDC();
 					dc->SetFont(font);
-
+					
+					wchar_t passwordChar=element->GetPasswordChar();
 					Point viewPosition=element->GetViewPosition();
 					Rect viewBounds(viewPosition, bounds.GetSize());
 					int startRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, viewBounds.y1)).row;
@@ -27120,7 +27162,7 @@ GuiColorizedTextElementRenderer
 								if(color.text.a)
 								{
 									dc->SetTextColor(RGB(color.text.r, color.text.g, color.text.b));
-									dc->DrawBuffer(tx, ty, &line.text[column], 1);
+									dc->DrawBuffer(tx, ty, (passwordChar?&passwordChar:&line.text[column]), 1);
 								}
 							}
 							x=x2;

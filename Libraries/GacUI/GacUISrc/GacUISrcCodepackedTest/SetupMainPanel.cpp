@@ -142,6 +142,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 		}
 		{
 			GuiSinglelineTextBox* textBox=g::NewTextBox();
+			textBox->SetPasswordChar(L'*');
 			cell->AddChild(textBox->GetBoundsComposition());
 			textBox->GetBoundsComposition()->SetBounds(Rect(Point(210, 280), Size(200, 27)));
 			textBox->SetText(L"Password TextBox");

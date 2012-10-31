@@ -1062,6 +1062,7 @@ GuiColorizedTextElementRenderer
 				if(renderTarget)
 				{
 					ID2D1RenderTarget* d2dRenderTarget=renderTarget->GetDirect2DRenderTarget();
+					wchar_t passwordChar=element->GetPasswordChar();
 					Point viewPosition=element->GetViewPosition();
 					Rect viewBounds(viewPosition, bounds.GetSize());
 					int startRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, viewBounds.y1)).row;
@@ -1122,7 +1123,7 @@ GuiColorizedTextElementRenderer
 							if(!crlf)
 							{
 								d2dRenderTarget->DrawText(
-									&line.text[column],
+									(passwordChar?&passwordChar:&line.text[column]),
 									1,
 									textFormat->textFormat.Obj(),
 									D2D1::RectF((FLOAT)tx, (FLOAT)ty, (FLOAT)tx+1, (FLOAT)ty+1),
