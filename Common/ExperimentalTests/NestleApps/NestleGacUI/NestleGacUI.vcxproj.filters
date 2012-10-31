@@ -16,6 +16,12 @@
     <Filter Include="Library">
       <UniqueIdentifier>{36c9d40e-f00f-43d6-8651-e2e6c5e297fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pages">
+      <UniqueIdentifier>{73ea3120-723d-45d6-8c3a-ca5d3d588503}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controls">
+      <UniqueIdentifier>{35e74a21-f360-434d-a64c-ec23afb05551}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -30,6 +36,18 @@
     <ClCompile Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUI.cpp">
       <Filter>Library</Filter>
     </ClCompile>
+    <ClCompile Include="NestlePage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginPage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="TopicListPage.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="NestleWindow.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h">
@@ -40,6 +58,18 @@
     </ClInclude>
     <ClInclude Include="..\NestleConsole\NestleSDK.h">
       <Filter>Library</Filter>
+    </ClInclude>
+    <ClInclude Include="NestlePage.h">
+      <Filter>Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginPage.h">
+      <Filter>Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="TopicListPage.h">
+      <Filter>Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="NestleWindow.h">
+      <Filter>Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
