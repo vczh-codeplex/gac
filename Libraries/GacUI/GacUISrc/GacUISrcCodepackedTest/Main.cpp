@@ -14,15 +14,16 @@
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
 {
 #ifdef GUI_GRAPHICS_RENDERER_GDI
-	return SetupWindowsGDIRenderer();
+	int result=SetupWindowsGDIRenderer();
 #endif
 #ifdef GUI_GRAPHICS_RENDERER_DIRECT2D
-	return SetupWindowsDirect2DRenderer();
+	int result=SetupWindowsDirect2DRenderer();
 #endif
 
 #if _DEBUG
 	_CrtDumpMemoryLeaks();
 #endif
+	return result;
 }
 
 extern void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container);
