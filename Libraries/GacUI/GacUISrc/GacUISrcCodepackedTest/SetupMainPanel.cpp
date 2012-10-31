@@ -140,6 +140,12 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 			textBox->GetBoundsComposition()->SetBounds(Rect(Point(210, 245), Size(200, 27)));
 			textBox->SetText(L"Singleline TextBox");
 		}
+		{
+			GuiSinglelineTextBox* textBox=g::NewTextBox();
+			cell->AddChild(textBox->GetBoundsComposition());
+			textBox->GetBoundsComposition()->SetBounds(Rect(Point(210, 280), Size(200, 27)));
+			textBox->SetText(L"Password TextBox");
+		}
 	}
 	{
 		GuiScrollContainer* scrollView=g::NewScrollContainer();
