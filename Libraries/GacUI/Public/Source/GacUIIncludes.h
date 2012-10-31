@@ -18683,6 +18683,7 @@ namespace vl
 				virtual elements::text::ColorEntry											GetDefaultTextBoxColorEntry()=0;
 				virtual controls::GuiListView::IStyleProvider*								CreateListViewStyle()=0;
 				virtual controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()=0;
+				virtual controls::GuiSelectableButton::IStyleController*					CreateListItemBackgroundStyle()=0;
 				
 				virtual controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()=0;
 				virtual controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()=0;
@@ -18805,9 +18806,10 @@ Theme
 				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
 				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
+				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
-				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
+				controls::GuiSelectableButton::IStyleController*					CreateListItemBackgroundStyle()override;
 				
 				controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
 				controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;
@@ -18883,9 +18885,10 @@ Theme
 				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
 				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
+				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
-				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
+				controls::GuiSelectableButton::IStyleController*					CreateListItemBackgroundStyle()override;
 
 				controls::GuiToolstripMenu::IStyleController*						CreateMenuStyle()override;
 				controls::GuiToolstripMenuBar::IStyleController*					CreateMenuBarStyle()override;

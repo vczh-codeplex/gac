@@ -11409,6 +11409,11 @@ Win7Theme
 				return new Win7TreeViewProvider;
 			}
 
+			controls::GuiSelectableButton::IStyleController* Win7Theme::CreateListItemBackgroundStyle()
+			{
+				return new Win7SelectableItemStyle();
+			}
+
 			elements::text::ColorEntry Win7Theme::GetDefaultTextBoxColorEntry()
 			{
 				return Win7GetTextBoxTextColor();
@@ -11612,6 +11617,11 @@ Win8Theme
 			controls::GuiTreeView::IStyleProvider* Win8Theme::CreateTreeViewStyle()
 			{
 				return new Win8TreeViewProvider;
+			}
+
+			controls::GuiSelectableButton::IStyleController* Win8Theme::CreateListItemBackgroundStyle()
+			{
+				return new Win8SelectableItemStyle();
 			}
 
 			elements::text::ColorEntry Win8Theme::GetDefaultTextBoxColorEntry()

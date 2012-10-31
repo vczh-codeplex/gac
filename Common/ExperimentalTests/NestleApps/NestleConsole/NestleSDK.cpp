@@ -169,7 +169,6 @@ Nestle Utility
 			request.cookie=cookie;
 			request.acceptTypes.Add(L"application/xml");
 			HttpQuery(request, response);
-	
 
 			if(response.statusCode==200)
 			{
@@ -328,7 +327,7 @@ NestleTopicsPage
 					HRESULT hr=nodeList->nextNode(&node);
 					if(hr==S_OK)
 					{
-						posts.Add(NestlePost(node));
+						posts.Add(new NestlePost(node));
 						node->Release();
 					}
 					else

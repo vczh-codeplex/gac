@@ -83,7 +83,7 @@ Nestle Data Structure
 			bool					operator!=(const NestleTopicsPage&)const{return true;}
 			NestleTopicsPage&		operator=(const NestleTopicsPage& page);
 
-			List<NestlePost>		posts;
+			List<Ptr<NestlePost>>	posts;
 			int						totalPages;
 			int						currentPage;
 		};

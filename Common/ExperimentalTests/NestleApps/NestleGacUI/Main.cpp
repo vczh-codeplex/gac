@@ -86,8 +86,48 @@ protected:
 	GuiSinglelineTextBox*				textPassword;
 	GuiButton*							buttonLogin;
 	GuiButton*							buttonCancel;
-public:
-	LoginPage()
+	Ptr<NestleServer>					nestleServer;
+
+	void buttonLogin_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		nestleServer=0;
+		WString apiKey=L"e1424eb84b6d4169a10c03fb1e73e140";
+		WString apiSecret=L"9814021f20054b558105fca1df6559a7";
+		WString username=textUsername->GetText();
+		WString password=textPassword->GetText();
+		SetEnabled(false);
+		GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::LargeWaiting));
+
+		GetApplication()->InvokeAsync([=]()
+		{
+			Ptr<NestleServer> server=new NestleServer(username, password, apiKey, apiSecret);
+			GetApplication()->InvokeInMainThreadAndWait([=]()
+			{
+				if(server->IsLoginSuccess())
+				{
+					nestleServer=server;
+					GuiEventArgs arguments;
+					Logined.Execute(arguments);
+				}
+				else
+				{
+					GetCurrentController()->DialogService()->ShowMessageBox(
+						GetBoundsComposition()->GetRelatedControlHost()->GetNativeWindow(),
+						L"登录失败，请检查用户名或密码是否正确，或者网络连接是否畅通。"
+						);
+				}
+				GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
+				SetEnabled(true);
+			});
+		});
+	}
+
+	void buttonCancel_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		Canceled.Execute(arguments);
+	}
+protected:
+	void InitializeComponents()
 	{
 		GuiTableComposition* table=new GuiTableComposition;
 		GetContainerComposition()->AddChild(table);
@@ -154,6 +194,7 @@ public:
 			buttonLogin->GetBoundsComposition()->SetPreferredMinSize(Size(80, 0));
 			buttonLogin->SetText(L"强势登录鸟窝");
 			buttonLogin->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			buttonLogin->Clicked.AttachMethod(this, &LoginPage::buttonLogin_Clicked);
 			cell->AddChild(buttonLogin->GetBoundsComposition());
 		}
 		{
@@ -164,15 +205,15 @@ public:
 			buttonCancel=g::NewButton();
 			buttonCancel->GetBoundsComposition()->SetPreferredMinSize(Size(80, 0));
 			buttonCancel->SetText(L"我呸！");
-			buttonCancel->SetEnabled(false);
 			buttonCancel->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			buttonCancel->Clicked.AttachMethod(this, &LoginPage::buttonCancel_Clicked);
 			cell->AddChild(buttonCancel->GetBoundsComposition());
 		}
 		{
 			GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
 			element->SetFont(GetFont());
 			element->SetWrapLine(true);
-			element->SetText(L"点击登录，畅游@Kula的傻逼鸟窝网站，放松身心与鸟人们进行激情互动！");
+			element->SetText(L"点击登录，畅游@Kula的鸟窝网站，放松身心与鸟人们进行激情互动！");
 
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
@@ -180,7 +221,186 @@ public:
 			cell->SetSite(4, 1, 1, 4);
 		}
 	}
+public:
+	GuiNotifyEvent						Logined;
+	GuiNotifyEvent						Canceled;
+
+	Ptr<NestleServer> CreatedNestleServer()
+	{
+		return nestleServer;
+	}
+
+	LoginPage()
+	{
+		Logined.SetAssociatedComposition(GetBoundsComposition());
+		Canceled.SetAssociatedComposition(GetBoundsComposition());
+		InitializeComponents();
+	}
 };
+
+/***********************************************************************
+Topic List Page
+***********************************************************************/
+
+class TopicListPage : public NestlePage
+{
+protected:
+
+	class ITopicItemView : public IDescriptable
+	{
+	public:
+		static const wchar_t* const		Identifier;
+
+		virtual Ptr<NestlePost>			GetPost(int itemIndex)=0;
+	};
+
+	//--------------------------------------------------------------
+
+	class TopicItemProvider : public list::ItemProviderBase, private ITopicItemView
+	{
+	protected:
+		Ptr<NestleTopicsPage>			topicsPage;
+
+	private:
+		Ptr<NestlePost> GetPost(int itemIndex)
+		{
+			return topicsPage->posts[itemIndex];
+		}
+	public:
+		TopicItemProvider(Ptr<NestleTopicsPage> _topicsPage)
+			:topicsPage(_topicsPage)
+		{
+		}
+
+		int Count()
+		{
+			return topicsPage->posts.Count();
+		}
+
+		IDescriptable* RequestView(const WString& identifier)
+		{
+			if(identifier==ITopicItemView::Identifier)
+			{
+				return (ITopicItemView*)this;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+
+		void ReleaseView(IDescriptable* view)
+		{
+		}
+	};
+
+	//-------------------------------------------------------------
+
+	class TopicItemStyleController : public list::ItemStyleControllerBase
+	{
+	protected:
+		GuiSelectableButton*					backgroundButton;
+		Ptr<NestlePost>							post;
+
+	public:
+		TopicItemStyleController(GuiListControl::IItemStyleProvider* _styleProvider)
+			:ItemStyleControllerBase(_styleProvider, 0)
+		{
+			backgroundButton=new GuiSelectableButton(GetCurrentTheme()->CreateListItemBackgroundStyle());
+			backgroundButton->SetAutoSelection(false);
+			Initialize(backgroundButton->GetBoundsComposition(), backgroundButton);
+		}
+
+		void SetPost(Ptr<NestlePost> _post)
+		{
+			post=_post;
+			backgroundButton->SetText(post->title);
+		}
+
+		void SetSelected(bool value)
+		{
+			backgroundButton->SetSelected(value);
+		}
+	};
+
+	//--------------------------------------------------------------
+
+	class TopicItemStyleProvider : public Object, public GuiSelectableListControl::IItemStyleProvider
+	{
+	protected:
+		ITopicItemView*					topicItemView;
+	public:
+		TopicItemStyleProvider()
+			:topicItemView(0)
+		{
+		}
+		
+		void AttachListControl(GuiListControl* value)
+		{
+			topicItemView=dynamic_cast<ITopicItemView*>(value->GetItemProvider()->RequestView(ITopicItemView::Identifier));
+		}
+
+		void DetachListControl()
+		{
+		}
+
+		int GetItemStyleId(int itemIndex)
+		{
+			return 0;
+		}
+
+		GuiListControl::IItemStyleController* CreateItemStyle(int styleId)
+		{
+			return new TopicItemStyleController(this);
+		}
+
+		void DestroyItemStyle(GuiListControl::IItemStyleController* style)
+		{
+			delete dynamic_cast<TopicItemStyleController*>(style);
+		}
+
+		void Install(GuiListControl::IItemStyleController* style, int itemIndex)
+		{
+			TopicItemStyleController* topicStyle=dynamic_cast<TopicItemStyleController*>(style);
+			Ptr<NestlePost> post=topicItemView->GetPost(itemIndex);
+			topicStyle->SetPost(post);
+		}
+
+		void SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)
+		{
+			TopicItemStyleController* topicStyle=dynamic_cast<TopicItemStyleController*>(style);
+			topicStyle->SetSelected(value);
+		}
+	};
+protected:
+	Ptr<NestleServer>					nestleServer;
+	GuiSelectableListControl*			topicList;
+
+public:
+	TopicListPage(Ptr<NestleServer> _nestleServer)
+		:nestleServer(_nestleServer)
+		,topicList(0)
+	{
+		GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::LargeWaiting));
+		GetApplication()->InvokeAsync([=]()
+		{
+			Ptr<NestleTopicsPage> page=nestleServer->GetTopics(0);
+
+			GetApplication()->InvokeInMainThreadAndWait([=]()
+			{
+				TopicItemProvider* itemProvider=new TopicItemProvider(page);
+				topicList=new GuiSelectableListControl(GetCurrentTheme()->CreateTextListStyle(), itemProvider);
+				topicList->SetArranger(new list::FixedHeightItemArranger);
+				topicList->SetStyleProvider(new TopicItemStyleProvider);
+				topicList->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				GetContainerComposition()->AddChild(topicList->GetBoundsComposition());
+				GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
+			});
+		});
+	}
+};
+
+const wchar_t* const TopicListPage::ITopicItemView::Identifier=L"VCZH-NESTLE-GACUI-CLIENT-TopicListPage::ITopicItemView";
 
 /***********************************************************************
 Main Window
@@ -190,7 +410,107 @@ class NestleWindow : public GuiWindow
 {
 protected:
 	GuiBoundsComposition*			pageContainerComposition;
+	Ptr<NestlePage>					currentPage;
+	List<Ptr<NestlePage>>			availableHistoryPages;
 
+	void PageInstall(Ptr<NestlePage> newPage)
+	{
+		currentPage=newPage;
+		pageContainerComposition->AddChild(newPage->GetBoundsComposition());
+	}
+
+	Ptr<NestlePage> PageUninstall()
+	{
+		Ptr<NestlePage> oldPage=0;
+		if(currentPage)
+		{
+			pageContainerComposition->RemoveChild(currentPage->GetBoundsComposition());
+			oldPage=currentPage;
+			currentPage=0;
+		}
+		return oldPage;
+	}
+
+	void PageForward(Ptr<NestlePage> newPage)
+	{
+		Ptr<NestlePage> page=PageUninstall();
+		if(page)
+		{
+			availableHistoryPages.Add(page);
+		}
+		PageInstall(newPage);
+	}
+
+	Ptr<NestlePage> PageBackward()
+	{
+		Ptr<NestlePage> oldPage=PageUninstall();
+		if(availableHistoryPages.Count()>0)
+		{
+			int index=availableHistoryPages.Count()-1;
+			Ptr<NestlePage> newPage=availableHistoryPages[index];
+			availableHistoryPages.RemoveAt(index);
+			PageInstall(newPage);
+		}
+		return oldPage;
+	}
+
+	void PageClear()
+	{
+		availableHistoryPages.Clear();
+		PageBackward();
+	}
+
+	void DelayDelete(Ptr<NestlePage> page)
+	{
+		GetApplication()->InvokeInMainThread([page](){});
+	}
+
+	//--------------------------------------------------------------
+
+	void LoginPage_Logined(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		Ptr<LoginPage> loginPage=currentPage.Cast<LoginPage>();
+		if(loginPage)
+		{
+			Ptr<NestleServer> server=loginPage->CreatedNestleServer();
+			PageClear();
+			PageForward(new TopicListPage(server));
+			DelayDelete(loginPage);
+		}
+		else
+		{
+			GetCurrentController()->DialogService()->ShowMessageBox(
+				GetNativeWindow(),
+				L"发生内部错误。"
+				);
+		}
+	}
+
+	void LoginPage_Canceled_InitialLogin(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		Close();
+	}
+
+	void LoginPage_Canceled_NonInitialLogin(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		PageBackward();
+	}
+
+	void ShowLoginPage(bool initialLogin)
+	{
+		LoginPage* loginPage=new LoginPage;
+		loginPage->Logined.AttachMethod(this, &NestleWindow::LoginPage_Logined);
+		if(initialLogin)
+		{
+			loginPage->Canceled.AttachMethod(this, &NestleWindow::LoginPage_Canceled_InitialLogin);
+		}
+		else
+		{
+			loginPage->Canceled.AttachMethod(this, &NestleWindow::LoginPage_Canceled_NonInitialLogin);
+		}
+		PageForward(loginPage);
+	}
+protected:
 	void InitializeComponents()
 	{
 		{
@@ -234,19 +554,26 @@ protected:
 			composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
 			GetContainerComposition()->AddChild(composition);
 		}
-		pageContainerComposition->AddChild((new LoginPage)->GetBoundsComposition());
 	}
 public:
 	//
 	NestleWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+		,pageContainerComposition(0)
+		,currentPage(0)
 	{
 		SetText(L"Vczh 鸟窝客户端 v1.0 (https://niaowo.me)");
 		SetClientSize(Size(800, 600));
 		GetBoundsComposition()->SetPreferredMinSize(Size(400, 300));
 		GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 		InitializeComponents();
+		ShowLoginPage(true);
 		MoveToScreenCenter();
+	}
+
+	~NestleWindow()
+	{
+		PageClear();
 	}
 };
 
