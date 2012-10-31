@@ -92,6 +92,9 @@
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h" />
     <ClInclude Include="..\NestleConsole\NestleSDK.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Resources\Background.jpg" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
