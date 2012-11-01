@@ -192,16 +192,22 @@ MainWindow
 			containerTopicList->SetVisible(true);
 		}
 
-		void MainWindow::LoadTopics()
+		void MainWindow::EnableControls(bool enabled)
+		{
+			toolbar->SetEnabled(enabled);
+			buttonLogin->SetEnabled(enabled);
+		}
+
+		void MainWindow::LoadTopics(int pageIndex)
 		{
 			listTopics->GetItems().Clear();
 			if(server)
 			{
-				SetEnabled(false);
+				EnableControls(false);
+				listTopics->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::LargeWaiting));
 				GetApplication()->InvokeAsync([=]()
 				{
-					listTopics->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::LargeWaiting));
-					Ptr<NestleTopicsPage> page=server->GetTopics(0);
+					Ptr<NestleTopicsPage> page=server->GetTopics(pageIndex);
 
 					GetApplication()->InvokeInMainThreadAndWait([=]()
 					{
@@ -211,8 +217,7 @@ MainWindow
 							listTopics->GetItems().Add(post);
 						}
 						listTopics->GetBoundsComposition()->SetAssociatedCursor(0);
-						SetEnabled(true);
-						GetNativeWindow()->SetFocus();
+						EnableControls(true);
 					});
 				});
 			}
@@ -227,19 +232,22 @@ MainWindow
 			}
 			SetEnabled(true);
 			GetNativeWindow()->SetFocus();
-			LoadTopics();
+			LoadTopics(0);
 		}
 
 		void MainWindow::commandRefresh_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			LoadTopics(currentPage->currentPage);
 		}
 
 		void MainWindow::commandPrevious_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			LoadTopics(currentPage->currentPage-1);
 		}
 
 		void MainWindow::commandNext_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			LoadTopics(currentPage->currentPage+1);
 		}
 
 		void MainWindow::commandNewPost_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
