@@ -383,6 +383,11 @@ NestleServer
 			return cookie!=L"";
 		}
 
+		const WString& NestleServer::GetUsername()
+		{
+			return username;
+		}
+
 		Ptr<NestleTopicsPage> NestleServer::GetTopics(int pageIndex)
 		{
 			WString url;

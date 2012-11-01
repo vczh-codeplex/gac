@@ -40,7 +40,8 @@ namespace vl
 			Ptr<GuiToolstripCommand>					commandUser;
 			Ptr<GuiToolstripCommand>					commandUserLogin;
 			Ptr<GuiToolstripCommand>					commandUserLogout;
-
+			
+			GuiLabel*									labelInformation;
 			GuiGraphicsComposition*						containerLogin;
 			GuiButton*									buttonLogin;
 			GuiGraphicsComposition*						containerTopicList;

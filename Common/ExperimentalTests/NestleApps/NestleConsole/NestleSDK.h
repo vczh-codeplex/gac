@@ -100,6 +100,7 @@ Nestle Data Structure
 			NestleServer(const WString& _username, const WString& _password, const WString& _apiKey, const WString& _apiSecret);
 			~NestleServer();
 
+			const WString&			GetUsername();
 			bool					IsLoginSuccess();
 			Ptr<NestleTopicsPage>	GetTopics(int pageIndex);
 			Ptr<NestlePost>			GetTopic(int id);

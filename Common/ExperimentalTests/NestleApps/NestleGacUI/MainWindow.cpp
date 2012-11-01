@@ -5,9 +5,9 @@ namespace vl
 	namespace nestle
 	{
 
-/***********************************************************************
-TopicItemControl
-***********************************************************************/
+		/***********************************************************************
+		TopicItemControl
+		***********************************************************************/
 
 		void TopicItemControl::buttonRead_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
@@ -27,9 +27,9 @@ TopicItemControl
 			descriptionElement->SetText(L"    "+post->description);
 		}
 
-/***********************************************************************
-TopicItemControl::InitializeComponents
-***********************************************************************/
+		/***********************************************************************
+		TopicItemControl::InitializeComponents
+		***********************************************************************/
 
 		void TopicItemControl::InitializeComponents()
 		{
@@ -44,7 +44,7 @@ TopicItemControl::InitializeComponents
 			Color titleColor(0, 0, 0);
 			Color frameColor(128, 128, 128);
 			Color bodyColor(64, 64, 64);
-			
+
 			GuiTableComposition* table=new GuiTableComposition;
 			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			GetContainerComposition()->AddChild(table);
@@ -161,9 +161,9 @@ TopicItemControl::InitializeComponents
 			}
 		}
 
-/***********************************************************************
-MainWindow
-***********************************************************************/
+		/***********************************************************************
+		MainWindow
+		***********************************************************************/
 
 		void MainWindow::SwitchToLogoutStatus()
 		{
@@ -175,6 +175,7 @@ MainWindow
 			commandUserLogout->SetEnabled(false);
 			containerLogin->SetVisible(true);
 			containerTopicList->SetVisible(false);
+			labelInformation->SetText(L"欢迎使用Vczh鸟窝客户端");
 			server=0;
 			currentPage=0;
 			loginWindow=0;
@@ -216,6 +217,7 @@ MainWindow
 						{
 							listTopics->GetItems().Add(post);
 						}
+						labelInformation->SetText(L"您好,"+server->GetUsername()+L"。欢迎使用Vczh鸟窝客户端。您正在浏览第"+itow(page->currentPage+1)+L"页，共"+itow(page->totalPages)+L"页。");
 						listTopics->GetBoundsComposition()->SetAssociatedCursor(0);
 						EnableControls(true);
 					});
@@ -298,9 +300,9 @@ MainWindow
 		{
 		}
 
-/***********************************************************************
-LoginWindow::InitializeComponents
-***********************************************************************/
+		/***********************************************************************
+		LoginWindow::InitializeComponents
+		***********************************************************************/
 
 		void MainWindow::InitializeComponents()
 		{
@@ -354,9 +356,10 @@ LoginWindow::InitializeComponents
 			table->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			table->SetCellPadding(2);
 			table->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-			table->SetRowsAndColumns(2, 1);
+			table->SetRowsAndColumns(3, 1);
 			table->SetRowOption(0, GuiCellOption::MinSizeOption());
-			table->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
+			table->SetRowOption(1, GuiCellOption::MinSizeOption());
+			table->SetRowOption(2, GuiCellOption::PercentageOption(1.0));
 			table->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
 			GetContainerComposition()->AddChild(table);
 			{
@@ -371,15 +374,24 @@ LoginWindow::InitializeComponents
 					->Button(commandSearch.Obj())
 					->Splitter()
 					->DropdownButton(commandUser.Obj())->BeginSubMenu()
-						->Button(commandUserLogin.Obj())
-						->Button(commandUserLogout.Obj())
-						->EndSubMenu()
+					->Button(commandUserLogin.Obj())
+					->Button(commandUserLogout.Obj())
+					->EndSubMenu()
 					;
 
 				GuiCellComposition* cell=new GuiCellComposition;
 				table->AddChild(cell);
 				cell->SetSite(0, 0, 1, 1);
 				cell->AddChild(toolbar->GetBoundsComposition());
+			}
+			{
+				labelInformation=g::NewLabel();
+				labelInformation->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+
+				GuiCellComposition* cell=new GuiCellComposition;
+				table->AddChild(cell);
+				cell->SetSite(1, 0, 1, 1);
+				cell->AddChild(labelInformation->GetBoundsComposition());
 			}
 			{
 				{
@@ -420,7 +432,7 @@ LoginWindow::InitializeComponents
 
 				GuiCellComposition* cell=new GuiCellComposition;
 				table->AddChild(cell);
-				cell->SetSite(1, 0, 1, 1);
+				cell->SetSite(2, 0, 1, 1);
 				cell->AddChild(containerLogin);
 				cell->AddChild(containerTopicList);
 			}
