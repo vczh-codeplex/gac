@@ -186,7 +186,7 @@ namespace vl
 			commandRefresh->SetEnabled(true);
 			commandPrevious->SetEnabled(true);
 			commandNext->SetEnabled(true);
-			commandNewPost->SetEnabled(true);
+			commandNewPost->SetEnabled(!newPostWindow || !newPostWindow->GetVisible());
 			commandSearch->SetEnabled(true);
 			commandUserLogout->SetEnabled(true);
 			containerLogin->SetVisible(false);
@@ -237,6 +237,15 @@ namespace vl
 			LoadTopics(0);
 		}
 
+		void MainWindow::newPostWindow_Closed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			commandNewPost->SetEnabled(true);
+			if(newPostWindow->GetCommittedPost())
+			{
+				LoadTopics(currentPage->currentPage);
+			}
+		}
+
 		void MainWindow::commandRefresh_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
 			LoadTopics(currentPage->currentPage);
@@ -259,6 +268,10 @@ namespace vl
 
 		void MainWindow::commandNewPost_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			newPostWindow=new NewPostWindow(server);
+			newPostWindow->WindowClosed.AttachMethod(this, &MainWindow::newPostWindow_Closed);
+			newPostWindow->Show();
+			commandNewPost->SetEnabled(false);
 		}
 
 		void MainWindow::commandSearch_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
