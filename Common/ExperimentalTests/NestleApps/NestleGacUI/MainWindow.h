@@ -32,14 +32,14 @@ namespace vl
 		{
 		protected:
 			GuiToolstripToolbar*						toolbar;
-			GuiToolstripCommand*						commandRefresh;
-			GuiToolstripCommand*						commandPrevious;
-			GuiToolstripCommand*						commandNext;
-			GuiToolstripCommand*						commandNewPost;
-			GuiToolstripCommand*						commandSearch;
-			GuiToolstripCommand*						commandUser;
-			GuiToolstripCommand*						commandUserLogin;
-			GuiToolstripCommand*						commandUserLogout;
+			Ptr<GuiToolstripCommand>					commandRefresh;
+			Ptr<GuiToolstripCommand>					commandPrevious;
+			Ptr<GuiToolstripCommand>					commandNext;
+			Ptr<GuiToolstripCommand>					commandNewPost;
+			Ptr<GuiToolstripCommand>					commandSearch;
+			Ptr<GuiToolstripCommand>					commandUser;
+			Ptr<GuiToolstripCommand>					commandUserLogin;
+			Ptr<GuiToolstripCommand>					commandUserLogout;
 
 			GuiGraphicsComposition*						containerLogin;
 			GuiButton*									buttonLogin;

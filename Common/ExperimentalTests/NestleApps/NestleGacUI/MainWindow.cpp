@@ -355,16 +355,16 @@ LoginWindow::InitializeComponents
 				toolbar=g::NewToolbar();
 				toolbar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				toolbar->GetBuilder()
-					->Button(commandRefresh)
-					->Button(commandPrevious)
-					->Button(commandNext)
+					->Button(commandRefresh.Obj())
+					->Button(commandPrevious.Obj())
+					->Button(commandNext.Obj())
 					->Splitter()
-					->Button(commandNewPost)
-					->Button(commandSearch)
+					->Button(commandNewPost.Obj())
+					->Button(commandSearch.Obj())
 					->Splitter()
-					->DropdownButton(commandUser)->BeginSubMenu()
-						->Button(commandUserLogin)
-						->Button(commandUserLogout)
+					->DropdownButton(commandUser.Obj())->BeginSubMenu()
+						->Button(commandUserLogin.Obj())
+						->Button(commandUserLogout.Obj())
 						->EndSubMenu()
 					;
 
