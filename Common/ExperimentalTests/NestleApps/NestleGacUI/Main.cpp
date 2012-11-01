@@ -6,13 +6,10 @@
 
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-/***********************************************************************
-Dependencies
-***********************************************************************/
+#include "LoginWindow.h"
 
-#include "..\..\..\..\Libraries\GacUI\Public\Source\GacUIIncludes.h"
-#include "..\NestleConsole\NestleSDK.h"
-#include "NestleWindow.h"
+using namespace vl;
+using namespace vl::nestle;
 
 /***********************************************************************
 WinMain
@@ -43,6 +40,6 @@ void GuiMain()
 		font.size=16;
 		GetCurrentController()->ResourceService()->SetDefaultFont(font);
 	}
-	NestleWindow window;
+	LoginWindow window;
 	GetApplication()->Run(&window);
 }
