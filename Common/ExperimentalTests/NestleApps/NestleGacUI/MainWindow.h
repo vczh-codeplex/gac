@@ -34,6 +34,7 @@ namespace vl
 			GuiToolstripToolbar*						toolbar;
 			Ptr<GuiToolstripCommand>					commandRefresh;
 			Ptr<GuiToolstripCommand>					commandPrevious;
+			Ptr<GuiToolstripCommand>					commandFirstPage;
 			Ptr<GuiToolstripCommand>					commandNext;
 			Ptr<GuiToolstripCommand>					commandNewPost;
 			Ptr<GuiToolstripCommand>					commandSearch;
@@ -58,6 +59,7 @@ namespace vl
 
 			void										loginWindow_Closed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandRefresh_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void										commandFirstPage_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandPrevious_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandNext_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandNewPost_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);

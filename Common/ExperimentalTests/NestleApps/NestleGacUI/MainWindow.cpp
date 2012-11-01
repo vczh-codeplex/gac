@@ -242,6 +242,11 @@ namespace vl
 			LoadTopics(currentPage->currentPage);
 		}
 
+		void MainWindow::commandFirstPage_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			LoadTopics(0);
+		}
+
 		void MainWindow::commandPrevious_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
 			LoadTopics(currentPage->currentPage-1);
@@ -287,6 +292,7 @@ namespace vl
 
 			commandRefresh->Executed.AttachMethod(this, &MainWindow::commandRefresh_Clicked);
 			commandPrevious->Executed.AttachMethod(this, &MainWindow::commandPrevious_Clicked);
+			commandFirstPage->Executed.AttachMethod(this, &MainWindow::commandFirstPage_Clicked);
 			commandNext->Executed.AttachMethod(this, &MainWindow::commandNext_Clicked);
 			commandNewPost->Executed.AttachMethod(this, &MainWindow::commandNewPost_Clicked);
 			commandSearch->Executed.AttachMethod(this, &MainWindow::commandSearch_Clicked);
@@ -317,6 +323,11 @@ namespace vl
 				command->SetImage(new GuiImageData(GetCurrentController()->ImageService()->CreateImageFromFile(L"..\\Resources\\ToolstripPrevious.png"), 0));
 				command->SetText(L"上一页");
 				commandPrevious=command;
+			}
+			{
+				GuiToolstripCommand* command=new GuiToolstripCommand;
+				command->SetText(L"跳转到第一页");
+				commandFirstPage=command;
 			}
 			{
 				GuiToolstripCommand* command=new GuiToolstripCommand;
@@ -367,16 +378,18 @@ namespace vl
 				toolbar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				toolbar->GetBuilder()
 					->Button(commandRefresh.Obj())
-					->Button(commandPrevious.Obj())
+					->SplitButton(commandPrevious.Obj())->BeginSubMenu()
+						->Button(commandFirstPage.Obj())
+						->EndSubMenu()
 					->Button(commandNext.Obj())
 					->Splitter()
 					->Button(commandNewPost.Obj())
 					->Button(commandSearch.Obj())
 					->Splitter()
 					->DropdownButton(commandUser.Obj())->BeginSubMenu()
-					->Button(commandUserLogin.Obj())
-					->Button(commandUserLogout.Obj())
-					->EndSubMenu()
+						->Button(commandUserLogin.Obj())
+						->Button(commandUserLogout.Obj())
+						->EndSubMenu()
 					;
 
 				GuiCellComposition* cell=new GuiCellComposition;
