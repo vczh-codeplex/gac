@@ -1,7 +1,7 @@
 #ifndef VCZH_NESTLECLIENT_WINDOWS_LOGINWINDOW
 #define VCZH_NESTLECLIENT_WINDOWS_LOGINWINDOW
 
-#include "..\..\..\..\Libraries\GacUI\Public\Source\GacUI.h"
+#include "..\..\..\..\Libraries\GacUI\Public\Source\GacUIIncludes.h"
 #include "..\NestleConsole\NestleSDK.h"
 
 namespace vl

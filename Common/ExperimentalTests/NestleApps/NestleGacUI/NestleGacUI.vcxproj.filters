@@ -48,12 +48,6 @@
     <ClCompile Include="TopicListPage.cpp">
       <Filter>Pages</Filter>
     </ClCompile>
-    <ClCompile Include="NestleWindow.cpp">
-      <Filter>Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="ControlStyles.cpp">
-      <Filter>Controls</Filter>
-    </ClCompile>
     <ClCompile Include="TopicPage.cpp">
       <Filter>Pages</Filter>
     </ClCompile>
@@ -62,6 +56,15 @@
     </ClCompile>
     <ClCompile Include="MainWindow.cpp">
       <Filter>Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="ControlStyles.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="NestleWindow.cpp">
+      <Filter>Pages</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomizableListBoxHelper.cpp">
+      <Filter>Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -83,12 +86,6 @@
     <ClInclude Include="TopicListPage.h">
       <Filter>Pages</Filter>
     </ClInclude>
-    <ClInclude Include="NestleWindow.h">
-      <Filter>Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="ControlStyles.h">
-      <Filter>Controls</Filter>
-    </ClInclude>
     <ClInclude Include="TopicPage.h">
       <Filter>Pages</Filter>
     </ClInclude>
@@ -97,6 +94,18 @@
     </ClInclude>
     <ClInclude Include="MainWindow.h">
       <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="ControlStyles.h">
+      <Filter>Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="NestleWindow.h">
+      <Filter>Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomizableListBoxHelper.h">
+      <Filter>Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUIIncludes.h">
+      <Filter>Library</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
