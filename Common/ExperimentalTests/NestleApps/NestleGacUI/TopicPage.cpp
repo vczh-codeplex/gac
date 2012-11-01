@@ -255,18 +255,80 @@ public:
 TopicPage
 ***********************************************************************/
 
+void TopicPage::RefreshCommentList()
+{
+	if(listComments)
+	{
+		listCommentsContainer->RemoveChild(listComments->GetBoundsComposition());
+		delete listComments;
+		listComments=0;
+	}
+	CommentItemProvider* itemProvider=new CommentItemProvider(post);
+	listComments=new GuiListControl(new TransparentListBoxStyle(), itemProvider);
+	listComments->SetArranger(new list::FixedHeightItemArranger);
+	listComments->SetStyleProvider(new CommentItemStyleProvider(this));
+	listComments->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+	listComments->SetHorizontalAlwaysVisible(false);
+	
+	listCommentsContainer->AddChild(listComments->GetBoundsComposition());
+}
+
+void TopicPage::buttonComment_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+{
+	WString commentBody=textComment->GetText();
+	GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::LargeWaiting));
+	SetEnabled(false);
+	GetApplication()->InvokeAsync([=]()
+	{
+		Ptr<NestleComment> comment=nestleServer->PostComment(post->id, commentBody);
+		if(comment)
+		{
+			post=nestleServer->GetTopic(post->id);
+		}
+		GetApplication()->InvokeInMainThreadAndWait([=]()
+		{
+			if(comment)
+			{
+				RefreshCommentList();
+				textComment->SetText(L"");
+			}
+			else
+			{
+				GetCurrentController()->DialogService()->ShowMessageBox(
+					GetBoundsComposition()->GetRelatedControlHost()->GetNativeWindow(),
+					L"回帖失败，请检查网络连接是否畅通。"
+					);
+			}
+			GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
+			SetEnabled(true);
+		});
+	});
+}
+
+void TopicPage::buttonBack_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+{
+	PostCloseRequested.Execute(arguments);
+}
+
 TopicPage::TopicPage(Ptr<NestleServer> _nestleServer, Ptr<NestlePost> _post)
 	:nestleServer(_nestleServer)
+	,post(_post)
 {
+	PostCloseRequested.SetAssociatedComposition(GetBoundsComposition());
 	GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::LargeWaiting));
+	SetEnabled(false);
+	InitializeComponents();
+
 	GetApplication()->InvokeAsync([=]()
 	{
 		post=nestleServer->GetTopic(_post->id);
 
 		GetApplication()->InvokeInMainThreadAndWait([=]()
 		{
-			InitializeComponents();
+			textPost->SetText(post->body);
+			RefreshCommentList();
 			GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
+			SetEnabled(true);
 		});
 	});
 }
@@ -294,25 +356,11 @@ void TopicPage::InitializeComponents()
 		textPost=g::NewMultilineTextBox();
 		textPost->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 		textPost->SetReadonly(false);
-		textPost->SetText(post->body);
 
 		GuiCellComposition* cell=new GuiCellComposition;
 		table->AddChild(cell);
 		cell->SetSite(0, 0, 1, 2);
 		cell->AddChild(textPost->GetBoundsComposition());
-	}
-	{
-		CommentItemProvider* itemProvider=new CommentItemProvider(post);
-		listComments=new GuiListControl(new TransparentListBoxStyle(), itemProvider);
-		listComments->SetArranger(new list::FixedHeightItemArranger);
-		listComments->SetStyleProvider(new CommentItemStyleProvider(this));
-		listComments->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-		listComments->SetHorizontalAlwaysVisible(false);
-
-		GuiCellComposition* cell=new GuiCellComposition;
-		table->AddChild(cell);
-		cell->SetSite(0, 2, 1, 2);
-		cell->AddChild(listComments->GetBoundsComposition());
 	}
 	{
 		textComment=g::NewMultilineTextBox();
@@ -327,6 +375,7 @@ void TopicPage::InitializeComponents()
 		buttonBack=g::NewButton();
 		buttonBack->SetText(L"  Po主再见！  ");
 		buttonBack->GetBoundsComposition()->SetPreferredMinSize(Size(0, 32));
+		buttonBack->Clicked.AttachMethod(this, &TopicPage::buttonBack_Clicked);
 
 		GuiCellComposition* cell=new GuiCellComposition;
 		table->AddChild(cell);
@@ -337,10 +386,21 @@ void TopicPage::InitializeComponents()
 		buttonComment=g::NewButton();
 		buttonComment->SetText(L"  我要一战！  ");
 		buttonComment->GetBoundsComposition()->SetPreferredMinSize(Size(0, 32));
+		buttonComment->Clicked.AttachMethod(this, &TopicPage::buttonComment_Clicked);
 
 		GuiCellComposition* cell=new GuiCellComposition;
 		table->AddChild(cell);
 		cell->SetSite(2, 3, 1, 1);
 		cell->AddChild(buttonComment->GetBoundsComposition());
+	}
+	{
+		listComments=0;
+
+		GuiCellComposition* cell=new GuiCellComposition;
+		table->AddChild(cell);
+		cell->SetSite(0, 2, 1, 2);
+		listCommentsContainer=cell;
+
+		RefreshCommentList();
 	}
 }

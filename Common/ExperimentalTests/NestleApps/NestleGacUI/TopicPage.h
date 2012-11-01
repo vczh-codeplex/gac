@@ -14,10 +14,17 @@ protected:
 	GuiMultilineTextBox*				textComment;
 	GuiButton*							buttonComment;
 	GuiButton*							buttonBack;
+	GuiGraphicsComposition*				listCommentsContainer;
+
+	void								RefreshCommentList();
+	void								buttonComment_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+	void								buttonBack_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 protected:
 	void								InitializeComponents();
 public:
 	TopicPage(Ptr<NestleServer> _nestleServer, Ptr<NestlePost> _post);
+
+	GuiNotifyEvent						PostCloseRequested;
 };
 
 #endif
