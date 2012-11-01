@@ -22,6 +22,9 @@
     <Filter Include="Controls">
       <UniqueIdentifier>{35e74a21-f360-434d-a64c-ec23afb05551}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Windows">
+      <UniqueIdentifier>{64bcc4d2-5c38-4d04-8902-319578831e18}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -54,6 +57,9 @@
     <ClCompile Include="TopicPage.cpp">
       <Filter>Pages</Filter>
     </ClCompile>
+    <ClCompile Include="LoginWindow.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h">
@@ -82,6 +88,9 @@
     </ClInclude>
     <ClInclude Include="TopicPage.h">
       <Filter>Pages</Filter>
+    </ClInclude>
+    <ClInclude Include="LoginWindow.h">
+      <Filter>Windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
