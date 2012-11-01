@@ -6,7 +6,7 @@
 
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-#include "LoginWindow.h"
+#include "MainWindow.h"
 
 using namespace vl;
 using namespace vl::nestle;
@@ -33,13 +33,11 @@ GuiMain
 
 void GuiMain()
 {
-	win8::Win8Theme theme;
-	SetCurrentTheme(&theme);
 	{
 		FontProperties font=GetCurrentController()->ResourceService()->GetDefaultFont();
 		font.size=16;
 		GetCurrentController()->ResourceService()->SetDefaultFont(font);
 	}
-	LoginWindow window;
+	MainWindow window;
 	GetApplication()->Run(&window);
 }

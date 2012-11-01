@@ -10012,7 +10012,7 @@ GuiControlHost
 				INativeWindow* window=host->GetNativeWindow();
 				if(window)
 				{
-					if(GetCurrentController()->WindowService()->GetMainWindow()==window)
+					if(GetCurrentController()->WindowService()->GetMainWindow()!=window)
 					{
 						window->Hide();
 					}
