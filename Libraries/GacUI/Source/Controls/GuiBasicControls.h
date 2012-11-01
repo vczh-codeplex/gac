@@ -60,6 +60,25 @@ Basic Construction
 				};
 
 				/// <summary>
+				/// An empty style for <see cref="GuiControl"/>.
+				/// </summary>
+				class EmptyStyleController : public Object, public IStyleController, public Description<EmptyStyleController>
+				{
+				protected:
+					compositions::GuiBoundsComposition*				boundsComposition;
+				public:
+					EmptyStyleController();
+					~EmptyStyleController();
+
+					compositions::GuiBoundsComposition*				GetBoundsComposition()override;
+					compositions::GuiGraphicsComposition*			GetContainerComposition()override;
+					void											SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+					void											SetText(const WString& value)override;
+					void											SetFont(const FontProperties& value)override;
+					void											SetVisuallyEnabled(bool value)override;
+				};
+
+				/// <summary>
 				/// A style provider is a callback interface for some control that already provides a style controller, but the controller need callbacks to create sub compositions or handle actions.
 				/// </summary>
 				class IStyleProvider : public virtual IDescriptable, public Description<IStyleProvider>

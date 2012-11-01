@@ -14858,6 +14858,22 @@ Basic Construction
 					virtual void									SetVisuallyEnabled(bool value)=0;
 				};
 
+				class EmptyStyleController : public Object, public IStyleController, public Description<EmptyStyleController>
+				{
+				protected:
+					compositions::GuiBoundsComposition*				boundsComposition;
+				public:
+					EmptyStyleController();
+					~EmptyStyleController();
+
+					compositions::GuiBoundsComposition*				GetBoundsComposition()override;
+					compositions::GuiGraphicsComposition*			GetContainerComposition()override;
+					void											SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+					void											SetText(const WString& value)override;
+					void											SetFont(const FontProperties& value)override;
+					void											SetVisuallyEnabled(bool value)override;
+				};
+
 				class IStyleProvider : public virtual IDescriptable, public Description<IStyleProvider>
 				{
 				public:

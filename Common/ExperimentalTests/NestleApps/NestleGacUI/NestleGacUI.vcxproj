@@ -86,6 +86,7 @@
     <ClCompile Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.cpp" />
     <ClCompile Include="..\NestleConsole\NestleSDK.cpp" />
     <ClCompile Include="ControlStyles.cpp" />
+    <ClCompile Include="CustomizableListBoxHelper.cpp" />
     <ClCompile Include="LoginPage.cpp" />
     <ClCompile Include="LoginWindow.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -97,9 +98,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUI.h" />
+    <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUIIncludes.h" />
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h" />
     <ClInclude Include="..\NestleConsole\NestleSDK.h" />
     <ClInclude Include="ControlStyles.h" />
+    <ClInclude Include="CustomizableListBoxHelper.h" />
     <ClInclude Include="LoginPage.h" />
     <ClInclude Include="LoginWindow.h" />
     <ClInclude Include="MainWindow.h" />
