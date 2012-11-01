@@ -86,7 +86,10 @@ void NestleWindow::LoginPage_Canceled_InitialLogin(GuiGraphicsComposition* sende
 
 void NestleWindow::LoginPage_Canceled_NonInitialLogin(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 {
-	PageBackward();
+	GetApplication()->InvokeInMainThread([=]()
+	{
+		PageBackward();
+	});
 }
 
 //--------------------------------------------------------------
@@ -98,11 +101,7 @@ void NestleWindow::TopicListPage_PostOpenRequested(GuiGraphicsComposition* sende
 	{
 		Ptr<NestleServer> server=topicListPage->GetServer();
 		Ptr<NestlePost> post=topicListPage->GetSelectedPost();
-		Ptr<TopicPage> topicPage=new TopicPage(server, post);
-		GetApplication()->InvokeInMainThread([=]()
-		{
-			PageForward(topicPage);
-		});
+		ShowTopicPage(server, post);
 	}
 	else
 	{
@@ -111,6 +110,16 @@ void NestleWindow::TopicListPage_PostOpenRequested(GuiGraphicsComposition* sende
 			L"发生内部错误。"
 			);
 	}
+}
+
+//--------------------------------------------------------------
+
+void NestleWindow::TopicPage_PostCloseRequested(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+{
+	GetApplication()->InvokeInMainThread([=]()
+	{
+		PageBackward();
+	});
 }
 
 //--------------------------------------------------------------
@@ -142,6 +151,16 @@ void NestleWindow::ShowTopicListPage(Ptr<NestleServer> server)
 
 	pageContainerElement->SetColor(Color(0, 0, 0, 0));
 	pageContainerComposition->SetAlignmentToParent(Margin(10, 10, 10, 32));
+}
+
+void NestleWindow::ShowTopicPage(Ptr<NestleServer> server, Ptr<NestlePost> post)
+{
+	Ptr<TopicPage> topicPage=new TopicPage(server, post);
+	topicPage->PostCloseRequested.AttachMethod(this, &NestleWindow::TopicPage_PostCloseRequested);
+	GetApplication()->InvokeInMainThread([=]()
+	{
+		PageForward(topicPage);
+	});
 }
 
 NestleWindow::NestleWindow()

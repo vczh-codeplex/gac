@@ -26,9 +26,11 @@ protected:
 	void							LoginPage_Canceled_InitialLogin(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 	void							LoginPage_Canceled_NonInitialLogin(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 	void							TopicListPage_PostOpenRequested(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+	void							TopicPage_PostCloseRequested(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 
 	void							ShowLoginPage(bool initialLogin);
 	void							ShowTopicListPage(Ptr<NestleServer> server);
+	void							ShowTopicPage(Ptr<NestleServer> server, Ptr<NestlePost> post);
 protected:
 	void							InitializeComponents();
 public:
