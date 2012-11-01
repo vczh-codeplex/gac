@@ -66,6 +66,9 @@
     <ClCompile Include="CustomizableListBoxHelper.cpp">
       <Filter>Controls</Filter>
     </ClCompile>
+    <ClCompile Include="NewPostWindow.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h">
@@ -106,6 +109,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\GacUIIncludes.h">
       <Filter>Library</Filter>
+    </ClInclude>
+    <ClInclude Include="NewPostWindow.h">
+      <Filter>Windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

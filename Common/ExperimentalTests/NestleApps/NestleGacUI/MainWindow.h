@@ -2,6 +2,7 @@
 #define VCZH_NESTLECLIENT_WINDOWS_MAINWINDOW
 
 #include "LoginWindow.h"
+#include "NewPostWindow.h"
 #include "CustomizableListBoxHelper.h"
 
 namespace vl
@@ -51,6 +52,7 @@ namespace vl
 			Ptr<NestleServer>							server;
 			Ptr<NestleTopicsPage>						currentPage;
 			Ptr<LoginWindow>							loginWindow;
+			Ptr<NewPostWindow>							newPostWindow;
 
 			void										SwitchToLogoutStatus();
 			void										SwitchToLoginStatus();
@@ -58,6 +60,7 @@ namespace vl
 			void										LoadTopics(int pageIndex);
 
 			void										loginWindow_Closed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void										newPostWindow_Closed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandRefresh_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandFirstPage_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandPrevious_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
