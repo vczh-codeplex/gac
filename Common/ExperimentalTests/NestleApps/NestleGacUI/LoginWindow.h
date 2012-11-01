@@ -25,9 +25,7 @@ namespace vl
 			LoginWindow();
 			~LoginWindow();
 
-			GuiNotifyEvent						Logined;
-
-			Ptr<NestleServer>					LoginWindow::CreatedNestleServer();
+			Ptr<NestleServer>					CreatedNestleServer();
 		};
 	}
 }

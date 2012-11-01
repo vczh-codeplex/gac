@@ -60,6 +60,9 @@
     <ClCompile Include="LoginWindow.cpp">
       <Filter>Windows</Filter>
     </ClCompile>
+    <ClCompile Include="MainWindow.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h">
@@ -92,9 +95,30 @@
     <ClInclude Include="LoginWindow.h">
       <Filter>Windows</Filter>
     </ClInclude>
+    <ClInclude Include="MainWindow.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\Resources\Background.jpg">
+    <Image Include="..\Resources\LoginWindowBackground.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Resources\ToolstripNewPost.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Resources\ToolstripNext.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Resources\ToolstripPrevious.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Resources\ToolstripRefresh.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Resources\ToolstripSearch.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Resources\ToolstripUser.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

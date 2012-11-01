@@ -89,6 +89,7 @@
     <ClCompile Include="LoginPage.cpp" />
     <ClCompile Include="LoginWindow.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="NestlePage.cpp" />
     <ClCompile Include="NestleWindow.cpp" />
     <ClCompile Include="TopicListPage.cpp" />
@@ -101,13 +102,20 @@
     <ClInclude Include="ControlStyles.h" />
     <ClInclude Include="LoginPage.h" />
     <ClInclude Include="LoginWindow.h" />
+    <ClInclude Include="MainWindow.h" />
     <ClInclude Include="NestlePage.h" />
     <ClInclude Include="NestleWindow.h" />
     <ClInclude Include="TopicListPage.h" />
     <ClInclude Include="TopicPage.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\Resources\Background.jpg" />
+    <Image Include="..\Resources\LoginWindowBackground.jpg" />
+    <Image Include="..\Resources\ToolstripNewPost.png" />
+    <Image Include="..\Resources\ToolstripNext.png" />
+    <Image Include="..\Resources\ToolstripPrevious.png" />
+    <Image Include="..\Resources\ToolstripRefresh.png" />
+    <Image Include="..\Resources\ToolstripSearch.png" />
+    <Image Include="..\Resources\ToolstripUser.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

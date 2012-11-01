@@ -16,7 +16,10 @@ LoginWindow
 			WString apiSecret=L"9814021f20054b558105fca1df6559a7";
 			WString username=textUsername->GetText();
 			WString password=textPassword->GetText();
-			SetEnabled(false);
+			textUsername->SetEnabled(false);
+			textPassword->SetEnabled(false);
+			buttonLogin->SetEnabled(false);
+			buttonCancel->SetEnabled(false);
 			GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::LargeWaiting));
 
 			GetApplication()->InvokeAsync([=]()
@@ -27,8 +30,6 @@ LoginWindow
 					if(server->IsLoginSuccess())
 					{
 						nestleServer=server;
-						GuiEventArgs arguments;
-						Logined.Execute(arguments);
 						Close();
 					}
 					else
@@ -38,8 +39,11 @@ LoginWindow
 							L"登录失败，请检查用户名或密码是否正确，或者网络连接是否畅通。"
 							);
 					}
-					GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
-					SetEnabled(true);
+					GetBoundsComposition()->SetAssociatedCursor(0);
+					textUsername->SetEnabled(true);
+					textPassword->SetEnabled(true);
+					buttonLogin->SetEnabled(true);
+					buttonCancel->SetEnabled(true);
 				});
 			});
 		}
@@ -52,7 +56,6 @@ LoginWindow
 		LoginWindow::LoginWindow()
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 		{
-			Logined.SetAssociatedComposition(GetBoundsComposition());
 			InitializeComponents();
 		}
 
@@ -92,7 +95,7 @@ LoginWindow::InitializeComponents
 				{
 					Ptr<INativeImage> image=GetCurrentController()
 						->ImageService()
-						->CreateImageFromFile(L"..\\Resources\\Background.jpg");
+						->CreateImageFromFile(L"..\\Resources\\LoginWindowBackground.jpg");
 
 					GuiImageFrameElement* element=GuiImageFrameElement::Create();
 					element->SetImage(image);
