@@ -52,7 +52,8 @@ namespace vl
 
 			void										SwitchToLogoutStatus();
 			void										SwitchToLoginStatus();
-			void										LoadTopics();
+			void										EnableControls(bool enabled);
+			void										LoadTopics(int pageIndex);
 
 			void										loginWindow_Closed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandRefresh_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
