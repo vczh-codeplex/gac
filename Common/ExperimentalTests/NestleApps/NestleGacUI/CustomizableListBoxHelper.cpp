@@ -141,7 +141,7 @@ ObjectItemProvider
 
 				IDescriptable* ObjectItemProvider::RequestView(const WString& identifier)
 				{
-					if(identifier==TextItemStyleProvider::ITextItemView::Identifier)
+					if(identifier==ObjectItemStyleProvider::IObjectItemView::Identifier)
 					{
 						return (ObjectItemStyleProvider::IObjectItemView*)this;
 					}
