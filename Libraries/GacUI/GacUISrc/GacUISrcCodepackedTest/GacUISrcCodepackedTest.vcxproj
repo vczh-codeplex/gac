@@ -94,6 +94,7 @@
     <ClCompile Include="SetupManagedToolstripWindow.cpp" />
     <ClCompile Include="SetupRibbonWindow.cpp" />
     <ClCompile Include="SetupTabPageListControlWindow.cpp" />
+    <ClCompile Include="SetupTabPageWindow.cpp" />
     <ClCompile Include="SetupTextBoxWindow.cpp" />
     <ClCompile Include="SetupTreeviewWindow.cpp" />
   </ItemGroup>
