@@ -1662,6 +1662,7 @@ Elements
 				bool					wrapLine;
 				bool					ellipse;
 				bool					multiline;
+				bool					wrapLineHeightCalculation;
 
 				GuiSolidLabelElement();
 			public:
@@ -1688,6 +1689,9 @@ Elements
 				
 				bool					GetMultiline();
 				void					SetMultiline(bool value);
+
+				bool					GetWrapLineHeightCalculation();
+				void					SetWrapLineHeightCalculation(bool value);
 			};
 
 			class GuiImageFrameElement : public Object, public IGuiGraphicsElement, public Description<GuiImageFrameElement>
@@ -2418,13 +2422,6 @@ Basic Construction
 					LimitToElement,
 					LimitToElementAndChildren,
 				};
-				
-				enum ParentSizeAffection
-				{
-					NotAffectedByParent,
-					AffectedByParent,
-					TotallyDecidedByParent,
-				};
 			protected:
 				CompositionList								children;
 				GuiGraphicsComposition*						parent;
@@ -2498,7 +2495,6 @@ Basic Construction
 				virtual Rect								GetClientArea();
 				virtual void								ForceCalculateSizeImmediately();
 				
-				virtual ParentSizeAffection					GetAffectionFromParent()=0;
 				virtual bool								IsSizeAffectParent()=0;
 				virtual Size								GetMinPreferredClientSize()=0;
 				virtual Rect								GetPreferredBounds()=0;
@@ -2514,7 +2510,6 @@ Basic Construction
 				GuiGraphicsSite();
 				~GuiGraphicsSite();
 				
-				ParentSizeAffection					GetAffectionFromParent()override;
 				bool								IsSizeAffectParent()override;
 				Size								GetMinPreferredClientSize()override;
 				Rect								GetPreferredBounds()override;
@@ -2579,7 +2574,6 @@ Basic Compositions
 
 				compositions::GuiNotifyEvent		BoundsChanged;
 				
-				ParentSizeAffection					GetAffectionFromParent()override;
 				Rect								GetPreferredBounds()override;
 				Rect								GetBounds()override;
 				void								SetBounds(Rect value);
@@ -2869,7 +2863,6 @@ Stack Compositions
 				GuiStackItemComposition();
 				~GuiStackItemComposition();
 				
-				ParentSizeAffection					GetAffectionFromParent()override;
 				bool								IsSizeAffectParent()override;
 				Rect								GetBounds()override;
 				void								SetBounds(Rect value);
@@ -2934,7 +2927,6 @@ Specialized Compositions
 				double								GetMaxRatio();
 				void								SetMaxRatio(double value);
 				
-				ParentSizeAffection					GetAffectionFromParent()override;
 				bool								IsSizeAffectParent()override;
 				Rect								GetBounds()override;
 			};
@@ -2960,7 +2952,6 @@ Specialized Compositions
 				void								SetHeightRatio(double value);
 				void								SetHeightPageSize(double value);
 				
-				ParentSizeAffection					GetAffectionFromParent()override;
 				bool								IsSizeAffectParent()override;
 				Rect								GetBounds()override;
 			};

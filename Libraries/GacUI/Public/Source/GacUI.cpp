@@ -20080,22 +20080,6 @@ GuiBoundsComposition
 			{
 			}
 
-			GuiGraphicsComposition::ParentSizeAffection GuiBoundsComposition::GetAffectionFromParent()
-			{
-				if(alignmentToParent==Margin(-1, -1, -1, -1))
-				{
-					return GuiGraphicsComposition::NotAffectedByParent;
-				}
-				else if(alignmentToParent.left!=-1 || alignmentToParent.top!=-1 || alignmentToParent.right!=-1 || alignmentToParent.bottom!=-1)
-				{
-					return GuiGraphicsComposition::TotallyDecidedByParent;
-				}
-				else
-				{
-					return GuiGraphicsComposition::AffectedByParent;
-				}
-			}
-
 			Rect GuiBoundsComposition::GetPreferredBounds()
 			{
 				Rect result=GetBoundsInternal(compositionBounds);
@@ -20883,11 +20867,6 @@ GuiGraphicsSite
 			{
 			}
 
-			GuiGraphicsComposition::ParentSizeAffection GuiGraphicsSite::GetAffectionFromParent()
-			{
-				return GuiGraphicsComposition::NotAffectedByParent;
-			}
-
 			bool GuiGraphicsSite::IsSizeAffectParent()
 			{
 				return true;
@@ -21044,11 +21023,6 @@ GuiSideAlignedComposition
 					value;
 			}
 
-			GuiGraphicsComposition::ParentSizeAffection GuiSideAlignedComposition::GetAffectionFromParent()
-			{
-				return GuiGraphicsComposition::TotallyDecidedByParent;
-			}
-
 			bool GuiSideAlignedComposition::IsSizeAffectParent()
 			{
 				return false;
@@ -21146,11 +21120,6 @@ GuiPartialViewComposition
 			void GuiPartialViewComposition::SetHeightPageSize(double value)
 			{
 				hPageSize=value;
-			}
-
-			GuiGraphicsComposition::ParentSizeAffection GuiPartialViewComposition::GetAffectionFromParent()
-			{
-				return GuiGraphicsComposition::TotallyDecidedByParent;
 			}
 
 			bool GuiPartialViewComposition::IsSizeAffectParent()
@@ -21431,11 +21400,6 @@ GuiStackItemComposition
 
 			GuiStackItemComposition::~GuiStackItemComposition()
 			{
-			}
-
-			GuiGraphicsComposition::ParentSizeAffection GuiStackItemComposition::GetAffectionFromParent()
-			{
-				return GuiGraphicsComposition::AffectedByParent;
 			}
 
 			bool GuiStackItemComposition::IsSizeAffectParent()
@@ -22578,6 +22542,7 @@ GuiSolidLabelElement
 				,wrapLine(false)
 				,ellipse(false)
 				,multiline(false)
+				,wrapLineHeightCalculation(false)
 			{
 				fontProperties.fontFamily=L"Lucida Console";
 				fontProperties.size=12;
@@ -22688,6 +22653,20 @@ GuiSolidLabelElement
 				if(multiline!=value)
 				{
 					multiline=value;
+					renderer->OnElementStateChanged();
+				}
+			}
+
+			bool GuiSolidLabelElement::GetWrapLineHeightCalculation()
+			{
+				return wrapLineHeightCalculation;
+			}
+
+			void GuiSolidLabelElement::SetWrapLineHeightCalculation(bool value)
+			{
+				if(wrapLineHeightCalculation!=value)
+				{
+					wrapLineHeightCalculation=value;
 					renderer->OnElementStateChanged();
 				}
 			}
@@ -24977,22 +24956,50 @@ GuiSolidLabelElementRenderer
 
 			void GuiSolidLabelElementRenderer::UpdateMinSize()
 			{
-				DestroyTextLayout();
-				if(renderTarget && !element->GetMultiline() && !element->GetWrapLine())
+				int oldMaxWidth=-1;
+				if(textLayout)
 				{
-					CreateTextLayout();
-					if(textLayout)
+					textLayout->GetMaxWidth();
+				}
+				DestroyTextLayout();
+				bool calculateSizeFromTextLayout=false;
+				if(renderTarget)
+				{
+					if(element->GetWrapLine())
 					{
-						DWRITE_TEXT_METRICS metrics;
-						HRESULT hr=textLayout->GetMetrics(&metrics);
-						if(!FAILED(hr))
+						if(element->GetWrapLineHeightCalculation())
 						{
-							minSize=Size((element->GetEllipse()?0:(int)ceil(metrics.widthIncludingTrailingWhitespace)), (int)ceil(metrics.height));
+							CreateTextLayout();
+							if(textLayout)
+							{
+								textLayout->SetWordWrapping(element->GetWrapLine()?DWRITE_WORD_WRAPPING_WRAP:DWRITE_WORD_WRAPPING_NO_WRAP);
+								textLayout->SetMaxWidth((float)(oldMaxWidth==-1?300:oldMaxWidth));
+								calculateSizeFromTextLayout=true;
+							}
 						}
-						return;
+					}
+					else
+					{
+						CreateTextLayout();
+						if(textLayout)
+						{
+							calculateSizeFromTextLayout=true;
+						}
 					}
 				}
-				minSize=Size();
+				if(calculateSizeFromTextLayout)
+				{
+					DWRITE_TEXT_METRICS metrics;
+					HRESULT hr=textLayout->GetMetrics(&metrics);
+					if(!FAILED(hr))
+					{
+						minSize=Size((element->GetEllipse()?0:(int)ceil(metrics.widthIncludingTrailingWhitespace)), (int)ceil(metrics.height));
+					}
+				}
+				else
+				{
+					minSize=Size();
+				}
 			}
 
 			void GuiSolidLabelElementRenderer::InitializeInternal()
@@ -25132,8 +25139,6 @@ GuiSolidLabelElementRenderer
 
 			void GuiSolidLabelElementRenderer::OnElementStateChanged()
 			{
-				bool fontChanged=false;
-				bool textChanged=false;
 				if(renderTarget)
 				{
 					Color color=element->GetColor();
@@ -25148,23 +25153,10 @@ GuiSolidLabelElementRenderer
 					{
 						DestroyTextFormat(renderTarget);
 						CreateTextFormat(renderTarget);
-						fontChanged=true;
 					}
 				}
-
-				if(oldText!=element->GetText())
-				{
-					oldText=element->GetText();
-					if(oldText==L"")
-					{
-						oldText=L"";
-					}
-					textChanged=true;
-				}
-				if(fontChanged || textChanged)
-				{
-					UpdateMinSize();
-				}
+				oldText=element->GetText();
+				UpdateMinSize();
 			}
 
 /***********************************************************************

@@ -232,6 +232,7 @@ void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 			{
 				GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
 				element->SetWrapLine(true);
+				element->SetWrapLineHeightCalculation(true);
 				element->SetText(texts[i]);
 				element->SetFont(container->GetFont());
 
@@ -260,6 +261,7 @@ void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 			{
 				GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
 				element->SetWrapLine(true);
+				element->SetWrapLineHeightCalculation(true);
 				element->SetText(texts[i]);
 				element->SetFont(container->GetFont());
 
