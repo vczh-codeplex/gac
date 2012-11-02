@@ -357,6 +357,7 @@ GuiSolidLabelElement
 				,wrapLine(false)
 				,ellipse(false)
 				,multiline(false)
+				,wrapLineHeightCalculation(false)
 			{
 				fontProperties.fontFamily=L"Lucida Console";
 				fontProperties.size=12;
@@ -467,6 +468,20 @@ GuiSolidLabelElement
 				if(multiline!=value)
 				{
 					multiline=value;
+					renderer->OnElementStateChanged();
+				}
+			}
+
+			bool GuiSolidLabelElement::GetWrapLineHeightCalculation()
+			{
+				return wrapLineHeightCalculation;
+			}
+
+			void GuiSolidLabelElement::SetWrapLineHeightCalculation(bool value)
+			{
+				if(wrapLineHeightCalculation!=value)
+				{
+					wrapLineHeightCalculation=value;
 					renderer->OnElementStateChanged();
 				}
 			}

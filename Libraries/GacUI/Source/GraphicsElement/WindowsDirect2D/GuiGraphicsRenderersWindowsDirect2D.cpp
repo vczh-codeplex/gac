@@ -481,22 +481,50 @@ GuiSolidLabelElementRenderer
 
 			void GuiSolidLabelElementRenderer::UpdateMinSize()
 			{
-				DestroyTextLayout();
-				if(renderTarget && !element->GetMultiline() && !element->GetWrapLine())
+				int oldMaxWidth=-1;
+				if(textLayout)
 				{
-					CreateTextLayout();
-					if(textLayout)
+					textLayout->GetMaxWidth();
+				}
+				DestroyTextLayout();
+				bool calculateSizeFromTextLayout=false;
+				if(renderTarget)
+				{
+					if(element->GetWrapLine())
 					{
-						DWRITE_TEXT_METRICS metrics;
-						HRESULT hr=textLayout->GetMetrics(&metrics);
-						if(!FAILED(hr))
+						if(element->GetWrapLineHeightCalculation())
 						{
-							minSize=Size((element->GetEllipse()?0:(int)ceil(metrics.widthIncludingTrailingWhitespace)), (int)ceil(metrics.height));
+							CreateTextLayout();
+							if(textLayout)
+							{
+								textLayout->SetWordWrapping(element->GetWrapLine()?DWRITE_WORD_WRAPPING_WRAP:DWRITE_WORD_WRAPPING_NO_WRAP);
+								textLayout->SetMaxWidth((float)(oldMaxWidth==-1?65536:oldMaxWidth));
+								calculateSizeFromTextLayout=true;
+							}
 						}
-						return;
+					}
+					else
+					{
+						CreateTextLayout();
+						if(textLayout)
+						{
+							calculateSizeFromTextLayout=true;
+						}
 					}
 				}
-				minSize=Size();
+				if(calculateSizeFromTextLayout)
+				{
+					DWRITE_TEXT_METRICS metrics;
+					HRESULT hr=textLayout->GetMetrics(&metrics);
+					if(!FAILED(hr))
+					{
+						minSize=Size((element->GetEllipse()?0:(int)ceil(metrics.widthIncludingTrailingWhitespace)), (int)ceil(metrics.height));
+					}
+				}
+				else
+				{
+					minSize=Size();
+				}
 			}
 
 			void GuiSolidLabelElementRenderer::InitializeInternal()
@@ -636,8 +664,6 @@ GuiSolidLabelElementRenderer
 
 			void GuiSolidLabelElementRenderer::OnElementStateChanged()
 			{
-				bool fontChanged=false;
-				bool textChanged=false;
 				if(renderTarget)
 				{
 					Color color=element->GetColor();
@@ -652,23 +678,10 @@ GuiSolidLabelElementRenderer
 					{
 						DestroyTextFormat(renderTarget);
 						CreateTextFormat(renderTarget);
-						fontChanged=true;
 					}
 				}
-
-				if(oldText!=element->GetText())
-				{
-					oldText=element->GetText();
-					if(oldText==L"")
-					{
-						oldText=L"";
-					}
-					textChanged=true;
-				}
-				if(fontChanged || textChanged)
-				{
-					UpdateMinSize();
-				}
+				oldText=element->GetText();
+				UpdateMinSize();
 			}
 
 /***********************************************************************

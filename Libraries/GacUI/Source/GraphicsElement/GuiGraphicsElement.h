@@ -691,6 +691,7 @@ Elements
 				bool					wrapLine;
 				bool					ellipse;
 				bool					multiline;
+				bool					wrapLineHeightCalculation;
 
 				GuiSolidLabelElement();
 			public:
@@ -778,6 +779,17 @@ Elements
 				/// </summary>
 				/// <param name="value">True if multiple lines is enabled for this text.</param>
 				void					SetMultiline(bool value);
+
+				/// <summary>
+				/// Get if the element calculates the min height when wrap line is enabled.
+				/// </summary>
+				/// <returns>Return true if the element calculates the min height when wrap line is enabled.</returns>
+				bool					GetWrapLineHeightCalculation();
+				/// <summary>
+				/// Set if the element calculates the min height when wrap line is enabled.
+				/// </summary>
+				/// <param name="value">True if the element calculates the min height when wrap line is enabled.</param>
+				void					SetWrapLineHeightCalculation(bool value);
 			};
 
 			/// <summary>
