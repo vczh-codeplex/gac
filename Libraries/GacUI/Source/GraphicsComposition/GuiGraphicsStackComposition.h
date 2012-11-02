@@ -113,7 +113,6 @@ Stack Compositions
 				GuiStackItemComposition();
 				~GuiStackItemComposition();
 				
-				ParentSizeAffection					GetAffectionFromParent()override;
 				bool								IsSizeAffectParent()override;
 				Rect								GetBounds()override;
 				/// <summary>Set the expected bounds of a stack item. In most of the cases only the size of the bounds is used.</summary>

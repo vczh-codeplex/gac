@@ -67,7 +67,6 @@ Specialized Compositions
 				/// <param name="value">The maximum ratio to limit the size according to the size of the parent.</param>
 				void								SetMaxRatio(double value);
 				
-				ParentSizeAffection					GetAffectionFromParent()override;
 				bool								IsSizeAffectParent()override;
 				Rect								GetBounds()override;
 			};
@@ -112,7 +111,6 @@ Specialized Compositions
 				/// <param name="value">The page size to decide the vertical size.</param>
 				void								SetHeightPageSize(double value);
 				
-				ParentSizeAffection					GetAffectionFromParent()override;
 				bool								IsSizeAffectParent()override;
 				Rect								GetBounds()override;
 			};

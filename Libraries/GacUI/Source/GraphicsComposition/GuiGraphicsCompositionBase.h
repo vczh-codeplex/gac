@@ -55,19 +55,6 @@ Basic Construction
 					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.MinSizeLimitation]Minimum size of this composition is combiniation of sub compositions and the minimum size of the contained graphics element.</summary>
 					LimitToElementAndChildren,
 				};
-				
-				/// <summary>
-				/// Relation between the composition size and the parent composition.
-				/// </summary>
-				enum ParentSizeAffection
-				{
-					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.ParentSizeAffection]The size doesn't aware of the parent composition.</summary>
-					NotAffectedByParent,
-					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.ParentSizeAffection]The size partially limited by the parent composition.</summary>
-					AffectedByParent,
-					/// <summary>[T:vl.presentation.compositions.GuiGraphicsComposition.ParentSizeAffection]The size is decided by the parent composition.</summary>
-					TotallyDecidedByParent,
-				};
 			protected:
 				CompositionList								children;
 				GuiGraphicsComposition*						parent;
@@ -221,9 +208,6 @@ Basic Construction
 				/// <summary>Force to calculate layout and size immediately</summary>
 				virtual void								ForceCalculateSizeImmediately();
 				
-				/// <summary>Get the parent size affection.</summary>
-				/// <returns>The parent size affection.</returns>
-				virtual ParentSizeAffection					GetAffectionFromParent()=0;
 				/// <summary>Test is the size calculation affected by the parent.</summary>
 				/// <returns>Returns true if the size calculation is affected by the parent.</returns>
 				virtual bool								IsSizeAffectParent()=0;
@@ -253,7 +237,6 @@ Basic Construction
 				GuiGraphicsSite();
 				~GuiGraphicsSite();
 				
-				ParentSizeAffection					GetAffectionFromParent()override;
 				bool								IsSizeAffectParent()override;
 				Size								GetMinPreferredClientSize()override;
 				Rect								GetPreferredBounds()override;

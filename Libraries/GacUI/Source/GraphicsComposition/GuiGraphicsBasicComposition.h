@@ -61,7 +61,6 @@ Basic Compositions
 				/// <summary>Event that will be raised when the final bounds is changed.</summary>
 				compositions::GuiNotifyEvent		BoundsChanged;
 				
-				ParentSizeAffection					GetAffectionFromParent()override;
 				Rect								GetPreferredBounds()override;
 				Rect								GetBounds()override;
 				/// <summary>Set the expected bounds.</summary>

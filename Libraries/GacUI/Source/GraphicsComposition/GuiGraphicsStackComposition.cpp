@@ -242,11 +242,6 @@ GuiStackItemComposition
 			{
 			}
 
-			GuiGraphicsComposition::ParentSizeAffection GuiStackItemComposition::GetAffectionFromParent()
-			{
-				return GuiGraphicsComposition::AffectedByParent;
-			}
-
 			bool GuiStackItemComposition::IsSizeAffectParent()
 			{
 				return false;
