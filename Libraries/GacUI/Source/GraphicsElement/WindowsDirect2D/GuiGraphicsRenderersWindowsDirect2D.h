@@ -112,6 +112,7 @@ Renderers
 				ID2D1SolidColorBrush*			brush;
 				Direct2DTextFormatPackage*		textFormat;
 				IDWriteTextLayout*				textLayout;
+				int								oldMaxWidth;
 
 				void					CreateBrush(IWindowsDirect2DRenderTarget* _renderTarget);
 				void					DestroyBrush(IWindowsDirect2DRenderTarget* _renderTarget);

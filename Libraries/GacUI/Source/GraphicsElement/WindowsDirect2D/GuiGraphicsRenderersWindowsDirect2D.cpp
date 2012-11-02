@@ -481,11 +481,7 @@ GuiSolidLabelElementRenderer
 
 			void GuiSolidLabelElementRenderer::UpdateMinSize()
 			{
-				int oldMaxWidth=-1;
-				if(textLayout)
-				{
-					textLayout->GetMaxWidth();
-				}
+				float maxWidth=0;
 				DestroyTextLayout();
 				bool calculateSizeFromTextLayout=false;
 				if(renderTarget)
@@ -497,8 +493,12 @@ GuiSolidLabelElementRenderer
 							CreateTextLayout();
 							if(textLayout)
 							{
-								textLayout->SetWordWrapping(element->GetWrapLine()?DWRITE_WORD_WRAPPING_WRAP:DWRITE_WORD_WRAPPING_NO_WRAP);
-								textLayout->SetMaxWidth((float)(oldMaxWidth==-1?65536:oldMaxWidth));
+								maxWidth=textLayout->GetMaxWidth();
+								if(oldMaxWidth!=-1)
+								{
+									textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
+									textLayout->SetMaxWidth((float)oldMaxWidth);
+								}
 								calculateSizeFromTextLayout=true;
 							}
 						}
@@ -508,6 +508,7 @@ GuiSolidLabelElementRenderer
 						CreateTextLayout();
 						if(textLayout)
 						{
+							maxWidth=textLayout->GetMaxWidth();
 							calculateSizeFromTextLayout=true;
 						}
 					}
@@ -518,8 +519,14 @@ GuiSolidLabelElementRenderer
 					HRESULT hr=textLayout->GetMetrics(&metrics);
 					if(!FAILED(hr))
 					{
-						minSize=Size((element->GetEllipse()?0:(int)ceil(metrics.widthIncludingTrailingWhitespace)), (int)ceil(metrics.height));
+						int width=0;
+						if(!element->GetEllipse() && !element->GetWrapLine() && !element->GetMultiline())
+						{
+							width=(int)ceil(metrics.widthIncludingTrailingWhitespace);
+						}
+						minSize=Size(width, (int)ceil(metrics.height));
 					}
+					textLayout->SetMaxWidth(maxWidth);
 				}
 				else
 				{
@@ -552,6 +559,7 @@ GuiSolidLabelElementRenderer
 				,textFormat(0)
 				,textLayout(0)
 				,oldText(L"")
+				,oldMaxWidth(-1)
 			{
 			}
 
@@ -659,6 +667,11 @@ GuiSolidLabelElementRenderer
 						);
 
 					textLayout->SetTrimming(&trimming, inlineObject);
+					if(oldMaxWidth!=textBounds.Width())
+					{
+						oldMaxWidth=textBounds.Width();
+						UpdateMinSize();
+					}
 				}
 			}
 

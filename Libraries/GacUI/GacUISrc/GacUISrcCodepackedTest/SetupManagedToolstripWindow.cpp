@@ -92,6 +92,31 @@ void CreateToolbar(GuiControlHost* controlHost, Ptr<INativeImage> (&imageButtons
 	}
 }
 
+GuiGraphicsComposition* CreateWrapLineText(const WString& text)
+{
+	GuiSolidLabelElement* textElement=GuiSolidLabelElement::Create();
+	textElement->SetWrapLine(true);
+	textElement->SetWrapLineHeightCalculation(true);
+	textElement->SetText(text);
+	textElement->SetFont(GetCurrentController()->ResourceService()->GetDefaultFont());
+
+	GuiBoundsComposition* textComposition=new GuiBoundsComposition;
+	textComposition->SetOwnedElement(textElement);
+	textComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+	textComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+
+	GuiSolidBorderElement* borderElement=GuiSolidBorderElement::Create();
+	borderElement->SetColor(Color(0, 0, 255));
+
+	GuiBoundsComposition* borderComposition=new GuiBoundsComposition;
+	borderComposition->SetOwnedElement(borderElement);
+	borderComposition->SetAlignmentToParent(Margin(10, 10, 10, 10));
+	borderComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+	borderComposition->AddChild(textComposition);
+
+	return borderComposition;
+}
+
 void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* container)
 {
 	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
@@ -225,19 +250,12 @@ void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 		{
 			GuiStackComposition* sub=new GuiStackComposition;
 			sub->SetDirection(GuiStackComposition::Vertical);
-			sub->SetPadding(10);
 			sub->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			sub->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			for(int i=0;i<rowCount;i++)
 			{
-				GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
-				element->SetWrapLine(true);
-				element->SetWrapLineHeightCalculation(true);
-				element->SetText(texts[i]);
-				element->SetFont(container->GetFont());
-
 				GuiStackItemComposition* item=new GuiStackItemComposition;
-				item->SetOwnedElement(element);
+				item->AddChild(CreateWrapLineText(texts[i]));
 				sub->AddChild(item);
 			}
 
@@ -248,7 +266,6 @@ void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 		}
 		{
 			GuiTableComposition* sub=new GuiTableComposition;
-			sub->SetCellPadding(10);
 			sub->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			sub->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			sub->SetRowsAndColumns(rowCount, 1);
@@ -259,16 +276,10 @@ void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* contai
 			}
 			for(int i=0;i<rowCount;i++)
 			{
-				GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
-				element->SetWrapLine(true);
-				element->SetWrapLineHeightCalculation(true);
-				element->SetText(texts[i]);
-				element->SetFont(container->GetFont());
-
 				GuiCellComposition* cell=new GuiCellComposition;
 				sub->AddChild(cell);
 				cell->SetSite(i, 0, 1, 1);
-				cell->SetOwnedElement(element);
+				cell->AddChild(CreateWrapLineText(texts[i]));
 			}
 
 			GuiCellComposition* cell=new GuiCellComposition;
