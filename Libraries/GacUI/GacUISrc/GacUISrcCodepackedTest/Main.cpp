@@ -25,79 +25,121 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 #endif
 	return result;
 }
-
-extern void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupTabPageListControlWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupRibbonWindow(GuiControlHost* controlHost, GuiControl* container);
+extern void SetupTabPageWindow(GuiControlHost* controlHost, GuiControl* container);
 
 /***********************************************************************
-SetupWindow
+MainWindow
 ***********************************************************************/
 
-void SetupTabPageWindow(GuiControlHost* controlHost, GuiControl* container)
+class MainWindow : public GuiWindow
 {
-	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-	GuiTab* tab=g::NewTab();
-	tab->GetBoundsComposition()->SetAlignmentToParent(Margin(6, 6, 6, 6));
+public:
+	MainWindow()
+		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 	{
-		GuiTabPage* page=tab->CreatePage();
-		page->SetText(L"Basic");
-		SetupBasicWindow(controlHost, page->GetContainer());
+#ifdef GUI_GRAPHICS_RENDERER_GDI
+		SetText(L"Vczh GUI Demo (GDI): "+GetCurrentController()->GetOSVersion());
+#endif
+#ifdef GUI_GRAPHICS_RENDERER_DIRECT2D
+		SetText(L"Vczh GUI Demo (Direct2D): "+GetCurrentController()->GetOSVersion());
+#endif
+		SetClientSize(Size(800, 600));
+		MoveToScreenCenter();
+		//SetupTabPageWindow(this, this);
+		{
+			const wchar_t* texts[]=
+			{
+				L"When using ReadFileEx you should check GetLastError even when the function returns \"success\" to check for conditions that are \"successes\" but have some outcome you might want to know about. For example, a buffer overflow when calling ReadFileEx will return TRUE, but GetLastError will report the overflow with ERROR_MORE_DATA. If the function call is successful and there are no warning conditions, GetLastError will return ERROR_SUCCESS.",
+				L"The ReadFileEx function may fail if there are too many outstanding asynchronous I/O requests. In the event of such a failure, GetLastError can return ERROR_INVALID_USER_BUFFER or ERROR_NOT_ENOUGH_MEMORY.",
+				L"To cancel all pending asynchronous I/O operations, use either: ",
+				L"CancelIo¡ªthis function only cancels operations issued by the calling thread for the specified file handle.",
+				L"CancelIoEx¡ªthis function cancels all operations issued by the threads for the specified file handle.",
+			};
+			const int rowCount=sizeof(texts)/sizeof(*texts);
+			
+			GuiTableComposition* table=new GuiTableComposition;
+			table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			table->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+			table->SetRowsAndColumns(1, 2);
+			table->SetRowOption(0, GuiCellOption::MinSizeOption());
+			table->SetColumnOption(0, GuiCellOption::PercentageOption(0.5));
+			table->SetColumnOption(1, GuiCellOption::PercentageOption(0.5));
+			{
+				GuiStackComposition* sub=new GuiStackComposition;
+				sub->SetDirection(GuiStackComposition::Vertical);
+				sub->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				sub->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				for(int i=0;i<rowCount;i++)
+				{
+					GuiStackItemComposition* item=new GuiStackItemComposition;
+					item->AddChild(CreateWrapLineText(texts[i]));
+					sub->AddChild(item);
+				}
+
+				GuiCellComposition* cell=new GuiCellComposition;
+				table->AddChild(cell);
+				cell->SetSite(0, 0, 1, 1);
+				cell->AddChild(sub);
+			}
+			{
+				GuiTableComposition* sub=new GuiTableComposition;
+				sub->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				sub->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				sub->SetRowsAndColumns(rowCount, 1);
+				sub->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
+				for(int i=0;i<rowCount;i++)
+				{
+					sub->SetRowOption(i, GuiCellOption::MinSizeOption());
+				}
+				for(int i=0;i<rowCount;i++)
+				{
+					GuiCellComposition* cell=new GuiCellComposition;
+					sub->AddChild(cell);
+					cell->SetSite(i, 0, 1, 1);
+					cell->AddChild(CreateWrapLineText(texts[i]));
+				}
+
+				GuiCellComposition* cell=new GuiCellComposition;
+				table->AddChild(cell);
+				cell->SetSite(0, 1, 1, 1);
+				cell->AddChild(sub);
+			}
+			GetContainerComposition()->AddChild(table);
+		}
 	}
+
+	GuiGraphicsComposition* CreateWrapLineText(const WString& text)
 	{
-		GuiTabPage* page=tab->CreatePage();
-		page->SetText(L"Text Box");
-		SetupTextBoxWindow(controlHost, page->GetContainer());
+		GuiSolidLabelElement* textElement=GuiSolidLabelElement::Create();
+		textElement->SetWrapLine(true);
+		textElement->SetWrapLineHeightCalculation(true);
+		textElement->SetText(text);
+		textElement->SetFont(GetCurrentController()->ResourceService()->GetDefaultFont());
+
+		GuiBoundsComposition* textComposition=new GuiBoundsComposition;
+		textComposition->SetOwnedElement(textElement);
+		textComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+		textComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+
+		GuiSolidBorderElement* borderElement=GuiSolidBorderElement::Create();
+		borderElement->SetColor(Color(0, 0, 255));
+
+		GuiBoundsComposition* borderComposition=new GuiBoundsComposition;
+		borderComposition->SetOwnedElement(borderElement);
+		borderComposition->SetAlignmentToParent(Margin(10, 10, 10, 10));
+		borderComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+		borderComposition->AddChild(textComposition);
+
+		return borderComposition;
 	}
-	{
-		GuiTabPage* page=tab->CreatePage();
-		page->SetText(L"List Control");
-		SetupTabPageListControlWindow(controlHost, page->GetContainer());
-	}
-	{
-		GuiTabPage* page=tab->CreatePage();
-		page->SetText(L"Toolstrip");
-		SetupTabPageToolstripWindow(controlHost, page->GetContainer());
-	}
-	{
-		GuiTabPage* page=tab->CreatePage();
-		page->SetText(L"Dialogs");
-		SetupDialogWindow(controlHost, page->GetContainer());
-	}
-	{
-		GuiTabPage* page=tab->CreatePage();
-		page->SetText(L"Ribbon (not completed)");
-		SetupRibbonWindow(controlHost, page->GetContainer());
-	}
-	container->GetContainerComposition()->AddChild(tab->GetBoundsComposition());
-	tab->MovePage(tab->GetPages()[3], 2);
-}
+};
+
+/***********************************************************************
+GuiMain
+***********************************************************************/
 
 void GuiMain()
 {
-	GuiWindow window(GetCurrentTheme()->CreateWindowStyle());
-#ifdef GUI_GRAPHICS_RENDERER_GDI
-	window.SetText(L"Vczh GUI Demo (GDI): "+GetCurrentController()->GetOSVersion());
-#endif
-#ifdef GUI_GRAPHICS_RENDERER_DIRECT2D
-	window.SetText(L"Vczh GUI Demo (Direct2D): "+GetCurrentController()->GetOSVersion());
-#endif
-	SetupTabPageWindow(&window, &window);
-
-	window.SetClientSize(Size(800, 600));
-	INativeScreen* screen=window.GetRelatedScreen();
-	Rect windowBounds=window.GetBounds();
-	Rect screenBounds=screen->GetClientBounds();
-	window.SetBounds(Rect(
-		Point(
-			screenBounds.Left()+(screenBounds.Width()-windowBounds.Width())/2,
-			screenBounds.Top()+(screenBounds.Height()-windowBounds.Height())/2
-			),
-		windowBounds.GetSize()
-		));
-
+	MainWindow window;
 	GetApplication()->Run(&window);
 }
