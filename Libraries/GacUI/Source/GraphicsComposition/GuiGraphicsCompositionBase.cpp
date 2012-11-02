@@ -494,11 +494,6 @@ GuiGraphicsSite
 			{
 			}
 
-			GuiGraphicsComposition::ParentSizeAffection GuiGraphicsSite::GetAffectionFromParent()
-			{
-				return GuiGraphicsComposition::NotAffectedByParent;
-			}
-
 			bool GuiGraphicsSite::IsSizeAffectParent()
 			{
 				return true;

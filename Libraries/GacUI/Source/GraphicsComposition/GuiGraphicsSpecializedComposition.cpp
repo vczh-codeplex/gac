@@ -56,11 +56,6 @@ GuiSideAlignedComposition
 					value;
 			}
 
-			GuiGraphicsComposition::ParentSizeAffection GuiSideAlignedComposition::GetAffectionFromParent()
-			{
-				return GuiGraphicsComposition::TotallyDecidedByParent;
-			}
-
 			bool GuiSideAlignedComposition::IsSizeAffectParent()
 			{
 				return false;
@@ -158,11 +153,6 @@ GuiPartialViewComposition
 			void GuiPartialViewComposition::SetHeightPageSize(double value)
 			{
 				hPageSize=value;
-			}
-
-			GuiGraphicsComposition::ParentSizeAffection GuiPartialViewComposition::GetAffectionFromParent()
-			{
-				return GuiGraphicsComposition::TotallyDecidedByParent;
 			}
 
 			bool GuiPartialViewComposition::IsSizeAffectParent()

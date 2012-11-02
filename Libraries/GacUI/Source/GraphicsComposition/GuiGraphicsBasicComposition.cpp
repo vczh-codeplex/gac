@@ -57,22 +57,6 @@ GuiBoundsComposition
 			{
 			}
 
-			GuiGraphicsComposition::ParentSizeAffection GuiBoundsComposition::GetAffectionFromParent()
-			{
-				if(alignmentToParent==Margin(-1, -1, -1, -1))
-				{
-					return GuiGraphicsComposition::NotAffectedByParent;
-				}
-				else if(alignmentToParent.left!=-1 || alignmentToParent.top!=-1 || alignmentToParent.right!=-1 || alignmentToParent.bottom!=-1)
-				{
-					return GuiGraphicsComposition::TotallyDecidedByParent;
-				}
-				else
-				{
-					return GuiGraphicsComposition::AffectedByParent;
-				}
-			}
-
 			Rect GuiBoundsComposition::GetPreferredBounds()
 			{
 				Rect result=GetBoundsInternal(compositionBounds);
