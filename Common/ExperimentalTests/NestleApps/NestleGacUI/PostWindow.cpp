@@ -11,6 +11,8 @@ PostItemControl
 
 		void PostItemControl::buttonReply_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			PostWindow* postWindow=dynamic_cast<PostWindow*>(sender->GetRelatedControlHost());
+			postWindow->Reply(authorElement->GetText());
 		}
 
 		PostItemControl::PostItemControl()
@@ -31,7 +33,7 @@ PostItemControl
 			}
 			authorElement->SetText(postItem->author);
 			dateTimeElement->SetText(postItem->createDateTime);
-			bodyElement->SetText(L"    "+postItem->body);
+			bodyElement->SetText(postItem->body);
 		}
 
 /***********************************************************************
@@ -141,6 +143,7 @@ PostItemControl::InitializeComponents
 					GuiBoundsComposition* composition=new GuiBoundsComposition;
 					composition->SetOwnedElement(element);
 					composition->SetAlignmentToParent(Margin(3, 3, 3, 3));
+					composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
 					descriptionComposition=composition;
 				}
 
@@ -175,6 +178,29 @@ PostWindow
 
 		void PostWindow::buttonPost_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			WString body=textBody->GetText();
+			buttonPost->SetEnabled(false);
+			GetApplication()->InvokeAsync([=]()
+			{
+				Ptr<NestleComment> comment=server->PostComment(post->id, body);
+				GetApplication()->InvokeInMainThreadAndWait([=]()
+				{
+					buttonPost->SetEnabled(true);
+					if(comment)
+					{
+						textBody->SetText(L"");
+						textBody->SetFocus();
+						RefreshPostItems();
+					}
+					else
+					{
+						GetCurrentController()->DialogService()->ShowMessageBox(
+							GetBoundsComposition()->GetRelatedControlHost()->GetNativeWindow(),
+							L"回帖失败，请检查网络连接是否畅通。"
+							);
+					}
+				});
+			});
 		}
 
 		void PostWindow::buttonCancel_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
@@ -186,8 +212,11 @@ PostWindow
 		{
 			FOREACH(PostItemControl*, postItemControl, postItemControls.Wrap())
 			{
-				postItemStack->RemoveChild(postItemControl->GetBoundsComposition());
+				GuiStackItemComposition* stackItem=dynamic_cast<GuiStackItemComposition*>(postItemControl->GetBoundsComposition()->GetParent());
+				postItemStack->RemoveChild(stackItem);
+				stackItem->RemoveChild(postItemControl->GetBoundsComposition());
 				delete postItemControl;
+				delete stackItem;
 			}
 			postItemControls.Clear();
 		}
@@ -195,7 +224,7 @@ PostWindow
 		void PostWindow::AddPostItem(Ptr<PostItem> postItem)
 		{
 			PostItemControl* postItemControl=new PostItemControl;
-			postItemContainers->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			postItemControl->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			postItemControl->Install(postItem);
 			postItemControls.Add(postItemControl);
 
@@ -262,6 +291,13 @@ PostWindow
 		{
 		}
 
+		void PostWindow::Reply(const WString& author)
+		{
+			textBody->SetText(L"@"+author+L"\r\n"+textBody->GetText());
+			textBody->Select(TextPos(), TextPos());
+			textBody->SetFocus();
+		}
+
 /***********************************************************************
 PostWindow::InitializeComponents
 ***********************************************************************/
@@ -299,7 +335,7 @@ PostWindow::InitializeComponents
 			{
 				textBody=g::NewMultilineTextBox();
 				textBody->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				textBody->SetText(L"<请输入新帖子的内容>");
+				textBody->SetText(L"<请输入回复的内容>");
 
 				GuiCellComposition* cell=new GuiCellComposition;
 				table->AddChild(cell);
