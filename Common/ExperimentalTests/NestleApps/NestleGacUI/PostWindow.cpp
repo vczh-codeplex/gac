@@ -15,6 +15,57 @@ PostItemControl
 			postWindow->Reply(authorElement->GetText());
 		}
 
+		void PostItemControl::buttonEdit_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+		}
+
+		void PostItemControl::buttonDelete_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			PostWindow* postWindow=dynamic_cast<PostWindow*>(sender->GetRelatedControlHost());
+			if(postItem->isComment)
+			{
+				GetApplication()->InvokeAsync([=]()
+				{
+					bool result=postWindow->GetServer()->DeleteComment(postItem->id);
+					GetApplication()->InvokeInMainThreadAndWait([=]()
+					{
+						if(result)
+						{
+							postWindow->RefreshPostItems();
+						}
+						else
+						{
+							GetCurrentController()->DialogService()->ShowMessageBox(
+								GetBoundsComposition()->GetRelatedControlHost()->GetNativeWindow(),
+								L"删除回复失败，请检查网络连接是否畅通。"
+								);
+						}
+					});
+				});
+			}
+			else
+			{
+				GetApplication()->InvokeAsync([=]()
+				{
+					bool result=postWindow->GetServer()->DeleteTopic(postItem->id);
+					GetApplication()->InvokeInMainThreadAndWait([=]()
+					{
+						if(result)
+						{
+							postWindow->Close();
+						}
+						else
+						{
+							GetCurrentController()->DialogService()->ShowMessageBox(
+								GetBoundsComposition()->GetRelatedControlHost()->GetNativeWindow(),
+								L"删除帖子失败，请检查网络连接是否畅通。"
+								);
+						}
+					});
+				});
+			}
+		}
+
 		PostItemControl::PostItemControl()
 		{
 			InitializeComponents();
@@ -34,6 +85,10 @@ PostItemControl
 			authorElement->SetText(postItem->author);
 			dateTimeElement->SetText(postItem->createDateTime);
 			bodyElement->SetText(postItem->body);
+			
+			PostWindow* postWindow=dynamic_cast<PostWindow*>(GetRelatedControlHost());
+			buttonEdit->SetVisible(postWindow->IsCurrentUser(postItem->author));
+			buttonDelete->SetVisible(postWindow->IsCurrentUser(postItem->author));
 		}
 
 /***********************************************************************
@@ -158,16 +213,49 @@ PostItemControl::InitializeComponents
 				cell->SetSite(2, 0, 1, 4);
 			}
 			{
-				buttonReply=g::NewButton();
-				buttonReply->SetFont(buttonFont);
-				buttonReply->SetText(L"我要♂一战");
-				buttonReply->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand));
-				buttonReply->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, -1, 0));
-				buttonReply->Clicked.AttachMethod(this, &PostItemControl::buttonReply_Clicked);
+				GuiStackComposition* stack=new GuiStackComposition;
+				stack->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				stack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				stack->SetDirection(GuiStackComposition::Horizontal);
+				{
+					buttonReply=g::NewButton();
+					buttonReply->SetFont(buttonFont);
+					buttonReply->SetText(L"我要♂一战");
+					buttonReply->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand));
+					buttonReply->GetBoundsComposition()->SetAlignmentToParent(Margin(3, 3, 3, 3));
+					buttonReply->Clicked.AttachMethod(this, &PostItemControl::buttonReply_Clicked);
 
+					GuiStackItemComposition* item=new GuiStackItemComposition;
+					item->AddChild(buttonReply->GetBoundsComposition());
+					stack->AddChild(item);
+				}
+				{
+					buttonEdit=g::NewButton();
+					buttonEdit->SetFont(buttonFont);
+					buttonEdit->SetText(L"    编辑    ");
+					buttonEdit->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand));
+					buttonEdit->GetBoundsComposition()->SetAlignmentToParent(Margin(3, 3, 3, 3));
+					buttonEdit->Clicked.AttachMethod(this, &PostItemControl::buttonEdit_Clicked);
+
+					GuiStackItemComposition* item=new GuiStackItemComposition;
+					item->AddChild(buttonEdit->GetBoundsComposition());
+					stack->AddChild(item);
+				}
+				{
+					buttonDelete=g::NewButton();
+					buttonDelete->SetFont(buttonFont);
+					buttonDelete->SetText(L"    删除    ");
+					buttonDelete->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand));
+					buttonDelete->GetBoundsComposition()->SetAlignmentToParent(Margin(3, 3, 3, 3));
+					buttonDelete->Clicked.AttachMethod(this, &PostItemControl::buttonDelete_Clicked);
+
+					GuiStackItemComposition* item=new GuiStackItemComposition;
+					item->AddChild(buttonDelete->GetBoundsComposition());
+					stack->AddChild(item);
+				}
 				GuiCellComposition* cell=new GuiCellComposition;
 				table->AddChild(cell);
-				cell->AddChild(buttonReply->GetBoundsComposition());
+				cell->AddChild(stack);
 				cell->SetSite(3, 0, 1, 4);
 			}
 		}
@@ -225,50 +313,13 @@ PostWindow
 		{
 			PostItemControl* postItemControl=new PostItemControl;
 			postItemControl->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			postItemControl->Install(postItem);
 			postItemControls.Add(postItemControl);
 
 			GuiStackItemComposition* item=new GuiStackItemComposition;
 			item->AddChild(postItemControl->GetBoundsComposition());
 			postItemStack->AddChild(item);
-		}
 
-		void PostWindow::RefreshPostItems()
-		{
-			buttonPost->SetEnabled(false);
-			buttonCancel->SetEnabled(false);
-			postItemContainers->SetEnabled(false);
-
-			GetApplication()->InvokeAsync([=]()
-			{
-				Ptr<NestlePost> newPost=server->GetTopic(post->id);
-
-				GetApplication()->InvokeInMainThreadAndWait([=]()
-				{
-					post=newPost;
-					ClearPostItems();
-					{
-						Ptr<PostItem> postItem=new PostItem;
-						postItem->title=post->title;
-						postItem->author=post->author;
-						postItem->createDateTime=post->createDateTime;
-						postItem->body=post->body;
-						AddPostItem(postItem);
-					}
-					FOREACH(Ptr<NestleComment>, comment, post->comments.Wrap())
-					{
-						Ptr<PostItem> postItem=new PostItem;
-						postItem->author=comment->author;
-						postItem->createDateTime=comment->createDateTime;
-						postItem->body=comment->body;
-						AddPostItem(postItem);
-					}
-
-					buttonPost->SetEnabled(true);
-					buttonCancel->SetEnabled(true);
-					postItemContainers->SetEnabled(true);
-				});
-			});
+			postItemControl->Install(postItem);
 		}
 
 		PostWindow::PostWindow(Ptr<NestleServer> _server, Ptr<NestlePost> _post)
@@ -291,11 +342,73 @@ PostWindow
 		{
 		}
 
+		void PostWindow::RefreshPostItems()
+		{
+			buttonPost->SetEnabled(false);
+			buttonCancel->SetEnabled(false);
+			postItemContainers->SetEnabled(false);
+
+			GetApplication()->InvokeAsync([=]()
+			{
+				Ptr<NestlePost> newPost=server->GetTopic(post->id);
+
+				GetApplication()->InvokeInMainThreadAndWait([=]()
+				{
+					post=newPost;
+					ClearPostItems();
+					if(post)
+					{
+						{
+							Ptr<PostItem> postItem=new PostItem;
+							postItem->title=post->title;
+							postItem->author=post->author;
+							postItem->createDateTime=post->createDateTime;
+							postItem->body=post->body;
+							postItem->isComment=false;
+							postItem->id=newPost->id;
+							AddPostItem(postItem);
+						}
+						FOREACH(Ptr<NestleComment>, comment, post->comments.Wrap())
+						{
+							Ptr<PostItem> postItem=new PostItem;
+							postItem->author=comment->author;
+							postItem->createDateTime=comment->createDateTime;
+							postItem->body=comment->body;
+							postItem->isComment=true;
+							postItem->id=comment->id;
+							AddPostItem(postItem);
+						}
+
+						buttonPost->SetEnabled(true);
+						buttonCancel->SetEnabled(true);
+						postItemContainers->SetEnabled(true);
+					}
+					else
+					{
+						GetCurrentController()->DialogService()->ShowMessageBox(
+							GetBoundsComposition()->GetRelatedControlHost()->GetNativeWindow(),
+							L"打开帖子失败，请检查网络连接是否畅通。"
+							);
+					}
+				});
+			});
+		}
+
 		void PostWindow::Reply(const WString& author)
 		{
 			textBody->SetText(L"@"+author+L"\r\n"+textBody->GetText());
 			textBody->Select(TextPos(), TextPos());
 			textBody->SetFocus();
+		}
+
+		Ptr<NestleServer> PostWindow::GetServer()
+		{
+			return server;
+		}
+
+		bool PostWindow::IsCurrentUser(const WString& author)
+		{
+			return server->GetUsername()==author;
 		}
 
 /***********************************************************************

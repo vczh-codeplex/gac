@@ -16,6 +16,8 @@ namespace vl
 			WString								author;
 			WString								createDateTime;
 			WString								body;
+			bool								isComment;
+			int									id;
 		};
 
 		class PostItemControl : public list::ObjectItemControl
@@ -27,9 +29,13 @@ namespace vl
 			GuiSolidLabelElement*				bodyElement;
 
 			GuiButton*							buttonReply;
+			GuiButton*							buttonEdit;
+			GuiButton*							buttonDelete;
 			Ptr<PostItem>						postItem;
 
 			void buttonReply_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void buttonEdit_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void buttonDelete_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 		protected:
 			void InitializeComponents();
 		public:
@@ -56,14 +62,16 @@ namespace vl
 
 			void								ClearPostItems();
 			void								AddPostItem(Ptr<PostItem> postItem);
-			void								RefreshPostItems();
 		protected:
 			void								InitializeComponents();
 		public:
 			PostWindow(Ptr<NestleServer> _server, Ptr<NestlePost> _post);
 			~PostWindow();
 
+			void								RefreshPostItems();
 			void								Reply(const WString& author);
+			Ptr<NestleServer>					GetServer();
+			bool								IsCurrentUser(const WString& author);
 		};
 	}
 }
