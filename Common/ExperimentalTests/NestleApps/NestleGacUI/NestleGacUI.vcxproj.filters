@@ -69,6 +69,9 @@
     <ClCompile Include="NewPostWindow.cpp">
       <Filter>Windows</Filter>
     </ClCompile>
+    <ClCompile Include="PostWindow.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Libraries\GacUI\Public\Source\Vlpp.h">
@@ -111,6 +114,9 @@
       <Filter>Library</Filter>
     </ClInclude>
     <ClInclude Include="NewPostWindow.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="PostWindow.h">
       <Filter>Windows</Filter>
     </ClInclude>
   </ItemGroup>

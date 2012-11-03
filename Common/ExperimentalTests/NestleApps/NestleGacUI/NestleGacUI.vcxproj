@@ -94,6 +94,7 @@
     <ClCompile Include="NestlePage.cpp" />
     <ClCompile Include="NestleWindow.cpp" />
     <ClCompile Include="NewPostWindow.cpp" />
+    <ClCompile Include="PostWindow.cpp" />
     <ClCompile Include="TopicListPage.cpp" />
     <ClCompile Include="TopicPage.cpp" />
   </ItemGroup>
@@ -110,6 +111,7 @@
     <ClInclude Include="NestlePage.h" />
     <ClInclude Include="NestleWindow.h" />
     <ClInclude Include="NewPostWindow.h" />
+    <ClInclude Include="PostWindow.h" />
     <ClInclude Include="TopicListPage.h" />
     <ClInclude Include="TopicPage.h" />
   </ItemGroup>
