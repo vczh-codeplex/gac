@@ -320,6 +320,7 @@ PostWindow::InitializeComponents
 				postItemContainers=g::NewScrollContainer();
 				postItemContainers->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				postItemContainers->SetHorizontalAlwaysVisible(false);
+				postItemContainers->SetExtendToFullWidth(true);
 
 				postItemStack=new GuiStackComposition;
 				postItemStack->SetAlignmentToParent(Margin(0, 0, 0, 0));
