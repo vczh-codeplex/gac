@@ -21998,7 +21998,24 @@ GuiTableComposition
 				{
 					result=GuiBoundsComposition::GetBounds();
 				}
-				if(previousBounds!=result)
+
+				bool cellMinSizeModified=false;
+				SortedList<GuiCellComposition*> cells;
+				FOREACH(GuiCellComposition*, cell, cellCompositions.Wrap())
+				{
+					if(cell && !cells.Contains(cell))
+					{
+						cells.Add(cell);
+						Size newSize=cell->GetPreferredBounds().GetSize();
+						if(cell->lastPreferredSize!=newSize)
+						{
+							cell->lastPreferredSize=newSize;
+							cellMinSizeModified=true;
+						}
+					}
+				}
+
+				if(previousBounds!=result || cellMinSizeModified)
 				{
 					previousBounds=result;
 					UpdateCellBounds();
