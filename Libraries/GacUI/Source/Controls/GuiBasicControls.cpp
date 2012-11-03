@@ -1168,6 +1168,7 @@ GuiScrollContainer::StyleController
 
 			GuiScrollContainer::StyleController::StyleController(GuiScrollView::IStyleProvider* styleProvider)
 				:GuiScrollView::StyleController(styleProvider)
+				,extendToFullWidth(false)
 			{
 				controlContainerComposition=new GuiBoundsComposition;
 				controlContainerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
@@ -1186,6 +1187,27 @@ GuiScrollContainer::StyleController
 			void GuiScrollContainer::StyleController::MoveContainer(Point leftTop)
 			{
 				controlContainerComposition->SetBounds(Rect(leftTop, Size(0, 0)));
+			}
+
+			bool GuiScrollContainer::StyleController::GetExtendToFullWidth()
+			{
+				return extendToFullWidth;
+			}
+
+			void GuiScrollContainer::StyleController::SetExtendToFullWidth(bool value)
+			{
+				if(extendToFullWidth!=value)
+				{
+					extendToFullWidth=value;
+					if(value)
+					{
+						controlContainerComposition->SetAlignmentToParent(Margin(0, -1, 0, -1));
+					}
+					else
+					{
+						controlContainerComposition->SetAlignmentToParent(Margin(-1, -1, -1, -1));
+					}
+				}
 			}
 
 /***********************************************************************
@@ -1218,6 +1240,16 @@ GuiScrollContainer
 
 			GuiScrollContainer::~GuiScrollContainer()
 			{
+			}
+
+			bool GuiScrollContainer::GetExtendToFullWidth()
+			{
+				return styleController->GetExtendToFullWidth();
+			}
+
+			void GuiScrollContainer::SetExtendToFullWidth(bool value)
+			{
+				styleController->SetExtendToFullWidth(value);
 			}
 		}
 	}

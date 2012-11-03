@@ -3737,12 +3737,16 @@ Scrolls
 				{
 				protected:
 					compositions::GuiBoundsComposition*		controlContainerComposition;
+					bool									extendToFullWidth;
 				public:
 					StyleController(GuiScrollView::IStyleProvider* styleProvider);
 					~StyleController();
 
 					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
 					void									MoveContainer(Point leftTop);
+
+					bool									GetExtendToFullWidth();
+					void									SetExtendToFullWidth(bool value);
 				};
 
 			protected:
@@ -3754,6 +3758,9 @@ Scrolls
 			public:
 				GuiScrollContainer(GuiScrollContainer::IStyleProvider* styleProvider);
 				~GuiScrollContainer();
+				
+				bool									GetExtendToFullWidth();
+				void									SetExtendToFullWidth(bool value);
 			};
 			
 			namespace list

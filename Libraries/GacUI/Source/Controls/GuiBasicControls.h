@@ -737,6 +737,7 @@ Scrolls
 				{
 				protected:
 					compositions::GuiBoundsComposition*		controlContainerComposition;
+					bool									extendToFullWidth;
 				public:
 					/// <summary>Create a style controller with a specified style provider.</summary>
 					/// <param name="_styleProvider">The style provider.</param>
@@ -747,6 +748,13 @@ Scrolls
 					/// <summary>Update sub controls using a specified left-top position of the view bounds.</summary>
 					/// <param name="leftTop">The specified left-top position of the view bounds.</param>
 					void									MoveContainer(Point leftTop);
+
+					/// <summary>Test does the content container always extend its width to fill the scroll container.</summary>
+					/// <returns>Return true if the content container always extend its width to fill the scroll container.</returns>
+					bool									GetExtendToFullWidth();
+					/// <summary>Set does the content container always extend its width to fill the scroll container.</summary>
+					/// <param name="value">Set to true if the content container always extend its width to fill the scroll container.</param>
+					void									SetExtendToFullWidth(bool value);
 				};
 
 			protected:
@@ -760,6 +768,13 @@ Scrolls
 				/// <param name="styleProvider">The style provider.</param>
 				GuiScrollContainer(GuiScrollContainer::IStyleProvider* styleProvider);
 				~GuiScrollContainer();
+				
+				/// <summary>Test does the content container always extend its width to fill the scroll container.</summary>
+				/// <returns>Return true if the content container always extend its width to fill the scroll container.</returns>
+				bool									GetExtendToFullWidth();
+				/// <summary>Set does the content container always extend its width to fill the scroll container.</summary>
+				/// <param name="value">Set to true if the content container always extend its width to fill the scroll container.</param>
+				void									SetExtendToFullWidth(bool value);
 			};
 			
 			namespace list
