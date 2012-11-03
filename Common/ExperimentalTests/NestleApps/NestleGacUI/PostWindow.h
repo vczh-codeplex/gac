@@ -62,6 +62,8 @@ namespace vl
 		public:
 			PostWindow(Ptr<NestleServer> _server, Ptr<NestlePost> _post);
 			~PostWindow();
+
+			void								Reply(const WString& author);
 		};
 	}
 }
