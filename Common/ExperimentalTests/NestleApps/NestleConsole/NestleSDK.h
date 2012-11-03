@@ -30,8 +30,11 @@ Nestle Utility
 ***********************************************************************/
 
 		WString						NestleGetSession(const WString& username, const WString& password, const WString& apiKey, const WString& apiSecret);
+		WString						NestleOperateXml(const WString& path, const WString& query, const WString& cookie, const WString& method, const WString& body);
 		WString						NestleGetXml(const WString& path, const WString& query, const WString& cookie);
 		WString						NestlePostXml(const WString& path, const WString& query, const WString& cookie, const WString& body);
+		WString						NestleDeleteXml(const WString& path, const WString& query, const WString& cookie);
+		WString						NestlePutXml(const WString& path, const WString& query, const WString& cookie, const WString& body);
 
 /***********************************************************************
 Nestle Data Structure
@@ -103,9 +106,13 @@ Nestle Data Structure
 			const WString&			GetUsername();
 			bool					IsLoginSuccess();
 			Ptr<NestleTopicsPage>	GetTopics(int pageIndex);
-			Ptr<NestlePost>			GetTopic(int id);
+			Ptr<NestlePost>			GetTopic(int postId);
 			Ptr<NestlePost>			PostTopic(const WString& title, const WString& content);
+			Ptr<NestlePost>			UpdateTopic(int postId, const WString& title, const WString& content);
+			bool					DeleteTopic(int postId);
 			Ptr<NestleComment>		PostComment(int postId, const WString& content);
+			Ptr<NestleComment>		UpdateComment(int commentId, const WString& content);
+			bool					DeleteComment(int commentId);
 		};
 	}
 }

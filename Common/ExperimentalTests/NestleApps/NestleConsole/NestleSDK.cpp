@@ -159,37 +159,34 @@ Nestle Utility
 			}
 		}
 
-		WString NestleGetXml(const WString& path, const WString& query, const WString& cookie)
+		WString NestleOperateXml(const WString& path, const WString& query, const WString& cookie, const WString& method, const WString& body)
 		{
-			HttpRequest request;
-			HttpResponse response;
-
-			request.SetHost(L"https://www.niaowo.me"+path+L".xml"+(query==L""?WString(L""):L"?"+query));
-			request.method=L"GET";
-			request.cookie=cookie;
-			request.acceptTypes.Add(L"application/xml");
-			HttpQuery(request, response);
-
-			if(response.statusCode==200)
+			bool form=false;
+			if(method==L"GET" || method==L"DELETE")
 			{
-				return response.GetBodyUtf8();
+				form=false;
+			}
+			else if(method==L"POST" || method==L"PUT")
+			{
+				form=true;
 			}
 			else
 			{
 				return L"";
 			}
-		}
 
-		WString NestlePostXml(const WString& path, const WString& query, const WString& cookie, const WString& body)
-		{
 			HttpRequest request;
 			HttpResponse response;
 
 			request.SetHost(L"https://www.niaowo.me"+path+L".xml"+(query==L""?WString(L""):L"?"+query));
-			request.method=L"POST";
+			request.method=method;
 			request.cookie=cookie;
-			request.contentType=L"application/x-www-form-urlencoded";
-			request.SetBodyUtf8(body);
+			request.acceptTypes.Add(L"application/xml");
+			if(form)
+			{
+				request.contentType=L"application/x-www-form-urlencoded";
+				request.SetBodyUtf8(body);
+			}
 			HttpQuery(request, response);
 
 			if(response.statusCode==200||response.statusCode==302)
@@ -200,6 +197,26 @@ Nestle Utility
 			{
 				return L"";
 			}
+		}
+
+		WString NestleGetXml(const WString& path, const WString& query, const WString& cookie)
+		{
+			return NestleOperateXml(path, query, cookie, L"GET", L"");
+		}
+
+		WString NestlePostXml(const WString& path, const WString& query, const WString& cookie, const WString& body)
+		{
+			return NestleOperateXml(path, query, cookie, L"POST", body);
+		}
+
+		WString NestleDeleteXml(const WString& path, const WString& query, const WString& cookie)
+		{
+			return NestleOperateXml(path, query, cookie, L"DELETE", L"");
+		}
+
+		WString NestlePutXml(const WString& path, const WString& query, const WString& cookie, const WString& body)
+		{
+			return NestleOperateXml(path, query, cookie, L"PUT", body);
 		}
 
 /***********************************************************************
@@ -365,6 +382,33 @@ NestleTopicsPage
 NestleServer
 ***********************************************************************/
 
+		template<typename T>
+		Ptr<T> CreateObjectFromXml(const WString& xml, const WString& xpath)
+		{
+			if(xml!=L"")
+			{
+				IXMLDOMDocument2* pDom=XmlLoad(xml);
+				if(pDom)
+				{
+					if(xpath==L"")
+					{
+						Ptr<T> object=new T(pDom);
+						pDom->Release();
+						return object;
+					}
+					else
+					{
+						IXMLDOMNode* node=XmlQuerySingleNode(pDom, xpath);
+						Ptr<T> object=new T(node);
+						node->Release();
+						pDom->Release();
+						return object;
+					}
+				}
+			}
+			return 0;
+		}
+
 		NestleServer::NestleServer(const WString& _username, const WString& _password, const WString& _apiKey, const WString& _apiSecret)
 			:username(_username)
 			,password(_password)
@@ -400,22 +444,12 @@ NestleServer
 				url=L"/topics/page/"+itow(pageIndex+1);
 			}
 			WString xml=NestleGetXml(url, L"", cookie);
-			if(xml!=L"")
-			{	
-				IXMLDOMDocument2* pDom=XmlLoad(xml);
-				if(pDom)
-				{
-					Ptr<NestleTopicsPage> page=new NestleTopicsPage(pDom);
-					pDom->Release();
-					return page;
-				}
-			}
-			return 0;
+			return CreateObjectFromXml<NestleTopicsPage>(xml, L"");
 		}
 
-		Ptr<NestlePost> NestleServer::GetTopic(int id)
+		Ptr<NestlePost> NestleServer::GetTopic(int postId)
 		{
-			WString url=L"/topics/"+itow(id);
+			WString url=L"/topics/"+itow(postId);
 			WString xml=NestleGetXml(url, L"output=markdown", cookie);
 			if(xml!=L"")
 			{
@@ -439,37 +473,45 @@ NestleServer
 			WString url=L"/topics";
 			WString body=L"title="+UrlEncodeQuery(title)+L"&body="+UrlEncodeQuery(content);
 			WString xml=NestlePostXml(url, L"", cookie, body);
-			if(xml!=L"")
-			{
-				IXMLDOMDocument2* pDom=XmlLoad(xml);
-				if(pDom)
-				{
-					IXMLDOMNode* node=XmlQuerySingleNode(pDom, L"/hash");
-					Ptr<NestlePost> post=new NestlePost(node);
-					pDom->Release();
-					return post;
-				}
-			}
-			return 0;
+			return CreateObjectFromXml<NestlePost>(xml, L"/hash");
+		}
+
+		Ptr<NestlePost> NestleServer::UpdateTopic(int postId, const WString& title, const WString& content)
+		{
+			WString url=L"/topics/"+itow(postId);
+			WString body=L"title="+UrlEncodeQuery(title)+L"&body="+UrlEncodeQuery(content);
+			WString xml=NestlePutXml(url, L"", cookie, body);
+			return CreateObjectFromXml<NestlePost>(xml, L"/hash");
+		}
+
+		bool NestleServer::DeleteTopic(int postId)
+		{
+			WString url=L"/topics/"+itow(postId);
+			WString xml=NestleDeleteXml(url, L"", cookie);
+			return CreateObjectFromXml<NestlePost>(xml, L"/hash");
 		}
 
 		Ptr<NestleComment> NestleServer::PostComment(int postId, const WString& content)
 		{
 			WString url=L"/comments";
 			WString body=L"topic="+itow(postId)+L"&body="+UrlEncodeQuery(content);
-			WString xml=NestlePostXml(url, L"output=markdown", cookie, body);
-			if(xml!=L"")
-			{
-				IXMLDOMDocument2* pDom=XmlLoad(xml);
-				if(pDom)
-				{
-					IXMLDOMNode* node=XmlQuerySingleNode(pDom, L"/hash");
-					Ptr<NestleComment> comment=new NestleComment(node);
-					pDom->Release();
-					return comment;
-				}
-			}
-			return 0;
+			WString xml=NestlePostXml(url, L"", cookie, body);
+			return CreateObjectFromXml<NestleComment>(xml, L"/hash");
+		}
+
+		Ptr<NestleComment> NestleServer::UpdateComment(int commentId, const WString& content)
+		{
+			WString url=L"/comments/"+itow(commentId);
+			WString body=L"body="+UrlEncodeQuery(content);
+			WString xml=NestlePutXml(url, L"", cookie, body);
+			return CreateObjectFromXml<NestleComment>(xml, L"/hash");
+		}
+
+		bool NestleServer::DeleteComment(int commentId)
+		{
+			WString url=L"/comments/"+itow(commentId);
+			WString xml=NestleDeleteXml(url, L"", cookie);
+			return CreateObjectFromXml<NestleComment>(xml, L"/hash");
 		}
 	}
 }
