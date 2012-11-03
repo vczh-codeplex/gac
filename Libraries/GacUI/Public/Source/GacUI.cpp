@@ -29380,12 +29380,19 @@ WinDC
 		SIZE WinDC::MeasureWrapLineBuffer(const wchar_t* Text, int CharCount, int MaxWidth)
 		{
 			SIZE size = {0};
-			INT fit=0;
+			int lineCount=0;
+			const wchar_t* reading=Text;
 			INT* dx=new INT[CharCount];
-			GetTextExtentExPoint(FHandle, Text, CharCount, MaxWidth, &fit, dx, &size);
+			while(*reading)
+			{
+				INT fit=0;
+				GetTextExtentExPoint(FHandle, reading, CharCount-(reading-Text), MaxWidth, &fit, dx, &size);
+				reading+=fit;
+				lineCount++;
+			}
 			delete dx;
 			size.cx=0;
-			size.cy*=fit;
+			size.cy*=lineCount;
 			return size;
 		}
 
