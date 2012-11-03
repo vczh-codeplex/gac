@@ -21,7 +21,14 @@ PostItemControl
 		void PostItemControl::Install(Ptr<Object> value)
 		{
 			postItem=value.Cast<PostItem>();
-			titleElement->SetText(L"◇ "+postItem->title);
+			if(postItem->title==L"")
+			{
+				titleElement->SetText(L"-----------------回复-----------------");
+			}
+			else
+			{
+				titleElement->SetText(L"◇ "+postItem->title);
+			}
 			authorElement->SetText(postItem->author);
 			dateTimeElement->SetText(postItem->createDateTime);
 			bodyElement->SetText(L"    "+postItem->body);
@@ -166,6 +173,75 @@ PostItemControl::InitializeComponents
 PostWindow
 ***********************************************************************/
 
+		void PostWindow::buttonPost_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+		}
+
+		void PostWindow::buttonCancel_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			Close();
+		}
+
+		void PostWindow::ClearPostItems()
+		{
+			FOREACH(PostItemControl*, postItemControl, postItemControls.Wrap())
+			{
+				postItemStack->RemoveChild(postItemControl->GetBoundsComposition());
+				delete postItemControl;
+			}
+			postItemControls.Clear();
+		}
+
+		void PostWindow::AddPostItem(Ptr<PostItem> postItem)
+		{
+			PostItemControl* postItemControl=new PostItemControl;
+			postItemContainers->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			postItemControl->Install(postItem);
+			postItemControls.Add(postItemControl);
+
+			GuiStackItemComposition* item=new GuiStackItemComposition;
+			item->AddChild(postItemControl->GetBoundsComposition());
+			postItemStack->AddChild(item);
+		}
+
+		void PostWindow::RefreshPostItems()
+		{
+			buttonPost->SetEnabled(false);
+			buttonCancel->SetEnabled(false);
+			postItemContainers->SetEnabled(false);
+
+			GetApplication()->InvokeAsync([=]()
+			{
+				Ptr<NestlePost> newPost=server->GetTopic(post->id);
+
+				GetApplication()->InvokeInMainThreadAndWait([=]()
+				{
+					post=newPost;
+					ClearPostItems();
+					{
+						Ptr<PostItem> postItem=new PostItem;
+						postItem->title=post->title;
+						postItem->author=post->author;
+						postItem->createDateTime=post->createDateTime;
+						postItem->body=post->body;
+						AddPostItem(postItem);
+					}
+					FOREACH(Ptr<NestleComment>, comment, post->comments.Wrap())
+					{
+						Ptr<PostItem> postItem=new PostItem;
+						postItem->author=comment->author;
+						postItem->createDateTime=comment->createDateTime;
+						postItem->body=comment->body;
+						AddPostItem(postItem);
+					}
+
+					buttonPost->SetEnabled(true);
+					buttonCancel->SetEnabled(true);
+					postItemContainers->SetEnabled(true);
+				});
+			});
+		}
+
 		PostWindow::PostWindow(Ptr<NestleServer> _server, Ptr<NestlePost> _post)
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 			,server(_server)
@@ -179,6 +255,7 @@ PostWindow
 			MoveToScreenCenter();
 
 			InitializeComponents();
+			RefreshPostItems();
 		}
 
 		PostWindow::~PostWindow()
@@ -191,6 +268,68 @@ PostWindow::InitializeComponents
 
 		void PostWindow::InitializeComponents()
 		{
+			GuiTableComposition* table=new GuiTableComposition;
+			GetContainerComposition()->AddChild(table);
+			table->SetAlignmentToParent(Margin(2, 2, 2, 2));
+			table->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+			table->SetCellPadding(4);
+			table->SetRowsAndColumns(3, 3);
+			table->SetRowOption(0, GuiCellOption::PercentageOption(1.0));
+			table->SetRowOption(1, GuiCellOption::AbsoluteOption(160));
+			table->SetRowOption(2, GuiCellOption::MinSizeOption());
+			table->SetColumnOption(0, GuiCellOption::MinSizeOption());
+			table->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
+			table->SetColumnOption(2, GuiCellOption::MinSizeOption());
+			{
+				postItemContainers=g::NewScrollContainer();
+				postItemContainers->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				postItemContainers->SetHorizontalAlwaysVisible(false);
+
+				postItemStack=new GuiStackComposition;
+				postItemStack->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				postItemStack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				postItemStack->SetDirection(GuiStackComposition::Vertical);
+				postItemContainers->GetContainerComposition()->AddChild(postItemStack);
+
+				GuiCellComposition* cell=new GuiCellComposition;
+				table->AddChild(cell);
+				cell->SetSite(0, 0, 1, 3);
+				cell->AddChild(postItemContainers->GetBoundsComposition());
+			}
+			{
+				textBody=g::NewMultilineTextBox();
+				textBody->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				textBody->SetText(L"<请输入新帖子的内容>");
+
+				GuiCellComposition* cell=new GuiCellComposition;
+				table->AddChild(cell);
+				cell->SetSite(1, 0, 1, 3);
+				cell->AddChild(textBody->GetBoundsComposition());
+			}
+			{
+				buttonPost=g::NewButton();
+				buttonPost->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				buttonPost->SetText(L"回帖");
+				buttonPost->GetBoundsComposition()->SetPreferredMinSize(Size(80, 36));
+				buttonPost->Clicked.AttachMethod(this, &PostWindow::buttonPost_Clicked);
+
+				GuiCellComposition* cell=new GuiCellComposition;
+				table->AddChild(cell);
+				cell->SetSite(2, 0, 1, 1);
+				cell->AddChild(buttonPost->GetBoundsComposition());
+			}
+			{
+				buttonCancel=g::NewButton();
+				buttonCancel->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				buttonCancel->SetText(L"关闭");
+				buttonCancel->GetBoundsComposition()->SetPreferredMinSize(Size(80, 36));
+				buttonCancel->Clicked.AttachMethod(this, &PostWindow::buttonCancel_Clicked);
+
+				GuiCellComposition* cell=new GuiCellComposition;
+				table->AddChild(cell);
+				cell->SetSite(2, 2, 1, 1);
+				cell->AddChild(buttonCancel->GetBoundsComposition());
+			}
 		}
 	}
 }

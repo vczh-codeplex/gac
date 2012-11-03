@@ -3,6 +3,7 @@
 
 #include "LoginWindow.h"
 #include "NewPostWindow.h"
+#include "PostWindow.h"
 #include "CustomizableListBoxHelper.h"
 
 namespace vl
@@ -53,6 +54,8 @@ namespace vl
 			Ptr<NestleTopicsPage>						currentPage;
 			Ptr<LoginWindow>							loginWindow;
 			Ptr<NewPostWindow>							newPostWindow;
+			List<Ptr<PostWindow>>						alivePostWindows;
+			List<Ptr<PostWindow>>						deadPostWindows;
 
 			void										SwitchToLogoutStatus();
 			void										SwitchToLoginStatus();
@@ -61,6 +64,7 @@ namespace vl
 
 			void										loginWindow_Closed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										newPostWindow_Closed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void										postWindow_Closed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandRefresh_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandFirstPage_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandPrevious_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
@@ -74,6 +78,8 @@ namespace vl
 		public:
 			MainWindow();
 			~MainWindow();
+
+			void										OpenPostWindow(Ptr<NestlePost> post);
 		};
 	}
 }
