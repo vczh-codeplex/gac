@@ -9,7 +9,7 @@ namespace vl
 {
 	namespace nestle
 	{
-		class PostItem
+		class PostItem : public Object
 		{
 		public:
 			WString								title;
@@ -43,6 +43,20 @@ namespace vl
 		protected:
 			Ptr<NestleServer>					server;
 			Ptr<NestlePost>						post;
+
+			GuiScrollContainer*					postItemContainers;
+			GuiStackComposition*				postItemStack;
+			List<PostItemControl*>				postItemControls;
+			GuiMultilineTextBox*				textBody;
+			GuiButton*							buttonPost;
+			GuiButton*							buttonCancel;
+
+			void								buttonPost_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void								buttonCancel_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+
+			void								ClearPostItems();
+			void								AddPostItem(Ptr<PostItem> postItem);
+			void								RefreshPostItems();
 		protected:
 			void								InitializeComponents();
 		public:

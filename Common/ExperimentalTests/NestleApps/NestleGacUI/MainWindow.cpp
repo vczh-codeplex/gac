@@ -11,6 +11,8 @@ TopicItemControl
 
 		void TopicItemControl::buttonRead_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			MainWindow* mainWindow=dynamic_cast<MainWindow*>(GetRelatedControlHost());
+			mainWindow->OpenPostWindow(post);
 		}
 
 		TopicItemControl::TopicItemControl()
@@ -246,6 +248,15 @@ MainWindow
 			}
 		}
 
+		void MainWindow::postWindow_Closed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			PostWindow* postWindow=dynamic_cast<PostWindow*>(sender->GetRelatedControlHost());
+			int index=alivePostWindows.IndexOf(postWindow);
+			Ptr<PostWindow> deadPostWindow=alivePostWindows[index];
+			alivePostWindows.RemoveAt(index);
+			deadPostWindows.Add(deadPostWindow);
+		}
+
 		void MainWindow::commandRefresh_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
 			LoadTopics(currentPage->currentPage);
@@ -317,6 +328,15 @@ MainWindow
 
 		MainWindow::~MainWindow()
 		{
+		}
+
+		void MainWindow::OpenPostWindow(Ptr<NestlePost> post)
+		{
+			deadPostWindows.Clear();
+			Ptr<PostWindow> postWindow=new PostWindow(server, post);
+			postWindow->WindowClosed.AttachMethod(this, &MainWindow::postWindow_Closed);
+			alivePostWindows.Add(postWindow);
+			postWindow->Show();
 		}
 
 /***********************************************************************
