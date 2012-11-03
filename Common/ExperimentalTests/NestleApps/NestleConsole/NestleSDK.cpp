@@ -245,6 +245,24 @@ Nestle Utility
 ***********************************************************************/
 
 /***********************************************************************
+NestleUser
+***********************************************************************/
+
+		NestleUser::NestleUser(IXMLDOMNode* commentElement)
+			:id(-1)
+		{
+			if(commentElement)
+			{
+				user=XmlQueryString(commentElement, L"./username/text()");
+				id=wtoi(XmlQueryString(commentElement, L"./id/text()"));
+			}
+		}
+
+		NestleUser::~NestleUser()
+		{
+		}
+
+/***********************************************************************
 NestleComment
 ***********************************************************************/
 
@@ -425,6 +443,46 @@ NestleServer
 		bool NestleServer::IsLoginSuccess()
 		{
 			return cookie!=L"";
+		}
+
+		void NestleServer::GetUsers(List<Ptr<NestleUser>>& users)
+		{
+			users.Count();
+			int page=0;
+			int totalPages=0;
+			while(true)
+			{
+				WString xml=NestleGetXml(L"/users", L"?page="+itow(page+1), cookie);
+				IXMLDOMDocument2* pDom=XmlLoad(xml);
+				if(pDom)
+				{
+					totalPages=wtoi(XmlQueryString(pDom, L"/hash/page/total-pages/text()"));
+					IXMLDOMNodeList* userNodes=XmlQuery(pDom, L"/hash/members/member");
+					if(userNodes)
+					{
+						while(true)
+						{
+							IXMLDOMNode* userNode=0;
+							HRESULT hr=userNodes->nextNode(&userNode);
+							if(hr==S_OK)
+							{
+								users.Add(new NestleUser(userNode));
+								userNode->Release();
+							}
+							else
+							{
+								break;
+							}
+						}
+						userNodes->Release();
+					}
+					pDom->Release();
+				}
+				if(++page>=totalPages)
+				{
+					return;
+				}
+			}
 		}
 
 		const WString& NestleServer::GetUsername()

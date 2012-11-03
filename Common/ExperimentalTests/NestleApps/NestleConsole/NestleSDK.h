@@ -40,6 +40,19 @@ Nestle Utility
 Nestle Data Structure
 ***********************************************************************/
 
+		class NestleUser
+		{
+		public:
+			NestleUser(IXMLDOMNode* commentElement=0);
+			~NestleUser();
+
+			bool					operator==(const NestleUser&)const{return false;}
+			bool					operator!=(const NestleUser&)const{return true;}
+
+			int						id;
+			WString					user;
+		};
+
 		class NestleComment : public Object
 		{
 		public:
@@ -105,6 +118,7 @@ Nestle Data Structure
 
 			const WString&			GetUsername();
 			bool					IsLoginSuccess();
+			void					GetUsers(List<Ptr<NestleUser>>& users);
 			Ptr<NestleTopicsPage>	GetTopics(int pageIndex);
 			Ptr<NestlePost>			GetTopic(int postId);
 			Ptr<NestlePost>			PostTopic(const WString& title, const WString& content);
