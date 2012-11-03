@@ -210,6 +210,7 @@ Table Compositions
 				int									column;
 				int									columnSpan;
 				GuiTableComposition*				tableParent;
+				Size								lastPreferredSize;
 				
 				void								ClearSitedCells(GuiTableComposition* table);
 				void								SetSitedCells(GuiTableComposition* table);
