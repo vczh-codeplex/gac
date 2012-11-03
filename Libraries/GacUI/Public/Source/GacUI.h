@@ -10593,9 +10593,13 @@ namespace vl
 				void					DrawString(int X, int Y, WString Text);
 				void					DrawString(int X, int Y, WString Text, int TabWidth, int TabOriginX);
 				void					DrawString(RECT Rect, WString Text, UINT Format);
+
 				SIZE					MeasureString(WString Text, int TabSize=-1);
 				SIZE					MeasureBuffer(const wchar_t* Text, int CharCount, int TabSize=-1);
 				SIZE					MeasureBuffer(const wchar_t* Text, int TabSize=-1);
+				SIZE					MeasureWrapLineString(WString Text, int MaxWidth);
+				SIZE					MeasureWrapLineBuffer(const wchar_t* Text, int CharCount, int MaxWidth);
+				SIZE					MeasureWrapLineBuffer(const wchar_t* Text, int MaxWidth);
 
 				void					FillRegion(WinRegion::Ptr Region);
 				void					FrameRegion(WinRegion::Ptr Region, int BlockWidth, int BlockHeight);
@@ -10919,6 +10923,7 @@ Renderers
 			protected:
 				FontProperties			oldFont;
 				Ptr<windows::WinFont>	font;
+				int						oldMaxWidth;
 
 				void					UpdateMinSize();
 
@@ -10926,6 +10931,8 @@ Renderers
 				void					FinalizeInternal();
 				void					RenderTargetChangedInternal(IWindowsGDIRenderTarget* oldRenderTarget, IWindowsGDIRenderTarget* newRenderTarget);
 			public:
+				GuiSolidLabelElementRenderer();
+
 				void					Render(Rect bounds)override;
 				void					OnElementStateChanged()override;
 			};
