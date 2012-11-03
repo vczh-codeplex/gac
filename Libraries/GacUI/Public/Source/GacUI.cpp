@@ -26800,14 +26800,32 @@ GuiSolidLabelElementRenderer
 
 			void GuiSolidLabelElementRenderer::UpdateMinSize()
 			{
-				if(renderTarget && !element->GetMultiline() && !element->GetWrapLine())
+				if(renderTarget)
 				{
 					renderTarget->GetDC()->SetFont(font);
+					SIZE size={0};
 					const WString& text=element->GetText();
-					SIZE size=text.Length()==0
-						?renderTarget->GetDC()->MeasureBuffer(L" ")
-						:renderTarget->GetDC()->MeasureString(text)
-						;
+					if(element->GetWrapLine())
+					{
+						if(element->GetWrapLineHeightCalculation())
+						{
+							if(oldMaxWidth==-1 || text.Length()==0)
+							{
+								size=renderTarget->GetDC()->MeasureBuffer(L" ");
+							}
+							else
+							{
+								size=renderTarget->GetDC()->MeasureWrapLineString(text, oldMaxWidth);
+							}
+						}
+					}
+					else
+					{
+						size=text.Length()==0
+							?renderTarget->GetDC()->MeasureBuffer(L" ")
+							:renderTarget->GetDC()->MeasureString(text)
+							;
+					}
 					minSize=Size((element->GetEllipse()?0:size.cx), size.cy);
 				}
 				else
@@ -26832,6 +26850,11 @@ GuiSolidLabelElementRenderer
 			void GuiSolidLabelElementRenderer::RenderTargetChangedInternal(IWindowsGDIRenderTarget* oldRenderTarget, IWindowsGDIRenderTarget* newRenderTarget)
 			{
 				UpdateMinSize();
+			}
+
+			GuiSolidLabelElementRenderer::GuiSolidLabelElementRenderer()
+				:oldMaxWidth(-1)
+			{
 			}
 
 			void GuiSolidLabelElementRenderer::Render(Rect bounds)
@@ -26892,6 +26915,11 @@ GuiSolidLabelElementRenderer
 						format|=DT_END_ELLIPSIS;
 					}
 					renderTarget->GetDC()->DrawString(rect, element->GetText(), format);
+					if(oldMaxWidth!=bounds.Width())
+					{
+						oldMaxWidth=bounds.Width();
+						UpdateMinSize();
+					}
 				}
 			}
 
@@ -29342,6 +29370,28 @@ WinDC
 		SIZE WinDC::MeasureBuffer(const wchar_t* Text, int TabSize)
 		{
 			return MeasureBuffer(Text, wcslen(Text), TabSize);
+		}
+
+		SIZE WinDC::MeasureWrapLineString(WString Text, int MaxWidth)
+		{
+			return MeasureWrapLineBuffer(Text.Buffer(), Text.Length(), MaxWidth);
+		}
+
+		SIZE WinDC::MeasureWrapLineBuffer(const wchar_t* Text, int CharCount, int MaxWidth)
+		{
+			SIZE size = {0};
+			INT fit=0;
+			INT* dx=new INT[CharCount];
+			GetTextExtentExPoint(FHandle, Text, CharCount, MaxWidth, &fit, dx, &size);
+			delete dx;
+			size.cx=0;
+			size.cy*=fit;
+			return size;
+		}
+
+		SIZE WinDC::MeasureWrapLineBuffer(const wchar_t* Text, int MaxWidth)
+		{
+			return MeasureWrapLineBuffer(Text, wcslen(Text), MaxWidth);
 		}
 
 		void WinDC::FillRegion(WinRegion::Ptr Region)

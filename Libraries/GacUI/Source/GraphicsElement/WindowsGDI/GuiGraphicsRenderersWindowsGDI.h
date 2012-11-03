@@ -123,6 +123,7 @@ Renderers
 			protected:
 				FontProperties			oldFont;
 				Ptr<windows::WinFont>	font;
+				int						oldMaxWidth;
 
 				void					UpdateMinSize();
 
@@ -130,6 +131,8 @@ Renderers
 				void					FinalizeInternal();
 				void					RenderTargetChangedInternal(IWindowsGDIRenderTarget* oldRenderTarget, IWindowsGDIRenderTarget* newRenderTarget);
 			public:
+				GuiSolidLabelElementRenderer();
+
 				void					Render(Rect bounds)override;
 				void					OnElementStateChanged()override;
 			};

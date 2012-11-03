@@ -9,7 +9,7 @@
 #include "..\..\Public\Source\GacUIIncludes.h"
 #include <Windows.h>
 
-#define GUI_GRAPHICS_RENDERER_DIRECT2D
+#define GUI_GRAPHICS_RENDERER_GDI
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
 {
