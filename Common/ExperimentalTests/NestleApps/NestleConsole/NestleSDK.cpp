@@ -571,5 +571,57 @@ NestleServer
 			WString xml=NestleDeleteXml(url, L"", cookie);
 			return CreateObjectFromXml<NestleComment>(xml, L"/hash");
 		}
+
+		WString NestleServer::UploadFile(stream::IStream& content)
+		{
+			HttpRequest request;
+			HttpResponse response;
+
+			request.SetHost(L"https://www.niaowo.me/files.xml");
+			request.method=L"POST";
+			request.cookie=cookie;
+			request.acceptTypes.Add(L"application/xml");
+			request.contentType=L"application/octet-stream";
+
+			{
+				const int FragmentSize=65536;
+				typedef Pair<int, char[FragmentSize]> FragmentBuffer;
+				List<Ptr<FragmentBuffer>> fragments;
+				int totalSize=0;
+				while(true)
+				{
+					Ptr<FragmentBuffer> pair=new FragmentBuffer;
+					pair->key=content.Read(pair->value, FragmentSize);
+					if(pair->key>0)
+					{
+						totalSize+=pair->key;
+						fragments.Add(pair);
+					}
+					else
+					{
+						break;
+					}
+				}
+
+				request.body.Resize(totalSize);
+				int index=0;
+				FOREACH(Ptr<FragmentBuffer>, fragment, fragments.Wrap())
+				{
+					memcpy(&request.body[index], fragment->value, fragment->key);
+					index+=fragment->key;
+				}
+			}
+
+			HttpQuery(request, response);
+
+			if(response.statusCode==200||response.statusCode==302)
+			{
+				return response.GetBodyUtf8();
+			}
+			else
+			{
+				return L"";
+			}
+		}
 	}
 }

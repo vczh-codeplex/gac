@@ -55,9 +55,11 @@ namespace vl
 			List<PostItemControl*>				postItemControls;
 			GuiMultilineTextBox*				textBody;
 			GuiButton*							buttonPost;
+			GuiButton*							buttonUploadPicture;
 			GuiButton*							buttonCancel;
 
 			void								buttonPost_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void								buttonUploadPicture_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void								buttonCancel_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 
 			void								ClearPostItems();
