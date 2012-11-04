@@ -127,7 +127,7 @@ Nestle Data Structure
 			Ptr<NestleComment>		PostComment(int postId, const WString& content);
 			Ptr<NestleComment>		UpdateComment(int commentId, const WString& content);
 			bool					DeleteComment(int commentId);
-			WString					UploadFile(stream::IStream& content);
+			WString					UploadFile(stream::IStream& content, const WString& fileName);
 		};
 	}
 }

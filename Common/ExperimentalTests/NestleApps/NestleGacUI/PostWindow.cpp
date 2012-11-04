@@ -311,7 +311,7 @@ PostWindow
 				))
 			{
 				FileStream stream(selectionFileNames[0], FileStream::ReadOnly);
-				WString url=server->UploadFile(stream);
+				WString url=server->UploadFile(stream, selectionFileNames[0]);
 			}
 		}
 
