@@ -2,6 +2,8 @@
 
 namespace vl
 {
+	using namespace stream;
+
 	namespace nestle
 	{
 
@@ -291,6 +293,28 @@ PostWindow
 			});
 		}
 
+		void PostWindow::buttonUploadPicture_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			List<WString> selectionFileNames;
+			int selectionFilterIndex=0;
+			if(GetCurrentController()->DialogService()->ShowFileDialog(
+				GetNativeWindow(),
+				selectionFileNames,
+				selectionFilterIndex,
+				INativeDialogService::FileDialogOpenPreview,
+				L"选择要上传的图片",
+				L"",
+				L"",
+				L"jpg",
+				L"图片文件(*.jpg;*.gif;*.png)|*.jpg;*.gif;*.png",
+				(INativeDialogService::FileDialogOptions)(INativeDialogService::FileDialogDereferenceLinks | INativeDialogService::FileDialogFileMustExist)
+				))
+			{
+				FileStream stream(selectionFileNames[0], FileStream::ReadOnly);
+				WString url=server->UploadFile(stream);
+			}
+		}
+
 		void PostWindow::buttonCancel_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
 			Close();
@@ -422,13 +446,14 @@ PostWindow::InitializeComponents
 			table->SetAlignmentToParent(Margin(2, 2, 2, 2));
 			table->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			table->SetCellPadding(4);
-			table->SetRowsAndColumns(3, 3);
+			table->SetRowsAndColumns(3, 4);
 			table->SetRowOption(0, GuiCellOption::PercentageOption(1.0));
 			table->SetRowOption(1, GuiCellOption::AbsoluteOption(160));
 			table->SetRowOption(2, GuiCellOption::MinSizeOption());
 			table->SetColumnOption(0, GuiCellOption::MinSizeOption());
-			table->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
-			table->SetColumnOption(2, GuiCellOption::MinSizeOption());
+			table->SetColumnOption(1, GuiCellOption::MinSizeOption());
+			table->SetColumnOption(2, GuiCellOption::PercentageOption(1.0));
+			table->SetColumnOption(3, GuiCellOption::MinSizeOption());
 			{
 				postItemContainers=g::NewScrollContainer();
 				postItemContainers->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -443,7 +468,7 @@ PostWindow::InitializeComponents
 
 				GuiCellComposition* cell=new GuiCellComposition;
 				table->AddChild(cell);
-				cell->SetSite(0, 0, 1, 3);
+				cell->SetSite(0, 0, 1, 4);
 				cell->AddChild(postItemContainers->GetBoundsComposition());
 			}
 			{
@@ -453,14 +478,14 @@ PostWindow::InitializeComponents
 
 				GuiCellComposition* cell=new GuiCellComposition;
 				table->AddChild(cell);
-				cell->SetSite(1, 0, 1, 3);
+				cell->SetSite(1, 0, 1, 4);
 				cell->AddChild(textBody->GetBoundsComposition());
 			}
 			{
 				buttonPost=g::NewButton();
 				buttonPost->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				buttonPost->SetText(L"回帖");
-				buttonPost->GetBoundsComposition()->SetPreferredMinSize(Size(80, 36));
+				buttonPost->GetBoundsComposition()->SetPreferredMinSize(Size(120, 36));
 				buttonPost->Clicked.AttachMethod(this, &PostWindow::buttonPost_Clicked);
 
 				GuiCellComposition* cell=new GuiCellComposition;
@@ -469,15 +494,27 @@ PostWindow::InitializeComponents
 				cell->AddChild(buttonPost->GetBoundsComposition());
 			}
 			{
+				buttonUploadPicture=g::NewButton();
+				buttonUploadPicture->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				buttonUploadPicture->SetText(L"上传图片");
+				buttonUploadPicture->GetBoundsComposition()->SetPreferredMinSize(Size(120, 36));
+				buttonUploadPicture->Clicked.AttachMethod(this, &PostWindow::buttonUploadPicture_Clicked);
+
+				GuiCellComposition* cell=new GuiCellComposition;
+				table->AddChild(cell);
+				cell->SetSite(2, 1, 1, 1);
+				cell->AddChild(buttonUploadPicture->GetBoundsComposition());
+			}
+			{
 				buttonCancel=g::NewButton();
 				buttonCancel->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				buttonCancel->SetText(L"关闭");
-				buttonCancel->GetBoundsComposition()->SetPreferredMinSize(Size(80, 36));
+				buttonCancel->GetBoundsComposition()->SetPreferredMinSize(Size(120, 36));
 				buttonCancel->Clicked.AttachMethod(this, &PostWindow::buttonCancel_Clicked);
 
 				GuiCellComposition* cell=new GuiCellComposition;
 				table->AddChild(cell);
-				cell->SetSite(2, 2, 1, 1);
+				cell->SetSite(2, 3, 1, 1);
 				cell->AddChild(buttonCancel->GetBoundsComposition());
 			}
 		}
