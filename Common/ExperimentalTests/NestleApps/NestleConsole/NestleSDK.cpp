@@ -2,6 +2,8 @@
 
 namespace vl
 {
+	using namespace stream;
+
 	namespace nestle
 	{
 
@@ -572,43 +574,73 @@ NestleServer
 			return CreateObjectFromXml<NestleComment>(xml, L"/hash");
 		}
 
-		WString NestleServer::UploadFile(stream::IStream& content)
+		WString NestleServer::UploadFile(stream::IStream& content, const WString& fileName)
 		{
 			HttpRequest request;
 			HttpResponse response;
+
+			WString boundary=L"fucking-kula-not-give-full-documentation";
+			WString contentFirst=
+				L"--"+boundary+L"\r\n"
+				L"Content-Disposition: form-data; name=\"file\"; filename=\""+fileName+L"\"\r\n"
+				L"Content-Type: application/octet-stream\r\n"
+				L"Content-Length: "+itow((int)content.Size())+L"\r\n"
+				L"\r\n"
+				;
+			WString contentLast=
+				L"--"+boundary+L"--\r\n"
+				;
 
 			request.SetHost(L"https://www.niaowo.me/files.xml");
 			request.method=L"POST";
 			request.cookie=cookie;
 			request.acceptTypes.Add(L"application/xml");
-			request.contentType=L"application/octet-stream";
+			request.contentType=L"multipart/form-data; boundary="+boundary;
 
 			{
-				const int FragmentSize=65536;
-				typedef Pair<int, char[FragmentSize]> FragmentBuffer;
-				List<Ptr<FragmentBuffer>> fragments;
-				int totalSize=0;
+				char buffer[65536];
+
+				MemoryStream stream;
+				{
+					Utf8Encoder encoder;
+					EncoderStream encoderStream(stream, encoder);
+					StreamWriter writer(encoderStream);
+					writer.WriteString(contentFirst);
+				}
 				while(true)
 				{
-					Ptr<FragmentBuffer> pair=new FragmentBuffer;
-					pair->key=content.Read(pair->value, FragmentSize);
-					if(pair->key>0)
-					{
-						totalSize+=pair->key;
-						fragments.Add(pair);
-					}
-					else
+					int length=content.Read(buffer, sizeof(buffer));
+					if(length==0)
 					{
 						break;
 					}
+					else
+					{
+						stream.Write(buffer, length);
+					}
+				}
+				{
+					Utf8Encoder encoder;
+					EncoderStream encoderStream(stream, encoder);
+					StreamWriter writer(encoderStream);
+					writer.WriteString(contentLast);
 				}
 
-				request.body.Resize(totalSize);
+				stream.SeekFromBegin(0);
+				request.body.Resize((int)stream.Size());
 				int index=0;
-				FOREACH(Ptr<FragmentBuffer>, fragment, fragments.Wrap())
+				while(true)
 				{
-					memcpy(&request.body[index], fragment->value, fragment->key);
-					index+=fragment->key;
+					int length=stream.Read(buffer, sizeof(buffer));
+					if(length==0)
+					{
+						break;
+					}
+					else
+					{
+						memcpy(&request.body[index], buffer, length);
+						index+=length;
+					}
 				}
 			}
 

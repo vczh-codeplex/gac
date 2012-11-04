@@ -428,23 +428,16 @@ HttpResponse
 
 	WString HttpResponse::GetBodyUtf8()
 	{
-		if(body.Count()==0)
-		{
-			return L"";
-		}
-		else
-		{
-			WString response;
-			char* utf8=&body[0];
-			vint totalSize=body.Count();
-			vint utf16Size=MultiByteToWideChar(CP_UTF8, 0, utf8, totalSize, NULL, 0);
-			wchar_t* utf16=new wchar_t[utf16Size+1];
-			ZeroMemory(utf16, (utf16Size+1)*sizeof(wchar_t));
-			MultiByteToWideChar(CP_UTF8, 0, utf8, totalSize, utf16, utf16Size);
-			response=utf16;
-			delete[] utf16;
-			return response;
-		}
+		WString response;
+		char* utf8=&body[0];
+		vint totalSize=body.Count();
+		vint utf16Size=MultiByteToWideChar(CP_UTF8, 0, utf8, totalSize, NULL, 0);
+		wchar_t* utf16=new wchar_t[utf16Size+1];
+		ZeroMemory(utf16, (utf16Size+1)*sizeof(wchar_t));
+		MultiByteToWideChar(CP_UTF8, 0, utf8, totalSize, utf16, utf16Size);
+		response=utf16;
+		delete[] utf16;
+		return response;
 	}
 
 /***********************************************************************
@@ -516,6 +509,14 @@ Utilities
 		if(request.cookie!=L"")
 		{
 			WinHttpAddRequestHeaders(requestInternet, (L"Cookie:"+request.cookie).Buffer(), -1, WINHTTP_ADDREQ_FLAG_REPLACE|WINHTTP_ADDREQ_FLAG_ADD);
+		}
+		
+		// extra headers
+		for(int i=0;i<request.extraHeaders.Count();i++)
+		{
+			WString key=request.extraHeaders.Keys()[i];
+			WString value=request.extraHeaders.Values()[i];
+			WinHttpAddRequestHeaders(requestInternet, (key+L":"+value).Buffer(), -1, WINHTTP_ADDREQ_FLAG_REPLACE|WINHTTP_ADDREQ_FLAG_ADD);
 		}
 
 		if(request.body.Count()>0)
@@ -613,7 +614,6 @@ Utilities
 				}
 			}
 			memcpy(&response.body[0], utf8, totalSize);
-			delete[] utf8;
 		}
 		FOREACH(BufferPair, p, availableBuffers.Wrap())
 		{

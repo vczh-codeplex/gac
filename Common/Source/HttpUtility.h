@@ -2,7 +2,7 @@
 #define VCZH_HTTPUTILITY
 
 #include "String.h"
-#include "Collections\List.h"
+#include "Collections\Dictionary.h"
 
 namespace vl
 {
@@ -13,8 +13,9 @@ HTTP Utility
 
 	class HttpRequest
 	{
-		typedef collections::Array<char>		BodyBuffer;
-		typedef collections::List<WString>		StringList;
+		typedef collections::Array<char>					BodyBuffer;
+		typedef collections::List<WString>					StringList;
+		typedef collections::Dictionary<WString, WString>	HeaderMap;
 	public:
 		WString				server;
 		vint				port;
@@ -27,6 +28,7 @@ HTTP Utility
 		BodyBuffer			body;
 		WString				contentType;
 		StringList			acceptTypes;
+		HeaderMap			extraHeaders;
 
 		HttpRequest();
 		bool				SetHost(const WString& inputQuery);

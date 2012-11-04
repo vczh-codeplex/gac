@@ -187,6 +187,14 @@ Utilities
 		{
 			WinHttpAddRequestHeaders(requestInternet, (L"Cookie:"+request.cookie).Buffer(), -1, WINHTTP_ADDREQ_FLAG_REPLACE|WINHTTP_ADDREQ_FLAG_ADD);
 		}
+		
+		// extra headers
+		for(int i=0;i<request.extraHeaders.Count();i++)
+		{
+			WString key=request.extraHeaders.Keys()[i];
+			WString value=request.extraHeaders.Values()[i];
+			WinHttpAddRequestHeaders(requestInternet, (key+L":"+value).Buffer(), -1, WINHTTP_ADDREQ_FLAG_REPLACE|WINHTTP_ADDREQ_FLAG_ADD);
+		}
 
 		if(request.body.Count()>0)
 		{
