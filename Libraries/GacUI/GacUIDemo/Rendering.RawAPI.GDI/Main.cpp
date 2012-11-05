@@ -32,9 +32,22 @@ protected:
 		hourPen=new WinPen(PS_SOLID, 5, RGB(255, 0, 0));
 	}
 
-	double GetAngle(int second)
+	double GetAngle(double second)
 	{
 		return (second-15)*3.1416/30;
+	}
+
+	void DrawLine(windows::WinDC* dc, Ptr<WinPen> pen, double angle, int startLength, int endLength, int x, int y)
+	{
+		dc->SetPen(pen);
+		double s=sin(angle);
+		double c=cos(angle);
+		int x1=(int)(c*startLength)+x+Radius;
+		int y1=(int)(s*startLength)+y+Radius;
+		int x2=(int)(c*endLength)+x+Radius;
+		int y2=(int)(s*endLength)+y+Radius;
+		dc->MoveTo(x1, y1);
+		dc->LineTo(x2, y2);
 	}
 
 	void element_Rendering(GuiGraphicsComposition* sender, GuiGDIElementEventArgs& arguments)
@@ -50,46 +63,21 @@ protected:
 		{
 			int scale=i%5==0?LongScale:ShortScale;
 			double angle=GetAngle(i);
-			double s=sin(angle);
-			double c=cos(angle);
-			int x1=(int)(c*Radius)+x+Radius;
-			int y1=(int)(s*Radius)+y+Radius;
-			int x2=(int)(c*(Radius-scale))+x+Radius;
-			int y2=(int)(s*(Radius-scale))+y+Radius;
-			arguments.dc->MoveTo(x1, y1);
-			arguments.dc->LineTo(x2, y2);
+			DrawLine(arguments.dc, borderPen, angle, Radius-scale, Radius, x, y);
 		}
 
 		DateTime dt=DateTime::LocalTime();
 		{
-			arguments.dc->SetPen(hourPen);
-			double angle=GetAngle(dt.hour*5);
-			double s=sin(angle);
-			double c=cos(angle);
-			int px=(int)(c*HourLength)+x+Radius;
-			int py=(int)(s*HourLength)+y+Radius;
-			arguments.dc->MoveTo(x+Radius, y+Radius);
-			arguments.dc->LineTo(px, py);
+			double angle=GetAngle(dt.hour*5+dt.minute/12.0+dt.second/720.0);
+			DrawLine(arguments.dc, hourPen, angle, 0, HourLength, x, y);
 		}
 		{
-			arguments.dc->SetPen(minutePen);
-			double angle=GetAngle(dt.minute);
-			double s=sin(angle);
-			double c=cos(angle);
-			int px=(int)(c*MinuteLength)+x+Radius;
-			int py=(int)(s*MinuteLength)+y+Radius;
-			arguments.dc->MoveTo(x+Radius, y+Radius);
-			arguments.dc->LineTo(px, py);
+			double angle=GetAngle(dt.minute+dt.second/60.0);
+			DrawLine(arguments.dc, minutePen, angle, 0, MinuteLength, x, y);
 		}
 		{
-			arguments.dc->SetPen(secondPen);
 			double angle=GetAngle(dt.second);
-			double s=sin(angle);
-			double c=cos(angle);
-			int px=(int)(c*SecondLength)+x+Radius;
-			int py=(int)(s*SecondLength)+y+Radius;
-			arguments.dc->MoveTo(x+Radius, y+Radius);
-			arguments.dc->LineTo(px, py);
+			DrawLine(arguments.dc, secondPen, angle, 0, SecondLength, x, y);
 		}
 	}
 public:
