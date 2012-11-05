@@ -19,6 +19,54 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace elements
+		{
+			
+/***********************************************************************
+Raw API Rendering Element
+***********************************************************************/
+
+			class GuiDirect2DElement;
+			
+			/// <summary>Direct2D Rendering event arguments.</summary>
+			struct GuiDirect2DElementEventArgs : compositions::GuiEventArgs
+			{
+			public:
+				/// <summary>The element that raised this event.</summary>
+				GuiDirect2DElement*				element;
+				/// <summary>Direct2D render target object.</summary>
+				ID2D1RenderTarget*				rt;
+				/// <summary>The range for rendering.</summary>
+				Rect							bounds;
+
+				GuiDirect2DElementEventArgs(GuiDirect2DElement* _element, ID2D1RenderTarget* _rt, Rect _bounds)
+					:element(_element)
+					,rt(_rt)
+					,bounds(_bounds)
+				{
+				}
+			};
+
+			/// <summary>
+			/// Defines an element for customized rendering using Direct2D.
+			/// </summary>
+			class GuiDirect2DElement : public Object, public IGuiGraphicsElement, public Description<GuiDirect2DElement>
+			{
+				DEFINE_GUI_GRAPHICS_ELEMENT(GuiDirect2DElement, L"Direct2DElement")
+			protected:
+				GuiDirect2DElement();
+			public:
+				~GuiDirect2DElement();
+				
+				/// <summary>Render target changed (before) event. Resources that binded to the render target can be released at this moment.</summary>
+				compositions::GuiGraphicsEvent<GuiDirect2DElementEventArgs>		BeforeRenderTargetChanged;
+				/// <summary>Render target changed (after) event. Resources that binded to the render target can be recreated at this moment.</summary>
+				compositions::GuiGraphicsEvent<GuiDirect2DElementEventArgs>		AfterRenderTargetChanged;
+				/// <summary>Rendering event.</summary>
+				compositions::GuiGraphicsEvent<GuiDirect2DElementEventArgs>		Rendering;
+			};
+		}
+
 		namespace elements_windows_d2d
 		{
 

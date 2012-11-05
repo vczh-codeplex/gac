@@ -1194,6 +1194,59 @@ GuiColorizedTextElementRenderer
 					}
 				}
 			}
+
+/***********************************************************************
+GuiDirect2DElementRenderer
+***********************************************************************/
+
+			void GuiDirect2DElementRenderer::InitializeInternal()
+			{
+			}
+
+			void GuiDirect2DElementRenderer::FinalizeInternal()
+			{
+			}
+
+			void GuiDirect2DElementRenderer::RenderTargetChangedInternal(IWindowsDirect2DRenderTarget* oldRenderTarget, IWindowsDirect2DRenderTarget* newRenderTarget)
+			{
+				if(oldRenderTarget)
+				{
+					GuiDirect2DElementEventArgs arguments(element, oldRenderTarget->GetDirect2DRenderTarget(), Rect());
+					element->BeforeRenderTargetChanged.Execute(arguments);
+				}
+				if(newRenderTarget)
+				{
+					GuiDirect2DElementEventArgs arguments(element, newRenderTarget->GetDirect2DRenderTarget(), Rect());
+					element->AfterRenderTargetChanged.Execute(arguments);
+				}
+			}
+
+			GuiDirect2DElementRenderer::GuiDirect2DElementRenderer()
+			{
+			}
+
+			GuiDirect2DElementRenderer::~GuiDirect2DElementRenderer()
+			{
+			}
+			
+			void GuiDirect2DElementRenderer::Render(Rect bounds)
+			{
+				if(renderTarget)
+				{
+					renderTarget->PushClipper(bounds);
+					if(!renderTarget->IsClipperCoverWholeTarget())
+					{
+						ID2D1RenderTarget* rt=renderTarget->GetDirect2DRenderTarget();
+						GuiDirect2DElementEventArgs arguments(element, rt, bounds);
+						element->Rendering.Execute(arguments);
+					}
+					renderTarget->PopClipper();
+				}
+			}
+
+			void GuiDirect2DElementRenderer::OnElementStateChanged()
+			{
+			}
 		}
 	}
 }

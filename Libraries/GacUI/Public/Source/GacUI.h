@@ -9956,6 +9956,44 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace elements
+		{
+			
+/***********************************************************************
+Raw API Rendering Element
+***********************************************************************/
+
+			class GuiDirect2DElement;
+			
+			struct GuiDirect2DElementEventArgs : compositions::GuiEventArgs
+			{
+			public:
+				GuiDirect2DElement*				element;
+				ID2D1RenderTarget*				rt;
+				Rect							bounds;
+
+				GuiDirect2DElementEventArgs(GuiDirect2DElement* _element, ID2D1RenderTarget* _rt, Rect _bounds)
+					:element(_element)
+					,rt(_rt)
+					,bounds(_bounds)
+				{
+				}
+			};
+
+			class GuiDirect2DElement : public Object, public IGuiGraphicsElement, public Description<GuiDirect2DElement>
+			{
+				DEFINE_GUI_GRAPHICS_ELEMENT(GuiDirect2DElement, L"Direct2DElement")
+			protected:
+				GuiDirect2DElement();
+			public:
+				~GuiDirect2DElement();
+				
+				compositions::GuiGraphicsEvent<GuiDirect2DElementEventArgs>		BeforeRenderTargetChanged;
+				compositions::GuiGraphicsEvent<GuiDirect2DElementEventArgs>		AfterRenderTargetChanged;
+				compositions::GuiGraphicsEvent<GuiDirect2DElementEventArgs>		Rendering;
+			};
+		}
+
 		namespace elements_windows_d2d
 		{
 
@@ -10246,6 +10284,23 @@ Renderers
 				void					FinalizeInternal();
 				void					RenderTargetChangedInternal(IWindowsDirect2DRenderTarget* oldRenderTarget, IWindowsDirect2DRenderTarget* newRenderTarget);
 			public:
+				void					Render(Rect bounds)override;
+				void					OnElementStateChanged()override;
+			};
+
+			class GuiDirect2DElementRenderer : public Object, public IGuiGraphicsRenderer
+			{
+				DEFINE_GUI_GRAPHICS_RENDERER(GuiDirect2DElement, GuiDirect2DElementRenderer, IWindowsDirect2DRenderTarget)
+
+			protected:
+
+				void					InitializeInternal();
+				void					FinalizeInternal();
+				void					RenderTargetChangedInternal(IWindowsDirect2DRenderTarget* oldRenderTarget, IWindowsDirect2DRenderTarget* newRenderTarget);
+			public:
+				GuiDirect2DElementRenderer();
+				~GuiDirect2DElementRenderer();
+
 				void					Render(Rect bounds)override;
 				void					OnElementStateChanged()override;
 			};
@@ -10741,6 +10796,42 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace elements
+		{
+			
+/***********************************************************************
+Raw API Rendering Element
+***********************************************************************/
+
+			class GuiGDIElement;
+
+			struct GuiGDIElementEventArgs : compositions::GuiEventArgs
+			{
+			public:
+				GuiGDIElement*				element;
+				windows::WinDC*				dc;
+				Rect						bounds;
+
+				GuiGDIElementEventArgs(GuiGDIElement* _element, windows::WinDC* _dc, Rect _bounds)
+					:element(_element)
+					,dc(_dc)
+					,bounds(_bounds)
+				{
+				}
+			};
+
+			class GuiGDIElement : public Object, public IGuiGraphicsElement, public Description<GuiGDIElement>
+			{
+				DEFINE_GUI_GRAPHICS_ELEMENT(GuiGDIElement, L"GDIElement")
+			protected:
+				GuiGDIElement();
+			public:
+				~GuiGDIElement();
+
+				compositions::GuiGraphicsEvent<GuiGDIElementEventArgs>		Rendering;
+			};
+		}
+
 		namespace elements_windows_gdi
 		{
 
@@ -11015,6 +11106,23 @@ Renderers
 				void					FinalizeInternal();
 				void					RenderTargetChangedInternal(IWindowsGDIRenderTarget* oldRenderTarget, IWindowsGDIRenderTarget* newRenderTarget);
 			public:
+				void					Render(Rect bounds)override;
+				void					OnElementStateChanged()override;
+			};
+
+			class GuiGDIElementRenderer : public Object, public IGuiGraphicsRenderer
+			{
+				DEFINE_GUI_GRAPHICS_RENDERER(GuiGDIElement, GuiGDIElementRenderer, IWindowsGDIRenderTarget)
+
+			protected:
+
+				void					InitializeInternal();
+				void					FinalizeInternal();
+				void					RenderTargetChangedInternal(IWindowsGDIRenderTarget* oldRenderTarget, IWindowsGDIRenderTarget* newRenderTarget);
+			public:
+				GuiGDIElementRenderer();
+				~GuiGDIElementRenderer();
+
 				void					Render(Rect bounds)override;
 				void					OnElementStateChanged()override;
 			};

@@ -25718,6 +25718,59 @@ GuiColorizedTextElementRenderer
 					}
 				}
 			}
+
+/***********************************************************************
+GuiDirect2DElementRenderer
+***********************************************************************/
+
+			void GuiDirect2DElementRenderer::InitializeInternal()
+			{
+			}
+
+			void GuiDirect2DElementRenderer::FinalizeInternal()
+			{
+			}
+
+			void GuiDirect2DElementRenderer::RenderTargetChangedInternal(IWindowsDirect2DRenderTarget* oldRenderTarget, IWindowsDirect2DRenderTarget* newRenderTarget)
+			{
+				if(oldRenderTarget)
+				{
+					GuiDirect2DElementEventArgs arguments(element, oldRenderTarget->GetDirect2DRenderTarget(), Rect());
+					element->BeforeRenderTargetChanged.Execute(arguments);
+				}
+				if(newRenderTarget)
+				{
+					GuiDirect2DElementEventArgs arguments(element, newRenderTarget->GetDirect2DRenderTarget(), Rect());
+					element->AfterRenderTargetChanged.Execute(arguments);
+				}
+			}
+
+			GuiDirect2DElementRenderer::GuiDirect2DElementRenderer()
+			{
+			}
+
+			GuiDirect2DElementRenderer::~GuiDirect2DElementRenderer()
+			{
+			}
+			
+			void GuiDirect2DElementRenderer::Render(Rect bounds)
+			{
+				if(renderTarget)
+				{
+					renderTarget->PushClipper(bounds);
+					if(!renderTarget->IsClipperCoverWholeTarget())
+					{
+						ID2D1RenderTarget* rt=renderTarget->GetDirect2DRenderTarget();
+						GuiDirect2DElementEventArgs arguments(element, rt, bounds);
+						element->Rendering.Execute(arguments);
+					}
+					renderTarget->PopClipper();
+				}
+			}
+
+			void GuiDirect2DElementRenderer::OnElementStateChanged()
+			{
+			}
 		}
 	}
 }
@@ -25730,6 +25783,22 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace elements
+		{
+
+/***********************************************************************
+GuiDirect2DElement
+***********************************************************************/
+
+			GuiDirect2DElement::GuiDirect2DElement()
+			{
+			}
+
+			GuiDirect2DElement::~GuiDirect2DElement()
+			{
+			}
+		}
+
 		namespace elements_windows_d2d
 		{
 			using namespace elements;
@@ -26362,6 +26431,7 @@ void RendererMainDirect2D()
 	elements_windows_d2d::GuiImageFrameElementRenderer::Register();
 	elements_windows_d2d::GuiPolygonElementRenderer::Register();
 	elements_windows_d2d::GuiColorizedTextElementRenderer::Register();
+	elements_windows_d2d::GuiDirect2DElementRenderer::Register();
 
 	GuiApplicationMain();
 	elements_windows_d2d::SetWindowsDirect2DResourceManager(0);
@@ -27324,6 +27394,49 @@ GuiColorizedTextElementRenderer
 					caretPen=resourceManager->CreateGdiPen(oldCaretColor);
 				}
 			}
+
+/***********************************************************************
+GuiGDIElementRenderer
+***********************************************************************/
+
+			void GuiGDIElementRenderer::InitializeInternal()
+			{
+			}
+
+			void GuiGDIElementRenderer::FinalizeInternal()
+			{
+			}
+
+			void GuiGDIElementRenderer::RenderTargetChangedInternal(IWindowsGDIRenderTarget* oldRenderTarget, IWindowsGDIRenderTarget* newRenderTarget)
+			{
+			}
+
+			GuiGDIElementRenderer::GuiGDIElementRenderer()
+			{
+			}
+
+			GuiGDIElementRenderer::~GuiGDIElementRenderer()
+			{
+			}
+			
+			void GuiGDIElementRenderer::Render(Rect bounds)
+			{
+				if(renderTarget)
+				{
+					renderTarget->PushClipper(bounds);
+					if(!renderTarget->IsClipperCoverWholeTarget())
+					{
+						WinDC* dc=renderTarget->GetDC();
+						GuiGDIElementEventArgs arguments(element, dc, bounds);
+						element->Rendering.Execute(arguments);
+					}
+					renderTarget->PopClipper();
+				}
+			}
+
+			void GuiGDIElementRenderer::OnElementStateChanged()
+			{
+			}
 		}
 	}
 }
@@ -27336,6 +27449,22 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace elements
+		{
+
+/***********************************************************************
+GuiGDIElement
+***********************************************************************/
+
+			GuiGDIElement::GuiGDIElement()
+			{
+			}
+
+			GuiGDIElement::~GuiGDIElement()
+			{
+			}
+		}
+
 		namespace elements_windows_gdi
 		{
 			using namespace windows;
@@ -27791,6 +27920,7 @@ void RendererMainGDI()
 	elements_windows_gdi::GuiImageFrameElementRenderer::Register();
 	elements_windows_gdi::GuiPolygonElementRenderer::Register();
 	elements_windows_gdi::GuiColorizedTextElementRenderer::Register();
+	elements_windows_gdi::GuiGDIElementRenderer::Register();
 
 	GuiApplicationMain();
 	elements_windows_gdi::SetWindowsGDIResourceManager(0);

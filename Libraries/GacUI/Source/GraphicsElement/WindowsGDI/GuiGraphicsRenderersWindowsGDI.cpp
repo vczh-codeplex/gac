@@ -952,6 +952,49 @@ GuiColorizedTextElementRenderer
 					caretPen=resourceManager->CreateGdiPen(oldCaretColor);
 				}
 			}
+
+/***********************************************************************
+GuiGDIElementRenderer
+***********************************************************************/
+
+			void GuiGDIElementRenderer::InitializeInternal()
+			{
+			}
+
+			void GuiGDIElementRenderer::FinalizeInternal()
+			{
+			}
+
+			void GuiGDIElementRenderer::RenderTargetChangedInternal(IWindowsGDIRenderTarget* oldRenderTarget, IWindowsGDIRenderTarget* newRenderTarget)
+			{
+			}
+
+			GuiGDIElementRenderer::GuiGDIElementRenderer()
+			{
+			}
+
+			GuiGDIElementRenderer::~GuiGDIElementRenderer()
+			{
+			}
+			
+			void GuiGDIElementRenderer::Render(Rect bounds)
+			{
+				if(renderTarget)
+				{
+					renderTarget->PushClipper(bounds);
+					if(!renderTarget->IsClipperCoverWholeTarget())
+					{
+						WinDC* dc=renderTarget->GetDC();
+						GuiGDIElementEventArgs arguments(element, dc, bounds);
+						element->Rendering.Execute(arguments);
+					}
+					renderTarget->PopClipper();
+				}
+			}
+
+			void GuiGDIElementRenderer::OnElementStateChanged()
+			{
+			}
 		}
 	}
 }

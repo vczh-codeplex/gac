@@ -218,6 +218,23 @@ Renderers
 				void					Render(Rect bounds)override;
 				void					OnElementStateChanged()override;
 			};
+
+			class GuiGDIElementRenderer : public Object, public IGuiGraphicsRenderer
+			{
+				DEFINE_GUI_GRAPHICS_RENDERER(GuiGDIElement, GuiGDIElementRenderer, IWindowsGDIRenderTarget)
+
+			protected:
+
+				void					InitializeInternal();
+				void					FinalizeInternal();
+				void					RenderTargetChangedInternal(IWindowsGDIRenderTarget* oldRenderTarget, IWindowsGDIRenderTarget* newRenderTarget);
+			public:
+				GuiGDIElementRenderer();
+				~GuiGDIElementRenderer();
+
+				void					Render(Rect bounds)override;
+				void					OnElementStateChanged()override;
+			};
 		}
 	}
 }

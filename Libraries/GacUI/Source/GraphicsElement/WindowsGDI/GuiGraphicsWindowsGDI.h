@@ -19,6 +19,50 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace elements
+		{
+			
+/***********************************************************************
+Raw API Rendering Element
+***********************************************************************/
+
+			class GuiGDIElement;
+
+			/// <summary>GDI Rendering event arguments.</summary>
+			struct GuiGDIElementEventArgs : compositions::GuiEventArgs
+			{
+			public:
+				/// <summary>The element that raised this event.</summary>
+				GuiGDIElement*				element;
+				/// <summary>The device context to draw. The HDC handle can be retrived using dc->GetHandle(), but it is recommended that using the WinDC class directly.</summary>
+				windows::WinDC*				dc;
+				/// <summary>The range for rendering.</summary>
+				Rect						bounds;
+
+				GuiGDIElementEventArgs(GuiGDIElement* _element, windows::WinDC* _dc, Rect _bounds)
+					:element(_element)
+					,dc(_dc)
+					,bounds(_bounds)
+				{
+				}
+			};
+
+			/// <summary>
+			/// Defines an element for customized rendering using GDI.
+			/// </summary>
+			class GuiGDIElement : public Object, public IGuiGraphicsElement, public Description<GuiGDIElement>
+			{
+				DEFINE_GUI_GRAPHICS_ELEMENT(GuiGDIElement, L"GDIElement")
+			protected:
+				GuiGDIElement();
+			public:
+				~GuiGDIElement();
+
+				/// <summary>Rendering event.</summary>
+				compositions::GuiGraphicsEvent<GuiGDIElementEventArgs>		Rendering;
+			};
+		}
+
 		namespace elements_windows_gdi
 		{
 

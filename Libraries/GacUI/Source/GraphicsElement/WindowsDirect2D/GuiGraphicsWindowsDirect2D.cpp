@@ -7,6 +7,22 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace elements
+		{
+
+/***********************************************************************
+GuiDirect2DElement
+***********************************************************************/
+
+			GuiDirect2DElement::GuiDirect2DElement()
+			{
+			}
+
+			GuiDirect2DElement::~GuiDirect2DElement()
+			{
+			}
+		}
+
 		namespace elements_windows_d2d
 		{
 			using namespace elements;
@@ -639,6 +655,7 @@ void RendererMainDirect2D()
 	elements_windows_d2d::GuiImageFrameElementRenderer::Register();
 	elements_windows_d2d::GuiPolygonElementRenderer::Register();
 	elements_windows_d2d::GuiColorizedTextElementRenderer::Register();
+	elements_windows_d2d::GuiDirect2DElementRenderer::Register();
 
 	GuiApplicationMain();
 	elements_windows_d2d::SetWindowsDirect2DResourceManager(0);
