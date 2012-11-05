@@ -36,12 +36,18 @@ Raw API Rendering Element
 				GuiDirect2DElement*				element;
 				/// <summary>Direct2D render target object.</summary>
 				ID2D1RenderTarget*				rt;
+				/// <summary>DirectWrite factory object.</summary>
+				IDWriteFactory*					factoryDWrite;
+				/// <summary>Direct2D factory object.</summary>
+				ID2D1Factory*					factoryD2D;
 				/// <summary>The range for rendering.</summary>
 				Rect							bounds;
 
-				GuiDirect2DElementEventArgs(GuiDirect2DElement* _element, ID2D1RenderTarget* _rt, Rect _bounds)
+				GuiDirect2DElementEventArgs(GuiDirect2DElement* _element, ID2D1RenderTarget* _rt, IDWriteFactory* _fdw, ID2D1Factory* _fd2d, Rect _bounds)
 					:element(_element)
 					,rt(_rt)
+					,factoryDWrite(_fdw)
+					,factoryD2D(_fd2d)
 					,bounds(_bounds)
 				{
 				}

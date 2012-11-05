@@ -176,8 +176,14 @@
     <Content Include="Content\Demos\Demos.Controls.TextBox.Editor.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Toolstrip.TextEditor.jpg" />
     <Content Include="Content\Demos\Demos.Controls.TreeView.FileExplorer.jpg" />
+    <Content Include="Content\Demos\Demos.Rendering.RawAPI.Direct2D.jpg" />
+    <Content Include="Content\Demos\Demos.Rendering.RawAPI.GDI.jpg" />
     <Content Include="Content\Demos\Demos.Template.Window.CustomizedBorder.jpg" />
     <Content Include="Content\Demos\Index.xml" />
+    <Content Include="Content\Demos\Rendering.RawAPI.Direct2D\DXGUI_58.jpg" />
+    <Content Include="Content\Demos\Rendering.RawAPI.Direct2D\Main.cpp" />
+    <Content Include="Content\Demos\Rendering.RawAPI.GDI\DXGUI_59.jpg" />
+    <Content Include="Content\Demos\Rendering.RawAPI.GDI\Main.cpp" />
     <Content Include="Content\Demos\Template.Window.CustomizedBorder\DXGUI_57.jpg" />
     <Content Include="Content\Demos\Template.Window.CustomizedBorder\Main.cpp" />
     <Content Include="Content\favicon.ico" />

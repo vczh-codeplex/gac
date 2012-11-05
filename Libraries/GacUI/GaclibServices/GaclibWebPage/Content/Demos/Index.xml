@@ -128,4 +128,19 @@
       <description>This demo shows how to build a window with a customized border and a skin.</description>
     </demo>
   </category>
+  <category name="Rendering">
+    <description>The &quot;Rendering&quot; category contains demos that show how to access the low level rendering API like Direct2D or GDI at runtime.</description>
+    <demo name="RawAPI.GDI">
+      <date>2012/11/4</date>
+      <image src="DXGUI_59.jpg" />
+      <cpp src="Main.cpp" />
+      <description>This demo shows how to use GDI api to draw a clock in a window.</description>
+    </demo>
+    <demo name="RawAPI.Direct2D">
+      <date>2012/11/5</date>
+      <image src="DXGUI_58.jpg" />
+      <cpp src="Main.cpp" />
+      <description>This demo shows how to use Direct2D api to draw a clock in a window.</description>
+    </demo>
+  </category>
 </demos>
