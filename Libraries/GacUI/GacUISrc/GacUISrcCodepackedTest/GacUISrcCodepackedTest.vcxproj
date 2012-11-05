@@ -122,6 +122,9 @@
     <None Include="Resources\_SaveAs.png" />
     <None Include="Resources\_Undo.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Resources\document.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
