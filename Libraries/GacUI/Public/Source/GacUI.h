@@ -9970,11 +9970,15 @@ Raw API Rendering Element
 			public:
 				GuiDirect2DElement*				element;
 				ID2D1RenderTarget*				rt;
+				IDWriteFactory*					factoryDWrite;
+				ID2D1Factory*					factoryD2D;
 				Rect							bounds;
 
-				GuiDirect2DElementEventArgs(GuiDirect2DElement* _element, ID2D1RenderTarget* _rt, Rect _bounds)
+				GuiDirect2DElementEventArgs(GuiDirect2DElement* _element, ID2D1RenderTarget* _rt, IDWriteFactory* _fdw, ID2D1Factory* _fd2d, Rect _bounds)
 					:element(_element)
 					,rt(_rt)
+					,factoryDWrite(_fdw)
+					,factoryD2D(_fd2d)
 					,bounds(_bounds)
 				{
 				}

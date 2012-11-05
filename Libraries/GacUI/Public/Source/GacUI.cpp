@@ -25733,14 +25733,16 @@ GuiDirect2DElementRenderer
 
 			void GuiDirect2DElementRenderer::RenderTargetChangedInternal(IWindowsDirect2DRenderTarget* oldRenderTarget, IWindowsDirect2DRenderTarget* newRenderTarget)
 			{
+				IDWriteFactory* fdw=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory();
+				ID2D1Factory* fd2d=GetWindowsDirect2DObjectProvider()->GetDirect2DFactory();
 				if(oldRenderTarget)
 				{
-					GuiDirect2DElementEventArgs arguments(element, oldRenderTarget->GetDirect2DRenderTarget(), Rect());
+					GuiDirect2DElementEventArgs arguments(element, oldRenderTarget->GetDirect2DRenderTarget(), fdw, fd2d, Rect());
 					element->BeforeRenderTargetChanged.Execute(arguments);
 				}
 				if(newRenderTarget)
 				{
-					GuiDirect2DElementEventArgs arguments(element, newRenderTarget->GetDirect2DRenderTarget(), Rect());
+					GuiDirect2DElementEventArgs arguments(element, newRenderTarget->GetDirect2DRenderTarget(), fdw, fd2d, Rect());
 					element->AfterRenderTargetChanged.Execute(arguments);
 				}
 			}
@@ -25757,11 +25759,13 @@ GuiDirect2DElementRenderer
 			{
 				if(renderTarget)
 				{
+					IDWriteFactory* fdw=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory();
+					ID2D1Factory* fd2d=GetWindowsDirect2DObjectProvider()->GetDirect2DFactory();
 					renderTarget->PushClipper(bounds);
 					if(!renderTarget->IsClipperCoverWholeTarget())
 					{
 						ID2D1RenderTarget* rt=renderTarget->GetDirect2DRenderTarget();
-						GuiDirect2DElementEventArgs arguments(element, rt, bounds);
+						GuiDirect2DElementEventArgs arguments(element, rt, fdw, fd2d, bounds);
 						element->Rendering.Execute(arguments);
 					}
 					renderTarget->PopClipper();
