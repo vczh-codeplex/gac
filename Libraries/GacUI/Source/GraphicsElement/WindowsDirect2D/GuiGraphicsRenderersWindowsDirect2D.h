@@ -222,6 +222,23 @@ Renderers
 				void					Render(Rect bounds)override;
 				void					OnElementStateChanged()override;
 			};
+
+			class GuiDirect2DElementRenderer : public Object, public IGuiGraphicsRenderer
+			{
+				DEFINE_GUI_GRAPHICS_RENDERER(GuiDirect2DElement, GuiDirect2DElementRenderer, IWindowsDirect2DRenderTarget)
+
+			protected:
+
+				void					InitializeInternal();
+				void					FinalizeInternal();
+				void					RenderTargetChangedInternal(IWindowsDirect2DRenderTarget* oldRenderTarget, IWindowsDirect2DRenderTarget* newRenderTarget);
+			public:
+				GuiDirect2DElementRenderer();
+				~GuiDirect2DElementRenderer();
+
+				void					Render(Rect bounds)override;
+				void					OnElementStateChanged()override;
+			};
 		}
 	}
 }
