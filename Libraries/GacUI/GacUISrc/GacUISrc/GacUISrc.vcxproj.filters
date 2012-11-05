@@ -120,9 +120,6 @@
     <ClCompile Include="..\..\..\..\Common\Source\Stream\RecorderStream.cpp">
       <Filter>Common\Stream</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\GacUI_WinMain.cpp">
-      <Filter>GacUI</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Controls\GuiApplication.cpp">
       <Filter>GacUI\Controls</Filter>
     </ClCompile>

@@ -142,7 +142,6 @@
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ToolstripStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripCommand.cpp" />
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripMenu.cpp" />
-    <ClCompile Include="..\..\Source\GacUI_WinMain.cpp" />
     <ClCompile Include="..\..\Source\GraphicsComposition\GuiGraphicsBasicComposition.cpp" />
     <ClCompile Include="..\..\Source\GraphicsComposition\GuiGraphicsComposition.cpp" />
     <ClCompile Include="..\..\Source\GraphicsComposition\GuiGraphicsCompositionBase.cpp" />
