@@ -140,61 +140,49 @@ DocumentFragment
 /***********************************************************************
 ScriptFragment
 ***********************************************************************/
-
-	class ScriptRun : public Object
+	
+	struct GlyphData
 	{
-	public:
-		DocumentFragment*				documentFragment;
-		SCRIPT_ITEM*					scriptItem;
-		int								start;
-		int								length;
-		const wchar_t*					runText;
+		Array<WORD>					glyphs;
+		Array<SCRIPT_VISATTR>		glyphVisattrs;
+		Array<int>					glyphAdvances;
+		Array<GOFFSET>				glyphOffsets;
+		Array<WORD>					charCluster;
+		ABC							runAbc;
 
-		SCRIPT_CACHE					scriptCache;
-		Array<WORD>						glyphs;
-		Array<SCRIPT_VISATTR>			glyphVisattrs;
-		Array<int>						glyphAdvances;
-		Array<GOFFSET>					glyphOffsets;
-		Array<WORD>						charCluster;
-		Array<SCRIPT_LOGATTR>			charLogattrs;
-		ABC								runAbc;
-
-		ScriptRun()
-			:documentFragment(0)
-			,scriptItem(0)
-			,start(0)
-			,length(0)
-			,scriptCache(0)
+		GlyphData()
 		{
 			memset(&runAbc, 0, sizeof(runAbc));
 		}
 
-		~ScriptRun()
+		void ClearUniscribeData(int glyphCount, int length)
 		{
-			ClearUniscribeData();
+			glyphs.Resize(glyphCount);
+			glyphVisattrs.Resize(glyphCount);
+			glyphAdvances.Resize(glyphCount);
+			glyphOffsets.Resize(glyphCount);
+			charCluster.Resize(length);
+			memset(&runAbc, 0, sizeof(runAbc));
 		}
-
-		void ClearUniscribeData()
+			
+		bool BuildUniscribeData(WinDC* dc, DocumentFragment* documentFragment, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, int length)
 		{
-			if(scriptCache)
+			int glyphCount=glyphs.Count();
+			bool resizeGlyphData=false;
+			if(glyphCount==0)
 			{
-				ScriptFreeCache(&scriptCache);
-				scriptCache=0;
+				glyphCount=(int)(1.5*length+16);
+				resizeGlyphData=true;
 			}
-		}
-
-		bool BuildUniscribeData(WinDC* dc)
-		{
-			ClearUniscribeData();
-			dc->SetFont(documentFragment->fontObject);
-			int glyphCount=(int)(1.5*length+16);
 			{
 				// generate shape information
-
 				WinDC* dcParameter=0;
-				glyphs.Resize(glyphCount);
-				glyphVisattrs.Resize(glyphCount);
-				charCluster.Resize(length);
+				if(resizeGlyphData)
+				{
+					glyphs.Resize(glyphCount);
+					glyphVisattrs.Resize(glyphCount);
+					charCluster.Resize(length);
+				}
 
 				while(true)
 				{
@@ -222,22 +210,34 @@ ScriptFragment
 					}
 					else if(hr==E_OUTOFMEMORY)
 					{
-						glyphCount+=length;
+						if(resizeGlyphData)
+						{
+							glyphCount+=length;
+						}
+						else
+						{
+							goto BUILD_UNISCRIBE_DATA_FAILED;
+						}
 					}
 					else
 					{
 						goto BUILD_UNISCRIBE_DATA_FAILED;
 					}
 				}
-				glyphs.Resize(glyphCount);
-				glyphVisattrs.Resize(glyphCount);
+				if(resizeGlyphData)
+				{
+					glyphs.Resize(glyphCount);
+					glyphVisattrs.Resize(glyphCount);
+				}
 			}
 			{
 				// generate place information
 				WinDC* dcParameter=0;
-				glyphAdvances.Resize(glyphCount);
-				glyphOffsets.Resize(glyphCount);
-
+				if(resizeGlyphData)
+				{
+					glyphAdvances.Resize(glyphCount);
+					glyphOffsets.Resize(glyphCount);
+				}
 				while(true)
 				{
 					HRESULT hr=ScriptPlace(
@@ -265,6 +265,60 @@ ScriptFragment
 					}
 				}
 			}
+
+			return true;
+BUILD_UNISCRIBE_DATA_FAILED:
+			return false;
+		}
+	};
+
+	class ScriptRun : public Object
+	{
+	public:
+
+		DocumentFragment*				documentFragment;
+		SCRIPT_ITEM*					scriptItem;
+		int								start;
+		int								length;
+		const wchar_t*					runText;
+
+		SCRIPT_CACHE					scriptCache;
+		Array<SCRIPT_LOGATTR>			charLogattrs;
+		int								advance;
+		GlyphData						wholeGlyph;
+		GlyphData						tempGlyph;
+
+		ScriptRun()
+			:documentFragment(0)
+			,scriptItem(0)
+			,start(0)
+			,length(0)
+			,scriptCache(0)
+			,advance(0)
+		{
+		}
+
+		~ScriptRun()
+		{
+			ClearUniscribeData();
+		}
+
+		void ClearUniscribeData()
+		{
+			if(scriptCache)
+			{
+				ScriptFreeCache(&scriptCache);
+				scriptCache=0;
+			}
+			charLogattrs.Resize(0);
+			advance=0;
+			wholeGlyph.ClearUniscribeData(0, 0);
+			tempGlyph.ClearUniscribeData(0, 0);
+		}
+
+		bool BuildUniscribeData(WinDC* dc)
+		{
+			ClearUniscribeData();
 			{
 				// generate break information
 				charLogattrs.Resize(length);
@@ -280,6 +334,14 @@ ScriptFragment
 					goto BUILD_UNISCRIBE_DATA_FAILED;
 				}
 			}
+
+			dc->SetFont(documentFragment->fontObject);
+			if(!wholeGlyph.BuildUniscribeData(dc, documentFragment, scriptItem, scriptCache, runText, length))
+			{
+				goto BUILD_UNISCRIBE_DATA_FAILED;
+			}
+			tempGlyph.ClearUniscribeData(wholeGlyph.glyphs.Count(), length);
+			advance=wholeGlyph.runAbc.abcA+wholeGlyph.runAbc.abcB+wholeGlyph.runAbc.abcC;
 
 			return true;
 BUILD_UNISCRIBE_DATA_FAILED:
@@ -519,11 +581,19 @@ TestWindow
 							FOREACH(Ptr<ScriptRun>, run, line->scriptRuns.Wrap())
 							{
 								if(cx>=w) break;
-								Color color=run->documentFragment->color;
-								dc->SetFont(run->documentFragment->fontObject);
-								dc->SetTextColor(RGB(color.r, color.g, color.b));
-								dc->DrawBuffer(x+cx, y+cy+(maxHeight-run->documentFragment->size), run->runText, run->length);
-								cx+=run->runAbc.abcA+run->runAbc.abcB+run->runAbc.abcC;
+								int runw=run->advance;
+								if(cx+runw>w)
+								{
+									break;
+								}
+								else
+								{
+									Color color=run->documentFragment->color;
+									dc->SetFont(run->documentFragment->fontObject);
+									dc->SetTextColor(RGB(color.r, color.g, color.b));
+									dc->DrawBuffer(x+cx, y+cy+(maxHeight-run->documentFragment->size), run->runText, run->length);
+									cx+=runw;
+								}
 							}
 						}
 						cx=0;
