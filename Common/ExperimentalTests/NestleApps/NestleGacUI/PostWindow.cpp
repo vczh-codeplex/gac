@@ -329,7 +329,7 @@ PostWindow
 						{
 							GetCurrentController()->DialogService()->ShowMessageBox(
 								GetBoundsComposition()->GetRelatedControlHost()->GetNativeWindow(),
-								L"上传图片，请检查网络连接是否畅通。"
+								L"上传图片失败，请检查网络连接是否畅通。"
 								);
 						}
 					});
