@@ -1,10 +1,14 @@
 #include "..\..\Source\GacUI.h"
-#include "..\..\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.h"
-#include "..\..\Source\NativeWindow\Windows\GDI\WinGDIApplication.h"
 #include "..\..\..\..\Common\Source\Stream\FileStream.h"
 #include "..\..\..\..\Common\Source\Stream\CharFormat.h"
 #include "..\..\..\..\Common\Source\Stream\Accessor.h"
 #include "..\..\..\..\Common\Source\Regex\Regex.h"
+
+#include "..\..\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.h"
+#include "..\..\Source\NativeWindow\Windows\GDI\WinGDIApplication.h"
+#include <usp10.h>
+
+#pragma comment(lib, "usp10.lib")
 
 using namespace vl::collections;
 using namespace vl::stream;
@@ -15,6 +19,22 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 {
 	return SetupWindowsGDIRenderer();
 }
+
+/***********************************************************************
+Uniscribe
+***********************************************************************/
+
+bool operator==(const SCRIPT_ITEM&, const SCRIPT_ITEM&){return false;}
+bool operator!=(const SCRIPT_ITEM&, const SCRIPT_ITEM&){return false;}
+
+bool operator==(const SCRIPT_VISATTR&, const SCRIPT_VISATTR&){return false;}
+bool operator!=(const SCRIPT_VISATTR&, const SCRIPT_VISATTR&){return false;}
+
+bool operator==(const GOFFSET&, const GOFFSET&){return false;}
+bool operator!=(const GOFFSET&, const GOFFSET&){return false;}
+
+bool operator==(const SCRIPT_LOGATTR&, const SCRIPT_LOGATTR&){return false;}
+bool operator!=(const SCRIPT_LOGATTR&, const SCRIPT_LOGATTR&){return false;}
 
 namespace test
 {
@@ -114,13 +134,257 @@ DocumentFragment
 ScriptFragment
 ***********************************************************************/
 
+	class ScriptRun
+	{
+	public:
+		DocumentFragment*				documentFragment;
+		SCRIPT_ITEM*					scriptItem;
+		int								start;
+		int								length;
+		const wchar_t*					runText;
+
+		SCRIPT_CACHE					scriptCache;
+		Array<WORD>						glyphs;
+		Array<SCRIPT_VISATTR>			glyphVisattrs;
+		Array<int>						glyphAdvances;
+		Array<GOFFSET>					glyphOffsets;
+		Array<WORD>						charCluster;
+		Array<SCRIPT_LOGATTR>			charLogattrs;
+		ABC								runAbc;
+
+		ScriptRun()
+			:documentFragment(0)
+			,scriptItem(0)
+			,start(0)
+			,length(0)
+			,scriptCache(0)
+		{
+			memset(&runAbc, 0, sizeof(runAbc));
+		}
+
+		~ScriptRun()
+		{
+			ClearUniscribeData();
+		}
+
+		void ClearUniscribeData()
+		{
+			if(scriptCache)
+			{
+				ScriptFreeCache(&scriptCache);
+				scriptCache=0;
+			}
+		}
+
+		bool BuildUniscribeData(WinDC* dc)
+		{
+			ClearUniscribeData();
+			int glyphCount=(int)(1.5*length+16);
+			{
+				// generate shape information
+
+				WinDC* dcParameter=0;
+				glyphs.Resize(glyphCount);
+				glyphVisattrs.Resize(glyphCount);
+				charCluster.Resize(length);
+
+				while(true)
+				{
+					int availableGlyphCount=0;
+					HRESULT hr=ScriptShape(
+						(dcParameter?dcParameter->GetHandle():NULL),
+						&scriptCache,
+						runText,
+						length,
+						glyphCount,
+						&scriptItem->a,
+						&glyphs[0],
+						&charCluster[0],
+						&glyphVisattrs[0],
+						&availableGlyphCount
+						);
+					if(hr==0)
+					{
+						glyphCount=availableGlyphCount;
+						break;
+					}
+					else if(hr==E_PENDING)
+					{
+						dcParameter=dc;
+					}
+					else if(hr==E_OUTOFMEMORY)
+					{
+						glyphCount+=length;
+					}
+					else
+					{
+						goto BUILD_UNISCRIBE_DATA_FAILED;
+					}
+				}
+				glyphs.Resize(glyphCount);
+				glyphVisattrs.Resize(glyphCount);
+			}
+			{
+				// generate place information
+				WinDC* dcParameter=0;
+				glyphAdvances.Resize(glyphCount);
+				glyphOffsets.Resize(glyphCount);
+
+				while(true)
+				{
+					HRESULT hr=ScriptPlace(
+						(dcParameter?dcParameter->GetHandle():NULL),
+						&scriptCache,
+						&glyphs[0],
+						glyphCount,
+						&glyphVisattrs[0],
+						&scriptItem->a,
+						&glyphAdvances[0],
+						&glyphOffsets[0],
+						&runAbc
+						);
+					if(hr==0)
+					{
+						break;
+					}
+					else if(hr==E_PENDING)
+					{
+						dcParameter=dc;
+					}
+					else
+					{
+						goto BUILD_UNISCRIBE_DATA_FAILED;
+					}
+				}
+			}
+			{
+				// generate break information
+				charLogattrs.Resize(length);
+
+				HRESULT hr=ScriptBreak(
+					runText,
+					length,
+					&scriptItem->a,
+					&charLogattrs[0]
+					);
+				if(hr!=0)
+				{
+					goto BUILD_UNISCRIBE_DATA_FAILED;
+				}
+			}
+
+			return true;
+BUILD_UNISCRIBE_DATA_FAILED:
+			ClearUniscribeData();
+			return false;
+		}
+	};
+
 	class ScriptLine
 	{
 	public:
 		List<Ptr<DocumentFragment>>		documentFragments;
+		WString							lineText;
 
-		void BuildUniscribeData(WinDC* dc)
+		Array<SCRIPT_ITEM>				scriptItems;
+		List<Ptr<ScriptRun>>			scriptRuns;
+
+		void CLearUniscribeData()
 		{
+			scriptItems.Resize(0);
+			scriptRuns.Clear();
+		}
+
+		bool BuildUniscribeData(WinDC* dc)
+		{
+			lineText=L"";
+			CLearUniscribeData();
+
+			FOREACH(Ptr<DocumentFragment>, fragment, documentFragments.Wrap())
+			{
+				lineText+=fragment->text;
+			}
+
+			if(lineText!=L"")
+			{
+				{
+					// itemize a line
+					scriptItems.Resize(lineText.Length()+2);
+					int scriptItemCount=0;
+					HRESULT hr=ScriptItemize(
+						lineText.Buffer(),
+						lineText.Length(),
+						scriptItems.Count()-1,
+						NULL,
+						NULL,
+						&scriptItems[0],
+						&scriptItemCount
+						);
+					if(hr!=0)
+					{
+						goto BUILD_UNISCRIBE_DATA_FAILED;
+					}
+					scriptItems.Resize(scriptItemCount+1);
+				}
+				{
+					// use item and document fragment information to produce runs
+					// one item is constructed by one or more runs
+					// characters in each run contains the same style
+					int fragmentIndex=0;
+					int fragmentStart=0;
+					for(int i=0;i<scriptItems.Count()-1;i++)
+					{
+						SCRIPT_ITEM* scriptItem=&scriptItems[i];
+						int start=scriptItem[0].iCharPos;
+						int length=scriptItem[1].iCharPos-scriptItem[0].iCharPos;
+						int currentStart=start;
+
+						while(currentStart<start+length)
+						{
+							DocumentFragment* fragment=0;
+							int itemRemainLength=length-(currentStart-start);
+							int fragmentRemainLength=0;
+							while(true)
+							{
+								fragment=documentFragments[fragmentIndex].Obj();
+								fragmentRemainLength=fragment->text.Length()-(currentStart-fragmentStart);
+								if(fragmentRemainLength<=0)
+								{
+									fragmentStart+=fragment->text.Length();
+									fragmentIndex++;
+								}
+								else
+								{
+									break;
+								}
+							}
+							int shortLength=itemRemainLength<fragmentRemainLength?itemRemainLength:fragmentRemainLength;
+
+							Ptr<ScriptRun> run=new ScriptRun;
+							run->documentFragment=fragment;
+							run->scriptItem=scriptItem;
+							run->start=currentStart;
+							run->length=shortLength;
+							run->runText=lineText.Buffer()+currentStart;
+							scriptRuns.Add(run);
+							currentStart+=shortLength;
+						}
+					}
+
+					// for each run, generate shape information
+					FOREACH(Ptr<ScriptRun>, run, scriptRuns.Wrap())
+					{
+						if(!run->BuildUniscribeData(dc))
+						{
+							goto BUILD_UNISCRIBE_DATA_FAILED;
+						}
+					}
+				}
+			}
+			return true;
+BUILD_UNISCRIBE_DATA_FAILED:
+			CLearUniscribeData();
+			return false;
 		}
 	};
 
