@@ -348,6 +348,41 @@ BUILD_UNISCRIBE_DATA_FAILED:
 			ClearUniscribeData();
 			return false;
 		}
+
+		int SumWidth(int charStart, int charLength)
+		{
+			int width=0;
+			for(int i=0;i<charLength;i++)
+			{
+				width+=wholeGlyph.glyphAdvances[i];
+			}
+			return width;
+		}
+
+		void SearchForLineBreak(int tempStart, int maxWidth, bool firstRun, int& charLength, int& charAdvances)
+		{
+			int width=0;
+			charLength=0;
+			charAdvances=0;
+			for(int i=tempStart;i<=length;i++)
+			{
+				if(i==length || charLogattrs[i].fSoftBreak==TRUE)
+				{
+					if(width<=maxWidth || (firstRun && charLength==0))
+					{
+						charLength=i-tempStart;
+						charAdvances=width;
+					}
+				}
+				if(i==length) break;
+				width+=wholeGlyph.glyphAdvances[i];
+			}
+		}
+
+		bool BuildUniscribeDataTemp(WinDC* dc, int tempStart, int tempLength)
+		{
+			return tempGlyph.BuildUniscribeData(dc, documentFragment, scriptItem, scriptCache, runText+tempStart, tempLength);
+		}
 	};
 
 	class ScriptLine : public Object
@@ -562,44 +597,95 @@ TestWindow
 				int h=bounds.Height()-10;
 				int cx=0;
 				int cy=0;
+				const int lineDistance=5;
+				const int paragraphDistance=10;
 
 				FOREACH(Ptr<ScriptParagraph>, paragraph, document->paragraphs.Wrap())
 				{
 					if(cy>=h) break;
 					FOREACH(Ptr<ScriptLine>, line, paragraph->lines.Wrap())
 					{
-						int maxHeight=0;
-						FOREACH(Ptr<DocumentFragment>, fragment, line->documentFragments.Wrap())
+						if(line->scriptRuns.Count()==0)
 						{
-							if(maxHeight<fragment->size)
+							// if this line doesn't contains any run, skip and render a blank line
+							cy+=line->documentFragments[0]->size+lineDistance;
+						}
+						else
+						{
+							// render this line into linces with auto line wrapping
+							int startRun=0;
+							int startRunOffset=0;
+							int lastRun=0;
+							int lastRunOffset=0;
+							int currentWidth=0;
+
+							while(startRun<line->scriptRuns.Count())
 							{
-								maxHeight=fragment->size;
+								int currentWidth=0;
+								bool firstRun=true;
+								// search for a range to fit in the given width
+								for(int i=startRun;i<line->scriptRuns.Count();i++)
+								{
+									int charLength=0;
+									int charAdvances=0;
+									ScriptRun* run=line->scriptRuns[i].Obj();
+									run->SearchForLineBreak(lastRunOffset, w-currentWidth, firstRun, charLength, charAdvances);
+									firstRun=false;
+
+									if(charLength==run->length-lastRunOffset)
+									{
+										lastRun=i+1;
+										lastRunOffset=0;
+										currentWidth+=charAdvances;
+									}
+									else
+									{
+										lastRun=i;
+										lastRunOffset=lastRunOffset+charLength;
+										break;
+									}
+								}
+
+								// if the range is empty, than this should be the end of line, ignore it
+								if(startRun<lastRun || (startRun==lastRun && startRunOffset<lastRunOffset))
+								{
+									// calculate the max line height in this range;
+									int maxHeight=0;
+									for(int i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
+									{
+										int size=line->scriptRuns[i]->documentFragment->size;
+										if(maxHeight<size)
+										{
+											maxHeight=size;
+										}
+									}
+
+									// render all runs inside this range
+									for(int i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
+									{
+										ScriptRun* run=line->scriptRuns[i].Obj();
+										int start=i==startRun?startRunOffset:0;
+										int end=i==lastRun?lastRunOffset:run->length;
+										int length=end-start;
+											
+										Color color=run->documentFragment->color;
+										dc->SetFont(run->documentFragment->fontObject);
+										dc->SetTextColor(RGB(color.r, color.g, color.b));
+										dc->DrawBuffer(x+cx, y+cy+(maxHeight-run->documentFragment->size), run->runText+start, length);
+
+										cx+=run->SumWidth(start, length);
+									}
+
+									cx=0;
+									cy+=maxHeight+lineDistance;
+								}
+
+								startRun=lastRun;
+								startRunOffset=lastRunOffset;
 							}
 						}
-						if(line->scriptRuns.Count()>0)
-						{
-							FOREACH(Ptr<ScriptRun>, run, line->scriptRuns.Wrap())
-							{
-								if(cx>=w) break;
-								int runw=run->advance;
-								if(cx+runw>w)
-								{
-									break;
-								}
-								else
-								{
-									Color color=run->documentFragment->color;
-									dc->SetFont(run->documentFragment->fontObject);
-									dc->SetTextColor(RGB(color.r, color.g, color.b));
-									dc->DrawBuffer(x+cx, y+cy+(maxHeight-run->documentFragment->size), run->runText, run->length);
-									cx+=runw;
-								}
-							}
-						}
-						cx=0;
-						cy+=maxHeight+5;
 					}
-					cy+=8;
+					cy+=paragraphDistance;
 				}
 			}
 			else
@@ -618,7 +704,7 @@ TestWindow
 		{
 			SetText(L"GacUISrc Test Application");
 			SetClientSize(Size(640, 480));
-			GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
+			GetBoundsComposition()->SetPreferredMinSize(Size(320, 240));
 			MoveToScreenCenter();
 			{
 				GuiGDIElement* element=GuiGDIElement::Create();
