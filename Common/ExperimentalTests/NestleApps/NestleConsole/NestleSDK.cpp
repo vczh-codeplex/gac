@@ -578,12 +578,38 @@ NestleServer
 		{
 			HttpRequest request;
 			HttpResponse response;
+			WString ext;
+			{
+				ext=wupper(fileName);
+				int index=ext.Length()-1;
+				while(index>=0 && ext[index]!=L'.')
+				{
+					index--;
+				}
+				if(index==-1)
+				{
+					return L"";
+				}
+				else
+				{
+					ext=ext.Sub(index, ext.Length()-index);
+				}
+			}
+
+			WString contentType;
+			if(ext==L".GIF") contentType=L"image/gif";
+			else if(ext==L".PNG") contentType=L"image/png";
+			else if(ext==L".JPG") contentType=L"image/jpeg";
+			else if(ext==L".TXT") contentType=L"text/plain";
+			else if(ext==L".TORRENT") contentType=L"application/octet-stream";
+			else if(ext==L".PDF") contentType=L"image/pdf";
+			else return L"";
 
 			WString boundary=L"fucking-kula-not-give-full-documentation";
 			WString contentFirst=
 				L"--"+boundary+L"\r\n"
-				L"Content-Disposition: form-data; name=\"file\"; filename=\""+fileName+L"\"\r\n"
-				L"Content-Type: application/octet-stream\r\n"
+				L"Content-Disposition: form-data; name=\"Filedata\"; filename=\""+fileName+L"\"\r\n"
+				L"Content-Type: "+contentType+L"\r\n"
 				L"Content-Length: "+itow((int)content.Size())+L"\r\n"
 				L"\r\n"
 				;
@@ -648,7 +674,15 @@ NestleServer
 
 			if(response.statusCode==200||response.statusCode==302)
 			{
-				return response.GetBodyUtf8();
+				WString url;
+				WString xml=response.GetBodyUtf8();
+				IXMLDOMDocument2* dom=XmlLoad(xml);
+				if(dom)
+				{
+					url=XmlQueryString(dom, L"/hash/url/text()");
+				}
+				dom->Release();
+				return url;
 			}
 			else
 			{
