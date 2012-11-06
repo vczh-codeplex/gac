@@ -52,6 +52,7 @@ DocumentFragment
 		Color				color;
 		int					size;
 		WString				text;
+		Ptr<WinFont>		fontObject;
 
 		DocumentFragment()
 			:paragraph(false)
@@ -66,8 +67,14 @@ DocumentFragment
 			,bold(prototype->bold)
 			,color(prototype->color)
 			,size(prototype->size)
+			,fontObject(prototype->fontObject)
 			,text(_text)
 		{
+		}
+
+		WString GetFingerPrint()
+		{
+			return font+L":"+(bold?L"B":L"N")+L":"+itow(size);
 		}
 	};
 
@@ -179,6 +186,7 @@ ScriptFragment
 		bool BuildUniscribeData(WinDC* dc)
 		{
 			ClearUniscribeData();
+			dc->SetFont(documentFragment->fontObject);
 			int glyphCount=(int)(1.5*length+16);
 			{
 				// generate shape information
@@ -400,9 +408,22 @@ BUILD_UNISCRIBE_DATA_FAILED:
 		Regex regex(L"\r\n");
 		Ptr<ScriptParagraph> currentParagraph;
 		Ptr<ScriptLine> currentLine;
+		Dictionary<WString, Ptr<WinFont>> fonts;
 
 		FOREACH(Ptr<DocumentFragment>, fragment, fragments.Wrap())
 		{
+			WString fragmentFingerPrint=fragment->GetFingerPrint();
+			int index=fonts.Keys().IndexOf(fragmentFingerPrint);
+			if(index==-1)
+			{
+				fragment->fontObject=new WinFont(fragment->font, fragment->size, 0, 0, 0, (fragment->bold?FW_BOLD:FW_NORMAL), false, false, false, true);
+				fonts.Add(fragmentFingerPrint, fragment->fontObject);
+			}
+			else
+			{
+				fragment->fontObject=fonts.Values()[index];
+			}
+
 			if(!currentParagraph)
 			{
 				currentParagraph=new ScriptParagraph;
