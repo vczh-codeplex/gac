@@ -685,6 +685,10 @@ TestWindow
 									int maxHeight=0;
 									for(int i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
 									{
+										if(i==lastRun && lastRunOffset==0)
+										{
+											break;
+										}
 										int size=line->scriptRuns[i]->documentFragment->size;
 										if(maxHeight<size)
 										{
