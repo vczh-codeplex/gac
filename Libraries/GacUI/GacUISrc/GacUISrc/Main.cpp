@@ -4,8 +4,8 @@
 #include "..\..\..\..\Common\Source\Stream\Accessor.h"
 #include "..\..\..\..\Common\Source\Regex\Regex.h"
 
-#include "..\..\Source\NativeWindow\Windows\Direct2D\WinDirect2DApplication.h"
-#include "..\..\Source\NativeWindow\Windows\GDI\WinGDIApplication.h"
+#include "..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.h"
+#include "..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.h"
 #include <usp10.h>
 
 #pragma comment(lib, "usp10.lib")
@@ -141,7 +141,7 @@ DocumentFragment
 ScriptFragment
 ***********************************************************************/
 
-	class ScriptRun
+	class ScriptRun : public Object
 	{
 	public:
 		DocumentFragment*				documentFragment;
@@ -288,7 +288,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 		}
 	};
 
-	class ScriptLine
+	class ScriptLine : public Object
 	{
 	public:
 		List<Ptr<DocumentFragment>>		documentFragments;
@@ -396,15 +396,22 @@ BUILD_UNISCRIBE_DATA_FAILED:
 		}
 	};
 
-	class ScriptParagraph
+	class ScriptParagraph : public Object
 	{
 	public:
 		List<Ptr<ScriptLine>>			lines;
 	};
 
-	void BuildScriptParagraphs(List<Ptr<DocumentFragment>>& fragments, List<Ptr<ScriptParagraph>>& script)
+	class ScriptDocument : public Object
 	{
-		script.Clear();
+	public:
+		List<Ptr<ScriptParagraph>>		paragraphs;
+	};
+
+	Ptr<ScriptDocument> BuildScriptParagraphs(List<Ptr<DocumentFragment>>& fragments)
+	{
+		Ptr<ScriptDocument> document=new ScriptDocument;
+		document->paragraphs.Clear();
 		Regex regex(L"\r\n");
 		Ptr<ScriptParagraph> currentParagraph;
 		Ptr<ScriptLine> currentLine;
@@ -427,7 +434,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 			if(!currentParagraph)
 			{
 				currentParagraph=new ScriptParagraph;
-				script.Add(currentParagraph);
+				document->paragraphs.Add(currentParagraph);
 			}
 			
 			if(fragment->paragraph)
@@ -459,7 +466,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 		HDC hdc=CreateCompatibleDC(NULL);
 		WinProxyDC dc;
 		dc.Initialize(hdc);
-		FOREACH(Ptr<ScriptParagraph>, paragraph, script.Wrap())
+		FOREACH(Ptr<ScriptParagraph>, paragraph, document->paragraphs.Wrap())
 		{
 			FOREACH(Ptr<ScriptLine>, line, paragraph->lines.Wrap())
 			{
@@ -467,6 +474,8 @@ BUILD_UNISCRIBE_DATA_FAILED:
 			}
 		}
 		DeleteDC(hdc);
+
+		return document;
 	}
 
 /***********************************************************************
@@ -476,7 +485,26 @@ TestWindow
 	class TestWindow : public GuiWindow
 	{
 	protected:
-		List<Ptr<ScriptParagraph>>		script;
+		Ptr<ScriptDocument>				document;
+		Ptr<WinFont>					messageFont;
+
+		void element_Rendering(GuiGraphicsComposition* composition, GuiGDIElementEventArgs& arguments)
+		{
+			WinDC* dc=arguments.dc;
+			Rect bounds=arguments.bounds;
+			if(document)
+			{
+			}
+			else
+			{
+				dc->SetFont(messageFont);
+				WString message=L"Initializing uniscribe data...";
+				SIZE size=dc->MeasureString(message);
+				int x=bounds.Left()+(bounds.Width()-size.cx)/2;
+				int y=bounds.Top()+(bounds.Height()-size.cy)/2;
+				dc->DrawString(x, y, message);
+			}
+		}
 	public:
 		TestWindow()
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -485,23 +513,25 @@ TestWindow
 			SetClientSize(Size(640, 480));
 			GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
 			MoveToScreenCenter();
+			{
+				GuiGDIElement* element=GuiGDIElement::Create();
+				element->Rendering.AttachMethod(this, &TestWindow::element_Rendering);
+			
+				GuiBoundsComposition* composition=new GuiBoundsComposition;
+				composition->SetOwnedElement(element);
+				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				GetContainerComposition()->AddChild(composition);
 
+				messageFont=new WinFont(L"Segoe UI", 56, 0, 0, 0,FW_NORMAL, false, false, false, true);
+			}
 			GetApplication()->InvokeAsync([=]()
 			{
-				GetApplication()->InvokeInMainThreadAndWait([=]()
-				{
-					SetText(L"GuiUISrc Test Application (executing BuildDocumentFragments() ...)");
-				});
 				List<Ptr<DocumentFragment>> fragments;
 				BuildDocumentFragments(L"..\\GacUISrcCodepackedTest\\Resources\\document.txt", fragments);
+				Ptr<ScriptDocument> scriptDocument=BuildScriptParagraphs(fragments);
 				GetApplication()->InvokeInMainThreadAndWait([=]()
 				{
-					SetText(L"GuiUISrc Test Application (executing BuildScriptParagraphs() ...)");
-				});
-				BuildScriptParagraphs(fragments, script);
-				GetApplication()->InvokeInMainThreadAndWait([=]()
-				{
-					SetText(L"GacUISrc Test Application (ready)");
+					document=scriptDocument;
 				});
 			});
 		}
