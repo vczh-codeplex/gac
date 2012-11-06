@@ -494,6 +494,43 @@ TestWindow
 			Rect bounds=arguments.bounds;
 			if(document)
 			{
+				int x=bounds.Left()+10;
+				int y=bounds.Top()+10;
+				int w=bounds.Width()-20;
+				int h=bounds.Height()-10;
+				int cx=0;
+				int cy=0;
+
+				FOREACH(Ptr<ScriptParagraph>, paragraph, document->paragraphs.Wrap())
+				{
+					if(cy>=h) break;
+					FOREACH(Ptr<ScriptLine>, line, paragraph->lines.Wrap())
+					{
+						int maxHeight=0;
+						FOREACH(Ptr<DocumentFragment>, fragment, line->documentFragments.Wrap())
+						{
+							if(maxHeight<fragment->size)
+							{
+								maxHeight=fragment->size;
+							}
+						}
+						if(line->scriptRuns.Count()>0)
+						{
+							FOREACH(Ptr<ScriptRun>, run, line->scriptRuns.Wrap())
+							{
+								if(cx>=w) break;
+								Color color=run->documentFragment->color;
+								dc->SetFont(run->documentFragment->fontObject);
+								dc->SetTextColor(RGB(color.r, color.g, color.b));
+								dc->DrawBuffer(x+cx, y+cy+(maxHeight-run->documentFragment->size), run->runText, run->length);
+								cx+=run->runAbc.abcA+run->runAbc.abcB+run->runAbc.abcC;
+							}
+						}
+						cx=0;
+						cy+=maxHeight+5;
+					}
+					cy+=8;
+				}
 			}
 			else
 			{
