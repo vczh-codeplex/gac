@@ -351,8 +351,13 @@ BUILD_UNISCRIBE_DATA_FAILED:
 
 		int SumWidth(int charStart, int charLength)
 		{
+			int cluster=wholeGlyph.charCluster[charStart];
+			int nextCluster
+				=charStart+charLength==length
+				?wholeGlyph.glyphs.Count()
+				:wholeGlyph.charCluster[charStart+charLength];
 			int width=0;
-			for(int i=0;i<charLength;i++)
+			for(int i=cluster;i<nextCluster;i++)
 			{
 				width+=wholeGlyph.glyphAdvances[i];
 			}
@@ -364,7 +369,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 			int width=0;
 			charLength=0;
 			charAdvances=0;
-			for(int i=tempStart;i<=length;i++)
+			for(int i=tempStart;i<=length;)
 			{
 				if(i==length || charLogattrs[i].fSoftBreak==TRUE)
 				{
@@ -373,9 +378,36 @@ BUILD_UNISCRIBE_DATA_FAILED:
 						charLength=i-tempStart;
 						charAdvances=width;
 					}
+					else
+					{
+						return;
+					}
 				}
 				if(i==length) break;
-				width+=wholeGlyph.glyphAdvances[i];
+
+				int cluster=wholeGlyph.charCluster[i];
+				int clusterLength=1;
+				while(i+clusterLength<length)
+				{
+					if(wholeGlyph.charCluster[i+clusterLength]==cluster)
+					{
+						clusterLength++;
+					}
+					else
+					{
+						break;
+					}
+				}
+
+				int nextCluster
+					=i+clusterLength==length
+					?wholeGlyph.glyphs.Count()
+					:wholeGlyph.charCluster[i+clusterLength];
+				for(int j=cluster;j<nextCluster;j++)
+				{
+					width+=wholeGlyph.glyphAdvances[j];
+				}
+				i+=clusterLength;
 			}
 		}
 
