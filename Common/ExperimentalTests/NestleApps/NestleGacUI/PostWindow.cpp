@@ -295,6 +295,8 @@ PostWindow
 
 		void PostWindow::buttonUploadPicture_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			buttonPost->SetEnabled(false);
+			buttonUploadPicture->SetEnabled(false);
 			List<WString> selectionFileNames;
 			int selectionFilterIndex=0;
 			if(GetCurrentController()->DialogService()->ShowFileDialog(
@@ -310,8 +312,28 @@ PostWindow
 				(INativeDialogService::FileDialogOptions)(INativeDialogService::FileDialogDereferenceLinks | INativeDialogService::FileDialogFileMustExist)
 				))
 			{
-				FileStream stream(selectionFileNames[0], FileStream::ReadOnly);
-				WString url=server->UploadFile(stream, selectionFileNames[0]);
+				WString fileName=selectionFileNames[0];
+				GetApplication()->InvokeAsync([=]()
+				{
+					FileStream stream(fileName, FileStream::ReadOnly);
+					WString url=server->UploadFile(stream, fileName);
+					GetApplication()->InvokeInMainThreadAndWait([=]()
+					{
+						buttonPost->SetEnabled(true);
+						buttonUploadPicture->SetEnabled(true);
+						if(url!=L"")
+						{
+							textBody->SetSelectionText(L"![]("+url+L")");
+						}
+						else
+						{
+							GetCurrentController()->DialogService()->ShowMessageBox(
+								GetBoundsComposition()->GetRelatedControlHost()->GetNativeWindow(),
+								L"上传图片，请检查网络连接是否畅通。"
+								);
+						}
+					});
+				});
 			}
 		}
 
