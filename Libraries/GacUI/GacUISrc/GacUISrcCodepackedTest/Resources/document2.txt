@@ -1,0 +1,716 @@
+<s>Courier New:true:#000000:10pt:UTF-8 SAMPLER</s>
+<p/>
+<s>Gentium Plus:false:#000000:18pt:  ¥ · £ · € · $ · ¢ · ₡ · ₢ · ₣ · ₤ · ₥ · ₦ · ₧ · ₨ · ₩ · ₪ · ₫ · ₭ · ₮ · ₯ · </s>
+<s>Times New Roman:false:#000000:18pt:₹</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:Frank da Cruz</s>
+<s>Gentium Plus:false:#0000FF:13.5pt:The Kermit Project - Columbia University</s>
+<s>Gentium Plus:false:#000000:13.5pt:New York City
+        </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:fdc@columbia.edu</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:Last update: Mon May 7 14:01:41 2012</s>
+<p/>
+<s>Times New Roman:false:#000000:12pt:</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:[ </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:PEACE</s>
+<s>Gentium Plus:false:#000000:13.5pt: ] [ </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Poetry</s>
+<s>Gentium Plus:false:#000000:13.5pt: ] [ </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:I Can Eat Glass</s>
+<s>Gentium Plus:false:#000000:13.5pt: ] [ </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Pangrams</s>
+<s>Gentium Plus:false:#000000:13.5pt: ] [ </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:HTML Features</s>
+<s>Gentium Plus:false:#000000:13.5pt: ] [ </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Credits, Tools, Commentary</s>
+<s>Gentium Plus:false:#000000:13.5pt: ]</s>
+<p/>
+<s>Gentium Plus:false:#000000:24pt:U</s>
+<s>Gentium Plus:false:#000000:18pt:TF-8</s>
+<s>Gentium Plus:false:#000000:13.5pt: is an ASCII-preserving encoding method for </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Unicode</s>
+<s>Gentium Plus:false:#000000:13.5pt: (ISO 10646), the Universal Character Set (UCS). The UCS encodes most of the world's writing systems in a single character set, allowing you to mix languages and scripts within a document without needing any tricks for switching character sets. This web page is encoded directly in UTF-8.</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:As shown </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:HERE</s>
+<s>Gentium Plus:false:#000000:13.5pt:, Columbia University's </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Kermit 95</s>
+<s>Gentium Plus:false:#000000:13.5pt: terminal emulation software can display UTF-8 plain text in Windows 95, 98, ME, NT, XP, Vista, or Windows 7 when using a monospace Unicode font like </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Andale Mono WT J</s>
+<s>Gentium Plus:false:#000000:13.5pt: or </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Everson Mono Terminal</s>
+<s>Gentium Plus:false:#000000:13.5pt:, or the lesser populated Courier New, Lucida Console, or Andale Mono. </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:C-Kermit</s>
+<s>Gentium Plus:false:#000000:13.5pt: can handle it too, </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:if you have a Unicode display</s>
+<s>Gentium Plus:false:#000000:13.5pt:. As many languages as are representable in your font can be seen on the screen at the same time.</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:
+          This, however, is a Web page, which started out as a kind of stress test for UTF-8 support in Web browsers, which was spotty when this page was first created but which has become standard in all modern browsers. The problem now is mainly the fonts and the browser's (or font's) support for the nonzero Unicode planes (as in, e.g., the Braille and Gothic examples below). And to some extent the rendition of combining sequences, right-to-left rendition(Arabic, Hebrew), and so on. </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:CLICK HERE</s>
+<s>Gentium Plus:false:#000000:13.5pt: for a survey of Unicode fonts for Windows.</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:The subtitle above shows currency symbols of many lands. If they don't appear as blobs, we're off to a good start! (The one on the end is the </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:new Indian Rupee sign</s>
+<s>Gentium Plus:false:#000000:13.5pt: which won't show up in fonts for a while.)</s>
+<p/>
+<s>Times New Roman:false:#000000:12pt:</s>
+<p/>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:From the Anglo-Saxon </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Rune Poem</s>
+<s>Gentium Plus:false:#000000:13.5pt: (Rune version):</s>
+<p/>
+<s>Segoe UI Symbol:false:#000000:13.5pt:ᚠᛇᚻ᛫ᛒᛦᚦ᛫ᚠᚱᚩᚠᚢᚱ᛫ᚠᛁᚱᚪ᛫ᚷᛖᚻᚹᛦᛚᚳᚢᛗ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Segoe UI Symbol:false:#000000:13.5pt:ᛋᚳᛖᚪᛚ᛫ᚦᛖᚪᚻ᛫ᛗᚪᚾᚾᚪ᛫ᚷᛖᚻᚹᛦᛚᚳ᛫ᛗᛁᚳᛚᚢᚾ᛫ᚻᛦᛏ᛫ᛞᚫᛚᚪᚾ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Segoe UI Symbol:false:#000000:13.5pt:ᚷᛁᚠ᛫ᚻᛖ᛫ᚹᛁᛚᛖ᛫ᚠᚩᚱ᛫ᛞᚱᛁᚻᛏᚾᛖ᛫ᛞᚩᛗᛖᛋ᛫ᚻᛚᛇᛏᚪᚾ᛬</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:From Laȝamon's </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Brut</s>
+<s>Gentium Plus:false:#000000:13.5pt: (The Chronicles of England, Middle English, West Midlands):</s>
+<p/>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:(The third letter in the author's name is Yogh, missing from many fonts; </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:CLICK HERE</s>
+<s>Gentium Plus:false:#000000:13.5pt: for another Middle English sample with some explanation of letters and encoding).</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:From the Tagelied of </s>
+<s>Gentium Plus:true:#0000FF:13.5pt:Wolfram von Eschenbach</s>
+<s>Gentium Plus:false:#000000:13.5pt: (Middle High German):</s>
+<p/>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:Some lines of </s>
+<s>Gentium Plus:true:#0000FF:13.5pt:Odysseus Elytis</s>
+<s>Gentium Plus:false:#000000:13.5pt: (Greek):</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:The first stanza of </s>
+<s>Gentium Plus:true:#0000FF:13.5pt:Pushkin</s>
+<s>Gentium Plus:false:#000000:13.5pt:'s Bronze Horseman (Russian):</s>
+<p/>
+<p/>
+<s>Gentium Plus:true:#0000FF:13.5pt:Šota Rustaveli</s>
+<s>Gentium Plus:false:#000000:13.5pt:'s Veṗxis Ṭq̇aosani, ̣︡Th, The Knight in the Tiger's Skin (Georgian):</s>
+<p/>
+<s>Sylfaen:false:#000000:13.5pt:ვეპხის</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:ტყაოსანი</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:შოთა</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:რუსთაველი</s>
+<p/>
+<s>Sylfaen:false:#000000:13.5pt:ღმერთსი</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:შემვედრე</s>
+<s>Gentium Plus:false:#000000:13.5pt:
+          ,</s>
+<s>Sylfaen:false:#000000:13.5pt:ნუთუ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:კვლა</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:დამხსნას</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:სოფლისა</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:შრომასა</s>
+<s>Gentium Plus:false:#000000:13.5pt:
+          ,</s>
+<s>Sylfaen:false:#000000:13.5pt:ცეცხლს</s>
+<s>Gentium Plus:false:#000000:13.5pt:
+          ,</s>
+<s>Sylfaen:false:#000000:13.5pt:წყალსა</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:და</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:მიწასა</s>
+<s>Gentium Plus:false:#000000:13.5pt:
+          ,</s>
+<s>Sylfaen:false:#000000:13.5pt:ჰაერთა</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:თანა</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:მრომასა</s>
+<s>Gentium Plus:false:#000000:13.5pt:
+          ;</s>
+<s>Sylfaen:false:#000000:13.5pt:მომცნეს</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:ფრთენი</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:და</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:აღვფრინდე</s>
+<s>Gentium Plus:false:#000000:13.5pt:
+          ,</s>
+<s>Sylfaen:false:#000000:13.5pt:მივჰხვდე</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:მას</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:ჩემსა</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:ნდომასა</s>
+<s>Gentium Plus:false:#000000:13.5pt:
+          ,</s>
+<s>Sylfaen:false:#000000:13.5pt:დღისით</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:და</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:ღამით</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:ვჰხედვიდე</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:მზისა</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:ელვათა</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Sylfaen:false:#000000:13.5pt:კრთომაასა</s>
+<s>Gentium Plus:false:#000000:13.5pt:.</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:
+          Tamil poetry of Subramaniya Bharathiyar:</s>
+<s>Latha:false:#000000:13.5pt:சுப்ரமணிய</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:பாரதியார்</s>
+<s>Gentium Plus:false:#000000:13.5pt:(1882-1921):
+        </s>
+<p/>
+<s>Latha:false:#000000:13.5pt:யாமறிந்த</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:மொழிகளிலே</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:தமிழ்மொழி</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:போல்</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:இனிதாவது</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:எங்கும்</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:காணோம்</s>
+<s>Gentium Plus:false:#000000:13.5pt:, </s>
+<s>Latha:false:#000000:13.5pt:பாமரராய்</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:விலங்குகளாய்</s>
+<s>Gentium Plus:false:#000000:13.5pt:
+          ,</s>
+<s>Latha:false:#000000:13.5pt:உலகனைத்தும்</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:இகழ்ச்சிசொலப்</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:பான்மை</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:கெட்டு</s>
+<s>Gentium Plus:false:#000000:13.5pt:, </s>
+<s>Latha:false:#000000:13.5pt:நாமமது</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:தமிழரெனக்</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:கொண்டு</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:இங்கு</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:வாழ்ந்திடுதல்</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:நன்றோ</s>
+<s>Gentium Plus:false:#000000:13.5pt:
+          ?</s>
+<s>Latha:false:#000000:13.5pt:சொல்லீர்</s>
+<s>Gentium Plus:false:#000000:13.5pt:!</s>
+<s>Latha:false:#000000:13.5pt:தேமதுரத்</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:தமிழோசை</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:உலகமெலாம்</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:பரவும்வகை</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:செய்தல்</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Latha:false:#000000:13.5pt:வேண்டும்</s>
+<s>Gentium Plus:false:#000000:13.5pt:.</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:
+          Kannada poetry by Kuvempu —</s>
+<s>Tunga:false:#000000:13.5pt:ಬಾ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಇಲ್ಲಿ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಸಂಭವಿಸು</s>
+<p/>
+<s>Tunga:false:#000000:13.5pt:ಬಾ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಇಲ್ಲಿ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಸಂಭವಿಸು</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಇಂದೆನ್ನ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಹೃದಯದಲಿ</s>
+<s>Gentium Plus:false:#000000:13.5pt: </s>
+<s>Tunga:false:#000000:13.5pt:ನಿತ್ಯವೂ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಅವತರಿಪ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಸತ್ಯಾವತಾರ</s>
+<p/>
+<s>Tunga:false:#000000:13.5pt:ಮಣ್ಣಾಗಿ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಮರವಾಗಿ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಮಿಗವಾಗಿ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಕಗವಾಗೀ</s>
+<s>Gentium Plus:false:#000000:13.5pt:... </s>
+<s>Tunga:false:#000000:13.5pt:ಮಣ್ಣಾಗಿ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಮರವಾಗಿ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಮಿಗವಾಗಿ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಕಗವಾಗಿ</s>
+<s>Gentium Plus:false:#000000:13.5pt: </s>
+<s>Tunga:false:#000000:13.5pt:ಭವ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಭವದಿ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಭತಿಸಿಹೇ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಭವತಿ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ದೂರ</s>
+<s>Gentium Plus:false:#000000:13.5pt: </s>
+<s>Tunga:false:#000000:13.5pt:ನಿತ್ಯವೂ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಅವತರಿಪ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಸತ್ಯಾವತಾರ</s>
+<s>Gentium Plus:false:#000000:13.5pt:||</s>
+<s>Tunga:false:#000000:13.5pt:ಬಾ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Tunga:false:#000000:13.5pt:ಇಲ್ಲಿ</s>
+<s>Gentium Plus:false:#000000:13.5pt:||
+        </s>
+<p/>
+<s>Times New Roman:false:#000000:12pt:</s>
+<p/>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:And from the sublime to the ridiculous, here is a </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:certain phrase¹</s>
+<s>Gentium Plus:false:#000000:13.5pt: in an assortment of languages:</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:(Additions, corrections, completions, </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:gratefuly accepted</s>
+<s>Gentium Plus:false:#000000:13.5pt:.)</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:For testing purposes, some of these are repeated in a </s>
+<s>Gentium Plus:true:#000000:13.5pt:monospace font</s>
+<s>Gentium Plus:false:#000000:13.5pt: . . .</s>
+<p/>
+<s>Gentium Plus:true:#000000:13.5pt:Notes:</s>
+<p/>
+<p/>
+<p/>
+<p/>
+<p/>
+<s>Gentium Plus:false:#000000:12pt:(The comma fell victim to the 1996 orthographic reform, cf. </s>
+<s>Courier New:false:#0000FF:10pt:http://www.ids-mannheim.de/reform/e3-1.html#P76</s>
+<s>Gentium Plus:false:#000000:12pt:.</s>
+<p/>
+<p/>
+<p/>
+<s>Gentium Plus:false:#000000:12pt:(However, you could remove the commas, on account of </s>
+<s>Courier New:false:#0000FF:10pt:http://www.ids-mannheim.de/reform/e3-1.html#P76</s>
+<s>Gentium Plus:false:#000000:12pt: and </s>
+<s>Courier New:false:#0000FF:10pt:http://www.ids-mannheim.de/reform/e3-1.html#P72</s>
+<s>Gentium Plus:false:#000000:12pt:, respectively.)</s>
+<p/>
+<s>Gentium Plus:false:#000000:12pt:I guess, also these examples translate the wrong sense of "hurt", though I do not know these languages well enough to assert them definitely:</s>
+<p/>
+<p/>
+<s>Gentium Plus:false:#000000:12pt:The northern Germanic variants of "skada" are probably right, as are the Slavic variants of "škodi/шкоди" (se); however the Slavic variants of " boli" (hv) are probably wrong, as "bolena" means "pain/ache", IIRC.</s>
+<p/>
+<p/>
+<p/>
+<s>Gentium Plus:false:#000000:12pt:cf. </s>
+<s>Gentium Plus:false:#0000FF:12pt:http://www.ids-mannheim.de/reform/e3-1.html#P76</s>
+<s>Gentium Plus:false:#000000:12pt:.</s>
+<p/>
+<s>Gentium Plus:false:#000000:12pt:The latest revision (2006) of the official German orthography has revived the comma around infinitive clauses commencing with ohne, or 5 other conjunctions, or depending from a noun or from an announcing demonstrative (</s>
+<s>Gentium Plus:false:#0000FF:12pt:http://www.ids-mannheim.de/reform/regeln2006.pdf</s>
+<s>Gentium Plus:false:#000000:12pt:, §75). So, it's again: Ich kann Glas essen, ohne mir zu schaden.</s>
+<p/>
+<s>Gentium Plus:false:#000000:12pt:Best wishes,     Otto Stolz
+        </s>
+<p/>
+<s>Euphemia:false:#000000:13.5pt:ᐊᓕᒍᖅ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Euphemia:false:#000000:13.5pt:ᓂᕆᔭᕌᖓᒃᑯ</s>
+<s>Gentium Plus:false:#000000:13.5pt:</s>
+<s>Euphemia:false:#000000:13.5pt:ᓱᕋᙱᑦᑐᓐᓇᖅᑐᖓ</s>
+<s>Gentium Plus:false:#000000:13.5pt: aliguq nirijaraangakku suranngittunnaqtunga
+        </s>
+<p/>
+<p/>
+<p/>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:
+          Script trivia: the syllable</s>
+<s>Euphemia:false:#000000:13.5pt:ᙱ</s>
+<s>Gentium Plus:false:#000000:13.5pt:is a single unicode character representing the two elements</s>
+<s>Euphemia:false:#000000:13.5pt:ᓐ</s>
+<s>Gentium Plus:false:#000000:13.5pt:(syllable-final n) and</s>
+<s>Euphemia:false:#000000:13.5pt:ᖏ</s>
+<s>Gentium Plus:false:#000000:13.5pt:(syllable ngi). I think they just did it that way because it looks tidier than the expected</s>
+<s>Euphemia:false:#000000:13.5pt:ᓐᖏ</s>
+<s>Gentium Plus:false:#000000:13.5pt:. If your operating system didn't come with </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Euphemia</s>
+<s>Gentium Plus:false:#000000:13.5pt: (all-purpose UCAS font), you can download </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Pigiarniq</s>
+<s>Gentium Plus:false:#000000:13.5pt:
+          . It comes with a jolly little inuksuk</s>
+<s>Euphemia:false:#000000:13.5pt:᐀</s>
+<s>Gentium Plus:false:#000000:13.5pt:that the Unicode Consortium is trying to make into a squatter.
+        </s>
+<p/>
+<s>Times New Roman:false:#000000:12pt:</s>
+<p/>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:The "I can eat glass" sentences do not necessarily show off the orthography of each language to best advantage. In many alphabetic written languages it is possible to include all (or most) letters (or "special" characters) in a single (often nonsense) pangram. These were traditionally used in typewriter instruction; now they are useful for stress-testing computer fonts and keyboard input methods. Here are a few examples (SEND MORE):</s>
+<p/>
+<s>MS Mincho:false:#000000:13.5pt:いろはにほへど　ちりぬるをわがよたれぞ　　つねならむうゐのおくやま　けふこえてあさきゆめみじ　ゑひもせず</s>
+<s>Gentium Plus:false:#000000:13.5pt:(4)
+        </s>
+<p/>
+<s>Gentium Plus:true:#000000:13.5pt:Notes:</s>
+<p/>
+<s>Gentium Plus:false:#0000FF:13.5pt:Click for full-size image (2.8MB)</s>
+<p/>
+<p/>
+<p/>
+<s>MS Mincho:false:#000000:13.5pt:色は匂へど散りぬるを我が世誰ぞ常ならむ有為の奥山今日越えて浅き夢見じ酔ひもせず</s>
+<p/>
+<s>Gentium Plus:true:#000000:13.5pt:Accented Cyrillic:</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:(This section contributed by Vladimir Marinov.)</s>
+<p/>
+<p/>
+<s>Times New Roman:false:#000000:12pt:</s>
+<p/>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:Here is the Russian alphabet (uppercase only) coded in three different ways, which should look identical:</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:In another test, we use HTML language tags to distinguish Bulgarian, Russian, and </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Serbian</s>
+<s>Gentium Plus:false:#000000:13.5pt:, which have different italic forms for lowercase б, г, д, п, and/or т:</s>
+<p/>
+<s>Times New Roman:false:#000000:12pt:</s>
+<p/>
+<p/>
+<s>Gentium Plus:true:#000000:13.5pt:Credits:</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:The "I can eat glass" phrase and the initial collection of translations: </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Ethan Mollick</s>
+<s>Gentium Plus:false:#000000:13.5pt:. Transcription / conversion to UTF-8: Frank da Cruz. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Albanian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Sindi Keesan. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Afrikaans:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Johan Fourie, Kevin Poalses. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Anglo Saxon:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Frank da Cruz. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Arabic:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Najib Tounsi. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Armenian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Vaçe Kundakçı. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Belarusian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Alexey Chernyak, Patricia Clausnitzer. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Bengali:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Somnath Purkayastha, Deepayan Sarkar. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Bislama:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Dan McGarry. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Braille:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Frank da Cruz. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Bulgarian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Sindi Keesan, Guentcho Skordev, Vladimir Marinov. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Burmese:</s>
+<s>Gentium Plus:false:#000000:13.5pt: "cetanapa". </s>
+<s>Gentium Plus:true:#000000:13.5pt:Cabo Verde Creole:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Cláudio Alexandre Duarte. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Catalán:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Jordi Bancells. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Chinese:</s>
+<s>Gentium Plus:false:#000000:13.5pt:
+          Jack Soo, Wong PuiLam. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Chinook Jargon:</s>
+<s>Gentium Plus:false:#000000:13.5pt: David Robertson. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Cornish:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Chris Stephens. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Croatian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Marjan Baće. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Czech:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Stanislav Pecha, Radovan Garabík. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Danish:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Morten Due Jorgensen. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Dutch:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Peter Gotink. Pim Blokland, Rob Daniel, Rob de Wit. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Erzian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Jack Rueter. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Esperanto:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Franko Luin, Radovan Garabík. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Estonian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Meelis Roos. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Faroese:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Jón Gaasedal. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Farsi/Persian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Payam Elahi. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Fijian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Paul Cannon. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Finnish:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Sampsa Toivanen, Mikko Ristilä. </s>
+<s>Gentium Plus:true:#000000:13.5pt:French:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Luc Carissimo, Anne Colin du Terrail, Sean M. Burke, Theo Morelli. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Galician:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Laura Probaos. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Georgian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Giorgi Lebanidze. </s>
+<s>Gentium Plus:true:#000000:13.5pt:German:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Christoph Päper, Otto Stolz, Karl Pentzlin, David Krings, Frank da Cruz, Peter Keel (Seegras), Elias Glantschnig. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Gothic:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Aurélien Coudurier. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Greek:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Ariel Glenn, Constantine Stathopoulos, Siva Nataraja, Christos Georgiou. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Hebrew:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Jonathan Rosenne, Tal Barnea. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Hausa:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Malami Buba, Tom Gewecke. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Hawaiian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: na Hauʻoli Motta, Anela de Rego, Kaliko Trapp. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Hindi:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Shirish Kalele, Nitin Dahra. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Hungarian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: András Rácz, Mark Holczhammer. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Icelandic:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Andrés Magnússon, Sveinn Baldursson. </s>
+<s>Gentium Plus:true:#000000:13.5pt:International Phonetic Alphabet (IPA):</s>
+<s>Gentium Plus:false:#000000:13.5pt: Siva Nataraja / Vincent Ramos. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Inuktitut</s>
+<s>Gentium Plus:false:#000000:13.5pt:: Louise Hope. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Irish:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Michael Everson, Marion Gunn, James Kass, Curtis Clark. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Italian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Thomas De Bellis. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Jamaican:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Stephen J. Cherin. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Japanese:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Makoto Takahashi, Yurio Miyazawa. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Kannada:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Sridhar R N, Alok G. Singh. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Karelian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Aleksandr Semakov. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Khmer:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Tola Sann. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Kirchröadsj:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Roger Stoffers. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Kreyòl:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Sean M. Burke. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Korean:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Jungshik Shin. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Langenfelder Platt:</s>
+<s>Gentium Plus:false:#000000:13.5pt: David Krings. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Lao:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Tola Sann. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Lëtzebuergescht:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Stefaan Eeckels. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Lingala:</s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Denis Moyogo Jacquerye</s>
+<s>Gentium Plus:false:#000000:13.5pt: (</s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Nkóta ya Kɔ́ngɔ míbalé </s>
+<s>Gentium Plus:false:#000000:13.5pt:) (Nkóta ya Kɔ́ngɔ míbal). </s>
+<s>Gentium Plus:true:#000000:13.5pt:Lithuanian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Gediminas Grigas. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Lojban:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Edward Cherlin. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Lusatian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Ronald Schaffhirt. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Macedonian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Sindi Keesan. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Malay:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Zarina Mustapha. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Maltese:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Kenneth Joseph Vella. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Manx:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Éanna Ó Brádaigh.</s>
+<s>Gentium Plus:true:#000000:13.5pt:Marathi:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Shirish Kalele. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Marquesan:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Kaliko Trapp. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Middle English:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Frank da Cruz. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Milanese:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Marco Cimarosti. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Mongolian:</s>
+<s>Gentium Plus:false:#000000:13.5pt:
+          TomGewecke. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Napoletano:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Diego Quintano. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Navajo:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Tom Gewecke. </s>
+<s>Gentium Plus:true:#0000FF:13.5pt:Nórdicg</s>
+<s>Gentium Plus:false:#000000:13.5pt:: Yẃlyan Rott. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Nepali:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Ujjwol Lamichhane, Rabi Tripathi. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Norwegian:</s>
+<s>Gentium Plus:false:#000000:13.5pt:Herman Ranes, Håvard Kvålen. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Odenwälderisch:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Alexander Heß. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Old Irish:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Michael Everson. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Old Norse:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Andrés Magnússon. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Papiamentu:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Bianca and Denise Zanardi. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Pashto:</s>
+<s>Gentium Plus:false:#000000:13.5pt: N.R. Liwal. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Pfälzisch:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Dr. Johannes Sander. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Picard:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Philippe Mennecier. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Polish:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Juliusz Chroboczek, Paweł Przeradowski, Wlodzislaw Kostecki. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Portuguese:</s>
+<s>Gentium Plus:false:#000000:13.5pt: "Cláudio" Alexandre Duarte, Bianca and Denise Zanardi, Pedro Palhoto Matos, Wagner Amaral. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Québécois:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Laurent Detillieux. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Roman:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Pierpaolo Bernardi. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Romanian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Juliusz Chroboczek, Ionel Mugurel. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Romansch:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Alexandre Suter. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Ruhrdeutsch:</s>
+<s>Gentium Plus:false:#000000:13.5pt: "Timwi". </s>
+<s>Gentium Plus:true:#000000:13.5pt:Russian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Alexey Chernyak, Serge Nesterovitch. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Sami:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Anne Colin du Terrail, Luc Carissimo. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Sanskrit:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Siva Nataraja / Vincent Ramos. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Sächsisch:</s>
+<s>Gentium Plus:false:#000000:13.5pt: André Müller. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Schwäbisch:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Otto Stolz. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Scots:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Jonathan Riddell. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Serbian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Sindi Keesan, Ranko Narancic, Boris Daljevic, Szilvia Csorba, O. Dag. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Sinhalese:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Abdul-Ahad (ASM). </s>
+<s>Gentium Plus:true:#000000:13.5pt:Slovak:</s>
+<s>Gentium Plus:false:#000000:13.5pt: G. Adam Stanislav, Radovan Garabík. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Slovenian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Albert Kolar. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Spanish:</s>
+<s>Gentium Plus:false:#000000:13.5pt: </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Aleida Morel</s>
+<s>Gentium Plus:false:#000000:13.5pt:, Laura Probaos. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Swahili:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Ronald Schaffhirt. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Swedish:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Christian Rose, Bengt Larsson. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Taiwanese:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Henry H. Tan-Tenn. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Tagalog:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Jim Soliven. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Tamil:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Vasee Vaseeharan, Vetrivel P. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Telugu:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Arjuna Rao Chavala. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Tibetan:</s>
+<s>Gentium Plus:false:#000000:13.5pt: D. Germano, Tom Gewecke. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Thai:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Alan Wood's wife. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Turkish:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Vaçe Kundakçı, Tom Gewecke, Merlign Olnon. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Ukrainian:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Michael Zajac, Oleg Podsadny. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Ulster Gaelic:</s>
+<s>Gentium Plus:false:#000000:13.5pt:Ciarán Ó Duibhín. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Urdu:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Mustafa Ali. </s>
+<s>Gentium Plus:true:#0000FF:13.5pt:Vietnamese</s>
+<s>Gentium Plus:false:#000000:13.5pt:: Dixon Au, [James] Đỗ Bá Phước </s>
+<s>PMingLiU:false:#000000:13.5pt:杜 伯 福</s>
+<s>Gentium Plus:false:#000000:13.5pt:. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Walloon:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Pablo Saratxaga. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Welsh:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Geiriadur Prifysgol Cymru (Andrew). </s>
+<s>Gentium Plus:true:#000000:13.5pt:Yiddish:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Mark David. </s>
+<s>Gentium Plus:true:#000000:13.5pt:Zeneise:</s>
+<s>Gentium Plus:false:#000000:13.5pt: Angelo Pavese.</s>
+<p/>
+<s>Gentium Plus:true:#000000:13.5pt:Tools Used to Create This Web Page:</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:The UTF8-aware </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Kermit 95</s>
+<s>Gentium Plus:false:#000000:13.5pt: terminal emulator on Windows, to a Unix host with the </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:EMACS</s>
+<s>Gentium Plus:false:#000000:13.5pt:
+          text editor. Kermit 95 displays UTF-8 and also allows keyboard entry of arbitrary Unicode BMP characters as 4 hexdigits, as shown </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:HERE</s>
+<s>Gentium Plus:false:#000000:13.5pt:. Hex codes for Unicode values can be found in </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:The Unicode Standard</s>
+<s>Gentium Plus:false:#000000:13.5pt: (recommended) and the </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:online code charts</s>
+<s>Gentium Plus:false:#000000:13.5pt:. When submissions arrive by email encoded in some other character set (Latin-1, Latin-2, KOI, various PC code pages, JEUC, etc), I use the TRANSLATE command of </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:C-Kermit</s>
+<s>Gentium Plus:false:#000000:13.5pt: on the Unix host (</s>
+<s>Gentium Plus:false:#0000FF:13.5pt:where I read my mail</s>
+<s>Gentium Plus:false:#000000:13.5pt:) to convert the character set to UTF-8 (I could also use Kermit 95 for this; it has the same TRANSLATE command). That's it -- no "Web authoring" tools, no locales, no "smart" anything. It's just plain text, nothing more. By the way, there's nothing special about EMACS -- any text editor will do, providing it allows entry of arbitrary 8-bit bytes as text, including the 0x80-0x9F "C1" range. EMACS 21.1 actually supports UTF-8; earlier versions don't know about it and display the octal codes; either way is OK for this purpose.</s>
+<p/>
+<s>Gentium Plus:true:#000000:13.5pt:Commentary:</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:Date: Wed, 27 Feb 2002 13:21:59 +0100From: "Bruno DEDOMINICIS" 
+        </s>
+<s>Courier New:false:#000000:10pt:<b.dedominicis@cite-sciences.fr></s>
+<s>Gentium Plus:false:#000000:13.5pt:Subject: Je peux manger du verre, cela ne me fait pas mal.
+        </s>
+<p/>
+<p/>
+<p/>
+<p/>
+<p/>
+<p/>
+<s>Gentium Plus:true:#000000:13.5pt:Other Unicode pages onsite:</s>
+<p/>
+<s>Gentium Plus:true:#000000:13.5pt:Unicode samplers and resources offsite:</s>
+<p/>
+<s>Gentium Plus:true:#000000:13.5pt:Unicode fonts:</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:[ </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Kermit 95</s>
+<s>Gentium Plus:false:#000000:13.5pt: ] [ </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:K95 Screen Shots</s>
+<s>Gentium Plus:false:#000000:13.5pt: ] [ </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:C-Kermit</s>
+<s>Gentium Plus:false:#000000:13.5pt: ] [ </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Kermit Home</s>
+<s>Gentium Plus:false:#000000:13.5pt: ] [ </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Display Problems?</s>
+<s>Gentium Plus:false:#000000:13.5pt: ] [ </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:The Unicode Consortium</s>
+<s>Gentium Plus:false:#000000:13.5pt: ]</s>
+<p/>
+<s>Times New Roman:false:#000000:12pt:</s>
+<p/>
+<s>Gentium Plus:false:#000000:13.5pt:UTF-8 Sampler / </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:The Kermit Project</s>
+<s>Gentium Plus:false:#000000:13.5pt: / </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:Columbia University</s>
+<s>Gentium Plus:false:#000000:13.5pt: / </s>
+<s>Gentium Plus:false:#0000FF:13.5pt:kermit@columbia.edu</s>
+<p/>
+<p/>
