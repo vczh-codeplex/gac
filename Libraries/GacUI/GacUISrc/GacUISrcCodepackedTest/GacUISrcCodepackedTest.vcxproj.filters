@@ -132,5 +132,8 @@
     <Text Include="Resources\document.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="Resources\document2.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

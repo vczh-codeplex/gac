@@ -756,7 +756,7 @@ TestWindow
 			GetApplication()->InvokeAsync([=]()
 			{
 				List<Ptr<DocumentFragment>> fragments;
-				BuildDocumentFragments(L"..\\GacUISrcCodepackedTest\\Resources\\document.txt", fragments);
+				BuildDocumentFragments(L"..\\GacUISrcCodepackedTest\\Resources\\document2.txt", fragments);
 				Ptr<ScriptDocument> scriptDocument=BuildScriptParagraphs(fragments);
 				GetApplication()->InvokeInMainThreadAndWait([=]()
 				{
