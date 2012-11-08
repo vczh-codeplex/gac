@@ -275,6 +275,15 @@ BUILD_UNISCRIBE_DATA_FAILED:
 	class ScriptRun : public Object
 	{
 	public:
+		struct RunFragmentBounds
+		{
+			int							start;
+			int							length;
+			Rect						bounds;
+
+			bool operator==(const RunFragmentBounds&){return false;}
+			bool operator!=(const RunFragmentBounds&){return false;}
+		};
 
 		DocumentFragment*				documentFragment;
 		SCRIPT_ITEM*					scriptItem;
@@ -287,6 +296,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 		int								advance;
 		GlyphData						wholeGlyph;
 		GlyphData						tempGlyph;
+		List<RunFragmentBounds>			fragmentBounds;
 
 		ScriptRun()
 			:documentFragment(0)
@@ -425,6 +435,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 
 		Array<SCRIPT_ITEM>				scriptItems;
 		List<Ptr<ScriptRun>>			scriptRuns;
+		Rect							bounds;
 
 		void CLearUniscribeData()
 		{
@@ -529,12 +540,184 @@ BUILD_UNISCRIBE_DATA_FAILED:
 	{
 	public:
 		List<Ptr<ScriptLine>>			lines;
+		Rect							bounds;
 	};
 
 	class ScriptDocument : public Object
 	{
 	public:
+		static const int				LineDistance=5;
+		static const int				ParagraphDistance=10;
+
 		List<Ptr<ScriptParagraph>>		paragraphs;
+		int								lastAvailableWidth;
+		Rect							bounds;
+
+		ScriptDocument()
+			:lastAvailableWidth(-1)
+		{
+		}
+
+		void Layout(int availableWidth)
+		{
+			if(lastAvailableWidth==availableWidth)
+			{
+				return;
+			}
+			lastAvailableWidth=availableWidth;
+
+			int cx=0;
+			int cy=0;
+			FOREACH(Ptr<ScriptParagraph>, paragraph, paragraphs.Wrap())
+			{
+				FOREACH(Ptr<ScriptLine>, line, paragraph->lines.Wrap())
+				{
+					if(line->scriptRuns.Count()==0)
+					{
+						// if this line doesn't contains any run, skip and render a blank line
+						int height=line->documentFragments[0]->size;
+						line->bounds=Rect(Point(cx, cy), Size(0, height));
+						cy+=height+LineDistance;
+					}
+					else
+					{
+						FOREACH(Ptr<ScriptRun>, run, line->scriptRuns.Wrap())
+						{
+							run->fragmentBounds.Clear();
+						}
+
+						// render this line into linces with auto line wrapping
+						int startRun=0;
+						int startRunOffset=0;
+						int lastRun=0;
+						int lastRunOffset=0;
+						int currentWidth=0;
+
+						while(startRun<line->scriptRuns.Count())
+						{
+							int currentWidth=0;
+							bool firstRun=true;
+							// search for a range to fit in the given width
+							for(int i=startRun;i<line->scriptRuns.Count();i++)
+							{
+								int charLength=0;
+								int charAdvances=0;
+								ScriptRun* run=line->scriptRuns[i].Obj();
+								run->SearchForLineBreak(lastRunOffset, availableWidth-currentWidth, firstRun, charLength, charAdvances);
+								firstRun=false;
+
+								if(charLength==run->length-lastRunOffset)
+								{
+									lastRun=i+1;
+									lastRunOffset=0;
+									currentWidth+=charAdvances;
+								}
+								else
+								{
+									lastRun=i;
+									lastRunOffset=lastRunOffset+charLength;
+									break;
+								}
+							}
+
+							// if the range is empty, than this should be the end of line, ignore it
+							if(startRun<lastRun || (startRun==lastRun && startRunOffset<lastRunOffset))
+							{
+								// calculate the max line height in this range;
+								int maxHeight=0;
+								for(int i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
+								{
+									if(i==lastRun && lastRunOffset==0)
+									{
+										break;
+									}
+									int size=line->scriptRuns[i]->documentFragment->size;
+									if(maxHeight<size)
+									{
+										maxHeight=size;
+									}
+								}
+
+								// render all runs inside this range
+								for(int i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
+								{
+									ScriptRun* run=line->scriptRuns[i].Obj();
+									int start=i==startRun?startRunOffset:0;
+									int end=i==lastRun?lastRunOffset:run->length;
+									int length=end-start;
+
+									ScriptRun::RunFragmentBounds fragmentBounds;
+									fragmentBounds.start=start;
+									fragmentBounds.length=length;
+									fragmentBounds.bounds=Rect(
+										Point(cx, cy+(maxHeight-run->documentFragment->size)), 
+										Size(run->SumWidth(start, length), run->documentFragment->size)
+										);
+									run->fragmentBounds.Add(fragmentBounds);
+
+									cx+=run->SumWidth(start, length);
+								}
+
+								cx=0;
+								cy+=maxHeight+LineDistance;
+							}
+
+							startRun=lastRun;
+							startRunOffset=lastRunOffset;
+						}
+
+						// calculate line bounds
+						int minX=0;
+						int minY=0;
+						int maxX=0;
+						int maxY=0;
+						FOREACH(Ptr<ScriptRun>, run, line->scriptRuns.Wrap())
+						{
+							FOREACH(ScriptRun::RunFragmentBounds, fragmentBounds, run->fragmentBounds.Wrap())
+							{
+								Rect bounds=fragmentBounds.bounds;
+								if(minX>bounds.Left()) minX=bounds.Left();
+								if(minY>bounds.Top()) minX=bounds.Top();
+								if(maxX<bounds.Right()) maxX=bounds.Right();
+								if(maxY<bounds.Bottom()) maxY=bounds.Bottom();
+							}
+						}
+						line->bounds=Rect(minX, minY, maxX, maxY);
+					}
+				}
+				cy+=ParagraphDistance;
+
+				// calculate paragraph bounds
+				int minX=0;
+				int minY=0;
+				int maxX=0;
+				int maxY=0;
+				FOREACH(Ptr<ScriptLine>, line, paragraph->lines.Wrap())
+				{
+					Rect bounds=line->bounds;
+					if(minX>bounds.Left()) minX=bounds.Left();
+					if(minY>bounds.Top()) minX=bounds.Top();
+					if(maxX<bounds.Right()) maxX=bounds.Right();
+					if(maxY<bounds.Bottom()) maxY=bounds.Bottom();
+				}
+				paragraph->bounds=Rect(minX, minY, maxX, maxY);
+			}
+
+			// calculate document bounds
+			int minX=0;
+			int minY=0;
+			int maxX=0;
+			int maxY=0;
+			FOREACH(Ptr<ScriptParagraph>, paragraph, paragraphs.Wrap())
+			{
+				Rect bounds=paragraph->bounds;
+				if(minX>bounds.Left()) minX=bounds.Left();
+				if(minY>bounds.Top()) minX=bounds.Top();
+				if(maxX<bounds.Right()) maxX=bounds.Right();
+				if(maxY<bounds.Bottom()) maxY=bounds.Bottom();
+			}
+			bounds=Rect(minX, minY, maxX, maxY);
+		}
 	};
 
 	Ptr<ScriptDocument> BuildScriptParagraphs(List<Ptr<DocumentFragment>>& fragments)
@@ -614,8 +797,13 @@ TestWindow
 	class TestWindow : public GuiWindow
 	{
 	protected:
+		static const int				BorderMargin=10;
+
 		Ptr<ScriptDocument>				document;
 		Ptr<WinFont>					messageFont;
+		GuiScrollContainer*				scrollContainer;
+		GuiGDIElement*					canvasElement;
+		GuiBoundsComposition*			canvasComposition;
 
 		void element_Rendering(GuiGraphicsComposition* composition, GuiGDIElementEventArgs& arguments)
 		{
@@ -623,110 +811,60 @@ TestWindow
 			Rect bounds=arguments.bounds;
 			if(document)
 			{
-				int x=bounds.Left()+10;
-				int y=bounds.Top()+10;
-				int w=bounds.Width()-20;
-				int h=bounds.Height()-10;
-				int cx=0;
-				int cy=0;
-				const int lineDistance=5;
-				const int paragraphDistance=10;
+				document->Layout(bounds.Width()-2*BorderMargin);
+				int x=bounds.Left()+BorderMargin;
+				int y=bounds.Top()+BorderMargin;
+				int w=document->bounds.Width();
+				int h=document->bounds.Height();
+
+				canvasComposition->SetPreferredMinSize(Size(0, h+BorderMargin*2));
 
 				FOREACH(Ptr<ScriptParagraph>, paragraph, document->paragraphs.Wrap())
 				{
-					if(cy>=h) break;
+					if(paragraph->bounds.Top()>=arguments.bounds.Height())
+					{
+						break;
+					}
+					else if(paragraph->bounds.Bottom()<=0)
+					{
+						continue;
+					}
 					FOREACH(Ptr<ScriptLine>, line, paragraph->lines.Wrap())
 					{
-						if(line->scriptRuns.Count()==0)
+						if(line->bounds.Top()>=arguments.bounds.Height())
 						{
-							// if this line doesn't contains any run, skip and render a blank line
-							cy+=line->documentFragments[0]->size+lineDistance;
+							break;
 						}
-						else
+						else if(line->bounds.Bottom()<=0)
 						{
-							// render this line into linces with auto line wrapping
-							int startRun=0;
-							int startRunOffset=0;
-							int lastRun=0;
-							int lastRunOffset=0;
-							int currentWidth=0;
-
-							while(startRun<line->scriptRuns.Count())
+							continue;
+						}
+						FOREACH(Ptr<ScriptRun>, run, line->scriptRuns.Wrap())
+						{
+							FOREACH(ScriptRun::RunFragmentBounds, fragmentBounds, run->fragmentBounds.Wrap())
 							{
-								int currentWidth=0;
-								bool firstRun=true;
-								// search for a range to fit in the given width
-								for(int i=startRun;i<line->scriptRuns.Count();i++)
+								if(fragmentBounds.bounds.Top()>=arguments.bounds.Height() || fragmentBounds.bounds.Bottom()<=0)
 								{
-									int charLength=0;
-									int charAdvances=0;
-									ScriptRun* run=line->scriptRuns[i].Obj();
-									run->SearchForLineBreak(lastRunOffset, w-currentWidth, firstRun, charLength, charAdvances);
-									firstRun=false;
-
-									if(charLength==run->length-lastRunOffset)
-									{
-										lastRun=i+1;
-										lastRunOffset=0;
-										currentWidth+=charAdvances;
-									}
-									else
-									{
-										lastRun=i;
-										lastRunOffset=lastRunOffset+charLength;
-										break;
-									}
+									continue;
 								}
-
-								// if the range is empty, than this should be the end of line, ignore it
-								if(startRun<lastRun || (startRun==lastRun && startRunOffset<lastRunOffset))
-								{
-									// calculate the max line height in this range;
-									int maxHeight=0;
-									for(int i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
-									{
-										if(i==lastRun && lastRunOffset==0)
-										{
-											break;
-										}
-										int size=line->scriptRuns[i]->documentFragment->size;
-										if(maxHeight<size)
-										{
-											maxHeight=size;
-										}
-									}
-
-									// render all runs inside this range
-									for(int i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
-									{
-										ScriptRun* run=line->scriptRuns[i].Obj();
-										int start=i==startRun?startRunOffset:0;
-										int end=i==lastRun?lastRunOffset:run->length;
-										int length=end-start;
+								int start=fragmentBounds.start;
+								int length=fragmentBounds.length;
+								int cx=fragmentBounds.bounds.Left();
+								int cy=fragmentBounds.bounds.Top();
 											
-										Color color=run->documentFragment->color;
-										dc->SetFont(run->documentFragment->fontObject);
-										dc->SetTextColor(RGB(color.r, color.g, color.b));
-										dc->DrawBuffer(x+cx, y+cy+(maxHeight-run->documentFragment->size), run->runText+start, length);
-
-										cx+=run->SumWidth(start, length);
-									}
-
-									cx=0;
-									cy+=maxHeight+lineDistance;
-								}
-
-								startRun=lastRun;
-								startRunOffset=lastRunOffset;
+								Color color=run->documentFragment->color;
+								dc->SetFont(run->documentFragment->fontObject);
+								dc->SetTextColor(RGB(color.r, color.g, color.b));
+								dc->DrawBuffer(x+cx, y+cy, run->runText+start, length);
 							}
 						}
 					}
-					cy+=paragraphDistance;
 				}
 			}
 			else
 			{
 				dc->SetFont(messageFont);
+				dc->SetTextColor(RGB(0, 0, 0));
 				WString message=L"Initializing uniscribe data...";
 				SIZE size=dc->MeasureString(message);
 				int x=bounds.Left()+(bounds.Width()-size.cx)/2;
@@ -743,20 +881,27 @@ TestWindow
 			GetBoundsComposition()->SetPreferredMinSize(Size(320, 240));
 			MoveToScreenCenter();
 			{
-				GuiGDIElement* element=GuiGDIElement::Create();
-				element->Rendering.AttachMethod(this, &TestWindow::element_Rendering);
+				canvasElement=GuiGDIElement::Create();
+				canvasElement->Rendering.AttachMethod(this, &TestWindow::element_Rendering);
 			
-				GuiBoundsComposition* composition=new GuiBoundsComposition;
-				composition->SetOwnedElement(element);
-				composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				GetContainerComposition()->AddChild(composition);
+				canvasComposition=new GuiBoundsComposition;
+				canvasComposition->SetOwnedElement(canvasElement);
+				canvasComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				canvasComposition->SetPreferredMinSize(Size(0, 100));
+
+				scrollContainer=new GuiScrollContainer(GetCurrentTheme()->CreateMultilineTextBoxStyle());
+				scrollContainer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				scrollContainer->SetHorizontalAlwaysVisible(false);
+				scrollContainer->GetContainerComposition()->AddChild(canvasComposition);
+				scrollContainer->SetExtendToFullWidth(true);
+				GetContainerComposition()->AddChild(scrollContainer->GetBoundsComposition());
 
 				messageFont=new WinFont(L"Segoe UI", 56, 0, 0, 0,FW_NORMAL, false, false, false, true);
 			}
 			GetApplication()->InvokeAsync([=]()
 			{
 				List<Ptr<DocumentFragment>> fragments;
-				BuildDocumentFragments(L"..\\GacUISrcCodepackedTest\\Resources\\document2.txt", fragments);
+				BuildDocumentFragments(L"..\\GacUISrcCodepackedTest\\Resources\\document.txt", fragments);
 				Ptr<ScriptDocument> scriptDocument=BuildScriptParagraphs(fragments);
 				GetApplication()->InvokeInMainThreadAndWait([=]()
 				{
