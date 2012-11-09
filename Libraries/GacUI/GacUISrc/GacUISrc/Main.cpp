@@ -435,12 +435,16 @@ BUILD_UNISCRIBE_DATA_FAILED:
 
 		Array<SCRIPT_ITEM>				scriptItems;
 		List<Ptr<ScriptRun>>			scriptRuns;
+		Array<int>						runVisualToLogical;
+		Array<int>						runLogicalToVisual;
 		Rect							bounds;
 
 		void CLearUniscribeData()
 		{
 			scriptItems.Resize(0);
 			scriptRuns.Clear();
+			runVisualToLogical.Resize(0);
+			runLogicalToVisual.Resize(0);
 		}
 
 		bool BuildUniscribeData(WinDC* dc)
@@ -456,6 +460,11 @@ BUILD_UNISCRIBE_DATA_FAILED:
 			if(lineText!=L"")
 			{
 				{
+					SCRIPT_DIGITSUBSTITUTE sds={0};
+					ScriptRecordDigitSubstitution(LOCALE_USER_DEFAULT, &sds);
+					SCRIPT_CONTROL sc={0};
+					SCRIPT_STATE ss={0};
+
 					// itemize a line
 					scriptItems.Resize(lineText.Length()+2);
 					int scriptItemCount=0;
@@ -463,8 +472,8 @@ BUILD_UNISCRIBE_DATA_FAILED:
 						lineText.Buffer(),
 						lineText.Length(),
 						scriptItems.Count()-1,
-						NULL,
-						NULL,
+						&sc,
+						&ss,
 						&scriptItems[0],
 						&scriptItemCount
 						);
@@ -527,6 +536,16 @@ BUILD_UNISCRIBE_DATA_FAILED:
 							goto BUILD_UNISCRIBE_DATA_FAILED;
 						}
 					}
+
+					// layout runs if there are RTL text
+					Array<BYTE> levels(scriptRuns.Count());
+					runVisualToLogical.Resize(scriptRuns.Count());
+					runLogicalToVisual.Resize(scriptRuns.Count());
+					for(int i=0;i<scriptRuns.Count();i++)
+					{
+						levels[i]=scriptRuns[i]->scriptItem->a.s.uBidiLevel;
+					}
+					ScriptLayout(levels.Count(), &levels[0], &runVisualToLogical[0], &runLogicalToVisual[0]);
 				}
 			}
 			return true;
@@ -556,6 +575,45 @@ BUILD_UNISCRIBE_DATA_FAILED:
 		ScriptDocument()
 			:lastAvailableWidth(-1)
 		{
+		}
+
+		void RebuildFontCache()
+		{
+			FOREACH(Ptr<ScriptParagraph>, paragraph, paragraphs.Wrap())
+			{
+				FOREACH(Ptr<ScriptLine>, line, paragraph->lines.Wrap())
+				{
+					FOREACH(Ptr<DocumentFragment>, fragment, line->documentFragments.Wrap())
+					{
+						fragment->fontObject=0;
+					}
+				}
+			}
+
+			Dictionary<WString, Ptr<WinFont>> fonts;
+			FOREACH(Ptr<ScriptParagraph>, paragraph, paragraphs.Wrap())
+			{
+				FOREACH(Ptr<ScriptLine>, line, paragraph->lines.Wrap())
+				{
+					FOREACH(Ptr<DocumentFragment>, fragment, line->documentFragments.Wrap())
+					{
+						if(!fragment->fontObject)
+						{
+							WString fragmentFingerPrint=fragment->GetFingerPrint();
+							int index=fonts.Keys().IndexOf(fragmentFingerPrint);
+							if(index==-1)
+							{
+								fragment->fontObject=new WinFont(fragment->font, fragment->size, 0, 0, 0, (fragment->bold?FW_BOLD:FW_NORMAL), false, false, false, true);
+								fonts.Add(fragmentFingerPrint, fragment->fontObject);
+							}
+							else
+							{
+								fragment->fontObject=fonts.Values()[index];
+							}
+						}
+					}
+				}
+			}
 		}
 
 		void Layout(int availableWidth)
@@ -602,7 +660,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 							{
 								int charLength=0;
 								int charAdvances=0;
-								ScriptRun* run=line->scriptRuns[i].Obj();
+								ScriptRun* run=line->scriptRuns[line->runVisualToLogical[i]].Obj();
 								run->SearchForLineBreak(lastRunOffset, availableWidth-currentWidth, firstRun, charLength, charAdvances);
 								firstRun=false;
 
@@ -631,7 +689,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 									{
 										break;
 									}
-									int size=line->scriptRuns[i]->documentFragment->size;
+									int size=line->scriptRuns[line->runVisualToLogical[i]]->documentFragment->size;
 									if(maxHeight<size)
 									{
 										maxHeight=size;
@@ -641,7 +699,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 								// render all runs inside this range
 								for(int i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
 								{
-									ScriptRun* run=line->scriptRuns[i].Obj();
+									ScriptRun* run=line->scriptRuns[line->runVisualToLogical[i]].Obj();
 									int start=i==startRun?startRunOffset:0;
 									int end=i==lastRun?lastRunOffset:run->length;
 									int length=end-start;
@@ -727,22 +785,9 @@ BUILD_UNISCRIBE_DATA_FAILED:
 		Regex regex(L"\r\n");
 		Ptr<ScriptParagraph> currentParagraph;
 		Ptr<ScriptLine> currentLine;
-		Dictionary<WString, Ptr<WinFont>> fonts;
 
 		FOREACH(Ptr<DocumentFragment>, fragment, fragments.Wrap())
 		{
-			WString fragmentFingerPrint=fragment->GetFingerPrint();
-			int index=fonts.Keys().IndexOf(fragmentFingerPrint);
-			if(index==-1)
-			{
-				fragment->fontObject=new WinFont(fragment->font, fragment->size, 0, 0, 0, (fragment->bold?FW_BOLD:FW_NORMAL), false, false, false, true);
-				fonts.Add(fragmentFingerPrint, fragment->fontObject);
-			}
-			else
-			{
-				fragment->fontObject=fonts.Values()[index];
-			}
-
 			if(!currentParagraph)
 			{
 				currentParagraph=new ScriptParagraph;
@@ -778,6 +823,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 		HDC hdc=CreateCompatibleDC(NULL);
 		WinProxyDC dc;
 		dc.Initialize(hdc);
+		document->RebuildFontCache();
 		FOREACH(Ptr<ScriptParagraph>, paragraph, document->paragraphs.Wrap())
 		{
 			FOREACH(Ptr<ScriptLine>, line, paragraph->lines.Wrap())
@@ -901,11 +947,12 @@ TestWindow
 			GetApplication()->InvokeAsync([=]()
 			{
 				List<Ptr<DocumentFragment>> fragments;
-				BuildDocumentFragments(L"..\\GacUISrcCodepackedTest\\Resources\\document.txt", fragments);
+				BuildDocumentFragments(L"..\\GacUISrcCodepackedTest\\Resources\\document2.txt", fragments);
 				Ptr<ScriptDocument> scriptDocument=BuildScriptParagraphs(fragments);
 				GetApplication()->InvokeInMainThreadAndWait([=]()
 				{
 					document=scriptDocument;
+					document->RebuildFontCache();
 				});
 			});
 		}
