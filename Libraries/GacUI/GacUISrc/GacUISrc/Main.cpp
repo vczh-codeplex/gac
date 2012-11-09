@@ -840,18 +840,38 @@ BUILD_UNISCRIBE_DATA_FAILED:
 TestWindow
 ***********************************************************************/
 
-	class TestWindow : public GuiWindow
+	class ScriptDocumentView : public GuiScrollView
 	{
 	protected:
 		static const int				BorderMargin=10;
-
 		Ptr<ScriptDocument>				document;
-		Ptr<WinFont>					messageFont;
-		GuiScrollContainer*				scrollContainer;
+		Rect							visibleDocumentBounds;
 		GuiGDIElement*					canvasElement;
 		GuiBoundsComposition*			canvasComposition;
+		Ptr<WinFont>					messageFont;
 
-		void element_Rendering(GuiGraphicsComposition* composition, GuiGDIElementEventArgs& arguments)
+		Size QueryFullSize()
+		{
+			if(document)
+			{
+				Size size=document->bounds.GetSize();
+				size.x+=BorderMargin*2;
+				size.y+=BorderMargin*2;
+				return size;
+			}
+			return Size(0, 0);
+		}
+
+		void UpdateView(Rect viewBounds)
+		{
+			if(document)
+			{
+				document->Layout(viewBounds.Width()-2*BorderMargin);
+			}
+			visibleDocumentBounds=viewBounds;
+		}
+
+		void canvasElement_Rendering(GuiGraphicsComposition* composition, GuiGDIElementEventArgs& arguments)
 		{
 			WinDC* dc=arguments.dc;
 			Rect bounds=arguments.bounds;
@@ -859,7 +879,7 @@ TestWindow
 			{
 				document->Layout(bounds.Width()-2*BorderMargin);
 				int x=bounds.Left()+BorderMargin;
-				int y=bounds.Top()+BorderMargin;
+				int y=bounds.Top()+BorderMargin-visibleDocumentBounds.Top();
 				int w=document->bounds.Width();
 				int h=document->bounds.Height();
 
@@ -867,21 +887,21 @@ TestWindow
 
 				FOREACH(Ptr<ScriptParagraph>, paragraph, document->paragraphs.Wrap())
 				{
-					if(paragraph->bounds.Top()>=arguments.bounds.Height())
+					if(paragraph->bounds.Top()>=visibleDocumentBounds.Bottom())
 					{
 						break;
 					}
-					else if(paragraph->bounds.Bottom()<=0)
+					else if(paragraph->bounds.Bottom()<=visibleDocumentBounds.Top())
 					{
 						continue;
 					}
 					FOREACH(Ptr<ScriptLine>, line, paragraph->lines.Wrap())
 					{
-						if(line->bounds.Top()>=arguments.bounds.Height())
+						if(line->bounds.Top()>=visibleDocumentBounds.Bottom())
 						{
 							break;
 						}
-						else if(line->bounds.Bottom()<=0)
+						else if(line->bounds.Bottom()<=visibleDocumentBounds.Top())
 						{
 							continue;
 						}
@@ -889,7 +909,7 @@ TestWindow
 						{
 							FOREACH(ScriptRun::RunFragmentBounds, fragmentBounds, run->fragmentBounds.Wrap())
 							{
-								if(fragmentBounds.bounds.Top()>=arguments.bounds.Height() || fragmentBounds.bounds.Bottom()<=0)
+								if(fragmentBounds.bounds.Top()>=visibleDocumentBounds.Bottom() || fragmentBounds.bounds.Bottom()<=visibleDocumentBounds.Top())
 								{
 									continue;
 								}
@@ -918,6 +938,45 @@ TestWindow
 				dc->DrawString(x, y, message);
 			}
 		}
+
+		void canvasComposition_BoundsChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
+		{
+			CalculateView();
+		}
+	public:
+		ScriptDocumentView()
+			:GuiScrollView(GetCurrentTheme()->CreateMultilineTextBoxStyle())
+		{
+			SetHorizontalAlwaysVisible(false);
+
+			canvasElement=GuiGDIElement::Create();
+			canvasElement->Rendering.AttachMethod(this, &ScriptDocumentView::canvasElement_Rendering);
+			
+			canvasComposition=new GuiBoundsComposition;
+			canvasComposition->SetOwnedElement(canvasElement);
+			canvasComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			canvasComposition->SetPreferredMinSize(Size(0, 100));
+			canvasComposition->BoundsChanged.AttachMethod(this, &ScriptDocumentView::canvasComposition_BoundsChanged);
+			GetContainerComposition()->AddChild(canvasComposition);
+
+			messageFont=new WinFont(L"Segoe UI", 56, 0, 0, 0,FW_NORMAL, false, false, false, true);
+		}
+
+		void SetDocument(Ptr<ScriptDocument> _document)
+		{
+			document=_document;
+			CalculateView();
+		}
+	};
+
+	class TestWindow : public GuiWindow
+	{
+	protected:
+		ScriptDocumentView*				scriptDocumentView;
+
+		void element_Rendering(GuiGraphicsComposition* composition, GuiGDIElementEventArgs& arguments)
+		{
+		}
 	public:
 		TestWindow()
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -927,22 +986,9 @@ TestWindow
 			GetBoundsComposition()->SetPreferredMinSize(Size(320, 240));
 			MoveToScreenCenter();
 			{
-				canvasElement=GuiGDIElement::Create();
-				canvasElement->Rendering.AttachMethod(this, &TestWindow::element_Rendering);
-			
-				canvasComposition=new GuiBoundsComposition;
-				canvasComposition->SetOwnedElement(canvasElement);
-				canvasComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				canvasComposition->SetPreferredMinSize(Size(0, 100));
-
-				scrollContainer=new GuiScrollContainer(GetCurrentTheme()->CreateMultilineTextBoxStyle());
-				scrollContainer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				scrollContainer->SetHorizontalAlwaysVisible(false);
-				scrollContainer->GetContainerComposition()->AddChild(canvasComposition);
-				scrollContainer->SetExtendToFullWidth(true);
-				GetContainerComposition()->AddChild(scrollContainer->GetBoundsComposition());
-
-				messageFont=new WinFont(L"Segoe UI", 56, 0, 0, 0,FW_NORMAL, false, false, false, true);
+				scriptDocumentView=new ScriptDocumentView();
+				scriptDocumentView->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				GetContainerComposition()->AddChild(scriptDocumentView->GetBoundsComposition());
 			}
 			GetApplication()->InvokeAsync([=]()
 			{
@@ -951,8 +997,8 @@ TestWindow
 				Ptr<ScriptDocument> scriptDocument=BuildScriptParagraphs(fragments);
 				GetApplication()->InvokeInMainThreadAndWait([=]()
 				{
-					document=scriptDocument;
-					document->RebuildFontCache();
+					scriptDocument->RebuildFontCache();
+					scriptDocumentView->SetDocument(scriptDocument);
 				});
 			});
 		}
