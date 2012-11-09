@@ -50,14 +50,16 @@ DocumentFragment
 		WString				font;
 		bool				bold;
 		Color				color;
-		int					size;
+		double				sizeInPoint;
+		int					sizeInPixel;
 		WString				text;
 		Ptr<WinFont>		fontObject;
 
 		DocumentFragment()
 			:paragraph(false)
 			,bold(false)
-			,size(0)
+			,sizeInPoint(0)
+			,sizeInPixel(0)
 		{
 		}
 
@@ -66,7 +68,8 @@ DocumentFragment
 			,font(prototype->font)
 			,bold(prototype->bold)
 			,color(prototype->color)
-			,size(prototype->size)
+			,sizeInPoint(prototype->sizeInPoint)
+			,sizeInPixel(prototype->sizeInPixel)
 			,fontObject(prototype->fontObject)
 			,text(_text)
 		{
@@ -74,7 +77,7 @@ DocumentFragment
 
 		WString GetFingerPrint()
 		{
-			return font+L":"+(bold?L"B":L"N")+L":"+itow(size);
+			return font+L":"+(bold?L"B":L"N")+L":"+itow(sizeInPixel);
 		}
 	};
 
@@ -97,6 +100,10 @@ DocumentFragment
 
 	void BuildDocumentFragments(const WString& fileName, List<Ptr<DocumentFragment>>& fragments)
 	{
+		HDC dc=CreateCompatibleDC(NULL);
+		int dpi=GetDeviceCaps(dc, LOGPIXELSY);
+		DeleteDC(dc);
+
 		fragments.Clear();
 		WString rawDocument;
 		{
@@ -122,7 +129,7 @@ DocumentFragment
 			}
 			else
 			{
-				WString font=match->Groups()[L"tag"][0].Value();
+				WString font=match->Groups()[L"font"][0].Value();
 				WString bold=match->Groups()[L"bold"][0].Value();
 				WString color=match->Groups()[L"color"][0].Value();
 				WString size=match->Groups()[L"size"][0].Value();
@@ -130,7 +137,8 @@ DocumentFragment
 
 				fragment->font=font;
 				fragment->bold=bold==L"true";
-				fragment->size=wtoi(size);
+				fragment->sizeInPoint=wtof(size);
+				fragment->sizeInPixel=(int)(fragment->sizeInPoint*dpi/72);
 				fragment->color=ConvertColor(color);
 				fragment->text=text;
 			}
@@ -174,6 +182,7 @@ ScriptFragment
 				glyphCount=(int)(1.5*length+16);
 				resizeGlyphData=true;
 			}
+			SCRIPT_ANALYSIS sa=scriptItem->a;
 			{
 				// generate shape information
 				WinDC* dcParameter=0;
@@ -193,7 +202,7 @@ ScriptFragment
 						runText,
 						length,
 						glyphCount,
-						&scriptItem->a,
+						&sa,
 						&glyphs[0],
 						&charCluster[0],
 						&glyphVisattrs[0],
@@ -217,6 +226,17 @@ ScriptFragment
 						else
 						{
 							goto BUILD_UNISCRIBE_DATA_FAILED;
+						}
+					}
+					else if(hr==USP_E_SCRIPT_NOT_IN_FONT)
+					{
+						if(sa.eScript==SCRIPT_UNDEFINED)
+						{
+							goto BUILD_UNISCRIBE_DATA_FAILED;
+						}
+						else
+						{
+							sa.eScript=SCRIPT_UNDEFINED;
 						}
 					}
 					else
@@ -246,7 +266,7 @@ ScriptFragment
 						&glyphs[0],
 						glyphCount,
 						&glyphVisattrs[0],
-						&scriptItem->a,
+						&sa,
 						&glyphAdvances[0],
 						&glyphOffsets[0],
 						&runAbc
@@ -464,6 +484,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 					ScriptRecordDigitSubstitution(LOCALE_USER_DEFAULT, &sds);
 					SCRIPT_CONTROL sc={0};
 					SCRIPT_STATE ss={0};
+					ScriptApplyDigitSubstitution(&sds, &sc, &ss);
 
 					// itemize a line
 					scriptItems.Resize(lineText.Length()+2);
@@ -603,7 +624,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 							int index=fonts.Keys().IndexOf(fragmentFingerPrint);
 							if(index==-1)
 							{
-								fragment->fontObject=new WinFont(fragment->font, fragment->size, 0, 0, 0, (fragment->bold?FW_BOLD:FW_NORMAL), false, false, false, true);
+								fragment->fontObject=new WinFont(fragment->font, fragment->sizeInPixel, 0, 0, 0, (fragment->bold?FW_BOLD:FW_NORMAL), false, false, false, true);
 								fonts.Add(fragmentFingerPrint, fragment->fontObject);
 							}
 							else
@@ -633,7 +654,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 					if(line->scriptRuns.Count()==0)
 					{
 						// if this line doesn't contains any run, skip and render a blank line
-						int height=line->documentFragments[0]->size;
+						int height=line->documentFragments[0]->sizeInPixel;
 						line->bounds=Rect(Point(cx, cy), Size(0, height));
 						cy+=height+LineDistance;
 					}
@@ -689,7 +710,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 									{
 										break;
 									}
-									int size=line->scriptRuns[line->runVisualToLogical[i]]->documentFragment->size;
+									int size=line->scriptRuns[line->runVisualToLogical[i]]->documentFragment->sizeInPixel;
 									if(maxHeight<size)
 									{
 										maxHeight=size;
@@ -708,8 +729,8 @@ BUILD_UNISCRIBE_DATA_FAILED:
 									fragmentBounds.start=start;
 									fragmentBounds.length=length;
 									fragmentBounds.bounds=Rect(
-										Point(cx, cy+(maxHeight-run->documentFragment->size)), 
-										Size(run->SumWidth(start, length), run->documentFragment->size)
+										Point(cx, cy+(maxHeight-run->documentFragment->sizeInPixel)), 
+										Size(run->SumWidth(start, length), run->documentFragment->sizeInPixel)
 										);
 									run->fragmentBounds.Add(fragmentBounds);
 
@@ -824,12 +845,14 @@ BUILD_UNISCRIBE_DATA_FAILED:
 		WinProxyDC dc;
 		dc.Initialize(hdc);
 		document->RebuildFontCache();
+		int counter=0;
 		FOREACH(Ptr<ScriptParagraph>, paragraph, document->paragraphs.Wrap())
 		{
 			FOREACH(Ptr<ScriptLine>, line, paragraph->lines.Wrap())
 			{
 				line->BuildUniscribeData(&dc);
 			}
+			counter++;
 		}
 		DeleteDC(hdc);
 
