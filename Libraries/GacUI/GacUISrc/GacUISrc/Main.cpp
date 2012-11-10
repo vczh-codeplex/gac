@@ -7,6 +7,7 @@
 #include "..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.h"
 #include "..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.h"
 #include <usp10.h>
+#include <math.h>
 
 #pragma comment(lib, "usp10.lib")
 
@@ -15,9 +16,16 @@ using namespace vl::stream;
 using namespace vl::regex;
 using namespace vl::presentation::windows;
 
+#define GUI_GRAPHICS_RENDERER_DIRECT2D
+
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
 {
-	return SetupWindowsGDIRenderer();
+#ifdef GUI_GRAPHICS_RENDERER_GDI
+	int result=SetupWindowsGDIRenderer();
+#endif
+#ifdef GUI_GRAPHICS_RENDERER_DIRECT2D
+	int result=SetupWindowsDirect2DRenderer();
+#endif
 }
 
 /***********************************************************************
@@ -81,6 +89,12 @@ DocumentFragment
 		}
 	};
 
+	class Document : public Object
+	{
+	public:
+		List<Ptr<DocumentFragment>>		documentFragments;
+	};
+
 	int ConvertHex(wchar_t c)
 	{
 		if(L'a'<=c && c<=L'f') return c-L'a'+10;
@@ -98,13 +112,13 @@ DocumentFragment
 			);
 	}
 
-	void BuildDocumentFragments(const WString& fileName, List<Ptr<DocumentFragment>>& fragments)
+	Ptr<Document> BuildDocumentFragments(const WString& fileName)
 	{
 		HDC dc=CreateCompatibleDC(NULL);
 		int dpi=GetDeviceCaps(dc, LOGPIXELSY);
 		DeleteDC(dc);
+		Ptr<Document> document=new Document;
 
-		fragments.Clear();
 		WString rawDocument;
 		{
 			FileStream fileStream(fileName, FileStream::ReadOnly);
@@ -122,7 +136,7 @@ DocumentFragment
 		{
 			Ptr<RegexMatch> match=matches[i];
 			Ptr<DocumentFragment> fragment=new DocumentFragment;
-			fragments.Add(fragment);
+			document->documentFragments.Add(fragment);
 			if(match->Groups()[L"tag"][0].Value()==L"p")
 			{
 				fragment->paragraph=true;
@@ -143,6 +157,8 @@ DocumentFragment
 				fragment->text=text;
 			}
 		}
+
+		return document;
 	}
 
 /***********************************************************************
@@ -660,7 +676,7 @@ BUILD_UNISCRIBE_DATA_FAILED:
 							int index=fonts.Keys().IndexOf(fragmentFingerPrint);
 							if(index==-1)
 							{
-								fragment->fontObject=new WinFont(fragment->font, fragment->sizeInPixel, 0, 0, 0, (fragment->bold?FW_BOLD:FW_NORMAL), false, false, false, true);
+								fragment->fontObject=new WinFont(fragment->font, -fragment->sizeInPixel, 0, 0, 0, (fragment->bold?FW_BOLD:FW_NORMAL), false, false, false, true);
 								fonts.Add(fragmentFingerPrint, fragment->fontObject);
 							}
 							else
@@ -835,20 +851,20 @@ BUILD_UNISCRIBE_DATA_FAILED:
 		}
 	};
 
-	Ptr<ScriptDocument> BuildScriptParagraphs(List<Ptr<DocumentFragment>>& fragments)
+	Ptr<ScriptDocument> BuildScriptParagraphs(Ptr<Document> document)
 	{
-		Ptr<ScriptDocument> document=new ScriptDocument;
-		document->paragraphs.Clear();
+		Ptr<ScriptDocument> scriptDocument=new ScriptDocument;
+		scriptDocument->paragraphs.Clear();
 		Regex regex(L"\r\n");
 		Ptr<ScriptParagraph> currentParagraph;
 		Ptr<ScriptLine> currentLine;
 
-		FOREACH(Ptr<DocumentFragment>, fragment, fragments.Wrap())
+		FOREACH(Ptr<DocumentFragment>, fragment, document->documentFragments.Wrap())
 		{
 			if(!currentParagraph)
 			{
 				currentParagraph=new ScriptParagraph;
-				document->paragraphs.Add(currentParagraph);
+				scriptDocument->paragraphs.Add(currentParagraph);
 			}
 			
 			if(fragment->paragraph)
@@ -880,9 +896,9 @@ BUILD_UNISCRIBE_DATA_FAILED:
 		HDC hdc=CreateCompatibleDC(NULL);
 		WinProxyDC dc;
 		dc.Initialize(hdc);
-		document->RebuildFontCache();
+		scriptDocument->RebuildFontCache();
 		int counter=0;
-		FOREACH(Ptr<ScriptParagraph>, paragraph, document->paragraphs.Wrap())
+		FOREACH(Ptr<ScriptParagraph>, paragraph, scriptDocument->paragraphs.Wrap())
 		{
 			FOREACH(Ptr<ScriptLine>, line, paragraph->lines.Wrap())
 			{
@@ -892,14 +908,14 @@ BUILD_UNISCRIBE_DATA_FAILED:
 		}
 		DeleteDC(hdc);
 
-		return document;
+		return scriptDocument;
 	}
 
 /***********************************************************************
-TestWindow
+ScriptDocumentViewGDI
 ***********************************************************************/
 
-	class ScriptDocumentView : public GuiScrollView
+	class ScriptDocumentViewGDI : public GuiScrollView
 	{
 	protected:
 		static const int				BorderMargin=10;
@@ -996,30 +1012,182 @@ TestWindow
 			CalculateView();
 		}
 	public:
-		ScriptDocumentView()
+		ScriptDocumentViewGDI()
 			:GuiScrollView(GetCurrentTheme()->CreateMultilineTextBoxStyle())
 		{
 			SetHorizontalAlwaysVisible(false);
 
 			canvasElement=GuiGDIElement::Create();
-			canvasElement->Rendering.AttachMethod(this, &ScriptDocumentView::canvasElement_Rendering);
+			canvasElement->Rendering.AttachMethod(this, &ScriptDocumentViewGDI::canvasElement_Rendering);
 			
 			canvasComposition=new GuiBoundsComposition;
 			canvasComposition->SetOwnedElement(canvasElement);
 			canvasComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
 			canvasComposition->SetPreferredMinSize(Size(0, 100));
-			canvasComposition->BoundsChanged.AttachMethod(this, &ScriptDocumentView::canvasComposition_BoundsChanged);
+			canvasComposition->BoundsChanged.AttachMethod(this, &ScriptDocumentViewGDI::canvasComposition_BoundsChanged);
 			GetContainerComposition()->AddChild(canvasComposition);
 
-			messageFont=new WinFont(L"Segoe UI", 56, 0, 0, 0,FW_NORMAL, false, false, false, true);
+			messageFont=new WinFont(L"Segoe UI", -48, 0, 0, 0,FW_NORMAL, false, false, false, true);
 		}
 
-		void SetDocument(Ptr<ScriptDocument> _document)
+		void SetDocument(Ptr<Document> _document)
 		{
-			document=_document;
-			CalculateView();
+			GetApplication()->InvokeAsync([=]()
+			{
+				Ptr<ScriptDocument> scriptDocument=BuildScriptParagraphs(_document);
+				GetApplication()->InvokeInMainThreadAndWait([=]()
+				{
+					document=scriptDocument;
+					CalculateView();
+				});
+			});
 		}
 	};
+
+/***********************************************************************
+ScriptDocumentViewDirect2D
+***********************************************************************/
+
+	class ScriptDocumentViewDirect2D : public GuiScrollView
+	{
+	protected:
+		static const int				BorderMargin=10;
+		Ptr<Document>					document;
+		Rect							visibleDocumentBounds;
+		GuiDirect2DElement*				canvasElement;
+		GuiBoundsComposition*			canvasComposition;
+
+		ComPtr<IDWriteTextLayout>		message;
+		ComPtr<ID2D1SolidColorBrush>	messageBrush;
+
+		Size QueryFullSize()
+		{
+			if(document)
+			{
+			}
+			return Size(0, 0);
+		}
+
+		void UpdateView(Rect viewBounds)
+		{
+			if(document)
+			{
+			}
+			visibleDocumentBounds=viewBounds;
+		}
+
+		void canvasElement_Rendering(GuiGraphicsComposition* composition, GuiDirect2DElementEventArgs& arguments)
+		{
+			if(document)
+			{
+			}
+			else if(message && messageBrush)
+			{
+				DWRITE_TEXT_METRICS metrics;
+				HRESULT hr=message->GetMetrics(&metrics);
+				if(!FAILED(hr))
+				{
+					int width=(int)ceil(metrics.widthIncludingTrailingWhitespace);
+					int height=(int)ceil(metrics.height);
+					int x=arguments.bounds.Left()+(arguments.bounds.Width()-width)/2;
+					int y=arguments.bounds.Top()+(arguments.bounds.Height()-height)/2;
+
+					arguments.rt->DrawTextLayout(
+						D2D1::Point2F((FLOAT)x, (FLOAT)y),
+						message.Obj(),
+						messageBrush.Obj(),
+						D2D1_DRAW_TEXT_OPTIONS_NO_SNAP
+						);
+				}
+			}
+		}
+
+		void canvasElement_BeforeRenderTargetChanged(GuiGraphicsComposition* composition, GuiDirect2DElementEventArgs& arguments)
+		{
+			message=0;
+			messageBrush=0;
+		}
+
+		void canvasElement_AfterRenderTargetChanged(GuiGraphicsComposition* composition, GuiDirect2DElementEventArgs& arguments)
+		{
+			{
+				IDWriteTextFormat* textFormat=0;
+				HRESULT hr=arguments.factoryDWrite->CreateTextFormat(
+					L"Segoe UI",
+					NULL,
+					DWRITE_FONT_WEIGHT_NORMAL,
+					DWRITE_FONT_STYLE_NORMAL,
+					DWRITE_FONT_STRETCH_NORMAL,
+					(FLOAT)48,
+					L"",
+					&textFormat);
+				if(!FAILED(hr))
+				{
+					IDWriteTextLayout* textLayout;
+					HRESULT hr=arguments.factoryDWrite->CreateTextLayout(
+						L"Initializing uniscribe data...",
+						wcslen(L"Initializing uniscribe data..."),
+						textFormat,
+						0,
+						0,
+						&textLayout);
+					if(!FAILED(hr))
+					{
+						textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
+						message=textLayout;
+					}
+					textFormat->Release();
+				}
+			}
+			{
+				ID2D1SolidColorBrush* brush=0;
+				HRESULT hr=arguments.rt->CreateSolidColorBrush(D2D1::ColorF(0, 0, 0), &brush);
+				if(!FAILED(hr))
+				{
+					messageBrush=brush;
+				}
+			}
+		}
+
+		void canvasComposition_BoundsChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
+		{
+			CalculateView();
+		}
+	public:
+		ScriptDocumentViewDirect2D()
+			:GuiScrollView(GetCurrentTheme()->CreateMultilineTextBoxStyle())
+		{
+			SetHorizontalAlwaysVisible(false);
+
+			canvasElement=GuiDirect2DElement::Create();
+			canvasElement->Rendering.AttachMethod(this, &ScriptDocumentViewDirect2D::canvasElement_Rendering);
+			canvasElement->BeforeRenderTargetChanged.AttachMethod(this, &ScriptDocumentViewDirect2D::canvasElement_BeforeRenderTargetChanged);
+			canvasElement->AfterRenderTargetChanged.AttachMethod(this, &ScriptDocumentViewDirect2D::canvasElement_AfterRenderTargetChanged);
+			
+			canvasComposition=new GuiBoundsComposition;
+			canvasComposition->SetOwnedElement(canvasElement);
+			canvasComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			canvasComposition->SetPreferredMinSize(Size(0, 100));
+			canvasComposition->BoundsChanged.AttachMethod(this, &ScriptDocumentViewDirect2D::canvasComposition_BoundsChanged);
+			GetContainerComposition()->AddChild(canvasComposition);
+		}
+
+		void SetDocument(Ptr<Document> _document)
+		{
+			document=_document;
+		}
+	};
+
+/***********************************************************************
+TestWindow
+***********************************************************************/
+
+#ifdef GUI_GRAPHICS_RENDERER_GDI
+	typedef ScriptDocumentViewGDI ScriptDocumentView;
+#endif
+#ifdef GUI_GRAPHICS_RENDERER_DIRECT2D
+	typedef ScriptDocumentViewDirect2D ScriptDocumentView;
+#endif
 
 	class TestWindow : public GuiWindow
 	{
@@ -1044,13 +1212,10 @@ TestWindow
 			}
 			GetApplication()->InvokeAsync([=]()
 			{
-				List<Ptr<DocumentFragment>> fragments;
-				BuildDocumentFragments(L"..\\GacUISrcCodepackedTest\\Resources\\document2.txt", fragments);
-				Ptr<ScriptDocument> scriptDocument=BuildScriptParagraphs(fragments);
+				Ptr<Document> document=BuildDocumentFragments(L"..\\GacUISrcCodepackedTest\\Resources\\document2.txt");
 				GetApplication()->InvokeInMainThreadAndWait([=]()
 				{
-					scriptDocument->RebuildFontCache();
-					scriptDocumentView->SetDocument(scriptDocument);
+					scriptDocumentView->SetDocument(document);
 				});
 			});
 		}
