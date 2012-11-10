@@ -157,10 +157,11 @@ ScriptFragment
 		Array<GOFFSET>				glyphOffsets;
 		Array<WORD>					charCluster;
 		ABC							runAbc;
+		SCRIPT_ANALYSIS				sa;
 
 		GlyphData()
 		{
-			memset(&runAbc, 0, sizeof(runAbc));
+			ClearUniscribeData(0, 0);
 		}
 
 		void ClearUniscribeData(int glyphCount, int length)
@@ -171,6 +172,7 @@ ScriptFragment
 			glyphOffsets.Resize(glyphCount);
 			charCluster.Resize(length);
 			memset(&runAbc, 0, sizeof(runAbc));
+			memset(&sa, 0, sizeof(sa));
 		}
 			
 		bool BuildUniscribeData(WinDC* dc, DocumentFragment* documentFragment, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, int length)
@@ -182,7 +184,7 @@ ScriptFragment
 				glyphCount=(int)(1.5*length+16);
 				resizeGlyphData=true;
 			}
-			SCRIPT_ANALYSIS sa=scriptItem->a;
+			sa=scriptItem->a;
 			{
 				// generate shape information
 				WinDC* dcParameter=0;
@@ -315,7 +317,6 @@ BUILD_UNISCRIBE_DATA_FAILED:
 		Array<SCRIPT_LOGATTR>			charLogattrs;
 		int								advance;
 		GlyphData						wholeGlyph;
-		GlyphData						tempGlyph;
 		List<RunFragmentBounds>			fragmentBounds;
 
 		ScriptRun()
@@ -343,7 +344,6 @@ BUILD_UNISCRIBE_DATA_FAILED:
 			charLogattrs.Resize(0);
 			advance=0;
 			wholeGlyph.ClearUniscribeData(0, 0);
-			tempGlyph.ClearUniscribeData(0, 0);
 		}
 
 		bool BuildUniscribeData(WinDC* dc)
@@ -370,7 +370,6 @@ BUILD_UNISCRIBE_DATA_FAILED:
 			{
 				goto BUILD_UNISCRIBE_DATA_FAILED;
 			}
-			tempGlyph.ClearUniscribeData(wholeGlyph.glyphs.Count(), length);
 			advance=wholeGlyph.runAbc.abcA+wholeGlyph.runAbc.abcB+wholeGlyph.runAbc.abcC;
 
 			return true;
@@ -379,13 +378,20 @@ BUILD_UNISCRIBE_DATA_FAILED:
 			return false;
 		}
 
-		int SumWidth(int charStart, int charLength)
+		void SearchGlyphCluster(int charStart, int charLength, int& cluster, int& nextCluster)
 		{
-			int cluster=wholeGlyph.charCluster[charStart];
-			int nextCluster
+			cluster=wholeGlyph.charCluster[charStart];
+			nextCluster
 				=charStart+charLength==length
 				?wholeGlyph.glyphs.Count()
 				:wholeGlyph.charCluster[charStart+charLength];
+		}
+
+		int SumWidth(int charStart, int charLength)
+		{
+			int cluster=0;
+			int nextCluster=0;
+			SearchGlyphCluster(charStart, charLength, cluster, nextCluster);
 			int width=0;
 			for(int i=cluster;i<nextCluster;i++)
 			{
@@ -441,9 +447,39 @@ BUILD_UNISCRIBE_DATA_FAILED:
 			}
 		}
 
-		bool BuildUniscribeDataTemp(WinDC* dc, int tempStart, int tempLength)
+		void Render(WinDC* dc, int fragmentBoundsIndex, int offsetX, int offsetY)
 		{
-			return tempGlyph.BuildUniscribeData(dc, documentFragment, scriptItem, scriptCache, runText+tempStart, tempLength);
+			Color color=documentFragment->color;
+			dc->SetFont(documentFragment->fontObject);
+			dc->SetTextColor(RGB(color.r, color.g, color.b));
+
+			RunFragmentBounds fragment=fragmentBounds[fragmentBoundsIndex];
+			RECT rect;
+			rect.left=fragment.bounds.Left()+offsetX;
+			rect.top=fragment.bounds.Top()+offsetY;
+			rect.right=fragment.bounds.Right()+offsetX;
+			rect.bottom=fragment.bounds.Bottom()+offsetY;
+			
+			int cluster=0;
+			int nextCluster=0;
+			SearchGlyphCluster(fragment.start, fragment.length, cluster, nextCluster);
+
+			HRESULT hr=ScriptTextOut(
+				dc->GetHandle(),
+				&scriptCache,
+				rect.left,
+				rect.top,
+				0,
+				&rect,
+				&wholeGlyph.sa,
+				NULL,
+				0,
+				&wholeGlyph.glyphs[cluster],
+				nextCluster-cluster,
+				&wholeGlyph.glyphAdvances[cluster],
+				NULL,
+				&wholeGlyph.glyphOffsets[cluster]
+				);
 		}
 	};
 
@@ -930,21 +966,14 @@ TestWindow
 						}
 						FOREACH(Ptr<ScriptRun>, run, line->scriptRuns.Wrap())
 						{
-							FOREACH(ScriptRun::RunFragmentBounds, fragmentBounds, run->fragmentBounds.Wrap())
+							for(int i=0;i<run->fragmentBounds.Count();i++)
 							{
+								ScriptRun::RunFragmentBounds fragmentBounds=run->fragmentBounds[i];
 								if(fragmentBounds.bounds.Top()>=visibleDocumentBounds.Bottom() || fragmentBounds.bounds.Bottom()<=visibleDocumentBounds.Top())
 								{
 									continue;
 								}
-								int start=fragmentBounds.start;
-								int length=fragmentBounds.length;
-								int cx=fragmentBounds.bounds.Left();
-								int cy=fragmentBounds.bounds.Top();
-											
-								Color color=run->documentFragment->color;
-								dc->SetFont(run->documentFragment->fontObject);
-								dc->SetTextColor(RGB(color.r, color.g, color.b));
-								dc->DrawBuffer(x+cx, y+cy, run->runText+start, length);
+								run->Render(dc, i, x, y);
 							}
 						}
 					}

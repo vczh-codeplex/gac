@@ -1,4 +1,6 @@
-<s>Courier New:true:#000000:10pt:UTF-8 SAMPLER</s>
+<s>Courier New:true:#000000:18pt:UTF-8 SAMPLER</s>
+<p/>
+<s>微软雅黑:true:#000000:18pt:𩰪㦲𦰗𠀼 𣂕𣴑𣱳𦁚</s>
 <p/>
 <s>Gentium Plus:false:#000000:18pt:¥ · £ · € · $ · ¢ · ₡ · ₢ · ₣ · ₤ · ₥ · ₦ · ₧ · ₨ · ₩ · ₪ · ₫ · ₭ · ₮ · ₯ ·</s>
 <s>Times New Roman:false:#000000:18pt:₹</s>
