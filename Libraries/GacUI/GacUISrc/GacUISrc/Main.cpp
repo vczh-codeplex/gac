@@ -1,5 +1,6 @@
 #include "..\..\Source\GacUI.h"
 #include "..\..\..\..\Common\Source\Stream\FileStream.h"
+#include "..\..\..\..\Common\Source\Stream\MemoryStream.h"
 #include "..\..\..\..\Common\Source\Stream\CharFormat.h"
 #include "..\..\..\..\Common\Source\Stream\Accessor.h"
 #include "..\..\..\..\Common\Source\Regex\Regex.h"
@@ -54,14 +55,16 @@ DocumentFragment
 	class DocumentFragment : public Object
 	{
 	public:
-		bool				paragraph;
-		WString				font;
-		bool				bold;
-		Color				color;
-		double				sizeInPoint;
-		int					sizeInPixel;
-		WString				text;
-		Ptr<WinFont>		fontObject;
+		bool							paragraph;
+		WString							font;
+		bool							bold;
+		Color							color;
+		double							sizeInPoint;
+		int								sizeInPixel;
+		WString							text;
+		Ptr<WinFont>					fontObject;
+		ComPtr<IDWriteTextFormat>		textFormatObject;
+		ComPtr<ID2D1SolidColorBrush>	textFormatBrush;
 
 		DocumentFragment()
 			:paragraph(false)
@@ -952,7 +955,6 @@ ScriptDocumentViewGDI
 			Rect bounds=arguments.bounds;
 			if(document)
 			{
-				document->Layout(bounds.Width()-2*BorderMargin);
 				int x=bounds.Left()+BorderMargin;
 				int y=bounds.Top()+BorderMargin-visibleDocumentBounds.Top();
 				int w=document->bounds.Width();
@@ -1048,11 +1050,219 @@ ScriptDocumentViewGDI
 ScriptDocumentViewDirect2D
 ***********************************************************************/
 
+	class DWriteDocument : public Object
+	{
+	public:
+		Ptr<Document>					document;
+		ComPtr<IDWriteTextLayout>		textLayout;
+
+		void BuildColorCache(ID2D1RenderTarget* rt)
+		{
+			FOREACH(Ptr<DocumentFragment>, fragment, document->documentFragments.Wrap())
+			{
+				if(!fragment->paragraph)
+				{
+					fragment->textFormatBrush=0;
+				}
+			}
+
+			Dictionary<Color, ComPtr<ID2D1SolidColorBrush>> brushes;
+			FOREACH(Ptr<DocumentFragment>, fragment, document->documentFragments.Wrap())
+			{
+				if(!fragment->paragraph)
+				{
+					if(!fragment->textFormatBrush)
+					{
+						int index=brushes.Keys().IndexOf(fragment->color);
+						if(index==-1)
+						{
+							ID2D1SolidColorBrush* brush=0;
+							HRESULT hr=rt->CreateSolidColorBrush(
+								D2D1::ColorF(fragment->color.r/255.0f, fragment->color.g/255.0f, fragment->color.b/255.0f),
+								D2D1::BrushProperties(),
+								&brush);
+							if(!FAILED(hr))
+							{
+								fragment->textFormatBrush=brush;
+							}
+							brushes.Add(fragment->color, fragment->textFormatBrush);
+						}
+						else
+						{
+							fragment->textFormatBrush=brushes.Values()[index];
+						}
+					}
+				}
+			}
+
+			SetTextColors();
+		}
+
+		void RebuildFontCache()
+		{
+			IDWriteFactory* factory=elements_windows_d2d::GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory();
+
+			FOREACH(Ptr<DocumentFragment>, fragment, document->documentFragments.Wrap())
+			{
+				if(!fragment->paragraph)
+				{
+					fragment->textFormatObject=0;
+				}
+			}
+
+			Dictionary<WString, ComPtr<IDWriteTextFormat>> fonts;
+			FOREACH(Ptr<DocumentFragment>, fragment, document->documentFragments.Wrap())
+			{
+				if(!fragment->paragraph)
+				{
+					if(!fragment->textFormatObject)
+					{
+						WString fragmentFingerPrint=fragment->GetFingerPrint();
+						int index=fonts.Keys().IndexOf(fragmentFingerPrint);
+						if(index==-1)
+						{
+							IDWriteTextFormat* textFormat=0;
+							HRESULT hr=factory->CreateTextFormat(
+								fragment->font.Buffer(),
+								NULL,
+								(fragment->bold?DWRITE_FONT_WEIGHT_BOLD:DWRITE_FONT_WEIGHT_NORMAL),
+								DWRITE_FONT_STYLE_NORMAL,
+								DWRITE_FONT_STRETCH_NORMAL,
+								(FLOAT)fragment->sizeInPixel,
+								L"",
+								&textFormat);
+							if(!FAILED(hr))
+							{
+								fragment->textFormatObject=textFormat;
+							}
+							fonts.Add(fragmentFingerPrint, fragment->textFormatObject);
+						}
+						else
+						{
+							fragment->textFormatObject=fonts.Values()[index];
+						}
+					}
+				}
+			}
+		}
+
+		WString GetFullText()
+		{
+			MemoryStream stream;
+			{
+				StreamWriter writer(stream);
+				FOREACH(Ptr<DocumentFragment>, fragment, document->documentFragments.Wrap())
+				{
+					if(fragment->paragraph)
+					{
+						writer.WriteString(L"\r\n\r\n");
+					}
+					else
+					{
+						writer.WriteString(fragment->text);
+					}
+				}
+			}
+			stream.SeekFromBegin(0);
+			{
+				StreamReader reader(stream);
+				return reader.ReadToEnd();
+			}
+		}
+
+		void BuildTextLayout()
+		{
+			WString fullText=GetFullText();
+			RebuildFontCache();
+			
+			IDWriteFactory* factory=elements_windows_d2d::GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory();
+			IDWriteTextFormat* textFormat=0;
+			HRESULT hr=factory->CreateTextFormat(
+				L"Segoe UI",
+				NULL,
+				DWRITE_FONT_WEIGHT_NORMAL,
+				DWRITE_FONT_STYLE_NORMAL,
+				DWRITE_FONT_STRETCH_NORMAL,
+				(FLOAT)10,
+				L"",
+				&textFormat);
+			if(!FAILED(hr))
+			{
+				IDWriteTextLayout* rawTextLayout;
+				HRESULT hr=factory->CreateTextLayout(
+					fullText.Buffer(),
+					fullText.Length(),
+					textFormat,
+					0,
+					0,
+					&rawTextLayout);
+				if(!FAILED(hr))
+				{
+					rawTextLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
+					textLayout=rawTextLayout;
+					SetTextFormats();
+				}
+				textFormat->Release();
+			}
+		}
+
+		void SetTextFormats()
+		{
+			DWRITE_TEXT_RANGE range={0};
+			FOREACH(Ptr<DocumentFragment>, fragment, document->documentFragments.Wrap())
+			{
+				if(fragment->paragraph)
+				{
+					range.length=4;
+				}
+				else
+				{
+					range.length=fragment->text.Length();
+				}
+				textLayout->SetFontFamilyName(fragment->font.Buffer(), range);
+				textLayout->SetFontSize((FLOAT)fragment->sizeInPixel, range);
+				textLayout->SetFontWeight((fragment->bold?DWRITE_FONT_WEIGHT_BOLD:DWRITE_FONT_WEIGHT_NORMAL), range);
+				range.startPosition+=range.length;
+			}
+		}
+
+		void SetTextColors()
+		{
+			DWRITE_TEXT_RANGE range={0};
+			FOREACH(Ptr<DocumentFragment>, fragment, document->documentFragments.Wrap())
+			{
+				if(fragment->paragraph)
+				{
+					range.length=4;
+				}
+				else
+				{
+					range.length=fragment->text.Length();
+				}
+				textLayout->SetDrawingEffect(fragment->textFormatBrush.Obj(), range);
+				range.startPosition+=range.length;
+			}
+		}
+
+		void Layout(int maxWidth)
+		{
+			textLayout->SetMaxWidth((FLOAT)maxWidth);
+		}
+
+		Size GetSize()
+		{
+			DWRITE_TEXT_METRICS metrics;
+			HRESULT hr=textLayout->GetMetrics(&metrics);
+			return Size(0, (int)metrics.height);
+		}
+	};
+
 	class ScriptDocumentViewDirect2D : public GuiScrollView
 	{
 	protected:
 		static const int				BorderMargin=10;
-		Ptr<Document>					document;
+		Ptr<DWriteDocument>				document;
+		bool							colorCache;
 		Rect							visibleDocumentBounds;
 		GuiDirect2DElement*				canvasElement;
 		GuiBoundsComposition*			canvasComposition;
@@ -1064,6 +1274,8 @@ ScriptDocumentViewDirect2D
 		{
 			if(document)
 			{
+				Size size=document->GetSize();
+				return Size(size.x+2*BorderMargin, size.y+2*BorderMargin);
 			}
 			return Size(0, 0);
 		}
@@ -1072,14 +1284,29 @@ ScriptDocumentViewDirect2D
 		{
 			if(document)
 			{
+				document->Layout(viewBounds.Width()-2*BorderMargin);
 			}
 			visibleDocumentBounds=viewBounds;
 		}
 
 		void canvasElement_Rendering(GuiGraphicsComposition* composition, GuiDirect2DElementEventArgs& arguments)
 		{
-			if(document)
+			if(document && messageBrush)
 			{
+				if(!colorCache)
+				{
+					document->BuildColorCache(arguments.rt);
+					colorCache=true;
+				}
+				Rect bounds=arguments.bounds;
+				int x=bounds.Left()+BorderMargin;
+				int y=bounds.Top()+BorderMargin-visibleDocumentBounds.Top();
+				arguments.rt->DrawTextLayout(
+					D2D1::Point2F((FLOAT)x, (FLOAT)y),
+					document->textLayout.Obj(),
+					messageBrush.Obj(),
+					D2D1_DRAW_TEXT_OPTIONS_NO_SNAP
+					);
 			}
 			else if(message && messageBrush)
 			{
@@ -1110,6 +1337,11 @@ ScriptDocumentViewDirect2D
 
 		void canvasElement_AfterRenderTargetChanged(GuiGraphicsComposition* composition, GuiDirect2DElementEventArgs& arguments)
 		{
+			if(document)
+			{
+				document->BuildColorCache(arguments.rt);
+				colorCache=true;
+			}
 			{
 				IDWriteTextFormat* textFormat=0;
 				HRESULT hr=arguments.factoryDWrite->CreateTextFormat(
@@ -1156,6 +1388,7 @@ ScriptDocumentViewDirect2D
 	public:
 		ScriptDocumentViewDirect2D()
 			:GuiScrollView(GetCurrentTheme()->CreateMultilineTextBoxStyle())
+			,colorCache(false)
 		{
 			SetHorizontalAlwaysVisible(false);
 
@@ -1174,7 +1407,11 @@ ScriptDocumentViewDirect2D
 
 		void SetDocument(Ptr<Document> _document)
 		{
-			document=_document;
+			document=new DWriteDocument;
+			document->document=_document;
+			document->BuildTextLayout();
+			colorCache=false;
+			CalculateView();
 		}
 	};
 
