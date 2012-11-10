@@ -108,7 +108,7 @@ DocumentFragment
 		WString rawDocument;
 		{
 			FileStream fileStream(fileName, FileStream::ReadOnly);
-			Utf8Decoder decoder;
+			BomDecoder decoder;
 			DecoderStream decoderStream(fileStream, decoder);
 			StreamReader reader(decoderStream);
 			rawDocument=reader.ReadToEnd();
