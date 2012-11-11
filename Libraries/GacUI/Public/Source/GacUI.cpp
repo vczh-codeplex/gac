@@ -25021,6 +25021,13 @@ GuiSolidLabelElementRenderer
 							textRange.length=oldText.Length();
 							textLayout->SetUnderline(TRUE, textRange);
 						}
+						if(oldFont.strikeline)
+						{
+							DWRITE_TEXT_RANGE textRange;
+							textRange.startPosition=0;
+							textRange.length=oldText.Length();
+							textLayout->SetStrikethrough(TRUE, textRange);
+						}
 					}
 					else
 					{
@@ -26040,7 +26047,7 @@ CachedResourceAllocator
 			};
 
 /***********************************************************************
-WindiwsGDIRenderTarget
+WindowsDirect2DRenderTarget
 ***********************************************************************/
 
 			class WindowsDirect2DImageFrameCache : public Object, public INativeImageFrameCache
@@ -26361,6 +26368,114 @@ WindiwsGDIRenderTarget
 			};
 
 /***********************************************************************
+WindowsDirect2DParagraph
+***********************************************************************/
+
+			class WindowsDirect2DParagraph : public Object, public IGuiGraphicsParagraph
+			{
+			protected:
+				IGuiGraphicsLayoutProvider*			provider;
+
+			public:
+				WindowsDirect2DParagraph(IGuiGraphicsLayoutProvider* _provider)
+					:provider(_provider)
+				{
+				}
+
+				~WindowsDirect2DParagraph()
+				{
+				}
+
+				IGuiGraphicsLayoutProvider* GetProvider()override
+				{
+					return provider;
+				}
+
+				bool GetWrapLine()override
+				{
+					throw 0;
+				}
+
+				void SetWrapLine(bool value)override
+				{
+					throw 0;
+				}
+
+				const WString& GetParagraphText()override
+				{
+					throw 0;
+				}
+
+				void SetParagraphText(const WString& value)override
+				{
+					throw 0;
+				}
+
+				int GetMaxWidth()override
+				{
+					throw 0;
+				}
+
+				void SetMaxWidth(int value)override
+				{
+					throw 0;
+				}
+
+				bool SetText(int start, int length, const WString& value)override
+				{
+					throw 0;
+				}
+
+				bool SetFont(int start, int length, const WString& value)override
+				{
+					throw 0;
+				}
+
+				bool SetSize(int start, int length, int size)override
+				{
+					throw 0;
+				}
+
+				bool SetStyle(int start, int length, TextStyle value)override
+				{
+					throw 0;
+				}
+
+				bool SetColor(int start, int length, Color value)override
+				{
+					throw 0;
+				}
+
+				int GetHeight()override
+				{
+					throw 0;
+				}
+
+				void SetRenderTarget(IGuiGraphicsRenderTarget* renderTarget)override
+				{
+					throw 0;
+				}
+
+				void Render(Rect bounds)override
+				{
+					throw 0;
+				}
+			};
+
+/***********************************************************************
+WindowsDorect2DLayoutProvider
+***********************************************************************/
+
+			class WindowsDorect2DLayoutProvider : public Object, public IGuiGraphicsLayoutProvider
+			{
+			public:
+				 Ptr<IGuiGraphicsParagraph> CreateParagraph()override
+				 {
+					 return new WindowsDirect2DParagraph(this);
+				 }
+			};
+
+/***********************************************************************
 WindowsGDIResourceManager
 ***********************************************************************/
 
@@ -26368,10 +26483,16 @@ WindowsGDIResourceManager
 			{
 			protected:
 				SortedList<Ptr<WindowsDirect2DRenderTarget>>		renderTargets;
+				Ptr<WindowsDorect2DLayoutProvider>					layoutProvider;
 
 				CachedTextFormatAllocator							textFormats;
 				CachedCharMeasurerAllocator							charMeasurers;
 			public:
+				WindowsDirect2DResourceManager()
+				{
+					layoutProvider=new WindowsDorect2DLayoutProvider;
+				}
+
 				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)override
 				{
 					return GetWindowsDirect2DObjectProvider()->GetBindedRenderTarget(window);
@@ -26379,7 +26500,7 @@ WindowsGDIResourceManager
 
 				IGuiGraphicsLayoutProvider* GetLayoutProvider()override
 				{
-					return 0;
+					return layoutProvider.Obj();
 				}
 
 				void NativeWindowCreated(INativeWindow* window)override
@@ -27516,7 +27637,7 @@ GuiGDIElement
 			using namespace collections;
 
 /***********************************************************************
-WindiwsGDIRenderTarget
+WindowsGDIRenderTarget
 ***********************************************************************/
 
 			class WindowsGDIRenderTarget : public Object, public IWindowsGDIRenderTarget
@@ -27726,6 +27847,114 @@ CachedResourceAllocator
 			};
 
 /***********************************************************************
+WindowsGDIParagraph
+***********************************************************************/
+
+			class WindowsGDIParagraph : public Object, public IGuiGraphicsParagraph
+			{
+			protected:
+				IGuiGraphicsLayoutProvider*			provider;
+
+			public:
+				WindowsGDIParagraph(IGuiGraphicsLayoutProvider* _provider)
+					:provider(_provider)
+				{
+				}
+
+				~WindowsGDIParagraph()
+				{
+				}
+
+				IGuiGraphicsLayoutProvider* GetProvider()override
+				{
+					return provider;
+				}
+
+				bool GetWrapLine()override
+				{
+					throw 0;
+				}
+
+				void SetWrapLine(bool value)override
+				{
+					throw 0;
+				}
+
+				const WString& GetParagraphText()override
+				{
+					throw 0;
+				}
+
+				void SetParagraphText(const WString& value)override
+				{
+					throw 0;
+				}
+
+				int GetMaxWidth()override
+				{
+					throw 0;
+				}
+
+				void SetMaxWidth(int value)override
+				{
+					throw 0;
+				}
+
+				bool SetText(int start, int length, const WString& value)override
+				{
+					throw 0;
+				}
+
+				bool SetFont(int start, int length, const WString& value)override
+				{
+					throw 0;
+				}
+
+				bool SetSize(int start, int length, int size)override
+				{
+					throw 0;
+				}
+
+				bool SetStyle(int start, int length, TextStyle value)override
+				{
+					throw 0;
+				}
+
+				bool SetColor(int start, int length, Color value)override
+				{
+					throw 0;
+				}
+
+				int GetHeight()override
+				{
+					throw 0;
+				}
+
+				void SetRenderTarget(IGuiGraphicsRenderTarget* renderTarget)override
+				{
+					throw 0;
+				}
+
+				void Render(Rect bounds)override
+				{
+					throw 0;
+				}
+			};
+
+/***********************************************************************
+WindowsGDILayoutProvider
+***********************************************************************/
+
+			class WindowsGDILayoutProvider : public Object, public IGuiGraphicsLayoutProvider
+			{
+			public:
+				 Ptr<IGuiGraphicsParagraph> CreateParagraph()override
+				 {
+					 return new WindowsGDIParagraph(this);
+				 }
+			};
+
+/***********************************************************************
 WindowsGDIResourceManager
 ***********************************************************************/
 
@@ -27813,12 +28042,18 @@ WindowsGDIResourceManager
 				typedef SortedList<Ptr<WindowsGDIImageFrameCache>> ImageCacheList;
 			protected:
 				SortedList<Ptr<WindowsGDIRenderTarget>>		renderTargets;
+				Ptr<WindowsGDILayoutProvider>				layoutProvider;
 				CachedPenAllocator							pens;
 				CachedBrushAllocator						brushes;
 				CachedFontAllocator							fonts;
 				CachedCharMeasurerAllocator					charMeasurers;
 				ImageCacheList								imageCaches;
 			public:
+				WindowsGDIResourceManager()
+				{
+					layoutProvider=new WindowsGDILayoutProvider;
+				}
+
 				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)override
 				{
 					return GetWindowsGDIObjectProvider()->GetBindedRenderTarget(window);
@@ -27826,7 +28061,7 @@ WindowsGDIResourceManager
 
 				IGuiGraphicsLayoutProvider* GetLayoutProvider()override
 				{
-					return 0;
+					return layoutProvider.Obj();
 				}
 
 				void NativeWindowCreated(INativeWindow* window)override

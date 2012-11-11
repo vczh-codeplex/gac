@@ -30,6 +30,19 @@ Layout Engine
 			class IGuiGraphicsParagraph : public Interface
 			{
 			public:
+				/// <summary>Text style. Items in this enumeration type can be combined.</summary>
+				enum TextStyle
+				{
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.TextStyle]Bold.</summary>
+					Bold=1,
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.TextStyle]Italic.</summary>
+					Italic=2,
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.TextStyle]Underline.</summary>
+					Underline=4,
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.TextStyle]Strikeline.</summary>
+					Strikeline=8,
+				};
+
 				/// <summary>Get the <see cref="IGuiGraphicsLayoutProvider"/> object that created this paragraph.</summary>
 				/// <returns>The layout provider object.</returns>
 				virtual IGuiGraphicsLayoutProvider*			GetProvider()=0;
@@ -70,36 +83,18 @@ Layout Engine
 				/// <param name="value">The size</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				virtual bool								SetSize(int start, int length, int size)=0;
-				/// <summary>Replace the bold style within the specified range.</summary>
+				/// <summary>Replace the text style within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
-				/// <param name="value">The bold style</param>
+				/// <param name="value">The text style</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetBold(int start, int length, bool value)=0;
-				/// <summary>Replace the italic style within the specified range.</summary>
-				/// <param name="start">The position of the first character of the specified range.</param>
-				/// <param name="length">The length of the specified range by character.</param>
-				/// <param name="value">The italic style</param>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetItalic(int start, int length, bool value)=0;
-				/// <summary>Replace the underline style within the specified range.</summary>
-				/// <param name="start">The position of the first character of the specified range.</param>
-				/// <param name="length">The length of the specified range by character.</param>
-				/// <param name="value">The underline style</param>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetUnderline(int start, int length, bool value)=0;
-				/// <summary>Replace the strikeline style within the specified range.</summary>
-				/// <param name="start">The position of the first character of the specified range.</param>
-				/// <param name="length">The length of the specified range by character.</param>
-				/// <param name="value">The strikeline style</param>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetStrikeline(int start, int length, bool value)=0;
+				virtual bool								SetStyle(int start, int length, TextStyle value)=0;
 				/// <summary>Replace the color within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
 				/// <param name="value">The color</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetColor(int start, int length, Color color)=0;
+				virtual bool								SetColor(int start, int length, Color value)=0;
 
 				/// <summary>Get the layouted height of the text. The result depends on rich styled text and the two important properties that can be set using <see cref="SetWrapLine"/> and <see cref="SetMaxWidth"/>.</summary>
 				/// <returns>The layouted height.</returns>
@@ -117,7 +112,7 @@ Layout Engine
 			{
 			public:
 				/// <summary>Create a paragraph with internal renderer device dependent objects initialized.</summary>
-				virtual IGuiGraphicsParagraph*				CreateParagraph()=0;
+				virtual Ptr<IGuiGraphicsParagraph>			CreateParagraph()=0;
 			};
 		}
 	}

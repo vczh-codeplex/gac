@@ -462,6 +462,13 @@ GuiSolidLabelElementRenderer
 							textRange.length=oldText.Length();
 							textLayout->SetUnderline(TRUE, textRange);
 						}
+						if(oldFont.strikeline)
+						{
+							DWRITE_TEXT_RANGE textRange;
+							textRange.startPosition=0;
+							textRange.length=oldText.Length();
+							textLayout->SetStrikethrough(TRUE, textRange);
+						}
 					}
 					else
 					{
