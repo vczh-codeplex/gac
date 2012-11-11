@@ -11717,18 +11717,18 @@ Developer: 陈梓瀚(vczh)
 Regex::RegexExpression
 
 Classes:
-	Expression						：表达式基类				|
+	Expression						：表达式基类					|
 	CharSetExpression				：字符集表达式				| a, [a-b], [^a-b0_9], \.rnt\/()+*?{}[]<>^$!=SsDdLlWw, [\rnt-[]\/^$]
-	LoopExpression					：循环表达式				| a{3}, a{3,}, a{1,3}, a+, a*, a?, LOOP?
-	SequenceExpression				：顺序表达式				| ab
-	AlternateExpression				：选择表达式				| a|b
+	LoopExpression					：循环表达式					| a{3}, a{3,}, a{1,3}, a+, a*, a?, LOOP?
+	SequenceExpression				：顺序表达式					| ab
+	AlternateExpression				：选择表达式					| a|b
 	BeginExpression					：【非纯】字符串起始表达式	| ^
 	EndExpression					：【非纯】字符串末尾表达式	| $
-	CaptureExpression				：【非纯】捕获表达式		| (<name>expr), (?expr)
-	MatchExpression					：【非纯】匹配表达式		| (<$name>), (<$name;i>), (<$i>)
-	PositiveExpression				：【非纯】正向预查表达式	| (=expr)
-	NegativeExpression				：【非纯】反向预查表达式	| (!expr)
-	UsingExpression					：引用表达式				| (<#name1>expr)...(<&name1>)...
+	CaptureExpression				：【非纯】捕获表达式			| (<name>expr), (?expr)
+	MatchExpression					：【非纯】匹配表达式			| (<$name>), (<$name;i>), (<$i>)
+	PositiveExpression				：【非纯】正向预查表达式		| (=expr)
+	NegativeExpression				：【非纯】反向预查表达式		| (!expr)
+	UsingExpression					：引用表达式					| (<#name1>expr)...(<&name1>)...
 
 	RegexExpression					：正则表达式
 

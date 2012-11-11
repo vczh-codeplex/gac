@@ -20548,12 +20548,20 @@ GuiGraphicsComposition
 			{
 				if(ownedElement)
 				{
-					ownedElement->GetRenderer()->SetRenderTarget(0);
+					IGuiGraphicsRenderer* renderer=ownedElement->GetRenderer();
+					if(renderer)
+					{
+						renderer->SetRenderTarget(0);
+					}
 				}
 				ownedElement=element;
 				if(ownedElement)
 				{
-					ownedElement->GetRenderer()->SetRenderTarget(renderTarget);
+					IGuiGraphicsRenderer* renderer=ownedElement->GetRenderer();
+					if(renderer)
+					{
+						renderer->SetRenderTarget(renderTarget);
+					}
 				}
 			}
 
@@ -20587,7 +20595,11 @@ GuiGraphicsComposition
 				renderTarget=value;
 				if(ownedElement)
 				{
-					ownedElement->GetRenderer()->SetRenderTarget(renderTarget);
+					IGuiGraphicsRenderer* renderer=ownedElement->GetRenderer();
+					if(renderer)
+					{
+						renderer->SetRenderTarget(renderTarget);
+					}
 				}
 				for(int i=0;i<children.Count();i++)
 				{
@@ -20615,7 +20627,11 @@ GuiGraphicsComposition
 
 						if(ownedElement)
 						{
-							ownedElement->GetRenderer()->Render(bounds);
+							IGuiGraphicsRenderer* renderer=ownedElement->GetRenderer();
+							if(renderer)
+							{
+								renderer->Render(bounds);
+							}
 						}
 						if(children.Count()>0)
 						{
@@ -20911,7 +20927,11 @@ GuiGraphicsSite
 				{
 					if(ownedElement)
 					{
-						minSize=ownedElement->GetRenderer()->GetMinSize();
+						IGuiGraphicsRenderer* renderer=ownedElement->GetRenderer();
+						if(renderer)
+						{
+							minSize=renderer->GetMinSize();
+						}
 					}
 				}
 				if(minSizeLimitation==GuiGraphicsComposition::LimitToElementAndChildren)
@@ -22241,83 +22261,6 @@ namespace vl
 		namespace elements
 		{
 			using namespace collections;
-
-/***********************************************************************
-GuiGraphicsResourceManager
-***********************************************************************/
-
-			GuiGraphicsResourceManager::GuiGraphicsResourceManager()
-			{
-			}
-
-			GuiGraphicsResourceManager::~GuiGraphicsResourceManager()
-			{
-			}
-
-			bool GuiGraphicsResourceManager::RegisterElementFactory(IGuiGraphicsElementFactory* factory)
-			{
-				if(elementFactories.Keys().Contains(factory->GetElementTypeName()))
-				{
-					return false;
-				}
-				else
-				{
-					elementFactories.Add(factory->GetElementTypeName(), factory);
-					return true;
-				}
-			}
-
-			bool GuiGraphicsResourceManager::RegisterRendererFactory(const WString& elementTypeName, IGuiGraphicsRendererFactory* factory)
-			{
-				if(rendererFactories.Keys().Contains(elementTypeName))
-				{
-					return false;
-				}
-				else
-				{
-					rendererFactories.Add(elementTypeName, factory);
-					return true;
-				}
-			}
-
-			IGuiGraphicsElementFactory* GuiGraphicsResourceManager::GetElementFactory(const WString& elementTypeName)
-			{
-				int index=elementFactories.Keys().IndexOf(elementTypeName);
-				return index==-1?0:elementFactories.Values()[index].Obj();
-			}
-
-			IGuiGraphicsRendererFactory* GuiGraphicsResourceManager::GetRendererFactory(const WString& elementTypeName)
-			{
-				int index=rendererFactories.Keys().IndexOf(elementTypeName);
-				return index==-1?0:rendererFactories.Values()[index].Obj();
-			}
-
-			GuiGraphicsResourceManager* guiGraphicsResourceManager=0;
-
-			GuiGraphicsResourceManager* GetGuiGraphicsResourceManager()
-			{
-				return guiGraphicsResourceManager;
-			}
-
-			void SetGuiGraphicsResourceManager(GuiGraphicsResourceManager* resourceManager)
-			{
-				guiGraphicsResourceManager=resourceManager;
-			}
-
-			bool RegisterFactories(IGuiGraphicsElementFactory* elementFactory, IGuiGraphicsRendererFactory* rendererFactory)
-			{
-				if(guiGraphicsResourceManager && elementFactory && rendererFactory)
-				{
-					if(guiGraphicsResourceManager->RegisterElementFactory(elementFactory))
-					{
-						if(guiGraphicsResourceManager->RegisterRendererFactory(elementFactory->GetElementTypeName(), rendererFactory))
-						{
-							return true;
-						}
-					}
-				}
-				return false;
-			}
 
 /***********************************************************************
 GuiSolidBorderElement
@@ -23694,6 +23637,98 @@ GuiShortcutKeyManager
 					}
 				}
 				return 0;
+			}
+		}
+	}
+}
+
+/***********************************************************************
+GraphicsElement\GuiGraphicsResourceManager.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace elements
+		{
+			using namespace collections;
+
+/***********************************************************************
+GuiGraphicsResourceManager
+***********************************************************************/
+
+			GuiGraphicsResourceManager::GuiGraphicsResourceManager()
+			{
+			}
+
+			GuiGraphicsResourceManager::~GuiGraphicsResourceManager()
+			{
+			}
+
+			bool GuiGraphicsResourceManager::RegisterElementFactory(IGuiGraphicsElementFactory* factory)
+			{
+				if(elementFactories.Keys().Contains(factory->GetElementTypeName()))
+				{
+					return false;
+				}
+				else
+				{
+					elementFactories.Add(factory->GetElementTypeName(), factory);
+					return true;
+				}
+			}
+
+			bool GuiGraphicsResourceManager::RegisterRendererFactory(const WString& elementTypeName, IGuiGraphicsRendererFactory* factory)
+			{
+				if(rendererFactories.Keys().Contains(elementTypeName))
+				{
+					return false;
+				}
+				else
+				{
+					rendererFactories.Add(elementTypeName, factory);
+					return true;
+				}
+			}
+
+			IGuiGraphicsElementFactory* GuiGraphicsResourceManager::GetElementFactory(const WString& elementTypeName)
+			{
+				int index=elementFactories.Keys().IndexOf(elementTypeName);
+				return index==-1?0:elementFactories.Values()[index].Obj();
+			}
+
+			IGuiGraphicsRendererFactory* GuiGraphicsResourceManager::GetRendererFactory(const WString& elementTypeName)
+			{
+				int index=rendererFactories.Keys().IndexOf(elementTypeName);
+				return index==-1?0:rendererFactories.Values()[index].Obj();
+			}
+
+			GuiGraphicsResourceManager* guiGraphicsResourceManager=0;
+
+			GuiGraphicsResourceManager* GetGuiGraphicsResourceManager()
+			{
+				return guiGraphicsResourceManager;
+			}
+
+			void SetGuiGraphicsResourceManager(GuiGraphicsResourceManager* resourceManager)
+			{
+				guiGraphicsResourceManager=resourceManager;
+			}
+
+			bool RegisterFactories(IGuiGraphicsElementFactory* elementFactory, IGuiGraphicsRendererFactory* rendererFactory)
+			{
+				if(guiGraphicsResourceManager && elementFactory && rendererFactory)
+				{
+					if(guiGraphicsResourceManager->RegisterElementFactory(elementFactory))
+					{
+						if(guiGraphicsResourceManager->RegisterRendererFactory(elementFactory->GetElementTypeName(), rendererFactory))
+						{
+							return true;
+						}
+					}
+				}
+				return false;
 			}
 		}
 	}
@@ -26337,9 +26372,14 @@ WindowsGDIResourceManager
 				CachedTextFormatAllocator							textFormats;
 				CachedCharMeasurerAllocator							charMeasurers;
 			public:
-				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)
+				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)override
 				{
 					return GetWindowsDirect2DObjectProvider()->GetBindedRenderTarget(window);
+				}
+
+				IGuiGraphicsLayoutProvider* GetLayoutProvider()override
+				{
+					return 0;
 				}
 
 				void NativeWindowCreated(INativeWindow* window)override
@@ -27779,9 +27819,14 @@ WindowsGDIResourceManager
 				CachedCharMeasurerAllocator					charMeasurers;
 				ImageCacheList								imageCaches;
 			public:
-				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)
+				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)override
 				{
 					return GetWindowsGDIObjectProvider()->GetBindedRenderTarget(window);
+				}
+
+				IGuiGraphicsLayoutProvider* GetLayoutProvider()override
+				{
+					return 0;
 				}
 
 				void NativeWindowCreated(INativeWindow* window)override

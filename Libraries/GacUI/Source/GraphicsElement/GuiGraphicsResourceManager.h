@@ -107,8 +107,12 @@ Helpers
 					{\
 						TELEMENT* element=new TELEMENT;\
 						element->factory=this;\
-						element->renderer=GetGuiGraphicsResourceManager()->GetRendererFactory(GetElementTypeName())->Create();\
-						element->renderer->Initialize(element);\
+						IGuiGraphicsRendererFactory* rendererFactory=GetGuiGraphicsResourceManager()->GetRendererFactory(GetElementTypeName());\
+						if(rendererFactory)\
+						{\
+							element->renderer=rendererFactory->Create();\
+							element->renderer->Initialize(element);\
+						}\
 						return element;\
 					}\
 				};\
