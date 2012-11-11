@@ -339,6 +339,9 @@
     <ClCompile Include="..\..\..\..\Common\Source\HttpUtility.cpp">
       <Filter>Common\Basic</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsResourceManager.cpp">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -673,6 +676,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\HttpUtility.h">
       <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsElementInterfaces.h">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsResourceManager.h">
+      <Filter>GacUI\GraphicsElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsDocumentInterfaces.h">
+      <Filter>GacUI\GraphicsElement</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
