@@ -143,12 +143,20 @@ GuiGraphicsComposition
 			{
 				if(ownedElement)
 				{
-					ownedElement->GetRenderer()->SetRenderTarget(0);
+					IGuiGraphicsRenderer* renderer=ownedElement->GetRenderer();
+					if(renderer)
+					{
+						renderer->SetRenderTarget(0);
+					}
 				}
 				ownedElement=element;
 				if(ownedElement)
 				{
-					ownedElement->GetRenderer()->SetRenderTarget(renderTarget);
+					IGuiGraphicsRenderer* renderer=ownedElement->GetRenderer();
+					if(renderer)
+					{
+						renderer->SetRenderTarget(renderTarget);
+					}
 				}
 			}
 
@@ -182,7 +190,11 @@ GuiGraphicsComposition
 				renderTarget=value;
 				if(ownedElement)
 				{
-					ownedElement->GetRenderer()->SetRenderTarget(renderTarget);
+					IGuiGraphicsRenderer* renderer=ownedElement->GetRenderer();
+					if(renderer)
+					{
+						renderer->SetRenderTarget(renderTarget);
+					}
 				}
 				for(int i=0;i<children.Count();i++)
 				{
@@ -210,7 +222,11 @@ GuiGraphicsComposition
 
 						if(ownedElement)
 						{
-							ownedElement->GetRenderer()->Render(bounds);
+							IGuiGraphicsRenderer* renderer=ownedElement->GetRenderer();
+							if(renderer)
+							{
+								renderer->Render(bounds);
+							}
 						}
 						if(children.Count()>0)
 						{
@@ -506,7 +522,11 @@ GuiGraphicsSite
 				{
 					if(ownedElement)
 					{
-						minSize=ownedElement->GetRenderer()->GetMinSize();
+						IGuiGraphicsRenderer* renderer=ownedElement->GetRenderer();
+						if(renderer)
+						{
+							minSize=renderer->GetMinSize();
+						}
 					}
 				}
 				if(minSizeLimitation==GuiGraphicsComposition::LimitToElementAndChildren)

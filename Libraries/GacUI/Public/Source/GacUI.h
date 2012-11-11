@@ -484,6 +484,154 @@ Resources
 #endif
 
 /***********************************************************************
+GRAPHICSELEMENT\GUIGRAPHICSELEMENTINTERFACES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Element System and Infrastructure Interfaces
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSELEMENTINTERFACES
+#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSELEMENTINTERFACES
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		using namespace reflection;
+
+		namespace elements
+		{
+			class IGuiGraphicsElement;
+			class IGuiGraphicsElementFactory;
+			class IGuiGraphicsRenderer;
+			class IGuiGraphicsRendererFactory;
+			class IGuiGraphicsRenderTarget;
+
+/***********************************************************************
+Basic Construction
+***********************************************************************/
+
+			class IGuiGraphicsElement : public virtual IDescriptable, public Description<IGuiGraphicsElement>
+			{
+			public:
+				virtual IGuiGraphicsElementFactory*		GetFactory()=0;
+				virtual IGuiGraphicsRenderer*			GetRenderer()=0;
+			};
+
+			class IGuiGraphicsElementFactory : public Interface
+			{
+			public:
+				virtual WString							GetElementTypeName()=0;
+				virtual IGuiGraphicsElement*			Create()=0;
+			};
+
+			class IGuiGraphicsRenderer : public Interface
+			{
+			public:
+				virtual IGuiGraphicsRendererFactory*	GetFactory()=0;
+
+				virtual void							Initialize(IGuiGraphicsElement* element)=0;
+				virtual void							Finalize()=0;
+				virtual void							SetRenderTarget(IGuiGraphicsRenderTarget* renderTarget)=0;
+				virtual void							Render(Rect bounds)=0;
+				virtual void							OnElementStateChanged()=0;
+				virtual Size							GetMinSize()=0;
+			};
+
+			class IGuiGraphicsRendererFactory : public Interface
+			{
+			public:
+				virtual IGuiGraphicsRenderer*			Create()=0;
+			};
+
+			class IGuiGraphicsRenderTarget : public Interface
+			{
+			public:
+				virtual void							StartRendering()=0;
+				virtual void							StopRendering()=0;
+				virtual void							PushClipper(Rect clipper)=0;
+				virtual void							PopClipper()=0;
+				virtual Rect							GetClipper()=0;
+				virtual bool							IsClipperCoverWholeTarget()=0;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+GRAPHICSELEMENT\GUIGRAPHICSDOCUMENTINTERFACES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Element System and Infrastructure Interfaces
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSDOCUMENTINTERFACES
+#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSDOCUMENTINTERFACES
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		using namespace reflection;
+
+		namespace elements
+		{
+
+/***********************************************************************
+Layout Engine
+***********************************************************************/
+
+			class IGuiGraphicsLayoutProvider;
+
+			class IGuiGraphicsParagraph : public Interface
+			{
+			public:
+				virtual IGuiGraphicsLayoutProvider*			GetProvider()=0;
+				virtual bool								GetWrapLine()=0;
+				virtual void								SetWrapLine(bool value)=0;
+				virtual const WString&						GetParagraphText()=0;
+				virtual void								SetParagraphText(const WString& value)=0;
+				virtual int									GetMaxWidth()=0;
+				virtual void								SetMaxWidth(int value)=0;
+
+				virtual bool								SetText(int start, int length, const WString& value)=0;
+				virtual bool								SetFont(int start, int length, const WString& value)=0;
+				virtual bool								SetSize(int start, int length, int size)=0;
+				virtual bool								SetBold(int start, int length, bool value)=0;
+				virtual bool								SetItalic(int start, int length, bool value)=0;
+				virtual bool								SetUnderline(int start, int length, bool value)=0;
+				virtual bool								SetStrikeline(int start, int length, bool value)=0;
+				virtual bool								SetColor(int start, int length, Color color)=0;
+
+				virtual int									GetHeight()=0;
+				virtual void								SetRenderTarget(IGuiGraphicsRenderTarget* renderTarget)=0;
+				virtual void								Render(Rect bounds)=0;
+			};
+
+			class IGuiGraphicsLayoutProvider : public Interface
+			{
+			public:
+				virtual IGuiGraphicsParagraph*				CreateParagraph()=0;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
 NATIVEWINDOW\GUINATIVEWINDOW.H
 ***********************************************************************/
 /***********************************************************************
@@ -1243,7 +1391,7 @@ Native Window Provider
 #endif
 
 /***********************************************************************
-GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
+GRAPHICSELEMENT\GUIGRAPHICSRESOURCEMANAGER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -1253,71 +1401,16 @@ GacUI::Element System and Infrastructure Interfaces
 Interfaces:
 ***********************************************************************/
 
-#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSELEMENT
-#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSELEMENT
+#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSRESOURCEMANAGER
+#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSRESOURCEMANAGER
 
 
 namespace vl
 {
 	namespace presentation
 	{
-		using namespace reflection;
-
 		namespace elements
 		{
-			class IGuiGraphicsElement;
-			class IGuiGraphicsElementFactory;
-			class IGuiGraphicsRenderer;
-			class IGuiGraphicsRendererFactory;
-			class IGuiGraphicsRenderTarget;
-
-/***********************************************************************
-Basic Construction
-***********************************************************************/
-
-			class IGuiGraphicsElement : public virtual IDescriptable, public Description<IGuiGraphicsElement>
-			{
-			public:
-				virtual IGuiGraphicsElementFactory*		GetFactory()=0;
-				virtual IGuiGraphicsRenderer*			GetRenderer()=0;
-			};
-
-			class IGuiGraphicsElementFactory : public Interface
-			{
-			public:
-				virtual WString							GetElementTypeName()=0;
-				virtual IGuiGraphicsElement*			Create()=0;
-			};
-
-			class IGuiGraphicsRenderer : public Interface
-			{
-			public:
-				virtual IGuiGraphicsRendererFactory*	GetFactory()=0;
-
-				virtual void							Initialize(IGuiGraphicsElement* element)=0;
-				virtual void							Finalize()=0;
-				virtual void							SetRenderTarget(IGuiGraphicsRenderTarget* renderTarget)=0;
-				virtual void							Render(Rect bounds)=0;
-				virtual void							OnElementStateChanged()=0;
-				virtual Size							GetMinSize()=0;
-			};
-
-			class IGuiGraphicsRendererFactory : public Interface
-			{
-			public:
-				virtual IGuiGraphicsRenderer*			Create()=0;
-			};
-
-			class IGuiGraphicsRenderTarget : public Interface
-			{
-			public:
-				virtual void							StartRendering()=0;
-				virtual void							StopRendering()=0;
-				virtual void							PushClipper(Rect clipper)=0;
-				virtual void							PopClipper()=0;
-				virtual Rect							GetClipper()=0;
-				virtual bool							IsClipperCoverWholeTarget()=0;
-			};
 
 /***********************************************************************
 Resource Manager
@@ -1339,6 +1432,7 @@ Resource Manager
 				virtual IGuiGraphicsElementFactory*		GetElementFactory(const WString& elementTypeName);
 				virtual IGuiGraphicsRendererFactory*	GetRendererFactory(const WString& elementTypeName);
 				virtual IGuiGraphicsRenderTarget*		GetRenderTarget(INativeWindow* window)=0;
+				virtual IGuiGraphicsLayoutProvider*		GetLayoutProvider()=0;
 			};
 
 			extern GuiGraphicsResourceManager*			GetGuiGraphicsResourceManager();
@@ -1362,8 +1456,12 @@ Helpers
 					{\
 						TELEMENT* element=new TELEMENT;\
 						element->factory=this;\
-						element->renderer=GetGuiGraphicsResourceManager()->GetRendererFactory(GetElementTypeName())->Create();\
-						element->renderer->Initialize(element);\
+						IGuiGraphicsRendererFactory* rendererFactory=GetGuiGraphicsResourceManager()->GetRendererFactory(GetElementTypeName());\
+						if(rendererFactory)\
+						{\
+							element->renderer=rendererFactory->Create();\
+							element->renderer->Initialize(element);\
+						}\
 						return element;\
 					}\
 				};\
@@ -1511,7 +1609,34 @@ Helpers
 							aliveResources.Set(key, package);\
 						}\
 					}\
-				}\
+				}
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Element System and Infrastructure Interfaces
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSELEMENT
+#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSELEMENT
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace elements
+		{
 
 /***********************************************************************
 Elements
@@ -9908,33 +10033,6 @@ List
 #endif
 
 /***********************************************************************
-GACUI.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-GacUI Header Files and Common Namespaces
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_GACUI
-#define VCZH_PRESENTATION_GACUI
-
-
-using namespace vl;
-using namespace vl::presentation;
-using namespace vl::presentation::elements;
-using namespace vl::presentation::compositions;
-using namespace vl::presentation::controls;
-using namespace vl::presentation::theme;
-
-extern int SetupWindowsGDIRenderer();
-extern int SetupWindowsDirect2DRenderer();
-
-#endif
-
-/***********************************************************************
 GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSWINDOWSDIRECT2D.H
 ***********************************************************************/
 /***********************************************************************
@@ -11685,5 +11783,32 @@ namespace vl
 		}
 	}
 }
+
+#endif
+
+/***********************************************************************
+GACUI.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI Header Files and Common Namespaces
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_GACUI
+#define VCZH_PRESENTATION_GACUI
+
+
+using namespace vl;
+using namespace vl::presentation;
+using namespace vl::presentation::elements;
+using namespace vl::presentation::compositions;
+using namespace vl::presentation::controls;
+using namespace vl::presentation::theme;
+
+extern int SetupWindowsGDIRenderer();
+extern int SetupWindowsDirect2DRenderer();
 
 #endif
