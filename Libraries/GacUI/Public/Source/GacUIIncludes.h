@@ -12136,6 +12136,14 @@ Layout Engine
 			class IGuiGraphicsParagraph : public Interface
 			{
 			public:
+				enum TextStyle
+				{
+					Bold=1,
+					Italic=2,
+					Underline=4,
+					Strikeline=8,
+				};
+
 				virtual IGuiGraphicsLayoutProvider*			GetProvider()=0;
 				virtual bool								GetWrapLine()=0;
 				virtual void								SetWrapLine(bool value)=0;
@@ -12147,11 +12155,8 @@ Layout Engine
 				virtual bool								SetText(int start, int length, const WString& value)=0;
 				virtual bool								SetFont(int start, int length, const WString& value)=0;
 				virtual bool								SetSize(int start, int length, int size)=0;
-				virtual bool								SetBold(int start, int length, bool value)=0;
-				virtual bool								SetItalic(int start, int length, bool value)=0;
-				virtual bool								SetUnderline(int start, int length, bool value)=0;
-				virtual bool								SetStrikeline(int start, int length, bool value)=0;
-				virtual bool								SetColor(int start, int length, Color color)=0;
+				virtual bool								SetStyle(int start, int length, TextStyle value)=0;
+				virtual bool								SetColor(int start, int length, Color value)=0;
 
 				virtual int									GetHeight()=0;
 				virtual void								SetRenderTarget(IGuiGraphicsRenderTarget* renderTarget)=0;
@@ -12161,7 +12166,7 @@ Layout Engine
 			class IGuiGraphicsLayoutProvider : public Interface
 			{
 			public:
-				virtual IGuiGraphicsParagraph*				CreateParagraph()=0;
+				virtual Ptr<IGuiGraphicsParagraph>			CreateParagraph()=0;
 			};
 		}
 	}
