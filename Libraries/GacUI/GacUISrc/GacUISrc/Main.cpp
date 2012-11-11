@@ -1350,15 +1350,15 @@ ScriptDocumentViewDirect2D
 					DWRITE_FONT_WEIGHT_NORMAL,
 					DWRITE_FONT_STYLE_NORMAL,
 					DWRITE_FONT_STRETCH_NORMAL,
-					(FLOAT)48,
+					(FLOAT)42,
 					L"",
 					&textFormat);
 				if(!FAILED(hr))
 				{
 					IDWriteTextLayout* textLayout;
 					HRESULT hr=arguments.factoryDWrite->CreateTextLayout(
-						L"Initializing uniscribe data...",
-						wcslen(L"Initializing uniscribe data..."),
+						L"Initializing IDWriteTextLayout...",
+						wcslen(L"Initializing IDWriteTextLayout..."),
 						textFormat,
 						0,
 						0,

@@ -332,9 +332,14 @@ WindowsGDIResourceManager
 				CachedCharMeasurerAllocator					charMeasurers;
 				ImageCacheList								imageCaches;
 			public:
-				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)
+				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)override
 				{
 					return GetWindowsGDIObjectProvider()->GetBindedRenderTarget(window);
+				}
+
+				IGuiGraphicsLayoutProvider* GetLayoutProvider()override
+				{
+					return 0;
 				}
 
 				void NativeWindowCreated(INativeWindow* window)override
