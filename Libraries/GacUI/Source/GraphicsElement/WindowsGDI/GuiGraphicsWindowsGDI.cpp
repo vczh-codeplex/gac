@@ -272,27 +272,12 @@ WindowsGDIParagraph
 					throw 0;
 				}
 
-				const WString& GetParagraphText()override
-				{
-					throw 0;
-				}
-
-				void SetParagraphText(const WString& value)override
-				{
-					throw 0;
-				}
-
 				int GetMaxWidth()override
 				{
 					throw 0;
 				}
 
 				void SetMaxWidth(int value)override
-				{
-					throw 0;
-				}
-
-				bool SetText(int start, int length, const WString& value)override
 				{
 					throw 0;
 				}
@@ -322,11 +307,6 @@ WindowsGDIParagraph
 					throw 0;
 				}
 
-				void SetRenderTarget(IGuiGraphicsRenderTarget* renderTarget)override
-				{
-					throw 0;
-				}
-
 				void Render(Rect bounds)override
 				{
 					throw 0;
@@ -340,7 +320,7 @@ WindowsGDILayoutProvider
 			class WindowsGDILayoutProvider : public Object, public IGuiGraphicsLayoutProvider
 			{
 			public:
-				 Ptr<IGuiGraphicsParagraph> CreateParagraph()override
+				 Ptr<IGuiGraphicsParagraph> CreateParagraph(const WString& text, IGuiGraphicsRenderTarget* renderTarget)override
 				 {
 					 return new WindowsGDIParagraph(this);
 				 }
