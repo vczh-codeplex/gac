@@ -1,12 +1,16 @@
 #include "GuiGraphicsTextElement.h"
+#include "..\..\..\..\Common\Source\Stream\MemoryStream.h"
+#include "..\..\..\..\Common\Source\Stream\Accessor.h"
 
 namespace vl
 {
+	using namespace stream;
+	using namespace collections;
+
 	namespace presentation
 	{
 		namespace elements
 		{
-			using namespace collections;
 
 			namespace text
 			{
@@ -870,6 +874,82 @@ GuiDocumentElement::GuiDocumentElementRenderer
 
 			void GuiDocumentElement::GuiDocumentElementRenderer::Render(Rect bounds)
 			{
+				renderTarget->PushClipper(bounds);
+				if(!renderTarget->IsClipperCoverWholeTarget())
+				{
+					int maxWidth=bounds.Width();
+					Rect clipper=renderTarget->GetClipper();
+					int cx=bounds.Left();
+					int cy=bounds.Top();
+					int y1=clipper.Top()-bounds.Top();
+					int y2=y1+clipper.Height();
+					int y=0;
+
+					for(int i=0;i<paragraphHeights.Count();i++)
+					{
+						int paragraphHeight=paragraphHeights[i];
+						if(y+paragraphHeight<=y1)
+						{
+							continue;
+						}
+						else if(y>=y2)
+						{
+							break;
+						}
+						else
+						{
+							Ptr<text::ParagraphCache> cache=paragraphCaches[i];
+							if(!cache)
+							{
+								cache=new text::ParagraphCache;
+								paragraphCaches[i]=cache;
+
+								Ptr<text::DocumentParagraph> paragraph=element->document->paragraphs[i];
+								MemoryStream stream;
+								{
+									StreamWriter writer(stream);
+									FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines.Wrap())
+									{
+										FOREACH(Ptr<text::DocumentRun>, run, line->runs.Wrap())
+										{
+											writer.WriteString(run->text);
+										}
+										writer.WriteString(L"\r\n");
+									}
+								}
+								{
+									stream.SeekFromBegin(0);
+									StreamReader reader(stream);
+									cache->fullText=reader.ReadToEnd();
+								}
+							}
+
+							if(!cache->graphicsParagraph)
+							{
+								cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
+							}
+							if(cache->graphicsParagraph->GetMaxWidth()==-1 || lastMaxWidth!=maxWidth)
+							{
+								cache->graphicsParagraph->SetMaxWidth(maxWidth);
+								int height=cache->graphicsParagraph->GetHeight();
+								if(paragraphHeight!=height)
+								{
+									cachedTotalHeight+=height-paragraphHeight;
+									paragraphHeight=height;
+									paragraphHeights[i]=paragraphHeight;
+								}
+							}
+
+							cache->graphicsParagraph->Render(Rect(Point(cx, cy+y), Size(maxWidth, paragraphHeight)));
+						}
+
+						y+=paragraphHeight+paragraphDistance;
+					}
+
+					lastMaxWidth=maxWidth;
+					minSize=Size(0, cachedTotalHeight);
+				}
+				renderTarget->PopClipper();
 			}
 
 			void GuiDocumentElement::GuiDocumentElementRenderer::OnElementStateChanged()
