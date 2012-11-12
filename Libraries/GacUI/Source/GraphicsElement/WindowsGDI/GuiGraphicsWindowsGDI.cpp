@@ -577,6 +577,7 @@ void RendererMainGDI()
 	elements_windows_gdi::GuiPolygonElementRenderer::Register();
 	elements_windows_gdi::GuiColorizedTextElementRenderer::Register();
 	elements_windows_gdi::GuiGDIElementRenderer::Register();
+	elements::GuiDocumentElement::GuiDocumentElementRenderer::Register();
 
 	GuiApplicationMain();
 	elements_windows_gdi::SetWindowsGDIResourceManager(0);

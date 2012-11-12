@@ -694,7 +694,10 @@ GuiColorizedTextElement
 			{
 				CopyFrom(colors.Wrap(), value.Wrap());
 				if(callback) callback->ColorChanged();
-				renderer->OnElementStateChanged();
+				if(renderer)
+				{
+					renderer->OnElementStateChanged();
+				}
 			}
 
 			const FontProperties& GuiColorizedTextElement::GetFont()
@@ -711,7 +714,10 @@ GuiColorizedTextElement
 					{
 						callback->FontChanged();
 					}
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -725,7 +731,10 @@ GuiColorizedTextElement
 				if(lines.GetPasswordChar()!=value)
 				{
 					lines.SetPasswordChar(value);
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -739,7 +748,10 @@ GuiColorizedTextElement
 				if(viewPosition!=value)
 				{
 					viewPosition=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -753,7 +765,10 @@ GuiColorizedTextElement
 				if(isVisuallyEnabled!=value)
 				{
 					isVisuallyEnabled=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -767,7 +782,10 @@ GuiColorizedTextElement
 				if(isFocused!=value)
 				{
 					isFocused=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -811,6 +829,96 @@ GuiColorizedTextElement
 				if(caretColor!=value)
 				{
 					caretColor=value;
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
+				}
+			}
+
+/***********************************************************************
+GuiDocumentElement::GuiDocumentElementRenderer
+***********************************************************************/
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::InitializeInternal()
+			{
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::FinalizeInternal()
+			{
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget)
+			{
+				for(int i=0;i<paragraphCaches.Count();i++)
+				{
+					text::ParagraphCache* cache=paragraphCaches[i].Obj();
+					if(cache)
+					{
+						cache->graphicsParagraph=0;
+					}
+				}
+			}
+
+			GuiDocumentElement::GuiDocumentElementRenderer::GuiDocumentElementRenderer()
+				:paragraphDistance(0)
+				,lastMaxWidth(-1)
+				,cachedTotalHeight(0)
+				,layoutProvider(GetGuiGraphicsResourceManager()->GetLayoutProvider())
+			{
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::Render(Rect bounds)
+			{
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::OnElementStateChanged()
+			{
+				if(element->document && element->document->paragraphs.Count()>0)
+				{
+					paragraphDistance=GetCurrentController()->ResourceService()->GetDefaultFont().size;
+					int defaultHeight=paragraphDistance;
+
+					paragraphCaches.Resize(element->document->paragraphs.Count());
+					paragraphHeights.Resize(element->document->paragraphs.Count());
+
+					for(int i=0;i<paragraphHeights.Count();i++)
+					{
+						paragraphHeights[i]=defaultHeight;
+					}
+					cachedTotalHeight=paragraphHeights.Count()*defaultHeight+(paragraphHeights.Count()-1)*paragraphDistance;
+				}
+				else
+				{
+					paragraphCaches.Resize(0);
+					paragraphHeights.Resize(0);
+					cachedTotalHeight=0;
+					minSize=Size(0, 0);
+				}
+			}
+
+/***********************************************************************
+GuiDocumentElement
+***********************************************************************/
+
+			GuiDocumentElement::GuiDocumentElement()
+			{
+			}
+
+			GuiDocumentElement::~GuiDocumentElement()
+			{
+			}
+
+			Ptr<text::DocumentModel> GuiDocumentElement::GetDocument()
+			{
+				return document;
+			}
+
+			void  GuiDocumentElement::SetDocument(Ptr<text::DocumentModel> value)
+			{
+				document=value;
+				if(renderer)
+				{
 					renderer->OnElementStateChanged();
 				}
 			}

@@ -33,7 +33,10 @@ GuiSolidBorderElement
 				if(color!=value)
 				{
 					color=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 			
@@ -72,7 +75,10 @@ GuiRoundBorderElement
 				if(color!=value)
 				{
 					color=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -86,7 +92,10 @@ GuiRoundBorderElement
 				if(radius!=value)
 				{
 					radius=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -119,7 +128,10 @@ Gui3DBorderElement
 				{
 					color1=value1;
 					color2=value2;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -153,7 +165,10 @@ Gui3DSplitterElement
 				{
 					color1=value1;
 					color2=value2;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -167,7 +182,10 @@ Gui3DSplitterElement
 				if(direction!=value)
 				{
 					direction=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -196,7 +214,10 @@ GuiSolidBackgroundElement
 				if(color!=value)
 				{
 					color=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 			
@@ -241,7 +262,10 @@ GuiGradientBackgroundElement
 				{
 					color1=value1;
 					color2=value2;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -255,7 +279,10 @@ GuiGradientBackgroundElement
 				if(direction!=value)
 				{
 					direction=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 			
@@ -301,7 +328,10 @@ GuiSolidLabelElement
 				if(color!=value)
 				{
 					color=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -315,7 +345,10 @@ GuiSolidLabelElement
 				if(fontProperties!=value)
 				{
 					fontProperties=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -329,7 +362,10 @@ GuiSolidLabelElement
 				if(text!=value)
 				{
 					text=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -349,7 +385,10 @@ GuiSolidLabelElement
 				{
 					hAlignment=horizontal;
 					vAlignment=vertical;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -363,7 +402,10 @@ GuiSolidLabelElement
 				if(wrapLine!=value)
 				{
 					wrapLine=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -377,7 +419,10 @@ GuiSolidLabelElement
 				if(ellipse!=value)
 				{
 					ellipse=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -391,7 +436,10 @@ GuiSolidLabelElement
 				if(multiline!=value)
 				{
 					multiline=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -405,7 +453,10 @@ GuiSolidLabelElement
 				if(wrapLineHeightCalculation!=value)
 				{
 					wrapLineHeightCalculation=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -451,7 +502,10 @@ GuiImageFrameElement
 						image=_image;
 						frameIndex=_frameIndex;
 					}
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -471,7 +525,10 @@ GuiImageFrameElement
 				{
 					hAlignment=horizontal;
 					vAlignment=vertical;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -485,7 +542,10 @@ GuiImageFrameElement
 				if(stretch!=value)
 				{
 					stretch=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -499,7 +559,10 @@ GuiImageFrameElement
 				if(enabled!=value)
 				{
 					enabled=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -525,7 +588,10 @@ GuiPolygonElement
 				if(size!=value)
 				{
 					size=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -546,7 +612,10 @@ GuiPolygonElement
 				{
 					memcpy(&points[0], p, sizeof(*p)*count);
 				}
-				renderer->OnElementStateChanged();
+				if(renderer)
+				{
+					renderer->OnElementStateChanged();
+				}
 			}
 
 			Color GuiPolygonElement::GetBorderColor()
@@ -559,7 +628,10 @@ GuiPolygonElement
 				if(borderColor!=value)
 				{
 					borderColor=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -573,7 +645,10 @@ GuiPolygonElement
 				if(backgroundColor!=value)
 				{
 					backgroundColor=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 		}

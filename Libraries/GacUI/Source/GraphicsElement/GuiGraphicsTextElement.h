@@ -19,7 +19,7 @@ namespace vl
 		{
 
 /***********************************************************************
-ColorizedText
+Colorized Plain Text (model)
 ***********************************************************************/
 
 			namespace text
@@ -411,6 +411,10 @@ ColorizedText
 					bool							operator!=(const ColorEntry& value){return true;}
 				};
 			}
+
+/***********************************************************************
+Colorized Plain Text (element)
+***********************************************************************/
 			
 			/// <summary>
 			/// Defines a text element with separate color configuration for each character.
@@ -573,6 +577,105 @@ ColorizedText
 				/// </summary>
 				/// <param name="value">The color of the caret.</param>
 				void								SetCaretColor(Color value);
+			};
+
+/***********************************************************************
+Rich Content Document (model)
+***********************************************************************/
+
+			namespace text
+			{
+				/// <summary>Pepresents a logical run of a rich content document.</summary>
+				class DocumentRun : public Object, public Description<DocumentRun>
+				{
+				public:
+					/// <summary>Run font and style.</summary>
+					FontProperties					style;
+
+					/// <summary>Run text.</summary>
+					WString							text;
+				};
+
+				/// <summary>Represents a logical line of a rich content document.</summary>
+				class DocumentLine : public Object, public Description<DocumentLine>
+				{
+					typedef collections::List<Ptr<DocumentRun>>			RunList;
+				public:
+					/// <summary>All runs in this paragraph.</summary>
+					RunList							runs;
+				};
+
+				/// <summary>Represents a logical paragraph of a rich content document.</summary>
+				class DocumentParagraph : public Object, public Description<DocumentParagraph>
+				{
+					typedef collections::List<Ptr<DocumentLine>>		LineList;
+				public:
+					/// <summary>All lines in this paragraph.</summary>
+					LineList						lines;
+				};
+
+				/// <summary>Represents a rich content document model.</summary>
+				class DocumentModel : public Object, public Description<DocumentModel>
+				{
+					typedef collections::List<Ptr<DocumentParagraph>>	ParagraphList;
+				public:
+					/// <summary>All paragraphs in this document.</summary>
+					ParagraphList					paragraphs;
+				};
+
+				struct ParagraphCache
+				{
+					WString							fullText;
+					Ptr<IGuiGraphicsParagraph>		graphicsParagraph;
+				};
+			}
+
+/***********************************************************************
+Rich Content Document (element)
+***********************************************************************/
+
+			/// <summary>Defines a rich text document element for rendering complex styled document.</summary>
+			class GuiDocumentElement : public Object, public IGuiGraphicsElement, public Description<GuiColorizedTextElement>
+			{
+				DEFINE_GUI_GRAPHICS_ELEMENT(GuiDocumentElement, L"RichDocument");
+			public:
+				class GuiDocumentElementRenderer : public Object, public IGuiGraphicsRenderer
+				{
+					DEFINE_GUI_GRAPHICS_RENDERER(GuiDocumentElement, GuiDocumentElementRenderer, IGuiGraphicsRenderTarget)
+				protected:
+
+					typedef collections::Array<Ptr<text::ParagraphCache>>		ParagraphCacheArray;
+				protected:
+					int									paragraphDistance;
+					int									lastMaxWidth;
+					int									cachedTotalHeight;
+					IGuiGraphicsLayoutProvider*			layoutProvider;
+					ParagraphCacheArray					paragraphCaches;
+					collections::Array<int>				paragraphHeights;
+
+					void					InitializeInternal();
+					void					FinalizeInternal();
+					void					RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget);
+				public:
+					GuiDocumentElementRenderer();
+
+					void					Render(Rect bounds)override;
+					void					OnElementStateChanged()override;
+				};
+
+			protected:
+				Ptr<text::DocumentModel>	document;
+
+				GuiDocumentElement();
+			public:
+				~GuiDocumentElement();
+				
+				/// <summary>Get the document.</summary>
+				/// <returns>The document.</returns>
+				Ptr<text::DocumentModel>	GetDocument();
+				/// <summary>Set the document. When a document is set to this element, modifying the document will lead to undefined behavior.</summary>
+				/// <param name="value">The document.</param>
+				void						SetDocument(Ptr<text::DocumentModel> value);
 			};
 		}
 	}

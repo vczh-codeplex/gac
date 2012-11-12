@@ -289,6 +289,22 @@ MainWindow
 		{
 		}
 
+		void MainWindow::commandSearchOpenApiPost_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			Ptr<NestlePost> post=new NestlePost;
+			post->title=L"正在加载...";
+			post->id=972;
+			OpenPostWindow(post);
+		}
+
+		void MainWindow::commandSearchOpenMarkdownPost_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			Ptr<NestlePost> post=new NestlePost;
+			post->title=L"正在加载...";
+			post->id=972;
+			OpenPostWindow(post);
+		}
+
 		void MainWindow::commandUserLogin_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
 			SetEnabled(false);
@@ -320,6 +336,8 @@ MainWindow
 			commandNext->Executed.AttachMethod(this, &MainWindow::commandNext_Clicked);
 			commandNewPost->Executed.AttachMethod(this, &MainWindow::commandNewPost_Clicked);
 			commandSearch->Executed.AttachMethod(this, &MainWindow::commandSearch_Clicked);
+			commandSearchOpenApiPost->Executed.AttachMethod(this, &MainWindow::commandSearchOpenApiPost_Clicked);
+			commandSearchOpenMarkdownPost->Executed.AttachMethod(this, &MainWindow::commandSearchOpenMarkdownPost_Clicked);
 			commandUserLogin->Executed.AttachMethod(this, &MainWindow::commandUserLogin_Clicked);
 			commandUserLogout->Executed.AttachMethod(this, &MainWindow::commandUserLogout_Clicked);
 
@@ -382,6 +400,16 @@ LoginWindow::InitializeComponents
 			}
 			{
 				GuiToolstripCommand* command=new GuiToolstripCommand;
+				command->SetText(L"打开鸟窝API说明贴");
+				commandSearchOpenApiPost=command;
+			}
+			{
+				GuiToolstripCommand* command=new GuiToolstripCommand;
+				command->SetText(L"打开鸟窝Markdown格式说明贴");
+				commandSearchOpenMarkdownPost=command;
+			}
+			{
+				GuiToolstripCommand* command=new GuiToolstripCommand;
 				command->SetImage(new GuiImageData(GetCurrentController()->ImageService()->CreateImageFromFile(L"..\\Resources\\ToolstripUser.png"), 0));
 				command->SetText(L"用户");
 				commandUser=command;
@@ -417,7 +445,10 @@ LoginWindow::InitializeComponents
 					->Button(commandNext.Obj())
 					->Splitter()
 					->Button(commandNewPost.Obj())
-					->Button(commandSearch.Obj())
+					->SplitButton(commandSearch.Obj())->BeginSubMenu()
+						->Button(commandSearchOpenApiPost.Obj())
+						->Button(commandSearchOpenMarkdownPost.Obj())
+						->EndSubMenu()
 					->Splitter()
 					->DropdownButton(commandUser.Obj())->BeginSubMenu()
 						->Button(commandUserLogin.Obj())
