@@ -609,26 +609,22 @@ Layout Engine
 				virtual IGuiGraphicsLayoutProvider*			GetProvider()=0;
 				virtual bool								GetWrapLine()=0;
 				virtual void								SetWrapLine(bool value)=0;
-				virtual const WString&						GetParagraphText()=0;
-				virtual void								SetParagraphText(const WString& value)=0;
 				virtual int									GetMaxWidth()=0;
 				virtual void								SetMaxWidth(int value)=0;
 
-				virtual bool								SetText(int start, int length, const WString& value)=0;
 				virtual bool								SetFont(int start, int length, const WString& value)=0;
 				virtual bool								SetSize(int start, int length, int size)=0;
 				virtual bool								SetStyle(int start, int length, TextStyle value)=0;
 				virtual bool								SetColor(int start, int length, Color value)=0;
 
 				virtual int									GetHeight()=0;
-				virtual void								SetRenderTarget(IGuiGraphicsRenderTarget* renderTarget)=0;
 				virtual void								Render(Rect bounds)=0;
 			};
 
 			class IGuiGraphicsLayoutProvider : public Interface
 			{
 			public:
-				virtual Ptr<IGuiGraphicsParagraph>			CreateParagraph()=0;
+				virtual Ptr<IGuiGraphicsParagraph>			CreateParagraph(const WString& text, IGuiGraphicsRenderTarget* renderTarget)=0;
 			};
 		}
 	}
@@ -1908,7 +1904,7 @@ namespace vl
 		{
 
 /***********************************************************************
-ColorizedText
+Colorized Plain Text (model)
 ***********************************************************************/
 
 			namespace text
@@ -2033,6 +2029,10 @@ ColorizedText
 					bool							operator!=(const ColorEntry& value){return true;}
 				};
 			}
+
+/***********************************************************************
+Colorized Plain Text (element)
+***********************************************************************/
 			
 			class GuiColorizedTextElement : public Object, public IGuiGraphicsElement, public Description<GuiColorizedTextElement>
 			{
@@ -2091,6 +2091,93 @@ ColorizedText
 				void								SetCaretVisible(bool value);
 				Color								GetCaretColor();
 				void								SetCaretColor(Color value);
+			};
+
+/***********************************************************************
+Rich Content Document (model)
+***********************************************************************/
+
+			namespace text
+			{
+				class DocumentRun : public Object, public Description<DocumentRun>
+				{
+				public:
+					FontProperties					style;
+
+					Color							color;
+
+					WString							text;
+				};
+
+				class DocumentLine : public Object, public Description<DocumentLine>
+				{
+					typedef collections::List<Ptr<DocumentRun>>			RunList;
+				public:
+					RunList							runs;
+				};
+
+				class DocumentParagraph : public Object, public Description<DocumentParagraph>
+				{
+					typedef collections::List<Ptr<DocumentLine>>		LineList;
+				public:
+					LineList						lines;
+				};
+
+				class DocumentModel : public Object, public Description<DocumentModel>
+				{
+					typedef collections::List<Ptr<DocumentParagraph>>	ParagraphList;
+				public:
+					ParagraphList					paragraphs;
+				};
+
+				struct ParagraphCache
+				{
+					WString							fullText;
+					Ptr<IGuiGraphicsParagraph>		graphicsParagraph;
+				};
+			}
+
+/***********************************************************************
+Rich Content Document (element)
+***********************************************************************/
+
+			class GuiDocumentElement : public Object, public IGuiGraphicsElement, public Description<GuiColorizedTextElement>
+			{
+				DEFINE_GUI_GRAPHICS_ELEMENT(GuiDocumentElement, L"RichDocument");
+			public:
+				class GuiDocumentElementRenderer : public Object, public IGuiGraphicsRenderer
+				{
+					DEFINE_GUI_GRAPHICS_RENDERER(GuiDocumentElement, GuiDocumentElementRenderer, IGuiGraphicsRenderTarget)
+				protected:
+
+					typedef collections::Array<Ptr<text::ParagraphCache>>		ParagraphCacheArray;
+				protected:
+					int									paragraphDistance;
+					int									lastMaxWidth;
+					int									cachedTotalHeight;
+					IGuiGraphicsLayoutProvider*			layoutProvider;
+					ParagraphCacheArray					paragraphCaches;
+					collections::Array<int>				paragraphHeights;
+
+					void					InitializeInternal();
+					void					FinalizeInternal();
+					void					RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget);
+				public:
+					GuiDocumentElementRenderer();
+
+					void					Render(Rect bounds)override;
+					void					OnElementStateChanged()override;
+				};
+
+			protected:
+				Ptr<text::DocumentModel>	document;
+
+				GuiDocumentElement();
+			public:
+				~GuiDocumentElement();
+				
+				Ptr<text::DocumentModel>	GetDocument();
+				void						SetDocument(Ptr<text::DocumentModel> value);
 			};
 		}
 	}

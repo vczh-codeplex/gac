@@ -16,6 +16,12 @@
     <Filter Include="TabPages">
       <UniqueIdentifier>{088c0e6b-577e-425a-bd87-fecede3f9617}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TabPages\ListBoxGroup">
+      <UniqueIdentifier>{50a7e80b-4220-42a8-b7d7-66bb3c24d213}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TabPages\TextBoxGroup">
+      <UniqueIdentifier>{96898674-95cb-4dbf-970a-3c788ad093ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Public\Source\GacUI.cpp">
@@ -30,38 +36,47 @@
     <ClCompile Include="SetupMainPanel.cpp">
       <Filter>TabPages</Filter>
     </ClCompile>
-    <ClCompile Include="SetupTextBoxWindow.cpp">
-      <Filter>TabPages</Filter>
-    </ClCompile>
-    <ClCompile Include="SetupListControlWindow.cpp">
-      <Filter>TabPages</Filter>
-    </ClCompile>
-    <ClCompile Include="SetupListDirectionWindow.cpp">
-      <Filter>TabPages</Filter>
-    </ClCompile>
-    <ClCompile Include="SetupListviewWindow.cpp">
-      <Filter>TabPages</Filter>
-    </ClCompile>
-    <ClCompile Include="SetupTreeviewWindow.cpp">
-      <Filter>TabPages</Filter>
-    </ClCompile>
     <ClCompile Include="SetupRibbonWindow.cpp">
       <Filter>TabPages</Filter>
     </ClCompile>
     <ClCompile Include="SetupBasicWindow.cpp">
       <Filter>TabPages</Filter>
     </ClCompile>
-    <ClCompile Include="SetupTabPageListControlWindow.cpp">
-      <Filter>TabPages</Filter>
-    </ClCompile>
     <ClCompile Include="SetupDialogWindow.cpp">
-      <Filter>TabPages</Filter>
-    </ClCompile>
-    <ClCompile Include="SetupManagedToolstripWindow.cpp">
       <Filter>TabPages</Filter>
     </ClCompile>
     <ClCompile Include="SetupTabPageWindow.cpp">
       <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupTextBoxWindow.cpp">
+      <Filter>TabPages\TextBoxGroup</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupTabPageTextBoxWindow.cpp">
+      <Filter>TabPages\TextBoxGroup</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupListControlWindow.cpp">
+      <Filter>TabPages\ListBoxGroup</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupListDirectionWindow.cpp">
+      <Filter>TabPages\ListBoxGroup</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupListviewWindow.cpp">
+      <Filter>TabPages\ListBoxGroup</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupTreeviewWindow.cpp">
+      <Filter>TabPages\ListBoxGroup</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupTabPageListControlWindow.cpp">
+      <Filter>TabPages\ListBoxGroup</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupSolidLabelElementLayoutWindow.cpp">
+      <Filter>TabPages\TextBoxGroup</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupToolstripWindow.cpp">
+      <Filter>TabPages</Filter>
+    </ClCompile>
+    <ClCompile Include="SetupDocumentElementLayoutWindow.cpp">
+      <Filter>TabPages\TextBoxGroup</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
