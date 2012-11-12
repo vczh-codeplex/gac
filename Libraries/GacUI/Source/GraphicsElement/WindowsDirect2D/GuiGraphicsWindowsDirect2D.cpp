@@ -553,15 +553,48 @@ WindowsDirect2DParagraph
 			{
 			protected:
 				IGuiGraphicsLayoutProvider*			provider;
+				IDWriteFactory*						dwriteFactory;
+				IWindowsDirect2DRenderTarget*		renderTarget;
+				ComPtr<IDWriteTextLayout>			textLayout;
+				bool								wrapLine;
+				int									maxWidth;
+				List<Color>							usedColors;
 
 			public:
-				WindowsDirect2DParagraph(IGuiGraphicsLayoutProvider* _provider)
+				WindowsDirect2DParagraph(IGuiGraphicsLayoutProvider* _provider, const WString& _text, IGuiGraphicsRenderTarget* _renderTarget)
 					:provider(_provider)
+					,dwriteFactory(GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory())
+					,renderTarget(dynamic_cast<IWindowsDirect2DRenderTarget*>(_renderTarget))
+					,textLayout(0)
+					,wrapLine(true)
+					,maxWidth(-1)
 				{
+					FontProperties defaultFont=GetCurrentController()->ResourceService()->GetDefaultFont();
+					Direct2DTextFormatPackage* package=GetWindowsDirect2DResourceManager()->CreateDirect2DTextFormat(defaultFont);
+
+					IDWriteTextLayout* rawTextLayout=0;
+					HRESULT hr=dwriteFactory->CreateTextLayout(
+						_text.Buffer(),
+						_text.Length(),
+						package->textFormat.Obj(),
+						0,
+						0,
+						&rawTextLayout);
+					if(!FAILED(hr))
+					{
+						textLayout=rawTextLayout;
+						textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
+					}
+
+					GetWindowsDirect2DResourceManager()->DestroyDirect2DTextFormat(defaultFont);
 				}
 
 				~WindowsDirect2DParagraph()
 				{
+					FOREACH(Color, color, usedColors.Wrap())
+					{
+						renderTarget->DestroyDirect2DBrush(color);
+					}
 				}
 
 				IGuiGraphicsLayoutProvider* GetProvider()override
@@ -571,85 +604,108 @@ WindowsDirect2DParagraph
 
 				bool GetWrapLine()override
 				{
-					throw 0;
+					return wrapLine;
 				}
 
 				void SetWrapLine(bool value)override
 				{
-					throw 0;
-				}
-
-				const WString& GetParagraphText()override
-				{
-					throw 0;
-				}
-
-				void SetParagraphText(const WString& value)override
-				{
-					throw 0;
+					if(wrapLine!=value)
+					{
+						wrapLine=value;
+						textLayout->SetWordWrapping(value?DWRITE_WORD_WRAPPING_WRAP:DWRITE_WORD_WRAPPING_NO_WRAP);
+					}
 				}
 
 				int GetMaxWidth()override
 				{
-					throw 0;
+					return maxWidth;
 				}
 
 				void SetMaxWidth(int value)override
 				{
-					throw 0;
-				}
-
-				bool SetText(int start, int length, const WString& value)override
-				{
-					throw 0;
+					if(maxWidth!=value)
+					{
+						maxWidth=value;
+						textLayout->SetMaxWidth(value==-1?65536:(FLOAT)value);
+					}
 				}
 
 				bool SetFont(int start, int length, const WString& value)override
 				{
-					throw 0;
+					DWRITE_TEXT_RANGE range;
+					range.startPosition=start;
+					range.length=length;
+					HRESULT hr=textLayout->SetFontFamilyName(value.Buffer(), range);
+					return !FAILED(hr);
 				}
 
 				bool SetSize(int start, int length, int size)override
 				{
-					throw 0;
+					DWRITE_TEXT_RANGE range;
+					range.startPosition=start;
+					range.length=length;
+					HRESULT hr=textLayout->SetFontSize((FLOAT)size, range);
+					return !FAILED(hr);
 				}
 
 				bool SetStyle(int start, int length, TextStyle value)override
 				{
-					throw 0;
+					DWRITE_TEXT_RANGE range;
+					range.startPosition=start;
+					range.length=length;
+					HRESULT hr=S_OK;
+
+					hr=textLayout->SetFontStyle(value&Italic?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL, range);
+					if(FAILED(hr)) return false;
+					hr=textLayout->SetFontWeight(value&Bold?DWRITE_FONT_WEIGHT_BOLD:DWRITE_FONT_WEIGHT_NORMAL, range);
+					if(FAILED(hr)) return false;
+					hr=textLayout->SetUnderline(value&Underline?TRUE:FALSE, range);
+					if(FAILED(hr)) return false;
+					hr=textLayout->SetStrikethrough(value&Strikeline?TRUE:FALSE, range);
+					if(FAILED(hr)) return false;
+
+					return true;
 				}
 
 				bool SetColor(int start, int length, Color value)override
 				{
-					throw 0;
+					ID2D1SolidColorBrush* brush=renderTarget->CreateDirect2DBrush(value);
+					usedColors.Add(value);
+
+					DWRITE_TEXT_RANGE range;
+					range.startPosition=start;
+					range.length=length;
+					HRESULT hr=textLayout->SetDrawingEffect(brush, range);
+					return !FAILED(hr);
 				}
 
 				int GetHeight()override
 				{
-					throw 0;
-				}
-
-				void SetRenderTarget(IGuiGraphicsRenderTarget* renderTarget)override
-				{
-					throw 0;
+					DWRITE_TEXT_METRICS metrics;
+					textLayout->GetMetrics(&metrics);
+					return (int)metrics.height;
 				}
 
 				void Render(Rect bounds)override
 				{
-					throw 0;
+					renderTarget->GetDirect2DRenderTarget()->DrawTextLayout(
+						D2D1::Point2F((FLOAT)bounds.Left(), (FLOAT)bounds.Top()),
+						textLayout.Obj(),
+						NULL,
+						D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
 				}
 			};
 
 /***********************************************************************
-WindowsDorect2DLayoutProvider
+WindowsDirect2DLayoutProvider
 ***********************************************************************/
 
-			class WindowsDorect2DLayoutProvider : public Object, public IGuiGraphicsLayoutProvider
+			class WindowsDirect2DLayoutProvider : public Object, public IGuiGraphicsLayoutProvider
 			{
 			public:
-				 Ptr<IGuiGraphicsParagraph> CreateParagraph()override
+				 Ptr<IGuiGraphicsParagraph> CreateParagraph(const WString& text, IGuiGraphicsRenderTarget* renderTarget)override
 				 {
-					 return new WindowsDirect2DParagraph(this);
+					 return new WindowsDirect2DParagraph(this, text, renderTarget);
 				 }
 			};
 
@@ -661,14 +717,14 @@ WindowsGDIResourceManager
 			{
 			protected:
 				SortedList<Ptr<WindowsDirect2DRenderTarget>>		renderTargets;
-				Ptr<WindowsDorect2DLayoutProvider>					layoutProvider;
+				Ptr<WindowsDirect2DLayoutProvider>					layoutProvider;
 
 				CachedTextFormatAllocator							textFormats;
 				CachedCharMeasurerAllocator							charMeasurers;
 			public:
 				WindowsDirect2DResourceManager()
 				{
-					layoutProvider=new WindowsDorect2DLayoutProvider;
+					layoutProvider=new WindowsDirect2DLayoutProvider;
 				}
 
 				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)override

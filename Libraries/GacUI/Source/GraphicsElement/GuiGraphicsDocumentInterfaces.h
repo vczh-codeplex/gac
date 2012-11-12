@@ -52,12 +52,6 @@ Layout Engine
 				/// <summary>Set if line auto-wrapping is enabled for this paragraph.</summary>
 				/// <param name="value">True if line auto-wrapping is enabled for this paragraph.</param>
 				virtual void								SetWrapLine(bool value)=0;
-				/// <summary>Get the text for this paragraph.</summary>
-				/// <returns>The text for this paragraph.</returns>
-				virtual const WString&						GetParagraphText()=0;
-				/// <summary>Set the text for this paragraph using the default font comes from [M:vl.presentation.INativeResourceService.GetDefaultFont].</summary>
-				/// <param name="value">The new text.</param>
-				virtual void								SetParagraphText(const WString& value)=0;
 				/// <summary>Get the max width for this paragraph. If there is no max width limitation, it returns -1.</summary>
 				/// <returns>The max width for this paragraph.</returns>
 				virtual int									GetMaxWidth()=0;
@@ -65,12 +59,6 @@ Layout Engine
 				/// <param name="value">The max width.</param>
 				virtual void								SetMaxWidth(int value)=0;
 
-				/// <summary>Replace the text within the specified range.</summary>
-				/// <param name="start">The position of the first character of the specified range.</param>
-				/// <param name="length">The length of the specified range by character.</param>
-				/// <param name="value">The text</param>
-				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetText(int start, int length, const WString& value)=0;
 				/// <summary>Replace the font within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
@@ -99,9 +87,6 @@ Layout Engine
 				/// <summary>Get the layouted height of the text. The result depends on rich styled text and the two important properties that can be set using <see cref="SetWrapLine"/> and <see cref="SetMaxWidth"/>.</summary>
 				/// <returns>The layouted height.</returns>
 				virtual int									GetHeight()=0;
-				/// <summary>Set a <see cref="IGuiGraphicsRenderTarget"></see> to this element.</summary>
-				/// <param name="renderTarget">The graphics render target. It can be NULL.</param>
-				virtual void								SetRenderTarget(IGuiGraphicsRenderTarget* renderTarget)=0;
 				/// <summary>Render the graphics element using a specified bounds.</summary>
 				/// <param name="bounds">Bounds to decide the size and position of the binded graphics element.</param>
 				virtual void								Render(Rect bounds)=0;
@@ -112,7 +97,10 @@ Layout Engine
 			{
 			public:
 				/// <summary>Create a paragraph with internal renderer device dependent objects initialized.</summary>
-				virtual Ptr<IGuiGraphicsParagraph>			CreateParagraph()=0;
+				/// <param name="text">The text used to fill the paragraph.</param>
+				/// <param name="renderTarget">The render target that the created paragraph will render to.</param>
+				/// <returns>The created paragraph object.</returns>
+				virtual Ptr<IGuiGraphicsParagraph>			CreateParagraph(const WString& text, IGuiGraphicsRenderTarget* renderTarget)=0;
 			};
 		}
 	}
