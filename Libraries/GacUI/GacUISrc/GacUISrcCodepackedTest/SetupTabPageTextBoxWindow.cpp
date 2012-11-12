@@ -21,12 +21,12 @@ void SetupTabPageTextBoxlWindow(GuiControlHost* controlHost, GuiControl* contain
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
-		page->SetText(L"Document Layout (document.txt)");
+		page->SetText(L"document.txt");
 		SetupDocumentElementLayoutWindow(controlHost, page->GetContainer(), L"Resources\\document.txt");
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
-		page->SetText(L"Document Layout (document2.txt)");
+		page->SetText(L"document2.txt");
 		SetupDocumentElementLayoutWindow(controlHost, page->GetContainer(), L"Resources\\document2.txt");
 	}
 	container->GetContainerComposition()->AddChild(tab->GetBoundsComposition());

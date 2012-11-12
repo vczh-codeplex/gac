@@ -1,5 +1,6 @@
 #include "GuiGraphicsWindowsGDI.h"
 #include "GuiGraphicsRenderersWindowsGDI.h"
+#include "GuiGraphicsLayoutProviderWindowsGDI.h"
 #include "..\..\Controls\GuiApplication.h"
 
 namespace vl
@@ -236,94 +237,6 @@ CachedResourceAllocator
 				{
 					return new GdiCharMeasurer(CachedFontAllocator::CreateGdiFont(value), value.size);
 				}
-			};
-
-/***********************************************************************
-WindowsGDIParagraph
-***********************************************************************/
-
-			class WindowsGDIParagraph : public Object, public IGuiGraphicsParagraph
-			{
-			protected:
-				IGuiGraphicsLayoutProvider*			provider;
-
-			public:
-				WindowsGDIParagraph(IGuiGraphicsLayoutProvider* _provider)
-					:provider(_provider)
-				{
-				}
-
-				~WindowsGDIParagraph()
-				{
-				}
-
-				IGuiGraphicsLayoutProvider* GetProvider()override
-				{
-					return provider;
-				}
-
-				bool GetWrapLine()override
-				{
-					throw 0;
-				}
-
-				void SetWrapLine(bool value)override
-				{
-					throw 0;
-				}
-
-				int GetMaxWidth()override
-				{
-					throw 0;
-				}
-
-				void SetMaxWidth(int value)override
-				{
-					throw 0;
-				}
-
-				bool SetFont(int start, int length, const WString& value)override
-				{
-					throw 0;
-				}
-
-				bool SetSize(int start, int length, int size)override
-				{
-					throw 0;
-				}
-
-				bool SetStyle(int start, int length, TextStyle value)override
-				{
-					throw 0;
-				}
-
-				bool SetColor(int start, int length, Color value)override
-				{
-					throw 0;
-				}
-
-				int GetHeight()override
-				{
-					throw 0;
-				}
-
-				void Render(Rect bounds)override
-				{
-					throw 0;
-				}
-			};
-
-/***********************************************************************
-WindowsGDILayoutProvider
-***********************************************************************/
-
-			class WindowsGDILayoutProvider : public Object, public IGuiGraphicsLayoutProvider
-			{
-			public:
-				 Ptr<IGuiGraphicsParagraph> CreateParagraph(const WString& text, IGuiGraphicsRenderTarget* renderTarget)override
-				 {
-					 return new WindowsGDIParagraph(this);
-				 }
 			};
 
 /***********************************************************************

@@ -342,6 +342,12 @@
     <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsResourceManager.cpp">
       <Filter>GacUI\GraphicsElement</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsLayoutProviderWindowsDirect2D.cpp">
+      <Filter>GacUI\GraphicsElement\WindowsDirect2D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsLayoutProviderWindowsGDI.cpp">
+      <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -685,6 +691,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsDocumentInterfaces.h">
       <Filter>GacUI\GraphicsElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsLayoutProviderWindowsDirect2D.h">
+      <Filter>GacUI\GraphicsElement\WindowsDirect2D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsLayoutProviderWindowsGDI.h">
+      <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
