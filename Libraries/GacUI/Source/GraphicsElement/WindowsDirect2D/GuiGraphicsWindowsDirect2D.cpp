@@ -553,6 +553,7 @@ WindowsDirect2DParagraph
 			{
 			protected:
 				IGuiGraphicsLayoutProvider*			provider;
+				ID2D1SolidColorBrush*				defaultTextColor;
 				IDWriteFactory*						dwriteFactory;
 				IWindowsDirect2DRenderTarget*		renderTarget;
 				ComPtr<IDWriteTextLayout>			textLayout;
@@ -571,6 +572,8 @@ WindowsDirect2DParagraph
 				{
 					FontProperties defaultFont=GetCurrentController()->ResourceService()->GetDefaultFont();
 					Direct2DTextFormatPackage* package=GetWindowsDirect2DResourceManager()->CreateDirect2DTextFormat(defaultFont);
+					defaultTextColor=renderTarget->CreateDirect2DBrush(Color(0, 0, 0));
+					usedColors.Add(Color(0, 0, 0));
 
 					IDWriteTextLayout* rawTextLayout=0;
 					HRESULT hr=dwriteFactory->CreateTextLayout(
@@ -691,7 +694,7 @@ WindowsDirect2DParagraph
 					renderTarget->GetDirect2DRenderTarget()->DrawTextLayout(
 						D2D1::Point2F((FLOAT)bounds.Left(), (FLOAT)bounds.Top()),
 						textLayout.Obj(),
-						NULL,
+						defaultTextColor,
 						D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
 				}
 			};
