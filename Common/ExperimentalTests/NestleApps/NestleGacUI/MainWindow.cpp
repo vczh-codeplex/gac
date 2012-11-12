@@ -219,7 +219,7 @@ MainWindow
 						{
 							listTopics->GetItems().Add(post);
 						}
-						labelInformation->SetText(L"您好,"+server->GetUsername()+L"。欢迎使用Vczh鸟窝客户端。您正在浏览第"+itow(page->currentPage+1)+L"页，共"+itow(page->totalPages)+L"页。");
+						labelInformation->SetText(L"您好，"+server->GetUsername()+L"。欢迎使用Vczh鸟窝客户端。您正在浏览第"+itow(page->currentPage+1)+L"页，共"+itow(page->totalPages)+L"页。");
 						listTopics->GetBoundsComposition()->SetAssociatedCursor(0);
 						EnableControls(true);
 					});
@@ -301,7 +301,7 @@ MainWindow
 		{
 			Ptr<NestlePost> post=new NestlePost;
 			post->title=L"正在加载...";
-			post->id=972;
+			post->id=138;
 			OpenPostWindow(post);
 		}
 
