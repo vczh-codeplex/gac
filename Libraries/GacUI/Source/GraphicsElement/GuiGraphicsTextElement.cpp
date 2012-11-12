@@ -890,6 +890,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						int paragraphHeight=paragraphHeights[i];
 						if(y+paragraphHeight<=y1)
 						{
+							y+=paragraphHeight+paragraphDistance;
 							continue;
 						}
 						else if(y>=y2)
@@ -898,13 +899,13 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						}
 						else
 						{
+							Ptr<text::DocumentParagraph> paragraph=element->document->paragraphs[i];
 							Ptr<text::ParagraphCache> cache=paragraphCaches[i];
 							if(!cache)
 							{
 								cache=new text::ParagraphCache;
 								paragraphCaches[i]=cache;
 
-								Ptr<text::DocumentParagraph> paragraph=element->document->paragraphs[i];
 								MemoryStream stream;
 								{
 									StreamWriter writer(stream);
@@ -927,8 +928,28 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							if(!cache->graphicsParagraph)
 							{
 								cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
+								int start=0;
+								FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines.Wrap())
+								{
+									FOREACH(Ptr<text::DocumentRun>, run, line->runs.Wrap())
+									{
+										int length=run->text.Length();
+										cache->graphicsParagraph->SetFont(start, length, run->style.fontFamily);
+										cache->graphicsParagraph->SetSize(start, length, run->style.size);
+										cache->graphicsParagraph->SetColor(start, length, run->color);
+										cache->graphicsParagraph->SetStyle(start, length, 
+											(IGuiGraphicsParagraph::TextStyle)
+											( (run->style.bold?IGuiGraphicsParagraph::Bold:0)
+											| (run->style.italic?IGuiGraphicsParagraph::Italic:0)
+											| (run->style.underline?IGuiGraphicsParagraph::Underline:0)
+											| (run->style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
+											));
+										start+=length;
+									}
+									start+=2;
+								}
 							}
-							if(cache->graphicsParagraph->GetMaxWidth()==-1 || lastMaxWidth!=maxWidth)
+							if(cache->graphicsParagraph->GetMaxWidth()!=maxWidth)
 							{
 								cache->graphicsParagraph->SetMaxWidth(maxWidth);
 								int height=cache->graphicsParagraph->GetHeight();
@@ -967,6 +988,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 						paragraphHeights[i]=defaultHeight;
 					}
 					cachedTotalHeight=paragraphHeights.Count()*defaultHeight+(paragraphHeights.Count()-1)*paragraphDistance;
+					minSize=Size(0, cachedTotalHeight);
 				}
 				else
 				{

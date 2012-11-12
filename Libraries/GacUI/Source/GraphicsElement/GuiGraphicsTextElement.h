@@ -592,6 +592,9 @@ Rich Content Document (model)
 					/// <summary>Run font and style.</summary>
 					FontProperties					style;
 
+					/// <summary>Run color.</summary>
+					Color							color;
+
 					/// <summary>Run text.</summary>
 					WString							text;
 				};
