@@ -831,6 +831,7 @@ void RendererMainDirect2D()
 	elements_windows_d2d::GuiPolygonElementRenderer::Register();
 	elements_windows_d2d::GuiColorizedTextElementRenderer::Register();
 	elements_windows_d2d::GuiDirect2DElementRenderer::Register();
+	elements::GuiDocumentElement::GuiDocumentElementRenderer::Register();
 
 	GuiApplicationMain();
 	elements_windows_d2d::SetWindowsDirect2DResourceManager(0);

@@ -40,6 +40,8 @@ namespace vl
 			Ptr<GuiToolstripCommand>					commandNext;
 			Ptr<GuiToolstripCommand>					commandNewPost;
 			Ptr<GuiToolstripCommand>					commandSearch;
+			Ptr<GuiToolstripCommand>					commandSearchOpenApiPost;
+			Ptr<GuiToolstripCommand>					commandSearchOpenMarkdownPost;
 			Ptr<GuiToolstripCommand>					commandUser;
 			Ptr<GuiToolstripCommand>					commandUserLogin;
 			Ptr<GuiToolstripCommand>					commandUserLogout;
@@ -71,6 +73,8 @@ namespace vl
 			void										commandNext_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandNewPost_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandSearch_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void										commandSearchOpenApiPost_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void										commandSearchOpenMarkdownPost_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandUserLogin_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void										commandUserLogout_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 		protected:

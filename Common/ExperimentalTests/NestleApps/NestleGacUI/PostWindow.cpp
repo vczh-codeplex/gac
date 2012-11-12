@@ -404,6 +404,7 @@ PostWindow
 					ClearPostItems();
 					if(post)
 					{
+						SetText(L"Î§¹ÛÌû×Ó£º"+post->title);
 						{
 							Ptr<PostItem> postItem=new PostItem;
 							postItem->title=post->title;
