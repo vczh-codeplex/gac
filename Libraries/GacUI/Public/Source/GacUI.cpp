@@ -22287,7 +22287,10 @@ GuiSolidBorderElement
 				if(color!=value)
 				{
 					color=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 			
@@ -22326,7 +22329,10 @@ GuiRoundBorderElement
 				if(color!=value)
 				{
 					color=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22340,7 +22346,10 @@ GuiRoundBorderElement
 				if(radius!=value)
 				{
 					radius=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22373,7 +22382,10 @@ Gui3DBorderElement
 				{
 					color1=value1;
 					color2=value2;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22407,7 +22419,10 @@ Gui3DSplitterElement
 				{
 					color1=value1;
 					color2=value2;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22421,7 +22436,10 @@ Gui3DSplitterElement
 				if(direction!=value)
 				{
 					direction=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22450,7 +22468,10 @@ GuiSolidBackgroundElement
 				if(color!=value)
 				{
 					color=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 			
@@ -22495,7 +22516,10 @@ GuiGradientBackgroundElement
 				{
 					color1=value1;
 					color2=value2;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22509,7 +22533,10 @@ GuiGradientBackgroundElement
 				if(direction!=value)
 				{
 					direction=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 			
@@ -22555,7 +22582,10 @@ GuiSolidLabelElement
 				if(color!=value)
 				{
 					color=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22569,7 +22599,10 @@ GuiSolidLabelElement
 				if(fontProperties!=value)
 				{
 					fontProperties=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22583,7 +22616,10 @@ GuiSolidLabelElement
 				if(text!=value)
 				{
 					text=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22603,7 +22639,10 @@ GuiSolidLabelElement
 				{
 					hAlignment=horizontal;
 					vAlignment=vertical;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22617,7 +22656,10 @@ GuiSolidLabelElement
 				if(wrapLine!=value)
 				{
 					wrapLine=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22631,7 +22673,10 @@ GuiSolidLabelElement
 				if(ellipse!=value)
 				{
 					ellipse=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22645,7 +22690,10 @@ GuiSolidLabelElement
 				if(multiline!=value)
 				{
 					multiline=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22659,7 +22707,10 @@ GuiSolidLabelElement
 				if(wrapLineHeightCalculation!=value)
 				{
 					wrapLineHeightCalculation=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22705,7 +22756,10 @@ GuiImageFrameElement
 						image=_image;
 						frameIndex=_frameIndex;
 					}
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22725,7 +22779,10 @@ GuiImageFrameElement
 				{
 					hAlignment=horizontal;
 					vAlignment=vertical;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22739,7 +22796,10 @@ GuiImageFrameElement
 				if(stretch!=value)
 				{
 					stretch=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22753,7 +22813,10 @@ GuiImageFrameElement
 				if(enabled!=value)
 				{
 					enabled=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22779,7 +22842,10 @@ GuiPolygonElement
 				if(size!=value)
 				{
 					size=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22800,7 +22866,10 @@ GuiPolygonElement
 				{
 					memcpy(&points[0], p, sizeof(*p)*count);
 				}
-				renderer->OnElementStateChanged();
+				if(renderer)
+				{
+					renderer->OnElementStateChanged();
+				}
 			}
 
 			Color GuiPolygonElement::GetBorderColor()
@@ -22813,7 +22882,10 @@ GuiPolygonElement
 				if(borderColor!=value)
 				{
 					borderColor=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -22827,7 +22899,10 @@ GuiPolygonElement
 				if(backgroundColor!=value)
 				{
 					backgroundColor=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 		}
@@ -23740,11 +23815,13 @@ GraphicsElement\GuiGraphicsTextElement.cpp
 
 namespace vl
 {
+	using namespace stream;
+	using namespace collections;
+
 	namespace presentation
 	{
 		namespace elements
 		{
-			using namespace collections;
 
 			namespace text
 			{
@@ -24432,7 +24509,10 @@ GuiColorizedTextElement
 			{
 				CopyFrom(colors.Wrap(), value.Wrap());
 				if(callback) callback->ColorChanged();
-				renderer->OnElementStateChanged();
+				if(renderer)
+				{
+					renderer->OnElementStateChanged();
+				}
 			}
 
 			const FontProperties& GuiColorizedTextElement::GetFont()
@@ -24449,7 +24529,10 @@ GuiColorizedTextElement
 					{
 						callback->FontChanged();
 					}
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -24463,7 +24546,10 @@ GuiColorizedTextElement
 				if(lines.GetPasswordChar()!=value)
 				{
 					lines.SetPasswordChar(value);
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -24477,7 +24563,10 @@ GuiColorizedTextElement
 				if(viewPosition!=value)
 				{
 					viewPosition=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -24491,7 +24580,10 @@ GuiColorizedTextElement
 				if(isVisuallyEnabled!=value)
 				{
 					isVisuallyEnabled=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -24505,7 +24597,10 @@ GuiColorizedTextElement
 				if(isFocused!=value)
 				{
 					isFocused=value;
-					renderer->OnElementStateChanged();
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
 				}
 			}
 
@@ -24549,6 +24644,194 @@ GuiColorizedTextElement
 				if(caretColor!=value)
 				{
 					caretColor=value;
+					if(renderer)
+					{
+						renderer->OnElementStateChanged();
+					}
+				}
+			}
+
+/***********************************************************************
+GuiDocumentElement::GuiDocumentElementRenderer
+***********************************************************************/
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::InitializeInternal()
+			{
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::FinalizeInternal()
+			{
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget)
+			{
+				for(int i=0;i<paragraphCaches.Count();i++)
+				{
+					text::ParagraphCache* cache=paragraphCaches[i].Obj();
+					if(cache)
+					{
+						cache->graphicsParagraph=0;
+					}
+				}
+			}
+
+			GuiDocumentElement::GuiDocumentElementRenderer::GuiDocumentElementRenderer()
+				:paragraphDistance(0)
+				,lastMaxWidth(-1)
+				,cachedTotalHeight(0)
+				,layoutProvider(GetGuiGraphicsResourceManager()->GetLayoutProvider())
+			{
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::Render(Rect bounds)
+			{
+				renderTarget->PushClipper(bounds);
+				if(!renderTarget->IsClipperCoverWholeTarget())
+				{
+					int maxWidth=bounds.Width();
+					Rect clipper=renderTarget->GetClipper();
+					int cx=bounds.Left();
+					int cy=bounds.Top();
+					int y1=clipper.Top()-bounds.Top();
+					int y2=y1+clipper.Height();
+					int y=0;
+
+					for(int i=0;i<paragraphHeights.Count();i++)
+					{
+						int paragraphHeight=paragraphHeights[i];
+						if(y+paragraphHeight<=y1)
+						{
+							y+=paragraphHeight+paragraphDistance;
+							continue;
+						}
+						else if(y>=y2)
+						{
+							break;
+						}
+						else
+						{
+							Ptr<text::DocumentParagraph> paragraph=element->document->paragraphs[i];
+							Ptr<text::ParagraphCache> cache=paragraphCaches[i];
+							if(!cache)
+							{
+								cache=new text::ParagraphCache;
+								paragraphCaches[i]=cache;
+
+								MemoryStream stream;
+								{
+									StreamWriter writer(stream);
+									FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines.Wrap())
+									{
+										FOREACH(Ptr<text::DocumentRun>, run, line->runs.Wrap())
+										{
+											writer.WriteString(run->text);
+										}
+										writer.WriteString(L"\r\n");
+									}
+								}
+								{
+									stream.SeekFromBegin(0);
+									StreamReader reader(stream);
+									cache->fullText=reader.ReadToEnd();
+								}
+							}
+
+							if(!cache->graphicsParagraph)
+							{
+								cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
+								int start=0;
+								FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines.Wrap())
+								{
+									FOREACH(Ptr<text::DocumentRun>, run, line->runs.Wrap())
+									{
+										int length=run->text.Length();
+										cache->graphicsParagraph->SetFont(start, length, run->style.fontFamily);
+										cache->graphicsParagraph->SetSize(start, length, run->style.size);
+										cache->graphicsParagraph->SetColor(start, length, run->color);
+										cache->graphicsParagraph->SetStyle(start, length, 
+											(IGuiGraphicsParagraph::TextStyle)
+											( (run->style.bold?IGuiGraphicsParagraph::Bold:0)
+											| (run->style.italic?IGuiGraphicsParagraph::Italic:0)
+											| (run->style.underline?IGuiGraphicsParagraph::Underline:0)
+											| (run->style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
+											));
+										start+=length;
+									}
+									start+=2;
+								}
+							}
+							if(cache->graphicsParagraph->GetMaxWidth()!=maxWidth)
+							{
+								cache->graphicsParagraph->SetMaxWidth(maxWidth);
+								int height=cache->graphicsParagraph->GetHeight();
+								if(paragraphHeight!=height)
+								{
+									cachedTotalHeight+=height-paragraphHeight;
+									paragraphHeight=height;
+									paragraphHeights[i]=paragraphHeight;
+								}
+							}
+
+							cache->graphicsParagraph->Render(Rect(Point(cx, cy+y), Size(maxWidth, paragraphHeight)));
+						}
+
+						y+=paragraphHeight+paragraphDistance;
+					}
+
+					lastMaxWidth=maxWidth;
+					minSize=Size(0, cachedTotalHeight);
+				}
+				renderTarget->PopClipper();
+			}
+
+			void GuiDocumentElement::GuiDocumentElementRenderer::OnElementStateChanged()
+			{
+				if(element->document && element->document->paragraphs.Count()>0)
+				{
+					paragraphDistance=GetCurrentController()->ResourceService()->GetDefaultFont().size;
+					int defaultHeight=paragraphDistance;
+
+					paragraphCaches.Resize(element->document->paragraphs.Count());
+					paragraphHeights.Resize(element->document->paragraphs.Count());
+
+					for(int i=0;i<paragraphHeights.Count();i++)
+					{
+						paragraphHeights[i]=defaultHeight;
+					}
+					cachedTotalHeight=paragraphHeights.Count()*defaultHeight+(paragraphHeights.Count()-1)*paragraphDistance;
+					minSize=Size(0, cachedTotalHeight);
+				}
+				else
+				{
+					paragraphCaches.Resize(0);
+					paragraphHeights.Resize(0);
+					cachedTotalHeight=0;
+					minSize=Size(0, 0);
+				}
+			}
+
+/***********************************************************************
+GuiDocumentElement
+***********************************************************************/
+
+			GuiDocumentElement::GuiDocumentElement()
+			{
+			}
+
+			GuiDocumentElement::~GuiDocumentElement()
+			{
+			}
+
+			Ptr<text::DocumentModel> GuiDocumentElement::GetDocument()
+			{
+				return document;
+			}
+
+			void  GuiDocumentElement::SetDocument(Ptr<text::DocumentModel> value)
+			{
+				document=value;
+				if(renderer)
+				{
 					renderer->OnElementStateChanged();
 				}
 			}
@@ -26375,15 +26658,51 @@ WindowsDirect2DParagraph
 			{
 			protected:
 				IGuiGraphicsLayoutProvider*			provider;
+				ID2D1SolidColorBrush*				defaultTextColor;
+				IDWriteFactory*						dwriteFactory;
+				IWindowsDirect2DRenderTarget*		renderTarget;
+				ComPtr<IDWriteTextLayout>			textLayout;
+				bool								wrapLine;
+				int									maxWidth;
+				List<Color>							usedColors;
 
 			public:
-				WindowsDirect2DParagraph(IGuiGraphicsLayoutProvider* _provider)
+				WindowsDirect2DParagraph(IGuiGraphicsLayoutProvider* _provider, const WString& _text, IGuiGraphicsRenderTarget* _renderTarget)
 					:provider(_provider)
+					,dwriteFactory(GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory())
+					,renderTarget(dynamic_cast<IWindowsDirect2DRenderTarget*>(_renderTarget))
+					,textLayout(0)
+					,wrapLine(true)
+					,maxWidth(-1)
 				{
+					FontProperties defaultFont=GetCurrentController()->ResourceService()->GetDefaultFont();
+					Direct2DTextFormatPackage* package=GetWindowsDirect2DResourceManager()->CreateDirect2DTextFormat(defaultFont);
+					defaultTextColor=renderTarget->CreateDirect2DBrush(Color(0, 0, 0));
+					usedColors.Add(Color(0, 0, 0));
+
+					IDWriteTextLayout* rawTextLayout=0;
+					HRESULT hr=dwriteFactory->CreateTextLayout(
+						_text.Buffer(),
+						_text.Length(),
+						package->textFormat.Obj(),
+						0,
+						0,
+						&rawTextLayout);
+					if(!FAILED(hr))
+					{
+						textLayout=rawTextLayout;
+						textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
+					}
+
+					GetWindowsDirect2DResourceManager()->DestroyDirect2DTextFormat(defaultFont);
 				}
 
 				~WindowsDirect2DParagraph()
 				{
+					FOREACH(Color, color, usedColors.Wrap())
+					{
+						renderTarget->DestroyDirect2DBrush(color);
+					}
 				}
 
 				IGuiGraphicsLayoutProvider* GetProvider()override
@@ -26393,85 +26712,108 @@ WindowsDirect2DParagraph
 
 				bool GetWrapLine()override
 				{
-					throw 0;
+					return wrapLine;
 				}
 
 				void SetWrapLine(bool value)override
 				{
-					throw 0;
-				}
-
-				const WString& GetParagraphText()override
-				{
-					throw 0;
-				}
-
-				void SetParagraphText(const WString& value)override
-				{
-					throw 0;
+					if(wrapLine!=value)
+					{
+						wrapLine=value;
+						textLayout->SetWordWrapping(value?DWRITE_WORD_WRAPPING_WRAP:DWRITE_WORD_WRAPPING_NO_WRAP);
+					}
 				}
 
 				int GetMaxWidth()override
 				{
-					throw 0;
+					return maxWidth;
 				}
 
 				void SetMaxWidth(int value)override
 				{
-					throw 0;
-				}
-
-				bool SetText(int start, int length, const WString& value)override
-				{
-					throw 0;
+					if(maxWidth!=value)
+					{
+						maxWidth=value;
+						textLayout->SetMaxWidth(value==-1?65536:(FLOAT)value);
+					}
 				}
 
 				bool SetFont(int start, int length, const WString& value)override
 				{
-					throw 0;
+					DWRITE_TEXT_RANGE range;
+					range.startPosition=start;
+					range.length=length;
+					HRESULT hr=textLayout->SetFontFamilyName(value.Buffer(), range);
+					return !FAILED(hr);
 				}
 
 				bool SetSize(int start, int length, int size)override
 				{
-					throw 0;
+					DWRITE_TEXT_RANGE range;
+					range.startPosition=start;
+					range.length=length;
+					HRESULT hr=textLayout->SetFontSize((FLOAT)size, range);
+					return !FAILED(hr);
 				}
 
 				bool SetStyle(int start, int length, TextStyle value)override
 				{
-					throw 0;
+					DWRITE_TEXT_RANGE range;
+					range.startPosition=start;
+					range.length=length;
+					HRESULT hr=S_OK;
+
+					hr=textLayout->SetFontStyle(value&Italic?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL, range);
+					if(FAILED(hr)) return false;
+					hr=textLayout->SetFontWeight(value&Bold?DWRITE_FONT_WEIGHT_BOLD:DWRITE_FONT_WEIGHT_NORMAL, range);
+					if(FAILED(hr)) return false;
+					hr=textLayout->SetUnderline(value&Underline?TRUE:FALSE, range);
+					if(FAILED(hr)) return false;
+					hr=textLayout->SetStrikethrough(value&Strikeline?TRUE:FALSE, range);
+					if(FAILED(hr)) return false;
+
+					return true;
 				}
 
 				bool SetColor(int start, int length, Color value)override
 				{
-					throw 0;
+					ID2D1SolidColorBrush* brush=renderTarget->CreateDirect2DBrush(value);
+					usedColors.Add(value);
+
+					DWRITE_TEXT_RANGE range;
+					range.startPosition=start;
+					range.length=length;
+					HRESULT hr=textLayout->SetDrawingEffect(brush, range);
+					return !FAILED(hr);
 				}
 
 				int GetHeight()override
 				{
-					throw 0;
-				}
-
-				void SetRenderTarget(IGuiGraphicsRenderTarget* renderTarget)override
-				{
-					throw 0;
+					DWRITE_TEXT_METRICS metrics;
+					textLayout->GetMetrics(&metrics);
+					return (int)metrics.height;
 				}
 
 				void Render(Rect bounds)override
 				{
-					throw 0;
+					renderTarget->GetDirect2DRenderTarget()->DrawTextLayout(
+						D2D1::Point2F((FLOAT)bounds.Left(), (FLOAT)bounds.Top()),
+						textLayout.Obj(),
+						defaultTextColor,
+						D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
 				}
 			};
 
 /***********************************************************************
-WindowsDorect2DLayoutProvider
+WindowsDirect2DLayoutProvider
 ***********************************************************************/
 
-			class WindowsDorect2DLayoutProvider : public Object, public IGuiGraphicsLayoutProvider
+			class WindowsDirect2DLayoutProvider : public Object, public IGuiGraphicsLayoutProvider
 			{
 			public:
-				 Ptr<IGuiGraphicsParagraph> CreateParagraph()override
+				 Ptr<IGuiGraphicsParagraph> CreateParagraph(const WString& text, IGuiGraphicsRenderTarget* renderTarget)override
 				 {
-					 return new WindowsDirect2DParagraph(this);
+					 return new WindowsDirect2DParagraph(this, text, renderTarget);
 				 }
 			};
 
@@ -26483,14 +26825,14 @@ WindowsGDIResourceManager
 			{
 			protected:
 				SortedList<Ptr<WindowsDirect2DRenderTarget>>		renderTargets;
-				Ptr<WindowsDorect2DLayoutProvider>					layoutProvider;
+				Ptr<WindowsDirect2DLayoutProvider>					layoutProvider;
 
 				CachedTextFormatAllocator							textFormats;
 				CachedCharMeasurerAllocator							charMeasurers;
 			public:
 				WindowsDirect2DResourceManager()
 				{
-					layoutProvider=new WindowsDorect2DLayoutProvider;
+					layoutProvider=new WindowsDirect2DLayoutProvider;
 				}
 
 				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)override
@@ -26597,6 +26939,7 @@ void RendererMainDirect2D()
 	elements_windows_d2d::GuiPolygonElementRenderer::Register();
 	elements_windows_d2d::GuiColorizedTextElementRenderer::Register();
 	elements_windows_d2d::GuiDirect2DElementRenderer::Register();
+	elements::GuiDocumentElement::GuiDocumentElementRenderer::Register();
 
 	GuiApplicationMain();
 	elements_windows_d2d::SetWindowsDirect2DResourceManager(0);
@@ -27880,27 +28223,12 @@ WindowsGDIParagraph
 					throw 0;
 				}
 
-				const WString& GetParagraphText()override
-				{
-					throw 0;
-				}
-
-				void SetParagraphText(const WString& value)override
-				{
-					throw 0;
-				}
-
 				int GetMaxWidth()override
 				{
 					throw 0;
 				}
 
 				void SetMaxWidth(int value)override
-				{
-					throw 0;
-				}
-
-				bool SetText(int start, int length, const WString& value)override
 				{
 					throw 0;
 				}
@@ -27930,11 +28258,6 @@ WindowsGDIParagraph
 					throw 0;
 				}
 
-				void SetRenderTarget(IGuiGraphicsRenderTarget* renderTarget)override
-				{
-					throw 0;
-				}
-
 				void Render(Rect bounds)override
 				{
 					throw 0;
@@ -27948,7 +28271,7 @@ WindowsGDILayoutProvider
 			class WindowsGDILayoutProvider : public Object, public IGuiGraphicsLayoutProvider
 			{
 			public:
-				 Ptr<IGuiGraphicsParagraph> CreateParagraph()override
+				 Ptr<IGuiGraphicsParagraph> CreateParagraph(const WString& text, IGuiGraphicsRenderTarget* renderTarget)override
 				 {
 					 return new WindowsGDIParagraph(this);
 				 }
@@ -28205,6 +28528,7 @@ void RendererMainGDI()
 	elements_windows_gdi::GuiPolygonElementRenderer::Register();
 	elements_windows_gdi::GuiColorizedTextElementRenderer::Register();
 	elements_windows_gdi::GuiGDIElementRenderer::Register();
+	elements::GuiDocumentElement::GuiDocumentElementRenderer::Register();
 
 	GuiApplicationMain();
 	elements_windows_gdi::SetWindowsGDIResourceManager(0);

@@ -1,7 +1,7 @@
 #include "..\..\Public\Source\GacUIIncludes.h"
 
 extern void SetupBasicWindow(GuiControlHost* controlHost, GuiControl* container);
-extern void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container);
+extern void SetupTabPageTextBoxlWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupTabPageListControlWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupTabPageToolstripWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container);
@@ -19,8 +19,8 @@ void SetupTabPageWindow(GuiControlHost* controlHost, GuiControl* container)
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
-		page->SetText(L"Text Box");
-		SetupTextBoxWindow(controlHost, page->GetContainer());
+		page->SetText(L"Text Layout");
+		SetupTabPageTextBoxlWindow(controlHost, page->GetContainer());
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
