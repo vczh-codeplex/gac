@@ -153,8 +153,10 @@
     <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsHost.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsResourceManager.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\GuiGraphicsTextElement.cpp" />
+    <ClCompile Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsLayoutProviderWindowsDirect2D.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsRenderersWindowsDirect2D.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.cpp" />
+    <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsLayoutProviderWindowsGDI.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.cpp" />
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.cpp" />
     <ClCompile Include="..\..\Source\NativeWindow\GuiNativeWindow.cpp" />
@@ -269,8 +271,10 @@
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsHost.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsResourceManager.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\GuiGraphicsTextElement.h" />
+    <ClInclude Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsLayoutProviderWindowsDirect2D.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsRenderersWindowsDirect2D.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsDirect2D\GuiGraphicsWindowsDirect2D.h" />
+    <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsLayoutProviderWindowsGDI.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsRenderersWindowsGDI.h" />
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsWindowsGDI.h" />
     <ClInclude Include="..\..\Source\NativeWindow\GuiNativeWindow.h" />

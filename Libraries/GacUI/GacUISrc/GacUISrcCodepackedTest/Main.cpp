@@ -43,7 +43,7 @@ public:
 #ifdef GUI_GRAPHICS_RENDERER_DIRECT2D
 		SetText(L"Vczh GUI Demo (Direct2D): "+GetCurrentController()->GetOSVersion());
 #endif
-		SetClientSize(Size(800, 600));
+		SetClientSize(Size(800, 660));
 		MoveToScreenCenter();
 		SetupTabPageWindow(this, this);
 	}
