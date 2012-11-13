@@ -12,11 +12,150 @@ namespace vl
 		{
 
 /***********************************************************************
+WindowsDirect2DElementInlineObject
+***********************************************************************/
+
+			class WindowsDirect2DElementInlineObject : public IDWriteInlineObject
+			{
+			protected:
+				int													counter;
+				IGuiGraphicsParagraph::InlineObjectProperties		properties;
+				Ptr<IGuiGraphicsElement>							element;
+				int													start;
+				int													length;
+
+			public:
+				WindowsDirect2DElementInlineObject(
+					const IGuiGraphicsParagraph::InlineObjectProperties& _properties,
+					Ptr<IGuiGraphicsElement> _element,
+					int _start,
+					int _length
+					)
+					:counter(1)
+					,properties(_properties)
+					,element(_element)
+					,start(_start)
+					,length(_length)
+				{
+				}
+
+				~WindowsDirect2DElementInlineObject()
+				{
+					IGuiGraphicsRenderer* graphicsRenderer=element->GetRenderer();
+					if(graphicsRenderer)
+					{
+						graphicsRenderer->SetRenderTarget(0);
+					}
+				}
+
+				int GetStart()
+				{
+					return start;
+				}
+
+				int GetLength()
+				{
+					return length;
+				}
+
+				HRESULT STDMETHODCALLTYPE QueryInterface( 
+					REFIID riid,
+					_COM_Outptr_ void __RPC_FAR *__RPC_FAR *ppvObject
+					)
+				{
+					if(ppvObject)
+					{
+						*ppvObject=NULL;
+					}
+					return E_NOINTERFACE;
+				}
+
+				ULONG STDMETHODCALLTYPE AddRef(void)
+				{
+					++counter;
+					return S_OK;
+				}
+
+				ULONG STDMETHODCALLTYPE Release(void)
+				{
+					if(--counter==0)
+					{
+						delete this;
+					}
+					return S_OK;
+				}
+
+				STDMETHOD(Draw)(
+					_In_opt_ void* clientDrawingContext,
+					IDWriteTextRenderer* renderer,
+					FLOAT originX,
+					FLOAT originY,
+					BOOL isSideways,
+					BOOL isRightToLeft,
+					_In_opt_ IUnknown* clientDrawingEffect
+					)override
+				{
+					IGuiGraphicsRenderer* graphicsRenderer=element->GetRenderer();
+					if(graphicsRenderer)
+					{
+						Rect bounds(Point((int)originX, (int)originY), properties.size);
+						graphicsRenderer->Render(bounds);
+					}
+					return S_OK;
+				}
+
+				STDMETHOD(GetMetrics)(
+					_Out_ DWRITE_INLINE_OBJECT_METRICS* metrics
+					)override
+				{
+					metrics->width=(FLOAT)properties.size.x;
+					metrics->height=(FLOAT)properties.size.y;
+					metrics->baseline=(FLOAT)(properties.baseline==-1?properties.size.y:properties.baseline);
+					metrics->supportsSideways=TRUE;
+					return S_OK;
+				}
+
+				STDMETHOD(GetOverhangMetrics)(
+					_Out_ DWRITE_OVERHANG_METRICS* overhangs
+					)override
+				{
+					overhangs->left=0;
+					overhangs->right=0;
+					overhangs->top=0;
+					overhangs->bottom=0;
+					return S_OK;
+				}
+
+				STDMETHOD(GetBreakConditions)(
+					_Out_ DWRITE_BREAK_CONDITION* breakConditionBefore,
+					_Out_ DWRITE_BREAK_CONDITION* breakConditionAfter
+					)override
+				{
+					switch(properties.breakCondition)
+					{
+					case IGuiGraphicsParagraph::StickToPreviousRun:
+						*breakConditionBefore=DWRITE_BREAK_CONDITION_MAY_NOT_BREAK;
+						*breakConditionAfter=DWRITE_BREAK_CONDITION_CAN_BREAK;
+						break;
+					case IGuiGraphicsParagraph::StickToNextRun:
+						*breakConditionBefore=DWRITE_BREAK_CONDITION_CAN_BREAK;
+						*breakConditionAfter=DWRITE_BREAK_CONDITION_MAY_NOT_BREAK;
+						break;
+					default:
+						*breakConditionBefore=DWRITE_BREAK_CONDITION_CAN_BREAK;
+						*breakConditionAfter=DWRITE_BREAK_CONDITION_CAN_BREAK;
+					}
+					return S_OK;
+				}
+			};
+
+/***********************************************************************
 WindowsDirect2DParagraph
 ***********************************************************************/
 
 			class WindowsDirect2DParagraph : public Object, public IGuiGraphicsParagraph
 			{
+				typedef Dictionary<IGuiGraphicsElement*, ComPtr<WindowsDirect2DElementInlineObject>>		InlineElementMap;
 			protected:
 				IGuiGraphicsLayoutProvider*			provider;
 				ID2D1SolidColorBrush*				defaultTextColor;
@@ -26,6 +165,7 @@ WindowsDirect2DParagraph
 				bool								wrapLine;
 				int									maxWidth;
 				List<Color>							usedColors;
+				InlineElementMap					inlineElements;
 
 			public:
 				WindowsDirect2DParagraph(IGuiGraphicsLayoutProvider* _provider, const WString& _text, IGuiGraphicsRenderTarget* _renderTarget)
@@ -159,11 +299,62 @@ WindowsDirect2DParagraph
 
 				bool SetInlineObject(int start, int length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)override
 				{
-					return false;
+					if(inlineElements.Keys().Contains(value.Obj()))
+					{
+						return false;
+					}
+					for(int i=0;i<inlineElements.Count();i++)
+					{
+						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values()[i];
+						if(start<inlineObject->GetStart()+inlineObject->GetLength() && inlineObject->GetStart()<start+length)
+						{
+							return false;
+						}
+					}
+					ComPtr<WindowsDirect2DElementInlineObject> inlineObject=new WindowsDirect2DElementInlineObject(properties, value, start, length);
+					DWRITE_TEXT_RANGE range;
+					range.startPosition=start;
+					range.length=length;
+					HRESULT hr=textLayout->SetInlineObject(inlineObject.Obj(), range);
+					if(!FAILED(hr))
+					{
+						IGuiGraphicsRenderer* renderer=value->GetRenderer();
+						if(renderer)
+						{
+							renderer->SetRenderTarget(renderTarget);
+						}
+						inlineElements.Add(value.Obj(), inlineObject);
+						return true;
+					}
+					else
+					{
+						return false;
+					}
 				}
 
 				bool ResetInlineObject(int start, int length)override
 				{
+					for(int i=0;i<inlineElements.Count();i++)
+					{
+						IGuiGraphicsElement* element=inlineElements.Keys()[i];
+						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values()[i];
+						if(inlineObject->GetStart()==start && inlineObject->GetLength()==length)
+						{
+							DWRITE_TEXT_RANGE range;
+							range.startPosition=start;
+							range.length=length;
+							HRESULT hr=textLayout->SetInlineObject(NULL, range);
+							if(!FAILED(hr))
+							{
+								inlineElements.Remove(element);
+								return true;
+							}
+							else
+							{
+								return false;
+							}
+						}
+					}
 					return false;
 				}
 

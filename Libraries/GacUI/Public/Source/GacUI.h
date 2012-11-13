@@ -593,6 +593,7 @@ namespace vl
 Layout Engine
 ***********************************************************************/
 
+			class IGuiGraphicsParagraph;
 			class IGuiGraphicsLayoutProvider;
 
 			class IGuiGraphicsParagraph : public Interface
@@ -606,16 +607,38 @@ Layout Engine
 					Strikeline=8,
 				};
 
+				enum BreakCondition
+				{
+					StickToPreviousRun,
+					StickToNextRun,
+					Alone,
+				};
+
+				struct InlineObjectProperties
+				{
+					Size					size;
+					int						baseline;
+					BreakCondition			breakCondition;
+
+					InlineObjectProperties()
+						:baseline(-1)
+					{
+					}
+				};
+
 				virtual IGuiGraphicsLayoutProvider*			GetProvider()=0;
+				virtual IGuiGraphicsRenderTarget*			GetRenderTarget()=0;
 				virtual bool								GetWrapLine()=0;
 				virtual void								SetWrapLine(bool value)=0;
 				virtual int									GetMaxWidth()=0;
 				virtual void								SetMaxWidth(int value)=0;
 
 				virtual bool								SetFont(int start, int length, const WString& value)=0;
-				virtual bool								SetSize(int start, int length, int size)=0;
+				virtual bool								SetSize(int start, int length, int value)=0;
 				virtual bool								SetStyle(int start, int length, TextStyle value)=0;
 				virtual bool								SetColor(int start, int length, Color value)=0;
+				virtual bool								SetInlineObject(int start, int length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)=0;
+				virtual bool								ResetInlineObject(int start, int length)=0;
 
 				virtual int									GetHeight()=0;
 				virtual void								Render(Rect bounds)=0;
@@ -2099,15 +2122,57 @@ Rich Content Document (model)
 
 			namespace text
 			{
+				class DocumentTextRun;
+				class DocumentImageRun;
+
 				class DocumentRun : public Object, public Description<DocumentRun>
 				{
 				public:
-					FontProperties					style;
+					class IVisitor : public Interface
+					{
+					public:
+						virtual void				Visit(DocumentTextRun* run)=0;
+						virtual void				Visit(DocumentImageRun* run)=0;
+					};
 
-					Color							color;
+					DocumentRun(){}
 
-					WString							text;
+					virtual void					Accept(IVisitor* visitor)=0;
 				};
+				
+				class DocumentTextRun : public DocumentRun, public Description<DocumentTextRun>
+				{
+				public:
+					FontProperties					style;
+					Color							color;
+					WString							text;
+
+					DocumentTextRun(){}
+
+					void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+				};
+				
+				class DocumentInlineObjectRun : public DocumentRun, public Description<DocumentInlineObjectRun>
+				{
+				public:
+					Size							size;
+					int								baseline;
+
+					DocumentInlineObjectRun():baseline(-1){}
+				};
+				
+				class DocumentImageRun : public DocumentInlineObjectRun, public Description<DocumentImageRun>
+				{
+				public:
+					Ptr<INativeImage>				image;
+					int								frameIndex;
+
+					DocumentImageRun(){}
+
+					void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+				};
+
+				//--------------------------------------------------------------------------
 
 				class DocumentLine : public Object, public Description<DocumentLine>
 				{
@@ -10256,6 +10321,38 @@ extern void RendererMainDirect2D();
 #endif
 
 /***********************************************************************
+GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSLAYOUTPROVIDERWINDOWSDIRECT2D.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Native Window::Direct2D Provider for Windows Implementation::Renderer
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSLAYOUTPROVIDERWINDOWSDIRECT2D
+#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSLAYOUTPROVIDERWINDOWSDIRECT2D
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace elements_windows_d2d
+		{
+			class WindowsDirect2DLayoutProvider : public Object, public elements::IGuiGraphicsLayoutProvider
+			{
+			public:
+				 Ptr<elements::IGuiGraphicsParagraph>		CreateParagraph(const WString& text, elements::IGuiGraphicsRenderTarget* renderTarget)override;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
 GRAPHICSELEMENT\WINDOWSDIRECT2D\GUIGRAPHICSRENDERERSWINDOWSDIRECT2D.H
 ***********************************************************************/
 /***********************************************************************
@@ -10497,6 +10594,38 @@ Renderers
 
 				void					Render(Rect bounds)override;
 				void					OnElementStateChanged()override;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+GRAPHICSELEMENT\WINDOWSGDI\GUIGRAPHICSLAYOUTPROVIDERWINDOWSGDI.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Native Window::GDI Provider for Windows Implementation::Renderer
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSLAYOUTPROVIDERWINDOWSGDI
+#define VCZH_PRESENTATION_ELEMENTS_GUIGRAPHICSLAYOUTPROVIDERWINDOWSGDI
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace elements_windows_gdi
+		{
+			class WindowsGDILayoutProvider : public Object, public elements::IGuiGraphicsLayoutProvider
+			{
+			public:
+				 Ptr<elements::IGuiGraphicsParagraph>		CreateParagraph(const WString& text, elements::IGuiGraphicsRenderTarget* renderTarget)override;
 			};
 		}
 	}

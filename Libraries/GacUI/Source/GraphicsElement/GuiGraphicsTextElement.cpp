@@ -909,7 +909,6 @@ Visitors
 
 						IGuiGraphicsParagraph::InlineObjectProperties properties;
 						properties.size=run->size;
-						properties.margin=run->margin;
 						properties.baseline=run->baseline;
 						properties.breakCondition=IGuiGraphicsParagraph::Alone;
 

@@ -62,8 +62,6 @@ Layout Engine
 					Size					size;
 					/// <summary>The baseline of the inline object.If the baseline is at the bottom, then set the baseline to -1.</summary>
 					int						baseline;
-					/// <summary>The margin of the inline object.</summary>
-					Margin					margin;
 					/// <summary>The break condition of the inline object.</summary>
 					BreakCondition			breakCondition;
 
