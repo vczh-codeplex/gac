@@ -931,7 +931,7 @@ PostWindow::InitializeComponents
 			table->SetColumnOption(2, GuiCellOption::PercentageOption(1.0));
 			table->SetColumnOption(3, GuiCellOption::MinSizeOption());
 			{
-				postItemContainers=g::NewScrollContainer();
+				postItemContainers=new GuiScrollContainer(GetCurrentTheme()->CreateMultilineTextBoxStyle());
 				postItemContainers->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				postItemContainers->SetHorizontalAlwaysVisible(false);
 				postItemContainers->SetExtendToFullWidth(true);
