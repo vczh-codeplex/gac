@@ -24,6 +24,7 @@ namespace vl
 		using namespace elements;
 		using namespace collections;
 		using namespace windows;
+		using namespace regex;
 
 		namespace elements_windows_gdi
 		{
@@ -587,6 +588,36 @@ Uniscribe Operations (UniscribeParagraph)
 
 						lines.Clear();
 						lastAvailableWidth=-1;
+						{
+							Regex regexLine(L"\r\n");
+							Ptr<UniscribeLine> line;
+							FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments.Wrap())
+							{
+								RegexMatch::List textLines;
+								regexLine.Split(fragment->text, true, textLines);
+
+								for(int i=0;i<textLines.Count();i++)
+								{
+									WString text=textLines[i]->Result().Value();
+									if(i>0)
+									{
+										line=0;
+									}
+									if(!line)
+									{
+										line=new UniscribeLine;
+										lines.Add(line);
+									}
+
+									Ptr<UniscribeFragment> runFragment=new UniscribeFragment;
+									runFragment->fontColor=fragment->fontColor;
+									runFragment->fontStyle=fragment->fontStyle;
+									runFragment->text=text;
+									runFragment->fontObject=fragment->fontObject;
+									line->documentFragments.Add(runFragment);
+								}
+							}
+						}
 
 						HDC hdc=CreateCompatibleDC(NULL);
 						WinProxyDC dc;
