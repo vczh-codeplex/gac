@@ -70,7 +70,7 @@ Layout Engine
 				/// <param name="length">The length of the specified range by character.</param>
 				/// <param name="value">The size</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetSize(int start, int length, int size)=0;
+				virtual bool								SetSize(int start, int length, int value)=0;
 				/// <summary>Replace the text style within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
