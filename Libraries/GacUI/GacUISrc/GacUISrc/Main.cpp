@@ -71,7 +71,7 @@ DocumentLoader
 		}
 
 		WString regexTag_s=L"<(<tag>s)>(<font>[^:]+):(<bold>[^:]+):(<color>[^:]+):(<size>[^:]+):(<text>/.*?)<//s>";
-		WString regexTag_i=L"<(<tag>i)>(<cx>[^:]+),(<cy>[^:]+):(<b>[^:]+):(<ml>[^:]+),(<mt>[^:]+),(<mr>[^:]+),(<mb>[^:]+):(<file>/.*?)<//i>";
+		WString regexTag_i=L"<(<tag>i)>(<cx>[^:]+),(<cy>[^:]+):(<b>[^:]+):(<file>/.*?)<//i>";
 		WString regexTag_p=L"<(<tag>p)//>";
 		Regex regexTag(regexTag_s+L"|"+regexTag_i+L"|"+regexTag_p);
 		Regex regexLine(L"\r\n");
@@ -94,10 +94,6 @@ DocumentLoader
 				int cx=wtoi(match->Groups()[L"cx"][0].Value());
 				int cy=wtoi(match->Groups()[L"cy"][0].Value());
 				int b=wtoi(match->Groups()[L"b"][0].Value());
-				int ml=wtoi(match->Groups()[L"ml"][0].Value());
-				int mt=wtoi(match->Groups()[L"mt"][0].Value());
-				int mr=wtoi(match->Groups()[L"mr"][0].Value());
-				int mb=wtoi(match->Groups()[L"mb"][0].Value());
 				WString file=match->Groups()[L"file"][0].Value();
 
 				if(!paragraph)
@@ -115,7 +111,6 @@ DocumentLoader
 				Ptr<text::DocumentImageRun> run=new text::DocumentImageRun;
 				run->size=Size(cx, cy);
 				run->baseline=b;
-				run->margin=Margin(ml, mt, mr, mb);
 				run->image=GetCurrentController()->ImageService()->CreateImageFromFile(L"..\\GacUISrcCodepackedTest\\Resources\\"+file);
 				run->frameIndex=0;
 				line->runs.Add(run);

@@ -635,8 +635,6 @@ Rich Content Document (model)
 					Size							size;
 					/// <summary>Baseline of the inline object.</summary>
 					int								baseline;
-					/// <summary>Margin of the inline object.</summary>
-					Margin							margin;
 
 					DocumentInlineObjectRun():baseline(-1){}
 				};
