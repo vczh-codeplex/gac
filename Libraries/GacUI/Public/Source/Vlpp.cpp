@@ -614,6 +614,7 @@ Utilities
 				}
 			}
 			memcpy(&response.body[0], utf8, totalSize);
+			delete[] utf8;
 		}
 		FOREACH(BufferPair, p, availableBuffers.Wrap())
 		{

@@ -26,7 +26,7 @@ namespace vl
 			GuiSolidLabelElement*				titleElement;
 			GuiSolidLabelElement*				authorElement;
 			GuiSolidLabelElement*				dateTimeElement;
-			GuiSolidLabelElement*				bodyElement;
+			GuiDocumentElement*					bodyElement;
 
 			GuiButton*							buttonReply;
 			GuiButton*							buttonEdit;

@@ -3,9 +3,447 @@
 namespace vl
 {
 	using namespace stream;
+	using namespace regex;
 
 	namespace nestle
 	{
+
+/***********************************************************************
+Markdown Parser
+***********************************************************************/
+
+		class DocumentWriter : public Object
+		{
+		protected:
+			Ptr<text::DocumentModel>		document;
+			Ptr<text::DocumentParagraph>	paragraph;
+			Ptr<text::DocumentLine>			line;
+			Ptr<text::DocumentTextRun>		run;
+
+		public:
+			DocumentWriter()
+			{
+				document=new text::DocumentModel;
+			}
+
+			Ptr<text::DocumentModel> Stop()
+			{
+				Ptr<text::DocumentModel> result=document;
+				document=0;
+				paragraph=0;
+				line=0;
+				run=0;
+				return result;
+			}
+
+			void EnsureLineExists()
+			{
+				if(!paragraph)
+				{
+					paragraph=new text::DocumentParagraph;
+					document->paragraphs.Add(paragraph);
+				}
+				if(!line)
+				{
+					line=new text::DocumentLine;
+					paragraph->lines.Add(line);
+				}
+			}
+
+			void FinishLine()
+			{
+				EnsureLineExists();
+				line=0;
+				run=0;
+			}
+
+			void FinishParagraph()
+			{
+				EnsureLineExists();
+				paragraph=0;
+				line=0;
+				run=0;
+			}
+
+			void BeginRun(const FontProperties& fontStyle, Color fontColor=Color(0, 0, 0))
+			{
+				EnsureLineExists();
+				run=new text::DocumentTextRun;
+				run->style=fontStyle;
+				run->color=fontColor;
+				line->runs.Add(run);
+			}
+
+			void WriteText(const WString& text)
+			{
+				EnsureLineExists();
+				if(!run)
+				{
+					BeginRun(GetCurrentController()->ResourceService()->GetDefaultFont());
+				}
+				run->text+=text;
+			}
+		};
+
+		const wchar_t* EscapeSpaces(const wchar_t* reading)
+		{
+			while(*reading)
+			{
+				if(*reading==L' ' || *reading==L'\t')
+				{
+					reading++;
+				}
+				else
+				{
+					break;
+				}
+			}
+			return reading;
+		}
+
+		Ptr<text::DocumentModel> ParseMarkdown(const WString& markdown)
+		{
+			WString processedMarkdown;
+			{
+				MemoryStream stream;
+				{
+					StreamWriter writer(stream);
+					const wchar_t* reading=markdown.Buffer();
+					while(*reading)
+					{
+						if(wcsncmp(reading, L"&LT;", 4)==0 || wcsncmp(reading, L"&lt;", 4)==0)
+						{
+							writer.WriteChar(L'<');
+							reading+=4;
+						}
+						else if(wcsncmp(reading, L"&GT;", 4)==0 || wcsncmp(reading, L"&gt;", 4)==0)
+						{
+							writer.WriteChar(L'>');
+							reading+=4;
+						}
+						else
+						{
+							writer.WriteChar(*reading);
+							reading++;
+						}
+					}
+				}
+				{
+					stream.SeekFromBegin(0);
+					StreamReader reader(stream);
+					processedMarkdown=reader.ReadToEnd();
+				}
+			}
+			DocumentWriter writer;
+
+			FontProperties defaultFont=GetCurrentController()->ResourceService()->GetDefaultFont();
+			FontProperties headerFonts[6];
+			FontProperties referenceFont=defaultFont;
+			FontProperties currentFont=defaultFont;
+			WString currentText;
+
+			Regex regexDirectLink(L"</s*(<link>[^>]+?)/s*>");
+			Regex regexIndirectLink(L"/[(<name>[^/]]*)/]/((<link>[^/t )]+)/s*(\"(<tip>[^\"]+)\"/s*)?/)");
+			Regex regexReferenceLink(L"/[(<name>[^/]]*)/]/[(<ref>[^/]]+)/]");
+			Regex regexReferenceTarget(L"/s*/[(<name>[^/]]+)/]:/s*(<link>[^ \"]+)");
+			Regex regexHorizon(L"/s*(/*{3,}|-{3,}|-/s+-/s+-(/s+-)?)/s*");
+
+			for(int i=0;i<sizeof(headerFonts)/sizeof(*headerFonts);i++)
+			{
+				headerFonts[i]=defaultFont;
+				headerFonts[i].size+=(i+1)*3;
+				headerFonts[i].bold=true;
+			}
+
+			Dictionary<WString, WString> referenceTargest;
+			{
+				StringReader reader(processedMarkdown);
+				while(!reader.IsEnd())
+				{
+					WString line=reader.ReadLine();
+					Ptr<RegexMatch> match=regexReferenceTarget.MatchHead(line);
+					if(match && match->Success())
+					{
+						WString name=match->Groups()[L"name"][0].Value();
+						WString link=match->Groups()[L"link"][0].Value();
+						referenceTargest.Set(name, link);
+					}
+				}
+			}
+			
+			StringReader reader(processedMarkdown);
+			while(!reader.IsEnd())
+			{
+				WString line=reader.ReadLine();
+				{
+					Ptr<RegexMatch> match=regexReferenceTarget.MatchHead(line);
+					if(match && match->Success())
+					{
+						continue;
+					}
+				}
+				const wchar_t* reading=line.Buffer();
+				bool referenceMode=false;
+
+				if(wcsncmp(reading, L"\t", 1)==0)
+				{
+					// test reference
+					reading+=1;
+					referenceMode=true;
+				}
+				else if(wcsncmp(reading, L"    ", 4)==0)
+				{
+					// test reference
+					reading+=4;
+					referenceMode=true;
+				}
+
+				if(referenceMode)
+				{
+					// write reference text
+					writer.BeginRun(referenceFont, Color(14, 73, 32));
+					writer.WriteText(L"\t");
+					writer.WriteText(reading);
+				}
+				else
+				{
+					// try horizon line
+					{
+						Ptr<RegexMatch> match=regexHorizon.MatchHead(line);
+						if(match && match->Success() && match->Result().Value()==line)
+						{
+							writer.BeginRun(defaultFont, Color(128, 128, 128));
+							writer.WriteText(L"---------------------------------------------------------------");
+							continue;
+						}
+					}
+#define NO_HEADER (sizeof(headerFonts)/sizeof(*headerFonts))
+					// try test header
+					int headerLevel=NO_HEADER;
+					{
+						const wchar_t* temp=reading;
+						while(*temp)
+						{
+							if(*temp==L'#')
+							{
+								if(headerLevel>0)
+								{
+									headerLevel--;
+								}
+								temp++;
+							}
+							else if((*temp==L' ' || *temp==L'\t') && headerLevel==NO_HEADER)
+							{
+								temp++;
+							}
+							else
+							{
+								break;
+							}
+						}
+						if(headerLevel!=NO_HEADER)
+						{
+							reading=EscapeSpaces(temp);
+						}
+					}
+
+					if(headerLevel!=NO_HEADER)
+					{
+						// header mode
+						const wchar_t* end=reading+wcslen(reading);
+						while(end[-1]==L'#')
+						{
+							end--;
+						}
+
+						writer.BeginRun(headerFonts[headerLevel]);
+						writer.WriteText(WString(reading, end-reading));
+						goto END_OF_LINE;
+					}
+
+					writer.BeginRun(defaultFont);
+					writer.WriteText(L"  ");
+					if(wcsncmp(reading, L"* ", 2)==0 || wcsncmp(reading, L"*\t", 2)==0 || wcsncmp(reading, L"- ", 2)==0 || wcsncmp(reading, L"-\t", 2)==0)
+					{
+						// try test unordered list
+						reading=EscapeSpaces(reading+2);
+
+						writer.BeginRun(defaultFont, Color(96, 96, 96));
+						writer.WriteText(L"¡ñ   ");
+					}
+					else
+					{
+						// try test ordered list
+						const wchar_t* temp=reading;
+						while(*temp)
+						{
+							if(L'0'<=*temp && *temp<=L'9')
+							{
+								temp++;
+							}
+							else
+							{
+								break;
+							}
+						}
+						if(temp>reading && *temp==L'.')
+						{
+							writer.BeginRun(defaultFont, Color(96, 96, 96));
+							writer.WriteText(WString(reading, temp-reading)+L".   ");
+							reading=EscapeSpaces(temp+1);
+						}
+					}
+
+					bool beganRun=false;
+					bool inQuot=false;
+					while(*reading)
+					{
+						if(!inQuot && (wcsncmp(reading, L"**", 2)==0 || wcsncmp(reading, L"__", 2)==0))
+						{
+							// enable/disable bold
+							currentFont.bold=!currentFont.bold;
+							writer.BeginRun(currentFont);
+							reading+=2;
+							beganRun=true;
+						}
+						else if(!inQuot && (wcsncmp(reading, L"*", 1)==0 || wcsncmp(reading, L"_", 1)==0))
+						{
+							// enable/disable italic
+							currentFont.italic=!currentFont.italic;
+							writer.BeginRun(currentFont);
+							reading+=1;
+							beganRun=true;
+						}
+						else if(!inQuot && (wcsncmp(reading, L"~~", 2)==0))
+						{
+							// enable/disable bold
+							currentFont.strikeline=!currentFont.strikeline;
+							writer.BeginRun(currentFont);
+							reading+=2;
+							beganRun=true;
+						}
+						else
+						{
+							bool imagePrefix=false;
+							if(*reading==L'!')
+							{
+								imagePrefix=true;
+								reading++;
+							}
+							// try direct link
+							{
+								Ptr<RegexMatch> match=regexDirectLink.MatchHead(reading);
+								if(match && match->Success())
+								{
+									WString link=match->Groups()[L"link"][0].Value();
+									reading+=match->Result().Length();
+
+									bool underline=currentFont.underline;
+									currentFont.underline=true;
+									writer.BeginRun(currentFont, Color(0, 0, 255));
+									writer.WriteText(link);
+									currentFont.underline=underline;
+
+									writer.BeginRun(currentFont);
+									beganRun=true;
+									goto END_OF_FRAGMENT;
+								}
+							}
+
+							// try indirect link
+							{
+								Ptr<RegexMatch> match=regexIndirectLink.MatchHead(reading);
+								if(match && match->Success())
+								{
+									WString name=match->Groups()[L"name"][0].Value();
+									WString link=match->Groups()[L"link"][0].Value();
+									if(name==L"")
+									{
+										name=link;
+									}
+									reading+=match->Result().Length();
+
+									bool underline=currentFont.underline;
+									currentFont.underline=true;
+									writer.BeginRun(currentFont, Color(0, 0, 255));
+									writer.WriteText(name);
+									currentFont.underline=underline;
+
+									writer.BeginRun(currentFont);
+									beganRun=true;
+									goto END_OF_FRAGMENT;
+								}
+							}
+
+							// try reference link
+							{
+								Ptr<RegexMatch> match=regexReferenceLink.MatchHead(reading);
+								if(match && match->Success())
+								{
+									WString name=match->Groups()[L"name"][0].Value();
+									WString ref=match->Groups()[L"ref"][0].Value();
+									WString link;
+									if(referenceTargest.Keys().Contains(ref))
+									{
+										link=referenceTargest[ref];
+										if(name==L"")
+										{
+											name=link;
+										}
+									}
+									else
+									{
+										if(name==L"")
+										{
+											name=ref;
+										}
+									}
+									reading+=match->Result().Length();
+
+									bool underline=currentFont.underline;
+									currentFont.underline=true;
+									writer.BeginRun(currentFont, Color(0, 0, 255));
+									writer.WriteText(name);
+									currentFont.underline=underline;
+
+									if(link==L"")
+									{
+										writer.BeginRun(defaultFont, Color(255, 0, 0));
+										writer.WriteText(L"<--[BAD REFERENCE]");
+									}
+
+									writer.BeginRun(currentFont);
+									beganRun=true;
+									goto END_OF_FRAGMENT;
+								}
+							}
+
+							if(imagePrefix)
+							{
+								reading--;
+							}
+
+							if(!beganRun)
+							{
+								writer.BeginRun(currentFont);
+								beganRun=true;
+							}
+							if(*reading==L'"')
+							{
+								inQuot=!inQuot;
+							}
+							writer.WriteText(*reading);
+							reading+=1;
+END_OF_FRAGMENT:;
+						}
+					}
+#undef NO_HEADER
+				}
+END_OF_LINE:
+				writer.FinishLine();
+			}
+			return writer.Stop();
+		}
 
 /***********************************************************************
 PostItemControl
@@ -86,7 +524,7 @@ PostItemControl
 			}
 			authorElement->SetText(postItem->author);
 			dateTimeElement->SetText(postItem->createDateTime);
-			bodyElement->SetText(postItem->body);
+			bodyElement->SetDocument(ParseMarkdown(postItem->body));
 			
 			PostWindow* postWindow=dynamic_cast<PostWindow*>(GetRelatedControlHost());
 			buttonEdit->SetVisible(postWindow->IsCurrentUser(postItem->author));
@@ -188,13 +626,7 @@ PostItemControl::InitializeComponents
 			{
 				GuiBoundsComposition* descriptionComposition=0;
 				{
-					GuiSolidLabelElement* element=GuiSolidLabelElement::Create();
-					element->SetFont(bodyFont);
-					element->SetWrapLine(true);
-					element->SetWrapLineHeightCalculation(true);
-					element->SetEllipse(true);
-					element->SetText(L"Description");
-					element->SetColor(bodyColor);
+					GuiDocumentElement* element=GuiDocumentElement::Create();
 					bodyElement=element;
 
 					GuiBoundsComposition* composition=new GuiBoundsComposition;
