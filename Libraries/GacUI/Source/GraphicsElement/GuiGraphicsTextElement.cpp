@@ -841,6 +841,96 @@ GuiColorizedTextElement
 			}
 
 /***********************************************************************
+Visitors
+***********************************************************************/
+
+			namespace visitors
+			{
+				class ExtractTextVisitor : public Object, public DocumentRun::IVisitor
+				{
+				public:
+					WString						text;
+
+					void Visit(DocumentTextRun* run)override
+					{
+						text=run->text;
+					}
+
+					void Visit(DocumentImageRun* run)override
+					{
+						text=L"[Image]";
+					}
+
+					static WString ExtractText(DocumentRun* run)
+					{
+						ExtractTextVisitor visitor;
+						run->Accept(&visitor);
+						return visitor.text;
+					}
+				};
+
+				class SetPropertiesVisitor : public Object, public DocumentRun::IVisitor
+				{
+				public:
+					int							start;
+					int							length;
+					IGuiGraphicsParagraph*		paragraph;
+
+					SetPropertiesVisitor(int _start, IGuiGraphicsParagraph* _paragraph)
+						:start(_start)
+						,length(0)
+						,paragraph(_paragraph)
+					{
+					}
+
+					void Visit(DocumentTextRun* run)override
+					{
+						length=run->text.Length();
+						if(length>0)
+						{
+							paragraph->SetFont(start, length, run->style.fontFamily);
+							paragraph->SetSize(start, length, run->style.size);
+							paragraph->SetColor(start, length, run->color);
+							paragraph->SetStyle(start, length, 
+								(IGuiGraphicsParagraph::TextStyle)
+								( (run->style.bold?IGuiGraphicsParagraph::Bold:0)
+								| (run->style.italic?IGuiGraphicsParagraph::Italic:0)
+								| (run->style.underline?IGuiGraphicsParagraph::Underline:0)
+								| (run->style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
+								));
+							start+=length;
+						}
+					}
+
+					void Visit(DocumentImageRun* run)override
+					{
+						// [Image]
+						length=7;
+
+						IGuiGraphicsParagraph::InlineObjectProperties properties;
+						properties.size=run->size;
+						properties.margin=run->margin;
+						properties.baseline=run->baseline;
+						properties.breakCondition=IGuiGraphicsParagraph::Alone;
+
+						Ptr<GuiImageFrameElement> element=GuiImageFrameElement::Create();
+						element->SetImage(run->image, run->frameIndex);
+						element->SetStretch(true);
+
+						paragraph->SetInlineObject(start, length, properties, element);
+					}
+
+					static int SetProperty(int start, IGuiGraphicsParagraph* paragraph, DocumentRun* run)
+					{
+						SetPropertiesVisitor visitor(start, paragraph);
+						run->Accept(&visitor);
+						return visitor.length;
+					}
+				};
+			}
+			using namespace visitors;
+
+/***********************************************************************
 GuiDocumentElement::GuiDocumentElementRenderer
 ***********************************************************************/
 
@@ -913,7 +1003,8 @@ GuiDocumentElement::GuiDocumentElementRenderer
 									{
 										FOREACH(Ptr<text::DocumentRun>, run, line->runs.Wrap())
 										{
-											writer.WriteString(run->text);
+											WString text=ExtractTextVisitor::ExtractText(run.Obj());
+											writer.WriteString(text);
 										}
 										writer.WriteString(L"\r\n");
 									}
@@ -933,21 +1024,8 @@ GuiDocumentElement::GuiDocumentElementRenderer
 								{
 									FOREACH(Ptr<text::DocumentRun>, run, line->runs.Wrap())
 									{
-										int length=run->text.Length();
-										if(length>0)
-										{
-											cache->graphicsParagraph->SetFont(start, length, run->style.fontFamily);
-											cache->graphicsParagraph->SetSize(start, length, run->style.size);
-											cache->graphicsParagraph->SetColor(start, length, run->color);
-											cache->graphicsParagraph->SetStyle(start, length, 
-												(IGuiGraphicsParagraph::TextStyle)
-												( (run->style.bold?IGuiGraphicsParagraph::Bold:0)
-												| (run->style.italic?IGuiGraphicsParagraph::Italic:0)
-												| (run->style.underline?IGuiGraphicsParagraph::Underline:0)
-												| (run->style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
-												));
-											start+=length;
-										}
+										int length=SetPropertiesVisitor::SetProperty(start, cache->graphicsParagraph.Obj(), run.Obj());
+										start+=length;
 									}
 									start+=2;
 								}

@@ -1002,6 +1002,11 @@ WindowsGDIParagraph
 					return provider;
 				}
 
+				IGuiGraphicsRenderTarget* GetRenderTarget()override
+				{
+					return renderTarget;
+				}
+
 				bool GetWrapLine()override
 				{
 					return true;
@@ -1076,6 +1081,16 @@ WindowsGDIParagraph
 					{
 						return false;
 					}
+				}
+
+				bool SetInlineObject(int start, int length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)override
+				{
+					return false;
+				}
+
+				bool ResetInlineObject(int start, int length)override
+				{
+					return false;
 				}
 
 				int GetHeight()override

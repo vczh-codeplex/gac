@@ -70,7 +70,10 @@ DocumentLoader
 			rawDocument=reader.ReadToEnd();
 		}
 
-		Regex regexTag(L"<(<tag>s)>(<font>[^:]+):(<bold>[^:]+):(<color>[^:]+):(<size>[^:]+):(<text>/.*?)<//s>|<(<tag>p)//>");
+		WString regexTag_s=L"<(<tag>s)>(<font>[^:]+):(<bold>[^:]+):(<color>[^:]+):(<size>[^:]+):(<text>/.*?)<//s>";
+		WString regexTag_i=L"<(<tag>i)>(<cx>[^:]+),(<cy>[^:]+):(<b>[^:]+):(<ml>[^:]+),(<mt>[^:]+),(<mr>[^:]+),(<mb>[^:]+):(<file>/.*?)<//i>";
+		WString regexTag_p=L"<(<tag>p)//>";
+		Regex regexTag(regexTag_s+L"|"+regexTag_i+L"|"+regexTag_p);
 		Regex regexLine(L"\r\n");
 		RegexMatch::List matches;
 		regexTag.Search(rawDocument, matches);
@@ -86,7 +89,38 @@ DocumentLoader
 				paragraph=0;
 				line=0;
 			}
-			else
+			else if(match->Groups()[L"tag"][0].Value()==L"i")
+			{
+				int cx=wtoi(match->Groups()[L"cx"][0].Value());
+				int cy=wtoi(match->Groups()[L"cy"][0].Value());
+				int b=wtoi(match->Groups()[L"b"][0].Value());
+				int ml=wtoi(match->Groups()[L"ml"][0].Value());
+				int mt=wtoi(match->Groups()[L"mt"][0].Value());
+				int mr=wtoi(match->Groups()[L"mr"][0].Value());
+				int mb=wtoi(match->Groups()[L"mb"][0].Value());
+				WString file=match->Groups()[L"file"][0].Value();
+
+				if(!paragraph)
+				{
+					paragraph=new text::DocumentParagraph;
+					document->paragraphs.Add(paragraph);
+					line=0;
+				}
+				if(!line)
+				{
+					line=new text::DocumentLine;
+					paragraph->lines.Add(line);
+				}
+
+				Ptr<text::DocumentImageRun> run=new text::DocumentImageRun;
+				run->size=Size(cx, cy);
+				run->baseline=b;
+				run->margin=Margin(ml, mt, mr, mb);
+				run->image=GetCurrentController()->ImageService()->CreateImageFromFile(L"..\\GacUISrcCodepackedTest\\Resources\\"+file);
+				run->frameIndex=0;
+				line->runs.Add(run);
+			}
+			else if(match->Groups()[L"tag"][0].Value()==L"s")
 			{
 				FontProperties fontStyle;
 				Color fontColor;
@@ -112,6 +146,7 @@ DocumentLoader
 					{
 						paragraph=new text::DocumentParagraph;
 						document->paragraphs.Add(paragraph);
+						line=0;
 					}
 					if(!line || j>0)
 					{
@@ -119,7 +154,7 @@ DocumentLoader
 						paragraph->lines.Add(line);
 					}
 
-					Ptr<text::DocumentRun> run=new text::DocumentRun;
+					Ptr<text::DocumentTextRun> run=new text::DocumentTextRun;
 					run->style=fontStyle;
 					run->color=fontColor;
 					run->text=lineText;
