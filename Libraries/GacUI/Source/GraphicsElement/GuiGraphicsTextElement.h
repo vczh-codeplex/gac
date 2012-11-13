@@ -585,19 +585,77 @@ Rich Content Document (model)
 
 			namespace text
 			{
+				class DocumentTextRun;
+				class DocumentImageRun;
+
 				/// <summary>Pepresents a logical run of a rich content document.</summary>
 				class DocumentRun : public Object, public Description<DocumentRun>
 				{
 				public:
+					/// <summary>A visitor interface for <see cref="DocumentRun"/>.</summary>
+					class IVisitor : public Interface
+					{
+					public:
+						/// <summary>Visit operation for <see cref="DocumentTextRun"/>.</summary>
+						/// <param name="run">The run object.</param>
+						virtual void				Visit(DocumentTextRun* run)=0;
+						/// <summary>Visit operation for <see cref="DocumentImageRun"/>.</summary>
+						/// <param name="run">The run object.</param>
+						virtual void				Visit(DocumentImageRun* run)=0;
+					};
+
+					DocumentRun(){}
+
+					/// <summary>Accept a <see cref="IVisitor"/> and trigger the selected visit operation.</summary>
+					/// <param name="visitor">The visitor.</param>
+					virtual void					Accept(IVisitor* visitor)=0;
+				};
+				
+				/// <summary>Pepresents a text run.</summary>
+				class DocumentTextRun : public DocumentRun, public Description<DocumentTextRun>
+				{
+				public:
 					/// <summary>Run font and style.</summary>
 					FontProperties					style;
-
 					/// <summary>Run color.</summary>
 					Color							color;
-
 					/// <summary>Run text.</summary>
 					WString							text;
+
+					DocumentTextRun(){}
+
+					void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 				};
+				
+				/// <summary>Pepresents a inline object run.</summary>
+				class DocumentInlineObjectRun : public DocumentRun, public Description<DocumentInlineObjectRun>
+				{
+				public:
+					/// <summary>Size of the inline object.</summary>
+					Size							size;
+					/// <summary>Baseline of the inline object.</summary>
+					int								baseline;
+					/// <summary>Margin of the inline object.</summary>
+					Margin							margin;
+
+					DocumentInlineObjectRun():baseline(-1){}
+				};
+				
+				/// <summary>Pepresents a image run.</summary>
+				class DocumentImageRun : public DocumentInlineObjectRun, public Description<DocumentImageRun>
+				{
+				public:
+					/// <summary>The image.</summary>
+					Ptr<INativeImage>				image;
+					/// <summary>The frame index.</summary>
+					int								frameIndex;
+
+					DocumentImageRun(){}
+
+					void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+				};
+
+				//--------------------------------------------------------------------------
 
 				/// <summary>Represents a logical line of a rich content document.</summary>
 				class DocumentLine : public Object, public Description<DocumentLine>

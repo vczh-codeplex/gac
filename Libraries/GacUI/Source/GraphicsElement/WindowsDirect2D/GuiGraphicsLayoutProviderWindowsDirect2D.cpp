@@ -71,6 +71,11 @@ WindowsDirect2DParagraph
 					return provider;
 				}
 
+				IGuiGraphicsRenderTarget* GetRenderTarget()override
+				{
+					return renderTarget;
+				}
+
 				bool GetWrapLine()override
 				{
 					return wrapLine;
@@ -150,6 +155,16 @@ WindowsDirect2DParagraph
 					range.length=length;
 					HRESULT hr=textLayout->SetDrawingEffect(brush, range);
 					return !FAILED(hr);
+				}
+
+				bool SetInlineObject(int start, int length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)override
+				{
+					return false;
+				}
+
+				bool ResetInlineObject(int start, int length)override
+				{
+					return false;
 				}
 
 				int GetHeight()override

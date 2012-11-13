@@ -24,6 +24,7 @@ namespace vl
 Layout Engine
 ***********************************************************************/
 
+			class IGuiGraphicsParagraph;
 			class IGuiGraphicsLayoutProvider;
 
 			/// <summary>Represents a paragraph of a layouted rich text content.</summary>
@@ -43,9 +44,41 @@ Layout Engine
 					Strikeline=8,
 				};
 
+				/// <summary>Inline object break condition.</summary>
+				enum BreakCondition
+				{
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.BreakCondition]Stay together with the previous run if possible.</summary>
+					StickToPreviousRun,
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.BreakCondition]Stay together with the next run if possible.</summary>
+					StickToNextRun,
+					/// <summary>[T:vl.presentation.elements.IGuiGraphicsParagraph.BreakCondition]Treat as a single run.</summary>
+					Alone,
+				};
+
+				/// <summary>Inline object properties.</summary>
+				struct InlineObjectProperties
+				{
+					/// <summary>The size of the inline object.</summary>
+					Size					size;
+					/// <summary>The baseline of the inline object.If the baseline is at the bottom, then set the baseline to -1.</summary>
+					int						baseline;
+					/// <summary>The margin of the inline object.</summary>
+					Margin					margin;
+					/// <summary>The break condition of the inline object.</summary>
+					BreakCondition			breakCondition;
+
+					InlineObjectProperties()
+						:baseline(-1)
+					{
+					}
+				};
+
 				/// <summary>Get the <see cref="IGuiGraphicsLayoutProvider"/> object that created this paragraph.</summary>
 				/// <returns>The layout provider object.</returns>
 				virtual IGuiGraphicsLayoutProvider*			GetProvider()=0;
+				/// <summary>Get the associated <see cref="IGuiGraphicsRenderTarget"/> to this paragraph.</summary>
+				/// <returns>The associated render target.</returns>
+				virtual IGuiGraphicsRenderTarget*			GetRenderTarget()=0;
 				/// <summary>Get if line auto-wrapping is enabled for this paragraph.</summary>
 				/// <returns>Return true if line auto-wrapping is enabled for this paragraph.</returns>
 				virtual bool								GetWrapLine()=0;
@@ -62,27 +95,39 @@ Layout Engine
 				/// <summary>Replace the font within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
-				/// <param name="value">The font</param>
+				/// <param name="value">The font.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				virtual bool								SetFont(int start, int length, const WString& value)=0;
 				/// <summary>Replace the size within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
-				/// <param name="value">The size</param>
+				/// <param name="value">The size.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				virtual bool								SetSize(int start, int length, int value)=0;
 				/// <summary>Replace the text style within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
-				/// <param name="value">The text style</param>
+				/// <param name="value">The text style.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				virtual bool								SetStyle(int start, int length, TextStyle value)=0;
 				/// <summary>Replace the color within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
-				/// <param name="value">The color</param>
+				/// <param name="value">The color.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				virtual bool								SetColor(int start, int length, Color value)=0;
+				/// <summary>Bind an <see cref="IGuiGraphicsElement"/> to a range of text.</summary>
+				/// <param name="start">The position of the first character of the specified range.</param>
+				/// <param name="length">The length of the specified range by character.</param>
+				/// <param name="properties">The properties for the inline object.</param>
+				/// <param name="value">The element.</param>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				virtual bool								SetInlineObject(int start, int length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)=0;
+				/// <summary>Unbind all inline objects to a range of text.</summary>
+				/// <param name="start">The position of the first character of the specified range.</param>
+				/// <param name="length">The length of the specified range by character.</param>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				virtual bool								ResetInlineObject(int start, int length)=0;
 
 				/// <summary>Get the layouted height of the text. The result depends on rich styled text and the two important properties that can be set using <see cref="SetWrapLine"/> and <see cref="SetMaxWidth"/>.</summary>
 				/// <returns>The layouted height.</returns>
