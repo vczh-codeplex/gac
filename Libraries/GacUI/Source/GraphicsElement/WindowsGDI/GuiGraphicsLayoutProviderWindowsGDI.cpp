@@ -742,7 +742,7 @@ Uniscribe Operations (UniscribeParagraph)
 									}
 
 									cx=0;
-									cy+=maxHeight;
+									cy+=(int)(maxHeight*1.5);
 								}
 
 								startRun=lastRun;
