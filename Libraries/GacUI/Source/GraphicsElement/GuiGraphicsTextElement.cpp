@@ -934,17 +934,20 @@ GuiDocumentElement::GuiDocumentElementRenderer
 									FOREACH(Ptr<text::DocumentRun>, run, line->runs.Wrap())
 									{
 										int length=run->text.Length();
-										cache->graphicsParagraph->SetFont(start, length, run->style.fontFamily);
-										cache->graphicsParagraph->SetSize(start, length, run->style.size);
-										cache->graphicsParagraph->SetColor(start, length, run->color);
-										cache->graphicsParagraph->SetStyle(start, length, 
-											(IGuiGraphicsParagraph::TextStyle)
-											( (run->style.bold?IGuiGraphicsParagraph::Bold:0)
-											| (run->style.italic?IGuiGraphicsParagraph::Italic:0)
-											| (run->style.underline?IGuiGraphicsParagraph::Underline:0)
-											| (run->style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
-											));
-										start+=length;
+										if(length>0)
+										{
+											cache->graphicsParagraph->SetFont(start, length, run->style.fontFamily);
+											cache->graphicsParagraph->SetSize(start, length, run->style.size);
+											cache->graphicsParagraph->SetColor(start, length, run->color);
+											cache->graphicsParagraph->SetStyle(start, length, 
+												(IGuiGraphicsParagraph::TextStyle)
+												( (run->style.bold?IGuiGraphicsParagraph::Bold:0)
+												| (run->style.italic?IGuiGraphicsParagraph::Italic:0)
+												| (run->style.underline?IGuiGraphicsParagraph::Underline:0)
+												| (run->style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
+												));
+											start+=length;
+										}
 									}
 									start+=2;
 								}

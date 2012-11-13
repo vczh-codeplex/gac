@@ -101,6 +101,7 @@ WindowsDirect2DParagraph
 
 				bool SetFont(int start, int length, const WString& value)override
 				{
+					if(length==0) return true;
 					DWRITE_TEXT_RANGE range;
 					range.startPosition=start;
 					range.length=length;
@@ -108,17 +109,19 @@ WindowsDirect2DParagraph
 					return !FAILED(hr);
 				}
 
-				bool SetSize(int start, int length, int size)override
+				bool SetSize(int start, int length, int value)override
 				{
+					if(length==0) return true;
 					DWRITE_TEXT_RANGE range;
 					range.startPosition=start;
 					range.length=length;
-					HRESULT hr=textLayout->SetFontSize((FLOAT)size, range);
+					HRESULT hr=textLayout->SetFontSize((FLOAT)value, range);
 					return !FAILED(hr);
 				}
 
 				bool SetStyle(int start, int length, TextStyle value)override
 				{
+					if(length==0) return true;
 					DWRITE_TEXT_RANGE range;
 					range.startPosition=start;
 					range.length=length;
@@ -138,6 +141,7 @@ WindowsDirect2DParagraph
 
 				bool SetColor(int start, int length, Color value)override
 				{
+					if(length==0) return true;
 					ID2D1SolidColorBrush* brush=renderTarget->CreateDirect2DBrush(value);
 					usedColors.Add(value);
 
