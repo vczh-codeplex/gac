@@ -59,7 +59,10 @@ Markdown Parser
 
 			void FinishParagraph()
 			{
-				EnsureLineExists();
+				if(!paragraph || paragraph->lines.Count()==0)
+				{
+					EnsureLineExists();
+				}
 				paragraph=0;
 				line=0;
 				run=0;
@@ -171,6 +174,7 @@ Markdown Parser
 				}
 			}
 			
+			bool lastLineIsEmpty=true;
 			StringReader reader(processedMarkdown);
 			while(!reader.IsEnd())
 			{
@@ -184,6 +188,23 @@ Markdown Parser
 				}
 				const wchar_t* reading=line.Buffer();
 				bool referenceMode=false;
+
+				{
+					// try empty line
+					if(*EscapeSpaces(reading)==0)
+					{
+						if(!lastLineIsEmpty)
+						{
+							lastLineIsEmpty=true;
+							writer.FinishParagraph();
+						}
+						continue;
+					}
+					else
+					{
+						lastLineIsEmpty=false;
+					}
+				}
 
 				if(wcsncmp(reading, L"\t", 1)==0)
 				{
@@ -439,7 +460,7 @@ END_OF_FRAGMENT:;
 					}
 #undef NO_HEADER
 				}
-END_OF_LINE:
+END_OF_LINE:;
 				writer.FinishLine();
 			}
 			return writer.Stop();
