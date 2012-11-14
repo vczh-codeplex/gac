@@ -20,6 +20,13 @@ namespace vl
 			int									id;
 		};
 
+		class PostResources : public Object
+		{
+		public:
+			Ptr<INativeImage>					imageLoading;
+			Ptr<INativeImage>					imageDownloadFailed;
+		};
+
 		class PostItemControl : public list::ObjectItemControl
 		{
 		protected:
@@ -49,6 +56,7 @@ namespace vl
 		protected:
 			Ptr<NestleServer>					server;
 			Ptr<NestlePost>						post;
+			Ptr<PostResources>					resources;
 
 			GuiScrollContainer*					postItemContainers;
 			GuiStackComposition*				postItemStack;
@@ -67,12 +75,13 @@ namespace vl
 		protected:
 			void								InitializeComponents();
 		public:
-			PostWindow(Ptr<NestleServer> _server, Ptr<NestlePost> _post);
+			PostWindow(Ptr<NestleServer> _server, Ptr<NestlePost> _post, Ptr<PostResources> _resources);
 			~PostWindow();
 
 			void								RefreshPostItems();
 			void								Reply(const WString& author);
 			Ptr<NestleServer>					GetServer();
+			Ptr<PostResources>					GetResources();
 			bool								IsCurrentUser(const WString& author);
 		};
 	}
