@@ -19,11 +19,11 @@ namespace vl
 		class MemoryStream : public Object, public virtual IStream
 		{
 		protected:
-			vint						block;
+			vint					block;
 			char*					buffer;
-			vint						size;
-			vint						position;
-			vint						capacity;
+			vint					size;
+			vint					position;
+			vint					capacity;
 
 			void					PrepareSpace(vint totalSpace);
 		public:
@@ -42,9 +42,10 @@ namespace vl
 			void					Seek(pos_t _size);
 			void					SeekFromBegin(pos_t _size);
 			void					SeekFromEnd(pos_t _size);
-			vint						Read(void* _buffer, vint _size);
-			vint						Write(void* _buffer, vint _size);
-			vint						Peek(void* _buffer, vint _size);
+			vint					Read(void* _buffer, vint _size);
+			vint					Write(void* _buffer, vint _size);
+			vint					Peek(void* _buffer, vint _size);
+			void*					GetInternalBuffer();
 		};
 	}
 }

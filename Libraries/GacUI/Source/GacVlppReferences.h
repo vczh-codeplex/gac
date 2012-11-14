@@ -18,6 +18,7 @@ Interfaces:
 #include "..\..\..\Common\Source\Collections\Operation.h"
 #include "..\..\..\Common\Source\Threading.h"
 #include "..\..\..\Common\Source\Regex\Regex.h"
+#include "..\..\..\Common\Source\Stream\Interfaces.h"
 #include "..\..\..\Common\Source\Reflection\GuiTypeDescriptor.h"
 
 #endif

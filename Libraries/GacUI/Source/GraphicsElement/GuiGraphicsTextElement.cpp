@@ -4,7 +4,6 @@
 
 namespace vl
 {
-	using namespace stream;
 	using namespace collections;
 
 	namespace presentation
@@ -995,9 +994,9 @@ GuiDocumentElement::GuiDocumentElementRenderer
 								cache=new text::ParagraphCache;
 								paragraphCaches[i]=cache;
 
-								MemoryStream stream;
+								stream::MemoryStream stream;
 								{
-									StreamWriter writer(stream);
+									stream::StreamWriter writer(stream);
 									FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines.Wrap())
 									{
 										FOREACH(Ptr<text::DocumentRun>, run, line->runs.Wrap())
@@ -1010,7 +1009,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 								}
 								{
 									stream.SeekFromBegin(0);
-									StreamReader reader(stream);
+									stream::StreamReader reader(stream);
 									cache->fullText=reader.ReadToEnd();
 								}
 							}
