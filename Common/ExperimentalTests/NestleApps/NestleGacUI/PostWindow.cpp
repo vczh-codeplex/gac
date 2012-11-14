@@ -401,12 +401,24 @@ Markdown Parser
 									}
 									reading+=match->Result().Length();
 
-									Ptr<ImageRunPlaceHolder> imageRunPlaceHolder=new ImageRunPlaceHolder;
-									imageRunPlaceHolder->imageRun=writer.WriteImagePlaceHolder(imageRunPlaceHolder->paragraphIndex);
-									imageRunPlaceHolder->link=link;
-									imageRunPlaceHolders.Add(imageRunPlaceHolder);
-
-									beganRun=false;
+									if(imagePrefix)
+									{
+										Ptr<ImageRunPlaceHolder> imageRunPlaceHolder=new ImageRunPlaceHolder;
+										imageRunPlaceHolder->imageRun=writer.WriteImagePlaceHolder(imageRunPlaceHolder->paragraphIndex);
+										imageRunPlaceHolder->link=link;
+										imageRunPlaceHolders.Add(imageRunPlaceHolder);
+										beganRun=false;
+									}
+									else
+									{
+										bool underline=currentFont.underline;
+										currentFont.underline=true;
+										writer.BeginRun(currentFont, Color(0, 0, 255));
+										writer.WriteText(name);
+										currentFont.underline=underline;
+										writer.BeginRun(currentFont);
+										beganRun=true;
+									}
 									goto END_OF_FRAGMENT;
 								}
 							}
@@ -436,11 +448,24 @@ Markdown Parser
 									}
 									reading+=match->Result().Length();
 
-									Ptr<ImageRunPlaceHolder> imageRunPlaceHolder=new ImageRunPlaceHolder;
-									imageRunPlaceHolder->imageRun=writer.WriteImagePlaceHolder(imageRunPlaceHolder->paragraphIndex);
-									imageRunPlaceHolder->link=link;
-									imageRunPlaceHolders.Add(imageRunPlaceHolder);
-
+									if(imagePrefix)
+									{
+										Ptr<ImageRunPlaceHolder> imageRunPlaceHolder=new ImageRunPlaceHolder;
+										imageRunPlaceHolder->imageRun=writer.WriteImagePlaceHolder(imageRunPlaceHolder->paragraphIndex);
+										imageRunPlaceHolder->link=link;
+										imageRunPlaceHolders.Add(imageRunPlaceHolder);
+										beganRun=false;
+									}
+									else
+									{
+										bool underline=currentFont.underline;
+										currentFont.underline=true;
+										writer.BeginRun(currentFont, Color(0, 0, 255));
+										writer.WriteText(name);
+										currentFont.underline=underline;
+										writer.BeginRun(currentFont);
+										beganRun=true;
+									}
 									beganRun=false;
 									goto END_OF_FRAGMENT;
 								}
@@ -484,12 +509,14 @@ GifAnimation
 			Ptr<text::DocumentImageRun>		imageRun;
 			int								paragraphIndex;
 			GuiDocumentElement*				documentElement;
+			bool							stopped;
 		public:
 			GifAnimation(Ptr<text::DocumentImageRun> _imageRun, int _paragraphIndex, GuiDocumentElement* _documentElement)
 				:imageRun(_imageRun)
 				,paragraphIndex(_paragraphIndex)
 				,documentElement(_documentElement)
 				,startTime(DateTime::LocalTime().totalMilliseconds)
+				,stopped(false)
 			{
 			}
 
@@ -500,19 +527,23 @@ GifAnimation
 
 			int GetCurrentPosition()
 			{
-				return 0;
+				return stopped?1:0;
 			}
 
 			void Play(int currentPosition, int totalLength)
 			{
-				unsigned __int64 ms=DateTime::LocalTime().totalMilliseconds-startTime;
-				int frameIndex=(ms/100)%imageRun->image->GetFrameCount();
-				imageRun->frameIndex=frameIndex;
-				documentElement->NotifyParagraphUpdated(paragraphIndex);
+				if(!stopped)
+				{
+					unsigned __int64 ms=DateTime::LocalTime().totalMilliseconds-startTime;
+					int frameIndex=(ms/100)%imageRun->image->GetFrameCount();
+					imageRun->frameIndex=frameIndex;
+					documentElement->NotifyParagraphUpdated(paragraphIndex);
+				}
 			}
 
 			void Stop()
 			{
+				stopped=true;
 			}
 		};
 
@@ -580,7 +611,24 @@ PostItemControl
 		PostItemControl::PostItemControl()
 		{
 			InitializeComponents();
+			downloadVersion=new DownloadVersion;
 		}
+
+		PostItemControl::~PostItemControl()
+		{
+			downloadVersion->version++;
+		}
+
+		struct ImageDownloadTask
+		{
+			Ptr<ImageRunPlaceHolder>		placeHolder;
+			Ptr<GifAnimation>				animation;
+		};
+
+		struct ImageDownloadTaskContainer
+		{
+			List<Ptr<ImageDownloadTask>>	tasks;
+		};
 
 		void PostItemControl::Install(Ptr<Object> value)
 		{
@@ -600,34 +648,103 @@ PostItemControl
 			buttonEdit->SetVisible(postWindow->IsCurrentUser(postItem->author));
 			buttonDelete->SetVisible(postWindow->IsCurrentUser(postItem->author));
 			{
-				List<Ptr<ImageRunPlaceHolder>> images;
-				Ptr<text::DocumentModel> document=ParseMarkdown(postItem->body, images);
+				Ptr<ImageDownloadTaskContainer> taskContainer=new ImageDownloadTaskContainer;
+				List<Ptr<ImageRunPlaceHolder>> placeHolders;
+				Ptr<text::DocumentModel> document=ParseMarkdown(postItem->body, placeHolders);
 
-				for(int i=0;i<images.Count();i++)
+				for(int i=0;i<placeHolders.Count();i++)
 				{
-					Ptr<ImageRunPlaceHolder> image=images[i];
-					if(image->link==L"")
+					Ptr<ImageRunPlaceHolder> placeHolder=placeHolders[i];
+					Ptr<ImageDownloadTask> task=new ImageDownloadTask;
+					task->placeHolder=placeHolder;
+					taskContainer->tasks.Add(task);
+
+					if(placeHolder->link==L"")
 					{
-						image->imageRun->image=postWindow->GetResources()->imageDownloadFailed;
-						image->imageRun->frameIndex=0;
-						image->imageRun->size=image->imageRun->image->GetFrame(0)->GetSize();
-						image->imageRun->baseline=image->imageRun->size.y;
+						placeHolder->imageRun->image=postWindow->GetResources()->imageDownloadFailed;
 					}
 					else
 					{
-						image->imageRun->image=postWindow->GetResources()->imageLoading;
-						image->imageRun->frameIndex=0;
-						image->imageRun->size=image->imageRun->image->GetFrame(0)->GetSize();
-						image->imageRun->baseline=image->imageRun->size.y;
+						placeHolder->imageRun->image=postWindow->GetResources()->imageLoading;
 					}
+					placeHolder->imageRun->frameIndex=0;
+					placeHolder->imageRun->size=placeHolder->imageRun->image->GetFrame(0)->GetSize();
+					placeHolder->imageRun->baseline=placeHolder->imageRun->size.y;
 
-					if(image->imageRun->image->GetFrameCount()>1)
+					if(placeHolder->imageRun->image->GetFrameCount()>1)
 					{
-						Ptr<GifAnimation> animation=new GifAnimation(image->imageRun, image->paragraphIndex, bodyElement);
+						Ptr<GifAnimation> animation=new GifAnimation(placeHolder->imageRun, placeHolder->paragraphIndex, bodyElement);
 						postWindow->GetGraphicsHost()->GetAnimationManager()->AddAnimation(animation);
+						task->animation=animation;
 					}
 				}
 				bodyElement->SetDocument(document);
+
+				WString cookie=postWindow->GetServer()->GetCookie();
+				Ptr<DownloadVersion> version=downloadVersion;
+				int currentVersion=++version->version;
+
+				GetApplication()->InvokeAsync([=]()
+				{
+					volatile bool needToExit=false;
+					for(int i=0;!needToExit&&i<taskContainer->tasks.Count();i++)
+					{
+						Ptr<ImageDownloadTask> task=taskContainer->tasks[i];
+						if(task->placeHolder->link==L"")
+						{
+							continue;
+						}
+
+						HttpRequest request;
+						request.acceptTypes.Add(L"image/gif");
+						request.acceptTypes.Add(L"image/png");
+						request.acceptTypes.Add(L"image/jpeg");
+						request.cookie=cookie;
+						request.method=L"GET";
+						request.SetHost(task->placeHolder->link);
+
+						HttpResponse response;
+						void* buffer=0;
+						int length=0;
+						if(HttpQuery(request, response))
+						{
+							if(response.body.Count()>0)
+							{
+								buffer=&response.body[0];
+								length=response.body.Count();
+							}
+						}
+						GetApplication()->InvokeInMainThreadAndWait([=, &needToExit]()
+						{
+							if(version->version!=currentVersion)
+							{
+								needToExit=true;
+							}
+							else
+							{
+								Ptr<INativeImage> resultImage;
+								if(buffer)
+								{
+									resultImage=GetCurrentController()->ImageService()->CreateImageFromMemory(buffer, length);
+								}
+								if(!resultImage)
+								{
+									resultImage=postWindow->GetResources()->imageDownloadFailed;
+								}
+								if(task->animation)
+								{
+									task->animation->Stop();
+								}
+								Ptr<ImageRunPlaceHolder> placeHolder=task->placeHolder;
+								placeHolder->imageRun->image=resultImage;
+								placeHolder->imageRun->frameIndex=0;
+								placeHolder->imageRun->size=placeHolder->imageRun->image->GetFrame(0)->GetSize();
+								placeHolder->imageRun->baseline=placeHolder->imageRun->size.y;
+								bodyElement->NotifyParagraphUpdated(placeHolder->paragraphIndex);
+							}
+						});
+					}
+				});
 			}
 		}
 
@@ -874,6 +991,11 @@ PostWindow
 			Close();
 		}
 
+		void PostWindow::this_WindowClosed(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			ClearPostItems();
+		}
+
 		void PostWindow::ClearPostItems()
 		{
 			FOREACH(PostItemControl*, postItemControl, postItemControls.Wrap())
@@ -1002,6 +1124,8 @@ PostWindow::InitializeComponents
 
 		void PostWindow::InitializeComponents()
 		{
+			WindowClosed.AttachMethod(this, &PostWindow::this_WindowClosed);
+
 			GuiTableComposition* table=new GuiTableComposition;
 			GetContainerComposition()->AddChild(table);
 			table->SetAlignmentToParent(Margin(2, 2, 2, 2));
