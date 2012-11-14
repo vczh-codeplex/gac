@@ -110,6 +110,7 @@
     <Image Include="..\Resources\DownloadFailed.png" />
     <Image Include="..\Resources\Downloading.gif" />
     <Image Include="..\Resources\Downloading.png" />
+    <Image Include="..\Resources\Downloading2.gif" />
     <Image Include="..\Resources\LoginWindowBackground.jpg" />
     <Image Include="..\Resources\ToolstripNewPost.png" />
     <Image Include="..\Resources\ToolstripNext.png" />
