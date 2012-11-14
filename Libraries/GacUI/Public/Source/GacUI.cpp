@@ -34397,10 +34397,14 @@ WindowsForm
 					case WM_NCCALCSIZE:
 						if((BOOL)wParam && customFrameMode)
 						{
-							NCCALCSIZE_PARAMS* params=(NCCALCSIZE_PARAMS*)lParam;
-							params->rgrc[2]=params->rgrc[1];
-							params->rgrc[1]=params->rgrc[0];
-							result=WVR_REDRAW;
+							result=0;
+							return true;
+						}
+						break;
+					case WM_NCACTIVATE:
+						if(customFrameMode)
+						{
+							result=FALSE;
 							return true;
 						}
 						break;
