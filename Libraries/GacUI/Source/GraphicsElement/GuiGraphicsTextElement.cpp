@@ -1079,6 +1079,18 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				}
 			}
 
+			void GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(int index)
+			{
+				if(0<=index && index<paragraphCaches.Count())
+				{
+					Ptr<ParagraphCache> cache=paragraphCaches[index];
+					if(cache)
+					{
+						cache->graphicsParagraph=0;
+					}
+				}
+			}
+
 /***********************************************************************
 GuiDocumentElement
 ***********************************************************************/
@@ -1096,12 +1108,21 @@ GuiDocumentElement
 				return document;
 			}
 
-			void  GuiDocumentElement::SetDocument(Ptr<text::DocumentModel> value)
+			void GuiDocumentElement::SetDocument(Ptr<text::DocumentModel> value)
 			{
 				document=value;
 				if(renderer)
 				{
 					renderer->OnElementStateChanged();
+				}
+			}
+			
+			void GuiDocumentElement::NotifyParagraphUpdated(int index)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					elementRenderer->NotifyParagraphUpdated(index);
 				}
 			}
 		}

@@ -13705,7 +13705,7 @@ Rich Content Document (model)
 					Ptr<INativeImage>				image;
 					int								frameIndex;
 
-					DocumentImageRun(){}
+					DocumentImageRun():frameIndex(0){}
 
 					void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 				};
@@ -13770,6 +13770,8 @@ Rich Content Document (element)
 
 					void					Render(Rect bounds)override;
 					void					OnElementStateChanged()override;
+
+					void					NotifyParagraphUpdated(int index);
 				};
 
 			protected:
@@ -13781,6 +13783,7 @@ Rich Content Document (element)
 				
 				Ptr<text::DocumentModel>	GetDocument();
 				void						SetDocument(Ptr<text::DocumentModel> value);
+				void						NotifyParagraphUpdated(int index);
 			};
 		}
 	}

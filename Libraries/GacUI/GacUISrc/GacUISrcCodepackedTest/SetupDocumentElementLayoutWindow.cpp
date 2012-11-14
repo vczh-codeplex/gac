@@ -2,6 +2,7 @@
 
 using namespace vl::stream;
 using namespace vl::regex;
+using namespace vl::collections;
 
 namespace document
 {
@@ -21,8 +22,14 @@ namespace document
 			ConvertHex(colorString[5])*16+ConvertHex(colorString[6])
 			);
 	}
+
+	struct GifRun
+	{
+		Ptr<text::DocumentImageRun>		imageRun;
+		int								paragraphIndex;
+	};
 	
-	Ptr<text::DocumentModel> BuildDocumentModel(const WString& fileName)
+	Ptr<text::DocumentModel> BuildDocumentModel(const WString& fileName, List<Ptr<GifRun>>& animations)
 	{
 		HDC dc=CreateCompatibleDC(NULL);
 		int dpi=GetDeviceCaps(dc, LOGPIXELSY);
@@ -82,6 +89,14 @@ namespace document
 				run->image=GetCurrentController()->ImageService()->CreateImageFromFile(L"Resources\\"+file);
 				run->frameIndex=0;
 				line->runs.Add(run);
+
+				if(run->image->GetFrameCount()>1)
+				{
+					Ptr<GifRun> gifRun=new GifRun;
+					gifRun->imageRun=run;
+					gifRun->paragraphIndex=document->paragraphs.Count()-1;
+					animations.Add(gifRun);
+				}
 			}
 			else if(match->Groups()[L"tag"][0].Value()==L"s")
 			{
@@ -128,6 +143,45 @@ namespace document
 
 		return document;
 	}
+
+	class GifAnimation : public Object, public IGuiGraphicsAnimation
+	{
+	protected:
+		unsigned __int64				startTime;
+		Ptr<text::DocumentImageRun>		imageRun;
+		int								paragraphIndex;
+		GuiDocumentElement*				documentElement;
+	public:
+		GifAnimation(Ptr<text::DocumentImageRun> _imageRun, int _paragraphIndex, GuiDocumentElement* _documentElement)
+			:imageRun(_imageRun)
+			,paragraphIndex(_paragraphIndex)
+			,documentElement(_documentElement)
+			,startTime(DateTime::LocalTime().totalMilliseconds)
+		{
+		}
+
+		int GetTotalLength()
+		{
+			return 1;
+		}
+
+		int GetCurrentPosition()
+		{
+			return 0;
+		}
+
+		void Play(int currentPosition, int totalLength)
+		{
+			unsigned __int64 ms=DateTime::LocalTime().totalMilliseconds-startTime;
+			int frameIndex=(ms/100)%imageRun->image->GetFrameCount();
+			imageRun->frameIndex=frameIndex;
+			documentElement->NotifyParagraphUpdated(paragraphIndex);
+		}
+
+		void Stop()
+		{
+		}
+	};
 }
 using namespace document;
 
@@ -143,8 +197,9 @@ void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* c
 	
 	GetApplication()->InvokeAsync([=]()
 	{
-		Ptr<text::DocumentModel> document=BuildDocumentModel(filename);
-		GetApplication()->InvokeInMainThreadAndWait([=]()
+		List<Ptr<GifRun>> animations;
+		Ptr<text::DocumentModel> document=BuildDocumentModel(filename, animations);
+		GetApplication()->InvokeInMainThreadAndWait([=, &animations]()
 		{
 			scriptDocumentView->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
 			GuiDocumentElement* element=GuiDocumentElement::Create();
@@ -155,6 +210,12 @@ void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* c
 			composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
 			composition->SetAlignmentToParent(Margin(10, 10, 10, 10));
 			scriptDocumentView->GetContainerComposition()->AddChild(composition);
+
+			for(int i=0;i<animations.Count();i++)
+			{
+				Ptr<GifAnimation> gifAnimation=new GifAnimation(animations[i]->imageRun, animations[i]->paragraphIndex, element);
+				controlHost->GetGraphicsHost()->GetAnimationManager()->AddAnimation(gifAnimation);
+			}
 		});
 	});
 

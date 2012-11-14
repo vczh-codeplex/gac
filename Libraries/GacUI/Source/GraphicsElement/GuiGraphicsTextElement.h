@@ -648,7 +648,7 @@ Rich Content Document (model)
 					/// <summary>The frame index.</summary>
 					int								frameIndex;
 
-					DocumentImageRun(){}
+					DocumentImageRun():frameIndex(0){}
 
 					void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 				};
@@ -720,6 +720,8 @@ Rich Content Document (element)
 
 					void					Render(Rect bounds)override;
 					void					OnElementStateChanged()override;
+
+					void					NotifyParagraphUpdated(int index);
 				};
 
 			protected:
@@ -732,9 +734,12 @@ Rich Content Document (element)
 				/// <summary>Get the document.</summary>
 				/// <returns>The document.</returns>
 				Ptr<text::DocumentModel>	GetDocument();
-				/// <summary>Set the document. When a document is set to this element, modifying the document will lead to undefined behavior.</summary>
+				/// <summary>Set the document. When a document is set to this element, modifying the document without invoking <see cref="NotifyParagraphUpdated"/> will lead to undefined behavior.</summary>
 				/// <param name="value">The document.</param>
 				void						SetDocument(Ptr<text::DocumentModel> value);
+				/// <summary>Notify that a specified paragraph is updated.</summary>
+				/// <param name="index">The paragraph index.</param>
+				void						NotifyParagraphUpdated(int index);
 			};
 		}
 	}

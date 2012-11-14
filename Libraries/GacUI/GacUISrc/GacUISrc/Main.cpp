@@ -54,7 +54,13 @@ DocumentLoader
 			);
 	}
 
-	Ptr<text::DocumentModel> BuildDocumentModel(const WString& fileName)
+	struct GifRun
+	{
+		Ptr<text::DocumentImageRun>		imageRun;
+		int								paragraphIndex;
+	};
+
+	Ptr<text::DocumentModel> BuildDocumentModel(const WString& fileName, List<Ptr<GifRun>>& animations)
 	{
 		HDC dc=CreateCompatibleDC(NULL);
 		int dpi=GetDeviceCaps(dc, LOGPIXELSY);
@@ -114,6 +120,14 @@ DocumentLoader
 				run->image=GetCurrentController()->ImageService()->CreateImageFromFile(L"..\\GacUISrcCodepackedTest\\Resources\\"+file);
 				run->frameIndex=0;
 				line->runs.Add(run);
+
+				if(run->image->GetFrameCount()>1)
+				{
+					Ptr<GifRun> gifRun=new GifRun;
+					gifRun->imageRun=run;
+					gifRun->paragraphIndex=document->paragraphs.Count()-1;
+					animations.Add(gifRun);
+				}
 			}
 			else if(match->Groups()[L"tag"][0].Value()==L"s")
 			{
@@ -164,6 +178,45 @@ DocumentLoader
 /***********************************************************************
 TestWindow
 ***********************************************************************/
+	
+	class GifAnimation : public Object, public IGuiGraphicsAnimation
+	{
+	protected:
+		unsigned __int64				startTime;
+		Ptr<text::DocumentImageRun>		imageRun;
+		int								paragraphIndex;
+		GuiDocumentElement*				documentElement;
+	public:
+		GifAnimation(Ptr<text::DocumentImageRun> _imageRun, int _paragraphIndex, GuiDocumentElement* _documentElement)
+			:imageRun(_imageRun)
+			,paragraphIndex(_paragraphIndex)
+			,documentElement(_documentElement)
+			,startTime(DateTime::LocalTime().totalMilliseconds)
+		{
+		}
+
+		int GetTotalLength()
+		{
+			return 1;
+		}
+
+		int GetCurrentPosition()
+		{
+			return 0;
+		}
+
+		void Play(int currentPosition, int totalLength)
+		{
+			unsigned __int64 ms=DateTime::LocalTime().totalMilliseconds-startTime;
+			int frameIndex=(ms/100)%imageRun->image->GetFrameCount();
+			imageRun->frameIndex=frameIndex;
+			documentElement->NotifyParagraphUpdated(paragraphIndex);
+		}
+
+		void Stop()
+		{
+		}
+	};
 
 	class TestWindow : public GuiWindow
 	{
@@ -188,8 +241,9 @@ TestWindow
 			}
 			GetApplication()->InvokeAsync([=]()
 			{
-				Ptr<text::DocumentModel> document=BuildDocumentModel(L"..\\GacUISrcCodepackedTest\\Resources\\document2.txt");
-				GetApplication()->InvokeInMainThreadAndWait([=]()
+				List<Ptr<GifRun>> animations;
+				Ptr<text::DocumentModel> document=BuildDocumentModel(L"..\\GacUISrcCodepackedTest\\Resources\\document2.txt", animations);
+				GetApplication()->InvokeInMainThreadAndWait([=, &animations]()
 				{
 					scriptDocumentView->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
 					GuiDocumentElement* element=GuiDocumentElement::Create();
@@ -200,6 +254,12 @@ TestWindow
 					composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
 					composition->SetAlignmentToParent(Margin(10, 10, 10, 10));
 					scriptDocumentView->GetContainerComposition()->AddChild(composition);
+
+					for(int i=0;i<animations.Count();i++)
+					{
+						Ptr<GifAnimation> gifAnimation=new GifAnimation(animations[i]->imageRun, animations[i]->paragraphIndex, element);
+						GetGraphicsHost()->GetAnimationManager()->AddAnimation(gifAnimation);
+					}
 				});
 			});
 		}
