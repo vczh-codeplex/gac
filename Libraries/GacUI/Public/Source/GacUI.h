@@ -777,6 +777,10 @@ Image Object
 		{
 		public:
 			virtual Ptr<INativeImage>			CreateImageFromFile(const WString& path)=0;
+
+			virtual Ptr<INativeImage>			CreateImageFromMemory(void* buffer, int length)=0;
+
+			virtual Ptr<INativeImage>			CreateImageFromStream(stream::IStream& stream)=0;
 		};
 
 /***********************************************************************
@@ -11541,6 +11545,8 @@ namespace vl
 				~WindowsImageService();
 
 				Ptr<INativeImage>							CreateImageFromFile(const WString& path);
+				Ptr<INativeImage>							CreateImageFromMemory(void* buffer, int length);
+				Ptr<INativeImage>							CreateImageFromStream(stream::IStream& stream);
 				Ptr<INativeImage>							CreateImageFromHBITMAP(HBITMAP handle);
 				Ptr<INativeImage>							CreateImageFromHICON(HICON handle);
 				IWICImagingFactory*							GetImagingFactory();

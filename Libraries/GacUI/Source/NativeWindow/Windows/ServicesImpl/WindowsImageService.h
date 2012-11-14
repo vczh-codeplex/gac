@@ -81,6 +81,8 @@ namespace vl
 				~WindowsImageService();
 
 				Ptr<INativeImage>							CreateImageFromFile(const WString& path);
+				Ptr<INativeImage>							CreateImageFromMemory(void* buffer, int length);
+				Ptr<INativeImage>							CreateImageFromStream(stream::IStream& stream);
 				Ptr<INativeImage>							CreateImageFromHBITMAP(HBITMAP handle);
 				Ptr<INativeImage>							CreateImageFromHICON(HICON handle);
 				IWICImagingFactory*							GetImagingFactory();

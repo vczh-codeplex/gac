@@ -280,6 +280,21 @@ Image Object
 			/// <returns>The created image.</returns>
 			/// <param name="path">The file path.</param>
 			virtual Ptr<INativeImage>			CreateImageFromFile(const WString& path)=0;
+
+			/// <summary>
+			/// Create an image from memory.
+			/// </summary>
+			/// <returns>The created image.</returns>
+			/// <param name="buffer">The memory pointer.</param>
+			/// <param name="length">The memory length.</param>
+			virtual Ptr<INativeImage>			CreateImageFromMemory(void* buffer, int length)=0;
+
+			/// <summary>
+			/// Create an image from stream.
+			/// </summary>
+			/// <returns>The created image.</returns>
+			/// <param name="stream">The stream.</param>
+			virtual Ptr<INativeImage>			CreateImageFromStream(stream::IStream& stream)=0;
 		};
 
 /***********************************************************************

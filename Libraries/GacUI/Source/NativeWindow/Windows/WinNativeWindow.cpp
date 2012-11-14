@@ -9,6 +9,7 @@
 #include "ServicesImpl\WindowsDialogService.h"
 
 #pragma comment(lib, "Imm32.lib")
+#pragma comment(lib, "Shlwapi.lib")
 
 namespace vl
 {

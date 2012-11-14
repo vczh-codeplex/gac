@@ -1,4 +1,7 @@
 #include "WindowsImageService.h"
+#include "..\..\..\..\..\..\Common\Source\Stream\MemoryStream.h"
+
+#include <Shlwapi.h>
 
 #pragma comment(lib, "WindowsCodecs.lib")
 
@@ -288,6 +291,39 @@ WindowsImageService
 				{
 					return 0;
 				}
+			}
+
+			Ptr<INativeImage> WindowsImageService::CreateImageFromMemory(void* buffer, int length)
+			{
+				Ptr<INativeImage> result;
+				::IStream* stream=SHCreateMemStream((const BYTE*)buffer, length);
+				if(stream)
+				{
+					IWICBitmapDecoder* bitmapDecoder=0;
+					HRESULT hr=imagingFactory->CreateDecoderFromStream(stream, NULL, WICDecodeMetadataCacheOnDemand, &bitmapDecoder);
+					if(SUCCEEDED(hr))
+					{
+						result=new WindowsImage(this, bitmapDecoder);
+					}
+					stream->Release();
+				}
+				return result;
+			}
+
+			Ptr<INativeImage> WindowsImageService::CreateImageFromStream(stream::IStream& stream)
+			{
+				stream::MemoryStream memoryStream;
+				char buffer[65536];
+				while(true)
+				{
+					int length=stream.Read(buffer, sizeof(buffer));
+					memoryStream.Write(buffer, length);
+					if(length!=sizeof(buffer))
+					{
+						break;
+					}
+				}
+				return CreateImageFromMemory(memoryStream.GetInternalBuffer(), (int)memoryStream.Size());
 			}
 
 			Ptr<INativeImage> WindowsImageService::CreateImageFromHBITMAP(HBITMAP handle)

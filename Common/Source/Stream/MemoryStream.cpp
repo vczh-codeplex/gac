@@ -164,5 +164,10 @@ MemoryStream
 			memmove(_buffer, buffer+position, _size);
 			return _size;
 		}
+
+		void* MemoryStream::GetInternalBuffer()
+		{
+			return buffer;
+		}
 	}
 }

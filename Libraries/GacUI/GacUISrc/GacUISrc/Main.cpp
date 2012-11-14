@@ -114,10 +114,11 @@ DocumentLoader
 					paragraph->lines.Add(line);
 				}
 
+				FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\"+file, FileStream::ReadOnly);
 				Ptr<text::DocumentImageRun> run=new text::DocumentImageRun;
 				run->size=Size(cx, cy);
 				run->baseline=b;
-				run->image=GetCurrentController()->ImageService()->CreateImageFromFile(L"..\\GacUISrcCodepackedTest\\Resources\\"+file);
+				run->image=GetCurrentController()->ImageService()->CreateImageFromStream(fileStream);
 				run->frameIndex=0;
 				line->runs.Add(run);
 

@@ -23815,7 +23815,6 @@ GraphicsElement\GuiGraphicsTextElement.cpp
 
 namespace vl
 {
-	using namespace stream;
 	using namespace collections;
 
 	namespace presentation
@@ -24806,9 +24805,9 @@ GuiDocumentElement::GuiDocumentElementRenderer
 								cache=new text::ParagraphCache;
 								paragraphCaches[i]=cache;
 
-								MemoryStream stream;
+								stream::MemoryStream stream;
 								{
-									StreamWriter writer(stream);
+									stream::StreamWriter writer(stream);
 									FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines.Wrap())
 									{
 										FOREACH(Ptr<text::DocumentRun>, run, line->runs.Wrap())
@@ -24821,7 +24820,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 								}
 								{
 									stream.SeekFromBegin(0);
-									StreamReader reader(stream);
+									stream::StreamReader reader(stream);
 									cache->fullText=reader.ReadToEnd();
 								}
 							}
@@ -30325,8 +30324,6 @@ int SetupWindowsDirect2DRenderer()
 NativeWindow\Windows\GDI\WinGDI.cpp
 ***********************************************************************/
 
-using namespace vl::stream;
-
 #pragma comment(lib, "Msimg32.lib")
 
 namespace vl
@@ -30884,7 +30881,7 @@ WinBitmap
 					Header2.bV5CSType=LCS_sRGB;
 					Header2.bV5Intent=LCS_GM_GRAPHICS;
 				}
-				FileStream Output(FileName, FileStream::WriteOnly);
+				stream::FileStream Output(FileName, stream::FileStream::WriteOnly);
 				Output.Write(&Header1, sizeof(Header1));
 				Output.Write(&Header2, sizeof(Header2));
 				for(int i=0;i<FHeight;i++)
@@ -33035,6 +33032,8 @@ WindowsDialogService
 NativeWindow\Windows\ServicesImpl\WindowsImageService.cpp
 ***********************************************************************/
 
+#include <Shlwapi.h>
+
 #pragma comment(lib, "WindowsCodecs.lib")
 
 namespace vl
@@ -33323,6 +33322,39 @@ WindowsImageService
 				{
 					return 0;
 				}
+			}
+
+			Ptr<INativeImage> WindowsImageService::CreateImageFromMemory(void* buffer, int length)
+			{
+				Ptr<INativeImage> result;
+				::IStream* stream=SHCreateMemStream((const BYTE*)buffer, length);
+				if(stream)
+				{
+					IWICBitmapDecoder* bitmapDecoder=0;
+					HRESULT hr=imagingFactory->CreateDecoderFromStream(stream, NULL, WICDecodeMetadataCacheOnDemand, &bitmapDecoder);
+					if(SUCCEEDED(hr))
+					{
+						result=new WindowsImage(this, bitmapDecoder);
+					}
+					stream->Release();
+				}
+				return result;
+			}
+
+			Ptr<INativeImage> WindowsImageService::CreateImageFromStream(stream::IStream& stream)
+			{
+				stream::MemoryStream memoryStream;
+				char buffer[65536];
+				while(true)
+				{
+					int length=stream.Read(buffer, sizeof(buffer));
+					memoryStream.Write(buffer, length);
+					if(length!=sizeof(buffer))
+					{
+						break;
+					}
+				}
+				return CreateImageFromMemory(memoryStream.GetInternalBuffer(), (int)memoryStream.Size());
 			}
 
 			Ptr<INativeImage> WindowsImageService::CreateImageFromHBITMAP(HBITMAP handle)
@@ -33784,6 +33816,7 @@ NativeWindow\Windows\WinNativeWindow.cpp
 ***********************************************************************/
 
 #pragma comment(lib, "Imm32.lib")
+#pragma comment(lib, "Shlwapi.lib")
 
 namespace vl
 {
