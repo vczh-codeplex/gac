@@ -108,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Resources\DownloadFailed.png" />
+    <Image Include="..\Resources\Downloading.gif" />
     <Image Include="..\Resources\Downloading.png" />
     <Image Include="..\Resources\LoginWindowBackground.jpg" />
     <Image Include="..\Resources\ToolstripNewPost.png" />

@@ -109,5 +109,8 @@
     <Image Include="..\Resources\Downloading.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="..\Resources\Downloading.gif">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

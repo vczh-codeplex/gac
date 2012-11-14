@@ -619,9 +619,12 @@ PostItemControl
 						image->imageRun->frameIndex=0;
 						image->imageRun->size=image->imageRun->image->GetFrame(0)->GetSize();
 						image->imageRun->baseline=image->imageRun->size.y;
+					}
 
-						//Ptr<GifAnimation> animation=new GifAnimation(image->imageRun, image->paragraphIndex, bodyElement);
-						//postWindow->GetGraphicsHost()->GetAnimationManager()->AddAnimation(animation);
+					if(image->imageRun->image->GetFrameCount()>1)
+					{
+						Ptr<GifAnimation> animation=new GifAnimation(image->imageRun, image->paragraphIndex, bodyElement);
+						postWindow->GetGraphicsHost()->GetAnimationManager()->AddAnimation(animation);
 					}
 				}
 				bodyElement->SetDocument(document);
