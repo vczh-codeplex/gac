@@ -162,7 +162,7 @@ Markdown Parser
 			FontProperties currentFont=defaultFont;
 			WString currentText;
 
-			Regex regexDirectLink(L"</s*(<link>[^>]+?)/s*>");
+			Regex regexDirectLink(L"(<link>(https?://|www.)[a-zA-Z0-9_///-?&=%.()]+)");
 			Regex regexIndirectLink(L"/[(<name>[^/]]*)/]/((<link>[^/t )]+)/s*(\"(<tip>[^\"]+)\"/s*)?/)");
 			Regex regexReferenceLink(L"/[(<name>[^/]]*)/]/[(<ref>[^/]]+)/]");
 			Regex regexReferenceTarget(L"/s*/[(<name>[^/]]+)/]:/s*(<link>[^ \"]+)");
@@ -646,106 +646,111 @@ PostItemControl
 
 			PostWindow* postWindow=dynamic_cast<PostWindow*>(GetRelatedControlHost());
 			buttonEdit->SetVisible(postWindow->IsCurrentUser(postItem->author));
+
 			buttonDelete->SetVisible(postWindow->IsCurrentUser(postItem->author));
+			GetApplication()->InvokeAsync([=]()
 			{
-				Ptr<ImageDownloadTaskContainer> taskContainer=new ImageDownloadTaskContainer;
 				List<Ptr<ImageRunPlaceHolder>> placeHolders;
 				Ptr<text::DocumentModel> document=ParseMarkdown(postItem->body, placeHolders);
 
-				for(int i=0;i<placeHolders.Count();i++)
+				GetApplication()->InvokeInMainThreadAndWait([=, &placeHolders]()
 				{
-					Ptr<ImageRunPlaceHolder> placeHolder=placeHolders[i];
-					Ptr<ImageDownloadTask> task=new ImageDownloadTask;
-					task->placeHolder=placeHolder;
-					taskContainer->tasks.Add(task);
-
-					if(placeHolder->link==L"")
+					Ptr<ImageDownloadTaskContainer> taskContainer=new ImageDownloadTaskContainer;
+					for(int i=0;i<placeHolders.Count();i++)
 					{
-						placeHolder->imageRun->image=postWindow->GetResources()->imageDownloadFailed;
-					}
-					else
-					{
-						placeHolder->imageRun->image=postWindow->GetResources()->imageLoading;
-					}
-					placeHolder->imageRun->frameIndex=0;
-					placeHolder->imageRun->size=placeHolder->imageRun->image->GetFrame(0)->GetSize();
-					placeHolder->imageRun->baseline=placeHolder->imageRun->size.y;
+						Ptr<ImageRunPlaceHolder> placeHolder=placeHolders[i];
+						Ptr<ImageDownloadTask> task=new ImageDownloadTask;
+						task->placeHolder=placeHolder;
+						taskContainer->tasks.Add(task);
 
-					if(placeHolder->imageRun->image->GetFrameCount()>1)
-					{
-						Ptr<GifAnimation> animation=new GifAnimation(placeHolder->imageRun, placeHolder->paragraphIndex, bodyElement);
-						postWindow->GetGraphicsHost()->GetAnimationManager()->AddAnimation(animation);
-						task->animation=animation;
-					}
-				}
-				bodyElement->SetDocument(document);
-
-				WString cookie=postWindow->GetServer()->GetCookie();
-				Ptr<DownloadVersion> version=downloadVersion;
-				int currentVersion=++version->version;
-
-				GetApplication()->InvokeAsync([=]()
-				{
-					volatile bool needToExit=false;
-					for(int i=0;!needToExit&&i<taskContainer->tasks.Count();i++)
-					{
-						Ptr<ImageDownloadTask> task=taskContainer->tasks[i];
-						if(task->placeHolder->link==L"")
+						if(placeHolder->link==L"")
 						{
-							continue;
+							placeHolder->imageRun->image=postWindow->GetResources()->imageDownloadFailed;
 						}
-
-						HttpRequest request;
-						request.acceptTypes.Add(L"image/gif");
-						request.acceptTypes.Add(L"image/png");
-						request.acceptTypes.Add(L"image/jpeg");
-						request.cookie=cookie;
-						request.method=L"GET";
-						request.SetHost(task->placeHolder->link);
-
-						HttpResponse response;
-						void* buffer=0;
-						int length=0;
-						if(HttpQuery(request, response))
+						else
 						{
-							if(response.body.Count()>0)
-							{
-								buffer=&response.body[0];
-								length=response.body.Count();
-							}
+							placeHolder->imageRun->image=postWindow->GetResources()->imageLoading;
 						}
-						GetApplication()->InvokeInMainThreadAndWait([=, &needToExit]()
+						placeHolder->imageRun->frameIndex=0;
+						placeHolder->imageRun->size=placeHolder->imageRun->image->GetFrame(0)->GetSize();
+						placeHolder->imageRun->baseline=placeHolder->imageRun->size.y;
+
+						if(placeHolder->imageRun->image->GetFrameCount()>1)
 						{
-							if(version->version!=currentVersion)
-							{
-								needToExit=true;
-							}
-							else
-							{
-								Ptr<INativeImage> resultImage;
-								if(buffer)
-								{
-									resultImage=GetCurrentController()->ImageService()->CreateImageFromMemory(buffer, length);
-								}
-								if(!resultImage)
-								{
-									resultImage=postWindow->GetResources()->imageDownloadFailed;
-								}
-								if(task->animation)
-								{
-									task->animation->Stop();
-								}
-								Ptr<ImageRunPlaceHolder> placeHolder=task->placeHolder;
-								placeHolder->imageRun->image=resultImage;
-								placeHolder->imageRun->frameIndex=0;
-								placeHolder->imageRun->size=placeHolder->imageRun->image->GetFrame(0)->GetSize();
-								placeHolder->imageRun->baseline=placeHolder->imageRun->size.y;
-								bodyElement->NotifyParagraphUpdated(placeHolder->paragraphIndex);
-							}
-						});
+							Ptr<GifAnimation> animation=new GifAnimation(placeHolder->imageRun, placeHolder->paragraphIndex, bodyElement);
+							postWindow->GetGraphicsHost()->GetAnimationManager()->AddAnimation(animation);
+							task->animation=animation;
+						}
 					}
+					bodyElement->SetDocument(document);
+
+					WString cookie=postWindow->GetServer()->GetCookie();
+					Ptr<DownloadVersion> version=downloadVersion;
+					int currentVersion=++version->version;
+
+					GetApplication()->InvokeAsync([=]()
+					{
+						volatile bool needToExit=false;
+						for(int i=0;!needToExit&&i<taskContainer->tasks.Count();i++)
+						{
+							Ptr<ImageDownloadTask> task=taskContainer->tasks[i];
+							if(task->placeHolder->link==L"")
+							{
+								continue;
+							}
+
+							HttpRequest request;
+							request.acceptTypes.Add(L"image/gif");
+							request.acceptTypes.Add(L"image/png");
+							request.acceptTypes.Add(L"image/jpeg");
+							request.cookie=cookie;
+							request.method=L"GET";
+							request.SetHost(task->placeHolder->link);
+
+							HttpResponse response;
+							void* buffer=0;
+							int length=0;
+							if(HttpQuery(request, response))
+							{
+								if(response.body.Count()>0)
+								{
+									buffer=&response.body[0];
+									length=response.body.Count();
+								}
+							}
+							GetApplication()->InvokeInMainThreadAndWait([=, &needToExit]()
+							{
+								if(version->version!=currentVersion)
+								{
+									needToExit=true;
+								}
+								else
+								{
+									Ptr<INativeImage> resultImage;
+									if(buffer)
+									{
+										resultImage=GetCurrentController()->ImageService()->CreateImageFromMemory(buffer, length);
+									}
+									if(!resultImage)
+									{
+										resultImage=postWindow->GetResources()->imageDownloadFailed;
+									}
+									if(task->animation)
+									{
+										task->animation->Stop();
+									}
+									Ptr<ImageRunPlaceHolder> placeHolder=task->placeHolder;
+									placeHolder->imageRun->image=resultImage;
+									placeHolder->imageRun->frameIndex=0;
+									placeHolder->imageRun->size=placeHolder->imageRun->image->GetFrame(0)->GetSize();
+									placeHolder->imageRun->baseline=placeHolder->imageRun->size.y;
+									bodyElement->NotifyParagraphUpdated(placeHolder->paragraphIndex);
+								}
+							});
+						}
+					});
 				});
-			}
+			});
 		}
 
 /***********************************************************************
