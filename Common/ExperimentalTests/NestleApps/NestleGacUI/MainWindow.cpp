@@ -341,6 +341,10 @@ MainWindow
 			commandUserLogin->Executed.AttachMethod(this, &MainWindow::commandUserLogin_Clicked);
 			commandUserLogout->Executed.AttachMethod(this, &MainWindow::commandUserLogout_Clicked);
 
+			postResources=new PostResources;
+			postResources->imageLoading=GetCurrentController()->ImageService()->CreateImageFromFile(L"..\\Resources\\Downloading.png");
+			postResources->imageDownloadFailed=GetCurrentController()->ImageService()->CreateImageFromFile(L"..\\Resources\\DownloadFailed.png");
+
 			SwitchToLogoutStatus();
 		}
 
@@ -351,7 +355,7 @@ MainWindow
 		void MainWindow::OpenPostWindow(Ptr<NestlePost> post)
 		{
 			deadPostWindows.Clear();
-			Ptr<PostWindow> postWindow=new PostWindow(server, post);
+			Ptr<PostWindow> postWindow=new PostWindow(server, post, postResources);
 			postWindow->WindowClosed.AttachMethod(this, &MainWindow::postWindow_Closed);
 			alivePostWindows.Add(postWindow);
 			postWindow->Show();

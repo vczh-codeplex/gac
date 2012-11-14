@@ -86,6 +86,16 @@ Markdown Parser
 				}
 				run->text+=text;
 			}
+
+			Ptr<text::DocumentImageRun> WriteImagePlaceHolder(int& paragraphIndex)
+			{
+				EnsureLineExists();
+				run=0;
+				Ptr<text::DocumentImageRun> imageRun=new text::DocumentImageRun;
+				line->runs.Add(imageRun);
+				paragraphIndex=document->paragraphs.Count()-1;
+				return imageRun;
+			}
 		};
 
 		const wchar_t* EscapeSpaces(const wchar_t* reading)
@@ -104,7 +114,14 @@ Markdown Parser
 			return reading;
 		}
 
-		Ptr<text::DocumentModel> ParseMarkdown(const WString& markdown)
+		struct ImageRunPlaceHolder
+		{
+			Ptr<text::DocumentImageRun>		imageRun;
+			WString							link;
+			int								paragraphIndex;
+		};
+
+		Ptr<text::DocumentModel> ParseMarkdown(const WString& markdown, List<Ptr<ImageRunPlaceHolder>>& imageRunPlaceHolders)
 		{
 			WString processedMarkdown;
 			{
@@ -384,14 +401,12 @@ Markdown Parser
 									}
 									reading+=match->Result().Length();
 
-									bool underline=currentFont.underline;
-									currentFont.underline=true;
-									writer.BeginRun(currentFont, Color(0, 0, 255));
-									writer.WriteText(name);
-									currentFont.underline=underline;
+									Ptr<ImageRunPlaceHolder> imageRunPlaceHolder=new ImageRunPlaceHolder;
+									imageRunPlaceHolder->imageRun=writer.WriteImagePlaceHolder(imageRunPlaceHolder->paragraphIndex);
+									imageRunPlaceHolder->link=link;
+									imageRunPlaceHolders.Add(imageRunPlaceHolder);
 
-									writer.BeginRun(currentFont);
-									beganRun=true;
+									beganRun=false;
 									goto END_OF_FRAGMENT;
 								}
 							}
@@ -421,20 +436,12 @@ Markdown Parser
 									}
 									reading+=match->Result().Length();
 
-									bool underline=currentFont.underline;
-									currentFont.underline=true;
-									writer.BeginRun(currentFont, Color(0, 0, 255));
-									writer.WriteText(name);
-									currentFont.underline=underline;
+									Ptr<ImageRunPlaceHolder> imageRunPlaceHolder=new ImageRunPlaceHolder;
+									imageRunPlaceHolder->imageRun=writer.WriteImagePlaceHolder(imageRunPlaceHolder->paragraphIndex);
+									imageRunPlaceHolder->link=link;
+									imageRunPlaceHolders.Add(imageRunPlaceHolder);
 
-									if(link==L"")
-									{
-										writer.BeginRun(defaultFont, Color(255, 0, 0));
-										writer.WriteText(L"<--[BAD REFERENCE]");
-									}
-
-									writer.BeginRun(currentFont);
-									beganRun=true;
+									beganRun=false;
 									goto END_OF_FRAGMENT;
 								}
 							}
@@ -465,6 +472,49 @@ END_OF_LINE:;
 			}
 			return writer.Stop();
 		}
+
+/***********************************************************************
+GifAnimation
+***********************************************************************/
+		
+		class GifAnimation : public Object, public IGuiGraphicsAnimation
+		{
+		protected:
+			unsigned __int64				startTime;
+			Ptr<text::DocumentImageRun>		imageRun;
+			int								paragraphIndex;
+			GuiDocumentElement*				documentElement;
+		public:
+			GifAnimation(Ptr<text::DocumentImageRun> _imageRun, int _paragraphIndex, GuiDocumentElement* _documentElement)
+				:imageRun(_imageRun)
+				,paragraphIndex(_paragraphIndex)
+				,documentElement(_documentElement)
+				,startTime(DateTime::LocalTime().totalMilliseconds)
+			{
+			}
+
+			int GetTotalLength()
+			{
+				return 1;
+			}
+
+			int GetCurrentPosition()
+			{
+				return 0;
+			}
+
+			void Play(int currentPosition, int totalLength)
+			{
+				unsigned __int64 ms=DateTime::LocalTime().totalMilliseconds-startTime;
+				int frameIndex=(ms/100)%imageRun->image->GetFrameCount();
+				imageRun->frameIndex=frameIndex;
+				documentElement->NotifyParagraphUpdated(paragraphIndex);
+			}
+
+			void Stop()
+			{
+			}
+		};
 
 /***********************************************************************
 PostItemControl
@@ -545,11 +595,37 @@ PostItemControl
 			}
 			authorElement->SetText(postItem->author);
 			dateTimeElement->SetText(postItem->createDateTime);
-			bodyElement->SetDocument(ParseMarkdown(postItem->body));
-			
+
 			PostWindow* postWindow=dynamic_cast<PostWindow*>(GetRelatedControlHost());
 			buttonEdit->SetVisible(postWindow->IsCurrentUser(postItem->author));
 			buttonDelete->SetVisible(postWindow->IsCurrentUser(postItem->author));
+			{
+				List<Ptr<ImageRunPlaceHolder>> images;
+				Ptr<text::DocumentModel> document=ParseMarkdown(postItem->body, images);
+
+				for(int i=0;i<images.Count();i++)
+				{
+					Ptr<ImageRunPlaceHolder> image=images[i];
+					if(image->link==L"")
+					{
+						image->imageRun->image=postWindow->GetResources()->imageDownloadFailed;
+						image->imageRun->frameIndex=0;
+						image->imageRun->size=image->imageRun->image->GetFrame(0)->GetSize();
+						image->imageRun->baseline=image->imageRun->size.y;
+					}
+					else
+					{
+						image->imageRun->image=postWindow->GetResources()->imageLoading;
+						image->imageRun->frameIndex=0;
+						image->imageRun->size=image->imageRun->image->GetFrame(0)->GetSize();
+						image->imageRun->baseline=image->imageRun->size.y;
+
+						//Ptr<GifAnimation> animation=new GifAnimation(image->imageRun, image->paragraphIndex, bodyElement);
+						//postWindow->GetGraphicsHost()->GetAnimationManager()->AddAnimation(animation);
+					}
+				}
+				bodyElement->SetDocument(document);
+			}
 		}
 
 /***********************************************************************
@@ -821,10 +897,11 @@ PostWindow
 			postItemControl->Install(postItem);
 		}
 
-		PostWindow::PostWindow(Ptr<NestleServer> _server, Ptr<NestlePost> _post)
+		PostWindow::PostWindow(Ptr<NestleServer> _server, Ptr<NestlePost> _post, Ptr<PostResources> _resources)
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 			,server(_server)
 			,post(_post)
+			,resources(_resources)
 		{
 			SetText(L"Î§¹ÛÌû×Ó£º"+post->title);
 			SetMinimizedBox(false);
@@ -904,6 +981,11 @@ PostWindow
 		Ptr<NestleServer> PostWindow::GetServer()
 		{
 			return server;
+		}
+
+		Ptr<PostResources> PostWindow::GetResources()
+		{
+			return resources;
 		}
 
 		bool PostWindow::IsCurrentUser(const WString& author)

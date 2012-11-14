@@ -52,6 +52,7 @@ namespace vl
 			GuiGraphicsComposition*						containerTopicList;
 			GuiListControlTemplate<TopicItemControl>*	listTopics;
 
+			Ptr<PostResources>							postResources;
 			Ptr<NestleServer>							server;
 			Ptr<NestleTopicsPage>						currentPage;
 			Ptr<LoginWindow>							loginWindow;
