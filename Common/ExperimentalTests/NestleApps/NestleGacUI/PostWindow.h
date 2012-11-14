@@ -30,6 +30,16 @@ namespace vl
 		class PostItemControl : public list::ObjectItemControl
 		{
 		protected:
+			struct DownloadVersion
+			{
+				volatile int					version;
+
+				DownloadVersion()
+					:version(0)
+				{
+				}
+			};
+
 			GuiSolidLabelElement*				titleElement;
 			GuiSolidLabelElement*				authorElement;
 			GuiSolidLabelElement*				dateTimeElement;
@@ -39,6 +49,7 @@ namespace vl
 			GuiButton*							buttonEdit;
 			GuiButton*							buttonDelete;
 			Ptr<PostItem>						postItem;
+			Ptr<DownloadVersion>				downloadVersion;
 
 			void buttonReply_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void buttonEdit_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
@@ -47,6 +58,7 @@ namespace vl
 			void InitializeComponents();
 		public:
 			PostItemControl();
+			~PostItemControl();
 
 			void								Install(Ptr<Object> value)override;
 		};
@@ -69,6 +81,7 @@ namespace vl
 			void								buttonPost_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void								buttonUploadPicture_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void								buttonCancel_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void								this_WindowClosed(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 
 			void								ClearPostItems();
 			void								AddPostItem(Ptr<PostItem> postItem);

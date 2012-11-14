@@ -117,6 +117,7 @@ Nestle Data Structure
 			~NestleServer();
 
 			const WString&			GetUsername();
+			const WString&			GetCookie();
 			bool					IsLoginSuccess();
 			void					GetUsers(List<Ptr<NestleUser>>& users);
 			Ptr<NestleTopicsPage>	GetTopics(int pageIndex);
