@@ -10,6 +10,7 @@ Classes:
 #define VCZH_PARSING_PARSINGTREE
 
 #include "..\Regex\Regex.h"
+#include "..\Stream\Accessor.h"
 
 namespace vl
 {
