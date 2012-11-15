@@ -4,3 +4,92 @@
 
 using namespace vl;
 using namespace vl::parsing;
+using namespace vl::parsing::definitions;
+
+TEST_CASE(TestParsingExpression)
+{
+	Ptr<ParsingDefinition> definition;
+	{
+		ParsingDefinitionWriter definitionWriter;
+
+		definitionWriter
+			.Type(
+				Class(L"Expression")
+				)
+			.Type(
+				Class(L"NumberExpression", L"Expression")
+					.Member(L"value", TokenType())
+				)
+			.Type(
+				Class(L"BinaryExpression", L"Expression")
+					.SubType(
+						Enum(L"BinaryOperator")
+							.Member(L"Add")
+							.Member(L"Sub")
+							.Member(L"Mul")
+							.Member(L"Div")
+						)
+					.Member(L"firstOperand", Type(L"Expression"))
+					.Member(L"secondOperand", Type(L"Expression"))
+					.Member(L"binaryOperator", Type(L"BinaryOperator"))
+				)
+			.Type(
+				Class(L"FunctionExpression", L"Expression")
+					.Member(L"functionName", TokenType())
+					.Member(L"arguments", Type(L"Expression").Array())
+				)
+
+			.Token(L"NAME",		L"[a-zA-Z_]/w*")
+			.Token(L"NUMBER",	L"/d+(./d+)")
+			.Token(L"ADD",		L"/+")
+			.Token(L"SUB",		L"-")
+			.Token(L"MUL",		L"/*")
+			.Token(L"DIV",		L"//")
+			.Token(L"LEFT",		L"/(")
+			.Token(L"RIGHT",	L"/)")
+			.Token(L"COMMA",	L",")
+
+			.Rule(L"Number", Type(L"NumberExpression"))
+				.Imply(Rule(L"NUMBER")[L"value"])
+				.EndRule()
+
+			.Rule(L"Call", Type(L"FunctionExpression"))
+				.Imply(Rule(L"NAME")[L"functionName"] + Text(L"(") + Opt(Rule(L"Exp")[L"arguments"] + *(Text(L",") + Rule(L"Exp")[L"arguments"])) + Text(L")"))
+				.EndRule()
+
+			.Rule(L"Factor", Type(L"Expression"))
+				.Imply(!Rule(L"Number") | !Rule(L"Call"))
+				.EndRule()
+
+			.Rule(L"Term", Type(L"Expression"))
+				.Imply(!Rule(L"Factor"))
+				.Imply(
+					(Rule(L"Term")[L"firstOperand"] + Text(L"*") + Rule(L"Factory")[L"secondOperand"])
+						.As(Type(L"BinaryExpression"))
+						.Set(L"binaryOperator", L"BinaryExpression::BinaryOperator::Mul")
+					)
+				.Imply(
+					(Rule(L"Term")[L"firstOperand"] + Text(L"/") + Rule(L"Factory")[L"secondOperand"])
+						.As(Type(L"BinaryExpression"))
+						.Set(L"binaryOperator", L"BinaryExpression::BinaryOperator::Div")
+					)
+				.EndRule()
+
+			.Rule(L"Exp", Type(L"Expression"))
+				.Imply(!Rule(L"Term"))
+				.Imply(
+					(Rule(L"Exp")[L"firstOperand"] + Text(L"+") + Rule(L"Term")[L"secondOperand"])
+						.As(Type(L"BinaryExpression"))
+						.Set(L"binaryOperator", L"BinaryExpression::BinaryOperator::Add")
+					)
+				.Imply(
+					(Rule(L"Exp")[L"firstOperand"] + Text(L"-") + Rule(L"Term")[L"secondOperand"])
+						.As(Type(L"BinaryExpression"))
+						.Set(L"binaryOperator", L"BinaryExpression::BinaryOperator::Sub")
+					)
+				.EndRule()
+			;
+
+		definition=definitionWriter.Definition();
+	}
+}

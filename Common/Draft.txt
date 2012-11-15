@@ -96,7 +96,6 @@ Priority:
 In a rule, any possible matching path should only contains one _Create or one _Use exclusively.
 If a rule contains _Create or _Use, all possible matching path that doesn't contains any _Create or _Use is considered returning null.
 If a rule doesn't contains any _Create or _Use, it is treated as always uses _Create(rule type).
-If a rule doesn't contains any _Create or _Use, and it doesn't contains any _Assign, it is treated as a wrong rule.
 
 ========================================================
 parse intel manual 2A and 2B to get binary code table
