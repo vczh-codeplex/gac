@@ -1,10 +1,32 @@
 #include <string.h>
 #include "..\..\Source\UnitTest\UnitTest.h"
 #include "..\..\Source\Parsing\ParsingDefinitions.h"
+#include "..\..\Source\Stream\FileStream.h"
+#include "..\..\Source\Stream\Accessor.h"
+#include "..\..\Source\Stream\CharFormat.h"
 
 using namespace vl;
+using namespace vl::stream;
+using namespace vl::collections;
 using namespace vl::parsing;
 using namespace vl::parsing::definitions;
+
+extern WString GetPath();
+
+namespace test
+{
+	void GeneralTest(Ptr<ParsingDefinition> definition, const WString& name)
+	{
+		{
+			FileStream fileStream(GetPath()+L"Parsing."+name+L".Definition.txt", FileStream::WriteOnly);
+			BomEncoder encoder(BomEncoder::Utf16);
+			EncoderStream encoderStream(fileStream, encoder);
+			StreamWriter writer(encoderStream);
+			Log(definition, writer);
+		}
+	}
+}
+using namespace test;
 
 TEST_CASE(TestParsingExpression)
 {
@@ -66,12 +88,12 @@ TEST_CASE(TestParsingExpression)
 				.Imply(
 					(Rule(L"Term")[L"firstOperand"] + Text(L"*") + Rule(L"Factory")[L"secondOperand"])
 						.As(Type(L"BinaryExpression"))
-						.Set(L"binaryOperator", L"BinaryExpression::BinaryOperator::Mul")
+						.Set(L"binaryOperator", L"Mul")
 					)
 				.Imply(
 					(Rule(L"Term")[L"firstOperand"] + Text(L"/") + Rule(L"Factory")[L"secondOperand"])
 						.As(Type(L"BinaryExpression"))
-						.Set(L"binaryOperator", L"BinaryExpression::BinaryOperator::Div")
+						.Set(L"binaryOperator", L"Div")
 					)
 				.EndRule()
 
@@ -80,16 +102,17 @@ TEST_CASE(TestParsingExpression)
 				.Imply(
 					(Rule(L"Exp")[L"firstOperand"] + Text(L"+") + Rule(L"Term")[L"secondOperand"])
 						.As(Type(L"BinaryExpression"))
-						.Set(L"binaryOperator", L"BinaryExpression::BinaryOperator::Add")
+						.Set(L"binaryOperator", L"Add")
 					)
 				.Imply(
 					(Rule(L"Exp")[L"firstOperand"] + Text(L"-") + Rule(L"Term")[L"secondOperand"])
 						.As(Type(L"BinaryExpression"))
-						.Set(L"binaryOperator", L"BinaryExpression::BinaryOperator::Sub")
+						.Set(L"binaryOperator", L"Sub")
 					)
 				.EndRule()
 			;
 
 		definition=definitionWriter.Definition();
 	}
+	GeneralTest(definition, L"Calculator");
 }

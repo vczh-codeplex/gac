@@ -130,6 +130,7 @@ ParsingDefinitionTypeWriter
 			{
 				Ptr<ParsingDefinitionPrimitiveType> primitiveType=new ParsingDefinitionPrimitiveType;
 				primitiveType->name=name;
+				type=primitiveType;
 			}
 
 			ParsingDefinitionTypeWriter ParsingDefinitionTypeWriter::Sub(const WString& subTypeName)const

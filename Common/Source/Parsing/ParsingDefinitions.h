@@ -427,6 +427,12 @@ namespace vl
 
 				Ptr<ParsingDefinition>							Definition()const;
 			};
+
+/***********************************************************************
+¸¨Öúº¯Êý
+***********************************************************************/
+
+			extern void				Log(Ptr<ParsingDefinition> definition, stream::TextWriter& writer);
 		}
 	}
 }
