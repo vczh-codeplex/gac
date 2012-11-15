@@ -25,7 +25,7 @@ namespace vl
 			class ParsingDefinitionNode : public Object
 			{
 			public:
-				ParsingTextRange				codeRange;
+				ParsingTextRange								codeRange;
 			};
 
 /***********************************************************************
@@ -33,6 +33,7 @@ namespace vl
 ***********************************************************************/
 
 			class ParsingDefinitionPrimitiveType;
+			class ParsingDefinitionTokenType;
 			class ParsingDefinitionSubType;
 			class ParsingDefinitionArrayType;
 
@@ -42,37 +43,45 @@ namespace vl
 				class IVisitor : public Interface
 				{
 				public:
-					virtual void				Visit(ParsingDefinitionPrimitiveType* node)=0;
-					virtual void				Visit(ParsingDefinitionSubType* node)=0;
-					virtual void				Visit(ParsingDefinitionArrayType* node)=0;
+					virtual void								Visit(ParsingDefinitionPrimitiveType* node)=0;
+					virtual void								Visit(ParsingDefinitionTokenType* node)=0;
+					virtual void								Visit(ParsingDefinitionSubType* node)=0;
+					virtual void								Visit(ParsingDefinitionArrayType* node)=0;
 				};
 
-				virtual void					Accept(IVisitor* visitor)=0;
+				virtual void									Accept(IVisitor* visitor)=0;
 			};
 
 			class ParsingDefinitionPrimitiveType : public ParsingDefinitionType
 			{
 			public:
-				WString							name;
+				WString											name;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionTokenType : public ParsingDefinitionType
+			{
+			public:
+
+				void											Accept(IVisitor* visitor)override;
 			};
 
 			class ParsingDefinitionSubType : public ParsingDefinitionType
 			{
 			public:
-				Ptr<ParsingDefinitionType>		parentType;
-				WString							subTypeName;
+				Ptr<ParsingDefinitionType>						parentType;
+				WString											subTypeName;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
 			};
 
 			class ParsingDefinitionArrayType : public ParsingDefinitionType
 			{
 			public:
-				Ptr<ParsingDefinitionType>		elementType;
+				Ptr<ParsingDefinitionType>						elementType;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
 			};
 
 /***********************************************************************
@@ -90,44 +99,45 @@ namespace vl
 				class IVisitor : public Interface
 				{
 				public:
-					virtual void				Visit(ParsingDefinitionClassMemberDefinition* node)=0;
-					virtual void				Visit(ParsingDefinitionClassDefinition* node)=0;
-					virtual void				Visit(ParsingDefinitionEnumMemberDefinition* node)=0;
-					virtual void				Visit(ParsingDefinitionEnumDefinition* node)=0;
+					virtual void								Visit(ParsingDefinitionClassMemberDefinition* node)=0;
+					virtual void								Visit(ParsingDefinitionClassDefinition* node)=0;
+					virtual void								Visit(ParsingDefinitionEnumMemberDefinition* node)=0;
+					virtual void								Visit(ParsingDefinitionEnumDefinition* node)=0;
 				};
 
-				virtual void					Accept(IVisitor* visitor)=0;
+				virtual void									Accept(IVisitor* visitor)=0;
 			public:
-				WString							name;
+				WString											name;
 			};
 
 			class ParsingDefinitionClassMemberDefinition : public ParsingDefinitionTypeDefinition
 			{
 			public:
-				Ptr<ParsingDefinitionType>		type;
-				WString							name;
+				Ptr<ParsingDefinitionType>						type;
+				WString											name;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
 			};
 
 			class ParsingDefinitionClassDefinition : public ParsingDefinitionTypeDefinition
 			{
 			public:
 				typedef collections::List<Ptr<ParsingDefinitionClassMemberDefinition>>	MemberList;
-				typedef collections::List<Ptr<ParsingDefinitionClassDefinition>>		TypeList;
+				typedef collections::List<Ptr<ParsingDefinitionTypeDefinition>>			TypeList;
 
-				MemberList						members;
-				TypeList						subTypes;
+				WString											parentType;
+				MemberList										members;
+				TypeList										subTypes;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
 			};
 
 			class ParsingDefinitionEnumMemberDefinition : public ParsingDefinitionTypeDefinition
 			{
 			public:
-				WString							name;
+				WString											name;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
 			};
 
 			class ParsingDefinitionEnumDefinition : public ParsingDefinitionTypeDefinition
@@ -135,22 +145,21 @@ namespace vl
 			public:
 				typedef collections::List<Ptr<ParsingDefinitionEnumMemberDefinition>>	MemberList;
 
-				MemberList						members;
+				MemberList										members;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
 			};
 
-/***********************************************************************
-文法结构
-***********************************************************************/
-
 			class ParsingDefinitionPrimitiveGrammar;
+			class ParsingDefinitionTextGrammar;
 			class ParsingDefinitionSequenceGrammar;
 			class ParsingDefinitionAlternativeGrammar;
 			class ParsingDefinitionLoopGrammar;
+			class ParsingDefinitionOptionalGrammar;
 			class ParsingDefinitionCreateGrammar;
 			class ParsingDefinitionAssignGrammar;
 			class ParsingDefinitionUseGrammar;
+			class ParsingDefinitionSetterGrammar;
 
 			class ParsingDefinitionGrammar : public ParsingDefinitionNode
 			{
@@ -158,31 +167,19 @@ namespace vl
 				class IVisitor : public Interface
 				{
 				public:
-					virtual void				Visit(ParsingDefinitionPrimitiveGrammar* node)=0;
-					virtual void				Visit(ParsingDefinitionSequenceGrammar* node)=0;
-					virtual void				Visit(ParsingDefinitionAlternativeGrammar* node)=0;
-					virtual void				Visit(ParsingDefinitionLoopGrammar* node)=0;
-					virtual void				Visit(ParsingDefinitionCreateGrammar* node)=0;
-					virtual void				Visit(ParsingDefinitionAssignGrammar* node)=0;
-					virtual void				Visit(ParsingDefinitionUseGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionPrimitiveGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionTextGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionSequenceGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionAlternativeGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionLoopGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionOptionalGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionCreateGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionAssignGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionUseGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionSetterGrammar* node)=0;
 				};
 
-				virtual void					Accept(IVisitor* visitor)=0;
-			};
-
-			class ParsingDefinitionTokenDefinition : public ParsingDefinitionNode
-			{
-			public:
-				WString							name;
-				WString							regex;
-			};
-
-			class ParsingDefinitionRuleDefinition : public ParsingDefinitionNode
-			{
-			public:
-				WString							name;
-				Ptr<ParsingDefinitionType>		type;
-				Ptr<ParsingDefinitionGrammar>	grammar;
+				virtual void									Accept(IVisitor* visitor)=0;
 			};
 
 /***********************************************************************
@@ -192,66 +189,107 @@ namespace vl
 			class ParsingDefinitionPrimitiveGrammar : public ParsingDefinitionGrammar
 			{
 			public:
-				WString							name;
+				WString											name;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionTextGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				WString											text;
+
+				void											Accept(IVisitor* visitor)override;
 			};
 
 			class ParsingDefinitionSequenceGrammar : public ParsingDefinitionGrammar
 			{
 			public:
-				Ptr<ParsingDefinitionGrammar>	first;
-				Ptr<ParsingDefinitionGrammar>	second;
+				Ptr<ParsingDefinitionGrammar>					first;
+				Ptr<ParsingDefinitionGrammar>					second;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
 			};
 
 			class ParsingDefinitionAlternativeGrammar : public ParsingDefinitionGrammar
 			{
 			public:
-				Ptr<ParsingDefinitionGrammar>	first;
-				Ptr<ParsingDefinitionGrammar>	second;
+				Ptr<ParsingDefinitionGrammar>					first;
+				Ptr<ParsingDefinitionGrammar>					second;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
 			};
 
 			class ParsingDefinitionLoopGrammar : public ParsingDefinitionGrammar
 			{
 			public:
-				Ptr<ParsingDefinitionGrammar>	grammar;
+				Ptr<ParsingDefinitionGrammar>					grammar;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionOptionalGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+
+				void											Accept(IVisitor* visitor)override;
 			};
 
 			class ParsingDefinitionCreateGrammar : public ParsingDefinitionGrammar
 			{
 			public:
-				Ptr<ParsingDefinitionGrammar>	grammar;
-				Ptr<ParsingDefinitionType>		type;
+				Ptr<ParsingDefinitionGrammar>					grammar;
+				Ptr<ParsingDefinitionType>						type;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
 			};
 
 			class ParsingDefinitionAssignGrammar : public ParsingDefinitionGrammar
 			{
 			public:
-				Ptr<ParsingDefinitionGrammar>	grammar;
-				WString							memberName;
+				Ptr<ParsingDefinitionGrammar>					grammar;
+				WString											memberName;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
 			};
 
 			class ParsingDefinitionUseGrammar : public ParsingDefinitionGrammar
 			{
 			public:
-				Ptr<ParsingDefinitionGrammar>	grammar;
+				Ptr<ParsingDefinitionGrammar>					grammar;
 
-				void							Accept(IVisitor* visitor)override;
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionSetterGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+				WString											memberName;
+				WString											value;
+
+				void											Accept(IVisitor* visitor)override;
 			};
 
 /***********************************************************************
-语法描述
+文法结构
 ***********************************************************************/
+
+			class ParsingDefinitionTokenDefinition : public ParsingDefinitionNode
+			{
+			public:
+				WString											name;
+				WString											regex;
+			};
+
+			class ParsingDefinitionRuleDefinition : public ParsingDefinitionNode
+			{
+			public:
+				WString															name;
+				Ptr<ParsingDefinitionType>										type;
+				collections::List<Ptr<ParsingDefinitionGrammar>>				grammars;
+			};
 
 			class ParsingDefinition : public Object
 			{
@@ -259,6 +297,135 @@ namespace vl
 				collections::List<Ptr<ParsingDefinitionTypeDefinition>>			types;
 				collections::List<Ptr<ParsingDefinitionTokenDefinition>>		tokens;
 				collections::List<Ptr<ParsingDefinitionRuleDefinition>>			rules;
+			};
+
+/***********************************************************************
+构造器（类型）
+***********************************************************************/
+
+			class ParsingDefinitionTypeWriter : public Object
+			{
+				friend ParsingDefinitionTypeWriter				Type(const WString& name);
+				friend ParsingDefinitionTypeWriter				TokenType();
+			protected:
+				Ptr<ParsingDefinitionType>						type;
+
+				ParsingDefinitionTypeWriter(Ptr<ParsingDefinitionType> internalType);
+				ParsingDefinitionTypeWriter(const WString& name);
+			public:
+				ParsingDefinitionTypeWriter(const ParsingDefinitionTypeWriter& typeWriter);
+
+				ParsingDefinitionTypeWriter						Sub(const WString& subTypeName)const;
+				ParsingDefinitionTypeWriter						Array()const;
+				Ptr<ParsingDefinitionType>						Type()const;
+			};
+
+			extern ParsingDefinitionTypeWriter					Type(const WString& name);
+			extern ParsingDefinitionTypeWriter					TokenType();
+
+/***********************************************************************
+构造器（类型定义）
+***********************************************************************/
+
+			class ParsingDefinitionTypeDefinitionWriter : public Object
+			{
+			public:
+				virtual Ptr<ParsingDefinitionTypeDefinition>	Definition()const=0;
+			};
+
+			class ParsingDefinitionClassDefinitionWriter : public ParsingDefinitionTypeDefinitionWriter
+			{
+			protected:
+				Ptr<ParsingDefinitionClassDefinition>			definition;
+
+			public:
+				ParsingDefinitionClassDefinitionWriter(const WString& name, const WString& parentType=L"");
+
+				ParsingDefinitionClassDefinitionWriter&			Member(const WString& name, const ParsingDefinitionTypeWriter& type);
+				ParsingDefinitionClassDefinitionWriter&			SubType(const ParsingDefinitionTypeDefinitionWriter& type);
+
+				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
+			};
+
+			extern ParsingDefinitionClassDefinitionWriter		Class(const WString& name, const WString& parentType=L"");
+
+			class ParsingDefinitionEnumDefinitionWriter : public ParsingDefinitionTypeDefinitionWriter
+			{
+			protected:
+				Ptr<ParsingDefinitionEnumDefinition>			definition;
+
+			public:
+				ParsingDefinitionEnumDefinitionWriter(const WString& name);
+
+				ParsingDefinitionEnumDefinitionWriter&			Member(const WString& name);
+
+				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
+			};
+
+			extern ParsingDefinitionEnumDefinitionWriter		Enum(const WString& name);
+
+/***********************************************************************
+构造器（文法规则）
+***********************************************************************/
+
+			class ParsingDefinitionGrammarWriter : public Object
+			{
+				friend ParsingDefinitionGrammarWriter			Rule(const WString& name);
+				friend ParsingDefinitionGrammarWriter			Text(const WString& name);
+				friend ParsingDefinitionGrammarWriter			Opt(const ParsingDefinitionGrammarWriter& writer);
+			protected:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+
+				ParsingDefinitionGrammarWriter(Ptr<ParsingDefinitionGrammar> internalGrammar);
+			public:
+				ParsingDefinitionGrammarWriter(const ParsingDefinitionGrammarWriter& grammarWriter);
+
+				ParsingDefinitionGrammarWriter					operator+(const ParsingDefinitionGrammarWriter& next)const;
+				ParsingDefinitionGrammarWriter					operator|(const ParsingDefinitionGrammarWriter& next)const;
+				ParsingDefinitionGrammarWriter					operator*()const;
+				ParsingDefinitionGrammarWriter					As(const ParsingDefinitionTypeWriter& type)const;
+				ParsingDefinitionGrammarWriter					operator[](const WString& memberName)const;
+				ParsingDefinitionGrammarWriter					operator!()const;
+				ParsingDefinitionGrammarWriter					Set(const WString& memberName, const WString& value)const;
+
+				Ptr<ParsingDefinitionGrammar>					Grammar()const;
+			};
+
+			extern ParsingDefinitionGrammarWriter				Rule(const WString& name);
+			extern ParsingDefinitionGrammarWriter				Text(const WString& text);
+			extern ParsingDefinitionGrammarWriter				Opt(const ParsingDefinitionGrammarWriter& writer);
+
+/***********************************************************************
+构造器（文法结构）
+***********************************************************************/
+
+			class ParsingDefinitionWriter;
+
+			class ParsingDefinitionRuleDefinitionWriter : public Object
+			{
+			protected:
+				Ptr<ParsingDefinitionRuleDefinition>			rule;
+				ParsingDefinitionWriter&						owner;
+			public:
+				ParsingDefinitionRuleDefinitionWriter(ParsingDefinitionWriter& _owner, Ptr<ParsingDefinitionRuleDefinition> _rule);
+
+				ParsingDefinitionRuleDefinitionWriter&			Imply(const ParsingDefinitionGrammarWriter& grammar);
+				ParsingDefinitionWriter&						EndRule();
+			};
+
+			class ParsingDefinitionWriter : public Object
+			{
+			protected:
+				Ptr<ParsingDefinition>							definition;
+
+			public:
+				ParsingDefinitionWriter();
+
+				ParsingDefinitionWriter&						Type(const ParsingDefinitionTypeDefinitionWriter& type);
+				ParsingDefinitionWriter&						Token(const WString& name, const WString& regex);
+				ParsingDefinitionRuleDefinitionWriter			Rule(const WString& name, const ParsingDefinitionTypeWriter& type);
+
+				Ptr<ParsingDefinition>							Definition()const;
 			};
 		}
 	}
