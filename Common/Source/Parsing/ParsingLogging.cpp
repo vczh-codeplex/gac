@@ -281,9 +281,8 @@ Logger (ParsingDefinitionGrammar)
 						writer.WriteString(L"( ");
 					}
 					LogInternal(node->grammar, priority, writer);
-					writer.WriteString(L"[ = ");
+					writer.WriteString(L" : ");
 					writer.WriteString(node->memberName);
-					writer.WriteString(L"]");
 					if(parentPriority>priority)
 					{
 						writer.WriteString(L" )");
@@ -293,8 +292,16 @@ Logger (ParsingDefinitionGrammar)
 				void Visit(ParsingDefinitionUseGrammar* node)override
 				{
 					int priority=PRIORITY_USE;
+					if(parentPriority>priority)
+					{
+						writer.WriteString(L"( ");
+					}
 					writer.WriteString(L"!");
 					LogInternal(node->grammar, priority, writer);
+					if(parentPriority>priority)
+					{
+						writer.WriteString(L" )");
+					}
 				}
 
 				void Visit(ParsingDefinitionSetterGrammar* node)override
@@ -305,10 +312,10 @@ Logger (ParsingDefinitionGrammar)
 						writer.WriteString(L"( ");
 					}
 					LogInternal(node->grammar, priority, writer);
-					writer.WriteString(L" { ");
+					writer.WriteString(L" with { ");
 					writer.WriteString(node->memberName);
 					writer.WriteString(L" = ");
-					writer.WriteString(node->value);
+					LogString(node->value, writer);
 					writer.WriteString(L" }");
 					if(parentPriority>priority)
 					{
