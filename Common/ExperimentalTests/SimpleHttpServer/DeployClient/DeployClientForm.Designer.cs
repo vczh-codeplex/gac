@@ -98,10 +98,11 @@
             // buttonUpdate
             // 
             this.buttonUpdate.AutoSize = true;
+            this.buttonUpdate.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.buttonUpdate.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.buttonUpdate.Location = new System.Drawing.Point(645, 3);
+            this.buttonUpdate.Location = new System.Drawing.Point(621, 3);
             this.buttonUpdate.Name = "buttonUpdate";
-            this.buttonUpdate.Size = new System.Drawing.Size(153, 22);
+            this.buttonUpdate.Size = new System.Drawing.Size(177, 22);
             this.buttonUpdate.TabIndex = 1;
             this.buttonUpdate.Text = "Update";
             this.buttonUpdate.UseVisualStyleBackColor = true;
@@ -146,12 +147,13 @@
             // buttonOpenLocalDirectory
             // 
             this.buttonOpenLocalDirectory.AutoSize = true;
+            this.buttonOpenLocalDirectory.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.buttonOpenLocalDirectory.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.buttonOpenLocalDirectory.Location = new System.Drawing.Point(645, 31);
+            this.buttonOpenLocalDirectory.Location = new System.Drawing.Point(621, 31);
             this.buttonOpenLocalDirectory.Name = "buttonOpenLocalDirectory";
-            this.buttonOpenLocalDirectory.Size = new System.Drawing.Size(153, 22);
+            this.buttonOpenLocalDirectory.Size = new System.Drawing.Size(177, 22);
             this.buttonOpenLocalDirectory.TabIndex = 5;
-            this.buttonOpenLocalDirectory.Text = "Explore Local Directory";
+            this.buttonOpenLocalDirectory.Text = "Explore Local Directory ...";
             this.buttonOpenLocalDirectory.UseVisualStyleBackColor = true;
             this.buttonOpenLocalDirectory.Click += new System.EventHandler(this.buttonOpenLocalDirectory_Click);
             // 
@@ -162,7 +164,7 @@
             this.labelServer.Location = new System.Drawing.Point(137, 8);
             this.labelServer.Margin = new System.Windows.Forms.Padding(8);
             this.labelServer.Name = "labelServer";
-            this.labelServer.Size = new System.Drawing.Size(497, 12);
+            this.labelServer.Size = new System.Drawing.Size(473, 12);
             this.labelServer.TabIndex = 6;
             this.labelServer.Text = "<Server Name>";
             this.labelServer.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -174,7 +176,7 @@
             this.labelLocalDirectory.Location = new System.Drawing.Point(137, 36);
             this.labelLocalDirectory.Margin = new System.Windows.Forms.Padding(8);
             this.labelLocalDirectory.Name = "labelLocalDirectory";
-            this.labelLocalDirectory.Size = new System.Drawing.Size(497, 12);
+            this.labelLocalDirectory.Size = new System.Drawing.Size(473, 12);
             this.labelLocalDirectory.TabIndex = 7;
             this.labelLocalDirectory.Text = "<Local Directory>";
             this.labelLocalDirectory.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;

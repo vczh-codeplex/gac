@@ -97,7 +97,7 @@ namespace DeployClient
         public DeployClientForm()
         {
             InitializeComponent();
-            AsyncUpdate(() => this.deployDatabase = new DeployDatabase());
+            AsyncUpdate(() => this.deployDatabase = new DeployDatabase(true));
         }
 
         private void timerUpdate_Tick(object sender, EventArgs e)
@@ -107,7 +107,7 @@ namespace DeployClient
 
         private void buttonOpenLocalDirectory_Click(object sender, EventArgs e)
         {
-            Process.Start(labelLocalDirectory.Text);
+            Process.Start("explorer", "\"" + labelLocalDirectory.Text + "\"");
         }
 
         private void buttonUpdate_Click(object sender, EventArgs e)

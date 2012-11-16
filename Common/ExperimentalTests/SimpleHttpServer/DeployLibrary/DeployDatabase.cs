@@ -38,6 +38,14 @@ namespace DeployLibrary
         public string LocalDirectory { get; private set; }
         public string ServerName { get; private set; }
 
+        public string DeployDirectory
+        {
+            get
+            {
+                return this.LocalDirectory + "-Deployment";
+            }
+        }
+
         public AzureBlobDirectory GetDeploymentDirectory(string deploynameName)
         {
             return this.deployContainer
@@ -74,7 +82,7 @@ namespace DeployLibrary
             }
         }
 
-        public DeployDatabase()
+        public DeployDatabase(bool controller)
         {
             XDocument configuration = XDocument.Load("StorageConfiguration.xml");
             string account = configuration.Root.Element("account").Value;
@@ -84,13 +92,16 @@ namespace DeployLibrary
 
             this.LocalDirectory = Path.GetFullPath(configuration.Root.Element("localDirectory").Value);
             this.ServerName = account;
-
             this.deployContainer = this.blobServer[container];
-            if (this.deployContainer.CreateContainerIfNotExist().Sync())
+
+            if (controller)
             {
-                this.ServiceMetadataVersion = "0";
+                if (this.deployContainer.CreateContainerIfNotExist().Sync())
+                {
+                    this.ServiceMetadataVersion = "0";
+                }
+                this.ServiceFolder.GetBlob("StorageConfiguration.xml").AsString = configuration.ToString();
             }
-            this.ServiceFolder.GetBlob("StorageConfiguration.xml").AsString = configuration.ToString();
         }
 
         public void Upload()
@@ -126,6 +137,22 @@ namespace DeployLibrary
 
         public void Download()
         {
+            string directory = this.DeployDirectory.Replace('\\', '/');
+            if (!directory.EndsWith("/"))
+            {
+                directory += "/";
+            }
+
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory, true);
+            }
+            Directory.CreateDirectory(directory);
+
+            foreach (var blob in this.ServiceFolder.FlatBlobs)
+            {
+                blob.DownloadToFile(directory + blob.Name).Async();
+            }
         }
     }
 
@@ -208,6 +235,26 @@ namespace DeployLibrary
             {
                 this.Directory.GetBlob("Status").AsString = value.ToString();
             }
+        }
+
+        public bool NeedDownload
+        {
+            get
+            {
+                return this.Version != this.Database.ServiceMetadataVersion;
+            }
+        }
+
+        public void Download()
+        {
+            this.Status = DeploymentStatus.Deploying;
+            this.Database.Download();
+
+            int version = 0;
+            int.TryParse(this.Version, out version);
+            version++;
+            this.Version = version.ToString();
+            this.Status = DeploymentStatus.FuckingOff;
         }
     }
 }
