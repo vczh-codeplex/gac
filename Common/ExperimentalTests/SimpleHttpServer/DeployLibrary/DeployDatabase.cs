@@ -55,7 +55,7 @@ namespace DeployLibrary
                 .ToArray();
         }
 
-        public Deployment GetDeployment(string deploymentName)
+        public Deployment GetDeployment(string deploymentName = null)
         {
             if (deploymentName == null)
             {
@@ -98,7 +98,7 @@ namespace DeployLibrary
     {
         Starting,
         Stopping,
-        Running,
+        FuckingOff,
         Deploying,
     }
 
@@ -128,7 +128,8 @@ namespace DeployLibrary
             if (!this.Exists)
             {
                 this.Version = "NO DEPLOYMENT";
-                this.Status = DeploymentStatus.Running;
+                this.HeartBeats = "NOT READY";
+                this.Status = DeploymentStatus.FuckingOff;
             }
         }
 
@@ -141,6 +142,18 @@ namespace DeployLibrary
             set
             {
                 this.Directory.GetBlob("Version").AsString = value;
+            }
+        }
+
+        public string HeartBeats
+        {
+            get
+            {
+                return this.Directory.GetBlob("HeartBeats").AsString;
+            }
+            set
+            {
+                this.Directory.GetBlob("HeartBeats").AsString = value;
             }
         }
 
@@ -158,7 +171,7 @@ namespace DeployLibrary
             }
             set
             {
-                this.Directory.GetBlob("Sttaus").AsString = value.ToString();
+                this.Directory.GetBlob("Status").AsString = value.ToString();
             }
         }
     }

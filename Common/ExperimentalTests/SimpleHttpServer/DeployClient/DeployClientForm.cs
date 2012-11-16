@@ -62,6 +62,7 @@ namespace DeployClient
             {
                 var item = new ListViewItem(deployment.DeploymenName);
                 item.SubItems.Add(deployment.Version);
+                item.SubItems.Add(deployment.HeartBeats);
                 item.SubItems.Add(deployment.Status.ToString());
                 listViewDeployments.Items.Add(item);
             }
