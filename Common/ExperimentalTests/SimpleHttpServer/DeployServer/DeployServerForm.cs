@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -45,6 +46,32 @@ namespace DeployServer
             this.Invoke(action);
         }
 
+        private void AsyncUpdate(Action action)
+        {
+            DisableControls();
+            Async(() =>
+            {
+                try
+                {
+                    action();
+                    Sync(() =>
+                    {
+                        EnableControls();
+                        UpdateData();
+                        timerUpdate.Enabled = true;
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Sync(() =>
+                    {
+                        EnableControls();
+                        MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    });
+                }
+            });
+        }
+
         private void DisplayDeploymentProperty(string name, string value)
         {
             var item = listViewDeployment
@@ -63,6 +90,7 @@ namespace DeployServer
 
         private void UpdateData()
         {
+            labelDeploymentDirectory.Text = this.deployDatabase.DeployDirectory;
             DisplayDeploymentProperty("Service Name", this.deployDatabase.ServerName);
             DisplayDeploymentProperty("Deployment Name", this.deployment.DeploymenName);
             DisplayDeploymentProperty("Version", this.deployment.Version);
@@ -78,7 +106,7 @@ namespace DeployServer
             {
                 try
                 {
-                    this.deployDatabase = new DeployDatabase();
+                    this.deployDatabase = new DeployDatabase(false);
                     this.deployment = this.deployDatabase.GetDeployment();
                     this.deployment.InitializeIfNotExists();
                     Sync(() =>
@@ -101,7 +129,16 @@ namespace DeployServer
         private void timerUpdate_Tick(object sender, EventArgs e)
         {
             this.deployment.HeartBeats = DateTime.Now.ToString();
+            if (this.deployment.NeedDownload)
+            {
+                AsyncUpdate(() => this.deployment.Download());
+            }
             UpdateData();
+        }
+
+        private void buttonOpenDeploymentDirectory_Click(object sender, EventArgs e)
+        {
+            Process.Start("explorer", "\"" + labelDeploymentDirectory.Text + "\"");
         }
     }
 }
