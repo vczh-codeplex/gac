@@ -2,5 +2,6 @@
 <storage>
   <account>vczhservices</account>
   <key></key>
-  <container>VczhServicesConnection</container>
+  <container>vczh-services-connection</container>
+  <localDirectory>.\ServiceFolder</localDirectory>
 </storage>
