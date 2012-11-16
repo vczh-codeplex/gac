@@ -1,3 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <services>
+  <service>
+    <name>HelloWorld</name>
+    <port>8080</port>
+    <key>SERVICE-IDENTIFIER-{12115248-873E-4812-9AA3-2AB5743798D1}</key>
+  </service>
 </services>

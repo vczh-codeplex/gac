@@ -15,6 +15,8 @@ cd..
 
 cd _DeployServiceFolder
 copy ..\ServiceFolder\ServiceConfiguration.xml ServiceConfiguration.xml
+copy ..\..\HelloWorldTestServer\bin\Release\*.exe *.exe
+copy ..\..\HelloWorldTestServer\bin\Release\*.dll *.dll
 cd..
 
 cd _DeployServerBinaries

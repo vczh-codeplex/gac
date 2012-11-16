@@ -7,6 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloWorldTestServer", "Hel
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configuration", "Configuration", "{78DD8177-6324-4611-83F6-23F175B8BA25}"
 	ProjectSection(SolutionItems) = preProject
+		Configuration\Debug.bat = Configuration\Debug.bat
 		Configuration\Release.bat = Configuration\Release.bat
 		Configuration\StorageConfiguration.Template.xml = Configuration\StorageConfiguration.Template.xml
 	EndProjectSection

@@ -5,7 +5,9 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace SimpleHttpServer
 {
@@ -149,6 +151,34 @@ namespace SimpleHttpServer
             httpListener.Prefixes.Add(string.Format("http://{0}:{1}{2}/", host, port, prefix));
             httpListener.Start();
             DriveHttpListener(httpListener, new RouteContext(serverType, prefix));
+        }
+
+        public static bool StartService(Type serverType, string name)
+        {
+            XDocument configuration = XDocument.Load("ServiceConfiguration.xml");
+            XElement service = configuration
+                .Root
+                .Elements("service")
+                .Where(s => s.Element("name").Value == name)
+                .First();
+
+            int port = int.Parse(service.Element("port").Value);
+            string key = service.Element("key").Value;
+
+            Semaphore semaphore = null;
+            if (Semaphore.TryOpenExisting(key, out semaphore))
+            {
+                Console.WriteLine("Service {0} already exists.", name);
+                return false;
+            }
+            else
+            {
+                semaphore = new Semaphore(0, 1, key);
+                Run(serverType, "+", port, "/" + name);
+                Console.WriteLine("Service has been started.");
+                Console.WriteLine("Address: http://localhost:{0}/{1}/", port, name);
+                return true;
+            }
         }
     }
 
