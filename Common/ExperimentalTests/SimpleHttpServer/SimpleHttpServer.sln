@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configuration", "Configurat
 	ProjectSection(SolutionItems) = preProject
 		Configuration\Debug.bat = Configuration\Debug.bat
 		Configuration\Release.bat = Configuration\Release.bat
+		Configuration\ServiceConfiguration.xml = Configuration\ServiceConfiguration.xml
 		Configuration\StorageConfiguration.Template.xml = Configuration\StorageConfiguration.Template.xml
 	EndProjectSection
 EndProject
@@ -19,11 +20,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeployLibrary", "DeployLibrary\DeployLibrary.csproj", "{69CF43A4-3524-498D-8CD2-9E76FC009D44}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureStorageFacadeLibrary", "..\..\..\Libraries\GacUI\GaclibServices\AzureStorageFacadeLibrary\AzureStorageFacadeLibrary.csproj", "{17116ED4-93B7-436F-8A99-B70627E2097A}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceFolder", "ServiceFolder", "{A97AEC01-3B0C-4B6D-8F3A-0638EE869147}"
-	ProjectSection(SolutionItems) = preProject
-		Configuration\ServiceFolder\ServiceConfiguration.xml = Configuration\ServiceFolder\ServiceConfiguration.xml
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NestleServices", "NestleServices", "{434872B7-BB7C-495F-907E-FD380644F972}"
 EndProject
@@ -106,7 +102,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{A97AEC01-3B0C-4B6D-8F3A-0638EE869147} = {78DD8177-6324-4611-83F6-23F175B8BA25}
 		{E6BA129D-CF2E-47FC-823B-89E6EF331673} = {434872B7-BB7C-495F-907E-FD380644F972}
 		{93932148-200F-4CF7-A204-AE88031833B4} = {434872B7-BB7C-495F-907E-FD380644F972}
 	EndGlobalSection
