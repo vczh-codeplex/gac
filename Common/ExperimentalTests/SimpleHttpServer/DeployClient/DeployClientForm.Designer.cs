@@ -44,6 +44,7 @@
             this.listViewDeployments = new System.Windows.Forms.ListView();
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tableMain.SuspendLayout();
             this.SuspendLayout();
@@ -202,6 +203,7 @@
             this.listViewDeployments.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader2,
             this.columnHeader3,
+            this.columnHeader5,
             this.columnHeader4});
             this.tableMain.SetColumnSpan(this.listViewDeployments, 3);
             this.listViewDeployments.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -223,6 +225,11 @@
             // 
             this.columnHeader3.Text = "Version";
             this.columnHeader3.Width = 120;
+            // 
+            // columnHeader5
+            // 
+            this.columnHeader5.Text = "Heart Beats";
+            this.columnHeader5.Width = 180;
             // 
             // columnHeader4
             // 
@@ -262,6 +269,7 @@
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.ColumnHeader columnHeader4;
+        private System.Windows.Forms.ColumnHeader columnHeader5;
     }
 }
 
