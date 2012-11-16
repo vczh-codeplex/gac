@@ -13,8 +13,9 @@ namespace HelloWorldTestServer
         public string Default()
         {
             return string.Format(
-                "<p>Hello, world!</p><p>{0}</p>",
-                new string[] { "Vczh", "JJMoe" }
+                "<p>Hello, world!</p><p>The current machine name is: {0}</p><p>{0}</p>",
+                Environment.MachineName,
+                new string[] { "Genius", "Vczh" }
                     .Select(s => string.Format("<a href=\"/HelloWorld/Person/{0}/\">{1}</a><br/>", s, s))
                     .Aggregate((a, b) => a + b)
                     );
