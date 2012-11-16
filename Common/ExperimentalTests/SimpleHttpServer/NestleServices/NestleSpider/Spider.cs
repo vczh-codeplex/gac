@@ -119,6 +119,10 @@ namespace NestleSpider
 
             int counter = 0;
 
+            // query before insert to determine old row key
+            // calculate body hash to determine the necessarity of inserting into blob container
+            // only update the delta
+
             Console.WriteLine("Topics");
             counter = 0;
             foreach (var topic in fullTopics)
@@ -131,7 +135,6 @@ namespace NestleSpider
                     Title = topic.Title,
                     Description = topic.Description,
                     Author = topic.Author,
-                    Body = topic.Body,
                     CreateDateTime = topic.CreateDateTime
                 };
                 nestleServer.Topics.AddEntity(nestleTopic);
@@ -151,7 +154,6 @@ namespace NestleSpider
                     TopicKey = comment.Topic.RowKey,
                     id = comment.id,
                     Author = comment.Author,
-                    Body = comment.Body,
                     CreateDateTime = comment.CreateDateTime
                 };
                 nestleServer.Comments.AddEntity(nestleComment);
@@ -195,6 +197,19 @@ namespace NestleSpider
                     nestleServer.Topics.Server.SaveChanges().Sync();
                 }
                 Console.WriteLine("{0}/{1}", ++counter, authorComments.Count);
+            }
+
+            Console.WriteLine("Bodies");
+            counter = 0;
+            foreach (var topic in fullTopics)
+            {
+                nestleServer.Bodies.GetBlob(topic.RowKey).AsString = topic.Body;
+                Console.WriteLine("{0}/{1}", ++counter, fullTopics.Count + fullComments.Length);
+            }
+            foreach (var comment in fullComments)
+            {
+                nestleServer.Bodies.GetBlob(comment.RowKey).AsString = comment.Body;
+                Console.WriteLine("{0}/{1}", ++counter, fullTopics.Count + fullComments.Length);
             }
 
             Console.WriteLine("*********************************************");

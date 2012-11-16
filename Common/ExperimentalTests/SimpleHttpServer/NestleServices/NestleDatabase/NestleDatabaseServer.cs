@@ -12,11 +12,13 @@ namespace NestleDatabase
     public class NestleDatabaseServer
     {
         private AzureTableServer tableServer = null;
+        private AzureBlobServer blobServer = null;
 
         public AzureTable Topics { get; set; }
         public AzureTable Comments { get; set; }
         public AzureTable AuthorTopics { get; set; }
         public AzureTable AuthorComments { get; set; }
+        public AzureBlobContainer Bodies { get; set; }
 
         public NestleDatabaseServer()
         {
@@ -25,16 +27,19 @@ namespace NestleDatabase
             string key = configuration.Root.Element("key").Value;
             string container = configuration.Root.Element("container").Value;
             this.tableServer = AzureStorageFacade.ConnectTableServer(AzureStorageFacade.CreateConnectionString(account, key));
+            this.blobServer = AzureStorageFacade.ConnectBlobServer(AzureStorageFacade.CreateConnectionString(account, key));
 
             this.Topics = this.tableServer["NestleTopics"];
             this.Comments = this.tableServer["NestleComments"];
             this.AuthorTopics = this.tableServer["NestleAuthorTopics"];
             this.AuthorComments = this.tableServer["NestleAuthorComments"];
+            this.Bodies = this.blobServer["nestle-topic-comment-bodies"];
 
             this.Topics.CreateTableIfNotExist().Sync();
             this.Comments.CreateTableIfNotExist().Sync();
             this.AuthorTopics.CreateTableIfNotExist().Sync();
             this.AuthorComments.CreateTableIfNotExist().Sync();
+            this.Bodies.CreateContainerIfNotExist().Sync();
         }
 
         public void Clear()
@@ -56,6 +61,10 @@ namespace NestleDatabase
                 this.AuthorComments.DeleteEntity(entity);
             }
             this.tableServer.SaveChanges().Sync();
+            foreach (var blob in this.Bodies.FlatBlobs)
+            {
+                blob.Delete();
+            }
         }
     }
 
@@ -65,7 +74,6 @@ namespace NestleDatabase
         public string Title { get; set; }
         public string Description { get; set; }
         public string Author { get; set; }
-        public string Body { get; set; }
         public DateTime CreateDateTime { get; set; }
     }
 
@@ -74,7 +82,6 @@ namespace NestleDatabase
         public string TopicKey { get; set; }
         public int id { get; set; }
         public string Author { get; set; }
-        public string Body { get; set; }
         public DateTime CreateDateTime { get; set; }
     }
 
