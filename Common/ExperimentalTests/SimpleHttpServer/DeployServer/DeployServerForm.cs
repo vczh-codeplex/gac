@@ -54,7 +54,7 @@ namespace DeployServer
             this.Invoke(action);
         }
 
-        private void AsyncUpdate(Action action)
+        private void AsyncUpdate(Action action, Action guiAction = null)
         {
             DisableControls();
             Async(() =>
@@ -65,6 +65,7 @@ namespace DeployServer
                     Sync(() =>
                     {
                         EnableControls();
+                        if (guiAction != null) guiAction();
                         UpdateData();
                     });
                 }
@@ -73,6 +74,7 @@ namespace DeployServer
                     Sync(() =>
                     {
                         EnableControls();
+                        if (guiAction != null) guiAction();
                         MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     });
                 }
@@ -113,11 +115,13 @@ namespace DeployServer
                 item.SubItems.Add(proxy.Running ? "Running" : "Stopped");
                 item.SubItems.Add(proxy.Url);
                 item.SubItems.Add(proxy.Error);
+                listViewServices.Items.Add(item);
             }
         }
 
         private void StopServices()
         {
+            this.deployment.Status = DeploymentStatus.Stopping;
             this.autoRestartService = false;
             foreach (DeployServerCallbackProxy proxy in this.proxies.Values)
             {
@@ -131,10 +135,12 @@ namespace DeployServer
             {
                 Thread.Sleep(1000);
             }
+            this.deployment.Status = DeploymentStatus.Stopped;
         }
 
         private void StartServices()
         {
+            this.deployment.Status = DeploymentStatus.Starting;
             foreach (DeployServerCallbackProxy proxy in this.proxies.Values)
             {
                 if (!proxy.Running)
@@ -148,13 +154,32 @@ namespace DeployServer
                 Thread.Sleep(1000);
             }
             this.autoRestartService = true;
+            this.deployment.Status = DeploymentStatus.FuckingOff;
+        }
+
+        private void DownloadServices()
+        {
+            AsyncUpdate(
+                () =>
+                {
+                    StopServices();
+                    this.deployment.Download();
+                    ReloadServiceConfiguration();
+                    StartServices();
+                },
+                () =>
+                {
+                    buttonStartServices.Enabled = false;
+                    buttonStopServices.Enabled = true;
+                }
+                );
         }
 
         private string ServiceConfigurationFile
         {
             get
             {
-                return Path.GetFullPath(@".\ServiceFolder\ServiceConfiguration.xml");
+                return Path.GetFullPath(this.deployDatabase.DeployDirectory) + @"\ServiceConfiguration.xml";
             }
         }
 
@@ -177,7 +202,6 @@ namespace DeployServer
         public DeployServerForm()
         {
             InitializeComponent();
-            ReloadServiceConfiguration();
             DisableControls();
             Async(() =>
             {
@@ -186,8 +210,13 @@ namespace DeployServer
                     this.deployDatabase = new DeployDatabase(false);
                     this.deployment = this.deployDatabase.GetDeployment();
                     this.deployment.InitializeIfNotExists();
+                    if (!File.Exists(this.ServiceConfigurationFile))
+                    {
+                        this.deployment.Download();
+                    }
                     Sync(() =>
                     {
+                        ReloadServiceConfiguration();
                         EnableControls();
                         UpdateData();
                         timerUpdate.Enabled = true;
@@ -208,13 +237,7 @@ namespace DeployServer
             this.deployment.HeartBeats = DateTime.Now.ToString();
             if (this.deployment.NeedDownload)
             {
-                AsyncUpdate(() =>
-                {
-                    StopServices();
-                    this.deployment.Download();
-                    ReloadServiceConfiguration();
-                    StartServices();
-                });
+                DownloadServices();
             }
             UpdateData();
 
@@ -237,22 +260,32 @@ namespace DeployServer
 
         private void buttonStartServices_Click(object sender, EventArgs e)
         {
-            AsyncUpdate(() =>
-            {
-                StartServices();
-                buttonStartServices.Enabled = false;
-                buttonStopServices.Enabled = true;
-            });
+            AsyncUpdate(
+                () =>
+                {
+                    StartServices();
+                },
+                () =>
+                {
+                    buttonStartServices.Enabled = false;
+                    buttonStopServices.Enabled = true;
+                }
+            );
         }
 
         private void buttonStopServices_Click(object sender, EventArgs e)
         {
-            AsyncUpdate(() =>
-            {
-                StopServices();
-                buttonStartServices.Enabled = true;
-                buttonStopServices.Enabled = false;
-            });
+            AsyncUpdate(
+                () =>
+                {
+                    StopServices();
+                },
+                () =>
+                {
+                    buttonStartServices.Enabled = true;
+                    buttonStopServices.Enabled = false;
+                }
+            );
         }
     }
 }

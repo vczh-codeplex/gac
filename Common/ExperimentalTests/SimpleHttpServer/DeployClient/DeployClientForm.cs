@@ -47,7 +47,7 @@ namespace DeployClient
             this.Invoke(action);
         }
 
-        private void AsyncUpdate(Action action)
+        private void AsyncUpdate(Action action, Action guiAction = null)
         {
             DisableControls();
             Async(() =>
@@ -58,6 +58,7 @@ namespace DeployClient
                     Sync(() =>
                     {
                         EnableControls();
+                        if (guiAction != null) guiAction();
                         UpdateData();
                     });
                 }
@@ -66,6 +67,7 @@ namespace DeployClient
                     Sync(() =>
                     {
                         EnableControls();
+                        if (guiAction != null) guiAction();
                         MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     });
                 }
