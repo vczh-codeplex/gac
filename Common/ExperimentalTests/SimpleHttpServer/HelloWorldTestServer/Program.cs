@@ -26,8 +26,9 @@ namespace HelloWorldTestServer
         public string Person(string name)
         {
             return string.Format(
-                "<p>Hi, {0}.</p><p><a href=\"/HelloWorld/\">Home Page</a></p>",
-                name);
+                "<p>Hi, {0}.</p><p>The current machine name is: {1}</p><p><a href=\"/HelloWorld/\">Home Page</a></p>",
+                name,
+                Environment.MachineName);
         }
 
         public void Stop()
