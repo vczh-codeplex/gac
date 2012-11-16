@@ -188,14 +188,50 @@ namespace DeployServer
             this.serviceConfiguration = XDocument.Load(this.ServiceConfigurationFile);
             this.proxies.Clear();
 
-            foreach (var name in this.serviceConfiguration
+            XElement machineElement = this.serviceConfiguration
                 .Root
-                .Elements("service")
-                .Select(s => s.Element("name").Value)
-                .ToArray()
-                )
+                .Element("machines")
+                .Elements("machine")
+                .Where(s => s.Element("name").Value.ToUpper() == Environment.MachineName.ToUpper())
+                .FirstOrDefault();
+
+            if (machineElement != null)
             {
-                this.proxies.Add(name, new DeployServerCallbackProxy(name, this.ServiceConfigurationFile, this.serviceConfiguration));
+                string[] functions = machineElement
+                    .Element("functions")
+                    .Elements("function")
+                    .Select(s => s.Value)
+                    .ToArray();
+
+                string[] services = functions
+                    .SelectMany(f =>
+                        {
+                            XElement functionElement = this.serviceConfiguration
+                                .Root
+                                .Element("functions")
+                                .Elements("function")
+                                .Where(s => s.Element("name").Value.ToUpper() == f.ToUpper())
+                                .FirstOrDefault();
+                            if (functionElement == null)
+                            {
+                                return new string[] { };
+                            }
+                            else
+                            {
+                                return functionElement
+                                    .Element("services")
+                                    .Elements("service")
+                                    .Select(s => s.Value)
+                                    .ToArray();
+                            }
+                        })
+                    .Distinct()
+                    .ToArray();
+
+                foreach (var name in services)
+                {
+                    this.proxies.Add(name, new DeployServerCallbackProxy(name, this.ServiceConfigurationFile, this.serviceConfiguration));
+                }
             }
         }
 

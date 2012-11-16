@@ -184,6 +184,7 @@ namespace SimpleHttpServer
             XDocument configuration = XDocument.Load("ServiceConfiguration.xml");
             XElement service = configuration
                 .Root
+                .Element("services")
                 .Elements("service")
                 .Where(s => s.Element("name").Value == name)
                 .First();
@@ -228,6 +229,7 @@ namespace SimpleHttpServer
         {
             XElement service = configuration
                 .Root
+                .Element("services")
                 .Elements("service")
                 .Where(s => s.Element("name").Value == name)
                 .First();
