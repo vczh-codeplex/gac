@@ -27,9 +27,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NestleSpider", "NestleServi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NestleSearch", "NestleServices\NestleSearch\NestleSearch.csproj", "{93932148-200F-4CF7-A204-AE88031833B4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NestleDatabase", "NestleServices\NestleDatabase\NestleDatabase.csproj", "{F2F38349-01CA-4627-978D-572FF483F357}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 9
+		SccNumberOfProjects = 10
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
@@ -59,6 +61,10 @@ Global
 		SccProjectTopLevelParentUniqueName8 = SimpleHttpServer.sln
 		SccProjectName8 = NestleServices/NestleSearch
 		SccLocalPath8 = NestleServices\\NestleSearch
+		SccProjectUniqueName9 = NestleServices\\NestleDatabase\\NestleDatabase.csproj
+		SccProjectTopLevelParentUniqueName9 = SimpleHttpServer.sln
+		SccProjectName9 = NestleServices/NestleDatabase
+		SccLocalPath9 = NestleServices\\NestleDatabase
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +103,10 @@ Global
 		{93932148-200F-4CF7-A204-AE88031833B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93932148-200F-4CF7-A204-AE88031833B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93932148-200F-4CF7-A204-AE88031833B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2F38349-01CA-4627-978D-572FF483F357}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2F38349-01CA-4627-978D-572FF483F357}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2F38349-01CA-4627-978D-572FF483F357}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2F38349-01CA-4627-978D-572FF483F357}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -104,5 +114,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{E6BA129D-CF2E-47FC-823B-89E6EF331673} = {434872B7-BB7C-495F-907E-FD380644F972}
 		{93932148-200F-4CF7-A204-AE88031833B4} = {434872B7-BB7C-495F-907E-FD380644F972}
+		{F2F38349-01CA-4627-978D-572FF483F357} = {434872B7-BB7C-495F-907E-FD380644F972}
 	EndGlobalSection
 EndGlobal

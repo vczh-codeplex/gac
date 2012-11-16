@@ -36,8 +36,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.WindowsAzure.StorageClient, Version=1.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Services.Client" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -55,6 +57,10 @@
     <ProjectReference Include="..\..\SimpleHttpServer\SimpleHttpServer.csproj">
       <Project>{90fdd5bd-20ba-4734-a96a-e2762d9c4f66}</Project>
       <Name>SimpleHttpServer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NestleDatabase\NestleDatabase.csproj">
+      <Project>{f2f38349-01ca-4627-978d-572ff483f357}</Project>
+      <Name>NestleDatabase</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
