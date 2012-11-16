@@ -1,4 +1,4 @@
 cd ServiceFolder
-copy ..\..\HelloWorldTestServer\bin\Release\*.exe *.exe
-copy ..\..\HelloWorldTestServer\bin\Release\*.dll *.dll
+copy ..\..\HelloWorldTestServer\bin\Debug\*.exe *.exe
+copy ..\..\HelloWorldTestServer\bin\Debug\*.dll *.dll
 cd..
