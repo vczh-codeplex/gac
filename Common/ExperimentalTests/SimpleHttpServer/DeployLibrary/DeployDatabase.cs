@@ -149,7 +149,7 @@ namespace DeployLibrary
                 {
                     Directory.Delete(directory, true);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                 }
             }
@@ -254,14 +254,14 @@ namespace DeployLibrary
 
         public void Download()
         {
+            string serverVersion = this.Database.ServiceMetadataVersion;
             var lastStatus = this.Status;
             this.Status = DeploymentStatus.Deploying;
             this.Database.Download();
 
             int version = 0;
             int.TryParse(this.Version, out version);
-            version++;
-            this.Version = version.ToString();
+            this.Version = serverVersion;
             this.Status = lastStatus;
         }
     }
