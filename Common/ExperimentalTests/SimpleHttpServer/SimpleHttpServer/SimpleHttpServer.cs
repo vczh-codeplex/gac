@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -86,6 +88,14 @@ namespace SimpleHttpServer
             private object serverObject = null;
             private RouteMethodRecord[] methods = null;
 
+            public Object ServerObject
+            {
+                get
+                {
+                    return this.serverObject;
+                }
+            }
+
             public RouteContext(Type serverType, string prefix)
             {
                 this.serverObject = serverType
@@ -145,15 +155,31 @@ namespace SimpleHttpServer
             }, null);
         }
 
-        public static void Run(Type serverType, string host, int port, string prefix)
+        private static RouteContext Run(Type serverType, string host, int port, string prefix)
         {
             HttpListener httpListener = new HttpListener();
             httpListener.Prefixes.Add(string.Format("http://{0}:{1}{2}/", host, port, prefix));
             httpListener.Start();
-            DriveHttpListener(httpListener, new RouteContext(serverType, prefix));
+
+            RouteContext context = new RouteContext(serverType, prefix);
+            DriveHttpListener(httpListener, context);
+            return context;
         }
 
-        public static bool StartService(Type serverType, string name)
+        class DeployServerCallback
+        {
+            public IDeployServerCallback CallbackInterface { get; set; }
+
+            [Get("/Stop")]
+            public string Stop()
+            {
+                this.CallbackInterface.Stop();
+                return "The \"Stop\" signal has been sent to the service.";
+            }
+        }
+
+        public static bool StartService<T>(string name)
+            where T : IDeployServerCallback
         {
             XDocument configuration = XDocument.Load("ServiceConfiguration.xml");
             XElement service = configuration
@@ -165,20 +191,84 @@ namespace SimpleHttpServer
             int port = int.Parse(service.Element("port").Value);
             string key = service.Element("key").Value;
 
+            string semaphoreName = "SERVICE-IDENTIFIER-" + key;
             Semaphore semaphore = null;
-            if (Semaphore.TryOpenExisting(key, out semaphore))
+            if (Semaphore.TryOpenExisting(semaphoreName, out semaphore))
             {
                 Console.WriteLine("Service {0} already exists.", name);
                 return false;
             }
             else
             {
-                semaphore = new Semaphore(0, 1, key);
-                Run(serverType, "+", port, "/" + name);
+                semaphore = new Semaphore(0, 1, semaphoreName);
+                IDeployServerCallback callbackInterface = (IDeployServerCallback)Run(typeof(T), "+", port, "/" + name).ServerObject;
+                DeployServerCallback callbackService = (DeployServerCallback)Run(typeof(DeployServerCallback), "localhost", port, "/Private-Service-" + name).ServerObject;
+                callbackService.CallbackInterface = callbackInterface;
+
                 Console.WriteLine("Service has been started.");
                 Console.WriteLine("Address: http://localhost:{0}/{1}/", port, name);
+                Console.WriteLine("Stop using: http://localhost:{0}/Private-Service-{1}/Stop/", port, name);
                 return true;
             }
+        }
+    }
+
+    public interface IDeployServerCallback
+    {
+        void Stop();
+    };
+
+    class DeployServerCallbackProxy : IDeployServerCallback
+    {
+        private string urlPrefix;
+        private string semaphoreName;
+        private string executablePath;
+
+        public DeployServerCallbackProxy(string name, string configurationFile)
+        {
+            XDocument configuration = XDocument.Load("ServiceConfiguration.xml");
+            XElement service = configuration
+                .Root
+                .Elements("service")
+                .Where(s => s.Element("name").Value == name)
+                .First();
+
+            int port = int.Parse(service.Element("port").Value);
+            string key = service.Element("key").Value;
+            string executable = service.Element("executable").Value;
+
+            this.urlPrefix = string.Format("http://localhost:{0}/Private-Service-{1}/", port, name);
+            this.semaphoreName = "SERVICE-IDENTIFIER-" + key;
+            this.executablePath = Path.GetDirectoryName(Path.GetFullPath(configurationFile)) + "/" + executable;
+        }
+
+        public bool Running
+        {
+            get
+            {
+                Semaphore semaphore = null;
+                if (Semaphore.TryOpenExisting(this.semaphoreName, out semaphore))
+                {
+                    semaphore.Dispose();
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        public void Start()
+        {
+            if (!this.Running)
+            {
+                Process.Start(this.executablePath);
+            }
+        }
+
+        public void Stop()
+        {
         }
     }
 

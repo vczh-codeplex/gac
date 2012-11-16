@@ -90,6 +90,10 @@
       <Project>{69cf43a4-3524-498d-8cd2-9e76fc009d44}</Project>
       <Name>DeployLibrary</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SimpleHttpServer\SimpleHttpServer.csproj">
+      <Project>{90fdd5bd-20ba-4734-a96a-e2762d9c4f66}</Project>
+      <Name>SimpleHttpServer</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -3,6 +3,7 @@
   <service>
     <name>HelloWorld</name>
     <port>8080</port>
-    <key>SERVICE-IDENTIFIER-{12115248-873E-4812-9AA3-2AB5743798D1}</key>
+    <executable>HelloWorldTestServer</executable>
+    <key>{12115248-873E-4812-9AA3-2AB5743798D1}</key>
   </service>
 </services>
