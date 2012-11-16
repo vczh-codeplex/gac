@@ -10,6 +10,12 @@ namespace NestleSpider
 {
     class Program : IDeployServerCallback
     {
+        [Get("")]
+        public string Default()
+        {
+            return "Welcome to Nestle Spider!";
+        }
+
         public void Stop()
         {
             stopEvent.Set();
