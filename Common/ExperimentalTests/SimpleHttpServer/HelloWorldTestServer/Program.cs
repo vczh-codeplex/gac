@@ -14,7 +14,7 @@ namespace HelloWorldTestServer
         public string Default()
         {
             return string.Format(
-                "<p>Hello, world!</p><p>The current machine name is: {0}</p><p>{1}</p>",
+                "<p>Hello, world!</p><p>The current machine name is: <strong>{0}</strong></p><p>{1}</p>",
                 Environment.MachineName,
                 new string[] { "Genius", "Vczh" }
                     .Select(s => string.Format("<a href=\"/HelloWorld/Person/{0}/\">{1}</a><br/>", s, s))
@@ -26,7 +26,7 @@ namespace HelloWorldTestServer
         public string Person(string name)
         {
             return string.Format(
-                "<p>Hi, {0}.</p><p>The current machine name is: {1}</p><p><a href=\"/HelloWorld/\">Home Page</a></p>",
+                "<p>Hi, {0}.</p><p>The current machine name is: <strong>{1}</strong></p><p><a href=\"/HelloWorld/\">Home Page</a></p>",
                 name,
                 Environment.MachineName);
         }
