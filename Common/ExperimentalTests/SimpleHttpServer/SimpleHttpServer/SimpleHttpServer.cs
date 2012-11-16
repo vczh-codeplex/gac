@@ -272,7 +272,12 @@ namespace SimpleHttpServer
             {
                 try
                 {
-                    Process.Start(this.executablePath);
+                    ProcessStartInfo psi = new ProcessStartInfo();
+                    psi.FileName = this.executablePath;
+                    psi.WorkingDirectory = Path.GetDirectoryName(psi.FileName);
+                    psi.UseShellExecute = true;
+                    psi.ErrorDialog = false;
+                    Process.Start(psi);
                     this.Error = "";
                 }
                 catch (Exception ex)
@@ -284,11 +289,19 @@ namespace SimpleHttpServer
 
         public void Stop()
         {
-            string url = this.urlPrefix + "Stop/";
-            HttpWebRequest request = HttpWebRequest.CreateHttp(url);
-            request.Method = "GET";
-            request.ContentLength = 0;
-            request.GetResponse();
+            try
+            {
+                string url = this.urlPrefix + "Stop/";
+                HttpWebRequest request = HttpWebRequest.CreateHttp(url);
+                request.Method = "GET";
+                request.ContentLength = 0;
+                request.GetResponse();
+                this.Error = "";
+            }
+            catch (Exception ex)
+            {
+                this.Error = ex.Message;
+            }
         }
     }
 

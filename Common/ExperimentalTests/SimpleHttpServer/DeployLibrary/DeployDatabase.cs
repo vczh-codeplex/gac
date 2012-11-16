@@ -143,9 +143,15 @@ namespace DeployLibrary
                 directory += "/";
             }
 
-            if (Directory.Exists(directory))
+            while (Directory.Exists(directory))
             {
-                Directory.Delete(directory, true);
+                try
+                {
+                    Directory.Delete(directory, true);
+                }
+                catch (Exception ex)
+                {
+                }
             }
             Directory.CreateDirectory(directory);
 
@@ -160,6 +166,7 @@ namespace DeployLibrary
     {
         Starting,
         Stopping,
+        Stopped,
         FuckingOff,
         Deploying,
     }
@@ -247,6 +254,7 @@ namespace DeployLibrary
 
         public void Download()
         {
+            var lastStatus = this.Status;
             this.Status = DeploymentStatus.Deploying;
             this.Database.Download();
 
@@ -254,7 +262,7 @@ namespace DeployLibrary
             int.TryParse(this.Version, out version);
             version++;
             this.Version = version.ToString();
-            this.Status = DeploymentStatus.FuckingOff;
+            this.Status = lastStatus;
         }
     }
 }

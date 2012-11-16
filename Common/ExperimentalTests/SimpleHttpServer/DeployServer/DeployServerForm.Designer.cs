@@ -44,8 +44,8 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.timerUpdate = new System.Windows.Forms.Timer(this.components);
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.timerUpdate = new System.Windows.Forms.Timer(this.components);
             this.tableMain.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,7 +53,7 @@
             // 
             this.tableMain.ColumnCount = 3;
             this.tableMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableMain.Controls.Add(this.label1, 0, 1);
             this.tableMain.Controls.Add(this.label2, 0, 3);
@@ -74,8 +74,7 @@
             this.tableMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 91F));
-            this.tableMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableMain.Size = new System.Drawing.Size(750, 558);
             this.tableMain.TabIndex = 0;
             // 
@@ -189,7 +188,7 @@
             this.buttonStopServices.Dock = System.Windows.Forms.DockStyle.Fill;
             this.buttonStopServices.Location = new System.Drawing.Point(558, 343);
             this.buttonStopServices.Name = "buttonStopServices";
-            this.buttonStopServices.Size = new System.Drawing.Size(189, 121);
+            this.buttonStopServices.Size = new System.Drawing.Size(189, 22);
             this.buttonStopServices.TabIndex = 6;
             this.buttonStopServices.Text = "Stop Services";
             this.buttonStopServices.UseVisualStyleBackColor = true;
@@ -229,15 +228,15 @@
             this.columnHeader5.Text = "Url";
             this.columnHeader5.Width = 240;
             // 
-            // timerUpdate
-            // 
-            this.timerUpdate.Interval = 5000;
-            this.timerUpdate.Tick += new System.EventHandler(this.timerUpdate_Tick);
-            // 
             // columnHeader6
             // 
             this.columnHeader6.Text = "Error";
             this.columnHeader6.Width = 240;
+            // 
+            // timerUpdate
+            // 
+            this.timerUpdate.Interval = 5000;
+            this.timerUpdate.Tick += new System.EventHandler(this.timerUpdate_Tick);
             // 
             // DeployServerForm
             // 
