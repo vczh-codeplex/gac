@@ -5,16 +5,35 @@
     <service>
       <name>HelloWorld</name>
       <port>8080</port>
-      <executable>HelloWorldTestServer</executable>
+      <executable>HelloWorldTestServer.exe</executable>
       <key>{12115248-873E-4812-9AA3-2AB5743798D1}</key>
+    </service>
+    <service>
+      <name>NestleSpider</name>
+      <port>8080</port>
+      <executable>NestleSpider.exe</executable>
+      <key>{440F4930-2022-484F-A730-ED3B591E4A94}</key>
+    </service>
+    <service>
+      <name>NestleSearch</name>
+      <port>8080</port>
+      <executable>NestleSearch.exe</executable>
+      <key>{D20FC89D-001E-435E-8220-DF20D953F092}</key>
     </service>
   </services>
   <!--Functions that group services for purposes-->
   <functions>
     <function>
-      <name>Basic</name>
+      <name>HttpServiceGateway</name>
       <services>
         <service>HelloWorld</service>
+        <service>NestleSearch</service>
+      </services>
+    </function>
+    <function>
+      <name>DataCollector</name>
+      <services>
+        <service>NestleSpider</service>
       </services>
     </function>
   </functions>
@@ -23,25 +42,27 @@
     <machine>
       <name>VCZH-COMPUTER</name>
       <functions>
-        <function>Basic</function>
+        <function>HttpServiceGateway</function>
+        <function>DataCollector</function>
       </functions>
     </machine>
     <machine>
       <name>VCZHSERVICES02</name>
       <functions>
-        <function>Basic</function>
+        <function>HttpServiceGateway</function>
+        <function>DataCollector</function>
       </functions>
     </machine>
     <machine>
       <name>VCZHSERVICES03</name>
       <functions>
-        <function>Basic</function>
+        <function>HttpServiceGateway</function>
       </functions>
     </machine>
     <machine>
       <name>VCZHSERVICES04</name>
       <functions>
-        <function>Basic</function>
+        <function>HttpServiceGateway</function>
       </functions>
     </machine>
   </machines>
