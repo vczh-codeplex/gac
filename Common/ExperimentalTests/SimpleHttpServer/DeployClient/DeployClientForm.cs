@@ -24,6 +24,7 @@ namespace DeployClient
             {
                 control.Enabled = true;
             }
+            timerUpdate.Enabled = true;
         }
 
         private void DisableControls()
@@ -33,6 +34,7 @@ namespace DeployClient
             {
                 control.Enabled = false;
             }
+            timerUpdate.Enabled = false;
         }
 
         private void Async(Action action)
@@ -57,7 +59,6 @@ namespace DeployClient
                     {
                         EnableControls();
                         UpdateData();
-                        timerUpdate.Enabled = true;
                     });
                 }
                 catch (Exception ex)
