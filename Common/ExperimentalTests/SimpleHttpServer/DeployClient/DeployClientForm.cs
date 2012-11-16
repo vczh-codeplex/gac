@@ -45,9 +45,35 @@ namespace DeployClient
             this.Invoke(action);
         }
 
+        private void AsyncUpdate(Action action)
+        {
+            DisableControls();
+            Async(() =>
+            {
+                try
+                {
+                    action();
+                    Sync(() =>
+                    {
+                        EnableControls();
+                        UpdateData();
+                        timerUpdate.Enabled = true;
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Sync(() =>
+                    {
+                        EnableControls();
+                        MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    });
+                }
+            });
+        }
+
         private void UpdateData()
         {
-            labelServer.Text = this.deployDatabase.ServerName;
+            labelServer.Text = string.Format("{0} (version = {1})", this.deployDatabase.ServerName, this.deployDatabase.ServiceMetadataVersion);
             labelLocalDirectory.Text = this.deployDatabase.LocalDirectory;
 
             listViewServerDirectory.Items.Clear();
@@ -71,27 +97,7 @@ namespace DeployClient
         public DeployClientForm()
         {
             InitializeComponent();
-            DisableControls();
-            Async(() =>
-            {
-                try
-                {
-                    this.deployDatabase = new DeployDatabase();
-                    Sync(() =>
-                    {
-                        EnableControls();
-                        UpdateData();
-                        timerUpdate.Enabled = true;
-                    });
-                }
-                catch (Exception ex)
-                {
-                    Sync(() =>
-                    {
-                        MessageBox.Show(ex.Message, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    });
-                }
-            });
+            AsyncUpdate(() => this.deployDatabase = new DeployDatabase());
         }
 
         private void timerUpdate_Tick(object sender, EventArgs e)
@@ -102,6 +108,11 @@ namespace DeployClient
         private void buttonOpenLocalDirectory_Click(object sender, EventArgs e)
         {
             Process.Start(labelLocalDirectory.Text);
+        }
+
+        private void buttonUpdate_Click(object sender, EventArgs e)
+        {
+            AsyncUpdate(() => this.deployDatabase.Upload());
         }
     }
 }

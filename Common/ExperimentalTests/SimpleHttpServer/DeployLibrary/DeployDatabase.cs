@@ -88,9 +88,44 @@ namespace DeployLibrary
             this.deployContainer = this.blobServer[container];
             if (this.deployContainer.CreateContainerIfNotExist().Sync())
             {
-                this.ServiceFolder.GetBlob("StorageConfiguration.xml").AsString = configuration.ToString();
                 this.ServiceMetadataVersion = "0";
             }
+            this.ServiceFolder.GetBlob("StorageConfiguration.xml").AsString = configuration.ToString();
+        }
+
+        public void Upload()
+        {
+            string directory = this.LocalDirectory.Replace('\\', '/');
+            if (!directory.EndsWith("/"))
+            {
+                directory += "/";
+            }
+            string[] files = Directory
+                .GetFiles(directory, "*", SearchOption.AllDirectories)
+                .Select(s => s.Substring(directory.Length).Replace('\\', '/'))
+                .ToArray();
+
+            foreach (var blob in this.ServiceFolder.FlatBlobs)
+            {
+                if (blob.Name != "StorageConfiguration.xml")
+                {
+                    blob.Delete().Sync();
+                }
+            }
+
+            foreach (var file in files)
+            {
+                this.ServiceFolder.GetBlob(file).UploadFromFile(directory + file).Sync();
+            }
+
+            int version = 0;
+            int.TryParse(this.ServiceMetadataVersion, out version);
+            version++;
+            this.ServiceMetadataVersion = version.ToString();
+        }
+
+        public void Download()
+        {
         }
     }
 

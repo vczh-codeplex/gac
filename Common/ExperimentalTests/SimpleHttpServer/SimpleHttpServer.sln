@@ -19,6 +19,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureStorageFacadeLibrary", "..\..\..\Libraries\GacUI\GaclibServices\AzureStorageFacadeLibrary\AzureStorageFacadeLibrary.csproj", "{17116ED4-93B7-436F-8A99-B70627E2097A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceFolder", "ServiceFolder", "{A97AEC01-3B0C-4B6D-8F3A-0638EE869147}"
+	ProjectSection(SolutionItems) = preProject
+		Configuration\ServiceFolder\ServiceConfiguration.xml = Configuration\ServiceFolder\ServiceConfiguration.xml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
