@@ -218,15 +218,14 @@ namespace SimpleHttpServer
         void Stop();
     };
 
-    class DeployServerCallbackProxy : IDeployServerCallback
+    public class DeployServerCallbackProxy : IDeployServerCallback
     {
         private string urlPrefix;
         private string semaphoreName;
         private string executablePath;
 
-        public DeployServerCallbackProxy(string name, string configurationFile)
+        public DeployServerCallbackProxy(string name, string configurationFile, XDocument configuration)
         {
-            XDocument configuration = XDocument.Load("ServiceConfiguration.xml");
             XElement service = configuration
                 .Root
                 .Elements("service")
@@ -240,7 +239,15 @@ namespace SimpleHttpServer
             this.urlPrefix = string.Format("http://localhost:{0}/Private-Service-{1}/", port, name);
             this.semaphoreName = "SERVICE-IDENTIFIER-" + key;
             this.executablePath = Path.GetDirectoryName(Path.GetFullPath(configurationFile)) + "/" + executable;
+
+            this.Url = string.Format("http://localhost:{0}/{1}/", port, name);
+            this.Name = name;
+            this.Error = "";
         }
+
+        public string Url { get; private set; }
+        public string Name { get; private set; }
+        public string Error { get; private set; }
 
         public bool Running
         {
@@ -263,12 +270,25 @@ namespace SimpleHttpServer
         {
             if (!this.Running)
             {
-                Process.Start(this.executablePath);
+                try
+                {
+                    Process.Start(this.executablePath);
+                    this.Error = "";
+                }
+                catch (Exception ex)
+                {
+                    this.Error = ex.Message;
+                }
             }
         }
 
         public void Stop()
         {
+            string url = this.urlPrefix + "Stop/";
+            HttpWebRequest request = HttpWebRequest.CreateHttp(url);
+            request.Method = "GET";
+            request.ContentLength = 0;
+            request.GetResponse();
         }
     }
 
