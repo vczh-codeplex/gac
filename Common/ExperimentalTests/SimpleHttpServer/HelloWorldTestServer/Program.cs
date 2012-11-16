@@ -31,7 +31,7 @@ namespace HelloWorldTestServer
 
         static void Main(string[] args)
         {
-            SimpleHttpServerHost.Run(typeof(Program), "+", 8080, "/HelloWorld");
+            SimpleHttpServerHost.StartService(typeof(Program), "HelloWorld");
             Console.WriteLine("Press [ENTER] to exit.");
             Console.ReadLine();
         }
