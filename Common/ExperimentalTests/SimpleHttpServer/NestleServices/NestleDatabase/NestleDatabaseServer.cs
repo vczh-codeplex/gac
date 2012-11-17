@@ -63,37 +63,39 @@ namespace NestleDatabase
             this.tableServer.SaveChanges().Sync();
             foreach (var blob in this.Bodies.FlatBlobs)
             {
-                blob.Delete();
+                blob.Delete().Async();
             }
         }
     }
 
     public class NestleTopic : TableServiceEntity
     {
-        public int id { get; set; }
+        // RowKey == TopicId
         public string Title { get; set; }
         public string Description { get; set; }
         public string Author { get; set; }
+        public string bodyMD5 { get; set; }
         public DateTime CreateDateTime { get; set; }
     }
 
     public class NestleComment : TableServiceEntity
     {
+        // RowKey == CommentId
         public string TopicKey { get; set; }
-        public int id { get; set; }
         public string Author { get; set; }
+        public string bodyMD5 { get; set; }
         public DateTime CreateDateTime { get; set; }
     }
 
     public class NestleAuthorTopic : TableServiceEntity
     {
+        // RowKey == TopicId
         public string Author { get; set; }
-        public string TopicKey { get; set; }
     }
 
     public class NestleAuthorComment : TableServiceEntity
     {
+        // RowKey == CommentId
         public string Author { get; set; }
-        public string CommentKey { get; set; }
     }
 }
