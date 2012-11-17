@@ -11,7 +11,6 @@ namespace NestleDatabase
 {
     public class NestleDatabaseServer
     {
-        private AzureTableServer tableServer = null;
         private AzureBlobServer blobServer = null;
 
         public AzureTable Topics { get; set; }
@@ -26,60 +25,150 @@ namespace NestleDatabase
             string account = configuration.Root.Element("account").Value;
             string key = configuration.Root.Element("key").Value;
             string container = configuration.Root.Element("container").Value;
-            this.tableServer = AzureStorageFacade.ConnectTableServer(AzureStorageFacade.CreateConnectionString(account, key));
+
             this.blobServer = AzureStorageFacade.ConnectBlobServer(AzureStorageFacade.CreateConnectionString(account, key));
-
-            this.Topics = this.tableServer["NestleTopics"];
-            this.Comments = this.tableServer["NestleComments"];
-            this.AuthorTopics = this.tableServer["NestleAuthorTopics"];
-            this.AuthorComments = this.tableServer["NestleAuthorComments"];
             this.Bodies = this.blobServer["nestle-topic-comment-bodies"];
-
-            this.Topics.CreateTableIfNotExist().Sync();
-            this.Comments.CreateTableIfNotExist().Sync();
-            this.AuthorTopics.CreateTableIfNotExist().Sync();
-            this.AuthorComments.CreateTableIfNotExist().Sync();
             this.Bodies.CreateContainerIfNotExist().Sync();
         }
 
-        public void Clear()
+        public NestleData Data
         {
-            this.Topics.DeleteTableIfExist().Sync();
-            this.Comments.DeleteTableIfExist().Sync();
-            this.AuthorTopics.DeleteTableIfExist().Sync();
-            this.AuthorComments.DeleteTableIfExist().Sync();
-            this.Bodies.DeleteContainer().Sync();
+            get
+            {
+                if (this.Bodies.GetBlob("rawData").DoesBlobExist().Sync())
+                {
+                    return new NestleData(XElement.Parse(this.Bodies.GetBlob("rawData").AsString));
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            set
+            {
+                this.Bodies.GetBlob("rawData").AsString = value.ToXml().ToString();
+            }
         }
     }
 
-    public class NestleTopic : TableServiceEntity
+    public class Topic
     {
-        // RowKey == TopicId
+        public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string Author { get; set; }
-        public string bodyMD5 { get; set; }
+        public string Body { get; set; }
         public DateTime CreateDateTime { get; set; }
+
+        public Topic(XElement xml)
+        {
+            this.Id = int.Parse(xml.Element("id").Value);
+            this.Title = xml.Element("title").Value;
+            this.Description = xml.Element("desc").Value;
+            this.Author = xml.Element("author").Value;
+            this.Body = xml.Element("body").Value;
+            this.CreateDateTime = DateTime.Parse(xml.Element("created").Value);
+        }
+
+        public XElement ToXml()
+        {
+            return new XElement("topic",
+                new XElement("id", this.Id),
+                new XElement("title", this.Title),
+                new XElement("desc", this.Description),
+                new XElement("author", this.Author),
+                new XElement("body", this.Body),
+                new XElement("created", this.CreateDateTime)
+                );
+        }
     }
 
-    public class NestleComment : TableServiceEntity
+    public class Comment
     {
-        // RowKey == CommentId
-        public string TopicKey { get; set; }
+        public int TopicId { get; set; }
+        public int Id { get; set; }
         public string Author { get; set; }
-        public string bodyMD5 { get; set; }
+        public string Body { get; set; }
+        public string BodyMD5 { get; set; }
         public DateTime CreateDateTime { get; set; }
+
+        public Comment(XElement xml, Topic topic)
+        {
+            if (topic == null)
+            {
+                this.Id = int.Parse(xml.Element("topic").Value);
+            }
+            else
+            {
+                this.TopicId = topic.Id;
+            }
+            this.Id = int.Parse(xml.Element("id").Value);
+            this.Author = xml.Element("author").Value;
+            this.Body = xml.Element("body").Value;
+            this.CreateDateTime = DateTime.Parse(xml.Element("created").Value);
+        }
+
+        public XElement ToXml()
+        {
+            return new XElement("comment",
+                new XElement("topic", this.TopicId),
+                new XElement("id", this.Id),
+                new XElement("author", this.Author),
+                new XElement("body", this.Body),
+                new XElement("created", this.CreateDateTime)
+                );
+        }
     }
 
-    public class NestleAuthorTopic : TableServiceEntity
+    public class AuthorWork
     {
-        // RowKey == TopicId
-        public string Author { get; set; }
+        public int id { get; set; }
+        public string Author;
+
+        public AuthorWork(XElement xml)
+        {
+            if (xml != null)
+            {
+                this.id = int.Parse(xml.Element("id").Value);
+                this.Author = xml.Element("author").Value;
+            }
+        }
+
+        public XElement ToXml()
+        {
+            return new XElement("authorWork",
+                new XElement("author", this.Author),
+                new XElement("id", this.id)
+                );
+        }
     }
 
-    public class NestleAuthorComment : TableServiceEntity
+    public class NestleData
     {
-        // RowKey == CommentId
-        public string Author { get; set; }
+        public Dictionary<int, Topic> Topics { get; set; }
+        public Dictionary<int, Comment> Comments { get; set; }
+        public AuthorWork[] AuthorTopics { get; set; }
+        public AuthorWork[] AuthorComments { get; set; }
+
+        public NestleData(XElement xml)
+        {
+            if (xml != null)
+            {
+                this.Topics = xml.Element("topics").Elements("topic").Select(x => new Topic(x)).ToDictionary(x => x.Id, x => x);
+                this.Comments = xml.Element("comments").Elements("comment").Select(x => new Comment(x, null)).ToDictionary(x => x.Id, x => x);
+                this.AuthorTopics = xml.Element("authorTopics").Elements("authorTopic").Select(x => new AuthorWork(x)).ToArray();
+                this.AuthorComments = xml.Element("authorComments").Elements("authorComment").Select(x => new AuthorWork(x)).ToArray();
+            }
+        }
+
+        public XElement ToXml()
+        {
+            return new XElement("nestleData",
+                new XElement("topics", this.Topics.Values.Select(t => t.ToXml()).ToArray()),
+                new XElement("comments", this.Comments.Values.Select(c => c.ToXml()).ToArray()),
+                new XElement("authorTopics", this.AuthorTopics.Select(a => a.ToXml()).ToArray()),
+                new XElement("authorComments", this.AuthorComments.Select(a => a.ToXml()).ToArray())
+                );
+        }
     }
 }

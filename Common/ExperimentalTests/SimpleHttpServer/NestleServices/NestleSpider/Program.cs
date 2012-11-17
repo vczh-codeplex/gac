@@ -28,7 +28,10 @@ namespace NestleSpider
             if (SimpleHttpServerHost.StartService<Program>("NestleSpider"))
             {
                 stopEvent = new ManualResetEvent(false);
-                stopEvent.WaitOne();
+                do
+                {
+                    Spider.Run();
+                } while (!stopEvent.WaitOne(3600 * 1000));
             }
             else
             {
