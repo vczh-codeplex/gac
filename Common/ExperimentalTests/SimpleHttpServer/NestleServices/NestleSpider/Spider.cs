@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -52,6 +53,18 @@ namespace NestleSpider
             }
         }
 
+        private string Hex(byte[] bytes)
+        {
+            return new string(
+                bytes
+                    .SelectMany(b => new char[] {
+                        "0123456789ABCDEF"[b / 16],
+                        "0123456789ABCDEF"[b % 16],
+                        })
+                    .ToArray()
+                );
+        }
+
         public void Run()
         {
             if (nestleServer == null)
@@ -91,12 +104,22 @@ namespace NestleSpider
                     fullTopics.Add(new Topic(topic.Root));
                     Console.WriteLine("Downloading Topic: {0}/{1} - {2}/{3}", i, totalPages, j + 1, topicIds.Length);
                 }
-                break;
             }
 
             Console.WriteLine("*********************************************");
             Console.WriteLine("Analyzing");
             Console.WriteLine("*********************************************");
+
+            MD5 md5 = MD5.Create();
+
+            foreach (var topic in fullTopics)
+            {
+                topic.BodyMD5 = Hex(md5.ComputeHash(Encoding.UTF8.GetBytes(topic.Body)));
+                foreach (var comment in topic.Comments)
+                {
+                    comment.BodyMD5 = Hex(md5.ComputeHash(Encoding.UTF8.GetBytes(topic.Body)));
+                }
+            }
 
             var authorTopics = fullTopics
                 .GroupBy(t => t.Author)
@@ -116,12 +139,7 @@ namespace NestleSpider
             Console.WriteLine("*********************************************");
             Console.WriteLine("Recording");
             Console.WriteLine("*********************************************");
-
             int counter = 0;
-
-            // query before insert to determine old row key
-            // calculate body hash to determine the necessarity of inserting into blob container
-            // only update the delta
 
             Console.WriteLine("Topics");
             counter = 0;
@@ -130,11 +148,11 @@ namespace NestleSpider
                 NestleTopic nestleTopic = new NestleTopic()
                 {
                     PartitionKey = "",
-                    RowKey = topic.RowKey,
-                    id = topic.id,
+                    RowKey = topic.id.ToString(),
                     Title = topic.Title,
                     Description = topic.Description,
                     Author = topic.Author,
+                    bodyMD5 = topic.BodyMD5,
                     CreateDateTime = topic.CreateDateTime
                 };
                 nestleServer.Topics.AddEntity(nestleTopic);
@@ -150,10 +168,10 @@ namespace NestleSpider
                 NestleComment nestleComment = new NestleComment()
                 {
                     PartitionKey = "",
-                    RowKey = comment.RowKey,
-                    TopicKey = comment.Topic.RowKey,
-                    id = comment.id,
+                    RowKey = comment.id.ToString(),
+                    TopicKey = comment.Topic.id.ToString(),
                     Author = comment.Author,
+                    bodyMD5 = comment.BodyMD5,
                     CreateDateTime = comment.CreateDateTime
                 };
                 nestleServer.Comments.AddEntity(nestleComment);
@@ -170,13 +188,12 @@ namespace NestleSpider
                     NestleAuthorTopic nestleAuthorTopic = new NestleAuthorTopic()
                     {
                         PartitionKey = "",
-                        RowKey = Guid.NewGuid().ToString(),
+                        RowKey = topic.id.ToString(),
                         Author = authorTopic.Key,
-                        TopicKey = topic.RowKey,
                     };
                     nestleServer.AuthorTopics.AddEntity(nestleAuthorTopic);
-                    nestleServer.Topics.Server.SaveChanges().Sync();
                 }
+                nestleServer.Topics.Server.SaveChanges().Sync();
                 Console.WriteLine("{0}/{1}", ++counter, authorTopics.Count);
             }
 
@@ -189,13 +206,12 @@ namespace NestleSpider
                     NestleAuthorComment nestleAuthorComment = new NestleAuthorComment()
                     {
                         PartitionKey = "",
-                        RowKey = Guid.NewGuid().ToString(),
+                        RowKey = comment.id.ToString(),
                         Author = authorComment.Key,
-                        CommentKey = comment.RowKey,
                     };
                     nestleServer.AuthorComments.AddEntity(nestleAuthorComment);
-                    nestleServer.Topics.Server.SaveChanges().Sync();
                 }
+                nestleServer.Topics.Server.SaveChanges().Sync();
                 Console.WriteLine("{0}/{1}", ++counter, authorComments.Count);
             }
 
@@ -203,12 +219,12 @@ namespace NestleSpider
             counter = 0;
             foreach (var topic in fullTopics)
             {
-                nestleServer.Bodies.GetBlob(topic.RowKey).AsString = topic.Body;
+                nestleServer.Bodies.GetBlob("Topic_" + topic.id.ToString()).AsString = topic.Body;
                 Console.WriteLine("{0}/{1}", ++counter, fullTopics.Count + fullComments.Length);
             }
             foreach (var comment in fullComments)
             {
-                nestleServer.Bodies.GetBlob(comment.RowKey).AsString = comment.Body;
+                nestleServer.Bodies.GetBlob("Comment_" + comment.id.ToString()).AsString = comment.Body;
                 Console.WriteLine("{0}/{1}", ++counter, fullTopics.Count + fullComments.Length);
             }
 
@@ -220,16 +236,15 @@ namespace NestleSpider
 
     class Comment
     {
-        public string RowKey { get; set; }
         public Topic Topic { get; set; }
         public int id { get; set; }
         public string Author { get; set; }
         public string Body { get; set; }
+        public string BodyMD5 { get; set; }
         public DateTime CreateDateTime { get; set; }
 
         public Comment(XElement xml, Topic topic)
         {
-            this.RowKey = Guid.NewGuid().ToString();
             this.Topic = topic;
             this.id = int.Parse(xml.Element("id").Value);
             this.Author = xml.Element("author").Value;
@@ -240,18 +255,17 @@ namespace NestleSpider
 
     class Topic
     {
-        public string RowKey { get; set; }
         public int id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string Author { get; set; }
         public string Body { get; set; }
+        public string BodyMD5 { get; set; }
         public DateTime CreateDateTime { get; set; }
         public Comment[] Comments { get; set; }
 
         public Topic(XElement xml)
         {
-            this.RowKey = Guid.NewGuid().ToString();
             this.id = int.Parse(xml.Element("topic").Element("id").Value);
             this.Title = xml.Element("topic").Element("title").Value;
             this.Description = xml.Element("topic").Element("desc").Value;
