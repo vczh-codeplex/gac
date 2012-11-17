@@ -47,12 +47,16 @@
   <ItemGroup>
     <Compile Include="NestleDatabaseServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WordTokenizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\Libraries\GacUI\GaclibServices\AzureStorageFacadeLibrary\AzureStorageFacadeLibrary.csproj">
       <Project>{17116ed4-93b7-436f-8a99-b70627e2097a}</Project>
       <Name>AzureStorageFacadeLibrary</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Words.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
