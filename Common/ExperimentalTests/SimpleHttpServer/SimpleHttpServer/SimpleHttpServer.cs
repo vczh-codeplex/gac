@@ -169,6 +169,7 @@ namespace SimpleHttpServer
         class DeployServerCallback
         {
             public IDeployServerCallback CallbackInterface { get; set; }
+            public Semaphore ServiceSemaphore;
 
             [Get("/Stop")]
             public string Stop()
@@ -205,6 +206,7 @@ namespace SimpleHttpServer
                 IDeployServerCallback callbackInterface = (IDeployServerCallback)Run(typeof(T), "+", port, "/" + name).ServerObject;
                 DeployServerCallback callbackService = (DeployServerCallback)Run(typeof(DeployServerCallback), "localhost", port, "/Private-Service-" + name).ServerObject;
                 callbackService.CallbackInterface = callbackInterface;
+                callbackService.ServiceSemaphore = semaphore;
 
                 Console.WriteLine("Service has been started.");
                 Console.WriteLine("Address: http://localhost:{0}/{1}/", port, name);
