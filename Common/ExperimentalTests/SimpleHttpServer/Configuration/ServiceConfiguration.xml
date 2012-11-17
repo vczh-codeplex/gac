@@ -12,7 +12,7 @@
       <name>NestleSpider</name>
       <port>8080</port>
       <executable>NestleSpider.exe</executable>
-      <key>{440F4930-2022-484F-A730-ED3B591E4A94}</key>
+      <key>{3FBFE6CF-2552-4E8D-B7A4-642F501754EC}</key>
     </service>
     <service>
       <name>NestleSearch</name>
