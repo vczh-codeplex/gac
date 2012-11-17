@@ -44,27 +44,11 @@ namespace NestleDatabase
 
         public void Clear()
         {
-            foreach (var entity in this.Topics.Query<NestleTopic>().Execute())
-            {
-                this.Topics.DeleteEntity(entity);
-            }
-            foreach (var entity in this.Comments.Query<NestleComment>().Execute())
-            {
-                this.Comments.DeleteEntity(entity);
-            }
-            foreach (var entity in this.AuthorTopics.Query<NestleAuthorTopic>().Execute())
-            {
-                this.AuthorTopics.DeleteEntity(entity);
-            }
-            foreach (var entity in this.AuthorComments.Query<NestleAuthorComment>().Execute())
-            {
-                this.AuthorComments.DeleteEntity(entity);
-            }
-            this.tableServer.SaveChanges().Sync();
-            foreach (var blob in this.Bodies.FlatBlobs)
-            {
-                blob.Delete().Async();
-            }
+            this.Topics.DeleteTableIfExist().Sync();
+            this.Comments.DeleteTableIfExist().Sync();
+            this.AuthorTopics.DeleteTableIfExist().Sync();
+            this.AuthorComments.DeleteTableIfExist().Sync();
+            this.Bodies.DeleteContainer().Sync();
         }
     }
 

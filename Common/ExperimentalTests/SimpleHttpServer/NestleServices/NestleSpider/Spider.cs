@@ -70,6 +70,7 @@ namespace NestleSpider
             if (nestleServer == null)
             {
                 nestleServer = new NestleDatabaseServer();
+                nestleServer.Clear();
             }
 
             Console.WriteLine("*********************************************");
