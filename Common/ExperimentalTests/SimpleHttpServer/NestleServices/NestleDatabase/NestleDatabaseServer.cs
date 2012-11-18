@@ -47,6 +47,27 @@ namespace NestleDatabase
             set
             {
                 this.Bodies.GetBlob("rawData").AsString = value.ToXml().ToString();
+                this.UpdateDateTime = DateTime.Now;
+            }
+        }
+
+        public DateTime UpdateDateTime
+        {
+            get
+            {
+                var blob = this.Bodies.GetBlob("rawDateUpdateDateTime");
+                if (blob.DoesBlobExist().Sync())
+                {
+                    return DateTime.Parse(blob.AsString);
+                }
+                else
+                {
+                    return new DateTime(0);
+                }
+            }
+            set
+            {
+                this.Bodies.GetBlob("rawDateUpdateDateTime").AsString = value.ToString();
             }
         }
     }
