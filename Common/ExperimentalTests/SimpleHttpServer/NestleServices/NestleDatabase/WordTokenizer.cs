@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace NestleDatabase
@@ -169,9 +170,80 @@ namespace NestleDatabase
 
         private static WordTokenizer tokenizerInstance = new WordTokenizer();
 
-        public static string[] Tokenize(string input)
+        private static bool IsDiscardable(char c)
         {
-            return tokenizerInstance.TokenizeInternal(input);
+            uint i = (uint)c;
+            return 0x3000 <= i && i <= 0x303F
+                || 0xFF01 <= i && i <= 0xFF0F
+                || 0xFF01 <= i && i <= 0xFF0F
+                || 0xFF1A <= i && i <= 0xFF20
+                || 0xFF38 <= i && i <= 0xFF40
+                || 0xFF58 <= i && i <= 0xFF5E
+                ;
+        }
+
+        private static bool IsAscii(char c)
+        {
+            return (uint)c < 128;
+        }
+
+        private static bool IsLetter(char c)
+        {
+            return 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z';
+        }
+
+        private static string[] Split(string input, Predicate<char> classifier)
+        {
+            List<int> fragments = new List<int>();
+            {
+                bool lastClass = false;
+                for (int i = 0; i < input.Length; i++)
+                {
+                    bool charClass = classifier(input[i]);
+                    if (i == 0 || charClass != lastClass)
+                    {
+                        fragments.Add(i);
+                        lastClass = charClass;
+                    }
+                }
+                fragments.Add(input.Length);
+            }
+
+            return Enumerable
+                .Range(0, fragments.Count - 1)
+                .Select(i => input.Substring(fragments[i], fragments[i + 1] - fragments[i]))
+                .ToArray();
+        }
+
+        public static IEnumerable<string> Tokenize(string input)
+        {
+            string[] fragments = Split(input, IsAscii);
+            foreach (var fragment in fragments)
+            {
+                if (IsAscii(fragment[0]))
+                {
+                    string[] words = Split(fragment, IsLetter)
+                        .Where(f => IsLetter(f[0]))
+                        .ToArray();
+                    foreach (var word in words)
+                    {
+                        yield return word;
+                    }
+                }
+                else
+                {
+                    string[] words = Split(fragment, IsDiscardable)
+                        .Where(f => !IsDiscardable(f[0]))
+                        .ToArray();
+                    foreach (var word in words)
+                    {
+                        foreach (var token in tokenizerInstance.TokenizeInternal(word))
+                        {
+                            yield return token;
+                        }
+                    }
+                }
+            }
         }
     }
 }
