@@ -1,9 +1,11 @@
 #include <string.h>
 #include "..\..\Source\UnitTest\UnitTest.h"
-#include "..\..\Source\Parsing\ParsingDefinitions.h"
 #include "..\..\Source\Stream\FileStream.h"
 #include "..\..\Source\Stream\Accessor.h"
 #include "..\..\Source\Stream\CharFormat.h"
+
+#include "..\..\Source\Parsing\ParsingDefinitions.h"
+#include "..\..\Source\Parsing\ParsingAutomaton.h"
 
 using namespace vl;
 using namespace vl::stream;
