@@ -1,4 +1,5 @@
 #include "ParsingAutomaton.h"
+#include "..\Collections\Operation.h"
 
 namespace vl
 {
@@ -10,9 +11,9 @@ namespace vl
 		namespace automaton
 		{
 
-			/***********************************************************************
-			ParsingSymbol
-			***********************************************************************/
+/***********************************************************************
+ParsingSymbol
+***********************************************************************/
 
 			bool ParsingSymbol::AddSubSymbol(ParsingSymbol* subSymbol)
 			{
@@ -138,9 +139,30 @@ namespace vl
 				}
 			}
 
-			/***********************************************************************
-			ParsingSymbolManager
-			***********************************************************************/
+			ParsingSymbol* ParsingSymbol::SearchClassSubSymbol(const WString& name)
+			{
+				if(type==ParsingSymbol::ClassType)
+				{
+					ParsingSymbol* scope=this;
+					while(scope)
+					{
+						ParsingSymbol* subSymbol=scope->GetSubSymbolByName(name);
+						if(subSymbol)
+						{
+							return subSymbol;
+						}
+						else
+						{
+							scope=scope->GetDescriptorSymbol();
+						}
+					}
+				}
+				return 0;
+			}
+
+/***********************************************************************
+ParsingSymbolManager
+***********************************************************************/
 
 			ParsingSymbol* ParsingSymbolManager::TryAddSubSymbol(Ptr<ParsingSymbol> subSymbol, ParsingSymbol* parentSymbol)
 			{
@@ -198,7 +220,7 @@ namespace vl
 			{
 				if((!baseType || baseType->GetType()==ParsingSymbol::ClassType) && (!parentType || parentType->IsType()))
 				{
-					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::ClassField, name, baseType);
+					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::ClassType, name, baseType);
 					return TryAddSubSymbol(symbol, parentType?parentType:globalSymbol);
 				}
 				else
@@ -222,7 +244,7 @@ namespace vl
 
 			ParsingSymbol* ParsingSymbolManager::AddEnum(const WString& name, ParsingSymbol* parentType)
 			{
-				if(!parentType || parentType->IsType())
+				if(!parentType || parentType->GetType()==ParsingSymbol::ClassType)
 				{
 					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::EnumType, name, 0);
 					return TryAddSubSymbol(symbol, parentType?parentType:globalSymbol);
@@ -336,12 +358,12 @@ FindType
 					result=0;
 					if(type)
 					{
-						ParsingSymbol* subType=type->GetSubSymbolByName(node->subTypeName);
-						if(!type)
+						ParsingSymbol* subType=type->SearchClassSubSymbol(node->subTypeName);
+						if(!subType)
 						{
 							errors.Add(new ParsingError(node, L"\""+GetTypeFullName(type)+L"\" does not has a sub type called \""+node->subTypeName+L"\"."));
 						}
-						else if(type->IsType())
+						else if(subType->IsType())
 						{
 							result=type;
 						}
@@ -369,12 +391,152 @@ FindType
 				return visitor.result;
 			}
 
-			/***********************************************************************
-			PrepareSymbols
-			***********************************************************************/
+/***********************************************************************
+PrepareSymbols
+***********************************************************************/
+
+			class PrepareSymbolsTypeDefinitionVisitor : public Object, public ParsingDefinitionTypeDefinition::IVisitor
+			{
+			public:
+				ParsingSymbolManager*				manager;
+				ParsingSymbol*						scope;
+				List<Ptr<ParsingError>>&			errors;
+
+				PrepareSymbolsTypeDefinitionVisitor(ParsingSymbolManager* _manager, ParsingSymbol* _scope, List<Ptr<ParsingError>>& _errors)
+					:manager(_manager)
+					,scope(_scope)
+					,errors(_errors)
+				{
+				}
+
+				bool EnsureNameNotExists(ParsingDefinitionTypeDefinition* node, const WString& subjectName)
+				{
+					if(scope->SearchClassSubSymbol(node->name))
+					{
+						errors.Add(new ParsingError(node, L"Cannot redefine \""+node->name+L"\" to be "+subjectName+L"."));
+						return false;
+					}
+					else
+					{
+						return true;
+					}
+				}
+
+				void Visit(ParsingDefinitionClassMemberDefinition* node)override
+				{
+					if(EnsureNameNotExists(node, L"a class field"))
+					{
+						ParsingSymbol* fieldType=FindType(node->type, manager, scope, errors);
+						if(fieldType)
+						{
+							ParsingSymbol* field=manager->AddField(node->name, scope, fieldType);
+							if(!field)
+							{
+								errors.Add(new ParsingError(node, L"A class field cannot be defined here."));
+							}
+						}
+					}
+				}
+
+				void Visit(ParsingDefinitionClassDefinition* node)override
+				{
+					if(EnsureNameNotExists(node, L"a class type"))
+					{
+						ParsingSymbol* baseType=0;
+						if(node->parentType)
+						{
+							baseType=FindType(node->parentType, manager, scope, errors);
+						}
+						ParsingSymbol* classType=manager->AddClass(node->name, baseType, (scope->GetType()==ParsingSymbol::Global?0:scope));
+						if(classType)
+						{
+							PrepareSymbolsTypeDefinitionVisitor visitor(manager, classType, errors);
+							FOREACH(Ptr<ParsingDefinitionTypeDefinition>, subType, node->subTypes.Wrap())
+							{
+								subType->Accept(&visitor);
+							}
+							FOREACH(Ptr<ParsingDefinitionClassMemberDefinition>, member, node->members.Wrap())
+							{
+								member->Accept(&visitor);
+							}
+						}
+						else
+						{
+							errors.Add(new ParsingError(node, L"A class type cannot be defined here."));
+						}
+					}
+				}
+
+				void Visit(ParsingDefinitionEnumMemberDefinition* node)override
+				{
+					if(EnsureNameNotExists(node, L"an enum item"))
+					{
+						ParsingSymbol* enumItem=manager->AddEnumItem(node->name, scope);
+						if(!enumItem)
+						{
+							errors.Add(new ParsingError(node, L"An enum item cannot be defined here."));
+						}
+					}
+				}
+
+				void Visit(ParsingDefinitionEnumDefinition* node)override
+				{
+					if(EnsureNameNotExists(node, L"an enum type"))
+					{
+						ParsingSymbol* enumType=manager->AddEnum(node->name, (scope->GetType()==ParsingSymbol::Global?0:scope));
+						if(enumType)
+						{
+							PrepareSymbolsTypeDefinitionVisitor visitor(manager, enumType, errors);
+							FOREACH(Ptr<ParsingDefinitionEnumMemberDefinition>, member, node->members.Wrap())
+							{
+								member->Accept(&visitor);
+							}
+						}
+						else
+						{
+							errors.Add(new ParsingError(node, L"An enum type cannot be defined here."));
+						}
+					}
+				}
+			};
 
 			void PrepareSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
 			{
+				{
+					PrepareSymbolsTypeDefinitionVisitor visitor(manager, manager->GetGlobal(), errors);
+					FOREACH(Ptr<ParsingDefinitionTypeDefinition>, typeDefinition, definition->types.Wrap())
+					{
+						typeDefinition->Accept(&visitor);
+					}
+				}
+
+				FOREACH(Ptr<ParsingDefinitionTokenDefinition>, token, definition->tokens.Wrap())
+				{
+					if(manager->GetGlobal()->GetSubSymbolByName(token->name))
+					{
+						errors.Add(new ParsingError(token.Obj(), L"Cannot redefine \""+token->name+L"\" to be a token definition."));
+					}
+					else
+					{
+						manager->AddTokenDefinition(token->name);
+					}
+				}
+
+				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules.Wrap())
+				{
+					if(manager->GetGlobal()->GetSubSymbolByName(rule->name))
+					{
+						errors.Add(new ParsingError(rule.Obj(), L"Cannot redefine \""+rule->name+L"\" to be a token definition."));
+					}
+					else
+					{
+						ParsingSymbol* type=FindType(rule->type, manager, 0, errors);
+						if(type)
+						{
+							manager->AddRuleDefinition(rule->name, type);
+						}
+					}
+				}
 			}
 		}
 	}

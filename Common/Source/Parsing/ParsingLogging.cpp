@@ -111,15 +111,15 @@ Logger (ParsingDefinitionTypeDefinition)
 				{
 					writer.WriteString(prefix);
 					writer.WriteString(L"class ");
-					if(node->parentType==L"")
+					if(node->parentType)
 					{
 						writer.WriteLine(node->name);
+						writer.WriteString(L" : ");
+						Log(node->parentType, writer);
 					}
 					else
 					{
 						writer.WriteString(node->name);
-						writer.WriteString(L" : ");
-						writer.WriteLine(node->parentType);
 					}
 
 					writer.WriteString(prefix);

@@ -168,11 +168,17 @@ ParsingDefinitionTypeWriter
 ParsingDefinitionClassDefinitionWriter
 ***********************************************************************/
 
-			ParsingDefinitionClassDefinitionWriter::ParsingDefinitionClassDefinitionWriter(const WString& name, const WString& parentType)
+			ParsingDefinitionClassDefinitionWriter::ParsingDefinitionClassDefinitionWriter(const WString& name)
 			{
 				definition=new ParsingDefinitionClassDefinition;
 				definition->name=name;
-				definition->parentType=parentType;
+			}
+
+			ParsingDefinitionClassDefinitionWriter::ParsingDefinitionClassDefinitionWriter(const WString& name, const ParsingDefinitionTypeWriter& parentType)
+			{
+				definition=new ParsingDefinitionClassDefinition;
+				definition->name=name;
+				definition->parentType=parentType.Type();
 			}
 
 			ParsingDefinitionClassDefinitionWriter& ParsingDefinitionClassDefinitionWriter::Member(const WString& name, const ParsingDefinitionTypeWriter& type)
@@ -195,7 +201,12 @@ ParsingDefinitionClassDefinitionWriter
 				return definition;
 			}
 
-			ParsingDefinitionClassDefinitionWriter Class(const WString& name, const WString& parentType)
+			ParsingDefinitionClassDefinitionWriter Class(const WString& name)
+			{
+				return ParsingDefinitionClassDefinitionWriter(name);
+			}
+
+			ParsingDefinitionClassDefinitionWriter Class(const WString& name, const ParsingDefinitionTypeWriter& parentType)
 			{
 				return ParsingDefinitionClassDefinitionWriter(name, parentType);
 			}

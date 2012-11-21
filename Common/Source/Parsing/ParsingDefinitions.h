@@ -115,7 +115,7 @@ namespace vl
 				typedef collections::List<Ptr<ParsingDefinitionClassMemberDefinition>>	MemberList;
 				typedef collections::List<Ptr<ParsingDefinitionTypeDefinition>>			TypeList;
 
-				WString											parentType;
+				Ptr<ParsingDefinitionType>						parentType;
 				MemberList										members;
 				TypeList										subTypes;
 
@@ -329,15 +329,17 @@ namespace vl
 				Ptr<ParsingDefinitionClassDefinition>			definition;
 
 			public:
-				ParsingDefinitionClassDefinitionWriter(const WString& name, const WString& parentType=L"");
+				ParsingDefinitionClassDefinitionWriter(const WString& name);
+				ParsingDefinitionClassDefinitionWriter(const WString& name, const ParsingDefinitionTypeWriter& parentType);
 
 				ParsingDefinitionClassDefinitionWriter&			Member(const WString& name, const ParsingDefinitionTypeWriter& type);
 				ParsingDefinitionClassDefinitionWriter&			SubType(const ParsingDefinitionTypeDefinitionWriter& type);
 
 				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
 			};
-
-			extern ParsingDefinitionClassDefinitionWriter		Class(const WString& name, const WString& parentType=L"");
+			
+			extern ParsingDefinitionClassDefinitionWriter		Class(const WString& name);
+			extern ParsingDefinitionClassDefinitionWriter		Class(const WString& name, const ParsingDefinitionTypeWriter& parentType);
 
 			class ParsingDefinitionEnumDefinitionWriter : public ParsingDefinitionTypeDefinitionWriter
 			{

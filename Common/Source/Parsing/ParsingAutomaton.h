@@ -67,6 +67,7 @@ namespace vl
 				ParsingSymbol*					GetDescriptorSymbol();
 				ParsingSymbol*					GetParentSymbol();
 				bool							IsType();
+				ParsingSymbol*					SearchClassSubSymbol(const WString& name);
 			};
 
 			class ParsingSymbolManager : public Object
