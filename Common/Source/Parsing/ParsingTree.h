@@ -214,6 +214,28 @@ namespace vl
 			vint						Count();
 			bool						Clear();
 		};
+
+/***********************************************************************
+语法树基础设施
+***********************************************************************/
+
+		class ParsingTreeCustomBase : public Object
+		{
+		public:
+			ParsingTextRange			codeRange;
+		};
+
+		class ParsingError : public Object
+		{
+		public:
+			ParsingTextRange			codeRange;
+			ParsingTreeCustomBase*		parsingTree;
+			WString						errorMessage;
+
+			ParsingError();
+			ParsingError(ParsingTreeCustomBase* _parsingTree, const WString& _errorMessage);
+			~ParsingError();
+		};
 	}
 }
 

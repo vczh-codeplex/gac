@@ -12,6 +12,7 @@ using namespace vl::stream;
 using namespace vl::collections;
 using namespace vl::parsing;
 using namespace vl::parsing::definitions;
+using namespace vl::parsing::automaton;
 
 extern WString GetPath();
 
@@ -26,6 +27,10 @@ namespace test
 			StreamWriter writer(encoderStream);
 			Log(definition, writer);
 		}
+		ParsingSymbolManager symbolManager;
+		List<Ptr<ParsingError>> errors;
+		PrepareSymbols(definition, &symbolManager, errors);
+		TEST_ASSERT(errors.Count()==0);
 	}
 }
 using namespace test;

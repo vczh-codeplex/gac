@@ -93,6 +93,14 @@ namespace vl
 				ParsingSymbol*					AddTokenDefinition(const WString& name);
 				ParsingSymbol*					AddRuleDefinition(const WString& name, ParsingSymbol* ruleType);
 			};
+
+/***********************************************************************
+”Ô“Â∑÷Œˆ
+***********************************************************************/
+
+			extern WString						GetTypeFullName(ParsingSymbol* type);
+			extern ParsingSymbol*				FindType(Ptr<definitions::ParsingDefinitionType> type, ParsingSymbolManager* manager, ParsingSymbol* scope, collections::List<Ptr<ParsingError>>& errors);
+			extern void							PrepareSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
 		}
 	}
 }
