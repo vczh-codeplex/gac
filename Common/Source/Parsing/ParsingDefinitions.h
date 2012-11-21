@@ -19,16 +19,6 @@ namespace vl
 		{
 
 /***********************************************************************
-基础结构
-***********************************************************************/
-
-			class ParsingDefinitionNode : public Object
-			{
-			public:
-				ParsingTextRange								codeRange;
-			};
-
-/***********************************************************************
 类型结构
 ***********************************************************************/
 
@@ -37,7 +27,7 @@ namespace vl
 			class ParsingDefinitionSubType;
 			class ParsingDefinitionArrayType;
 
-			class ParsingDefinitionType : public ParsingDefinitionNode
+			class ParsingDefinitionType : public ParsingTreeCustomBase
 			{
 			public:
 				class IVisitor : public Interface
@@ -93,7 +83,7 @@ namespace vl
 			class ParsingDefinitionEnumMemberDefinition;
 			class ParsingDefinitionEnumDefinition;
 
-			class ParsingDefinitionTypeDefinition : public ParsingDefinitionNode
+			class ParsingDefinitionTypeDefinition : public ParsingTreeCustomBase
 			{
 			public:
 				class IVisitor : public Interface
@@ -161,7 +151,7 @@ namespace vl
 			class ParsingDefinitionUseGrammar;
 			class ParsingDefinitionSetterGrammar;
 
-			class ParsingDefinitionGrammar : public ParsingDefinitionNode
+			class ParsingDefinitionGrammar : public ParsingTreeCustomBase
 			{
 			public:
 				class IVisitor : public Interface
@@ -276,14 +266,14 @@ namespace vl
 文法结构
 ***********************************************************************/
 
-			class ParsingDefinitionTokenDefinition : public ParsingDefinitionNode
+			class ParsingDefinitionTokenDefinition : public ParsingTreeCustomBase
 			{
 			public:
 				WString											name;
 				WString											regex;
 			};
 
-			class ParsingDefinitionRuleDefinition : public ParsingDefinitionNode
+			class ParsingDefinitionRuleDefinition : public ParsingTreeCustomBase
 			{
 			public:
 				WString															name;
@@ -291,7 +281,7 @@ namespace vl
 				collections::List<Ptr<ParsingDefinitionGrammar>>				grammars;
 			};
 
-			class ParsingDefinition : public Object
+			class ParsingDefinition : public ParsingTreeCustomBase
 			{
 			public:
 				collections::List<Ptr<ParsingDefinitionTypeDefinition>>			types;
@@ -432,7 +422,7 @@ namespace vl
 辅助函数
 ***********************************************************************/
 
-			extern void				Log(Ptr<ParsingDefinition> definition, stream::TextWriter& writer);
+			extern void											Log(Ptr<ParsingDefinition> definition, stream::TextWriter& writer);
 		}
 	}
 }

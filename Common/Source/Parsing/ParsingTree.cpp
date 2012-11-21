@@ -458,5 +458,24 @@ ParsingTreeArray
 			items.Clear();
 			return true;
 		}
+
+/***********************************************************************
+ParsingError
+***********************************************************************/
+
+		ParsingError::ParsingError()
+		{
+		}
+
+		ParsingError::ParsingError(ParsingTreeCustomBase* _parsingTree, const WString& _errorMessage)
+			:codeRange(_parsingTree->codeRange)
+			,parsingTree(_parsingTree)
+			,errorMessage(_errorMessage)
+		{
+		}
+
+		ParsingError::~ParsingError()
+		{
+		}
 	}
 }

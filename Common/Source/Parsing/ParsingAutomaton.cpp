@@ -4,12 +4,15 @@ namespace vl
 {
 	namespace parsing
 	{
+		using namespace collections;
+		using namespace definitions;
+
 		namespace automaton
 		{
 
-/***********************************************************************
-ParsingSymbol
-***********************************************************************/
+			/***********************************************************************
+			ParsingSymbol
+			***********************************************************************/
 
 			bool ParsingSymbol::AddSubSymbol(ParsingSymbol* subSymbol)
 			{
@@ -135,9 +138,9 @@ ParsingSymbol
 				}
 			}
 
-/***********************************************************************
-ParsingSymbolManager
-***********************************************************************/
+			/***********************************************************************
+			ParsingSymbolManager
+			***********************************************************************/
 
 			ParsingSymbol* ParsingSymbolManager::TryAddSubSymbol(Ptr<ParsingSymbol> subSymbol, ParsingSymbol* parentSymbol)
 			{
@@ -260,6 +263,118 @@ ParsingSymbolManager
 				{
 					return 0;
 				}
+			}
+
+/***********************************************************************
+FindType
+***********************************************************************/
+
+			WString GetTypeFullName(ParsingSymbol* type)
+			{
+				WString name=type->GetName();
+				type=type->GetParentSymbol();
+				while(type && type!=type->GetManager()->GetGlobal())
+				{
+					name=type->GetName()+L"."+name;
+					type=type->GetParentSymbol();
+				}
+				return name;
+			}
+
+/***********************************************************************
+FindType
+***********************************************************************/
+
+			class FindTypeVisitor : public Object, public ParsingDefinitionType::IVisitor
+			{
+			public:
+				ParsingSymbolManager*				manager;
+				ParsingSymbol*						scope;
+				List<Ptr<ParsingError>>&			errors;
+				ParsingSymbol*						result;
+
+				FindTypeVisitor(ParsingSymbolManager* _manager, ParsingSymbol* _scope, List<Ptr<ParsingError>>& _errors)
+					:manager(_manager)
+					,scope(_scope)
+					,errors(_errors)
+					,result(0)
+				{
+				}
+
+				void Visit(ParsingDefinitionPrimitiveType* node)override
+				{
+					ParsingSymbol* currentScope=scope;
+					while(currentScope)
+					{
+						ParsingSymbol* type=currentScope->GetSubSymbolByName(node->name);
+						if(type)
+						{
+							if(type->IsType())
+							{
+								result=type;
+							}
+							else
+							{
+								errors.Add(new ParsingError(node, L"\""+node->name+L"\" in current scope is not a type."));
+							}
+							return;
+						}
+						currentScope=currentScope->GetParentSymbol();
+					}
+					errors.Add(new ParsingError(node, L"Cannot not find \""+node->name+L"\" in current scope."));
+				}
+
+				void Visit(ParsingDefinitionTokenType* node)override
+				{
+					result=manager->GetTokenType();
+				}
+
+				void Visit(ParsingDefinitionSubType* node)override
+				{
+					node->parentType->Accept(this);
+					ParsingSymbol* type=result;
+					result=0;
+					if(type)
+					{
+						ParsingSymbol* subType=type->GetSubSymbolByName(node->subTypeName);
+						if(!type)
+						{
+							errors.Add(new ParsingError(node, L"\""+GetTypeFullName(type)+L"\" does not has a sub type called \""+node->subTypeName+L"\"."));
+						}
+						else if(type->IsType())
+						{
+							result=type;
+						}
+						else
+						{
+							errors.Add(new ParsingError(node, L"\""+GetTypeFullName(type)+L"\" contains a sub definition called \""+node->subTypeName+L"\" but this is not a type."));
+						}
+					}
+				}
+
+				void Visit(ParsingDefinitionArrayType* node)override
+				{
+					node->elementType->Accept(this);
+					if(result)
+					{
+						result=result->GetManager()->GetArrayType(result);
+					}
+				}
+			};
+
+			ParsingSymbol* FindType(Ptr<definitions::ParsingDefinitionType> type, ParsingSymbolManager* manager, ParsingSymbol* scope, collections::List<Ptr<ParsingError>>& errors)
+			{
+				FindTypeVisitor visitor(manager, (scope?scope:manager->GetGlobal()), errors);
+				type->Accept(&visitor);
+				return visitor.result;
+			}
+
+			/***********************************************************************
+			PrepareSymbols
+			***********************************************************************/
+
+			void PrepareSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
+			{
 			}
 		}
 	}
