@@ -3,6 +3,7 @@
 #include "..\..\Source\Stream\FileStream.h"
 #include "..\..\Source\Stream\Accessor.h"
 #include "..\..\Source\Stream\CharFormat.h"
+#include "..\..\Source\Collections\Operation.h"
 
 #include "..\..\Source\Parsing\ParsingDefinitions.h"
 #include "..\..\Source\Parsing\ParsingAutomaton.h"
@@ -20,16 +21,32 @@ namespace test
 {
 	void GeneralTest(Ptr<ParsingDefinition> definition, const WString& name)
 	{
-		{
-			FileStream fileStream(GetPath()+L"Parsing."+name+L".Definition.txt", FileStream::WriteOnly);
-			BomEncoder encoder(BomEncoder::Utf16);
-			EncoderStream encoderStream(fileStream, encoder);
-			StreamWriter writer(encoderStream);
-			Log(definition, writer);
-		}
+		FileStream fileStream(GetPath()+L"Parsing."+name+L".Definition.txt", FileStream::WriteOnly);
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+
+		writer.WriteLine(L"=============================================================");
+		writer.WriteLine(L"Grammar");
+		writer.WriteLine(L"=============================================================");
+		Log(definition, writer);
+
 		ParsingSymbolManager symbolManager;
 		List<Ptr<ParsingError>> errors;
 		PrepareSymbols(definition, &symbolManager, errors);
+		if(errors.Count()>0)
+		{
+			writer.WriteLine(L"=============================================================");
+			writer.WriteLine(L"errors");
+			writer.WriteLine(L"=============================================================");
+			FOREACH(Ptr<ParsingError>, error, errors.Wrap())
+			{
+				writer.WriteLine(error->errorMessage);
+			}
+
+			encoderStream.Close();
+			fileStream.Close();
+		}
 		TEST_ASSERT(errors.Count()==0);
 	}
 }
@@ -43,30 +60,30 @@ TEST_CASE(TestParsingExpression)
 
 		definitionWriter
 			.Type(
-				Class(L"Expression")
-				)
+			Class(L"Expression")
+			)
 			.Type(
-				Class(L"NumberExpression", L"Expression")
-					.Member(L"value", TokenType())
-				)
+			Class(L"NumberExpression", Type(L"Expression"))
+			.Member(L"value", TokenType())
+			)
 			.Type(
-				Class(L"BinaryExpression", L"Expression")
-					.SubType(
-						Enum(L"BinaryOperator")
-							.Member(L"Add")
-							.Member(L"Sub")
-							.Member(L"Mul")
-							.Member(L"Div")
-						)
-					.Member(L"firstOperand", Type(L"Expression"))
-					.Member(L"secondOperand", Type(L"Expression"))
-					.Member(L"binaryOperator", Type(L"BinaryOperator"))
-				)
+			Class(L"BinaryExpression", Type(L"Expression"))
+			.SubType(
+			Enum(L"BinaryOperator")
+			.Member(L"Add")
+			.Member(L"Sub")
+			.Member(L"Mul")
+			.Member(L"Div")
+			)
+			.Member(L"firstOperand", Type(L"Expression"))
+			.Member(L"secondOperand", Type(L"Expression"))
+			.Member(L"binaryOperator", Type(L"BinaryOperator"))
+			)
 			.Type(
-				Class(L"FunctionExpression", L"Expression")
-					.Member(L"functionName", TokenType())
-					.Member(L"arguments", Type(L"Expression").Array())
-				)
+			Class(L"FunctionExpression", Type(L"Expression"))
+			.Member(L"functionName", TokenType())
+			.Member(L"arguments", Type(L"Expression").Array())
+			)
 
 			.Token(L"NAME",		L"[a-zA-Z_]/w*")
 			.Token(L"NUMBER",	L"/d+(./d+)")
@@ -79,44 +96,44 @@ TEST_CASE(TestParsingExpression)
 			.Token(L"COMMA",	L",")
 
 			.Rule(L"Number", Type(L"NumberExpression"))
-				.Imply(Rule(L"NUMBER")[L"value"])
-				.EndRule()
+			.Imply(Rule(L"NUMBER")[L"value"])
+			.EndRule()
 
 			.Rule(L"Call", Type(L"FunctionExpression"))
-				.Imply(Rule(L"NAME")[L"functionName"] + Text(L"(") + Opt(Rule(L"Exp")[L"arguments"] + *(Text(L",") + Rule(L"Exp")[L"arguments"])) + Text(L")"))
-				.EndRule()
+			.Imply(Rule(L"NAME")[L"functionName"] + Text(L"(") + Opt(Rule(L"Exp")[L"arguments"] + *(Text(L",") + Rule(L"Exp")[L"arguments"])) + Text(L")"))
+			.EndRule()
 
 			.Rule(L"Factor", Type(L"Expression"))
-				.Imply(!Rule(L"Number") | !Rule(L"Call"))
-				.EndRule()
+			.Imply(!Rule(L"Number") | !Rule(L"Call"))
+			.EndRule()
 
 			.Rule(L"Term", Type(L"Expression"))
-				.Imply(!Rule(L"Factor"))
-				.Imply(
-					(Rule(L"Term")[L"firstOperand"] + Text(L"*") + Rule(L"Factory")[L"secondOperand"])
-						.As(Type(L"BinaryExpression"))
-						.Set(L"binaryOperator", L"Mul")
-					)
-				.Imply(
-					(Rule(L"Term")[L"firstOperand"] + Text(L"/") + Rule(L"Factory")[L"secondOperand"])
-						.As(Type(L"BinaryExpression"))
-						.Set(L"binaryOperator", L"Div")
-					)
-				.EndRule()
+			.Imply(!Rule(L"Factor"))
+			.Imply(
+			(Rule(L"Term")[L"firstOperand"] + Text(L"*") + Rule(L"Factory")[L"secondOperand"])
+			.As(Type(L"BinaryExpression"))
+			.Set(L"binaryOperator", L"Mul")
+			)
+			.Imply(
+			(Rule(L"Term")[L"firstOperand"] + Text(L"/") + Rule(L"Factory")[L"secondOperand"])
+			.As(Type(L"BinaryExpression"))
+			.Set(L"binaryOperator", L"Div")
+			)
+			.EndRule()
 
 			.Rule(L"Exp", Type(L"Expression"))
-				.Imply(!Rule(L"Term"))
-				.Imply(
-					(Rule(L"Exp")[L"firstOperand"] + Text(L"+") + Rule(L"Term")[L"secondOperand"])
-						.As(Type(L"BinaryExpression"))
-						.Set(L"binaryOperator", L"Add")
-					)
-				.Imply(
-					(Rule(L"Exp")[L"firstOperand"] + Text(L"-") + Rule(L"Term")[L"secondOperand"])
-						.As(Type(L"BinaryExpression"))
-						.Set(L"binaryOperator", L"Sub")
-					)
-				.EndRule()
+			.Imply(!Rule(L"Term"))
+			.Imply(
+			(Rule(L"Exp")[L"firstOperand"] + Text(L"+") + Rule(L"Term")[L"secondOperand"])
+			.As(Type(L"BinaryExpression"))
+			.Set(L"binaryOperator", L"Add")
+			)
+			.Imply(
+			(Rule(L"Exp")[L"firstOperand"] + Text(L"-") + Rule(L"Term")[L"secondOperand"])
+			.As(Type(L"BinaryExpression"))
+			.Set(L"binaryOperator", L"Sub")
+			)
+			.EndRule()
 			;
 
 		definition=definitionWriter.Definition();
