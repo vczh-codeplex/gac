@@ -343,7 +343,7 @@ Logger (ParsingDefinitionGrammar)
 Logger (ParsingDefinitionGrammar)
 ***********************************************************************/
 
-			WString TypeToString(Ptr<ParsingDefinitionType> type)
+			WString TypeToString(ParsingDefinitionType* type)
 			{
 				MemoryStream stream(64);
 				{
@@ -357,7 +357,7 @@ Logger (ParsingDefinitionGrammar)
 				}
 			}
 
-			WString GrammarToString(Ptr<ParsingDefinitionGrammar> grammar)
+			WString GrammarToString(ParsingDefinitionGrammar* grammar)
 			{
 				MemoryStream stream(64);
 				{
