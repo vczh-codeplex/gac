@@ -287,6 +287,68 @@ ParsingSymbolManager
 				}
 			}
 
+			ParsingSymbol* ParsingSymbolManager::CacheGetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope)
+			{
+				DefinitionTypeScopePair key(type, scope);
+				vint index=definitionTypeSymbolCache.Keys().IndexOf(key);
+				return index==-1?0:definitionTypeSymbolCache.Values()[index];
+			}
+
+			bool ParsingSymbolManager::CacheSetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope, ParsingSymbol* symbol)
+			{
+				DefinitionTypeScopePair key(type, scope);
+				vint index=definitionTypeSymbolCache.Keys().IndexOf(key);
+				if(index==-1)
+				{
+					definitionTypeSymbolCache.Add(key, symbol);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			ParsingSymbol* ParsingSymbolManager::CacheGetSymbol(definitions::ParsingDefinitionGrammar* grammar)
+			{
+				vint index=definitionGrammarSymbolCache.Keys().IndexOf(grammar);
+				return index==-1?0:definitionGrammarSymbolCache.Values()[index];
+			}
+
+			bool ParsingSymbolManager::CacheSetSymbol(definitions::ParsingDefinitionGrammar* grammar, ParsingSymbol* symbol)
+			{
+				vint index=definitionGrammarSymbolCache.Keys().IndexOf(grammar);
+				if(index==-1)
+				{
+					definitionGrammarSymbolCache.Add(grammar, symbol);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			ParsingSymbol* ParsingSymbolManager::CacheGetType(definitions::ParsingDefinitionGrammar* grammar)
+			{
+				vint index=definitionGrammarTypeCache.Keys().IndexOf(grammar);
+				return index==-1?0:definitionGrammarTypeCache.Values()[index];
+			}
+
+			bool ParsingSymbolManager::CacheSetType(definitions::ParsingDefinitionGrammar* grammar, ParsingSymbol* type)
+			{
+				vint index=definitionGrammarTypeCache.Keys().IndexOf(grammar);
+				if(index==-1)
+				{
+					definitionGrammarTypeCache.Add(grammar, type);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
 /***********************************************************************
 FindType
 ***********************************************************************/
@@ -353,9 +415,7 @@ FindType
 
 				void Visit(ParsingDefinitionSubType* node)override
 				{
-					node->parentType->Accept(this);
-					ParsingSymbol* type=result;
-					result=0;
+					ParsingSymbol* type=FindType(node->parentType, manager, scope, errors);
 					if(type)
 					{
 						ParsingSymbol* subType=type->SearchClassSubSymbol(node->subTypeName);
@@ -376,19 +436,25 @@ FindType
 
 				void Visit(ParsingDefinitionArrayType* node)override
 				{
-					node->elementType->Accept(this);
-					if(result)
+					ParsingSymbol* type=FindType(node->elementType, manager, scope, errors);
+					if(type)
 					{
-						result=result->GetManager()->GetArrayType(result);
+						result=manager->GetArrayType(type);
 					}
 				}
 			};
 
 			ParsingSymbol* FindType(Ptr<definitions::ParsingDefinitionType> type, ParsingSymbolManager* manager, ParsingSymbol* scope, collections::List<Ptr<ParsingError>>& errors)
 			{
-				FindTypeVisitor visitor(manager, (scope?scope:manager->GetGlobal()), errors);
-				type->Accept(&visitor);
-				return visitor.result;
+				ParsingSymbol* result=manager->CacheGetType(type.Obj(), scope);
+				if(!result)
+				{
+					FindTypeVisitor visitor(manager, (scope?scope:manager->GetGlobal()), errors);
+					type->Accept(&visitor);
+					result=visitor.result;
+					manager->CacheSetType(type.Obj(), scope, result);
+				}
+				return result;
 			}
 
 /***********************************************************************
@@ -533,10 +599,203 @@ PrepareSymbols
 						ParsingSymbol* type=FindType(rule->type, manager, 0, errors);
 						if(type)
 						{
+							if(type->GetType()!=ParsingSymbol::ClassType)
+							{
+								errors.Add(new ParsingError(rule.Obj(), L"\""+GetTypeFullName(type)+L"\" cannot be a type of a rule because this is not a class type."));
+							}
 							manager->AddRuleDefinition(rule->name, type);
 						}
 					}
 				}
+			}
+
+/***********************************************************************
+ValidateRuleStructure
+***********************************************************************/
+
+			class ValidateRuleStructureVisitor : public Object, public ParsingDefinitionGrammar::IVisitor
+			{
+			public:
+				ParsingSymbolManager*				manager;
+				ParsingDefinitionRuleDefinition*	rule;
+				List<Ptr<ParsingError>>&			errors;
+				vint								loopCount;
+
+				ValidateRuleStructureVisitor(ParsingSymbolManager* _manager, ParsingDefinitionRuleDefinition* _rule, List<Ptr<ParsingError>>& _errors)
+					:manager(_manager)
+					,errors(_errors)
+					,rule(_rule)
+					,loopCount(0)
+				{
+				}
+
+				void CheckCreationType(ParsingDefinitionGrammar* node, ParsingSymbol* nodeType)
+				{
+					if(nodeType->GetType()==ParsingSymbol::ClassType)
+					{
+						ParsingSymbol* ruleType=manager->GetGlobal()->GetSubSymbolByName(rule->name)->GetDescriptorSymbol();
+						ParsingSymbol* currentType=nodeType;
+						while(currentType && currentType!=ruleType)
+						{
+							currentType=currentType->GetDescriptorSymbol();
+						}
+						if(!currentType)
+						{
+							errors.Add(new ParsingError(node, L"Cannot create type \""+GetTypeFullName(nodeType)+L"\" in a rule of type \""+GetTypeFullName(ruleType)+L"\" because there are no implicit conversions from the created type to the rule type."));
+						}
+					}
+					else
+					{
+						errors.Add(new ParsingError(node, L"\""+GetTypeFullName(nodeType)+L"\" cannot be created because this is not a class type."));
+					}
+				}
+
+				void Visit(ParsingDefinitionPrimitiveGrammar* node)override
+				{
+					ParsingSymbol* symbol=manager->GetGlobal()->GetSubSymbolByName(node->name);
+					if(!symbol)
+					{
+						errors.Add(new ParsingError(node, L"Cannot find a token or a rule with name \""+node->name+L"\"."));
+					}
+					else switch(symbol->GetType())
+					{
+					case ParsingSymbol::TokenDef:
+					case ParsingSymbol::RuleDef:
+						{
+							ParsingSymbol* symbolType=symbol->GetDescriptorSymbol();
+							manager->CacheSetSymbol(node, symbol);
+							manager->CacheSetType(node, symbolType);
+						}
+						break;
+					default:
+						errors.Add(new ParsingError(node, L"\""+node->name+L"\" is not a token definition or rule definition."));
+					}
+				}
+
+				void Visit(ParsingDefinitionTextGrammar* node)override
+				{
+					manager->CacheSetType(node, manager->GetTokenType());
+				}
+
+				void Visit(ParsingDefinitionSequenceGrammar* node)override
+				{
+					node->first->Accept(this);
+					node->second->Accept(this);
+				}
+
+				void Visit(ParsingDefinitionAlternativeGrammar* node)override
+				{
+					node->first->Accept(this);
+					node->second->Accept(this);
+				}
+
+				void Visit(ParsingDefinitionLoopGrammar* node)override
+				{
+					loopCount++;
+					node->grammar->Accept(this);
+					loopCount--;
+				}
+
+				void Visit(ParsingDefinitionOptionalGrammar* node)override
+				{
+					node->grammar->Accept(this);
+				}
+
+				void Visit(ParsingDefinitionCreateGrammar* node)override
+				{
+					if(loopCount>0)
+					{
+						errors.Add(new ParsingError(node, L"Parsing tree node creation (the \"as\" operator) is not allowed inside loops."));
+					}
+					if(ParsingSymbol* nodeType=FindType(node->type, manager, 0, errors))
+					{
+						CheckCreationType(node, nodeType);
+					}
+					node->grammar->Accept(this);
+				}
+
+				void Visit(ParsingDefinitionAssignGrammar* node)override
+				{
+					if(!node->grammar.Cast<ParsingDefinitionPrimitiveGrammar>() && !node->grammar.Cast<ParsingDefinitionTextGrammar>())
+					{
+						errors.Add(new ParsingError(node, L"Only parsing tree node returned from a rule or a token can be assigned to a class field."));
+					}
+					node->grammar->Accept(this);
+				}
+
+				void Visit(ParsingDefinitionUseGrammar* node)override
+				{
+					if(loopCount>0)
+					{
+						errors.Add(new ParsingError(node, L"Parsing tree node reusing (the \"!\" operator) is not allowed inside loops."));
+					}
+					if(!node->grammar.Cast<ParsingDefinitionPrimitiveGrammar>())
+					{
+						errors.Add(new ParsingError(node, L"Only parsing tree node returned from a rule can be reused."));
+					}
+					else if(ParsingSymbol* symbol=manager->CacheGetSymbol(node->grammar.Obj()))
+					{
+						if(symbol->GetType()!=ParsingSymbol::RuleDef)
+						{
+							errors.Add(new ParsingError(node, L"Only parsing tree node returned from a rule can be reused."));
+						}
+					}
+					if(ParsingSymbol* nodeType=manager->CacheGetType(node->grammar.Obj()))
+					{
+						CheckCreationType(node, nodeType);
+					}
+					node->grammar->Accept(this);
+				}
+
+				void Visit(ParsingDefinitionSetterGrammar* node)override
+				{
+					node->grammar->Accept(this);
+				}
+			};
+
+			void ValidateRuleStructure(Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
+			{
+				ValidateRuleStructureVisitor visitor(manager, rule.Obj(), errors);
+				FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars.Wrap())
+				{
+					grammar->Accept(&visitor);
+				}
+			}
+
+/***********************************************************************
+ResolveRuleSymbols
+***********************************************************************/
+
+			void ResolveRuleSymbols(Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
+			{
+			}
+
+/***********************************************************************
+ResolveSymbols
+***********************************************************************/
+
+			void ResolveSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
+			{
+				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules.Wrap())
+				{
+					vint errorCount=errors.Count();
+					ValidateRuleStructure(rule, manager, errors);
+					if(errors.Count()==errorCount)
+					{
+						ResolveRuleSymbols(rule, manager, errors);
+					}
+				}
+			}
+
+/***********************************************************************
+ValidateDefinition
+***********************************************************************/
+
+			void ValidateDefinition(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
+			{
+				PrepareSymbols(definition, manager, errors);
+				if(errors.Count()>0) return;
+				ResolveSymbols(definition, manager, errors);
 			}
 		}
 	}

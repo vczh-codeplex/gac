@@ -19,6 +19,44 @@ namespace vl
 		{
 
 /***********************************************************************
+符号表关联对象
+***********************************************************************/
+
+			class ParsingSymbol;
+
+			struct DefinitionTypeScopePair
+			{
+				definitions::ParsingDefinitionType*		type;
+				ParsingSymbol*							scope;
+
+				DefinitionTypeScopePair()
+				{
+				}
+
+				DefinitionTypeScopePair(definitions::ParsingDefinitionType* _type, ParsingSymbol* _scope)
+					:type(_type)
+					,scope(_scope)
+				{
+				}
+
+				vint Compare(const DefinitionTypeScopePair& pair)
+				{
+					if(type<pair.type) return -1;
+					if(type>pair.type) return 1;
+					if(scope<pair.scope) return -1;
+					if(scope>pair.scope) return 1;
+					return 0;
+				}
+
+				bool operator==(const DefinitionTypeScopePair& pair){return Compare(pair)==0;}
+				bool operator!=(const DefinitionTypeScopePair& pair){return Compare(pair)!=0;}
+				bool operator>(const DefinitionTypeScopePair& pair){return Compare(pair)>0;}
+				bool operator>=(const DefinitionTypeScopePair& pair){return Compare(pair)>=0;}
+				bool operator<(const DefinitionTypeScopePair& pair){return Compare(pair)<0;}
+				bool operator<=(const DefinitionTypeScopePair& pair){return Compare(pair)<=0;}
+			};
+
+/***********************************************************************
 符号表
 ***********************************************************************/
 
@@ -72,11 +110,17 @@ namespace vl
 
 			class ParsingSymbolManager : public Object
 			{
-				typedef collections::List<Ptr<ParsingSymbol>>						ParsingSymbolList;
+
+				typedef collections::List<Ptr<ParsingSymbol>>												ParsingSymbolList;
+				typedef collections::Dictionary<DefinitionTypeScopePair, ParsingSymbol*>					DefinitionTypeSymbolMap;
+				typedef collections::Dictionary<definitions::ParsingDefinitionGrammar*, ParsingSymbol*>		DefinitionGrammarSymbolMap;
 			protected:
 				ParsingSymbol*					globalSymbol;
 				ParsingSymbol*					tokenTypeSymbol;
 				ParsingSymbolList				createdSymbols;
+				DefinitionTypeSymbolMap			definitionTypeSymbolCache;
+				DefinitionGrammarSymbolMap		definitionGrammarSymbolCache;
+				DefinitionGrammarSymbolMap		definitionGrammarTypeCache;
 
 				ParsingSymbol*					TryAddSubSymbol(Ptr<ParsingSymbol> subSymbol, ParsingSymbol* parentSymbol);
 			public:
@@ -93,6 +137,13 @@ namespace vl
 				ParsingSymbol*					AddEnumItem(const WString& name, ParsingSymbol* enumType);
 				ParsingSymbol*					AddTokenDefinition(const WString& name);
 				ParsingSymbol*					AddRuleDefinition(const WString& name, ParsingSymbol* ruleType);
+
+				ParsingSymbol*					CacheGetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope);
+				bool							CacheSetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope, ParsingSymbol* symbol);
+				ParsingSymbol*					CacheGetSymbol(definitions::ParsingDefinitionGrammar* grammar);
+				bool							CacheSetSymbol(definitions::ParsingDefinitionGrammar* grammar, ParsingSymbol* symbol);
+				ParsingSymbol*					CacheGetType(definitions::ParsingDefinitionGrammar* grammar);
+				bool							CacheSetType(definitions::ParsingDefinitionGrammar* grammar, ParsingSymbol* type);
 			};
 
 /***********************************************************************
@@ -102,6 +153,10 @@ namespace vl
 			extern WString						GetTypeFullName(ParsingSymbol* type);
 			extern ParsingSymbol*				FindType(Ptr<definitions::ParsingDefinitionType> type, ParsingSymbolManager* manager, ParsingSymbol* scope, collections::List<Ptr<ParsingError>>& errors);
 			extern void							PrepareSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+			extern void							ValidateRuleStructure(Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+			extern void							ResolveRuleSymbols(Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+			extern void							ResolveSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+			extern void							ValidateDefinition(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
 		}
 	}
 }
