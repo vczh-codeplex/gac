@@ -1,4 +1,5 @@
 #include "ParsingDefinitions.h"
+#include "..\Stream\MemoryStream.h"
 #include "..\Collections\OperationForEach.h"
 
 namespace vl
@@ -341,6 +342,34 @@ Logger (ParsingDefinitionGrammar)
 /***********************************************************************
 Logger (ParsingDefinitionGrammar)
 ***********************************************************************/
+
+			WString TypeToString(Ptr<ParsingDefinitionType> type)
+			{
+				MemoryStream stream(64);
+				{
+					StreamWriter writer(stream);
+					Log(type, writer);
+				}
+				stream.SeekFromBegin(0);
+				{
+					StreamReader reader(stream);
+					return reader.ReadToEnd();
+				}
+			}
+
+			WString GrammarToString(Ptr<ParsingDefinitionGrammar> grammar)
+			{
+				MemoryStream stream(64);
+				{
+					StreamWriter writer(stream);
+					Log(grammar, writer);
+				}
+				stream.SeekFromBegin(0);
+				{
+					StreamReader reader(stream);
+					return reader.ReadToEnd();
+				}
+			}
 
 			void Log(Ptr<ParsingDefinition> definition, TextWriter& writer)
 			{
