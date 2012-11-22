@@ -755,9 +755,9 @@ ValidateRuleStructure
 
 			void ValidateRuleStructure(Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
 			{
-				ValidateRuleStructureVisitor visitor(manager, rule.Obj(), errors);
 				FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars.Wrap())
 				{
+					ValidateRuleStructureVisitor visitor(manager, rule.Obj(), errors);
 					grammar->Accept(&visitor);
 				}
 			}
@@ -766,8 +766,192 @@ ValidateRuleStructure
 ResolveRuleSymbols
 ***********************************************************************/
 
+			struct GrammarPathFragment
+			{
+				// primitive, text                      -> transition
+				// optional, create, use assign, setter -> epsilon
+				GrammarPathFragment*						previousFragment;
+				ParsingDefinitionGrammar*					grammar;
+				bool										epsilon;
+				ParsingSymbol*								createdType;
+
+				GrammarPathFragment()
+					:previousFragment(0)
+					,grammar(0)
+				{
+				}
+			};
+
+			struct GrammarPath
+			{
+				List<Ptr<GrammarPathFragment>>				fragments;
+				ParsingSymbol*								pathType;
+
+				WString ToString()
+				{
+					WString result;
+					FOREACH(Ptr<GrammarPathFragment>, fragment, fragments.Wrap())
+					{
+						if(!fragment->epsilon)
+						{
+							if(result!=L"") result+=L" ";
+							result+=GrammarToString(fragment->grammar);
+						}
+					}
+					return result;
+				}
+			};
+
+			class EnumerateGrammarPathVisitor : public Object, public ParsingDefinitionGrammar::IVisitor
+			{
+			public:
+				ParsingSymbolManager*						manager;
+				ParsingDefinitionRuleDefinition*			rule;
+
+				List<Ptr<GrammarPathFragment>>				createdFragments;
+				List<GrammarPathFragment*>					currentFragmentEnds;
+
+				EnumerateGrammarPathVisitor(ParsingSymbolManager* _manager, ParsingDefinitionRuleDefinition* _rule)
+					:manager(_manager)
+					,rule(_rule)
+				{
+				}
+
+				EnumerateGrammarPathVisitor(const EnumerateGrammarPathVisitor& visitor)
+					:manager(visitor.manager)
+					,rule(visitor.rule)
+				{
+					CopyFrom(currentFragmentEnds.Wrap(), visitor.currentFragmentEnds.Wrap());
+				}
+
+				void Join(const EnumerateGrammarPathVisitor& visitor)
+				{
+					CopyFrom(createdFragments.Wrap(), visitor.createdFragments.Wrap());
+					CopyFrom(currentFragmentEnds.Wrap(), visitor.currentFragmentEnds.Wrap());
+				}
+
+				void AddFragment(ParsingDefinitionGrammar* node, bool epsilon, ParsingSymbol* createdType)
+				{
+					for(vint i=0;i<currentFragmentEnds.Count();i++)
+					{
+						GrammarPathFragment* fragment=new GrammarPathFragment;
+						fragment->previousFragment=currentFragmentEnds[i];
+						fragment->grammar=node;
+						fragment->epsilon=epsilon;
+						fragment->createdType=createdType;
+						currentFragmentEnds[i]=fragment;
+						createdFragments.Add(fragment);
+					}
+				}
+
+				void BuildPath(List<Ptr<GrammarPath>>& paths)
+				{
+					FOREACH(GrammarPathFragment*, fragment, currentFragmentEnds.Wrap())
+					{
+						Ptr<GrammarPath> path=new GrammarPath;
+						paths.Add(path);
+
+						GrammarPathFragment* current=fragment;
+						while(current)
+						{
+							path->fragments.Insert(0, createdFragments[createdFragments.IndexOf(current)]);
+							current=current->previousFragment;
+						}
+					}
+				}
+
+				void Visit(ParsingDefinitionPrimitiveGrammar* node)override
+				{
+					AddFragment(node, false, 0);
+				}
+
+				void Visit(ParsingDefinitionTextGrammar* node)override
+				{
+					AddFragment(node, false, 0);
+				}
+
+				void Visit(ParsingDefinitionSequenceGrammar* node)override
+				{
+					node->first->Accept(this);
+					node->second->Accept(this);
+				}
+
+				void Visit(ParsingDefinitionAlternativeGrammar* node)override
+				{
+					EnumerateGrammarPathVisitor visitor(*this);
+					node->second->Accept(&visitor);
+					node->first->Accept(this);
+					Join(visitor);
+				}
+
+				void Visit(ParsingDefinitionLoopGrammar* node)override
+				{
+					node->grammar->Accept(this);
+				}
+
+				void Visit(ParsingDefinitionOptionalGrammar* node)override
+				{
+					EnumerateGrammarPathVisitor visitor(*this);
+					node->grammar->Accept(&visitor);
+					AddFragment(node, true, 0);
+					Join(visitor);
+				}
+
+				void Visit(ParsingDefinitionCreateGrammar* node)override
+				{
+					AddFragment(node, true, manager->CacheGetType(node->type.Obj(), manager->GetGlobal()));
+				}
+
+				void Visit(ParsingDefinitionAssignGrammar* node)override
+				{
+					node->grammar->Accept(this);
+					AddFragment(node, true, 0);
+				}
+
+				void Visit(ParsingDefinitionUseGrammar* node)override
+				{
+					AddFragment(node, true, manager->CacheGetSymbol(node->grammar.Obj())->GetDescriptorSymbol());
+				}
+
+				void Visit(ParsingDefinitionSetterGrammar* node)override
+				{
+					node->grammar->Accept(this);
+					AddFragment(node, true, 0);
+				}
+			};
+
 			void ResolveRuleSymbols(Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
 			{
+				ParsingSymbol* ruleType=manager->GetGlobal()->GetSubSymbolByName(rule->name)->GetDescriptorSymbol();
+
+				FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars.Wrap())
+				{
+					List<Ptr<GrammarPath>> paths;
+					{
+						EnumerateGrammarPathVisitor visitor(manager, rule.Obj());
+						grammar->Accept(&visitor);
+						visitor.BuildPath(paths);
+					}
+
+					FOREACH(Ptr<GrammarPath>, path, paths.Wrap())
+					{
+						path->pathType=ruleType;
+						vint createdTypeCount=0;
+						FOREACH(Ptr<GrammarPathFragment>, fragment, path->fragments.Wrap())
+						{
+							if(fragment->createdType)
+							{
+								createdTypeCount++;
+								path->pathType=fragment->createdType;
+							}
+						}
+
+						if(createdTypeCount>1)
+						{
+							errors.Add(new ParsingError(grammar.Obj(), L"Multiple parsing tree nodes are created if the following path is chosen: \""+path->ToString()+L"\"."));
+						}
+					}
+				}
 			}
 
 /***********************************************************************

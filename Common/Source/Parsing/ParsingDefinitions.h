@@ -424,8 +424,8 @@ namespace vl
 ¸¨Öúº¯Êý
 ***********************************************************************/
 
-			extern WString										TypeToString(Ptr<ParsingDefinitionType> type);
-			extern WString										GrammarToString(Ptr<ParsingDefinitionGrammar> grammar);
+			extern WString										TypeToString(ParsingDefinitionType* type);
+			extern WString										GrammarToString(ParsingDefinitionGrammar* grammar);
 			extern void											Log(Ptr<ParsingDefinition> definition, stream::TextWriter& writer);
 		}
 	}
