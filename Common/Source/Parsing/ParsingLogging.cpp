@@ -42,7 +42,7 @@ Logger (ParsingDefinitionType)
 				{
 				}
 
-				static void LogInternal(Ptr<ParsingDefinitionType> type, TextWriter& writer)
+				static void LogInternal(ParsingDefinitionType* type, TextWriter& writer)
 				{
 					ParsingDefinitionTypeLogger visitor(writer);
 					type->Accept(&visitor);
@@ -60,19 +60,19 @@ Logger (ParsingDefinitionType)
 
 				void Visit(ParsingDefinitionSubType* node)override
 				{
-					LogInternal(node->parentType, writer);
+					LogInternal(node->parentType.Obj(), writer);
 					writer.WriteString(L".");
 					writer.WriteString(node->subTypeName);
 				}
 
 				void Visit(ParsingDefinitionArrayType* node)override
 				{
-					LogInternal(node->elementType, writer);
+					LogInternal(node->elementType.Obj(), writer);
 					writer.WriteString(L"[]");
 				}
 			};
 
-			void Log(Ptr<ParsingDefinitionType> type, TextWriter& writer)
+			void Log(ParsingDefinitionType* type, TextWriter& writer)
 			{
 				ParsingDefinitionTypeLogger::LogInternal(type, writer);
 			}
@@ -87,7 +87,7 @@ Logger (ParsingDefinitionTypeDefinition)
 				WString			prefix;
 				TextWriter&		writer;
 
-				static void LogInternal(Ptr<ParsingDefinitionTypeDefinition> definition, const WString& prefix, TextWriter& writer)
+				static void LogInternal(ParsingDefinitionTypeDefinition* definition, const WString& prefix, TextWriter& writer)
 				{
 					ParsingDefinitionTypeDefinitionLogger visitor(prefix, writer);
 					definition->Accept(&visitor);
@@ -102,7 +102,7 @@ Logger (ParsingDefinitionTypeDefinition)
 				void Visit(ParsingDefinitionClassMemberDefinition* node)override
 				{
 					writer.WriteString(prefix);
-					Log(node->type, writer);
+					Log(node->type.Obj(), writer);
 					writer.WriteString(L" ");
 					writer.WriteString(node->name);
 					writer.WriteLine(L";");
@@ -116,7 +116,7 @@ Logger (ParsingDefinitionTypeDefinition)
 					{
 						writer.WriteString(node->name);
 						writer.WriteString(L" : ");
-						Log(node->parentType, writer);
+						Log(node->parentType.Obj(), writer);
 						writer.WriteLine(L"");
 					}
 					else
@@ -129,13 +129,13 @@ Logger (ParsingDefinitionTypeDefinition)
 
 					for(int i=0;i<node->subTypes.Count();i++)
 					{
-						LogInternal(node->subTypes[i], prefix+L"    ", writer);
+						LogInternal(node->subTypes[i].Obj(), prefix+L"    ", writer);
 						writer.WriteLine(L"");
 					}
 
 					for(int i=0;i<node->members.Count();i++)
 					{
-						LogInternal(node->members[i], prefix+L"    ", writer);
+						LogInternal(node->members[i].Obj(), prefix+L"    ", writer);
 					}
 
 					writer.WriteString(prefix);
@@ -160,7 +160,7 @@ Logger (ParsingDefinitionTypeDefinition)
 
 					for(int i=0;i<node->members.Count();i++)
 					{
-						LogInternal(node->members[i], prefix+L"    ", writer);
+						LogInternal(node->members[i].Obj(), prefix+L"    ", writer);
 					}
 
 					writer.WriteString(prefix);
@@ -168,7 +168,7 @@ Logger (ParsingDefinitionTypeDefinition)
 				}
 			};
 
-			void Log(Ptr<ParsingDefinitionTypeDefinition> definition, const WString& prefix, TextWriter& writer)
+			void Log(ParsingDefinitionTypeDefinition* definition, const WString& prefix, TextWriter& writer)
 			{
 				ParsingDefinitionTypeDefinitionLogger::LogInternal(definition, prefix, writer);
 			}
@@ -197,7 +197,7 @@ Logger (ParsingDefinitionGrammar)
 				{
 				}
 
-				static void LogInternal(Ptr<ParsingDefinitionGrammar> grammar, int parentPriority, TextWriter& writer)
+				static void LogInternal(ParsingDefinitionGrammar* grammar, int parentPriority, TextWriter& writer)
 				{
 					ParsingDefinitionGrammarLogger visitor(writer, parentPriority);
 					grammar->Accept(&visitor);
@@ -220,9 +220,9 @@ Logger (ParsingDefinitionGrammar)
 					{
 						writer.WriteString(L"( ");
 					}
-					LogInternal(node->first, priority, writer);
+					LogInternal(node->first.Obj(), priority, writer);
 					writer.WriteString(L" ");
-					LogInternal(node->second, priority, writer);
+					LogInternal(node->second.Obj(), priority, writer);
 					if(parentPriority>priority)
 					{
 						writer.WriteString(L" )");
@@ -236,9 +236,9 @@ Logger (ParsingDefinitionGrammar)
 					{
 						writer.WriteString(L"( ");
 					}
-					LogInternal(node->first, priority, writer);
+					LogInternal(node->first.Obj(), priority, writer);
 					writer.WriteString(L" | ");
-					LogInternal(node->second, priority, writer);
+					LogInternal(node->second.Obj(), priority, writer);
 					if(parentPriority>priority)
 					{
 						writer.WriteString(L" )");
@@ -248,14 +248,14 @@ Logger (ParsingDefinitionGrammar)
 				void Visit(ParsingDefinitionLoopGrammar* node)override
 				{
 					writer.WriteString(L"{ ");
-					LogInternal(node->grammar, PRIORITY_NONE, writer);
+					LogInternal(node->grammar.Obj(), PRIORITY_NONE, writer);
 					writer.WriteString(L" }");
 				}
 
 				void Visit(ParsingDefinitionOptionalGrammar* node)override
 				{
 					writer.WriteString(L"[ ");
-					LogInternal(node->grammar, PRIORITY_NONE, writer);
+					LogInternal(node->grammar.Obj(), PRIORITY_NONE, writer);
 					writer.WriteString(L" ]");
 				}
 
@@ -266,9 +266,9 @@ Logger (ParsingDefinitionGrammar)
 					{
 						writer.WriteString(L"( ");
 					}
-					LogInternal(node->grammar, priority, writer);
+					LogInternal(node->grammar.Obj(), priority, writer);
 					writer.WriteString(L" as ");
-					Log(node->type, writer);
+					Log(node->type.Obj(), writer);
 					if(parentPriority>priority)
 					{
 						writer.WriteString(L" )");
@@ -282,7 +282,7 @@ Logger (ParsingDefinitionGrammar)
 					{
 						writer.WriteString(L"( ");
 					}
-					LogInternal(node->grammar, priority, writer);
+					LogInternal(node->grammar.Obj(), priority, writer);
 					writer.WriteString(L" : ");
 					writer.WriteString(node->memberName);
 					if(parentPriority>priority)
@@ -299,7 +299,7 @@ Logger (ParsingDefinitionGrammar)
 						writer.WriteString(L"( ");
 					}
 					writer.WriteString(L"!");
-					LogInternal(node->grammar, priority, writer);
+					LogInternal(node->grammar.Obj(), priority, writer);
 					if(parentPriority>priority)
 					{
 						writer.WriteString(L" )");
@@ -313,7 +313,7 @@ Logger (ParsingDefinitionGrammar)
 					{
 						writer.WriteString(L"( ");
 					}
-					LogInternal(node->grammar, priority, writer);
+					LogInternal(node->grammar.Obj(), priority, writer);
 					writer.WriteString(L" with { ");
 					writer.WriteString(node->memberName);
 					writer.WriteString(L" = ");
@@ -326,7 +326,7 @@ Logger (ParsingDefinitionGrammar)
 				}
 			};
 
-			void Log(Ptr<ParsingDefinitionGrammar> grammar, TextWriter& writer)
+			void Log(ParsingDefinitionGrammar* grammar, TextWriter& writer)
 			{
 				ParsingDefinitionGrammarLogger::LogInternal(grammar, PRIORITY_NONE, writer);
 			}
@@ -375,7 +375,7 @@ Logger (ParsingDefinitionGrammar)
 			{
 				FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, definition->types.Wrap())
 				{
-					Log(type, L"", writer);
+					Log(type.Obj(), L"", writer);
 					writer.WriteLine(L"");
 				}
 				
@@ -392,13 +392,13 @@ Logger (ParsingDefinitionGrammar)
 				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules.Wrap())
 				{
 					writer.WriteString(L"rule ");
-					Log(rule->type, writer);
+					Log(rule->type.Obj(), writer);
 					writer.WriteString(L" ");
 					writer.WriteLine(rule->name);
 					FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars.Wrap())
 					{
 						writer.WriteString(L"        = ");
-						Log(grammar, writer);
+						Log(grammar.Obj(), writer);
 						writer.WriteLine(L";");
 					}
 					writer.WriteLine(L"");
