@@ -778,6 +778,8 @@ ResolveRuleSymbols
 				GrammarPathFragment()
 					:previousFragment(0)
 					,grammar(0)
+					,epsilon(false)
+					,createdType(0)
 				{
 				}
 			};
@@ -826,21 +828,30 @@ ResolveRuleSymbols
 
 				void Join(const EnumerateGrammarPathVisitor& visitor)
 				{
-					CopyFrom(createdFragments.Wrap(), visitor.createdFragments.Wrap());
-					CopyFrom(currentFragmentEnds.Wrap(), visitor.currentFragmentEnds.Wrap());
+					CopyFrom(createdFragments.Wrap(), visitor.createdFragments.Wrap(), true);
+					CopyFrom(currentFragmentEnds.Wrap(), visitor.currentFragmentEnds.Wrap(), true);
 				}
 
 				void AddFragment(ParsingDefinitionGrammar* node, bool epsilon, ParsingSymbol* createdType)
 				{
-					for(vint i=0;i<currentFragmentEnds.Count();i++)
+					if(currentFragmentEnds.Count()==0)
 					{
 						GrammarPathFragment* fragment=new GrammarPathFragment;
-						fragment->previousFragment=currentFragmentEnds[i];
 						fragment->grammar=node;
 						fragment->epsilon=epsilon;
 						fragment->createdType=createdType;
-						currentFragmentEnds[i]=fragment;
 						createdFragments.Add(fragment);
+						currentFragmentEnds.Add(fragment);
+					}
+					else for(vint i=0;i<currentFragmentEnds.Count();i++)
+					{
+						GrammarPathFragment* fragment=new GrammarPathFragment;
+						fragment->grammar=node;
+						fragment->epsilon=epsilon;
+						fragment->createdType=createdType;
+						createdFragments.Add(fragment);
+						fragment->previousFragment=currentFragmentEnds[i];
+						currentFragmentEnds[i]=fragment;
 					}
 				}
 
@@ -886,7 +897,10 @@ ResolveRuleSymbols
 
 				void Visit(ParsingDefinitionLoopGrammar* node)override
 				{
-					node->grammar->Accept(this);
+					EnumerateGrammarPathVisitor visitor(*this);
+					node->grammar->Accept(&visitor);
+					AddFragment(node, true, 0);
+					Join(visitor);
 				}
 
 				void Visit(ParsingDefinitionOptionalGrammar* node)override
@@ -899,6 +913,7 @@ ResolveRuleSymbols
 
 				void Visit(ParsingDefinitionCreateGrammar* node)override
 				{
+					node->grammar->Accept(this);
 					AddFragment(node, true, manager->CacheGetType(node->type.Obj(), manager->GetGlobal()));
 				}
 
@@ -910,6 +925,7 @@ ResolveRuleSymbols
 
 				void Visit(ParsingDefinitionUseGrammar* node)override
 				{
+					node->grammar->Accept(this);
 					AddFragment(node, true, manager->CacheGetSymbol(node->grammar.Obj())->GetDescriptorSymbol());
 				}
 
@@ -946,6 +962,7 @@ ResolveRuleSymbols
 							}
 						}
 
+						WString text=path->ToString();
 						if(createdTypeCount>1)
 						{
 							errors.Add(new ParsingError(grammar.Obj(), L"Multiple parsing tree nodes are created if the following path is chosen: \""+path->ToString()+L"\"."));
