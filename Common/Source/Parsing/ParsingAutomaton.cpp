@@ -399,14 +399,21 @@ FindType
 
 			WString GetTypeFullName(ParsingSymbol* type)
 			{
-				WString name=type->GetName();
-				type=type->GetParentSymbol();
-				while(type && type!=type->GetManager()->GetGlobal())
+				if(type->GetType()==ParsingSymbol::ArrayType)
 				{
-					name=type->GetName()+L"."+name;
-					type=type->GetParentSymbol();
+					return GetTypeFullName(type->GetDescriptorSymbol())+L"[]";
 				}
-				return name;
+				else
+				{
+					WString name=type->GetName();
+					type=type->GetParentSymbol();
+					while(type && type!=type->GetManager()->GetGlobal())
+					{
+						name=type->GetName()+L"."+name;
+						type=type->GetParentSymbol();
+					}
+					return name;
+				}
 			}
 
 /***********************************************************************
@@ -1078,6 +1085,17 @@ ResolveRuleSymbols
 				{
 					if(ParsingSymbol* field=GetFieldFromCombined(node, node->memberName))
 					{
+						ParsingSymbol* fieldType=field->GetDescriptorSymbol();
+						ParsingSymbol* valueType=manager->CacheGetType(node->grammar.Obj());
+						ParsingSymbol* targetFieldType=fieldType;
+						if(targetFieldType->GetType()==ParsingSymbol::ArrayType)
+						{
+							targetFieldType=targetFieldType->GetDescriptorSymbol();
+						}
+						if(targetFieldType!=valueType && valueType->SearchCommonBaseClass(targetFieldType)!=targetFieldType)
+						{
+							errors.Add(new ParsingError(node, L"Cannot assign value from grammar {"+GrammarToString(node->grammar.Obj())+L"} of type \""+GetTypeFullName(valueType)+L"\" to the field \""+node->memberName+L"\" of type \""+GetTypeFullName(fieldType)+L"\"."));
+						}
 					}
 				}
 
@@ -1089,6 +1107,23 @@ ResolveRuleSymbols
 				{
 					if(ParsingSymbol* field=GetFieldFromCombined(node, node->memberName))
 					{
+						if(field->GetDescriptorSymbol()->GetType()!=ParsingSymbol::EnumType)
+						{
+							errors.Add(new ParsingError(node, L"Setter operation (the \"with\" operator) can only specify the value of a class field of an enum type. But \""+GetTypeFullName(field->GetDescriptorSymbol())+L"\" is not a enum type."));
+						}
+						else
+						{
+							ParsingSymbol* enumType=field->GetDescriptorSymbol();
+							ParsingSymbol* enumItem=enumType->GetSubSymbolByName(node->value);
+							if(!enumItem)
+							{
+								errors.Add(new ParsingError(node, L"Type \""+GetTypeFullName(enumType)+L"\" from field \""+node->memberName+L"\" does not have an enum item called \""+node->value+L"\"."));
+							}
+							else if(enumItem->GetType()!=ParsingSymbol::EnumItem)
+							{
+								errors.Add(new ParsingError(node, L"Type \""+GetTypeFullName(enumType)+L"\" from field \""+node->memberName+L"\" has a symbol called \""+node->value+L"\", but this is not an enum item."));
+							}
+						}
 					}
 				}
 			};
