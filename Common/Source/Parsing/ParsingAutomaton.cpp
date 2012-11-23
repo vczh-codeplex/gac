@@ -1085,6 +1085,9 @@ ResolveRuleSymbols
 				{
 					if(ParsingSymbol* field=GetFieldFromCombined(node, node->memberName))
 					{
+						manager->CacheSetSymbol(node, field);
+						manager->CacheSetType(node, field->GetDescriptorSymbol());
+
 						ParsingSymbol* fieldType=field->GetDescriptorSymbol();
 						ParsingSymbol* valueType=manager->CacheGetType(node->grammar.Obj());
 						ParsingSymbol* targetFieldType=fieldType;
@@ -1107,6 +1110,9 @@ ResolveRuleSymbols
 				{
 					if(ParsingSymbol* field=GetFieldFromCombined(node, node->memberName))
 					{
+						manager->CacheSetSymbol(node, field);
+						manager->CacheSetType(node, field->GetDescriptorSymbol());
+
 						if(field->GetDescriptorSymbol()->GetType()!=ParsingSymbol::EnumType)
 						{
 							errors.Add(new ParsingError(node, L"Setter operation (the \"with\" operator) can only specify the value of a class field of an enum type. But \""+GetTypeFullName(field->GetDescriptorSymbol())+L"\" is not a enum type."));
