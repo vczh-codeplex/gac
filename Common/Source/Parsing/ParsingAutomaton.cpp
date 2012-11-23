@@ -160,6 +160,50 @@ ParsingSymbol
 				return 0;
 			}
 
+			ParsingSymbol* ParsingSymbol::SearchCommonBaseClass(ParsingSymbol* classType)
+			{
+				if(type==ParsingSymbol::ClassType && classType->GetType()==ParsingSymbol::ClassType)
+				{
+					vint aCount=0;
+					vint bCount=0;
+					ParsingSymbol* a=this;
+					ParsingSymbol* b=classType;
+					while(a || b)
+					{
+						if(a)
+						{
+							aCount++;
+							a=a->GetDescriptorSymbol();
+						}
+						if(b)
+						{
+							bCount++;
+							b=b->GetDescriptorSymbol();
+						}
+					}
+
+					a=this;
+					b=classType;
+					vint min=aCount<bCount?aCount:bCount;
+					for(vint i=aCount;i>min;i--)
+					{
+						a=a->GetDescriptorSymbol();
+					}
+					for(vint i=bCount;i>min;i--)
+					{
+						b=b->GetDescriptorSymbol();
+					}
+
+					while(a!=b)
+					{
+						a=a->GetDescriptorSymbol();
+						b=b->GetDescriptorSymbol();
+					}
+					return a;
+				}
+				return 0;
+			}
+
 /***********************************************************************
 ParsingSymbolManager
 ***********************************************************************/
@@ -768,8 +812,8 @@ ResolveRuleSymbols
 
 			struct GrammarPathFragment
 			{
-				// primitive, text                      -> transition
-				// optional, create, use assign, setter -> epsilon
+				// primitive, text                            -> transition
+				// loop, optional, create, use assign, setter -> epsilon
 				GrammarPathFragment*						previousFragment;
 				ParsingDefinitionGrammar*					grammar;
 				bool										epsilon;
@@ -802,6 +846,11 @@ ResolveRuleSymbols
 					}
 					return result;
 				}
+			};
+
+			struct GrammarPathContainer
+			{
+				List<Ptr<GrammarPath>>						paths;
 			};
 
 			class EnumerateGrammarPathVisitor : public Object, public ParsingDefinitionGrammar::IVisitor
@@ -914,7 +963,7 @@ ResolveRuleSymbols
 				void Visit(ParsingDefinitionCreateGrammar* node)override
 				{
 					node->grammar->Accept(this);
-					AddFragment(node, true, manager->CacheGetType(node->type.Obj(), manager->GetGlobal()));
+					AddFragment(node, true, manager->CacheGetType(node->type.Obj(), 0));
 				}
 
 				void Visit(ParsingDefinitionAssignGrammar* node)override
@@ -936,6 +985,114 @@ ResolveRuleSymbols
 				}
 			};
 
+			class ResolveAssignerGrammarVisitor : public Object, public ParsingDefinitionGrammar::IVisitor
+			{
+			public:
+				typedef Dictionary<ParsingDefinitionGrammar*, Ptr<GrammarPathContainer>>	GrammarPathMap;
+				ParsingSymbolManager*			manager;
+				List<Ptr<ParsingError>>&		errors;
+				GrammarPathMap&					grammarPaths;
+
+				ResolveAssignerGrammarVisitor(ParsingSymbolManager* _manager, List<Ptr<ParsingError>>& _errors, GrammarPathMap& _grammarPaths)
+					:manager(_manager)
+					,errors(_errors)
+					,grammarPaths(_grammarPaths)
+				{
+				}
+
+				ParsingSymbol* GetFieldFromCombined(ParsingDefinitionGrammar* node, const WString& fieldName)
+				{
+					Ptr<GrammarPathContainer> paths=grammarPaths[node];
+					ParsingSymbol* pathType=paths->paths[0]->pathType;
+					for(vint i=1;i<paths->paths.Count();i++)
+					{
+						pathType=pathType->SearchCommonBaseClass(paths->paths[i]->pathType);
+						if(!pathType) break;
+					}
+
+					WString pathNames;
+					WString typeNames;
+					for(int i=0;i<paths->paths.Count();i++)
+					{
+						if(i>0)
+						{
+							pathNames+=L", ";
+							typeNames+=L", ";
+						}
+						pathNames+=L"{"+paths->paths[i]->ToString()+L"}";
+						typeNames+=L"\""+GetTypeFullName(paths->paths[i]->pathType)+L"\"";
+					}
+
+					if(pathType)
+					{
+						ParsingSymbol* field=pathType->SearchClassSubSymbol(fieldName);
+						if(!field)
+						{
+							errors.Add(new ParsingError(node, L"There are multiple grammar paths with different created types get through this operation for class field \""+fieldName+L"\", but the common base type \""+GetTypeFullName(pathType)+L"\" of these types doesn't contains the required class field. Types: "+typeNames+L"; Paths: "+pathNames+L"."));
+						}
+						else if(field->GetType()!=ParsingSymbol::ClassField)
+						{
+							errors.Add(new ParsingError(node, L"There are multiple grammar paths with different created types get through this operation for class field \""+fieldName+L"\", and the common base type \""+GetTypeFullName(pathType)+L"\" of these types contains a symbol called \""+fieldName+L"\", but this is not a class field. Types: "+typeNames+L"; Paths: "+pathNames+L"."));
+						}
+						else
+						{
+							return field;
+						}
+					}
+					else
+					{
+						errors.Add(new ParsingError(node, L"There are multiple grammar paths with different created types get through this operation for class field \""+fieldName+L"\", but these types don't have a common base type. Types: "+typeNames+L"; Paths: "+pathNames+L"."));
+					}
+					return 0;
+				}
+
+				void Visit(ParsingDefinitionPrimitiveGrammar* node)override
+				{
+				}
+
+				void Visit(ParsingDefinitionTextGrammar* node)override
+				{
+				}
+
+				void Visit(ParsingDefinitionSequenceGrammar* node)override
+				{
+				}
+
+				void Visit(ParsingDefinitionAlternativeGrammar* node)override
+				{
+				}
+
+				void Visit(ParsingDefinitionLoopGrammar* node)override
+				{
+				}
+
+				void Visit(ParsingDefinitionOptionalGrammar* node)override
+				{
+				}
+
+				void Visit(ParsingDefinitionCreateGrammar* node)override
+				{
+				}
+
+				void Visit(ParsingDefinitionAssignGrammar* node)override
+				{
+					if(ParsingSymbol* field=GetFieldFromCombined(node, node->memberName))
+					{
+					}
+				}
+
+				void Visit(ParsingDefinitionUseGrammar* node)override
+				{
+				}
+
+				void Visit(ParsingDefinitionSetterGrammar* node)override
+				{
+					if(ParsingSymbol* field=GetFieldFromCombined(node, node->memberName))
+					{
+					}
+				}
+			};
+
 			void ResolveRuleSymbols(Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
 			{
 				ParsingSymbol* ruleType=manager->GetGlobal()->GetSubSymbolByName(rule->name)->GetDescriptorSymbol();
@@ -953,6 +1110,7 @@ ResolveRuleSymbols
 					{
 						path->pathType=ruleType;
 						vint createdTypeCount=0;
+						vint transitionCount=0;
 						FOREACH(Ptr<GrammarPathFragment>, fragment, path->fragments.Wrap())
 						{
 							if(fragment->createdType)
@@ -960,13 +1118,47 @@ ResolveRuleSymbols
 								createdTypeCount++;
 								path->pathType=fragment->createdType;
 							}
+							if(!fragment->epsilon)
+							{
+								transitionCount++;
+							}
 						}
 
-						WString text=path->ToString();
 						if(createdTypeCount>1)
 						{
-							errors.Add(new ParsingError(grammar.Obj(), L"Multiple parsing tree nodes are created if the following path is chosen: \""+path->ToString()+L"\"."));
+							errors.Add(new ParsingError(grammar.Obj(), L"Multiple parsing tree nodes are created if the following path is chosen: \""+path->ToString()+L"\" in rule \""+rule->name+L"\"."));
 						}
+						if(transitionCount==0)
+						{
+							errors.Add(new ParsingError(grammar.Obj(), L"Rule \""+rule->name+L"\" is not allowed to infer to an empty token sequence."));
+						}
+					}
+
+					ResolveAssignerGrammarVisitor::GrammarPathMap grammarPathMap;
+					FOREACH(Ptr<GrammarPath>, path, paths.Wrap())
+					{
+						FOREACH(Ptr<GrammarPathFragment>, fragment, path->fragments.Wrap())
+						{
+							ParsingDefinitionGrammar* grammar=fragment->grammar;
+							Ptr<GrammarPathContainer> container;
+							vint index=grammarPathMap.Keys().IndexOf(grammar);
+							if(index==-1)
+							{
+								container=new GrammarPathContainer;
+								grammarPathMap.Add(grammar, container);
+							}
+							else
+							{
+								container=grammarPathMap.Values()[index];
+							}
+							container->paths.Add(path);
+						}
+					}
+
+					ResolveAssignerGrammarVisitor visitor(manager, errors, grammarPathMap);
+					FOREACH(ParsingDefinitionGrammar*, grammar, grammarPathMap.Keys())
+					{
+						grammar->Accept(&visitor);
 					}
 				}
 			}
