@@ -106,6 +106,7 @@ namespace vl
 				ParsingSymbol*					GetParentSymbol();
 				bool							IsType();
 				ParsingSymbol*					SearchClassSubSymbol(const WString& name);
+				ParsingSymbol*					SearchCommonBaseClass(ParsingSymbol* classType);
 			};
 
 			class ParsingSymbolManager : public Object
