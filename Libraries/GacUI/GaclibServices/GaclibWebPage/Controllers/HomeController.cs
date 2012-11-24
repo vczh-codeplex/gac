@@ -29,7 +29,7 @@ namespace GaclibWebPage.Controllers
             return View(model);
         }
 
-        public ActionResult Download(NavigationBarModel model)
+        public ActionResult Download(DownloadPageModel model)
         {
             model.ActiveButton = NavigationButtons.Download;
             return View(model);

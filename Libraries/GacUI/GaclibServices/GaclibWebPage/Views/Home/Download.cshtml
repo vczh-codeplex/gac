@@ -1,4 +1,4 @@
-﻿@model GaclibWebPage.Models.NavigationBarModel
+﻿@model GaclibWebPage.Models.DownloadPageModel
 
 @{
     ViewBag.Title = "GacLib - Download";
@@ -22,6 +22,15 @@
                 <p>
                 <a href="http://gac.codeplex.com/SourceControl/BrowseLatest" target="_blank">http://gac.codeplex.com/SourceControl/BrowseLatest</a>
                 </p>
+            </il>
+            <il>
+                <strong>Download Pages in Codeplex</strong>
+                @foreach(var version in Model.Versions)
+                {
+                    <p>
+                    <strong>@version.Version</strong>@(": ")<a href="@version.Url" target="_blank">@version.Url</a>
+                    </p>
+                }
             </il>
         </ul>
         <h1 id="Introduction">Introduction</h1>
