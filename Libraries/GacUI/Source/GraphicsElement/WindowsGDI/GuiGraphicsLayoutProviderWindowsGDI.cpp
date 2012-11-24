@@ -30,6 +30,43 @@ namespace vl
 		{
 
 /***********************************************************************
+Uniscribe Operations (UniscribeFragment)
+***********************************************************************/
+
+			struct UniscribeFragment
+			{
+				FontProperties									fontStyle;
+				Color											fontColor;
+				WString											text;
+				Ptr<WinFont>									fontObject;
+
+				Ptr<IGuiGraphicsElement>						element;
+				IGuiGraphicsParagraph::InlineObjectProperties	inlineObjectProperties;
+				List<Ptr<UniscribeFragment>>					cachedTextFragment;
+
+				WString GetFingerprint()
+				{
+					return fontStyle.fontFamily+L"#"
+						+itow(fontStyle.size)+L"#"
+						+(fontStyle.bold?L"B":L"N")+L"#"
+						+(fontStyle.italic?L"I":L"N")+L"#"
+						+(fontStyle.underline?L"U":L"N")+L"#"
+						+(fontStyle.strikeline?L"S":L"N")+L"#"
+						;
+				}
+
+				Ptr<UniscribeFragment> Copy()
+				{
+					Ptr<UniscribeFragment> fragment=new UniscribeFragment;
+					fragment->fontStyle=fontStyle;
+					fragment->fontColor=fontColor;
+					fragment->text=text;
+					fragment->fontObject=fontObject;
+					return fragment;
+				}
+			};
+
+/***********************************************************************
 Uniscribe Operations (UniscribeGlyphData)
 ***********************************************************************/
 
@@ -179,39 +216,6 @@ Uniscribe Operations (UniscribeGlyphData)
 			};
 
 /***********************************************************************
-Uniscribe Operations (UniscribeFragment)
-***********************************************************************/
-
-			struct UniscribeFragment
-			{
-				FontProperties					fontStyle;
-				Color							fontColor;
-				WString							text;
-				Ptr<WinFont>					fontObject;
-
-				WString GetFingerprint()
-				{
-					return fontStyle.fontFamily+L"#"
-						+itow(fontStyle.size)+L"#"
-						+(fontStyle.bold?L"B":L"N")+L"#"
-						+(fontStyle.italic?L"I":L"N")+L"#"
-						+(fontStyle.underline?L"U":L"N")+L"#"
-						+(fontStyle.strikeline?L"S":L"N")+L"#"
-						;
-				}
-
-				Ptr<UniscribeFragment> Copy()
-				{
-					Ptr<UniscribeFragment> fragment=new UniscribeFragment;
-					fragment->fontStyle=fontStyle;
-					fragment->fontColor=fontColor;
-					fragment->text=text;
-					fragment->fontObject=fontObject;
-					return fragment;
-				}
-			};
-
-/***********************************************************************
 Uniscribe Operations (UniscribeRun)
 ***********************************************************************/
 
@@ -229,16 +233,10 @@ Uniscribe Operations (UniscribeRun)
 				};
 
 				UniscribeFragment*				documentFragment;
-
 				SCRIPT_ITEM*					scriptItem;
 				int								start;
 				int								length;
 				const wchar_t*					runText;
-
-				SCRIPT_CACHE					scriptCache;
-				Array<SCRIPT_LOGATTR>			charLogattrs;
-				int								advance;
-				UniscribeGlyphData				wholeGlyph;
 				List<RunFragmentBounds>			fragmentBounds;
 
 				UniscribeRun()
@@ -246,12 +244,39 @@ Uniscribe Operations (UniscribeRun)
 					,scriptItem(0)
 					,start(0)
 					,length(0)
-					,scriptCache(0)
-					,advance(0)
 				{
 				}
 
 				~UniscribeRun()
+				{
+				}
+
+				virtual bool					BuildUniscribeData(WinDC* dc)=0;
+				virtual int						SumWidth(int charStart, int charLength)=0;
+				virtual int						SumHeight()=0;
+				virtual void					SearchForLineBreak(int tempStart, int maxWidth, bool firstRun, int& charLength, int& charAdvances)=0;
+				virtual void					Render(WinDC* dc, int fragmentBoundsIndex, int offsetX, int offsetY)=0;
+			};
+
+/***********************************************************************
+Uniscribe Operations (UniscribeTextRun)
+***********************************************************************/
+
+			class UniscribeTextRun : public UniscribeRun
+			{
+			public:
+				SCRIPT_CACHE					scriptCache;
+				Array<SCRIPT_LOGATTR>			charLogattrs;
+				int								advance;
+				UniscribeGlyphData				wholeGlyph;
+
+				UniscribeTextRun()
+					:scriptCache(0)
+					,advance(0)
+				{
+				}
+
+				~UniscribeTextRun()
 				{
 					ClearUniscribeData();
 				}
@@ -268,7 +293,16 @@ Uniscribe Operations (UniscribeRun)
 					wholeGlyph.ClearUniscribeData(0, 0);
 				}
 
-				bool BuildUniscribeData(WinDC* dc)
+				void SearchGlyphCluster(int charStart, int charLength, int& cluster, int& nextCluster)
+				{
+					cluster=wholeGlyph.charCluster[charStart];
+					nextCluster
+						=charStart+charLength==length
+						?wholeGlyph.glyphs.Count()
+						:wholeGlyph.charCluster[charStart+charLength];
+				}
+
+				bool BuildUniscribeData(WinDC* dc)override
 				{
 					ClearUniscribeData();
 					{
@@ -300,16 +334,7 @@ Uniscribe Operations (UniscribeRun)
 					return false;
 				}
 
-				void SearchGlyphCluster(int charStart, int charLength, int& cluster, int& nextCluster)
-				{
-					cluster=wholeGlyph.charCluster[charStart];
-					nextCluster
-						=charStart+charLength==length
-						?wholeGlyph.glyphs.Count()
-						:wholeGlyph.charCluster[charStart+charLength];
-				}
-
-				int SumWidth(int charStart, int charLength)
+				int SumWidth(int charStart, int charLength)override
 				{
 					int cluster=0;
 					int nextCluster=0;
@@ -322,7 +347,12 @@ Uniscribe Operations (UniscribeRun)
 					return width;
 				}
 
-				void SearchForLineBreak(int tempStart, int maxWidth, bool firstRun, int& charLength, int& charAdvances)
+				int SumHeight()override
+				{
+					return documentFragment->fontStyle.size;
+				}
+
+				void SearchForLineBreak(int tempStart, int maxWidth, bool firstRun, int& charLength, int& charAdvances)override
 				{
 					int width=0;
 					charLength=0;
@@ -369,7 +399,7 @@ Uniscribe Operations (UniscribeRun)
 					}
 				}
 
-				void Render(WinDC* dc, int fragmentBoundsIndex, int offsetX, int offsetY)
+				void Render(WinDC* dc, int fragmentBoundsIndex, int offsetX, int offsetY)override
 				{
 					Color fontColor=documentFragment->fontColor;
 					dc->SetFont(documentFragment->fontObject);
@@ -406,6 +436,60 @@ Uniscribe Operations (UniscribeRun)
 			};
 
 /***********************************************************************
+Uniscribe Operations (UniscribeElementRun)
+***********************************************************************/
+
+			class UniscribeElementRun : public UniscribeRun
+			{
+			public:
+				Ptr<IGuiGraphicsElement>						element;
+				IGuiGraphicsParagraph::InlineObjectProperties	properties;
+
+				UniscribeElementRun()
+				{
+				}
+
+				~UniscribeElementRun()
+				{
+				}
+
+				bool BuildUniscribeData(WinDC* dc)override
+				{
+					return true;
+				}
+
+				int SumWidth(int charStart, int charLength)override
+				{
+					return properties.size.x;
+				}
+
+				int SumHeight()override
+				{
+					return properties.size.y;
+				}
+
+				void SearchForLineBreak(int tempStart, int maxWidth, bool firstRun, int& charLength, int& charAdvances)override
+				{
+					charLength=length-tempStart;
+					charAdvances=properties.size.x;
+				}
+
+				void Render(WinDC* dc, int fragmentBoundsIndex, int offsetX, int offsetY)override
+				{
+					Rect bounds=fragmentBounds[fragmentBoundsIndex].bounds;
+					bounds.x1+=offsetX;
+					bounds.x2+=offsetX;
+					bounds.y1+=offsetY;
+					bounds.y2+=offsetY;
+					IGuiGraphicsRenderer* renderer=element->GetRenderer();
+					if(renderer)
+					{
+						renderer->Render(bounds);
+					}
+				}
+			};
+
+/***********************************************************************
 Uniscribe Operations (UniscribeLine)
 ***********************************************************************/
 
@@ -433,10 +517,11 @@ Uniscribe Operations (UniscribeLine)
 				{
 					lineText=L"";
 					CLearUniscribeData();
-
+					int current=0;
 					FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments.Wrap())
 					{
 						lineText+=fragment->text;
+						current+=fragment->text.Length();
 					}
 
 					if(lineText!=L"")
@@ -499,14 +584,45 @@ Uniscribe Operations (UniscribeLine)
 										}
 									}
 									int shortLength=itemRemainLength<fragmentRemainLength?itemRemainLength:fragmentRemainLength;
-
-									Ptr<UniscribeRun> run=new UniscribeRun;
-									run->documentFragment=fragment;
-									run->scriptItem=scriptItem;
-									run->start=currentStart;
-									run->length=shortLength;
-									run->runText=lineText.Buffer()+currentStart;
-									scriptRuns.Add(run);
+									bool skip=false;
+									{
+										int elementCurrent=0;
+										FOREACH(Ptr<UniscribeFragment>, elementFragment, documentFragments.Wrap())
+										{
+											int elementLength=elementFragment->text.Length();
+											if(elementFragment->element)
+											{
+												if(elementCurrent<=currentStart && currentStart+shortLength<=elementCurrent+elementLength)
+												{
+													if(elementCurrent==currentStart)
+													{
+														Ptr<UniscribeElementRun> run=new UniscribeElementRun;
+														run->documentFragment=fragment;
+														run->scriptItem=scriptItem;
+														run->start=currentStart;
+														run->length=elementLength;
+														run->runText=lineText.Buffer()+currentStart;
+														run->element=elementFragment->element;
+														run->properties=elementFragment->inlineObjectProperties;
+														scriptRuns.Add(run);
+													}
+													skip=true;
+													break;
+												}
+											}
+											elementCurrent+=elementLength;
+										}
+									}
+									if(!skip)
+									{
+										Ptr<UniscribeTextRun> run=new UniscribeTextRun;
+										run->documentFragment=fragment;
+										run->scriptItem=scriptItem;
+										run->start=currentStart;
+										run->length=shortLength;
+										run->runText=lineText.Buffer()+currentStart;
+										scriptRuns.Add(run);
+									}
 									currentStart+=shortLength;
 								}
 							}
@@ -614,24 +730,44 @@ Uniscribe Operations (UniscribeParagraph)
 							Ptr<UniscribeLine> line;
 							FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments.Wrap())
 							{
-								RegexMatch::List textLines;
-								regexLine.Split(fragment->text, true, textLines);
-
-								for(int i=0;i<textLines.Count();i++)
+								if(fragment->element)
 								{
-									WString text=textLines[i]->Result().Value();
-									if(i>0)
-									{
-										line=0;
-									}
 									if(!line)
 									{
 										line=new UniscribeLine;
 										lines.Add(line);
 									}
+									line->documentFragments.Add(fragment);
+								}
+								else
+								{
+									RegexMatch::List textLines;
+									regexLine.Split(fragment->text, true, textLines);
 
-									Ptr<UniscribeFragment> runFragment=fragment->Copy();
-									line->documentFragments.Add(runFragment);
+									for(int i=0;i<textLines.Count();i++)
+									{
+										WString text=textLines[i]->Result().Value();
+										if(i>0)
+										{
+											line=0;
+										}
+										if(!line)
+										{
+											line=new UniscribeLine;
+											lines.Add(line);
+										}
+
+										if(textLines.Count()==1)
+										{
+											line->documentFragments.Add(fragment);
+										}
+										else
+										{
+											Ptr<UniscribeFragment> runFragment=fragment->Copy();
+											runFragment->text=text;
+											line->documentFragments.Add(runFragment);
+										}
+									}
 								}
 							}
 						}
@@ -714,7 +850,7 @@ Uniscribe Operations (UniscribeParagraph)
 										{
 											break;
 										}
-										int size=line->scriptRuns[line->runVisualToLogical[i]]->documentFragment->fontStyle.size;
+										int size=line->scriptRuns[line->runVisualToLogical[i]]->SumHeight();
 										if(maxHeight<size)
 										{
 											maxHeight=size;
@@ -733,8 +869,8 @@ Uniscribe Operations (UniscribeParagraph)
 										fragmentBounds.start=start;
 										fragmentBounds.length=length;
 										fragmentBounds.bounds=Rect(
-											Point(cx, cy+(maxHeight-run->documentFragment->fontStyle.size)), 
-											Size(run->SumWidth(start, length), run->documentFragment->fontStyle.size)
+											Point(cx, cy+maxHeight-run->SumHeight()),
+											Size(run->SumWidth(start, length), run->SumHeight())
 											);
 										run->fragmentBounds.Add(fragmentBounds);
 
@@ -823,10 +959,17 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 				}
 
-				void CutFragment(int fs, int ss, int fe, int se, int& f1, int& f2)
+				bool CutFragment(int fs, int ss, int fe, int se, int& f1, int& f2)
 				{
 					f1=-1;
 					f2=-1;
+					for(int i=fs;i<=fe;i++)
+					{
+						if(documentFragments[i]->element)
+						{
+							return false;
+						}
+					}
 					if(fs==fe)
 					{
 						Ptr<UniscribeFragment> fragment=documentFragments[fs];
@@ -915,53 +1058,129 @@ Uniscribe Operations (UniscribeParagraph)
 							documentFragments.Insert(fe, rightFragment);
 						}
 					}
+					return true;
 				}
 
-				void SetFont(int start, int length, const WString& value)
+				bool SetFont(int start, int length, const WString& value)
 				{
 					int fs, ss, fe, se, f1, f2;
 					SearchFragment(start, length, fs, ss, fe, se);
-					CutFragment(fs, ss, fe, se, f1, f2);
-					for(int i=f1;i<=f2;i++)
+					if(CutFragment(fs, ss, fe, se, f1, f2))
 					{
-						documentFragments[i]->fontStyle.fontFamily=value;
+						for(int i=f1;i<=f2;i++)
+						{
+							documentFragments[i]->fontStyle.fontFamily=value;
+						}
+						built=false;
+						return true;
+					}
+					else
+					{
+						return false;
 					}
 				}
 
-				void SetSize(int start, int length, int value)
+				bool SetSize(int start, int length, int value)
 				{
 					int fs, ss, fe, se, f1, f2;
 					SearchFragment(start, length, fs, ss, fe, se);
-					CutFragment(fs, ss, fe, se, f1, f2);
-					for(int i=f1;i<=f2;i++)
+					if(CutFragment(fs, ss, fe, se, f1, f2))
 					{
-						documentFragments[i]->fontStyle.size=value;
+						for(int i=f1;i<=f2;i++)
+						{
+							documentFragments[i]->fontStyle.size=value;
+						}
+						built=false;
+						return true;
+					}
+					else
+					{
+						return false;
 					}
 				}
 
-				void SetStyle(int start, int length, bool bold, bool italic, bool underline, bool strikeline)
+				bool SetStyle(int start, int length, bool bold, bool italic, bool underline, bool strikeline)
 				{
 					int fs, ss, fe, se, f1, f2;
 					SearchFragment(start, length, fs, ss, fe, se);
-					CutFragment(fs, ss, fe, se, f1, f2);
-					for(int i=f1;i<=f2;i++)
+					if(CutFragment(fs, ss, fe, se, f1, f2))
 					{
-						documentFragments[i]->fontStyle.bold=bold;
-						documentFragments[i]->fontStyle.italic=italic;
-						documentFragments[i]->fontStyle.underline=underline;
-						documentFragments[i]->fontStyle.strikeline=strikeline;
+						for(int i=f1;i<=f2;i++)
+						{
+							documentFragments[i]->fontStyle.bold=bold;
+							documentFragments[i]->fontStyle.italic=italic;
+							documentFragments[i]->fontStyle.underline=underline;
+							documentFragments[i]->fontStyle.strikeline=strikeline;
+						}
+						built=false;
+						return true;
+					}
+					else
+					{
+						return false;
 					}
 				}
 
-				void SetColor(int start, int length, Color value)
+				bool SetColor(int start, int length, Color value)
 				{
 					int fs, ss, fe, se, f1, f2;
 					SearchFragment(start, length, fs, ss, fe, se);
-					CutFragment(fs, ss, fe, se, f1, f2);
-					for(int i=f1;i<=f2;i++)
+					if(CutFragment(fs, ss, fe, se, f1, f2))
 					{
-						documentFragments[i]->fontColor=value;
+						for(int i=f1;i<=f2;i++)
+						{
+							documentFragments[i]->fontColor=value;
+						}
+						built=false;
+						return true;
 					}
+					else
+					{
+						return false;
+					}
+				}
+
+				bool SetInlineObject(int start, int length, const IGuiGraphicsParagraph::InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)
+				{
+					int fs, ss, fe, se, f1, f2;
+					SearchFragment(start, length, fs, ss, fe, se);
+					if(CutFragment(fs, ss, fe, se, f1, f2))
+					{
+						Ptr<UniscribeFragment> elementFragment=new UniscribeFragment;
+						for(int i=f1;i<=f2;i++)
+						{
+							elementFragment->text+=documentFragments[f1]->text;
+							elementFragment->cachedTextFragment.Add(documentFragments[f1]);
+							documentFragments.RemoveAt(f1);
+						}
+						elementFragment->inlineObjectProperties=properties;
+						elementFragment->element=value;
+						documentFragments.Insert(f1, elementFragment);
+						built=false;
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+
+				Ptr<IGuiGraphicsElement> ResetInlineObject(int start, int length)
+				{
+					int fs, ss, fe, se;
+					SearchFragment(start, length, fs, ss, fe, se);
+					Ptr<UniscribeFragment> fragment=documentFragments[fs];
+					if(fs==fe && ss==0 && se==fragment->text.Length() && fragment->element)
+					{
+						documentFragments.RemoveAt(fs);
+						for(int i=0;i<fragment->cachedTextFragment.Count();i++)
+						{
+							documentFragments.Insert(fs+i, fragment->cachedTextFragment[i]);
+						}
+						built=false;
+						return fragment->element;
+					}
+					return 0;
 				}
 			};
 
@@ -1032,8 +1251,7 @@ WindowsGDIParagraph
 					if(length==0) return true;
 					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
 					{
-						paragraph->SetFont(start, length, value);
-						return true;
+						return paragraph->SetFont(start, length, value);
 					}
 					else
 					{
@@ -1046,8 +1264,7 @@ WindowsGDIParagraph
 					if(length==0) return true;
 					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
 					{
-						paragraph->SetSize(start, length, value);
-						return true;
+						return paragraph->SetSize(start, length, value);
 					}
 					else
 					{
@@ -1060,8 +1277,7 @@ WindowsGDIParagraph
 					if(length==0) return true;
 					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
 					{
-						paragraph->SetStyle(start, length, (value&Bold)!=0, (value&Italic)!=0, (value&Underline)!=0, (value&Strikeline)!=0);
-						return true;
+						return paragraph->SetStyle(start, length, (value&Bold)!=0, (value&Italic)!=0, (value&Underline)!=0, (value&Strikeline)!=0);
 					}
 					else
 					{
@@ -1074,8 +1290,7 @@ WindowsGDIParagraph
 					if(length==0) return true;
 					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
 					{
-						paragraph->SetColor(start, length, value);
-						return true;
+						return paragraph->SetColor(start, length, value);
 					}
 					else
 					{
@@ -1085,11 +1300,37 @@ WindowsGDIParagraph
 
 				bool SetInlineObject(int start, int length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)override
 				{
+					if(length==0) return true;
+					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
+					{
+						if(paragraph->SetInlineObject(start, length, properties, value))
+						{
+							IGuiGraphicsRenderer* renderer=value->GetRenderer();
+							if(renderer)
+							{
+								renderer->SetRenderTarget(renderTarget);
+							}
+							return true;
+						}
+					}
 					return false;
 				}
 
 				bool ResetInlineObject(int start, int length)override
 				{
+					if(length==0) return true;
+					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
+					{
+						if(Ptr<IGuiGraphicsElement> element=paragraph->ResetInlineObject(start, length))
+						{
+							IGuiGraphicsRenderer* renderer=element->GetRenderer();
+							if(renderer)
+							{
+								renderer->SetRenderTarget(0);
+							}
+							return true;
+						}
+					}
 					return false;
 				}
 
