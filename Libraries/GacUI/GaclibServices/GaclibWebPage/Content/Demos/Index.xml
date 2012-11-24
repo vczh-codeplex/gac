@@ -142,5 +142,11 @@
       <cpp src="Main.cpp" />
       <description>This demo shows how to use Direct2D api to draw a clock in a window.</description>
     </demo>
+    <demo name="TextLayout.RichText">
+      <date>2012/11/24</date>
+      <image src="DXGUI_60.jpg"/>
+      <cpp src="Main.cpp"/>
+      <description>This demo shows how to put a rich text document with embedded images in a window.</description>
+    </demo>
   </category>
 </demos>
