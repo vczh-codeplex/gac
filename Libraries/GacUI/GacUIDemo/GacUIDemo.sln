@@ -50,9 +50,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rendering.RawAPI.GDI", "Ren
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rendering.RawAPI.Direct2D", "Rendering.RawAPI.Direct2D\Rendering.RawAPI.Direct2D.vcxproj", "{FBAA9433-4B1B-44FF-8EC9-F7C037859ABC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rendering.TextLayout.RichText", "Rendering.TextLayout.RichText\Rendering.TextLayout.RichText.vcxproj", "{6AB710A6-1530-4D9B-B954-E772B69E7373}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 21
+		SccNumberOfProjects = 22
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
@@ -134,6 +136,10 @@ Global
 		SccProjectTopLevelParentUniqueName20 = GacUIDemo.sln
 		SccProjectName20 = Rendering.RawAPI.Direct2D
 		SccLocalPath20 = Rendering.RawAPI.Direct2D
+		SccProjectUniqueName21 = Rendering.TextLayout.RichText\\Rendering.TextLayout.RichText.vcxproj
+		SccProjectTopLevelParentUniqueName21 = GacUIDemo.sln
+		SccProjectName21 = Rendering.TextLayout.RichText
+		SccLocalPath21 = Rendering.TextLayout.RichText
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -220,6 +226,10 @@ Global
 		{FBAA9433-4B1B-44FF-8EC9-F7C037859ABC}.Debug|Win32.Build.0 = Debug|Win32
 		{FBAA9433-4B1B-44FF-8EC9-F7C037859ABC}.Release|Win32.ActiveCfg = Release|Win32
 		{FBAA9433-4B1B-44FF-8EC9-F7C037859ABC}.Release|Win32.Build.0 = Release|Win32
+		{6AB710A6-1530-4D9B-B954-E772B69E7373}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6AB710A6-1530-4D9B-B954-E772B69E7373}.Debug|Win32.Build.0 = Debug|Win32
+		{6AB710A6-1530-4D9B-B954-E772B69E7373}.Release|Win32.ActiveCfg = Release|Win32
+		{6AB710A6-1530-4D9B-B954-E772B69E7373}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -243,5 +253,6 @@ Global
 		{ED487B28-E445-464D-A09A-97BC9E57FC8D} = {B05A7B62-D27C-48B3-9AA6-AC15ABC38BD8}
 		{1AAAFFB1-0E0C-4D06-B18E-AC3816F97217} = {57FFC37A-0073-4D67-92D4-98FB5C4A309A}
 		{FBAA9433-4B1B-44FF-8EC9-F7C037859ABC} = {57FFC37A-0073-4D67-92D4-98FB5C4A309A}
+		{6AB710A6-1530-4D9B-B954-E772B69E7373} = {57FFC37A-0073-4D67-92D4-98FB5C4A309A}
 	EndGlobalSection
 EndGlobal
