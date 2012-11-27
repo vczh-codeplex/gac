@@ -210,6 +210,9 @@
     <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton.cpp">
       <Filter>Common\Parsing</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\ParsingAnalyzer.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
@@ -453,6 +456,9 @@
       <Filter>Common\Parsing</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Parsing\ParsingAutomaton.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Parsing\ParsingAnalyzer.h">
       <Filter>Common\Parsing</Filter>
     </ClInclude>
   </ItemGroup>

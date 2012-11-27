@@ -6,6 +6,7 @@
 #include "..\..\Source\Collections\Operation.h"
 
 #include "..\..\Source\Parsing\ParsingDefinitions.h"
+#include "..\..\Source\Parsing\ParsingAnalyzer.h"
 #include "..\..\Source\Parsing\ParsingAutomaton.h"
 
 using namespace vl;
@@ -13,7 +14,7 @@ using namespace vl::stream;
 using namespace vl::collections;
 using namespace vl::parsing;
 using namespace vl::parsing::definitions;
-using namespace vl::parsing::automaton;
+using namespace vl::parsing::analyzing;
 
 extern WString GetPath();
 

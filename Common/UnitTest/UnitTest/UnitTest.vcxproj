@@ -163,6 +163,7 @@
     <ClCompile Include="..\..\Source\Entity\TreeXml.cpp" />
     <ClCompile Include="..\..\Source\Exception.cpp" />
     <ClCompile Include="..\..\Source\GlobalStorage.cpp" />
+    <ClCompile Include="..\..\Source\Parsing\ParsingAnalyzer.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingDefinitions.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingLogging.cpp" />
@@ -258,6 +259,7 @@
     <ClInclude Include="..\..\Source\Function.h" />
     <ClInclude Include="..\..\Source\GlobalStorage.h" />
     <ClInclude Include="..\..\Source\Lazy.h" />
+    <ClInclude Include="..\..\Source\Parsing\ParsingAnalyzer.h" />
     <ClInclude Include="..\..\Source\Parsing\ParsingAutomaton.h" />
     <ClInclude Include="..\..\Source\Parsing\ParsingDefinitions.h" />
     <ClInclude Include="..\..\Source\Parsing\ParsingTree.h" />
