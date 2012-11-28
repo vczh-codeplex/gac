@@ -426,6 +426,8 @@ namespace vl
 
 			extern WString										TypeToString(ParsingDefinitionType* type);
 			extern WString										GrammarToString(ParsingDefinitionGrammar* grammar);
+			extern WString										GrammarStateToString(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
+			extern ParsingDefinitionGrammar*					FindAppropriateGrammarState(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
 			extern void											Log(Ptr<ParsingDefinition> definition, stream::TextWriter& writer);
 		}
 	}

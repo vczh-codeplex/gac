@@ -188,19 +188,36 @@ Logger (ParsingDefinitionGrammar)
 			class ParsingDefinitionGrammarLogger : public Object, public ParsingDefinitionGrammar::IVisitor
 			{
 			public:
-				TextWriter&		writer;
-				int				parentPriority;
+				TextWriter&					writer;
+				int							parentPriority;
+				ParsingDefinitionGrammar*	stateNode;
+				bool						beforeNode;
 
-				ParsingDefinitionGrammarLogger(TextWriter& _writer, int _parentPriority)
+				ParsingDefinitionGrammarLogger(TextWriter& _writer, int _parentPriority, ParsingDefinitionGrammar* _stateNode, bool _beforeNode)
 					:writer(_writer)
 					,parentPriority(_parentPriority)
+					,stateNode(_stateNode)
+					,beforeNode(_beforeNode)
 				{
 				}
 
-				static void LogInternal(ParsingDefinitionGrammar* grammar, int parentPriority, TextWriter& writer)
+				static void LogInternal(ParsingDefinitionGrammar* grammar, int parentPriority, ParsingDefinitionGrammar* stateNode, bool beforeNode, TextWriter& writer)
 				{
-					ParsingDefinitionGrammarLogger visitor(writer, parentPriority);
+					if(grammar==stateNode && beforeNode)
+					{
+						writer.WriteString(L"¡¤ ");
+					}
+					ParsingDefinitionGrammarLogger visitor(writer, parentPriority, stateNode, beforeNode);
 					grammar->Accept(&visitor);
+					if(grammar==stateNode && !beforeNode)
+					{
+						writer.WriteString(L" ¡¤");
+					}
+				}
+
+				void LogInternal(ParsingDefinitionGrammar* grammar, int parentPriority, TextWriter& writer)
+				{
+					LogInternal(grammar, parentPriority, stateNode, beforeNode, writer);
 				}
 
 				void Visit(ParsingDefinitionPrimitiveGrammar* node)override
@@ -328,7 +345,12 @@ Logger (ParsingDefinitionGrammar)
 
 			void Log(ParsingDefinitionGrammar* grammar, TextWriter& writer)
 			{
-				ParsingDefinitionGrammarLogger::LogInternal(grammar, PRIORITY_NONE, writer);
+				ParsingDefinitionGrammarLogger::LogInternal(grammar, PRIORITY_NONE, 0, true, writer);
+			}
+
+			void Log(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode, TextWriter& writer)
+			{
+				ParsingDefinitionGrammarLogger::LogInternal(grammar, PRIORITY_NONE, stateNode, beforeNode, writer);
 			}
 
 #undef PRIORITY_NONE
@@ -338,6 +360,103 @@ Logger (ParsingDefinitionGrammar)
 #undef PRIORITY_SEQUENCE
 #undef PRIORITY_USE
 #undef PRIORITY_ASSIGN
+
+/***********************************************************************
+FindAppropriateGrammarState
+***********************************************************************/
+
+			class FindAppropriateGrammarStateVisitor : public Object, public ParsingDefinitionGrammar::IVisitor
+			{
+			public:
+				ParsingDefinitionGrammar*	stateNode;
+				bool						beforeNode;
+				ParsingDefinitionGrammar*	beforeReference;
+				ParsingDefinitionGrammar*	afterReference;
+				ParsingDefinitionGrammar*	result;
+
+				FindAppropriateGrammarStateVisitor(ParsingDefinitionGrammar* _stateNode, bool _beforeNode, ParsingDefinitionGrammar* _beforeReference, ParsingDefinitionGrammar* _afterReference)
+					:stateNode(_stateNode)
+					,beforeNode(_beforeNode)
+					,beforeReference(_beforeReference)
+					,afterReference(_afterReference)
+					,result(0)
+				{
+				}
+
+				static ParsingDefinitionGrammar* Find(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode, ParsingDefinitionGrammar* beforeReference, ParsingDefinitionGrammar* afterReference)
+				{
+					if(grammar==stateNode)
+					{
+						return
+							beforeNode
+							?(beforeReference?beforeReference:stateNode)
+							:(afterReference?afterReference:stateNode)
+							;
+					}
+					else
+					{
+						FindAppropriateGrammarStateVisitor visitor(stateNode, beforeNode, beforeReference, afterReference);
+						grammar->Accept(&visitor);
+						return visitor.result;
+					}
+				}
+
+				void Visit(ParsingDefinitionPrimitiveGrammar* node)override
+				{
+				}
+
+				void Visit(ParsingDefinitionTextGrammar* node)override
+				{
+				}
+
+				void Visit(ParsingDefinitionSequenceGrammar* node)override
+				{
+					result=Find(node->first.Obj(), stateNode, beforeNode, (beforeReference?beforeReference:node), 0);
+					if(!result)
+					{
+						result=Find(node->second.Obj(), stateNode, beforeNode, 0, (afterReference?afterReference:node));
+					}
+				}
+
+				void Visit(ParsingDefinitionAlternativeGrammar* node)override
+				{
+					result=Find(node->first.Obj(), stateNode, beforeNode, (beforeReference?beforeReference:node), (afterReference?afterReference:node));
+					if(!result)
+					{
+						result=Find(node->second.Obj(), stateNode, beforeNode, (beforeReference?beforeReference:node), (afterReference?afterReference:node));
+					}
+				}
+
+				void Visit(ParsingDefinitionLoopGrammar* node)override
+				{
+					result=Find(node->grammar.Obj(), stateNode, beforeNode, (beforeReference?beforeReference:node), (afterReference?afterReference:node));
+				}
+
+				void Visit(ParsingDefinitionOptionalGrammar* node)override
+				{
+					result=Find(node->grammar.Obj(), stateNode, beforeNode, (beforeReference?beforeReference:node), (afterReference?afterReference:node));
+				}
+
+				void Visit(ParsingDefinitionCreateGrammar* node)override
+				{
+					result=Find(node->grammar.Obj(), stateNode, beforeNode, (beforeReference?beforeReference:node), (afterReference?afterReference:node));
+				}
+
+				void Visit(ParsingDefinitionAssignGrammar* node)override
+				{
+					result=Find(node->grammar.Obj(), stateNode, beforeNode, (beforeReference?beforeReference:node), (afterReference?afterReference:node));
+				}
+
+				void Visit(ParsingDefinitionUseGrammar* node)override
+				{
+					result=Find(node->grammar.Obj(), stateNode, beforeNode, (beforeReference?beforeReference:node), (afterReference?afterReference:node));
+				}
+
+				void Visit(ParsingDefinitionSetterGrammar* node)override
+				{
+					result=Find(node->grammar.Obj(), stateNode, beforeNode, beforeReference, afterReference);
+				}
+			};
 
 /***********************************************************************
 Logger (ParsingDefinitionGrammar)
@@ -359,16 +478,26 @@ Logger (ParsingDefinitionGrammar)
 
 			WString GrammarToString(ParsingDefinitionGrammar* grammar)
 			{
+				return GrammarStateToString(grammar, 0, true);
+			}
+
+			WString GrammarStateToString(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode)
+			{
 				MemoryStream stream(64);
 				{
 					StreamWriter writer(stream);
-					Log(grammar, writer);
+					Log(grammar, stateNode, beforeNode, writer);
 				}
 				stream.SeekFromBegin(0);
 				{
 					StreamReader reader(stream);
 					return reader.ReadToEnd();
 				}
+			}
+
+			ParsingDefinitionGrammar* FindAppropriateGrammarState(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode)
+			{
+				return FindAppropriateGrammarStateVisitor::Find(grammar, stateNode, beforeNode, 0, 0);
 			}
 
 			void Log(Ptr<ParsingDefinition> definition, TextWriter& writer)
