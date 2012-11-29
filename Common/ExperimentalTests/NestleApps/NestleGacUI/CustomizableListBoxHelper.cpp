@@ -173,7 +173,7 @@ GuiListControlTemplateBase
 			{
 			}
 
-			collections::IList<Ptr<Object>>& GuiListControlTemplateBase::GetItems()
+			list::ObjectItemProvider& GuiListControlTemplateBase::GetItems()
 			{
 				return *itemProvider;
 			}

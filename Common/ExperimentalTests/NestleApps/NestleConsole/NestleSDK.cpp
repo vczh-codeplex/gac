@@ -328,7 +328,7 @@ NestlePost
 			,author(post.author)
 			,id(post.id)
 		{
-			CopyFrom(comments.Wrap(), post.comments.Wrap());
+			CopyFrom(comments, post.comments);
 		}
 
 		NestlePost::~NestlePost()
@@ -343,7 +343,7 @@ NestlePost
 			createDateTime=post.createDateTime;
 			author=post.author;
 			id=post.id;
-			CopyFrom(comments.Wrap(), post.comments.Wrap());
+			CopyFrom(comments, post.comments);
 			return *this;
 		}
 
@@ -383,7 +383,7 @@ NestleTopicsPage
 			:totalPages(page.totalPages)
 			,currentPage(page.currentPage)
 		{
-			CopyFrom(posts.Wrap(), page.posts.Wrap());
+			CopyFrom(posts, page.posts);
 		}
 
 		NestleTopicsPage::~NestleTopicsPage()
@@ -394,7 +394,7 @@ NestleTopicsPage
 		{
 			totalPages=post.totalPages;
 			currentPage=post.currentPage;
-			CopyFrom(posts.Wrap(), post.posts.Wrap());
+			CopyFrom(posts, post.posts);
 			return *this;
 		}
 

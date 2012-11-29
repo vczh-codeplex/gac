@@ -43,5 +43,5 @@ void SetupTabPageWindow(GuiControlHost* controlHost, GuiControl* container)
 		SetupRibbonWindow(controlHost, page->GetContainer());
 	}
 	container->GetContainerComposition()->AddChild(tab->GetBoundsComposition());
-	tab->MovePage(tab->GetPages()[3], 2);
+	tab->MovePage(tab->GetPages().Get(3), 2);
 }

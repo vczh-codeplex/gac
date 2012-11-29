@@ -515,13 +515,13 @@ Utilities
 		for(int i=0;i<request.extraHeaders.Count();i++)
 		{
 			WString key=request.extraHeaders.Keys()[i];
-			WString value=request.extraHeaders.Values()[i];
+			WString value=request.extraHeaders.Values().Get(i);
 			WinHttpAddRequestHeaders(requestInternet, (key+L":"+value).Buffer(), -1, WINHTTP_ADDREQ_FLAG_REPLACE|WINHTTP_ADDREQ_FLAG_ADD);
 		}
 
 		if(request.body.Count()>0)
 		{
-			httpResult=WinHttpSendRequest(requestInternet, WINHTTP_NO_ADDITIONAL_HEADERS, 0, (LPVOID)&request.body[0], request.body.Count(), request.body.Count(), NULL);
+			httpResult=WinHttpSendRequest(requestInternet, WINHTTP_NO_ADDITIONAL_HEADERS, 0, (LPVOID)&request.body.Get(0), request.body.Count(), request.body.Count(), NULL);
 		}
 		else
 		{
@@ -597,7 +597,7 @@ Utilities
 
 		// concatincate response body
 		int totalSize=0;
-		FOREACH(BufferPair, p, availableBuffers.Wrap())
+		FOREACH(BufferPair, p, availableBuffers)
 		{
 			totalSize+=p.length;
 		}
@@ -607,7 +607,7 @@ Utilities
 			char* utf8=new char[totalSize];
 			{
 				char* temp=utf8;
-				FOREACH(BufferPair, p, availableBuffers.Wrap())
+				FOREACH(BufferPair, p, availableBuffers)
 				{
 					memcpy(temp, p.buffer, p.length);
 					temp+=p.length;
@@ -616,7 +616,7 @@ Utilities
 			memcpy(&response.body[0], utf8, totalSize);
 			delete[] utf8;
 		}
-		FOREACH(BufferPair, p, availableBuffers.Wrap())
+		FOREACH(BufferPair, p, availableBuffers)
 		{
 			delete[] p.buffer;
 		}
@@ -810,13 +810,13 @@ description::TypeManager
 
 				IValueSerializer* GetValueSerializer(vint index)
 				{
-					return valueSerializers.Values()[index].Obj();
+					return valueSerializers.Values().Get(index).Obj();
 				}
 
 				IValueSerializer* GetValueSerializer(const WString& name)
 				{
 					vint index=valueSerializers.Keys().IndexOf(name);
-					return index==-1?0:valueSerializers.Values()[index].Obj();
+					return index==-1?0:valueSerializers.Values().Get(index).Obj();
 				}
 
 				bool SetValueSerializer(const WString& name, Ptr<IValueSerializer> valueSerializer)
@@ -847,13 +847,13 @@ description::TypeManager
 
 				ITypeDescriptor* GetTypeDescriptor(vint index)
 				{
-					return typeDescriptors.Values()[index].Obj();
+					return typeDescriptors.Values().Get(index).Obj();
 				}
 
 				ITypeDescriptor* GetTypeDescriptor(const WString& name)
 				{
 					vint index=typeDescriptors.Keys().IndexOf(name);
-					return index==-1?0:typeDescriptors.Values()[index].Obj();
+					return index==-1?0:typeDescriptors.Values().Get(index).Obj();
 				}
 
 				bool SetTypeDescriptor(const WString& name, Ptr<ITypeDescriptor> typeDescriptor)
@@ -1211,7 +1211,7 @@ description::MethodInfoImpl
 				IMethodGroupInfo*											ownerMethodGroup;
 				List<Ptr<ParameterInfoImpl>>									parameters;
 				Ptr<MethodReturnImpl>										returnInfo;
-				Func<Value(const Value&, collections::IArray<Value>&)>		invoker;
+				Func<Value(const Value&, collections::Array<Value>&)>		invoker;
 			public:
 				MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup)
 					:ownerMethodGroup(_ownerMethodGroup)
@@ -1255,7 +1255,7 @@ description::MethodInfoImpl
 					return returnInfo.Obj();
 				}
 
-				Value Invoke(const Value& thisObject, collections::IArray<Value>& arguments)override
+				Value Invoke(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					return invoker(thisObject, arguments);
 				}
@@ -1277,7 +1277,7 @@ description::MethodInfoImpl
 					returnInfo=new MethodReturnImpl(_type, _nullable);
 				}
 
-				void BuilderSetInvoker(const Func<Value(const Value&, collections::IArray<Value>&)>& _invoker)
+				void BuilderSetInvoker(const Func<Value(const Value&, collections::Array<Value>&)>& _invoker)
 				{
 					invoker=_invoker;
 				}
@@ -1505,7 +1505,7 @@ description::GeneralTypeDescriptor::PropertyGroup
 				}
 				else
 				{
-					buildingMethodGroup=propertyGroup.methodGroups.Values()[index];
+					buildingMethodGroup=propertyGroup.methodGroups.Values().Get(index);
 					methodGroup=buildingMethodGroup.Cast<MethodGroupInfoImpl>();
 				}
 
@@ -1526,7 +1526,7 @@ description::GeneralTypeDescriptor::PropertyGroup
 				return *this;
 			}
 
-			GeneralTypeDescriptor::PropertyGroup::MethodBuilder& GeneralTypeDescriptor::PropertyGroup::MethodBuilder::Invoker(const Func<Value(const Value&, collections::IArray<Value>&)>& _invoker)
+			GeneralTypeDescriptor::PropertyGroup::MethodBuilder& GeneralTypeDescriptor::PropertyGroup::MethodBuilder::Invoker(const Func<Value(const Value&, collections::Array<Value>&)>& _invoker)
 			{
 				dynamic_cast<MethodInfoImpl*>(buildingMethod.Obj())->BuilderSetInvoker(_invoker);
 				return *this;
@@ -1669,7 +1669,7 @@ description::GeneralTypeDescriptor
 				propertyGroup.Prepare();
 				if(0<=index && index<propertyGroup.properties.Count())
 				{
-					return propertyGroup.properties.Values()[index].Obj();
+					return propertyGroup.properties.Values().Get(index).Obj();
 				}
 				else
 				{
@@ -1703,7 +1703,7 @@ description::GeneralTypeDescriptor
 				vint index=propertyGroup.properties.Keys().IndexOf(name);
 				if(index!=-1)
 				{
-					return propertyGroup.properties.Values()[index].Obj();
+					return propertyGroup.properties.Values().Get(index).Obj();
 				}
 				if(inheritable)
 				{
@@ -1730,7 +1730,7 @@ description::GeneralTypeDescriptor
 				propertyGroup.Prepare();
 				if(0<=index && index<propertyGroup.events.Count())
 				{
-					return propertyGroup.events.Values()[index].Obj();
+					return propertyGroup.events.Values().Get(index).Obj();
 				}
 				else
 				{
@@ -1764,7 +1764,7 @@ description::GeneralTypeDescriptor
 				vint index=propertyGroup.events.Keys().IndexOf(name);
 				if(index!=-1)
 				{
-					return propertyGroup.events.Values()[index].Obj();
+					return propertyGroup.events.Values().Get(index).Obj();
 				}
 				if(inheritable)
 				{
@@ -1791,7 +1791,7 @@ description::GeneralTypeDescriptor
 				propertyGroup.Prepare();
 				if(0<=index && index<propertyGroup.methodGroups.Count())
 				{
-					return propertyGroup.methodGroups.Values()[index].Obj();
+					return propertyGroup.methodGroups.Values().Get(index).Obj();
 				}
 				else
 				{
@@ -1825,7 +1825,7 @@ description::GeneralTypeDescriptor
 				vint index=propertyGroup.methodGroups.Keys().IndexOf(name);
 				if(index!=-1)
 				{
-					return propertyGroup.methodGroups.Values()[index].Obj();
+					return propertyGroup.methodGroups.Values().Get(index).Obj();
 				}
 				if(inheritable)
 				{
@@ -1921,7 +1921,7 @@ RegexMatch
 				}
 				else
 				{
-					groups.Add(_rich->CaptureNames()[capture.capture], RegexString(_string, capture.start, capture.length));
+					groups.Add(_rich->CaptureNames().Get(capture.capture), RegexString(_string, capture.start, capture.length));
 				}
 			}
 		}
@@ -1944,12 +1944,12 @@ RegexMatch
 
 		const RegexMatch::CaptureList& RegexMatch::Captures()const
 		{
-			return captures.Wrap();
+			return captures;
 		}
 
 		const RegexMatch::CaptureGroup& RegexMatch::Groups()const
 		{
-			return groups.Wrap();
+			return groups;
 		}
 
 /***********************************************************************
@@ -2266,7 +2266,7 @@ RegexTokens
 						}
 						else
 						{
-							id=stateTokens[result.finalState];
+							id=stateTokens.Get(result.finalState);
 						}
 						if(token.token==-2)
 						{
@@ -2451,7 +2451,7 @@ RegexLexerWalker
 		vint RegexLexerWalker::GetRelatedToken(vint state)const
 		{
 			vint finalState=pure->GetRelatedFinalState(state);
-			return finalState==-1?-1:stateTokens[finalState];
+			return finalState==-1?-1:stateTokens.Get(finalState);
 		}
 
 		void RegexLexerWalker::Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const
@@ -2482,7 +2482,7 @@ RegexLexerWalker
 			}
 			if(pure->IsFinalState(state))
 			{
-				token=stateTokens[state];
+				token=stateTokens.Get(state);
 				finalState=true;
 				return;
 			}
@@ -2660,8 +2660,8 @@ RegexLexer
 			Automaton::Ref bigEnfa=new Automaton;
 			for(vint i=0;i<dfas.Count();i++)
 			{
-				CopyFrom(bigEnfa->states.Wrap(), dfas[i]->states.Wrap());
-				CopyFrom(bigEnfa->transitions.Wrap(), dfas[i]->transitions.Wrap());
+				CopyFrom(bigEnfa->states, dfas[i]->states);
+				CopyFrom(bigEnfa->transitions, dfas[i]->transitions);
 			}
 			bigEnfa->startState=bigEnfa->NewState();
 			for(vint i=0;i<dfas.Count();i++)
@@ -2675,16 +2675,16 @@ RegexLexer
 			Automaton::Ref bigNfa=EpsilonNfaToNfa(bigEnfa, PureEpsilonChecker, nfaStateMap);
 			for(vint i=0;i<nfaStateMap.Keys().Count();i++)
 			{
-				void* userData=nfaStateMap.Values()[i]->userData;
+				void* userData=nfaStateMap.Values().Get(i)->userData;
 				nfaStateMap.Keys()[i]->userData=userData;
 			}
 			Automaton::Ref bigDfa=NfaToDfa(bigNfa, dfaStateMap);
 			for(vint i=0;i<dfaStateMap.Keys().Count();i++)
 			{
-				void* userData=dfaStateMap.GetByIndex(i)[0]->userData;
+				void* userData=dfaStateMap.GetByIndex(i).Get(0)->userData;
 				for(vint j=1;j<dfaStateMap.GetByIndex(i).Count();j++)
 				{
-					void* newData=dfaStateMap.GetByIndex(i)[j]->userData;
+					void* newData=dfaStateMap.GetByIndex(i).Get(j)->userData;
 					if(userData>newData)
 					{
 						userData=newData;
@@ -2928,7 +2928,7 @@ Automaton
 			stateMap.Add(source->startState, target->NewState());
 			nfaStateMap.Add(stateMap[source->startState], source->startState);
 			target->startState=target->states[0].Obj();
-			CopyFrom(target->captureNames.Wrap(), source->captureNames.Wrap());
+			CopyFrom(target->captureNames, source->captureNames);
 
 			for(vint i=0;i<target->states.Count();i++)
 			{
@@ -2972,7 +2972,7 @@ Automaton
 			Group<Transition*, Transition*> nfaTransitions;
 			List<Transition*> transitionClasses;//保证转换先后顺序不被nfaTransitions.Keys破坏
 
-			CopyFrom(target->captureNames.Wrap(), source->captureNames.Wrap());
+			CopyFrom(target->captureNames, source->captureNames);
 			State* startState=target->NewState();
 			target->startState=startState;
 			dfaStateMap.Add(startState, source->startState);
@@ -2989,10 +2989,10 @@ Automaton
 				transitionClasses.Clear();
 
 				//对该DFA状态的所有等价NFA状态进行遍历
-				const IReadonlyList<State*>& nfaStates=dfaStateMap[currentState];
+				const List<State*>& nfaStates=dfaStateMap[currentState];
 				for(vint j=0;j<nfaStates.Count();j++)
 				{
-					State* nfaState=nfaStates[j];
+					State* nfaState=nfaStates.Get(j);
 					//对每一个NFA状态的所有转换进行遍历
 					for(vint k=0;k<nfaState->transitions.Count();k++)
 					{
@@ -3022,12 +3022,12 @@ Automaton
 				//遍历所有种类的NFA转换
 				for(vint j=0;j<transitionClasses.Count();j++)
 				{
-					const IReadonlyList<Transition*>& transitionSet=nfaTransitions[transitionClasses[j]];
+					const List<Transition*>& transitionSet=nfaTransitions[transitionClasses[j]];
 					//对所有转换的NFA目标状态集合进行排序
 					transitionTargets.Clear();
 					for(vint l=0;l<transitionSet.Count();l++)
 					{
-						State* nfaState=transitionSet[l]->target;
+						State* nfaState=transitionSet.Get(l)->target;
 						if(!transitionTargets.Contains(nfaState))
 						{
 							transitionTargets.Add(nfaState);
@@ -3038,7 +3038,7 @@ Automaton
 					for(vint k=0;k<dfaStateMap.Count();k++)
 					{
 						//将DFA的等价NFA状态集合进行排序
-						dfaStateMap.CopyValuesToCollection(k, relativeStates);
+						CopyFrom(relativeStates, dfaStateMap.GetByIndex(k));
 						//比较两者是否相等
 						if(relativeStates.Count()==transitionTargets.Count())
 						{
@@ -3619,7 +3619,7 @@ CharSetNormalizationAlgorithm
 			void Apply(CharSetExpression* expression, NormalizedCharSet* target)
 			{
 				CharRange::List source;
-				CopyFrom(source.Wrap(), expression->ranges.Wrap());
+				CopyFrom(source, expression->ranges);
 				expression->ranges.Clear();
 				Loop(expression, source, target);
 				expression->reverse=false;
@@ -3643,7 +3643,7 @@ MergeAlgorithm
 			Expression::Ref Apply(CharSetExpression* expression, MergeParameter* target)
 			{
 				Ptr<CharSetExpression> result=new CharSetExpression;
-				CopyFrom(result->ranges.Wrap(), expression->ranges.Wrap());
+				CopyFrom(result->ranges, expression->ranges);
 				result->reverse=expression->reverse;
 				return result;
 			}
@@ -3986,21 +3986,21 @@ Expression
 			NormalizedCharSet normalized;
 			BuildNormalizedCharSetAlgorithm().Invoke(this, &normalized);
 			SetNormalizedCharSetAlgorithm().Invoke(this, &normalized);
-			CopyFrom(subsets.Wrap(), normalized.ranges.Wrap());
+			CopyFrom(subsets, normalized.ranges);
 		}
 
 		void Expression::CollectCharSet(CharRange::List& subsets)
 		{
 			NormalizedCharSet normalized;
-			CopyFrom(normalized.ranges.Wrap(), subsets.Wrap());
+			CopyFrom(normalized.ranges, subsets);
 			BuildNormalizedCharSetAlgorithm().Invoke(this, &normalized);
-			CopyFrom(subsets.Wrap(), normalized.ranges.Wrap());
+			CopyFrom(subsets, normalized.ranges);
 		}
 
 		void Expression::ApplyCharSet(CharRange::List& subsets)
 		{
 			NormalizedCharSet normalized;
-			CopyFrom(normalized.ranges.Wrap(), subsets.Wrap());
+			CopyFrom(normalized.ranges, subsets);
 			SetNormalizedCharSetAlgorithm().Invoke(this, &normalized);
 		}
 
@@ -5320,9 +5320,9 @@ RichInterpretor
 			return false;
 		}
 
-		const IReadonlyList<WString>& RichInterpretor::CaptureNames()
+		const List<WString>& RichInterpretor::CaptureNames()
 		{
-			return dfa->captureNames.Wrap();
+			return dfa->captureNames;
 		}
 	}
 }
@@ -5411,7 +5411,7 @@ RegexNode
 			CharSetExpression* source=dynamic_cast<CharSetExpression*>(expression.Obj());
 			CHECK_ERROR(source, L"RegexNode::operator!()#!操作符只能使用在字符集合表达式上。");
 			Ptr<CharSetExpression> target=new CharSetExpression;
-			CopyFrom(target->ranges.Wrap(), source->ranges.Wrap());
+			CopyFrom(target->ranges, source->ranges);
 			target->reverse=!source->reverse;
 			return RegexNode(target);
 		}
@@ -5423,7 +5423,7 @@ RegexNode
 			CHECK_ERROR(left && right && !left->reverse && !right->reverse, L"RegexNode::operator%(const RegexNode&)#非凡转字符集合表达式才能使用%操作符连接。");
 			Ptr<CharSetExpression> target=new CharSetExpression;
 			target->reverse=false;
-			CopyFrom(target->ranges.Wrap(), left->ranges.Wrap());
+			CopyFrom(target->ranges, left->ranges);
 			for(vint i=0;i<right->ranges.Count();i++)
 			{
 				if(!target->AddRangeWithConflict(right->ranges[i]))
@@ -6013,9 +6013,9 @@ BroadcastStream
 		{
 		}
 
-		BroadcastStream::_ListInterface& BroadcastStream::Targets()
+		BroadcastStream::StreamList& BroadcastStream::Targets()
 		{
-			return streams.Wrap();
+			return streams;
 		}
 
 		bool BroadcastStream::CanRead()const

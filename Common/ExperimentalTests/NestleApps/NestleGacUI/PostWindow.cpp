@@ -184,8 +184,8 @@ Markdown Parser
 					Ptr<RegexMatch> match=regexReferenceTarget.MatchHead(line);
 					if(match && match->Success())
 					{
-						WString name=match->Groups()[L"name"][0].Value();
-						WString link=match->Groups()[L"link"][0].Value();
+						WString name=match->Groups()[L"name"].Get(0).Value();
+						WString link=match->Groups()[L"link"].Get(0).Value();
 						referenceTargest.Set(name, link);
 					}
 				}
@@ -373,7 +373,7 @@ Markdown Parser
 								Ptr<RegexMatch> match=regexDirectLink.MatchHead(reading);
 								if(match && match->Success())
 								{
-									WString link=match->Groups()[L"link"][0].Value();
+									WString link=match->Groups()[L"link"].Get(0).Value();
 									reading+=match->Result().Length();
 
 									bool underline=currentFont.underline;
@@ -393,8 +393,8 @@ Markdown Parser
 								Ptr<RegexMatch> match=regexIndirectLink.MatchHead(reading);
 								if(match && match->Success())
 								{
-									WString name=match->Groups()[L"name"][0].Value();
-									WString link=match->Groups()[L"link"][0].Value();
+									WString name=match->Groups()[L"name"].Get(0).Value();
+									WString link=match->Groups()[L"link"].Get(0).Value();
 									if(name==L"")
 									{
 										name=link;
@@ -428,8 +428,8 @@ Markdown Parser
 								Ptr<RegexMatch> match=regexReferenceLink.MatchHead(reading);
 								if(match && match->Success())
 								{
-									WString name=match->Groups()[L"name"][0].Value();
-									WString ref=match->Groups()[L"ref"][0].Value();
+									WString name=match->Groups()[L"name"].Get(0).Value();
+									WString ref=match->Groups()[L"ref"].Get(0).Value();
 									WString link;
 									if(referenceTargest.Keys().Contains(ref))
 									{
@@ -1003,7 +1003,7 @@ PostWindow
 
 		void PostWindow::ClearPostItems()
 		{
-			FOREACH(PostItemControl*, postItemControl, postItemControls.Wrap())
+			FOREACH(PostItemControl*, postItemControl, postItemControls)
 			{
 				GuiStackItemComposition* stackItem=dynamic_cast<GuiStackItemComposition*>(postItemControl->GetBoundsComposition()->GetParent());
 				postItemStack->RemoveChild(stackItem);
@@ -1075,7 +1075,7 @@ PostWindow
 							postItem->id=newPost->id;
 							AddPostItem(postItem);
 						}
-						FOREACH(Ptr<NestleComment>, comment, post->comments.Wrap())
+						FOREACH(Ptr<NestleComment>, comment, post->comments)
 						{
 							Ptr<PostItem> postItem=new PostItem;
 							postItem->author=comment->author;

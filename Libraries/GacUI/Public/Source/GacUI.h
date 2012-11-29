@@ -1587,7 +1587,7 @@ Helpers
 					int index=aliveResources.Keys().IndexOf(key);\
 					if(index!=-1)\
 					{\
-						Package package=aliveResources.Values()[index];\
+						Package package=aliveResources.Values().Get(index);\
 						package.counter++;\
 						aliveResources.Set(key, package);\
 						return package.resource;\
@@ -1618,7 +1618,7 @@ Helpers
 					int index=aliveResources.Keys().IndexOf(key);\
 					if(index!=-1)\
 					{\
-						Package package=aliveResources.Values()[index];\
+						Package package=aliveResources.Values().Get(index);\
 						package.counter--;\
 						if(package.counter==0)\
 						{\
@@ -2066,7 +2066,6 @@ Colorized Plain Text (element)
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiColorizedTextElement, L"ColorizedText");
 
 				typedef collections::Array<text::ColorEntry>			ColorArray;
-				typedef collections::IReadonlyList<text::ColorEntry>	IColorArray;
 			public:
 				class ICallback : public virtual IDescriptable, public Description<ICallback>
 				{
@@ -2097,7 +2096,7 @@ Colorized Plain Text (element)
 				ICallback*							GetCallback();
 				void								SetCallback(ICallback* value);
 				
-				const IColorArray&					GetColors();
+				const ColorArray&					GetColors();
 				void								SetColors(const ColorArray& value);
 				const FontProperties&				GetFont();
 				void								SetFont(const FontProperties& value);
@@ -2699,7 +2698,6 @@ Basic Construction
 
 			class GuiGraphicsComposition : public Object, public Description<GuiGraphicsComposition>
 			{
-				typedef collections::IReadonlyList<GuiGraphicsComposition*> ICompositionList;
 				typedef collections::List<GuiGraphicsComposition*> CompositionList;
 
 				friend class controls::GuiControl;
@@ -2742,7 +2740,7 @@ Basic Construction
 				~GuiGraphicsComposition();
 
 				GuiGraphicsComposition*						GetParent();
-				const ICompositionList&						Children();
+				const CompositionList&						Children();
 				bool										AddChild(GuiGraphicsComposition* child);
 				bool										InsertChild(int index, GuiGraphicsComposition* child);
 				bool										RemoveChild(GuiGraphicsComposition* child);
@@ -3099,7 +3097,6 @@ Stack Compositions
 				friend class GuiStackItemComposition;
 
 				typedef collections::List<GuiStackItemComposition*>				ItemCompositionList;
-				typedef collections::IReadonlyList<GuiStackItemComposition*>	IItemCompositionList;
 			public:
 				enum Direction
 				{
@@ -3123,7 +3120,7 @@ Stack Compositions
 				GuiStackComposition();
 				~GuiStackComposition();
 
-				const IItemCompositionList&			GetStackItems();
+				const ItemCompositionList&			GetStackItems();
 				bool								InsertStackItem(int index, GuiStackItemComposition* item);
 				
 				Direction							GetDirection();
@@ -4059,7 +4056,7 @@ List interface common implementation
 ***********************************************************************/
 
 				template<typename T, typename K=typename KeyType<T>::Type>
-				class ItemsBase : public Object, public collections::IList<T, K>
+				class ItemsBase : public Object
 				{
 				protected:
 					collections::List<T, K>					items;
@@ -4090,7 +4087,7 @@ List interface common implementation
 
 					collections::IEnumerator<T>* CreateEnumerator()const
 					{
-						return items.Wrap().CreateEnumerator();
+						return items.CreateEnumerator();
 					}
 
 					bool Contains(const K& item)const
@@ -4635,7 +4632,7 @@ List Control
 					Ptr<compositions::GuiNotifyEvent::IHandler>		mouseLeaveHandler;
 				};
 				
-				friend class collections::ReadonlyListEnumerator<Ptr<VisibleStyleHelper>>;
+				friend class collections::ArrayBase<Ptr<VisibleStyleHelper>>;
 				collections::Dictionary<IItemStyleController*, Ptr<VisibleStyleHelper>>		visibleStyles;
 
 				void											OnItemMouseEvent(compositions::GuiItemMouseEvent& itemEvent, IItemStyleController* style, compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
@@ -4714,7 +4711,7 @@ Selectable List Control
 				bool											GetMultiSelect();
 				void											SetMultiSelect(bool value);
 				
-				const collections::IReadonlyList<int>&			GetSelectedItems();
+				const collections::SortedList<int>&				GetSelectedItems();
 				bool											GetSelected(int itemIndex);
 				void											SetSelected(int itemIndex, bool value);
 				bool											SelectItemsByClick(int itemIndex, bool ctrl, bool shift);
@@ -5449,7 +5446,6 @@ ListView ItemStyleProvider
 				protected:
 
 					typedef collections::List<GuiListControl::IItemStyleController*>				ItemStyleList;
-					typedef collections::IReadonlyList<GuiListControl::IItemStyleController*>		IItemStyleList;
 
 					IListViewItemView*							listViewItemView;
 					Ptr<IListViewItemContentProvider>			listViewItemContentProvider;
@@ -5464,7 +5460,7 @@ ListView ItemStyleProvider
 					void										DestroyItemStyle(GuiListControl::IItemStyleController* style)override;
 					void										Install(GuiListControl::IItemStyleController* style, int itemIndex)override;
 
-					const IItemStyleList&						GetCreatedItemStyles();
+					const ItemStyleList&						GetCreatedItemStyles();
 					bool										IsItemStyleAttachedToListView(GuiListControl::IItemStyleController* itemStyle);
 
 					template<typename T>
@@ -6086,11 +6082,9 @@ GuiVirtualTreeListControl Predefined NodeProvider
 				class MemoryNodeProvider
 					: public Object
 					, public virtual INodeProvider
-					, private collections::IList<Ptr<MemoryNodeProvider>>
 					, public Description<MemoryNodeProvider>
 				{
 					typedef collections::List<Ptr<MemoryNodeProvider>> ChildList;
-					typedef collections::IList<Ptr<MemoryNodeProvider>> IChildList;
 					typedef collections::IEnumerator<Ptr<MemoryNodeProvider>> ChildListEnumerator;
 				protected:
 					MemoryNodeProvider*				parent;
@@ -6131,7 +6125,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					Ptr<DescriptableObject>			GetData();
 					void							SetData(const Ptr<DescriptableObject>& value);
 					void							NotifyDataModified();
-					IChildList&						Children();
+					ChildList&						Children();
 
 					bool							GetExpanding()override;
 					void							SetExpanding(bool value)override;
@@ -6588,7 +6582,7 @@ Tab Control
 				bool											CreatePage(GuiTabPage* page, int index=-1);
 				bool											RemovePage(GuiTabPage* value);
 				bool											MovePage(GuiTabPage* page, int newIndex);
-				const collections::IReadonlyList<GuiTabPage*>&	GetPages();
+				const collections::List<GuiTabPage*>&			GetPages();
 
 				GuiTabPage*										GetSelectedPage();
 				bool											SetSelectedPage(GuiTabPage* value);
@@ -6647,7 +6641,7 @@ namespace vl
 				void											OnMouseDown(Point location);
 			public:
 				void											Run(GuiWindow* _mainWindow);
-				const collections::IReadonlyList<GuiWindow*>&	GetWindows();
+				const collections::List<GuiWindow*>&			GetWindows();
 				GuiWindow*										GetWindow(Point location);
 
 				bool											IsInMainThread();
@@ -6876,9 +6870,9 @@ Colorizer
 				~GuiTextBoxRegexColorizer();
 
 				elements::text::ColorEntry									GetDefaultColor();
-				collections::IReadonlyList<WString>&						GetTokenRegexes();
-				collections::IReadonlyList<elements::text::ColorEntry>&		GetTokenColors();
-				collections::IReadonlyList<elements::text::ColorEntry>&		GetExtraTokenColors();
+				collections::List<WString>&									GetTokenRegexes();
+				collections::List<elements::text::ColorEntry>&				GetTokenColors();
+				collections::List<elements::text::ColorEntry>&				GetExtraTokenColors();
 				int															GetExtraTokenIndexStart();
 				
 				bool														SetDefaultColor(elements::text::ColorEntry value);
@@ -6906,7 +6900,7 @@ Undo Redo
 					virtual void							Undo()=0;
 					virtual void							Redo()=0;
 				};
-				friend class collections::ReadonlyListEnumerator<Ptr<IEditStep>>;
+				friend class collections::ArrayBase<Ptr<IEditStep>>;
 
 			protected:
 				collections::List<Ptr<IEditStep>>			steps;
@@ -7256,7 +7250,7 @@ namespace vl
 Toolstrip Item Collection
 ***********************************************************************/
 
-			class GuiToolstripCollection : public Object, public collections::IList<GuiControl*>
+			class GuiToolstripCollection : public Object
 			{
 			public:
 				class IContentCallback : public Interface
@@ -7278,19 +7272,19 @@ Toolstrip Item Collection
 				GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer);
 				~GuiToolstripCollection();
 
-				collections::IEnumerator<GuiControl*>*		CreateEnumerator()const override;
-				bool										Contains(GuiControl* const& item)const override;
-				vint										Count()const override;
-				GuiControl* const&							Get(vint index)const override;
-				GuiControl* const&							operator[](vint index)const override;
-				vint										IndexOf(GuiControl* const& item)const override;
-				vint										Add(GuiControl* const& item)override;
-				bool										Remove(GuiControl* const& item)override;
-				bool										RemoveAt(vint index)override;
-				bool										RemoveRange(vint index, vint count)override;
-				bool										Clear()override;
-				vint										Insert(vint index, GuiControl* const& item)override;
-				bool										Set(vint index, GuiControl* const& item)override;
+				collections::IEnumerator<GuiControl*>*		CreateEnumerator()const;
+				bool										Contains(GuiControl* const& item)const;
+				vint										Count()const;
+				GuiControl* const&							Get(vint index)const;
+				GuiControl* const&							operator[](vint index)const;
+				vint										IndexOf(GuiControl* const& item)const;
+				vint										Add(GuiControl* const& item);
+				bool										Remove(GuiControl* const& item);
+				bool										RemoveAt(vint index);
+				bool										RemoveRange(vint index, vint count);
+				bool										Clear();
+				vint										Insert(vint index, GuiControl* const& item);
+				bool										Set(vint index, GuiControl* const& item);
 			};
 
 /***********************************************************************
