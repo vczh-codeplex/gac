@@ -87,6 +87,7 @@ namespace vl
 				definitions::ParsingDefinitionGrammar*				stateNode;
 				StatePosition										statePosition;
 				WString												stateName;
+				WString												stateExpression;
 
 				State();
 				~State();
@@ -99,6 +100,7 @@ namespace vl
 				State*												rootRuleEndState;
 				State*												startState;
 				collections::List<State*>							endStates;
+				int													stateNameCount;
 
 				RuleInfo();
 				~RuleInfo();
@@ -131,7 +133,8 @@ namespace vl
 ¸¨Öúº¯Êý
 ***********************************************************************/
 
-			extern Ptr<Automaton>						CreateEpsilonPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager);
+			extern Ptr<Automaton>									CreateEpsilonPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager);
+			extern void												Log(Ptr<Automaton> automaton, stream::TextWriter& writer);
 		}
 	}
 }
