@@ -210,7 +210,7 @@ Helpers
 					int index=aliveResources.Keys().IndexOf(key);\
 					if(index!=-1)\
 					{\
-						Package package=aliveResources.Values()[index];\
+						Package package=aliveResources.Values().Get(index);\
 						package.counter++;\
 						aliveResources.Set(key, package);\
 						return package.resource;\
@@ -241,7 +241,7 @@ Helpers
 					int index=aliveResources.Keys().IndexOf(key);\
 					if(index!=-1)\
 					{\
-						Package package=aliveResources.Values()[index];\
+						Package package=aliveResources.Values().Get(index);\
 						package.counter--;\
 						if(package.counter==0)\
 						{\

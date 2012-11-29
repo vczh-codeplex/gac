@@ -177,10 +177,8 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\Dictionary.h" />
-    <ClInclude Include="..\..\..\..\Common\Source\Collections\DictionaryWrappers.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\Interfaces.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\List.h" />
-    <ClInclude Include="..\..\..\..\Common\Source\Collections\ListWrappers.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\Operation.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationAggregate.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationConcat.h" />
@@ -219,7 +217,6 @@
     <ClInclude Include="..\..\..\..\Common\Source\Stream\MemoryStream.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Stream\MemoryWrapperStream.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Stream\RecorderStream.h" />
-    <ClInclude Include="..\..\..\..\Common\Source\Stream\StreamSerialization.h" />
     <ClInclude Include="..\..\..\..\Common\Source\String.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Threading.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Tuple.h" />

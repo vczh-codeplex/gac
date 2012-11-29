@@ -688,14 +688,14 @@ GuiColorizedTextElement
 				}
 			}
 
-			const GuiColorizedTextElement::IColorArray& GuiColorizedTextElement::GetColors()
+			const GuiColorizedTextElement::ColorArray& GuiColorizedTextElement::GetColors()
 			{
-				return colors.Wrap();
+				return colors;
 			}
 
 			void GuiColorizedTextElement::SetColors(const ColorArray& value)
 			{
-				CopyFrom(colors.Wrap(), value.Wrap());
+				CopyFrom(colors, value);
 				if(callback) callback->ColorChanged();
 				if(renderer)
 				{
@@ -997,9 +997,9 @@ GuiDocumentElement::GuiDocumentElementRenderer
 								stream::MemoryStream stream;
 								{
 									stream::StreamWriter writer(stream);
-									FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines.Wrap())
+									FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines)
 									{
-										FOREACH(Ptr<text::DocumentRun>, run, line->runs.Wrap())
+										FOREACH(Ptr<text::DocumentRun>, run, line->runs)
 										{
 											WString text=ExtractTextVisitor::ExtractText(run.Obj());
 											writer.WriteString(text);
@@ -1018,9 +1018,9 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							{
 								cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
 								int start=0;
-								FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines.Wrap())
+								FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines)
 								{
-									FOREACH(Ptr<text::DocumentRun>, run, line->runs.Wrap())
+									FOREACH(Ptr<text::DocumentRun>, run, line->runs)
 									{
 										int length=SetPropertiesVisitor::SetProperty(start, cache->graphicsParagraph.Obj(), run.Obj());
 										start+=length;

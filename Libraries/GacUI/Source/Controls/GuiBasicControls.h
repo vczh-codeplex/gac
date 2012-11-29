@@ -784,7 +784,7 @@ List interface common implementation
 ***********************************************************************/
 
 				template<typename T, typename K=typename KeyType<T>::Type>
-				class ItemsBase : public Object, public collections::IList<T, K>
+				class ItemsBase : public Object
 				{
 				protected:
 					collections::List<T, K>					items;
@@ -815,7 +815,7 @@ List interface common implementation
 
 					collections::IEnumerator<T>* CreateEnumerator()const
 					{
-						return items.Wrap().CreateEnumerator();
+						return items.CreateEnumerator();
 					}
 
 					bool Contains(const K& item)const

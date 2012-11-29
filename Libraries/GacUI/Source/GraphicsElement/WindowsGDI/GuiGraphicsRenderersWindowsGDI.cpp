@@ -788,7 +788,7 @@ GuiColorizedTextElementRenderer
 				newColors.Resize(element->GetColors().Count());
 				for(int i=0;i<newColors.Count();i++)
 				{
-					text::ColorEntry entry=element->GetColors()[i];
+					text::ColorEntry entry=element->GetColors().Get(i);
 					ColorEntryResource newEntry;
 
 					newEntry.normal.text=entry.normal.text;
@@ -804,7 +804,7 @@ GuiColorizedTextElementRenderer
 				}
 
 				DestroyColors();
-				CopyFrom(colors.Wrap(), newColors.Wrap());
+				CopyFrom(colors, newColors);
 			}
 
 			void GuiColorizedTextElementRenderer::FontChanged()

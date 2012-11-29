@@ -377,16 +377,10 @@
     <ClInclude Include="..\..\..\..\Common\Source\Collections\Dictionary.h">
       <Filter>Common\Collections</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Common\Source\Collections\DictionaryWrappers.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Collections\Interfaces.h">
       <Filter>Common\Collections</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Collections\List.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Common\Source\Collections\ListWrappers.h">
       <Filter>Common\Collections</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Collections\Operation.h">
@@ -453,9 +447,6 @@
       <Filter>Common\Stream</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Stream\RecorderStream.h">
-      <Filter>Common\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Common\Source\Stream\StreamSerialization.h">
       <Filter>Common\Stream</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\GacUI.h">

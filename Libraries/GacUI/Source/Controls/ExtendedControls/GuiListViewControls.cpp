@@ -230,9 +230,9 @@ ListViewItemStyleProvider
 					itemStyle->Install(listViewItemView, itemIndex);
 				}
 
-				const ListViewItemStyleProvider::IItemStyleList& ListViewItemStyleProvider::GetCreatedItemStyles()
+				const ListViewItemStyleProvider::ItemStyleList& ListViewItemStyleProvider::GetCreatedItemStyles()
 				{
-					return itemStyles.Wrap();
+					return itemStyles;
 				}
 
 				bool ListViewItemStyleProvider::IsItemStyleAttachedToListView(GuiListControl::IItemStyleController* itemStyle)
@@ -996,10 +996,10 @@ ListViewColumnItemArranger
 				{
 					for(int i=columnHeaders->GetStackItems().Count()-1;i>=0;i--)
 					{
-						GuiStackItemComposition* item=columnHeaders->GetStackItems()[i];
+						GuiStackItemComposition* item=columnHeaders->GetStackItems().Get(i);
 						columnHeaders->RemoveChild(item);
 
-						GuiControl* button=item->Children()[0]->GetAssociatedControl();
+						GuiControl* button=item->Children().Get(0)->GetAssociatedControl();
 						if(button)
 						{
 							item->RemoveChild(button->GetBoundsComposition());
@@ -1262,7 +1262,7 @@ ListViewDetailContentProvider
 					int count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
 					for(int i=0;i<count;i++)
 					{
-						GuiListControl::IItemStyleController* itemStyleController=listViewItemStyleProvider->GetCreatedItemStyles()[i];
+						GuiListControl::IItemStyleController* itemStyleController=listViewItemStyleProvider->GetCreatedItemStyles().Get(i);
 						ItemContent* itemContent=listViewItemStyleProvider->GetItemContent<ItemContent>(itemStyleController);
 						if(itemContent)
 						{

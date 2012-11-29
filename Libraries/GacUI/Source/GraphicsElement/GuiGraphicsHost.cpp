@@ -56,7 +56,7 @@ GuiGraphicsHost
 			{
 				for(int i=0;i<composition->Children().Count();i++)
 				{
-					DisconnectCompositionInternal(composition->Children()[i]);
+					DisconnectCompositionInternal(composition->Children().Get(i));
 				}
 				if(mouseCaptureComposition==composition)
 				{
@@ -398,7 +398,7 @@ GuiGraphicsHost
 					}
 				}
 
-				CopyFrom(mouseEnterCompositions.Wrap(), newCompositions.Wrap());
+				CopyFrom(mouseEnterCompositions, newCompositions);
 				for(int i=firstDifferentIndex;i<mouseEnterCompositions.Count();i++)
 				{
 					GuiGraphicsComposition* composition=mouseEnterCompositions[i];
@@ -751,7 +751,7 @@ GuiShortcutKeyManager
 			bool GuiShortcutKeyManager::Execute(const NativeWindowKeyInfo& info)
 			{
 				bool executed=false;
-				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems.Wrap())
+				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{
 					if(item->CanActivate(info))
 					{
@@ -765,7 +765,7 @@ GuiShortcutKeyManager
 
 			IGuiShortcutKeyItem* GuiShortcutKeyManager::CreateShortcut(bool ctrl, bool shift, bool alt, int key)
 			{
-				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems.Wrap())
+				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{
 					if(item->CanActivate(ctrl, shift, alt, key))
 					{
@@ -779,7 +779,7 @@ GuiShortcutKeyManager
 
 			bool GuiShortcutKeyManager::DestroyShortcut(bool ctrl, bool shift, bool alt, int key)
 			{
-				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems.Wrap())
+				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{
 					if(item->CanActivate(ctrl, shift, alt, key))
 					{
@@ -792,7 +792,7 @@ GuiShortcutKeyManager
 
 			IGuiShortcutKeyItem* GuiShortcutKeyManager::TryGetShortcut(bool ctrl, bool shift, bool alt, int key)
 			{
-				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems.Wrap())
+				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{
 					if(item->CanActivate(ctrl, shift, alt, key))
 					{

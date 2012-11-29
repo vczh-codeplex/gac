@@ -659,7 +659,7 @@ WindowsForm
 				~WindowsForm()
 				{
 					List<INativeWindowListener*> copiedListeners;
-					CopyFrom(copiedListeners.Wrap(), listeners.Wrap());
+					CopyFrom(copiedListeners, listeners);
 					for(int i=0;i<copiedListeners.Count();i++)
 					{
 						INativeWindowListener* listener=copiedListeners[i];
@@ -1137,7 +1137,7 @@ WindowsController
 					int index=windows.Keys().IndexOf(hwnd);
 					if(index!=-1)
 					{
-						WindowsForm* window=windows.Values()[index];
+						WindowsForm* window=windows.Values().Get(index);
 						skipDefaultProcedure=window->HandleMessage(hwnd, uMsg, wParam, lParam, result);
 						switch(uMsg)
 						{
@@ -1157,14 +1157,14 @@ WindowsController
 							{
 								for(int i=0;i<windows.Count();i++)
 								{
-									if(windows.Values()[i]->IsVisible())
+									if(windows.Values().Get(i)->IsVisible())
 									{
-										windows.Values()[i]->Hide();
+										windows.Values().Get(i)->Hide();
 									}
 								}
 								while(windows.Count())
 								{
-									DestroyNativeWindow(windows.Values()[0]);
+									DestroyNativeWindow(windows.Values().Get(0));
 								}
 								PostQuitMessage(0);
 							}
@@ -1228,7 +1228,7 @@ WindowsController
 					}
 					else
 					{
-						return windows.Values()[index];
+						return windows.Values().Get(index);
 					}
 				}
 

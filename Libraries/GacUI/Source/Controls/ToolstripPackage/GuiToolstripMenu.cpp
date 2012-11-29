@@ -31,7 +31,7 @@ GuiToolstripCollection
 			{
 				GuiControl* control=items[index];
 				items.RemoveAt(index);
-				GuiStackItemComposition* stackItem=stackComposition->GetStackItems()[index];
+				GuiStackItemComposition* stackItem=stackComposition->GetStackItems().Get(index);
 
 				stackComposition->RemoveChild(stackItem);
 				stackItem->RemoveChild(control->GetBoundsComposition());
@@ -97,7 +97,7 @@ GuiToolstripCollection
 
 			collections::IEnumerator<GuiControl*>* GuiToolstripCollection::CreateEnumerator()const
 			{
-				return items.Wrap().CreateEnumerator();
+				return items.CreateEnumerator();
 			}
 
 			bool GuiToolstripCollection::Contains(GuiControl* const& item)const

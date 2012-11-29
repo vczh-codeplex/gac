@@ -113,9 +113,9 @@ GuiStackComposition
 			{
 			}
 
-			const GuiStackComposition::IItemCompositionList& GuiStackComposition::GetStackItems()
+			const GuiStackComposition::ItemCompositionList& GuiStackComposition::GetStackItems()
 			{
-				return stackItems.Wrap();
+				return stackItems;
 			}
 
 			bool GuiStackComposition::InsertStackItem(int index, GuiStackItemComposition* item)

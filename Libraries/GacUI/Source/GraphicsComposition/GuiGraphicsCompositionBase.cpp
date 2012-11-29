@@ -84,9 +84,9 @@ GuiGraphicsComposition
 				return parent;
 			}
 
-			const GuiGraphicsComposition::ICompositionList& GuiGraphicsComposition::Children()
+			const GuiGraphicsComposition::CompositionList& GuiGraphicsComposition::Children()
 			{
-				return children.Wrap();
+				return children;
 			}
 
 			bool GuiGraphicsComposition::AddChild(GuiGraphicsComposition* child)

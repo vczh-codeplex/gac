@@ -120,7 +120,7 @@ GuiTab
 
 			void GuiTab::CommandExecutor::ShowTab(int index)
 			{
-				tab->SetSelectedPage(tab->GetPages()[index]);
+				tab->SetSelectedPage(tab->GetPages().Get(index));
 			}
 
 			GuiTab::GuiTab(IStyleController* _styleController)
@@ -222,9 +222,9 @@ GuiTab
 				return true;
 			}
 
-			const collections::IReadonlyList<GuiTabPage*>& GuiTab::GetPages()
+			const collections::List<GuiTabPage*>& GuiTab::GetPages()
 			{
-				return tabPages.Wrap();
+				return tabPages;
 			}
 
 			GuiTabPage* GuiTab::GetSelectedPage()

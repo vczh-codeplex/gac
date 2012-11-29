@@ -49,7 +49,7 @@ namespace vl
 				void											Run(GuiWindow* _mainWindow);
 				/// <summary>Get all created <see cref="GuiWindow"/> instances. This contains normal windows, popup windows, menus, or other types of windows that inherits from <see cref="GuiWindow"/>.</summary>
 				/// <returns>All created <see cref="GuiWindow"/> instances.</returns>
-				const collections::IReadonlyList<GuiWindow*>&	GetWindows();
+				const collections::List<GuiWindow*>&			GetWindows();
 				/// <summary>Get the <see cref="GuiWindow"/> instance that the mouse cursor are directly in.</summary>
 				/// <returns>The <see cref="GuiWindow"/> instance that the mouse cursor are directly in.</returns>
 				/// <param name="location">The mouse cursor.</param>

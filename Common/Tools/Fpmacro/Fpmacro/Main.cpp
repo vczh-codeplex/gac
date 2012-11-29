@@ -65,7 +65,7 @@ protected:
 			int index=environment->objects.Keys().IndexOf(name);
 			if(index!=-1)
 			{
-				RunningObject::Ref result=Run(environment->objects.Values()[index], environment);
+				RunningObject::Ref result=Run(environment->objects.Values().Get(index), environment);
 				return result;
 			}
 			else
@@ -108,7 +108,7 @@ protected:
 		{
 			newEnvironment->objects.Add(parameters[i], Run(arguments.Get(i), environment));
 		}
-		CopyFrom(newEnvironment->objects.Wrap(), predefinedEnvironment->objects.Wrap(), true);
+		CopyFrom(newEnvironment->objects, predefinedEnvironment->objects, true);
 		return Run(runningObject, newEnvironment);
 	}
 };
@@ -897,7 +897,7 @@ protected:
 		else
 		{
 			ConcatExpression* expression=new ConcatExpression;
-			CopyFrom(expression->expressions.Wrap(), input->Wrap());
+			CopyFrom(expression->expressions, *input.Obj());
 			return expression;
 		}
 	}
@@ -905,7 +905,7 @@ protected:
 	static Expression::Ref ToArray(const Ptr<Expression::List>& input)
 	{
 		ArrayExpression* expression=new ArrayExpression;
-		CopyFrom(expression->elements.Wrap(), input->Wrap());
+		CopyFrom(expression->elements, *input.Obj());
 		return expression;
 	}
 
@@ -913,7 +913,7 @@ protected:
 	{
 		InvokeExpression* expression=new InvokeExpression;
 		expression->function=input.First();
-		CopyFrom(expression->arguments.Wrap(), input.Second()->Wrap());
+		CopyFrom(expression->arguments,*input.Second().Obj());
 		return expression;
 	}
 
@@ -947,20 +947,20 @@ protected:
 	{
 		ReferenceDefinition* definition=new ReferenceDefinition;
 		definition->name=input.First();
-		CopyFrom(definition->parameters.Wrap(), input.Second()->Wrap());
+		CopyFrom(definition->parameters,*input.Second().Obj());
 		return definition;
 	}
 
 	static Definition::Ref ToRefDef(const ParsingPair<Ptr<ReferenceDefinition>, Ptr<List<Definition::Ref>>>& input)
 	{
-		CopyFrom(input.First()->definitions.Wrap(), input.Second()->Wrap());
+		CopyFrom(input.First()->definitions,*input.Second().Obj());
 		return input.First();
 	}
 
 	static Macro::Ref ToMacro(const Ptr<List<Definition::Ref>>& input)
 	{
 		Macro* macro=new Macro;
-		CopyFrom(macro->definitions.Wrap(), input->Wrap());
+		CopyFrom(macro->definitions, *input.Obj());
 		return macro;
 	}
 public:

@@ -979,7 +979,7 @@ GuiColorizedTextElementRenderer
 					colors.Resize(element->GetColors().Count());
 					for(int i=0;i<colors.Count();i++)
 					{
-						text::ColorEntry entry=element->GetColors()[i];
+						text::ColorEntry entry=element->GetColors().Get(i);
 						ColorEntryResource newEntry;
 
 						newEntry.normal.text=entry.normal.text;

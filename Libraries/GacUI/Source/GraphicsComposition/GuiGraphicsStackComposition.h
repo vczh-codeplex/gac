@@ -33,7 +33,6 @@ Stack Compositions
 				friend class GuiStackItemComposition;
 
 				typedef collections::List<GuiStackItemComposition*>				ItemCompositionList;
-				typedef collections::IReadonlyList<GuiStackItemComposition*>	IItemCompositionList;
 			public:
 				/// <summary>Stack item layout direction.</summary>
 				enum Direction
@@ -62,7 +61,7 @@ Stack Compositions
 
 				/// <summary>Get all stack items inside the stack composition.</summary>
 				/// <returns>All stack items inside the stack composition.</returns>
-				const IItemCompositionList&			GetStackItems();
+				const ItemCompositionList&			GetStackItems();
 				/// <summary>Insert an stack item at a specified position.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="index">The position.</param>

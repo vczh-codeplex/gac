@@ -192,13 +192,13 @@ Utilities
 		for(int i=0;i<request.extraHeaders.Count();i++)
 		{
 			WString key=request.extraHeaders.Keys()[i];
-			WString value=request.extraHeaders.Values()[i];
+			WString value=request.extraHeaders.Values().Get(i);
 			WinHttpAddRequestHeaders(requestInternet, (key+L":"+value).Buffer(), -1, WINHTTP_ADDREQ_FLAG_REPLACE|WINHTTP_ADDREQ_FLAG_ADD);
 		}
 
 		if(request.body.Count()>0)
 		{
-			httpResult=WinHttpSendRequest(requestInternet, WINHTTP_NO_ADDITIONAL_HEADERS, 0, (LPVOID)&request.body[0], request.body.Count(), request.body.Count(), NULL);
+			httpResult=WinHttpSendRequest(requestInternet, WINHTTP_NO_ADDITIONAL_HEADERS, 0, (LPVOID)&request.body.Get(0), request.body.Count(), request.body.Count(), NULL);
 		}
 		else
 		{
@@ -274,7 +274,7 @@ Utilities
 
 		// concatincate response body
 		int totalSize=0;
-		FOREACH(BufferPair, p, availableBuffers.Wrap())
+		FOREACH(BufferPair, p, availableBuffers)
 		{
 			totalSize+=p.length;
 		}
@@ -284,7 +284,7 @@ Utilities
 			char* utf8=new char[totalSize];
 			{
 				char* temp=utf8;
-				FOREACH(BufferPair, p, availableBuffers.Wrap())
+				FOREACH(BufferPair, p, availableBuffers)
 				{
 					memcpy(temp, p.buffer, p.length);
 					temp+=p.length;
@@ -293,7 +293,7 @@ Utilities
 			memcpy(&response.body[0], utf8, totalSize);
 			delete[] utf8;
 		}
-		FOREACH(BufferPair, p, availableBuffers.Wrap())
+		FOREACH(BufferPair, p, availableBuffers)
 		{
 			delete[] p.buffer;
 		}

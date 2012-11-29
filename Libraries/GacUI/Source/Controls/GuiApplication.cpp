@@ -111,9 +111,9 @@ GuiApplication
 				}
 			}
 
-			const collections::IReadonlyList<GuiWindow*>& GuiApplication::GetWindows()
+			const collections::List<GuiWindow*>& GuiApplication::GetWindows()
 			{
-				return windows.Wrap();
+				return windows;
 			}
 
 			GuiWindow* GuiApplication::GetWindow(Point location)
