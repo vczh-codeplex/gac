@@ -51,14 +51,14 @@ Intersect/Except
 					:enumerator(_enumerator)
 					,index(0)
 				{
-					CopyFrom(reference.Wrap(), _reference);
+					CopyFrom(reference, _reference);
 					GoNearest();
 				}
 
 				Enumerator(const Enumerator& _enumerator)
 				{
 					enumerator=_enumerator.enumerator->Clone();
-					CopyFrom(reference.Wrap(), _enumerator.reference.Wrap());
+					CopyFrom(reference, _enumerator.reference);
 					index=_enumerator.index;
 				}
 

@@ -69,7 +69,7 @@ GlobalStorage
 		{
 			for(vint i=0;i<GetGlobalStorageManager().storages->Count();i++)
 			{
-				GetGlobalStorageManager().storages->Values()[i]->ClearResource();
+				GetGlobalStorageManager().storages->Values().Get(i)->ClearResource();
 			}
 			GetGlobalStorageManager().storages=0;
 		}

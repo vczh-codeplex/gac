@@ -149,12 +149,12 @@ ParsingTreeNode
 
 		void ParsingTreeNode::InitializeQueryCache()
 		{
-			const INodeList& subNodes=GetSubNodesInternal();
+			const NodeList& subNodes=GetSubNodesInternal();
 			ClearQueryCache();
 			if(&subNodes)
 			{
-				CopyFrom(cachedOrderedSubNodes.Wrap(), subNodes>>OrderBy(&CompareTextRange));
-				FOREACH(Ptr<ParsingTreeNode>, node, cachedOrderedSubNodes.Wrap())
+				CopyFrom(cachedOrderedSubNodes, subNodes>>OrderBy(&CompareTextRange));
+				FOREACH(Ptr<ParsingTreeNode>, node, cachedOrderedSubNodes)
 				{
 					node->InitializeQueryCache();
 				}
@@ -171,9 +171,9 @@ ParsingTreeNode
 			return parent;
 		}
 
-		const ParsingTreeNode::INodeList& ParsingTreeNode::GetSubNodes()
+		const ParsingTreeNode::NodeList& ParsingTreeNode::GetSubNodes()
 		{
-			return cachedOrderedSubNodes.Wrap();
+			return cachedOrderedSubNodes;
 		}
 
 		Ptr<ParsingTreeNode> ParsingTreeNode::FindNode(const ParsingTextPos& position)
@@ -204,9 +204,9 @@ ParsingTreeNode
 ParsingTreeToken
 ***********************************************************************/
 
-		const ParsingTreeToken::INodeList& ParsingTreeToken::GetSubNodesInternal()
+		const ParsingTreeToken::NodeList& ParsingTreeToken::GetSubNodesInternal()
 		{
-			return *(INodeList*)0;
+			return *(NodeList*)0;
 		}
 
 		ParsingTreeToken::ParsingTreeToken(const WString& _value, vint _tokenIndex, const ParsingTextRange& _codeRange)
@@ -249,7 +249,7 @@ ParsingTreeToken
 ParsingTreeObject
 ***********************************************************************/
 
-		const ParsingTreeObject::INodeList& ParsingTreeObject::GetSubNodesInternal()
+		const ParsingTreeObject::NodeList& ParsingTreeObject::GetSubNodesInternal()
 		{
 			return members.Values();
 		}
@@ -279,15 +279,15 @@ ParsingTreeObject
 			type=_type;
 		}
 
-		ParsingTreeObject::INodeMap& ParsingTreeObject::GetMembers()
+		ParsingTreeObject::NodeMap& ParsingTreeObject::GetMembers()
 		{
-			return members.Wrap();
+			return members;
 		}
 
 		Ptr<ParsingTreeNode> ParsingTreeObject::GetMember(const WString& name)
 		{
 			vint index=members.Keys().IndexOf(name);
-			return index==-1?0:members.Values()[index];
+			return index==-1?0:members.Values().Get(index);
 		}
 
 		bool ParsingTreeObject::SetMember(const WString& name, Ptr<ParsingTreeNode> node)
@@ -295,7 +295,7 @@ ParsingTreeObject
 			vint index=members.Keys().IndexOf(name);
 			if(index!=-1)
 			{
-				Ptr<ParsingTreeNode> previous=members.Values()[index];
+				Ptr<ParsingTreeNode> previous=members.Values().Get(index);
 				if(previous==node) return true;
 				if(!BeforeRemoveChild(previous) || !BeforeAddChild(node)) return false;
 				members.Remove(name);
@@ -311,7 +311,7 @@ ParsingTreeObject
 			vint index=members.Keys().IndexOf(name);
 			if(index!=-1)
 			{
-				Ptr<ParsingTreeNode> previous=members.Values()[index];
+				Ptr<ParsingTreeNode> previous=members.Values().Get(index);
 				if(BeforeRemoveChild(previous))
 				{
 					members.Remove(name);
@@ -322,7 +322,7 @@ ParsingTreeObject
 			return false;
 		}
 
-		const ParsingTreeObject::INameList& ParsingTreeObject::GetMemberNames()
+		const ParsingTreeObject::NameList& ParsingTreeObject::GetMemberNames()
 		{
 			return members.Keys();
 		}
@@ -331,9 +331,9 @@ ParsingTreeObject
 ParsingTreeArray
 ***********************************************************************/
 
-		const ParsingTreeArray::INodeList& ParsingTreeArray::GetSubNodesInternal()
+		const ParsingTreeArray::NodeList& ParsingTreeArray::GetSubNodesInternal()
 		{
-			return items.Wrap();
+			return items;
 		}
 
 		ParsingTreeArray::ParsingTreeArray(const WString& _elementType, const ParsingTextRange& _codeRange)
@@ -361,9 +361,9 @@ ParsingTreeArray
 			elementType=_elementType;
 		}
 
-		ParsingTreeArray::INodeArray& ParsingTreeArray::GetItems()
+		ParsingTreeArray::NodeArray& ParsingTreeArray::GetItems()
 		{
-			return items.Wrap();
+			return items;
 		}
 
 		Ptr<ParsingTreeNode> ParsingTreeArray::GetItem(vint index)
@@ -447,11 +447,11 @@ ParsingTreeArray
 
 		bool ParsingTreeArray::Clear()
 		{
-			FOREACH(Ptr<ParsingTreeNode>, node, items.Wrap())
+			FOREACH(Ptr<ParsingTreeNode>, node, items)
 			{
 				if(!BeforeRemoveChild(node)) return false;
 			}
-			FOREACH(Ptr<ParsingTreeNode>, node, items.Wrap())
+			FOREACH(Ptr<ParsingTreeNode>, node, items)
 			{
 				AfterRemoveChild(node);
 			}

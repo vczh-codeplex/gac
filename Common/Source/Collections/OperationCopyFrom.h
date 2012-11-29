@@ -19,240 +19,144 @@ namespace vl
 ÈÝÆ÷¸´ÖÆ
 ***********************************************************************/
 
-		template<typename T, typename K>
-		void CopyFrom(IArray<T, K>& dst, const IReadonlyList<T, K>& src, bool append=false)
+		namespace copyfrom_internal
 		{
-			vint start=0;
-			if(append)
-			{
-				start=dst.Count();
-				dst.Resize(start+src.Count());
-			}
-			else
-			{
-				dst.Resize(src.Count());
-			}
-			vint srcCount=src.Count();
-			for(vint i=0;i<srcCount;i++)
-			{
-				dst.Set(start+i, src[i]);
-			}
-		}
+			using namespace randomaccess_internal;
 
-		template<typename T, typename K>
-		void CopyFrom(ICollection<T, K>& dst, const IReadonlyList<T, K>& src, bool append=false)
-		{
-			if(!append)
+			template<typename Ds, typename Ss, bool DsRA, bool SsRA>
+			struct CopyFromAlgorithm
 			{
-				dst.Clear();
-			}
-			vint srcCount=src.Count();
-			for(vint i=0;i<srcCount;i++)
-			{
-				dst.Add(src[i]);
-			}
-		}
+			};
 
-		template<typename KT, typename VT, typename KK, typename VK>
-		void CopyFrom(IDictionary<KT, VT, KK, VK>& dst, const IReadonlyList<Pair<KT, VT>>& src, bool append=false)
-		{
-			if(!append)
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, true, true>
 			{
-				dst.Clear();
-			}
-			vint srcCount=src.Count();
-			for(vint i=0;i<srcCount;i++)
-			{
-				const Pair<KT, VT>& pair=src[i];
-				dst.Set(pair.key, pair.value);
-			}
-		}
-
-		template<typename KT, typename VT, typename KK, typename VK>
-		void CopyFrom(IGroup<KT, VT, KK, VK>& dst, const IReadonlyList<Pair<KT, VT>>& src, bool append=false)
-		{
-			if(!append)
-			{
-				dst.Clear();
-			}
-			vint srcCount=src.Count();
-			for(vint i=0;i<srcCount;i++)
-			{
-				const Pair<KT, VT>& pair=src[i];
-				dst.Add(pair.key, pair.value);
-			}
-		}
-
-		template<typename T, typename K>
-		void CopyFrom(IArray<T, K>& dst, const IEnumerable<T>& src, bool append=false)
-		{
-			IEnumerator<T>* enumerator=src.CreateEnumerator();
-			try
-			{
-				vint count=0;
-				while(enumerator->Available())
+				static void Perform(Ds& ds, const Ss& ss, bool append)
 				{
-					count++;
-					enumerator->Next();
+					vint copyCount=RandomAccess<Ss>::GetCount(ss);
+					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
+					vint resizeCount=index+copyCount;
+					RandomAccess<Ds>::SetCount(ds, resizeCount);
+					for(vint i=0;i<copyCount;i++)
+					{
+						RandomAccess<Ds>::SetValue(ds, index+i, RandomAccess<Ss>::GetValue(ss, i));
+					}
 				}
-				enumerator->Reset();
-				vint start=0;
-				if(append)
-				{
-					start=dst.Count();
-					dst.Resize(start+count);
-				}
-				else
-				{
-					dst.Resize(count);
-				}
-				while(enumerator->Available())
-				{
-					dst.Set(start+enumerator->Index(), enumerator->Current());
-					enumerator->Next();
-				}
-				delete enumerator;
-			}
-			catch(...)
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, false, true>
 			{
-				delete enumerator;
-				throw;
-			}
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					if(!append)
+					{
+						ds.Clear();
+					}
+					vint copyCount=RandomAccess<Ss>::GetCount(ss);
+					for(vint i=0;i<copyCount;i++)
+					{
+						RandomAccess<Ds>::AppendValue(ds, RandomAccess<Ss>::GetValue(ss, i));
+					}
+				}
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, true, false>
+			{
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					Ptr<IEnumerator<typename Ss::ElementType>> enumerator;
+					vint copyCount=0;
+
+					enumerator=ss.CreateEnumerator();
+					while(enumerator->Available())
+					{
+						copyCount++;
+						enumerator->Next();
+					}
+
+					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
+					vint resizeCount=index+copyCount;
+					RandomAccess<Ds>::SetCount(ds, resizeCount);
+
+					enumerator=ss.CreateEnumerator();
+					for(vint i=0;i<copyCount;i++)
+					{
+						RandomAccess<Ds>::SetValue(ds, index+i, enumerator->Current());
+						enumerator->Next();
+					}
+				}
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, false, false>
+			{
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					if(!append)
+					{
+						ds.Clear();
+					}
+					Ptr<IEnumerator<typename Ss::ElementType>> enumerator=ss.CreateEnumerator();
+					while(enumerator->Available())
+					{
+						RandomAccess<Ds>::AppendValue(ds, enumerator->Current());
+						enumerator->Next();
+					}
+				}
+			};
+
+			template<typename T>
+			struct Slice
+			{
+				const T*	items;
+				vint		count;
+			};
 		}
 
-		template<typename T, typename K>
-		void CopyFrom(ICollection<T, K>& dst, const IEnumerable<T>& src, bool append=false)
+		namespace randomaccess_internal
 		{
-			IEnumerator<T>* enumerator=src.CreateEnumerator();
-			try
+			template<typename T>
+			struct RandomAccessable<copyfrom_internal::Slice<T>>
 			{
-				if(!append)
-				{
-					dst.Clear();
-				}
-				while(enumerator->Available())
-				{
-					dst.Add(enumerator->Current());
-					enumerator->Next();
-				}
-				delete enumerator;
-			}
-			catch(...)
+				static const bool							CanRead = true;
+				static const bool							CanResize = true;
+			};
+		
+			template<typename T>
+			struct RandomAccess<copyfrom_internal::Slice<T>>
 			{
-				delete enumerator;
-				throw;
-			}
+				static vint GetCount(const copyfrom_internal::Slice<T>& t)
+				{
+					return t.count;
+				}
+
+				static const T& GetValue(const copyfrom_internal::Slice<T>& t, vint index)
+				{
+					return t.items[index];
+				}
+			};
 		}
 
-		template<typename KT, typename VT, typename KK, typename VK>
-		void CopyFrom(IDictionary<KT, VT, KK, VK>& dst, const IEnumerable<Pair<KT, VT>>& src, bool append=false)
+		template<typename Ds, typename Ss>
+		void CopyFrom(Ds& ds, const Ss& ss, bool append=false)
 		{
-			IEnumerator<Pair<KT, VT>>* enumerator=src.CreateEnumerator();
-			try
-			{
-				if(!append)
-				{
-					dst.Clear();
-				}
-				while(enumerator->Available())
-				{
-					const Pair<KT, VT>& pair=enumerator->Current();
-					dst.Set(pair.key, pair.value);
-					enumerator->Next();
-				}
-				delete enumerator;
-			}
-			catch(...)
-			{
-				delete enumerator;
-				throw;
-			}
+			copyfrom_internal::CopyFromAlgorithm<Ds, Ss, randomaccess_internal::RandomAccessable<Ds>::CanResize, randomaccess_internal::RandomAccessable<Ss>::CanRead>::Perform(ds, ss, append);
 		}
 
-		template<typename KT, typename VT, typename KK, typename VK>
-		void CopyFrom(IGroup<KT, VT, KK, VK>& dst, const IEnumerable<Pair<KT, VT>>& src, bool append=false)
+		template<typename Ds, typename S>
+		void CopyFrom(Ds& ds, const S* buffer, vint count, bool append=false)
 		{
-			IEnumerator<Pair<KT, VT>>* enumerator=src.CreateEnumerator();
-			try
-			{
-				if(!append)
-				{
-					dst.Clear();
-				}
-				while(enumerator->Available())
-				{
-					const Pair<KT, VT>& pair=enumerator->Current();
-					dst.Add(pair.key, pair.value);
-					enumerator->Next();
-				}
-				delete enumerator;
-			}
-			catch(...)
-			{
-				delete enumerator;
-				throw;
-			}
+			copyfrom_internal::Slice<S> slice={buffer, count};
+			CopyFrom(ds, slice, append);
 		}
 
-		template<typename T, typename K, typename I>
-		void CopyFrom(IArray<T, K>& dst, I begin, vint length, bool append=false)
+		template<typename Ds, typename S>
+		void CopyFrom(Ds& ds, const S* begin, const S* end, bool append=false)
 		{
-			vint start=0;
-			if(append)
-			{
-				start=dst.Count();
-				dst.Resize(start+length);
-			}
-			else
-			{
-				dst.Resize(length);
-			}
-
-			for(vint i=0;i<length;i++)
-			{
-				dst.Set(start+i, *begin++);
-			}
-		}
-
-		template<typename T, typename K, typename I>
-		void CopyFrom(ICollection<T, K>& dst, I begin, vint length, bool append=false)
-		{
-			if(!append)
-			{
-				dst.Clear();
-			}
-
-			for(vint i=0;i<length;i++)
-			{
-				dst.Add(*begin++);
-			}
-		}
-
-		template<typename T, typename K, typename I>
-		void CopyFrom(IArray<T, K>& dst, I begin, I end, bool append=false)
-		{
-			vint length=0;
-			I current=begin;
-			while(current!=end)
-			{
-				length++;
-				current++;
-			}
-			CopyFrom(dst, begin, length, append);
-		}
-
-		template<typename T, typename K, typename I>
-		void CopyFrom(ICollection<T, K>& dst, I begin, I end, bool append=false)
-		{
-			if(!append)
-			{
-				dst.Clear();
-			}
-
-			while(begin!=end)
-			{
-				dst.Add(*begin++);
-			}
+			copyfrom_internal::Slice<S> slice={begin, end-begin};
+			CopyFrom(ds, slice, append);
 		}
 	}
 }

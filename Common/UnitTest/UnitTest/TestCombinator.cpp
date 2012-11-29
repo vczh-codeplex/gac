@@ -66,7 +66,7 @@ TEST_CASE(TestEnumerableInput)
 		list.Add(original[i]);
 	}
 
-	EnumerableInput<wchar_t> input=list.Wrap();
+	EnumerableInput<wchar_t> input=list;
 	TEST_ASSERT(input.Available()==true);
 	TEST_ASSERT(input.Index()==0);
 	TEST_ASSERT(input.Current()==L'v');
@@ -816,7 +816,7 @@ TEST_CASE(TestTokenInput)
 	tokens.Add(L"/+|-");
 	tokens.Add(L"/*|//");
 
-	RegexLexer lexer(tokens.Wrap());
+	RegexLexer lexer(tokens);
 
 	_Node NUM=tk(0);
 	_Node OPEN=tk(1);
@@ -832,7 +832,7 @@ TEST_CASE(TestTokenInput)
 	{
 		WString code=L"(1+2)*(3+4)";
 		List<RegexToken> regexTokens;
-		CopyFrom(regexTokens.Wrap(), lexer.Parse(code));
+		CopyFrom(regexTokens, lexer.Parse(code));
 		Types<TokenInput<RegexToken>>::GlobalInfo info;
 		TokenInput<RegexToken> input(&regexTokens[0], regexTokens.Count());
 		ParsingResult<vint> result=EXP.Parse(input, info);
@@ -843,7 +843,7 @@ TEST_CASE(TestTokenInput)
 	{
 		WString code=L"(10+20)*(30+40)";
 		List<RegexToken> regexTokens;
-		CopyFrom(regexTokens.Wrap(), lexer.Parse(code));
+		CopyFrom(regexTokens, lexer.Parse(code));
 		TokenInput<RegexToken> input(&regexTokens[0], regexTokens.Count());
 		TEST_ASSERT(EXP.Parse(input, false)==2100);
 	}

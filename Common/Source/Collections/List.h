@@ -16,7 +16,6 @@ Classes:
 
 #include <string.h>
 #include "Interfaces.h"
-#include "ListWrappers.h"
 
 namespace vl
 {
@@ -33,7 +32,7 @@ namespace vl
 		};
 		
 		template<typename T>
-		class ListStore<T,false> abstract : public Object
+		class ListStore<T, false> abstract : public Object
 		{
 		protected:
 			static void CopyObjects(T* dest, const T* source, vint count)
@@ -65,7 +64,7 @@ namespace vl
 		};
 		
 		template<typename T>
-		class ListStore<T,true> abstract : public Object
+		class ListStore<T, true> abstract : public Object
 		{
 		protected:
 			static void CopyObjects(T* dest, const T* source, vint count)
@@ -81,14 +80,92 @@ namespace vl
 			}
 		public:
 		};
-
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class ListBase abstract : public ListStore<T,POD<T>::Result>
+		
+		template<typename T>
+		class ArrayBase abstract : public ListStore<T,POD<T>::Result>, public virtual IEnumerable<T>
 		{
 		protected:
-			vint						count;
-			vint						capacity;
+			class Enumerator : public Object, public virtual IEnumerator<T>
+			{
+			private:
+				const ArrayBase<T>*				container;
+				vint							index;
+			public:
+				Enumerator(const ArrayBase<T>* _container, vint _index)
+				{
+					container=_container;
+					index=_index;
+				}
+
+				Enumerator* Clone()const
+				{
+					return new Enumerator(container, index);
+				}
+
+				const T& Current()const
+				{
+					return container->Get(index);
+				}
+
+				vint Index()const
+				{
+					return index;
+				}
+
+				bool Next()
+				{
+					index++;
+					return Available();
+				}
+
+				bool Available()const
+				{
+					return index>=0 && index<container->Count();
+				}
+
+				void Reset()
+				{
+					index=0;
+				}
+			};
+			
 			T*						buffer;
+			vint					count;
+		public:
+			ArrayBase()
+				:buffer(0)
+				,count(0)
+			{
+			}
+
+			IEnumerator<T>* CreateEnumerator()const
+			{
+				return new Enumerator(this, 0);
+			}
+
+			vint Count()const
+			{
+				return count;
+			}
+
+			const T& Get(vint index)const
+			{
+				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::Get(vint)#参数越界。");
+				return buffer[index];
+			}
+
+			const T& operator[](vint index)const
+			{
+				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::operator[](vint)#参数index越界。");
+				return buffer[index];
+			}
+		};
+
+		template<typename T, typename K=typename KeyType<T>::Type>
+		class ListBase abstract : public ArrayBase<T>
+		{
+		protected:
+			vint					capacity;
 			bool					lessMemoryMode;
 
 			vint CalculateCapacity(vint expected)
@@ -159,23 +236,6 @@ namespace vl
 				lessMemoryMode=mode;
 			}
 
-			vint Count()const
-			{
-				return count;
-			}
-
-			const T& Get(vint index)const
-			{
-				CHECK_ERROR(index>=0 && index<count, L"ListBase<T, K>::Get(vint)#参数越界。");
-				return buffer[index];
-			}
-
-			const T& operator[](vint index)const
-			{
-				CHECK_ERROR(index>=0 && index<count, L"ListBase<T, K>::operator[](vint)#参数index越界。");
-				return buffer[index];
-			}
-
 			bool RemoveAt(vint index)
 			{
 				vint previousCount=count;
@@ -220,13 +280,9 @@ namespace vl
 ***********************************************************************/
 
 		template<typename T, typename K=typename KeyType<T>::Type>
-		class Array : public ListStore<T, POD<T>::Result>, private NotCopyable
+		class Array : public ArrayBase<T>
 		{
 		protected:
-			vint								count;
-			T*								buffer;
-			mutable ArrayWrapper<Array<T, K>, T, K>		wrapper;
-
 			void Create(vint size)
 			{
 				if(size>0)
@@ -250,13 +306,11 @@ namespace vl
 		public:
 			Array(vint size=0)
 			{
-				wrapper.SetContainer(this);
 				Create(size);
 			}
 
 			Array(const T* _buffer, vint size)
 			{
-				wrapper.SetContainer(this);
 				Create(size);
 				CopyObjects(buffer, _buffer, size);
 			}
@@ -269,23 +323,6 @@ namespace vl
 			bool Contains(const K& item)const
 			{
 				return IndexOf(item)!=-1;
-			}
-
-			vint Count()const
-			{
-				return count;
-			}
-
-			const T& Get(vint index)const
-			{
-				CHECK_ERROR(index>=0 && index<count, L"Array<T, K>::Get(vint)#参数越界。");
-				return buffer[index];
-			}
-
-			const T& operator[](vint index)const
-			{
-				CHECK_ERROR(index>=0 && index<count, L"Array<T, K>::operator[](vint)#参数index越界。");
-				return buffer[index];
 			}
 
 			vint IndexOf(const K& item)const
@@ -320,22 +357,14 @@ namespace vl
 				CopyObjects(buffer, oldBuffer, (count<oldCount?count:oldCount));
 				delete[] oldBuffer;
 			}
-
-			IArray<T, K>& Wrap()const
-			{
-				return wrapper;
-			}
 		};
 
 		template<typename T, typename K=typename KeyType<T>::Type>
-		class List : public ListBase<T, K>, private NotCopyable
+		class List : public ListBase<T, K>
 		{
-		protected:
-			mutable ListWrapper<List<T, K>, T, K>	wrapper;
 		public:
 			List()
 			{
-				wrapper.SetContainer(this);
 			}
 
 			bool Contains(const K& item)const
@@ -396,22 +425,14 @@ namespace vl
 				CHECK_ERROR(index>=0 && index<count, L"List<T, K>::operator[](vint)#参数index越界。");
 				return buffer[index];
 			}
-
-			IList<T, K>& Wrap()const
-			{
-				return wrapper;
-			}
 		};
 
 		template<typename T, typename K=typename KeyType<T>::Type>
-		class SortedList : public ListBase<T, K>, private NotCopyable
+		class SortedList : public ListBase<T, K>
 		{
-		protected:
-			mutable CollectionWrapper<SortedList<T, K>, T, K>	wrapper;
 		public:
 			SortedList()
 			{
-				wrapper.SetContainer(this);
 			}
 
 			bool Contains(const K& item)const
@@ -502,46 +523,34 @@ SORTED_LIST_INSERT:
 					return false;
 				}
 			}
-
-			ICollection<T, K>& Wrap()const
-			{
-				return wrapper;
-			}
 		};
 
 /***********************************************************************
-容器复制模板
+随机访问
 ***********************************************************************/
 
-		template<typename A, typename B>
-		void CopyToCollection(A& dst, const B& src, bool append=false)
+		namespace randomaccess_internal
 		{
-			if(!append)dst.Clear();
-			vint count=src.Count();
-			for(vint i=0;i<count;i++)
+			template<typename T, typename K>
+			struct RandomAccessable<Array<T, K>>
 			{
-				dst.Add(src.Get(i));
-			}
-		}
+				static const bool							CanRead = true;
+				static const bool							CanResize = true;
+			};
 
-		template<typename A, typename B>
-		void CopyToArray(A& dst, const B& src, bool append=false)
-		{
-			vint start=0;
-			vint count=src.Count();
-			if(append)
+			template<typename T, typename K>
+			struct RandomAccessable<List<T, K>>
 			{
-				start=dst.Count();
-				dst.Resize(start+count);
-			}
-			else
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
+
+			template<typename T, typename K>
+			struct RandomAccessable<SortedList<T, K>>
 			{
-				dst.Resize(count);
-			}
-			for(vint i=0;i<count;i++)
-			{
-				dst[start+i]=src.Get(i);
-			}
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
 		}
 	}
 }

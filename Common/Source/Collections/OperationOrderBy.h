@@ -69,7 +69,7 @@ OrderBy
 		public:
 			OrderByEnumerable(const IEnumerable<T>& enumerable, const Func<vint(T, T)>& orderer)
 			{
-				CopyFrom(values.Wrap(), enumerable);
+				CopyFrom(values, enumerable);
 				if(values.Count()>0)
 				{
 					Sort(&values[0], values.Count(), orderer);
@@ -78,7 +78,7 @@ OrderBy
 
 			IEnumerator<T>* CreateEnumerator()const
 			{
-				return values.Wrap().CreateEnumerator();
+				return values.CreateEnumerator();
 			}
 		};
 

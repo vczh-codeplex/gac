@@ -324,7 +324,7 @@ CreateEpsilonPDA
 				ruleInfo->startState=automaton->RuleStartState(rule.Obj());
 				automaton->Epsilon(ruleInfo->rootRuleStartState, ruleInfo->startState);
 
-				FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars.Wrap())
+				FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars)
 				{
 					State* grammarStartState=automaton->StartState(rule.Obj(), grammar.Obj(), grammar.Obj());
 					State* grammarEndState=automaton->EndState(rule.Obj(), grammar.Obj(), grammar.Obj());
@@ -340,7 +340,7 @@ CreateEpsilonPDA
 			Ptr<Automaton> CreateEpsilonPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager)
 			{
 				Ptr<Automaton> automaton=new Automaton(manager);
-				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules.Wrap())
+				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules)
 				{
 					CreateEpsilonPDA(automaton, rule, manager);
 				}

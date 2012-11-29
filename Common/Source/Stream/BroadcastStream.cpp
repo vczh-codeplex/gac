@@ -19,9 +19,9 @@ BroadcastStream
 		{
 		}
 
-		BroadcastStream::_ListInterface& BroadcastStream::Targets()
+		BroadcastStream::StreamList& BroadcastStream::Targets()
 		{
-			return streams.Wrap();
+			return streams;
 		}
 
 		bool BroadcastStream::CanRead()const

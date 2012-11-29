@@ -152,15 +152,6 @@
     <ClCompile Include="..\..\Source\Combinator\StringCombinator.cpp" />
     <ClCompile Include="..\..\Source\Combinator\TokenCombinator.cpp" />
     <ClCompile Include="..\..\Source\Console.cpp" />
-    <ClCompile Include="..\..\Source\Entity\BigObjectPoolEntity.cpp" />
-    <ClCompile Include="..\..\Source\Entity\GcSingleThreadEntity.cpp" />
-    <ClCompile Include="..\..\Source\Entity\GeneralObjectPoolEntity.cpp" />
-    <ClCompile Include="..\..\Source\Entity\SmallObjectPoolEntity.cpp" />
-    <ClCompile Include="..\..\Source\Entity\TaskEntity.cpp" />
-    <ClCompile Include="..\..\Source\Entity\TreeDoc.cpp" />
-    <ClCompile Include="..\..\Source\Entity\TreeJson.cpp" />
-    <ClCompile Include="..\..\Source\Entity\TreeQuery.cpp" />
-    <ClCompile Include="..\..\Source\Entity\TreeXml.cpp" />
     <ClCompile Include="..\..\Source\Exception.cpp" />
     <ClCompile Include="..\..\Source\GlobalStorage.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingAnalyzer.cpp" />
@@ -192,9 +183,6 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="TestBasic.cpp" />
     <ClCompile Include="TestCombinator.cpp" />
-    <ClCompile Include="TestEntity.cpp" />
-    <ClCompile Include="TestEntityTask.cpp" />
-    <ClCompile Include="TestEntityTree.cpp" />
     <ClCompile Include="TestFunction.cpp" />
     <ClCompile Include="TestGlobalStorage.cpp" />
     <ClCompile Include="TestList.cpp" />
@@ -207,10 +195,8 @@
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h" />
     <ClInclude Include="..\..\Source\Collections\Dictionary.h" />
-    <ClInclude Include="..\..\Source\Collections\DictionaryWrappers.h" />
     <ClInclude Include="..\..\Source\Collections\Interfaces.h" />
     <ClInclude Include="..\..\Source\Collections\List.h" />
-    <ClInclude Include="..\..\Source\Collections\ListWrappers.h" />
     <ClInclude Include="..\..\Source\Collections\Operation.h" />
     <ClInclude Include="..\..\Source\Collections\OperationAggregate.h" />
     <ClInclude Include="..\..\Source\Collections\OperationConcat.h" />
@@ -242,18 +228,6 @@
     <ClInclude Include="..\..\Source\Combinator\_Unit.h" />
     <ClInclude Include="..\..\Source\Combinator\_Using.h" />
     <ClInclude Include="..\..\Source\Console.h" />
-    <ClInclude Include="..\..\Source\Entity\BigObjectPoolEntity.h" />
-    <ClInclude Include="..\..\Source\Entity\BinaryBalanceTreeEntity.h" />
-    <ClInclude Include="..\..\Source\Entity\GcEntityCommon.h" />
-    <ClInclude Include="..\..\Source\Entity\GcSingleThreadEntity.h" />
-    <ClInclude Include="..\..\Source\Entity\GeneralObjectPoolEntity.h" />
-    <ClInclude Include="..\..\Source\Entity\Linear.h" />
-    <ClInclude Include="..\..\Source\Entity\SmallObjectPoolEntity.h" />
-    <ClInclude Include="..\..\Source\Entity\TaskEntity.h" />
-    <ClInclude Include="..\..\Source\Entity\TreeDoc.h" />
-    <ClInclude Include="..\..\Source\Entity\TreeJson.h" />
-    <ClInclude Include="..\..\Source\Entity\TreeQuery.h" />
-    <ClInclude Include="..\..\Source\Entity\TreeXml.h" />
     <ClInclude Include="..\..\Source\Event.h" />
     <ClInclude Include="..\..\Source\Exception.h" />
     <ClInclude Include="..\..\Source\Function.h" />
@@ -282,7 +256,6 @@
     <ClInclude Include="..\..\Source\Stream\MemoryStream.h" />
     <ClInclude Include="..\..\Source\Stream\MemoryWrapperStream.h" />
     <ClInclude Include="..\..\Source\Stream\RecorderStream.h" />
-    <ClInclude Include="..\..\Source\Stream\StreamSerialization.h" />
     <ClInclude Include="..\..\Source\String.h" />
     <ClInclude Include="..\..\Source\Threading.h" />
     <ClInclude Include="..\..\Source\Tuple.h" />

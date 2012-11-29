@@ -10,114 +10,32 @@ Data Structure::Operations
 
 #include "Interfaces.h"
 #include "..\String.h"
+#include "OperationCopyFrom.h"
 
 namespace vl
 {
 	namespace collections
 	{
-		template<typename T, typename K>
-		void CopyFrom(IArray<T, K>& dst, const ObjectString<T>& src, bool append=false)
+		template<typename Ds, typename S>
+		void CopyFrom(Ds& ds, const ObjectString<S>& ss, bool append=false)
 		{
-			vint start=0;
-			if(append)
+			const S* buffer=ss.Buffer();
+			vint count=ss.Length();
+			CopyFrom(ds, buffer, count, append);
+		}
+
+		template<typename D, typename Ss>
+		void CopyFrom(ObjectString<D>& ds, const Ss& ss, bool append=false)
+		{
+			Array<D> da(ds.Buffer(), ds.Length());
+			CopyFrom(da, ss, append);
+			if(da.Count()==0)
 			{
-				start=dst.Count();
-				dst.Resize(start+src.Length());
+				ds=ObjectString<D>();
 			}
 			else
 			{
-				dst.Resize(src.Length());
-			}
-			for(vint i=0;i<src.Length();i++)
-			{
-				dst.Set(start+i, src[i]);
-			}
-		}
-
-		template<typename T, typename K>
-		void CopyFrom(ICollection<T, K>& dst, const ObjectString<T>& src, bool append=false)
-		{
-			if(!append)
-			{
-				dst.Clear();
-			}
-			for(vint i=0;i<src.Length();i++)
-			{
-				dst.Add(src[i]);
-			}
-		}
-
-		template<typename T, typename K>
-		void CopyFrom(ObjectString<T>& dst, const IReadonlyList<T, K>& src, bool append=false)
-		{
-			T* buffer=new T[src.Count()+1];
-			try
-			{
-				for(vint i=0;i<src.Count();i++)
-				{
-					buffer[i]=src[i];
-				}
-				buffer[src.Count()]=0;
-				if(append)
-				{
-					dst+=buffer;
-				}
-				else
-				{
-					dst=buffer;
-				}
-				delete[] buffer;
-			}
-			catch(...)
-			{
-				delete[] buffer;
-				throw;
-			}
-		}
-
-		template<typename T>
-		void CopyFrom(ObjectString<T>& dst, const IEnumerable<T>& src, bool append=false)
-		{
-			IEnumerator<T>* enumerator=src.CreateEnumerator();
-			try
-			{
-				vint count=0;
-				while(enumerator->Available())
-				{
-					count++;
-					enumerator->Next();
-				}
-				enumerator->Reset();
-				T* buffer=new T[count+1];
-				try
-				{
-					while(enumerator->Available())
-					{
-						buffer[enumerator->Index()]=enumerator->Current();
-						enumerator->Next();
-					}
-					buffer[count]=0;
-					if(append)
-					{
-						dst+=buffer;
-					}
-					else
-					{
-						dst=buffer;
-					}
-					delete[] buffer;
-				}
-				catch(...)
-				{
-					delete[] buffer;
-					throw;
-				}
-				delete enumerator;
-			}
-			catch(...)
-			{
-				delete enumerator;
-				throw;
+				ds=ObjectString<D>(&da[0], da.Count());
 			}
 		}
 	}

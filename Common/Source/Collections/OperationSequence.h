@@ -371,7 +371,7 @@ Distinct
 				Enumerator(const Enumerator& _enumerator)
 				{
 					enumerator=_enumerator.enumerator->Clone();
-					CopyFrom(distinct.Wrap(), _enumerator.distinct.Wrap());
+					CopyFrom(distinct, _enumerator.distinct);
 				}
 
 				~Enumerator()
@@ -458,12 +458,12 @@ Reverse
 				Enumerator(const IEnumerable<T>& enumerable)
 					:index(0)
 				{
-					CopyFrom(cache.Wrap(), enumerable);
+					CopyFrom(cache, enumerable);
 				}
 
 				Enumerator(const Enumerator& _enumerator)
 				{
-					CopyFrom(cache.Wrap(), _enumerator.cache.Wrap());
+					CopyFrom(cache, _enumerator.cache);
 					index=_enumerator.index;
 				}
 

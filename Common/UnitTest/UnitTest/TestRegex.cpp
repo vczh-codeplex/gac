@@ -867,13 +867,13 @@ TEST_CASE(TestRegexCapture)
 		TEST_ASSERT(match->Groups().Keys()[0]==L"a");
 		TEST_ASSERT(match->Groups().Keys()[1]==L"b");
 		TEST_ASSERT(match->Groups()[L"a"].Count()==1);
-		TEST_ASSERT(match->Groups()[L"a"][0].Start()==0);
-		TEST_ASSERT(match->Groups()[L"a"][0].Length()==4);
-		TEST_ASSERT(match->Groups()[L"a"][0].Value()==L"vczh");
+		TEST_ASSERT(match->Groups()[L"a"].Get(0).Start()==0);
+		TEST_ASSERT(match->Groups()[L"a"].Get(0).Length()==4);
+		TEST_ASSERT(match->Groups()[L"a"].Get(0).Value()==L"vczh");
 		TEST_ASSERT(match->Groups()[L"b"].Count()==1);
-		TEST_ASSERT(match->Groups()[L"b"][0].Start()==4);
-		TEST_ASSERT(match->Groups()[L"b"][0].Length()==6);
-		TEST_ASSERT(match->Groups()[L"b"][0].Value()==L"genius");
+		TEST_ASSERT(match->Groups()[L"b"].Get(0).Start()==4);
+		TEST_ASSERT(match->Groups()[L"b"].Get(0).Length()==6);
+		TEST_ASSERT(match->Groups()[L"b"].Get(0).Value()==L"genius");
 	}
 	{
 		Regex regex(L"^(?/d+).(?/d+).(?/d+).(<$0>).(<$1>).(<$2>)$");
@@ -889,15 +889,15 @@ TEST_CASE(TestRegexCapture)
 		TEST_ASSERT(match->Result().Length()==17);
 		TEST_ASSERT(match->Result().Value()==L"123.4.56.123.4.56");
 		TEST_ASSERT(match->Captures().Count()==3);
-		TEST_ASSERT(match->Captures()[0].Start()==0);
-		TEST_ASSERT(match->Captures()[0].Length()==3);
-		TEST_ASSERT(match->Captures()[0].Value()==L"123");
-		TEST_ASSERT(match->Captures()[1].Start()==4);
-		TEST_ASSERT(match->Captures()[1].Length()==1);
-		TEST_ASSERT(match->Captures()[1].Value()==L"4");
-		TEST_ASSERT(match->Captures()[2].Start()==6);
-		TEST_ASSERT(match->Captures()[2].Length()==2);
-		TEST_ASSERT(match->Captures()[2].Value()==L"56");
+		TEST_ASSERT(match->Captures().Get(0).Start()==0);
+		TEST_ASSERT(match->Captures().Get(0).Length()==3);
+		TEST_ASSERT(match->Captures().Get(0).Value()==L"123");
+		TEST_ASSERT(match->Captures().Get(1).Start()==4);
+		TEST_ASSERT(match->Captures().Get(1).Length()==1);
+		TEST_ASSERT(match->Captures().Get(1).Value()==L"4");
+		TEST_ASSERT(match->Captures().Get(2).Start()==6);
+		TEST_ASSERT(match->Captures().Get(2).Length()==2);
+		TEST_ASSERT(match->Captures().Get(2).Value()==L"56");
 	}
 }
 
@@ -988,11 +988,11 @@ TEST_CASE(TestRegexLexer1)
 	codes.Add(L"/d+");
 	codes.Add(L"/s+");
 	codes.Add(L"[a-zA-Z_]/w*");
-	RegexLexer lexer(codes.Wrap());
+	RegexLexer lexer(codes);
 
 	{
 		List<RegexToken> tokens;
-		CopyFrom(tokens.Wrap(), lexer.Parse(L"vczh is$$a&&genius  1234"));
+		CopyFrom(tokens, lexer.Parse(L"vczh is$$a&&genius  1234"));
 		TestRegexLexer1Validation(tokens);
 	}
 	{
@@ -1165,7 +1165,7 @@ TEST_CASE(TestRegexLexer2)
 	codes.Add(L"/d+");
 	codes.Add(L"[a-zA-Z_]/w*");
 	codes.Add(L"\"[^\"]*\"");
-	RegexLexer lexer(codes.Wrap());
+	RegexLexer lexer(codes);
 
 	WString input=
 		L"12345vczh is a genius!"		L"\r\n"
@@ -1173,7 +1173,7 @@ TEST_CASE(TestRegexLexer2)
 		L"hey!";
 	{
 		List<RegexToken> tokens;
-		CopyFrom(tokens.Wrap(), lexer.Parse(input));
+		CopyFrom(tokens, lexer.Parse(input));
 		TestRegexLexer2Validation(tokens);
 	}
 	{
@@ -1189,11 +1189,11 @@ TEST_CASE(TestRegexLexer3)
 		List<WString> codes;
 		codes.Add(L"unit");
 		codes.Add(L"/w+");
-		RegexLexer lexer(codes.Wrap());
+		RegexLexer lexer(codes);
 		{
 			WString input=L"unit";
 			List<RegexToken> tokens;
-			CopyFrom(tokens.Wrap(), lexer.Parse(input));
+			CopyFrom(tokens, lexer.Parse(input));
 			TEST_ASSERT(tokens.Count()==1);
 			TEST_ASSERT(tokens[0].start==0);
 			TEST_ASSERT(tokens[0].length==4);
@@ -1206,7 +1206,7 @@ TEST_CASE(TestRegexLexer3)
 		{
 			WString input=L"vczh";
 			List<RegexToken> tokens;
-			CopyFrom(tokens.Wrap(), lexer.Parse(input));
+			CopyFrom(tokens, lexer.Parse(input));
 			TEST_ASSERT(tokens.Count()==1);
 			TEST_ASSERT(tokens[0].start==0);
 			TEST_ASSERT(tokens[0].length==4);
@@ -1221,11 +1221,11 @@ TEST_CASE(TestRegexLexer3)
 		List<WString> codes;
 		codes.Add(L"/w+");
 		codes.Add(L"unit");
-		RegexLexer lexer(codes.Wrap());
+		RegexLexer lexer(codes);
 		{
 			WString input=L"unit";
 			List<RegexToken> tokens;
-			CopyFrom(tokens.Wrap(), lexer.Parse(input));
+			CopyFrom(tokens, lexer.Parse(input));
 			TEST_ASSERT(tokens.Count()==1);
 			TEST_ASSERT(tokens[0].start==0);
 			TEST_ASSERT(tokens[0].length==4);
@@ -1238,7 +1238,7 @@ TEST_CASE(TestRegexLexer3)
 		{
 			WString input=L"vczh";
 			List<RegexToken> tokens;
-			CopyFrom(tokens.Wrap(), lexer.Parse(input));
+			CopyFrom(tokens, lexer.Parse(input));
 			TEST_ASSERT(tokens.Count()==1);
 			TEST_ASSERT(tokens[0].start==0);
 			TEST_ASSERT(tokens[0].length==4);
@@ -1257,11 +1257,11 @@ TEST_CASE(TestRegexLexer4)
 		List<WString> codes;
 		codes.Add(L"=");
 		codes.Add(L"==");
-		RegexLexer lexer(codes.Wrap());
+		RegexLexer lexer(codes);
 		{
 			WString input=L"=";
 			List<RegexToken> tokens;
-			CopyFrom(tokens.Wrap(), lexer.Parse(input));
+			CopyFrom(tokens, lexer.Parse(input));
 			TEST_ASSERT(tokens.Count()==1);
 			TEST_ASSERT(tokens[0].start==0);
 			TEST_ASSERT(tokens[0].length==1);
@@ -1274,7 +1274,7 @@ TEST_CASE(TestRegexLexer4)
 		{
 			WString input=L"==";
 			List<RegexToken> tokens;
-			CopyFrom(tokens.Wrap(), lexer.Parse(input));
+			CopyFrom(tokens, lexer.Parse(input));
 			TEST_ASSERT(tokens.Count()==1);
 			TEST_ASSERT(tokens[0].start==0);
 			TEST_ASSERT(tokens[0].length==2);
@@ -1289,11 +1289,11 @@ TEST_CASE(TestRegexLexer4)
 		List<WString> codes;
 		codes.Add(L"==");
 		codes.Add(L"=");
-		RegexLexer lexer(codes.Wrap());
+		RegexLexer lexer(codes);
 		{
 			WString input=L"=";
 			List<RegexToken> tokens;
-			CopyFrom(tokens.Wrap(), lexer.Parse(input));
+			CopyFrom(tokens, lexer.Parse(input));
 			TEST_ASSERT(tokens.Count()==1);
 			TEST_ASSERT(tokens[0].start==0);
 			TEST_ASSERT(tokens[0].length==1);
@@ -1306,7 +1306,7 @@ TEST_CASE(TestRegexLexer4)
 		{
 			WString input=L"==";
 			List<RegexToken> tokens;
-			CopyFrom(tokens.Wrap(), lexer.Parse(input));
+			CopyFrom(tokens, lexer.Parse(input));
 			TEST_ASSERT(tokens.Count()==1);
 			TEST_ASSERT(tokens[0].start==0);
 			TEST_ASSERT(tokens[0].length==2);
@@ -1341,7 +1341,7 @@ TEST_CASE(TestRegexLexerWalker)
 	codes.Add(L"/d+(./d+)?");
 	codes.Add(L"[a-zA-Z_]/w*");
 	codes.Add(L"\"[^\"]*\"");
-	RegexLexer lexer(codes.Wrap());
+	RegexLexer lexer(codes);
 	RegexLexerWalker walker=lexer.Walk();
 
 	vint state=-1;
@@ -1400,7 +1400,7 @@ TEST_CASE(TestRegexLexerColorizer)
 	codes.Add(L"/d+(./d+)?");
 	codes.Add(L"[a-zA-Z_]/w*");
 	codes.Add(L"\"[^\"]*\"");
-	RegexLexer lexer(codes.Wrap());
+	RegexLexer lexer(codes);
 	RegexLexerColorizer colorizer=lexer.Colorize();
 
 	const wchar_t line1[]=L" genius 10..10.10   \"a";

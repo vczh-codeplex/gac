@@ -442,7 +442,7 @@ CharSetNormalizationAlgorithm
 			void Apply(CharSetExpression* expression, NormalizedCharSet* target)
 			{
 				CharRange::List source;
-				CopyFrom(source.Wrap(), expression->ranges.Wrap());
+				CopyFrom(source, expression->ranges);
 				expression->ranges.Clear();
 				Loop(expression, source, target);
 				expression->reverse=false;
@@ -466,7 +466,7 @@ MergeAlgorithm
 			Expression::Ref Apply(CharSetExpression* expression, MergeParameter* target)
 			{
 				Ptr<CharSetExpression> result=new CharSetExpression;
-				CopyFrom(result->ranges.Wrap(), expression->ranges.Wrap());
+				CopyFrom(result->ranges, expression->ranges);
 				result->reverse=expression->reverse;
 				return result;
 			}
@@ -809,21 +809,21 @@ Expression
 			NormalizedCharSet normalized;
 			BuildNormalizedCharSetAlgorithm().Invoke(this, &normalized);
 			SetNormalizedCharSetAlgorithm().Invoke(this, &normalized);
-			CopyFrom(subsets.Wrap(), normalized.ranges.Wrap());
+			CopyFrom(subsets, normalized.ranges);
 		}
 
 		void Expression::CollectCharSet(CharRange::List& subsets)
 		{
 			NormalizedCharSet normalized;
-			CopyFrom(normalized.ranges.Wrap(), subsets.Wrap());
+			CopyFrom(normalized.ranges, subsets);
 			BuildNormalizedCharSetAlgorithm().Invoke(this, &normalized);
-			CopyFrom(subsets.Wrap(), normalized.ranges.Wrap());
+			CopyFrom(subsets, normalized.ranges);
 		}
 
 		void Expression::ApplyCharSet(CharRange::List& subsets)
 		{
 			NormalizedCharSet normalized;
-			CopyFrom(normalized.ranges.Wrap(), subsets.Wrap());
+			CopyFrom(normalized.ranges, subsets);
 			SetNormalizedCharSetAlgorithm().Invoke(this, &normalized);
 		}
 

@@ -111,7 +111,7 @@ ParsingSymbol
 				}
 				else
 				{
-					return subSymbolMap.Values()[index];
+					return subSymbolMap.Values().Get(index);
 				}
 			}
 
@@ -335,7 +335,7 @@ ParsingSymbolManager
 			{
 				DefinitionTypeScopePair key(type, scope);
 				vint index=definitionTypeSymbolCache.Keys().IndexOf(key);
-				return index==-1?0:definitionTypeSymbolCache.Values()[index];
+				return index==-1?0:definitionTypeSymbolCache.Values().Get(index);
 			}
 
 			bool ParsingSymbolManager::CacheSetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope, ParsingSymbol* symbol)
@@ -356,7 +356,7 @@ ParsingSymbolManager
 			ParsingSymbol* ParsingSymbolManager::CacheGetSymbol(definitions::ParsingDefinitionGrammar* grammar)
 			{
 				vint index=definitionGrammarSymbolCache.Keys().IndexOf(grammar);
-				return index==-1?0:definitionGrammarSymbolCache.Values()[index];
+				return index==-1?0:definitionGrammarSymbolCache.Values().Get(index);
 			}
 
 			bool ParsingSymbolManager::CacheSetSymbol(definitions::ParsingDefinitionGrammar* grammar, ParsingSymbol* symbol)
@@ -376,7 +376,7 @@ ParsingSymbolManager
 			ParsingSymbol* ParsingSymbolManager::CacheGetType(definitions::ParsingDefinitionGrammar* grammar)
 			{
 				vint index=definitionGrammarTypeCache.Keys().IndexOf(grammar);
-				return index==-1?0:definitionGrammarTypeCache.Values()[index];
+				return index==-1?0:definitionGrammarTypeCache.Values().Get(index);
 			}
 
 			bool ParsingSymbolManager::CacheSetType(definitions::ParsingDefinitionGrammar* grammar, ParsingSymbol* type)
@@ -568,11 +568,11 @@ PrepareSymbols
 						if(classType)
 						{
 							PrepareSymbolsTypeDefinitionVisitor visitor(manager, classType, errors);
-							FOREACH(Ptr<ParsingDefinitionTypeDefinition>, subType, node->subTypes.Wrap())
+							FOREACH(Ptr<ParsingDefinitionTypeDefinition>, subType, node->subTypes)
 							{
 								subType->Accept(&visitor);
 							}
-							FOREACH(Ptr<ParsingDefinitionClassMemberDefinition>, member, node->members.Wrap())
+							FOREACH(Ptr<ParsingDefinitionClassMemberDefinition>, member, node->members)
 							{
 								member->Accept(&visitor);
 							}
@@ -604,7 +604,7 @@ PrepareSymbols
 						if(enumType)
 						{
 							PrepareSymbolsTypeDefinitionVisitor visitor(manager, enumType, errors);
-							FOREACH(Ptr<ParsingDefinitionEnumMemberDefinition>, member, node->members.Wrap())
+							FOREACH(Ptr<ParsingDefinitionEnumMemberDefinition>, member, node->members)
 							{
 								member->Accept(&visitor);
 							}
@@ -621,13 +621,13 @@ PrepareSymbols
 			{
 				{
 					PrepareSymbolsTypeDefinitionVisitor visitor(manager, manager->GetGlobal(), errors);
-					FOREACH(Ptr<ParsingDefinitionTypeDefinition>, typeDefinition, definition->types.Wrap())
+					FOREACH(Ptr<ParsingDefinitionTypeDefinition>, typeDefinition, definition->types)
 					{
 						typeDefinition->Accept(&visitor);
 					}
 				}
 
-				FOREACH(Ptr<ParsingDefinitionTokenDefinition>, token, definition->tokens.Wrap())
+				FOREACH(Ptr<ParsingDefinitionTokenDefinition>, token, definition->tokens)
 				{
 					if(manager->GetGlobal()->GetSubSymbolByName(token->name))
 					{
@@ -639,7 +639,7 @@ PrepareSymbols
 					}
 				}
 
-				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules.Wrap())
+				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules)
 				{
 					if(manager->GetGlobal()->GetSubSymbolByName(rule->name))
 					{
@@ -806,7 +806,7 @@ ValidateRuleStructure
 
 			void ValidateRuleStructure(Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
 			{
-				FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars.Wrap())
+				FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars)
 				{
 					ValidateRuleStructureVisitor visitor(manager, rule.Obj(), errors);
 					grammar->Accept(&visitor);
@@ -843,7 +843,7 @@ ResolveRuleSymbols
 				WString ToString()
 				{
 					WString result;
-					FOREACH(Ptr<GrammarPathFragment>, fragment, fragments.Wrap())
+					FOREACH(Ptr<GrammarPathFragment>, fragment, fragments)
 					{
 						if(!fragment->epsilon)
 						{
@@ -879,13 +879,13 @@ ResolveRuleSymbols
 					:manager(visitor.manager)
 					,rule(visitor.rule)
 				{
-					CopyFrom(currentFragmentEnds.Wrap(), visitor.currentFragmentEnds.Wrap());
+					CopyFrom(currentFragmentEnds, visitor.currentFragmentEnds);
 				}
 
 				void Join(const EnumerateGrammarPathVisitor& visitor)
 				{
-					CopyFrom(createdFragments.Wrap(), visitor.createdFragments.Wrap(), true);
-					CopyFrom(currentFragmentEnds.Wrap(), visitor.currentFragmentEnds.Wrap(), true);
+					CopyFrom(createdFragments, visitor.createdFragments, true);
+					CopyFrom(currentFragmentEnds, visitor.currentFragmentEnds, true);
 				}
 
 				void AddFragment(ParsingDefinitionGrammar* node, bool epsilon, ParsingSymbol* createdType)
@@ -913,7 +913,7 @@ ResolveRuleSymbols
 
 				void BuildPath(List<Ptr<GrammarPath>>& paths)
 				{
-					FOREACH(GrammarPathFragment*, fragment, currentFragmentEnds.Wrap())
+					FOREACH(GrammarPathFragment*, fragment, currentFragmentEnds)
 					{
 						Ptr<GrammarPath> path=new GrammarPath;
 						paths.Add(path);
@@ -1138,7 +1138,7 @@ ResolveRuleSymbols
 			{
 				ParsingSymbol* ruleType=manager->GetGlobal()->GetSubSymbolByName(rule->name)->GetDescriptorSymbol();
 
-				FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars.Wrap())
+				FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars)
 				{
 					List<Ptr<GrammarPath>> paths;
 					{
@@ -1147,12 +1147,12 @@ ResolveRuleSymbols
 						visitor.BuildPath(paths);
 					}
 
-					FOREACH(Ptr<GrammarPath>, path, paths.Wrap())
+					FOREACH(Ptr<GrammarPath>, path, paths)
 					{
 						path->pathType=ruleType;
 						vint createdTypeCount=0;
 						vint transitionCount=0;
-						FOREACH(Ptr<GrammarPathFragment>, fragment, path->fragments.Wrap())
+						FOREACH(Ptr<GrammarPathFragment>, fragment, path->fragments)
 						{
 							if(fragment->createdType)
 							{
@@ -1176,9 +1176,9 @@ ResolveRuleSymbols
 					}
 
 					ResolveAssignerGrammarVisitor::GrammarPathMap grammarPathMap;
-					FOREACH(Ptr<GrammarPath>, path, paths.Wrap())
+					FOREACH(Ptr<GrammarPath>, path, paths)
 					{
-						FOREACH(Ptr<GrammarPathFragment>, fragment, path->fragments.Wrap())
+						FOREACH(Ptr<GrammarPathFragment>, fragment, path->fragments)
 						{
 							ParsingDefinitionGrammar* grammar=fragment->grammar;
 							Ptr<GrammarPathContainer> container;
@@ -1190,7 +1190,7 @@ ResolveRuleSymbols
 							}
 							else
 							{
-								container=grammarPathMap.Values()[index];
+								container=grammarPathMap.Values().Get(index);
 							}
 							container->paths.Add(path);
 						}
@@ -1210,7 +1210,7 @@ ResolveSymbols
 
 			void ResolveSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
 			{
-				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules.Wrap())
+				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules)
 				{
 					vint errorCount=errors.Count();
 					ValidateRuleStructure(rule, manager, errors);

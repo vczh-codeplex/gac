@@ -111,7 +111,7 @@ GeneralTypeDescriptor
 													bool											_nullable
 													);
 						MethodBuilder&			Invoker(
-													const Func<Value(const Value&, collections::IArray<Value>&)>&	_invoker
+													const Func<Value(const Value&, collections::Array<Value>&)>&	_invoker
 													);
 						PropertyGroup&			Done();
 					};

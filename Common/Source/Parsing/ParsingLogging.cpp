@@ -503,13 +503,13 @@ Logger (ParsingDefinitionGrammar)
 
 			void Log(Ptr<ParsingDefinition> definition, TextWriter& writer)
 			{
-				FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, definition->types.Wrap())
+				FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, definition->types)
 				{
 					Log(type.Obj(), L"", writer);
 					writer.WriteLine(L"");
 				}
 				
-				FOREACH(Ptr<ParsingDefinitionTokenDefinition>, token, definition->tokens.Wrap())
+				FOREACH(Ptr<ParsingDefinitionTokenDefinition>, token, definition->tokens)
 				{
 					writer.WriteString(L"token ");
 					writer.WriteString(token->name);
@@ -519,13 +519,13 @@ Logger (ParsingDefinitionGrammar)
 				}
 				writer.WriteLine(L"");
 				
-				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules.Wrap())
+				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules)
 				{
 					writer.WriteString(L"rule ");
 					Log(rule->type.Obj(), writer);
 					writer.WriteString(L" ");
 					writer.WriteLine(rule->name);
-					FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars.Wrap())
+					FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars)
 					{
 						writer.WriteString(L"        = ");
 						Log(grammar.Obj(), writer);
@@ -565,7 +565,7 @@ Logger (Automaton)
 						writer.WriteString(L" => ");
 						writer.WriteLine(state->stateExpression);
 
-						FOREACH(Transition*, transition, state->transitions.Wrap())
+						FOREACH(Transition*, transition, state->transitions)
 						{
 							if(!states.Contains(transition->target))
 							{
@@ -598,7 +598,7 @@ Logger (Automaton)
 							if(transition->stackPattern.Count()>0)
 							{
 								writer.WriteString(L"        STACK PATTERNS");
-								FOREACH(State*, stackPattern, transition->stackPattern.Wrap())
+								FOREACH(State*, stackPattern, transition->stackPattern)
 								{
 									writer.WriteString(L" [");
 									writer.WriteString(stackPattern->stateName);
@@ -619,7 +619,7 @@ Logger (Automaton)
 								writer.WriteLine(L"]");
 							}
 
-							FOREACH(Ptr<Action>, action, transition->actions.Wrap())
+							FOREACH(Ptr<Action>, action, transition->actions)
 							{
 								writer.WriteString(L"        ACTION");
 								switch(action->actionType)

@@ -157,7 +157,7 @@ Node
 				{
 					if(trackingInput.Available() && globalInfo.candidateErrors.Count())
 					{
-						CopyFrom(globalInfo.errors.Wrap(), globalInfo.candidateErrors.Wrap());
+						CopyFrom(globalInfo.errors, globalInfo.candidateErrors);
 					}
 					throw CombinatorException<I>(trackingInput, globalInfo);
 				}

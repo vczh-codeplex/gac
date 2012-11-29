@@ -147,13 +147,13 @@ description::TypeManager
 
 				IValueSerializer* GetValueSerializer(vint index)
 				{
-					return valueSerializers.Values()[index].Obj();
+					return valueSerializers.Values().Get(index).Obj();
 				}
 
 				IValueSerializer* GetValueSerializer(const WString& name)
 				{
 					vint index=valueSerializers.Keys().IndexOf(name);
-					return index==-1?0:valueSerializers.Values()[index].Obj();
+					return index==-1?0:valueSerializers.Values().Get(index).Obj();
 				}
 
 				bool SetValueSerializer(const WString& name, Ptr<IValueSerializer> valueSerializer)
@@ -184,13 +184,13 @@ description::TypeManager
 
 				ITypeDescriptor* GetTypeDescriptor(vint index)
 				{
-					return typeDescriptors.Values()[index].Obj();
+					return typeDescriptors.Values().Get(index).Obj();
 				}
 
 				ITypeDescriptor* GetTypeDescriptor(const WString& name)
 				{
 					vint index=typeDescriptors.Keys().IndexOf(name);
-					return index==-1?0:typeDescriptors.Values()[index].Obj();
+					return index==-1?0:typeDescriptors.Values().Get(index).Obj();
 				}
 
 				bool SetTypeDescriptor(const WString& name, Ptr<ITypeDescriptor> typeDescriptor)

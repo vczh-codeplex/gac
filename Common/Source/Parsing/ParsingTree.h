@@ -116,13 +116,12 @@ namespace vl
 			};
 		protected:
 			typedef collections::List<Ptr<ParsingTreeNode>>				NodeList;
-			typedef collections::IReadonlyList<Ptr<ParsingTreeNode>>	INodeList;
 
 			ParsingTextRange			codeRange;
 			ParsingTreeNode*			parent;
 			NodeList					cachedOrderedSubNodes;
 
-			virtual const INodeList&	GetSubNodesInternal()=0;
+			virtual const NodeList&		GetSubNodesInternal()=0;
 			bool						BeforeAddChild(Ptr<ParsingTreeNode> node);
 			void						AfterAddChild(Ptr<ParsingTreeNode> node);
 			bool						BeforeRemoveChild(Ptr<ParsingTreeNode> node);
@@ -138,7 +137,7 @@ namespace vl
 			void						InitializeQueryCache();
 			void						ClearQueryCache();
 			ParsingTreeNode*			GetParent();
-			const INodeList&			GetSubNodes();
+			const NodeList&				GetSubNodes();
 			Ptr<ParsingTreeNode>		FindNode(const ParsingTextPos& position);
 		};
 
@@ -148,7 +147,7 @@ namespace vl
 			WString						value;
 			vint						tokenIndex;
 
-			const INodeList&			GetSubNodesInternal()override;
+			const NodeList&				GetSubNodesInternal()override;
 		public:
 			ParsingTreeToken(const WString& _value, vint _tokenIndex=-1, const ParsingTextRange& _codeRange=ParsingTextRange());
 			~ParsingTreeToken();
@@ -164,13 +163,12 @@ namespace vl
 		{
 		protected:
 			typedef collections::Dictionary<WString, Ptr<ParsingTreeNode>>				NodeMap;
-			typedef collections::IReadonlyDictionary<WString, Ptr<ParsingTreeNode>>		INodeMap;
-			typedef collections::IReadonlyList<WString>									INameList;
+			typedef collections::SortedList<WString>									NameList;
 
 			WString						type;
 			NodeMap						members;
 
-			const INodeList&			GetSubNodesInternal()override;
+			const NodeList&			GetSubNodesInternal()override;
 		public:
 			ParsingTreeObject(const WString& _type=L"", const ParsingTextRange& _codeRange=ParsingTextRange());
 			~ParsingTreeObject();
@@ -178,23 +176,22 @@ namespace vl
 			void						Accept(IVisitor* visitor)override;
 			const WString&				GetType();
 			void						SetType(const WString& _type);
-			INodeMap&					GetMembers();
+			NodeMap&					GetMembers();
 			Ptr<ParsingTreeNode>		GetMember(const WString& name);
 			bool						SetMember(const WString& name, Ptr<ParsingTreeNode> node);
 			bool						RemoveMember(const WString& name);
-			const INameList&			GetMemberNames();
+			const NameList&				GetMemberNames();
 		};
 
 		class ParsingTreeArray : public ParsingTreeNode
 		{
 		protected:
 			typedef collections::List<Ptr<ParsingTreeNode>>								NodeArray;
-			typedef collections::IReadonlyList<Ptr<ParsingTreeNode>>					INodeArray;
 
 			WString						elementType;
 			NodeArray					items;
 
-			const INodeList&			GetSubNodesInternal()override;
+			const NodeList&				GetSubNodesInternal()override;
 		public:
 			ParsingTreeArray(const WString& _elementType=L"", const ParsingTextRange& _codeRange=ParsingTextRange());
 			~ParsingTreeArray();
@@ -202,7 +199,7 @@ namespace vl
 			void						Accept(IVisitor* visitor)override;
 			const WString&				GetElementType();
 			void						SetElementType(const WString& _elementType);
-			INodeArray&					GetItems();
+			NodeArray&					GetItems();
 			Ptr<ParsingTreeNode>		GetItem(vint index);
 			bool						SetItem(vint index, Ptr<ParsingTreeNode> node);
 			bool						AddItem(Ptr<ParsingTreeNode> node);

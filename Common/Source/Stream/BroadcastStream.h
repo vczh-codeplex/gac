@@ -19,17 +19,16 @@ namespace vl
 	{
 		class BroadcastStream : public Object, public virtual IStream
 		{
-			typedef collections::IList<IStream*>	_ListInterface;
-			typedef collections::List<IStream*>		_List;
+			typedef collections::List<IStream*>		StreamList;
 		protected:
 			bool					closed;
 			pos_t					position;
-			_List					streams;
+			StreamList				streams;
 		public:
 			BroadcastStream();
 			~BroadcastStream();
 
-			_ListInterface&			Targets();
+			StreamList&				Targets();
 			bool					CanRead()const;
 			bool					CanWrite()const;
 			bool					CanSeek()const;

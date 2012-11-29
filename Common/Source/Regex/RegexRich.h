@@ -61,7 +61,7 @@ namespace vl
 
 			bool							MatchHead(const wchar_t* input, const wchar_t* start, RichResult& result);
 			bool							Match(const wchar_t* input, const wchar_t* start, RichResult& result);
-			const IReadonlyList<WString>&	CaptureNames();
+			const List<WString>&			CaptureNames();
 		};
 	};
 }
