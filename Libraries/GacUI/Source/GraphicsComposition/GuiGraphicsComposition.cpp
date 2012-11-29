@@ -70,7 +70,7 @@ GuiSubComponentMeasurer::MeasuringSource
 
 			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetSubComponentComposition(int index)
 			{
-				return subComponents.Values()[index];
+				return subComponents.Values().Get(index);
 			}
 
 			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetSubComponentComposition(const WString& name)
@@ -130,7 +130,7 @@ GuiSubComponentMeasurer
 			void GuiSubComponentMeasurer::MeasureAndUpdate(const WString& measuringCategory, Direction direction)
 			{
 				List<IMeasuringSource*> sources;
-				FOREACH(IMeasuringSource*, source, measuringSources.Wrap())
+				FOREACH(IMeasuringSource*, source, measuringSources)
 				{
 					if(source->GetMeasuringCategory()==measuringCategory)
 					{
@@ -139,7 +139,7 @@ GuiSubComponentMeasurer
 				}
 
 				Dictionary<WString, int> sizes;
-				FOREACH(IMeasuringSource*, source, sources.Wrap())
+				FOREACH(IMeasuringSource*, source, sources)
 				{
 					int count=source->GetSubComponentCount();
 					for(int i=0;i<count;i++)
@@ -155,13 +155,13 @@ GuiSubComponentMeasurer
 						{
 							sizes.Add(name, sizeComponent);
 						}
-						else if(sizes.Values()[index]<sizeComponent)
+						else if(sizes.Values().Get(index)<sizeComponent)
 						{
 							sizes.Set(name, sizeComponent);
 						}
 					}
 				}
-				FOREACH(IMeasuringSource*, source, sources.Wrap())
+				FOREACH(IMeasuringSource*, source, sources)
 				{
 					int count=source->GetSubComponentCount();
 					for(int i=0;i<count;i++)

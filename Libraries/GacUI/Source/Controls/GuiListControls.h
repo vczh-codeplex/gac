@@ -373,7 +373,7 @@ List Control
 					Ptr<compositions::GuiNotifyEvent::IHandler>		mouseLeaveHandler;
 				};
 				
-				friend class collections::ReadonlyListEnumerator<Ptr<VisibleStyleHelper>>;
+				friend class collections::ArrayBase<Ptr<VisibleStyleHelper>>;
 				collections::Dictionary<IItemStyleController*, Ptr<VisibleStyleHelper>>		visibleStyles;
 
 				void											OnItemMouseEvent(compositions::GuiItemMouseEvent& itemEvent, IItemStyleController* style, compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
@@ -506,7 +506,7 @@ Selectable List Control
 				
 				/// <summary>Get indices of all selected items.</summary>
 				/// <returns>Indices of all selected items.</returns>
-				const collections::IReadonlyList<int>&			GetSelectedItems();
+				const collections::SortedList<int>&				GetSelectedItems();
 				/// <summary>Get the selection status of an item.</summary>
 				/// <returns>The selection status of an item.</returns>
 				/// <param name="itemIndex">The index of the item.</param>

@@ -49,13 +49,13 @@ GuiGraphicsResourceManager
 			IGuiGraphicsElementFactory* GuiGraphicsResourceManager::GetElementFactory(const WString& elementTypeName)
 			{
 				int index=elementFactories.Keys().IndexOf(elementTypeName);
-				return index==-1?0:elementFactories.Values()[index].Obj();
+				return index==-1?0:elementFactories.Values().Get(index).Obj();
 			}
 
 			IGuiGraphicsRendererFactory* GuiGraphicsResourceManager::GetRendererFactory(const WString& elementTypeName)
 			{
 				int index=rendererFactories.Keys().IndexOf(elementTypeName);
-				return index==-1?0:rendererFactories.Values()[index].Obj();
+				return index==-1?0:rendererFactories.Values().Get(index).Obj();
 			}
 
 			GuiGraphicsResourceManager* guiGraphicsResourceManager=0;

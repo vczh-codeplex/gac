@@ -92,8 +92,8 @@ Win7TabStyle
 			{
 				for(int i=headerOverflowMenuStack->GetStackItems().Count()-1;i>=0;i--)
 				{
-					GuiStackItemComposition* item=headerOverflowMenuStack->GetStackItems()[i];
-					GuiControl* button=item->Children()[0]->GetAssociatedControl();
+					GuiStackItemComposition* item=headerOverflowMenuStack->GetStackItems().Get(i);
+					GuiControl* button=item->Children().Get(0)->GetAssociatedControl();
 
 					headerOverflowMenuStack->RemoveChild(item);
 					item->RemoveChild(button->GetBoundsComposition());
@@ -137,7 +137,7 @@ Win7TabStyle
 				int childCount=tabHeaderComposition->Children().Count();
 				for(int i=0;i<itemCount;i++)
 				{
-					GuiStackItemComposition* item=tabHeaderComposition->GetStackItems()[i];
+					GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(i);
 					if(headerButtons[i]->GetSelected())
 					{
 						tabHeaderComposition->MoveChild(item, childCount-1);
@@ -282,7 +282,7 @@ Win7TabStyle
 
 			void Win7TabStyle::RemoveTab(int index)
 			{
-				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems()[index];
+				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(index);
 				GuiSelectableButton* button=headerButtons[index];
 
 				tabHeaderComposition->RemoveChild(item);
@@ -296,7 +296,7 @@ Win7TabStyle
 
 			void Win7TabStyle::MoveTab(int oldIndex, int newIndex)
 			{
-				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems()[oldIndex];
+				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(oldIndex);
 				tabHeaderComposition->RemoveChild(item);
 				tabHeaderComposition->InsertStackItem(newIndex, item);
 

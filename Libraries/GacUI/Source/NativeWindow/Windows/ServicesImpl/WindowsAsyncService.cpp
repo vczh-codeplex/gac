@@ -48,7 +48,7 @@ WindowsAsyncService
 				Array<TaskItem> items;
 				{
 					SpinLock::Scope scope(taskListLock);
-					CopyFrom(items.Wrap(), taskItems.Wrap());
+					CopyFrom(items, taskItems);
 					taskItems.RemoveRange(0, items.Count());
 				}
 				for(int i=0;i<items.Count();i++)

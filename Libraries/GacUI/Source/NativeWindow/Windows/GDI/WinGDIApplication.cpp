@@ -105,7 +105,7 @@ namespace vl
 			WinDC* GetNativeWindowDC(INativeWindow* window)
 			{
 				int index=gdiListener->nativeWindowListeners.Keys().IndexOf(window);
-				return index==-1?0:gdiListener->nativeWindowListeners.Values()[index]->GetWinDC();
+				return index==-1?0:gdiListener->nativeWindowListeners.Values().Get(index)->GetWinDC();
 			}
 
 			HDC GetNativeWindowHDC(INativeWindow* window)

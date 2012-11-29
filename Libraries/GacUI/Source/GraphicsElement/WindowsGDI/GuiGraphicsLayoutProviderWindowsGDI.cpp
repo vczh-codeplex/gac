@@ -518,7 +518,7 @@ Uniscribe Operations (UniscribeLine)
 					lineText=L"";
 					CLearUniscribeData();
 					int current=0;
-					FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments.Wrap())
+					FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
 					{
 						lineText+=fragment->text;
 						current+=fragment->text.Length();
@@ -587,7 +587,7 @@ Uniscribe Operations (UniscribeLine)
 									bool skip=false;
 									{
 										int elementCurrent=0;
-										FOREACH(Ptr<UniscribeFragment>, elementFragment, documentFragments.Wrap())
+										FOREACH(Ptr<UniscribeFragment>, elementFragment, documentFragments)
 										{
 											int elementLength=elementFragment->text.Length();
 											if(elementFragment->element)
@@ -628,7 +628,7 @@ Uniscribe Operations (UniscribeLine)
 							}
 
 							// for each run, generate shape information
-							FOREACH(Ptr<UniscribeRun>, run, scriptRuns.Wrap())
+							FOREACH(Ptr<UniscribeRun>, run, scriptRuns)
 							{
 								if(!run->BuildUniscribeData(dc))
 								{
@@ -655,7 +655,7 @@ Uniscribe Operations (UniscribeLine)
 
 				void Render(WinDC* dc, int offsetX, int offsetY)
 				{
-					FOREACH(Ptr<UniscribeRun>, run, scriptRuns.Wrap())
+					FOREACH(Ptr<UniscribeRun>, run, scriptRuns)
 					{
 						for(int i=0;i<run->fragmentBounds.Count();i++)
 						{
@@ -692,7 +692,7 @@ Uniscribe Operations (UniscribeParagraph)
 
 				void ClearUniscribeData()
 				{
-					FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments.Wrap())
+					FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
 					{
 						GetWindowsGDIResourceManager()->DestroyGdiFont(fragment->fontStyle);
 						fragment->fontObject=0;
@@ -708,7 +708,7 @@ Uniscribe Operations (UniscribeParagraph)
 						built=true;
 						ClearUniscribeData();
 						Dictionary<WString, Ptr<WinFont>> fonts;
-						FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments.Wrap())
+						FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
 						{
 							if(!fragment->fontObject)
 							{
@@ -721,14 +721,14 @@ Uniscribe Operations (UniscribeParagraph)
 								}
 								else
 								{
-									fragment->fontObject=fonts.Values()[index];
+									fragment->fontObject=fonts.Values().Get(index);
 								}
 							}
 						}
 						{
 							Regex regexLine(L"\r\n");
 							Ptr<UniscribeLine> line;
-							FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments.Wrap())
+							FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
 							{
 								if(fragment->element)
 								{
@@ -772,7 +772,7 @@ Uniscribe Operations (UniscribeParagraph)
 							}
 						}
 
-						FOREACH(Ptr<UniscribeLine>, line, lines.Wrap())
+						FOREACH(Ptr<UniscribeLine>, line, lines)
 						{
 							line->BuildUniscribeData(dc);
 						}
@@ -789,7 +789,7 @@ Uniscribe Operations (UniscribeParagraph)
 
 					int cx=0;
 					int cy=0;
-					FOREACH(Ptr<UniscribeLine>, line, lines.Wrap())
+					FOREACH(Ptr<UniscribeLine>, line, lines)
 					{
 						if(line->scriptRuns.Count()==0)
 						{
@@ -800,7 +800,7 @@ Uniscribe Operations (UniscribeParagraph)
 						}
 						else
 						{
-							FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns.Wrap())
+							FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns)
 							{
 								run->fragmentBounds.Clear();
 							}
@@ -890,9 +890,9 @@ Uniscribe Operations (UniscribeParagraph)
 							int minY=0;
 							int maxX=0;
 							int maxY=0;
-							FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns.Wrap())
+							FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns)
 							{
-								FOREACH(UniscribeRun::RunFragmentBounds, fragmentBounds, run->fragmentBounds.Wrap())
+								FOREACH(UniscribeRun::RunFragmentBounds, fragmentBounds, run->fragmentBounds)
 								{
 									Rect bounds=fragmentBounds.bounds;
 									if(minX>bounds.Left()) minX=bounds.Left();
@@ -910,7 +910,7 @@ Uniscribe Operations (UniscribeParagraph)
 					int minY=0;
 					int maxX=0;
 					int maxY=0;
-					FOREACH(Ptr<UniscribeLine>, line, lines.Wrap())
+					FOREACH(Ptr<UniscribeLine>, line, lines)
 					{
 						Rect bounds=line->bounds;
 						if(minX>bounds.Left()) minX=bounds.Left();
@@ -923,7 +923,7 @@ Uniscribe Operations (UniscribeParagraph)
 
 				void Render(WinDC* dc, int offsetX, int offsetY)
 				{
-					FOREACH(Ptr<UniscribeLine>, line, lines.Wrap())
+					FOREACH(Ptr<UniscribeLine>, line, lines)
 					{
 						line->Render(dc, offsetX, offsetY);
 					}

@@ -462,7 +462,7 @@ GuiTableComposition
 				int childCount=Children().Count();
 				for(int i=0;i<childCount;i++)
 				{
-					GuiCellComposition* cell=dynamic_cast<GuiCellComposition*>(Children()[i]);
+					GuiCellComposition* cell=dynamic_cast<GuiCellComposition*>(Children().Get(i));
 					if(cell)
 					{
 						cell->OnTableRowsAndColumnsChanged();
@@ -551,7 +551,7 @@ GuiTableComposition
 
 				bool cellMinSizeModified=false;
 				SortedList<GuiCellComposition*> cells;
-				FOREACH(GuiCellComposition*, cell, cellCompositions.Wrap())
+				FOREACH(GuiCellComposition*, cell, cellCompositions)
 				{
 					if(cell && !cells.Contains(cell))
 					{

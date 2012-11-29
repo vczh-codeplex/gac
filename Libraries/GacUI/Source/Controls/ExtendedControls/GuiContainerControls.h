@@ -152,7 +152,7 @@ Tab Control
 				bool											MovePage(GuiTabPage* page, int newIndex);
 				/// <summary>Get all pages.</summary>
 				/// <returns>All pages.</returns>
-				const collections::IReadonlyList<GuiTabPage*>&	GetPages();
+				const collections::List<GuiTabPage*>&			GetPages();
 
 				/// <summary>Get the selected page.</summary>
 				/// <returns>The selected page.</returns>

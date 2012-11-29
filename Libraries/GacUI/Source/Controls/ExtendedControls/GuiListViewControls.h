@@ -264,7 +264,6 @@ ListView ItemStyleProvider
 				protected:
 
 					typedef collections::List<GuiListControl::IItemStyleController*>				ItemStyleList;
-					typedef collections::IReadonlyList<GuiListControl::IItemStyleController*>		IItemStyleList;
 
 					IListViewItemView*							listViewItemView;
 					Ptr<IListViewItemContentProvider>			listViewItemContentProvider;
@@ -283,7 +282,7 @@ ListView ItemStyleProvider
 
 					/// <summary>Get all created item styles.</summary>
 					/// <returns>All created item styles.</returns>
-					const IItemStyleList&						GetCreatedItemStyles();
+					const ItemStyleList&						GetCreatedItemStyles();
 					/// <summary>Test is an item style controller placed in the list view control. If not, maybe the style controller is cached for reusing.</summary>
 					/// <returns>Returns true if an item style controller is placed in the list view control.</returns>
 					bool										IsItemStyleAttachedToListView(GuiListControl::IItemStyleController* itemStyle);

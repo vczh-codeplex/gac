@@ -499,9 +499,9 @@ MemoryNodeProvider
 					}
 				}
 
-				MemoryNodeProvider::IChildList& MemoryNodeProvider::Children()
+				MemoryNodeProvider::ChildList& MemoryNodeProvider::Children()
 				{
-					return *this;
+					return children;
 				}
 
 				bool MemoryNodeProvider::GetExpanding()
@@ -575,7 +575,7 @@ MemoryNodeProvider
 
 				MemoryNodeProvider::ChildListEnumerator* MemoryNodeProvider::CreateEnumerator()const
 				{
-					return children.Wrap().CreateEnumerator();
+					return children.CreateEnumerator();
 				}
 
 				bool MemoryNodeProvider::Contains(const KeyType<Ptr<MemoryNodeProvider>>::Type& item)const

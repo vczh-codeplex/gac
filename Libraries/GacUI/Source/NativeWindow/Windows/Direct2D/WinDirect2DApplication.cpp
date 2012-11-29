@@ -119,7 +119,7 @@ namespace vl
 			ID2D1RenderTarget* GetNativeWindowDirect2DRenderTarget(INativeWindow* window)
 			{
 				int index=direct2DListener->nativeWindowListeners.Keys().IndexOf(window);
-				return index==-1?0:direct2DListener->nativeWindowListeners.Values()[index]->GetDirect2DRenderTarget();
+				return index==-1?0:direct2DListener->nativeWindowListeners.Values().Get(index)->GetDirect2DRenderTarget();
 			}
 
 			ID2D1Factory* GetDirect2DFactory()

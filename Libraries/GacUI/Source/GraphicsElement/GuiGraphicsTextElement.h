@@ -424,7 +424,6 @@ Colorized Plain Text (element)
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiColorizedTextElement, L"ColorizedText");
 
 				typedef collections::Array<text::ColorEntry>			ColorArray;
-				typedef collections::IReadonlyList<text::ColorEntry>	IColorArray;
 			public:
 				/// <summary>
 				/// An callback interface. Member functions will be called when colors or fonts of a <see cref="GuiColorizedTextElement"/> changed.
@@ -480,7 +479,7 @@ Colorized Plain Text (element)
 				/// Get the binded color table. Use <see cref="text::CharAtt::colorIndex"/> to use colors in this color table.
 				/// </summary>
 				/// <returns>The binded color table.</returns>
-				const IColorArray&					GetColors();
+				const ColorArray&					GetColors();
 				/// <summary>
 				/// Bind a color table. Use <see cref="text::CharAtt::colorIndex"/> to use colors in this color table. <see cref="ICallback::ColorChanged"/> will be called.
 				/// </summary>

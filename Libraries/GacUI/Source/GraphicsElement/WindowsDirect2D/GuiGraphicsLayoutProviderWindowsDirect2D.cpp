@@ -200,7 +200,7 @@ WindowsDirect2DParagraph
 
 				~WindowsDirect2DParagraph()
 				{
-					FOREACH(Color, color, usedColors.Wrap())
+					FOREACH(Color, color, usedColors)
 					{
 						renderTarget->DestroyDirect2DBrush(color);
 					}
@@ -305,7 +305,7 @@ WindowsDirect2DParagraph
 					}
 					for(int i=0;i<inlineElements.Count();i++)
 					{
-						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values()[i];
+						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values().Get(i);
 						if(start<inlineObject->GetStart()+inlineObject->GetLength() && inlineObject->GetStart()<start+length)
 						{
 							return false;
@@ -336,8 +336,8 @@ WindowsDirect2DParagraph
 				{
 					for(int i=0;i<inlineElements.Count();i++)
 					{
-						IGuiGraphicsElement* element=inlineElements.Keys()[i];
-						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values()[i];
+						IGuiGraphicsElement* element=inlineElements.Keys().Get(i);
+						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values().Get(i);
 						if(inlineObject->GetStart()==start && inlineObject->GetLength()==length)
 						{
 							DWRITE_TEXT_RANGE range;

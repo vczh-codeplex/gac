@@ -308,7 +308,7 @@ GuiListControl
 				int index=visibleStyles.Keys().IndexOf(style);
 				if(index!=-1)
 				{
-					Ptr<VisibleStyleHelper> helper=visibleStyles.Values()[index];
+					Ptr<VisibleStyleHelper> helper=visibleStyles.Values().Get(index);
 					visibleStyles.Remove(style);
 					
 					DETACH_ITEM_EVENT(leftButtonDown);
@@ -565,9 +565,9 @@ GuiSelectableListControl
 				}
 			}
 
-			const collections::IReadonlyList<int>& GuiSelectableListControl::GetSelectedItems()
+			const collections::SortedList<int>& GuiSelectableListControl::GetSelectedItems()
 			{
-				return selectedItems.Wrap();
+				return selectedItems;
 			}
 
 			bool GuiSelectableListControl::GetSelected(int itemIndex)

@@ -70,7 +70,7 @@ WindowsImageFrame
 			{
 				for(int i=0;i<caches.Count();i++)
 				{
-					caches.Values()[i]->OnDetach(this);
+					caches.Values().Get(i)->OnDetach(this);
 				}
 			}
 
@@ -102,7 +102,7 @@ WindowsImageFrame
 			Ptr<INativeImageFrameCache> WindowsImageFrame::GetCache(void* key)
 			{
 				int index=caches.Keys().IndexOf(key);
-				return index==-1?0:caches.Values()[index];
+				return index==-1?0:caches.Values().Get(index);
 			}
 
 			Ptr<INativeImageFrameCache> WindowsImageFrame::RemoveCache(void* key)
@@ -112,7 +112,7 @@ WindowsImageFrame
 				{
 					return 0;
 				}
-				Ptr<INativeImageFrameCache> cache=caches.Values()[index];
+				Ptr<INativeImageFrameCache> cache=caches.Values().Get(index);
 				cache->OnDetach(this);
 				caches.Remove(key);
 				return cache;

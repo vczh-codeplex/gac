@@ -285,11 +285,9 @@ GuiVirtualTreeListControl Predefined NodeProvider
 				class MemoryNodeProvider
 					: public Object
 					, public virtual INodeProvider
-					, private collections::IList<Ptr<MemoryNodeProvider>>
 					, public Description<MemoryNodeProvider>
 				{
 					typedef collections::List<Ptr<MemoryNodeProvider>> ChildList;
-					typedef collections::IList<Ptr<MemoryNodeProvider>> IChildList;
 					typedef collections::IEnumerator<Ptr<MemoryNodeProvider>> ChildListEnumerator;
 				protected:
 					MemoryNodeProvider*				parent;
@@ -340,7 +338,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					void							NotifyDataModified();
 					/// <summary>Get all sub nodes.</summary>
 					/// <returns>All sub nodes.</returns>
-					IChildList&						Children();
+					ChildList&						Children();
 
 					bool							GetExpanding()override;
 					void							SetExpanding(bool value)override;

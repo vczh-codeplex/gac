@@ -692,7 +692,7 @@ namespace dumppdb
 		for(int i=0;i<udtSymbols.Count();i++)
 		{
 			WString className=udtSymbols.Keys()[i];
-			IDiaSymbol* classSymbol=udtSymbols.Values()[i];
+			IDiaSymbol* classSymbol=udtSymbols.Values().Get(i);
 			enum SymTagEnum symTag=SymTagNull;
 			classSymbol->get_symTag((DWORD*)&symTag);
 			if(symTag==SymTagUDT)
@@ -714,7 +714,7 @@ namespace dumppdb
 		}
 		for(int i=0;i<udtSymbols.Count();i++)
 		{
-			udtSymbols.Values()[i]->Release();
+			udtSymbols.Values().Get(i)->Release();
 		}
 		udtSymbols.Clear();
 
@@ -722,13 +722,13 @@ namespace dumppdb
 		for(int i=0;i<funcSymbols.Count();i++)
 		{
 			WString funcName=funcSymbols.Keys()[i];
-			IDiaSymbol* funcSymbol=funcSymbols.Values()[i];
+			IDiaSymbol* funcSymbol=funcSymbols.Values().Get(i);
 			DumpMethod(file, funcSymbol);
 		}
 		PrintXMLClose(file, 1, L"functions");
 		for(int i=0;i<funcSymbols.Count();i++)
 		{
-			funcSymbols.Values()[i]->Release();
+			funcSymbols.Values().Get(i)->Release();
 		}
 		funcSymbols.Clear();
 	}

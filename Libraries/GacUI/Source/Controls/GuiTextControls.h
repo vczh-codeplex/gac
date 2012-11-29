@@ -211,13 +211,13 @@ Colorizer
 				elements::text::ColorEntry									GetDefaultColor();
 				/// <summary>Get all regular expressions for tokens.</summary>
 				/// <returns>All regular expressions for tokens.</returns>
-				collections::IReadonlyList<WString>&						GetTokenRegexes();
+				collections::List<WString>&									GetTokenRegexes();
 				/// <summary>Get all colors for tokens.</summary>
 				/// <returns>All colors for tokens.</returns>
-				collections::IReadonlyList<elements::text::ColorEntry>&		GetTokenColors();
+				collections::List<elements::text::ColorEntry>&				GetTokenColors();
 				/// <summary>Get all colors for extra tokens.</summary>
 				/// <returns>All colors for extra tokens.</returns>
-				collections::IReadonlyList<elements::text::ColorEntry>&		GetExtraTokenColors();
+				collections::List<elements::text::ColorEntry>&				GetExtraTokenColors();
 				/// <summary>Get the first token index for the first extra token.</summary>
 				/// <returns>The first token index for the first extra token. Returns -1 if this operation failed.</returns>
 				int															GetExtraTokenIndexStart();
@@ -264,7 +264,7 @@ Undo Redo
 					virtual void							Undo()=0;
 					virtual void							Redo()=0;
 				};
-				friend class collections::ReadonlyListEnumerator<Ptr<IEditStep>>;
+				friend class collections::ArrayBase<Ptr<IEditStep>>;
 
 			protected:
 				collections::List<Ptr<IEditStep>>			steps;

@@ -808,19 +808,19 @@ GuiTextBoxRegexColorizer
 				return defaultColor;
 			}
 
-			collections::IReadonlyList<WString>& GuiTextBoxRegexColorizer::GetTokenRegexes()
+			collections::List<WString>& GuiTextBoxRegexColorizer::GetTokenRegexes()
 			{
-				return tokenRegexes.Wrap();
+				return tokenRegexes;
 			}
 
-			collections::IReadonlyList<elements::text::ColorEntry>& GuiTextBoxRegexColorizer::GetTokenColors()
+			collections::List<elements::text::ColorEntry>& GuiTextBoxRegexColorizer::GetTokenColors()
 			{
-				return tokenColors.Wrap();
+				return tokenColors;
 			}
 
-			collections::IReadonlyList<elements::text::ColorEntry>& GuiTextBoxRegexColorizer::GetExtraTokenColors()
+			collections::List<elements::text::ColorEntry>& GuiTextBoxRegexColorizer::GetExtraTokenColors()
 			{
-				return extraTokenColors.Wrap();
+				return extraTokenColors;
 			}
 
 			int GuiTextBoxRegexColorizer::GetExtraTokenIndexStart()
@@ -883,7 +883,7 @@ GuiTextBoxRegexColorizer
 				}
 				else
 				{
-					lexer=new regex::RegexLexer(tokenRegexes.Wrap());
+					lexer=new regex::RegexLexer(tokenRegexes);
 					colors.Resize(1+tokenRegexes.Count()+extraTokenColors.Count());
 					colors[0]=defaultColor;
 					for(int i=0;i<tokenColors.Count();i++)

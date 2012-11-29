@@ -37,7 +37,6 @@ Basic Construction
 			/// </summary>
 			class GuiGraphicsComposition : public Object, public Description<GuiGraphicsComposition>
 			{
-				typedef collections::IReadonlyList<GuiGraphicsComposition*> ICompositionList;
 				typedef collections::List<GuiGraphicsComposition*> CompositionList;
 
 				friend class controls::GuiControl;
@@ -90,7 +89,7 @@ Basic Construction
 				GuiGraphicsComposition*						GetParent();
 				/// <summary>Get all child compositions ordered by z-order from low to high.</summary>
 				/// <returns>Child compositions.</returns>
-				const ICompositionList&						Children();
+				const CompositionList&						Children();
 				/// <summary>Add a composition as a child.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="child">The child composition to add.</param>
