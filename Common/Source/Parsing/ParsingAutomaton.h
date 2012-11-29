@@ -31,10 +31,10 @@ namespace vl
 			public:
 				enum ActionType
 				{
-					Create,
-					Assign,
-					Using,
-					Setter,
+					Create, // new source
+					Assign, // source ::= <created symbol>
+					Using,  // use <created symbol>
+					Setter, // source ::= target
 				};
 
 				ActionType											actionType;
@@ -81,6 +81,7 @@ namespace vl
 
 				collections::List<Transition*>						transitions;
 				collections::List<Transition*>						inputs;
+				bool												endState;
 
 				ParsingSymbol*										ownerRuleSymbol;
 				definitions::ParsingDefinitionRuleDefinition*		ownerRule;
@@ -127,6 +128,8 @@ namespace vl
 				Transition*											CreateTransition(State* start, State* end);
 				Transition*											Epsilon(State* start, State* end);
 				Transition*											Finish(State* start, State* end);
+				Transition*											Symbol(State* start, State* end, ParsingSymbol* transitionSymbol);
+				Transition*											Symbol(State* start, State* end, const WString& transitionText);
 			};
 
 /***********************************************************************
