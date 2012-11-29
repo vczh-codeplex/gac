@@ -186,19 +186,19 @@ namespace vl
 		{
 		private:
 			ReturnType					returnValue;
-			void*						parameterValue;
+			ParameterType*				parameterValue;
 		public:
 
 			ReturnType Invoke(Expression* expression, ParameterType parameter)
 			{
-				parameterValue=(void*)&parameter;
+				parameterValue=&parameter;
 				expression->Apply(*this);
 				return returnValue;
 			}
 
 			ReturnType Invoke(Expression::Ref expression, ParameterType parameter)
 			{
-				parameterValue=(void*)&parameter;
+				parameterValue=&parameter;
 				expression->Apply(*this);
 				return returnValue;
 			}
@@ -217,57 +217,57 @@ namespace vl
 		public:
 			void Visit(CharSetExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(LoopExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(SequenceExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(AlternateExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(BeginExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(EndExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(CaptureExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(MatchExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(PositiveExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(NegativeExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(UsingExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 		};
 
@@ -275,18 +275,18 @@ namespace vl
 		class RegexExpressionAlgorithm<void, ParameterType> : public Object, public IRegexExpressionAlgorithm
 		{
 		private:
-			void*						parameterValue;
+			ParameterType*				parameterValue;
 		public:
 
 			void Invoke(Expression* expression, ParameterType parameter)
 			{
-				parameterValue=(void*)&parameter;
+				parameterValue=&parameter;
 				expression->Apply(*this);
 			}
 
 			void Invoke(Expression::Ref expression, ParameterType parameter)
 			{
-				parameterValue=(void*)&parameter;
+				parameterValue=&parameter;
 				expression->Apply(*this);
 			}
 
@@ -304,57 +304,57 @@ namespace vl
 		public:
 			void Visit(CharSetExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(LoopExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(SequenceExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(AlternateExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(BeginExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(EndExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(CaptureExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(MatchExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(PositiveExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(NegativeExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(UsingExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 		};
 
