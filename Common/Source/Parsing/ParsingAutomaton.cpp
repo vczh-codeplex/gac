@@ -67,6 +67,7 @@ RuleInfo
 				:rootRuleStartState(0)
 				,rootRuleEndState(0)
 				,startState(0)
+				,stateNameCount(0)
 			{
 			}
 
@@ -94,7 +95,8 @@ Automaton
 
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
-				state->stateName=L"， <"+ownerRule->name+L">";
+				state->stateName=ownerRule->name+L".RootStart";
+				state->stateExpression=L"， <"+ownerRule->name+L">";
 				return state;
 			}
 
@@ -105,7 +107,8 @@ Automaton
 
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
-				state->stateName=L"， $<"+ownerRule->name+L">";
+				state->stateName=ownerRule->name+L".RootEnd";
+				state->stateExpression=L"， $<"+ownerRule->name+L">";
 				return state;
 			}
 
@@ -116,7 +119,8 @@ Automaton
 
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
-				state->stateName=L"$<"+ownerRule->name+L"> ，";
+				state->stateName=ownerRule->name+L".Start";
+				state->stateExpression=L"$<"+ownerRule->name+L"> ，";
 				return state;
 			}
 
@@ -129,7 +133,8 @@ Automaton
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
 				state->stateNode=stateNode;
 				state->statePosition=State::BeforeNode;
-				state->stateName=L"<"+ownerRule->name+L">: "+GrammarStateToString(grammarNode, stateNode, true);
+				state->stateName=ownerRule->name+L"."+itow(++ruleInfos[ownerRule]->stateNameCount);
+				state->stateExpression=L"<"+ownerRule->name+L">: "+GrammarStateToString(grammarNode, stateNode, true);
 				return state;
 			}
 
@@ -141,8 +146,9 @@ Automaton
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
 				state->stateNode=stateNode;
-				state->statePosition=State::BeforeNode;
-				state->stateName=L"<"+ownerRule->name+L">: "+GrammarStateToString(grammarNode, stateNode, false);
+				state->statePosition=State::AfterNode;
+				state->stateName=ownerRule->name+L"."+itow(++ruleInfos[ownerRule]->stateNameCount);
+				state->stateExpression=L"<"+ownerRule->name+L">: "+GrammarStateToString(grammarNode, stateNode, false);
 				return state;
 			}
 

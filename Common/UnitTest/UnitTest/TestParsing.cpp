@@ -38,7 +38,7 @@ namespace test
 		if(errors.Count()>0)
 		{
 			writer.WriteLine(L"=============================================================");
-			writer.WriteLine(L"errors");
+			writer.WriteLine(L"Errprs");
 			writer.WriteLine(L"=============================================================");
 			FOREACH(Ptr<ParsingError>, error, errors.Wrap())
 			{
@@ -49,6 +49,12 @@ namespace test
 			fileStream.Close();
 		}
 		TEST_ASSERT(errors.Count()==0);
+
+		Ptr<Automaton> automaton=CreateEpsilonPDA(definition, &symbolManager);
+		writer.WriteLine(L"=============================================================");
+		writer.WriteLine(L"Epsilon PDA");
+		writer.WriteLine(L"=============================================================");
+		Log(automaton, writer);
 	}
 }
 using namespace test;

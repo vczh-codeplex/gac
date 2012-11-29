@@ -1,4 +1,5 @@
 #include "ParsingDefinitions.h"
+#include "ParsingAutomaton.h"
 #include "..\Stream\MemoryStream.h"
 #include "..\Collections\OperationForEach.h"
 
@@ -531,6 +532,120 @@ Logger (ParsingDefinitionGrammar)
 						writer.WriteLine(L";");
 					}
 					writer.WriteLine(L"");
+				}
+			}
+		}
+
+		namespace analyzing
+		{
+/***********************************************************************
+Logger (Automaton)
+***********************************************************************/
+
+			void Log(Ptr<Automaton> automaton, stream::TextWriter& writer)
+			{
+				FOREACH(Ptr<RuleInfo>, ruleInfo, automaton->ruleInfos.Values())
+				{
+					List<State*> states;
+					states.Add(ruleInfo->rootRuleStartState);
+					vint currentState=0;
+
+					while(currentState<states.Count())
+					{
+						State* state=states[currentState++];
+						writer.WriteString(state->stateName);
+						writer.WriteString(L" => ");
+						writer.WriteLine(state->stateExpression);
+
+						FOREACH(Transition*, transition, state->transitions.Wrap())
+						{
+							writer.WriteLine(L"");
+							if(!states.Contains(transition->target))
+							{
+								states.Add(transition->target);
+							}
+							switch(transition->transitionType)
+							{
+							case Transition::Epsilon:
+								writer.WriteString(L"    EPSILON");
+								break;
+							case Transition::Finish:
+								writer.WriteString(L"    FINISH");
+								break;
+							case Transition::Symbol:
+								{
+									writer.WriteString(L"    SYMBOL [");
+									if(transition->transitionSymbol)
+									{
+										writer.WriteString(transition->transitionSymbol->GetName());
+									}
+									writer.WriteString(L"] [");
+									writer.WriteString(transition->transitionText);
+									writer.WriteString(L"]");
+								}
+								break;
+							}
+							writer.WriteString(L" => ");
+							writer.WriteLine(transition->target->stateName);
+
+							if(transition->stackPattern.Count()>0)
+							{
+								writer.WriteString(L"        STACK PATTERNS");
+								FOREACH(State*, stackPattern, transition->stackPattern.Wrap())
+								{
+									writer.WriteString(L" [");
+									writer.WriteString(stackPattern->stateName);
+									writer.WriteString(L"]");
+								}
+								writer.WriteLine(L"");
+							}
+
+							if(transition->lookAheadSymbol!=0 || transition->lookAheadText!=L"")
+							{
+								writer.WriteString(L"        LOOK AHEAD [");
+								if(transition->lookAheadSymbol)
+								{
+									writer.WriteString(transition->lookAheadSymbol->GetName());
+								}
+								writer.WriteString(L"] [");
+								writer.WriteString(transition->lookAheadText);
+								writer.WriteLine(L"]");
+							}
+
+							FOREACH(Ptr<Action>, action, transition->actions.Wrap())
+							{
+								writer.WriteString(L"        ACTION");
+								switch(action->actionType)
+								{
+								case Action::Create:
+									writer.WriteString(L" CREATE");
+									break;
+								case Action::Assign:
+									writer.WriteString(L" ASSIGN");
+									break;
+								case Action::Using:
+									writer.WriteString(L" USING");
+									break;
+								case Action::Setter:
+									writer.WriteString(L" TARGET");
+									break;
+								}
+								writer.WriteString(L" SOURCE[");
+								if(action->actionSource)
+								{
+									writer.WriteString(action->actionSource->GetName());
+								}
+								writer.WriteString(L"] TARGET[");
+								if(action->actionTarget)
+								{
+									writer.WriteString(action->actionTarget->GetName());
+								}
+								writer.WriteLine(L"]");
+							}
+						}
+						writer.WriteLine(L"");
+					}
+					writer.WriteLine(L"--------------------------------");
 				}
 			}
 		}
