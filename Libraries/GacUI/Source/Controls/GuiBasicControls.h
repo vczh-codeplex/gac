@@ -784,7 +784,7 @@ List interface common implementation
 ***********************************************************************/
 
 				template<typename T, typename K=typename KeyType<T>::Type>
-				class ItemsBase : public Object
+				class ItemsBase : public Object, public virtual collections::IEnumerable<T>
 				{
 				protected:
 					collections::List<T, K>					items;
@@ -792,12 +792,19 @@ List interface common implementation
 					virtual void							NotifyUpdateInternal(int start, int count, int newCount)=0;
 					
 				public:
+					typedef T		ElementType;
+
 					ItemsBase()
 					{
 					}
 
 					~ItemsBase()
 					{
+					}
+
+					collections::IEnumerator<T>* CreateEnumerator()const
+					{
+						return items.CreateEnumerator();
 					}
 
 					bool NotifyUpdate(int start, int count=1)
@@ -811,11 +818,6 @@ List interface common implementation
 							NotifyUpdateInternal(start, count, count);
 							return true;
 						}
-					}
-
-					collections::IEnumerator<T>* CreateEnumerator()const
-					{
-						return items.CreateEnumerator();
 					}
 
 					bool Contains(const K& item)const
@@ -921,6 +923,19 @@ List interface common implementation
 					}
 				};
 			}
+		}
+	}
+
+	namespace collections
+	{
+		namespace randomaccess_internal
+		{
+			template<typename T>
+			struct RandomAccessable<presentation::controls::list::ItemsBase<T>>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
 		}
 	}
 }

@@ -284,6 +284,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 				/// <summary>An in-memory <see cref="INodeProvider"/> implementation.</summary>
 				class MemoryNodeProvider
 					: public Object
+					, public virtual collections::IEnumerable<Ptr<MemoryNodeProvider>>
 					, public virtual INodeProvider
 					, public Description<MemoryNodeProvider>
 				{
@@ -321,6 +322,8 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					vint							Insert(vint index, const Ptr<MemoryNodeProvider>& item);
 					bool							Set(vint index, const Ptr<MemoryNodeProvider>& item);
 				public:
+					typedef Ptr<MemoryNodeProvider>	ElementType;
+
 					/// <summary>Create a node provider.</summary>
 					MemoryNodeProvider();
 					/// <summary>Create a node provider with a data object.</summary>
@@ -653,6 +656,19 @@ TreeView
 					void									SetStyleSelected(INodeItemStyleController* style, bool value)override;
 				};
 			}
+		}
+	}
+
+	namespace collections
+	{
+		namespace randomaccess_internal
+		{
+			template<>
+			struct RandomAccessable<presentation::controls::tree::MemoryNodeProvider>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
 		}
 	}
 }

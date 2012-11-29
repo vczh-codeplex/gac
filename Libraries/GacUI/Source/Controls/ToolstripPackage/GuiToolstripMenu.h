@@ -29,7 +29,7 @@ Toolstrip Item Collection
 ***********************************************************************/
 
 			/// <summary>Toolstrip item collection.</summary>
-			class GuiToolstripCollection : public Object
+			class GuiToolstripCollection : public Object, public virtual collections::IEnumerable<GuiControl*>
 			{
 			public:
 				class IContentCallback : public Interface
@@ -48,6 +48,8 @@ Toolstrip Item Collection
 				void										RemoveAtInternal(vint index);
 				void										InsertInternal(vint index, GuiControl* control);
 			public:
+				typedef GuiControl*							ElementType;
+
 				GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer);
 				~GuiToolstripCollection();
 
@@ -246,6 +248,19 @@ Toolstrip Component
 				/// <summary>Create the toolstrip sub menu if necessary. The created toolstrip sub menu is owned by this menu button.</summary>
 				/// <param name="subMenuStyleController">The style controller for the toolstrip sub menu. If this argument is null, it will call <see cref="IStyleController::CreateSubMenuStyleController"/> for a style controller.</param>
 				void											CreateToolstripSubMenu(GuiToolstripMenu::IStyleController* subMenuStyleController=0);
+			};
+		}
+	}
+
+	namespace collections
+	{
+		namespace randomaccess_internal
+		{
+			template<>
+			struct RandomAccessable<presentation::controls::GuiToolstripCollection>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
 			};
 		}
 	}
