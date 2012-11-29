@@ -31,8 +31,8 @@ Functions:
 	[T] >>	Except([T]) => [T]
 	[T] >>	Pairwise([K]) => [(T,K)]
 
-FOREACH(X, a, XList.Wrap())
-FOREACH_INDEXER(X, a, index, XList.Wrap())
+FOREACH(X, a, XList)
+FOREACH_INDEXER(X, a, index, XList)
 ***********************************************************************/
 
 #ifndef VCZH_COLLECTIONS_OPERATION

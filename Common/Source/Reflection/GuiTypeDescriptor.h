@@ -14,7 +14,7 @@ XML Representation for Code Generation:
 #include "..\String.h"
 #include "..\Exception.h"
 #include "..\Function.h"
-#include "..\Collections\Interfaces.h"
+#include "..\Collections\List.h"
 
 namespace vl
 {
@@ -214,7 +214,7 @@ ITypeDescriptor (method)
 				virtual vint					GetParameterCount()=0;
 				virtual IParameterInfo*			GetParameter(vint index)=0;
 				virtual IValueInfo*				GetReturn()=0;
-				virtual Value					Invoke(const Value& thisObject, collections::IArray<Value>& arguments)=0;
+				virtual Value					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			};
 
 			class IMethodGroupInfo : public IMemberInfo

@@ -199,7 +199,7 @@ Automaton
 			stateMap.Add(source->startState, target->NewState());
 			nfaStateMap.Add(stateMap[source->startState], source->startState);
 			target->startState=target->states[0].Obj();
-			CopyFrom(target->captureNames.Wrap(), source->captureNames.Wrap());
+			CopyFrom(target->captureNames, source->captureNames);
 
 			for(vint i=0;i<target->states.Count();i++)
 			{
@@ -243,7 +243,7 @@ Automaton
 			Group<Transition*, Transition*> nfaTransitions;
 			List<Transition*> transitionClasses;//保证转换先后顺序不被nfaTransitions.Keys破坏
 
-			CopyFrom(target->captureNames.Wrap(), source->captureNames.Wrap());
+			CopyFrom(target->captureNames, source->captureNames);
 			State* startState=target->NewState();
 			target->startState=startState;
 			dfaStateMap.Add(startState, source->startState);
@@ -260,10 +260,10 @@ Automaton
 				transitionClasses.Clear();
 
 				//对该DFA状态的所有等价NFA状态进行遍历
-				const IReadonlyList<State*>& nfaStates=dfaStateMap[currentState];
+				const List<State*>& nfaStates=dfaStateMap[currentState];
 				for(vint j=0;j<nfaStates.Count();j++)
 				{
-					State* nfaState=nfaStates[j];
+					State* nfaState=nfaStates.Get(j);
 					//对每一个NFA状态的所有转换进行遍历
 					for(vint k=0;k<nfaState->transitions.Count();k++)
 					{
@@ -293,12 +293,12 @@ Automaton
 				//遍历所有种类的NFA转换
 				for(vint j=0;j<transitionClasses.Count();j++)
 				{
-					const IReadonlyList<Transition*>& transitionSet=nfaTransitions[transitionClasses[j]];
+					const List<Transition*>& transitionSet=nfaTransitions[transitionClasses[j]];
 					//对所有转换的NFA目标状态集合进行排序
 					transitionTargets.Clear();
 					for(vint l=0;l<transitionSet.Count();l++)
 					{
-						State* nfaState=transitionSet[l]->target;
+						State* nfaState=transitionSet.Get(l)->target;
 						if(!transitionTargets.Contains(nfaState))
 						{
 							transitionTargets.Add(nfaState);
@@ -309,7 +309,7 @@ Automaton
 					for(vint k=0;k<dfaStateMap.Count();k++)
 					{
 						//将DFA的等价NFA状态集合进行排序
-						dfaStateMap.CopyValuesToCollection(k, relativeStates);
+						CopyFrom(relativeStates, dfaStateMap.GetByIndex(k));
 						//比较两者是否相等
 						if(relativeStates.Count()==transitionTargets.Count())
 						{

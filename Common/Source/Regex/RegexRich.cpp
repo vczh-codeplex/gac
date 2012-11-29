@@ -421,9 +421,9 @@ RichInterpretor
 			return false;
 		}
 
-		const IReadonlyList<WString>& RichInterpretor::CaptureNames()
+		const List<WString>& RichInterpretor::CaptureNames()
 		{
-			return dfa->captureNames.Wrap();
+			return dfa->captureNames;
 		}
 	}
 }

@@ -81,7 +81,7 @@ RegexNode
 			CharSetExpression* source=dynamic_cast<CharSetExpression*>(expression.Obj());
 			CHECK_ERROR(source, L"RegexNode::operator!()#!操作符只能使用在字符集合表达式上。");
 			Ptr<CharSetExpression> target=new CharSetExpression;
-			CopyFrom(target->ranges.Wrap(), source->ranges.Wrap());
+			CopyFrom(target->ranges, source->ranges);
 			target->reverse=!source->reverse;
 			return RegexNode(target);
 		}
@@ -93,7 +93,7 @@ RegexNode
 			CHECK_ERROR(left && right && !left->reverse && !right->reverse, L"RegexNode::operator%(const RegexNode&)#非凡转字符集合表达式才能使用%操作符连接。");
 			Ptr<CharSetExpression> target=new CharSetExpression;
 			target->reverse=false;
-			CopyFrom(target->ranges.Wrap(), left->ranges.Wrap());
+			CopyFrom(target->ranges, left->ranges);
 			for(vint i=0;i<right->ranges.Count();i++)
 			{
 				if(!target->AddRangeWithConflict(right->ranges[i]))

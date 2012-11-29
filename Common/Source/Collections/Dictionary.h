@@ -12,7 +12,6 @@ Classes:
 #define VCZH_COLLECTIONS_DICTIONARY
 
 #include "List.h"
-#include "DictionaryWrappers.h"
 
 namespace vl
 {
@@ -21,20 +20,81 @@ namespace vl
 		template<
 			typename KT,
 			typename VT,
-			typename ValueContainer=List<VT, typename KeyType<VT>::Type>,
 			typename KK=typename KeyType<KT>::Type, 
 			typename VK=typename KeyType<VT>::Type
 		>
-		class Dictionary : public Object, private NotCopyable
+		class Dictionary : public Object, public virtual IEnumerable<Pair<KT, VT>>
 		{
+			typedef SortedList<KT, KK>			KeyContainer;
+			typedef List<VT, VK>				ValueContainer;
 		protected:
-			SortedList<KT, KK>					keys;
+			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
+			{
+			private:
+				const Dictionary<KT, VT, KK, VK>*	container;
+				vint								index;
+				Pair<KT, VT>						current;
+
+				void UpdateCurrent()
+				{
+					if(index<container->Count())
+					{
+						current.key=container->Keys().Get(index);
+						current.value=container->Values().Get(index);
+					}
+				}
+			public:
+				Enumerator(const Dictionary<KT, VT, KK, VK>* _container, vint _index=0)
+				{
+					container=_container;
+					index=_index;
+					UpdateCurrent();
+				}
+				
+				IEnumerator<Pair<KT, VT>>* Clone()const
+				{
+					return new Enumerator(container, index);
+				}
+
+				const Pair<KT, VT>& Current()const
+				{
+					return current;
+				}
+
+				vint Index()const
+				{
+					return index;
+				}
+
+				bool Next()
+				{
+					index++;
+					UpdateCurrent();
+					return Available();
+				}
+
+				bool Available()const
+				{
+					return index>=0 && index<container->Count();
+				}
+
+				void Reset()
+				{
+					index=0;
+					UpdateCurrent();
+				}
+			};
+
+			KeyContainer						keys;
 			ValueContainer						values;
-			mutable DictionaryWrapper<Dictionary<KT, VT, ValueContainer, KK, VK>, KT, VT, KK, VK>	wrapper;
 		public:
 			Dictionary()
 			{
-				wrapper.SetContainer(this);
+			}
+
+			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
+			{
+				return new Enumerator(this);
 			}
 
 			void SetLessMemoryMode(bool mode)
@@ -43,38 +103,14 @@ namespace vl
 				values.SetLessMemoryMode(mode);
 			}
 
-			template<typename T>
-			void CopyKeysToCollection(T& dst, bool append=false)const
+			const KeyContainer& Keys()const
 			{
-				CopyToCollection(dst, keys, append);
+				return keys;
 			}
 
-			template<typename T>
-			void CopyKeysToArray(T& dst, bool append=false)const
+			const ValueContainer& Values()const
 			{
-				CopyToArray(dst, keys, append);
-			}
-
-			template<typename T>
-			void CopyValuesToCollection(T& dst, bool append=false)const
-			{
-				CopyToCollection(dst, values, append);
-			}
-
-			template<typename T>
-			void CopyValuesToArray(T& dst, bool append=false)const
-			{
-				CopyToArray(dst, values, append);
-			}
-
-			const IReadonlyList<KT, KK>& Keys()const
-			{
-				return keys.Wrap();
-			}
-
-			const IReadonlyList<VT, VK>& Values()const
-			{
-				return values.Wrap();
+				return values;
 			}
 
 			vint Count()const
@@ -107,6 +143,11 @@ namespace vl
 				return true;
 			}
 
+			bool Add(const Pair<KT, VT>& value)
+			{
+				return Add(value.key, value.value);
+			}
+
 			bool Add(const KT& key, const VT& value)
 			{
 				CHECK_ERROR(!keys.Contains(key), L"Dictionary<KT, KK, ValueContainer, VT, VK>::Add(const KT&, const VT&)#key已存在。");
@@ -136,30 +177,126 @@ namespace vl
 				values.Clear();
 				return true;
 			}
-
-			IDictionary<KT, VT, KK, VK>& Wrap()const
-			{
-				return wrapper;
-			}
 		};
 
 		template<
 			typename KT,
 			typename VT,
-			typename ValueContainer=List<VT, typename KeyType<VT>::Type>,
 			typename KK=typename KeyType<KT>::Type,
 			typename VK=typename KeyType<VT>::Type
 		>
-		class Group : public Object, private NotCopyable
+		class Group : public Object, public virtual IEnumerable<Pair<KT, VT>>
 		{
+			typedef SortedList<KT, KK>		KeyContainer;
+			typedef List<VT, VK>			ValueContainer;
 		protected:
-			SortedList<KT, KK>				keys;
+			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
+			{
+			private:
+				const Group<KT, VT, KK, VK>*		container;
+				vint											keyIndex;
+				vint											valueIndex;
+				Pair<KT, VT>								current;
+
+				void UpdateCurrent()
+				{
+					if(keyIndex<container->Count())
+					{
+						const ValueContainer& values=container->GetByIndex(keyIndex);
+						if(valueIndex<values.Count())
+						{
+							current.key=container->Keys().Get(keyIndex);
+							current.value=values.Get(valueIndex);
+						}
+					}
+				}
+			public:
+				Enumerator(const Group<KT, VT, KK, VK>* _container, vint _keyIndex=0, vint _valueIndex=0)
+				{
+					container=_container;
+					keyIndex=_keyIndex;
+					valueIndex=_valueIndex;
+					UpdateCurrent();
+				}
+				
+				IEnumerator<Pair<KT, VT>>* Clone()const
+				{
+					return new Enumerator(container, keyIndex, valueIndex);
+				}
+
+				const Pair<KT, VT>& Current()const
+				{
+					return current;
+				}
+
+				vint Index()const
+				{
+					if(Available())
+					{
+						vint index=0;
+						for(vint i=0;i<keyIndex;i++)
+						{
+							index+=container->GetByIndex(i).Count();
+						}
+						return index+valueIndex;
+					}
+					else
+					{
+						return -1;
+					}
+				}
+
+				bool Next()
+				{
+					if(keyIndex<container->Count())
+					{
+						const ValueContainer& values=container->GetByIndex(keyIndex);
+						valueIndex++;
+						if(valueIndex<values.Count())
+						{
+							UpdateCurrent();
+							return true;
+						}
+						else
+						{
+							keyIndex++;
+							valueIndex=0;
+							UpdateCurrent();
+							return keyIndex<container->Count();
+						}
+					}
+					else
+					{
+						return false;
+					}
+				}
+
+				bool Available()const
+				{
+					if(keyIndex<container->Count())
+					{
+						const ValueContainer& values=container->GetByIndex(keyIndex);
+						if(valueIndex<values.Count())
+						{
+							return true;
+						}
+					}
+					return false;
+				}
+
+				void Reset()
+				{
+					keyIndex=0;
+					valueIndex=0;
+					UpdateCurrent();
+				}
+			};
+
+			KeyContainer					keys;
 			List<ValueContainer*>			values;
-			mutable GroupWrapper<Group<KT, VT, ValueContainer, KK, VK>, KT, VT, KK, VK>	wrapper;
 		public:
 			Group()
 			{
-				wrapper.SetContainer(this);
 			}
 
 			~Group()
@@ -167,33 +304,14 @@ namespace vl
 				Clear();
 			}
 
-			template<typename T>
-			void CopyKeysToCollection(T& dst, bool append=false)const
+			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
 			{
-				CopyToCollection(dst, keys, append);
+				return new Enumerator(this);
 			}
 
-			template<typename T>
-			void CopyKeysToArray(T& dst, bool append=false)const
+			const KeyContainer& Keys()const
 			{
-				CopyToArray(dst, keys, append);
-			}
-
-			template<typename T>
-			void CopyValuesToCollection(vint index, T& dst, bool append=false)const
-			{
-				CopyToCollection(dst, *(values.Get(index)), append);
-			}
-
-			template<typename T>
-			void CopyValuesToArray(vint index, T& dst, bool append=false)const
-			{
-				CopyToArray(dst, *(values.Get(index)), append);
-			}
-
-			const IReadonlyList<KT, KK>& Keys()const
-			{
-				return keys.Wrap();
+				return keys;
 			}
 
 			vint Count()const
@@ -201,19 +319,19 @@ namespace vl
 				return keys.Count();
 			}
 
-			const IReadonlyList<VT, VK>& Get(const KK& key)const
+			const ValueContainer& Get(const KK& key)const
 			{
-				return values.Get(keys.IndexOf(key))->Wrap();
+				return *values.Get(keys.IndexOf(key));
 			}
 
-			const IReadonlyList<VT, VK>& GetByIndex(vint index)const
+			const ValueContainer& GetByIndex(vint index)const
 			{
-				return values.Get(index)->Wrap();
+				return *values.Get(index);
 			}
 
-			const IReadonlyList<VT, VK>& operator[](const KK& key)const
+			const ValueContainer& operator[](const KK& key)const
 			{
-				return values.Get(keys.IndexOf(key))->Wrap();
+				return *values.Get(keys.IndexOf(key));
 			}
 
 			bool Contains(const KK& key)const
@@ -232,6 +350,11 @@ namespace vl
 				{
 					return false;
 				}
+			}
+
+			bool Add(const Pair<KT, VT>& value)
+			{
+				return Add(value.key, value.value);
 			}
 
 			bool Add(const KT& key, const VT& value)
@@ -299,12 +422,39 @@ namespace vl
 				values.Clear();
 				return true;
 			}
-
-			IGroup<KT, VT, KK, VK>& Wrap()const
-			{
-				return wrapper;
-			}
 		};
+
+/***********************************************************************
+随机访问
+***********************************************************************/
+		namespace randomaccess_internal
+		{
+			template<typename KT, typename VT, typename KK, typename VK>
+			struct RandomAccessable<Dictionary<KT, VT, KK, VK>>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
+		
+			template<typename KT, typename VT, typename KK, typename VK>
+			struct RandomAccess<Dictionary<KT, VT, KK, VK>>
+			{
+				static vint GetCount(const Dictionary<KT, VT, KK, VK>& t)
+				{
+					return t.Count();
+				}
+
+				static Pair<KT, VT> GetValue(const Dictionary<KT, VT, KK, VK>& t, vint index)
+				{
+					return Pair<KT, VT>(t.Keys().Get(index), t.Values().Get(index));
+				}
+
+				static void AppendValue(Dictionary<KT, VT, KK, VK>& t, const Pair<KT, VT>& value)
+				{
+					t.Set(value.key, value.value);
+				}
+			};
+		}
 	}
 }
 

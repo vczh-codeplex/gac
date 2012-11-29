@@ -121,7 +121,7 @@ TEST_CASE(TestMutex)
 		TEST_ASSERT(data.counter==0);
 		TEST_ASSERT(data.mutex.Release());
 	}
-	FOREACH(Thread*, thread, threads.Wrap())
+	FOREACH(Thread*, thread, threads)
 	{
 		thread->Wait();
 		TEST_ASSERT(thread->GetState()==Thread::Stopped);
@@ -191,7 +191,7 @@ TEST_CASE(TestSemaphore)
 		CriticalSection::Scope lock(data.cs);
 		TEST_ASSERT(data.counter==10);
 	}
-	FOREACH(Thread*, thread, threads.Wrap())
+	FOREACH(Thread*, thread, threads)
 	{
 		thread->Wait();
 		TEST_ASSERT(thread->GetState()==Thread::Stopped);
@@ -243,7 +243,7 @@ TEST_CASE(TestEventObject)
 		TEST_ASSERT(data.counter==0);
 		TEST_ASSERT(data.eventObject.Signal());
 	}
-	FOREACH(Thread*, thread, threads.Wrap())
+	FOREACH(Thread*, thread, threads)
 	{
 		thread->Wait();
 		TEST_ASSERT(thread->GetState()==Thread::Stopped);
@@ -293,7 +293,7 @@ TEST_CASE(TestCriticalSection)
 		Thread::Sleep(1000);
 		TEST_ASSERT(data.counter==0);
 	}
-	FOREACH(Thread*, thread, threads.Wrap())
+	FOREACH(Thread*, thread, threads)
 	{
 		thread->Wait();
 		TEST_ASSERT(thread->GetState()==Thread::Stopped);
@@ -365,7 +365,7 @@ TEST_CASE(TestReaderWriterLock)
 		TEST_ASSERT(data.counter==0);
 	}
 	data.ev.Signal();
-	FOREACH(Thread*, thread, threads.Wrap())
+	FOREACH(Thread*, thread, threads)
 	{
 		thread->Wait();
 		TEST_ASSERT(thread->GetState()==Thread::Stopped);
@@ -417,7 +417,7 @@ TEST_CASE(TestSpinLock)
 		Thread::Sleep(1000);
 		TEST_ASSERT(data.counter==0);
 	}
-	FOREACH(Thread*, thread, threads.Wrap())
+	FOREACH(Thread*, thread, threads)
 	{
 		thread->Wait();
 		TEST_ASSERT(thread->GetState()==Thread::Stopped);

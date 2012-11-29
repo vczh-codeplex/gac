@@ -60,8 +60,8 @@ namespace vl
 		public:
 			typedef Ptr<RegexMatch>										Ref;
 			typedef collections::List<Ref>								List;
-			typedef collections::IReadonlyList<RegexString>				CaptureList;
-			typedef collections::IReadonlyGroup<WString, RegexString>	CaptureGroup;
+			typedef collections::List<RegexString>						CaptureList;
+			typedef collections::Group<WString, RegexString>			CaptureGroup;
 		protected:
 			collections::List<RegexString>				captures;
 			collections::Group<WString, RegexString>	groups;

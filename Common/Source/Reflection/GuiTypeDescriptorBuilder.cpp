@@ -185,7 +185,7 @@ description::MethodInfoImpl
 				IMethodGroupInfo*											ownerMethodGroup;
 				List<Ptr<ParameterInfoImpl>>									parameters;
 				Ptr<MethodReturnImpl>										returnInfo;
-				Func<Value(const Value&, collections::IArray<Value>&)>		invoker;
+				Func<Value(const Value&, collections::Array<Value>&)>		invoker;
 			public:
 				MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup)
 					:ownerMethodGroup(_ownerMethodGroup)
@@ -229,7 +229,7 @@ description::MethodInfoImpl
 					return returnInfo.Obj();
 				}
 
-				Value Invoke(const Value& thisObject, collections::IArray<Value>& arguments)override
+				Value Invoke(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					return invoker(thisObject, arguments);
 				}
@@ -251,7 +251,7 @@ description::MethodInfoImpl
 					returnInfo=new MethodReturnImpl(_type, _nullable);
 				}
 
-				void BuilderSetInvoker(const Func<Value(const Value&, collections::IArray<Value>&)>& _invoker)
+				void BuilderSetInvoker(const Func<Value(const Value&, collections::Array<Value>&)>& _invoker)
 				{
 					invoker=_invoker;
 				}
@@ -479,7 +479,7 @@ description::GeneralTypeDescriptor::PropertyGroup
 				}
 				else
 				{
-					buildingMethodGroup=propertyGroup.methodGroups.Values()[index];
+					buildingMethodGroup=propertyGroup.methodGroups.Values().Get(index);
 					methodGroup=buildingMethodGroup.Cast<MethodGroupInfoImpl>();
 				}
 
@@ -500,7 +500,7 @@ description::GeneralTypeDescriptor::PropertyGroup
 				return *this;
 			}
 
-			GeneralTypeDescriptor::PropertyGroup::MethodBuilder& GeneralTypeDescriptor::PropertyGroup::MethodBuilder::Invoker(const Func<Value(const Value&, collections::IArray<Value>&)>& _invoker)
+			GeneralTypeDescriptor::PropertyGroup::MethodBuilder& GeneralTypeDescriptor::PropertyGroup::MethodBuilder::Invoker(const Func<Value(const Value&, collections::Array<Value>&)>& _invoker)
 			{
 				dynamic_cast<MethodInfoImpl*>(buildingMethod.Obj())->BuilderSetInvoker(_invoker);
 				return *this;
@@ -643,7 +643,7 @@ description::GeneralTypeDescriptor
 				propertyGroup.Prepare();
 				if(0<=index && index<propertyGroup.properties.Count())
 				{
-					return propertyGroup.properties.Values()[index].Obj();
+					return propertyGroup.properties.Values().Get(index).Obj();
 				}
 				else
 				{
@@ -677,7 +677,7 @@ description::GeneralTypeDescriptor
 				vint index=propertyGroup.properties.Keys().IndexOf(name);
 				if(index!=-1)
 				{
-					return propertyGroup.properties.Values()[index].Obj();
+					return propertyGroup.properties.Values().Get(index).Obj();
 				}
 				if(inheritable)
 				{
@@ -704,7 +704,7 @@ description::GeneralTypeDescriptor
 				propertyGroup.Prepare();
 				if(0<=index && index<propertyGroup.events.Count())
 				{
-					return propertyGroup.events.Values()[index].Obj();
+					return propertyGroup.events.Values().Get(index).Obj();
 				}
 				else
 				{
@@ -738,7 +738,7 @@ description::GeneralTypeDescriptor
 				vint index=propertyGroup.events.Keys().IndexOf(name);
 				if(index!=-1)
 				{
-					return propertyGroup.events.Values()[index].Obj();
+					return propertyGroup.events.Values().Get(index).Obj();
 				}
 				if(inheritable)
 				{
@@ -765,7 +765,7 @@ description::GeneralTypeDescriptor
 				propertyGroup.Prepare();
 				if(0<=index && index<propertyGroup.methodGroups.Count())
 				{
-					return propertyGroup.methodGroups.Values()[index].Obj();
+					return propertyGroup.methodGroups.Values().Get(index).Obj();
 				}
 				else
 				{
@@ -799,7 +799,7 @@ description::GeneralTypeDescriptor
 				vint index=propertyGroup.methodGroups.Keys().IndexOf(name);
 				if(index!=-1)
 				{
-					return propertyGroup.methodGroups.Values()[index].Obj();
+					return propertyGroup.methodGroups.Values().Get(index).Obj();
 				}
 				if(inheritable)
 				{

@@ -40,7 +40,7 @@ namespace test
 			writer.WriteLine(L"=============================================================");
 			writer.WriteLine(L"Errprs");
 			writer.WriteLine(L"=============================================================");
-			FOREACH(Ptr<ParsingError>, error, errors.Wrap())
+			FOREACH(Ptr<ParsingError>, error, errors)
 			{
 				writer.WriteLine(error->errorMessage);
 			}

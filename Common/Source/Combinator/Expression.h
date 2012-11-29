@@ -53,7 +53,7 @@ namespace vl
 
 				vint GetMaxErrorPosition(const ErrorList& errors)
 				{
-					return errors.Wrap()>>collections::Select(GetInputFromError)>>collections::Max();
+					return errors>>collections::Select(GetInputFromError)>>collections::Max();
 				}
 			public:
 				typedef Ptr<GlobalInfo>					Ref;
@@ -63,16 +63,16 @@ namespace vl
 
 				void Append(const GlobalInfo& info)
 				{
-					collections::CopyFrom(errors.Wrap(), info.errors.Wrap(), true);
+					collections::CopyFrom(errors, info.errors, true);
 					if(info.candidateErrors.Count()!=0)
 					{
 						if(candidateErrors.Count()==0)
 						{
-							collections::CopyFrom(candidateErrors.Wrap(), info.candidateErrors.Wrap(), false);
+							collections::CopyFrom(candidateErrors, info.candidateErrors, false);
 						}
 						else if(GetMaxErrorPosition(candidateErrors) < GetMaxErrorPosition(info.candidateErrors))
 						{
-							collections::CopyFrom(candidateErrors.Wrap(), info.candidateErrors.Wrap(), false);
+							collections::CopyFrom(candidateErrors, info.candidateErrors, false);
 						}
 					}
 				}
@@ -81,19 +81,19 @@ namespace vl
 				{
 					if(info.errors.Count()==0)
 					{
-						collections::CopyFrom(candidateErrors.Wrap(), info.candidateErrors.Wrap(), false);
+						collections::CopyFrom(candidateErrors, info.candidateErrors, false);
 					}
 					else if(info.candidateErrors.Count()==0)
 					{
-						collections::CopyFrom(candidateErrors.Wrap(), info.errors.Wrap(), false);
+						collections::CopyFrom(candidateErrors, info.errors, false);
 					}
 					else if(GetMaxErrorPosition(info.errors) < GetMaxErrorPosition(info.candidateErrors))
 					{
-						collections::CopyFrom(candidateErrors.Wrap(), info.candidateErrors.Wrap(), false);
+						collections::CopyFrom(candidateErrors, info.candidateErrors, false);
 					}
 					else
 					{
-						collections::CopyFrom(candidateErrors.Wrap(), info.errors.Wrap(), false);
+						collections::CopyFrom(candidateErrors, info.errors, false);
 					}
 				}
 			};

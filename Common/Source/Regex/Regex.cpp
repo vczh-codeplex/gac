@@ -71,7 +71,7 @@ RegexMatch
 				}
 				else
 				{
-					groups.Add(_rich->CaptureNames()[capture.capture], RegexString(_string, capture.start, capture.length));
+					groups.Add(_rich->CaptureNames().Get(capture.capture), RegexString(_string, capture.start, capture.length));
 				}
 			}
 		}
@@ -94,12 +94,12 @@ RegexMatch
 
 		const RegexMatch::CaptureList& RegexMatch::Captures()const
 		{
-			return captures.Wrap();
+			return captures;
 		}
 
 		const RegexMatch::CaptureGroup& RegexMatch::Groups()const
 		{
-			return groups.Wrap();
+			return groups;
 		}
 
 /***********************************************************************
@@ -416,7 +416,7 @@ RegexTokens
 						}
 						else
 						{
-							id=stateTokens[result.finalState];
+							id=stateTokens.Get(result.finalState);
 						}
 						if(token.token==-2)
 						{
@@ -601,7 +601,7 @@ RegexLexerWalker
 		vint RegexLexerWalker::GetRelatedToken(vint state)const
 		{
 			vint finalState=pure->GetRelatedFinalState(state);
-			return finalState==-1?-1:stateTokens[finalState];
+			return finalState==-1?-1:stateTokens.Get(finalState);
 		}
 
 		void RegexLexerWalker::Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const
@@ -632,7 +632,7 @@ RegexLexerWalker
 			}
 			if(pure->IsFinalState(state))
 			{
-				token=stateTokens[state];
+				token=stateTokens.Get(state);
 				finalState=true;
 				return;
 			}
@@ -810,8 +810,8 @@ RegexLexer
 			Automaton::Ref bigEnfa=new Automaton;
 			for(vint i=0;i<dfas.Count();i++)
 			{
-				CopyFrom(bigEnfa->states.Wrap(), dfas[i]->states.Wrap());
-				CopyFrom(bigEnfa->transitions.Wrap(), dfas[i]->transitions.Wrap());
+				CopyFrom(bigEnfa->states, dfas[i]->states);
+				CopyFrom(bigEnfa->transitions, dfas[i]->transitions);
 			}
 			bigEnfa->startState=bigEnfa->NewState();
 			for(vint i=0;i<dfas.Count();i++)
@@ -825,16 +825,16 @@ RegexLexer
 			Automaton::Ref bigNfa=EpsilonNfaToNfa(bigEnfa, PureEpsilonChecker, nfaStateMap);
 			for(vint i=0;i<nfaStateMap.Keys().Count();i++)
 			{
-				void* userData=nfaStateMap.Values()[i]->userData;
+				void* userData=nfaStateMap.Values().Get(i)->userData;
 				nfaStateMap.Keys()[i]->userData=userData;
 			}
 			Automaton::Ref bigDfa=NfaToDfa(bigNfa, dfaStateMap);
 			for(vint i=0;i<dfaStateMap.Keys().Count();i++)
 			{
-				void* userData=dfaStateMap.GetByIndex(i)[0]->userData;
+				void* userData=dfaStateMap.GetByIndex(i).Get(0)->userData;
 				for(vint j=1;j<dfaStateMap.GetByIndex(i).Count();j++)
 				{
-					void* newData=dfaStateMap.GetByIndex(i)[j]->userData;
+					void* newData=dfaStateMap.GetByIndex(i).Get(j)->userData;
 					if(userData>newData)
 					{
 						userData=newData;
