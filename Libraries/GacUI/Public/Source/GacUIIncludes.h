@@ -14696,7 +14696,7 @@ List interface common implementation
 ***********************************************************************/
 
 				template<typename T, typename K=typename KeyType<T>::Type>
-				class ItemsBase : public Object
+				class ItemsBase : public Object, public virtual collections::IEnumerable<T>
 				{
 				protected:
 					collections::List<T, K>					items;
@@ -14704,12 +14704,19 @@ List interface common implementation
 					virtual void							NotifyUpdateInternal(int start, int count, int newCount)=0;
 					
 				public:
+					typedef T		ElementType;
+
 					ItemsBase()
 					{
 					}
 
 					~ItemsBase()
 					{
+					}
+
+					collections::IEnumerator<T>* CreateEnumerator()const
+					{
+						return items.CreateEnumerator();
 					}
 
 					bool NotifyUpdate(int start, int count=1)
@@ -14723,11 +14730,6 @@ List interface common implementation
 							NotifyUpdateInternal(start, count, count);
 							return true;
 						}
-					}
-
-					collections::IEnumerator<T>* CreateEnumerator()const
-					{
-						return items.CreateEnumerator();
 					}
 
 					bool Contains(const K& item)const
@@ -14833,6 +14835,19 @@ List interface common implementation
 					}
 				};
 			}
+		}
+	}
+
+	namespace collections
+	{
+		namespace randomaccess_internal
+		{
+			template<typename T>
+			struct RandomAccessable<presentation::controls::list::ItemsBase<T>>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
 		}
 	}
 }
@@ -17404,6 +17419,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 			{
 				class MemoryNodeProvider
 					: public Object
+					, public virtual collections::IEnumerable<Ptr<MemoryNodeProvider>>
 					, public virtual INodeProvider
 					, public Description<MemoryNodeProvider>
 				{
@@ -17441,6 +17457,8 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					vint							Insert(vint index, const Ptr<MemoryNodeProvider>& item);
 					bool							Set(vint index, const Ptr<MemoryNodeProvider>& item);
 				public:
+					typedef Ptr<MemoryNodeProvider>	ElementType;
+
 					MemoryNodeProvider();
 					MemoryNodeProvider(const Ptr<DescriptableObject>& _data);
 					~MemoryNodeProvider();
@@ -17687,6 +17705,19 @@ TreeView
 			}
 		}
 	}
+
+	namespace collections
+	{
+		namespace randomaccess_internal
+		{
+			template<>
+			struct RandomAccessable<presentation::controls::tree::MemoryNodeProvider>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
+		}
+	}
 }
 
 #endif
@@ -17890,7 +17921,7 @@ namespace vl
 Toolstrip Item Collection
 ***********************************************************************/
 
-			class GuiToolstripCollection : public Object
+			class GuiToolstripCollection : public Object, public virtual collections::IEnumerable<GuiControl*>
 			{
 			public:
 				class IContentCallback : public Interface
@@ -17909,6 +17940,8 @@ Toolstrip Item Collection
 				void										RemoveAtInternal(vint index);
 				void										InsertInternal(vint index, GuiControl* control);
 			public:
+				typedef GuiControl*							ElementType;
+
 				GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer);
 				~GuiToolstripCollection();
 
@@ -18041,6 +18074,19 @@ Toolstrip Component
 
 				GuiToolstripMenu*								GetToolstripSubMenu();
 				void											CreateToolstripSubMenu(GuiToolstripMenu::IStyleController* subMenuStyleController=0);
+			};
+		}
+	}
+
+	namespace collections
+	{
+		namespace randomaccess_internal
+		{
+			template<>
+			struct RandomAccessable<presentation::controls::GuiToolstripCollection>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
 			};
 		}
 	}
