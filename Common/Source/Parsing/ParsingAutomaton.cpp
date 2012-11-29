@@ -52,6 +52,7 @@ State
 				,ownerRuleSymbol(0)
 				,stateNode(0)
 				,statePosition(BeforeNode)
+				,endState(false)
 			{
 			}
 
@@ -95,7 +96,7 @@ Automaton
 
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
-				state->stateName=ownerRule->name+L".RootStart";
+				state->stateName=ownerRule->name+L".Start";
 				state->stateExpression=L"¡¤ <"+ownerRule->name+L">";
 				return state;
 			}
@@ -107,7 +108,7 @@ Automaton
 
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
-				state->stateName=ownerRule->name+L".RootEnd";
+				state->stateName=ownerRule->name+L".RootStart";
 				state->stateExpression=L"¡¤ $<"+ownerRule->name+L">";
 				return state;
 			}
@@ -119,7 +120,7 @@ Automaton
 
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
-				state->stateName=ownerRule->name+L".Start";
+				state->stateName=ownerRule->name+L".RootEnd";
 				state->stateExpression=L"$<"+ownerRule->name+L"> ¡¤";
 				return state;
 			}
@@ -134,6 +135,7 @@ Automaton
 				state->stateNode=stateNode;
 				state->statePosition=State::BeforeNode;
 				state->stateName=ownerRule->name+L"."+itow(++ruleInfos[ownerRule]->stateNameCount);
+				stateNode=FindAppropriateGrammarState(grammarNode, stateNode, true);
 				state->stateExpression=L"<"+ownerRule->name+L">: "+GrammarStateToString(grammarNode, stateNode, true);
 				return state;
 			}
@@ -148,6 +150,7 @@ Automaton
 				state->stateNode=stateNode;
 				state->statePosition=State::AfterNode;
 				state->stateName=ownerRule->name+L"."+itow(++ruleInfos[ownerRule]->stateNameCount);
+				stateNode=FindAppropriateGrammarState(grammarNode, stateNode, false);
 				state->stateExpression=L"<"+ownerRule->name+L">: "+GrammarStateToString(grammarNode, stateNode, false);
 				return state;
 			}
@@ -179,6 +182,22 @@ Automaton
 				return transition;
 			}
 
+			Transition* Automaton::Symbol(State* start, State* end, ParsingSymbol* transitionSymbol)
+			{
+				Transition* transition=CreateTransition(start, end);
+				transition->transitionType=Transition::Symbol;
+				transition->transitionSymbol=transitionSymbol;
+				return transition;
+			}
+
+			Transition* Automaton::Symbol(State* start, State* end, const WString& transitionText)
+			{
+				Transition* transition=CreateTransition(start, end);
+				transition->transitionType=Transition::Symbol;
+				transition->transitionText=transitionText;
+				return transition;
+			}
+
 /***********************************************************************
 CreateEpsilonPDA
 ***********************************************************************/
@@ -186,68 +205,112 @@ CreateEpsilonPDA
 			class CreateEpsilonPDAVisitor : public Object, public ParsingDefinitionGrammar::IVisitor
 			{
 			public:
-				Ptr<Automaton>					automaton;
-				ParsingDefinitionGrammar*		ruleGrammar;
-				State*							startState;
-				State*							endState;
+				Ptr<Automaton>						automaton;
+				ParsingDefinitionGrammar*			ruleGrammar;
+				State*								startState;
+				State*								endState;
+				Transition*							result;
 
 				CreateEpsilonPDAVisitor(Ptr<Automaton> _automaton, ParsingDefinitionGrammar* _ruleGrammar, State* _startState, State* _endState)
 					:automaton(_automaton)
 					,ruleGrammar(_ruleGrammar)
 					,startState(_startState)
 					,endState(_endState)
+					,result(0)
 				{
 				}
 
-				static void Create(ParsingDefinitionGrammar* grammar, Ptr<Automaton> automaton, ParsingDefinitionGrammar* ruleGrammar, State* startState, State* endState)
+				static Transition* Create(ParsingDefinitionGrammar* grammar, Ptr<Automaton> automaton, ParsingDefinitionGrammar* ruleGrammar, State* startState, State* endState)
 				{
 					CreateEpsilonPDAVisitor visitor(automaton, ruleGrammar, startState, endState);
 					grammar->Accept(&visitor);
+					return visitor.result;
 				}
 
-				void Create(ParsingDefinitionGrammar* grammar, State* startState, State* endState)
+				Transition* Create(ParsingDefinitionGrammar* grammar, State* startState, State* endState)
 				{
-					Create(grammar, automaton, ruleGrammar, startState, endState);
+					return Create(grammar, automaton, ruleGrammar, startState, endState);
 				}
 
 				void Visit(ParsingDefinitionPrimitiveGrammar* node)override
 				{
+					result=automaton->Symbol(startState, endState, automaton->symbolManager->CacheGetSymbol(node));
 				}
 
 				void Visit(ParsingDefinitionTextGrammar* node)override
 				{
+					result=automaton->Symbol(startState, endState, node->text);
 				}
 
 				void Visit(ParsingDefinitionSequenceGrammar* node)override
 				{
+					State* middleState=automaton->EndState(startState->ownerRule, ruleGrammar, node->first.Obj());
+					Create(node->first.Obj(), startState, middleState);
+					Create(node->second.Obj(), middleState, endState);
 				}
 
 				void Visit(ParsingDefinitionAlternativeGrammar* node)override
 				{
+					Create(node->first.Obj(), startState, endState);
+					Create(node->second.Obj(), startState, endState);
 				}
 
 				void Visit(ParsingDefinitionLoopGrammar* node)override
 				{
+					State* loopStart=automaton->StartState(startState->ownerRule, ruleGrammar, node->grammar.Obj());
+					automaton->Epsilon(startState, loopStart);
+					automaton->Epsilon(loopStart, endState);
+					Create(node->grammar.Obj(), loopStart, loopStart);
 				}
 
 				void Visit(ParsingDefinitionOptionalGrammar* node)override
 				{
+					Create(node->grammar.Obj(), startState, endState);
+					automaton->Epsilon(startState, endState);
 				}
 
 				void Visit(ParsingDefinitionCreateGrammar* node)override
 				{
+					State* middleState=automaton->EndState(startState->ownerRule, ruleGrammar, node->grammar.Obj());
+					Create(node->grammar.Obj(), startState, middleState);
+					Transition* transition=automaton->Epsilon(middleState, endState);
+
+					Ptr<Action> action=new Action;
+					action->actionType=Action::Create;
+					action->actionSource=automaton->symbolManager->CacheGetType(node->type.Obj(), automaton->symbolManager->GetGlobal());
+					transition->actions.Add(action);
 				}
 
 				void Visit(ParsingDefinitionAssignGrammar* node)override
 				{
+					Transition* transition=Create(node->grammar.Obj(), startState, endState);
+
+					Ptr<Action> action=new Action;
+					action->actionType=Action::Assign;
+					action->actionSource=automaton->symbolManager->CacheGetSymbol(node);
+					transition->actions.Add(action);
 				}
 
 				void Visit(ParsingDefinitionUseGrammar* node)override
 				{
+					Transition* transition=Create(node->grammar.Obj(), startState, endState);
+
+					Ptr<Action> action=new Action;
+					action->actionType=Action::Using;
+					transition->actions.Add(action);
 				}
 
 				void Visit(ParsingDefinitionSetterGrammar* node)override
 				{
+					State* middleState=automaton->EndState(startState->ownerRule, ruleGrammar, node->grammar.Obj());
+					Create(node->grammar.Obj(), startState, middleState);
+					Transition* transition=automaton->Epsilon(middleState, endState);
+
+					Ptr<Action> action=new Action;
+					action->actionType=Action::Setter;
+					action->actionSource=automaton->symbolManager->CacheGetSymbol(node);
+					action->actionTarget=action->actionSource->GetDescriptorSymbol()->GetSubSymbolByName(node->value);
+					transition->actions.Add(action);
 				}
 			};
 
@@ -265,6 +328,8 @@ CreateEpsilonPDA
 				{
 					State* grammarStartState=automaton->StartState(rule.Obj(), grammar.Obj(), grammar.Obj());
 					State* grammarEndState=automaton->EndState(rule.Obj(), grammar.Obj(), grammar.Obj());
+					grammarEndState->stateName+=L".End";
+					grammarEndState->endState=true;
 					automaton->Epsilon(ruleInfo->startState, grammarStartState);
 					automaton->Finish(grammarEndState, ruleInfo->rootRuleEndState);
 					ruleInfo->endStates.Add(grammarEndState);

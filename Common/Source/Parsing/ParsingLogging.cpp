@@ -206,13 +206,13 @@ Logger (ParsingDefinitionGrammar)
 				{
 					if(grammar==stateNode && beforeNode)
 					{
-						writer.WriteString(L"¡¤ ");
+						writer.WriteString(L"¡ñ");
 					}
 					ParsingDefinitionGrammarLogger visitor(writer, parentPriority, stateNode, beforeNode);
 					grammar->Accept(&visitor);
 					if(grammar==stateNode && !beforeNode)
 					{
-						writer.WriteString(L" ¡¤");
+						writer.WriteString(L"¡ñ");
 					}
 				}
 
@@ -553,13 +553,20 @@ Logger (Automaton)
 					while(currentState<states.Count())
 					{
 						State* state=states[currentState++];
+						if(state->endState)
+						{
+							writer.WriteString(L"END STATE ");
+						}
+						else
+						{
+							writer.WriteString(L"STATE ");
+						}
 						writer.WriteString(state->stateName);
 						writer.WriteString(L" => ");
 						writer.WriteLine(state->stateExpression);
 
 						FOREACH(Transition*, transition, state->transitions.Wrap())
 						{
-							writer.WriteLine(L"");
 							if(!states.Contains(transition->target))
 							{
 								states.Add(transition->target);
