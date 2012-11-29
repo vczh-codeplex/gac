@@ -215,7 +215,7 @@ MainWindow
 					GetApplication()->InvokeInMainThreadAndWait([=]()
 					{
 						currentPage=page;
-						FOREACH(Ptr<NestlePost>, post, page->posts.Wrap())
+						FOREACH(Ptr<NestlePost>, post, page->posts)
 						{
 							listTopics->GetItems().Add(post);
 						}

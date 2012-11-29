@@ -96,7 +96,7 @@ Predefined ItemStyle
 				GuiListControlTemplateBase(list::ObjectItemControl::IFactory* objectItemControlFactory, bool selectable);
 				~GuiListControlTemplateBase();
 
-				collections::IList<Ptr<Object>>&				GetItems();
+				list::ObjectItemProvider&						GetItems();
 			};
 
 			template<typename T>

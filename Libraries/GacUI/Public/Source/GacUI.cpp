@@ -319,7 +319,7 @@ GuiTab
 
 			void GuiTab::CommandExecutor::ShowTab(int index)
 			{
-				tab->SetSelectedPage(tab->GetPages()[index]);
+				tab->SetSelectedPage(tab->GetPages().Get(index));
 			}
 
 			GuiTab::GuiTab(IStyleController* _styleController)
@@ -421,9 +421,9 @@ GuiTab
 				return true;
 			}
 
-			const collections::IReadonlyList<GuiTabPage*>& GuiTab::GetPages()
+			const collections::List<GuiTabPage*>& GuiTab::GetPages()
 			{
-				return tabPages.Wrap();
+				return tabPages;
 			}
 
 			GuiTabPage* GuiTab::GetSelectedPage()
@@ -694,9 +694,9 @@ ListViewItemStyleProvider
 					itemStyle->Install(listViewItemView, itemIndex);
 				}
 
-				const ListViewItemStyleProvider::IItemStyleList& ListViewItemStyleProvider::GetCreatedItemStyles()
+				const ListViewItemStyleProvider::ItemStyleList& ListViewItemStyleProvider::GetCreatedItemStyles()
 				{
-					return itemStyles.Wrap();
+					return itemStyles;
 				}
 
 				bool ListViewItemStyleProvider::IsItemStyleAttachedToListView(GuiListControl::IItemStyleController* itemStyle)
@@ -1460,10 +1460,10 @@ ListViewColumnItemArranger
 				{
 					for(int i=columnHeaders->GetStackItems().Count()-1;i>=0;i--)
 					{
-						GuiStackItemComposition* item=columnHeaders->GetStackItems()[i];
+						GuiStackItemComposition* item=columnHeaders->GetStackItems().Get(i);
 						columnHeaders->RemoveChild(item);
 
-						GuiControl* button=item->Children()[0]->GetAssociatedControl();
+						GuiControl* button=item->Children().Get(0)->GetAssociatedControl();
 						if(button)
 						{
 							item->RemoveChild(button->GetBoundsComposition());
@@ -1726,7 +1726,7 @@ ListViewDetailContentProvider
 					int count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
 					for(int i=0;i<count;i++)
 					{
-						GuiListControl::IItemStyleController* itemStyleController=listViewItemStyleProvider->GetCreatedItemStyles()[i];
+						GuiListControl::IItemStyleController* itemStyleController=listViewItemStyleProvider->GetCreatedItemStyles().Get(i);
 						ItemContent* itemContent=listViewItemStyleProvider->GetItemContent<ItemContent>(itemStyleController);
 						if(itemContent)
 						{
@@ -3364,9 +3364,9 @@ MemoryNodeProvider
 					}
 				}
 
-				MemoryNodeProvider::IChildList& MemoryNodeProvider::Children()
+				MemoryNodeProvider::ChildList& MemoryNodeProvider::Children()
 				{
-					return *this;
+					return children;
 				}
 
 				bool MemoryNodeProvider::GetExpanding()
@@ -3440,7 +3440,7 @@ MemoryNodeProvider
 
 				MemoryNodeProvider::ChildListEnumerator* MemoryNodeProvider::CreateEnumerator()const
 				{
-					return children.Wrap().CreateEnumerator();
+					return children.CreateEnumerator();
 				}
 
 				bool MemoryNodeProvider::Contains(const KeyType<Ptr<MemoryNodeProvider>>::Type& item)const
@@ -4370,9 +4370,9 @@ GuiApplication
 				}
 			}
 
-			const collections::IReadonlyList<GuiWindow*>& GuiApplication::GetWindows()
+			const collections::List<GuiWindow*>& GuiApplication::GetWindows()
 			{
-				return windows.Wrap();
+				return windows;
 			}
 
 			GuiWindow* GuiApplication::GetWindow(Point location)
@@ -6051,7 +6051,7 @@ GuiListControl
 				int index=visibleStyles.Keys().IndexOf(style);
 				if(index!=-1)
 				{
-					Ptr<VisibleStyleHelper> helper=visibleStyles.Values()[index];
+					Ptr<VisibleStyleHelper> helper=visibleStyles.Values().Get(index);
 					visibleStyles.Remove(style);
 					
 					DETACH_ITEM_EVENT(leftButtonDown);
@@ -6308,9 +6308,9 @@ GuiSelectableListControl
 				}
 			}
 
-			const collections::IReadonlyList<int>& GuiSelectableListControl::GetSelectedItems()
+			const collections::SortedList<int>& GuiSelectableListControl::GetSelectedItems()
 			{
-				return selectedItems.Wrap();
+				return selectedItems;
 			}
 
 			bool GuiSelectableListControl::GetSelected(int itemIndex)
@@ -8618,19 +8618,19 @@ GuiTextBoxRegexColorizer
 				return defaultColor;
 			}
 
-			collections::IReadonlyList<WString>& GuiTextBoxRegexColorizer::GetTokenRegexes()
+			collections::List<WString>& GuiTextBoxRegexColorizer::GetTokenRegexes()
 			{
-				return tokenRegexes.Wrap();
+				return tokenRegexes;
 			}
 
-			collections::IReadonlyList<elements::text::ColorEntry>& GuiTextBoxRegexColorizer::GetTokenColors()
+			collections::List<elements::text::ColorEntry>& GuiTextBoxRegexColorizer::GetTokenColors()
 			{
-				return tokenColors.Wrap();
+				return tokenColors;
 			}
 
-			collections::IReadonlyList<elements::text::ColorEntry>& GuiTextBoxRegexColorizer::GetExtraTokenColors()
+			collections::List<elements::text::ColorEntry>& GuiTextBoxRegexColorizer::GetExtraTokenColors()
 			{
-				return extraTokenColors.Wrap();
+				return extraTokenColors;
 			}
 
 			int GuiTextBoxRegexColorizer::GetExtraTokenIndexStart()
@@ -8693,7 +8693,7 @@ GuiTextBoxRegexColorizer
 				}
 				else
 				{
-					lexer=new regex::RegexLexer(tokenRegexes.Wrap());
+					lexer=new regex::RegexLexer(tokenRegexes);
 					colors.Resize(1+tokenRegexes.Count()+extraTokenColors.Count());
 					colors[0]=defaultColor;
 					for(int i=0;i<tokenColors.Count();i++)
@@ -15455,8 +15455,8 @@ Win7TabStyle
 			{
 				for(int i=headerOverflowMenuStack->GetStackItems().Count()-1;i>=0;i--)
 				{
-					GuiStackItemComposition* item=headerOverflowMenuStack->GetStackItems()[i];
-					GuiControl* button=item->Children()[0]->GetAssociatedControl();
+					GuiStackItemComposition* item=headerOverflowMenuStack->GetStackItems().Get(i);
+					GuiControl* button=item->Children().Get(0)->GetAssociatedControl();
 
 					headerOverflowMenuStack->RemoveChild(item);
 					item->RemoveChild(button->GetBoundsComposition());
@@ -15500,7 +15500,7 @@ Win7TabStyle
 				int childCount=tabHeaderComposition->Children().Count();
 				for(int i=0;i<itemCount;i++)
 				{
-					GuiStackItemComposition* item=tabHeaderComposition->GetStackItems()[i];
+					GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(i);
 					if(headerButtons[i]->GetSelected())
 					{
 						tabHeaderComposition->MoveChild(item, childCount-1);
@@ -15645,7 +15645,7 @@ Win7TabStyle
 
 			void Win7TabStyle::RemoveTab(int index)
 			{
-				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems()[index];
+				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(index);
 				GuiSelectableButton* button=headerButtons[index];
 
 				tabHeaderComposition->RemoveChild(item);
@@ -15659,7 +15659,7 @@ Win7TabStyle
 
 			void Win7TabStyle::MoveTab(int oldIndex, int newIndex)
 			{
-				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems()[oldIndex];
+				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(oldIndex);
 				tabHeaderComposition->RemoveChild(item);
 				tabHeaderComposition->InsertStackItem(newIndex, item);
 
@@ -19486,7 +19486,7 @@ GuiToolstripCollection
 			{
 				GuiControl* control=items[index];
 				items.RemoveAt(index);
-				GuiStackItemComposition* stackItem=stackComposition->GetStackItems()[index];
+				GuiStackItemComposition* stackItem=stackComposition->GetStackItems().Get(index);
 
 				stackComposition->RemoveChild(stackItem);
 				stackItem->RemoveChild(control->GetBoundsComposition());
@@ -19552,7 +19552,7 @@ GuiToolstripCollection
 
 			collections::IEnumerator<GuiControl*>* GuiToolstripCollection::CreateEnumerator()const
 			{
-				return items.Wrap().CreateEnumerator();
+				return items.CreateEnumerator();
 			}
 
 			bool GuiToolstripCollection::Contains(GuiControl* const& item)const
@@ -20293,7 +20293,7 @@ GuiSubComponentMeasurer::MeasuringSource
 
 			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetSubComponentComposition(int index)
 			{
-				return subComponents.Values()[index];
+				return subComponents.Values().Get(index);
 			}
 
 			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetSubComponentComposition(const WString& name)
@@ -20353,7 +20353,7 @@ GuiSubComponentMeasurer
 			void GuiSubComponentMeasurer::MeasureAndUpdate(const WString& measuringCategory, Direction direction)
 			{
 				List<IMeasuringSource*> sources;
-				FOREACH(IMeasuringSource*, source, measuringSources.Wrap())
+				FOREACH(IMeasuringSource*, source, measuringSources)
 				{
 					if(source->GetMeasuringCategory()==measuringCategory)
 					{
@@ -20362,7 +20362,7 @@ GuiSubComponentMeasurer
 				}
 
 				Dictionary<WString, int> sizes;
-				FOREACH(IMeasuringSource*, source, sources.Wrap())
+				FOREACH(IMeasuringSource*, source, sources)
 				{
 					int count=source->GetSubComponentCount();
 					for(int i=0;i<count;i++)
@@ -20378,13 +20378,13 @@ GuiSubComponentMeasurer
 						{
 							sizes.Add(name, sizeComponent);
 						}
-						else if(sizes.Values()[index]<sizeComponent)
+						else if(sizes.Values().Get(index)<sizeComponent)
 						{
 							sizes.Set(name, sizeComponent);
 						}
 					}
 				}
-				FOREACH(IMeasuringSource*, source, sources.Wrap())
+				FOREACH(IMeasuringSource*, source, sources)
 				{
 					int count=source->GetSubComponentCount();
 					for(int i=0;i<count;i++)
@@ -20489,9 +20489,9 @@ GuiGraphicsComposition
 				return parent;
 			}
 
-			const GuiGraphicsComposition::ICompositionList& GuiGraphicsComposition::Children()
+			const GuiGraphicsComposition::CompositionList& GuiGraphicsComposition::Children()
 			{
-				return children.Wrap();
+				return children;
 			}
 
 			bool GuiGraphicsComposition::AddChild(GuiGraphicsComposition* child)
@@ -21325,9 +21325,9 @@ GuiStackComposition
 			{
 			}
 
-			const GuiStackComposition::IItemCompositionList& GuiStackComposition::GetStackItems()
+			const GuiStackComposition::ItemCompositionList& GuiStackComposition::GetStackItems()
 			{
-				return stackItems.Wrap();
+				return stackItems;
 			}
 
 			bool GuiStackComposition::InsertStackItem(int index, GuiStackItemComposition* item)
@@ -21964,7 +21964,7 @@ GuiTableComposition
 				int childCount=Children().Count();
 				for(int i=0;i<childCount;i++)
 				{
-					GuiCellComposition* cell=dynamic_cast<GuiCellComposition*>(Children()[i]);
+					GuiCellComposition* cell=dynamic_cast<GuiCellComposition*>(Children().Get(i));
 					if(cell)
 					{
 						cell->OnTableRowsAndColumnsChanged();
@@ -22053,7 +22053,7 @@ GuiTableComposition
 
 				bool cellMinSizeModified=false;
 				SortedList<GuiCellComposition*> cells;
-				FOREACH(GuiCellComposition*, cell, cellCompositions.Wrap())
+				FOREACH(GuiCellComposition*, cell, cellCompositions)
 				{
 					if(cell && !cells.Contains(cell))
 					{
@@ -22968,7 +22968,7 @@ GuiGraphicsHost
 			{
 				for(int i=0;i<composition->Children().Count();i++)
 				{
-					DisconnectCompositionInternal(composition->Children()[i]);
+					DisconnectCompositionInternal(composition->Children().Get(i));
 				}
 				if(mouseCaptureComposition==composition)
 				{
@@ -23310,7 +23310,7 @@ GuiGraphicsHost
 					}
 				}
 
-				CopyFrom(mouseEnterCompositions.Wrap(), newCompositions.Wrap());
+				CopyFrom(mouseEnterCompositions, newCompositions);
 				for(int i=firstDifferentIndex;i<mouseEnterCompositions.Count();i++)
 				{
 					GuiGraphicsComposition* composition=mouseEnterCompositions[i];
@@ -23663,7 +23663,7 @@ GuiShortcutKeyManager
 			bool GuiShortcutKeyManager::Execute(const NativeWindowKeyInfo& info)
 			{
 				bool executed=false;
-				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems.Wrap())
+				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{
 					if(item->CanActivate(info))
 					{
@@ -23677,7 +23677,7 @@ GuiShortcutKeyManager
 
 			IGuiShortcutKeyItem* GuiShortcutKeyManager::CreateShortcut(bool ctrl, bool shift, bool alt, int key)
 			{
-				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems.Wrap())
+				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{
 					if(item->CanActivate(ctrl, shift, alt, key))
 					{
@@ -23691,7 +23691,7 @@ GuiShortcutKeyManager
 
 			bool GuiShortcutKeyManager::DestroyShortcut(bool ctrl, bool shift, bool alt, int key)
 			{
-				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems.Wrap())
+				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{
 					if(item->CanActivate(ctrl, shift, alt, key))
 					{
@@ -23704,7 +23704,7 @@ GuiShortcutKeyManager
 
 			IGuiShortcutKeyItem* GuiShortcutKeyManager::TryGetShortcut(bool ctrl, bool shift, bool alt, int key)
 			{
-				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems.Wrap())
+				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{
 					if(item->CanActivate(ctrl, shift, alt, key))
 					{
@@ -23770,13 +23770,13 @@ GuiGraphicsResourceManager
 			IGuiGraphicsElementFactory* GuiGraphicsResourceManager::GetElementFactory(const WString& elementTypeName)
 			{
 				int index=elementFactories.Keys().IndexOf(elementTypeName);
-				return index==-1?0:elementFactories.Values()[index].Obj();
+				return index==-1?0:elementFactories.Values().Get(index).Obj();
 			}
 
 			IGuiGraphicsRendererFactory* GuiGraphicsResourceManager::GetRendererFactory(const WString& elementTypeName)
 			{
 				int index=rendererFactories.Keys().IndexOf(elementTypeName);
-				return index==-1?0:rendererFactories.Values()[index].Obj();
+				return index==-1?0:rendererFactories.Values().Get(index).Obj();
 			}
 
 			GuiGraphicsResourceManager* guiGraphicsResourceManager=0;
@@ -24499,14 +24499,14 @@ GuiColorizedTextElement
 				}
 			}
 
-			const GuiColorizedTextElement::IColorArray& GuiColorizedTextElement::GetColors()
+			const GuiColorizedTextElement::ColorArray& GuiColorizedTextElement::GetColors()
 			{
-				return colors.Wrap();
+				return colors;
 			}
 
 			void GuiColorizedTextElement::SetColors(const ColorArray& value)
 			{
-				CopyFrom(colors.Wrap(), value.Wrap());
+				CopyFrom(colors, value);
 				if(callback) callback->ColorChanged();
 				if(renderer)
 				{
@@ -24808,9 +24808,9 @@ GuiDocumentElement::GuiDocumentElementRenderer
 								stream::MemoryStream stream;
 								{
 									stream::StreamWriter writer(stream);
-									FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines.Wrap())
+									FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines)
 									{
-										FOREACH(Ptr<text::DocumentRun>, run, line->runs.Wrap())
+										FOREACH(Ptr<text::DocumentRun>, run, line->runs)
 										{
 											WString text=ExtractTextVisitor::ExtractText(run.Obj());
 											writer.WriteString(text);
@@ -24829,9 +24829,9 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							{
 								cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
 								int start=0;
-								FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines.Wrap())
+								FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines)
 								{
-									FOREACH(Ptr<text::DocumentRun>, run, line->runs.Wrap())
+									FOREACH(Ptr<text::DocumentRun>, run, line->runs)
 									{
 										int length=SetPropertiesVisitor::SetProperty(start, cache->graphicsParagraph.Obj(), run.Obj());
 										start+=length;
@@ -25142,7 +25142,7 @@ WindowsDirect2DParagraph
 
 				~WindowsDirect2DParagraph()
 				{
-					FOREACH(Color, color, usedColors.Wrap())
+					FOREACH(Color, color, usedColors)
 					{
 						renderTarget->DestroyDirect2DBrush(color);
 					}
@@ -25247,7 +25247,7 @@ WindowsDirect2DParagraph
 					}
 					for(int i=0;i<inlineElements.Count();i++)
 					{
-						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values()[i];
+						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values().Get(i);
 						if(start<inlineObject->GetStart()+inlineObject->GetLength() && inlineObject->GetStart()<start+length)
 						{
 							return false;
@@ -25278,8 +25278,8 @@ WindowsDirect2DParagraph
 				{
 					for(int i=0;i<inlineElements.Count();i++)
 					{
-						IGuiGraphicsElement* element=inlineElements.Keys()[i];
-						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values()[i];
+						IGuiGraphicsElement* element=inlineElements.Keys().Get(i);
+						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values().Get(i);
 						if(inlineObject->GetStart()==start && inlineObject->GetLength()==length)
 						{
 							DWRITE_TEXT_RANGE range;
@@ -26311,7 +26311,7 @@ GuiColorizedTextElementRenderer
 					colors.Resize(element->GetColors().Count());
 					for(int i=0;i<colors.Count();i++)
 					{
-						text::ColorEntry entry=element->GetColors()[i];
+						text::ColorEntry entry=element->GetColors().Get(i);
 						ColorEntryResource newEntry;
 
 						newEntry.normal.text=entry.normal.text;
@@ -27789,7 +27789,7 @@ Uniscribe Operations (UniscribeLine)
 					lineText=L"";
 					CLearUniscribeData();
 					int current=0;
-					FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments.Wrap())
+					FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
 					{
 						lineText+=fragment->text;
 						current+=fragment->text.Length();
@@ -27858,7 +27858,7 @@ Uniscribe Operations (UniscribeLine)
 									bool skip=false;
 									{
 										int elementCurrent=0;
-										FOREACH(Ptr<UniscribeFragment>, elementFragment, documentFragments.Wrap())
+										FOREACH(Ptr<UniscribeFragment>, elementFragment, documentFragments)
 										{
 											int elementLength=elementFragment->text.Length();
 											if(elementFragment->element)
@@ -27899,7 +27899,7 @@ Uniscribe Operations (UniscribeLine)
 							}
 
 							// for each run, generate shape information
-							FOREACH(Ptr<UniscribeRun>, run, scriptRuns.Wrap())
+							FOREACH(Ptr<UniscribeRun>, run, scriptRuns)
 							{
 								if(!run->BuildUniscribeData(dc))
 								{
@@ -27926,7 +27926,7 @@ Uniscribe Operations (UniscribeLine)
 
 				void Render(WinDC* dc, int offsetX, int offsetY)
 				{
-					FOREACH(Ptr<UniscribeRun>, run, scriptRuns.Wrap())
+					FOREACH(Ptr<UniscribeRun>, run, scriptRuns)
 					{
 						for(int i=0;i<run->fragmentBounds.Count();i++)
 						{
@@ -27963,7 +27963,7 @@ Uniscribe Operations (UniscribeParagraph)
 
 				void ClearUniscribeData()
 				{
-					FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments.Wrap())
+					FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
 					{
 						GetWindowsGDIResourceManager()->DestroyGdiFont(fragment->fontStyle);
 						fragment->fontObject=0;
@@ -27979,7 +27979,7 @@ Uniscribe Operations (UniscribeParagraph)
 						built=true;
 						ClearUniscribeData();
 						Dictionary<WString, Ptr<WinFont>> fonts;
-						FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments.Wrap())
+						FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
 						{
 							if(!fragment->fontObject)
 							{
@@ -27992,14 +27992,14 @@ Uniscribe Operations (UniscribeParagraph)
 								}
 								else
 								{
-									fragment->fontObject=fonts.Values()[index];
+									fragment->fontObject=fonts.Values().Get(index);
 								}
 							}
 						}
 						{
 							Regex regexLine(L"\r\n");
 							Ptr<UniscribeLine> line;
-							FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments.Wrap())
+							FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
 							{
 								if(fragment->element)
 								{
@@ -28043,7 +28043,7 @@ Uniscribe Operations (UniscribeParagraph)
 							}
 						}
 
-						FOREACH(Ptr<UniscribeLine>, line, lines.Wrap())
+						FOREACH(Ptr<UniscribeLine>, line, lines)
 						{
 							line->BuildUniscribeData(dc);
 						}
@@ -28060,7 +28060,7 @@ Uniscribe Operations (UniscribeParagraph)
 
 					int cx=0;
 					int cy=0;
-					FOREACH(Ptr<UniscribeLine>, line, lines.Wrap())
+					FOREACH(Ptr<UniscribeLine>, line, lines)
 					{
 						if(line->scriptRuns.Count()==0)
 						{
@@ -28071,7 +28071,7 @@ Uniscribe Operations (UniscribeParagraph)
 						}
 						else
 						{
-							FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns.Wrap())
+							FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns)
 							{
 								run->fragmentBounds.Clear();
 							}
@@ -28161,9 +28161,9 @@ Uniscribe Operations (UniscribeParagraph)
 							int minY=0;
 							int maxX=0;
 							int maxY=0;
-							FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns.Wrap())
+							FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns)
 							{
-								FOREACH(UniscribeRun::RunFragmentBounds, fragmentBounds, run->fragmentBounds.Wrap())
+								FOREACH(UniscribeRun::RunFragmentBounds, fragmentBounds, run->fragmentBounds)
 								{
 									Rect bounds=fragmentBounds.bounds;
 									if(minX>bounds.Left()) minX=bounds.Left();
@@ -28181,7 +28181,7 @@ Uniscribe Operations (UniscribeParagraph)
 					int minY=0;
 					int maxX=0;
 					int maxY=0;
-					FOREACH(Ptr<UniscribeLine>, line, lines.Wrap())
+					FOREACH(Ptr<UniscribeLine>, line, lines)
 					{
 						Rect bounds=line->bounds;
 						if(minX>bounds.Left()) minX=bounds.Left();
@@ -28194,7 +28194,7 @@ Uniscribe Operations (UniscribeParagraph)
 
 				void Render(WinDC* dc, int offsetX, int offsetY)
 				{
-					FOREACH(Ptr<UniscribeLine>, line, lines.Wrap())
+					FOREACH(Ptr<UniscribeLine>, line, lines)
 					{
 						line->Render(dc, offsetX, offsetY);
 					}
@@ -29425,7 +29425,7 @@ GuiColorizedTextElementRenderer
 				newColors.Resize(element->GetColors().Count());
 				for(int i=0;i<newColors.Count();i++)
 				{
-					text::ColorEntry entry=element->GetColors()[i];
+					text::ColorEntry entry=element->GetColors().Get(i);
 					ColorEntryResource newEntry;
 
 					newEntry.normal.text=entry.normal.text;
@@ -29441,7 +29441,7 @@ GuiColorizedTextElementRenderer
 				}
 
 				DestroyColors();
-				CopyFrom(colors.Wrap(), newColors.Wrap());
+				CopyFrom(colors, newColors);
 			}
 
 			void GuiColorizedTextElementRenderer::FontChanged()
@@ -30464,7 +30464,7 @@ namespace vl
 			ID2D1RenderTarget* GetNativeWindowDirect2DRenderTarget(INativeWindow* window)
 			{
 				int index=direct2DListener->nativeWindowListeners.Keys().IndexOf(window);
-				return index==-1?0:direct2DListener->nativeWindowListeners.Values()[index]->GetDirect2DRenderTarget();
+				return index==-1?0:direct2DListener->nativeWindowListeners.Values().Get(index)->GetDirect2DRenderTarget();
 			}
 
 			ID2D1Factory* GetDirect2DFactory()
@@ -32585,7 +32585,7 @@ namespace vl
 			WinDC* GetNativeWindowDC(INativeWindow* window)
 			{
 				int index=gdiListener->nativeWindowListeners.Keys().IndexOf(window);
-				return index==-1?0:gdiListener->nativeWindowListeners.Values()[index]->GetWinDC();
+				return index==-1?0:gdiListener->nativeWindowListeners.Values().Get(index)->GetWinDC();
 			}
 
 			HDC GetNativeWindowHDC(INativeWindow* window)
@@ -32720,7 +32720,7 @@ WindowsAsyncService
 				Array<TaskItem> items;
 				{
 					SpinLock::Scope scope(taskListLock);
-					CopyFrom(items.Wrap(), taskItems.Wrap());
+					CopyFrom(items, taskItems);
 					taskItems.RemoveRange(0, items.Count());
 				}
 				for(int i=0;i<items.Count();i++)
@@ -33342,7 +33342,7 @@ WindowsImageFrame
 			{
 				for(int i=0;i<caches.Count();i++)
 				{
-					caches.Values()[i]->OnDetach(this);
+					caches.Values().Get(i)->OnDetach(this);
 				}
 			}
 
@@ -33374,7 +33374,7 @@ WindowsImageFrame
 			Ptr<INativeImageFrameCache> WindowsImageFrame::GetCache(void* key)
 			{
 				int index=caches.Keys().IndexOf(key);
-				return index==-1?0:caches.Values()[index];
+				return index==-1?0:caches.Values().Get(index);
 			}
 
 			Ptr<INativeImageFrameCache> WindowsImageFrame::RemoveCache(void* key)
@@ -33384,7 +33384,7 @@ WindowsImageFrame
 				{
 					return 0;
 				}
-				Ptr<INativeImageFrameCache> cache=caches.Values()[index];
+				Ptr<INativeImageFrameCache> cache=caches.Values().Get(index);
 				cache->OnDetach(this);
 				caches.Remove(key);
 				return cache;
@@ -34707,7 +34707,7 @@ WindowsForm
 				~WindowsForm()
 				{
 					List<INativeWindowListener*> copiedListeners;
-					CopyFrom(copiedListeners.Wrap(), listeners.Wrap());
+					CopyFrom(copiedListeners, listeners);
 					for(int i=0;i<copiedListeners.Count();i++)
 					{
 						INativeWindowListener* listener=copiedListeners[i];
@@ -35185,7 +35185,7 @@ WindowsController
 					int index=windows.Keys().IndexOf(hwnd);
 					if(index!=-1)
 					{
-						WindowsForm* window=windows.Values()[index];
+						WindowsForm* window=windows.Values().Get(index);
 						skipDefaultProcedure=window->HandleMessage(hwnd, uMsg, wParam, lParam, result);
 						switch(uMsg)
 						{
@@ -35205,14 +35205,14 @@ WindowsController
 							{
 								for(int i=0;i<windows.Count();i++)
 								{
-									if(windows.Values()[i]->IsVisible())
+									if(windows.Values().Get(i)->IsVisible())
 									{
-										windows.Values()[i]->Hide();
+										windows.Values().Get(i)->Hide();
 									}
 								}
 								while(windows.Count())
 								{
-									DestroyNativeWindow(windows.Values()[0]);
+									DestroyNativeWindow(windows.Values().Get(0));
 								}
 								PostQuitMessage(0);
 							}
@@ -35276,7 +35276,7 @@ WindowsController
 					}
 					else
 					{
-						return windows.Values()[index];
+						return windows.Values().Get(index);
 					}
 				}
 

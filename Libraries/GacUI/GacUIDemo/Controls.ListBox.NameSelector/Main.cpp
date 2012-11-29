@@ -117,11 +117,11 @@ private:
 
 		List<int> selectedItems;
 		CopyFrom(
-			selectedItems.Wrap(),
+			selectedItems,
 			from->GetSelectedItems()
 				>>OrderBy(ReverseCompareInt)
 			);
-		FOREACH(int, index, selectedItems.Wrap())
+		FOREACH(int, index, selectedItems)
 		{
 			from->GetItems().RemoveAt(index);
 		}

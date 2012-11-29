@@ -94,7 +94,7 @@ private:
 		Func<Ptr<list::ListViewItem>(Ptr<FileProperties>)> converter(this, &SortingAndFilteringWindow::CreateFileItem);
 
 		listView->GetItems().Clear();
-		CopyFrom(listView->GetItems(), fileProperties.Wrap()>>Where(filter)>>OrderBy(comparer)>>Select(converter));
+		CopyFrom(listView->GetItems(), fileProperties>>Where(filter)>>OrderBy(comparer)>>Select(converter));
 	}
 
 	void ShowAllFileType_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
@@ -179,7 +179,7 @@ public:
 			List<WString> directories;
 			List<WString> files;
 			SearchDirectoriesAndFiles(directory, directories, files);
-			FOREACH(WString, file, directories.Wrap()>>Concat(files.Wrap()))
+			FOREACH(WString, file, directories>>Concat(files))
 			{
 				fileProperties.Add(new FileProperties(directory+L"\\"+file));
 			}
@@ -198,8 +198,8 @@ public:
 			// Added all existing file type in the folder as menu items
 			Array<WString> fileTypes;
 			CopyFrom(
-				fileTypes.Wrap(),
-				fileProperties.Wrap()
+				fileTypes,
+				fileProperties
 				>>Select(Func<WString(Ptr<FileProperties>)>(
 					[](Ptr<FileProperties> file){return file->GetTypeName();}
 				))
@@ -208,7 +208,7 @@ public:
 					[](WString a, WString b){return _wcsicmp(a.Buffer(), b.Buffer());}
 				))
 				);
-			FOREACH(WString, typeName, fileTypes.Wrap())
+			FOREACH(WString, typeName, fileTypes)
 			{
 				// Create menu button for each file type
 				fileTypeMenu->GetBuilder()->Button(0, typeName, &button);

@@ -327,14 +327,6 @@ Data Structure::Interfaces
 Interfaces:
 	IEnumerator<T>									：枚举器
 	IEnumerable<T>									：可枚举对象
-	IReadonlyList<T>								：只读列表
-	IArray<T>										：数组
-	ICollection<T>									：集合
-	IList<T>										：列表
-	IReadonlyDictionary<K,V>						：只读映射
-	IDictionary<K,V>								：映射
-	IReadonlyGroup<K,V>								：只读多重映射
-	IGroup<K,V>										：多重映射
 ***********************************************************************/
 
 #ifndef VCZH_COLLECTIONS_INTERFACES
@@ -366,90 +358,53 @@ namespace vl
 		class IEnumerable : public virtual Interface
 		{
 		public:
+			typedef T									ElementType;
+
 			virtual IEnumerator<T>*						CreateEnumerator()const=0;
 		};
 
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class IReadonlyList : public virtual IEnumerable<T>
-		{
-		public:
-			virtual bool								Contains(const K& item)const=0;
-			virtual vint								Count()const=0;
-			virtual const T&							Get(vint index)const=0;
-			virtual const T&							operator[](vint index)const=0;
-			virtual vint								IndexOf(const K& item)const=0;
-		};
+/***********************************************************************
+随机存取
+***********************************************************************/
 
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class IArray : public virtual IReadonlyList<T, K>
+		namespace randomaccess_internal
 		{
-		public:
-			virtual void								Set(vint index, const T& item)=0;
-			virtual void								Resize(vint size)=0;
-		};
+			template<typename T>
+			struct RandomAccessable
+			{
+				static const bool							CanRead = false;
+				static const bool							CanResize = false;
+			};
 
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class ICollection : public virtual IReadonlyList<T, K>
-		{
-		public:
-			virtual vint								Add(const T& item)=0;
-			virtual bool								Remove(const K& item)=0;
-			virtual bool								RemoveAt(vint index)=0;
-			virtual bool								RemoveRange(vint index, vint count)=0;
-			virtual bool								Clear()=0;
-		};
+			template<typename T>
+			struct RandomAccess
+			{
+				static vint GetCount(const T& t)
+				{
+					return t.Count();
+				}
 
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class IList : public virtual ICollection<T, K>
-		{
-		public:
-			virtual vint								Insert(vint index, const T& item)=0;
-			virtual bool								Set(vint index, const T& item)=0;
-		};
+				static const typename T::ElementType& GetValue(const T& t, vint index)
+				{
+					return t.Get(index);
+				}
 
-		template<typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
-		class IReadonlyDictionary : public virtual IEnumerable<Pair<KT, VT>>
-		{
-		public:
-			virtual const IReadonlyList<KT, KK>&		Keys()const=0;
-			virtual const IReadonlyList<VT, VK>&		Values()const=0;
-			virtual vint								Count()const=0;
-			virtual const VT&							Get(const KK& key)const=0;
-			virtual const VT&							operator[](const KK& key)const=0;
-		};
+				static void SetCount(T& t, vint count)
+				{
+					t.Resize(count);
+				}
 
-		template<typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
-		class IDictionary : public virtual IReadonlyDictionary<KT, VT, KK, VK>
-		{
-		public:
-			virtual bool								Set(const KK& key, const VT& value)=0;
-			virtual bool								Add(const KT& key, const VT& value)=0;
-			virtual bool								Remove(const KK& key)=0;
-			virtual bool								Clear()=0;
-		};
+				static void SetValue(T& t, vint index, const typename T::ElementType& value)
+				{
+					t.Set(index, value);
+				}
 
-		template<typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
-		class IReadonlyGroup : public virtual IEnumerable<Pair<KT, VT>>
-		{
-		public:
-			virtual const IReadonlyList<KT, KK>&		Keys()const=0;
-			virtual vint								Count()const=0;
-			virtual const IReadonlyList<VT, VK>&		Get(const KK& key)const=0;
-			virtual const IReadonlyList<VT, VK>&		GetByIndex(vint index)const=0;
-			virtual const IReadonlyList<VT, VK>&		operator[](const KK& key)const=0;
-			virtual bool								Contains(const KK& key)const=0;
-			virtual bool								Contains(const KK& key, const VK& value)const=0;
-		};
-
-		template<typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
-		class IGroup: public virtual IReadonlyGroup<KT, VT, KK, VK>
-		{
-		public:
-			virtual bool								Add(const KT& key, const VT& value)=0;
-			virtual bool								Remove(const KK& key)=0;
-			virtual bool								Remove(const KK& key, const VK& value)=0;
-			virtual bool								Clear()=0;
-		};
+				static void AppendValue(T& t, const typename T::ElementType& value)
+				{
+					t.Add(value);
+				}
+			};
+		}
 	}
 }
 
@@ -478,240 +433,144 @@ namespace vl
 容器复制
 ***********************************************************************/
 
-		template<typename T, typename K>
-		void CopyFrom(IArray<T, K>& dst, const IReadonlyList<T, K>& src, bool append=false)
+		namespace copyfrom_internal
 		{
-			vint start=0;
-			if(append)
-			{
-				start=dst.Count();
-				dst.Resize(start+src.Count());
-			}
-			else
-			{
-				dst.Resize(src.Count());
-			}
-			vint srcCount=src.Count();
-			for(vint i=0;i<srcCount;i++)
-			{
-				dst.Set(start+i, src[i]);
-			}
-		}
+			using namespace randomaccess_internal;
 
-		template<typename T, typename K>
-		void CopyFrom(ICollection<T, K>& dst, const IReadonlyList<T, K>& src, bool append=false)
-		{
-			if(!append)
+			template<typename Ds, typename Ss, bool DsRA, bool SsRA>
+			struct CopyFromAlgorithm
 			{
-				dst.Clear();
-			}
-			vint srcCount=src.Count();
-			for(vint i=0;i<srcCount;i++)
-			{
-				dst.Add(src[i]);
-			}
-		}
+			};
 
-		template<typename KT, typename VT, typename KK, typename VK>
-		void CopyFrom(IDictionary<KT, VT, KK, VK>& dst, const IReadonlyList<Pair<KT, VT>>& src, bool append=false)
-		{
-			if(!append)
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, true, true>
 			{
-				dst.Clear();
-			}
-			vint srcCount=src.Count();
-			for(vint i=0;i<srcCount;i++)
-			{
-				const Pair<KT, VT>& pair=src[i];
-				dst.Set(pair.key, pair.value);
-			}
-		}
-
-		template<typename KT, typename VT, typename KK, typename VK>
-		void CopyFrom(IGroup<KT, VT, KK, VK>& dst, const IReadonlyList<Pair<KT, VT>>& src, bool append=false)
-		{
-			if(!append)
-			{
-				dst.Clear();
-			}
-			vint srcCount=src.Count();
-			for(vint i=0;i<srcCount;i++)
-			{
-				const Pair<KT, VT>& pair=src[i];
-				dst.Add(pair.key, pair.value);
-			}
-		}
-
-		template<typename T, typename K>
-		void CopyFrom(IArray<T, K>& dst, const IEnumerable<T>& src, bool append=false)
-		{
-			IEnumerator<T>* enumerator=src.CreateEnumerator();
-			try
-			{
-				vint count=0;
-				while(enumerator->Available())
+				static void Perform(Ds& ds, const Ss& ss, bool append)
 				{
-					count++;
-					enumerator->Next();
+					vint copyCount=RandomAccess<Ss>::GetCount(ss);
+					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
+					vint resizeCount=index+copyCount;
+					RandomAccess<Ds>::SetCount(ds, resizeCount);
+					for(vint i=0;i<copyCount;i++)
+					{
+						RandomAccess<Ds>::SetValue(ds, index+i, RandomAccess<Ss>::GetValue(ss, i));
+					}
 				}
-				enumerator->Reset();
-				vint start=0;
-				if(append)
-				{
-					start=dst.Count();
-					dst.Resize(start+count);
-				}
-				else
-				{
-					dst.Resize(count);
-				}
-				while(enumerator->Available())
-				{
-					dst.Set(start+enumerator->Index(), enumerator->Current());
-					enumerator->Next();
-				}
-				delete enumerator;
-			}
-			catch(...)
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, false, true>
 			{
-				delete enumerator;
-				throw;
-			}
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					if(!append)
+					{
+						ds.Clear();
+					}
+					vint copyCount=RandomAccess<Ss>::GetCount(ss);
+					for(vint i=0;i<copyCount;i++)
+					{
+						RandomAccess<Ds>::AppendValue(ds, RandomAccess<Ss>::GetValue(ss, i));
+					}
+				}
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, true, false>
+			{
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					Ptr<IEnumerator<typename Ss::ElementType>> enumerator;
+					vint copyCount=0;
+
+					enumerator=ss.CreateEnumerator();
+					while(enumerator->Available())
+					{
+						copyCount++;
+						enumerator->Next();
+					}
+
+					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
+					vint resizeCount=index+copyCount;
+					RandomAccess<Ds>::SetCount(ds, resizeCount);
+
+					enumerator=ss.CreateEnumerator();
+					for(vint i=0;i<copyCount;i++)
+					{
+						RandomAccess<Ds>::SetValue(ds, index+i, enumerator->Current());
+						enumerator->Next();
+					}
+				}
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, false, false>
+			{
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					if(!append)
+					{
+						ds.Clear();
+					}
+					Ptr<IEnumerator<typename Ss::ElementType>> enumerator=ss.CreateEnumerator();
+					while(enumerator->Available())
+					{
+						RandomAccess<Ds>::AppendValue(ds, enumerator->Current());
+						enumerator->Next();
+					}
+				}
+			};
+
+			template<typename T>
+			struct Slice
+			{
+				const T*	items;
+				vint		count;
+			};
 		}
 
-		template<typename T, typename K>
-		void CopyFrom(ICollection<T, K>& dst, const IEnumerable<T>& src, bool append=false)
+		namespace randomaccess_internal
 		{
-			IEnumerator<T>* enumerator=src.CreateEnumerator();
-			try
+			template<typename T>
+			struct RandomAccessable<copyfrom_internal::Slice<T>>
 			{
-				if(!append)
-				{
-					dst.Clear();
-				}
-				while(enumerator->Available())
-				{
-					dst.Add(enumerator->Current());
-					enumerator->Next();
-				}
-				delete enumerator;
-			}
-			catch(...)
+				static const bool							CanRead = true;
+				static const bool							CanResize = true;
+			};
+		
+			template<typename T>
+			struct RandomAccess<copyfrom_internal::Slice<T>>
 			{
-				delete enumerator;
-				throw;
-			}
+				static vint GetCount(const copyfrom_internal::Slice<T>& t)
+				{
+					return t.count;
+				}
+
+				static const T& GetValue(const copyfrom_internal::Slice<T>& t, vint index)
+				{
+					return t.items[index];
+				}
+			};
 		}
 
-		template<typename KT, typename VT, typename KK, typename VK>
-		void CopyFrom(IDictionary<KT, VT, KK, VK>& dst, const IEnumerable<Pair<KT, VT>>& src, bool append=false)
+		template<typename Ds, typename Ss>
+		void CopyFrom(Ds& ds, const Ss& ss, bool append=false)
 		{
-			IEnumerator<Pair<KT, VT>>* enumerator=src.CreateEnumerator();
-			try
-			{
-				if(!append)
-				{
-					dst.Clear();
-				}
-				while(enumerator->Available())
-				{
-					const Pair<KT, VT>& pair=enumerator->Current();
-					dst.Set(pair.key, pair.value);
-					enumerator->Next();
-				}
-				delete enumerator;
-			}
-			catch(...)
-			{
-				delete enumerator;
-				throw;
-			}
+			copyfrom_internal::CopyFromAlgorithm<Ds, Ss, randomaccess_internal::RandomAccessable<Ds>::CanResize, randomaccess_internal::RandomAccessable<Ss>::CanRead>::Perform(ds, ss, append);
 		}
 
-		template<typename KT, typename VT, typename KK, typename VK>
-		void CopyFrom(IGroup<KT, VT, KK, VK>& dst, const IEnumerable<Pair<KT, VT>>& src, bool append=false)
+		template<typename Ds, typename S>
+		void CopyFrom(Ds& ds, const S* buffer, vint count, bool append=false)
 		{
-			IEnumerator<Pair<KT, VT>>* enumerator=src.CreateEnumerator();
-			try
-			{
-				if(!append)
-				{
-					dst.Clear();
-				}
-				while(enumerator->Available())
-				{
-					const Pair<KT, VT>& pair=enumerator->Current();
-					dst.Add(pair.key, pair.value);
-					enumerator->Next();
-				}
-				delete enumerator;
-			}
-			catch(...)
-			{
-				delete enumerator;
-				throw;
-			}
+			copyfrom_internal::Slice<S> slice={buffer, count};
+			CopyFrom(ds, slice, append);
 		}
 
-		template<typename T, typename K, typename I>
-		void CopyFrom(IArray<T, K>& dst, I begin, vint length, bool append=false)
+		template<typename Ds, typename S>
+		void CopyFrom(Ds& ds, const S* begin, const S* end, bool append=false)
 		{
-			vint start=0;
-			if(append)
-			{
-				start=dst.Count();
-				dst.Resize(start+length);
-			}
-			else
-			{
-				dst.Resize(length);
-			}
-
-			for(vint i=0;i<length;i++)
-			{
-				dst.Set(start+i, *begin++);
-			}
-		}
-
-		template<typename T, typename K, typename I>
-		void CopyFrom(ICollection<T, K>& dst, I begin, vint length, bool append=false)
-		{
-			if(!append)
-			{
-				dst.Clear();
-			}
-
-			for(vint i=0;i<length;i++)
-			{
-				dst.Add(*begin++);
-			}
-		}
-
-		template<typename T, typename K, typename I>
-		void CopyFrom(IArray<T, K>& dst, I begin, I end, bool append=false)
-		{
-			vint length=0;
-			I current=begin;
-			while(current!=end)
-			{
-				length++;
-				current++;
-			}
-			CopyFrom(dst, begin, length, append);
-		}
-
-		template<typename T, typename K, typename I>
-		void CopyFrom(ICollection<T, K>& dst, I begin, I end, bool append=false)
-		{
-			if(!append)
-			{
-				dst.Clear();
-			}
-
-			while(begin!=end)
-			{
-				dst.Add(*begin++);
-			}
+			copyfrom_internal::Slice<S> slice={begin, end-begin};
+			CopyFrom(ds, slice, append);
 		}
 	}
 }
@@ -6632,430 +6491,6 @@ Where
 #endif
 
 /***********************************************************************
-COLLECTIONS\LISTWRAPPERS.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::List Wrappers
-
-Classes:
-	ReadonlyListEnumerator<T>
-	ReadonlyListConverter<T>
-	ReadonlyListWrapper<T>
-	ArrayWrapper<T>
-	CollectionWrapper<T>
-	ListWrapper<T>
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_LISTWRAPPERS
-#define VCZH_COLLECTIONS_LISTWRAPPERS
-
-
-namespace vl
-{
-	namespace collections
-	{
-
-/***********************************************************************
-代理
-***********************************************************************/
-
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class ReadonlyListEnumerator : public Object, public virtual IEnumerator<T>
-		{
-		private:
-			const IReadonlyList<T, K>*			container;
-			vint									index;
-		public:
-			ReadonlyListEnumerator(const IReadonlyList<T, K>* _container, vint _index)
-			{
-				container=_container;
-				index=_index;
-			}
-
-			ReadonlyListEnumerator<T>* Clone()const
-			{
-				return new ReadonlyListEnumerator<T, K>(container, index);
-			}
-
-			const T& Current()const
-			{
-				return container->Get(index);
-			}
-
-			vint Index()const
-			{
-				return index;
-			}
-
-			bool Next()
-			{
-				index++;
-				return Available();
-			}
-
-			bool Available()const
-			{
-				return index>=0 && index<container->Count();
-			}
-
-			void Reset()
-			{
-				index=0;
-			}
-		};
-
-		template<typename C, typename T, typename K=typename KeyType<T>::Type>
-		class ReadonlyListWrapper : public Object, public virtual IReadonlyList<T, K>
-		{
-		private:
-			C*									container;
-		public:
-			ReadonlyListWrapper(C* _container=0)
-			{
-				container=_container;
-			}
-
-			C* GetContainer()
-			{
-				return container;
-			}
-
-			void SetContainer(C* _container)
-			{
-				container=_container;
-			}
-
-			IEnumerator<T>* CreateEnumerator()const
-			{
-				return new ReadonlyListEnumerator<T, K>(this, 0);
-			}
-
-			bool Contains(const K& item)const
-			{
-				return container->Contains(item);
-			}
-
-			vint Count()const
-			{
-				return container->Count();
-			}
-
-			const T& Get(vint index)const
-			{
-				return container->Get(index);
-			}
-
-			const T& operator[](vint index)const
-			{
-				return container->operator[](index);
-			}
-
-			vint IndexOf(const K& item)const
-			{
-				return container->IndexOf(item);
-			}
-		};
-
-		template<typename C, typename T, typename K=typename KeyType<T>::Type>
-		class ArrayWrapper : public Object, public virtual IArray<T, K>
-		{
-		private:
-			C*									container;
-		public:
-			ArrayWrapper(C* _container=0)
-			{
-				container=_container;
-			}
-
-			C* GetContainer()
-			{
-				return container;
-			}
-
-			void SetContainer(C* _container)
-			{
-				container=_container;
-			}
-
-			IEnumerator<T>* CreateEnumerator()const
-			{
-				return new ReadonlyListEnumerator<T, K>(this, 0);
-			}
-
-			bool Contains(const K& item)const
-			{
-				return container->Contains(item);
-			}
-
-			vint Count()const
-			{
-				return container->Count();
-			}
-
-			const T& Get(vint index)const
-			{
-				return container->Get(index);
-			}
-
-			const T& operator[](vint index)const
-			{
-				return container->operator[](index);
-			}
-
-			vint IndexOf(const K& item)const
-			{
-				return container->IndexOf(item);
-			}
-
-			void Set(vint index, const T& item)
-			{
-				container->Set(index, item);
-			}
-
-			void Resize(vint size)
-			{
-				container->Resize(size);
-			}
-		};
-
-		template<typename C, typename T, typename K=KeyType<T>::Type>
-		class CollectionWrapper : public Object, public virtual ICollection<T, K>
-		{
-		private:
-			C*									container;
-		public:
-			CollectionWrapper(C* _container=0)
-			{
-				container=_container;
-			}
-
-			C* GetContainer()
-			{
-				return container;
-			}
-
-			void SetContainer(C* _container)
-			{
-				container=_container;
-			}
-
-			IEnumerator<T>* CreateEnumerator()const
-			{
-				return new ReadonlyListEnumerator<T, K>(this, 0);
-			}
-
-			bool Contains(const K& item)const
-			{
-				return container->Contains(item);
-			}
-
-			vint Count()const
-			{
-				return container->Count();
-			}
-
-			const T& Get(vint index)const
-			{
-				return container->Get(index);
-			}
-
-			const T& operator[](vint index)const
-			{
-				return container->operator[](index);
-			}
-
-			vint IndexOf(const K& item)const
-			{
-				return container->IndexOf(item);
-			}
-
-			vint Add(const T& item)
-			{
-				return container->Add(item);
-			}
-
-			bool Remove(const K& item)
-			{
-				return container->Remove(item);
-			}
-
-			bool RemoveAt(vint index)
-			{
-				return container->RemoveAt(index);
-			}
-
-			bool RemoveRange(vint index, vint count)
-			{
-				return container->RemoveRange(index, count);
-			}
-
-			bool Clear()
-			{
-				return container->Clear();
-			}
-		};
-
-		template<typename C, typename T, typename K=KeyType<T>::Type>
-		class ListWrapper : public Object, public virtual IList<T, K>
-		{
-		private:
-			C*									container;
-		public:
-			ListWrapper(C* _container=0)
-			{
-				container=_container;
-			}
-
-			C* GetContainer()
-			{
-				return container;
-			}
-
-			void SetContainer(C* _container)
-			{
-				container=_container;
-			}
-
-			IEnumerator<T>* CreateEnumerator()const
-			{
-				return new ReadonlyListEnumerator<T, K>(this, 0);
-			}
-
-			bool Contains(const K& item)const
-			{
-				return container->Contains(item);
-			}
-
-			vint Count()const
-			{
-				return container->Count();
-			}
-
-			const T& Get(vint index)const
-			{
-				return container->Get(index);
-			}
-
-			const T& operator[](vint index)const
-			{
-				return container->operator[](index);
-			}
-
-			vint IndexOf(const K& item)const
-			{
-				return container->IndexOf(item);
-			}
-
-			vint Add(const T& item)
-			{
-				return container->Add(item);
-			}
-
-			bool Remove(const K& item)
-			{
-				return container->Remove(item);
-			}
-
-			bool RemoveAt(vint index)
-			{
-				return container->RemoveAt(index);
-			}
-
-			bool RemoveRange(vint index, vint count)
-			{
-				return container->RemoveRange(index, count);
-			}
-
-			bool Clear()
-			{
-				return container->Clear();
-			}
-
-			vint Insert(vint index, const T& item)
-			{
-				return container->Insert(index, item);
-			}
-
-			bool Set(vint index, const T& item)
-			{
-				return container->Set(index, item);
-			}
-		};
-
-/***********************************************************************
-类型转换代理
-***********************************************************************/
-
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class ReadonlyListImplBase : public virtual IReadonlyList<T, K>
-		{
-		public:
-			IEnumerator<T>* CreateEnumerator()const
-			{
-				return new ReadonlyListEnumerator<T, K>(this, 0);
-			}
-
-			bool Contains(const K& item)const
-			{
-				return IndexOf(item)!=-1;
-			}
-
-			const T& operator[](vint index)const
-			{
-				return Get(index);
-			}
-
-			vint IndexOf(const K& item)const
-			{
-				vint count=Count();
-				for(vint i=0;i<count;i++)
-				{
-					if(Get(i)==item)
-					{
-						return i;
-					}
-				}
-				return -1;
-			}
-		};
-
-		template<typename TS, typename TD, typename KS=typename KeyType<TS>::Type, typename KD=typename KeyType<TD>::Type>
-		class ReadonlyListConverterBase : protected ReadonlyListImplBase<TD, KD>
-		{
-		private:
-			IReadonlyList<TS, KS>*				container;
-
-		protected:
-			ReadonlyListConverterBase()
-				:container(0)
-			{
-			}
-
-			vint Count()const
-			{
-				return container->Count();
-			}
-
-			const TD& Get(vint index)const
-			{
-				return Convert(container->Get(index));
-			}
-
-			void SetContainer(IReadonlyList<TS, KS>* _container)
-			{
-				container=_container;
-			}
-
-			virtual const TD& Convert(const TS& value)const;
-		};
-	}
-}
-
-#endif
-
-/***********************************************************************
 COLLECTIONS\LIST.H
 ***********************************************************************/
 /***********************************************************************
@@ -7091,7 +6526,7 @@ namespace vl
 		};
 		
 		template<typename T>
-		class ListStore<T,false> abstract : public Object
+		class ListStore<T, false> abstract : public Object
 		{
 		protected:
 			static void CopyObjects(T* dest, const T* source, vint count)
@@ -7123,7 +6558,7 @@ namespace vl
 		};
 		
 		template<typename T>
-		class ListStore<T,true> abstract : public Object
+		class ListStore<T, true> abstract : public Object
 		{
 		protected:
 			static void CopyObjects(T* dest, const T* source, vint count)
@@ -7139,14 +6574,92 @@ namespace vl
 			}
 		public:
 		};
-
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class ListBase abstract : public ListStore<T,POD<T>::Result>
+		
+		template<typename T>
+		class ArrayBase abstract : public ListStore<T,POD<T>::Result>, public virtual IEnumerable<T>
 		{
 		protected:
-			vint						count;
-			vint						capacity;
+			class Enumerator : public Object, public virtual IEnumerator<T>
+			{
+			private:
+				const ArrayBase<T>*				container;
+				vint							index;
+			public:
+				Enumerator(const ArrayBase<T>* _container, vint _index)
+				{
+					container=_container;
+					index=_index;
+				}
+
+				Enumerator* Clone()const
+				{
+					return new Enumerator(container, index);
+				}
+
+				const T& Current()const
+				{
+					return container->Get(index);
+				}
+
+				vint Index()const
+				{
+					return index;
+				}
+
+				bool Next()
+				{
+					index++;
+					return Available();
+				}
+
+				bool Available()const
+				{
+					return index>=0 && index<container->Count();
+				}
+
+				void Reset()
+				{
+					index=0;
+				}
+			};
+			
 			T*						buffer;
+			vint					count;
+		public:
+			ArrayBase()
+				:buffer(0)
+				,count(0)
+			{
+			}
+
+			IEnumerator<T>* CreateEnumerator()const
+			{
+				return new Enumerator(this, 0);
+			}
+
+			vint Count()const
+			{
+				return count;
+			}
+
+			const T& Get(vint index)const
+			{
+				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::Get(vint)#参数越界。");
+				return buffer[index];
+			}
+
+			const T& operator[](vint index)const
+			{
+				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::operator[](vint)#参数index越界。");
+				return buffer[index];
+			}
+		};
+
+		template<typename T, typename K=typename KeyType<T>::Type>
+		class ListBase abstract : public ArrayBase<T>
+		{
+		protected:
+			vint					capacity;
 			bool					lessMemoryMode;
 
 			vint CalculateCapacity(vint expected)
@@ -7217,23 +6730,6 @@ namespace vl
 				lessMemoryMode=mode;
 			}
 
-			vint Count()const
-			{
-				return count;
-			}
-
-			const T& Get(vint index)const
-			{
-				CHECK_ERROR(index>=0 && index<count, L"ListBase<T, K>::Get(vint)#参数越界。");
-				return buffer[index];
-			}
-
-			const T& operator[](vint index)const
-			{
-				CHECK_ERROR(index>=0 && index<count, L"ListBase<T, K>::operator[](vint)#参数index越界。");
-				return buffer[index];
-			}
-
 			bool RemoveAt(vint index)
 			{
 				vint previousCount=count;
@@ -7278,13 +6774,9 @@ namespace vl
 ***********************************************************************/
 
 		template<typename T, typename K=typename KeyType<T>::Type>
-		class Array : public ListStore<T, POD<T>::Result>, private NotCopyable
+		class Array : public ArrayBase<T>
 		{
 		protected:
-			vint								count;
-			T*								buffer;
-			mutable ArrayWrapper<Array<T, K>, T, K>		wrapper;
-
 			void Create(vint size)
 			{
 				if(size>0)
@@ -7308,13 +6800,11 @@ namespace vl
 		public:
 			Array(vint size=0)
 			{
-				wrapper.SetContainer(this);
 				Create(size);
 			}
 
 			Array(const T* _buffer, vint size)
 			{
-				wrapper.SetContainer(this);
 				Create(size);
 				CopyObjects(buffer, _buffer, size);
 			}
@@ -7327,23 +6817,6 @@ namespace vl
 			bool Contains(const K& item)const
 			{
 				return IndexOf(item)!=-1;
-			}
-
-			vint Count()const
-			{
-				return count;
-			}
-
-			const T& Get(vint index)const
-			{
-				CHECK_ERROR(index>=0 && index<count, L"Array<T, K>::Get(vint)#参数越界。");
-				return buffer[index];
-			}
-
-			const T& operator[](vint index)const
-			{
-				CHECK_ERROR(index>=0 && index<count, L"Array<T, K>::operator[](vint)#参数index越界。");
-				return buffer[index];
 			}
 
 			vint IndexOf(const K& item)const
@@ -7378,22 +6851,14 @@ namespace vl
 				CopyObjects(buffer, oldBuffer, (count<oldCount?count:oldCount));
 				delete[] oldBuffer;
 			}
-
-			IArray<T, K>& Wrap()const
-			{
-				return wrapper;
-			}
 		};
 
 		template<typename T, typename K=typename KeyType<T>::Type>
-		class List : public ListBase<T, K>, private NotCopyable
+		class List : public ListBase<T, K>
 		{
-		protected:
-			mutable ListWrapper<List<T, K>, T, K>	wrapper;
 		public:
 			List()
 			{
-				wrapper.SetContainer(this);
 			}
 
 			bool Contains(const K& item)const
@@ -7454,22 +6919,14 @@ namespace vl
 				CHECK_ERROR(index>=0 && index<count, L"List<T, K>::operator[](vint)#参数index越界。");
 				return buffer[index];
 			}
-
-			IList<T, K>& Wrap()const
-			{
-				return wrapper;
-			}
 		};
 
 		template<typename T, typename K=typename KeyType<T>::Type>
-		class SortedList : public ListBase<T, K>, private NotCopyable
+		class SortedList : public ListBase<T, K>
 		{
-		protected:
-			mutable CollectionWrapper<SortedList<T, K>, T, K>	wrapper;
 		public:
 			SortedList()
 			{
-				wrapper.SetContainer(this);
 			}
 
 			bool Contains(const K& item)const
@@ -7560,46 +7017,34 @@ SORTED_LIST_INSERT:
 					return false;
 				}
 			}
-
-			ICollection<T, K>& Wrap()const
-			{
-				return wrapper;
-			}
 		};
 
 /***********************************************************************
-容器复制模板
+随机访问
 ***********************************************************************/
 
-		template<typename A, typename B>
-		void CopyToCollection(A& dst, const B& src, bool append=false)
+		namespace randomaccess_internal
 		{
-			if(!append)dst.Clear();
-			vint count=src.Count();
-			for(vint i=0;i<count;i++)
+			template<typename T, typename K>
+			struct RandomAccessable<Array<T, K>>
 			{
-				dst.Add(src.Get(i));
-			}
-		}
+				static const bool							CanRead = true;
+				static const bool							CanResize = true;
+			};
 
-		template<typename A, typename B>
-		void CopyToArray(A& dst, const B& src, bool append=false)
-		{
-			vint start=0;
-			vint count=src.Count();
-			if(append)
+			template<typename T, typename K>
+			struct RandomAccessable<List<T, K>>
 			{
-				start=dst.Count();
-				dst.Resize(start+count);
-			}
-			else
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
+
+			template<typename T, typename K>
+			struct RandomAccessable<SortedList<T, K>>
 			{
-				dst.Resize(count);
-			}
-			for(vint i=0;i<count;i++)
-			{
-				dst[start+i]=src.Get(i);
-			}
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
 		}
 	}
 }
@@ -7676,7 +7121,7 @@ OrderBy
 		public:
 			OrderByEnumerable(const IEnumerable<T>& enumerable, const Func<vint(T, T)>& orderer)
 			{
-				CopyFrom(values.Wrap(), enumerable);
+				CopyFrom(values, enumerable);
 				if(values.Count()>0)
 				{
 					Sort(&values[0], values.Count(), orderer);
@@ -7685,7 +7130,7 @@ OrderBy
 
 			IEnumerator<T>* CreateEnumerator()const
 			{
-				return values.Wrap().CreateEnumerator();
+				return values.CreateEnumerator();
 			}
 		};
 
@@ -8672,7 +8117,7 @@ Distinct
 				Enumerator(const Enumerator& _enumerator)
 				{
 					enumerator=_enumerator.enumerator->Clone();
-					CopyFrom(distinct.Wrap(), _enumerator.distinct.Wrap());
+					CopyFrom(distinct, _enumerator.distinct);
 				}
 
 				~Enumerator()
@@ -8759,12 +8204,12 @@ Reverse
 				Enumerator(const IEnumerable<T>& enumerable)
 					:index(0)
 				{
-					CopyFrom(cache.Wrap(), enumerable);
+					CopyFrom(cache, enumerable);
 				}
 
 				Enumerator(const Enumerator& _enumerator)
 				{
-					CopyFrom(cache.Wrap(), _enumerator.cache.Wrap());
+					CopyFrom(cache, _enumerator.cache);
 					index=_enumerator.index;
 				}
 
@@ -8999,14 +8444,14 @@ Intersect/Except
 					:enumerator(_enumerator)
 					,index(0)
 				{
-					CopyFrom(reference.Wrap(), _reference);
+					CopyFrom(reference, _reference);
 					GoNearest();
 				}
 
 				Enumerator(const Enumerator& _enumerator)
 				{
 					enumerator=_enumerator.enumerator->Clone();
-					CopyFrom(reference.Wrap(), _enumerator.reference.Wrap());
+					CopyFrom(reference, _enumerator.reference);
 					index=_enumerator.index;
 				}
 
@@ -9732,109 +9177,26 @@ namespace vl
 {
 	namespace collections
 	{
-		template<typename T, typename K>
-		void CopyFrom(IArray<T, K>& dst, const ObjectString<T>& src, bool append=false)
+		template<typename Ds, typename S>
+		void CopyFrom(Ds& ds, const ObjectString<S>& ss, bool append=false)
 		{
-			vint start=0;
-			if(append)
+			const S* buffer=ss.Buffer();
+			vint count=ss.Length();
+			CopyFrom(ds, buffer, count, append);
+		}
+
+		template<typename D, typename Ss>
+		void CopyFrom(ObjectString<D>& ds, const Ss& ss, bool append=false)
+		{
+			Array<D> da(ds.Buffer(), ds.Length());
+			CopyFrom(da, ss, append);
+			if(da.Count()==0)
 			{
-				start=dst.Count();
-				dst.Resize(start+src.Length());
+				ds=ObjectString<D>();
 			}
 			else
 			{
-				dst.Resize(src.Length());
-			}
-			for(vint i=0;i<src.Length();i++)
-			{
-				dst.Set(start+i, src[i]);
-			}
-		}
-
-		template<typename T, typename K>
-		void CopyFrom(ICollection<T, K>& dst, const ObjectString<T>& src, bool append=false)
-		{
-			if(!append)
-			{
-				dst.Clear();
-			}
-			for(vint i=0;i<src.Length();i++)
-			{
-				dst.Add(src[i]);
-			}
-		}
-
-		template<typename T, typename K>
-		void CopyFrom(ObjectString<T>& dst, const IReadonlyList<T, K>& src, bool append=false)
-		{
-			T* buffer=new T[src.Count()+1];
-			try
-			{
-				for(vint i=0;i<src.Count();i++)
-				{
-					buffer[i]=src[i];
-				}
-				buffer[src.Count()]=0;
-				if(append)
-				{
-					dst+=buffer;
-				}
-				else
-				{
-					dst=buffer;
-				}
-				delete[] buffer;
-			}
-			catch(...)
-			{
-				delete[] buffer;
-				throw;
-			}
-		}
-
-		template<typename T>
-		void CopyFrom(ObjectString<T>& dst, const IEnumerable<T>& src, bool append=false)
-		{
-			IEnumerator<T>* enumerator=src.CreateEnumerator();
-			try
-			{
-				vint count=0;
-				while(enumerator->Available())
-				{
-					count++;
-					enumerator->Next();
-				}
-				enumerator->Reset();
-				T* buffer=new T[count+1];
-				try
-				{
-					while(enumerator->Available())
-					{
-						buffer[enumerator->Index()]=enumerator->Current();
-						enumerator->Next();
-					}
-					buffer[count]=0;
-					if(append)
-					{
-						dst+=buffer;
-					}
-					else
-					{
-						dst=buffer;
-					}
-					delete[] buffer;
-				}
-				catch(...)
-				{
-					delete[] buffer;
-					throw;
-				}
-				delete enumerator;
-			}
-			catch(...)
-			{
-				delete enumerator;
-				throw;
+				ds=ObjectString<D>(&da[0], da.Count());
 			}
 		}
 	}
@@ -9878,8 +9240,8 @@ Functions:
 	[T] >>	Except([T]) => [T]
 	[T] >>	Pairwise([K]) => [(T,K)]
 
-FOREACH(X, a, XList.Wrap())
-FOREACH_INDEXER(X, a, index, XList.Wrap())
+FOREACH(X, a, XList)
+FOREACH_INDEXER(X, a, index, XList)
 ***********************************************************************/
 
 #ifndef VCZH_COLLECTIONS_OPERATION
@@ -9980,61 +9342,54 @@ namespace vl
 #endif
 
 /***********************************************************************
-COLLECTIONS\DICTIONARYWRAPPERS.H
+COLLECTIONS\DICTIONARY.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: 陈梓瀚(vczh)
-Data Structure::Dictionary Wrappers
+Data Structure::Dictionary
 
 Classes:
-	ReadonlyDictionaryWrapper<V,K>
-	DictionaryWrapper<V,K>
-	ReadonlyGroupWrapper<V,K>
-	GroupWrapper<V,K>
+	Dictionary<KT, VT, KK, VK>					：映射
+	Group<KT, VT, KK, VK>						：多重映射
 ***********************************************************************/
 
-#ifndef VCZH_COLLECTIONS_DICTIONARYWRAPPERS
-#define VCZH_COLLECTIONS_DICTIONARYWRAPPERS
+#ifndef VCZH_COLLECTIONS_DICTIONARY
+#define VCZH_COLLECTIONS_DICTIONARY
 
 
 namespace vl
 {
 	namespace collections
 	{
-
-/***********************************************************************
-代理
-***********************************************************************/
-
-		template<typename C, typename KT, typename VT, typename KK, typename VK>
-		class DictionaryWrapper;
-		
-		template<typename C, typename KT, typename VT, typename KK, typename VK>
-		class GroupWrapper;
-
-		template<typename C, typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
-		class ReadonlyDictionaryWrapper : public Object, public virtual IReadonlyDictionary<KT, VT, KK, VK>
+		template<
+			typename KT,
+			typename VT,
+			typename KK=typename KeyType<KT>::Type, 
+			typename VK=typename KeyType<VT>::Type
+		>
+		class Dictionary : public Object, public virtual IEnumerable<Pair<KT, VT>>
 		{
-			friend class DictionaryWrapper<C, KT, VT, KK, VK>;
-		private:
+			typedef SortedList<KT, KK>			KeyContainer;
+			typedef List<VT, VK>				ValueContainer;
+		protected:
 			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
 			{
 			private:
-				const IReadonlyDictionary<KT, VT, KK, VK>*	container;
-				vint											index;
-				Pair<KT, VT>								current;
+				const Dictionary<KT, VT, KK, VK>*	container;
+				vint								index;
+				Pair<KT, VT>						current;
 
 				void UpdateCurrent()
 				{
 					if(index<container->Count())
 					{
-						current.key=container->Keys()[index];
-						current.value=container->Values()[index];
+						current.key=container->Keys().Get(index);
+						current.value=container->Values().Get(index);
 					}
 				}
 			public:
-				Enumerator(const IReadonlyDictionary* _container, vint _index=0)
+				Enumerator(const Dictionary<KT, VT, KK, VK>* _container, vint _index=0)
 				{
 					container=_container;
 					index=_index;
@@ -10075,21 +9430,11 @@ namespace vl
 				}
 			};
 
-			C*						container;
+			KeyContainer						keys;
+			ValueContainer						values;
 		public:
-			ReadonlyDictionaryWrapper(C* _container=0)
+			Dictionary()
 			{
-				container=_container;
-			}
-
-			C* GetContainer()
-			{
-				return container;
-			}
-
-			void SetContainer(C* _container)
-			{
-				container=_container;
 			}
 
 			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
@@ -10097,113 +9442,103 @@ namespace vl
 				return new Enumerator(this);
 			}
 
-			const IReadonlyList<KT, KK>& Keys()const
+			void SetLessMemoryMode(bool mode)
 			{
-				return container->Keys();
+				keys.SetLessMemoryMode(mode);
+				values.SetLessMemoryMode(mode);
 			}
 
-			const IReadonlyList<VT, VK>& Values()const
+			const KeyContainer& Keys()const
 			{
-				return container->Values();
+				return keys;
 			}
 
-			vint Count()const
+			const ValueContainer& Values()const
 			{
-				return container->Count();
-			}
-
-			const VT& Get(const KK& key)const
-			{
-				return container->Get(key);
-			}
-
-			const VT& operator[](const KK& key)const
-			{
-				return container->operator[](key);
-			}
-		};
-
-		template<typename C, typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
-		class DictionaryWrapper : public Object, public virtual IDictionary<KT, VT, KK, VK>
-		{
-		private:
-			C*						container;
-		public:
-			DictionaryWrapper(C* _container=0)
-			{
-				container=_container;
-			}
-
-			C* GetContainer()
-			{
-				return container;
-			}
-
-			void SetContainer(C* _container)
-			{
-				container=_container;
-			}
-
-			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
-			{
-				return new ReadonlyDictionaryWrapper<C, KT, VT, KK, VK>::Enumerator(this);
-			}
-
-			const IReadonlyList<KT, KK>& Keys()const
-			{
-				return container->Keys();
-			}
-
-			const IReadonlyList<VT, VK>& Values()const
-			{
-				return container->Values();
+				return values;
 			}
 
 			vint Count()const
 			{
-				return container->Count();
+				return keys.Count();
 			}
 
 			const VT& Get(const KK& key)const
 			{
-				return container->Get(key);
+				return values.Get(keys.IndexOf(key));
 			}
 
 			const VT& operator[](const KK& key)const
 			{
-				return container->operator[](key);
+				return values.Get(keys.IndexOf(key));
 			}
 
 			bool Set(const KK& key, const VT& value)
 			{
-				return container->Set(key, value);
+				vint index=keys.IndexOf(key);
+				if(index==-1)
+				{
+					index=keys.Add(key);
+					values.Insert(index, value);
+				}
+				else
+				{
+					values[index]=value;
+				}
+				return true;
+			}
+
+			bool Add(const Pair<KT, VT>& value)
+			{
+				return Add(value.key, value.value);
 			}
 
 			bool Add(const KT& key, const VT& value)
 			{
-				return container->Add(key, value);
+				CHECK_ERROR(!keys.Contains(key), L"Dictionary<KT, KK, ValueContainer, VT, VK>::Add(const KT&, const VT&)#key已存在。");
+				vint index=keys.Add(key);
+				values.Insert(index, value);
+				return true;
 			}
 
 			bool Remove(const KK& key)
 			{
-				return container->Remove(key);
+				vint index=keys.IndexOf(key);
+				if(index!=-1)
+				{
+					keys.RemoveAt(index);
+					values.RemoveAt(index);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 			bool Clear()
 			{
-				return container->Clear();
+				keys.Clear();
+				values.Clear();
+				return true;
 			}
 		};
 
-		template<typename C, typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
-		class ReadonlyGroupWrapper : public Object, public virtual IReadonlyGroup<KT, VT, KK, VK>
+		template<
+			typename KT,
+			typename VT,
+			typename KK=typename KeyType<KT>::Type,
+			typename VK=typename KeyType<VT>::Type
+		>
+		class Group : public Object, public virtual IEnumerable<Pair<KT, VT>>
 		{
-			friend class GroupWrapper<C, KT, VT, KK, VK>;
-		private:
+			typedef SortedList<KT, KK>		KeyContainer;
+			typedef List<VT, VK>			ValueContainer;
+		protected:
 			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
 			{
 			private:
-				const IReadonlyGroup<KT, VT, KK, VK>*		container;
+				const Group<KT, VT, KK, VK>*		container;
 				vint											keyIndex;
 				vint											valueIndex;
 				Pair<KT, VT>								current;
@@ -10212,16 +9547,16 @@ namespace vl
 				{
 					if(keyIndex<container->Count())
 					{
-						const IReadonlyList<VT, VK>& values=container->GetByIndex(keyIndex);
+						const ValueContainer& values=container->GetByIndex(keyIndex);
 						if(valueIndex<values.Count())
 						{
-							current.key=container->Keys()[keyIndex];
-							current.value=values[valueIndex];
+							current.key=container->Keys().Get(keyIndex);
+							current.value=values.Get(valueIndex);
 						}
 					}
 				}
 			public:
-				Enumerator(const IReadonlyGroup* _container, vint _keyIndex=0, vint _valueIndex=0)
+				Enumerator(const Group<KT, VT, KK, VK>* _container, vint _keyIndex=0, vint _valueIndex=0)
 				{
 					container=_container;
 					keyIndex=_keyIndex;
@@ -10260,7 +9595,7 @@ namespace vl
 				{
 					if(keyIndex<container->Count())
 					{
-						const IReadonlyList<VT, VK>& values=container->GetByIndex(keyIndex);
+						const ValueContainer& values=container->GetByIndex(keyIndex);
 						valueIndex++;
 						if(valueIndex<values.Count())
 						{
@@ -10285,7 +9620,7 @@ namespace vl
 				{
 					if(keyIndex<container->Count())
 					{
-						const IReadonlyList<VT, VK>& values=container->GetByIndex(keyIndex);
+						const ValueContainer& values=container->GetByIndex(keyIndex);
 						if(valueIndex<values.Count())
 						{
 							return true;
@@ -10302,317 +9637,11 @@ namespace vl
 				}
 			};
 
-			C*									container;
-		public:
-			ReadonlyGroupWrapper(C* _container=0)
-			{
-				container=_container;
-			}
-
-			C* GetContainer()
-			{
-				return container;
-			}
-
-			void SetContainer(C* _container)
-			{
-				container=_container;
-			}
-
-			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
-			{
-				return new Enumerator(this);
-			}
-
-			const IReadonlyList<KT, KK>& Keys()const
-			{
-				return container->Keys();
-			}
-
-			vint Count()const
-			{
-				return container->Count();
-			}
-
-			const IReadonlyList<VT, VK>& Get(const KK& key)const
-			{
-				return container->Get(key);
-			}
-
-			const IReadonlyList<VT, VK>& GetByIndex(vint index)const
-			{
-				return container->GetByIndex(index);
-			}
-
-			const IReadonlyList<VT, VK>& operator[](const KK& key)const
-			{
-				return container->operator[](key);
-			}
-
-			bool Contains(const KK& key)const
-			{
-				return container->Contains(key);
-			}
-
-			bool Contains(const KK& key, const VK& value)const
-			{
-				return container->Contains(key, value);
-			}
-		};
-
-		template<typename C, typename KT, typename VT, typename KK=typename KeyType<KT>::Type, typename VK=typename KeyType<VT>::Type>
-		class GroupWrapper : public Object, public virtual IGroup<KT, VT, KK, VK>
-		{
-		private:
-			C*									container;
-		public:
-			GroupWrapper(C* _container=0)
-			{
-				container=_container;
-			}
-
-			C* GetContainer()
-			{
-				return container;
-			}
-
-			void SetContainer(C* _container)
-			{
-				container=_container;
-			}
-
-			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
-			{
-				return new ReadonlyGroupWrapper<C, KT, VT, KK, VK>::Enumerator(this);
-			}
-
-			const IReadonlyList<KT, KK>& Keys()const
-			{
-				return container->Keys();
-			}
-
-			vint Count()const
-			{
-				return container->Count();
-			}
-
-			const IReadonlyList<VT, VK>& Get(const KK& key)const
-			{
-				return container->Get(key);
-			}
-
-			const IReadonlyList<VT, VK>& GetByIndex(vint index)const
-			{
-				return container->GetByIndex(index);
-			}
-
-			const IReadonlyList<VT, VK>& operator[](const KK& key)const
-			{
-				return container->operator[](key);
-			}
-
-			bool Contains(const KK& key)const
-			{
-				return container->Contains(key);
-			}
-
-			bool Contains(const KK& key, const VK& value)const
-			{
-				return container->Contains(key, value);
-			}
-
-			bool Add(const KT& key, const VT& value)
-			{
-				return container->Add(key, value);
-			}
-
-			bool Remove(const KK& key)
-			{
-				return container->Remove(key);
-			}
-
-			bool Remove(const KK& key, const VK& value)
-			{
-				return container->Remove(key, value);
-			}
-
-			bool Clear()
-			{
-				return container->Clear();
-			}
-		};
-
-/***********************************************************************
-类型转换代理
-***********************************************************************/
-	}
-}
-
-#endif
-
-/***********************************************************************
-COLLECTIONS\DICTIONARY.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Dictionary
-
-Classes:
-	Dictionary<KT, VT, KK, VK>					：映射
-	Group<KT, VT, KK, VK>						：多重映射
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_DICTIONARY
-#define VCZH_COLLECTIONS_DICTIONARY
-
-
-namespace vl
-{
-	namespace collections
-	{
-		template<
-			typename KT,
-			typename VT,
-			typename ValueContainer=List<VT, typename KeyType<VT>::Type>,
-			typename KK=typename KeyType<KT>::Type, 
-			typename VK=typename KeyType<VT>::Type
-		>
-		class Dictionary : public Object, private NotCopyable
-		{
-		protected:
-			SortedList<KT, KK>					keys;
-			ValueContainer						values;
-			mutable DictionaryWrapper<Dictionary<KT, VT, ValueContainer, KK, VK>, KT, VT, KK, VK>	wrapper;
-		public:
-			Dictionary()
-			{
-				wrapper.SetContainer(this);
-			}
-
-			void SetLessMemoryMode(bool mode)
-			{
-				keys.SetLessMemoryMode(mode);
-				values.SetLessMemoryMode(mode);
-			}
-
-			template<typename T>
-			void CopyKeysToCollection(T& dst, bool append=false)const
-			{
-				CopyToCollection(dst, keys, append);
-			}
-
-			template<typename T>
-			void CopyKeysToArray(T& dst, bool append=false)const
-			{
-				CopyToArray(dst, keys, append);
-			}
-
-			template<typename T>
-			void CopyValuesToCollection(T& dst, bool append=false)const
-			{
-				CopyToCollection(dst, values, append);
-			}
-
-			template<typename T>
-			void CopyValuesToArray(T& dst, bool append=false)const
-			{
-				CopyToArray(dst, values, append);
-			}
-
-			const IReadonlyList<KT, KK>& Keys()const
-			{
-				return keys.Wrap();
-			}
-
-			const IReadonlyList<VT, VK>& Values()const
-			{
-				return values.Wrap();
-			}
-
-			vint Count()const
-			{
-				return keys.Count();
-			}
-
-			const VT& Get(const KK& key)const
-			{
-				return values.Get(keys.IndexOf(key));
-			}
-
-			const VT& operator[](const KK& key)const
-			{
-				return values.Get(keys.IndexOf(key));
-			}
-
-			bool Set(const KK& key, const VT& value)
-			{
-				vint index=keys.IndexOf(key);
-				if(index==-1)
-				{
-					index=keys.Add(key);
-					values.Insert(index, value);
-				}
-				else
-				{
-					values[index]=value;
-				}
-				return true;
-			}
-
-			bool Add(const KT& key, const VT& value)
-			{
-				CHECK_ERROR(!keys.Contains(key), L"Dictionary<KT, KK, ValueContainer, VT, VK>::Add(const KT&, const VT&)#key已存在。");
-				vint index=keys.Add(key);
-				values.Insert(index, value);
-				return true;
-			}
-
-			bool Remove(const KK& key)
-			{
-				vint index=keys.IndexOf(key);
-				if(index!=-1)
-				{
-					keys.RemoveAt(index);
-					values.RemoveAt(index);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Clear()
-			{
-				keys.Clear();
-				values.Clear();
-				return true;
-			}
-
-			IDictionary<KT, VT, KK, VK>& Wrap()const
-			{
-				return wrapper;
-			}
-		};
-
-		template<
-			typename KT,
-			typename VT,
-			typename ValueContainer=List<VT, typename KeyType<VT>::Type>,
-			typename KK=typename KeyType<KT>::Type,
-			typename VK=typename KeyType<VT>::Type
-		>
-		class Group : public Object, private NotCopyable
-		{
-		protected:
-			SortedList<KT, KK>				keys;
+			KeyContainer					keys;
 			List<ValueContainer*>			values;
-			mutable GroupWrapper<Group<KT, VT, ValueContainer, KK, VK>, KT, VT, KK, VK>	wrapper;
 		public:
 			Group()
 			{
-				wrapper.SetContainer(this);
 			}
 
 			~Group()
@@ -10620,33 +9649,14 @@ namespace vl
 				Clear();
 			}
 
-			template<typename T>
-			void CopyKeysToCollection(T& dst, bool append=false)const
+			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
 			{
-				CopyToCollection(dst, keys, append);
+				return new Enumerator(this);
 			}
 
-			template<typename T>
-			void CopyKeysToArray(T& dst, bool append=false)const
+			const KeyContainer& Keys()const
 			{
-				CopyToArray(dst, keys, append);
-			}
-
-			template<typename T>
-			void CopyValuesToCollection(vint index, T& dst, bool append=false)const
-			{
-				CopyToCollection(dst, *(values.Get(index)), append);
-			}
-
-			template<typename T>
-			void CopyValuesToArray(vint index, T& dst, bool append=false)const
-			{
-				CopyToArray(dst, *(values.Get(index)), append);
-			}
-
-			const IReadonlyList<KT, KK>& Keys()const
-			{
-				return keys.Wrap();
+				return keys;
 			}
 
 			vint Count()const
@@ -10654,19 +9664,19 @@ namespace vl
 				return keys.Count();
 			}
 
-			const IReadonlyList<VT, VK>& Get(const KK& key)const
+			const ValueContainer& Get(const KK& key)const
 			{
-				return values.Get(keys.IndexOf(key))->Wrap();
+				return *values.Get(keys.IndexOf(key));
 			}
 
-			const IReadonlyList<VT, VK>& GetByIndex(vint index)const
+			const ValueContainer& GetByIndex(vint index)const
 			{
-				return values.Get(index)->Wrap();
+				return *values.Get(index);
 			}
 
-			const IReadonlyList<VT, VK>& operator[](const KK& key)const
+			const ValueContainer& operator[](const KK& key)const
 			{
-				return values.Get(keys.IndexOf(key))->Wrap();
+				return *values.Get(keys.IndexOf(key));
 			}
 
 			bool Contains(const KK& key)const
@@ -10685,6 +9695,11 @@ namespace vl
 				{
 					return false;
 				}
+			}
+
+			bool Add(const Pair<KT, VT>& value)
+			{
+				return Add(value.key, value.value);
 			}
 
 			bool Add(const KT& key, const VT& value)
@@ -10752,12 +9767,39 @@ namespace vl
 				values.Clear();
 				return true;
 			}
-
-			IGroup<KT, VT, KK, VK>& Wrap()const
-			{
-				return wrapper;
-			}
 		};
+
+/***********************************************************************
+随机访问
+***********************************************************************/
+		namespace randomaccess_internal
+		{
+			template<typename KT, typename VT, typename KK, typename VK>
+			struct RandomAccessable<Dictionary<KT, VT, KK, VK>>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
+		
+			template<typename KT, typename VT, typename KK, typename VK>
+			struct RandomAccess<Dictionary<KT, VT, KK, VK>>
+			{
+				static vint GetCount(const Dictionary<KT, VT, KK, VK>& t)
+				{
+					return t.Count();
+				}
+
+				static Pair<KT, VT> GetValue(const Dictionary<KT, VT, KK, VK>& t, vint index)
+				{
+					return Pair<KT, VT>(t.Keys().Get(index), t.Values().Get(index));
+				}
+
+				static void AppendValue(Dictionary<KT, VT, KK, VK>& t, const Pair<KT, VT>& value)
+				{
+					t.Set(value.key, value.value);
+				}
+			};
+		}
 	}
 }
 
@@ -11032,7 +10074,7 @@ ITypeDescriptor (method)
 				virtual vint					GetParameterCount()=0;
 				virtual IParameterInfo*			GetParameter(vint index)=0;
 				virtual IValueInfo*				GetReturn()=0;
-				virtual Value					Invoke(const Value& thisObject, collections::IArray<Value>& arguments)=0;
+				virtual Value					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			};
 
 			class IMethodGroupInfo : public IMemberInfo
@@ -11259,7 +10301,7 @@ GeneralTypeDescriptor
 													bool											_nullable
 													);
 						MethodBuilder&			Invoker(
-													const Func<Value(const Value&, collections::IArray<Value>&)>&	_invoker
+													const Func<Value(const Value&, collections::Array<Value>&)>&	_invoker
 													);
 						PropertyGroup&			Done();
 					};
@@ -11403,8 +10445,8 @@ namespace vl
 		public:
 			typedef Ptr<RegexMatch>										Ref;
 			typedef collections::List<Ref>								List;
-			typedef collections::IReadonlyList<RegexString>				CaptureList;
-			typedef collections::IReadonlyGroup<WString, RegexString>	CaptureGroup;
+			typedef collections::List<RegexString>						CaptureList;
+			typedef collections::Group<WString, RegexString>			CaptureGroup;
 		protected:
 			collections::List<RegexString>				captures;
 			collections::Group<WString, RegexString>	groups;
@@ -11897,19 +10939,19 @@ namespace vl
 		{
 		private:
 			ReturnType					returnValue;
-			void*						parameterValue;
+			ParameterType*				parameterValue;
 		public:
 
 			ReturnType Invoke(Expression* expression, ParameterType parameter)
 			{
-				parameterValue=(void*)&parameter;
+				parameterValue=&parameter;
 				expression->Apply(*this);
 				return returnValue;
 			}
 
 			ReturnType Invoke(Expression::Ref expression, ParameterType parameter)
 			{
-				parameterValue=(void*)&parameter;
+				parameterValue=&parameter;
 				expression->Apply(*this);
 				return returnValue;
 			}
@@ -11928,57 +10970,57 @@ namespace vl
 		public:
 			void Visit(CharSetExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(LoopExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(SequenceExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(AlternateExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(BeginExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(EndExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(CaptureExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(MatchExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(PositiveExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(NegativeExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 
 			void Visit(UsingExpression* expression)
 			{
-				returnValue=Apply(expression, *((ParameterType*)parameterValue));
+				returnValue=Apply(expression, *parameterValue);
 			}
 		};
 
@@ -11986,18 +11028,18 @@ namespace vl
 		class RegexExpressionAlgorithm<void, ParameterType> : public Object, public IRegexExpressionAlgorithm
 		{
 		private:
-			void*						parameterValue;
+			ParameterType*				parameterValue;
 		public:
 
 			void Invoke(Expression* expression, ParameterType parameter)
 			{
-				parameterValue=(void*)&parameter;
+				parameterValue=&parameter;
 				expression->Apply(*this);
 			}
 
 			void Invoke(Expression::Ref expression, ParameterType parameter)
 			{
-				parameterValue=(void*)&parameter;
+				parameterValue=&parameter;
 				expression->Apply(*this);
 			}
 
@@ -12015,57 +11057,57 @@ namespace vl
 		public:
 			void Visit(CharSetExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(LoopExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(SequenceExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(AlternateExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(BeginExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(EndExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(CaptureExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(MatchExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(PositiveExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(NegativeExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 
 			void Visit(UsingExpression* expression)
 			{
-				Apply(expression, *((ParameterType*)parameterValue));
+				Apply(expression, *parameterValue);
 			}
 		};
 
@@ -12208,7 +11250,7 @@ namespace vl
 
 			bool							MatchHead(const wchar_t* input, const wchar_t* start, RichResult& result);
 			bool							Match(const wchar_t* input, const wchar_t* start, RichResult& result);
-			const IReadonlyList<WString>&	CaptureNames();
+			const List<WString>&			CaptureNames();
 		};
 	};
 }
@@ -12509,17 +11551,16 @@ namespace vl
 	{
 		class BroadcastStream : public Object, public virtual IStream
 		{
-			typedef collections::IList<IStream*>	_ListInterface;
-			typedef collections::List<IStream*>		_List;
+			typedef collections::List<IStream*>		StreamList;
 		protected:
 			bool					closed;
 			pos_t					position;
-			_List					streams;
+			StreamList				streams;
 		public:
 			BroadcastStream();
 			~BroadcastStream();
 
-			_ListInterface&			Targets();
+			StreamList&				Targets();
 			bool					CanRead()const;
 			bool					CanWrite()const;
 			bool					CanSeek()const;
