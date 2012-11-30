@@ -14718,8 +14718,6 @@ List interface common implementation
 					}
 					
 				public:
-					typedef T		ElementType;
-
 					ItemsBase()
 					{
 					}
