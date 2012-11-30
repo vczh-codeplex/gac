@@ -4061,7 +4061,21 @@ List interface common implementation
 				protected:
 					collections::List<T, K>					items;
 
-					virtual void							NotifyUpdateInternal(int start, int count, int newCount)=0;
+					virtual void NotifyUpdateInternal(int start, int count, int newCount)
+					{
+					}
+
+					virtual bool InsertInternal(int index, const T& value)
+					{
+						items.Insert(index, value);
+						return true;
+					}
+
+					virtual bool RemoveAtInternal(int index, const T& value)
+					{
+						items.RemoveAt(index);
+						return true;
+					}
 					
 				public:
 					typedef T		ElementType;
@@ -4136,7 +4150,7 @@ List interface common implementation
 
 					bool RemoveAt(vint index)
 					{
-						if(items.RemoveAt(index))
+						if(RemoveAtInternal(index, items[index]))
 						{
 							NotifyUpdateInternal(index, 1, 0);
 							return true;
@@ -4149,9 +4163,13 @@ List interface common implementation
 
 					bool RemoveRange(vint index, vint count)
 					{
-						if(items.RemoveRange(index, count))
+						if(count<=0) return false;
+						if(0<=index && index<items.Count() && index+count<=items.Count())
 						{
-							NotifyUpdateInternal(index, count, 0);
+							while(count-->0)
+							{
+								RemoveAt(index+count);
+							}
 							return true;
 						}
 						else
@@ -4162,31 +4180,31 @@ List interface common implementation
 
 					bool Clear()
 					{
-						vint count=items.Count();
-						if(items.Clear())
+						while(items.Count()>0)
 						{
-							NotifyUpdateInternal(0, count, 0);
-							return true;
+							RemoveAt(items.Count()-1);
 						}
-						else
-						{
-							return false;
-						}
+						return true;
 					}
 
 					vint Insert(vint index, const T& item)
 					{
-						vint result=items.Insert(index, item);
-						NotifyUpdateInternal(index, 0, 1);
-						return result;
+						if(InsertInternal(index, item))
+						{
+							NotifyUpdateInternal(index, 0, 1);
+							return index;
+						}
+						else
+						{
+							return -1;
+						}
 					}
 
 					bool Set(vint index, const T& item)
 					{
-						if(items.Set(index, item))
+						if(Insert(index, item))
 						{
-							NotifyUpdateInternal(index, 1, 1);
-							return true;
+							return RemoveAt(index+1);
 						}
 						else
 						{
@@ -6096,12 +6114,28 @@ GuiVirtualTreeListControl Predefined NodeProvider
 			{
 				class MemoryNodeProvider
 					: public Object
-					, public virtual collections::IEnumerable<Ptr<MemoryNodeProvider>>
 					, public virtual INodeProvider
 					, public Description<MemoryNodeProvider>
 				{
 					typedef collections::List<Ptr<MemoryNodeProvider>> ChildList;
 					typedef collections::IEnumerator<Ptr<MemoryNodeProvider>> ChildListEnumerator;
+
+				public:
+					class NodeCollection : public list::ItemsBase<Ptr<MemoryNodeProvider>>
+					{
+						friend class MemoryNodeProvider;
+					protected:
+						MemoryNodeProvider*			ownerProvider;
+
+						void						OnBeforeChildModified(int start, int count, int newCount);
+						void						OnAfterChildModified(int start, int count, int newCount);
+						bool						InsertInternal(int index, Ptr<MemoryNodeProvider> const& child)override;
+						bool						RemoveAtInternal(int index, Ptr<MemoryNodeProvider> const& child)override;
+
+						NodeCollection();
+					public:
+					};
+
 				protected:
 					MemoryNodeProvider*				parent;
 					bool							expanding;
@@ -6109,33 +6143,11 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					int								totalVisibleNodeCount;
 					int								offsetBeforeChildModified;
 					Ptr<DescriptableObject>			data;
-					ChildList						children;
+					NodeCollection					children;
 
 					virtual INodeProviderCallback*	GetCallbackProxyInternal();
 					void							OnChildTotalVisibleNodesChanged(int offset);
-					void							OnBeforeChildModified(int start, int count, int newCount);
-					void							OnAfterChildModified(int start, int count, int newCount);
-					bool							OnRequestRemove(MemoryNodeProvider* child);
-					bool							OnRequestInsert(MemoryNodeProvider* child);
-				private:
-					
-					ChildListEnumerator*			CreateEnumerator()const;
-					bool							Contains(const KeyType<Ptr<MemoryNodeProvider>>::Type& item)const;
-					vint							Count()const;
-					vint							Count();
-					const							Ptr<MemoryNodeProvider>& Get(vint index)const;
-					const							Ptr<MemoryNodeProvider>& operator[](vint index)const;
-					vint							IndexOf(const KeyType<Ptr<MemoryNodeProvider>>::Type& item)const;
-					vint							Add(const Ptr<MemoryNodeProvider>& item);
-					bool							Remove(const KeyType<Ptr<MemoryNodeProvider>>::Type& item);
-					bool							RemoveAt(vint index);
-					bool							RemoveRange(vint index, vint count);
-					bool							Clear();
-					vint							Insert(vint index, const Ptr<MemoryNodeProvider>& item);
-					bool							Set(vint index, const Ptr<MemoryNodeProvider>& item);
 				public:
-					typedef Ptr<MemoryNodeProvider>	ElementType;
-
 					MemoryNodeProvider();
 					MemoryNodeProvider(const Ptr<DescriptableObject>& _data);
 					~MemoryNodeProvider();
@@ -6143,7 +6155,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					Ptr<DescriptableObject>			GetData();
 					void							SetData(const Ptr<DescriptableObject>& value);
 					void							NotifyDataModified();
-					ChildList&						Children();
+					NodeCollection&					Children();
 
 					bool							GetExpanding()override;
 					void							SetExpanding(bool value)override;
@@ -7281,7 +7293,7 @@ namespace vl
 Toolstrip Item Collection
 ***********************************************************************/
 
-			class GuiToolstripCollection : public Object, public virtual collections::IEnumerable<GuiControl*>
+			class GuiToolstripCollection : public list::ItemsBase<GuiControl*>
 			{
 			public:
 				class IContentCallback : public Interface
@@ -7293,31 +7305,14 @@ Toolstrip Item Collection
 				IContentCallback*							contentCallback;
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
-				collections::List<GuiControl*>				items;
 
 				void										InvokeUpdateLayout();
 				void										OnInterestingMenuButtonPropertyChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void										RemoveAtInternal(vint index);
-				void										InsertInternal(vint index, GuiControl* control);
+				bool										RemoveAtInternal(int index, GuiControl* const& control)override;
+				bool										InsertInternal(int index, GuiControl* const& control)override;
 			public:
-				typedef GuiControl*							ElementType;
-
 				GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer);
 				~GuiToolstripCollection();
-
-				collections::IEnumerator<GuiControl*>*		CreateEnumerator()const;
-				bool										Contains(GuiControl* const& item)const;
-				vint										Count()const;
-				GuiControl* const&							Get(vint index)const;
-				GuiControl* const&							operator[](vint index)const;
-				vint										IndexOf(GuiControl* const& item)const;
-				vint										Add(GuiControl* const& item);
-				bool										Remove(GuiControl* const& item);
-				bool										RemoveAt(vint index);
-				bool										RemoveRange(vint index, vint count);
-				bool										Clear();
-				vint										Insert(vint index, GuiControl* const& item);
-				bool										Set(vint index, GuiControl* const& item);
 			};
 
 /***********************************************************************

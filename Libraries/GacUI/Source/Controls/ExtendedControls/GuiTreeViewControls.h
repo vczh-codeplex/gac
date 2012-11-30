@@ -284,12 +284,28 @@ GuiVirtualTreeListControl Predefined NodeProvider
 				/// <summary>An in-memory <see cref="INodeProvider"/> implementation.</summary>
 				class MemoryNodeProvider
 					: public Object
-					, public virtual collections::IEnumerable<Ptr<MemoryNodeProvider>>
 					, public virtual INodeProvider
 					, public Description<MemoryNodeProvider>
 				{
 					typedef collections::List<Ptr<MemoryNodeProvider>> ChildList;
 					typedef collections::IEnumerator<Ptr<MemoryNodeProvider>> ChildListEnumerator;
+
+				public:
+					class NodeCollection : public list::ItemsBase<Ptr<MemoryNodeProvider>>
+					{
+						friend class MemoryNodeProvider;
+					protected:
+						MemoryNodeProvider*			ownerProvider;
+
+						void						OnBeforeChildModified(int start, int count, int newCount);
+						void						OnAfterChildModified(int start, int count, int newCount);
+						bool						InsertInternal(int index, Ptr<MemoryNodeProvider> const& child)override;
+						bool						RemoveAtInternal(int index, Ptr<MemoryNodeProvider> const& child)override;
+
+						NodeCollection();
+					public:
+					};
+
 				protected:
 					MemoryNodeProvider*				parent;
 					bool							expanding;
@@ -297,33 +313,11 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					int								totalVisibleNodeCount;
 					int								offsetBeforeChildModified;
 					Ptr<DescriptableObject>			data;
-					ChildList						children;
+					NodeCollection					children;
 
 					virtual INodeProviderCallback*	GetCallbackProxyInternal();
 					void							OnChildTotalVisibleNodesChanged(int offset);
-					void							OnBeforeChildModified(int start, int count, int newCount);
-					void							OnAfterChildModified(int start, int count, int newCount);
-					bool							OnRequestRemove(MemoryNodeProvider* child);
-					bool							OnRequestInsert(MemoryNodeProvider* child);
-				private:
-					
-					ChildListEnumerator*			CreateEnumerator()const;
-					bool							Contains(const KeyType<Ptr<MemoryNodeProvider>>::Type& item)const;
-					vint							Count()const;
-					vint							Count();
-					const							Ptr<MemoryNodeProvider>& Get(vint index)const;
-					const							Ptr<MemoryNodeProvider>& operator[](vint index)const;
-					vint							IndexOf(const KeyType<Ptr<MemoryNodeProvider>>::Type& item)const;
-					vint							Add(const Ptr<MemoryNodeProvider>& item);
-					bool							Remove(const KeyType<Ptr<MemoryNodeProvider>>::Type& item);
-					bool							RemoveAt(vint index);
-					bool							RemoveRange(vint index, vint count);
-					bool							Clear();
-					vint							Insert(vint index, const Ptr<MemoryNodeProvider>& item);
-					bool							Set(vint index, const Ptr<MemoryNodeProvider>& item);
 				public:
-					typedef Ptr<MemoryNodeProvider>	ElementType;
-
 					/// <summary>Create a node provider.</summary>
 					MemoryNodeProvider();
 					/// <summary>Create a node provider with a data object.</summary>
@@ -341,7 +335,7 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					void							NotifyDataModified();
 					/// <summary>Get all sub nodes.</summary>
 					/// <returns>All sub nodes.</returns>
-					ChildList&						Children();
+					NodeCollection&					Children();
 
 					bool							GetExpanding()override;
 					void							SetExpanding(bool value)override;

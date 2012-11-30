@@ -789,7 +789,21 @@ List interface common implementation
 				protected:
 					collections::List<T, K>					items;
 
-					virtual void							NotifyUpdateInternal(int start, int count, int newCount)=0;
+					virtual void NotifyUpdateInternal(int start, int count, int newCount)
+					{
+					}
+
+					virtual bool InsertInternal(int index, const T& value)
+					{
+						items.Insert(index, value);
+						return true;
+					}
+
+					virtual bool RemoveAtInternal(int index, const T& value)
+					{
+						items.RemoveAt(index);
+						return true;
+					}
 					
 				public:
 					typedef T		ElementType;
@@ -864,7 +878,7 @@ List interface common implementation
 
 					bool RemoveAt(vint index)
 					{
-						if(items.RemoveAt(index))
+						if(RemoveAtInternal(index, items[index]))
 						{
 							NotifyUpdateInternal(index, 1, 0);
 							return true;
@@ -877,9 +891,13 @@ List interface common implementation
 
 					bool RemoveRange(vint index, vint count)
 					{
-						if(items.RemoveRange(index, count))
+						if(count<=0) return false;
+						if(0<=index && index<items.Count() && index+count<=items.Count())
 						{
-							NotifyUpdateInternal(index, count, 0);
+							while(count-->0)
+							{
+								RemoveAt(index+count);
+							}
 							return true;
 						}
 						else
@@ -890,31 +908,31 @@ List interface common implementation
 
 					bool Clear()
 					{
-						vint count=items.Count();
-						if(items.Clear())
+						while(items.Count()>0)
 						{
-							NotifyUpdateInternal(0, count, 0);
-							return true;
+							RemoveAt(items.Count()-1);
 						}
-						else
-						{
-							return false;
-						}
+						return true;
 					}
 
 					vint Insert(vint index, const T& item)
 					{
-						vint result=items.Insert(index, item);
-						NotifyUpdateInternal(index, 0, 1);
-						return result;
+						if(InsertInternal(index, item))
+						{
+							NotifyUpdateInternal(index, 0, 1);
+							return index;
+						}
+						else
+						{
+							return -1;
+						}
 					}
 
 					bool Set(vint index, const T& item)
 					{
-						if(items.Set(index, item))
+						if(Insert(index, item))
 						{
-							NotifyUpdateInternal(index, 1, 1);
-							return true;
+							return RemoveAt(index+1);
 						}
 						else
 						{
