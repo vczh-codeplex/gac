@@ -3236,6 +3236,77 @@ NodeItemProvider
 				}
 
 /***********************************************************************
+MemoryNodeProvider::NodeCollection
+***********************************************************************/
+
+				void MemoryNodeProvider::NodeCollection::OnBeforeChildModified(int start, int count, int newCount)
+				{
+					ownerProvider->offsetBeforeChildModified=0;
+					if(ownerProvider->expanding)
+					{
+						for(int i=0;i<count;i++)
+						{
+							ownerProvider->offsetBeforeChildModified+=items[start+i]->totalVisibleNodeCount;
+						}
+					}
+					INodeProviderCallback* proxy=ownerProvider->GetCallbackProxyInternal();
+					if(proxy)
+					{
+						proxy->OnBeforeItemModified(ownerProvider, start, count, newCount);
+					}
+				}
+
+				void MemoryNodeProvider::NodeCollection::OnAfterChildModified(int start, int count, int newCount)
+				{
+					ownerProvider->childCount+=(newCount-count);
+					if(ownerProvider->expanding)
+					{
+						int offset=0;
+						for(int i=0;i<newCount;i++)
+						{
+							offset+=items[start+i]->totalVisibleNodeCount;
+						}
+						ownerProvider->OnChildTotalVisibleNodesChanged(offset-ownerProvider->offsetBeforeChildModified);
+					}
+					INodeProviderCallback* proxy=ownerProvider->GetCallbackProxyInternal();
+					if(proxy)
+					{
+						proxy->OnAfterItemModified(ownerProvider, start, count, newCount);
+					}
+				}
+
+				bool MemoryNodeProvider::NodeCollection::InsertInternal(int index, Ptr<MemoryNodeProvider> const& child)
+				{
+					if(child->parent==0)
+					{
+						OnBeforeChildModified(index, 0, 1);
+						child->parent=ownerProvider;
+						items.Insert(index, child);
+						OnAfterChildModified(index, 0, 1);
+						return true;
+					}
+					return false;
+				}
+
+				bool MemoryNodeProvider::NodeCollection::RemoveAtInternal(int index, Ptr<MemoryNodeProvider> const& child)
+				{
+					if(child->parent==ownerProvider)
+					{
+						OnBeforeChildModified(index, 1, 0);
+						child->parent=0;
+						items.RemoveAt(index);
+						OnAfterChildModified(index, 1, 0);
+						return true;
+					}
+					return false;
+				}
+
+				MemoryNodeProvider::NodeCollection::NodeCollection()
+					:ownerProvider(0)
+				{
+				}
+
+/***********************************************************************
 MemoryNodeProvider
 ***********************************************************************/
 
@@ -3260,62 +3331,6 @@ MemoryNodeProvider
 					}
 				}
 
-				void MemoryNodeProvider::OnBeforeChildModified(int start, int count, int newCount)
-				{
-					offsetBeforeChildModified=0;
-					if(expanding)
-					{
-						for(int i=0;i<count;i++)
-						{
-							offsetBeforeChildModified+=children[start+i]->totalVisibleNodeCount;
-						}
-					}
-					INodeProviderCallback* proxy=GetCallbackProxyInternal();
-					if(proxy)
-					{
-						proxy->OnBeforeItemModified(this, start, count, newCount);
-					}
-				}
-
-				void MemoryNodeProvider::OnAfterChildModified(int start, int count, int newCount)
-				{
-					childCount+=(newCount-count);
-					if(expanding)
-					{
-						int offset=0;
-						for(int i=0;i<newCount;i++)
-						{
-							offset+=children[start+i]->totalVisibleNodeCount;
-						}
-						OnChildTotalVisibleNodesChanged(offset-offsetBeforeChildModified);
-					}
-					INodeProviderCallback* proxy=GetCallbackProxyInternal();
-					if(proxy)
-					{
-						proxy->OnAfterItemModified(this, start, count, newCount);
-					}
-				}
-
-				bool MemoryNodeProvider::OnRequestRemove(MemoryNodeProvider* child)
-				{
-					if(child->parent==this)
-					{
-						child->parent=0;
-						return true;
-					}
-					return false;
-				}
-
-				bool MemoryNodeProvider::OnRequestInsert(MemoryNodeProvider* child)
-				{
-					if(child->parent==0)
-					{
-						child->parent=this;
-						return true;
-					}
-					return false;
-				}
-
 				MemoryNodeProvider::MemoryNodeProvider()
 					:parent(0)
 					,expanding(false)
@@ -3323,6 +3338,7 @@ MemoryNodeProvider
 					,totalVisibleNodeCount(1)
 					,offsetBeforeChildModified(0)
 				{
+					children.ownerProvider=this;
 				}
 
 				MemoryNodeProvider::MemoryNodeProvider(const Ptr<DescriptableObject>& _data)
@@ -3333,6 +3349,7 @@ MemoryNodeProvider
 					,offsetBeforeChildModified(0)
 					,data(_data)
 				{
+					children.ownerProvider=this;
 				}
 
 				MemoryNodeProvider::~MemoryNodeProvider()
@@ -3364,7 +3381,7 @@ MemoryNodeProvider
 					}
 				}
 
-				MemoryNodeProvider::ChildList& MemoryNodeProvider::Children()
+				MemoryNodeProvider::NodeCollection& MemoryNodeProvider::Children()
 				{
 					return children;
 				}
@@ -3434,119 +3451,6 @@ MemoryNodeProvider
 
 				void MemoryNodeProvider::Release()
 				{
-				}
-
-				//---------------------------------------------------
-
-				MemoryNodeProvider::ChildListEnumerator* MemoryNodeProvider::CreateEnumerator()const
-				{
-					return children.CreateEnumerator();
-				}
-
-				bool MemoryNodeProvider::Contains(const KeyType<Ptr<MemoryNodeProvider>>::Type& item)const
-				{
-					return children.Contains(item);
-				}
-
-				vint MemoryNodeProvider::Count()const
-				{
-					return children.Count();
-				}
-
-				vint MemoryNodeProvider::Count()
-				{
-					return children.Count();
-				}
-
-				const Ptr<MemoryNodeProvider>& MemoryNodeProvider::Get(vint index)const
-				{
-					return children.Get(index);
-				}
-
-				const Ptr<MemoryNodeProvider>& MemoryNodeProvider::operator[](vint index)const
-				{
-					return children.Get(index);
-				}
-
-				vint MemoryNodeProvider::IndexOf(const KeyType<Ptr<MemoryNodeProvider>>::Type& item)const
-				{
-					return children.IndexOf(item);
-				}
-
-				vint MemoryNodeProvider::Add(const Ptr<MemoryNodeProvider>& item)
-				{
-					return Insert(children.Count(), item);
-				}
-
-				bool MemoryNodeProvider::Remove(const KeyType<Ptr<MemoryNodeProvider>>::Type& item)
-				{
-					vint index=children.IndexOf(item);
-					if(index==-1) return false;
-					return RemoveAt(index);
-				}
-
-				bool MemoryNodeProvider::RemoveAt(vint index)
-				{
-					if(0<=index && index<children.Count())
-					{
-						if(OnRequestRemove(children[index].Obj()))
-						{
-							OnBeforeChildModified(index, 1, 0);
-							children.RemoveAt(index);
-							OnAfterChildModified(index, 1, 0);
-							return true;
-						}
-					}
-					return false;
-				}
-
-				bool MemoryNodeProvider::RemoveRange(vint index, vint count)
-				{
-					for(int i=0;i<index;i++)
-					{
-						int j=index+i;
-						if(0<=j && j<children.Count())
-						{
-							OnRequestRemove(children[j].Obj());
-						}
-					}
-					OnBeforeChildModified(index, count, 0);
-					children.RemoveRange(index, count);
-					OnAfterChildModified(index, count, 0);
-					return true;
-				}
-
-				bool MemoryNodeProvider::Clear()
-				{
-					return RemoveRange(0, children.Count());
-				}
-
-				vint MemoryNodeProvider::Insert(vint index, const Ptr<MemoryNodeProvider>& item)
-				{
-					if(OnRequestInsert(item.Obj()))
-					{
-						OnBeforeChildModified(index, 0, 1);
-						vint result=children.Insert(index, item);
-						OnAfterChildModified(index, 0, 1);
-						return result;
-					}
-					return -1;
-				}
-
-				bool MemoryNodeProvider::Set(vint index, const Ptr<MemoryNodeProvider>& item)
-				{
-					if(0<=index && index<children.Count())
-					{
-						if(OnRequestInsert(item.Obj()))
-						{
-							OnRequestRemove(children[index].Obj());
-							OnBeforeChildModified(index, 1, 1);
-							children[index]=item;
-							OnAfterChildModified(index, 1, 1);
-							return true;
-						}
-					}
-					return false;
 				}
 
 /***********************************************************************
@@ -19482,9 +19386,8 @@ GuiToolstripCollection
 				InvokeUpdateLayout();
 			}
 
-			void GuiToolstripCollection::RemoveAtInternal(vint index)
+			bool GuiToolstripCollection::RemoveAtInternal(int index, GuiControl* const& control)
 			{
-				GuiControl* control=items[index];
 				items.RemoveAt(index);
 				GuiStackItemComposition* stackItem=stackComposition->GetStackItems().Get(index);
 
@@ -19509,9 +19412,10 @@ GuiToolstripCollection
 				}
 				delete control;
 				InvokeUpdateLayout();
+				return true;
 			}
 
-			void GuiToolstripCollection::InsertInternal(vint index, GuiControl* control)
+			bool GuiToolstripCollection::InsertInternal(int index, GuiControl* const& control)
 			{
 				items.Insert(index, control);
 				GuiStackItemComposition* stackItem=new GuiStackItemComposition;
@@ -19537,6 +19441,7 @@ GuiToolstripCollection
 					}
 				}
 				InvokeUpdateLayout();
+				return true;
 			}
 
 			GuiToolstripCollection::GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer)
@@ -19548,112 +19453,6 @@ GuiToolstripCollection
 
 			GuiToolstripCollection::~GuiToolstripCollection()
 			{
-			}
-
-			collections::IEnumerator<GuiControl*>* GuiToolstripCollection::CreateEnumerator()const
-			{
-				return items.CreateEnumerator();
-			}
-
-			bool GuiToolstripCollection::Contains(GuiControl* const& item)const
-			{
-				return items.Contains(item);
-			}
-
-			vint GuiToolstripCollection::Count()const
-			{
-				return items.Count();
-			}
-
-			GuiControl* const& GuiToolstripCollection::Get(vint index)const
-			{
-				return items.Get(index);
-			}
-
-			GuiControl* const& GuiToolstripCollection::operator[](vint index)const
-			{
-				return items.Get(index);
-			}
-
-			vint GuiToolstripCollection::IndexOf(GuiControl* const& item)const
-			{
-				return items.IndexOf(item);
-			}
-
-			vint GuiToolstripCollection::Add(GuiControl* const& item)
-			{
-				return Insert(items.Count(), item);
-			}
-
-			bool GuiToolstripCollection::Remove(GuiControl* const& item)
-			{
-				return RemoveAt(items.IndexOf(item));
-			}
-
-			bool GuiToolstripCollection::RemoveAt(vint index)
-			{
-				if(0<=index && index<items.Count())
-				{
-					RemoveAtInternal(index);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool GuiToolstripCollection::RemoveRange(vint index, vint count)
-			{
-				if(count<=0) return false;
-				if(0<=index && index<items.Count() && index+count<=items.Count())
-				{
-					while(count-->0)
-					{
-						RemoveAt(index+count);
-					}
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool GuiToolstripCollection::Clear()
-			{
-				while(items.Count()>0)
-				{
-					RemoveAt(items.Count()-1);
-				}
-				return true;
-			}
-
-			vint GuiToolstripCollection::Insert(vint index, GuiControl* const& item)
-			{
-				if(0<=index && index<=items.Count() && item && !item->GetBoundsComposition()->GetParent())
-				{
-					InsertInternal(index, item);
-					return index;
-				}
-				else
-				{
-					return -1;
-				}
-			}
-
-			bool GuiToolstripCollection::Set(vint index, GuiControl* const& item)
-			{
-				if(0<=index && index<items.Count() && item && !item->GetBoundsComposition()->GetParent())
-				{
-					RemoveAtInternal(index);
-					InsertInternal(index, item);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
 			}
 
 /***********************************************************************

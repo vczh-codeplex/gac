@@ -29,7 +29,7 @@ Toolstrip Item Collection
 ***********************************************************************/
 
 			/// <summary>Toolstrip item collection.</summary>
-			class GuiToolstripCollection : public Object, public virtual collections::IEnumerable<GuiControl*>
+			class GuiToolstripCollection : public list::ItemsBase<GuiControl*>
 			{
 			public:
 				class IContentCallback : public Interface
@@ -41,31 +41,14 @@ Toolstrip Item Collection
 				IContentCallback*							contentCallback;
 				compositions::GuiStackComposition*			stackComposition;
 				Ptr<compositions::GuiSubComponentMeasurer>	subComponentMeasurer;
-				collections::List<GuiControl*>				items;
 
 				void										InvokeUpdateLayout();
 				void										OnInterestingMenuButtonPropertyChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void										RemoveAtInternal(vint index);
-				void										InsertInternal(vint index, GuiControl* control);
+				bool										RemoveAtInternal(int index, GuiControl* const& control)override;
+				bool										InsertInternal(int index, GuiControl* const& control)override;
 			public:
-				typedef GuiControl*							ElementType;
-
 				GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer);
 				~GuiToolstripCollection();
-
-				collections::IEnumerator<GuiControl*>*		CreateEnumerator()const;
-				bool										Contains(GuiControl* const& item)const;
-				vint										Count()const;
-				GuiControl* const&							Get(vint index)const;
-				GuiControl* const&							operator[](vint index)const;
-				vint										IndexOf(GuiControl* const& item)const;
-				vint										Add(GuiControl* const& item);
-				bool										Remove(GuiControl* const& item);
-				bool										RemoveAt(vint index);
-				bool										RemoveRange(vint index, vint count);
-				bool										Clear();
-				vint										Insert(vint index, GuiControl* const& item);
-				bool										Set(vint index, GuiControl* const& item);
 			};
 
 /***********************************************************************
