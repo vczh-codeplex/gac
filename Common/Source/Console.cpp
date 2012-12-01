@@ -10,10 +10,34 @@ namespace vl
 Console
 ***********************************************************************/
 
+		void Console::Write(const wchar_t* string, vint length)
+		{
+			HANDLE outHandle=GetStdHandle(STD_OUTPUT_HANDLE);
+			DWORD fileMode=0;
+			DWORD written=0;
+			if((GetFileType(outHandle) & FILE_TYPE_CHAR) && GetConsoleMode(outHandle, &fileMode))
+			{
+				WriteConsole(outHandle, string, (int)length, &written,0);
+			}
+			else
+			{
+				int codePage = GetConsoleOutputCP();
+				int charCount = WideCharToMultiByte(codePage, 0, string, -1, 0, 0, 0, 0);
+				char* codePageBuffer = new char[charCount];
+				WideCharToMultiByte(codePage, 0, string, -1, codePageBuffer, charCount, 0, 0);
+				WriteFile(outHandle, codePageBuffer, charCount-1, &written, 0);
+				delete codePageBuffer;
+			}
+		}
+
+		void Console::Write(const wchar_t* string)
+		{
+			Write(string, wcslen(string));
+		}
+
 		void Console::Write(const WString& string)
 		{
-			DWORD count=0;
-			WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE),string.Buffer(),(int)string.Length(),&count,0);
+			Write(string.Buffer(), string.Length());
 		}
 
 		void Console::WriteLine(const WString& string)

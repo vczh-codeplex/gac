@@ -17,6 +17,8 @@ namespace vl
 		class Console abstract
 		{
 		public:
+			static void Write(const wchar_t* string, vint length);
+			static void Write(const wchar_t* string);
 			static void Write(const WString& string);
 			static void WriteLine(const WString& string);
 			static WString Read();
