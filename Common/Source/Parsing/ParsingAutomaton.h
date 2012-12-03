@@ -50,8 +50,9 @@ namespace vl
 			public:
 				enum TransitionType
 				{
+					TokenBegin,
+					TokenFinish,
 					Epsilon,
-					Finish,
 					Symbol,
 				};
 
@@ -85,6 +86,7 @@ namespace vl
 
 				ParsingSymbol*										ownerRuleSymbol;
 				definitions::ParsingDefinitionRuleDefinition*		ownerRule;
+				definitions::ParsingDefinitionGrammar*				grammarNode;
 				definitions::ParsingDefinitionGrammar*				stateNode;
 				StatePosition										statePosition;
 				WString												stateName;
@@ -124,12 +126,15 @@ namespace vl
 				State*												RootRuleEndState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
 				State*												StartState(definitions::ParsingDefinitionRuleDefinition* ownerRule, definitions::ParsingDefinitionGrammar* grammarNode, definitions::ParsingDefinitionGrammar* stateNode);
 				State*												EndState(definitions::ParsingDefinitionRuleDefinition* ownerRule, definitions::ParsingDefinitionGrammar* grammarNode, definitions::ParsingDefinitionGrammar* stateNode);
+				State*												CopyState(State* oldState);
 
 				Transition*											CreateTransition(State* start, State* end);
+				Transition*											TokenBegin(State* start, State* end);
+				Transition*											TokenFinish(State* start, State* end);
 				Transition*											Epsilon(State* start, State* end);
-				Transition*											Finish(State* start, State* end);
 				Transition*											Symbol(State* start, State* end, ParsingSymbol* transitionSymbol);
 				Transition*											Symbol(State* start, State* end, const WString& transitionText);
+				Transition*											CopyTransition(State* start, State* end, Transition* oldTransition);
 			};
 
 /***********************************************************************

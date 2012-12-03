@@ -50,6 +50,7 @@ State
 			State::State()
 				:ownerRule(0)
 				,ownerRuleSymbol(0)
+				,grammarNode(0)
 				,stateNode(0)
 				,statePosition(BeforeNode)
 				,endState(false)
@@ -132,6 +133,7 @@ Automaton
 
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
+				state->grammarNode=grammarNode;
 				state->stateNode=stateNode;
 				state->statePosition=State::BeforeNode;
 				state->stateName=ownerRule->name+L"."+itow(++ruleInfos[ownerRule]->stateNameCount);
@@ -147,12 +149,28 @@ Automaton
 
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
+				state->grammarNode=grammarNode;
 				state->stateNode=stateNode;
 				state->statePosition=State::AfterNode;
 				state->stateName=ownerRule->name+L"."+itow(++ruleInfos[ownerRule]->stateNameCount);
 				stateNode=FindAppropriateGrammarState(grammarNode, stateNode, false);
 				state->stateExpression=L"<"+ownerRule->name+L">: "+GrammarStateToString(grammarNode, stateNode, false);
 				return state;
+			}
+
+			State* Automaton::CopyState(State* oldState)
+			{
+				State* resultState=0;
+				if(oldState->statePosition==State::BeforeNode)
+				{
+					resultState=StartState(oldState->ownerRule, oldState->grammarNode, oldState->stateNode);
+				}
+				else
+				{
+					resultState=EndState(oldState->ownerRule, oldState->grammarNode, oldState->stateNode);
+				}
+				resultState->endState=oldState->endState;
+				return resultState;
 			}
 
 			Transition* Automaton::CreateTransition(State* start, State* end)
@@ -168,17 +186,24 @@ Automaton
 				return transition;
 			}
 
+			Transition* Automaton::TokenBegin(State* start, State* end)
+			{
+				Transition* transition=CreateTransition(start, end);
+				transition->transitionType=Transition::TokenBegin;
+				return transition;
+			}
+
+			Transition* Automaton::TokenFinish(State* start, State* end)
+			{
+				Transition* transition=CreateTransition(start, end);
+				transition->transitionType=Transition::TokenFinish;
+				return transition;
+			}
+
 			Transition* Automaton::Epsilon(State* start, State* end)
 			{
 				Transition* transition=CreateTransition(start, end);
 				transition->transitionType=Transition::Epsilon;
-				return transition;
-			}
-
-			Transition* Automaton::Finish(State* start, State* end)
-			{
-				Transition* transition=CreateTransition(start, end);
-				transition->transitionType=Transition::Finish;
 				return transition;
 			}
 
@@ -195,6 +220,15 @@ Automaton
 				Transition* transition=CreateTransition(start, end);
 				transition->transitionType=Transition::Symbol;
 				transition->transitionText=transitionText;
+				return transition;
+			}
+
+			Transition* Automaton::CopyTransition(State* start, State* end, Transition* oldTransition)
+			{
+				Transition* transition=CreateTransition(start, end);
+				transition->transitionType=oldTransition->transitionType;
+				transition->transitionSymbol=oldTransition->transitionSymbol;
+				transition->transitionText=oldTransition->transitionText;
 				return transition;
 			}
 
@@ -277,7 +311,7 @@ CreateEpsilonPDA
 
 					Ptr<Action> action=new Action;
 					action->actionType=Action::Create;
-					action->actionSource=automaton->symbolManager->CacheGetType(node->type.Obj(), automaton->symbolManager->GetGlobal());
+					action->actionSource=automaton->symbolManager->CacheGetType(node->type.Obj(), 0);
 					transition->actions.Add(action);
 				}
 
@@ -330,8 +364,8 @@ CreateEpsilonPDA
 					State* grammarEndState=automaton->EndState(rule.Obj(), grammar.Obj(), grammar.Obj());
 					grammarEndState->stateName+=L".End";
 					grammarEndState->endState=true;
-					automaton->Epsilon(ruleInfo->startState, grammarStartState);
-					automaton->Finish(grammarEndState, ruleInfo->rootRuleEndState);
+					automaton->TokenBegin(ruleInfo->startState, grammarStartState);
+					automaton->TokenFinish(grammarEndState, ruleInfo->rootRuleEndState);
 					ruleInfo->endStates.Add(grammarEndState);
 					CreateEpsilonPDAVisitor::Create(grammar.Obj(), automaton, grammar.Obj(), grammarStartState, grammarEndState);
 				}
@@ -351,9 +385,97 @@ CreateEpsilonPDA
 CreatePDAFromEpsilonPDA
 ***********************************************************************/
 
+			typedef Pair<State*, Ptr<List<Transition*>>> EpsilonClosureItem;
+
+			void SearchEpsilonClosureInternal(List<Transition*>& transitionPath, Transition* transition, State* state, List<EpsilonClosureItem>& closure)
+			{
+				if(!transition || transition->transitionType==Transition::Epsilon)
+				{
+					FOREACH(Transition*, newTransition, state->transitions)
+					{
+						if(!transitionPath.Contains(newTransition))
+						{
+							transitionPath.Add(newTransition);
+							SearchEpsilonClosureInternal(transitionPath, newTransition, newTransition->target, closure);
+							transitionPath.RemoveAt(transitionPath.Count()-1);
+						}
+					}
+				}
+				else
+				{
+					Ptr<List<Transition*>> path=new List<Transition*>;
+					CopyFrom(*path.Obj(), transitionPath);
+					closure.Add(EpsilonClosureItem(state, path));
+				}
+			}
+
+			void SearchEpsilonClosure(State* startState, List<EpsilonClosureItem>& closure)
+			{
+				List<Transition*> transitionPath;
+				SearchEpsilonClosureInternal(transitionPath, 0, startState, closure);
+			}
+
+			State* GetMappedState(Ptr<Automaton> newAutomaton, Ptr<RuleInfo> newRuleInfo, State* oldState, List<State*>& scanningStates, Dictionary<State*, State*>& oldNewStateMap)
+			{
+				State* newState=0;
+				vint mapIndex=oldNewStateMap.Keys().IndexOf(oldState);
+				if(mapIndex==-1)
+				{
+					newState=newAutomaton->CopyState(oldState);
+					oldNewStateMap.Add(oldState, newState);
+					scanningStates.Add(oldState);
+					if(newState->endState)
+					{
+						newRuleInfo->endStates.Add(newState);
+					}
+				}
+				else
+				{
+					newState=oldNewStateMap.Values().Get(mapIndex);
+				}
+				return newState;
+			}
+
 			Ptr<Automaton> CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA)
 			{
 				Ptr<Automaton> automaton=new Automaton(epsilonPDA->symbolManager);
+				FOREACH(ParsingDefinitionRuleDefinition*, rule, epsilonPDA->ruleInfos.Keys())
+				{
+					Ptr<RuleInfo> ruleInfo=epsilonPDA->ruleInfos[rule];
+					Ptr<RuleInfo> newRuleInfo=new RuleInfo;
+					automaton->ruleInfos.Add(rule, newRuleInfo);
+
+					newRuleInfo->rootRuleStartState=automaton->RootRuleStartState(rule);
+					newRuleInfo->rootRuleEndState=automaton->RootRuleEndState(rule);
+					newRuleInfo->startState=automaton->RuleStartState(rule);
+
+					Dictionary<State*, State*> oldNewStateMap;
+					List<State*> scanningStates;
+					vint currentStateIndex=0;
+					oldNewStateMap.Add(ruleInfo->rootRuleStartState, newRuleInfo->rootRuleStartState);
+					oldNewStateMap.Add(ruleInfo->rootRuleEndState, newRuleInfo->rootRuleEndState);
+					oldNewStateMap.Add(ruleInfo->startState, newRuleInfo->startState);
+					scanningStates.Add(ruleInfo->rootRuleStartState);
+
+					while(currentStateIndex<scanningStates.Count())
+					{
+						State* currentOldState=scanningStates[currentStateIndex++];
+						State* currentNewState=GetMappedState(automaton, newRuleInfo, currentOldState, scanningStates, oldNewStateMap);
+
+						List<EpsilonClosureItem> closure;
+						SearchEpsilonClosure(currentOldState, closure);
+						FOREACH(EpsilonClosureItem, closureItem, closure)
+						{
+							Transition* oldTransition=closureItem.value->Get(closureItem.value->Count()-1);
+							State* newEndState=GetMappedState(automaton, newRuleInfo, oldTransition->target, scanningStates, oldNewStateMap);
+							Transition* transition=automaton->CopyTransition(currentNewState, newEndState, oldTransition);
+							FOREACH(Transition*, pathTransition, *closureItem.value.Obj())
+							{
+								CopyFrom(transition->actions, pathTransition->actions, true);
+							}
+						}
+					}
+				}
 				return automaton;
 			}
 		}
