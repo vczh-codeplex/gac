@@ -576,8 +576,11 @@ Logger (Automaton)
 							case Transition::Epsilon:
 								writer.WriteString(L"    EPSILON");
 								break;
-							case Transition::Finish:
-								writer.WriteString(L"    FINISH");
+							case Transition::TokenBegin:
+								writer.WriteString(L"    TOKEN-BEGIN");
+								break;
+							case Transition::TokenFinish:
+								writer.WriteString(L"    TOKEN-FINISH");
 								break;
 							case Transition::Symbol:
 								{
@@ -634,7 +637,7 @@ Logger (Automaton)
 									writer.WriteString(L" USING");
 									break;
 								case Action::Setter:
-									writer.WriteString(L" TARGET");
+									writer.WriteString(L" SET");
 									break;
 								}
 								writer.WriteString(L" SOURCE[");
