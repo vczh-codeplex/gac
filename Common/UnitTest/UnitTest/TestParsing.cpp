@@ -50,11 +50,17 @@ namespace test
 		}
 		TEST_ASSERT(errors.Count()==0);
 
-		Ptr<Automaton> automaton=CreateEpsilonPDA(definition, &symbolManager);
+		Ptr<Automaton> epsilonPDA=CreateEpsilonPDA(definition, &symbolManager);
 		writer.WriteLine(L"=============================================================");
 		writer.WriteLine(L"Epsilon PDA");
 		writer.WriteLine(L"=============================================================");
-		Log(automaton, writer);
+		Log(epsilonPDA, writer);
+
+		Ptr<Automaton> nondeterministicPDA=CreateNondeterministicPDAFromEpsilonPDA(epsilonPDA);
+		writer.WriteLine(L"=============================================================");
+		writer.WriteLine(L"Nondeterministic PDA");
+		writer.WriteLine(L"=============================================================");
+		Log(nondeterministicPDA, writer);
 	}
 }
 using namespace test;

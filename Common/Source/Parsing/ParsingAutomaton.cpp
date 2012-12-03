@@ -346,6 +346,16 @@ CreateEpsilonPDA
 				}
 				return automaton;
 			}
+
+/***********************************************************************
+CreatePDAFromEpsilonPDA
+***********************************************************************/
+
+			Ptr<Automaton> CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA)
+			{
+				Ptr<Automaton> automaton=new Automaton(epsilonPDA->symbolManager);
+				return automaton;
+			}
 		}
 	}
 }

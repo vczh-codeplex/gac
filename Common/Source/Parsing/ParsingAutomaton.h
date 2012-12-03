@@ -137,6 +137,7 @@ namespace vl
 ***********************************************************************/
 
 			extern Ptr<Automaton>									CreateEpsilonPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager);
+			extern Ptr<Automaton>									CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA);
 			extern void												Log(Ptr<Automaton> automaton, stream::TextWriter& writer);
 		}
 	}
