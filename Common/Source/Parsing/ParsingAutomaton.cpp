@@ -385,62 +385,115 @@ CreateEpsilonPDA
 CreatePDAFromEpsilonPDA
 ***********************************************************************/
 
-			typedef Pair<State*, Ptr<List<Transition*>>> EpsilonClosureItem;
-
-			void SearchEpsilonClosureInternal(List<Transition*>& transitionPath, Transition* transition, State* state, List<EpsilonClosureItem>& closure)
+			namespace closure_searching
 			{
-				if(!transition || transition->transitionType==Transition::Epsilon)
+				struct ClosureItem
 				{
-					FOREACH(Transition*, newTransition, state->transitions)
+					State*						state;			// target state of one path of a closure
+					Ptr<List<Transition*>>		transitions;	// path
+
+					ClosureItem()
+						:state(0)
 					{
-						if(!transitionPath.Contains(newTransition))
+					}
+
+					ClosureItem(State* _state, Ptr<List<Transition*>> _transitions)
+						:state(_state)
+						,transitions(_transitions)
+					{
+					}
+				};
+
+				enum ClosureSearchResult
+				{
+					Continue,
+					Hit,
+					Blocked,
+				};
+
+				// closure function for searching <epsilon* symbol> reachable states
+				ClosureSearchResult EpsilonClosure(Transition* transition)
+				{
+					return
+						transition->transitionType!=Transition::Epsilon?Hit:
+						transition->target->endState?Blocked:
+						Continue;
+				}
+
+				// closure function for searching <epsilon*> reachable end states
+				ClosureSearchResult EndStateClosure(Transition* transition)
+				{
+					return
+						transition->transitionType!=Transition::Epsilon?Blocked:
+						transition->target->endState?Hit:
+						Continue;
+				}
+
+				// closure searching function
+				void SearchClosureInternal(ClosureSearchResult(*closurePredicate)(Transition*), List<Transition*>& transitionPath, Transition* transition, State* state, List<ClosureItem>& closure)
+				{
+					ClosureSearchResult result=transition?closurePredicate(transition):Continue;
+					switch(result)
+					{
+					case Continue:
 						{
-							transitionPath.Add(newTransition);
-							SearchEpsilonClosureInternal(transitionPath, newTransition, newTransition->target, closure);
-							transitionPath.RemoveAt(transitionPath.Count()-1);
+							FOREACH(Transition*, newTransition, state->transitions)
+							{
+								if(!transitionPath.Contains(newTransition))
+								{
+									transitionPath.Add(newTransition);
+									SearchClosureInternal(closurePredicate, transitionPath, newTransition, newTransition->target, closure);
+									transitionPath.RemoveAt(transitionPath.Count()-1);
+								}
+							}
+						}
+						break;
+					case Hit:
+						{
+							Ptr<List<Transition*>> path=new List<Transition*>;
+							CopyFrom(*path.Obj(), transitionPath);
+							closure.Add(ClosureItem(state, path));
+						}
+						break;
+					}
+				}
+
+				void SearchClosure(ClosureSearchResult(*closurePredicate)(Transition*), State* startState, List<ClosureItem>& closure)
+				{
+					List<Transition*> transitionPath;
+					SearchClosureInternal(closurePredicate, transitionPath, 0, startState, closure);
+				}
+
+				// map old state to new state and track all states that are not visited yet
+				State* GetMappedState(Ptr<Automaton> newAutomaton, Ptr<RuleInfo> newRuleInfo, State* oldState, List<State*>& scanningStates, Dictionary<State*, State*>& oldNewStateMap)
+				{
+					State* newState=0;
+					vint mapIndex=oldNewStateMap.Keys().IndexOf(oldState);
+					if(mapIndex==-1)
+					{
+						newState=newAutomaton->CopyState(oldState);
+						oldNewStateMap.Add(oldState, newState);
+						scanningStates.Add(oldState);
+						if(newState->endState)
+						{
+							newRuleInfo->endStates.Add(newState);
 						}
 					}
-				}
-				else
-				{
-					Ptr<List<Transition*>> path=new List<Transition*>;
-					CopyFrom(*path.Obj(), transitionPath);
-					closure.Add(EpsilonClosureItem(state, path));
-				}
-			}
-
-			void SearchEpsilonClosure(State* startState, List<EpsilonClosureItem>& closure)
-			{
-				List<Transition*> transitionPath;
-				SearchEpsilonClosureInternal(transitionPath, 0, startState, closure);
-			}
-
-			State* GetMappedState(Ptr<Automaton> newAutomaton, Ptr<RuleInfo> newRuleInfo, State* oldState, List<State*>& scanningStates, Dictionary<State*, State*>& oldNewStateMap)
-			{
-				State* newState=0;
-				vint mapIndex=oldNewStateMap.Keys().IndexOf(oldState);
-				if(mapIndex==-1)
-				{
-					newState=newAutomaton->CopyState(oldState);
-					oldNewStateMap.Add(oldState, newState);
-					scanningStates.Add(oldState);
-					if(newState->endState)
+					else
 					{
-						newRuleInfo->endStates.Add(newState);
+						newState=oldNewStateMap.Values().Get(mapIndex);
 					}
+					return newState;
 				}
-				else
-				{
-					newState=oldNewStateMap.Values().Get(mapIndex);
-				}
-				return newState;
 			}
+			using namespace closure_searching;
 
 			Ptr<Automaton> CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA)
 			{
 				Ptr<Automaton> automaton=new Automaton(epsilonPDA->symbolManager);
 				FOREACH(ParsingDefinitionRuleDefinition*, rule, epsilonPDA->ruleInfos.Keys())
 				{
+					// build new rule info
 					Ptr<RuleInfo> ruleInfo=epsilonPDA->ruleInfos[rule];
 					Ptr<RuleInfo> newRuleInfo=new RuleInfo;
 					automaton->ruleInfos.Add(rule, newRuleInfo);
@@ -449,30 +502,103 @@ CreatePDAFromEpsilonPDA
 					newRuleInfo->rootRuleEndState=automaton->RootRuleEndState(rule);
 					newRuleInfo->startState=automaton->RuleStartState(rule);
 
+					// build state mapping and state visiting tracking
 					Dictionary<State*, State*> oldNewStateMap;
+					Dictionary<State*, Ptr<List<ClosureItem>>> endStateClosures;
 					List<State*> scanningStates;
 					vint currentStateIndex=0;
 					oldNewStateMap.Add(ruleInfo->rootRuleStartState, newRuleInfo->rootRuleStartState);
 					oldNewStateMap.Add(ruleInfo->rootRuleEndState, newRuleInfo->rootRuleEndState);
 					oldNewStateMap.Add(ruleInfo->startState, newRuleInfo->startState);
+					// begin with a root rule state state
 					scanningStates.Add(ruleInfo->rootRuleStartState);
 
 					while(currentStateIndex<scanningStates.Count())
 					{
+						// map visiting state to new state
 						State* currentOldState=scanningStates[currentStateIndex++];
 						State* currentNewState=GetMappedState(automaton, newRuleInfo, currentOldState, scanningStates, oldNewStateMap);
 
-						List<EpsilonClosureItem> closure;
-						SearchEpsilonClosure(currentOldState, closure);
-						FOREACH(EpsilonClosureItem, closureItem, closure)
+						// search for epsilon closure
+						List<ClosureItem> closure;
+						SearchClosure(&EpsilonClosure, currentOldState, closure);
+						FOREACH(ClosureItem, closureItem, closure)
 						{
-							Transition* oldTransition=closureItem.value->Get(closureItem.value->Count()-1);
-							State* newEndState=GetMappedState(automaton, newRuleInfo, oldTransition->target, scanningStates, oldNewStateMap);
-							Transition* transition=automaton->CopyTransition(currentNewState, newEndState, oldTransition);
-							FOREACH(Transition*, pathTransition, *closureItem.value.Obj())
+							// search for end state closure of the target state of each path in the closure
+							Ptr<List<ClosureItem>> endStateClosure;
+							vint endStateIndex=endStateClosures.Keys().IndexOf(closureItem.state);
+							if(endStateIndex==-1)
 							{
-								CopyFrom(transition->actions, pathTransition->actions, true);
+								endStateClosure=new List<ClosureItem>;
+								SearchClosure(&EndStateClosure, closureItem.state, *endStateClosure.Obj());
+								endStateClosures.Add(closureItem.state, endStateClosure);
 							}
+							else
+							{
+								endStateClosure=endStateClosures.Values().Get(endStateIndex);
+							}
+
+							// build compacted non-epsilon transition to the target state of the path
+							Transition* oldTransition=closureItem.transitions->Get(closureItem.transitions->Count()-1);
+							{
+								State* newEndState=GetMappedState(automaton, newRuleInfo, oldTransition->target, scanningStates, oldNewStateMap);
+								Transition* transition=automaton->CopyTransition(currentNewState, newEndState, oldTransition);
+								FOREACH(Transition*, pathTransition, *closureItem.transitions.Obj())
+								{
+									CopyFrom(transition->actions, pathTransition->actions, true);
+								}
+							}
+
+							// if there is any path in the end state closure of the target state
+							FOREACH(ClosureItem, endStateClosureItem, *endStateClosure.Obj())
+							{
+								// build a transition to the mapped end state
+								State* newEndState=GetMappedState(automaton, newRuleInfo, endStateClosureItem.state, scanningStates, oldNewStateMap);
+								Transition* transition=automaton->CopyTransition(currentNewState, newEndState, oldTransition);
+								// copy all actions in the compacted non-epsilon transition
+								FOREACH(Transition*, pathTransition, *closureItem.transitions.Obj())
+								{
+									CopyFrom(transition->actions, pathTransition->actions, true);
+								}
+								// copy all actions in the end state path
+								FOREACH(Transition*, pathTransition, *endStateClosureItem.transitions.Obj())
+								{
+									CopyFrom(transition->actions, pathTransition->actions, true);
+								}
+							}
+						}
+					}
+
+					// delete all states that are not reachable to the end state
+					List<State*> newStates;
+					FOREACH(State*, oldState, scanningStates)
+					{
+						newStates.Add(oldNewStateMap[oldState]);
+					}
+					while(true)
+					{
+						// find a non-end state without out transitions
+						vint deleteCount=0;
+						for(vint i=newStates.Count()-1;i>=0;i--)
+						{
+							State* newState=newStates[i];
+							if(newState->transitions.Count()==0)
+							{
+								if(newState!=newRuleInfo->rootRuleEndState && !newState->endState)
+								{
+									// delete the state;
+									FOREACH(Transition*, transition, newState->inputs)
+									{
+										transition->source->transitions.Remove(transition);
+										automaton->transitions.Remove(transition);
+									}
+									automaton->states.Remove(newState);
+								}
+							}
+						}
+						if(deleteCount==0)
+						{
+							break;
 						}
 					}
 				}
