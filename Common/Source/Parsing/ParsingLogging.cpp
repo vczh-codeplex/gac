@@ -561,9 +561,8 @@ Logger (Automaton)
 						{
 							writer.WriteString(L"STATE ");
 						}
-						writer.WriteString(state->stateName);
-						writer.WriteString(L" => ");
 						writer.WriteLine(state->stateExpression);
+						writer.WriteLine(state->stateName);
 
 						FOREACH(Transition*, transition, state->transitions)
 						{
@@ -624,28 +623,27 @@ Logger (Automaton)
 
 							FOREACH(Ptr<Action>, action, transition->actions)
 							{
-								writer.WriteString(L"        ACTION");
 								switch(action->actionType)
 								{
 								case Action::Create:
-									writer.WriteString(L" CREATE");
+									writer.WriteString(L"        CREATE");
 									break;
 								case Action::Assign:
-									writer.WriteString(L" ASSIGN");
+									writer.WriteString(L"        ASSIGN");
 									break;
 								case Action::Using:
-									writer.WriteString(L" USING");
+									writer.WriteString(L"        USING");
 									break;
 								case Action::Setter:
-									writer.WriteString(L" SET");
+									writer.WriteString(L"        SET");
 									break;
 								}
-								writer.WriteString(L" SOURCE[");
+								writer.WriteString(L" [");
 								if(action->actionSource)
 								{
 									writer.WriteString(action->actionSource->GetName());
 								}
-								writer.WriteString(L"] TARGET[");
+								writer.WriteString(L"] [");
 								if(action->actionTarget)
 								{
 									writer.WriteString(action->actionTarget->GetName());

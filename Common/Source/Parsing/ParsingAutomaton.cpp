@@ -465,7 +465,7 @@ CreatePDAFromEpsilonPDA
 				}
 
 				// map old state to new state and track all states that are not visited yet
-				State* GetMappedState(Ptr<Automaton> newAutomaton, Ptr<RuleInfo> newRuleInfo, State* oldState, List<State*>& scanningStates, Dictionary<State*, State*>& oldNewStateMap)
+				State* GetMappedState(Ptr<Automaton> newAutomaton, State* oldState, List<State*>& scanningStates, Dictionary<State*, State*>& oldNewStateMap)
 				{
 					State* newState=0;
 					vint mapIndex=oldNewStateMap.Keys().IndexOf(oldState);
@@ -474,10 +474,6 @@ CreatePDAFromEpsilonPDA
 						newState=newAutomaton->CopyState(oldState);
 						oldNewStateMap.Add(oldState, newState);
 						scanningStates.Add(oldState);
-						if(newState->endState)
-						{
-							newRuleInfo->endStates.Add(newState);
-						}
 					}
 					else
 					{
@@ -487,6 +483,99 @@ CreatePDAFromEpsilonPDA
 				}
 			}
 			using namespace closure_searching;
+
+			void DeleteState(Ptr<Automaton> automaton, State* state)
+			{
+				FOREACH(Transition*, transition, state->inputs)
+				{
+					transition->source->transitions.Remove(transition);
+					automaton->transitions.Remove(transition);
+				}
+				FOREACH(Transition*, transition, state->transitions)
+				{
+					transition->target->inputs.Remove(transition);
+					automaton->transitions.Remove(transition);
+				}
+				automaton->states.Remove(state);
+			}
+
+			void DeleteUnnecessaryStates(Ptr<Automaton> automaton, Ptr<RuleInfo> newRuleInfo, List<State*>& newStates)
+			{
+				// delete all states that are not reachable to the end state
+				while(true)
+				{
+					// find a non-end state without out transitions
+					vint deleteCount=0;
+					for(vint i=newStates.Count()-1;i>=0;i--)
+					{
+						State* newState=newStates[i];
+						if(newState->transitions.Count()==0)
+						{
+							if(newState!=newRuleInfo->rootRuleEndState && !newState->endState)
+							{
+								DeleteState(automaton, newState);
+							}
+						}
+					}
+					if(deleteCount==0)
+					{
+						break;
+					}
+				}
+			}
+
+			bool IsMergableCandidate(State* state, Ptr<RuleInfo> newRuleInfo)
+			{
+				return state!=newRuleInfo->rootRuleStartState && state!=newRuleInfo->rootRuleEndState && state!=newRuleInfo->startState;
+			}
+
+			bool IsMergable(State* state1, State* state2)
+			{
+				return false;
+			}
+
+			void MergeState2ToState1(Ptr<Automaton> automaton, State* state1, State* state2)
+			{
+				// retarget state2's input to state1
+				CopyFrom(state1->inputs, state2->inputs, true);
+				FOREACH(Transition*, transition, state2->inputs)
+				{
+					transition->target=state1;
+				}
+				state2->inputs.Clear();
+				DeleteState(automaton, state2);
+			}
+
+			void MergeStates(Ptr<Automaton> automaton, Ptr<RuleInfo> newRuleInfo, List<State*>& newStates)
+			{
+				while(true)
+				{
+					vint mergeCount=0;
+					for(vint i=0;i<newStates.Count();i++)
+					{
+						State* state1=newStates[i];
+						if(IsMergableCandidate(state1, newRuleInfo))
+						{
+							for(vint j=i+1;j<newStates.Count();j++)
+							{
+								State* state2=newStates[j];
+								if(state1!=state2 && IsMergableCandidate(state2, newRuleInfo))
+								{
+									if(IsMergable(state1, state2))
+									{
+										MergeState2ToState1(automaton, state1, state2);
+										newStates.RemoveAt(j);
+										goto MERGED_STATES_PAIR;
+									}
+								}
+							}
+						}
+					}
+					break;
+				MERGED_STATES_PAIR:
+					continue;
+				}
+			}
 
 			Ptr<Automaton> CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA)
 			{
@@ -517,7 +606,7 @@ CreatePDAFromEpsilonPDA
 					{
 						// map visiting state to new state
 						State* currentOldState=scanningStates[currentStateIndex++];
-						State* currentNewState=GetMappedState(automaton, newRuleInfo, currentOldState, scanningStates, oldNewStateMap);
+						State* currentNewState=GetMappedState(automaton, currentOldState, scanningStates, oldNewStateMap);
 
 						// search for epsilon closure
 						List<ClosureItem> closure;
@@ -541,7 +630,7 @@ CreatePDAFromEpsilonPDA
 							// build compacted non-epsilon transition to the target state of the path
 							Transition* oldTransition=closureItem.transitions->Get(closureItem.transitions->Count()-1);
 							{
-								State* newEndState=GetMappedState(automaton, newRuleInfo, oldTransition->target, scanningStates, oldNewStateMap);
+								State* newEndState=GetMappedState(automaton, oldTransition->target, scanningStates, oldNewStateMap);
 								Transition* transition=automaton->CopyTransition(currentNewState, newEndState, oldTransition);
 								FOREACH(Transition*, pathTransition, *closureItem.transitions.Obj())
 								{
@@ -553,7 +642,7 @@ CreatePDAFromEpsilonPDA
 							FOREACH(ClosureItem, endStateClosureItem, *endStateClosure.Obj())
 							{
 								// build a transition to the mapped end state
-								State* newEndState=GetMappedState(automaton, newRuleInfo, endStateClosureItem.state, scanningStates, oldNewStateMap);
+								State* newEndState=GetMappedState(automaton, endStateClosureItem.state, scanningStates, oldNewStateMap);
 								Transition* transition=automaton->CopyTransition(currentNewState, newEndState, oldTransition);
 								// copy all actions in the compacted non-epsilon transition
 								FOREACH(Transition*, pathTransition, *closureItem.transitions.Obj())
@@ -569,36 +658,14 @@ CreatePDAFromEpsilonPDA
 						}
 					}
 
-					// delete all states that are not reachable to the end state
 					List<State*> newStates;
-					FOREACH(State*, oldState, scanningStates)
+					CopyFrom(newStates, oldNewStateMap.Values());
+					DeleteUnnecessaryStates(automaton, newRuleInfo, newStates);
+					FOREACH(State*, state, newStates)
 					{
-						newStates.Add(oldNewStateMap[oldState]);
-					}
-					while(true)
-					{
-						// find a non-end state without out transitions
-						vint deleteCount=0;
-						for(vint i=newStates.Count()-1;i>=0;i--)
+						if(state->endState)
 						{
-							State* newState=newStates[i];
-							if(newState->transitions.Count()==0)
-							{
-								if(newState!=newRuleInfo->rootRuleEndState && !newState->endState)
-								{
-									// delete the state;
-									FOREACH(Transition*, transition, newState->inputs)
-									{
-										transition->source->transitions.Remove(transition);
-										automaton->transitions.Remove(transition);
-									}
-									automaton->states.Remove(newState);
-								}
-							}
-						}
-						if(deleteCount==0)
-						{
-							break;
+							newRuleInfo->endStates.Add(state);
 						}
 					}
 				}
