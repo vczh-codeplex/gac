@@ -553,6 +553,7 @@ Logger (Automaton)
 					while(currentState<states.Count())
 					{
 						State* state=states[currentState++];
+						writer.WriteLine(state->stateExpression);
 						if(state->endState)
 						{
 							writer.WriteString(L"END STATE ");
@@ -561,7 +562,6 @@ Logger (Automaton)
 						{
 							writer.WriteString(L"STATE ");
 						}
-						writer.WriteLine(state->stateExpression);
 						writer.WriteLine(state->stateName);
 
 						FOREACH(Transition*, transition, state->transitions)

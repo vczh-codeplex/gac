@@ -135,6 +135,9 @@ namespace vl
 				Transition*											Symbol(State* start, State* end, ParsingSymbol* transitionSymbol);
 				Transition*											Symbol(State* start, State* end, const WString& transitionText);
 				Transition*											CopyTransition(State* start, State* end, Transition* oldTransition);
+
+				void												DeleteTransition(Transition* transition);
+				void												DeleteState(State* state);
 			};
 
 /***********************************************************************

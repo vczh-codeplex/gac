@@ -110,7 +110,7 @@ Automaton
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
 				state->stateName=ownerRule->name+L".RootStart";
-				state->stateExpression=L"¡¤ $<"+ownerRule->name+L">";
+				state->stateExpression=L"¡ñ $<"+ownerRule->name+L">";
 				return state;
 			}
 
@@ -122,7 +122,7 @@ Automaton
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
 				state->stateName=ownerRule->name+L".RootEnd";
-				state->stateExpression=L"$<"+ownerRule->name+L"> ¡¤";
+				state->stateExpression=L"$<"+ownerRule->name+L"> ¡ñ";
 				return state;
 			}
 
@@ -230,6 +230,26 @@ Automaton
 				transition->transitionSymbol=oldTransition->transitionSymbol;
 				transition->transitionText=oldTransition->transitionText;
 				return transition;
+			}
+
+			void Automaton::DeleteTransition(Transition* transition)
+			{
+				transition->source->transitions.Remove(transition);
+				transition->target->inputs.Remove(transition);
+				transitions.Remove(transition);
+			}
+
+			void Automaton::DeleteState(State* state)
+			{
+				while(state->inputs.Count())
+				{
+					DeleteTransition(state->inputs[0]);
+				}
+				while(state->transitions.Count())
+				{
+					DeleteTransition(state->transitions[0]);
+				}
+				states.Remove(state);
 			}
 
 /***********************************************************************
@@ -484,21 +504,6 @@ CreatePDAFromEpsilonPDA
 			}
 			using namespace closure_searching;
 
-			void DeleteState(Ptr<Automaton> automaton, State* state)
-			{
-				FOREACH(Transition*, transition, state->inputs)
-				{
-					transition->source->transitions.Remove(transition);
-					automaton->transitions.Remove(transition);
-				}
-				FOREACH(Transition*, transition, state->transitions)
-				{
-					transition->target->inputs.Remove(transition);
-					automaton->transitions.Remove(transition);
-				}
-				automaton->states.Remove(state);
-			}
-
 			void DeleteUnnecessaryStates(Ptr<Automaton> automaton, Ptr<RuleInfo> newRuleInfo, List<State*>& newStates)
 			{
 				// delete all states that are not reachable to the end state
@@ -513,7 +518,8 @@ CreatePDAFromEpsilonPDA
 						{
 							if(newState!=newRuleInfo->rootRuleEndState && !newState->endState)
 							{
-								DeleteState(automaton, newState);
+								automaton->DeleteState(newState);
+								newStates.RemoveAt(i);
 							}
 						}
 					}
@@ -529,25 +535,117 @@ CreatePDAFromEpsilonPDA
 				return state!=newRuleInfo->rootRuleStartState && state!=newRuleInfo->rootRuleEndState && state!=newRuleInfo->startState;
 			}
 
+			vint CompareTransitionForRearranging(Transition* t1, Transition* t2)
+			{
+				if(t1->transitionType<t2->transitionType) return -1;
+				if(t1->transitionType>t2->transitionType) return 1;
+				if(t1->transitionSymbol<t2->transitionSymbol) return -1;
+				if(t1->transitionSymbol>t2->transitionSymbol) return 1;
+				if(t1->transitionText<t2->transitionText) return -1;
+				if(t1->transitionText>t2->transitionText) return 1;
+				if(t1->lookAheadSymbol<t2->lookAheadSymbol) return -1;
+				if(t1->lookAheadSymbol>t2->lookAheadSymbol) return 1;
+				if(t1->lookAheadText<t2->lookAheadText) return -1;
+				if(t1->lookAheadText>t2->lookAheadText) return 1;
+				return 0;
+			}
+
+			vint CompareActionForRearranging(Ptr<Action> a1, Ptr<Action> a2)
+			{
+				if(a1->actionType<a2->actionType) return -1;
+				if(a1->actionType>a2->actionType) return 1;
+				if(a1->actionSource<a2->actionSource) return -1;
+				if(a1->actionSource>a2->actionSource) return 1;
+				if(a1->actionTarget<a2->actionTarget) return -1;
+				if(a1->actionTarget>a2->actionTarget) return 1;
+				return 0;
+			}
+
+			void RearrangeState(State* state, SortedList<State*>& stateContentSorted)
+			{
+				if(!stateContentSorted.Contains(state))
+				{
+					FOREACH(Transition*, transition, state->transitions)
+					{
+						CopyFrom(transition->actions, transition->actions>>OrderBy(&CompareActionForRearranging));
+					}
+					CopyFrom(state->transitions, state->transitions>>OrderBy(&CompareTransitionForRearranging));
+					stateContentSorted.Add(state);
+				}
+			}
+
+			bool IsSameTransitionContent(Transition* t1, Transition* t2)
+			{
+				if(	t1->actions.Count()!=t2->actions.Count() ||
+					t1->transitionType!=t2->transitionType ||
+					t1->transitionSymbol!=t2->transitionSymbol ||
+					t1->transitionText!=t2->transitionText ||
+					t1->lookAheadSymbol!=t2->lookAheadSymbol ||
+					t1->lookAheadText!=t2->lookAheadText)
+				{
+					return false;
+				}
+				for(vint j=0;j<t1->actions.Count();j++)
+				{
+					Ptr<Action> a1=t1->actions[j];
+					Ptr<Action> a2=t2->actions[j];
+					if(	a1->actionType!=a2->actionType ||
+						a1->actionSource!=a2->actionSource ||
+						a1->actionTarget!=a2->actionTarget)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+
 			bool IsMergable(State* state1, State* state2)
 			{
-				return false;
+				if(state1->transitions.Count()!=state2->transitions.Count()) return false;
+				for(vint i=0;i<state1->transitions.Count();i++)
+				{
+					Transition* t1=state1->transitions[i];
+					Transition* t2=state2->transitions[i];
+					if(!IsSameTransitionContent(t1, t2) || t1->target!=t2->target)
+					{
+						return false;
+					}
+				}
+				return true;
 			}
 
 			void MergeState2ToState1(Ptr<Automaton> automaton, State* state1, State* state2)
 			{
+				// modify state1's expression
+				state1->stateExpression+=L"\r\n"+state2->stateExpression;
+
 				// retarget state2's input to state1
-				CopyFrom(state1->inputs, state2->inputs, true);
-				FOREACH(Transition*, transition, state2->inputs)
+				for(vint i=state2->inputs.Count()-1;i>=0;i--)
 				{
-					transition->target=state1;
+					Transition* t2=state2->inputs[i];
+					bool add=true;
+					FOREACH(Transition*, t1, state1->inputs)
+					{
+						if(IsSameTransitionContent(t1, t2) && t1->source==t2->source)
+						{
+							add=false;
+							break;
+						}
+					}
+					if(add)
+					{
+						state1->inputs.Add(t2);
+						t2->target=state1;
+						state2->inputs.RemoveAt(i);
+					}
 				}
-				state2->inputs.Clear();
-				DeleteState(automaton, state2);
+
+				automaton->DeleteState(state2);
 			}
 
 			void MergeStates(Ptr<Automaton> automaton, Ptr<RuleInfo> newRuleInfo, List<State*>& newStates)
 			{
+				SortedList<State*> stateContentSorted;
 				while(true)
 				{
 					vint mergeCount=0;
@@ -561,6 +659,8 @@ CreatePDAFromEpsilonPDA
 								State* state2=newStates[j];
 								if(state1!=state2 && IsMergableCandidate(state2, newRuleInfo))
 								{
+									RearrangeState(state1, stateContentSorted);
+									RearrangeState(state2, stateContentSorted);
 									if(IsMergable(state1, state2))
 									{
 										MergeState2ToState1(automaton, state1, state2);
@@ -661,6 +761,7 @@ CreatePDAFromEpsilonPDA
 					List<State*> newStates;
 					CopyFrom(newStates, oldNewStateMap.Values());
 					DeleteUnnecessaryStates(automaton, newRuleInfo, newStates);
+					MergeStates(automaton, newRuleInfo, newStates);
 					FOREACH(State*, state, newStates)
 					{
 						if(state->endState)
