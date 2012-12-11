@@ -51,7 +51,7 @@ instance Equable<int64>
 
 ------------------------
 
-concept T as TextWriter
+ref concept T as TextWriter
 {
 	bool T.Write(string text);
 }
@@ -98,7 +98,7 @@ instance<T> Convertable<T[], string>
 
 ------------------------
 
-concept T as Catchable
+ref concept T as Catchable
 {
 	string T.Message{get;}
 }
@@ -239,7 +239,7 @@ void Main()
 
 ------------------------
 
-concept T as Disposable
+ref concept T as Disposable
 {
 	void T.Dispose();
 }
@@ -252,6 +252,26 @@ void Function(int a, ref int b);
 
 // function type
 int(int, int)
+
+struct Type
+{
+	int field;
+}
+
+int Type.Property
+{
+	get{}set{}
+}
+
+int Type.this[int index]
+{
+	get{}set{}
+}
+
+Type type;
+Function(ref type.field);
+Function(ref type.Property);
+Function(ref type[0]);
 
 ------------------------
 
@@ -281,6 +301,83 @@ instance B as Concept
 
 	... // like overridding
 }
+
+------------------------
+
+// predefine concepts
+
+// (T)e
+// e as T
+concept Convertable<TSource, TDest>
+{
+	TDest Convert(TSource source);
+}
+
+// catch(x)
+ref concept T as Catchable
+{
+	string T.Message{get;}
+}
+
+// using(var x=y)
+ref concept T as Disposable
+{
+	void T.Dispose();
+}
+
+// foreach(var x in xs)
+ref concept TThis as Enumerable<T>
+{
+	Enumerator<T> TThis.CreateEnumerator();
+}
+
+ref concept TThis as Enumerator<T>
+{
+	bool TThis.MoveNext();
+	T TThis.Current{get;}
+}
+
+// new InterfaceConceptType
+concept DefaultImpl<T>
+	requires ref concept T
+{
+	T CreateDefaultImpl;
+}
+
+------------------------
+
+concept Negatable<T>			// + - (unary operator)
+concept Increasable<T>			// ++ -- (unary operator), T operator prefix ++(ref T), T operator postfix ++(ref T), ...
+concept Shiftable<T>			// << <<= >> >>=
+concept Multable<T>				// * *= / /=
+concept Modulable<T>			// % %=
+concept Addable<T>				// + += - -=, T operator+(T, T), void operator+(ref T, T), ...
+concept BitOperatable<T>		// & &= | |= ^ ^=
+concept Equable<T>				// == !=
+concept Comparable<T>			// < > <= >=
+concept LogicalOperatable<T>	// && &&= || ||= ^ ^=  !(unary operator)
+
+<< >>
+* / %
++ -
+< <= > >= == !=
+&
+^
+|
+&&
+||
+?:
+??
+
+------------------------
+
+// generic requires statement
+
+requires Concept<Ts...> // instance Concept<Ts...> exists
+requires T as Concept<Ts...> // instance T as Concept<Ts...> exists
+requires T as Type // (T is Type or T mixin Type)
+requires T as new() // (T is struct) or (T is ref struct) or (T is ref concept with instance DefaultImpl<T>)
+requires [struct | ref struct | ref concept] T as Concept<Ts...>, Type, new(), ...
 
 ------------------------
 
