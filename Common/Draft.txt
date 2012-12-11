@@ -102,7 +102,7 @@ intptr GetStdoutHandle() __foreign "GetStdoutHandle";
 void ReleaseStdoutHandle(intptr handle) __foreign "ReleaseStdoutHandle";
 void WriteIOHandle(intptr handle, string text) __foreign "WriteIOHandle";
 
-concept __Rtti<T>
+concept __RAII<T>
 {
 	void T.Initialize() __invisible;
 	void T.Finalize() __invisible;
@@ -113,7 +113,7 @@ struct Stdout
 	intptr stdoutHandle;
 }
 
-instance __Rtti<Stdout>
+instance __RAII<Stdout>
 {
 	void Stdout.Initialize()
 	{
