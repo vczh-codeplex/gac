@@ -113,6 +113,14 @@ struct Stdout
 	intptr stdoutHandle;
 }
 
+instance Stdout : TextWriter
+{
+	bool Stdout.Write(string text)
+	{
+		WriteIOHandle(stdoutHandle, text);
+	}
+}
+
 instance __RAII<Stdout>
 {
 	void Stdout.Initialize()
