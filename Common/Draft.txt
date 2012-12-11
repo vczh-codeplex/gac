@@ -14,3 +14,133 @@ x86 and x64 assembler
 intermediate code
 enriched C language
 design a language for Calculation, AsyncIO, Server and GUI programming
+========================================================
+
+concept Equable<T>
+{
+	bool IsEqual(T a, T b);
+}
+
+bool operator==<T>(T a, T b)
+	with Equable<T>
+{
+	return IsEqual(a, b);
+}
+
+bool operator==<T>(T a, T b)
+	with Equable<T>
+{
+	return !IsEqual(a, b);
+}
+
+instance Equable<int32>
+{
+	bool IsEqual(int32 a, int32 b) __embedded_asm equ_i32;
+}
+
+instance Equable<int64>
+{
+	bool IsEqual(int64 a, int64 b) __inline __asm
+	{
+		push_i64 a;
+		push_i64 b;
+		equ_i64;
+		ret;
+	}
+}
+
+------------------------
+
+concept T : TextWriter
+{
+	bool T.Write(string text);
+}
+
+concept Convertable<TSource, TDest>
+{
+	TDest Convert(TSource source);
+}
+
+concept Printable<T>
+{
+	bool TextWriter.Write(T value);
+}
+
+instance<T> Printable<T>
+	with Convertable<T, string>
+{
+	bool TextWriter.Print(T value);
+	{
+		string text=Convert(value);
+		return Write(text);
+	}
+}
+
+instance Convertable<int32, string>
+{
+	string Convert(int32 source) __foreign "Int32ToString";
+}
+
+instance<T> Convertable<T[], string>
+	with Convertable<T, string>
+{
+	string Convert(T[] source)
+	{
+		string result;
+		foreach(var i in source)
+		{
+			string text=Convert(i); // Convertable<T, string>.Convert(i);
+			result+=", {0}".Format(text);
+		}
+		return result==""?"":result.SubString(2);
+	}
+}
+
+------------------------
+
+intptr GetStdoutHandle() __foreign "GetStdoutHandle";
+void ReleaseStdoutHandle(intptr handle) __foreign "ReleaseStdoutHandle";
+void WriteIOHandle(intptr handle, string text) __foreign "WriteIOHandle";
+
+concept __Rtti<T>
+{
+	void T.Initialize() __invisible;
+	void T.Finalize() __invisible;
+}
+
+struct Stdout
+{
+	intptr stdoutHandle;
+}
+
+instance __Rtti<Stdout>
+{
+	void Stdout.Initialize()
+	{
+		stdoutHandle = GetStdoutHandle();
+	}
+
+	void Stdout.Finalize()
+	{
+		ReleaseStdoutHandle(stdoutHandle);
+		stdoutHandle=null;
+	}
+}
+
+Stdout stdout;
+
+ITextWriter Console
+{
+	get
+	{
+		return (TextWriter)stdout;
+	}
+}
+
+------------------------
+
+void Main()
+{
+	int32[] numbers={1,2,3,4,5,6,7,8,9,10};
+	Console.Write(numbers);
+}
