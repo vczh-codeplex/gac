@@ -141,29 +141,13 @@ enum BinaryOperator
 	Add, Sub, Mul, Div
 }
 
---begin--
-
-ref struct Expression
-{
-	case NumberExpression
-	{
-		double number;
-	}
-
-	case BinaryExpression
-	{
-		BinaryOperator op;
-		Expression left;
-		Expression right;
-	}
-}
-
---or--
-
 ref struct Expression{}
 
 ref struct NumberExpression
 {
+	// only ref struct can mixin another ref struct
+	// mixin inherits concepts
+	// mixin is equivalent to virtual & multiple inheritance
 	mixin Expression;
 	double number;
 }
@@ -171,73 +155,47 @@ ref struct NumberExpression
 ref struct BinaryExpression
 {
 	mixin Expression;
+	BinaryOperator op;
 	Expression left;
 	Expression right;
 }
 
---end--
+------------------------
 
-double Expression.Evaluate()
+// another way to achieve this
+// double Evaluate(switch Expression expr);
+double switch Expression.Evaluate();
+
+double case NumberExpression.Evaluate()
 {
-	switch(this)
-	{
-		case NumberExpression e:
-			return e.number;
-		case BinaryExpression e with e.op == BinaryOperator.Add:
-			return e.left.Evaluate() + e.right.Evaluate();
-		case BinaryExpression e with e.op == BinaryOperator.Sub:
-			return e.left.Evaluate() - e.right.Evaluate();
-		case BinaryExpression e with e.op == BinaryOperator.Mul:
-			return e.left.Evaluate() * e.right.Evaluate();
-		case BinaryExpression e with e.op == BinaryOperator.Div:
-			return e.left.Evaluate() / e.right.Evaluate();
-	}
-	throw new ArgumentException
-	{
-		message = "Internal Error."
-		argument = "this";
-	};
+	return number;
 }
 
-double Expression.Evaluate()
+double case BinaryExpression.Evaluate()
 {
-	switch(this)
+	switch(op)
 	{
-		case NumberExpression e:
-			return e.number;
-		case BinaryExpression e:
-			switch(e.op)
-			{
-			case BinaryOperator.Add:
-				return e.left.Evaluate() + e.right.Evaluate();
-			case BinaryOperator.Sub:
-				return e.left.Evaluate() - e.right.Evaluate();
-			case BinaryOperator.Mul:
-				return e.left.Evaluate() * e.right.Evaluate();
-			case BinaryOperator.Div:
-				return e.left.Evaluate() / e.right.Evaluate();
-			}
+	case BinaryOperator.Add:
+		return left.Evaluate()+right.Evaluate();
+	case BinaryOperator.Sub:
+		return left.Evaluate()-right.Evaluate();
+	case BinaryOperator.Mul:
+		return left.Evaluate()*right.Evaluate();
+	case BinaryOperator.Div:
+		return left.Evaluate()/right.Evaluate();
+
+	// if the switch statement needs to execute the "default" section
+	// but there is no "default" section
+	// then it will throw a SwitchFailException
 	}
-	throw new ArgumentException
-	{
-		message = "Internal Error.";
-		argument = "this";
-	};
 }
 
 ------------------------
 
 intptr GetStdoutHandle() __foreign "GetStdoutHandle";
-void ReleaseStdoutHandle(intptr handle) __foreign "ReleaseStdoutHandle";
 void WriteIOHandle(intptr handle, string text) __foreign "WriteIOHandle";
 
-concept __RAII<T>
-{
-	void T.Initialize() __invisible;
-	void T.Finalize() __invisible;
-}
-
-struct Stdout
+ref struct Stdout
 {
 	intptr stdoutHandle;
 }
@@ -250,21 +208,10 @@ instance Stdout as TextWriter
 	}
 }
 
-instance __RAII<Stdout>
+Stdout stdout = new Stdout
 {
-	void Stdout.Initialize()
-	{
-		stdoutHandle = GetStdoutHandle();
-	}
-
-	void Stdout.Finalize()
-	{
-		ReleaseStdoutHandle(stdoutHandle);
-		stdoutHandle=null;
-	}
-}
-
-Stdout stdout;
+	stdoutHandle = GetStdoutHandle();
+};
 
 ITextWriter Console
 {
@@ -288,4 +235,20 @@ void Main()
 {
 	int32[] numbers={1,2,3,4,5,6,7,8,9,10};
 	Console.Write(numbers);
+}
+
+------------------------
+
+concept T as Disposable
+{
+	void T.Dispose();
+}
+
+using (var v = expr){}
+
+------------------------
+
+concept Continuation
+{
+	// disigning
 }
