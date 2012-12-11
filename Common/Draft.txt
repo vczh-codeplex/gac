@@ -22,13 +22,13 @@ concept Equable<T>
 }
 
 bool operator==<T>(T a, T b)
-	with Equable<T>
+	requires Equable<T>
 {
 	return IsEqual(a, b);
 }
 
 bool operator==<T>(T a, T b)
-	with Equable<T>
+	requires Equable<T>
 {
 	return !IsEqual(a, b);
 }
@@ -67,9 +67,9 @@ concept Printable<T>
 }
 
 instance<T> Printable<T>
-	with Convertable<T, string>
+	requires Convertable<T, string>
 {
-	bool TextWriter.Print(T value);
+	bool TextWriter.Print(T value)
 	{
 		string text=Convert(value);
 		return Write(text);
@@ -82,7 +82,7 @@ instance Convertable<int32, string>
 }
 
 instance<T> Convertable<T[], string>
-	with Convertable<T, string>
+	requires Convertable<T, string>
 {
 	string Convert(T[] source)
 	{
@@ -245,6 +245,42 @@ concept T as Disposable
 }
 
 using (var v = expr){}
+
+------------------------
+
+void Function(int a, ref int b);
+
+// function type
+int(int, int)
+
+------------------------
+
+instance<T> Concept<int, T>{}
+instance<T> Concept<T, string>{}
+
+instance Concept<int, string>
+{
+	// A {mixin B}: foreach type argument in A and B there is A is not less general
+	// e.g. A(T) B(string), A(Expression), B(NumberExpression), A(int), B(int)
+	// but cannot mixin itself
+	mixin instance Concept<int, T>
+
+	... // like overridding
+}
+
+------------------------
+
+ref struct A{}
+ref struct B{mixin A;}
+
+instance A as Concept{}
+
+instance B as Concept
+{
+	mixin instance A as Concept
+
+	... // like overridding
+}
 
 ------------------------
 
