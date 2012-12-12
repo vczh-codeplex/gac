@@ -20,6 +20,7 @@ primitive types: (struct)
 	int8, int16, int32, int64
 	uint8, uint16, uint32, uint64
 	float, double, char, bool, string
+	void (can use new void)
 
 primitive types: (ref struct)
 	T[]
@@ -435,33 +436,83 @@ requires [struct | ref struct | ref concept] T as Concept<Ts...>, Type, new(), .
 
 ------------------------
 
-concept Continuable<T>
+a=>b
+(int a)=>b
+(a, b)=>c
+(int a, int b)=>c
+(int a, int b){return c;}
+delegate int(int a, int b){return c;}
+
+------------------------
+
+concept Continuable<TC>
 {
-	// disigning
+}
+
+concept ContinuationNullable<TC>
+{
+	TC Null{get;}
+}
+
+concept ContinuationReturnable<T, TC>
+{
+	TC Return(T t);
+}
+
+concept ContinuationBindable<TC, T, UC>
+{
+	UC Bind(TC closure, UC(T) continuation);
 }
 
 ------------------------
 
-Enumerable<int> Range(int start, int count) continue
+Enumerable<T> Take<T>(Enumerable<T> ts, int count) continue
 {
-	if(count==0)
+	Enumerator<T> e=ts.CreateEnumerator();
+	while(count-->0)
 	{
-		return;
+		if(!e.MoveNext()) return;
+		yield e.Current;
 	}
-	else
+}
+
+Enumerable<T> $Take$0<T>(Enumerable<T>, int count)
+{
+	Enumerator<T> e=ts.CreateEnumerator();
+	if(count-->0)
 	{
-		yield start;
-		yield Range(start+1, count-1);
+		if(!e.MoveNext()) return ContinuationNullable<Enumerable<T>>.Null;
+		return ContinuationBindable<T, T, Enumerable<T>>.Bind(e.Current, $yield=>$Take$1<T>($yield, e, count));
 	}
+	return ContinuationNullable<Enumerable<T>>.Null;
+}
+
+Enumerable<T> $Take$1<T>(T $yield, Enumerator<T> e, int count)
+{
+	if(count-->0)
+	{
+		if(!e.MoveNext()) return ContinuationNullable<Enumerable<T>>.Null;
+		return ContinuationBindable<T, T, Enumerable<T>>.Bind(e.Current, $yield=>$Take$1<T>($yield, e, count));
+	}
+	return ContinuationNullable<Enumerable<T>>.Null;
 }
 
 ------------------------
 
-Enumerable<T> Filter<T>(Enumerable<T> ts, bool(T) predicate) continue
+Enumerable<T> Concat<T>(Enumerable<T> a, Enumerable<T> b) continue
 {
-	foreach(var t in ts)
-		if(predicate(t))
-			yield t;
+	yield a;
+	yield b;
+}
+
+Enumerable<T> $Concat$0<T>(Enumerable<T> a, Enumerable<T> b)
+{
+	return ContinuationBindable<Enumerable<T>, Enumerable<T>, Enumerable<T>>.Bind(a, $yield=>$Concat$1<T>($yield, b));
+}
+
+Enumerable<T> $Concat$1<T>(Enumerable<T> $yield, Enumerable<T> b)
+{
+	return b;
 }
 
 ------------------------
@@ -474,6 +525,27 @@ Task<string[]> DownloadAndJoin(string[] urls) continue
 		result.Add(yield DownloadAsync(url));
 	}
 	return result.ToArray();
+}
+
+Task<string[]> $DownloadAndJoin$0(string[] urls)
+{
+	List<string> result = new List<string>;
+	Enumerator<string> e=urls.CreateEnumerator();
+	if(e.MoveNext())
+	{
+		return ContinuationBindable<Task<string>, string, Task<string[]>>.Bind(DownloadAsync(url), $yield=>$DownloadAndJoin$1($yield, result, e));
+	}
+	return ContinuationReturnable<Task<string[]>>.Return(result.ToArray());
+}
+
+Task<string[]> $DownloadAndJoin$1(string text, List<string> result, Enumerator<string> e)
+{
+	result.Add(text);
+	if(e.MoveNext())
+	{
+		return ContinuationBindable<Task<string>, string, Task<string[]>>.Bind(DownloadAsync(url), $yield=>$DownloadAndJoin$1($yield, result, e));
+	}
+	return ContinuationReturnable<Task<string[]>>.Return(result.ToArray());
 }
 
 ------------------------
