@@ -466,7 +466,7 @@ concept ContinuationBindable<TC, T, UC>
 
 ------------------------
 
-Enumerable<T> Take<T>(Enumerable<T> ts, int count) continue
+Enumerable<T> Take<T>(Enumerable<T> ts, int count) yield
 {
 	Enumerator<T> e=ts.CreateEnumerator();
 	while(count-->0)
@@ -499,7 +499,7 @@ Enumerable<T> $Take$1<T>(T $yield, Enumerator<T> e, int count)
 
 ------------------------
 
-Enumerable<T> Concat<T>(Enumerable<T> a, Enumerable<T> b) continue
+Enumerable<T> Concat<T>(Enumerable<T> a, Enumerable<T> b) yield
 {
 	yield a;
 	yield b;
@@ -517,7 +517,7 @@ Enumerable<T> $Concat$1<T>(Enumerable<T> $yield, Enumerable<T> b)
 
 ------------------------
 
-Task<string[]> DownloadAndJoin(string[] urls) continue
+Task<string[]> DownloadAndJoin(string[] urls) yield
 {
 	List<string> result = new List<string>;
 	foreach(var url in urls)
