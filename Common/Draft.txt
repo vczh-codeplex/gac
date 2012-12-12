@@ -435,7 +435,45 @@ requires [struct | ref struct | ref concept] T as Concept<Ts...>, Type, new(), .
 
 ------------------------
 
-concept Continuation
+concept Continuable<T>
 {
 	// disigning
 }
+
+------------------------
+
+Enumerable<int> Range(int start, int count) continue
+{
+	if(count==0)
+	{
+		return;
+	}
+	else
+	{
+		yield start;
+		yield Range(start+1, count-1);
+	}
+}
+
+------------------------
+
+Enumerable<T> Filter<T>(Enumerable<T> ts, bool(T) predicate) continue
+{
+	foreach(var t in ts)
+		if(predicate(t))
+			yield t;
+}
+
+------------------------
+
+Task<string[]> DownloadAndJoin(string[] urls) continue
+{
+	List<string> result = new List<string>;
+	foreach(var url in urls)
+	{
+		result.Add(yield DownloadAsync(url));
+	}
+	return result.ToArray();
+}
+
+------------------------
