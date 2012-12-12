@@ -466,6 +466,15 @@ concept ContinuationBindable<TC, T, UC>
 
 ------------------------
 
+instance<T> ContinuationNullable<Enumerable<T>>;
+instance<T> ContinuationBindable<T, T, Enumerable<T>>;
+instance<T> ContinuationBindable<Enumerable<T>, Enumerable<T>, Enumerable<T>>;
+
+instance<T> ContinuationReturnable<T, Task<T>>;
+instance<T, U> ContinuationBindable<Task<T>, T, Task<U>>;
+
+------------------------
+
 Enumerable<T> Take<T>(Enumerable<T> ts, int count) yield
 {
 	Enumerator<T> e=ts.CreateEnumerator();
