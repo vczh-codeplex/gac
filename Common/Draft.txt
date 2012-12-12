@@ -16,6 +16,54 @@ enriched C language
 design a language for Calculation, AsyncIO, Server and GUI programming
 ========================================================
 
+primitive types: (struct)
+	int8, int16, int32, int64
+	uint8, uint16, uint32, uint64
+	float, double, char, bool, string
+
+primitive types: (ref struct)
+	T[]
+	object
+
+implicit type conversion
+	int8 -> int16 -> int32 -> int64
+	uint8 -> uint16 -> uint32 -> uint64
+	float -> double
+	everything -> object
+
+	ref struct From
+	{
+		mixin To;
+	}
+
+	ref concept TThis as From // TThis must be ref struct
+		requires TThis as To
+	{
+	}
+
+	instance From as To
+	{
+	}
+
+explicit type conversion
+	all implicit type conversion
+	integer|char <--> integer|char
+	numeric <--> numeric
+	object <--> ref struct | struct | ref concept
+	ref struct|ref concept <--> ref struct|ref concept
+
+concept Convertable<TSource, TDest>
+{
+	TDest Convert(TSource source);
+}
+
+concept ImplicitConvertable<TSource, TDesT>
+{
+	TDest Convert(TSource source);
+}
+
+========================================================
+
 concept Equable<T>
 {
 	bool IsEqual(T a, T b);
@@ -313,6 +361,11 @@ concept Convertable<TSource, TDest>
 	TDest Convert(TSource source);
 }
 
+concept ImplicitConvertable<TSource, TDesT>
+{
+	TDest Convert(TSource source);
+}
+
 // catch(x)
 ref concept T as Catchable
 {
@@ -378,6 +431,7 @@ requires T as Concept<Ts...> // instance T as Concept<Ts...> exists
 requires T as Type // (T is Type or T mixin Type)
 requires T as new() // (T is struct) or (T is ref struct) or (T is ref concept with instance DefaultImpl<T>)
 requires [struct | ref struct | ref concept] T as Concept<Ts...>, Type, new(), ...
+          ^-- "|" is really can be used here
 
 ------------------------
 
