@@ -1,0 +1,191 @@
+========================================================
+Types
+========================================================
+
+Predefined types: (struct)
+	int8			:0
+	int16			:0
+	int32			:0
+	int64			:0
+	uint8			:0
+	uint16			:0
+	uint32			:0
+	uint64			:0
+	float32			:0
+	float64			:0
+	bool			:false
+	char			:'\0'
+	string			:""
+	void			:new void
+	Pair<T, U>		:new Pair<T, U>{first=default(T), second=default(U)}
+	ref T			:empty reference
+
+Predefined types: (ref struct)
+	T[]				:null
+	object			:null
+	R(params tuple)	:null
+	Type			:type object for reflection
+
+Type shortcut:
+	(T0, T1, T2)	:Pair<T0, Pair<T1, Pair<T2, void>>>
+	R(T0, T1, T2)	:R(params (T0, T1, T2)
+
+========================================================
+Expressions
+========================================================
+
+Constant for values:
+	true, false, null
+	123, 123.456, 123.456E-10
+	'a', '\0', '\r', '\n', '\t', '\\', '\'', '\"', '\xFFFF'
+	"a\0\r\n\t\\\'\"\xFFFF"
+	@"	line1
+		line2
+		line3 ""
+	"
+
+Type constructors:
+	default(T)		// default value of type T
+	typeof(T)		// get the type object for T
+	(a, b, c)		// create tuple with values for type (Ta, Tb, Tc)
+
+	new Type		// create a struct value or ref struct value with all fields set to default values
+	new Type		// create a struct value or ref struct value with values for some fields and default values for others
+	{
+		Field=Value,
+		///
+	}
+
+	new Type[count]	// create an array with a specified length and all elements set to default values
+	new Type[]		// create an array with element values specified
+	{
+		Value,
+		...
+	}
+
+	ref	a			// create a reference to a left value, a variable of a reference type can be redirected using <refA = ref a;>
+
+Operators: (ordered in preference)
+	+ - ! ~ ++ --
+	<< >>
+	* / %
+	+ -
+	< <= > >= == !=
+	&
+	^
+	|
+	&&
+	||
+	?:
+	??
+	a[b]
+	= x=
+
+========================================================
+Function Declaration
+========================================================
+	
+========================================================
+Type Declaration
+========================================================
+	
+========================================================
+Concept Declaration
+========================================================
+
+========================================================
+Predefined Concepts
+========================================================
+
+Concepts for operators
+	concept Negatable<T>
+	{
+		T operator +(T value);
+		T operator -(T value);
+	}
+
+	concept Increasable<T>
+	{
+		ref T operator prefix++(ref T value);
+		ref T operator prefix--(ref T value);
+		T operator postfix++(ref T value);
+		T operator postfix--(ref T value);
+	}
+
+	concept Shiftable<T>
+	{
+		T operator <<(T value);
+		T operator >>(T value);
+		ref T operator <<=(ref T dst, T src);
+		ref T operator >>=(ref T dst, T src);
+	}
+
+	concept Multable<T>
+	{
+		T operator *(T value);
+		T operator /(T value);
+		ref T operator *=(ref T dst, T src);
+		ref T operator /=(ref T dst, T src);
+		T One{get;}
+	}
+
+	concept Modulable<T>
+	{
+		T operator %(T value);
+		ref T operator %=(ref T dst, T src);
+	}
+
+	concept Addable<T>
+	{
+		T operator +(T value);
+		T operator -(T value);
+		ref T operator +=(ref T dst, T src);
+		ref T operator -=(ref T dst, T src);
+		T Zero{get;}
+	}
+
+	concept BitOperatable<T>
+	{
+		T operator &(T value);
+		T operator |(T value);
+		T operator ^(T value);
+		ref T operator &=(ref T dst, T src);
+		ref T operator |=(ref T dst, T src);
+		ref T operator ^=(ref T dst, T src);
+	}
+
+	concept Equable<T>
+	{
+		T operator ==(T value);
+		T operator !=(T value);
+	}
+
+	concept Comparable<T>
+	{
+		T operator <(T value);
+		T operator <=(T value);
+		T operator >(T value);
+		T operator >=(T value);
+	}
+
+	concept LogicalOperatable<T>
+	{
+		T operator &&(T value);
+		T operator ||(T value);
+		T operator ^(T value);
+		ref T operator &&=(ref T dst, T src);
+		ref T operator ||=(ref T dst, T src);
+		ref T operator ^=(ref T dst, T src);
+	}
+
+========================================================
+Predefined Exceptions
+========================================================
+
+========================================================
+Statements
+========================================================
+
+========================================================
+Module System
+========================================================
