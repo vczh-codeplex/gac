@@ -300,7 +300,7 @@ using (var v = expr){}
 void Function(int a, ref int b);
 
 // function type
-int(int, int)
+int(int, ref int)
 
 struct Type
 {
@@ -555,6 +555,68 @@ Task<string[]> $DownloadAndJoin$1(string text, List<string> result, Enumerator<s
 		return ContinuationBindable<Task<string>, string, Task<string[]>>.Bind(DownloadAsync(url), $yield=>$DownloadAndJoin$1($yield, result, e));
 	}
 	return ContinuationReturnable<Task<string[]>>.Return(result.ToArray());
+}
+
+------------------------
+
+int a=0;
+ref int b=ref a;
+
+------------------------
+
+(T1, T2, T3) = Pair<T1, Pair<T2, Pair<T3, void>>>
+
+R(Ts...) == R(params (Ts, ...))
+f(a, b, c) == f(params (a, b, c))
+
+concept ObjectArrayInitializable<T>
+{
+	T FromArray(params object[] values);
+	object[] ToArray(T value);
+}
+
+instance<T> ObjectArrayInitializable<Pair<T, void>>
+{
+	Pair<T, void> FromArray(params object values)
+	{
+		if(values.Length!=1) throw ArgumentException
+		{
+			Message = "...";
+		};
+		return ((T)values[0], new void);
+	}
+
+	object[] ToArray(Pair<T, void> value)
+	{
+		return new object[]{value.First};
+	}
+}
+
+instance<T, U> ObjectArrayInitializable<Pair<T, U>>
+{
+	Pair<T, U> FromArray(params object values)
+	{
+		if(values.Length<=2) throw ArgumentException
+		{
+			Message = "...";
+		};
+		return ((T)values[0], ObjectArrayInitializable<U>.FromArray(values.Skip(1).ToArray());
+	}
+
+	object[] ToArray(Pair<T, U> value)
+	{
+		return new object[]{value.First}.Concat(ObjectArrayInitializable<U>.ToArray(value.Second));
+	}
+}
+
+object(object[]) ToProxy<R, Ts...>(R(Ts...) function)
+{
+	return ps=>R(params ObjectArrayInitializable<(Ts, ...)>.FromArray(parameters);
+}
+
+R(Ts...) FromProxy<R, Ts...>(object(object[]) proxy)
+{
+	return (Ts ts...)=>(R)proxy(ObjectArrayInitializable<(Ts, ...)>.ToArray((ts, ...));
 }
 
 ------------------------
