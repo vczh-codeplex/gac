@@ -569,6 +569,21 @@ ref int b=ref a;
 R(Ts...) == R(params (Ts, ...))
 f(a, b, c) == f(params (a, b, c))
 
+tuple type		: (X<Ts>, ...)
+tuple value		: (f(ts), ...)
+				: (a, b, (ts, ...)) // because tuple is pair, (T0, (T1, T2)) == (T0, T1, T2)
+
+function type	: R(T0, T1, X<Ts> ...)
+				: R(params (T0, T1, (X<Ts>, ...)))
+
+function decl	: R f(T0 t0, T1 t1, X<Ts> ts ...)
+				: R f(params (T0, T1, (X<Ts>, ...)) values) // params tuple v.s. params array: R f(T0 t0, T1 t1, params X<T> values)
+
+invoke function	: f(a, b, f(ts) ...)
+				: f(params (a, b, (ts, ...)))
+
+------------------------
+
 concept ObjectArrayInitializable<T>
 {
 	T FromArray(params object[] values);
