@@ -18,17 +18,40 @@ Predefined types: (struct)
 	string			:""
 	void			:new void
 	Pair<T, U>		:new Pair<T, U>{first=default(T), second=default(U)}
-	ref T			:empty reference
+	Ref<T>			:empty reference (represent as "ref null")
 
 Predefined types: (ref struct)
 	T[]				:null
 	object			:null
 	R(params tuple)	:null
-	Type			:type object for reflection
+	Type			:type object for reflection (concept)
 
 Type shortcut:
 	(T0, T1, T2)	:Pair<T0, Pair<T1, Pair<T2, void>>>
 	R(T0, T1, T2)	:R(params (T0, T1, T2)
+	ref T			:Ref<T>
+
+struct Ref<T>		//this is a special type, programmers will not see getter, setter. ref null is a shortcut to new Ref<T>
+{
+	T() getter;
+	void(T) setter;
+}
+
+reading to and writing from Ref<T> redirect to Ref<T>.Value
+
+T Ref<T>.Value<T>
+{
+	get
+	{
+		if(this.getter == null) throw new EmptyReferenceException;
+		return this.getter();
+	}
+	set
+	{
+		if(this.setter == null) throw new EmptyReferenceException;
+		this.setter(value);
+	}
+}
 
 ========================================================
 Expressions
@@ -50,6 +73,7 @@ Type constructors:
 	(a, b, c)		// create tuple with values for type (Ta, Tb, Tc)
 
 	new Type		// create a struct value or ref struct value with all fields set to default values
+					// for predefined struct, it gets its default value for the type
 	new Type		// create a struct value or ref struct value with values for some fields and default values for others
 	{
 		Field=Value,
@@ -62,6 +86,8 @@ Type constructors:
 		Value,
 		...
 	}
+
+	new Concept		// go to concept DefaultImpl<T>, for ref concept T
 
 	ref	a			// create a reference to a left value, a variable of a reference type can be redirected using <refA = ref a;>
 
@@ -78,8 +104,87 @@ Operators: (ordered in preference)
 	||
 	?:
 	??
-	a[b]
-	= x=
+	a[b]			// this is a property
+	= x=			// = is not overloadable
+
+Implicit conversion:
+	(struct, ref struct, ref concept) -> object
+
+	ref struct From
+	{
+		mixin To;
+	}
+
+	ref concept TThis as From // TThis must be ref struct
+		requires TThis as To
+	{
+	}
+
+	instance From as To
+	{
+	}
+
+	not satisfies then go to custom
+		concept ImplicitConvertable<TSource, TDest>
+
+	Predefined ImplicitConvertable implementation:
+		int8 -> int16 -> int32 -> int64
+		uint8 -> uint16 -> uint32 -> uint64
+		float32 -> float64
+		(int8, int16, uint8, uint16) -> float32
+		(int32, uint32) -> float64
+
+	implicit conversion always search 1 level only
+
+Explicit conversion:
+	(T)expr
+	expr as T // same as (T)expr, except that cast fail returns null, not throw exception
+
+	1. search for implicit conversion rule
+	2. search for Convertable<TSource, TDest>
+	3. read the real type (rtti) and perform implicit conversion rule without invoking ImplicitConvertable<TSource, TDesT>
+	4. throw TypeCastException
+
+	Predefine Convertable implementation:
+		all numberic types <--> all numberic types
+		char <--> all integer types
+
+		instance<TSource, TDest> Convertable<TSource, TDest>
+			requires ImplicitConvertable<TSource, TDest>
+		{
+			TDest Convert(TSource source)
+			{
+				return ImplicitConvertable<TSource, TDest>.Convert(source);
+			}
+		}
+
+Member access:
+	struct.field
+	ref struct.field
+	ref concept.function
+	x.ExtensionProperty
+	x.ExtensionFunction
+
+Reference access:
+	ref a // for variable, argument, field, get-set property, type of ref T (like return values from +=)
+
+Function invoking:
+	Function(arg0, arg1, arg2) is equivalent to Function(params (arg0, arg1, arg2))
+
+	for void f(string a, params int[] arguments) arguments we have
+	f("a", new int[]{1, 2, 3}) is equivalent to f("a", 1, 2, 3);
+
+	for ref T argument we should only pass expressions of ref expr into it
+	like for void f(ref a);
+	we should invoke it like
+		f(ref variable);
+		f(ref a[b]);
+		f(ref a.operator+=(b))
+		etc..
+
+========================================================
+Generic Constraint
+========================================================
 
 ========================================================
 Function Declaration
@@ -91,6 +196,31 @@ Type Declaration
 	
 ========================================================
 Concept Declaration
+========================================================
+
+========================================================
+Statements
+========================================================
+
+========================================================
+Continuation
+========================================================
+
+========================================================
+Module System
+========================================================
+
+========================================================
+Predefined Exceptions
+========================================================
+
+NullReferenceException
+EmptyReferenceException
+TypeCastException
+IndexOutOfRangeException
+
+========================================================
+Predefined Functions
 ========================================================
 
 ========================================================
@@ -178,14 +308,66 @@ Concepts for operators
 		ref T operator ^=(ref T dst, T src);
 	}
 
+	concept Convertable<TSource, TDest>
+	{
+		TDest Convert(TSource source);
+	}
+
+	concept ImplicitConvertable<TSource, TDesT>
+	{
+		TDest Convert(TSource source);
+	}
+	
+	ref concept T as Throwable
+	{
+		string T.Message{get;}
+	}
+	
+	ref concept T as Disposable
+	{
+		void T.Dispose();
+	}
+
+	ref concept TThis as Enumerable<T>
+	{
+		Enumerator<T> TThis.CreateEnumerator();
+	}
+
+	ref concept TThis as Enumerator<T>
+	{
+		bool TThis.MoveNext();
+		T TThis.Current{get;}
+	}
+
+	concept DefaultImpl<T>
+		requires ref concept T
+	{
+		T CreateDefaultImpl;
+	}
+	
+	concept Continuable<TC>
+	{
+	}
+
+	concept ContinuationNullable<TC>
+	{
+		TC Null{get;}
+	}
+
+	concept ContinuationReturnable<T, TC>
+	{
+		TC Return(T t);
+	}
+
+	concept ContinuationBindable<TC, T, UC>
+	{
+		UC Bind(TC closure, UC(T) continuation);
+	}
+
 ========================================================
-Predefined Exceptions
+Predefined Instances
 ========================================================
 
 ========================================================
-Statements
-========================================================
-
-========================================================
-Module System
+Intermediate Language Definition
 ========================================================
