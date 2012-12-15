@@ -182,6 +182,11 @@ Function invoking:
 		f(ref a.operator+=(b))
 		etc..
 
+Lambda expression:
+		a=>b
+		(a, ref b)=>b
+		int(int a, int ref b){return b;}
+
 ========================================================
 Generic Constraint
 ========================================================
