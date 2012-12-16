@@ -5,4163 +5,6 @@ DEVELOPER: 陈梓瀚(vczh)
 #include "GacUI.h"
 
 /***********************************************************************
-Controls\ExtendedControls\GuiComboControls.cpp
-***********************************************************************/
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-
-/***********************************************************************
-GuiComboBoxBase::CommandExecutor
-***********************************************************************/
-
-			GuiComboBoxBase::CommandExecutor::CommandExecutor(GuiComboBoxBase* _combo)
-				:combo(_combo)
-			{
-			}
-
-			GuiComboBoxBase::CommandExecutor::~CommandExecutor()
-			{
-			}
-
-			void GuiComboBoxBase::CommandExecutor::ShowPopup()
-			{
-				combo->ShowPopup();
-			}
-
-			void GuiComboBoxBase::CommandExecutor::SelectItem()
-			{
-				combo->SelectItem();
-			}
-
-/***********************************************************************
-GuiComboBoxBase
-***********************************************************************/
-
-			void GuiComboBoxBase::SelectItem()
-			{
-				ItemSelecting.Execute(GetNotifyEventArguments());
-				styleController->OnItemSelected();
-				ItemSelected.Execute(GetNotifyEventArguments());
-			}
-
-			void GuiComboBoxBase::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				styleController->OnClicked();
-			}
-
-			void GuiComboBoxBase::OnPopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				styleController->OnPopupOpened();
-				PopupOpened.Execute(arguments);
-			}
-
-			void GuiComboBoxBase::OnPopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				styleController->OnPopupClosed();
-				PopupClosed.Execute(arguments);
-			}
-
-			GuiComboBoxBase::GuiComboBoxBase(IStyleController* _styleController)
-				:GuiButton(_styleController)
-			{
-				commandExecutor=new CommandExecutor(this);
-				styleController=dynamic_cast<IStyleController*>(GetStyleController());
-				styleController->SetCommandExecutor(commandExecutor.Obj());
-				popup=new GuiPopup(styleController->CreatePopupStyle());
-				popup->GetNativeWindow()->SetAlwaysPassFocusToParent(true);
-
-				PopupOpened.SetAssociatedComposition(boundsComposition);
-				PopupClosed.SetAssociatedComposition(boundsComposition);
-				ItemSelecting.SetAssociatedComposition(boundsComposition);
-				ItemSelected.SetAssociatedComposition(boundsComposition);
-
-				Clicked.AttachMethod(this, &GuiComboBoxBase::OnClicked);
-				popup->WindowOpened.AttachMethod(this, &GuiComboBoxBase::OnPopupOpened);
-				popup->WindowClosed.AttachMethod(this, &GuiComboBoxBase::OnPopupClosed);
-			}
-
-			GuiComboBoxBase::~GuiComboBoxBase()
-			{
-				delete popup;
-			}
-
-			void GuiComboBoxBase::ShowPopup()
-			{
-				Size size=popup->GetBoundsComposition()->GetPreferredMinSize();
-				size.x=GetBoundsComposition()->GetBounds().Width();
-				if(size.y<GetFont().size)
-				{
-					size.y=GetFont().size;
-				}
-				popup->GetBoundsComposition()->SetPreferredMinSize(size);
-				popup->ShowPopup(this, true);
-			}
-
-			GuiPopup* GuiComboBoxBase::GetPopup()
-			{
-				return popup;
-			}
-
-/***********************************************************************
-GuiComboBoxListControl
-***********************************************************************/
-
-			void GuiComboBoxListControl::DisplaySelectedContent(int itemIndex)
-			{
-				if(primaryTextView)
-				{
-					if(itemIndex==-1)
-					{
-						SetText(L"");
-					}
-					else if(primaryTextView->ContainsPrimaryText(itemIndex))
-					{
-						WString text=primaryTextView->GetPrimaryTextViewText(itemIndex);
-						SetText(text);
-						popup->Hide();
-					}
-				}
-			}
-
-			void GuiComboBoxListControl::OnListControlSelectionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				DisplaySelectedContent(GetSelectedIndex());
-				SelectedIndexChanged.Execute(GetNotifyEventArguments());
-			}
-
-			GuiComboBoxListControl::GuiComboBoxListControl(IStyleController* _styleController, GuiSelectableListControl* _containedListControl)
-				:GuiComboBoxBase(_styleController)
-				,containedListControl(_containedListControl)
-			{
-				containedListControl->SetMultiSelect(false);
-				containedListControl->SelectionChanged.AttachMethod(this, &GuiComboBoxListControl::OnListControlSelectionChanged);
-				primaryTextView=dynamic_cast<GuiListControl::IItemPrimaryTextView*>(containedListControl->GetItemProvider()->RequestView(GuiListControl::IItemPrimaryTextView::Identifier));
-
-				SelectedIndexChanged.SetAssociatedComposition(GetBoundsComposition());
-
-				containedListControl->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				popup->GetBoundsComposition()->AddChild(containedListControl->GetBoundsComposition());
-				SetFont(GetFont());
-			}
-
-			GuiComboBoxListControl::~GuiComboBoxListControl()
-			{
-				if(primaryTextView)
-				{
-					containedListControl->GetItemProvider()->ReleaseView(primaryTextView);
-				}
-			}
-
-			void GuiComboBoxListControl::SetFont(const FontProperties& value)
-			{
-				GuiComboBoxBase::SetFont(value);
-				Size size=popup->GetBoundsComposition()->GetPreferredMinSize();
-				size.y=20*value.size;
-				popup->GetBoundsComposition()->SetPreferredMinSize(size);
-			}
-
-			GuiSelectableListControl* GuiComboBoxListControl::GetContainedListControl()
-			{
-				return containedListControl;
-			}
-
-			int GuiComboBoxListControl::GetSelectedIndex()
-			{
-				if(containedListControl->GetSelectedItems().Count()==1)
-				{
-					return containedListControl->GetSelectedItems()[0];
-				}
-				else
-				{
-					return -1;
-				}
-			}
-
-			void GuiComboBoxListControl::SetSelectedIndex(int value)
-			{
-				containedListControl->SetSelected(value, true);
-			}
-
-			GuiListControl::IItemProvider* GuiComboBoxListControl::GetItemProvider()
-			{
-				return containedListControl->GetItemProvider();
-			}
-		}
-	}
-}
-
-/***********************************************************************
-Controls\ExtendedControls\GuiContainerControls.cpp
-***********************************************************************/
-
-namespace vl
-{
-	namespace presentation
-	{
-		using namespace compositions;
-
-		namespace controls
-		{
-/***********************************************************************
-GuiTabPage
-***********************************************************************/
-
-			GuiTabPage::GuiTabPage()
-				:container(0)
-				,owner(0)
-			{
-			}
-
-			GuiTabPage::~GuiTabPage()
-			{
-				if(!container->GetParent())
-				{
-					delete container;
-				}
-			}
-
-			bool GuiTabPage::AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController)
-			{
-				if(owner)
-				{
-					return false;
-				}
-				else
-				{
-					if(!container)
-					{
-						container=new GuiControl(_styleController);
-						TextChanged.SetAssociatedComposition(container->GetBoundsComposition());
-						PageInstalled.SetAssociatedComposition(container->GetBoundsComposition());
-						PageUninstalled.SetAssociatedComposition(container->GetBoundsComposition());
-						PageContainerReady.SetAssociatedComposition(container->GetBoundsComposition());
-
-						PageContainerReady.Execute(container->GetNotifyEventArguments());
-					}
-					owner=_owner;
-					PageInstalled.Execute(container->GetNotifyEventArguments());
-					return true;
-				}
-			}
-
-			bool GuiTabPage::DeassociateTab(GuiTab* _owner)
-			{
-				if(owner && owner==_owner)
-				{
-					PageUninstalled.Execute(container->GetNotifyEventArguments());
-					owner=0;
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			GuiControl* GuiTabPage::GetContainer()
-			{
-				return container;
-			}
-
-			GuiTab* GuiTabPage::GetOwnerTab()
-			{
-				return owner;
-			}
-
-			const WString& GuiTabPage::GetText()
-			{
-				return text;
-			}
-
-			void GuiTabPage::SetText(const WString& value)
-			{
-				if(text!=value)
-				{
-					text=value;
-					if(owner)
-					{
-						owner->styleController->SetTabText(owner->tabPages.IndexOf(this), text);
-					}
-					if(container)
-					{
-						TextChanged.Execute(container->GetNotifyEventArguments());
-					}
-					else
-					{
-						GuiEventArgs arguments;
-						TextChanged.Execute(arguments);
-					}
-				}
-			}
-
-			bool GuiTabPage::GetSelected()
-			{
-				return owner->GetSelectedPage()==this;
-			}
-
-/***********************************************************************
-GuiTab
-***********************************************************************/
-
-			GuiTab::CommandExecutor::CommandExecutor(GuiTab* _tab)
-				:tab(_tab)
-			{
-			}
-
-			GuiTab::CommandExecutor::~CommandExecutor()
-			{
-			}
-
-			void GuiTab::CommandExecutor::ShowTab(int index)
-			{
-				tab->SetSelectedPage(tab->GetPages().Get(index));
-			}
-
-			GuiTab::GuiTab(IStyleController* _styleController)
-				:GuiControl(_styleController)
-				,styleController(_styleController)
-				,selectedPage(0)
-			{
-				commandExecutor=new CommandExecutor(this);
-				styleController->SetCommandExecutor(commandExecutor.Obj());
-			}
-
-			GuiTab::~GuiTab()
-			{
-				for(int i=0;i<tabPages.Count();i++)
-				{
-					delete tabPages[i];
-				}
-			}
-
-			GuiTabPage* GuiTab::CreatePage(int index)
-			{
-				GuiTabPage* page=new GuiTabPage();
-				if(CreatePage(page, index))
-				{
-					return page;
-				}
-				else
-				{
-					delete page;
-					return 0;
-				}
-			}
-
-			bool GuiTab::CreatePage(GuiTabPage* page, int index)
-			{
-				if(index>=0 && index>=tabPages.Count())
-				{
-					index=tabPages.Count()-1;
-				}
-				else if(index<-1)
-				{
-					index=-1;
-				}
-
-				if(page->AssociateTab(this, styleController->CreateTabPageStyleController()))
-				{
-					index=index==-1?tabPages.Add(page):tabPages.Insert(index, page);
-					GetContainerComposition()->AddChild(page->GetContainer()->GetBoundsComposition());
-					styleController->InsertTab(index);
-					styleController->SetTabText(index, page->GetText());
-				
-					if(!selectedPage)
-					{
-						SetSelectedPage(page);
-					}
-					page->GetContainer()->SetVisible(page==selectedPage);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool GuiTab::RemovePage(GuiTabPage* value)
-			{
-				if(value->GetOwnerTab()==this && value->DeassociateTab(this))
-				{
-					int index=tabPages.IndexOf(value);
-					styleController->RemoveTab(index);
-					GetContainerComposition()->RemoveChild(value->GetContainer()->GetBoundsComposition());
-					tabPages.RemoveAt(index);
-					if(tabPages.Count()==0)
-					{
-						SetSelectedPage(0);
-						return 0;
-					}
-					else if(selectedPage==value)
-					{
-						SetSelectedPage(tabPages[0]);
-					}
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool GuiTab::MovePage(GuiTabPage* page, int newIndex)
-			{
-				if(!page) return false;
-				int index=tabPages.IndexOf(page);
-				if(index==-1) return false;
-				tabPages.RemoveAt(index);
-				tabPages.Insert(newIndex, page);
-				styleController->MoveTab(index, newIndex);
-				styleController->SetSelectedTab(tabPages.IndexOf(selectedPage));
-				return true;
-			}
-
-			const collections::List<GuiTabPage*>& GuiTab::GetPages()
-			{
-				return tabPages;
-			}
-
-			GuiTabPage* GuiTab::GetSelectedPage()
-			{
-				return selectedPage;
-			}
-
-			bool GuiTab::SetSelectedPage(GuiTabPage* value)
-			{
-				if(value->GetOwnerTab()==this)
-				{
-					if(selectedPage!=value)
-					{
-						selectedPage=value;
-						for(int i=0;i<tabPages.Count();i++)
-						{
-							bool selected=tabPages[i]==value;
-							tabPages[i]->GetContainer()->SetVisible(selected);
-							if(selected)
-							{
-								styleController->SetSelectedTab(i);
-							}
-						}
-						SelectedPageChanged.Execute(GetNotifyEventArguments());
-					}
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-		}
-	}
-}
-
-/***********************************************************************
-Controls\ExtendedControls\GuiListViewControls.cpp
-***********************************************************************/
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-			using namespace elements;
-			using namespace compositions;
-
-			namespace list
-			{
-
-/***********************************************************************
-ListViewItemStyleProviderBase::TextItemStyleController
-***********************************************************************/
-
-				ListViewItemStyleProviderBase::ListViewItemStyleController::ListViewItemStyleController(ListViewItemStyleProviderBase* provider)
-					:ItemStyleControllerBase(provider, 0)
-					,backgroundButton(0)
-					,listViewItemStyleProvider(provider)
-				{
-					backgroundButton=new GuiSelectableButton(listViewItemStyleProvider->listControl->GetListViewStyleProvider()->CreateItemBackground());
-					backgroundButton->SetAutoSelection(false);
-					Initialize(backgroundButton->GetBoundsComposition(), backgroundButton);
-				}
-
-				ListViewItemStyleProviderBase::ListViewItemStyleController::~ListViewItemStyleController()
-				{
-				}
-
-				bool ListViewItemStyleProviderBase::ListViewItemStyleController::GetSelected()
-				{
-					return backgroundButton->GetSelected();
-				}
-
-				void ListViewItemStyleProviderBase::ListViewItemStyleController::SetSelected(bool value)
-				{
-					backgroundButton->SetSelected(value);
-				}
-
-/***********************************************************************
-ListViewItemStyleProviderBase
-***********************************************************************/
-
-				ListViewItemStyleProviderBase::ListViewItemStyleProviderBase()
-					:listControl(0)
-				{
-				}
-
-				ListViewItemStyleProviderBase::~ListViewItemStyleProviderBase()
-				{
-				}
-
-				void ListViewItemStyleProviderBase::AttachListControl(GuiListControl* value)
-				{
-					listControl=dynamic_cast<GuiListViewBase*>(value);
-				}
-
-				void ListViewItemStyleProviderBase::DetachListControl()
-				{
-					listControl=0;
-				}
-
-				int ListViewItemStyleProviderBase::GetItemStyleId(int itemIndex)
-				{
-					return 0;
-				}
-
-				void ListViewItemStyleProviderBase::SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)
-				{
-					ListViewItemStyleController* textStyle=dynamic_cast<ListViewItemStyleController*>(style);
-					textStyle->SetSelected(value);
-				}
-			}
-
-/***********************************************************************
-GuiListViewColumnHeader
-***********************************************************************/
-			
-			GuiListViewColumnHeader::GuiListViewColumnHeader(IStyleController* _styleController)
-				:GuiMenuButton(_styleController)
-				,columnSortingState(NotSorted)
-				,styleController(_styleController)
-			{
-				styleController->SetColumnSortingState(columnSortingState);
-			}
-
-			GuiListViewColumnHeader::~GuiListViewColumnHeader()
-			{
-			}
-
-			GuiListViewColumnHeader::ColumnSortingState GuiListViewColumnHeader::GetColumnSortingState()
-			{
-				return columnSortingState;
-			}
-
-			void GuiListViewColumnHeader::SetColumnSortingState(ColumnSortingState value)
-			{
-				if(columnSortingState!=value)
-				{
-					columnSortingState=value;
-					styleController->SetColumnSortingState(columnSortingState);
-				}
-			}
-
-/***********************************************************************
-GuiListViewBase
-***********************************************************************/
-
-			GuiListViewBase::GuiListViewBase(IStyleProvider* _styleProvider, GuiListControl::IItemProvider* _itemProvider)
-				:GuiSelectableListControl(_styleProvider, _itemProvider)
-				,styleProvider(0)
-			{
-				styleProvider=dynamic_cast<IStyleProvider*>(styleController->GetStyleProvider());
-				ColumnClicked.SetAssociatedComposition(boundsComposition);
-			}
-
-			GuiListViewBase::~GuiListViewBase()
-			{
-			}
-
-			GuiListViewBase::IStyleProvider* GuiListViewBase::GetListViewStyleProvider()
-			{
-				return styleProvider;
-			}
-
-			Ptr<GuiListControl::IItemStyleProvider> GuiListViewBase::SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)
-			{
-				if(value.Cast<list::ListViewItemStyleProvider>())
-				{
-					return GuiSelectableListControl::SetStyleProvider(value);
-				}
-				else
-				{
-					return 0;
-				}
-			}
-
-			namespace list
-			{
-
-/***********************************************************************
-ListViewItemStyleProvider::ListViewContentItemStyleController
-***********************************************************************/
-
-				ListViewItemStyleProvider::ListViewContentItemStyleController::ListViewContentItemStyleController(ListViewItemStyleProvider* provider)
-					:ListViewItemStyleController(provider)
-					,listViewItemStyleProvider(provider)
-				{
-					content=listViewItemStyleProvider->listViewItemContentProvider->CreateItemContent(backgroundButton->GetFont());
-					GuiBoundsComposition* composition=content->GetContentComposition();
-					composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
-					backgroundButton->GetContainerComposition()->AddChild(composition);
-
-					GuiBoundsComposition* decorator=content->GetBackgroundDecorator();
-					if(decorator)
-					{
-						backgroundButton->GetBoundsComposition()->AddChild(decorator);
-						backgroundButton->GetBoundsComposition()->MoveChild(decorator, 0);
-					}
-				}
-
-				ListViewItemStyleProvider::ListViewContentItemStyleController::~ListViewContentItemStyleController()
-				{
-				}
-
-				ListViewItemStyleProvider::IListViewItemContent* ListViewItemStyleProvider::ListViewContentItemStyleController::GetItemContent()
-				{
-					return content.Obj();
-				}
-
-				void ListViewItemStyleProvider::ListViewContentItemStyleController::Install(IListViewItemView* view, int itemIndex)
-				{
-					content->Install(listViewItemStyleProvider->listControl->GetListViewStyleProvider(), view, itemIndex);
-				}
-
-/***********************************************************************
-ListViewItemStyleProvider
-***********************************************************************/
-
-				const wchar_t* const ListViewItemStyleProvider::IListViewItemView::Identifier = L"vl::presentation::controls::list::ListViewItemStyleProvider::IListViewItemView";
-
-				ListViewItemStyleProvider::ListViewItemStyleProvider(IListViewItemContentProvider* itemContentProvider)
-					:listViewItemView(0)
-					,listViewItemContentProvider(itemContentProvider)
-				{
-				}
-
-				ListViewItemStyleProvider::~ListViewItemStyleProvider()
-				{
-				}
-
-				void ListViewItemStyleProvider::AttachListControl(GuiListControl* value)
-				{
-					ListViewItemStyleProviderBase::AttachListControl(value);
-					listViewItemView=dynamic_cast<IListViewItemView*>(value->GetItemProvider()->RequestView(IListViewItemView::Identifier));
-					listViewItemContentProvider->AttachListControl(value);
-				}
-
-				void ListViewItemStyleProvider::DetachListControl()
-				{
-					listViewItemContentProvider->DetachListControl();
-					listControl->GetItemProvider()->ReleaseView(listViewItemView);
-					listViewItemView=0;
-					ListViewItemStyleProviderBase::DetachListControl();
-				}
-
-				GuiListControl::IItemStyleController* ListViewItemStyleProvider::CreateItemStyle(int styleId)
-				{
-					ListViewContentItemStyleController* itemStyle=new ListViewContentItemStyleController(this);
-					itemStyles.Add(itemStyle);
-					return itemStyle;
-				}
-
-				void ListViewItemStyleProvider::DestroyItemStyle(GuiListControl::IItemStyleController* style)
-				{
-					ListViewContentItemStyleController* itemStyle=dynamic_cast<ListViewContentItemStyleController*>(style);
-					if(itemStyle)
-					{
-						itemStyles.Remove(itemStyle);
-						delete itemStyle;
-					}
-				}
-
-				void ListViewItemStyleProvider::Install(GuiListControl::IItemStyleController* style, int itemIndex)
-				{
-					ListViewContentItemStyleController* itemStyle=dynamic_cast<ListViewContentItemStyleController*>(style);
-					itemStyle->Install(listViewItemView, itemIndex);
-				}
-
-				const ListViewItemStyleProvider::ItemStyleList& ListViewItemStyleProvider::GetCreatedItemStyles()
-				{
-					return itemStyles;
-				}
-
-				bool ListViewItemStyleProvider::IsItemStyleAttachedToListView(GuiListControl::IItemStyleController* itemStyle)
-				{
-					return itemStyle && itemStyle->GetBoundsComposition()->GetParent();
-				}
-				
-/***********************************************************************
-ListViewBigIconContentProvider
-***********************************************************************/
-
-				ListViewBigIconContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
-					:contentComposition(0)
-				{
-					contentComposition=new GuiBoundsComposition;
-					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-
-					GuiTableComposition* table=new GuiTableComposition;
-					contentComposition->AddChild(table);
-					table->SetRowsAndColumns(2, 3);
-					table->SetRowOption(0, GuiCellOption::MinSizeOption());
-					table->SetRowOption(1, GuiCellOption::MinSizeOption());
-					table->SetColumnOption(0, GuiCellOption::PercentageOption(0.5));
-					table->SetColumnOption(1, GuiCellOption::MinSizeOption());
-					table->SetColumnOption(2, GuiCellOption::PercentageOption(0.5));
-					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-					table->SetCellPadding(5);
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetSite(0, 1, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
-
-						image=GuiImageFrameElement::Create();
-						image->SetStretch(true);
-						cell->SetOwnedElement(image);
-					}
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
-						cell->SetSite(1, 0, 1, 3);
-						cell->SetPreferredMinSize(Size(64, 40));
-
-						text=GuiSolidLabelElement::Create();
-						text->SetAlignments(Alignment::Center, Alignment::Top);
-						text->SetFont(font);
-						text->SetWrapLine(true);
-						text->SetEllipse(true);
-						cell->SetOwnedElement(text);
-					}
-				}
-
-				ListViewBigIconContentProvider::ItemContent::~ItemContent()
-				{
-				}
-
-				compositions::GuiBoundsComposition* ListViewBigIconContentProvider::ItemContent::GetContentComposition()
-				{
-					return contentComposition;
-				}
-
-				compositions::GuiBoundsComposition* ListViewBigIconContentProvider::ItemContent::GetBackgroundDecorator()
-				{
-					return 0;
-				}
-
-				void ListViewBigIconContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
-				{
-					Ptr<GuiImageData> imageData=view->GetLargeImage(itemIndex);
-					if(imageData)
-					{
-						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
-					}
-					else
-					{
-						image->SetImage(0);
-					}
-					text->SetText(view->GetText(itemIndex));
-					text->SetColor(styleProvider->GetPrimaryTextColor());
-				}
-
-				ListViewBigIconContentProvider::ListViewBigIconContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
-				{
-				}
-
-				ListViewBigIconContentProvider::~ListViewBigIconContentProvider()
-				{
-				}
-
-				GuiListControl::IItemCoordinateTransformer* ListViewBigIconContentProvider::CreatePreferredCoordinateTransformer()
-				{
-					return new DefaultItemCoordinateTransformer;
-				}
-
-				GuiListControl::IItemArranger* ListViewBigIconContentProvider::CreatePreferredArranger()
-				{
-					return new FixedSizeMultiColumnItemArranger;
-				}
-
-				ListViewItemStyleProvider::IListViewItemContent* ListViewBigIconContentProvider::CreateItemContent(const FontProperties& font)
-				{
-					return new ItemContent(iconSize, font);
-				}
-
-				void ListViewBigIconContentProvider::AttachListControl(GuiListControl* value)
-				{
-				}
-
-				void ListViewBigIconContentProvider::DetachListControl()
-				{
-				}
-				
-/***********************************************************************
-ListViewSmallIconContentProvider
-***********************************************************************/
-
-				ListViewSmallIconContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
-					:contentComposition(0)
-				{
-					contentComposition=new GuiBoundsComposition;
-					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-
-					GuiTableComposition* table=new GuiTableComposition;
-					contentComposition->AddChild(table);
-					table->SetRowsAndColumns(3, 2);
-					table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
-					table->SetRowOption(1, GuiCellOption::MinSizeOption());
-					table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
-					table->SetColumnOption(0, GuiCellOption::MinSizeOption());
-					table->SetColumnOption(1, GuiCellOption::MinSizeOption());
-					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-					table->SetCellPadding(2);
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetSite(1, 0, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
-
-						image=GuiImageFrameElement::Create();
-						image->SetStretch(true);
-						cell->SetOwnedElement(image);
-					}
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetSite(0, 1, 3, 1);
-						cell->SetPreferredMinSize(Size(192, 0));
-
-						text=GuiSolidLabelElement::Create();
-						text->SetAlignments(Alignment::Left, Alignment::Center);
-						text->SetFont(font);
-						text->SetEllipse(true);
-						cell->SetOwnedElement(text);
-					}
-				}
-
-				ListViewSmallIconContentProvider::ItemContent::~ItemContent()
-				{
-				}
-
-				compositions::GuiBoundsComposition* ListViewSmallIconContentProvider::ItemContent::GetContentComposition()
-				{
-					return contentComposition;
-				}
-
-				compositions::GuiBoundsComposition* ListViewSmallIconContentProvider::ItemContent::GetBackgroundDecorator()
-				{
-					return 0;
-				}
-
-				void ListViewSmallIconContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
-				{
-					Ptr<GuiImageData> imageData=view->GetSmallImage(itemIndex);
-					if(imageData)
-					{
-						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
-					}
-					else
-					{
-						image->SetImage(0);
-					}
-					text->SetText(view->GetText(itemIndex));
-					text->SetColor(styleProvider->GetPrimaryTextColor());
-				}
-
-				ListViewSmallIconContentProvider::ListViewSmallIconContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
-				{
-				}
-
-				ListViewSmallIconContentProvider::~ListViewSmallIconContentProvider()
-				{
-				}
-
-				GuiListControl::IItemCoordinateTransformer* ListViewSmallIconContentProvider::CreatePreferredCoordinateTransformer()
-				{
-					return new DefaultItemCoordinateTransformer;
-				}
-
-				GuiListControl::IItemArranger* ListViewSmallIconContentProvider::CreatePreferredArranger()
-				{
-					return new FixedSizeMultiColumnItemArranger;
-				}
-
-				ListViewItemStyleProvider::IListViewItemContent* ListViewSmallIconContentProvider::CreateItemContent(const FontProperties& font)
-				{
-					return new ItemContent(iconSize, font);
-				}
-
-				void ListViewSmallIconContentProvider::AttachListControl(GuiListControl* value)
-				{
-				}
-
-				void ListViewSmallIconContentProvider::DetachListControl()
-				{
-				}
-				
-/***********************************************************************
-ListViewListContentProvider
-***********************************************************************/
-
-				ListViewListContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
-					:contentComposition(0)
-				{
-					contentComposition=new GuiBoundsComposition;
-					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-
-					GuiTableComposition* table=new GuiTableComposition;
-					contentComposition->AddChild(table);
-					table->SetRowsAndColumns(3, 2);
-					table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
-					table->SetRowOption(1, GuiCellOption::MinSizeOption());
-					table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
-					table->SetColumnOption(0, GuiCellOption::MinSizeOption());
-					table->SetColumnOption(1, GuiCellOption::MinSizeOption());
-					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-					table->SetCellPadding(2);
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetSite(1, 0, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
-
-						image=GuiImageFrameElement::Create();
-						image->SetStretch(true);
-						cell->SetOwnedElement(image);
-					}
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetSite(0, 1, 3, 1);
-						cell->SetMargin(Margin(0, 0, 16, 0));
-
-						text=GuiSolidLabelElement::Create();
-						text->SetAlignments(Alignment::Left, Alignment::Center);
-						text->SetFont(font);
-						cell->SetOwnedElement(text);
-					}
-				}
-
-				ListViewListContentProvider::ItemContent::~ItemContent()
-				{
-				}
-
-				compositions::GuiBoundsComposition* ListViewListContentProvider::ItemContent::GetContentComposition()
-				{
-					return contentComposition;
-				}
-
-				compositions::GuiBoundsComposition* ListViewListContentProvider::ItemContent::GetBackgroundDecorator()
-				{
-					return 0;
-				}
-
-				void ListViewListContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
-				{
-					Ptr<GuiImageData> imageData=view->GetSmallImage(itemIndex);
-					if(imageData)
-					{
-						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
-					}
-					else
-					{
-						image->SetImage(0);
-					}
-					text->SetText(view->GetText(itemIndex));
-					text->SetColor(styleProvider->GetPrimaryTextColor());
-				}
-
-				ListViewListContentProvider::ListViewListContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
-				{
-				}
-
-				ListViewListContentProvider::~ListViewListContentProvider()
-				{
-				}
-
-				GuiListControl::IItemCoordinateTransformer* ListViewListContentProvider::CreatePreferredCoordinateTransformer()
-				{
-					return new DefaultItemCoordinateTransformer;
-				}
-
-				GuiListControl::IItemArranger* ListViewListContentProvider::CreatePreferredArranger()
-				{
-					return new FixedHeightMultiColumnItemArranger;
-				}
-
-				ListViewItemStyleProvider::IListViewItemContent* ListViewListContentProvider::CreateItemContent(const FontProperties& font)
-				{
-					return new ItemContent(iconSize, font);
-				}
-
-				void ListViewListContentProvider::AttachListControl(GuiListControl* value)
-				{
-				}
-
-				void ListViewListContentProvider::DetachListControl()
-				{
-				}
-				
-/***********************************************************************
-ListViewTileContentProvider
-***********************************************************************/
-
-				void ListViewTileContentProvider::ItemContent::RemoveTextElement(int textRow)
-				{
-					GuiCellComposition* cell=textTable->GetSitedCell(textRow+1, 0);
-					textTable->RemoveChild(cell);
-					delete cell;
-				}
-
-				elements::GuiSolidLabelElement* ListViewTileContentProvider::ItemContent::CreateTextElement(int textRow, const FontProperties& font)
-				{
-					GuiCellComposition* cell=new GuiCellComposition;
-					textTable->AddChild(cell);
-					cell->SetSite(textRow+1, 0, 1, 1);
-
-					elements::GuiSolidLabelElement* textElement=GuiSolidLabelElement::Create();
-					textElement->SetAlignments(Alignment::Left, Alignment::Center);
-					textElement->SetFont(font);
-					textElement->SetEllipse(true);
-					cell->SetOwnedElement(textElement);
-					return textElement;
-				}
-
-				void ListViewTileContentProvider::ItemContent::ResetTextTable(int textRows)
-				{
-					textTable->SetRowsAndColumns(textRows+2, 1);
-					textTable->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
-					for(int i=0;i<textRows;i++)
-					{
-						textTable->SetRowOption(i+1, GuiCellOption::MinSizeOption());
-					}
-					textTable->SetRowOption(textRows+1, GuiCellOption::PercentageOption(0.5));
-					textTable->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
-				}
-
-				ListViewTileContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
-					:contentComposition(0)
-				{
-					contentComposition=new GuiBoundsComposition;
-					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-
-					GuiTableComposition* table=new GuiTableComposition;
-					contentComposition->AddChild(table);
-					table->SetRowsAndColumns(3, 2);
-					table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
-					table->SetRowOption(1, GuiCellOption::MinSizeOption());
-					table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
-					table->SetColumnOption(0, GuiCellOption::MinSizeOption());
-					table->SetColumnOption(1, GuiCellOption::MinSizeOption());
-					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-					table->SetCellPadding(4);
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetSite(1, 0, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
-
-						image=GuiImageFrameElement::Create();
-						image->SetStretch(true);
-						cell->SetOwnedElement(image);
-					}
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetSite(0, 1, 3, 1);
-						cell->SetPreferredMinSize(Size(224, 0));
-
-						textTable=new GuiTableComposition;
-						textTable->SetCellPadding(1);
-						ResetTextTable(1);
-						textTable->SetAlignmentToParent(Margin(0, 0, 0, 0));
-						cell->AddChild(textTable);
-						{
-							text=CreateTextElement(0, font);
-						}
-					}
-				}
-
-				ListViewTileContentProvider::ItemContent::~ItemContent()
-				{
-				}
-
-				compositions::GuiBoundsComposition* ListViewTileContentProvider::ItemContent::GetContentComposition()
-				{
-					return contentComposition;
-				}
-
-				compositions::GuiBoundsComposition* ListViewTileContentProvider::ItemContent::GetBackgroundDecorator()
-				{
-					return 0;
-				}
-
-				void ListViewTileContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
-				{
-					Ptr<GuiImageData> imageData=view->GetLargeImage(itemIndex);
-					if(imageData)
-					{
-						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
-					}
-					else
-					{
-						image->SetImage(0);
-					}
-					text->SetText(view->GetText(itemIndex));
-					text->SetColor(styleProvider->GetPrimaryTextColor());
-
-					for(int i=0;i<dataTexts.Count();i++)
-					{
-						RemoveTextElement(i+1);
-					}
-					int dataColumnCount=view->GetDataColumnCount();
-					ResetTextTable(dataColumnCount+1);
-					dataTexts.Resize(dataColumnCount);
-					for(int i=0;i<dataColumnCount;i++)
-					{
-						dataTexts[i]=CreateTextElement(i+1, text->GetFont());
-						dataTexts[i]->SetText(view->GetSubItem(itemIndex, view->GetDataColumn(i)));
-						dataTexts[i]->SetColor(styleProvider->GetSecondaryTextColor());
-					}
-				}
-
-				ListViewTileContentProvider::ListViewTileContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
-				{
-				}
-
-				ListViewTileContentProvider::~ListViewTileContentProvider()
-				{
-				}
-
-				GuiListControl::IItemCoordinateTransformer* ListViewTileContentProvider::CreatePreferredCoordinateTransformer()
-				{
-					return new DefaultItemCoordinateTransformer;
-				}
-
-				GuiListControl::IItemArranger* ListViewTileContentProvider::CreatePreferredArranger()
-				{
-					return new FixedSizeMultiColumnItemArranger;
-				}
-
-				ListViewItemStyleProvider::IListViewItemContent* ListViewTileContentProvider::CreateItemContent(const FontProperties& font)
-				{
-					return new ItemContent(iconSize, font);
-				}
-
-				void ListViewTileContentProvider::AttachListControl(GuiListControl* value)
-				{
-				}
-
-				void ListViewTileContentProvider::DetachListControl()
-				{
-				}
-				
-/***********************************************************************
-ListViewInformationContentProvider
-***********************************************************************/
-
-				ListViewInformationContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
-					:contentComposition(0)
-					,baselineFont(font)
-				{
-					contentComposition=new GuiBoundsComposition;
-					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-					{
-						bottomLine=GuiSolidBackgroundElement::Create();
-						bottomLineComposition=new GuiBoundsComposition;
-						bottomLineComposition->SetOwnedElement(bottomLine);
-						bottomLineComposition->SetAlignmentToParent(Margin(8, -1, 8, 0));
-						bottomLineComposition->SetPreferredMinSize(Size(0, 1));
-					}
-
-					GuiTableComposition* table=new GuiTableComposition;
-					contentComposition->AddChild(table);
-					table->SetRowsAndColumns(3, 3);
-					table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
-					table->SetRowOption(1, GuiCellOption::MinSizeOption());
-					table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
-					table->SetColumnOption(0, GuiCellOption::MinSizeOption());
-					table->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
-					table->SetColumnOption(2, GuiCellOption::MinSizeOption());
-					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-					table->SetCellPadding(4);
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetSite(1, 0, 1, 1);
-						cell->SetPreferredMinSize(iconSize);
-
-						image=GuiImageFrameElement::Create();
-						image->SetStretch(true);
-						cell->SetOwnedElement(image);
-					}
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetSite(0, 1, 3, 1);
-
-						FontProperties textFont=font;
-						textFont.size=(int)(textFont.size*1.2);
-
-						text=GuiSolidLabelElement::Create();
-						text->SetFont(textFont);
-						text->SetEllipse(true);
-						cell->SetOwnedElement(text);
-					}
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetSite(0, 2, 3, 1);
-						cell->SetPreferredMinSize(Size(224, 0));
-
-						textTable=new GuiTableComposition;
-						textTable->SetCellPadding(4);
-						textTable->SetAlignmentToParent(Margin(0, 0, 0, 0));
-						cell->AddChild(textTable);
-					}
-				}
-
-				ListViewInformationContentProvider::ItemContent::~ItemContent()
-				{
-				}
-
-				compositions::GuiBoundsComposition* ListViewInformationContentProvider::ItemContent::GetContentComposition()
-				{
-					return contentComposition;
-				}
-
-				compositions::GuiBoundsComposition* ListViewInformationContentProvider::ItemContent::GetBackgroundDecorator()
-				{
-					return bottomLineComposition;
-				}
-
-				void ListViewInformationContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
-				{
-					Ptr<GuiImageData> imageData=view->GetLargeImage(itemIndex);
-					if(imageData)
-					{
-						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
-					}
-					else
-					{
-						image->SetImage(0);
-					}
-					text->SetText(view->GetText(itemIndex));
-					text->SetColor(styleProvider->GetPrimaryTextColor());
-					bottomLine->SetColor(styleProvider->GetItemSeparatorColor());
-
-					for(int i=0;i<dataTexts.Count();i++)
-					{
-						GuiCellComposition* cell=textTable->GetSitedCell(i, 0);
-						textTable->RemoveChild(cell);
-						delete cell;
-					}
-
-					int dataColumnCount=view->GetDataColumnCount();
-					dataTexts.Resize(dataColumnCount);
-					textTable->SetRowsAndColumns(dataColumnCount, 1);
-					textTable->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
-					for(int i=0;i<dataColumnCount;i++)
-					{
-						textTable->SetRowOption(i, GuiCellOption::MinSizeOption());
-					}
-					
-					for(int i=0;i<dataColumnCount;i++)
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						textTable->AddChild(cell);
-						cell->SetSite(i, 0, 1, 1);
-
-						GuiTableComposition* dataTable=new GuiTableComposition;
-						dataTable->SetRowsAndColumns(1, 2);
-						dataTable->SetRowOption(0, GuiCellOption::MinSizeOption());
-						dataTable->SetColumnOption(0, GuiCellOption::MinSizeOption());
-						dataTable->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
-						dataTable->SetAlignmentToParent(Margin(0, 0, 0, 0));
-						cell->AddChild(dataTable);
-						{
-							GuiCellComposition* cell=new GuiCellComposition;
-							dataTable->AddChild(cell);
-							cell->SetSite(0, 0, 1, 1);
-
-							GuiSolidLabelElement* textColumn=GuiSolidLabelElement::Create();
-							textColumn->SetFont(baselineFont);
-							textColumn->SetText(view->GetColumnText(view->GetDataColumn(i)+1)+L": ");
-							textColumn->SetColor(styleProvider->GetSecondaryTextColor());
-							cell->SetOwnedElement(textColumn);
-						}
-						{
-							GuiCellComposition* cell=new GuiCellComposition;
-							dataTable->AddChild(cell);
-							cell->SetSite(0, 1, 1, 1);
-
-							GuiSolidLabelElement* textData=GuiSolidLabelElement::Create();
-							textData->SetFont(baselineFont);
-							textData->SetEllipse(true);
-							textData->SetText(view->GetSubItem(itemIndex, view->GetDataColumn(i)));
-							textData->SetColor(styleProvider->GetPrimaryTextColor());
-							cell->SetOwnedElement(textData);
-						}
-					}
-				}
-
-				ListViewInformationContentProvider::ListViewInformationContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
-				{
-				}
-
-				ListViewInformationContentProvider::~ListViewInformationContentProvider()
-				{
-				}
-
-				GuiListControl::IItemCoordinateTransformer* ListViewInformationContentProvider::CreatePreferredCoordinateTransformer()
-				{
-					return new DefaultItemCoordinateTransformer;
-				}
-
-				GuiListControl::IItemArranger* ListViewInformationContentProvider::CreatePreferredArranger()
-				{
-					return new FixedHeightItemArranger;
-				}
-
-				ListViewItemStyleProvider::IListViewItemContent* ListViewInformationContentProvider::CreateItemContent(const FontProperties& font)
-				{
-					return new ItemContent(iconSize, font);
-				}
-
-				void ListViewInformationContentProvider::AttachListControl(GuiListControl* value)
-				{
-				}
-
-				void ListViewInformationContentProvider::DetachListControl()
-				{
-				}
-				
-/***********************************************************************
-ListViewColumnItemArranger::ColumnItemViewCallback
-***********************************************************************/
-
-				ListViewColumnItemArranger::ColumnItemViewCallback::ColumnItemViewCallback(ListViewColumnItemArranger* _arranger)
-					:arranger(_arranger)
-				{
-				}
-
-				ListViewColumnItemArranger::ColumnItemViewCallback::~ColumnItemViewCallback()
-				{
-				}
-
-				void ListViewColumnItemArranger::ColumnItemViewCallback::OnColumnChanged()
-				{
-					arranger->RebuildColumns();
-				}
-				
-/***********************************************************************
-ListViewColumnItemArranger
-***********************************************************************/
-
-				const wchar_t* const ListViewColumnItemArranger::IColumnItemView::Identifier = L"vl::presentation::controls::list::ListViewColumnItemArranger::IColumnItemView";
-
-				void ListViewColumnItemArranger::ColumnClicked(int index, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-				{
-					GuiItemEventArgs args(listView->ColumnClicked.GetAssociatedComposition());
-					args.itemIndex=index;
-					listView->ColumnClicked.Execute(args);
-				}
-
-				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-				{
-					if(listView->GetVisuallyEnabled())
-					{
-						arguments.handled=true;
-						splitterDragging=true;
-						splitterLatestX=arguments.x;
-					}
-				}
-
-				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-				{
-					if(listView->GetVisuallyEnabled())
-					{
-						arguments.handled=true;
-						splitterDragging=false;
-						splitterLatestX=0;
-					}
-				}
-
-				void ListViewColumnItemArranger::ColumnHeaderSplitterMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-				{
-					if(splitterDragging)
-					{
-						int offset=arguments.x-splitterLatestX;
-						int index=columnHeaderSplitters.IndexOf(dynamic_cast<GuiBoundsComposition*>(sender));
-						if(index!=-1)
-						{
-							GuiBoundsComposition* buttonBounds=columnHeaderButtons[index]->GetBoundsComposition();
-							Rect bounds=buttonBounds->GetBounds();
-							Rect newBounds(bounds.LeftTop(), Size(bounds.Width()+offset, bounds.Height()));
-							buttonBounds->SetBounds(newBounds);
-
-							int finalSize=buttonBounds->GetBounds().Width();
-							columnItemView->SetColumnSize(index, finalSize);
-						}
-					}
-				}
-
-				void ListViewColumnItemArranger::RearrangeItemBounds()
-				{
-					FixedHeightItemArranger::RearrangeItemBounds();
-					int count=columnHeaders->GetParent()->Children().Count();
-					columnHeaders->GetParent()->MoveChild(columnHeaders, count-1);
-					columnHeaders->SetBounds(Rect(Point(-viewBounds.Left(), 0), Size(0, 0)));
-				}
-
-				int ListViewColumnItemArranger::GetWidth()
-				{
-					int width=columnHeaders->GetBounds().Width()-SplitterWidth;
-					if(width<SplitterWidth)
-					{
-						width=SplitterWidth;
-					}
-					return width;
-				}
-
-				int ListViewColumnItemArranger::GetYOffset()
-				{
-					return columnHeaders->GetBounds().Height();
-				}
-
-				Size ListViewColumnItemArranger::OnCalculateTotalSize()
-				{
-					Size size=FixedHeightItemArranger::OnCalculateTotalSize();
-					size.x+=SplitterWidth;
-					return size;
-				}
-
-				void ListViewColumnItemArranger::DeleteColumnButtons()
-				{
-					for(int i=columnHeaders->GetStackItems().Count()-1;i>=0;i--)
-					{
-						GuiStackItemComposition* item=columnHeaders->GetStackItems().Get(i);
-						columnHeaders->RemoveChild(item);
-
-						GuiControl* button=item->Children().Get(0)->GetAssociatedControl();
-						if(button)
-						{
-							item->RemoveChild(button->GetBoundsComposition());
-							delete button;
-						}
-						delete item;
-					}
-					columnHeaderButtons.Clear();
-					columnHeaderSplitters.Clear();
-				}
-
-				void ListViewColumnItemArranger::RebuildColumns()
-				{
-					if(columnItemView && columnHeaderButtons.Count()==columnItemView->GetColumnCount())
-					{
-						for(int i=0;i<columnItemView->GetColumnCount();i++)
-						{
-							GuiListViewColumnHeader* button=columnHeaderButtons[i];
-							button->SetText(columnItemView->GetColumnText(i));
-							button->SetSubMenu(columnItemView->GetDropdownPopup(i), false);
-							button->SetColumnSortingState(columnItemView->GetSortingState(i));
-							button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
-						}
-					}
-					else
-					{
-						DeleteColumnButtons();
-						if(columnItemView)
-						{
-							for(int i=0;i<columnItemView->GetColumnCount();i++)
-							{
-								GuiBoundsComposition* splitterComposition=new GuiBoundsComposition;
-								splitterComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
-								splitterComposition->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::SizeWE));
-								splitterComposition->SetAlignmentToParent(Margin(0, 0, -1, 0));
-								splitterComposition->SetPreferredMinSize(Size(SplitterWidth, 0));
-								columnHeaderSplitters.Add(splitterComposition);
-
-								splitterComposition->GetEventReceiver()->leftButtonDown.AttachMethod(this, &ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonDown);
-								splitterComposition->GetEventReceiver()->leftButtonUp.AttachMethod(this, &ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonUp);
-								splitterComposition->GetEventReceiver()->mouseMove.AttachMethod(this, &ListViewColumnItemArranger::ColumnHeaderSplitterMouseMove);
-							}
-							for(int i=0;i<columnItemView->GetColumnCount();i++)
-							{
-								GuiListViewColumnHeader* button=new GuiListViewColumnHeader(styleProvider->CreateColumnStyle());
-								button->SetText(columnItemView->GetColumnText(i));
-								button->SetSubMenu(columnItemView->GetDropdownPopup(i), false);
-								button->SetColumnSortingState(columnItemView->GetSortingState(i));
-								button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
-								button->Clicked.AttachLambda(Curry(Func<void(int, GuiGraphicsComposition*, GuiEventArgs&)>(this, &ListViewColumnItemArranger::ColumnClicked))(i));
-								columnHeaderButtons.Add(button);
-								if(i>0)
-								{
-									button->GetContainerComposition()->AddChild(columnHeaderSplitters[i-1]);
-								}
-
-								GuiStackItemComposition* item=new GuiStackItemComposition;
-								item->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-								item->AddChild(button->GetBoundsComposition());
-								columnHeaders->AddChild(item);
-							}
-							if(columnItemView->GetColumnCount()>0)
-							{
-								GuiBoundsComposition* splitterComposition=columnHeaderSplitters[columnItemView->GetColumnCount()-1];
-
-								GuiStackItemComposition* item=new GuiStackItemComposition;
-								item->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-								item->AddChild(splitterComposition);
-								columnHeaders->AddChild(item);
-							}
-						}
-					}
-					callback->OnTotalSizeChanged();
-				}
-
-				ListViewColumnItemArranger::ListViewColumnItemArranger()
-					:listView(0)
-					,styleProvider(0)
-					,columnItemView(0)
-					,splitterDragging(false)
-					,splitterLatestX(0)
-				{
-					columnHeaders=new GuiStackComposition;
-					columnHeaders->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-					columnItemViewCallback=new ColumnItemViewCallback(this);
-				}
-
-				ListViewColumnItemArranger::~ListViewColumnItemArranger()
-				{
-					if(!columnHeaders->GetParent())
-					{
-						DeleteColumnButtons();
-						delete columnHeaders;
-					}
-				}
-
-				void ListViewColumnItemArranger::AttachListControl(GuiListControl* value)
-				{
-					FixedHeightItemArranger::AttachListControl(value);
-					listView=dynamic_cast<GuiListViewBase*>(value);
-					if(listView)
-					{
-						styleProvider=listView->GetListViewStyleProvider();
-						listView->GetContainerComposition()->AddChild(columnHeaders);
-						columnItemView=dynamic_cast<IColumnItemView*>(listView->GetItemProvider()->RequestView(IColumnItemView::Identifier));
-						if(columnItemView)
-						{
-							columnItemView->AttachCallback(columnItemViewCallback.Obj());
-							RebuildColumns();
-						}
-					}
-				}
-
-				void ListViewColumnItemArranger::DetachListControl()
-				{
-					if(listView)
-					{
-						if(columnItemView)
-						{
-							columnItemView->DetachCallback(columnItemViewCallback.Obj());
-							listView->GetItemProvider()->ReleaseView(columnItemView);
-							columnItemView=0;
-						}
-						listView->GetContainerComposition()->RemoveChild(columnHeaders);
-						styleProvider=0;
-						listView=0;
-					}
-					FixedHeightItemArranger::DetachListControl();
-				}
-				
-/***********************************************************************
-ListViewDetailContentProvider
-***********************************************************************/
-
-				ListViewDetailContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font, GuiListControl::IItemProvider* _itemProvider)
-					:contentComposition(0)
-					,itemProvider(_itemProvider)
-				{
-					columnItemView=dynamic_cast<ListViewColumnItemArranger::IColumnItemView*>(itemProvider->RequestView(ListViewColumnItemArranger::IColumnItemView::Identifier));
-					contentComposition=new GuiBoundsComposition;
-					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-
-					textTable=new GuiTableComposition;
-					textTable->SetAlignmentToParent(Margin(0, 0, 0, 0));
-					textTable->SetRowsAndColumns(1, 1);
-					textTable->SetRowOption(0, GuiCellOption::MinSizeOption());
-					textTable->SetColumnOption(0, GuiCellOption::AbsoluteOption(0));
-					contentComposition->AddChild(textTable);
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						textTable->AddChild(cell);
-						cell->SetSite(0, 0, 1, 1);
-
-						GuiTableComposition* table=new GuiTableComposition;
-						cell->AddChild(table);
-						table->SetRowsAndColumns(3, 2);
-						table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
-						table->SetRowOption(1, GuiCellOption::MinSizeOption());
-						table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
-						table->SetColumnOption(0, GuiCellOption::MinSizeOption());
-						table->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
-						table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-						table->SetCellPadding(2);
-						{
-							GuiCellComposition* cell=new GuiCellComposition;
-							table->AddChild(cell);
-							cell->SetSite(1, 0, 1, 1);
-							cell->SetPreferredMinSize(iconSize);
-
-							image=GuiImageFrameElement::Create();
-							image->SetStretch(true);
-							cell->SetOwnedElement(image);
-						}
-						{
-							GuiCellComposition* cell=new GuiCellComposition;
-							table->AddChild(cell);
-							cell->SetSite(0, 1, 3, 1);
-							cell->SetMargin(Margin(0, 0, 8, 0));
-
-							text=GuiSolidLabelElement::Create();
-							text->SetAlignments(Alignment::Left, Alignment::Center);
-							text->SetFont(font);
-							text->SetEllipse(true);
-							cell->SetOwnedElement(text);
-						}
-					}
-				}
-
-				ListViewDetailContentProvider::ItemContent::~ItemContent()
-				{
-					if(columnItemView)
-					{
-						itemProvider->ReleaseView(columnItemView);
-					}
-				}
-
-				compositions::GuiBoundsComposition* ListViewDetailContentProvider::ItemContent::GetContentComposition()
-				{
-					return contentComposition;
-				}
-
-				compositions::GuiBoundsComposition* ListViewDetailContentProvider::ItemContent::GetBackgroundDecorator()
-				{
-					return 0;
-				}
-
-				void ListViewDetailContentProvider::ItemContent::UpdateSubItemSize()
-				{
-					int columnCount=columnItemView->GetColumnCount();
-					for(int i=0;i<columnCount;i++)
-					{
-						textTable->SetColumnOption(i, GuiCellOption::AbsoluteOption(columnItemView->GetColumnSize(i)));
-					}
-					textTable->UpdateCellBounds();
-				}
-
-				void ListViewDetailContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
-				{
-					for(int i=1;i<textTable->GetColumns();i++)
-					{
-						GuiCellComposition* cell=textTable->GetSitedCell(0, i);
-						textTable->RemoveChild(cell);
-						delete cell;
-					}
-
-					Ptr<GuiImageData> imageData=view->GetSmallImage(itemIndex);
-					if(imageData)
-					{
-						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
-					}
-					else
-					{
-						image->SetImage(0);
-					}
-					text->SetText(view->GetText(itemIndex));
-					text->SetColor(styleProvider->GetPrimaryTextColor());
-
-					int columnCount=columnItemView->GetColumnCount();
-					textTable->SetRowsAndColumns(1, columnCount);
-					for(int i=1;i<columnCount;i++)
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						textTable->AddChild(cell);
-						cell->SetSite(0, i, 1, 1);
-						cell->SetMargin(Margin(8, 0, 8, 0));
-
-						GuiSolidLabelElement* subText=GuiSolidLabelElement::Create();
-						subText->SetAlignments(Alignment::Left, Alignment::Center);
-						subText->SetFont(text->GetFont());
-						subText->SetEllipse(true);
-						subText->SetText(view->GetSubItem(itemIndex, i-1));
-						subText->SetColor(styleProvider->GetSecondaryTextColor());
-						cell->SetOwnedElement(subText);
-					}
-					UpdateSubItemSize();
-				}
-
-				void ListViewDetailContentProvider::OnColumnChanged()
-				{
-					int count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
-					for(int i=0;i<count;i++)
-					{
-						GuiListControl::IItemStyleController* itemStyleController=listViewItemStyleProvider->GetCreatedItemStyles().Get(i);
-						ItemContent* itemContent=listViewItemStyleProvider->GetItemContent<ItemContent>(itemStyleController);
-						if(itemContent)
-						{
-							itemContent->UpdateSubItemSize();
-						}
-					}
-				}
-
-				ListViewDetailContentProvider::ListViewDetailContentProvider(Size _iconSize)
-					:iconSize(_iconSize)
-					,itemProvider(0)
-					,columnItemView(0)
-					,listViewItemStyleProvider(0)
-				{
-				}
-
-				ListViewDetailContentProvider::~ListViewDetailContentProvider()
-				{
-				}
-
-				GuiListControl::IItemCoordinateTransformer* ListViewDetailContentProvider::CreatePreferredCoordinateTransformer()
-				{
-					return new DefaultItemCoordinateTransformer;
-				}
-
-				GuiListControl::IItemArranger* ListViewDetailContentProvider::CreatePreferredArranger()
-				{
-					return new ListViewColumnItemArranger;
-				}
-
-				ListViewItemStyleProvider::IListViewItemContent* ListViewDetailContentProvider::CreateItemContent(const FontProperties& font)
-				{
-					return new ItemContent(iconSize, font, itemProvider);
-				}
-
-				void ListViewDetailContentProvider::AttachListControl(GuiListControl* value)
-				{
-					listViewItemStyleProvider=dynamic_cast<ListViewItemStyleProvider*>(value->GetStyleProvider());
-					itemProvider=value->GetItemProvider();
-					columnItemView=dynamic_cast<ListViewColumnItemArranger::IColumnItemView*>(itemProvider->RequestView(ListViewColumnItemArranger::IColumnItemView::Identifier));
-					if(columnItemView)
-					{
-						columnItemView->AttachCallback(this);
-					}
-				}
-
-				void ListViewDetailContentProvider::DetachListControl()
-				{
-					if(columnItemView)
-					{
-						columnItemView->DetachCallback(this);
-						itemProvider->ReleaseView(columnItemView);
-					}
-					itemProvider=0;
-					listViewItemStyleProvider=0;
-				}
-
-/***********************************************************************
-ListViewColumn
-***********************************************************************/
-
-				ListViewColumn::ListViewColumn(const WString& _text, int _size)
-					:text(_text)
-					,size(_size)
-					,dropdownPopup(0)
-					,sortingState(GuiListViewColumnHeader::NotSorted)
-				{
-				}
-
-/***********************************************************************
-ListViewDataColumns
-***********************************************************************/
-
-				void ListViewDataColumns::NotifyUpdateInternal(int start, int count, int newCount)
-				{
-					itemProvider->NotifyUpdate(0, itemProvider->Count());
-				}
-
-				ListViewDataColumns::ListViewDataColumns()
-					:itemProvider(0)
-				{
-				}
-
-				ListViewDataColumns::~ListViewDataColumns()
-				{
-				}
-
-/***********************************************************************
-ListViewColumns
-***********************************************************************/
-
-				void ListViewColumns::NotifyUpdateInternal(int start, int count, int newCount)
-				{
-					for(int i=0;i<itemProvider->columnItemViewCallbacks.Count();i++)
-					{
-						itemProvider->columnItemViewCallbacks[i]->OnColumnChanged();
-					}
-					itemProvider->NotifyUpdate(0, itemProvider->Count());
-				}
-
-				ListViewColumns::ListViewColumns()
-					:itemProvider(0)
-				{
-				}
-
-				ListViewColumns::~ListViewColumns()
-				{
-				}
-
-/***********************************************************************
-ListViewItemProvider
-***********************************************************************/
-
-				bool ListViewItemProvider::ContainsPrimaryText(int itemIndex)
-				{
-					return true;
-				}
-
-				WString ListViewItemProvider::GetPrimaryTextViewText(int itemIndex)
-				{
-					return Get(itemIndex)->text;
-				}
-
-				Ptr<GuiImageData> ListViewItemProvider::GetSmallImage(int itemIndex)
-				{
-					return Get(itemIndex)->smallImage;
-				}
-
-				Ptr<GuiImageData> ListViewItemProvider::GetLargeImage(int itemIndex)
-				{
-					return Get(itemIndex)->largeImage;
-				}
-
-				WString ListViewItemProvider::GetText(int itemIndex)
-				{
-					return Get(itemIndex)->text;
-				}
-
-				WString ListViewItemProvider::GetSubItem(int itemIndex, int index)
-				{
-					Ptr<ListViewItem> item=Get(itemIndex);
-					if(index<0 || index>=item->subItems.Count())
-					{
-						return L"";
-					}
-					else
-					{
-						return item->subItems[index];
-					}
-				}
-
-				int ListViewItemProvider::GetDataColumnCount()
-				{
-					return dataColumns.Count();
-				}
-
-				int ListViewItemProvider::GetDataColumn(int index)
-				{
-					return dataColumns[index];
-				}
-
-				bool ListViewItemProvider::AttachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)
-				{
-					if(columnItemViewCallbacks.Contains(value))
-					{
-						return false;
-					}
-					else
-					{
-						columnItemViewCallbacks.Add(value);
-						return true;
-					}
-				}
-
-				bool ListViewItemProvider::DetachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)
-				{
-					int index=columnItemViewCallbacks.IndexOf(value);
-					if(index==-1)
-					{
-						return false;
-					}
-					else
-					{
-						columnItemViewCallbacks.Remove(value);
-						return true;
-					}
-				}
-
-				int ListViewItemProvider::GetColumnCount()
-				{
-					return columns.Count();
-				}
-
-				WString ListViewItemProvider::GetColumnText(int index)
-				{
-					if(index<0 || index>=columns.Count())
-					{
-						return L"";
-					}
-					else
-					{
-						return columns[index]->text;
-					}
-				}
-
-				int ListViewItemProvider::GetColumnSize(int index)
-				{
-					if(index<0 || index>=columns.Count())
-					{
-						return 0;
-					}
-					else
-					{
-						return columns[index]->size;
-					}
-				}
-
-				void ListViewItemProvider::SetColumnSize(int index, int value)
-				{
-					if(index>=0 && index<columns.Count())
-					{
-						columns[index]->size=value;
-						for(int i=0;i<columnItemViewCallbacks.Count();i++)
-						{
-							columnItemViewCallbacks[i]->OnColumnChanged();
-						}
-					}
-				}
-
-				GuiMenu* ListViewItemProvider::GetDropdownPopup(int index)
-				{
-					if(index<0 || index>=columns.Count())
-					{
-						return 0;
-					}
-					else
-					{
-						return columns[index]->dropdownPopup;
-					}
-				}
-
-				GuiListViewColumnHeader::ColumnSortingState ListViewItemProvider::GetSortingState(int index)
-				{
-					if(index<0 || index>=columns.Count())
-					{
-						return GuiListViewColumnHeader::NotSorted;
-					}
-					else
-					{
-						return columns[index]->sortingState;
-					}
-				}
-
-				ListViewItemProvider::ListViewItemProvider()
-				{
-					columns.itemProvider=this;
-					dataColumns.itemProvider=this;
-				}
-
-				ListViewItemProvider::~ListViewItemProvider()
-				{
-				}
-
-				IDescriptable* ListViewItemProvider::RequestView(const WString& identifier)
-				{
-					if(identifier==ListViewItemStyleProvider::IListViewItemView::Identifier)
-					{
-						return (ListViewItemStyleProvider::IListViewItemView*)this;
-					}
-					else if(identifier==ListViewColumnItemArranger::IColumnItemView::Identifier)
-					{
-						return (ListViewColumnItemArranger::IColumnItemView*)this;
-					}
-					else if(identifier==GuiListControl::IItemPrimaryTextView::Identifier)
-					{
-						return (GuiListControl::IItemPrimaryTextView*)this;
-					}
-					else
-					{
-						return 0;
-					}
-				}
-
-				void ListViewItemProvider::ReleaseView(IDescriptable* view)
-				{
-				}
-
-				ListViewDataColumns& ListViewItemProvider::GetDataColumns()
-				{
-					return dataColumns;
-				}
-
-				ListViewColumns& ListViewItemProvider::GetColumns()
-				{
-					return columns;
-				}
-			}
-
-/***********************************************************************
-GuiListView
-***********************************************************************/
-
-			GuiVirtualListView::GuiVirtualListView(IStyleProvider* _styleProvider, GuiListControl::IItemProvider* _itemProvider)
-				:GuiListViewBase(_styleProvider, _itemProvider)
-			{
-				ChangeItemStyle(new list::ListViewBigIconContentProvider);
-			}
-
-			GuiVirtualListView::~GuiVirtualListView()
-			{
-			}
-
-			void GuiVirtualListView::ChangeItemStyle(list::ListViewItemStyleProvider::IListViewItemContentProvider* contentProvider)
-			{
-				SetStyleProvider(0);
-				SetArranger(0);
-				SetCoordinateTransformer(contentProvider->CreatePreferredCoordinateTransformer());
-				SetStyleProvider(new list::ListViewItemStyleProvider(contentProvider));
-				SetArranger(contentProvider->CreatePreferredArranger());
-			}
-
-/***********************************************************************
-GuiListView
-***********************************************************************/
-
-			GuiListView::GuiListView(IStyleProvider* _styleProvider)
-				:GuiVirtualListView(_styleProvider, new list::ListViewItemProvider)
-			{
-				items=dynamic_cast<list::ListViewItemProvider*>(itemProvider.Obj());
-			}
-
-			GuiListView::~GuiListView()
-			{
-			}
-
-			list::ListViewItemProvider& GuiListView::GetItems()
-			{
-				return *items;
-			}
-		}
-	}
-}
-
-/***********************************************************************
-Controls\ExtendedControls\GuiMenuControls.cpp
-***********************************************************************/
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-
-/***********************************************************************
-IGuiMenuService
-***********************************************************************/
-
-			const wchar_t* const IGuiMenuService::Identifier = L"vl::presentation::controls::IGuiMenuService";
-
-			IGuiMenuService::IGuiMenuService()
-				:openingMenu(0)
-			{
-			}
-
-			void IGuiMenuService::MenuItemExecuted()
-			{
-				if(openingMenu)
-				{
-					openingMenu->Hide();
-				}
-				if(GetParentMenuService())
-				{
-					GetParentMenuService()->MenuItemExecuted();
-				}
-			}
-
-			GuiMenu* IGuiMenuService::GetOpeningMenu()
-			{
-				return openingMenu;
-			}
-
-			void IGuiMenuService::MenuOpened(GuiMenu* menu)
-			{
-				if(openingMenu!=menu && openingMenu)
-				{
-					openingMenu->Hide();
-				}
-				openingMenu=menu;
-			}
-
-			void IGuiMenuService::MenuClosed(GuiMenu* menu)
-			{
-				if(openingMenu==menu)
-				{
-					openingMenu=0;
-				}
-			}
-
-/***********************************************************************
-GuiMenu
-***********************************************************************/
-
-			IGuiMenuService* GuiMenu::GetParentMenuService()
-			{
-				return parentMenuService;
-			}
-
-			IGuiMenuService::Direction GuiMenu::GetPreferredDirection()
-			{
-				return IGuiMenuService::Vertical;
-			}
-
-			bool GuiMenu::IsActiveState()
-			{
-				return true;
-			}
-
-			bool GuiMenu::IsSubMenuActivatedByMouseDown()
-			{
-				return false;
-			}
-
-			void GuiMenu::MenuItemExecuted()
-			{
-				IGuiMenuService::MenuItemExecuted();
-				Hide();
-			}
-
-			void GuiMenu::OnWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				if(parentMenuService)
-				{
-					parentMenuService->MenuOpened(this);
-				}
-			}
-
-			void GuiMenu::MouseClickedOnOtherWindow(GuiWindow* window)
-			{
-				GuiMenu* targetMenu=dynamic_cast<GuiMenu*>(window);
-				if(!targetMenu)
-				{
-					Hide();
-				}
-			}
-
-			void GuiMenu::OnWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				if(parentMenuService)
-				{
-					parentMenuService->MenuClosed(this);
-					GuiMenu* openingSubMenu=GetOpeningMenu();
-					if(openingSubMenu)
-					{
-						openingSubMenu->Hide();
-					}
-				}
-			}
-
-			GuiMenu::GuiMenu(IStyleController* _styleController, GuiControl* _owner)
-				:GuiPopup(_styleController)
-				,owner(_owner)
-				,parentMenuService(0)
-			{
-				GetNativeWindow()->SetAlwaysPassFocusToParent(true);
-				UpdateMenuService();
-				WindowOpened.AttachMethod(this, &GuiMenu::OnWindowOpened);
-				WindowClosed.AttachMethod(this, &GuiMenu::OnWindowClosed);
-			}
-
-			GuiMenu::~GuiMenu()
-			{
-			}
-
-			void GuiMenu::UpdateMenuService()
-			{
-				if(owner)
-				{
-					parentMenuService=owner->QueryService<IGuiMenuService>();
-				}
-			}
-
-			IDescriptable* GuiMenu::QueryService(const WString& identifier)
-			{
-				if(identifier==IGuiMenuService::Identifier)
-				{
-					return (IGuiMenuService*)this;
-				}
-				else
-				{
-					return GuiPopup::QueryService(identifier);
-				}
-			}
-
-/***********************************************************************
-GuiMenuBar
-***********************************************************************/
-
-			IGuiMenuService* GuiMenuBar::GetParentMenuService()
-			{
-				return 0;
-			}
-
-			IGuiMenuService::Direction GuiMenuBar::GetPreferredDirection()
-			{
-				return IGuiMenuService::Horizontal;
-			}
-
-			bool GuiMenuBar::IsActiveState()
-			{
-				return GetOpeningMenu()!=0;
-			}
-
-			bool GuiMenuBar::IsSubMenuActivatedByMouseDown()
-			{
-				return true;
-			}
-
-			GuiMenuBar::GuiMenuBar(GuiControl::IStyleController* _styleController)
-				:GuiControl(_styleController)
-			{
-			}
-
-			GuiMenuBar::~GuiMenuBar()
-			{
-			}
-
-			IDescriptable* GuiMenuBar::QueryService(const WString& identifier)
-			{
-				if(identifier==IGuiMenuService::Identifier)
-				{
-					return (IGuiMenuService*)this;
-				}
-				else
-				{
-					return GuiControl::QueryService(identifier);
-				}
-			}
-
-/***********************************************************************
-GuiMenuButton
-***********************************************************************/
-
-			const wchar_t* const GuiMenuButton::MenuItemSubComponentMeasuringCategoryName=L"MenuItem";
-
-			GuiButton* GuiMenuButton::GetSubMenuHost()
-			{
-				GuiButton* button=styleController->GetSubMenuHost();
-				return button?button:this;
-			}
-
-			void GuiMenuButton::OpenSubMenuInternal()
-			{
-				if(!GetSubMenuOpening())
-				{
-					if(ownerMenuService)
-					{
-						GuiMenu* openingSiblingMenu=ownerMenuService->GetOpeningMenu();
-						if(openingSiblingMenu)
-						{
-							openingSiblingMenu->Hide();
-						}
-					}
-					SetSubMenuOpening(true);
-				}
-			}
-
-			void GuiMenuButton::OnParentLineChanged()
-			{
-				GuiButton::OnParentLineChanged();
-				ownerMenuService=QueryService<IGuiMenuService>();
-				if(ownerMenuService)
-				{
-					SetClickOnMouseUp(!ownerMenuService->IsSubMenuActivatedByMouseDown());
-				}
-				if(subMenu)
-				{
-					subMenu->UpdateMenuService();
-				}
-			}
-
-			void GuiMenuButton::OnSubMenuWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				SubMenuOpeningChanged.Execute(GetNotifyEventArguments());
-				styleController->SetSubMenuOpening(true);
-			}
-
-			void GuiMenuButton::OnSubMenuWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				SubMenuOpeningChanged.Execute(GetNotifyEventArguments());
-				styleController->SetSubMenuOpening(false);
-			}
-
-			void GuiMenuButton::OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				if(GetVisuallyEnabled())
-				{
-					if(ownerMenuService && ownerMenuService->IsActiveState())
-					{
-						OpenSubMenuInternal();
-					}
-				}
-			}
-
-			void GuiMenuButton::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				if(GetSubMenu())
-				{
-					OpenSubMenuInternal();
-				}
-				else if(GetVisuallyEnabled())
-				{
-					if(ownerMenuService)
-					{
-						ownerMenuService->MenuItemExecuted();
-					}
-				}
-			}
-
-			GuiMenuButton::GuiMenuButton(IStyleController* _styleController)
-				:GuiButton(_styleController)
-				,styleController(_styleController)
-				,subMenu(0)
-				,ownedSubMenu(false)
-				,ownerMenuService(0)
-			{
-				SubMenuOpeningChanged.SetAssociatedComposition(boundsComposition);
-				ImageChanged.SetAssociatedComposition(boundsComposition);
-				ShortcutTextChanged.SetAssociatedComposition(boundsComposition);
-				GetSubMenuHost()->Clicked.AttachMethod(this, &GuiMenuButton::OnClicked);
-				GetSubMenuHost()->GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiMenuButton::OnMouseEnter);
-			}
-
-			GuiMenuButton::~GuiMenuButton()
-			{
-				if(subMenu && ownedSubMenu)
-				{
-					delete subMenu;
-				}
-			}
-
-			Ptr<GuiImageData> GuiMenuButton::GetImage()
-			{
-				return image;
-			}
-
-			void GuiMenuButton::SetImage(Ptr<GuiImageData> value)
-			{
-				if(image!=value)
-				{
-					image=value;
-					styleController->SetImage(image);
-					ImageChanged.Execute(GetNotifyEventArguments());
-				}
-			}
-
-			const WString& GuiMenuButton::GetShortcutText()
-			{
-				return shortcutText;
-			}
-
-			void GuiMenuButton::SetShortcutText(const WString& value)
-			{
-				if(shortcutText!=value)
-				{
-					shortcutText=value;
-					styleController->SetShortcutText(shortcutText);
-					ShortcutTextChanged.Execute(GetNotifyEventArguments());
-				}
-			}
-
-			bool GuiMenuButton::IsSubMenuExists()
-			{
-				return subMenu!=0;
-			}
-
-			GuiMenu* GuiMenuButton::GetSubMenu()
-			{
-				return subMenu;
-			}
-
-			void GuiMenuButton::CreateSubMenu(GuiMenu::IStyleController* subMenuStyleController)
-			{
-				if(!subMenu)
-				{
-					GuiMenu* newSubMenu=new GuiMenu(subMenuStyleController?subMenuStyleController:styleController->CreateSubMenuStyleController(), this);
-					SetSubMenu(newSubMenu, true);
-				}
-			}
-
-			void GuiMenuButton::SetSubMenu(GuiMenu* value, bool owned)
-			{
-				if(subMenu)
-				{
-					if(ownedSubMenu)
-					{
-						delete subMenu;
-					}
-				}
-				subMenu=value;
-				ownedSubMenu=owned;
-				if(subMenu)
-				{
-					subMenu->WindowOpened.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowOpened);
-					subMenu->WindowClosed.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowClosed);
-				}
-				styleController->SetSubMenuExisting(subMenu!=0);
-			}
-
-			void GuiMenuButton::DestroySubMenu()
-			{
-				if(subMenu)
-				{
-					if(ownedSubMenu)
-					{
-						delete subMenu;
-					}
-					subMenu=0;
-					ownedSubMenu=false;
-					styleController->SetSubMenuExisting(false);
-				}
-			}
-
-			bool GuiMenuButton::GetOwnedSubMenu()
-			{
-				return subMenu && ownedSubMenu;
-			}
-
-			bool GuiMenuButton::GetSubMenuOpening()
-			{
-				if(subMenu)
-				{
-					return subMenu->GetOpening();
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			void GuiMenuButton::SetSubMenuOpening(bool value)
-			{
-				if(subMenu)
-				{
-					if(value)
-					{
-						subMenu->SetClientSize(preferredMenuClientSize);
-						IGuiMenuService::Direction direction=ownerMenuService?ownerMenuService->GetPreferredDirection():IGuiMenuService::Horizontal;
-						subMenu->ShowPopup(GetSubMenuHost(), direction==IGuiMenuService::Horizontal);
-					}
-					else
-					{
-						subMenu->Close();
-					}
-				}
-			}
-
-			Size GuiMenuButton::GetPreferredMenuClientSize()
-			{
-				return preferredMenuClientSize;
-			}
-
-			void GuiMenuButton::SetPreferredMenuClientSize(Size value)
-			{
-				preferredMenuClientSize=value;
-			}
-		}
-	}
-}
-
-/***********************************************************************
-Controls\ExtendedControls\GuiTextListControls.cpp
-***********************************************************************/
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-			using namespace collections;
-			using namespace elements;
-			using namespace compositions;
-
-			namespace list
-			{
-
-/***********************************************************************
-TextItemStyleProvider::TextItemStyleController
-***********************************************************************/
-
-				void TextItemStyleProvider::TextItemStyleController::OnBulletSelectedChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-				{
-					textItemStyleProvider->OnStyleCheckedChanged(this);
-				}
-
-				TextItemStyleProvider::TextItemStyleController::TextItemStyleController(TextItemStyleProvider* provider)
-					:ItemStyleControllerBase(provider, 0)
-					,backgroundButton(0)
-					,bulletButton(0)
-					,textElement(0)
-					,textItemStyleProvider(provider)
-				{
-					backgroundButton=new GuiSelectableButton(textItemStyleProvider->textItemStyleProvider->CreateBackgroundStyleController());
-					backgroundButton->SetAutoSelection(false);
-					
-					textElement=GuiSolidLabelElement::Create();
-					textElement->SetAlignments(Alignment::Left, Alignment::Center);
-					textElement->SetFont(backgroundButton->GetFont());
-
-					GuiBoundsComposition* textComposition=new GuiBoundsComposition;
-					textComposition->SetOwnedElement(textElement);
-					textComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
-
-					GuiSelectableButton::IStyleController* bulletStyleController=textItemStyleProvider->textItemStyleProvider->CreateBulletStyleController();
-					if(bulletStyleController)
-					{
-						bulletButton=new GuiSelectableButton(bulletStyleController);
-						bulletButton->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-						bulletButton->SelectedChanged.AttachMethod(this, &TextItemStyleController::OnBulletSelectedChanged);
-
-						GuiTableComposition* table=new GuiTableComposition;
-						backgroundButton->GetContainerComposition()->AddChild(table);
-						table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-						table->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-						table->SetRowsAndColumns(1, 2);
-						table->SetRowOption(0, GuiCellOption::PercentageOption(1.0));
-						table->SetColumnOption(0, GuiCellOption::MinSizeOption());
-						table->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
-						{
-							GuiCellComposition* cell=new GuiCellComposition;
-							table->AddChild(cell);
-							cell->SetSite(0, 0, 1, 1);
-							cell->AddChild(bulletButton->GetBoundsComposition());
-						}
-						{
-							GuiCellComposition* cell=new GuiCellComposition;
-							table->AddChild(cell);
-							cell->SetSite(0, 1, 1, 1);
-							cell->AddChild(textComposition);
-							textComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
-						}
-					}
-					else
-					{
-						backgroundButton->GetContainerComposition()->AddChild(textComposition);
-						textComposition->SetAlignmentToParent(Margin(5, 0, 0, 0));
-					}
-					Initialize(backgroundButton->GetBoundsComposition(), backgroundButton);
-				}
-
-				TextItemStyleProvider::TextItemStyleController::~TextItemStyleController()
-				{
-				}
-
-				bool TextItemStyleProvider::TextItemStyleController::GetSelected()
-				{
-					return backgroundButton->GetSelected();
-				}
-
-				void TextItemStyleProvider::TextItemStyleController::SetSelected(bool value)
-				{
-					backgroundButton->SetSelected(value);
-				}
-
-				bool TextItemStyleProvider::TextItemStyleController::GetChecked()
-				{
-					return bulletButton?bulletButton->GetSelected():false;
-				}
-
-				void TextItemStyleProvider::TextItemStyleController::SetChecked(bool value)
-				{
-					if(bulletButton) bulletButton->SetSelected(value);
-				}
-				
-				const WString& TextItemStyleProvider::TextItemStyleController::GetText()
-				{
-					return textElement->GetText();
-				}
-
-				void TextItemStyleProvider::TextItemStyleController::SetText(const WString& value)
-				{
-					textElement->SetText(value);
-				}
-
-/***********************************************************************
-TextItemStyleProvider
-***********************************************************************/
-
-				const wchar_t* const TextItemStyleProvider::ITextItemView::Identifier = L"vl::presentation::controls::list::TextItemStyleProvider::ITextItemView";
-
-				void TextItemStyleProvider::OnStyleCheckedChanged(TextItemStyleController* style)
-				{
-					int index=listControl->GetArranger()->GetVisibleIndex(style);
-					if(index!=-1)
-					{
-						textItemView->SetCheckedSilently(index, style->GetChecked());
-					}
-				}
-
-				TextItemStyleProvider::TextItemStyleProvider(ITextItemStyleProvider* _textItemStyleProvider)
-					:textItemStyleProvider(_textItemStyleProvider)
-					,textItemView(0)
-					,listControl(0)
-				{
-				}
-
-				TextItemStyleProvider::~TextItemStyleProvider()
-				{
-				}
-
-				void TextItemStyleProvider::AttachListControl(GuiListControl* value)
-				{
-					listControl=value;;
-					textItemView=dynamic_cast<ITextItemView*>(value->GetItemProvider()->RequestView(ITextItemView::Identifier));
-				}
-
-				void TextItemStyleProvider::DetachListControl()
-				{
-					listControl->GetItemProvider()->ReleaseView(textItemView);
-					textItemView=0;
-					listControl=0;
-				}
-
-				int TextItemStyleProvider::GetItemStyleId(int itemIndex)
-				{
-					return 0;
-				}
-
-				GuiListControl::IItemStyleController* TextItemStyleProvider::CreateItemStyle(int styleId)
-				{
-					return new TextItemStyleController(this);
-				}
-
-				void TextItemStyleProvider::DestroyItemStyle(GuiListControl::IItemStyleController* style)
-				{
-					delete dynamic_cast<TextItemStyleController*>(style);
-				}
-
-				void TextItemStyleProvider::Install(GuiListControl::IItemStyleController* style, int itemIndex)
-				{
-					TextItemStyleController* textStyle=dynamic_cast<TextItemStyleController*>(style);
-					textStyle->SetText(textItemView->GetText(itemIndex));
-					textStyle->SetChecked(textItemView->GetChecked(itemIndex));
-				}
-
-				void TextItemStyleProvider::SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)
-				{
-					TextItemStyleController* textStyle=dynamic_cast<TextItemStyleController*>(style);
-					textStyle->SetSelected(value);
-				}
-
-/***********************************************************************
-TextItem
-***********************************************************************/
-
-				TextItem::TextItem()
-					:checked(false)
-				{
-				}
-
-				TextItem::TextItem(const TextItem& item)
-					:text(item.text)
-					,checked(item.checked)
-				{
-				}
-
-				TextItem::TextItem(const WString& _text, bool _checked)
-					:text(_text)
-					,checked(_checked)
-				{
-				}
-
-				TextItem::TextItem(const wchar_t* _text, bool _checked)
-					:text(_text)
-					,checked(_checked)
-				{
-				}
-
-				TextItem::~TextItem()
-				{
-				}
-
-				bool TextItem::operator==(const TextItem& value)const
-				{
-					return text==value.text;
-				}
-
-				bool TextItem::operator!=(const TextItem& value)const
-				{
-					return text!=value.text;
-				}
-
-				const WString& TextItem::GetText()const
-				{
-					return text;
-				}
-
-				bool TextItem::GetChecked()const
-				{
-					return checked;
-				}
-
-/***********************************************************************
-TextItemProvider
-***********************************************************************/
-
-				bool TextItemProvider::ContainsPrimaryText(int itemIndex)
-				{
-					return true;
-				}
-
-				WString TextItemProvider::GetPrimaryTextViewText(int itemIndex)
-				{
-					return Get(itemIndex).GetText();
-				}
-				
-				WString TextItemProvider::GetText(int itemIndex)
-				{
-					return Get(itemIndex).GetText();
-				}
-
-				bool TextItemProvider::GetChecked(int itemIndex)
-				{
-					return Get(itemIndex).GetChecked();
-				}
-
-				void TextItemProvider::SetCheckedSilently(int itemIndex, bool value)
-				{
-					items[itemIndex].checked=value;
-				}
-
-				TextItemProvider::TextItemProvider()
-				{
-				}
-
-				TextItemProvider::~TextItemProvider()
-				{
-				}
-					
-				void TextItemProvider::SetText(int itemIndex, const WString& value)
-				{
-					items[itemIndex].text=value;
-					InvokeOnItemModified(itemIndex, 1, 1);
-				}
-
-				void TextItemProvider::SetChecked(int itemIndex, bool value)
-				{
-					SetCheckedSilently(itemIndex, value);
-					InvokeOnItemModified(itemIndex, 1, 1);
-				}
-
-				IDescriptable* TextItemProvider::RequestView(const WString& identifier)
-				{
-					if(identifier==TextItemStyleProvider::ITextItemView::Identifier)
-					{
-						return (TextItemStyleProvider::ITextItemView*)this;
-					}
-					else if(identifier==GuiListControl::IItemPrimaryTextView::Identifier)
-					{
-						return (GuiListControl::IItemPrimaryTextView*)this;
-					}
-					else
-					{
-						return 0;
-					}
-				}
-
-				void TextItemProvider::ReleaseView(IDescriptable* view)
-				{
-				}
-			}
-
-/***********************************************************************
-GuiTextList
-***********************************************************************/
-
-			GuiVirtualTextList::GuiVirtualTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, GuiListControl::IItemProvider* _itemProvider)
-				:GuiSelectableListControl(_styleProvider, _itemProvider)
-			{
-				ChangeItemStyle(_itemStyleProvider);
-				SetArranger(new list::FixedHeightItemArranger);
-			}
-
-			GuiVirtualTextList::~GuiVirtualTextList()
-			{
-			}
-
-			Ptr<GuiListControl::IItemStyleProvider> GuiVirtualTextList::SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)
-			{
-				if(value.Cast<list::TextItemStyleProvider>())
-				{
-					return GuiSelectableListControl::SetStyleProvider(value);
-				}
-				else
-				{
-					return 0;
-				}
-			}
-
-			Ptr<GuiListControl::IItemStyleProvider> GuiVirtualTextList::ChangeItemStyle(list::TextItemStyleProvider::ITextItemStyleProvider* itemStyleProvider)
-			{
-				if(itemStyleProvider)
-				{
-					return SetStyleProvider(new list::TextItemStyleProvider(itemStyleProvider));
-				}
-				else
-				{
-					return 0;
-				}
-			}
-
-/***********************************************************************
-GuiTextList
-***********************************************************************/
-
-			GuiTextList::GuiTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider)
-				:GuiVirtualTextList(_styleProvider, _itemStyleProvider, new list::TextItemProvider)
-			{
-				items=dynamic_cast<list::TextItemProvider*>(itemProvider.Obj());
-			}
-
-			GuiTextList::~GuiTextList()
-			{
-			}
-
-			list::TextItemProvider& GuiTextList::GetItems()
-			{
-				return *items;
-			}
-		}
-	}
-}
-
-/***********************************************************************
-Controls\ExtendedControls\GuiTreeViewControls.cpp
-***********************************************************************/
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-			using namespace elements;
-			using namespace compositions;
-
-			namespace tree
-			{
-				const wchar_t* const INodeItemView::Identifier = L"vl::presentation::controls::tree::INodeItemView";
-				const wchar_t* const INodeItemPrimaryTextView::Identifier = L"vl::presentation:;cotnrols::tree::INodeItemPrimaryTextView";
-
-/***********************************************************************
-NodeItemProvider
-***********************************************************************/
-
-				INodeProvider* NodeItemProvider::GetNodeByOffset(INodeProvider* provider, int offset)
-				{
-					if(offset==0) return provider;
-					INodeProvider* result=0;
-					if(provider->GetExpanding() && offset>0)
-					{
-						offset-=1;
-						int count=provider->GetChildCount();
-						for(int i=0;(!result && i<count);i++)
-						{
-							INodeProvider* child=provider->GetChild(i);
-							int visibleCount=child->CalculateTotalVisibleNodes();
-							if(offset<visibleCount)
-							{
-								result=GetNodeByOffset(child, offset);
-							}
-							else
-							{
-								offset-=visibleCount;
-							}
-						}
-					}
-					ReleaseNode(provider);
-					return result;
-				}
-
-				void NodeItemProvider::OnAttached(INodeRootProvider* provider)
-				{
-				}
-
-				void NodeItemProvider::OnBeforeItemModified(INodeProvider* parentNode, int start, int count, int newCount)
-				{
-					offsetBeforeChildModified=0;
-					int base=CalculateNodeVisibilityIndexInternal(parentNode);
-					if(base!=-2 && parentNode->GetExpanding())
-					{
-						for(int i=0;i<count;i++)
-						{
-							INodeProvider* child=parentNode->GetChild(start+i);
-							offsetBeforeChildModified+=child->CalculateTotalVisibleNodes();
-							child->Release();
-						}
-					}
-				}
-
-				void NodeItemProvider::OnAfterItemModified(INodeProvider* parentNode, int start, int count, int newCount)
-				{
-					int base=CalculateNodeVisibilityIndexInternal(parentNode);
-					if(base!=-2 && parentNode->GetExpanding())
-					{
-						int offset=0;
-						int firstChildStart=-1;
-						for(int i=0;i<newCount;i++)
-						{
-							INodeProvider* child=parentNode->GetChild(start+i);
-							if(i==0)
-							{
-								firstChildStart=CalculateNodeVisibilityIndexInternal(child);
-							}
-							offset+=child->CalculateTotalVisibleNodes();
-							child->Release();
-						}
-
-						if(firstChildStart==-1)
-						{
-							int childCount=parentNode->GetChildCount();
-							if(childCount==0)
-							{
-								firstChildStart=base+1;
-							}
-							else if(start<childCount)
-							{
-								INodeProvider* child=parentNode->GetChild(start);
-								firstChildStart=CalculateNodeVisibilityIndexInternal(child);
-								child->Release();
-							}
-							else
-							{
-								INodeProvider* child=parentNode->GetChild(start-1);
-								firstChildStart=CalculateNodeVisibilityIndexInternal(child);
-								firstChildStart+=child->CalculateTotalVisibleNodes();
-								child->Release();
-							}
-						}
-						InvokeOnItemModified(firstChildStart, offsetBeforeChildModified, offset);
-					}
-				}
-
-				void NodeItemProvider::OnItemExpanded(INodeProvider* node)
-				{
-					int base=CalculateNodeVisibilityIndexInternal(node);
-					if(base!=-2)
-					{
-						int visibility=node->CalculateTotalVisibleNodes();
-						InvokeOnItemModified(base+1, 0, visibility-1);
-					}
-				}
-
-				void NodeItemProvider::OnItemCollapsed(INodeProvider* node)
-				{
-					int base=CalculateNodeVisibilityIndexInternal(node);
-					if(base!=-2)
-					{
-						int visibility=0;
-						int count=node->GetChildCount();
-						for(int i=0;i<count;i++)
-						{
-							INodeProvider* child=node->GetChild(i);
-							visibility+=child->CalculateTotalVisibleNodes();
-							child->Release();
-						}
-						InvokeOnItemModified(base+1, visibility, 0);
-					}
-				}
-
-				int NodeItemProvider::CalculateNodeVisibilityIndexInternal(INodeProvider* node)
-				{
-					INodeProvider* parent=node->GetParent();
-					if(parent==0)
-					{
-						return -1;
-					}
-					if(!parent->GetExpanding())
-					{
-						return -2;
-					}
-
-					int index=CalculateNodeVisibilityIndexInternal(parent);
-					if(index==-2)
-					{
-						return -2;
-					}
-
-					int count=parent->GetChildCount();
-					for(int i=0;i<count;i++)
-					{
-						INodeProvider* child=parent->GetChild(i);
-						bool findResult=child==node;
-						if(findResult)
-						{
-							index++;
-						}
-						else
-						{
-							index+=child->CalculateTotalVisibleNodes();
-						}
-						child->Release();
-						if(findResult)
-						{
-							return index;
-						}
-					}
-					return -1;
-				}
-
-				int NodeItemProvider::CalculateNodeVisibilityIndex(INodeProvider* node)
-				{
-					int result=CalculateNodeVisibilityIndexInternal(node);
-					return result<0?-1:result;
-				}
-
-				bool NodeItemProvider::ContainsPrimaryText(int itemIndex)
-				{
-					if(nodeItemPrimaryTextView)
-					{
-						INodeProvider* node=RequestNode(itemIndex);
-						if(node)
-						{
-							bool result=node->GetChildCount()==0;
-							ReleaseNode(node);
-							return result;
-						}
-					}
-					return true;
-				}
-
-				WString NodeItemProvider::GetPrimaryTextViewText(int itemIndex)
-				{
-					if(nodeItemPrimaryTextView)
-					{
-						INodeProvider* node=RequestNode(itemIndex);
-						if(node)
-						{
-							WString result=nodeItemPrimaryTextView->GetPrimaryTextViewText(node);
-							ReleaseNode(node);
-							return result;
-						}
-					}
-					return L"";
-				}
-
-				INodeProvider* NodeItemProvider::RequestNode(int index)
-				{
-					if(root->CanGetNodeByVisibleIndex())
-					{
-						return root->GetNodeByVisibleIndex(index+1);
-					}
-					else
-					{
-						return GetNodeByOffset(root->GetRootNode(), index+1);
-					}
-				}
-
-				void NodeItemProvider::ReleaseNode(INodeProvider* node)
-				{
-					if(node)
-					{
-						node->Release();
-					}
-				}
-
-				NodeItemProvider::NodeItemProvider(INodeRootProvider* _root)
-					:root(_root)
-				{
-					root->AttachCallback(this);
-					nodeItemPrimaryTextView=dynamic_cast<INodeItemPrimaryTextView*>(root->RequestView(INodeItemPrimaryTextView::Identifier));
-				}
-
-				NodeItemProvider::~NodeItemProvider()
-				{
-					if(nodeItemPrimaryTextView)
-					{
-						root->ReleaseView(nodeItemPrimaryTextView);
-					}
-					root->DetachCallback(this);
-				}
-
-				Ptr<INodeRootProvider> NodeItemProvider::GetRoot()
-				{
-					return root;
-				}
-
-				int NodeItemProvider::Count()
-				{
-					return root->GetRootNode()->CalculateTotalVisibleNodes()-1;
-				}
-
-				IDescriptable* NodeItemProvider::RequestView(const WString& identifier)
-				{
-					if(identifier==INodeItemView::Identifier)
-					{
-						return (INodeItemView*)this;
-					}
-					else if(identifier==GuiListControl::IItemPrimaryTextView::Identifier)
-					{
-						return (GuiListControl::IItemPrimaryTextView*)this;
-					}
-					else
-					{
-						return root->RequestView(identifier);
-					}
-				}
-
-				void NodeItemProvider::ReleaseView(IDescriptable* view)
-				{
-					if(dynamic_cast<INodeItemView*>(view)==0)
-					{
-						root->ReleaseView(view);
-					}
-				}
-
-/***********************************************************************
-NodeItemProvider
-***********************************************************************/
-
-				NodeItemStyleProvider::NodeItemStyleProvider(Ptr<INodeItemStyleProvider> provider)
-					:nodeItemStyleProvider(provider)
-					,listControl(0)
-					,nodeItemView(0)
-				{
-					nodeItemStyleProvider->BindItemStyleProvider(this);
-				}
-
-				NodeItemStyleProvider::~NodeItemStyleProvider()
-				{
-				}
-
-				void NodeItemStyleProvider::AttachListControl(GuiListControl* value)
-				{
-					listControl=value;
-					nodeItemView=dynamic_cast<INodeItemView*>(listControl->GetItemProvider()->RequestView(INodeItemView::Identifier));
-					nodeItemStyleProvider->AttachListControl(value);
-				}
-
-				void NodeItemStyleProvider::DetachListControl()
-				{
-					nodeItemStyleProvider->DetachListControl();
-					if(nodeItemView)
-					{
-						listControl->GetItemProvider()->ReleaseView(nodeItemView);
-						nodeItemView=0;
-					}
-					listControl=0;
-				}
-
-				int NodeItemStyleProvider::GetItemStyleId(int itemIndex)
-				{
-					int result=-1;
-					if(nodeItemView)
-					{
-						INodeProvider* node=nodeItemView->RequestNode(itemIndex);
-						if(node)
-						{
-							result=nodeItemStyleProvider->GetItemStyleId(node);
-							nodeItemView->ReleaseNode(node);
-						}
-					}
-					return result;
-				}
-
-				GuiListControl::IItemStyleController* NodeItemStyleProvider::CreateItemStyle(int styleId)
-				{
-					return nodeItemStyleProvider->CreateItemStyle(styleId);
-				}
-
-				void NodeItemStyleProvider::DestroyItemStyle(GuiListControl::IItemStyleController* style)
-				{
-					INodeItemStyleController* nodeStyle=dynamic_cast<INodeItemStyleController*>(style);
-					if(nodeStyle)
-					{
-						nodeItemStyleProvider->DestroyItemStyle(nodeStyle);
-					}
-				}
-
-				void NodeItemStyleProvider::Install(GuiListControl::IItemStyleController* style, int itemIndex)
-				{
-					if(nodeItemView)
-					{
-						INodeItemStyleController* nodeStyle=dynamic_cast<INodeItemStyleController*>(style);
-						if(nodeStyle)
-						{
-							INodeProvider* node=nodeItemView->RequestNode(itemIndex);
-							if(node)
-							{
-								nodeItemStyleProvider->Install(nodeStyle, node);
-							}
-						}
-					}
-				}
-
-				void NodeItemStyleProvider::SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)
-				{
-					if(nodeItemView)
-					{
-						INodeItemStyleController* nodeStyle=dynamic_cast<INodeItemStyleController*>(style);
-						if(nodeStyle)
-						{
-							nodeItemStyleProvider->SetStyleSelected(nodeStyle, value);
-						}
-					}
-				}
-
-/***********************************************************************
-MemoryNodeProvider::NodeCollection
-***********************************************************************/
-
-				void MemoryNodeProvider::NodeCollection::OnBeforeChildModified(int start, int count, int newCount)
-				{
-					ownerProvider->offsetBeforeChildModified=0;
-					if(ownerProvider->expanding)
-					{
-						for(int i=0;i<count;i++)
-						{
-							ownerProvider->offsetBeforeChildModified+=items[start+i]->totalVisibleNodeCount;
-						}
-					}
-					INodeProviderCallback* proxy=ownerProvider->GetCallbackProxyInternal();
-					if(proxy)
-					{
-						proxy->OnBeforeItemModified(ownerProvider, start, count, newCount);
-					}
-				}
-
-				void MemoryNodeProvider::NodeCollection::OnAfterChildModified(int start, int count, int newCount)
-				{
-					ownerProvider->childCount+=(newCount-count);
-					if(ownerProvider->expanding)
-					{
-						int offset=0;
-						for(int i=0;i<newCount;i++)
-						{
-							offset+=items[start+i]->totalVisibleNodeCount;
-						}
-						ownerProvider->OnChildTotalVisibleNodesChanged(offset-ownerProvider->offsetBeforeChildModified);
-					}
-					INodeProviderCallback* proxy=ownerProvider->GetCallbackProxyInternal();
-					if(proxy)
-					{
-						proxy->OnAfterItemModified(ownerProvider, start, count, newCount);
-					}
-				}
-
-				bool MemoryNodeProvider::NodeCollection::InsertInternal(int index, Ptr<MemoryNodeProvider> const& child)
-				{
-					if(child->parent==0)
-					{
-						OnBeforeChildModified(index, 0, 1);
-						child->parent=ownerProvider;
-						items.Insert(index, child);
-						OnAfterChildModified(index, 0, 1);
-						return true;
-					}
-					return false;
-				}
-
-				bool MemoryNodeProvider::NodeCollection::RemoveAtInternal(int index, Ptr<MemoryNodeProvider> const& child)
-				{
-					if(child->parent==ownerProvider)
-					{
-						OnBeforeChildModified(index, 1, 0);
-						child->parent=0;
-						items.RemoveAt(index);
-						OnAfterChildModified(index, 1, 0);
-						return true;
-					}
-					return false;
-				}
-
-				MemoryNodeProvider::NodeCollection::NodeCollection()
-					:ownerProvider(0)
-				{
-				}
-
-/***********************************************************************
-MemoryNodeProvider
-***********************************************************************/
-
-				INodeProviderCallback* MemoryNodeProvider::GetCallbackProxyInternal()
-				{
-					if(parent)
-					{
-						return parent->GetCallbackProxyInternal();
-					}
-					else
-					{
-						return 0;
-					}
-				}
-
-				void MemoryNodeProvider::OnChildTotalVisibleNodesChanged(int offset)
-				{
-					totalVisibleNodeCount+=offset;
-					if(parent)
-					{
-						parent->OnChildTotalVisibleNodesChanged(offset);
-					}
-				}
-
-				MemoryNodeProvider::MemoryNodeProvider()
-					:parent(0)
-					,expanding(false)
-					,childCount(0)
-					,totalVisibleNodeCount(1)
-					,offsetBeforeChildModified(0)
-				{
-					children.ownerProvider=this;
-				}
-
-				MemoryNodeProvider::MemoryNodeProvider(const Ptr<DescriptableObject>& _data)
-					:parent(0)
-					,expanding(false)
-					,childCount(0)
-					,totalVisibleNodeCount(1)
-					,offsetBeforeChildModified(0)
-					,data(_data)
-				{
-					children.ownerProvider=this;
-				}
-
-				MemoryNodeProvider::~MemoryNodeProvider()
-				{
-				}
-
-				Ptr<DescriptableObject> MemoryNodeProvider::GetData()
-				{
-					return data;
-				}
-
-				void MemoryNodeProvider::SetData(const Ptr<DescriptableObject>& value)
-				{
-					data=value;
-					NotifyDataModified();
-				}
-
-				void MemoryNodeProvider::NotifyDataModified()
-				{
-					if(parent)
-					{
-						int index=parent->children.IndexOf(this);
-						INodeProviderCallback* proxy=GetCallbackProxyInternal();
-						if(proxy)
-						{
-							proxy->OnBeforeItemModified(parent, index, 1, 1);
-							proxy->OnAfterItemModified(parent, index, 1, 1);
-						}
-					}
-				}
-
-				MemoryNodeProvider::NodeCollection& MemoryNodeProvider::Children()
-				{
-					return children;
-				}
-
-				bool MemoryNodeProvider::GetExpanding()
-				{
-					return expanding;
-				}
-
-				void MemoryNodeProvider::SetExpanding(bool value)
-				{
-					if(expanding!=value)
-					{
-						expanding=value;
-						int offset=0;
-						for(int i=0;i<childCount;i++)
-						{
-							offset+=children[i]->totalVisibleNodeCount;
-						}
-
-						OnChildTotalVisibleNodesChanged(expanding?offset:-offset);
-						INodeProviderCallback* proxy=GetCallbackProxyInternal();
-						if(proxy)
-						{
-							if(expanding)
-							{
-								proxy->OnItemExpanded(this);
-							}
-							else
-							{
-								proxy->OnItemCollapsed(this);
-							}
-						}
-					}
-				}
-
-				int MemoryNodeProvider::CalculateTotalVisibleNodes()
-				{
-					return totalVisibleNodeCount;
-				}
-
-				int MemoryNodeProvider::GetChildCount()
-				{
-					return childCount;
-				}
-
-				INodeProvider* MemoryNodeProvider::GetParent()
-				{
-					return parent;
-				}
-
-				INodeProvider* MemoryNodeProvider::GetChild(int index)
-				{
-					if(0<=index && index<childCount)
-					{
-						return children[index].Obj();
-					}
-					else
-					{
-						return 0;
-					}
-				}
-
-				void MemoryNodeProvider::Increase()
-				{
-				}
-
-				void MemoryNodeProvider::Release()
-				{
-				}
-
-/***********************************************************************
-NodeRootProviderBase
-***********************************************************************/
-
-				void NodeRootProviderBase::OnAttached(INodeRootProvider* provider)
-				{
-				}
-
-				void NodeRootProviderBase::OnBeforeItemModified(INodeProvider* parentNode, int start, int count, int newCount)
-				{
-					for(int i=0;i<callbacks.Count();i++)
-					{
-						callbacks[i]->OnBeforeItemModified(parentNode, start, count, newCount);
-					}
-				}
-
-				void NodeRootProviderBase::OnAfterItemModified(INodeProvider* parentNode, int start, int count, int newCount)
-				{
-					for(int i=0;i<callbacks.Count();i++)
-					{
-						callbacks[i]->OnAfterItemModified(parentNode, start, count, newCount);
-					}
-				}
-
-				void NodeRootProviderBase::OnItemExpanded(INodeProvider* node)
-				{
-					for(int i=0;i<callbacks.Count();i++)
-					{
-						callbacks[i]->OnItemExpanded(node);
-					}
-				}
-
-				void NodeRootProviderBase::OnItemCollapsed(INodeProvider* node)
-				{
-					for(int i=0;i<callbacks.Count();i++)
-					{
-						callbacks[i]->OnItemCollapsed(node);
-					}
-				}
-
-				NodeRootProviderBase::NodeRootProviderBase()
-				{
-				}
-
-				NodeRootProviderBase::~NodeRootProviderBase()
-				{
-				}
-
-				bool NodeRootProviderBase::CanGetNodeByVisibleIndex()
-				{
-					return false;
-				}
-
-				INodeProvider* NodeRootProviderBase::GetNodeByVisibleIndex(int index)
-				{
-					return 0;
-				}
-
-				bool NodeRootProviderBase::AttachCallback(INodeProviderCallback* value)
-				{
-					if(callbacks.Contains(value))
-					{
-						return false;
-					}
-					else
-					{
-						callbacks.Add(value);
-						value->OnAttached(this);
-						return true;
-					}
-				}
-
-				bool NodeRootProviderBase::DetachCallback(INodeProviderCallback* value)
-				{
-					int index=callbacks.IndexOf(value);
-					if(index==-1)
-					{
-						return false;
-					}
-					else
-					{
-						value->OnAttached(0);
-						callbacks.Remove(value);
-						return true;
-					}
-				}
-
-				IDescriptable* NodeRootProviderBase::RequestView(const WString& identifier)
-				{
-					return 0;
-				}
-
-				void NodeRootProviderBase::ReleaseView(IDescriptable* view)
-				{
-				}
-
-/***********************************************************************
-MemoryNodeRootProvider
-***********************************************************************/
-
-				INodeProviderCallback* MemoryNodeRootProvider::GetCallbackProxyInternal()
-				{
-					return this;
-				}
-
-				MemoryNodeRootProvider::MemoryNodeRootProvider()
-				{
-					SetExpanding(true);
-				}
-
-				MemoryNodeRootProvider::~MemoryNodeRootProvider()
-				{
-				}
-
-				INodeProvider* MemoryNodeRootProvider::GetRootNode()
-				{
-					return this;
-				}
-
-				MemoryNodeProvider* MemoryNodeRootProvider::GetMemoryNode(INodeProvider* node)
-				{
-					return dynamic_cast<MemoryNodeProvider*>(node);
-				}
-			}
-
-/***********************************************************************
-GuiVirtualTreeListControl
-***********************************************************************/
-
-			void GuiVirtualTreeListControl::OnAttached(tree::INodeRootProvider* provider)
-			{
-			}
-
-			void GuiVirtualTreeListControl::OnBeforeItemModified(tree::INodeProvider* parentNode, int start, int count, int newCount)
-			{
-			}
-
-			void GuiVirtualTreeListControl::OnAfterItemModified(tree::INodeProvider* parentNode, int start, int count, int newCount)
-			{
-			}
-
-			void GuiVirtualTreeListControl::OnItemExpanded(tree::INodeProvider* node)
-			{
-				GuiNodeEventArgs arguments;
-				(GuiEventArgs&)arguments=GetNotifyEventArguments();
-				arguments.node=node;
-				NodeExpanded.Execute(arguments);
-			}
-
-			void GuiVirtualTreeListControl::OnItemCollapsed(tree::INodeProvider* node)
-			{
-				GuiNodeEventArgs arguments;
-				(GuiEventArgs&)arguments=GetNotifyEventArguments();
-				arguments.node=node;
-				NodeCollapsed.Execute(arguments);
-			}
-
-			void GuiVirtualTreeListControl::OnItemMouseEvent(compositions::GuiNodeMouseEvent& nodeEvent, compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments)
-			{
-				tree::INodeProvider* node=GetNodeItemView()->RequestNode(arguments.itemIndex);
-				if(node)
-				{
-					GuiNodeMouseEventArgs redirectArguments;
-					(GuiMouseEventArgs&)redirectArguments=arguments;
-					redirectArguments.node=node;
-					nodeEvent.Execute(redirectArguments);
-					(GuiMouseEventArgs&)arguments=redirectArguments;
-					GetNodeItemView()->ReleaseNode(node);
-				}
-			}
-
-			void GuiVirtualTreeListControl::OnItemNotifyEvent(compositions::GuiNodeNotifyEvent& nodeEvent, compositions::GuiGraphicsComposition* sender, compositions::GuiItemEventArgs& arguments)
-			{
-				tree::INodeProvider* node=GetNodeItemView()->RequestNode(arguments.itemIndex);
-				if(node)
-				{
-					GuiNodeEventArgs redirectArguments;
-					(GuiEventArgs&)redirectArguments=arguments;
-					redirectArguments.node=node;
-					nodeEvent.Execute(redirectArguments);
-					(GuiEventArgs&)arguments=redirectArguments;
-					GetNodeItemView()->ReleaseNode(node);
-				}
-			}
-
-#define ATTACH_ITEM_MOUSE_EVENT(NODEEVENTNAME, ITEMEVENTNAME)\
-					{\
-						Func<void(GuiNodeMouseEvent&, GuiGraphicsComposition*, GuiItemMouseEventArgs&)> func(this, &GuiVirtualTreeListControl::OnItemMouseEvent);\
-						ITEMEVENTNAME.AttachFunction(Curry(func)(NODEEVENTNAME));\
-					}\
-
-#define ATTACH_ITEM_NOTIFY_EVENT(NODEEVENTNAME, ITEMEVENTNAME)\
-					{\
-						Func<void(GuiNodeNotifyEvent&, GuiGraphicsComposition*, GuiItemEventArgs&)> func(this, &GuiVirtualTreeListControl::OnItemNotifyEvent);\
-						ITEMEVENTNAME.AttachFunction(Curry(func)(NODEEVENTNAME));\
-					}\
-
-			GuiVirtualTreeListControl::GuiVirtualTreeListControl(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider)
-				:GuiSelectableListControl(_styleProvider, new tree::NodeItemProvider(_nodeRootProvider))
-			{
-				nodeItemProvider=dynamic_cast<tree::NodeItemProvider*>(GetItemProvider());
-				nodeItemView=dynamic_cast<tree::INodeItemView*>(GetItemProvider()->RequestView(tree::INodeItemView::Identifier));
-				
-				NodeLeftButtonDown.SetAssociatedComposition(boundsComposition);
-				NodeLeftButtonUp.SetAssociatedComposition(boundsComposition);
-				NodeLeftButtonDoubleClick.SetAssociatedComposition(boundsComposition);
-				NodeMiddleButtonDown.SetAssociatedComposition(boundsComposition);
-				NodeMiddleButtonUp.SetAssociatedComposition(boundsComposition);
-				NodeMiddleButtonDoubleClick.SetAssociatedComposition(boundsComposition);
-				NodeRightButtonDown.SetAssociatedComposition(boundsComposition);
-				NodeRightButtonUp.SetAssociatedComposition(boundsComposition);
-				NodeRightButtonDoubleClick.SetAssociatedComposition(boundsComposition);
-				NodeMouseMove.SetAssociatedComposition(boundsComposition);
-				NodeMouseEnter.SetAssociatedComposition(boundsComposition);
-				NodeMouseLeave.SetAssociatedComposition(boundsComposition);
-				NodeExpanded.SetAssociatedComposition(boundsComposition);
-				NodeCollapsed.SetAssociatedComposition(boundsComposition);
-
-				ATTACH_ITEM_MOUSE_EVENT(NodeLeftButtonDown, ItemLeftButtonDown);
-				ATTACH_ITEM_MOUSE_EVENT(NodeLeftButtonUp, ItemLeftButtonUp);
-				ATTACH_ITEM_MOUSE_EVENT(NodeLeftButtonDoubleClick, ItemLeftButtonDoubleClick);
-				ATTACH_ITEM_MOUSE_EVENT(NodeMiddleButtonDown, ItemMiddleButtonDown);
-				ATTACH_ITEM_MOUSE_EVENT(NodeMiddleButtonUp, ItemMiddleButtonUp);
-				ATTACH_ITEM_MOUSE_EVENT(NodeMiddleButtonDoubleClick, ItemMiddleButtonDoubleClick);
-				ATTACH_ITEM_MOUSE_EVENT(NodeRightButtonDown, ItemRightButtonDown);
-				ATTACH_ITEM_MOUSE_EVENT(NodeRightButtonUp, ItemRightButtonUp);
-				ATTACH_ITEM_MOUSE_EVENT(NodeRightButtonDoubleClick, ItemRightButtonDoubleClick);
-				ATTACH_ITEM_MOUSE_EVENT(NodeMouseMove, ItemMouseMove);
-				ATTACH_ITEM_NOTIFY_EVENT(NodeMouseEnter, ItemMouseEnter);
-				ATTACH_ITEM_NOTIFY_EVENT(NodeMouseLeave, ItemMouseLeave);
-
-				nodeItemProvider->GetRoot()->AttachCallback(this);
-			}
-
-#undef ATTACH_ITEM_MOUSE_EVENT
-#undef ATTACH_ITEM_NOTIFY_EVENT
-
-			GuiVirtualTreeListControl::~GuiVirtualTreeListControl()
-			{
-				GetItemProvider()->ReleaseView(nodeItemView);
-			}
-
-			tree::INodeItemView* GuiVirtualTreeListControl::GetNodeItemView()
-			{
-				return nodeItemView;
-			}
-
-			tree::INodeRootProvider* GuiVirtualTreeListControl::GetNodeRootProvider()
-			{
-				return nodeItemProvider->GetRoot().Obj();
-			}
-
-			tree::INodeItemStyleProvider* GuiVirtualTreeListControl::GetNodeStyleProvider()
-			{
-				return nodeStyleProvider.Obj();
-			}
-
-			Ptr<tree::INodeItemStyleProvider> GuiVirtualTreeListControl::SetNodeStyleProvider(Ptr<tree::INodeItemStyleProvider> styleProvider)
-			{
-				Ptr<tree::INodeItemStyleProvider> old=nodeStyleProvider;
-				nodeStyleProvider=styleProvider;
-				GuiSelectableListControl::SetStyleProvider(new tree::NodeItemStyleProvider(nodeStyleProvider));
-				return old;
-			}
-
-			namespace tree
-			{
-
-/***********************************************************************
-TreeViewItem
-***********************************************************************/
-
-				const wchar_t* const ITreeViewItemView::Identifier = L"vl::presentation::controls::tree::ITreeViewItemView";
-
-				TreeViewItem::TreeViewItem()
-				{
-				}
-
-				TreeViewItem::TreeViewItem(const Ptr<GuiImageData>& _image, const WString& _text)
-					:image(_image)
-					,text(_text)
-				{
-				}
-
-/***********************************************************************
-TreeViewItemRootProvider
-***********************************************************************/
-
-				WString TreeViewItemRootProvider::GetPrimaryTextViewText(INodeProvider* node)
-				{
-					return GetNodeText(node);
-				}
-
-				Ptr<GuiImageData> TreeViewItemRootProvider::GetNodeImage(INodeProvider* node)
-				{
-					MemoryNodeProvider* memoryNode=dynamic_cast<MemoryNodeProvider*>(node);
-					if(memoryNode)
-					{
-						Ptr<TreeViewItem> data=memoryNode->GetData().Cast<TreeViewItem>();
-						if(data)
-						{
-							return data->image;
-						}
-					}
-					return 0;
-				}
-
-				WString	TreeViewItemRootProvider::GetNodeText(INodeProvider* node)
-				{
-					MemoryNodeProvider* memoryNode=dynamic_cast<MemoryNodeProvider*>(node);
-					if(memoryNode)
-					{
-						Ptr<TreeViewItem> data=memoryNode->GetData().Cast<TreeViewItem>();
-						if(data)
-						{
-							return data->text;
-						}
-					}
-					return L"";
-				}
-
-				TreeViewItemRootProvider::TreeViewItemRootProvider()
-				{
-				}
-
-				TreeViewItemRootProvider::~TreeViewItemRootProvider()
-				{
-				}
-
-				IDescriptable* TreeViewItemRootProvider::RequestView(const WString& identifier)
-				{
-					if(identifier==ITreeViewItemView::Identifier)
-					{
-						return (ITreeViewItemView*)this;
-					}
-					else if(identifier==INodeItemPrimaryTextView::Identifier)
-					{
-						return (INodeItemPrimaryTextView*)this;
-					}
-					else
-					{
-						return MemoryNodeRootProvider::RequestView(identifier);
-					}
-				}
-
-				void TreeViewItemRootProvider::ReleaseView(IDescriptable* view)
-				{
-					return MemoryNodeRootProvider::ReleaseView(view);
-				}
-
-				Ptr<TreeViewItem> TreeViewItemRootProvider::GetTreeViewData(INodeProvider* node)
-				{
-					Ptr<MemoryNodeProvider> memoryNode=GetMemoryNode(node);
-					if(memoryNode)
-					{
-						return memoryNode->GetData().Cast<TreeViewItem>();
-					}
-					else
-					{
-						return 0;
-					}
-				}
-
-				void TreeViewItemRootProvider::SetTreeViewData(INodeProvider* node, Ptr<TreeViewItem> value)
-				{
-					Ptr<MemoryNodeProvider> memoryNode=GetMemoryNode(node);
-					if(memoryNode)
-					{
-						memoryNode->SetData(value);
-					}
-				}
-				
-				void TreeViewItemRootProvider::UpdateTreeViewData(INodeProvider* node)
-				{
-					Ptr<MemoryNodeProvider> memoryNode=GetMemoryNode(node);
-					if(memoryNode)
-					{
-						memoryNode->NotifyDataModified();
-					}
-				}
-
-/***********************************************************************
-TreeViewNodeItemStyleProvider::ItemController
-***********************************************************************/
-
-				void TreeViewNodeItemStyleProvider::ItemController::SwitchNodeExpanding()
-				{
-					if(backgroundButton->GetBoundsComposition()->GetParent())
-					{
-						GuiListControl::IItemArranger* arranger=styleProvider->treeControl->GetArranger();
-						int index=arranger->GetVisibleIndex(this);
-						if(index!=-1)
-						{
-							INodeItemView* view=styleProvider->treeControl->GetNodeItemView();
-							INodeProvider* node=view->RequestNode(index);
-							if(node)
-							{
-								bool expanding=node->GetExpanding();
-								node->SetExpanding(!expanding);
-								view->ReleaseNode(node);
-							}
-						}
-					}
-				}
-
-				void TreeViewNodeItemStyleProvider::ItemController::OnBackgroundButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-				{
-					if(backgroundButton->GetVisuallyEnabled())
-					{
-						SwitchNodeExpanding();
-					}
-				}
-
-				void TreeViewNodeItemStyleProvider::ItemController::OnExpandingButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-				{
-					arguments.handled=true;
-				}
-
-				void TreeViewNodeItemStyleProvider::ItemController::OnExpandingButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-				{
-					if(expandingButton->GetVisuallyEnabled())
-					{
-						SwitchNodeExpanding();
-					}
-				}
-
-				TreeViewNodeItemStyleProvider::ItemController::ItemController(TreeViewNodeItemStyleProvider* _styleProvider)
-					:list::ItemStyleControllerBase(_styleProvider->GetBindedItemStyleProvider(), 0)
-					,styleProvider(_styleProvider)
-				{
-					backgroundButton=new GuiSelectableButton(styleProvider->treeControl->GetTreeViewStyleProvider()->CreateItemBackground());
-					backgroundButton->SetAutoSelection(false);
-					backgroundButton->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-					backgroundButton->GetEventReceiver()->leftButtonDoubleClick.AttachMethod(this, &ItemController::OnBackgroundButtonDoubleClick);
-
-					table=new GuiTableComposition;
-					backgroundButton->GetBoundsComposition()->AddChild(table);
-					table->SetRowsAndColumns(3, 4);
-					table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
-					table->SetRowOption(1, GuiCellOption::MinSizeOption());
-					table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
-					table->SetColumnOption(0, GuiCellOption::AbsoluteOption(0));
-					table->SetColumnOption(1, GuiCellOption::MinSizeOption());
-					table->SetColumnOption(2, GuiCellOption::MinSizeOption());
-					table->SetColumnOption(3, GuiCellOption::MinSizeOption());
-					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-					table->SetCellPadding(2);
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetSite(0, 1, 3, 1);
-						cell->SetPreferredMinSize(Size(16, 16));
-
-						expandingButton=new GuiSelectableButton(styleProvider->treeControl->GetTreeViewStyleProvider()->CreateItemExpandingDecorator());
-						expandingButton->SetAutoSelection(false);
-						expandingButton->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-						expandingButton->GetEventReceiver()->leftButtonDoubleClick.AttachMethod(this, &ItemController::OnExpandingButtonDoubleClick);
-						expandingButton->Clicked.AttachMethod(this, &ItemController::OnExpandingButtonClicked);
-						cell->AddChild(expandingButton->GetBoundsComposition());
-					}
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetSite(1, 2, 1, 1);
-						cell->SetPreferredMinSize(Size(16, 16));
-
-						image=GuiImageFrameElement::Create();
-						image->SetStretch(true);
-						cell->SetOwnedElement(image);
-					}
-					{
-						GuiCellComposition* cell=new GuiCellComposition;
-						table->AddChild(cell);
-						cell->SetSite(0, 3, 3, 1);
-						cell->SetPreferredMinSize(Size(192, 0));
-
-						text=GuiSolidLabelElement::Create();
-						text->SetAlignments(Alignment::Left, Alignment::Center);
-						text->SetFont(styleProvider->treeControl->GetFont());
-						text->SetEllipse(true);
-						cell->SetOwnedElement(text);
-					}
-					Initialize(backgroundButton->GetBoundsComposition(), backgroundButton);
-				}
-
-				INodeItemStyleProvider* TreeViewNodeItemStyleProvider::ItemController::GetNodeStyleProvider()
-				{
-					return styleProvider;
-				}
-
-				void TreeViewNodeItemStyleProvider::ItemController::Install(INodeProvider* node)
-				{
-					ITreeViewItemView* view=styleProvider->treeViewItemView;
-					Ptr<GuiImageData> imageData=view->GetNodeImage(node);
-					if(imageData)
-					{
-						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
-					}
-					else
-					{
-						image->SetImage(0);
-					}
-					text->SetText(view->GetNodeText(node));
-					text->SetColor(styleProvider->treeControl->GetTreeViewStyleProvider()->GetTextColor());
-					UpdateExpandingButton(node);
-
-					int level=-2;
-					while(node)
-					{
-						node=node->GetParent();
-						level++;
-					}
-					table->SetColumnOption(0, GuiCellOption::AbsoluteOption(level*16));
-				}
-
-				bool TreeViewNodeItemStyleProvider::ItemController::GetSelected()
-				{
-					return backgroundButton->GetSelected();
-				}
-
-				void TreeViewNodeItemStyleProvider::ItemController::SetSelected(bool value)
-				{
-					backgroundButton->SetSelected(value);
-				}
-
-				void TreeViewNodeItemStyleProvider::ItemController::UpdateExpandingButton(INodeProvider* associatedNode)
-				{
-					expandingButton->SetSelected(associatedNode->GetExpanding());
-					expandingButton->SetVisible(associatedNode->GetChildCount()>0);
-				}
-
-/***********************************************************************
-TreeViewNodeItemStyleProvider
-***********************************************************************/
-
-				TreeViewNodeItemStyleProvider::TreeViewNodeItemStyleProvider()
-					:treeControl(0)
-					,bindedItemStyleProvider(0)
-					,treeViewItemView(0)
-				{
-				}
-
-				TreeViewNodeItemStyleProvider::~TreeViewNodeItemStyleProvider()
-				{
-				}
-
-				TreeViewNodeItemStyleProvider::ItemController* TreeViewNodeItemStyleProvider::GetRelatedController(INodeProvider* node)
-				{
-					int index=treeControl->GetNodeItemView()->CalculateNodeVisibilityIndex(node);
-					if(index!=-1)
-					{
-						GuiListControl::IItemStyleController* style=treeControl->GetArranger()->GetVisibleStyle(index);
-						if(style)
-						{
-							ItemController* itemController=dynamic_cast<ItemController*>(style);
-							return itemController;
-						}
-					}
-					return 0;
-				}
-
-				void TreeViewNodeItemStyleProvider::UpdateExpandingButton(INodeProvider* node)
-				{
-					ItemController* itemController=GetRelatedController(node);
-					if(itemController)
-					{
-						itemController->UpdateExpandingButton(node);
-					}
-				}
-
-				void TreeViewNodeItemStyleProvider::OnAttached(INodeRootProvider* provider)
-				{
-				}
-
-				void TreeViewNodeItemStyleProvider::OnBeforeItemModified(INodeProvider* parentNode, int start, int count, int newCount)
-				{
-				}
-
-				void TreeViewNodeItemStyleProvider::OnAfterItemModified(INodeProvider* parentNode, int start, int count, int newCount)
-				{
-					UpdateExpandingButton(parentNode);
-				}
-
-				void TreeViewNodeItemStyleProvider::OnItemExpanded(INodeProvider* node)
-				{
-					UpdateExpandingButton(node);
-				}
-
-				void TreeViewNodeItemStyleProvider::OnItemCollapsed(INodeProvider* node)
-				{
-					UpdateExpandingButton(node);
-				}
-
-				void TreeViewNodeItemStyleProvider::BindItemStyleProvider(GuiListControl::IItemStyleProvider* styleProvider)
-				{
-					bindedItemStyleProvider=styleProvider;
-				}
-
-				GuiListControl::IItemStyleProvider* TreeViewNodeItemStyleProvider::GetBindedItemStyleProvider()
-				{
-					return bindedItemStyleProvider;
-				}
-
-				void TreeViewNodeItemStyleProvider::AttachListControl(GuiListControl* value)
-				{
-					treeControl=dynamic_cast<GuiVirtualTreeView*>(value);
-					if(treeControl)
-					{
-						treeViewItemView=dynamic_cast<ITreeViewItemView*>(treeControl->GetItemProvider()->RequestView(ITreeViewItemView::Identifier));
-						treeControl->GetNodeRootProvider()->AttachCallback(this);
-					}
-				}
-
-				void TreeViewNodeItemStyleProvider::DetachListControl()
-				{
-					if(treeViewItemView)
-					{
-						treeControl->GetItemProvider()->ReleaseView(treeViewItemView);
-						treeViewItemView=0;
-					}
-					if(treeControl)
-					{
-						treeControl->GetNodeRootProvider()->DetachCallback(this);
-						treeControl=0;
-					}
-				}
-
-				int TreeViewNodeItemStyleProvider::GetItemStyleId(INodeProvider* node)
-				{
-					return 0;
-				}
-
-				INodeItemStyleController* TreeViewNodeItemStyleProvider::CreateItemStyle(int styleId)
-				{
-					return new ItemController(this);
-				}
-
-				void TreeViewNodeItemStyleProvider::DestroyItemStyle(INodeItemStyleController* style)
-				{
-					ItemController* itemController=dynamic_cast<ItemController*>(style);
-					if(itemController)
-					{
-						delete itemController;
-					}
-				}
-
-				void TreeViewNodeItemStyleProvider::Install(INodeItemStyleController* style, INodeProvider* node)
-				{
-					ItemController* itemController=dynamic_cast<ItemController*>(style);
-					if(itemController)
-					{
-						itemController->Install(node);
-					}
-				}
-
-				void TreeViewNodeItemStyleProvider::SetStyleSelected(INodeItemStyleController* style, bool value)
-				{
-					ItemController* itemController=dynamic_cast<ItemController*>(style);
-					if(itemController)
-					{
-						itemController->SetSelected(value);
-					}
-				}
-			}
-
-/***********************************************************************
-GuiVirtualTreeView
-***********************************************************************/
-
-			GuiVirtualTreeView::GuiVirtualTreeView(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider)
-				:GuiVirtualTreeListControl(_styleProvider, _nodeRootProvider)
-			{
-				styleProvider=dynamic_cast<IStyleProvider*>(styleController->GetStyleProvider());
-				SetNodeStyleProvider(new tree::TreeViewNodeItemStyleProvider);
-				SetArranger(new list::FixedHeightItemArranger);
-			}
-
-			GuiVirtualTreeView::~GuiVirtualTreeView()
-			{
-			}
-
-			GuiVirtualTreeView::IStyleProvider* GuiVirtualTreeView::GetTreeViewStyleProvider()
-			{
-				return styleProvider;
-			}
-
-/***********************************************************************
-GuiTreeView
-***********************************************************************/
-
-			GuiTreeView::GuiTreeView(IStyleProvider* _styleProvider)
-				:GuiVirtualTreeView(_styleProvider, new tree::TreeViewItemRootProvider)
-			{
-				nodes=nodeItemProvider->GetRoot().Cast<tree::TreeViewItemRootProvider>();
-			}
-
-			GuiTreeView::~GuiTreeView()
-			{
-			}
-
-			Ptr<tree::TreeViewItemRootProvider> GuiTreeView::Nodes()
-			{
-				return nodes;
-			}
-		}
-	}
-}
-
-/***********************************************************************
 Controls\GuiApplication.cpp
 ***********************************************************************/
 
@@ -5223,6 +1066,271 @@ GuiScroll
 			{
 				return totalSize-pageSize;
 			}
+		}
+	}
+}
+
+/***********************************************************************
+Controls\GuiContainerControls.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		using namespace compositions;
+
+		namespace controls
+		{
+/***********************************************************************
+GuiTabPage
+***********************************************************************/
+
+			GuiTabPage::GuiTabPage()
+				:container(0)
+				,owner(0)
+			{
+			}
+
+			GuiTabPage::~GuiTabPage()
+			{
+				if(!container->GetParent())
+				{
+					delete container;
+				}
+			}
+
+			bool GuiTabPage::AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController)
+			{
+				if(owner)
+				{
+					return false;
+				}
+				else
+				{
+					if(!container)
+					{
+						container=new GuiControl(_styleController);
+						TextChanged.SetAssociatedComposition(container->GetBoundsComposition());
+						PageInstalled.SetAssociatedComposition(container->GetBoundsComposition());
+						PageUninstalled.SetAssociatedComposition(container->GetBoundsComposition());
+						PageContainerReady.SetAssociatedComposition(container->GetBoundsComposition());
+
+						PageContainerReady.Execute(container->GetNotifyEventArguments());
+					}
+					owner=_owner;
+					PageInstalled.Execute(container->GetNotifyEventArguments());
+					return true;
+				}
+			}
+
+			bool GuiTabPage::DeassociateTab(GuiTab* _owner)
+			{
+				if(owner && owner==_owner)
+				{
+					PageUninstalled.Execute(container->GetNotifyEventArguments());
+					owner=0;
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			GuiControl* GuiTabPage::GetContainer()
+			{
+				return container;
+			}
+
+			GuiTab* GuiTabPage::GetOwnerTab()
+			{
+				return owner;
+			}
+
+			const WString& GuiTabPage::GetText()
+			{
+				return text;
+			}
+
+			void GuiTabPage::SetText(const WString& value)
+			{
+				if(text!=value)
+				{
+					text=value;
+					if(owner)
+					{
+						owner->styleController->SetTabText(owner->tabPages.IndexOf(this), text);
+					}
+					if(container)
+					{
+						TextChanged.Execute(container->GetNotifyEventArguments());
+					}
+					else
+					{
+						GuiEventArgs arguments;
+						TextChanged.Execute(arguments);
+					}
+				}
+			}
+
+			bool GuiTabPage::GetSelected()
+			{
+				return owner->GetSelectedPage()==this;
+			}
+
+/***********************************************************************
+GuiTab
+***********************************************************************/
+
+			GuiTab::CommandExecutor::CommandExecutor(GuiTab* _tab)
+				:tab(_tab)
+			{
+			}
+
+			GuiTab::CommandExecutor::~CommandExecutor()
+			{
+			}
+
+			void GuiTab::CommandExecutor::ShowTab(int index)
+			{
+				tab->SetSelectedPage(tab->GetPages().Get(index));
+			}
+
+			GuiTab::GuiTab(IStyleController* _styleController)
+				:GuiControl(_styleController)
+				,styleController(_styleController)
+				,selectedPage(0)
+			{
+				commandExecutor=new CommandExecutor(this);
+				styleController->SetCommandExecutor(commandExecutor.Obj());
+			}
+
+			GuiTab::~GuiTab()
+			{
+				for(int i=0;i<tabPages.Count();i++)
+				{
+					delete tabPages[i];
+				}
+			}
+
+			GuiTabPage* GuiTab::CreatePage(int index)
+			{
+				GuiTabPage* page=new GuiTabPage();
+				if(CreatePage(page, index))
+				{
+					return page;
+				}
+				else
+				{
+					delete page;
+					return 0;
+				}
+			}
+
+			bool GuiTab::CreatePage(GuiTabPage* page, int index)
+			{
+				if(index>=0 && index>=tabPages.Count())
+				{
+					index=tabPages.Count()-1;
+				}
+				else if(index<-1)
+				{
+					index=-1;
+				}
+
+				if(page->AssociateTab(this, styleController->CreateTabPageStyleController()))
+				{
+					index=index==-1?tabPages.Add(page):tabPages.Insert(index, page);
+					GetContainerComposition()->AddChild(page->GetContainer()->GetBoundsComposition());
+					styleController->InsertTab(index);
+					styleController->SetTabText(index, page->GetText());
+				
+					if(!selectedPage)
+					{
+						SetSelectedPage(page);
+					}
+					page->GetContainer()->SetVisible(page==selectedPage);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool GuiTab::RemovePage(GuiTabPage* value)
+			{
+				if(value->GetOwnerTab()==this && value->DeassociateTab(this))
+				{
+					int index=tabPages.IndexOf(value);
+					styleController->RemoveTab(index);
+					GetContainerComposition()->RemoveChild(value->GetContainer()->GetBoundsComposition());
+					tabPages.RemoveAt(index);
+					if(tabPages.Count()==0)
+					{
+						SetSelectedPage(0);
+						return 0;
+					}
+					else if(selectedPage==value)
+					{
+						SetSelectedPage(tabPages[0]);
+					}
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool GuiTab::MovePage(GuiTabPage* page, int newIndex)
+			{
+				if(!page) return false;
+				int index=tabPages.IndexOf(page);
+				if(index==-1) return false;
+				tabPages.RemoveAt(index);
+				tabPages.Insert(newIndex, page);
+				styleController->MoveTab(index, newIndex);
+				styleController->SetSelectedTab(tabPages.IndexOf(selectedPage));
+				return true;
+			}
+
+			const collections::List<GuiTabPage*>& GuiTab::GetPages()
+			{
+				return tabPages;
+			}
+
+			GuiTabPage* GuiTab::GetSelectedPage()
+			{
+				return selectedPage;
+			}
+
+			bool GuiTab::SetSelectedPage(GuiTabPage* value)
+			{
+				if(value->GetOwnerTab()==this)
+				{
+					if(selectedPage!=value)
+					{
+						selectedPage=value;
+						for(int i=0;i<tabPages.Count();i++)
+						{
+							bool selected=tabPages[i]==value;
+							tabPages[i]->GetContainer()->SetVisible(selected);
+							if(selected)
+							{
+								styleController->SetSelectedTab(i);
+							}
+						}
+						SelectedPageChanged.Execute(GetNotifyEventArguments());
+					}
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
 
 /***********************************************************************
 GuiScrollView::StyleController
@@ -5644,7 +1752,1095 @@ GuiScrollContainer
 }
 
 /***********************************************************************
-Controls\GuiListControls.cpp
+Controls\GuiWindowControls.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+			using namespace elements;
+			using namespace compositions;
+
+/***********************************************************************
+GuiControlHost
+***********************************************************************/
+
+			void GuiControlHost::OnNativeWindowChanged()
+			{
+			}
+
+			void GuiControlHost::OnVisualStatusChanged()
+			{
+			}
+
+			void GuiControlHost::Moved()
+			{
+				OnVisualStatusChanged();
+			}
+
+			void GuiControlHost::Enabled()
+			{
+				GuiControl::SetEnabled(true);
+				OnVisualStatusChanged();
+			}
+
+			void GuiControlHost::Disabled()
+			{
+				GuiControl::SetEnabled(false);
+				OnVisualStatusChanged();
+			}
+
+			void GuiControlHost::GotFocus()
+			{
+				WindowGotFocus.Execute(GetNotifyEventArguments());
+				OnVisualStatusChanged();
+			}
+
+			void GuiControlHost::LostFocus()
+			{
+				WindowLostFocus.Execute(GetNotifyEventArguments());
+				OnVisualStatusChanged();
+			}
+
+			void GuiControlHost::Activated()
+			{
+				WindowActivated.Execute(GetNotifyEventArguments());
+				OnVisualStatusChanged();
+			}
+
+			void GuiControlHost::Deactivated()
+			{
+				WindowDeactivated.Execute(GetNotifyEventArguments());
+				OnVisualStatusChanged();
+			}
+
+			void GuiControlHost::Opened()
+			{
+				WindowOpened.Execute(GetNotifyEventArguments());
+			}
+
+			void GuiControlHost::Closing(bool& cancel)
+			{
+				GuiRequestEventArgs arguments(GetStyleController()->GetBoundsComposition());
+				arguments.cancel=cancel;
+				WindowClosing.Execute(arguments);
+				if(!arguments.handled)
+				{
+					cancel=arguments.cancel;
+				}
+			}
+
+			void GuiControlHost::Closed()
+			{
+				WindowClosed.Execute(GetNotifyEventArguments());
+			}
+
+			void GuiControlHost::Destroying()
+			{
+				WindowDestroying.Execute(GetNotifyEventArguments());
+				SetNativeWindow(0);
+			}
+
+			GuiControlHost::GuiControlHost(GuiControl::IStyleController* _styleController)
+				:GuiControl(_styleController)
+			{
+				GetStyleController()->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				
+				WindowGotFocus.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
+				WindowLostFocus.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
+				WindowActivated.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
+				WindowDeactivated.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
+				WindowOpened.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
+				WindowClosing.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
+				WindowClosed.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
+				WindowDestroying.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
+
+				host=new GuiGraphicsHost;
+				host->GetMainComposition()->AddChild(GetStyleController()->GetBoundsComposition());
+			}
+
+			GuiControlHost::~GuiControlHost()
+			{
+				OnBeforeReleaseGraphicsHost();
+				styleController=0;
+				for(int i=0;i<components.Count();i++)
+				{
+					delete components[i];
+				}
+				delete host;
+			}
+
+			compositions::GuiGraphicsHost* GuiControlHost::GetGraphicsHost()
+			{
+				return host;
+			}
+
+			compositions::GuiGraphicsComposition* GuiControlHost::GetMainComposition()
+			{
+				return host->GetMainComposition();
+			}
+
+			INativeWindow* GuiControlHost::GetNativeWindow()
+			{
+				return host->GetNativeWindow();
+			}
+
+			void GuiControlHost::SetNativeWindow(INativeWindow* window)
+			{
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->UninstallListener(this);
+				}
+				host->SetNativeWindow(window);
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->InstallListener(this);
+				}
+				OnNativeWindowChanged();
+			}
+
+			void GuiControlHost::ForceCalculateSizeImmediately()
+			{
+				boundsComposition->ForceCalculateSizeImmediately();
+				SetBounds(GetBounds());
+			}
+
+			void GuiControlHost::Render()
+			{
+				host->Render();
+			}
+
+			bool GuiControlHost::GetEnabled()
+			{
+				if(host->GetNativeWindow())
+				{
+					return host->GetNativeWindow()->IsEnabled();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void GuiControlHost::SetEnabled(bool value)
+			{
+				if(host->GetNativeWindow())
+				{
+					if(value)
+					{
+						host->GetNativeWindow()->Enable();
+					}
+					else
+					{
+						host->GetNativeWindow()->Disable();
+					}
+				}
+			}
+
+			bool GuiControlHost::GetFocused()
+			{
+				if(host->GetNativeWindow())
+				{
+					return host->GetNativeWindow()->IsFocused();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void GuiControlHost::SetFocused()
+			{
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->SetFocus();
+				}
+			}
+
+			bool GuiControlHost::GetActivated()
+			{
+				if(host->GetNativeWindow())
+				{
+					return host->GetNativeWindow()->IsActivated();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void GuiControlHost::SetActivated()
+			{
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->SetActivate();
+				}
+			}
+
+			bool GuiControlHost::GetShowInTaskBar()
+			{
+				if(host->GetNativeWindow())
+				{
+					return host->GetNativeWindow()->IsAppearedInTaskBar();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void GuiControlHost::SetShowInTaskBar(bool value)
+			{
+				if(host->GetNativeWindow())
+				{
+					if(value)
+					{
+						host->GetNativeWindow()->ShowInTaskBar();
+					}
+					else
+					{
+						host->GetNativeWindow()->HideInTaskBar();
+					}
+				}
+			}
+
+			bool GuiControlHost::GetEnabledActivate()
+			{
+				if(host->GetNativeWindow())
+				{
+					return host->GetNativeWindow()->IsEnabledActivate();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void GuiControlHost::SetEnabledActivate(bool value)
+			{
+				if(host->GetNativeWindow())
+				{
+					if(value)
+					{
+						host->GetNativeWindow()->EnableActivate();
+					}
+					else
+					{
+						host->GetNativeWindow()->DisableActivate();
+					}
+				}
+			}
+
+			bool GuiControlHost::GetTopMost()
+			{
+				if(host->GetNativeWindow())
+				{
+					return host->GetNativeWindow()->GetTopMost();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void GuiControlHost::SetTopMost(bool topmost)
+			{
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->SetTopMost(topmost);
+				}
+			}
+
+			bool GuiControlHost::AddComponent(GuiComponent* component)
+			{
+				if(components.Contains(component))
+				{
+					return false;
+				}
+				else
+				{
+					components.Add(component);
+					return true;
+				}
+			}
+
+			bool GuiControlHost::RemoveComponent(GuiComponent* component)
+			{
+				return components.Remove(component);
+			}
+
+			bool GuiControlHost::ContainsComponent(GuiComponent* component)
+			{
+				return components.Contains(component);
+			}
+
+			compositions::IGuiShortcutKeyManager* GuiControlHost::GetShortcutKeyManager()
+			{
+				return host->GetShortcutKeyManager();
+			}
+
+			void GuiControlHost::SetShortcutKeyManager(compositions::IGuiShortcutKeyManager* value)
+			{
+				host->SetShortcutKeyManager(value);
+			}
+
+			Size GuiControlHost::GetClientSize()
+			{
+				if(host->GetNativeWindow())
+				{
+					return host->GetNativeWindow()->GetClientSize();
+				}
+				else
+				{
+					return Size(0, 0);
+				}
+			}
+
+			void GuiControlHost::SetClientSize(Size value)
+			{
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->SetClientSize(value);
+				}
+			}
+
+			Rect GuiControlHost::GetBounds()
+			{
+				if(host->GetNativeWindow())
+				{
+					return host->GetNativeWindow()->GetBounds();
+				}
+				else
+				{
+					return Rect();
+				}
+			}
+
+			void GuiControlHost::SetBounds(Rect value)
+			{
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->SetBounds(value);
+				}
+			}
+
+			GuiControlHost* GuiControlHost::GetRelatedControlHost()
+			{
+				return this;
+			}
+
+			const WString& GuiControlHost::GetText()
+			{
+				WString result;
+				if(host->GetNativeWindow())
+				{
+					result=host->GetNativeWindow()->GetTitle();
+				}
+				if(result!=GuiControl::GetText())
+				{
+					GuiControl::SetText(result);
+				}
+				return GuiControl::GetText();
+			}
+
+			void GuiControlHost::SetText(const WString& value)
+			{
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->SetTitle(value);
+					GuiControl::SetText(value);
+				}
+			}
+
+			INativeScreen* GuiControlHost::GetRelatedScreen()
+			{
+				if(host->GetNativeWindow())
+				{
+					return GetCurrentController()->ScreenService()->GetScreen(host->GetNativeWindow());
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+			void GuiControlHost::Show()
+			{
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->Show();
+				}
+			}
+
+			void GuiControlHost::ShowDeactivated()
+			{
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->ShowDeactivated();
+				}
+			}
+
+			void GuiControlHost::ShowRestored()
+			{
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->ShowRestored();
+				}
+			}
+
+			void GuiControlHost::ShowMaximized()
+			{
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->ShowMaximized();
+				}
+			}
+
+			void GuiControlHost::ShowMinimized()
+			{
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->ShowMinimized();
+				}
+			}
+
+			void GuiControlHost::Hide()
+			{
+				if(host->GetNativeWindow())
+				{
+					host->GetNativeWindow()->Hide();
+				}
+			}
+
+			void GuiControlHost::Close()
+			{
+				INativeWindow* window=host->GetNativeWindow();
+				if(window)
+				{
+					if(GetCurrentController()->WindowService()->GetMainWindow()!=window)
+					{
+						window->Hide();
+					}
+					else
+					{
+						SetNativeWindow(0);
+						GetCurrentController()->WindowService()->DestroyNativeWindow(window);
+					}
+				}
+			}
+
+			bool GuiControlHost::GetOpening()
+			{
+				INativeWindow* window=host->GetNativeWindow();
+				if(window)
+				{
+					return window->IsVisible();
+				}
+				return false;
+			}
+
+/***********************************************************************
+GuiWindow::DefaultBehaviorStyleController
+***********************************************************************/
+
+			GuiWindow::DefaultBehaviorStyleController::DefaultBehaviorStyleController()
+				:window(0)
+			{
+			}
+
+			GuiWindow::DefaultBehaviorStyleController::~DefaultBehaviorStyleController()
+			{
+			}
+
+			void GuiWindow::DefaultBehaviorStyleController::AttachWindow(GuiWindow* _window)
+			{
+				window=_window;
+			}
+
+			void GuiWindow::DefaultBehaviorStyleController::InitializeNativeWindowProperties()
+			{
+			}
+
+			bool GuiWindow::DefaultBehaviorStyleController::GetMaximizedBox()
+			{
+				if(window->GetNativeWindow())
+				{
+					return window->GetNativeWindow()->GetMaximizedBox();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void GuiWindow::DefaultBehaviorStyleController::SetMaximizedBox(bool visible)
+			{
+				if(window->GetNativeWindow())
+				{
+					window->GetNativeWindow()->SetMaximizedBox(visible);
+				}
+			}
+
+			bool GuiWindow::DefaultBehaviorStyleController::GetMinimizedBox()
+			{
+				if(window->GetNativeWindow())
+				{
+					return window->GetNativeWindow()->GetMinimizedBox();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void GuiWindow::DefaultBehaviorStyleController::SetMinimizedBox(bool visible)
+			{
+				if(window->GetNativeWindow())
+				{
+					window->GetNativeWindow()->SetMinimizedBox(visible);
+				}
+			}
+
+			bool GuiWindow::DefaultBehaviorStyleController::GetBorder()
+			{
+				if(window->GetNativeWindow())
+				{
+					return window->GetNativeWindow()->GetBorder();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void GuiWindow::DefaultBehaviorStyleController::SetBorder(bool visible)
+			{
+				if(window->GetNativeWindow())
+				{
+					window->GetNativeWindow()->SetBorder(visible);
+				}
+			}
+
+			bool GuiWindow::DefaultBehaviorStyleController::GetSizeBox()
+			{
+				if(window->GetNativeWindow())
+				{
+					return window->GetNativeWindow()->GetSizeBox();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void GuiWindow::DefaultBehaviorStyleController::SetSizeBox(bool visible)
+			{
+				if(window->GetNativeWindow())
+				{
+					window->GetNativeWindow()->SetSizeBox(visible);
+				}
+			}
+
+			bool GuiWindow::DefaultBehaviorStyleController::GetIconVisible()
+			{
+				if(window->GetNativeWindow())
+				{
+					return window->GetNativeWindow()->GetIconVisible();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void GuiWindow::DefaultBehaviorStyleController::SetIconVisible(bool visible)
+			{
+				if(window->GetNativeWindow())
+				{
+					window->GetNativeWindow()->SetIconVisible(visible);
+				}
+			}
+
+			bool GuiWindow::DefaultBehaviorStyleController::GetTitleBar()
+			{
+				if(window->GetNativeWindow())
+				{
+					return window->GetNativeWindow()->GetTitleBar();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void GuiWindow::DefaultBehaviorStyleController::SetTitleBar(bool visible)
+			{
+				if(window->GetNativeWindow())
+				{
+					window->GetNativeWindow()->SetTitleBar(visible);
+				}
+			}
+
+/***********************************************************************
+GuiWindow
+***********************************************************************/
+
+			void GuiWindow::OnNativeWindowChanged()
+			{
+				styleController->InitializeNativeWindowProperties();
+				GuiControlHost::OnNativeWindowChanged();
+			}
+
+			void GuiWindow::OnVisualStatusChanged()
+			{
+				GuiControlHost::OnVisualStatusChanged();
+			}
+
+			void GuiWindow::MouseClickedOnOtherWindow(GuiWindow* window)
+			{
+			}
+
+			GuiWindow::GuiWindow(IStyleController* _styleController)
+				:GuiControlHost(_styleController)
+				,styleController(_styleController)
+			{
+				ClipboardUpdated.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
+				INativeWindow* window=GetCurrentController()->WindowService()->CreateNativeWindow();
+				styleController->AttachWindow(this);
+				SetNativeWindow(window);
+				GetApplication()->RegisterWindow(this);
+			}
+
+			GuiWindow::~GuiWindow()
+			{
+				GetApplication()->UnregisterWindow(this);
+				INativeWindow* window=host->GetNativeWindow();
+				if(window)
+				{
+					SetNativeWindow(0);
+					GetCurrentController()->WindowService()->DestroyNativeWindow(window);
+				}
+			}
+
+			void GuiWindow::MoveToScreenCenter()
+			{
+				INativeScreen* screen=GetRelatedScreen();
+				if(screen)
+				{
+					Rect screenBounds=screen->GetClientBounds();
+					Rect windowBounds=GetBounds();
+					SetBounds(
+						Rect(
+							Point(
+								windowBounds.Left()+(screenBounds.Width()-windowBounds.Width())/2,
+								windowBounds.Top()+(screenBounds.Height()-windowBounds.Height())/2
+								),
+							windowBounds.GetSize()
+							)
+						);
+				}
+			}
+
+			bool GuiWindow::GetMaximizedBox()
+			{
+				return styleController->GetMaximizedBox();
+			}
+
+			void GuiWindow::SetMaximizedBox(bool visible)
+			{
+				styleController->SetMaximizedBox(visible);
+			}
+
+			bool GuiWindow::GetMinimizedBox()
+			{
+				return styleController->GetMinimizedBox();
+			}
+
+			void GuiWindow::SetMinimizedBox(bool visible)
+			{
+				styleController->SetMinimizedBox(visible);
+			}
+
+			bool GuiWindow::GetBorder()
+			{
+				return styleController->GetBorder();
+			}
+
+			void GuiWindow::SetBorder(bool visible)
+			{
+				styleController->SetBorder(visible);
+			}
+
+			bool GuiWindow::GetSizeBox()
+			{
+				return styleController->GetSizeBox();
+			}
+
+			void GuiWindow::SetSizeBox(bool visible)
+			{
+				styleController->SetSizeBox(visible);
+			}
+
+			bool GuiWindow::GetIconVisible()
+			{
+				return styleController->GetIconVisible();
+			}
+
+			void GuiWindow::SetIconVisible(bool visible)
+			{
+				styleController->SetIconVisible(visible);
+			}
+
+			bool GuiWindow::GetTitleBar()
+			{
+				return styleController->GetTitleBar();
+			}
+
+			void GuiWindow::SetTitleBar(bool visible)
+			{
+				styleController->SetTitleBar(visible);
+			}
+
+/***********************************************************************
+GuiPopup
+***********************************************************************/
+
+			void GuiPopup::MouseClickedOnOtherWindow(GuiWindow* window)
+			{
+				Hide();
+			}
+
+			void GuiPopup::PopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				GetApplication()->RegisterPopupOpened(this);
+			}
+
+			void GuiPopup::PopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				GetApplication()->RegisterPopupClosed(this);
+			}
+
+			GuiPopup::GuiPopup(IStyleController* _styleController)
+				:GuiWindow(_styleController)
+			{
+				SetMinimizedBox(false);
+				SetMaximizedBox(false);
+				SetSizeBox(false);
+				SetTitleBar(false);
+				SetShowInTaskBar(false);
+				GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+
+				WindowOpened.AttachMethod(this, &GuiPopup::PopupOpened);
+				WindowClosed.AttachMethod(this, &GuiPopup::PopupClosed);
+			}
+
+			GuiPopup::~GuiPopup()
+			{
+				GetApplication()->RegisterPopupClosed(this);
+			}
+
+			bool GuiPopup::IsClippedByScreen(Point location)
+			{
+				SetBounds(Rect(location, GetBounds().GetSize()));
+				INativeWindow* window=GetNativeWindow();
+				if(window)
+				{
+					INativeScreen* screen=GetCurrentController()->ScreenService()->GetScreen(window);
+					if(screen)
+					{
+						Rect screenBounds=screen->GetClientBounds();
+						Rect windowBounds=window->GetBounds();
+						return !screenBounds.Contains(windowBounds.LeftTop()) || !screenBounds.Contains(windowBounds.RightBottom());
+					}
+				}
+				return true;
+			}
+
+			void GuiPopup::ShowPopup(Point location)
+			{
+				INativeWindow* window=GetNativeWindow();
+				if(window)
+				{
+					INativeScreen* screen=GetCurrentController()->ScreenService()->GetScreen(window);
+					if(screen)
+					{
+						Rect screenBounds=screen->GetClientBounds();
+						Size size=window->GetBounds().GetSize();
+
+						if(location.x<screenBounds.x1)
+						{
+							location.x=screenBounds.x1;
+						}
+						else if(location.x+size.x>screenBounds.x2)
+						{
+							location.x=screenBounds.x2-size.x;
+						}
+
+						if(location.y<screenBounds.y1)
+						{
+							location.y=screenBounds.y1;
+						}
+						else if(location.y+size.y>screenBounds.y2)
+						{
+							location.y=screenBounds.y2-size.y;
+						}
+					}
+					SetBounds(Rect(location, GetBounds().GetSize()));
+					bool value=GetNativeWindow()->IsEnabledActivate();
+					ShowDeactivated();
+				}
+			}
+
+			void GuiPopup::ShowPopup(GuiControl* control, bool preferredTopBottomSide)
+			{
+				INativeWindow* window=GetNativeWindow();
+				if(window)
+				{
+					Point locations[4];
+					Size size=window->GetBounds().GetSize();
+					Rect controlBounds=control->GetBoundsComposition()->GetGlobalBounds();
+
+					GuiControlHost* controlHost=control->GetBoundsComposition()->GetRelatedControlHost();
+					if(controlHost)
+					{
+						INativeWindow* controlWindow=controlHost->GetNativeWindow();
+						if(controlWindow)
+						{
+							Point controlClientOffset=controlWindow->GetClientBoundsInScreen().LeftTop();
+							controlBounds.x1+=controlClientOffset.x;
+							controlBounds.x2+=controlClientOffset.x;
+							controlBounds.y1+=controlClientOffset.y;
+							controlBounds.y2+=controlClientOffset.y;
+
+							if(preferredTopBottomSide)
+							{
+								locations[0]=Point(controlBounds.x1, controlBounds.y2);
+								locations[1]=Point(controlBounds.x2-size.x, controlBounds.y2);
+								locations[2]=Point(controlBounds.x1, controlBounds.y1-size.y);
+								locations[3]=Point(controlBounds.x2-size.x, controlBounds.y1-size.y);
+							}
+							else
+							{
+								locations[0]=Point(controlBounds.x2, controlBounds.y1);
+								locations[1]=Point(controlBounds.x2, controlBounds.y2-size.y);
+								locations[2]=Point(controlBounds.x1-size.x, controlBounds.y1);
+								locations[3]=Point(controlBounds.x1-size.x, controlBounds.y2-size.y);
+							}
+
+							window->SetParent(controlWindow);
+							for(int i=0;i<4;i++)
+							{
+								if(!IsClippedByScreen(locations[i]))
+								{
+									ShowPopup(locations[i]);
+									return;
+								}
+							}
+							ShowPopup(locations[0]);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+/***********************************************************************
+Controls\ListControlPackage\GuiComboControls.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+
+/***********************************************************************
+GuiComboBoxBase::CommandExecutor
+***********************************************************************/
+
+			GuiComboBoxBase::CommandExecutor::CommandExecutor(GuiComboBoxBase* _combo)
+				:combo(_combo)
+			{
+			}
+
+			GuiComboBoxBase::CommandExecutor::~CommandExecutor()
+			{
+			}
+
+			void GuiComboBoxBase::CommandExecutor::ShowPopup()
+			{
+				combo->ShowPopup();
+			}
+
+			void GuiComboBoxBase::CommandExecutor::SelectItem()
+			{
+				combo->SelectItem();
+			}
+
+/***********************************************************************
+GuiComboBoxBase
+***********************************************************************/
+
+			void GuiComboBoxBase::SelectItem()
+			{
+				ItemSelecting.Execute(GetNotifyEventArguments());
+				styleController->OnItemSelected();
+				ItemSelected.Execute(GetNotifyEventArguments());
+			}
+
+			void GuiComboBoxBase::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				styleController->OnClicked();
+			}
+
+			void GuiComboBoxBase::OnPopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				styleController->OnPopupOpened();
+				PopupOpened.Execute(arguments);
+			}
+
+			void GuiComboBoxBase::OnPopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				styleController->OnPopupClosed();
+				PopupClosed.Execute(arguments);
+			}
+
+			GuiComboBoxBase::GuiComboBoxBase(IStyleController* _styleController)
+				:GuiButton(_styleController)
+			{
+				commandExecutor=new CommandExecutor(this);
+				styleController=dynamic_cast<IStyleController*>(GetStyleController());
+				styleController->SetCommandExecutor(commandExecutor.Obj());
+				popup=new GuiPopup(styleController->CreatePopupStyle());
+				popup->GetNativeWindow()->SetAlwaysPassFocusToParent(true);
+
+				PopupOpened.SetAssociatedComposition(boundsComposition);
+				PopupClosed.SetAssociatedComposition(boundsComposition);
+				ItemSelecting.SetAssociatedComposition(boundsComposition);
+				ItemSelected.SetAssociatedComposition(boundsComposition);
+
+				Clicked.AttachMethod(this, &GuiComboBoxBase::OnClicked);
+				popup->WindowOpened.AttachMethod(this, &GuiComboBoxBase::OnPopupOpened);
+				popup->WindowClosed.AttachMethod(this, &GuiComboBoxBase::OnPopupClosed);
+			}
+
+			GuiComboBoxBase::~GuiComboBoxBase()
+			{
+				delete popup;
+			}
+
+			void GuiComboBoxBase::ShowPopup()
+			{
+				Size size=popup->GetBoundsComposition()->GetPreferredMinSize();
+				size.x=GetBoundsComposition()->GetBounds().Width();
+				if(size.y<GetFont().size)
+				{
+					size.y=GetFont().size;
+				}
+				popup->GetBoundsComposition()->SetPreferredMinSize(size);
+				popup->ShowPopup(this, true);
+			}
+
+			GuiPopup* GuiComboBoxBase::GetPopup()
+			{
+				return popup;
+			}
+
+/***********************************************************************
+GuiComboBoxListControl
+***********************************************************************/
+
+			void GuiComboBoxListControl::DisplaySelectedContent(int itemIndex)
+			{
+				if(primaryTextView)
+				{
+					if(itemIndex==-1)
+					{
+						SetText(L"");
+					}
+					else if(primaryTextView->ContainsPrimaryText(itemIndex))
+					{
+						WString text=primaryTextView->GetPrimaryTextViewText(itemIndex);
+						SetText(text);
+						popup->Hide();
+					}
+				}
+			}
+
+			void GuiComboBoxListControl::OnListControlSelectionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				DisplaySelectedContent(GetSelectedIndex());
+				SelectedIndexChanged.Execute(GetNotifyEventArguments());
+			}
+
+			GuiComboBoxListControl::GuiComboBoxListControl(IStyleController* _styleController, GuiSelectableListControl* _containedListControl)
+				:GuiComboBoxBase(_styleController)
+				,containedListControl(_containedListControl)
+			{
+				containedListControl->SetMultiSelect(false);
+				containedListControl->SelectionChanged.AttachMethod(this, &GuiComboBoxListControl::OnListControlSelectionChanged);
+				primaryTextView=dynamic_cast<GuiListControl::IItemPrimaryTextView*>(containedListControl->GetItemProvider()->RequestView(GuiListControl::IItemPrimaryTextView::Identifier));
+
+				SelectedIndexChanged.SetAssociatedComposition(GetBoundsComposition());
+
+				containedListControl->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				popup->GetBoundsComposition()->AddChild(containedListControl->GetBoundsComposition());
+				SetFont(GetFont());
+			}
+
+			GuiComboBoxListControl::~GuiComboBoxListControl()
+			{
+				if(primaryTextView)
+				{
+					containedListControl->GetItemProvider()->ReleaseView(primaryTextView);
+				}
+			}
+
+			void GuiComboBoxListControl::SetFont(const FontProperties& value)
+			{
+				GuiComboBoxBase::SetFont(value);
+				Size size=popup->GetBoundsComposition()->GetPreferredMinSize();
+				size.y=20*value.size;
+				popup->GetBoundsComposition()->SetPreferredMinSize(size);
+			}
+
+			GuiSelectableListControl* GuiComboBoxListControl::GetContainedListControl()
+			{
+				return containedListControl;
+			}
+
+			int GuiComboBoxListControl::GetSelectedIndex()
+			{
+				if(containedListControl->GetSelectedItems().Count()==1)
+				{
+					return containedListControl->GetSelectedItems()[0];
+				}
+				else
+				{
+					return -1;
+				}
+			}
+
+			void GuiComboBoxListControl::SetSelectedIndex(int value)
+			{
+				containedListControl->SetSelected(value, true);
+			}
+
+			GuiListControl::IItemProvider* GuiComboBoxListControl::GetItemProvider()
+			{
+				return containedListControl->GetItemProvider();
+			}
+		}
+	}
+}
+
+/***********************************************************************
+Controls\ListControlPackage\GuiListControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -7711,1815 +4907,7 @@ ItemProviderBase
 }
 
 /***********************************************************************
-Controls\GuiTextControls.cpp
-***********************************************************************/
-#include <math.h>
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-			using namespace elements;
-			using namespace elements::text;
-			using namespace compositions;
-
-/***********************************************************************
-GuiTextElementOperator::DefaultCallback
-***********************************************************************/
-
-			GuiTextElementOperator::DefaultCallback::DefaultCallback(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition)
-				:textElement(_textElement)
-				,textComposition(_textComposition)
-			{
-			}
-
-			GuiTextElementOperator::DefaultCallback::~DefaultCallback()
-			{
-			}
-
-			TextPos GuiTextElementOperator::DefaultCallback::GetLeftWord(TextPos pos)
-			{
-				return pos;
-			}
-
-			TextPos GuiTextElementOperator::DefaultCallback::GetRightWord(TextPos pos)
-			{
-				return pos;
-			}
-
-			void GuiTextElementOperator::DefaultCallback::GetWord(TextPos pos, TextPos& begin, TextPos& end)
-			{
-				begin=pos;
-				end=pos;
-			}
-
-			int GuiTextElementOperator::DefaultCallback::GetPageRows()
-			{
-				return textComposition->GetBounds().Height()/textElement->GetLines().GetRowHeight();
-			}
-
-			bool GuiTextElementOperator::DefaultCallback::BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)
-			{
-				return true;
-			}
-
-/***********************************************************************
-GuiTextElementOperator::ShortcutCommand
-***********************************************************************/
-
-			GuiTextElementOperator::ShortcutCommand::ShortcutCommand(bool _ctrl, bool _shift, int _key, const Func<void()> _action)
-				:ctrl(_ctrl)
-				,shift(_shift)
-				,key(_key)
-				,action(_action)
-			{
-			}
-
-			GuiTextElementOperator::ShortcutCommand::~ShortcutCommand()
-			{
-			}
-
-			bool GuiTextElementOperator::ShortcutCommand::IsTheRightKey(bool _ctrl, bool _shift, int _key)
-			{
-				return _ctrl==ctrl && _shift==shift && _key==key;
-			}
-
-			void GuiTextElementOperator::ShortcutCommand::Execute()
-			{
-				action();
-			}
-
-/***********************************************************************
-GuiTextElementOperator
-***********************************************************************/
-
-			void GuiTextElementOperator::UpdateCaretPoint()
-			{
-				GuiGraphicsHost* host=textComposition->GetRelatedGraphicsHost();
-				if(host)
-				{
-					Rect caret=textElement->GetLines().GetRectFromTextPos(textElement->GetCaretEnd());
-					Point view=textElement->GetViewPosition();
-					int textMargin=callback->GetTextMargin();
-					int x=caret.x1-view.x;
-					int y=caret.y2-view.y;
-					host->SetCaretPoint(Point(x, y), textComposition);
-				}
-			}
-
-			void GuiTextElementOperator::Move(TextPos pos, bool shift)
-			{
-				TextPos oldBegin=textElement->GetCaretBegin();
-				TextPos oldEnd=textElement->GetCaretEnd();
-
-				pos=textElement->GetLines().Normalize(pos);
-				if(!shift)
-				{
-					textElement->SetCaretBegin(pos);
-				}
-				textElement->SetCaretEnd(pos);
-				if(textControl)
-				{
-					GuiGraphicsHost* host=textComposition->GetRelatedGraphicsHost();
-					if(host)
-					{
-						if(host->GetFocusedComposition()==textControl->GetFocusableComposition())
-						{
-							textElement->SetCaretVisible(true);
-						}
-					}
-				}
-
-				Rect bounds=textElement->GetLines().GetRectFromTextPos(pos);
-				Rect view=Rect(textElement->GetViewPosition(), textComposition->GetBounds().GetSize());
-				Point viewPoint=view.LeftTop();
-
-				if(view.x2>view.x1 && view.y2>view.y1)
-				{
-					if(bounds.x1<view.x1)
-					{
-						viewPoint.x=bounds.x1;
-					}
-					else if(bounds.x2>view.x2)
-					{
-						viewPoint.x=bounds.x2-view.Width();
-					}
-					if(bounds.y1<view.y1)
-					{
-						viewPoint.y=bounds.y1;
-					}
-					else if(bounds.y2>view.y2)
-					{
-						viewPoint.y=bounds.y2-view.Height();
-					}
-				}
-
-				callback->ScrollToView(viewPoint);
-				UpdateCaretPoint();
-
-				if(textBoxCommonInterface)
-				{
-					if(oldBegin!=textElement->GetCaretBegin() || oldEnd!=textElement->GetCaretEnd())
-					{
-						textBoxCommonInterface->RaiseSelectionChanged();
-					}
-				}
-			}
-
-			void GuiTextElementOperator::Modify(TextPos start, TextPos end, const WString& input)
-			{
-				if(start>end)
-				{
-					TextPos temp=start;
-					start=end;
-					end=temp;
-				}
-				TextPos originalStart=start;
-				TextPos originalEnd=end;
-				WString originalText=textElement->GetLines().GetText(start, end);
-				WString inputText=input;
-				if(callback->BeforeModify(start, end, originalText, inputText))
-				{
-					{
-						SpinLock::Scope scope(elementModifyLock);
-						end=textElement->GetLines().Modify(start, end, inputText);
-					}
-					callback->AfterModify(originalStart, originalEnd, originalText, start, end, inputText);
-					for(int i=0;i<textEditCallbacks.Count();i++)
-					{
-						textEditCallbacks[i]->TextEditNotify(originalStart, originalEnd, originalText, start, end, inputText);
-					}
-					Move(end, false);
-
-					if(textBoxCommonInterface)
-					{
-						textBoxCommonInterface->RaiseTextChanged();
-					}
-				}
-			}
-
-			bool GuiTextElementOperator::ProcessKey(int code, bool shift, bool ctrl)
-			{
-				for(int i=0;i<shortcutCommands.Count();i++)
-				{
-					if(shortcutCommands[i]->IsTheRightKey(ctrl, shift, code))
-					{
-						shortcutCommands[i]->Execute();
-						return true;
-					}
-				}
-				TextPos begin=textElement->GetCaretBegin();
-				TextPos end=textElement->GetCaretEnd();
-				switch(code)
-				{
-				case VKEY_UP:
-					{
-						end.row--;
-						Move(end, shift);
-					}
-					return true;
-				case VKEY_DOWN:
-					{
-						end.row++;
-						Move(end, shift);
-					}
-					return true;
-				case VKEY_LEFT:
-					{
-						if(ctrl)
-						{
-							Move(callback->GetLeftWord(end), shift);
-						}
-						else
-						{
-							if(end.column==0)
-							{
-								if(end.row>0)
-								{
-									end.row--;
-									end=textElement->GetLines().Normalize(end);
-									end.column=textElement->GetLines().GetLine(end.row).dataLength;
-								}
-							}
-							else
-							{
-								end.column--;
-							}
-							Move(end, shift);
-						}
-					}
-					return true;
-				case VKEY_RIGHT:
-					{
-						if(ctrl)
-						{
-							Move(callback->GetRightWord(end), shift);
-						}
-						else
-						{
-							if(end.column==textElement->GetLines().GetLine(end.row).dataLength)
-							{
-								if(end.row<textElement->GetLines().GetCount()-1)
-								{
-									end.row++;
-									end.column=0;
-								}
-							}
-							else
-							{
-								end.column++;
-							}
-							Move(end, shift);
-						}
-					}
-					return true;
-				case VKEY_HOME:
-					{
-						if(ctrl)
-						{
-							Move(TextPos(0, 0), shift);
-						}
-						else
-						{
-							end.column=0;
-							Move(end, shift);
-						}
-					}
-					return true;
-				case VKEY_END:
-					{
-						if(ctrl)
-						{
-							end.row=textElement->GetLines().GetCount()-1;
-						}
-						end.column=textElement->GetLines().GetLine(end.row).dataLength;
-						Move(end, shift);
-					}
-					return true;
-				case VKEY_PRIOR:
-					{
-						end.row-=callback->GetPageRows();
-						Move(end, shift);
-					}
-					return true;
-				case VKEY_NEXT:
-					{
-						end.row+=callback->GetPageRows();
-						Move(end, shift);
-					}
-					return true;
-				case VKEY_BACK:
-					if(!readonly)
-					{
-						if(ctrl && !shift)
-						{
-							ProcessKey(VKEY_LEFT, true, true);
-							ProcessKey(VKEY_BACK, false, false);
-						}
-						else if(!ctrl && shift)
-						{
-							ProcessKey(VKEY_UP, true, false);
-							ProcessKey(VKEY_BACK, false, false);
-						}
-						else
-						{
-							if(begin==end)
-							{
-								ProcessKey(VKEY_LEFT, true, false);
-							}
-							SetSelectionText(L"");
-						}
-						return true;
-					}
-					break;
-				case VKEY_DELETE:
-					if(!readonly)
-					{
-						if(ctrl && !shift)
-						{
-							ProcessKey(VKEY_RIGHT, true, true);
-							ProcessKey(VKEY_DELETE, false, false);
-						}
-						else if(!ctrl && shift)
-						{
-							ProcessKey(VKEY_DOWN, true, false);
-							ProcessKey(VKEY_DELETE, false, false);
-						}
-						else
-						{
-							if(begin==end)
-							{
-								ProcessKey(VKEY_RIGHT, true, false);
-							}
-							SetSelectionText(L"");
-						}
-						return true;
-					}
-					break;
-				}
-				return false;
-			}
-
-			void GuiTextElementOperator::OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				textElement->SetFocused(true);
-				textElement->SetCaretVisible(true);
-				UpdateCaretPoint();
-			}
-
-			void GuiTextElementOperator::OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				textElement->SetFocused(false);
-				textElement->SetCaretVisible(false);
-			}
-
-			void GuiTextElementOperator::OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				textElement->SetCaretVisible(!textElement->GetCaretVisible());
-			}
-
-			void GuiTextElementOperator::OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-			{
-				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
-				{
-					dragging=true;
-					TextPos pos=GetNearestTextPos(Point(arguments.x, arguments.y));
-					Move(pos, arguments.shift);
-				}
-			}
-
-			void GuiTextElementOperator::OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-			{
-				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
-				{
-					dragging=false;
-				}
-			}
-
-			void GuiTextElementOperator::OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-			{
-				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
-				{
-					if(dragging)
-					{
-						TextPos pos=GetNearestTextPos(Point(arguments.x, arguments.y));
-						Move(pos, true);
-					}
-				}
-			}
-
-			void GuiTextElementOperator::OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments)
-			{
-				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
-				{
-					if(ProcessKey(arguments.code, arguments.shift, arguments.ctrl))
-					{
-						arguments.handled=true;
-					}
-				}
-			}
-
-			void GuiTextElementOperator::OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments)
-			{
-				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
-				{
-					if(!readonly && arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && !arguments.ctrl)
-					{
-						SetSelectionText(WString(arguments.code));
-					}
-				}
-			}
-
-			GuiTextElementOperator::GuiTextElementOperator()
-				:textElement(0)
-				,textComposition(0)
-				,textControl(0)
-				,textBoxCommonInterface(0)
-				,callback(0)
-				,dragging(false)
-				,readonly(false)
-			{
-			}
-
-			GuiTextElementOperator::~GuiTextElementOperator()
-			{
-				for(int i=0;i<textEditCallbacks.Count();i++)
-				{
-					textEditCallbacks[i]->Detach();
-				}
-				textEditCallbacks.Clear();
-			}
-
-			void GuiTextElementOperator::Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl)
-			{
-				textElement=_textElement;
-				textComposition=_textComposition;
-				textControl=_textControl;
-				textComposition->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::IBeam));
-
-				GuiGraphicsComposition* focusableComposition=textControl->GetFocusableComposition();
-				focusableComposition->GetEventReceiver()->gotFocus.AttachMethod(this, &GuiTextElementOperator::OnGotFocus);
-				focusableComposition->GetEventReceiver()->lostFocus.AttachMethod(this, &GuiTextElementOperator::OnLostFocus);
-				focusableComposition->GetEventReceiver()->caretNotify.AttachMethod(this, &GuiTextElementOperator::OnCaretNotify);
-				textComposition->GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiTextElementOperator::OnLeftButtonDown);
-				textComposition->GetEventReceiver()->leftButtonUp.AttachMethod(this, &GuiTextElementOperator::OnLeftButtonUp);
-				textComposition->GetEventReceiver()->mouseMove.AttachMethod(this, &GuiTextElementOperator::OnMouseMove);
-				focusableComposition->GetEventReceiver()->keyDown.AttachMethod(this, &GuiTextElementOperator::OnKeyDown);
-				focusableComposition->GetEventReceiver()->charInput.AttachMethod(this, &GuiTextElementOperator::OnCharInput);
-
-				for(int i=0;i<textEditCallbacks.Count();i++)
-				{
-					textEditCallbacks[i]->Attach(textElement, elementModifyLock);
-				}
-			}
-			
-			GuiTextElementOperator::ICallback* GuiTextElementOperator::GetCallback()
-			{
-				return callback;
-			}
-
-			void GuiTextElementOperator::SetCallback(ICallback* value)
-			{
-				callback=value;
-			}
-
-			bool GuiTextElementOperator::AttachTextEditCallback(Ptr<ITextEditCallback> value)
-			{
-				if(textEditCallbacks.Contains(value.Obj()))
-				{
-					return false;
-				}
-				else
-				{
-					textEditCallbacks.Add(value);
-					if(textElement)
-					{
-						value->Attach(textElement, elementModifyLock);
-					}
-					return true;
-				}
-			}
-
-			bool GuiTextElementOperator::DetachTextEditCallback(Ptr<ITextEditCallback> value)
-			{
-				if(textEditCallbacks.Remove(value.Obj()))
-				{
-					value->Detach();
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			GuiTextBoxCommonInterface* GuiTextElementOperator::GetTextBoxCommonInterface()
-			{
-				return textBoxCommonInterface;
-			}
-
-			void GuiTextElementOperator::SetTextBoxCommonInterface(GuiTextBoxCommonInterface* value)
-			{
-				textBoxCommonInterface=value;
-			}
-
-			void GuiTextElementOperator::AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand)
-			{
-				shortcutCommands.Add(shortcutCommand);
-			}
-
-			elements::GuiColorizedTextElement* GuiTextElementOperator::GetTextElement()
-			{
-				return textElement;
-			}
-
-			compositions::GuiGraphicsComposition* GuiTextElementOperator::GetTextComposition()
-			{
-				return textComposition;
-			}
-
-			void GuiTextElementOperator::Select(TextPos begin, TextPos end)
-			{
-				Move(begin, false);
-				Move(end, true);
-			}
-
-			TextPos GuiTextElementOperator::GetNearestTextPos(Point point)
-			{
-				Point viewPosition=textElement->GetViewPosition();
-				Point mousePosition=Point(point.x+viewPosition.x, point.y+viewPosition.y);
-				TextPos pos=textElement->GetLines().GetTextPosFromPoint(mousePosition);
-				if(pos.column<textElement->GetLines().GetLine(pos.row).dataLength)
-				{
-					Rect rect=textElement->GetLines().GetRectFromTextPos(pos);
-					if(abs(rect.x1-mousePosition.x)>=abs(rect.x2-1-mousePosition.x))
-					{
-						pos.column++;
-					}
-				}
-				return pos;
-			}
-
-			WString GuiTextElementOperator::GetSelectionText()
-			{
-				TextPos selectionBegin=textElement->GetCaretBegin()<textElement->GetCaretEnd()?textElement->GetCaretBegin():textElement->GetCaretEnd();
-				TextPos selectionEnd=textElement->GetCaretBegin()>textElement->GetCaretEnd()?textElement->GetCaretBegin():textElement->GetCaretEnd();
-				return textElement->GetLines().GetText(selectionBegin, selectionEnd);
-			}
-
-			void GuiTextElementOperator::SetSelectionText(const WString& value)
-			{
-				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value);
-			}
-
-			void GuiTextElementOperator::SetText(const WString& value)
-			{
-				if(textElement)
-				{
-					TextPos end;
-					if(textElement->GetLines().GetCount()>0)
-					{
-						end.row=textElement->GetLines().GetCount()-1;
-						end.column=textElement->GetLines().GetLine(end.row).dataLength;
-					}
-					Modify(TextPos(), end, value);
-				}
-			}
-
-			bool GuiTextElementOperator::CanCut()
-			{
-				return !readonly && textElement->GetCaretBegin()!=textElement->GetCaretEnd() && textElement->GetPasswordChar()==L'\0';
-			}
-
-			bool GuiTextElementOperator::CanCopy()
-			{
-				return textElement->GetCaretBegin()!=textElement->GetCaretEnd() && textElement->GetPasswordChar()==L'\0';
-			}
-
-			bool GuiTextElementOperator::CanPaste()
-			{
-				return !readonly && GetCurrentController()->ClipboardService()->ContainsText() && textElement->GetPasswordChar()==L'\0';
-			}
-
-			void GuiTextElementOperator::SelectAll()
-			{
-				int row=textElement->GetLines().GetCount()-1;
-				Move(TextPos(0, 0), false);
-				Move(TextPos(row, textElement->GetLines().GetLine(row).dataLength), true);
-			}
-
-			bool GuiTextElementOperator::Cut()
-			{
-				if(CanCut())
-				{
-					GetCurrentController()->ClipboardService()->SetText(GetSelectionText());
-					SetSelectionText(L"");
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool GuiTextElementOperator::Copy()
-			{
-				if(CanCopy())
-				{
-					GetCurrentController()->ClipboardService()->SetText(GetSelectionText());
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool GuiTextElementOperator::Paste()
-			{
-				if(CanPaste())
-				{
-					SetSelectionText(GetCurrentController()->ClipboardService()->GetText());
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-			
-			bool GuiTextElementOperator::GetReadonly()
-			{
-				return readonly;
-			}
-
-			void GuiTextElementOperator::SetReadonly(bool value)
-			{
-				readonly=value;
-			}
-
-/***********************************************************************
-GuiTextBoxColorizer
-***********************************************************************/
-
-			void GuiTextBoxColorizerBase::ColorizerThreadProc(void* argument)
-			{
-				GuiTextBoxColorizerBase* colorizer=(GuiTextBoxColorizerBase*)argument;
-				while(!colorizer->isFinalizing)
-				{
-					int lineIndex=-1;
-					wchar_t* text=0;
-					unsigned __int32* colors=0;
-					int length=0;
-					int lexerState=-1;
-					int contextState=-1;
-
-					{
-						SpinLock::Scope scope(*colorizer->elementModifyLock);
-						if(colorizer->colorizedLineCount>=colorizer->element->GetLines().GetCount())
-						{
-							colorizer->isColorizerRunning=false;
-							break;
-						}
-
-						lineIndex=colorizer->colorizedLineCount++;
-						TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
-						length=line.dataLength;
-						text=new wchar_t[length+2];
-						colors=new unsigned __int32[length+2];
-						memcpy(text, line.text, sizeof(wchar_t)*length);
-						text[length]=L'\r';
-						text[length+1]=L'\n';
-						lexerState=lineIndex==0?colorizer->GetLexerStartState():colorizer->element->GetLines().GetLine(lineIndex-1).lexerFinalState;
-						contextState=lineIndex==0?colorizer->GetContextStartState():colorizer->element->GetLines().GetLine(lineIndex-1).contextFinalState;
-					}
-
-					colorizer->ColorizeLineWithCRLF(text, colors, length+2, lexerState, contextState);
-
-					{
-						SpinLock::Scope scope(*colorizer->elementModifyLock);
-						if(lineIndex<colorizer->colorizedLineCount && lineIndex<colorizer->element->GetLines().GetCount())
-						{
-							TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
-							line.lexerFinalState=lexerState;
-							line.contextFinalState=contextState;
-							for(int i=0;i<length;i++)
-							{
-								line.att[i].colorIndex=colors[i];
-							}
-						}
-						delete[] text;
-						delete[] colors;
-					}
-				}
-				colorizer->colorizerRunningEvent.Leave();
-			}
-
-			void GuiTextBoxColorizerBase::StartColorizer()
-			{
-				if(!isColorizerRunning)
-				{
-					isColorizerRunning=true;
-					colorizerRunningEvent.Enter();
-					ThreadPoolLite::Queue(&GuiTextBoxColorizerBase::ColorizerThreadProc, this);
-				}
-			}
-
-			void GuiTextBoxColorizerBase::StopColorizer()
-			{
-				isFinalizing=true;
-				colorizerRunningEvent.Enter();
-				colorizerRunningEvent.Leave();
-				colorizedLineCount=0;
-				isFinalizing=false;
-			}
-
-			GuiTextBoxColorizerBase::GuiTextBoxColorizerBase()
-				:element(0)
-				,elementModifyLock(0)
-				,colorizedLineCount(0)
-				,isColorizerRunning(false)
-				,isFinalizing(false)
-			{
-			}
-
-			GuiTextBoxColorizerBase::~GuiTextBoxColorizerBase()
-			{
-				StopColorizer();
-			}
-
-			void GuiTextBoxColorizerBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
-			{
-				if(_element)
-				{
-					SpinLock::Scope scope(_elementModifyLock);
-					element=_element;
-					elementModifyLock=&_elementModifyLock;
-					StartColorizer();
-				}
-			}
-
-			void GuiTextBoxColorizerBase::Detach()
-			{
-				if(element && elementModifyLock)
-				{
-					StopColorizer();
-					SpinLock::Scope scope(*elementModifyLock);
-					element=0;
-					elementModifyLock=0;
-				}
-			}
-
-			void GuiTextBoxColorizerBase::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
-			{
-				if(element && elementModifyLock)
-				{
-					SpinLock::Scope scope(*elementModifyLock);
-					int line=originalStart.row<originalEnd.row?originalStart.row:originalEnd.row;
-					if(colorizedLineCount>line)
-					{
-						colorizedLineCount=line;
-					}
-					StartColorizer();
-				}
-			}
-
-/***********************************************************************
-GuiTextBoxRegexColorizer
-***********************************************************************/
-
-			struct GuiTextBoxRegexColorizerProcData
-			{
-				GuiTextBoxRegexColorizer*		colorizer;
-				const wchar_t*					text;
-				unsigned __int32*				colors;
-				int								contextState;
-			};
-
-			void GuiTextBoxRegexColorizer::ColorizerProc(void* argument, vint start, vint length, vint token)
-			{
-				GuiTextBoxRegexColorizerProcData& data=*(GuiTextBoxRegexColorizerProcData*)argument;
-				data.colorizer->ColorizeTokenContextSensitive(data.text, start, length, token, data.contextState);
-				for(int i=0;i<length;i++)
-				{
-					data.colors[start+i]=token+1;
-				}
-			}
-
-			GuiTextBoxRegexColorizer::GuiTextBoxRegexColorizer()
-			{
-				colors.Resize(1);
-			}
-
-			GuiTextBoxRegexColorizer::~GuiTextBoxRegexColorizer()
-			{
-			}
-
-			elements::text::ColorEntry GuiTextBoxRegexColorizer::GetDefaultColor()
-			{
-				return defaultColor;
-			}
-
-			collections::List<WString>& GuiTextBoxRegexColorizer::GetTokenRegexes()
-			{
-				return tokenRegexes;
-			}
-
-			collections::List<elements::text::ColorEntry>& GuiTextBoxRegexColorizer::GetTokenColors()
-			{
-				return tokenColors;
-			}
-
-			collections::List<elements::text::ColorEntry>& GuiTextBoxRegexColorizer::GetExtraTokenColors()
-			{
-				return extraTokenColors;
-			}
-
-			int GuiTextBoxRegexColorizer::GetExtraTokenIndexStart()
-			{
-				if(lexer)
-				{
-					return tokenColors.Count();
-				}
-				else
-				{
-					return -1;
-				}
-			}
-
-			bool GuiTextBoxRegexColorizer::SetDefaultColor(elements::text::ColorEntry value)
-			{
-				if(lexer)
-				{
-					return false;
-				}
-				else
-				{
-					defaultColor=value;
-					return true;
-				}
-			}
-
-			int GuiTextBoxRegexColorizer::AddToken(const WString& regex, elements::text::ColorEntry color)
-			{
-				if(lexer)
-				{
-					return -1;
-				}
-				else
-				{
-					tokenRegexes.Add(regex);
-					tokenColors.Add(color);
-					return tokenColors.Count()-1;
-				}
-			}
-
-			int GuiTextBoxRegexColorizer::AddExtraToken(elements::text::ColorEntry color)
-			{
-				if(lexer)
-				{
-					return -1;
-				}
-				else
-				{
-					extraTokenColors.Add(color);
-					return extraTokenColors.Count()-1;
-				}
-			}
-
-			bool GuiTextBoxRegexColorizer::Setup()
-			{
-				if(lexer || tokenRegexes.Count()==0)
-				{
-					return false;
-				}
-				else
-				{
-					lexer=new regex::RegexLexer(tokenRegexes);
-					colors.Resize(1+tokenRegexes.Count()+extraTokenColors.Count());
-					colors[0]=defaultColor;
-					for(int i=0;i<tokenColors.Count();i++)
-					{
-						colors[i+1]=tokenColors[i];
-					}
-					for(int i=0;i<extraTokenColors.Count();i++)
-					{
-						colors[i+1+tokenColors.Count()]=extraTokenColors[i];
-					}
-					colorizer=new regex::RegexLexerColorizer(lexer->Colorize());
-					return true;
-				}
-			}
-
-			void GuiTextBoxRegexColorizer::ColorizeTokenContextSensitive(const wchar_t* text, vint start, vint length, vint& token, int& contextState)
-			{
-			}
-
-			int GuiTextBoxRegexColorizer::GetLexerStartState()
-			{
-				return lexer?colorizer->GetStartState():-1;
-			}
-
-			int GuiTextBoxRegexColorizer::GetContextStartState()
-			{
-				return 0;
-			}
-
-			void GuiTextBoxRegexColorizer::ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)
-			{
-				if(lexer)
-				{
-					GuiTextBoxRegexColorizerProcData data;
-					data.colorizer=this;
-					data.text=text;
-					data.colors=colors;
-					data.contextState=contextState;
-
-					memset(colors, 0, sizeof(*colors)*length);
-					colorizer->Reset(lexerState);
-					colorizer->Colorize(text, length, &GuiTextBoxRegexColorizer::ColorizerProc, &data);
-
-					lexerState=colorizer->GetCurrentState();
-					contextState=data.contextState;
-				}
-				else
-				{
-					lexerState=-1;
-					contextState=-1;
-				}
-			}
-
-			const GuiTextBoxRegexColorizer::ColorArray& GuiTextBoxRegexColorizer::GetColors()
-			{
-				return colors;
-			}
-
-/***********************************************************************
-GuiGeneralUndoRedoProcessor
-***********************************************************************/
-
-			GuiGeneralUndoRedoProcessor::GuiGeneralUndoRedoProcessor()
-				:firstFutureStep(0)
-				,savedStep(0)
-				,performingUndoRedo(false)
-			{
-			}
-
-			GuiGeneralUndoRedoProcessor::~GuiGeneralUndoRedoProcessor()
-			{
-			}
-
-			void GuiGeneralUndoRedoProcessor::PushStep(Ptr<IEditStep> step)
-			{
-				if(!performingUndoRedo)
-				{
-					if(firstFutureStep<savedStep)
-					{
-						savedStep=-1;
-					}
-
-					int count=steps.Count()-firstFutureStep;
-					if(count>0)
-					{
-						steps.RemoveRange(firstFutureStep, count);
-					}
-				
-					steps.Add(step);
-					firstFutureStep=steps.Count();
-				}
-			}
-
-			bool GuiGeneralUndoRedoProcessor::CanUndo()
-			{
-				return firstFutureStep>0;
-			}
-
-			bool GuiGeneralUndoRedoProcessor::CanRedo()
-			{
-				return steps.Count()>firstFutureStep;
-			}
-
-			void GuiGeneralUndoRedoProcessor::ClearUndoRedo()
-			{
-				if(!performingUndoRedo)
-				{
-					steps.Clear();
-					firstFutureStep=0;
-					savedStep=-1;
-				}
-			}
-
-			bool GuiGeneralUndoRedoProcessor::GetModified()
-			{
-				return firstFutureStep!=savedStep;
-			}
-
-			void GuiGeneralUndoRedoProcessor::NotifyModificationSaved()
-			{
-				if(!performingUndoRedo)
-				{
-					savedStep=firstFutureStep;
-				}
-			}
-
-			bool GuiGeneralUndoRedoProcessor::Undo()
-			{
-				if(!CanUndo()) return false;
-				performingUndoRedo=true;
-				firstFutureStep--;
-				steps[firstFutureStep]->Undo();
-				performingUndoRedo=false;
-				return true;
-			}
-
-			bool GuiGeneralUndoRedoProcessor::Redo()
-			{
-				if(!CanRedo()) return false;
-				performingUndoRedo=true;
-				firstFutureStep++;
-				steps[firstFutureStep-1]->Redo();
-				performingUndoRedo=false;
-				return true;
-			}
-
-/***********************************************************************
-GuiTextBoxUndoRedoProcessor::EditStep
-***********************************************************************/
-
-			void GuiTextBoxUndoRedoProcessor::EditStep::Undo()
-			{
-				processor->textElementOperator->Select(inputStart, inputEnd);
-				processor->textElementOperator->SetSelectionText(originalText);
-				processor->textElementOperator->Select(originalStart, originalEnd);
-			}
-
-			void GuiTextBoxUndoRedoProcessor::EditStep::Redo()
-			{
-				processor->textElementOperator->Select(originalStart, originalEnd);
-				processor->textElementOperator->SetSelectionText(inputText);
-				processor->textElementOperator->Select(inputStart, inputEnd);
-			}
-
-/***********************************************************************
-GuiTextBoxUndoRedoProcessor
-***********************************************************************/
-
-			GuiTextBoxUndoRedoProcessor::GuiTextBoxUndoRedoProcessor(GuiTextElementOperator* _textElementOperator)
-				:textElementOperator(_textElementOperator)
-			{
-			}
-
-			GuiTextBoxUndoRedoProcessor::~GuiTextBoxUndoRedoProcessor()
-			{
-			}
-
-			void GuiTextBoxUndoRedoProcessor::Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)
-			{
-			}
-
-			void GuiTextBoxUndoRedoProcessor::Detach()
-			{
-				ClearUndoRedo();
-			}
-
-			void GuiTextBoxUndoRedoProcessor::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
-			{
-				Ptr<EditStep> step=new EditStep;
-				step->processor=this;
-				step->originalStart=originalStart;
-				step->originalEnd=originalEnd;
-				step->originalText=originalText;
-				step->inputStart=inputStart;
-				step->inputEnd=inputEnd;
-				step->inputText=inputText;
-				PushStep(step);
-			}
-
-/***********************************************************************
-GuiTextBoxCommonInterface
-***********************************************************************/
-
-			void GuiTextBoxCommonInterface::RaiseTextChanged()
-			{
-				textControl->TextChanged.Execute(textControl->GetNotifyEventArguments());
-			}
-
-			void GuiTextBoxCommonInterface::RaiseSelectionChanged()
-			{
-				SelectionChanged.Execute(textControl->GetNotifyEventArguments());
-			}
-
-			void GuiTextBoxCommonInterface::InitializeCommonInterface(GuiControl* _textControl, GuiTextElementOperator* _textElementOperator)
-			{
-				textElementOperator=_textElementOperator;
-				textControl=_textControl;
-				SelectionChanged.SetAssociatedComposition(textControl->GetBoundsComposition());
-				textElementOperator->SetTextBoxCommonInterface(this);
-
-				undoRedoProcessor=new GuiTextBoxUndoRedoProcessor(textElementOperator);
-				textElementOperator->AttachTextEditCallback(undoRedoProcessor);
-
-				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'A', Func<void()>(this, &GuiTextBoxCommonInterface::SelectAll)));
-				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'Z', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Undo))));
-				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'Y', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Redo))));
-				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'X', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Cut))));
-				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'C', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Copy))));
-				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'V', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Paste))));
-			}
-
-			GuiTextBoxCommonInterface::GuiTextBoxCommonInterface()
-				:textElementOperator(0)
-				,textControl(0)
-			{
-			}
-
-			GuiTextBoxCommonInterface::~GuiTextBoxCommonInterface()
-			{
-				if(colorizer)
-				{
-					textElementOperator->DetachTextEditCallback(colorizer);
-					colorizer=0;
-				}
-				if(undoRedoProcessor)
-				{
-					textElementOperator->DetachTextEditCallback(undoRedoProcessor);
-					undoRedoProcessor=0;
-				}
-			}
-
-			compositions::GuiGraphicsComposition* GuiTextBoxCommonInterface::GetTextComposition()
-			{
-				return textElementOperator->GetTextComposition();
-			}
-
-			Ptr<GuiTextBoxColorizerBase> GuiTextBoxCommonInterface::GetColorizer()
-			{
-				return colorizer;
-			}
-
-			void GuiTextBoxCommonInterface::SetColorizer(Ptr<GuiTextBoxColorizerBase> value)
-			{
-				if(textElementOperator)
-				{
-					if(colorizer)
-					{
-						textElementOperator->DetachTextEditCallback(colorizer);
-					}
-					colorizer=value;
-					if(colorizer)
-					{
-						textElementOperator->AttachTextEditCallback(colorizer);
-						textElementOperator->GetTextElement()->SetColors(colorizer->GetColors());
-					}
-				}
-			}
-
-			bool GuiTextBoxCommonInterface::CanUndo()
-			{
-				return undoRedoProcessor->CanUndo();
-			}
-
-			bool GuiTextBoxCommonInterface::CanRedo()
-			{
-				return undoRedoProcessor->CanRedo();
-			}
-
-			void GuiTextBoxCommonInterface::ClearUndoRedo()
-			{
-				undoRedoProcessor->ClearUndoRedo();
-			}
-
-			bool GuiTextBoxCommonInterface::GetModified()
-			{
-				return undoRedoProcessor->GetModified();
-			}
-
-			void GuiTextBoxCommonInterface::NotifyModificationSaved()
-			{
-				undoRedoProcessor->NotifyModificationSaved();
-			}
-
-			bool GuiTextBoxCommonInterface::Undo()
-			{
-				return undoRedoProcessor->Undo();
-			}
-
-			bool GuiTextBoxCommonInterface::Redo()
-			{
-				return undoRedoProcessor->Redo();
-			}
-
-			bool GuiTextBoxCommonInterface::CanCut()
-			{
-				return textElementOperator->CanCut();
-			}
-
-			bool GuiTextBoxCommonInterface::CanCopy()
-			{
-				return textElementOperator->CanCopy();
-			}
-
-			bool GuiTextBoxCommonInterface::CanPaste()
-			{
-				return textElementOperator->CanPaste();
-			}
-
-			void GuiTextBoxCommonInterface::SelectAll()
-			{
-				textElementOperator->SelectAll();
-			}
-
-			bool GuiTextBoxCommonInterface::Cut()
-			{
-				return textElementOperator->Cut();
-			}
-
-			bool GuiTextBoxCommonInterface::Copy()
-			{
-				return textElementOperator->Copy();
-			}
-
-			bool GuiTextBoxCommonInterface::Paste()
-			{
-				return textElementOperator->Paste();
-			}
-
-			WString GuiTextBoxCommonInterface::GetRowText(int row)
-			{
-				TextPos start=textElementOperator->GetTextElement()->GetLines().Normalize(TextPos(row, 0));
-				TextPos end=TextPos(start.row, textElementOperator->GetTextElement()->GetLines().GetLine(start.row).dataLength);
-				return GetFragmentText(start, end);
-			}
-
-			WString GuiTextBoxCommonInterface::GetFragmentText(TextPos start, TextPos end)
-			{
-				start=textElementOperator->GetTextElement()->GetLines().Normalize(start);
-				end=textElementOperator->GetTextElement()->GetLines().Normalize(end);
-				return textElementOperator->GetTextElement()->GetLines().GetText(start, end);
-			}
-				
-			int GuiTextBoxCommonInterface::GetRowWidth(int row)
-			{
-				return textElementOperator->GetTextElement()->GetLines().GetRowWidth(row);
-			}
-
-			int GuiTextBoxCommonInterface::GetRowHeight()
-			{
-				return textElementOperator->GetTextElement()->GetLines().GetRowHeight();
-			}
-
-			int GuiTextBoxCommonInterface::GetMaxWidth()
-			{
-				return textElementOperator->GetTextElement()->GetLines().GetMaxWidth();
-			}
-
-			int GuiTextBoxCommonInterface::GetMaxHeight()
-			{
-				return textElementOperator->GetTextElement()->GetLines().GetMaxHeight();
-			}
-
-			TextPos GuiTextBoxCommonInterface::GetTextPosFromPoint(Point point)
-			{
-				Point view=textElementOperator->GetTextElement()->GetViewPosition();
-				return textElementOperator->GetTextElement()->GetLines().GetTextPosFromPoint(Point(point.x+view.x, point.y+view.y));
-			}
-
-			Point GuiTextBoxCommonInterface::GetPointFromTextPos(TextPos pos)
-			{
-				Point view=textElementOperator->GetTextElement()->GetViewPosition();
-				Point result=textElementOperator->GetTextElement()->GetLines().GetPointFromTextPos(pos);
-				return Point(result.x-view.x, result.y-view.y);
-			}
-
-			Rect GuiTextBoxCommonInterface::GetRectFromTextPos(TextPos pos)
-			{
-				Point view=textElementOperator->GetTextElement()->GetViewPosition();
-				Rect result=textElementOperator->GetTextElement()->GetLines().GetRectFromTextPos(pos);
-				return Rect(Point(result.x1-view.x, result.y1-view.y), result.GetSize());
-			}
-
-			TextPos GuiTextBoxCommonInterface::GetNearestTextPos(Point point)
-			{
-				return textElementOperator->GetNearestTextPos(point);
-			}
-
-			TextPos GuiTextBoxCommonInterface::GetCaretBegin()
-			{
-				return textElementOperator->GetTextElement()->GetCaretBegin();
-			}
-
-			TextPos GuiTextBoxCommonInterface::GetCaretEnd()
-			{
-				return textElementOperator->GetTextElement()->GetCaretEnd();
-			}
-
-			TextPos GuiTextBoxCommonInterface::GetCaretSmall()
-			{
-				TextPos c1=GetCaretBegin();
-				TextPos c2=GetCaretBegin();
-				return c1<c2?c1:c2;
-			}
-
-			TextPos GuiTextBoxCommonInterface::GetCaretLarge()
-			{
-				TextPos c1=GetCaretBegin();
-				TextPos c2=GetCaretBegin();
-				return c1>c2?c1:c2;
-			}
-
-			void GuiTextBoxCommonInterface::Select(TextPos begin, TextPos end)
-			{
-				begin=textElementOperator->GetTextElement()->GetLines().Normalize(begin);
-				end=textElementOperator->GetTextElement()->GetLines().Normalize(end);
-				textElementOperator->Select(begin, end);
-			}
-
-			WString GuiTextBoxCommonInterface::GetSelectionText()
-			{
-				return textElementOperator->GetSelectionText();
-			}
-
-			void GuiTextBoxCommonInterface::SetSelectionText(const WString& value)
-			{
-				return textElementOperator->SetSelectionText(value);
-			}
-
-			bool GuiTextBoxCommonInterface::GetReadonly()
-			{
-				return textElementOperator->GetReadonly();
-			}
-
-			void GuiTextBoxCommonInterface::SetReadonly(bool value)
-			{
-				textElementOperator->SetReadonly(value);
-			}
-
-/***********************************************************************
-GuiMultilineTextBox::StyleController
-***********************************************************************/
-
-			GuiMultilineTextBox::StyleController::StyleController(GuiScrollView::IStyleProvider* styleProvider)
-				:GuiScrollView::StyleController(styleProvider)
-				,textElement(0)
-				,textComposition(0)
-			{
-				textElement=GuiColorizedTextElement::Create();
-
-				textComposition=new GuiBoundsComposition;
-				textComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				textComposition->SetOwnedElement(textElement);
-
-				GetInternalContainerComposition()->AddChild(textComposition);
-			}
-
-			GuiMultilineTextBox::StyleController::~StyleController()
-			{
-			}
-
-			elements::GuiColorizedTextElement* GuiMultilineTextBox::StyleController::GetTextElement()
-			{
-				return textElement;
-			}
-
-			compositions::GuiGraphicsComposition* GuiMultilineTextBox::StyleController::GetTextComposition()
-			{
-				return textComposition;
-			}
-
-			GuiTextElementOperator* GuiMultilineTextBox::StyleController::GetTextElementOperator()
-			{
-				return &textElementOperator;
-			}
-
-			void GuiMultilineTextBox::StyleController::SetViewPosition(Point value)
-			{
-				textElement->SetViewPosition(value);
-			}
-
-			void GuiMultilineTextBox::StyleController::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
-			{
-				GuiScrollView::StyleController::SetFocusableComposition(value);
-				textElementOperator.Install(textElement, textComposition, scrollView);
-				if(!textElementOperator.GetCallback())
-				{
-					if(!defaultCallback)
-					{
-						defaultCallback=new TextElementOperatorCallback(dynamic_cast<GuiMultilineTextBox*>(scrollView));
-					}
-					textElementOperator.SetCallback(defaultCallback.Obj());
-				}
-			}
-
-			WString GuiMultilineTextBox::StyleController::GetText()
-			{
-				return textElement->GetLines().GetText();
-			}
-
-			void GuiMultilineTextBox::StyleController::SetText(const WString& value)
-			{
-				textElementOperator.SetText(value);
-				textElement->SetCaretBegin(TextPos(0, 0));
-				textElement->SetCaretEnd(TextPos(0, 0));
-				GuiScrollView::StyleController::SetText(value);
-			}
-
-			void GuiMultilineTextBox::StyleController::SetFont(const FontProperties& value)
-			{
-				textElement->SetFont(value);
-				GuiScrollView::StyleController::SetFont(value);
-			}
-
-			void GuiMultilineTextBox::StyleController::SetVisuallyEnabled(bool value)
-			{
-				textElement->SetVisuallyEnabled(value);
-				GuiScrollView::StyleController::SetVisuallyEnabled(value);
-			}
-
-/***********************************************************************
-GuiMultilineTextBox::DefaultTextElementOperatorCallback
-***********************************************************************/
-
-			GuiMultilineTextBox::TextElementOperatorCallback::TextElementOperatorCallback(GuiMultilineTextBox* _textControl)
-				:GuiTextElementOperator::DefaultCallback(
-					dynamic_cast<StyleController*>(_textControl->GetStyleController())->GetTextElement(),
-					dynamic_cast<StyleController*>(_textControl->GetStyleController())->GetTextComposition()
-					)
-				,textControl(_textControl)
-				,textController(dynamic_cast<StyleController*>(_textControl->GetStyleController()))
-			{
-			}
-
-			void GuiMultilineTextBox::TextElementOperatorCallback::AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
-			{
-				textControl->CalculateView();
-			}
-			
-			void GuiMultilineTextBox::TextElementOperatorCallback::ScrollToView(Point point)
-			{
-				point.x+=TextMargin;
-				point.y+=TextMargin;
-				Point oldPoint(textControl->GetHorizontalScroll()->GetPosition(), textControl->GetVerticalScroll()->GetPosition());
-				int marginX=0;
-				int marginY=0;
-				if(oldPoint.x<point.x)
-				{
-					marginX=TextMargin;
-				}
-				else if(oldPoint.x>point.x)
-				{
-					marginX=-TextMargin;
-				}
-				if(oldPoint.y<point.y)
-				{
-					marginY=TextMargin;
-				}
-				else if(oldPoint.y>point.y)
-				{
-					marginY=-TextMargin;
-				}
-				textControl->GetHorizontalScroll()->SetPosition(point.x+marginX);
-				textControl->GetVerticalScroll()->SetPosition(point.y+marginY);
-			}
-
-			int GuiMultilineTextBox::TextElementOperatorCallback::GetTextMargin()
-			{
-				return TextMargin;
-			}
-
-/***********************************************************************
-GuiMultilineTextBox
-***********************************************************************/
-
-			void GuiMultilineTextBox::CalculateViewAndSetScroll()
-			{
-				CalculateView();
-				int smallMove=styleController->GetTextElement()->GetLines().GetRowHeight();
-				int bigMove=smallMove*5;
-				styleController->GetHorizontalScroll()->SetSmallMove(smallMove);
-				styleController->GetHorizontalScroll()->SetBigMove(bigMove);
-				styleController->GetVerticalScroll()->SetSmallMove(smallMove);
-				styleController->GetVerticalScroll()->SetBigMove(bigMove);
-			}
-
-			void GuiMultilineTextBox::OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)
-			{
-				CalculateViewAndSetScroll();
-				GuiScrollView::OnRenderTargetChanged(renderTarget);
-			}
-
-			Size GuiMultilineTextBox::QueryFullSize()
-			{
-				text::TextLines& lines=styleController->GetTextElement()->GetLines();
-				return Size(lines.GetMaxWidth()+TextMargin*2, lines.GetMaxHeight()+TextMargin*2);
-			}
-
-			void GuiMultilineTextBox::UpdateView(Rect viewBounds)
-			{
-				styleController->SetViewPosition(viewBounds.LeftTop()-Size(TextMargin, TextMargin));
-			}
-
-			void GuiMultilineTextBox::OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-			{
-				if(GetVisuallyEnabled())
-				{
-					boundsComposition->GetRelatedGraphicsHost()->SetFocus(boundsComposition);
-				}
-			}
-
-			GuiMultilineTextBox::GuiMultilineTextBox(GuiMultilineTextBox::IStyleProvider* styleProvider)
-				:GuiScrollView(new StyleController(styleProvider))
-			{
-				styleController=dynamic_cast<StyleController*>(GetStyleController());
-
-				boundsComposition->GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiMultilineTextBox::OnBoundsMouseButtonDown);
-				boundsComposition->GetEventReceiver()->middleButtonDown.AttachMethod(this, &GuiMultilineTextBox::OnBoundsMouseButtonDown);
-				boundsComposition->GetEventReceiver()->rightButtonDown.AttachMethod(this, &GuiMultilineTextBox::OnBoundsMouseButtonDown);
-				SetFocusableComposition(boundsComposition);
-
-				InitializeCommonInterface(this, styleController->GetTextElementOperator());
-			}
-
-			GuiMultilineTextBox::~GuiMultilineTextBox()
-			{
-			}
-
-			const WString& GuiMultilineTextBox::GetText()
-			{
-				text=styleController->GetText();
-				return text;
-			}
-
-			void GuiMultilineTextBox::SetText(const WString& value)
-			{
-				text=GetText();
-				GuiScrollView::SetText(value);
-				CalculateView();
-			}
-
-			void GuiMultilineTextBox::SetFont(const FontProperties& value)
-			{
-				GuiScrollView::SetFont(value);
-				CalculateViewAndSetScroll();
-			}
-
-/***********************************************************************
-GuiSinglelineTextBox::StyleController
-***********************************************************************/
-
-			GuiSinglelineTextBox::StyleController::StyleController(IStyleProvider* _styleProvider)
-				:styleProvider(_styleProvider)
-				,boundsComposition(0)
-				,containerComposition(0)
-				,textBox(0)
-				,textElement(0)
-				,textComposition(0)
-			{
-				boundsComposition=new GuiBoundsComposition;
-				containerComposition=styleProvider->InstallBackground(boundsComposition);
-
-				textElement=GuiColorizedTextElement::Create();
-				textElement->SetViewPosition(Point(-TextMargin, -TextMargin));
-
-				textCompositionTable=new GuiTableComposition;
-				textCompositionTable->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				textCompositionTable->SetRowsAndColumns(3, 1);
-				textCompositionTable->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
-				textCompositionTable->SetRowOption(1, GuiCellOption::AbsoluteOption(0));
-				textCompositionTable->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
-				textCompositionTable->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
-				containerComposition->AddChild(textCompositionTable);
-
-				textComposition=new GuiCellComposition;
-				textComposition->SetOwnedElement(textElement);
-				textCompositionTable->AddChild(textComposition);
-				textComposition->SetSite(1, 0, 1, 1);
-
-				styleProvider->AssociateStyleController(this);
-			}
-
-			GuiSinglelineTextBox::StyleController::~StyleController()
-			{
-			}
-
-			void GuiSinglelineTextBox::StyleController::SetTextBox(GuiSinglelineTextBox* value)
-			{
-				textBox=value;
-			}
-
-			void GuiSinglelineTextBox::StyleController::RearrangeTextElement()
-			{
-				textCompositionTable->SetRowOption(1, GuiCellOption::AbsoluteOption(textElement->GetLines().GetRowHeight()+2*TextMargin));
-			}
-
-			compositions::GuiBoundsComposition* GuiSinglelineTextBox::StyleController::GetBoundsComposition()
-			{
-				return boundsComposition;
-			}
-
-			compositions::GuiGraphicsComposition* GuiSinglelineTextBox::StyleController::GetContainerComposition()
-			{
-				return containerComposition;
-			}
-
-			void GuiSinglelineTextBox::StyleController::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
-			{
-				styleProvider->SetFocusableComposition(value);
-				textElementOperator.Install(textElement, textComposition, textBox);
-				if(!textElementOperator.GetCallback())
-				{
-					if(!defaultCallback)
-					{
-						defaultCallback=new TextElementOperatorCallback(textBox);
-					}
-					textElementOperator.SetCallback(defaultCallback.Obj());
-				}
-			}
-
-			WString GuiSinglelineTextBox::StyleController::GetText()
-			{
-				return textElement->GetLines().GetText();
-			}
-
-			void GuiSinglelineTextBox::StyleController::SetText(const WString& value)
-			{
-				textElementOperator.SetText(value);
-				textElement->SetCaretBegin(TextPos(0, 0));
-				textElement->SetCaretEnd(TextPos(0, 0));
-				styleProvider->SetText(value);
-			}
-
-			void GuiSinglelineTextBox::StyleController::SetFont(const FontProperties& value)
-			{
-				textElement->SetFont(value);
-				styleProvider->SetFont(value);
-			}
-
-			void GuiSinglelineTextBox::StyleController::SetVisuallyEnabled(bool value)
-			{
-				textElement->SetVisuallyEnabled(value);
-				styleProvider->SetVisuallyEnabled(value);
-			}
-
-			elements::GuiColorizedTextElement* GuiSinglelineTextBox::StyleController::GetTextElement()
-			{
-				return textElement;
-			}
-
-			compositions::GuiGraphicsComposition* GuiSinglelineTextBox::StyleController::GetTextComposition()
-			{
-				return textComposition;
-			}
-
-			GuiTextElementOperator* GuiSinglelineTextBox::StyleController::GetTextElementOperator()
-			{
-				return &textElementOperator;
-			}
-
-			void GuiSinglelineTextBox::StyleController::SetViewPosition(Point value)
-			{
-				textElement->SetViewPosition(value);
-			}
-
-/***********************************************************************
-GuiSinglelineTextBox::DefaultTextElementOperatorCallback
-***********************************************************************/
-
-			GuiSinglelineTextBox::TextElementOperatorCallback::TextElementOperatorCallback(GuiSinglelineTextBox* _textControl)
-				:GuiTextElementOperator::DefaultCallback(
-					dynamic_cast<StyleController*>(_textControl->GetStyleController())->GetTextElement(),
-					dynamic_cast<StyleController*>(_textControl->GetStyleController())->GetTextComposition()
-					)
-				,textControl(_textControl)
-				,textController(dynamic_cast<StyleController*>(_textControl->GetStyleController()))
-			{
-			}
-
-			bool GuiSinglelineTextBox::TextElementOperatorCallback::BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)
-			{
-				int length=inputText.Length();
-				const wchar_t* input=inputText.Buffer();
-				for(int i=0;i<length;i++)
-				{
-					if(*input==0 || *input==L'\r' || *input==L'\n')
-					{
-						length=i;
-						break;
-					}
-				}
-				if(length!=inputText.Length())
-				{
-					inputText=inputText.Left(length);
-				}
-				return true;
-			}
-
-			void GuiSinglelineTextBox::TextElementOperatorCallback::AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
-			{
-			}
-			
-			void GuiSinglelineTextBox::TextElementOperatorCallback::ScrollToView(Point point)
-			{
-				int newX=point.x;
-				int oldX=textElement->GetViewPosition().x;
-				int marginX=0;
-				if(oldX<newX)
-				{
-					marginX=TextMargin;
-				}
-				else if(oldX>newX)
-				{
-					marginX=-TextMargin;
-				}
-
-				newX+=marginX;
-				int minX=-TextMargin;
-				int maxX=textElement->GetLines().GetMaxWidth()+TextMargin-textComposition->GetBounds().Width();
-				if(newX>=maxX)
-				{
-					newX=maxX-1;
-				}
-				if(newX<minX)
-				{
-					newX=minX;
-				}
-				textElement->SetViewPosition(Point(newX, -TextMargin));
-			}
-
-			int GuiSinglelineTextBox::TextElementOperatorCallback::GetTextMargin()
-			{
-				return TextMargin;
-			}
-
-/***********************************************************************
-GuiSinglelineTextBox
-***********************************************************************/
-
-			void GuiSinglelineTextBox::OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)
-			{
-				styleController->RearrangeTextElement();
-				GuiControl::OnRenderTargetChanged(renderTarget);
-			}
-
-			void GuiSinglelineTextBox::OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
-			{
-				if(GetVisuallyEnabled())
-				{
-					boundsComposition->GetRelatedGraphicsHost()->SetFocus(boundsComposition);
-				}
-			}
-
-			GuiSinglelineTextBox::GuiSinglelineTextBox(GuiSinglelineTextBox::IStyleProvider* styleProvider)
-				:GuiControl(new StyleController(styleProvider))
-			{
-				styleController=dynamic_cast<StyleController*>(GetStyleController());
-				styleController->SetTextBox(this);
-
-				boundsComposition->GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiSinglelineTextBox::OnBoundsMouseButtonDown);
-				boundsComposition->GetEventReceiver()->middleButtonDown.AttachMethod(this, &GuiSinglelineTextBox::OnBoundsMouseButtonDown);
-				boundsComposition->GetEventReceiver()->rightButtonDown.AttachMethod(this, &GuiSinglelineTextBox::OnBoundsMouseButtonDown);
-				SetFocusableComposition(boundsComposition);
-
-				InitializeCommonInterface(this, styleController->GetTextElementOperator());
-			}
-
-			GuiSinglelineTextBox::~GuiSinglelineTextBox()
-			{
-			}
-
-			const WString& GuiSinglelineTextBox::GetText()
-			{
-				text=styleController->GetText();
-				return text;
-			}
-
-			void GuiSinglelineTextBox::SetText(const WString& value)
-			{
-				GuiControl::SetText(value);
-			}
-
-			void GuiSinglelineTextBox::SetFont(const FontProperties& value)
-			{
-				GuiControl::SetFont(value);
-				styleController->RearrangeTextElement();
-			}
-
-			wchar_t GuiSinglelineTextBox::GetPasswordChar()
-			{
-				return styleController->GetTextElement()->GetPasswordChar();
-			}
-
-			void GuiSinglelineTextBox::SetPasswordChar(wchar_t value)
-			{
-				styleController->GetTextElement()->SetPasswordChar(value);
-			}
-		}
-	}
-}
-
-/***********************************************************************
-Controls\GuiWindowControls.cpp
+Controls\ListControlPackage\GuiListViewControls.cpp
 ***********************************************************************/
 
 namespace vl
@@ -9531,402 +4919,128 @@ namespace vl
 			using namespace elements;
 			using namespace compositions;
 
+			namespace list
+			{
+
 /***********************************************************************
-GuiControlHost
+ListViewItemStyleProviderBase::TextItemStyleController
 ***********************************************************************/
 
-			void GuiControlHost::OnNativeWindowChanged()
-			{
-			}
-
-			void GuiControlHost::OnVisualStatusChanged()
-			{
-			}
-
-			void GuiControlHost::Moved()
-			{
-				OnVisualStatusChanged();
-			}
-
-			void GuiControlHost::Enabled()
-			{
-				GuiControl::SetEnabled(true);
-				OnVisualStatusChanged();
-			}
-
-			void GuiControlHost::Disabled()
-			{
-				GuiControl::SetEnabled(false);
-				OnVisualStatusChanged();
-			}
-
-			void GuiControlHost::GotFocus()
-			{
-				WindowGotFocus.Execute(GetNotifyEventArguments());
-				OnVisualStatusChanged();
-			}
-
-			void GuiControlHost::LostFocus()
-			{
-				WindowLostFocus.Execute(GetNotifyEventArguments());
-				OnVisualStatusChanged();
-			}
-
-			void GuiControlHost::Activated()
-			{
-				WindowActivated.Execute(GetNotifyEventArguments());
-				OnVisualStatusChanged();
-			}
-
-			void GuiControlHost::Deactivated()
-			{
-				WindowDeactivated.Execute(GetNotifyEventArguments());
-				OnVisualStatusChanged();
-			}
-
-			void GuiControlHost::Opened()
-			{
-				WindowOpened.Execute(GetNotifyEventArguments());
-			}
-
-			void GuiControlHost::Closing(bool& cancel)
-			{
-				GuiRequestEventArgs arguments(GetStyleController()->GetBoundsComposition());
-				arguments.cancel=cancel;
-				WindowClosing.Execute(arguments);
-				if(!arguments.handled)
+				ListViewItemStyleProviderBase::ListViewItemStyleController::ListViewItemStyleController(ListViewItemStyleProviderBase* provider)
+					:ItemStyleControllerBase(provider, 0)
+					,backgroundButton(0)
+					,listViewItemStyleProvider(provider)
 				{
-					cancel=arguments.cancel;
+					backgroundButton=new GuiSelectableButton(listViewItemStyleProvider->listControl->GetListViewStyleProvider()->CreateItemBackground());
+					backgroundButton->SetAutoSelection(false);
+					Initialize(backgroundButton->GetBoundsComposition(), backgroundButton);
+				}
+
+				ListViewItemStyleProviderBase::ListViewItemStyleController::~ListViewItemStyleController()
+				{
+				}
+
+				bool ListViewItemStyleProviderBase::ListViewItemStyleController::GetSelected()
+				{
+					return backgroundButton->GetSelected();
+				}
+
+				void ListViewItemStyleProviderBase::ListViewItemStyleController::SetSelected(bool value)
+				{
+					backgroundButton->SetSelected(value);
+				}
+
+/***********************************************************************
+ListViewItemStyleProviderBase
+***********************************************************************/
+
+				ListViewItemStyleProviderBase::ListViewItemStyleProviderBase()
+					:listControl(0)
+				{
+				}
+
+				ListViewItemStyleProviderBase::~ListViewItemStyleProviderBase()
+				{
+				}
+
+				void ListViewItemStyleProviderBase::AttachListControl(GuiListControl* value)
+				{
+					listControl=dynamic_cast<GuiListViewBase*>(value);
+				}
+
+				void ListViewItemStyleProviderBase::DetachListControl()
+				{
+					listControl=0;
+				}
+
+				int ListViewItemStyleProviderBase::GetItemStyleId(int itemIndex)
+				{
+					return 0;
+				}
+
+				void ListViewItemStyleProviderBase::SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)
+				{
+					ListViewItemStyleController* textStyle=dynamic_cast<ListViewItemStyleController*>(style);
+					textStyle->SetSelected(value);
 				}
 			}
 
-			void GuiControlHost::Closed()
+/***********************************************************************
+GuiListViewColumnHeader
+***********************************************************************/
+			
+			GuiListViewColumnHeader::GuiListViewColumnHeader(IStyleController* _styleController)
+				:GuiMenuButton(_styleController)
+				,columnSortingState(NotSorted)
+				,styleController(_styleController)
 			{
-				WindowClosed.Execute(GetNotifyEventArguments());
+				styleController->SetColumnSortingState(columnSortingState);
 			}
 
-			void GuiControlHost::Destroying()
+			GuiListViewColumnHeader::~GuiListViewColumnHeader()
 			{
-				WindowDestroying.Execute(GetNotifyEventArguments());
-				SetNativeWindow(0);
 			}
 
-			GuiControlHost::GuiControlHost(GuiControl::IStyleController* _styleController)
-				:GuiControl(_styleController)
+			GuiListViewColumnHeader::ColumnSortingState GuiListViewColumnHeader::GetColumnSortingState()
 			{
-				GetStyleController()->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				
-				WindowGotFocus.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
-				WindowLostFocus.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
-				WindowActivated.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
-				WindowDeactivated.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
-				WindowOpened.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
-				WindowClosing.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
-				WindowClosed.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
-				WindowDestroying.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
-
-				host=new GuiGraphicsHost;
-				host->GetMainComposition()->AddChild(GetStyleController()->GetBoundsComposition());
+				return columnSortingState;
 			}
 
-			GuiControlHost::~GuiControlHost()
+			void GuiListViewColumnHeader::SetColumnSortingState(ColumnSortingState value)
 			{
-				OnBeforeReleaseGraphicsHost();
-				styleController=0;
-				for(int i=0;i<components.Count();i++)
+				if(columnSortingState!=value)
 				{
-					delete components[i];
-				}
-				delete host;
-			}
-
-			compositions::GuiGraphicsHost* GuiControlHost::GetGraphicsHost()
-			{
-				return host;
-			}
-
-			compositions::GuiGraphicsComposition* GuiControlHost::GetMainComposition()
-			{
-				return host->GetMainComposition();
-			}
-
-			INativeWindow* GuiControlHost::GetNativeWindow()
-			{
-				return host->GetNativeWindow();
-			}
-
-			void GuiControlHost::SetNativeWindow(INativeWindow* window)
-			{
-				if(host->GetNativeWindow())
-				{
-					host->GetNativeWindow()->UninstallListener(this);
-				}
-				host->SetNativeWindow(window);
-				if(host->GetNativeWindow())
-				{
-					host->GetNativeWindow()->InstallListener(this);
-				}
-				OnNativeWindowChanged();
-			}
-
-			void GuiControlHost::ForceCalculateSizeImmediately()
-			{
-				boundsComposition->ForceCalculateSizeImmediately();
-				SetBounds(GetBounds());
-			}
-
-			void GuiControlHost::Render()
-			{
-				host->Render();
-			}
-
-			bool GuiControlHost::GetEnabled()
-			{
-				if(host->GetNativeWindow())
-				{
-					return host->GetNativeWindow()->IsEnabled();
-				}
-				else
-				{
-					return false;
+					columnSortingState=value;
+					styleController->SetColumnSortingState(columnSortingState);
 				}
 			}
 
-			void GuiControlHost::SetEnabled(bool value)
+/***********************************************************************
+GuiListViewBase
+***********************************************************************/
+
+			GuiListViewBase::GuiListViewBase(IStyleProvider* _styleProvider, GuiListControl::IItemProvider* _itemProvider)
+				:GuiSelectableListControl(_styleProvider, _itemProvider)
+				,styleProvider(0)
 			{
-				if(host->GetNativeWindow())
-				{
-					if(value)
-					{
-						host->GetNativeWindow()->Enable();
-					}
-					else
-					{
-						host->GetNativeWindow()->Disable();
-					}
-				}
+				styleProvider=dynamic_cast<IStyleProvider*>(styleController->GetStyleProvider());
+				ColumnClicked.SetAssociatedComposition(boundsComposition);
 			}
 
-			bool GuiControlHost::GetFocused()
+			GuiListViewBase::~GuiListViewBase()
 			{
-				if(host->GetNativeWindow())
-				{
-					return host->GetNativeWindow()->IsFocused();
-				}
-				else
-				{
-					return false;
-				}
 			}
 
-			void GuiControlHost::SetFocused()
+			GuiListViewBase::IStyleProvider* GuiListViewBase::GetListViewStyleProvider()
 			{
-				if(host->GetNativeWindow())
-				{
-					host->GetNativeWindow()->SetFocus();
-				}
+				return styleProvider;
 			}
 
-			bool GuiControlHost::GetActivated()
+			Ptr<GuiListControl::IItemStyleProvider> GuiListViewBase::SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)
 			{
-				if(host->GetNativeWindow())
+				if(value.Cast<list::ListViewItemStyleProvider>())
 				{
-					return host->GetNativeWindow()->IsActivated();
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			void GuiControlHost::SetActivated()
-			{
-				if(host->GetNativeWindow())
-				{
-					host->GetNativeWindow()->SetActivate();
-				}
-			}
-
-			bool GuiControlHost::GetShowInTaskBar()
-			{
-				if(host->GetNativeWindow())
-				{
-					return host->GetNativeWindow()->IsAppearedInTaskBar();
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			void GuiControlHost::SetShowInTaskBar(bool value)
-			{
-				if(host->GetNativeWindow())
-				{
-					if(value)
-					{
-						host->GetNativeWindow()->ShowInTaskBar();
-					}
-					else
-					{
-						host->GetNativeWindow()->HideInTaskBar();
-					}
-				}
-			}
-
-			bool GuiControlHost::GetEnabledActivate()
-			{
-				if(host->GetNativeWindow())
-				{
-					return host->GetNativeWindow()->IsEnabledActivate();
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			void GuiControlHost::SetEnabledActivate(bool value)
-			{
-				if(host->GetNativeWindow())
-				{
-					if(value)
-					{
-						host->GetNativeWindow()->EnableActivate();
-					}
-					else
-					{
-						host->GetNativeWindow()->DisableActivate();
-					}
-				}
-			}
-
-			bool GuiControlHost::GetTopMost()
-			{
-				if(host->GetNativeWindow())
-				{
-					return host->GetNativeWindow()->GetTopMost();
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			void GuiControlHost::SetTopMost(bool topmost)
-			{
-				if(host->GetNativeWindow())
-				{
-					host->GetNativeWindow()->SetTopMost(topmost);
-				}
-			}
-
-			bool GuiControlHost::AddComponent(GuiComponent* component)
-			{
-				if(components.Contains(component))
-				{
-					return false;
-				}
-				else
-				{
-					components.Add(component);
-					return true;
-				}
-			}
-
-			bool GuiControlHost::RemoveComponent(GuiComponent* component)
-			{
-				return components.Remove(component);
-			}
-
-			bool GuiControlHost::ContainsComponent(GuiComponent* component)
-			{
-				return components.Contains(component);
-			}
-
-			compositions::IGuiShortcutKeyManager* GuiControlHost::GetShortcutKeyManager()
-			{
-				return host->GetShortcutKeyManager();
-			}
-
-			void GuiControlHost::SetShortcutKeyManager(compositions::IGuiShortcutKeyManager* value)
-			{
-				host->SetShortcutKeyManager(value);
-			}
-
-			Size GuiControlHost::GetClientSize()
-			{
-				if(host->GetNativeWindow())
-				{
-					return host->GetNativeWindow()->GetClientSize();
-				}
-				else
-				{
-					return Size(0, 0);
-				}
-			}
-
-			void GuiControlHost::SetClientSize(Size value)
-			{
-				if(host->GetNativeWindow())
-				{
-					host->GetNativeWindow()->SetClientSize(value);
-				}
-			}
-
-			Rect GuiControlHost::GetBounds()
-			{
-				if(host->GetNativeWindow())
-				{
-					return host->GetNativeWindow()->GetBounds();
-				}
-				else
-				{
-					return Rect();
-				}
-			}
-
-			void GuiControlHost::SetBounds(Rect value)
-			{
-				if(host->GetNativeWindow())
-				{
-					host->GetNativeWindow()->SetBounds(value);
-				}
-			}
-
-			GuiControlHost* GuiControlHost::GetRelatedControlHost()
-			{
-				return this;
-			}
-
-			const WString& GuiControlHost::GetText()
-			{
-				WString result;
-				if(host->GetNativeWindow())
-				{
-					result=host->GetNativeWindow()->GetTitle();
-				}
-				if(result!=GuiControl::GetText())
-				{
-					GuiControl::SetText(result);
-				}
-				return GuiControl::GetText();
-			}
-
-			void GuiControlHost::SetText(const WString& value)
-			{
-				if(host->GetNativeWindow())
-				{
-					host->GetNativeWindow()->SetTitle(value);
-					GuiControl::SetText(value);
-				}
-			}
-
-			INativeScreen* GuiControlHost::GetRelatedScreen()
-			{
-				if(host->GetNativeWindow())
-				{
-					return GetCurrentController()->ScreenService()->GetScreen(host->GetNativeWindow());
+					return GuiSelectableListControl::SetStyleProvider(value);
 				}
 				else
 				{
@@ -9934,482 +5048,3133 @@ GuiControlHost
 				}
 			}
 
-			void GuiControlHost::Show()
+			namespace list
 			{
-				if(host->GetNativeWindow())
-				{
-					host->GetNativeWindow()->Show();
-				}
-			}
 
-			void GuiControlHost::ShowDeactivated()
-			{
-				if(host->GetNativeWindow())
-				{
-					host->GetNativeWindow()->ShowDeactivated();
-				}
-			}
+/***********************************************************************
+ListViewItemStyleProvider::ListViewContentItemStyleController
+***********************************************************************/
 
-			void GuiControlHost::ShowRestored()
-			{
-				if(host->GetNativeWindow())
+				ListViewItemStyleProvider::ListViewContentItemStyleController::ListViewContentItemStyleController(ListViewItemStyleProvider* provider)
+					:ListViewItemStyleController(provider)
+					,listViewItemStyleProvider(provider)
 				{
-					host->GetNativeWindow()->ShowRestored();
-				}
-			}
+					content=listViewItemStyleProvider->listViewItemContentProvider->CreateItemContent(backgroundButton->GetFont());
+					GuiBoundsComposition* composition=content->GetContentComposition();
+					composition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					backgroundButton->GetContainerComposition()->AddChild(composition);
 
-			void GuiControlHost::ShowMaximized()
-			{
-				if(host->GetNativeWindow())
-				{
-					host->GetNativeWindow()->ShowMaximized();
-				}
-			}
-
-			void GuiControlHost::ShowMinimized()
-			{
-				if(host->GetNativeWindow())
-				{
-					host->GetNativeWindow()->ShowMinimized();
-				}
-			}
-
-			void GuiControlHost::Hide()
-			{
-				if(host->GetNativeWindow())
-				{
-					host->GetNativeWindow()->Hide();
-				}
-			}
-
-			void GuiControlHost::Close()
-			{
-				INativeWindow* window=host->GetNativeWindow();
-				if(window)
-				{
-					if(GetCurrentController()->WindowService()->GetMainWindow()!=window)
+					GuiBoundsComposition* decorator=content->GetBackgroundDecorator();
+					if(decorator)
 					{
-						window->Hide();
+						backgroundButton->GetBoundsComposition()->AddChild(decorator);
+						backgroundButton->GetBoundsComposition()->MoveChild(decorator, 0);
+					}
+				}
+
+				ListViewItemStyleProvider::ListViewContentItemStyleController::~ListViewContentItemStyleController()
+				{
+				}
+
+				ListViewItemStyleProvider::IListViewItemContent* ListViewItemStyleProvider::ListViewContentItemStyleController::GetItemContent()
+				{
+					return content.Obj();
+				}
+
+				void ListViewItemStyleProvider::ListViewContentItemStyleController::Install(IListViewItemView* view, int itemIndex)
+				{
+					content->Install(listViewItemStyleProvider->listControl->GetListViewStyleProvider(), view, itemIndex);
+				}
+
+/***********************************************************************
+ListViewItemStyleProvider
+***********************************************************************/
+
+				const wchar_t* const ListViewItemStyleProvider::IListViewItemView::Identifier = L"vl::presentation::controls::list::ListViewItemStyleProvider::IListViewItemView";
+
+				ListViewItemStyleProvider::ListViewItemStyleProvider(IListViewItemContentProvider* itemContentProvider)
+					:listViewItemView(0)
+					,listViewItemContentProvider(itemContentProvider)
+				{
+				}
+
+				ListViewItemStyleProvider::~ListViewItemStyleProvider()
+				{
+				}
+
+				void ListViewItemStyleProvider::AttachListControl(GuiListControl* value)
+				{
+					ListViewItemStyleProviderBase::AttachListControl(value);
+					listViewItemView=dynamic_cast<IListViewItemView*>(value->GetItemProvider()->RequestView(IListViewItemView::Identifier));
+					listViewItemContentProvider->AttachListControl(value);
+				}
+
+				void ListViewItemStyleProvider::DetachListControl()
+				{
+					listViewItemContentProvider->DetachListControl();
+					listControl->GetItemProvider()->ReleaseView(listViewItemView);
+					listViewItemView=0;
+					ListViewItemStyleProviderBase::DetachListControl();
+				}
+
+				GuiListControl::IItemStyleController* ListViewItemStyleProvider::CreateItemStyle(int styleId)
+				{
+					ListViewContentItemStyleController* itemStyle=new ListViewContentItemStyleController(this);
+					itemStyles.Add(itemStyle);
+					return itemStyle;
+				}
+
+				void ListViewItemStyleProvider::DestroyItemStyle(GuiListControl::IItemStyleController* style)
+				{
+					ListViewContentItemStyleController* itemStyle=dynamic_cast<ListViewContentItemStyleController*>(style);
+					if(itemStyle)
+					{
+						itemStyles.Remove(itemStyle);
+						delete itemStyle;
+					}
+				}
+
+				void ListViewItemStyleProvider::Install(GuiListControl::IItemStyleController* style, int itemIndex)
+				{
+					ListViewContentItemStyleController* itemStyle=dynamic_cast<ListViewContentItemStyleController*>(style);
+					itemStyle->Install(listViewItemView, itemIndex);
+				}
+
+				const ListViewItemStyleProvider::ItemStyleList& ListViewItemStyleProvider::GetCreatedItemStyles()
+				{
+					return itemStyles;
+				}
+
+				bool ListViewItemStyleProvider::IsItemStyleAttachedToListView(GuiListControl::IItemStyleController* itemStyle)
+				{
+					return itemStyle && itemStyle->GetBoundsComposition()->GetParent();
+				}
+				
+/***********************************************************************
+ListViewBigIconContentProvider
+***********************************************************************/
+
+				ListViewBigIconContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+					:contentComposition(0)
+				{
+					contentComposition=new GuiBoundsComposition;
+					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+
+					GuiTableComposition* table=new GuiTableComposition;
+					contentComposition->AddChild(table);
+					table->SetRowsAndColumns(2, 3);
+					table->SetRowOption(0, GuiCellOption::MinSizeOption());
+					table->SetRowOption(1, GuiCellOption::MinSizeOption());
+					table->SetColumnOption(0, GuiCellOption::PercentageOption(0.5));
+					table->SetColumnOption(1, GuiCellOption::MinSizeOption());
+					table->SetColumnOption(2, GuiCellOption::PercentageOption(0.5));
+					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					table->SetCellPadding(5);
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 1, 1, 1);
+						cell->SetPreferredMinSize(iconSize);
+
+						image=GuiImageFrameElement::Create();
+						image->SetStretch(true);
+						cell->SetOwnedElement(image);
+					}
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
+						cell->SetSite(1, 0, 1, 3);
+						cell->SetPreferredMinSize(Size(64, 40));
+
+						text=GuiSolidLabelElement::Create();
+						text->SetAlignments(Alignment::Center, Alignment::Top);
+						text->SetFont(font);
+						text->SetWrapLine(true);
+						text->SetEllipse(true);
+						cell->SetOwnedElement(text);
+					}
+				}
+
+				ListViewBigIconContentProvider::ItemContent::~ItemContent()
+				{
+				}
+
+				compositions::GuiBoundsComposition* ListViewBigIconContentProvider::ItemContent::GetContentComposition()
+				{
+					return contentComposition;
+				}
+
+				compositions::GuiBoundsComposition* ListViewBigIconContentProvider::ItemContent::GetBackgroundDecorator()
+				{
+					return 0;
+				}
+
+				void ListViewBigIconContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				{
+					Ptr<GuiImageData> imageData=view->GetLargeImage(itemIndex);
+					if(imageData)
+					{
+						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
 					}
 					else
 					{
-						SetNativeWindow(0);
-						GetCurrentController()->WindowService()->DestroyNativeWindow(window);
+						image->SetImage(0);
 					}
+					text->SetText(view->GetText(itemIndex));
+					text->SetColor(styleProvider->GetPrimaryTextColor());
 				}
-			}
 
-			bool GuiControlHost::GetOpening()
-			{
-				INativeWindow* window=host->GetNativeWindow();
-				if(window)
+				ListViewBigIconContentProvider::ListViewBigIconContentProvider(Size _iconSize)
+					:iconSize(_iconSize)
 				{
-					return window->IsVisible();
 				}
-				return false;
-			}
 
+				ListViewBigIconContentProvider::~ListViewBigIconContentProvider()
+				{
+				}
+
+				GuiListControl::IItemCoordinateTransformer* ListViewBigIconContentProvider::CreatePreferredCoordinateTransformer()
+				{
+					return new DefaultItemCoordinateTransformer;
+				}
+
+				GuiListControl::IItemArranger* ListViewBigIconContentProvider::CreatePreferredArranger()
+				{
+					return new FixedSizeMultiColumnItemArranger;
+				}
+
+				ListViewItemStyleProvider::IListViewItemContent* ListViewBigIconContentProvider::CreateItemContent(const FontProperties& font)
+				{
+					return new ItemContent(iconSize, font);
+				}
+
+				void ListViewBigIconContentProvider::AttachListControl(GuiListControl* value)
+				{
+				}
+
+				void ListViewBigIconContentProvider::DetachListControl()
+				{
+				}
+				
 /***********************************************************************
-GuiWindow::DefaultBehaviorStyleController
+ListViewSmallIconContentProvider
 ***********************************************************************/
 
-			GuiWindow::DefaultBehaviorStyleController::DefaultBehaviorStyleController()
-				:window(0)
-			{
-			}
-
-			GuiWindow::DefaultBehaviorStyleController::~DefaultBehaviorStyleController()
-			{
-			}
-
-			void GuiWindow::DefaultBehaviorStyleController::AttachWindow(GuiWindow* _window)
-			{
-				window=_window;
-			}
-
-			void GuiWindow::DefaultBehaviorStyleController::InitializeNativeWindowProperties()
-			{
-			}
-
-			bool GuiWindow::DefaultBehaviorStyleController::GetMaximizedBox()
-			{
-				if(window->GetNativeWindow())
+				ListViewSmallIconContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+					:contentComposition(0)
 				{
-					return window->GetNativeWindow()->GetMaximizedBox();
-				}
-				else
-				{
-					return false;
-				}
-			}
+					contentComposition=new GuiBoundsComposition;
+					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 
-			void GuiWindow::DefaultBehaviorStyleController::SetMaximizedBox(bool visible)
-			{
-				if(window->GetNativeWindow())
-				{
-					window->GetNativeWindow()->SetMaximizedBox(visible);
-				}
-			}
-
-			bool GuiWindow::DefaultBehaviorStyleController::GetMinimizedBox()
-			{
-				if(window->GetNativeWindow())
-				{
-					return window->GetNativeWindow()->GetMinimizedBox();
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			void GuiWindow::DefaultBehaviorStyleController::SetMinimizedBox(bool visible)
-			{
-				if(window->GetNativeWindow())
-				{
-					window->GetNativeWindow()->SetMinimizedBox(visible);
-				}
-			}
-
-			bool GuiWindow::DefaultBehaviorStyleController::GetBorder()
-			{
-				if(window->GetNativeWindow())
-				{
-					return window->GetNativeWindow()->GetBorder();
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			void GuiWindow::DefaultBehaviorStyleController::SetBorder(bool visible)
-			{
-				if(window->GetNativeWindow())
-				{
-					window->GetNativeWindow()->SetBorder(visible);
-				}
-			}
-
-			bool GuiWindow::DefaultBehaviorStyleController::GetSizeBox()
-			{
-				if(window->GetNativeWindow())
-				{
-					return window->GetNativeWindow()->GetSizeBox();
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			void GuiWindow::DefaultBehaviorStyleController::SetSizeBox(bool visible)
-			{
-				if(window->GetNativeWindow())
-				{
-					window->GetNativeWindow()->SetSizeBox(visible);
-				}
-			}
-
-			bool GuiWindow::DefaultBehaviorStyleController::GetIconVisible()
-			{
-				if(window->GetNativeWindow())
-				{
-					return window->GetNativeWindow()->GetIconVisible();
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			void GuiWindow::DefaultBehaviorStyleController::SetIconVisible(bool visible)
-			{
-				if(window->GetNativeWindow())
-				{
-					window->GetNativeWindow()->SetIconVisible(visible);
-				}
-			}
-
-			bool GuiWindow::DefaultBehaviorStyleController::GetTitleBar()
-			{
-				if(window->GetNativeWindow())
-				{
-					return window->GetNativeWindow()->GetTitleBar();
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			void GuiWindow::DefaultBehaviorStyleController::SetTitleBar(bool visible)
-			{
-				if(window->GetNativeWindow())
-				{
-					window->GetNativeWindow()->SetTitleBar(visible);
-				}
-			}
-
-/***********************************************************************
-GuiWindow
-***********************************************************************/
-
-			void GuiWindow::OnNativeWindowChanged()
-			{
-				styleController->InitializeNativeWindowProperties();
-				GuiControlHost::OnNativeWindowChanged();
-			}
-
-			void GuiWindow::OnVisualStatusChanged()
-			{
-				GuiControlHost::OnVisualStatusChanged();
-			}
-
-			void GuiWindow::MouseClickedOnOtherWindow(GuiWindow* window)
-			{
-			}
-
-			GuiWindow::GuiWindow(IStyleController* _styleController)
-				:GuiControlHost(_styleController)
-				,styleController(_styleController)
-			{
-				ClipboardUpdated.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
-				INativeWindow* window=GetCurrentController()->WindowService()->CreateNativeWindow();
-				styleController->AttachWindow(this);
-				SetNativeWindow(window);
-				GetApplication()->RegisterWindow(this);
-			}
-
-			GuiWindow::~GuiWindow()
-			{
-				GetApplication()->UnregisterWindow(this);
-				INativeWindow* window=host->GetNativeWindow();
-				if(window)
-				{
-					SetNativeWindow(0);
-					GetCurrentController()->WindowService()->DestroyNativeWindow(window);
-				}
-			}
-
-			void GuiWindow::MoveToScreenCenter()
-			{
-				INativeScreen* screen=GetRelatedScreen();
-				if(screen)
-				{
-					Rect screenBounds=screen->GetClientBounds();
-					Rect windowBounds=GetBounds();
-					SetBounds(
-						Rect(
-							Point(
-								windowBounds.Left()+(screenBounds.Width()-windowBounds.Width())/2,
-								windowBounds.Top()+(screenBounds.Height()-windowBounds.Height())/2
-								),
-							windowBounds.GetSize()
-							)
-						);
-				}
-			}
-
-			bool GuiWindow::GetMaximizedBox()
-			{
-				return styleController->GetMaximizedBox();
-			}
-
-			void GuiWindow::SetMaximizedBox(bool visible)
-			{
-				styleController->SetMaximizedBox(visible);
-			}
-
-			bool GuiWindow::GetMinimizedBox()
-			{
-				return styleController->GetMinimizedBox();
-			}
-
-			void GuiWindow::SetMinimizedBox(bool visible)
-			{
-				styleController->SetMinimizedBox(visible);
-			}
-
-			bool GuiWindow::GetBorder()
-			{
-				return styleController->GetBorder();
-			}
-
-			void GuiWindow::SetBorder(bool visible)
-			{
-				styleController->SetBorder(visible);
-			}
-
-			bool GuiWindow::GetSizeBox()
-			{
-				return styleController->GetSizeBox();
-			}
-
-			void GuiWindow::SetSizeBox(bool visible)
-			{
-				styleController->SetSizeBox(visible);
-			}
-
-			bool GuiWindow::GetIconVisible()
-			{
-				return styleController->GetIconVisible();
-			}
-
-			void GuiWindow::SetIconVisible(bool visible)
-			{
-				styleController->SetIconVisible(visible);
-			}
-
-			bool GuiWindow::GetTitleBar()
-			{
-				return styleController->GetTitleBar();
-			}
-
-			void GuiWindow::SetTitleBar(bool visible)
-			{
-				styleController->SetTitleBar(visible);
-			}
-
-/***********************************************************************
-GuiPopup
-***********************************************************************/
-
-			void GuiPopup::MouseClickedOnOtherWindow(GuiWindow* window)
-			{
-				Hide();
-			}
-
-			void GuiPopup::PopupOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				GetApplication()->RegisterPopupOpened(this);
-			}
-
-			void GuiPopup::PopupClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
-			{
-				GetApplication()->RegisterPopupClosed(this);
-			}
-
-			GuiPopup::GuiPopup(IStyleController* _styleController)
-				:GuiWindow(_styleController)
-			{
-				SetMinimizedBox(false);
-				SetMaximizedBox(false);
-				SetSizeBox(false);
-				SetTitleBar(false);
-				SetShowInTaskBar(false);
-				GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-
-				WindowOpened.AttachMethod(this, &GuiPopup::PopupOpened);
-				WindowClosed.AttachMethod(this, &GuiPopup::PopupClosed);
-			}
-
-			GuiPopup::~GuiPopup()
-			{
-				GetApplication()->RegisterPopupClosed(this);
-			}
-
-			bool GuiPopup::IsClippedByScreen(Point location)
-			{
-				SetBounds(Rect(location, GetBounds().GetSize()));
-				INativeWindow* window=GetNativeWindow();
-				if(window)
-				{
-					INativeScreen* screen=GetCurrentController()->ScreenService()->GetScreen(window);
-					if(screen)
+					GuiTableComposition* table=new GuiTableComposition;
+					contentComposition->AddChild(table);
+					table->SetRowsAndColumns(3, 2);
+					table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
+					table->SetRowOption(1, GuiCellOption::MinSizeOption());
+					table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
+					table->SetColumnOption(0, GuiCellOption::MinSizeOption());
+					table->SetColumnOption(1, GuiCellOption::MinSizeOption());
+					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					table->SetCellPadding(2);
 					{
-						Rect screenBounds=screen->GetClientBounds();
-						Rect windowBounds=window->GetBounds();
-						return !screenBounds.Contains(windowBounds.LeftTop()) || !screenBounds.Contains(windowBounds.RightBottom());
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(1, 0, 1, 1);
+						cell->SetPreferredMinSize(iconSize);
+
+						image=GuiImageFrameElement::Create();
+						image->SetStretch(true);
+						cell->SetOwnedElement(image);
+					}
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 1, 3, 1);
+						cell->SetPreferredMinSize(Size(192, 0));
+
+						text=GuiSolidLabelElement::Create();
+						text->SetAlignments(Alignment::Left, Alignment::Center);
+						text->SetFont(font);
+						text->SetEllipse(true);
+						cell->SetOwnedElement(text);
 					}
 				}
-				return true;
-			}
 
-			void GuiPopup::ShowPopup(Point location)
-			{
-				INativeWindow* window=GetNativeWindow();
-				if(window)
+				ListViewSmallIconContentProvider::ItemContent::~ItemContent()
 				{
-					INativeScreen* screen=GetCurrentController()->ScreenService()->GetScreen(window);
-					if(screen)
+				}
+
+				compositions::GuiBoundsComposition* ListViewSmallIconContentProvider::ItemContent::GetContentComposition()
+				{
+					return contentComposition;
+				}
+
+				compositions::GuiBoundsComposition* ListViewSmallIconContentProvider::ItemContent::GetBackgroundDecorator()
+				{
+					return 0;
+				}
+
+				void ListViewSmallIconContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				{
+					Ptr<GuiImageData> imageData=view->GetSmallImage(itemIndex);
+					if(imageData)
 					{
-						Rect screenBounds=screen->GetClientBounds();
-						Size size=window->GetBounds().GetSize();
+						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
+					}
+					else
+					{
+						image->SetImage(0);
+					}
+					text->SetText(view->GetText(itemIndex));
+					text->SetColor(styleProvider->GetPrimaryTextColor());
+				}
 
-						if(location.x<screenBounds.x1)
-						{
-							location.x=screenBounds.x1;
-						}
-						else if(location.x+size.x>screenBounds.x2)
-						{
-							location.x=screenBounds.x2-size.x;
-						}
+				ListViewSmallIconContentProvider::ListViewSmallIconContentProvider(Size _iconSize)
+					:iconSize(_iconSize)
+				{
+				}
 
-						if(location.y<screenBounds.y1)
+				ListViewSmallIconContentProvider::~ListViewSmallIconContentProvider()
+				{
+				}
+
+				GuiListControl::IItemCoordinateTransformer* ListViewSmallIconContentProvider::CreatePreferredCoordinateTransformer()
+				{
+					return new DefaultItemCoordinateTransformer;
+				}
+
+				GuiListControl::IItemArranger* ListViewSmallIconContentProvider::CreatePreferredArranger()
+				{
+					return new FixedSizeMultiColumnItemArranger;
+				}
+
+				ListViewItemStyleProvider::IListViewItemContent* ListViewSmallIconContentProvider::CreateItemContent(const FontProperties& font)
+				{
+					return new ItemContent(iconSize, font);
+				}
+
+				void ListViewSmallIconContentProvider::AttachListControl(GuiListControl* value)
+				{
+				}
+
+				void ListViewSmallIconContentProvider::DetachListControl()
+				{
+				}
+				
+/***********************************************************************
+ListViewListContentProvider
+***********************************************************************/
+
+				ListViewListContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+					:contentComposition(0)
+				{
+					contentComposition=new GuiBoundsComposition;
+					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+
+					GuiTableComposition* table=new GuiTableComposition;
+					contentComposition->AddChild(table);
+					table->SetRowsAndColumns(3, 2);
+					table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
+					table->SetRowOption(1, GuiCellOption::MinSizeOption());
+					table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
+					table->SetColumnOption(0, GuiCellOption::MinSizeOption());
+					table->SetColumnOption(1, GuiCellOption::MinSizeOption());
+					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					table->SetCellPadding(2);
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(1, 0, 1, 1);
+						cell->SetPreferredMinSize(iconSize);
+
+						image=GuiImageFrameElement::Create();
+						image->SetStretch(true);
+						cell->SetOwnedElement(image);
+					}
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 1, 3, 1);
+						cell->SetMargin(Margin(0, 0, 16, 0));
+
+						text=GuiSolidLabelElement::Create();
+						text->SetAlignments(Alignment::Left, Alignment::Center);
+						text->SetFont(font);
+						cell->SetOwnedElement(text);
+					}
+				}
+
+				ListViewListContentProvider::ItemContent::~ItemContent()
+				{
+				}
+
+				compositions::GuiBoundsComposition* ListViewListContentProvider::ItemContent::GetContentComposition()
+				{
+					return contentComposition;
+				}
+
+				compositions::GuiBoundsComposition* ListViewListContentProvider::ItemContent::GetBackgroundDecorator()
+				{
+					return 0;
+				}
+
+				void ListViewListContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				{
+					Ptr<GuiImageData> imageData=view->GetSmallImage(itemIndex);
+					if(imageData)
+					{
+						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
+					}
+					else
+					{
+						image->SetImage(0);
+					}
+					text->SetText(view->GetText(itemIndex));
+					text->SetColor(styleProvider->GetPrimaryTextColor());
+				}
+
+				ListViewListContentProvider::ListViewListContentProvider(Size _iconSize)
+					:iconSize(_iconSize)
+				{
+				}
+
+				ListViewListContentProvider::~ListViewListContentProvider()
+				{
+				}
+
+				GuiListControl::IItemCoordinateTransformer* ListViewListContentProvider::CreatePreferredCoordinateTransformer()
+				{
+					return new DefaultItemCoordinateTransformer;
+				}
+
+				GuiListControl::IItemArranger* ListViewListContentProvider::CreatePreferredArranger()
+				{
+					return new FixedHeightMultiColumnItemArranger;
+				}
+
+				ListViewItemStyleProvider::IListViewItemContent* ListViewListContentProvider::CreateItemContent(const FontProperties& font)
+				{
+					return new ItemContent(iconSize, font);
+				}
+
+				void ListViewListContentProvider::AttachListControl(GuiListControl* value)
+				{
+				}
+
+				void ListViewListContentProvider::DetachListControl()
+				{
+				}
+				
+/***********************************************************************
+ListViewTileContentProvider
+***********************************************************************/
+
+				void ListViewTileContentProvider::ItemContent::RemoveTextElement(int textRow)
+				{
+					GuiCellComposition* cell=textTable->GetSitedCell(textRow+1, 0);
+					textTable->RemoveChild(cell);
+					delete cell;
+				}
+
+				elements::GuiSolidLabelElement* ListViewTileContentProvider::ItemContent::CreateTextElement(int textRow, const FontProperties& font)
+				{
+					GuiCellComposition* cell=new GuiCellComposition;
+					textTable->AddChild(cell);
+					cell->SetSite(textRow+1, 0, 1, 1);
+
+					elements::GuiSolidLabelElement* textElement=GuiSolidLabelElement::Create();
+					textElement->SetAlignments(Alignment::Left, Alignment::Center);
+					textElement->SetFont(font);
+					textElement->SetEllipse(true);
+					cell->SetOwnedElement(textElement);
+					return textElement;
+				}
+
+				void ListViewTileContentProvider::ItemContent::ResetTextTable(int textRows)
+				{
+					textTable->SetRowsAndColumns(textRows+2, 1);
+					textTable->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
+					for(int i=0;i<textRows;i++)
+					{
+						textTable->SetRowOption(i+1, GuiCellOption::MinSizeOption());
+					}
+					textTable->SetRowOption(textRows+1, GuiCellOption::PercentageOption(0.5));
+					textTable->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
+				}
+
+				ListViewTileContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+					:contentComposition(0)
+				{
+					contentComposition=new GuiBoundsComposition;
+					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+
+					GuiTableComposition* table=new GuiTableComposition;
+					contentComposition->AddChild(table);
+					table->SetRowsAndColumns(3, 2);
+					table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
+					table->SetRowOption(1, GuiCellOption::MinSizeOption());
+					table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
+					table->SetColumnOption(0, GuiCellOption::MinSizeOption());
+					table->SetColumnOption(1, GuiCellOption::MinSizeOption());
+					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					table->SetCellPadding(4);
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(1, 0, 1, 1);
+						cell->SetPreferredMinSize(iconSize);
+
+						image=GuiImageFrameElement::Create();
+						image->SetStretch(true);
+						cell->SetOwnedElement(image);
+					}
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 1, 3, 1);
+						cell->SetPreferredMinSize(Size(224, 0));
+
+						textTable=new GuiTableComposition;
+						textTable->SetCellPadding(1);
+						ResetTextTable(1);
+						textTable->SetAlignmentToParent(Margin(0, 0, 0, 0));
+						cell->AddChild(textTable);
 						{
-							location.y=screenBounds.y1;
-						}
-						else if(location.y+size.y>screenBounds.y2)
-						{
-							location.y=screenBounds.y2-size.y;
+							text=CreateTextElement(0, font);
 						}
 					}
-					SetBounds(Rect(location, GetBounds().GetSize()));
-					bool value=GetNativeWindow()->IsEnabledActivate();
-					ShowDeactivated();
 				}
-			}
 
-			void GuiPopup::ShowPopup(GuiControl* control, bool preferredTopBottomSide)
-			{
-				INativeWindow* window=GetNativeWindow();
-				if(window)
+				ListViewTileContentProvider::ItemContent::~ItemContent()
 				{
-					Point locations[4];
-					Size size=window->GetBounds().GetSize();
-					Rect controlBounds=control->GetBoundsComposition()->GetGlobalBounds();
+				}
 
-					GuiControlHost* controlHost=control->GetBoundsComposition()->GetRelatedControlHost();
-					if(controlHost)
+				compositions::GuiBoundsComposition* ListViewTileContentProvider::ItemContent::GetContentComposition()
+				{
+					return contentComposition;
+				}
+
+				compositions::GuiBoundsComposition* ListViewTileContentProvider::ItemContent::GetBackgroundDecorator()
+				{
+					return 0;
+				}
+
+				void ListViewTileContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				{
+					Ptr<GuiImageData> imageData=view->GetLargeImage(itemIndex);
+					if(imageData)
 					{
-						INativeWindow* controlWindow=controlHost->GetNativeWindow();
-						if(controlWindow)
-						{
-							Point controlClientOffset=controlWindow->GetClientBoundsInScreen().LeftTop();
-							controlBounds.x1+=controlClientOffset.x;
-							controlBounds.x2+=controlClientOffset.x;
-							controlBounds.y1+=controlClientOffset.y;
-							controlBounds.y2+=controlClientOffset.y;
+						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
+					}
+					else
+					{
+						image->SetImage(0);
+					}
+					text->SetText(view->GetText(itemIndex));
+					text->SetColor(styleProvider->GetPrimaryTextColor());
 
-							if(preferredTopBottomSide)
+					for(int i=0;i<dataTexts.Count();i++)
+					{
+						RemoveTextElement(i+1);
+					}
+					int dataColumnCount=view->GetDataColumnCount();
+					ResetTextTable(dataColumnCount+1);
+					dataTexts.Resize(dataColumnCount);
+					for(int i=0;i<dataColumnCount;i++)
+					{
+						dataTexts[i]=CreateTextElement(i+1, text->GetFont());
+						dataTexts[i]->SetText(view->GetSubItem(itemIndex, view->GetDataColumn(i)));
+						dataTexts[i]->SetColor(styleProvider->GetSecondaryTextColor());
+					}
+				}
+
+				ListViewTileContentProvider::ListViewTileContentProvider(Size _iconSize)
+					:iconSize(_iconSize)
+				{
+				}
+
+				ListViewTileContentProvider::~ListViewTileContentProvider()
+				{
+				}
+
+				GuiListControl::IItemCoordinateTransformer* ListViewTileContentProvider::CreatePreferredCoordinateTransformer()
+				{
+					return new DefaultItemCoordinateTransformer;
+				}
+
+				GuiListControl::IItemArranger* ListViewTileContentProvider::CreatePreferredArranger()
+				{
+					return new FixedSizeMultiColumnItemArranger;
+				}
+
+				ListViewItemStyleProvider::IListViewItemContent* ListViewTileContentProvider::CreateItemContent(const FontProperties& font)
+				{
+					return new ItemContent(iconSize, font);
+				}
+
+				void ListViewTileContentProvider::AttachListControl(GuiListControl* value)
+				{
+				}
+
+				void ListViewTileContentProvider::DetachListControl()
+				{
+				}
+				
+/***********************************************************************
+ListViewInformationContentProvider
+***********************************************************************/
+
+				ListViewInformationContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font)
+					:contentComposition(0)
+					,baselineFont(font)
+				{
+					contentComposition=new GuiBoundsComposition;
+					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+					{
+						bottomLine=GuiSolidBackgroundElement::Create();
+						bottomLineComposition=new GuiBoundsComposition;
+						bottomLineComposition->SetOwnedElement(bottomLine);
+						bottomLineComposition->SetAlignmentToParent(Margin(8, -1, 8, 0));
+						bottomLineComposition->SetPreferredMinSize(Size(0, 1));
+					}
+
+					GuiTableComposition* table=new GuiTableComposition;
+					contentComposition->AddChild(table);
+					table->SetRowsAndColumns(3, 3);
+					table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
+					table->SetRowOption(1, GuiCellOption::MinSizeOption());
+					table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
+					table->SetColumnOption(0, GuiCellOption::MinSizeOption());
+					table->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
+					table->SetColumnOption(2, GuiCellOption::MinSizeOption());
+					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					table->SetCellPadding(4);
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(1, 0, 1, 1);
+						cell->SetPreferredMinSize(iconSize);
+
+						image=GuiImageFrameElement::Create();
+						image->SetStretch(true);
+						cell->SetOwnedElement(image);
+					}
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 1, 3, 1);
+
+						FontProperties textFont=font;
+						textFont.size=(int)(textFont.size*1.2);
+
+						text=GuiSolidLabelElement::Create();
+						text->SetFont(textFont);
+						text->SetEllipse(true);
+						cell->SetOwnedElement(text);
+					}
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 2, 3, 1);
+						cell->SetPreferredMinSize(Size(224, 0));
+
+						textTable=new GuiTableComposition;
+						textTable->SetCellPadding(4);
+						textTable->SetAlignmentToParent(Margin(0, 0, 0, 0));
+						cell->AddChild(textTable);
+					}
+				}
+
+				ListViewInformationContentProvider::ItemContent::~ItemContent()
+				{
+				}
+
+				compositions::GuiBoundsComposition* ListViewInformationContentProvider::ItemContent::GetContentComposition()
+				{
+					return contentComposition;
+				}
+
+				compositions::GuiBoundsComposition* ListViewInformationContentProvider::ItemContent::GetBackgroundDecorator()
+				{
+					return bottomLineComposition;
+				}
+
+				void ListViewInformationContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				{
+					Ptr<GuiImageData> imageData=view->GetLargeImage(itemIndex);
+					if(imageData)
+					{
+						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
+					}
+					else
+					{
+						image->SetImage(0);
+					}
+					text->SetText(view->GetText(itemIndex));
+					text->SetColor(styleProvider->GetPrimaryTextColor());
+					bottomLine->SetColor(styleProvider->GetItemSeparatorColor());
+
+					for(int i=0;i<dataTexts.Count();i++)
+					{
+						GuiCellComposition* cell=textTable->GetSitedCell(i, 0);
+						textTable->RemoveChild(cell);
+						delete cell;
+					}
+
+					int dataColumnCount=view->GetDataColumnCount();
+					dataTexts.Resize(dataColumnCount);
+					textTable->SetRowsAndColumns(dataColumnCount, 1);
+					textTable->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
+					for(int i=0;i<dataColumnCount;i++)
+					{
+						textTable->SetRowOption(i, GuiCellOption::MinSizeOption());
+					}
+					
+					for(int i=0;i<dataColumnCount;i++)
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						textTable->AddChild(cell);
+						cell->SetSite(i, 0, 1, 1);
+
+						GuiTableComposition* dataTable=new GuiTableComposition;
+						dataTable->SetRowsAndColumns(1, 2);
+						dataTable->SetRowOption(0, GuiCellOption::MinSizeOption());
+						dataTable->SetColumnOption(0, GuiCellOption::MinSizeOption());
+						dataTable->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
+						dataTable->SetAlignmentToParent(Margin(0, 0, 0, 0));
+						cell->AddChild(dataTable);
+						{
+							GuiCellComposition* cell=new GuiCellComposition;
+							dataTable->AddChild(cell);
+							cell->SetSite(0, 0, 1, 1);
+
+							GuiSolidLabelElement* textColumn=GuiSolidLabelElement::Create();
+							textColumn->SetFont(baselineFont);
+							textColumn->SetText(view->GetColumnText(view->GetDataColumn(i)+1)+L": ");
+							textColumn->SetColor(styleProvider->GetSecondaryTextColor());
+							cell->SetOwnedElement(textColumn);
+						}
+						{
+							GuiCellComposition* cell=new GuiCellComposition;
+							dataTable->AddChild(cell);
+							cell->SetSite(0, 1, 1, 1);
+
+							GuiSolidLabelElement* textData=GuiSolidLabelElement::Create();
+							textData->SetFont(baselineFont);
+							textData->SetEllipse(true);
+							textData->SetText(view->GetSubItem(itemIndex, view->GetDataColumn(i)));
+							textData->SetColor(styleProvider->GetPrimaryTextColor());
+							cell->SetOwnedElement(textData);
+						}
+					}
+				}
+
+				ListViewInformationContentProvider::ListViewInformationContentProvider(Size _iconSize)
+					:iconSize(_iconSize)
+				{
+				}
+
+				ListViewInformationContentProvider::~ListViewInformationContentProvider()
+				{
+				}
+
+				GuiListControl::IItemCoordinateTransformer* ListViewInformationContentProvider::CreatePreferredCoordinateTransformer()
+				{
+					return new DefaultItemCoordinateTransformer;
+				}
+
+				GuiListControl::IItemArranger* ListViewInformationContentProvider::CreatePreferredArranger()
+				{
+					return new FixedHeightItemArranger;
+				}
+
+				ListViewItemStyleProvider::IListViewItemContent* ListViewInformationContentProvider::CreateItemContent(const FontProperties& font)
+				{
+					return new ItemContent(iconSize, font);
+				}
+
+				void ListViewInformationContentProvider::AttachListControl(GuiListControl* value)
+				{
+				}
+
+				void ListViewInformationContentProvider::DetachListControl()
+				{
+				}
+				
+/***********************************************************************
+ListViewColumnItemArranger::ColumnItemViewCallback
+***********************************************************************/
+
+				ListViewColumnItemArranger::ColumnItemViewCallback::ColumnItemViewCallback(ListViewColumnItemArranger* _arranger)
+					:arranger(_arranger)
+				{
+				}
+
+				ListViewColumnItemArranger::ColumnItemViewCallback::~ColumnItemViewCallback()
+				{
+				}
+
+				void ListViewColumnItemArranger::ColumnItemViewCallback::OnColumnChanged()
+				{
+					arranger->RebuildColumns();
+				}
+				
+/***********************************************************************
+ListViewColumnItemArranger
+***********************************************************************/
+
+				const wchar_t* const ListViewColumnItemArranger::IColumnItemView::Identifier = L"vl::presentation::controls::list::ListViewColumnItemArranger::IColumnItemView";
+
+				void ListViewColumnItemArranger::ColumnClicked(int index, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+				{
+					GuiItemEventArgs args(listView->ColumnClicked.GetAssociatedComposition());
+					args.itemIndex=index;
+					listView->ColumnClicked.Execute(args);
+				}
+
+				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+				{
+					if(listView->GetVisuallyEnabled())
+					{
+						arguments.handled=true;
+						splitterDragging=true;
+						splitterLatestX=arguments.x;
+					}
+				}
+
+				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+				{
+					if(listView->GetVisuallyEnabled())
+					{
+						arguments.handled=true;
+						splitterDragging=false;
+						splitterLatestX=0;
+					}
+				}
+
+				void ListViewColumnItemArranger::ColumnHeaderSplitterMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+				{
+					if(splitterDragging)
+					{
+						int offset=arguments.x-splitterLatestX;
+						int index=columnHeaderSplitters.IndexOf(dynamic_cast<GuiBoundsComposition*>(sender));
+						if(index!=-1)
+						{
+							GuiBoundsComposition* buttonBounds=columnHeaderButtons[index]->GetBoundsComposition();
+							Rect bounds=buttonBounds->GetBounds();
+							Rect newBounds(bounds.LeftTop(), Size(bounds.Width()+offset, bounds.Height()));
+							buttonBounds->SetBounds(newBounds);
+
+							int finalSize=buttonBounds->GetBounds().Width();
+							columnItemView->SetColumnSize(index, finalSize);
+						}
+					}
+				}
+
+				void ListViewColumnItemArranger::RearrangeItemBounds()
+				{
+					FixedHeightItemArranger::RearrangeItemBounds();
+					int count=columnHeaders->GetParent()->Children().Count();
+					columnHeaders->GetParent()->MoveChild(columnHeaders, count-1);
+					columnHeaders->SetBounds(Rect(Point(-viewBounds.Left(), 0), Size(0, 0)));
+				}
+
+				int ListViewColumnItemArranger::GetWidth()
+				{
+					int width=columnHeaders->GetBounds().Width()-SplitterWidth;
+					if(width<SplitterWidth)
+					{
+						width=SplitterWidth;
+					}
+					return width;
+				}
+
+				int ListViewColumnItemArranger::GetYOffset()
+				{
+					return columnHeaders->GetBounds().Height();
+				}
+
+				Size ListViewColumnItemArranger::OnCalculateTotalSize()
+				{
+					Size size=FixedHeightItemArranger::OnCalculateTotalSize();
+					size.x+=SplitterWidth;
+					return size;
+				}
+
+				void ListViewColumnItemArranger::DeleteColumnButtons()
+				{
+					for(int i=columnHeaders->GetStackItems().Count()-1;i>=0;i--)
+					{
+						GuiStackItemComposition* item=columnHeaders->GetStackItems().Get(i);
+						columnHeaders->RemoveChild(item);
+
+						GuiControl* button=item->Children().Get(0)->GetAssociatedControl();
+						if(button)
+						{
+							item->RemoveChild(button->GetBoundsComposition());
+							delete button;
+						}
+						delete item;
+					}
+					columnHeaderButtons.Clear();
+					columnHeaderSplitters.Clear();
+				}
+
+				void ListViewColumnItemArranger::RebuildColumns()
+				{
+					if(columnItemView && columnHeaderButtons.Count()==columnItemView->GetColumnCount())
+					{
+						for(int i=0;i<columnItemView->GetColumnCount();i++)
+						{
+							GuiListViewColumnHeader* button=columnHeaderButtons[i];
+							button->SetText(columnItemView->GetColumnText(i));
+							button->SetSubMenu(columnItemView->GetDropdownPopup(i), false);
+							button->SetColumnSortingState(columnItemView->GetSortingState(i));
+							button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
+						}
+					}
+					else
+					{
+						DeleteColumnButtons();
+						if(columnItemView)
+						{
+							for(int i=0;i<columnItemView->GetColumnCount();i++)
 							{
-								locations[0]=Point(controlBounds.x1, controlBounds.y2);
-								locations[1]=Point(controlBounds.x2-size.x, controlBounds.y2);
-								locations[2]=Point(controlBounds.x1, controlBounds.y1-size.y);
-								locations[3]=Point(controlBounds.x2-size.x, controlBounds.y1-size.y);
+								GuiBoundsComposition* splitterComposition=new GuiBoundsComposition;
+								splitterComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+								splitterComposition->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::SizeWE));
+								splitterComposition->SetAlignmentToParent(Margin(0, 0, -1, 0));
+								splitterComposition->SetPreferredMinSize(Size(SplitterWidth, 0));
+								columnHeaderSplitters.Add(splitterComposition);
+
+								splitterComposition->GetEventReceiver()->leftButtonDown.AttachMethod(this, &ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonDown);
+								splitterComposition->GetEventReceiver()->leftButtonUp.AttachMethod(this, &ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonUp);
+								splitterComposition->GetEventReceiver()->mouseMove.AttachMethod(this, &ListViewColumnItemArranger::ColumnHeaderSplitterMouseMove);
+							}
+							for(int i=0;i<columnItemView->GetColumnCount();i++)
+							{
+								GuiListViewColumnHeader* button=new GuiListViewColumnHeader(styleProvider->CreateColumnStyle());
+								button->SetText(columnItemView->GetColumnText(i));
+								button->SetSubMenu(columnItemView->GetDropdownPopup(i), false);
+								button->SetColumnSortingState(columnItemView->GetSortingState(i));
+								button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
+								button->Clicked.AttachLambda(Curry(Func<void(int, GuiGraphicsComposition*, GuiEventArgs&)>(this, &ListViewColumnItemArranger::ColumnClicked))(i));
+								columnHeaderButtons.Add(button);
+								if(i>0)
+								{
+									button->GetContainerComposition()->AddChild(columnHeaderSplitters[i-1]);
+								}
+
+								GuiStackItemComposition* item=new GuiStackItemComposition;
+								item->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+								item->AddChild(button->GetBoundsComposition());
+								columnHeaders->AddChild(item);
+							}
+							if(columnItemView->GetColumnCount()>0)
+							{
+								GuiBoundsComposition* splitterComposition=columnHeaderSplitters[columnItemView->GetColumnCount()-1];
+
+								GuiStackItemComposition* item=new GuiStackItemComposition;
+								item->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+								item->AddChild(splitterComposition);
+								columnHeaders->AddChild(item);
+							}
+						}
+					}
+					callback->OnTotalSizeChanged();
+				}
+
+				ListViewColumnItemArranger::ListViewColumnItemArranger()
+					:listView(0)
+					,styleProvider(0)
+					,columnItemView(0)
+					,splitterDragging(false)
+					,splitterLatestX(0)
+				{
+					columnHeaders=new GuiStackComposition;
+					columnHeaders->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+					columnItemViewCallback=new ColumnItemViewCallback(this);
+				}
+
+				ListViewColumnItemArranger::~ListViewColumnItemArranger()
+				{
+					if(!columnHeaders->GetParent())
+					{
+						DeleteColumnButtons();
+						delete columnHeaders;
+					}
+				}
+
+				void ListViewColumnItemArranger::AttachListControl(GuiListControl* value)
+				{
+					FixedHeightItemArranger::AttachListControl(value);
+					listView=dynamic_cast<GuiListViewBase*>(value);
+					if(listView)
+					{
+						styleProvider=listView->GetListViewStyleProvider();
+						listView->GetContainerComposition()->AddChild(columnHeaders);
+						columnItemView=dynamic_cast<IColumnItemView*>(listView->GetItemProvider()->RequestView(IColumnItemView::Identifier));
+						if(columnItemView)
+						{
+							columnItemView->AttachCallback(columnItemViewCallback.Obj());
+							RebuildColumns();
+						}
+					}
+				}
+
+				void ListViewColumnItemArranger::DetachListControl()
+				{
+					if(listView)
+					{
+						if(columnItemView)
+						{
+							columnItemView->DetachCallback(columnItemViewCallback.Obj());
+							listView->GetItemProvider()->ReleaseView(columnItemView);
+							columnItemView=0;
+						}
+						listView->GetContainerComposition()->RemoveChild(columnHeaders);
+						styleProvider=0;
+						listView=0;
+					}
+					FixedHeightItemArranger::DetachListControl();
+				}
+				
+/***********************************************************************
+ListViewDetailContentProvider
+***********************************************************************/
+
+				ListViewDetailContentProvider::ItemContent::ItemContent(Size iconSize, const FontProperties& font, GuiListControl::IItemProvider* _itemProvider)
+					:contentComposition(0)
+					,itemProvider(_itemProvider)
+				{
+					columnItemView=dynamic_cast<ListViewColumnItemArranger::IColumnItemView*>(itemProvider->RequestView(ListViewColumnItemArranger::IColumnItemView::Identifier));
+					contentComposition=new GuiBoundsComposition;
+					contentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+
+					textTable=new GuiTableComposition;
+					textTable->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					textTable->SetRowsAndColumns(1, 1);
+					textTable->SetRowOption(0, GuiCellOption::MinSizeOption());
+					textTable->SetColumnOption(0, GuiCellOption::AbsoluteOption(0));
+					contentComposition->AddChild(textTable);
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						textTable->AddChild(cell);
+						cell->SetSite(0, 0, 1, 1);
+
+						GuiTableComposition* table=new GuiTableComposition;
+						cell->AddChild(table);
+						table->SetRowsAndColumns(3, 2);
+						table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
+						table->SetRowOption(1, GuiCellOption::MinSizeOption());
+						table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
+						table->SetColumnOption(0, GuiCellOption::MinSizeOption());
+						table->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
+						table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+						table->SetCellPadding(2);
+						{
+							GuiCellComposition* cell=new GuiCellComposition;
+							table->AddChild(cell);
+							cell->SetSite(1, 0, 1, 1);
+							cell->SetPreferredMinSize(iconSize);
+
+							image=GuiImageFrameElement::Create();
+							image->SetStretch(true);
+							cell->SetOwnedElement(image);
+						}
+						{
+							GuiCellComposition* cell=new GuiCellComposition;
+							table->AddChild(cell);
+							cell->SetSite(0, 1, 3, 1);
+							cell->SetMargin(Margin(0, 0, 8, 0));
+
+							text=GuiSolidLabelElement::Create();
+							text->SetAlignments(Alignment::Left, Alignment::Center);
+							text->SetFont(font);
+							text->SetEllipse(true);
+							cell->SetOwnedElement(text);
+						}
+					}
+				}
+
+				ListViewDetailContentProvider::ItemContent::~ItemContent()
+				{
+					if(columnItemView)
+					{
+						itemProvider->ReleaseView(columnItemView);
+					}
+				}
+
+				compositions::GuiBoundsComposition* ListViewDetailContentProvider::ItemContent::GetContentComposition()
+				{
+					return contentComposition;
+				}
+
+				compositions::GuiBoundsComposition* ListViewDetailContentProvider::ItemContent::GetBackgroundDecorator()
+				{
+					return 0;
+				}
+
+				void ListViewDetailContentProvider::ItemContent::UpdateSubItemSize()
+				{
+					int columnCount=columnItemView->GetColumnCount();
+					for(int i=0;i<columnCount;i++)
+					{
+						textTable->SetColumnOption(i, GuiCellOption::AbsoluteOption(columnItemView->GetColumnSize(i)));
+					}
+					textTable->UpdateCellBounds();
+				}
+
+				void ListViewDetailContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				{
+					for(int i=1;i<textTable->GetColumns();i++)
+					{
+						GuiCellComposition* cell=textTable->GetSitedCell(0, i);
+						textTable->RemoveChild(cell);
+						delete cell;
+					}
+
+					Ptr<GuiImageData> imageData=view->GetSmallImage(itemIndex);
+					if(imageData)
+					{
+						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
+					}
+					else
+					{
+						image->SetImage(0);
+					}
+					text->SetText(view->GetText(itemIndex));
+					text->SetColor(styleProvider->GetPrimaryTextColor());
+
+					int columnCount=columnItemView->GetColumnCount();
+					textTable->SetRowsAndColumns(1, columnCount);
+					for(int i=1;i<columnCount;i++)
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						textTable->AddChild(cell);
+						cell->SetSite(0, i, 1, 1);
+						cell->SetMargin(Margin(8, 0, 8, 0));
+
+						GuiSolidLabelElement* subText=GuiSolidLabelElement::Create();
+						subText->SetAlignments(Alignment::Left, Alignment::Center);
+						subText->SetFont(text->GetFont());
+						subText->SetEllipse(true);
+						subText->SetText(view->GetSubItem(itemIndex, i-1));
+						subText->SetColor(styleProvider->GetSecondaryTextColor());
+						cell->SetOwnedElement(subText);
+					}
+					UpdateSubItemSize();
+				}
+
+				void ListViewDetailContentProvider::OnColumnChanged()
+				{
+					int count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
+					for(int i=0;i<count;i++)
+					{
+						GuiListControl::IItemStyleController* itemStyleController=listViewItemStyleProvider->GetCreatedItemStyles().Get(i);
+						ItemContent* itemContent=listViewItemStyleProvider->GetItemContent<ItemContent>(itemStyleController);
+						if(itemContent)
+						{
+							itemContent->UpdateSubItemSize();
+						}
+					}
+				}
+
+				ListViewDetailContentProvider::ListViewDetailContentProvider(Size _iconSize)
+					:iconSize(_iconSize)
+					,itemProvider(0)
+					,columnItemView(0)
+					,listViewItemStyleProvider(0)
+				{
+				}
+
+				ListViewDetailContentProvider::~ListViewDetailContentProvider()
+				{
+				}
+
+				GuiListControl::IItemCoordinateTransformer* ListViewDetailContentProvider::CreatePreferredCoordinateTransformer()
+				{
+					return new DefaultItemCoordinateTransformer;
+				}
+
+				GuiListControl::IItemArranger* ListViewDetailContentProvider::CreatePreferredArranger()
+				{
+					return new ListViewColumnItemArranger;
+				}
+
+				ListViewItemStyleProvider::IListViewItemContent* ListViewDetailContentProvider::CreateItemContent(const FontProperties& font)
+				{
+					return new ItemContent(iconSize, font, itemProvider);
+				}
+
+				void ListViewDetailContentProvider::AttachListControl(GuiListControl* value)
+				{
+					listViewItemStyleProvider=dynamic_cast<ListViewItemStyleProvider*>(value->GetStyleProvider());
+					itemProvider=value->GetItemProvider();
+					columnItemView=dynamic_cast<ListViewColumnItemArranger::IColumnItemView*>(itemProvider->RequestView(ListViewColumnItemArranger::IColumnItemView::Identifier));
+					if(columnItemView)
+					{
+						columnItemView->AttachCallback(this);
+					}
+				}
+
+				void ListViewDetailContentProvider::DetachListControl()
+				{
+					if(columnItemView)
+					{
+						columnItemView->DetachCallback(this);
+						itemProvider->ReleaseView(columnItemView);
+					}
+					itemProvider=0;
+					listViewItemStyleProvider=0;
+				}
+
+/***********************************************************************
+ListViewColumn
+***********************************************************************/
+
+				ListViewColumn::ListViewColumn(const WString& _text, int _size)
+					:text(_text)
+					,size(_size)
+					,dropdownPopup(0)
+					,sortingState(GuiListViewColumnHeader::NotSorted)
+				{
+				}
+
+/***********************************************************************
+ListViewDataColumns
+***********************************************************************/
+
+				void ListViewDataColumns::NotifyUpdateInternal(int start, int count, int newCount)
+				{
+					itemProvider->NotifyUpdate(0, itemProvider->Count());
+				}
+
+				ListViewDataColumns::ListViewDataColumns()
+					:itemProvider(0)
+				{
+				}
+
+				ListViewDataColumns::~ListViewDataColumns()
+				{
+				}
+
+/***********************************************************************
+ListViewColumns
+***********************************************************************/
+
+				void ListViewColumns::NotifyUpdateInternal(int start, int count, int newCount)
+				{
+					for(int i=0;i<itemProvider->columnItemViewCallbacks.Count();i++)
+					{
+						itemProvider->columnItemViewCallbacks[i]->OnColumnChanged();
+					}
+					itemProvider->NotifyUpdate(0, itemProvider->Count());
+				}
+
+				ListViewColumns::ListViewColumns()
+					:itemProvider(0)
+				{
+				}
+
+				ListViewColumns::~ListViewColumns()
+				{
+				}
+
+/***********************************************************************
+ListViewItemProvider
+***********************************************************************/
+
+				bool ListViewItemProvider::ContainsPrimaryText(int itemIndex)
+				{
+					return true;
+				}
+
+				WString ListViewItemProvider::GetPrimaryTextViewText(int itemIndex)
+				{
+					return Get(itemIndex)->text;
+				}
+
+				Ptr<GuiImageData> ListViewItemProvider::GetSmallImage(int itemIndex)
+				{
+					return Get(itemIndex)->smallImage;
+				}
+
+				Ptr<GuiImageData> ListViewItemProvider::GetLargeImage(int itemIndex)
+				{
+					return Get(itemIndex)->largeImage;
+				}
+
+				WString ListViewItemProvider::GetText(int itemIndex)
+				{
+					return Get(itemIndex)->text;
+				}
+
+				WString ListViewItemProvider::GetSubItem(int itemIndex, int index)
+				{
+					Ptr<ListViewItem> item=Get(itemIndex);
+					if(index<0 || index>=item->subItems.Count())
+					{
+						return L"";
+					}
+					else
+					{
+						return item->subItems[index];
+					}
+				}
+
+				int ListViewItemProvider::GetDataColumnCount()
+				{
+					return dataColumns.Count();
+				}
+
+				int ListViewItemProvider::GetDataColumn(int index)
+				{
+					return dataColumns[index];
+				}
+
+				bool ListViewItemProvider::AttachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)
+				{
+					if(columnItemViewCallbacks.Contains(value))
+					{
+						return false;
+					}
+					else
+					{
+						columnItemViewCallbacks.Add(value);
+						return true;
+					}
+				}
+
+				bool ListViewItemProvider::DetachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)
+				{
+					int index=columnItemViewCallbacks.IndexOf(value);
+					if(index==-1)
+					{
+						return false;
+					}
+					else
+					{
+						columnItemViewCallbacks.Remove(value);
+						return true;
+					}
+				}
+
+				int ListViewItemProvider::GetColumnCount()
+				{
+					return columns.Count();
+				}
+
+				WString ListViewItemProvider::GetColumnText(int index)
+				{
+					if(index<0 || index>=columns.Count())
+					{
+						return L"";
+					}
+					else
+					{
+						return columns[index]->text;
+					}
+				}
+
+				int ListViewItemProvider::GetColumnSize(int index)
+				{
+					if(index<0 || index>=columns.Count())
+					{
+						return 0;
+					}
+					else
+					{
+						return columns[index]->size;
+					}
+				}
+
+				void ListViewItemProvider::SetColumnSize(int index, int value)
+				{
+					if(index>=0 && index<columns.Count())
+					{
+						columns[index]->size=value;
+						for(int i=0;i<columnItemViewCallbacks.Count();i++)
+						{
+							columnItemViewCallbacks[i]->OnColumnChanged();
+						}
+					}
+				}
+
+				GuiMenu* ListViewItemProvider::GetDropdownPopup(int index)
+				{
+					if(index<0 || index>=columns.Count())
+					{
+						return 0;
+					}
+					else
+					{
+						return columns[index]->dropdownPopup;
+					}
+				}
+
+				GuiListViewColumnHeader::ColumnSortingState ListViewItemProvider::GetSortingState(int index)
+				{
+					if(index<0 || index>=columns.Count())
+					{
+						return GuiListViewColumnHeader::NotSorted;
+					}
+					else
+					{
+						return columns[index]->sortingState;
+					}
+				}
+
+				ListViewItemProvider::ListViewItemProvider()
+				{
+					columns.itemProvider=this;
+					dataColumns.itemProvider=this;
+				}
+
+				ListViewItemProvider::~ListViewItemProvider()
+				{
+				}
+
+				IDescriptable* ListViewItemProvider::RequestView(const WString& identifier)
+				{
+					if(identifier==ListViewItemStyleProvider::IListViewItemView::Identifier)
+					{
+						return (ListViewItemStyleProvider::IListViewItemView*)this;
+					}
+					else if(identifier==ListViewColumnItemArranger::IColumnItemView::Identifier)
+					{
+						return (ListViewColumnItemArranger::IColumnItemView*)this;
+					}
+					else if(identifier==GuiListControl::IItemPrimaryTextView::Identifier)
+					{
+						return (GuiListControl::IItemPrimaryTextView*)this;
+					}
+					else
+					{
+						return 0;
+					}
+				}
+
+				void ListViewItemProvider::ReleaseView(IDescriptable* view)
+				{
+				}
+
+				ListViewDataColumns& ListViewItemProvider::GetDataColumns()
+				{
+					return dataColumns;
+				}
+
+				ListViewColumns& ListViewItemProvider::GetColumns()
+				{
+					return columns;
+				}
+			}
+
+/***********************************************************************
+GuiListView
+***********************************************************************/
+
+			GuiVirtualListView::GuiVirtualListView(IStyleProvider* _styleProvider, GuiListControl::IItemProvider* _itemProvider)
+				:GuiListViewBase(_styleProvider, _itemProvider)
+			{
+				ChangeItemStyle(new list::ListViewBigIconContentProvider);
+			}
+
+			GuiVirtualListView::~GuiVirtualListView()
+			{
+			}
+
+			void GuiVirtualListView::ChangeItemStyle(list::ListViewItemStyleProvider::IListViewItemContentProvider* contentProvider)
+			{
+				SetStyleProvider(0);
+				SetArranger(0);
+				SetCoordinateTransformer(contentProvider->CreatePreferredCoordinateTransformer());
+				SetStyleProvider(new list::ListViewItemStyleProvider(contentProvider));
+				SetArranger(contentProvider->CreatePreferredArranger());
+			}
+
+/***********************************************************************
+GuiListView
+***********************************************************************/
+
+			GuiListView::GuiListView(IStyleProvider* _styleProvider)
+				:GuiVirtualListView(_styleProvider, new list::ListViewItemProvider)
+			{
+				items=dynamic_cast<list::ListViewItemProvider*>(itemProvider.Obj());
+			}
+
+			GuiListView::~GuiListView()
+			{
+			}
+
+			list::ListViewItemProvider& GuiListView::GetItems()
+			{
+				return *items;
+			}
+		}
+	}
+}
+
+/***********************************************************************
+Controls\ListControlPackage\GuiTextListControls.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+			using namespace collections;
+			using namespace elements;
+			using namespace compositions;
+
+			namespace list
+			{
+
+/***********************************************************************
+TextItemStyleProvider::TextItemStyleController
+***********************************************************************/
+
+				void TextItemStyleProvider::TextItemStyleController::OnBulletSelectedChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+				{
+					textItemStyleProvider->OnStyleCheckedChanged(this);
+				}
+
+				TextItemStyleProvider::TextItemStyleController::TextItemStyleController(TextItemStyleProvider* provider)
+					:ItemStyleControllerBase(provider, 0)
+					,backgroundButton(0)
+					,bulletButton(0)
+					,textElement(0)
+					,textItemStyleProvider(provider)
+				{
+					backgroundButton=new GuiSelectableButton(textItemStyleProvider->textItemStyleProvider->CreateBackgroundStyleController());
+					backgroundButton->SetAutoSelection(false);
+					
+					textElement=GuiSolidLabelElement::Create();
+					textElement->SetAlignments(Alignment::Left, Alignment::Center);
+					textElement->SetFont(backgroundButton->GetFont());
+
+					GuiBoundsComposition* textComposition=new GuiBoundsComposition;
+					textComposition->SetOwnedElement(textElement);
+					textComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+
+					GuiSelectableButton::IStyleController* bulletStyleController=textItemStyleProvider->textItemStyleProvider->CreateBulletStyleController();
+					if(bulletStyleController)
+					{
+						bulletButton=new GuiSelectableButton(bulletStyleController);
+						bulletButton->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+						bulletButton->SelectedChanged.AttachMethod(this, &TextItemStyleController::OnBulletSelectedChanged);
+
+						GuiTableComposition* table=new GuiTableComposition;
+						backgroundButton->GetContainerComposition()->AddChild(table);
+						table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+						table->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+						table->SetRowsAndColumns(1, 2);
+						table->SetRowOption(0, GuiCellOption::PercentageOption(1.0));
+						table->SetColumnOption(0, GuiCellOption::MinSizeOption());
+						table->SetColumnOption(1, GuiCellOption::PercentageOption(1.0));
+						{
+							GuiCellComposition* cell=new GuiCellComposition;
+							table->AddChild(cell);
+							cell->SetSite(0, 0, 1, 1);
+							cell->AddChild(bulletButton->GetBoundsComposition());
+						}
+						{
+							GuiCellComposition* cell=new GuiCellComposition;
+							table->AddChild(cell);
+							cell->SetSite(0, 1, 1, 1);
+							cell->AddChild(textComposition);
+							textComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+						}
+					}
+					else
+					{
+						backgroundButton->GetContainerComposition()->AddChild(textComposition);
+						textComposition->SetAlignmentToParent(Margin(5, 0, 0, 0));
+					}
+					Initialize(backgroundButton->GetBoundsComposition(), backgroundButton);
+				}
+
+				TextItemStyleProvider::TextItemStyleController::~TextItemStyleController()
+				{
+				}
+
+				bool TextItemStyleProvider::TextItemStyleController::GetSelected()
+				{
+					return backgroundButton->GetSelected();
+				}
+
+				void TextItemStyleProvider::TextItemStyleController::SetSelected(bool value)
+				{
+					backgroundButton->SetSelected(value);
+				}
+
+				bool TextItemStyleProvider::TextItemStyleController::GetChecked()
+				{
+					return bulletButton?bulletButton->GetSelected():false;
+				}
+
+				void TextItemStyleProvider::TextItemStyleController::SetChecked(bool value)
+				{
+					if(bulletButton) bulletButton->SetSelected(value);
+				}
+				
+				const WString& TextItemStyleProvider::TextItemStyleController::GetText()
+				{
+					return textElement->GetText();
+				}
+
+				void TextItemStyleProvider::TextItemStyleController::SetText(const WString& value)
+				{
+					textElement->SetText(value);
+				}
+
+/***********************************************************************
+TextItemStyleProvider
+***********************************************************************/
+
+				const wchar_t* const TextItemStyleProvider::ITextItemView::Identifier = L"vl::presentation::controls::list::TextItemStyleProvider::ITextItemView";
+
+				void TextItemStyleProvider::OnStyleCheckedChanged(TextItemStyleController* style)
+				{
+					int index=listControl->GetArranger()->GetVisibleIndex(style);
+					if(index!=-1)
+					{
+						textItemView->SetCheckedSilently(index, style->GetChecked());
+					}
+				}
+
+				TextItemStyleProvider::TextItemStyleProvider(ITextItemStyleProvider* _textItemStyleProvider)
+					:textItemStyleProvider(_textItemStyleProvider)
+					,textItemView(0)
+					,listControl(0)
+				{
+				}
+
+				TextItemStyleProvider::~TextItemStyleProvider()
+				{
+				}
+
+				void TextItemStyleProvider::AttachListControl(GuiListControl* value)
+				{
+					listControl=value;;
+					textItemView=dynamic_cast<ITextItemView*>(value->GetItemProvider()->RequestView(ITextItemView::Identifier));
+				}
+
+				void TextItemStyleProvider::DetachListControl()
+				{
+					listControl->GetItemProvider()->ReleaseView(textItemView);
+					textItemView=0;
+					listControl=0;
+				}
+
+				int TextItemStyleProvider::GetItemStyleId(int itemIndex)
+				{
+					return 0;
+				}
+
+				GuiListControl::IItemStyleController* TextItemStyleProvider::CreateItemStyle(int styleId)
+				{
+					return new TextItemStyleController(this);
+				}
+
+				void TextItemStyleProvider::DestroyItemStyle(GuiListControl::IItemStyleController* style)
+				{
+					delete dynamic_cast<TextItemStyleController*>(style);
+				}
+
+				void TextItemStyleProvider::Install(GuiListControl::IItemStyleController* style, int itemIndex)
+				{
+					TextItemStyleController* textStyle=dynamic_cast<TextItemStyleController*>(style);
+					textStyle->SetText(textItemView->GetText(itemIndex));
+					textStyle->SetChecked(textItemView->GetChecked(itemIndex));
+				}
+
+				void TextItemStyleProvider::SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)
+				{
+					TextItemStyleController* textStyle=dynamic_cast<TextItemStyleController*>(style);
+					textStyle->SetSelected(value);
+				}
+
+/***********************************************************************
+TextItem
+***********************************************************************/
+
+				TextItem::TextItem()
+					:checked(false)
+				{
+				}
+
+				TextItem::TextItem(const TextItem& item)
+					:text(item.text)
+					,checked(item.checked)
+				{
+				}
+
+				TextItem::TextItem(const WString& _text, bool _checked)
+					:text(_text)
+					,checked(_checked)
+				{
+				}
+
+				TextItem::TextItem(const wchar_t* _text, bool _checked)
+					:text(_text)
+					,checked(_checked)
+				{
+				}
+
+				TextItem::~TextItem()
+				{
+				}
+
+				bool TextItem::operator==(const TextItem& value)const
+				{
+					return text==value.text;
+				}
+
+				bool TextItem::operator!=(const TextItem& value)const
+				{
+					return text!=value.text;
+				}
+
+				const WString& TextItem::GetText()const
+				{
+					return text;
+				}
+
+				bool TextItem::GetChecked()const
+				{
+					return checked;
+				}
+
+/***********************************************************************
+TextItemProvider
+***********************************************************************/
+
+				bool TextItemProvider::ContainsPrimaryText(int itemIndex)
+				{
+					return true;
+				}
+
+				WString TextItemProvider::GetPrimaryTextViewText(int itemIndex)
+				{
+					return Get(itemIndex).GetText();
+				}
+				
+				WString TextItemProvider::GetText(int itemIndex)
+				{
+					return Get(itemIndex).GetText();
+				}
+
+				bool TextItemProvider::GetChecked(int itemIndex)
+				{
+					return Get(itemIndex).GetChecked();
+				}
+
+				void TextItemProvider::SetCheckedSilently(int itemIndex, bool value)
+				{
+					items[itemIndex].checked=value;
+				}
+
+				TextItemProvider::TextItemProvider()
+				{
+				}
+
+				TextItemProvider::~TextItemProvider()
+				{
+				}
+					
+				void TextItemProvider::SetText(int itemIndex, const WString& value)
+				{
+					items[itemIndex].text=value;
+					InvokeOnItemModified(itemIndex, 1, 1);
+				}
+
+				void TextItemProvider::SetChecked(int itemIndex, bool value)
+				{
+					SetCheckedSilently(itemIndex, value);
+					InvokeOnItemModified(itemIndex, 1, 1);
+				}
+
+				IDescriptable* TextItemProvider::RequestView(const WString& identifier)
+				{
+					if(identifier==TextItemStyleProvider::ITextItemView::Identifier)
+					{
+						return (TextItemStyleProvider::ITextItemView*)this;
+					}
+					else if(identifier==GuiListControl::IItemPrimaryTextView::Identifier)
+					{
+						return (GuiListControl::IItemPrimaryTextView*)this;
+					}
+					else
+					{
+						return 0;
+					}
+				}
+
+				void TextItemProvider::ReleaseView(IDescriptable* view)
+				{
+				}
+			}
+
+/***********************************************************************
+GuiTextList
+***********************************************************************/
+
+			GuiVirtualTextList::GuiVirtualTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider, GuiListControl::IItemProvider* _itemProvider)
+				:GuiSelectableListControl(_styleProvider, _itemProvider)
+			{
+				ChangeItemStyle(_itemStyleProvider);
+				SetArranger(new list::FixedHeightItemArranger);
+			}
+
+			GuiVirtualTextList::~GuiVirtualTextList()
+			{
+			}
+
+			Ptr<GuiListControl::IItemStyleProvider> GuiVirtualTextList::SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)
+			{
+				if(value.Cast<list::TextItemStyleProvider>())
+				{
+					return GuiSelectableListControl::SetStyleProvider(value);
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+			Ptr<GuiListControl::IItemStyleProvider> GuiVirtualTextList::ChangeItemStyle(list::TextItemStyleProvider::ITextItemStyleProvider* itemStyleProvider)
+			{
+				if(itemStyleProvider)
+				{
+					return SetStyleProvider(new list::TextItemStyleProvider(itemStyleProvider));
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+/***********************************************************************
+GuiTextList
+***********************************************************************/
+
+			GuiTextList::GuiTextList(IStyleProvider* _styleProvider, list::TextItemStyleProvider::ITextItemStyleProvider* _itemStyleProvider)
+				:GuiVirtualTextList(_styleProvider, _itemStyleProvider, new list::TextItemProvider)
+			{
+				items=dynamic_cast<list::TextItemProvider*>(itemProvider.Obj());
+			}
+
+			GuiTextList::~GuiTextList()
+			{
+			}
+
+			list::TextItemProvider& GuiTextList::GetItems()
+			{
+				return *items;
+			}
+		}
+	}
+}
+
+/***********************************************************************
+Controls\ListControlPackage\GuiTreeViewControls.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+			using namespace elements;
+			using namespace compositions;
+
+			namespace tree
+			{
+				const wchar_t* const INodeItemView::Identifier = L"vl::presentation::controls::tree::INodeItemView";
+				const wchar_t* const INodeItemPrimaryTextView::Identifier = L"vl::presentation:;cotnrols::tree::INodeItemPrimaryTextView";
+
+/***********************************************************************
+NodeItemProvider
+***********************************************************************/
+
+				INodeProvider* NodeItemProvider::GetNodeByOffset(INodeProvider* provider, int offset)
+				{
+					if(offset==0) return provider;
+					INodeProvider* result=0;
+					if(provider->GetExpanding() && offset>0)
+					{
+						offset-=1;
+						int count=provider->GetChildCount();
+						for(int i=0;(!result && i<count);i++)
+						{
+							INodeProvider* child=provider->GetChild(i);
+							int visibleCount=child->CalculateTotalVisibleNodes();
+							if(offset<visibleCount)
+							{
+								result=GetNodeByOffset(child, offset);
 							}
 							else
 							{
-								locations[0]=Point(controlBounds.x2, controlBounds.y1);
-								locations[1]=Point(controlBounds.x2, controlBounds.y2-size.y);
-								locations[2]=Point(controlBounds.x1-size.x, controlBounds.y1);
-								locations[3]=Point(controlBounds.x1-size.x, controlBounds.y2-size.y);
+								offset-=visibleCount;
 							}
+						}
+					}
+					ReleaseNode(provider);
+					return result;
+				}
 
-							window->SetParent(controlWindow);
-							for(int i=0;i<4;i++)
-							{
-								if(!IsClippedByScreen(locations[i]))
-								{
-									ShowPopup(locations[i]);
-									return;
-								}
-							}
-							ShowPopup(locations[0]);
+				void NodeItemProvider::OnAttached(INodeRootProvider* provider)
+				{
+				}
+
+				void NodeItemProvider::OnBeforeItemModified(INodeProvider* parentNode, int start, int count, int newCount)
+				{
+					offsetBeforeChildModified=0;
+					int base=CalculateNodeVisibilityIndexInternal(parentNode);
+					if(base!=-2 && parentNode->GetExpanding())
+					{
+						for(int i=0;i<count;i++)
+						{
+							INodeProvider* child=parentNode->GetChild(start+i);
+							offsetBeforeChildModified+=child->CalculateTotalVisibleNodes();
+							child->Release();
 						}
 					}
 				}
+
+				void NodeItemProvider::OnAfterItemModified(INodeProvider* parentNode, int start, int count, int newCount)
+				{
+					int base=CalculateNodeVisibilityIndexInternal(parentNode);
+					if(base!=-2 && parentNode->GetExpanding())
+					{
+						int offset=0;
+						int firstChildStart=-1;
+						for(int i=0;i<newCount;i++)
+						{
+							INodeProvider* child=parentNode->GetChild(start+i);
+							if(i==0)
+							{
+								firstChildStart=CalculateNodeVisibilityIndexInternal(child);
+							}
+							offset+=child->CalculateTotalVisibleNodes();
+							child->Release();
+						}
+
+						if(firstChildStart==-1)
+						{
+							int childCount=parentNode->GetChildCount();
+							if(childCount==0)
+							{
+								firstChildStart=base+1;
+							}
+							else if(start<childCount)
+							{
+								INodeProvider* child=parentNode->GetChild(start);
+								firstChildStart=CalculateNodeVisibilityIndexInternal(child);
+								child->Release();
+							}
+							else
+							{
+								INodeProvider* child=parentNode->GetChild(start-1);
+								firstChildStart=CalculateNodeVisibilityIndexInternal(child);
+								firstChildStart+=child->CalculateTotalVisibleNodes();
+								child->Release();
+							}
+						}
+						InvokeOnItemModified(firstChildStart, offsetBeforeChildModified, offset);
+					}
+				}
+
+				void NodeItemProvider::OnItemExpanded(INodeProvider* node)
+				{
+					int base=CalculateNodeVisibilityIndexInternal(node);
+					if(base!=-2)
+					{
+						int visibility=node->CalculateTotalVisibleNodes();
+						InvokeOnItemModified(base+1, 0, visibility-1);
+					}
+				}
+
+				void NodeItemProvider::OnItemCollapsed(INodeProvider* node)
+				{
+					int base=CalculateNodeVisibilityIndexInternal(node);
+					if(base!=-2)
+					{
+						int visibility=0;
+						int count=node->GetChildCount();
+						for(int i=0;i<count;i++)
+						{
+							INodeProvider* child=node->GetChild(i);
+							visibility+=child->CalculateTotalVisibleNodes();
+							child->Release();
+						}
+						InvokeOnItemModified(base+1, visibility, 0);
+					}
+				}
+
+				int NodeItemProvider::CalculateNodeVisibilityIndexInternal(INodeProvider* node)
+				{
+					INodeProvider* parent=node->GetParent();
+					if(parent==0)
+					{
+						return -1;
+					}
+					if(!parent->GetExpanding())
+					{
+						return -2;
+					}
+
+					int index=CalculateNodeVisibilityIndexInternal(parent);
+					if(index==-2)
+					{
+						return -2;
+					}
+
+					int count=parent->GetChildCount();
+					for(int i=0;i<count;i++)
+					{
+						INodeProvider* child=parent->GetChild(i);
+						bool findResult=child==node;
+						if(findResult)
+						{
+							index++;
+						}
+						else
+						{
+							index+=child->CalculateTotalVisibleNodes();
+						}
+						child->Release();
+						if(findResult)
+						{
+							return index;
+						}
+					}
+					return -1;
+				}
+
+				int NodeItemProvider::CalculateNodeVisibilityIndex(INodeProvider* node)
+				{
+					int result=CalculateNodeVisibilityIndexInternal(node);
+					return result<0?-1:result;
+				}
+
+				bool NodeItemProvider::ContainsPrimaryText(int itemIndex)
+				{
+					if(nodeItemPrimaryTextView)
+					{
+						INodeProvider* node=RequestNode(itemIndex);
+						if(node)
+						{
+							bool result=node->GetChildCount()==0;
+							ReleaseNode(node);
+							return result;
+						}
+					}
+					return true;
+				}
+
+				WString NodeItemProvider::GetPrimaryTextViewText(int itemIndex)
+				{
+					if(nodeItemPrimaryTextView)
+					{
+						INodeProvider* node=RequestNode(itemIndex);
+						if(node)
+						{
+							WString result=nodeItemPrimaryTextView->GetPrimaryTextViewText(node);
+							ReleaseNode(node);
+							return result;
+						}
+					}
+					return L"";
+				}
+
+				INodeProvider* NodeItemProvider::RequestNode(int index)
+				{
+					if(root->CanGetNodeByVisibleIndex())
+					{
+						return root->GetNodeByVisibleIndex(index+1);
+					}
+					else
+					{
+						return GetNodeByOffset(root->GetRootNode(), index+1);
+					}
+				}
+
+				void NodeItemProvider::ReleaseNode(INodeProvider* node)
+				{
+					if(node)
+					{
+						node->Release();
+					}
+				}
+
+				NodeItemProvider::NodeItemProvider(INodeRootProvider* _root)
+					:root(_root)
+				{
+					root->AttachCallback(this);
+					nodeItemPrimaryTextView=dynamic_cast<INodeItemPrimaryTextView*>(root->RequestView(INodeItemPrimaryTextView::Identifier));
+				}
+
+				NodeItemProvider::~NodeItemProvider()
+				{
+					if(nodeItemPrimaryTextView)
+					{
+						root->ReleaseView(nodeItemPrimaryTextView);
+					}
+					root->DetachCallback(this);
+				}
+
+				Ptr<INodeRootProvider> NodeItemProvider::GetRoot()
+				{
+					return root;
+				}
+
+				int NodeItemProvider::Count()
+				{
+					return root->GetRootNode()->CalculateTotalVisibleNodes()-1;
+				}
+
+				IDescriptable* NodeItemProvider::RequestView(const WString& identifier)
+				{
+					if(identifier==INodeItemView::Identifier)
+					{
+						return (INodeItemView*)this;
+					}
+					else if(identifier==GuiListControl::IItemPrimaryTextView::Identifier)
+					{
+						return (GuiListControl::IItemPrimaryTextView*)this;
+					}
+					else
+					{
+						return root->RequestView(identifier);
+					}
+				}
+
+				void NodeItemProvider::ReleaseView(IDescriptable* view)
+				{
+					if(dynamic_cast<INodeItemView*>(view)==0)
+					{
+						root->ReleaseView(view);
+					}
+				}
+
+/***********************************************************************
+NodeItemProvider
+***********************************************************************/
+
+				NodeItemStyleProvider::NodeItemStyleProvider(Ptr<INodeItemStyleProvider> provider)
+					:nodeItemStyleProvider(provider)
+					,listControl(0)
+					,nodeItemView(0)
+				{
+					nodeItemStyleProvider->BindItemStyleProvider(this);
+				}
+
+				NodeItemStyleProvider::~NodeItemStyleProvider()
+				{
+				}
+
+				void NodeItemStyleProvider::AttachListControl(GuiListControl* value)
+				{
+					listControl=value;
+					nodeItemView=dynamic_cast<INodeItemView*>(listControl->GetItemProvider()->RequestView(INodeItemView::Identifier));
+					nodeItemStyleProvider->AttachListControl(value);
+				}
+
+				void NodeItemStyleProvider::DetachListControl()
+				{
+					nodeItemStyleProvider->DetachListControl();
+					if(nodeItemView)
+					{
+						listControl->GetItemProvider()->ReleaseView(nodeItemView);
+						nodeItemView=0;
+					}
+					listControl=0;
+				}
+
+				int NodeItemStyleProvider::GetItemStyleId(int itemIndex)
+				{
+					int result=-1;
+					if(nodeItemView)
+					{
+						INodeProvider* node=nodeItemView->RequestNode(itemIndex);
+						if(node)
+						{
+							result=nodeItemStyleProvider->GetItemStyleId(node);
+							nodeItemView->ReleaseNode(node);
+						}
+					}
+					return result;
+				}
+
+				GuiListControl::IItemStyleController* NodeItemStyleProvider::CreateItemStyle(int styleId)
+				{
+					return nodeItemStyleProvider->CreateItemStyle(styleId);
+				}
+
+				void NodeItemStyleProvider::DestroyItemStyle(GuiListControl::IItemStyleController* style)
+				{
+					INodeItemStyleController* nodeStyle=dynamic_cast<INodeItemStyleController*>(style);
+					if(nodeStyle)
+					{
+						nodeItemStyleProvider->DestroyItemStyle(nodeStyle);
+					}
+				}
+
+				void NodeItemStyleProvider::Install(GuiListControl::IItemStyleController* style, int itemIndex)
+				{
+					if(nodeItemView)
+					{
+						INodeItemStyleController* nodeStyle=dynamic_cast<INodeItemStyleController*>(style);
+						if(nodeStyle)
+						{
+							INodeProvider* node=nodeItemView->RequestNode(itemIndex);
+							if(node)
+							{
+								nodeItemStyleProvider->Install(nodeStyle, node);
+							}
+						}
+					}
+				}
+
+				void NodeItemStyleProvider::SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)
+				{
+					if(nodeItemView)
+					{
+						INodeItemStyleController* nodeStyle=dynamic_cast<INodeItemStyleController*>(style);
+						if(nodeStyle)
+						{
+							nodeItemStyleProvider->SetStyleSelected(nodeStyle, value);
+						}
+					}
+				}
+
+/***********************************************************************
+MemoryNodeProvider::NodeCollection
+***********************************************************************/
+
+				void MemoryNodeProvider::NodeCollection::OnBeforeChildModified(int start, int count, int newCount)
+				{
+					ownerProvider->offsetBeforeChildModified=0;
+					if(ownerProvider->expanding)
+					{
+						for(int i=0;i<count;i++)
+						{
+							ownerProvider->offsetBeforeChildModified+=items[start+i]->totalVisibleNodeCount;
+						}
+					}
+					INodeProviderCallback* proxy=ownerProvider->GetCallbackProxyInternal();
+					if(proxy)
+					{
+						proxy->OnBeforeItemModified(ownerProvider, start, count, newCount);
+					}
+				}
+
+				void MemoryNodeProvider::NodeCollection::OnAfterChildModified(int start, int count, int newCount)
+				{
+					ownerProvider->childCount+=(newCount-count);
+					if(ownerProvider->expanding)
+					{
+						int offset=0;
+						for(int i=0;i<newCount;i++)
+						{
+							offset+=items[start+i]->totalVisibleNodeCount;
+						}
+						ownerProvider->OnChildTotalVisibleNodesChanged(offset-ownerProvider->offsetBeforeChildModified);
+					}
+					INodeProviderCallback* proxy=ownerProvider->GetCallbackProxyInternal();
+					if(proxy)
+					{
+						proxy->OnAfterItemModified(ownerProvider, start, count, newCount);
+					}
+				}
+
+				bool MemoryNodeProvider::NodeCollection::InsertInternal(int index, Ptr<MemoryNodeProvider> const& child)
+				{
+					if(child->parent==0)
+					{
+						OnBeforeChildModified(index, 0, 1);
+						child->parent=ownerProvider;
+						items.Insert(index, child);
+						OnAfterChildModified(index, 0, 1);
+						return true;
+					}
+					return false;
+				}
+
+				bool MemoryNodeProvider::NodeCollection::RemoveAtInternal(int index, Ptr<MemoryNodeProvider> const& child)
+				{
+					if(child->parent==ownerProvider)
+					{
+						OnBeforeChildModified(index, 1, 0);
+						child->parent=0;
+						items.RemoveAt(index);
+						OnAfterChildModified(index, 1, 0);
+						return true;
+					}
+					return false;
+				}
+
+				MemoryNodeProvider::NodeCollection::NodeCollection()
+					:ownerProvider(0)
+				{
+				}
+
+/***********************************************************************
+MemoryNodeProvider
+***********************************************************************/
+
+				INodeProviderCallback* MemoryNodeProvider::GetCallbackProxyInternal()
+				{
+					if(parent)
+					{
+						return parent->GetCallbackProxyInternal();
+					}
+					else
+					{
+						return 0;
+					}
+				}
+
+				void MemoryNodeProvider::OnChildTotalVisibleNodesChanged(int offset)
+				{
+					totalVisibleNodeCount+=offset;
+					if(parent)
+					{
+						parent->OnChildTotalVisibleNodesChanged(offset);
+					}
+				}
+
+				MemoryNodeProvider::MemoryNodeProvider()
+					:parent(0)
+					,expanding(false)
+					,childCount(0)
+					,totalVisibleNodeCount(1)
+					,offsetBeforeChildModified(0)
+				{
+					children.ownerProvider=this;
+				}
+
+				MemoryNodeProvider::MemoryNodeProvider(const Ptr<DescriptableObject>& _data)
+					:parent(0)
+					,expanding(false)
+					,childCount(0)
+					,totalVisibleNodeCount(1)
+					,offsetBeforeChildModified(0)
+					,data(_data)
+				{
+					children.ownerProvider=this;
+				}
+
+				MemoryNodeProvider::~MemoryNodeProvider()
+				{
+				}
+
+				Ptr<DescriptableObject> MemoryNodeProvider::GetData()
+				{
+					return data;
+				}
+
+				void MemoryNodeProvider::SetData(const Ptr<DescriptableObject>& value)
+				{
+					data=value;
+					NotifyDataModified();
+				}
+
+				void MemoryNodeProvider::NotifyDataModified()
+				{
+					if(parent)
+					{
+						int index=parent->children.IndexOf(this);
+						INodeProviderCallback* proxy=GetCallbackProxyInternal();
+						if(proxy)
+						{
+							proxy->OnBeforeItemModified(parent, index, 1, 1);
+							proxy->OnAfterItemModified(parent, index, 1, 1);
+						}
+					}
+				}
+
+				MemoryNodeProvider::NodeCollection& MemoryNodeProvider::Children()
+				{
+					return children;
+				}
+
+				bool MemoryNodeProvider::GetExpanding()
+				{
+					return expanding;
+				}
+
+				void MemoryNodeProvider::SetExpanding(bool value)
+				{
+					if(expanding!=value)
+					{
+						expanding=value;
+						int offset=0;
+						for(int i=0;i<childCount;i++)
+						{
+							offset+=children[i]->totalVisibleNodeCount;
+						}
+
+						OnChildTotalVisibleNodesChanged(expanding?offset:-offset);
+						INodeProviderCallback* proxy=GetCallbackProxyInternal();
+						if(proxy)
+						{
+							if(expanding)
+							{
+								proxy->OnItemExpanded(this);
+							}
+							else
+							{
+								proxy->OnItemCollapsed(this);
+							}
+						}
+					}
+				}
+
+				int MemoryNodeProvider::CalculateTotalVisibleNodes()
+				{
+					return totalVisibleNodeCount;
+				}
+
+				int MemoryNodeProvider::GetChildCount()
+				{
+					return childCount;
+				}
+
+				INodeProvider* MemoryNodeProvider::GetParent()
+				{
+					return parent;
+				}
+
+				INodeProvider* MemoryNodeProvider::GetChild(int index)
+				{
+					if(0<=index && index<childCount)
+					{
+						return children[index].Obj();
+					}
+					else
+					{
+						return 0;
+					}
+				}
+
+				void MemoryNodeProvider::Increase()
+				{
+				}
+
+				void MemoryNodeProvider::Release()
+				{
+				}
+
+/***********************************************************************
+NodeRootProviderBase
+***********************************************************************/
+
+				void NodeRootProviderBase::OnAttached(INodeRootProvider* provider)
+				{
+				}
+
+				void NodeRootProviderBase::OnBeforeItemModified(INodeProvider* parentNode, int start, int count, int newCount)
+				{
+					for(int i=0;i<callbacks.Count();i++)
+					{
+						callbacks[i]->OnBeforeItemModified(parentNode, start, count, newCount);
+					}
+				}
+
+				void NodeRootProviderBase::OnAfterItemModified(INodeProvider* parentNode, int start, int count, int newCount)
+				{
+					for(int i=0;i<callbacks.Count();i++)
+					{
+						callbacks[i]->OnAfterItemModified(parentNode, start, count, newCount);
+					}
+				}
+
+				void NodeRootProviderBase::OnItemExpanded(INodeProvider* node)
+				{
+					for(int i=0;i<callbacks.Count();i++)
+					{
+						callbacks[i]->OnItemExpanded(node);
+					}
+				}
+
+				void NodeRootProviderBase::OnItemCollapsed(INodeProvider* node)
+				{
+					for(int i=0;i<callbacks.Count();i++)
+					{
+						callbacks[i]->OnItemCollapsed(node);
+					}
+				}
+
+				NodeRootProviderBase::NodeRootProviderBase()
+				{
+				}
+
+				NodeRootProviderBase::~NodeRootProviderBase()
+				{
+				}
+
+				bool NodeRootProviderBase::CanGetNodeByVisibleIndex()
+				{
+					return false;
+				}
+
+				INodeProvider* NodeRootProviderBase::GetNodeByVisibleIndex(int index)
+				{
+					return 0;
+				}
+
+				bool NodeRootProviderBase::AttachCallback(INodeProviderCallback* value)
+				{
+					if(callbacks.Contains(value))
+					{
+						return false;
+					}
+					else
+					{
+						callbacks.Add(value);
+						value->OnAttached(this);
+						return true;
+					}
+				}
+
+				bool NodeRootProviderBase::DetachCallback(INodeProviderCallback* value)
+				{
+					int index=callbacks.IndexOf(value);
+					if(index==-1)
+					{
+						return false;
+					}
+					else
+					{
+						value->OnAttached(0);
+						callbacks.Remove(value);
+						return true;
+					}
+				}
+
+				IDescriptable* NodeRootProviderBase::RequestView(const WString& identifier)
+				{
+					return 0;
+				}
+
+				void NodeRootProviderBase::ReleaseView(IDescriptable* view)
+				{
+				}
+
+/***********************************************************************
+MemoryNodeRootProvider
+***********************************************************************/
+
+				INodeProviderCallback* MemoryNodeRootProvider::GetCallbackProxyInternal()
+				{
+					return this;
+				}
+
+				MemoryNodeRootProvider::MemoryNodeRootProvider()
+				{
+					SetExpanding(true);
+				}
+
+				MemoryNodeRootProvider::~MemoryNodeRootProvider()
+				{
+				}
+
+				INodeProvider* MemoryNodeRootProvider::GetRootNode()
+				{
+					return this;
+				}
+
+				MemoryNodeProvider* MemoryNodeRootProvider::GetMemoryNode(INodeProvider* node)
+				{
+					return dynamic_cast<MemoryNodeProvider*>(node);
+				}
+			}
+
+/***********************************************************************
+GuiVirtualTreeListControl
+***********************************************************************/
+
+			void GuiVirtualTreeListControl::OnAttached(tree::INodeRootProvider* provider)
+			{
+			}
+
+			void GuiVirtualTreeListControl::OnBeforeItemModified(tree::INodeProvider* parentNode, int start, int count, int newCount)
+			{
+			}
+
+			void GuiVirtualTreeListControl::OnAfterItemModified(tree::INodeProvider* parentNode, int start, int count, int newCount)
+			{
+			}
+
+			void GuiVirtualTreeListControl::OnItemExpanded(tree::INodeProvider* node)
+			{
+				GuiNodeEventArgs arguments;
+				(GuiEventArgs&)arguments=GetNotifyEventArguments();
+				arguments.node=node;
+				NodeExpanded.Execute(arguments);
+			}
+
+			void GuiVirtualTreeListControl::OnItemCollapsed(tree::INodeProvider* node)
+			{
+				GuiNodeEventArgs arguments;
+				(GuiEventArgs&)arguments=GetNotifyEventArguments();
+				arguments.node=node;
+				NodeCollapsed.Execute(arguments);
+			}
+
+			void GuiVirtualTreeListControl::OnItemMouseEvent(compositions::GuiNodeMouseEvent& nodeEvent, compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments)
+			{
+				tree::INodeProvider* node=GetNodeItemView()->RequestNode(arguments.itemIndex);
+				if(node)
+				{
+					GuiNodeMouseEventArgs redirectArguments;
+					(GuiMouseEventArgs&)redirectArguments=arguments;
+					redirectArguments.node=node;
+					nodeEvent.Execute(redirectArguments);
+					(GuiMouseEventArgs&)arguments=redirectArguments;
+					GetNodeItemView()->ReleaseNode(node);
+				}
+			}
+
+			void GuiVirtualTreeListControl::OnItemNotifyEvent(compositions::GuiNodeNotifyEvent& nodeEvent, compositions::GuiGraphicsComposition* sender, compositions::GuiItemEventArgs& arguments)
+			{
+				tree::INodeProvider* node=GetNodeItemView()->RequestNode(arguments.itemIndex);
+				if(node)
+				{
+					GuiNodeEventArgs redirectArguments;
+					(GuiEventArgs&)redirectArguments=arguments;
+					redirectArguments.node=node;
+					nodeEvent.Execute(redirectArguments);
+					(GuiEventArgs&)arguments=redirectArguments;
+					GetNodeItemView()->ReleaseNode(node);
+				}
+			}
+
+#define ATTACH_ITEM_MOUSE_EVENT(NODEEVENTNAME, ITEMEVENTNAME)\
+					{\
+						Func<void(GuiNodeMouseEvent&, GuiGraphicsComposition*, GuiItemMouseEventArgs&)> func(this, &GuiVirtualTreeListControl::OnItemMouseEvent);\
+						ITEMEVENTNAME.AttachFunction(Curry(func)(NODEEVENTNAME));\
+					}\
+
+#define ATTACH_ITEM_NOTIFY_EVENT(NODEEVENTNAME, ITEMEVENTNAME)\
+					{\
+						Func<void(GuiNodeNotifyEvent&, GuiGraphicsComposition*, GuiItemEventArgs&)> func(this, &GuiVirtualTreeListControl::OnItemNotifyEvent);\
+						ITEMEVENTNAME.AttachFunction(Curry(func)(NODEEVENTNAME));\
+					}\
+
+			GuiVirtualTreeListControl::GuiVirtualTreeListControl(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider)
+				:GuiSelectableListControl(_styleProvider, new tree::NodeItemProvider(_nodeRootProvider))
+			{
+				nodeItemProvider=dynamic_cast<tree::NodeItemProvider*>(GetItemProvider());
+				nodeItemView=dynamic_cast<tree::INodeItemView*>(GetItemProvider()->RequestView(tree::INodeItemView::Identifier));
+				
+				NodeLeftButtonDown.SetAssociatedComposition(boundsComposition);
+				NodeLeftButtonUp.SetAssociatedComposition(boundsComposition);
+				NodeLeftButtonDoubleClick.SetAssociatedComposition(boundsComposition);
+				NodeMiddleButtonDown.SetAssociatedComposition(boundsComposition);
+				NodeMiddleButtonUp.SetAssociatedComposition(boundsComposition);
+				NodeMiddleButtonDoubleClick.SetAssociatedComposition(boundsComposition);
+				NodeRightButtonDown.SetAssociatedComposition(boundsComposition);
+				NodeRightButtonUp.SetAssociatedComposition(boundsComposition);
+				NodeRightButtonDoubleClick.SetAssociatedComposition(boundsComposition);
+				NodeMouseMove.SetAssociatedComposition(boundsComposition);
+				NodeMouseEnter.SetAssociatedComposition(boundsComposition);
+				NodeMouseLeave.SetAssociatedComposition(boundsComposition);
+				NodeExpanded.SetAssociatedComposition(boundsComposition);
+				NodeCollapsed.SetAssociatedComposition(boundsComposition);
+
+				ATTACH_ITEM_MOUSE_EVENT(NodeLeftButtonDown, ItemLeftButtonDown);
+				ATTACH_ITEM_MOUSE_EVENT(NodeLeftButtonUp, ItemLeftButtonUp);
+				ATTACH_ITEM_MOUSE_EVENT(NodeLeftButtonDoubleClick, ItemLeftButtonDoubleClick);
+				ATTACH_ITEM_MOUSE_EVENT(NodeMiddleButtonDown, ItemMiddleButtonDown);
+				ATTACH_ITEM_MOUSE_EVENT(NodeMiddleButtonUp, ItemMiddleButtonUp);
+				ATTACH_ITEM_MOUSE_EVENT(NodeMiddleButtonDoubleClick, ItemMiddleButtonDoubleClick);
+				ATTACH_ITEM_MOUSE_EVENT(NodeRightButtonDown, ItemRightButtonDown);
+				ATTACH_ITEM_MOUSE_EVENT(NodeRightButtonUp, ItemRightButtonUp);
+				ATTACH_ITEM_MOUSE_EVENT(NodeRightButtonDoubleClick, ItemRightButtonDoubleClick);
+				ATTACH_ITEM_MOUSE_EVENT(NodeMouseMove, ItemMouseMove);
+				ATTACH_ITEM_NOTIFY_EVENT(NodeMouseEnter, ItemMouseEnter);
+				ATTACH_ITEM_NOTIFY_EVENT(NodeMouseLeave, ItemMouseLeave);
+
+				nodeItemProvider->GetRoot()->AttachCallback(this);
+			}
+
+#undef ATTACH_ITEM_MOUSE_EVENT
+#undef ATTACH_ITEM_NOTIFY_EVENT
+
+			GuiVirtualTreeListControl::~GuiVirtualTreeListControl()
+			{
+				GetItemProvider()->ReleaseView(nodeItemView);
+			}
+
+			tree::INodeItemView* GuiVirtualTreeListControl::GetNodeItemView()
+			{
+				return nodeItemView;
+			}
+
+			tree::INodeRootProvider* GuiVirtualTreeListControl::GetNodeRootProvider()
+			{
+				return nodeItemProvider->GetRoot().Obj();
+			}
+
+			tree::INodeItemStyleProvider* GuiVirtualTreeListControl::GetNodeStyleProvider()
+			{
+				return nodeStyleProvider.Obj();
+			}
+
+			Ptr<tree::INodeItemStyleProvider> GuiVirtualTreeListControl::SetNodeStyleProvider(Ptr<tree::INodeItemStyleProvider> styleProvider)
+			{
+				Ptr<tree::INodeItemStyleProvider> old=nodeStyleProvider;
+				nodeStyleProvider=styleProvider;
+				GuiSelectableListControl::SetStyleProvider(new tree::NodeItemStyleProvider(nodeStyleProvider));
+				return old;
+			}
+
+			namespace tree
+			{
+
+/***********************************************************************
+TreeViewItem
+***********************************************************************/
+
+				const wchar_t* const ITreeViewItemView::Identifier = L"vl::presentation::controls::tree::ITreeViewItemView";
+
+				TreeViewItem::TreeViewItem()
+				{
+				}
+
+				TreeViewItem::TreeViewItem(const Ptr<GuiImageData>& _image, const WString& _text)
+					:image(_image)
+					,text(_text)
+				{
+				}
+
+/***********************************************************************
+TreeViewItemRootProvider
+***********************************************************************/
+
+				WString TreeViewItemRootProvider::GetPrimaryTextViewText(INodeProvider* node)
+				{
+					return GetNodeText(node);
+				}
+
+				Ptr<GuiImageData> TreeViewItemRootProvider::GetNodeImage(INodeProvider* node)
+				{
+					MemoryNodeProvider* memoryNode=dynamic_cast<MemoryNodeProvider*>(node);
+					if(memoryNode)
+					{
+						Ptr<TreeViewItem> data=memoryNode->GetData().Cast<TreeViewItem>();
+						if(data)
+						{
+							return data->image;
+						}
+					}
+					return 0;
+				}
+
+				WString	TreeViewItemRootProvider::GetNodeText(INodeProvider* node)
+				{
+					MemoryNodeProvider* memoryNode=dynamic_cast<MemoryNodeProvider*>(node);
+					if(memoryNode)
+					{
+						Ptr<TreeViewItem> data=memoryNode->GetData().Cast<TreeViewItem>();
+						if(data)
+						{
+							return data->text;
+						}
+					}
+					return L"";
+				}
+
+				TreeViewItemRootProvider::TreeViewItemRootProvider()
+				{
+				}
+
+				TreeViewItemRootProvider::~TreeViewItemRootProvider()
+				{
+				}
+
+				IDescriptable* TreeViewItemRootProvider::RequestView(const WString& identifier)
+				{
+					if(identifier==ITreeViewItemView::Identifier)
+					{
+						return (ITreeViewItemView*)this;
+					}
+					else if(identifier==INodeItemPrimaryTextView::Identifier)
+					{
+						return (INodeItemPrimaryTextView*)this;
+					}
+					else
+					{
+						return MemoryNodeRootProvider::RequestView(identifier);
+					}
+				}
+
+				void TreeViewItemRootProvider::ReleaseView(IDescriptable* view)
+				{
+					return MemoryNodeRootProvider::ReleaseView(view);
+				}
+
+				Ptr<TreeViewItem> TreeViewItemRootProvider::GetTreeViewData(INodeProvider* node)
+				{
+					Ptr<MemoryNodeProvider> memoryNode=GetMemoryNode(node);
+					if(memoryNode)
+					{
+						return memoryNode->GetData().Cast<TreeViewItem>();
+					}
+					else
+					{
+						return 0;
+					}
+				}
+
+				void TreeViewItemRootProvider::SetTreeViewData(INodeProvider* node, Ptr<TreeViewItem> value)
+				{
+					Ptr<MemoryNodeProvider> memoryNode=GetMemoryNode(node);
+					if(memoryNode)
+					{
+						memoryNode->SetData(value);
+					}
+				}
+				
+				void TreeViewItemRootProvider::UpdateTreeViewData(INodeProvider* node)
+				{
+					Ptr<MemoryNodeProvider> memoryNode=GetMemoryNode(node);
+					if(memoryNode)
+					{
+						memoryNode->NotifyDataModified();
+					}
+				}
+
+/***********************************************************************
+TreeViewNodeItemStyleProvider::ItemController
+***********************************************************************/
+
+				void TreeViewNodeItemStyleProvider::ItemController::SwitchNodeExpanding()
+				{
+					if(backgroundButton->GetBoundsComposition()->GetParent())
+					{
+						GuiListControl::IItemArranger* arranger=styleProvider->treeControl->GetArranger();
+						int index=arranger->GetVisibleIndex(this);
+						if(index!=-1)
+						{
+							INodeItemView* view=styleProvider->treeControl->GetNodeItemView();
+							INodeProvider* node=view->RequestNode(index);
+							if(node)
+							{
+								bool expanding=node->GetExpanding();
+								node->SetExpanding(!expanding);
+								view->ReleaseNode(node);
+							}
+						}
+					}
+				}
+
+				void TreeViewNodeItemStyleProvider::ItemController::OnBackgroundButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+				{
+					if(backgroundButton->GetVisuallyEnabled())
+					{
+						SwitchNodeExpanding();
+					}
+				}
+
+				void TreeViewNodeItemStyleProvider::ItemController::OnExpandingButtonDoubleClick(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+				{
+					arguments.handled=true;
+				}
+
+				void TreeViewNodeItemStyleProvider::ItemController::OnExpandingButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+				{
+					if(expandingButton->GetVisuallyEnabled())
+					{
+						SwitchNodeExpanding();
+					}
+				}
+
+				TreeViewNodeItemStyleProvider::ItemController::ItemController(TreeViewNodeItemStyleProvider* _styleProvider)
+					:list::ItemStyleControllerBase(_styleProvider->GetBindedItemStyleProvider(), 0)
+					,styleProvider(_styleProvider)
+				{
+					backgroundButton=new GuiSelectableButton(styleProvider->treeControl->GetTreeViewStyleProvider()->CreateItemBackground());
+					backgroundButton->SetAutoSelection(false);
+					backgroundButton->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+					backgroundButton->GetEventReceiver()->leftButtonDoubleClick.AttachMethod(this, &ItemController::OnBackgroundButtonDoubleClick);
+
+					table=new GuiTableComposition;
+					backgroundButton->GetBoundsComposition()->AddChild(table);
+					table->SetRowsAndColumns(3, 4);
+					table->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
+					table->SetRowOption(1, GuiCellOption::MinSizeOption());
+					table->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
+					table->SetColumnOption(0, GuiCellOption::AbsoluteOption(0));
+					table->SetColumnOption(1, GuiCellOption::MinSizeOption());
+					table->SetColumnOption(2, GuiCellOption::MinSizeOption());
+					table->SetColumnOption(3, GuiCellOption::MinSizeOption());
+					table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					table->SetCellPadding(2);
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 1, 3, 1);
+						cell->SetPreferredMinSize(Size(16, 16));
+
+						expandingButton=new GuiSelectableButton(styleProvider->treeControl->GetTreeViewStyleProvider()->CreateItemExpandingDecorator());
+						expandingButton->SetAutoSelection(false);
+						expandingButton->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+						expandingButton->GetEventReceiver()->leftButtonDoubleClick.AttachMethod(this, &ItemController::OnExpandingButtonDoubleClick);
+						expandingButton->Clicked.AttachMethod(this, &ItemController::OnExpandingButtonClicked);
+						cell->AddChild(expandingButton->GetBoundsComposition());
+					}
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(1, 2, 1, 1);
+						cell->SetPreferredMinSize(Size(16, 16));
+
+						image=GuiImageFrameElement::Create();
+						image->SetStretch(true);
+						cell->SetOwnedElement(image);
+					}
+					{
+						GuiCellComposition* cell=new GuiCellComposition;
+						table->AddChild(cell);
+						cell->SetSite(0, 3, 3, 1);
+						cell->SetPreferredMinSize(Size(192, 0));
+
+						text=GuiSolidLabelElement::Create();
+						text->SetAlignments(Alignment::Left, Alignment::Center);
+						text->SetFont(styleProvider->treeControl->GetFont());
+						text->SetEllipse(true);
+						cell->SetOwnedElement(text);
+					}
+					Initialize(backgroundButton->GetBoundsComposition(), backgroundButton);
+				}
+
+				INodeItemStyleProvider* TreeViewNodeItemStyleProvider::ItemController::GetNodeStyleProvider()
+				{
+					return styleProvider;
+				}
+
+				void TreeViewNodeItemStyleProvider::ItemController::Install(INodeProvider* node)
+				{
+					ITreeViewItemView* view=styleProvider->treeViewItemView;
+					Ptr<GuiImageData> imageData=view->GetNodeImage(node);
+					if(imageData)
+					{
+						image->SetImage(imageData->GetImage(), imageData->GetFrameIndex());
+					}
+					else
+					{
+						image->SetImage(0);
+					}
+					text->SetText(view->GetNodeText(node));
+					text->SetColor(styleProvider->treeControl->GetTreeViewStyleProvider()->GetTextColor());
+					UpdateExpandingButton(node);
+
+					int level=-2;
+					while(node)
+					{
+						node=node->GetParent();
+						level++;
+					}
+					table->SetColumnOption(0, GuiCellOption::AbsoluteOption(level*16));
+				}
+
+				bool TreeViewNodeItemStyleProvider::ItemController::GetSelected()
+				{
+					return backgroundButton->GetSelected();
+				}
+
+				void TreeViewNodeItemStyleProvider::ItemController::SetSelected(bool value)
+				{
+					backgroundButton->SetSelected(value);
+				}
+
+				void TreeViewNodeItemStyleProvider::ItemController::UpdateExpandingButton(INodeProvider* associatedNode)
+				{
+					expandingButton->SetSelected(associatedNode->GetExpanding());
+					expandingButton->SetVisible(associatedNode->GetChildCount()>0);
+				}
+
+/***********************************************************************
+TreeViewNodeItemStyleProvider
+***********************************************************************/
+
+				TreeViewNodeItemStyleProvider::TreeViewNodeItemStyleProvider()
+					:treeControl(0)
+					,bindedItemStyleProvider(0)
+					,treeViewItemView(0)
+				{
+				}
+
+				TreeViewNodeItemStyleProvider::~TreeViewNodeItemStyleProvider()
+				{
+				}
+
+				TreeViewNodeItemStyleProvider::ItemController* TreeViewNodeItemStyleProvider::GetRelatedController(INodeProvider* node)
+				{
+					int index=treeControl->GetNodeItemView()->CalculateNodeVisibilityIndex(node);
+					if(index!=-1)
+					{
+						GuiListControl::IItemStyleController* style=treeControl->GetArranger()->GetVisibleStyle(index);
+						if(style)
+						{
+							ItemController* itemController=dynamic_cast<ItemController*>(style);
+							return itemController;
+						}
+					}
+					return 0;
+				}
+
+				void TreeViewNodeItemStyleProvider::UpdateExpandingButton(INodeProvider* node)
+				{
+					ItemController* itemController=GetRelatedController(node);
+					if(itemController)
+					{
+						itemController->UpdateExpandingButton(node);
+					}
+				}
+
+				void TreeViewNodeItemStyleProvider::OnAttached(INodeRootProvider* provider)
+				{
+				}
+
+				void TreeViewNodeItemStyleProvider::OnBeforeItemModified(INodeProvider* parentNode, int start, int count, int newCount)
+				{
+				}
+
+				void TreeViewNodeItemStyleProvider::OnAfterItemModified(INodeProvider* parentNode, int start, int count, int newCount)
+				{
+					UpdateExpandingButton(parentNode);
+				}
+
+				void TreeViewNodeItemStyleProvider::OnItemExpanded(INodeProvider* node)
+				{
+					UpdateExpandingButton(node);
+				}
+
+				void TreeViewNodeItemStyleProvider::OnItemCollapsed(INodeProvider* node)
+				{
+					UpdateExpandingButton(node);
+				}
+
+				void TreeViewNodeItemStyleProvider::BindItemStyleProvider(GuiListControl::IItemStyleProvider* styleProvider)
+				{
+					bindedItemStyleProvider=styleProvider;
+				}
+
+				GuiListControl::IItemStyleProvider* TreeViewNodeItemStyleProvider::GetBindedItemStyleProvider()
+				{
+					return bindedItemStyleProvider;
+				}
+
+				void TreeViewNodeItemStyleProvider::AttachListControl(GuiListControl* value)
+				{
+					treeControl=dynamic_cast<GuiVirtualTreeView*>(value);
+					if(treeControl)
+					{
+						treeViewItemView=dynamic_cast<ITreeViewItemView*>(treeControl->GetItemProvider()->RequestView(ITreeViewItemView::Identifier));
+						treeControl->GetNodeRootProvider()->AttachCallback(this);
+					}
+				}
+
+				void TreeViewNodeItemStyleProvider::DetachListControl()
+				{
+					if(treeViewItemView)
+					{
+						treeControl->GetItemProvider()->ReleaseView(treeViewItemView);
+						treeViewItemView=0;
+					}
+					if(treeControl)
+					{
+						treeControl->GetNodeRootProvider()->DetachCallback(this);
+						treeControl=0;
+					}
+				}
+
+				int TreeViewNodeItemStyleProvider::GetItemStyleId(INodeProvider* node)
+				{
+					return 0;
+				}
+
+				INodeItemStyleController* TreeViewNodeItemStyleProvider::CreateItemStyle(int styleId)
+				{
+					return new ItemController(this);
+				}
+
+				void TreeViewNodeItemStyleProvider::DestroyItemStyle(INodeItemStyleController* style)
+				{
+					ItemController* itemController=dynamic_cast<ItemController*>(style);
+					if(itemController)
+					{
+						delete itemController;
+					}
+				}
+
+				void TreeViewNodeItemStyleProvider::Install(INodeItemStyleController* style, INodeProvider* node)
+				{
+					ItemController* itemController=dynamic_cast<ItemController*>(style);
+					if(itemController)
+					{
+						itemController->Install(node);
+					}
+				}
+
+				void TreeViewNodeItemStyleProvider::SetStyleSelected(INodeItemStyleController* style, bool value)
+				{
+					ItemController* itemController=dynamic_cast<ItemController*>(style);
+					if(itemController)
+					{
+						itemController->SetSelected(value);
+					}
+				}
+			}
+
+/***********************************************************************
+GuiVirtualTreeView
+***********************************************************************/
+
+			GuiVirtualTreeView::GuiVirtualTreeView(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider)
+				:GuiVirtualTreeListControl(_styleProvider, _nodeRootProvider)
+			{
+				styleProvider=dynamic_cast<IStyleProvider*>(styleController->GetStyleProvider());
+				SetNodeStyleProvider(new tree::TreeViewNodeItemStyleProvider);
+				SetArranger(new list::FixedHeightItemArranger);
+			}
+
+			GuiVirtualTreeView::~GuiVirtualTreeView()
+			{
+			}
+
+			GuiVirtualTreeView::IStyleProvider* GuiVirtualTreeView::GetTreeViewStyleProvider()
+			{
+				return styleProvider;
+			}
+
+/***********************************************************************
+GuiTreeView
+***********************************************************************/
+
+			GuiTreeView::GuiTreeView(IStyleProvider* _styleProvider)
+				:GuiVirtualTreeView(_styleProvider, new tree::TreeViewItemRootProvider)
+			{
+				nodes=nodeItemProvider->GetRoot().Cast<tree::TreeViewItemRootProvider>();
+			}
+
+			GuiTreeView::~GuiTreeView()
+			{
+			}
+
+			Ptr<tree::TreeViewItemRootProvider> GuiTreeView::Nodes()
+			{
+				return nodes;
 			}
 		}
 	}
@@ -10418,6 +8183,7 @@ GuiPopup
 /***********************************************************************
 Controls\Styles\GuiCommonStyles.cpp
 ***********************************************************************/
+#include <math.h>
 
 namespace vl
 {
@@ -19245,6 +17011,2240 @@ Win8ToolstripSplitterStyle
 
 			void Win8ToolstripSplitterStyle::SetVisuallyEnabled(bool value)
 			{
+			}
+		}
+	}
+}
+
+/***********************************************************************
+Controls\TextEditorPackage\GuiTextControls.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+			using namespace elements;
+			using namespace elements::text;
+			using namespace compositions;
+
+/***********************************************************************
+GuiTextElementOperator::DefaultCallback
+***********************************************************************/
+
+			GuiTextElementOperator::DefaultCallback::DefaultCallback(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition)
+				:textElement(_textElement)
+				,textComposition(_textComposition)
+			{
+			}
+
+			GuiTextElementOperator::DefaultCallback::~DefaultCallback()
+			{
+			}
+
+			TextPos GuiTextElementOperator::DefaultCallback::GetLeftWord(TextPos pos)
+			{
+				return pos;
+			}
+
+			TextPos GuiTextElementOperator::DefaultCallback::GetRightWord(TextPos pos)
+			{
+				return pos;
+			}
+
+			void GuiTextElementOperator::DefaultCallback::GetWord(TextPos pos, TextPos& begin, TextPos& end)
+			{
+				begin=pos;
+				end=pos;
+			}
+
+			int GuiTextElementOperator::DefaultCallback::GetPageRows()
+			{
+				return textComposition->GetBounds().Height()/textElement->GetLines().GetRowHeight();
+			}
+
+			bool GuiTextElementOperator::DefaultCallback::BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)
+			{
+				return true;
+			}
+
+/***********************************************************************
+GuiTextElementOperator::ShortcutCommand
+***********************************************************************/
+
+			GuiTextElementOperator::ShortcutCommand::ShortcutCommand(bool _ctrl, bool _shift, int _key, const Func<void()> _action)
+				:ctrl(_ctrl)
+				,shift(_shift)
+				,key(_key)
+				,action(_action)
+			{
+			}
+
+			GuiTextElementOperator::ShortcutCommand::~ShortcutCommand()
+			{
+			}
+
+			bool GuiTextElementOperator::ShortcutCommand::IsTheRightKey(bool _ctrl, bool _shift, int _key)
+			{
+				return _ctrl==ctrl && _shift==shift && _key==key;
+			}
+
+			void GuiTextElementOperator::ShortcutCommand::Execute()
+			{
+				action();
+			}
+
+/***********************************************************************
+GuiTextElementOperator
+***********************************************************************/
+
+			void GuiTextElementOperator::UpdateCaretPoint()
+			{
+				GuiGraphicsHost* host=textComposition->GetRelatedGraphicsHost();
+				if(host)
+				{
+					Rect caret=textElement->GetLines().GetRectFromTextPos(textElement->GetCaretEnd());
+					Point view=textElement->GetViewPosition();
+					int textMargin=callback->GetTextMargin();
+					int x=caret.x1-view.x;
+					int y=caret.y2-view.y;
+					host->SetCaretPoint(Point(x, y), textComposition);
+				}
+			}
+
+			void GuiTextElementOperator::Move(TextPos pos, bool shift)
+			{
+				TextPos oldBegin=textElement->GetCaretBegin();
+				TextPos oldEnd=textElement->GetCaretEnd();
+
+				pos=textElement->GetLines().Normalize(pos);
+				if(!shift)
+				{
+					textElement->SetCaretBegin(pos);
+				}
+				textElement->SetCaretEnd(pos);
+				if(textControl)
+				{
+					GuiGraphicsHost* host=textComposition->GetRelatedGraphicsHost();
+					if(host)
+					{
+						if(host->GetFocusedComposition()==textControl->GetFocusableComposition())
+						{
+							textElement->SetCaretVisible(true);
+						}
+					}
+				}
+
+				Rect bounds=textElement->GetLines().GetRectFromTextPos(pos);
+				Rect view=Rect(textElement->GetViewPosition(), textComposition->GetBounds().GetSize());
+				Point viewPoint=view.LeftTop();
+
+				if(view.x2>view.x1 && view.y2>view.y1)
+				{
+					if(bounds.x1<view.x1)
+					{
+						viewPoint.x=bounds.x1;
+					}
+					else if(bounds.x2>view.x2)
+					{
+						viewPoint.x=bounds.x2-view.Width();
+					}
+					if(bounds.y1<view.y1)
+					{
+						viewPoint.y=bounds.y1;
+					}
+					else if(bounds.y2>view.y2)
+					{
+						viewPoint.y=bounds.y2-view.Height();
+					}
+				}
+
+				callback->ScrollToView(viewPoint);
+				UpdateCaretPoint();
+
+				if(textBoxCommonInterface)
+				{
+					if(oldBegin!=textElement->GetCaretBegin() || oldEnd!=textElement->GetCaretEnd())
+					{
+						textBoxCommonInterface->RaiseSelectionChanged();
+					}
+				}
+			}
+
+			void GuiTextElementOperator::Modify(TextPos start, TextPos end, const WString& input)
+			{
+				if(start>end)
+				{
+					TextPos temp=start;
+					start=end;
+					end=temp;
+				}
+				TextPos originalStart=start;
+				TextPos originalEnd=end;
+				WString originalText=textElement->GetLines().GetText(start, end);
+				WString inputText=input;
+				if(callback->BeforeModify(start, end, originalText, inputText))
+				{
+					{
+						SpinLock::Scope scope(elementModifyLock);
+						end=textElement->GetLines().Modify(start, end, inputText);
+					}
+					callback->AfterModify(originalStart, originalEnd, originalText, start, end, inputText);
+					for(int i=0;i<textEditCallbacks.Count();i++)
+					{
+						textEditCallbacks[i]->TextEditNotify(originalStart, originalEnd, originalText, start, end, inputText);
+					}
+					Move(end, false);
+
+					if(textBoxCommonInterface)
+					{
+						textBoxCommonInterface->RaiseTextChanged();
+					}
+				}
+			}
+
+			bool GuiTextElementOperator::ProcessKey(int code, bool shift, bool ctrl)
+			{
+				for(int i=0;i<shortcutCommands.Count();i++)
+				{
+					if(shortcutCommands[i]->IsTheRightKey(ctrl, shift, code))
+					{
+						shortcutCommands[i]->Execute();
+						return true;
+					}
+				}
+				TextPos begin=textElement->GetCaretBegin();
+				TextPos end=textElement->GetCaretEnd();
+				switch(code)
+				{
+				case VKEY_UP:
+					{
+						end.row--;
+						Move(end, shift);
+					}
+					return true;
+				case VKEY_DOWN:
+					{
+						end.row++;
+						Move(end, shift);
+					}
+					return true;
+				case VKEY_LEFT:
+					{
+						if(ctrl)
+						{
+							Move(callback->GetLeftWord(end), shift);
+						}
+						else
+						{
+							if(end.column==0)
+							{
+								if(end.row>0)
+								{
+									end.row--;
+									end=textElement->GetLines().Normalize(end);
+									end.column=textElement->GetLines().GetLine(end.row).dataLength;
+								}
+							}
+							else
+							{
+								end.column--;
+							}
+							Move(end, shift);
+						}
+					}
+					return true;
+				case VKEY_RIGHT:
+					{
+						if(ctrl)
+						{
+							Move(callback->GetRightWord(end), shift);
+						}
+						else
+						{
+							if(end.column==textElement->GetLines().GetLine(end.row).dataLength)
+							{
+								if(end.row<textElement->GetLines().GetCount()-1)
+								{
+									end.row++;
+									end.column=0;
+								}
+							}
+							else
+							{
+								end.column++;
+							}
+							Move(end, shift);
+						}
+					}
+					return true;
+				case VKEY_HOME:
+					{
+						if(ctrl)
+						{
+							Move(TextPos(0, 0), shift);
+						}
+						else
+						{
+							end.column=0;
+							Move(end, shift);
+						}
+					}
+					return true;
+				case VKEY_END:
+					{
+						if(ctrl)
+						{
+							end.row=textElement->GetLines().GetCount()-1;
+						}
+						end.column=textElement->GetLines().GetLine(end.row).dataLength;
+						Move(end, shift);
+					}
+					return true;
+				case VKEY_PRIOR:
+					{
+						end.row-=callback->GetPageRows();
+						Move(end, shift);
+					}
+					return true;
+				case VKEY_NEXT:
+					{
+						end.row+=callback->GetPageRows();
+						Move(end, shift);
+					}
+					return true;
+				case VKEY_BACK:
+					if(!readonly)
+					{
+						if(ctrl && !shift)
+						{
+							ProcessKey(VKEY_LEFT, true, true);
+							ProcessKey(VKEY_BACK, false, false);
+						}
+						else if(!ctrl && shift)
+						{
+							ProcessKey(VKEY_UP, true, false);
+							ProcessKey(VKEY_BACK, false, false);
+						}
+						else
+						{
+							if(begin==end)
+							{
+								ProcessKey(VKEY_LEFT, true, false);
+							}
+							SetSelectionText(L"");
+						}
+						return true;
+					}
+					break;
+				case VKEY_DELETE:
+					if(!readonly)
+					{
+						if(ctrl && !shift)
+						{
+							ProcessKey(VKEY_RIGHT, true, true);
+							ProcessKey(VKEY_DELETE, false, false);
+						}
+						else if(!ctrl && shift)
+						{
+							ProcessKey(VKEY_DOWN, true, false);
+							ProcessKey(VKEY_DELETE, false, false);
+						}
+						else
+						{
+							if(begin==end)
+							{
+								ProcessKey(VKEY_RIGHT, true, false);
+							}
+							SetSelectionText(L"");
+						}
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+
+			void GuiTextElementOperator::OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				textElement->SetFocused(true);
+				textElement->SetCaretVisible(true);
+				UpdateCaretPoint();
+			}
+
+			void GuiTextElementOperator::OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				textElement->SetFocused(false);
+				textElement->SetCaretVisible(false);
+			}
+
+			void GuiTextElementOperator::OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				textElement->SetCaretVisible(!textElement->GetCaretVisible());
+			}
+
+			void GuiTextElementOperator::OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			{
+				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
+				{
+					dragging=true;
+					TextPos pos=GetNearestTextPos(Point(arguments.x, arguments.y));
+					Move(pos, arguments.shift);
+				}
+			}
+
+			void GuiTextElementOperator::OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			{
+				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
+				{
+					dragging=false;
+				}
+			}
+
+			void GuiTextElementOperator::OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			{
+				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
+				{
+					if(dragging)
+					{
+						TextPos pos=GetNearestTextPos(Point(arguments.x, arguments.y));
+						Move(pos, true);
+					}
+				}
+			}
+
+			void GuiTextElementOperator::OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments)
+			{
+				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
+				{
+					if(ProcessKey(arguments.code, arguments.shift, arguments.ctrl))
+					{
+						arguments.handled=true;
+					}
+				}
+			}
+
+			void GuiTextElementOperator::OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments)
+			{
+				if(textControl->GetVisuallyEnabled() && arguments.compositionSource==arguments.eventSource)
+				{
+					if(!readonly && arguments.code!=VKEY_ESCAPE && arguments.code!=VKEY_BACK && !arguments.ctrl)
+					{
+						SetSelectionText(WString(arguments.code));
+					}
+				}
+			}
+
+			GuiTextElementOperator::GuiTextElementOperator()
+				:textElement(0)
+				,textComposition(0)
+				,textControl(0)
+				,textBoxCommonInterface(0)
+				,callback(0)
+				,dragging(false)
+				,readonly(false)
+			{
+			}
+
+			GuiTextElementOperator::~GuiTextElementOperator()
+			{
+				for(int i=0;i<textEditCallbacks.Count();i++)
+				{
+					textEditCallbacks[i]->Detach();
+				}
+				textEditCallbacks.Clear();
+			}
+
+			void GuiTextElementOperator::Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl)
+			{
+				textElement=_textElement;
+				textComposition=_textComposition;
+				textControl=_textControl;
+				textComposition->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::IBeam));
+
+				GuiGraphicsComposition* focusableComposition=textControl->GetFocusableComposition();
+				focusableComposition->GetEventReceiver()->gotFocus.AttachMethod(this, &GuiTextElementOperator::OnGotFocus);
+				focusableComposition->GetEventReceiver()->lostFocus.AttachMethod(this, &GuiTextElementOperator::OnLostFocus);
+				focusableComposition->GetEventReceiver()->caretNotify.AttachMethod(this, &GuiTextElementOperator::OnCaretNotify);
+				textComposition->GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiTextElementOperator::OnLeftButtonDown);
+				textComposition->GetEventReceiver()->leftButtonUp.AttachMethod(this, &GuiTextElementOperator::OnLeftButtonUp);
+				textComposition->GetEventReceiver()->mouseMove.AttachMethod(this, &GuiTextElementOperator::OnMouseMove);
+				focusableComposition->GetEventReceiver()->keyDown.AttachMethod(this, &GuiTextElementOperator::OnKeyDown);
+				focusableComposition->GetEventReceiver()->charInput.AttachMethod(this, &GuiTextElementOperator::OnCharInput);
+
+				for(int i=0;i<textEditCallbacks.Count();i++)
+				{
+					textEditCallbacks[i]->Attach(textElement, elementModifyLock);
+				}
+			}
+			
+			GuiTextElementOperator::ICallback* GuiTextElementOperator::GetCallback()
+			{
+				return callback;
+			}
+
+			void GuiTextElementOperator::SetCallback(ICallback* value)
+			{
+				callback=value;
+			}
+
+			bool GuiTextElementOperator::AttachTextEditCallback(Ptr<ITextEditCallback> value)
+			{
+				if(textEditCallbacks.Contains(value.Obj()))
+				{
+					return false;
+				}
+				else
+				{
+					textEditCallbacks.Add(value);
+					if(textElement)
+					{
+						value->Attach(textElement, elementModifyLock);
+					}
+					return true;
+				}
+			}
+
+			bool GuiTextElementOperator::DetachTextEditCallback(Ptr<ITextEditCallback> value)
+			{
+				if(textEditCallbacks.Remove(value.Obj()))
+				{
+					value->Detach();
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			GuiTextBoxCommonInterface* GuiTextElementOperator::GetTextBoxCommonInterface()
+			{
+				return textBoxCommonInterface;
+			}
+
+			void GuiTextElementOperator::SetTextBoxCommonInterface(GuiTextBoxCommonInterface* value)
+			{
+				textBoxCommonInterface=value;
+			}
+
+			void GuiTextElementOperator::AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand)
+			{
+				shortcutCommands.Add(shortcutCommand);
+			}
+
+			elements::GuiColorizedTextElement* GuiTextElementOperator::GetTextElement()
+			{
+				return textElement;
+			}
+
+			compositions::GuiGraphicsComposition* GuiTextElementOperator::GetTextComposition()
+			{
+				return textComposition;
+			}
+
+			void GuiTextElementOperator::Select(TextPos begin, TextPos end)
+			{
+				Move(begin, false);
+				Move(end, true);
+			}
+
+			TextPos GuiTextElementOperator::GetNearestTextPos(Point point)
+			{
+				Point viewPosition=textElement->GetViewPosition();
+				Point mousePosition=Point(point.x+viewPosition.x, point.y+viewPosition.y);
+				TextPos pos=textElement->GetLines().GetTextPosFromPoint(mousePosition);
+				if(pos.column<textElement->GetLines().GetLine(pos.row).dataLength)
+				{
+					Rect rect=textElement->GetLines().GetRectFromTextPos(pos);
+					if(abs(rect.x1-mousePosition.x)>=abs(rect.x2-1-mousePosition.x))
+					{
+						pos.column++;
+					}
+				}
+				return pos;
+			}
+
+			WString GuiTextElementOperator::GetSelectionText()
+			{
+				TextPos selectionBegin=textElement->GetCaretBegin()<textElement->GetCaretEnd()?textElement->GetCaretBegin():textElement->GetCaretEnd();
+				TextPos selectionEnd=textElement->GetCaretBegin()>textElement->GetCaretEnd()?textElement->GetCaretBegin():textElement->GetCaretEnd();
+				return textElement->GetLines().GetText(selectionBegin, selectionEnd);
+			}
+
+			void GuiTextElementOperator::SetSelectionText(const WString& value)
+			{
+				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value);
+			}
+
+			void GuiTextElementOperator::SetText(const WString& value)
+			{
+				if(textElement)
+				{
+					TextPos end;
+					if(textElement->GetLines().GetCount()>0)
+					{
+						end.row=textElement->GetLines().GetCount()-1;
+						end.column=textElement->GetLines().GetLine(end.row).dataLength;
+					}
+					Modify(TextPos(), end, value);
+				}
+			}
+
+			bool GuiTextElementOperator::CanCut()
+			{
+				return !readonly && textElement->GetCaretBegin()!=textElement->GetCaretEnd() && textElement->GetPasswordChar()==L'\0';
+			}
+
+			bool GuiTextElementOperator::CanCopy()
+			{
+				return textElement->GetCaretBegin()!=textElement->GetCaretEnd() && textElement->GetPasswordChar()==L'\0';
+			}
+
+			bool GuiTextElementOperator::CanPaste()
+			{
+				return !readonly && GetCurrentController()->ClipboardService()->ContainsText() && textElement->GetPasswordChar()==L'\0';
+			}
+
+			void GuiTextElementOperator::SelectAll()
+			{
+				int row=textElement->GetLines().GetCount()-1;
+				Move(TextPos(0, 0), false);
+				Move(TextPos(row, textElement->GetLines().GetLine(row).dataLength), true);
+			}
+
+			bool GuiTextElementOperator::Cut()
+			{
+				if(CanCut())
+				{
+					GetCurrentController()->ClipboardService()->SetText(GetSelectionText());
+					SetSelectionText(L"");
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool GuiTextElementOperator::Copy()
+			{
+				if(CanCopy())
+				{
+					GetCurrentController()->ClipboardService()->SetText(GetSelectionText());
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool GuiTextElementOperator::Paste()
+			{
+				if(CanPaste())
+				{
+					SetSelectionText(GetCurrentController()->ClipboardService()->GetText());
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			
+			bool GuiTextElementOperator::GetReadonly()
+			{
+				return readonly;
+			}
+
+			void GuiTextElementOperator::SetReadonly(bool value)
+			{
+				readonly=value;
+			}
+
+/***********************************************************************
+GuiTextBoxColorizer
+***********************************************************************/
+
+			void GuiTextBoxColorizerBase::ColorizerThreadProc(void* argument)
+			{
+				GuiTextBoxColorizerBase* colorizer=(GuiTextBoxColorizerBase*)argument;
+				while(!colorizer->isFinalizing)
+				{
+					int lineIndex=-1;
+					wchar_t* text=0;
+					unsigned __int32* colors=0;
+					int length=0;
+					int lexerState=-1;
+					int contextState=-1;
+
+					{
+						SpinLock::Scope scope(*colorizer->elementModifyLock);
+						if(colorizer->colorizedLineCount>=colorizer->element->GetLines().GetCount())
+						{
+							colorizer->isColorizerRunning=false;
+							break;
+						}
+
+						lineIndex=colorizer->colorizedLineCount++;
+						TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
+						length=line.dataLength;
+						text=new wchar_t[length+2];
+						colors=new unsigned __int32[length+2];
+						memcpy(text, line.text, sizeof(wchar_t)*length);
+						text[length]=L'\r';
+						text[length+1]=L'\n';
+						lexerState=lineIndex==0?colorizer->GetLexerStartState():colorizer->element->GetLines().GetLine(lineIndex-1).lexerFinalState;
+						contextState=lineIndex==0?colorizer->GetContextStartState():colorizer->element->GetLines().GetLine(lineIndex-1).contextFinalState;
+					}
+
+					colorizer->ColorizeLineWithCRLF(text, colors, length+2, lexerState, contextState);
+
+					{
+						SpinLock::Scope scope(*colorizer->elementModifyLock);
+						if(lineIndex<colorizer->colorizedLineCount && lineIndex<colorizer->element->GetLines().GetCount())
+						{
+							TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
+							line.lexerFinalState=lexerState;
+							line.contextFinalState=contextState;
+							for(int i=0;i<length;i++)
+							{
+								line.att[i].colorIndex=colors[i];
+							}
+						}
+						delete[] text;
+						delete[] colors;
+					}
+				}
+				colorizer->colorizerRunningEvent.Leave();
+			}
+
+			void GuiTextBoxColorizerBase::StartColorizer()
+			{
+				if(!isColorizerRunning)
+				{
+					isColorizerRunning=true;
+					colorizerRunningEvent.Enter();
+					ThreadPoolLite::Queue(&GuiTextBoxColorizerBase::ColorizerThreadProc, this);
+				}
+			}
+
+			void GuiTextBoxColorizerBase::StopColorizer()
+			{
+				isFinalizing=true;
+				colorizerRunningEvent.Enter();
+				colorizerRunningEvent.Leave();
+				colorizedLineCount=0;
+				isFinalizing=false;
+			}
+
+			GuiTextBoxColorizerBase::GuiTextBoxColorizerBase()
+				:element(0)
+				,elementModifyLock(0)
+				,colorizedLineCount(0)
+				,isColorizerRunning(false)
+				,isFinalizing(false)
+			{
+			}
+
+			GuiTextBoxColorizerBase::~GuiTextBoxColorizerBase()
+			{
+				StopColorizer();
+			}
+
+			void GuiTextBoxColorizerBase::Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)
+			{
+				if(_element)
+				{
+					SpinLock::Scope scope(_elementModifyLock);
+					element=_element;
+					elementModifyLock=&_elementModifyLock;
+					StartColorizer();
+				}
+			}
+
+			void GuiTextBoxColorizerBase::Detach()
+			{
+				if(element && elementModifyLock)
+				{
+					StopColorizer();
+					SpinLock::Scope scope(*elementModifyLock);
+					element=0;
+					elementModifyLock=0;
+				}
+			}
+
+			void GuiTextBoxColorizerBase::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			{
+				if(element && elementModifyLock)
+				{
+					SpinLock::Scope scope(*elementModifyLock);
+					int line=originalStart.row<originalEnd.row?originalStart.row:originalEnd.row;
+					if(colorizedLineCount>line)
+					{
+						colorizedLineCount=line;
+					}
+					StartColorizer();
+				}
+			}
+
+/***********************************************************************
+GuiTextBoxRegexColorizer
+***********************************************************************/
+
+			struct GuiTextBoxRegexColorizerProcData
+			{
+				GuiTextBoxRegexColorizer*		colorizer;
+				const wchar_t*					text;
+				unsigned __int32*				colors;
+				int								contextState;
+			};
+
+			void GuiTextBoxRegexColorizer::ColorizerProc(void* argument, vint start, vint length, vint token)
+			{
+				GuiTextBoxRegexColorizerProcData& data=*(GuiTextBoxRegexColorizerProcData*)argument;
+				data.colorizer->ColorizeTokenContextSensitive(data.text, start, length, token, data.contextState);
+				for(int i=0;i<length;i++)
+				{
+					data.colors[start+i]=token+1;
+				}
+			}
+
+			GuiTextBoxRegexColorizer::GuiTextBoxRegexColorizer()
+			{
+				colors.Resize(1);
+			}
+
+			GuiTextBoxRegexColorizer::~GuiTextBoxRegexColorizer()
+			{
+			}
+
+			elements::text::ColorEntry GuiTextBoxRegexColorizer::GetDefaultColor()
+			{
+				return defaultColor;
+			}
+
+			collections::List<WString>& GuiTextBoxRegexColorizer::GetTokenRegexes()
+			{
+				return tokenRegexes;
+			}
+
+			collections::List<elements::text::ColorEntry>& GuiTextBoxRegexColorizer::GetTokenColors()
+			{
+				return tokenColors;
+			}
+
+			collections::List<elements::text::ColorEntry>& GuiTextBoxRegexColorizer::GetExtraTokenColors()
+			{
+				return extraTokenColors;
+			}
+
+			int GuiTextBoxRegexColorizer::GetExtraTokenIndexStart()
+			{
+				if(lexer)
+				{
+					return tokenColors.Count();
+				}
+				else
+				{
+					return -1;
+				}
+			}
+
+			bool GuiTextBoxRegexColorizer::SetDefaultColor(elements::text::ColorEntry value)
+			{
+				if(lexer)
+				{
+					return false;
+				}
+				else
+				{
+					defaultColor=value;
+					return true;
+				}
+			}
+
+			int GuiTextBoxRegexColorizer::AddToken(const WString& regex, elements::text::ColorEntry color)
+			{
+				if(lexer)
+				{
+					return -1;
+				}
+				else
+				{
+					tokenRegexes.Add(regex);
+					tokenColors.Add(color);
+					return tokenColors.Count()-1;
+				}
+			}
+
+			int GuiTextBoxRegexColorizer::AddExtraToken(elements::text::ColorEntry color)
+			{
+				if(lexer)
+				{
+					return -1;
+				}
+				else
+				{
+					extraTokenColors.Add(color);
+					return extraTokenColors.Count()-1;
+				}
+			}
+
+			bool GuiTextBoxRegexColorizer::Setup()
+			{
+				if(lexer || tokenRegexes.Count()==0)
+				{
+					return false;
+				}
+				else
+				{
+					lexer=new regex::RegexLexer(tokenRegexes);
+					colors.Resize(1+tokenRegexes.Count()+extraTokenColors.Count());
+					colors[0]=defaultColor;
+					for(int i=0;i<tokenColors.Count();i++)
+					{
+						colors[i+1]=tokenColors[i];
+					}
+					for(int i=0;i<extraTokenColors.Count();i++)
+					{
+						colors[i+1+tokenColors.Count()]=extraTokenColors[i];
+					}
+					colorizer=new regex::RegexLexerColorizer(lexer->Colorize());
+					return true;
+				}
+			}
+
+			void GuiTextBoxRegexColorizer::ColorizeTokenContextSensitive(const wchar_t* text, vint start, vint length, vint& token, int& contextState)
+			{
+			}
+
+			int GuiTextBoxRegexColorizer::GetLexerStartState()
+			{
+				return lexer?colorizer->GetStartState():-1;
+			}
+
+			int GuiTextBoxRegexColorizer::GetContextStartState()
+			{
+				return 0;
+			}
+
+			void GuiTextBoxRegexColorizer::ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)
+			{
+				if(lexer)
+				{
+					GuiTextBoxRegexColorizerProcData data;
+					data.colorizer=this;
+					data.text=text;
+					data.colors=colors;
+					data.contextState=contextState;
+
+					memset(colors, 0, sizeof(*colors)*length);
+					colorizer->Reset(lexerState);
+					colorizer->Colorize(text, length, &GuiTextBoxRegexColorizer::ColorizerProc, &data);
+
+					lexerState=colorizer->GetCurrentState();
+					contextState=data.contextState;
+				}
+				else
+				{
+					lexerState=-1;
+					contextState=-1;
+				}
+			}
+
+			const GuiTextBoxRegexColorizer::ColorArray& GuiTextBoxRegexColorizer::GetColors()
+			{
+				return colors;
+			}
+
+/***********************************************************************
+GuiGeneralUndoRedoProcessor
+***********************************************************************/
+
+			GuiGeneralUndoRedoProcessor::GuiGeneralUndoRedoProcessor()
+				:firstFutureStep(0)
+				,savedStep(0)
+				,performingUndoRedo(false)
+			{
+			}
+
+			GuiGeneralUndoRedoProcessor::~GuiGeneralUndoRedoProcessor()
+			{
+			}
+
+			void GuiGeneralUndoRedoProcessor::PushStep(Ptr<IEditStep> step)
+			{
+				if(!performingUndoRedo)
+				{
+					if(firstFutureStep<savedStep)
+					{
+						savedStep=-1;
+					}
+
+					int count=steps.Count()-firstFutureStep;
+					if(count>0)
+					{
+						steps.RemoveRange(firstFutureStep, count);
+					}
+				
+					steps.Add(step);
+					firstFutureStep=steps.Count();
+				}
+			}
+
+			bool GuiGeneralUndoRedoProcessor::CanUndo()
+			{
+				return firstFutureStep>0;
+			}
+
+			bool GuiGeneralUndoRedoProcessor::CanRedo()
+			{
+				return steps.Count()>firstFutureStep;
+			}
+
+			void GuiGeneralUndoRedoProcessor::ClearUndoRedo()
+			{
+				if(!performingUndoRedo)
+				{
+					steps.Clear();
+					firstFutureStep=0;
+					savedStep=-1;
+				}
+			}
+
+			bool GuiGeneralUndoRedoProcessor::GetModified()
+			{
+				return firstFutureStep!=savedStep;
+			}
+
+			void GuiGeneralUndoRedoProcessor::NotifyModificationSaved()
+			{
+				if(!performingUndoRedo)
+				{
+					savedStep=firstFutureStep;
+				}
+			}
+
+			bool GuiGeneralUndoRedoProcessor::Undo()
+			{
+				if(!CanUndo()) return false;
+				performingUndoRedo=true;
+				firstFutureStep--;
+				steps[firstFutureStep]->Undo();
+				performingUndoRedo=false;
+				return true;
+			}
+
+			bool GuiGeneralUndoRedoProcessor::Redo()
+			{
+				if(!CanRedo()) return false;
+				performingUndoRedo=true;
+				firstFutureStep++;
+				steps[firstFutureStep-1]->Redo();
+				performingUndoRedo=false;
+				return true;
+			}
+
+/***********************************************************************
+GuiTextBoxUndoRedoProcessor::EditStep
+***********************************************************************/
+
+			void GuiTextBoxUndoRedoProcessor::EditStep::Undo()
+			{
+				processor->textElementOperator->Select(inputStart, inputEnd);
+				processor->textElementOperator->SetSelectionText(originalText);
+				processor->textElementOperator->Select(originalStart, originalEnd);
+			}
+
+			void GuiTextBoxUndoRedoProcessor::EditStep::Redo()
+			{
+				processor->textElementOperator->Select(originalStart, originalEnd);
+				processor->textElementOperator->SetSelectionText(inputText);
+				processor->textElementOperator->Select(inputStart, inputEnd);
+			}
+
+/***********************************************************************
+GuiTextBoxUndoRedoProcessor
+***********************************************************************/
+
+			GuiTextBoxUndoRedoProcessor::GuiTextBoxUndoRedoProcessor(GuiTextElementOperator* _textElementOperator)
+				:textElementOperator(_textElementOperator)
+			{
+			}
+
+			GuiTextBoxUndoRedoProcessor::~GuiTextBoxUndoRedoProcessor()
+			{
+			}
+
+			void GuiTextBoxUndoRedoProcessor::Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)
+			{
+			}
+
+			void GuiTextBoxUndoRedoProcessor::Detach()
+			{
+				ClearUndoRedo();
+			}
+
+			void GuiTextBoxUndoRedoProcessor::TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			{
+				Ptr<EditStep> step=new EditStep;
+				step->processor=this;
+				step->originalStart=originalStart;
+				step->originalEnd=originalEnd;
+				step->originalText=originalText;
+				step->inputStart=inputStart;
+				step->inputEnd=inputEnd;
+				step->inputText=inputText;
+				PushStep(step);
+			}
+
+/***********************************************************************
+GuiTextBoxCommonInterface
+***********************************************************************/
+
+			void GuiTextBoxCommonInterface::RaiseTextChanged()
+			{
+				textControl->TextChanged.Execute(textControl->GetNotifyEventArguments());
+			}
+
+			void GuiTextBoxCommonInterface::RaiseSelectionChanged()
+			{
+				SelectionChanged.Execute(textControl->GetNotifyEventArguments());
+			}
+
+			void GuiTextBoxCommonInterface::InitializeCommonInterface(GuiControl* _textControl, GuiTextElementOperator* _textElementOperator)
+			{
+				textElementOperator=_textElementOperator;
+				textControl=_textControl;
+				SelectionChanged.SetAssociatedComposition(textControl->GetBoundsComposition());
+				textElementOperator->SetTextBoxCommonInterface(this);
+
+				undoRedoProcessor=new GuiTextBoxUndoRedoProcessor(textElementOperator);
+				textElementOperator->AttachTextEditCallback(undoRedoProcessor);
+
+				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'A', Func<void()>(this, &GuiTextBoxCommonInterface::SelectAll)));
+				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'Z', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Undo))));
+				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'Y', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Redo))));
+				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'X', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Cut))));
+				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'C', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Copy))));
+				textElementOperator->AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'V', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Paste))));
+			}
+
+			GuiTextBoxCommonInterface::GuiTextBoxCommonInterface()
+				:textElementOperator(0)
+				,textControl(0)
+			{
+			}
+
+			GuiTextBoxCommonInterface::~GuiTextBoxCommonInterface()
+			{
+				if(colorizer)
+				{
+					textElementOperator->DetachTextEditCallback(colorizer);
+					colorizer=0;
+				}
+				if(undoRedoProcessor)
+				{
+					textElementOperator->DetachTextEditCallback(undoRedoProcessor);
+					undoRedoProcessor=0;
+				}
+			}
+
+			compositions::GuiGraphicsComposition* GuiTextBoxCommonInterface::GetTextComposition()
+			{
+				return textElementOperator->GetTextComposition();
+			}
+
+			Ptr<GuiTextBoxColorizerBase> GuiTextBoxCommonInterface::GetColorizer()
+			{
+				return colorizer;
+			}
+
+			void GuiTextBoxCommonInterface::SetColorizer(Ptr<GuiTextBoxColorizerBase> value)
+			{
+				if(textElementOperator)
+				{
+					if(colorizer)
+					{
+						textElementOperator->DetachTextEditCallback(colorizer);
+					}
+					colorizer=value;
+					if(colorizer)
+					{
+						textElementOperator->AttachTextEditCallback(colorizer);
+						textElementOperator->GetTextElement()->SetColors(colorizer->GetColors());
+					}
+				}
+			}
+
+			bool GuiTextBoxCommonInterface::CanUndo()
+			{
+				return undoRedoProcessor->CanUndo();
+			}
+
+			bool GuiTextBoxCommonInterface::CanRedo()
+			{
+				return undoRedoProcessor->CanRedo();
+			}
+
+			void GuiTextBoxCommonInterface::ClearUndoRedo()
+			{
+				undoRedoProcessor->ClearUndoRedo();
+			}
+
+			bool GuiTextBoxCommonInterface::GetModified()
+			{
+				return undoRedoProcessor->GetModified();
+			}
+
+			void GuiTextBoxCommonInterface::NotifyModificationSaved()
+			{
+				undoRedoProcessor->NotifyModificationSaved();
+			}
+
+			bool GuiTextBoxCommonInterface::Undo()
+			{
+				return undoRedoProcessor->Undo();
+			}
+
+			bool GuiTextBoxCommonInterface::Redo()
+			{
+				return undoRedoProcessor->Redo();
+			}
+
+			bool GuiTextBoxCommonInterface::CanCut()
+			{
+				return textElementOperator->CanCut();
+			}
+
+			bool GuiTextBoxCommonInterface::CanCopy()
+			{
+				return textElementOperator->CanCopy();
+			}
+
+			bool GuiTextBoxCommonInterface::CanPaste()
+			{
+				return textElementOperator->CanPaste();
+			}
+
+			void GuiTextBoxCommonInterface::SelectAll()
+			{
+				textElementOperator->SelectAll();
+			}
+
+			bool GuiTextBoxCommonInterface::Cut()
+			{
+				return textElementOperator->Cut();
+			}
+
+			bool GuiTextBoxCommonInterface::Copy()
+			{
+				return textElementOperator->Copy();
+			}
+
+			bool GuiTextBoxCommonInterface::Paste()
+			{
+				return textElementOperator->Paste();
+			}
+
+			WString GuiTextBoxCommonInterface::GetRowText(int row)
+			{
+				TextPos start=textElementOperator->GetTextElement()->GetLines().Normalize(TextPos(row, 0));
+				TextPos end=TextPos(start.row, textElementOperator->GetTextElement()->GetLines().GetLine(start.row).dataLength);
+				return GetFragmentText(start, end);
+			}
+
+			WString GuiTextBoxCommonInterface::GetFragmentText(TextPos start, TextPos end)
+			{
+				start=textElementOperator->GetTextElement()->GetLines().Normalize(start);
+				end=textElementOperator->GetTextElement()->GetLines().Normalize(end);
+				return textElementOperator->GetTextElement()->GetLines().GetText(start, end);
+			}
+				
+			int GuiTextBoxCommonInterface::GetRowWidth(int row)
+			{
+				return textElementOperator->GetTextElement()->GetLines().GetRowWidth(row);
+			}
+
+			int GuiTextBoxCommonInterface::GetRowHeight()
+			{
+				return textElementOperator->GetTextElement()->GetLines().GetRowHeight();
+			}
+
+			int GuiTextBoxCommonInterface::GetMaxWidth()
+			{
+				return textElementOperator->GetTextElement()->GetLines().GetMaxWidth();
+			}
+
+			int GuiTextBoxCommonInterface::GetMaxHeight()
+			{
+				return textElementOperator->GetTextElement()->GetLines().GetMaxHeight();
+			}
+
+			TextPos GuiTextBoxCommonInterface::GetTextPosFromPoint(Point point)
+			{
+				Point view=textElementOperator->GetTextElement()->GetViewPosition();
+				return textElementOperator->GetTextElement()->GetLines().GetTextPosFromPoint(Point(point.x+view.x, point.y+view.y));
+			}
+
+			Point GuiTextBoxCommonInterface::GetPointFromTextPos(TextPos pos)
+			{
+				Point view=textElementOperator->GetTextElement()->GetViewPosition();
+				Point result=textElementOperator->GetTextElement()->GetLines().GetPointFromTextPos(pos);
+				return Point(result.x-view.x, result.y-view.y);
+			}
+
+			Rect GuiTextBoxCommonInterface::GetRectFromTextPos(TextPos pos)
+			{
+				Point view=textElementOperator->GetTextElement()->GetViewPosition();
+				Rect result=textElementOperator->GetTextElement()->GetLines().GetRectFromTextPos(pos);
+				return Rect(Point(result.x1-view.x, result.y1-view.y), result.GetSize());
+			}
+
+			TextPos GuiTextBoxCommonInterface::GetNearestTextPos(Point point)
+			{
+				return textElementOperator->GetNearestTextPos(point);
+			}
+
+			TextPos GuiTextBoxCommonInterface::GetCaretBegin()
+			{
+				return textElementOperator->GetTextElement()->GetCaretBegin();
+			}
+
+			TextPos GuiTextBoxCommonInterface::GetCaretEnd()
+			{
+				return textElementOperator->GetTextElement()->GetCaretEnd();
+			}
+
+			TextPos GuiTextBoxCommonInterface::GetCaretSmall()
+			{
+				TextPos c1=GetCaretBegin();
+				TextPos c2=GetCaretBegin();
+				return c1<c2?c1:c2;
+			}
+
+			TextPos GuiTextBoxCommonInterface::GetCaretLarge()
+			{
+				TextPos c1=GetCaretBegin();
+				TextPos c2=GetCaretBegin();
+				return c1>c2?c1:c2;
+			}
+
+			void GuiTextBoxCommonInterface::Select(TextPos begin, TextPos end)
+			{
+				begin=textElementOperator->GetTextElement()->GetLines().Normalize(begin);
+				end=textElementOperator->GetTextElement()->GetLines().Normalize(end);
+				textElementOperator->Select(begin, end);
+			}
+
+			WString GuiTextBoxCommonInterface::GetSelectionText()
+			{
+				return textElementOperator->GetSelectionText();
+			}
+
+			void GuiTextBoxCommonInterface::SetSelectionText(const WString& value)
+			{
+				return textElementOperator->SetSelectionText(value);
+			}
+
+			bool GuiTextBoxCommonInterface::GetReadonly()
+			{
+				return textElementOperator->GetReadonly();
+			}
+
+			void GuiTextBoxCommonInterface::SetReadonly(bool value)
+			{
+				textElementOperator->SetReadonly(value);
+			}
+
+/***********************************************************************
+GuiMultilineTextBox::StyleController
+***********************************************************************/
+
+			GuiMultilineTextBox::StyleController::StyleController(GuiScrollView::IStyleProvider* styleProvider)
+				:GuiScrollView::StyleController(styleProvider)
+				,textElement(0)
+				,textComposition(0)
+			{
+				textElement=GuiColorizedTextElement::Create();
+
+				textComposition=new GuiBoundsComposition;
+				textComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				textComposition->SetOwnedElement(textElement);
+
+				GetInternalContainerComposition()->AddChild(textComposition);
+			}
+
+			GuiMultilineTextBox::StyleController::~StyleController()
+			{
+			}
+
+			elements::GuiColorizedTextElement* GuiMultilineTextBox::StyleController::GetTextElement()
+			{
+				return textElement;
+			}
+
+			compositions::GuiGraphicsComposition* GuiMultilineTextBox::StyleController::GetTextComposition()
+			{
+				return textComposition;
+			}
+
+			GuiTextElementOperator* GuiMultilineTextBox::StyleController::GetTextElementOperator()
+			{
+				return &textElementOperator;
+			}
+
+			void GuiMultilineTextBox::StyleController::SetViewPosition(Point value)
+			{
+				textElement->SetViewPosition(value);
+			}
+
+			void GuiMultilineTextBox::StyleController::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+				GuiScrollView::StyleController::SetFocusableComposition(value);
+				textElementOperator.Install(textElement, textComposition, scrollView);
+				if(!textElementOperator.GetCallback())
+				{
+					if(!defaultCallback)
+					{
+						defaultCallback=new TextElementOperatorCallback(dynamic_cast<GuiMultilineTextBox*>(scrollView));
+					}
+					textElementOperator.SetCallback(defaultCallback.Obj());
+				}
+			}
+
+			WString GuiMultilineTextBox::StyleController::GetText()
+			{
+				return textElement->GetLines().GetText();
+			}
+
+			void GuiMultilineTextBox::StyleController::SetText(const WString& value)
+			{
+				textElementOperator.SetText(value);
+				textElement->SetCaretBegin(TextPos(0, 0));
+				textElement->SetCaretEnd(TextPos(0, 0));
+				GuiScrollView::StyleController::SetText(value);
+			}
+
+			void GuiMultilineTextBox::StyleController::SetFont(const FontProperties& value)
+			{
+				textElement->SetFont(value);
+				GuiScrollView::StyleController::SetFont(value);
+			}
+
+			void GuiMultilineTextBox::StyleController::SetVisuallyEnabled(bool value)
+			{
+				textElement->SetVisuallyEnabled(value);
+				GuiScrollView::StyleController::SetVisuallyEnabled(value);
+			}
+
+/***********************************************************************
+GuiMultilineTextBox::DefaultTextElementOperatorCallback
+***********************************************************************/
+
+			GuiMultilineTextBox::TextElementOperatorCallback::TextElementOperatorCallback(GuiMultilineTextBox* _textControl)
+				:GuiTextElementOperator::DefaultCallback(
+					dynamic_cast<StyleController*>(_textControl->GetStyleController())->GetTextElement(),
+					dynamic_cast<StyleController*>(_textControl->GetStyleController())->GetTextComposition()
+					)
+				,textControl(_textControl)
+				,textController(dynamic_cast<StyleController*>(_textControl->GetStyleController()))
+			{
+			}
+
+			void GuiMultilineTextBox::TextElementOperatorCallback::AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			{
+				textControl->CalculateView();
+			}
+			
+			void GuiMultilineTextBox::TextElementOperatorCallback::ScrollToView(Point point)
+			{
+				point.x+=TextMargin;
+				point.y+=TextMargin;
+				Point oldPoint(textControl->GetHorizontalScroll()->GetPosition(), textControl->GetVerticalScroll()->GetPosition());
+				int marginX=0;
+				int marginY=0;
+				if(oldPoint.x<point.x)
+				{
+					marginX=TextMargin;
+				}
+				else if(oldPoint.x>point.x)
+				{
+					marginX=-TextMargin;
+				}
+				if(oldPoint.y<point.y)
+				{
+					marginY=TextMargin;
+				}
+				else if(oldPoint.y>point.y)
+				{
+					marginY=-TextMargin;
+				}
+				textControl->GetHorizontalScroll()->SetPosition(point.x+marginX);
+				textControl->GetVerticalScroll()->SetPosition(point.y+marginY);
+			}
+
+			int GuiMultilineTextBox::TextElementOperatorCallback::GetTextMargin()
+			{
+				return TextMargin;
+			}
+
+/***********************************************************************
+GuiMultilineTextBox
+***********************************************************************/
+
+			void GuiMultilineTextBox::CalculateViewAndSetScroll()
+			{
+				CalculateView();
+				int smallMove=styleController->GetTextElement()->GetLines().GetRowHeight();
+				int bigMove=smallMove*5;
+				styleController->GetHorizontalScroll()->SetSmallMove(smallMove);
+				styleController->GetHorizontalScroll()->SetBigMove(bigMove);
+				styleController->GetVerticalScroll()->SetSmallMove(smallMove);
+				styleController->GetVerticalScroll()->SetBigMove(bigMove);
+			}
+
+			void GuiMultilineTextBox::OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)
+			{
+				CalculateViewAndSetScroll();
+				GuiScrollView::OnRenderTargetChanged(renderTarget);
+			}
+
+			Size GuiMultilineTextBox::QueryFullSize()
+			{
+				text::TextLines& lines=styleController->GetTextElement()->GetLines();
+				return Size(lines.GetMaxWidth()+TextMargin*2, lines.GetMaxHeight()+TextMargin*2);
+			}
+
+			void GuiMultilineTextBox::UpdateView(Rect viewBounds)
+			{
+				styleController->SetViewPosition(viewBounds.LeftTop()-Size(TextMargin, TextMargin));
+			}
+
+			void GuiMultilineTextBox::OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			{
+				if(GetVisuallyEnabled())
+				{
+					boundsComposition->GetRelatedGraphicsHost()->SetFocus(boundsComposition);
+				}
+			}
+
+			GuiMultilineTextBox::GuiMultilineTextBox(GuiMultilineTextBox::IStyleProvider* styleProvider)
+				:GuiScrollView(new StyleController(styleProvider))
+			{
+				styleController=dynamic_cast<StyleController*>(GetStyleController());
+
+				boundsComposition->GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiMultilineTextBox::OnBoundsMouseButtonDown);
+				boundsComposition->GetEventReceiver()->middleButtonDown.AttachMethod(this, &GuiMultilineTextBox::OnBoundsMouseButtonDown);
+				boundsComposition->GetEventReceiver()->rightButtonDown.AttachMethod(this, &GuiMultilineTextBox::OnBoundsMouseButtonDown);
+				SetFocusableComposition(boundsComposition);
+
+				InitializeCommonInterface(this, styleController->GetTextElementOperator());
+			}
+
+			GuiMultilineTextBox::~GuiMultilineTextBox()
+			{
+			}
+
+			const WString& GuiMultilineTextBox::GetText()
+			{
+				text=styleController->GetText();
+				return text;
+			}
+
+			void GuiMultilineTextBox::SetText(const WString& value)
+			{
+				text=GetText();
+				GuiScrollView::SetText(value);
+				CalculateView();
+			}
+
+			void GuiMultilineTextBox::SetFont(const FontProperties& value)
+			{
+				GuiScrollView::SetFont(value);
+				CalculateViewAndSetScroll();
+			}
+
+/***********************************************************************
+GuiSinglelineTextBox::StyleController
+***********************************************************************/
+
+			GuiSinglelineTextBox::StyleController::StyleController(IStyleProvider* _styleProvider)
+				:styleProvider(_styleProvider)
+				,boundsComposition(0)
+				,containerComposition(0)
+				,textBox(0)
+				,textElement(0)
+				,textComposition(0)
+			{
+				boundsComposition=new GuiBoundsComposition;
+				containerComposition=styleProvider->InstallBackground(boundsComposition);
+
+				textElement=GuiColorizedTextElement::Create();
+				textElement->SetViewPosition(Point(-TextMargin, -TextMargin));
+
+				textCompositionTable=new GuiTableComposition;
+				textCompositionTable->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				textCompositionTable->SetRowsAndColumns(3, 1);
+				textCompositionTable->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
+				textCompositionTable->SetRowOption(1, GuiCellOption::AbsoluteOption(0));
+				textCompositionTable->SetRowOption(2, GuiCellOption::PercentageOption(0.5));
+				textCompositionTable->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
+				containerComposition->AddChild(textCompositionTable);
+
+				textComposition=new GuiCellComposition;
+				textComposition->SetOwnedElement(textElement);
+				textCompositionTable->AddChild(textComposition);
+				textComposition->SetSite(1, 0, 1, 1);
+
+				styleProvider->AssociateStyleController(this);
+			}
+
+			GuiSinglelineTextBox::StyleController::~StyleController()
+			{
+			}
+
+			void GuiSinglelineTextBox::StyleController::SetTextBox(GuiSinglelineTextBox* value)
+			{
+				textBox=value;
+			}
+
+			void GuiSinglelineTextBox::StyleController::RearrangeTextElement()
+			{
+				textCompositionTable->SetRowOption(1, GuiCellOption::AbsoluteOption(textElement->GetLines().GetRowHeight()+2*TextMargin));
+			}
+
+			compositions::GuiBoundsComposition* GuiSinglelineTextBox::StyleController::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* GuiSinglelineTextBox::StyleController::GetContainerComposition()
+			{
+				return containerComposition;
+			}
+
+			void GuiSinglelineTextBox::StyleController::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+				styleProvider->SetFocusableComposition(value);
+				textElementOperator.Install(textElement, textComposition, textBox);
+				if(!textElementOperator.GetCallback())
+				{
+					if(!defaultCallback)
+					{
+						defaultCallback=new TextElementOperatorCallback(textBox);
+					}
+					textElementOperator.SetCallback(defaultCallback.Obj());
+				}
+			}
+
+			WString GuiSinglelineTextBox::StyleController::GetText()
+			{
+				return textElement->GetLines().GetText();
+			}
+
+			void GuiSinglelineTextBox::StyleController::SetText(const WString& value)
+			{
+				textElementOperator.SetText(value);
+				textElement->SetCaretBegin(TextPos(0, 0));
+				textElement->SetCaretEnd(TextPos(0, 0));
+				styleProvider->SetText(value);
+			}
+
+			void GuiSinglelineTextBox::StyleController::SetFont(const FontProperties& value)
+			{
+				textElement->SetFont(value);
+				styleProvider->SetFont(value);
+			}
+
+			void GuiSinglelineTextBox::StyleController::SetVisuallyEnabled(bool value)
+			{
+				textElement->SetVisuallyEnabled(value);
+				styleProvider->SetVisuallyEnabled(value);
+			}
+
+			elements::GuiColorizedTextElement* GuiSinglelineTextBox::StyleController::GetTextElement()
+			{
+				return textElement;
+			}
+
+			compositions::GuiGraphicsComposition* GuiSinglelineTextBox::StyleController::GetTextComposition()
+			{
+				return textComposition;
+			}
+
+			GuiTextElementOperator* GuiSinglelineTextBox::StyleController::GetTextElementOperator()
+			{
+				return &textElementOperator;
+			}
+
+			void GuiSinglelineTextBox::StyleController::SetViewPosition(Point value)
+			{
+				textElement->SetViewPosition(value);
+			}
+
+/***********************************************************************
+GuiSinglelineTextBox::DefaultTextElementOperatorCallback
+***********************************************************************/
+
+			GuiSinglelineTextBox::TextElementOperatorCallback::TextElementOperatorCallback(GuiSinglelineTextBox* _textControl)
+				:GuiTextElementOperator::DefaultCallback(
+					dynamic_cast<StyleController*>(_textControl->GetStyleController())->GetTextElement(),
+					dynamic_cast<StyleController*>(_textControl->GetStyleController())->GetTextComposition()
+					)
+				,textControl(_textControl)
+				,textController(dynamic_cast<StyleController*>(_textControl->GetStyleController()))
+			{
+			}
+
+			bool GuiSinglelineTextBox::TextElementOperatorCallback::BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)
+			{
+				int length=inputText.Length();
+				const wchar_t* input=inputText.Buffer();
+				for(int i=0;i<length;i++)
+				{
+					if(*input==0 || *input==L'\r' || *input==L'\n')
+					{
+						length=i;
+						break;
+					}
+				}
+				if(length!=inputText.Length())
+				{
+					inputText=inputText.Left(length);
+				}
+				return true;
+			}
+
+			void GuiSinglelineTextBox::TextElementOperatorCallback::AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)
+			{
+			}
+			
+			void GuiSinglelineTextBox::TextElementOperatorCallback::ScrollToView(Point point)
+			{
+				int newX=point.x;
+				int oldX=textElement->GetViewPosition().x;
+				int marginX=0;
+				if(oldX<newX)
+				{
+					marginX=TextMargin;
+				}
+				else if(oldX>newX)
+				{
+					marginX=-TextMargin;
+				}
+
+				newX+=marginX;
+				int minX=-TextMargin;
+				int maxX=textElement->GetLines().GetMaxWidth()+TextMargin-textComposition->GetBounds().Width();
+				if(newX>=maxX)
+				{
+					newX=maxX-1;
+				}
+				if(newX<minX)
+				{
+					newX=minX;
+				}
+				textElement->SetViewPosition(Point(newX, -TextMargin));
+			}
+
+			int GuiSinglelineTextBox::TextElementOperatorCallback::GetTextMargin()
+			{
+				return TextMargin;
+			}
+
+/***********************************************************************
+GuiSinglelineTextBox
+***********************************************************************/
+
+			void GuiSinglelineTextBox::OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)
+			{
+				styleController->RearrangeTextElement();
+				GuiControl::OnRenderTargetChanged(renderTarget);
+			}
+
+			void GuiSinglelineTextBox::OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			{
+				if(GetVisuallyEnabled())
+				{
+					boundsComposition->GetRelatedGraphicsHost()->SetFocus(boundsComposition);
+				}
+			}
+
+			GuiSinglelineTextBox::GuiSinglelineTextBox(GuiSinglelineTextBox::IStyleProvider* styleProvider)
+				:GuiControl(new StyleController(styleProvider))
+			{
+				styleController=dynamic_cast<StyleController*>(GetStyleController());
+				styleController->SetTextBox(this);
+
+				boundsComposition->GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiSinglelineTextBox::OnBoundsMouseButtonDown);
+				boundsComposition->GetEventReceiver()->middleButtonDown.AttachMethod(this, &GuiSinglelineTextBox::OnBoundsMouseButtonDown);
+				boundsComposition->GetEventReceiver()->rightButtonDown.AttachMethod(this, &GuiSinglelineTextBox::OnBoundsMouseButtonDown);
+				SetFocusableComposition(boundsComposition);
+
+				InitializeCommonInterface(this, styleController->GetTextElementOperator());
+			}
+
+			GuiSinglelineTextBox::~GuiSinglelineTextBox()
+			{
+			}
+
+			const WString& GuiSinglelineTextBox::GetText()
+			{
+				text=styleController->GetText();
+				return text;
+			}
+
+			void GuiSinglelineTextBox::SetText(const WString& value)
+			{
+				GuiControl::SetText(value);
+			}
+
+			void GuiSinglelineTextBox::SetFont(const FontProperties& value)
+			{
+				GuiControl::SetFont(value);
+				styleController->RearrangeTextElement();
+			}
+
+			wchar_t GuiSinglelineTextBox::GetPasswordChar()
+			{
+				return styleController->GetTextElement()->GetPasswordChar();
+			}
+
+			void GuiSinglelineTextBox::SetPasswordChar(wchar_t value)
+			{
+				styleController->GetTextElement()->SetPasswordChar(value);
+			}
+		}
+	}
+}
+
+/***********************************************************************
+Controls\ToolstripPackage\GuiMenuControls.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+
+/***********************************************************************
+IGuiMenuService
+***********************************************************************/
+
+			const wchar_t* const IGuiMenuService::Identifier = L"vl::presentation::controls::IGuiMenuService";
+
+			IGuiMenuService::IGuiMenuService()
+				:openingMenu(0)
+			{
+			}
+
+			void IGuiMenuService::MenuItemExecuted()
+			{
+				if(openingMenu)
+				{
+					openingMenu->Hide();
+				}
+				if(GetParentMenuService())
+				{
+					GetParentMenuService()->MenuItemExecuted();
+				}
+			}
+
+			GuiMenu* IGuiMenuService::GetOpeningMenu()
+			{
+				return openingMenu;
+			}
+
+			void IGuiMenuService::MenuOpened(GuiMenu* menu)
+			{
+				if(openingMenu!=menu && openingMenu)
+				{
+					openingMenu->Hide();
+				}
+				openingMenu=menu;
+			}
+
+			void IGuiMenuService::MenuClosed(GuiMenu* menu)
+			{
+				if(openingMenu==menu)
+				{
+					openingMenu=0;
+				}
+			}
+
+/***********************************************************************
+GuiMenu
+***********************************************************************/
+
+			IGuiMenuService* GuiMenu::GetParentMenuService()
+			{
+				return parentMenuService;
+			}
+
+			IGuiMenuService::Direction GuiMenu::GetPreferredDirection()
+			{
+				return IGuiMenuService::Vertical;
+			}
+
+			bool GuiMenu::IsActiveState()
+			{
+				return true;
+			}
+
+			bool GuiMenu::IsSubMenuActivatedByMouseDown()
+			{
+				return false;
+			}
+
+			void GuiMenu::MenuItemExecuted()
+			{
+				IGuiMenuService::MenuItemExecuted();
+				Hide();
+			}
+
+			void GuiMenu::OnWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if(parentMenuService)
+				{
+					parentMenuService->MenuOpened(this);
+				}
+			}
+
+			void GuiMenu::MouseClickedOnOtherWindow(GuiWindow* window)
+			{
+				GuiMenu* targetMenu=dynamic_cast<GuiMenu*>(window);
+				if(!targetMenu)
+				{
+					Hide();
+				}
+			}
+
+			void GuiMenu::OnWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if(parentMenuService)
+				{
+					parentMenuService->MenuClosed(this);
+					GuiMenu* openingSubMenu=GetOpeningMenu();
+					if(openingSubMenu)
+					{
+						openingSubMenu->Hide();
+					}
+				}
+			}
+
+			GuiMenu::GuiMenu(IStyleController* _styleController, GuiControl* _owner)
+				:GuiPopup(_styleController)
+				,owner(_owner)
+				,parentMenuService(0)
+			{
+				GetNativeWindow()->SetAlwaysPassFocusToParent(true);
+				UpdateMenuService();
+				WindowOpened.AttachMethod(this, &GuiMenu::OnWindowOpened);
+				WindowClosed.AttachMethod(this, &GuiMenu::OnWindowClosed);
+			}
+
+			GuiMenu::~GuiMenu()
+			{
+			}
+
+			void GuiMenu::UpdateMenuService()
+			{
+				if(owner)
+				{
+					parentMenuService=owner->QueryService<IGuiMenuService>();
+				}
+			}
+
+			IDescriptable* GuiMenu::QueryService(const WString& identifier)
+			{
+				if(identifier==IGuiMenuService::Identifier)
+				{
+					return (IGuiMenuService*)this;
+				}
+				else
+				{
+					return GuiPopup::QueryService(identifier);
+				}
+			}
+
+/***********************************************************************
+GuiMenuBar
+***********************************************************************/
+
+			IGuiMenuService* GuiMenuBar::GetParentMenuService()
+			{
+				return 0;
+			}
+
+			IGuiMenuService::Direction GuiMenuBar::GetPreferredDirection()
+			{
+				return IGuiMenuService::Horizontal;
+			}
+
+			bool GuiMenuBar::IsActiveState()
+			{
+				return GetOpeningMenu()!=0;
+			}
+
+			bool GuiMenuBar::IsSubMenuActivatedByMouseDown()
+			{
+				return true;
+			}
+
+			GuiMenuBar::GuiMenuBar(GuiControl::IStyleController* _styleController)
+				:GuiControl(_styleController)
+			{
+			}
+
+			GuiMenuBar::~GuiMenuBar()
+			{
+			}
+
+			IDescriptable* GuiMenuBar::QueryService(const WString& identifier)
+			{
+				if(identifier==IGuiMenuService::Identifier)
+				{
+					return (IGuiMenuService*)this;
+				}
+				else
+				{
+					return GuiControl::QueryService(identifier);
+				}
+			}
+
+/***********************************************************************
+GuiMenuButton
+***********************************************************************/
+
+			const wchar_t* const GuiMenuButton::MenuItemSubComponentMeasuringCategoryName=L"MenuItem";
+
+			GuiButton* GuiMenuButton::GetSubMenuHost()
+			{
+				GuiButton* button=styleController->GetSubMenuHost();
+				return button?button:this;
+			}
+
+			void GuiMenuButton::OpenSubMenuInternal()
+			{
+				if(!GetSubMenuOpening())
+				{
+					if(ownerMenuService)
+					{
+						GuiMenu* openingSiblingMenu=ownerMenuService->GetOpeningMenu();
+						if(openingSiblingMenu)
+						{
+							openingSiblingMenu->Hide();
+						}
+					}
+					SetSubMenuOpening(true);
+				}
+			}
+
+			void GuiMenuButton::OnParentLineChanged()
+			{
+				GuiButton::OnParentLineChanged();
+				ownerMenuService=QueryService<IGuiMenuService>();
+				if(ownerMenuService)
+				{
+					SetClickOnMouseUp(!ownerMenuService->IsSubMenuActivatedByMouseDown());
+				}
+				if(subMenu)
+				{
+					subMenu->UpdateMenuService();
+				}
+			}
+
+			void GuiMenuButton::OnSubMenuWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				SubMenuOpeningChanged.Execute(GetNotifyEventArguments());
+				styleController->SetSubMenuOpening(true);
+			}
+
+			void GuiMenuButton::OnSubMenuWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				SubMenuOpeningChanged.Execute(GetNotifyEventArguments());
+				styleController->SetSubMenuOpening(false);
+			}
+
+			void GuiMenuButton::OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if(GetVisuallyEnabled())
+				{
+					if(ownerMenuService && ownerMenuService->IsActiveState())
+					{
+						OpenSubMenuInternal();
+					}
+				}
+			}
+
+			void GuiMenuButton::OnClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if(GetSubMenu())
+				{
+					OpenSubMenuInternal();
+				}
+				else if(GetVisuallyEnabled())
+				{
+					if(ownerMenuService)
+					{
+						ownerMenuService->MenuItemExecuted();
+					}
+				}
+			}
+
+			GuiMenuButton::GuiMenuButton(IStyleController* _styleController)
+				:GuiButton(_styleController)
+				,styleController(_styleController)
+				,subMenu(0)
+				,ownedSubMenu(false)
+				,ownerMenuService(0)
+			{
+				SubMenuOpeningChanged.SetAssociatedComposition(boundsComposition);
+				ImageChanged.SetAssociatedComposition(boundsComposition);
+				ShortcutTextChanged.SetAssociatedComposition(boundsComposition);
+				GetSubMenuHost()->Clicked.AttachMethod(this, &GuiMenuButton::OnClicked);
+				GetSubMenuHost()->GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiMenuButton::OnMouseEnter);
+			}
+
+			GuiMenuButton::~GuiMenuButton()
+			{
+				if(subMenu && ownedSubMenu)
+				{
+					delete subMenu;
+				}
+			}
+
+			Ptr<GuiImageData> GuiMenuButton::GetImage()
+			{
+				return image;
+			}
+
+			void GuiMenuButton::SetImage(Ptr<GuiImageData> value)
+			{
+				if(image!=value)
+				{
+					image=value;
+					styleController->SetImage(image);
+					ImageChanged.Execute(GetNotifyEventArguments());
+				}
+			}
+
+			const WString& GuiMenuButton::GetShortcutText()
+			{
+				return shortcutText;
+			}
+
+			void GuiMenuButton::SetShortcutText(const WString& value)
+			{
+				if(shortcutText!=value)
+				{
+					shortcutText=value;
+					styleController->SetShortcutText(shortcutText);
+					ShortcutTextChanged.Execute(GetNotifyEventArguments());
+				}
+			}
+
+			bool GuiMenuButton::IsSubMenuExists()
+			{
+				return subMenu!=0;
+			}
+
+			GuiMenu* GuiMenuButton::GetSubMenu()
+			{
+				return subMenu;
+			}
+
+			void GuiMenuButton::CreateSubMenu(GuiMenu::IStyleController* subMenuStyleController)
+			{
+				if(!subMenu)
+				{
+					GuiMenu* newSubMenu=new GuiMenu(subMenuStyleController?subMenuStyleController:styleController->CreateSubMenuStyleController(), this);
+					SetSubMenu(newSubMenu, true);
+				}
+			}
+
+			void GuiMenuButton::SetSubMenu(GuiMenu* value, bool owned)
+			{
+				if(subMenu)
+				{
+					if(ownedSubMenu)
+					{
+						delete subMenu;
+					}
+				}
+				subMenu=value;
+				ownedSubMenu=owned;
+				if(subMenu)
+				{
+					subMenu->WindowOpened.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowOpened);
+					subMenu->WindowClosed.AttachMethod(this, &GuiMenuButton::OnSubMenuWindowClosed);
+				}
+				styleController->SetSubMenuExisting(subMenu!=0);
+			}
+
+			void GuiMenuButton::DestroySubMenu()
+			{
+				if(subMenu)
+				{
+					if(ownedSubMenu)
+					{
+						delete subMenu;
+					}
+					subMenu=0;
+					ownedSubMenu=false;
+					styleController->SetSubMenuExisting(false);
+				}
+			}
+
+			bool GuiMenuButton::GetOwnedSubMenu()
+			{
+				return subMenu && ownedSubMenu;
+			}
+
+			bool GuiMenuButton::GetSubMenuOpening()
+			{
+				if(subMenu)
+				{
+					return subMenu->GetOpening();
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void GuiMenuButton::SetSubMenuOpening(bool value)
+			{
+				if(subMenu)
+				{
+					if(value)
+					{
+						subMenu->SetClientSize(preferredMenuClientSize);
+						IGuiMenuService::Direction direction=ownerMenuService?ownerMenuService->GetPreferredDirection():IGuiMenuService::Horizontal;
+						subMenu->ShowPopup(GetSubMenuHost(), direction==IGuiMenuService::Horizontal);
+					}
+					else
+					{
+						subMenu->Close();
+					}
+				}
+			}
+
+			Size GuiMenuButton::GetPreferredMenuClientSize()
+			{
+				return preferredMenuClientSize;
+			}
+
+			void GuiMenuButton::SetPreferredMenuClientSize(Size value)
+			{
+				preferredMenuClientSize=value;
 			}
 		}
 	}

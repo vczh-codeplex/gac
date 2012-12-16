@@ -203,10 +203,34 @@ namespace vl
 Console
 ***********************************************************************/
 
+		void Console::Write(const wchar_t* string, vint length)
+		{
+			HANDLE outHandle=GetStdHandle(STD_OUTPUT_HANDLE);
+			DWORD fileMode=0;
+			DWORD written=0;
+			if((GetFileType(outHandle) & FILE_TYPE_CHAR) && GetConsoleMode(outHandle, &fileMode))
+			{
+				WriteConsole(outHandle, string, (int)length, &written,0);
+			}
+			else
+			{
+				int codePage = GetConsoleOutputCP();
+				int charCount = WideCharToMultiByte(codePage, 0, string, -1, 0, 0, 0, 0);
+				char* codePageBuffer = new char[charCount];
+				WideCharToMultiByte(codePage, 0, string, -1, codePageBuffer, charCount, 0, 0);
+				WriteFile(outHandle, codePageBuffer, charCount-1, &written, 0);
+				delete codePageBuffer;
+			}
+		}
+
+		void Console::Write(const wchar_t* string)
+		{
+			Write(string, wcslen(string));
+		}
+
 		void Console::Write(const WString& string)
 		{
-			DWORD count=0;
-			WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE),string.Buffer(),(int)string.Length(),&count,0);
+			Write(string.Buffer(), string.Length());
 		}
 
 		void Console::WriteLine(const WString& string)
@@ -4692,6 +4716,113 @@ namespace vl
 			{
 				throw ParsingException(e.Message(), code, input-start);
 			}
+		}
+
+		WString EscapeTextForRegex(const WString& literalString)
+		{
+			WString result;
+			for(vint i=0;i<literalString.Length();i++)
+			{
+				wchar_t c=literalString[i];
+				switch(c)
+				{
+				case L'\\':case L'/':case L'(':case L')':case L'+':case L'*':case L'?':case L'|':
+				case L'{':case L'}':case L'[':case L']':case L'<':case L'>':
+				case L'^':case L'$':case L'!':case L'=':
+					result+=WString(L"\\")+c;
+					break;
+				case L'\r':
+					result+=L"\\r";
+					break;
+				case L'\n':
+					result+=L"\\n";
+					break;
+				case L'\t':
+					result+=L"\\t";
+					break;
+				default:
+					result+=c;
+				}
+			}
+			return result;
+		}
+
+		WString UnescapeTextForRegex(const WString& escapedText)
+		{
+			WString result;
+			for(vint i=0;i<escapedText.Length();i++)
+			{
+				wchar_t c=escapedText[i];
+				if(c==L'\\' || c==L'/')
+				{
+					if(i<escapedText.Length()-1)
+					{
+						i++;
+						c=escapedText[i];
+						switch(c)
+						{
+						case L'r':
+							result+=L"\r";
+							break;
+						case L'n':
+							result+=L"\n";
+							break;
+						case L't':
+							result+=L"\t";
+							break;
+						default:
+							result+=c;
+						}
+						continue;
+					}
+				}
+				result+=c;
+			}
+			return result;
+		}
+
+		WString NormalizeEscapedTextForRegex(const WString& escapedText)
+		{
+			WString result;
+			for(vint i=0;i<escapedText.Length();i++)
+			{
+				wchar_t c=escapedText[i];
+				if(c==L'\\' || c==L'/')
+				{
+					if(i<escapedText.Length()-1)
+					{
+						i++;
+						c=escapedText[i];
+						result+=WString(L"\\")+c;
+						continue;
+					}
+				}
+				result+=c;
+			}
+			return result;
+		}
+
+		bool IsRegexEscapedListeralString(const WString& regex)
+		{
+			for(vint i=0;i<regex.Length();i++)
+			{
+				wchar_t c=regex[i];
+				if(c==L'\\' || c==L'/')
+				{
+					i++;
+				}
+				else
+				{
+					switch(c)
+					{
+					case L'\\':case L'/':case L'(':case L')':case L'+':case L'*':case L'?':case L'|':
+					case L'{':case L'}':case L'[':case L']':case L'<':case L'>':
+					case L'^':case L'$':case L'!':case L'=':
+						return false;
+					}
+				}
+			}
+			return true;
 		}
 	}
 }

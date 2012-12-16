@@ -37,9 +37,6 @@
     <Filter Include="GacUI\NativeWindow">
       <UniqueIdentifier>{d431374b-430b-48f6-8897-587dd9d73ed3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GacUI\Controls\ExtendedControls">
-      <UniqueIdentifier>{5a42a659-890c-440f-ad26-f0a3ff0ee7e9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GacUI\Controls\Styles">
       <UniqueIdentifier>{89ba437f-f3fa-4585-9765-9ae8f4604055}</UniqueIdentifier>
     </Filter>
@@ -78,6 +75,12 @@
     </Filter>
     <Filter Include="GacUI\Controls\Styles\Win8Styles">
       <UniqueIdentifier>{c5bd68a8-d5ed-446f-99f9-7fdfed4c9665}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI\Controls\ListControlPackage">
+      <UniqueIdentifier>{1190b073-6aa3-499f-9699-6675f3dad1ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GacUI\Controls\TextEditorPackage">
+      <UniqueIdentifier>{c8170665-ff39-4334-b7c9-03a8ac92559b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -126,32 +129,8 @@
     <ClCompile Include="..\..\Source\Controls\GuiBasicControls.cpp">
       <Filter>GacUI\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\GuiListControls.cpp">
-      <Filter>GacUI\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\GuiTextControls.cpp">
-      <Filter>GacUI\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Controls\GuiWindowControls.cpp">
       <Filter>GacUI\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiComboControls.cpp">
-      <Filter>GacUI\Controls\ExtendedControls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiContainerControls.cpp">
-      <Filter>GacUI\Controls\ExtendedControls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiListViewControls.cpp">
-      <Filter>GacUI\Controls\ExtendedControls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiMenuControls.cpp">
-      <Filter>GacUI\Controls\ExtendedControls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiTextListControls.cpp">
-      <Filter>GacUI\Controls\ExtendedControls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\ExtendedControls\GuiTreeViewControls.cpp">
-      <Filter>GacUI\Controls\ExtendedControls</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Controls\Styles\GuiCommonStyles.cpp">
       <Filter>GacUI\Controls\Styles</Filter>
@@ -348,6 +327,30 @@
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsLayoutProviderWindowsGDI.cpp">
       <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiComboControls.cpp">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiListViewControls.cpp">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiTextListControls.cpp">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiTreeViewControls.cpp">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiMenuControls.cpp">
+      <Filter>GacUI\Controls\ToolstripPackage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\GuiContainerControls.cpp">
+      <Filter>GacUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextControls.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiListControls.cpp">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -461,32 +464,8 @@
     <ClInclude Include="..\..\Source\Controls\GuiBasicControls.h">
       <Filter>GacUI\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\GuiListControls.h">
-      <Filter>GacUI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\GuiTextControls.h">
-      <Filter>GacUI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Controls\GuiWindowControls.h">
       <Filter>GacUI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiComboControls.h">
-      <Filter>GacUI\Controls\ExtendedControls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiContainerControls.h">
-      <Filter>GacUI\Controls\ExtendedControls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiListViewControls.h">
-      <Filter>GacUI\Controls\ExtendedControls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiMenuControls.h">
-      <Filter>GacUI\Controls\ExtendedControls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiTextListControls.h">
-      <Filter>GacUI\Controls\ExtendedControls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\ExtendedControls\GuiTreeViewControls.h">
-      <Filter>GacUI\Controls\ExtendedControls</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\Styles\GuiCommonStyles.h">
       <Filter>GacUI\Controls\Styles</Filter>
@@ -688,6 +667,30 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsLayoutProviderWindowsGDI.h">
       <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiComboControls.h">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiListViewControls.h">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiTextListControls.h">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiTreeViewControls.h">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiMenuControls.h">
+      <Filter>GacUI\Controls\ToolstripPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\GuiContainerControls.h">
+      <Filter>GacUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextControls.h">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiListControls.h">
+      <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
