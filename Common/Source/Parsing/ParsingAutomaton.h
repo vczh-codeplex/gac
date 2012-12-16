@@ -63,9 +63,7 @@ namespace vl
 				collections::List<State*>							stackPattern;
 				TransitionType										transitionType;
 				ParsingSymbol*										transitionSymbol;
-				WString												transitionText;
 				ParsingSymbol*										lookAheadSymbol;
-				WString												lookAheadText;
 
 				Transition();
 				~Transition();
@@ -133,7 +131,6 @@ namespace vl
 				Transition*											TokenFinish(State* start, State* end);
 				Transition*											Epsilon(State* start, State* end);
 				Transition*											Symbol(State* start, State* end, ParsingSymbol* transitionSymbol);
-				Transition*											Symbol(State* start, State* end, const WString& transitionText);
 				Transition*											CopyTransition(State* start, State* end, Transition* oldTransition);
 
 				void												DeleteTransition(Transition* transition);

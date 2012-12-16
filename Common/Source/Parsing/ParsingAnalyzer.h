@@ -85,6 +85,7 @@ namespace vl
 				SymbolType						type;
 				WString							name;
 				ParsingSymbol*					descriptorSymbol;
+				WString							descriptorString;
 				ParsingSymbol*					parentSymbol;
 				ParsingSymbol*					arrayTypeSymbol;
 				ParsingSymbolList				subSymbolList;
@@ -92,7 +93,7 @@ namespace vl
 
 				bool							AddSubSymbol(ParsingSymbol* subSymbol);
 
-				ParsingSymbol(ParsingSymbolManager* _manager, SymbolType _type, const WString& _name, ParsingSymbol* _descriptorSymbol);
+				ParsingSymbol(ParsingSymbolManager* _manager, SymbolType _type, const WString& _name, ParsingSymbol* _descriptorSymbol, const WString& _descriptorString);
 			public:
 				~ParsingSymbol();
 
@@ -103,6 +104,7 @@ namespace vl
 				ParsingSymbol*					GetSubSymbol(vint index);
 				ParsingSymbol*					GetSubSymbolByName(const WString& name);
 				ParsingSymbol*					GetDescriptorSymbol();
+				WString							GetDescriptorString();
 				ParsingSymbol*					GetParentSymbol();
 				bool							IsType();
 				ParsingSymbol*					SearchClassSubSymbol(const WString& name);
@@ -136,7 +138,7 @@ namespace vl
 				ParsingSymbol*					AddField(const WString& name, ParsingSymbol* classType, ParsingSymbol* fieldType);
 				ParsingSymbol*					AddEnum(const WString& name, ParsingSymbol* parentType=0);
 				ParsingSymbol*					AddEnumItem(const WString& name, ParsingSymbol* enumType);
-				ParsingSymbol*					AddTokenDefinition(const WString& name);
+				ParsingSymbol*					AddTokenDefinition(const WString& name, const WString& regex);
 				ParsingSymbol*					AddRuleDefinition(const WString& name, ParsingSymbol* ruleType);
 
 				ParsingSymbol*					CacheGetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope);

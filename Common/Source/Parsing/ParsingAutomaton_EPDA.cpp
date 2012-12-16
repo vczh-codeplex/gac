@@ -52,7 +52,7 @@ CreateEpsilonPDAVisitor
 
 				void Visit(ParsingDefinitionTextGrammar* node)override
 				{
-					result=automaton->Symbol(startState, endState, node->text);
+					result=automaton->Symbol(startState, endState, automaton->symbolManager->CacheGetSymbol(node));
 				}
 
 				void Visit(ParsingDefinitionSequenceGrammar* node)override
