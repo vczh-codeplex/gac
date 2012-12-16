@@ -1,5 +1,6 @@
 #include "ParsingDefinitions.h"
 #include "ParsingAutomaton.h"
+#include "..\Regex\RegexExpression.h"
 #include "..\Stream\MemoryStream.h"
 #include "..\Collections\OperationForEach.h"
 
@@ -542,6 +543,29 @@ Logger (ParsingDefinitionGrammar)
 Logger (Automaton)
 ***********************************************************************/
 
+			void LogTransitionSymbol(ParsingSymbol* symbol, stream::TextWriter& writer)
+			{
+				if(symbol->GetType()==ParsingSymbol::TokenDef)
+				{
+					writer.WriteString(L"[");
+					writer.WriteString(symbol->GetName());
+
+					WString regex=symbol->GetDescriptorString();
+					if(regex_internal::IsRegexEscapedListeralString(regex))
+					{
+						writer.WriteString(L" ");
+						definitions::LogString(regex_internal::UnescapeTextForRegex(regex), writer);
+					}
+					writer.WriteString(L"]");
+				}
+				else
+				{
+					writer.WriteString(L"<");
+					writer.WriteString(symbol->GetName());
+					writer.WriteString(L">");
+				}
+			}
+
 			void Log(Ptr<Automaton> automaton, stream::TextWriter& writer)
 			{
 				FOREACH(Ptr<RuleInfo>, ruleInfo, automaton->ruleInfos.Values())
@@ -583,14 +607,11 @@ Logger (Automaton)
 								break;
 							case Transition::Symbol:
 								{
-									writer.WriteString(L"    SYMBOL [");
+									writer.WriteString(L"    ");
 									if(transition->transitionSymbol)
 									{
-										writer.WriteString(transition->transitionSymbol->GetName());
+										LogTransitionSymbol(transition->transitionSymbol, writer);
 									}
-									writer.WriteString(L"] [");
-									writer.WriteString(transition->transitionText);
-									writer.WriteString(L"]");
 								}
 								break;
 							}
@@ -602,23 +623,18 @@ Logger (Automaton)
 								writer.WriteString(L"        STACK PATTERNS");
 								FOREACH(State*, stackPattern, transition->stackPattern)
 								{
-									writer.WriteString(L" [");
+									writer.WriteString(L" <");
 									writer.WriteString(stackPattern->stateName);
-									writer.WriteString(L"]");
+									writer.WriteString(L">");
 								}
 								writer.WriteLine(L"");
 							}
 
-							if(transition->lookAheadSymbol!=0 || transition->lookAheadText!=L"")
+							if(transition->lookAheadSymbol!=0)
 							{
-								writer.WriteString(L"        LOOK AHEAD [");
-								if(transition->lookAheadSymbol)
-								{
-									writer.WriteString(transition->lookAheadSymbol->GetName());
-								}
-								writer.WriteString(L"] [");
-								writer.WriteString(transition->lookAheadText);
-								writer.WriteLine(L"]");
+								writer.WriteString(L"        LOOK AHEAD");
+								LogTransitionSymbol(transition->lookAheadSymbol, writer);
+								writer.WriteLine(L"");
 							}
 
 							FOREACH(Ptr<Action>, action, transition->actions)
@@ -626,29 +642,28 @@ Logger (Automaton)
 								switch(action->actionType)
 								{
 								case Action::Create:
-									writer.WriteString(L"        CREATE");
+									writer.WriteString(L"        CREATE ");
 									break;
 								case Action::Assign:
-									writer.WriteString(L"        ASSIGN");
+									writer.WriteString(L"        ASSIGN ");
 									break;
 								case Action::Using:
-									writer.WriteString(L"        USING");
+									writer.WriteString(L"        USING ");
 									break;
 								case Action::Setter:
-									writer.WriteString(L"        SET");
+									writer.WriteString(L"        SET ");
 									break;
 								}
-								writer.WriteString(L" [");
 								if(action->actionSource)
 								{
 									writer.WriteString(action->actionSource->GetName());
 								}
-								writer.WriteString(L"] [");
 								if(action->actionTarget)
 								{
+									writer.WriteString(L" => ");
 									writer.WriteString(action->actionTarget->GetName());
 								}
-								writer.WriteLine(L"]");
+								writer.WriteLine(L"");
 							}
 						}
 						writer.WriteLine(L"");

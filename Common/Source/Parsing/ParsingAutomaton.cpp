@@ -215,20 +215,11 @@ Automaton
 				return transition;
 			}
 
-			Transition* Automaton::Symbol(State* start, State* end, const WString& transitionText)
-			{
-				Transition* transition=CreateTransition(start, end);
-				transition->transitionType=Transition::Symbol;
-				transition->transitionText=transitionText;
-				return transition;
-			}
-
 			Transition* Automaton::CopyTransition(State* start, State* end, Transition* oldTransition)
 			{
 				Transition* transition=CreateTransition(start, end);
 				transition->transitionType=oldTransition->transitionType;
 				transition->transitionSymbol=oldTransition->transitionSymbol;
-				transition->transitionText=oldTransition->transitionText;
 				return transition;
 			}
 

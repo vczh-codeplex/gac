@@ -157,12 +157,8 @@ CreateNondeterministicPDAFromEpsilonPDA::state_clearning
 					if(t1->transitionType>t2->transitionType) return 1;
 					if(t1->transitionSymbol<t2->transitionSymbol) return -1;
 					if(t1->transitionSymbol>t2->transitionSymbol) return 1;
-					if(t1->transitionText<t2->transitionText) return -1;
-					if(t1->transitionText>t2->transitionText) return 1;
 					if(t1->lookAheadSymbol<t2->lookAheadSymbol) return -1;
 					if(t1->lookAheadSymbol>t2->lookAheadSymbol) return 1;
-					if(t1->lookAheadText<t2->lookAheadText) return -1;
-					if(t1->lookAheadText>t2->lookAheadText) return 1;
 					return 0;
 				}
 
@@ -195,9 +191,7 @@ CreateNondeterministicPDAFromEpsilonPDA::state_clearning
 					if(	t1->actions.Count()!=t2->actions.Count() ||
 						t1->transitionType!=t2->transitionType ||
 						t1->transitionSymbol!=t2->transitionSymbol ||
-						t1->transitionText!=t2->transitionText ||
-						t1->lookAheadSymbol!=t2->lookAheadSymbol ||
-						t1->lookAheadText!=t2->lookAheadText)
+						t1->lookAheadSymbol!=t2->lookAheadSymbol)
 					{
 						return false;
 					}

@@ -1,4 +1,5 @@
 #include "ParsingAnalyzer.h"
+#include "..\Regex\RegexExpression.h"
 #include "..\Collections\Operation.h"
 
 namespace vl
@@ -56,11 +57,12 @@ ParsingSymbol
 				return true;
 			}
 
-			ParsingSymbol::ParsingSymbol(ParsingSymbolManager* _manager, SymbolType _type, const WString& _name, ParsingSymbol* _descriptorSymbol)
+			ParsingSymbol::ParsingSymbol(ParsingSymbolManager* _manager, SymbolType _type, const WString& _name, ParsingSymbol* _descriptorSymbol, const WString& _descriptorString)
 				:manager(_manager)
 				,type(_type)
 				,name(_name)
 				,descriptorSymbol(_descriptorSymbol)
+				,descriptorString(_descriptorString)
 				,parentSymbol(0)
 				,arrayTypeSymbol(0)
 			{
@@ -118,6 +120,11 @@ ParsingSymbol
 			ParsingSymbol* ParsingSymbol::GetDescriptorSymbol()
 			{
 				return descriptorSymbol;
+			}
+
+			WString ParsingSymbol::GetDescriptorString()
+			{
+				return descriptorString;
 			}
 
 			ParsingSymbol* ParsingSymbol::GetParentSymbol()
@@ -223,8 +230,8 @@ ParsingSymbolManager
 
 			ParsingSymbolManager::ParsingSymbolManager()
 			{
-				globalSymbol=new ParsingSymbol(this, ParsingSymbol::Global, L"", 0);
-				tokenTypeSymbol=new ParsingSymbol(this, ParsingSymbol::TokenType, L"token", 0);
+				globalSymbol=new ParsingSymbol(this, ParsingSymbol::Global, L"", 0, L"");
+				tokenTypeSymbol=new ParsingSymbol(this, ParsingSymbol::TokenType, L"token", 0, L"");
 				createdSymbols.Add(globalSymbol);
 				createdSymbols.Add(tokenTypeSymbol);
 			}
@@ -249,7 +256,7 @@ ParsingSymbolManager
 				{
 					if(!elementType->arrayTypeSymbol)
 					{
-						elementType->arrayTypeSymbol=new ParsingSymbol(this, ParsingSymbol::ArrayType, L"", elementType);
+						elementType->arrayTypeSymbol=new ParsingSymbol(this, ParsingSymbol::ArrayType, L"", elementType, L"");
 						createdSymbols.Add(elementType->arrayTypeSymbol);
 					}
 					return elementType->arrayTypeSymbol;
@@ -264,7 +271,7 @@ ParsingSymbolManager
 			{
 				if((!baseType || baseType->GetType()==ParsingSymbol::ClassType) && (!parentType || parentType->IsType()))
 				{
-					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::ClassType, name, baseType);
+					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::ClassType, name, baseType, L"");
 					return TryAddSubSymbol(symbol, parentType?parentType:globalSymbol);
 				}
 				else
@@ -277,7 +284,7 @@ ParsingSymbolManager
 			{
 				if(classType && classType->GetType()==ParsingSymbol::ClassType && fieldType && fieldType->IsType())
 				{
-					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::ClassField, name, fieldType);
+					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::ClassField, name, fieldType, L"");
 					return TryAddSubSymbol(symbol, classType);
 				}
 				else
@@ -290,7 +297,7 @@ ParsingSymbolManager
 			{
 				if(!parentType || parentType->GetType()==ParsingSymbol::ClassType)
 				{
-					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::EnumType, name, 0);
+					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::EnumType, name, 0, L"");
 					return TryAddSubSymbol(symbol, parentType?parentType:globalSymbol);
 				}
 				else
@@ -303,7 +310,7 @@ ParsingSymbolManager
 			{
 				if(enumType && enumType->GetType()==ParsingSymbol::EnumType)
 				{
-					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::EnumItem, name, enumType);
+					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::EnumItem, name, enumType, L"");
 					return TryAddSubSymbol(symbol, enumType);
 				}
 				else
@@ -312,9 +319,9 @@ ParsingSymbolManager
 				}
 			}
 
-			ParsingSymbol* ParsingSymbolManager::AddTokenDefinition(const WString& name)
+			ParsingSymbol* ParsingSymbolManager::AddTokenDefinition(const WString& name, const WString& regex)
 			{
-				ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::TokenDef, name, tokenTypeSymbol);
+				ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::TokenDef, name, tokenTypeSymbol, regex);
 				return TryAddSubSymbol(symbol, globalSymbol);
 			}
 
@@ -322,7 +329,7 @@ ParsingSymbolManager
 			{
 				if(ruleType && ruleType->IsType())
 				{
-					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::TokenDef, name, ruleType);
+					ParsingSymbol* symbol=new ParsingSymbol(this, ParsingSymbol::RuleDef, name, ruleType, L"");
 					return TryAddSubSymbol(symbol, globalSymbol);
 				}
 				else
@@ -635,7 +642,15 @@ PrepareSymbols
 					}
 					else
 					{
-						manager->AddTokenDefinition(token->name);
+						manager->AddTokenDefinition(token->name, token->regex);
+						try
+						{
+							regex_internal::ParseRegexExpression(token->regex);
+						}
+						catch(const ParsingException& ex)
+						{
+							errors.Add(new ParsingError(token.Obj(), L"Wrong token definition for \""+token->name+L"\": "+ex.Message()));
+						}
 					}
 				}
 
@@ -725,7 +740,22 @@ ValidateRuleStructure
 
 				void Visit(ParsingDefinitionTextGrammar* node)override
 				{
-					manager->CacheSetType(node, manager->GetTokenType());
+					WString regex=regex_internal::EscapeTextForRegex(node->text);
+					for(vint i=0;i<manager->GetGlobal()->GetSubSymbolCount();i++)
+					{
+						ParsingSymbol* symbol=manager->GetGlobal()->GetSubSymbol(i);
+						if(symbol->GetType()==ParsingSymbol::TokenDef)
+						{
+							WString normalizedRegex=regex_internal::NormalizeEscapedTextForRegex(symbol->GetDescriptorString());
+							if(normalizedRegex==regex)
+							{
+								manager->CacheSetSymbol(node, symbol);
+								manager->CacheSetType(node, manager->GetTokenType());
+								return;
+							}
+						}
+					}
+					errors.Add(new ParsingError(node, L"Cannot find a token whose definition is exactly \""+regex+L"\"."));
 				}
 
 				void Visit(ParsingDefinitionSequenceGrammar* node)override

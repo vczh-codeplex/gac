@@ -370,6 +370,11 @@ namespace vl
 		extern Ptr<Expression>			ParseAlt(const wchar_t*& input);
 		extern Ptr<Expression>			ParseExpression(const wchar_t*& input);
 		extern RegexExpression::Ref		ParseRegexExpression(const WString& code);
+
+		extern WString					EscapeTextForRegex(const WString& literalString);
+		extern WString					UnescapeTextForRegex(const WString& escapedText);
+		extern WString					NormalizeEscapedTextForRegex(const WString& escapedText);
+		extern bool						IsRegexEscapedListeralString(const WString& regex);
 	}
 }
 

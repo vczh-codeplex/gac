@@ -582,5 +582,112 @@ namespace vl
 				throw ParsingException(e.Message(), code, input-start);
 			}
 		}
+
+		WString EscapeTextForRegex(const WString& literalString)
+		{
+			WString result;
+			for(vint i=0;i<literalString.Length();i++)
+			{
+				wchar_t c=literalString[i];
+				switch(c)
+				{
+				case L'\\':case L'/':case L'(':case L')':case L'+':case L'*':case L'?':case L'|':
+				case L'{':case L'}':case L'[':case L']':case L'<':case L'>':
+				case L'^':case L'$':case L'!':case L'=':
+					result+=WString(L"\\")+c;
+					break;
+				case L'\r':
+					result+=L"\\r";
+					break;
+				case L'\n':
+					result+=L"\\n";
+					break;
+				case L'\t':
+					result+=L"\\t";
+					break;
+				default:
+					result+=c;
+				}
+			}
+			return result;
+		}
+
+		WString UnescapeTextForRegex(const WString& escapedText)
+		{
+			WString result;
+			for(vint i=0;i<escapedText.Length();i++)
+			{
+				wchar_t c=escapedText[i];
+				if(c==L'\\' || c==L'/')
+				{
+					if(i<escapedText.Length()-1)
+					{
+						i++;
+						c=escapedText[i];
+						switch(c)
+						{
+						case L'r':
+							result+=L"\r";
+							break;
+						case L'n':
+							result+=L"\n";
+							break;
+						case L't':
+							result+=L"\t";
+							break;
+						default:
+							result+=c;
+						}
+						continue;
+					}
+				}
+				result+=c;
+			}
+			return result;
+		}
+
+		WString NormalizeEscapedTextForRegex(const WString& escapedText)
+		{
+			WString result;
+			for(vint i=0;i<escapedText.Length();i++)
+			{
+				wchar_t c=escapedText[i];
+				if(c==L'\\' || c==L'/')
+				{
+					if(i<escapedText.Length()-1)
+					{
+						i++;
+						c=escapedText[i];
+						result+=WString(L"\\")+c;
+						continue;
+					}
+				}
+				result+=c;
+			}
+			return result;
+		}
+
+		bool IsRegexEscapedListeralString(const WString& regex)
+		{
+			for(vint i=0;i<regex.Length();i++)
+			{
+				wchar_t c=regex[i];
+				if(c==L'\\' || c==L'/')
+				{
+					i++;
+				}
+				else
+				{
+					switch(c)
+					{
+					case L'\\':case L'/':case L'(':case L')':case L'+':case L'*':case L'?':case L'|':
+					case L'{':case L'}':case L'[':case L']':case L'<':case L'>':
+					case L'^':case L'$':case L'!':case L'=':
+						return false;
+					}
+				}
+			}
+			return true;
+		}
 	}
 }
