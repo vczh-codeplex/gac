@@ -10,15 +10,18 @@ Interfaces:
 #define VCZH_PRESENTATION_CONTROLS_GUITHEMESTYLEFACTORY
 
 #include "..\GuiBasicControls.h"
-#include "..\GuiTextControls.h"
-#include "..\GuiListControls.h"
 #include "..\GuiWindowControls.h"
-#include "..\ExtendedControls\GuiContainerControls.h"
-#include "..\ExtendedControls\GuiTextListControls.h"
-#include "..\ExtendedControls\GuiListViewControls.h"
-#include "..\ExtendedControls\GuiTreeViewControls.h"
-#include "..\ExtendedControls\GuiMenuControls.h"
-#include "..\ExtendedControls\GuiComboControls.h"
+#include "..\GuiContainerControls.h"
+
+#include "..\TextEditorPackage\GuiTextControls.h"
+
+#include "..\ListControlPackage\GuiListControls.h"
+#include "..\ListControlPackage\GuiTextListControls.h"
+#include "..\ListControlPackage\GuiListViewControls.h"
+#include "..\ListControlPackage\GuiTreeViewControls.h"
+#include "..\ListControlPackage\GuiComboControls.h"
+
+#include "..\ToolstripPackage\GuiMenuControls.h"
 #include "..\ToolstripPackage\GuiToolstripMenu.h"
 
 namespace vl

@@ -9271,6 +9271,8 @@ namespace vl
 		class Console abstract
 		{
 		public:
+			static void Write(const wchar_t* string, vint length);
+			static void Write(const wchar_t* string);
 			static void Write(const WString& string);
 			static void WriteLine(const WString& string);
 			static WString Read();
@@ -11123,6 +11125,11 @@ namespace vl
 		extern Ptr<Expression>			ParseAlt(const wchar_t*& input);
 		extern Ptr<Expression>			ParseExpression(const wchar_t*& input);
 		extern RegexExpression::Ref		ParseRegexExpression(const WString& code);
+
+		extern WString					EscapeTextForRegex(const WString& literalString);
+		extern WString					UnescapeTextForRegex(const WString& escapedText);
+		extern WString					NormalizeEscapedTextForRegex(const WString& escapedText);
+		extern bool						IsRegexEscapedListeralString(const WString& regex);
 	}
 }
 

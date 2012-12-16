@@ -10,7 +10,7 @@ Interfaces:
 #define VCZH_PRESENTATION_CONTROLS_GUITOOLSTRIPMENU
 
 #include "GuiToolstripCommand.h"
-#include "..\ExtendedControls\GuiMenuControls.h"
+#include "GuiMenuControls.h"
 
 namespace vl
 {

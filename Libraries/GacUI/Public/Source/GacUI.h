@@ -3932,122 +3932,6 @@ Scrolls
 				int										GetMinPosition();
 				int										GetMaxPosition();
 			};
-
-			class GuiScrollView : public GuiControl, public Description<GuiScrollView>
-			{
-			public:
-				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
-				{
-				public:
-					virtual GuiScroll::IStyleController*			CreateHorizontalScrollStyle()=0;
-					virtual GuiScroll::IStyleController*			CreateVerticalScrollStyle()=0;
-					virtual int										GetDefaultScrollSize()=0;
-					virtual compositions::GuiGraphicsComposition*	InstallBackground(compositions::GuiBoundsComposition* boundsComposition)=0;
-				};
-				
-				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
-				{
-				protected:
-					Ptr<IStyleProvider>						styleProvider;
-					GuiScrollView*							scrollView;
-					GuiScroll*								horizontalScroll;
-					GuiScroll*								verticalScroll;
-					compositions::GuiBoundsComposition*		boundsComposition;
-					compositions::GuiTableComposition*		tableComposition;
-					compositions::GuiCellComposition*		containerCellComposition;
-					compositions::GuiBoundsComposition*		containerComposition;
-					bool									horizontalAlwaysVisible;
-					bool									verticalAlwaysVisible;
-
-					void									UpdateTable();
-				public:
-					StyleController(IStyleProvider* _styleProvider);
-					~StyleController();
-
-					void									SetScrollView(GuiScrollView* _scrollView);
-					void									AdjustView(Size fullSize);
-					IStyleProvider*							GetStyleProvider();
-
-					GuiScroll*								GetHorizontalScroll();
-					GuiScroll*								GetVerticalScroll();
-					compositions::GuiTableComposition*		GetInternalTableComposition();
-					compositions::GuiBoundsComposition*		GetInternalContainerComposition();
-
-					bool									GetHorizontalAlwaysVisible();
-					void									SetHorizontalAlwaysVisible(bool value);
-					bool									GetVerticalAlwaysVisible();
-					void									SetVerticalAlwaysVisible(bool value);
-
-					compositions::GuiBoundsComposition*		GetBoundsComposition()override;
-					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
-					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-					void									SetText(const WString& value)override;
-					void									SetFont(const FontProperties& value)override;
-					void									SetVisuallyEnabled(bool value)override;
-				};
-			protected:
-
-				StyleController*						styleController;
-				bool									supressScrolling;
-
-				void									OnContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void									OnHorizontalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void									OnVerticalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void									CallUpdateView();
-				void									Initialize();
-
-				virtual Size							QueryFullSize()=0;
-				virtual void							UpdateView(Rect viewBounds)=0;
-				
-				GuiScrollView(StyleController* _styleController);
-			public:
-				GuiScrollView(IStyleProvider* styleProvider);
-				~GuiScrollView();
-
-				void									CalculateView();
-				Size									GetViewSize();
-				Rect									GetViewBounds();
-				
-				GuiScroll*								GetHorizontalScroll();
-				GuiScroll*								GetVerticalScroll();
-				bool									GetHorizontalAlwaysVisible();
-				void									SetHorizontalAlwaysVisible(bool value);
-				bool									GetVerticalAlwaysVisible();
-				void									SetVerticalAlwaysVisible(bool value);
-			};
-			
-			class GuiScrollContainer : public GuiScrollView, public Description<GuiScrollContainer>
-			{
-			public:
-				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
-				{
-				protected:
-					compositions::GuiBoundsComposition*		controlContainerComposition;
-					bool									extendToFullWidth;
-				public:
-					StyleController(GuiScrollView::IStyleProvider* styleProvider);
-					~StyleController();
-
-					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
-					void									MoveContainer(Point leftTop);
-
-					bool									GetExtendToFullWidth();
-					void									SetExtendToFullWidth(bool value);
-				};
-
-			protected:
-				StyleController*						styleController;
-
-				void									OnControlContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				Size									QueryFullSize()override;
-				void									UpdateView(Rect viewBounds)override;
-			public:
-				GuiScrollContainer(GuiScrollContainer::IStyleProvider* styleProvider);
-				~GuiScrollContainer();
-				
-				bool									GetExtendToFullWidth();
-				void									SetExtendToFullWidth(bool value);
-			};
 			
 			namespace list
 			{
@@ -4435,7 +4319,810 @@ Window
 #endif
 
 /***********************************************************************
-CONTROLS\GUILISTCONTROLS.H
+CONTROLS\GUIAPPLICATION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Application Framework
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUIAPPLICATION
+#define VCZH_PRESENTATION_CONTROLS_GUIAPPLICATION
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+			class GuiApplication : public Object, private INativeControllerListener
+			{
+				friend void GuiApplicationInitialize();
+				friend class GuiWindow;
+				friend class GuiPopup;
+				friend class Ptr<GuiApplication>;
+			private:
+				void											LeftButtonDown(Point position)override;
+				void											LeftButtonUp(Point position)override;
+				void											RightButtonDown(Point position)override;
+				void											RightButtonUp(Point position)override;
+				void											ClipboardUpdated()override;
+			protected:
+				GuiWindow*										mainWindow;
+				collections::List<GuiWindow*>					windows;
+				collections::SortedList<GuiPopup*>				openingPopups;
+
+				GuiApplication();
+				~GuiApplication();
+
+				void											RegisterWindow(GuiWindow* window);
+				void											UnregisterWindow(GuiWindow* window);
+				void											RegisterPopupOpened(GuiPopup* popup);
+				void											RegisterPopupClosed(GuiPopup* popup);
+				void											OnMouseDown(Point location);
+			public:
+				void											Run(GuiWindow* _mainWindow);
+				const collections::List<GuiWindow*>&			GetWindows();
+				GuiWindow*										GetWindow(Point location);
+
+				bool											IsInMainThread();
+				void											InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument);
+				void											InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument);
+				bool											InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds=-1);
+				void											InvokeAsync(const Func<void()>& proc);
+				void											InvokeInMainThread(const Func<void()>& proc);
+				bool											InvokeInMainThreadAndWait(const Func<void()>& proc, int milliseconds=-1);
+
+				template<typename T>
+				void InvokeLambdaInMainThread(const T& proc)
+				{
+					InvokeInMainThread(Func<void()>(proc));
+				}
+				
+				template<typename T>
+				bool InvokeLambdaInMainThreadAndWait(const T& proc, int milliseconds=-1)
+				{
+					return InvokeInMainThreadAndWait(Func<void()>(proc), milliseconds);
+				}
+			};
+
+			extern GuiApplication*								GetApplication();
+		}
+	}
+}
+
+extern void GuiApplicationMain();
+
+#endif
+
+/***********************************************************************
+CONTROLS\GUICONTAINERCONTROLS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUICONTAINERCONTROLS
+#define VCZH_PRESENTATION_CONTROLS_GUICONTAINERCONTROLS
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+/***********************************************************************
+Tab Control
+***********************************************************************/
+
+			class GuiTab;
+
+			class GuiTabPage : public Object, public Description<GuiTabPage>
+			{
+				friend class GuiTab;
+				friend class Ptr<GuiTabPage>;
+			protected:
+				GuiControl*										container;
+				GuiTab*											owner;
+				WString											text;
+				
+				GuiTabPage();
+				~GuiTabPage();
+
+				bool											AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController);
+				bool											DeassociateTab(GuiTab* _owner);
+			public:
+				compositions::GuiNotifyEvent					TextChanged;
+				compositions::GuiNotifyEvent					PageInstalled;
+				compositions::GuiNotifyEvent					PageUninstalled;
+				compositions::GuiNotifyEvent					PageContainerReady;
+
+				GuiControl*										GetContainer();
+				GuiTab*											GetOwnerTab();
+				const WString&									GetText();
+				void											SetText(const WString& param);
+				bool											GetSelected();
+			};
+
+			class GuiTab : public GuiControl, public Description<GuiTab>
+			{
+				friend class GuiTabPage;
+			public:
+				class ICommandExecutor : public virtual IDescriptable, public Description<ICommandExecutor>
+				{
+				public:
+					virtual void								ShowTab(int index)=0;
+				};
+				
+				class IStyleController : public virtual GuiControl::IStyleController, public Description<IStyleController>
+				{
+				public:
+					virtual void								SetCommandExecutor(ICommandExecutor* value)=0;
+					virtual void								InsertTab(int index)=0;
+					virtual void								SetTabText(int index, const WString& value)=0;
+					virtual void								RemoveTab(int index)=0;
+					virtual void								MoveTab(int oldIndex, int newIndex)=0;
+					virtual void								SetSelectedTab(int index)=0;
+					virtual GuiControl::IStyleController*		CreateTabPageStyleController()=0;
+				};
+			protected:
+				class CommandExecutor : public Object, public ICommandExecutor
+				{
+				protected:
+					GuiTab*										tab;
+				public:
+					CommandExecutor(GuiTab* _tab);
+					~CommandExecutor();
+
+					void										ShowTab(int index)override;
+				};
+
+				Ptr<CommandExecutor>							commandExecutor;
+				IStyleController*								styleController;
+				collections::List<GuiTabPage*>					tabPages;
+				GuiTabPage*										selectedPage;
+			public:
+				GuiTab(IStyleController* _styleController);
+				~GuiTab();
+
+				compositions::GuiNotifyEvent					SelectedPageChanged;
+
+				GuiTabPage*										CreatePage(int index=-1);
+				bool											CreatePage(GuiTabPage* page, int index=-1);
+				bool											RemovePage(GuiTabPage* value);
+				bool											MovePage(GuiTabPage* page, int newIndex);
+				const collections::List<GuiTabPage*>&			GetPages();
+
+				GuiTabPage*										GetSelectedPage();
+				bool											SetSelectedPage(GuiTabPage* value);
+			};
+
+/***********************************************************************
+Scroll View
+***********************************************************************/
+
+			class GuiScrollView : public GuiControl, public Description<GuiScrollView>
+			{
+			public:
+				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
+				{
+				public:
+					virtual GuiScroll::IStyleController*			CreateHorizontalScrollStyle()=0;
+					virtual GuiScroll::IStyleController*			CreateVerticalScrollStyle()=0;
+					virtual int										GetDefaultScrollSize()=0;
+					virtual compositions::GuiGraphicsComposition*	InstallBackground(compositions::GuiBoundsComposition* boundsComposition)=0;
+				};
+				
+				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
+				{
+				protected:
+					Ptr<IStyleProvider>						styleProvider;
+					GuiScrollView*							scrollView;
+					GuiScroll*								horizontalScroll;
+					GuiScroll*								verticalScroll;
+					compositions::GuiBoundsComposition*		boundsComposition;
+					compositions::GuiTableComposition*		tableComposition;
+					compositions::GuiCellComposition*		containerCellComposition;
+					compositions::GuiBoundsComposition*		containerComposition;
+					bool									horizontalAlwaysVisible;
+					bool									verticalAlwaysVisible;
+
+					void									UpdateTable();
+				public:
+					StyleController(IStyleProvider* _styleProvider);
+					~StyleController();
+
+					void									SetScrollView(GuiScrollView* _scrollView);
+					void									AdjustView(Size fullSize);
+					IStyleProvider*							GetStyleProvider();
+
+					GuiScroll*								GetHorizontalScroll();
+					GuiScroll*								GetVerticalScroll();
+					compositions::GuiTableComposition*		GetInternalTableComposition();
+					compositions::GuiBoundsComposition*		GetInternalContainerComposition();
+
+					bool									GetHorizontalAlwaysVisible();
+					void									SetHorizontalAlwaysVisible(bool value);
+					bool									GetVerticalAlwaysVisible();
+					void									SetVerticalAlwaysVisible(bool value);
+
+					compositions::GuiBoundsComposition*		GetBoundsComposition()override;
+					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
+					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+					void									SetText(const WString& value)override;
+					void									SetFont(const FontProperties& value)override;
+					void									SetVisuallyEnabled(bool value)override;
+				};
+			protected:
+
+				StyleController*						styleController;
+				bool									supressScrolling;
+
+				void									OnContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnHorizontalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnVerticalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									CallUpdateView();
+				void									Initialize();
+
+				virtual Size							QueryFullSize()=0;
+				virtual void							UpdateView(Rect viewBounds)=0;
+				
+				GuiScrollView(StyleController* _styleController);
+			public:
+				GuiScrollView(IStyleProvider* styleProvider);
+				~GuiScrollView();
+
+				void									CalculateView();
+				Size									GetViewSize();
+				Rect									GetViewBounds();
+				
+				GuiScroll*								GetHorizontalScroll();
+				GuiScroll*								GetVerticalScroll();
+				bool									GetHorizontalAlwaysVisible();
+				void									SetHorizontalAlwaysVisible(bool value);
+				bool									GetVerticalAlwaysVisible();
+				void									SetVerticalAlwaysVisible(bool value);
+			};
+			
+			class GuiScrollContainer : public GuiScrollView, public Description<GuiScrollContainer>
+			{
+			public:
+				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
+				{
+				protected:
+					compositions::GuiBoundsComposition*		controlContainerComposition;
+					bool									extendToFullWidth;
+				public:
+					StyleController(GuiScrollView::IStyleProvider* styleProvider);
+					~StyleController();
+
+					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
+					void									MoveContainer(Point leftTop);
+
+					bool									GetExtendToFullWidth();
+					void									SetExtendToFullWidth(bool value);
+				};
+
+			protected:
+				StyleController*						styleController;
+
+				void									OnControlContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				Size									QueryFullSize()override;
+				void									UpdateView(Rect viewBounds)override;
+			public:
+				GuiScrollContainer(GuiScrollContainer::IStyleProvider* styleProvider);
+				~GuiScrollContainer();
+				
+				bool									GetExtendToFullWidth();
+				void									SetExtendToFullWidth(bool value);
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TEXTEDITORPACKAGE\GUITEXTCONTROLS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCONTROLS
+#define VCZH_PRESENTATION_CONTROLS_GUITEXTCONTROLS
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+
+/***********************************************************************
+Common Operations
+***********************************************************************/
+
+			class GuiTextBoxCommonInterface;
+
+			class GuiTextElementOperator : public Object, public Description<GuiTextElementOperator>
+			{
+			public:
+				class ICallback : public virtual IDescriptable, public Description<ICallback>
+				{
+				public:
+					virtual TextPos							GetLeftWord(TextPos pos)=0;
+					virtual TextPos							GetRightWord(TextPos pos)=0;
+					virtual void							GetWord(TextPos pos, TextPos& begin, TextPos& end)=0;
+					virtual int								GetPageRows()=0;
+					virtual bool							BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)=0;
+					virtual void							AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
+					virtual void							ScrollToView(Point point)=0;
+					virtual int								GetTextMargin()=0;
+				};
+
+				class DefaultCallback : public Object, public ICallback, public Description<DefaultCallback>
+				{
+				protected:
+					elements::GuiColorizedTextElement*		textElement;
+					compositions::GuiGraphicsComposition*	textComposition;
+					bool									readonly;
+				public:
+					DefaultCallback(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition);
+					~DefaultCallback();
+
+					TextPos									GetLeftWord(TextPos pos)override;
+					TextPos									GetRightWord(TextPos pos)override;
+					void									GetWord(TextPos pos, TextPos& begin, TextPos& end)override;
+					int										GetPageRows()override;
+					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
+				};
+
+				class ITextEditCallback : public virtual IDescriptable, public Description<ITextEditCallback>
+				{
+				public:
+					virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
+					virtual void							Detach()=0;
+					virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
+				};
+
+				class ShortcutCommand
+				{
+				protected:
+					bool									ctrl;
+					bool									shift;
+					int										key;
+					Func<void()>							action;
+				public:
+					ShortcutCommand(bool _ctrl, bool _shift, int _key, const Func<void()> _action);
+					~ShortcutCommand();
+
+					bool									IsTheRightKey(bool _ctrl, bool _shift, int _key);
+					void									Execute();
+				};
+
+			protected:
+				elements::GuiColorizedTextElement*			textElement;
+				compositions::GuiGraphicsComposition*		textComposition;
+				GuiControl*									textControl;
+				GuiTextBoxCommonInterface*					textBoxCommonInterface;
+				ICallback*									callback;
+				bool										dragging;
+				bool										readonly;
+
+				SpinLock									elementModifyLock;
+				collections::List<Ptr<ITextEditCallback>>	textEditCallbacks;
+				collections::List<Ptr<ShortcutCommand>>		shortcutCommands;
+
+				void										UpdateCaretPoint();
+				void										Move(TextPos pos, bool shift);
+				void										Modify(TextPos start, TextPos end, const WString& input);
+				bool										ProcessKey(int code, bool shift, bool ctrl);
+					
+				void										OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void										OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+
+				void										OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments);
+				void										OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments);
+			public:
+				GuiTextElementOperator();
+				~GuiTextElementOperator();
+
+				void										Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl);
+				ICallback*									GetCallback();
+				void										SetCallback(ICallback* value);
+				bool										AttachTextEditCallback(Ptr<ITextEditCallback> value);
+				bool										DetachTextEditCallback(Ptr<ITextEditCallback> value);
+				GuiTextBoxCommonInterface*					GetTextBoxCommonInterface();
+				void										SetTextBoxCommonInterface(GuiTextBoxCommonInterface* value);
+				void										AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand);
+
+				elements::GuiColorizedTextElement*			GetTextElement();
+				compositions::GuiGraphicsComposition*		GetTextComposition();
+				TextPos										GetNearestTextPos(Point point);
+				void										Select(TextPos begin, TextPos end);
+				WString										GetSelectionText();
+				void										SetSelectionText(const WString& value);
+				void										SetText(const WString& value);
+
+				bool										CanCut();
+				bool										CanCopy();
+				bool										CanPaste();
+				void										SelectAll();
+				bool										Cut();
+				bool										Copy();
+				bool										Paste();
+
+				bool										GetReadonly();
+				void										SetReadonly(bool value);
+			};
+
+/***********************************************************************
+Colorizer
+***********************************************************************/
+			
+			class GuiTextBoxColorizerBase : public Object, public GuiTextElementOperator::ITextEditCallback
+			{
+			public:
+				typedef collections::Array<elements::text::ColorEntry>			ColorArray;
+			protected:
+				elements::GuiColorizedTextElement*			element;
+				SpinLock*									elementModifyLock;
+				volatile int								colorizedLineCount;
+				volatile bool								isColorizerRunning;
+				volatile bool								isFinalizing;
+				SpinLock									colorizerRunningEvent;
+
+				static void									ColorizerThreadProc(void* argument);
+
+				void										StartColorizer();
+				void										StopColorizer();
+			public:
+				GuiTextBoxColorizerBase();
+				~GuiTextBoxColorizerBase();
+
+				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
+				void										Detach()override;
+				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+
+				virtual int									GetLexerStartState()=0;
+				virtual int									GetContextStartState()=0;
+				virtual void								ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)=0;
+				virtual const ColorArray&					GetColors()=0;
+			};
+
+			class GuiTextBoxRegexColorizer : public GuiTextBoxColorizerBase
+			{
+			protected:
+				Ptr<regex::RegexLexer>										lexer;
+				Ptr<regex::RegexLexerColorizer>								colorizer;
+				ColorArray													colors;
+
+				elements::text::ColorEntry									defaultColor;
+				collections::List<WString>									tokenRegexes;
+				collections::List<elements::text::ColorEntry>				tokenColors;
+				collections::List<elements::text::ColorEntry>				extraTokenColors;
+
+				static void													ColorizerProc(void* argument, vint start, vint length, vint token);
+			public:
+				GuiTextBoxRegexColorizer();
+				~GuiTextBoxRegexColorizer();
+
+				elements::text::ColorEntry									GetDefaultColor();
+				collections::List<WString>&									GetTokenRegexes();
+				collections::List<elements::text::ColorEntry>&				GetTokenColors();
+				collections::List<elements::text::ColorEntry>&				GetExtraTokenColors();
+				int															GetExtraTokenIndexStart();
+				
+				bool														SetDefaultColor(elements::text::ColorEntry value);
+				int															AddToken(const WString& regex, elements::text::ColorEntry color);
+				int															AddExtraToken(elements::text::ColorEntry color);
+				bool														Setup();
+				virtual void												ColorizeTokenContextSensitive(const wchar_t* text, vint start, vint length, vint& token, int& contextState);
+
+				int															GetLexerStartState()override;
+				int															GetContextStartState()override;
+				void														ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override;
+				const ColorArray&											GetColors()override;
+			};
+
+/***********************************************************************
+Undo Redo
+***********************************************************************/
+
+			class GuiGeneralUndoRedoProcessor : public Object
+			{
+			protected:
+				class IEditStep : public Interface
+				{
+				public:
+					virtual void							Undo()=0;
+					virtual void							Redo()=0;
+				};
+				friend class collections::ArrayBase<Ptr<IEditStep>>;
+
+			protected:
+				collections::List<Ptr<IEditStep>>			steps;
+				int											firstFutureStep;
+				int											savedStep;
+				bool										performingUndoRedo;
+
+				void										PushStep(Ptr<IEditStep> step);
+			public:
+				GuiGeneralUndoRedoProcessor();
+				~GuiGeneralUndoRedoProcessor();
+
+				bool										CanUndo();
+				bool										CanRedo();
+				void										ClearUndoRedo();
+				bool										GetModified();
+				void										NotifyModificationSaved();
+				bool										Undo();
+				bool										Redo();
+			};
+
+			class GuiTextBoxUndoRedoProcessor : public GuiGeneralUndoRedoProcessor, public GuiTextElementOperator::ITextEditCallback
+			{
+			protected:
+				class EditStep : public Object, public IEditStep
+				{
+				public:
+					GuiTextBoxUndoRedoProcessor*			processor;
+					TextPos									originalStart;
+					TextPos									originalEnd;
+					WString									originalText;
+					TextPos									inputStart;
+					TextPos									inputEnd;
+					WString									inputText;
+					
+					void									Undo();
+					void									Redo();
+				};
+
+				GuiTextElementOperator*						textElementOperator;
+			public:
+				GuiTextBoxUndoRedoProcessor(GuiTextElementOperator* _textElementOperator);
+				~GuiTextBoxUndoRedoProcessor();
+
+				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock);
+				void										Detach();
+				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText);
+			};
+
+/***********************************************************************
+Common Interface
+***********************************************************************/
+
+			class GuiTextBoxCommonInterface : public Description<GuiTextBoxCommonInterface>
+			{
+				friend class GuiTextElementOperator;
+			protected:
+				GuiTextElementOperator*						textElementOperator;
+				GuiControl*									textControl;
+				Ptr<GuiTextBoxColorizerBase>				colorizer;
+				Ptr<GuiTextBoxUndoRedoProcessor>			undoRedoProcessor;
+
+				void										RaiseTextChanged();
+				void										RaiseSelectionChanged();
+				void										InitializeCommonInterface(GuiControl* _textControl, GuiTextElementOperator* _textElementOperator);
+			public:
+				GuiTextBoxCommonInterface();
+				~GuiTextBoxCommonInterface();
+
+				compositions::GuiNotifyEvent				SelectionChanged;
+
+				compositions::GuiGraphicsComposition*		GetTextComposition();
+
+				Ptr<GuiTextBoxColorizerBase>				GetColorizer();
+				void										SetColorizer(Ptr<GuiTextBoxColorizerBase> value);
+
+				bool										CanUndo();
+				bool										CanRedo();
+				void										ClearUndoRedo();
+				bool										GetModified();
+				void										NotifyModificationSaved();
+				bool										Undo();
+				bool										Redo();
+				
+				bool										CanCut();
+				bool										CanCopy();
+				bool										CanPaste();
+				void										SelectAll();
+				bool										Cut();
+				bool										Copy();
+				bool										Paste();
+				
+				WString										GetRowText(int row);
+				WString										GetFragmentText(TextPos start, TextPos end);
+				int											GetRowWidth(int row);
+				int											GetRowHeight();
+				int											GetMaxWidth();
+				int											GetMaxHeight();
+				TextPos										GetTextPosFromPoint(Point point);
+				Point										GetPointFromTextPos(TextPos pos);
+				Rect										GetRectFromTextPos(TextPos pos);
+				TextPos										GetNearestTextPos(Point point);
+
+				TextPos										GetCaretBegin();
+				TextPos										GetCaretEnd();
+				TextPos										GetCaretSmall();
+				TextPos										GetCaretLarge();
+				void										Select(TextPos begin, TextPos end);
+				
+				WString										GetSelectionText();
+				void										SetSelectionText(const WString& value);
+
+				bool										GetReadonly();
+				void										SetReadonly(bool value);
+			};
+
+/***********************************************************************
+MultilineTextBox
+***********************************************************************/
+
+			class GuiMultilineTextBox : public GuiScrollView, public GuiTextBoxCommonInterface, public Description<GuiMultilineTextBox>
+			{
+			public:
+				static const int							TextMargin=3;
+
+				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
+				{
+				protected:
+					elements::GuiColorizedTextElement*		textElement;
+					compositions::GuiBoundsComposition*		textComposition;
+					GuiTextElementOperator					textElementOperator;
+					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
+
+				public:
+					StyleController(GuiScrollView::IStyleProvider* styleProvider);
+					~StyleController();
+
+					elements::GuiColorizedTextElement*		GetTextElement();
+					compositions::GuiGraphicsComposition*	GetTextComposition();
+					GuiTextElementOperator*					GetTextElementOperator();
+					void									SetViewPosition(Point value);
+					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+
+					WString									GetText();
+					void									SetText(const WString& value)override;
+					void									SetFont(const FontProperties& value)override;
+					void									SetVisuallyEnabled(bool value)override;
+				};
+
+				class TextElementOperatorCallback : public GuiTextElementOperator::DefaultCallback, public Description<TextElementOperatorCallback>
+				{
+				protected:
+					GuiMultilineTextBox*					textControl;
+					StyleController*						textController;
+				public:
+					TextElementOperatorCallback(GuiMultilineTextBox* _textControl);
+
+					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+					void									ScrollToView(Point point)override;
+					int										GetTextMargin()override;
+				};
+
+			protected:
+				StyleController*							styleController;
+
+				void										CalculateViewAndSetScroll();
+				void										OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)override;
+				Size										QueryFullSize()override;
+				void										UpdateView(Rect viewBounds)override;
+				void										OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+			public:
+				GuiMultilineTextBox(GuiMultilineTextBox::IStyleProvider* styleProvider);
+				~GuiMultilineTextBox();
+
+				const WString&								GetText()override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+			};
+
+/***********************************************************************
+SinglelineTextBox
+***********************************************************************/
+			
+			class GuiSinglelineTextBox : public GuiControl, public GuiTextBoxCommonInterface, public Description<GuiSinglelineTextBox>
+			{
+			public:
+				static const int							TextMargin=3;
+
+				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
+				{
+				public:
+					virtual compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* background)=0;
+				};
+
+				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
+				{
+				protected:
+					Ptr<IStyleProvider>						styleProvider;
+					compositions::GuiBoundsComposition*		boundsComposition;
+					compositions::GuiGraphicsComposition*	containerComposition;
+
+					GuiSinglelineTextBox*					textBox;
+					elements::GuiColorizedTextElement*		textElement;
+					compositions::GuiTableComposition*		textCompositionTable;
+					compositions::GuiCellComposition*		textComposition;
+					GuiTextElementOperator					textElementOperator;
+					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
+
+				public:
+					StyleController(IStyleProvider* _styleProvider);
+					~StyleController();
+
+					void									SetTextBox(GuiSinglelineTextBox* value);
+					void									RearrangeTextElement();
+					compositions::GuiBoundsComposition*		GetBoundsComposition();
+					compositions::GuiGraphicsComposition*	GetContainerComposition();
+					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
+
+					WString									GetText();
+					void									SetText(const WString& value);
+					void									SetFont(const FontProperties& value);
+					void									SetVisuallyEnabled(bool value);
+
+					elements::GuiColorizedTextElement*		GetTextElement();
+					compositions::GuiGraphicsComposition*	GetTextComposition();
+					GuiTextElementOperator*					GetTextElementOperator();
+					void									SetViewPosition(Point value);
+				};
+
+				class TextElementOperatorCallback : public GuiTextElementOperator::DefaultCallback, public Description<TextElementOperatorCallback>
+				{
+				protected:
+					GuiSinglelineTextBox*					textControl;
+					StyleController*						textController;
+				public:
+					TextElementOperatorCallback(GuiSinglelineTextBox* _textControl);
+
+					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
+					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+					void									ScrollToView(Point point)override;
+					int										GetTextMargin()override;
+				};
+			protected:
+				StyleController*							styleController;
+				
+				void										OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)override;
+				void										OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+			public:
+				GuiSinglelineTextBox(GuiSinglelineTextBox::IStyleProvider* styleProvider);
+				~GuiSinglelineTextBox();
+
+				const WString&								GetText()override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				wchar_t										GetPasswordChar();
+				void										SetPasswordChar(wchar_t value);
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\LISTCONTROLPACKAGE\GUILISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -4976,7 +5663,7 @@ Predefined ItemProvider
 #endif
 
 /***********************************************************************
-CONTROLS\EXTENDEDCONTROLS\GUITEXTLISTCONTROLS.H
+CONTROLS\LISTCONTROLPACKAGE\GUITEXTLISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5140,7 +5827,7 @@ TextList Control
 #endif
 
 /***********************************************************************
-CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
+CONTROLS\TOOLSTRIPPACKAGE\GUIMENUCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5303,7 +5990,7 @@ MenuButton
 #endif
 
 /***********************************************************************
-CONTROLS\EXTENDEDCONTROLS\GUILISTVIEWCONTROLS.H
+CONTROLS\LISTCONTROLPACKAGE\GUILISTVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -5925,7 +6612,7 @@ ListView
 #endif
 
 /***********************************************************************
-CONTROLS\EXTENDEDCONTROLS\GUITREEVIEWCONTROLS.H
+CONTROLS\LISTCONTROLPACKAGE\GUITREEVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -6410,7 +7097,7 @@ TreeView
 #endif
 
 /***********************************************************************
-CONTROLS\EXTENDEDCONTROLS\GUICOMBOCONTROLS.H
+CONTROLS\LISTCONTROLPACKAGE\GUICOMBOCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -6515,689 +7202,6 @@ ComboBox with GuiListControl
 				int											GetSelectedIndex();
 				void										SetSelectedIndex(int value);
 				GuiListControl::IItemProvider*				GetItemProvider();
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-CONTROLS\EXTENDEDCONTROLS\GUICONTAINERCONTROLS.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-GacUI::Control System
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_CONTROLS_GUICONTAINERCONTROLS
-#define VCZH_PRESENTATION_CONTROLS_GUICONTAINERCONTROLS
-
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-/***********************************************************************
-Tab Control
-***********************************************************************/
-
-			class GuiTab;
-
-			class GuiTabPage : public Object, public Description<GuiTabPage>
-			{
-				friend class GuiTab;
-				friend class Ptr<GuiTabPage>;
-			protected:
-				GuiControl*										container;
-				GuiTab*											owner;
-				WString											text;
-				
-				GuiTabPage();
-				~GuiTabPage();
-
-				bool											AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController);
-				bool											DeassociateTab(GuiTab* _owner);
-			public:
-				compositions::GuiNotifyEvent					TextChanged;
-				compositions::GuiNotifyEvent					PageInstalled;
-				compositions::GuiNotifyEvent					PageUninstalled;
-				compositions::GuiNotifyEvent					PageContainerReady;
-
-				GuiControl*										GetContainer();
-				GuiTab*											GetOwnerTab();
-				const WString&									GetText();
-				void											SetText(const WString& param);
-				bool											GetSelected();
-			};
-
-			class GuiTab : public GuiControl, public Description<GuiTab>
-			{
-				friend class GuiTabPage;
-			public:
-				class ICommandExecutor : public virtual IDescriptable, public Description<ICommandExecutor>
-				{
-				public:
-					virtual void								ShowTab(int index)=0;
-				};
-				
-				class IStyleController : public virtual GuiControl::IStyleController, public Description<IStyleController>
-				{
-				public:
-					virtual void								SetCommandExecutor(ICommandExecutor* value)=0;
-					virtual void								InsertTab(int index)=0;
-					virtual void								SetTabText(int index, const WString& value)=0;
-					virtual void								RemoveTab(int index)=0;
-					virtual void								MoveTab(int oldIndex, int newIndex)=0;
-					virtual void								SetSelectedTab(int index)=0;
-					virtual GuiControl::IStyleController*		CreateTabPageStyleController()=0;
-				};
-			protected:
-				class CommandExecutor : public Object, public ICommandExecutor
-				{
-				protected:
-					GuiTab*										tab;
-				public:
-					CommandExecutor(GuiTab* _tab);
-					~CommandExecutor();
-
-					void										ShowTab(int index)override;
-				};
-
-				Ptr<CommandExecutor>							commandExecutor;
-				IStyleController*								styleController;
-				collections::List<GuiTabPage*>					tabPages;
-				GuiTabPage*										selectedPage;
-			public:
-				GuiTab(IStyleController* _styleController);
-				~GuiTab();
-
-				compositions::GuiNotifyEvent					SelectedPageChanged;
-
-				GuiTabPage*										CreatePage(int index=-1);
-				bool											CreatePage(GuiTabPage* page, int index=-1);
-				bool											RemovePage(GuiTabPage* value);
-				bool											MovePage(GuiTabPage* page, int newIndex);
-				const collections::List<GuiTabPage*>&			GetPages();
-
-				GuiTabPage*										GetSelectedPage();
-				bool											SetSelectedPage(GuiTabPage* value);
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-CONTROLS\GUIAPPLICATION.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-GacUI::Application Framework
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_CONTROLS_GUIAPPLICATION
-#define VCZH_PRESENTATION_CONTROLS_GUIAPPLICATION
-
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-			class GuiApplication : public Object, private INativeControllerListener
-			{
-				friend void GuiApplicationInitialize();
-				friend class GuiWindow;
-				friend class GuiPopup;
-				friend class Ptr<GuiApplication>;
-			private:
-				void											LeftButtonDown(Point position)override;
-				void											LeftButtonUp(Point position)override;
-				void											RightButtonDown(Point position)override;
-				void											RightButtonUp(Point position)override;
-				void											ClipboardUpdated()override;
-			protected:
-				GuiWindow*										mainWindow;
-				collections::List<GuiWindow*>					windows;
-				collections::SortedList<GuiPopup*>				openingPopups;
-
-				GuiApplication();
-				~GuiApplication();
-
-				void											RegisterWindow(GuiWindow* window);
-				void											UnregisterWindow(GuiWindow* window);
-				void											RegisterPopupOpened(GuiPopup* popup);
-				void											RegisterPopupClosed(GuiPopup* popup);
-				void											OnMouseDown(Point location);
-			public:
-				void											Run(GuiWindow* _mainWindow);
-				const collections::List<GuiWindow*>&			GetWindows();
-				GuiWindow*										GetWindow(Point location);
-
-				bool											IsInMainThread();
-				void											InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument);
-				void											InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument);
-				bool											InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds=-1);
-				void											InvokeAsync(const Func<void()>& proc);
-				void											InvokeInMainThread(const Func<void()>& proc);
-				bool											InvokeInMainThreadAndWait(const Func<void()>& proc, int milliseconds=-1);
-
-				template<typename T>
-				void InvokeLambdaInMainThread(const T& proc)
-				{
-					InvokeInMainThread(Func<void()>(proc));
-				}
-				
-				template<typename T>
-				bool InvokeLambdaInMainThreadAndWait(const T& proc, int milliseconds=-1)
-				{
-					return InvokeInMainThreadAndWait(Func<void()>(proc), milliseconds);
-				}
-			};
-
-			extern GuiApplication*								GetApplication();
-		}
-	}
-}
-
-extern void GuiApplicationMain();
-
-#endif
-
-/***********************************************************************
-CONTROLS\GUITEXTCONTROLS.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-GacUI::Control System
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCONTROLS
-#define VCZH_PRESENTATION_CONTROLS_GUITEXTCONTROLS
-
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-
-/***********************************************************************
-Common Operations
-***********************************************************************/
-
-			class GuiTextBoxCommonInterface;
-
-			class GuiTextElementOperator : public Object, public Description<GuiTextElementOperator>
-			{
-			public:
-				class ICallback : public virtual IDescriptable, public Description<ICallback>
-				{
-				public:
-					virtual TextPos							GetLeftWord(TextPos pos)=0;
-					virtual TextPos							GetRightWord(TextPos pos)=0;
-					virtual void							GetWord(TextPos pos, TextPos& begin, TextPos& end)=0;
-					virtual int								GetPageRows()=0;
-					virtual bool							BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)=0;
-					virtual void							AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
-					virtual void							ScrollToView(Point point)=0;
-					virtual int								GetTextMargin()=0;
-				};
-
-				class DefaultCallback : public Object, public ICallback, public Description<DefaultCallback>
-				{
-				protected:
-					elements::GuiColorizedTextElement*		textElement;
-					compositions::GuiGraphicsComposition*	textComposition;
-					bool									readonly;
-				public:
-					DefaultCallback(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition);
-					~DefaultCallback();
-
-					TextPos									GetLeftWord(TextPos pos)override;
-					TextPos									GetRightWord(TextPos pos)override;
-					void									GetWord(TextPos pos, TextPos& begin, TextPos& end)override;
-					int										GetPageRows()override;
-					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
-				};
-
-				class ITextEditCallback : public virtual IDescriptable, public Description<ITextEditCallback>
-				{
-				public:
-					virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
-					virtual void							Detach()=0;
-					virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
-				};
-
-				class ShortcutCommand
-				{
-				protected:
-					bool									ctrl;
-					bool									shift;
-					int										key;
-					Func<void()>							action;
-				public:
-					ShortcutCommand(bool _ctrl, bool _shift, int _key, const Func<void()> _action);
-					~ShortcutCommand();
-
-					bool									IsTheRightKey(bool _ctrl, bool _shift, int _key);
-					void									Execute();
-				};
-
-			protected:
-				elements::GuiColorizedTextElement*			textElement;
-				compositions::GuiGraphicsComposition*		textComposition;
-				GuiControl*									textControl;
-				GuiTextBoxCommonInterface*					textBoxCommonInterface;
-				ICallback*									callback;
-				bool										dragging;
-				bool										readonly;
-
-				SpinLock									elementModifyLock;
-				collections::List<Ptr<ITextEditCallback>>	textEditCallbacks;
-				collections::List<Ptr<ShortcutCommand>>		shortcutCommands;
-
-				void										UpdateCaretPoint();
-				void										Move(TextPos pos, bool shift);
-				void										Modify(TextPos start, TextPos end, const WString& input);
-				bool										ProcessKey(int code, bool shift, bool ctrl);
-					
-				void										OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void										OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void										OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-
-				void										OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void										OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void										OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void										OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments);
-				void										OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments);
-			public:
-				GuiTextElementOperator();
-				~GuiTextElementOperator();
-
-				void										Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl);
-				ICallback*									GetCallback();
-				void										SetCallback(ICallback* value);
-				bool										AttachTextEditCallback(Ptr<ITextEditCallback> value);
-				bool										DetachTextEditCallback(Ptr<ITextEditCallback> value);
-				GuiTextBoxCommonInterface*					GetTextBoxCommonInterface();
-				void										SetTextBoxCommonInterface(GuiTextBoxCommonInterface* value);
-				void										AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand);
-
-				elements::GuiColorizedTextElement*			GetTextElement();
-				compositions::GuiGraphicsComposition*		GetTextComposition();
-				TextPos										GetNearestTextPos(Point point);
-				void										Select(TextPos begin, TextPos end);
-				WString										GetSelectionText();
-				void										SetSelectionText(const WString& value);
-				void										SetText(const WString& value);
-
-				bool										CanCut();
-				bool										CanCopy();
-				bool										CanPaste();
-				void										SelectAll();
-				bool										Cut();
-				bool										Copy();
-				bool										Paste();
-
-				bool										GetReadonly();
-				void										SetReadonly(bool value);
-			};
-
-/***********************************************************************
-Colorizer
-***********************************************************************/
-			
-			class GuiTextBoxColorizerBase : public Object, public GuiTextElementOperator::ITextEditCallback
-			{
-			public:
-				typedef collections::Array<elements::text::ColorEntry>			ColorArray;
-			protected:
-				elements::GuiColorizedTextElement*			element;
-				SpinLock*									elementModifyLock;
-				volatile int								colorizedLineCount;
-				volatile bool								isColorizerRunning;
-				volatile bool								isFinalizing;
-				SpinLock									colorizerRunningEvent;
-
-				static void									ColorizerThreadProc(void* argument);
-
-				void										StartColorizer();
-				void										StopColorizer();
-			public:
-				GuiTextBoxColorizerBase();
-				~GuiTextBoxColorizerBase();
-
-				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
-				void										Detach()override;
-				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-
-				virtual int									GetLexerStartState()=0;
-				virtual int									GetContextStartState()=0;
-				virtual void								ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)=0;
-				virtual const ColorArray&					GetColors()=0;
-			};
-
-			class GuiTextBoxRegexColorizer : public GuiTextBoxColorizerBase
-			{
-			protected:
-				Ptr<regex::RegexLexer>										lexer;
-				Ptr<regex::RegexLexerColorizer>								colorizer;
-				ColorArray													colors;
-
-				elements::text::ColorEntry									defaultColor;
-				collections::List<WString>									tokenRegexes;
-				collections::List<elements::text::ColorEntry>				tokenColors;
-				collections::List<elements::text::ColorEntry>				extraTokenColors;
-
-				static void													ColorizerProc(void* argument, vint start, vint length, vint token);
-			public:
-				GuiTextBoxRegexColorizer();
-				~GuiTextBoxRegexColorizer();
-
-				elements::text::ColorEntry									GetDefaultColor();
-				collections::List<WString>&									GetTokenRegexes();
-				collections::List<elements::text::ColorEntry>&				GetTokenColors();
-				collections::List<elements::text::ColorEntry>&				GetExtraTokenColors();
-				int															GetExtraTokenIndexStart();
-				
-				bool														SetDefaultColor(elements::text::ColorEntry value);
-				int															AddToken(const WString& regex, elements::text::ColorEntry color);
-				int															AddExtraToken(elements::text::ColorEntry color);
-				bool														Setup();
-				virtual void												ColorizeTokenContextSensitive(const wchar_t* text, vint start, vint length, vint& token, int& contextState);
-
-				int															GetLexerStartState()override;
-				int															GetContextStartState()override;
-				void														ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override;
-				const ColorArray&											GetColors()override;
-			};
-
-/***********************************************************************
-Undo Redo
-***********************************************************************/
-
-			class GuiGeneralUndoRedoProcessor : public Object
-			{
-			protected:
-				class IEditStep : public Interface
-				{
-				public:
-					virtual void							Undo()=0;
-					virtual void							Redo()=0;
-				};
-				friend class collections::ArrayBase<Ptr<IEditStep>>;
-
-			protected:
-				collections::List<Ptr<IEditStep>>			steps;
-				int											firstFutureStep;
-				int											savedStep;
-				bool										performingUndoRedo;
-
-				void										PushStep(Ptr<IEditStep> step);
-			public:
-				GuiGeneralUndoRedoProcessor();
-				~GuiGeneralUndoRedoProcessor();
-
-				bool										CanUndo();
-				bool										CanRedo();
-				void										ClearUndoRedo();
-				bool										GetModified();
-				void										NotifyModificationSaved();
-				bool										Undo();
-				bool										Redo();
-			};
-
-			class GuiTextBoxUndoRedoProcessor : public GuiGeneralUndoRedoProcessor, public GuiTextElementOperator::ITextEditCallback
-			{
-			protected:
-				class EditStep : public Object, public IEditStep
-				{
-				public:
-					GuiTextBoxUndoRedoProcessor*			processor;
-					TextPos									originalStart;
-					TextPos									originalEnd;
-					WString									originalText;
-					TextPos									inputStart;
-					TextPos									inputEnd;
-					WString									inputText;
-					
-					void									Undo();
-					void									Redo();
-				};
-
-				GuiTextElementOperator*						textElementOperator;
-			public:
-				GuiTextBoxUndoRedoProcessor(GuiTextElementOperator* _textElementOperator);
-				~GuiTextBoxUndoRedoProcessor();
-
-				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock);
-				void										Detach();
-				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText);
-			};
-
-/***********************************************************************
-Common Interface
-***********************************************************************/
-
-			class GuiTextBoxCommonInterface : public Description<GuiTextBoxCommonInterface>
-			{
-				friend class GuiTextElementOperator;
-			protected:
-				GuiTextElementOperator*						textElementOperator;
-				GuiControl*									textControl;
-				Ptr<GuiTextBoxColorizerBase>				colorizer;
-				Ptr<GuiTextBoxUndoRedoProcessor>			undoRedoProcessor;
-
-				void										RaiseTextChanged();
-				void										RaiseSelectionChanged();
-				void										InitializeCommonInterface(GuiControl* _textControl, GuiTextElementOperator* _textElementOperator);
-			public:
-				GuiTextBoxCommonInterface();
-				~GuiTextBoxCommonInterface();
-
-				compositions::GuiNotifyEvent				SelectionChanged;
-
-				compositions::GuiGraphicsComposition*		GetTextComposition();
-
-				Ptr<GuiTextBoxColorizerBase>				GetColorizer();
-				void										SetColorizer(Ptr<GuiTextBoxColorizerBase> value);
-
-				bool										CanUndo();
-				bool										CanRedo();
-				void										ClearUndoRedo();
-				bool										GetModified();
-				void										NotifyModificationSaved();
-				bool										Undo();
-				bool										Redo();
-				
-				bool										CanCut();
-				bool										CanCopy();
-				bool										CanPaste();
-				void										SelectAll();
-				bool										Cut();
-				bool										Copy();
-				bool										Paste();
-				
-				WString										GetRowText(int row);
-				WString										GetFragmentText(TextPos start, TextPos end);
-				int											GetRowWidth(int row);
-				int											GetRowHeight();
-				int											GetMaxWidth();
-				int											GetMaxHeight();
-				TextPos										GetTextPosFromPoint(Point point);
-				Point										GetPointFromTextPos(TextPos pos);
-				Rect										GetRectFromTextPos(TextPos pos);
-				TextPos										GetNearestTextPos(Point point);
-
-				TextPos										GetCaretBegin();
-				TextPos										GetCaretEnd();
-				TextPos										GetCaretSmall();
-				TextPos										GetCaretLarge();
-				void										Select(TextPos begin, TextPos end);
-				
-				WString										GetSelectionText();
-				void										SetSelectionText(const WString& value);
-
-				bool										GetReadonly();
-				void										SetReadonly(bool value);
-			};
-
-/***********************************************************************
-MultilineTextBox
-***********************************************************************/
-
-			class GuiMultilineTextBox : public GuiScrollView, public GuiTextBoxCommonInterface, public Description<GuiMultilineTextBox>
-			{
-			public:
-				static const int							TextMargin=3;
-
-				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
-				{
-				protected:
-					elements::GuiColorizedTextElement*		textElement;
-					compositions::GuiBoundsComposition*		textComposition;
-					GuiTextElementOperator					textElementOperator;
-					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
-
-				public:
-					StyleController(GuiScrollView::IStyleProvider* styleProvider);
-					~StyleController();
-
-					elements::GuiColorizedTextElement*		GetTextElement();
-					compositions::GuiGraphicsComposition*	GetTextComposition();
-					GuiTextElementOperator*					GetTextElementOperator();
-					void									SetViewPosition(Point value);
-					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-
-					WString									GetText();
-					void									SetText(const WString& value)override;
-					void									SetFont(const FontProperties& value)override;
-					void									SetVisuallyEnabled(bool value)override;
-				};
-
-				class TextElementOperatorCallback : public GuiTextElementOperator::DefaultCallback, public Description<TextElementOperatorCallback>
-				{
-				protected:
-					GuiMultilineTextBox*					textControl;
-					StyleController*						textController;
-				public:
-					TextElementOperatorCallback(GuiMultilineTextBox* _textControl);
-
-					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-					void									ScrollToView(Point point)override;
-					int										GetTextMargin()override;
-				};
-
-			protected:
-				StyleController*							styleController;
-
-				void										CalculateViewAndSetScroll();
-				void										OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)override;
-				Size										QueryFullSize()override;
-				void										UpdateView(Rect viewBounds)override;
-				void										OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-			public:
-				GuiMultilineTextBox(GuiMultilineTextBox::IStyleProvider* styleProvider);
-				~GuiMultilineTextBox();
-
-				const WString&								GetText()override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-			};
-
-/***********************************************************************
-SinglelineTextBox
-***********************************************************************/
-			
-			class GuiSinglelineTextBox : public GuiControl, public GuiTextBoxCommonInterface, public Description<GuiSinglelineTextBox>
-			{
-			public:
-				static const int							TextMargin=3;
-
-				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
-				{
-				public:
-					virtual compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* background)=0;
-				};
-
-				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
-				{
-				protected:
-					Ptr<IStyleProvider>						styleProvider;
-					compositions::GuiBoundsComposition*		boundsComposition;
-					compositions::GuiGraphicsComposition*	containerComposition;
-
-					GuiSinglelineTextBox*					textBox;
-					elements::GuiColorizedTextElement*		textElement;
-					compositions::GuiTableComposition*		textCompositionTable;
-					compositions::GuiCellComposition*		textComposition;
-					GuiTextElementOperator					textElementOperator;
-					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
-
-				public:
-					StyleController(IStyleProvider* _styleProvider);
-					~StyleController();
-
-					void									SetTextBox(GuiSinglelineTextBox* value);
-					void									RearrangeTextElement();
-					compositions::GuiBoundsComposition*		GetBoundsComposition();
-					compositions::GuiGraphicsComposition*	GetContainerComposition();
-					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
-
-					WString									GetText();
-					void									SetText(const WString& value);
-					void									SetFont(const FontProperties& value);
-					void									SetVisuallyEnabled(bool value);
-
-					elements::GuiColorizedTextElement*		GetTextElement();
-					compositions::GuiGraphicsComposition*	GetTextComposition();
-					GuiTextElementOperator*					GetTextElementOperator();
-					void									SetViewPosition(Point value);
-				};
-
-				class TextElementOperatorCallback : public GuiTextElementOperator::DefaultCallback, public Description<TextElementOperatorCallback>
-				{
-				protected:
-					GuiSinglelineTextBox*					textControl;
-					StyleController*						textController;
-				public:
-					TextElementOperatorCallback(GuiSinglelineTextBox* _textControl);
-
-					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
-					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
-					void									ScrollToView(Point point)override;
-					int										GetTextMargin()override;
-				};
-			protected:
-				StyleController*							styleController;
-				
-				void										OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)override;
-				void										OnBoundsMouseButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-			public:
-				GuiSinglelineTextBox(GuiSinglelineTextBox::IStyleProvider* styleProvider);
-				~GuiSinglelineTextBox();
-
-				const WString&								GetText()override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-				wchar_t										GetPasswordChar();
-				void										SetPasswordChar(wchar_t value);
 			};
 		}
 	}
@@ -7460,6 +7464,9 @@ Interfaces:
 
 #ifndef VCZH_PRESENTATION_CONTROLS_GUITHEMESTYLEFACTORY
 #define VCZH_PRESENTATION_CONTROLS_GUITHEMESTYLEFACTORY
+
+
+
 
 
 namespace vl

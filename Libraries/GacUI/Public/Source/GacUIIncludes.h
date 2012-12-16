@@ -14572,122 +14572,6 @@ Scrolls
 				int										GetMinPosition();
 				int										GetMaxPosition();
 			};
-
-			class GuiScrollView : public GuiControl, public Description<GuiScrollView>
-			{
-			public:
-				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
-				{
-				public:
-					virtual GuiScroll::IStyleController*			CreateHorizontalScrollStyle()=0;
-					virtual GuiScroll::IStyleController*			CreateVerticalScrollStyle()=0;
-					virtual int										GetDefaultScrollSize()=0;
-					virtual compositions::GuiGraphicsComposition*	InstallBackground(compositions::GuiBoundsComposition* boundsComposition)=0;
-				};
-				
-				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
-				{
-				protected:
-					Ptr<IStyleProvider>						styleProvider;
-					GuiScrollView*							scrollView;
-					GuiScroll*								horizontalScroll;
-					GuiScroll*								verticalScroll;
-					compositions::GuiBoundsComposition*		boundsComposition;
-					compositions::GuiTableComposition*		tableComposition;
-					compositions::GuiCellComposition*		containerCellComposition;
-					compositions::GuiBoundsComposition*		containerComposition;
-					bool									horizontalAlwaysVisible;
-					bool									verticalAlwaysVisible;
-
-					void									UpdateTable();
-				public:
-					StyleController(IStyleProvider* _styleProvider);
-					~StyleController();
-
-					void									SetScrollView(GuiScrollView* _scrollView);
-					void									AdjustView(Size fullSize);
-					IStyleProvider*							GetStyleProvider();
-
-					GuiScroll*								GetHorizontalScroll();
-					GuiScroll*								GetVerticalScroll();
-					compositions::GuiTableComposition*		GetInternalTableComposition();
-					compositions::GuiBoundsComposition*		GetInternalContainerComposition();
-
-					bool									GetHorizontalAlwaysVisible();
-					void									SetHorizontalAlwaysVisible(bool value);
-					bool									GetVerticalAlwaysVisible();
-					void									SetVerticalAlwaysVisible(bool value);
-
-					compositions::GuiBoundsComposition*		GetBoundsComposition()override;
-					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
-					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-					void									SetText(const WString& value)override;
-					void									SetFont(const FontProperties& value)override;
-					void									SetVisuallyEnabled(bool value)override;
-				};
-			protected:
-
-				StyleController*						styleController;
-				bool									supressScrolling;
-
-				void									OnContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void									OnHorizontalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void									OnVerticalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void									CallUpdateView();
-				void									Initialize();
-
-				virtual Size							QueryFullSize()=0;
-				virtual void							UpdateView(Rect viewBounds)=0;
-				
-				GuiScrollView(StyleController* _styleController);
-			public:
-				GuiScrollView(IStyleProvider* styleProvider);
-				~GuiScrollView();
-
-				void									CalculateView();
-				Size									GetViewSize();
-				Rect									GetViewBounds();
-				
-				GuiScroll*								GetHorizontalScroll();
-				GuiScroll*								GetVerticalScroll();
-				bool									GetHorizontalAlwaysVisible();
-				void									SetHorizontalAlwaysVisible(bool value);
-				bool									GetVerticalAlwaysVisible();
-				void									SetVerticalAlwaysVisible(bool value);
-			};
-			
-			class GuiScrollContainer : public GuiScrollView, public Description<GuiScrollContainer>
-			{
-			public:
-				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
-				{
-				protected:
-					compositions::GuiBoundsComposition*		controlContainerComposition;
-					bool									extendToFullWidth;
-				public:
-					StyleController(GuiScrollView::IStyleProvider* styleProvider);
-					~StyleController();
-
-					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
-					void									MoveContainer(Point leftTop);
-
-					bool									GetExtendToFullWidth();
-					void									SetExtendToFullWidth(bool value);
-				};
-
-			protected:
-				StyleController*						styleController;
-
-				void									OnControlContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				Size									QueryFullSize()override;
-				void									UpdateView(Rect viewBounds)override;
-			public:
-				GuiScrollContainer(GuiScrollContainer::IStyleProvider* styleProvider);
-				~GuiScrollContainer();
-				
-				bool									GetExtendToFullWidth();
-				void									SetExtendToFullWidth(bool value);
-			};
 			
 			namespace list
 			{
@@ -15156,7 +15040,239 @@ extern void GuiApplicationMain();
 #endif
 
 /***********************************************************************
-LIBRARIES\GACUI\SOURCE\CONTROLS\GUITEXTCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\GUICONTAINERCONTROLS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUICONTAINERCONTROLS
+#define VCZH_PRESENTATION_CONTROLS_GUICONTAINERCONTROLS
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+/***********************************************************************
+Tab Control
+***********************************************************************/
+
+			class GuiTab;
+
+			class GuiTabPage : public Object, public Description<GuiTabPage>
+			{
+				friend class GuiTab;
+				friend class Ptr<GuiTabPage>;
+			protected:
+				GuiControl*										container;
+				GuiTab*											owner;
+				WString											text;
+				
+				GuiTabPage();
+				~GuiTabPage();
+
+				bool											AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController);
+				bool											DeassociateTab(GuiTab* _owner);
+			public:
+				compositions::GuiNotifyEvent					TextChanged;
+				compositions::GuiNotifyEvent					PageInstalled;
+				compositions::GuiNotifyEvent					PageUninstalled;
+				compositions::GuiNotifyEvent					PageContainerReady;
+
+				GuiControl*										GetContainer();
+				GuiTab*											GetOwnerTab();
+				const WString&									GetText();
+				void											SetText(const WString& param);
+				bool											GetSelected();
+			};
+
+			class GuiTab : public GuiControl, public Description<GuiTab>
+			{
+				friend class GuiTabPage;
+			public:
+				class ICommandExecutor : public virtual IDescriptable, public Description<ICommandExecutor>
+				{
+				public:
+					virtual void								ShowTab(int index)=0;
+				};
+				
+				class IStyleController : public virtual GuiControl::IStyleController, public Description<IStyleController>
+				{
+				public:
+					virtual void								SetCommandExecutor(ICommandExecutor* value)=0;
+					virtual void								InsertTab(int index)=0;
+					virtual void								SetTabText(int index, const WString& value)=0;
+					virtual void								RemoveTab(int index)=0;
+					virtual void								MoveTab(int oldIndex, int newIndex)=0;
+					virtual void								SetSelectedTab(int index)=0;
+					virtual GuiControl::IStyleController*		CreateTabPageStyleController()=0;
+				};
+			protected:
+				class CommandExecutor : public Object, public ICommandExecutor
+				{
+				protected:
+					GuiTab*										tab;
+				public:
+					CommandExecutor(GuiTab* _tab);
+					~CommandExecutor();
+
+					void										ShowTab(int index)override;
+				};
+
+				Ptr<CommandExecutor>							commandExecutor;
+				IStyleController*								styleController;
+				collections::List<GuiTabPage*>					tabPages;
+				GuiTabPage*										selectedPage;
+			public:
+				GuiTab(IStyleController* _styleController);
+				~GuiTab();
+
+				compositions::GuiNotifyEvent					SelectedPageChanged;
+
+				GuiTabPage*										CreatePage(int index=-1);
+				bool											CreatePage(GuiTabPage* page, int index=-1);
+				bool											RemovePage(GuiTabPage* value);
+				bool											MovePage(GuiTabPage* page, int newIndex);
+				const collections::List<GuiTabPage*>&			GetPages();
+
+				GuiTabPage*										GetSelectedPage();
+				bool											SetSelectedPage(GuiTabPage* value);
+			};
+
+/***********************************************************************
+Scroll View
+***********************************************************************/
+
+			class GuiScrollView : public GuiControl, public Description<GuiScrollView>
+			{
+			public:
+				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
+				{
+				public:
+					virtual GuiScroll::IStyleController*			CreateHorizontalScrollStyle()=0;
+					virtual GuiScroll::IStyleController*			CreateVerticalScrollStyle()=0;
+					virtual int										GetDefaultScrollSize()=0;
+					virtual compositions::GuiGraphicsComposition*	InstallBackground(compositions::GuiBoundsComposition* boundsComposition)=0;
+				};
+				
+				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
+				{
+				protected:
+					Ptr<IStyleProvider>						styleProvider;
+					GuiScrollView*							scrollView;
+					GuiScroll*								horizontalScroll;
+					GuiScroll*								verticalScroll;
+					compositions::GuiBoundsComposition*		boundsComposition;
+					compositions::GuiTableComposition*		tableComposition;
+					compositions::GuiCellComposition*		containerCellComposition;
+					compositions::GuiBoundsComposition*		containerComposition;
+					bool									horizontalAlwaysVisible;
+					bool									verticalAlwaysVisible;
+
+					void									UpdateTable();
+				public:
+					StyleController(IStyleProvider* _styleProvider);
+					~StyleController();
+
+					void									SetScrollView(GuiScrollView* _scrollView);
+					void									AdjustView(Size fullSize);
+					IStyleProvider*							GetStyleProvider();
+
+					GuiScroll*								GetHorizontalScroll();
+					GuiScroll*								GetVerticalScroll();
+					compositions::GuiTableComposition*		GetInternalTableComposition();
+					compositions::GuiBoundsComposition*		GetInternalContainerComposition();
+
+					bool									GetHorizontalAlwaysVisible();
+					void									SetHorizontalAlwaysVisible(bool value);
+					bool									GetVerticalAlwaysVisible();
+					void									SetVerticalAlwaysVisible(bool value);
+
+					compositions::GuiBoundsComposition*		GetBoundsComposition()override;
+					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
+					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+					void									SetText(const WString& value)override;
+					void									SetFont(const FontProperties& value)override;
+					void									SetVisuallyEnabled(bool value)override;
+				};
+			protected:
+
+				StyleController*						styleController;
+				bool									supressScrolling;
+
+				void									OnContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnHorizontalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									OnVerticalScroll(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									CallUpdateView();
+				void									Initialize();
+
+				virtual Size							QueryFullSize()=0;
+				virtual void							UpdateView(Rect viewBounds)=0;
+				
+				GuiScrollView(StyleController* _styleController);
+			public:
+				GuiScrollView(IStyleProvider* styleProvider);
+				~GuiScrollView();
+
+				void									CalculateView();
+				Size									GetViewSize();
+				Rect									GetViewBounds();
+				
+				GuiScroll*								GetHorizontalScroll();
+				GuiScroll*								GetVerticalScroll();
+				bool									GetHorizontalAlwaysVisible();
+				void									SetHorizontalAlwaysVisible(bool value);
+				bool									GetVerticalAlwaysVisible();
+				void									SetVerticalAlwaysVisible(bool value);
+			};
+			
+			class GuiScrollContainer : public GuiScrollView, public Description<GuiScrollContainer>
+			{
+			public:
+				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
+				{
+				protected:
+					compositions::GuiBoundsComposition*		controlContainerComposition;
+					bool									extendToFullWidth;
+				public:
+					StyleController(GuiScrollView::IStyleProvider* styleProvider);
+					~StyleController();
+
+					compositions::GuiGraphicsComposition*	GetContainerComposition()override;
+					void									MoveContainer(Point leftTop);
+
+					bool									GetExtendToFullWidth();
+					void									SetExtendToFullWidth(bool value);
+				};
+
+			protected:
+				StyleController*						styleController;
+
+				void									OnControlContainerBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				Size									QueryFullSize()override;
+				void									UpdateView(Rect viewBounds)override;
+			public:
+				GuiScrollContainer(GuiScrollContainer::IStyleProvider* styleProvider);
+				~GuiScrollContainer();
+				
+				bool									GetExtendToFullWidth();
+				void									SetExtendToFullWidth(bool value);
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+LIBRARIES\GACUI\SOURCE\CONTROLS\TEXTEDITORPACKAGE\GUITEXTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -15646,7 +15762,7 @@ SinglelineTextBox
 #endif
 
 /***********************************************************************
-LIBRARIES\GACUI\SOURCE\CONTROLS\GUILISTCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\LISTCONTROLPACKAGE\GUILISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -16187,119 +16303,7 @@ Predefined ItemProvider
 #endif
 
 /***********************************************************************
-LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICONTAINERCONTROLS.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-GacUI::Control System
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_CONTROLS_GUICONTAINERCONTROLS
-#define VCZH_PRESENTATION_CONTROLS_GUICONTAINERCONTROLS
-
-
-namespace vl
-{
-	namespace presentation
-	{
-		namespace controls
-		{
-/***********************************************************************
-Tab Control
-***********************************************************************/
-
-			class GuiTab;
-
-			class GuiTabPage : public Object, public Description<GuiTabPage>
-			{
-				friend class GuiTab;
-				friend class Ptr<GuiTabPage>;
-			protected:
-				GuiControl*										container;
-				GuiTab*											owner;
-				WString											text;
-				
-				GuiTabPage();
-				~GuiTabPage();
-
-				bool											AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController);
-				bool											DeassociateTab(GuiTab* _owner);
-			public:
-				compositions::GuiNotifyEvent					TextChanged;
-				compositions::GuiNotifyEvent					PageInstalled;
-				compositions::GuiNotifyEvent					PageUninstalled;
-				compositions::GuiNotifyEvent					PageContainerReady;
-
-				GuiControl*										GetContainer();
-				GuiTab*											GetOwnerTab();
-				const WString&									GetText();
-				void											SetText(const WString& param);
-				bool											GetSelected();
-			};
-
-			class GuiTab : public GuiControl, public Description<GuiTab>
-			{
-				friend class GuiTabPage;
-			public:
-				class ICommandExecutor : public virtual IDescriptable, public Description<ICommandExecutor>
-				{
-				public:
-					virtual void								ShowTab(int index)=0;
-				};
-				
-				class IStyleController : public virtual GuiControl::IStyleController, public Description<IStyleController>
-				{
-				public:
-					virtual void								SetCommandExecutor(ICommandExecutor* value)=0;
-					virtual void								InsertTab(int index)=0;
-					virtual void								SetTabText(int index, const WString& value)=0;
-					virtual void								RemoveTab(int index)=0;
-					virtual void								MoveTab(int oldIndex, int newIndex)=0;
-					virtual void								SetSelectedTab(int index)=0;
-					virtual GuiControl::IStyleController*		CreateTabPageStyleController()=0;
-				};
-			protected:
-				class CommandExecutor : public Object, public ICommandExecutor
-				{
-				protected:
-					GuiTab*										tab;
-				public:
-					CommandExecutor(GuiTab* _tab);
-					~CommandExecutor();
-
-					void										ShowTab(int index)override;
-				};
-
-				Ptr<CommandExecutor>							commandExecutor;
-				IStyleController*								styleController;
-				collections::List<GuiTabPage*>					tabPages;
-				GuiTabPage*										selectedPage;
-			public:
-				GuiTab(IStyleController* _styleController);
-				~GuiTab();
-
-				compositions::GuiNotifyEvent					SelectedPageChanged;
-
-				GuiTabPage*										CreatePage(int index=-1);
-				bool											CreatePage(GuiTabPage* page, int index=-1);
-				bool											RemovePage(GuiTabPage* value);
-				bool											MovePage(GuiTabPage* page, int newIndex);
-				const collections::List<GuiTabPage*>&			GetPages();
-
-				GuiTabPage*										GetSelectedPage();
-				bool											SetSelectedPage(GuiTabPage* value);
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITEXTLISTCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\LISTCONTROLPACKAGE\GUITEXTLISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -16463,7 +16467,7 @@ TextList Control
 #endif
 
 /***********************************************************************
-LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUIMENUCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\TOOLSTRIPPACKAGE\GUIMENUCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -16626,7 +16630,7 @@ MenuButton
 #endif
 
 /***********************************************************************
-LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUILISTVIEWCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\LISTCONTROLPACKAGE\GUILISTVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -17248,7 +17252,7 @@ ListView
 #endif
 
 /***********************************************************************
-LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUITREEVIEWCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\LISTCONTROLPACKAGE\GUITREEVIEWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -17733,7 +17737,7 @@ TreeView
 #endif
 
 /***********************************************************************
-LIBRARIES\GACUI\SOURCE\CONTROLS\EXTENDEDCONTROLS\GUICOMBOCONTROLS.H
+LIBRARIES\GACUI\SOURCE\CONTROLS\LISTCONTROLPACKAGE\GUICOMBOCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -18100,6 +18104,9 @@ Interfaces:
 
 #ifndef VCZH_PRESENTATION_CONTROLS_GUITHEMESTYLEFACTORY
 #define VCZH_PRESENTATION_CONTROLS_GUITHEMESTYLEFACTORY
+
+
+
 
 
 namespace vl
