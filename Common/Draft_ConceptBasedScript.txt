@@ -86,6 +86,7 @@ Type constructors:
 		Value,
 		...
 	}
+	[a, b, c]		// create an array of automatically type inference
 
 	new Concept		// go to concept DefaultImpl<T>, for ref concept T
 
@@ -182,6 +183,9 @@ Function invoking:
 		f(ref a.operator+=(b))
 		etc..
 
+Extension function invoking:
+	expression.Function( ... )
+
 Lambda expression:
 		a=>b
 		(a, ref b)=>b
@@ -193,6 +197,10 @@ Generic Constraint
 
 ========================================================
 Function Declaration
+========================================================
+
+========================================================
+Property Declaration
 ========================================================
 	
 ========================================================
@@ -211,6 +219,13 @@ Statements
 	statement; ...
 }
 
+(type | var) variable [ = expression] ;
+
+(variable | pattern) = expression ; // failing to match the pattern will raise a PatternAssignException
+                                    // variables in the pattern can contains not-declared variables. in this case, those variable is declared.
+									// assignment can use function result type to choose a correct overloaded function
+									// like (int a, success) = TryConvert("abc"); will use TryConvertable<string, int>.TryConvert
+
 if (boolean expression)
 	statement;
 [else
@@ -223,10 +238,10 @@ do
 	statement;
 while (boolean expression)
 
-foreach (type variable in enumerable)
+foreach ((type | var) variable in enumerable)
 	statement;
 
-using(type variable = initialization)
+using((type | var) variable = initialization)
 	statement;
 
 try
@@ -240,9 +255,32 @@ continue;
 break;
 return [expression];
 
+switch (expression)
+{
+	case pattern1 :
+	case pattern2 :
+		statement;
+		break;
+	default :
+		// falling into a not-explicitly-declared default will raise a SwitchException
+}
+
+Pattern:
+	Type variable // switch only
+	(a, b, c)
+	[a, b, c]
+	([Dog a, Fox b, Cat c : remains], b (c, d))
+	constant
+
 ========================================================
 Continuation
 ========================================================
+
+ContinuableType FunctionDeclaration yield
+{
+	a = yield b;			// call ContinuationBindable<T>.Bind(xb, a=>remains)
+	return [expression] ;	// call ContinuationNullable<T>.Null or ContinuationReturnable<T>.Return
+}
 
 ========================================================
 Module System
@@ -256,6 +294,8 @@ NullReferenceException
 EmptyReferenceException
 TypeCastException
 IndexOutOfRangeException
+SwitchException
+PatternAssignException
 
 ========================================================
 Predefined Functions
@@ -357,6 +397,11 @@ Concepts for type conversions:
 	concept ImplicitConvertable<TSource, TDesT>
 	{
 		TDest Convert(TSource source);
+	}
+
+	concept TryConvertable<TSource, TDest>
+	{
+		(TDest, bool) TryConvert(TSource source);
 	}
 
 Concepts for exceptions:
