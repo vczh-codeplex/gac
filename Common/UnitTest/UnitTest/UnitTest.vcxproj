@@ -156,7 +156,9 @@
     <ClCompile Include="..\..\Source\GlobalStorage.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingAnalyzer.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton.cpp" />
+    <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton_Closure.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton_EPDA.cpp" />
+    <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton_JPDA.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton_NPDA.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingDefinitions.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingLogging.cpp" />

@@ -180,6 +180,12 @@
     <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton_NPDA.cpp">
       <Filter>Common\Parsing</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton_Closure.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton_JPDA.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
