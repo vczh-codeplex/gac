@@ -23,18 +23,23 @@ Predefined types: (struct)
 Predefined types: (ref struct)
 	T[]				:null
 	object			:null
-	R(params tuple)	:null
+	R(params tuple)	:null (concept)
 	Type			:type object for reflection (concept)
 
 Type shortcut:
 	(T0, T1, T2)	:Pair<T0, Pair<T1, Pair<T2, void>>>
-	R(T0, T1, T2)	:R(params (T0, T1, T2)
+	R(T0, T1, T2)	:R(params (T0, T1, T2)) // Invokable<R, (T0, T1, T2)>
 	ref T			:Ref<T>
 
 struct Ref<T>		//this is a special type, programmers will not see getter, setter. ref null is a shortcut to new Ref<T>
 {
 	T() getter;
 	void(T) setter;
+}
+
+concept T as Invokable<TResult, TParameters>
+{
+	TResult Invoke(TParameters paremters);
 }
 
 reading to and writing from Ref<T> redirect to Ref<T>.Value
@@ -187,9 +192,16 @@ Extension function invoking:
 	expression.Function( ... )
 
 Lambda expression:
-		a=>b
-		(a, ref b)=>b
-		int(int a, int ref b){return b;}
+	a=>b
+	(a, ref b)=>b
+	int(int a, int ref b){return b;}
+
+yield as ContinuableType // so it can be used as c=>yield as Enumerable<int>{for(int i=0;i<c;i++)yield c;}
+{
+	a = yield b;
+	yield a;
+	yield return [expression] ;
+}
 
 ========================================================
 Generic Constraint
@@ -276,10 +288,23 @@ Pattern:
 Continuation
 ========================================================
 
-ContinuableType FunctionDeclaration yield
+FunctionDeclaration yield
 {
-	a = yield b;			// call ContinuationBindable<T>.Bind(xb, a=>remains)
-	return [expression] ;	// call ContinuationNullable<T>.Null or ContinuationReturnable<T>.Return
+	a = yield b;				// call ContinuationBindable<TC, T, UC>.Bind(xb, a=>remains)
+	yield a;					// call ContinuationYieldable<TC, UC>.Yield(xa, ()=>remains)
+	yield return [expression] ;	// call ContinuationNullable<TC>.Null or ContinuationReturnable<T>.Return
+}
+
+ContinuableType PropertyName
+{
+	get yield
+	{
+		...
+	}
+	set // do not accept yield
+	{
+		...
+	}
 }
 
 ========================================================
@@ -387,6 +412,18 @@ Concepts for operators
 		ref T operator ^=(ref T dst, T src);
 	}
 
+Concepts for predefined types:
+
+	concept T as Invokable<TResult, TParameters>
+	{
+		TResult Invoke(TParameters paremters);
+	}
+
+	concept T as Type
+	{
+		...
+	}
+
 Concepts for type conversions:
 
 	concept Convertable<TSource, TDest>
@@ -458,9 +495,24 @@ Concepts for continuations:
 		UC Bind(TC closure, UC(T) continuation);
 	}
 
+	concept ContinuationYieldable<TC, UC>
+	{
+		UC Bind(TC closure, UC(T) continuation);
+	}
+
 ========================================================
 Predefined Instances
 ========================================================
+
+	instance<T> Continuable<Enumerable<T>>
+	instance<T> ContinuationNullable<Enumerable<T>>
+	instance<T> ContinuationYieldable<T, Enumerable<T>>
+	instance<T> ContinuationYieldable<Enumerable<T>, Enumerable<T>>
+
+	instance<T> Continable<Task<T>>
+	instance<T> ContinableReturnable<Task<T>>
+	instance ContinuableNullable<Task<void>>
+	instance<T, U> ContinableBindable<Task<T>, T, Task<U>>
 
 ========================================================
 Intermediate Language Definition
