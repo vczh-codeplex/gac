@@ -85,6 +85,11 @@ Type constructors:
 		///
 	}
 
+	new Type(a, b, ...)          // there are Constructable<Type, ParameterTupleType>
+	new Type(params tuple)
+	new Type(a, b, ...){...}
+	new Type(params tuple){...}
+
 	new Type[count]	// create an array with a specified length and all elements set to default values
 	new Type[]		// create an array with element values specified
 	{
@@ -215,14 +220,16 @@ Generic Constraint
 requires GenericConstraint, ...
 
 GenericConstraint:
+	params T // T is a tuple
 	struct T
 	ref struct T
 	ref concept T
-	struct | ref struct T
+	struct | ref struct | ref concept T
 	...
 
 	T as RefConceptType
 	T mixin RefStructType
+	new T // DefaultImpl<T> for ref concept, always accept struct and ref struct
 	...
 
 	ConceptName<T1, T2, T3>
@@ -231,8 +238,11 @@ GenericConstraint:
 Function Declaration
 ========================================================
 
-Type [[swtich | case] RecieveType .] Name [<T1, T2, ...>] [GenericConstraint] (Parameter, ...) statement;
-Type [[switch | case] ReceiveType .] Name [<T1, T2, ...>] [GenericConstraint] (params TupleType Name) statement;
+[Attributes]
+Type [[Attributes] [swtich | case] RecieveType .] Name [<[Attributes] T1, T2, ...>] [GenericConstraint] ([Attributes] Parameter, ...) statement;
+
+[Attributes]
+Type [[Attributes] [switch | case] ReceiveType .] Name [<[Attributes] T1, T2, ...>] [GenericConstraint] ([Attributes] params TupleType Name) statement;
 
 Parameter:
 	Type name
@@ -311,7 +321,8 @@ Multiple dispatch:
 Property Declaration
 ========================================================
 
-Type [[switch | case] ReceiveType .] Name [<T1, T2, ...>] [GenericConstraint] 
+[Attributes]
+Type [[Attributes] [switch | case] ReceiveType .] Name [<[Attributes] T1, T2, ...>] [GenericConstraint]
 {
 	[get statement;]
 	[set statement;]
@@ -320,14 +331,96 @@ Type [[switch | case] ReceiveType .] Name [<T1, T2, ...>] [GenericConstraint]
 ========================================================
 Type Declaration
 ========================================================
+
+[Attributes]
+struct Name [<[Attributes] T1, T2, ...>] [GenericConstraint]
+{
+	[Attributes] Type Name;
+	...
+}
+
+[Attributes]
+ref struct Name [<[Attributes] T1, T2, ...>] [GenericConstraint]
+{
+	[Attributes]
+	mixin Type;
+	...
+
+	[Attributes] Type Name;
+	...
+}
 	
 ========================================================
 Concept Declaration
 ========================================================
+
+[Attributes]
+concept Name [<[Attributes] T1, T2, ...>] [GenericConstraint]
+{
+	FunctionDeclaration | PropertyDeclaration // cannot have a body
+	...
+}
+
+[Attributes]
+ref concept [Attributes] T as Name [<[Attributes] T1, T2, ...>] [GenericConstraint]
+{
+	FunctionDeclaration | PropertyDeclaration // cannot have a body
+	...
+	// all declarations should have a receiver type T, and T should only appear as a receiver type
+}
 	
 ========================================================
 Instance Declaration
 ========================================================
+
+[Attributes]
+instance [<[Attributes] T1, T2, ...>] [[Attributes] ImplType as] Concept [<T1, T2, ...>] [GenericConstraint]
+{
+	FunctionDeclaration | PropertyDeclaration // should have a body
+}
+	
+========================================================
+Attribute Declaration
+========================================================
+
+attribute [Att(1, "vczh", a=10, b="genius")] implies
+
+ref struct Att
+{
+	int a;
+	string b;
+	int c;
+	string d;
+}
+
+instance Attributable<Att>
+{
+}
+
+instance Constructable<Att, (int, string)>
+{
+	Att Construct(int c, string d)
+	{
+		return new Att
+		{
+			c=c,
+			d=d,
+		};
+	}
+}
+	
+========================================================
+Namespace Declaration
+========================================================
+
+[public | private(by default)] namespace Name1. ... .Name2
+{
+	[public | private] Declaration // if public or private marked the current namespace, then it becomes the default option.
+	                               // otherwise, private is the default option.
+								   // embedded namespaces always use private by default.
+								   // instance can only use public.
+	...
+}
 
 ========================================================
 Statements
@@ -429,10 +522,6 @@ SwitchException
 PatternAssignException
 
 ========================================================
-Predefined Functions
-========================================================
-
-========================================================
 Predefined Concepts
 ========================================================
 
@@ -521,8 +610,9 @@ Concepts for operators
 Concepts for predefined types:
 
 	concept T as Invokable<TResult, TParameters>
+		requires params TParameters
 	{
-		TResult Invoke(TParameters paremters);
+		TResult Invoke(params TParameters paremters);
 	}
 
 	concept T as Type
@@ -554,6 +644,12 @@ Concepts for exceptions:
 		string T.Message{get;}
 	}
 
+Concepts for attributes:
+
+	concept Attributable<T>
+	{
+	}
+
 Concepts for statements;
 	
 	ref concept T as Disposable
@@ -572,12 +668,18 @@ Concepts for statements;
 		T TThis.Current{get;}
 	}
 
-Concepts for concept default implementations:
+Concepts for type creations:
 
 	concept DefaultImpl<T>
 		requires ref concept T
 	{
 		T CreateDefaultImpl;
+	}
+
+	concept Constructable<T, TParameters> // TParams is a tuple
+		requires params TParameters
+	{
+		T Construct(params TParameters parameters);
 	}
 
 Concepts for continuations:
