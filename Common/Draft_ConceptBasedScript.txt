@@ -203,19 +203,119 @@ yield as ContinuableType // so it can be used as c=>yield as Enumerable<int>{for
 	yield return [expression] ;
 }
 
+Others:
+	this // for function and property body representing the receive object
+	mixin(Type) // for the mixin-ed object that mixin-ed in the type of "this" expression
+	typeof(Type) // for the Type object of the specified type
+
 ========================================================
 Generic Constraint
 ========================================================
 
-requires [TypeConstraint] T [: ConceptConstraint, ...]
+requires GenericConstraint, ...
+
+GenericConstraint:
+	struct T
+	ref struct T
+	ref concept T
+	struct | ref struct T
+	...
+
+	T as RefConceptType
+	T mixin RefStructType
+	...
+
+	ConceptName<T1, T2, T3>
 
 ========================================================
 Function Declaration
 ========================================================
 
+Type [[swtich | case] RecieveType .] Name [<T1, T2, ...>] [GenericConstraint] (Parameter, ...) statement;
+Type [[switch | case] ReceiveType .] Name [<T1, T2, ...>] [GenericConstraint] (params TupleType Name) statement;
+
+Parameter:
+	Type name
+	ref Type name
+	params ArrayType name // should be the last one]
+	switch Type name // attend multiple dispatching
+	case Type name
+
+Multiple dispatch:
+	if a function declaration contains switch in receive type or any parameter types,
+	this function is a multiple dispatch root declaration, therefore cannot have a body (statement)
+	any implementation for this root declaration should have the same header with "switch" replaced with "case", and type replaced with case type
+
+	example:
+		ref struct Expression
+		{
+		}
+
+		ref struct NumberExpression
+		{
+			mixin Expression;
+			double number;
+		}
+
+		enum BinaryOperator{ Add, Sub, Mul, Div }
+
+		ref struct BinaryExpression
+		{
+			mixin Expression;
+			BinaryOperator op;
+			Expression left;
+			Expression right;
+		}
+
+		double switch Expression.Evaluate();
+
+		double case NumberExpression.Evaluate()
+		{
+			return this.number;
+		}
+
+		double case BinaryExpression.Evaluate()
+		{
+			switch(op)
+			{
+				case BinaryOperator.Add: return left.Evaluate() + right.Evaluate();
+				case BinaryOperator.Sub: return left.Evaluate() - right.Evaluate();
+				case BinaryOperator.Mul: return left.Evaluate() * right.Evaluate();
+				case BinaryOperator.Div: return left.Evaluate() / right.Evaluate();
+			}
+		}
+
+		void Main()
+		{
+			Expression e = new BinaryExpression
+			{
+				op = BinaryOperator.Mul,
+				left = new BinaryExpression
+				{
+					op = BinaryOperator.Add,
+					left = new NumberExpression{ number = 1 }
+					left = new NumberExpression{ number = 2 }
+				},
+				right = new BinaryExpression
+				{
+					op = BinaryOperator.Add,
+					left = new NumberExpression{ number = 3 }
+					left = new NumberExpression{ number = 4 }
+				},
+			}
+
+			Console.WriteLine(e.Evaluate()) // prints "21"
+		}
+
 ========================================================
 Property Declaration
 ========================================================
+
+Type [[switch | case] ReceiveType .] Name [<T1, T2, ...>] [GenericConstraint] 
+{
+	[get statement;]
+	[set statement;]
+}
 	
 ========================================================
 Type Declaration
