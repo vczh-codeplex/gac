@@ -175,6 +175,8 @@ Member access:
 	ref concept.function
 	x.ExtensionProperty
 	x.ExtensionFunction
+	namespace.property/function
+	namespace.type. ...
 
 Reference access:
 	ref a // for variable, argument, field, get-set property, type of ref T (like return values from +=)
@@ -507,8 +509,15 @@ ContinuableType PropertyName
 }
 
 ========================================================
-Module System
+Code File
 ========================================================
+
+using Namespaces;
+
+using A = int;
+using B<T> = List<T>;
+
+NamespaceDeclaration // there should be one and only up to one namespace declaration for a code file
 
 ========================================================
 Predefined Exceptions
