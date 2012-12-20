@@ -22,51 +22,73 @@ namespace test
 {
 	void GeneralTest(Ptr<ParsingDefinition> definition, const WString& name)
 	{
-		FileStream fileStream(GetPath()+L"Parsing."+name+L".Definition.txt", FileStream::WriteOnly);
-		BomEncoder encoder(BomEncoder::Utf16);
-		EncoderStream encoderStream(fileStream, encoder);
-		StreamWriter writer(encoderStream);
-
-		writer.WriteLine(L"=============================================================");
-		writer.WriteLine(L"Grammar");
-		writer.WriteLine(L"=============================================================");
-		Log(definition, writer);
-
 		ParsingSymbolManager symbolManager;
 		List<Ptr<ParsingError>> errors;
 		ValidateDefinition(definition, &symbolManager, errors);
-		if(errors.Count()>0)
 		{
-			writer.WriteLine(L"=============================================================");
-			writer.WriteLine(L"Errprs");
-			writer.WriteLine(L"=============================================================");
-			FOREACH(Ptr<ParsingError>, error, errors)
-			{
-				writer.WriteLine(error->errorMessage);
-			}
+			FileStream fileStream(GetPath()+L"Parsing."+name+L".Definition.txt", FileStream::WriteOnly);
+			BomEncoder encoder(BomEncoder::Utf16);
+			EncoderStream encoderStream(fileStream, encoder);
+			StreamWriter writer(encoderStream);
 
-			encoderStream.Close();
-			fileStream.Close();
+			writer.WriteLine(L"=============================================================");
+			writer.WriteLine(L"Grammar");
+			writer.WriteLine(L"=============================================================");
+			Log(definition, writer);
+
+			if(errors.Count()>0)
+			{
+				writer.WriteLine(L"=============================================================");
+				writer.WriteLine(L"Errprs");
+				writer.WriteLine(L"=============================================================");
+				FOREACH(Ptr<ParsingError>, error, errors)
+				{
+					writer.WriteLine(error->errorMessage);
+				}
+
+				encoderStream.Close();
+				fileStream.Close();
+			}
+			TEST_ASSERT(errors.Count()==0);
 		}
-		TEST_ASSERT(errors.Count()==0);
 
 		Ptr<Automaton> epsilonPDA=CreateEpsilonPDA(definition, &symbolManager);
-		writer.WriteLine(L"=============================================================");
-		writer.WriteLine(L"Epsilon PDA");
-		writer.WriteLine(L"=============================================================");
-		Log(epsilonPDA, writer);
-
 		Ptr<Automaton> nondeterministicPDA=CreateNondeterministicPDAFromEpsilonPDA(epsilonPDA);
-		writer.WriteLine(L"=============================================================");
-		writer.WriteLine(L"Nondeterministic PDA");
-		writer.WriteLine(L"=============================================================");
-		Log(nondeterministicPDA, writer);
-
 		Ptr<Automaton> jointPDA=CreateJointPDAFromNondeterministicPDA(nondeterministicPDA);
-		writer.WriteLine(L"=============================================================");
-		writer.WriteLine(L"Joint PDA");
-		writer.WriteLine(L"=============================================================");
-		Log(jointPDA, writer);
+		
+		{
+			FileStream fileStream(GetPath()+L"Parsing."+name+L".EPDA.txt", FileStream::WriteOnly);
+			BomEncoder encoder(BomEncoder::Utf16);
+			EncoderStream encoderStream(fileStream, encoder);
+			StreamWriter writer(encoderStream);
+
+			writer.WriteLine(L"=============================================================");
+			writer.WriteLine(L"Epsilon PDA");
+			writer.WriteLine(L"=============================================================");
+			Log(epsilonPDA, writer);
+		}
+		{
+			FileStream fileStream(GetPath()+L"Parsing."+name+L".NPDA.txt", FileStream::WriteOnly);
+			BomEncoder encoder(BomEncoder::Utf16);
+			EncoderStream encoderStream(fileStream, encoder);
+			StreamWriter writer(encoderStream);
+
+			writer.WriteLine(L"=============================================================");
+			writer.WriteLine(L"Non-deterministic PDA");
+			writer.WriteLine(L"=============================================================");
+			Log(nondeterministicPDA, writer);
+		}
+		{
+			FileStream fileStream(GetPath()+L"Parsing."+name+L".JPDA.txt", FileStream::WriteOnly);
+			BomEncoder encoder(BomEncoder::Utf16);
+			EncoderStream encoderStream(fileStream, encoder);
+			StreamWriter writer(encoderStream);
+
+			writer.WriteLine(L"=============================================================");
+			writer.WriteLine(L"Joint PDA");
+			writer.WriteLine(L"=============================================================");
+			Log(jointPDA, writer);
+		}
 	}
 }
 using namespace test;
