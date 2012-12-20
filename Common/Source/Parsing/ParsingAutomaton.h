@@ -35,6 +35,8 @@ namespace vl
 					Assign, // source ::= <created symbol>
 					Using,  // use <created symbol>
 					Setter, // source ::= target
+					Shift,
+					Reduce,
 				};
 
 				ActionType											actionType;

@@ -61,6 +61,12 @@ namespace test
 		writer.WriteLine(L"Nondeterministic PDA");
 		writer.WriteLine(L"=============================================================");
 		Log(nondeterministicPDA, writer);
+
+		Ptr<Automaton> jointPDA=CreateJointPDAFromNondeterministicPDA(nondeterministicPDA);
+		writer.WriteLine(L"=============================================================");
+		writer.WriteLine(L"Joint PDA");
+		writer.WriteLine(L"=============================================================");
+		Log(jointPDA, writer);
 	}
 }
 using namespace test;
