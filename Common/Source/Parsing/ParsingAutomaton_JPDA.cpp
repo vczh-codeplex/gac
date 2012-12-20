@@ -17,15 +17,10 @@ RemoveEpsilonTransitions
 			Ptr<Automaton> CreateJointPDAFromNondeterministicPDA(Ptr<Automaton> nondeterministicPDA)
 			{
 				Ptr<Automaton> automaton=new Automaton(nondeterministicPDA->symbolManager);
-				Dictionary<State*, State*> oldNewStateMap;
-				FOREACH(Ptr<State>, oldState, nondeterministicPDA->states)
-				{
-					State* newState=automaton->CopyState(oldState.Obj());
-					oldNewStateMap.Add(oldState.Obj(), newState);
-				}
 
 				// build rule info data
 				Dictionary<WString, ParsingDefinitionRuleDefinition*> ruleMap;
+				Dictionary<State*, State*> oldNewStateMap;
 				FOREACH(ParsingDefinitionRuleDefinition*, rule, nondeterministicPDA->ruleInfos.Keys())
 				{
 					// build new rule info
@@ -34,13 +29,26 @@ RemoveEpsilonTransitions
 					automaton->ruleInfos.Add(rule, newRuleInfo);
 					ruleMap.Add(rule->name, rule);
 
-					// rebuild new rule info data
-					newRuleInfo->rootRuleStartState=oldNewStateMap[ruleInfo->rootRuleStartState];
-					newRuleInfo->rootRuleEndState=oldNewStateMap[ruleInfo->rootRuleEndState];
-					newRuleInfo->startState=oldNewStateMap[ruleInfo->startState];
-					FOREACH(State*, endState, ruleInfo->endStates)
+					newRuleInfo->rootRuleStartState=automaton->RootRuleStartState(rule);
+					newRuleInfo->rootRuleEndState=automaton->RootRuleEndState(rule);
+					newRuleInfo->startState=automaton->RuleStartState(rule);
+
+					oldNewStateMap.Add(ruleInfo->rootRuleStartState, newRuleInfo->rootRuleStartState);
+					oldNewStateMap.Add(ruleInfo->rootRuleEndState, newRuleInfo->rootRuleEndState);
+					oldNewStateMap.Add(ruleInfo->startState, newRuleInfo->startState);
+
+					newRuleInfo->rootRuleStartState->stateExpression=ruleInfo->rootRuleStartState->stateExpression;
+					newRuleInfo->rootRuleEndState->stateExpression=ruleInfo->rootRuleEndState->stateExpression;
+					newRuleInfo->startState->stateExpression=ruleInfo->startState->stateExpression;
+				}
+
+				FOREACH(Ptr<State>, oldState, nondeterministicPDA->states)
+				{
+					if((oldState->inputs.Count()>0 || oldState->transitions.Count()>0) && !oldNewStateMap.Keys().Contains(oldState.Obj()))
 					{
-						newRuleInfo->endStates.Add(oldNewStateMap[endState]);
+						State* newState=automaton->CopyState(oldState.Obj());
+						oldNewStateMap.Add(oldState.Obj(), newState);
+						newState->stateExpression=oldState->stateExpression;
 					}
 				}
 
@@ -48,6 +56,13 @@ RemoveEpsilonTransitions
 				FOREACH(ParsingDefinitionRuleDefinition*, rule, nondeterministicPDA->ruleInfos.Keys())
 				{
 					Ptr<RuleInfo> ruleInfo=nondeterministicPDA->ruleInfos[rule];
+					Ptr<RuleInfo> newRuleInfo=automaton->ruleInfos[rule];
+
+					// complete new rule info
+					FOREACH(State*, endState, ruleInfo->endStates)
+					{
+						newRuleInfo->endStates.Add(oldNewStateMap[endState]);
+					}
 
 					// create joint transitions according to old automaton
 					List<State*> scanningStates;
@@ -63,7 +78,7 @@ RemoveEpsilonTransitions
 							State* oldSource=oldTransition->source;
 							State* oldTarget=oldTransition->target;
 							State* newSource=oldNewStateMap[oldSource];
-							State* newTarget=oldNewStateMap[newTarget];
+							State* newTarget=oldNewStateMap[oldTarget];
 
 							if(oldTransition->transitionType==Transition::Symbol && oldTransition->transitionSymbol->GetType()==ParsingSymbol::RuleDef)
 							{

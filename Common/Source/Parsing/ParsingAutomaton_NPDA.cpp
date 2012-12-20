@@ -288,6 +288,12 @@ CreateNondeterministicPDAFromEpsilonPDA
 					CopyFrom(newStates, oldNewStateMap.Values());
 					DeleteUnnecessaryStates(automaton, newRuleInfo, newStates);
 					MergeStates(automaton, newRuleInfo, newStates);
+
+					// there should be at east one and only one transition that is TokenBegin from rootRuleStartState
+					// update the startState because the startState may be deleted
+					newRuleInfo->startState=newRuleInfo->rootRuleStartState->transitions[0]->target;
+
+					// record end states
 					FOREACH(State*, state, newStates)
 					{
 						if(state->endState)
