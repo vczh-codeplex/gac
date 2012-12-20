@@ -570,9 +570,29 @@ Logger (Automaton)
 			{
 				FOREACH(Ptr<RuleInfo>, ruleInfo, automaton->ruleInfos.Values())
 				{
-					List<State*> states;
+					writer.WriteString(L"Root Rule Start: ");
+					writer.WriteLine(ruleInfo->rootRuleStartState->stateName);
+
+					writer.WriteString(L"Root Rule End: ");
+					writer.WriteLine(ruleInfo->rootRuleEndState->stateName);
+
+					writer.WriteString(L"Rule Start: ");
+					writer.WriteLine(ruleInfo->startState->stateName);
+
+					FOREACH(State*, endState, ruleInfo->endStates)
+					{
+						writer.WriteString(L"Rule End: ");
+						writer.WriteLine(endState->stateName);
+					}
+
+					writer.WriteLine(L"");
+				}
+
+				List<State*> states;
+				FOREACH(Ptr<RuleInfo>, ruleInfo, automaton->ruleInfos.Values())
+				{
+					vint currentState=states.Count();
 					states.Add(ruleInfo->rootRuleStartState);
-					vint currentState=0;
 
 					while(currentState<states.Count())
 					{
