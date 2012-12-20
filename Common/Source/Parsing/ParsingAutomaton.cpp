@@ -220,6 +220,7 @@ Automaton
 				Transition* transition=CreateTransition(start, end);
 				transition->transitionType=oldTransition->transitionType;
 				transition->transitionSymbol=oldTransition->transitionSymbol;
+				transition->lookAheadSymbol=oldTransition->lookAheadSymbol;
 				return transition;
 			}
 

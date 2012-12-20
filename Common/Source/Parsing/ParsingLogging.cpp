@@ -653,6 +653,12 @@ Logger (Automaton)
 								case Action::Setter:
 									writer.WriteString(L"        SET ");
 									break;
+								case Action::Shift:
+									writer.WriteString(L"        SHIFT ");
+									break;
+								case Action::Reduce:
+									writer.WriteString(L"        REDUCE ");
+									break;
 								}
 								if(action->actionSource)
 								{
