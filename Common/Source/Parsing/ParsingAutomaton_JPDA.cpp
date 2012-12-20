@@ -96,8 +96,6 @@ RemoveEpsilonTransitions
 									Ptr<Action> action=new Action;
 									action->actionType=Action::Shift;
 									shiftTransition->actions.Add(action);
-
-									if(!scanningStates.Contains(oldRuleInfo->startState)) scanningStates.Add(oldRuleInfo->startState);
 								}
 
 								FOREACH(State*, oldEndState, oldRuleInfo->endStates)
@@ -108,8 +106,6 @@ RemoveEpsilonTransitions
 									reduceTransition->actions.Add(action);
 									CopyFrom(reduceTransition->actions, oldTransition->actions, true);
 									reduceTransition->stackPattern.Add(newSource);
-
-									if(!scanningStates.Contains(oldEndState)) scanningStates.Add(oldEndState);
 								}
 							}
 							else
