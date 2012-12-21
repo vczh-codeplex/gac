@@ -106,6 +106,31 @@ CreateNondeterministicPDAFromEpsilonPDA::state_clearning
 					return true;
 				}
 
+				void MoveActionsForMergingState(Transition* transition)
+				{
+					// collect all movable actions
+					List<Ptr<Action>> movableActions;
+					for(vint i=transition->actions.Count()-1;i>=0;i--)
+					{
+						switch(transition->actions[i]->actionType)
+						{
+						// Using and Assign actions are not movable
+						case Action::Using:
+						case Action::Assign:
+							break;
+						default:
+							movableActions.Add(transition->actions[i]);
+							transition->actions.RemoveAt(i);
+						}
+					}
+
+					// copy all movable actions
+					FOREACH(Transition*, t, transition->source->inputs)
+					{
+						CopyFrom(t->actions, movableActions, true);
+					}
+				}
+
 				bool IsMergableBecauseTransitions(State* state1, State* state2)
 				{
 					if(state1->transitions.Count()!=state2->transitions.Count()) return false;
@@ -115,16 +140,8 @@ CreateNondeterministicPDAFromEpsilonPDA::state_clearning
 						Transition* t2=state2->transitions[0];
 						if(CompareTransitionForRearranging(t1, t2)==0 && !IsSameTransitionContent(t1, t2) && t1->target==t2->target)
 						{
-							FOREACH(Transition*, t, state1->inputs)
-							{
-								CopyFrom(t->actions, t1->actions, true);
-							}
-							FOREACH(Transition*, t, state2->inputs)
-							{
-								CopyFrom(t->actions, t2->actions, true);
-							}
-							t1->actions.Clear();
-							t2->actions.Clear();
+							MoveActionsForMergingState(t1);
+							MoveActionsForMergingState(t2);
 						}
 					}
 					for(vint i=0;i<state1->transitions.Count();i++)
