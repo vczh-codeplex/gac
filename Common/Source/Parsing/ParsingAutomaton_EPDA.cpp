@@ -139,7 +139,7 @@ CreateRuleEpsilonPDA
 				ruleInfo->rootRuleStartState=automaton->RootRuleStartState(rule.Obj());
 				ruleInfo->rootRuleEndState=automaton->RootRuleEndState(rule.Obj());
 				ruleInfo->startState=automaton->RuleStartState(rule.Obj());
-				automaton->Epsilon(ruleInfo->rootRuleStartState, ruleInfo->startState);
+				automaton->TokenBegin(ruleInfo->rootRuleStartState, ruleInfo->startState);
 
 				FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars)
 				{
@@ -147,7 +147,7 @@ CreateRuleEpsilonPDA
 					State* grammarEndState=automaton->EndState(rule.Obj(), grammar.Obj(), grammar.Obj());
 					grammarEndState->stateName+=L".End";
 					grammarEndState->endState=true;
-					automaton->TokenBegin(ruleInfo->startState, grammarStartState);
+					automaton->Epsilon(ruleInfo->startState, grammarStartState);
 					automaton->TokenFinish(grammarEndState, ruleInfo->rootRuleEndState);
 					ruleInfo->endStates.Add(grammarEndState);
 					CreateEpsilonPDAVisitor::Create(grammar.Obj(), automaton, grammar.Obj(), grammarStartState, grammarEndState);
