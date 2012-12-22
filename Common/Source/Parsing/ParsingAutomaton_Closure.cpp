@@ -103,11 +103,14 @@ CreateNondeterministicPDAFromEpsilonPDA::closure_searching
 					{
 						newState=newAutomaton->CopyState(oldState);
 						oldNewStateMap.Add(oldState, newState);
-						scanningStates.Add(oldState);
 					}
 					else
 					{
 						newState=oldNewStateMap.Values().Get(mapIndex);
+					}
+					if(!scanningStates.Contains(oldState))
+					{
+						scanningStates.Add(oldState);
 					}
 					return newState;
 				}
