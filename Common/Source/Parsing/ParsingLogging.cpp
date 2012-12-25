@@ -691,6 +691,16 @@ Logger (Automaton)
 									writer.WriteString(L"        REDUCE ");
 									break;
 								}
+
+								if(action->shiftReduceSource && action->shiftReduceTarget)
+								{
+									writer.WriteString(L"[");
+									writer.WriteString(action->shiftReduceSource->stateName);
+									writer.WriteString(L" => ");
+									writer.WriteString(action->shiftReduceTarget->stateName);
+									writer.WriteString(L"] ");
+								}
+
 								if(action->actionSource)
 								{
 									writer.WriteString(action->actionSource->GetName());

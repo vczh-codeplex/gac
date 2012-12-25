@@ -43,6 +43,10 @@ namespace vl
 				ParsingSymbol*										actionTarget;
 				ParsingSymbol*										actionSource;
 
+				// the following two fields record which rule symbol transition generate this shift/reduce action
+				State*												shiftReduceSource;
+				State*												shiftReduceTarget;
+
 				Action();
 				~Action();
 			};

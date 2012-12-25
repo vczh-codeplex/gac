@@ -95,6 +95,8 @@ CreateJointPDAFromNondeterministicPDA
 									Transition* shiftTransition=automaton->Epsilon(newSource, oldNewStateMap[oldRuleInfo->startState]);
 									Ptr<Action> action=new Action;
 									action->actionType=Action::Shift;
+									action->shiftReduceSource=newSource;
+									action->shiftReduceTarget=newTarget;
 									shiftTransition->actions.Add(action);
 								}
 
@@ -103,6 +105,8 @@ CreateJointPDAFromNondeterministicPDA
 									Transition* reduceTransition=automaton->Epsilon(oldNewStateMap[oldEndState], newTarget);
 									Ptr<Action> action=new Action;
 									action->actionType=Action::Reduce;
+									action->shiftReduceSource=newSource;
+									action->shiftReduceTarget=newTarget;
 									reduceTransition->actions.Add(action);
 									CopyFrom(reduceTransition->actions, oldTransition->actions, true);
 									reduceTransition->stackPattern.Add(newSource);
@@ -147,11 +151,32 @@ CompactJointPDA
 
 					FOREACH(ClosureItem, closureItem, closure)
 					{
-						if(closureItem.cycle)
+						// in joint PDA, only shift and reduce transitions are epsilon transition
+						// if there are more than one transition in a path, then there should be shift or reduce transitions in the path
+						if(closureItem.transitions->Count()>1)
 						{
-						}
-						else
-						{
+							if(closureItem.cycle)
+							{
+								// a left recursive compacted transition is found
+							}
+							else
+							{
+								// build shift-reduce-compacted non-left-recursive transition to the target state of the path
+								Transition* lastTransition=closureItem.transitions->Get(closureItem.transitions->Count()-1);
+								{
+									Transition* transition=jointPDA->CopyTransition(currentState, lastTransition->target, lastTransition);
+									transition->stackOperationType=Transition::ShiftReduceCompacted;
+
+									// there will be <shift* token>, <reduce* token> or <reduce* shift* token>
+									// but there will not be something like <reduce* shift* reduce* token>
+									// so we can append stackPattern safely
+									FOREACH(Transition*, pathTransition, *closureItem.transitions.Obj())
+									{
+										CopyFrom(transition->stackPattern, pathTransition->stackPattern, true);
+										CopyFrom(transition->actions, pathTransition->actions, true);
+									}
+								}
+							}
 						}
 					}
 				}
