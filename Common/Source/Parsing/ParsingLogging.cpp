@@ -635,7 +635,18 @@ Logger (Automaton)
 								}
 								break;
 							}
-							writer.WriteString(L" => ");
+							switch(transition->stackOperationType)
+							{
+							case Transition::None:
+								writer.WriteString(L" => ");
+								break;
+							case Transition::ShiftReduceCompacted:
+								writer.WriteString(L" [SHIFT-REDUCE-COMPACTED] => ");
+								break;
+							case Transition::LeftRecursive:
+								writer.WriteString(L" [LEFT-RECURSIVE] => ");
+								break;
+							}
 							writer.WriteLine(transition->target->stateName);
 
 							if(transition->stackPattern.Count()>0)

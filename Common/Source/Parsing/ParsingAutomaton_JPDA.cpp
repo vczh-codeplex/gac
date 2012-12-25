@@ -124,8 +124,46 @@ CreateJointPDAFromNondeterministicPDA
 CompactJointPDA
 ***********************************************************************/
 
+			using namespace closure_searching;
+			
+			// closure function for searching shift-reduce-compact transition
+			ClosureSearchResult ShiftReduceCompactClosure(Transition* transition)
+			{
+				return
+					transition->stackOperationType!=Transition::None?Blocked:
+					transition->transitionType!=Transition::Epsilon?Hit:
+					Continue;
+			}
+
 			void CompactJointPDA(Ptr<Automaton> jointPDA)
 			{
+				FOREACH(Ptr<State>, state, jointPDA->states)
+				{
+					State* currentState=state.Obj();
+
+					// search for epsilon closure
+					List<ClosureItem> closure;
+					SearchClosure(&ShiftReduceCompactClosure, currentState, closure);
+
+					FOREACH(ClosureItem, closureItem, closure)
+					{
+						if(closureItem.cycle)
+						{
+						}
+						else
+						{
+						}
+					}
+				}
+
+				for(vint i=jointPDA->transitions.Count()-1;i>=0;i--)
+				{
+					Transition* transition=jointPDA->transitions[i].Obj();
+					if(transition->stackOperationType==Transition::None && transition->transitionType==Transition::Epsilon)
+					{
+						jointPDA->DeleteTransition(transition);
+					}
+				}
 			}
 		}
 	}
