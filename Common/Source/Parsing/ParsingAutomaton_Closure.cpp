@@ -38,9 +38,9 @@ CreateNondeterministicPDAFromEpsilonPDA::closure_searching
 				// closure searching function
 				void SearchClosureInternal(ClosureSearchResult(*closurePredicate)(Transition*), List<Transition*>& transitionPath, Transition* transition, State* state, List<ClosureItem>& closure)
 				{
-					for(vint i=0;i<transitionPath.Count()-1;i++)
+					FOREACH(Transition*, singleTransitionPath, transitionPath)
 					{
-						if(transitionPath[i]->target==state)
+						if(singleTransitionPath->source==state)
 						{
 							Ptr<List<Transition*>> path=new List<Transition*>;
 							CopyFrom(*path.Obj(), transitionPath);
