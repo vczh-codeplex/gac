@@ -142,6 +142,34 @@ namespace vl
 /***********************************************************************
 ¸¨Öúº¯Êý
 ***********************************************************************/
+			namespace closure_searching
+			{
+				struct ClosureItem
+				{
+					State*											state;			// target state of one path of a closure
+					Ptr<collections::List<Transition*>>				transitions;	// path
+
+					ClosureItem()
+						:state(0)
+					{
+					}
+
+					ClosureItem(State* _state, Ptr<collections::List<Transition*>> _transitions)
+						:state(_state)
+						,transitions(_transitions)
+					{
+					}
+				};
+
+				enum ClosureSearchResult
+				{
+					Continue,
+					Hit,
+					Blocked,
+				};
+
+				extern void											SearchClosure(ClosureSearchResult(*closurePredicate)(Transition*), State* startState, collections::List<ClosureItem>& closure);
+			}
 
 			extern Ptr<Automaton>									CreateEpsilonPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager);
 			extern void												RemoveEpsilonTransitions(collections::Dictionary<State*, State*>& oldNewStateMap, collections::List<State*>& scanningStates, Ptr<Automaton> automaton);

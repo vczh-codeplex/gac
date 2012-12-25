@@ -17,30 +17,6 @@ CreateNondeterministicPDAFromEpsilonPDA::closure_searching
 
 			namespace closure_searching
 			{
-				struct ClosureItem
-				{
-					State*						state;			// target state of one path of a closure
-					Ptr<List<Transition*>>		transitions;	// path
-
-					ClosureItem()
-						:state(0)
-					{
-					}
-
-					ClosureItem(State* _state, Ptr<List<Transition*>> _transitions)
-						:state(_state)
-						,transitions(_transitions)
-					{
-					}
-				};
-
-				enum ClosureSearchResult
-				{
-					Continue,
-					Hit,
-					Blocked,
-				};
-
 				// closure function for searching <epsilon* symbol> reachable states
 				ClosureSearchResult EpsilonClosure(Transition* transition)
 				{
