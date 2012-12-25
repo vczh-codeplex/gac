@@ -20,6 +20,19 @@ extern WString GetPath();
 
 namespace test
 {
+	void LogPDA(Ptr<Automaton> pda, const WString& fileName, const WString& name)
+	{
+		FileStream fileStream(GetPath()+fileName, FileStream::WriteOnly);
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+
+		writer.WriteLine(L"=============================================================");
+		writer.WriteLine(name);
+		writer.WriteLine(L"=============================================================");
+		Log(pda, writer);
+	}
+
 	void GeneralTest(Ptr<ParsingDefinition> definition, const WString& name)
 	{
 		ParsingSymbolManager symbolManager;
@@ -56,39 +69,12 @@ namespace test
 		Ptr<Automaton> nondeterministicPDA=CreateNondeterministicPDAFromEpsilonPDA(epsilonPDA);
 		Ptr<Automaton> jointPDA=CreateJointPDAFromNondeterministicPDA(nondeterministicPDA);
 		
-		{
-			FileStream fileStream(GetPath()+L"Parsing."+name+L".EPDA.txt", FileStream::WriteOnly);
-			BomEncoder encoder(BomEncoder::Utf16);
-			EncoderStream encoderStream(fileStream, encoder);
-			StreamWriter writer(encoderStream);
+		LogPDA(epsilonPDA, L"Parsing."+name+L".EPDA.txt", L"Epsilon PDA");
+		LogPDA(nondeterministicPDA, L"Parsing."+name+L".NPDA.txt", L"Non-deterministic PDA");
+		LogPDA(jointPDA, L"Parsing."+name+L".JPDA.txt", L"Joint PDA");
 
-			writer.WriteLine(L"=============================================================");
-			writer.WriteLine(L"Epsilon PDA");
-			writer.WriteLine(L"=============================================================");
-			Log(epsilonPDA, writer);
-		}
-		{
-			FileStream fileStream(GetPath()+L"Parsing."+name+L".NPDA.txt", FileStream::WriteOnly);
-			BomEncoder encoder(BomEncoder::Utf16);
-			EncoderStream encoderStream(fileStream, encoder);
-			StreamWriter writer(encoderStream);
-
-			writer.WriteLine(L"=============================================================");
-			writer.WriteLine(L"Non-deterministic PDA");
-			writer.WriteLine(L"=============================================================");
-			Log(nondeterministicPDA, writer);
-		}
-		{
-			FileStream fileStream(GetPath()+L"Parsing."+name+L".JPDA.txt", FileStream::WriteOnly);
-			BomEncoder encoder(BomEncoder::Utf16);
-			EncoderStream encoderStream(fileStream, encoder);
-			StreamWriter writer(encoderStream);
-
-			writer.WriteLine(L"=============================================================");
-			writer.WriteLine(L"Joint PDA");
-			writer.WriteLine(L"=============================================================");
-			Log(jointPDA, writer);
-		}
+		CompactJointPDA(jointPDA);
+		LogPDA(jointPDA, L"Parsing."+name+L".JPDA-Compacted.txt", L"Compacted Joint PDA");
 	}
 }
 using namespace test;

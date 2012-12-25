@@ -148,15 +148,18 @@ namespace vl
 				{
 					State*											state;			// target state of one path of a closure
 					Ptr<collections::List<Transition*>>				transitions;	// path
+					bool											cycle;			// true: invalid closure because there are cycles, and in the middle of the path there will be a transition that targets to the state field.
 
 					ClosureItem()
 						:state(0)
+						,cycle(false)
 					{
 					}
 
-					ClosureItem(State* _state, Ptr<collections::List<Transition*>> _transitions)
+					ClosureItem(State* _state, Ptr<collections::List<Transition*>> _transitions, bool _cycle)
 						:state(_state)
 						,transitions(_transitions)
+						,cycle(_cycle)
 					{
 					}
 				};
@@ -175,6 +178,7 @@ namespace vl
 			extern void												RemoveEpsilonTransitions(collections::Dictionary<State*, State*>& oldNewStateMap, collections::List<State*>& scanningStates, Ptr<Automaton> automaton);
 			extern Ptr<Automaton>									CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA);
 			extern Ptr<Automaton>									CreateJointPDAFromNondeterministicPDA(Ptr<Automaton> nondeterministicPDA);
+			extern void												CompactJointPDA(Ptr<Automaton> jointPDA);
 			extern void												Log(Ptr<Automaton> automaton, stream::TextWriter& writer);
 		}
 	}
