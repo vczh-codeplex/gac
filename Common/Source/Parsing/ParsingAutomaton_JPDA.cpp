@@ -11,7 +11,7 @@ namespace vl
 		namespace analyzing
 		{
 /***********************************************************************
-RemoveEpsilonTransitions
+CreateJointPDAFromNondeterministicPDA
 ***********************************************************************/
 
 			Ptr<Automaton> CreateJointPDAFromNondeterministicPDA(Ptr<Automaton> nondeterministicPDA)
@@ -118,6 +118,14 @@ RemoveEpsilonTransitions
 					}
 				}
 				return automaton;
+			}
+
+/***********************************************************************
+CompactJointPDA
+***********************************************************************/
+
+			void CompactJointPDA(Ptr<Automaton> jointPDA)
+			{
 			}
 		}
 	}
