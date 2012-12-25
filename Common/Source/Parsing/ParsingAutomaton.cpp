@@ -34,6 +34,7 @@ Transition
 				:source(0)
 				,target(0)
 				,transitionType(Epsilon)
+				,stackOperationType(None)
 				,transitionSymbol(0)
 				,lookAheadSymbol(0)
 			{
@@ -219,6 +220,7 @@ Automaton
 			{
 				Transition* transition=CreateTransition(start, end);
 				transition->transitionType=oldTransition->transitionType;
+				transition->stackOperationType=oldTransition->stackOperationType;
 				transition->transitionSymbol=oldTransition->transitionSymbol;
 				transition->lookAheadSymbol=oldTransition->lookAheadSymbol;
 				return transition;
