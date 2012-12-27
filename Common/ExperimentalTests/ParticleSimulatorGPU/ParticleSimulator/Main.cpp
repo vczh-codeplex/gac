@@ -1,6 +1,8 @@
 #include "..\..\..\..\Libraries\GacUI\Public\Source\GacUI.h"
 #include <math.h>
-#include <Windows.h>
+#include <amp.h>
+
+using namespace concurrency;
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
 {
@@ -8,21 +10,129 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	return SetupWindowsDirect2DRenderer();
 }
 
+struct Particle
+{
+	float				positionX;
+	float				positionY;
+	float				velocityX;
+	float				velocityY;
+	float				mass;
+	bool				enabled;
+
+	Particle()
+		:positionX(0.0f)
+		,positionY(0.0f)
+		,velocityX(0.0f)
+		,velocityY(0.0f)
+		,mass(0.0f)
+		,enabled(false)
+	{
+	}
+};
+
 class Direct2DWindow : public GuiWindow
 {
 protected:
-	static const int						NoGravityRadius=420;
+	// constants
+	static const int						MaxParticle			= 1000;
+	static const int						NoGravityRadius		= 420;
 
+	// gravity system
+	Particle								particleBufferA[MaxParticle];
+	Particle								particleBufferB[MaxParticle];
+	array_view<Particle, 1>*				particleViewA;
+	array_view<Particle, 1>*				particleViewB;
+
+	Particle*								oldParticleBuffer;
+	Particle*								newParticleBuffer;
+	array_view<Particle, 1>*				oldParticleView;
+	array_view<Particle, 1>*				newParticleView;
+
+	// rendering resources
 	ComPtr<ID2D1SolidColorBrush>			brushNoGravity;
+	ComPtr<ID2D1SolidColorBrush>			brushParticle;
 
-	float GetAngle(float second)
+	void InitializeAmpBuffer()
 	{
-		return (second-15.0f)*3.1416f/30.0f;
+		particleViewA=new array_view<Particle, 1>(MaxParticle, particleBufferA);
+		particleViewB=new array_view<Particle, 1>(MaxParticle, particleBufferB);
+		particleViewB->discard_data();
+
+		oldParticleBuffer=particleBufferA;
+		newParticleBuffer=particleBufferB;
+		oldParticleView=particleViewA;
+		newParticleView=particleViewB;
+	}
+
+	void FinalizeAmpBuffer()
+	{
+		delete particleViewA;
+		delete particleViewB;
+	}
+
+	void Step()
+	{
+		array_view<Particle, 1>& from=*oldParticleView;
+		array_view<Particle, 1>& to=*newParticleView;
+		parallel_for_each(oldParticleView->extent, [=](index<1> i) restrict(amp)
+		{
+			to[i]=from[i];
+		});
+		newParticleView->synchronize();
+	}
+
+	void Swap()
+	{
+		Particle* buffer=oldParticleBuffer;
+		oldParticleBuffer=newParticleBuffer;
+		newParticleBuffer=buffer;
+
+		array_view<Particle, 1>* view=oldParticleView;
+		oldParticleView=newParticleView;
+		newParticleView=view;
+	}
+
+	void AddParticle(float x, float y)
+	{
+		for(int i=0;i<MaxParticle;i++)
+		{
+			if(!oldParticleBuffer[i].enabled)
+			{
+				Particle p;
+				p.positionX=x;
+				p.positionY=y;
+				p.enabled=true;
+				oldParticleBuffer[i]=p;
+				break;
+			}
+		}
+		oldParticleView->refresh();
+	}
+
+	void AddManyParticles(float x, float y, int count)
+	{
+		srand((unsigned)time(0));
+		for(int i=0;i<MaxParticle && count>0;i++)
+		{
+			if(!oldParticleBuffer[i].enabled)
+			{
+				Particle p;
+				p.positionX=x+(float)(rand()-RAND_MAX/2)/RAND_MAX;
+				p.positionY=y+(float)(rand()-RAND_MAX/2)/RAND_MAX;
+				p.enabled=true;
+				oldParticleBuffer[i]=p;
+				count--;
+				break;
+			}
+		}
+		oldParticleView->refresh();
 	}
 
 	// arguments.rt is ID2D1RenderTarget.
 	void element_Rendering(GuiGraphicsComposition* sender, GuiDirect2DElementEventArgs& arguments)
 	{
+		Step();
+
 		int w=arguments.bounds.Width();
 		int h=arguments.bounds.Height();
 		{
@@ -41,12 +151,28 @@ protected:
 				3.0f
 				);
 		}
+
+		for(int i=0;i<MaxParticle;i++)
+		{
+			if(newParticleBuffer[i].enabled)
+			{
+				float x=newParticleBuffer[i].positionX;
+				float y=newParticleBuffer[i].positionY;
+				arguments.rt->DrawEllipse(
+					D2D1::Ellipse(D2D1::Point2F(x-2.0f, y-2.0f), 2.0f, 2.0f),
+					brushParticle.Obj()
+					);
+			}
+		}
+
+		Swap();
 	}
 
 	// The render target is going to be destroyed, any binded resources should be released.
 	void element_BeforeRenderTargetChanged(GuiGraphicsComposition* sender, GuiDirect2DElementEventArgs& arguments)
 	{
 		brushNoGravity=0;
+		brushParticle=0;
 	}
 
 	// The new render target is prepared, any binded resources are allowed to recreate now.
@@ -58,12 +184,25 @@ protected:
 			arguments.rt->CreateSolidColorBrush(D2D1::ColorF(0.8f, 0.4f, 0.2f), D2D1::BrushProperties(), &brush);
 			brushNoGravity=brush;
 		}
+		{
+			brush=0;
+			arguments.rt->CreateSolidColorBrush(D2D1::ColorF(0.2f, 1.0f, 0.7f), D2D1::BrushProperties(), &brush);
+			brushParticle=brush;
+		}
 	}
 public:
 	Direct2DWindow()
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+		,particleViewA(0)
+		,particleViewB(0)
+		,oldParticleBuffer(0)
+		,newParticleBuffer(0)
+		,oldParticleView(0)
+		,newParticleView(0)
 	{
-		SetText(L"Rendering.RawAPI.Direct2D");
+		InitializeAmpBuffer();
+
+		SetText(L"Particle Simulator");
 		SetMinimizedBox(false);
 		SetMaximizedBox(false);
 		SetSizeBox(false);
@@ -80,6 +219,11 @@ public:
 			composition->SetOwnedElement(element);
 			GetContainerComposition()->AddChild(composition);
 		}
+	}
+
+	~Direct2DWindow()
+	{
+		FinalizeAmpBuffer();
 	}
 };
 
