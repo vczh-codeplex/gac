@@ -10,6 +10,7 @@ Classes:
 #define VCZH_PARSING_PARSINGAUTOMATON
 
 #include "ParsingAnalyzer.h"
+#include "ParsingTable.h"
 
 namespace vl
 {
@@ -192,6 +193,7 @@ namespace vl
 			extern Ptr<Automaton>									CreateJointPDAFromNondeterministicPDA(Ptr<Automaton> nondeterministicPDA);
 			extern void												CompactJointPDA(Ptr<Automaton> jointPDA);
 			extern void												MarkLeftRecursiveInJointPDA(Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
+			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
 			extern void												Log(Ptr<Automaton> automaton, stream::TextWriter& writer);
 		}
 	}
