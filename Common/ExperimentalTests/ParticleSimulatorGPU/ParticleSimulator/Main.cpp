@@ -48,6 +48,13 @@ protected:
 	array_view<Particle, 1>*				oldParticleView;
 	array_view<Particle, 1>*				newParticleView;
 
+	// operation states
+	bool									dragging;
+	float									createX;
+	float									createY;
+	float									shootX;
+	float									shootY;
+
 	// rendering resources
 	ComPtr<ID2D1SolidColorBrush>			brushNoGravity;
 	ComPtr<ID2D1SolidColorBrush>			brushParticle;
@@ -76,7 +83,10 @@ protected:
 		array_view<Particle, 1>& to=*newParticleView;
 		parallel_for_each(oldParticleView->extent, [=](index<1> i) restrict(amp)
 		{
-			to[i]=from[i];
+			Particle p=from[i];
+			p.positionX+=p.velocityX;
+			p.positionY+=p.velocityY;
+			to[i]=p;
 		});
 		newParticleView->synchronize();
 	}
@@ -92,7 +102,7 @@ protected:
 		newParticleView=view;
 	}
 
-	void AddParticle(float x, float y)
+	void AddParticle(float x, float y, float vx, float vy)
 	{
 		for(int i=0;i<MaxParticle;i++)
 		{
@@ -101,6 +111,8 @@ protected:
 				Particle p;
 				p.positionX=x;
 				p.positionY=y;
+				p.velocityX=vx;
+				p.velocityY=vy;
 				p.enabled=true;
 				oldParticleBuffer[i]=p;
 				break;
@@ -109,7 +121,7 @@ protected:
 		oldParticleView->refresh();
 	}
 
-	void AddManyParticles(float x, float y, int count)
+	void AddManyParticles(float x, float y, float vx, float vy, int count)
 	{
 		srand((unsigned)time(0));
 		for(int i=0;i<MaxParticle && count>0;i++)
@@ -119,10 +131,11 @@ protected:
 				Particle p;
 				p.positionX=x+(float)(rand()-RAND_MAX/2)/RAND_MAX;
 				p.positionY=y+(float)(rand()-RAND_MAX/2)/RAND_MAX;
+				p.velocityX=vx;
+				p.velocityY=vy;
 				p.enabled=true;
 				oldParticleBuffer[i]=p;
 				count--;
-				break;
 			}
 		}
 		oldParticleView->refresh();
@@ -165,6 +178,15 @@ protected:
 			}
 		}
 
+		if(dragging)
+		{
+			arguments.rt->DrawLine(
+				D2D1::Point2F(createX, createY),
+				D2D1::Point2F(shootX, shootY),
+				brushNoGravity.Obj()
+				);
+		}
+
 		Swap();
 	}
 
@@ -186,8 +208,39 @@ protected:
 		}
 		{
 			brush=0;
-			arguments.rt->CreateSolidColorBrush(D2D1::ColorF(0.2f, 1.0f, 0.7f), D2D1::BrushProperties(), &brush);
+			arguments.rt->CreateSolidColorBrush(D2D1::ColorF(0.2f, 0.7f, 0.4f), D2D1::BrushProperties(), &brush);
 			brushParticle=brush;
+		}
+	}
+
+	void window_LeftButtonDown(GuiGraphicsComposition* sender, GuiMouseEventArgs& arguments)
+	{
+		shootX=createX=(float)arguments.x;
+		shootY=createY=(float)arguments.y;
+		dragging=true;
+	}
+
+	void window_LeftButtonUp(GuiGraphicsComposition* sender, GuiMouseEventArgs& arguments)
+	{
+		dragging=false;
+		float vx=(shootX-createX)/40;
+		float vy=(shootY-createY)/40;
+		if(arguments.ctrl)
+		{
+			AddManyParticles(createX, createY, vx, vy, 100);
+		}
+		else
+		{
+			AddParticle(createX, createY, vx, vy);
+		}
+	}
+
+	void window_MouseMove(GuiGraphicsComposition* sender, GuiMouseEventArgs& arguments)
+	{
+		if(dragging)
+		{
+			shootX=(float)arguments.x;
+			shootY=(float)arguments.y;
 		}
 	}
 public:
@@ -199,6 +252,7 @@ public:
 		,newParticleBuffer(0)
 		,oldParticleView(0)
 		,newParticleView(0)
+		,dragging(false)
 	{
 		InitializeAmpBuffer();
 
@@ -219,6 +273,10 @@ public:
 			composition->SetOwnedElement(element);
 			GetContainerComposition()->AddChild(composition);
 		}
+
+		this->GetEventReceiver()->leftButtonDown.AttachMethod(this, &Direct2DWindow::window_LeftButtonDown);
+		this->GetEventReceiver()->leftButtonUp.AttachMethod(this, &Direct2DWindow::window_LeftButtonUp);
+		this->GetEventReceiver()->mouseMove.AttachMethod(this, &Direct2DWindow::window_MouseMove);
 	}
 
 	~Direct2DWindow()
