@@ -202,6 +202,76 @@ CompactJointPDA
 					}
 				}
 			}
+
+/***********************************************************************
+MarkLeftRecursiveInJointPDA
+***********************************************************************/
+
+			void MarkLeftRecursiveInJointPDA(Ptr<Automaton> jointPDA)
+			{
+				// record all left recursive shifts and delete all left recursive epsilon transition
+				SortedList<Pair<State*, State*>> leftRecursiveShifts;
+				FOREACH(Ptr<State>, state, jointPDA->states)
+				{
+					for(vint i=state->transitions.Count()-1;i>=0;i--)
+					{
+						Transition* transition=state->transitions[i];
+						if(transition->stackOperationType==Transition::LeftRecursive)
+						{
+							Ptr<Action> shiftAction;
+							FOREACH(Ptr<Action>, action, transition->actions)
+							{
+								if(action->actionType==Action::Shift)
+								{
+									if(shiftAction)
+									{
+										// print error
+									}
+									else
+									{
+										shiftAction=action;
+									}
+								}
+							}
+							leftRecursiveShifts.Add(Pair<State*, State*>(shiftAction->shiftReduceSource, shiftAction->shiftReduceTarget));
+							jointPDA->DeleteTransition(transition);
+						}
+					}
+				}
+
+				// change all reduce actions whose (shiftReduceSource, shiftReduceTarget) is recorded in leftRecursiveShifts to left-recursive-reduce
+				// when a reduce is converted to a left-recursive-reduce, the corresponding state in stackPattern should be removed
+				// so this will keep count(Reduce) == count(stackPattern)
+				FOREACH(Ptr<State>, state, jointPDA->states)
+				{
+					FOREACH(Transition*, transition, state->transitions)
+					{
+						vint stackPatternIndex=transition->stackPattern.Count();
+						for(vint i=transition->actions.Count()-1;i>=0;i--)
+						{
+							Ptr<Action> action=transition->actions[i];
+							if(action->actionType==Action::Reduce)
+							{
+								stackPatternIndex--;
+								Pair<State*, State*> shift(action->shiftReduceSource, action->shiftReduceTarget);
+								if(leftRecursiveShifts.Contains(shift))
+								{
+									// need to create a new action because in the previous phrases, these action object are shared and treated as read only
+									Ptr<Action> newAction=new Action;
+									newAction->actionType=Action::LeftRecursiveReduce;
+									newAction->actionSource=action->actionSource;
+									newAction->actionTarget=action->actionTarget;
+									newAction->shiftReduceSource=action->shiftReduceSource;
+									newAction->shiftReduceTarget=action->shiftReduceTarget;
+
+									transition->actions[i]=newAction;
+									transition->stackPattern.RemoveAt(stackPatternIndex);
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }
