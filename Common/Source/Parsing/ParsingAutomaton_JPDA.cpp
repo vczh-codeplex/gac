@@ -109,7 +109,6 @@ CreateJointPDAFromNondeterministicPDA
 									action->shiftReduceTarget=newTarget;
 									reduceTransition->actions.Add(action);
 									CopyFrom(reduceTransition->actions, oldTransition->actions, true);
-									reduceTransition->stackPattern.Add(newSource);
 								}
 							}
 							else
@@ -186,7 +185,6 @@ CompactJointPDA
 							// so we can append stackPattern safely
 							FOREACH(Transition*, pathTransition, *closureItem.transitions.Obj())
 							{
-								CopyFrom(transition->stackPattern, pathTransition->stackPattern, true);
 								CopyFrom(transition->actions, pathTransition->actions, true);
 							}
 						}
@@ -253,13 +251,11 @@ MarkLeftRecursiveInJointPDA
 				{
 					FOREACH(Transition*, transition, state->transitions)
 					{
-						vint stackPatternIndex=transition->stackPattern.Count();
 						for(vint i=transition->actions.Count()-1;i>=0;i--)
 						{
 							Ptr<Action> action=transition->actions[i];
 							if(action->actionType==Action::Reduce)
 							{
-								stackPatternIndex--;
 								Pair<State*, State*> shift(action->shiftReduceSource, action->shiftReduceTarget);
 								if(leftRecursiveShifts.Contains(shift))
 								{
@@ -272,7 +268,6 @@ MarkLeftRecursiveInJointPDA
 									newAction->shiftReduceTarget=action->shiftReduceTarget;
 
 									transition->actions[i]=newAction;
-									transition->stackPattern.RemoveAt(stackPatternIndex);
 								}
 							}
 						}

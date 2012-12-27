@@ -649,25 +649,6 @@ Logger (Automaton)
 							}
 							writer.WriteLine(transition->target->stateName);
 
-							if(transition->stackPattern.Count()>0)
-							{
-								writer.WriteString(L"        STACK PATTERNS");
-								FOREACH(State*, stackPattern, transition->stackPattern)
-								{
-									writer.WriteString(L" <");
-									writer.WriteString(stackPattern->stateName);
-									writer.WriteString(L">");
-								}
-								writer.WriteLine(L"");
-							}
-
-							if(transition->lookAheadSymbol!=0)
-							{
-								writer.WriteString(L"        LOOK AHEAD");
-								LogTransitionSymbol(transition->lookAheadSymbol, writer);
-								writer.WriteLine(L"");
-							}
-
 							FOREACH(Ptr<Action>, action, transition->actions)
 							{
 								switch(action->actionType)
