@@ -1,8 +1,10 @@
 #include "..\..\..\..\Libraries\GacUI\Public\Source\GacUI.h"
 #include <math.h>
 #include <amp.h>
+#include <amp_math.h>
 
 using namespace concurrency;
+using namespace concurrency::fast_math;
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
 {
@@ -24,7 +26,7 @@ struct Particle
 		,positionY(0.0f)
 		,velocityX(0.0f)
 		,velocityY(0.0f)
-		,mass(0.0f)
+		,mass(1.0f)
 		,enabled(false)
 	{
 	}
@@ -77,13 +79,54 @@ protected:
 		delete particleViewB;
 	}
 
-	void Step()
+	void StepGPU(float cx, float cy)
 	{
 		array_view<Particle, 1>& from=*oldParticleView;
 		array_view<Particle, 1>& to=*newParticleView;
 		parallel_for_each(oldParticleView->extent, [=](index<1> i) restrict(amp)
 		{
-			Particle p=from[i];
+			Particle& pref=from[i];
+			Particle p=pref;
+			if(!p.enabled) return;
+
+			float px=p.positionX;
+			float py=p.positionY;
+			float fx=0.0f;
+			float fy=0.0f;
+
+			float distanceSquare=(px-cx)*(px-cx)+(py-cy)*(py-cy);
+			if(distanceSquare>NoGravityRadius*NoGravityRadius)
+			{
+				float distance=sqrt(distanceSquare);
+				float cos=(cx-px)/distance;
+				float sin=(cy-py)/distance;
+				fx+=cos;
+				fy+=sin;
+			}
+
+			for(int j=0;j<MaxParticle;j++)
+			{
+				Particle& q=from[j];
+				if(&pref!=&q && q.enabled)
+				{
+					float vx=q.positionX-px;
+					float vy=q.positionY-py;
+					distanceSquare=vx*vx+vy*vy;
+					if(distanceSquare<0.0001f)
+					{
+						distanceSquare=0.0001f;
+					}
+					float distance=sqrt(distanceSquare);
+					float cos=vx/distance;
+					float sin=vy/distance;
+					float f=100*p.mass*q.mass/distanceSquare;
+					fx+=f*cos;
+					fy+=f*sin;
+				}
+			}
+
+			p.velocityX+=fx/p.mass;
+			p.velocityY+=fy/p.mass;
 			p.positionX+=p.velocityX;
 			p.positionY+=p.velocityY;
 			to[i]=p;
@@ -104,6 +147,7 @@ protected:
 
 	void AddParticle(float x, float y, float vx, float vy)
 	{
+		oldParticleView->synchronize();
 		for(int i=0;i<MaxParticle;i++)
 		{
 			if(!oldParticleBuffer[i].enabled)
@@ -123,6 +167,7 @@ protected:
 
 	void AddManyParticles(float x, float y, float vx, float vy, int count)
 	{
+		oldParticleView->synchronize();
 		srand((unsigned)time(0));
 		for(int i=0;i<MaxParticle && count>0;i++)
 		{
@@ -144,10 +189,11 @@ protected:
 	// arguments.rt is ID2D1RenderTarget.
 	void element_Rendering(GuiGraphicsComposition* sender, GuiDirect2DElementEventArgs& arguments)
 	{
-		Step();
-
 		int w=arguments.bounds.Width();
 		int h=arguments.bounds.Height();
+		StepGPU((float)w/2, (float)h/2);
+
+		// draw background
 		{
 			arguments.rt->Clear(D2D1::ColorF(1.0f, 1.0f, 1.0f));
 			int x=arguments.bounds.Left()+(w-NoGravityRadius*2)/2;
@@ -165,6 +211,7 @@ protected:
 				);
 		}
 
+		// draw particles
 		for(int i=0;i<MaxParticle;i++)
 		{
 			if(newParticleBuffer[i].enabled)
@@ -178,6 +225,7 @@ protected:
 			}
 		}
 
+		// draw particle creation velocity
 		if(dragging)
 		{
 			arguments.rt->DrawLine(
