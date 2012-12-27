@@ -123,11 +123,17 @@ TEST_CASE(TestParsingExpression)
 			.Token(L"COMMA",	L",")
 
 			.Rule(L"Number", Type(L"NumberExpression"))
-				.Imply(Rule(L"NUMBER")[L"value"])
+				.Imply(
+					Rule(L"NUMBER")[L"value"]
+						.As(Type(L"NumberExpression"))
+					)
 				.EndRule()
 
 			.Rule(L"Call", Type(L"FunctionExpression"))
-				.Imply(Rule(L"NAME")[L"functionName"] + Text(L"(") + Opt(Rule(L"Exp")[L"arguments"] + *(Text(L",") + Rule(L"Exp")[L"arguments"])) + Text(L")"))
+				.Imply(
+					(Rule(L"NAME")[L"functionName"] + Text(L"(") + Opt(Rule(L"Exp")[L"arguments"] + *(Text(L",") + Rule(L"Exp")[L"arguments"])) + Text(L")"))
+						.As(Type(L"FunctionExpression"))
+					)
 				.EndRule()
 
 			.Rule(L"Factor", Type(L"Expression"))
