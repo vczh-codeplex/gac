@@ -74,11 +74,9 @@ namespace vl
 				State*												target;
 				collections::List<Ptr<Action>>						actions;
 				
-				collections::List<State*>							stackPattern;
 				TransitionType										transitionType;
 				StackOperationType									stackOperationType;
 				ParsingSymbol*										transitionSymbol;
-				ParsingSymbol*										lookAheadSymbol;
 
 				Transition();
 				~Transition();

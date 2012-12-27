@@ -38,7 +38,6 @@ Transition
 				,transitionType(Epsilon)
 				,stackOperationType(None)
 				,transitionSymbol(0)
-				,lookAheadSymbol(0)
 			{
 			}
 
@@ -224,7 +223,6 @@ Automaton
 				transition->transitionType=oldTransition->transitionType;
 				transition->stackOperationType=oldTransition->stackOperationType;
 				transition->transitionSymbol=oldTransition->transitionSymbol;
-				transition->lookAheadSymbol=oldTransition->lookAheadSymbol;
 				return transition;
 			}
 
