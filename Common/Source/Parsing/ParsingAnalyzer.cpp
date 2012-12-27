@@ -870,6 +870,11 @@ ResolveRuleSymbols
 				List<Ptr<GrammarPathFragment>>				fragments;
 				ParsingSymbol*								pathType;
 
+				GrammarPath()
+					:pathType(0)
+				{
+				}
+
 				WString ToString()
 				{
 					WString result;
@@ -1195,7 +1200,11 @@ ResolveRuleSymbols
 							}
 						}
 
-						if(createdTypeCount>1)
+						if(createdTypeCount==0)
+						{
+							errors.Add(new ParsingError(grammar.Obj(), L"No parsing tree node is created if the following path is chosen: \""+path->ToString()+L"\" in rule \""+rule->name+L"\"."));
+						}
+						else if(createdTypeCount>1)
 						{
 							errors.Add(new ParsingError(grammar.Obj(), L"Multiple parsing tree nodes are created if the following path is chosen: \""+path->ToString()+L"\" in rule \""+rule->name+L"\"."));
 						}
