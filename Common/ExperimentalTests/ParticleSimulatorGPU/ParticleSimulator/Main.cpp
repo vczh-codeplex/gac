@@ -36,7 +36,7 @@ class Direct2DWindow : public GuiWindow
 {
 protected:
 	// constants
-	static const int						MaxParticle			= 1000;
+	static const int						MaxParticle			= 10000;
 	static const int						NoGravityRadius		= 420;
 
 	// gravity system
@@ -45,6 +45,7 @@ protected:
 	array_view<Particle, 1>*				particleViewA;
 	array_view<Particle, 1>*				particleViewB;
 
+	int										particleCount;
 	Particle*								oldParticleBuffer;
 	Particle*								newParticleBuffer;
 	array_view<Particle, 1>*				oldParticleView;
@@ -67,6 +68,7 @@ protected:
 		particleViewB=new array_view<Particle, 1>(MaxParticle, particleBufferB);
 		particleViewB->discard_data();
 
+		particleCount=0;
 		oldParticleBuffer=particleBufferA;
 		newParticleBuffer=particleBufferB;
 		oldParticleView=particleViewA;
@@ -81,54 +83,55 @@ protected:
 
 	void StepGPU(float cx, float cy)
 	{
+		if(particleCount==0) return;
 		array_view<Particle, 1>& from=*oldParticleView;
 		array_view<Particle, 1>& to=*newParticleView;
-		parallel_for_each(oldParticleView->extent, [=](index<1> i) restrict(amp)
+		parallel_for_each(extent<1>(particleCount), [=](index<1> i) restrict(amp)
 		{
-			Particle& pref=from[i];
-			Particle p=pref;
-			if(!p.enabled) return;
-
-			float px=p.positionX;
-			float py=p.positionY;
-			float fx=0.0f;
-			float fy=0.0f;
-
-			float distanceSquare=(px-cx)*(px-cx)+(py-cy)*(py-cy);
-			if(distanceSquare>NoGravityRadius*NoGravityRadius)
+			Particle p=from[i];
+			if(p.enabled)
 			{
-				float distance=sqrt(distanceSquare);
-				float cos=(cx-px)/distance;
-				float sin=(cy-py)/distance;
-				fx+=cos;
-				fy+=sin;
-			}
+				float px=p.positionX;
+				float py=p.positionY;
+				float fx=0.0f;
+				float fy=0.0f;
 
-			for(int j=0;j<MaxParticle;j++)
-			{
-				Particle& q=from[j];
-				if(&pref!=&q && q.enabled)
+				float distanceSquare=(px-cx)*(px-cx)+(py-cy)*(py-cy);
+				if(distanceSquare>NoGravityRadius*NoGravityRadius)
 				{
-					float vx=q.positionX-px;
-					float vy=q.positionY-py;
-					distanceSquare=vx*vx+vy*vy;
-					if(distanceSquare<0.0001f)
-					{
-						distanceSquare=0.0001f;
-					}
 					float distance=sqrt(distanceSquare);
-					float cos=vx/distance;
-					float sin=vy/distance;
-					float f=100*p.mass*q.mass/distanceSquare;
-					fx+=f*cos;
-					fy+=f*sin;
+					float cos=(cx-px)/distance;
+					float sin=(cy-py)/distance;
+					fx+=cos;
+					fy+=sin;
 				}
-			}
 
-			p.velocityX+=fx/p.mass;
-			p.velocityY+=fy/p.mass;
-			p.positionX+=p.velocityX;
-			p.positionY+=p.velocityY;
+				for(int j=0;j<MaxParticle;j++)
+				{
+					Particle q=from[j];
+					if(q.enabled)
+					{
+						float vx=q.positionX-px;
+						float vy=q.positionY-py;
+						distanceSquare=vx*vx+vy*vy;
+						if(distanceSquare<5.0f)
+						{
+							distanceSquare=5.0f;
+						}
+						float distance=sqrt(distanceSquare);
+						float cos=vx/distance;
+						float sin=vy/distance;
+						float f=0.1f*p.mass*q.mass/distanceSquare;
+						fx+=f*cos;
+						fy+=f*sin;
+					}
+				}
+
+				p.velocityX+=fx/p.mass;
+				p.velocityY+=fy/p.mass;
+				p.positionX+=p.velocityX;
+				p.positionY+=p.velocityY;
+			}
 			to[i]=p;
 		});
 		newParticleView->synchronize();
@@ -159,6 +162,7 @@ protected:
 				p.velocityY=vy;
 				p.enabled=true;
 				oldParticleBuffer[i]=p;
+				particleCount++;
 				break;
 			}
 		}
@@ -174,12 +178,13 @@ protected:
 			if(!oldParticleBuffer[i].enabled)
 			{
 				Particle p;
-				p.positionX=x+(float)(rand()-RAND_MAX/2)/RAND_MAX;
-				p.positionY=y+(float)(rand()-RAND_MAX/2)/RAND_MAX;
+				p.positionX=x+0.01f*(float)(rand()-RAND_MAX/2)/RAND_MAX;
+				p.positionY=y+0.01f*(float)(rand()-RAND_MAX/2)/RAND_MAX;
 				p.velocityX=vx;
 				p.velocityY=vy;
 				p.enabled=true;
 				oldParticleBuffer[i]=p;
+				particleCount++;
 				count--;
 			}
 		}
@@ -296,6 +301,7 @@ public:
 		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 		,particleViewA(0)
 		,particleViewB(0)
+		,particleCount(0)
 		,oldParticleBuffer(0)
 		,newParticleBuffer(0)
 		,oldParticleView(0)
