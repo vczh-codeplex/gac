@@ -207,8 +207,9 @@ CompactJointPDA
 MarkLeftRecursiveInJointPDA
 ***********************************************************************/
 
-			void MarkLeftRecursiveInJointPDA(Ptr<Automaton> jointPDA)
+			void MarkLeftRecursiveInJointPDA(Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors)
 			{
+				vint errorCount=errors.Count();
 				// record all left recursive shifts and delete all left recursive epsilon transition
 				SortedList<Pair<State*, State*>> leftRecursiveShifts;
 				FOREACH(Ptr<State>, state, jointPDA->states)
@@ -225,7 +226,8 @@ MarkLeftRecursiveInJointPDA
 								{
 									if(shiftAction)
 									{
-										// print error
+										errors.Add(new ParsingError(state->ownerRule, L"Indirect left recursive transition in rule \""+state->ownerRule->name+L"\" is not allowed."));
+										goto FOUND_INDIRECT_LEFT_RECURSIVE_TRANSITION;
 									}
 									else
 									{
@@ -234,9 +236,14 @@ MarkLeftRecursiveInJointPDA
 								}
 							}
 							leftRecursiveShifts.Add(Pair<State*, State*>(shiftAction->shiftReduceSource, shiftAction->shiftReduceTarget));
+						FOUND_INDIRECT_LEFT_RECURSIVE_TRANSITION:
 							jointPDA->DeleteTransition(transition);
 						}
 					}
+				}
+				if(errorCount!=errors.Count())
+				{
+					return;
 				}
 
 				// change all reduce actions whose (shiftReduceSource, shiftReduceTarget) is recorded in leftRecursiveShifts to left-recursive-reduce

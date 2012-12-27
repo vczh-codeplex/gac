@@ -20,7 +20,21 @@ extern WString GetPath();
 
 namespace test
 {
-	void LogPDA(Ptr<Automaton> pda, const WString& fileName, const WString& name)
+	void LogError(List<Ptr<ParsingError>>& errors, StreamWriter& writer)
+	{
+		if(errors.Count()>0)
+		{
+			writer.WriteLine(L"=============================================================");
+			writer.WriteLine(L"Errors");
+			writer.WriteLine(L"=============================================================");
+			FOREACH(Ptr<ParsingError>, error, errors)
+			{
+				writer.WriteLine(error->errorMessage);
+			}
+		}
+	}
+
+	void LogPDA(Ptr<Automaton> pda, const WString& fileName, const WString& name, List<Ptr<ParsingError>>& errors=*(List<Ptr<ParsingError>>*)0)
 	{
 		FileStream fileStream(GetPath()+fileName, FileStream::WriteOnly);
 		BomEncoder encoder(BomEncoder::Utf16);
@@ -31,6 +45,11 @@ namespace test
 		writer.WriteLine(name);
 		writer.WriteLine(L"=============================================================");
 		Log(pda, writer);
+
+		if(&errors)
+		{
+			LogError(errors, writer);
+		}
 	}
 
 	void GeneralTest(Ptr<ParsingDefinition> definition, const WString& name)
@@ -48,22 +67,9 @@ namespace test
 			writer.WriteLine(L"Grammar");
 			writer.WriteLine(L"=============================================================");
 			Log(definition, writer);
-
-			if(errors.Count()>0)
-			{
-				writer.WriteLine(L"=============================================================");
-				writer.WriteLine(L"Errprs");
-				writer.WriteLine(L"=============================================================");
-				FOREACH(Ptr<ParsingError>, error, errors)
-				{
-					writer.WriteLine(error->errorMessage);
-				}
-
-				encoderStream.Close();
-				fileStream.Close();
-			}
-			TEST_ASSERT(errors.Count()==0);
+			LogError(errors, writer);
 		}
+		TEST_ASSERT(errors.Count()==0);
 
 		Ptr<Automaton> epsilonPDA=CreateEpsilonPDA(definition, &symbolManager);
 		Ptr<Automaton> nondeterministicPDA=CreateNondeterministicPDAFromEpsilonPDA(epsilonPDA);
@@ -76,8 +82,9 @@ namespace test
 		CompactJointPDA(jointPDA);
 		LogPDA(jointPDA, L"Parsing."+name+L".JPDA-Compacted.txt", L"Compacted Joint PDA");
 
-		MarkLeftRecursiveInJointPDA(jointPDA);
-		LogPDA(jointPDA, L"Parsing."+name+L".JPDA-Marked.txt", L"Compacted Joint PDA");
+		MarkLeftRecursiveInJointPDA(jointPDA, errors);
+		LogPDA(jointPDA, L"Parsing."+name+L".JPDA-Marked.txt", L"Compacted Joint PDA", errors);
+		TEST_ASSERT(errors.Count()==0);
 	}
 }
 using namespace test;
