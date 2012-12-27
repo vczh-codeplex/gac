@@ -34,7 +34,8 @@ namespace test
 		}
 	}
 
-	void LogPDA(Ptr<Automaton> pda, const WString& fileName, const WString& name, List<Ptr<ParsingError>>& errors=*(List<Ptr<ParsingError>>*)0)
+	template<typename TLoggable>
+	void LogParsingData(TLoggable loggable, const WString& fileName, const WString& name, List<Ptr<ParsingError>>& errors=*(List<Ptr<ParsingError>>*)0)
 	{
 		FileStream fileStream(GetPath()+fileName, FileStream::WriteOnly);
 		BomEncoder encoder(BomEncoder::Utf16);
@@ -44,7 +45,7 @@ namespace test
 		writer.WriteLine(L"=============================================================");
 		writer.WriteLine(name);
 		writer.WriteLine(L"=============================================================");
-		Log(pda, writer);
+		Log(loggable, writer);
 
 		if(&errors)
 		{
@@ -57,33 +58,22 @@ namespace test
 		ParsingSymbolManager symbolManager;
 		List<Ptr<ParsingError>> errors;
 		ValidateDefinition(definition, &symbolManager, errors);
-		{
-			FileStream fileStream(GetPath()+L"Parsing."+name+L".Definition.txt", FileStream::WriteOnly);
-			BomEncoder encoder(BomEncoder::Utf16);
-			EncoderStream encoderStream(fileStream, encoder);
-			StreamWriter writer(encoderStream);
-
-			writer.WriteLine(L"=============================================================");
-			writer.WriteLine(L"Grammar");
-			writer.WriteLine(L"=============================================================");
-			Log(definition, writer);
-			LogError(errors, writer);
-		}
+		LogParsingData(definition, L"Parsing."+name+L".Definition.txt", L"Grammar Definition", errors);
 		TEST_ASSERT(errors.Count()==0);
 
 		Ptr<Automaton> epsilonPDA=CreateEpsilonPDA(definition, &symbolManager);
 		Ptr<Automaton> nondeterministicPDA=CreateNondeterministicPDAFromEpsilonPDA(epsilonPDA);
 		Ptr<Automaton> jointPDA=CreateJointPDAFromNondeterministicPDA(nondeterministicPDA);
 		
-		LogPDA(epsilonPDA, L"Parsing."+name+L".EPDA.txt", L"Epsilon PDA");
-		LogPDA(nondeterministicPDA, L"Parsing."+name+L".NPDA.txt", L"Non-deterministic PDA");
-		LogPDA(jointPDA, L"Parsing."+name+L".JPDA.txt", L"Joint PDA");
+		LogParsingData(epsilonPDA, L"Parsing."+name+L".EPDA.txt", L"Epsilon PDA");
+		LogParsingData(nondeterministicPDA, L"Parsing."+name+L".NPDA.txt", L"Non-deterministic PDA");
+		LogParsingData(jointPDA, L"Parsing."+name+L".JPDA.txt", L"Joint PDA");
 
 		CompactJointPDA(jointPDA);
-		LogPDA(jointPDA, L"Parsing."+name+L".JPDA-Compacted.txt", L"Compacted Joint PDA");
+		LogParsingData(jointPDA, L"Parsing."+name+L".JPDA-Compacted.txt", L"Compacted Joint PDA");
 
 		MarkLeftRecursiveInJointPDA(jointPDA, errors);
-		LogPDA(jointPDA, L"Parsing."+name+L".JPDA-Marked.txt", L"Compacted Joint PDA", errors);
+		LogParsingData(jointPDA, L"Parsing."+name+L".JPDA-Marked.txt", L"Compacted Joint PDA", errors);
 		TEST_ASSERT(errors.Count()==0);
 	}
 }
