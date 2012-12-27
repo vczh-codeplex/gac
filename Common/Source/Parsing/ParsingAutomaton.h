@@ -37,6 +37,7 @@ namespace vl
 					Setter, // source ::= target
 					Shift,
 					Reduce,
+					LeftRecursiveReduce,
 				};
 
 				ActionType											actionType;
@@ -154,6 +155,7 @@ namespace vl
 /***********************************************************************
 ¸¨Öúº¯Êý
 ***********************************************************************/
+
 			namespace closure_searching
 			{
 				struct ClosureItem
@@ -191,6 +193,7 @@ namespace vl
 			extern Ptr<Automaton>									CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA);
 			extern Ptr<Automaton>									CreateJointPDAFromNondeterministicPDA(Ptr<Automaton> nondeterministicPDA);
 			extern void												CompactJointPDA(Ptr<Automaton> jointPDA);
+			extern void												MarkLeftRecursiveInJointPDA(Ptr<Automaton> jointPDA);
 			extern void												Log(Ptr<Automaton> automaton, stream::TextWriter& writer);
 		}
 	}

@@ -75,6 +75,9 @@ namespace test
 
 		CompactJointPDA(jointPDA);
 		LogPDA(jointPDA, L"Parsing."+name+L".JPDA-Compacted.txt", L"Compacted Joint PDA");
+
+		MarkLeftRecursiveInJointPDA(jointPDA);
+		LogPDA(jointPDA, L"Parsing."+name+L".JPDA-Marked.txt", L"Compacted Joint PDA");
 	}
 }
 using namespace test;

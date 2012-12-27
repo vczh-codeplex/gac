@@ -690,6 +690,9 @@ Logger (Automaton)
 								case Action::Reduce:
 									writer.WriteString(L"        REDUCE ");
 									break;
+								case Action::LeftRecursiveReduce:
+									writer.WriteString(L"        LR-REDUCE ");
+									break;
 								}
 
 								if(action->shiftReduceSource && action->shiftReduceTarget)
