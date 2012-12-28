@@ -8,6 +8,7 @@
 #include "..\..\Source\Parsing\ParsingDefinitions.h"
 #include "..\..\Source\Parsing\ParsingAnalyzer.h"
 #include "..\..\Source\Parsing\ParsingAutomaton.h"
+#include "..\..\Source\Parsing\ParsingTable.h"
 
 using namespace vl;
 using namespace vl::stream;
@@ -15,6 +16,7 @@ using namespace vl::collections;
 using namespace vl::parsing;
 using namespace vl::parsing::definitions;
 using namespace vl::parsing::analyzing;
+using namespace vl::parsing::tabling;
 
 extern WString GetPath();
 
@@ -75,6 +77,8 @@ namespace test
 		MarkLeftRecursiveInJointPDA(jointPDA, errors);
 		LogParsingData(jointPDA, L"Parsing."+name+L".JPDA-Marked.txt", L"Compacted Joint PDA", errors);
 		TEST_ASSERT(errors.Count()==0);
+
+		Ptr<ParsingTable> table=GenerateTable(definition, jointPDA, errors);
 	}
 }
 using namespace test;

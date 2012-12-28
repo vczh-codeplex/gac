@@ -10,6 +10,7 @@ Classes:
 #define VCZH_PARSING_PARSINGTABLE
 
 #include "ParsingAnalyzer.h"
+#include "..\Regex\Regex.h"
 
 namespace vl
 {
@@ -20,6 +21,99 @@ namespace vl
 			class ParsingTable : public Object
 			{
 			public:
+				static const vint							TokenBegin=0;
+				static const vint							TokenFinish=1;
+				static const vint							UserTokenStart=2;
+
+				class TokenInfo
+				{
+				public:
+					WString									name;
+					WString									regex;
+				};
+
+				class StateInfo
+				{
+				public:
+					WString									ruleName;
+					WString									stateName;
+					WString									stateExpression;
+				};
+
+				class RuleInfo
+				{
+				public:
+					WString									name;
+					WString									type;
+					vint									rootStartState;
+				};
+
+				class Instruction
+				{
+				public:
+					enum InstructionType
+					{
+						Create,
+						Assign,
+						Using,
+						Setter,
+						Shift,
+						Reduce,
+						LeftRecursiveReduce,
+					};
+
+					InstructionType							instructionType;
+					vint									stateParameter;
+					WString									nameParameter;
+					WString									value;
+
+					Instruction()
+						:instructionType(Create)
+						,stateParameter(0)
+					{
+					}
+				};
+
+				class TransitionItem
+				{
+				public:
+					collections::List<vint>					stackPattern;
+					collections::List<Instruction>			instructions;
+				};
+
+				class TransitionBag
+				{
+				public:
+					collections::List<Ptr<TransitionItem>>	transitionItems;
+				};
+
+			protected:
+				regex::RegexLexer							lexer;
+				collections::Array<Ptr<TransitionBag>>		transitionBags;
+				vint										tokenCount;
+				vint										stateCount;
+				collections::Array<TokenInfo>				tokenInfos;
+				collections::Array<StateInfo>				stateInfos;
+				collections::Array<RuleInfo>				ruleInfos;
+
+			public:
+				ParsingTable(const collections::List<WString>& tokenRegex, vint _tokenCount, vint _stateCount, vint _ruleCount);
+				~ParsingTable();
+
+				vint										GetTokenCount();
+				const TokenInfo&							GetTokenInfo(vint token);
+				void										SetTokenInfo(vint token, const TokenInfo& info);
+
+				vint										GetStateCount();
+				const StateInfo&							GetStateInfo(vint state);
+				void										SetStateInfo(vint state, const StateInfo& info);
+
+				vint										GetRuleCount();
+				const RuleInfo&								GetRuleInfo(vint rule);
+				void										SetRuleInfo(vint rule, const RuleInfo& info);
+
+				Ptr<TransitionBag>							GetTransitionBag(vint state, vint token);
+				void										SetTransitionBag(vint state, vint token, Ptr<TransitionBag> bag);
 			};
 		}
 	}
