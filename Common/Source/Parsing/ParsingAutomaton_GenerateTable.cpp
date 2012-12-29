@@ -135,6 +135,27 @@ namespace vl
 					}
 				}
 
+				for(vint i=0;i<table->GetStateCount();i++)
+				{
+					for(vint j=0;j<table->GetTokenCount();j++)
+					{
+						Ptr<ParsingTable::TransitionBag> bag=table->GetTransitionBag(i, j);
+						if(bag)
+						{
+							CopyFrom(bag->transitionItems, bag->transitionItems>>OrderBy(ParsingTable::TransitionItem::Compare));
+							for(vint k=0;k<bag->transitionItems.Count()-1;k++)
+							{
+								Ptr<ParsingTable::TransitionItem> t1=bag->transitionItems[k];
+								Ptr<ParsingTable::TransitionItem> t2=bag->transitionItems[k+1];
+								if(ParsingTable::TransitionItem::CheckOrder(t1, t2, false)==ParsingTable::TransitionItem::UnknownOrder)
+								{
+									// print error
+								}
+							}
+						}
+					}
+				}
+
 				return table;
 			}
 		}

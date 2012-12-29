@@ -18,6 +18,11 @@ namespace vl
 	{
 		namespace tabling
 		{
+
+/***********************************************************************
+Ìø×ª±í
+***********************************************************************/
+
 			class ParsingTable : public Object
 			{
 			public:
@@ -79,6 +84,17 @@ namespace vl
 				public:
 					collections::List<vint>					stackPattern;
 					collections::List<Instruction>			instructions;
+
+					enum OrderResult
+					{
+						CorrectOrder,
+						WrongOrder,
+						SameOrder,
+						UnknownOrder,
+					};
+
+					static OrderResult						CheckOrder(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2, bool forceGivingOrder);
+					static vint								Compare(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2);
 				};
 
 				class TransitionBag

@@ -1,4 +1,5 @@
 #include "ParsingTable.h"
+#include "..\Collections\OperationForEach.h"
 
 namespace vl
 {
@@ -6,6 +7,88 @@ namespace vl
 	{
 		namespace tabling
 		{
+			using namespace collections;
+
+/***********************************************************************
+ParsingTable::TransitionItem
+***********************************************************************/
+
+			enum TransitionLevel
+			{
+				ReduceTransition,
+				LeftRecursiveReduceTransition,
+				NormalTransition,
+			};
+
+			TransitionLevel GetTransitionLevel(Ptr<ParsingTable::TransitionItem> t)
+			{
+				bool hasReduce=false;
+				bool hasLrReduce=false;
+				FOREACH(ParsingTable::Instruction, ins, t->instructions)
+				{
+					switch(ins.instructionType)
+					{
+					case ParsingTable::Instruction::Reduce:
+						hasReduce=true;
+						break;
+					case ParsingTable::Instruction::LeftRecursiveReduce:
+						hasLrReduce=true;
+						break;
+					}
+				}
+
+				return
+					hasLrReduce?LeftRecursiveReduceTransition:
+					hasReduce?ReduceTransition:
+					NormalTransition;
+			}
+
+			ParsingTable::TransitionItem::OrderResult ParsingTable::TransitionItem::CheckOrder(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2, bool forceGivingOrder)
+			{
+				TransitionLevel level1=GetTransitionLevel(t1);
+				TransitionLevel level2=GetTransitionLevel(t2);
+				if(level1>level2) return CorrectOrder;
+				if(level1<level2) return WrongOrder;
+
+				vint ic1=t1->stackPattern.Count();
+				vint ic2=t2->stackPattern.Count();
+				vint ic=ic1<ic2?ic1:ic2;
+
+				for(vint i=0;i<ic;i++)
+				{
+					vint s1=t1->stackPattern[i];
+					vint s2=t2->stackPattern[i];
+
+					if(s1>s2)
+					{
+						return CorrectOrder;
+					}
+					else if(s1<s2)
+					{
+						return WrongOrder;
+					}
+				}
+
+				if(forceGivingOrder)
+				{
+					return t1>t2?CorrectOrder:SameOrder;
+				}
+				else
+				{
+					return UnknownOrder;
+				}
+			}
+
+			vint ParsingTable::TransitionItem::Compare(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2)
+			{
+				OrderResult order=CheckOrder(t1, t2, true);
+				switch(order)
+				{
+				case CorrectOrder:	return -1;
+				case WrongOrder:	return 1;
+				default:			return 0;
+				}
+			}
 
 /***********************************************************************
 ParsingTable
