@@ -83,6 +83,45 @@ namespace test
 }
 using namespace test;
 
+TEST_CASE(TestParseNameList)
+{
+	Ptr<ParsingDefinition> definition;
+	{
+		ParsingDefinitionWriter definitionWriter;
+
+		definitionWriter
+			.Type(
+				Class(L"NameItemExpression")
+					.Member(L"name", TokenType())
+				)
+			.Type(
+				Class(L"NameListExpression")
+					.Member(L"names", Type(L"NameItemExpression").Array())
+				)
+
+			.Token(L"NAME", L"[a-zA-Z_]/w*")
+			.Token(L"COMMA", L",")
+
+			.Rule(L"Name", Type(L"NameItemExpression"))
+				.Imply(
+					(Rule(L"NAME")[L"name"])
+						.As(Type(L"NameItemExpression"))
+					)
+				.EndRule()
+
+			.Rule(L"NameList", Type(L"NameListExpression"))
+				.Imply(
+					(Rule(L"Name")[L"names"] + *(Text(L",") + Rule(L"Name")[L"names"]))
+						.As(Type(L"NameListExpression"))
+					)
+				.EndRule()
+			;
+
+		definition=definitionWriter.Definition();
+	}
+	GeneralTest(definition, L"NameList");
+}
+
 TEST_CASE(TestParsingExpression)
 {
 	Ptr<ParsingDefinition> definition;
