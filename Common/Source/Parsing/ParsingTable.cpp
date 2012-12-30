@@ -107,11 +107,12 @@ ParsingTable::TransitionItem
 ParsingTable
 ***********************************************************************/
 
-			ParsingTable::ParsingTable(const collections::List<WString>& tokenRegex, vint _tokenCount, vint _stateCount, vint _ruleCount)
+			ParsingTable::ParsingTable(const collections::List<WString>& tokenRegex, vint _tokenCount, vint discardTokenCount, vint _stateCount, vint _ruleCount)
 				:lexer(tokenRegex)
 				,tokenCount(_tokenCount+2)
 				,stateCount(_stateCount)
 				,tokenInfos(_tokenCount+2)
+				,discardTokenInfos(discardTokenCount)
 				,stateInfos(_stateCount)
 				,ruleInfos(_ruleCount)
 				,transitionBags((_tokenCount+2)*_stateCount)
@@ -135,6 +136,21 @@ ParsingTable
 			void ParsingTable::SetTokenInfo(vint token, const TokenInfo& info)
 			{
 				tokenInfos[token]=info;
+			}
+
+			vint ParsingTable::GetDiscardTokenCount()
+			{
+				return discardTokenInfos.Count();
+			}
+
+			const ParsingTable::TokenInfo& ParsingTable::GetDiscardTokenInfo(vint token)
+			{
+				return discardTokenInfos[token];
+			}
+
+			void ParsingTable::SetDiscardTokenInfo(vint token, const TokenInfo& info)
+			{
+				discardTokenInfos[token]=info;
 			}
 
 			vint ParsingTable::GetStateCount()

@@ -112,16 +112,21 @@ namespace vl
 				vint										tokenCount;
 				vint										stateCount;
 				collections::Array<TokenInfo>				tokenInfos;
+				collections::Array<TokenInfo>				discardTokenInfos;
 				collections::Array<StateInfo>				stateInfos;
 				collections::Array<RuleInfo>				ruleInfos;
 
 			public:
-				ParsingTable(const collections::List<WString>& tokenRegex, vint _tokenCount, vint _stateCount, vint _ruleCount);
+				ParsingTable(const collections::List<WString>& tokenRegex, vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
 				~ParsingTable();
 
 				vint										GetTokenCount();
 				const TokenInfo&							GetTokenInfo(vint token);
 				void										SetTokenInfo(vint token, const TokenInfo& info);
+
+				vint										GetDiscardTokenCount();
+				const TokenInfo&							GetDiscardTokenInfo(vint token);
+				void										SetDiscardTokenInfo(vint token, const TokenInfo& info);
 
 				vint										GetStateCount();
 				const StateInfo&							GetStateInfo(vint state);

@@ -15,6 +15,7 @@ namespace vl
 			{
 				List<WString> tokenRegex;
 				Dictionary<ParsingSymbol*, vint> tokenIds;
+				List<WString> discardTokens;
 				List<State*> stateIds;
 				{
 					vint currentState=0;
@@ -42,16 +43,26 @@ namespace vl
 					}
 				}
 
-				vint tokenCount=definition->tokens.Count();
+				vint tokenCount=0;
+				vint discardTokenCount=0;
 				vint stateCount=stateIds.Count();
 
 				FOREACH(Ptr<ParsingDefinitionTokenDefinition>, token, definition->tokens)
 				{
-					ParsingSymbol* tokenSymbol=jointPDA->symbolManager->GetGlobal()->GetSubSymbolByName(token->name);
-					tokenIds.Add(tokenSymbol, tokenRegex.Count()+ParsingTable::UserTokenStart);
-					tokenRegex.Add(tokenSymbol->GetDescriptorString());
+					if(token->discard)
+					{
+						discardTokens.Add(token->name);
+						discardTokenCount++;
+					}
+					else
+					{
+						ParsingSymbol* tokenSymbol=jointPDA->symbolManager->GetGlobal()->GetSubSymbolByName(token->name);
+						tokenIds.Add(tokenSymbol, tokenRegex.Count()+ParsingTable::UserTokenStart);
+						tokenRegex.Add(tokenSymbol->GetDescriptorString());
+						tokenCount++;
+					}
 				}
-				Ptr<ParsingTable> table=new ParsingTable(tokenRegex, tokenCount, stateCount, definition->rules.Count());
+				Ptr<ParsingTable> table=new ParsingTable(tokenRegex, tokenCount, discardTokenCount, stateCount, definition->rules.Count());
 
 				FOREACH(ParsingSymbol*, symbol, tokenIds.Keys())
 				{
@@ -61,6 +72,16 @@ namespace vl
 
 					vint id=tokenIds[symbol];
 					table->SetTokenInfo(id, info);
+				}
+
+				FOREACH_INDEXER(WString, name, i, discardTokens)
+				{
+					ParsingSymbol* symbol=jointPDA->symbolManager->GetGlobal()->GetSubSymbolByName(name);
+
+					ParsingTable::TokenInfo info;
+					info.name=symbol->GetName();
+					info.regex=symbol->GetDescriptorString();
+					table->SetDiscardTokenInfo(i, info);
 				}
 
 				FOREACH_INDEXER(ParsingDefinitionRuleDefinition*, rule, i, jointPDA->ruleInfos.Keys())
