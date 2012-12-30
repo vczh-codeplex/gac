@@ -312,6 +312,7 @@ TEST_CASE(TestParsingExpression)
 
 			.Rule(L"Factor", Type(L"Expression"))
 				.Imply(!Rule(L"Number") | !Rule(L"Call"))
+				.Imply(Text(L"(") + !Rule(L"Exp") + Text(L")"))
 				.EndRule()
 
 			.Rule(L"Term", Type(L"Expression"))
@@ -350,6 +351,9 @@ TEST_CASE(TestParsingExpression)
 	const wchar_t* inputs[]=
 	{
 		L"0",
+		L"1+2",
+		L"1*2+3*4",
+		L"(1+2)*(3+4)",
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{

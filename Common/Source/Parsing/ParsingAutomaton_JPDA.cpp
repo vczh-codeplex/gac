@@ -287,6 +287,7 @@ MarkLeftRecursiveInJointPDA
 							if(Transition::IsEquivalent(t1, t2, true))
 							{
 								jointPDA->DeleteTransition(t2);
+								deleted=true;
 								goto TRANSITION_DELETED;
 							}
 						}
