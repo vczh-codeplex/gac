@@ -331,6 +331,20 @@ ParsingState
 
 								if(match)
 								{
+									for(vint j=0;j<item->instructions.Count();j++)
+									{
+										ParsingTable::Instruction& ins=item->instructions[j];
+										switch(ins.instructionType)
+										{
+										case ParsingTable::Instruction::Shift:
+											stateStack.Add(ins.stateParameter);
+											break;
+										case ParsingTable::Instruction::Reduce:
+											stateStack.RemoveAt(stateStack.Count()-1);
+											break;
+										}
+									}
+
 									TransitionResult result;
 									result.tableTokenIndex=token;
 									result.token=regexToken;
