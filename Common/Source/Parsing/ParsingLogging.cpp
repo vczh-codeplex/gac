@@ -716,6 +716,8 @@ Logger (ParsingTable)
 				vint columns=table->GetTokenCount()+1;
 				Array<WString> stringTable(rows*columns);
 
+				stringTable[0]=L"<Parsing Table>";
+
 				for(vint row=0; row<table->GetStateCount();row++)
 				{
 					stringTable[(row+1)*columns]=itow(row)+L": "+table->GetStateInfo(row).stateName;
@@ -734,57 +736,65 @@ Logger (ParsingTable)
 				{
 					for(vint column=0;column<table->GetTokenCount();column++)
 					{
-						WString content;
 						Ptr<ParsingTable::TransitionBag> bag=table->GetTransitionBag(row, column);
-						FOREACH(Ptr<ParsingTable::TransitionItem>, item, bag->transitionItems)
+						if(bag)
 						{
-							if(content!=L"") content+=L"\r\n";
-							content+=itow(item->targetState);
-							FOREACH_INDEXER(vint, state, index, item->stackPattern)
+							WString content;
+							FOREACH(Ptr<ParsingTable::TransitionItem>, item, bag->transitionItems)
 							{
-								content+=(index==0?L" : ":L", ");
-							}
-							content+=L"\r\n    ";
-							FOREACH(ParsingTable::Instruction, ins, item->instructions)
-							{
-								switch(ins.instructionType)
+								if(content!=L"") content+=L"\r\n";
+								content+=itow(item->targetState);
+								FOREACH_INDEXER(vint, state, index, item->stackPattern)
 								{
-								case ParsingTable::Instruction::Create:
-									content+=L"C";
-									break;
-								case ParsingTable::Instruction::Using:
-									content+=L"U";
-									break;
-								case ParsingTable::Instruction::Assign:
-									content+=L"A";
-									break;
-								case ParsingTable::Instruction::Setter:
-									content+=L"S";
-									break;
-								case ParsingTable::Instruction::Shift:
-									content+=L"[+"+itow(ins.stateParameter)+L"]";
-									break;
-								case ParsingTable::Instruction::Reduce:
-									content+=L"[-"+itow(ins.stateParameter)+L"]";
-									break;
-								case ParsingTable::Instruction::LeftRecursiveReduce:
-									content+=L"[!"+itow(ins.stateParameter)+L"]";
-									break;
+									content+=(index==0?L" : ":L", ");
+								}
+								content+=L"\r\n    ";
+								FOREACH(ParsingTable::Instruction, ins, item->instructions)
+								{
+									switch(ins.instructionType)
+									{
+									case ParsingTable::Instruction::Create:
+										content+=L"C";
+										break;
+									case ParsingTable::Instruction::Using:
+										content+=L"U";
+										break;
+									case ParsingTable::Instruction::Assign:
+										content+=L"A";
+										break;
+									case ParsingTable::Instruction::Item:
+										content+=L"I";
+										break;
+									case ParsingTable::Instruction::Setter:
+										content+=L"S";
+										break;
+									case ParsingTable::Instruction::Shift:
+										content+=L"[+"+itow(ins.stateParameter)+L"]";
+										break;
+									case ParsingTable::Instruction::Reduce:
+										content+=L"[-"+itow(ins.stateParameter)+L"]";
+										break;
+									case ParsingTable::Instruction::LeftRecursiveReduce:
+										content+=L"[!"+itow(ins.stateParameter)+L"]";
+										break;
+									}
 								}
 							}
+							stringTable[(row+1)*columns+(column+1)]=content;
 						}
-						stringTable[(row+1)*columns+(column+1)]=content;
 					}
 				}
 
 				writer.WriteLine(L"C: Create");
 				writer.WriteLine(L"U: Using");
 				writer.WriteLine(L"A: Assign");
+				writer.WriteLine(L"I: Item");
 				writer.WriteLine(L"S: Setter");
 				writer.WriteLine(L"[+s]: Shift[push s]");
 				writer.WriteLine(L"[-s]: Reduce[pop s]");
 				writer.WriteLine(L"[!s]: Left-Recursive-Reduce[fake s]");
 				writer.WriteLine(L"");
+				writer.WriteMonospacedEnglishTable(stringTable, rows, columns);
 			}
 		}
 	}
