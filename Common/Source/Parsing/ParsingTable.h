@@ -151,10 +151,38 @@ namespace vl
 
 			class ParsingState : public Object
 			{
+			public:
+				class TransitionResult
+				{
+				public:
+					vint									tableTokenIndex;
+					vint									tableStateSource;
+					vint									tableStateTarget;
+					regex::RegexToken*						token;
+					ParsingTable::TransitionItem*			transition;
+
+					TransitionResult()
+						:tableTokenIndex(-1)
+						,tableStateSource(-1)
+						,tableStateTarget(-1)
+						,token(0)
+						,transition(0)
+					{
+					}
+
+					operator bool()const
+					{
+						return transition!=0;
+					}
+				};
 			private:
 				WString										input;
 				Ptr<ParsingTable>							table;
 				collections::List<regex::RegexToken>		tokens;
+
+				collections::List<vint>						stateStack;
+				vint										currentState;
+				vint										currentToken;
 			public:
 				ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex=-1);
 				~ParsingState();
@@ -162,6 +190,9 @@ namespace vl
 				const WString&								GetInput();
 				Ptr<ParsingTable>							GetTable();
 				const collections::List<regex::RegexToken>&	GetTokens();
+
+				vint										Reset(const WString& rule);
+				TransitionResult							ReadToken();
 			};
 
 /***********************************************************************

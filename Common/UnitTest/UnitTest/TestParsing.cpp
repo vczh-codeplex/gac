@@ -124,6 +124,67 @@ namespace test
 		writer.WriteLine(L"=============================================================");
 		writer.WriteLine(L"Transition");
 		writer.WriteLine(L"=============================================================");
+		vint startState=state.Reset(rule);
+		TEST_ASSERT(startState!=-1);
+		writer.WriteLine(L"StartState: "+itow(startState)+L"["+table->GetStateInfo(startState).stateName+L"]");
+
+		while(true)
+		{
+			ParsingState::TransitionResult result=state.ReadToken();
+			if(result)
+			{
+				switch(result.tableTokenIndex)
+				{
+				case ParsingTable::TokenBegin:
+					writer.WriteString(L"$TokenBegin => ");
+					break;
+				case ParsingTable::TokenFinish:
+					writer.WriteString(L"$TokenFinish => ");
+					break;
+				default:
+					writer.WriteString(table->GetTokenInfo(result.tableTokenIndex).name);
+					writer.WriteString(L"[");
+					writer.WriteString(WString(result.token->reading, result.token->length));
+					writer.WriteString(L"] => ");
+				}
+				writer.WriteLine(table->GetStateInfo(result.tableStateTarget).stateName);
+
+				FOREACH(ParsingTable::Instruction, ins, result.transition->instructions)
+				{
+					switch(ins.instructionType)
+					{
+					case ParsingTable::Instruction::Create:
+						writer.WriteLine(L"    Create "+ins.nameParameter);
+						break;
+					case ParsingTable::Instruction::Using:
+						writer.WriteLine(L"    Using");
+						break;
+					case ParsingTable::Instruction::Assign:
+						writer.WriteLine(L"    Assign "+ins.nameParameter);
+						break;
+					case ParsingTable::Instruction::Item:
+						writer.WriteLine(L"    Item "+ins.nameParameter);
+						break;
+					case ParsingTable::Instruction::Setter:
+						writer.WriteLine(L"    Setter "+ins.nameParameter+L" = "+ins.value);
+						break;
+					case ParsingTable::Instruction::Shift:
+						writer.WriteLine(L"    Shift "+table->GetStateInfo(ins.stateParameter).ruleName);
+						break;
+					case ParsingTable::Instruction::Reduce:
+						writer.WriteLine(L"    Reduce "+table->GetStateInfo(ins.stateParameter).ruleName);
+						break;
+					case ParsingTable::Instruction::LeftRecursiveReduce:
+						writer.WriteLine(L"    LR-Reduce "+table->GetStateInfo(ins.stateParameter).ruleName);
+						break;
+					}
+				}
+			}
+			else
+			{
+				break;
+			}
+		}
 
 		writer.WriteLine(L"=============================================================");
 		writer.WriteLine(L"Tree");
@@ -172,8 +233,8 @@ TEST_CASE(TestParseNameList)
 
 	Ptr<ParsingTable> table=CreateTable(definition, L"NameList");
 	Parse(table, L"vczh", L"NameList", L"NameList", 0);
-	Parse(table, L"vczh, genius", L"NameList", L"NameList", 0);
-	Parse(table, L"vczh, genius, programmer", L"NameList", L"NameList", 0);
+	Parse(table, L"vczh, genius", L"NameList", L"NameList", 1);
+	Parse(table, L"vczh, genius, programmer", L"NameList", L"NameList", 2);
 }
 
 TEST_CASE(TestParsingExpression)
