@@ -1,6 +1,5 @@
 #include "ParsingTable.h"
-#include "..\Collections\OperationForEach.h"
-#include "..\Collections\OperationCopyFrom.h"
+#include "..\Collections\Operation.h"
 
 namespace vl
 {
@@ -202,7 +201,7 @@ ParsingTable
 			void ParsingTable::Initialize()
 			{
 				List<WString> tokens;
-				FOREACH(TokenInfo, info, tokenInfos)
+				FOREACH(TokenInfo, info, tokenInfos>>Skip(UserTokenStart))
 				{
 					tokens.Add(info.regex);
 				}
@@ -213,9 +212,19 @@ ParsingTable
 				lexer=new RegexLexer(tokens);
 			}
 
-			bool ParsingTable::IsInputToken(const regex::RegexToken& token)
+			bool ParsingTable::IsInputToken(vint regexTokenIndex)
 			{
-				return token.token>=0 && token.token<tokenCount-UserTokenStart;
+				return regexTokenIndex>=0 && regexTokenIndex<tokenCount-UserTokenStart;
+			}
+
+			vint ParsingTable::GetTableTokenIndex(vint regexTokenIndex)
+			{
+				return IsInputToken(regexTokenIndex)?regexTokenIndex+UserTokenStart:-1;
+			}
+
+			vint ParsingTable::GetTableDiscardTokenIndex(vint regexTokenIndex)
+			{
+				return regexTokenIndex>=tokenCount-UserTokenStart?regexTokenIndex-(tokenCount-UserTokenStart):-1;
 			}
 
 /***********************************************************************
