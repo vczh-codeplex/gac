@@ -354,6 +354,7 @@ TEST_CASE(TestParsingExpression)
 		L"1+2",
 		L"1*2+3*4",
 		L"(1+2)*(3+4)",
+		L"exp()-pow(cos(1.57*2), 4)",
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
