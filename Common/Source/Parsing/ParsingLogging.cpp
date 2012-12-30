@@ -747,8 +747,9 @@ Logger (ParsingTable)
 								FOREACH_INDEXER(vint, state, index, item->stackPattern)
 								{
 									content+=(index==0?L" : ":L", ");
+									content+=itow(state);
 								}
-								content+=L"\r\n    ";
+								content+=L"\r\n >";
 								FOREACH(ParsingTable::Instruction, ins, item->instructions)
 								{
 									switch(ins.instructionType)
