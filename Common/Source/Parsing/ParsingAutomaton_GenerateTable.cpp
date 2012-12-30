@@ -149,7 +149,12 @@ namespace vl
 								Ptr<ParsingTable::TransitionItem> t2=bag->transitionItems[k+1];
 								if(ParsingTable::TransitionItem::CheckOrder(t1, t2, false)==ParsingTable::TransitionItem::UnknownOrder)
 								{
-									// print error
+									WString stateName=table->GetStateInfo(i).stateName;
+									WString tokenName=
+										j==ParsingTable::TokenBegin?WString(L"$TokenBegin"):
+										j==ParsingTable::TokenFinish?WString(L"$TokenFinish"):
+										table->GetTokenInfo(j).name;
+									errors.Add(new ParsingError(jointPDA->states[i]->ownerRule, L"Conflict happened in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
 								}
 							}
 						}

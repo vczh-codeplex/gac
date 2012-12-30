@@ -703,5 +703,16 @@ Logger (Automaton)
 				}
 			}
 		}
+
+		namespace tabling
+		{
+/***********************************************************************
+Logger (ParsingTable)
+***********************************************************************/
+
+			void Log(Ptr<ParsingTable> table, stream::TextWriter& writer)
+			{
+			}
+		}
 	}
 }
