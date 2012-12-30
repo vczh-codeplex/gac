@@ -45,6 +45,36 @@ Transition
 			{
 			}
 
+			bool Transition::IsEquivalent(Transition* t1, Transition* t2, bool careSourceAndTarget)
+			{
+				if(careSourceAndTarget)
+				{
+					if(t1->source!=t2->source || t1->target!=t2->target)
+					{
+						return false;
+					}
+				}
+				if(	t1->actions.Count()!=t2->actions.Count() ||
+					t1->transitionType!=t2->transitionType ||
+					t1->transitionSymbol!=t2->transitionSymbol)
+				{
+					return false;
+				}
+				for(vint j=0;j<t1->actions.Count();j++)
+				{
+					Ptr<Action> a1=t1->actions[j];
+					Ptr<Action> a2=t2->actions[j];
+					if(	a1->actionType!=a2->actionType ||
+						a1->actionSource!=a2->actionSource ||
+						a1->actionTarget!=a2->actionTarget ||
+						a1->shiftReduceSource!=a2->shiftReduceSource )
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+
 /***********************************************************************
 State
 ***********************************************************************/

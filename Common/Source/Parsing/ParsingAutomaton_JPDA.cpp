@@ -273,6 +273,27 @@ MarkLeftRecursiveInJointPDA
 						}
 					}
 				}
+
+				// delete complicated transitions
+				FOREACH(Ptr<State>, state, jointPDA->states)
+				{
+					while(true)
+					{
+						bool deleted=false;
+						FOREACH(Transition*, t1, state->transitions)
+						FOREACH(Transition*, t2, state->transitions)
+						if(t1!=t2)
+						{
+							if(Transition::IsEquivalent(t1, t2, true))
+							{
+								jointPDA->DeleteTransition(t2);
+								goto TRANSITION_DELETED;
+							}
+						}
+					TRANSITION_DELETED:
+						if(!deleted) break;
+					}
+				}
 			}
 		}
 	}

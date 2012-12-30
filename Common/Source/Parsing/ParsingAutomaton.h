@@ -81,6 +81,8 @@ namespace vl
 
 				Transition();
 				~Transition();
+
+				static bool											IsEquivalent(Transition* t1, Transition* t2, bool careSourceAndTarget);
 			};
 
 			class State : public Object

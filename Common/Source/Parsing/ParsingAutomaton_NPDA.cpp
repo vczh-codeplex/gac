@@ -81,28 +81,6 @@ CreateNondeterministicPDAFromEpsilonPDA::state_clearning
 					}
 				}
 
-				bool IsSameTransitionContent(Transition* t1, Transition* t2)
-				{
-					if(	t1->actions.Count()!=t2->actions.Count() ||
-						t1->transitionType!=t2->transitionType ||
-						t1->transitionSymbol!=t2->transitionSymbol)
-					{
-						return false;
-					}
-					for(vint j=0;j<t1->actions.Count();j++)
-					{
-						Ptr<Action> a1=t1->actions[j];
-						Ptr<Action> a2=t2->actions[j];
-						if(	a1->actionType!=a2->actionType ||
-							a1->actionSource!=a2->actionSource ||
-							a1->actionTarget!=a2->actionTarget)
-						{
-							return false;
-						}
-					}
-					return true;
-				}
-
 				void MoveActionsForMergingState(Transition* transition)
 				{
 					// collect all movable actions
@@ -135,7 +113,7 @@ CreateNondeterministicPDAFromEpsilonPDA::state_clearning
 					{
 						Transition* t1=state1->transitions[0];
 						Transition* t2=state2->transitions[0];
-						if(CompareTransitionForRearranging(t1, t2)==0 && !IsSameTransitionContent(t1, t2) && t1->target==t2->target)
+						if(CompareTransitionForRearranging(t1, t2)==0 && !Transition::IsEquivalent(t1, t2, false) && t1->target==t2->target)
 						{
 							MoveActionsForMergingState(t1);
 							MoveActionsForMergingState(t2);
@@ -145,7 +123,7 @@ CreateNondeterministicPDAFromEpsilonPDA::state_clearning
 					{
 						Transition* t1=state1->transitions[i];
 						Transition* t2=state2->transitions[i];
-						if(!IsSameTransitionContent(t1, t2) || t1->target!=t2->target)
+						if(!Transition::IsEquivalent(t1, t2, false) || t1->target!=t2->target)
 						{
 							return false;
 						}
@@ -160,7 +138,7 @@ CreateNondeterministicPDAFromEpsilonPDA::state_clearning
 					{
 						Transition* t1=state1->inputs[i];
 						Transition* t2=state2->inputs[i];
-						if(!IsSameTransitionContent(t1, t2) || t1->source!=t2->source)
+						if(!Transition::IsEquivalent(t1, t2, false) || t1->source!=t2->source)
 						{
 							return false;
 						}
@@ -180,7 +158,7 @@ CreateNondeterministicPDAFromEpsilonPDA::state_clearning
 						bool add=true;
 						FOREACH(Transition*, t1, state1->inputs)
 						{
-							if(IsSameTransitionContent(t1, t2) && t1->source==t2->source)
+							if(Transition::IsEquivalent(t1, t2, false) && t1->source==t2->source)
 							{
 								add=false;
 								break;
@@ -209,7 +187,7 @@ CreateNondeterministicPDAFromEpsilonPDA::state_clearning
 						bool add=true;
 						FOREACH(Transition*, t1, state1->transitions)
 						{
-							if(IsSameTransitionContent(t1, t2) && t1->target==t2->target)
+							if(Transition::IsEquivalent(t1, t2, false) && t1->target==t2->target)
 							{
 								add=false;
 								break;
