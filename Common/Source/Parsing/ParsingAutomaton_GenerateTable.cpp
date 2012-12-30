@@ -80,6 +80,7 @@ namespace vl
 						}
 
 						Ptr<ParsingTable::TransitionItem> item=new ParsingTable::TransitionItem;
+						item->token=tokenIndex;
 						bag->transitionItems.Add(item);
 
 						FOREACH(Ptr<Action>, action, transition->actions)
@@ -121,6 +122,7 @@ namespace vl
 								{
 									ins.instructionType=ParsingTable::Instruction::Reduce;
 									ins.stateParameter=jointPDA->states.IndexOf(action->shiftReduceSource);
+									item->stackPattern.Add(ins.stateParameter);
 								}
 								break;
 							case Action::LeftRecursiveReduce:

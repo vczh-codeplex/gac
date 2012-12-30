@@ -45,6 +45,7 @@ ParsingTable::TransitionItem
 
 			ParsingTable::TransitionItem::OrderResult ParsingTable::TransitionItem::CheckOrder(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2, bool forceGivingOrder)
 			{
+				if(t1->token!=t2->token) return UnknownOrder;
 				TransitionLevel level1=GetTransitionLevel(t1);
 				TransitionLevel level2=GetTransitionLevel(t2);
 				if(level1>level2) return CorrectOrder;
@@ -64,6 +65,18 @@ ParsingTable::TransitionItem
 						return CorrectOrder;
 					}
 					else if(s1<s2)
+					{
+						return WrongOrder;
+					}
+				}
+
+				if(t1->token==TokenFinish)
+				{
+					if(ic1>ic2)
+					{
+						return CorrectOrder;
+					}
+					else if(ic1<ic2)
 					{
 						return WrongOrder;
 					}

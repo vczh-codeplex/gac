@@ -82,6 +82,7 @@ namespace vl
 				class TransitionItem
 				{
 				public:
+					vint									token;
 					collections::List<vint>					stackPattern;
 					collections::List<Instruction>			instructions;
 
