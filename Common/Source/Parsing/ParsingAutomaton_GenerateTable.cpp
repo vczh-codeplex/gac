@@ -81,6 +81,7 @@ namespace vl
 
 						Ptr<ParsingTable::TransitionItem> item=new ParsingTable::TransitionItem;
 						item->token=tokenIndex;
+						item->targetState=jointPDA->states.IndexOf(transition->target);
 						bag->transitionItems.Add(item);
 
 						FOREACH(Ptr<Action>, action, transition->actions)

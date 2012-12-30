@@ -83,6 +83,7 @@ namespace vl
 				{
 				public:
 					vint									token;
+					vint									targetState;
 					collections::List<vint>					stackPattern;
 					collections::List<Instruction>			instructions;
 
