@@ -1,5 +1,6 @@
 #include "ParsingTable.h"
 #include "..\Collections\OperationForEach.h"
+#include "..\Collections\OperationCopyFrom.h"
 
 namespace vl
 {
@@ -8,6 +9,7 @@ namespace vl
 		namespace tabling
 		{
 			using namespace collections;
+			using namespace regex;
 
 /***********************************************************************
 ParsingTable::TransitionItem
@@ -107,15 +109,14 @@ ParsingTable::TransitionItem
 ParsingTable
 ***********************************************************************/
 
-			ParsingTable::ParsingTable(const collections::List<WString>& tokenRegex, vint _tokenCount, vint discardTokenCount, vint _stateCount, vint _ruleCount)
-				:lexer(tokenRegex)
-				,tokenCount(_tokenCount+2)
+			ParsingTable::ParsingTable(vint _tokenCount, vint discardTokenCount, vint _stateCount, vint _ruleCount)
+				:tokenCount(_tokenCount+UserTokenStart)
 				,stateCount(_stateCount)
-				,tokenInfos(_tokenCount+2)
+				,tokenInfos(_tokenCount+UserTokenStart)
 				,discardTokenInfos(discardTokenCount)
 				,stateInfos(_stateCount)
 				,ruleInfos(_ruleCount)
-				,transitionBags((_tokenCount+2)*_stateCount)
+				,transitionBags((_tokenCount+UserTokenStart)*_stateCount)
 			{
 			}
 
@@ -183,6 +184,11 @@ ParsingTable
 				ruleInfos[rule]=info;
 			}
 
+			const regex::RegexLexer& ParsingTable::GetLexer()
+			{
+				return *lexer.Obj();
+			}
+
 			Ptr<ParsingTable::TransitionBag> ParsingTable::GetTransitionBag(vint state, vint token)
 			{
 				return transitionBags[state*tokenCount+token];
@@ -191,6 +197,55 @@ ParsingTable
 			void ParsingTable::SetTransitionBag(vint state, vint token, Ptr<TransitionBag> bag)
 			{
 				transitionBags[state*tokenCount+token]=bag;
+			}
+
+			void ParsingTable::Initialize()
+			{
+				List<WString> tokens;
+				FOREACH(TokenInfo, info, tokenInfos)
+				{
+					tokens.Add(info.regex);
+				}
+				FOREACH(TokenInfo, info, discardTokenInfos)
+				{
+					tokens.Add(info.regex);
+				}
+				lexer=new RegexLexer(tokens);
+			}
+
+			bool ParsingTable::IsInputToken(const regex::RegexToken& token)
+			{
+				return token.token>=0 && token.token<tokenCount-UserTokenStart;
+			}
+
+/***********************************************************************
+ParsingState
+***********************************************************************/
+
+			ParsingState::ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex)
+				:input(_input)
+				,table(_table)
+			{
+				CopyFrom(tokens, table->GetLexer().Parse(input, codeIndex));
+			}
+
+			ParsingState::~ParsingState()
+			{
+			}
+
+			const WString& ParsingState::GetInput()
+			{
+				return input;
+			}
+
+			Ptr<ParsingTable> ParsingState::GetTable()
+			{
+				return table;
+			}
+
+			const collections::List<regex::RegexToken>& ParsingState::GetTokens()
+			{
+				return tokens;
 			}
 		}
 	}

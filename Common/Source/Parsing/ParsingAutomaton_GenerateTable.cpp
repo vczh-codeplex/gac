@@ -13,7 +13,6 @@ namespace vl
 		{
 			Ptr<tabling::ParsingTable> GenerateTable(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors)
 			{
-				List<WString> tokenRegex;
 				Dictionary<ParsingSymbol*, vint> tokenIds;
 				List<WString> discardTokens;
 				List<State*> stateIds;
@@ -57,12 +56,11 @@ namespace vl
 					else
 					{
 						ParsingSymbol* tokenSymbol=jointPDA->symbolManager->GetGlobal()->GetSubSymbolByName(token->name);
-						tokenIds.Add(tokenSymbol, tokenRegex.Count()+ParsingTable::UserTokenStart);
-						tokenRegex.Add(tokenSymbol->GetDescriptorString());
+						tokenIds.Add(tokenSymbol, tokenIds.Count()+ParsingTable::UserTokenStart);
 						tokenCount++;
 					}
 				}
-				Ptr<ParsingTable> table=new ParsingTable(tokenRegex, tokenCount, discardTokenCount, stateCount, definition->rules.Count());
+				Ptr<ParsingTable> table=new ParsingTable(tokenCount, discardTokenCount, stateCount, definition->rules.Count());
 
 				FOREACH(ParsingSymbol*, symbol, tokenIds.Keys())
 				{
@@ -220,6 +218,7 @@ namespace vl
 					}
 				}
 
+				table->Initialize();
 				return table;
 			}
 		}
