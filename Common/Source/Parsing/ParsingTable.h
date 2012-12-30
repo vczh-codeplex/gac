@@ -140,7 +140,9 @@ namespace vl
 				Ptr<TransitionBag>							GetTransitionBag(vint state, vint token);
 				void										SetTransitionBag(vint state, vint token, Ptr<TransitionBag> bag);
 				void										Initialize();
-				bool										IsInputToken(const regex::RegexToken& token);
+				bool										IsInputToken(vint regexTokenIndex);
+				vint										GetTableTokenIndex(vint regexTokenIndex);
+				vint										GetTableDiscardTokenIndex(vint regexTokenIndex);
 			};
 
 /***********************************************************************

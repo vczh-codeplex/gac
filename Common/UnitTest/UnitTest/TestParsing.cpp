@@ -13,6 +13,7 @@
 using namespace vl;
 using namespace vl::stream;
 using namespace vl::collections;
+using namespace vl::regex;
 using namespace vl::parsing;
 using namespace vl::parsing::definitions;
 using namespace vl::parsing::analyzing;
@@ -55,7 +56,7 @@ namespace test
 		}
 	}
 
-	void GeneralTest(Ptr<ParsingDefinition> definition, const WString& name)
+	Ptr<ParsingTable> CreateTable(Ptr<ParsingDefinition> definition, const WString& name)
 	{
 		ParsingSymbolManager symbolManager;
 		List<Ptr<ParsingError>> errors;
@@ -81,6 +82,52 @@ namespace test
 		Ptr<ParsingTable> table=GenerateTable(definition, jointPDA, errors);
 		LogParsingData(table, L"Parsing."+name+L".Table.txt", L"Table", errors);
 		TEST_ASSERT(errors.Count()==0);
+
+		return table;
+	}
+
+	void Parse(Ptr<ParsingTable> table, const WString& input, const WString& name, const WString& rule, vint index)
+	{
+		FileStream fileStream(GetPath()+L"Parsing."+name+L".["+itow(index)+L"].txt", FileStream::WriteOnly);
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+
+		ParsingState state(input, table);
+
+		writer.WriteLine(L"=============================================================");
+		writer.WriteLine(L"Input");
+		writer.WriteLine(L"=============================================================");
+		writer.WriteLine(input);
+
+		writer.WriteLine(L"=============================================================");
+		writer.WriteLine(L"Tokens");
+		writer.WriteLine(L"=============================================================");
+		FOREACH(RegexToken, token, state.GetTokens())
+		{
+			WString tokenName;
+			if(token.token==-1)
+			{
+				tokenName=L"<ERROR>";
+			}
+			else if(table->IsInputToken(token.token))
+			{
+				tokenName=table->GetTokenInfo(table->GetTableTokenIndex(token.token)).name;
+			}
+			else
+			{
+				tokenName=table->GetDiscardTokenInfo(table->GetTableDiscardTokenIndex(token.token)).name;
+			}
+			writer.WriteLine(tokenName+L": "+WString(token.reading, token.length));
+		}
+
+		writer.WriteLine(L"=============================================================");
+		writer.WriteLine(L"Transition");
+		writer.WriteLine(L"=============================================================");
+
+		writer.WriteLine(L"=============================================================");
+		writer.WriteLine(L"Tree");
+		writer.WriteLine(L"=============================================================");
 	}
 }
 using namespace test;
@@ -122,7 +169,11 @@ TEST_CASE(TestParseNameList)
 
 		definition=definitionWriter.Definition();
 	}
-	GeneralTest(definition, L"NameList");
+
+	Ptr<ParsingTable> table=CreateTable(definition, L"NameList");
+	Parse(table, L"vczh", L"NameList", L"NameList", 0);
+	Parse(table, L"vczh, genius", L"NameList", L"NameList", 0);
+	Parse(table, L"vczh, genius, programmer", L"NameList", L"NameList", 0);
 }
 
 TEST_CASE(TestParsingExpression)
@@ -218,5 +269,6 @@ TEST_CASE(TestParsingExpression)
 
 		definition=definitionWriter.Definition();
 	}
-	GeneralTest(definition, L"Calculator");
+
+	Ptr<ParsingTable> table=CreateTable(definition, L"Calculator");
 }
