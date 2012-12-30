@@ -189,6 +189,8 @@ namespace test
 						break;
 					}
 				}
+
+				TEST_ASSERT(builder.Run(result));
 			}
 			else
 			{
@@ -200,10 +202,8 @@ namespace test
 		writer.WriteLine(L"Tree");
 		writer.WriteLine(L"=============================================================");
 		Ptr<ParsingTreeNode> node=builder.GetNode();
-		if(node)
-		{
-			Log(node, writer);
-		}
+		TEST_ASSERT(node);
+		Log(node, writer);
 	}
 }
 using namespace test;

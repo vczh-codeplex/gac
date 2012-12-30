@@ -158,6 +158,7 @@ namespace vl
 					vint									tableTokenIndex;
 					vint									tableStateSource;
 					vint									tableStateTarget;
+					vint									tokenIndexInStream;
 					regex::RegexToken*						token;
 					ParsingTable::TransitionItem*			transition;
 
@@ -165,6 +166,7 @@ namespace vl
 						:tableTokenIndex(-1)
 						,tableStateSource(-1)
 						,tableStateTarget(-1)
+						,tokenIndexInStream(-1)
 						,token(0)
 						,transition(0)
 					{
@@ -203,6 +205,8 @@ namespace vl
 			class ParsingTreeBuilder : public Object
 			{
 			protected:
+				Ptr<ParsingTreeNode>						createdObject;
+				Ptr<ParsingTreeObject>						operationTarget;
 				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
 
 			public:
@@ -210,7 +214,7 @@ namespace vl
 				~ParsingTreeBuilder();
 
 				void										Reset();
-				void										Run(const ParsingState::TransitionResult& result);
+				bool										Run(const ParsingState::TransitionResult& result);
 				Ptr<ParsingTreeObject>						GetNode();
 			};
 

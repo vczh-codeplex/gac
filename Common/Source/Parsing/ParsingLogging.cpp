@@ -873,7 +873,7 @@ Logger (ParsingTreeNode)
 				}
 				prefix=oldPrefix;
 				writer.WriteString(prefix);
-				writer.WriteLine(L"}");
+				writer.WriteString(L"}");
 			}
 
 			void Visit(ParsingTreeArray* node)
@@ -890,7 +890,7 @@ Logger (ParsingTreeNode)
 				}
 				prefix=oldPrefix;
 				writer.WriteString(prefix);
-				writer.WriteLine(L"}");
+				writer.WriteString(L"}");
 			}
 		};
 

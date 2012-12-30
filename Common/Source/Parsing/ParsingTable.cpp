@@ -348,6 +348,7 @@ ParsingState
 									TransitionResult result;
 									result.tableTokenIndex=token;
 									result.token=regexToken;
+									result.tokenIndexInStream=regexToken?currentToken-1:-1;
 									result.tableStateSource=currentState;
 									result.tableStateTarget=item->targetState;
 									result.transition=item;
@@ -382,18 +383,136 @@ ParsingTreeBuilder
 
 			void ParsingTreeBuilder::Reset()
 			{
-				nodeStack.Add(new ParsingTreeObject());
+				createdObject=0;
+				operationTarget=new ParsingTreeObject();
+				nodeStack.Clear();
 			}
 
-			void ParsingTreeBuilder::Run(const ParsingState::TransitionResult& result)
+			bool ParsingTreeBuilder::Run(const ParsingState::TransitionResult& result)
 			{
+				if(!operationTarget)
+				{
+					return false;
+				}
+				for(vint j=0;j<result.transition->instructions.Count();j++)
+				{
+					ParsingTable::Instruction& ins=result.transition->instructions[j];
+					switch(ins.instructionType)
+					{
+					case ParsingTable::Instruction::Create:
+						{
+							if(operationTarget->GetType()!=L"")
+							{
+								return false;
+							}
+							operationTarget->SetType(ins.nameParameter);
+						}
+						break;
+					case ParsingTable::Instruction::Using:
+						{
+							if(operationTarget->GetType()!=L"" || !createdObject)
+							{
+								return false;
+							}
+							Ptr<ParsingTreeObject> obj=createdObject.Cast<ParsingTreeObject>();
+							if(!obj)
+							{
+								return false;
+							}
+							for(vint i=0;i<operationTarget->GetMembers().Count();i++)
+							{
+								WString name=operationTarget->GetMembers().Keys().Get(i);
+								Ptr<ParsingTreeNode> value=operationTarget->GetMembers().Values().Get(i);
+								obj->SetMember(name, value);
+							}
+							operationTarget=obj;
+							createdObject=0;
+						}
+						break;
+					case ParsingTable::Instruction::Assign:
+						{
+							if(!createdObject)
+							{
+								if(result.token==0)
+								{
+									return false;
+								}
+								Ptr<ParsingTreeToken> value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
+								operationTarget->SetMember(ins.nameParameter, value);
+							}
+							else
+							{
+								operationTarget->SetMember(ins.nameParameter, createdObject);
+								createdObject=0;
+							}
+						}
+						break;
+					case ParsingTable::Instruction::Item:
+						{
+							Ptr<ParsingTreeArray> arr=operationTarget->GetMember(ins.nameParameter).Cast<ParsingTreeArray>();;
+							if(!arr)
+							{
+								arr=new ParsingTreeArray();
+								operationTarget->SetMember(ins.nameParameter, arr);
+							}
+							if(!createdObject)
+							{
+								if(result.token==0)
+								{
+									return false;
+								}
+								Ptr<ParsingTreeToken> value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
+								arr->AddItem(value);
+							}
+							else
+							{
+								arr->AddItem(createdObject);
+								createdObject=0;
+							}
+						}
+						break;
+					case ParsingTable::Instruction::Setter:
+						{
+							Ptr<ParsingTreeToken> value=new ParsingTreeToken(ins.value, -1);
+							operationTarget->SetMember(ins.nameParameter, value);
+						}
+						break;
+					case ParsingTable::Instruction::Shift:
+						{
+							nodeStack.Add(operationTarget);
+							operationTarget=new ParsingTreeObject();
+							createdObject=0;
+						}
+						break;
+					case ParsingTable::Instruction::Reduce:
+						{
+							if(nodeStack.Count()==0)
+							{
+								return false;
+							}
+							createdObject=operationTarget;
+							operationTarget=nodeStack[nodeStack.Count()-1];
+							nodeStack.RemoveAt(nodeStack.Count()-1);
+						}
+						break;
+					case ParsingTable::Instruction::LeftRecursiveReduce:
+						{
+							createdObject=operationTarget;
+							operationTarget=new ParsingTreeObject();
+						}
+						break;
+					default:
+						return false;
+					}
+				}
+				return true;
 			}
 
 			Ptr<ParsingTreeObject> ParsingTreeBuilder::GetNode()
 			{
-				if(nodeStack.Count()==1)
+				if(nodeStack.Count()==0)
 				{
-					return nodeStack[0];
+					return operationTarget;
 				}
 				else
 				{
