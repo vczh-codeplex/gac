@@ -13,10 +13,38 @@ namespace vl
 		{
 			Ptr<tabling::ParsingTable> GenerateTable(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors)
 			{
-				vint tokenCount=definition->tokens.Count();
-				vint stateCount=jointPDA->states.Count();
 				List<WString> tokenRegex;
 				Dictionary<ParsingSymbol*, vint> tokenIds;
+				List<State*> stateIds;
+				{
+					vint currentState=0;
+					List<State*> scanningStates;
+					FOREACH(Ptr<RuleInfo>, ruleInfo, jointPDA->ruleInfos.Values())
+					{
+						if(!scanningStates.Contains(ruleInfo->rootRuleStartState))
+						{
+							scanningStates.Add(ruleInfo->rootRuleStartState);
+						}
+						
+						while(currentState<scanningStates.Count())
+						{
+							State* state=scanningStates[currentState++];
+							stateIds.Add(state);
+
+							FOREACH(Transition*, transition, state->transitions)
+							{
+								if(!scanningStates.Contains(transition->target))
+								{
+									scanningStates.Add(transition->target);
+								}
+							}
+						}
+					}
+				}
+
+				vint tokenCount=definition->tokens.Count();
+				vint stateCount=stateIds.Count();
+
 				FOREACH(Ptr<ParsingDefinitionTokenDefinition>, token, definition->tokens)
 				{
 					ParsingSymbol* tokenSymbol=jointPDA->symbolManager->GetGlobal()->GetSubSymbolByName(token->name);
@@ -41,11 +69,11 @@ namespace vl
 					ParsingTable::RuleInfo info;
 					info.name=rule->name;
 					info.type=TypeToString(rule->type.Obj());
-					info.rootStartState=jointPDA->states.IndexOf(pdaRuleInfo->rootRuleStartState);
+					info.rootStartState=stateIds.IndexOf(pdaRuleInfo->rootRuleStartState);
 					table->SetRuleInfo(i, info);
 				}
 
-				FOREACH_INDEXER(Ptr<State>, state, i, jointPDA->states)
+				FOREACH_INDEXER(State*, state, i, stateIds)
 				{
 					ParsingTable::StateInfo info;
 					info.ruleName=state->ownerRule->name;
@@ -54,7 +82,7 @@ namespace vl
 					table->SetStateInfo(i, info);
 				}
 
-				FOREACH_INDEXER(Ptr<State>, state, stateIndex, jointPDA->states)
+				FOREACH_INDEXER(State*, state, stateIndex, stateIds)
 				{
 					FOREACH(Transition*, transition, state->transitions)
 					{
@@ -81,7 +109,7 @@ namespace vl
 
 						Ptr<ParsingTable::TransitionItem> item=new ParsingTable::TransitionItem;
 						item->token=tokenIndex;
-						item->targetState=jointPDA->states.IndexOf(transition->target);
+						item->targetState=stateIds.IndexOf(transition->target);
 						bag->transitionItems.Add(item);
 
 						FOREACH(Ptr<Action>, action, transition->actions)
@@ -123,20 +151,20 @@ namespace vl
 							case Action::Shift:
 								{
 									ins.instructionType=ParsingTable::Instruction::Shift;
-									ins.stateParameter=jointPDA->states.IndexOf(action->shiftReduceSource);
+									ins.stateParameter=stateIds.IndexOf(action->shiftReduceSource);
 								}
 								break;
 							case Action::Reduce:
 								{
 									ins.instructionType=ParsingTable::Instruction::Reduce;
-									ins.stateParameter=jointPDA->states.IndexOf(action->shiftReduceSource);
+									ins.stateParameter=stateIds.IndexOf(action->shiftReduceSource);
 									item->stackPattern.Add(ins.stateParameter);
 								}
 								break;
 							case Action::LeftRecursiveReduce:
 								{
 									ins.instructionType=ParsingTable::Instruction::LeftRecursiveReduce;
-									ins.stateParameter=jointPDA->states.IndexOf(action->shiftReduceSource);
+									ins.stateParameter=stateIds.IndexOf(action->shiftReduceSource);
 								}
 								break;
 							}
@@ -164,7 +192,7 @@ namespace vl
 										j==ParsingTable::TokenBegin?WString(L"$TokenBegin"):
 										j==ParsingTable::TokenFinish?WString(L"$TokenFinish"):
 										table->GetTokenInfo(j).name;
-									errors.Add(new ParsingError(jointPDA->states[i]->ownerRule, L"Conflict happened in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
+									errors.Add(new ParsingError(stateIds[i]->ownerRule, L"Conflict happened in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
 								}
 							}
 						}

@@ -728,7 +728,7 @@ Logger (ParsingTable)
 					WString content=
 						column==ParsingTable::TokenBegin?L"0: $TokenBegin":
 						column==ParsingTable::TokenFinish?L"1: $TokenFinish":
-						itow(column)+L": "+table->GetTokenInfo(column).name;
+						itow(column)+L": "+table->GetTokenInfo(column).name+L"\r\n  "+table->GetTokenInfo(column).regex;
 					stringTable[column+1]=content;
 				}
 				
@@ -749,7 +749,7 @@ Logger (ParsingTable)
 									content+=(index==0?L" : ":L", ");
 									content+=itow(state);
 								}
-								content+=L"\r\n >";
+								content+=L"\r\n  ";
 								FOREACH(ParsingTable::Instruction, ins, item->instructions)
 								{
 									switch(ins.instructionType)
@@ -795,6 +795,22 @@ Logger (ParsingTable)
 				writer.WriteLine(L"[-s]: Reduce[pop s]");
 				writer.WriteLine(L"[!s]: Left-Recursive-Reduce[fake s]");
 				writer.WriteLine(L"");
+
+				for(vint i=0;i<table->GetRuleCount();i++)
+				{
+					const ParsingTable::RuleInfo& ruleInfo=table->GetRuleInfo(i);
+					writer.WriteString(ruleInfo.name);
+					writer.WriteChar(L'<');
+					writer.WriteString(ruleInfo.type);
+					writer.WriteString(L">: ");
+					writer.WriteString(itow(ruleInfo.rootStartState));
+					writer.WriteChar(L'[');
+					writer.WriteString(table->GetStateInfo(ruleInfo.rootStartState).stateName);
+					writer.WriteChar(L']');
+					writer.WriteLine(L"");
+				}
+				writer.WriteLine(L"");
+
 				writer.WriteMonospacedEnglishTable(stringTable, rows, columns);
 			}
 		}
