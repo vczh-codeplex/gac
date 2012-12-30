@@ -103,6 +103,7 @@ TEST_CASE(TestParseNameList)
 
 			.Token(L"NAME", L"[a-zA-Z_]/w*")
 			.Token(L"COMMA", L",")
+			.Discard(L"SPACE", L"/s+")
 
 			.Rule(L"Name", Type(L"NameItemExpression"))
 				.Imply(
@@ -166,6 +167,7 @@ TEST_CASE(TestParsingExpression)
 			.Token(L"LEFT",		L"/(")
 			.Token(L"RIGHT",	L"/)")
 			.Token(L"COMMA",	L",")
+			.Discard(L"SPACE", L"/s+")
 
 			.Rule(L"Number", Type(L"NumberExpression"))
 				.Imply(

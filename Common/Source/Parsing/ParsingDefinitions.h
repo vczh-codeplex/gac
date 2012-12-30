@@ -271,6 +271,7 @@ namespace vl
 			public:
 				WString											name;
 				WString											regex;
+				bool											discard;
 			};
 
 			class ParsingDefinitionRuleDefinition : public ParsingTreeCustomBase
@@ -415,6 +416,7 @@ namespace vl
 
 				ParsingDefinitionWriter&						Type(const ParsingDefinitionTypeDefinitionWriter& type);
 				ParsingDefinitionWriter&						Token(const WString& name, const WString& regex);
+				ParsingDefinitionWriter&						Discard(const WString& name, const WString& regex);
 				ParsingDefinitionRuleDefinitionWriter			Rule(const WString& name, const ParsingDefinitionTypeWriter& type);
 
 				Ptr<ParsingDefinition>							Definition()const;

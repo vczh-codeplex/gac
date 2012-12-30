@@ -682,13 +682,15 @@ ValidateRuleStructure
 			class ValidateRuleStructureVisitor : public Object, public ParsingDefinitionGrammar::IVisitor
 			{
 			public:
+				Ptr<ParsingDefinition>				definition;
 				ParsingSymbolManager*				manager;
 				ParsingDefinitionRuleDefinition*	rule;
 				List<Ptr<ParsingError>>&			errors;
 				vint								loopCount;
 
-				ValidateRuleStructureVisitor(ParsingSymbolManager* _manager, ParsingDefinitionRuleDefinition* _rule, List<Ptr<ParsingError>>& _errors)
-					:manager(_manager)
+				ValidateRuleStructureVisitor(Ptr<ParsingDefinition> _definition, ParsingSymbolManager* _manager, ParsingDefinitionRuleDefinition* _rule, List<Ptr<ParsingError>>& _errors)
+					:definition(_definition)
+					,manager(_manager)
 					,errors(_errors)
 					,rule(_rule)
 					,loopCount(0)
@@ -726,6 +728,22 @@ ValidateRuleStructure
 					else switch(symbol->GetType())
 					{
 					case ParsingSymbol::TokenDef:
+						{
+							bool discard=false;
+							FOREACH(Ptr<ParsingDefinitionTokenDefinition>, token, definition->tokens)
+							{
+								if(token->name==symbol->GetName())
+								{
+									discard=token->discard;
+									break;
+								}
+							}
+							if(discard)
+							{
+								errors.Add(new ParsingError(node, L"Cannot use discard token \""+node->name+L"\" as input."));
+								break;
+							}
+						}
 					case ParsingSymbol::RuleDef:
 						{
 							ParsingSymbol* symbolType=symbol->GetDescriptorSymbol();
@@ -834,11 +852,11 @@ ValidateRuleStructure
 				}
 			};
 
-			void ValidateRuleStructure(Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
+			void ValidateRuleStructure(Ptr<definitions::ParsingDefinition> definition, Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
 			{
 				FOREACH(Ptr<ParsingDefinitionGrammar>, grammar, rule->grammars)
 				{
-					ValidateRuleStructureVisitor visitor(manager, rule.Obj(), errors);
+					ValidateRuleStructureVisitor visitor(definition, manager, rule.Obj(), errors);
 					grammar->Accept(&visitor);
 				}
 			}
@@ -1252,7 +1270,7 @@ ResolveSymbols
 				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules)
 				{
 					vint errorCount=errors.Count();
-					ValidateRuleStructure(rule, manager, errors);
+					ValidateRuleStructure(definition, rule, manager, errors);
 					if(errors.Count()==errorCount)
 					{
 						ResolveRuleSymbols(rule, manager, errors);

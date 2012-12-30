@@ -375,6 +375,17 @@ ParsingDefinitionWriter
 				Ptr<ParsingDefinitionTokenDefinition> token=new ParsingDefinitionTokenDefinition;
 				token->name=name;
 				token->regex=regex;
+				token->discard=false;
+				definition->tokens.Add(token);
+				return *this;
+			}
+
+			ParsingDefinitionWriter& ParsingDefinitionWriter::Discard(const WString& name, const WString& regex)
+			{
+				Ptr<ParsingDefinitionTokenDefinition> token=new ParsingDefinitionTokenDefinition;
+				token->name=name;
+				token->regex=regex;
+				token->discard=true;
 				definition->tokens.Add(token);
 				return *this;
 			}

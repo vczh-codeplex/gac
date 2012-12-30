@@ -512,7 +512,14 @@ Logger (ParsingDefinitionGrammar)
 				
 				FOREACH(Ptr<ParsingDefinitionTokenDefinition>, token, definition->tokens)
 				{
-					writer.WriteString(L"token ");
+					if(token->discard)
+					{
+						writer.WriteString(L"discardtoken ");
+					}
+					else
+					{
+						writer.WriteString(L"token ");
+					}
 					writer.WriteString(token->name);
 					writer.WriteString(L" = ");
 					LogString(token->regex, writer);
