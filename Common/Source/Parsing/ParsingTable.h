@@ -131,6 +131,12 @@ namespace vl
 				Ptr<TransitionBag>							GetTransitionBag(vint state, vint token);
 				void										SetTransitionBag(vint state, vint token, Ptr<TransitionBag> bag);
 			};
+
+/***********************************************************************
+¸¨Öúº¯Êý
+***********************************************************************/
+
+			extern void										Log(Ptr<ParsingTable> table, stream::TextWriter& writer);
 		}
 	}
 }

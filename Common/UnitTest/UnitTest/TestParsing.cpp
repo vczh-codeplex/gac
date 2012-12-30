@@ -79,6 +79,8 @@ namespace test
 		TEST_ASSERT(errors.Count()==0);
 
 		Ptr<ParsingTable> table=GenerateTable(definition, jointPDA, errors);
+		LogParsingData(table, L"Parsing."+name+L".Table.txt", L"Table", errors);
+		TEST_ASSERT(errors.Count()==0);
 	}
 }
 using namespace test;
