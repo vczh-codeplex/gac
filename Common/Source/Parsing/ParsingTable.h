@@ -107,7 +107,7 @@ namespace vl
 				};
 
 			protected:
-				regex::RegexLexer							lexer;
+				Ptr<regex::RegexLexer>						lexer;
 				collections::Array<Ptr<TransitionBag>>		transitionBags;
 				vint										tokenCount;
 				vint										stateCount;
@@ -117,7 +117,7 @@ namespace vl
 				collections::Array<RuleInfo>				ruleInfos;
 
 			public:
-				ParsingTable(const collections::List<WString>& tokenRegex, vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
+				ParsingTable(vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
 				~ParsingTable();
 
 				vint										GetTokenCount();
@@ -136,8 +136,30 @@ namespace vl
 				const RuleInfo&								GetRuleInfo(vint rule);
 				void										SetRuleInfo(vint rule, const RuleInfo& info);
 
+				const regex::RegexLexer&					GetLexer();
 				Ptr<TransitionBag>							GetTransitionBag(vint state, vint token);
 				void										SetTransitionBag(vint state, vint token, Ptr<TransitionBag> bag);
+				void										Initialize();
+				bool										IsInputToken(const regex::RegexToken& token);
+			};
+
+/***********************************************************************
+Óï·¨·ÖÎöÆ÷
+***********************************************************************/
+
+			class ParsingState : public Object
+			{
+			private:
+				WString										input;
+				Ptr<ParsingTable>							table;
+				collections::List<regex::RegexToken>		tokens;
+			public:
+				ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex=-1);
+				~ParsingState();
+
+				const WString&								GetInput();
+				Ptr<ParsingTable>							GetTable();
+				const collections::List<regex::RegexToken>&	GetTokens();
 			};
 
 /***********************************************************************
