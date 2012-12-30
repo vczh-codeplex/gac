@@ -821,5 +821,84 @@ Logger (ParsingTable)
 				writer.WriteMonospacedEnglishTable(stringTable, rows, columns);
 			}
 		}
+
+/***********************************************************************
+Logger (ParsingTreeNode)
+***********************************************************************/
+
+		class LogParsingTreeNodeVisitor : public Object, public ParsingTreeNode::IVisitor
+		{
+		protected:
+			TextWriter&				writer;
+			WString					prefix;
+		public:
+			LogParsingTreeNodeVisitor(TextWriter& _writer, const WString& _prefix)
+				:writer(_writer)
+				,prefix(_prefix)
+			{
+			}
+
+			void Write(ParsingTreeNode* node)
+			{
+				if(node)
+				{
+					node->Accept(this);
+				}
+				else
+				{
+					writer.WriteString(L"null");
+				}
+			}
+
+			void Visit(ParsingTreeToken* node)
+			{
+				writer.WriteChar(L'[');
+				writer.WriteString(node->GetValue());
+				writer.WriteChar(L']');
+			}
+
+			void Visit(ParsingTreeObject* node)
+			{
+				WString oldPrefix=prefix;
+				writer.WriteString(node->GetType());
+				writer.WriteLine(L" {");
+				prefix+=L"    ";
+				for(vint i=0;i<node->GetMembers().Count();i++)
+				{
+					writer.WriteString(prefix);
+					writer.WriteString(node->GetMembers().Keys().Get(i));
+					writer.WriteString(L" = ");
+					Write(node->GetMembers().Values().Get(i).Obj());
+					writer.WriteLine(L"");
+				}
+				prefix=oldPrefix;
+				writer.WriteString(prefix);
+				writer.WriteLine(L"}");
+			}
+
+			void Visit(ParsingTreeArray* node)
+			{
+				WString oldPrefix=prefix;
+				writer.WriteString(node->GetElementType());
+				writer.WriteLine(L"[] {");
+				prefix+=L"    ";
+				for(vint i=0;i<node->Count();i++)
+				{
+					writer.WriteString(prefix);
+					Write(node->GetItem(i).Obj());
+					writer.WriteLine(L",");
+				}
+				prefix=oldPrefix;
+				writer.WriteString(prefix);
+				writer.WriteLine(L"}");
+			}
+		};
+
+		void Log(Ptr<ParsingTreeNode> node, stream::TextWriter& writer, const WString& prefix)
+		{
+			writer.WriteString(prefix);
+			LogParsingTreeNodeVisitor visitor(writer, prefix);
+			node->Accept(&visitor);
+		}
 	}
 }
