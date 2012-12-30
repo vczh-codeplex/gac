@@ -281,11 +281,15 @@ ParsingState
 				RegexToken* regexToken=0;
 				while(0<=currentToken && currentToken<tokens.Count())
 				{
-					if(table->IsInputToken((regexToken=&tokens[currentToken++])->token))
+					if(table->IsInputToken((regexToken=&tokens[currentToken])->token))
 					{
 						break;
 					}
-					regexToken=0;
+					else
+					{
+						regexToken=0;
+						currentToken++;
+					}
 				}
 				if(currentToken==-1)
 				{
@@ -303,6 +307,7 @@ ParsingState
 				{
 					return TransitionResult();
 				}
+				currentToken++;
 
 				ParsingTable::TransitionBag* bag=table->GetTransitionBag(currentState, token).Obj();
 				if(bag)
@@ -310,7 +315,7 @@ ParsingState
 					for(vint i=0;i<bag->transitionItems.Count();i++)
 					{
 						ParsingTable::TransitionItem* item=bag->transitionItems[i].Obj();
-						if(item->stackPattern.Count()>=stateStack.Count())
+						if(item->stackPattern.Count()<=stateStack.Count())
 						{
 							if(token!=ParsingTable::TokenFinish || item->stackPattern.Count()==stateStack.Count())
 							{
