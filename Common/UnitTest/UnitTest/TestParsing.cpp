@@ -240,9 +240,16 @@ TEST_CASE(TestParseNameList)
 	}
 
 	Ptr<ParsingTable> table=CreateTable(definition, L"NameList");
-	Parse(table, L"vczh", L"NameList", L"NameList", 0);
-	Parse(table, L"vczh, genius", L"NameList", L"NameList", 1);
-	Parse(table, L"vczh, genius, programmer", L"NameList", L"NameList", 2);
+	const wchar_t* inputs[]=
+	{
+		L"vczh",
+		L"vczh, genius",
+		L"vczh, genius, programmer",
+	};
+	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
+	{
+		Parse(table, inputs[i], L"NameList", L"NameList", i);
+	}
 }
 
 TEST_CASE(TestParsingExpression)
@@ -279,7 +286,7 @@ TEST_CASE(TestParsingExpression)
 			)
 
 			.Token(L"NAME",		L"[a-zA-Z_]/w*")
-			.Token(L"NUMBER",	L"/d+(./d+)")
+			.Token(L"NUMBER",	L"/d+(./d+)?")
 			.Token(L"ADD",		L"/+")
 			.Token(L"SUB",		L"-")
 			.Token(L"MUL",		L"/*")
@@ -340,4 +347,12 @@ TEST_CASE(TestParsingExpression)
 	}
 
 	Ptr<ParsingTable> table=CreateTable(definition, L"Calculator");
+	const wchar_t* inputs[]=
+	{
+		L"0",
+	};
+	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
+	{
+		Parse(table, inputs[i], L"Calculator", L"Exp", i);
+	}
 }
