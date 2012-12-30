@@ -197,6 +197,24 @@ namespace vl
 			};
 
 /***********************************************************************
+语法树生成器
+***********************************************************************/
+
+			class ParsingTreeBuilder : public Object
+			{
+			protected:
+				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
+
+			public:
+				ParsingTreeBuilder();
+				~ParsingTreeBuilder();
+
+				void										Reset();
+				void										Run(const ParsingState::TransitionResult& result);
+				Ptr<ParsingTreeObject>						GetNode();
+			};
+
+/***********************************************************************
 辅助函数
 ***********************************************************************/
 
