@@ -234,6 +234,8 @@ ParsingState
 			ParsingState::ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex)
 				:input(_input)
 				,table(_table)
+				,currentState(-1)
+				,currentToken(-1)
 			{
 				CopyFrom(tokens, table->GetLexer().Parse(input, codeIndex));
 			}
@@ -255,6 +257,27 @@ ParsingState
 			const collections::List<regex::RegexToken>& ParsingState::GetTokens()
 			{
 				return tokens;
+			}
+
+			vint ParsingState::Reset(const WString& rule)
+			{
+				for(vint i=0;i<table->GetRuleCount();i++)
+				{
+					const ParsingTable::RuleInfo& info=table->GetRuleInfo(i);
+					if(info.name==rule)
+					{
+						stateStack.Clear();
+						currentState=info.rootStartState;
+						currentToken=-1;
+						return currentState;
+					}
+				}
+				return -1;
+			}
+
+			ParsingState::TransitionResult ParsingState::ReadToken()
+			{
+				return TransitionResult();
 			}
 		}
 	}
