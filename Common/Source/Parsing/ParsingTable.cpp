@@ -303,6 +303,45 @@ ParsingState
 				{
 					return TransitionResult();
 				}
+
+				ParsingTable::TransitionBag* bag=table->GetTransitionBag(currentState, token).Obj();
+				if(bag)
+				{
+					for(vint i=0;i<bag->transitionItems.Count();i++)
+					{
+						ParsingTable::TransitionItem* item=bag->transitionItems[i].Obj();
+						if(item->stackPattern.Count()>=stateStack.Count())
+						{
+							if(token!=ParsingTable::TokenFinish || item->stackPattern.Count()==stateStack.Count())
+							{
+								bool match=true;
+								for(vint j=0;j<item->stackPattern.Count();j++)
+								{
+									if(item->stackPattern[j]!=stateStack[stateStack.Count()-1-j])
+									{
+										match=false;
+										break;
+									}
+								}
+
+								if(match)
+								{
+									TransitionResult result;
+									result.tableTokenIndex=token;
+									result.token=regexToken;
+									result.tableStateSource=currentState;
+									result.tableStateTarget=item->targetState;
+									result.transition=item;
+
+									currentState=item->targetState;
+									return result;
+								}
+							}
+						}
+					}
+				}
+
+				return TransitionResult();
 			}
 
 			const collections::List<vint>& ParsingState::GetStateStack()
