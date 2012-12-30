@@ -367,6 +367,39 @@ ParsingState
 			{
 				return stateStack;
 			}
+
+/***********************************************************************
+ParsingTreeBuilder
+***********************************************************************/
+
+			ParsingTreeBuilder::ParsingTreeBuilder()
+			{
+			}
+
+			ParsingTreeBuilder::~ParsingTreeBuilder()
+			{
+			}
+
+			void ParsingTreeBuilder::Reset()
+			{
+				nodeStack.Add(new ParsingTreeObject());
+			}
+
+			void ParsingTreeBuilder::Run(const ParsingState::TransitionResult& result)
+			{
+			}
+
+			Ptr<ParsingTreeObject> ParsingTreeBuilder::GetNode()
+			{
+				if(nodeStack.Count()==1)
+				{
+					return nodeStack[0];
+				}
+				else
+				{
+					return 0;
+				}
+			}
 		}
 	}
 }

@@ -94,6 +94,8 @@ namespace test
 		StreamWriter writer(encoderStream);
 
 		ParsingState state(input, table);
+		ParsingTreeBuilder builder;
+		builder.Reset();
 
 		writer.WriteLine(L"=============================================================");
 		writer.WriteLine(L"Input");
@@ -197,6 +199,11 @@ namespace test
 		writer.WriteLine(L"=============================================================");
 		writer.WriteLine(L"Tree");
 		writer.WriteLine(L"=============================================================");
+		Ptr<ParsingTreeNode> node=builder.GetNode();
+		if(node)
+		{
+			Log(node, writer);
+		}
 	}
 }
 using namespace test;

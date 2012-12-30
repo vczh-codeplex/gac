@@ -216,7 +216,7 @@ namespace vl
 辅助函数
 ***********************************************************************/
 
-		extern void						Log(Ptr<ParsingTreeNode> node, stream::TextWriter& writer, const WString& prefix);
+		extern void						Log(Ptr<ParsingTreeNode> node, stream::TextWriter& writer, const WString& prefix=L"");
 
 /***********************************************************************
 语法树基础设施
