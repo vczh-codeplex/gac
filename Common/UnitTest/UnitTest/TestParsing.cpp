@@ -147,7 +147,15 @@ namespace test
 					writer.WriteString(WString(result.token->reading, result.token->length));
 					writer.WriteString(L"] => ");
 				}
-				writer.WriteLine(table->GetStateInfo(result.tableStateTarget).stateName);
+				writer.WriteLine(itow(result.tableStateTarget)+L"["+table->GetStateInfo(result.tableStateTarget).stateName+L"]");
+
+				writer.WriteString(L"    State Stack: ");
+				FOREACH_INDEXER(vint, stateIndex, i, state.GetStateStack())
+				{
+					if(i!=0) writer.WriteString(L", ");
+					writer.WriteString(itow(stateIndex)+L"["+table->GetStateInfo(stateIndex).stateName+L"]");
+				}
+				writer.WriteLine(L"");
 
 				FOREACH(ParsingTable::Instruction, ins, result.transition->instructions)
 				{
@@ -169,13 +177,13 @@ namespace test
 						writer.WriteLine(L"    Setter "+ins.nameParameter+L" = "+ins.value);
 						break;
 					case ParsingTable::Instruction::Shift:
-						writer.WriteLine(L"    Shift "+table->GetStateInfo(ins.stateParameter).ruleName);
+						writer.WriteLine(L"    Shift "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
 						break;
 					case ParsingTable::Instruction::Reduce:
-						writer.WriteLine(L"    Reduce "+table->GetStateInfo(ins.stateParameter).ruleName);
+						writer.WriteLine(L"    Reduce "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
 						break;
 					case ParsingTable::Instruction::LeftRecursiveReduce:
-						writer.WriteLine(L"    LR-Reduce "+table->GetStateInfo(ins.stateParameter).ruleName);
+						writer.WriteLine(L"    LR-Reduce "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
 						break;
 					}
 				}

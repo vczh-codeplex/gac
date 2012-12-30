@@ -277,7 +277,37 @@ ParsingState
 
 			ParsingState::TransitionResult ParsingState::ReadToken()
 			{
-				return TransitionResult();
+				vint token=-1;
+				RegexToken* regexToken=0;
+				while(0<=currentToken && currentToken<tokens.Count())
+				{
+					if(table->IsInputToken((regexToken=&tokens[currentToken++])->token))
+					{
+						break;
+					}
+					regexToken=0;
+				}
+				if(currentToken==-1)
+				{
+					token=ParsingTable::TokenBegin;
+				}
+				else if(currentToken==tokens.Count())
+				{
+					token=ParsingTable::TokenFinish;
+				}
+				else if(0<=currentToken && currentToken<tokens.Count())
+				{
+					token=table->GetTableTokenIndex(regexToken->token);
+				}
+				else
+				{
+					return TransitionResult();
+				}
+			}
+
+			const collections::List<vint>& ParsingState::GetStateStack()
+			{
+				return stateStack;
 			}
 		}
 	}
