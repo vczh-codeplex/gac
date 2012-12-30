@@ -60,6 +60,7 @@ namespace vl
 					{
 						Create,
 						Assign,
+						Item,
 						Using,
 						Setter,
 						Shift,

@@ -16,6 +16,7 @@ Classes:
 #define VCZH_STREAM_ACCESSOR
 
 #include "Interfaces.h"
+#include "..\Collections\List.h"
 #include "..\String.h"
 
 namespace vl
@@ -47,6 +48,8 @@ namespace vl
 			virtual void				WriteLine(const wchar_t* string, vint charCount);
 			virtual void				WriteLine(const wchar_t* string);
 			virtual void				WriteLine(const WString& string);
+
+			virtual void				WriteMonospacedEnglishTable(collections::Array<WString>& tableByRow, vint rows, vint columns);
 		};
 
 		class StringReader : public TextReader

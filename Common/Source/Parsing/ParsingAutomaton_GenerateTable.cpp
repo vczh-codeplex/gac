@@ -102,7 +102,14 @@ namespace vl
 								break;
 							case Action::Assign:
 								{
-									ins.instructionType=ParsingTable::Instruction::Assign;
+									if(action->actionSource->GetDescriptorSymbol()->GetType()==ParsingSymbol::ArrayType)
+									{
+										ins.instructionType=ParsingTable::Instruction::Item;
+									}
+									else
+									{
+										ins.instructionType=ParsingTable::Instruction::Assign;
+									}
 									ins.nameParameter=action->actionSource->GetName();
 								}
 								break;

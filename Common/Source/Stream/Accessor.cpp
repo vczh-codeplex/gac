@@ -5,6 +5,7 @@ namespace vl
 {
 	namespace stream
 	{
+		using namespace collections;
 
 /***********************************************************************
 TextReader
@@ -141,6 +142,27 @@ TextWriter
 		{
 			WriteString(string);
 			WriteString(L"\r\n", 2);
+		}
+
+		void TextWriter::WriteMonospacedEnglishTable(collections::Array<WString>& tableByRow, vint rows, vint columns)
+		{
+			Array<vint> rowHeights(rows);
+			Array<vint> columnWidths(columns);
+			for(vint i=0;i<rows;i++) rowHeights[i]=0;
+			for(vint j=0;j<columns;j++) columnWidths[j]=0;
+
+			for(vint i=0;i<rows;i++)
+			{
+				for(vint j=0;j<columns;j++)
+				{
+					WString text=tableByRow[i*columns+j];
+					const wchar_t* reading=text.Buffer();
+					vint width=0;
+					vint height=0;
+
+
+				}
+			}
 		}
 
 /***********************************************************************
