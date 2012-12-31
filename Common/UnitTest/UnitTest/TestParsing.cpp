@@ -527,6 +527,7 @@ TEST_CASE(TestParsingStatement)
 		L"if a < b then if b < c then return c else return b",
 		L"if a < b then if b < c then return c else return b else return a",
 		L"if a > b then { a = b if c <= d then e = f g = h } else { if a != b then return a else return b }",
+		L"if a < b then if a > b then if a <= b then if a >= b then if a == b then if a != b then return null",
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
