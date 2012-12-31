@@ -206,7 +206,7 @@ namespace vl
 								Ptr<ParsingTable::TransitionItem> t2=bag->transitionItems[k+1];
 								if(ParsingTable::TransitionItem::CheckOrder(t1, t2, false)==ParsingTable::TransitionItem::UnknownOrder)
 								{
-									WString stateName=table->GetStateInfo(i).stateName;
+									WString stateName=itow(i)+L"["+table->GetStateInfo(i).stateName+L"]";
 									WString tokenName=
 										j==ParsingTable::TokenBegin?WString(L"$TokenBegin"):
 										j==ParsingTable::TokenFinish?WString(L"$TokenFinish"):
