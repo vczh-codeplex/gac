@@ -368,3 +368,101 @@ TEST_CASE(TestParsingExpression)
 		Parse(table, inputs[i], L"Calculator", L"Exp", i);
 	}
 }
+
+TEST_CASE(TestParsingStatement)
+{
+	Ptr<ParsingDefinition> definition;
+	{
+		ParsingDefinitionWriter definitionWriter;
+
+		definitionWriter
+			.Type(
+				Class(L"ValueExpression")
+					.Member(L"content", TokenType())
+				)
+			.Type(
+				Class(L"ConditionExpression")
+					.SubType(
+						Enum(L"ConditionOperator")
+							.Member(L"LT")
+							.Member(L"LE")
+							.Member(L"GT")
+							.Member(L"GE")
+							.Member(L"EQ")
+							.Member(L"NE")
+						)
+					.Member(L"leftOperand", Type(L"ValueExpression"))
+					.Member(L"rightOperand", Type(L"ValueExpression"))
+					.Member(L"conditionOperator", Type(L"ConditionOperator"))
+				)
+			.Type(
+				Class(L"Statement")
+				)
+			.Type(
+				Class(L"IfElseStatement", Type(L"Statement"))
+					.Member(L"condition", Type(L"ConditionExpression"))
+					.Member(L"trueStatement", Type(L"Statement"))
+					.Member(L"falseStatement", Type(L"Statement"))
+				)
+			.Type(
+				Class(L"AssignStatement", Type(L"Statement"))
+					.Member(L"leftOperand", Type(L"ValueExpression"))
+					.Member(L"rightOperand", Type(L"ValueExpression"))
+				)
+			.Type(
+				Class(L"ReturnStatement", Type(L"Statement"))
+					.Member(L"result", Type(L"ValueExpression"))
+				)
+
+			.Token(L"IF", L"if")
+			.Token(L"ELSE", L"else")
+			.Token(L"RETURN", L"return")
+			.Token(L"LEFT", L"/(")
+			.Token(L"RIGHT", L"/)")
+			.Token(L"LT", L"/<")
+			.Token(L"LE", L"/</=")
+			.Token(L"GT", L"/>")
+			.Token(L"GE", L"/>/=")
+			.Token(L"EQ", L"/=/=")
+			.Token(L"NE", L"/!/=")
+			.Token(L"VALUE", L"[a-zA-Z_]/w+")
+
+			.Rule(L"Value", Type(L"ValueExpression"))
+				.Imply(
+					(Rule(L"VALUE")[L"content"]).As(Type(L"ValueExpression"))
+					)
+				.EndRule()
+
+			.Rule(L"Condition", Type(L"ConditionExpression"))
+				.Imply(
+					(Rule(L"Value")[L"leftOperand"] + Text(L"<") + Rule(L"Value")[L"rightOperand"])
+						.As(Type(L"ConditionExpression")).Set(L"conditionOperator", L"LT")
+					)
+				.Imply(
+					(Rule(L"Value")[L"leftOperand"] + Text(L"<=") + Rule(L"Value")[L"rightOperand"])
+						.As(Type(L"ConditionExpression")).Set(L"conditionOperator", L"LE")
+					)
+				.Imply(
+					(Rule(L"Value")[L"leftOperand"] + Text(L">") + Rule(L"Value")[L"rightOperand"])
+						.As(Type(L"ConditionExpression")).Set(L"conditionOperator", L"GT")
+					)
+				.Imply(
+					(Rule(L"Value")[L"leftOperand"] + Text(L">=") + Rule(L"Value")[L"rightOperand"])
+						.As(Type(L"ConditionExpression")).Set(L"conditionOperator", L"GE")
+					)
+				.Imply(
+					(Rule(L"Value")[L"leftOperand"] + Text(L"==") + Rule(L"Value")[L"rightOperand"])
+						.As(Type(L"ConditionExpression")).Set(L"conditionOperator", L"EQ")
+					)
+				.Imply(
+					(Rule(L"Value")[L"leftOperand"] + Text(L"!=") + Rule(L"Value")[L"rightOperand"])
+						.As(Type(L"ConditionExpression")).Set(L"conditionOperator", L"NE")
+					)
+				.EndRule()
+			;
+
+		definition=definitionWriter.Definition();
+	}
+
+	Ptr<ParsingTable> table=CreateTable(definition, L"Statement");
+}
