@@ -233,7 +233,10 @@ MarkLeftRecursiveInJointPDA
 									}
 								}
 							}
-							leftRecursiveShifts.Add(Pair<State*, State*>(shiftAction->shiftReduceSource, shiftAction->shiftReduceTarget));
+							if(shiftAction)
+							{
+								leftRecursiveShifts.Add(Pair<State*, State*>(shiftAction->shiftReduceSource, shiftAction->shiftReduceTarget));
+							}
 						FOUND_INDIRECT_LEFT_RECURSIVE_TRANSITION:
 							jointPDA->DeleteTransition(transition);
 						}

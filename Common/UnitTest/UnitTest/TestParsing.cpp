@@ -23,20 +23,6 @@ extern WString GetPath();
 
 namespace test
 {
-	void LogError(List<Ptr<ParsingError>>& errors, StreamWriter& writer)
-	{
-		if(errors.Count()>0)
-		{
-			writer.WriteLine(L"=============================================================");
-			writer.WriteLine(L"Errors");
-			writer.WriteLine(L"=============================================================");
-			FOREACH(Ptr<ParsingError>, error, errors)
-			{
-				writer.WriteLine(error->errorMessage);
-			}
-		}
-	}
-
 	template<typename TLoggable>
 	void LogParsingData(TLoggable loggable, const WString& fileName, const WString& name, List<Ptr<ParsingError>>& errors=*(List<Ptr<ParsingError>>*)0)
 	{
@@ -50,9 +36,16 @@ namespace test
 		writer.WriteLine(L"=============================================================");
 		Log(loggable, writer);
 
-		if(&errors)
+		if(&errors && errors.Count()>0)
 		{
-			LogError(errors, writer);
+			writer.WriteLine(L"=============================================================");
+			writer.WriteLine(L"Errors");
+			writer.WriteLine(L"=============================================================");
+			FOREACH(Ptr<ParsingError>, error, errors)
+			{
+				writer.WriteLine(error->errorMessage);
+			}
+			unittest::UnitTest::PrintInfo(L"Errors are logged in \""+fileName+L"\".");
 		}
 	}
 
