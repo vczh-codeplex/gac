@@ -142,6 +142,9 @@ namespace test
 						writer.WriteString(L"$TokenFinish => ");
 						meetTokenFinish=true;
 						break;
+					case ParsingTable::TryReduce:
+						writer.WriteString(L"TryReduce => ");
+						break;
 					default:
 						writer.WriteString(table->GetTokenInfo(result.tableTokenIndex).name);
 						writer.WriteString(L"[");
@@ -366,6 +369,7 @@ TEST_CASE(TestParsingExpression)
 		L"1*2+3*4",
 		L"(1+2)*(3+4)",
 		L"exp()-pow(cos(1.57*2), 4)",
+		L"1+1+1+1+1+1",
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
@@ -517,7 +521,9 @@ TEST_CASE(TestParsingStatement)
 		L"a = b",
 		L"return value",
 		L"{}",
-		L"{ a = b c = d return e }"
+		L"{ a = b c = d return e }",
+		L"if a < b then return a else return b",
+		L"{ if a < b then return a else return b }",
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{

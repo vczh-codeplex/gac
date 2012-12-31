@@ -632,6 +632,9 @@ Logger (Automaton)
 							case Transition::TokenFinish:
 								writer.WriteString(L"    TOKEN-FINISH");
 								break;
+							case Transition::TryReduce:
+								writer.WriteString(L"    TRY-REDUCE");
+								break;
 							case Transition::Symbol:
 								{
 									writer.WriteString(L"    ");
@@ -735,6 +738,7 @@ Logger (ParsingTable)
 					WString content=
 						column==ParsingTable::TokenBegin?L"0: $TokenBegin":
 						column==ParsingTable::TokenFinish?L"1: $TokenFinish":
+						column==ParsingTable::TryReduce?L"2: $TryReduce":
 						itow(column)+L": "+table->GetTokenInfo(column).name+L"\r\n  "+table->GetTokenInfo(column).regex;
 					stringTable[column+1]=content;
 				}

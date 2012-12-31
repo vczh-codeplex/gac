@@ -232,6 +232,13 @@ Automaton
 				return transition;
 			}
 
+			Transition* Automaton::TryReduce(State* start, State* end)
+			{
+				Transition* transition=CreateTransition(start, end);
+				transition->transitionType=Transition::TryReduce;
+				return transition;
+			}
+
 			Transition* Automaton::Epsilon(State* start, State* end)
 			{
 				Transition* transition=CreateTransition(start, end);

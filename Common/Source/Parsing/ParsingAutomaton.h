@@ -58,10 +58,11 @@ namespace vl
 			public:
 				enum TransitionType
 				{
-					TokenBegin,
-					TokenFinish,
-					Epsilon,
-					Symbol,
+					TokenBegin,		// token stream start
+					TokenFinish,	// token stream end
+					TryReduce,		// rule end
+					Epsilon,		// an epsilon transition
+					Symbol,			// a syntax symbol
 				};
 
 				enum StackOperationType
@@ -145,6 +146,7 @@ namespace vl
 				Transition*											CreateTransition(State* start, State* end);
 				Transition*											TokenBegin(State* start, State* end);
 				Transition*											TokenFinish(State* start, State* end);
+				Transition*											TryReduce(State* start, State* end);
 				Transition*											Epsilon(State* start, State* end);
 				Transition*											Symbol(State* start, State* end, ParsingSymbol* transitionSymbol);
 				Transition*											CopyTransition(State* start, State* end, Transition* oldTransition);
