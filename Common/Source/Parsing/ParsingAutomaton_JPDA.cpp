@@ -110,17 +110,6 @@ CreateJointPDAFromNondeterministicPDA
 									reduceTransition->actions.Add(action);
 									CopyFrom(reduceTransition->actions, oldTransition->actions, true);
 								}
-
-								FOREACH(State*, oldEndState, oldRuleInfo->endStates)
-								{
-									Transition* reduceTransition=automaton->TryReduce(oldNewStateMap[oldEndState], newTarget);
-									Ptr<Action> action=new Action;
-									action->actionType=Action::Reduce;
-									action->shiftReduceSource=newSource;
-									action->shiftReduceTarget=newTarget;
-									reduceTransition->actions.Add(action);
-									CopyFrom(reduceTransition->actions, oldTransition->actions, true);
-								}
 							}
 							else
 							{
@@ -161,21 +150,48 @@ CompactJointPDA
 
 					FOREACH(ClosureItem, closureItem, closure)
 					{
-						Transition::StackOperationType stackOperationType=Transition::None;
 						Transition* lastTransition=closureItem.transitions->Get(closureItem.transitions->Count()-1);
+						Transition::StackOperationType stackOperationType=Transition::None;
+						Transition::TransitionType transitionType=lastTransition->transitionType;
 
 						if(closureItem.cycle && lastTransition->transitionType==Transition::Epsilon)
 						{
-							// a left recursive compacted transition is found
-							// if the left recursive state is not the current state
-							// that means this transition path fall into other left recursive state
-							// e.g.
-							//     Term = Factor | Term (here is a left recursion) * Factor
-							//     Exp = Term (this rule symbol transition will fall into Term's left recursive state) ...
-							// if such a case happened, this transition path will be simply discarded
-							if(closureItem.state==currentState)
+							bool containsShift=false;
+							bool containsReduce=false;
+							FOREACH(Transition*, pathTransition, *closureItem.transitions.Obj())
 							{
-								stackOperationType=Transition::LeftRecursive;
+								FOREACH(Ptr<Action>, action, pathTransition->actions)
+								{
+									if(action->actionType==Action::Shift) containsShift=true;
+									if(action->actionType==Action::Reduce) containsReduce=true;
+								}
+							}
+							if(containsShift && !containsReduce)
+							{
+								// a left recursive compacted shift transition is found
+								// if the left recursive state is not the current state
+								// that means this transition path fall into other left recursive state
+								// e.g.
+								//     Term = Factor | Term (here is a left recursion) * Factor
+								//     Exp = Term (this rule symbol transition will fall into Term's left recursive state) ...
+								// if such a case happened, this transition path will be simply discarded
+								if(closureItem.state==currentState)
+								{
+									stackOperationType=Transition::LeftRecursive;
+								}
+							}
+							else if(!containsShift && containsReduce)
+							{
+								// a right recursive compacted reduce transition is found
+								// if this state will receive $TokenFinish, then the stack pattern number can be infinite
+								// e.g. for right recursive expression "a b c" == "(a (b c))"
+								// when trying to do a transition by $TokenFinish
+								//     "a b" should reduce once
+								//     "a b c" should reduce twice
+								// if such a case happened, a $TryReduce transition should be added
+
+								stackOperationType=Transition::ShiftReduceCompacted;
+								transitionType=Transition::TryReduce;
 							}
 						}
 						else if(closureItem.transitions->Count()>1)
@@ -189,6 +205,7 @@ CompactJointPDA
 						{
 							// build shift-reduce-compacted transition to the target state of the path
 							Transition* transition=jointPDA->CopyTransition(currentState, lastTransition->target, lastTransition);
+							transition->transitionType=transitionType;
 							transition->stackOperationType=stackOperationType;
 
 							// there will be <shift* token>, <reduce* token> or <reduce* shift* token>
