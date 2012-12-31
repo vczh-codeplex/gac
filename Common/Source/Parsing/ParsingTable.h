@@ -196,6 +196,7 @@ namespace vl
 
 				vint										Reset(const WString& rule);
 				TransitionResult							ReadToken();
+				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken=0);
 				const collections::List<vint>&				GetStateStack();
 			};
 

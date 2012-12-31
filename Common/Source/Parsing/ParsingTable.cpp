@@ -307,9 +307,25 @@ ParsingState
 				{
 					return TransitionResult();
 				}
-				currentToken++;
 
-				ParsingTable::TransitionBag* bag=table->GetTransitionBag(currentState, token).Obj();
+				bool tryReduce=false;
+				TransitionResult result=ReadToken(token, regexToken);
+				if(!result)
+				{
+					result=ReadToken(ParsingTable::TryReduce, 0);
+					tryReduce=true;
+				}
+
+				if(result && !tryReduce)
+				{
+					currentToken++;
+				}
+				return result;
+			}
+
+			ParsingState::TransitionResult ParsingState::ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken)
+			{
+				ParsingTable::TransitionBag* bag=table->GetTransitionBag(currentState, tableTokenIndex).Obj();
 				if(bag)
 				{
 					for(vint i=0;i<bag->transitionItems.Count();i++)
@@ -317,7 +333,7 @@ ParsingState
 						ParsingTable::TransitionItem* item=bag->transitionItems[i].Obj();
 						if(item->stackPattern.Count()<=stateStack.Count())
 						{
-							if(token!=ParsingTable::TokenFinish || item->stackPattern.Count()==stateStack.Count())
+							if(tableTokenIndex!=ParsingTable::TokenFinish || item->stackPattern.Count()==stateStack.Count())
 							{
 								bool match=true;
 								for(vint j=0;j<item->stackPattern.Count();j++)
@@ -346,9 +362,9 @@ ParsingState
 									}
 
 									TransitionResult result;
-									result.tableTokenIndex=token;
+									result.tableTokenIndex=tableTokenIndex;
 									result.token=regexToken;
-									result.tokenIndexInStream=regexToken?currentToken-1:-1;
+									result.tokenIndexInStream=regexToken?currentToken:-1;
 									result.tableStateSource=currentState;
 									result.tableStateTarget=item->targetState;
 									result.transition=item;
@@ -360,7 +376,6 @@ ParsingState
 						}
 					}
 				}
-
 				return TransitionResult();
 			}
 
