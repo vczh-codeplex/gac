@@ -413,18 +413,24 @@ TEST_CASE(TestParsingStatement)
 				Class(L"ReturnStatement", Type(L"Statement"))
 					.Member(L"result", Type(L"ValueExpression"))
 				)
+			.Type(
+				Class(L"BlockStatement", Type(L"Statement"))
+					.Member(L"statements", Type(L"Statement").Array())
+				)
 
 			.Token(L"IF", L"if")
+			.Token(L"THEN", L"then")
 			.Token(L"ELSE", L"else")
 			.Token(L"RETURN", L"return")
-			.Token(L"LEFT", L"/(")
-			.Token(L"RIGHT", L"/)")
+			.Token(L"OPEN", L"/{")
+			.Token(L"CLOSE", L"/}")
 			.Token(L"LT", L"/<")
 			.Token(L"LE", L"/</=")
 			.Token(L"GT", L"/>")
 			.Token(L"GE", L"/>/=")
 			.Token(L"EQ", L"/=/=")
 			.Token(L"NE", L"/!/=")
+			.Token(L"ASSIGN", L"/=")
 			.Token(L"VALUE", L"[a-zA-Z_]/w+")
 
 			.Rule(L"Value", Type(L"ValueExpression"))
@@ -458,6 +464,42 @@ TEST_CASE(TestParsingStatement)
 					(Rule(L"Value")[L"leftOperand"] + Text(L"!=") + Rule(L"Value")[L"rightOperand"])
 						.As(Type(L"ConditionExpression")).Set(L"conditionOperator", L"NE")
 					)
+				.EndRule()
+
+			.Rule(L"Assign", Type(L"AssignStatement"))
+				.Imply(
+					(Rule(L"Value")[L"leftOperand"] + Text(L"=") + Rule(L"Value")[L"rightOperand"])
+						.As(Type(L"AssignStatement"))
+					)
+				.EndRule()
+
+			.Rule(L"Return", Type(L"ReturnStatement"))
+				.Imply(
+					(Text(L"return") + Rule(L"Value")[L"result"])
+						.As(Type(L"ReturnStatement"))
+					)
+				.EndRule()
+
+			.Rule(L"Block", Type(L"BlockStatement"))
+				.Imply(
+					(Text(L"{") + *Rule(L"Stat")[L"statements"] + Text(L"}"))
+						.As(Type(L"BlockStatement"))
+					)
+				.EndRule()
+
+			.Rule(L"IfElse", Type(L"IfElseStatement"))
+				.Imply(
+					(
+						Text(L"if") + Rule(L"Condition")[L"condition"] +
+						Text(L"then") + Rule(L"Stat")[L"trueStatement"] +
+						Opt(Text(L"else") + Rule(L"Stat")[L"falseStatement"])
+						)
+						.As(Type(L"IfElseStatement"))
+					)
+				.EndRule()
+
+			.Rule(L"Stat", Type(L"Statement"))
+				.Imply(!Rule(L"Assign") | !Rule(L"Return") | !Rule(L"Block") | !Rule(L"IfElse"))
 				.EndRule()
 			;
 

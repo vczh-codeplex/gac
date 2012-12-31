@@ -658,7 +658,7 @@ PrepareSymbols
 				{
 					if(manager->GetGlobal()->GetSubSymbolByName(rule->name))
 					{
-						errors.Add(new ParsingError(rule.Obj(), L"Cannot redefine \""+rule->name+L"\" to be a token definition."));
+						errors.Add(new ParsingError(rule.Obj(), L"Cannot redefine \""+rule->name+L"\" to be a rule definition."));
 					}
 					else
 					{
