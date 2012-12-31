@@ -40,7 +40,7 @@ CreateNondeterministicPDAFromEpsilonPDA::closure_searching
 				{
 					FOREACH(Transition*, singleTransitionPath, transitionPath)
 					{
-						if(singleTransitionPath->source==state)
+						if(singleTransitionPath->source==state && closurePredicate(singleTransitionPath)!=Blocked)
 						{
 							Ptr<List<Transition*>> path=new List<Transition*>;
 							CopyFrom(*path.Obj(), transitionPath);
