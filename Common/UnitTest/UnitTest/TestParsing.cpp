@@ -81,122 +81,133 @@ namespace test
 
 	void Parse(Ptr<ParsingTable> table, const WString& input, const WString& name, const WString& rule, vint index)
 	{
-		FileStream fileStream(GetPath()+L"Parsing."+name+L".["+itow(index)+L"].txt", FileStream::WriteOnly);
-		BomEncoder encoder(BomEncoder::Utf16);
-		EncoderStream encoderStream(fileStream, encoder);
-		StreamWriter writer(encoderStream);
-
-		ParsingState state(input, table);
-		ParsingTreeBuilder builder;
-		builder.Reset();
-
-		writer.WriteLine(L"=============================================================");
-		writer.WriteLine(L"Input");
-		writer.WriteLine(L"=============================================================");
-		writer.WriteLine(input);
-
-		writer.WriteLine(L"=============================================================");
-		writer.WriteLine(L"Tokens");
-		writer.WriteLine(L"=============================================================");
-		FOREACH(RegexToken, token, state.GetTokens())
+		unittest::UnitTest::PrintInfo(L"Parsing: "+input);
+		bool meetTokenFinish=false;
+		Ptr<ParsingTreeNode> node;
 		{
-			WString tokenName;
-			if(token.token==-1)
-			{
-				tokenName=L"<ERROR>";
-			}
-			else if(table->IsInputToken(token.token))
-			{
-				tokenName=table->GetTokenInfo(table->GetTableTokenIndex(token.token)).name;
-			}
-			else
-			{
-				tokenName=table->GetDiscardTokenInfo(table->GetTableDiscardTokenIndex(token.token)).name;
-			}
-			writer.WriteLine(tokenName+L": "+WString(token.reading, token.length));
-		}
+			FileStream fileStream(GetPath()+L"Parsing."+name+L".["+itow(index)+L"].txt", FileStream::WriteOnly);
+			BomEncoder encoder(BomEncoder::Utf16);
+			EncoderStream encoderStream(fileStream, encoder);
+			StreamWriter writer(encoderStream);
 
-		writer.WriteLine(L"=============================================================");
-		writer.WriteLine(L"Transition");
-		writer.WriteLine(L"=============================================================");
-		vint startState=state.Reset(rule);
-		TEST_ASSERT(startState!=-1);
-		writer.WriteLine(L"StartState: "+itow(startState)+L"["+table->GetStateInfo(startState).stateName+L"]");
+			ParsingState state(input, table);
+			ParsingTreeBuilder builder;
+			builder.Reset();
 
-		while(true)
-		{
-			ParsingState::TransitionResult result=state.ReadToken();
-			if(result)
+			writer.WriteLine(L"=============================================================");
+			writer.WriteLine(L"Input");
+			writer.WriteLine(L"=============================================================");
+			writer.WriteLine(input);
+
+			writer.WriteLine(L"=============================================================");
+			writer.WriteLine(L"Tokens");
+			writer.WriteLine(L"=============================================================");
+			FOREACH(RegexToken, token, state.GetTokens())
 			{
-				switch(result.tableTokenIndex)
+				WString tokenName;
+				if(token.token==-1)
 				{
-				case ParsingTable::TokenBegin:
-					writer.WriteString(L"$TokenBegin => ");
-					break;
-				case ParsingTable::TokenFinish:
-					writer.WriteString(L"$TokenFinish => ");
-					break;
-				default:
-					writer.WriteString(table->GetTokenInfo(result.tableTokenIndex).name);
-					writer.WriteString(L"[");
-					writer.WriteString(WString(result.token->reading, result.token->length));
-					writer.WriteString(L"] => ");
+					tokenName=L"<ERROR>";
 				}
-				writer.WriteLine(itow(result.tableStateTarget)+L"["+table->GetStateInfo(result.tableStateTarget).stateName+L"]");
-
-				writer.WriteString(L"    State Stack: ");
-				FOREACH_INDEXER(vint, stateIndex, i, state.GetStateStack())
+				else if(table->IsInputToken(token.token))
 				{
-					if(i!=0) writer.WriteString(L", ");
-					writer.WriteString(itow(stateIndex)+L"["+table->GetStateInfo(stateIndex).stateName+L"]");
+					tokenName=table->GetTokenInfo(table->GetTableTokenIndex(token.token)).name;
 				}
-				writer.WriteLine(L"");
-
-				FOREACH(ParsingTable::Instruction, ins, result.transition->instructions)
+				else
 				{
-					switch(ins.instructionType)
+					tokenName=table->GetDiscardTokenInfo(table->GetTableDiscardTokenIndex(token.token)).name;
+				}
+				writer.WriteLine(tokenName+L": "+WString(token.reading, token.length));
+			}
+
+			writer.WriteLine(L"=============================================================");
+			writer.WriteLine(L"Transition");
+			writer.WriteLine(L"=============================================================");
+			vint startState=state.Reset(rule);
+			TEST_ASSERT(startState!=-1);
+			writer.WriteLine(L"StartState: "+itow(startState)+L"["+table->GetStateInfo(startState).stateName+L"]");
+
+			while(true)
+			{
+				ParsingState::TransitionResult result=state.ReadToken();
+				if(result)
+				{
+					TEST_ASSERT(!meetTokenFinish);
+					switch(result.tableTokenIndex)
 					{
-					case ParsingTable::Instruction::Create:
-						writer.WriteLine(L"    Create "+ins.nameParameter);
+					case ParsingTable::TokenBegin:
+						writer.WriteString(L"$TokenBegin => ");
 						break;
-					case ParsingTable::Instruction::Using:
-						writer.WriteLine(L"    Using");
+					case ParsingTable::TokenFinish:
+						writer.WriteString(L"$TokenFinish => ");
+						meetTokenFinish=true;
 						break;
-					case ParsingTable::Instruction::Assign:
-						writer.WriteLine(L"    Assign "+ins.nameParameter);
-						break;
-					case ParsingTable::Instruction::Item:
-						writer.WriteLine(L"    Item "+ins.nameParameter);
-						break;
-					case ParsingTable::Instruction::Setter:
-						writer.WriteLine(L"    Setter "+ins.nameParameter+L" = "+ins.value);
-						break;
-					case ParsingTable::Instruction::Shift:
-						writer.WriteLine(L"    Shift "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
-						break;
-					case ParsingTable::Instruction::Reduce:
-						writer.WriteLine(L"    Reduce "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
-						break;
-					case ParsingTable::Instruction::LeftRecursiveReduce:
-						writer.WriteLine(L"    LR-Reduce "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
-						break;
+					default:
+						writer.WriteString(table->GetTokenInfo(result.tableTokenIndex).name);
+						writer.WriteString(L"[");
+						writer.WriteString(WString(result.token->reading, result.token->length));
+						writer.WriteString(L"] => ");
 					}
-				}
+					writer.WriteLine(itow(result.tableStateTarget)+L"["+table->GetStateInfo(result.tableStateTarget).stateName+L"]");
 
-				TEST_ASSERT(builder.Run(result));
+					writer.WriteString(L"    State Stack: ");
+					FOREACH_INDEXER(vint, stateIndex, i, state.GetStateStack())
+					{
+						if(i!=0) writer.WriteString(L", ");
+						writer.WriteString(itow(stateIndex)+L"["+table->GetStateInfo(stateIndex).stateName+L"]");
+					}
+					writer.WriteLine(L"");
+
+					FOREACH(ParsingTable::Instruction, ins, result.transition->instructions)
+					{
+						switch(ins.instructionType)
+						{
+						case ParsingTable::Instruction::Create:
+							writer.WriteLine(L"    Create "+ins.nameParameter);
+							break;
+						case ParsingTable::Instruction::Using:
+							writer.WriteLine(L"    Using");
+							break;
+						case ParsingTable::Instruction::Assign:
+							writer.WriteLine(L"    Assign "+ins.nameParameter);
+							break;
+						case ParsingTable::Instruction::Item:
+							writer.WriteLine(L"    Item "+ins.nameParameter);
+							break;
+						case ParsingTable::Instruction::Setter:
+							writer.WriteLine(L"    Setter "+ins.nameParameter+L" = "+ins.value);
+							break;
+						case ParsingTable::Instruction::Shift:
+							writer.WriteLine(L"    Shift "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
+							break;
+						case ParsingTable::Instruction::Reduce:
+							writer.WriteLine(L"    Reduce "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
+							break;
+						case ParsingTable::Instruction::LeftRecursiveReduce:
+							writer.WriteLine(L"    LR-Reduce "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
+							break;
+						}
+					}
+
+					TEST_ASSERT(builder.Run(result));
+				}
+				else
+				{
+					break;
+				}
 			}
-			else
+
+			writer.WriteLine(L"=============================================================");
+			writer.WriteLine(L"Tree");
+			writer.WriteLine(L"=============================================================");
+			node=builder.GetNode();
+			if(node)
 			{
-				break;
+				Log(node, writer);
 			}
 		}
-
-		writer.WriteLine(L"=============================================================");
-		writer.WriteLine(L"Tree");
-		writer.WriteLine(L"=============================================================");
-		Ptr<ParsingTreeNode> node=builder.GetNode();
+		TEST_ASSERT(meetTokenFinish);
 		TEST_ASSERT(node);
-		Log(node, writer);
 	}
 }
 using namespace test;
@@ -411,20 +422,21 @@ TEST_CASE(TestParsingStatement)
 					.Member(L"statements", Type(L"Statement").Array())
 				)
 
-			.Token(L"IF", L"if")
-			.Token(L"THEN", L"then")
-			.Token(L"ELSE", L"else")
-			.Token(L"RETURN", L"return")
-			.Token(L"OPEN", L"/{")
-			.Token(L"CLOSE", L"/}")
-			.Token(L"LT", L"/<")
-			.Token(L"LE", L"/</=")
-			.Token(L"GT", L"/>")
-			.Token(L"GE", L"/>/=")
-			.Token(L"EQ", L"/=/=")
-			.Token(L"NE", L"/!/=")
-			.Token(L"ASSIGN", L"/=")
-			.Token(L"VALUE", L"[a-zA-Z_]/w+")
+			.Token(L"IF",		L"if")
+			.Token(L"THEN",		L"then")
+			.Token(L"ELSE",		L"else")
+			.Token(L"RETURN",	L"return")
+			.Token(L"OPEN",		L"/{")
+			.Token(L"CLOSE",	L"/}")
+			.Token(L"LT",		L"/<")
+			.Token(L"LE",		L"/</=")
+			.Token(L"GT",		L"/>")
+			.Token(L"GE",		L"/>/=")
+			.Token(L"EQ",		L"/=/=")
+			.Token(L"NE",		L"/!/=")
+			.Token(L"ASSIGN",	L"/=")
+			.Token(L"VALUE",	L"[a-zA-Z_]/w*")
+			.Discard(L"SPACE",	L"/s+")
 
 			.Rule(L"Value", Type(L"ValueExpression"))
 				.Imply(
@@ -500,4 +512,15 @@ TEST_CASE(TestParsingStatement)
 	}
 
 	Ptr<ParsingTable> table=CreateTable(definition, L"Statement");
+	const wchar_t* inputs[]=
+	{
+		L"a = b",
+		L"return value",
+		L"{}",
+		L"{ a = b c = d return e }"
+	};
+	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
+	{
+		Parse(table, inputs[i], L"Statement", L"Stat", i);
+	}
 }
