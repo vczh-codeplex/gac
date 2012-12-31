@@ -124,7 +124,8 @@ RemoveEpsilonTransitions
 					SearchClosure(&EpsilonClosure, currentOldState, closure);
 					FOREACH(ClosureItem, closureItem, closure)
 					{
-						if(!closureItem.cycle)
+						Transition* oldTransition=closureItem.transitions->Get(closureItem.transitions->Count()-1);
+						if(!closureItem.cycle || oldTransition->transitionType!=Transition::Epsilon)
 						{
 							// search for end state closure of the target state of each path in the closure
 							Ptr<List<ClosureItem>> endStateClosure;
@@ -141,7 +142,6 @@ RemoveEpsilonTransitions
 							}
 
 							// build compacted non-epsilon transition to the target state of the path
-							Transition* oldTransition=closureItem.transitions->Get(closureItem.transitions->Count()-1);
 							{
 								State* newEndState=GetMappedState(automaton, oldTransition->target, scanningStates, oldNewStateMap);
 								Transition* transition=automaton->CopyTransition(currentNewState, newEndState, oldTransition);
