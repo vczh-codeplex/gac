@@ -11429,6 +11429,8 @@ namespace vl
 			virtual void				WriteLine(const wchar_t* string, vint charCount);
 			virtual void				WriteLine(const wchar_t* string);
 			virtual void				WriteLine(const WString& string);
+
+			virtual void				WriteMonospacedEnglishTable(collections::Array<WString>& tableByRow, vint rows, vint columns);
 		};
 
 		class StringReader : public TextReader

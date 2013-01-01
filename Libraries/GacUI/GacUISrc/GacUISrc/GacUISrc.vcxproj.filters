@@ -351,6 +351,18 @@
     <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiListControls.cpp">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextElementOperator.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextUndoRedo.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -691,6 +703,18 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiListControls.h">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextElementOperator.h">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.h">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextUndoRedo.h">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.h">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
