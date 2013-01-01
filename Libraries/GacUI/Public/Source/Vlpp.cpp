@@ -5648,6 +5648,7 @@ namespace vl
 {
 	namespace stream
 	{
+		using namespace collections;
 
 /***********************************************************************
 TextReader
@@ -5784,6 +5785,106 @@ TextWriter
 		{
 			WriteString(string);
 			WriteString(L"\r\n", 2);
+		}
+
+		namespace monospace_tabling
+		{
+			void WriteBorderLine(TextWriter& writer, Array<vint>& columnWidths, vint columns)
+			{
+				writer.WriteChar(L'+');
+				for(vint i=0;i<columns;i++)
+				{
+					vint c=columnWidths[i];
+					for(vint j=0;j<c;j++)
+					{
+						writer.WriteChar(L'-');
+					}
+					writer.WriteChar(L'+');
+				}
+				writer.WriteLine(L"");
+			}
+
+			void WriteContentLine(TextWriter& writer, Array<vint>& columnWidths, vint rowHeight, vint columns, Array<WString>& tableByRow, vint startRow)
+			{
+				vint cellStart=startRow*columns;
+				for(vint r=0;r<rowHeight;r++)
+				{
+					writer.WriteChar(L'|');
+					for(vint c=0;c<columns;c++)
+					{
+						const wchar_t* cell=tableByRow[cellStart+c].Buffer();
+						for(vint i=0;i<r;i++)
+						{
+							if(cell) cell=wcsstr(cell, L"\r\n");
+							if(cell) cell+=2;
+						}
+
+						writer.WriteChar(L' ');
+						vint length=0;
+						if(cell)
+						{
+							const wchar_t* end=wcsstr(cell, L"\r\n");
+							length=end?end-cell:(vint)wcslen(cell);
+							writer.WriteString(cell, length);
+						}
+
+						for(vint i=columnWidths[c]-2;i>=length;i--)
+						{
+							writer.WriteChar(L' ');
+						}
+						writer.WriteChar(L'|');
+					}
+					writer.WriteLine(L"");
+				}
+			}
+		}
+		using namespace monospace_tabling;
+
+		void TextWriter::WriteMonospacedEnglishTable(collections::Array<WString>& tableByRow, vint rows, vint columns)
+		{
+			Array<vint> rowHeights(rows);
+			Array<vint> columnWidths(columns);
+			for(vint i=0;i<rows;i++) rowHeights[i]=0;
+			for(vint j=0;j<columns;j++) columnWidths[j]=0;
+
+			for(vint i=0;i<rows;i++)
+			{
+				for(vint j=0;j<columns;j++)
+				{
+					WString text=tableByRow[i*columns+j];
+					const wchar_t* reading=text.Buffer();
+					vint width=0;
+					vint height=0;
+
+					while(reading)
+					{
+						height++;
+						const wchar_t* crlf=wcsstr(reading, L"\r\n");
+						if(crlf)
+						{
+							vint length=crlf-reading+2;
+							if(width<length) width=length;
+							reading=crlf+2;
+						}
+						else
+						{
+							vint length=(vint)wcslen(reading)+2;
+							if(width<length) width=length;
+							reading=0;
+						}
+					}
+
+					if(rowHeights[i]<height) rowHeights[i]=height;
+					if(columnWidths[j]<width) columnWidths[j]=width;
+				}
+			}
+
+			WriteBorderLine(*this, columnWidths, columns);
+			for(vint i=0;i<rows;i++)
+			{
+				WriteContentLine(*this, columnWidths, rowHeights[i], columns, tableByRow, i);
+				WriteBorderLine(*this, columnWidths, columns);
+			}
 		}
 
 /***********************************************************************

@@ -4632,7 +4632,7 @@ Scroll View
 #endif
 
 /***********************************************************************
-CONTROLS\TEXTEDITORPACKAGE\GUITEXTCONTROLS.H
+CONTROLS\TEXTEDITORPACKAGE\GUITEXTELEMENTOPERATOR.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -4642,8 +4642,8 @@ GacUI::Control System
 Interfaces:
 ***********************************************************************/
 
-#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCONTROLS
-#define VCZH_PRESENTATION_CONTROLS_GUITEXTCONTROLS
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTELEMENTOPERATOR
+#define VCZH_PRESENTATION_CONTROLS_GUITEXTELEMENTOPERATOR
 
 
 namespace vl
@@ -4774,6 +4774,33 @@ Common Operations
 				bool										GetReadonly();
 				void										SetReadonly(bool value);
 			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TEXTEDITORPACKAGE\GUITEXTCOLORIZER.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCOLORIZER
+#define VCZH_PRESENTATION_CONTROLS_GUITEXTCOLORIZER
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
 
 /***********************************************************************
 Colorizer
@@ -4843,6 +4870,33 @@ Colorizer
 				void														ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override;
 				const ColorArray&											GetColors()override;
 			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TEXTEDITORPACKAGE\GUITEXTUNDOREDO.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTUNDOREDO
+#define VCZH_PRESENTATION_CONTROLS_GUITEXTUNDOREDO
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
 
 /***********************************************************************
 Undo Redo
@@ -4906,6 +4960,33 @@ Undo Redo
 				void										Detach();
 				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText);
 			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TEXTEDITORPACKAGE\GUITEXTCOMMONINTERFACE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCOMMONINTERFACE
+#define VCZH_PRESENTATION_CONTROLS_GUITEXTCOMMONINTERFACE
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
 
 /***********************************************************************
 Common Interface
@@ -4973,6 +5054,33 @@ Common Interface
 				bool										GetReadonly();
 				void										SetReadonly(bool value);
 			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+CONTROLS\TEXTEDITORPACKAGE\GUITEXTCONTROLS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCONTROLS
+#define VCZH_PRESENTATION_CONTROLS_GUITEXTCONTROLS
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
 
 /***********************************************************************
 MultilineTextBox

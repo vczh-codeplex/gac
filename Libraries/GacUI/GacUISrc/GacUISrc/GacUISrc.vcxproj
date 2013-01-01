@@ -138,7 +138,11 @@
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8StylesCommon.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8TabStyles.cpp" />
     <ClCompile Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ToolstripStyles.cpp" />
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.cpp" />
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.cpp" />
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextControls.cpp" />
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextElementOperator.cpp" />
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextUndoRedo.cpp" />
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiMenuControls.cpp" />
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripCommand.cpp" />
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripMenu.cpp" />
@@ -249,7 +253,11 @@
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8StylesCommon.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8TabStyles.h" />
     <ClInclude Include="..\..\Source\Controls\Styles\Win8Styles\GuiWin8ToolstripStyles.h" />
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.h" />
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.h" />
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextControls.h" />
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextElementOperator.h" />
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextUndoRedo.h" />
     <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiMenuControls.h" />
     <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripCommand.h" />
     <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripMenu.h" />
