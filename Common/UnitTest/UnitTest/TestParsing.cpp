@@ -79,7 +79,7 @@ namespace test
 		return table;
 	}
 
-	void Parse(Ptr<ParsingTable> table, const WString& input, const WString& name, const WString& rule, vint index)
+	Ptr<ParsingTreeNode> Parse(Ptr<ParsingTable> table, const WString& input, const WString& name, const WString& rule, vint index)
 	{
 		unittest::UnitTest::PrintInfo(L"Parsing: "+input);
 		bool meetTokenFinish=false;
@@ -211,13 +211,14 @@ namespace test
 		}
 		TEST_ASSERT(meetTokenFinish);
 		TEST_ASSERT(node);
+		return node;
 	}
 }
 using namespace test;
 
-TEST_CASE(TestParseNameList)
+namespace test
 {
-	Ptr<ParsingDefinition> definition;
+	Ptr<ParsingDefinition> CreateNameListDefinition()
 	{
 		ParsingDefinitionWriter definitionWriter;
 
@@ -250,9 +251,14 @@ TEST_CASE(TestParseNameList)
 				.EndRule()
 			;
 
-		definition=definitionWriter.Definition();
+		return definitionWriter.Definition();
 	}
+}
+using namespace test;
 
+TEST_CASE(TestParseNameList)
+{
+	Ptr<ParsingDefinition> definition=CreateNameListDefinition();
 	Ptr<ParsingTable> table=CreateTable(definition, L"NameList");
 	const wchar_t* inputs[]=
 	{
@@ -266,9 +272,9 @@ TEST_CASE(TestParseNameList)
 	}
 }
 
-TEST_CASE(TestParsingExpression)
+namespace test
 {
-	Ptr<ParsingDefinition> definition;
+	Ptr<ParsingDefinition> CreateExpressionDefinition()
 	{
 		ParsingDefinitionWriter definitionWriter;
 
@@ -358,9 +364,14 @@ TEST_CASE(TestParsingExpression)
 				.EndRule()
 			;
 
-		definition=definitionWriter.Definition();
+		return definitionWriter.Definition();
 	}
+}
+using namespace test;
 
+TEST_CASE(TestParsingExpression)
+{
+	Ptr<ParsingDefinition> definition=CreateExpressionDefinition();
 	Ptr<ParsingTable> table=CreateTable(definition, L"Calculator");
 	const wchar_t* inputs[]=
 	{
@@ -377,9 +388,9 @@ TEST_CASE(TestParsingExpression)
 	}
 }
 
-TEST_CASE(TestParsingStatement)
+namespace test
 {
-	Ptr<ParsingDefinition> definition;
+	Ptr<ParsingDefinition> CreateStatementDefinition()
 	{
 		ParsingDefinitionWriter definitionWriter;
 
@@ -512,9 +523,14 @@ TEST_CASE(TestParsingStatement)
 				.EndRule()
 			;
 
-		definition=definitionWriter.Definition();
+		return definitionWriter.Definition();
 	}
+}
+using namespace test;
 
+TEST_CASE(TestParsingStatement)
+{
+	Ptr<ParsingDefinition> definition=CreateStatementDefinition();
 	Ptr<ParsingTable> table=CreateTable(definition, L"Statement");
 	const wchar_t* inputs[]=
 	{
@@ -537,6 +553,27 @@ TEST_CASE(TestParsingStatement)
 
 TEST_CASE(TestParsingGrammar)
 {
-	Ptr<ParsingDefinition> definition=CreateParserDefinition();
+	Ptr<ParsingDefinition> definition;
+	Ptr<ParsingDefinition> inputDefs[]=
+	{
+		CreateNameListDefinition(),
+		CreateExpressionDefinition(),
+		CreateStatementDefinition(),
+		definition=CreateParserDefinition(),
+	};
+	const wchar_t* inputTexts[][2]=
+	{
+		{L"Type", L"token"},
+		{L"Type", L"Item"},
+		{L"Type", L"Item[]"},
+		{L"Type", L"Item.SubItem"},
+		{L"Type", L"Item[][][]"},
+		{L"Type", L"Item.SubItem[]"},
+		{L"Type", L"Item[].SubItem[].AnotherSubItem[]"},
+	};
 	Ptr<ParsingTable> table=CreateTable(definition, L"Syngram");
+	for(vint i=0;i<sizeof(inputTexts)/sizeof(*inputTexts);i++)
+	{
+		Parse(table, inputTexts[i][1], L"Syngram", inputTexts[i][0], i);
+	}
 }
