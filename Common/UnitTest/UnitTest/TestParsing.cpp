@@ -578,6 +578,17 @@ TEST_CASE(TestParsingGrammar)
 								L"class Item{ string name; Ordering ordering; }"
 								L"Item x; Item y;"
 							L"}"},
+
+		{L"Grammar",		L"Factor"},
+		{L"Grammar",		L"\"*\""},
+		{L"Grammar",		L"Factor : operand"},
+		{L"Grammar",		L"Term \"*\" Factor"},
+		{L"Grammar",		L"!Term \"*\" Factor:second"},
+		{L"Grammar",		L"A B | C D"},
+		{L"Grammar",		L"A {B}"},
+		{L"Grammar",		L"A [B]"},
+		{L"Grammar",		L"[Exp:argument {\",\" Exp:argument}]"},
+		{L"Grammar",		L"Term:first \"*\" Factor:second as BinaryExpression with {Operator = \"Mul\"}"},
 	};
 	Ptr<ParsingTable> table=CreateTable(definition, L"Syngram");
 	for(vint i=0;i<sizeof(inputTexts)/sizeof(*inputTexts);i++)

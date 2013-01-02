@@ -154,6 +154,8 @@ namespace vl
 					.Token(L"TOKEN",		L"token")
 					.Token(L"DISCARDTOKEN",	L"discardtoken")
 					.Token(L"RULE",			L"rule")
+					.Token(L"AS",			L"as")
+					.Token(L"WITH",			L"with")
 
 					.Token(L"OPEN",			L"/{")
 					.Token(L"CLOSE",		L"/}")
@@ -161,8 +163,11 @@ namespace vl
 					.Token(L"COLON",		L":")
 					.Token(L"COMMA",		L",")
 					.Token(L"DOT",			L".")
-					.Token(L"ASSIGN",		L"=")
-					.Token(L"ARRAYTYPE",	L"/[/]")
+					.Token(L"ASSIGN",		L"/=")
+					.Token(L"USING",		L"/!")
+					.Token(L"OR",			L"/|")
+					.Token(L"OPTOPEN"	,	L"/[")
+					.Token(L"OPTCLOSE"	,	L"/]")
 
 					.Token(L"NAME",			L"[a-zA-Z_]/w*")
 					.Token(L"STRING",		L"\"([^\"]|\"\")*\"")
@@ -182,7 +187,7 @@ namespace vl
 								.As(Type(L"SubTypeObj"))
 							)
 						.Imply(
-							(Rule(L"Type")[L"elementType"] + Text(L"[]"))
+							(Rule(L"Type")[L"elementType"] + Text(L"[") + Text(L"]"))
 								.As(Type(L"ArrayTypeObj"))
 							)
 						.EndRule()
@@ -217,6 +222,67 @@ namespace vl
 						.EndRule()
 					.Rule(L"TypeDecl", Type(L"TypeDef"))
 						.Imply(!Rule(L"Enum") | !Rule(L"Class"))
+						.EndRule()
+					//------------------------------------
+					.Rule(L"PrimitiveGrammar", Type(L"GrammarDef"))
+						.Imply(
+							(Rule(L"NAME")[L"name"])
+								.As(Type(L"PrimitiveGrammarDef"))
+							)
+						.Imply(
+							(Rule(L"STRING")[L"text"])
+								.As(Type(L"TextGrammarDef"))
+							)
+						.Imply(
+							(Rule(L"PrimitiveGrammar")[L"grammar"] + Text(L":") + Rule(L"NAME")[L"memberName"])
+								.As(Type(L"AssignGrammarDef"))
+							)
+						.Imply(
+							(Text(L"!") + Rule(L"PrimitiveGrammar")[L"grammar"])
+								.As(Type(L"UseGrammarDef"))
+							)
+						.Imply(
+							(Text(L"[") + Rule(L"Grammar")[L"grammar"] + Text(L"]"))
+								.As(Type(L"OptionalGrammarDef"))
+							)
+						.Imply(
+							(Text(L"{") + Rule(L"Grammar")[L"grammar"] + Text(L"}"))
+								.As(Type(L"LoopGrammarDef"))
+							)
+						.EndRule()
+
+					.Rule(L"SequenceGrammar", Type(L"GrammarDef"))
+						.Imply(
+							!Rule(L"PrimitiveGrammar")
+							)
+						.Imply(
+							(Rule(L"SequenceGrammar")[L"first"] + Rule(L"PrimitiveGrammar")[L"second"])
+								.As(Type(L"SequenceGrammarDef"))
+							)
+						.EndRule()
+
+					.Rule(L"AlternativeGrammar", Type(L"GrammarDef"))
+						.Imply(
+							!Rule(L"SequenceGrammar")
+							)
+						.Imply(
+							(Rule(L"AlternativeGrammar")[L"first"] + Text(L"|") + Rule(L"SequenceGrammar")[L"second"])
+								.As(Type(L"AlternativeGrammarDef"))
+							)
+						.EndRule()
+
+					.Rule(L"Grammar", Type(L"GrammarDef"))
+						.Imply(
+							!Rule(L"AlternativeGrammar")
+							)
+						.Imply(
+							(Rule(L"Grammar")[L"grammar"] + Text(L"as") + Rule(L"Type")[L"type"])
+								.As(Type(L"CreateGrammarDef"))
+							)
+						.Imply(
+							(Rule(L"Grammar")[L"grammar"] + Text(L"with") + Text(L"{") + Rule(L"NAME")[L"memberName"] + Text(L"=") + Rule(L"STRING")[L"value"] + Text(L"}"))
+								.As(Type(L"SetterGrammarDef"))
+							)
 						.EndRule()
 					;
 
