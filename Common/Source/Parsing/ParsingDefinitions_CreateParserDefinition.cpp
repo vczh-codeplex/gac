@@ -284,6 +284,29 @@ namespace vl
 								.As(Type(L"SetterGrammarDef"))
 							)
 						.EndRule()
+					//------------------------------------
+					.Rule(L"TokenDecl", Type(L"TokenDef"))
+						.Imply(
+							(Text(L"token") + Rule(L"NAME")[L"name"] + Text(L"=") + Rule(L"STRING")[L"regex"] + Text(L";"))
+								.As(Type(L"TokenDef"))
+								.Set(L"discard", L"KeepToken")
+							)
+						.Imply(
+							(Text(L"discardtoken") + Rule(L"NAME")[L"name"] + Text(L"=") + Rule(L"STRING")[L"regex"] + Text(L";"))
+								.As(Type(L"TokenDef"))
+								.Set(L"discard", L"DiscardToken")
+							)
+						.EndRule()
+
+					.Rule(L"RuleDecl", Type(L"RuleDef"))
+						.Imply(
+							(
+								Text(L"rule") + Rule(L"Type")[L"type"] + Rule(L"NAME")[L"name"]
+								+ *(Text(L"=") + Rule(L"Grammar")[L"grammars"] + Text(L";"))
+								)
+								.As(Type(L"RuleDef"))
+							)
+						.EndRule()
 					;
 
 				return definitionWriter.Definition();
