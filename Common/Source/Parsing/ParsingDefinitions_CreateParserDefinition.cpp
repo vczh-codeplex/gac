@@ -186,6 +186,38 @@ namespace vl
 								.As(Type(L"ArrayTypeObj"))
 							)
 						.EndRule()
+					//-------------------------------------
+					.Rule(L"EnumMember", Type(L"EnumMemberDef"))
+						.Imply(
+							(Rule(L"NAME")[L"name"] + Text(L","))
+								.As(Type(L"EnumMemberDef"))
+							)
+						.EndRule()
+					.Rule(L"Enum", Type(L"EnumTypeDef"))
+						.Imply(
+							(Text(L"enum") + Rule(L"NAME")[L"name"] + Text(L"{") + *(Rule(L"EnumMember")[L"members"]) + Text(L"}"))
+								.As(Type(L"EnumTypeDef"))
+							)
+						.EndRule()
+					.Rule(L"ClassMember", Type(L"ClassMemberDef"))
+						.Imply(
+							(Rule(L"Type")[L"type"] + Rule(L"NAME")[L"name"] + Text(L";"))
+								.As(Type(L"ClassMemberDef"))
+							)
+						.EndRule()
+					.Rule(L"Class", Type(L"ClassTypeDef"))
+						.Imply(
+							(
+								Text(L"class") + Rule(L"NAME")[L"name"] + Opt(Text(L":") + Rule(L"Type")[L"parentType"]) + Text(L"{")
+								+ *(Rule(L"ClassMember")[L"members"] | Rule(L"TypeDecl")[L"subTypes"])
+								+ Text(L"}")
+								)
+								.As(Type(L"ClassTypeDef"))
+							)
+						.EndRule()
+					.Rule(L"TypeDecl", Type(L"TypeDef"))
+						.Imply(!Rule(L"Enum") | !Rule(L"Class"))
+						.EndRule()
 					;
 
 				return definitionWriter.Definition();

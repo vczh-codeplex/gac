@@ -563,13 +563,21 @@ TEST_CASE(TestParsingGrammar)
 	};
 	const wchar_t* inputTexts[][2]=
 	{
-		{L"Type", L"token"},
-		{L"Type", L"Item"},
-		{L"Type", L"Item[]"},
-		{L"Type", L"Item.SubItem"},
-		{L"Type", L"Item[][][]"},
-		{L"Type", L"Item.SubItem[]"},
-		{L"Type", L"Item[].SubItem[].AnotherSubItem[]"},
+		{L"Type",			L"token"},
+		{L"Type",			L"Item"},
+		{L"Type",			L"Item[]"},
+		{L"Type",			L"Item.SubItem"},
+		{L"Type",			L"Item[][][]"},
+		{L"Type",			L"Item.SubItem[]"},
+		{L"Type",			L"Item[].SubItem[].AnotherSubItem[]"},
+
+		{L"TypeDecl",		L"enum Boolean{ True, False, }"},
+		{L"TypeDecl",		L"class Vector{ int x; int y; }"},
+		{L"TypeDecl",		L"class ComplexVector : SimpleVector{"
+								L"enum Ordering{ Ordered, Unordered, }"
+								L"class Item{ string name; Ordering ordering; }"
+								L"Item x; Item y;"
+							L"}"},
 	};
 	Ptr<ParsingTable> table=CreateTable(definition, L"Syngram");
 	for(vint i=0;i<sizeof(inputTexts)/sizeof(*inputTexts);i++)
