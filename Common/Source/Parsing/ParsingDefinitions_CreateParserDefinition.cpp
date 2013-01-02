@@ -149,7 +149,43 @@ namespace vl
 							.Member(L"rules", Type(L"RuleDef").Array())
 						)
 					//-------------------------------------
+					.Token(L"CLASS",		L"class")
+					.Token(L"ENUM",			L"enum")
+					.Token(L"TOKEN",		L"token")
+					.Token(L"DISCARDTOKEN",	L"discardtoken")
+					.Token(L"RULE",			L"rule")
+
+					.Token(L"OPEN",			L"/{")
+					.Token(L"CLOSE",		L"/}")
+					.Token(L"SEMICOLON",	L";")
+					.Token(L"COLON",		L":")
+					.Token(L"COMMA",		L",")
+					.Token(L"DOT",			L".")
+					.Token(L"ASSIGN",		L"=")
+					.Token(L"ARRAYTYPE",	L"/[/]")
+
+					.Token(L"NAME",			L"[a-zA-Z_]/w*")
+					.Token(L"STRING",		L"\"([^\"]|\"\")*\"")
+					.Discard(L"SPACE",		L"/s+")
 					//-------------------------------------
+					.Rule(L"Type", Type(L"TypeObj"))
+						.Imply(
+							(Rule(L"NAME")[L"name"])
+								.As(Type(L"PrimitiveTypeObj"))
+							)
+						.Imply(
+							Text(L"token")
+								.As(Type(L"TokenTypeObj"))
+							)
+						.Imply(
+							(Rule(L"Type")[L"parentType"] + Text(L".") + Rule(L"NAME")[L"name"])
+								.As(Type(L"SubTypeObj"))
+							)
+						.Imply(
+							(Rule(L"Type")[L"elementType"] + Text(L"[]"))
+								.As(Type(L"ArrayTypeObj"))
+							)
+						.EndRule()
 					;
 
 				return definitionWriter.Definition();
