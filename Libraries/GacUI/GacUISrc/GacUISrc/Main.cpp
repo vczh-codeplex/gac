@@ -44,6 +44,8 @@ namespace test
 
 			entry.normal.text=Color(0, 0, 255);
 			AddToken(L"class|enum|token|discardtoken|rule|as|with", entry);
+
+			AddToken(L"[a-zA-Z_]/w*", GetDefaultColor());
 			
 			entry.normal.text=Color(43, 145, 175);
 			AddExtraToken(entry);
@@ -85,7 +87,10 @@ namespace test
 
 				ParsingError error;
 				Ptr<ParsingTreeNode> node=window->grammarParser->Parse(currentParsingText, L"ParserDecl", error);
-				node->InitializeQueryCache();
+				if(node)
+				{
+					node->InitializeQueryCache();
+				}
 				{
 					SpinLock::Scope scope(window->parsingTreeLock);
 					window->parsingTreeNode=node;
