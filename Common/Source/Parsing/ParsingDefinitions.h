@@ -437,6 +437,7 @@ namespace vl
 ***********************************************************************/
 			
 			extern Ptr<ParsingDefinition>						CreateParserDefinition();
+			extern Ptr<ParsingDefinition>						DeserializeDefinition(Ptr<ParsingTreeNode> node);
 		}
 	}
 }

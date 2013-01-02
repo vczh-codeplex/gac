@@ -635,5 +635,9 @@ TEST_CASE(TestParsingBootstrap)
 		WString grammar=ParsingDefinitionToText(inputDefs[i]);
 		Ptr<ParsingTreeNode> node=parser->Parse(grammar, L"ParserDecl", firstError);
 		TEST_ASSERT(node);
+		Ptr<ParsingDefinition> def=DeserializeDefinition(node);
+		TEST_ASSERT(def);
+		WString grammar2=ParsingDefinitionToText(def);
+		TEST_ASSERT(grammar==grammar2);
 	}
 }

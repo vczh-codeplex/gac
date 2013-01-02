@@ -6,6 +6,12 @@ namespace vl
 	{
 		namespace definitions
 		{
+			using namespace collections;
+
+/***********************************************************************
+вт╬ы
+***********************************************************************/
+
 			Ptr<ParsingDefinition> CreateParserDefinition()
 			{
 				ParsingDefinitionWriter definitionWriter;
@@ -336,6 +342,239 @@ namespace vl
 					;
 
 				return definitionWriter.Definition();
+			}
+
+			WString DeserializeString(Ptr<ParsingTreeToken> token)
+			{
+				const WString& value=token->GetValue();
+				if(value.Length()>=2 && value[0]==L'"' && value[value.Length()-1]==L'"')
+				{
+					Array<wchar_t> chars(value.Length());
+					memset(&chars[0], 0, chars.Count()*sizeof(wchar_t));
+					const wchar_t* reading=value.Buffer()+1;
+					wchar_t* writing=&chars[0];
+					while(*reading)
+					{
+						if(*reading!=L'"')
+						{
+							*writing++=*reading++;
+						}
+						else if(reading[1]!=L'"')
+						{
+							break;
+						}
+						else
+						{
+							*writing++=L'"';
+							reading+=2;
+						}
+					}
+					return &chars[0];
+				}
+				return L"";
+			}
+
+			void SetName(WString& target, Ptr<ParsingTreeNode> node)
+			{
+				Ptr<ParsingTreeToken> token=node.Cast<ParsingTreeToken>();
+				if(token)
+				{
+					target=token->GetValue();
+				}
+			}
+
+			void SetText(WString& target, Ptr<ParsingTreeNode> node)
+			{
+				Ptr<ParsingTreeToken> token=node.Cast<ParsingTreeToken>();
+				if(token)
+				{
+					target=DeserializeString(token);
+				}
+			}
+
+			template<typename T>
+			void SetArray(List<Ptr<T>>& target, Ptr<ParsingTreeNode> node)
+			{
+				Ptr<ParsingTreeArray> source=node.Cast<ParsingTreeArray>();
+				if(source)
+				{
+					for(vint i=0;i<source->Count();i++)
+					{
+						target.Add(Deserialize(source->GetItem(i).Cast<ParsingTreeObject>()).Cast<T>());
+					}
+				}
+			}
+
+			template<typename T>
+			void SetMember(Ptr<T>& target, Ptr<ParsingTreeNode> node)
+			{
+				Ptr<ParsingTreeObject> source=node.Cast<ParsingTreeObject>();
+				if(source)
+				{
+					target=Deserialize(source).Cast<T>();
+				}
+			}
+
+			Ptr<ParsingTreeCustomBase> Deserialize(Ptr<ParsingTreeObject> node)
+			{
+				if(!node)
+				{
+					return 0;
+				}
+				else if(node->GetType()==L"PrimitiveTypeObj")
+				{
+					Ptr<ParsingDefinitionPrimitiveType> target=new ParsingDefinitionPrimitiveType;
+					SetName(target->name, node->GetMember(L"name"));
+					return target;
+				}
+				else if(node->GetType()==L"TokenTypeObj")
+				{
+					Ptr<ParsingDefinitionTokenType> target=new ParsingDefinitionTokenType;
+					return target;
+				}
+				else if(node->GetType()==L"SubTypeObj")
+				{
+					Ptr<ParsingDefinitionSubType> target=new ParsingDefinitionSubType;
+					SetMember(target->parentType, node->GetMember(L"parentType"));
+					SetName(target->subTypeName, node->GetMember(L"name"));
+					return target;
+				}
+				else if(node->GetType()==L"ArrayTypeObj")
+				{
+					Ptr<ParsingDefinitionArrayType> target=new ParsingDefinitionArrayType;
+					SetMember(target->elementType, node->GetMember(L"elementType"));
+					return target;
+				}
+				else if(node->GetType()==L"ClassMemberDef")
+				{
+					Ptr<ParsingDefinitionClassMemberDefinition> target=new ParsingDefinitionClassMemberDefinition;
+					SetMember(target->type, node->GetMember(L"type"));
+					SetName(target->name, node->GetMember(L"name"));
+					return target;
+				}
+				else if(node->GetType()==L"ClassTypeDef")
+				{
+					Ptr<ParsingDefinitionClassDefinition> target=new ParsingDefinitionClassDefinition;
+					SetMember(target->parentType, node->GetMember(L"parentType"));
+					SetName(target->name, node->GetMember(L"name"));
+					SetArray(target->members, node->GetMember(L"members"));
+					SetArray(target->subTypes, node->GetMember(L"subTypes"));
+					return target;
+				}
+				else if(node->GetType()==L"EnumMemberDef")
+				{
+					Ptr<ParsingDefinitionEnumMemberDefinition> target=new ParsingDefinitionEnumMemberDefinition;
+					SetName(target->name, node->GetMember(L"name"));
+					return target;
+				}
+				else if(node->GetType()==L"EnumTypeDef")
+				{
+					Ptr<ParsingDefinitionEnumDefinition> target=new ParsingDefinitionEnumDefinition;
+					SetName(target->name, node->GetMember(L"name"));
+					SetArray(target->members, node->GetMember(L"members"));
+					return target;
+				}
+				else if(node->GetType()==L"PrimitiveGrammarDef")
+				{
+					Ptr<ParsingDefinitionPrimitiveGrammar> target=new ParsingDefinitionPrimitiveGrammar;
+					SetName(target->name, node->GetMember(L"name"));
+					return target;
+				}
+				else if(node->GetType()==L"TextGrammarDef")
+				{
+					Ptr<ParsingDefinitionTextGrammar> target=new ParsingDefinitionTextGrammar;
+					SetText(target->text, node->GetMember(L"text"));
+					return target;
+				}
+				else if(node->GetType()==L"SequenceGrammarDef")
+				{
+					Ptr<ParsingDefinitionSequenceGrammar> target=new ParsingDefinitionSequenceGrammar;
+					SetMember(target->first, node->GetMember(L"first"));
+					SetMember(target->second, node->GetMember(L"second"));
+					return target;
+				}
+				else if(node->GetType()==L"AlternativeGrammarDef")
+				{
+					Ptr<ParsingDefinitionAlternativeGrammar> target=new ParsingDefinitionAlternativeGrammar;
+					SetMember(target->first, node->GetMember(L"first"));
+					SetMember(target->second, node->GetMember(L"second"));
+					return target;
+				}
+				else if(node->GetType()==L"LoopGrammarDef")
+				{
+					Ptr<ParsingDefinitionLoopGrammar> target=new ParsingDefinitionLoopGrammar;
+					SetMember(target->grammar, node->GetMember(L"grammar"));
+					return target;
+				}
+				else if(node->GetType()==L"OptionalGrammarDef")
+				{
+					Ptr<ParsingDefinitionOptionalGrammar> target=new ParsingDefinitionOptionalGrammar;
+					SetMember(target->grammar, node->GetMember(L"grammar"));
+					return target;
+				}
+				else if(node->GetType()==L"CreateGrammarDef")
+				{
+					Ptr<ParsingDefinitionCreateGrammar> target=new ParsingDefinitionCreateGrammar;
+					SetMember(target->grammar, node->GetMember(L"grammar"));
+					SetMember(target->type, node->GetMember(L"type"));
+					return target;
+				}
+				else if(node->GetType()==L"AssignGrammarDef")
+				{
+					Ptr<ParsingDefinitionAssignGrammar> target=new ParsingDefinitionAssignGrammar;
+					SetMember(target->grammar, node->GetMember(L"grammar"));
+					SetName(target->memberName, node->GetMember(L"memberName"));
+					return target;
+				}
+				else if(node->GetType()==L"UseGrammarDef")
+				{
+					Ptr<ParsingDefinitionUseGrammar> target=new ParsingDefinitionUseGrammar;
+					SetMember(target->grammar, node->GetMember(L"grammar"));
+					return target;
+				}
+				else if(node->GetType()==L"SetterGrammarDef")
+				{
+					Ptr<ParsingDefinitionSetterGrammar> target=new ParsingDefinitionSetterGrammar;
+					SetMember(target->grammar, node->GetMember(L"grammar"));
+					SetName(target->memberName, node->GetMember(L"memberName"));
+					SetText(target->value, node->GetMember(L"value"));
+					return target;
+				}
+				else if(node->GetType()==L"TokenDef")
+				{
+					Ptr<ParsingDefinitionTokenDefinition> target=new ParsingDefinitionTokenDefinition;
+					SetName(target->name, node->GetMember(L"name"));
+					SetText(target->regex, node->GetMember(L"regex"));
+
+					Ptr<ParsingTreeToken> token=node->GetMember(L"discard").Cast<ParsingTreeToken>();
+					target->discard=(token && token->GetValue()==L"DiscardToken");
+					return target;
+				}
+				else if(node->GetType()==L"RuleDef")
+				{
+					Ptr<ParsingDefinitionRuleDefinition> target=new ParsingDefinitionRuleDefinition;
+					SetName(target->name, node->GetMember(L"name"));
+					SetMember(target->type, node->GetMember(L"type"));
+					SetArray(target->grammars, node->GetMember(L"grammars"));
+					return target;
+				}
+				else if(node->GetType()==L"ParserDef")
+				{
+					Ptr<ParsingDefinition> target=new ParsingDefinition;
+					SetArray(target->types, node->GetMember(L"types"));
+					SetArray(target->tokens, node->GetMember(L"tokens"));
+					SetArray(target->rules, node->GetMember(L"rules"));
+					return target;
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+			Ptr<ParsingDefinition> DeserializeDefinition(Ptr<ParsingTreeNode> node)
+			{
+				return Deserialize(node.Cast<ParsingTreeObject>()).Cast<ParsingDefinition>();
 			}
 		}
 	}
