@@ -314,9 +314,16 @@ namespace vl
 					.Rule(L"ParserDecl", Type(L"ParserDef"))
 						.Imply(
 							(
-								Rule(L"TypeDecl")[L"types"] |
-								Rule(L"TokenDecl")[L"tokens"] |
-								Rule(L"RuleDecl")[L"rules"]
+								*(
+									Rule(L"TypeDecl")[L"types"] |
+									Rule(L"TokenDecl")[L"tokens"] |
+									Rule(L"RuleDecl")[L"rules"]
+									)
+								+(
+									Rule(L"TypeDecl")[L"types"] |
+									Rule(L"TokenDecl")[L"tokens"] |
+									Rule(L"RuleDecl")[L"rules"]
+									)
 								)
 								.As(Type(L"ParserDef"))
 							)

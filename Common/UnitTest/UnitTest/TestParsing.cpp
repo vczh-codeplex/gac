@@ -1,6 +1,7 @@
 #include <string.h>
 #include "..\..\Source\UnitTest\UnitTest.h"
 #include "..\..\Source\Stream\FileStream.h"
+#include "..\..\Source\Stream\MemoryStream.h"
 #include "..\..\Source\Stream\Accessor.h"
 #include "..\..\Source\Stream\CharFormat.h"
 #include "..\..\Source\Collections\Operation.h"
@@ -551,6 +552,22 @@ TEST_CASE(TestParsingStatement)
 	}
 }
 
+namespace test
+{
+	WString ParsingDefinitionToText(Ptr<ParsingDefinition> definition)
+	{
+		MemoryStream stream;
+		{
+			StreamWriter writer(stream);
+			Log(definition, writer);
+		}
+		stream.SeekFromBegin(0);
+		StreamReader reader(stream);
+		return reader.ReadToEnd();
+	}
+}
+using namespace test;
+
 TEST_CASE(TestParsingGrammar)
 {
 	Ptr<ParsingDefinition> definition;
@@ -594,5 +611,10 @@ TEST_CASE(TestParsingGrammar)
 	for(vint i=0;i<sizeof(inputTexts)/sizeof(*inputTexts);i++)
 	{
 		Parse(table, inputTexts[i][1], L"Syngram", inputTexts[i][0], i);
+	}
+	for(vint i=0;i<sizeof(inputDefs)/sizeof(*inputDefs);i++)
+	{
+		WString grammar=ParsingDefinitionToText(inputDefs[i]);
+		Parse(table, grammar, L"Syngram_Bootstrap", L"ParserDecl", i);
 	}
 }
