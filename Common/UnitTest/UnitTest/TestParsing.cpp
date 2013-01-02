@@ -106,11 +106,8 @@ namespace test
 			FOREACH(RegexToken, token, state.GetTokens())
 			{
 				WString tokenName;
-				if(token.token==-1)
-				{
-					tokenName=L"<ERROR>";
-				}
-				else if(table->IsInputToken(token.token))
+				TEST_ASSERT(token.token!=-1);
+				if(table->IsInputToken(token.token))
 				{
 					tokenName=table->GetTokenInfo(table->GetTableTokenIndex(token.token)).name;
 				}

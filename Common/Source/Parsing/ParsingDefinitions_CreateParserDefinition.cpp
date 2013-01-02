@@ -168,6 +168,8 @@ namespace vl
 					.Token(L"OR",			L"/|")
 					.Token(L"OPTOPEN"	,	L"/[")
 					.Token(L"OPTCLOSE"	,	L"/]")
+					.Token(L"PREOPEN"	,	L"/(")
+					.Token(L"PRECLOSE"	,	L"/)")
 
 					.Token(L"NAME",			L"[a-zA-Z_]/w*")
 					.Token(L"STRING",		L"\"([^\"]|\"\")*\"")
@@ -248,6 +250,9 @@ namespace vl
 						.Imply(
 							(Text(L"{") + Rule(L"Grammar")[L"grammar"] + Text(L"}"))
 								.As(Type(L"LoopGrammarDef"))
+							)
+						.Imply(
+							(Text(L"(") + !Rule(L"Grammar") + Text(L")"))
 							)
 						.EndRule()
 
