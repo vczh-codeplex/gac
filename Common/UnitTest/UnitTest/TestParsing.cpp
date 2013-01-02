@@ -534,3 +534,9 @@ TEST_CASE(TestParsingStatement)
 		Parse(table, inputs[i], L"Statement", L"Stat", i);
 	}
 }
+
+TEST_CASE(TestParsingGrammar)
+{
+	Ptr<ParsingDefinition> definition=CreateParserDefinition();
+	Ptr<ParsingTable> table=CreateTable(definition, L"Syngram");
+}
