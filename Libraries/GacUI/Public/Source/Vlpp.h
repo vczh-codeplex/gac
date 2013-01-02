@@ -9864,529 +9864,6 @@ HTTP Utility
 #endif
 
 /***********************************************************************
-REFLECTION\GUITYPEDESCRIPTOR.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Framework::Reflection
-
-XML Representation for Code Generation:
-***********************************************************************/
-
-#ifndef VCZH_REFLECTION_GUITYPEDESCRIPTOR
-#define VCZH_REFLECTION_GUITYPEDESCRIPTOR
-
-
-namespace vl
-{
-	namespace reflection
-	{
-
-/***********************************************************************
-Attribute
-***********************************************************************/
-
-		namespace description
-		{
-			class ITypeDescriptor;
-		}
-
-		class DescriptableObject
-		{
-			template<typename T>
-			friend class Description;
-
-			friend class DescriptableValue;
-		protected:
-			size_t									objectSize;
-			description::ITypeDescriptor**			typeDescriptor;
-		public:
-			DescriptableObject();
-			virtual ~DescriptableObject();
-
-			description::ITypeDescriptor*			GetTypeDescriptor();
-		};
-
-		class IDescriptable : public virtual Interface, public virtual DescriptableObject
-		{
-		public:
-			~IDescriptable(){}
-		};
-		
-		template<typename T>
-		class Description : public virtual DescriptableObject
-		{
-		protected:
-			static description::ITypeDescriptor*		associatedTypeDescriptor;
-		public:
-			Description()
-			{
-				if(objectSize<sizeof(T))
-				{
-					objectSize=sizeof(T);
-					typeDescriptor=&associatedTypeDescriptor;
-				}
-			}
-
-			static description::ITypeDescriptor* GetAssociatedTypeDescriptor()
-			{
-				return associatedTypeDescriptor;
-			}
-
-			static void SetAssociatedTypeDescroptor(description::ITypeDescriptor* typeDescroptor)
-			{
-				if(!associatedTypeDescriptor)
-				{
-					associatedTypeDescriptor=typeDescroptor;
-				}
-			}
-		};
-
-		template<typename T>
-		description::ITypeDescriptor* Description<T>::associatedTypeDescriptor=0;
-
-/***********************************************************************
-Value
-***********************************************************************/
-
-		namespace description
-		{
-			class Value : public Object
-			{
-			public:
-				enum ValueType
-				{
-					Null,
-					DescriptableObjectRef,
-					DescriptableObjectPtr,
-					Text,
-				};
-			protected:
-				ValueType						valueType;
-				DescriptableObject*				descriptableObjectRef;
-				Ptr<DescriptableObject>			descriptableObjectPtr;
-				WString							text;
-				ITypeDescriptor*				typeDescriptor;
-			public:
-				Value();
-				Value(DescriptableObject* value);
-				Value(Ptr<DescriptableObject> value);
-				Value(const WString& value, ITypeDescriptor* associatedTypeDescriptor);
-				Value(const Value& value);
-
-				Value&							operator=(const Value& value);
-
-				ValueType						GetValueType()const;
-				DescriptableObject*				GetDescriptableObjectRef()const;
-				Ptr<DescriptableObject>			GetDescriptableObjectPtr()const;
-				const WString&					GetText()const;
-				ITypeDescriptor*				GetTypeDescriptor()const;
-			};
-
-			class IValueSerializer : public Interface
-			{
-			public:
-				virtual WString					GetName()=0;
-				virtual ITypeDescriptor*		GetOwnerTypeDescriptor()=0;
-				virtual bool					Validate(const WString& text)=0;
-				virtual bool					Parse(const WString& input, Value& output)=0;
-			};
-
-			template<typename T>
-			class ITypedValueSerializer : public IValueSerializer
-			{
-				virtual bool					Serialize(const T& input, Value& output)=0;
-				virtual bool					Deserialize(const Value& input, T& output)=0;
-			};
-
-/***********************************************************************
-ITypeDescriptor (basic)
-***********************************************************************/
-
-			class IMemberInfo : public virtual Interface
-			{
-			public:
-				virtual ITypeDescriptor*		GetOwnerTypeDescriptor()=0;
-				virtual const WString&			GetName()=0;
-			};
-
-			class IValueInfo : public virtual Interface
-			{
-			public:
-				virtual ITypeDescriptor*		GetValueTypeDescriptor()=0;
-				virtual bool					CanBeNull()=0;
-			};
-
-/***********************************************************************
-ITypeDescriptor (event)
-***********************************************************************/
-
-			class IEventInfo;
-
-			class IEventHandler : public Interface
-			{
-			public:
-				virtual IEventInfo*				GetOwnerEvent()=0;
-				virtual Value					GetOwnerObject()=0;
-				virtual bool					IsAttached()=0;
-				virtual bool					Detach()=0;
-				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
-			};
-
-			class IEventInfo : public IMemberInfo
-			{
-			public:
-				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)=0;
-				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
-			};
-
-/***********************************************************************
-ITypeDescriptor (property)
-***********************************************************************/
-
-			class IPropertyInfo : public IMemberInfo, public IValueInfo
-			{
-			public:
-				virtual bool					IsReadable()=0;
-				virtual bool					IsWritable()=0;
-				virtual IEventInfo*				GetValueChangedEvent()=0;
-				virtual Value					GetValue(const Value& thisObject)=0;
-				virtual void					SetValue(const Value& thisObject, Value newValue)=0;
-			};
-
-/***********************************************************************
-ITypeDescriptor (method)
-***********************************************************************/
-
-			class IMethodInfo;
-			class IMethodGroupInfo;
-
-			class IParameterInfo : public IMemberInfo, public IValueInfo
-			{
-			public:
-				virtual IMethodInfo*			GetOwnerMethod()=0;
-				virtual bool					CanOutput()=0;
-			};
-
-			class IMethodInfo : public IMemberInfo
-			{
-			public:
-				virtual IMethodGroupInfo*		GetOwnerMethodGroup()=0;
-				virtual vint					GetParameterCount()=0;
-				virtual IParameterInfo*			GetParameter(vint index)=0;
-				virtual IValueInfo*				GetReturn()=0;
-				virtual Value					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
-			};
-
-			class IMethodGroupInfo : public IMemberInfo
-			{
-			public:
-				virtual vint					GetMethodCount()=0;
-				virtual IMethodInfo*			GetMethod(vint index)=0;
-			};
-
-/***********************************************************************
-ITypeDescriptor
-***********************************************************************/
-
-			class ITypeDescriptor : public Interface
-			{
-			public:
-				virtual const WString&			GetTypeName()=0;
-				virtual IValueSerializer*		GetValueSerializer()=0;
-				virtual vint					GetBaseTypeDescriptorCount()=0;
-				virtual ITypeDescriptor*		GetBaseTypeDescriptor(vint index)=0;
-
-				virtual vint					GetPropertyCount()=0;
-				virtual IPropertyInfo*			GetProperty(vint index)=0;
-				virtual bool					IsPropertyExists(const WString& name, bool inheritable)=0;
-				virtual IPropertyInfo*			GetPropertyByName(const WString& name, bool inheritable)=0;
-
-				virtual vint					GetEventCount()=0;
-				virtual IEventInfo*				GetEvent(vint index)=0;
-				virtual bool					IsEventExists(const WString& name, bool inheritable)=0;
-				virtual IEventInfo*				GetEventByName(const WString& name, bool inheritable)=0;
-
-				virtual vint					GetMethodGroupCount()=0;
-				virtual IMethodGroupInfo*		GetMethodGroup(vint index)=0;
-				virtual bool					IsMethodGroupExists(const WString& name, bool inheritable)=0;
-				virtual IMethodGroupInfo*		GetMethodGroupByName(const WString& name, bool inheritable)=0;
-				virtual IMethodGroupInfo*		GetConstructorGroup()=0;
-			};
-
-/***********************************************************************
-ITypeManager
-***********************************************************************/
-
-			class ITypeManager;
-
-			class ITypeLoader : public Interface
-			{
-			public:
-				virtual void					Load(ITypeManager* manager)=0;
-				virtual void					Unload(ITypeManager* manager)=0;
-			};
-
-			class ITypeManager : public Interface
-			{
-			public:
-				virtual vint					GetValueSerializerCount()=0;
-				virtual IValueSerializer*		GetValueSerializer(vint index)=0;
-				virtual IValueSerializer*		GetValueSerializer(const WString& name)=0;
-				virtual bool					SetValueSerializer(const WString& name, Ptr<IValueSerializer> valueSerializer)=0;
-				
-				virtual vint					GetTypeDescriptorCount()=0;
-				virtual ITypeDescriptor*		GetTypeDescriptor(vint index)=0;
-				virtual ITypeDescriptor*		GetTypeDescriptor(const WString& name)=0;
-				virtual bool					SetTypeDescriptor(const WString& name, Ptr<ITypeDescriptor> typeDescriptor)=0;
-
-				virtual bool					AddTypeLoader(Ptr<ITypeLoader> typeLoader)=0;
-				virtual bool					RemoveTypeLoader(Ptr<ITypeLoader> typeLoader)=0;
-				virtual bool					Load()=0;
-				virtual bool					Unload()=0;
-				virtual bool					Reload()=0;
-				virtual bool					IsLoaded()=0;
-			};
-
-			extern ITypeManager*				GetGlobalTypeManager();
-			extern bool							DestroyGlobalTypeManager();
-			extern IValueSerializer*			GetValueSerializer(const WString& name);
-			extern ITypeDescriptor*				GetTypeDescriptor(const WString& name);
-
-/***********************************************************************
-Exceptions
-***********************************************************************/
-
-			class TypeDescriptorException : public Exception
-			{
-			public:
-				TypeDescriptorException(const WString& message)
-					:Exception(message)
-				{
-				}
-			};
-
-			class PropertyIsNotReadableException : public TypeDescriptorException
-			{
-			public:
-				PropertyIsNotReadableException(IPropertyInfo* propertyInfo)
-					:TypeDescriptorException(L"Cannot read value from a property \""+propertyInfo->GetName()+L"\" that is not readable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\"/")
-				{
-				}
-			};
-
-			class PropertyIsNotWritableException : public TypeDescriptorException
-			{
-			public:
-				PropertyIsNotWritableException(IPropertyInfo* propertyInfo)
-					:TypeDescriptorException(L"Cannot write value to a property \""+propertyInfo->GetName()+L"\" that is not writable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\"/")
-				{
-				}
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-REFLECTION\GUITYPEDESCRIPTORBUILDER.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Framework::Reflection
-
-Classes:
-***********************************************************************/
-
-#ifndef VCZH_REFLECTION_GUITYPEDESCRIPTORBUILDER
-#define VCZH_REFLECTION_GUITYPEDESCRIPTORBUILDER
-
-
-namespace vl
-{
-	namespace reflection
-	{
-		namespace description
-		{
-
-/***********************************************************************
-Exceptions
-***********************************************************************/
-
-			class TypeDescriptorBuilderException : public Exception
-			{
-			public:
-				TypeDescriptorBuilderException(const WString& message)
-					:Exception(message)
-				{
-				}
-			};
-
-			class PropertyAlreadyExistsException : public TypeDescriptorBuilderException
-			{
-			public:
-				PropertyAlreadyExistsException(ITypeDescriptor* typeDescriptor, const WString& propertyName)
-					:TypeDescriptorBuilderException(L"Property \""+propertyName+L"\" already exists in type \""+typeDescriptor->GetTypeName()+L"\".")
-				{
-				}
-			};
-
-			class EventAlreadyExistsException : public TypeDescriptorBuilderException
-			{
-			public:
-				EventAlreadyExistsException(ITypeDescriptor* typeDescriptor, const WString& eventName)
-					:TypeDescriptorBuilderException(L"Event \""+eventName+L"\" already exists in type \""+typeDescriptor->GetTypeName()+L"\".")
-				{
-				}
-			};
-
-			class ParameterAlreadyExistsException : public TypeDescriptorBuilderException
-			{
-			public:
-				ParameterAlreadyExistsException(IMethodInfo* method,  const WString& parameterName)
-					:TypeDescriptorBuilderException(L"Parameter \""+parameterName+L"\" already exists in method \""+method->GetName()+L"\" in type \""+method->GetOwnerTypeDescriptor()->GetTypeName()+L"\".")
-				{
-				}
-			};
-
-/***********************************************************************
-GeneralTypeDescriptor
-***********************************************************************/
-
-			class GeneralTypeDescriptor : public Object, public ITypeDescriptor
-			{
-			public:
-				class PropertyGroup
-				{
-					friend class GeneralTypeDescriptor;
-				protected:
-					bool														loaded;
-					Func<void(PropertyGroup*)>									loaderProcedure;
-					ITypeDescriptor*											ownerTypeDescriptor;
-					
-					WString														typeName;
-					IValueSerializer*											valueSerializer;
-					collections::List<ITypeDescriptor*>							baseTypeDescriptors;
-					collections::Dictionary<WString, Ptr<IPropertyInfo>>		properties;
-					collections::Dictionary<WString, Ptr<IEventInfo>>			events;
-					collections::Dictionary<WString, Ptr<IMethodGroupInfo>>		methodGroups;
-					Ptr<IMethodGroupInfo>										contructorGroup;
-
-				public:
-					PropertyGroup();
-					~PropertyGroup();
-
-					void						Prepare();
-
-					//----------------------------------------------------
-
-					class MethodBuilder
-					{
-					protected:
-						PropertyGroup&			propertyGroup;
-						Ptr<IMethodGroupInfo>	buildingMethodGroup;
-						Ptr<IMethodInfo>		buildingMethod;
-					public:
-						MethodBuilder(PropertyGroup& _propertyGroup, const WString& _name);
-
-						MethodBuilder&			Parameter(
-													const WString&									_name,
-													ITypeDescriptor*								_type,
-													bool											_nullable,
-													bool											_canOutput
-													);
-						MethodBuilder&			Return(
-													ITypeDescriptor*								_type,
-													bool											_nullable
-													);
-						MethodBuilder&			Invoker(
-													const Func<Value(const Value&, collections::Array<Value>&)>&	_invoker
-													);
-						PropertyGroup&			Done();
-					};
-
-					//----------------------------------------------------
-
-					class EventBuilder
-					{
-					protected:
-						PropertyGroup&			propertyGroup;
-						Ptr<IEventInfo>			buildingEvent;
-					public:
-						EventBuilder(PropertyGroup& _propertyGroup, const WString& _name);
-
-						EventBuilder&			Attacher(
-													const Func<void(DescriptableObject*, IEventHandler*)>&	_attacher
-													);
-						EventBuilder&			Detacher(
-													const Func<void(DescriptableObject*, IEventHandler*)>&	_detacher
-													);
-						EventBuilder&			Invoker(
-													const Func<Value(const Value&, Value&)>&		_invoker
-													);
-						PropertyGroup&			Done();
-					};
-
-					//----------------------------------------------------
-
-					PropertyGroup&				TypeName(
-													const WString&									_typeName
-													);
-					PropertyGroup&				Property(
-													const WString&									_name,
-													ITypeDescriptor*								_type,
-													bool											_nullable,
-													const Func<Value(const Value&)>&				_getter,
-													const Func<void(const Value&, const Value&)>&	_setter,
-													const WString&									_valueChangedEventName
-													);
-					MethodBuilder				Method(
-													const WString&									_name
-													);
-					EventBuilder				Event(
-													const WString&									_name
-													);
-				};
-			protected:
-				PropertyGroup				propertyGroup;
-
-			public:
-				GeneralTypeDescriptor(const Func<void(PropertyGroup*)>& loaderProcedure);
-				~GeneralTypeDescriptor();
-
-				PropertyGroup&				Operations();
-
-				const WString&				GetTypeName()override;
-				IValueSerializer*			GetValueSerializer()override;
-				vint						GetBaseTypeDescriptorCount()override;
-				ITypeDescriptor*			GetBaseTypeDescriptor(vint index)override;
-
-				vint						GetPropertyCount()override;
-				IPropertyInfo*				GetProperty(vint index)override;
-				bool						IsPropertyExists(const WString& name, bool inheritable)override;
-				IPropertyInfo*				GetPropertyByName(const WString& name, bool inheritable)override;
-
-				vint						GetEventCount()override;
-				IEventInfo*					GetEvent(vint index)override;
-				bool						IsEventExists(const WString& name, bool inheritable)override;
-				IEventInfo*					GetEventByName(const WString& name, bool inheritable)override;
-
-				vint						GetMethodGroupCount()override;
-				IMethodGroupInfo*			GetMethodGroup(vint index)override;
-				bool						IsMethodGroupExists(const WString& name, bool inheritable)override;
-				IMethodGroupInfo*			GetMethodGroupByName(const WString& name, bool inheritable)override;
-				IMethodGroupInfo*			GetConstructorGroup()override;
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
 REGEX\REGEX.H
 ***********************************************************************/
 /***********************************************************************
@@ -10585,6 +10062,1093 @@ namespace vl
 			RegexLexerWalker							Walk()const;
 			RegexLexerColorizer							Colorize()const;
 		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+STREAM\INTERFACES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Stream::Interfaces
+
+Interfaces:
+	IStream							：流
+***********************************************************************/
+
+#ifndef VCZH_STREAM_INTERFACES
+#define VCZH_STREAM_INTERFACES
+
+
+namespace vl
+{
+	namespace stream
+	{
+		class IStream : public virtual Interface
+		{
+		public:
+			virtual bool					CanRead()const=0;
+			virtual bool					CanWrite()const=0;
+			virtual bool					CanSeek()const=0;
+			virtual bool					CanPeek()const=0;
+			virtual bool					IsLimited()const=0;
+			virtual bool					IsAvailable()const=0;
+			virtual void					Close()=0;
+			virtual pos_t					Position()const=0;
+			virtual pos_t					Size()const=0;
+			virtual void					Seek(pos_t _size)=0;
+			virtual void					SeekFromBegin(pos_t _size)=0;
+			virtual void					SeekFromEnd(pos_t _size)=0;
+			virtual vint					Read(void* _buffer, vint _size)=0;
+			virtual vint					Write(void* _buffer, vint _size)=0;
+			virtual vint					Peek(void* _buffer, vint _size)=0;
+		};
+
+		class IEncoder : public Interface
+		{
+		public:
+			virtual void					Setup(IStream* _stream)=0;
+			virtual	void					Close()=0;
+			virtual vint					Write(void* _buffer, vint _size)=0;
+		};
+
+		class IDecoder : public Interface
+		{
+		public:
+			virtual void					Setup(IStream* _stream)=0;
+			virtual	void					Close()=0;
+			virtual vint					Read(void* _buffer, vint _size)=0;
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+STREAM\ACCESSOR.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Stream::Accessor
+
+Classes:
+	TextReader						：字符串阅读器
+	TextWriter						：字符串书写器
+	StreamReader					：流阅读器
+	StreamWriter					：流书写器
+	EncoderStream					：编码流
+	DecoderStream					：解码流
+***********************************************************************/
+
+#ifndef VCZH_STREAM_ACCESSOR
+#define VCZH_STREAM_ACCESSOR
+
+
+namespace vl
+{
+	namespace stream
+	{
+
+/***********************************************************************
+流控制器
+***********************************************************************/
+
+		class TextReader : public Object, private NotCopyable
+		{
+		public:
+			virtual bool				IsEnd()=0;
+			virtual wchar_t				ReadChar()=0;
+			virtual WString				ReadString(vint length);
+			virtual WString				ReadLine();
+			virtual WString				ReadToEnd();
+		};
+
+		class TextWriter : public Object, private NotCopyable
+		{
+		public:
+			virtual void				WriteChar(wchar_t c)=0;
+			virtual void				WriteString(const wchar_t* string, vint charCount);
+			virtual void				WriteString(const wchar_t* string);
+			virtual void				WriteString(const WString& string);
+			virtual void				WriteLine(const wchar_t* string, vint charCount);
+			virtual void				WriteLine(const wchar_t* string);
+			virtual void				WriteLine(const WString& string);
+
+			virtual void				WriteMonospacedEnglishTable(collections::Array<WString>& tableByRow, vint rows, vint columns);
+		};
+
+		class StringReader : public TextReader
+		{
+		protected:
+			WString						string;
+			vint						current;
+			bool						lastCallIsReadLine;
+
+			void						PrepareIfLastCallIsReadLine();
+		public:
+			StringReader(const WString& _string);
+
+			bool						IsEnd();
+			wchar_t						ReadChar();
+			WString						ReadString(vint length);
+			WString						ReadLine();
+			WString						ReadToEnd();
+		};
+
+		class StreamReader : public TextReader
+		{
+		protected:
+			IStream*					stream;
+		public:
+			StreamReader(IStream& _stream);
+
+			bool						IsEnd();
+			wchar_t						ReadChar();
+		};
+
+		class StreamWriter : public TextWriter
+		{
+		protected:
+			IStream*					stream;
+		public:
+			StreamWriter(IStream& _stream);
+			using TextWriter::WriteString;
+
+			void						WriteChar(wchar_t c);
+			void						WriteString(const wchar_t* string, vint charCount);
+		};
+
+/***********************************************************************
+编码解码
+***********************************************************************/
+
+		class EncoderStream : public virtual IStream
+		{
+		protected:
+			IStream*					stream;
+			IEncoder*					encoder;
+			pos_t						position;
+
+		public:
+			EncoderStream(IStream& _stream, IEncoder& _encoder);
+			~EncoderStream();
+
+			bool						CanRead()const;
+			bool						CanWrite()const;
+			bool						CanSeek()const;
+			bool						CanPeek()const;
+			bool						IsLimited()const;
+			bool						IsAvailable()const;
+			void						Close();
+			pos_t						Position()const;
+			pos_t						Size()const;
+			void						Seek(pos_t _size);
+			void						SeekFromBegin(pos_t _size);
+			void						SeekFromEnd(pos_t _size);
+			vint							Read(void* _buffer, vint _size);
+			vint							Write(void* _buffer, vint _size);
+			vint							Peek(void* _buffer, vint _size);
+		};
+
+		class DecoderStream : public virtual IStream
+		{
+		protected:
+			IStream*					stream;
+			IDecoder*					decoder;
+			pos_t						position;
+
+		public:
+			DecoderStream(IStream& _stream, IDecoder& _decoder);
+			~DecoderStream();
+
+			bool						CanRead()const;
+			bool						CanWrite()const;
+			bool						CanSeek()const;
+			bool						CanPeek()const;
+			bool						IsLimited()const;
+			bool						IsAvailable()const;
+			void						Close();
+			pos_t						Position()const;
+			pos_t						Size()const;
+			void						Seek(pos_t _size);
+			void						SeekFromBegin(pos_t _size);
+			void						SeekFromEnd(pos_t _size);
+			vint							Read(void* _buffer, vint _size);
+			vint							Write(void* _buffer, vint _size);
+			vint							Peek(void* _buffer, vint _size);
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSINGTREE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Parsing Tree
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGTREE
+#define VCZH_PARSING_PARSINGTREE
+
+
+namespace vl
+{
+	namespace parsing
+	{
+
+/***********************************************************************
+位置信息
+***********************************************************************/
+
+		struct ParsingTextPos
+		{
+			vint			index;
+			vint			row;
+			vint			column;
+
+			ParsingTextPos()
+				:index(0)
+				,row(0)
+				,column(0)
+			{
+			}
+
+			ParsingTextPos(vint _index, vint _row, vint _column)
+				:index(_index)
+				,row(_row)
+				,column(_column)
+			{
+			}
+
+			bool operator==(const ParsingTextPos& pos)const{return index==pos.index;}
+			bool operator!=(const ParsingTextPos& pos)const{return index!=pos.index;}
+			bool operator<(const ParsingTextPos& pos)const{return index<pos.index;}
+			bool operator<=(const ParsingTextPos& pos)const{return index<=pos.index;}
+			bool operator>(const ParsingTextPos& pos)const{return index>pos.index;}
+			bool operator>=(const ParsingTextPos& pos)const{return index>=pos.index;}
+		};
+
+		struct ParsingTextRange
+		{
+			ParsingTextPos	start;
+			ParsingTextPos	end;
+
+			ParsingTextRange()
+			{
+			}
+
+			ParsingTextRange(const ParsingTextPos& _start, const ParsingTextPos& _end)
+				:start(_start)
+				,end(_end)
+			{
+			}
+
+			bool operator==(const ParsingTextRange& range)const{return start==range.start && end==range.end;}
+			bool operator!=(const ParsingTextRange& range)const{return start!=range.start || end!=range.end;}
+			bool Contains(const ParsingTextPos& pos)const{return start<=pos && pos<=end;}
+			bool Contains(const ParsingTextRange& range)const{return start<=range.start && range.end<=end;}
+		};
+
+/***********************************************************************
+通用语法树
+***********************************************************************/
+
+		class ParsingTreeNode;
+		class ParsingTreeToken;
+		class ParsingTreeObject;
+		class ParsingTreeArray;
+
+		class ParsingTreeNode : public Object
+		{
+		public:
+			class IVisitor : public Interface
+			{
+			public:
+				virtual void			Visit(ParsingTreeToken* node)=0;
+				virtual void			Visit(ParsingTreeObject* node)=0;
+				virtual void			Visit(ParsingTreeArray* node)=0;
+			};
+
+			class TraversalVisitor : public Object, public IVisitor
+			{
+			public:
+				enum TraverseDirection
+				{
+					ByTextPosition,
+					ByStorePosition
+				};
+			protected:
+				TraverseDirection		direction;
+			public:
+				TraversalVisitor(TraverseDirection _direction);
+
+				virtual void			BeforeVisit(ParsingTreeToken* node);
+				virtual void			AfterVisit(ParsingTreeToken* node);
+				virtual void			BeforeVisit(ParsingTreeObject* node);
+				virtual void			AfterVisit(ParsingTreeObject* node);
+				virtual void			BeforeVisit(ParsingTreeArray* node);
+				virtual void			AfterVisit(ParsingTreeArray* node);
+
+				virtual void			Visit(ParsingTreeToken* node)override;
+				virtual void			Visit(ParsingTreeObject* node)override;
+				virtual void			Visit(ParsingTreeArray* node)override;
+			};
+		protected:
+			typedef collections::List<Ptr<ParsingTreeNode>>				NodeList;
+
+			ParsingTextRange			codeRange;
+			ParsingTreeNode*			parent;
+			NodeList					cachedOrderedSubNodes;
+
+			virtual const NodeList&		GetSubNodesInternal()=0;
+			bool						BeforeAddChild(Ptr<ParsingTreeNode> node);
+			void						AfterAddChild(Ptr<ParsingTreeNode> node);
+			bool						BeforeRemoveChild(Ptr<ParsingTreeNode> node);
+			void						AfterRemoveChild(Ptr<ParsingTreeNode> node);
+		public:
+			ParsingTreeNode(const ParsingTextRange& _codeRange);
+			~ParsingTreeNode();
+
+			virtual void				Accept(IVisitor* visitor)=0;
+			ParsingTextRange			GetCodeRange();
+			void						SetCodeRange(const ParsingTextRange& range);
+
+			void						InitializeQueryCache();
+			void						ClearQueryCache();
+			ParsingTreeNode*			GetParent();
+			const NodeList&				GetSubNodes();
+			Ptr<ParsingTreeNode>		FindNode(const ParsingTextPos& position);
+		};
+
+		class ParsingTreeToken : public ParsingTreeNode
+		{
+		protected:
+			WString						value;
+			vint						tokenIndex;
+
+			const NodeList&				GetSubNodesInternal()override;
+		public:
+			ParsingTreeToken(const WString& _value, vint _tokenIndex=-1, const ParsingTextRange& _codeRange=ParsingTextRange());
+			~ParsingTreeToken();
+
+			void						Accept(IVisitor* visitor)override;
+			vint						GetTokenIndex();
+			void						SetTokenIndex(vint _tokenIndex);
+			const WString&				GetValue();
+			void						SetValue(const WString& _value);
+		};
+
+		class ParsingTreeObject : public ParsingTreeNode
+		{
+		protected:
+			typedef collections::Dictionary<WString, Ptr<ParsingTreeNode>>				NodeMap;
+			typedef collections::SortedList<WString>									NameList;
+
+			WString						type;
+			NodeMap						members;
+
+			const NodeList&			GetSubNodesInternal()override;
+		public:
+			ParsingTreeObject(const WString& _type=L"", const ParsingTextRange& _codeRange=ParsingTextRange());
+			~ParsingTreeObject();
+
+			void						Accept(IVisitor* visitor)override;
+			const WString&				GetType();
+			void						SetType(const WString& _type);
+			NodeMap&					GetMembers();
+			Ptr<ParsingTreeNode>		GetMember(const WString& name);
+			bool						SetMember(const WString& name, Ptr<ParsingTreeNode> node);
+			bool						RemoveMember(const WString& name);
+			const NameList&				GetMemberNames();
+		};
+
+		class ParsingTreeArray : public ParsingTreeNode
+		{
+		protected:
+			typedef collections::List<Ptr<ParsingTreeNode>>								NodeArray;
+
+			WString						elementType;
+			NodeArray					items;
+
+			const NodeList&				GetSubNodesInternal()override;
+		public:
+			ParsingTreeArray(const WString& _elementType=L"", const ParsingTextRange& _codeRange=ParsingTextRange());
+			~ParsingTreeArray();
+
+			void						Accept(IVisitor* visitor)override;
+			const WString&				GetElementType();
+			void						SetElementType(const WString& _elementType);
+			NodeArray&					GetItems();
+			Ptr<ParsingTreeNode>		GetItem(vint index);
+			bool						SetItem(vint index, Ptr<ParsingTreeNode> node);
+			bool						AddItem(Ptr<ParsingTreeNode> node);
+			bool						InsertItem(vint index, Ptr<ParsingTreeNode> node);
+			bool						RemoveItem(vint index);
+			bool						RemoveItem(Ptr<ParsingTreeNode> node);
+			vint						IndexOfItem(Ptr<ParsingTreeNode> node);
+			bool						ContainsItem(Ptr<ParsingTreeNode> node);
+			vint						Count();
+			bool						Clear();
+		};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+		extern void						Log(Ptr<ParsingTreeNode> node, stream::TextWriter& writer, const WString& prefix=L"");
+
+/***********************************************************************
+语法树基础设施
+***********************************************************************/
+
+		class ParsingTreeCustomBase : public Object
+		{
+		public:
+			ParsingTextRange			codeRange;
+		};
+
+		class ParsingError : public Object
+		{
+		public:
+			ParsingTextRange			codeRange;
+			const regex::RegexToken*	token;
+			ParsingTreeCustomBase*		parsingTree;
+			WString						errorMessage;
+
+			ParsingError();
+			ParsingError(const WString& _errorMessage);
+			ParsingError(const regex::RegexToken* _token, const WString& _errorMessage);
+			ParsingError(ParsingTreeCustomBase* _parsingTree, const WString& _errorMessage);
+			~ParsingError();
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSINGDEFINITIONS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Definitions
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGDEFINITIONS
+#define VCZH_PARSING_PARSINGDEFINITIONS
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace definitions
+		{
+
+/***********************************************************************
+类型结构
+***********************************************************************/
+
+			class ParsingDefinitionPrimitiveType;
+			class ParsingDefinitionTokenType;
+			class ParsingDefinitionSubType;
+			class ParsingDefinitionArrayType;
+
+			class ParsingDefinitionType : public ParsingTreeCustomBase
+			{
+			public:
+				class IVisitor : public Interface
+				{
+				public:
+					virtual void								Visit(ParsingDefinitionPrimitiveType* node)=0;
+					virtual void								Visit(ParsingDefinitionTokenType* node)=0;
+					virtual void								Visit(ParsingDefinitionSubType* node)=0;
+					virtual void								Visit(ParsingDefinitionArrayType* node)=0;
+				};
+
+				virtual void									Accept(IVisitor* visitor)=0;
+			};
+
+			class ParsingDefinitionPrimitiveType : public ParsingDefinitionType
+			{
+			public:
+				WString											name;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionTokenType : public ParsingDefinitionType
+			{
+			public:
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionSubType : public ParsingDefinitionType
+			{
+			public:
+				Ptr<ParsingDefinitionType>						parentType;
+				WString											subTypeName;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionArrayType : public ParsingDefinitionType
+			{
+			public:
+				Ptr<ParsingDefinitionType>						elementType;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+/***********************************************************************
+数据结构
+***********************************************************************/
+
+			class ParsingDefinitionClassMemberDefinition;
+			class ParsingDefinitionClassDefinition;
+			class ParsingDefinitionEnumMemberDefinition;
+			class ParsingDefinitionEnumDefinition;
+
+			class ParsingDefinitionTypeDefinition : public ParsingTreeCustomBase
+			{
+			public:
+				class IVisitor : public Interface
+				{
+				public:
+					virtual void								Visit(ParsingDefinitionClassMemberDefinition* node)=0;
+					virtual void								Visit(ParsingDefinitionClassDefinition* node)=0;
+					virtual void								Visit(ParsingDefinitionEnumMemberDefinition* node)=0;
+					virtual void								Visit(ParsingDefinitionEnumDefinition* node)=0;
+				};
+
+				virtual void									Accept(IVisitor* visitor)=0;
+			public:
+				WString											name;
+			};
+
+			class ParsingDefinitionClassMemberDefinition : public ParsingDefinitionTypeDefinition
+			{
+			public:
+				Ptr<ParsingDefinitionType>						type;
+				WString											name;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionClassDefinition : public ParsingDefinitionTypeDefinition
+			{
+			public:
+				typedef collections::List<Ptr<ParsingDefinitionClassMemberDefinition>>	MemberList;
+				typedef collections::List<Ptr<ParsingDefinitionTypeDefinition>>			TypeList;
+
+				Ptr<ParsingDefinitionType>						parentType;
+				MemberList										members;
+				TypeList										subTypes;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionEnumMemberDefinition : public ParsingDefinitionTypeDefinition
+			{
+			public:
+				WString											name;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionEnumDefinition : public ParsingDefinitionTypeDefinition
+			{
+			public:
+				typedef collections::List<Ptr<ParsingDefinitionEnumMemberDefinition>>	MemberList;
+
+				MemberList										members;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionPrimitiveGrammar;
+			class ParsingDefinitionTextGrammar;
+			class ParsingDefinitionSequenceGrammar;
+			class ParsingDefinitionAlternativeGrammar;
+			class ParsingDefinitionLoopGrammar;
+			class ParsingDefinitionOptionalGrammar;
+			class ParsingDefinitionCreateGrammar;
+			class ParsingDefinitionAssignGrammar;
+			class ParsingDefinitionUseGrammar;
+			class ParsingDefinitionSetterGrammar;
+
+			class ParsingDefinitionGrammar : public ParsingTreeCustomBase
+			{
+			public:
+				class IVisitor : public Interface
+				{
+				public:
+					virtual void								Visit(ParsingDefinitionPrimitiveGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionTextGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionSequenceGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionAlternativeGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionLoopGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionOptionalGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionCreateGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionAssignGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionUseGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionSetterGrammar* node)=0;
+				};
+
+				virtual void									Accept(IVisitor* visitor)=0;
+			};
+
+/***********************************************************************
+文法规则
+***********************************************************************/
+
+			class ParsingDefinitionPrimitiveGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				WString											name;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionTextGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				WString											text;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionSequenceGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					first;
+				Ptr<ParsingDefinitionGrammar>					second;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionAlternativeGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					first;
+				Ptr<ParsingDefinitionGrammar>					second;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionLoopGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionOptionalGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionCreateGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+				Ptr<ParsingDefinitionType>						type;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionAssignGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+				WString											memberName;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionUseGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionSetterGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+				WString											memberName;
+				WString											value;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+/***********************************************************************
+文法结构
+***********************************************************************/
+
+			class ParsingDefinitionTokenDefinition : public ParsingTreeCustomBase
+			{
+			public:
+				WString											name;
+				WString											regex;
+				bool											discard;
+			};
+
+			class ParsingDefinitionRuleDefinition : public ParsingTreeCustomBase
+			{
+			public:
+				WString															name;
+				Ptr<ParsingDefinitionType>										type;
+				collections::List<Ptr<ParsingDefinitionGrammar>>				grammars;
+			};
+
+			class ParsingDefinition : public ParsingTreeCustomBase
+			{
+			public:
+				collections::List<Ptr<ParsingDefinitionTypeDefinition>>			types;
+				collections::List<Ptr<ParsingDefinitionTokenDefinition>>		tokens;
+				collections::List<Ptr<ParsingDefinitionRuleDefinition>>			rules;
+			};
+
+/***********************************************************************
+构造器（类型）
+***********************************************************************/
+
+			class ParsingDefinitionTypeWriter : public Object
+			{
+				friend ParsingDefinitionTypeWriter				Type(const WString& name);
+				friend ParsingDefinitionTypeWriter				TokenType();
+			protected:
+				Ptr<ParsingDefinitionType>						type;
+
+				ParsingDefinitionTypeWriter(Ptr<ParsingDefinitionType> internalType);
+				ParsingDefinitionTypeWriter(const WString& name);
+			public:
+				ParsingDefinitionTypeWriter(const ParsingDefinitionTypeWriter& typeWriter);
+
+				ParsingDefinitionTypeWriter						Sub(const WString& subTypeName)const;
+				ParsingDefinitionTypeWriter						Array()const;
+				Ptr<ParsingDefinitionType>						Type()const;
+			};
+
+			extern ParsingDefinitionTypeWriter					Type(const WString& name);
+			extern ParsingDefinitionTypeWriter					TokenType();
+
+/***********************************************************************
+构造器（类型定义）
+***********************************************************************/
+
+			class ParsingDefinitionTypeDefinitionWriter : public Object
+			{
+			public:
+				virtual Ptr<ParsingDefinitionTypeDefinition>	Definition()const=0;
+			};
+
+			class ParsingDefinitionClassDefinitionWriter : public ParsingDefinitionTypeDefinitionWriter
+			{
+			protected:
+				Ptr<ParsingDefinitionClassDefinition>			definition;
+
+			public:
+				ParsingDefinitionClassDefinitionWriter(const WString& name);
+				ParsingDefinitionClassDefinitionWriter(const WString& name, const ParsingDefinitionTypeWriter& parentType);
+
+				ParsingDefinitionClassDefinitionWriter&			Member(const WString& name, const ParsingDefinitionTypeWriter& type);
+				ParsingDefinitionClassDefinitionWriter&			SubType(const ParsingDefinitionTypeDefinitionWriter& type);
+
+				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
+			};
+			
+			extern ParsingDefinitionClassDefinitionWriter		Class(const WString& name);
+			extern ParsingDefinitionClassDefinitionWriter		Class(const WString& name, const ParsingDefinitionTypeWriter& parentType);
+
+			class ParsingDefinitionEnumDefinitionWriter : public ParsingDefinitionTypeDefinitionWriter
+			{
+			protected:
+				Ptr<ParsingDefinitionEnumDefinition>			definition;
+
+			public:
+				ParsingDefinitionEnumDefinitionWriter(const WString& name);
+
+				ParsingDefinitionEnumDefinitionWriter&			Member(const WString& name);
+
+				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
+			};
+
+			extern ParsingDefinitionEnumDefinitionWriter		Enum(const WString& name);
+
+/***********************************************************************
+构造器（文法规则）
+***********************************************************************/
+
+			class ParsingDefinitionGrammarWriter : public Object
+			{
+				friend ParsingDefinitionGrammarWriter			Rule(const WString& name);
+				friend ParsingDefinitionGrammarWriter			Text(const WString& name);
+				friend ParsingDefinitionGrammarWriter			Opt(const ParsingDefinitionGrammarWriter& writer);
+			protected:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+
+				ParsingDefinitionGrammarWriter(Ptr<ParsingDefinitionGrammar> internalGrammar);
+			public:
+				ParsingDefinitionGrammarWriter(const ParsingDefinitionGrammarWriter& grammarWriter);
+
+				ParsingDefinitionGrammarWriter					operator+(const ParsingDefinitionGrammarWriter& next)const;
+				ParsingDefinitionGrammarWriter					operator|(const ParsingDefinitionGrammarWriter& next)const;
+				ParsingDefinitionGrammarWriter					operator*()const;
+				ParsingDefinitionGrammarWriter					As(const ParsingDefinitionTypeWriter& type)const;
+				ParsingDefinitionGrammarWriter					operator[](const WString& memberName)const;
+				ParsingDefinitionGrammarWriter					operator!()const;
+				ParsingDefinitionGrammarWriter					Set(const WString& memberName, const WString& value)const;
+
+				Ptr<ParsingDefinitionGrammar>					Grammar()const;
+			};
+
+			extern ParsingDefinitionGrammarWriter				Rule(const WString& name);
+			extern ParsingDefinitionGrammarWriter				Text(const WString& text);
+			extern ParsingDefinitionGrammarWriter				Opt(const ParsingDefinitionGrammarWriter& writer);
+
+/***********************************************************************
+构造器（文法结构）
+***********************************************************************/
+
+			class ParsingDefinitionWriter;
+
+			class ParsingDefinitionRuleDefinitionWriter : public Object
+			{
+			protected:
+				Ptr<ParsingDefinitionRuleDefinition>			rule;
+				ParsingDefinitionWriter&						owner;
+			public:
+				ParsingDefinitionRuleDefinitionWriter(ParsingDefinitionWriter& _owner, Ptr<ParsingDefinitionRuleDefinition> _rule);
+
+				ParsingDefinitionRuleDefinitionWriter&			Imply(const ParsingDefinitionGrammarWriter& grammar);
+				ParsingDefinitionWriter&						EndRule();
+			};
+
+			class ParsingDefinitionWriter : public Object
+			{
+			protected:
+				Ptr<ParsingDefinition>							definition;
+
+			public:
+				ParsingDefinitionWriter();
+
+				ParsingDefinitionWriter&						Type(const ParsingDefinitionTypeDefinitionWriter& type);
+				ParsingDefinitionWriter&						Token(const WString& name, const WString& regex);
+				ParsingDefinitionWriter&						Discard(const WString& name, const WString& regex);
+				ParsingDefinitionRuleDefinitionWriter			Rule(const WString& name, const ParsingDefinitionTypeWriter& type);
+
+				Ptr<ParsingDefinition>							Definition()const;
+			};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+			extern WString										TypeToString(ParsingDefinitionType* type);
+			extern WString										GrammarToString(ParsingDefinitionGrammar* grammar);
+			extern WString										GrammarStateToString(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
+			extern ParsingDefinitionGrammar*					FindAppropriateGrammarState(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
+			extern void											Log(Ptr<ParsingDefinition> definition, stream::TextWriter& writer);
+
+/***********************************************************************
+自举
+***********************************************************************/
+			
+			extern Ptr<ParsingDefinition>						CreateParserDefinition();
+			extern Ptr<ParsingDefinition>						DeserializeDefinition(Ptr<ParsingTreeNode> node);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSINGANALYZER.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Analyzing
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGANALYZER
+#define VCZH_PARSING_PARSINGANALYZER
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace analyzing
+		{
+
+/***********************************************************************
+符号表关联对象
+***********************************************************************/
+
+			class ParsingSymbol;
+
+			struct DefinitionTypeScopePair
+			{
+				definitions::ParsingDefinitionType*		type;
+				ParsingSymbol*							scope;
+
+				DefinitionTypeScopePair()
+				{
+				}
+
+				DefinitionTypeScopePair(definitions::ParsingDefinitionType* _type, ParsingSymbol* _scope)
+					:type(_type)
+					,scope(_scope)
+				{
+				}
+
+				vint Compare(const DefinitionTypeScopePair& pair)
+				{
+					if(type<pair.type) return -1;
+					if(type>pair.type) return 1;
+					if(scope<pair.scope) return -1;
+					if(scope>pair.scope) return 1;
+					return 0;
+				}
+
+				bool operator==(const DefinitionTypeScopePair& pair){return Compare(pair)==0;}
+				bool operator!=(const DefinitionTypeScopePair& pair){return Compare(pair)!=0;}
+				bool operator>(const DefinitionTypeScopePair& pair){return Compare(pair)>0;}
+				bool operator>=(const DefinitionTypeScopePair& pair){return Compare(pair)>=0;}
+				bool operator<(const DefinitionTypeScopePair& pair){return Compare(pair)<0;}
+				bool operator<=(const DefinitionTypeScopePair& pair){return Compare(pair)<=0;}
+			};
+
+/***********************************************************************
+符号表
+***********************************************************************/
+
+			class ParsingSymbol : public Object
+			{
+				friend class ParsingSymbolManager;
+
+				typedef collections::Dictionary<WString, ParsingSymbol*>		ParsingSymbolMap;
+				typedef collections::List<ParsingSymbol*>						ParsingSymbolList;
+			public:
+				enum SymbolType
+				{
+					Global,
+					EnumType,
+					ClassType,		// descriptor == base type
+					ArrayType,		// descriptor == element type
+					TokenType,
+					EnumItem,		// descriptor == parent
+					ClassField,		// descriptor == field type
+					TokenDef,		// descriptor == token type
+					RuleDef,		// descriptor == rule type
+				};
+
+			protected:
+				ParsingSymbolManager*			manager;
+				SymbolType						type;
+				WString							name;
+				ParsingSymbol*					descriptorSymbol;
+				WString							descriptorString;
+				ParsingSymbol*					parentSymbol;
+				ParsingSymbol*					arrayTypeSymbol;
+				ParsingSymbolList				subSymbolList;
+				ParsingSymbolMap				subSymbolMap;
+
+				bool							AddSubSymbol(ParsingSymbol* subSymbol);
+
+				ParsingSymbol(ParsingSymbolManager* _manager, SymbolType _type, const WString& _name, ParsingSymbol* _descriptorSymbol, const WString& _descriptorString);
+			public:
+				~ParsingSymbol();
+
+				ParsingSymbolManager*			GetManager();
+				SymbolType						GetType();
+				const WString&					GetName();
+				vint							GetSubSymbolCount();
+				ParsingSymbol*					GetSubSymbol(vint index);
+				ParsingSymbol*					GetSubSymbolByName(const WString& name);
+				ParsingSymbol*					GetDescriptorSymbol();
+				WString							GetDescriptorString();
+				ParsingSymbol*					GetParentSymbol();
+				bool							IsType();
+				ParsingSymbol*					SearchClassSubSymbol(const WString& name);
+				ParsingSymbol*					SearchCommonBaseClass(ParsingSymbol* classType);
+			};
+
+			class ParsingSymbolManager : public Object
+			{
+
+				typedef collections::List<Ptr<ParsingSymbol>>												ParsingSymbolList;
+				typedef collections::Dictionary<DefinitionTypeScopePair, ParsingSymbol*>					DefinitionTypeSymbolMap;
+				typedef collections::Dictionary<definitions::ParsingDefinitionGrammar*, ParsingSymbol*>		DefinitionGrammarSymbolMap;
+			protected:
+				ParsingSymbol*					globalSymbol;
+				ParsingSymbol*					tokenTypeSymbol;
+				ParsingSymbolList				createdSymbols;
+				DefinitionTypeSymbolMap			definitionTypeSymbolCache;
+				DefinitionGrammarSymbolMap		definitionGrammarSymbolCache;
+				DefinitionGrammarSymbolMap		definitionGrammarTypeCache;
+
+				ParsingSymbol*					TryAddSubSymbol(Ptr<ParsingSymbol> subSymbol, ParsingSymbol* parentSymbol);
+			public:
+				ParsingSymbolManager();
+				~ParsingSymbolManager();
+
+				ParsingSymbol*					GetGlobal();
+				ParsingSymbol*					GetTokenType();
+				ParsingSymbol*					GetArrayType(ParsingSymbol* elementType);
+
+				ParsingSymbol*					AddClass(const WString& name, ParsingSymbol* baseType, ParsingSymbol* parentType=0);
+				ParsingSymbol*					AddField(const WString& name, ParsingSymbol* classType, ParsingSymbol* fieldType);
+				ParsingSymbol*					AddEnum(const WString& name, ParsingSymbol* parentType=0);
+				ParsingSymbol*					AddEnumItem(const WString& name, ParsingSymbol* enumType);
+				ParsingSymbol*					AddTokenDefinition(const WString& name, const WString& regex);
+				ParsingSymbol*					AddRuleDefinition(const WString& name, ParsingSymbol* ruleType);
+
+				ParsingSymbol*					CacheGetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope);
+				bool							CacheSetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope, ParsingSymbol* symbol);
+				ParsingSymbol*					CacheGetSymbol(definitions::ParsingDefinitionGrammar* grammar);
+				bool							CacheSetSymbol(definitions::ParsingDefinitionGrammar* grammar, ParsingSymbol* symbol);
+				ParsingSymbol*					CacheGetType(definitions::ParsingDefinitionGrammar* grammar);
+				bool							CacheSetType(definitions::ParsingDefinitionGrammar* grammar, ParsingSymbol* type);
+			};
+
+/***********************************************************************
+语义分析
+***********************************************************************/
+
+			extern WString						GetTypeFullName(ParsingSymbol* type);
+			extern ParsingSymbol*				FindType(Ptr<definitions::ParsingDefinitionType> type, ParsingSymbolManager* manager, ParsingSymbol* scope, collections::List<Ptr<ParsingError>>& errors);
+			extern void							PrepareSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+			extern void							ValidateRuleStructure(Ptr<definitions::ParsingDefinition> definition, Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+			extern void							ResolveRuleSymbols(Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+			extern void							ResolveSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+			extern void							ValidateDefinition(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+		}
 	}
 }
 
@@ -11136,6 +11700,1043 @@ namespace vl
 #endif
 
 /***********************************************************************
+PARSING\PARSINGTABLE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Automaton
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGTABLE
+#define VCZH_PARSING_PARSINGTABLE
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace tabling
+		{
+
+/***********************************************************************
+跳转表
+***********************************************************************/
+
+			class ParsingTable : public Object
+			{
+			public:
+				static const vint							TokenBegin=0;
+				static const vint							TokenFinish=1;
+				static const vint							TryReduce=2;
+				static const vint							UserTokenStart=3;
+
+				class TokenInfo
+				{
+				public:
+					WString									name;
+					WString									regex;
+				};
+
+				class StateInfo
+				{
+				public:
+					WString									ruleName;
+					WString									stateName;
+					WString									stateExpression;
+				};
+
+				class RuleInfo
+				{
+				public:
+					WString									name;
+					WString									type;
+					vint									rootStartState;
+				};
+
+				class Instruction
+				{
+				public:
+					enum InstructionType
+					{
+						Create,
+						Assign,
+						Item,
+						Using,
+						Setter,
+						Shift,
+						Reduce,
+						LeftRecursiveReduce,
+					};
+
+					InstructionType							instructionType;
+					vint									stateParameter;
+					WString									nameParameter;
+					WString									value;
+
+					Instruction()
+						:instructionType(Create)
+						,stateParameter(0)
+					{
+					}
+				};
+
+				class TransitionItem
+				{
+				public:
+					vint									token;
+					vint									targetState;
+					collections::List<vint>					stackPattern;
+					collections::List<Instruction>			instructions;
+
+					enum OrderResult
+					{
+						CorrectOrder,
+						WrongOrder,
+						SameOrder,
+						UnknownOrder,
+					};
+
+					static OrderResult						CheckOrder(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2, bool forceGivingOrder);
+					static vint								Compare(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2);
+				};
+
+				class TransitionBag
+				{
+				public:
+					collections::List<Ptr<TransitionItem>>	transitionItems;
+				};
+
+			protected:
+				Ptr<regex::RegexLexer>						lexer;
+				collections::Array<Ptr<TransitionBag>>		transitionBags;
+				vint										tokenCount;
+				vint										stateCount;
+				collections::Array<TokenInfo>				tokenInfos;
+				collections::Array<TokenInfo>				discardTokenInfos;
+				collections::Array<StateInfo>				stateInfos;
+				collections::Array<RuleInfo>				ruleInfos;
+
+			public:
+				ParsingTable(vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
+				~ParsingTable();
+
+				vint										GetTokenCount();
+				const TokenInfo&							GetTokenInfo(vint token);
+				void										SetTokenInfo(vint token, const TokenInfo& info);
+
+				vint										GetDiscardTokenCount();
+				const TokenInfo&							GetDiscardTokenInfo(vint token);
+				void										SetDiscardTokenInfo(vint token, const TokenInfo& info);
+
+				vint										GetStateCount();
+				const StateInfo&							GetStateInfo(vint state);
+				void										SetStateInfo(vint state, const StateInfo& info);
+
+				vint										GetRuleCount();
+				const RuleInfo&								GetRuleInfo(vint rule);
+				void										SetRuleInfo(vint rule, const RuleInfo& info);
+
+				const regex::RegexLexer&					GetLexer();
+				Ptr<TransitionBag>							GetTransitionBag(vint state, vint token);
+				void										SetTransitionBag(vint state, vint token, Ptr<TransitionBag> bag);
+				void										Initialize();
+				bool										IsInputToken(vint regexTokenIndex);
+				vint										GetTableTokenIndex(vint regexTokenIndex);
+				vint										GetTableDiscardTokenIndex(vint regexTokenIndex);
+			};
+
+/***********************************************************************
+语法分析器
+***********************************************************************/
+
+			class ParsingState : public Object
+			{
+			public:
+				class TransitionResult
+				{
+				public:
+					vint									tableTokenIndex;
+					vint									tableStateSource;
+					vint									tableStateTarget;
+					vint									tokenIndexInStream;
+					regex::RegexToken*						token;
+					ParsingTable::TransitionItem*			transition;
+
+					TransitionResult()
+						:tableTokenIndex(-1)
+						,tableStateSource(-1)
+						,tableStateTarget(-1)
+						,tokenIndexInStream(-1)
+						,token(0)
+						,transition(0)
+					{
+					}
+
+					operator bool()const
+					{
+						return transition!=0;
+					}
+				};
+			private:
+				WString										input;
+				Ptr<ParsingTable>							table;
+				collections::List<regex::RegexToken>		tokens;
+
+				collections::List<vint>						stateStack;
+				vint										currentState;
+				vint										currentToken;
+			public:
+				ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex=-1);
+				~ParsingState();
+
+				const WString&								GetInput();
+				Ptr<ParsingTable>							GetTable();
+				const collections::List<regex::RegexToken>&	GetTokens();
+
+				vint										Reset(const WString& rule);
+				TransitionResult							ReadToken();
+				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken=0);
+				vint										GetCurrentToken();
+				const collections::List<vint>&				GetStateStack();
+			};
+
+/***********************************************************************
+语法树生成器
+***********************************************************************/
+
+			class ParsingTreeBuilder : public Object
+			{
+			protected:
+				Ptr<ParsingTreeNode>						createdObject;
+				Ptr<ParsingTreeObject>						operationTarget;
+				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
+
+			public:
+				ParsingTreeBuilder();
+				~ParsingTreeBuilder();
+
+				void										Reset();
+				bool										Run(const ParsingState::TransitionResult& result);
+				Ptr<ParsingTreeObject>						GetNode();
+			};
+
+			class ParsingRestrictParser : public Object
+			{
+			protected:
+				Ptr<ParsingTable>							table;
+
+				const regex::RegexToken*					ConvertToken(vint token, ParsingState& state);
+			public:
+				ParsingRestrictParser(Ptr<ParsingTable> _table);
+				~ParsingRestrictParser();
+
+				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, ParsingError& firstError);
+			};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+			extern Ptr<ParsingRestrictParser>				CreateBootstrapParser();
+			extern void										Log(Ptr<ParsingTable> table, stream::TextWriter& writer);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSINGAUTOMATON.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Automaton
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGAUTOMATON
+#define VCZH_PARSING_PARSINGAUTOMATON
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace analyzing
+		{
+
+/***********************************************************************
+状态机
+***********************************************************************/
+
+			class Action;
+			class Transition;
+			class State;
+
+			class Action : public Object
+			{
+			public:
+				enum ActionType
+				{
+					Create, // new source
+					Assign, // source ::= <created symbol>
+					Using,  // use <created symbol>
+					Setter, // source ::= target
+					Shift,
+					Reduce,
+					LeftRecursiveReduce,
+				};
+
+				ActionType											actionType;
+				ParsingSymbol*										actionTarget;
+				ParsingSymbol*										actionSource;
+
+				// the following two fields record which rule symbol transition generate this shift/reduce action
+				State*												shiftReduceSource;
+				State*												shiftReduceTarget;
+
+				Action();
+				~Action();
+			};
+
+			class Transition : public Object
+			{
+			public:
+				enum TransitionType
+				{
+					TokenBegin,		// token stream start
+					TokenFinish,	// token stream end
+					TryReduce,		// rule end
+					Epsilon,		// an epsilon transition
+					Symbol,			// a syntax symbol
+				};
+
+				enum StackOperationType
+				{
+					None,
+					ShiftReduceCompacted,
+					LeftRecursive,
+				};
+
+				State*												source;
+				State*												target;
+				collections::List<Ptr<Action>>						actions;
+				
+				TransitionType										transitionType;
+				StackOperationType									stackOperationType;
+				ParsingSymbol*										transitionSymbol;
+
+				Transition();
+				~Transition();
+
+				static bool											IsEquivalent(Transition* t1, Transition* t2, bool careSourceAndTarget);
+			};
+
+			class State : public Object
+			{
+			public:
+				enum StatePosition
+				{
+					BeforeNode,
+					AfterNode,
+				};
+
+				collections::List<Transition*>						transitions;
+				collections::List<Transition*>						inputs;
+				bool												endState;
+
+				ParsingSymbol*										ownerRuleSymbol;
+				definitions::ParsingDefinitionRuleDefinition*		ownerRule;
+				definitions::ParsingDefinitionGrammar*				grammarNode;
+				definitions::ParsingDefinitionGrammar*				stateNode;
+				StatePosition										statePosition;
+				WString												stateName;
+				WString												stateExpression;
+
+				State();
+				~State();
+			};
+
+			class RuleInfo : public Object
+			{
+			public:
+				State*												rootRuleStartState;
+				State*												rootRuleEndState;
+				State*												startState;
+				collections::List<State*>							endStates;
+				int													stateNameCount;
+
+				RuleInfo();
+				~RuleInfo();
+			};
+
+			class Automaton : public Object
+			{
+				typedef collections::Dictionary<definitions::ParsingDefinitionRuleDefinition*, Ptr<RuleInfo>>		RuleInfoMap;
+			public:
+				ParsingSymbolManager*								symbolManager;
+				collections::List<Ptr<Transition>>					transitions;
+				collections::List<Ptr<State>>						states;
+				RuleInfoMap											ruleInfos;
+
+				Automaton(ParsingSymbolManager* _symbolManager);
+				~Automaton();
+
+				State*												RuleStartState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
+				State*												RootRuleStartState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
+				State*												RootRuleEndState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
+				State*												StartState(definitions::ParsingDefinitionRuleDefinition* ownerRule, definitions::ParsingDefinitionGrammar* grammarNode, definitions::ParsingDefinitionGrammar* stateNode);
+				State*												EndState(definitions::ParsingDefinitionRuleDefinition* ownerRule, definitions::ParsingDefinitionGrammar* grammarNode, definitions::ParsingDefinitionGrammar* stateNode);
+				State*												CopyState(State* oldState);
+
+				Transition*											CreateTransition(State* start, State* end);
+				Transition*											TokenBegin(State* start, State* end);
+				Transition*											TokenFinish(State* start, State* end);
+				Transition*											TryReduce(State* start, State* end);
+				Transition*											Epsilon(State* start, State* end);
+				Transition*											Symbol(State* start, State* end, ParsingSymbol* transitionSymbol);
+				Transition*											CopyTransition(State* start, State* end, Transition* oldTransition);
+
+				void												DeleteTransition(Transition* transition);
+				void												DeleteState(State* state);
+			};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+			namespace closure_searching
+			{
+				struct ClosureItem
+				{
+					State*											state;			// target state of one path of a closure
+					Ptr<collections::List<Transition*>>				transitions;	// path
+					bool											cycle;			// true: invalid closure because there are cycles, and in the middle of the path there will be a transition that targets to the state field.
+
+					ClosureItem()
+						:state(0)
+						,cycle(false)
+					{
+					}
+
+					ClosureItem(State* _state, Ptr<collections::List<Transition*>> _transitions, bool _cycle)
+						:state(_state)
+						,transitions(_transitions)
+						,cycle(_cycle)
+					{
+					}
+				};
+
+				enum ClosureSearchResult
+				{
+					Continue,
+					Hit,
+					Blocked,
+				};
+
+				extern void											SearchClosure(ClosureSearchResult(*closurePredicate)(Transition*), State* startState, collections::List<ClosureItem>& closure);
+			}
+
+			extern Ptr<Automaton>									CreateEpsilonPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager);
+			extern void												RemoveEpsilonTransitions(collections::Dictionary<State*, State*>& oldNewStateMap, collections::List<State*>& scanningStates, Ptr<Automaton> automaton);
+			extern Ptr<Automaton>									CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA);
+			extern Ptr<Automaton>									CreateJointPDAFromNondeterministicPDA(Ptr<Automaton> nondeterministicPDA);
+			extern void												CompactJointPDA(Ptr<Automaton> jointPDA);
+			extern void												MarkLeftRecursiveInJointPDA(Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
+			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
+			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, collections::List<Ptr<ParsingError>>& errors);
+			extern void												Log(Ptr<Automaton> automaton, stream::TextWriter& writer);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+STREAM\MEMORYSTREAM.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Stream::MemoryStream
+
+Interfaces:
+	MemoryStream					：内存流
+***********************************************************************/
+
+#ifndef VCZH_STREAM_MEMORYSTREAM
+#define VCZH_STREAM_MEMORYSTREAM
+
+
+namespace vl
+{
+	namespace stream
+	{
+		class MemoryStream : public Object, public virtual IStream
+		{
+		protected:
+			vint					block;
+			char*					buffer;
+			vint					size;
+			vint					position;
+			vint					capacity;
+
+			void					PrepareSpace(vint totalSpace);
+		public:
+			MemoryStream(vint _block=65536);
+			~MemoryStream();
+
+			bool					CanRead()const;
+			bool					CanWrite()const;
+			bool					CanSeek()const;
+			bool					CanPeek()const;
+			bool					IsLimited()const;
+			bool					IsAvailable()const;
+			void					Close();
+			pos_t					Position()const;
+			pos_t					Size()const;
+			void					Seek(pos_t _size);
+			void					SeekFromBegin(pos_t _size);
+			void					SeekFromEnd(pos_t _size);
+			vint					Read(void* _buffer, vint _size);
+			vint					Write(void* _buffer, vint _size);
+			vint					Peek(void* _buffer, vint _size);
+			void*					GetInternalBuffer();
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+REFLECTION\GUITYPEDESCRIPTOR.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Framework::Reflection
+
+XML Representation for Code Generation:
+***********************************************************************/
+
+#ifndef VCZH_REFLECTION_GUITYPEDESCRIPTOR
+#define VCZH_REFLECTION_GUITYPEDESCRIPTOR
+
+
+namespace vl
+{
+	namespace reflection
+	{
+
+/***********************************************************************
+Attribute
+***********************************************************************/
+
+		namespace description
+		{
+			class ITypeDescriptor;
+		}
+
+		class DescriptableObject
+		{
+			template<typename T>
+			friend class Description;
+
+			friend class DescriptableValue;
+		protected:
+			size_t									objectSize;
+			description::ITypeDescriptor**			typeDescriptor;
+		public:
+			DescriptableObject();
+			virtual ~DescriptableObject();
+
+			description::ITypeDescriptor*			GetTypeDescriptor();
+		};
+
+		class IDescriptable : public virtual Interface, public virtual DescriptableObject
+		{
+		public:
+			~IDescriptable(){}
+		};
+		
+		template<typename T>
+		class Description : public virtual DescriptableObject
+		{
+		protected:
+			static description::ITypeDescriptor*		associatedTypeDescriptor;
+		public:
+			Description()
+			{
+				if(objectSize<sizeof(T))
+				{
+					objectSize=sizeof(T);
+					typeDescriptor=&associatedTypeDescriptor;
+				}
+			}
+
+			static description::ITypeDescriptor* GetAssociatedTypeDescriptor()
+			{
+				return associatedTypeDescriptor;
+			}
+
+			static void SetAssociatedTypeDescroptor(description::ITypeDescriptor* typeDescroptor)
+			{
+				if(!associatedTypeDescriptor)
+				{
+					associatedTypeDescriptor=typeDescroptor;
+				}
+			}
+		};
+
+		template<typename T>
+		description::ITypeDescriptor* Description<T>::associatedTypeDescriptor=0;
+
+/***********************************************************************
+Value
+***********************************************************************/
+
+		namespace description
+		{
+			class Value : public Object
+			{
+			public:
+				enum ValueType
+				{
+					Null,
+					DescriptableObjectRef,
+					DescriptableObjectPtr,
+					Text,
+				};
+			protected:
+				ValueType						valueType;
+				DescriptableObject*				descriptableObjectRef;
+				Ptr<DescriptableObject>			descriptableObjectPtr;
+				WString							text;
+				ITypeDescriptor*				typeDescriptor;
+			public:
+				Value();
+				Value(DescriptableObject* value);
+				Value(Ptr<DescriptableObject> value);
+				Value(const WString& value, ITypeDescriptor* associatedTypeDescriptor);
+				Value(const Value& value);
+
+				Value&							operator=(const Value& value);
+
+				ValueType						GetValueType()const;
+				DescriptableObject*				GetDescriptableObjectRef()const;
+				Ptr<DescriptableObject>			GetDescriptableObjectPtr()const;
+				const WString&					GetText()const;
+				ITypeDescriptor*				GetTypeDescriptor()const;
+			};
+
+			class IValueSerializer : public Interface
+			{
+			public:
+				virtual WString					GetName()=0;
+				virtual ITypeDescriptor*		GetOwnerTypeDescriptor()=0;
+				virtual bool					Validate(const WString& text)=0;
+				virtual bool					Parse(const WString& input, Value& output)=0;
+			};
+
+			template<typename T>
+			class ITypedValueSerializer : public IValueSerializer
+			{
+				virtual bool					Serialize(const T& input, Value& output)=0;
+				virtual bool					Deserialize(const Value& input, T& output)=0;
+			};
+
+/***********************************************************************
+ITypeDescriptor (basic)
+***********************************************************************/
+
+			class IMemberInfo : public virtual Interface
+			{
+			public:
+				virtual ITypeDescriptor*		GetOwnerTypeDescriptor()=0;
+				virtual const WString&			GetName()=0;
+			};
+
+			class IValueInfo : public virtual Interface
+			{
+			public:
+				virtual ITypeDescriptor*		GetValueTypeDescriptor()=0;
+				virtual bool					CanBeNull()=0;
+			};
+
+/***********************************************************************
+ITypeDescriptor (event)
+***********************************************************************/
+
+			class IEventInfo;
+
+			class IEventHandler : public Interface
+			{
+			public:
+				virtual IEventInfo*				GetOwnerEvent()=0;
+				virtual Value					GetOwnerObject()=0;
+				virtual bool					IsAttached()=0;
+				virtual bool					Detach()=0;
+				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
+			};
+
+			class IEventInfo : public IMemberInfo
+			{
+			public:
+				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)=0;
+				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
+			};
+
+/***********************************************************************
+ITypeDescriptor (property)
+***********************************************************************/
+
+			class IPropertyInfo : public IMemberInfo, public IValueInfo
+			{
+			public:
+				virtual bool					IsReadable()=0;
+				virtual bool					IsWritable()=0;
+				virtual IEventInfo*				GetValueChangedEvent()=0;
+				virtual Value					GetValue(const Value& thisObject)=0;
+				virtual void					SetValue(const Value& thisObject, Value newValue)=0;
+			};
+
+/***********************************************************************
+ITypeDescriptor (method)
+***********************************************************************/
+
+			class IMethodInfo;
+			class IMethodGroupInfo;
+
+			class IParameterInfo : public IMemberInfo, public IValueInfo
+			{
+			public:
+				virtual IMethodInfo*			GetOwnerMethod()=0;
+				virtual bool					CanOutput()=0;
+			};
+
+			class IMethodInfo : public IMemberInfo
+			{
+			public:
+				virtual IMethodGroupInfo*		GetOwnerMethodGroup()=0;
+				virtual vint					GetParameterCount()=0;
+				virtual IParameterInfo*			GetParameter(vint index)=0;
+				virtual IValueInfo*				GetReturn()=0;
+				virtual Value					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
+			};
+
+			class IMethodGroupInfo : public IMemberInfo
+			{
+			public:
+				virtual vint					GetMethodCount()=0;
+				virtual IMethodInfo*			GetMethod(vint index)=0;
+			};
+
+/***********************************************************************
+ITypeDescriptor
+***********************************************************************/
+
+			class ITypeDescriptor : public Interface
+			{
+			public:
+				virtual const WString&			GetTypeName()=0;
+				virtual IValueSerializer*		GetValueSerializer()=0;
+				virtual vint					GetBaseTypeDescriptorCount()=0;
+				virtual ITypeDescriptor*		GetBaseTypeDescriptor(vint index)=0;
+
+				virtual vint					GetPropertyCount()=0;
+				virtual IPropertyInfo*			GetProperty(vint index)=0;
+				virtual bool					IsPropertyExists(const WString& name, bool inheritable)=0;
+				virtual IPropertyInfo*			GetPropertyByName(const WString& name, bool inheritable)=0;
+
+				virtual vint					GetEventCount()=0;
+				virtual IEventInfo*				GetEvent(vint index)=0;
+				virtual bool					IsEventExists(const WString& name, bool inheritable)=0;
+				virtual IEventInfo*				GetEventByName(const WString& name, bool inheritable)=0;
+
+				virtual vint					GetMethodGroupCount()=0;
+				virtual IMethodGroupInfo*		GetMethodGroup(vint index)=0;
+				virtual bool					IsMethodGroupExists(const WString& name, bool inheritable)=0;
+				virtual IMethodGroupInfo*		GetMethodGroupByName(const WString& name, bool inheritable)=0;
+				virtual IMethodGroupInfo*		GetConstructorGroup()=0;
+			};
+
+/***********************************************************************
+ITypeManager
+***********************************************************************/
+
+			class ITypeManager;
+
+			class ITypeLoader : public Interface
+			{
+			public:
+				virtual void					Load(ITypeManager* manager)=0;
+				virtual void					Unload(ITypeManager* manager)=0;
+			};
+
+			class ITypeManager : public Interface
+			{
+			public:
+				virtual vint					GetValueSerializerCount()=0;
+				virtual IValueSerializer*		GetValueSerializer(vint index)=0;
+				virtual IValueSerializer*		GetValueSerializer(const WString& name)=0;
+				virtual bool					SetValueSerializer(const WString& name, Ptr<IValueSerializer> valueSerializer)=0;
+				
+				virtual vint					GetTypeDescriptorCount()=0;
+				virtual ITypeDescriptor*		GetTypeDescriptor(vint index)=0;
+				virtual ITypeDescriptor*		GetTypeDescriptor(const WString& name)=0;
+				virtual bool					SetTypeDescriptor(const WString& name, Ptr<ITypeDescriptor> typeDescriptor)=0;
+
+				virtual bool					AddTypeLoader(Ptr<ITypeLoader> typeLoader)=0;
+				virtual bool					RemoveTypeLoader(Ptr<ITypeLoader> typeLoader)=0;
+				virtual bool					Load()=0;
+				virtual bool					Unload()=0;
+				virtual bool					Reload()=0;
+				virtual bool					IsLoaded()=0;
+			};
+
+			extern ITypeManager*				GetGlobalTypeManager();
+			extern bool							DestroyGlobalTypeManager();
+			extern IValueSerializer*			GetValueSerializer(const WString& name);
+			extern ITypeDescriptor*				GetTypeDescriptor(const WString& name);
+
+/***********************************************************************
+Exceptions
+***********************************************************************/
+
+			class TypeDescriptorException : public Exception
+			{
+			public:
+				TypeDescriptorException(const WString& message)
+					:Exception(message)
+				{
+				}
+			};
+
+			class PropertyIsNotReadableException : public TypeDescriptorException
+			{
+			public:
+				PropertyIsNotReadableException(IPropertyInfo* propertyInfo)
+					:TypeDescriptorException(L"Cannot read value from a property \""+propertyInfo->GetName()+L"\" that is not readable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\"/")
+				{
+				}
+			};
+
+			class PropertyIsNotWritableException : public TypeDescriptorException
+			{
+			public:
+				PropertyIsNotWritableException(IPropertyInfo* propertyInfo)
+					:TypeDescriptorException(L"Cannot write value to a property \""+propertyInfo->GetName()+L"\" that is not writable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\"/")
+				{
+				}
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+REFLECTION\GUITYPEDESCRIPTORBUILDER.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Framework::Reflection
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_REFLECTION_GUITYPEDESCRIPTORBUILDER
+#define VCZH_REFLECTION_GUITYPEDESCRIPTORBUILDER
+
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+
+/***********************************************************************
+Exceptions
+***********************************************************************/
+
+			class TypeDescriptorBuilderException : public Exception
+			{
+			public:
+				TypeDescriptorBuilderException(const WString& message)
+					:Exception(message)
+				{
+				}
+			};
+
+			class PropertyAlreadyExistsException : public TypeDescriptorBuilderException
+			{
+			public:
+				PropertyAlreadyExistsException(ITypeDescriptor* typeDescriptor, const WString& propertyName)
+					:TypeDescriptorBuilderException(L"Property \""+propertyName+L"\" already exists in type \""+typeDescriptor->GetTypeName()+L"\".")
+				{
+				}
+			};
+
+			class EventAlreadyExistsException : public TypeDescriptorBuilderException
+			{
+			public:
+				EventAlreadyExistsException(ITypeDescriptor* typeDescriptor, const WString& eventName)
+					:TypeDescriptorBuilderException(L"Event \""+eventName+L"\" already exists in type \""+typeDescriptor->GetTypeName()+L"\".")
+				{
+				}
+			};
+
+			class ParameterAlreadyExistsException : public TypeDescriptorBuilderException
+			{
+			public:
+				ParameterAlreadyExistsException(IMethodInfo* method,  const WString& parameterName)
+					:TypeDescriptorBuilderException(L"Parameter \""+parameterName+L"\" already exists in method \""+method->GetName()+L"\" in type \""+method->GetOwnerTypeDescriptor()->GetTypeName()+L"\".")
+				{
+				}
+			};
+
+/***********************************************************************
+GeneralTypeDescriptor
+***********************************************************************/
+
+			class GeneralTypeDescriptor : public Object, public ITypeDescriptor
+			{
+			public:
+				class PropertyGroup
+				{
+					friend class GeneralTypeDescriptor;
+				protected:
+					bool														loaded;
+					Func<void(PropertyGroup*)>									loaderProcedure;
+					ITypeDescriptor*											ownerTypeDescriptor;
+					
+					WString														typeName;
+					IValueSerializer*											valueSerializer;
+					collections::List<ITypeDescriptor*>							baseTypeDescriptors;
+					collections::Dictionary<WString, Ptr<IPropertyInfo>>		properties;
+					collections::Dictionary<WString, Ptr<IEventInfo>>			events;
+					collections::Dictionary<WString, Ptr<IMethodGroupInfo>>		methodGroups;
+					Ptr<IMethodGroupInfo>										contructorGroup;
+
+				public:
+					PropertyGroup();
+					~PropertyGroup();
+
+					void						Prepare();
+
+					//----------------------------------------------------
+
+					class MethodBuilder
+					{
+					protected:
+						PropertyGroup&			propertyGroup;
+						Ptr<IMethodGroupInfo>	buildingMethodGroup;
+						Ptr<IMethodInfo>		buildingMethod;
+					public:
+						MethodBuilder(PropertyGroup& _propertyGroup, const WString& _name);
+
+						MethodBuilder&			Parameter(
+													const WString&									_name,
+													ITypeDescriptor*								_type,
+													bool											_nullable,
+													bool											_canOutput
+													);
+						MethodBuilder&			Return(
+													ITypeDescriptor*								_type,
+													bool											_nullable
+													);
+						MethodBuilder&			Invoker(
+													const Func<Value(const Value&, collections::Array<Value>&)>&	_invoker
+													);
+						PropertyGroup&			Done();
+					};
+
+					//----------------------------------------------------
+
+					class EventBuilder
+					{
+					protected:
+						PropertyGroup&			propertyGroup;
+						Ptr<IEventInfo>			buildingEvent;
+					public:
+						EventBuilder(PropertyGroup& _propertyGroup, const WString& _name);
+
+						EventBuilder&			Attacher(
+													const Func<void(DescriptableObject*, IEventHandler*)>&	_attacher
+													);
+						EventBuilder&			Detacher(
+													const Func<void(DescriptableObject*, IEventHandler*)>&	_detacher
+													);
+						EventBuilder&			Invoker(
+													const Func<Value(const Value&, Value&)>&		_invoker
+													);
+						PropertyGroup&			Done();
+					};
+
+					//----------------------------------------------------
+
+					PropertyGroup&				TypeName(
+													const WString&									_typeName
+													);
+					PropertyGroup&				Property(
+													const WString&									_name,
+													ITypeDescriptor*								_type,
+													bool											_nullable,
+													const Func<Value(const Value&)>&				_getter,
+													const Func<void(const Value&, const Value&)>&	_setter,
+													const WString&									_valueChangedEventName
+													);
+					MethodBuilder				Method(
+													const WString&									_name
+													);
+					EventBuilder				Event(
+													const WString&									_name
+													);
+				};
+			protected:
+				PropertyGroup				propertyGroup;
+
+			public:
+				GeneralTypeDescriptor(const Func<void(PropertyGroup*)>& loaderProcedure);
+				~GeneralTypeDescriptor();
+
+				PropertyGroup&				Operations();
+
+				const WString&				GetTypeName()override;
+				IValueSerializer*			GetValueSerializer()override;
+				vint						GetBaseTypeDescriptorCount()override;
+				ITypeDescriptor*			GetBaseTypeDescriptor(vint index)override;
+
+				vint						GetPropertyCount()override;
+				IPropertyInfo*				GetProperty(vint index)override;
+				bool						IsPropertyExists(const WString& name, bool inheritable)override;
+				IPropertyInfo*				GetPropertyByName(const WString& name, bool inheritable)override;
+
+				vint						GetEventCount()override;
+				IEventInfo*					GetEvent(vint index)override;
+				bool						IsEventExists(const WString& name, bool inheritable)override;
+				IEventInfo*					GetEventByName(const WString& name, bool inheritable)override;
+
+				vint						GetMethodGroupCount()override;
+				IMethodGroupInfo*			GetMethodGroup(vint index)override;
+				bool						IsMethodGroupExists(const WString& name, bool inheritable)override;
+				IMethodGroupInfo*			GetMethodGroupByName(const WString& name, bool inheritable)override;
+				IMethodGroupInfo*			GetConstructorGroup()override;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
 REGEX\REGEXPURE.H
 ***********************************************************************/
 /***********************************************************************
@@ -11314,225 +12915,6 @@ namespace vl
 		extern RegexNode				r_l();
 		extern RegexNode				r_w();
 		extern RegexNode				rAnyChar();
-	}
-}
-
-#endif
-
-/***********************************************************************
-STREAM\INTERFACES.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Stream::Interfaces
-
-Interfaces:
-	IStream							：流
-***********************************************************************/
-
-#ifndef VCZH_STREAM_INTERFACES
-#define VCZH_STREAM_INTERFACES
-
-
-namespace vl
-{
-	namespace stream
-	{
-		class IStream : public virtual Interface
-		{
-		public:
-			virtual bool					CanRead()const=0;
-			virtual bool					CanWrite()const=0;
-			virtual bool					CanSeek()const=0;
-			virtual bool					CanPeek()const=0;
-			virtual bool					IsLimited()const=0;
-			virtual bool					IsAvailable()const=0;
-			virtual void					Close()=0;
-			virtual pos_t					Position()const=0;
-			virtual pos_t					Size()const=0;
-			virtual void					Seek(pos_t _size)=0;
-			virtual void					SeekFromBegin(pos_t _size)=0;
-			virtual void					SeekFromEnd(pos_t _size)=0;
-			virtual vint					Read(void* _buffer, vint _size)=0;
-			virtual vint					Write(void* _buffer, vint _size)=0;
-			virtual vint					Peek(void* _buffer, vint _size)=0;
-		};
-
-		class IEncoder : public Interface
-		{
-		public:
-			virtual void					Setup(IStream* _stream)=0;
-			virtual	void					Close()=0;
-			virtual vint					Write(void* _buffer, vint _size)=0;
-		};
-
-		class IDecoder : public Interface
-		{
-		public:
-			virtual void					Setup(IStream* _stream)=0;
-			virtual	void					Close()=0;
-			virtual vint					Read(void* _buffer, vint _size)=0;
-		};
-	}
-}
-
-#endif
-
-/***********************************************************************
-STREAM\ACCESSOR.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Stream::Accessor
-
-Classes:
-	TextReader						：字符串阅读器
-	TextWriter						：字符串书写器
-	StreamReader					：流阅读器
-	StreamWriter					：流书写器
-	EncoderStream					：编码流
-	DecoderStream					：解码流
-***********************************************************************/
-
-#ifndef VCZH_STREAM_ACCESSOR
-#define VCZH_STREAM_ACCESSOR
-
-
-namespace vl
-{
-	namespace stream
-	{
-
-/***********************************************************************
-流控制器
-***********************************************************************/
-
-		class TextReader : public Object, private NotCopyable
-		{
-		public:
-			virtual bool				IsEnd()=0;
-			virtual wchar_t				ReadChar()=0;
-			virtual WString				ReadString(vint length);
-			virtual WString				ReadLine();
-			virtual WString				ReadToEnd();
-		};
-
-		class TextWriter : public Object, private NotCopyable
-		{
-		public:
-			virtual void				WriteChar(wchar_t c)=0;
-			virtual void				WriteString(const wchar_t* string, vint charCount);
-			virtual void				WriteString(const wchar_t* string);
-			virtual void				WriteString(const WString& string);
-			virtual void				WriteLine(const wchar_t* string, vint charCount);
-			virtual void				WriteLine(const wchar_t* string);
-			virtual void				WriteLine(const WString& string);
-
-			virtual void				WriteMonospacedEnglishTable(collections::Array<WString>& tableByRow, vint rows, vint columns);
-		};
-
-		class StringReader : public TextReader
-		{
-		protected:
-			WString						string;
-			vint						current;
-			bool						lastCallIsReadLine;
-
-			void						PrepareIfLastCallIsReadLine();
-		public:
-			StringReader(const WString& _string);
-
-			bool						IsEnd();
-			wchar_t						ReadChar();
-			WString						ReadString(vint length);
-			WString						ReadLine();
-			WString						ReadToEnd();
-		};
-
-		class StreamReader : public TextReader
-		{
-		protected:
-			IStream*					stream;
-		public:
-			StreamReader(IStream& _stream);
-
-			bool						IsEnd();
-			wchar_t						ReadChar();
-		};
-
-		class StreamWriter : public TextWriter
-		{
-		protected:
-			IStream*					stream;
-		public:
-			StreamWriter(IStream& _stream);
-			using TextWriter::WriteString;
-
-			void						WriteChar(wchar_t c);
-			void						WriteString(const wchar_t* string, vint charCount);
-		};
-
-/***********************************************************************
-编码解码
-***********************************************************************/
-
-		class EncoderStream : public virtual IStream
-		{
-		protected:
-			IStream*					stream;
-			IEncoder*					encoder;
-			pos_t						position;
-
-		public:
-			EncoderStream(IStream& _stream, IEncoder& _encoder);
-			~EncoderStream();
-
-			bool						CanRead()const;
-			bool						CanWrite()const;
-			bool						CanSeek()const;
-			bool						CanPeek()const;
-			bool						IsLimited()const;
-			bool						IsAvailable()const;
-			void						Close();
-			pos_t						Position()const;
-			pos_t						Size()const;
-			void						Seek(pos_t _size);
-			void						SeekFromBegin(pos_t _size);
-			void						SeekFromEnd(pos_t _size);
-			vint							Read(void* _buffer, vint _size);
-			vint							Write(void* _buffer, vint _size);
-			vint							Peek(void* _buffer, vint _size);
-		};
-
-		class DecoderStream : public virtual IStream
-		{
-		protected:
-			IStream*					stream;
-			IDecoder*					decoder;
-			pos_t						position;
-
-		public:
-			DecoderStream(IStream& _stream, IDecoder& _decoder);
-			~DecoderStream();
-
-			bool						CanRead()const;
-			bool						CanWrite()const;
-			bool						CanSeek()const;
-			bool						CanPeek()const;
-			bool						IsLimited()const;
-			bool						IsAvailable()const;
-			void						Close();
-			pos_t						Position()const;
-			pos_t						Size()const;
-			void						Seek(pos_t _size);
-			void						SeekFromBegin(pos_t _size);
-			void						SeekFromEnd(pos_t _size);
-			vint							Read(void* _buffer, vint _size);
-			vint							Write(void* _buffer, vint _size);
-			vint							Peek(void* _buffer, vint _size);
-		};
 	}
 }
 
@@ -11925,62 +13307,6 @@ namespace vl
 			vint						Read(void* _buffer, vint _size);
 			vint						Write(void* _buffer, vint _size);
 			vint						Peek(void* _buffer, vint _size);
-		};
-	}
-}
-
-#endif
-
-/***********************************************************************
-STREAM\MEMORYSTREAM.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Stream::MemoryStream
-
-Interfaces:
-	MemoryStream					：内存流
-***********************************************************************/
-
-#ifndef VCZH_STREAM_MEMORYSTREAM
-#define VCZH_STREAM_MEMORYSTREAM
-
-
-namespace vl
-{
-	namespace stream
-	{
-		class MemoryStream : public Object, public virtual IStream
-		{
-		protected:
-			vint					block;
-			char*					buffer;
-			vint					size;
-			vint					position;
-			vint					capacity;
-
-			void					PrepareSpace(vint totalSpace);
-		public:
-			MemoryStream(vint _block=65536);
-			~MemoryStream();
-
-			bool					CanRead()const;
-			bool					CanWrite()const;
-			bool					CanSeek()const;
-			bool					CanPeek()const;
-			bool					IsLimited()const;
-			bool					IsAvailable()const;
-			void					Close();
-			pos_t					Position()const;
-			pos_t					Size()const;
-			void					Seek(pos_t _size);
-			void					SeekFromBegin(pos_t _size);
-			void					SeekFromEnd(pos_t _size);
-			vint					Read(void* _buffer, vint _size);
-			vint					Write(void* _buffer, vint _size);
-			vint					Peek(void* _buffer, vint _size);
-			void*					GetInternalBuffer();
 		};
 	}
 }

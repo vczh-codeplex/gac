@@ -82,6 +82,9 @@
     <Filter Include="GacUI\Controls\TextEditorPackage">
       <UniqueIdentifier>{c8170665-ff39-4334-b7c9-03a8ac92559b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Parsing">
+      <UniqueIdentifier>{70f80a42-6e04-474c-9406-d39c857fefca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -362,6 +365,42 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.cpp">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAnalyzer.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton_Closure.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton_EPDA.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton_GenerateTable.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton_JPDA.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton_NPDA.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingDefinitions.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingDefinitions_CreateParserDefinition.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingLogging.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingTable.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingTree.cpp">
+      <Filter>Common\Parsing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -715,6 +754,21 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.h">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingAnalyzer.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingDefinitions.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingTable.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingTree.h">
+      <Filter>Common\Parsing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
