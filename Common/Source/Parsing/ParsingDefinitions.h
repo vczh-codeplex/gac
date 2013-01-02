@@ -430,8 +430,13 @@ namespace vl
 			extern WString										GrammarToString(ParsingDefinitionGrammar* grammar);
 			extern WString										GrammarStateToString(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
 			extern ParsingDefinitionGrammar*					FindAppropriateGrammarState(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
-			extern Ptr<ParsingDefinition>						CreateParserDefinition();
 			extern void											Log(Ptr<ParsingDefinition> definition, stream::TextWriter& writer);
+
+/***********************************************************************
+вт╬ы
+***********************************************************************/
+			
+			extern Ptr<ParsingDefinition>						CreateParserDefinition();
 		}
 	}
 }

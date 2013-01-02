@@ -232,10 +232,13 @@ namespace vl
 		{
 		public:
 			ParsingTextRange			codeRange;
+			const regex::RegexToken*	token;
 			ParsingTreeCustomBase*		parsingTree;
 			WString						errorMessage;
 
 			ParsingError();
+			ParsingError(const WString& _errorMessage);
+			ParsingError(const regex::RegexToken* _token, const WString& _errorMessage);
 			ParsingError(ParsingTreeCustomBase* _parsingTree, const WString& _errorMessage);
 			~ParsingError();
 		};

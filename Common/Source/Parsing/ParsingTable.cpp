@@ -1,4 +1,5 @@
 #include "ParsingTable.h"
+#include "ParsingAutomaton.h"
 #include "..\Collections\Operation.h"
 
 namespace vl
@@ -7,6 +8,8 @@ namespace vl
 	{
 		namespace tabling
 		{
+			using namespace definitions;
+			using namespace analyzing;
 			using namespace collections;
 			using namespace regex;
 
@@ -379,6 +382,11 @@ ParsingState
 				return TransitionResult();
 			}
 
+			vint ParsingState::GetCurrentToken()
+			{
+				return currentToken;
+			}
+
 			const collections::List<vint>& ParsingState::GetStateStack()
 			{
 				return stateStack;
@@ -533,6 +541,95 @@ ParsingTreeBuilder
 				{
 					return 0;
 				}
+			}
+
+/***********************************************************************
+ParsingRestrictParser
+***********************************************************************/
+
+			const regex::RegexToken* ParsingRestrictParser::ConvertToken(vint token, ParsingState& state)
+			{
+				if(token<=0)
+				{
+					token=0;
+				}
+				else if(token>state.GetTokens().Count())
+				{
+					token=state.GetTokens().Count();
+				}
+
+				return token==state.GetTokens().Count()?0:&state.GetTokens().Get(token);
+			}
+
+			ParsingRestrictParser::ParsingRestrictParser(Ptr<ParsingTable> _table)
+				:table(_table)
+			{
+			}
+
+			ParsingRestrictParser::~ParsingRestrictParser()
+			{
+			}
+
+			Ptr<ParsingTreeNode> ParsingRestrictParser::Parse(const WString& input, const WString& rule, ParsingError& error)
+			{
+				ParsingState state(input, table);
+				if(state.Reset(rule)==-1)
+				{
+					error=ParsingError(L"Rule \""+rule+L"\" does not exist.");
+				}
+				ParsingTreeBuilder builder;
+				builder.Reset();
+
+				for(vint i=0;i<state.GetTokens().Count();i++)
+				{
+					const RegexToken* token=&state.GetTokens().Get(i);
+					if(token->token==-1)
+					{
+						error=ParsingError(token, L"Unrecognizable token.");
+					}
+				}
+
+				ParsingState::TransitionResult result;
+				while(true)
+				{
+					result=state.ReadToken();
+					if(!result)
+					{
+						const RegexToken* token=ConvertToken(state.GetCurrentToken(), state);
+						error=ParsingError(token, (token==0?L"Error happened during parsing.":L"Error happened during parsing when reaching to the end of the input."));
+						return 0;
+					}
+					else if(!builder.Run(result))
+					{
+						const RegexToken* token=ConvertToken(state.GetCurrentToken(), state);
+						error=ParsingError(token, L"Internal error when building the parsing tree.");
+						return 0;
+					}
+					else if(result.tableTokenIndex==ParsingTable::TokenFinish)
+					{
+						break;
+					}
+				}
+
+				Ptr<ParsingTreeNode> node=builder.GetNode();
+				if(!node)
+				{
+					error=ParsingError(L"Internal error when building the parsing tree after a succeeded parsing process.");
+					return 0;
+				}
+				return node;
+			}
+
+			Ptr<ParsingRestrictParser> CreateBootstrapParser()
+			{
+				List<Ptr<ParsingError>> errors;
+				Ptr<ParsingDefinition> definition=CreateParserDefinition();
+				Ptr<ParsingTable> table=GenerateTable(definition, errors);
+				if(table)
+				{
+					return new ParsingRestrictParser(table);
+				}
+				return 0;
 			}
 		}
 	}

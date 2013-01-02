@@ -9,8 +9,7 @@ Classes:
 #ifndef VCZH_PARSING_PARSINGTABLE
 #define VCZH_PARSING_PARSINGTABLE
 
-#include "ParsingAnalyzer.h"
-#include "..\Regex\Regex.h"
+#include "ParsingTree.h"
 
 namespace vl
 {
@@ -197,6 +196,7 @@ namespace vl
 				vint										Reset(const WString& rule);
 				TransitionResult							ReadToken();
 				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken=0);
+				vint										GetCurrentToken();
 				const collections::List<vint>&				GetStateStack();
 			};
 
@@ -220,10 +220,24 @@ namespace vl
 				Ptr<ParsingTreeObject>						GetNode();
 			};
 
+			class ParsingRestrictParser : public Object
+			{
+			protected:
+				Ptr<ParsingTable>							table;
+
+				const regex::RegexToken*					ConvertToken(vint token, ParsingState& state);
+			public:
+				ParsingRestrictParser(Ptr<ParsingTable> _table);
+				~ParsingRestrictParser();
+
+				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, ParsingError& firstError);
+			};
+
 /***********************************************************************
 ¸¨Öúº¯Êý
 ***********************************************************************/
 
+			extern Ptr<ParsingRestrictParser>				CreateBootstrapParser();
 			extern void										Log(Ptr<ParsingTable> table, stream::TextWriter& writer);
 		}
 	}

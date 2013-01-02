@@ -615,3 +615,25 @@ TEST_CASE(TestParsingGrammar)
 		Parse(table, grammar, L"Syngram_Bootstrap", L"ParserDecl", i);
 	}
 }
+
+TEST_CASE(TestParsingBootstrap)
+{
+	Ptr<ParsingRestrictParser> parser=CreateBootstrapParser();
+	TEST_ASSERT(parser);
+
+	Ptr<ParsingDefinition> inputDefs[]=
+	{
+		CreateNameListDefinition(),
+		CreateExpressionDefinition(),
+		CreateStatementDefinition(),
+		CreateParserDefinition(),
+	};
+
+	ParsingError firstError;
+	for(vint i=0;i<sizeof(inputDefs)/sizeof(*inputDefs);i++)
+	{
+		WString grammar=ParsingDefinitionToText(inputDefs[i]);
+		Ptr<ParsingTreeNode> node=parser->Parse(grammar, L"ParserDecl", firstError);
+		TEST_ASSERT(node);
+	}
+}

@@ -240,6 +240,30 @@ namespace vl
 				table->Initialize();
 				return table;
 			}
+
+			Ptr<tabling::ParsingTable> GenerateTable(Ptr<definitions::ParsingDefinition> definition, collections::List<Ptr<ParsingError>>& errors)
+			{
+				errors.Clear();
+				ParsingSymbolManager symbolManager;
+				ValidateDefinition(definition, &symbolManager, errors);
+				if(errors.Count()==0)
+				{
+					Ptr<Automaton> epsilonPDA=CreateEpsilonPDA(definition, &symbolManager);
+					Ptr<Automaton> nondeterministicPDA=CreateNondeterministicPDAFromEpsilonPDA(epsilonPDA);
+					Ptr<Automaton> jointPDA=CreateJointPDAFromNondeterministicPDA(nondeterministicPDA);
+					CompactJointPDA(jointPDA);
+					MarkLeftRecursiveInJointPDA(jointPDA, errors);
+					if(errors.Count()==0)
+					{
+						Ptr<ParsingTable> table=GenerateTable(definition, jointPDA, errors);
+						if(errors.Count()==0)
+						{
+							return table;
+						}
+					}
+				}
+				return 0;
+			}
 		}
 	}
 }
