@@ -537,9 +537,9 @@ Logger (ParsingDefinitionGrammar)
 					{
 						writer.WriteString(L"        = ");
 						Log(grammar.Obj(), writer);
-						writer.WriteLine(L";");
+						writer.WriteLine(L"");
 					}
-					writer.WriteLine(L"");
+					writer.WriteLine(L"        ;");
 				}
 			}
 		}

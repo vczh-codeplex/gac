@@ -298,13 +298,27 @@ namespace vl
 							)
 						.EndRule()
 
+					.Rule(L"RuleFragmentDecl", Type(L"GrammarDef"))
+						.Imply(
+							Text(L"=") + !Rule(L"Grammar") + Text(L";")
+							)
+						.EndRule()
+
 					.Rule(L"RuleDecl", Type(L"RuleDef"))
 						.Imply(
-							(
-								Text(L"rule") + Rule(L"Type")[L"type"] + Rule(L"NAME")[L"name"]
-								+ *(Text(L"=") + Rule(L"Grammar")[L"grammars"] + Text(L";"))
-								)
+							(Text(L"rule") + Rule(L"Type")[L"type"] + Rule(L"NAME")[L"name"] + *(Text(L"=") + Rule(L"Grammar")[L"grammars"]) + Text(L";"))
 								.As(Type(L"RuleDef"))
+							)
+						.EndRule()
+					//------------------------------------
+					.Rule(L"ParserDecl", Type(L"ParserDef"))
+						.Imply(
+							(
+								Rule(L"TypeDecl")[L"types"] |
+								Rule(L"TokenDecl")[L"tokens"] |
+								Rule(L"RuleDecl")[L"rules"]
+								)
+								.As(Type(L"ParserDef"))
 							)
 						.EndRule()
 					;
