@@ -464,11 +464,37 @@ ParsingError
 ***********************************************************************/
 
 		ParsingError::ParsingError()
+			:token(0)
+			,parsingTree(0)
 		{
+		}
+
+		ParsingError::ParsingError(const WString& _errorMessage)
+			:token(0)
+			,parsingTree(0)
+			,errorMessage(_errorMessage)
+		{
+		}
+
+		ParsingError::ParsingError(const regex::RegexToken* _token, const WString& _errorMessage)
+			:token(_token)
+			,parsingTree(0)
+			,errorMessage(_errorMessage)
+		{
+			if(token)
+			{
+				codeRange.start.row=_token->rowStart;
+				codeRange.start.column=_token->columnStart;
+				codeRange.start.index=_token->start;
+				codeRange.end.row=_token->rowEnd;
+				codeRange.end.column=_token->columnEnd;
+				codeRange.end.index=_token->start+_token->length-1;
+			}
 		}
 
 		ParsingError::ParsingError(ParsingTreeCustomBase* _parsingTree, const WString& _errorMessage)
 			:codeRange(_parsingTree->codeRange)
+			,token(0)
 			,parsingTree(_parsingTree)
 			,errorMessage(_errorMessage)
 		{
