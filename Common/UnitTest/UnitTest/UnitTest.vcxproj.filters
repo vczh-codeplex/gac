@@ -192,6 +192,9 @@
     <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton_GenerateTable.cpp">
       <Filter>Common\Parsing</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\ParsingDefinitions_CreateParserDefinition.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
