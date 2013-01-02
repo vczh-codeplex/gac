@@ -46,6 +46,7 @@ Colorizer
 				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
 				void										Detach()override;
 				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+				void										RestartColorizer();
 
 				/// <summary>Get the lexical analyzer start state for the first line.</summary>
 				/// <returns>The lexical analyzer start state for the first line.</returns>
@@ -54,12 +55,13 @@ Colorizer
 				/// <returns>The context sensitive start state for the first line.</returns>
 				virtual int									GetContextStartState()=0;
 				/// <summary>Colorizer one line with a start state.</summary>
+				/// <param name="lineIndex">Line index.</param>
 				/// <param name="text">Text buffer.</param>
 				/// <param name="colors">Color index buffer. The index should be in [0 .. [M:vl.presentation.controls.GuiTextBoxColorizerBase.GetColors]()-1].</param>
 				/// <param name="length">The length of the buffer.</param>
 				/// <param name="lexerState">The lexical analyzer state for this line. After executing this function, the new value of this argument indicates the new state.</param>
 				/// <param name="contextState">The context sensitive state for this line. After executing this function, the new value of this argument indicates the new state.</param>
-				virtual void								ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)=0;
+				virtual void								ColorizeLineWithCRLF(int lineIndex, const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)=0;
 				/// <summary>Get the supported colors ordered by their indices.</summary>
 				/// <returns>The supported colors ordered by their indices.</returns>
 				virtual const ColorArray&					GetColors()=0;
@@ -116,16 +118,17 @@ Colorizer
 				/// <summary>Setup the colorizer. After that, the colorizer cannot be changed.</summary>
 				bool														Setup();
 				/// <summary>Callback function to set context sensitive state and change token accordingly.</summary>
+				/// <param name="lineIndex">Line index.</param>
 				/// <param name="text">Text buffer.</param>
 				/// <param name="start">The start position of the token.</param>
 				/// <param name="length">The length of the token.</param>
 				/// <param name="token">The token type. After executing this function, the new value of this argument indicates the new token type.</param>
 				/// <param name="contextState">The context sensitive state. After executing this function, the new value of this argument indicates the new state.</param>
-				virtual void												ColorizeTokenContextSensitive(const wchar_t* text, vint start, vint length, vint& token, int& contextState);
+				virtual void												ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState);
 
 				int															GetLexerStartState()override;
 				int															GetContextStartState()override;
-				void														ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override;
+				void														ColorizeLineWithCRLF(int lineIndex, const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override;
 				const ColorArray&											GetColors()override;
 			};
 		}
