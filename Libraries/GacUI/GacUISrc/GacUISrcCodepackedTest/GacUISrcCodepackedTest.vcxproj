@@ -129,6 +129,7 @@
     <None Include="Resources\_Undo.png" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="Resources\CalculatorDefinition.txt" />
     <Text Include="Resources\document.txt" />
     <Text Include="Resources\document2.txt" />
   </ItemGroup>
