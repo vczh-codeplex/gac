@@ -16,6 +16,7 @@ namespace vl
 				Dictionary<ParsingSymbol*, vint> tokenIds;
 				List<WString> discardTokens;
 				List<State*> stateIds;
+				vint availableStateCount=0;
 				{
 					vint currentState=0;
 					List<State*> scanningStates;
@@ -39,6 +40,17 @@ namespace vl
 								}
 							}
 						}
+					}
+					availableStateCount=scanningStates.Count();
+				}
+
+				// there will be some states that is used in shift and reduce but it is not a reachable state
+				// so the state table will record all state
+				FOREACH(Ptr<State>, state, jointPDA->states)
+				{
+					if(!stateIds.Contains(state.Obj()))
+					{
+						stateIds.Add(state.Obj());
 					}
 				}
 
@@ -103,6 +115,9 @@ namespace vl
 
 				FOREACH_INDEXER(State*, state, stateIndex, stateIds)
 				{
+					// if this state is not necessary, stop building the table
+					if(stateIndex>=availableStateCount) break;
+
 					FOREACH(Transition*, transition, state->transitions)
 					{
 						vint tokenIndex=-1;
