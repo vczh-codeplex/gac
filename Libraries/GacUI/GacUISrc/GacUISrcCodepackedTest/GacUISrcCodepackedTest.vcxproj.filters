@@ -150,5 +150,8 @@
     <Text Include="Resources\document2.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="Resources\CalculatorDefinition.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
