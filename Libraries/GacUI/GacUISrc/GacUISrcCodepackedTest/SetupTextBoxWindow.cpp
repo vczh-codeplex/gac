@@ -24,7 +24,7 @@ public:
 		return 0;
 	}
 
-	void ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override
+	void ColorizeLineWithCRLF(int lineIndex, const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override
 	{
 		if(length>0)
 		{
