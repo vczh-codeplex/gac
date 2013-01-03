@@ -31,10 +31,66 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 namespace test
 {
-	class GrammarColorizer : public GuiTextBoxRegexColorizer
+	class GrammarParser : public Object
 	{
 	public:
-		GrammarColorizer()
+
+	protected:
+
+	};
+
+	class GrammarColorizer : public GuiTextBoxRegexColorizer
+	{
+	protected:
+		Ptr<ParsingRestrictParser>				grammarParser;
+		volatile bool							finalizing;
+
+		SpinLock								parsingTreeLock;
+		Ptr<ParsingTreeNode>					parsingTreeNode;
+
+		SpinLock								parsingTextLock;
+		WString									parsingText;
+		volatile bool							isParsingRunning;
+		SpinLock								parsingRunningEvent;
+
+		void ParsingProcInternal()
+		{
+			while(true)
+			{
+				WString currentParsingText;
+				{
+					SpinLock::Scope scope(parsingTextLock);
+					currentParsingText=parsingText;
+					parsingText=L"";
+				}
+				if(currentParsingText==L"")
+				{
+					isParsingRunning=false;
+					break;
+				}
+
+				ParsingError error;
+				Ptr<ParsingTreeNode> node=grammarParser->Parse(currentParsingText, L"ParserDecl", error);
+				if(node)
+				{
+					node->InitializeQueryCache();
+				}
+				{
+					SpinLock::Scope scope(parsingTreeLock);
+					parsingTreeNode=node;
+					node=0;
+				}
+				RestartColorizer();
+			}
+			parsingRunningEvent.Leave();
+		}
+
+		static void ParsingProc(void* argument)
+		{
+			((GrammarColorizer*)argument)->ParsingProcInternal();
+		}
+
+		void InitializeColorizer()
 		{
 			text::ColorEntry entry=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
 			SetDefaultColor(entry);
@@ -52,65 +108,33 @@ namespace test
 
 			Setup();
 		}
-	};
 
-	class TestWindow : public GuiWindow
-	{
-	protected:
-		GuiMultilineTextBox*					textBoxGrammar;
-		Ptr<ParsingRestrictParser>				grammarParser;
-
-		SpinLock								parsingTreeLock;
-		Ptr<ParsingTreeNode>					parsingTreeNode;
-
-		SpinLock								parsingTextLock;
-		WString									parsingText;
-		volatile bool							isParsingRunning;
-		SpinLock								parsingRunningEvent;
-
-		static void ParsingProc(void* argument)
+		void InitializeParser()
 		{
-			TestWindow* window=(TestWindow*)argument;
-			while(true)
-			{
-				WString currentParsingText;
-				{
-					SpinLock::Scope scope(window->parsingTextLock);
-					currentParsingText=window->parsingText;
-					window->parsingText=L"";
-				}
-				if(currentParsingText==L"")
-				{
-					window->isParsingRunning=false;
-					break;
-				}
-
-				ParsingError error;
-				Ptr<ParsingTreeNode> node=window->grammarParser->Parse(currentParsingText, L"ParserDecl", error);
-				if(node)
-				{
-					node->InitializeQueryCache();
-				}
-				{
-					SpinLock::Scope scope(window->parsingTreeLock);
-					window->parsingTreeNode=node;
-					node=0;
-				}
-
-				GetApplication()->InvokeInMainThread([=]()
-				{
-					window->textBoxGrammar->GetColorizer()->RestartColorizer();
-				});
-			}
-			window->parsingRunningEvent.Leave();
+			grammarParser=CreateBootstrapParser();
+		}
+	public:
+		GrammarColorizer()
+			:isParsingRunning(false)
+			,finalizing(false)
+		{
+			InitializeColorizer();
+			InitializeParser();
 		}
 
-		void textBoxGrammar_TextChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
+		~GrammarColorizer()
+		{
+			finalizing=true;
+			parsingRunningEvent.Enter();
+			parsingRunningEvent.Leave();
+		}
+
+		void SubmitCurrentText(const wchar_t* text)
 		{
 			{
 				// copy the text because this is a cross thread accessible data
 				SpinLock::Scope scope(parsingTextLock);
-				parsingText=textBoxGrammar->GetText().Buffer();
+				parsingText=text;
 			}
 			if(!isParsingRunning)
 			{
@@ -119,12 +143,23 @@ namespace test
 				ThreadPoolLite::Queue(&ParsingProc, this);
 			}
 		}
+	};
+
+	class TestWindow : public GuiWindow
+	{
+	protected:
+		GuiMultilineTextBox*					textBoxGrammar;
+		Ptr<GrammarColorizer>					colorizer;
+
+		void textBoxGrammar_TextChanged(GuiGraphicsComposition* composition, GuiEventArgs& arguments)
+		{
+			WString text=textBoxGrammar->GetText();
+			colorizer->SubmitCurrentText(text.Buffer());
+		}
 	public:
 		TestWindow()
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
-			,isParsingRunning(false)
 		{
-			grammarParser=CreateBootstrapParser();
 
 			SetText(L"GacUISrc Test Application");
 			SetClientSize(Size(640, 480));
@@ -134,7 +169,8 @@ namespace test
 			textBoxGrammar=g::NewMultilineTextBox();
 			textBoxGrammar->GetBoundsComposition()->SetAlignmentToParent(Margin(3, 3, 3, 3));
 			GetBoundsComposition()->AddChild(textBoxGrammar->GetBoundsComposition());
-			textBoxGrammar->SetColorizer(new GrammarColorizer);
+			colorizer=new GrammarColorizer;
+			textBoxGrammar->SetColorizer(colorizer);
 			textBoxGrammar->TextChanged.AttachMethod(this, &TestWindow::textBoxGrammar_TextChanged);
 
 			{
@@ -145,12 +181,6 @@ namespace test
 				textBoxGrammar->SetText(reader.ReadToEnd());
 				textBoxGrammar->Select(TextPos(), TextPos());
 			}
-		}
-
-		~TestWindow()
-		{
-			parsingRunningEvent.Enter();
-			parsingRunningEvent.Leave();
 		}
 	};
 }
