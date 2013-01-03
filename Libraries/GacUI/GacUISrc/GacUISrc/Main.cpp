@@ -31,13 +31,91 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 namespace test
 {
-	class GrammarParser : public Object
+
+/***********************************************************************
+SymbolLookup
+***********************************************************************/
+
+	class TypeSymbol : public Object
 	{
 	public:
+		WString									typeName;
+		Dictionary<WString, Ptr<TypeSymbol>>	subTypes;
 
-	protected:
-
+		void CollectTypes(Ptr<ParsingTreeArray> types)
+		{
+			if(types)
+			{
+				for(int i=0;i<types->Count();i++)
+				{
+					Ptr<ParsingTreeObject> type=types->GetItem(i).Cast<ParsingTreeObject>();
+					if(type)
+					{
+						Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
+						if(name && !subTypes.Keys().Contains(name->GetValue()))
+						{
+							Ptr<TypeSymbol> symbol=new TypeSymbol;
+							symbol->typeName=name->GetValue();
+							subTypes.Add(symbol->typeName, symbol);
+							symbol->CollectTypes(type->GetMember(L"subTypes").Cast<ParsingTreeArray>());
+						}
+					}
+				}
+			}
+		}
 	};
+
+	class ParserDecl : public TypeSymbol
+	{
+	public:
+		SortedList<WString>						tokens;
+		SortedList<WString>						rules;
+
+		ParserDecl(Ptr<ParsingTreeObject> parserDecl)
+		{
+			CollectTypes(parserDecl->GetMember(L"types").Cast<ParsingTreeArray>());
+			{
+				Ptr<ParsingTreeArray> items=parserDecl->GetMember(L"tokens").Cast<ParsingTreeArray>();
+				if(items)
+				{
+					for(int i=0;i<items->Count();i++)
+					{
+						Ptr<ParsingTreeObject> type=items->GetItem(i).Cast<ParsingTreeObject>();
+						if(type)
+						{
+							Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
+							if(name)
+							{
+								tokens.Add(name->GetValue());
+							}
+						}
+					}
+				}
+			}
+			{
+				Ptr<ParsingTreeArray> items=parserDecl->GetMember(L"rules").Cast<ParsingTreeArray>();
+				if(items)
+				{
+					for(int i=0;i<items->Count();i++)
+					{
+						Ptr<ParsingTreeObject> type=items->GetItem(i).Cast<ParsingTreeObject>();
+						if(type)
+						{
+							Ptr<ParsingTreeToken> name=type->GetMember(L"name").Cast<ParsingTreeToken>();
+							if(name)
+							{
+								rules.Add(name->GetValue());
+							}
+						}
+					}
+				}
+			}
+		}
+	};
+
+/***********************************************************************
+GrammarColorizer
+***********************************************************************/
 
 	class GrammarColorizer : public GuiTextBoxRegexColorizer
 	{
@@ -46,7 +124,8 @@ namespace test
 		volatile bool							finalizing;
 
 		SpinLock								parsingTreeLock;
-		Ptr<ParsingTreeNode>					parsingTreeNode;
+		Ptr<ParsingTreeObject>					parsingTreeNode;
+		Ptr<ParserDecl>							parsingTreeDecl;
 
 		SpinLock								parsingTextLock;
 		WString									parsingText;
@@ -70,14 +149,17 @@ namespace test
 				}
 
 				ParsingError error;
-				Ptr<ParsingTreeNode> node=grammarParser->Parse(currentParsingText, L"ParserDecl", error);
+				Ptr<ParsingTreeObject> node=grammarParser->Parse(currentParsingText, L"ParserDecl", error).Cast<ParsingTreeObject>();
+				Ptr<ParserDecl> decl;
 				if(node)
 				{
 					node->InitializeQueryCache();
+					decl=new ParserDecl(node);
 				}
 				{
 					SpinLock::Scope scope(parsingTreeLock);
 					parsingTreeNode=node;
+					parsingTreeDecl=decl;
 					node=0;
 				}
 				RestartColorizer();
@@ -101,9 +183,19 @@ namespace test
 			entry.normal.text=Color(0, 0, 255);
 			AddToken(L"class|enum|token|discardtoken|rule|as|with", entry);
 
+			// 2 -- token
 			AddToken(L"[a-zA-Z_]/w*", GetDefaultColor());
 			
+			// 3 -- type name
 			entry.normal.text=Color(43, 145, 175);
+			AddExtraToken(entry);
+			
+			// 4 -- token name
+			entry.normal.text=Color(163, 73, 164);
+			AddExtraToken(entry);
+			
+			// 5 -- rule name
+			entry.normal.text=Color(255, 127, 39);
 			AddExtraToken(entry);
 
 			Setup();
@@ -163,12 +255,36 @@ namespace test
 							{
 								token=3;
 							}
+							else if(tokenParent->GetType()==L"TokenDef" && tokenParent->GetMember(L"name")==foundNode)
+							{
+								token=4;
+							}
+							else if(tokenParent->GetType()==L"RuleDef" && tokenParent->GetMember(L"name")==foundNode)
+							{
+								token=5;
+							}
+							else if(tokenParent->GetType()==L"PrimitiveGrammarDef" && tokenParent->GetMember(L"name")==foundNode)
+							{
+								WString name=foundToken->GetValue();
+								if(parsingTreeDecl->tokens.Contains(name))
+								{
+									token=4;
+								}
+								else if(parsingTreeDecl->rules.Contains(name))
+								{
+									token=5;
+								}
+							}
 						}
 					}
 				}
 			}
 		}
 	};
+
+/***********************************************************************
+TestWindow
+***********************************************************************/
 
 	class TestWindow : public GuiWindow
 	{
