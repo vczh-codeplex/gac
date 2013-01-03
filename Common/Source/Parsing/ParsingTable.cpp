@@ -397,6 +397,7 @@ ParsingState
 											break;
 										case ParsingTable::Instruction::LeftRecursiveReduce:
 											{
+												result.AddShiftReduceRange(shiftToken, reduceToken);
 												reduceToken=regexToken;
 											}
 											break;
@@ -577,6 +578,16 @@ ParsingTreeBuilder
 						{
 							createdObject=operationTarget;
 							operationTarget=new ParsingTreeObject();
+
+							if(result.shiftReduceRanges)
+							{
+								ParsingState::ShiftReduceRange tokenRange=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
+								if(tokenRange.shiftToken && tokenRange.reduceToken)
+								{
+									ParsingTextRange codeRange(tokenRange.shiftToken, tokenRange.reduceToken);
+									createdObject->SetCodeRange(codeRange);
+								}
+							}
 						}
 						break;
 					default:
