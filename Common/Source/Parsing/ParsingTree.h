@@ -189,10 +189,10 @@ namespace vl
 			ParsingTreeNode*			GetParent();
 			const NodeList&				GetSubNodes();
 
-			static Ptr<ParsingTreeNode>	FindSubNode(Ptr<ParsingTreeNode> node, const ParsingTextPos& position);
-			static Ptr<ParsingTreeNode>	FindSubNode(Ptr<ParsingTreeNode> node, const ParsingTextRange& range);
-			static Ptr<ParsingTreeNode>	FindDeepestNode(Ptr<ParsingTreeNode> node, const ParsingTextPos& position);
-			static Ptr<ParsingTreeNode>	FindDeepestNode(Ptr<ParsingTreeNode> node, const ParsingTextRange& range);
+			ParsingTreeNode*			FindSubNode(const ParsingTextPos& position);
+			ParsingTreeNode*			FindSubNode(const ParsingTextRange& range);
+			ParsingTreeNode*			FindDeepestNode(const ParsingTextPos& position);
+			ParsingTreeNode*			FindDeepestNode(const ParsingTextRange& range);
 		};
 
 		class ParsingTreeToken : public ParsingTreeNode

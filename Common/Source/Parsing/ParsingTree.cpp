@@ -176,21 +176,21 @@ ParsingTreeNode
 			return cachedOrderedSubNodes;
 		}
 
-		Ptr<ParsingTreeNode> ParsingTreeNode::FindSubNode(Ptr<ParsingTreeNode> node, const ParsingTextPos& position)
+		ParsingTreeNode* ParsingTreeNode::FindSubNode(const ParsingTextPos& position)
 		{
-			return FindSubNode(node, ParsingTextRange(position, position));
+			return FindSubNode(ParsingTextRange(position, position));
 		}
 
-		Ptr<ParsingTreeNode> ParsingTreeNode::FindSubNode(Ptr<ParsingTreeNode> node, const ParsingTextRange& range)
+		ParsingTreeNode* ParsingTreeNode::FindSubNode(const ParsingTextRange& range)
 		{
-			if(node && node->codeRange.start<=range.start && range.end<=node->codeRange.end)
+			if(codeRange.start<=range.start && range.end<=codeRange.end)
 			{
 				vint start=0;
-				vint end=node->cachedOrderedSubNodes.Count()-1;
+				vint end=cachedOrderedSubNodes.Count()-1;
 				while(start<=end)
 				{
 					vint selected=(start+end)/2;
-					ParsingTreeNode* selectedNode=node->cachedOrderedSubNodes[selected].Obj();
+					ParsingTreeNode* selectedNode=cachedOrderedSubNodes[selected].Obj();
 					if(range.end<selectedNode->codeRange.start)
 					{
 						end=selected-1;
@@ -201,25 +201,26 @@ ParsingTreeNode
 					}
 					else
 					{
-						return node->cachedOrderedSubNodes[selected];
+						return cachedOrderedSubNodes[selected].Obj();
 					}
 				}
 			}
-			return node;
+			return this;
 		}
 
-		Ptr<ParsingTreeNode> ParsingTreeNode::FindDeepestNode(Ptr<ParsingTreeNode> node, const ParsingTextPos& position)
+		ParsingTreeNode* ParsingTreeNode::FindDeepestNode(const ParsingTextPos& position)
 		{
-			return FindDeepestNode(node, ParsingTextRange(position, position));
+			return FindDeepestNode(ParsingTextRange(position, position));
 		}
 
-		Ptr<ParsingTreeNode> ParsingTreeNode::FindDeepestNode(Ptr<ParsingTreeNode> node, const ParsingTextRange& range)
+		ParsingTreeNode* ParsingTreeNode::FindDeepestNode(const ParsingTextRange& range)
 		{
-			Ptr<ParsingTreeNode> result;
+			ParsingTreeNode* result=0;
+			ParsingTreeNode* node=this;
 			do
 			{
 				result=node;
-				node=FindSubNode(node, range);
+				node=node->FindSubNode(range);
 			}while(result!=node);
 			return result;
 		}
