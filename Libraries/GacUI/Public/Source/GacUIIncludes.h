@@ -15469,10 +15469,11 @@ Colorizer
 				void										Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock)override;
 				void										Detach()override;
 				void										TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
+				void										RestartColorizer();
 
 				virtual int									GetLexerStartState()=0;
 				virtual int									GetContextStartState()=0;
-				virtual void								ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)=0;
+				virtual void								ColorizeLineWithCRLF(int lineIndex, const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)=0;
 				virtual const ColorArray&					GetColors()=0;
 			};
 
@@ -15503,11 +15504,11 @@ Colorizer
 				int															AddToken(const WString& regex, elements::text::ColorEntry color);
 				int															AddExtraToken(elements::text::ColorEntry color);
 				bool														Setup();
-				virtual void												ColorizeTokenContextSensitive(const wchar_t* text, vint start, vint length, vint& token, int& contextState);
+				virtual void												ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState);
 
 				int															GetLexerStartState()override;
 				int															GetContextStartState()override;
-				void														ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override;
+				void														ColorizeLineWithCRLF(int lineIndex, const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override;
 				const ColorArray&											GetColors()override;
 			};
 		}

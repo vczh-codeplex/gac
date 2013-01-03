@@ -5358,10 +5358,12 @@ Logger (ParsingTreeNode)
 		protected:
 			TextWriter&				writer;
 			WString					prefix;
+			WString					originalInput;
 		public:
-			LogParsingTreeNodeVisitor(TextWriter& _writer, const WString& _prefix)
+			LogParsingTreeNodeVisitor(TextWriter& _writer, const WString& _originalInput, const WString& _prefix)
 				:writer(_writer)
 				,prefix(_prefix)
+				,originalInput(_originalInput)
 			{
 			}
 
@@ -5377,18 +5379,40 @@ Logger (ParsingTreeNode)
 				}
 			}
 
+			void WriteInput(ParsingTreeNode* node)
+			{
+				if(originalInput!=L"")
+				{
+					ParsingTextRange range=node->GetCodeRange();
+					if(range.start.index!=ParsingTextPos::UnknownValue && range.end.index!=ParsingTextPos::UnknownValue)
+					{
+						vint start=range.start.index;
+						vint length=range.end.index-start+1;
+						if(length>0)
+						{
+							writer.WriteString(L" // 【");
+							writer.WriteString(originalInput.Sub(start, length));
+							writer.WriteString(L"】");
+						}
+					}
+				}
+			}
+
 			void Visit(ParsingTreeToken* node)
 			{
 				writer.WriteChar(L'[');
 				writer.WriteString(node->GetValue());
 				writer.WriteChar(L']');
+				WriteInput(node);
 			}
 
 			void Visit(ParsingTreeObject* node)
 			{
 				WString oldPrefix=prefix;
 				writer.WriteString(node->GetType());
-				writer.WriteLine(L" {");
+				writer.WriteString(L" {");
+				WriteInput(node);
+				writer.WriteLine(L"");
 				prefix+=L"    ";
 				for(vint i=0;i<node->GetMembers().Count();i++)
 				{
@@ -5407,7 +5431,9 @@ Logger (ParsingTreeNode)
 			{
 				WString oldPrefix=prefix;
 				writer.WriteString(node->GetElementType());
-				writer.WriteLine(L"[] {");
+				writer.WriteString(L"[] {");
+				WriteInput(node);
+				writer.WriteLine(L"");
 				prefix+=L"    ";
 				for(vint i=0;i<node->Count();i++)
 				{
@@ -5421,10 +5447,10 @@ Logger (ParsingTreeNode)
 			}
 		};
 
-		void Log(Ptr<ParsingTreeNode> node, stream::TextWriter& writer, const WString& prefix)
+		void Log(Ptr<ParsingTreeNode> node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix)
 		{
 			writer.WriteString(prefix);
-			LogParsingTreeNodeVisitor visitor(writer, prefix);
+			LogParsingTreeNodeVisitor visitor(writer, originalInput, prefix);
 			node->Accept(&visitor);
 		}
 	}
@@ -5671,6 +5697,8 @@ ParsingState
 				,table(_table)
 				,currentState(-1)
 				,currentToken(-1)
+				,shiftToken(0)
+				,reduceToken(0)
 			{
 				CopyFrom(tokens, table->GetLexer().Parse(input, codeIndex));
 			}
@@ -5704,6 +5732,8 @@ ParsingState
 						stateStack.Clear();
 						currentState=info.rootStartState;
 						currentToken=-1;
+						shiftToken=0;
+						reduceToken=0;
 						return currentState;
 					}
 				}
@@ -5782,17 +5812,13 @@ ParsingState
 
 								if(match)
 								{
-									for(vint j=0;j<item->instructions.Count();j++)
+									if(regexToken)
 									{
-										ParsingTable::Instruction& ins=item->instructions[j];
-										switch(ins.instructionType)
+										if(!shiftToken)
 										{
-										case ParsingTable::Instruction::Shift:
-											stateStack.Add(ins.stateParameter);
-											break;
-										case ParsingTable::Instruction::Reduce:
-											stateStack.RemoveAt(stateStack.Count()-1);
-											break;
+											shiftToken=regexToken;
+											reduceToken=regexToken;
+											shiftTokenStack.Add(shiftToken);
 										}
 									}
 
@@ -5803,6 +5829,50 @@ ParsingState
 									result.tableStateSource=currentState;
 									result.tableStateTarget=item->targetState;
 									result.transition=item;
+
+									for(vint j=0;j<item->instructions.Count();j++)
+									{
+										ParsingTable::Instruction& ins=item->instructions[j];
+										switch(ins.instructionType)
+										{
+										case ParsingTable::Instruction::Shift:
+											{
+												stateStack.Add(ins.stateParameter);
+
+												shiftTokenStack.Add(shiftToken);
+												shiftToken=regexToken;
+												reduceToken=regexToken;
+											}
+											break;
+										case ParsingTable::Instruction::Reduce:
+											{
+												stateStack.RemoveAt(stateStack.Count()-1);
+
+												result.AddShiftReduceRange(shiftToken, reduceToken);
+												shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
+												shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
+											}
+											break;
+										case ParsingTable::Instruction::LeftRecursiveReduce:
+											{
+												result.AddShiftReduceRange(shiftToken, reduceToken);
+												reduceToken=regexToken;
+											}
+											break;
+										}
+									}
+
+									if(regexToken)
+									{
+										reduceToken=regexToken;
+									}
+
+									if(tableTokenIndex==ParsingTable::TokenFinish)
+									{
+										shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
+										shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
+										result.AddShiftReduceRange(shiftToken, reduceToken);
+									}
 
 									currentState=item->targetState;
 									return result;
@@ -5849,6 +5919,7 @@ ParsingTreeBuilder
 				{
 					return false;
 				}
+				vint shiftReduceRangeIndex=0;
 				for(vint j=0;j<result.transition->instructions.Count();j++)
 				{
 					ParsingTable::Instruction& ins=result.transition->instructions[j];
@@ -5893,6 +5964,7 @@ ParsingTreeBuilder
 									return false;
 								}
 								Ptr<ParsingTreeToken> value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
+								value->SetCodeRange(ParsingTextRange(result.token, result.token));
 								operationTarget->SetMember(ins.nameParameter, value);
 							}
 							else
@@ -5910,6 +5982,8 @@ ParsingTreeBuilder
 								arr=new ParsingTreeArray();
 								operationTarget->SetMember(ins.nameParameter, arr);
 							}
+							ParsingTextRange arrRange=arr->GetCodeRange();
+							ParsingTextRange itemRange;
 							if(!createdObject)
 							{
 								if(result.token==0)
@@ -5917,13 +5991,26 @@ ParsingTreeBuilder
 									return false;
 								}
 								Ptr<ParsingTreeToken> value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
+								value->SetCodeRange(ParsingTextRange(result.token, result.token));
+								itemRange=value->GetCodeRange();
 								arr->AddItem(value);
 							}
 							else
 							{
 								arr->AddItem(createdObject);
+								itemRange=createdObject->GetCodeRange();
 								createdObject=0;
 							}
+
+							if(arrRange.start.index==ParsingTextPos::UnknownValue || itemRange.start<arrRange.start)
+							{
+								arrRange.start=itemRange.start;
+							}
+							if(arrRange.end.index==ParsingTextPos::UnknownValue || itemRange.end>arrRange.end)
+							{
+								arrRange.end=itemRange.end;
+							}
+							arr->SetCodeRange(arrRange);
 						}
 						break;
 					case ParsingTable::Instruction::Setter:
@@ -5948,16 +6035,49 @@ ParsingTreeBuilder
 							createdObject=operationTarget;
 							operationTarget=nodeStack[nodeStack.Count()-1];
 							nodeStack.RemoveAt(nodeStack.Count()-1);
+
+							if(result.shiftReduceRanges)
+							{
+								ParsingState::ShiftReduceRange tokenRange=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
+								if(tokenRange.shiftToken && tokenRange.reduceToken)
+								{
+									ParsingTextRange codeRange(tokenRange.shiftToken, tokenRange.reduceToken);
+									createdObject->SetCodeRange(codeRange);
+								}
+							}
 						}
 						break;
 					case ParsingTable::Instruction::LeftRecursiveReduce:
 						{
 							createdObject=operationTarget;
 							operationTarget=new ParsingTreeObject();
+
+							if(result.shiftReduceRanges)
+							{
+								ParsingState::ShiftReduceRange tokenRange=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
+								if(tokenRange.shiftToken && tokenRange.reduceToken)
+								{
+									ParsingTextRange codeRange(tokenRange.shiftToken, tokenRange.reduceToken);
+									createdObject->SetCodeRange(codeRange);
+								}
+							}
 						}
 						break;
 					default:
 						return false;
+					}
+				}
+
+				if(result.tableTokenIndex==ParsingTable::TokenFinish)
+				{
+					if(result.shiftReduceRanges)
+					{
+						ParsingState::ShiftReduceRange tokenRange=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
+						if(tokenRange.shiftToken && tokenRange.reduceToken)
+						{
+							ParsingTextRange codeRange(tokenRange.shiftToken, tokenRange.reduceToken);
+							operationTarget->SetCodeRange(codeRange);
+						}
 					}
 				}
 				return true;
@@ -6246,28 +6366,53 @@ ParsingTreeNode
 			return cachedOrderedSubNodes;
 		}
 
-		Ptr<ParsingTreeNode> ParsingTreeNode::FindNode(const ParsingTextPos& position)
+		ParsingTreeNode* ParsingTreeNode::FindSubNode(const ParsingTextPos& position)
 		{
-			vint start=0;
-			vint end=cachedOrderedSubNodes.Count()-1;
-			while(start<=end)
+			return FindSubNode(ParsingTextRange(position, position));
+		}
+
+		ParsingTreeNode* ParsingTreeNode::FindSubNode(const ParsingTextRange& range)
+		{
+			if(codeRange.start<=range.start && range.end<=codeRange.end)
 			{
-				vint selected=(start+end)/2;
-				ParsingTreeNode* selectedNode=cachedOrderedSubNodes[selected].Obj();
-				if(position<selectedNode->codeRange.start)
+				vint start=0;
+				vint end=cachedOrderedSubNodes.Count()-1;
+				while(start<=end)
 				{
-					end=selected-1;
-				}
-				else if(position>selectedNode->codeRange.end)
-				{
-					start=selected+1;
-				}
-				else
-				{
-					return cachedOrderedSubNodes[selected];
+					vint selected=(start+end)/2;
+					ParsingTreeNode* selectedNode=cachedOrderedSubNodes[selected].Obj();
+					if(range.end<selectedNode->codeRange.start)
+					{
+						end=selected-1;
+					}
+					else if(range.start>selectedNode->codeRange.end)
+					{
+						start=selected+1;
+					}
+					else
+					{
+						return cachedOrderedSubNodes[selected].Obj();
+					}
 				}
 			}
-			return 0;
+			return this;
+		}
+
+		ParsingTreeNode* ParsingTreeNode::FindDeepestNode(const ParsingTextPos& position)
+		{
+			return FindDeepestNode(ParsingTextRange(position, position));
+		}
+
+		ParsingTreeNode* ParsingTreeNode::FindDeepestNode(const ParsingTextRange& range)
+		{
+			ParsingTreeNode* result=0;
+			ParsingTreeNode* node=this;
+			do
+			{
+				result=node;
+				node=node->FindSubNode(range);
+			}while(result!=node);
+			return result;
 		}
 
 /***********************************************************************

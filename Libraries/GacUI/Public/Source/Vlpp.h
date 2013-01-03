@@ -10312,14 +10312,29 @@ namespace vl
 
 		struct ParsingTextPos
 		{
-			vint			index;
-			vint			row;
-			vint			column;
+			static const int	UnknownValue=-2;
+			vint				index;
+			vint				row;
+			vint				column;
 
 			ParsingTextPos()
-				:index(0)
-				,row(0)
-				,column(0)
+				:index(UnknownValue)
+				,row(UnknownValue)
+				,column(UnknownValue)
+			{
+			}
+
+			ParsingTextPos(vint _index)
+				:index(_index)
+				,row(UnknownValue)
+				,column(UnknownValue)
+			{
+			}
+
+			ParsingTextPos(vint _row, vint _column)
+				:index(UnknownValue)
+				,row(_row)
+				,column(_column)
 			{
 			}
 
@@ -10330,12 +10345,35 @@ namespace vl
 			{
 			}
 
-			bool operator==(const ParsingTextPos& pos)const{return index==pos.index;}
-			bool operator!=(const ParsingTextPos& pos)const{return index!=pos.index;}
-			bool operator<(const ParsingTextPos& pos)const{return index<pos.index;}
-			bool operator<=(const ParsingTextPos& pos)const{return index<=pos.index;}
-			bool operator>(const ParsingTextPos& pos)const{return index>pos.index;}
-			bool operator>=(const ParsingTextPos& pos)const{return index>=pos.index;}
+			static vint Compare(const ParsingTextPos& a, const ParsingTextPos& b)
+			{
+				if(a.index!=UnknownValue && b.index!=UnknownValue)
+				{
+					return a.index-b.index;
+				}
+				else if(a.row!=UnknownValue && a.column!=UnknownValue && b.row!=UnknownValue && b.column!=UnknownValue)
+				{
+					if(a.row==b.row)
+					{
+						return a.column-b.column;
+					}
+					else
+					{
+						return a.row-b.row;
+					}
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+			bool operator==(const ParsingTextPos& pos)const{return Compare(*this, pos)==0;}
+			bool operator!=(const ParsingTextPos& pos)const{return Compare(*this, pos)!=0;}
+			bool operator<(const ParsingTextPos& pos)const{return Compare(*this, pos)<0;}
+			bool operator<=(const ParsingTextPos& pos)const{return Compare(*this, pos)<=0;}
+			bool operator>(const ParsingTextPos& pos)const{return Compare(*this, pos)>0;}
+			bool operator>=(const ParsingTextPos& pos)const{return Compare(*this, pos)>=0;}
 		};
 
 		struct ParsingTextRange
@@ -10345,12 +10383,24 @@ namespace vl
 
 			ParsingTextRange()
 			{
+				end.index=-1;
+				end.column=-1;
 			}
 
 			ParsingTextRange(const ParsingTextPos& _start, const ParsingTextPos& _end)
 				:start(_start)
 				,end(_end)
 			{
+			}
+
+			ParsingTextRange(const regex::RegexToken* startToken, const regex::RegexToken* endToken)
+			{
+				start.index=startToken->start;
+				start.row=startToken->rowStart;
+				start.column=startToken->columnStart;
+				end.index=endToken->start+endToken->length-1;
+				end.row=endToken->rowEnd;
+				end.column=endToken->columnEnd;
 			}
 
 			bool operator==(const ParsingTextRange& range)const{return start==range.start && end==range.end;}
@@ -10427,7 +10477,11 @@ namespace vl
 			void						ClearQueryCache();
 			ParsingTreeNode*			GetParent();
 			const NodeList&				GetSubNodes();
-			Ptr<ParsingTreeNode>		FindNode(const ParsingTextPos& position);
+
+			ParsingTreeNode*			FindSubNode(const ParsingTextPos& position);
+			ParsingTreeNode*			FindSubNode(const ParsingTextRange& range);
+			ParsingTreeNode*			FindDeepestNode(const ParsingTextPos& position);
+			ParsingTreeNode*			FindDeepestNode(const ParsingTextRange& range);
 		};
 
 		class ParsingTreeToken : public ParsingTreeNode
@@ -10505,7 +10559,7 @@ namespace vl
 辅助函数
 ***********************************************************************/
 
-		extern void						Log(Ptr<ParsingTreeNode> node, stream::TextWriter& writer, const WString& prefix=L"");
+		extern void						Log(Ptr<ParsingTreeNode> node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix=L"");
 
 /***********************************************************************
 语法树基础设施
@@ -11855,15 +11909,28 @@ namespace vl
 			class ParsingState : public Object
 			{
 			public:
+				struct ShiftReduceRange
+				{
+					regex::RegexToken*							shiftToken;
+					regex::RegexToken*							reduceToken;
+
+					ShiftReduceRange()
+						:shiftToken(0)
+						,reduceToken(0)
+					{
+					}
+				};
+
 				class TransitionResult
 				{
 				public:
-					vint									tableTokenIndex;
-					vint									tableStateSource;
-					vint									tableStateTarget;
-					vint									tokenIndexInStream;
-					regex::RegexToken*						token;
-					ParsingTable::TransitionItem*			transition;
+					vint										tableTokenIndex;
+					vint										tableStateSource;
+					vint										tableStateTarget;
+					vint										tokenIndexInStream;
+					regex::RegexToken*							token;
+					ParsingTable::TransitionItem*				transition;
+					Ptr<collections::List<ShiftReduceRange>>	shiftReduceRanges;
 
 					TransitionResult()
 						:tableTokenIndex(-1)
@@ -11879,6 +11946,18 @@ namespace vl
 					{
 						return transition!=0;
 					}
+
+					void AddShiftReduceRange(regex::RegexToken* shiftToken, regex::RegexToken* reduceToken)
+					{
+						ShiftReduceRange range;
+						range.shiftToken=shiftToken;
+						range.reduceToken=reduceToken;
+						if(!shiftReduceRanges)
+						{
+							shiftReduceRanges=new collections::List<ShiftReduceRange>();
+						}
+						shiftReduceRanges->Add(range);
+					}
 				};
 			private:
 				WString										input;
@@ -11888,6 +11967,10 @@ namespace vl
 				collections::List<vint>						stateStack;
 				vint										currentState;
 				vint										currentToken;
+				
+				collections::List<regex::RegexToken*>		shiftTokenStack;
+				regex::RegexToken*							shiftToken;
+				regex::RegexToken*							reduceToken;
 			public:
 				ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex=-1);
 				~ParsingState();
@@ -11898,7 +11981,7 @@ namespace vl
 
 				vint										Reset(const WString& rule);
 				TransitionResult							ReadToken();
-				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken=0);
+				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken);
 				vint										GetCurrentToken();
 				const collections::List<vint>&				GetStateStack();
 			};
@@ -11910,10 +11993,9 @@ namespace vl
 			class ParsingTreeBuilder : public Object
 			{
 			protected:
-				Ptr<ParsingTreeNode>						createdObject;
-				Ptr<ParsingTreeObject>						operationTarget;
-				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
-
+				Ptr<ParsingTreeNode>									createdObject;
+				Ptr<ParsingTreeObject>									operationTarget;
+				collections::List<Ptr<ParsingTreeObject>>				nodeStack;
 			public:
 				ParsingTreeBuilder();
 				~ParsingTreeBuilder();

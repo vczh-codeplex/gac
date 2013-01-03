@@ -17066,7 +17066,7 @@ GuiTextBoxColorizer
 						contextState=lineIndex==0?colorizer->GetContextStartState():colorizer->element->GetLines().GetLine(lineIndex-1).contextFinalState;
 					}
 
-					colorizer->ColorizeLineWithCRLF(text, colors, length+2, lexerState, contextState);
+					colorizer->ColorizeLineWithCRLF(lineIndex, text, colors, length+2, lexerState, contextState);
 
 					{
 						SpinLock::Scope scope(*colorizer->elementModifyLock);
@@ -17156,6 +17156,13 @@ GuiTextBoxColorizer
 				}
 			}
 
+			void GuiTextBoxColorizerBase::RestartColorizer()
+			{
+				SpinLock::Scope scope(*elementModifyLock);
+				colorizedLineCount=0;
+				StartColorizer();
+			}
+
 /***********************************************************************
 GuiTextBoxRegexColorizer
 ***********************************************************************/
@@ -17163,6 +17170,7 @@ GuiTextBoxRegexColorizer
 			struct GuiTextBoxRegexColorizerProcData
 			{
 				GuiTextBoxRegexColorizer*		colorizer;
+				int								lineIndex;
 				const wchar_t*					text;
 				unsigned __int32*				colors;
 				int								contextState;
@@ -17171,7 +17179,7 @@ GuiTextBoxRegexColorizer
 			void GuiTextBoxRegexColorizer::ColorizerProc(void* argument, vint start, vint length, vint token)
 			{
 				GuiTextBoxRegexColorizerProcData& data=*(GuiTextBoxRegexColorizerProcData*)argument;
-				data.colorizer->ColorizeTokenContextSensitive(data.text, start, length, token, data.contextState);
+				data.colorizer->ColorizeTokenContextSensitive(data.lineIndex, data.text, start, length, token, data.contextState);
 				for(int i=0;i<length;i++)
 				{
 					data.colors[start+i]=token+1;
@@ -17283,7 +17291,7 @@ GuiTextBoxRegexColorizer
 				}
 			}
 
-			void GuiTextBoxRegexColorizer::ColorizeTokenContextSensitive(const wchar_t* text, vint start, vint length, vint& token, int& contextState)
+			void GuiTextBoxRegexColorizer::ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)
 			{
 			}
 
@@ -17297,12 +17305,13 @@ GuiTextBoxRegexColorizer
 				return 0;
 			}
 
-			void GuiTextBoxRegexColorizer::ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)
+			void GuiTextBoxRegexColorizer::ColorizeLineWithCRLF(int lineIndex, const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)
 			{
 				if(lexer)
 				{
 					GuiTextBoxRegexColorizerProcData data;
 					data.colorizer=this;
+					data.lineIndex=lineIndex;
 					data.text=text;
 					data.colors=colors;
 					data.contextState=contextState;
