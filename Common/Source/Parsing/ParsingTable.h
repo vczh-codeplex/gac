@@ -206,7 +206,6 @@ namespace vl
 				vint										currentToken;
 				
 				collections::List<regex::RegexToken*>		shiftTokenStack;
-				regex::RegexToken*							shiftTokenForLeftRecursion;
 				regex::RegexToken*							shiftToken;
 				regex::RegexToken*							reduceToken;
 			public:

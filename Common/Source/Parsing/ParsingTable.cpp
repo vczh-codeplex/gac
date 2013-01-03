@@ -239,7 +239,6 @@ ParsingState
 				,table(_table)
 				,currentState(-1)
 				,currentToken(-1)
-				,shiftTokenForLeftRecursion(0)
 				,shiftToken(0)
 				,reduceToken(0)
 			{
@@ -275,7 +274,6 @@ ParsingState
 						stateStack.Clear();
 						currentState=info.rootStartState;
 						currentToken=-1;
-						shiftTokenForLeftRecursion=0;
 						shiftToken=0;
 						reduceToken=0;
 						return currentState;
@@ -361,6 +359,8 @@ ParsingState
 										if(!shiftToken)
 										{
 											shiftToken=regexToken;
+											reduceToken=regexToken;
+											shiftTokenStack.Add(shiftToken);
 										}
 									}
 
@@ -380,40 +380,44 @@ ParsingState
 										case ParsingTable::Instruction::Shift:
 											{
 												stateStack.Add(ins.stateParameter);
+
 												shiftTokenStack.Add(shiftToken);
 												shiftToken=regexToken;
+												reduceToken=regexToken;
 											}
 											break;
 										case ParsingTable::Instruction::Reduce:
 											{
-												result.AddShiftReduceRange(shiftToken, reduceToken);
-												
 												stateStack.RemoveAt(stateStack.Count()-1);
-												shiftTokenForLeftRecursion=shiftToken;
+
 												shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
 												shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
+												result.AddShiftReduceRange(shiftToken, reduceToken);
 											}
 											break;
 										case ParsingTable::Instruction::LeftRecursiveReduce:
 											{
 												shiftTokenStack.Add(shiftToken);
-												shiftToken=shiftTokenForLeftRecursion;
-												shiftTokenForLeftRecursion=0;
+
+												reduceToken=regexToken;
 											}
 											break;
 										}
 									}
 
-									if(tableTokenIndex==ParsingTable::TokenFinish)
-									{
-										result.AddShiftReduceRange(shiftToken, reduceToken);
-									}
-
-									currentState=item->targetState;
 									if(regexToken)
 									{
 										reduceToken=regexToken;
 									}
+
+									if(tableTokenIndex==ParsingTable::TokenFinish)
+									{
+										shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
+										shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
+										result.AddShiftReduceRange(shiftToken, reduceToken);
+									}
+
+									currentState=item->targetState;
 									return result;
 								}
 							}
@@ -503,6 +507,7 @@ ParsingTreeBuilder
 									return false;
 								}
 								Ptr<ParsingTreeToken> value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
+								value->SetCodeRange(ParsingTextRange(result.token, result.token));
 								operationTarget->SetMember(ins.nameParameter, value);
 							}
 							else
