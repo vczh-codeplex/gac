@@ -653,8 +653,9 @@ TEST_CASE(TestParsingTreeCharacterPosition)
 		parser=new ParsingRestrictParser(table);
 	}
 
-	WString input=L"11+22*33+44";
+	WString input=L"11+22*\r\n33+44";
 	ParsingError firstError;
 	Ptr<ParsingTreeNode> node=parser->Parse(input, L"Exp", firstError);
 	TEST_ASSERT(node);
+	node->InitializeQueryCache();
 }

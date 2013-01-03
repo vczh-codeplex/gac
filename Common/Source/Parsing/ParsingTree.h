@@ -64,6 +64,16 @@ namespace vl
 			{
 			}
 
+			ParsingTextRange(const regex::RegexToken* startToken, const regex::RegexToken* endToken)
+			{
+				start.index=startToken->start;
+				start.row=startToken->rowStart;
+				start.column=startToken->columnStart;
+				end.index=endToken->start+endToken->length-1;
+				end.row=endToken->rowEnd;
+				end.column=endToken->columnEnd;
+			}
+
 			bool operator==(const ParsingTextRange& range)const{return start==range.start && end==range.end;}
 			bool operator!=(const ParsingTextRange& range)const{return start!=range.start || end!=range.end;}
 			bool Contains(const ParsingTextPos& pos)const{return start<=pos && pos<=end;}
