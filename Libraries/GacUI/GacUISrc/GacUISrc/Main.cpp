@@ -143,6 +143,31 @@ namespace test
 				ThreadPoolLite::Queue(&ParsingProc, this);
 			}
 		}
+
+		void ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
+		{
+			SpinLock::Scope scope(parsingTreeLock);
+			if(parsingTreeNode && token==2)
+			{
+				ParsingTextPos pos(lineIndex, start);
+				ParsingTreeNode* foundNode=parsingTreeNode->FindDeepestNode(pos);
+				if(foundNode)
+				{
+					ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
+					if(foundToken)
+					{
+						ParsingTreeObject* tokenParent=dynamic_cast<ParsingTreeObject*>(foundNode->GetParent());
+						if(tokenParent)
+						{
+							if(tokenParent->GetType()==L"ClassTypeDef" && tokenParent->GetMember(L"name")==foundNode)
+							{
+								token=3;
+							}
+						}
+					}
+				}
+			}
+		}
 	};
 
 	class TestWindow : public GuiWindow

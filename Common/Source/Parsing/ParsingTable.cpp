@@ -524,6 +524,8 @@ ParsingTreeBuilder
 								arr=new ParsingTreeArray();
 								operationTarget->SetMember(ins.nameParameter, arr);
 							}
+							ParsingTextRange arrRange=arr->GetCodeRange();
+							ParsingTextRange itemRange;
 							if(!createdObject)
 							{
 								if(result.token==0)
@@ -531,13 +533,26 @@ ParsingTreeBuilder
 									return false;
 								}
 								Ptr<ParsingTreeToken> value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
+								value->SetCodeRange(ParsingTextRange(result.token, result.token));
+								itemRange=value->GetCodeRange();
 								arr->AddItem(value);
 							}
 							else
 							{
 								arr->AddItem(createdObject);
+								itemRange=createdObject->GetCodeRange();
 								createdObject=0;
 							}
+
+							if(arrRange.start.index==ParsingTextPos::UnknownValue || itemRange.start<arrRange.start)
+							{
+								arrRange.start=itemRange.start;
+							}
+							if(arrRange.end.index==ParsingTextPos::UnknownValue || itemRange.end>arrRange.end)
+							{
+								arrRange.end=itemRange.end;
+							}
+							arr->SetCodeRange(arrRange);
 						}
 						break;
 					case ParsingTable::Instruction::Setter:
