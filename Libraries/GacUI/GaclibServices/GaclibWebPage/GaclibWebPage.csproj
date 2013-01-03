@@ -146,6 +146,8 @@
     <Content Include="Content\Demos\Controls.Tab.TextBoxPage\DXGUI_32.jpg" />
     <Content Include="Content\Demos\Controls.Tab.TextBoxPage\DXGUI_33.jpg" />
     <Content Include="Content\Demos\Controls.Tab.TextBoxPage\Main.cpp" />
+    <Content Include="Content\Demos\Controls.TextBox.AdvancedColorizer\DXGUI_57.jpg" />
+    <Content Include="Content\Demos\Controls.TextBox.AdvancedColorizer\Main.cpp" />
     <Content Include="Content\Demos\Controls.TextBox.Colorizer\DXGUI_35.jpg" />
     <Content Include="Content\Demos\Controls.TextBox.Colorizer\DXGUI_36.jpg" />
     <Content Include="Content\Demos\Controls.TextBox.Colorizer\DXGUI_37.jpg" />
@@ -162,6 +164,7 @@
     <Content Include="Content\Demos\Controls.TreeView.FileExplorer\DXGUI_51.jpg" />
     <Content Include="Content\Demos\Controls.TreeView.FileExplorer\DXGUI_52.jpg" />
     <Content Include="Content\Demos\Controls.TreeView.FileExplorer\Main.cpp" />
+    <Content Include="Content\Demos\Demos.Controls.TextBox.AdvancedColorizer.jpg" />
     <Content Include="Content\Demos\Demos.Rendering.TextLayout.RichText.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Button.CheckAndRadio.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Button.EnableDisable.jpg" />
