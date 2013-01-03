@@ -80,9 +80,12 @@ namespace test
 		return table;
 	}
 
-	Ptr<ParsingTreeNode> Parse(Ptr<ParsingTable> table, const WString& input, const WString& name, const WString& rule, vint index)
+	Ptr<ParsingTreeNode> Parse(Ptr<ParsingTable> table, const WString& input, const WString& name, const WString& rule, vint index, bool showInput)
 	{
-		unittest::UnitTest::PrintInfo(L"Parsing: "+input);
+		if(showInput)
+		{
+			unittest::UnitTest::PrintInfo(L"Parsing: "+input);
+		}
 		bool meetTokenFinish=false;
 		Ptr<ParsingTreeNode> node;
 		{
@@ -204,7 +207,12 @@ namespace test
 			node=builder.GetNode();
 			if(node)
 			{
-				Log(node, writer);
+				WString originalInput;
+				if(showInput)
+				{
+					originalInput=input;
+				}
+				Log(node, originalInput, writer);
 			}
 		}
 		TEST_ASSERT(meetTokenFinish);
@@ -266,7 +274,7 @@ TEST_CASE(TestParseNameList)
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
-		Parse(table, inputs[i], L"NameList", L"NameList", i);
+		Parse(table, inputs[i], L"NameList", L"NameList", i, true);
 	}
 }
 
@@ -382,7 +390,7 @@ TEST_CASE(TestParsingExpression)
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
-		Parse(table, inputs[i], L"Calculator", L"Exp", i);
+		Parse(table, inputs[i], L"Calculator", L"Exp", i, true);
 	}
 }
 
@@ -545,7 +553,7 @@ TEST_CASE(TestParsingStatement)
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
-		Parse(table, inputs[i], L"Statement", L"Stat", i);
+		Parse(table, inputs[i], L"Statement", L"Stat", i, true);
 	}
 }
 
@@ -607,12 +615,12 @@ TEST_CASE(TestParsingGrammar)
 	Ptr<ParsingTable> table=CreateTable(definition, L"Syngram");
 	for(vint i=0;i<sizeof(inputTexts)/sizeof(*inputTexts);i++)
 	{
-		Parse(table, inputTexts[i][1], L"Syngram", inputTexts[i][0], i);
+		Parse(table, inputTexts[i][1], L"Syngram", inputTexts[i][0], i, true);
 	}
 	for(vint i=0;i<sizeof(inputDefs)/sizeof(*inputDefs);i++)
 	{
 		WString grammar=ParsingDefinitionToText(inputDefs[i]);
-		Parse(table, grammar, L"Syngram_Bootstrap", L"ParserDecl", i);
+		Parse(table, grammar, L"Syngram_Bootstrap", L"ParserDecl", i, false);
 	}
 }
 

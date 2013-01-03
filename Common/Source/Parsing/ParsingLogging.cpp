@@ -835,10 +835,12 @@ Logger (ParsingTreeNode)
 		protected:
 			TextWriter&				writer;
 			WString					prefix;
+			WString					originalInput;
 		public:
-			LogParsingTreeNodeVisitor(TextWriter& _writer, const WString& _prefix)
+			LogParsingTreeNodeVisitor(TextWriter& _writer, const WString& _originalInput, const WString& _prefix)
 				:writer(_writer)
 				,prefix(_prefix)
+				,originalInput(_originalInput)
 			{
 			}
 
@@ -854,18 +856,37 @@ Logger (ParsingTreeNode)
 				}
 			}
 
+			void WriteInput(ParsingTreeNode* node)
+			{
+				if(originalInput!=L"")
+				{
+					ParsingTextRange range=node->GetCodeRange();
+					vint start=range.start.index;
+					vint length=range.end.index-start+1;
+					if(length>0)
+					{
+						writer.WriteString(L" // ¡¾");
+						writer.WriteString(originalInput.Sub(start, length));
+						writer.WriteString(L"¡¿");
+					}
+				}
+			}
+
 			void Visit(ParsingTreeToken* node)
 			{
 				writer.WriteChar(L'[');
 				writer.WriteString(node->GetValue());
 				writer.WriteChar(L']');
+				WriteInput(node);
 			}
 
 			void Visit(ParsingTreeObject* node)
 			{
 				WString oldPrefix=prefix;
 				writer.WriteString(node->GetType());
-				writer.WriteLine(L" {");
+				writer.WriteString(L" {");
+				WriteInput(node);
+				writer.WriteLine(L"");
 				prefix+=L"    ";
 				for(vint i=0;i<node->GetMembers().Count();i++)
 				{
@@ -884,7 +905,9 @@ Logger (ParsingTreeNode)
 			{
 				WString oldPrefix=prefix;
 				writer.WriteString(node->GetElementType());
-				writer.WriteLine(L"[] {");
+				writer.WriteString(L"[] {");
+				WriteInput(node);
+				writer.WriteLine(L"");
 				prefix+=L"    ";
 				for(vint i=0;i<node->Count();i++)
 				{
@@ -898,10 +921,10 @@ Logger (ParsingTreeNode)
 			}
 		};
 
-		void Log(Ptr<ParsingTreeNode> node, stream::TextWriter& writer, const WString& prefix)
+		void Log(Ptr<ParsingTreeNode> node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix)
 		{
 			writer.WriteString(prefix);
-			LogParsingTreeNodeVisitor visitor(writer, prefix);
+			LogParsingTreeNodeVisitor visitor(writer, originalInput, prefix);
 			node->Accept(&visitor);
 		}
 	}
