@@ -390,15 +390,13 @@ ParsingState
 											{
 												stateStack.RemoveAt(stateStack.Count()-1);
 
+												result.AddShiftReduceRange(shiftToken, reduceToken);
 												shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
 												shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
-												result.AddShiftReduceRange(shiftToken, reduceToken);
 											}
 											break;
 										case ParsingTable::Instruction::LeftRecursiveReduce:
 											{
-												shiftTokenStack.Add(shiftToken);
-
 												reduceToken=regexToken;
 											}
 											break;

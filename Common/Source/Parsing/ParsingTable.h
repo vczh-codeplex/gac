@@ -156,6 +156,12 @@ namespace vl
 				{
 					regex::RegexToken*							shiftToken;
 					regex::RegexToken*							reduceToken;
+
+					ShiftReduceRange()
+						:shiftToken(0)
+						,reduceToken(0)
+					{
+					}
 				};
 
 				class TransitionResult
@@ -230,10 +236,9 @@ namespace vl
 			class ParsingTreeBuilder : public Object
 			{
 			protected:
-				Ptr<ParsingTreeNode>						createdObject;
-				Ptr<ParsingTreeObject>						operationTarget;
-				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
-
+				Ptr<ParsingTreeNode>									createdObject;
+				Ptr<ParsingTreeObject>									operationTarget;
+				collections::List<Ptr<ParsingTreeObject>>				nodeStack;
 			public:
 				ParsingTreeBuilder();
 				~ParsingTreeBuilder();
