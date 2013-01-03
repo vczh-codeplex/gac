@@ -162,6 +162,7 @@ namespace test
 					}
 					writer.WriteLine(L"");
 
+					vint shiftReduceRangeIndex=0;
 					FOREACH(ParsingTable::Instruction, ins, result.transition->instructions)
 					{
 						switch(ins.instructionType)
@@ -186,10 +187,32 @@ namespace test
 							break;
 						case ParsingTable::Instruction::Reduce:
 							writer.WriteLine(L"    Reduce "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
+							if(result.shiftReduceRanges && showInput)
+							{
+								ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
+								vint start=range.shiftToken->start;
+								vint end=range.reduceToken->start+range.reduceToken->length;
+								writer.WriteString(L"        ¡¾");
+								writer.WriteString(input.Sub(start, end-start));
+								writer.WriteLine(L"¡¿");
+							}
 							break;
 						case ParsingTable::Instruction::LeftRecursiveReduce:
 							writer.WriteLine(L"    LR-Reduce "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
 							break;
+						}
+					}
+
+					if(result.tableTokenIndex==ParsingTable::TokenFinish)
+					{
+						if(result.shiftReduceRanges && showInput)
+						{
+							ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
+							vint start=range.shiftToken->start;
+							vint end=range.reduceToken->start+range.reduceToken->length;
+							writer.WriteString(L"        ¡¾");
+							writer.WriteString(input.Sub(start, end-start));
+							writer.WriteLine(L"¡¿");
 						}
 					}
 
