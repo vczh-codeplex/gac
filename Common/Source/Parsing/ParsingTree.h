@@ -58,7 +58,7 @@ namespace vl
 
 			static vint Compare(const ParsingTextPos& a, const ParsingTextPos& b)
 			{
-				if(a.index!=UnknownValue && a.index!=UnknownValue)
+				if(a.index!=UnknownValue && b.index!=UnknownValue)
 				{
 					return a.index-b.index;
 				}
@@ -189,10 +189,10 @@ namespace vl
 			ParsingTreeNode*			GetParent();
 			const NodeList&				GetSubNodes();
 
-			Ptr<ParsingTreeNode>		FindSubNode(const ParsingTextPos& position);
-			Ptr<ParsingTreeNode>		FindSubNode(const ParsingTextRange& range);
-			Ptr<ParsingTreeNode>		FindDeepestNode(const ParsingTextPos& position);
-			Ptr<ParsingTreeNode>		FindDeepestNode(const ParsingTextRange& range);
+			static Ptr<ParsingTreeNode>	FindSubNode(Ptr<ParsingTreeNode> node, const ParsingTextPos& position);
+			static Ptr<ParsingTreeNode>	FindSubNode(Ptr<ParsingTreeNode> node, const ParsingTextRange& range);
+			static Ptr<ParsingTreeNode>	FindDeepestNode(Ptr<ParsingTreeNode> node, const ParsingTextPos& position);
+			static Ptr<ParsingTreeNode>	FindDeepestNode(Ptr<ParsingTreeNode> node, const ParsingTextRange& range);
 		};
 
 		class ParsingTreeToken : public ParsingTreeNode
