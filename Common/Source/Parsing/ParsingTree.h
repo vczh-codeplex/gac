@@ -56,6 +56,8 @@ namespace vl
 
 			ParsingTextRange()
 			{
+				end.index=-1;
+				end.column=-1;
 			}
 
 			ParsingTextRange(const ParsingTextPos& _start, const ParsingTextPos& _end)
@@ -226,7 +228,7 @@ namespace vl
 辅助函数
 ***********************************************************************/
 
-		extern void						Log(Ptr<ParsingTreeNode> node, stream::TextWriter& writer, const WString& prefix=L"");
+		extern void						Log(Ptr<ParsingTreeNode> node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix=L"");
 
 /***********************************************************************
 语法树基础设施
