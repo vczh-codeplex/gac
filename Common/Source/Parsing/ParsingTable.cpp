@@ -239,6 +239,9 @@ ParsingState
 				,table(_table)
 				,currentState(-1)
 				,currentToken(-1)
+				,shiftTokenForLeftRecursion(0)
+				,shiftToken(0)
+				,reduceToken(0)
 			{
 				CopyFrom(tokens, table->GetLexer().Parse(input, codeIndex));
 			}
@@ -272,6 +275,9 @@ ParsingState
 						stateStack.Clear();
 						currentState=info.rootStartState;
 						currentToken=-1;
+						shiftTokenForLeftRecursion=0;
+						shiftToken=0;
+						reduceToken=0;
 						return currentState;
 					}
 				}
@@ -350,17 +356,11 @@ ParsingState
 
 								if(match)
 								{
-									for(vint j=0;j<item->instructions.Count();j++)
+									if(regexToken)
 									{
-										ParsingTable::Instruction& ins=item->instructions[j];
-										switch(ins.instructionType)
+										if(!shiftToken)
 										{
-										case ParsingTable::Instruction::Shift:
-											stateStack.Add(ins.stateParameter);
-											break;
-										case ParsingTable::Instruction::Reduce:
-											stateStack.RemoveAt(stateStack.Count()-1);
-											break;
+											shiftToken=regexToken;
 										}
 									}
 
@@ -372,7 +372,48 @@ ParsingState
 									result.tableStateTarget=item->targetState;
 									result.transition=item;
 
+									for(vint j=0;j<item->instructions.Count();j++)
+									{
+										ParsingTable::Instruction& ins=item->instructions[j];
+										switch(ins.instructionType)
+										{
+										case ParsingTable::Instruction::Shift:
+											{
+												stateStack.Add(ins.stateParameter);
+												shiftTokenStack.Add(shiftToken);
+												shiftToken=regexToken;
+											}
+											break;
+										case ParsingTable::Instruction::Reduce:
+											{
+												result.AddShiftReduceRange(shiftToken, reduceToken);
+												
+												stateStack.RemoveAt(stateStack.Count()-1);
+												shiftTokenForLeftRecursion=shiftToken;
+												shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
+												shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
+											}
+											break;
+										case ParsingTable::Instruction::LeftRecursiveReduce:
+											{
+												shiftTokenStack.Add(shiftToken);
+												shiftToken=shiftTokenForLeftRecursion;
+												shiftTokenForLeftRecursion=0;
+											}
+											break;
+										}
+									}
+
+									if(tableTokenIndex==ParsingTable::TokenFinish)
+									{
+										result.AddShiftReduceRange(shiftToken, reduceToken);
+									}
+
 									currentState=item->targetState;
+									if(regexToken)
+									{
+										reduceToken=regexToken;
+									}
 									return result;
 								}
 							}
@@ -417,6 +458,7 @@ ParsingTreeBuilder
 				{
 					return false;
 				}
+				vint shiftReduceRangeIndex=0;
 				for(vint j=0;j<result.transition->instructions.Count();j++)
 				{
 					ParsingTable::Instruction& ins=result.transition->instructions[j];
@@ -516,6 +558,16 @@ ParsingTreeBuilder
 							createdObject=operationTarget;
 							operationTarget=nodeStack[nodeStack.Count()-1];
 							nodeStack.RemoveAt(nodeStack.Count()-1);
+
+							if(result.shiftReduceRanges)
+							{
+								ParsingState::ShiftReduceRange tokenRange=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
+								if(tokenRange.shiftToken && tokenRange.reduceToken)
+								{
+									ParsingTextRange codeRange(tokenRange.shiftToken, tokenRange.reduceToken);
+									createdObject->SetCodeRange(codeRange);
+								}
+							}
 						}
 						break;
 					case ParsingTable::Instruction::LeftRecursiveReduce:
@@ -526,6 +578,19 @@ ParsingTreeBuilder
 						break;
 					default:
 						return false;
+					}
+				}
+
+				if(result.tableTokenIndex==ParsingTable::TokenFinish)
+				{
+					if(result.shiftReduceRanges)
+					{
+						ParsingState::ShiftReduceRange tokenRange=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
+						if(tokenRange.shiftToken && tokenRange.reduceToken)
+						{
+							ParsingTextRange codeRange(tokenRange.shiftToken, tokenRange.reduceToken);
+							operationTarget->SetCodeRange(codeRange);
+						}
 					}
 				}
 				return true;

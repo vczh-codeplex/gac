@@ -152,15 +152,22 @@ namespace vl
 			class ParsingState : public Object
 			{
 			public:
+				struct ShiftReduceRange
+				{
+					regex::RegexToken*							shiftToken;
+					regex::RegexToken*							reduceToken;
+				};
+
 				class TransitionResult
 				{
 				public:
-					vint									tableTokenIndex;
-					vint									tableStateSource;
-					vint									tableStateTarget;
-					vint									tokenIndexInStream;
-					regex::RegexToken*						token;
-					ParsingTable::TransitionItem*			transition;
+					vint										tableTokenIndex;
+					vint										tableStateSource;
+					vint										tableStateTarget;
+					vint										tokenIndexInStream;
+					regex::RegexToken*							token;
+					ParsingTable::TransitionItem*				transition;
+					Ptr<collections::List<ShiftReduceRange>>	shiftReduceRanges;
 
 					TransitionResult()
 						:tableTokenIndex(-1)
@@ -176,6 +183,18 @@ namespace vl
 					{
 						return transition!=0;
 					}
+
+					void AddShiftReduceRange(regex::RegexToken* shiftToken, regex::RegexToken* reduceToken)
+					{
+						ShiftReduceRange range;
+						range.shiftToken=shiftToken;
+						range.reduceToken=reduceToken;
+						if(!shiftReduceRanges)
+						{
+							shiftReduceRanges=new collections::List<ShiftReduceRange>();
+						}
+						shiftReduceRanges->Add(range);
+					}
 				};
 			private:
 				WString										input;
@@ -185,6 +204,11 @@ namespace vl
 				collections::List<vint>						stateStack;
 				vint										currentState;
 				vint										currentToken;
+				
+				collections::List<regex::RegexToken*>		shiftTokenStack;
+				regex::RegexToken*							shiftTokenForLeftRecursion;
+				regex::RegexToken*							shiftToken;
+				regex::RegexToken*							reduceToken;
 			public:
 				ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex=-1);
 				~ParsingState();
@@ -195,7 +219,7 @@ namespace vl
 
 				vint										Reset(const WString& rule);
 				TransitionResult							ReadToken();
-				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken=0);
+				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken);
 				vint										GetCurrentToken();
 				const collections::List<vint>&				GetStateStack();
 			};
