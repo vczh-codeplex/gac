@@ -41,8 +41,14 @@ SymbolLookup
 	public:
 		WString									typeName;
 		Dictionary<WString, Ptr<TypeSymbol>>	subTypes;
+		TypeSymbol*								parent;
 
-		void CollectTypes(Ptr<ParsingTreeArray> types)
+		TypeSymbol()
+			:parent(0)
+		{
+		}
+
+		void CollectTypes(Ptr<ParsingTreeArray> types, Dictionary<ParsingTreeNode*, TypeSymbol*>& nodeTypeMap)
 		{
 			if(types)
 			{
@@ -56,8 +62,10 @@ SymbolLookup
 						{
 							Ptr<TypeSymbol> symbol=new TypeSymbol;
 							symbol->typeName=name->GetValue();
+							symbol->parent=this;
 							subTypes.Add(symbol->typeName, symbol);
-							symbol->CollectTypes(type->GetMember(L"subTypes").Cast<ParsingTreeArray>());
+							symbol->CollectTypes(type->GetMember(L"subTypes").Cast<ParsingTreeArray>(), nodeTypeMap);
+							nodeTypeMap.Add(type.Obj(), symbol.Obj());
 						}
 					}
 				}
@@ -68,12 +76,14 @@ SymbolLookup
 	class ParserDecl : public TypeSymbol
 	{
 	public:
-		SortedList<WString>						tokens;
-		SortedList<WString>						rules;
+		SortedList<WString>							tokens;
+		SortedList<WString>							rules;
+		Dictionary<ParsingTreeNode*, TypeSymbol*>	nodeTypeMap;
 
 		ParserDecl(Ptr<ParsingTreeObject> parserDecl)
 		{
-			CollectTypes(parserDecl->GetMember(L"types").Cast<ParsingTreeArray>());
+			nodeTypeMap.Add(parserDecl.Obj(), this);
+			CollectTypes(parserDecl->GetMember(L"types").Cast<ParsingTreeArray>(), nodeTypeMap);
 			{
 				Ptr<ParsingTreeArray> items=parserDecl->GetMember(L"tokens").Cast<ParsingTreeArray>();
 				if(items)
@@ -205,6 +215,48 @@ GrammarColorizer
 		{
 			grammarParser=CreateBootstrapParser();
 		}
+
+		TypeSymbol* FindScope(ParsingTreeNode* node)
+		{
+			if(!node) return 0;
+			int index=parsingTreeDecl->nodeTypeMap.Keys().IndexOf(node);
+			return index==-1?FindScope(node->GetParent()):parsingTreeDecl->nodeTypeMap.Values().Get(index);
+		}
+
+		TypeSymbol* FindType(TypeSymbol* scope, const WString& name)
+		{
+			if(!scope) return 0;
+			if(name==L"") return 0;
+			int index=scope->subTypes.Keys().IndexOf(name);
+			if(index!=-1) return scope->subTypes.Values().Get(index).Obj();
+			return FindType(scope->parent, name);
+		}
+
+		TypeSymbol* FindType(TypeSymbol* scope, ParsingTreeObject* object)
+		{
+			if(scope && object)
+			{
+				Ptr<ParsingTreeToken> name=object->GetMember(L"name").Cast<ParsingTreeToken>();
+				if(name)
+				{
+					WString typeName=name->GetValue();
+					if(object->GetType()==L"PrimitiveTypeObj")
+					{
+						return FindType(scope, typeName);
+					}
+					else if(object->GetType()==L"SubTypeObj")
+					{
+						TypeSymbol* type=FindType(scope, object->GetMember(L"parentType").Cast<ParsingTreeObject>().Obj());
+						if(type)
+						{
+							int index=type->subTypes.Keys().IndexOf(typeName);
+							if(index!=-1) return type->subTypes.Values().Get(index).Obj();
+						}
+					}
+				}
+			}
+			return 0;
+		}
 	public:
 		GrammarColorizer()
 			:isParsingRunning(false)
@@ -273,6 +325,14 @@ GrammarColorizer
 								else if(parsingTreeDecl->rules.Contains(name))
 								{
 									token=5;
+								}
+							}
+							else if((tokenParent->GetType()==L"PrimitiveTypeObj" || tokenParent->GetType()==L"SubTypeObj") && tokenParent->GetMember(L"name")==foundNode)
+							{
+								TypeSymbol* scope=FindScope(tokenParent);
+								if(FindType(scope, tokenParent))
+								{
+									token=3;
 								}
 							}
 						}
