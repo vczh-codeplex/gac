@@ -118,6 +118,12 @@
       <cpp src="Main.cpp" />
       <description>This demo shows how to build a color picker using tracker control.</description>
     </demo>
+    <demo name="TextBox.AdvancedColorizer">
+      <date>2013/1/3</date>
+      <image src="DXGUI_57.jpg" />
+      <cpp src="Main.cpp" />
+      <description>This demo shows how to build a code editor with context sensitive colorizing based on GuiMultilineTextBox.</description>
+    </demo>
   </category>
   <category name="Template">
     <description>The &quot;Template&quot; category contains demos that show how to build template or skin for each type of controls.</description>
