@@ -176,49 +176,51 @@ ParsingTreeNode
 			return cachedOrderedSubNodes;
 		}
 
-		Ptr<ParsingTreeNode> ParsingTreeNode::FindSubNode(const ParsingTextPos& position)
+		Ptr<ParsingTreeNode> ParsingTreeNode::FindSubNode(Ptr<ParsingTreeNode> node, const ParsingTextPos& position)
 		{
-			return FindSubNode(ParsingTextRange(position, position));
+			return FindSubNode(node, ParsingTextRange(position, position));
 		}
 
-		Ptr<ParsingTreeNode> ParsingTreeNode::FindSubNode(const ParsingTextRange& range)
+		Ptr<ParsingTreeNode> ParsingTreeNode::FindSubNode(Ptr<ParsingTreeNode> node, const ParsingTextRange& range)
 		{
-			vint start=0;
-			vint end=cachedOrderedSubNodes.Count()-1;
-			while(start<=end)
+			if(node && node->codeRange.start<=range.start && range.end<=node->codeRange.end)
 			{
-				vint selected=(start+end)/2;
-				ParsingTreeNode* selectedNode=cachedOrderedSubNodes[selected].Obj();
-				if(range.end<selectedNode->codeRange.start)
+				vint start=0;
+				vint end=node->cachedOrderedSubNodes.Count()-1;
+				while(start<=end)
 				{
-					end=selected-1;
-				}
-				else if(range.start>selectedNode->codeRange.end)
-				{
-					start=selected+1;
-				}
-				else
-				{
-					return cachedOrderedSubNodes[selected];
+					vint selected=(start+end)/2;
+					ParsingTreeNode* selectedNode=node->cachedOrderedSubNodes[selected].Obj();
+					if(range.end<selectedNode->codeRange.start)
+					{
+						end=selected-1;
+					}
+					else if(range.start>selectedNode->codeRange.end)
+					{
+						start=selected+1;
+					}
+					else
+					{
+						return node->cachedOrderedSubNodes[selected];
+					}
 				}
 			}
-			return 0;
+			return node;
 		}
 
-		Ptr<ParsingTreeNode> ParsingTreeNode::FindDeepestNode(const ParsingTextPos& position)
+		Ptr<ParsingTreeNode> ParsingTreeNode::FindDeepestNode(Ptr<ParsingTreeNode> node, const ParsingTextPos& position)
 		{
-			return FindDeepestNode(ParsingTextRange(position, position));
+			return FindDeepestNode(node, ParsingTextRange(position, position));
 		}
 
-		Ptr<ParsingTreeNode> ParsingTreeNode::FindDeepestNode(const ParsingTextRange& range)
+		Ptr<ParsingTreeNode> ParsingTreeNode::FindDeepestNode(Ptr<ParsingTreeNode> node, const ParsingTextRange& range)
 		{
-			Ptr<ParsingTreeNode> node=FindSubNode(range);
-			Ptr<ParsingTreeNode> result=node;
-			while(node)
+			Ptr<ParsingTreeNode> result;
+			do
 			{
 				result=node;
-				node=node->FindSubNode(range);
-			}
+				node=FindSubNode(node, range);
+			}while(result!=node);
 			return result;
 		}
 

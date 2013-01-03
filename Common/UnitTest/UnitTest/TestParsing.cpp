@@ -692,7 +692,7 @@ TEST_CASE(TestParsingTreeCharacterPosition)
 
 	{
 		ParsingTextPos pos(3);
-		Ptr<ParsingTreeNode> foundNode=node->FindDeepestNode(pos);
+		Ptr<ParsingTreeNode> foundNode=ParsingTreeNode::FindDeepestNode(node, pos);
 		TEST_ASSERT(foundNode);
 		Ptr<ParsingTreeToken> token=foundNode.Cast<ParsingTreeToken>();
 		TEST_ASSERT(token);
@@ -700,7 +700,7 @@ TEST_CASE(TestParsingTreeCharacterPosition)
 	}
 	{
 		ParsingTextPos pos(4);
-		Ptr<ParsingTreeNode> foundNode=node->FindDeepestNode(pos);
+		Ptr<ParsingTreeNode> foundNode=ParsingTreeNode::FindDeepestNode(node, pos);
 		TEST_ASSERT(foundNode);
 		Ptr<ParsingTreeToken> token=foundNode.Cast<ParsingTreeToken>();
 		TEST_ASSERT(token);
@@ -708,10 +708,34 @@ TEST_CASE(TestParsingTreeCharacterPosition)
 	}
 	{
 		ParsingTextPos pos(5);
-		Ptr<ParsingTreeNode> foundNode=node->FindDeepestNode(pos);
+		Ptr<ParsingTreeNode> foundNode=ParsingTreeNode::FindDeepestNode(node, pos);
 		TEST_ASSERT(foundNode);
 		Ptr<ParsingTreeObject> obj=foundNode.Cast<ParsingTreeObject>();
 		TEST_ASSERT(obj);
 		TEST_ASSERT(obj->GetMember(L"binaryOperator").Cast<ParsingTreeToken>()->GetValue()==L"Mul");
+	}
+	{
+		ParsingTextPos pos(1, 1);
+		Ptr<ParsingTreeNode> foundNode=ParsingTreeNode::FindDeepestNode(node, pos);
+		TEST_ASSERT(foundNode);
+		Ptr<ParsingTreeToken> token=foundNode.Cast<ParsingTreeToken>();
+		TEST_ASSERT(token);
+		TEST_ASSERT(token->GetValue()==L"33");
+	}
+	{
+		ParsingTextPos pos(1, 2);
+		Ptr<ParsingTreeNode> foundNode=ParsingTreeNode::FindDeepestNode(node, pos);
+		TEST_ASSERT(foundNode);
+		Ptr<ParsingTreeObject> obj=foundNode.Cast<ParsingTreeObject>();
+		TEST_ASSERT(obj);
+		TEST_ASSERT(obj->GetMember(L"binaryOperator").Cast<ParsingTreeToken>()->GetValue()==L"Add");
+	}
+	{
+		ParsingTextPos pos(1, 3);
+		Ptr<ParsingTreeNode> foundNode=ParsingTreeNode::FindDeepestNode(node, pos);
+		TEST_ASSERT(foundNode);
+		Ptr<ParsingTreeToken> token=foundNode.Cast<ParsingTreeToken>();
+		TEST_ASSERT(token);
+		TEST_ASSERT(token->GetValue()==L"44");
 	}
 }
