@@ -641,3 +641,20 @@ TEST_CASE(TestParsingBootstrap)
 		TEST_ASSERT(grammar==grammar2);
 	}
 }
+
+TEST_CASE(TestParsingTreeCharacterPosition)
+{
+	Ptr<ParsingRestrictParser> parser;
+	{
+		List<Ptr<ParsingError>> errors;
+		Ptr<ParsingDefinition> definition=CreateExpressionDefinition();
+		Ptr<ParsingTable> table=GenerateTable(definition, errors);
+		TEST_ASSERT(table);
+		parser=new ParsingRestrictParser(table);
+	}
+
+	WString input=L"11+22*33+44";
+	ParsingError firstError;
+	Ptr<ParsingTreeNode> node=parser->Parse(input, L"Exp", firstError);
+	TEST_ASSERT(node);
+}
