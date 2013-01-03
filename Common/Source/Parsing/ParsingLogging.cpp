@@ -861,13 +861,16 @@ Logger (ParsingTreeNode)
 				if(originalInput!=L"")
 				{
 					ParsingTextRange range=node->GetCodeRange();
-					vint start=range.start.index;
-					vint length=range.end.index-start+1;
-					if(length>0)
+					if(range.start.index!=ParsingTextPos::UnknownValue && range.end.index!=ParsingTextPos::UnknownValue)
 					{
-						writer.WriteString(L" // ¡¾");
-						writer.WriteString(originalInput.Sub(start, length));
-						writer.WriteString(L"¡¿");
+						vint start=range.start.index;
+						vint length=range.end.index-start+1;
+						if(length>0)
+						{
+							writer.WriteString(L" // ¡¾");
+							writer.WriteString(originalInput.Sub(start, length));
+							writer.WriteString(L"¡¿");
+						}
 					}
 				}
 			}

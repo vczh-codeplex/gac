@@ -23,14 +23,29 @@ namespace vl
 
 		struct ParsingTextPos
 		{
-			vint			index;
-			vint			row;
-			vint			column;
+			static const int	UnknownValue=-2;
+			vint				index;
+			vint				row;
+			vint				column;
 
 			ParsingTextPos()
-				:index(0)
-				,row(0)
-				,column(0)
+				:index(UnknownValue)
+				,row(UnknownValue)
+				,column(UnknownValue)
+			{
+			}
+
+			ParsingTextPos(vint _index)
+				:index(_index)
+				,row(UnknownValue)
+				,column(UnknownValue)
+			{
+			}
+
+			ParsingTextPos(vint _row, vint _column)
+				:index(UnknownValue)
+				,row(_row)
+				,column(_column)
 			{
 			}
 
@@ -41,12 +56,35 @@ namespace vl
 			{
 			}
 
-			bool operator==(const ParsingTextPos& pos)const{return index==pos.index;}
-			bool operator!=(const ParsingTextPos& pos)const{return index!=pos.index;}
-			bool operator<(const ParsingTextPos& pos)const{return index<pos.index;}
-			bool operator<=(const ParsingTextPos& pos)const{return index<=pos.index;}
-			bool operator>(const ParsingTextPos& pos)const{return index>pos.index;}
-			bool operator>=(const ParsingTextPos& pos)const{return index>=pos.index;}
+			static vint Compare(const ParsingTextPos& a, const ParsingTextPos& b)
+			{
+				if(a.index!=UnknownValue && a.index!=UnknownValue)
+				{
+					return a.index-b.index;
+				}
+				else if(a.row!=UnknownValue && a.column!=UnknownValue && b.row!=UnknownValue && b.column!=UnknownValue)
+				{
+					if(a.row==b.row)
+					{
+						return a.column-b.column;
+					}
+					else
+					{
+						return a.row-b.row;
+					}
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+			bool operator==(const ParsingTextPos& pos)const{return Compare(*this, pos)==0;}
+			bool operator!=(const ParsingTextPos& pos)const{return Compare(*this, pos)!=0;}
+			bool operator<(const ParsingTextPos& pos)const{return Compare(*this, pos)<0;}
+			bool operator<=(const ParsingTextPos& pos)const{return Compare(*this, pos)<=0;}
+			bool operator>(const ParsingTextPos& pos)const{return Compare(*this, pos)>0;}
+			bool operator>=(const ParsingTextPos& pos)const{return Compare(*this, pos)>=0;}
 		};
 
 		struct ParsingTextRange
@@ -150,7 +188,11 @@ namespace vl
 			void						ClearQueryCache();
 			ParsingTreeNode*			GetParent();
 			const NodeList&				GetSubNodes();
-			Ptr<ParsingTreeNode>		FindNode(const ParsingTextPos& position);
+
+			Ptr<ParsingTreeNode>		FindSubNode(const ParsingTextPos& position);
+			Ptr<ParsingTreeNode>		FindSubNode(const ParsingTextRange& range);
+			Ptr<ParsingTreeNode>		FindDeepestNode(const ParsingTextPos& position);
+			Ptr<ParsingTreeNode>		FindDeepestNode(const ParsingTextRange& range);
 		};
 
 		class ParsingTreeToken : public ParsingTreeNode
