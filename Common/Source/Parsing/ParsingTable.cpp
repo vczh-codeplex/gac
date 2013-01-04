@@ -282,6 +282,135 @@ ParsingState
 				return -1;
 			}
 
+			vint ParsingState::GetCurrentToken()
+			{
+				return currentToken;
+			}
+
+			const collections::List<vint>& ParsingState::GetStateStack()
+			{
+				return stateStack;
+			}
+
+			void ParsingState::MatchToken(vint tableTokenIndex, collections::List<ParsingTable::TransitionItem*>& items, bool fetchFirstOnly)
+			{
+				ParsingTable::TransitionBag* bag=table->GetTransitionBag(currentState, tableTokenIndex).Obj();
+				if(bag)
+				{
+					for(vint i=0;i<bag->transitionItems.Count();i++)
+					{
+						ParsingTable::TransitionItem* item=bag->transitionItems[i].Obj();
+						if(item->stackPattern.Count()<=stateStack.Count())
+						{
+							if(tableTokenIndex!=ParsingTable::TokenFinish || item->stackPattern.Count()==stateStack.Count())
+							{
+								bool match=true;
+								for(vint j=0;j<item->stackPattern.Count();j++)
+								{
+									if(item->stackPattern[j]!=stateStack[stateStack.Count()-1-j])
+									{
+										match=false;
+										break;
+									}
+								}
+
+								if(match)
+								{
+									items.Add(item);
+									if(fetchFirstOnly)
+									{
+										return;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			ParsingTable::TransitionItem* ParsingState::MatchToken(vint tableTokenIndex)
+			{
+				collections::List<ParsingTable::TransitionItem*> items;
+				MatchToken(tableTokenIndex, items, true);
+				return items.Count()>0?items[0]:0;
+			}
+
+			ParsingState::TransitionResult ParsingState::ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken)
+			{
+				ParsingTable::TransitionItem* item=MatchToken(tableTokenIndex);
+				if(item)
+				{
+					if(regexToken)
+					{
+						if(!shiftToken)
+						{
+							shiftToken=regexToken;
+							reduceToken=regexToken;
+							shiftTokenStack.Add(shiftToken);
+						}
+					}
+
+					TransitionResult result;
+					result.tableTokenIndex=tableTokenIndex;
+					result.token=regexToken;
+					result.tokenIndexInStream=regexToken?currentToken:-1;
+					result.tableStateSource=currentState;
+					result.tableStateTarget=item->targetState;
+					result.transition=item;
+
+					for(vint j=0;j<item->instructions.Count();j++)
+					{
+						ParsingTable::Instruction& ins=item->instructions[j];
+						switch(ins.instructionType)
+						{
+						case ParsingTable::Instruction::Shift:
+							{
+								stateStack.Add(ins.stateParameter);
+
+								shiftTokenStack.Add(shiftToken);
+								shiftToken=regexToken;
+								reduceToken=regexToken;
+							}
+							break;
+						case ParsingTable::Instruction::Reduce:
+							{
+								stateStack.RemoveAt(stateStack.Count()-1);
+
+								result.AddShiftReduceRange(shiftToken, reduceToken);
+								shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
+								shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
+							}
+							break;
+						case ParsingTable::Instruction::LeftRecursiveReduce:
+							{
+								result.AddShiftReduceRange(shiftToken, reduceToken);
+								if(regexToken)
+								{
+									reduceToken=regexToken;
+								}
+							}
+							break;
+						}
+					}
+
+					if(regexToken)
+					{
+						reduceToken=regexToken;
+					}
+
+					if(tableTokenIndex==ParsingTable::TokenFinish)
+					{
+						shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
+						shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
+						result.AddShiftReduceRange(shiftToken, reduceToken);
+					}
+
+					currentState=item->targetState;
+					return result;
+				}
+				return TransitionResult();
+			}
+
 			ParsingState::TransitionResult ParsingState::ReadToken()
 			{
 				vint token=-1;
@@ -328,112 +457,6 @@ ParsingState
 					currentToken++;
 				}
 				return result;
-			}
-
-			ParsingState::TransitionResult ParsingState::ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken)
-			{
-				ParsingTable::TransitionBag* bag=table->GetTransitionBag(currentState, tableTokenIndex).Obj();
-				if(bag)
-				{
-					for(vint i=0;i<bag->transitionItems.Count();i++)
-					{
-						ParsingTable::TransitionItem* item=bag->transitionItems[i].Obj();
-						if(item->stackPattern.Count()<=stateStack.Count())
-						{
-							if(tableTokenIndex!=ParsingTable::TokenFinish || item->stackPattern.Count()==stateStack.Count())
-							{
-								bool match=true;
-								for(vint j=0;j<item->stackPattern.Count();j++)
-								{
-									if(item->stackPattern[j]!=stateStack[stateStack.Count()-1-j])
-									{
-										match=false;
-										break;
-									}
-								}
-
-								if(match)
-								{
-									if(regexToken)
-									{
-										if(!shiftToken)
-										{
-											shiftToken=regexToken;
-											reduceToken=regexToken;
-											shiftTokenStack.Add(shiftToken);
-										}
-									}
-
-									TransitionResult result;
-									result.tableTokenIndex=tableTokenIndex;
-									result.token=regexToken;
-									result.tokenIndexInStream=regexToken?currentToken:-1;
-									result.tableStateSource=currentState;
-									result.tableStateTarget=item->targetState;
-									result.transition=item;
-
-									for(vint j=0;j<item->instructions.Count();j++)
-									{
-										ParsingTable::Instruction& ins=item->instructions[j];
-										switch(ins.instructionType)
-										{
-										case ParsingTable::Instruction::Shift:
-											{
-												stateStack.Add(ins.stateParameter);
-
-												shiftTokenStack.Add(shiftToken);
-												shiftToken=regexToken;
-												reduceToken=regexToken;
-											}
-											break;
-										case ParsingTable::Instruction::Reduce:
-											{
-												stateStack.RemoveAt(stateStack.Count()-1);
-
-												result.AddShiftReduceRange(shiftToken, reduceToken);
-												shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
-												shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
-											}
-											break;
-										case ParsingTable::Instruction::LeftRecursiveReduce:
-											{
-												result.AddShiftReduceRange(shiftToken, reduceToken);
-												reduceToken=regexToken;
-											}
-											break;
-										}
-									}
-
-									if(regexToken)
-									{
-										reduceToken=regexToken;
-									}
-
-									if(tableTokenIndex==ParsingTable::TokenFinish)
-									{
-										shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
-										shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
-										result.AddShiftReduceRange(shiftToken, reduceToken);
-									}
-
-									currentState=item->targetState;
-									return result;
-								}
-							}
-						}
-					}
-				}
-				return TransitionResult();
-			}
-
-			vint ParsingState::GetCurrentToken()
-			{
-				return currentToken;
-			}
-
-			const collections::List<vint>& ParsingState::GetStateStack()
-			{
-				return stateStack;
 			}
 
 /***********************************************************************

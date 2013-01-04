@@ -223,10 +223,13 @@ namespace vl
 				const collections::List<regex::RegexToken>&	GetTokens();
 
 				vint										Reset(const WString& rule);
-				TransitionResult							ReadToken();
-				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken);
 				vint										GetCurrentToken();
 				const collections::List<vint>&				GetStateStack();
+
+				void										MatchToken(vint tableTokenIndex, collections::List<ParsingTable::TransitionItem*>& items, bool fetchFirstOnly);
+				ParsingTable::TransitionItem*				MatchToken(vint tableTokenIndex);
+				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken);
+				TransitionResult							ReadToken();
 			};
 
 /***********************************************************************
