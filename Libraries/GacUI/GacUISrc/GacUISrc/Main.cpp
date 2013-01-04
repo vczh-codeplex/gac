@@ -130,7 +130,7 @@ GrammarColorizer
 	class GrammarColorizer : public GuiTextBoxRegexColorizer
 	{
 	protected:
-		Ptr<ParsingRestrictParser>				grammarParser;
+		Ptr<ParsingStrictParser>				grammarParser;
 		volatile bool							finalizing;
 
 		SpinLock								parsingTreeLock;
