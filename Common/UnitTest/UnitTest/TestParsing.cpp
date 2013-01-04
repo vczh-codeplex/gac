@@ -649,7 +649,7 @@ TEST_CASE(TestParsingGrammar)
 
 TEST_CASE(TestParsingBootstrap)
 {
-	Ptr<ParsingRestrictParser> parser=CreateBootstrapParser();
+	Ptr<ParsingStrictParser> parser=CreateBootstrapParser();
 	TEST_ASSERT(parser);
 
 	Ptr<ParsingDefinition> inputDefs[]=
@@ -675,13 +675,13 @@ TEST_CASE(TestParsingBootstrap)
 
 TEST_CASE(TestParsingTreeCharacterPosition)
 {
-	Ptr<ParsingRestrictParser> parser;
+	Ptr<ParsingStrictParser> parser;
 	{
 		List<Ptr<ParsingError>> errors;
 		Ptr<ParsingDefinition> definition=CreateExpressionDefinition();
 		Ptr<ParsingTable> table=GenerateTable(definition, errors);
 		TEST_ASSERT(table);
-		parser=new ParsingRestrictParser(table);
+		parser=new ParsingStrictParser(table);
 	}
 
 	WString input=L"11+22*\r\n33+44";

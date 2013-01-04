@@ -221,6 +221,7 @@ namespace vl
 				const WString&								GetInput();
 				Ptr<ParsingTable>							GetTable();
 				const collections::List<regex::RegexToken>&	GetTokens();
+				regex::RegexToken*							GetToken(vint index);
 
 				vint										Reset(const WString& rule);
 				vint										GetCurrentToken();
@@ -239,9 +240,9 @@ namespace vl
 			class ParsingTreeBuilder : public Object
 			{
 			protected:
-				Ptr<ParsingTreeNode>									createdObject;
-				Ptr<ParsingTreeObject>									operationTarget;
-				collections::List<Ptr<ParsingTreeObject>>				nodeStack;
+				Ptr<ParsingTreeNode>						createdObject;
+				Ptr<ParsingTreeObject>						operationTarget;
+				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
 			public:
 				ParsingTreeBuilder();
 				~ParsingTreeBuilder();
@@ -251,24 +252,35 @@ namespace vl
 				Ptr<ParsingTreeObject>						GetNode();
 			};
 
-			class ParsingRestrictParser : public Object
+			class ParsingStrictParser : public Object
 			{
 			protected:
 				Ptr<ParsingTable>							table;
 
-				const regex::RegexToken*					ConvertToken(vint token, ParsingState& state);
 			public:
-				ParsingRestrictParser(Ptr<ParsingTable> _table);
-				~ParsingRestrictParser();
+				ParsingStrictParser(Ptr<ParsingTable> _table);
+				~ParsingStrictParser();
 
 				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, ParsingError& firstError);
+			};
+
+			class ParsingAutoRecoverParser : public Object
+			{
+			protected:
+				Ptr<ParsingTable>							table;
+
+			public:
+				ParsingAutoRecoverParser(Ptr<ParsingTable> _table);
+				~ParsingAutoRecoverParser();
+
+				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule);
 			};
 
 /***********************************************************************
 ¸¨Öúº¯Êý
 ***********************************************************************/
 
-			extern Ptr<ParsingRestrictParser>				CreateBootstrapParser();
+			extern Ptr<ParsingStrictParser>					CreateBootstrapParser();
 			extern void										Log(Ptr<ParsingTable> table, stream::TextWriter& writer);
 		}
 	}
