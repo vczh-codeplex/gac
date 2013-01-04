@@ -163,10 +163,10 @@ Win8GroupBoxStyle
 				style->textElement->SetColor(colorCurrent);
 			}
 
-			void Win8GroupBoxStyle::SetMargins(int fontSize)
+			void Win8GroupBoxStyle::SetMargins(vint fontSize)
 			{
 				fontSize+=4;
-				int half=fontSize/2;
+				vint half=fontSize/2;
 				borderComposition->SetAlignmentToParent(Margin(0, half, 0, 0));
 				containerComposition->SetAlignmentToParent(Margin(1, fontSize, 1, 1));
 				textBackgroundComposition->SetAlignmentToParent(Margin(half, 2, -1, -1));

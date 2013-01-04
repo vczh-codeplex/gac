@@ -26,7 +26,7 @@ MultilineTextBox
 			class GuiMultilineTextBox : public GuiScrollView, public GuiTextBoxCommonInterface, public Description<GuiMultilineTextBox>
 			{
 			public:
-				static const int							TextMargin=3;
+				static const vint							TextMargin=3;
 
 				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
 				{
@@ -62,7 +62,7 @@ MultilineTextBox
 
 					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
 					void									ScrollToView(Point point)override;
-					int										GetTextMargin()override;
+					vint										GetTextMargin()override;
 				};
 
 			protected:
@@ -92,7 +92,7 @@ SinglelineTextBox
 			class GuiSinglelineTextBox : public GuiControl, public GuiTextBoxCommonInterface, public Description<GuiSinglelineTextBox>
 			{
 			public:
-				static const int							TextMargin=3;
+				static const vint							TextMargin=3;
 
 				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
 				{
@@ -146,7 +146,7 @@ SinglelineTextBox
 					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
 					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
 					void									ScrollToView(Point point)override;
-					int										GetTextMargin()override;
+					vint										GetTextMargin()override;
 				};
 			protected:
 				StyleController*							styleController;

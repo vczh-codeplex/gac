@@ -167,11 +167,11 @@ Basic Construction
 				GuiControl*								GetParent();
 				/// <summary>Get the number of child controls.</summary>
 				/// <returns>The number of child controls.</returns>
-				int										GetChildrenCount();
+				vint										GetChildrenCount();
 				/// <summary>Get the child control using a specified index.</summary>
 				/// <returns>The child control.</returns>
 				/// <param name="index">The specified index.</param>
-				GuiControl*								GetChild(int index);
+				GuiControl*								GetChild(vint index);
 				/// <summary>Put another control in the container composition of this control.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="control">The control to put in this control.</param>
@@ -261,7 +261,7 @@ Basic Construction
 			{
 			protected:
 				Ptr<INativeImage>				image;
-				int								frameIndex;
+				vint								frameIndex;
 
 			public:
 				/// <summary>Create an empty image data.</summary>
@@ -269,7 +269,7 @@ Basic Construction
 				/// <summary>Create an image data with a specified image and a frame index.</summary>
 				/// <param name="_image">The specified image.</param>
 				/// <param name="_frameIndex">The specified frame index.</param>
-				GuiImageData(Ptr<INativeImage> _image, int _frameIndex);
+				GuiImageData(Ptr<INativeImage> _image, vint _frameIndex);
 				~GuiImageData();
 
 				/// <summary>Get the specified image.</summary>
@@ -277,7 +277,7 @@ Basic Construction
 				Ptr<INativeImage>				GetImage();
 				/// <summary>Get the specified frame index.</summary>
 				/// <returns>The specified frame index.</returns>
-				int								GetFrameIndex();
+				vint								GetFrameIndex();
 			};
 
 /***********************************************************************
@@ -480,13 +480,13 @@ Scrolls
 
 					/// <summary>Change to total size of the scroll.</summary>
 					/// <param name="value">The total size.</param>
-					virtual void						SetTotalSize(int value)=0;
+					virtual void						SetTotalSize(vint value)=0;
 					/// <summary>Change to page size of the scroll.</summary>
 					/// <param name="value">The page size.</param>
-					virtual void						SetPageSize(int value)=0;
+					virtual void						SetPageSize(vint value)=0;
 					/// <summary>Change to position of the scroll.</summary>
 					/// <param name="value">The position.</param>
-					virtual void						SetPosition(int value)=0;
+					virtual void						SetPosition(vint value)=0;
 				};
 				
 				/// <summary>Style controller interface for <see cref="GuiScroll"/>.</summary>
@@ -498,13 +498,13 @@ Scrolls
 					virtual void						SetCommandExecutor(ICommandExecutor* value)=0;
 					/// <summary>Called when the total size is changed.</summary>
 					/// <param name="value">The total size.</param>
-					virtual void						SetTotalSize(int value)=0;
+					virtual void						SetTotalSize(vint value)=0;
 					/// <summary>Called when the page size is changed.</summary>
 					/// <param name="value">The page size.</param>
-					virtual void						SetPageSize(int value)=0;
+					virtual void						SetPageSize(vint value)=0;
 					/// <summary>Called when the position is changed.</summary>
 					/// <param name="value">The position.</param>
-					virtual void						SetPosition(int value)=0;
+					virtual void						SetPosition(vint value)=0;
 				};
 			protected:
 				class CommandExecutor : public Object, public ICommandExecutor
@@ -520,18 +520,18 @@ Scrolls
 					void								BigDecrease()override;
 					void								BigIncrease()override;
 
-					void								SetTotalSize(int value)override;
-					void								SetPageSize(int value)override;
-					void								SetPosition(int value)override;
+					void								SetTotalSize(vint value)override;
+					void								SetPageSize(vint value)override;
+					void								SetPosition(vint value)override;
 				};
 
 				IStyleController*						styleController;
 				Ptr<CommandExecutor>					commandExecutor;
-				int										totalSize;
-				int										pageSize;
-				int										position;
-				int										smallMove;
-				int										bigMove;
+				vint										totalSize;
+				vint										pageSize;
+				vint										position;
+				vint										smallMove;
+				vint										bigMove;
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
@@ -551,41 +551,41 @@ Scrolls
 				
 				/// <summary>Get the total size.</summary>
 				/// <returns>The total size.</returns>
-				virtual int								GetTotalSize();
+				virtual vint								GetTotalSize();
 				/// <summary>Set the total size.</summary>
 				/// <param name="value">The total size.</param>
-				virtual void							SetTotalSize(int value);
+				virtual void							SetTotalSize(vint value);
 				/// <summary>Get the page size.</summary>
 				/// <returns>The page size.</returns>
-				virtual int								GetPageSize();
+				virtual vint								GetPageSize();
 				/// <summary>Set the page size.</summary>
 				/// <param name="value">The page size.</param>
-				virtual void							SetPageSize(int value);
+				virtual void							SetPageSize(vint value);
 				/// <summary>Get the position.</summary>
 				/// <returns>The position.</returns>
-				virtual int								GetPosition();
+				virtual vint								GetPosition();
 				/// <summary>Set the position.</summary>
 				/// <param name="value">The position.</param>
-				virtual void							SetPosition(int value);
+				virtual void							SetPosition(vint value);
 				/// <summary>Get the small move.</summary>
 				/// <returns>The small move.</returns>
-				virtual int								GetSmallMove();
+				virtual vint								GetSmallMove();
 				/// <summary>Set the small move.</summary>
 				/// <param name="value">The small move.</param>
-				virtual void							SetSmallMove(int value);
+				virtual void							SetSmallMove(vint value);
 				/// <summary>Get the big move.</summary>
 				/// <returns>The big move.</returns>
-				virtual int								GetBigMove();
+				virtual vint								GetBigMove();
 				/// <summary>Set the big move.</summary>
 				/// <param name="value">The big move.</param>
-				virtual void							SetBigMove(int value);
+				virtual void							SetBigMove(vint value);
 				
 				/// <summary>Get the minimum possible position.</summary>
 				/// <returns>The minimum possible position.</returns>
-				int										GetMinPosition();
+				vint										GetMinPosition();
 				/// <summary>Get the maximum possible position.</summary>
 				/// <returns>The maximum possible position.</returns>
-				int										GetMaxPosition();
+				vint										GetMaxPosition();
 			};
 			
 			namespace list
@@ -600,17 +600,17 @@ List interface common implementation
 				protected:
 					collections::List<T, K>					items;
 
-					virtual void NotifyUpdateInternal(int start, int count, int newCount)
+					virtual void NotifyUpdateInternal(vint start, vint count, vint newCount)
 					{
 					}
 
-					virtual bool InsertInternal(int index, const T& value)
+					virtual bool InsertInternal(vint index, const T& value)
 					{
 						items.Insert(index, value);
 						return true;
 					}
 
-					virtual bool RemoveAtInternal(int index, const T& value)
+					virtual bool RemoveAtInternal(vint index, const T& value)
 					{
 						items.RemoveAt(index);
 						return true;
@@ -630,7 +630,7 @@ List interface common implementation
 						return items.CreateEnumerator();
 					}
 
-					bool NotifyUpdate(int start, int count=1)
+					bool NotifyUpdate(vint start, vint count=1)
 					{
 						if(start<0 || start>=items.Count() || count<=0 || start+count>items.Count())
 						{

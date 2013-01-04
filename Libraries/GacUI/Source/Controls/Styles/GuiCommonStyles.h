@@ -44,9 +44,9 @@ Scrolls
 				compositions::GuiBoundsComposition*					boundsComposition;
 				compositions::GuiBoundsComposition*					containerComposition;
 
-				int													totalSize;
-				int													pageSize;
-				int													position;
+				vint													totalSize;
+				vint													pageSize;
+				vint													position;
 				Point												draggingStartLocation;
 				bool												draggingHandle;
 
@@ -78,7 +78,7 @@ Scrolls
 				/// <summary>Build the style. This function is supposed to be called in the contructor of the sub class.</summary>
 				/// <param name="defaultSize">The size of the increment button and decrement button.</param>
 				/// <param name="arrowSize">The size of the arrows in the increment button and decrement button.</param>
-				void												BuildStyle(int defaultSize, int arrowSize);
+				void												BuildStyle(vint defaultSize, vint arrowSize);
 			public:
 				/// <summary>Create the style controller using a specified direction.</summary>
 				/// <param name="_direction">The specified direction</param>
@@ -92,9 +92,9 @@ Scrolls
 				void												SetFont(const FontProperties& value)override;
 				void												SetVisuallyEnabled(bool value)override;
 				void												SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)override;
-				void												SetTotalSize(int value)override;
-				void												SetPageSize(int value)override;
-				void												SetPosition(int value)override;
+				void												SetTotalSize(vint value)override;
+				void												SetPageSize(vint value)override;
+				void												SetPosition(vint value)override;
 			};
 			
 			/// <summary>A general implementation for <see cref="controls::GuiScroll::IStyleController"/> to make a tracker control (or a slide bar).</summary>
@@ -113,9 +113,9 @@ Scrolls
 				controls::GuiButton*								handleButton;
 				compositions::GuiTableComposition*					handleComposition;
 
-				int													totalSize;
-				int													pageSize;
-				int													position;
+				vint													totalSize;
+				vint													pageSize;
+				vint													position;
 				Point												draggingStartLocation;
 				bool												draggingHandle;
 
@@ -141,7 +141,7 @@ Scrolls
 				/// <param name="trackPadding">The padding between the tracker groove to the control.</param>
 				/// <param name="handleLong">The size of the long size of the handle button. Horizontal: height; Vertical: width.</param>
 				/// <param name="handleShort">The size of the short size of the handle button. Horizontal: width; Vertical: height.</param>
-				void												BuildStyle(int trackThickness, int trackPadding, int handleLong, int handleShort);
+				void												BuildStyle(vint trackThickness, vint trackPadding, vint handleLong, vint handleShort);
 			public:
 				/// <summary>Create the style controller using a specified direction.</summary>
 				/// <param name="_direction">The specified direction</param>
@@ -155,9 +155,9 @@ Scrolls
 				void												SetFont(const FontProperties& value)override;
 				void												SetVisuallyEnabled(bool value)override;
 				void												SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)override;
-				void												SetTotalSize(int value)override;
-				void												SetPageSize(int value)override;
-				void												SetPosition(int value)override;
+				void												SetTotalSize(vint value)override;
+				void												SetPageSize(vint value)override;
+				void												SetPosition(vint value)override;
 			};
 
 			class CommonFragmentBuilder
@@ -186,8 +186,8 @@ Scrolls
 Helper Functions
 ***********************************************************************/
 			
-		extern unsigned char							IntToColor(int color);
-		extern Color									BlendColor(Color c1, Color c2, int currentPosition, int totalLength);
+		extern unsigned char							IntToColor(vint color);
+		extern Color									BlendColor(Color c1, Color c2, vint currentPosition, vint totalLength);
 
 /***********************************************************************
 Animation
@@ -204,11 +204,11 @@ Animation
 					bool									stopped;\
 					bool									disabled;\
 					bool									enableAnimation;\
-					void									PlayInternal(int currentPosition, int totalLength);\
+					void									PlayInternal(vint currentPosition, vint totalLength);\
 				public:\
 					TransferringAnimation(TSTYLECONTROLLER* _style, const TSTATE& begin);\
 					void									Disable();\
-					void									Play(int currentPosition, int totalLength)override;\
+					void									Play(vint currentPosition, vint totalLength)override;\
 					void									Stop()override;\
 					bool									GetEnableAnimation();\
 					void									SetEnableAnimation(bool value);\
@@ -237,7 +237,7 @@ Animation Implementation
 			{\
 				disabled=true;\
 			}\
-			void TSTYLECONTROLLER::TransferringAnimation::Play(int currentPosition, int totalLength)\
+			void TSTYLECONTROLLER::TransferringAnimation::Play(vint currentPosition, vint totalLength)\
 			{\
 				if(!disabled)\
 				{\
@@ -286,7 +286,7 @@ Animation Implementation
 					}\
 				}\
 			}\
-			void TSTYLECONTROLLER::TransferringAnimation::PlayInternal(int currentPosition, int totalLength)\
+			void TSTYLECONTROLLER::TransferringAnimation::PlayInternal(vint currentPosition, vint totalLength)\
 
 #define IMPLEMENT_TRANSFERRING_ANIMATION(TSTATE, TSTYLECONTROLLER)\
 	IMPLEMENT_TRANSFERRING_ANIMATION_BASE(TSTATE, TSTYLECONTROLLER, DEFAULT_TRANSFERRING_ANIMATION_HOST_GETTER)

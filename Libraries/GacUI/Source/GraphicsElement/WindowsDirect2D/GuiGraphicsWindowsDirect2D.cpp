@@ -175,7 +175,7 @@ CachedResourceAllocator
 				{
 				protected:
 					ComPtr<IDWriteTextFormat>		font;
-					int								size;
+					vint								size;
 
 					Size MeasureInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)
 					{
@@ -194,24 +194,24 @@ CachedResourceAllocator
 							hr=textLayout->GetMetrics(&metrics);
 							if(!FAILED(hr))
 							{
-								charSize=Size((int)ceil(metrics.widthIncludingTrailingWhitespace), (int)ceil(metrics.height));
+								charSize=Size((vint)ceil(metrics.widthIncludingTrailingWhitespace), (vint)ceil(metrics.height));
 							}
 							textLayout->Release();
 						}
 						return charSize;
 					}
 
-					int MeasureWidthInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)
+					vint MeasureWidthInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)
 					{
 						return MeasureInternal(character, renderTarget).x;
 					}
 
-					int GetRowHeightInternal(IGuiGraphicsRenderTarget* renderTarget)
+					vint GetRowHeightInternal(IGuiGraphicsRenderTarget* renderTarget)
 					{
 						return MeasureInternal(L' ', renderTarget).y;
 					}
 				public:
-					Direct2DCharMeasurer(ComPtr<IDWriteTextFormat> _font, int _size)
+					Direct2DCharMeasurer(ComPtr<IDWriteTextFormat> _font, vint _size)
 						:text::CharMeasurer(_size)
 						,size(_size)
 						,font(_font)
@@ -299,9 +299,9 @@ WindowsDirect2DRenderTarget
 								hr=frameBitmap->CopyPixels(&rect, rect.Width*4, rect.Width*rect.Height*4, buffer);
 								if(SUCCEEDED(hr))
 								{
-									int count=rect.Width*rect.Height;
+									vint count=rect.Width*rect.Height;
 									BYTE* read=buffer;
-									for(int i=0;i<count;i++)
+									for(vint i=0;i<count;i++)
 									{
 										BYTE g=(read[0]+read[1]+read[2])/6+read[3]/2;
 										read[0]=g;
@@ -331,7 +331,7 @@ WindowsDirect2DRenderTarget
 				INativeWindow*					window;
 				ID2D1RenderTarget*				d2dRenderTarget;
 				List<Rect>						clippers;
-				int								clipperCoverWholeTargetCounter;
+				vint								clipperCoverWholeTargetCounter;
 
 				CachedSolidBrushAllocator		solidBrushes;
 				CachedLinearBrushAllocator		linearBrushes;

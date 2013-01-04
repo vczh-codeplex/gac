@@ -64,13 +64,13 @@ GuiBoundsComposition
 				{
 					if(alignmentToParent.left>=0)
 					{
-						int offset=alignmentToParent.left-result.x1;
+						vint offset=alignmentToParent.left-result.x1;
 						result.x1+=offset;
 						result.x2+=offset;
 					}
 					if(alignmentToParent.top>=0)
 					{
-						int offset=alignmentToParent.top-result.y1;
+						vint offset=alignmentToParent.top-result.y1;
 						result.y1+=offset;
 						result.y2+=offset;
 					}
@@ -99,13 +99,13 @@ GuiBoundsComposition
 					}
 					else if(alignmentToParent.left>=0)
 					{
-						int width=result.Width();
+						vint width=result.Width();
 						result.x1=alignmentToParent.left;
 						result.x2=result.x1+width;
 					}
 					else if(alignmentToParent.right>=0)
 					{
-						int width=result.Width();
+						vint width=result.Width();
 						result.x2=clientSize.x-alignmentToParent.right;
 						result.x1=result.x2-width;
 					}
@@ -117,13 +117,13 @@ GuiBoundsComposition
 					}
 					else if(alignmentToParent.top>=0)
 					{
-						int height=result.Height();
+						vint height=result.Height();
 						result.y1=alignmentToParent.top;
 						result.y2=result.y1+height;
 					}
 					else if(alignmentToParent.bottom>=0)
 					{
-						int height=result.Height();
+						vint height=result.Height();
 						result.y2=clientSize.y-alignmentToParent.bottom;
 						result.y1=result.y2-height;
 					}

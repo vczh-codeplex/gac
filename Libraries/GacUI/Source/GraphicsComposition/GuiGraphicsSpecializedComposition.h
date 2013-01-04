@@ -42,7 +42,7 @@ Specialized Compositions
 				};
 			protected:
 				Direction							direction;
-				int									maxLength;
+				vint									maxLength;
 				double								maxRatio;
 			public:
 				GuiSideAlignedComposition();
@@ -56,10 +56,10 @@ Specialized Compositions
 				void								SetDirection(Direction value);
 				/// <summary>Get the maximum length of this composition.</summary>
 				/// <returns>The maximum length of this composition.</returns>
-				int									GetMaxLength();
+				vint									GetMaxLength();
 				/// <summary>Set the maximum length of this composition.</summary>
 				/// <param name="value">The maximum length of this composition.</param>
-				void								SetMaxLength(int value);
+				void								SetMaxLength(vint value);
 				/// <summary>Get the maximum ratio to limit the size according to the size of the parent.</summary>
 				/// <returns>The maximum ratio to limit the size according to the size of the parent.</returns>
 				double								GetMaxRatio();

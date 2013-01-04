@@ -30,7 +30,7 @@ Colorizer
 			protected:
 				elements::GuiColorizedTextElement*			element;
 				SpinLock*									elementModifyLock;
-				volatile int								colorizedLineCount;
+				volatile vint								colorizedLineCount;
 				volatile bool								isColorizerRunning;
 				volatile bool								isFinalizing;
 				SpinLock									colorizerRunningEvent;
@@ -50,10 +50,10 @@ Colorizer
 
 				/// <summary>Get the lexical analyzer start state for the first line.</summary>
 				/// <returns>The lexical analyzer start state for the first line.</returns>
-				virtual int									GetLexerStartState()=0;
+				virtual vint									GetLexerStartState()=0;
 				/// <summary>Get the context sensitive start state for the first line.</summary>
 				/// <returns>The context sensitive start state for the first line.</returns>
-				virtual int									GetContextStartState()=0;
+				virtual vint									GetContextStartState()=0;
 				/// <summary>Colorizer one line with a start state.</summary>
 				/// <param name="lineIndex">Line index.</param>
 				/// <param name="text">Text buffer.</param>
@@ -61,7 +61,7 @@ Colorizer
 				/// <param name="length">The length of the buffer.</param>
 				/// <param name="lexerState">The lexical analyzer state for this line. After executing this function, the new value of this argument indicates the new state.</param>
 				/// <param name="contextState">The context sensitive state for this line. After executing this function, the new value of this argument indicates the new state.</param>
-				virtual void								ColorizeLineWithCRLF(int lineIndex, const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)=0;
+				virtual void								ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, unsigned __int32* colors, vint length, vint& lexerState, vint& contextState)=0;
 				/// <summary>Get the supported colors ordered by their indices.</summary>
 				/// <returns>The supported colors ordered by their indices.</returns>
 				virtual const ColorArray&					GetColors()=0;
@@ -100,7 +100,7 @@ Colorizer
 				collections::List<elements::text::ColorEntry>&				GetExtraTokenColors();
 				/// <summary>Get the first token index for the first extra token.</summary>
 				/// <returns>The first token index for the first extra token. Returns -1 if this operation failed.</returns>
-				int															GetExtraTokenIndexStart();
+				vint															GetExtraTokenIndexStart();
 				
 				/// <summary>Set the default color. Call [M:vl.presentation.controls.GuiTextBoxRegexColorizer.Setup] after finishing all configuration.</summary>
 				/// <returns>Returns the token index of this token. Returns -1 if this operation failed.</returns>
@@ -110,11 +110,11 @@ Colorizer
 				/// <returns>Returns the token index of this token. Returns -1 if this operation failed.</returns>
 				/// <param name="regex">The regular expression for this token type.</param>
 				/// <param name="color">The color for this token type.</param>
-				int															AddToken(const WString& regex, elements::text::ColorEntry color);
+				vint															AddToken(const WString& regex, elements::text::ColorEntry color);
 				/// <summary>Add an extra  token type. Call [M:vl.presentation.controls.GuiTextBoxRegexColorizer.Setup] after finishing all configuration.</summary>
 				/// <returns>Returns the extra token index of this token. The token index for this token is regex-token-count + extra-token-index Returns -1 if this operation failed.</returns>
 				/// <param name="color">The color for this token type.</param>
-				int															AddExtraToken(elements::text::ColorEntry color);
+				vint															AddExtraToken(elements::text::ColorEntry color);
 				/// <summary>Setup the colorizer. After that, the colorizer cannot be changed.</summary>
 				bool														Setup();
 				/// <summary>Callback function to set context sensitive state and change token accordingly.</summary>
@@ -124,11 +124,11 @@ Colorizer
 				/// <param name="length">The length of the token.</param>
 				/// <param name="token">The token type. After executing this function, the new value of this argument indicates the new token type.</param>
 				/// <param name="contextState">The context sensitive state. After executing this function, the new value of this argument indicates the new state.</param>
-				virtual void												ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState);
+				virtual void												ColorizeTokenContextSensitive(vint lineIndex, const wchar_t* text, vint start, vint length, vint& token, vint& contextState);
 
-				int															GetLexerStartState()override;
-				int															GetContextStartState()override;
-				void														ColorizeLineWithCRLF(int lineIndex, const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override;
+				vint															GetLexerStartState()override;
+				vint															GetContextStartState()override;
+				void														ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, unsigned __int32* colors, vint length, vint& lexerState, vint& contextState)override;
 				const ColorArray&											GetColors()override;
 			};
 		}

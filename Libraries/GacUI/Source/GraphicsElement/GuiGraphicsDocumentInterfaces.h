@@ -61,7 +61,7 @@ Layout Engine
 					/// <summary>The size of the inline object.</summary>
 					Size					size;
 					/// <summary>The baseline of the inline object.If the baseline is at the bottom, then set the baseline to -1.</summary>
-					int						baseline;
+					vint						baseline;
 					/// <summary>The break condition of the inline object.</summary>
 					BreakCondition			breakCondition;
 
@@ -85,51 +85,51 @@ Layout Engine
 				virtual void								SetWrapLine(bool value)=0;
 				/// <summary>Get the max width for this paragraph. If there is no max width limitation, it returns -1.</summary>
 				/// <returns>The max width for this paragraph.</returns>
-				virtual int									GetMaxWidth()=0;
+				virtual vint									GetMaxWidth()=0;
 				/// <summary>Set the max width for this paragraph. If the max width is set to -1, the max width limitation will be removed.</summary>
 				/// <param name="value">The max width.</param>
-				virtual void								SetMaxWidth(int value)=0;
+				virtual void								SetMaxWidth(vint value)=0;
 
 				/// <summary>Replace the font within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
 				/// <param name="value">The font.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetFont(int start, int length, const WString& value)=0;
+				virtual bool								SetFont(vint start, vint length, const WString& value)=0;
 				/// <summary>Replace the size within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
 				/// <param name="value">The size.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetSize(int start, int length, int value)=0;
+				virtual bool								SetSize(vint start, vint length, vint value)=0;
 				/// <summary>Replace the text style within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
 				/// <param name="value">The text style.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetStyle(int start, int length, TextStyle value)=0;
+				virtual bool								SetStyle(vint start, vint length, TextStyle value)=0;
 				/// <summary>Replace the color within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
 				/// <param name="value">The color.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetColor(int start, int length, Color value)=0;
+				virtual bool								SetColor(vint start, vint length, Color value)=0;
 				/// <summary>Bind an <see cref="IGuiGraphicsElement"/> to a range of text.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
 				/// <param name="properties">The properties for the inline object.</param>
 				/// <param name="value">The element.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetInlineObject(int start, int length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)=0;
+				virtual bool								SetInlineObject(vint start, vint length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)=0;
 				/// <summary>Unbind all inline objects to a range of text.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>
 				/// <param name="length">The length of the specified range by character.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								ResetInlineObject(int start, int length)=0;
+				virtual bool								ResetInlineObject(vint start, vint length)=0;
 
 				/// <summary>Get the layouted height of the text. The result depends on rich styled text and the two important properties that can be set using <see cref="SetWrapLine"/> and <see cref="SetMaxWidth"/>.</summary>
 				/// <returns>The layouted height.</returns>
-				virtual int									GetHeight()=0;
+				virtual vint									GetHeight()=0;
 				/// <summary>Render the graphics element using a specified bounds.</summary>
 				/// <param name="bounds">Bounds to decide the size and position of the binded graphics element.</param>
 				virtual void								Render(Rect bounds)=0;

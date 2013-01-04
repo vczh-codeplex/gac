@@ -33,11 +33,11 @@ Common Operations
 					virtual TextPos							GetLeftWord(TextPos pos)=0;
 					virtual TextPos							GetRightWord(TextPos pos)=0;
 					virtual void							GetWord(TextPos pos, TextPos& begin, TextPos& end)=0;
-					virtual int								GetPageRows()=0;
+					virtual vint								GetPageRows()=0;
 					virtual bool							BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)=0;
 					virtual void							AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
 					virtual void							ScrollToView(Point point)=0;
-					virtual int								GetTextMargin()=0;
+					virtual vint								GetTextMargin()=0;
 				};
 
 				class DefaultCallback : public Object, public ICallback, public Description<DefaultCallback>
@@ -53,7 +53,7 @@ Common Operations
 					TextPos									GetLeftWord(TextPos pos)override;
 					TextPos									GetRightWord(TextPos pos)override;
 					void									GetWord(TextPos pos, TextPos& begin, TextPos& end)override;
-					int										GetPageRows()override;
+					vint										GetPageRows()override;
 					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
 				};
 
@@ -70,13 +70,13 @@ Common Operations
 				protected:
 					bool									ctrl;
 					bool									shift;
-					int										key;
+					vint										key;
 					Func<void()>							action;
 				public:
-					ShortcutCommand(bool _ctrl, bool _shift, int _key, const Func<void()> _action);
+					ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<void()> _action);
 					~ShortcutCommand();
 
-					bool									IsTheRightKey(bool _ctrl, bool _shift, int _key);
+					bool									IsTheRightKey(bool _ctrl, bool _shift, vint _key);
 					void									Execute();
 				};
 
@@ -96,7 +96,7 @@ Common Operations
 				void										UpdateCaretPoint();
 				void										Move(TextPos pos, bool shift);
 				void										Modify(TextPos start, TextPos end, const WString& input);
-				bool										ProcessKey(int code, bool shift, bool ctrl);
+				bool										ProcessKey(vint code, bool shift, bool ctrl);
 					
 				void										OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);

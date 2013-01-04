@@ -114,7 +114,7 @@ ComboBox with GuiListControl
 				GuiSelectableListControl*					containedListControl;
 				GuiListControl::IItemPrimaryTextView*		primaryTextView;
 
-				virtual void								DisplaySelectedContent(int itemIndex);
+				virtual void								DisplaySelectedContent(vint itemIndex);
 				void										OnListControlSelectionChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				/// <summary>Create a control with a specified style controller and a list control that will be put in the popup control to show all items.</summary>
@@ -133,10 +133,10 @@ ComboBox with GuiListControl
 				
 				/// <summary>Get the selected index.</summary>
 				/// <returns>The selected index.</returns>
-				int											GetSelectedIndex();
+				vint											GetSelectedIndex();
 				/// <summary>Set the selected index.</summary>
 				/// <param name="value">The selected index.</param>
-				void										SetSelectedIndex(int value);
+				void										SetSelectedIndex(vint value);
 				/// <summary>Get the item provider in the list control.</summary>
 				/// <returns>The item provider in the list control.</returns>
 				GuiListControl::IItemProvider*				GetItemProvider();

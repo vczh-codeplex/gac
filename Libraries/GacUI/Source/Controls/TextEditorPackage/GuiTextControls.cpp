@@ -115,8 +115,8 @@ GuiMultilineTextBox::DefaultTextElementOperatorCallback
 				point.x+=TextMargin;
 				point.y+=TextMargin;
 				Point oldPoint(textControl->GetHorizontalScroll()->GetPosition(), textControl->GetVerticalScroll()->GetPosition());
-				int marginX=0;
-				int marginY=0;
+				vint marginX=0;
+				vint marginY=0;
 				if(oldPoint.x<point.x)
 				{
 					marginX=TextMargin;
@@ -137,7 +137,7 @@ GuiMultilineTextBox::DefaultTextElementOperatorCallback
 				textControl->GetVerticalScroll()->SetPosition(point.y+marginY);
 			}
 
-			int GuiMultilineTextBox::TextElementOperatorCallback::GetTextMargin()
+			vint GuiMultilineTextBox::TextElementOperatorCallback::GetTextMargin()
 			{
 				return TextMargin;
 			}
@@ -149,8 +149,8 @@ GuiMultilineTextBox
 			void GuiMultilineTextBox::CalculateViewAndSetScroll()
 			{
 				CalculateView();
-				int smallMove=styleController->GetTextElement()->GetLines().GetRowHeight();
-				int bigMove=smallMove*5;
+				vint smallMove=styleController->GetTextElement()->GetLines().GetRowHeight();
+				vint bigMove=smallMove*5;
 				styleController->GetHorizontalScroll()->SetSmallMove(smallMove);
 				styleController->GetHorizontalScroll()->SetBigMove(bigMove);
 				styleController->GetVerticalScroll()->SetSmallMove(smallMove);
@@ -352,9 +352,9 @@ GuiSinglelineTextBox::DefaultTextElementOperatorCallback
 
 			bool GuiSinglelineTextBox::TextElementOperatorCallback::BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)
 			{
-				int length=inputText.Length();
+				vint length=inputText.Length();
 				const wchar_t* input=inputText.Buffer();
-				for(int i=0;i<length;i++)
+				for(vint i=0;i<length;i++)
 				{
 					if(*input==0 || *input==L'\r' || *input==L'\n')
 					{
@@ -375,9 +375,9 @@ GuiSinglelineTextBox::DefaultTextElementOperatorCallback
 			
 			void GuiSinglelineTextBox::TextElementOperatorCallback::ScrollToView(Point point)
 			{
-				int newX=point.x;
-				int oldX=textElement->GetViewPosition().x;
-				int marginX=0;
+				vint newX=point.x;
+				vint oldX=textElement->GetViewPosition().x;
+				vint marginX=0;
 				if(oldX<newX)
 				{
 					marginX=TextMargin;
@@ -388,8 +388,8 @@ GuiSinglelineTextBox::DefaultTextElementOperatorCallback
 				}
 
 				newX+=marginX;
-				int minX=-TextMargin;
-				int maxX=textElement->GetLines().GetMaxWidth()+TextMargin-textComposition->GetBounds().Width();
+				vint minX=-TextMargin;
+				vint maxX=textElement->GetLines().GetMaxWidth()+TextMargin-textComposition->GetBounds().Width();
 				if(newX>=maxX)
 				{
 					newX=maxX-1;
@@ -401,7 +401,7 @@ GuiSinglelineTextBox::DefaultTextElementOperatorCallback
 				textElement->SetViewPosition(Point(newX, -TextMargin));
 			}
 
-			int GuiSinglelineTextBox::TextElementOperatorCallback::GetTextMargin()
+			vint GuiSinglelineTextBox::TextElementOperatorCallback::GetTextMargin()
 			{
 				return TextMargin;
 			}

@@ -71,7 +71,7 @@ WindowsDialogService
 				}
 #undef MAP
 
-				int result=MessageBox(hWnd, lpText, lpCaption, uType);
+				vint result=MessageBox(hWnd, lpText, lpCaption, uType);
 				switch(result)
 				{
 				case IDABORT: return SelectAbort;
@@ -94,7 +94,7 @@ WindowsDialogService
 				COLORREF customColorsBuffer[16]={0};
 				if(customColors)
 				{
-					for(int i=0;i<sizeof(customColorsBuffer)/sizeof(*customColorsBuffer);i++)
+					for(vint i=0;i<sizeof(customColorsBuffer)/sizeof(*customColorsBuffer);i++)
 					{
 						customColorsBuffer[i]=RGB(customColors[i].r, customColors[i].g, customColors[i].b);
 					}
@@ -124,7 +124,7 @@ WindowsDialogService
 					selection=Color(GetRValue(chooseColor.rgbResult), GetGValue(chooseColor.rgbResult), GetBValue(chooseColor.rgbResult));
 					if(customColors)
 					{
-						for(int i=0;i<sizeof(customColorsBuffer)/sizeof(*customColorsBuffer);i++)
+						for(vint i=0;i<sizeof(customColorsBuffer)/sizeof(*customColorsBuffer);i++)
 						{
 							COLORREF color=customColorsBuffer[i];
 							customColors[i]=Color(GetRValue(color), GetGValue(color), GetBValue(color));
@@ -138,7 +138,7 @@ WindowsDialogService
 			{
 				LOGFONT logFont;
 				ZeroMemory(&logFont, sizeof(logFont));
-				logFont.lfHeight=-selectionFont.size;
+				logFont.lfHeight=-(int)selectionFont.size;
 				logFont.lfWeight=selectionFont.bold?FW_BOLD:FW_REGULAR;
 				logFont.lfItalic=selectionFont.italic?TRUE:FALSE;
 				logFont.lfUnderline=selectionFont.underline?TRUE:FALSE;
@@ -169,7 +169,7 @@ WindowsDialogService
 				return result!=FALSE;
 			}
 
-			bool WindowsDialogService::ShowFileDialog(INativeWindow* window, collections::List<WString>& selectionFileNames, int& selectionFilterIndex, FileDialogTypes dialogType, const WString& title, const WString& initialFileName, const WString& initialDirectory, const WString& defaultExtension, const WString& filter, FileDialogOptions options)
+			bool WindowsDialogService::ShowFileDialog(INativeWindow* window, collections::List<WString>& selectionFileNames, vint& selectionFilterIndex, FileDialogTypes dialogType, const WString& title, const WString& initialFileName, const WString& initialDirectory, const WString& defaultExtension, const WString& filter, FileDialogOptions options)
 			{
 				Array<wchar_t> fileNamesBuffer(65536>initialFileName.Length()+1?65536:initialFileName.Length()+1);
 				wcscpy_s(&fileNamesBuffer[0], fileNamesBuffer.Count(), initialFileName.Buffer());
@@ -181,17 +181,17 @@ WindowsDialogService
 				ofn.hInstance=NULL;
 				ofn.lpstrCustomFilter=NULL;
 				ofn.nMaxCustFilter=0;
-				ofn.nFilterIndex=selectionFilterIndex+1;
+				ofn.nFilterIndex=(int)selectionFilterIndex+1;
 				ofn.lpstrFile=&fileNamesBuffer[0];
-				ofn.nMaxFile=fileNamesBuffer.Count();
+				ofn.nMaxFile=(int)fileNamesBuffer.Count();
 				ofn.lpstrFileTitle=NULL;
 				ofn.nMaxFileTitle=0;
 				ofn.lpstrInitialDir=initialDirectory==L""?NULL:initialDirectory.Buffer();
 				ofn.lpstrTitle=title==L""?NULL:title.Buffer();
 				ofn.lpstrDefExt=defaultExtension==L""?NULL:defaultExtension.Buffer();
 
-				List<int> filterSeparators;
-				for(int i=0;i<filter.Length();i++)
+				List<vint> filterSeparators;
+				for(vint i=0;i<filter.Length();i++)
 				{
 					if(filter[i]==L'|')
 					{
@@ -204,10 +204,10 @@ WindowsDialogService
 				}
 
 				Array<wchar_t> filterBuffer(filter.Length()+2);
-				int index=0;
-				for(int i=0;i<filterSeparators.Count();i++)
+				vint index=0;
+				for(vint i=0;i<filterSeparators.Count();i++)
 				{
-					int end=filterSeparators[i];
+					vint end=filterSeparators[i];
 					wcsncpy_s(&filterBuffer[index], filterBuffer.Count()-index, filter.Buffer()+index, end-index);
 					filterBuffer[end]=0;
 					index=end+1;

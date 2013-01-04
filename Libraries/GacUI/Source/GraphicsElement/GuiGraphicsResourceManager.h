@@ -187,11 +187,11 @@ Helpers
 
 #define DEFINE_CACHED_RESOURCE_ALLOCATOR(TKEY, TVALUE)\
 			public:\
-				static const int DeadPackageMax=32;\
+				static const vint DeadPackageMax=32;\
 				struct Package\
 				{\
 					TVALUE							resource;\
-					int								counter;\
+					vint								counter;\
 					bool operator==(const Package& package)const{return false;}\
 					bool operator!=(const Package& package)const{return true;}\
 				};\
@@ -207,7 +207,7 @@ Helpers
 			public:\
 				TVALUE Create(const TKEY& key)\
 				{\
-					int index=aliveResources.Keys().IndexOf(key);\
+					vint index=aliveResources.Keys().IndexOf(key);\
 					if(index!=-1)\
 					{\
 						Package package=aliveResources.Values().Get(index);\
@@ -216,7 +216,7 @@ Helpers
 						return package.resource;\
 					}\
 					TVALUE resource;\
-					for(int i=0;i<deadResources.Count();i++)\
+					for(vint i=0;i<deadResources.Count();i++)\
 					{\
 						if(deadResources[i].key==key)\
 						{\
@@ -238,7 +238,7 @@ Helpers
 				}\
 				void Destroy(const TKEY& key)\
 				{\
-					int index=aliveResources.Keys().IndexOf(key);\
+					vint index=aliveResources.Keys().IndexOf(key);\
 					if(index!=-1)\
 					{\
 						Package package=aliveResources.Values().Get(index);\

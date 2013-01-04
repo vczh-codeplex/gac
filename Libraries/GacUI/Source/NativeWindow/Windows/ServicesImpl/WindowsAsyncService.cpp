@@ -51,7 +51,7 @@ WindowsAsyncService
 					CopyFrom(items, taskItems);
 					taskItems.RemoveRange(0, items.Count());
 				}
-				for(int i=0;i<items.Count();i++)
+				for(vint i=0;i<items.Count();i++)
 				{
 					TaskItem taskItem=items[i];
 					taskItem.proc(taskItem.argument);
@@ -79,7 +79,7 @@ WindowsAsyncService
 				taskItems.Add(item);
 			}
 
-			bool WindowsAsyncService::InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds)
+			bool WindowsAsyncService::InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, vint milliseconds)
 			{
 				Semaphore semaphore;
 				semaphore.Create(0, 1);

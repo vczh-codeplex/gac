@@ -44,8 +44,8 @@ Toolstrip Item Collection
 
 				void										InvokeUpdateLayout();
 				void										OnInterestingMenuButtonPropertyChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				bool										RemoveAtInternal(int index, GuiControl* const& control)override;
-				bool										InsertInternal(int index, GuiControl* const& control)override;
+				bool										RemoveAtInternal(vint index, GuiControl* const& control)override;
+				bool										InsertInternal(vint index, GuiControl* const& control)override;
 			public:
 				GuiToolstripCollection(IContentCallback* _contentCallback, compositions::GuiStackComposition* _stackComposition, Ptr<compositions::GuiSubComponentMeasurer> _subComponentMeasurer);
 				~GuiToolstripCollection();

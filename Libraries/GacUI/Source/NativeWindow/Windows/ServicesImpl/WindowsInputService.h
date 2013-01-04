@@ -35,13 +35,13 @@ namespace vl
 				void								StartTimer()override;
 				void								StopTimer()override;
 				bool								IsTimerEnabled()override;
-				bool								IsKeyPressing(int code)override;
-				bool								IsKeyToggled(int code)override;
-				WString								GetKeyName(int code)override;
+				bool								IsKeyPressing(vint code)override;
+				bool								IsKeyToggled(vint code)override;
+				WString								GetKeyName(vint code)override;
 			};
 
-			extern bool								WinIsKeyPressing(int code);
-			extern bool								WinIsKeyToggled(int code);
+			extern bool								WinIsKeyPressing(vint code);
+			extern bool								WinIsKeyToggled(vint code);
 		}
 	}
 }

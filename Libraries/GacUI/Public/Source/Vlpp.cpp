@@ -431,10 +431,10 @@ HttpRequest
 
 	void HttpRequest::SetBodyUtf8(const WString& bodyString)
 	{
-		vint utf8Size=WideCharToMultiByte(CP_UTF8, 0, bodyString.Buffer(), bodyString.Length(), NULL, 0, NULL, NULL);
+		vint utf8Size=WideCharToMultiByte(CP_UTF8, 0, bodyString.Buffer(), (int)bodyString.Length(), NULL, 0, NULL, NULL);
 		char* utf8=new char[utf8Size+1];
 		ZeroMemory(utf8, utf8Size+1);
-		WideCharToMultiByte(CP_UTF8, 0, bodyString.Buffer(), bodyString.Length(), utf8, utf8Size, NULL, NULL);
+		WideCharToMultiByte(CP_UTF8, 0, bodyString.Buffer(), (int)bodyString.Length(), utf8, (int)utf8Size, NULL, NULL);
 
 		body.Resize(utf8Size);
 		memcpy(&body[0], utf8, utf8Size);
@@ -455,10 +455,10 @@ HttpResponse
 		WString response;
 		char* utf8=&body[0];
 		vint totalSize=body.Count();
-		vint utf16Size=MultiByteToWideChar(CP_UTF8, 0, utf8, totalSize, NULL, 0);
+		vint utf16Size=MultiByteToWideChar(CP_UTF8, 0, utf8, (int)totalSize, NULL, 0);
 		wchar_t* utf16=new wchar_t[utf16Size+1];
 		ZeroMemory(utf16, (utf16Size+1)*sizeof(wchar_t));
-		MultiByteToWideChar(CP_UTF8, 0, utf8, totalSize, utf16, utf16Size);
+		MultiByteToWideChar(CP_UTF8, 0, utf8, (int)totalSize, utf16, (int)utf16Size);
 		response=utf16;
 		delete[] utf16;
 		return response;
@@ -507,7 +507,7 @@ Utilities
 		if(!internet) goto CLEANUP;
 
 		// connect
-		connectedInternet=WinHttpConnect(internet, request.server.Buffer(), request.port, 0);
+		connectedInternet=WinHttpConnect(internet, request.server.Buffer(), (int)request.port, 0);
 		error=GetLastError();
 		if(!connectedInternet) goto CLEANUP;
 
@@ -545,7 +545,7 @@ Utilities
 
 		if(request.body.Count()>0)
 		{
-			httpResult=WinHttpSendRequest(requestInternet, WINHTTP_NO_ADDITIONAL_HEADERS, 0, (LPVOID)&request.body.Get(0), request.body.Count(), request.body.Count(), NULL);
+			httpResult=WinHttpSendRequest(requestInternet, WINHTTP_NO_ADDITIONAL_HEADERS, 0, (LPVOID)&request.body.Get(0), (int)request.body.Count(), (int)request.body.Count(), NULL);
 		}
 		else
 		{
@@ -620,7 +620,7 @@ Utilities
 		}
 
 		// concatincate response body
-		int totalSize=0;
+		vint totalSize=0;
 		FOREACH(BufferPair, p, availableBuffers)
 		{
 			totalSize+=p.length;
@@ -653,10 +653,10 @@ Utilities
 
 	WString UrlEncodeQuery(const WString& query)
 	{
-		vint utf8Size=WideCharToMultiByte(CP_UTF8, 0, query.Buffer(), query.Length(), NULL, 0, NULL, NULL);
+		vint utf8Size=WideCharToMultiByte(CP_UTF8, 0, query.Buffer(),(int) query.Length(), NULL, 0, NULL, NULL);
 		char* utf8=new char[utf8Size+1];
 		ZeroMemory(utf8, utf8Size+1);
-		WideCharToMultiByte(CP_UTF8, 0, query.Buffer(), query.Length(), utf8, utf8Size, NULL, NULL);
+		WideCharToMultiByte(CP_UTF8, 0, query.Buffer(), (int)query.Length(), utf8, (int)utf8Size, NULL, NULL);
 
 		wchar_t* encoded=new wchar_t[utf8Size*3+1];
 		ZeroMemory(encoded, (utf8Size*3+1)*sizeof(wchar_t));

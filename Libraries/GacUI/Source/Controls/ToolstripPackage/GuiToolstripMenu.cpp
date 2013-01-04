@@ -27,7 +27,7 @@ GuiToolstripCollection
 				InvokeUpdateLayout();
 			}
 
-			bool GuiToolstripCollection::RemoveAtInternal(int index, GuiControl* const& control)
+			bool GuiToolstripCollection::RemoveAtInternal(vint index, GuiControl* const& control)
 			{
 				items.RemoveAt(index);
 				GuiStackItemComposition* stackItem=stackComposition->GetStackItems().Get(index);
@@ -56,7 +56,7 @@ GuiToolstripCollection
 				return true;
 			}
 
-			bool GuiToolstripCollection::InsertInternal(int index, GuiControl* const& control)
+			bool GuiToolstripCollection::InsertInternal(vint index, GuiControl* const& control)
 			{
 				items.Insert(index, control);
 				GuiStackItemComposition* stackItem=new GuiStackItemComposition;

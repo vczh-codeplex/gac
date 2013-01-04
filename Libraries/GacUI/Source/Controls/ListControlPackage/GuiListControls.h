@@ -45,7 +45,7 @@ List Control
 					/// <param name="start">The index of the first modified item.</param>
 					/// <param name="count">The number of all modified items.</param>
 					/// <param name="newCount">The number of new items. If items are inserted or removed, newCount may not equals to count.</param>
-					virtual void								OnItemModified(int start, int count, int newCount)=0;
+					virtual void								OnItemModified(vint start, vint count, vint newCount)=0;
 				};
 
 				/// <summary>Item arranger callback. Item arrangers use this interface to communicate with the list control. When setting positions for item controls, functions in this callback object is suggested to call because they use the result from the [T:vl.presentation.controls.GuiListControl.IItemCoordinateTransformer].</summary>
@@ -55,7 +55,7 @@ List Control
 					/// <summary>Request an item control representing an item in the item provider. This function is suggested to call when an item control gets into the visible area.</summary>
 					/// <returns>The item control.</returns>
 					/// <param name="itemIndex">The index of the item in the item provider.</param>
-					virtual IItemStyleController*					RequestItem(int itemIndex)=0;
+					virtual IItemStyleController*					RequestItem(vint itemIndex)=0;
 					/// <summary>Release an item control. This function is suggested to call when an item control gets out of the visible area.</summary>
 					/// <param name="style">The item control.</param>
 					virtual void									ReleaseItem(IItemStyleController* style)=0;
@@ -99,11 +99,11 @@ List Control
 					/// <summary>Get the text of an item.</summary>
 					/// <returns>The text of an item.</returns>
 					/// <param name="itemIndex">The index of the item.</param>
-					virtual WString								GetPrimaryTextViewText(int itemIndex)=0;
+					virtual WString								GetPrimaryTextViewText(vint itemIndex)=0;
 					/// <summary>Test does an item contain a text.</summary>
 					/// <returns>Returns true if an item contains a text.</returns>
 					/// <param name="itemIndex">The index of the item.</param>
-					virtual bool								ContainsPrimaryText(int itemIndex)=0;
+					virtual bool								ContainsPrimaryText(vint itemIndex)=0;
 				};
 
 				//-----------------------------------------------------------
@@ -149,7 +149,7 @@ List Control
 					virtual bool								DetachCallback(IItemProviderCallback* value)=0;
 					/// <summary>Get the number of items in this item proivder.</summary>
 					/// <returns>The number of items in this item proivder.</returns>
-					virtual int									Count()=0;
+					virtual vint									Count()=0;
 					/// <summary>Request a view for this item provider. If the specified view is not supported, it returns null. If you want to get a view of type IXXX, use IXXX::Identifier as the identifier. When the view object is no longer needed, Calling to the [M:vl.presentation.controls.GuiListControl.IItemProvider.ReleaseView] is needed.</summary>
 					/// <returns>The view object.</returns>
 					/// <param name="identifier">The identifier for the requested view.</param>
@@ -168,7 +168,7 @@ List Control
 					virtual IItemStyleProvider*					GetStyleProvider()=0;
 					/// <summary>Get the item style id for the binded item.</summary>
 					/// <returns>The item style id.</returns>
-					virtual int									GetItemStyleId()=0;
+					virtual vint									GetItemStyleId()=0;
 					/// <summary>Get the bounds composition that represnets the binded item.</summary>
 					/// <returns>The bounds composition</returns>
 					virtual compositions::GuiBoundsComposition*	GetBoundsComposition()=0;
@@ -196,18 +196,18 @@ List Control
 					/// <summary>Get a item style id from an item index.</summary>
 					/// <returns>The item style id.</returns>
 					/// <param name="itemIndex">The item index.</param>
-					virtual int									GetItemStyleId(int itemIndex)=0;
+					virtual vint									GetItemStyleId(vint itemIndex)=0;
 					/// <summary>Create an item style controller from an item style id.</summary>
 					/// <returns>The created item style controller.</returns>
 					/// <param name="styleId">The item style id.</param>
-					virtual IItemStyleController*				CreateItemStyle(int styleId)=0;
+					virtual IItemStyleController*				CreateItemStyle(vint styleId)=0;
 					/// <summary>Destroy an item style controller.</summary>
 					/// <param name="style">The item style controller.</param>
 					virtual void								DestroyItemStyle(IItemStyleController* style)=0;
 					/// <summary>Bind an item to an item style controller.</summary>
 					/// <param name="style">The item style controller.</param>
 					/// <param name="itemIndex">The item style id.</param>
-					virtual void								Install(IItemStyleController* style, int itemIndex)=0;
+					virtual void								Install(IItemStyleController* style, vint itemIndex)=0;
 				};
 				
 				/// <summary>Item arranger for a <see cref="GuiListControl"/>. Item arranger decides how to arrange and item controls. When implementing an item arranger, <see cref="IItemArrangerCallback"/> is suggested to use when calculating locations and sizes for item controls.</summary>
@@ -231,22 +231,22 @@ List Control
 					/// <summary>Get the item style controller for an visible item index. If an item is not visible, it returns null.</summary>
 					/// <returns>The item style controller.</returns>
 					/// <param name="itemIndex">The item index.</param>
-					virtual IItemStyleController*				GetVisibleStyle(int itemIndex)=0;
+					virtual IItemStyleController*				GetVisibleStyle(vint itemIndex)=0;
 					/// <summary>Get the item index for an visible item style controller. If an item is not visible, it returns -1.</summary>
 					/// <returns>The item index.</returns>
 					/// <param name="style">The item style controller.</param>
-					virtual int									GetVisibleIndex(IItemStyleController* style)=0;
+					virtual vint									GetVisibleIndex(IItemStyleController* style)=0;
 					/// <summary>Called when the visible area of item container is changed.</summary>
 					virtual void								OnViewChanged(Rect bounds)=0;
 					/// <summary>Find the item by an base item and a key direction.</summary>
 					/// <returns>The item index that is found. Returns -1 if this operation failed.</returns>
 					/// <param name="itemIndex">The base item index.</param>
 					/// <param name="key">The key direction.</param>
-					virtual int									FindItem(int itemIndex, KeyDirection key)=0;
+					virtual vint									FindItem(vint itemIndex, KeyDirection key)=0;
 					/// <summary>Adjust the view location to make an item visible.</summary>
 					/// <returns>Returns true if this operation succeeded.</returns>
 					/// <param name="itemIndex">The item index of the item to be made visible.</param>
-					virtual bool								EnsureItemVisible(int itemIndex)=0;
+					virtual bool								EnsureItemVisible(vint itemIndex)=0;
 				};
 				
 				/// <summary>Item coordinate transformer for a <see cref="GuiListControl"/>. In all functions in this interface, real coordinate is in the list control's container space, virtual coordinate is in a space that the transformer created.</summary>
@@ -317,8 +317,8 @@ List Control
 					void										ClearCache();
 
 					void										OnAttached(IItemProvider* provider)override;
-					void										OnItemModified(int start, int count, int newCount)override;
-					IItemStyleController*						RequestItem(int itemIndex)override;
+					void										OnItemModified(vint start, vint count, vint newCount)override;
+					IItemStyleController*						RequestItem(vint itemIndex)override;
 					void										ReleaseItem(IItemStyleController* style)override;
 					void										SetViewLocation(Point value)override;
 					Size										GetStylePreferredSize(IItemStyleController* style)override;
@@ -340,8 +340,8 @@ List Control
 				Ptr<IItemCoordinateTransformer>					itemCoordinateTransformer;
 				Size											fullSize;
 
-				virtual void									OnItemModified(int start, int count, int newCount);
-				virtual void									OnStyleInstalled(int itemIndex, IItemStyleController* style);
+				virtual void									OnItemModified(vint start, vint count, vint newCount);
+				virtual void									OnStyleInstalled(vint itemIndex, IItemStyleController* style);
 				virtual void									OnStyleUninstalled(IItemStyleController* style);
 				
 				void											OnRenderTargetChanged(elements::IGuiGraphicsRenderTarget* renderTarget)override;
@@ -447,7 +447,7 @@ List Control
 				/// <summary>Adjust the view location to make an item visible.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="itemIndex">The item index of the item to be made visible.</param>
-				virtual bool									EnsureItemVisible(int itemIndex);
+				virtual bool									EnsureItemVisible(vint itemIndex);
 			};
 
 /***********************************************************************
@@ -470,20 +470,20 @@ Selectable List Control
 			protected:
 
 				Ptr<IItemStyleProvider>							selectableStyleProvider;
-				collections::SortedList<int>					selectedItems;
+				collections::SortedList<vint>					selectedItems;
 				bool											multiSelect;
-				int												selectedItemIndexStart;
-				int												selectedItemIndexEnd;
+				vint												selectedItemIndexStart;
+				vint												selectedItemIndexEnd;
 
-				void											OnItemModified(int start, int count, int newCount)override;
-				void											OnStyleInstalled(int itemIndex, IItemStyleController* style)override;
+				void											OnItemModified(vint start, vint count, vint newCount)override;
+				void											OnStyleInstalled(vint itemIndex, IItemStyleController* style)override;
 				void											OnStyleUninstalled(IItemStyleController* style)override;
-				virtual void									OnItemSelectionChanged(int itemIndex, bool value);
+				virtual void									OnItemSelectionChanged(vint itemIndex, bool value);
 				virtual void									OnItemSelectionCleared();
 				void											OnItemLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiItemMouseEventArgs& arguments);
 
 				void											NormalizeSelectedItemIndexStartEnd();
-				void											SetMultipleItemsSelectedSilently(int start, int end, bool selected);
+				void											SetMultipleItemsSelectedSilently(vint start, vint end, bool selected);
 				void											OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments);
 			public:
 				/// <summary>Create a control with a specified style provider.</summary>
@@ -506,25 +506,25 @@ Selectable List Control
 				
 				/// <summary>Get indices of all selected items.</summary>
 				/// <returns>Indices of all selected items.</returns>
-				const collections::SortedList<int>&				GetSelectedItems();
+				const collections::SortedList<vint>&				GetSelectedItems();
 				/// <summary>Get the selection status of an item.</summary>
 				/// <returns>The selection status of an item.</returns>
 				/// <param name="itemIndex">The index of the item.</param>
-				bool											GetSelected(int itemIndex);
+				bool											GetSelected(vint itemIndex);
 				/// <summary>Set the selection status of an item.</summary>
 				/// <param name="itemIndex">The index of the item.</param>
 				/// <param name="value">Set to true to select the item.</param>
-				void											SetSelected(int itemIndex, bool value);
+				void											SetSelected(vint itemIndex, bool value);
 				/// <summary>Set the selection status of an item, and affect other selected item according to key status.</summary>
 				/// <param name="itemIndex">The index of the item.</param>
 				/// <param name="ctrl">Set to true if the control key is pressing.</param>
 				/// <param name="shift">Set to true if the shift key is pressing.</param>
-				bool											SelectItemsByClick(int itemIndex, bool ctrl, bool shift);
+				bool											SelectItemsByClick(vint itemIndex, bool ctrl, bool shift);
 				/// <summary>Set the selection status using keys.</summary>
 				/// <param name="code">The key code that is pressing.</param>
 				/// <param name="ctrl">Set to true if the control key is pressing.</param>
 				/// <param name="shift">Set to true if the shift key is pressing.</param>
-				bool											SelectItemsByKey(int code, bool ctrl, bool shift);
+				bool											SelectItemsByKey(vint code, bool ctrl, bool shift);
 				/// <summary>Unselect all items.</summary>
 				void											ClearSelection();
 			};
@@ -616,7 +616,7 @@ Predefined ItemArranger
 					GuiListControl::IItemArrangerCallback*		callback;
 					GuiListControl::IItemProvider*				itemProvider;
 					Rect										viewBounds;
-					int											startIndex;
+					vint											startIndex;
 					StyleList									visibleStyles;
 
 					virtual void								ClearStyles();
@@ -629,14 +629,14 @@ Predefined ItemArranger
 					~RangedItemArrangerBase();
 
 					void										OnAttached(GuiListControl::IItemProvider* provider)override;
-					void										OnItemModified(int start, int count, int newCount)override;
+					void										OnItemModified(vint start, vint count, vint newCount)override;
 					void										AttachListControl(GuiListControl* value)override;
 					void										DetachListControl()override;
 					GuiListControl::IItemArrangerCallback*		GetCallback()override;
 					void										SetCallback(GuiListControl::IItemArrangerCallback* value)override;
 					Size										GetTotalSize()override;
-					GuiListControl::IItemStyleController*		GetVisibleStyle(int itemIndex)override;
-					int											GetVisibleIndex(GuiListControl::IItemStyleController* style)override;
+					GuiListControl::IItemStyleController*		GetVisibleStyle(vint itemIndex)override;
+					vint											GetVisibleIndex(GuiListControl::IItemStyleController* style)override;
 					void										OnViewChanged(Rect bounds)override;
 				};
 				
@@ -644,12 +644,12 @@ Predefined ItemArranger
 				class FixedHeightItemArranger : public RangedItemArrangerBase, public Description<FixedHeightItemArranger>
 				{
 				protected:
-					int											rowHeight;
+					vint											rowHeight;
 					bool										suppressOnViewChanged;
 
 					virtual void								RearrangeItemBounds();
-					virtual int									GetWidth();
-					virtual int									GetYOffset();
+					virtual vint									GetWidth();
+					virtual vint									GetYOffset();
 					void										OnStylesCleared()override;
 					Size										OnCalculateTotalSize()override;
 					void										OnViewChangedInternal(Rect oldBounds, Rect newBounds)override;
@@ -658,8 +658,8 @@ Predefined ItemArranger
 					FixedHeightItemArranger();
 					~FixedHeightItemArranger();
 
-					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
-					bool										EnsureItemVisible(int itemIndex)override;
+					vint											FindItem(vint itemIndex, GuiListControl::KeyDirection key)override;
+					bool										EnsureItemVisible(vint itemIndex)override;
 				};
 
 				/// <summary>Fixed size multiple columns item arranger. This arranger adjust all items in multiple lines with the same size. The width is the maximum width of all minimum widths of displayed items. The same to height.</summary>
@@ -670,7 +670,7 @@ Predefined ItemArranger
 					bool										suppressOnViewChanged;
 
 					virtual void								RearrangeItemBounds();
-					void										CalculateRange(Size itemSize, Rect bounds, int count, int& start, int& end);
+					void										CalculateRange(Size itemSize, Rect bounds, vint count, vint& start, vint& end);
 					void										OnStylesCleared()override;
 					Size										OnCalculateTotalSize()override;
 					void										OnViewChangedInternal(Rect oldBounds, Rect newBounds)override;
@@ -679,19 +679,19 @@ Predefined ItemArranger
 					FixedSizeMultiColumnItemArranger();
 					~FixedSizeMultiColumnItemArranger();
 
-					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
-					bool										EnsureItemVisible(int itemIndex)override;
+					vint											FindItem(vint itemIndex, GuiListControl::KeyDirection key)override;
+					bool										EnsureItemVisible(vint itemIndex)override;
 				};
 				
 				/// <summary>Fixed size multiple columns item arranger. This arranger adjust all items in multiple columns with the same height. The height is the maximum width of all minimum height of displayed items. Each item will displayed using its minimum width.</summary>
 				class FixedHeightMultiColumnItemArranger : public RangedItemArrangerBase, public Description<FixedHeightMultiColumnItemArranger>
 				{
 				protected:
-					int											itemHeight;
+					vint											itemHeight;
 					bool										suppressOnViewChanged;
 
 					virtual void								RearrangeItemBounds();
-					void										CalculateRange(int itemHeight, Rect bounds, int& rows, int& startColumn);
+					void										CalculateRange(vint itemHeight, Rect bounds, vint& rows, vint& startColumn);
 					void										OnStylesCleared()override;
 					Size										OnCalculateTotalSize()override;
 					void										OnViewChangedInternal(Rect oldBounds, Rect newBounds)override;
@@ -700,8 +700,8 @@ Predefined ItemArranger
 					FixedHeightMultiColumnItemArranger();
 					~FixedHeightMultiColumnItemArranger();
 
-					int											FindItem(int itemIndex, GuiListControl::KeyDirection key)override;
-					bool										EnsureItemVisible(int itemIndex)override;
+					vint											FindItem(vint itemIndex, GuiListControl::KeyDirection key)override;
+					bool										EnsureItemVisible(vint itemIndex)override;
 				};
 			}
 
@@ -716,7 +716,7 @@ Predefined ItemStyleController
 				{
 				protected:
 					GuiListControl::IItemStyleProvider*			provider;
-					int											styleId;
+					vint											styleId;
 					compositions::GuiBoundsComposition*			boundsComposition;
 					GuiControl*									associatedControl;
 					bool										isInstalled;
@@ -727,12 +727,12 @@ Predefined ItemStyleController
 					/// <summary>Create the item style controller with a specified item style provider and a specified item style id.</summary>
 					/// <param name="_provider">The specified item style provider.</param>
 					/// <param name="_styleId">The specified item style id.</param>
-					ItemStyleControllerBase(GuiListControl::IItemStyleProvider* _provider, int _styleId);
+					ItemStyleControllerBase(GuiListControl::IItemStyleProvider* _provider, vint _styleId);
 				public:
 					~ItemStyleControllerBase();
 					
 					GuiListControl::IItemStyleProvider*			GetStyleProvider()override;
-					int											GetItemStyleId()override;
+					vint											GetItemStyleId()override;
 					compositions::GuiBoundsComposition*			GetBoundsComposition()override;
 					bool										IsCacheable()override;
 					bool										IsInstalled()override;
@@ -753,7 +753,7 @@ Predefined ItemProvider
 				protected:
 					collections::List<GuiListControl::IItemProviderCallback*>	callbacks;
 
-					virtual void								InvokeOnItemModified(int start, int count, int newCount);
+					virtual void								InvokeOnItemModified(vint start, vint count, vint newCount);
 				public:
 					/// <summary>Create the item provider.</summary>
 					ItemProviderBase();
@@ -767,12 +767,12 @@ Predefined ItemProvider
 				class ListProvider : public ItemProviderBase, public ItemsBase<T>
 				{
 				protected:
-					void NotifyUpdateInternal(int start, int count, int newCount)
+					void NotifyUpdateInternal(vint start, vint count, vint newCount)
 					{
 						InvokeOnItemModified(start, count, newCount);
 					}
 				public:
-					int Count()override
+					vint Count()override
 					{
 						return items.Count();
 					}

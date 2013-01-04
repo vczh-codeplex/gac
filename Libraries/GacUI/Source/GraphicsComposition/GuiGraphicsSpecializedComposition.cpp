@@ -32,12 +32,12 @@ GuiSideAlignedComposition
 				direction=value;
 			}
 
-			int GuiSideAlignedComposition::GetMaxLength()
+			vint GuiSideAlignedComposition::GetMaxLength()
 			{
 				return maxLength;
 			}
 
-			void GuiSideAlignedComposition::SetMaxLength(int value)
+			void GuiSideAlignedComposition::SetMaxLength(vint value)
 			{
 				if(value<0) value=0;
 				maxLength=value;
@@ -67,8 +67,8 @@ GuiSideAlignedComposition
 				if(parent)
 				{
 					Rect bounds=parent->GetBounds();
-					int w=(int)(bounds.Width()*maxRatio);
-					int h=(int)(bounds.Height()*maxRatio);
+					vint w=(vint)(bounds.Width()*maxRatio);
+					vint h=(vint)(bounds.Height()*maxRatio);
 					if(w>maxLength) w=maxLength;
 					if(h>maxLength) h=maxLength;
 					switch(direction)
@@ -166,14 +166,14 @@ GuiPartialViewComposition
 				if(parent)
 				{
 					Rect bounds=parent->GetBounds();
-					int w=bounds.Width();
-					int h=bounds.Height();
-					int pw=(int)(wPageSize*w);
-					int ph=(int)(hPageSize*h);
+					vint w=bounds.Width();
+					vint h=bounds.Height();
+					vint pw=(vint)(wPageSize*w);
+					vint ph=(vint)(hPageSize*h);
 
-					int ow=preferredMinSize.x-pw;
+					vint ow=preferredMinSize.x-pw;
 					if(ow<0) ow=0;
-					int oh=preferredMinSize.y-ph;
+					vint oh=preferredMinSize.y-ph;
 					if(oh<0) oh=0;
 
 					w-=ow;
@@ -181,7 +181,7 @@ GuiPartialViewComposition
 					pw+=ow;
 					ph+=oh;
 
-					return Rect(Point((int)(wRatio*w), (int)(hRatio*h)), Size(pw, ph));
+					return Rect(Point((vint)(wRatio*w), (vint)(hRatio*h)), Size(pw, ph));
 				}
 				return Rect();
 			}

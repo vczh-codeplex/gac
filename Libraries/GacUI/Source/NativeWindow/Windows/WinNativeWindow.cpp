@@ -82,12 +82,12 @@ WindowsForm
 				
 				DWORD InternalGetExStyle()
 				{
-					return GetWindowLongPtr(handle,GWL_EXSTYLE);
+					return (DWORD)GetWindowLongPtr(handle,GWL_EXSTYLE);
 				}
 
 				void InternalSetExStyle(DWORD exStyle)
 				{
-					LONG result=SetWindowLongPtr(handle,GWL_EXSTYLE,exStyle);
+					LONG_PTR result=SetWindowLongPtr(handle,GWL_EXSTYLE,exStyle);
 					SetWindowPos(handle,0,0,0,0,0,SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
 				}
 
@@ -99,7 +99,7 @@ WindowsForm
 
 				void SetExStyle(DWORD exStyle, bool available)
 				{
-					LONG_PTR Long=InternalGetExStyle();
+					DWORD Long=InternalGetExStyle();
 					if(available)
 					{
 						Long|=exStyle;
@@ -108,7 +108,7 @@ WindowsForm
 					{
 						Long&=~exStyle;
 					}
-					InternalSetExStyle(Long);
+					InternalSetExStyle((DWORD)Long);
 				}
 
 				bool GetStyle(DWORD style)
@@ -169,7 +169,7 @@ WindowsForm
 				NativeWindowCharInfo ConvertChar(WPARAM wParam)
 				{
 					NativeWindowCharInfo info;
-					info.code=wParam;
+					info.code=(wchar_t)wParam;
 					info.ctrl=WinIsKeyPressing(VK_CONTROL);
 					info.shift=WinIsKeyPressing(VK_SHIFT);
 					info.alt=WinIsKeyPressing(VK_MENU);
@@ -192,8 +192,8 @@ WindowsForm
 					HIMC imc = ImmGetContext(handle);
 					COMPOSITIONFORM cf;
 					cf.dwStyle = CFS_POINT;
-					cf.ptCurrentPos.x = caretPoint.x;
-					cf.ptCurrentPos.y = caretPoint.y;
+					cf.ptCurrentPos.x = (int)caretPoint.x;
+					cf.ptCurrentPos.y = (int)caretPoint.y;
 					ImmSetCompositionWindow(imc, &cf);
 					ImmReleaseContext(handle, imc);
 				}
@@ -220,7 +220,7 @@ WindowsForm
 						{
 							LPRECT rawBounds=(LPRECT)lParam;
 							Rect bounds(rawBounds->left, rawBounds->top, rawBounds->right, rawBounds->bottom);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->Moving(bounds, false);
 							}
@@ -229,17 +229,17 @@ WindowsForm
 								||	rawBounds->right!=bounds.Right()
 								||	rawBounds->bottom!=bounds.Bottom())
 							{
-								rawBounds->left=bounds.Left();
-								rawBounds->top=bounds.Top();
-								rawBounds->right=bounds.Right();
-								rawBounds->bottom=bounds.Bottom();
+								rawBounds->left=(int)bounds.Left();
+								rawBounds->top=(int)bounds.Top();
+								rawBounds->right=(int)bounds.Right();
+								rawBounds->bottom=(int)bounds.Bottom();
 								result=TRUE;
 							}
 						}
 						break;
 					case WM_MOVE:case WM_SIZE:
 						{
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->Moved();
 							}
@@ -247,7 +247,7 @@ WindowsForm
 						break;
 					case WM_ENABLE:
 						{
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								if(wParam==TRUE)
 								{
@@ -262,7 +262,7 @@ WindowsForm
 						break;
 					case WM_SETFOCUS:
 						{
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->GotFocus();
 							}
@@ -270,7 +270,7 @@ WindowsForm
 						break;
 					case WM_KILLFOCUS:
 						{
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->LostFocus();
 							}
@@ -278,7 +278,7 @@ WindowsForm
 						break;
 					case WM_ACTIVATE:
 						{
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								if(wParam==WA_ACTIVE || wParam==WA_CLICKACTIVE)
 								{
@@ -295,14 +295,14 @@ WindowsForm
 						{
 							if(wParam==TRUE)
 							{
-								for(int i=0;i<listeners.Count();i++)
+								for(vint i=0;i<listeners.Count();i++)
 								{
 									listeners[i]->Opened();
 								}
 							}
 							else
 							{
-								for(int i=0;i<listeners.Count();i++)
+								for(vint i=0;i<listeners.Count();i++)
 								{
 									listeners[i]->Closed();
 								}
@@ -312,7 +312,7 @@ WindowsForm
 					case WM_CLOSE:
 						{
 							bool cancel=false;
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->Closing(cancel);
 							}
@@ -322,7 +322,7 @@ WindowsForm
 					case WM_LBUTTONDOWN:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->LeftButtonDown(info);
 							}
@@ -331,7 +331,7 @@ WindowsForm
 					case WM_LBUTTONUP:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->LeftButtonUp(info);
 							}
@@ -340,7 +340,7 @@ WindowsForm
 					case WM_LBUTTONDBLCLK:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->LeftButtonDoubleClick(info);
 							}
@@ -349,7 +349,7 @@ WindowsForm
 					case WM_RBUTTONDOWN:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->RightButtonDown(info);
 							}
@@ -358,7 +358,7 @@ WindowsForm
 					case WM_RBUTTONUP:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->RightButtonUp(info);
 							}
@@ -367,7 +367,7 @@ WindowsForm
 					case WM_RBUTTONDBLCLK:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->RightButtonDoubleClick(info);
 							}
@@ -376,7 +376,7 @@ WindowsForm
 					case WM_MBUTTONDOWN:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->MiddleButtonDown(info);
 							}
@@ -385,7 +385,7 @@ WindowsForm
 					case WM_MBUTTONUP:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->MiddleButtonUp(info);
 							}
@@ -394,7 +394,7 @@ WindowsForm
 					case WM_MBUTTONDBLCLK:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->MiddleButtonDoubleClick(info);
 							}
@@ -403,7 +403,7 @@ WindowsForm
 					case WM_MOUSEHWHEEL:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, true);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->HorizontalWheel(info);
 							}
@@ -412,7 +412,7 @@ WindowsForm
 					case WM_MOUSEWHEEL:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, true);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->VerticalWheel(info);
 							}
@@ -426,13 +426,13 @@ WindowsForm
 								if(!mouseHoving)
 								{
 									mouseHoving=true;
-									for(int i=0;i<listeners.Count();i++)
+									for(vint i=0;i<listeners.Count();i++)
 									{
 										listeners[i]->MouseEntered();
 									}
 									TrackMouse(true);
 								}
-								for(int i=0;i<listeners.Count();i++)
+								for(vint i=0;i<listeners.Count();i++)
 								{
 									listeners[i]->MouseMoving(info);
 								}
@@ -444,7 +444,7 @@ WindowsForm
 							mouseLastX=-1;
 							mouseLastY=-1;
 							mouseHoving=false;
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->MouseLeaved();
 							}
@@ -458,7 +458,7 @@ WindowsForm
 					case WM_KEYUP:
 						{
 							NativeWindowKeyInfo info=ConvertKey(wParam, lParam);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->KeyUp(info);
 							}
@@ -467,7 +467,7 @@ WindowsForm
 					case WM_KEYDOWN:
 						{
 							NativeWindowKeyInfo info=ConvertKey(wParam, lParam);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->KeyDown(info);
 							}
@@ -476,7 +476,7 @@ WindowsForm
 					case WM_SYSKEYUP:
 						{
 							NativeWindowKeyInfo info=ConvertKey(wParam, lParam);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->SysKeyUp(info);
 							}
@@ -485,7 +485,7 @@ WindowsForm
 					case WM_SYSKEYDOWN:
 						{
 							NativeWindowKeyInfo info=ConvertKey(wParam, lParam);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->SysKeyDown(info);
 							}
@@ -494,7 +494,7 @@ WindowsForm
 					case WM_CHAR:
 						{
 							NativeWindowCharInfo info=ConvertChar(wParam);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->Char(info);
 							}
@@ -502,7 +502,7 @@ WindowsForm
 						break;
 					case WM_PAINT:
 						{
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->Paint();
 							}
@@ -517,9 +517,9 @@ WindowsForm
 						{
 							POINTS location=MAKEPOINTS(lParam);
 							Point windowLocation=GetBounds().LeftTop();
-							location.x-=windowLocation.x;
-							location.y-=windowLocation.y;
-							for(int i=0;i<listeners.Count();i++)
+							location.x-=(SHORT)windowLocation.x;
+							location.y-=(SHORT)windowLocation.y;
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								switch(listeners[i]->HitTest(Point(location.x, location.y)))
 								{
@@ -635,9 +635,9 @@ WindowsForm
 				WindowsForm*						parentWindow;
 				bool								alwaysPassFocusToParent;
 				List<INativeWindowListener*>		listeners;
-				int									mouseLastX;
-				int									mouseLastY;
-				int									mouseHoving;
+				vint									mouseLastX;
+				vint									mouseLastY;
+				vint									mouseHoving;
 				Interface*							graphicsHandler;
 				bool								customFrameMode;
 			public:
@@ -660,7 +660,7 @@ WindowsForm
 				{
 					List<INativeWindowListener*> copiedListeners;
 					CopyFrom(copiedListeners, listeners);
-					for(int i=0;i<copiedListeners.Count();i++)
+					for(vint i=0;i<copiedListeners.Count();i++)
 					{
 						INativeWindowListener* listener=copiedListeners[i];
 						if(listeners.Contains(listener))
@@ -673,7 +673,7 @@ WindowsForm
 
 				void InvokeDestroying()
 				{
-					for(int i=0;i<listeners.Count();i++)
+					for(vint i=0;i<listeners.Count();i++)
 					{
 						listeners[i]->Destroying();
 					}
@@ -709,11 +709,11 @@ WindowsForm
 				void SetBounds(const Rect& bounds)
 				{
 					Rect newBounds=bounds;
-					for(int i=0;i<listeners.Count();i++)
+					for(vint i=0;i<listeners.Count();i++)
 					{
 						listeners[i]->Moving(newBounds, true);
 					}
-					MoveWindow(handle, newBounds.Left(), newBounds.Top(), newBounds.Width(), newBounds.Height(), FALSE);
+					MoveWindow(handle, (int)newBounds.Left(), (int)newBounds.Top(), (int)newBounds.Width(), (int)newBounds.Height(), FALSE);
 				}
 
 				Size GetClientSize()
@@ -723,10 +723,10 @@ WindowsForm
 
 				void SetClientSize(Size size)
 				{
-					RECT required={0,0,size.x,size.y};
+					RECT required={0,0,(int)size.x,(int)size.y};
 					RECT bounds;
 					GetWindowRect(handle, &bounds);
-					AdjustWindowRect(&required, GetWindowLongPtr(handle, GWL_STYLE), FALSE);
+					AdjustWindowRect(&required, (DWORD)GetWindowLongPtr(handle, GWL_STYLE), FALSE);
 					SetBounds(Rect(Point(bounds.left, bounds.top), Size(required.right-required.left, required.bottom-required.top)));
 				}
 
@@ -741,7 +741,7 @@ WindowsForm
 						RECT required={0,0,0,0};
 						RECT bounds;
 						GetWindowRect(handle, &bounds);
-						AdjustWindowRect(&required, GetWindowLongPtr(handle, GWL_STYLE), FALSE);
+						AdjustWindowRect(&required, (DWORD)GetWindowLongPtr(handle, GWL_STYLE), FALSE);
 						return Rect(
 							Point(
 								(bounds.left-required.left),
@@ -808,11 +808,11 @@ WindowsForm
 						parentWindow=window;
 						if(parentWindow)
 						{
-							SetWindowLongPtr(handle, GWL_HWNDPARENT, (LONG_PTR)window->handle);
+							SetWindowLongPtr(handle, GWLP_HWNDPARENT, (LONG_PTR)window->handle);
 						}
 						else
 						{
-							SetWindowLongPtr(handle, GWL_HWNDPARENT, NULL);
+							SetWindowLongPtr(handle, GWLP_HWNDPARENT, NULL);
 						}
 					}
 				}
@@ -1134,7 +1134,7 @@ WindowsController
 				bool HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& result)
 				{
 					bool skipDefaultProcedure=false;
-					int index=windows.Keys().IndexOf(hwnd);
+					vint index=windows.Keys().IndexOf(hwnd);
 					if(index!=-1)
 					{
 						WindowsForm* window=windows.Values().Get(index);
@@ -1155,7 +1155,7 @@ WindowsController
 							DestroyNativeWindow(window);
 							if(window==mainWindow)
 							{
-								for(int i=0;i<windows.Count();i++)
+								for(vint i=0;i<windows.Count();i++)
 								{
 									if(windows.Values().Get(i)->IsVisible())
 									{
@@ -1218,10 +1218,10 @@ WindowsController
 				INativeWindow* GetWindow(Point location)
 				{
 					POINT p;
-					p.x=location.x;
-					p.y=location.y;
+					p.x=(int)location.x;
+					p.y=(int)location.y;
 					HWND handle=WindowFromPoint(p);
-					int index=windows.Keys().IndexOf(handle);
+					vint index=windows.Keys().IndexOf(handle);
 					if(index==-1)
 					{
 						return 0;

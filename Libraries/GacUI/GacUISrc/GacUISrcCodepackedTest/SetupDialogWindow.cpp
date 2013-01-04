@@ -182,7 +182,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		buttonFileDialog1->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
 			List<WString> selectionFileNames;
-			int selectionFilterIndex=0;
+			vint selectionFilterIndex=0;
 			if(GetCurrentController()->DialogService()->ShowFileDialog(
 				controlHost->GetNativeWindow(),
 				selectionFileNames,
@@ -214,7 +214,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		buttonFileDialog2->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
 			List<WString> selectionFileNames;
-			int selectionFilterIndex=0;
+			vint selectionFilterIndex=0;
 			if(GetCurrentController()->DialogService()->ShowFileDialog(
 				controlHost->GetNativeWindow(),
 				selectionFileNames,
@@ -248,7 +248,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		buttonFileDialog3->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
 			List<WString> selectionFileNames;
-			int selectionFilterIndex=0;
+			vint selectionFilterIndex=0;
 			if(GetCurrentController()->DialogService()->ShowFileDialog(
 				controlHost->GetNativeWindow(),
 				selectionFileNames,
@@ -278,7 +278,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 		buttonFileDialog4->Clicked.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
 			List<WString> selectionFileNames;
-			int selectionFilterIndex=0;
+			vint selectionFilterIndex=0;
 			if(GetCurrentController()->DialogService()->ShowFileDialog(
 				controlHost->GetNativeWindow(),
 				selectionFileNames,
@@ -298,7 +298,7 @@ void SetupDialogWindow(GuiControlHost* controlHost, GuiControl* container)
 				))
 			{
 				WString message=L"Filter Index: "+itow(selectionFilterIndex);
-				for(int i=0;i<selectionFileNames.Count();i++)
+				for(vint i=0;i<selectionFileNames.Count();i++)
 				{
 					message+=L"\r\nFile: "+selectionFileNames[i];
 				}

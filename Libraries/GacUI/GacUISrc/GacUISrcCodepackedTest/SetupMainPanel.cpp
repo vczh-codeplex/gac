@@ -182,7 +182,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 
 			buttonClear->Clicked.AttachLambda([scrollView](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
-				for(int i=scrollView->GetChildrenCount()-1;i>=0;i--)
+				for(vint i=scrollView->GetChildrenCount()-1;i>=0;i--)
 				{
 					GuiControl* child=scrollView->GetChild(i);
 					if(dynamic_cast<GuiButton*>(child))

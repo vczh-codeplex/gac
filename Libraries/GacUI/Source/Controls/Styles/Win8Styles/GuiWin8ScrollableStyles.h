@@ -52,8 +52,8 @@ Scroll
 			class Win8ScrollStyle : public common_styles::CommonScrollStyle, public Description<Win8ScrollStyle>
 			{
 			public:
-				static const int							DefaultSize=16;
-				static const int							ArrowSize=8;
+				static const vint							DefaultSize=16;
+				static const vint							ArrowSize=8;
 			protected:
 				controls::GuiButton::IStyleController*		CreateDecreaseButtonStyle(Direction direction)override;
 				controls::GuiButton::IStyleController*		CreateIncreaseButtonStyle(Direction direction)override;
@@ -70,10 +70,10 @@ Scroll
 			class Win8TrackStyle : public common_styles::CommonTrackStyle, public Description<Win8TrackStyle>
 			{
 			public:
-				static const int							TrackThickness=4;
-				static const int							TrackPadding=6;
-				static const int							HandleLong=16;
-				static const int							HandleShort=10;
+				static const vint							TrackThickness=4;
+				static const vint							TrackPadding=6;
+				static const vint							HandleLong=16;
+				static const vint							HandleShort=10;
 
 			protected:
 				controls::GuiButton::IStyleController*		CreateHandleButtonStyle(Direction direction)override;
@@ -90,9 +90,9 @@ Scroll
 			class Win8ProgressBarStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<Win8ProgressBarStyle>
 			{
 			protected:
-				int											totalSize;
-				int											pageSize;
-				int											position;
+				vint											totalSize;
+				vint											pageSize;
+				vint											position;
 				compositions::GuiBoundsComposition*			boundsComposition;
 				compositions::GuiBoundsComposition*			containerComposition;
 				compositions::GuiPartialViewComposition*	progressComposition;
@@ -109,9 +109,9 @@ Scroll
 				void										SetFont(const FontProperties& value)override;
 				void										SetVisuallyEnabled(bool value)override;
 				void										SetCommandExecutor(controls::GuiScroll::ICommandExecutor* value)override;
-				void										SetTotalSize(int value)override;
-				void										SetPageSize(int value)override;
-				void										SetPosition(int value)override;
+				void										SetTotalSize(vint value)override;
+				void										SetPageSize(vint value)override;
+				void										SetPosition(vint value)override;
 			};
 
 /***********************************************************************
@@ -134,7 +134,7 @@ ScrollView
 
 				controls::GuiScroll::IStyleController*		CreateHorizontalScrollStyle()override;
 				controls::GuiScroll::IStyleController*		CreateVerticalScrollStyle()override;
-				int											GetDefaultScrollSize()override;
+				vint											GetDefaultScrollSize()override;
 				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 

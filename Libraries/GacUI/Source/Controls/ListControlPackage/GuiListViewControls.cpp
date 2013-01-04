@@ -63,7 +63,7 @@ ListViewItemStyleProviderBase
 					listControl=0;
 				}
 
-				int ListViewItemStyleProviderBase::GetItemStyleId(int itemIndex)
+				vint ListViewItemStyleProviderBase::GetItemStyleId(vint itemIndex)
 				{
 					return 0;
 				}
@@ -171,7 +171,7 @@ ListViewItemStyleProvider::ListViewContentItemStyleController
 					return content.Obj();
 				}
 
-				void ListViewItemStyleProvider::ListViewContentItemStyleController::Install(IListViewItemView* view, int itemIndex)
+				void ListViewItemStyleProvider::ListViewContentItemStyleController::Install(IListViewItemView* view, vint itemIndex)
 				{
 					content->Install(listViewItemStyleProvider->listControl->GetListViewStyleProvider(), view, itemIndex);
 				}
@@ -207,7 +207,7 @@ ListViewItemStyleProvider
 					ListViewItemStyleProviderBase::DetachListControl();
 				}
 
-				GuiListControl::IItemStyleController* ListViewItemStyleProvider::CreateItemStyle(int styleId)
+				GuiListControl::IItemStyleController* ListViewItemStyleProvider::CreateItemStyle(vint styleId)
 				{
 					ListViewContentItemStyleController* itemStyle=new ListViewContentItemStyleController(this);
 					itemStyles.Add(itemStyle);
@@ -224,7 +224,7 @@ ListViewItemStyleProvider
 					}
 				}
 
-				void ListViewItemStyleProvider::Install(GuiListControl::IItemStyleController* style, int itemIndex)
+				void ListViewItemStyleProvider::Install(GuiListControl::IItemStyleController* style, vint itemIndex)
 				{
 					ListViewContentItemStyleController* itemStyle=dynamic_cast<ListViewContentItemStyleController*>(style);
 					itemStyle->Install(listViewItemView, itemIndex);
@@ -300,7 +300,7 @@ ListViewBigIconContentProvider
 					return 0;
 				}
 
-				void ListViewBigIconContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				void ListViewBigIconContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
 					Ptr<GuiImageData> imageData=view->GetLargeImage(itemIndex);
 					if(imageData)
@@ -405,7 +405,7 @@ ListViewSmallIconContentProvider
 					return 0;
 				}
 
-				void ListViewSmallIconContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				void ListViewSmallIconContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
 					Ptr<GuiImageData> imageData=view->GetSmallImage(itemIndex);
 					if(imageData)
@@ -509,7 +509,7 @@ ListViewListContentProvider
 					return 0;
 				}
 
-				void ListViewListContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				void ListViewListContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
 					Ptr<GuiImageData> imageData=view->GetSmallImage(itemIndex);
 					if(imageData)
@@ -560,14 +560,14 @@ ListViewListContentProvider
 ListViewTileContentProvider
 ***********************************************************************/
 
-				void ListViewTileContentProvider::ItemContent::RemoveTextElement(int textRow)
+				void ListViewTileContentProvider::ItemContent::RemoveTextElement(vint textRow)
 				{
 					GuiCellComposition* cell=textTable->GetSitedCell(textRow+1, 0);
 					textTable->RemoveChild(cell);
 					delete cell;
 				}
 
-				elements::GuiSolidLabelElement* ListViewTileContentProvider::ItemContent::CreateTextElement(int textRow, const FontProperties& font)
+				elements::GuiSolidLabelElement* ListViewTileContentProvider::ItemContent::CreateTextElement(vint textRow, const FontProperties& font)
 				{
 					GuiCellComposition* cell=new GuiCellComposition;
 					textTable->AddChild(cell);
@@ -581,11 +581,11 @@ ListViewTileContentProvider
 					return textElement;
 				}
 
-				void ListViewTileContentProvider::ItemContent::ResetTextTable(int textRows)
+				void ListViewTileContentProvider::ItemContent::ResetTextTable(vint textRows)
 				{
 					textTable->SetRowsAndColumns(textRows+2, 1);
 					textTable->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
-					for(int i=0;i<textRows;i++)
+					for(vint i=0;i<textRows;i++)
 					{
 						textTable->SetRowOption(i+1, GuiCellOption::MinSizeOption());
 					}
@@ -650,7 +650,7 @@ ListViewTileContentProvider
 					return 0;
 				}
 
-				void ListViewTileContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				void ListViewTileContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
 					Ptr<GuiImageData> imageData=view->GetLargeImage(itemIndex);
 					if(imageData)
@@ -664,14 +664,14 @@ ListViewTileContentProvider
 					text->SetText(view->GetText(itemIndex));
 					text->SetColor(styleProvider->GetPrimaryTextColor());
 
-					for(int i=0;i<dataTexts.Count();i++)
+					for(vint i=0;i<dataTexts.Count();i++)
 					{
 						RemoveTextElement(i+1);
 					}
-					int dataColumnCount=view->GetDataColumnCount();
+					vint dataColumnCount=view->GetDataColumnCount();
 					ResetTextTable(dataColumnCount+1);
 					dataTexts.Resize(dataColumnCount);
-					for(int i=0;i<dataColumnCount;i++)
+					for(vint i=0;i<dataColumnCount;i++)
 					{
 						dataTexts[i]=CreateTextElement(i+1, text->GetFont());
 						dataTexts[i]->SetText(view->GetSubItem(itemIndex, view->GetDataColumn(i)));
@@ -756,7 +756,7 @@ ListViewInformationContentProvider
 						cell->SetSite(0, 1, 3, 1);
 
 						FontProperties textFont=font;
-						textFont.size=(int)(textFont.size*1.2);
+						textFont.size=(vint)(textFont.size*1.2);
 
 						text=GuiSolidLabelElement::Create();
 						text->SetFont(textFont);
@@ -790,7 +790,7 @@ ListViewInformationContentProvider
 					return bottomLineComposition;
 				}
 
-				void ListViewInformationContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				void ListViewInformationContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
 					Ptr<GuiImageData> imageData=view->GetLargeImage(itemIndex);
 					if(imageData)
@@ -805,23 +805,23 @@ ListViewInformationContentProvider
 					text->SetColor(styleProvider->GetPrimaryTextColor());
 					bottomLine->SetColor(styleProvider->GetItemSeparatorColor());
 
-					for(int i=0;i<dataTexts.Count();i++)
+					for(vint i=0;i<dataTexts.Count();i++)
 					{
 						GuiCellComposition* cell=textTable->GetSitedCell(i, 0);
 						textTable->RemoveChild(cell);
 						delete cell;
 					}
 
-					int dataColumnCount=view->GetDataColumnCount();
+					vint dataColumnCount=view->GetDataColumnCount();
 					dataTexts.Resize(dataColumnCount);
 					textTable->SetRowsAndColumns(dataColumnCount, 1);
 					textTable->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
-					for(int i=0;i<dataColumnCount;i++)
+					for(vint i=0;i<dataColumnCount;i++)
 					{
 						textTable->SetRowOption(i, GuiCellOption::MinSizeOption());
 					}
 					
-					for(int i=0;i<dataColumnCount;i++)
+					for(vint i=0;i<dataColumnCount;i++)
 					{
 						GuiCellComposition* cell=new GuiCellComposition;
 						textTable->AddChild(cell);
@@ -916,7 +916,7 @@ ListViewColumnItemArranger
 
 				const wchar_t* const ListViewColumnItemArranger::IColumnItemView::Identifier = L"vl::presentation::controls::list::ListViewColumnItemArranger::IColumnItemView";
 
-				void ListViewColumnItemArranger::ColumnClicked(int index, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+				void ListViewColumnItemArranger::ColumnClicked(vint index, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 				{
 					GuiItemEventArgs args(listView->ColumnClicked.GetAssociatedComposition());
 					args.itemIndex=index;
@@ -947,8 +947,8 @@ ListViewColumnItemArranger
 				{
 					if(splitterDragging)
 					{
-						int offset=arguments.x-splitterLatestX;
-						int index=columnHeaderSplitters.IndexOf(dynamic_cast<GuiBoundsComposition*>(sender));
+						vint offset=arguments.x-splitterLatestX;
+						vint index=columnHeaderSplitters.IndexOf(dynamic_cast<GuiBoundsComposition*>(sender));
 						if(index!=-1)
 						{
 							GuiBoundsComposition* buttonBounds=columnHeaderButtons[index]->GetBoundsComposition();
@@ -956,7 +956,7 @@ ListViewColumnItemArranger
 							Rect newBounds(bounds.LeftTop(), Size(bounds.Width()+offset, bounds.Height()));
 							buttonBounds->SetBounds(newBounds);
 
-							int finalSize=buttonBounds->GetBounds().Width();
+							vint finalSize=buttonBounds->GetBounds().Width();
 							columnItemView->SetColumnSize(index, finalSize);
 						}
 					}
@@ -965,14 +965,14 @@ ListViewColumnItemArranger
 				void ListViewColumnItemArranger::RearrangeItemBounds()
 				{
 					FixedHeightItemArranger::RearrangeItemBounds();
-					int count=columnHeaders->GetParent()->Children().Count();
+					vint count=columnHeaders->GetParent()->Children().Count();
 					columnHeaders->GetParent()->MoveChild(columnHeaders, count-1);
 					columnHeaders->SetBounds(Rect(Point(-viewBounds.Left(), 0), Size(0, 0)));
 				}
 
-				int ListViewColumnItemArranger::GetWidth()
+				vint ListViewColumnItemArranger::GetWidth()
 				{
-					int width=columnHeaders->GetBounds().Width()-SplitterWidth;
+					vint width=columnHeaders->GetBounds().Width()-SplitterWidth;
 					if(width<SplitterWidth)
 					{
 						width=SplitterWidth;
@@ -980,7 +980,7 @@ ListViewColumnItemArranger
 					return width;
 				}
 
-				int ListViewColumnItemArranger::GetYOffset()
+				vint ListViewColumnItemArranger::GetYOffset()
 				{
 					return columnHeaders->GetBounds().Height();
 				}
@@ -994,7 +994,7 @@ ListViewColumnItemArranger
 
 				void ListViewColumnItemArranger::DeleteColumnButtons()
 				{
-					for(int i=columnHeaders->GetStackItems().Count()-1;i>=0;i--)
+					for(vint i=columnHeaders->GetStackItems().Count()-1;i>=0;i--)
 					{
 						GuiStackItemComposition* item=columnHeaders->GetStackItems().Get(i);
 						columnHeaders->RemoveChild(item);
@@ -1015,7 +1015,7 @@ ListViewColumnItemArranger
 				{
 					if(columnItemView && columnHeaderButtons.Count()==columnItemView->GetColumnCount())
 					{
-						for(int i=0;i<columnItemView->GetColumnCount();i++)
+						for(vint i=0;i<columnItemView->GetColumnCount();i++)
 						{
 							GuiListViewColumnHeader* button=columnHeaderButtons[i];
 							button->SetText(columnItemView->GetColumnText(i));
@@ -1029,7 +1029,7 @@ ListViewColumnItemArranger
 						DeleteColumnButtons();
 						if(columnItemView)
 						{
-							for(int i=0;i<columnItemView->GetColumnCount();i++)
+							for(vint i=0;i<columnItemView->GetColumnCount();i++)
 							{
 								GuiBoundsComposition* splitterComposition=new GuiBoundsComposition;
 								splitterComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -1042,14 +1042,14 @@ ListViewColumnItemArranger
 								splitterComposition->GetEventReceiver()->leftButtonUp.AttachMethod(this, &ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonUp);
 								splitterComposition->GetEventReceiver()->mouseMove.AttachMethod(this, &ListViewColumnItemArranger::ColumnHeaderSplitterMouseMove);
 							}
-							for(int i=0;i<columnItemView->GetColumnCount();i++)
+							for(vint i=0;i<columnItemView->GetColumnCount();i++)
 							{
 								GuiListViewColumnHeader* button=new GuiListViewColumnHeader(styleProvider->CreateColumnStyle());
 								button->SetText(columnItemView->GetColumnText(i));
 								button->SetSubMenu(columnItemView->GetDropdownPopup(i), false);
 								button->SetColumnSortingState(columnItemView->GetSortingState(i));
 								button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
-								button->Clicked.AttachLambda(Curry(Func<void(int, GuiGraphicsComposition*, GuiEventArgs&)>(this, &ListViewColumnItemArranger::ColumnClicked))(i));
+								button->Clicked.AttachLambda(Curry(Func<void(vint, GuiGraphicsComposition*, GuiEventArgs&)>(this, &ListViewColumnItemArranger::ColumnClicked))(i));
 								columnHeaderButtons.Add(button);
 								if(i>0)
 								{
@@ -1208,17 +1208,17 @@ ListViewDetailContentProvider
 
 				void ListViewDetailContentProvider::ItemContent::UpdateSubItemSize()
 				{
-					int columnCount=columnItemView->GetColumnCount();
-					for(int i=0;i<columnCount;i++)
+					vint columnCount=columnItemView->GetColumnCount();
+					for(vint i=0;i<columnCount;i++)
 					{
 						textTable->SetColumnOption(i, GuiCellOption::AbsoluteOption(columnItemView->GetColumnSize(i)));
 					}
 					textTable->UpdateCellBounds();
 				}
 
-				void ListViewDetailContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				void ListViewDetailContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
-					for(int i=1;i<textTable->GetColumns();i++)
+					for(vint i=1;i<textTable->GetColumns();i++)
 					{
 						GuiCellComposition* cell=textTable->GetSitedCell(0, i);
 						textTable->RemoveChild(cell);
@@ -1237,9 +1237,9 @@ ListViewDetailContentProvider
 					text->SetText(view->GetText(itemIndex));
 					text->SetColor(styleProvider->GetPrimaryTextColor());
 
-					int columnCount=columnItemView->GetColumnCount();
+					vint columnCount=columnItemView->GetColumnCount();
 					textTable->SetRowsAndColumns(1, columnCount);
-					for(int i=1;i<columnCount;i++)
+					for(vint i=1;i<columnCount;i++)
 					{
 						GuiCellComposition* cell=new GuiCellComposition;
 						textTable->AddChild(cell);
@@ -1259,8 +1259,8 @@ ListViewDetailContentProvider
 
 				void ListViewDetailContentProvider::OnColumnChanged()
 				{
-					int count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
-					for(int i=0;i<count;i++)
+					vint count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
+					for(vint i=0;i<count;i++)
 					{
 						GuiListControl::IItemStyleController* itemStyleController=listViewItemStyleProvider->GetCreatedItemStyles().Get(i);
 						ItemContent* itemContent=listViewItemStyleProvider->GetItemContent<ItemContent>(itemStyleController);
@@ -1324,7 +1324,7 @@ ListViewDetailContentProvider
 ListViewColumn
 ***********************************************************************/
 
-				ListViewColumn::ListViewColumn(const WString& _text, int _size)
+				ListViewColumn::ListViewColumn(const WString& _text, vint _size)
 					:text(_text)
 					,size(_size)
 					,dropdownPopup(0)
@@ -1336,7 +1336,7 @@ ListViewColumn
 ListViewDataColumns
 ***********************************************************************/
 
-				void ListViewDataColumns::NotifyUpdateInternal(int start, int count, int newCount)
+				void ListViewDataColumns::NotifyUpdateInternal(vint start, vint count, vint newCount)
 				{
 					itemProvider->NotifyUpdate(0, itemProvider->Count());
 				}
@@ -1354,9 +1354,9 @@ ListViewDataColumns
 ListViewColumns
 ***********************************************************************/
 
-				void ListViewColumns::NotifyUpdateInternal(int start, int count, int newCount)
+				void ListViewColumns::NotifyUpdateInternal(vint start, vint count, vint newCount)
 				{
-					for(int i=0;i<itemProvider->columnItemViewCallbacks.Count();i++)
+					for(vint i=0;i<itemProvider->columnItemViewCallbacks.Count();i++)
 					{
 						itemProvider->columnItemViewCallbacks[i]->OnColumnChanged();
 					}
@@ -1376,32 +1376,32 @@ ListViewColumns
 ListViewItemProvider
 ***********************************************************************/
 
-				bool ListViewItemProvider::ContainsPrimaryText(int itemIndex)
+				bool ListViewItemProvider::ContainsPrimaryText(vint itemIndex)
 				{
 					return true;
 				}
 
-				WString ListViewItemProvider::GetPrimaryTextViewText(int itemIndex)
+				WString ListViewItemProvider::GetPrimaryTextViewText(vint itemIndex)
 				{
 					return Get(itemIndex)->text;
 				}
 
-				Ptr<GuiImageData> ListViewItemProvider::GetSmallImage(int itemIndex)
+				Ptr<GuiImageData> ListViewItemProvider::GetSmallImage(vint itemIndex)
 				{
 					return Get(itemIndex)->smallImage;
 				}
 
-				Ptr<GuiImageData> ListViewItemProvider::GetLargeImage(int itemIndex)
+				Ptr<GuiImageData> ListViewItemProvider::GetLargeImage(vint itemIndex)
 				{
 					return Get(itemIndex)->largeImage;
 				}
 
-				WString ListViewItemProvider::GetText(int itemIndex)
+				WString ListViewItemProvider::GetText(vint itemIndex)
 				{
 					return Get(itemIndex)->text;
 				}
 
-				WString ListViewItemProvider::GetSubItem(int itemIndex, int index)
+				WString ListViewItemProvider::GetSubItem(vint itemIndex, vint index)
 				{
 					Ptr<ListViewItem> item=Get(itemIndex);
 					if(index<0 || index>=item->subItems.Count())
@@ -1414,12 +1414,12 @@ ListViewItemProvider
 					}
 				}
 
-				int ListViewItemProvider::GetDataColumnCount()
+				vint ListViewItemProvider::GetDataColumnCount()
 				{
 					return dataColumns.Count();
 				}
 
-				int ListViewItemProvider::GetDataColumn(int index)
+				vint ListViewItemProvider::GetDataColumn(vint index)
 				{
 					return dataColumns[index];
 				}
@@ -1439,7 +1439,7 @@ ListViewItemProvider
 
 				bool ListViewItemProvider::DetachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)
 				{
-					int index=columnItemViewCallbacks.IndexOf(value);
+					vint index=columnItemViewCallbacks.IndexOf(value);
 					if(index==-1)
 					{
 						return false;
@@ -1451,12 +1451,12 @@ ListViewItemProvider
 					}
 				}
 
-				int ListViewItemProvider::GetColumnCount()
+				vint ListViewItemProvider::GetColumnCount()
 				{
 					return columns.Count();
 				}
 
-				WString ListViewItemProvider::GetColumnText(int index)
+				WString ListViewItemProvider::GetColumnText(vint index)
 				{
 					if(index<0 || index>=columns.Count())
 					{
@@ -1468,7 +1468,7 @@ ListViewItemProvider
 					}
 				}
 
-				int ListViewItemProvider::GetColumnSize(int index)
+				vint ListViewItemProvider::GetColumnSize(vint index)
 				{
 					if(index<0 || index>=columns.Count())
 					{
@@ -1480,19 +1480,19 @@ ListViewItemProvider
 					}
 				}
 
-				void ListViewItemProvider::SetColumnSize(int index, int value)
+				void ListViewItemProvider::SetColumnSize(vint index, vint value)
 				{
 					if(index>=0 && index<columns.Count())
 					{
 						columns[index]->size=value;
-						for(int i=0;i<columnItemViewCallbacks.Count();i++)
+						for(vint i=0;i<columnItemViewCallbacks.Count();i++)
 						{
 							columnItemViewCallbacks[i]->OnColumnChanged();
 						}
 					}
 				}
 
-				GuiMenu* ListViewItemProvider::GetDropdownPopup(int index)
+				GuiMenu* ListViewItemProvider::GetDropdownPopup(vint index)
 				{
 					if(index<0 || index>=columns.Count())
 					{
@@ -1504,7 +1504,7 @@ ListViewItemProvider
 					}
 				}
 
-				GuiListViewColumnHeader::ColumnSortingState ListViewItemProvider::GetSortingState(int index)
+				GuiListViewColumnHeader::ColumnSortingState ListViewItemProvider::GetSortingState(vint index)
 				{
 					if(index<0 || index>=columns.Count())
 					{

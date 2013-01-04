@@ -26,7 +26,7 @@ namespace document
 	struct GifRun
 	{
 		Ptr<text::DocumentImageRun>		imageRun;
-		int								paragraphIndex;
+		vint							paragraphIndex;
 	};
 	
 	Ptr<text::DocumentModel> BuildDocumentModel(const WString& fileName, List<Ptr<GifRun>>& animations)
@@ -66,9 +66,9 @@ namespace document
 			}
 			else if(match->Groups()[L"tag"].Get(0).Value()==L"i")
 			{
-				int cx=wtoi(match->Groups()[L"cx"].Get(0).Value());
-				int cy=wtoi(match->Groups()[L"cy"].Get(0).Value());
-				int b=wtoi(match->Groups()[L"b"].Get(0).Value());
+				vint cx=wtoi(match->Groups()[L"cx"].Get(0).Value());
+				vint cy=wtoi(match->Groups()[L"cy"].Get(0).Value());
+				vint b=wtoi(match->Groups()[L"b"].Get(0).Value());
 				WString file=match->Groups()[L"file"].Get(0).Value();
 
 				if(!paragraph)
@@ -149,10 +149,10 @@ namespace document
 	protected:
 		unsigned __int64				startTime;
 		Ptr<text::DocumentImageRun>		imageRun;
-		int								paragraphIndex;
+		vint							paragraphIndex;
 		GuiDocumentElement*				documentElement;
 	public:
-		GifAnimation(Ptr<text::DocumentImageRun> _imageRun, int _paragraphIndex, GuiDocumentElement* _documentElement)
+		GifAnimation(Ptr<text::DocumentImageRun> _imageRun, vint _paragraphIndex, GuiDocumentElement* _documentElement)
 			:imageRun(_imageRun)
 			,paragraphIndex(_paragraphIndex)
 			,documentElement(_documentElement)
@@ -160,20 +160,20 @@ namespace document
 		{
 		}
 
-		int GetTotalLength()
+		vint GetTotalLength()
 		{
 			return 1;
 		}
 
-		int GetCurrentPosition()
+		vint GetCurrentPosition()
 		{
 			return 0;
 		}
 
-		void Play(int currentPosition, int totalLength)
+		void Play(vint currentPosition, vint totalLength)
 		{
 			unsigned __int64 ms=DateTime::LocalTime().totalMilliseconds-startTime;
-			int frameIndex=(ms/100)%imageRun->image->GetFrameCount();
+			vint frameIndex=(ms/100)%imageRun->image->GetFrameCount();
 			imageRun->frameIndex=frameIndex;
 			documentElement->NotifyParagraphUpdated(paragraphIndex);
 		}

@@ -219,7 +219,7 @@ GrammarColorizer
 		TypeSymbol* FindScope(ParsingTreeNode* node)
 		{
 			if(!node) return 0;
-			int index=parsingTreeDecl->nodeTypeMap.Keys().IndexOf(node);
+			vint index=parsingTreeDecl->nodeTypeMap.Keys().IndexOf(node);
 			return index==-1?FindScope(node->GetParent()):parsingTreeDecl->nodeTypeMap.Values().Get(index);
 		}
 
@@ -227,7 +227,7 @@ GrammarColorizer
 		{
 			if(!scope) return 0;
 			if(name==L"") return 0;
-			int index=scope->subTypes.Keys().IndexOf(name);
+			vint index=scope->subTypes.Keys().IndexOf(name);
 			if(index!=-1) return scope->subTypes.Values().Get(index).Obj();
 			return FindType(scope->parent, name);
 		}
@@ -249,7 +249,7 @@ GrammarColorizer
 						TypeSymbol* type=FindType(scope, object->GetMember(L"parentType").Cast<ParsingTreeObject>().Obj());
 						if(type)
 						{
-							int index=type->subTypes.Keys().IndexOf(typeName);
+							vint index=type->subTypes.Keys().IndexOf(typeName);
 							if(index!=-1) return type->subTypes.Values().Get(index).Obj();
 						}
 					}
@@ -288,7 +288,7 @@ GrammarColorizer
 			}
 		}
 
-		void ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
+		void ColorizeTokenContextSensitive(vint lineIndex, const wchar_t* text, vint start, vint length, vint& token, vint& contextState)override
 		{
 			SpinLock::Scope scope(parsingTreeLock);
 			if(parsingTreeNode && token==2)

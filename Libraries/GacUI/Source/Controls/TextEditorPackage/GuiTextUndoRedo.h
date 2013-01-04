@@ -35,8 +35,8 @@ Undo Redo
 
 			protected:
 				collections::List<Ptr<IEditStep>>			steps;
-				int											firstFutureStep;
-				int											savedStep;
+				vint											firstFutureStep;
+				vint											savedStep;
 				bool										performingUndoRedo;
 
 				void										PushStep(Ptr<IEditStep> step);

@@ -47,7 +47,7 @@ WindowsCallbackService
 				{
 				case WM_LBUTTONDOWN:
 					{
-						for(int i=0;i<listeners.Count();i++)
+						for(vint i=0;i<listeners.Count();i++)
 						{
 							listeners[i]->LeftButtonDown(location);
 						}
@@ -55,7 +55,7 @@ WindowsCallbackService
 					break;
 				case WM_LBUTTONUP:
 					{
-						for(int i=0;i<listeners.Count();i++)
+						for(vint i=0;i<listeners.Count();i++)
 						{
 							listeners[i]->LeftButtonUp(location);
 						}
@@ -63,7 +63,7 @@ WindowsCallbackService
 					break;
 				case WM_RBUTTONDOWN:
 					{
-						for(int i=0;i<listeners.Count();i++)
+						for(vint i=0;i<listeners.Count();i++)
 						{
 							listeners[i]->RightButtonDown(location);
 						}
@@ -71,7 +71,7 @@ WindowsCallbackService
 					break;
 				case WM_RBUTTONUP:
 					{
-						for(int i=0;i<listeners.Count();i++)
+						for(vint i=0;i<listeners.Count();i++)
 						{
 							listeners[i]->RightButtonUp(location);
 						}
@@ -79,7 +79,7 @@ WindowsCallbackService
 					break;
 				case WM_MOUSEMOVE:
 					{
-						for(int i=0;i<listeners.Count();i++)
+						for(vint i=0;i<listeners.Count();i++)
 						{
 							listeners[i]->MouseMoving(location);
 						}
@@ -90,7 +90,7 @@ WindowsCallbackService
 
 			void WindowsCallbackService::InvokeGlobalTimer()
 			{
-				for(int i=0;i<listeners.Count();i++)
+				for(vint i=0;i<listeners.Count();i++)
 				{
 					listeners[i]->GlobalTimer();
 				}
@@ -98,7 +98,7 @@ WindowsCallbackService
 
 			void WindowsCallbackService::InvokeClipboardUpdated()
 			{
-				for(int i=0;i<listeners.Count();i++)
+				for(vint i=0;i<listeners.Count();i++)
 				{
 					listeners[i]->ClipboardUpdated();
 				}
@@ -106,7 +106,7 @@ WindowsCallbackService
 
 			void WindowsCallbackService::InvokeNativeWindowCreated(INativeWindow* window)
 			{
-				for(int i=0;i<listeners.Count();i++)
+				for(vint i=0;i<listeners.Count();i++)
 				{
 					listeners[i]->NativeWindowCreated(window);
 				}
@@ -114,7 +114,7 @@ WindowsCallbackService
 
 			void WindowsCallbackService::InvokeNativeWindowDestroyed(INativeWindow* window)
 			{
-				for(int i=0;i<listeners.Count();i++)
+				for(vint i=0;i<listeners.Count();i++)
 				{
 					listeners[i]->NativeWindowDestroying(window);
 				}

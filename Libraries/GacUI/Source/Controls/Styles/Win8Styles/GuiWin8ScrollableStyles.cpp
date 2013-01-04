@@ -212,7 +212,7 @@ Win8ProgressBarStyle
 
 			void Win8ProgressBarStyle::UpdateProgressBar()
 			{
-				int max=totalSize-pageSize;
+				vint max=totalSize-pageSize;
 				if(position<0)
 				{
 					progressComposition->SetWidthPageSize(0);
@@ -301,19 +301,19 @@ Win8ProgressBarStyle
 			{
 			}
 
-			void Win8ProgressBarStyle::SetTotalSize(int value)
+			void Win8ProgressBarStyle::SetTotalSize(vint value)
 			{
 				totalSize=value;
 				UpdateProgressBar();
 			}
 
-			void Win8ProgressBarStyle::SetPageSize(int value)
+			void Win8ProgressBarStyle::SetPageSize(vint value)
 			{
 				pageSize=value;
 				UpdateProgressBar();
 			}
 
-			void Win8ProgressBarStyle::SetPosition(int value)
+			void Win8ProgressBarStyle::SetPosition(vint value)
 			{
 				position=value;
 				UpdateProgressBar();
@@ -361,7 +361,7 @@ Win8ScrollViewProvider
 				return new Win8ScrollStyle(Win8ScrollStyle::Vertical);
 			}
 
-			int Win8ScrollViewProvider::GetDefaultScrollSize()
+			vint Win8ScrollViewProvider::GetDefaultScrollSize()
 			{
 				return Win8ScrollStyle::DefaultSize;
 			}

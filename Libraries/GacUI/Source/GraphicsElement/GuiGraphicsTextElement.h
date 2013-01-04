@@ -44,8 +44,8 @@ Colorized Plain Text (model)
 				/// </summary>
 				struct TextLine
 				{
-					static const int				BlockSize=32;
-					static const int				MaxWidth=0xFFFF;
+					static const vint				BlockSize=32;
+					static const vint				MaxWidth=0xFFFF;
 					
 					/// <summary>
 					/// A character buffer starts from the first character of this line.
@@ -58,28 +58,28 @@ Colorized Plain Text (model)
 					/// <summary>
 					/// The number of available <see cref="CharAtt::rightOffset"/> in the buffer.
 					/// </summary>
-					int								availableOffsetCount;
+					vint								availableOffsetCount;
 					/// <summary>
 					/// The number of elements in the allocated buffer memory.
 					/// </summary>
-					int								bufferLength;
+					vint								bufferLength;
 					/// <summary>
 					/// The number of available characters in the buffer.
 					/// </summary>
-					int								dataLength;
+					vint								dataLength;
 					/// <summary>
 					/// The internal lexical analyzer state of a colorizer when it parses to the end of this line. -1 means that this state is not available.
 					/// </summary>
-					int								lexerFinalState;
+					vint								lexerFinalState;
 					/// <summary>
 					/// The internal context sensitive state of a colorizer when it parses to the end of this line. -1 means that this state is not available.
 					/// </summary>
-					int								contextFinalState;
+					vint								contextFinalState;
 
 					TextLine();
 					~TextLine();
 
-					static int						CalculateBufferLength(int dataLength);
+					static vint						CalculateBufferLength(vint dataLength);
 					bool							operator==(const TextLine& value)const{return false;}
 					bool							operator!=(const TextLine& value)const{return true;}
 
@@ -104,13 +104,13 @@ Colorized Plain Text (model)
 					/// <param name="count">The number of characters to be replaced.</param>
 					/// <param name="input">The buffer to the characters to write into this line.</param>
 					/// <param name="inputCount">The numbers of the characters to write into this line.</param>
-					bool							Modify(int start, int count, const wchar_t* input, int inputCount);
+					bool							Modify(vint start, vint count, const wchar_t* input, vint inputCount);
 					/// <summary>
 					/// Split a text line into two by the position. The current line contains characters before this position. This function returns a new text line contains characters after this position.
 					/// </summary>
 					/// <returns>The new text line.</returns>
 					/// <param name="index">.</param>
-					TextLine						Split(int index);
+					TextLine						Split(vint index);
 					/// <summary>
 					/// Append a text line after the this text line, and finalize the input text line.
 					/// </summary>
@@ -125,8 +125,8 @@ Colorized Plain Text (model)
 				{
 				protected:
 					IGuiGraphicsRenderTarget*		oldRenderTarget;
-					int								rowHeight;
-					int								widths[65536];
+					vint								rowHeight;
+					vint								widths[65536];
 					
 					/// <summary>
 					/// Measure the width of a character.
@@ -134,20 +134,20 @@ Colorized Plain Text (model)
 					/// <returns>The width in pixel.</returns>
 					/// <param name="character">The character to measure. This is a pure virtual member function to be overrided.</param>
 					/// <param name="renderTarget">The render target which the character is going to be rendered. This is a pure virtual member function to be overrided.</param>
-					virtual int						MeasureWidthInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)=0;
+					virtual vint						MeasureWidthInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)=0;
 					/// <summary>
 					/// Measure the height of a character.
 					/// </summary>
 					/// <returns>The height in pixel.</returns>
 					/// <param name="renderTarget">The render target which the character is going to be rendered.</param>
-					virtual int						GetRowHeightInternal(IGuiGraphicsRenderTarget* renderTarget)=0;
+					virtual vint						GetRowHeightInternal(IGuiGraphicsRenderTarget* renderTarget)=0;
 				public:
 
 					/// <summary>
 					/// Initialize a character measurer.
 					/// </summary>
 					/// <param name="_rowHeight">The default character height in pixel before the character measurer is binded to a render target.</param>
-					CharMeasurer(int _rowHeight);
+					CharMeasurer(vint _rowHeight);
 					~CharMeasurer();
 
 					/// <summary>
@@ -160,12 +160,12 @@ Colorized Plain Text (model)
 					/// </summary>
 					/// <returns>The width of a character, in pixel.</returns>
 					/// <param name="character">The character to measure.</param>
-					int								MeasureWidth(wchar_t character);
+					vint								MeasureWidth(wchar_t character);
 					/// <summary>
 					/// Measure the height of a character.
 					/// </summary>
 					/// <returns>The height of a character, in pixel.</returns>
-					int								GetRowHeight();
+					vint								GetRowHeight();
 				};
 
 				/// <summary>
@@ -178,9 +178,9 @@ Colorized Plain Text (model)
 					TextLineList					lines;
 					CharMeasurer*					charMeasurer;
 					IGuiGraphicsRenderTarget*		renderTarget;
-					int								tabWidth;
-					int								tabSpaceCount;
-					int								availableColorizedLines;
+					vint								tabWidth;
+					vint								tabSpaceCount;
+					vint								availableColorizedLines;
 					wchar_t							passwordChar;
 				public:
 					TextLines();
@@ -190,23 +190,23 @@ Colorized Plain Text (model)
 					/// Returns the number of text lines.
 					/// </summary>
 					/// <returns>The number of text lines.</returns>
-					int								GetCount();
+					vint								GetCount();
 					/// <summary>
 					/// Returns the text line of a specified row number.
 					/// </summary>
 					/// <returns>The related text line object.</returns>
 					/// <param name="row">The specified row number.</param>
-					TextLine&						GetLine(int row);
+					TextLine&						GetLine(vint row);
 					/// <summary>
 					/// Returns the number of lines that are colorized.
 					/// </summary>
 					/// <returns>The number of lines that are colorized.</returns>
-					int								GetAvailableColorizedLines();
+					vint								GetAvailableColorizedLines();
 					/// <summary>
 					/// Set the number of lines that are colorized.
 					/// </summary>
 					/// <param name="value">The number of lines that are colorized.</param>
-					void							SetAvailableColorizedLines(int value);
+					void							SetAvailableColorizedLines(vint value);
 					/// <summary>
 					/// Returns the binded <see cref="CharMeasurer"/>.
 					/// </summary>
@@ -251,7 +251,7 @@ Colorized Plain Text (model)
 					/// <returns>Returns true if this operation succeeded.</returns>
 					/// <param name="start">The first row number.</param>
 					/// <param name="count">The number of text lines to be removed.</param>
-					bool							RemoveLines(int start, int count);
+					bool							RemoveLines(vint start, vint count);
 					/// <summary>
 					/// Test is a text position available in the text lines.
 					/// </summary>
@@ -273,7 +273,7 @@ Colorized Plain Text (model)
 					/// <param name="inputs">The buffer to the string buffers to replace into the text lines.</param>
 					/// <param name="inputCounts">The numbers of characters for each string buffer.</param>
 					/// <param name="rows">The number of string buffers.</param>
-					TextPos							Modify(TextPos start, TextPos end, const wchar_t** inputs, int* inputCounts, int rows);
+					TextPos							Modify(TextPos start, TextPos end, const wchar_t** inputs, vint* inputCounts, vint rows);
 					/// <summary>
 					/// Modify some text lines by replacing characters.
 					/// </summary>
@@ -282,7 +282,7 @@ Colorized Plain Text (model)
 					/// <param name="end">The end position of the range of characters to be replaced.</param>
 					/// <param name="input">The buffer to the string to replace into the text lines.</param>
 					/// <param name="inputCount">The number of characters to replace into the text lines.</param>
-					TextPos							Modify(TextPos start, TextPos end, const wchar_t* input, int inputCount);
+					TextPos							Modify(TextPos start, TextPos end, const wchar_t* input, vint inputCount);
 					/// <summary>
 					/// Modify some text lines by replacing characters.
 					/// </summary>
@@ -312,38 +312,38 @@ Colorized Plain Text (model)
 					/// Returns the number of spaces to replace a tab character for rendering.
 					/// </summary>
 					/// <returns>The number of spaces to replace a tab character for rendering.</returns>
-					int								GetTabSpaceCount();
+					vint								GetTabSpaceCount();
 					/// <summary>
 					/// Set the number of spaces to replace a tab character for rendering.
 					/// </summary>
 					/// <param name="value">The number of spaces to replace a tab character for rendering.</param>
-					void							SetTabSpaceCount(int value);
+					void							SetTabSpaceCount(vint value);
 					/// <summary>
 					/// Measure all characters in a specified row.
 					/// </summary>
 					/// <param name="row">The specified row number.</param>
-					void							MeasureRow(int row);
+					void							MeasureRow(vint row);
 					/// <summary>
 					/// Returns the width of a specified row.
 					/// </summary>
 					/// <returns>The width of a specified row, in pixel.</returns>
 					/// <param name="row">The specified row number.</param>
-					int								GetRowWidth(int row);
+					vint								GetRowWidth(vint row);
 					/// <summary>
 					/// Returns the height of a row.
 					/// </summary>
 					/// <returns>The height of a row, in pixel.</returns>
-					int								GetRowHeight();
+					vint								GetRowHeight();
 					/// <summary>
 					/// Returns the total width of the text lines.
 					/// </summary>
 					/// <returns>The width of the text lines, in pixel.</returns>
-					int								GetMaxWidth();
+					vint								GetMaxWidth();
 					/// <summary>
 					/// Returns the total height of the text lines.
 					/// </summary>
 					/// <returns>The height of the text lines, in pixel.</returns>
-					int								GetMaxHeight();
+					vint								GetMaxHeight();
 					/// <summary>
 					/// Get the text position near to specified point.
 					/// </summary>
@@ -633,7 +633,7 @@ Rich Content Document (model)
 					/// <summary>Size of the inline object.</summary>
 					Size							size;
 					/// <summary>Baseline of the inline object.</summary>
-					int								baseline;
+					vint								baseline;
 
 					DocumentInlineObjectRun():baseline(-1){}
 				};
@@ -645,7 +645,7 @@ Rich Content Document (model)
 					/// <summary>The image.</summary>
 					Ptr<INativeImage>				image;
 					/// <summary>The frame index.</summary>
-					int								frameIndex;
+					vint								frameIndex;
 
 					DocumentImageRun():frameIndex(0){}
 
@@ -704,12 +704,12 @@ Rich Content Document (element)
 
 					typedef collections::Array<Ptr<text::ParagraphCache>>		ParagraphCacheArray;
 				protected:
-					int									paragraphDistance;
-					int									lastMaxWidth;
-					int									cachedTotalHeight;
+					vint									paragraphDistance;
+					vint									lastMaxWidth;
+					vint									cachedTotalHeight;
 					IGuiGraphicsLayoutProvider*			layoutProvider;
 					ParagraphCacheArray					paragraphCaches;
-					collections::Array<int>				paragraphHeights;
+					collections::Array<vint>				paragraphHeights;
 
 					void					InitializeInternal();
 					void					FinalizeInternal();
@@ -720,7 +720,7 @@ Rich Content Document (element)
 					void					Render(Rect bounds)override;
 					void					OnElementStateChanged()override;
 
-					void					NotifyParagraphUpdated(int index);
+					void					NotifyParagraphUpdated(vint index);
 				};
 
 			protected:
@@ -738,7 +738,7 @@ Rich Content Document (element)
 				void						SetDocument(Ptr<text::DocumentModel> value);
 				/// <summary>Notify that a specified paragraph is updated.</summary>
 				/// <param name="index">The paragraph index.</param>
-				void						NotifyParagraphUpdated(int index);
+				void						NotifyParagraphUpdated(vint index);
 			};
 		}
 	}

@@ -112,7 +112,7 @@ GuiControlHost
 			{
 				OnBeforeReleaseGraphicsHost();
 				styleController=0;
-				for(int i=0;i<components.Count();i++)
+				for(vint i=0;i<components.Count();i++)
 				{
 					delete components[i];
 				}
@@ -877,7 +877,7 @@ GuiPopup
 							}
 
 							window->SetParent(controlWindow);
-							for(int i=0;i<4;i++)
+							for(vint i=0;i<4;i++)
 							{
 								if(!IsClippedByScreen(locations[i]))
 								{

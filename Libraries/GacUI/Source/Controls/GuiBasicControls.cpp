@@ -76,7 +76,7 @@ GuiControl
 
 			void GuiControl::OnParentLineChanged()
 			{
-				for(int i=0;i<children.Count();i++)
+				for(vint i=0;i<children.Count();i++)
 				{
 					children[i]->OnParentLineChanged();
 				}
@@ -88,7 +88,7 @@ GuiControl
 
 			void GuiControl::OnBeforeReleaseGraphicsHost()
 			{
-				for(int i=0;i<children.Count();i++)
+				for(vint i=0;i<children.Count();i++)
 				{
 					children[i]->OnBeforeReleaseGraphicsHost();
 				}
@@ -103,7 +103,7 @@ GuiControl
 					styleController->SetVisuallyEnabled(isVisuallyEnabled);
 					VisuallyEnabledChanged.Execute(GetNotifyEventArguments());
 
-					for(int i=0;i<children.Count();i++)
+					for(vint i=0;i<children.Count();i++)
 					{
 						children[i]->UpdateVisuallyEnabled();
 					}
@@ -146,14 +146,14 @@ GuiControl
 			{
 				if(parent || !styleController)
 				{
-					for(int i=0;i<children.Count();i++)
+					for(vint i=0;i<children.Count();i++)
 					{
 						delete children[i];
 					}
 				}
 				else
 				{
-					for(int i=children.Count()-1;i>=0;i--)
+					for(vint i=children.Count()-1;i>=0;i--)
 					{
 						GuiControl* child=children[i];
 						child->GetBoundsComposition()->GetParent()->RemoveChild(child->GetBoundsComposition());
@@ -198,12 +198,12 @@ GuiControl
 				return parent;
 			}
 
-			int GuiControl::GetChildrenCount()
+			vint GuiControl::GetChildrenCount()
 			{
 				return children.Count();
 			}
 
-			GuiControl* GuiControl::GetChild(int index)
+			GuiControl* GuiControl::GetChild(vint index)
 			{
 				return children[index];
 			}
@@ -338,7 +338,7 @@ GuiImageData
 			{
 			}
 
-			GuiImageData::GuiImageData(Ptr<INativeImage> _image, int _frameIndex)
+			GuiImageData::GuiImageData(Ptr<INativeImage> _image, vint _frameIndex)
 				:image(_image)
 				,frameIndex(_frameIndex)
 			{
@@ -353,7 +353,7 @@ GuiImageData
 				return image;
 			}
 
-			int GuiImageData::GetFrameIndex()
+			vint GuiImageData::GetFrameIndex()
 			{
 				return frameIndex;
 			}
@@ -525,7 +525,7 @@ GuiSelectableButton::GroupController
 
 			GuiSelectableButton::GroupController::~GroupController()
 			{
-				for(int i=buttons.Count()-1;i>=0;i--)
+				for(vint i=buttons.Count()-1;i>=0;i--)
 				{
 					buttons[i]->SetGroupController(0);
 				}
@@ -562,7 +562,7 @@ GuiSelectableButton::MutexGroupController
 				if(!suppress)
 				{
 					suppress=true;
-					for(int i=0;i<buttons.Count();i++)
+					for(vint i=0;i<buttons.Count();i++)
 					{
 						buttons[i]->SetSelected(buttons[i]==button);
 					}
@@ -690,17 +690,17 @@ GuiScroll::CommandExecutor
 				scroll->SetPosition(scroll->GetPosition()+scroll->GetBigMove());
 			}
 			
-			void GuiScroll::CommandExecutor::SetTotalSize(int value)
+			void GuiScroll::CommandExecutor::SetTotalSize(vint value)
 			{
 				scroll->SetTotalSize(value);
 			}
 
-			void GuiScroll::CommandExecutor::SetPageSize(int value)
+			void GuiScroll::CommandExecutor::SetPageSize(vint value)
 			{
 				scroll->SetPageSize(value);
 			}
 
-			void GuiScroll::CommandExecutor::SetPosition(int value)
+			void GuiScroll::CommandExecutor::SetPosition(vint value)
 			{
 				scroll->SetPosition(value);
 			}
@@ -735,12 +735,12 @@ GuiScroll
 			{
 			}
 
-			int GuiScroll::GetTotalSize()
+			vint GuiScroll::GetTotalSize()
 			{
 				return totalSize;
 			}
 
-			void GuiScroll::SetTotalSize(int value)
+			void GuiScroll::SetTotalSize(vint value)
 			{
 				if(totalSize!=value && 0<value)
 				{
@@ -758,12 +758,12 @@ GuiScroll
 				}
 			}
 
-			int GuiScroll::GetPageSize()
+			vint GuiScroll::GetPageSize()
 			{
 				return pageSize;
 			}
 
-			void GuiScroll::SetPageSize(int value)
+			void GuiScroll::SetPageSize(vint value)
 			{
 				if(pageSize!=value && 0<=value && value<=totalSize)
 				{
@@ -777,16 +777,16 @@ GuiScroll
 				}
 			}
 
-			int GuiScroll::GetPosition()
+			vint GuiScroll::GetPosition()
 			{
 				return position;
 			}
 
-			void GuiScroll::SetPosition(int value)
+			void GuiScroll::SetPosition(vint value)
 			{
-				int min=GetMinPosition();
-				int max=GetMaxPosition();
-				int newPosition=
+				vint min=GetMinPosition();
+				vint max=GetMaxPosition();
+				vint newPosition=
 					value<min?min:
 					value>max?max:
 					value;
@@ -798,12 +798,12 @@ GuiScroll
 				}
 			}
 
-			int GuiScroll::GetSmallMove()
+			vint GuiScroll::GetSmallMove()
 			{
 				return smallMove;
 			}
 
-			void GuiScroll::SetSmallMove(int value)
+			void GuiScroll::SetSmallMove(vint value)
 			{
 				if(value>0 && smallMove!=value)
 				{
@@ -812,12 +812,12 @@ GuiScroll
 				}
 			}
 
-			int GuiScroll::GetBigMove()
+			vint GuiScroll::GetBigMove()
 			{
 				return bigMove;
 			}
 
-			void GuiScroll::SetBigMove(int value)
+			void GuiScroll::SetBigMove(vint value)
 			{
 				if(value>0 && bigMove!=value)
 				{
@@ -826,12 +826,12 @@ GuiScroll
 				}
 			}
 
-			int GuiScroll::GetMinPosition()
+			vint GuiScroll::GetMinPosition()
 			{
 				return 0;
 			}
 
-			int GuiScroll::GetMaxPosition()
+			vint GuiScroll::GetMaxPosition()
 			{
 				return totalSize-pageSize;
 			}

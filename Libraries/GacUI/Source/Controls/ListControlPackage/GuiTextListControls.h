@@ -52,15 +52,15 @@ TextList Style Provider
 						/// <summary>Get the text of an item.</summary>
 						/// <returns>The text of an item.</returns>
 						/// <param name="itemIndex">The index of an item.</param>
-						virtual WString							GetText(int itemIndex)=0;
+						virtual WString							GetText(vint itemIndex)=0;
 						/// <summary>Get the check state of an item.</summary>
 						/// <returns>The check state of an item.</returns>
 						/// <param name="itemIndex">The index of an item.</param>
-						virtual bool							GetChecked(int itemIndex)=0;
+						virtual bool							GetChecked(vint itemIndex)=0;
 						/// <summary>Set the check state of an item without invoving any UI action.</summary>
 						/// <param name="itemIndex">The index of an item.</param>
 						/// <param name="value">The new check state.</param>
-						virtual void							SetCheckedSilently(int itemIndex, bool value)=0;
+						virtual void							SetCheckedSilently(vint itemIndex, bool value)=0;
 					};
 
 					/// <summary>The item style controller for <see cref="TextItemStyleProvider"/>.</summary>
@@ -113,10 +113,10 @@ TextList Style Provider
 
 					void										AttachListControl(GuiListControl* value)override;
 					void										DetachListControl()override;
-					int											GetItemStyleId(int itemIndex)override;
-					GuiListControl::IItemStyleController*		CreateItemStyle(int styleId)override;
+					vint											GetItemStyleId(vint itemIndex)override;
+					GuiListControl::IItemStyleController*		CreateItemStyle(vint styleId)override;
 					void										DestroyItemStyle(GuiListControl::IItemStyleController* style)override;
-					void										Install(GuiListControl::IItemStyleController* style, int itemIndex)override;
+					void										Install(GuiListControl::IItemStyleController* style, vint itemIndex)override;
 					void										SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)override;
 				};
 
@@ -162,11 +162,11 @@ TextList Data Source
 				class TextItemProvider : public ListProvider<TextItem>, protected TextItemStyleProvider::ITextItemView, public Description<TextItemProvider>
 				{
 				protected:
-					bool										ContainsPrimaryText(int itemIndex)override;
-					WString										GetPrimaryTextViewText(int itemIndex)override;
-					WString										GetText(int itemIndex)override;
-					bool										GetChecked(int itemIndex)override;
-					void										SetCheckedSilently(int itemIndex, bool value)override;
+					bool										ContainsPrimaryText(vint itemIndex)override;
+					WString										GetPrimaryTextViewText(vint itemIndex)override;
+					WString										GetText(vint itemIndex)override;
+					bool										GetChecked(vint itemIndex)override;
+					void										SetCheckedSilently(vint itemIndex, bool value)override;
 				public:
 					TextItemProvider();
 					~TextItemProvider();
@@ -174,11 +174,11 @@ TextList Data Source
 					/// <summary>Set the text of an item.</summary>
 					/// <param name="itemIndex">The index of an item.</param>
 					/// <param name="value">The text of an item.</param>
-					void										SetText(int itemIndex, const WString& value);
+					void										SetText(vint itemIndex, const WString& value);
 					/// <summary>Set the check state of an item.</summary>
 					/// <param name="itemIndex">The index of an item.</param>
 					/// <param name="value">The check state of an item.</param>
-					void										SetChecked(int itemIndex, bool value);
+					void										SetChecked(vint itemIndex, bool value);
 
 					IDescriptable*								RequestView(const WString& identifier)override;
 					void										ReleaseView(IDescriptable* view)override;

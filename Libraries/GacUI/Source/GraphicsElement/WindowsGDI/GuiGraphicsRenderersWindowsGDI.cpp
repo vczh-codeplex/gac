@@ -89,7 +89,7 @@ GuiRoundBorderElementRenderer
 			{
 				if(oldColor.a>0)
 				{
-					int ellipse=element->GetRadius()*2;
+					vint ellipse=element->GetRadius()*2;
 					renderTarget->GetDC()->SetBrush(brush);
 					renderTarget->GetDC()->SetPen(pen);
 					renderTarget->GetDC()->RoundRect(bounds.Left(), bounds.Top(), bounds.Right()-1, bounds.Bottom()-1, ellipse, ellipse);
@@ -204,7 +204,7 @@ Gui3DSplitterElementRenderer
 				{
 				case Gui3DSplitterElement::Horizontal:
 					{
-						int y=bounds.y1+bounds.Height()/2-1;
+						vint y=bounds.y1+bounds.Height()/2-1;
 						p11=Point(bounds.x1, y);
 						p12=Point(bounds.x2, y);
 						p21=Point(bounds.x1, y+1);
@@ -213,7 +213,7 @@ Gui3DSplitterElementRenderer
 					break;
 				case Gui3DSplitterElement::Vertical:
 					{
-						int x=bounds.x1+bounds.Width()/2-1;
+						vint x=bounds.x1+bounds.Width()/2-1;
 						p11=Point(x, bounds.y1);
 						p12=Point(x, bounds.y2);
 						p21=Point(x+1, bounds.y1);
@@ -336,14 +336,14 @@ GuiGradientBackgroundElementRenderer
 					TRIVERTEX vertices[4];
 					GRADIENT_TRIANGLE triangles[2];
 
-					vertices[0].x=bounds.x1;
-					vertices[0].y=bounds.y1;
-					vertices[1].x=bounds.x1;
-					vertices[1].y=bounds.y2;
-					vertices[2].x=bounds.x2;
-					vertices[2].y=bounds.y2;
-					vertices[3].x=bounds.x2;
-					vertices[3].y=bounds.y1;
+					vertices[0].x=(int)bounds.x1;
+					vertices[0].y=(int)bounds.y1;
+					vertices[1].x=(int)bounds.x1;
+					vertices[1].y=(int)bounds.y2;
+					vertices[2].x=(int)bounds.x2;
+					vertices[2].y=(int)bounds.y2;
+					vertices[3].x=(int)bounds.x2;
+					vertices[3].y=(int)bounds.y1;
 
 					triangles[0].Vertex1=0;
 					triangles[0].Vertex2=1;
@@ -495,10 +495,10 @@ GuiSolidLabelElementRenderer
 
 					UINT format=DT_NOPREFIX;
 					RECT rect;
-					rect.left=bounds.Left();
-					rect.top=bounds.Top();
-					rect.right=bounds.Right();
-					rect.bottom=bounds.Bottom();
+					rect.left=(int)bounds.Left();
+					rect.top=(int)bounds.Top();
+					rect.right=(int)bounds.Right();
+					rect.bottom=(int)bounds.Bottom();
 
 					if(element->GetMultiline() || element->GetWrapLine())
 					{
@@ -614,8 +614,8 @@ GuiImageFrameElementRenderer
 					}
 					else
 					{
-						int x=0;
-						int y=0;
+						vint x=0;
+						vint y=0;
 						switch(element->GetHorizontalAlignment())
 						{
 						case Alignment::Left:
@@ -645,8 +645,8 @@ GuiImageFrameElementRenderer
 					if(element->GetImage()->GetFormat()==INativeImage::Gif &&  element->GetFrameIndex()>0)
 					{
 						IWindowsGDIResourceManager* resourceManager=GetWindowsGDIResourceManager();
-						int max=element->GetFrameIndex();
-						for(int i=0;i<=max;i++)
+						vint max=element->GetFrameIndex();
+						for(vint i=0;i<=max;i++)
 						{
 							Ptr<WinBitmap> frameBitmap=resourceManager->GetBitmap(element->GetImage()->GetFrame(i), element->GetEnabled());
 							dc->Draw(
@@ -711,20 +711,20 @@ GuiPolygonElementRenderer
 			{
 				if(pointCount>=3 && (oldPenColor.a || oldBrushColor.a))
 				{
-					int offsetX=(bounds.Width()-minSize.x)/2+bounds.x1;
-					int offsetY=(bounds.Height()-minSize.y)/2+bounds.y1;
-					for(int i=0;i<pointCount;i++)
+					vint offsetX=(bounds.Width()-minSize.x)/2+bounds.x1;
+					vint offsetY=(bounds.Height()-minSize.y)/2+bounds.y1;
+					for(vint i=0;i<pointCount;i++)
 					{
-						points[i].x+=offsetX;
-						points[i].y+=offsetY;
+						points[i].x+=(int)offsetX;
+						points[i].y+=(int)offsetY;
 					}
 					renderTarget->GetDC()->SetPen(pen);
 					renderTarget->GetDC()->SetBrush(brush);
 					renderTarget->GetDC()->PolyGon(points, pointCount);
-					for(int i=0;i<pointCount;i++)
+					for(vint i=0;i<pointCount;i++)
 					{
-						points[i].x-=offsetX;
-						points[i].y-=offsetY;
+						points[i].x-=(int)offsetX;
+						points[i].y-=(int)offsetY;
 					}
 				}
 			}
@@ -742,11 +742,11 @@ GuiPolygonElementRenderer
 					if(pointCount>0)
 					{
 						points=new POINT[pointCount];
-						for(int i=0;i<pointCount;i++)
+						for(vint i=0;i<pointCount;i++)
 						{
 							Point p=element->GetPoint(i);
-							points[i].x=p.x;
-							points[i].y=p.y;
+							points[i].x=(int)p.x;
+							points[i].y=(int)p.y;
 						}
 					}
 				}
@@ -773,7 +773,7 @@ GuiColorizedTextElementRenderer
 			void GuiColorizedTextElementRenderer::DestroyColors()
 			{
 				IWindowsGDIResourceManager* resourceManager=GetWindowsGDIResourceManager();
-				for(int i=0;i<colors.Count();i++)
+				for(vint i=0;i<colors.Count();i++)
 				{
 					resourceManager->DestroyGdiBrush(colors[i].normal.background);
 					resourceManager->DestroyGdiBrush(colors[i].selectedFocused.background);
@@ -786,7 +786,7 @@ GuiColorizedTextElementRenderer
 				IWindowsGDIResourceManager* resourceManager=GetWindowsGDIResourceManager();
 				ColorArray newColors;
 				newColors.Resize(element->GetColors().Count());
-				for(int i=0;i<newColors.Count();i++)
+				for(vint i=0;i<newColors.Count();i++)
 				{
 					text::ColorEntry entry=element->GetColors().Get(i);
 					ColorEntryResource newEntry;
@@ -857,23 +857,23 @@ GuiColorizedTextElementRenderer
 					wchar_t passwordChar=element->GetPasswordChar();
 					Point viewPosition=element->GetViewPosition();
 					Rect viewBounds(viewPosition, bounds.GetSize());
-					int startRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, viewBounds.y1)).row;
-					int endRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, viewBounds.y2)).row;
+					vint startRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, viewBounds.y1)).row;
+					vint endRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, viewBounds.y2)).row;
 					TextPos selectionBegin=element->GetCaretBegin()<element->GetCaretEnd()?element->GetCaretBegin():element->GetCaretEnd();
 					TextPos selectionEnd=element->GetCaretBegin()>element->GetCaretEnd()?element->GetCaretBegin():element->GetCaretEnd();
 					bool focused=element->GetFocused();
 					Ptr<windows::WinBrush> lastBrush=0;
 
-					for(int row=startRow;row<=endRow;row++)
+					for(vint row=startRow;row<=endRow;row++)
 					{
 						Rect startRect=element->GetLines().GetRectFromTextPos(TextPos(row, 0));
 						Point startPoint=startRect.LeftTop();
-						int startColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, startPoint.y)).column;
-						int endColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, startPoint.y)).column;
+						vint startColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, startPoint.y)).column;
+						vint endColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, startPoint.y)).column;
 						text::TextLine& line=element->GetLines().GetLine(row);
 
-						int x=startColumn==0?0:line.att[startColumn-1].rightOffset;
-						for(int column=startColumn; column<=endColumn; column++)
+						vint x=startColumn==0?0:line.att[startColumn-1].rightOffset;
+						for(vint column=startColumn; column<=endColumn; column++)
 						{
 							bool inSelection=false;
 							if(selectionBegin.row==selectionEnd.row)
@@ -894,7 +894,7 @@ GuiColorizedTextElementRenderer
 							}
 							
 							bool crlf=column==line.dataLength;
-							int colorIndex=crlf?0:line.att[column].colorIndex;
+							vint colorIndex=crlf?0:line.att[column].colorIndex;
 							if(colorIndex>=colors.Count())
 							{
 								colorIndex=0;
@@ -903,9 +903,9 @@ GuiColorizedTextElementRenderer
 								!inSelection?colors[colorIndex].normal:
 								focused?colors[colorIndex].selectedFocused:
 								colors[colorIndex].selectedUnfocused;
-							int x2=crlf?x+startRect.Height()/2:line.att[column].rightOffset;
-							int tx=x-viewPosition.x+bounds.x1;
-							int ty=startPoint.y-viewPosition.y+bounds.y1;
+							vint x2=crlf?x+startRect.Height()/2:line.att[column].rightOffset;
+							vint tx=x-viewPosition.x+bounds.x1;
+							vint ty=startPoint.y-viewPosition.y+bounds.y1;
 							
 							if(color.background.a)
 							{
@@ -931,7 +931,7 @@ GuiColorizedTextElementRenderer
 					if(element->GetCaretVisible() && element->GetLines().IsAvailable(element->GetCaretEnd()))
 					{
 						Point caretPoint=element->GetLines().GetPointFromTextPos(element->GetCaretEnd());
-						int height=element->GetLines().GetRowHeight();
+						vint height=element->GetLines().GetRowHeight();
 						dc->SetPen(caretPen);
 						dc->MoveTo(caretPoint.x-viewPosition.x+bounds.x1, caretPoint.y-viewPosition.y+bounds.y1+1);
 						dc->LineTo(caretPoint.x-viewPosition.x+bounds.x1, caretPoint.y+height-viewPosition.y+bounds.y1-1);

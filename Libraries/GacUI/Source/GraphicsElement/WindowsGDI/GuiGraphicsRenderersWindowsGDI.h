@@ -123,7 +123,7 @@ Renderers
 			protected:
 				FontProperties			oldFont;
 				Ptr<windows::WinFont>	font;
-				int						oldMaxWidth;
+				vint						oldMaxWidth;
 
 				void					UpdateMinSize();
 
@@ -160,7 +160,7 @@ Renderers
 				DEFINE_GUI_GRAPHICS_RENDERER(GuiPolygonElement, GuiPolygonElementRenderer, IWindowsGDIRenderTarget)
 			protected:
 				POINT*							points;
-				int								pointCount;
+				vint								pointCount;
 				Color							oldPenColor;
 				Color							oldBrushColor;
 				Ptr<windows::WinPen>			pen;

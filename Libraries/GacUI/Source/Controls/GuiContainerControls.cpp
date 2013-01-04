@@ -118,7 +118,7 @@ GuiTab
 			{
 			}
 
-			void GuiTab::CommandExecutor::ShowTab(int index)
+			void GuiTab::CommandExecutor::ShowTab(vint index)
 			{
 				tab->SetSelectedPage(tab->GetPages().Get(index));
 			}
@@ -134,13 +134,13 @@ GuiTab
 
 			GuiTab::~GuiTab()
 			{
-				for(int i=0;i<tabPages.Count();i++)
+				for(vint i=0;i<tabPages.Count();i++)
 				{
 					delete tabPages[i];
 				}
 			}
 
-			GuiTabPage* GuiTab::CreatePage(int index)
+			GuiTabPage* GuiTab::CreatePage(vint index)
 			{
 				GuiTabPage* page=new GuiTabPage();
 				if(CreatePage(page, index))
@@ -154,7 +154,7 @@ GuiTab
 				}
 			}
 
-			bool GuiTab::CreatePage(GuiTabPage* page, int index)
+			bool GuiTab::CreatePage(GuiTabPage* page, vint index)
 			{
 				if(index>=0 && index>=tabPages.Count())
 				{
@@ -189,7 +189,7 @@ GuiTab
 			{
 				if(value->GetOwnerTab()==this && value->DeassociateTab(this))
 				{
-					int index=tabPages.IndexOf(value);
+					vint index=tabPages.IndexOf(value);
 					styleController->RemoveTab(index);
 					GetContainerComposition()->RemoveChild(value->GetContainer()->GetBoundsComposition());
 					tabPages.RemoveAt(index);
@@ -210,10 +210,10 @@ GuiTab
 				}
 			}
 
-			bool GuiTab::MovePage(GuiTabPage* page, int newIndex)
+			bool GuiTab::MovePage(GuiTabPage* page, vint newIndex)
 			{
 				if(!page) return false;
-				int index=tabPages.IndexOf(page);
+				vint index=tabPages.IndexOf(page);
 				if(index==-1) return false;
 				tabPages.RemoveAt(index);
 				tabPages.Insert(newIndex, page);
@@ -239,7 +239,7 @@ GuiTab
 					if(selectedPage!=value)
 					{
 						selectedPage=value;
-						for(int i=0;i<tabPages.Count();i++)
+						for(vint i=0;i<tabPages.Count();i++)
 						{
 							bool selected=tabPages[i]==value;
 							tabPages[i]->GetContainer()->SetVisible(selected);
