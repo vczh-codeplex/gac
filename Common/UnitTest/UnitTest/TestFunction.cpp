@@ -266,8 +266,8 @@ TEST_CASE(TestLambdaChooser)
 
 TEST_CASE(TestCurryingWithLambda)
 {
-	Func<int(int,int,int)> add=[](int a, int b, int c){return a+b+c;};
-	auto add_1=Curry<int(int,int,int)>(add)(1);
+	Func<vint(vint,vint,vint)> add=[](vint a, vint b, vint c){return a+b+c;};
+	auto add_1=Curry<vint(vint,vint,vint)>(add)(1);
 	auto add_1_2=Curry(add_1)(2);
 	auto add_1_2_3=Curry(add_1_2)(3);
 
@@ -277,8 +277,8 @@ TEST_CASE(TestCurryingWithLambda)
 	TEST_ASSERT(add_1_2_3()==6);
 
 	vint r=0;
-	Func<void(int,int,int,int&)> addr=[](int a, int b, int c, int& r){r=a+b+c;};
-	auto addr_1=Curry<void(int,int,int,int&)>(addr)(1);
+	Func<void(vint,vint,vint,vint&)> addr=[](vint a, vint b, vint c, vint& r){r=a+b+c;};
+	auto addr_1=Curry<void(vint,vint,vint,vint&)>(addr)(1);
 	auto addr_1_2=Curry(addr_1)(2);
 	auto addr_1_2_3=Curry(addr_1_2)(3);
 	auto addr_1_2_3_4=Curry(addr_1_2_3)(r);
