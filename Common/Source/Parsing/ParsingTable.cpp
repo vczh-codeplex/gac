@@ -264,6 +264,20 @@ ParsingState
 				return tokens;
 			}
 
+			regex::RegexToken* ParsingState::GetToken(vint index)
+			{
+				if(index<=0)
+				{
+					index=0;
+				}
+				else if(index>tokens.Count())
+				{
+					index=tokens.Count();
+				}
+
+				return index==tokens.Count()?0:&tokens[index];
+			}
+
 			vint ParsingState::Reset(const WString& rule)
 			{
 				for(vint i=0;i<table->GetRuleCount();i++)
@@ -661,33 +675,19 @@ ParsingTreeBuilder
 			}
 
 /***********************************************************************
-ParsingRestrictParser
+ParsingStrictParser
 ***********************************************************************/
 
-			const regex::RegexToken* ParsingRestrictParser::ConvertToken(vint token, ParsingState& state)
-			{
-				if(token<=0)
-				{
-					token=0;
-				}
-				else if(token>state.GetTokens().Count())
-				{
-					token=state.GetTokens().Count();
-				}
-
-				return token==state.GetTokens().Count()?0:&state.GetTokens().Get(token);
-			}
-
-			ParsingRestrictParser::ParsingRestrictParser(Ptr<ParsingTable> _table)
+			ParsingStrictParser::ParsingStrictParser(Ptr<ParsingTable> _table)
 				:table(_table)
 			{
 			}
 
-			ParsingRestrictParser::~ParsingRestrictParser()
+			ParsingStrictParser::~ParsingStrictParser()
 			{
 			}
 
-			Ptr<ParsingTreeNode> ParsingRestrictParser::Parse(const WString& input, const WString& rule, ParsingError& error)
+			Ptr<ParsingTreeNode> ParsingStrictParser::Parse(const WString& input, const WString& rule, ParsingError& error)
 			{
 				ParsingState state(input, table);
 				if(state.Reset(rule)==-1)
@@ -712,13 +712,13 @@ ParsingRestrictParser
 					result=state.ReadToken();
 					if(!result)
 					{
-						const RegexToken* token=ConvertToken(state.GetCurrentToken(), state);
+						const RegexToken* token=state.GetToken(state.GetCurrentToken());
 						error=ParsingError(token, (token==0?L"Error happened during parsing.":L"Error happened during parsing when reaching to the end of the input."));
 						return 0;
 					}
 					else if(!builder.Run(result))
 					{
-						const RegexToken* token=ConvertToken(state.GetCurrentToken(), state);
+						const RegexToken* token=state.GetToken(state.GetCurrentToken());
 						error=ParsingError(token, L"Internal error when building the parsing tree.");
 						return 0;
 					}
@@ -737,15 +737,41 @@ ParsingRestrictParser
 				return node;
 			}
 
-			Ptr<ParsingRestrictParser> CreateBootstrapParser()
+			Ptr<ParsingStrictParser> CreateBootstrapParser()
 			{
 				List<Ptr<ParsingError>> errors;
 				Ptr<ParsingDefinition> definition=CreateParserDefinition();
 				Ptr<ParsingTable> table=GenerateTable(definition, errors);
 				if(table)
 				{
-					return new ParsingRestrictParser(table);
+					return new ParsingStrictParser(table);
 				}
+				return 0;
+			}
+
+/***********************************************************************
+ParsingAutoRecoverParser
+***********************************************************************/
+
+			ParsingAutoRecoverParser::ParsingAutoRecoverParser(Ptr<ParsingTable> _table)
+				:table(_table)
+			{
+			}
+
+			ParsingAutoRecoverParser::~ParsingAutoRecoverParser()
+			{
+			}
+
+			Ptr<ParsingTreeNode> ParsingAutoRecoverParser::Parse(const WString& input, const WString& rule)
+			{
+				ParsingState state(input, table);
+				if(state.Reset(rule)==-1)
+				{
+					return 0;
+				}
+				ParsingTreeBuilder builder;
+				builder.Reset();
+
 				return 0;
 			}
 		}
