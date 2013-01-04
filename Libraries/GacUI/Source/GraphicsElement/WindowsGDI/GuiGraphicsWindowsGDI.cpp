@@ -39,7 +39,7 @@ WindowsGDIRenderTarget
 				INativeWindow*				window;
 				WinDC*						dc;
 				List<Rect>					clippers;
-				int							clipperCoverWholeTargetCounter;
+				vint							clipperCoverWholeTargetCounter;
 
 				void ApplyClipper()
 				{
@@ -171,7 +171,7 @@ CachedResourceAllocator
 			public:
 				static Ptr<WinFont> CreateGdiFont(const FontProperties& value)
 				{
-					int size=value.size<0?value.size:-value.size;
+					vint size=value.size<0?value.size:-value.size;
 					return new WinFont(value.fontFamily, size, 0, 0, 0, (value.bold?FW_BOLD:FW_NORMAL), value.italic, value.underline, value.strikeline, value.antialias);
 				}
 
@@ -190,7 +190,7 @@ CachedResourceAllocator
 				{
 				protected:
 					Ptr<WinFont>			font;
-					int						size;
+					vint						size;
 
 					Size MeasureInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)
 					{
@@ -208,12 +208,12 @@ CachedResourceAllocator
 						}
 					}
 
-					int MeasureWidthInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)
+					vint MeasureWidthInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)
 					{
 						return MeasureInternal(character, renderTarget).x;
 					}
 
-					int GetRowHeightInternal(IGuiGraphicsRenderTarget* renderTarget)
+					vint GetRowHeightInternal(IGuiGraphicsRenderTarget* renderTarget)
 					{
 						if(renderTarget)
 						{
@@ -225,7 +225,7 @@ CachedResourceAllocator
 						}
 					}
 				public:
-					GdiCharMeasurer(Ptr<WinFont> _font, int _size)
+					GdiCharMeasurer(Ptr<WinFont> _font, vint _size)
 						:text::CharMeasurer(_size)
 						,size(_size)
 						,font(_font)
@@ -270,9 +270,9 @@ WindowsGDIResourceManager
 					WICRect rect;
 					rect.X=0;
 					rect.Y=0;
-					rect.Width=size.x;
-					rect.Height=size.y;
-					wicBitmap->CopyPixels(&rect, bitmap->GetLineBytes(), bitmap->GetLineBytes()*size.y, (BYTE*)bitmap->GetScanLines()[0]);
+					rect.Width=(int)size.x;
+					rect.Height=(int)size.y;
+					wicBitmap->CopyPixels(&rect, (int)bitmap->GetLineBytes(), (int)(bitmap->GetLineBytes()*size.y), (BYTE*)bitmap->GetScanLines()[0]);
 
 					bitmap->BuildAlphaChannel(false);
 				}
@@ -297,14 +297,14 @@ WindowsGDIResourceManager
 					{
 						if(!disabledBitmap)
 						{
-							int w=bitmap->GetWidth();
-							int h=bitmap->GetHeight();
+							vint w=bitmap->GetWidth();
+							vint h=bitmap->GetHeight();
 							disabledBitmap=new WinBitmap(w, h, WinBitmap::vbb32Bits, true);
-							for(int y=0;y<h;y++)
+							for(vint y=0;y<h;y++)
 							{
 								BYTE* read=bitmap->GetScanLines()[y];
 								BYTE* write=disabledBitmap->GetScanLines()[y];
-								for(int x=0;x<w;x++)
+								for(vint x=0;x<w;x++)
 								{
 									BYTE g=(read[0]+read[1]+read[2])/6+read[3]/2;
 									write[0]=g;

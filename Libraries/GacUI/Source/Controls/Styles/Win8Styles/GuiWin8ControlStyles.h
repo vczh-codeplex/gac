@@ -94,7 +94,7 @@ Container
 				elements::GuiSolidLabelElement*				textElement;
 				Ptr<TransferringAnimation>					transferringAnimation;
 
-				void										SetMargins(int fontSize);
+				void										SetMargins(vint fontSize);
 			public:
 				/// <summary>Create the style.</summary>
 				Win8GroupBoxStyle();

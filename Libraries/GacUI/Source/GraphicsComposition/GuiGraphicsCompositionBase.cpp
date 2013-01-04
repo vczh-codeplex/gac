@@ -30,7 +30,7 @@ GuiGraphicsComposition
 				}
 				else
 				{
-					for(int i=0;i<children.Count();i++)
+					for(vint i=0;i<children.Count();i++)
 					{
 						children[i]->OnControlParentChanged(control);
 					}
@@ -73,7 +73,7 @@ GuiGraphicsComposition
 
 			GuiGraphicsComposition::~GuiGraphicsComposition()
 			{
-				for(int i=0;i<children.Count();i++)
+				for(vint i=0;i<children.Count();i++)
 				{
 					delete children[i];
 				}
@@ -94,7 +94,7 @@ GuiGraphicsComposition
 				return InsertChild(children.Count(), child);
 			}
 
-			bool GuiGraphicsComposition::InsertChild(int index, GuiGraphicsComposition* child)
+			bool GuiGraphicsComposition::InsertChild(vint index, GuiGraphicsComposition* child)
 			{
 				if(!child) return false;
 				if(child->GetParent()) return false;
@@ -109,7 +109,7 @@ GuiGraphicsComposition
 			bool GuiGraphicsComposition::RemoveChild(GuiGraphicsComposition* child)
 			{
 				if(!child) return false;
-				int index=children.IndexOf(child);
+				vint index=children.IndexOf(child);
 				if(index==-1) return false;
 				child->OnParentChanged(child->parent, 0);
 				OnChildRemoved(child);
@@ -124,10 +124,10 @@ GuiGraphicsComposition
 				return true;
 			}
 
-			bool GuiGraphicsComposition::MoveChild(GuiGraphicsComposition* child, int newIndex)
+			bool GuiGraphicsComposition::MoveChild(GuiGraphicsComposition* child, vint newIndex)
 			{
 				if(!child) return false;
-				int index=children.IndexOf(child);
+				vint index=children.IndexOf(child);
 				if(index==-1) return false;
 				children.RemoveAt(index);
 				children.Insert(newIndex, child);
@@ -196,7 +196,7 @@ GuiGraphicsComposition
 						renderer->SetRenderTarget(renderTarget);
 					}
 				}
-				for(int i=0;i<children.Count();i++)
+				for(vint i=0;i<children.Count();i++)
 				{
 					children[i]->SetRenderTarget(renderTarget);
 				}
@@ -240,7 +240,7 @@ GuiGraphicsComposition
 								renderTarget->PushClipper(bounds);
 								if(!renderTarget->IsClipperCoverWholeTarget())
 								{
-									for(int i=0;i<children.Count();i++)
+									for(vint i=0;i<children.Count();i++)
 									{
 										children[i]->Render(Size(bounds.x1, bounds.y1));
 									}
@@ -274,12 +274,12 @@ GuiGraphicsComposition
 				if(relativeBounds.Contains(location))
 				{
 					Rect clientArea=GetClientArea();
-					for(int i=children.Count()-1;i>=0;i--)
+					for(vint i=children.Count()-1;i>=0;i--)
 					{
 						GuiGraphicsComposition* child=children[i];
 						Rect childBounds=child->GetBounds();
-						int offsetX=childBounds.x1+(clientArea.x1-bounds.x1);
-						int offsetY=childBounds.y1+(clientArea.y1-bounds.y1);
+						vint offsetX=childBounds.x1+(clientArea.x1-bounds.x1);
+						vint offsetY=childBounds.y1+(clientArea.y1-bounds.y1);
 						Point newLocation=location-Size(offsetX, offsetY);
 						GuiGraphicsComposition* childResult=child->FindComposition(newLocation);
 						if(childResult)
@@ -321,7 +321,7 @@ GuiGraphicsComposition
 			{
 				if(associatedControl)
 				{
-					for(int i=0;i<children.Count();i++)
+					for(vint i=0;i<children.Count();i++)
 					{
 						children[i]->OnControlParentChanged(0);
 					}
@@ -329,7 +329,7 @@ GuiGraphicsComposition
 				associatedControl=control;
 				if(associatedControl)
 				{
-					for(int i=0;i<children.Count();i++)
+					for(vint i=0;i<children.Count();i++)
 					{
 						children[i]->OnControlParentChanged(associatedControl);
 					}
@@ -477,7 +477,7 @@ GuiGraphicsComposition
 
 			void GuiGraphicsComposition::ForceCalculateSizeImmediately()
 			{
-				for(int i=0;i<children.Count();i++)
+				for(vint i=0;i<children.Count();i++)
 				{
 					children[i]->ForceCalculateSizeImmediately();
 				}
@@ -495,8 +495,8 @@ GuiGraphicsSite
 
 				minSize.x+=margin.left+margin.right+internalMargin.left+internalMargin.right;
 				minSize.y+=margin.top+margin.bottom+internalMargin.top+internalMargin.bottom;
-				int w=expectedBounds.Width();
-				int h=expectedBounds.Height();
+				vint w=expectedBounds.Width();
+				vint h=expectedBounds.Height();
 				if(minSize.x<w) minSize.x=w;
 				if(minSize.y<h) minSize.y=h;
 				return Rect(expectedBounds.LeftTop(), minSize);
@@ -531,8 +531,8 @@ GuiGraphicsSite
 				}
 				if(minSizeLimitation==GuiGraphicsComposition::LimitToElementAndChildren)
 				{
-					int childCount=Children().Count();
-					for(int i=0;i<childCount;i++)
+					vint childCount=Children().Count();
+					for(vint i=0;i<childCount;i++)
 					{
 						GuiGraphicsComposition* child=children[i];
 						if(child->IsSizeAffectParent())

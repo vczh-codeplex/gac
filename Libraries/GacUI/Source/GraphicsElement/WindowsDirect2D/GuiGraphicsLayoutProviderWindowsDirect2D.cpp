@@ -18,18 +18,18 @@ WindowsDirect2DElementInlineObject
 			class WindowsDirect2DElementInlineObject : public IDWriteInlineObject
 			{
 			protected:
-				int													counter;
+				vint													counter;
 				IGuiGraphicsParagraph::InlineObjectProperties		properties;
 				Ptr<IGuiGraphicsElement>							element;
-				int													start;
-				int													length;
+				vint													start;
+				vint													length;
 
 			public:
 				WindowsDirect2DElementInlineObject(
 					const IGuiGraphicsParagraph::InlineObjectProperties& _properties,
 					Ptr<IGuiGraphicsElement> _element,
-					int _start,
-					int _length
+					vint _start,
+					vint _length
 					)
 					:counter(1)
 					,properties(_properties)
@@ -48,12 +48,12 @@ WindowsDirect2DElementInlineObject
 					}
 				}
 
-				int GetStart()
+				vint GetStart()
 				{
 					return start;
 				}
 
-				int GetLength()
+				vint GetLength()
 				{
 					return length;
 				}
@@ -98,7 +98,7 @@ WindowsDirect2DElementInlineObject
 					IGuiGraphicsRenderer* graphicsRenderer=element->GetRenderer();
 					if(graphicsRenderer)
 					{
-						Rect bounds(Point((int)originX, (int)originY), properties.size);
+						Rect bounds(Point((vint)originX, (vint)originY), properties.size);
 						graphicsRenderer->Render(bounds);
 					}
 					return S_OK;
@@ -163,7 +163,7 @@ WindowsDirect2DParagraph
 				IWindowsDirect2DRenderTarget*		renderTarget;
 				ComPtr<IDWriteTextLayout>			textLayout;
 				bool								wrapLine;
-				int									maxWidth;
+				vint									maxWidth;
 				List<Color>							usedColors;
 				InlineElementMap					inlineElements;
 
@@ -184,7 +184,7 @@ WindowsDirect2DParagraph
 					IDWriteTextLayout* rawTextLayout=0;
 					HRESULT hr=dwriteFactory->CreateTextLayout(
 						_text.Buffer(),
-						_text.Length(),
+						(int)_text.Length(),
 						package->textFormat.Obj(),
 						0,
 						0,
@@ -230,12 +230,12 @@ WindowsDirect2DParagraph
 					}
 				}
 
-				int GetMaxWidth()override
+				vint GetMaxWidth()override
 				{
 					return maxWidth;
 				}
 
-				void SetMaxWidth(int value)override
+				void SetMaxWidth(vint value)override
 				{
 					if(maxWidth!=value)
 					{
@@ -244,32 +244,32 @@ WindowsDirect2DParagraph
 					}
 				}
 
-				bool SetFont(int start, int length, const WString& value)override
+				bool SetFont(vint start, vint length, const WString& value)override
 				{
 					if(length==0) return true;
 					DWRITE_TEXT_RANGE range;
-					range.startPosition=start;
-					range.length=length;
+					range.startPosition=(int)start;
+					range.length=(int)length;
 					HRESULT hr=textLayout->SetFontFamilyName(value.Buffer(), range);
 					return !FAILED(hr);
 				}
 
-				bool SetSize(int start, int length, int value)override
+				bool SetSize(vint start, vint length, vint value)override
 				{
 					if(length==0) return true;
 					DWRITE_TEXT_RANGE range;
-					range.startPosition=start;
-					range.length=length;
+					range.startPosition=(int)start;
+					range.length=(int)length;
 					HRESULT hr=textLayout->SetFontSize((FLOAT)value, range);
 					return !FAILED(hr);
 				}
 
-				bool SetStyle(int start, int length, TextStyle value)override
+				bool SetStyle(vint start, vint length, TextStyle value)override
 				{
 					if(length==0) return true;
 					DWRITE_TEXT_RANGE range;
-					range.startPosition=start;
-					range.length=length;
+					range.startPosition=(int)start;
+					range.length=(int)length;
 					HRESULT hr=S_OK;
 
 					hr=textLayout->SetFontStyle(value&Italic?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL, range);
@@ -284,26 +284,26 @@ WindowsDirect2DParagraph
 					return true;
 				}
 
-				bool SetColor(int start, int length, Color value)override
+				bool SetColor(vint start, vint length, Color value)override
 				{
 					if(length==0) return true;
 					ID2D1SolidColorBrush* brush=renderTarget->CreateDirect2DBrush(value);
 					usedColors.Add(value);
 
 					DWRITE_TEXT_RANGE range;
-					range.startPosition=start;
-					range.length=length;
+					range.startPosition=(int)start;
+					range.length=(int)length;
 					HRESULT hr=textLayout->SetDrawingEffect(brush, range);
 					return !FAILED(hr);
 				}
 
-				bool SetInlineObject(int start, int length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)override
+				bool SetInlineObject(vint start, vint length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)override
 				{
 					if(inlineElements.Keys().Contains(value.Obj()))
 					{
 						return false;
 					}
-					for(int i=0;i<inlineElements.Count();i++)
+					for(vint i=0;i<inlineElements.Count();i++)
 					{
 						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values().Get(i);
 						if(start<inlineObject->GetStart()+inlineObject->GetLength() && inlineObject->GetStart()<start+length)
@@ -313,8 +313,8 @@ WindowsDirect2DParagraph
 					}
 					ComPtr<WindowsDirect2DElementInlineObject> inlineObject=new WindowsDirect2DElementInlineObject(properties, value, start, length);
 					DWRITE_TEXT_RANGE range;
-					range.startPosition=start;
-					range.length=length;
+					range.startPosition=(int)start;
+					range.length=(int)length;
 					HRESULT hr=textLayout->SetInlineObject(inlineObject.Obj(), range);
 					if(!FAILED(hr))
 					{
@@ -332,17 +332,17 @@ WindowsDirect2DParagraph
 					}
 				}
 
-				bool ResetInlineObject(int start, int length)override
+				bool ResetInlineObject(vint start, vint length)override
 				{
-					for(int i=0;i<inlineElements.Count();i++)
+					for(vint i=0;i<inlineElements.Count();i++)
 					{
 						IGuiGraphicsElement* element=inlineElements.Keys().Get(i);
 						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values().Get(i);
 						if(inlineObject->GetStart()==start && inlineObject->GetLength()==length)
 						{
 							DWRITE_TEXT_RANGE range;
-							range.startPosition=start;
-							range.length=length;
+							range.startPosition=(int)start;
+							range.length=(int)length;
 							HRESULT hr=textLayout->SetInlineObject(NULL, range);
 							if(!FAILED(hr))
 							{
@@ -358,11 +358,11 @@ WindowsDirect2DParagraph
 					return false;
 				}
 
-				int GetHeight()override
+				vint GetHeight()override
 				{
 					DWRITE_TEXT_METRICS metrics;
 					textLayout->GetMetrics(&metrics);
-					return (int)metrics.height;
+					return (vint)metrics.height;
 				}
 
 				void Render(Rect bounds)override

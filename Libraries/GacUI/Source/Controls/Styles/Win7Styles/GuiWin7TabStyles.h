@@ -75,11 +75,11 @@ Tab
 				void										SetVisuallyEnabled(bool value)override;
 
 				void										SetCommandExecutor(controls::GuiTab::ICommandExecutor* value)override;
-				void										InsertTab(int index)override;
-				void										SetTabText(int index, const WString& value)override;
-				void										RemoveTab(int index)override;
-				void										MoveTab(int oldIndex, int newIndex)override;
-				void										SetSelectedTab(int index)override;
+				void										InsertTab(vint index)override;
+				void										SetTabText(vint index, const WString& value)override;
+				void										RemoveTab(vint index)override;
+				void										MoveTab(vint oldIndex, vint newIndex)override;
+				void										SetSelectedTab(vint index)override;
 				controls::GuiControl::IStyleController*		CreateTabPageStyleController()override;
 			};
 		}

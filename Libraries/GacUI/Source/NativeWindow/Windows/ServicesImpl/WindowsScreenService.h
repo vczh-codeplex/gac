@@ -43,15 +43,15 @@ namespace vl
 				struct MonitorEnumProcData
 				{
 					WindowsScreenService*	screenService;
-					int						currentScreen;
+					vint						currentScreen;
 				};
 
 				WindowsScreenService(HandleRetriver _handleRetriver);
 
 				static BOOL CALLBACK							MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 				void											RefreshScreenInformation();
-				int												GetScreenCount()override;
-				INativeScreen*									GetScreen(int index)override;
+				vint												GetScreenCount()override;
+				INativeScreen*									GetScreen(vint index)override;
 				INativeScreen*									GetScreen(INativeWindow* window)override;
 			};
 		}

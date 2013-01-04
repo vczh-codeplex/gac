@@ -68,7 +68,7 @@ WindowsImageFrame
 
 			WindowsImageFrame::~WindowsImageFrame()
 			{
-				for(int i=0;i<caches.Count();i++)
+				for(vint i=0;i<caches.Count();i++)
 				{
 					caches.Values().Get(i)->OnDetach(this);
 				}
@@ -89,7 +89,7 @@ WindowsImageFrame
 
 			bool WindowsImageFrame::SetCache(void* key, Ptr<INativeImageFrameCache> cache)
 			{
-				int index=caches.Keys().IndexOf(key);
+				vint index=caches.Keys().IndexOf(key);
 				if(index!=-1)
 				{
 					return false;
@@ -101,13 +101,13 @@ WindowsImageFrame
 
 			Ptr<INativeImageFrameCache> WindowsImageFrame::GetCache(void* key)
 			{
-				int index=caches.Keys().IndexOf(key);
+				vint index=caches.Keys().IndexOf(key);
 				return index==-1?0:caches.Values().Get(index);
 			}
 
 			Ptr<INativeImageFrameCache> WindowsImageFrame::RemoveCache(void* key)
 			{
-				int index=caches.Keys().IndexOf(key);
+				vint index=caches.Keys().IndexOf(key);
 				if(index==-1)
 				{
 					return 0;
@@ -183,12 +183,12 @@ WindowsImage
 				return INativeImage::Unknown;
 			}
 
-			int WindowsImage::GetFrameCount()
+			vint WindowsImage::GetFrameCount()
 			{
 				return frames.Count();
 			}
 
-			INativeImageFrame* WindowsImage::GetFrame(int index)
+			INativeImageFrame* WindowsImage::GetFrame(vint index)
 			{
 				if(0<=index && index<GetFrameCount())
 				{
@@ -196,7 +196,7 @@ WindowsImage
 					if(!frame)
 					{
 						IWICBitmapFrameDecode* frameDecode=0;
-						HRESULT hr=bitmapDecoder->GetFrame(index, &frameDecode);
+						HRESULT hr=bitmapDecoder->GetFrame((int)index, &frameDecode);
 						if(SUCCEEDED(hr))
 						{
 							frame=new WindowsImageFrame(this, frameDecode);
@@ -236,12 +236,12 @@ WindowsBitmapImage
 				return formatType;
 			}
 
-			int WindowsBitmapImage::GetFrameCount()
+			vint WindowsBitmapImage::GetFrameCount()
 			{
 				return 1;
 			}
 
-			INativeImageFrame* WindowsBitmapImage::GetFrame(int index)
+			INativeImageFrame* WindowsBitmapImage::GetFrame(vint index)
 			{
 				return index==0?frame.Obj():0;
 			}
@@ -293,10 +293,10 @@ WindowsImageService
 				}
 			}
 
-			Ptr<INativeImage> WindowsImageService::CreateImageFromMemory(void* buffer, int length)
+			Ptr<INativeImage> WindowsImageService::CreateImageFromMemory(void* buffer, vint length)
 			{
 				Ptr<INativeImage> result;
-				::IStream* stream=SHCreateMemStream((const BYTE*)buffer, length);
+				::IStream* stream=SHCreateMemStream((const BYTE*)buffer, (int)length);
 				if(stream)
 				{
 					IWICBitmapDecoder* bitmapDecoder=0;
@@ -316,14 +316,14 @@ WindowsImageService
 				char buffer[65536];
 				while(true)
 				{
-					int length=stream.Read(buffer, sizeof(buffer));
+					vint length=stream.Read(buffer, sizeof(buffer));
 					memoryStream.Write(buffer, length);
 					if(length!=sizeof(buffer))
 					{
 						break;
 					}
 				}
-				return CreateImageFromMemory(memoryStream.GetInternalBuffer(), (int)memoryStream.Size());
+				return CreateImageFromMemory(memoryStream.GetInternalBuffer(), (vint)memoryStream.Size());
 			}
 
 			Ptr<INativeImage> WindowsImageService::CreateImageFromHBITMAP(HBITMAP handle)

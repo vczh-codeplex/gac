@@ -52,23 +52,23 @@ TextPos
 			/// <summary>
 			/// Row number.
 			/// </summary>
-			int			row;
+			vint			row;
 			/// <summary>
 			/// Column number. If a line has 4 characters, there are 5 available column numbers(from 0 to 4) in this line.
 			/// </summary>
-			int			column;
+			vint			column;
 
 			TextPos()
 				:row(0) ,column(0)
 			{
 			}
 
-			TextPos(int _row, int _column)
+			TextPos(vint _row, vint _column)
 				:row(_row) ,column(_column)
 			{
 			}
 
-			int Compare(const TextPos& value)const
+			vint Compare(const TextPos& value)const
 			{
 				if(row<value.row) return -1;
 				if(row>value.row) return 1;
@@ -97,18 +97,18 @@ Point
 			/// <summary>
 			/// Position in x dimension.
 			/// </summary>
-			int			x;
+			vint			x;
 			/// <summary>
 			/// Position in y dimension.
 			/// </summary>
-			int			y;
+			vint			y;
 
 			Point()
 				:x(0) ,y(0)
 			{
 			}
 
-			Point(int _x, int _y)
+			Point(vint _x, vint _y)
 				:x(_x) ,y(_y)
 			{
 			}
@@ -136,18 +136,18 @@ Size
 			/// <summary>
 			/// Size in x dimension.
 			/// </summary>
-			int			x;
+			vint			x;
 			/// <summary>
 			/// Size in y dimension.
 			/// </summary>
-			int			y;
+			vint			y;
 
 			Size()
 				:x(0) ,y(0)
 			{
 			}
 
-			Size(int _x, int _y)
+			Size(vint _x, vint _y)
 				:x(_x) ,y(_y)
 			{
 			}
@@ -175,26 +175,26 @@ Rectangle
 			/// <summary>
 			/// Left.
 			/// </summary>
-			int		x1;
+			vint		x1;
 			/// <summary>
 			/// Top.
 			/// </summary>
-			int		y1;
+			vint		y1;
 			/// <summary>
 			/// Left + Width.
 			/// </summary>
-			int		x2;
+			vint		x2;
 			/// <summary>
 			/// Top + Height.
 			/// </summary>
-			int		y2;
+			vint		y2;
 
 			Rect()
 				:x1(0), y1(0), x2(0), y2(0)
 			{
 			}
 
-			Rect(int _x1, int _y1, int _x2, int _y2)
+			Rect(vint _x1, vint _y1, vint _x2, vint _y2)
 				:x1(_x1), y1(_y1), x2(_x2), y2(_y2)
 			{
 			}
@@ -229,37 +229,37 @@ Rectangle
 				return Size(x2-x1, y2-y1);
 			}
 
-			int Left()const
+			vint Left()const
 			{
 				return x1;
 			}
 
-			int Right()const
+			vint Right()const
 			{
 				return x2;
 			}
 
-			int Width()const
+			vint Width()const
 			{
 				return x2-x1;
 			}
 
-			int Top()const
+			vint Top()const
 			{
 				return y1;
 			}
 
-			int Bottom()const
+			vint Bottom()const
 			{
 				return y2;
 			}
 
-			int Height()const
+			vint Height()const
 			{
 				return y2-y1;
 			}
 
-			void Expand(int x, int y)
+			void Expand(vint x, vint y)
 			{
 				x1-=x;
 				y1-=y;
@@ -275,7 +275,7 @@ Rectangle
 				y2+=s.y;
 			}
 
-			void Move(int x, int y)
+			void Move(vint x, vint y)
 			{
 				x1+=x;
 				y1+=y;
@@ -331,12 +331,12 @@ Rectangle
 			return Size(s1.x-s2.x, s1.y-s2.y);
 		}
 
-		inline Size operator*(Size s, int i)
+		inline Size operator*(Size s, vint i)
 		{
 			return Size(s.x*i, s.y*i);
 		}
 
-		inline Size operator/(Size s, int i)
+		inline Size operator/(Size s, vint i)
 		{
 			return Size(s.x/i, s.y/i);
 		}
@@ -397,7 +397,7 @@ Color
 			{
 			}
 
-			int Compare(Color color)const
+			vint Compare(Color color)const
 			{
 				return value-color.value;
 			}
@@ -422,26 +422,26 @@ Margin
 			/// <summary>
 			/// The left margin.
 			/// </summary>
-			int		left;
+			vint		left;
 			/// <summary>
 			/// The top margin.
 			/// </summary>
-			int		top;
+			vint		top;
 			/// <summary>
 			/// The right margin.
 			/// </summary>
-			int		right;
+			vint		right;
 			/// <summary>
 			/// The bottom margin.
 			/// </summary>
-			int		bottom;
+			vint		bottom;
 
 			Margin()
 				:left(0), top(0), right(0), bottom(0)
 			{
 			}
 
-			Margin(int _left, int _top, int _right, int _bottom)
+			Margin(vint _left, vint _top, vint _right, vint _bottom)
 				:left(_left), top(_top), right(_right), bottom(_bottom)
 			{
 			}
@@ -473,7 +473,7 @@ Resources
 			/// <summary>
 			/// Font size in pixel.
 			/// </summary>
-			int					size;
+			vint					size;
 			/// <summary>
 			/// True if the font is bold.
 			/// </summary>
@@ -510,9 +510,9 @@ Resources
 			{
 			}
 			
-			int Compare(const FontProperties& value)const
+			vint Compare(const FontProperties& value)const
 			{
-				int result=0;
+				vint result=0;
 				
 				result=WString::Compare(fontFamily, value.fontFamily);
 				if(result!=0) return result;
@@ -520,19 +520,19 @@ Resources
 				result=size-value.size;
 				if(result!=0) return result;
 
-				result=(int)bold-(int)value.bold;
+				result=(vint)bold-(vint)value.bold;
 				if(result!=0) return result;
 
-				result=(int)italic-(int)value.italic;
+				result=(vint)italic-(vint)value.italic;
 				if(result!=0) return result;
 
-				result=(int)underline-(int)value.underline;
+				result=(vint)underline-(vint)value.underline;
 				if(result!=0) return result;
 
-				result=(int)strikeline-(int)value.strikeline;
+				result=(vint)strikeline-(vint)value.strikeline;
 				if(result!=0) return result;
 
-				result=(int)antialias-(int)value.antialias;
+				result=(vint)antialias-(vint)value.antialias;
 				if(result!=0) return result;
 
 				return 0;

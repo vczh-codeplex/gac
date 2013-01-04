@@ -47,7 +47,7 @@ Button Configuration
 
 				void										SetAlphaWithoutText(unsigned char a);
 
-				static Win8ButtonColors						Blend(const Win8ButtonColors& c1, const Win8ButtonColors& c2, int ratio, int total);
+				static Win8ButtonColors						Blend(const Win8ButtonColors& c1, const Win8ButtonColors& c2, vint ratio, vint total);
 
 				static Win8ButtonColors						ButtonNormal();
 				static Win8ButtonColors						ButtonActive();
@@ -154,7 +154,7 @@ Button Configuration
 					return !(*this==colors);
 				}
 
-				static Win8TextBoxColors					Blend(const Win8TextBoxColors& c1, const Win8TextBoxColors& c2, int ratio, int total);
+				static Win8TextBoxColors					Blend(const Win8TextBoxColors& c1, const Win8TextBoxColors& c2, vint ratio, vint total);
 
 				static Win8TextBoxColors					Normal();
 				static Win8TextBoxColors					Active();

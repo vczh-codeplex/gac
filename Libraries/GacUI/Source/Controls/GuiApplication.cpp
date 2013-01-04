@@ -37,7 +37,7 @@ GuiApplication
 
 			void GuiApplication::ClipboardUpdated()
 			{
-				for(int i=0;i<windows.Count();i++)
+				for(vint i=0;i<windows.Count();i++)
 				{
 					GuiEventArgs arguments=windows[i]->GetNotifyEventArguments();
 					windows[i]->ClipboardUpdated.Execute(arguments);
@@ -92,7 +92,7 @@ GuiApplication
 			void GuiApplication::OnMouseDown(Point location)
 			{
 				GuiWindow* window=GetWindow(location);
-				for(int i=0;i<windows.Count();i++)
+				for(vint i=0;i<windows.Count();i++)
 				{
 					if(windows[i]!=window)
 					{
@@ -121,7 +121,7 @@ GuiApplication
 				INativeWindow* nativeWindow=GetCurrentController()->WindowService()->GetWindow(location);
 				if(nativeWindow)
 				{
-					for(int i=0;i<windows.Count();i++)
+					for(vint i=0;i<windows.Count();i++)
 					{
 						GuiWindow* window=windows[i];
 						if(window->GetNativeWindow()==nativeWindow)
@@ -148,7 +148,7 @@ GuiApplication
 				GetCurrentController()->AsyncService()->InvokeInMainThread(proc, argument);
 			}
 
-			bool GuiApplication::InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds)
+			bool GuiApplication::InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, vint milliseconds)
 			{
 				return GetCurrentController()->AsyncService()->InvokeInMainThreadAndWait(proc, argument, milliseconds);
 			}
@@ -170,7 +170,7 @@ GuiApplication
 				InvokeInMainThread(&InvokeInMainThreadProc, new Func<void()>(proc));
 			}
 
-			bool GuiApplication::InvokeInMainThreadAndWait(const Func<void()>& proc, int milliseconds)
+			bool GuiApplication::InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds)
 			{
 				return InvokeInMainThreadAndWait(&InvokeInMainThreadProc, new Func<void()>(proc));
 			}
@@ -191,7 +191,7 @@ Helpers
 				Ptr<theme::ITheme> theme;
 				{
 					WString osVersion=GetCurrentController()->GetOSVersion();
-					int index=osVersion.IndexOf(L';');
+					vint index=osVersion.IndexOf(L';');
 					WString osMainVersion=osVersion.Sub(0, index);
 					if(osMainVersion==L"Windows 8" || osMainVersion==L"Windows Server 2012")
 					{

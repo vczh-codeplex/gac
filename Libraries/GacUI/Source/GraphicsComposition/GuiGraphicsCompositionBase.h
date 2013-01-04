@@ -98,7 +98,7 @@ Basic Construction
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="index">The z-order. 0 means the lowest position.</param>
 				/// <param name="child">The child composition to add.</param>
-				bool										InsertChild(int index, GuiGraphicsComposition* child);
+				bool										InsertChild(vint index, GuiGraphicsComposition* child);
 				/// <summary>Remove a child composition.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="child">The child composition to remove.</param>
@@ -107,7 +107,7 @@ Basic Construction
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="child">The child composition to move.</param>
 				/// <param name="newIndex">The new z-order. 0 means the lowest position.</param>
-				bool										MoveChild(GuiGraphicsComposition* child, int newIndex);
+				bool										MoveChild(GuiGraphicsComposition* child, vint newIndex);
 
 				/// <summary>Get the contained graphics element.</summary>
 				/// <returns>The contained graphics element.</returns>

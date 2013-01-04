@@ -163,10 +163,10 @@ Win7GroupBoxStyle
 				style->textElement->SetColor(colorCurrent);
 			}
 
-			void Win7GroupBoxStyle::SetMargins(int fontSize)
+			void Win7GroupBoxStyle::SetMargins(vint fontSize)
 			{
 				fontSize+=4;
-				int half=fontSize/2;
+				vint half=fontSize/2;
 				sinkBorderComposition->SetAlignmentToParent(Margin(0, half, 1, 1));
 				raisedBorderComposition->SetAlignmentToParent(Margin(1, half+1, 0, 0));
 				containerComposition->SetAlignmentToParent(Margin(2, fontSize, 2, 2));

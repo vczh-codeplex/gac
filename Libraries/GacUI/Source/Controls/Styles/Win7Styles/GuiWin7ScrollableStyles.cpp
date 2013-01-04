@@ -218,7 +218,7 @@ Win7ProgressBarStyle
 
 			void Win7ProgressBarStyle::UpdateProgressBar()
 			{
-				int max=totalSize-pageSize;
+				vint max=totalSize-pageSize;
 				if(position<0)
 				{
 					progressComposition->SetWidthPageSize(0);
@@ -338,19 +338,19 @@ Win7ProgressBarStyle
 			{
 			}
 
-			void Win7ProgressBarStyle::SetTotalSize(int value)
+			void Win7ProgressBarStyle::SetTotalSize(vint value)
 			{
 				totalSize=value;
 				UpdateProgressBar();
 			}
 
-			void Win7ProgressBarStyle::SetPageSize(int value)
+			void Win7ProgressBarStyle::SetPageSize(vint value)
 			{
 				pageSize=value;
 				UpdateProgressBar();
 			}
 
-			void Win7ProgressBarStyle::SetPosition(int value)
+			void Win7ProgressBarStyle::SetPosition(vint value)
 			{
 				position=value;
 				UpdateProgressBar();
@@ -398,7 +398,7 @@ Win7ScrollViewProvider
 				return new Win7ScrollStyle(Win7ScrollStyle::Vertical);
 			}
 
-			int Win7ScrollViewProvider::GetDefaultScrollSize()
+			vint Win7ScrollViewProvider::GetDefaultScrollSize()
 			{
 				return Win7ScrollStyle::DefaultSize;
 			}

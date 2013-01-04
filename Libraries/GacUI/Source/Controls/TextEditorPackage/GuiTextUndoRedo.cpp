@@ -35,7 +35,7 @@ GuiGeneralUndoRedoProcessor
 						savedStep=-1;
 					}
 
-					int count=steps.Count()-firstFutureStep;
+					vint count=steps.Count()-firstFutureStep;
 					if(count>0)
 					{
 						steps.RemoveRange(firstFutureStep, count);

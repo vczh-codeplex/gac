@@ -43,7 +43,7 @@ GuiApplication
 
 			void GuiApplication::ClipboardUpdated()
 			{
-				for(int i=0;i<windows.Count();i++)
+				for(vint i=0;i<windows.Count();i++)
 				{
 					GuiEventArgs arguments=windows[i]->GetNotifyEventArguments();
 					windows[i]->ClipboardUpdated.Execute(arguments);
@@ -98,7 +98,7 @@ GuiApplication
 			void GuiApplication::OnMouseDown(Point location)
 			{
 				GuiWindow* window=GetWindow(location);
-				for(int i=0;i<windows.Count();i++)
+				for(vint i=0;i<windows.Count();i++)
 				{
 					if(windows[i]!=window)
 					{
@@ -127,7 +127,7 @@ GuiApplication
 				INativeWindow* nativeWindow=GetCurrentController()->WindowService()->GetWindow(location);
 				if(nativeWindow)
 				{
-					for(int i=0;i<windows.Count();i++)
+					for(vint i=0;i<windows.Count();i++)
 					{
 						GuiWindow* window=windows[i];
 						if(window->GetNativeWindow()==nativeWindow)
@@ -154,7 +154,7 @@ GuiApplication
 				GetCurrentController()->AsyncService()->InvokeInMainThread(proc, argument);
 			}
 
-			bool GuiApplication::InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds)
+			bool GuiApplication::InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, vint milliseconds)
 			{
 				return GetCurrentController()->AsyncService()->InvokeInMainThreadAndWait(proc, argument, milliseconds);
 			}
@@ -176,7 +176,7 @@ GuiApplication
 				InvokeInMainThread(&InvokeInMainThreadProc, new Func<void()>(proc));
 			}
 
-			bool GuiApplication::InvokeInMainThreadAndWait(const Func<void()>& proc, int milliseconds)
+			bool GuiApplication::InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds)
 			{
 				return InvokeInMainThreadAndWait(&InvokeInMainThreadProc, new Func<void()>(proc));
 			}
@@ -197,7 +197,7 @@ Helpers
 				Ptr<theme::ITheme> theme;
 				{
 					WString osVersion=GetCurrentController()->GetOSVersion();
-					int index=osVersion.IndexOf(L';');
+					vint index=osVersion.IndexOf(L';');
 					WString osMainVersion=osVersion.Sub(0, index);
 					if(osMainVersion==L"Windows 8" || osMainVersion==L"Windows Server 2012")
 					{
@@ -307,7 +307,7 @@ GuiControl
 
 			void GuiControl::OnParentLineChanged()
 			{
-				for(int i=0;i<children.Count();i++)
+				for(vint i=0;i<children.Count();i++)
 				{
 					children[i]->OnParentLineChanged();
 				}
@@ -319,7 +319,7 @@ GuiControl
 
 			void GuiControl::OnBeforeReleaseGraphicsHost()
 			{
-				for(int i=0;i<children.Count();i++)
+				for(vint i=0;i<children.Count();i++)
 				{
 					children[i]->OnBeforeReleaseGraphicsHost();
 				}
@@ -334,7 +334,7 @@ GuiControl
 					styleController->SetVisuallyEnabled(isVisuallyEnabled);
 					VisuallyEnabledChanged.Execute(GetNotifyEventArguments());
 
-					for(int i=0;i<children.Count();i++)
+					for(vint i=0;i<children.Count();i++)
 					{
 						children[i]->UpdateVisuallyEnabled();
 					}
@@ -377,14 +377,14 @@ GuiControl
 			{
 				if(parent || !styleController)
 				{
-					for(int i=0;i<children.Count();i++)
+					for(vint i=0;i<children.Count();i++)
 					{
 						delete children[i];
 					}
 				}
 				else
 				{
-					for(int i=children.Count()-1;i>=0;i--)
+					for(vint i=children.Count()-1;i>=0;i--)
 					{
 						GuiControl* child=children[i];
 						child->GetBoundsComposition()->GetParent()->RemoveChild(child->GetBoundsComposition());
@@ -429,12 +429,12 @@ GuiControl
 				return parent;
 			}
 
-			int GuiControl::GetChildrenCount()
+			vint GuiControl::GetChildrenCount()
 			{
 				return children.Count();
 			}
 
-			GuiControl* GuiControl::GetChild(int index)
+			GuiControl* GuiControl::GetChild(vint index)
 			{
 				return children[index];
 			}
@@ -569,7 +569,7 @@ GuiImageData
 			{
 			}
 
-			GuiImageData::GuiImageData(Ptr<INativeImage> _image, int _frameIndex)
+			GuiImageData::GuiImageData(Ptr<INativeImage> _image, vint _frameIndex)
 				:image(_image)
 				,frameIndex(_frameIndex)
 			{
@@ -584,7 +584,7 @@ GuiImageData
 				return image;
 			}
 
-			int GuiImageData::GetFrameIndex()
+			vint GuiImageData::GetFrameIndex()
 			{
 				return frameIndex;
 			}
@@ -756,7 +756,7 @@ GuiSelectableButton::GroupController
 
 			GuiSelectableButton::GroupController::~GroupController()
 			{
-				for(int i=buttons.Count()-1;i>=0;i--)
+				for(vint i=buttons.Count()-1;i>=0;i--)
 				{
 					buttons[i]->SetGroupController(0);
 				}
@@ -793,7 +793,7 @@ GuiSelectableButton::MutexGroupController
 				if(!suppress)
 				{
 					suppress=true;
-					for(int i=0;i<buttons.Count();i++)
+					for(vint i=0;i<buttons.Count();i++)
 					{
 						buttons[i]->SetSelected(buttons[i]==button);
 					}
@@ -921,17 +921,17 @@ GuiScroll::CommandExecutor
 				scroll->SetPosition(scroll->GetPosition()+scroll->GetBigMove());
 			}
 			
-			void GuiScroll::CommandExecutor::SetTotalSize(int value)
+			void GuiScroll::CommandExecutor::SetTotalSize(vint value)
 			{
 				scroll->SetTotalSize(value);
 			}
 
-			void GuiScroll::CommandExecutor::SetPageSize(int value)
+			void GuiScroll::CommandExecutor::SetPageSize(vint value)
 			{
 				scroll->SetPageSize(value);
 			}
 
-			void GuiScroll::CommandExecutor::SetPosition(int value)
+			void GuiScroll::CommandExecutor::SetPosition(vint value)
 			{
 				scroll->SetPosition(value);
 			}
@@ -966,12 +966,12 @@ GuiScroll
 			{
 			}
 
-			int GuiScroll::GetTotalSize()
+			vint GuiScroll::GetTotalSize()
 			{
 				return totalSize;
 			}
 
-			void GuiScroll::SetTotalSize(int value)
+			void GuiScroll::SetTotalSize(vint value)
 			{
 				if(totalSize!=value && 0<value)
 				{
@@ -989,12 +989,12 @@ GuiScroll
 				}
 			}
 
-			int GuiScroll::GetPageSize()
+			vint GuiScroll::GetPageSize()
 			{
 				return pageSize;
 			}
 
-			void GuiScroll::SetPageSize(int value)
+			void GuiScroll::SetPageSize(vint value)
 			{
 				if(pageSize!=value && 0<=value && value<=totalSize)
 				{
@@ -1008,16 +1008,16 @@ GuiScroll
 				}
 			}
 
-			int GuiScroll::GetPosition()
+			vint GuiScroll::GetPosition()
 			{
 				return position;
 			}
 
-			void GuiScroll::SetPosition(int value)
+			void GuiScroll::SetPosition(vint value)
 			{
-				int min=GetMinPosition();
-				int max=GetMaxPosition();
-				int newPosition=
+				vint min=GetMinPosition();
+				vint max=GetMaxPosition();
+				vint newPosition=
 					value<min?min:
 					value>max?max:
 					value;
@@ -1029,12 +1029,12 @@ GuiScroll
 				}
 			}
 
-			int GuiScroll::GetSmallMove()
+			vint GuiScroll::GetSmallMove()
 			{
 				return smallMove;
 			}
 
-			void GuiScroll::SetSmallMove(int value)
+			void GuiScroll::SetSmallMove(vint value)
 			{
 				if(value>0 && smallMove!=value)
 				{
@@ -1043,12 +1043,12 @@ GuiScroll
 				}
 			}
 
-			int GuiScroll::GetBigMove()
+			vint GuiScroll::GetBigMove()
 			{
 				return bigMove;
 			}
 
-			void GuiScroll::SetBigMove(int value)
+			void GuiScroll::SetBigMove(vint value)
 			{
 				if(value>0 && bigMove!=value)
 				{
@@ -1057,12 +1057,12 @@ GuiScroll
 				}
 			}
 
-			int GuiScroll::GetMinPosition()
+			vint GuiScroll::GetMinPosition()
 			{
 				return 0;
 			}
 
-			int GuiScroll::GetMaxPosition()
+			vint GuiScroll::GetMaxPosition()
 			{
 				return totalSize-pageSize;
 			}
@@ -1192,7 +1192,7 @@ GuiTab
 			{
 			}
 
-			void GuiTab::CommandExecutor::ShowTab(int index)
+			void GuiTab::CommandExecutor::ShowTab(vint index)
 			{
 				tab->SetSelectedPage(tab->GetPages().Get(index));
 			}
@@ -1208,13 +1208,13 @@ GuiTab
 
 			GuiTab::~GuiTab()
 			{
-				for(int i=0;i<tabPages.Count();i++)
+				for(vint i=0;i<tabPages.Count();i++)
 				{
 					delete tabPages[i];
 				}
 			}
 
-			GuiTabPage* GuiTab::CreatePage(int index)
+			GuiTabPage* GuiTab::CreatePage(vint index)
 			{
 				GuiTabPage* page=new GuiTabPage();
 				if(CreatePage(page, index))
@@ -1228,7 +1228,7 @@ GuiTab
 				}
 			}
 
-			bool GuiTab::CreatePage(GuiTabPage* page, int index)
+			bool GuiTab::CreatePage(GuiTabPage* page, vint index)
 			{
 				if(index>=0 && index>=tabPages.Count())
 				{
@@ -1263,7 +1263,7 @@ GuiTab
 			{
 				if(value->GetOwnerTab()==this && value->DeassociateTab(this))
 				{
-					int index=tabPages.IndexOf(value);
+					vint index=tabPages.IndexOf(value);
 					styleController->RemoveTab(index);
 					GetContainerComposition()->RemoveChild(value->GetContainer()->GetBoundsComposition());
 					tabPages.RemoveAt(index);
@@ -1284,10 +1284,10 @@ GuiTab
 				}
 			}
 
-			bool GuiTab::MovePage(GuiTabPage* page, int newIndex)
+			bool GuiTab::MovePage(GuiTabPage* page, vint newIndex)
 			{
 				if(!page) return false;
-				int index=tabPages.IndexOf(page);
+				vint index=tabPages.IndexOf(page);
 				if(index==-1) return false;
 				tabPages.RemoveAt(index);
 				tabPages.Insert(newIndex, page);
@@ -1313,7 +1313,7 @@ GuiTab
 					if(selectedPage!=value)
 					{
 						selectedPage=value;
-						for(int i=0;i<tabPages.Count();i++)
+						for(vint i=0;i<tabPages.Count();i++)
 						{
 							bool selected=tabPages[i]==value;
 							tabPages[i]->GetContainer()->SetVisible(selected);
@@ -1866,7 +1866,7 @@ GuiControlHost
 			{
 				OnBeforeReleaseGraphicsHost();
 				styleController=0;
-				for(int i=0;i<components.Count();i++)
+				for(vint i=0;i<components.Count();i++)
 				{
 					delete components[i];
 				}
@@ -2631,7 +2631,7 @@ GuiPopup
 							}
 
 							window->SetParent(controlWindow);
-							for(int i=0;i<4;i++)
+							for(vint i=0;i<4;i++)
 							{
 								if(!IsClippedByScreen(locations[i]))
 								{
@@ -2755,7 +2755,7 @@ GuiComboBoxBase
 GuiComboBoxListControl
 ***********************************************************************/
 
-			void GuiComboBoxListControl::DisplaySelectedContent(int itemIndex)
+			void GuiComboBoxListControl::DisplaySelectedContent(vint itemIndex)
 			{
 				if(primaryTextView)
 				{
@@ -2814,7 +2814,7 @@ GuiComboBoxListControl
 				return containedListControl;
 			}
 
-			int GuiComboBoxListControl::GetSelectedIndex()
+			vint GuiComboBoxListControl::GetSelectedIndex()
 			{
 				if(containedListControl->GetSelectedItems().Count()==1)
 				{
@@ -2826,7 +2826,7 @@ GuiComboBoxListControl
 				}
 			}
 
-			void GuiComboBoxListControl::SetSelectedIndex(int value)
+			void GuiComboBoxListControl::SetSelectedIndex(vint value)
 			{
 				containedListControl->SetSelected(value, true);
 			}
@@ -2871,11 +2871,11 @@ GuiListControl::ItemCallback
 
 			void GuiListControl::ItemCallback::ClearCache()
 			{
-				for(int i=0;i<cachedStyles.Count();i++)
+				for(vint i=0;i<cachedStyles.Count();i++)
 				{
 					listControl->itemStyleProvider->DestroyItemStyle(cachedStyles[i]);
 				}
-				for(int i=0;i<installedStyles.Count();i++)
+				for(vint i=0;i<installedStyles.Count();i++)
 				{
 					listControl->itemStyleProvider->DestroyItemStyle(installedStyles[i]);
 				}
@@ -2887,16 +2887,16 @@ GuiListControl::ItemCallback
 			{
 			}
 
-			void GuiListControl::ItemCallback::OnItemModified(int start, int count, int newCount)
+			void GuiListControl::ItemCallback::OnItemModified(vint start, vint count, vint newCount)
 			{
 				listControl->OnItemModified(start, count, newCount);
 			}
 
-			GuiListControl::IItemStyleController* GuiListControl::ItemCallback::RequestItem(int itemIndex)
+			GuiListControl::IItemStyleController* GuiListControl::ItemCallback::RequestItem(vint itemIndex)
 			{
-				int id=listControl->itemStyleProvider->GetItemStyleId(itemIndex);
+				vint id=listControl->itemStyleProvider->GetItemStyleId(itemIndex);
 				IItemStyleController* style=0;
-				for(int i=0;i<cachedStyles.Count();i++)
+				for(vint i=0;i<cachedStyles.Count();i++)
 				{
 					IItemStyleController* cachedStyle=cachedStyles[i];
 					if(cachedStyle->GetItemStyleId()==id)
@@ -2920,7 +2920,7 @@ GuiListControl::ItemCallback
 
 			void GuiListControl::ItemCallback::ReleaseItem(IItemStyleController* style)
 			{
-				int index=installedStyles.IndexOf(style);
+				vint index=installedStyles.IndexOf(style);
 				if(index!=-1)
 				{
 					listControl->OnStyleUninstalled(style);
@@ -2984,11 +2984,11 @@ GuiListControl::ItemCallback
 GuiListControl
 ***********************************************************************/
 
-			void GuiListControl::OnItemModified(int start, int count, int newCount)
+			void GuiListControl::OnItemModified(vint start, vint count, vint newCount)
 			{
 			}
 
-			void GuiListControl::OnStyleInstalled(int itemIndex, IItemStyleController* style)
+			void GuiListControl::OnStyleInstalled(vint itemIndex, IItemStyleController* style)
 			{
 				AttachItemEvents(style);
 			}
@@ -3070,7 +3070,7 @@ GuiListControl
 			{
 				if(itemArranger && GetVisuallyEnabled())
 				{
-					int itemIndex=itemArranger->GetVisibleIndex(style);
+					vint itemIndex=itemArranger->GetVisibleIndex(style);
 					if(itemIndex!=-1)
 					{
 						GuiItemMouseEventArgs redirectArguments;
@@ -3088,7 +3088,7 @@ GuiListControl
 			{
 				if(itemArranger && GetVisuallyEnabled())
 				{
-					int itemIndex=itemArranger->GetVisibleIndex(style);
+					vint itemIndex=itemArranger->GetVisibleIndex(style);
 					if(itemIndex!=-1)
 					{
 						GuiItemEventArgs redirectArguments;
@@ -3120,7 +3120,7 @@ GuiListControl
 
 			void GuiListControl::AttachItemEvents(IItemStyleController* style)
 			{
-				int index=visibleStyles.Keys().IndexOf(style);
+				vint index=visibleStyles.Keys().IndexOf(style);
 				if(index==-1)
 				{
 					Ptr<VisibleStyleHelper> helper=new VisibleStyleHelper;
@@ -3148,7 +3148,7 @@ GuiListControl
 
 			void GuiListControl::DetachItemEvents(IItemStyleController* style)
 			{
-				int index=visibleStyles.Keys().IndexOf(style);
+				vint index=visibleStyles.Keys().IndexOf(style);
 				if(index!=-1)
 				{
 					Ptr<VisibleStyleHelper> helper=visibleStyles.Values().Get(index);
@@ -3261,7 +3261,7 @@ GuiListControl
 				return old;
 			}
 
-			bool GuiListControl::EnsureItemVisible(int itemIndex)
+			bool GuiListControl::EnsureItemVisible(vint itemIndex)
 			{
 				if(itemIndex<0 || itemIndex>=itemProvider->Count())
 				{
@@ -3274,7 +3274,7 @@ GuiListControl
 GuiSelectableListControl
 ***********************************************************************/
 
-			void GuiSelectableListControl::OnItemModified(int start, int count, int newCount)
+			void GuiSelectableListControl::OnItemModified(vint start, vint count, vint newCount)
 			{
 				GuiListControl::OnItemModified(start, count, newCount);
 				if(count!=newCount)
@@ -3283,7 +3283,7 @@ GuiSelectableListControl
 				}
 			}
 
-			void GuiSelectableListControl::OnStyleInstalled(int itemIndex, IItemStyleController* style)
+			void GuiSelectableListControl::OnStyleInstalled(vint itemIndex, IItemStyleController* style)
 			{
 				GuiListControl::OnStyleInstalled(itemIndex, style);
 				selectableStyleProvider->SetStyleSelected(style, selectedItems.Contains(itemIndex));
@@ -3294,7 +3294,7 @@ GuiSelectableListControl
 				GuiListControl::OnStyleUninstalled(style);
 			}
 
-			void GuiSelectableListControl::OnItemSelectionChanged(int itemIndex, bool value)
+			void GuiSelectableListControl::OnItemSelectionChanged(vint itemIndex, bool value)
 			{
 				GuiListControl::IItemStyleController* style=itemArranger->GetVisibleStyle(itemIndex);
 				if(style)
@@ -3305,7 +3305,7 @@ GuiSelectableListControl
 
 			void GuiSelectableListControl::OnItemSelectionCleared()
 			{
-				for(int i=0;i<visibleStyles.Count();i++)
+				for(vint i=0;i<visibleStyles.Count();i++)
 				{
 					selectableStyleProvider->SetStyleSelected(visibleStyles.Keys()[i], false);
 				}
@@ -3331,18 +3331,18 @@ GuiSelectableListControl
 				}
 			}
 
-			void GuiSelectableListControl::SetMultipleItemsSelectedSilently(int start, int end, bool selected)
+			void GuiSelectableListControl::SetMultipleItemsSelectedSilently(vint start, vint end, bool selected)
 			{
 				if(start>end)
 				{
-					int temp=start;
+					vint temp=start;
 					start=end;
 					end=temp;
 				}
-				int count=itemProvider->Count();
+				vint count=itemProvider->Count();
 				if(start<0) start=0;
 				if(end>=count) end=count-1;
-				for(int i=start;i<=end;i++)
+				for(vint i=start;i<=end;i++)
 				{
 					if(selected)
 					{
@@ -3408,17 +3408,17 @@ GuiSelectableListControl
 				}
 			}
 
-			const collections::SortedList<int>& GuiSelectableListControl::GetSelectedItems()
+			const collections::SortedList<vint>& GuiSelectableListControl::GetSelectedItems()
 			{
 				return selectedItems;
 			}
 
-			bool GuiSelectableListControl::GetSelected(int itemIndex)
+			bool GuiSelectableListControl::GetSelected(vint itemIndex)
 			{
 				return selectedItems.Contains(itemIndex);
 			}
 
-			void GuiSelectableListControl::SetSelected(int itemIndex, bool value)
+			void GuiSelectableListControl::SetSelected(vint itemIndex, bool value)
 			{
 				if(value)
 				{
@@ -3444,7 +3444,7 @@ GuiSelectableListControl
 				}
 			}
 
-			bool GuiSelectableListControl::SelectItemsByClick(int itemIndex, bool ctrl, bool shift)
+			bool GuiSelectableListControl::SelectItemsByClick(vint itemIndex, bool ctrl, bool shift)
 			{
 				NormalizeSelectedItemIndexStartEnd();
 				if(0<=itemIndex && itemIndex<itemProvider->Count())
@@ -3468,7 +3468,7 @@ GuiSelectableListControl
 					{
 						if(ctrl)
 						{
-							int index=selectedItems.IndexOf(itemIndex);
+							vint index=selectedItems.IndexOf(itemIndex);
 							if(index==-1)
 							{
 								selectedItems.Add(itemIndex);
@@ -3496,7 +3496,7 @@ GuiSelectableListControl
 				return false;
 			}
 
-			bool GuiSelectableListControl::SelectItemsByKey(int code, bool ctrl, bool shift)
+			bool GuiSelectableListControl::SelectItemsByKey(vint code, bool ctrl, bool shift)
 			{
 				if(!GetArranger()) return false;
 
@@ -3536,7 +3536,7 @@ GuiSelectableListControl
 				{
 					keyDirection=GetCoordinateTransformer()->RealKeyDirectionToVirtualKeyDirection(keyDirection);
 				}
-				int itemIndex=GetArranger()->FindItem(selectedItemIndexEnd, keyDirection);
+				vint itemIndex=GetArranger()->FindItem(selectedItemIndexEnd, keyDirection);
 				if(SelectItemsByClick(itemIndex, ctrl, shift))
 				{
 					return EnsureItemVisible(itemIndex);
@@ -3672,12 +3672,12 @@ AxisAlignedItemCoordinateTransformer
 
 				Rect AxisAlignedItemCoordinateTransformer::RealRectToVirtualRect(Size realFullSize, Rect rect)
 				{
-					int x1=rect.x1;
-					int x2=realFullSize.x-rect.x2;
-					int y1=rect.y1;
-					int y2=realFullSize.y-rect.y2;
-					int w=rect.Width();
-					int h=rect.Height();
+					vint x1=rect.x1;
+					vint x2=realFullSize.x-rect.x2;
+					vint y1=rect.y1;
+					vint y2=realFullSize.y-rect.y2;
+					vint w=rect.Width();
+					vint h=rect.Height();
 					switch(alignment)
 					{
 					case LeftDown:
@@ -3703,12 +3703,12 @@ AxisAlignedItemCoordinateTransformer
 				Rect AxisAlignedItemCoordinateTransformer::VirtualRectToRealRect(Size realFullSize, Rect rect)
 				{
 					realFullSize=RealSizeToVirtualSize(realFullSize);
-					int x1=rect.x1;
-					int x2=realFullSize.x-rect.x2;
-					int y1=rect.y1;
-					int y2=realFullSize.y-rect.y2;
-					int w=rect.Width();
-					int h=rect.Height();
+					vint x1=rect.x1;
+					vint x2=realFullSize.x-rect.x2;
+					vint y1=rect.y1;
+					vint y2=realFullSize.y-rect.y2;
+					vint w=rect.Width();
+					vint h=rect.Height();
 					switch(alignment)
 					{
 					case LeftDown:
@@ -3733,10 +3733,10 @@ AxisAlignedItemCoordinateTransformer
 
 				Margin AxisAlignedItemCoordinateTransformer::RealMarginToVirtualMargin(Margin margin)
 				{
-					int x1=margin.left;
-					int x2=margin.right;
-					int y1=margin.top;
-					int y2=margin.bottom;
+					vint x1=margin.left;
+					vint x2=margin.right;
+					vint y1=margin.top;
+					vint y2=margin.bottom;
 					switch(alignment)
 					{
 					case LeftDown:
@@ -3761,10 +3761,10 @@ AxisAlignedItemCoordinateTransformer
 
 				Margin AxisAlignedItemCoordinateTransformer::VirtualMarginToRealMargin(Margin margin)
 				{
-					int x1=margin.left;
-					int x2=margin.right;
-					int y1=margin.top;
-					int y2=margin.bottom;
+					vint x1=margin.left;
+					vint x2=margin.right;
+					vint y1=margin.top;
+					vint y2=margin.bottom;
 					switch(alignment)
 					{
 					case LeftDown:
@@ -3922,7 +3922,7 @@ RangedItemArrangerBase
 					startIndex=0;
 					if(callback)
 					{
-						for(int i=0;i<visibleStyles.Count();i++)
+						for(vint i=0;i<visibleStyles.Count();i++)
 						{
 							GuiListControl::IItemStyleController* style=visibleStyles[i];
 							callback->ReleaseItem(style);
@@ -3952,22 +3952,22 @@ RangedItemArrangerBase
 					}
 				}
 
-				void RangedItemArrangerBase::OnItemModified(int start, int count, int newCount)
+				void RangedItemArrangerBase::OnItemModified(vint start, vint count, vint newCount)
 				{
 					if(callback)
 					{
-						int visibleCount=visibleStyles.Count();
-						int itemCount=itemProvider->Count();
+						vint visibleCount=visibleStyles.Count();
+						vint itemCount=itemProvider->Count();
 						SortedList<GuiListControl::IItemStyleController*> reusedStyles;
-						for(int i=0;i<visibleCount;i++)
+						for(vint i=0;i<visibleCount;i++)
 						{
-							int index=startIndex+i;
+							vint index=startIndex+i;
 							if(index>=itemCount)
 							{
 								break;
 							}
 
-							int oldIndex=-1;
+							vint oldIndex=-1;
 							if(index<start)
 							{
 								oldIndex=index;
@@ -3997,7 +3997,7 @@ RangedItemArrangerBase
 							}
 						}
 
-						for(int i=0;i<visibleCount;i++)
+						for(vint i=0;i<visibleCount;i++)
 						{
 							GuiListControl::IItemStyleController* style=visibleStyles[i];
 							if(!reusedStyles.Contains(style))
@@ -4039,7 +4039,7 @@ RangedItemArrangerBase
 					return OnCalculateTotalSize();
 				}
 
-				GuiListControl::IItemStyleController* RangedItemArrangerBase::GetVisibleStyle(int itemIndex)
+				GuiListControl::IItemStyleController* RangedItemArrangerBase::GetVisibleStyle(vint itemIndex)
 				{
 					if(startIndex<=itemIndex && itemIndex<startIndex+visibleStyles.Count())
 					{
@@ -4051,9 +4051,9 @@ RangedItemArrangerBase
 					}
 				}
 
-				int RangedItemArrangerBase::GetVisibleIndex(GuiListControl::IItemStyleController* style)
+				vint RangedItemArrangerBase::GetVisibleIndex(GuiListControl::IItemStyleController* style)
 				{
-					int index=visibleStyles.IndexOf(style);
+					vint index=visibleStyles.IndexOf(style);
 					return index==-1?-1:index+startIndex;
 				}
 
@@ -4073,13 +4073,13 @@ FixedHeightItemArranger
 
 				void FixedHeightItemArranger::RearrangeItemBounds()
 				{
-					int x0=-viewBounds.Left();
-					int y0=-viewBounds.Top()+GetYOffset();
-					int width=GetWidth();
-					for(int i=0;i<visibleStyles.Count();i++)
+					vint x0=-viewBounds.Left();
+					vint y0=-viewBounds.Top()+GetYOffset();
+					vint width=GetWidth();
+					for(vint i=0;i<visibleStyles.Count();i++)
 					{
 						GuiListControl::IItemStyleController* style=visibleStyles[i];
-						int top=y0+(startIndex+i)*rowHeight;
+						vint top=y0+(startIndex+i)*rowHeight;
 						if(width==-1)
 						{
 							callback->SetStyleAlignmentToParent(style, Margin(0, -1, 0, -1));
@@ -4093,12 +4093,12 @@ FixedHeightItemArranger
 					}
 				}
 
-				int FixedHeightItemArranger::GetWidth()
+				vint FixedHeightItemArranger::GetWidth()
 				{
 					return -1;
 				}
 
-				int FixedHeightItemArranger::GetYOffset()
+				vint FixedHeightItemArranger::GetYOffset()
 				{
 					return 0;
 				}
@@ -4112,7 +4112,7 @@ FixedHeightItemArranger
 				{
 					if(callback)
 					{
-						int width=GetWidth();
+						vint width=GetWidth();
 						if(width<0) width=0;
 						return Size(width, rowHeight*itemProvider->Count()+GetYOffset());
 					}
@@ -4128,16 +4128,16 @@ FixedHeightItemArranger
 					{
 						if(!suppressOnViewChanged)
 						{
-							int oldVisibleCount=visibleStyles.Count();
-							int newRowHeight=rowHeight;
-							int newStartIndex=(newBounds.Top()-GetYOffset())/rowHeight;
+							vint oldVisibleCount=visibleStyles.Count();
+							vint newRowHeight=rowHeight;
+							vint newStartIndex=(newBounds.Top()-GetYOffset())/rowHeight;
 							if(newStartIndex<0) newStartIndex=0;
 
-							int endIndex=startIndex+visibleStyles.Count()-1;
-							int newEndIndex=(newBounds.Bottom()-1)/newRowHeight;
-							int itemCount=itemProvider->Count();
+							vint endIndex=startIndex+visibleStyles.Count()-1;
+							vint newEndIndex=(newBounds.Bottom()-1)/newRowHeight;
+							vint itemCount=itemProvider->Count();
 
-							for(int i=newStartIndex;i<=newEndIndex && i<itemCount;i++)
+							for(vint i=newStartIndex;i<=newEndIndex && i<itemCount;i++)
 							{
 								if(startIndex<=i && i<=endIndex)
 								{
@@ -4148,7 +4148,7 @@ FixedHeightItemArranger
 								{
 									GuiListControl::IItemStyleController* style=callback->RequestItem(i);
 									visibleStyles.Add(style);
-									int styleHeight=callback->GetStylePreferredSize(style).y;
+									vint styleHeight=callback->GetStylePreferredSize(style).y;
 									if(newRowHeight<styleHeight)
 									{
 										newRowHeight=styleHeight;
@@ -4157,9 +4157,9 @@ FixedHeightItemArranger
 								}
 							}
 
-							for(int i=0;i<oldVisibleCount;i++)
+							for(vint i=0;i<oldVisibleCount;i++)
 							{
-								int index=startIndex+i;
+								vint index=startIndex+i;
 								if(index<newStartIndex || newEndIndex<index)
 								{
 									GuiListControl::IItemStyleController* style=visibleStyles[i];
@@ -4170,7 +4170,7 @@ FixedHeightItemArranger
 
 							if(rowHeight!=newRowHeight)
 							{
-								int offset=oldBounds.Top()-rowHeight*startIndex;
+								vint offset=oldBounds.Top()-rowHeight*startIndex;
 								rowHeight=newRowHeight;
 								suppressOnViewChanged=true;
 								callback->OnTotalSizeChanged();
@@ -4193,11 +4193,11 @@ FixedHeightItemArranger
 				{
 				}
 
-				int FixedHeightItemArranger::FindItem(int itemIndex, GuiListControl::KeyDirection key)
+				vint FixedHeightItemArranger::FindItem(vint itemIndex, GuiListControl::KeyDirection key)
 				{
-					int count=itemProvider->Count();
+					vint count=itemProvider->Count();
 					if(count==0) return -1;
-					int groupCount=viewBounds.Height()/rowHeight;
+					vint groupCount=viewBounds.Height()/rowHeight;
 					if(groupCount==0) groupCount=1;
 					switch(key)
 					{
@@ -4228,7 +4228,7 @@ FixedHeightItemArranger
 					else return itemIndex;
 				}
 
-				bool FixedHeightItemArranger::EnsureItemVisible(int itemIndex)
+				bool FixedHeightItemArranger::EnsureItemVisible(vint itemIndex)
 				{
 					if(callback)
 					{
@@ -4238,9 +4238,9 @@ FixedHeightItemArranger
 						}
 						while(true)
 						{
-							int yOffset=GetYOffset();
-							int top=itemIndex*rowHeight;
-							int bottom=top+rowHeight+yOffset;
+							vint yOffset=GetYOffset();
+							vint top=itemIndex*rowHeight;
+							vint bottom=top+rowHeight+yOffset;
 
 							if(viewBounds.Height()<rowHeight)
 							{
@@ -4276,25 +4276,25 @@ FixedSizeMultiColumnItemArranger
 
 				void FixedSizeMultiColumnItemArranger::RearrangeItemBounds()
 				{
-					int y0=-viewBounds.Top();
-					int rowItems=viewBounds.Width()/itemSize.x;
+					vint y0=-viewBounds.Top();
+					vint rowItems=viewBounds.Width()/itemSize.x;
 					if(rowItems<1) rowItems=1;
 
-					for(int i=0;i<visibleStyles.Count();i++)
+					for(vint i=0;i<visibleStyles.Count();i++)
 					{
 						GuiListControl::IItemStyleController* style=visibleStyles[i];
-						int row=(startIndex+i)/rowItems;
-						int col=(startIndex+i)%rowItems;
+						vint row=(startIndex+i)/rowItems;
+						vint col=(startIndex+i)%rowItems;
 						callback->SetStyleBounds(style, Rect(Point(col*itemSize.x, y0+row*itemSize.y), itemSize));
 					}
 				}
 
-				void FixedSizeMultiColumnItemArranger::CalculateRange(Size itemSize, Rect bounds, int count, int& start, int& end)
+				void FixedSizeMultiColumnItemArranger::CalculateRange(Size itemSize, Rect bounds, vint count, vint& start, vint& end)
 				{
-					int startRow=bounds.Top()/itemSize.y;
+					vint startRow=bounds.Top()/itemSize.y;
 					if(startRow<0) startRow=0;
-					int endRow=(bounds.Bottom()-1)/itemSize.y;
-					int cols=bounds.Width()/itemSize.x;
+					vint endRow=(bounds.Bottom()-1)/itemSize.y;
+					vint cols=bounds.Width()/itemSize.x;
 					if(cols<1) cols=1;
 
 					start=startRow*cols;
@@ -4311,9 +4311,9 @@ FixedSizeMultiColumnItemArranger
 				{
 					if(callback)
 					{
-						int rowItems=viewBounds.Width()/itemSize.x;
+						vint rowItems=viewBounds.Width()/itemSize.x;
 						if(rowItems<1) rowItems=1;
-						int rows=itemProvider->Count()/rowItems;
+						vint rows=itemProvider->Count()/rowItems;
 						if(itemProvider->Count()%rowItems) rows++;
 
 						return Size(itemSize.x*rowItems, itemSize.y*rows);
@@ -4330,25 +4330,25 @@ FixedSizeMultiColumnItemArranger
 					{
 						if(!suppressOnViewChanged)
 						{
-							int oldVisibleCount=visibleStyles.Count();
+							vint oldVisibleCount=visibleStyles.Count();
 							Size newItemSize=itemSize;
-							int endIndex=startIndex+visibleStyles.Count()-1;
+							vint endIndex=startIndex+visibleStyles.Count()-1;
 
-							int newStartIndex=0;
-							int newEndIndex=0;
-							int itemCount=itemProvider->Count();
+							vint newStartIndex=0;
+							vint newEndIndex=0;
+							vint itemCount=itemProvider->Count();
 							CalculateRange(newItemSize, newBounds, itemCount, newStartIndex, newEndIndex);
 							if(newItemSize==Size(1, 1) && newStartIndex<newEndIndex)
 							{
 								newEndIndex=newStartIndex;
 							}
 
-							int previousStartIndex=-1;
-							int previousEndIndex=-1;
+							vint previousStartIndex=-1;
+							vint previousEndIndex=-1;
 
 							while(true)
 							{
-								for(int i=newStartIndex;i<=newEndIndex;i++)
+								for(vint i=newStartIndex;i<=newEndIndex;i++)
 								{
 									if(startIndex<=i && i<=endIndex)
 									{
@@ -4374,8 +4374,8 @@ FixedSizeMultiColumnItemArranger
 									}
 								}
 
-								int updatedStartIndex=0;
-								int updatedEndIndex=0;
+								vint updatedStartIndex=0;
+								vint updatedEndIndex=0;
 								CalculateRange(newItemSize, newBounds, itemCount, updatedStartIndex, updatedEndIndex);
 								bool again=updatedStartIndex<newStartIndex || updatedEndIndex>newEndIndex;
 								previousStartIndex=newStartIndex;
@@ -4385,9 +4385,9 @@ FixedSizeMultiColumnItemArranger
 								if(!again) break;
 							}
 
-							for(int i=0;i<oldVisibleCount;i++)
+							for(vint i=0;i<oldVisibleCount;i++)
 							{
-								int index=startIndex+i;
+								vint index=startIndex+i;
 								if(index<newStartIndex || newEndIndex<index)
 								{
 									GuiListControl::IItemStyleController* style=visibleStyles[i];
@@ -4419,12 +4419,12 @@ FixedSizeMultiColumnItemArranger
 				{
 				}
 
-				int FixedSizeMultiColumnItemArranger::FindItem(int itemIndex, GuiListControl::KeyDirection key)
+				vint FixedSizeMultiColumnItemArranger::FindItem(vint itemIndex, GuiListControl::KeyDirection key)
 				{
-					int count=itemProvider->Count();
-					int columnCount=viewBounds.Width()/itemSize.x;
+					vint count=itemProvider->Count();
+					vint columnCount=viewBounds.Width()/itemSize.x;
 					if(columnCount==0) columnCount=1;
-					int rowCount=viewBounds.Height()/itemSize.y;
+					vint rowCount=viewBounds.Height()/itemSize.y;
 					if(rowCount==0) rowCount=1;
 
 					switch(key)
@@ -4468,7 +4468,7 @@ FixedSizeMultiColumnItemArranger
 					else return itemIndex;
 				}
 
-				bool FixedSizeMultiColumnItemArranger::EnsureItemVisible(int itemIndex)
+				bool FixedSizeMultiColumnItemArranger::EnsureItemVisible(vint itemIndex)
 				{
 					if(callback)
 					{
@@ -4478,13 +4478,13 @@ FixedSizeMultiColumnItemArranger
 						}
 						while(true)
 						{
-							int rowHeight=itemSize.y;
-							int columnCount=viewBounds.Width()/itemSize.x;
+							vint rowHeight=itemSize.y;
+							vint columnCount=viewBounds.Width()/itemSize.x;
 							if(columnCount==0) columnCount=1;
-							int rowIndex=itemIndex/columnCount;
+							vint rowIndex=itemIndex/columnCount;
 
-							int top=rowIndex*rowHeight;
-							int bottom=top+rowHeight;
+							vint top=rowIndex*rowHeight;
+							vint bottom=top+rowHeight;
 
 							if(viewBounds.Height()<rowHeight)
 							{
@@ -4520,27 +4520,27 @@ FixedHeightMultiColumnItemArranger
 
 				void FixedHeightMultiColumnItemArranger::RearrangeItemBounds()
 				{
-					int rows=0;
-					int startColumn=0;
+					vint rows=0;
+					vint startColumn=0;
 					CalculateRange(itemHeight, viewBounds, rows, startColumn);
-					int currentWidth=0;
-					int totalWidth=0;
-					for(int i=0;i<visibleStyles.Count();i++)
+					vint currentWidth=0;
+					vint totalWidth=0;
+					for(vint i=0;i<visibleStyles.Count();i++)
 					{
-						int column=i%rows;
+						vint column=i%rows;
 						if(column==0)
 						{
 							totalWidth+=currentWidth;
 							currentWidth=0;
 						}
 						GuiListControl::IItemStyleController* style=visibleStyles[i];
-						int itemWidth=callback->GetStylePreferredSize(style).x;
+						vint itemWidth=callback->GetStylePreferredSize(style).x;
 						if(currentWidth<itemWidth) currentWidth=itemWidth;
 						callback->SetStyleBounds(style, Rect(Point(totalWidth, itemHeight*column), Size(0, 0)));
 					}
 				}
 
-				void FixedHeightMultiColumnItemArranger::CalculateRange(int itemHeight, Rect bounds, int& rows, int& startColumn)
+				void FixedHeightMultiColumnItemArranger::CalculateRange(vint itemHeight, Rect bounds, vint& rows, vint& startColumn)
 				{
 					rows=bounds.Height()/itemHeight;
 					if(rows<1) rows=1;
@@ -4556,9 +4556,9 @@ FixedHeightMultiColumnItemArranger
 				{
 					if(callback)
 					{
-						int rows=viewBounds.Height()/itemHeight;
+						vint rows=viewBounds.Height()/itemHeight;
 						if(rows<1) rows=1;
-						int columns=itemProvider->Count()/rows;
+						vint columns=itemProvider->Count()/rows;
 						if(itemProvider->Count()%rows) columns+=1;
 						return Size(viewBounds.Width()*columns, 0);
 					}
@@ -4574,28 +4574,28 @@ FixedHeightMultiColumnItemArranger
 					{
 						if(!suppressOnViewChanged)
 						{
-							int oldVisibleCount=visibleStyles.Count();
-							int endIndex=startIndex+oldVisibleCount-1;
+							vint oldVisibleCount=visibleStyles.Count();
+							vint endIndex=startIndex+oldVisibleCount-1;
 
-							int newItemHeight=itemHeight;
-							int itemCount=itemProvider->Count();
+							vint newItemHeight=itemHeight;
+							vint itemCount=itemProvider->Count();
 
-							int previousStartIndex=-1;
-							int previousEndIndex=-1;
-							int newStartIndex=-1;
-							int newEndIndex=-1;
+							vint previousStartIndex=-1;
+							vint previousEndIndex=-1;
+							vint newStartIndex=-1;
+							vint newEndIndex=-1;
 
 							while(true)
 							{
-								int newRows=0;
-								int newStartColumn=0;
-								int currentWidth=0;
-								int totalWidth=0;
+								vint newRows=0;
+								vint newStartColumn=0;
+								vint currentWidth=0;
+								vint totalWidth=0;
 								CalculateRange(newItemHeight, newBounds, newRows, newStartColumn);
 								newStartIndex=newRows*newStartColumn;
-								int currentItemHeight=newItemHeight;
+								vint currentItemHeight=newItemHeight;
 
-								for(int i=newStartIndex;i<itemCount;i++)
+								for(vint i=newStartIndex;i<itemCount;i++)
 								{
 									if(i%newRows==0)
 									{
@@ -4643,9 +4643,9 @@ FixedHeightMultiColumnItemArranger
 							newStartIndex=previousStartIndex;
 							newEndIndex=previousEndIndex;
 
-							for(int i=0;i<oldVisibleCount;i++)
+							for(vint i=0;i<oldVisibleCount;i++)
 							{
-								int index=startIndex+i;
+								vint index=startIndex+i;
 								if(index<newStartIndex || newEndIndex<index)
 								{
 									GuiListControl::IItemStyleController* style=visibleStyles[i];
@@ -4677,10 +4677,10 @@ FixedHeightMultiColumnItemArranger
 				{
 				}
 
-				int FixedHeightMultiColumnItemArranger::FindItem(int itemIndex, GuiListControl::KeyDirection key)
+				vint FixedHeightMultiColumnItemArranger::FindItem(vint itemIndex, GuiListControl::KeyDirection key)
 				{
-					int count=itemProvider->Count();
-					int groupCount=viewBounds.Height()/itemHeight;
+					vint count=itemProvider->Count();
+					vint groupCount=viewBounds.Height()/itemHeight;
 					if(groupCount==0) groupCount=1;
 					switch(key)
 					{
@@ -4717,7 +4717,7 @@ FixedHeightMultiColumnItemArranger
 					else return itemIndex;
 				}
 
-				bool FixedHeightMultiColumnItemArranger::EnsureItemVisible(int itemIndex)
+				bool FixedHeightMultiColumnItemArranger::EnsureItemVisible(vint itemIndex)
 				{
 					if(callback)
 					{
@@ -4727,11 +4727,11 @@ FixedHeightMultiColumnItemArranger
 						}
 						while(true)
 						{
-							int rowCount=viewBounds.Height()/itemHeight;
+							vint rowCount=viewBounds.Height()/itemHeight;
 							if(rowCount==0) rowCount=1;
-							int columnIndex=itemIndex/rowCount;
-							int minIndex=startIndex;
-							int maxIndex=startIndex+visibleStyles.Count()-1;
+							vint columnIndex=itemIndex/rowCount;
+							vint minIndex=startIndex;
+							vint maxIndex=startIndex+visibleStyles.Count()-1;
 
 							Point location=viewBounds.LeftTop();
 							if(minIndex<=itemIndex && itemIndex<=maxIndex)
@@ -4800,7 +4800,7 @@ ItemStyleControllerBase
 					associatedControl=0;
 				}
 
-				ItemStyleControllerBase::ItemStyleControllerBase(GuiListControl::IItemStyleProvider* _provider, int _styleId)
+				ItemStyleControllerBase::ItemStyleControllerBase(GuiListControl::IItemStyleProvider* _provider, vint _styleId)
 					:provider(_provider)
 					,styleId(_styleId)
 					,boundsComposition(0)
@@ -4819,7 +4819,7 @@ ItemStyleControllerBase
 					return provider;
 				}
 
-				int ItemStyleControllerBase::GetItemStyleId()
+				vint ItemStyleControllerBase::GetItemStyleId()
 				{
 					return styleId;
 				}
@@ -4853,9 +4853,9 @@ ItemStyleControllerBase
 ItemProviderBase
 ***********************************************************************/
 
-				void ItemProviderBase::InvokeOnItemModified(int start, int count, int newCount)
+				void ItemProviderBase::InvokeOnItemModified(vint start, vint count, vint newCount)
 				{
-					for(int i=0;i<callbacks.Count();i++)
+					for(vint i=0;i<callbacks.Count();i++)
 					{
 						callbacks[i]->OnItemModified(start, count, newCount);
 					}
@@ -4867,7 +4867,7 @@ ItemProviderBase
 
 				ItemProviderBase::~ItemProviderBase()
 				{
-					for(int i=0;i<callbacks.Count();i++)
+					for(vint i=0;i<callbacks.Count();i++)
 					{
 						callbacks[i]->OnAttached(0);
 					}
@@ -4889,7 +4889,7 @@ ItemProviderBase
 
 				bool ItemProviderBase::DetachCallback(GuiListControl::IItemProviderCallback* value)
 				{
-					int index=callbacks.IndexOf(value);
+					vint index=callbacks.IndexOf(value);
 					if(index==-1)
 					{
 						return false;
@@ -4973,7 +4973,7 @@ ListViewItemStyleProviderBase
 					listControl=0;
 				}
 
-				int ListViewItemStyleProviderBase::GetItemStyleId(int itemIndex)
+				vint ListViewItemStyleProviderBase::GetItemStyleId(vint itemIndex)
 				{
 					return 0;
 				}
@@ -5081,7 +5081,7 @@ ListViewItemStyleProvider::ListViewContentItemStyleController
 					return content.Obj();
 				}
 
-				void ListViewItemStyleProvider::ListViewContentItemStyleController::Install(IListViewItemView* view, int itemIndex)
+				void ListViewItemStyleProvider::ListViewContentItemStyleController::Install(IListViewItemView* view, vint itemIndex)
 				{
 					content->Install(listViewItemStyleProvider->listControl->GetListViewStyleProvider(), view, itemIndex);
 				}
@@ -5117,7 +5117,7 @@ ListViewItemStyleProvider
 					ListViewItemStyleProviderBase::DetachListControl();
 				}
 
-				GuiListControl::IItemStyleController* ListViewItemStyleProvider::CreateItemStyle(int styleId)
+				GuiListControl::IItemStyleController* ListViewItemStyleProvider::CreateItemStyle(vint styleId)
 				{
 					ListViewContentItemStyleController* itemStyle=new ListViewContentItemStyleController(this);
 					itemStyles.Add(itemStyle);
@@ -5134,7 +5134,7 @@ ListViewItemStyleProvider
 					}
 				}
 
-				void ListViewItemStyleProvider::Install(GuiListControl::IItemStyleController* style, int itemIndex)
+				void ListViewItemStyleProvider::Install(GuiListControl::IItemStyleController* style, vint itemIndex)
 				{
 					ListViewContentItemStyleController* itemStyle=dynamic_cast<ListViewContentItemStyleController*>(style);
 					itemStyle->Install(listViewItemView, itemIndex);
@@ -5210,7 +5210,7 @@ ListViewBigIconContentProvider
 					return 0;
 				}
 
-				void ListViewBigIconContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				void ListViewBigIconContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
 					Ptr<GuiImageData> imageData=view->GetLargeImage(itemIndex);
 					if(imageData)
@@ -5315,7 +5315,7 @@ ListViewSmallIconContentProvider
 					return 0;
 				}
 
-				void ListViewSmallIconContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				void ListViewSmallIconContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
 					Ptr<GuiImageData> imageData=view->GetSmallImage(itemIndex);
 					if(imageData)
@@ -5419,7 +5419,7 @@ ListViewListContentProvider
 					return 0;
 				}
 
-				void ListViewListContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				void ListViewListContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
 					Ptr<GuiImageData> imageData=view->GetSmallImage(itemIndex);
 					if(imageData)
@@ -5470,14 +5470,14 @@ ListViewListContentProvider
 ListViewTileContentProvider
 ***********************************************************************/
 
-				void ListViewTileContentProvider::ItemContent::RemoveTextElement(int textRow)
+				void ListViewTileContentProvider::ItemContent::RemoveTextElement(vint textRow)
 				{
 					GuiCellComposition* cell=textTable->GetSitedCell(textRow+1, 0);
 					textTable->RemoveChild(cell);
 					delete cell;
 				}
 
-				elements::GuiSolidLabelElement* ListViewTileContentProvider::ItemContent::CreateTextElement(int textRow, const FontProperties& font)
+				elements::GuiSolidLabelElement* ListViewTileContentProvider::ItemContent::CreateTextElement(vint textRow, const FontProperties& font)
 				{
 					GuiCellComposition* cell=new GuiCellComposition;
 					textTable->AddChild(cell);
@@ -5491,11 +5491,11 @@ ListViewTileContentProvider
 					return textElement;
 				}
 
-				void ListViewTileContentProvider::ItemContent::ResetTextTable(int textRows)
+				void ListViewTileContentProvider::ItemContent::ResetTextTable(vint textRows)
 				{
 					textTable->SetRowsAndColumns(textRows+2, 1);
 					textTable->SetRowOption(0, GuiCellOption::PercentageOption(0.5));
-					for(int i=0;i<textRows;i++)
+					for(vint i=0;i<textRows;i++)
 					{
 						textTable->SetRowOption(i+1, GuiCellOption::MinSizeOption());
 					}
@@ -5560,7 +5560,7 @@ ListViewTileContentProvider
 					return 0;
 				}
 
-				void ListViewTileContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				void ListViewTileContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
 					Ptr<GuiImageData> imageData=view->GetLargeImage(itemIndex);
 					if(imageData)
@@ -5574,14 +5574,14 @@ ListViewTileContentProvider
 					text->SetText(view->GetText(itemIndex));
 					text->SetColor(styleProvider->GetPrimaryTextColor());
 
-					for(int i=0;i<dataTexts.Count();i++)
+					for(vint i=0;i<dataTexts.Count();i++)
 					{
 						RemoveTextElement(i+1);
 					}
-					int dataColumnCount=view->GetDataColumnCount();
+					vint dataColumnCount=view->GetDataColumnCount();
 					ResetTextTable(dataColumnCount+1);
 					dataTexts.Resize(dataColumnCount);
-					for(int i=0;i<dataColumnCount;i++)
+					for(vint i=0;i<dataColumnCount;i++)
 					{
 						dataTexts[i]=CreateTextElement(i+1, text->GetFont());
 						dataTexts[i]->SetText(view->GetSubItem(itemIndex, view->GetDataColumn(i)));
@@ -5666,7 +5666,7 @@ ListViewInformationContentProvider
 						cell->SetSite(0, 1, 3, 1);
 
 						FontProperties textFont=font;
-						textFont.size=(int)(textFont.size*1.2);
+						textFont.size=(vint)(textFont.size*1.2);
 
 						text=GuiSolidLabelElement::Create();
 						text->SetFont(textFont);
@@ -5700,7 +5700,7 @@ ListViewInformationContentProvider
 					return bottomLineComposition;
 				}
 
-				void ListViewInformationContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				void ListViewInformationContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
 					Ptr<GuiImageData> imageData=view->GetLargeImage(itemIndex);
 					if(imageData)
@@ -5715,23 +5715,23 @@ ListViewInformationContentProvider
 					text->SetColor(styleProvider->GetPrimaryTextColor());
 					bottomLine->SetColor(styleProvider->GetItemSeparatorColor());
 
-					for(int i=0;i<dataTexts.Count();i++)
+					for(vint i=0;i<dataTexts.Count();i++)
 					{
 						GuiCellComposition* cell=textTable->GetSitedCell(i, 0);
 						textTable->RemoveChild(cell);
 						delete cell;
 					}
 
-					int dataColumnCount=view->GetDataColumnCount();
+					vint dataColumnCount=view->GetDataColumnCount();
 					dataTexts.Resize(dataColumnCount);
 					textTable->SetRowsAndColumns(dataColumnCount, 1);
 					textTable->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
-					for(int i=0;i<dataColumnCount;i++)
+					for(vint i=0;i<dataColumnCount;i++)
 					{
 						textTable->SetRowOption(i, GuiCellOption::MinSizeOption());
 					}
 					
-					for(int i=0;i<dataColumnCount;i++)
+					for(vint i=0;i<dataColumnCount;i++)
 					{
 						GuiCellComposition* cell=new GuiCellComposition;
 						textTable->AddChild(cell);
@@ -5826,7 +5826,7 @@ ListViewColumnItemArranger
 
 				const wchar_t* const ListViewColumnItemArranger::IColumnItemView::Identifier = L"vl::presentation::controls::list::ListViewColumnItemArranger::IColumnItemView";
 
-				void ListViewColumnItemArranger::ColumnClicked(int index, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+				void ListViewColumnItemArranger::ColumnClicked(vint index, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 				{
 					GuiItemEventArgs args(listView->ColumnClicked.GetAssociatedComposition());
 					args.itemIndex=index;
@@ -5857,8 +5857,8 @@ ListViewColumnItemArranger
 				{
 					if(splitterDragging)
 					{
-						int offset=arguments.x-splitterLatestX;
-						int index=columnHeaderSplitters.IndexOf(dynamic_cast<GuiBoundsComposition*>(sender));
+						vint offset=arguments.x-splitterLatestX;
+						vint index=columnHeaderSplitters.IndexOf(dynamic_cast<GuiBoundsComposition*>(sender));
 						if(index!=-1)
 						{
 							GuiBoundsComposition* buttonBounds=columnHeaderButtons[index]->GetBoundsComposition();
@@ -5866,7 +5866,7 @@ ListViewColumnItemArranger
 							Rect newBounds(bounds.LeftTop(), Size(bounds.Width()+offset, bounds.Height()));
 							buttonBounds->SetBounds(newBounds);
 
-							int finalSize=buttonBounds->GetBounds().Width();
+							vint finalSize=buttonBounds->GetBounds().Width();
 							columnItemView->SetColumnSize(index, finalSize);
 						}
 					}
@@ -5875,14 +5875,14 @@ ListViewColumnItemArranger
 				void ListViewColumnItemArranger::RearrangeItemBounds()
 				{
 					FixedHeightItemArranger::RearrangeItemBounds();
-					int count=columnHeaders->GetParent()->Children().Count();
+					vint count=columnHeaders->GetParent()->Children().Count();
 					columnHeaders->GetParent()->MoveChild(columnHeaders, count-1);
 					columnHeaders->SetBounds(Rect(Point(-viewBounds.Left(), 0), Size(0, 0)));
 				}
 
-				int ListViewColumnItemArranger::GetWidth()
+				vint ListViewColumnItemArranger::GetWidth()
 				{
-					int width=columnHeaders->GetBounds().Width()-SplitterWidth;
+					vint width=columnHeaders->GetBounds().Width()-SplitterWidth;
 					if(width<SplitterWidth)
 					{
 						width=SplitterWidth;
@@ -5890,7 +5890,7 @@ ListViewColumnItemArranger
 					return width;
 				}
 
-				int ListViewColumnItemArranger::GetYOffset()
+				vint ListViewColumnItemArranger::GetYOffset()
 				{
 					return columnHeaders->GetBounds().Height();
 				}
@@ -5904,7 +5904,7 @@ ListViewColumnItemArranger
 
 				void ListViewColumnItemArranger::DeleteColumnButtons()
 				{
-					for(int i=columnHeaders->GetStackItems().Count()-1;i>=0;i--)
+					for(vint i=columnHeaders->GetStackItems().Count()-1;i>=0;i--)
 					{
 						GuiStackItemComposition* item=columnHeaders->GetStackItems().Get(i);
 						columnHeaders->RemoveChild(item);
@@ -5925,7 +5925,7 @@ ListViewColumnItemArranger
 				{
 					if(columnItemView && columnHeaderButtons.Count()==columnItemView->GetColumnCount())
 					{
-						for(int i=0;i<columnItemView->GetColumnCount();i++)
+						for(vint i=0;i<columnItemView->GetColumnCount();i++)
 						{
 							GuiListViewColumnHeader* button=columnHeaderButtons[i];
 							button->SetText(columnItemView->GetColumnText(i));
@@ -5939,7 +5939,7 @@ ListViewColumnItemArranger
 						DeleteColumnButtons();
 						if(columnItemView)
 						{
-							for(int i=0;i<columnItemView->GetColumnCount();i++)
+							for(vint i=0;i<columnItemView->GetColumnCount();i++)
 							{
 								GuiBoundsComposition* splitterComposition=new GuiBoundsComposition;
 								splitterComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -5952,14 +5952,14 @@ ListViewColumnItemArranger
 								splitterComposition->GetEventReceiver()->leftButtonUp.AttachMethod(this, &ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonUp);
 								splitterComposition->GetEventReceiver()->mouseMove.AttachMethod(this, &ListViewColumnItemArranger::ColumnHeaderSplitterMouseMove);
 							}
-							for(int i=0;i<columnItemView->GetColumnCount();i++)
+							for(vint i=0;i<columnItemView->GetColumnCount();i++)
 							{
 								GuiListViewColumnHeader* button=new GuiListViewColumnHeader(styleProvider->CreateColumnStyle());
 								button->SetText(columnItemView->GetColumnText(i));
 								button->SetSubMenu(columnItemView->GetDropdownPopup(i), false);
 								button->SetColumnSortingState(columnItemView->GetSortingState(i));
 								button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
-								button->Clicked.AttachLambda(Curry(Func<void(int, GuiGraphicsComposition*, GuiEventArgs&)>(this, &ListViewColumnItemArranger::ColumnClicked))(i));
+								button->Clicked.AttachLambda(Curry(Func<void(vint, GuiGraphicsComposition*, GuiEventArgs&)>(this, &ListViewColumnItemArranger::ColumnClicked))(i));
 								columnHeaderButtons.Add(button);
 								if(i>0)
 								{
@@ -6118,17 +6118,17 @@ ListViewDetailContentProvider
 
 				void ListViewDetailContentProvider::ItemContent::UpdateSubItemSize()
 				{
-					int columnCount=columnItemView->GetColumnCount();
-					for(int i=0;i<columnCount;i++)
+					vint columnCount=columnItemView->GetColumnCount();
+					for(vint i=0;i<columnCount;i++)
 					{
 						textTable->SetColumnOption(i, GuiCellOption::AbsoluteOption(columnItemView->GetColumnSize(i)));
 					}
 					textTable->UpdateCellBounds();
 				}
 
-				void ListViewDetailContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)
+				void ListViewDetailContentProvider::ItemContent::Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)
 				{
-					for(int i=1;i<textTable->GetColumns();i++)
+					for(vint i=1;i<textTable->GetColumns();i++)
 					{
 						GuiCellComposition* cell=textTable->GetSitedCell(0, i);
 						textTable->RemoveChild(cell);
@@ -6147,9 +6147,9 @@ ListViewDetailContentProvider
 					text->SetText(view->GetText(itemIndex));
 					text->SetColor(styleProvider->GetPrimaryTextColor());
 
-					int columnCount=columnItemView->GetColumnCount();
+					vint columnCount=columnItemView->GetColumnCount();
 					textTable->SetRowsAndColumns(1, columnCount);
-					for(int i=1;i<columnCount;i++)
+					for(vint i=1;i<columnCount;i++)
 					{
 						GuiCellComposition* cell=new GuiCellComposition;
 						textTable->AddChild(cell);
@@ -6169,8 +6169,8 @@ ListViewDetailContentProvider
 
 				void ListViewDetailContentProvider::OnColumnChanged()
 				{
-					int count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
-					for(int i=0;i<count;i++)
+					vint count=listViewItemStyleProvider->GetCreatedItemStyles().Count();
+					for(vint i=0;i<count;i++)
 					{
 						GuiListControl::IItemStyleController* itemStyleController=listViewItemStyleProvider->GetCreatedItemStyles().Get(i);
 						ItemContent* itemContent=listViewItemStyleProvider->GetItemContent<ItemContent>(itemStyleController);
@@ -6234,7 +6234,7 @@ ListViewDetailContentProvider
 ListViewColumn
 ***********************************************************************/
 
-				ListViewColumn::ListViewColumn(const WString& _text, int _size)
+				ListViewColumn::ListViewColumn(const WString& _text, vint _size)
 					:text(_text)
 					,size(_size)
 					,dropdownPopup(0)
@@ -6246,7 +6246,7 @@ ListViewColumn
 ListViewDataColumns
 ***********************************************************************/
 
-				void ListViewDataColumns::NotifyUpdateInternal(int start, int count, int newCount)
+				void ListViewDataColumns::NotifyUpdateInternal(vint start, vint count, vint newCount)
 				{
 					itemProvider->NotifyUpdate(0, itemProvider->Count());
 				}
@@ -6264,9 +6264,9 @@ ListViewDataColumns
 ListViewColumns
 ***********************************************************************/
 
-				void ListViewColumns::NotifyUpdateInternal(int start, int count, int newCount)
+				void ListViewColumns::NotifyUpdateInternal(vint start, vint count, vint newCount)
 				{
-					for(int i=0;i<itemProvider->columnItemViewCallbacks.Count();i++)
+					for(vint i=0;i<itemProvider->columnItemViewCallbacks.Count();i++)
 					{
 						itemProvider->columnItemViewCallbacks[i]->OnColumnChanged();
 					}
@@ -6286,32 +6286,32 @@ ListViewColumns
 ListViewItemProvider
 ***********************************************************************/
 
-				bool ListViewItemProvider::ContainsPrimaryText(int itemIndex)
+				bool ListViewItemProvider::ContainsPrimaryText(vint itemIndex)
 				{
 					return true;
 				}
 
-				WString ListViewItemProvider::GetPrimaryTextViewText(int itemIndex)
+				WString ListViewItemProvider::GetPrimaryTextViewText(vint itemIndex)
 				{
 					return Get(itemIndex)->text;
 				}
 
-				Ptr<GuiImageData> ListViewItemProvider::GetSmallImage(int itemIndex)
+				Ptr<GuiImageData> ListViewItemProvider::GetSmallImage(vint itemIndex)
 				{
 					return Get(itemIndex)->smallImage;
 				}
 
-				Ptr<GuiImageData> ListViewItemProvider::GetLargeImage(int itemIndex)
+				Ptr<GuiImageData> ListViewItemProvider::GetLargeImage(vint itemIndex)
 				{
 					return Get(itemIndex)->largeImage;
 				}
 
-				WString ListViewItemProvider::GetText(int itemIndex)
+				WString ListViewItemProvider::GetText(vint itemIndex)
 				{
 					return Get(itemIndex)->text;
 				}
 
-				WString ListViewItemProvider::GetSubItem(int itemIndex, int index)
+				WString ListViewItemProvider::GetSubItem(vint itemIndex, vint index)
 				{
 					Ptr<ListViewItem> item=Get(itemIndex);
 					if(index<0 || index>=item->subItems.Count())
@@ -6324,12 +6324,12 @@ ListViewItemProvider
 					}
 				}
 
-				int ListViewItemProvider::GetDataColumnCount()
+				vint ListViewItemProvider::GetDataColumnCount()
 				{
 					return dataColumns.Count();
 				}
 
-				int ListViewItemProvider::GetDataColumn(int index)
+				vint ListViewItemProvider::GetDataColumn(vint index)
 				{
 					return dataColumns[index];
 				}
@@ -6349,7 +6349,7 @@ ListViewItemProvider
 
 				bool ListViewItemProvider::DetachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)
 				{
-					int index=columnItemViewCallbacks.IndexOf(value);
+					vint index=columnItemViewCallbacks.IndexOf(value);
 					if(index==-1)
 					{
 						return false;
@@ -6361,12 +6361,12 @@ ListViewItemProvider
 					}
 				}
 
-				int ListViewItemProvider::GetColumnCount()
+				vint ListViewItemProvider::GetColumnCount()
 				{
 					return columns.Count();
 				}
 
-				WString ListViewItemProvider::GetColumnText(int index)
+				WString ListViewItemProvider::GetColumnText(vint index)
 				{
 					if(index<0 || index>=columns.Count())
 					{
@@ -6378,7 +6378,7 @@ ListViewItemProvider
 					}
 				}
 
-				int ListViewItemProvider::GetColumnSize(int index)
+				vint ListViewItemProvider::GetColumnSize(vint index)
 				{
 					if(index<0 || index>=columns.Count())
 					{
@@ -6390,19 +6390,19 @@ ListViewItemProvider
 					}
 				}
 
-				void ListViewItemProvider::SetColumnSize(int index, int value)
+				void ListViewItemProvider::SetColumnSize(vint index, vint value)
 				{
 					if(index>=0 && index<columns.Count())
 					{
 						columns[index]->size=value;
-						for(int i=0;i<columnItemViewCallbacks.Count();i++)
+						for(vint i=0;i<columnItemViewCallbacks.Count();i++)
 						{
 							columnItemViewCallbacks[i]->OnColumnChanged();
 						}
 					}
 				}
 
-				GuiMenu* ListViewItemProvider::GetDropdownPopup(int index)
+				GuiMenu* ListViewItemProvider::GetDropdownPopup(vint index)
 				{
 					if(index<0 || index>=columns.Count())
 					{
@@ -6414,7 +6414,7 @@ ListViewItemProvider
 					}
 				}
 
-				GuiListViewColumnHeader::ColumnSortingState ListViewItemProvider::GetSortingState(int index)
+				GuiListViewColumnHeader::ColumnSortingState ListViewItemProvider::GetSortingState(vint index)
 				{
 					if(index<0 || index>=columns.Count())
 					{
@@ -6639,7 +6639,7 @@ TextItemStyleProvider
 
 				void TextItemStyleProvider::OnStyleCheckedChanged(TextItemStyleController* style)
 				{
-					int index=listControl->GetArranger()->GetVisibleIndex(style);
+					vint index=listControl->GetArranger()->GetVisibleIndex(style);
 					if(index!=-1)
 					{
 						textItemView->SetCheckedSilently(index, style->GetChecked());
@@ -6670,12 +6670,12 @@ TextItemStyleProvider
 					listControl=0;
 				}
 
-				int TextItemStyleProvider::GetItemStyleId(int itemIndex)
+				vint TextItemStyleProvider::GetItemStyleId(vint itemIndex)
 				{
 					return 0;
 				}
 
-				GuiListControl::IItemStyleController* TextItemStyleProvider::CreateItemStyle(int styleId)
+				GuiListControl::IItemStyleController* TextItemStyleProvider::CreateItemStyle(vint styleId)
 				{
 					return new TextItemStyleController(this);
 				}
@@ -6685,7 +6685,7 @@ TextItemStyleProvider
 					delete dynamic_cast<TextItemStyleController*>(style);
 				}
 
-				void TextItemStyleProvider::Install(GuiListControl::IItemStyleController* style, int itemIndex)
+				void TextItemStyleProvider::Install(GuiListControl::IItemStyleController* style, vint itemIndex)
 				{
 					TextItemStyleController* textStyle=dynamic_cast<TextItemStyleController*>(style);
 					textStyle->SetText(textItemView->GetText(itemIndex));
@@ -6753,27 +6753,27 @@ TextItem
 TextItemProvider
 ***********************************************************************/
 
-				bool TextItemProvider::ContainsPrimaryText(int itemIndex)
+				bool TextItemProvider::ContainsPrimaryText(vint itemIndex)
 				{
 					return true;
 				}
 
-				WString TextItemProvider::GetPrimaryTextViewText(int itemIndex)
+				WString TextItemProvider::GetPrimaryTextViewText(vint itemIndex)
 				{
 					return Get(itemIndex).GetText();
 				}
 				
-				WString TextItemProvider::GetText(int itemIndex)
+				WString TextItemProvider::GetText(vint itemIndex)
 				{
 					return Get(itemIndex).GetText();
 				}
 
-				bool TextItemProvider::GetChecked(int itemIndex)
+				bool TextItemProvider::GetChecked(vint itemIndex)
 				{
 					return Get(itemIndex).GetChecked();
 				}
 
-				void TextItemProvider::SetCheckedSilently(int itemIndex, bool value)
+				void TextItemProvider::SetCheckedSilently(vint itemIndex, bool value)
 				{
 					items[itemIndex].checked=value;
 				}
@@ -6786,13 +6786,13 @@ TextItemProvider
 				{
 				}
 					
-				void TextItemProvider::SetText(int itemIndex, const WString& value)
+				void TextItemProvider::SetText(vint itemIndex, const WString& value)
 				{
 					items[itemIndex].text=value;
 					InvokeOnItemModified(itemIndex, 1, 1);
 				}
 
-				void TextItemProvider::SetChecked(int itemIndex, bool value)
+				void TextItemProvider::SetChecked(vint itemIndex, bool value)
 				{
 					SetCheckedSilently(itemIndex, value);
 					InvokeOnItemModified(itemIndex, 1, 1);
@@ -6902,18 +6902,18 @@ namespace vl
 NodeItemProvider
 ***********************************************************************/
 
-				INodeProvider* NodeItemProvider::GetNodeByOffset(INodeProvider* provider, int offset)
+				INodeProvider* NodeItemProvider::GetNodeByOffset(INodeProvider* provider, vint offset)
 				{
 					if(offset==0) return provider;
 					INodeProvider* result=0;
 					if(provider->GetExpanding() && offset>0)
 					{
 						offset-=1;
-						int count=provider->GetChildCount();
-						for(int i=0;(!result && i<count);i++)
+						vint count=provider->GetChildCount();
+						for(vint i=0;(!result && i<count);i++)
 						{
 							INodeProvider* child=provider->GetChild(i);
-							int visibleCount=child->CalculateTotalVisibleNodes();
+							vint visibleCount=child->CalculateTotalVisibleNodes();
 							if(offset<visibleCount)
 							{
 								result=GetNodeByOffset(child, offset);
@@ -6932,13 +6932,13 @@ NodeItemProvider
 				{
 				}
 
-				void NodeItemProvider::OnBeforeItemModified(INodeProvider* parentNode, int start, int count, int newCount)
+				void NodeItemProvider::OnBeforeItemModified(INodeProvider* parentNode, vint start, vint count, vint newCount)
 				{
 					offsetBeforeChildModified=0;
-					int base=CalculateNodeVisibilityIndexInternal(parentNode);
+					vint base=CalculateNodeVisibilityIndexInternal(parentNode);
 					if(base!=-2 && parentNode->GetExpanding())
 					{
-						for(int i=0;i<count;i++)
+						for(vint i=0;i<count;i++)
 						{
 							INodeProvider* child=parentNode->GetChild(start+i);
 							offsetBeforeChildModified+=child->CalculateTotalVisibleNodes();
@@ -6947,14 +6947,14 @@ NodeItemProvider
 					}
 				}
 
-				void NodeItemProvider::OnAfterItemModified(INodeProvider* parentNode, int start, int count, int newCount)
+				void NodeItemProvider::OnAfterItemModified(INodeProvider* parentNode, vint start, vint count, vint newCount)
 				{
-					int base=CalculateNodeVisibilityIndexInternal(parentNode);
+					vint base=CalculateNodeVisibilityIndexInternal(parentNode);
 					if(base!=-2 && parentNode->GetExpanding())
 					{
-						int offset=0;
-						int firstChildStart=-1;
-						for(int i=0;i<newCount;i++)
+						vint offset=0;
+						vint firstChildStart=-1;
+						for(vint i=0;i<newCount;i++)
 						{
 							INodeProvider* child=parentNode->GetChild(start+i);
 							if(i==0)
@@ -6967,7 +6967,7 @@ NodeItemProvider
 
 						if(firstChildStart==-1)
 						{
-							int childCount=parentNode->GetChildCount();
+							vint childCount=parentNode->GetChildCount();
 							if(childCount==0)
 							{
 								firstChildStart=base+1;
@@ -6992,22 +6992,22 @@ NodeItemProvider
 
 				void NodeItemProvider::OnItemExpanded(INodeProvider* node)
 				{
-					int base=CalculateNodeVisibilityIndexInternal(node);
+					vint base=CalculateNodeVisibilityIndexInternal(node);
 					if(base!=-2)
 					{
-						int visibility=node->CalculateTotalVisibleNodes();
+						vint visibility=node->CalculateTotalVisibleNodes();
 						InvokeOnItemModified(base+1, 0, visibility-1);
 					}
 				}
 
 				void NodeItemProvider::OnItemCollapsed(INodeProvider* node)
 				{
-					int base=CalculateNodeVisibilityIndexInternal(node);
+					vint base=CalculateNodeVisibilityIndexInternal(node);
 					if(base!=-2)
 					{
-						int visibility=0;
-						int count=node->GetChildCount();
-						for(int i=0;i<count;i++)
+						vint visibility=0;
+						vint count=node->GetChildCount();
+						for(vint i=0;i<count;i++)
 						{
 							INodeProvider* child=node->GetChild(i);
 							visibility+=child->CalculateTotalVisibleNodes();
@@ -7017,7 +7017,7 @@ NodeItemProvider
 					}
 				}
 
-				int NodeItemProvider::CalculateNodeVisibilityIndexInternal(INodeProvider* node)
+				vint NodeItemProvider::CalculateNodeVisibilityIndexInternal(INodeProvider* node)
 				{
 					INodeProvider* parent=node->GetParent();
 					if(parent==0)
@@ -7029,14 +7029,14 @@ NodeItemProvider
 						return -2;
 					}
 
-					int index=CalculateNodeVisibilityIndexInternal(parent);
+					vint index=CalculateNodeVisibilityIndexInternal(parent);
 					if(index==-2)
 					{
 						return -2;
 					}
 
-					int count=parent->GetChildCount();
-					for(int i=0;i<count;i++)
+					vint count=parent->GetChildCount();
+					for(vint i=0;i<count;i++)
 					{
 						INodeProvider* child=parent->GetChild(i);
 						bool findResult=child==node;
@@ -7057,13 +7057,13 @@ NodeItemProvider
 					return -1;
 				}
 
-				int NodeItemProvider::CalculateNodeVisibilityIndex(INodeProvider* node)
+				vint NodeItemProvider::CalculateNodeVisibilityIndex(INodeProvider* node)
 				{
-					int result=CalculateNodeVisibilityIndexInternal(node);
+					vint result=CalculateNodeVisibilityIndexInternal(node);
 					return result<0?-1:result;
 				}
 
-				bool NodeItemProvider::ContainsPrimaryText(int itemIndex)
+				bool NodeItemProvider::ContainsPrimaryText(vint itemIndex)
 				{
 					if(nodeItemPrimaryTextView)
 					{
@@ -7078,7 +7078,7 @@ NodeItemProvider
 					return true;
 				}
 
-				WString NodeItemProvider::GetPrimaryTextViewText(int itemIndex)
+				WString NodeItemProvider::GetPrimaryTextViewText(vint itemIndex)
 				{
 					if(nodeItemPrimaryTextView)
 					{
@@ -7093,7 +7093,7 @@ NodeItemProvider
 					return L"";
 				}
 
-				INodeProvider* NodeItemProvider::RequestNode(int index)
+				INodeProvider* NodeItemProvider::RequestNode(vint index)
 				{
 					if(root->CanGetNodeByVisibleIndex())
 					{
@@ -7134,7 +7134,7 @@ NodeItemProvider
 					return root;
 				}
 
-				int NodeItemProvider::Count()
+				vint NodeItemProvider::Count()
 				{
 					return root->GetRootNode()->CalculateTotalVisibleNodes()-1;
 				}
@@ -7197,9 +7197,9 @@ NodeItemProvider
 					listControl=0;
 				}
 
-				int NodeItemStyleProvider::GetItemStyleId(int itemIndex)
+				vint NodeItemStyleProvider::GetItemStyleId(vint itemIndex)
 				{
-					int result=-1;
+					vint result=-1;
 					if(nodeItemView)
 					{
 						INodeProvider* node=nodeItemView->RequestNode(itemIndex);
@@ -7212,7 +7212,7 @@ NodeItemProvider
 					return result;
 				}
 
-				GuiListControl::IItemStyleController* NodeItemStyleProvider::CreateItemStyle(int styleId)
+				GuiListControl::IItemStyleController* NodeItemStyleProvider::CreateItemStyle(vint styleId)
 				{
 					return nodeItemStyleProvider->CreateItemStyle(styleId);
 				}
@@ -7226,7 +7226,7 @@ NodeItemProvider
 					}
 				}
 
-				void NodeItemStyleProvider::Install(GuiListControl::IItemStyleController* style, int itemIndex)
+				void NodeItemStyleProvider::Install(GuiListControl::IItemStyleController* style, vint itemIndex)
 				{
 					if(nodeItemView)
 					{
@@ -7258,12 +7258,12 @@ NodeItemProvider
 MemoryNodeProvider::NodeCollection
 ***********************************************************************/
 
-				void MemoryNodeProvider::NodeCollection::OnBeforeChildModified(int start, int count, int newCount)
+				void MemoryNodeProvider::NodeCollection::OnBeforeChildModified(vint start, vint count, vint newCount)
 				{
 					ownerProvider->offsetBeforeChildModified=0;
 					if(ownerProvider->expanding)
 					{
-						for(int i=0;i<count;i++)
+						for(vint i=0;i<count;i++)
 						{
 							ownerProvider->offsetBeforeChildModified+=items[start+i]->totalVisibleNodeCount;
 						}
@@ -7275,13 +7275,13 @@ MemoryNodeProvider::NodeCollection
 					}
 				}
 
-				void MemoryNodeProvider::NodeCollection::OnAfterChildModified(int start, int count, int newCount)
+				void MemoryNodeProvider::NodeCollection::OnAfterChildModified(vint start, vint count, vint newCount)
 				{
 					ownerProvider->childCount+=(newCount-count);
 					if(ownerProvider->expanding)
 					{
-						int offset=0;
-						for(int i=0;i<newCount;i++)
+						vint offset=0;
+						for(vint i=0;i<newCount;i++)
 						{
 							offset+=items[start+i]->totalVisibleNodeCount;
 						}
@@ -7294,7 +7294,7 @@ MemoryNodeProvider::NodeCollection
 					}
 				}
 
-				bool MemoryNodeProvider::NodeCollection::InsertInternal(int index, Ptr<MemoryNodeProvider> const& child)
+				bool MemoryNodeProvider::NodeCollection::InsertInternal(vint index, Ptr<MemoryNodeProvider> const& child)
 				{
 					if(child->parent==0)
 					{
@@ -7307,7 +7307,7 @@ MemoryNodeProvider::NodeCollection
 					return false;
 				}
 
-				bool MemoryNodeProvider::NodeCollection::RemoveAtInternal(int index, Ptr<MemoryNodeProvider> const& child)
+				bool MemoryNodeProvider::NodeCollection::RemoveAtInternal(vint index, Ptr<MemoryNodeProvider> const& child)
 				{
 					if(child->parent==ownerProvider)
 					{
@@ -7341,7 +7341,7 @@ MemoryNodeProvider
 					}
 				}
 
-				void MemoryNodeProvider::OnChildTotalVisibleNodesChanged(int offset)
+				void MemoryNodeProvider::OnChildTotalVisibleNodesChanged(vint offset)
 				{
 					totalVisibleNodeCount+=offset;
 					if(parent)
@@ -7390,7 +7390,7 @@ MemoryNodeProvider
 				{
 					if(parent)
 					{
-						int index=parent->children.IndexOf(this);
+						vint index=parent->children.IndexOf(this);
 						INodeProviderCallback* proxy=GetCallbackProxyInternal();
 						if(proxy)
 						{
@@ -7415,8 +7415,8 @@ MemoryNodeProvider
 					if(expanding!=value)
 					{
 						expanding=value;
-						int offset=0;
-						for(int i=0;i<childCount;i++)
+						vint offset=0;
+						for(vint i=0;i<childCount;i++)
 						{
 							offset+=children[i]->totalVisibleNodeCount;
 						}
@@ -7437,12 +7437,12 @@ MemoryNodeProvider
 					}
 				}
 
-				int MemoryNodeProvider::CalculateTotalVisibleNodes()
+				vint MemoryNodeProvider::CalculateTotalVisibleNodes()
 				{
 					return totalVisibleNodeCount;
 				}
 
-				int MemoryNodeProvider::GetChildCount()
+				vint MemoryNodeProvider::GetChildCount()
 				{
 					return childCount;
 				}
@@ -7452,7 +7452,7 @@ MemoryNodeProvider
 					return parent;
 				}
 
-				INodeProvider* MemoryNodeProvider::GetChild(int index)
+				INodeProvider* MemoryNodeProvider::GetChild(vint index)
 				{
 					if(0<=index && index<childCount)
 					{
@@ -7480,17 +7480,17 @@ NodeRootProviderBase
 				{
 				}
 
-				void NodeRootProviderBase::OnBeforeItemModified(INodeProvider* parentNode, int start, int count, int newCount)
+				void NodeRootProviderBase::OnBeforeItemModified(INodeProvider* parentNode, vint start, vint count, vint newCount)
 				{
-					for(int i=0;i<callbacks.Count();i++)
+					for(vint i=0;i<callbacks.Count();i++)
 					{
 						callbacks[i]->OnBeforeItemModified(parentNode, start, count, newCount);
 					}
 				}
 
-				void NodeRootProviderBase::OnAfterItemModified(INodeProvider* parentNode, int start, int count, int newCount)
+				void NodeRootProviderBase::OnAfterItemModified(INodeProvider* parentNode, vint start, vint count, vint newCount)
 				{
-					for(int i=0;i<callbacks.Count();i++)
+					for(vint i=0;i<callbacks.Count();i++)
 					{
 						callbacks[i]->OnAfterItemModified(parentNode, start, count, newCount);
 					}
@@ -7498,7 +7498,7 @@ NodeRootProviderBase
 
 				void NodeRootProviderBase::OnItemExpanded(INodeProvider* node)
 				{
-					for(int i=0;i<callbacks.Count();i++)
+					for(vint i=0;i<callbacks.Count();i++)
 					{
 						callbacks[i]->OnItemExpanded(node);
 					}
@@ -7506,7 +7506,7 @@ NodeRootProviderBase
 
 				void NodeRootProviderBase::OnItemCollapsed(INodeProvider* node)
 				{
-					for(int i=0;i<callbacks.Count();i++)
+					for(vint i=0;i<callbacks.Count();i++)
 					{
 						callbacks[i]->OnItemCollapsed(node);
 					}
@@ -7525,7 +7525,7 @@ NodeRootProviderBase
 					return false;
 				}
 
-				INodeProvider* NodeRootProviderBase::GetNodeByVisibleIndex(int index)
+				INodeProvider* NodeRootProviderBase::GetNodeByVisibleIndex(vint index)
 				{
 					return 0;
 				}
@@ -7546,7 +7546,7 @@ NodeRootProviderBase
 
 				bool NodeRootProviderBase::DetachCallback(INodeProviderCallback* value)
 				{
-					int index=callbacks.IndexOf(value);
+					vint index=callbacks.IndexOf(value);
 					if(index==-1)
 					{
 						return false;
@@ -7605,11 +7605,11 @@ GuiVirtualTreeListControl
 			{
 			}
 
-			void GuiVirtualTreeListControl::OnBeforeItemModified(tree::INodeProvider* parentNode, int start, int count, int newCount)
+			void GuiVirtualTreeListControl::OnBeforeItemModified(tree::INodeProvider* parentNode, vint start, vint count, vint newCount)
 			{
 			}
 
-			void GuiVirtualTreeListControl::OnAfterItemModified(tree::INodeProvider* parentNode, int start, int count, int newCount)
+			void GuiVirtualTreeListControl::OnAfterItemModified(tree::INodeProvider* parentNode, vint start, vint count, vint newCount)
 			{
 			}
 
@@ -7862,7 +7862,7 @@ TreeViewNodeItemStyleProvider::ItemController
 					if(backgroundButton->GetBoundsComposition()->GetParent())
 					{
 						GuiListControl::IItemArranger* arranger=styleProvider->treeControl->GetArranger();
-						int index=arranger->GetVisibleIndex(this);
+						vint index=arranger->GetVisibleIndex(this);
 						if(index!=-1)
 						{
 							INodeItemView* view=styleProvider->treeControl->GetNodeItemView();
@@ -7978,7 +7978,7 @@ TreeViewNodeItemStyleProvider::ItemController
 					text->SetColor(styleProvider->treeControl->GetTreeViewStyleProvider()->GetTextColor());
 					UpdateExpandingButton(node);
 
-					int level=-2;
+					vint level=-2;
 					while(node)
 					{
 						node=node->GetParent();
@@ -8020,7 +8020,7 @@ TreeViewNodeItemStyleProvider
 
 				TreeViewNodeItemStyleProvider::ItemController* TreeViewNodeItemStyleProvider::GetRelatedController(INodeProvider* node)
 				{
-					int index=treeControl->GetNodeItemView()->CalculateNodeVisibilityIndex(node);
+					vint index=treeControl->GetNodeItemView()->CalculateNodeVisibilityIndex(node);
 					if(index!=-1)
 					{
 						GuiListControl::IItemStyleController* style=treeControl->GetArranger()->GetVisibleStyle(index);
@@ -8046,11 +8046,11 @@ TreeViewNodeItemStyleProvider
 				{
 				}
 
-				void TreeViewNodeItemStyleProvider::OnBeforeItemModified(INodeProvider* parentNode, int start, int count, int newCount)
+				void TreeViewNodeItemStyleProvider::OnBeforeItemModified(INodeProvider* parentNode, vint start, vint count, vint newCount)
 				{
 				}
 
-				void TreeViewNodeItemStyleProvider::OnAfterItemModified(INodeProvider* parentNode, int start, int count, int newCount)
+				void TreeViewNodeItemStyleProvider::OnAfterItemModified(INodeProvider* parentNode, vint start, vint count, vint newCount)
 				{
 					UpdateExpandingButton(parentNode);
 				}
@@ -8099,12 +8099,12 @@ TreeViewNodeItemStyleProvider
 					}
 				}
 
-				int TreeViewNodeItemStyleProvider::GetItemStyleId(INodeProvider* node)
+				vint TreeViewNodeItemStyleProvider::GetItemStyleId(INodeProvider* node)
 				{
 					return 0;
 				}
 
-				INodeItemStyleController* TreeViewNodeItemStyleProvider::CreateItemStyle(int styleId)
+				INodeItemStyleController* TreeViewNodeItemStyleProvider::CreateItemStyle(vint styleId)
 				{
 					return new ItemController(this);
 				}
@@ -8245,9 +8245,9 @@ CommonScrollStyle
 			{
 				if(draggingHandle)
 				{
-					int totalPixels=0;
-					int currentOffset=0;
-					int newOffset=0;
+					vint totalPixels=0;
+					vint currentOffset=0;
+					vint newOffset=0;
 					switch(direction)
 					{
 					case Horizontal:
@@ -8263,12 +8263,12 @@ CommonScrollStyle
 					}
 
 					double ratio=(double)newOffset/totalPixels;
-					int newPosition=(int)(ratio*totalSize);
+					vint newPosition=(vint)(ratio*totalSize);
 
-					int offset1=(int)(((double)newPosition/totalSize)*totalPixels);
-					int offset2=int(((double)(newPosition+1)/totalSize)*totalPixels);
-					int delta1=abs(offset1-newOffset);
-					int delta2=abs(offset2-newOffset);
+					vint offset1=(vint)(((double)newPosition/totalSize)*totalPixels);
+					vint offset2=vint(((double)(newPosition+1)/totalSize)*totalPixels);
+					vint delta1=abs((int)(offset1-newOffset));
+					vint delta2=abs((int)(offset2-newOffset));
 					if(delta1<delta2)
 					{
 						commandExecutor->SetPosition(newPosition);
@@ -8319,7 +8319,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::BuildStyle(int defaultSize, int arrowSize)
+			void CommonScrollStyle::BuildStyle(vint defaultSize, vint arrowSize)
 			{
 				boundsComposition=new GuiBoundsComposition;
 				containerComposition=InstallBackground(boundsComposition, direction);
@@ -8442,7 +8442,7 @@ CommonScrollStyle
 				commandExecutor=value;
 			}
 
-			void CommonScrollStyle::SetTotalSize(int value)
+			void CommonScrollStyle::SetTotalSize(vint value)
 			{
 				if(totalSize!=value)
 				{
@@ -8451,7 +8451,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::SetPageSize(int value)
+			void CommonScrollStyle::SetPageSize(vint value)
 			{
 				if(pageSize!=value)
 				{
@@ -8460,7 +8460,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::SetPosition(int value)
+			void CommonScrollStyle::SetPosition(vint value)
 			{
 				if(position!=value)
 				{
@@ -8475,7 +8475,7 @@ CommonTrackStyle
 
 			void CommonTrackStyle::UpdateHandle()
 			{
-				int maxSize=totalSize-pageSize;
+				vint maxSize=totalSize-pageSize;
 				if(maxSize<1) maxSize=1;
 				double ratio=(double)position/maxSize;
 				switch(direction)
@@ -8505,9 +8505,9 @@ CommonTrackStyle
 			{
 				if(draggingHandle)
 				{
-					int totalPixels=0;
-					int currentOffset=0;
-					int newOffset=0;
+					vint totalPixels=0;
+					vint currentOffset=0;
+					vint newOffset=0;
 
 					Rect handleArea=handleComposition->GetBounds();
 					Rect handleBounds=handleButton->GetBoundsComposition()->GetParent()->GetBounds();
@@ -8526,14 +8526,14 @@ CommonTrackStyle
 					}
 
 					double ratio=(double)newOffset/totalPixels;
-					int maxSize=totalSize-pageSize;
+					vint maxSize=totalSize-pageSize;
 					if(maxSize<1) maxSize=1;
-					int newPosition=(int)(ratio*maxSize);
+					vint newPosition=(vint)(ratio*maxSize);
 
-					int offset1=(int)(((double)newPosition/maxSize)*totalPixels);
-					int offset2=int(((double)(newPosition+1)/maxSize)*totalPixels);
-					int delta1=abs(offset1-newOffset);
-					int delta2=abs(offset2-newOffset);
+					vint offset1=(vint)(((double)newPosition/maxSize)*totalPixels);
+					vint offset2=vint(((double)(newPosition+1)/maxSize)*totalPixels);
+					vint delta1=abs((int)(offset1-newOffset));
+					vint delta2=abs((int)(offset2-newOffset));
 					if(delta1<delta2)
 					{
 						commandExecutor->SetPosition(newPosition);
@@ -8550,7 +8550,7 @@ CommonTrackStyle
 				draggingHandle=false;
 			}
 
-			void CommonTrackStyle::BuildStyle(int trackThickness, int trackPadding, int handleLong, int handleShort)
+			void CommonTrackStyle::BuildStyle(vint trackThickness, vint trackPadding, vint handleLong, vint handleShort)
 			{
 				boundsComposition=new GuiBoundsComposition;
 				InstallBackground(boundsComposition, direction);
@@ -8696,7 +8696,7 @@ CommonTrackStyle
 				}
 			}
 
-			void CommonTrackStyle::SetTotalSize(int value)
+			void CommonTrackStyle::SetTotalSize(vint value)
 			{
 				if(totalSize!=value)
 				{
@@ -8705,7 +8705,7 @@ CommonTrackStyle
 				}
 			}
 
-			void CommonTrackStyle::SetPageSize(int value)
+			void CommonTrackStyle::SetPageSize(vint value)
 			{
 				if(pageSize!=value)
 				{
@@ -8714,7 +8714,7 @@ CommonTrackStyle
 				}
 			}
 
-			void CommonTrackStyle::SetPosition(int value)
+			void CommonTrackStyle::SetPosition(vint value)
 			{
 				if(position!=value)
 				{
@@ -8829,12 +8829,12 @@ CommonFragmentBuilder
 Helpers
 ***********************************************************************/
 
-		unsigned char IntToColor(int color)
+		unsigned char IntToColor(vint color)
 		{
 			return color<0?0:color>255?255:(unsigned char)color;
 		}
 
-		Color BlendColor(Color c1, Color c2, int currentPosition, int totalLength)
+		Color BlendColor(Color c1, Color c2, vint currentPosition, vint totalLength)
 		{
 			return Color(
 				(unsigned char)IntToColor((c2.r*currentPosition+c1.r*(totalLength-currentPosition))/totalLength),
@@ -9250,12 +9250,12 @@ Win7Theme
 				return new Win7ProgressBarStyle;
 			}
 
-			int Win7Theme::GetScrollDefaultSize()
+			vint Win7Theme::GetScrollDefaultSize()
 			{
 				return Win7ScrollStyle::DefaultSize;
 			}
 
-			int Win7Theme::GetTrackerDefaultSize()
+			vint Win7Theme::GetTrackerDefaultSize()
 			{
 				return Win7TrackStyle::HandleLong;
 			}
@@ -9460,12 +9460,12 @@ Win8Theme
 				return new Win8ProgressBarStyle;
 			}
 
-			int Win8Theme::GetScrollDefaultSize()
+			vint Win8Theme::GetScrollDefaultSize()
 			{
 				return Win8ScrollStyle::DefaultSize;
 			}
 
-			int Win8Theme::GetTrackerDefaultSize()
+			vint Win8Theme::GetTrackerDefaultSize()
 			{
 				return Win8TrackStyle::HandleLong;
 			}
@@ -9946,10 +9946,10 @@ Win7GroupBoxStyle
 				style->textElement->SetColor(colorCurrent);
 			}
 
-			void Win7GroupBoxStyle::SetMargins(int fontSize)
+			void Win7GroupBoxStyle::SetMargins(vint fontSize)
 			{
 				fontSize+=4;
-				int half=fontSize/2;
+				vint half=fontSize/2;
 				sinkBorderComposition->SetAlignmentToParent(Margin(0, half, 1, 1));
 				raisedBorderComposition->SetAlignmentToParent(Margin(1, half+1, 0, 0));
 				containerComposition->SetAlignmentToParent(Margin(2, fontSize, 2, 2));
@@ -11560,7 +11560,7 @@ Win7ProgressBarStyle
 
 			void Win7ProgressBarStyle::UpdateProgressBar()
 			{
-				int max=totalSize-pageSize;
+				vint max=totalSize-pageSize;
 				if(position<0)
 				{
 					progressComposition->SetWidthPageSize(0);
@@ -11680,19 +11680,19 @@ Win7ProgressBarStyle
 			{
 			}
 
-			void Win7ProgressBarStyle::SetTotalSize(int value)
+			void Win7ProgressBarStyle::SetTotalSize(vint value)
 			{
 				totalSize=value;
 				UpdateProgressBar();
 			}
 
-			void Win7ProgressBarStyle::SetPageSize(int value)
+			void Win7ProgressBarStyle::SetPageSize(vint value)
 			{
 				pageSize=value;
 				UpdateProgressBar();
 			}
 
-			void Win7ProgressBarStyle::SetPosition(int value)
+			void Win7ProgressBarStyle::SetPosition(vint value)
 			{
 				position=value;
 				UpdateProgressBar();
@@ -11740,7 +11740,7 @@ Win7ScrollViewProvider
 				return new Win7ScrollStyle(Win7ScrollStyle::Vertical);
 			}
 
-			int Win7ScrollViewProvider::GetDefaultScrollSize()
+			vint Win7ScrollViewProvider::GetDefaultScrollSize()
 			{
 				return Win7ScrollStyle::DefaultSize;
 			}
@@ -12023,7 +12023,7 @@ Win7ButtonColors
 				g4.a=a;
 			}
 
-			Win7ButtonColors Win7ButtonColors::Blend(const Win7ButtonColors& c1, const Win7ButtonColors& c2, int ratio, int total)
+			Win7ButtonColors Win7ButtonColors::Blend(const Win7ButtonColors& c1, const Win7ButtonColors& c2, vint ratio, vint total)
 			{
 				if(ratio<0) ratio=0;
 				else if(ratio>total) ratio=total;
@@ -12622,8 +12622,8 @@ Win7CheckedButtonElements
 
 			Win7CheckedButtonElements Win7CheckedButtonElements::Create(elements::ElementShape::Type shape, bool backgroundVisible)
 			{
-				const int checkSize=13;
-				const int checkPadding=2;
+				const vint checkSize=13;
+				const vint checkPadding=2;
 
 				Win7CheckedButtonElements button;
 				{
@@ -12910,7 +12910,7 @@ Win7MenuItemButtonElements
 Win7TextBoxColors
 ***********************************************************************/
 
-			Win7TextBoxColors Win7TextBoxColors::Blend(const Win7TextBoxColors& c1, const Win7TextBoxColors& c2, int ratio, int total)
+			Win7TextBoxColors Win7TextBoxColors::Blend(const Win7TextBoxColors& c1, const Win7TextBoxColors& c2, vint ratio, vint total)
 			{
 				if(ratio<0) ratio=0;
 				else if(ratio>total) ratio=total;
@@ -12997,7 +12997,7 @@ Helpers
 
 			void Win7SetFont(GuiSolidLabelElement* element, GuiBoundsComposition* composition, const FontProperties& fontProperties)
 			{
-				int margin=3;
+				vint margin=3;
 				element->SetFont(fontProperties);
 				composition->SetMargin(Margin(margin, margin, margin, margin));
 			}
@@ -13106,7 +13106,7 @@ Win7TabStyle
 			{
 				if(commandExecutor)
 				{
-					int index=headerButtons.IndexOf(dynamic_cast<GuiSelectableButton*>(sender->GetAssociatedControl()));
+					vint index=headerButtons.IndexOf(dynamic_cast<GuiSelectableButton*>(sender->GetAssociatedControl()));
 					if(index!=-1)
 					{
 						commandExecutor->ShowTab(index);
@@ -13116,14 +13116,14 @@ Win7TabStyle
 
 			void Win7TabStyle::OnTabHeaderBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				int height=headerOverflowButton->GetBoundsComposition()->GetBounds().Height();
+				vint height=headerOverflowButton->GetBoundsComposition()->GetBounds().Height();
 				headerOverflowButton->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(height, 0)));
 				UpdateHeaderOverflowButtonVisibility();
 			}
 
 			void Win7TabStyle::OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				for(int i=headerOverflowMenuStack->GetStackItems().Count()-1;i>=0;i--)
+				for(vint i=headerOverflowMenuStack->GetStackItems().Count()-1;i>=0;i--)
 				{
 					GuiStackItemComposition* item=headerOverflowMenuStack->GetStackItems().Get(i);
 					GuiControl* button=item->Children().Get(0)->GetAssociatedControl();
@@ -13134,7 +13134,7 @@ Win7TabStyle
 					delete item;
 				}
 
-				for(int i=0;i<headerButtons.Count();i++)
+				for(vint i=0;i<headerButtons.Count();i++)
 				{
 					GuiStackItemComposition* item=new GuiStackItemComposition;
 					headerOverflowMenuStack->AddChild(item);
@@ -13152,7 +13152,7 @@ Win7TabStyle
 
 			void Win7TabStyle::OnHeaderOverflowMenuButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				int index=headerOverflowMenuStack->GetStackItems().IndexOf(dynamic_cast<GuiStackItemComposition*>(sender->GetParent()));
+				vint index=headerOverflowMenuStack->GetStackItems().IndexOf(dynamic_cast<GuiStackItemComposition*>(sender->GetParent()));
 				if(index!=-1)
 				{
 					commandExecutor->ShowTab(index);
@@ -13166,9 +13166,9 @@ Win7TabStyle
 
 			void Win7TabStyle::UpdateHeaderZOrder()
 			{
-				int itemCount=tabHeaderComposition->GetStackItems().Count();
-				int childCount=tabHeaderComposition->Children().Count();
-				for(int i=0;i<itemCount;i++)
+				vint itemCount=tabHeaderComposition->GetStackItems().Count();
+				vint childCount=tabHeaderComposition->Children().Count();
+				for(vint i=0;i<itemCount;i++)
 				{
 					GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(i);
 					if(headerButtons[i]->GetSelected())
@@ -13291,7 +13291,7 @@ Win7TabStyle
 				commandExecutor=value;
 			}
 
-			void Win7TabStyle::InsertTab(int index)
+			void Win7TabStyle::InsertTab(vint index)
 			{
 				GuiSelectableButton* button=new GuiSelectableButton(new Win7TabPageHeaderStyle);
 				button->SetAutoSelection(false);
@@ -13307,13 +13307,13 @@ Win7TabStyle
 				UpdateHeaderZOrder();
 			}
 
-			void Win7TabStyle::SetTabText(int index, const WString& value)
+			void Win7TabStyle::SetTabText(vint index, const WString& value)
 			{
 				headerButtons[index]->SetText(value);
 				UpdateHeaderOverflowButtonVisibility();
 			}
 
-			void Win7TabStyle::RemoveTab(int index)
+			void Win7TabStyle::RemoveTab(vint index)
 			{
 				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(index);
 				GuiSelectableButton* button=headerButtons[index];
@@ -13327,7 +13327,7 @@ Win7TabStyle
 				UpdateHeaderOverflowButtonVisibility();
 			}
 
-			void Win7TabStyle::MoveTab(int oldIndex, int newIndex)
+			void Win7TabStyle::MoveTab(vint oldIndex, vint newIndex)
 			{
 				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(oldIndex);
 				tabHeaderComposition->RemoveChild(item);
@@ -13340,7 +13340,7 @@ Win7TabStyle
 				UpdateHeaderOverflowButtonVisibility();
 			}
 
-			void Win7TabStyle::SetSelectedTab(int index)
+			void Win7TabStyle::SetSelectedTab(vint index)
 			{
 				headerButtons[index]->SetSelected(true);
 				UpdateHeaderZOrder();
@@ -14177,10 +14177,10 @@ Win8GroupBoxStyle
 				style->textElement->SetColor(colorCurrent);
 			}
 
-			void Win8GroupBoxStyle::SetMargins(int fontSize)
+			void Win8GroupBoxStyle::SetMargins(vint fontSize)
 			{
 				fontSize+=4;
-				int half=fontSize/2;
+				vint half=fontSize/2;
 				borderComposition->SetAlignmentToParent(Margin(0, half, 0, 0));
 				containerComposition->SetAlignmentToParent(Margin(1, fontSize, 1, 1));
 				textBackgroundComposition->SetAlignmentToParent(Margin(half, 2, -1, -1));
@@ -15294,7 +15294,7 @@ Win8ProgressBarStyle
 
 			void Win8ProgressBarStyle::UpdateProgressBar()
 			{
-				int max=totalSize-pageSize;
+				vint max=totalSize-pageSize;
 				if(position<0)
 				{
 					progressComposition->SetWidthPageSize(0);
@@ -15383,19 +15383,19 @@ Win8ProgressBarStyle
 			{
 			}
 
-			void Win8ProgressBarStyle::SetTotalSize(int value)
+			void Win8ProgressBarStyle::SetTotalSize(vint value)
 			{
 				totalSize=value;
 				UpdateProgressBar();
 			}
 
-			void Win8ProgressBarStyle::SetPageSize(int value)
+			void Win8ProgressBarStyle::SetPageSize(vint value)
 			{
 				pageSize=value;
 				UpdateProgressBar();
 			}
 
-			void Win8ProgressBarStyle::SetPosition(int value)
+			void Win8ProgressBarStyle::SetPosition(vint value)
 			{
 				position=value;
 				UpdateProgressBar();
@@ -15443,7 +15443,7 @@ Win8ScrollViewProvider
 				return new Win8ScrollStyle(Win8ScrollStyle::Vertical);
 			}
 
-			int Win8ScrollViewProvider::GetDefaultScrollSize()
+			vint Win8ScrollViewProvider::GetDefaultScrollSize()
 			{
 				return Win8ScrollStyle::DefaultSize;
 			}
@@ -15731,7 +15731,7 @@ Win8ButtonColors
 				g2.a=a;
 			}
 
-			Win8ButtonColors Win8ButtonColors::Blend(const Win8ButtonColors& c1, const Win8ButtonColors& c2, int ratio, int total)
+			Win8ButtonColors Win8ButtonColors::Blend(const Win8ButtonColors& c1, const Win8ButtonColors& c2, vint ratio, vint total)
 			{
 				if(ratio<0) ratio=0;
 				else if(ratio>total) ratio=total;
@@ -16218,8 +16218,8 @@ Win8CheckedButtonElements
 
 			Win8CheckedButtonElements Win8CheckedButtonElements::Create(elements::ElementShape::Type shape, bool backgroundVisible)
 			{
-				const int checkSize=13;
-				const int checkPadding=2;
+				const vint checkSize=13;
+				const vint checkPadding=2;
 
 				Win8CheckedButtonElements button;
 				{
@@ -16476,7 +16476,7 @@ Win8MenuItemButtonElements
 Win8TextBoxColors
 ***********************************************************************/
 
-			Win8TextBoxColors Win8TextBoxColors::Blend(const Win8TextBoxColors& c1, const Win8TextBoxColors& c2, int ratio, int total)
+			Win8TextBoxColors Win8TextBoxColors::Blend(const Win8TextBoxColors& c1, const Win8TextBoxColors& c2, vint ratio, vint total)
 			{
 				if(ratio<0) ratio=0;
 				else if(ratio>total) ratio=total;
@@ -16558,7 +16558,7 @@ Helpers
 
 			void Win8SetFont(GuiSolidLabelElement* element, GuiBoundsComposition* composition, const FontProperties& fontProperties)
 			{
-				int margin=3;
+				vint margin=3;
 				element->SetFont(fontProperties);
 				composition->SetMargin(Margin(margin, margin, margin, margin));
 			}
@@ -17039,12 +17039,12 @@ GuiTextBoxColorizer
 				GuiTextBoxColorizerBase* colorizer=(GuiTextBoxColorizerBase*)argument;
 				while(!colorizer->isFinalizing)
 				{
-					int lineIndex=-1;
+					vint lineIndex=-1;
 					wchar_t* text=0;
 					unsigned __int32* colors=0;
-					int length=0;
-					int lexerState=-1;
-					int contextState=-1;
+					vint length=0;
+					vint lexerState=-1;
+					vint contextState=-1;
 
 					{
 						SpinLock::Scope scope(*colorizer->elementModifyLock);
@@ -17075,7 +17075,7 @@ GuiTextBoxColorizer
 							TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
 							line.lexerFinalState=lexerState;
 							line.contextFinalState=contextState;
-							for(int i=0;i<length;i++)
+							for(vint i=0;i<length;i++)
 							{
 								line.att[i].colorIndex=colors[i];
 							}
@@ -17147,7 +17147,7 @@ GuiTextBoxColorizer
 				if(element && elementModifyLock)
 				{
 					SpinLock::Scope scope(*elementModifyLock);
-					int line=originalStart.row<originalEnd.row?originalStart.row:originalEnd.row;
+					vint line=originalStart.row<originalEnd.row?originalStart.row:originalEnd.row;
 					if(colorizedLineCount>line)
 					{
 						colorizedLineCount=line;
@@ -17170,19 +17170,19 @@ GuiTextBoxRegexColorizer
 			struct GuiTextBoxRegexColorizerProcData
 			{
 				GuiTextBoxRegexColorizer*		colorizer;
-				int								lineIndex;
+				vint								lineIndex;
 				const wchar_t*					text;
 				unsigned __int32*				colors;
-				int								contextState;
+				vint								contextState;
 			};
 
 			void GuiTextBoxRegexColorizer::ColorizerProc(void* argument, vint start, vint length, vint token)
 			{
 				GuiTextBoxRegexColorizerProcData& data=*(GuiTextBoxRegexColorizerProcData*)argument;
 				data.colorizer->ColorizeTokenContextSensitive(data.lineIndex, data.text, start, length, token, data.contextState);
-				for(int i=0;i<length;i++)
+				for(vint i=0;i<length;i++)
 				{
-					data.colors[start+i]=token+1;
+					data.colors[start+i]=(int)token+1;
 				}
 			}
 
@@ -17215,7 +17215,7 @@ GuiTextBoxRegexColorizer
 				return extraTokenColors;
 			}
 
-			int GuiTextBoxRegexColorizer::GetExtraTokenIndexStart()
+			vint GuiTextBoxRegexColorizer::GetExtraTokenIndexStart()
 			{
 				if(lexer)
 				{
@@ -17240,7 +17240,7 @@ GuiTextBoxRegexColorizer
 				}
 			}
 
-			int GuiTextBoxRegexColorizer::AddToken(const WString& regex, elements::text::ColorEntry color)
+			vint GuiTextBoxRegexColorizer::AddToken(const WString& regex, elements::text::ColorEntry color)
 			{
 				if(lexer)
 				{
@@ -17254,7 +17254,7 @@ GuiTextBoxRegexColorizer
 				}
 			}
 
-			int GuiTextBoxRegexColorizer::AddExtraToken(elements::text::ColorEntry color)
+			vint GuiTextBoxRegexColorizer::AddExtraToken(elements::text::ColorEntry color)
 			{
 				if(lexer)
 				{
@@ -17278,11 +17278,11 @@ GuiTextBoxRegexColorizer
 					lexer=new regex::RegexLexer(tokenRegexes);
 					colors.Resize(1+tokenRegexes.Count()+extraTokenColors.Count());
 					colors[0]=defaultColor;
-					for(int i=0;i<tokenColors.Count();i++)
+					for(vint i=0;i<tokenColors.Count();i++)
 					{
 						colors[i+1]=tokenColors[i];
 					}
-					for(int i=0;i<extraTokenColors.Count();i++)
+					for(vint i=0;i<extraTokenColors.Count();i++)
 					{
 						colors[i+1+tokenColors.Count()]=extraTokenColors[i];
 					}
@@ -17291,21 +17291,21 @@ GuiTextBoxRegexColorizer
 				}
 			}
 
-			void GuiTextBoxRegexColorizer::ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)
+			void GuiTextBoxRegexColorizer::ColorizeTokenContextSensitive(vint lineIndex, const wchar_t* text, vint start, vint length, vint& token, vint& contextState)
 			{
 			}
 
-			int GuiTextBoxRegexColorizer::GetLexerStartState()
+			vint GuiTextBoxRegexColorizer::GetLexerStartState()
 			{
 				return lexer?colorizer->GetStartState():-1;
 			}
 
-			int GuiTextBoxRegexColorizer::GetContextStartState()
+			vint GuiTextBoxRegexColorizer::GetContextStartState()
 			{
 				return 0;
 			}
 
-			void GuiTextBoxRegexColorizer::ColorizeLineWithCRLF(int lineIndex, const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)
+			void GuiTextBoxRegexColorizer::ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, unsigned __int32* colors, vint length, vint& lexerState, vint& contextState)
 			{
 				if(lexer)
 				{
@@ -17501,7 +17501,7 @@ GuiTextBoxCommonInterface
 				return textElementOperator->Paste();
 			}
 
-			WString GuiTextBoxCommonInterface::GetRowText(int row)
+			WString GuiTextBoxCommonInterface::GetRowText(vint row)
 			{
 				TextPos start=textElementOperator->GetTextElement()->GetLines().Normalize(TextPos(row, 0));
 				TextPos end=TextPos(start.row, textElementOperator->GetTextElement()->GetLines().GetLine(start.row).dataLength);
@@ -17515,22 +17515,22 @@ GuiTextBoxCommonInterface
 				return textElementOperator->GetTextElement()->GetLines().GetText(start, end);
 			}
 				
-			int GuiTextBoxCommonInterface::GetRowWidth(int row)
+			vint GuiTextBoxCommonInterface::GetRowWidth(vint row)
 			{
 				return textElementOperator->GetTextElement()->GetLines().GetRowWidth(row);
 			}
 
-			int GuiTextBoxCommonInterface::GetRowHeight()
+			vint GuiTextBoxCommonInterface::GetRowHeight()
 			{
 				return textElementOperator->GetTextElement()->GetLines().GetRowHeight();
 			}
 
-			int GuiTextBoxCommonInterface::GetMaxWidth()
+			vint GuiTextBoxCommonInterface::GetMaxWidth()
 			{
 				return textElementOperator->GetTextElement()->GetLines().GetMaxWidth();
 			}
 
-			int GuiTextBoxCommonInterface::GetMaxHeight()
+			vint GuiTextBoxCommonInterface::GetMaxHeight()
 			{
 				return textElementOperator->GetTextElement()->GetLines().GetMaxHeight();
 			}
@@ -17733,8 +17733,8 @@ GuiMultilineTextBox::DefaultTextElementOperatorCallback
 				point.x+=TextMargin;
 				point.y+=TextMargin;
 				Point oldPoint(textControl->GetHorizontalScroll()->GetPosition(), textControl->GetVerticalScroll()->GetPosition());
-				int marginX=0;
-				int marginY=0;
+				vint marginX=0;
+				vint marginY=0;
 				if(oldPoint.x<point.x)
 				{
 					marginX=TextMargin;
@@ -17755,7 +17755,7 @@ GuiMultilineTextBox::DefaultTextElementOperatorCallback
 				textControl->GetVerticalScroll()->SetPosition(point.y+marginY);
 			}
 
-			int GuiMultilineTextBox::TextElementOperatorCallback::GetTextMargin()
+			vint GuiMultilineTextBox::TextElementOperatorCallback::GetTextMargin()
 			{
 				return TextMargin;
 			}
@@ -17767,8 +17767,8 @@ GuiMultilineTextBox
 			void GuiMultilineTextBox::CalculateViewAndSetScroll()
 			{
 				CalculateView();
-				int smallMove=styleController->GetTextElement()->GetLines().GetRowHeight();
-				int bigMove=smallMove*5;
+				vint smallMove=styleController->GetTextElement()->GetLines().GetRowHeight();
+				vint bigMove=smallMove*5;
 				styleController->GetHorizontalScroll()->SetSmallMove(smallMove);
 				styleController->GetHorizontalScroll()->SetBigMove(bigMove);
 				styleController->GetVerticalScroll()->SetSmallMove(smallMove);
@@ -17970,9 +17970,9 @@ GuiSinglelineTextBox::DefaultTextElementOperatorCallback
 
 			bool GuiSinglelineTextBox::TextElementOperatorCallback::BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)
 			{
-				int length=inputText.Length();
+				vint length=inputText.Length();
 				const wchar_t* input=inputText.Buffer();
-				for(int i=0;i<length;i++)
+				for(vint i=0;i<length;i++)
 				{
 					if(*input==0 || *input==L'\r' || *input==L'\n')
 					{
@@ -17993,9 +17993,9 @@ GuiSinglelineTextBox::DefaultTextElementOperatorCallback
 			
 			void GuiSinglelineTextBox::TextElementOperatorCallback::ScrollToView(Point point)
 			{
-				int newX=point.x;
-				int oldX=textElement->GetViewPosition().x;
-				int marginX=0;
+				vint newX=point.x;
+				vint oldX=textElement->GetViewPosition().x;
+				vint marginX=0;
 				if(oldX<newX)
 				{
 					marginX=TextMargin;
@@ -18006,8 +18006,8 @@ GuiSinglelineTextBox::DefaultTextElementOperatorCallback
 				}
 
 				newX+=marginX;
-				int minX=-TextMargin;
-				int maxX=textElement->GetLines().GetMaxWidth()+TextMargin-textComposition->GetBounds().Width();
+				vint minX=-TextMargin;
+				vint maxX=textElement->GetLines().GetMaxWidth()+TextMargin-textComposition->GetBounds().Width();
 				if(newX>=maxX)
 				{
 					newX=maxX-1;
@@ -18019,7 +18019,7 @@ GuiSinglelineTextBox::DefaultTextElementOperatorCallback
 				textElement->SetViewPosition(Point(newX, -TextMargin));
 			}
 
-			int GuiSinglelineTextBox::TextElementOperatorCallback::GetTextMargin()
+			vint GuiSinglelineTextBox::TextElementOperatorCallback::GetTextMargin()
 			{
 				return TextMargin;
 			}
@@ -18134,7 +18134,7 @@ GuiTextElementOperator::DefaultCallback
 				end=pos;
 			}
 
-			int GuiTextElementOperator::DefaultCallback::GetPageRows()
+			vint GuiTextElementOperator::DefaultCallback::GetPageRows()
 			{
 				return textComposition->GetBounds().Height()/textElement->GetLines().GetRowHeight();
 			}
@@ -18148,7 +18148,7 @@ GuiTextElementOperator::DefaultCallback
 GuiTextElementOperator::ShortcutCommand
 ***********************************************************************/
 
-			GuiTextElementOperator::ShortcutCommand::ShortcutCommand(bool _ctrl, bool _shift, int _key, const Func<void()> _action)
+			GuiTextElementOperator::ShortcutCommand::ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<void()> _action)
 				:ctrl(_ctrl)
 				,shift(_shift)
 				,key(_key)
@@ -18160,7 +18160,7 @@ GuiTextElementOperator::ShortcutCommand
 			{
 			}
 
-			bool GuiTextElementOperator::ShortcutCommand::IsTheRightKey(bool _ctrl, bool _shift, int _key)
+			bool GuiTextElementOperator::ShortcutCommand::IsTheRightKey(bool _ctrl, bool _shift, vint _key)
 			{
 				return _ctrl==ctrl && _shift==shift && _key==key;
 			}
@@ -18181,9 +18181,9 @@ GuiTextElementOperator
 				{
 					Rect caret=textElement->GetLines().GetRectFromTextPos(textElement->GetCaretEnd());
 					Point view=textElement->GetViewPosition();
-					int textMargin=callback->GetTextMargin();
-					int x=caret.x1-view.x;
-					int y=caret.y2-view.y;
+					vint textMargin=callback->GetTextMargin();
+					vint x=caret.x1-view.x;
+					vint y=caret.y2-view.y;
 					host->SetCaretPoint(Point(x, y), textComposition);
 				}
 			}
@@ -18266,7 +18266,7 @@ GuiTextElementOperator
 						end=textElement->GetLines().Modify(start, end, inputText);
 					}
 					callback->AfterModify(originalStart, originalEnd, originalText, start, end, inputText);
-					for(int i=0;i<textEditCallbacks.Count();i++)
+					for(vint i=0;i<textEditCallbacks.Count();i++)
 					{
 						textEditCallbacks[i]->TextEditNotify(originalStart, originalEnd, originalText, start, end, inputText);
 					}
@@ -18279,9 +18279,9 @@ GuiTextElementOperator
 				}
 			}
 
-			bool GuiTextElementOperator::ProcessKey(int code, bool shift, bool ctrl)
+			bool GuiTextElementOperator::ProcessKey(vint code, bool shift, bool ctrl)
 			{
-				for(int i=0;i<shortcutCommands.Count();i++)
+				for(vint i=0;i<shortcutCommands.Count();i++)
 				{
 					if(shortcutCommands[i]->IsTheRightKey(ctrl, shift, code))
 					{
@@ -18524,7 +18524,7 @@ GuiTextElementOperator
 
 			GuiTextElementOperator::~GuiTextElementOperator()
 			{
-				for(int i=0;i<textEditCallbacks.Count();i++)
+				for(vint i=0;i<textEditCallbacks.Count();i++)
 				{
 					textEditCallbacks[i]->Detach();
 				}
@@ -18548,7 +18548,7 @@ GuiTextElementOperator
 				focusableComposition->GetEventReceiver()->keyDown.AttachMethod(this, &GuiTextElementOperator::OnKeyDown);
 				focusableComposition->GetEventReceiver()->charInput.AttachMethod(this, &GuiTextElementOperator::OnCharInput);
 
-				for(int i=0;i<textEditCallbacks.Count();i++)
+				for(vint i=0;i<textEditCallbacks.Count();i++)
 				{
 					textEditCallbacks[i]->Attach(textElement, elementModifyLock);
 				}
@@ -18633,7 +18633,7 @@ GuiTextElementOperator
 				if(pos.column<textElement->GetLines().GetLine(pos.row).dataLength)
 				{
 					Rect rect=textElement->GetLines().GetRectFromTextPos(pos);
-					if(abs(rect.x1-mousePosition.x)>=abs(rect.x2-1-mousePosition.x))
+					if(abs((int)(rect.x1-mousePosition.x))>=abs((int)(rect.x2-1-mousePosition.x)))
 					{
 						pos.column++;
 					}
@@ -18684,7 +18684,7 @@ GuiTextElementOperator
 
 			void GuiTextElementOperator::SelectAll()
 			{
-				int row=textElement->GetLines().GetCount()-1;
+				vint row=textElement->GetLines().GetCount()-1;
 				Move(TextPos(0, 0), false);
 				Move(TextPos(row, textElement->GetLines().GetLine(row).dataLength), true);
 			}
@@ -18780,7 +18780,7 @@ GuiGeneralUndoRedoProcessor
 						savedStep=-1;
 					}
 
-					int count=steps.Count()-firstFutureStep;
+					vint count=steps.Count()-firstFutureStep;
 					if(count>0)
 					{
 						steps.RemoveRange(firstFutureStep, count);
@@ -19463,7 +19463,7 @@ GuiToolstripCollection
 				InvokeUpdateLayout();
 			}
 
-			bool GuiToolstripCollection::RemoveAtInternal(int index, GuiControl* const& control)
+			bool GuiToolstripCollection::RemoveAtInternal(vint index, GuiControl* const& control)
 			{
 				items.RemoveAt(index);
 				GuiStackItemComposition* stackItem=stackComposition->GetStackItems().Get(index);
@@ -19492,7 +19492,7 @@ GuiToolstripCollection
 				return true;
 			}
 
-			bool GuiToolstripCollection::InsertInternal(int index, GuiControl* const& control)
+			bool GuiToolstripCollection::InsertInternal(vint index, GuiControl* const& control)
 			{
 				items.Insert(index, control);
 				GuiStackItemComposition* stackItem=new GuiStackItemComposition;
@@ -19995,13 +19995,13 @@ GuiBoundsComposition
 				{
 					if(alignmentToParent.left>=0)
 					{
-						int offset=alignmentToParent.left-result.x1;
+						vint offset=alignmentToParent.left-result.x1;
 						result.x1+=offset;
 						result.x2+=offset;
 					}
 					if(alignmentToParent.top>=0)
 					{
-						int offset=alignmentToParent.top-result.y1;
+						vint offset=alignmentToParent.top-result.y1;
 						result.y1+=offset;
 						result.y2+=offset;
 					}
@@ -20030,13 +20030,13 @@ GuiBoundsComposition
 					}
 					else if(alignmentToParent.left>=0)
 					{
-						int width=result.Width();
+						vint width=result.Width();
 						result.x1=alignmentToParent.left;
 						result.x2=result.x1+width;
 					}
 					else if(alignmentToParent.right>=0)
 					{
-						int width=result.Width();
+						vint width=result.Width();
 						result.x2=clientSize.x-alignmentToParent.right;
 						result.x1=result.x2-width;
 					}
@@ -20048,13 +20048,13 @@ GuiBoundsComposition
 					}
 					else if(alignmentToParent.top>=0)
 					{
-						int height=result.Height();
+						vint height=result.Height();
 						result.y1=alignmentToParent.top;
 						result.y2=result.y1+height;
 					}
 					else if(alignmentToParent.bottom>=0)
 					{
-						int height=result.Height();
+						vint height=result.Height();
 						result.y2=clientSize.y-alignmentToParent.bottom;
 						result.y1=result.y2-height;
 					}
@@ -20157,17 +20157,17 @@ GuiSubComponentMeasurer::MeasuringSource
 				return measuringCategory;
 			}
 
-			int GuiSubComponentMeasurer::MeasuringSource::GetSubComponentCount()
+			vint GuiSubComponentMeasurer::MeasuringSource::GetSubComponentCount()
 			{
 				return subComponents.Count();
 			}
 
-			WString GuiSubComponentMeasurer::MeasuringSource::GetSubComponentName(int index)
+			WString GuiSubComponentMeasurer::MeasuringSource::GetSubComponentName(vint index)
 			{
 				return subComponents.Keys()[index];
 			}
 
-			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetSubComponentComposition(int index)
+			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetSubComponentComposition(vint index)
 			{
 				return subComponents.Values().Get(index);
 			}
@@ -20237,19 +20237,19 @@ GuiSubComponentMeasurer
 					}
 				}
 
-				Dictionary<WString, int> sizes;
+				Dictionary<WString, vint> sizes;
 				FOREACH(IMeasuringSource*, source, sources)
 				{
-					int count=source->GetSubComponentCount();
-					for(int i=0;i<count;i++)
+					vint count=source->GetSubComponentCount();
+					for(vint i=0;i<count;i++)
 					{
 						WString name=source->GetSubComponentName(i);
 						GuiGraphicsComposition* composition=source->GetSubComponentComposition(i);
 						composition->SetPreferredMinSize(Size(0, 0));
 						Size size=composition->GetPreferredBounds().GetSize();
-						int sizeComponent=direction==Horizontal?size.x:size.y;
+						vint sizeComponent=direction==Horizontal?size.x:size.y;
 
-						int index=sizes.Keys().IndexOf(name);
+						vint index=sizes.Keys().IndexOf(name);
 						if(index==-1)
 						{
 							sizes.Add(name, sizeComponent);
@@ -20262,8 +20262,8 @@ GuiSubComponentMeasurer
 				}
 				FOREACH(IMeasuringSource*, source, sources)
 				{
-					int count=source->GetSubComponentCount();
-					for(int i=0;i<count;i++)
+					vint count=source->GetSubComponentCount();
+					for(vint i=0;i<count;i++)
 					{
 						WString name=source->GetSubComponentName(i);
 						GuiGraphicsComposition* composition=source->GetSubComponentComposition(i);
@@ -20311,7 +20311,7 @@ GuiGraphicsComposition
 				}
 				else
 				{
-					for(int i=0;i<children.Count();i++)
+					for(vint i=0;i<children.Count();i++)
 					{
 						children[i]->OnControlParentChanged(control);
 					}
@@ -20354,7 +20354,7 @@ GuiGraphicsComposition
 
 			GuiGraphicsComposition::~GuiGraphicsComposition()
 			{
-				for(int i=0;i<children.Count();i++)
+				for(vint i=0;i<children.Count();i++)
 				{
 					delete children[i];
 				}
@@ -20375,7 +20375,7 @@ GuiGraphicsComposition
 				return InsertChild(children.Count(), child);
 			}
 
-			bool GuiGraphicsComposition::InsertChild(int index, GuiGraphicsComposition* child)
+			bool GuiGraphicsComposition::InsertChild(vint index, GuiGraphicsComposition* child)
 			{
 				if(!child) return false;
 				if(child->GetParent()) return false;
@@ -20390,7 +20390,7 @@ GuiGraphicsComposition
 			bool GuiGraphicsComposition::RemoveChild(GuiGraphicsComposition* child)
 			{
 				if(!child) return false;
-				int index=children.IndexOf(child);
+				vint index=children.IndexOf(child);
 				if(index==-1) return false;
 				child->OnParentChanged(child->parent, 0);
 				OnChildRemoved(child);
@@ -20405,10 +20405,10 @@ GuiGraphicsComposition
 				return true;
 			}
 
-			bool GuiGraphicsComposition::MoveChild(GuiGraphicsComposition* child, int newIndex)
+			bool GuiGraphicsComposition::MoveChild(GuiGraphicsComposition* child, vint newIndex)
 			{
 				if(!child) return false;
-				int index=children.IndexOf(child);
+				vint index=children.IndexOf(child);
 				if(index==-1) return false;
 				children.RemoveAt(index);
 				children.Insert(newIndex, child);
@@ -20477,7 +20477,7 @@ GuiGraphicsComposition
 						renderer->SetRenderTarget(renderTarget);
 					}
 				}
-				for(int i=0;i<children.Count();i++)
+				for(vint i=0;i<children.Count();i++)
 				{
 					children[i]->SetRenderTarget(renderTarget);
 				}
@@ -20521,7 +20521,7 @@ GuiGraphicsComposition
 								renderTarget->PushClipper(bounds);
 								if(!renderTarget->IsClipperCoverWholeTarget())
 								{
-									for(int i=0;i<children.Count();i++)
+									for(vint i=0;i<children.Count();i++)
 									{
 										children[i]->Render(Size(bounds.x1, bounds.y1));
 									}
@@ -20555,12 +20555,12 @@ GuiGraphicsComposition
 				if(relativeBounds.Contains(location))
 				{
 					Rect clientArea=GetClientArea();
-					for(int i=children.Count()-1;i>=0;i--)
+					for(vint i=children.Count()-1;i>=0;i--)
 					{
 						GuiGraphicsComposition* child=children[i];
 						Rect childBounds=child->GetBounds();
-						int offsetX=childBounds.x1+(clientArea.x1-bounds.x1);
-						int offsetY=childBounds.y1+(clientArea.y1-bounds.y1);
+						vint offsetX=childBounds.x1+(clientArea.x1-bounds.x1);
+						vint offsetY=childBounds.y1+(clientArea.y1-bounds.y1);
 						Point newLocation=location-Size(offsetX, offsetY);
 						GuiGraphicsComposition* childResult=child->FindComposition(newLocation);
 						if(childResult)
@@ -20602,7 +20602,7 @@ GuiGraphicsComposition
 			{
 				if(associatedControl)
 				{
-					for(int i=0;i<children.Count();i++)
+					for(vint i=0;i<children.Count();i++)
 					{
 						children[i]->OnControlParentChanged(0);
 					}
@@ -20610,7 +20610,7 @@ GuiGraphicsComposition
 				associatedControl=control;
 				if(associatedControl)
 				{
-					for(int i=0;i<children.Count();i++)
+					for(vint i=0;i<children.Count();i++)
 					{
 						children[i]->OnControlParentChanged(associatedControl);
 					}
@@ -20758,7 +20758,7 @@ GuiGraphicsComposition
 
 			void GuiGraphicsComposition::ForceCalculateSizeImmediately()
 			{
-				for(int i=0;i<children.Count();i++)
+				for(vint i=0;i<children.Count();i++)
 				{
 					children[i]->ForceCalculateSizeImmediately();
 				}
@@ -20776,8 +20776,8 @@ GuiGraphicsSite
 
 				minSize.x+=margin.left+margin.right+internalMargin.left+internalMargin.right;
 				minSize.y+=margin.top+margin.bottom+internalMargin.top+internalMargin.bottom;
-				int w=expectedBounds.Width();
-				int h=expectedBounds.Height();
+				vint w=expectedBounds.Width();
+				vint h=expectedBounds.Height();
 				if(minSize.x<w) minSize.x=w;
 				if(minSize.y<h) minSize.y=h;
 				return Rect(expectedBounds.LeftTop(), minSize);
@@ -20812,8 +20812,8 @@ GuiGraphicsSite
 				}
 				if(minSizeLimitation==GuiGraphicsComposition::LimitToElementAndChildren)
 				{
-					int childCount=Children().Count();
-					for(int i=0;i<childCount;i++)
+					vint childCount=Children().Count();
+					for(vint i=0;i<childCount;i++)
 					{
 						GuiGraphicsComposition* child=children[i];
 						if(child->IsSizeAffectParent())
@@ -20927,12 +20927,12 @@ GuiSideAlignedComposition
 				direction=value;
 			}
 
-			int GuiSideAlignedComposition::GetMaxLength()
+			vint GuiSideAlignedComposition::GetMaxLength()
 			{
 				return maxLength;
 			}
 
-			void GuiSideAlignedComposition::SetMaxLength(int value)
+			void GuiSideAlignedComposition::SetMaxLength(vint value)
 			{
 				if(value<0) value=0;
 				maxLength=value;
@@ -20962,8 +20962,8 @@ GuiSideAlignedComposition
 				if(parent)
 				{
 					Rect bounds=parent->GetBounds();
-					int w=(int)(bounds.Width()*maxRatio);
-					int h=(int)(bounds.Height()*maxRatio);
+					vint w=(vint)(bounds.Width()*maxRatio);
+					vint h=(vint)(bounds.Height()*maxRatio);
 					if(w>maxLength) w=maxLength;
 					if(h>maxLength) h=maxLength;
 					switch(direction)
@@ -21061,14 +21061,14 @@ GuiPartialViewComposition
 				if(parent)
 				{
 					Rect bounds=parent->GetBounds();
-					int w=bounds.Width();
-					int h=bounds.Height();
-					int pw=(int)(wPageSize*w);
-					int ph=(int)(hPageSize*h);
+					vint w=bounds.Width();
+					vint h=bounds.Height();
+					vint pw=(vint)(wPageSize*w);
+					vint ph=(vint)(hPageSize*h);
 
-					int ow=preferredMinSize.x-pw;
+					vint ow=preferredMinSize.x-pw;
 					if(ow<0) ow=0;
-					int oh=preferredMinSize.y-ph;
+					vint oh=preferredMinSize.y-ph;
 					if(oh<0) oh=0;
 
 					w-=ow;
@@ -21076,7 +21076,7 @@ GuiPartialViewComposition
 					pw+=ow;
 					ph+=oh;
 
-					return Rect(Point((int)(wRatio*w), (int)(hRatio*h)), Size(pw, ph));
+					return Rect(Point((vint)(wRatio*w), (vint)(hRatio*h)), Size(pw, ph));
 				}
 				return Rect();
 			}
@@ -21107,13 +21107,13 @@ GuiStackComposition
 				}
 
 				stackItemTotalSize=Size(0, 0);
-				int x=extraMargin.left?extraMargin.left:0;
-				int y=extraMargin.top?extraMargin.top:0;
+				vint x=extraMargin.left?extraMargin.left:0;
+				vint y=extraMargin.top?extraMargin.top:0;
 				switch(direction)
 				{
 				case GuiStackComposition::Horizontal:
 					{
-						for(int i=0;i<stackItems.Count();i++)
+						for(vint i=0;i<stackItems.Count();i++)
 						{
 							Size itemSize=stackItems[i]->GetMinSize();
 							if(i>0) stackItemTotalSize.x+=padding;
@@ -21125,7 +21125,7 @@ GuiStackComposition
 					break;
 				case GuiStackComposition::Vertical:
 					{
-						for(int i=0;i<stackItems.Count();i++)
+						for(vint i=0;i<stackItems.Count();i++)
 						{
 							Size itemSize=stackItems[i]->GetMinSize();
 							if(i>0) stackItemTotalSize.y+=padding;
@@ -21146,11 +21146,11 @@ GuiStackComposition
 				{
 				case Horizontal:
 					{
-						int y=0;
+						vint y=0;
 						if(extraMargin.top>0) y+=extraMargin.top;
 						if(extraMargin.bottom>0) y+=extraMargin.bottom;
 
-						for(int i=0;i<stackItemBounds.Count();i++)
+						for(vint i=0;i<stackItemBounds.Count();i++)
 						{
 							stackItemBounds[i].y2=stackItemBounds[i].y1+previousBounds.Height()-y;
 						}
@@ -21158,11 +21158,11 @@ GuiStackComposition
 					break;
 				case Vertical:
 					{
-						int x=0;
+						vint x=0;
 						if(extraMargin.left>0) x+=extraMargin.left;
 						if(extraMargin.right>0) x+=extraMargin.right;
 
-						for(int i=0;i<stackItemBounds.Count();i++)
+						for(vint i=0;i<stackItemBounds.Count();i++)
 						{
 							stackItemBounds[i].x2=stackItemBounds[i].x1+previousBounds.Width()-x;
 						}
@@ -21206,7 +21206,7 @@ GuiStackComposition
 				return stackItems;
 			}
 
-			bool GuiStackComposition::InsertStackItem(int index, GuiStackItemComposition* item)
+			bool GuiStackComposition::InsertStackItem(vint index, GuiStackItemComposition* item)
 			{
 				index=stackItems.Insert(index, item);
 				if(!AddChild(item))
@@ -21230,12 +21230,12 @@ GuiStackComposition
 				direction=value;
 			}
 
-			int GuiStackComposition::GetPadding()
+			vint GuiStackComposition::GetPadding()
 			{
 				return padding;
 			}
 
-			void GuiStackComposition::SetPadding(int value)
+			void GuiStackComposition::SetPadding(vint value)
 			{
 				padding=value;
 			}
@@ -21249,8 +21249,8 @@ GuiStackComposition
 					if(minSize.x<stackItemTotalSize.x) minSize.x=stackItemTotalSize.x;
 					if(minSize.y<stackItemTotalSize.y) minSize.y=stackItemTotalSize.y;
 				}
-				int x=0;
-				int y=0;
+				vint x=0;
+				vint y=0;
 				if(extraMargin.left>0) x+=extraMargin.left;
 				if(extraMargin.right>0) x+=extraMargin.right;
 				if(extraMargin.top>0) y+=extraMargin.top;
@@ -21279,7 +21279,7 @@ GuiStackComposition
 			bool GuiStackComposition::IsStackItemClipped()
 			{
 				Rect clientArea=GetClientArea();
-				for(int i=0;i<stackItems.Count();i++)
+				for(vint i=0;i<stackItems.Count();i++)
 				{
 					Rect stackItemBounds=stackItems[i]->GetBounds();
 					switch(direction)
@@ -21340,7 +21340,7 @@ GuiStackItemComposition
 				Rect result=bounds;
 				if(stackParent)
 				{
-					int index=stackParent->stackItems.IndexOf(this);
+					vint index=stackParent->stackItems.IndexOf(this);
 					if(index!=-1)
 					{
 						if(stackParent->stackItemBounds.Count()!=stackParent->stackItems.Count())
@@ -21395,76 +21395,76 @@ GuiTableComposition
 
 			namespace update_cell_bounds_helpers
 			{
-				int First(int a, int b)
+				vint First(vint a, vint b)
 				{
 					return a;
 				}
 
-				int Second(int a, int b)
+				vint Second(vint a, vint b)
 				{
 					return b;
 				}
 
-				int X(Size s)
+				vint X(Size s)
 				{
 					return s.x;
 				}
 
-				int Y(Size s)
+				vint Y(Size s)
 				{
 					return s.y;
 				}
 
-				int RL(GuiCellComposition* cell)
+				vint RL(GuiCellComposition* cell)
 				{
 					return cell->GetRow();
 				}
 
-				int CL(GuiCellComposition* cell)
+				vint CL(GuiCellComposition* cell)
 				{
 					return cell->GetColumn();
 				}
 
-				int RS(GuiCellComposition* cell)
+				vint RS(GuiCellComposition* cell)
 				{
 					return cell->GetRowSpan();
 				}
 
-				int CS(GuiCellComposition* cell)
+				vint CS(GuiCellComposition* cell)
 				{
 					return cell->GetColumnSpan();
 				}
 			}
 			using namespace update_cell_bounds_helpers;
 
-			int GuiTableComposition::GetSiteIndex(int _rows, int _columns, int _row, int _column)
+			vint GuiTableComposition::GetSiteIndex(vint _rows, vint _columns, vint _row, vint _column)
 			{
 				return _row*_columns+_column;
 			}
 
-			void GuiTableComposition::SetSitedCell(int _row, int _column, GuiCellComposition* cell)
+			void GuiTableComposition::SetSitedCell(vint _row, vint _column, GuiCellComposition* cell)
 			{
 				cellCompositions[GetSiteIndex(rows, columns, _row, _column)]=cell;
 			}
 
 			void GuiTableComposition::UpdateCellBoundsInternal(
-				collections::Array<int>& dimSizes,
-				int& dimSize,
-				int& dimSizeWithPercentage,
+				collections::Array<vint>& dimSizes,
+				vint& dimSize,
+				vint& dimSizeWithPercentage,
 				collections::Array<GuiCellOption>& dimOptions,
-				int GuiTableComposition::* dim1,
-				int GuiTableComposition::* dim2,
-				int (*getSize)(Size),
-				int (*getLocation)(GuiCellComposition*),
-				int (*getSpan)(GuiCellComposition*),
-				int (*getRow)(int, int),
-				int (*getCol)(int, int),
-				int maxPass
+				vint GuiTableComposition::* dim1,
+				vint GuiTableComposition::* dim2,
+				vint (*getSize)(Size),
+				vint (*getLocation)(GuiCellComposition*),
+				vint (*getSpan)(GuiCellComposition*),
+				vint (*getRow)(vint, vint),
+				vint (*getCol)(vint, vint),
+				vint maxPass
 				)
 			{
-				for(int pass=0;pass<maxPass;pass++)
+				for(vint pass=0;pass<maxPass;pass++)
 				{
-					for(int i=0;i<this->*dim1;i++)
+					for(vint i=0;i<this->*dim1;i++)
 					{
 						GuiCellOption option=dimOptions[i];
 						if(pass==0)
@@ -21480,7 +21480,7 @@ GuiTableComposition
 							break;
 						case GuiCellOption::MinSize:
 							{
-								for(int j=0;j<this->*dim2;j++)
+								for(vint j=0;j<this->*dim2;j++)
 								{
 									GuiCellComposition* cell=GetSitedCell(getRow(i, j), getCol(i, j));
 									if(cell)
@@ -21496,9 +21496,9 @@ GuiTableComposition
 										}
 										if(accept)
 										{
-											int size=getSize(cell->GetPreferredBounds().GetSize());
-											int span=getSpan(cell);
-											for(int k=1;k<span;k++)
+											vint size=getSize(cell->GetPreferredBounds().GetSize());
+											vint span=getSpan(cell);
+											for(vint k=1;k<span;k++)
 											{
 												size-=dimSizes[i-k]+cellPadding;
 											}
@@ -21516,7 +21516,7 @@ GuiTableComposition
 				}
 				
 				bool percentageExists=false;
-				for(int i=0;i<this->*dim1;i++)
+				for(vint i=0;i<this->*dim1;i++)
 				{
 					GuiCellOption option=dimOptions[i];
 					if(option.composeType==GuiCellOption::Percentage)
@@ -21530,25 +21530,25 @@ GuiTableComposition
 
 				if(percentageExists)
 				{
-					for(int i=0;i<this->*dim1;i++)
+					for(vint i=0;i<this->*dim1;i++)
 					{
 						GuiCellOption option=dimOptions[i];
 						if(option.composeType==GuiCellOption::Percentage)
 						{
 							if(0.001<option.percentage)
 							{
-								for(int j=0;j<this->*dim2;j++)
+								for(vint j=0;j<this->*dim2;j++)
 								{
 									GuiCellComposition* cell=GetSitedCell(getRow(i, j), getCol(i, j));
 									if(cell)
 									{
-										int size=getSize(cell->GetPreferredBounds().GetSize());
-										int start=getLocation(cell);
-										int span=getSpan(cell);
+										vint size=getSize(cell->GetPreferredBounds().GetSize());
+										vint start=getLocation(cell);
+										vint span=getSpan(cell);
 										size-=(span-1)*cellPadding;
 										double totalPercentage=0;
 
-										for(int k=start;k<start+span;k++)
+										for(vint k=start;k<start+span;k++)
 										{
 											if(dimOptions[k].composeType==GuiCellOption::Percentage)
 											{
@@ -21563,7 +21563,7 @@ GuiTableComposition
 											}
 										}
 
-										size=(int)ceil(size*option.percentage/totalPercentage);
+										size=(vint)ceil(size*option.percentage/totalPercentage);
 										if(dimSizes[i]<size)
 										{
 											dimSizes[i]=size;
@@ -21574,15 +21574,15 @@ GuiTableComposition
 						}
 					}
 
-					int percentageTotalSize=0;
-					for(int i=0;i<this->*dim1;i++)
+					vint percentageTotalSize=0;
+					for(vint i=0;i<this->*dim1;i++)
 					{
 						GuiCellOption option=dimOptions[i];
 						if(option.composeType==GuiCellOption::Percentage)
 						{
 							if(0.001<option.percentage)
 							{
-								int size=(int)ceil(dimSizes[i]/option.percentage);
+								vint size=(vint)ceil(dimSizes[i]/option.percentage);
 								if(percentageTotalSize<size)
 								{
 									percentageTotalSize=size;
@@ -21592,7 +21592,7 @@ GuiTableComposition
 					}
 
 					double totalPercentage=0;
-					for(int i=0;i<this->*dim1;i++)
+					for(vint i=0;i<this->*dim1;i++)
 					{
 						GuiCellOption option=dimOptions[i];
 						if(option.composeType==GuiCellOption::Percentage)
@@ -21604,14 +21604,14 @@ GuiTableComposition
 						}
 					}
 					
-					for(int i=0;i<this->*dim1;i++)
+					for(vint i=0;i<this->*dim1;i++)
 					{
 						GuiCellOption option=dimOptions[i];
 						if(option.composeType==GuiCellOption::Percentage)
 						{
 							if(0.001<option.percentage)
 							{
-								int size=(int)ceil(percentageTotalSize*option.percentage/totalPercentage);
+								vint size=(vint)ceil(percentageTotalSize*option.percentage/totalPercentage);
 								if(dimSizes[i]<size)
 								{
 									dimSizes[i]=size;
@@ -21621,7 +21621,7 @@ GuiTableComposition
 					}
 				}
 
-				for(int i=0;i<this->*dim1;i++)
+				for(vint i=0;i<this->*dim1;i++)
 				{
 					if(dimOptions[i].composeType!=GuiCellOption::Percentage)
 					{
@@ -21632,17 +21632,17 @@ GuiTableComposition
 			}
 
 			void GuiTableComposition::UpdateCellBoundsPercentages(
-				collections::Array<int>& dimSizes,
-				int dimSize,
-				int maxDimSize,
+				collections::Array<vint>& dimSizes,
+				vint dimSize,
+				vint maxDimSize,
 				collections::Array<GuiCellOption>& dimOptions
 				)
 			{
 				if(maxDimSize>dimSize)
 				{
 					double totalPercentage=0;
-					int percentageCount=0;
-					for(int i=0;i<dimOptions.Count();i++)
+					vint percentageCount=0;
+					for(vint i=0;i<dimOptions.Count();i++)
 					{
 						GuiCellOption option=dimOptions[i];
 						if(option.composeType==GuiCellOption::Percentage)
@@ -21653,49 +21653,49 @@ GuiTableComposition
 					}
 					if(percentageCount>0 && totalPercentage>0.001)
 					{
-						for(int i=0;i<dimOptions.Count();i++)
+						for(vint i=0;i<dimOptions.Count();i++)
 						{
 							GuiCellOption option=dimOptions[i];
 							if(option.composeType==GuiCellOption::Percentage)
 							{
-								dimSizes[i]=(int)((maxDimSize-dimSize)*option.percentage/totalPercentage);
+								dimSizes[i]=(vint)((maxDimSize-dimSize)*option.percentage/totalPercentage);
 							}
 						}
 					}
 				}
 			}
 
-			int GuiTableComposition::UpdateCellBoundsOffsets(
-				collections::Array<int>& offsets,
-				collections::Array<int>& sizes,
-				int start,
-				int max
+			vint GuiTableComposition::UpdateCellBoundsOffsets(
+				collections::Array<vint>& offsets,
+				collections::Array<vint>& sizes,
+				vint start,
+				vint max
 				)
 			{
 				offsets[0]=start;
-				for(int i=1;i<offsets.Count();i++)
+				for(vint i=1;i<offsets.Count();i++)
 				{
 					start+=cellPadding+sizes[i-1];
 					offsets[i]=start;
 				}
 
-				int last=offsets.Count()-1;
-				int right=offsets[last]+sizes[last];
+				vint last=offsets.Count()-1;
+				vint right=offsets[last]+sizes[last];
 				return max-right;
 			}
 
 			void GuiTableComposition::UpdateCellBoundsInternal()
 			{
-				Array<int> rowOffsets, columnOffsets, rowSizes, columnSizes;
+				Array<vint> rowOffsets, columnOffsets, rowSizes, columnSizes;
 				rowOffsets.Resize(rows);
 				rowSizes.Resize(rows);
 				columnOffsets.Resize(columns);
 				columnSizes.Resize(columns);
 				{
-					int rowTotal=(rows-1)*cellPadding;
-					int columnTotal=(columns-1)*cellPadding;
-					int rowTotalWithPercentage=rowTotal;
-					int columnTotalWithPercentage=columnTotal;
+					vint rowTotal=(rows-1)*cellPadding;
+					vint columnTotal=(columns-1)*cellPadding;
+					vint rowTotalWithPercentage=rowTotal;
+					vint columnTotalWithPercentage=columnTotal;
 
 					UpdateCellBoundsInternal(
 						rowSizes,
@@ -21732,11 +21732,11 @@ GuiTableComposition
 					rowExtending=UpdateCellBoundsOffsets(rowOffsets, rowSizes, cellPadding, cellPadding+area.Height());
 					columnExtending=UpdateCellBoundsOffsets(columnOffsets, columnSizes, cellPadding, cellPadding+area.Width());
 
-					for(int i=0;i<rows;i++)
+					for(vint i=0;i<rows;i++)
 					{
-						for(int j=0;j<columns;j++)
+						for(vint j=0;j<columns;j++)
 						{
-							int index=GetSiteIndex(rows, columns, i, j);
+							vint index=GetSiteIndex(rows, columns, i, j);
 							cellBounds[index]=Rect(Point(columnOffsets[j], rowOffsets[i]), Size(columnSizes[j], rowSizes[i]));
 						}
 					}
@@ -21745,14 +21745,14 @@ GuiTableComposition
 
 			void GuiTableComposition::UpdateTableContentMinSize()
 			{
-				Array<int> rowSizes, columnSizes;
+				Array<vint> rowSizes, columnSizes;
 				rowSizes.Resize(rows);
 				columnSizes.Resize(columns);
 				{
-					int rowTotal=(rows+1)*cellPadding;
-					int columnTotal=(columns+1)*cellPadding;
-					int rowTotalWithPercentage=rowTotal;
-					int columnTotalWithPercentage=columnTotal;
+					vint rowTotal=(rows+1)*cellPadding;
+					vint columnTotal=(columns+1)*cellPadding;
+					vint rowTotalWithPercentage=rowTotal;
+					vint columnTotalWithPercentage=columnTotal;
 
 					UpdateCellBoundsInternal(
 						rowSizes,
@@ -21813,32 +21813,32 @@ GuiTableComposition
 			{
 			}
 
-			int GuiTableComposition::GetRows()
+			vint GuiTableComposition::GetRows()
 			{
 				return rows;
 			}
 
-			int GuiTableComposition::GetColumns()
+			vint GuiTableComposition::GetColumns()
 			{
 				return columns;
 			}
 
-			bool GuiTableComposition::SetRowsAndColumns(int _rows, int _columns)
+			bool GuiTableComposition::SetRowsAndColumns(vint _rows, vint _columns)
 			{
 				if(_rows<=0 || _columns<=0) return false;
 				rowOptions.Resize(_rows);
 				columnOptions.Resize(_columns);
 				cellCompositions.Resize(_rows*_columns);
 				cellBounds.Resize(_rows*_columns);
-				for(int i=0;i<_rows*_columns;i++)
+				for(vint i=0;i<_rows*_columns;i++)
 				{
 					cellCompositions[i]=0;
 					cellBounds[i]=Rect();
 				}
 				rows=_rows;
 				columns=_columns;
-				int childCount=Children().Count();
-				for(int i=0;i<childCount;i++)
+				vint childCount=Children().Count();
+				for(vint i=0;i<childCount;i++)
 				{
 					GuiCellComposition* cell=dynamic_cast<GuiCellComposition*>(Children().Get(i));
 					if(cell)
@@ -21850,37 +21850,37 @@ GuiTableComposition
 				return true;
 			}
 
-			GuiCellComposition* GuiTableComposition::GetSitedCell(int _row, int _column)
+			GuiCellComposition* GuiTableComposition::GetSitedCell(vint _row, vint _column)
 			{
 				return cellCompositions[GetSiteIndex(rows, columns, _row, _column)];
 			}
 
-			GuiCellOption GuiTableComposition::GetRowOption(int _row)
+			GuiCellOption GuiTableComposition::GetRowOption(vint _row)
 			{
 				return rowOptions[_row];
 			}
 
-			void GuiTableComposition::SetRowOption(int _row, GuiCellOption option)
+			void GuiTableComposition::SetRowOption(vint _row, GuiCellOption option)
 			{
 				rowOptions[_row]=option;
 			}
 
-			GuiCellOption GuiTableComposition::GetColumnOption(int _column)
+			GuiCellOption GuiTableComposition::GetColumnOption(vint _column)
 			{
 				return columnOptions[_column];
 			}
 
-			void GuiTableComposition::SetColumnOption(int _column, GuiCellOption option)
+			void GuiTableComposition::SetColumnOption(vint _column, GuiCellOption option)
 			{
 				columnOptions[_column]=option;
 			}
 
-			int GuiTableComposition::GetCellPadding()
+			vint GuiTableComposition::GetCellPadding()
 			{
 				return cellPadding;
 			}
 
-			void GuiTableComposition::SetCellPadding(int value)
+			void GuiTableComposition::SetCellPadding(vint value)
 			{
 				if(value<0) value=0;
 				cellPadding=value;
@@ -21959,9 +21959,9 @@ GuiCellComposition
 			{
 				if(row!=-1 && column!=-1)
 				{
-					for(int r=0;r<rowSpan;r++)
+					for(vint r=0;r<rowSpan;r++)
 					{
-						for(int c=0;c<columnSpan;c++)
+						for(vint c=0;c<columnSpan;c++)
 						{
 							table->SetSitedCell(row+r, column+c, 0);
 						}
@@ -21971,9 +21971,9 @@ GuiCellComposition
 
 			void GuiCellComposition::SetSitedCells(GuiTableComposition* table)
 			{
-				for(int r=0;r<rowSpan;r++)
+				for(vint r=0;r<rowSpan;r++)
 				{
-					for(int c=0;c<columnSpan;c++)
+					for(vint c=0;c<columnSpan;c++)
 					{
 						table->SetSitedCell(row+r, column+c, this);
 					}
@@ -21988,15 +21988,15 @@ GuiCellComposition
 				columnSpan=1;
 			}
 
-			bool GuiCellComposition::SetSiteInternal(int _row, int _column, int _rowSpan, int _columnSpan)
+			bool GuiCellComposition::SetSiteInternal(vint _row, vint _column, vint _rowSpan, vint _columnSpan)
 			{
 				if(!tableParent) return false;
 				if(_row<0 || _row>=tableParent->rows || _column<0 || _column>=tableParent->columns) return false;
 				if(_rowSpan<1 || _row+_rowSpan>tableParent->rows || _columnSpan<1 || _column+_columnSpan>tableParent->columns) return false;
 
-				for(int r=0;r<_rowSpan;r++)
+				for(vint r=0;r<_rowSpan;r++)
 				{
-					for(int c=0;c<_columnSpan;c++)
+					for(vint c=0;c<_columnSpan;c++)
 					{
 						GuiCellComposition* cell=tableParent->GetSitedCell(_row+r, _column+c);
 						if(cell && cell!=this)
@@ -22058,27 +22058,27 @@ GuiCellComposition
 				return tableParent;
 			}
 
-			int GuiCellComposition::GetRow()
+			vint GuiCellComposition::GetRow()
 			{
 				return row;
 			}
 
-			int GuiCellComposition::GetRowSpan()
+			vint GuiCellComposition::GetRowSpan()
 			{
 				return rowSpan;
 			}
 
-			int GuiCellComposition::GetColumn()
+			vint GuiCellComposition::GetColumn()
 			{
 				return column;
 			}
 
-			int GuiCellComposition::GetColumnSpan()
+			vint GuiCellComposition::GetColumnSpan()
 			{
 				return columnSpan;
 			}
 
-			bool GuiCellComposition::SetSite(int _row, int _column, int _rowSpan, int _columnSpan)
+			bool GuiCellComposition::SetSite(vint _row, vint _column, vint _rowSpan, vint _columnSpan)
 			{
 				if(SetSiteInternal(_row, _column, _rowSpan, _columnSpan))
 				{
@@ -22097,11 +22097,11 @@ GuiCellComposition
 				{
 					Rect bounds1, bounds2;
 					{
-						int index=tableParent->GetSiteIndex(tableParent->rows, tableParent->columns, row, column);
+						vint index=tableParent->GetSiteIndex(tableParent->rows, tableParent->columns, row, column);
 						bounds1=tableParent->cellBounds[index];
 					}
 					{
-						int index=tableParent->GetSiteIndex(tableParent->rows, tableParent->columns, row+rowSpan-1, column+columnSpan-1);
+						vint index=tableParent->GetSiteIndex(tableParent->rows, tableParent->columns, row+rowSpan-1, column+columnSpan-1);
 						bounds2=tableParent->cellBounds[index];
 						if(tableParent->GetMinSizeLimitation()==GuiGraphicsComposition::NoLimit)
 						{
@@ -22212,12 +22212,12 @@ GuiRoundBorderElement
 				}
 			}
 
-			int GuiRoundBorderElement::GetRadius()
+			vint GuiRoundBorderElement::GetRadius()
 			{
 				return radius;
 			}
 
-			void GuiRoundBorderElement::SetRadius(int value)
+			void GuiRoundBorderElement::SetRadius(vint value)
 			{
 				if(radius!=value)
 				{
@@ -22613,12 +22613,12 @@ GuiImageFrameElement
 				return image;
 			}
 
-			int GuiImageFrameElement::GetFrameIndex()
+			vint GuiImageFrameElement::GetFrameIndex()
 			{
 				return frameIndex;
 			}
 
-			void GuiImageFrameElement::SetImage(Ptr<INativeImage> _image, int _frameIndex)
+			void GuiImageFrameElement::SetImage(Ptr<INativeImage> _image, vint _frameIndex)
 			{
 				if(image!=_image || frameIndex!=_frameIndex)
 				{
@@ -22725,17 +22725,17 @@ GuiPolygonElement
 				}
 			}
 
-			const Point& GuiPolygonElement::GetPoint(int index)
+			const Point& GuiPolygonElement::GetPoint(vint index)
 			{
 				return points[index];
 			}
 
-			int GuiPolygonElement::GetPointCount()
+			vint GuiPolygonElement::GetPointCount()
 			{
 				return points.Count();
 			}
 
-			void GuiPolygonElement::SetPoints(const Point* p, int count)
+			void GuiPolygonElement::SetPoints(const Point* p, vint count)
 			{
 				points.Resize(count);
 				if(count>0)
@@ -22822,11 +22822,11 @@ GuiGraphicsAnimationManager
 
 			void GuiGraphicsAnimationManager::Play()
 			{
-				for(int i=playingAnimations.Count()-1;i>=0;i--)
+				for(vint i=playingAnimations.Count()-1;i>=0;i--)
 				{
 					Ptr<IGuiGraphicsAnimation> animation=playingAnimations[i];
-					int totalLength=animation->GetTotalLength();
-					int currentPosition=animation->GetCurrentPosition();
+					vint totalLength=animation->GetTotalLength();
+					vint currentPosition=animation->GetCurrentPosition();
 					animation->Play(currentPosition, totalLength);
 					if(currentPosition>=totalLength)
 					{
@@ -22842,7 +22842,7 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::DisconnectCompositionInternal(GuiGraphicsComposition* composition)
 			{
-				for(int i=0;i<composition->Children().Count();i++)
+				for(vint i=0;i<composition->Children().Count();i++)
 				{
 					DisconnectCompositionInternal(composition->Children().Get(i));
 				}
@@ -22897,7 +22897,7 @@ GuiGraphicsHost
 				GuiCharEventArgs arguments(composition);
 				(NativeWindowCharInfo&)arguments=info;
 
-				for(int i=compositions.Count()-1;i>=0;i--)
+				for(vint i=compositions.Count()-1;i>=0;i--)
 				{
 					compositions[i]->GetEventReceiver()->previewCharInput.Execute(arguments);
 					if(arguments.handled)
@@ -22906,7 +22906,7 @@ GuiGraphicsHost
 					}
 				}
 
-				for(int i=0;i<compositions.Count();i++)
+				for(vint i=0;i<compositions.Count();i++)
 				{
 					(compositions[i]->GetEventReceiver()->*eventReceiverEvent).Execute(arguments);
 					if(arguments.handled)
@@ -22931,7 +22931,7 @@ GuiGraphicsHost
 				GuiKeyEventArgs arguments(composition);
 				(NativeWindowKeyInfo&)arguments=info;
 
-				for(int i=compositions.Count()-1;i>=0;i--)
+				for(vint i=compositions.Count()-1;i>=0;i--)
 				{
 					compositions[i]->GetEventReceiver()->previewKey.Execute(arguments);
 					if(arguments.handled)
@@ -22940,7 +22940,7 @@ GuiGraphicsHost
 					}
 				}
 
-				for(int i=0;i<compositions.Count();i++)
+				for(vint i=0;i<compositions.Count();i++)
 				{
 					(compositions[i]->GetEventReceiver()->*eventReceiverEvent).Execute(arguments);
 					if(arguments.handled)
@@ -22954,8 +22954,8 @@ GuiGraphicsHost
 			{
 				arguments.compositionSource=composition;
 				arguments.eventSource=0;
-				int x=arguments.x;
-				int y=arguments.y;
+				vint x=arguments.x;
+				vint y=arguments.y;
 
 				while(composition)
 				{
@@ -23162,8 +23162,8 @@ GuiGraphicsHost
 					}
 				}
 
-				int firstDifferentIndex=mouseEnterCompositions.Count();
-				for(int i=0;i<mouseEnterCompositions.Count();i++)
+				vint firstDifferentIndex=mouseEnterCompositions.Count();
+				for(vint i=0;i<mouseEnterCompositions.Count();i++)
 				{
 					if(i==newCompositions.Count())
 					{
@@ -23177,7 +23177,7 @@ GuiGraphicsHost
 					}
 				}
 
-				for(int i=mouseEnterCompositions.Count()-1;i>=firstDifferentIndex;i--)
+				for(vint i=mouseEnterCompositions.Count()-1;i>=firstDifferentIndex;i--)
 				{
 					GuiGraphicsComposition* composition=mouseEnterCompositions[i];
 					if(composition->HasEventReceiver())
@@ -23187,7 +23187,7 @@ GuiGraphicsHost
 				}
 
 				CopyFrom(mouseEnterCompositions, newCompositions);
-				for(int i=firstDifferentIndex;i<mouseEnterCompositions.Count();i++)
+				for(vint i=firstDifferentIndex;i<mouseEnterCompositions.Count();i++)
 				{
 					GuiGraphicsComposition* composition=mouseEnterCompositions[i];
 					if(composition->HasEventReceiver())
@@ -23219,7 +23219,7 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::MouseLeaved()
 			{
-				for(int i=mouseEnterCompositions.Count()-1;i>=0;i--)
+				for(vint i=mouseEnterCompositions.Count()-1;i>=0;i--)
 				{
 					GuiGraphicsComposition* composition=mouseEnterCompositions[i];
 					if(composition->HasEventReceiver())
@@ -23434,7 +23434,7 @@ GuiGraphicsHost
 GuiTimeBasedAnimation
 ***********************************************************************/
 
-			GuiTimeBasedAnimation::GuiTimeBasedAnimation(int totalMilliseconds)
+			GuiTimeBasedAnimation::GuiTimeBasedAnimation(vint totalMilliseconds)
 				:startTime(0)
 				,length(totalMilliseconds)
 			{
@@ -23445,7 +23445,7 @@ GuiTimeBasedAnimation
 			{
 			}
 
-			void GuiTimeBasedAnimation::Restart(int totalMilliseconds)
+			void GuiTimeBasedAnimation::Restart(vint totalMilliseconds)
 			{
 				startTime=DateTime::LocalTime().totalMilliseconds;
 				if(totalMilliseconds>-1)
@@ -23454,21 +23454,21 @@ GuiTimeBasedAnimation
 				}
 			}
 
-			int GuiTimeBasedAnimation::GetTotalLength()
+			vint GuiTimeBasedAnimation::GetTotalLength()
 			{
 				return length;
 			}
 
-			int GuiTimeBasedAnimation::GetCurrentPosition()
+			vint GuiTimeBasedAnimation::GetCurrentPosition()
 			{
-				return (int)(DateTime::LocalTime().totalMilliseconds-startTime);
+				return (vint)(DateTime::LocalTime().totalMilliseconds-startTime);
 			}
 
 /***********************************************************************
 GuiShortcutKeyItem
 ***********************************************************************/
 
-			GuiShortcutKeyItem::GuiShortcutKeyItem(GuiShortcutKeyManager* _shortcutKeyManager, bool _ctrl, bool _shift, bool _alt, int _key)
+			GuiShortcutKeyItem::GuiShortcutKeyItem(GuiShortcutKeyManager* _shortcutKeyManager, bool _ctrl, bool _shift, bool _alt, vint _key)
 				:shortcutKeyManager(_shortcutKeyManager)
 				,ctrl(_ctrl)
 				,shift(_shift)
@@ -23505,7 +23505,7 @@ GuiShortcutKeyItem
 					info.code==key;
 			}
 
-			bool GuiShortcutKeyItem::CanActivate(bool _ctrl, bool _shift, bool _alt, int _key)
+			bool GuiShortcutKeyItem::CanActivate(bool _ctrl, bool _shift, bool _alt, vint _key)
 			{
 				return
 					_ctrl==ctrl &&
@@ -23526,12 +23526,12 @@ GuiShortcutKeyManager
 			{
 			}
 
-			int GuiShortcutKeyManager::GetItemCount()
+			vint GuiShortcutKeyManager::GetItemCount()
 			{
 				return shortcutKeyItems.Count();
 			}
 
-			IGuiShortcutKeyItem* GuiShortcutKeyManager::GetItem(int index)
+			IGuiShortcutKeyItem* GuiShortcutKeyManager::GetItem(vint index)
 			{
 				return shortcutKeyItems[index].Obj();
 			}
@@ -23551,7 +23551,7 @@ GuiShortcutKeyManager
 				return executed;
 			}
 
-			IGuiShortcutKeyItem* GuiShortcutKeyManager::CreateShortcut(bool ctrl, bool shift, bool alt, int key)
+			IGuiShortcutKeyItem* GuiShortcutKeyManager::CreateShortcut(bool ctrl, bool shift, bool alt, vint key)
 			{
 				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{
@@ -23565,7 +23565,7 @@ GuiShortcutKeyManager
 				return item.Obj();
 			}
 
-			bool GuiShortcutKeyManager::DestroyShortcut(bool ctrl, bool shift, bool alt, int key)
+			bool GuiShortcutKeyManager::DestroyShortcut(bool ctrl, bool shift, bool alt, vint key)
 			{
 				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{
@@ -23578,7 +23578,7 @@ GuiShortcutKeyManager
 				return false;
 			}
 
-			IGuiShortcutKeyItem* GuiShortcutKeyManager::TryGetShortcut(bool ctrl, bool shift, bool alt, int key)
+			IGuiShortcutKeyItem* GuiShortcutKeyManager::TryGetShortcut(bool ctrl, bool shift, bool alt, vint key)
 			{
 				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{
@@ -23645,13 +23645,13 @@ GuiGraphicsResourceManager
 
 			IGuiGraphicsElementFactory* GuiGraphicsResourceManager::GetElementFactory(const WString& elementTypeName)
 			{
-				int index=elementFactories.Keys().IndexOf(elementTypeName);
+				vint index=elementFactories.Keys().IndexOf(elementTypeName);
 				return index==-1?0:elementFactories.Values().Get(index).Obj();
 			}
 
 			IGuiGraphicsRendererFactory* GuiGraphicsResourceManager::GetRendererFactory(const WString& elementTypeName)
 			{
-				int index=rendererFactories.Keys().IndexOf(elementTypeName);
+				vint index=rendererFactories.Keys().IndexOf(elementTypeName);
 				return index==-1?0:rendererFactories.Values().Get(index).Obj();
 			}
 
@@ -23720,10 +23720,10 @@ text::TextLine
 				{
 				}
 
-				int TextLine::CalculateBufferLength(int dataLength)
+				vint TextLine::CalculateBufferLength(vint dataLength)
 				{
 					if(dataLength<1)dataLength=1;
-					int bufferLength=dataLength-dataLength%BlockSize;
+					vint bufferLength=dataLength-dataLength%BlockSize;
 					if(bufferLength<dataLength)
 					{
 						bufferLength+=BlockSize;
@@ -23764,12 +23764,12 @@ text::TextLine
 					return text && att;
 				}
 
-				bool TextLine::Modify(int start, int count, const wchar_t* input, int inputCount)
+				bool TextLine::Modify(vint start, vint count, const wchar_t* input, vint inputCount)
 				{
 					if(!text || !att || start<0 || count<0 || start+count>dataLength || inputCount<0) return false;
 
-					int newDataLength=dataLength-count+inputCount;
-					int newBufferLength=CalculateBufferLength(newDataLength);
+					vint newDataLength=dataLength-count+inputCount;
+					vint newBufferLength=CalculateBufferLength(newDataLength);
 					if(newBufferLength!=bufferLength)
 					{
 						wchar_t* newText=new wchar_t[newBufferLength];
@@ -23804,10 +23804,10 @@ text::TextLine
 					return true;
 				}
 
-				TextLine TextLine::Split(int index)
+				TextLine TextLine::Split(vint index)
 				{
 					if(index<0 || index>dataLength) return TextLine();
-					int count=dataLength-index;
+					vint count=dataLength-index;
 					TextLine line;
 					line.Initialize();
 					line.Modify(0, 0, text+index, count);
@@ -23818,7 +23818,7 @@ text::TextLine
 
 				void TextLine::AppendAndFinalize(TextLine& line)
 				{
-					int oldDataLength=dataLength;
+					vint oldDataLength=dataLength;
 					Modify(oldDataLength, 0, line.text, line.dataLength);
 					memcpy(att+oldDataLength, line.att, line.dataLength*sizeof(CharAtt));
 					line.Finalize();
@@ -23828,7 +23828,7 @@ text::TextLine
 text::CharMeasurer
 ***********************************************************************/
 
-				CharMeasurer::CharMeasurer(int _rowHeight)
+				CharMeasurer::CharMeasurer(vint _rowHeight)
 					:oldRenderTarget(0)
 					,rowHeight(_rowHeight)
 				{
@@ -23849,9 +23849,9 @@ text::CharMeasurer
 					}
 				}
 
-				int CharMeasurer::MeasureWidth(wchar_t character)
+				vint CharMeasurer::MeasureWidth(wchar_t character)
 				{
-					int w=widths[character];
+					vint w=widths[character];
 					if(w==0)
 					{
 						widths[character]=w=MeasureWidthInternal(character, oldRenderTarget);
@@ -23859,7 +23859,7 @@ text::CharMeasurer
 					return w;
 				}
 
-				int CharMeasurer::GetRowHeight()
+				vint CharMeasurer::GetRowHeight()
 				{
 					return rowHeight;
 				}
@@ -23887,12 +23887,12 @@ text::TextLines
 
 				//--------------------------------------------------------
 
-				int TextLines::GetCount()
+				vint TextLines::GetCount()
 				{
 					return lines.Count();
 				}
 
-				TextLine& TextLines::GetLine(int row)
+				TextLine& TextLines::GetLine(vint row)
 				{
 					return lines[row];
 				}
@@ -23930,8 +23930,8 @@ text::TextLines
 						return WString(lines[start.row].text+start.column, end.column-start.column);
 					}
 
-					int count=0;
-					for(int i=start.row+1;i<end.row;i++)
+					vint count=0;
+					for(vint i=start.row+1;i<end.row;i++)
 					{
 						count+=lines[i].dataLength;
 					}
@@ -23942,10 +23942,10 @@ text::TextLines
 					buffer.Resize(count+(end.row-start.row)*2);
 					wchar_t* writing=&buffer[0];
 
-					for(int i=start.row;i<=end.row;i++)
+					for(vint i=start.row;i<=end.row;i++)
 					{
 						wchar_t* text=lines[i].text;
-						int chars=0;
+						vint chars=0;
 						if(i==start.row)
 						{
 							text+=start.column;
@@ -23983,10 +23983,10 @@ text::TextLines
 
 				//--------------------------------------------------------
 
-				bool TextLines::RemoveLines(int start, int count)
+				bool TextLines::RemoveLines(vint start, vint count)
 				{
 					if(start<0 || count<0 || start+count>lines.Count()) return false;
-					for(int i=start+count-1;i>=start;i--)
+					for(vint i=start+count-1;i>=start;i--)
 					{
 						lines[i].Finalize();
 					}
@@ -24027,7 +24027,7 @@ text::TextLines
 					}
 				}
 
-				TextPos TextLines::Modify(TextPos start, TextPos end, const wchar_t** inputs, int* inputCounts, int rows)
+				TextPos TextLines::Modify(TextPos start, TextPos end, const wchar_t** inputs, vint* inputCounts, vint rows)
 				{
 					if(!IsAvailable(start) || !IsAvailable(end) || start>end) return TextPos(-1, -1);
 
@@ -24043,7 +24043,7 @@ text::TextLines
 							{
 								RemoveLines(start.row+1, end.row-start.row-1);
 							}
-							int modifyCount=lines[start.row].dataLength-start.column+end.column;
+							vint modifyCount=lines[start.row].dataLength-start.column+end.column;
 							lines[start.row].AppendAndFinalize(lines[start.row+1]);
 							lines.RemoveAt(start.row+1);
 							lines[start.row].Modify(start.column, modifyCount, inputs[0], inputCounts[0]);
@@ -24058,11 +24058,11 @@ text::TextLines
 						end=TextPos(start.row+1, 0);
 					}
 
-					int oldMiddleLines=end.row-start.row-1;
-					int newMiddleLines=rows-2;
+					vint oldMiddleLines=end.row-start.row-1;
+					vint newMiddleLines=rows-2;
 					if(oldMiddleLines<newMiddleLines)
 					{
-						for(int i=oldMiddleLines;i<newMiddleLines;i++)
+						for(vint i=oldMiddleLines;i<newMiddleLines;i++)
 						{
 							TextLine line;
 							line.Initialize();
@@ -24077,17 +24077,17 @@ text::TextLines
 
 					lines[start.row].Modify(start.column, lines[start.row].dataLength-start.column, inputs[0], inputCounts[0]);
 					lines[end.row].Modify(0, end.column, inputs[rows-1], inputCounts[rows-1]);
-					for(int i=1;i<rows-1;i++)
+					for(vint i=1;i<rows-1;i++)
 					{
 						lines[start.row+i].Modify(0, lines[start.row+i].dataLength, inputs[i], inputCounts[i]);
 					}
 					return TextPos(end.row, inputCounts[rows-1]);
 				}
 
-				TextPos TextLines::Modify(TextPos start, TextPos end, const wchar_t* input, int inputCount)
+				TextPos TextLines::Modify(TextPos start, TextPos end, const wchar_t* input, vint inputCount)
 				{
 					List<const wchar_t*> inputs;
-					List<int> inputCounts;
+					List<vint> inputCounts;
 					const wchar_t* previous=input;
 					const wchar_t* current=input;
 
@@ -24137,7 +24137,7 @@ text::TextLines
 
 				void TextLines::ClearMeasurement()
 				{
-					for(int i=0;i<lines.Count();i++)
+					for(vint i=0;i<lines.Count();i++)
 					{
 						lines[i].availableOffsetCount=0;
 					}
@@ -24151,12 +24151,12 @@ text::TextLines
 					}
 				}
 
-				int TextLines::GetTabSpaceCount()
+				vint TextLines::GetTabSpaceCount()
 				{
 					return tabSpaceCount;
 				}
 
-				void TextLines::SetTabSpaceCount(int value)
+				void TextLines::SetTabSpaceCount(vint value)
 				{
 					if(value<1) value=1;
 					if(tabSpaceCount!=value)
@@ -24166,19 +24166,19 @@ text::TextLines
 					}
 				}
 
-				void TextLines::MeasureRow(int row)
+				void TextLines::MeasureRow(vint row)
 				{
 					TextLine& line=lines[row];
-					int offset=0;
+					vint offset=0;
 					if(line.availableOffsetCount)
 					{
 						offset=line.att[line.availableOffsetCount-1].rightOffset;
 					}
-					for(int i=line.availableOffsetCount;i<line.dataLength;i++)
+					for(vint i=line.availableOffsetCount;i<line.dataLength;i++)
 					{
 						CharAtt& att=line.att[i];
 						wchar_t c=line.text[i];
-						int width=0;
+						vint width=0;
 						if(passwordChar)
 						{
 							width=charMeasurer->MeasureWidth(passwordChar);
@@ -24192,12 +24192,12 @@ text::TextLines
 							width=charMeasurer->MeasureWidth(line.text[i]);
 						}
 						offset+=width;
-						att.rightOffset=offset;
+						att.rightOffset=(int)offset;
 					}
 					line.availableOffsetCount=line.dataLength;
 				}
 
-				int TextLines::GetRowWidth(int row)
+				vint TextLines::GetRowWidth(vint row)
 				{
 					if(row<0 || row>=lines.Count()) return -1;
 					TextLine& line=lines[row];
@@ -24212,17 +24212,17 @@ text::TextLines
 					}
 				}
 
-				int TextLines::GetRowHeight()
+				vint TextLines::GetRowHeight()
 				{
 					return charMeasurer->GetRowHeight();
 				}
 
-				int TextLines::GetMaxWidth()
+				vint TextLines::GetMaxWidth()
 				{
-					int width=0;
-					for(int i=0;i<lines.Count();i++)
+					vint width=0;
+					for(vint i=0;i<lines.Count();i++)
 					{
-						int rowWidth=GetRowWidth(i);
+						vint rowWidth=GetRowWidth(i);
 						if(width<rowWidth)
 						{
 							width=rowWidth;
@@ -24231,14 +24231,14 @@ text::TextLines
 					return width;
 				}
 
-				int TextLines::GetMaxHeight()
+				vint TextLines::GetMaxHeight()
 				{
 					return lines.Count()*charMeasurer->GetRowHeight();
 				}
 
 				TextPos TextLines::GetTextPosFromPoint(Point point)
 				{
-					int h=charMeasurer->GetRowHeight();
+					vint h=charMeasurer->GetRowHeight();
 					if(point.y<0)
 					{
 						point.y=0;
@@ -24248,7 +24248,7 @@ text::TextLines
 						point.y=h*lines.Count()-1;
 					}
 
-					int row=point.y/h;
+					vint row=point.y/h;
 					if(point.x<0)
 					{
 						return TextPos(row, 0);
@@ -24259,12 +24259,12 @@ text::TextLines
 					}
 					TextLine& line=lines[row];
 
-					int i1=0, i2=line.dataLength;
-					int p1=0, p2=line.att[line.dataLength-1].rightOffset;
+					vint i1=0, i2=line.dataLength;
+					vint p1=0, p2=line.att[line.dataLength-1].rightOffset;
 					while(i2-i1>1)
 					{
-						int i=(i1+i2)/2;
-						int p=i==0?0:line.att[i-1].rightOffset;
+						vint i=(i1+i2)/2;
+						vint p=i==0?0:line.att[i-1].rightOffset;
 						if(point.x<p)
 						{
 							i2=i;
@@ -24283,7 +24283,7 @@ text::TextLines
 				{
 					if(IsAvailable(pos))
 					{
-						int y=pos.row*charMeasurer->GetRowHeight();
+						vint y=pos.row*charMeasurer->GetRowHeight();
 						if(pos.column==0)
 						{
 							return Point(0, y);
@@ -24310,7 +24310,7 @@ text::TextLines
 					}
 					else
 					{
-						int h=charMeasurer->GetRowHeight();
+						vint h=charMeasurer->GetRowHeight();
 						TextLine& line=lines[pos.row];
 						if(pos.column==line.dataLength)
 						{
@@ -24558,11 +24558,11 @@ Visitors
 				class SetPropertiesVisitor : public Object, public DocumentRun::IVisitor
 				{
 				public:
-					int							start;
-					int							length;
+					vint							start;
+					vint							length;
 					IGuiGraphicsParagraph*		paragraph;
 
-					SetPropertiesVisitor(int _start, IGuiGraphicsParagraph* _paragraph)
+					SetPropertiesVisitor(vint _start, IGuiGraphicsParagraph* _paragraph)
 						:start(_start)
 						,length(0)
 						,paragraph(_paragraph)
@@ -24605,7 +24605,7 @@ Visitors
 						paragraph->SetInlineObject(start, length, properties, element);
 					}
 
-					static int SetProperty(int start, IGuiGraphicsParagraph* paragraph, DocumentRun* run)
+					static vint SetProperty(vint start, IGuiGraphicsParagraph* paragraph, DocumentRun* run)
 					{
 						SetPropertiesVisitor visitor(start, paragraph);
 						run->Accept(&visitor);
@@ -24629,7 +24629,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 
 			void GuiDocumentElement::GuiDocumentElementRenderer::RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget)
 			{
-				for(int i=0;i<paragraphCaches.Count();i++)
+				for(vint i=0;i<paragraphCaches.Count();i++)
 				{
 					text::ParagraphCache* cache=paragraphCaches[i].Obj();
 					if(cache)
@@ -24652,17 +24652,17 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				renderTarget->PushClipper(bounds);
 				if(!renderTarget->IsClipperCoverWholeTarget())
 				{
-					int maxWidth=bounds.Width();
+					vint maxWidth=bounds.Width();
 					Rect clipper=renderTarget->GetClipper();
-					int cx=bounds.Left();
-					int cy=bounds.Top();
-					int y1=clipper.Top()-bounds.Top();
-					int y2=y1+clipper.Height();
-					int y=0;
+					vint cx=bounds.Left();
+					vint cy=bounds.Top();
+					vint y1=clipper.Top()-bounds.Top();
+					vint y2=y1+clipper.Height();
+					vint y=0;
 
-					for(int i=0;i<paragraphHeights.Count();i++)
+					for(vint i=0;i<paragraphHeights.Count();i++)
 					{
-						int paragraphHeight=paragraphHeights[i];
+						vint paragraphHeight=paragraphHeights[i];
 						if(y+paragraphHeight<=y1)
 						{
 							y+=paragraphHeight+paragraphDistance;
@@ -24704,12 +24704,12 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							if(!cache->graphicsParagraph)
 							{
 								cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
-								int start=0;
+								vint start=0;
 								FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines)
 								{
 									FOREACH(Ptr<text::DocumentRun>, run, line->runs)
 									{
-										int length=SetPropertiesVisitor::SetProperty(start, cache->graphicsParagraph.Obj(), run.Obj());
+										vint length=SetPropertiesVisitor::SetProperty(start, cache->graphicsParagraph.Obj(), run.Obj());
 										start+=length;
 									}
 									start+=2;
@@ -24718,7 +24718,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							if(cache->graphicsParagraph->GetMaxWidth()!=maxWidth)
 							{
 								cache->graphicsParagraph->SetMaxWidth(maxWidth);
-								int height=cache->graphicsParagraph->GetHeight();
+								vint height=cache->graphicsParagraph->GetHeight();
 								if(paragraphHeight!=height)
 								{
 									cachedTotalHeight+=height-paragraphHeight;
@@ -24744,12 +24744,12 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				if(element->document && element->document->paragraphs.Count()>0)
 				{
 					paragraphDistance=GetCurrentController()->ResourceService()->GetDefaultFont().size;
-					int defaultHeight=paragraphDistance;
+					vint defaultHeight=paragraphDistance;
 
 					paragraphCaches.Resize(element->document->paragraphs.Count());
 					paragraphHeights.Resize(element->document->paragraphs.Count());
 
-					for(int i=0;i<paragraphHeights.Count();i++)
+					for(vint i=0;i<paragraphHeights.Count();i++)
 					{
 						paragraphHeights[i]=defaultHeight;
 					}
@@ -24765,7 +24765,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				}
 			}
 
-			void GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(int index)
+			void GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(vint index)
 			{
 				if(0<=index && index<paragraphCaches.Count())
 				{
@@ -24803,7 +24803,7 @@ GuiDocumentElement
 				}
 			}
 			
-			void GuiDocumentElement::NotifyParagraphUpdated(int index)
+			void GuiDocumentElement::NotifyParagraphUpdated(vint index)
 			{
 				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
 				if(elementRenderer)
@@ -24836,18 +24836,18 @@ WindowsDirect2DElementInlineObject
 			class WindowsDirect2DElementInlineObject : public IDWriteInlineObject
 			{
 			protected:
-				int													counter;
+				vint													counter;
 				IGuiGraphicsParagraph::InlineObjectProperties		properties;
 				Ptr<IGuiGraphicsElement>							element;
-				int													start;
-				int													length;
+				vint													start;
+				vint													length;
 
 			public:
 				WindowsDirect2DElementInlineObject(
 					const IGuiGraphicsParagraph::InlineObjectProperties& _properties,
 					Ptr<IGuiGraphicsElement> _element,
-					int _start,
-					int _length
+					vint _start,
+					vint _length
 					)
 					:counter(1)
 					,properties(_properties)
@@ -24866,12 +24866,12 @@ WindowsDirect2DElementInlineObject
 					}
 				}
 
-				int GetStart()
+				vint GetStart()
 				{
 					return start;
 				}
 
-				int GetLength()
+				vint GetLength()
 				{
 					return length;
 				}
@@ -24916,7 +24916,7 @@ WindowsDirect2DElementInlineObject
 					IGuiGraphicsRenderer* graphicsRenderer=element->GetRenderer();
 					if(graphicsRenderer)
 					{
-						Rect bounds(Point((int)originX, (int)originY), properties.size);
+						Rect bounds(Point((vint)originX, (vint)originY), properties.size);
 						graphicsRenderer->Render(bounds);
 					}
 					return S_OK;
@@ -24981,7 +24981,7 @@ WindowsDirect2DParagraph
 				IWindowsDirect2DRenderTarget*		renderTarget;
 				ComPtr<IDWriteTextLayout>			textLayout;
 				bool								wrapLine;
-				int									maxWidth;
+				vint									maxWidth;
 				List<Color>							usedColors;
 				InlineElementMap					inlineElements;
 
@@ -25002,7 +25002,7 @@ WindowsDirect2DParagraph
 					IDWriteTextLayout* rawTextLayout=0;
 					HRESULT hr=dwriteFactory->CreateTextLayout(
 						_text.Buffer(),
-						_text.Length(),
+						(int)_text.Length(),
 						package->textFormat.Obj(),
 						0,
 						0,
@@ -25048,12 +25048,12 @@ WindowsDirect2DParagraph
 					}
 				}
 
-				int GetMaxWidth()override
+				vint GetMaxWidth()override
 				{
 					return maxWidth;
 				}
 
-				void SetMaxWidth(int value)override
+				void SetMaxWidth(vint value)override
 				{
 					if(maxWidth!=value)
 					{
@@ -25062,32 +25062,32 @@ WindowsDirect2DParagraph
 					}
 				}
 
-				bool SetFont(int start, int length, const WString& value)override
+				bool SetFont(vint start, vint length, const WString& value)override
 				{
 					if(length==0) return true;
 					DWRITE_TEXT_RANGE range;
-					range.startPosition=start;
-					range.length=length;
+					range.startPosition=(int)start;
+					range.length=(int)length;
 					HRESULT hr=textLayout->SetFontFamilyName(value.Buffer(), range);
 					return !FAILED(hr);
 				}
 
-				bool SetSize(int start, int length, int value)override
+				bool SetSize(vint start, vint length, vint value)override
 				{
 					if(length==0) return true;
 					DWRITE_TEXT_RANGE range;
-					range.startPosition=start;
-					range.length=length;
+					range.startPosition=(int)start;
+					range.length=(int)length;
 					HRESULT hr=textLayout->SetFontSize((FLOAT)value, range);
 					return !FAILED(hr);
 				}
 
-				bool SetStyle(int start, int length, TextStyle value)override
+				bool SetStyle(vint start, vint length, TextStyle value)override
 				{
 					if(length==0) return true;
 					DWRITE_TEXT_RANGE range;
-					range.startPosition=start;
-					range.length=length;
+					range.startPosition=(int)start;
+					range.length=(int)length;
 					HRESULT hr=S_OK;
 
 					hr=textLayout->SetFontStyle(value&Italic?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL, range);
@@ -25102,26 +25102,26 @@ WindowsDirect2DParagraph
 					return true;
 				}
 
-				bool SetColor(int start, int length, Color value)override
+				bool SetColor(vint start, vint length, Color value)override
 				{
 					if(length==0) return true;
 					ID2D1SolidColorBrush* brush=renderTarget->CreateDirect2DBrush(value);
 					usedColors.Add(value);
 
 					DWRITE_TEXT_RANGE range;
-					range.startPosition=start;
-					range.length=length;
+					range.startPosition=(int)start;
+					range.length=(int)length;
 					HRESULT hr=textLayout->SetDrawingEffect(brush, range);
 					return !FAILED(hr);
 				}
 
-				bool SetInlineObject(int start, int length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)override
+				bool SetInlineObject(vint start, vint length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)override
 				{
 					if(inlineElements.Keys().Contains(value.Obj()))
 					{
 						return false;
 					}
-					for(int i=0;i<inlineElements.Count();i++)
+					for(vint i=0;i<inlineElements.Count();i++)
 					{
 						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values().Get(i);
 						if(start<inlineObject->GetStart()+inlineObject->GetLength() && inlineObject->GetStart()<start+length)
@@ -25131,8 +25131,8 @@ WindowsDirect2DParagraph
 					}
 					ComPtr<WindowsDirect2DElementInlineObject> inlineObject=new WindowsDirect2DElementInlineObject(properties, value, start, length);
 					DWRITE_TEXT_RANGE range;
-					range.startPosition=start;
-					range.length=length;
+					range.startPosition=(int)start;
+					range.length=(int)length;
 					HRESULT hr=textLayout->SetInlineObject(inlineObject.Obj(), range);
 					if(!FAILED(hr))
 					{
@@ -25150,17 +25150,17 @@ WindowsDirect2DParagraph
 					}
 				}
 
-				bool ResetInlineObject(int start, int length)override
+				bool ResetInlineObject(vint start, vint length)override
 				{
-					for(int i=0;i<inlineElements.Count();i++)
+					for(vint i=0;i<inlineElements.Count();i++)
 					{
 						IGuiGraphicsElement* element=inlineElements.Keys().Get(i);
 						ComPtr<WindowsDirect2DElementInlineObject> inlineObject=inlineElements.Values().Get(i);
 						if(inlineObject->GetStart()==start && inlineObject->GetLength()==length)
 						{
 							DWRITE_TEXT_RANGE range;
-							range.startPosition=start;
-							range.length=length;
+							range.startPosition=(int)start;
+							range.length=(int)length;
 							HRESULT hr=textLayout->SetInlineObject(NULL, range);
 							if(!FAILED(hr))
 							{
@@ -25176,11 +25176,11 @@ WindowsDirect2DParagraph
 					return false;
 				}
 
-				int GetHeight()override
+				vint GetHeight()override
 				{
 					DWRITE_TEXT_METRICS metrics;
 					textLayout->GetMetrics(&metrics);
-					return (int)metrics.height;
+					return (vint)metrics.height;
 				}
 
 				void Render(Rect bounds)override
@@ -25481,7 +25481,7 @@ Gui3DSplitterElementRenderer
 				{
 				case Gui3DSplitterElement::Horizontal:
 					{
-						int y=bounds.y1+bounds.Height()/2-1;
+						vint y=bounds.y1+bounds.Height()/2-1;
 						p11=D2D1::Point2F((FLOAT)bounds.x1, (FLOAT)y+0.5f);
 						p12=D2D1::Point2F((FLOAT)bounds.x2, (FLOAT)y+0.5f);
 						p21=D2D1::Point2F((FLOAT)bounds.x1, (FLOAT)y+1.5f);
@@ -25490,7 +25490,7 @@ Gui3DSplitterElementRenderer
 					break;
 				case Gui3DSplitterElement::Vertical:
 					{
-						int x=bounds.x1+bounds.Width()/2-1;
+						vint x=bounds.x1+bounds.Width()/2-1;
 						p11=D2D1::Point2F((FLOAT)x+0.5f, (FLOAT)bounds.y1-0.0f);
 						p12=D2D1::Point2F((FLOAT)x+0.5f, (FLOAT)bounds.y2+0.0f);
 						p21=D2D1::Point2F((FLOAT)x+1.5f, (FLOAT)bounds.y1-0.0f);
@@ -25656,7 +25656,7 @@ GuiSolidLabelElementRenderer
 				{
 					HRESULT hr=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory()->CreateTextLayout(
 						oldText.Buffer(),
-						oldText.Length(),
+						(int)oldText.Length(),
 						textFormat->textFormat.Obj(),
 						0,
 						0,
@@ -25667,14 +25667,14 @@ GuiSolidLabelElementRenderer
 						{
 							DWRITE_TEXT_RANGE textRange;
 							textRange.startPosition=0;
-							textRange.length=oldText.Length();
+							textRange.length=(int)oldText.Length();
 							textLayout->SetUnderline(TRUE, textRange);
 						}
 						if(oldFont.strikeline)
 						{
 							DWRITE_TEXT_RANGE textRange;
 							textRange.startPosition=0;
-							textRange.length=oldText.Length();
+							textRange.length=(int)oldText.Length();
 							textLayout->SetStrikethrough(TRUE, textRange);
 						}
 					}
@@ -25734,12 +25734,12 @@ GuiSolidLabelElementRenderer
 					HRESULT hr=textLayout->GetMetrics(&metrics);
 					if(!FAILED(hr))
 					{
-						int width=0;
+						vint width=0;
 						if(!element->GetEllipse() && !element->GetWrapLine() && !element->GetMultiline())
 						{
-							width=(int)ceil(metrics.widthIncludingTrailingWhitespace);
+							width=(vint)ceil(metrics.widthIncludingTrailingWhitespace);
 						}
-						minSize=Size(width, (int)ceil(metrics.height));
+						minSize=Size(width, (vint)ceil(metrics.height));
 					}
 					textLayout->SetMaxWidth(maxWidth);
 				}
@@ -25785,8 +25785,8 @@ GuiSolidLabelElementRenderer
 					CreateTextLayout();
 				}
 
-				int x=0;
-				int y=0;
+				vint x=0;
+				vint y=0;
 				switch(element->GetHorizontalAlignment())
 				{
 				case Alignment::Left:
@@ -25961,8 +25961,8 @@ GuiImageFrameElementRenderer
 					}
 					else
 					{
-						int x=0;
-						int y=0;
+						vint x=0;
+						vint y=0;
 						switch(element->GetHorizontalAlignment())
 						{
 						case Alignment::Left:
@@ -25991,8 +25991,8 @@ GuiImageFrameElementRenderer
 					}
 					if(element->GetImage()->GetFormat()==INativeImage::Gif &&  element->GetFrameIndex()>0)
 					{
-						int max=element->GetFrameIndex();
-						for(int i=0;i<=max;i++)
+						vint max=element->GetFrameIndex();
+						for(vint i=0;i<=max;i++)
 						{
 							ComPtr<ID2D1Bitmap> frameBitmap=renderTarget->GetBitmap(element->GetImage()->GetFrame(i), element->GetEnabled());
 							d2dRenderTarget->DrawBitmap(frameBitmap.Obj(), destination, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, source);
@@ -26053,7 +26053,7 @@ GuiPolygonElementRenderer
 						p.x=(FLOAT)(oldPoints[0].x+offset.x)+0.5f;
 						p.y=(FLOAT)(oldPoints[0].y+offset.y)+0.5f;
 						pgs->BeginFigure(p, D2D1_FIGURE_BEGIN_FILLED);
-						for(int i=1;i<oldPoints.Count();i++)
+						for(vint i=1;i<oldPoints.Count();i++)
 						{
 							p.x=(FLOAT)(oldPoints[i].x+offset.x)+0.5f;
 							p.y=(FLOAT)(oldPoints[i].y+offset.y)+0.5f;
@@ -26134,8 +26134,8 @@ GuiPolygonElementRenderer
 				if(renderTarget && geometry)
 				{
 					ID2D1RenderTarget* d2dRenderTarget=renderTarget->GetDirect2DRenderTarget();
-					int offsetX=(bounds.Width()-minSize.x)/2+bounds.x1;
-					int offsetY=(bounds.Height()-minSize.y)/2+bounds.y1;
+					vint offsetX=(bounds.Width()-minSize.x)/2+bounds.x1;
+					vint offsetY=(bounds.Height()-minSize.y)/2+bounds.y1;
 
 					D2D1_MATRIX_3X2_F oldT, newT;
 					d2dRenderTarget->GetTransform(&oldT);
@@ -26160,7 +26160,7 @@ GuiPolygonElementRenderer
 				}
 				else
 				{
-					for(int i=0;i<oldPoints.Count();i++)
+					for(vint i=0;i<oldPoints.Count();i++)
 					{
 						if(oldPoints[i]!=element->GetPoint(i))
 						{
@@ -26185,7 +26185,7 @@ GuiColorizedTextElementRenderer
 				if(_renderTarget)
 				{
 					colors.Resize(element->GetColors().Count());
-					for(int i=0;i<colors.Count();i++)
+					for(vint i=0;i<colors.Count();i++)
 					{
 						text::ColorEntry entry=element->GetColors().Get(i);
 						ColorEntryResource newEntry;
@@ -26211,7 +26211,7 @@ GuiColorizedTextElementRenderer
 			{
 				if(_renderTarget)
 				{
-					for(int i=0;i<colors.Count();i++)
+					for(vint i=0;i<colors.Count();i++)
 					{
 						_renderTarget->DestroyDirect2DBrush(colors[i].normal.text);
 						_renderTarget->DestroyDirect2DBrush(colors[i].normal.background);
@@ -26306,24 +26306,24 @@ GuiColorizedTextElementRenderer
 					wchar_t passwordChar=element->GetPasswordChar();
 					Point viewPosition=element->GetViewPosition();
 					Rect viewBounds(viewPosition, bounds.GetSize());
-					int startRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, viewBounds.y1)).row;
-					int endRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, viewBounds.y2)).row;
+					vint startRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, viewBounds.y1)).row;
+					vint endRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, viewBounds.y2)).row;
 					TextPos selectionBegin=element->GetCaretBegin()<element->GetCaretEnd()?element->GetCaretBegin():element->GetCaretEnd();
 					TextPos selectionEnd=element->GetCaretBegin()>element->GetCaretEnd()?element->GetCaretBegin():element->GetCaretEnd();
 					bool focused=element->GetFocused();
 					
 					renderTarget->SetTextAntialias(oldFont.antialias, oldFont.verticalAntialias);
 
-					for(int row=startRow;row<=endRow;row++)
+					for(vint row=startRow;row<=endRow;row++)
 					{
 						Rect startRect=element->GetLines().GetRectFromTextPos(TextPos(row, 0));
 						Point startPoint=startRect.LeftTop();
-						int startColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, startPoint.y)).column;
-						int endColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, startPoint.y)).column;
+						vint startColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, startPoint.y)).column;
+						vint endColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, startPoint.y)).column;
 						text::TextLine& line=element->GetLines().GetLine(row);
 
-						int x=startColumn==0?0:line.att[startColumn-1].rightOffset;
-						for(int column=startColumn; column<=endColumn; column++)
+						vint x=startColumn==0?0:line.att[startColumn-1].rightOffset;
+						for(vint column=startColumn; column<=endColumn; column++)
 						{
 							bool inSelection=false;
 							if(selectionBegin.row==selectionEnd.row)
@@ -26344,7 +26344,7 @@ GuiColorizedTextElementRenderer
 							}
 							
 							bool crlf=column==line.dataLength;
-							int colorIndex=crlf?0:line.att[column].colorIndex;
+							vint colorIndex=crlf?0:line.att[column].colorIndex;
 							if(colorIndex>=colors.Count())
 							{
 								colorIndex=0;
@@ -26353,9 +26353,9 @@ GuiColorizedTextElementRenderer
 								!inSelection?colors[colorIndex].normal:
 								focused?colors[colorIndex].selectedFocused:
 								colors[colorIndex].selectedUnfocused;
-							int x2=crlf?x+startRect.Height()/2:line.att[column].rightOffset;
-							int tx=x-viewPosition.x+bounds.x1;
-							int ty=startPoint.y-viewPosition.y+bounds.y1;
+							vint x2=crlf?x+startRect.Height()/2:line.att[column].rightOffset;
+							vint tx=x-viewPosition.x+bounds.x1;
+							vint ty=startPoint.y-viewPosition.y+bounds.y1;
 							
 							if(color.background.a>0)
 							{
@@ -26380,7 +26380,7 @@ GuiColorizedTextElementRenderer
 					if(element->GetCaretVisible() && element->GetLines().IsAvailable(element->GetCaretEnd()))
 					{
 						Point caretPoint=element->GetLines().GetPointFromTextPos(element->GetCaretEnd());
-						int height=element->GetLines().GetRowHeight();
+						vint height=element->GetLines().GetRowHeight();
 						Point p1(caretPoint.x-viewPosition.x+bounds.x1, caretPoint.y-viewPosition.y+bounds.y1+1);
 						Point p2(caretPoint.x-viewPosition.x+bounds.x1, caretPoint.y+height-viewPosition.y+bounds.y1-1);
 						d2dRenderTarget->DrawLine(
@@ -26645,7 +26645,7 @@ CachedResourceAllocator
 				{
 				protected:
 					ComPtr<IDWriteTextFormat>		font;
-					int								size;
+					vint								size;
 
 					Size MeasureInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)
 					{
@@ -26664,24 +26664,24 @@ CachedResourceAllocator
 							hr=textLayout->GetMetrics(&metrics);
 							if(!FAILED(hr))
 							{
-								charSize=Size((int)ceil(metrics.widthIncludingTrailingWhitespace), (int)ceil(metrics.height));
+								charSize=Size((vint)ceil(metrics.widthIncludingTrailingWhitespace), (vint)ceil(metrics.height));
 							}
 							textLayout->Release();
 						}
 						return charSize;
 					}
 
-					int MeasureWidthInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)
+					vint MeasureWidthInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)
 					{
 						return MeasureInternal(character, renderTarget).x;
 					}
 
-					int GetRowHeightInternal(IGuiGraphicsRenderTarget* renderTarget)
+					vint GetRowHeightInternal(IGuiGraphicsRenderTarget* renderTarget)
 					{
 						return MeasureInternal(L' ', renderTarget).y;
 					}
 				public:
-					Direct2DCharMeasurer(ComPtr<IDWriteTextFormat> _font, int _size)
+					Direct2DCharMeasurer(ComPtr<IDWriteTextFormat> _font, vint _size)
 						:text::CharMeasurer(_size)
 						,size(_size)
 						,font(_font)
@@ -26769,9 +26769,9 @@ WindowsDirect2DRenderTarget
 								hr=frameBitmap->CopyPixels(&rect, rect.Width*4, rect.Width*rect.Height*4, buffer);
 								if(SUCCEEDED(hr))
 								{
-									int count=rect.Width*rect.Height;
+									vint count=rect.Width*rect.Height;
 									BYTE* read=buffer;
-									for(int i=0;i<count;i++)
+									for(vint i=0;i<count;i++)
 									{
 										BYTE g=(read[0]+read[1]+read[2])/6+read[3]/2;
 										read[0]=g;
@@ -26801,7 +26801,7 @@ WindowsDirect2DRenderTarget
 				INativeWindow*					window;
 				ID2D1RenderTarget*				d2dRenderTarget;
 				List<Rect>						clippers;
-				int								clipperCoverWholeTargetCounter;
+				vint								clipperCoverWholeTargetCounter;
 
 				CachedSolidBrushAllocator		solidBrushes;
 				CachedLinearBrushAllocator		linearBrushes;
@@ -27232,7 +27232,7 @@ Uniscribe Operations (UniscribeGlyphData)
 					ClearUniscribeData(0, 0);
 				}
 
-				void ClearUniscribeData(int glyphCount, int length)
+				void ClearUniscribeData(vint glyphCount, vint length)
 				{
 					glyphs.Resize(glyphCount);
 					glyphVisattrs.Resize(glyphCount);
@@ -27243,13 +27243,13 @@ Uniscribe Operations (UniscribeGlyphData)
 					memset(&sa, 0, sizeof(sa));
 				}
 			
-				bool BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, int length)
+				bool BuildUniscribeData(WinDC* dc, SCRIPT_ITEM* scriptItem, SCRIPT_CACHE& scriptCache, const wchar_t* runText, vint length)
 				{
-					int glyphCount=glyphs.Count();
+					vint glyphCount=glyphs.Count();
 					bool resizeGlyphData=false;
 					if(glyphCount==0)
 					{
-						glyphCount=(int)(1.5*length+16);
+						glyphCount=(vint)(1.5*length+16);
 						resizeGlyphData=true;
 					}
 					sa=scriptItem->a;
@@ -27270,8 +27270,8 @@ Uniscribe Operations (UniscribeGlyphData)
 								(dcParameter?dcParameter->GetHandle():NULL),
 								&scriptCache,
 								runText,
-								length,
-								glyphCount,
+								(int)length,
+								(int)glyphCount,
 								&sa,
 								&glyphs[0],
 								&charCluster[0],
@@ -27334,7 +27334,7 @@ Uniscribe Operations (UniscribeGlyphData)
 								(dcParameter?dcParameter->GetHandle():NULL),
 								&scriptCache,
 								&glyphs[0],
-								glyphCount,
+								(int)glyphCount,
 								&glyphVisattrs[0],
 								&sa,
 								&glyphAdvances[0],
@@ -27371,8 +27371,8 @@ Uniscribe Operations (UniscribeRun)
 			public:
 				struct RunFragmentBounds
 				{
-					int							start;
-					int							length;
+					vint							start;
+					vint							length;
 					Rect						bounds;
 
 					bool operator==(const RunFragmentBounds&){return false;}
@@ -27381,8 +27381,8 @@ Uniscribe Operations (UniscribeRun)
 
 				UniscribeFragment*				documentFragment;
 				SCRIPT_ITEM*					scriptItem;
-				int								start;
-				int								length;
+				vint								start;
+				vint								length;
 				const wchar_t*					runText;
 				List<RunFragmentBounds>			fragmentBounds;
 
@@ -27399,10 +27399,10 @@ Uniscribe Operations (UniscribeRun)
 				}
 
 				virtual bool					BuildUniscribeData(WinDC* dc)=0;
-				virtual int						SumWidth(int charStart, int charLength)=0;
-				virtual int						SumHeight()=0;
-				virtual void					SearchForLineBreak(int tempStart, int maxWidth, bool firstRun, int& charLength, int& charAdvances)=0;
-				virtual void					Render(WinDC* dc, int fragmentBoundsIndex, int offsetX, int offsetY)=0;
+				virtual vint						SumWidth(vint charStart, vint charLength)=0;
+				virtual vint						SumHeight()=0;
+				virtual void					SearchForLineBreak(vint tempStart, vint maxWidth, bool firstRun, vint& charLength, vint& charAdvances)=0;
+				virtual void					Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY)=0;
 			};
 
 /***********************************************************************
@@ -27414,7 +27414,7 @@ Uniscribe Operations (UniscribeTextRun)
 			public:
 				SCRIPT_CACHE					scriptCache;
 				Array<SCRIPT_LOGATTR>			charLogattrs;
-				int								advance;
+				vint								advance;
 				UniscribeGlyphData				wholeGlyph;
 
 				UniscribeTextRun()
@@ -27440,7 +27440,7 @@ Uniscribe Operations (UniscribeTextRun)
 					wholeGlyph.ClearUniscribeData(0, 0);
 				}
 
-				void SearchGlyphCluster(int charStart, int charLength, int& cluster, int& nextCluster)
+				void SearchGlyphCluster(vint charStart, vint charLength, vint& cluster, vint& nextCluster)
 				{
 					cluster=wholeGlyph.charCluster[charStart];
 					nextCluster
@@ -27458,7 +27458,7 @@ Uniscribe Operations (UniscribeTextRun)
 
 						HRESULT hr=ScriptBreak(
 							runText,
-							length,
+							(int)length,
 							&scriptItem->a,
 							&charLogattrs[0]
 							);
@@ -27481,30 +27481,30 @@ Uniscribe Operations (UniscribeTextRun)
 					return false;
 				}
 
-				int SumWidth(int charStart, int charLength)override
+				vint SumWidth(vint charStart, vint charLength)override
 				{
-					int cluster=0;
-					int nextCluster=0;
+					vint cluster=0;
+					vint nextCluster=0;
 					SearchGlyphCluster(charStart, charLength, cluster, nextCluster);
-					int width=0;
-					for(int i=cluster;i<nextCluster;i++)
+					vint width=0;
+					for(vint i=cluster;i<nextCluster;i++)
 					{
 						width+=wholeGlyph.glyphAdvances[i];
 					}
 					return width;
 				}
 
-				int SumHeight()override
+				vint SumHeight()override
 				{
 					return documentFragment->fontStyle.size;
 				}
 
-				void SearchForLineBreak(int tempStart, int maxWidth, bool firstRun, int& charLength, int& charAdvances)override
+				void SearchForLineBreak(vint tempStart, vint maxWidth, bool firstRun, vint& charLength, vint& charAdvances)override
 				{
-					int width=0;
+					vint width=0;
 					charLength=0;
 					charAdvances=0;
-					for(int i=tempStart;i<=length;)
+					for(vint i=tempStart;i<=length;)
 					{
 						if(i==length || charLogattrs[i].fSoftBreak==TRUE)
 						{
@@ -27520,8 +27520,8 @@ Uniscribe Operations (UniscribeTextRun)
 						}
 						if(i==length) break;
 
-						int cluster=wholeGlyph.charCluster[i];
-						int clusterLength=1;
+						vint cluster=wholeGlyph.charCluster[i];
+						vint clusterLength=1;
 						while(i+clusterLength<length)
 						{
 							if(wholeGlyph.charCluster[i+clusterLength]==cluster)
@@ -27534,11 +27534,11 @@ Uniscribe Operations (UniscribeTextRun)
 							}
 						}
 
-						int nextCluster
+						vint nextCluster
 							=i+clusterLength==length
 							?wholeGlyph.glyphs.Count()
 							:wholeGlyph.charCluster[i+clusterLength];
-						for(int j=cluster;j<nextCluster;j++)
+						for(vint j=cluster;j<nextCluster;j++)
 						{
 							width+=wholeGlyph.glyphAdvances[j];
 						}
@@ -27546,7 +27546,7 @@ Uniscribe Operations (UniscribeTextRun)
 					}
 				}
 
-				void Render(WinDC* dc, int fragmentBoundsIndex, int offsetX, int offsetY)override
+				void Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY)override
 				{
 					Color fontColor=documentFragment->fontColor;
 					dc->SetFont(documentFragment->fontObject);
@@ -27554,13 +27554,13 @@ Uniscribe Operations (UniscribeTextRun)
 
 					RunFragmentBounds fragment=fragmentBounds[fragmentBoundsIndex];
 					RECT rect;
-					rect.left=fragment.bounds.Left()+offsetX;
-					rect.top=fragment.bounds.Top()+offsetY;
-					rect.right=fragment.bounds.Right()+offsetX;
-					rect.bottom=fragment.bounds.Bottom()+offsetY;
+					rect.left=(int)(fragment.bounds.Left()+offsetX);
+					rect.top=(int)(fragment.bounds.Top()+offsetY);
+					rect.right=(int)(fragment.bounds.Right()+offsetX);
+					rect.bottom=(int)(fragment.bounds.Bottom()+offsetY);
 			
-					int cluster=0;
-					int nextCluster=0;
+					vint cluster=0;
+					vint nextCluster=0;
 					SearchGlyphCluster(fragment.start, fragment.length, cluster, nextCluster);
 
 					HRESULT hr=ScriptTextOut(
@@ -27574,7 +27574,7 @@ Uniscribe Operations (UniscribeTextRun)
 						NULL,
 						0,
 						&wholeGlyph.glyphs[cluster],
-						nextCluster-cluster,
+						(int)(nextCluster-cluster),
 						&wholeGlyph.glyphAdvances[cluster],
 						NULL,
 						&wholeGlyph.glyphOffsets[cluster]
@@ -27605,23 +27605,23 @@ Uniscribe Operations (UniscribeElementRun)
 					return true;
 				}
 
-				int SumWidth(int charStart, int charLength)override
+				vint SumWidth(vint charStart, vint charLength)override
 				{
 					return properties.size.x;
 				}
 
-				int SumHeight()override
+				vint SumHeight()override
 				{
 					return properties.size.y;
 				}
 
-				void SearchForLineBreak(int tempStart, int maxWidth, bool firstRun, int& charLength, int& charAdvances)override
+				void SearchForLineBreak(vint tempStart, vint maxWidth, bool firstRun, vint& charLength, vint& charAdvances)override
 				{
 					charLength=length-tempStart;
 					charAdvances=properties.size.x;
 				}
 
-				void Render(WinDC* dc, int fragmentBoundsIndex, int offsetX, int offsetY)override
+				void Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY)override
 				{
 					Rect bounds=fragmentBounds[fragmentBoundsIndex].bounds;
 					bounds.x1+=offsetX;
@@ -27664,7 +27664,7 @@ Uniscribe Operations (UniscribeLine)
 				{
 					lineText=L"";
 					CLearUniscribeData();
-					int current=0;
+					vint current=0;
 					FOREACH(Ptr<UniscribeFragment>, fragment, documentFragments)
 					{
 						lineText+=fragment->text;
@@ -27685,8 +27685,8 @@ Uniscribe Operations (UniscribeLine)
 							int scriptItemCount=0;
 							HRESULT hr=ScriptItemize(
 								lineText.Buffer(),
-								lineText.Length(),
-								scriptItems.Count()-1,
+								(int)lineText.Length(),
+								(int)(scriptItems.Count()-1),
 								&sc,
 								&ss,
 								&scriptItems[0],
@@ -27702,20 +27702,20 @@ Uniscribe Operations (UniscribeLine)
 							// use item and document fragment information to produce runs
 							// one item is constructed by one or more runs
 							// characters in each run contains the same style
-							int fragmentIndex=0;
-							int fragmentStart=0;
-							for(int i=0;i<scriptItems.Count()-1;i++)
+							vint fragmentIndex=0;
+							vint fragmentStart=0;
+							for(vint i=0;i<scriptItems.Count()-1;i++)
 							{
 								SCRIPT_ITEM* scriptItem=&scriptItems[i];
-								int start=scriptItem[0].iCharPos;
-								int length=scriptItem[1].iCharPos-scriptItem[0].iCharPos;
-								int currentStart=start;
+								vint start=scriptItem[0].iCharPos;
+								vint length=scriptItem[1].iCharPos-scriptItem[0].iCharPos;
+								vint currentStart=start;
 
 								while(currentStart<start+length)
 								{
 									UniscribeFragment* fragment=0;
-									int itemRemainLength=length-(currentStart-start);
-									int fragmentRemainLength=0;
+									vint itemRemainLength=length-(currentStart-start);
+									vint fragmentRemainLength=0;
 									while(true)
 									{
 										fragment=documentFragments[fragmentIndex].Obj();
@@ -27730,13 +27730,13 @@ Uniscribe Operations (UniscribeLine)
 											break;
 										}
 									}
-									int shortLength=itemRemainLength<fragmentRemainLength?itemRemainLength:fragmentRemainLength;
+									vint shortLength=itemRemainLength<fragmentRemainLength?itemRemainLength:fragmentRemainLength;
 									bool skip=false;
 									{
-										int elementCurrent=0;
+										vint elementCurrent=0;
 										FOREACH(Ptr<UniscribeFragment>, elementFragment, documentFragments)
 										{
-											int elementLength=elementFragment->text.Length();
+											vint elementLength=elementFragment->text.Length();
 											if(elementFragment->element)
 											{
 												if(elementCurrent<=currentStart && currentStart+shortLength<=elementCurrent+elementLength)
@@ -27787,11 +27787,11 @@ Uniscribe Operations (UniscribeLine)
 							Array<BYTE> levels(scriptRuns.Count());
 							runVisualToLogical.Resize(scriptRuns.Count());
 							runLogicalToVisual.Resize(scriptRuns.Count());
-							for(int i=0;i<scriptRuns.Count();i++)
+							for(vint i=0;i<scriptRuns.Count();i++)
 							{
 								levels[i]=scriptRuns[i]->scriptItem->a.s.uBidiLevel;
 							}
-							ScriptLayout(levels.Count(), &levels[0], &runVisualToLogical[0], &runLogicalToVisual[0]);
+							ScriptLayout((int)levels.Count(), &levels[0], &runVisualToLogical[0], &runLogicalToVisual[0]);
 						}
 					}
 					return true;
@@ -27800,11 +27800,11 @@ Uniscribe Operations (UniscribeLine)
 					return false;
 				}
 
-				void Render(WinDC* dc, int offsetX, int offsetY)
+				void Render(WinDC* dc, vint offsetX, vint offsetY)
 				{
 					FOREACH(Ptr<UniscribeRun>, run, scriptRuns)
 					{
-						for(int i=0;i<run->fragmentBounds.Count();i++)
+						for(vint i=0;i<run->fragmentBounds.Count();i++)
 						{
 							run->Render(dc, i, offsetX, offsetY);
 						}
@@ -27823,7 +27823,7 @@ Uniscribe Operations (UniscribeParagraph)
 				bool							built;
 
 				List<Ptr<UniscribeLine>>		lines;
-				int								lastAvailableWidth;
+				vint								lastAvailableWidth;
 				Rect							bounds;
 
 				UniscribeParagraph()
@@ -27860,7 +27860,7 @@ Uniscribe Operations (UniscribeParagraph)
 							if(!fragment->fontObject)
 							{
 								WString fragmentFingerPrint=fragment->GetFingerprint();
-								int index=fonts.Keys().IndexOf(fragmentFingerPrint);
+								vint index=fonts.Keys().IndexOf(fragmentFingerPrint);
 								if(index==-1)
 								{
 									fragment->fontObject=GetWindowsGDIResourceManager()->CreateGdiFont(fragment->fontStyle);
@@ -27891,7 +27891,7 @@ Uniscribe Operations (UniscribeParagraph)
 									RegexMatch::List textLines;
 									regexLine.Split(fragment->text, true, textLines);
 
-									for(int i=0;i<textLines.Count();i++)
+									for(vint i=0;i<textLines.Count();i++)
 									{
 										WString text=textLines[i]->Result().Value();
 										if(i>0)
@@ -27926,7 +27926,7 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 				}
 
-				void Layout(int availableWidth)
+				void Layout(vint availableWidth)
 				{
 					if(lastAvailableWidth==availableWidth)
 					{
@@ -27934,14 +27934,14 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 					lastAvailableWidth=availableWidth;
 
-					int cx=0;
-					int cy=0;
+					vint cx=0;
+					vint cy=0;
 					FOREACH(Ptr<UniscribeLine>, line, lines)
 					{
 						if(line->scriptRuns.Count()==0)
 						{
 							// if this line doesn't contains any run, skip and render a blank line
-							int height=line->documentFragments[0]->fontStyle.size;
+							vint height=line->documentFragments[0]->fontStyle.size;
 							line->bounds=Rect(Point(cx, cy), Size(0, height));
 							cy+=height;
 						}
@@ -27953,21 +27953,21 @@ Uniscribe Operations (UniscribeParagraph)
 							}
 
 							// render this line into linces with auto line wrapping
-							int startRun=0;
-							int startRunOffset=0;
-							int lastRun=0;
-							int lastRunOffset=0;
-							int currentWidth=0;
+							vint startRun=0;
+							vint startRunOffset=0;
+							vint lastRun=0;
+							vint lastRunOffset=0;
+							vint currentWidth=0;
 
 							while(startRun<line->scriptRuns.Count())
 							{
-								int currentWidth=0;
+								vint currentWidth=0;
 								bool firstRun=true;
 								// search for a range to fit in the given width
-								for(int i=startRun;i<line->scriptRuns.Count();i++)
+								for(vint i=startRun;i<line->scriptRuns.Count();i++)
 								{
-									int charLength=0;
-									int charAdvances=0;
+									vint charLength=0;
+									vint charAdvances=0;
 									UniscribeRun* run=line->scriptRuns[line->runVisualToLogical[i]].Obj();
 									run->SearchForLineBreak(lastRunOffset, availableWidth-currentWidth, firstRun, charLength, charAdvances);
 									firstRun=false;
@@ -27990,14 +27990,14 @@ Uniscribe Operations (UniscribeParagraph)
 								if(startRun<lastRun || (startRun==lastRun && startRunOffset<lastRunOffset))
 								{
 									// calculate the max line height in this range;
-									int maxHeight=0;
-									for(int i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
+									vint maxHeight=0;
+									for(vint i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
 									{
 										if(i==lastRun && lastRunOffset==0)
 										{
 											break;
 										}
-										int size=line->scriptRuns[line->runVisualToLogical[i]]->SumHeight();
+										vint size=line->scriptRuns[line->runVisualToLogical[i]]->SumHeight();
 										if(maxHeight<size)
 										{
 											maxHeight=size;
@@ -28005,12 +28005,12 @@ Uniscribe Operations (UniscribeParagraph)
 									}
 
 									// render all runs inside this range
-									for(int i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
+									for(vint i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
 									{
 										UniscribeRun* run=line->scriptRuns[line->runVisualToLogical[i]].Obj();
-										int start=i==startRun?startRunOffset:0;
-										int end=i==lastRun?lastRunOffset:run->length;
-										int length=end-start;
+										vint start=i==startRun?startRunOffset:0;
+										vint end=i==lastRun?lastRunOffset:run->length;
+										vint length=end-start;
 
 										UniscribeRun::RunFragmentBounds fragmentBounds;
 										fragmentBounds.start=start;
@@ -28025,7 +28025,7 @@ Uniscribe Operations (UniscribeParagraph)
 									}
 
 									cx=0;
-									cy+=(int)(maxHeight*1.5);
+									cy+=(vint)(maxHeight*1.5);
 								}
 
 								startRun=lastRun;
@@ -28033,10 +28033,10 @@ Uniscribe Operations (UniscribeParagraph)
 							}
 
 							// calculate line bounds
-							int minX=0;
-							int minY=0;
-							int maxX=0;
-							int maxY=0;
+							vint minX=0;
+							vint minY=0;
+							vint maxX=0;
+							vint maxY=0;
 							FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns)
 							{
 								FOREACH(UniscribeRun::RunFragmentBounds, fragmentBounds, run->fragmentBounds)
@@ -28053,10 +28053,10 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 
 					// calculate paragraph bounds
-					int minX=0;
-					int minY=0;
-					int maxX=0;
-					int maxY=0;
+					vint minX=0;
+					vint minY=0;
+					vint maxX=0;
+					vint maxY=0;
 					FOREACH(Ptr<UniscribeLine>, line, lines)
 					{
 						Rect bounds=line->bounds;
@@ -28068,7 +28068,7 @@ Uniscribe Operations (UniscribeParagraph)
 					bounds=Rect(minX, minY, maxX, maxY);
 				}
 
-				void Render(WinDC* dc, int offsetX, int offsetY)
+				void Render(WinDC* dc, vint offsetX, vint offsetY)
 				{
 					FOREACH(Ptr<UniscribeLine>, line, lines)
 					{
@@ -28078,16 +28078,16 @@ Uniscribe Operations (UniscribeParagraph)
 
 				//-------------------------------------------------------------------------
 
-				void SearchFragment(int start, int length, int& fs, int& ss, int& fe, int& se)
+				void SearchFragment(vint start, vint length, vint& fs, vint& ss, vint& fe, vint& se)
 				{
 					fs=-1;
 					ss=-1;
 					fe=-1;
 					se=-1;
-					int current=0;
-					for(int i=0;i<documentFragments.Count();i++)
+					vint current=0;
+					for(vint i=0;i<documentFragments.Count();i++)
 					{
-						int fragmentLength=documentFragments[i]->text.Length();
+						vint fragmentLength=documentFragments[i]->text.Length();
 						if(current<=start && start<current+fragmentLength)
 						{
 							fs=i;
@@ -28106,11 +28106,11 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 				}
 
-				bool CutFragment(int fs, int ss, int fe, int se, int& f1, int& f2)
+				bool CutFragment(vint fs, vint ss, vint fe, vint se, vint& f1, vint& f2)
 				{
 					f1=-1;
 					f2=-1;
-					for(int i=fs;i<=fe;i++)
+					for(vint i=fs;i<=fe;i++)
 					{
 						if(documentFragments[i]->element)
 						{
@@ -28120,7 +28120,7 @@ Uniscribe Operations (UniscribeParagraph)
 					if(fs==fe)
 					{
 						Ptr<UniscribeFragment> fragment=documentFragments[fs];
-						int length=fragment->text.Length();
+						vint length=fragment->text.Length();
 						if(ss==0)
 						{
 							if(se==length)
@@ -28180,7 +28180,7 @@ Uniscribe Operations (UniscribeParagraph)
 						{
 							f1=fs+1;
 							fe++;
-							int length=fragmentStart->text.Length();
+							vint length=fragmentStart->text.Length();
 							Ptr<UniscribeFragment> leftFragment=fragmentStart->Copy();
 
 							leftFragment->text=leftFragment->text.Sub(0, ss);
@@ -28196,7 +28196,7 @@ Uniscribe Operations (UniscribeParagraph)
 						{
 							f2=fe;
 							fe++;
-							int length=fragmentEnd->text.Length();
+							vint length=fragmentEnd->text.Length();
 							Ptr<UniscribeFragment> rightFragment=fragmentEnd->Copy();
 
 							fragmentEnd->text=fragmentEnd->text.Sub(0, se);
@@ -28208,13 +28208,13 @@ Uniscribe Operations (UniscribeParagraph)
 					return true;
 				}
 
-				bool SetFont(int start, int length, const WString& value)
+				bool SetFont(vint start, vint length, const WString& value)
 				{
-					int fs, ss, fe, se, f1, f2;
+					vint fs, ss, fe, se, f1, f2;
 					SearchFragment(start, length, fs, ss, fe, se);
 					if(CutFragment(fs, ss, fe, se, f1, f2))
 					{
-						for(int i=f1;i<=f2;i++)
+						for(vint i=f1;i<=f2;i++)
 						{
 							documentFragments[i]->fontStyle.fontFamily=value;
 						}
@@ -28227,13 +28227,13 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 				}
 
-				bool SetSize(int start, int length, int value)
+				bool SetSize(vint start, vint length, vint value)
 				{
-					int fs, ss, fe, se, f1, f2;
+					vint fs, ss, fe, se, f1, f2;
 					SearchFragment(start, length, fs, ss, fe, se);
 					if(CutFragment(fs, ss, fe, se, f1, f2))
 					{
-						for(int i=f1;i<=f2;i++)
+						for(vint i=f1;i<=f2;i++)
 						{
 							documentFragments[i]->fontStyle.size=value;
 						}
@@ -28246,13 +28246,13 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 				}
 
-				bool SetStyle(int start, int length, bool bold, bool italic, bool underline, bool strikeline)
+				bool SetStyle(vint start, vint length, bool bold, bool italic, bool underline, bool strikeline)
 				{
-					int fs, ss, fe, se, f1, f2;
+					vint fs, ss, fe, se, f1, f2;
 					SearchFragment(start, length, fs, ss, fe, se);
 					if(CutFragment(fs, ss, fe, se, f1, f2))
 					{
-						for(int i=f1;i<=f2;i++)
+						for(vint i=f1;i<=f2;i++)
 						{
 							documentFragments[i]->fontStyle.bold=bold;
 							documentFragments[i]->fontStyle.italic=italic;
@@ -28268,13 +28268,13 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 				}
 
-				bool SetColor(int start, int length, Color value)
+				bool SetColor(vint start, vint length, Color value)
 				{
-					int fs, ss, fe, se, f1, f2;
+					vint fs, ss, fe, se, f1, f2;
 					SearchFragment(start, length, fs, ss, fe, se);
 					if(CutFragment(fs, ss, fe, se, f1, f2))
 					{
-						for(int i=f1;i<=f2;i++)
+						for(vint i=f1;i<=f2;i++)
 						{
 							documentFragments[i]->fontColor=value;
 						}
@@ -28287,14 +28287,14 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 				}
 
-				bool SetInlineObject(int start, int length, const IGuiGraphicsParagraph::InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)
+				bool SetInlineObject(vint start, vint length, const IGuiGraphicsParagraph::InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)
 				{
-					int fs, ss, fe, se, f1, f2;
+					vint fs, ss, fe, se, f1, f2;
 					SearchFragment(start, length, fs, ss, fe, se);
 					if(CutFragment(fs, ss, fe, se, f1, f2))
 					{
 						Ptr<UniscribeFragment> elementFragment=new UniscribeFragment;
-						for(int i=f1;i<=f2;i++)
+						for(vint i=f1;i<=f2;i++)
 						{
 							elementFragment->text+=documentFragments[f1]->text;
 							elementFragment->cachedTextFragment.Add(documentFragments[f1]);
@@ -28312,15 +28312,15 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 				}
 
-				Ptr<IGuiGraphicsElement> ResetInlineObject(int start, int length)
+				Ptr<IGuiGraphicsElement> ResetInlineObject(vint start, vint length)
 				{
-					int fs, ss, fe, se;
+					vint fs, ss, fe, se;
 					SearchFragment(start, length, fs, ss, fe, se);
 					Ptr<UniscribeFragment> fragment=documentFragments[fs];
 					if(fs==fe && ss==0 && se==fragment->text.Length() && fragment->element)
 					{
 						documentFragments.RemoveAt(fs);
-						for(int i=0;i<fragment->cachedTextFragment.Count();i++)
+						for(vint i=0;i<fragment->cachedTextFragment.Count();i++)
 						{
 							documentFragments.Insert(fs+i, fragment->cachedTextFragment[i]);
 						}
@@ -28382,18 +28382,18 @@ WindowsGDIParagraph
 				{
 				}
 
-				int GetMaxWidth()override
+				vint GetMaxWidth()override
 				{
 					return paragraph->lastAvailableWidth;
 				}
 
-				void SetMaxWidth(int value)override
+				void SetMaxWidth(vint value)override
 				{
 					paragraph->BuildUniscribeData(renderTarget->GetDC());
 					paragraph->Layout(value);
 				}
 
-				bool SetFont(int start, int length, const WString& value)override
+				bool SetFont(vint start, vint length, const WString& value)override
 				{
 					if(length==0) return true;
 					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
@@ -28406,7 +28406,7 @@ WindowsGDIParagraph
 					}
 				}
 
-				bool SetSize(int start, int length, int value)override
+				bool SetSize(vint start, vint length, vint value)override
 				{
 					if(length==0) return true;
 					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
@@ -28419,7 +28419,7 @@ WindowsGDIParagraph
 					}
 				}
 
-				bool SetStyle(int start, int length, TextStyle value)override
+				bool SetStyle(vint start, vint length, TextStyle value)override
 				{
 					if(length==0) return true;
 					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
@@ -28432,7 +28432,7 @@ WindowsGDIParagraph
 					}
 				}
 
-				bool SetColor(int start, int length, Color value)override
+				bool SetColor(vint start, vint length, Color value)override
 				{
 					if(length==0) return true;
 					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
@@ -28445,7 +28445,7 @@ WindowsGDIParagraph
 					}
 				}
 
-				bool SetInlineObject(int start, int length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)override
+				bool SetInlineObject(vint start, vint length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)override
 				{
 					if(length==0) return true;
 					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
@@ -28463,7 +28463,7 @@ WindowsGDIParagraph
 					return false;
 				}
 
-				bool ResetInlineObject(int start, int length)override
+				bool ResetInlineObject(vint start, vint length)override
 				{
 					if(length==0) return true;
 					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
@@ -28481,7 +28481,7 @@ WindowsGDIParagraph
 					return false;
 				}
 
-				int GetHeight()override
+				vint GetHeight()override
 				{
 					paragraph->BuildUniscribeData(renderTarget->GetDC());
 					if(paragraph->lastAvailableWidth==-1)
@@ -28602,7 +28602,7 @@ GuiRoundBorderElementRenderer
 			{
 				if(oldColor.a>0)
 				{
-					int ellipse=element->GetRadius()*2;
+					vint ellipse=element->GetRadius()*2;
 					renderTarget->GetDC()->SetBrush(brush);
 					renderTarget->GetDC()->SetPen(pen);
 					renderTarget->GetDC()->RoundRect(bounds.Left(), bounds.Top(), bounds.Right()-1, bounds.Bottom()-1, ellipse, ellipse);
@@ -28717,7 +28717,7 @@ Gui3DSplitterElementRenderer
 				{
 				case Gui3DSplitterElement::Horizontal:
 					{
-						int y=bounds.y1+bounds.Height()/2-1;
+						vint y=bounds.y1+bounds.Height()/2-1;
 						p11=Point(bounds.x1, y);
 						p12=Point(bounds.x2, y);
 						p21=Point(bounds.x1, y+1);
@@ -28726,7 +28726,7 @@ Gui3DSplitterElementRenderer
 					break;
 				case Gui3DSplitterElement::Vertical:
 					{
-						int x=bounds.x1+bounds.Width()/2-1;
+						vint x=bounds.x1+bounds.Width()/2-1;
 						p11=Point(x, bounds.y1);
 						p12=Point(x, bounds.y2);
 						p21=Point(x+1, bounds.y1);
@@ -28849,14 +28849,14 @@ GuiGradientBackgroundElementRenderer
 					TRIVERTEX vertices[4];
 					GRADIENT_TRIANGLE triangles[2];
 
-					vertices[0].x=bounds.x1;
-					vertices[0].y=bounds.y1;
-					vertices[1].x=bounds.x1;
-					vertices[1].y=bounds.y2;
-					vertices[2].x=bounds.x2;
-					vertices[2].y=bounds.y2;
-					vertices[3].x=bounds.x2;
-					vertices[3].y=bounds.y1;
+					vertices[0].x=(int)bounds.x1;
+					vertices[0].y=(int)bounds.y1;
+					vertices[1].x=(int)bounds.x1;
+					vertices[1].y=(int)bounds.y2;
+					vertices[2].x=(int)bounds.x2;
+					vertices[2].y=(int)bounds.y2;
+					vertices[3].x=(int)bounds.x2;
+					vertices[3].y=(int)bounds.y1;
 
 					triangles[0].Vertex1=0;
 					triangles[0].Vertex2=1;
@@ -29008,10 +29008,10 @@ GuiSolidLabelElementRenderer
 
 					UINT format=DT_NOPREFIX;
 					RECT rect;
-					rect.left=bounds.Left();
-					rect.top=bounds.Top();
-					rect.right=bounds.Right();
-					rect.bottom=bounds.Bottom();
+					rect.left=(int)bounds.Left();
+					rect.top=(int)bounds.Top();
+					rect.right=(int)bounds.Right();
+					rect.bottom=(int)bounds.Bottom();
 
 					if(element->GetMultiline() || element->GetWrapLine())
 					{
@@ -29127,8 +29127,8 @@ GuiImageFrameElementRenderer
 					}
 					else
 					{
-						int x=0;
-						int y=0;
+						vint x=0;
+						vint y=0;
 						switch(element->GetHorizontalAlignment())
 						{
 						case Alignment::Left:
@@ -29158,8 +29158,8 @@ GuiImageFrameElementRenderer
 					if(element->GetImage()->GetFormat()==INativeImage::Gif &&  element->GetFrameIndex()>0)
 					{
 						IWindowsGDIResourceManager* resourceManager=GetWindowsGDIResourceManager();
-						int max=element->GetFrameIndex();
-						for(int i=0;i<=max;i++)
+						vint max=element->GetFrameIndex();
+						for(vint i=0;i<=max;i++)
 						{
 							Ptr<WinBitmap> frameBitmap=resourceManager->GetBitmap(element->GetImage()->GetFrame(i), element->GetEnabled());
 							dc->Draw(
@@ -29224,20 +29224,20 @@ GuiPolygonElementRenderer
 			{
 				if(pointCount>=3 && (oldPenColor.a || oldBrushColor.a))
 				{
-					int offsetX=(bounds.Width()-minSize.x)/2+bounds.x1;
-					int offsetY=(bounds.Height()-minSize.y)/2+bounds.y1;
-					for(int i=0;i<pointCount;i++)
+					vint offsetX=(bounds.Width()-minSize.x)/2+bounds.x1;
+					vint offsetY=(bounds.Height()-minSize.y)/2+bounds.y1;
+					for(vint i=0;i<pointCount;i++)
 					{
-						points[i].x+=offsetX;
-						points[i].y+=offsetY;
+						points[i].x+=(int)offsetX;
+						points[i].y+=(int)offsetY;
 					}
 					renderTarget->GetDC()->SetPen(pen);
 					renderTarget->GetDC()->SetBrush(brush);
 					renderTarget->GetDC()->PolyGon(points, pointCount);
-					for(int i=0;i<pointCount;i++)
+					for(vint i=0;i<pointCount;i++)
 					{
-						points[i].x-=offsetX;
-						points[i].y-=offsetY;
+						points[i].x-=(int)offsetX;
+						points[i].y-=(int)offsetY;
 					}
 				}
 			}
@@ -29255,11 +29255,11 @@ GuiPolygonElementRenderer
 					if(pointCount>0)
 					{
 						points=new POINT[pointCount];
-						for(int i=0;i<pointCount;i++)
+						for(vint i=0;i<pointCount;i++)
 						{
 							Point p=element->GetPoint(i);
-							points[i].x=p.x;
-							points[i].y=p.y;
+							points[i].x=(int)p.x;
+							points[i].y=(int)p.y;
 						}
 					}
 				}
@@ -29286,7 +29286,7 @@ GuiColorizedTextElementRenderer
 			void GuiColorizedTextElementRenderer::DestroyColors()
 			{
 				IWindowsGDIResourceManager* resourceManager=GetWindowsGDIResourceManager();
-				for(int i=0;i<colors.Count();i++)
+				for(vint i=0;i<colors.Count();i++)
 				{
 					resourceManager->DestroyGdiBrush(colors[i].normal.background);
 					resourceManager->DestroyGdiBrush(colors[i].selectedFocused.background);
@@ -29299,7 +29299,7 @@ GuiColorizedTextElementRenderer
 				IWindowsGDIResourceManager* resourceManager=GetWindowsGDIResourceManager();
 				ColorArray newColors;
 				newColors.Resize(element->GetColors().Count());
-				for(int i=0;i<newColors.Count();i++)
+				for(vint i=0;i<newColors.Count();i++)
 				{
 					text::ColorEntry entry=element->GetColors().Get(i);
 					ColorEntryResource newEntry;
@@ -29370,23 +29370,23 @@ GuiColorizedTextElementRenderer
 					wchar_t passwordChar=element->GetPasswordChar();
 					Point viewPosition=element->GetViewPosition();
 					Rect viewBounds(viewPosition, bounds.GetSize());
-					int startRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, viewBounds.y1)).row;
-					int endRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, viewBounds.y2)).row;
+					vint startRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, viewBounds.y1)).row;
+					vint endRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, viewBounds.y2)).row;
 					TextPos selectionBegin=element->GetCaretBegin()<element->GetCaretEnd()?element->GetCaretBegin():element->GetCaretEnd();
 					TextPos selectionEnd=element->GetCaretBegin()>element->GetCaretEnd()?element->GetCaretBegin():element->GetCaretEnd();
 					bool focused=element->GetFocused();
 					Ptr<windows::WinBrush> lastBrush=0;
 
-					for(int row=startRow;row<=endRow;row++)
+					for(vint row=startRow;row<=endRow;row++)
 					{
 						Rect startRect=element->GetLines().GetRectFromTextPos(TextPos(row, 0));
 						Point startPoint=startRect.LeftTop();
-						int startColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, startPoint.y)).column;
-						int endColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, startPoint.y)).column;
+						vint startColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, startPoint.y)).column;
+						vint endColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, startPoint.y)).column;
 						text::TextLine& line=element->GetLines().GetLine(row);
 
-						int x=startColumn==0?0:line.att[startColumn-1].rightOffset;
-						for(int column=startColumn; column<=endColumn; column++)
+						vint x=startColumn==0?0:line.att[startColumn-1].rightOffset;
+						for(vint column=startColumn; column<=endColumn; column++)
 						{
 							bool inSelection=false;
 							if(selectionBegin.row==selectionEnd.row)
@@ -29407,7 +29407,7 @@ GuiColorizedTextElementRenderer
 							}
 							
 							bool crlf=column==line.dataLength;
-							int colorIndex=crlf?0:line.att[column].colorIndex;
+							vint colorIndex=crlf?0:line.att[column].colorIndex;
 							if(colorIndex>=colors.Count())
 							{
 								colorIndex=0;
@@ -29416,9 +29416,9 @@ GuiColorizedTextElementRenderer
 								!inSelection?colors[colorIndex].normal:
 								focused?colors[colorIndex].selectedFocused:
 								colors[colorIndex].selectedUnfocused;
-							int x2=crlf?x+startRect.Height()/2:line.att[column].rightOffset;
-							int tx=x-viewPosition.x+bounds.x1;
-							int ty=startPoint.y-viewPosition.y+bounds.y1;
+							vint x2=crlf?x+startRect.Height()/2:line.att[column].rightOffset;
+							vint tx=x-viewPosition.x+bounds.x1;
+							vint ty=startPoint.y-viewPosition.y+bounds.y1;
 							
 							if(color.background.a)
 							{
@@ -29444,7 +29444,7 @@ GuiColorizedTextElementRenderer
 					if(element->GetCaretVisible() && element->GetLines().IsAvailable(element->GetCaretEnd()))
 					{
 						Point caretPoint=element->GetLines().GetPointFromTextPos(element->GetCaretEnd());
-						int height=element->GetLines().GetRowHeight();
+						vint height=element->GetLines().GetRowHeight();
 						dc->SetPen(caretPen);
 						dc->MoveTo(caretPoint.x-viewPosition.x+bounds.x1, caretPoint.y-viewPosition.y+bounds.y1+1);
 						dc->LineTo(caretPoint.x-viewPosition.x+bounds.x1, caretPoint.y+height-viewPosition.y+bounds.y1-1);
@@ -29552,7 +29552,7 @@ WindowsGDIRenderTarget
 				INativeWindow*				window;
 				WinDC*						dc;
 				List<Rect>					clippers;
-				int							clipperCoverWholeTargetCounter;
+				vint							clipperCoverWholeTargetCounter;
 
 				void ApplyClipper()
 				{
@@ -29684,7 +29684,7 @@ CachedResourceAllocator
 			public:
 				static Ptr<WinFont> CreateGdiFont(const FontProperties& value)
 				{
-					int size=value.size<0?value.size:-value.size;
+					vint size=value.size<0?value.size:-value.size;
 					return new WinFont(value.fontFamily, size, 0, 0, 0, (value.bold?FW_BOLD:FW_NORMAL), value.italic, value.underline, value.strikeline, value.antialias);
 				}
 
@@ -29703,7 +29703,7 @@ CachedResourceAllocator
 				{
 				protected:
 					Ptr<WinFont>			font;
-					int						size;
+					vint						size;
 
 					Size MeasureInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)
 					{
@@ -29721,12 +29721,12 @@ CachedResourceAllocator
 						}
 					}
 
-					int MeasureWidthInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)
+					vint MeasureWidthInternal(wchar_t character, IGuiGraphicsRenderTarget* renderTarget)
 					{
 						return MeasureInternal(character, renderTarget).x;
 					}
 
-					int GetRowHeightInternal(IGuiGraphicsRenderTarget* renderTarget)
+					vint GetRowHeightInternal(IGuiGraphicsRenderTarget* renderTarget)
 					{
 						if(renderTarget)
 						{
@@ -29738,7 +29738,7 @@ CachedResourceAllocator
 						}
 					}
 				public:
-					GdiCharMeasurer(Ptr<WinFont> _font, int _size)
+					GdiCharMeasurer(Ptr<WinFont> _font, vint _size)
 						:text::CharMeasurer(_size)
 						,size(_size)
 						,font(_font)
@@ -29783,9 +29783,9 @@ WindowsGDIResourceManager
 					WICRect rect;
 					rect.X=0;
 					rect.Y=0;
-					rect.Width=size.x;
-					rect.Height=size.y;
-					wicBitmap->CopyPixels(&rect, bitmap->GetLineBytes(), bitmap->GetLineBytes()*size.y, (BYTE*)bitmap->GetScanLines()[0]);
+					rect.Width=(int)size.x;
+					rect.Height=(int)size.y;
+					wicBitmap->CopyPixels(&rect, (int)bitmap->GetLineBytes(), (int)(bitmap->GetLineBytes()*size.y), (BYTE*)bitmap->GetScanLines()[0]);
 
 					bitmap->BuildAlphaChannel(false);
 				}
@@ -29810,14 +29810,14 @@ WindowsGDIResourceManager
 					{
 						if(!disabledBitmap)
 						{
-							int w=bitmap->GetWidth();
-							int h=bitmap->GetHeight();
+							vint w=bitmap->GetWidth();
+							vint h=bitmap->GetHeight();
 							disabledBitmap=new WinBitmap(w, h, WinBitmap::vbb32Bits, true);
-							for(int y=0;y<h;y++)
+							for(vint y=0;y<h;y++)
 							{
 								BYTE* read=bitmap->GetScanLines()[y];
 								BYTE* write=disabledBitmap->GetScanLines()[y];
-								for(int x=0;x<w;x++)
+								for(vint x=0;x<w;x++)
 								{
 									BYTE g=(read[0]+read[1]+read[2])/6+read[3]/2;
 									write[0]=g;
@@ -30253,7 +30253,7 @@ namespace vl
 							D2D1::RenderTargetProperties(),
 							D2D1::HwndRenderTargetProperties(
 								form->GetWindowHandle(),
-								D2D1::SizeU(size.x, size.y)
+								D2D1::SizeU((int)size.x, (int)size.y)
 								),
 							&renderTarget
 							);
@@ -30265,7 +30265,7 @@ namespace vl
 					}
 					else if(previousSize!=size)
 					{
-						d2dRenderTarget->Resize(D2D1::SizeU(size.x, size.y));
+						d2dRenderTarget->Resize(D2D1::SizeU((int)size.x, (int)size.y));
 					}
 					previousSize=size;
 				}
@@ -30339,7 +30339,7 @@ namespace vl
 
 			ID2D1RenderTarget* GetNativeWindowDirect2DRenderTarget(INativeWindow* window)
 			{
-				int index=direct2DListener->nativeWindowListeners.Keys().IndexOf(window);
+				vint index=direct2DListener->nativeWindowListeners.Keys().IndexOf(window);
 				return index==-1?0:direct2DListener->nativeWindowListeners.Values().Get(index)->GetDirect2DRenderTarget();
 			}
 
@@ -30459,15 +30459,15 @@ WinRegion
 			return EqualRgn(Region1->GetHandle(), Region2->GetHandle())!=0;
 		}
 
-		WinRegion::WinRegion(int Left, int Top, int Right, int Bottom, bool Rectangle)
+		WinRegion::WinRegion(vint Left, vint Top, vint Right, vint Bottom, bool Rectangle)
 		{
 			if(Rectangle)
 			{
-				FHandle=CreateRectRgn(Left, Top, Right, Bottom);
+				FHandle=CreateRectRgn((int)Left, (int)Top, (int)Right, (int)Bottom);
 			}
 			else
 			{
-				FHandle=CreateEllipticRgn(Left, Top, Right, Bottom);
+				FHandle=CreateEllipticRgn((int)Left, (int)Top, (int)Right, (int)Bottom);
 			}
 		}
 
@@ -30483,14 +30483,14 @@ WinRegion
 			}
 		}
 
-		WinRegion::WinRegion(int Left, int Top, int Right, int Bottom, int EllipseWidth, int EllipseHeight)
+		WinRegion::WinRegion(vint Left, vint Top, vint Right, vint Bottom, vint EllipseWidth, vint EllipseHeight)
 		{
-			FHandle=CreateRoundRectRgn(Left, Top, Right, Bottom, EllipseWidth, EllipseHeight);
+			FHandle=CreateRoundRectRgn((int)Left, (int)Top, (int)Right, (int)Bottom, (int)EllipseWidth, (int)EllipseHeight);
 		}
 
-		WinRegion::WinRegion(POINT* Points, int Count, bool Alternate)
+		WinRegion::WinRegion(POINT* Points, vint Count, bool Alternate)
 		{
-			FHandle=CreatePolygonRgn(Points, Count, Alternate?ALTERNATE:WINDING);
+			FHandle=CreatePolygonRgn(Points, (int)Count, Alternate?ALTERNATE:WINDING);
 		}
 
 		WinRegion::WinRegion(WinRegion::Ptr Region)
@@ -30499,10 +30499,10 @@ WinRegion
 			CombineRgn(FHandle, Region->GetHandle(), Region->GetHandle(), RGN_COPY);
 		}
 
-		WinRegion::WinRegion(WinRegion::Ptr Region1, WinRegion::Ptr Region2, int CombineMode)
+		WinRegion::WinRegion(WinRegion::Ptr Region1, WinRegion::Ptr Region2, vint CombineMode)
 		{
 			FHandle=CreateRectRgn(0, 0, 1, 1);
-			CombineRgn(FHandle, Region1->GetHandle(), Region2->GetHandle(), CombineMode);
+			CombineRgn(FHandle, Region1->GetHandle(), Region2->GetHandle(), (int)CombineMode);
 		}
 
 		WinRegion::WinRegion(HRGN RegionHandle)
@@ -30537,9 +30537,9 @@ WinRegion
 			return Rect;
 		}
 
-		void WinRegion::Move(int OffsetX, int OffsetY)
+		void WinRegion::Move(vint OffsetX, vint OffsetY)
 		{
-			OffsetRgn(FHandle, OffsetX, OffsetY);
+			OffsetRgn(FHandle, (int)OffsetX, (int)OffsetY);
 		}
 
 /*********************************************************************************************************
@@ -30694,20 +30694,20 @@ WinTransform
 WinMetaFileBuilder
 *********************************************************************************************************/
 
-		void WinMetaFileBuilder::Create(int Width, int Height)
+		void WinMetaFileBuilder::Create(vint Width, vint Height)
 		{
 			HDC hdcRef=GetDC(NULL);
-			int iWidthMM = GetDeviceCaps(hdcRef, HORZSIZE); 
-			int iHeightMM = GetDeviceCaps(hdcRef, VERTSIZE); 
-			int iWidthPels = GetDeviceCaps(hdcRef, HORZRES); 
-			int iHeightPels = GetDeviceCaps(hdcRef, VERTRES); 
+			vint iWidthMM = GetDeviceCaps(hdcRef, HORZSIZE); 
+			vint iHeightMM = GetDeviceCaps(hdcRef, VERTSIZE); 
+			vint iWidthPels = GetDeviceCaps(hdcRef, HORZRES); 
+			vint iHeightPels = GetDeviceCaps(hdcRef, VERTRES); 
 			ReleaseDC(NULL, hdcRef);
 
 			RECT Rect;
 			Rect.left=0;
 			Rect.top=0;
-			Rect.right = (Width*iWidthMM*100)/iWidthPels;
-			Rect.bottom = (Height*iHeightMM*100)/iHeightPels;
+			Rect.right = (int)((Width*iWidthMM*100)/iWidthPels);
+			Rect.bottom = (int)((Height*iHeightMM*100)/iHeightPels);
 
 			HDC Handle=CreateEnhMetaFile(NULL, NULL, &Rect, L"VczhLibrary++GDI\0Enhanced Meta File\0");
 			FDC->Initialize(Handle);
@@ -30721,8 +30721,8 @@ WinMetaFileBuilder
 			RECT Rect;
 			Rect.left=0;
 			Rect.top=0;
-			Rect.right=FWidth;
-			Rect.bottom=FHeight;
+			Rect.right=(int)FWidth;
+			Rect.bottom=(int)FHeight;
 			PlayEnhMetaFile(FDC->GetHandle(), Handle, &Rect);
 		}
 
@@ -30731,7 +30731,7 @@ WinMetaFileBuilder
 			DeleteEnhMetaFile(CloseEnhMetaFile(FDC->GetHandle()));
 		}
 
-		WinMetaFileBuilder::WinMetaFileBuilder(int Width, int Height)
+		WinMetaFileBuilder::WinMetaFileBuilder(vint Width, vint Height)
 		{
 			FDC=new WinProxyDC();
 			Create(Width, Height);
@@ -30787,12 +30787,12 @@ WinMetaFileBuilder
 			return FDC;
 		}
 
-		int WinMetaFileBuilder::GetWidth()
+		vint WinMetaFileBuilder::GetWidth()
 		{
 			return FWidth;
 		}
 
-		int WinMetaFileBuilder::GetHeight()
+		vint WinMetaFileBuilder::GetHeight()
 		{
 			return FHeight;
 		}
@@ -30826,12 +30826,12 @@ WinMetaFile
 			return FHandle;
 		}
 
-		int WinMetaFile::GetWidth()
+		vint WinMetaFile::GetWidth()
 		{
 			return FWidth;
 		}
 
-		int WinMetaFile::GetHeight()
+		vint WinMetaFile::GetHeight()
 		{
 			return FHeight;
 		}
@@ -30840,7 +30840,7 @@ WinMetaFile
 WinBitmap
 *********************************************************************************************************/
 
-		int WinBitmap::GetBitsFromBB(BitmapBits BB)
+		vint WinBitmap::GetBitsFromBB(BitmapBits BB)
 		{
 			switch(BB)
 			{
@@ -30853,22 +30853,22 @@ WinBitmap
 			}
 		}
 
-		int WinBitmap::GetLineBytes(int Width, BitmapBits BB)
+		vint WinBitmap::GetLineBytes(vint Width, BitmapBits BB)
 		{
-			int Bits=GetBitsFromBB(BB);
-			int LineBits=Width*Bits;
-			int AlignBits=sizeof(DWORD)*8;
+			vint Bits=GetBitsFromBB(BB);
+			vint LineBits=Width*Bits;
+			vint AlignBits=sizeof(DWORD)*8;
 			LineBits+=(AlignBits-LineBits%AlignBits)%AlignBits;
 			return LineBits/8;
 		}
 
-		void WinBitmap::FillBitmapInfoHeader(int Width, int Height, BitmapBits Bits, BITMAPINFOHEADER* Header)
+		void WinBitmap::FillBitmapInfoHeader(vint Width, vint Height, BitmapBits Bits, BITMAPINFOHEADER* Header)
 		{
 			Header->biSize=sizeof(BITMAPINFOHEADER);
-			Header->biWidth=Width;
-			Header->biHeight=-Height;
+			Header->biWidth=(int)Width;
+			Header->biHeight=-(int)Height;
 			Header->biPlanes=1;
-			Header->biBitCount=GetBitsFromBB(Bits);
+			Header->biBitCount=(int)GetBitsFromBB(Bits);
 			Header->biCompression=BI_RGB;
 			Header->biSizeImage=0;
 			Header->biXPelsPerMeter=0;
@@ -30877,20 +30877,20 @@ WinBitmap
 			Header->biClrImportant=0;
 		}
 
-		HBITMAP WinBitmap::CreateDDB(int Width, int Height, BitmapBits Bits)
+		HBITMAP WinBitmap::CreateDDB(vint Width, vint Height, BitmapBits Bits)
 		{
 			if(Bits==vbb2Bits)
 			{
-				return CreateBitmap(Width, Height, 2, GetBitsFromBB(Bits), NULL);
+				return CreateBitmap((int)Width, (int)Height, 2, (int)GetBitsFromBB(Bits), NULL);
 			}
 			else
 			{
 				WinBitmap Bitmap(1, 1, Bits, true);
-				return CreateCompatibleBitmap(Bitmap.GetWinDC()->GetHandle(), Width, Height);
+				return CreateCompatibleBitmap(Bitmap.GetWinDC()->GetHandle(), (int)Width, (int)Height);
 			}
 		}
 
-		HBITMAP WinBitmap::CreateDIB(int Width, int Height, BitmapBits Bits, BYTE**& ScanLines)
+		HBITMAP WinBitmap::CreateDIB(vint Width, vint Height, BitmapBits Bits, BYTE**& ScanLines)
 		{
 			BITMAPINFO* Info=(BITMAPINFO*)malloc(sizeof(BITMAPINFOHEADER)+2*sizeof(RGBQUAD));
 			FillBitmapInfoHeader(Width, Height, Bits, &Info->bmiHeader);
@@ -30906,8 +30906,8 @@ WinBitmap
 			BYTE* FirstLine=0;
 			HBITMAP Handle=CreateDIBSection(FDC->GetHandle(), Info, DIB_RGB_COLORS, (void**)&FirstLine, NULL, 0);
 			ScanLines=new BYTE*[Height];
-			int LineBytes=GetLineBytes(Width, Bits);
-			for(int i=0;i<Height;i++)
+			vint LineBytes=GetLineBytes(Width, Bits);
+			for(vint i=0;i<Height;i++)
 			{
 				ScanLines[i]=FirstLine+LineBytes*i;
 			}
@@ -30915,7 +30915,7 @@ WinBitmap
 			return Handle;
 		}
 
-		void WinBitmap::Constructor(int Width, int Height, BitmapBits Bits, bool DIBSections)
+		void WinBitmap::Constructor(vint Width, vint Height, BitmapBits Bits, bool DIBSections)
 		{
 			FDC=new WinImageDC();
 			if(DIBSections)
@@ -30938,7 +30938,7 @@ WinBitmap
 			}
 		}
 	
-		WinBitmap::WinBitmap(int Width, int Height, BitmapBits Bits, bool DIBSections)
+		WinBitmap::WinBitmap(vint Width, vint Height, BitmapBits Bits, bool DIBSections)
 		{
 			Constructor(Width, Height, Bits, DIBSections);
 		}
@@ -30982,7 +30982,7 @@ WinBitmap
 				BITMAPV5HEADER Header2;
 				{
 					Header1.bfType='M'*256+'B';
-					Header1.bfSize=sizeof(Header1)+sizeof(Header2)+GetLineBytes()*FHeight;
+					Header1.bfSize=(int)(sizeof(Header1)+sizeof(Header2)+GetLineBytes()*FHeight);
 					Header1.bfReserved1=0;
 					Header1.bfReserved2=0;
 					Header1.bfOffBits=sizeof(Header2)+sizeof(Header1);
@@ -30990,10 +30990,10 @@ WinBitmap
 				{
 					memset(&Header2, 0, sizeof(Header2));
 					Header2.bV5Size=sizeof(Header2);
-					Header2.bV5Width=FWidth;
-					Header2.bV5Height=-FHeight;
+					Header2.bV5Width=(int)FWidth;
+					Header2.bV5Height=-(int)FHeight;
 					Header2.bV5Planes=1;
-					Header2.bV5BitCount=GetBitsFromBB(FBits);
+					Header2.bV5BitCount=(int)GetBitsFromBB(FBits);
 					Header2.bV5Compression=BI_RGB;
 					Header2.bV5CSType=LCS_sRGB;
 					Header2.bV5Intent=LCS_GM_GRAPHICS;
@@ -31001,7 +31001,7 @@ WinBitmap
 				stream::FileStream Output(FileName, stream::FileStream::WriteOnly);
 				Output.Write(&Header1, sizeof(Header1));
 				Output.Write(&Header2, sizeof(Header2));
-				for(int i=0;i<FHeight;i++)
+				for(vint i=0;i<FHeight;i++)
 				{
 					Output.Write(FScanLines[i], GetLineBytes());
 				}
@@ -31019,17 +31019,17 @@ WinBitmap
 			return FDC;
 		}
 
-		int WinBitmap::GetWidth()
+		vint WinBitmap::GetWidth()
 		{
 			return FWidth;
 		}
 
-		int WinBitmap::GetHeight()
+		vint WinBitmap::GetHeight()
 		{
 			return FHeight;
 		}
 
-		int WinBitmap::GetLineBytes()
+		vint WinBitmap::GetLineBytes()
 		{
 			return GetLineBytes(FWidth, FBits);
 		}
@@ -31071,10 +31071,10 @@ WinBitmap
 				FAlphaChannelBuilt=true;
 				if(autoPremultiply)
 				{
-					for(int i=0;i<FHeight;i++)
+					for(vint i=0;i<FHeight;i++)
 					{
 						BYTE* Colors=FScanLines[i];
-						int j=FWidth;
+						vint j=FWidth;
 						while(j--)
 						{
 							BYTE Alpha=Colors[3];
@@ -31092,10 +31092,10 @@ WinBitmap
 		{
 			if(CanBuildAlphaChannel() && !FAlphaChannelBuilt)
 			{
-				for(int i=0;i<FHeight;i++)
+				for(vint i=0;i<FHeight;i++)
 				{
 					COLORREF* Colors=(COLORREF*)FScanLines[i];
-					int j=FWidth;
+					vint j=FWidth;
 					while(j--)
 					{
 						COLORREF Dest=*Colors & 0x00FFFFFF;
@@ -31110,10 +31110,10 @@ WinBitmap
 		{
 			if(CanBuildAlphaChannel() && !FAlphaChannelBuilt)
 			{
-				for(int i=0;i<FHeight;i++)
+				for(vint i=0;i<FHeight;i++)
 				{
 					BYTE* Colors=FScanLines[i];
-					int j=FWidth;
+					vint j=FWidth;
 					while(j--)
 					{
 						Colors[3]=Alpha;
@@ -31128,10 +31128,10 @@ WinBitmap
 			if(CanBuildAlphaChannel() && !FAlphaChannelBuilt)
 			{
 				COLORREF A=Alpha<<24;
-				for(int i=0;i<FHeight;i++)
+				for(vint i=0;i<FHeight;i++)
 				{
 					COLORREF* Colors=(COLORREF*)FScanLines[i];
-					int j=FWidth;
+					vint j=FWidth;
 					while(j--)
 					{
 						COLORREF Dest=*Colors & 0x00FFFFFF;
@@ -31146,10 +31146,10 @@ WinBitmap
 		{
 			if(CanBuildAlphaChannel() && !FAlphaChannelBuilt)
 			{
-				for(int i=0;i<FHeight;i++)
+				for(vint i=0;i<FHeight;i++)
 				{
 					COLORREF* Colors=(COLORREF*)FScanLines[i];
-					int j=FWidth;
+					vint j=FWidth;
 					while(j--)
 					{
 						COLORREF Dest=*Colors & 0x00FFFFFF;
@@ -31164,10 +31164,10 @@ WinBitmap
 		{
 			if(CanBuildAlphaChannel() && !FAlphaChannelBuilt)
 			{
-				for(int i=0;i<FHeight;i++)
+				for(vint i=0;i<FHeight;i++)
 				{
 					COLORREF* Colors=(COLORREF*)FScanLines[i];
-					int j=FWidth;
+					vint j=FWidth;
 					while(j--)
 					{
 						COLORREF Dest=*Colors & 0x00FFFFFF;
@@ -31182,10 +31182,10 @@ WinBitmap
 		{
 			if(CanBuildAlphaChannel() && !FAlphaChannelBuilt)
 			{
-				for(int i=0;i<FHeight;i++)
+				for(vint i=0;i<FHeight;i++)
 				{
 					COLORREF* Colors=(COLORREF*)FScanLines[i];
-					int j=FWidth;
+					vint j=FWidth;
 					while(j--)
 					{
 						COLORREF Dest= *Colors & 0x00FFFFFF;
@@ -31216,17 +31216,17 @@ WinBrush
 			FHandle=CreateSolidBrush(Color);
 		}
 
-		WinBrush::WinBrush(int Hatch, COLORREF Color)
+		WinBrush::WinBrush(vint Hatch, COLORREF Color)
 		{
 			FDIBMemory=0;
-			FHandle=CreateHatchBrush(Hatch, Color);
+			FHandle=CreateHatchBrush((int)Hatch, Color);
 		}
 
 		WinBrush::WinBrush(WinBitmap::Ptr DIB)
 		{
 			WinBitmap Temp(DIB->GetWidth(), DIB->GetHeight(), WinBitmap::vbb24Bits, true);
 			Temp.GetWinDC()->Draw(0, 0, DIB);
-			int HeaderSize=sizeof(BITMAPINFOHEADER);
+			vint HeaderSize=sizeof(BITMAPINFOHEADER);
 			FDIBMemory=new unsigned char[HeaderSize+Temp.GetHeight()*Temp.GetLineBytes()];
 			Temp.FillCompatibleHeader((BITMAPINFOHEADER*)FDIBMemory);
 			memcpy(FDIBMemory+HeaderSize, Temp.GetScanLines()[0], Temp.GetHeight()*Temp.GetLineBytes());
@@ -31253,37 +31253,37 @@ WinBrush
 WinPen
 *********************************************************************************************************/
 
-		WinPen::WinPen(int Style, int Width, COLORREF Color)
+		WinPen::WinPen(vint Style, vint Width, COLORREF Color)
 		{
 			FDIBMemory=0;
-			FHandle=CreatePen(Style, Width, Color);
+			FHandle=CreatePen((int)Style, (int)Width, (int)Color);
 		}
 
-		WinPen::WinPen(int Style, int EndCap, int Join, int Width, COLORREF Color)
+		WinPen::WinPen(vint Style, vint EndCap, vint Join, vint Width, COLORREF Color)
 		{
 			FDIBMemory=0;
 			LOGBRUSH Brush;
 			Brush.lbColor=Color;
 			Brush.lbStyle=BS_SOLID;
 			Brush.lbHatch=0;
-			FHandle=ExtCreatePen(PS_GEOMETRIC|Style|EndCap|Join, Width, &Brush, 0, 0);
+			FHandle=ExtCreatePen((int)(PS_GEOMETRIC|Style|EndCap|Join), (int)Width, &Brush, 0, 0);
 		}
 
-		WinPen::WinPen(int Style, int EndCap, int Join, int Hatch, int Width, COLORREF Color)
+		WinPen::WinPen(vint Style, vint EndCap, vint Join, vint Hatch, vint Width, COLORREF Color)
 		{
 			FDIBMemory=0;
 			LOGBRUSH Brush;
 			Brush.lbColor=Color;
 			Brush.lbStyle=BS_HATCHED;
 			Brush.lbHatch=Hatch;
-			FHandle=ExtCreatePen(PS_GEOMETRIC|Style|EndCap|Join, Width, &Brush, 0, 0);
+			FHandle=ExtCreatePen((int)(PS_GEOMETRIC|Style|EndCap|Join), (int)Width, &Brush, 0, 0);
 		}
 
-		WinPen::WinPen(WinBitmap::Ptr DIB, int Style, int EndCap, int Join, int Width)
+		WinPen::WinPen(WinBitmap::Ptr DIB, vint Style, vint EndCap, vint Join, vint Width)
 		{
 			WinBitmap Temp(DIB->GetWidth(), DIB->GetHeight(), WinBitmap::vbb24Bits, true);
 			Temp.GetWinDC()->Draw(0, 0, DIB);
-			int HeaderSize=sizeof(BITMAPINFOHEADER);
+			vint HeaderSize=sizeof(BITMAPINFOHEADER);
 			FDIBMemory=new unsigned char[HeaderSize+Temp.GetHeight()*Temp.GetLineBytes()];
 			Temp.FillCompatibleHeader((BITMAPINFOHEADER*)FDIBMemory);
 			memcpy(FDIBMemory+HeaderSize, Temp.GetScanLines()[0], Temp.GetHeight()*Temp.GetLineBytes());
@@ -31292,7 +31292,7 @@ WinPen
 			Brush.lbColor=RGB(0, 0, 0);
 			Brush.lbStyle=BS_DIBPATTERNPT;
 			Brush.lbHatch=(LONG)FDIBMemory;
-			FHandle=ExtCreatePen(PS_GEOMETRIC|Style|EndCap|Join, Width, &Brush, 0, 0);
+			FHandle=ExtCreatePen((int)(PS_GEOMETRIC|Style|EndCap|Join), (int)Width, &Brush, 0, 0);
 		}
 
 		WinPen::~WinPen()
@@ -31313,13 +31313,13 @@ WinPen
 WinFont
 *********************************************************************************************************/
 
-		WinFont::WinFont(WString Name, int Height, int Width, int Escapement, int Orientation, int Weight, bool Italic, bool Underline, bool StrikeOut, bool Antialise)
+		WinFont::WinFont(WString Name, vint Height, vint Width, vint Escapement, vint Orientation, vint Weight, bool Italic, bool Underline, bool StrikeOut, bool Antialise)
 		{
-			FFontInfo.lfHeight=Height;
-			FFontInfo.lfWidth=Width;
-			FFontInfo.lfEscapement=Escapement;
-			FFontInfo.lfOrientation=Orientation;
-			FFontInfo.lfWeight=Weight;
+			FFontInfo.lfHeight=(int)Height;
+			FFontInfo.lfWidth=(int)Width;
+			FFontInfo.lfEscapement=(int)Escapement;
+			FFontInfo.lfOrientation=(int)Orientation;
+			FFontInfo.lfWeight=(int)Weight;
 			FFontInfo.lfItalic=Italic?TRUE:FALSE;
 			FFontInfo.lfUnderline=Underline?TRUE:FALSE;
 			FFontInfo.lfStrikeOut=StrikeOut?TRUE:FALSE;
@@ -31527,27 +31527,28 @@ WinDC
 
 		/*------------------------------------------------------------------------------*/
 
-		void WinDC::DrawBuffer(int X, int Y, const wchar_t* Text, int CharCount)
+		void WinDC::DrawBuffer(vint X, vint Y, const wchar_t* Text, vint CharCount)
 		{
-			TextOut(FHandle, X, Y, Text, CharCount);
+			TextOut(FHandle, (int)X, (int)Y, Text, (int)CharCount);
 		}
 
-		void WinDC::DrawBuffer(int X, int Y, const wchar_t* Text, int CharCount, int TabWidth, int TabOriginX)
+		void WinDC::DrawBuffer(vint X, vint Y, const wchar_t* Text, vint CharCount, vint TabWidth, vint TabOriginX)
 		{
-			TabbedTextOut(FHandle, X, Y, Text, CharCount, 1, &TabWidth, TabOriginX);
+			int realTabWidth=(int)TabWidth;
+			TabbedTextOut(FHandle, (int)X, (int)Y, Text, (int)CharCount, 1, &realTabWidth, (int)TabOriginX);
 		}
 
-		void WinDC::DrawBuffer(RECT Rect, const wchar_t* Text, int CharCount, UINT Format)
+		void WinDC::DrawBuffer(RECT Rect, const wchar_t* Text, vint CharCount, UINT Format)
 		{
-			DrawText(FHandle, Text, CharCount, &Rect, Format);
+			DrawText(FHandle, Text, (int)CharCount, &Rect, Format);
 		}
 
-		void WinDC::DrawString(int X, int Y, WString Text)
+		void WinDC::DrawString(vint X, vint Y, WString Text)
 		{
 			DrawBuffer(X, Y, Text.Buffer(), Text.Length());
 		}
 
-		void WinDC::DrawString(int X, int Y, WString Text, int TabWidth, int TabOriginX)
+		void WinDC::DrawString(vint X, vint Y, WString Text, vint TabWidth, vint TabOriginX)
 		{
 			DrawBuffer(X, Y, Text.Buffer(), Text.Length(), TabWidth, TabOriginX);
 		}
@@ -31557,57 +31558,58 @@ WinDC
 			DrawBuffer(Rect, Text.Buffer(), Text.Length(), Format);
 		}
 
-		SIZE WinDC::MeasureString(WString Text, int TabSize)
+		SIZE WinDC::MeasureString(WString Text, vint TabSize)
 		{
 			return MeasureBuffer(Text.Buffer(), Text.Length(), TabSize);
 		}
 
-		SIZE WinDC::MeasureBuffer(const wchar_t* Text, int CharCount, int TabSize)
+		SIZE WinDC::MeasureBuffer(const wchar_t* Text, vint CharCount, vint TabSize)
 		{
 			SIZE Size;
 			if(TabSize==-1)
 			{
-				GetTextExtentPoint32(FHandle, Text, CharCount, &Size);
+				GetTextExtentPoint32(FHandle, Text, (int)CharCount, &Size);
 			}
 			else
 			{
-				DWORD Result=GetTabbedTextExtent(FHandle, Text, CharCount, 1, &TabSize);
+				int realTabSize=(int)TabSize;
+				DWORD Result=GetTabbedTextExtent(FHandle, Text, (int)CharCount, 1, &realTabSize);
 				Size.cx=LOWORD(Result);
 				Size.cy=HIWORD(Result);
 			}
 			return Size;
 		}
 
-		SIZE WinDC::MeasureBuffer(const wchar_t* Text, int TabSize)
+		SIZE WinDC::MeasureBuffer(const wchar_t* Text, vint TabSize)
 		{
 			return MeasureBuffer(Text, wcslen(Text), TabSize);
 		}
 
-		SIZE WinDC::MeasureWrapLineString(WString Text, int MaxWidth)
+		SIZE WinDC::MeasureWrapLineString(WString Text, vint MaxWidth)
 		{
 			return MeasureWrapLineBuffer(Text.Buffer(), Text.Length(), MaxWidth);
 		}
 
-		SIZE WinDC::MeasureWrapLineBuffer(const wchar_t* Text, int CharCount, int MaxWidth)
+		SIZE WinDC::MeasureWrapLineBuffer(const wchar_t* Text, vint CharCount, vint MaxWidth)
 		{
 			SIZE size = {0};
-			int lineCount=0;
+			vint lineCount=0;
 			const wchar_t* reading=Text;
 			INT* dx=new INT[CharCount];
 			while(*reading)
 			{
 				INT fit=0;
-				GetTextExtentExPoint(FHandle, reading, CharCount-(reading-Text), MaxWidth, &fit, dx, &size);
+				GetTextExtentExPoint(FHandle, reading, (int)(CharCount-(reading-Text)), (int)MaxWidth, &fit, dx, &size);
 				reading+=fit;
 				lineCount++;
 			}
 			delete dx;
 			size.cx=0;
-			size.cy*=lineCount;
+			size.cy*=(int)lineCount;
 			return size;
 		}
 
-		SIZE WinDC::MeasureWrapLineBuffer(const wchar_t* Text, int MaxWidth)
+		SIZE WinDC::MeasureWrapLineBuffer(const wchar_t* Text, vint MaxWidth)
 		{
 			return MeasureWrapLineBuffer(Text, wcslen(Text), MaxWidth);
 		}
@@ -31617,24 +31619,24 @@ WinDC
 			FillRgn(FHandle, Region->GetHandle(), FBrush->GetHandle());
 		}
 
-		void WinDC::FrameRegion(WinRegion::Ptr Region, int BlockWidth, int BlockHeight)
+		void WinDC::FrameRegion(WinRegion::Ptr Region, vint BlockWidth, vint BlockHeight)
 		{
-			FrameRgn(FHandle, Region->GetHandle(), FBrush->GetHandle(), BlockWidth, BlockHeight);
+			FrameRgn(FHandle, Region->GetHandle(), FBrush->GetHandle(), (int)BlockWidth, (int)BlockHeight);
 		}
 
-		void WinDC::MoveTo(int X, int Y)
+		void WinDC::MoveTo(vint X, vint Y)
 		{
-			::MoveToEx(FHandle, X, Y, NULL);
+			::MoveToEx(FHandle, (int)X, (int)Y, NULL);
 		}
 
-		void WinDC::LineTo(int X, int Y)
+		void WinDC::LineTo(vint X, vint Y)
 		{
-			::LineTo(FHandle, X, Y);
+			::LineTo(FHandle, (int)X, (int)Y);
 		}
 
-		void WinDC::Rectangle(int Left, int Top, int Right, int Bottom)
+		void WinDC::Rectangle(vint Left, vint Top, vint Right, vint Bottom)
 		{
-			::Rectangle(FHandle, Left, Top, Right, Bottom);
+			::Rectangle(FHandle, (int)Left, (int)Top, (int)Right, (int)Bottom);
 		}
 
 		void WinDC::Rectangle(RECT Rect)
@@ -31642,13 +31644,13 @@ WinDC
 			::Rectangle(FHandle, Rect.left, Rect.top, Rect.right, Rect.bottom);
 		}
 
-		void WinDC::FocusRectangle(int Left, int Top, int Right, int Bottom)
+		void WinDC::FocusRectangle(vint Left, vint Top, vint Right, vint Bottom)
 		{
 			RECT Rect;
-			Rect.left=Left;
-			Rect.top=Top;
-			Rect.right=Right;
-			Rect.bottom=Bottom;
+			Rect.left=(int)Left;
+			Rect.top=(int)Top;
+			Rect.right=(int)Right;
+			Rect.bottom=(int)Bottom;
 			::DrawFocusRect(FHandle, &Rect);
 		}
 
@@ -31657,13 +31659,13 @@ WinDC
 			::DrawFocusRect(FHandle, &Rect);
 		}
 
-		void WinDC::FillRect(int Left, int Top, int Right, int Bottom)
+		void WinDC::FillRect(vint Left, vint Top, vint Right, vint Bottom)
 		{
 			RECT Rect;
-			Rect.left=Left;
-			Rect.top=Top;
-			Rect.right=Right;
-			Rect.bottom=Bottom;
+			Rect.left=(int)Left;
+			Rect.top=(int)Top;
+			Rect.right=(int)Right;
+			Rect.bottom=(int)Bottom;
 			::FillRect(FHandle, &Rect, FBrush->GetHandle());
 		}
 
@@ -31672,9 +31674,9 @@ WinDC
 			::FillRect(FHandle, &Rect, FBrush->GetHandle());
 		}
 
-		void WinDC::Ellipse(int Left, int Top, int Right, int Bottom)
+		void WinDC::Ellipse(vint Left, vint Top, vint Right, vint Bottom)
 		{
-			::Ellipse(FHandle, Left, Top, Right, Bottom);
+			::Ellipse(FHandle, (int)Left, (int)Top, (int)Right, (int)Bottom);
 		}
 
 		void WinDC::Ellipse(RECT Rect)
@@ -31682,44 +31684,44 @@ WinDC
 			::Ellipse(FHandle, Rect.left, Rect.top, Rect.right, Rect.bottom);
 		}
 
-		void WinDC::RoundRect(int Left, int Top, int Right, int Bottom, int EllipseWidth, int EllipseHeight)
+		void WinDC::RoundRect(vint Left, vint Top, vint Right, vint Bottom, vint EllipseWidth, vint EllipseHeight)
 		{
-			::RoundRect(FHandle, Left, Top, Right, Bottom, EllipseWidth, EllipseHeight);
+			::RoundRect(FHandle, (int)Left, (int)Top, (int)Right, (int)Bottom, (int)EllipseWidth, (int)EllipseHeight);
 		}
 
-		void WinDC::RoundRect(RECT Rect, int EllipseWidth, int EllipseHeight)
+		void WinDC::RoundRect(RECT Rect, vint EllipseWidth, vint EllipseHeight)
 		{
-			::RoundRect(FHandle, Rect.left, Rect.top, Rect.right, Rect.bottom, EllipseWidth, EllipseHeight);
+			::RoundRect(FHandle, (int)Rect.left, (int)Rect.top, (int)Rect.right, (int)Rect.bottom, (int)EllipseWidth, (int)EllipseHeight);
 		}
 
-		void WinDC::PolyLine(const POINT* Points, int Count)
+		void WinDC::PolyLine(const POINT* Points, vint Count)
 		{
-			::Polyline(FHandle, Points, Count);
+			::Polyline(FHandle, Points, (int)Count);
 		}
 
-		void WinDC::PolyLineTo(const POINT* Points, int Count)
+		void WinDC::PolyLineTo(const POINT* Points, vint Count)
 		{
-			::PolylineTo(FHandle, Points, Count);
+			::PolylineTo(FHandle, Points, (int)Count);
 		}
 
-		void WinDC::PolyGon(const POINT* Points, int Count)
+		void WinDC::PolyGon(const POINT* Points, vint Count)
 		{
-			::Polygon(FHandle, Points, Count);
+			::Polygon(FHandle, Points, (int)Count);
 		}
 
-		void WinDC::PolyBezier(const POINT* Points, int Count)
+		void WinDC::PolyBezier(const POINT* Points, vint Count)
 		{
-			::PolyBezier(FHandle, Points, Count);
+			::PolyBezier(FHandle, Points, (int)Count);
 		}
 
-		void WinDC::PolyBezierTo(const POINT* Points, int Count)
+		void WinDC::PolyBezierTo(const POINT* Points, vint Count)
 		{
-			::PolyBezierTo(FHandle, Points, Count);
+			::PolyBezierTo(FHandle, Points, (int)Count);
 		}
 
-		void WinDC::PolyDraw(const POINT* Points, const BYTE* Actions, int PointCount)
+		void WinDC::PolyDraw(const POINT* Points, const BYTE* Actions, vint PointCount)
 		{
-			::PolyDraw(FHandle, Points, Actions, PointCount);
+			::PolyDraw(FHandle, Points, Actions, (int)PointCount);
 		}
 
 		void WinDC::Arc(RECT Bound, POINT Start, POINT End)
@@ -31727,54 +31729,54 @@ WinDC
 			::Arc(FHandle, Bound.left, Bound.top, Bound.right, Bound.bottom, Start.x, Start.y, End.x, End.y);
 		}
 
-		void WinDC::Arc(int Left, int Top, int Right, int Bottom, int StartX, int StartY, int EndX, int EndY)
+		void WinDC::Arc(vint Left, vint Top, vint Right, vint Bottom, vint StartX, vint StartY, vint EndX, vint EndY)
 		{
-			::Arc(FHandle, Left, Top, Right, Bottom, StartX, StartY, EndX, EndY);
+			::Arc(FHandle, (int)Left, (int)Top, (int)Right, (int)Bottom, (int)StartX, (int)StartY, (int)EndX, (int)EndY);
 		}
 
 		void WinDC::ArcTo(RECT Bound, POINT Start, POINT End)
 		{
-			::ArcTo(FHandle, Bound.left, Bound.top, Bound.right, Bound.bottom, Start.x, Start.y, End.x, End.y);
+			::ArcTo(FHandle, (int)Bound.left, (int)Bound.top, (int)Bound.right, (int)Bound.bottom, (int)Start.x, (int)Start.y, (int)End.x, (int)End.y);
 		}
 
-		void WinDC::ArcTo(int Left, int Top, int Right, int Bottom, int StartX, int StartY, int EndX, int EndY)
+		void WinDC::ArcTo(vint Left, vint Top, vint Right, vint Bottom, vint StartX, vint StartY, vint EndX, vint EndY)
 		{
-			::ArcTo(FHandle, Left, Top, Right, Bottom, StartX, StartY, EndX, EndY);
+			::ArcTo(FHandle, (int)Left, (int)Top, (int)Right, (int)Bottom, (int)StartX, (int)StartY, (int)EndX, (int)EndY);
 		}
 
-		void WinDC::AngleArc(int X, int Y, int Radius, float StartAngle, float SweepAngle)
+		void WinDC::AngleArc(vint X, vint Y, vint Radius, float StartAngle, float SweepAngle)
 		{
-			::AngleArc(FHandle, X, Y, Radius, StartAngle, SweepAngle);
+			::AngleArc(FHandle, (int)X, (int)Y, (int)Radius, StartAngle, SweepAngle);
 		}
 
-		void WinDC::AngleArc(int X, int Y, int Radius, double StartAngle, double SweepAngle)
+		void WinDC::AngleArc(vint X, vint Y, vint Radius, double StartAngle, double SweepAngle)
 		{
-			::AngleArc(FHandle, X, Y, Radius, (float)StartAngle, (float)SweepAngle);
+			::AngleArc(FHandle, (int)X, (int)Y, (int)Radius, (float)StartAngle, (float)SweepAngle);
 		}
 
 		void WinDC::Chord(RECT Bound, POINT Start, POINT End)
 		{
-			::Chord(FHandle, Bound.left, Bound.top, Bound.right, Bound.bottom, Start.x, Start.y, End.x, End.y);
+			::Chord(FHandle, (int)Bound.left, (int)Bound.top, (int)Bound.right, (int)Bound.bottom, (int)Start.x, (int)Start.y, (int)End.x, (int)End.y);
 		}
 
-		void WinDC::Chord(int Left, int Top, int Right, int Bottom, int StartX, int StartY, int EndX, int EndY)
+		void WinDC::Chord(vint Left, vint Top, vint Right, vint Bottom, vint StartX, vint StartY, vint EndX, vint EndY)
 		{
-			::Chord(FHandle, Left, Top, Right, Bottom, StartX, StartY, EndX, EndY);
+			::Chord(FHandle, (int)Left, (int)Top, (int)Right, (int)Bottom, (int)StartX, (int)StartY, (int)EndX, (int)EndY);
 		}
 
 		void WinDC::Pie(RECT Bound, POINT Start, POINT End)
 		{
-			::Pie(FHandle, Bound.left, Bound.top, Bound.right, Bound.bottom, Start.x, Start.y, End.x, End.y);
+			::Pie(FHandle, (int)Bound.left, (int)Bound.top, (int)Bound.right, (int)Bound.bottom, (int)Start.x, (int)Start.y, (int)End.x, (int)End.y);
 		}
 
-		void WinDC::Pie(int Left, int Top, int Right, int Bottom, int StartX, int StartY, int EndX, int EndY)
+		void WinDC::Pie(vint Left, vint Top, vint Right, vint Bottom, vint StartX, vint StartY, vint EndX, vint EndY)
 		{
-			::Pie(FHandle, Left, Top, Right, Bottom, StartX, StartY, EndX, EndY);
+			::Pie(FHandle, (int)Left, (int)Top, (int)Right, (int)Bottom, (int)StartX, (int)StartY, (int)EndX, (int)EndY);
 		}
 
-		void WinDC::GradientTriangle(TRIVERTEX* Vertices, int VerticesCount, GRADIENT_TRIANGLE* Triangles, int TriangleCount)
+		void WinDC::GradientTriangle(TRIVERTEX* Vertices, vint VerticesCount, GRADIENT_TRIANGLE* Triangles, vint TriangleCount)
 		{
-			GradientFill(FHandle, Vertices, VerticesCount, Triangles, TriangleCount, GRADIENT_FILL_TRIANGLE);
+			GradientFill(FHandle, Vertices, (int)VerticesCount, Triangles, (int)TriangleCount, GRADIENT_FILL_TRIANGLE);
 		}
 
 		/*------------------------------------------------------------------------------*/
@@ -31836,9 +31838,9 @@ WinDC
 			return RectVisible(FHandle, &Rect)==TRUE;
 		}
 
-		void WinDC::ClipPath(int CombineMode)
+		void WinDC::ClipPath(vint CombineMode)
 		{
-			SelectClipPath(FHandle, CombineMode);
+			SelectClipPath(FHandle, (int)CombineMode);
 		}
 
 		void WinDC::ClipRegion(WinRegion::Ptr Region)
@@ -31851,14 +31853,14 @@ WinDC
 			SelectClipRgn(FHandle, NULL);
 		}
 
-		void WinDC::MoveClip(int OffsetX, int OffsetY)
+		void WinDC::MoveClip(vint OffsetX, vint OffsetY)
 		{
-			OffsetClipRgn(FHandle, OffsetX, OffsetY);
+			OffsetClipRgn(FHandle, (int)OffsetX, (int)OffsetY);
 		}
 
-		void WinDC::CombineClip(WinRegion::Ptr Region, int CombineMode)
+		void WinDC::CombineClip(WinRegion::Ptr Region, vint CombineMode)
 		{
-			ExtSelectClipRgn(FHandle, Region->GetHandle(), CombineMode);
+			ExtSelectClipRgn(FHandle, Region->GetHandle(), (int)CombineMode);
 		}
 
 		void WinDC::IntersetClipRect(RECT Rect)
@@ -31901,10 +31903,10 @@ WinDC
 
 		/*------------------------------------------------------------------------------*/
 
-		void WinDC::Copy(int dstX, int dstY, int dstW, int dstH, WinDC* Source, int srcX, int srcY, DWORD DrawROP)
+		void WinDC::Copy(vint dstX, vint dstY, vint dstW, vint dstH, WinDC* Source, vint srcX, vint srcY, DWORD DrawROP)
 		{
 			HDC SourceHandle=Source?Source->GetHandle():0;
-			BitBlt(FHandle, dstX, dstY, dstW, dstH, SourceHandle, srcX, srcY, DrawROP);
+			BitBlt(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, SourceHandle, (int)srcX, (int)srcY, (int)DrawROP);
 		}
 
 		void WinDC::Copy(RECT dstRect, WinDC* Source, POINT srcPos, DWORD DrawROP)
@@ -31913,10 +31915,10 @@ WinDC
 			BitBlt(FHandle, dstRect.left, dstRect.top, dstRect.right-dstRect.left, dstRect.bottom-dstRect.top, SourceHandle, srcPos.x, srcPos.y, DrawROP);
 		}
 
-		void WinDC::Copy(int dstX, int dstY, int dstW, int dstH, WinDC* Source, int srcX, int srcY , int srcW, int srcH, DWORD DrawROP)
+		void WinDC::Copy(vint dstX, vint dstY, vint dstW, vint dstH, WinDC* Source, vint srcX, vint srcY , vint srcW, vint srcH, DWORD DrawROP)
 		{
 			HDC SourceHandle=Source?Source->GetHandle():0;
-			StretchBlt(FHandle, dstX, dstY, dstW, dstH, SourceHandle, srcX, srcY, srcW, srcH, DrawROP);
+			StretchBlt(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, SourceHandle, (int)srcX, (int)srcY, (int)srcW, (int)srcH, (int)DrawROP);
 		}
 
 		void WinDC::Copy(RECT dstRect, WinDC* Source, RECT srcRect, DWORD DrawROP)
@@ -31927,13 +31929,13 @@ WinDC
 						DrawROP);
 		}
 
-		void WinDC::Copy(POINT UpperLeft, POINT UpperRight, POINT LowerLeft, WinDC* Source, int srcX, int srcY, int srcW, int srcH)
+		void WinDC::Copy(POINT UpperLeft, POINT UpperRight, POINT LowerLeft, WinDC* Source, vint srcX, vint srcY, vint srcW, vint srcH)
 		{
 			POINT Pt[3];
 			Pt[0]=UpperLeft;
 			Pt[1]=UpperRight;
 			Pt[2]=LowerLeft;
-			PlgBlt(FHandle, Pt, Source->GetHandle(), srcX, srcY, srcW, srcH, 0, 0, 0);
+			PlgBlt(FHandle, Pt, Source->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, 0, 0, 0);
 		}
 
 		void WinDC::Copy(POINT UpperLeft, POINT UpperRight, POINT LowerLeft, WinDC*Source, RECT srcRect)
@@ -31945,9 +31947,9 @@ WinDC
 			PlgBlt(FHandle, Pt, Source->GetHandle(), srcRect.left, srcRect.top, srcRect.right-srcRect.left, srcRect.bottom-srcRect.top, 0, 0, 0);
 		}
 
-		void WinDC::CopyTrans(int dstX, int dstY, int dstW, int dstH, WinDC* Source, int srcX, int srcY , int srcW, int srcH, COLORREF Color)
+		void WinDC::CopyTrans(vint dstX, vint dstY, vint dstW, vint dstH, WinDC* Source, vint srcX, vint srcY , vint srcW, vint srcH, COLORREF Color)
 		{
-			TransparentBlt(FHandle, dstX, dstY, dstW, dstH, Source->GetHandle(), srcX, srcY, srcW, srcH, Color);
+			TransparentBlt(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Source->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Color);
 		}
 
 		void WinDC::CopyTrans(RECT dstRect, WinDC* Source, RECT srcRect, COLORREF Color)
@@ -31959,7 +31961,7 @@ WinDC
 
 		/*------------------------------------------------------------------------------*/
 
-		void WinDC::Draw(int dstX, int dstY, WinMetaFile* MetaFile)
+		void WinDC::Draw(vint dstX, vint dstY, WinMetaFile* MetaFile)
 		{
 			Draw(dstX, dstY, MetaFile->GetWidth(), MetaFile->GetHeight(), MetaFile);
 		}
@@ -31969,13 +31971,13 @@ WinDC
 			Draw(Pos.x, Pos.y, MetaFile->GetWidth(), MetaFile->GetHeight(), MetaFile);
 		}
 
-		void WinDC::Draw(int dstX, int dstY, int dstW, int dstH, WinMetaFile* MetaFile)
+		void WinDC::Draw(vint dstX, vint dstY, vint dstW, vint dstH, WinMetaFile* MetaFile)
 		{
 			RECT Rect;
-			Rect.left=dstX;
-			Rect.top=dstY;
-			Rect.right=dstX+dstW;
-			Rect.bottom=dstY+dstH;
+			Rect.left=(int)dstX;
+			Rect.top=(int)dstY;
+			Rect.right=(int)(dstX+dstW);
+			Rect.bottom=(int)(dstY+dstH);
 			Draw(Rect, MetaFile);
 		}
 
@@ -31986,63 +31988,63 @@ WinDC
 
 		/*------------------------------------------------------------------------------*/
 
-		void WinDC::Draw(int dstX, int dstY, WinBitmap::Ptr Bitmap)
+		void WinDC::Draw(vint dstX, vint dstY, WinBitmap::Ptr Bitmap)
 		{
-			int dstW=Bitmap->GetWidth();
-			int dstH=Bitmap->GetHeight();
-			int srcX=0;
-			int srcY=0;
+			vint dstW=Bitmap->GetWidth();
+			vint dstH=Bitmap->GetHeight();
+			vint srcX=0;
+			vint srcY=0;
 			if(!Bitmap->IsAlphaChannelBuilt())
 			{
-				BitBlt(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, SRCCOPY);
+				BitBlt(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, SRCCOPY);
 			}
 			else
 			{
-				int srcW=dstW;
-				int srcH=dstH;
+				vint srcW=dstW;
+				vint srcH=dstH;
 				BLENDFUNCTION Blend;
 				Blend.BlendOp=AC_SRC_OVER;
 				Blend.BlendFlags=0;
 				Blend.SourceConstantAlpha=255;
 				Blend.AlphaFormat=AC_SRC_ALPHA;
-				AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+				AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 			}
 		}
 
 		void WinDC::Draw(POINT Pos, WinBitmap::Ptr Bitmap)
 		{
-			int dstX=Pos.x;
-			int dstY=Pos.y;
-			int dstW=Bitmap->GetWidth();
-			int dstH=Bitmap->GetHeight();
-			int srcX=0;
-			int srcY=0;
+			vint dstX=Pos.x;
+			vint dstY=Pos.y;
+			vint dstW=Bitmap->GetWidth();
+			vint dstH=Bitmap->GetHeight();
+			vint srcX=0;
+			vint srcY=0;
 			if(!Bitmap->IsAlphaChannelBuilt())
 			{
-				BitBlt(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, SRCCOPY);
+				BitBlt(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, SRCCOPY);
 			}
 			else
 			{
-				int srcW=dstW;
-				int srcH=dstH;
+				vint srcW=dstW;
+				vint srcH=dstH;
 				BLENDFUNCTION Blend;
 				Blend.BlendOp=AC_SRC_OVER;
 				Blend.BlendFlags=0;
 				Blend.SourceConstantAlpha=255;
 				Blend.AlphaFormat=AC_SRC_ALPHA;
-				AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+				AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 			}
 		}
 
-		void WinDC::Draw(int dstX, int dstY, int dstW, int dstH, WinBitmap::Ptr Bitmap)
+		void WinDC::Draw(vint dstX, vint dstY, vint dstW, vint dstH, WinBitmap::Ptr Bitmap)
 		{
-			int srcX=0;
-			int srcY=0;
-			int srcW=Bitmap->GetWidth();
-			int srcH=Bitmap->GetHeight();
+			vint srcX=0;
+			vint srcY=0;
+			vint srcW=Bitmap->GetWidth();
+			vint srcH=Bitmap->GetHeight();
 			if(!Bitmap->IsAlphaChannelBuilt())
 			{
-				StretchBlt(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, SRCCOPY);
+				StretchBlt(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, SRCCOPY);
 			}
 			else
 			{
@@ -32051,23 +32053,23 @@ WinDC
 				Blend.BlendFlags=0;
 				Blend.SourceConstantAlpha=255;
 				Blend.AlphaFormat=AC_SRC_ALPHA;
-				AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+				AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 			}
 		}
 
 		void WinDC::Draw(RECT Rect, WinBitmap::Ptr Bitmap)
 		{
-			int dstX=Rect.left;
-			int dstY=Rect.top;
-			int dstW=Rect.right-Rect.left;
-			int dstH=Rect.bottom-Rect.top;
-			int srcX=0;
-			int srcY=0;
-			int srcW=Bitmap->GetWidth();
-			int srcH=Bitmap->GetHeight();
+			vint dstX=Rect.left;
+			vint dstY=Rect.top;
+			vint dstW=Rect.right-Rect.left;
+			vint dstH=Rect.bottom-Rect.top;
+			vint srcX=0;
+			vint srcY=0;
+			vint srcW=Bitmap->GetWidth();
+			vint srcH=Bitmap->GetHeight();
 			if(!Bitmap->IsAlphaChannelBuilt())
 			{
-				StretchBlt(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, SRCCOPY);
+				StretchBlt(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, SRCCOPY);
 			}
 			else
 			{
@@ -32076,59 +32078,59 @@ WinDC
 				Blend.BlendFlags=0;
 				Blend.SourceConstantAlpha=255;
 				Blend.AlphaFormat=AC_SRC_ALPHA;
-				AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+				AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 			}
 		}
 
-		void WinDC::Draw(int dstX, int dstY, int dstW, int dstH, WinBitmap::Ptr Bitmap, int srcX, int srcY)
+		void WinDC::Draw(vint dstX, vint dstY, vint dstW, vint dstH, WinBitmap::Ptr Bitmap, vint srcX, vint srcY)
 		{
 			if(!Bitmap->IsAlphaChannelBuilt())
 			{
-				BitBlt(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, SRCCOPY);
+				BitBlt(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, SRCCOPY);
 			}
 			else
 			{
-				int srcW=dstW;
-				int srcH=dstH;
+				vint srcW=dstW;
+				vint srcH=dstH;
 				BLENDFUNCTION Blend;
 				Blend.BlendOp=AC_SRC_OVER;
 				Blend.BlendFlags=0;
 				Blend.SourceConstantAlpha=255;
 				Blend.AlphaFormat=AC_SRC_ALPHA;
-				AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+				AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 			}
 		}
 
 		void WinDC::Draw(RECT Rect, WinBitmap::Ptr Bitmap, POINT Pos)
 		{
-			int dstX=Rect.left;
-			int dstY=Rect.top;
-			int dstW=Rect.right-Rect.left;
-			int dstH=Rect.bottom-Rect.top;
-			int srcX=Pos.x;
-			int srcY=Pos.y;
+			vint dstX=Rect.left;
+			vint dstY=Rect.top;
+			vint dstW=Rect.right-Rect.left;
+			vint dstH=Rect.bottom-Rect.top;
+			vint srcX=Pos.x;
+			vint srcY=Pos.y;
 			if(!Bitmap->IsAlphaChannelBuilt())
 			{
-				BitBlt(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, SRCCOPY);
+				BitBlt(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, SRCCOPY);
 			}
 			else
 			{
-				int srcW=dstW;
-				int srcH=dstH;
+				vint srcW=dstW;
+				vint srcH=dstH;
 				BLENDFUNCTION Blend;
 				Blend.BlendOp=AC_SRC_OVER;
 				Blend.BlendFlags=0;
 				Blend.SourceConstantAlpha=255;
 				Blend.AlphaFormat=AC_SRC_ALPHA;
-				AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+				AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 			}
 		}
 
-		void WinDC::Draw(int dstX, int dstY, int dstW, int dstH, WinBitmap::Ptr Bitmap, int srcX, int srcY, int srcW, int srcH)
+		void WinDC::Draw(vint dstX, vint dstY, vint dstW, vint dstH, WinBitmap::Ptr Bitmap, vint srcX, vint srcY, vint srcW, vint srcH)
 		{
 			if(!Bitmap->IsAlphaChannelBuilt())
 			{
-				StretchBlt(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, SRCCOPY);
+				StretchBlt(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, SRCCOPY);
 			}
 			else
 			{
@@ -32137,23 +32139,23 @@ WinDC
 				Blend.BlendFlags=0;
 				Blend.SourceConstantAlpha=255;
 				Blend.AlphaFormat=AC_SRC_ALPHA;
-				AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+				AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 			}
 		}
 
 		void WinDC::Draw(RECT dstRect, WinBitmap::Ptr Bitmap, RECT srcRect)
 		{
-			int dstX=dstRect.left;
-			int dstY=dstRect.top;
-			int dstW=dstRect.right-dstRect.left;
-			int dstH=dstRect.bottom-dstRect.top;
-			int srcX=srcRect.left;
-			int srcY=srcRect.top;
-			int srcW=srcRect.right-srcRect.left;
-			int srcH=srcRect.bottom-srcRect.top;
+			vint dstX=dstRect.left;
+			vint dstY=dstRect.top;
+			vint dstW=dstRect.right-dstRect.left;
+			vint dstH=dstRect.bottom-dstRect.top;
+			vint srcX=srcRect.left;
+			vint srcY=srcRect.top;
+			vint srcW=srcRect.right-srcRect.left;
+			vint srcH=srcRect.bottom-srcRect.top;
 			if(!Bitmap->IsAlphaChannelBuilt())
 			{
-				StretchBlt(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, SRCCOPY);
+				StretchBlt(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, SRCCOPY);
 			}
 			else
 			{
@@ -32162,141 +32164,141 @@ WinDC
 				Blend.BlendFlags=0;
 				Blend.SourceConstantAlpha=255;
 				Blend.AlphaFormat=AC_SRC_ALPHA;
-				AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+				AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 			}
 		}
 
 		/*------------------------------------------------------------------------------*/
 
-		void WinDC::Draw(int dstX, int dstY, WinBitmap::Ptr Bitmap, unsigned char Alpha)
+		void WinDC::Draw(vint dstX, vint dstY, WinBitmap::Ptr Bitmap, unsigned char Alpha)
 		{
-			int dstW=Bitmap->GetWidth();
-			int dstH=Bitmap->GetHeight();
-			int srcX=0;
-			int srcY=0;
-			int srcW=dstW;
-			int srcH=dstH;
+			vint dstW=Bitmap->GetWidth();
+			vint dstH=Bitmap->GetHeight();
+			vint srcX=0;
+			vint srcY=0;
+			vint srcW=dstW;
+			vint srcH=dstH;
 
 			BLENDFUNCTION Blend;
 			Blend.BlendOp=AC_SRC_OVER;
 			Blend.BlendFlags=0;
 			Blend.SourceConstantAlpha=Alpha;
 			Blend.AlphaFormat=Bitmap->IsAlphaChannelBuilt()?AC_SRC_ALPHA:0;
-			AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+			AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 		}
 
 		void WinDC::Draw(POINT Pos, WinBitmap::Ptr Bitmap, unsigned char Alpha)
 		{
-			int dstX=Pos.x;
-			int dstY=Pos.y;
-			int dstW=Bitmap->GetWidth();
-			int dstH=Bitmap->GetHeight();
-			int srcX=0;
-			int srcY=0;
-			int srcW=dstW;
-			int srcH=dstH;
+			vint dstX=Pos.x;
+			vint dstY=Pos.y;
+			vint dstW=Bitmap->GetWidth();
+			vint dstH=Bitmap->GetHeight();
+			vint srcX=0;
+			vint srcY=0;
+			vint srcW=dstW;
+			vint srcH=dstH;
 
 			BLENDFUNCTION Blend;
 			Blend.BlendOp=AC_SRC_OVER;
 			Blend.BlendFlags=0;
 			Blend.SourceConstantAlpha=Alpha;
 			Blend.AlphaFormat=Bitmap->IsAlphaChannelBuilt()?AC_SRC_ALPHA:0;
-			AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+			AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 		}
 
-		void WinDC::Draw(int dstX, int dstY, int dstW, int dstH, WinBitmap::Ptr Bitmap, unsigned char Alpha)
+		void WinDC::Draw(vint dstX, vint dstY, vint dstW, vint dstH, WinBitmap::Ptr Bitmap, unsigned char Alpha)
 		{
-			int srcX=0;
-			int srcY=0;
-			int srcW=Bitmap->GetWidth();
-			int srcH=Bitmap->GetHeight();
+			vint srcX=0;
+			vint srcY=0;
+			vint srcW=Bitmap->GetWidth();
+			vint srcH=Bitmap->GetHeight();
 
 			BLENDFUNCTION Blend;
 			Blend.BlendOp=AC_SRC_OVER;
 			Blend.BlendFlags=0;
 			Blend.SourceConstantAlpha=Alpha;
 			Blend.AlphaFormat=Bitmap->IsAlphaChannelBuilt()?AC_SRC_ALPHA:0;
-			AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+			AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 		}
 
 		void WinDC::Draw(RECT Rect, WinBitmap::Ptr Bitmap, unsigned char Alpha)
 		{
-			int dstX=Rect.left;
-			int dstY=Rect.top;
-			int dstW=Rect.right-Rect.left;
-			int dstH=Rect.bottom-Rect.top;
-			int srcX=0;
-			int srcY=0;
-			int srcW=Bitmap->GetWidth();
-			int srcH=Bitmap->GetHeight();
+			vint dstX=Rect.left;
+			vint dstY=Rect.top;
+			vint dstW=Rect.right-Rect.left;
+			vint dstH=Rect.bottom-Rect.top;
+			vint srcX=0;
+			vint srcY=0;
+			vint srcW=Bitmap->GetWidth();
+			vint srcH=Bitmap->GetHeight();
 
 			BLENDFUNCTION Blend;
 			Blend.BlendOp=AC_SRC_OVER;
 			Blend.BlendFlags=0;
 			Blend.SourceConstantAlpha=Alpha;
 			Blend.AlphaFormat=Bitmap->IsAlphaChannelBuilt()?AC_SRC_ALPHA:0;
-			AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+			AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 		}
 
-		void WinDC::Draw(int dstX, int dstY, int dstW, int dstH, WinBitmap::Ptr Bitmap, int srcX, int srcY, unsigned char Alpha)
+		void WinDC::Draw(vint dstX, vint dstY, vint dstW, vint dstH, WinBitmap::Ptr Bitmap, vint srcX, vint srcY, unsigned char Alpha)
 		{
-			int srcW=dstW;
-			int srcH=dstH;
+			vint srcW=dstW;
+			vint srcH=dstH;
 
 			BLENDFUNCTION Blend;
 			Blend.BlendOp=AC_SRC_OVER;
 			Blend.BlendFlags=0;
 			Blend.SourceConstantAlpha=Alpha;
 			Blend.AlphaFormat=Bitmap->IsAlphaChannelBuilt()?AC_SRC_ALPHA:0;
-			AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+			AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 		}
 
 		void WinDC::Draw(RECT Rect, WinBitmap::Ptr Bitmap, POINT Pos, unsigned char Alpha)
 		{
-			int dstX=Rect.left;
-			int dstY=Rect.top;
-			int dstW=Rect.right-Rect.left;
-			int dstH=Rect.bottom-Rect.top;
-			int srcX=Pos.x;
-			int srcY=Pos.y;
-			int srcW=dstW;
-			int srcH=dstH;
+			vint dstX=Rect.left;
+			vint dstY=Rect.top;
+			vint dstW=Rect.right-Rect.left;
+			vint dstH=Rect.bottom-Rect.top;
+			vint srcX=Pos.x;
+			vint srcY=Pos.y;
+			vint srcW=dstW;
+			vint srcH=dstH;
 
 			BLENDFUNCTION Blend;
 			Blend.BlendOp=AC_SRC_OVER;
 			Blend.BlendFlags=0;
 			Blend.SourceConstantAlpha=Alpha;
 			Blend.AlphaFormat=Bitmap->IsAlphaChannelBuilt()?AC_SRC_ALPHA:0;
-			AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+			AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 		}
 
-		void WinDC::Draw(int dstX, int dstY, int dstW, int dstH, WinBitmap::Ptr Bitmap, int srcX, int srcY, int srcW, int srcH, unsigned char Alpha)
+		void WinDC::Draw(vint dstX, vint dstY, vint dstW, vint dstH, WinBitmap::Ptr Bitmap, vint srcX, vint srcY, vint srcW, vint srcH, unsigned char Alpha)
 		{
 			BLENDFUNCTION Blend;
 			Blend.BlendOp=AC_SRC_OVER;
 			Blend.BlendFlags=0;
 			Blend.SourceConstantAlpha=Alpha;
 			Blend.AlphaFormat=Bitmap->IsAlphaChannelBuilt()?AC_SRC_ALPHA:0;
-			AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+			AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 		}
 
 		void WinDC::Draw(RECT dstRect, WinBitmap::Ptr Bitmap, RECT srcRect, unsigned char Alpha)
 		{
-			int dstX=dstRect.left;
-			int dstY=dstRect.top;
-			int dstW=dstRect.right-dstRect.left;
-			int dstH=dstRect.bottom-dstRect.top;
-			int srcX=srcRect.left;
-			int srcY=srcRect.top;
-			int srcW=srcRect.right-srcRect.left;
-			int srcH=srcRect.bottom-srcRect.top;
+			vint dstX=dstRect.left;
+			vint dstY=dstRect.top;
+			vint dstW=dstRect.right-dstRect.left;
+			vint dstH=dstRect.bottom-dstRect.top;
+			vint srcX=srcRect.left;
+			vint srcY=srcRect.top;
+			vint srcW=srcRect.right-srcRect.left;
+			vint srcH=srcRect.bottom-srcRect.top;
 
 			BLENDFUNCTION Blend;
 			Blend.BlendOp=AC_SRC_OVER;
 			Blend.BlendFlags=0;
 			Blend.SourceConstantAlpha=Alpha;
 			Blend.AlphaFormat=Bitmap->IsAlphaChannelBuilt()?AC_SRC_ALPHA:0;
-			AlphaBlend(FHandle, dstX, dstY, dstW, dstH, Bitmap->GetWinDC()->GetHandle(), srcX, srcY, srcW, srcH, Blend);
+			AlphaBlend(FHandle, (int)dstX, (int)dstY, (int)dstW, (int)dstH, Bitmap->GetWinDC()->GetHandle(), (int)srcX, (int)srcY, (int)srcW, (int)srcH, Blend);
 		}
 
 /*********************************************************************************************************
@@ -32371,7 +32373,7 @@ namespace vl
 				Ptr<WinBitmap>					buffer;
 				INativeWindow*					window;
 
-				int DetermineBufferLength(int minSize, int minBound, int maxBound, int currentSize)
+				vint DetermineBufferLength(vint minSize, vint minBound, vint maxBound, vint currentSize)
 				{
 					if(currentSize<minSize || currentSize>maxBound)
 					{
@@ -32389,8 +32391,8 @@ namespace vl
 					Size minBounds(windowSize.x*5/4, windowSize.y*5/4);
 					Size maxBounds(windowSize.x*3/2, windowSize.y*3/2);
 					Size currentSize=buffer?Size(buffer->GetWidth(), buffer->GetHeight()):Size(0, 0);
-					int newWidth=DetermineBufferLength(windowSize.x, minBounds.x, maxBounds.x, currentSize.x);
-					int newHeight=DetermineBufferLength(windowSize.y, minBounds.y, maxBounds.y, currentSize.y);
+					vint newWidth=DetermineBufferLength(windowSize.x, minBounds.x, maxBounds.x, currentSize.x);
+					vint newHeight=DetermineBufferLength(windowSize.y, minBounds.y, maxBounds.y, currentSize.y);
 					return Size(newWidth, newHeight);
 				}
 
@@ -32460,7 +32462,7 @@ namespace vl
 
 			WinDC* GetNativeWindowDC(INativeWindow* window)
 			{
-				int index=gdiListener->nativeWindowListeners.Keys().IndexOf(window);
+				vint index=gdiListener->nativeWindowListeners.Keys().IndexOf(window);
 				return index==-1?0:gdiListener->nativeWindowListeners.Values().Get(index)->GetWinDC();
 			}
 
@@ -32599,7 +32601,7 @@ WindowsAsyncService
 					CopyFrom(items, taskItems);
 					taskItems.RemoveRange(0, items.Count());
 				}
-				for(int i=0;i<items.Count();i++)
+				for(vint i=0;i<items.Count();i++)
 				{
 					TaskItem taskItem=items[i];
 					taskItem.proc(taskItem.argument);
@@ -32627,7 +32629,7 @@ WindowsAsyncService
 				taskItems.Add(item);
 			}
 
-			bool WindowsAsyncService::InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds)
+			bool WindowsAsyncService::InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, vint milliseconds)
 			{
 				Semaphore semaphore;
 				semaphore.Create(0, 1);
@@ -32700,7 +32702,7 @@ WindowsCallbackService
 				{
 				case WM_LBUTTONDOWN:
 					{
-						for(int i=0;i<listeners.Count();i++)
+						for(vint i=0;i<listeners.Count();i++)
 						{
 							listeners[i]->LeftButtonDown(location);
 						}
@@ -32708,7 +32710,7 @@ WindowsCallbackService
 					break;
 				case WM_LBUTTONUP:
 					{
-						for(int i=0;i<listeners.Count();i++)
+						for(vint i=0;i<listeners.Count();i++)
 						{
 							listeners[i]->LeftButtonUp(location);
 						}
@@ -32716,7 +32718,7 @@ WindowsCallbackService
 					break;
 				case WM_RBUTTONDOWN:
 					{
-						for(int i=0;i<listeners.Count();i++)
+						for(vint i=0;i<listeners.Count();i++)
 						{
 							listeners[i]->RightButtonDown(location);
 						}
@@ -32724,7 +32726,7 @@ WindowsCallbackService
 					break;
 				case WM_RBUTTONUP:
 					{
-						for(int i=0;i<listeners.Count();i++)
+						for(vint i=0;i<listeners.Count();i++)
 						{
 							listeners[i]->RightButtonUp(location);
 						}
@@ -32732,7 +32734,7 @@ WindowsCallbackService
 					break;
 				case WM_MOUSEMOVE:
 					{
-						for(int i=0;i<listeners.Count();i++)
+						for(vint i=0;i<listeners.Count();i++)
 						{
 							listeners[i]->MouseMoving(location);
 						}
@@ -32743,7 +32745,7 @@ WindowsCallbackService
 
 			void WindowsCallbackService::InvokeGlobalTimer()
 			{
-				for(int i=0;i<listeners.Count();i++)
+				for(vint i=0;i<listeners.Count();i++)
 				{
 					listeners[i]->GlobalTimer();
 				}
@@ -32751,7 +32753,7 @@ WindowsCallbackService
 
 			void WindowsCallbackService::InvokeClipboardUpdated()
 			{
-				for(int i=0;i<listeners.Count();i++)
+				for(vint i=0;i<listeners.Count();i++)
 				{
 					listeners[i]->ClipboardUpdated();
 				}
@@ -32759,7 +32761,7 @@ WindowsCallbackService
 
 			void WindowsCallbackService::InvokeNativeWindowCreated(INativeWindow* window)
 			{
-				for(int i=0;i<listeners.Count();i++)
+				for(vint i=0;i<listeners.Count();i++)
 				{
 					listeners[i]->NativeWindowCreated(window);
 				}
@@ -32767,7 +32769,7 @@ WindowsCallbackService
 
 			void WindowsCallbackService::InvokeNativeWindowDestroyed(INativeWindow* window)
 			{
-				for(int i=0;i<listeners.Count();i++)
+				for(vint i=0;i<listeners.Count();i++)
 				{
 					listeners[i]->NativeWindowDestroying(window);
 				}
@@ -32853,7 +32855,7 @@ WindowsClipboardService
 				if(OpenClipboard(ownerHandle))
 				{
 					EmptyClipboard();
-					int size=(value.Length()+1)*sizeof(wchar_t);
+					vint size=(value.Length()+1)*sizeof(wchar_t);
 					HGLOBAL data=GlobalAlloc(GMEM_MOVEABLE, size);
 					wchar_t* buffer=(wchar_t*)GlobalLock(data);
 					memcpy(buffer, value.Buffer(), size);
@@ -32943,7 +32945,7 @@ WindowsDialogService
 				}
 #undef MAP
 
-				int result=MessageBox(hWnd, lpText, lpCaption, uType);
+				vint result=MessageBox(hWnd, lpText, lpCaption, uType);
 				switch(result)
 				{
 				case IDABORT: return SelectAbort;
@@ -32966,7 +32968,7 @@ WindowsDialogService
 				COLORREF customColorsBuffer[16]={0};
 				if(customColors)
 				{
-					for(int i=0;i<sizeof(customColorsBuffer)/sizeof(*customColorsBuffer);i++)
+					for(vint i=0;i<sizeof(customColorsBuffer)/sizeof(*customColorsBuffer);i++)
 					{
 						customColorsBuffer[i]=RGB(customColors[i].r, customColors[i].g, customColors[i].b);
 					}
@@ -32996,7 +32998,7 @@ WindowsDialogService
 					selection=Color(GetRValue(chooseColor.rgbResult), GetGValue(chooseColor.rgbResult), GetBValue(chooseColor.rgbResult));
 					if(customColors)
 					{
-						for(int i=0;i<sizeof(customColorsBuffer)/sizeof(*customColorsBuffer);i++)
+						for(vint i=0;i<sizeof(customColorsBuffer)/sizeof(*customColorsBuffer);i++)
 						{
 							COLORREF color=customColorsBuffer[i];
 							customColors[i]=Color(GetRValue(color), GetGValue(color), GetBValue(color));
@@ -33010,7 +33012,7 @@ WindowsDialogService
 			{
 				LOGFONT logFont;
 				ZeroMemory(&logFont, sizeof(logFont));
-				logFont.lfHeight=-selectionFont.size;
+				logFont.lfHeight=-(int)selectionFont.size;
 				logFont.lfWeight=selectionFont.bold?FW_BOLD:FW_REGULAR;
 				logFont.lfItalic=selectionFont.italic?TRUE:FALSE;
 				logFont.lfUnderline=selectionFont.underline?TRUE:FALSE;
@@ -33041,7 +33043,7 @@ WindowsDialogService
 				return result!=FALSE;
 			}
 
-			bool WindowsDialogService::ShowFileDialog(INativeWindow* window, collections::List<WString>& selectionFileNames, int& selectionFilterIndex, FileDialogTypes dialogType, const WString& title, const WString& initialFileName, const WString& initialDirectory, const WString& defaultExtension, const WString& filter, FileDialogOptions options)
+			bool WindowsDialogService::ShowFileDialog(INativeWindow* window, collections::List<WString>& selectionFileNames, vint& selectionFilterIndex, FileDialogTypes dialogType, const WString& title, const WString& initialFileName, const WString& initialDirectory, const WString& defaultExtension, const WString& filter, FileDialogOptions options)
 			{
 				Array<wchar_t> fileNamesBuffer(65536>initialFileName.Length()+1?65536:initialFileName.Length()+1);
 				wcscpy_s(&fileNamesBuffer[0], fileNamesBuffer.Count(), initialFileName.Buffer());
@@ -33053,17 +33055,17 @@ WindowsDialogService
 				ofn.hInstance=NULL;
 				ofn.lpstrCustomFilter=NULL;
 				ofn.nMaxCustFilter=0;
-				ofn.nFilterIndex=selectionFilterIndex+1;
+				ofn.nFilterIndex=(int)selectionFilterIndex+1;
 				ofn.lpstrFile=&fileNamesBuffer[0];
-				ofn.nMaxFile=fileNamesBuffer.Count();
+				ofn.nMaxFile=(int)fileNamesBuffer.Count();
 				ofn.lpstrFileTitle=NULL;
 				ofn.nMaxFileTitle=0;
 				ofn.lpstrInitialDir=initialDirectory==L""?NULL:initialDirectory.Buffer();
 				ofn.lpstrTitle=title==L""?NULL:title.Buffer();
 				ofn.lpstrDefExt=defaultExtension==L""?NULL:defaultExtension.Buffer();
 
-				List<int> filterSeparators;
-				for(int i=0;i<filter.Length();i++)
+				List<vint> filterSeparators;
+				for(vint i=0;i<filter.Length();i++)
 				{
 					if(filter[i]==L'|')
 					{
@@ -33076,10 +33078,10 @@ WindowsDialogService
 				}
 
 				Array<wchar_t> filterBuffer(filter.Length()+2);
-				int index=0;
-				for(int i=0;i<filterSeparators.Count();i++)
+				vint index=0;
+				for(vint i=0;i<filterSeparators.Count();i++)
 				{
-					int end=filterSeparators[i];
+					vint end=filterSeparators[i];
 					wcsncpy_s(&filterBuffer[index], filterBuffer.Count()-index, filter.Buffer()+index, end-index);
 					filterBuffer[end]=0;
 					index=end+1;
@@ -33216,7 +33218,7 @@ WindowsImageFrame
 
 			WindowsImageFrame::~WindowsImageFrame()
 			{
-				for(int i=0;i<caches.Count();i++)
+				for(vint i=0;i<caches.Count();i++)
 				{
 					caches.Values().Get(i)->OnDetach(this);
 				}
@@ -33237,7 +33239,7 @@ WindowsImageFrame
 
 			bool WindowsImageFrame::SetCache(void* key, Ptr<INativeImageFrameCache> cache)
 			{
-				int index=caches.Keys().IndexOf(key);
+				vint index=caches.Keys().IndexOf(key);
 				if(index!=-1)
 				{
 					return false;
@@ -33249,13 +33251,13 @@ WindowsImageFrame
 
 			Ptr<INativeImageFrameCache> WindowsImageFrame::GetCache(void* key)
 			{
-				int index=caches.Keys().IndexOf(key);
+				vint index=caches.Keys().IndexOf(key);
 				return index==-1?0:caches.Values().Get(index);
 			}
 
 			Ptr<INativeImageFrameCache> WindowsImageFrame::RemoveCache(void* key)
 			{
-				int index=caches.Keys().IndexOf(key);
+				vint index=caches.Keys().IndexOf(key);
 				if(index==-1)
 				{
 					return 0;
@@ -33331,12 +33333,12 @@ WindowsImage
 				return INativeImage::Unknown;
 			}
 
-			int WindowsImage::GetFrameCount()
+			vint WindowsImage::GetFrameCount()
 			{
 				return frames.Count();
 			}
 
-			INativeImageFrame* WindowsImage::GetFrame(int index)
+			INativeImageFrame* WindowsImage::GetFrame(vint index)
 			{
 				if(0<=index && index<GetFrameCount())
 				{
@@ -33344,7 +33346,7 @@ WindowsImage
 					if(!frame)
 					{
 						IWICBitmapFrameDecode* frameDecode=0;
-						HRESULT hr=bitmapDecoder->GetFrame(index, &frameDecode);
+						HRESULT hr=bitmapDecoder->GetFrame((int)index, &frameDecode);
 						if(SUCCEEDED(hr))
 						{
 							frame=new WindowsImageFrame(this, frameDecode);
@@ -33384,12 +33386,12 @@ WindowsBitmapImage
 				return formatType;
 			}
 
-			int WindowsBitmapImage::GetFrameCount()
+			vint WindowsBitmapImage::GetFrameCount()
 			{
 				return 1;
 			}
 
-			INativeImageFrame* WindowsBitmapImage::GetFrame(int index)
+			INativeImageFrame* WindowsBitmapImage::GetFrame(vint index)
 			{
 				return index==0?frame.Obj():0;
 			}
@@ -33441,10 +33443,10 @@ WindowsImageService
 				}
 			}
 
-			Ptr<INativeImage> WindowsImageService::CreateImageFromMemory(void* buffer, int length)
+			Ptr<INativeImage> WindowsImageService::CreateImageFromMemory(void* buffer, vint length)
 			{
 				Ptr<INativeImage> result;
-				::IStream* stream=SHCreateMemStream((const BYTE*)buffer, length);
+				::IStream* stream=SHCreateMemStream((const BYTE*)buffer, (int)length);
 				if(stream)
 				{
 					IWICBitmapDecoder* bitmapDecoder=0;
@@ -33464,14 +33466,14 @@ WindowsImageService
 				char buffer[65536];
 				while(true)
 				{
-					int length=stream.Read(buffer, sizeof(buffer));
+					vint length=stream.Read(buffer, sizeof(buffer));
 					memoryStream.Write(buffer, length);
 					if(length!=sizeof(buffer))
 					{
 						break;
 					}
 				}
-				return CreateImageFromMemory(memoryStream.GetInternalBuffer(), (int)memoryStream.Size());
+				return CreateImageFromMemory(memoryStream.GetInternalBuffer(), (vint)memoryStream.Size());
 			}
 
 			Ptr<INativeImage> WindowsImageService::CreateImageFromHBITMAP(HBITMAP handle)
@@ -33548,14 +33550,14 @@ namespace vl
 	{
 		namespace windows
 		{
-			bool WinIsKeyPressing(int code)
+			bool WinIsKeyPressing(vint code)
 			{
-				return (GetKeyState(code)&0xF0)!=0;
+				return (GetKeyState((int)code)&0xF0)!=0;
 			}
 
-			bool WinIsKeyToggled(int code)
+			bool WinIsKeyToggled(vint code)
 			{
-				return (GetKeyState(code)&0x0F)!=0;
+				return (GetKeyState((int)code)&0x0F)!=0;
 			}
 
 /***********************************************************************
@@ -33620,20 +33622,20 @@ WindowsInputService
 				return isTimerEnabled;
 			}
 				
-			bool WindowsInputService::IsKeyPressing(int code)
+			bool WindowsInputService::IsKeyPressing(vint code)
 			{
 				return WinIsKeyPressing(code);
 			}
 
-			bool WindowsInputService::IsKeyToggled(int code)
+			bool WindowsInputService::IsKeyToggled(vint code)
 			{
 				return WinIsKeyToggled(code);
 			}
 
-			WString WindowsInputService::GetKeyName(int code)
+			WString WindowsInputService::GetKeyName(vint code)
 			{
 				wchar_t name[256]={0};
-				int scanCode=MapVirtualKey(code, MAPVK_VK_TO_VSC)<<16;
+				vint scanCode=MapVirtualKey((int)code, MAPVK_VK_TO_VSC)<<16;
 				switch(code)
 				{
 				case VK_INSERT:
@@ -33649,7 +33651,7 @@ WindowsInputService
 					scanCode|=1<<24;
 					break;
 				}
-				GetKeyNameText(scanCode, name, sizeof(name)/sizeof(*name));
+				GetKeyNameText((int)scanCode, name, sizeof(name)/sizeof(*name));
 				return name[0]?name:L"?";
 			}
 		}
@@ -33749,7 +33751,7 @@ WindowsResourceService
 			{
 				{
 					systemCursors.Resize(INativeCursor::SystemCursorCount);
-					for(int i=0;i<systemCursors.Count();i++)
+					for(vint i=0;i<systemCursors.Count();i++)
 					{
 						systemCursors[i]=new WindowsCursor((INativeCursor::SystemCursorType)i);
 					}
@@ -33774,7 +33776,7 @@ WindowsResourceService
 
 			INativeCursor* WindowsResourceService::GetSystemCursor(INativeCursor::SystemCursorType type)
 			{
-				int index=(int)type;
+				vint index=(vint)type;
 				if(0<=index && index<systemCursors.Count())
 				{
 					return systemCursors[index].Obj();
@@ -33882,7 +33884,7 @@ WindowsScreenService
 
 			void WindowsScreenService::RefreshScreenInformation()
 			{
-				for(int i=0;i<screens.Count();i++)
+				for(vint i=0;i<screens.Count();i++)
 				{
 					screens[i]->monitor=NULL;
 				}
@@ -33892,13 +33894,13 @@ WindowsScreenService
 				EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)(&data));
 			}
 				
-			int WindowsScreenService::GetScreenCount()
+			vint WindowsScreenService::GetScreenCount()
 			{
 				RefreshScreenInformation();
 				return GetSystemMetrics(SM_CMONITORS);
 			}
 
-			INativeScreen* WindowsScreenService::GetScreen(int index)
+			INativeScreen* WindowsScreenService::GetScreen(vint index)
 			{
 				RefreshScreenInformation();
 				return screens[index].Obj();
@@ -33913,7 +33915,7 @@ WindowsScreenService
 					HMONITOR monitor=MonitorFromWindow(hwnd, MONITOR_DEFAULTTONULL);
 					if(monitor!=NULL)
 					{
-						for(int i=0;i<screens.Count();i++)
+						for(vint i=0;i<screens.Count();i++)
 						{
 							if(screens[i]->monitor==monitor)
 							{
@@ -34006,12 +34008,12 @@ WindowsForm
 				
 				DWORD InternalGetExStyle()
 				{
-					return GetWindowLongPtr(handle,GWL_EXSTYLE);
+					return (DWORD)GetWindowLongPtr(handle,GWL_EXSTYLE);
 				}
 
 				void InternalSetExStyle(DWORD exStyle)
 				{
-					LONG result=SetWindowLongPtr(handle,GWL_EXSTYLE,exStyle);
+					LONG_PTR result=SetWindowLongPtr(handle,GWL_EXSTYLE,exStyle);
 					SetWindowPos(handle,0,0,0,0,0,SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
 				}
 
@@ -34023,7 +34025,7 @@ WindowsForm
 
 				void SetExStyle(DWORD exStyle, bool available)
 				{
-					LONG_PTR Long=InternalGetExStyle();
+					DWORD Long=InternalGetExStyle();
 					if(available)
 					{
 						Long|=exStyle;
@@ -34032,7 +34034,7 @@ WindowsForm
 					{
 						Long&=~exStyle;
 					}
-					InternalSetExStyle(Long);
+					InternalSetExStyle((DWORD)Long);
 				}
 
 				bool GetStyle(DWORD style)
@@ -34093,7 +34095,7 @@ WindowsForm
 				NativeWindowCharInfo ConvertChar(WPARAM wParam)
 				{
 					NativeWindowCharInfo info;
-					info.code=wParam;
+					info.code=(wchar_t)wParam;
 					info.ctrl=WinIsKeyPressing(VK_CONTROL);
 					info.shift=WinIsKeyPressing(VK_SHIFT);
 					info.alt=WinIsKeyPressing(VK_MENU);
@@ -34116,8 +34118,8 @@ WindowsForm
 					HIMC imc = ImmGetContext(handle);
 					COMPOSITIONFORM cf;
 					cf.dwStyle = CFS_POINT;
-					cf.ptCurrentPos.x = caretPoint.x;
-					cf.ptCurrentPos.y = caretPoint.y;
+					cf.ptCurrentPos.x = (int)caretPoint.x;
+					cf.ptCurrentPos.y = (int)caretPoint.y;
 					ImmSetCompositionWindow(imc, &cf);
 					ImmReleaseContext(handle, imc);
 				}
@@ -34144,7 +34146,7 @@ WindowsForm
 						{
 							LPRECT rawBounds=(LPRECT)lParam;
 							Rect bounds(rawBounds->left, rawBounds->top, rawBounds->right, rawBounds->bottom);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->Moving(bounds, false);
 							}
@@ -34153,17 +34155,17 @@ WindowsForm
 								||	rawBounds->right!=bounds.Right()
 								||	rawBounds->bottom!=bounds.Bottom())
 							{
-								rawBounds->left=bounds.Left();
-								rawBounds->top=bounds.Top();
-								rawBounds->right=bounds.Right();
-								rawBounds->bottom=bounds.Bottom();
+								rawBounds->left=(int)bounds.Left();
+								rawBounds->top=(int)bounds.Top();
+								rawBounds->right=(int)bounds.Right();
+								rawBounds->bottom=(int)bounds.Bottom();
 								result=TRUE;
 							}
 						}
 						break;
 					case WM_MOVE:case WM_SIZE:
 						{
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->Moved();
 							}
@@ -34171,7 +34173,7 @@ WindowsForm
 						break;
 					case WM_ENABLE:
 						{
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								if(wParam==TRUE)
 								{
@@ -34186,7 +34188,7 @@ WindowsForm
 						break;
 					case WM_SETFOCUS:
 						{
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->GotFocus();
 							}
@@ -34194,7 +34196,7 @@ WindowsForm
 						break;
 					case WM_KILLFOCUS:
 						{
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->LostFocus();
 							}
@@ -34202,7 +34204,7 @@ WindowsForm
 						break;
 					case WM_ACTIVATE:
 						{
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								if(wParam==WA_ACTIVE || wParam==WA_CLICKACTIVE)
 								{
@@ -34219,14 +34221,14 @@ WindowsForm
 						{
 							if(wParam==TRUE)
 							{
-								for(int i=0;i<listeners.Count();i++)
+								for(vint i=0;i<listeners.Count();i++)
 								{
 									listeners[i]->Opened();
 								}
 							}
 							else
 							{
-								for(int i=0;i<listeners.Count();i++)
+								for(vint i=0;i<listeners.Count();i++)
 								{
 									listeners[i]->Closed();
 								}
@@ -34236,7 +34238,7 @@ WindowsForm
 					case WM_CLOSE:
 						{
 							bool cancel=false;
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->Closing(cancel);
 							}
@@ -34246,7 +34248,7 @@ WindowsForm
 					case WM_LBUTTONDOWN:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->LeftButtonDown(info);
 							}
@@ -34255,7 +34257,7 @@ WindowsForm
 					case WM_LBUTTONUP:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->LeftButtonUp(info);
 							}
@@ -34264,7 +34266,7 @@ WindowsForm
 					case WM_LBUTTONDBLCLK:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->LeftButtonDoubleClick(info);
 							}
@@ -34273,7 +34275,7 @@ WindowsForm
 					case WM_RBUTTONDOWN:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->RightButtonDown(info);
 							}
@@ -34282,7 +34284,7 @@ WindowsForm
 					case WM_RBUTTONUP:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->RightButtonUp(info);
 							}
@@ -34291,7 +34293,7 @@ WindowsForm
 					case WM_RBUTTONDBLCLK:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->RightButtonDoubleClick(info);
 							}
@@ -34300,7 +34302,7 @@ WindowsForm
 					case WM_MBUTTONDOWN:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->MiddleButtonDown(info);
 							}
@@ -34309,7 +34311,7 @@ WindowsForm
 					case WM_MBUTTONUP:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->MiddleButtonUp(info);
 							}
@@ -34318,7 +34320,7 @@ WindowsForm
 					case WM_MBUTTONDBLCLK:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, false);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->MiddleButtonDoubleClick(info);
 							}
@@ -34327,7 +34329,7 @@ WindowsForm
 					case WM_MOUSEHWHEEL:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, true);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->HorizontalWheel(info);
 							}
@@ -34336,7 +34338,7 @@ WindowsForm
 					case WM_MOUSEWHEEL:
 						{
 							NativeWindowMouseInfo info=ConvertMouse(wParam, lParam, true);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->VerticalWheel(info);
 							}
@@ -34350,13 +34352,13 @@ WindowsForm
 								if(!mouseHoving)
 								{
 									mouseHoving=true;
-									for(int i=0;i<listeners.Count();i++)
+									for(vint i=0;i<listeners.Count();i++)
 									{
 										listeners[i]->MouseEntered();
 									}
 									TrackMouse(true);
 								}
-								for(int i=0;i<listeners.Count();i++)
+								for(vint i=0;i<listeners.Count();i++)
 								{
 									listeners[i]->MouseMoving(info);
 								}
@@ -34368,7 +34370,7 @@ WindowsForm
 							mouseLastX=-1;
 							mouseLastY=-1;
 							mouseHoving=false;
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->MouseLeaved();
 							}
@@ -34382,7 +34384,7 @@ WindowsForm
 					case WM_KEYUP:
 						{
 							NativeWindowKeyInfo info=ConvertKey(wParam, lParam);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->KeyUp(info);
 							}
@@ -34391,7 +34393,7 @@ WindowsForm
 					case WM_KEYDOWN:
 						{
 							NativeWindowKeyInfo info=ConvertKey(wParam, lParam);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->KeyDown(info);
 							}
@@ -34400,7 +34402,7 @@ WindowsForm
 					case WM_SYSKEYUP:
 						{
 							NativeWindowKeyInfo info=ConvertKey(wParam, lParam);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->SysKeyUp(info);
 							}
@@ -34409,7 +34411,7 @@ WindowsForm
 					case WM_SYSKEYDOWN:
 						{
 							NativeWindowKeyInfo info=ConvertKey(wParam, lParam);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->SysKeyDown(info);
 							}
@@ -34418,7 +34420,7 @@ WindowsForm
 					case WM_CHAR:
 						{
 							NativeWindowCharInfo info=ConvertChar(wParam);
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->Char(info);
 							}
@@ -34426,7 +34428,7 @@ WindowsForm
 						break;
 					case WM_PAINT:
 						{
-							for(int i=0;i<listeners.Count();i++)
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->Paint();
 							}
@@ -34441,9 +34443,9 @@ WindowsForm
 						{
 							POINTS location=MAKEPOINTS(lParam);
 							Point windowLocation=GetBounds().LeftTop();
-							location.x-=windowLocation.x;
-							location.y-=windowLocation.y;
-							for(int i=0;i<listeners.Count();i++)
+							location.x-=(SHORT)windowLocation.x;
+							location.y-=(SHORT)windowLocation.y;
+							for(vint i=0;i<listeners.Count();i++)
 							{
 								switch(listeners[i]->HitTest(Point(location.x, location.y)))
 								{
@@ -34559,9 +34561,9 @@ WindowsForm
 				WindowsForm*						parentWindow;
 				bool								alwaysPassFocusToParent;
 				List<INativeWindowListener*>		listeners;
-				int									mouseLastX;
-				int									mouseLastY;
-				int									mouseHoving;
+				vint									mouseLastX;
+				vint									mouseLastY;
+				vint									mouseHoving;
 				Interface*							graphicsHandler;
 				bool								customFrameMode;
 			public:
@@ -34584,7 +34586,7 @@ WindowsForm
 				{
 					List<INativeWindowListener*> copiedListeners;
 					CopyFrom(copiedListeners, listeners);
-					for(int i=0;i<copiedListeners.Count();i++)
+					for(vint i=0;i<copiedListeners.Count();i++)
 					{
 						INativeWindowListener* listener=copiedListeners[i];
 						if(listeners.Contains(listener))
@@ -34597,7 +34599,7 @@ WindowsForm
 
 				void InvokeDestroying()
 				{
-					for(int i=0;i<listeners.Count();i++)
+					for(vint i=0;i<listeners.Count();i++)
 					{
 						listeners[i]->Destroying();
 					}
@@ -34633,11 +34635,11 @@ WindowsForm
 				void SetBounds(const Rect& bounds)
 				{
 					Rect newBounds=bounds;
-					for(int i=0;i<listeners.Count();i++)
+					for(vint i=0;i<listeners.Count();i++)
 					{
 						listeners[i]->Moving(newBounds, true);
 					}
-					MoveWindow(handle, newBounds.Left(), newBounds.Top(), newBounds.Width(), newBounds.Height(), FALSE);
+					MoveWindow(handle, (int)newBounds.Left(), (int)newBounds.Top(), (int)newBounds.Width(), (int)newBounds.Height(), FALSE);
 				}
 
 				Size GetClientSize()
@@ -34647,10 +34649,10 @@ WindowsForm
 
 				void SetClientSize(Size size)
 				{
-					RECT required={0,0,size.x,size.y};
+					RECT required={0,0,(int)size.x,(int)size.y};
 					RECT bounds;
 					GetWindowRect(handle, &bounds);
-					AdjustWindowRect(&required, GetWindowLongPtr(handle, GWL_STYLE), FALSE);
+					AdjustWindowRect(&required, (DWORD)GetWindowLongPtr(handle, GWL_STYLE), FALSE);
 					SetBounds(Rect(Point(bounds.left, bounds.top), Size(required.right-required.left, required.bottom-required.top)));
 				}
 
@@ -34665,7 +34667,7 @@ WindowsForm
 						RECT required={0,0,0,0};
 						RECT bounds;
 						GetWindowRect(handle, &bounds);
-						AdjustWindowRect(&required, GetWindowLongPtr(handle, GWL_STYLE), FALSE);
+						AdjustWindowRect(&required, (DWORD)GetWindowLongPtr(handle, GWL_STYLE), FALSE);
 						return Rect(
 							Point(
 								(bounds.left-required.left),
@@ -34732,11 +34734,11 @@ WindowsForm
 						parentWindow=window;
 						if(parentWindow)
 						{
-							SetWindowLongPtr(handle, GWL_HWNDPARENT, (LONG_PTR)window->handle);
+							SetWindowLongPtr(handle, GWLP_HWNDPARENT, (LONG_PTR)window->handle);
 						}
 						else
 						{
-							SetWindowLongPtr(handle, GWL_HWNDPARENT, NULL);
+							SetWindowLongPtr(handle, GWLP_HWNDPARENT, NULL);
 						}
 					}
 				}
@@ -35058,7 +35060,7 @@ WindowsController
 				bool HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& result)
 				{
 					bool skipDefaultProcedure=false;
-					int index=windows.Keys().IndexOf(hwnd);
+					vint index=windows.Keys().IndexOf(hwnd);
 					if(index!=-1)
 					{
 						WindowsForm* window=windows.Values().Get(index);
@@ -35079,7 +35081,7 @@ WindowsController
 							DestroyNativeWindow(window);
 							if(window==mainWindow)
 							{
-								for(int i=0;i<windows.Count();i++)
+								for(vint i=0;i<windows.Count();i++)
 								{
 									if(windows.Values().Get(i)->IsVisible())
 									{
@@ -35142,10 +35144,10 @@ WindowsController
 				INativeWindow* GetWindow(Point location)
 				{
 					POINT p;
-					p.x=location.x;
-					p.y=location.y;
+					p.x=(int)location.x;
+					p.y=(int)location.y;
 					HWND handle=WindowFromPoint(p);
-					int index=windows.Keys().IndexOf(handle);
+					vint index=windows.Keys().IndexOf(handle);
 					if(index==-1)
 					{
 						return 0;

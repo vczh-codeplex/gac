@@ -19,13 +19,13 @@ GuiStackComposition
 				}
 
 				stackItemTotalSize=Size(0, 0);
-				int x=extraMargin.left?extraMargin.left:0;
-				int y=extraMargin.top?extraMargin.top:0;
+				vint x=extraMargin.left?extraMargin.left:0;
+				vint y=extraMargin.top?extraMargin.top:0;
 				switch(direction)
 				{
 				case GuiStackComposition::Horizontal:
 					{
-						for(int i=0;i<stackItems.Count();i++)
+						for(vint i=0;i<stackItems.Count();i++)
 						{
 							Size itemSize=stackItems[i]->GetMinSize();
 							if(i>0) stackItemTotalSize.x+=padding;
@@ -37,7 +37,7 @@ GuiStackComposition
 					break;
 				case GuiStackComposition::Vertical:
 					{
-						for(int i=0;i<stackItems.Count();i++)
+						for(vint i=0;i<stackItems.Count();i++)
 						{
 							Size itemSize=stackItems[i]->GetMinSize();
 							if(i>0) stackItemTotalSize.y+=padding;
@@ -58,11 +58,11 @@ GuiStackComposition
 				{
 				case Horizontal:
 					{
-						int y=0;
+						vint y=0;
 						if(extraMargin.top>0) y+=extraMargin.top;
 						if(extraMargin.bottom>0) y+=extraMargin.bottom;
 
-						for(int i=0;i<stackItemBounds.Count();i++)
+						for(vint i=0;i<stackItemBounds.Count();i++)
 						{
 							stackItemBounds[i].y2=stackItemBounds[i].y1+previousBounds.Height()-y;
 						}
@@ -70,11 +70,11 @@ GuiStackComposition
 					break;
 				case Vertical:
 					{
-						int x=0;
+						vint x=0;
 						if(extraMargin.left>0) x+=extraMargin.left;
 						if(extraMargin.right>0) x+=extraMargin.right;
 
-						for(int i=0;i<stackItemBounds.Count();i++)
+						for(vint i=0;i<stackItemBounds.Count();i++)
 						{
 							stackItemBounds[i].x2=stackItemBounds[i].x1+previousBounds.Width()-x;
 						}
@@ -118,7 +118,7 @@ GuiStackComposition
 				return stackItems;
 			}
 
-			bool GuiStackComposition::InsertStackItem(int index, GuiStackItemComposition* item)
+			bool GuiStackComposition::InsertStackItem(vint index, GuiStackItemComposition* item)
 			{
 				index=stackItems.Insert(index, item);
 				if(!AddChild(item))
@@ -142,12 +142,12 @@ GuiStackComposition
 				direction=value;
 			}
 
-			int GuiStackComposition::GetPadding()
+			vint GuiStackComposition::GetPadding()
 			{
 				return padding;
 			}
 
-			void GuiStackComposition::SetPadding(int value)
+			void GuiStackComposition::SetPadding(vint value)
 			{
 				padding=value;
 			}
@@ -161,8 +161,8 @@ GuiStackComposition
 					if(minSize.x<stackItemTotalSize.x) minSize.x=stackItemTotalSize.x;
 					if(minSize.y<stackItemTotalSize.y) minSize.y=stackItemTotalSize.y;
 				}
-				int x=0;
-				int y=0;
+				vint x=0;
+				vint y=0;
 				if(extraMargin.left>0) x+=extraMargin.left;
 				if(extraMargin.right>0) x+=extraMargin.right;
 				if(extraMargin.top>0) y+=extraMargin.top;
@@ -191,7 +191,7 @@ GuiStackComposition
 			bool GuiStackComposition::IsStackItemClipped()
 			{
 				Rect clientArea=GetClientArea();
-				for(int i=0;i<stackItems.Count();i++)
+				for(vint i=0;i<stackItems.Count();i++)
 				{
 					Rect stackItemBounds=stackItems[i]->GetBounds();
 					switch(direction)
@@ -252,7 +252,7 @@ GuiStackItemComposition
 				Rect result=bounds;
 				if(stackParent)
 				{
-					int index=stackParent->stackItems.IndexOf(this);
+					vint index=stackParent->stackItems.IndexOf(this);
 					if(index!=-1)
 					{
 						if(stackParent->stackItemBounds.Count()!=stackParent->stackItems.Count())

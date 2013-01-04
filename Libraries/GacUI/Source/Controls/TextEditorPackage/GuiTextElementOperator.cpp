@@ -42,7 +42,7 @@ GuiTextElementOperator::DefaultCallback
 				end=pos;
 			}
 
-			int GuiTextElementOperator::DefaultCallback::GetPageRows()
+			vint GuiTextElementOperator::DefaultCallback::GetPageRows()
 			{
 				return textComposition->GetBounds().Height()/textElement->GetLines().GetRowHeight();
 			}
@@ -56,7 +56,7 @@ GuiTextElementOperator::DefaultCallback
 GuiTextElementOperator::ShortcutCommand
 ***********************************************************************/
 
-			GuiTextElementOperator::ShortcutCommand::ShortcutCommand(bool _ctrl, bool _shift, int _key, const Func<void()> _action)
+			GuiTextElementOperator::ShortcutCommand::ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<void()> _action)
 				:ctrl(_ctrl)
 				,shift(_shift)
 				,key(_key)
@@ -68,7 +68,7 @@ GuiTextElementOperator::ShortcutCommand
 			{
 			}
 
-			bool GuiTextElementOperator::ShortcutCommand::IsTheRightKey(bool _ctrl, bool _shift, int _key)
+			bool GuiTextElementOperator::ShortcutCommand::IsTheRightKey(bool _ctrl, bool _shift, vint _key)
 			{
 				return _ctrl==ctrl && _shift==shift && _key==key;
 			}
@@ -89,9 +89,9 @@ GuiTextElementOperator
 				{
 					Rect caret=textElement->GetLines().GetRectFromTextPos(textElement->GetCaretEnd());
 					Point view=textElement->GetViewPosition();
-					int textMargin=callback->GetTextMargin();
-					int x=caret.x1-view.x;
-					int y=caret.y2-view.y;
+					vint textMargin=callback->GetTextMargin();
+					vint x=caret.x1-view.x;
+					vint y=caret.y2-view.y;
 					host->SetCaretPoint(Point(x, y), textComposition);
 				}
 			}
@@ -174,7 +174,7 @@ GuiTextElementOperator
 						end=textElement->GetLines().Modify(start, end, inputText);
 					}
 					callback->AfterModify(originalStart, originalEnd, originalText, start, end, inputText);
-					for(int i=0;i<textEditCallbacks.Count();i++)
+					for(vint i=0;i<textEditCallbacks.Count();i++)
 					{
 						textEditCallbacks[i]->TextEditNotify(originalStart, originalEnd, originalText, start, end, inputText);
 					}
@@ -187,9 +187,9 @@ GuiTextElementOperator
 				}
 			}
 
-			bool GuiTextElementOperator::ProcessKey(int code, bool shift, bool ctrl)
+			bool GuiTextElementOperator::ProcessKey(vint code, bool shift, bool ctrl)
 			{
-				for(int i=0;i<shortcutCommands.Count();i++)
+				for(vint i=0;i<shortcutCommands.Count();i++)
 				{
 					if(shortcutCommands[i]->IsTheRightKey(ctrl, shift, code))
 					{
@@ -432,7 +432,7 @@ GuiTextElementOperator
 
 			GuiTextElementOperator::~GuiTextElementOperator()
 			{
-				for(int i=0;i<textEditCallbacks.Count();i++)
+				for(vint i=0;i<textEditCallbacks.Count();i++)
 				{
 					textEditCallbacks[i]->Detach();
 				}
@@ -456,7 +456,7 @@ GuiTextElementOperator
 				focusableComposition->GetEventReceiver()->keyDown.AttachMethod(this, &GuiTextElementOperator::OnKeyDown);
 				focusableComposition->GetEventReceiver()->charInput.AttachMethod(this, &GuiTextElementOperator::OnCharInput);
 
-				for(int i=0;i<textEditCallbacks.Count();i++)
+				for(vint i=0;i<textEditCallbacks.Count();i++)
 				{
 					textEditCallbacks[i]->Attach(textElement, elementModifyLock);
 				}
@@ -541,7 +541,7 @@ GuiTextElementOperator
 				if(pos.column<textElement->GetLines().GetLine(pos.row).dataLength)
 				{
 					Rect rect=textElement->GetLines().GetRectFromTextPos(pos);
-					if(abs(rect.x1-mousePosition.x)>=abs(rect.x2-1-mousePosition.x))
+					if(abs((int)(rect.x1-mousePosition.x))>=abs((int)(rect.x2-1-mousePosition.x)))
 					{
 						pos.column++;
 					}
@@ -592,7 +592,7 @@ GuiTextElementOperator
 
 			void GuiTextElementOperator::SelectAll()
 			{
-				int row=textElement->GetLines().GetCount()-1;
+				vint row=textElement->GetLines().GetCount()-1;
 				Move(TextPos(0, 0), false);
 				Move(TextPos(row, textElement->GetLines().GetLine(row).dataLength), true);
 			}

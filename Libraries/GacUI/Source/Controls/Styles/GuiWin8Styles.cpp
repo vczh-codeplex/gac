@@ -182,12 +182,12 @@ Win8Theme
 				return new Win8ProgressBarStyle;
 			}
 
-			int Win8Theme::GetScrollDefaultSize()
+			vint Win8Theme::GetScrollDefaultSize()
 			{
 				return Win8ScrollStyle::DefaultSize;
 			}
 
-			int Win8Theme::GetTrackerDefaultSize()
+			vint Win8Theme::GetTrackerDefaultSize()
 			{
 				return Win8TrackStyle::HandleLong;
 			}

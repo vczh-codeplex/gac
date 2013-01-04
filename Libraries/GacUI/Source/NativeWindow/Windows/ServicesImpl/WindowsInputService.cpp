@@ -6,14 +6,14 @@ namespace vl
 	{
 		namespace windows
 		{
-			bool WinIsKeyPressing(int code)
+			bool WinIsKeyPressing(vint code)
 			{
-				return (GetKeyState(code)&0xF0)!=0;
+				return (GetKeyState((int)code)&0xF0)!=0;
 			}
 
-			bool WinIsKeyToggled(int code)
+			bool WinIsKeyToggled(vint code)
 			{
-				return (GetKeyState(code)&0x0F)!=0;
+				return (GetKeyState((int)code)&0x0F)!=0;
 			}
 
 /***********************************************************************
@@ -78,20 +78,20 @@ WindowsInputService
 				return isTimerEnabled;
 			}
 				
-			bool WindowsInputService::IsKeyPressing(int code)
+			bool WindowsInputService::IsKeyPressing(vint code)
 			{
 				return WinIsKeyPressing(code);
 			}
 
-			bool WindowsInputService::IsKeyToggled(int code)
+			bool WindowsInputService::IsKeyToggled(vint code)
 			{
 				return WinIsKeyToggled(code);
 			}
 
-			WString WindowsInputService::GetKeyName(int code)
+			WString WindowsInputService::GetKeyName(vint code)
 			{
 				wchar_t name[256]={0};
-				int scanCode=MapVirtualKey(code, MAPVK_VK_TO_VSC)<<16;
+				vint scanCode=MapVirtualKey((int)code, MAPVK_VK_TO_VSC)<<16;
 				switch(code)
 				{
 				case VK_INSERT:
@@ -107,7 +107,7 @@ WindowsInputService
 					scanCode|=1<<24;
 					break;
 				}
-				GetKeyNameText(scanCode, name, sizeof(name)/sizeof(*name));
+				GetKeyNameText((int)scanCode, name, sizeof(name)/sizeof(*name));
 				return name[0]?name:L"?";
 			}
 		}

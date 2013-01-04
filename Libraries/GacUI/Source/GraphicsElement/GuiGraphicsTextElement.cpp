@@ -33,10 +33,10 @@ text::TextLine
 				{
 				}
 
-				int TextLine::CalculateBufferLength(int dataLength)
+				vint TextLine::CalculateBufferLength(vint dataLength)
 				{
 					if(dataLength<1)dataLength=1;
-					int bufferLength=dataLength-dataLength%BlockSize;
+					vint bufferLength=dataLength-dataLength%BlockSize;
 					if(bufferLength<dataLength)
 					{
 						bufferLength+=BlockSize;
@@ -77,12 +77,12 @@ text::TextLine
 					return text && att;
 				}
 
-				bool TextLine::Modify(int start, int count, const wchar_t* input, int inputCount)
+				bool TextLine::Modify(vint start, vint count, const wchar_t* input, vint inputCount)
 				{
 					if(!text || !att || start<0 || count<0 || start+count>dataLength || inputCount<0) return false;
 
-					int newDataLength=dataLength-count+inputCount;
-					int newBufferLength=CalculateBufferLength(newDataLength);
+					vint newDataLength=dataLength-count+inputCount;
+					vint newBufferLength=CalculateBufferLength(newDataLength);
 					if(newBufferLength!=bufferLength)
 					{
 						wchar_t* newText=new wchar_t[newBufferLength];
@@ -117,10 +117,10 @@ text::TextLine
 					return true;
 				}
 
-				TextLine TextLine::Split(int index)
+				TextLine TextLine::Split(vint index)
 				{
 					if(index<0 || index>dataLength) return TextLine();
-					int count=dataLength-index;
+					vint count=dataLength-index;
 					TextLine line;
 					line.Initialize();
 					line.Modify(0, 0, text+index, count);
@@ -131,7 +131,7 @@ text::TextLine
 
 				void TextLine::AppendAndFinalize(TextLine& line)
 				{
-					int oldDataLength=dataLength;
+					vint oldDataLength=dataLength;
 					Modify(oldDataLength, 0, line.text, line.dataLength);
 					memcpy(att+oldDataLength, line.att, line.dataLength*sizeof(CharAtt));
 					line.Finalize();
@@ -141,7 +141,7 @@ text::TextLine
 text::CharMeasurer
 ***********************************************************************/
 
-				CharMeasurer::CharMeasurer(int _rowHeight)
+				CharMeasurer::CharMeasurer(vint _rowHeight)
 					:oldRenderTarget(0)
 					,rowHeight(_rowHeight)
 				{
@@ -162,9 +162,9 @@ text::CharMeasurer
 					}
 				}
 
-				int CharMeasurer::MeasureWidth(wchar_t character)
+				vint CharMeasurer::MeasureWidth(wchar_t character)
 				{
-					int w=widths[character];
+					vint w=widths[character];
 					if(w==0)
 					{
 						widths[character]=w=MeasureWidthInternal(character, oldRenderTarget);
@@ -172,7 +172,7 @@ text::CharMeasurer
 					return w;
 				}
 
-				int CharMeasurer::GetRowHeight()
+				vint CharMeasurer::GetRowHeight()
 				{
 					return rowHeight;
 				}
@@ -200,12 +200,12 @@ text::TextLines
 
 				//--------------------------------------------------------
 
-				int TextLines::GetCount()
+				vint TextLines::GetCount()
 				{
 					return lines.Count();
 				}
 
-				TextLine& TextLines::GetLine(int row)
+				TextLine& TextLines::GetLine(vint row)
 				{
 					return lines[row];
 				}
@@ -243,8 +243,8 @@ text::TextLines
 						return WString(lines[start.row].text+start.column, end.column-start.column);
 					}
 
-					int count=0;
-					for(int i=start.row+1;i<end.row;i++)
+					vint count=0;
+					for(vint i=start.row+1;i<end.row;i++)
 					{
 						count+=lines[i].dataLength;
 					}
@@ -255,10 +255,10 @@ text::TextLines
 					buffer.Resize(count+(end.row-start.row)*2);
 					wchar_t* writing=&buffer[0];
 
-					for(int i=start.row;i<=end.row;i++)
+					for(vint i=start.row;i<=end.row;i++)
 					{
 						wchar_t* text=lines[i].text;
-						int chars=0;
+						vint chars=0;
 						if(i==start.row)
 						{
 							text+=start.column;
@@ -296,10 +296,10 @@ text::TextLines
 
 				//--------------------------------------------------------
 
-				bool TextLines::RemoveLines(int start, int count)
+				bool TextLines::RemoveLines(vint start, vint count)
 				{
 					if(start<0 || count<0 || start+count>lines.Count()) return false;
-					for(int i=start+count-1;i>=start;i--)
+					for(vint i=start+count-1;i>=start;i--)
 					{
 						lines[i].Finalize();
 					}
@@ -340,7 +340,7 @@ text::TextLines
 					}
 				}
 
-				TextPos TextLines::Modify(TextPos start, TextPos end, const wchar_t** inputs, int* inputCounts, int rows)
+				TextPos TextLines::Modify(TextPos start, TextPos end, const wchar_t** inputs, vint* inputCounts, vint rows)
 				{
 					if(!IsAvailable(start) || !IsAvailable(end) || start>end) return TextPos(-1, -1);
 
@@ -356,7 +356,7 @@ text::TextLines
 							{
 								RemoveLines(start.row+1, end.row-start.row-1);
 							}
-							int modifyCount=lines[start.row].dataLength-start.column+end.column;
+							vint modifyCount=lines[start.row].dataLength-start.column+end.column;
 							lines[start.row].AppendAndFinalize(lines[start.row+1]);
 							lines.RemoveAt(start.row+1);
 							lines[start.row].Modify(start.column, modifyCount, inputs[0], inputCounts[0]);
@@ -371,11 +371,11 @@ text::TextLines
 						end=TextPos(start.row+1, 0);
 					}
 
-					int oldMiddleLines=end.row-start.row-1;
-					int newMiddleLines=rows-2;
+					vint oldMiddleLines=end.row-start.row-1;
+					vint newMiddleLines=rows-2;
 					if(oldMiddleLines<newMiddleLines)
 					{
-						for(int i=oldMiddleLines;i<newMiddleLines;i++)
+						for(vint i=oldMiddleLines;i<newMiddleLines;i++)
 						{
 							TextLine line;
 							line.Initialize();
@@ -390,17 +390,17 @@ text::TextLines
 
 					lines[start.row].Modify(start.column, lines[start.row].dataLength-start.column, inputs[0], inputCounts[0]);
 					lines[end.row].Modify(0, end.column, inputs[rows-1], inputCounts[rows-1]);
-					for(int i=1;i<rows-1;i++)
+					for(vint i=1;i<rows-1;i++)
 					{
 						lines[start.row+i].Modify(0, lines[start.row+i].dataLength, inputs[i], inputCounts[i]);
 					}
 					return TextPos(end.row, inputCounts[rows-1]);
 				}
 
-				TextPos TextLines::Modify(TextPos start, TextPos end, const wchar_t* input, int inputCount)
+				TextPos TextLines::Modify(TextPos start, TextPos end, const wchar_t* input, vint inputCount)
 				{
 					List<const wchar_t*> inputs;
-					List<int> inputCounts;
+					List<vint> inputCounts;
 					const wchar_t* previous=input;
 					const wchar_t* current=input;
 
@@ -450,7 +450,7 @@ text::TextLines
 
 				void TextLines::ClearMeasurement()
 				{
-					for(int i=0;i<lines.Count();i++)
+					for(vint i=0;i<lines.Count();i++)
 					{
 						lines[i].availableOffsetCount=0;
 					}
@@ -464,12 +464,12 @@ text::TextLines
 					}
 				}
 
-				int TextLines::GetTabSpaceCount()
+				vint TextLines::GetTabSpaceCount()
 				{
 					return tabSpaceCount;
 				}
 
-				void TextLines::SetTabSpaceCount(int value)
+				void TextLines::SetTabSpaceCount(vint value)
 				{
 					if(value<1) value=1;
 					if(tabSpaceCount!=value)
@@ -479,19 +479,19 @@ text::TextLines
 					}
 				}
 
-				void TextLines::MeasureRow(int row)
+				void TextLines::MeasureRow(vint row)
 				{
 					TextLine& line=lines[row];
-					int offset=0;
+					vint offset=0;
 					if(line.availableOffsetCount)
 					{
 						offset=line.att[line.availableOffsetCount-1].rightOffset;
 					}
-					for(int i=line.availableOffsetCount;i<line.dataLength;i++)
+					for(vint i=line.availableOffsetCount;i<line.dataLength;i++)
 					{
 						CharAtt& att=line.att[i];
 						wchar_t c=line.text[i];
-						int width=0;
+						vint width=0;
 						if(passwordChar)
 						{
 							width=charMeasurer->MeasureWidth(passwordChar);
@@ -505,12 +505,12 @@ text::TextLines
 							width=charMeasurer->MeasureWidth(line.text[i]);
 						}
 						offset+=width;
-						att.rightOffset=offset;
+						att.rightOffset=(int)offset;
 					}
 					line.availableOffsetCount=line.dataLength;
 				}
 
-				int TextLines::GetRowWidth(int row)
+				vint TextLines::GetRowWidth(vint row)
 				{
 					if(row<0 || row>=lines.Count()) return -1;
 					TextLine& line=lines[row];
@@ -525,17 +525,17 @@ text::TextLines
 					}
 				}
 
-				int TextLines::GetRowHeight()
+				vint TextLines::GetRowHeight()
 				{
 					return charMeasurer->GetRowHeight();
 				}
 
-				int TextLines::GetMaxWidth()
+				vint TextLines::GetMaxWidth()
 				{
-					int width=0;
-					for(int i=0;i<lines.Count();i++)
+					vint width=0;
+					for(vint i=0;i<lines.Count();i++)
 					{
-						int rowWidth=GetRowWidth(i);
+						vint rowWidth=GetRowWidth(i);
 						if(width<rowWidth)
 						{
 							width=rowWidth;
@@ -544,14 +544,14 @@ text::TextLines
 					return width;
 				}
 
-				int TextLines::GetMaxHeight()
+				vint TextLines::GetMaxHeight()
 				{
 					return lines.Count()*charMeasurer->GetRowHeight();
 				}
 
 				TextPos TextLines::GetTextPosFromPoint(Point point)
 				{
-					int h=charMeasurer->GetRowHeight();
+					vint h=charMeasurer->GetRowHeight();
 					if(point.y<0)
 					{
 						point.y=0;
@@ -561,7 +561,7 @@ text::TextLines
 						point.y=h*lines.Count()-1;
 					}
 
-					int row=point.y/h;
+					vint row=point.y/h;
 					if(point.x<0)
 					{
 						return TextPos(row, 0);
@@ -572,12 +572,12 @@ text::TextLines
 					}
 					TextLine& line=lines[row];
 
-					int i1=0, i2=line.dataLength;
-					int p1=0, p2=line.att[line.dataLength-1].rightOffset;
+					vint i1=0, i2=line.dataLength;
+					vint p1=0, p2=line.att[line.dataLength-1].rightOffset;
 					while(i2-i1>1)
 					{
-						int i=(i1+i2)/2;
-						int p=i==0?0:line.att[i-1].rightOffset;
+						vint i=(i1+i2)/2;
+						vint p=i==0?0:line.att[i-1].rightOffset;
 						if(point.x<p)
 						{
 							i2=i;
@@ -596,7 +596,7 @@ text::TextLines
 				{
 					if(IsAvailable(pos))
 					{
-						int y=pos.row*charMeasurer->GetRowHeight();
+						vint y=pos.row*charMeasurer->GetRowHeight();
 						if(pos.column==0)
 						{
 							return Point(0, y);
@@ -623,7 +623,7 @@ text::TextLines
 					}
 					else
 					{
-						int h=charMeasurer->GetRowHeight();
+						vint h=charMeasurer->GetRowHeight();
 						TextLine& line=lines[pos.row];
 						if(pos.column==line.dataLength)
 						{
@@ -871,11 +871,11 @@ Visitors
 				class SetPropertiesVisitor : public Object, public DocumentRun::IVisitor
 				{
 				public:
-					int							start;
-					int							length;
+					vint							start;
+					vint							length;
 					IGuiGraphicsParagraph*		paragraph;
 
-					SetPropertiesVisitor(int _start, IGuiGraphicsParagraph* _paragraph)
+					SetPropertiesVisitor(vint _start, IGuiGraphicsParagraph* _paragraph)
 						:start(_start)
 						,length(0)
 						,paragraph(_paragraph)
@@ -918,7 +918,7 @@ Visitors
 						paragraph->SetInlineObject(start, length, properties, element);
 					}
 
-					static int SetProperty(int start, IGuiGraphicsParagraph* paragraph, DocumentRun* run)
+					static vint SetProperty(vint start, IGuiGraphicsParagraph* paragraph, DocumentRun* run)
 					{
 						SetPropertiesVisitor visitor(start, paragraph);
 						run->Accept(&visitor);
@@ -942,7 +942,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 
 			void GuiDocumentElement::GuiDocumentElementRenderer::RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget)
 			{
-				for(int i=0;i<paragraphCaches.Count();i++)
+				for(vint i=0;i<paragraphCaches.Count();i++)
 				{
 					text::ParagraphCache* cache=paragraphCaches[i].Obj();
 					if(cache)
@@ -965,17 +965,17 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				renderTarget->PushClipper(bounds);
 				if(!renderTarget->IsClipperCoverWholeTarget())
 				{
-					int maxWidth=bounds.Width();
+					vint maxWidth=bounds.Width();
 					Rect clipper=renderTarget->GetClipper();
-					int cx=bounds.Left();
-					int cy=bounds.Top();
-					int y1=clipper.Top()-bounds.Top();
-					int y2=y1+clipper.Height();
-					int y=0;
+					vint cx=bounds.Left();
+					vint cy=bounds.Top();
+					vint y1=clipper.Top()-bounds.Top();
+					vint y2=y1+clipper.Height();
+					vint y=0;
 
-					for(int i=0;i<paragraphHeights.Count();i++)
+					for(vint i=0;i<paragraphHeights.Count();i++)
 					{
-						int paragraphHeight=paragraphHeights[i];
+						vint paragraphHeight=paragraphHeights[i];
 						if(y+paragraphHeight<=y1)
 						{
 							y+=paragraphHeight+paragraphDistance;
@@ -1017,12 +1017,12 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							if(!cache->graphicsParagraph)
 							{
 								cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
-								int start=0;
+								vint start=0;
 								FOREACH(Ptr<text::DocumentLine>, line, paragraph->lines)
 								{
 									FOREACH(Ptr<text::DocumentRun>, run, line->runs)
 									{
-										int length=SetPropertiesVisitor::SetProperty(start, cache->graphicsParagraph.Obj(), run.Obj());
+										vint length=SetPropertiesVisitor::SetProperty(start, cache->graphicsParagraph.Obj(), run.Obj());
 										start+=length;
 									}
 									start+=2;
@@ -1031,7 +1031,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							if(cache->graphicsParagraph->GetMaxWidth()!=maxWidth)
 							{
 								cache->graphicsParagraph->SetMaxWidth(maxWidth);
-								int height=cache->graphicsParagraph->GetHeight();
+								vint height=cache->graphicsParagraph->GetHeight();
 								if(paragraphHeight!=height)
 								{
 									cachedTotalHeight+=height-paragraphHeight;
@@ -1057,12 +1057,12 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				if(element->document && element->document->paragraphs.Count()>0)
 				{
 					paragraphDistance=GetCurrentController()->ResourceService()->GetDefaultFont().size;
-					int defaultHeight=paragraphDistance;
+					vint defaultHeight=paragraphDistance;
 
 					paragraphCaches.Resize(element->document->paragraphs.Count());
 					paragraphHeights.Resize(element->document->paragraphs.Count());
 
-					for(int i=0;i<paragraphHeights.Count();i++)
+					for(vint i=0;i<paragraphHeights.Count();i++)
 					{
 						paragraphHeights[i]=defaultHeight;
 					}
@@ -1078,7 +1078,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				}
 			}
 
-			void GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(int index)
+			void GuiDocumentElement::GuiDocumentElementRenderer::NotifyParagraphUpdated(vint index)
 			{
 				if(0<=index && index<paragraphCaches.Count())
 				{
@@ -1116,7 +1116,7 @@ GuiDocumentElement
 				}
 			}
 			
-			void GuiDocumentElement::NotifyParagraphUpdated(int index)
+			void GuiDocumentElement::NotifyParagraphUpdated(vint index)
 			{
 				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
 				if(elementRenderer)

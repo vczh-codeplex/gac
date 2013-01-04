@@ -311,7 +311,7 @@ Predefined Item Events
 			struct GuiItemEventArgs : public GuiEventArgs
 			{
 				/// <summary>Item index.</summary>
-				int			itemIndex;
+				vint			itemIndex;
 
 				GuiItemEventArgs()
 					:itemIndex(-1)
@@ -331,7 +331,7 @@ Predefined Item Events
 			struct GuiItemMouseEventArgs : public GuiMouseEventArgs
 			{
 				/// <summary>Item index.</summary>
-				int			itemIndex;
+				vint			itemIndex;
 
 				GuiItemMouseEventArgs()
 					:itemIndex(-1)

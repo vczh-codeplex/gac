@@ -82,12 +82,12 @@ GuiRoundBorderElement
 				}
 			}
 
-			int GuiRoundBorderElement::GetRadius()
+			vint GuiRoundBorderElement::GetRadius()
 			{
 				return radius;
 			}
 
-			void GuiRoundBorderElement::SetRadius(int value)
+			void GuiRoundBorderElement::SetRadius(vint value)
 			{
 				if(radius!=value)
 				{
@@ -483,12 +483,12 @@ GuiImageFrameElement
 				return image;
 			}
 
-			int GuiImageFrameElement::GetFrameIndex()
+			vint GuiImageFrameElement::GetFrameIndex()
 			{
 				return frameIndex;
 			}
 
-			void GuiImageFrameElement::SetImage(Ptr<INativeImage> _image, int _frameIndex)
+			void GuiImageFrameElement::SetImage(Ptr<INativeImage> _image, vint _frameIndex)
 			{
 				if(image!=_image || frameIndex!=_frameIndex)
 				{
@@ -595,17 +595,17 @@ GuiPolygonElement
 				}
 			}
 
-			const Point& GuiPolygonElement::GetPoint(int index)
+			const Point& GuiPolygonElement::GetPoint(vint index)
 			{
 				return points[index];
 			}
 
-			int GuiPolygonElement::GetPointCount()
+			vint GuiPolygonElement::GetPointCount()
 			{
 				return points.Count();
 			}
 
-			void GuiPolygonElement::SetPoints(const Point* p, int count)
+			void GuiPolygonElement::SetPoints(const Point* p, vint count)
 			{
 				points.Resize(count);
 				if(count>0)

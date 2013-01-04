@@ -122,7 +122,7 @@ System Object
 				LastSystemCursor=SizeWE,
 			};
 
-			static const int			SystemCursorCount=LastSystemCursor+1;
+			static const vint			SystemCursorCount=LastSystemCursor+1;
 		public:
 			/// <summary>
 			/// Test is the cursor a system provided cursor.
@@ -259,13 +259,13 @@ Image Object
 			/// Get the number of frames in this image.
 			/// </summary>
 			/// <returns>The number of frames in this image.</returns>
-			virtual int							GetFrameCount()=0;
+			virtual vint							GetFrameCount()=0;
 			/// <summary>
 			/// Get the frame in this image by a specified frame index.
 			/// </summary>
 			/// <returns>The frame in this image by a specified frame index.</returns>
 			/// <param name="index">The specified frame index.</param>
-			virtual INativeImageFrame*			GetFrame(int index)=0;
+			virtual INativeImageFrame*			GetFrame(vint index)=0;
 		};
 		
 		/// <summary>
@@ -287,7 +287,7 @@ Image Object
 			/// <returns>The created image.</returns>
 			/// <param name="buffer">The memory pointer.</param>
 			/// <param name="length">The memory length.</param>
-			virtual Ptr<INativeImage>			CreateImageFromMemory(void* buffer, int length)=0;
+			virtual Ptr<INativeImage>			CreateImageFromMemory(void* buffer, vint length)=0;
 
 			/// <summary>
 			/// Create an image from stream.
@@ -627,11 +627,11 @@ Native Window
 			/// <summary>True if the right mouse button is pressed.</summary>
 			bool						right;
 			/// <summary>The mouse position of x dimension.</summary>
-			int							x;
+			vint							x;
 			/// <summary>The mouse position of y dimension.</summary>
-			int							y;
+			vint							y;
 			/// <summary>The delta of the wheel.</summary>
-			int							wheel;
+			vint							wheel;
 		};
 		
 		/// <summary>
@@ -640,7 +640,7 @@ Native Window
 		struct NativeWindowKeyInfo
 		{
 			/// <summary>Key code of the key that sends this message.</summary>
-			int							code;
+			vint							code;
 			/// <summary>True if the control button is pressed.</summary>
 			bool						ctrl;
 			/// <summary>True if the shift button is pressed.</summary>
@@ -939,7 +939,7 @@ Native Window Services
 			/// <param name="proc">The specified function.</param>
 			/// <param name="argument">The specified argument.</param>
 			/// <param name="milliseconds">The specified period of time to wait. Set to -1 (default value) to wait forever until the function completed.</param>
-			virtual bool					InvokeInMainThreadAndWait(AsyncTaskProc* proc, void* argument, int milliseconds=-1)=0;
+			virtual bool					InvokeInMainThreadAndWait(AsyncTaskProc* proc, void* argument, vint milliseconds=-1)=0;
 		};
 		
 		/// <summary>
@@ -976,13 +976,13 @@ Native Window Services
 			/// Get the number of all available screens.
 			/// </summary>
 			///  <returns>The number of all available screens.</returns>
-			virtual int						GetScreenCount()=0;
+			virtual vint						GetScreenCount()=0;
 			/// <summary>
 			/// Get the screen object by a specified screen index.
 			/// </summary>
 			/// <returns>The screen object.</returns>
 			/// <param name="index">The specified screen index.</param>
-			virtual INativeScreen*			GetScreen(int index)=0;
+			virtual INativeScreen*			GetScreen(vint index)=0;
 			/// <summary>
 			/// Get the screen object where the main part of the specified window is inside.
 			/// </summary>
@@ -1063,19 +1063,19 @@ Native Window Services
 			/// Test is the specified key pressing.
 			/// </summary>
 			/// <returns>Returns true if the specified key is pressing.</returns>
-			virtual bool					IsKeyPressing(int code)=0;
+			virtual bool					IsKeyPressing(vint code)=0;
 			/// <summary>
 			/// Test is the specified key toggled.
 			/// </summary>
 			/// <returns>Returns true if the specified key is toggled.</returns>
-			virtual bool					IsKeyToggled(int code)=0;
+			virtual bool					IsKeyToggled(vint code)=0;
 
 			/// <summary>
 			/// Get the name of a key.
 			/// </summary>
 			/// <returns>The name of a key.</returns>
 			/// <param name="key">Key code</param>
-			virtual WString					GetKeyName(int code)=0;
+			virtual WString					GetKeyName(vint code)=0;
 		};
 		
 		/// <summary>
@@ -1289,7 +1289,7 @@ Native Window Services
 			/// <param name="defaultExtension">The default file extension.</param>
 			/// <param name="filter">The file name filter like L"Text Files|*.txt|All Files|*.*".</param>
 			/// <param name="options">File dialog options. Multiple options can be combined using the "|" operator.</param>
-			virtual bool							ShowFileDialog(INativeWindow* window, collections::List<WString>& selectionFileNames, int& selectionFilterIndex, FileDialogTypes dialogType, const WString& title, const WString& initialFileName, const WString& initialDirectory, const WString& defaultExtension, const WString& filter, FileDialogOptions options)=0;
+			virtual bool							ShowFileDialog(INativeWindow* window, collections::List<WString>& selectionFileNames, vint& selectionFilterIndex, FileDialogTypes dialogType, const WString& title, const WString& initialFileName, const WString& initialDirectory, const WString& defaultExtension, const WString& filter, FileDialogOptions options)=0;
 		};
 
 /***********************************************************************

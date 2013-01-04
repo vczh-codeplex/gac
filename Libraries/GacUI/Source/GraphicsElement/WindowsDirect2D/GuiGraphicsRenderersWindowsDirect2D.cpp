@@ -273,7 +273,7 @@ Gui3DSplitterElementRenderer
 				{
 				case Gui3DSplitterElement::Horizontal:
 					{
-						int y=bounds.y1+bounds.Height()/2-1;
+						vint y=bounds.y1+bounds.Height()/2-1;
 						p11=D2D1::Point2F((FLOAT)bounds.x1, (FLOAT)y+0.5f);
 						p12=D2D1::Point2F((FLOAT)bounds.x2, (FLOAT)y+0.5f);
 						p21=D2D1::Point2F((FLOAT)bounds.x1, (FLOAT)y+1.5f);
@@ -282,7 +282,7 @@ Gui3DSplitterElementRenderer
 					break;
 				case Gui3DSplitterElement::Vertical:
 					{
-						int x=bounds.x1+bounds.Width()/2-1;
+						vint x=bounds.x1+bounds.Width()/2-1;
 						p11=D2D1::Point2F((FLOAT)x+0.5f, (FLOAT)bounds.y1-0.0f);
 						p12=D2D1::Point2F((FLOAT)x+0.5f, (FLOAT)bounds.y2+0.0f);
 						p21=D2D1::Point2F((FLOAT)x+1.5f, (FLOAT)bounds.y1-0.0f);
@@ -448,7 +448,7 @@ GuiSolidLabelElementRenderer
 				{
 					HRESULT hr=GetWindowsDirect2DObjectProvider()->GetDirectWriteFactory()->CreateTextLayout(
 						oldText.Buffer(),
-						oldText.Length(),
+						(int)oldText.Length(),
 						textFormat->textFormat.Obj(),
 						0,
 						0,
@@ -459,14 +459,14 @@ GuiSolidLabelElementRenderer
 						{
 							DWRITE_TEXT_RANGE textRange;
 							textRange.startPosition=0;
-							textRange.length=oldText.Length();
+							textRange.length=(int)oldText.Length();
 							textLayout->SetUnderline(TRUE, textRange);
 						}
 						if(oldFont.strikeline)
 						{
 							DWRITE_TEXT_RANGE textRange;
 							textRange.startPosition=0;
-							textRange.length=oldText.Length();
+							textRange.length=(int)oldText.Length();
 							textLayout->SetStrikethrough(TRUE, textRange);
 						}
 					}
@@ -526,12 +526,12 @@ GuiSolidLabelElementRenderer
 					HRESULT hr=textLayout->GetMetrics(&metrics);
 					if(!FAILED(hr))
 					{
-						int width=0;
+						vint width=0;
 						if(!element->GetEllipse() && !element->GetWrapLine() && !element->GetMultiline())
 						{
-							width=(int)ceil(metrics.widthIncludingTrailingWhitespace);
+							width=(vint)ceil(metrics.widthIncludingTrailingWhitespace);
 						}
-						minSize=Size(width, (int)ceil(metrics.height));
+						minSize=Size(width, (vint)ceil(metrics.height));
 					}
 					textLayout->SetMaxWidth(maxWidth);
 				}
@@ -577,8 +577,8 @@ GuiSolidLabelElementRenderer
 					CreateTextLayout();
 				}
 
-				int x=0;
-				int y=0;
+				vint x=0;
+				vint y=0;
 				switch(element->GetHorizontalAlignment())
 				{
 				case Alignment::Left:
@@ -753,8 +753,8 @@ GuiImageFrameElementRenderer
 					}
 					else
 					{
-						int x=0;
-						int y=0;
+						vint x=0;
+						vint y=0;
 						switch(element->GetHorizontalAlignment())
 						{
 						case Alignment::Left:
@@ -783,8 +783,8 @@ GuiImageFrameElementRenderer
 					}
 					if(element->GetImage()->GetFormat()==INativeImage::Gif &&  element->GetFrameIndex()>0)
 					{
-						int max=element->GetFrameIndex();
-						for(int i=0;i<=max;i++)
+						vint max=element->GetFrameIndex();
+						for(vint i=0;i<=max;i++)
 						{
 							ComPtr<ID2D1Bitmap> frameBitmap=renderTarget->GetBitmap(element->GetImage()->GetFrame(i), element->GetEnabled());
 							d2dRenderTarget->DrawBitmap(frameBitmap.Obj(), destination, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, source);
@@ -845,7 +845,7 @@ GuiPolygonElementRenderer
 						p.x=(FLOAT)(oldPoints[0].x+offset.x)+0.5f;
 						p.y=(FLOAT)(oldPoints[0].y+offset.y)+0.5f;
 						pgs->BeginFigure(p, D2D1_FIGURE_BEGIN_FILLED);
-						for(int i=1;i<oldPoints.Count();i++)
+						for(vint i=1;i<oldPoints.Count();i++)
 						{
 							p.x=(FLOAT)(oldPoints[i].x+offset.x)+0.5f;
 							p.y=(FLOAT)(oldPoints[i].y+offset.y)+0.5f;
@@ -926,8 +926,8 @@ GuiPolygonElementRenderer
 				if(renderTarget && geometry)
 				{
 					ID2D1RenderTarget* d2dRenderTarget=renderTarget->GetDirect2DRenderTarget();
-					int offsetX=(bounds.Width()-minSize.x)/2+bounds.x1;
-					int offsetY=(bounds.Height()-minSize.y)/2+bounds.y1;
+					vint offsetX=(bounds.Width()-minSize.x)/2+bounds.x1;
+					vint offsetY=(bounds.Height()-minSize.y)/2+bounds.y1;
 
 					D2D1_MATRIX_3X2_F oldT, newT;
 					d2dRenderTarget->GetTransform(&oldT);
@@ -952,7 +952,7 @@ GuiPolygonElementRenderer
 				}
 				else
 				{
-					for(int i=0;i<oldPoints.Count();i++)
+					for(vint i=0;i<oldPoints.Count();i++)
 					{
 						if(oldPoints[i]!=element->GetPoint(i))
 						{
@@ -977,7 +977,7 @@ GuiColorizedTextElementRenderer
 				if(_renderTarget)
 				{
 					colors.Resize(element->GetColors().Count());
-					for(int i=0;i<colors.Count();i++)
+					for(vint i=0;i<colors.Count();i++)
 					{
 						text::ColorEntry entry=element->GetColors().Get(i);
 						ColorEntryResource newEntry;
@@ -1003,7 +1003,7 @@ GuiColorizedTextElementRenderer
 			{
 				if(_renderTarget)
 				{
-					for(int i=0;i<colors.Count();i++)
+					for(vint i=0;i<colors.Count();i++)
 					{
 						_renderTarget->DestroyDirect2DBrush(colors[i].normal.text);
 						_renderTarget->DestroyDirect2DBrush(colors[i].normal.background);
@@ -1098,24 +1098,24 @@ GuiColorizedTextElementRenderer
 					wchar_t passwordChar=element->GetPasswordChar();
 					Point viewPosition=element->GetViewPosition();
 					Rect viewBounds(viewPosition, bounds.GetSize());
-					int startRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, viewBounds.y1)).row;
-					int endRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, viewBounds.y2)).row;
+					vint startRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, viewBounds.y1)).row;
+					vint endRow=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, viewBounds.y2)).row;
 					TextPos selectionBegin=element->GetCaretBegin()<element->GetCaretEnd()?element->GetCaretBegin():element->GetCaretEnd();
 					TextPos selectionEnd=element->GetCaretBegin()>element->GetCaretEnd()?element->GetCaretBegin():element->GetCaretEnd();
 					bool focused=element->GetFocused();
 					
 					renderTarget->SetTextAntialias(oldFont.antialias, oldFont.verticalAntialias);
 
-					for(int row=startRow;row<=endRow;row++)
+					for(vint row=startRow;row<=endRow;row++)
 					{
 						Rect startRect=element->GetLines().GetRectFromTextPos(TextPos(row, 0));
 						Point startPoint=startRect.LeftTop();
-						int startColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, startPoint.y)).column;
-						int endColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, startPoint.y)).column;
+						vint startColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x1, startPoint.y)).column;
+						vint endColumn=element->GetLines().GetTextPosFromPoint(Point(viewBounds.x2, startPoint.y)).column;
 						text::TextLine& line=element->GetLines().GetLine(row);
 
-						int x=startColumn==0?0:line.att[startColumn-1].rightOffset;
-						for(int column=startColumn; column<=endColumn; column++)
+						vint x=startColumn==0?0:line.att[startColumn-1].rightOffset;
+						for(vint column=startColumn; column<=endColumn; column++)
 						{
 							bool inSelection=false;
 							if(selectionBegin.row==selectionEnd.row)
@@ -1136,7 +1136,7 @@ GuiColorizedTextElementRenderer
 							}
 							
 							bool crlf=column==line.dataLength;
-							int colorIndex=crlf?0:line.att[column].colorIndex;
+							vint colorIndex=crlf?0:line.att[column].colorIndex;
 							if(colorIndex>=colors.Count())
 							{
 								colorIndex=0;
@@ -1145,9 +1145,9 @@ GuiColorizedTextElementRenderer
 								!inSelection?colors[colorIndex].normal:
 								focused?colors[colorIndex].selectedFocused:
 								colors[colorIndex].selectedUnfocused;
-							int x2=crlf?x+startRect.Height()/2:line.att[column].rightOffset;
-							int tx=x-viewPosition.x+bounds.x1;
-							int ty=startPoint.y-viewPosition.y+bounds.y1;
+							vint x2=crlf?x+startRect.Height()/2:line.att[column].rightOffset;
+							vint tx=x-viewPosition.x+bounds.x1;
+							vint ty=startPoint.y-viewPosition.y+bounds.y1;
 							
 							if(color.background.a>0)
 							{
@@ -1172,7 +1172,7 @@ GuiColorizedTextElementRenderer
 					if(element->GetCaretVisible() && element->GetLines().IsAvailable(element->GetCaretEnd()))
 					{
 						Point caretPoint=element->GetLines().GetPointFromTextPos(element->GetCaretEnd());
-						int height=element->GetLines().GetRowHeight();
+						vint height=element->GetLines().GetRowHeight();
 						Point p1(caretPoint.x-viewPosition.x+bounds.x1, caretPoint.y-viewPosition.y+bounds.y1+1);
 						Point p2(caretPoint.x-viewPosition.x+bounds.x1, caretPoint.y+height-viewPosition.y+bounds.y1-1);
 						d2dRenderTarget->DrawLine(

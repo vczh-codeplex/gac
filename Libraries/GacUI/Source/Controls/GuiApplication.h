@@ -71,7 +71,7 @@ namespace vl
 				/// <param name="proc">The specified function.</param>
 				/// <param name="argument">The specified argument.</param>
 				/// <param name="milliseconds">The specified period of time to wait. Set to -1 (default value) to wait forever until the function completed.</param>
-				bool											InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds=-1);
+				bool											InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, vint milliseconds=-1);
 				/// <summary>Invoke a specified function asynchronously.</summary>
 				/// <param name="proc">The specified function.</param>
 				void											InvokeAsync(const Func<void()>& proc);
@@ -82,7 +82,7 @@ namespace vl
 				/// <returns>Return true if the function complete. Return false if the function has not completed during a specified period of time.</returns>
 				/// <param name="proc">The specified function.</param>
 				/// <param name="milliseconds">The specified period of time to wait. Set to -1 (default value) to wait forever until the function completed.</param>
-				bool											InvokeInMainThreadAndWait(const Func<void()>& proc, int milliseconds=-1);
+				bool											InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds=-1);
 
 				template<typename T>
 				void InvokeLambdaInMainThread(const T& proc)
@@ -91,7 +91,7 @@ namespace vl
 				}
 				
 				template<typename T>
-				bool InvokeLambdaInMainThreadAndWait(const T& proc, int milliseconds=-1)
+				bool InvokeLambdaInMainThreadAndWait(const T& proc, vint milliseconds=-1)
 				{
 					return InvokeInMainThreadAndWait(Func<void()>(proc), milliseconds);
 				}

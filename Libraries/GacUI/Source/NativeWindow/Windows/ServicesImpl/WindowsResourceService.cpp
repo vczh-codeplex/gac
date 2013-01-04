@@ -89,7 +89,7 @@ WindowsResourceService
 			{
 				{
 					systemCursors.Resize(INativeCursor::SystemCursorCount);
-					for(int i=0;i<systemCursors.Count();i++)
+					for(vint i=0;i<systemCursors.Count();i++)
 					{
 						systemCursors[i]=new WindowsCursor((INativeCursor::SystemCursorType)i);
 					}
@@ -114,7 +114,7 @@ WindowsResourceService
 
 			INativeCursor* WindowsResourceService::GetSystemCursor(INativeCursor::SystemCursorType type)
 			{
-				int index=(int)type;
+				vint index=(vint)type;
 				if(0<=index && index<systemCursors.Count())
 				{
 					return systemCursors[index].Obj();

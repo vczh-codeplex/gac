@@ -58,17 +58,17 @@ GuiSubComponentMeasurer::MeasuringSource
 				return measuringCategory;
 			}
 
-			int GuiSubComponentMeasurer::MeasuringSource::GetSubComponentCount()
+			vint GuiSubComponentMeasurer::MeasuringSource::GetSubComponentCount()
 			{
 				return subComponents.Count();
 			}
 
-			WString GuiSubComponentMeasurer::MeasuringSource::GetSubComponentName(int index)
+			WString GuiSubComponentMeasurer::MeasuringSource::GetSubComponentName(vint index)
 			{
 				return subComponents.Keys()[index];
 			}
 
-			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetSubComponentComposition(int index)
+			GuiGraphicsComposition* GuiSubComponentMeasurer::MeasuringSource::GetSubComponentComposition(vint index)
 			{
 				return subComponents.Values().Get(index);
 			}
@@ -138,19 +138,19 @@ GuiSubComponentMeasurer
 					}
 				}
 
-				Dictionary<WString, int> sizes;
+				Dictionary<WString, vint> sizes;
 				FOREACH(IMeasuringSource*, source, sources)
 				{
-					int count=source->GetSubComponentCount();
-					for(int i=0;i<count;i++)
+					vint count=source->GetSubComponentCount();
+					for(vint i=0;i<count;i++)
 					{
 						WString name=source->GetSubComponentName(i);
 						GuiGraphicsComposition* composition=source->GetSubComponentComposition(i);
 						composition->SetPreferredMinSize(Size(0, 0));
 						Size size=composition->GetPreferredBounds().GetSize();
-						int sizeComponent=direction==Horizontal?size.x:size.y;
+						vint sizeComponent=direction==Horizontal?size.x:size.y;
 
-						int index=sizes.Keys().IndexOf(name);
+						vint index=sizes.Keys().IndexOf(name);
 						if(index==-1)
 						{
 							sizes.Add(name, sizeComponent);
@@ -163,8 +163,8 @@ GuiSubComponentMeasurer
 				}
 				FOREACH(IMeasuringSource*, source, sources)
 				{
-					int count=source->GetSubComponentCount();
-					for(int i=0;i<count;i++)
+					vint count=source->GetSubComponentCount();
+					for(vint i=0;i<count;i++)
 					{
 						WString name=source->GetSubComponentName(i);
 						GuiGraphicsComposition* composition=source->GetSubComponentComposition(i);

@@ -32,7 +32,7 @@ namespace vl
 							D2D1::RenderTargetProperties(),
 							D2D1::HwndRenderTargetProperties(
 								form->GetWindowHandle(),
-								D2D1::SizeU(size.x, size.y)
+								D2D1::SizeU((int)size.x, (int)size.y)
 								),
 							&renderTarget
 							);
@@ -44,7 +44,7 @@ namespace vl
 					}
 					else if(previousSize!=size)
 					{
-						d2dRenderTarget->Resize(D2D1::SizeU(size.x, size.y));
+						d2dRenderTarget->Resize(D2D1::SizeU((int)size.x, (int)size.y));
 					}
 					previousSize=size;
 				}
@@ -118,7 +118,7 @@ namespace vl
 
 			ID2D1RenderTarget* GetNativeWindowDirect2DRenderTarget(INativeWindow* window)
 			{
-				int index=direct2DListener->nativeWindowListeners.Keys().IndexOf(window);
+				vint index=direct2DListener->nativeWindowListeners.Keys().IndexOf(window);
 				return index==-1?0:direct2DListener->nativeWindowListeners.Values().Get(index)->GetDirect2DRenderTarget();
 			}
 

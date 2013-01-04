@@ -22,7 +22,7 @@ Win8ButtonColors
 				g2.a=a;
 			}
 
-			Win8ButtonColors Win8ButtonColors::Blend(const Win8ButtonColors& c1, const Win8ButtonColors& c2, int ratio, int total)
+			Win8ButtonColors Win8ButtonColors::Blend(const Win8ButtonColors& c1, const Win8ButtonColors& c2, vint ratio, vint total)
 			{
 				if(ratio<0) ratio=0;
 				else if(ratio>total) ratio=total;
@@ -509,8 +509,8 @@ Win8CheckedButtonElements
 
 			Win8CheckedButtonElements Win8CheckedButtonElements::Create(elements::ElementShape::Type shape, bool backgroundVisible)
 			{
-				const int checkSize=13;
-				const int checkPadding=2;
+				const vint checkSize=13;
+				const vint checkPadding=2;
 
 				Win8CheckedButtonElements button;
 				{
@@ -767,7 +767,7 @@ Win8MenuItemButtonElements
 Win8TextBoxColors
 ***********************************************************************/
 
-			Win8TextBoxColors Win8TextBoxColors::Blend(const Win8TextBoxColors& c1, const Win8TextBoxColors& c2, int ratio, int total)
+			Win8TextBoxColors Win8TextBoxColors::Blend(const Win8TextBoxColors& c1, const Win8TextBoxColors& c2, vint ratio, vint total)
 			{
 				if(ratio<0) ratio=0;
 				else if(ratio>total) ratio=total;
@@ -849,7 +849,7 @@ Helpers
 
 			void Win8SetFont(GuiSolidLabelElement* element, GuiBoundsComposition* composition, const FontProperties& fontProperties)
 			{
-				int margin=3;
+				vint margin=3;
 				element->SetFont(fontProperties);
 				composition->SetMargin(Margin(margin, margin, margin, margin));
 			}

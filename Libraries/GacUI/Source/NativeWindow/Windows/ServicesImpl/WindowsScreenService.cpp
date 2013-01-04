@@ -75,7 +75,7 @@ WindowsScreenService
 
 			void WindowsScreenService::RefreshScreenInformation()
 			{
-				for(int i=0;i<screens.Count();i++)
+				for(vint i=0;i<screens.Count();i++)
 				{
 					screens[i]->monitor=NULL;
 				}
@@ -85,13 +85,13 @@ WindowsScreenService
 				EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)(&data));
 			}
 				
-			int WindowsScreenService::GetScreenCount()
+			vint WindowsScreenService::GetScreenCount()
 			{
 				RefreshScreenInformation();
 				return GetSystemMetrics(SM_CMONITORS);
 			}
 
-			INativeScreen* WindowsScreenService::GetScreen(int index)
+			INativeScreen* WindowsScreenService::GetScreen(vint index)
 			{
 				RefreshScreenInformation();
 				return screens[index].Obj();
@@ -106,7 +106,7 @@ WindowsScreenService
 					HMONITOR monitor=MonitorFromWindow(hwnd, MONITOR_DEFAULTTONULL);
 					if(monitor!=NULL)
 					{
-						for(int i=0;i<screens.Count();i++)
+						for(vint i=0;i<screens.Count();i++)
 						{
 							if(screens[i]->monitor==monitor)
 							{

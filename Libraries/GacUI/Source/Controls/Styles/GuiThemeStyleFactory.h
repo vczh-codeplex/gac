@@ -129,10 +129,10 @@ namespace vl
 				virtual controls::GuiScroll::IStyleController*								CreateProgressBarStyle()=0;
 				/// <summary>Get the default size for scrolls.</summary>
 				/// <returns>The default size for scrolls.</returns>
-				virtual int																	GetScrollDefaultSize()=0;
+				virtual vint																	GetScrollDefaultSize()=0;
 				/// <summary>Get the default size for trackers.</summary>
 				/// <returns>The default size for trackers.</returns>
-				virtual int																	GetTrackerDefaultSize()=0;
+				virtual vint																	GetTrackerDefaultSize()=0;
 				
 				/// <summary>Create a style for text list.</summary>
 				/// <returns>The created style.</returns>

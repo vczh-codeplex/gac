@@ -119,7 +119,7 @@ TextItemStyleProvider
 
 				void TextItemStyleProvider::OnStyleCheckedChanged(TextItemStyleController* style)
 				{
-					int index=listControl->GetArranger()->GetVisibleIndex(style);
+					vint index=listControl->GetArranger()->GetVisibleIndex(style);
 					if(index!=-1)
 					{
 						textItemView->SetCheckedSilently(index, style->GetChecked());
@@ -150,12 +150,12 @@ TextItemStyleProvider
 					listControl=0;
 				}
 
-				int TextItemStyleProvider::GetItemStyleId(int itemIndex)
+				vint TextItemStyleProvider::GetItemStyleId(vint itemIndex)
 				{
 					return 0;
 				}
 
-				GuiListControl::IItemStyleController* TextItemStyleProvider::CreateItemStyle(int styleId)
+				GuiListControl::IItemStyleController* TextItemStyleProvider::CreateItemStyle(vint styleId)
 				{
 					return new TextItemStyleController(this);
 				}
@@ -165,7 +165,7 @@ TextItemStyleProvider
 					delete dynamic_cast<TextItemStyleController*>(style);
 				}
 
-				void TextItemStyleProvider::Install(GuiListControl::IItemStyleController* style, int itemIndex)
+				void TextItemStyleProvider::Install(GuiListControl::IItemStyleController* style, vint itemIndex)
 				{
 					TextItemStyleController* textStyle=dynamic_cast<TextItemStyleController*>(style);
 					textStyle->SetText(textItemView->GetText(itemIndex));
@@ -233,27 +233,27 @@ TextItem
 TextItemProvider
 ***********************************************************************/
 
-				bool TextItemProvider::ContainsPrimaryText(int itemIndex)
+				bool TextItemProvider::ContainsPrimaryText(vint itemIndex)
 				{
 					return true;
 				}
 
-				WString TextItemProvider::GetPrimaryTextViewText(int itemIndex)
+				WString TextItemProvider::GetPrimaryTextViewText(vint itemIndex)
 				{
 					return Get(itemIndex).GetText();
 				}
 				
-				WString TextItemProvider::GetText(int itemIndex)
+				WString TextItemProvider::GetText(vint itemIndex)
 				{
 					return Get(itemIndex).GetText();
 				}
 
-				bool TextItemProvider::GetChecked(int itemIndex)
+				bool TextItemProvider::GetChecked(vint itemIndex)
 				{
 					return Get(itemIndex).GetChecked();
 				}
 
-				void TextItemProvider::SetCheckedSilently(int itemIndex, bool value)
+				void TextItemProvider::SetCheckedSilently(vint itemIndex, bool value)
 				{
 					items[itemIndex].checked=value;
 				}
@@ -266,13 +266,13 @@ TextItemProvider
 				{
 				}
 					
-				void TextItemProvider::SetText(int itemIndex, const WString& value)
+				void TextItemProvider::SetText(vint itemIndex, const WString& value)
 				{
 					items[itemIndex].text=value;
 					InvokeOnItemModified(itemIndex, 1, 1);
 				}
 
-				void TextItemProvider::SetChecked(int itemIndex, bool value)
+				void TextItemProvider::SetChecked(vint itemIndex, bool value)
 				{
 					SetCheckedSilently(itemIndex, value);
 					InvokeOnItemModified(itemIndex, 1, 1);

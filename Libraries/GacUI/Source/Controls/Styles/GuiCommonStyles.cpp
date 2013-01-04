@@ -61,9 +61,9 @@ CommonScrollStyle
 			{
 				if(draggingHandle)
 				{
-					int totalPixels=0;
-					int currentOffset=0;
-					int newOffset=0;
+					vint totalPixels=0;
+					vint currentOffset=0;
+					vint newOffset=0;
 					switch(direction)
 					{
 					case Horizontal:
@@ -79,12 +79,12 @@ CommonScrollStyle
 					}
 
 					double ratio=(double)newOffset/totalPixels;
-					int newPosition=(int)(ratio*totalSize);
+					vint newPosition=(vint)(ratio*totalSize);
 
-					int offset1=(int)(((double)newPosition/totalSize)*totalPixels);
-					int offset2=int(((double)(newPosition+1)/totalSize)*totalPixels);
-					int delta1=abs(offset1-newOffset);
-					int delta2=abs(offset2-newOffset);
+					vint offset1=(vint)(((double)newPosition/totalSize)*totalPixels);
+					vint offset2=vint(((double)(newPosition+1)/totalSize)*totalPixels);
+					vint delta1=abs((int)(offset1-newOffset));
+					vint delta2=abs((int)(offset2-newOffset));
 					if(delta1<delta2)
 					{
 						commandExecutor->SetPosition(newPosition);
@@ -135,7 +135,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::BuildStyle(int defaultSize, int arrowSize)
+			void CommonScrollStyle::BuildStyle(vint defaultSize, vint arrowSize)
 			{
 				boundsComposition=new GuiBoundsComposition;
 				containerComposition=InstallBackground(boundsComposition, direction);
@@ -258,7 +258,7 @@ CommonScrollStyle
 				commandExecutor=value;
 			}
 
-			void CommonScrollStyle::SetTotalSize(int value)
+			void CommonScrollStyle::SetTotalSize(vint value)
 			{
 				if(totalSize!=value)
 				{
@@ -267,7 +267,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::SetPageSize(int value)
+			void CommonScrollStyle::SetPageSize(vint value)
 			{
 				if(pageSize!=value)
 				{
@@ -276,7 +276,7 @@ CommonScrollStyle
 				}
 			}
 
-			void CommonScrollStyle::SetPosition(int value)
+			void CommonScrollStyle::SetPosition(vint value)
 			{
 				if(position!=value)
 				{
@@ -291,7 +291,7 @@ CommonTrackStyle
 
 			void CommonTrackStyle::UpdateHandle()
 			{
-				int maxSize=totalSize-pageSize;
+				vint maxSize=totalSize-pageSize;
 				if(maxSize<1) maxSize=1;
 				double ratio=(double)position/maxSize;
 				switch(direction)
@@ -321,9 +321,9 @@ CommonTrackStyle
 			{
 				if(draggingHandle)
 				{
-					int totalPixels=0;
-					int currentOffset=0;
-					int newOffset=0;
+					vint totalPixels=0;
+					vint currentOffset=0;
+					vint newOffset=0;
 
 					Rect handleArea=handleComposition->GetBounds();
 					Rect handleBounds=handleButton->GetBoundsComposition()->GetParent()->GetBounds();
@@ -342,14 +342,14 @@ CommonTrackStyle
 					}
 
 					double ratio=(double)newOffset/totalPixels;
-					int maxSize=totalSize-pageSize;
+					vint maxSize=totalSize-pageSize;
 					if(maxSize<1) maxSize=1;
-					int newPosition=(int)(ratio*maxSize);
+					vint newPosition=(vint)(ratio*maxSize);
 
-					int offset1=(int)(((double)newPosition/maxSize)*totalPixels);
-					int offset2=int(((double)(newPosition+1)/maxSize)*totalPixels);
-					int delta1=abs(offset1-newOffset);
-					int delta2=abs(offset2-newOffset);
+					vint offset1=(vint)(((double)newPosition/maxSize)*totalPixels);
+					vint offset2=vint(((double)(newPosition+1)/maxSize)*totalPixels);
+					vint delta1=abs((int)(offset1-newOffset));
+					vint delta2=abs((int)(offset2-newOffset));
 					if(delta1<delta2)
 					{
 						commandExecutor->SetPosition(newPosition);
@@ -366,7 +366,7 @@ CommonTrackStyle
 				draggingHandle=false;
 			}
 
-			void CommonTrackStyle::BuildStyle(int trackThickness, int trackPadding, int handleLong, int handleShort)
+			void CommonTrackStyle::BuildStyle(vint trackThickness, vint trackPadding, vint handleLong, vint handleShort)
 			{
 				boundsComposition=new GuiBoundsComposition;
 				InstallBackground(boundsComposition, direction);
@@ -512,7 +512,7 @@ CommonTrackStyle
 				}
 			}
 
-			void CommonTrackStyle::SetTotalSize(int value)
+			void CommonTrackStyle::SetTotalSize(vint value)
 			{
 				if(totalSize!=value)
 				{
@@ -521,7 +521,7 @@ CommonTrackStyle
 				}
 			}
 
-			void CommonTrackStyle::SetPageSize(int value)
+			void CommonTrackStyle::SetPageSize(vint value)
 			{
 				if(pageSize!=value)
 				{
@@ -530,7 +530,7 @@ CommonTrackStyle
 				}
 			}
 
-			void CommonTrackStyle::SetPosition(int value)
+			void CommonTrackStyle::SetPosition(vint value)
 			{
 				if(position!=value)
 				{
@@ -645,12 +645,12 @@ CommonFragmentBuilder
 Helpers
 ***********************************************************************/
 
-		unsigned char IntToColor(int color)
+		unsigned char IntToColor(vint color)
 		{
 			return color<0?0:color>255?255:(unsigned char)color;
 		}
 
-		Color BlendColor(Color c1, Color c2, int currentPosition, int totalLength)
+		Color BlendColor(Color c1, Color c2, vint currentPosition, vint totalLength)
 		{
 			return Color(
 				(unsigned char)IntToColor((c2.r*currentPosition+c1.r*(totalLength-currentPosition))/totalLength),

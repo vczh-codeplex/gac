@@ -52,8 +52,8 @@ namespace vl
 
 				INativeImageService*						GetImageService()override;
 				FormatType									GetFormat()override;
-				int											GetFrameCount()override;
-				INativeImageFrame*							GetFrame(int index)override;
+				vint											GetFrameCount()override;
+				INativeImageFrame*							GetFrame(vint index)override;
 			};
 
 			class WindowsBitmapImage : public Object, public INativeImage
@@ -68,8 +68,8 @@ namespace vl
 
 				INativeImageService*						GetImageService()override;
 				FormatType									GetFormat()override;
-				int											GetFrameCount()override;
-				INativeImageFrame*							GetFrame(int index)override;
+				vint											GetFrameCount()override;
+				INativeImageFrame*							GetFrame(vint index)override;
 			};
 
 			class WindowsImageService : public Object, public INativeImageService
@@ -81,7 +81,7 @@ namespace vl
 				~WindowsImageService();
 
 				Ptr<INativeImage>							CreateImageFromFile(const WString& path);
-				Ptr<INativeImage>							CreateImageFromMemory(void* buffer, int length);
+				Ptr<INativeImage>							CreateImageFromMemory(void* buffer, vint length);
 				Ptr<INativeImage>							CreateImageFromStream(stream::IStream& stream);
 				Ptr<INativeImage>							CreateImageFromHBITMAP(HBITMAP handle);
 				Ptr<INativeImage>							CreateImageFromHICON(HICON handle);

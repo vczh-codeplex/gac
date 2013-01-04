@@ -73,7 +73,7 @@ Win7TabStyle
 			{
 				if(commandExecutor)
 				{
-					int index=headerButtons.IndexOf(dynamic_cast<GuiSelectableButton*>(sender->GetAssociatedControl()));
+					vint index=headerButtons.IndexOf(dynamic_cast<GuiSelectableButton*>(sender->GetAssociatedControl()));
 					if(index!=-1)
 					{
 						commandExecutor->ShowTab(index);
@@ -83,14 +83,14 @@ Win7TabStyle
 
 			void Win7TabStyle::OnTabHeaderBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				int height=headerOverflowButton->GetBoundsComposition()->GetBounds().Height();
+				vint height=headerOverflowButton->GetBoundsComposition()->GetBounds().Height();
 				headerOverflowButton->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(height, 0)));
 				UpdateHeaderOverflowButtonVisibility();
 			}
 
 			void Win7TabStyle::OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				for(int i=headerOverflowMenuStack->GetStackItems().Count()-1;i>=0;i--)
+				for(vint i=headerOverflowMenuStack->GetStackItems().Count()-1;i>=0;i--)
 				{
 					GuiStackItemComposition* item=headerOverflowMenuStack->GetStackItems().Get(i);
 					GuiControl* button=item->Children().Get(0)->GetAssociatedControl();
@@ -101,7 +101,7 @@ Win7TabStyle
 					delete item;
 				}
 
-				for(int i=0;i<headerButtons.Count();i++)
+				for(vint i=0;i<headerButtons.Count();i++)
 				{
 					GuiStackItemComposition* item=new GuiStackItemComposition;
 					headerOverflowMenuStack->AddChild(item);
@@ -119,7 +119,7 @@ Win7TabStyle
 
 			void Win7TabStyle::OnHeaderOverflowMenuButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				int index=headerOverflowMenuStack->GetStackItems().IndexOf(dynamic_cast<GuiStackItemComposition*>(sender->GetParent()));
+				vint index=headerOverflowMenuStack->GetStackItems().IndexOf(dynamic_cast<GuiStackItemComposition*>(sender->GetParent()));
 				if(index!=-1)
 				{
 					commandExecutor->ShowTab(index);
@@ -133,9 +133,9 @@ Win7TabStyle
 
 			void Win7TabStyle::UpdateHeaderZOrder()
 			{
-				int itemCount=tabHeaderComposition->GetStackItems().Count();
-				int childCount=tabHeaderComposition->Children().Count();
-				for(int i=0;i<itemCount;i++)
+				vint itemCount=tabHeaderComposition->GetStackItems().Count();
+				vint childCount=tabHeaderComposition->Children().Count();
+				for(vint i=0;i<itemCount;i++)
 				{
 					GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(i);
 					if(headerButtons[i]->GetSelected())
@@ -258,7 +258,7 @@ Win7TabStyle
 				commandExecutor=value;
 			}
 
-			void Win7TabStyle::InsertTab(int index)
+			void Win7TabStyle::InsertTab(vint index)
 			{
 				GuiSelectableButton* button=new GuiSelectableButton(new Win7TabPageHeaderStyle);
 				button->SetAutoSelection(false);
@@ -274,13 +274,13 @@ Win7TabStyle
 				UpdateHeaderZOrder();
 			}
 
-			void Win7TabStyle::SetTabText(int index, const WString& value)
+			void Win7TabStyle::SetTabText(vint index, const WString& value)
 			{
 				headerButtons[index]->SetText(value);
 				UpdateHeaderOverflowButtonVisibility();
 			}
 
-			void Win7TabStyle::RemoveTab(int index)
+			void Win7TabStyle::RemoveTab(vint index)
 			{
 				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(index);
 				GuiSelectableButton* button=headerButtons[index];
@@ -294,7 +294,7 @@ Win7TabStyle
 				UpdateHeaderOverflowButtonVisibility();
 			}
 
-			void Win7TabStyle::MoveTab(int oldIndex, int newIndex)
+			void Win7TabStyle::MoveTab(vint oldIndex, vint newIndex)
 			{
 				GuiStackItemComposition* item=tabHeaderComposition->GetStackItems().Get(oldIndex);
 				tabHeaderComposition->RemoveChild(item);
@@ -307,7 +307,7 @@ Win7TabStyle
 				UpdateHeaderOverflowButtonVisibility();
 			}
 
-			void Win7TabStyle::SetSelectedTab(int index)
+			void Win7TabStyle::SetSelectedTab(vint index)
 			{
 				headerButtons[index]->SetSelected(true);
 				UpdateHeaderZOrder();

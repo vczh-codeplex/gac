@@ -60,7 +60,7 @@ ListView Base
 
 					void										AttachListControl(GuiListControl* value)override;
 					void										DetachListControl()override;
-					int											GetItemStyleId(int itemIndex)override;
+					vint											GetItemStyleId(vint itemIndex)override;
 					void										SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)override;
 				};
 			}
@@ -171,36 +171,36 @@ ListView ItemStyleProvider
 						/// <summary>Get the small image of an item.</summary>
 						/// <returns>The small image.</returns>
 						/// <param name="itemIndex">The index of the item.</param>
-						virtual Ptr<GuiImageData>				GetSmallImage(int itemIndex)=0;
+						virtual Ptr<GuiImageData>				GetSmallImage(vint itemIndex)=0;
 						/// <summary>Get the large image of an item.</summary>
 						/// <returns>The large image.</returns>
 						/// <param name="itemIndex">The index of the item.</param>
-						virtual Ptr<GuiImageData>				GetLargeImage(int itemIndex)=0;
+						virtual Ptr<GuiImageData>				GetLargeImage(vint itemIndex)=0;
 						/// <summary>Get the text of an item.</summary>
 						/// <returns>The text.</returns>
 						/// <param name="itemIndex">The index of the item.</param>
-						virtual WString							GetText(int itemIndex)=0;
+						virtual WString							GetText(vint itemIndex)=0;
 						/// <summary>Get the sub item text of an item. If the sub item index out of range, it returns an empty string.</summary>
 						/// <returns>The sub item text.</returns>
 						/// <param name="itemIndex">The index of the item.</param>
 						/// <param name="iindextemIndex">The sub item index of the item.</param>
-						virtual WString							GetSubItem(int itemIndex, int index)=0;
+						virtual WString							GetSubItem(vint itemIndex, vint index)=0;
 
 						/// <summary>Get the number of data columns.</summary>
 						/// <returns>The number of data columns.</returns>
-						virtual int								GetDataColumnCount()=0;
+						virtual vint								GetDataColumnCount()=0;
 						/// <summary>Get the column index of the index-th data column.</summary>
 						/// <returns>The column index.</returns>
 						/// <param name="index">The order of the data column.</param>
-						virtual int								GetDataColumn(int index)=0;
+						virtual vint								GetDataColumn(vint index)=0;
 
 						/// <summary>Get the number of columns.</summary>
 						/// <returns>The number of columns.</returns>
-						virtual int								GetColumnCount()=0;
+						virtual vint								GetColumnCount()=0;
 						/// <summary>Get the text of a column.</summary>
 						/// <returns>The text.</returns>
 						/// <param name="itemIndex">The index of the column.</param>
-						virtual WString							GetColumnText(int index)=0;
+						virtual WString							GetColumnText(vint index)=0;
 					};
 
 					/// <summary>Represents the extra item content information of a list view item.</summary>
@@ -217,7 +217,7 @@ ListView ItemStyleProvider
 						/// <param name="styleProvider">Style provider for the list view control.</param>
 						/// <param name="view">The <see cref="IListViewItemView"/> for the list view control.</param>
 						/// <param name="itemIndex">The index of the item to install.</param>
-						virtual void											Install(GuiListViewBase::IStyleProvider* styleProvider, IListViewItemView* view, int itemIndex)=0;
+						virtual void											Install(GuiListViewBase::IStyleProvider* styleProvider, IListViewItemView* view, vint itemIndex)=0;
 					};
 
 					/// <summary>List view item content provider.</summary>
@@ -258,7 +258,7 @@ ListView ItemStyleProvider
 						/// <summary>Install data of an item to the item style controller for rendering.</summary>
 						/// <param name="view">The <see cref="IListViewItemView"/> for the list view control.</param>
 						/// <param name="itemIndex">The index of the item to install.</param>
-						void									Install(IListViewItemView* view, int itemIndex);
+						void									Install(IListViewItemView* view, vint itemIndex);
 					};
 
 				protected:
@@ -276,9 +276,9 @@ ListView ItemStyleProvider
 
 					void										AttachListControl(GuiListControl* value)override;
 					void										DetachListControl()override;
-					GuiListControl::IItemStyleController*		CreateItemStyle(int styleId)override;
+					GuiListControl::IItemStyleController*		CreateItemStyle(vint styleId)override;
 					void										DestroyItemStyle(GuiListControl::IItemStyleController* style)override;
-					void										Install(GuiListControl::IItemStyleController* style, int itemIndex)override;
+					void										Install(GuiListControl::IItemStyleController* style, vint itemIndex)override;
 
 					/// <summary>Get all created item styles.</summary>
 					/// <returns>All created item styles.</returns>
@@ -327,7 +327,7 @@ ListView ItemContentProvider
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
-						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
+						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
 					};
 
 					Size												iconSize;
@@ -361,7 +361,7 @@ ListView ItemContentProvider
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
-						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
+						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
 					};
 
 					Size												iconSize;
@@ -395,7 +395,7 @@ ListView ItemContentProvider
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
-						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
+						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
 					};
 
 					Size												iconSize;
@@ -426,16 +426,16 @@ ListView ItemContentProvider
 						compositions::GuiTableComposition*				textTable;
 						DataTextElementArray							dataTexts;
 
-						void											RemoveTextElement(int textRow);
-						elements::GuiSolidLabelElement*					CreateTextElement(int textRow, const FontProperties& font);
-						void											ResetTextTable(int textRows);
+						void											RemoveTextElement(vint textRow);
+						elements::GuiSolidLabelElement*					CreateTextElement(vint textRow, const FontProperties& font);
+						void											ResetTextTable(vint textRows);
 					public:
 						ItemContent(Size iconSize, const FontProperties& font);
 						~ItemContent();
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
-						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
+						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
 					};
 
 					Size												iconSize;
@@ -476,7 +476,7 @@ ListView ItemContentProvider
 
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
-						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
+						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
 					};
 
 					Size												iconSize;
@@ -503,7 +503,7 @@ ListView ItemContentProvider(Detailed)
 					typedef collections::List<GuiListViewColumnHeader*>					ColumnHeaderButtonList;
 					typedef collections::List<compositions::GuiBoundsComposition*>		ColumnHeaderSplitterList;
 				public:
-					static const int							SplitterWidth=8;
+					static const vint							SplitterWidth=8;
 					
 					/// <summary>Callback for [T:vl.presentation.controls.list.ListViewColumnItemArranger.IColumnItemView]. Column item view use this interface to notify column related modification.</summary>
 					class IColumnItemViewCallback : public virtual IDescriptable, public Description<IColumnItemViewCallback>
@@ -530,27 +530,27 @@ ListView ItemContentProvider(Detailed)
 						virtual bool											DetachCallback(IColumnItemViewCallback* value)=0;
 						/// <summary>Get the number of all columns.</summary>
 						/// <returns>The number of all columns.</returns>
-						virtual int												GetColumnCount()=0;
+						virtual vint												GetColumnCount()=0;
 						/// <summary>Get the text of the column.</summary>
 						/// <returns>The text of the column.</returns>
 						/// <param name="index">The index of the column.</param>
-						virtual WString											GetColumnText(int index)=0;
+						virtual WString											GetColumnText(vint index)=0;
 						/// <summary>Get the size of the column.</summary>
 						/// <returns>The size of the column.</returns>
 						/// <param name="index">The index of the column.</param>
-						virtual int												GetColumnSize(int index)=0;
+						virtual vint												GetColumnSize(vint index)=0;
 						/// <summary>Set the size of the column.</summary>
 						/// <param name="index">The index of the column.</param>
 						/// <param name="value">The new size of the column.</param>
-						virtual void											SetColumnSize(int index, int value)=0;
+						virtual void											SetColumnSize(vint index, vint value)=0;
 						/// <summary>Get the popup binded to the column.</summary>
 						/// <returns>The popup binded to the column.</returns>
 						/// <param name="index">The index of the column.</param>
-						virtual GuiMenu*										GetDropdownPopup(int index)=0;
+						virtual GuiMenu*										GetDropdownPopup(vint index)=0;
 						/// <summary>Get the sorting state of the column.</summary>
 						/// <returns>The sorting state of the column.</returns>
 						/// <param name="index">The index of the column.</param>
-						virtual GuiListViewColumnHeader::ColumnSortingState		GetSortingState(int index)=0;
+						virtual GuiListViewColumnHeader::ColumnSortingState		GetSortingState(vint index)=0;
 					};
 				protected:
 					class ColumnItemViewCallback : public Object, public virtual IColumnItemViewCallback
@@ -572,16 +572,16 @@ ListView ItemContentProvider(Detailed)
 					ColumnHeaderButtonList						columnHeaderButtons;
 					ColumnHeaderSplitterList					columnHeaderSplitters;
 					bool										splitterDragging;
-					int											splitterLatestX;
+					vint											splitterLatestX;
 
-					void										ColumnClicked(int index, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+					void										ColumnClicked(vint index, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					void										ColumnHeaderSplitterLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 					void										ColumnHeaderSplitterLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 					void										ColumnHeaderSplitterMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 
 					void										RearrangeItemBounds()override;
-					int											GetWidth()override;
-					int											GetYOffset()override;
+					vint											GetWidth()override;
+					vint											GetYOffset()override;
 					Size										OnCalculateTotalSize()override;
 					void										DeleteColumnButtons();
 					void										RebuildColumns();
@@ -621,7 +621,7 @@ ListView ItemContentProvider(Detailed)
 						compositions::GuiBoundsComposition*				GetContentComposition()override;
 						compositions::GuiBoundsComposition*				GetBackgroundDecorator()override;
 						void											UpdateSubItemSize();
-						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, int itemIndex)override;
+						void											Install(GuiListViewBase::IStyleProvider* styleProvider, ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override;
 					};
 
 					Size												iconSize;
@@ -673,7 +673,7 @@ ListView
 					/// <summary>Column text.</summary>
 					WString											text;
 					/// <summary>Column size.</summary>
-					int												size;
+					vint												size;
 					/// <summary>Column dropdown popup.</summary>
 					GuiMenu*										dropdownPopup;
 					/// <summary>Column sorting state.</summary>
@@ -682,17 +682,17 @@ ListView
 					/// <summary>Create a column with the specified text and size.</summary>
 					/// <param name="_text">The specified text.</param>
 					/// <param name="_size">The specified size.</param>
-					ListViewColumn(const WString& _text=L"", int _size=160);
+					ListViewColumn(const WString& _text=L"", vint _size=160);
 				};
 
 				/// <summary>List view data column container.</summary>
-				class ListViewDataColumns : public ItemsBase<int>
+				class ListViewDataColumns : public ItemsBase<vint>
 				{
 					friend class ListViewItemProvider;
 				protected:
 					ListViewItemProvider*						itemProvider;
 
-					void NotifyUpdateInternal(int start, int count, int newCount)override;
+					void NotifyUpdateInternal(vint start, vint count, vint newCount)override;
 				public:
 					/// <summary>Create a container.</summary>
 					ListViewDataColumns();
@@ -706,7 +706,7 @@ ListView
 				protected:
 					ListViewItemProvider*						itemProvider;
 
-					void NotifyUpdateInternal(int start, int count, int newCount)override;
+					void NotifyUpdateInternal(vint start, vint count, vint newCount)override;
 				public:
 					/// <summary>Create a container.</summary>
 					ListViewColumns();
@@ -728,23 +728,23 @@ ListView
 					ListViewColumns										columns;
 					ColumnItemViewCallbackList							columnItemViewCallbacks;
 
-					bool												ContainsPrimaryText(int itemIndex)override;
-					WString												GetPrimaryTextViewText(int itemIndex)override;
-					Ptr<GuiImageData>									GetSmallImage(int itemIndex)override;
-					Ptr<GuiImageData>									GetLargeImage(int itemIndex)override;
-					WString												GetText(int itemIndex)override;
-					WString												GetSubItem(int itemIndex, int index)override;
-					int													GetDataColumnCount()override;
-					int													GetDataColumn(int index)override;
+					bool												ContainsPrimaryText(vint itemIndex)override;
+					WString												GetPrimaryTextViewText(vint itemIndex)override;
+					Ptr<GuiImageData>									GetSmallImage(vint itemIndex)override;
+					Ptr<GuiImageData>									GetLargeImage(vint itemIndex)override;
+					WString												GetText(vint itemIndex)override;
+					WString												GetSubItem(vint itemIndex, vint index)override;
+					vint													GetDataColumnCount()override;
+					vint													GetDataColumn(vint index)override;
 
 					bool												AttachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)override;
 					bool												DetachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)override;
-					int													GetColumnCount()override;
-					WString												GetColumnText(int index)override;
-					int													GetColumnSize(int index)override;
-					void												SetColumnSize(int index, int value)override;
-					GuiMenu*											GetDropdownPopup(int index)override;
-					GuiListViewColumnHeader::ColumnSortingState			GetSortingState(int index)override;
+					vint													GetColumnCount()override;
+					WString												GetColumnText(vint index)override;
+					vint													GetColumnSize(vint index)override;
+					void												SetColumnSize(vint index, vint value)override;
+					GuiMenu*											GetDropdownPopup(vint index)override;
+					GuiListViewColumnHeader::ColumnSortingState			GetSortingState(vint index)override;
 				public:
 					ListViewItemProvider();
 					~ListViewItemProvider();

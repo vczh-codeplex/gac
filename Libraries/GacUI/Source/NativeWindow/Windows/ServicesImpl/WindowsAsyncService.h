@@ -34,7 +34,7 @@ namespace vl
 					bool operator!=(const TaskItem& item)const{return true;}
 				};
 			protected:
-				int								mainThreadId;
+				vint								mainThreadId;
 				SpinLock						taskListLock;
 				collections::List<TaskItem>		taskItems;
 			public:
@@ -45,7 +45,7 @@ namespace vl
 				bool							IsInMainThread()override;
 				void							InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument)override;
 				void							InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument)override;
-				bool							InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, int milliseconds)override;
+				bool							InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, vint milliseconds)override;
 			};
 		}
 	}

@@ -159,7 +159,7 @@ GuiTextBoxCommonInterface
 				return textElementOperator->Paste();
 			}
 
-			WString GuiTextBoxCommonInterface::GetRowText(int row)
+			WString GuiTextBoxCommonInterface::GetRowText(vint row)
 			{
 				TextPos start=textElementOperator->GetTextElement()->GetLines().Normalize(TextPos(row, 0));
 				TextPos end=TextPos(start.row, textElementOperator->GetTextElement()->GetLines().GetLine(start.row).dataLength);
@@ -173,22 +173,22 @@ GuiTextBoxCommonInterface
 				return textElementOperator->GetTextElement()->GetLines().GetText(start, end);
 			}
 				
-			int GuiTextBoxCommonInterface::GetRowWidth(int row)
+			vint GuiTextBoxCommonInterface::GetRowWidth(vint row)
 			{
 				return textElementOperator->GetTextElement()->GetLines().GetRowWidth(row);
 			}
 
-			int GuiTextBoxCommonInterface::GetRowHeight()
+			vint GuiTextBoxCommonInterface::GetRowHeight()
 			{
 				return textElementOperator->GetTextElement()->GetLines().GetRowHeight();
 			}
 
-			int GuiTextBoxCommonInterface::GetMaxWidth()
+			vint GuiTextBoxCommonInterface::GetMaxWidth()
 			{
 				return textElementOperator->GetTextElement()->GetLines().GetMaxWidth();
 			}
 
-			int GuiTextBoxCommonInterface::GetMaxHeight()
+			vint GuiTextBoxCommonInterface::GetMaxHeight()
 			{
 				return textElementOperator->GetTextElement()->GetLines().GetMaxHeight();
 			}

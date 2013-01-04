@@ -73,7 +73,7 @@ WindowsClipboardService
 				if(OpenClipboard(ownerHandle))
 				{
 					EmptyClipboard();
-					int size=(value.Length()+1)*sizeof(wchar_t);
+					vint size=(value.Length()+1)*sizeof(wchar_t);
 					HGLOBAL data=GlobalAlloc(GMEM_MOVEABLE, size);
 					wchar_t* buffer=(wchar_t*)GlobalLock(data);
 					memcpy(buffer, value.Buffer(), size);

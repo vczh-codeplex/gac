@@ -103,7 +103,7 @@ GuiComboBoxBase
 GuiComboBoxListControl
 ***********************************************************************/
 
-			void GuiComboBoxListControl::DisplaySelectedContent(int itemIndex)
+			void GuiComboBoxListControl::DisplaySelectedContent(vint itemIndex)
 			{
 				if(primaryTextView)
 				{
@@ -162,7 +162,7 @@ GuiComboBoxListControl
 				return containedListControl;
 			}
 
-			int GuiComboBoxListControl::GetSelectedIndex()
+			vint GuiComboBoxListControl::GetSelectedIndex()
 			{
 				if(containedListControl->GetSelectedItems().Count()==1)
 				{
@@ -174,7 +174,7 @@ GuiComboBoxListControl
 				}
 			}
 
-			void GuiComboBoxListControl::SetSelectedIndex(int value)
+			void GuiComboBoxListControl::SetSelectedIndex(vint value)
 			{
 				containedListControl->SetSelected(value, true);
 			}

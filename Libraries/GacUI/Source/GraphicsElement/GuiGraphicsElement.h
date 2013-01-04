@@ -80,7 +80,7 @@ Elements
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiRoundBorderElement, L"RoundBorder")
 			protected:
 				Color					color;
-				int						radius;
+				vint						radius;
 
 				GuiRoundBorderElement();
 			public:
@@ -101,12 +101,12 @@ Elements
 				/// Get the radius of round corners.
 				/// </summary>
 				/// <returns>The radius.</returns>
-				int						GetRadius();
+				vint						GetRadius();
 				/// <summary>
 				/// Set the radius of round corners.
 				/// </summary>
 				/// <param name="value">The new radius.</param>
-				void					SetRadius(int value);
+				void					SetRadius(vint value);
 			};
 			
 			/// <summary>
@@ -425,7 +425,7 @@ Elements
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiImageFrameElement, L"ImageFrame");
 			protected:
 				Ptr<INativeImage>		image;
-				int						frameIndex;
+				vint						frameIndex;
 				Alignment::Type			hAlignment;
 				Alignment::Type			vAlignment;
 				bool					stretch;
@@ -444,13 +444,13 @@ Elements
 				/// Get the index of the frame in the containing image.
 				/// </summary>
 				/// <returns>The index of the frame in the containing image</returns>
-				int						GetFrameIndex();
+				vint						GetFrameIndex();
 				/// <summary>
 				/// Set the containing image and the frame index.
 				/// </summary>
 				/// <param name="_image">The new containing image.</param>
 				/// <param name="_frameIndex">The new frameIndex.</param>
-				void					SetImage(Ptr<INativeImage> _image, int _frameIndex=0);
+				void					SetImage(Ptr<INativeImage> _image, vint _frameIndex=0);
 				
 				/// <summary>
 				/// Get the horizontal alignment of the image.
@@ -524,18 +524,18 @@ Elements
 				/// </summary>
 				/// <param name="index">The index to access a point.</param>
 				/// <returns>The point of the polygon element associated with the index.</returns>
-				const Point&			GetPoint(int index);
+				const Point&			GetPoint(vint index);
 				/// <summary>
 				/// Get the number of points
 				/// </summary>
 				/// <returns>The number of points.</returns>
-				int						GetPointCount();
+				vint						GetPointCount();
 				/// <summary>
 				/// Set all points to the polygon element.
 				/// </summary>
 				/// <param name="p">A pointer to a buffer that stores all points.</param>
 				/// <param name="index">The number of points.</param>
-				void					SetPoints(const Point* p, int count);
+				void					SetPoints(const Point* p, vint count);
 				
 				/// <summary>
 				/// Get the border color.

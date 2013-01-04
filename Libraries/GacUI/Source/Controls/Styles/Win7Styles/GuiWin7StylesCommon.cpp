@@ -25,7 +25,7 @@ Win7ButtonColors
 				g4.a=a;
 			}
 
-			Win7ButtonColors Win7ButtonColors::Blend(const Win7ButtonColors& c1, const Win7ButtonColors& c2, int ratio, int total)
+			Win7ButtonColors Win7ButtonColors::Blend(const Win7ButtonColors& c1, const Win7ButtonColors& c2, vint ratio, vint total)
 			{
 				if(ratio<0) ratio=0;
 				else if(ratio>total) ratio=total;
@@ -624,8 +624,8 @@ Win7CheckedButtonElements
 
 			Win7CheckedButtonElements Win7CheckedButtonElements::Create(elements::ElementShape::Type shape, bool backgroundVisible)
 			{
-				const int checkSize=13;
-				const int checkPadding=2;
+				const vint checkSize=13;
+				const vint checkPadding=2;
 
 				Win7CheckedButtonElements button;
 				{
@@ -912,7 +912,7 @@ Win7MenuItemButtonElements
 Win7TextBoxColors
 ***********************************************************************/
 
-			Win7TextBoxColors Win7TextBoxColors::Blend(const Win7TextBoxColors& c1, const Win7TextBoxColors& c2, int ratio, int total)
+			Win7TextBoxColors Win7TextBoxColors::Blend(const Win7TextBoxColors& c1, const Win7TextBoxColors& c2, vint ratio, vint total)
 			{
 				if(ratio<0) ratio=0;
 				else if(ratio>total) ratio=total;
@@ -999,7 +999,7 @@ Helpers
 
 			void Win7SetFont(GuiSolidLabelElement* element, GuiBoundsComposition* composition, const FontProperties& fontProperties)
 			{
-				int margin=3;
+				vint margin=3;
 				element->SetFont(fontProperties);
 				composition->SetMargin(Margin(margin, margin, margin, margin));
 			}

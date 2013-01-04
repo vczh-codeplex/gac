@@ -43,15 +43,15 @@ namespace vl
 					virtual WString						GetMeasuringCategory()=0;
 					/// <summary>Get the sub component count.</summary>
 					/// <returns>The sub component count.</returns>
-					virtual int							GetSubComponentCount()=0;
+					virtual vint							GetSubComponentCount()=0;
 					/// <summary>Get the name of the specified sub component.</summary>
 					/// <returns>The name of the specified sub component.</returns>
 					/// <param name="index">The index of the specified sub component.</param>
-					virtual WString						GetSubComponentName(int index)=0;
+					virtual WString						GetSubComponentName(vint index)=0;
 					/// <summary>Get the composition of the specified sub component.</summary>
 					/// <returns>The composition of the specified sub component.</returns>
 					/// <param name="index">The index of the specified sub component.</param>
-					virtual GuiGraphicsComposition*		GetSubComponentComposition(int index)=0;
+					virtual GuiGraphicsComposition*		GetSubComponentComposition(vint index)=0;
 					/// <summary>Get the composition of the specified sub component.</summary>
 					/// <returns>The composition of the specified sub component.</returns>
 					/// <param name="name">The name of the specified sub component.</param>
@@ -98,9 +98,9 @@ namespace vl
 					void								DetachMeasurer(GuiSubComponentMeasurer* value)override;
 					GuiSubComponentMeasurer*			GetAttachedMeasurer()override;
 					WString								GetMeasuringCategory()override;
-					int									GetSubComponentCount()override;
-					WString								GetSubComponentName(int index)override;
-					GuiGraphicsComposition*				GetSubComponentComposition(int index)override;
+					vint									GetSubComponentCount()override;
+					WString								GetSubComponentName(vint index)override;
+					GuiGraphicsComposition*				GetSubComponentComposition(vint index)override;
 					GuiGraphicsComposition*				GetSubComponentComposition(const WString& name)override;
 					GuiGraphicsComposition*				GetMainComposition()override;
 					void								SubComponentPreferredMinSizeUpdated()override;

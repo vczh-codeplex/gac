@@ -15,7 +15,7 @@ namespace vl
 				Ptr<WinBitmap>					buffer;
 				INativeWindow*					window;
 
-				int DetermineBufferLength(int minSize, int minBound, int maxBound, int currentSize)
+				vint DetermineBufferLength(vint minSize, vint minBound, vint maxBound, vint currentSize)
 				{
 					if(currentSize<minSize || currentSize>maxBound)
 					{
@@ -33,8 +33,8 @@ namespace vl
 					Size minBounds(windowSize.x*5/4, windowSize.y*5/4);
 					Size maxBounds(windowSize.x*3/2, windowSize.y*3/2);
 					Size currentSize=buffer?Size(buffer->GetWidth(), buffer->GetHeight()):Size(0, 0);
-					int newWidth=DetermineBufferLength(windowSize.x, minBounds.x, maxBounds.x, currentSize.x);
-					int newHeight=DetermineBufferLength(windowSize.y, minBounds.y, maxBounds.y, currentSize.y);
+					vint newWidth=DetermineBufferLength(windowSize.x, minBounds.x, maxBounds.x, currentSize.x);
+					vint newHeight=DetermineBufferLength(windowSize.y, minBounds.y, maxBounds.y, currentSize.y);
 					return Size(newWidth, newHeight);
 				}
 
@@ -104,7 +104,7 @@ namespace vl
 
 			WinDC* GetNativeWindowDC(INativeWindow* window)
 			{
-				int index=gdiListener->nativeWindowListeners.Keys().IndexOf(window);
+				vint index=gdiListener->nativeWindowListeners.Keys().IndexOf(window);
 				return index==-1?0:gdiListener->nativeWindowListeners.Values().Get(index)->GetWinDC();
 			}
 

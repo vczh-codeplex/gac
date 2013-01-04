@@ -183,12 +183,12 @@ Win7Theme
 				return new Win7ProgressBarStyle;
 			}
 
-			int Win7Theme::GetScrollDefaultSize()
+			vint Win7Theme::GetScrollDefaultSize()
 			{
 				return Win7ScrollStyle::DefaultSize;
 			}
 
-			int Win7Theme::GetTrackerDefaultSize()
+			vint Win7Theme::GetTrackerDefaultSize()
 			{
 				return Win7TrackStyle::HandleLong;
 			}

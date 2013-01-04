@@ -34,11 +34,11 @@ GuiGraphicsAnimationManager
 
 			void GuiGraphicsAnimationManager::Play()
 			{
-				for(int i=playingAnimations.Count()-1;i>=0;i--)
+				for(vint i=playingAnimations.Count()-1;i>=0;i--)
 				{
 					Ptr<IGuiGraphicsAnimation> animation=playingAnimations[i];
-					int totalLength=animation->GetTotalLength();
-					int currentPosition=animation->GetCurrentPosition();
+					vint totalLength=animation->GetTotalLength();
+					vint currentPosition=animation->GetCurrentPosition();
 					animation->Play(currentPosition, totalLength);
 					if(currentPosition>=totalLength)
 					{
@@ -54,7 +54,7 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::DisconnectCompositionInternal(GuiGraphicsComposition* composition)
 			{
-				for(int i=0;i<composition->Children().Count();i++)
+				for(vint i=0;i<composition->Children().Count();i++)
 				{
 					DisconnectCompositionInternal(composition->Children().Get(i));
 				}
@@ -109,7 +109,7 @@ GuiGraphicsHost
 				GuiCharEventArgs arguments(composition);
 				(NativeWindowCharInfo&)arguments=info;
 
-				for(int i=compositions.Count()-1;i>=0;i--)
+				for(vint i=compositions.Count()-1;i>=0;i--)
 				{
 					compositions[i]->GetEventReceiver()->previewCharInput.Execute(arguments);
 					if(arguments.handled)
@@ -118,7 +118,7 @@ GuiGraphicsHost
 					}
 				}
 
-				for(int i=0;i<compositions.Count();i++)
+				for(vint i=0;i<compositions.Count();i++)
 				{
 					(compositions[i]->GetEventReceiver()->*eventReceiverEvent).Execute(arguments);
 					if(arguments.handled)
@@ -143,7 +143,7 @@ GuiGraphicsHost
 				GuiKeyEventArgs arguments(composition);
 				(NativeWindowKeyInfo&)arguments=info;
 
-				for(int i=compositions.Count()-1;i>=0;i--)
+				for(vint i=compositions.Count()-1;i>=0;i--)
 				{
 					compositions[i]->GetEventReceiver()->previewKey.Execute(arguments);
 					if(arguments.handled)
@@ -152,7 +152,7 @@ GuiGraphicsHost
 					}
 				}
 
-				for(int i=0;i<compositions.Count();i++)
+				for(vint i=0;i<compositions.Count();i++)
 				{
 					(compositions[i]->GetEventReceiver()->*eventReceiverEvent).Execute(arguments);
 					if(arguments.handled)
@@ -166,8 +166,8 @@ GuiGraphicsHost
 			{
 				arguments.compositionSource=composition;
 				arguments.eventSource=0;
-				int x=arguments.x;
-				int y=arguments.y;
+				vint x=arguments.x;
+				vint y=arguments.y;
 
 				while(composition)
 				{
@@ -374,8 +374,8 @@ GuiGraphicsHost
 					}
 				}
 
-				int firstDifferentIndex=mouseEnterCompositions.Count();
-				for(int i=0;i<mouseEnterCompositions.Count();i++)
+				vint firstDifferentIndex=mouseEnterCompositions.Count();
+				for(vint i=0;i<mouseEnterCompositions.Count();i++)
 				{
 					if(i==newCompositions.Count())
 					{
@@ -389,7 +389,7 @@ GuiGraphicsHost
 					}
 				}
 
-				for(int i=mouseEnterCompositions.Count()-1;i>=firstDifferentIndex;i--)
+				for(vint i=mouseEnterCompositions.Count()-1;i>=firstDifferentIndex;i--)
 				{
 					GuiGraphicsComposition* composition=mouseEnterCompositions[i];
 					if(composition->HasEventReceiver())
@@ -399,7 +399,7 @@ GuiGraphicsHost
 				}
 
 				CopyFrom(mouseEnterCompositions, newCompositions);
-				for(int i=firstDifferentIndex;i<mouseEnterCompositions.Count();i++)
+				for(vint i=firstDifferentIndex;i<mouseEnterCompositions.Count();i++)
 				{
 					GuiGraphicsComposition* composition=mouseEnterCompositions[i];
 					if(composition->HasEventReceiver())
@@ -431,7 +431,7 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::MouseLeaved()
 			{
-				for(int i=mouseEnterCompositions.Count()-1;i>=0;i--)
+				for(vint i=mouseEnterCompositions.Count()-1;i>=0;i--)
 				{
 					GuiGraphicsComposition* composition=mouseEnterCompositions[i];
 					if(composition->HasEventReceiver())
@@ -646,7 +646,7 @@ GuiGraphicsHost
 GuiTimeBasedAnimation
 ***********************************************************************/
 
-			GuiTimeBasedAnimation::GuiTimeBasedAnimation(int totalMilliseconds)
+			GuiTimeBasedAnimation::GuiTimeBasedAnimation(vint totalMilliseconds)
 				:startTime(0)
 				,length(totalMilliseconds)
 			{
@@ -657,7 +657,7 @@ GuiTimeBasedAnimation
 			{
 			}
 
-			void GuiTimeBasedAnimation::Restart(int totalMilliseconds)
+			void GuiTimeBasedAnimation::Restart(vint totalMilliseconds)
 			{
 				startTime=DateTime::LocalTime().totalMilliseconds;
 				if(totalMilliseconds>-1)
@@ -666,21 +666,21 @@ GuiTimeBasedAnimation
 				}
 			}
 
-			int GuiTimeBasedAnimation::GetTotalLength()
+			vint GuiTimeBasedAnimation::GetTotalLength()
 			{
 				return length;
 			}
 
-			int GuiTimeBasedAnimation::GetCurrentPosition()
+			vint GuiTimeBasedAnimation::GetCurrentPosition()
 			{
-				return (int)(DateTime::LocalTime().totalMilliseconds-startTime);
+				return (vint)(DateTime::LocalTime().totalMilliseconds-startTime);
 			}
 
 /***********************************************************************
 GuiShortcutKeyItem
 ***********************************************************************/
 
-			GuiShortcutKeyItem::GuiShortcutKeyItem(GuiShortcutKeyManager* _shortcutKeyManager, bool _ctrl, bool _shift, bool _alt, int _key)
+			GuiShortcutKeyItem::GuiShortcutKeyItem(GuiShortcutKeyManager* _shortcutKeyManager, bool _ctrl, bool _shift, bool _alt, vint _key)
 				:shortcutKeyManager(_shortcutKeyManager)
 				,ctrl(_ctrl)
 				,shift(_shift)
@@ -717,7 +717,7 @@ GuiShortcutKeyItem
 					info.code==key;
 			}
 
-			bool GuiShortcutKeyItem::CanActivate(bool _ctrl, bool _shift, bool _alt, int _key)
+			bool GuiShortcutKeyItem::CanActivate(bool _ctrl, bool _shift, bool _alt, vint _key)
 			{
 				return
 					_ctrl==ctrl &&
@@ -738,12 +738,12 @@ GuiShortcutKeyManager
 			{
 			}
 
-			int GuiShortcutKeyManager::GetItemCount()
+			vint GuiShortcutKeyManager::GetItemCount()
 			{
 				return shortcutKeyItems.Count();
 			}
 
-			IGuiShortcutKeyItem* GuiShortcutKeyManager::GetItem(int index)
+			IGuiShortcutKeyItem* GuiShortcutKeyManager::GetItem(vint index)
 			{
 				return shortcutKeyItems[index].Obj();
 			}
@@ -763,7 +763,7 @@ GuiShortcutKeyManager
 				return executed;
 			}
 
-			IGuiShortcutKeyItem* GuiShortcutKeyManager::CreateShortcut(bool ctrl, bool shift, bool alt, int key)
+			IGuiShortcutKeyItem* GuiShortcutKeyManager::CreateShortcut(bool ctrl, bool shift, bool alt, vint key)
 			{
 				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{
@@ -777,7 +777,7 @@ GuiShortcutKeyManager
 				return item.Obj();
 			}
 
-			bool GuiShortcutKeyManager::DestroyShortcut(bool ctrl, bool shift, bool alt, int key)
+			bool GuiShortcutKeyManager::DestroyShortcut(bool ctrl, bool shift, bool alt, vint key)
 			{
 				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{
@@ -790,7 +790,7 @@ GuiShortcutKeyManager
 				return false;
 			}
 
-			IGuiShortcutKeyItem* GuiShortcutKeyManager::TryGetShortcut(bool ctrl, bool shift, bool alt, int key)
+			IGuiShortcutKeyItem* GuiShortcutKeyManager::TryGetShortcut(bool ctrl, bool shift, bool alt, vint key)
 			{
 				FOREACH(Ptr<GuiShortcutKeyItem>, item, shortcutKeyItems)
 				{

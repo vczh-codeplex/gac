@@ -98,7 +98,7 @@ Common Interface
 				/// <summary>Get the text from a specified row number.</summary>
 				/// <returns>The text from a specified row number.</returns>
 				/// <param name="row">The specified row number.</param>
-				WString										GetRowText(int row);
+				WString										GetRowText(vint row);
 				/// <summary>Get the text from a specified range.</summary>
 				/// <returns>The text from a specified range.</returns>
 				/// <param name="start">The specified start position.</param>
@@ -107,16 +107,16 @@ Common Interface
 				/// <summary>Get the width of a row.</summary>
 				/// <returns>The width of a row in pixel.</returns>
 				/// <param name="row">The specified row number</param>
-				int											GetRowWidth(int row);
+				vint											GetRowWidth(vint row);
 				/// <summary>Get the height of a row.</summary>
 				/// <returns>The height of a row in pixel.</returns>
-				int											GetRowHeight();
+				vint											GetRowHeight();
 				/// <summary>Get the maximum width of all rows.</summary>
 				/// <returns>The maximum width of all rows.</returns>
-				int											GetMaxWidth();
+				vint											GetMaxWidth();
 				/// <summary>Get the total height of all rows.</summary>
 				/// <returns>The total height of all rows.</returns>
-				int											GetMaxHeight();
+				vint											GetMaxHeight();
 				/// <summary>Get the nearest position of a character from a specified display position.</summary>
 				/// <returns>Get the nearest position of a character.</returns>
 				/// <param name="point">The specified display position.</param>

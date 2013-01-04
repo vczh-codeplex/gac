@@ -47,7 +47,7 @@ Stack Compositions
 				ItemCompositionList					stackItems;
 				collections::Array<Rect>			stackItemBounds;
 				Size								stackItemTotalSize;
-				int									padding;
+				vint									padding;
 				Rect								previousBounds;
 				Margin								extraMargin;
 
@@ -66,7 +66,7 @@ Stack Compositions
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="index">The position.</param>
 				/// <param name="item">The statck item to insert.</param>
-				bool								InsertStackItem(int index, GuiStackItemComposition* item);
+				bool								InsertStackItem(vint index, GuiStackItemComposition* item);
 				
 				/// <summary>Get the stack item layout direction.</summary>
 				/// <returns>The stack item layout direction.</returns>
@@ -76,10 +76,10 @@ Stack Compositions
 				void								SetDirection(Direction value);
 				/// <summary>Get the stack item padding.</summary>
 				/// <returns>The stack item padding.</returns>
-				int									GetPadding();
+				vint									GetPadding();
 				/// <summary>Set the stack item padding.</summary>
 				/// <param name="value">The stack item padding.</param>
-				void								SetPadding(int value);
+				void								SetPadding(vint value);
 
 				Size								GetMinPreferredClientSize()override;
 				Rect								GetBounds()override;

@@ -76,7 +76,7 @@ Tab Control
 				public:
 					/// <summary>Select a tab page.</summary>
 					/// <param name="index">The specified position for the tab page.</param>
-					virtual void								ShowTab(int index)=0;
+					virtual void								ShowTab(vint index)=0;
 				};
 				
 				/// <summary>Style controller interface for <see cref="GuiTab"/>.</summary>
@@ -88,21 +88,21 @@ Tab Control
 					virtual void								SetCommandExecutor(ICommandExecutor* value)=0;
 					/// <summary>Insert a tag header at the specified position.</summary>
 					/// <param name="index">The specified position.</param>
-					virtual void								InsertTab(int index)=0;
+					virtual void								InsertTab(vint index)=0;
 					/// <summary>Set the text of a tag header at the specified position.</summary>
 					/// <param name="index">The specified position.</param>
 					/// <param name="value">The text.</param>
-					virtual void								SetTabText(int index, const WString& value)=0;
+					virtual void								SetTabText(vint index, const WString& value)=0;
 					/// <summary>Remove the tag header at the specified position.</summary>
 					/// <param name="index">The specified position.</param>
-					virtual void								RemoveTab(int index)=0;
+					virtual void								RemoveTab(vint index)=0;
 					/// <summary>Move a tag header from a position to another.</summary>
 					/// <param name="oldIndex">The old position.</param>
 					/// <param name="newIndex">The new position.</param>
-					virtual void								MoveTab(int oldIndex, int newIndex)=0;
+					virtual void								MoveTab(vint oldIndex, vint newIndex)=0;
 					/// <summary>Render a tag header at the specified position as selected.</summary>
 					/// <param name="index">The specified position.</param>
-					virtual void								SetSelectedTab(int index)=0;
+					virtual void								SetSelectedTab(vint index)=0;
 					/// <summary>Create a style controller for tab page container control.</summary>
 					/// <returns>The created style controller.</returns>
 					virtual GuiControl::IStyleController*		CreateTabPageStyleController()=0;
@@ -116,7 +116,7 @@ Tab Control
 					CommandExecutor(GuiTab* _tab);
 					~CommandExecutor();
 
-					void										ShowTab(int index)override;
+					void										ShowTab(vint index)override;
 				};
 
 				Ptr<CommandExecutor>							commandExecutor;
@@ -135,12 +135,12 @@ Tab Control
 				/// <summary>Create a tag page at the specified index.</summary>
 				/// <returns>The created page.</returns>
 				/// <param name="index">The specified index. Set to -1 to insert at the last position.</param>
-				GuiTabPage*										CreatePage(int index=-1);
+				GuiTabPage*										CreatePage(vint index=-1);
 				/// <summary>Insert a tag page at the specified index.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="page">The tab page to insert. This page should be a new page that has never been inserted to a <see cref="GuiTab"/>.</param>
 				/// <param name="index">The specified index. Set to -1 to insert at the last position.</param>
-				bool											CreatePage(GuiTabPage* page, int index=-1);
+				bool											CreatePage(GuiTabPage* page, vint index=-1);
 				/// <summary>Remove the tag page at the specified index.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="page">The tab page to remove.</param>
@@ -149,7 +149,7 @@ Tab Control
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="page">The tab page to move.</param>
 				/// <param name="index">The new position.</param>
-				bool											MovePage(GuiTabPage* page, int newIndex);
+				bool											MovePage(GuiTabPage* page, vint newIndex);
 				/// <summary>Get all pages.</summary>
 				/// <returns>All pages.</returns>
 				const collections::List<GuiTabPage*>&			GetPages();
@@ -183,7 +183,7 @@ Scroll View
 					virtual GuiScroll::IStyleController*			CreateVerticalScrollStyle()=0;
 					/// <summary>Get the default scroll size for scroll bars, width for vertical, height for horizontal.</summary>
 					/// <returns>The default scroll size.</returns>
-					virtual int										GetDefaultScrollSize()=0;
+					virtual vint										GetDefaultScrollSize()=0;
 					/// <summary>Called when the control begins to initialize. The control pass the bounds composition, and the style provider can put background compositions and elements on it, and return a container composition to contain content and scroll bars.</summary>
 					/// <returns>A container composition to contain content and scroll bars</returns>
 					/// <param name="boundsComposition">The bounds composition to install background.</param>
