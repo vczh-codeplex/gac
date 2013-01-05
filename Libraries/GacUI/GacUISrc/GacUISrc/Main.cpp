@@ -158,8 +158,8 @@ GrammarColorizer
 					break;
 				}
 
-				ParsingError error;
-				Ptr<ParsingTreeObject> node=grammarParser->Parse(currentParsingText, L"ParserDecl", error).Cast<ParsingTreeObject>();
+				List<Ptr<ParsingError>> errors;
+				Ptr<ParsingTreeObject> node=grammarParser->Parse(currentParsingText, L"ParserDecl", errors).Cast<ParsingTreeObject>();
 				Ptr<ParserDecl> decl;
 				if(node)
 				{
