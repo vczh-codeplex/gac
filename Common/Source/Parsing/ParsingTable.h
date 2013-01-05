@@ -252,28 +252,41 @@ namespace vl
 				Ptr<ParsingTreeObject>						GetNode();
 			};
 
-			class ParsingStrictParser : public Object
+/***********************************************************************
+Óï·¨·ÖÎöÆ÷Çý¶¯Æ÷
+***********************************************************************/
+
+			class ParsingGeneralParser : public Object
 			{
 			protected:
 				Ptr<ParsingTable>							table;
 
+				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)=0;
+			public:
+				ParsingGeneralParser(Ptr<ParsingTable> _table);
+				~ParsingGeneralParser();
+
+				virtual Ptr<ParsingTreeNode>				Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors);
+			};
+
+			class ParsingStrictParser : public ParsingGeneralParser
+			{
+			protected:
+
+				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
 				ParsingStrictParser(Ptr<ParsingTable> _table);
 				~ParsingStrictParser();
-
-				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, ParsingError& firstError);
 			};
 
-			class ParsingAutoRecoverParser : public Object
+			class ParsingAutoRecoverParser : public ParsingGeneralParser
 			{
 			protected:
-				Ptr<ParsingTable>							table;
 
+				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
 				ParsingAutoRecoverParser(Ptr<ParsingTable> _table);
 				~ParsingAutoRecoverParser();
-
-				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule);
 			};
 
 /***********************************************************************

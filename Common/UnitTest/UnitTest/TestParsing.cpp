@@ -660,11 +660,11 @@ TEST_CASE(TestParsingBootstrap)
 		CreateParserDefinition(),
 	};
 
-	ParsingError firstError;
+	List<Ptr<ParsingError>> errors;
 	for(vint i=0;i<sizeof(inputDefs)/sizeof(*inputDefs);i++)
 	{
 		WString grammar=ParsingDefinitionToText(inputDefs[i]);
-		Ptr<ParsingTreeNode> node=parser->Parse(grammar, L"ParserDecl", firstError);
+		Ptr<ParsingTreeNode> node=parser->Parse(grammar, L"ParserDecl", errors);
 		TEST_ASSERT(node);
 		Ptr<ParsingDefinition> def=DeserializeDefinition(node);
 		TEST_ASSERT(def);
@@ -685,8 +685,8 @@ TEST_CASE(TestParsingTreeCharacterPosition)
 	}
 
 	WString input=L"11+22*\r\n33+44";
-	ParsingError firstError;
-	Ptr<ParsingTreeNode> node=parser->Parse(input, L"Exp", firstError);
+	List<Ptr<ParsingError>> errors;
+	Ptr<ParsingTreeNode> node=parser->Parse(input, L"Exp", errors);
 	TEST_ASSERT(node);
 	node->InitializeQueryCache();
 
