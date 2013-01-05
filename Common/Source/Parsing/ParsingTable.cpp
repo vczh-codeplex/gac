@@ -538,12 +538,16 @@ ParsingTreeBuilder
 						{
 							if(!createdObject)
 							{
+								Ptr<ParsingTreeToken> value;
 								if(result.token==0)
 								{
-									return false;
+									value=new ParsingTreeToken(L"", result.tokenIndexInStream);
 								}
-								Ptr<ParsingTreeToken> value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
-								value->SetCodeRange(ParsingTextRange(result.token, result.token));
+								else
+								{
+									value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
+									value->SetCodeRange(ParsingTextRange(result.token, result.token));
+								}
 								operationTarget->SetMember(ins.nameParameter, value);
 							}
 							else
@@ -565,13 +569,17 @@ ParsingTreeBuilder
 							ParsingTextRange itemRange;
 							if(!createdObject)
 							{
+								Ptr<ParsingTreeToken> value;
 								if(result.token==0)
 								{
-									return false;
+									value=new ParsingTreeToken(L"", result.tokenIndexInStream);
 								}
-								Ptr<ParsingTreeToken> value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
-								value->SetCodeRange(ParsingTextRange(result.token, result.token));
-								itemRange=value->GetCodeRange();
+								else
+								{
+									value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
+									value->SetCodeRange(ParsingTextRange(result.token, result.token));
+									itemRange=value->GetCodeRange();
+								}
 								arr->AddItem(value);
 							}
 							else
@@ -780,9 +788,83 @@ ParsingStrictParser
 ParsingAutoRecoverParser
 ***********************************************************************/
 
+			vint GetTransitionLevelForAutoRecover(ParsingTable::TransitionItem* t)
+			{
+				bool hasShift=false;
+				bool hasReduce=false;
+				bool hasLrReduce=false;
+				FOREACH(ParsingTable::Instruction, ins, t->instructions)
+				{
+					switch(ins.instructionType)
+					{
+					case ParsingTable::Instruction::Shift:
+						hasShift=true;
+						break;
+					case ParsingTable::Instruction::Reduce:
+						hasReduce=true;
+						break;
+					case ParsingTable::Instruction::LeftRecursiveReduce:
+						hasLrReduce=true;
+						break;
+					}
+				}
+
+				if(hasShift)
+				{
+					return
+						hasLrReduce?5:
+						hasShift?4:
+						3;
+				}
+				else
+				{
+					return
+						hasLrReduce?2:
+						hasShift?1:
+						0;
+				}
+			}
+
+			ParsingTable::TransitionItem* ParsingAutoRecoverParser::ChooseRecoverItem(ParsingState& state, collections::List<ParsingTable::TransitionItem*>& candidates)
+			{
+				return candidates[0];
+			}
+
 			ParsingState::TransitionResult ParsingAutoRecoverParser::OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
 			{
-				return ParsingState::TransitionResult();
+				List<ParsingTable::TransitionItem*> availableItems;
+				vint tokenCount=table->GetTokenCount();
+				for(vint i=0;i<tokenCount;i++)
+				{
+					state.MatchToken(i, availableItems, true);
+				}
+
+				List<ParsingTable::TransitionItem*> selectedItems;
+				vint selectedLevel=-1;
+				FOREACH(ParsingTable::TransitionItem*, item, availableItems)
+				{
+					vint level=GetTransitionLevelForAutoRecover(item);
+					if(level>selectedLevel)
+					{
+						selectedLevel=level;
+						selectedItems.Clear();
+						selectedItems.Add(item);
+					}
+					else if(level==selectedLevel)
+					{
+						selectedItems.Add(item);
+					}
+				}
+
+				if(selectedItems.Count()>0)
+				{
+					ParsingTable::TransitionItem* item=ChooseRecoverItem(state, selectedItems);
+					return state.ReadToken(item->token, 0);
+				}
+				else
+				{
+					return ParsingState::TransitionResult();
+				}
 			}
 
 			ParsingAutoRecoverParser::ParsingAutoRecoverParser(Ptr<ParsingTable> _table)

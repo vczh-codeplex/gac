@@ -283,6 +283,7 @@ namespace vl
 			{
 			protected:
 
+				ParsingTable::TransitionItem*				ChooseRecoverItem(ParsingState& state, collections::List<ParsingTable::TransitionItem*>& candidates);
 				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
 				ParsingAutoRecoverParser(Ptr<ParsingTable> _table);
