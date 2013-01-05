@@ -739,3 +739,51 @@ TEST_CASE(TestParsingTreeCharacterPosition)
 		TEST_ASSERT(token->GetValue()==L"44");
 	}
 }
+
+namespace test
+{
+	void ParseWithAutoRecover(Ptr<ParsingDefinition> definition, const WString& name, const WString& rule, List<WString>& inputs)
+	{
+		List<Ptr<ParsingError>> errors;
+		Ptr<ParsingTable> table=GenerateTable(definition, errors);
+		TEST_ASSERT(table);
+		Ptr<ParsingAutoRecoverParser> parser=new ParsingAutoRecoverParser(table);
+
+		FileStream fileStream(GetPath()+L"Parsing.AutoRecover."+name+L".txt", FileStream::WriteOnly);
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+
+		FOREACH(WString, input, inputs)
+		{
+			unittest::UnitTest::PrintInfo(L"Parsing: "+input);
+			writer.WriteLine(L"=============================================================");
+			writer.WriteLine(input);
+			writer.WriteLine(L"=============================================================");
+
+			errors.Clear();
+			Ptr<ParsingTreeNode> node=parser->Parse(input, rule, errors);
+			if(node)
+			{
+				Log(node, input, writer);
+			}
+		}
+	}
+}
+using namespace test;
+
+TEST_CASE(TestAutoRecoverParser)
+{
+	Ptr<ParsingDefinition> definition=CreateExpressionDefinition();
+	List<WString> inputs;
+	inputs.Add(L"");
+	inputs.Add(L"+");
+	inputs.Add(L"1+");
+	inputs.Add(L"+1");
+	inputs.Add(L"(1");
+	inputs.Add(L"1)");
+	inputs.Add(L"1 2+3)");
+	inputs.Add(L"(1 2+3");
+	inputs.Add(L"()");
+	ParseWithAutoRecover(definition, L"Calculator", L"Exp", inputs);
+}
