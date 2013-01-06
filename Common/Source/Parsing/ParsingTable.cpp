@@ -854,7 +854,7 @@ ParsingStrictParser
 			{
 			}
 
-			Ptr<ParsingStrictParser> CreateBootstrapParser()
+			Ptr<ParsingStrictParser> CreateBootstrapStrictParser()
 			{
 				List<Ptr<ParsingError>> errors;
 				Ptr<ParsingDefinition> definition=CreateParserDefinition();
@@ -862,6 +862,18 @@ ParsingStrictParser
 				if(table)
 				{
 					return new ParsingStrictParser(table);
+				}
+				return 0;
+			}
+
+			Ptr<ParsingAutoRecoverParser> CreateBootstrapAutoRecoverParser()
+			{
+				List<Ptr<ParsingError>> errors;
+				Ptr<ParsingDefinition> definition=CreateParserDefinition();
+				Ptr<ParsingTable> table=GenerateTable(definition, errors);
+				if(table)
+				{
+					return new ParsingAutoRecoverParser(table);
 				}
 				return 0;
 			}

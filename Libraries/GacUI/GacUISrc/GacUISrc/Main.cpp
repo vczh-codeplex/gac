@@ -130,7 +130,7 @@ GrammarColorizer
 	class GrammarColorizer : public GuiTextBoxRegexColorizer
 	{
 	protected:
-		Ptr<ParsingStrictParser>				grammarParser;
+		Ptr<ParsingAutoRecoverParser>			grammarParser;
 		volatile bool							finalizing;
 
 		SpinLock								parsingTreeLock;
@@ -213,7 +213,7 @@ GrammarColorizer
 
 		void InitializeParser()
 		{
-			grammarParser=CreateBootstrapParser();
+			grammarParser=CreateBootstrapAutoRecoverParser();
 		}
 
 		TypeSymbol* FindScope(ParsingTreeNode* node)

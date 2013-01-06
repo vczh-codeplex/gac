@@ -317,7 +317,8 @@ namespace vl
 ¸¨Öúº¯Êý
 ***********************************************************************/
 
-			extern Ptr<ParsingStrictParser>					CreateBootstrapParser();
+			extern Ptr<ParsingStrictParser>					CreateBootstrapStrictParser();
+			extern Ptr<ParsingAutoRecoverParser>			CreateBootstrapAutoRecoverParser();
 			extern void										Log(Ptr<ParsingTable> table, stream::TextWriter& writer);
 		}
 	}

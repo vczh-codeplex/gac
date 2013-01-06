@@ -11921,9 +11921,8 @@ namespace vl
 					}
 				};
 
-				class TransitionResult
+				struct TransitionResult
 				{
-				public:
 					vint										tableTokenIndex;
 					vint										tableStateSource;
 					vint										tableStateTarget;
@@ -11959,6 +11958,25 @@ namespace vl
 						shiftReduceRanges->Add(range);
 					}
 				};
+
+				struct Future
+				{
+					vint									currentState;
+					vint									reduceStateCount;
+					collections::List<vint>					shiftStates;
+					vint									selectedToken;
+					Future*									previous;
+					Future*									next;
+
+					Future()
+						:currentState(-1)
+						,reduceStateCount(0)
+						,selectedToken(-1)
+						,previous(0)
+						,next(0)
+					{
+					}
+				};
 			private:
 				WString										input;
 				Ptr<ParsingTable>							table;
@@ -11967,6 +11985,7 @@ namespace vl
 				collections::List<vint>						stateStack;
 				vint										currentState;
 				vint										currentToken;
+				vint										tokenSequenceIndex;
 				
 				collections::List<regex::RegexToken*>		shiftTokenStack;
 				regex::RegexToken*							shiftToken;
@@ -11978,12 +11997,18 @@ namespace vl
 				const WString&								GetInput();
 				Ptr<ParsingTable>							GetTable();
 				const collections::List<regex::RegexToken>&	GetTokens();
+				regex::RegexToken*							GetToken(vint index);
 
 				vint										Reset(const WString& rule);
-				TransitionResult							ReadToken();
-				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken);
 				vint										GetCurrentToken();
 				const collections::List<vint>&				GetStateStack();
+				vint										GetCurrentState();
+
+				ParsingTable::TransitionItem*				MatchToken(vint tableTokenIndex);
+				ParsingTable::TransitionItem*				MatchTokenInFuture(vint tableTokenIndex, Future* future);
+				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken);
+				TransitionResult							ReadToken();
+				bool										ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now);
 			};
 
 /***********************************************************************
@@ -11993,9 +12018,9 @@ namespace vl
 			class ParsingTreeBuilder : public Object
 			{
 			protected:
-				Ptr<ParsingTreeNode>									createdObject;
-				Ptr<ParsingTreeObject>									operationTarget;
-				collections::List<Ptr<ParsingTreeObject>>				nodeStack;
+				Ptr<ParsingTreeNode>						createdObject;
+				Ptr<ParsingTreeObject>						operationTarget;
+				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
 			public:
 				ParsingTreeBuilder();
 				~ParsingTreeBuilder();
@@ -12005,24 +12030,52 @@ namespace vl
 				Ptr<ParsingTreeObject>						GetNode();
 			};
 
-			class ParsingRestrictParser : public Object
+/***********************************************************************
+语法分析器驱动器
+***********************************************************************/
+
+			class ParsingGeneralParser : public Object
 			{
 			protected:
 				Ptr<ParsingTable>							table;
 
-				const regex::RegexToken*					ConvertToken(vint token, ParsingState& state);
+				virtual void								OnReset();
+				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)=0;
 			public:
-				ParsingRestrictParser(Ptr<ParsingTable> _table);
-				~ParsingRestrictParser();
+				ParsingGeneralParser(Ptr<ParsingTable> _table);
+				~ParsingGeneralParser();
 
-				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, ParsingError& firstError);
+				virtual Ptr<ParsingTreeNode>				Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors);
+			};
+
+			class ParsingStrictParser : public ParsingGeneralParser
+			{
+			protected:
+
+				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
+			public:
+				ParsingStrictParser(Ptr<ParsingTable> _table);
+				~ParsingStrictParser();
+			};
+
+			class ParsingAutoRecoverParser : public ParsingGeneralParser
+			{
+			protected:
+				collections::Array<ParsingState::Future>	recoverFutures;
+				vint										recoveringFutureIndex;
+
+				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
+			public:
+				ParsingAutoRecoverParser(Ptr<ParsingTable> _table);
+				~ParsingAutoRecoverParser();
 			};
 
 /***********************************************************************
 辅助函数
 ***********************************************************************/
 
-			extern Ptr<ParsingRestrictParser>				CreateBootstrapParser();
+			extern Ptr<ParsingStrictParser>					CreateBootstrapStrictParser();
+			extern Ptr<ParsingAutoRecoverParser>			CreateBootstrapAutoRecoverParser();
 			extern void										Log(Ptr<ParsingTable> table, stream::TextWriter& writer);
 		}
 	}
