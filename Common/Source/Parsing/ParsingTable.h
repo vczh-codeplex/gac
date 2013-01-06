@@ -226,6 +226,7 @@ namespace vl
 				vint										Reset(const WString& rule);
 				vint										GetCurrentToken();
 				const collections::List<vint>&				GetStateStack();
+				vint										GetCurrentState();
 
 				void										MatchToken(vint tableTokenIndex, collections::List<ParsingTable::TransitionItem*>& items, bool fetchFirstOnly);
 				ParsingTable::TransitionItem*				MatchToken(vint tableTokenIndex);
@@ -261,6 +262,7 @@ namespace vl
 			protected:
 				Ptr<ParsingTable>							table;
 
+				virtual void								OnReset();
 				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)=0;
 			public:
 				ParsingGeneralParser(Ptr<ParsingTable> _table);
@@ -282,8 +284,12 @@ namespace vl
 			class ParsingAutoRecoverParser : public ParsingGeneralParser
 			{
 			protected:
+				regex::RegexToken*																					discardHistoryToken;
+				collections::Dictionary<WString, Ptr<collections::SortedList<ParsingTable::TransitionItem*>>>		discardHistory;
+				collections::Dictionary<WString, ParsingTable::TransitionItem*>										recoverDecision;
 
 				ParsingTable::TransitionItem*				ChooseRecoverItem(ParsingState& state, collections::List<ParsingTable::TransitionItem*>& candidates);
+				void										OnReset()override;
 				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
 				ParsingAutoRecoverParser(Ptr<ParsingTable> _table);
