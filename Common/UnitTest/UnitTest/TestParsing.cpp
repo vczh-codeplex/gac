@@ -767,6 +767,7 @@ namespace test
 			{
 				Log(node, input, writer);
 			}
+			writer.WriteLine(L"");
 		}
 	}
 }

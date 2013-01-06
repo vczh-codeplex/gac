@@ -239,6 +239,7 @@ ParsingState
 				,table(_table)
 				,currentState(-1)
 				,currentToken(-1)
+				,tokenSequenceIndex(0)
 				,shiftToken(0)
 				,reduceToken(0)
 			{
@@ -288,6 +289,7 @@ ParsingState
 						stateStack.Clear();
 						currentState=info.rootStartState;
 						currentToken=-1;
+						tokenSequenceIndex=0;
 						shiftToken=0;
 						reduceToken=0;
 						return currentState;
@@ -311,47 +313,49 @@ ParsingState
 				return currentState;
 			}
 
-			void ParsingState::MatchToken(vint tableTokenIndex, collections::List<ParsingTable::TransitionItem*>& items, bool fetchFirstOnly)
+			ParsingTable::TransitionItem* ParsingState::MatchToken(vint tableTokenIndex)
 			{
-				ParsingTable::TransitionBag* bag=table->GetTransitionBag(currentState, tableTokenIndex).Obj();
+				Future future;
+				future.currentState=currentState;
+				return MatchTokenInFuture(tableTokenIndex, &future);
+			}
+
+			ParsingTable::TransitionItem* ParsingState::MatchTokenInFuture(vint tableTokenIndex, Future* future)
+			{
+				ParsingTable::TransitionBag* bag=table->GetTransitionBag(future->currentState, tableTokenIndex).Obj();
 				if(bag)
 				{
 					for(vint i=0;i<bag->transitionItems.Count();i++)
 					{
 						ParsingTable::TransitionItem* item=bag->transitionItems[i].Obj();
-						if(item->stackPattern.Count()<=stateStack.Count())
+						vint availableStackDepth=stateStack.Count()-future->reduceStateCount;
+						vint totalStackDepth=stateStack.Count()-future->reduceStateCount+future->shiftStates.Count();
+						if(item->stackPattern.Count()<=totalStackDepth)
 						{
-							if(tableTokenIndex!=ParsingTable::TokenFinish || item->stackPattern.Count()==stateStack.Count())
+							if(tableTokenIndex!=ParsingTable::TokenFinish || item->stackPattern.Count()==totalStackDepth)
 							{
 								bool match=true;
 								for(vint j=0;j<item->stackPattern.Count();j++)
 								{
-									if(item->stackPattern[j]!=stateStack[stateStack.Count()-1-j])
+									vint state=
+										j<future->shiftStates.Count()
+										?future->shiftStates[future->shiftStates.Count()-1-j]
+										:stateStack[availableStackDepth-1-(j-future->shiftStates.Count())]
+										;
+									if(item->stackPattern[j]!=state)
 									{
 										match=false;
-										break;
 									}
 								}
-
 								if(match)
 								{
-									items.Add(item);
-									if(fetchFirstOnly)
-									{
-										return;
-									}
+									return item;
 								}
 							}
 						}
 					}
 				}
-			}
-
-			ParsingTable::TransitionItem* ParsingState::MatchToken(vint tableTokenIndex)
-			{
-				collections::List<ParsingTable::TransitionItem*> items;
-				MatchToken(tableTokenIndex, items, true);
-				return items.Count()>0?items[0]:0;
+				return 0;
 			}
 
 			ParsingState::TransitionResult ParsingState::ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken)
@@ -365,8 +369,15 @@ ParsingState
 						{
 							shiftToken=regexToken;
 							reduceToken=regexToken;
+						}
+					}
+					if(tableTokenIndex>=ParsingTable::UserTokenStart)
+					{
+						if(tokenSequenceIndex==0)
+						{
 							shiftTokenStack.Add(shiftToken);
 						}
+						tokenSequenceIndex++;
 					}
 
 					TransitionResult result;
@@ -476,6 +487,68 @@ ParsingState
 					currentToken++;
 				}
 				return result;
+			}
+
+			bool ParsingState::ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now)
+			{
+				ParsingTable::TransitionItem* selectedItem=0;
+				if(previous)
+				{
+					selectedItem=MatchTokenInFuture(tableTokenIndex, previous);
+				}
+				else
+				{
+					selectedItem=MatchToken(tableTokenIndex);
+				}
+
+				if(selectedItem)
+				{
+					if(previous)
+					{
+						now->reduceStateCount=previous->reduceStateCount;
+						CopyFrom(now->shiftStates, previous->shiftStates);
+					}
+					else
+					{
+						now->reduceStateCount=0;
+						now->shiftStates.Clear();
+					}
+					now->currentState=selectedItem->targetState;
+					now->selectedToken=tableTokenIndex;
+					now->previous=previous;
+					now->next=0;
+
+					for(vint j=0;j<selectedItem->instructions.Count();j++)
+					{
+						ParsingTable::Instruction& ins=selectedItem->instructions[j];
+						switch(ins.instructionType)
+						{
+						case ParsingTable::Instruction::Shift:
+							{
+								now->shiftStates.Add(ins.stateParameter);
+							}
+							break;
+						case ParsingTable::Instruction::Reduce:
+							{
+								if(now->shiftStates.Count()==0)
+								{
+									now->reduceStateCount++;
+								}
+								else
+								{
+									now->shiftStates.RemoveAt(now->shiftStates.Count()-1);
+								}
+							}
+							break;
+						}
+					}
+
+					return true;
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 /***********************************************************************
@@ -797,136 +870,80 @@ ParsingStrictParser
 ParsingAutoRecoverParser
 ***********************************************************************/
 
-			vint GetTransitionLevelForAutoRecover(ParsingTable::TransitionItem* t)
-			{
-				bool hasShift=false;
-				bool hasReduce=false;
-				bool hasLrReduce=false;
-				FOREACH(ParsingTable::Instruction, ins, t->instructions)
-				{
-					switch(ins.instructionType)
-					{
-					case ParsingTable::Instruction::Shift:
-						hasShift=true;
-						break;
-					case ParsingTable::Instruction::Reduce:
-						hasReduce=true;
-						break;
-					case ParsingTable::Instruction::LeftRecursiveReduce:
-						hasLrReduce=true;
-						break;
-					}
-				}
-
-				if(hasShift)
-				{
-					return
-						hasLrReduce?5:
-						hasShift?4:
-						3;
-				}
-				else
-				{
-					return
-						hasLrReduce?2:
-						hasShift?1:
-						0;
-				}
-			}
-
-			ParsingTable::TransitionItem* ParsingAutoRecoverParser::ChooseRecoverItem(ParsingState& state, collections::List<ParsingTable::TransitionItem*>& candidates)
-			{
-				if(discardHistoryToken!=state.GetToken(state.GetCurrentToken()))
-				{
-					discardHistory.Clear();
-					discardHistoryToken=state.GetToken(state.GetCurrentToken());
-				}
-
-				WString key=itow(state.GetCurrentState());
-				FOREACH(ParsingTable::TransitionItem*, item, candidates)
-				{
-					key+=L":"+u64tow((unsigned __int64)item);
-				}
-
-				vint index=discardHistory.Keys().IndexOf(key);
-				Ptr<SortedList<ParsingTable::TransitionItem*>> discard;
-				if(index==-1)
-				{
-					discard=new SortedList<ParsingTable::TransitionItem*>;
-					discardHistory.Add(key, discard);
-				}
-				else
-				{
-					discard=discardHistory.Values().Get(index);
-				}
-
-				ParsingTable::TransitionItem* selectedItem=0;
-				FOREACH(ParsingTable::TransitionItem*, item, candidates)
-				{
-					if(!discard->Contains(item))
-					{
-						selectedItem=item;
-						break;
-					}
-				}
-
-				if(selectedItem)
-				{
-					discard->Add(selectedItem);
-					return selectedItem;
-				}
-				else
-				{
-					return candidates[0];
-				}
-			}
-
-			void ParsingAutoRecoverParser::OnReset()
-			{
-				discardHistoryToken=0;
-				discardHistory.Clear();
-			}
-
 			ParsingState::TransitionResult ParsingAutoRecoverParser::OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
 			{
-				List<ParsingTable::TransitionItem*> availableItems;
-				vint tokenCount=table->GetTokenCount();
-				for(vint i=0;i<tokenCount;i++)
+				vint targetTableTokenIndex=(currentToken?table->GetTableTokenIndex(currentToken->token):ParsingTable::TokenFinish);
+
+				vint selectedTableTokenIndex=-1;
+				if(recoveringFutureIndex==-1)
 				{
-					state.MatchToken(i, availableItems, true);
+					vint processingFutureIndex=-1;
+					vint usedFutureCount=0;
+					while(true)
+					{
+						ParsingState::Future* previous=0;
+						if(processingFutureIndex!=-1)
+						{
+							previous=&recoverFutures[processingFutureIndex];
+						}
+						processingFutureIndex++;
+
+						vint currentTableTokenIndex=0;
+						while(currentTableTokenIndex<table->GetTokenCount() && usedFutureCount<recoverFutures.Count())
+						{
+							ParsingState::Future* now=&recoverFutures[usedFutureCount];
+							if(state.ReadTokenInFuture(currentTableTokenIndex, previous, now))
+							{
+								if(currentTableTokenIndex==targetTableTokenIndex)
+								{
+									ParsingState::Future* future=previous;
+									while(future->previous)
+									{
+										future->previous->next=future;
+										future=future->previous;
+									}
+									recoveringFutureIndex=future-&recoverFutures[0];
+									goto FOUND_ERROR_RECOVER_SOLUTION;
+								}
+								else
+								{
+									usedFutureCount++;
+								}
+							}
+							currentTableTokenIndex++;
+						}
+					}
+				}
+			FOUND_ERROR_RECOVER_SOLUTION:
+
+				if(recoveringFutureIndex!=-1)
+				{
+					ParsingState::Future* future=&recoverFutures[recoveringFutureIndex];
+					selectedTableTokenIndex=future->selectedToken;
+					if(future->next)
+					{
+						recoveringFutureIndex+=future->next-future;
+					}
+					else
+					{
+						recoveringFutureIndex=-1;
+					}
 				}
 
-				List<ParsingTable::TransitionItem*> selectedItems;
-				vint selectedLevel=-1;
-				FOREACH(ParsingTable::TransitionItem*, item, availableItems)
+				if(selectedTableTokenIndex==-1)
 				{
-					vint level=GetTransitionLevelForAutoRecover(item);
-					if(level>selectedLevel)
-					{
-						selectedLevel=level;
-						selectedItems.Clear();
-						selectedItems.Add(item);
-					}
-					else if(level==selectedLevel)
-					{
-						selectedItems.Add(item);
-					}
-				}
-
-				if(selectedItems.Count()>0)
-				{
-					ParsingTable::TransitionItem* item=ChooseRecoverItem(state, selectedItems);
-					return state.ReadToken(item->token, 0);
+					return ParsingState::TransitionResult();
 				}
 				else
 				{
-					return ParsingState::TransitionResult();
+					return state.ReadToken(selectedTableTokenIndex, 0);
 				}
 			}
 
 			ParsingAutoRecoverParser::ParsingAutoRecoverParser(Ptr<ParsingTable> _table)
 				:ParsingGeneralParser(_table)
-				,discardHistoryToken(0)
+				,recoverFutures(65536)
+				,recoveringFutureIndex(-1)
 			{
 			}
 
