@@ -306,6 +306,11 @@ ParsingState
 				return stateStack;
 			}
 
+			vint ParsingState::GetCurrentState()
+			{
+				return currentState;
+			}
+
 			void ParsingState::MatchToken(vint tableTokenIndex, collections::List<ParsingTable::TransitionItem*>& items, bool fetchFirstOnly)
 			{
 				ParsingTable::TransitionBag* bag=table->GetTransitionBag(currentState, tableTokenIndex).Obj();
@@ -686,6 +691,10 @@ ParsingTreeBuilder
 ParsingGeneralParser
 ***********************************************************************/
 
+			void ParsingGeneralParser::OnReset()
+			{
+			}
+
 			ParsingGeneralParser::ParsingGeneralParser(Ptr<ParsingTable> _table)
 				:table(_table)
 			{
@@ -827,7 +836,55 @@ ParsingAutoRecoverParser
 
 			ParsingTable::TransitionItem* ParsingAutoRecoverParser::ChooseRecoverItem(ParsingState& state, collections::List<ParsingTable::TransitionItem*>& candidates)
 			{
-				return candidates[0];
+				if(discardHistoryToken!=state.GetToken(state.GetCurrentToken()))
+				{
+					discardHistory.Clear();
+					discardHistoryToken=state.GetToken(state.GetCurrentToken());
+				}
+
+				WString key=itow(state.GetCurrentState());
+				FOREACH(ParsingTable::TransitionItem*, item, candidates)
+				{
+					key+=L":"+u64tow((unsigned __int64)item);
+				}
+
+				vint index=discardHistory.Keys().IndexOf(key);
+				Ptr<SortedList<ParsingTable::TransitionItem*>> discard;
+				if(index==-1)
+				{
+					discard=new SortedList<ParsingTable::TransitionItem*>;
+					discardHistory.Add(key, discard);
+				}
+				else
+				{
+					discard=discardHistory.Values().Get(index);
+				}
+
+				ParsingTable::TransitionItem* selectedItem=0;
+				FOREACH(ParsingTable::TransitionItem*, item, candidates)
+				{
+					if(!discard->Contains(item))
+					{
+						selectedItem=item;
+						break;
+					}
+				}
+
+				if(selectedItem)
+				{
+					discard->Add(selectedItem);
+					return selectedItem;
+				}
+				else
+				{
+					return candidates[0];
+				}
+			}
+
+			void ParsingAutoRecoverParser::OnReset()
+			{
+				discardHistoryToken=0;
+				discardHistory.Clear();
 			}
 
 			ParsingState::TransitionResult ParsingAutoRecoverParser::OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
@@ -869,6 +926,7 @@ ParsingAutoRecoverParser
 
 			ParsingAutoRecoverParser::ParsingAutoRecoverParser(Ptr<ParsingTable> _table)
 				:ParsingGeneralParser(_table)
+				,discardHistoryToken(0)
 			{
 			}
 
