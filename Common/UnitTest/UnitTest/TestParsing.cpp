@@ -649,7 +649,7 @@ TEST_CASE(TestParsingGrammar)
 
 TEST_CASE(TestParsingBootstrap)
 {
-	Ptr<ParsingStrictParser> parser=CreateBootstrapParser();
+	Ptr<ParsingStrictParser> parser=CreateBootstrapStrictParser();
 	TEST_ASSERT(parser);
 
 	Ptr<ParsingDefinition> inputDefs[]=

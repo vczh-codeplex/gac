@@ -112,7 +112,7 @@ GrammarColorizer
 class GrammarColorizer : public GuiTextBoxRegexColorizer
 {
 protected:
-	Ptr<ParsingRestrictParser>				grammarParser;
+	Ptr<ParsingAutoRecoverParser>			grammarParser;
 	volatile bool							finalizing;
 
 	SpinLock								parsingTreeLock;
@@ -140,8 +140,8 @@ protected:
 				break;
 			}
 
-			ParsingError error;
-			Ptr<ParsingTreeObject> node=grammarParser->Parse(currentParsingText, L"ParserDecl", error).Cast<ParsingTreeObject>();
+			List<Ptr<ParsingError>> errors;
+			Ptr<ParsingTreeObject> node=grammarParser->Parse(currentParsingText, L"ParserDecl", errors).Cast<ParsingTreeObject>();
 			Ptr<ParserDecl> decl;
 			if(node)
 			{
@@ -195,7 +195,7 @@ protected:
 
 	void InitializeParser()
 	{
-		grammarParser=CreateBootstrapParser();
+		grammarParser=CreateBootstrapAutoRecoverParser();
 	}
 
 	TypeSymbol* FindScope(ParsingTreeNode* node)

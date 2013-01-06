@@ -5697,6 +5697,7 @@ ParsingState
 				,table(_table)
 				,currentState(-1)
 				,currentToken(-1)
+				,tokenSequenceIndex(0)
 				,shiftToken(0)
 				,reduceToken(0)
 			{
@@ -5722,6 +5723,20 @@ ParsingState
 				return tokens;
 			}
 
+			regex::RegexToken* ParsingState::GetToken(vint index)
+			{
+				if(index<=0)
+				{
+					index=0;
+				}
+				else if(index>tokens.Count())
+				{
+					index=tokens.Count();
+				}
+
+				return index==tokens.Count()?0:&tokens[index];
+			}
+
 			vint ParsingState::Reset(const WString& rule)
 			{
 				for(vint i=0;i<table->GetRuleCount();i++)
@@ -5732,12 +5747,156 @@ ParsingState
 						stateStack.Clear();
 						currentState=info.rootStartState;
 						currentToken=-1;
+						tokenSequenceIndex=0;
 						shiftToken=0;
 						reduceToken=0;
 						return currentState;
 					}
 				}
 				return -1;
+			}
+
+			vint ParsingState::GetCurrentToken()
+			{
+				return currentToken;
+			}
+
+			const collections::List<vint>& ParsingState::GetStateStack()
+			{
+				return stateStack;
+			}
+
+			vint ParsingState::GetCurrentState()
+			{
+				return currentState;
+			}
+
+			ParsingTable::TransitionItem* ParsingState::MatchToken(vint tableTokenIndex)
+			{
+				Future future;
+				future.currentState=currentState;
+				return MatchTokenInFuture(tableTokenIndex, &future);
+			}
+
+			ParsingTable::TransitionItem* ParsingState::MatchTokenInFuture(vint tableTokenIndex, Future* future)
+			{
+				ParsingTable::TransitionBag* bag=table->GetTransitionBag(future->currentState, tableTokenIndex).Obj();
+				if(bag)
+				{
+					for(vint i=0;i<bag->transitionItems.Count();i++)
+					{
+						ParsingTable::TransitionItem* item=bag->transitionItems[i].Obj();
+						vint availableStackDepth=stateStack.Count()-future->reduceStateCount;
+						vint totalStackDepth=stateStack.Count()-future->reduceStateCount+future->shiftStates.Count();
+						if(item->stackPattern.Count()<=totalStackDepth)
+						{
+							if(tableTokenIndex!=ParsingTable::TokenFinish || item->stackPattern.Count()==totalStackDepth)
+							{
+								bool match=true;
+								for(vint j=0;j<item->stackPattern.Count();j++)
+								{
+									vint state=
+										j<future->shiftStates.Count()
+										?future->shiftStates[future->shiftStates.Count()-1-j]
+										:stateStack[availableStackDepth-1-(j-future->shiftStates.Count())]
+										;
+									if(item->stackPattern[j]!=state)
+									{
+										match=false;
+									}
+								}
+								if(match)
+								{
+									return item;
+								}
+							}
+						}
+					}
+				}
+				return 0;
+			}
+
+			ParsingState::TransitionResult ParsingState::ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken)
+			{
+				ParsingTable::TransitionItem* item=MatchToken(tableTokenIndex);
+				if(item)
+				{
+					if(regexToken)
+					{
+						if(!shiftToken)
+						{
+							shiftToken=regexToken;
+							reduceToken=regexToken;
+						}
+					}
+					if(tableTokenIndex>=ParsingTable::UserTokenStart)
+					{
+						if(tokenSequenceIndex==0)
+						{
+							shiftTokenStack.Add(shiftToken);
+						}
+						tokenSequenceIndex++;
+					}
+
+					TransitionResult result;
+					result.tableTokenIndex=tableTokenIndex;
+					result.token=regexToken;
+					result.tokenIndexInStream=regexToken?currentToken:-1;
+					result.tableStateSource=currentState;
+					result.tableStateTarget=item->targetState;
+					result.transition=item;
+
+					for(vint j=0;j<item->instructions.Count();j++)
+					{
+						ParsingTable::Instruction& ins=item->instructions[j];
+						switch(ins.instructionType)
+						{
+						case ParsingTable::Instruction::Shift:
+							{
+								stateStack.Add(ins.stateParameter);
+
+								shiftTokenStack.Add(shiftToken);
+								shiftToken=regexToken;
+								reduceToken=regexToken;
+							}
+							break;
+						case ParsingTable::Instruction::Reduce:
+							{
+								stateStack.RemoveAt(stateStack.Count()-1);
+
+								result.AddShiftReduceRange(shiftToken, reduceToken);
+								shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
+								shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
+							}
+							break;
+						case ParsingTable::Instruction::LeftRecursiveReduce:
+							{
+								result.AddShiftReduceRange(shiftToken, reduceToken);
+								if(regexToken)
+								{
+									reduceToken=regexToken;
+								}
+							}
+							break;
+						}
+					}
+
+					if(regexToken)
+					{
+						reduceToken=regexToken;
+					}
+
+					if(tableTokenIndex==ParsingTable::TokenFinish)
+					{
+						shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
+						shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
+						result.AddShiftReduceRange(shiftToken, reduceToken);
+					}
+
+					currentState=item->targetState;
+					return result;
+				}
+				return TransitionResult();
 			}
 
 			ParsingState::TransitionResult ParsingState::ReadToken()
@@ -5788,110 +5947,66 @@ ParsingState
 				return result;
 			}
 
-			ParsingState::TransitionResult ParsingState::ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken)
+			bool ParsingState::ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now)
 			{
-				ParsingTable::TransitionBag* bag=table->GetTransitionBag(currentState, tableTokenIndex).Obj();
-				if(bag)
+				ParsingTable::TransitionItem* selectedItem=0;
+				if(previous)
 				{
-					for(vint i=0;i<bag->transitionItems.Count();i++)
+					selectedItem=MatchTokenInFuture(tableTokenIndex, previous);
+				}
+				else
+				{
+					selectedItem=MatchToken(tableTokenIndex);
+				}
+
+				if(selectedItem)
+				{
+					if(previous)
 					{
-						ParsingTable::TransitionItem* item=bag->transitionItems[i].Obj();
-						if(item->stackPattern.Count()<=stateStack.Count())
+						now->reduceStateCount=previous->reduceStateCount;
+						CopyFrom(now->shiftStates, previous->shiftStates);
+					}
+					else
+					{
+						now->reduceStateCount=0;
+						now->shiftStates.Clear();
+					}
+					now->currentState=selectedItem->targetState;
+					now->selectedToken=tableTokenIndex;
+					now->previous=previous;
+					now->next=0;
+
+					for(vint j=0;j<selectedItem->instructions.Count();j++)
+					{
+						ParsingTable::Instruction& ins=selectedItem->instructions[j];
+						switch(ins.instructionType)
 						{
-							if(tableTokenIndex!=ParsingTable::TokenFinish || item->stackPattern.Count()==stateStack.Count())
+						case ParsingTable::Instruction::Shift:
 							{
-								bool match=true;
-								for(vint j=0;j<item->stackPattern.Count();j++)
+								now->shiftStates.Add(ins.stateParameter);
+							}
+							break;
+						case ParsingTable::Instruction::Reduce:
+							{
+								if(now->shiftStates.Count()==0)
 								{
-									if(item->stackPattern[j]!=stateStack[stateStack.Count()-1-j])
-									{
-										match=false;
-										break;
-									}
+									now->reduceStateCount++;
 								}
-
-								if(match)
+								else
 								{
-									if(regexToken)
-									{
-										if(!shiftToken)
-										{
-											shiftToken=regexToken;
-											reduceToken=regexToken;
-											shiftTokenStack.Add(shiftToken);
-										}
-									}
-
-									TransitionResult result;
-									result.tableTokenIndex=tableTokenIndex;
-									result.token=regexToken;
-									result.tokenIndexInStream=regexToken?currentToken:-1;
-									result.tableStateSource=currentState;
-									result.tableStateTarget=item->targetState;
-									result.transition=item;
-
-									for(vint j=0;j<item->instructions.Count();j++)
-									{
-										ParsingTable::Instruction& ins=item->instructions[j];
-										switch(ins.instructionType)
-										{
-										case ParsingTable::Instruction::Shift:
-											{
-												stateStack.Add(ins.stateParameter);
-
-												shiftTokenStack.Add(shiftToken);
-												shiftToken=regexToken;
-												reduceToken=regexToken;
-											}
-											break;
-										case ParsingTable::Instruction::Reduce:
-											{
-												stateStack.RemoveAt(stateStack.Count()-1);
-
-												result.AddShiftReduceRange(shiftToken, reduceToken);
-												shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
-												shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
-											}
-											break;
-										case ParsingTable::Instruction::LeftRecursiveReduce:
-											{
-												result.AddShiftReduceRange(shiftToken, reduceToken);
-												reduceToken=regexToken;
-											}
-											break;
-										}
-									}
-
-									if(regexToken)
-									{
-										reduceToken=regexToken;
-									}
-
-									if(tableTokenIndex==ParsingTable::TokenFinish)
-									{
-										shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
-										shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
-										result.AddShiftReduceRange(shiftToken, reduceToken);
-									}
-
-									currentState=item->targetState;
-									return result;
+									now->shiftStates.RemoveAt(now->shiftStates.Count()-1);
 								}
 							}
+							break;
 						}
 					}
+
+					return true;
 				}
-				return TransitionResult();
-			}
-
-			vint ParsingState::GetCurrentToken()
-			{
-				return currentToken;
-			}
-
-			const collections::List<vint>& ParsingState::GetStateStack()
-			{
-				return stateStack;
+				else
+				{
+					return false;
+				}
 			}
 
 /***********************************************************************
@@ -5959,12 +6074,16 @@ ParsingTreeBuilder
 						{
 							if(!createdObject)
 							{
+								Ptr<ParsingTreeToken> value;
 								if(result.token==0)
 								{
-									return false;
+									value=new ParsingTreeToken(L"", result.tokenIndexInStream);
 								}
-								Ptr<ParsingTreeToken> value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
-								value->SetCodeRange(ParsingTextRange(result.token, result.token));
+								else
+								{
+									value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
+									value->SetCodeRange(ParsingTextRange(result.token, result.token));
+								}
 								operationTarget->SetMember(ins.nameParameter, value);
 							}
 							else
@@ -5986,13 +6105,17 @@ ParsingTreeBuilder
 							ParsingTextRange itemRange;
 							if(!createdObject)
 							{
+								Ptr<ParsingTreeToken> value;
 								if(result.token==0)
 								{
-									return false;
+									value=new ParsingTreeToken(L"", result.tokenIndexInStream);
 								}
-								Ptr<ParsingTreeToken> value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
-								value->SetCodeRange(ParsingTextRange(result.token, result.token));
-								itemRange=value->GetCodeRange();
+								else
+								{
+									value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
+									value->SetCodeRange(ParsingTextRange(result.token, result.token));
+									itemRange=value->GetCodeRange();
+								}
 								arr->AddItem(value);
 							}
 							else
@@ -6096,38 +6219,29 @@ ParsingTreeBuilder
 			}
 
 /***********************************************************************
-ParsingRestrictParser
+ParsingGeneralParser
 ***********************************************************************/
 
-			const regex::RegexToken* ParsingRestrictParser::ConvertToken(vint token, ParsingState& state)
+			void ParsingGeneralParser::OnReset()
 			{
-				if(token<=0)
-				{
-					token=0;
-				}
-				else if(token>state.GetTokens().Count())
-				{
-					token=state.GetTokens().Count();
-				}
-
-				return token==state.GetTokens().Count()?0:&state.GetTokens().Get(token);
 			}
 
-			ParsingRestrictParser::ParsingRestrictParser(Ptr<ParsingTable> _table)
+			ParsingGeneralParser::ParsingGeneralParser(Ptr<ParsingTable> _table)
 				:table(_table)
 			{
 			}
 
-			ParsingRestrictParser::~ParsingRestrictParser()
+			ParsingGeneralParser::~ParsingGeneralParser()
 			{
 			}
 
-			Ptr<ParsingTreeNode> ParsingRestrictParser::Parse(const WString& input, const WString& rule, ParsingError& error)
+			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors)
 			{
 				ParsingState state(input, table);
 				if(state.Reset(rule)==-1)
 				{
-					error=ParsingError(L"Rule \""+rule+L"\" does not exist.");
+					errors.Add(new ParsingError(L"Rule \""+rule+L"\" does not exist."));
+					return 0;
 				}
 				ParsingTreeBuilder builder;
 				builder.Reset();
@@ -6137,7 +6251,7 @@ ParsingRestrictParser
 					const RegexToken* token=&state.GetTokens().Get(i);
 					if(token->token==-1)
 					{
-						error=ParsingError(token, L"Unrecognizable token.");
+						errors.Add(new ParsingError(token, L"Unrecognizable token."));
 					}
 				}
 
@@ -6147,41 +6261,164 @@ ParsingRestrictParser
 					result=state.ReadToken();
 					if(!result)
 					{
-						const RegexToken* token=ConvertToken(state.GetCurrentToken(), state);
-						error=ParsingError(token, (token==0?L"Error happened during parsing.":L"Error happened during parsing when reaching to the end of the input."));
-						return 0;
+						const RegexToken* token=state.GetToken(state.GetCurrentToken());
+						result=OnErrorRecover(state, token, errors);
+						if(!result)
+						{
+							return 0;
+						}
 					}
-					else if(!builder.Run(result))
+					if(result)
 					{
-						const RegexToken* token=ConvertToken(state.GetCurrentToken(), state);
-						error=ParsingError(token, L"Internal error when building the parsing tree.");
-						return 0;
-					}
-					else if(result.tableTokenIndex==ParsingTable::TokenFinish)
-					{
-						break;
+						if(!builder.Run(result))
+						{
+							const RegexToken* token=state.GetToken(state.GetCurrentToken());
+							errors.Add(new ParsingError(token, L"Internal error when building the parsing tree."));
+							return 0;
+						}
+						else if(result.tableTokenIndex==ParsingTable::TokenFinish)
+						{
+							break;
+						}
 					}
 				}
 
 				Ptr<ParsingTreeNode> node=builder.GetNode();
 				if(!node)
 				{
-					error=ParsingError(L"Internal error when building the parsing tree after a succeeded parsing process.");
+					errors.Add(new ParsingError(L"Internal error when building the parsing tree after a succeeded parsing process."));
 					return 0;
 				}
 				return node;
 			}
 
-			Ptr<ParsingRestrictParser> CreateBootstrapParser()
+/***********************************************************************
+ParsingStrictParser
+***********************************************************************/
+
+			ParsingState::TransitionResult ParsingStrictParser::OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
+			{
+				const RegexToken* token=state.GetToken(state.GetCurrentToken());
+				errors.Add(new ParsingError(token, (token==0?L"Error happened during parsing when reaching to the end of the input.":L"Error happened during parsing.")));
+				return ParsingState::TransitionResult();
+			}
+
+			ParsingStrictParser::ParsingStrictParser(Ptr<ParsingTable> _table)
+				:ParsingGeneralParser(_table)
+			{
+			}
+
+			ParsingStrictParser::~ParsingStrictParser()
+			{
+			}
+
+			Ptr<ParsingStrictParser> CreateBootstrapStrictParser()
 			{
 				List<Ptr<ParsingError>> errors;
 				Ptr<ParsingDefinition> definition=CreateParserDefinition();
 				Ptr<ParsingTable> table=GenerateTable(definition, errors);
 				if(table)
 				{
-					return new ParsingRestrictParser(table);
+					return new ParsingStrictParser(table);
 				}
 				return 0;
+			}
+
+			Ptr<ParsingAutoRecoverParser> CreateBootstrapAutoRecoverParser()
+			{
+				List<Ptr<ParsingError>> errors;
+				Ptr<ParsingDefinition> definition=CreateParserDefinition();
+				Ptr<ParsingTable> table=GenerateTable(definition, errors);
+				if(table)
+				{
+					return new ParsingAutoRecoverParser(table);
+				}
+				return 0;
+			}
+
+/***********************************************************************
+ParsingAutoRecoverParser
+***********************************************************************/
+
+			ParsingState::TransitionResult ParsingAutoRecoverParser::OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
+			{
+				vint targetTableTokenIndex=(currentToken?table->GetTableTokenIndex(currentToken->token):ParsingTable::TokenFinish);
+
+				vint selectedTableTokenIndex=-1;
+				if(recoveringFutureIndex==-1)
+				{
+					vint processingFutureIndex=-1;
+					vint usedFutureCount=0;
+					while(true)
+					{
+						ParsingState::Future* previous=0;
+						if(processingFutureIndex!=-1)
+						{
+							previous=&recoverFutures[processingFutureIndex];
+						}
+						processingFutureIndex++;
+
+						vint currentTableTokenIndex=0;
+						while(currentTableTokenIndex<table->GetTokenCount() && usedFutureCount<recoverFutures.Count())
+						{
+							ParsingState::Future* now=&recoverFutures[usedFutureCount];
+							if(state.ReadTokenInFuture(currentTableTokenIndex, previous, now))
+							{
+								if(currentTableTokenIndex==targetTableTokenIndex)
+								{
+									ParsingState::Future* future=previous;
+									while(future->previous)
+									{
+										future->previous->next=future;
+										future=future->previous;
+									}
+									recoveringFutureIndex=future-&recoverFutures[0];
+									goto FOUND_ERROR_RECOVER_SOLUTION;
+								}
+								else
+								{
+									usedFutureCount++;
+								}
+							}
+							currentTableTokenIndex++;
+						}
+					}
+				}
+			FOUND_ERROR_RECOVER_SOLUTION:
+
+				if(recoveringFutureIndex!=-1)
+				{
+					ParsingState::Future* future=&recoverFutures[recoveringFutureIndex];
+					selectedTableTokenIndex=future->selectedToken;
+					if(future->next)
+					{
+						recoveringFutureIndex+=future->next-future;
+					}
+					else
+					{
+						recoveringFutureIndex=-1;
+					}
+				}
+
+				if(selectedTableTokenIndex==-1)
+				{
+					return ParsingState::TransitionResult();
+				}
+				else
+				{
+					return state.ReadToken(selectedTableTokenIndex, 0);
+				}
+			}
+
+			ParsingAutoRecoverParser::ParsingAutoRecoverParser(Ptr<ParsingTable> _table)
+				:ParsingGeneralParser(_table)
+				,recoverFutures(65536)
+				,recoveringFutureIndex(-1)
+			{
+			}
+
+			ParsingAutoRecoverParser::~ParsingAutoRecoverParser()
+			{
 			}
 		}
 	}
