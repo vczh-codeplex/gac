@@ -164,9 +164,8 @@ namespace vl
 					}
 				};
 
-				class TransitionResult
+				struct TransitionResult
 				{
-				public:
 					vint										tableTokenIndex;
 					vint										tableStateSource;
 					vint										tableStateTarget;
@@ -202,6 +201,25 @@ namespace vl
 						shiftReduceRanges->Add(range);
 					}
 				};
+
+				struct Future
+				{
+					vint									currentState;
+					vint									reduceStateCount;
+					collections::List<vint>					shiftStates;
+					vint									selectedToken;
+					Future*									previous;
+					Future*									next;
+
+					Future()
+						:currentState(-1)
+						,reduceStateCount(0)
+						,selectedToken(-1)
+						,previous(0)
+						,next(0)
+					{
+					}
+				};
 			private:
 				WString										input;
 				Ptr<ParsingTable>							table;
@@ -210,6 +228,7 @@ namespace vl
 				collections::List<vint>						stateStack;
 				vint										currentState;
 				vint										currentToken;
+				vint										tokenSequenceIndex;
 				
 				collections::List<regex::RegexToken*>		shiftTokenStack;
 				regex::RegexToken*							shiftToken;
@@ -228,10 +247,11 @@ namespace vl
 				const collections::List<vint>&				GetStateStack();
 				vint										GetCurrentState();
 
-				void										MatchToken(vint tableTokenIndex, collections::List<ParsingTable::TransitionItem*>& items, bool fetchFirstOnly);
 				ParsingTable::TransitionItem*				MatchToken(vint tableTokenIndex);
+				ParsingTable::TransitionItem*				MatchTokenInFuture(vint tableTokenIndex, Future* future);
 				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken);
 				TransitionResult							ReadToken();
+				bool										ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now);
 			};
 
 /***********************************************************************
@@ -284,12 +304,9 @@ namespace vl
 			class ParsingAutoRecoverParser : public ParsingGeneralParser
 			{
 			protected:
-				regex::RegexToken*																					discardHistoryToken;
-				collections::Dictionary<WString, Ptr<collections::SortedList<ParsingTable::TransitionItem*>>>		discardHistory;
-				collections::Dictionary<WString, ParsingTable::TransitionItem*>										recoverDecision;
+				collections::Array<ParsingState::Future>	recoverFutures;
+				vint										recoveringFutureIndex;
 
-				ParsingTable::TransitionItem*				ChooseRecoverItem(ParsingState& state, collections::List<ParsingTable::TransitionItem*>& candidates);
-				void										OnReset()override;
 				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
 				ParsingAutoRecoverParser(Ptr<ParsingTable> _table);
