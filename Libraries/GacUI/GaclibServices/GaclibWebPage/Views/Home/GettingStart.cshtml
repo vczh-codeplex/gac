@@ -3,7 +3,10 @@
 @{
     ViewBag.Title = "GacLib - Getting Start";
 }
-
+<script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shCore.js")" ></script>
+<script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shBrushCpp.js")" ></script>
+<link rel="Stylesheet" type="text/css" href="@Url.Content("~/Content/SyntaxHighlighter/styles/shCore.css")" />
+<link rel="Stylesheet" type="text/css" href="@Url.Content("~/Content/SyntaxHighlighter/styles/shThemeRDark.css")" />
 <tr>
     <td align="left" valign="top" colspan="6">
         <h1>Introduction</h1>
@@ -62,7 +65,7 @@
             The following code shows how to write a hello world using GacUI.
         </p>
         <h2>Hello, world!</h2>
-        <pre class="CppCode">
+        <pre class="brush: cpp; gutter: false;">
 #include "..\..\Public\Source\GacUIIncludes.h"
 #include &lt;Windows.h&gt;
 
@@ -98,3 +101,6 @@ void GuiMain()
         </p>
     </td>
 </tr>
+<script type="text/javascript">
+    SyntaxHighlighter.all()
+</script>
