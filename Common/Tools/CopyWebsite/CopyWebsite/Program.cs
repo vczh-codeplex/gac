@@ -148,6 +148,10 @@ namespace CopyWebsite
                     {
                         collect = true;
                     }
+                    else if (tagName == "script" && attName == "src")
+                    {
+                        collect = true;
+                    }
 
                     if (collect)
                     {
