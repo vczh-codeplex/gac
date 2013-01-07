@@ -30,7 +30,7 @@
             string fileName = Path.GetFileName(cppName);
             string anchorName = fileName.ToUpper().Replace('.', '_');
             <strong><a name="@anchorName">@fileName</a></strong>
-            <pre class="brush: cpp; gutter: false;">@Model.CppCodes[cppName]</pre>
+            <div class="CppCode"><pre class="brush: cpp; gutter: false;">@Model.CppCodes[cppName]</pre></div>
         }
     </td>
 </tr>
