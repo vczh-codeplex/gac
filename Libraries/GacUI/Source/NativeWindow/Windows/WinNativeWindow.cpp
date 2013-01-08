@@ -510,6 +510,13 @@ WindowsForm
 						break;
 					case WM_ERASEBKGND:
 						return true;
+					case WM_IME_SETCONTEXT:
+						{
+							HIMC imc = ImmGetContext(handle);
+							ImmAssociateContext(hwnd, imc);
+							ImmReleaseContext(handle, imc);
+						}
+						break;
 					case WM_IME_STARTCOMPOSITION:
 						UpdateCompositionForContent();
 						break;
