@@ -511,6 +511,7 @@ WindowsForm
 					case WM_ERASEBKGND:
 						return true;
 					case WM_IME_SETCONTEXT:
+						if(wParam==TRUE)
 						{
 							HIMC imc = ImmGetContext(handle);
 							ImmAssociateContext(hwnd, imc);
