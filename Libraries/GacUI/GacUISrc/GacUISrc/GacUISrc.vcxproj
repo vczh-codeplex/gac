@@ -220,7 +220,7 @@
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.cpp" />
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.cpp" />
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextControls.cpp" />
-    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextElementOperator.cpp" />
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextGeneralOperations.cpp" />
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextUndoRedo.cpp" />
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiMenuControls.cpp" />
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripCommand.cpp" />
@@ -340,7 +340,7 @@
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.h" />
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.h" />
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextControls.h" />
-    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextElementOperator.h" />
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextGeneralOperations.h" />
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextUndoRedo.h" />
     <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiMenuControls.h" />
     <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripCommand.h" />

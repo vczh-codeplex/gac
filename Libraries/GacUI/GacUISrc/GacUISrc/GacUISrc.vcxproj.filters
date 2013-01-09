@@ -354,9 +354,6 @@
     <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiListControls.cpp">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextElementOperator.cpp">
-      <Filter>GacUI\Controls\TextEditorPackage</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.cpp">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClCompile>
@@ -401,6 +398,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingTree.cpp">
       <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextGeneralOperations.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -743,9 +743,6 @@
     <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiListControls.h">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextElementOperator.h">
-      <Filter>GacUI\Controls\TextEditorPackage</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.h">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClInclude>
@@ -769,6 +766,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingTree.h">
       <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextGeneralOperations.h">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

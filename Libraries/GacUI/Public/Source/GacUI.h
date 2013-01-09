@@ -4632,7 +4632,7 @@ Scroll View
 #endif
 
 /***********************************************************************
-CONTROLS\TEXTEDITORPACKAGE\GUITEXTELEMENTOPERATOR.H
+CONTROLS\TEXTEDITORPACKAGE\GUITEXTGENERALOPERATIONS.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
@@ -4657,149 +4657,12 @@ namespace vl
 Common Operations
 ***********************************************************************/
 
-			class GuiTextBoxCommonInterface;
-
-			class GuiTextElementOperator : public Description<GuiTextElementOperator>
+			class ICommonTextEditCallback : public virtual IDescriptable, public Description<ICommonTextEditCallback>
 			{
-			protected:
-				class ICallback : public virtual IDescriptable, public Description<ICallback>
-				{
-				public:
-					virtual TextPos							GetLeftWord(TextPos pos)=0;
-					virtual TextPos							GetRightWord(TextPos pos)=0;
-					virtual void							GetWord(TextPos pos, TextPos& begin, TextPos& end)=0;
-					virtual vint							GetPageRows()=0;
-					virtual bool							BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)=0;
-					virtual void							AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
-					virtual void							ScrollToView(Point point)=0;
-					virtual vint							GetTextMargin()=0;
-				};
-
-				class DefaultCallback : public Object, public ICallback, public Description<DefaultCallback>
-				{
-				protected:
-					elements::GuiColorizedTextElement*		textElement;
-					compositions::GuiGraphicsComposition*	textComposition;
-					bool									readonly;
-				public:
-					DefaultCallback(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition);
-					~DefaultCallback();
-
-					TextPos									GetLeftWord(TextPos pos)override;
-					TextPos									GetRightWord(TextPos pos)override;
-					void									GetWord(TextPos pos, TextPos& begin, TextPos& end)override;
-					vint									GetPageRows()override;
-					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
-				};
-
 			public:
-				class ShortcutCommand
-				{
-				protected:
-					bool									ctrl;
-					bool									shift;
-					vint									key;
-					Func<void()>							action;
-				public:
-					ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<void()> _action);
-					~ShortcutCommand();
-
-					bool									IsTheRightKey(bool _ctrl, bool _shift, vint _key);
-					void									Execute();
-				};
-
-				class ITextEditCallback : public virtual IDescriptable, public Description<ITextEditCallback>
-				{
-				public:
-					virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
-					virtual void							Detach()=0;
-					virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
-				};
-
-			private:
-				elements::GuiColorizedTextElement*			textElement;
-				compositions::GuiGraphicsComposition*		textComposition;
-				GuiControl*									textControl;
-				ICallback*									callback;
-				bool										dragging;
-				bool										readonly;
-
-				SpinLock									elementModifyLock;
-				collections::List<Ptr<ITextEditCallback>>	textEditCallbacks;
-				collections::List<Ptr<ShortcutCommand>>		shortcutCommands;
-
-				void										UpdateCaretPoint();
-				void										Move(TextPos pos, bool shift);
-				void										Modify(TextPos start, TextPos end, const WString& input);
-				bool										ProcessKey(vint code, bool shift, bool ctrl);
-					
-				void										OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void										OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void										OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-
-				void										OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void										OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void										OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
-				void										OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments);
-				void										OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments);
-
-			protected:
-
-				void										Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl);
-				ICallback*									GetCallback();
-				void										SetCallback(ICallback* value);
-				bool										AttachTextEditCallback(Ptr<ITextEditCallback> value);
-				bool										DetachTextEditCallback(Ptr<ITextEditCallback> value);
-				void										AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand);
-				elements::GuiColorizedTextElement*			GetTextElement();
-				void										UnsafeSetText(const WString& value);
-			public:
-				GuiTextElementOperator();
-				~GuiTextElementOperator();
-
-				compositions::GuiNotifyEvent				SelectionChanged;
-				
-				compositions::GuiGraphicsComposition*		GetTextComposition();
-
-				//================ clipboard operations
-
-				bool										CanCut();
-				bool										CanCopy();
-				bool										CanPaste();
-				bool										Cut();
-				bool										Copy();
-				bool										Paste();
-
-				//================ editing control
-
-				bool										GetReadonly();
-				void										SetReadonly(bool value);
-
-				//================ text operations
-
-				void										SelectAll();
-				void										Select(TextPos begin, TextPos end);
-				WString										GetSelectionText();
-				void										SetSelectionText(const WString& value);
-				
-				WString										GetRowText(vint row);
-				WString										GetFragmentText(TextPos start, TextPos end);
-
-				TextPos										GetCaretBegin();
-				TextPos										GetCaretEnd();
-				TextPos										GetCaretSmall();
-				TextPos										GetCaretLarge();
-
-				//================ position query
-
-				vint										GetRowWidth(vint row);
-				vint										GetRowHeight();
-				vint										GetMaxWidth();
-				vint										GetMaxHeight();
-				TextPos										GetTextPosFromPoint(Point point);
-				Point										GetPointFromTextPos(TextPos pos);
-				Rect										GetRectFromTextPos(TextPos pos);
-				TextPos										GetNearestTextPos(Point point);
+				virtual void							Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock)=0;
+				virtual void							Detach()=0;
+				virtual void							TextEditNotify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
 			};
 		}
 	}
@@ -4833,7 +4696,7 @@ namespace vl
 Colorizer
 ***********************************************************************/
 			
-			class GuiTextBoxColorizerBase : public Object, public GuiTextElementOperator::ITextEditCallback
+			class GuiTextBoxColorizerBase : public Object, public ICommonTextEditCallback
 			{
 			public:
 				typedef collections::Array<elements::text::ColorEntry>			ColorArray;
@@ -4926,6 +4789,8 @@ namespace vl
 		namespace controls
 		{
 
+			class GuiTextBoxCommonInterface;
+
 /***********************************************************************
 Undo Redo
 ***********************************************************************/
@@ -4961,7 +4826,7 @@ Undo Redo
 				bool										Redo();
 			};
 
-			class GuiTextBoxUndoRedoProcessor : public GuiGeneralUndoRedoProcessor, public GuiTextElementOperator::ITextEditCallback
+			class GuiTextBoxUndoRedoProcessor : public GuiGeneralUndoRedoProcessor, public ICommonTextEditCallback
 			{
 			protected:
 				class EditStep : public Object, public IEditStep
@@ -4979,9 +4844,9 @@ Undo Redo
 					void									Redo();
 				};
 
-				GuiTextElementOperator*						textElementOperator;
+				GuiTextBoxCommonInterface*					textBoxCommonInterface;
 			public:
-				GuiTextBoxUndoRedoProcessor(GuiTextElementOperator* _textElementOperator);
+				GuiTextBoxUndoRedoProcessor(GuiTextBoxCommonInterface* _textBoxCommonInterface);
 				~GuiTextBoxUndoRedoProcessor();
 
 				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock);
@@ -5020,30 +4885,156 @@ namespace vl
 Common Interface
 ***********************************************************************/
 
-			class GuiTextBoxCommonInterface : public GuiTextElementOperator, public Description<GuiTextBoxCommonInterface>
+			class GuiTextBoxCommonInterface : public Description<GuiTextBoxCommonInterface>
 			{
 			protected:
-				Ptr<GuiTextBoxColorizerBase>				colorizer;
-				Ptr<GuiTextBoxUndoRedoProcessor>			undoRedoProcessor;
+				class ICallback : public virtual IDescriptable, public Description<ICallback>
+				{
+				public:
+					virtual TextPos									GetLeftWord(TextPos pos)=0;
+					virtual TextPos									GetRightWord(TextPos pos)=0;
+					virtual void									GetWord(TextPos pos, TextPos& begin, TextPos& end)=0;
+					virtual vint									GetPageRows()=0;
+					virtual bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)=0;
+					virtual void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)=0;
+					virtual void									ScrollToView(Point point)=0;
+					virtual vint									GetTextMargin()=0;
+				};
+
+				class DefaultCallback : public Object, public ICallback, public Description<DefaultCallback>
+				{
+				protected:
+					elements::GuiColorizedTextElement*				textElement;
+					compositions::GuiGraphicsComposition*			textComposition;
+					bool											readonly;
+				public:
+					DefaultCallback(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition);
+					~DefaultCallback();
+
+					TextPos											GetLeftWord(TextPos pos)override;
+					TextPos											GetRightWord(TextPos pos)override;
+					void											GetWord(TextPos pos, TextPos& begin, TextPos& end)override;
+					vint											GetPageRows()override;
+					bool											BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
+				};
+
+			public:
+				class ShortcutCommand
+				{
+				protected:
+					bool											ctrl;
+					bool											shift;
+					vint											key;
+					Func<void()>									action;
+				public:
+					ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<void()> _action);
+					ShortcutCommand(bool _ctrl, bool _shift, vint _key, const Func<bool()> _action);
+					~ShortcutCommand();
+
+					bool											IsTheRightKey(bool _ctrl, bool _shift, vint _key);
+					void											Execute();
+				};
+
+			private:
+				elements::GuiColorizedTextElement*					textElement;
+				compositions::GuiGraphicsComposition*				textComposition;
+				GuiControl*											textControl;
+				ICallback*											callback;
+				bool												dragging;
+				bool												readonly;
+				Ptr<GuiTextBoxColorizerBase>						colorizer;
+				Ptr<GuiTextBoxUndoRedoProcessor>					undoRedoProcessor;
+
+				SpinLock											elementModifyLock;
+				collections::List<Ptr<ICommonTextEditCallback>>		textEditCallbacks;
+				collections::List<Ptr<ShortcutCommand>>				shortcutCommands;
+
+				void												UpdateCaretPoint();
+				void												Move(TextPos pos, bool shift);
+				void												Modify(TextPos start, TextPos end, const WString& input);
+				bool												ProcessKey(vint code, bool shift, bool ctrl);
+					
+				void												OnGotFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void												OnLostFocus(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void												OnCaretNotify(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+
+				void												OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void												OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void												OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void												OnKeyDown(compositions::GuiGraphicsComposition* sender, compositions::GuiKeyEventArgs& arguments);
+				void												OnCharInput(compositions::GuiGraphicsComposition* sender, compositions::GuiCharEventArgs& arguments);
+
+			protected:
+
+				void												Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl);
+				ICallback*											GetCallback();
+				void												SetCallback(ICallback* value);
+				bool												AttachTextEditCallback(Ptr<ICommonTextEditCallback> value);
+				bool												DetachTextEditCallback(Ptr<ICommonTextEditCallback> value);
+				void												AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand);
+				elements::GuiColorizedTextElement*					GetTextElement();
+				void												UnsafeSetText(const WString& value);
 
 			public:
 				GuiTextBoxCommonInterface();
 				~GuiTextBoxCommonInterface();
 
+				compositions::GuiNotifyEvent						SelectionChanged;
+
+				//================ clipboard operations
+
+				bool												CanCut();
+				bool												CanCopy();
+				bool												CanPaste();
+				bool												Cut();
+				bool												Copy();
+				bool												Paste();
+
+				//================ editing control
+
+				bool												GetReadonly();
+				void												SetReadonly(bool value);
+
+				//================ text operations
+
+				void												SelectAll();
+				void												Select(TextPos begin, TextPos end);
+				WString												GetSelectionText();
+				void												SetSelectionText(const WString& value);
+				
+				WString												GetRowText(vint row);
+				WString												GetFragmentText(TextPos start, TextPos end);
+
+				TextPos												GetCaretBegin();
+				TextPos												GetCaretEnd();
+				TextPos												GetCaretSmall();
+				TextPos												GetCaretLarge();
+
+				//================ position query
+
+				vint												GetRowWidth(vint row);
+				vint												GetRowHeight();
+				vint												GetMaxWidth();
+				vint												GetMaxHeight();
+				TextPos												GetTextPosFromPoint(Point point);
+				Point												GetPointFromTextPos(TextPos pos);
+				Rect												GetRectFromTextPos(TextPos pos);
+				TextPos												GetNearestTextPos(Point point);
+
 				//================ colorizing
 
-				Ptr<GuiTextBoxColorizerBase>				GetColorizer();
-				void										SetColorizer(Ptr<GuiTextBoxColorizerBase> value);
+				Ptr<GuiTextBoxColorizerBase>						GetColorizer();
+				void												SetColorizer(Ptr<GuiTextBoxColorizerBase> value);
 
 				//================ undo redo control
 
-				bool										CanUndo();
-				bool										CanRedo();
-				void										ClearUndoRedo();
-				bool										GetModified();
-				void										NotifyModificationSaved();
-				bool										Undo();
-				bool										Redo();
+				bool												CanUndo();
+				bool												CanRedo();
+				void												ClearUndoRedo();
+				bool												GetModified();
+				void												NotifyModificationSaved();
+				bool												Undo();
+				bool												Redo();
 			};
 		}
 	}
@@ -5085,10 +5076,10 @@ MultilineTextBox
 				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
 				{
 				protected:
-					elements::GuiColorizedTextElement*		textElement;
-					compositions::GuiBoundsComposition*		textComposition;
-					GuiMultilineTextBox*					textBox;
-					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
+					elements::GuiColorizedTextElement*			textElement;
+					compositions::GuiBoundsComposition*			textComposition;
+					GuiMultilineTextBox*						textBox;
+					Ptr<GuiTextBoxCommonInterface::ICallback>	defaultCallback;
 
 				public:
 					StyleController(GuiScrollView::IStyleProvider* styleProvider);
@@ -5106,7 +5097,7 @@ MultilineTextBox
 					void									SetVisuallyEnabled(bool value)override;
 				};
 
-				class TextElementOperatorCallback : public GuiTextElementOperator::DefaultCallback, public Description<TextElementOperatorCallback>
+				class TextElementOperatorCallback : public GuiTextBoxCommonInterface::DefaultCallback, public Description<TextElementOperatorCallback>
 				{
 				protected:
 					GuiMultilineTextBox*					textControl;
@@ -5154,15 +5145,15 @@ SinglelineTextBox
 				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
 				{
 				protected:
-					Ptr<IStyleProvider>						styleProvider;
-					compositions::GuiBoundsComposition*		boundsComposition;
-					compositions::GuiGraphicsComposition*	containerComposition;
+					Ptr<IStyleProvider>							styleProvider;
+					compositions::GuiBoundsComposition*			boundsComposition;
+					compositions::GuiGraphicsComposition*		containerComposition;
 
-					GuiSinglelineTextBox*					textBox;
-					elements::GuiColorizedTextElement*		textElement;
-					compositions::GuiTableComposition*		textCompositionTable;
-					compositions::GuiCellComposition*		textComposition;
-					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
+					GuiSinglelineTextBox*						textBox;
+					elements::GuiColorizedTextElement*			textElement;
+					compositions::GuiTableComposition*			textCompositionTable;
+					compositions::GuiCellComposition*			textComposition;
+					Ptr<GuiTextBoxCommonInterface::ICallback>	defaultCallback;
 
 				public:
 					StyleController(IStyleProvider* _styleProvider);
@@ -5184,7 +5175,7 @@ SinglelineTextBox
 					void									SetViewPosition(Point value);
 				};
 
-				class TextElementOperatorCallback : public GuiTextElementOperator::DefaultCallback, public Description<TextElementOperatorCallback>
+				class TextElementOperatorCallback : public GuiTextBoxCommonInterface::DefaultCallback, public Description<TextElementOperatorCallback>
 				{
 				protected:
 					GuiSinglelineTextBox*					textControl;

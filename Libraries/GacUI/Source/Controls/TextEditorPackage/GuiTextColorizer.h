@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCOLORIZER
 #define VCZH_PRESENTATION_CONTROLS_GUITEXTCOLORIZER
 
-#include "GuiTextElementOperator.h"
+#include "GuiTextGeneralOperations.h"
 
 namespace vl
 {
@@ -23,7 +23,7 @@ Colorizer
 ***********************************************************************/
 			
 			/// <summary>The base class of text box colorizer.</summary>
-			class GuiTextBoxColorizerBase : public Object, public GuiTextElementOperator::ITextEditCallback
+			class GuiTextBoxColorizerBase : public Object, public ICommonTextEditCallback
 			{
 			public:
 				typedef collections::Array<elements::text::ColorEntry>			ColorArray;

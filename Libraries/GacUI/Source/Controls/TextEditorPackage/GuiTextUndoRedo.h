@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTUNDOREDO
 #define VCZH_PRESENTATION_CONTROLS_GUITEXTUNDOREDO
 
-#include "GuiTextElementOperator.h"
+#include "GuiTextGeneralOperations.h"
 
 namespace vl
 {
@@ -17,6 +17,8 @@ namespace vl
 	{
 		namespace controls
 		{
+
+			class GuiTextBoxCommonInterface;
 
 /***********************************************************************
 Undo Redo
@@ -53,7 +55,7 @@ Undo Redo
 				bool										Redo();
 			};
 
-			class GuiTextBoxUndoRedoProcessor : public GuiGeneralUndoRedoProcessor, public GuiTextElementOperator::ITextEditCallback
+			class GuiTextBoxUndoRedoProcessor : public GuiGeneralUndoRedoProcessor, public ICommonTextEditCallback
 			{
 			protected:
 				class EditStep : public Object, public IEditStep
@@ -71,9 +73,9 @@ Undo Redo
 					void									Redo();
 				};
 
-				GuiTextElementOperator*						textElementOperator;
+				GuiTextBoxCommonInterface*					textBoxCommonInterface;
 			public:
-				GuiTextBoxUndoRedoProcessor(GuiTextElementOperator* _textElementOperator);
+				GuiTextBoxUndoRedoProcessor(GuiTextBoxCommonInterface* _textBoxCommonInterface);
 				~GuiTextBoxUndoRedoProcessor();
 
 				void										Attach(elements::GuiColorizedTextElement* element, SpinLock& elementModifyLock);
