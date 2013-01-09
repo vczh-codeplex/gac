@@ -405,6 +405,7 @@ namespace test
 	private:
 		// global
 		ITfThreadMgr*						threadManager;
+		GuiMultilineTextBox*				textBox;
 
 		// local
 		ITfDocumentMgr*						documentManager;
@@ -443,6 +444,10 @@ namespace test
 			this->WindowGotFocus.AttachMethod(this, &TestWindow::OnGotFocus);
 			this->WindowLostFocus.AttachMethod(this, &TestWindow::OnLostFocus);
 			MoveToScreenCenter();
+
+			textBox=g::NewMultilineTextBox();
+			textBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			this->AddChild(textBox);
 
 			HWND hwnd=windows::GetWindowsForm(GetNativeWindow())->GetWindowHandle();
 			textStore.hwnd=hwnd;

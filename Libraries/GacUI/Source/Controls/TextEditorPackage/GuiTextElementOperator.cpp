@@ -146,12 +146,9 @@ GuiTextElementOperator
 				callback->ScrollToView(viewPoint);
 				UpdateCaretPoint();
 
-				if(textBoxCommonInterface)
+				if(oldBegin!=textElement->GetCaretBegin() || oldEnd!=textElement->GetCaretEnd())
 				{
-					if(oldBegin!=textElement->GetCaretBegin() || oldEnd!=textElement->GetCaretEnd())
-					{
-						textBoxCommonInterface->RaiseSelectionChanged();
-					}
+					SelectionChanged.Execute(textControl->GetNotifyEventArguments());
 				}
 			}
 
@@ -180,10 +177,7 @@ GuiTextElementOperator
 					}
 					Move(end, false);
 
-					if(textBoxCommonInterface)
-					{
-						textBoxCommonInterface->RaiseTextChanged();
-					}
+					textControl->TextChanged.Execute(textControl->GetNotifyEventArguments());
 				}
 			}
 
@@ -419,32 +413,13 @@ GuiTextElementOperator
 				}
 			}
 
-			GuiTextElementOperator::GuiTextElementOperator()
-				:textElement(0)
-				,textComposition(0)
-				,textControl(0)
-				,textBoxCommonInterface(0)
-				,callback(0)
-				,dragging(false)
-				,readonly(false)
-			{
-			}
-
-			GuiTextElementOperator::~GuiTextElementOperator()
-			{
-				for(vint i=0;i<textEditCallbacks.Count();i++)
-				{
-					textEditCallbacks[i]->Detach();
-				}
-				textEditCallbacks.Clear();
-			}
-
 			void GuiTextElementOperator::Install(elements::GuiColorizedTextElement* _textElement, compositions::GuiGraphicsComposition* _textComposition, GuiControl* _textControl)
 			{
 				textElement=_textElement;
 				textComposition=_textComposition;
 				textControl=_textControl;
 				textComposition->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::IBeam));
+				SelectionChanged.SetAssociatedComposition(textControl->GetBoundsComposition());
 
 				GuiGraphicsComposition* focusableComposition=textControl->GetFocusableComposition();
 				focusableComposition->GetEventReceiver()->gotFocus.AttachMethod(this, &GuiTextElementOperator::OnGotFocus);
@@ -502,16 +477,6 @@ GuiTextElementOperator
 				}
 			}
 
-			GuiTextBoxCommonInterface* GuiTextElementOperator::GetTextBoxCommonInterface()
-			{
-				return textBoxCommonInterface;
-			}
-
-			void GuiTextElementOperator::SetTextBoxCommonInterface(GuiTextBoxCommonInterface* value)
-			{
-				textBoxCommonInterface=value;
-			}
-
 			void GuiTextElementOperator::AddShortcutCommand(Ptr<ShortcutCommand> shortcutCommand)
 			{
 				shortcutCommands.Add(shortcutCommand);
@@ -522,46 +487,7 @@ GuiTextElementOperator
 				return textElement;
 			}
 
-			compositions::GuiGraphicsComposition* GuiTextElementOperator::GetTextComposition()
-			{
-				return textComposition;
-			}
-
-			void GuiTextElementOperator::Select(TextPos begin, TextPos end)
-			{
-				Move(begin, false);
-				Move(end, true);
-			}
-
-			TextPos GuiTextElementOperator::GetNearestTextPos(Point point)
-			{
-				Point viewPosition=textElement->GetViewPosition();
-				Point mousePosition=Point(point.x+viewPosition.x, point.y+viewPosition.y);
-				TextPos pos=textElement->GetLines().GetTextPosFromPoint(mousePosition);
-				if(pos.column<textElement->GetLines().GetLine(pos.row).dataLength)
-				{
-					Rect rect=textElement->GetLines().GetRectFromTextPos(pos);
-					if(abs((int)(rect.x1-mousePosition.x))>=abs((int)(rect.x2-1-mousePosition.x)))
-					{
-						pos.column++;
-					}
-				}
-				return pos;
-			}
-
-			WString GuiTextElementOperator::GetSelectionText()
-			{
-				TextPos selectionBegin=textElement->GetCaretBegin()<textElement->GetCaretEnd()?textElement->GetCaretBegin():textElement->GetCaretEnd();
-				TextPos selectionEnd=textElement->GetCaretBegin()>textElement->GetCaretEnd()?textElement->GetCaretBegin():textElement->GetCaretEnd();
-				return textElement->GetLines().GetText(selectionBegin, selectionEnd);
-			}
-
-			void GuiTextElementOperator::SetSelectionText(const WString& value)
-			{
-				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value);
-			}
-
-			void GuiTextElementOperator::SetText(const WString& value)
+			void GuiTextElementOperator::UnsafeSetText(const WString& value)
 			{
 				if(textElement)
 				{
@@ -574,6 +500,36 @@ GuiTextElementOperator
 					Modify(TextPos(), end, value);
 				}
 			}
+
+			GuiTextElementOperator::GuiTextElementOperator()
+				:textElement(0)
+				,textComposition(0)
+				,textControl(0)
+				,callback(0)
+				,dragging(false)
+				,readonly(false)
+			{
+				AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'A', Func<void()>(this, &GuiTextBoxCommonInterface::SelectAll)));
+				AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'X', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Cut))));
+				AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'C', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Copy))));
+				AddShortcutCommand(new GuiTextElementOperator::ShortcutCommand(true, false, 'V', Func<void()>(Func<bool()>(this, &GuiTextBoxCommonInterface::Paste))));
+			}
+
+			GuiTextElementOperator::~GuiTextElementOperator()
+			{
+				for(vint i=0;i<textEditCallbacks.Count();i++)
+				{
+					textEditCallbacks[i]->Detach();
+				}
+				textEditCallbacks.Clear();
+			}
+
+			compositions::GuiGraphicsComposition* GuiTextElementOperator::GetTextComposition()
+			{
+				return textComposition;
+			}
+
+			//================ clipboard operations
 
 			bool GuiTextElementOperator::CanCut()
 			{
@@ -588,13 +544,6 @@ GuiTextElementOperator
 			bool GuiTextElementOperator::CanPaste()
 			{
 				return !readonly && GetCurrentController()->ClipboardService()->ContainsText() && textElement->GetPasswordChar()==L'\0';
-			}
-
-			void GuiTextElementOperator::SelectAll()
-			{
-				vint row=textElement->GetLines().GetCount()-1;
-				Move(TextPos(0, 0), false);
-				Move(TextPos(row, textElement->GetLines().GetLine(row).dataLength), true);
 			}
 
 			bool GuiTextElementOperator::Cut()
@@ -637,6 +586,8 @@ GuiTextElementOperator
 				}
 			}
 			
+			//================ editing control
+			
 			bool GuiTextElementOperator::GetReadonly()
 			{
 				return readonly;
@@ -645,6 +596,129 @@ GuiTextElementOperator
 			void GuiTextElementOperator::SetReadonly(bool value)
 			{
 				readonly=value;
+			}
+
+			//================ text operations
+
+			void GuiTextElementOperator::Select(TextPos begin, TextPos end)
+			{
+				Move(begin, false);
+				Move(end, true);
+			}
+
+			void GuiTextElementOperator::SelectAll()
+			{
+				vint row=textElement->GetLines().GetCount()-1;
+				Move(TextPos(0, 0), false);
+				Move(TextPos(row, textElement->GetLines().GetLine(row).dataLength), true);
+			}
+
+			WString GuiTextElementOperator::GetSelectionText()
+			{
+				TextPos selectionBegin=textElement->GetCaretBegin()<textElement->GetCaretEnd()?textElement->GetCaretBegin():textElement->GetCaretEnd();
+				TextPos selectionEnd=textElement->GetCaretBegin()>textElement->GetCaretEnd()?textElement->GetCaretBegin():textElement->GetCaretEnd();
+				return textElement->GetLines().GetText(selectionBegin, selectionEnd);
+			}
+
+			void GuiTextElementOperator::SetSelectionText(const WString& value)
+			{
+				Modify(textElement->GetCaretBegin(), textElement->GetCaretEnd(), value);
+			}
+
+			WString GuiTextElementOperator::GetRowText(vint row)
+			{
+				TextPos start=textElement->GetLines().Normalize(TextPos(row, 0));
+				TextPos end=TextPos(start.row, textElement->GetLines().GetLine(start.row).dataLength);
+				return GetFragmentText(start, end);
+			}
+
+			WString GuiTextElementOperator::GetFragmentText(TextPos start, TextPos end)
+			{
+				start=textElement->GetLines().Normalize(start);
+				end=textElement->GetLines().Normalize(end);
+				return textElement->GetLines().GetText(start, end);
+			}
+
+			TextPos GuiTextElementOperator::GetCaretBegin()
+			{
+				return textElement->GetCaretBegin();
+			}
+
+			TextPos GuiTextElementOperator::GetCaretEnd()
+			{
+				return textElement->GetCaretEnd();
+			}
+
+			TextPos GuiTextElementOperator::GetCaretSmall()
+			{
+				TextPos c1=GetCaretBegin();
+				TextPos c2=GetCaretEnd();
+				return c1<c2?c1:c2;
+			}
+
+			TextPos GuiTextElementOperator::GetCaretLarge()
+			{
+				TextPos c1=GetCaretBegin();
+				TextPos c2=GetCaretEnd();
+				return c1>c2?c1:c2;
+			}
+
+			//================ position query
+				
+			vint GuiTextElementOperator::GetRowWidth(vint row)
+			{
+				return textElement->GetLines().GetRowWidth(row);
+			}
+
+			vint GuiTextElementOperator::GetRowHeight()
+			{
+				return textElement->GetLines().GetRowHeight();
+			}
+
+			vint GuiTextElementOperator::GetMaxWidth()
+			{
+				return textElement->GetLines().GetMaxWidth();
+			}
+
+			vint GuiTextElementOperator::GetMaxHeight()
+			{
+				return textElement->GetLines().GetMaxHeight();
+			}
+
+			TextPos GuiTextElementOperator::GetTextPosFromPoint(Point point)
+			{
+				Point view=textElement->GetViewPosition();
+				return textElement->GetLines().GetTextPosFromPoint(Point(point.x+view.x, point.y+view.y));
+			}
+
+			Point GuiTextElementOperator::GetPointFromTextPos(TextPos pos)
+			{
+				Point view=textElement->GetViewPosition();
+				Point result=textElement->GetLines().GetPointFromTextPos(pos);
+				return Point(result.x-view.x, result.y-view.y);
+			}
+
+			Rect GuiTextElementOperator::GetRectFromTextPos(TextPos pos)
+			{
+				Point view=textElement->GetViewPosition();
+				Rect result=textElement->GetLines().GetRectFromTextPos(pos);
+				return Rect(Point(result.x1-view.x, result.y1-view.y), result.GetSize());
+			}
+
+			TextPos GuiTextElementOperator::GetNearestTextPos(Point point)
+			{
+				Point viewPosition=textElement->GetViewPosition();
+				Point mousePosition=Point(point.x+viewPosition.x, point.y+viewPosition.y);
+				TextPos pos=textElement->GetLines().GetTextPosFromPoint(mousePosition);
+				if(pos.column<textElement->GetLines().GetLine(pos.row).dataLength)
+				{
+					Rect rect=textElement->GetLines().GetRectFromTextPos(pos);
+					if(abs((int)(rect.x1-mousePosition.x))>=abs((int)(rect.x2-1-mousePosition.x)))
+					{
+						pos.column++;
+					}
+				}
+				return pos;
 			}
 		}
 	}

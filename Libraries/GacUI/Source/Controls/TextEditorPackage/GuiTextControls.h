@@ -33,16 +33,16 @@ MultilineTextBox
 				protected:
 					elements::GuiColorizedTextElement*		textElement;
 					compositions::GuiBoundsComposition*		textComposition;
-					GuiTextElementOperator					textElementOperator;
+					GuiMultilineTextBox*					textBox;
 					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
 
 				public:
 					StyleController(GuiScrollView::IStyleProvider* styleProvider);
 					~StyleController();
 
+					void									Initialize(GuiMultilineTextBox* control);
 					elements::GuiColorizedTextElement*		GetTextElement();
 					compositions::GuiGraphicsComposition*	GetTextComposition();
-					GuiTextElementOperator*					GetTextElementOperator();
 					void									SetViewPosition(Point value);
 					void									SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
 
@@ -62,7 +62,7 @@ MultilineTextBox
 
 					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
 					void									ScrollToView(Point point)override;
-					vint										GetTextMargin()override;
+					vint									GetTextMargin()override;
 				};
 
 			protected:
@@ -111,14 +111,13 @@ SinglelineTextBox
 					elements::GuiColorizedTextElement*		textElement;
 					compositions::GuiTableComposition*		textCompositionTable;
 					compositions::GuiCellComposition*		textComposition;
-					GuiTextElementOperator					textElementOperator;
 					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
 
 				public:
 					StyleController(IStyleProvider* _styleProvider);
 					~StyleController();
 
-					void									SetTextBox(GuiSinglelineTextBox* value);
+					void									SetTextBox(GuiSinglelineTextBox* control);
 					void									RearrangeTextElement();
 					compositions::GuiBoundsComposition*		GetBoundsComposition();
 					compositions::GuiGraphicsComposition*	GetContainerComposition();
@@ -131,7 +130,6 @@ SinglelineTextBox
 
 					elements::GuiColorizedTextElement*		GetTextElement();
 					compositions::GuiGraphicsComposition*	GetTextComposition();
-					GuiTextElementOperator*					GetTextElementOperator();
 					void									SetViewPosition(Point value);
 				};
 
@@ -146,7 +144,7 @@ SinglelineTextBox
 					bool									BeforeModify(TextPos start, TextPos end, const WString& originalText, WString& inputText)override;
 					void									AfterModify(TextPos originalStart, TextPos originalEnd, const WString& originalText, TextPos inputStart, TextPos inputEnd, const WString& inputText)override;
 					void									ScrollToView(Point point)override;
-					vint										GetTextMargin()override;
+					vint									GetTextMargin()override;
 				};
 			protected:
 				StyleController*							styleController;
