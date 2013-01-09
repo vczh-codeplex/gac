@@ -1,5 +1,5 @@
 #include "GuiTextUndoRedo.h"
-#include <math.h>
+#include "GuiTextCommonInterface.h"
 
 namespace vl
 {
@@ -105,24 +105,24 @@ GuiTextBoxUndoRedoProcessor::EditStep
 
 			void GuiTextBoxUndoRedoProcessor::EditStep::Undo()
 			{
-				processor->textElementOperator->Select(inputStart, inputEnd);
-				processor->textElementOperator->SetSelectionText(originalText);
-				processor->textElementOperator->Select(originalStart, originalEnd);
+				processor->textBoxCommonInterface->Select(inputStart, inputEnd);
+				processor->textBoxCommonInterface->SetSelectionText(originalText);
+				processor->textBoxCommonInterface->Select(originalStart, originalEnd);
 			}
 
 			void GuiTextBoxUndoRedoProcessor::EditStep::Redo()
 			{
-				processor->textElementOperator->Select(originalStart, originalEnd);
-				processor->textElementOperator->SetSelectionText(inputText);
-				processor->textElementOperator->Select(inputStart, inputEnd);
+				processor->textBoxCommonInterface->Select(originalStart, originalEnd);
+				processor->textBoxCommonInterface->SetSelectionText(inputText);
+				processor->textBoxCommonInterface->Select(inputStart, inputEnd);
 			}
 
 /***********************************************************************
 GuiTextBoxUndoRedoProcessor
 ***********************************************************************/
 
-			GuiTextBoxUndoRedoProcessor::GuiTextBoxUndoRedoProcessor(GuiTextElementOperator* _textElementOperator)
-				:textElementOperator(_textElementOperator)
+			GuiTextBoxUndoRedoProcessor::GuiTextBoxUndoRedoProcessor(GuiTextBoxCommonInterface* _textBoxCommonInterface)
+				:textBoxCommonInterface(_textBoxCommonInterface)
 			{
 			}
 

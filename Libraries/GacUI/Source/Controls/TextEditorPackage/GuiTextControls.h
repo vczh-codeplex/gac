@@ -31,10 +31,10 @@ MultilineTextBox
 				class StyleController : public GuiScrollView::StyleController, public Description<StyleController>
 				{
 				protected:
-					elements::GuiColorizedTextElement*		textElement;
-					compositions::GuiBoundsComposition*		textComposition;
-					GuiMultilineTextBox*					textBox;
-					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
+					elements::GuiColorizedTextElement*			textElement;
+					compositions::GuiBoundsComposition*			textComposition;
+					GuiMultilineTextBox*						textBox;
+					Ptr<GuiTextBoxCommonInterface::ICallback>	defaultCallback;
 
 				public:
 					StyleController(GuiScrollView::IStyleProvider* styleProvider);
@@ -52,7 +52,7 @@ MultilineTextBox
 					void									SetVisuallyEnabled(bool value)override;
 				};
 
-				class TextElementOperatorCallback : public GuiTextElementOperator::DefaultCallback, public Description<TextElementOperatorCallback>
+				class TextElementOperatorCallback : public GuiTextBoxCommonInterface::DefaultCallback, public Description<TextElementOperatorCallback>
 				{
 				protected:
 					GuiMultilineTextBox*					textControl;
@@ -103,15 +103,15 @@ SinglelineTextBox
 				class StyleController : public Object, public GuiControl::IStyleController, public Description<StyleController>
 				{
 				protected:
-					Ptr<IStyleProvider>						styleProvider;
-					compositions::GuiBoundsComposition*		boundsComposition;
-					compositions::GuiGraphicsComposition*	containerComposition;
+					Ptr<IStyleProvider>							styleProvider;
+					compositions::GuiBoundsComposition*			boundsComposition;
+					compositions::GuiGraphicsComposition*		containerComposition;
 
-					GuiSinglelineTextBox*					textBox;
-					elements::GuiColorizedTextElement*		textElement;
-					compositions::GuiTableComposition*		textCompositionTable;
-					compositions::GuiCellComposition*		textComposition;
-					Ptr<GuiTextElementOperator::ICallback>	defaultCallback;
+					GuiSinglelineTextBox*						textBox;
+					elements::GuiColorizedTextElement*			textElement;
+					compositions::GuiTableComposition*			textCompositionTable;
+					compositions::GuiCellComposition*			textComposition;
+					Ptr<GuiTextBoxCommonInterface::ICallback>	defaultCallback;
 
 				public:
 					StyleController(IStyleProvider* _styleProvider);
@@ -133,7 +133,7 @@ SinglelineTextBox
 					void									SetViewPosition(Point value);
 				};
 
-				class TextElementOperatorCallback : public GuiTextElementOperator::DefaultCallback, public Description<TextElementOperatorCallback>
+				class TextElementOperatorCallback : public GuiTextBoxCommonInterface::DefaultCallback, public Description<TextElementOperatorCallback>
 				{
 				protected:
 					GuiSinglelineTextBox*					textControl;

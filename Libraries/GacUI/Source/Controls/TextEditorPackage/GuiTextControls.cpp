@@ -100,7 +100,7 @@ GuiMultilineTextBox::DefaultTextElementOperatorCallback
 ***********************************************************************/
 
 			GuiMultilineTextBox::TextElementOperatorCallback::TextElementOperatorCallback(GuiMultilineTextBox* _textControl)
-				:GuiTextElementOperator::DefaultCallback(
+				:GuiTextBoxCommonInterface::DefaultCallback(
 					dynamic_cast<StyleController*>(_textControl->GetStyleController())->GetTextElement(),
 					dynamic_cast<StyleController*>(_textControl->GetStyleController())->GetTextComposition()
 					)
@@ -342,7 +342,7 @@ GuiSinglelineTextBox::DefaultTextElementOperatorCallback
 ***********************************************************************/
 
 			GuiSinglelineTextBox::TextElementOperatorCallback::TextElementOperatorCallback(GuiSinglelineTextBox* _textControl)
-				:GuiTextElementOperator::DefaultCallback(
+				:GuiTextBoxCommonInterface::DefaultCallback(
 					dynamic_cast<StyleController*>(_textControl->GetStyleController())->GetTextElement(),
 					dynamic_cast<StyleController*>(_textControl->GetStyleController())->GetTextComposition()
 					)
