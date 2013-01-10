@@ -6,10 +6,8 @@
 #include "..\..\Source\Stream\CharFormat.h"
 #include "..\..\Source\Collections\Operation.h"
 
-#include "..\..\Source\Parsing\ParsingDefinitions.h"
-#include "..\..\Source\Parsing\ParsingAnalyzer.h"
 #include "..\..\Source\Parsing\ParsingAutomaton.h"
-#include "..\..\Source\Parsing\ParsingTable.h"
+#include "..\..\Source\Parsing\Parsing.h"
 
 using namespace vl;
 using namespace vl::stream;

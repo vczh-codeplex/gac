@@ -14,3 +14,14 @@ x86 and x64 assembler
 intermediate code
 enriched C language
 design a language for Calculation, AsyncIO, Server and GUI programming
+========================================================
+<gacdoc>
+	<content>
+		<paragraph>
+			<text xxx>text</text>
+			<object:image xxx />
+			<linebreak />
+		</paragraph>
+	</content>
+	<resources><resource name=".."></resources></resouces>
+</gacdoc>
