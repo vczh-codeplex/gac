@@ -195,6 +195,12 @@
     <ClCompile Include="..\..\Source\Parsing\ParsingDefinitions_CreateParserDefinition.cpp">
       <Filter>Common\Parsing</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\Parsing.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\ParsingState.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
@@ -399,6 +405,12 @@
       <Filter>Common\Parsing</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Parsing\ParsingTable.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Parsing\Parsing.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Parsing\ParsingState.h">
       <Filter>Common\Parsing</Filter>
     </ClInclude>
   </ItemGroup>
