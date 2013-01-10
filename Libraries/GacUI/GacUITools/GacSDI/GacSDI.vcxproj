@@ -77,11 +77,13 @@
   <ItemGroup>
     <ClCompile Include="..\..\Public\Source\GacUI.cpp" />
     <ClCompile Include="..\..\Public\Source\Vlpp.cpp" />
+    <ClCompile Include="..\Source\SDI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h" />
     <ClInclude Include="..\..\Public\Source\GacUIIncludes.h" />
     <ClInclude Include="..\..\Public\Source\Vlpp.h" />
+    <ClInclude Include="..\Source\SDI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

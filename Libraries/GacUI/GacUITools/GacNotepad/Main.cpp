@@ -1,36 +1,14 @@
-#include "..\..\Public\Source\GacUI.h"
+#include "..\Source\SDI.h"
 
-using namespace vl::collections;
+using namespace vl::sdi;
+
+/***********************************************************************
+WinMain
+***********************************************************************/
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
 {
-	return SetupWindowsDirect2DRenderer();
-}
-
-class MainWindow : public GuiWindow
-{
-public:
-	MainWindow()
-		:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
-	{
-		this->SetText(L"GacUI Notepad (www.gaclib.net)");
-
-		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
-		this->ForceCalculateSizeImmediately();
-		this->MoveToScreenCenter();
-	}
-
-	~MainWindow()
-	{
-	}
-};
-
-/***********************************************************************
-GuiMain
-***********************************************************************/
-
-void GuiMain()
-{
-	MainWindow window;
-	GetApplication()->Run(&window);
+	SDIConfiguration config;
+	config.applicationName=L"Notepad";
+	return StartSDI(config);
 }

@@ -13,23 +13,32 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Library">
+      <UniqueIdentifier>{a08f9539-e110-4c3f-96dc-7aaa7713485a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Public\Source\GacUI.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Library</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Public\Source\Vlpp.cpp">
+      <Filter>Library</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\SDI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
-      <Filter>Header Files</Filter>
+      <Filter>Library</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Public\Source\GacUIIncludes.h">
-      <Filter>Header Files</Filter>
+      <Filter>Library</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Public\Source\Vlpp.h">
+      <Filter>Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SDI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
