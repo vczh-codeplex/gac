@@ -7,25 +7,25 @@ class Node
 {
 }
 
-class TextFragment : Node
-{
-	token content;
-}
-
 class Text : Node
 {
-	TextFragment[] fragments (XmlUnescapingText);
+	token content (XmlUnescapeTextFragment);
 }
 
 class CData : Node
 {
-	token content (XmlUnescapingCData);
+	token content (XmlUnescapeCData);
 }
 
 class Attribute : Node
 {
 	token name;
-	token value (XmlUnescapingText);
+	token value (XmlUnescapeAttributeValue);
+}
+
+class Comment : Node
+{
+	token content (XmlUnescapeComment);
 }
 
 class Element : Node
@@ -33,12 +33,7 @@ class Element : Node
 	token name;
 	token closingName;
 	Attribute[] attributes;
-	Node[] subNodes;
-}
-
-class Comment : Node
-{
-	token content (XmlUnescapingComment);
+	Node[] subNodes (XmlMergeTextFragment);
 }
 
 class Instruction : Node
@@ -73,8 +68,7 @@ token CDATA = "/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>";
 discardtoken SPACE = "/s+";
 
 rule Attribute XAttribute = NAME:name "=" TEXT:value as Attribute;
-rule TextFragment XTextFragment = (NAME:content) as TextFragment;
-rule Text XText = XTextFragment:fragments {XTextFragment:fragments} as Text;
+rule Text XText = (NAME:content) as Text;
 rule CData XCData = CDATA:content as CData;
 rule Comment XComment = COMMENT:content as Comment;
 rule Element XElement = "<" NAME:name {XAttribute:attributes} ("/>" | ">" {XSubNode:subNodes} "</" NAME:closingName ">") as Element;
