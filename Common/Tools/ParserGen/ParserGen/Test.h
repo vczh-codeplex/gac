@@ -23,7 +23,7 @@ namespace vl
 			class XmlInstruction;
 			class XmlDocument;
 
-			class XmlNode
+			class XmlNode : public vl::parsing::ParsingTreeCustomBase
 			{
 			public:
 				class IVisitor : public Interface
