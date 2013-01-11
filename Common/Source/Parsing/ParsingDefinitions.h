@@ -104,7 +104,6 @@ namespace vl
 			{
 			public:
 				Ptr<ParsingDefinitionType>						type;
-				WString											name;
 				WString											unescapingFunction;
 
 				void											Accept(IVisitor* visitor)override;
@@ -126,7 +125,6 @@ namespace vl
 			class ParsingDefinitionEnumMemberDefinition : public ParsingDefinitionTypeDefinition
 			{
 			public:
-				WString											name;
 
 				void											Accept(IVisitor* visitor)override;
 			};

@@ -473,7 +473,7 @@ FindType
 
 				void Visit(ParsingDefinitionSubType* node)override
 				{
-					ParsingSymbol* type=FindType(node->parentType, manager, scope, errors);
+					ParsingSymbol* type=FindType(node->parentType.Obj(), manager, scope, errors);
 					if(type)
 					{
 						ParsingSymbol* subType=type->SearchClassSubSymbol(node->subTypeName);
@@ -494,7 +494,7 @@ FindType
 
 				void Visit(ParsingDefinitionArrayType* node)override
 				{
-					ParsingSymbol* type=FindType(node->elementType, manager, scope, errors);
+					ParsingSymbol* type=FindType(node->elementType.Obj(), manager, scope, errors);
 					if(type)
 					{
 						result=manager->GetArrayType(type);
@@ -502,15 +502,15 @@ FindType
 				}
 			};
 
-			ParsingSymbol* FindType(Ptr<definitions::ParsingDefinitionType> type, ParsingSymbolManager* manager, ParsingSymbol* scope, collections::List<Ptr<ParsingError>>& errors)
+			ParsingSymbol* FindType(definitions::ParsingDefinitionType* type, ParsingSymbolManager* manager, ParsingSymbol* scope, collections::List<Ptr<ParsingError>>& errors)
 			{
-				ParsingSymbol* result=manager->CacheGetType(type.Obj(), scope);
+				ParsingSymbol* result=manager->CacheGetType(type, scope);
 				if(!result)
 				{
 					FindTypeVisitor visitor(manager, (scope?scope:manager->GetGlobal()), errors);
 					type->Accept(&visitor);
 					result=visitor.result;
-					manager->CacheSetType(type.Obj(), scope, result);
+					manager->CacheSetType(type, scope, result);
 				}
 				return result;
 			}
@@ -550,7 +550,7 @@ PrepareSymbols
 				{
 					if(EnsureNameNotExists(node, L"a class field"))
 					{
-						ParsingSymbol* fieldType=FindType(node->type, manager, scope, errors);
+						ParsingSymbol* fieldType=FindType(node->type.Obj(), manager, scope, errors);
 						if(fieldType)
 						{
 							ParsingSymbol* field=manager->AddField(node->name, scope, fieldType);
@@ -569,7 +569,7 @@ PrepareSymbols
 						ParsingSymbol* baseType=0;
 						if(node->parentType)
 						{
-							baseType=FindType(node->parentType, manager, scope, errors);
+							baseType=FindType(node->parentType.Obj(), manager, scope, errors);
 						}
 						ParsingSymbol* classType=manager->AddClass(node->name, baseType, (scope->GetType()==ParsingSymbol::Global?0:scope));
 						if(classType)
@@ -662,7 +662,7 @@ PrepareSymbols
 					}
 					else
 					{
-						ParsingSymbol* type=FindType(rule->type, manager, 0, errors);
+						ParsingSymbol* type=FindType(rule->type.Obj(), manager, 0, errors);
 						if(type)
 						{
 							if(type->GetType()!=ParsingSymbol::ClassType)
@@ -806,7 +806,7 @@ ValidateRuleStructure
 					{
 						errors.Add(new ParsingError(node, L"Parsing tree node creation (the \"as\" operator) is not allowed inside loops."));
 					}
-					if(ParsingSymbol* nodeType=FindType(node->type, manager, 0, errors))
+					if(ParsingSymbol* nodeType=FindType(node->type.Obj(), manager, 0, errors))
 					{
 						CheckCreationType(node, nodeType);
 					}

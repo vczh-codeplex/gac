@@ -132,12 +132,207 @@ void WriteFileEnd(List<WString>& codeNamespaces, StreamWriter& writer)
 	}
 }
 
+/***********************************************************************
+Syntax Tree Generation
+***********************************************************************/
+
+class PrintTypeVisitor : public Object, public ParsingDefinitionType::IVisitor
+{
+public:
+	ParsingSymbol*				scope;
+	ParsingSymbolManager*		manager;
+	TextWriter&					writer;
+	bool						forBaseClass;
+
+	PrintTypeVisitor(ParsingSymbol* _scope, ParsingSymbolManager* _manager, TextWriter& _writer, bool _forBaseClass)
+		:scope(_scope)
+		,manager(_manager)
+		,writer(_writer)
+		,forBaseClass(_forBaseClass)
+	{
+	}
+
+	void Visit(ParsingDefinitionPrimitiveType* node)override
+	{
+		if(forBaseClass)
+		{
+			writer.WriteString(node->name);
+		}
+		else
+		{
+			List<Ptr<ParsingError>> errors;
+			ParsingSymbol* type=FindType(node, manager, scope, errors);
+			if(type->GetType()==ParsingSymbol::EnumType)
+			{
+				writer.WriteString(node->name);
+				writer.WriteString(L"::Type");
+			}
+			else
+			{
+				writer.WriteString(L"vl::Ptr<");
+				writer.WriteString(node->name);
+				writer.WriteString(L">");
+			}
+		}
+	}
+
+	void Visit(ParsingDefinitionTokenType* node)override
+	{
+		writer.WriteString(L"vl::parsing::ParsingToken");
+	}
+
+	void Visit(ParsingDefinitionSubType* node)override
+	{
+		node->parentType->Accept(this);
+		writer.WriteString(L".");
+		writer.WriteString(node->subTypeName);
+	}
+
+	void Visit(ParsingDefinitionArrayType* node)override
+	{
+		writer.WriteString(L"vl::collections::List<");
+		node->elementType->Accept(this);
+		writer.WriteString(L">");
+	}
+};
+
+class PrintTypeDefinitionVisitor : public Object, public ParsingDefinitionTypeDefinition::IVisitor
+{
+public:
+	ParsingSymbol*			scope;
+	ParsingSymbolManager*	manager;
+	WString					prefix;
+	TextWriter&				writer;
+
+	void LogInternal(ParsingDefinitionTypeDefinition* _definition, const WString& _prefix)
+	{
+		ParsingSymbol* oldScope=scope;
+		WString oldPrefix=prefix;
+
+		scope=(scope?scope:manager->GetGlobal())->GetSubSymbolByName(_definition->name);
+		if(!scope) scope=oldScope;
+		prefix=_prefix;
+		_definition->Accept(this);
+
+		prefix=oldPrefix;
+		scope=oldScope;
+	}
+
+	PrintTypeDefinitionVisitor(ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _prefix, TextWriter& _writer)
+		:scope(_scope)
+		,manager(_manager)
+		,prefix(_prefix)
+		,writer(_writer)
+	{
+	}
+
+	void Visit(ParsingDefinitionClassMemberDefinition* node)override
+	{
+		writer.WriteString(prefix);
+		{
+			PrintTypeVisitor visitor(scope, manager, writer, false);
+			node->type->Accept(&visitor);
+		}
+		writer.WriteString(L" ");
+		writer.WriteString(node->name);
+		writer.WriteLine(L";");
+	}
+
+	void Visit(ParsingDefinitionClassDefinition* node)override
+	{
+		writer.WriteString(prefix);
+		writer.WriteString(L"class ");
+		if(node->parentType)
+		{
+			writer.WriteString(node->name);
+			writer.WriteString(L" : public ");
+			{
+				PrintTypeVisitor visitor(scope, manager, writer, true);
+				node->parentType->Accept(&visitor);
+			}
+			writer.WriteLine(L"");
+		}
+		else
+		{
+			writer.WriteLine(node->name);
+		}
+
+		writer.WriteString(prefix);
+		writer.WriteLine(L"{");
+
+		for(int i=0;i<node->subTypes.Count();i++)
+		{
+			LogInternal(node->subTypes[i].Obj(), prefix+L"\t");
+			writer.WriteLine(L"");
+		}
+
+		for(int i=0;i<node->members.Count();i++)
+		{
+			LogInternal(node->members[i].Obj(), prefix+L"\t");
+		}
+
+		writer.WriteString(prefix);
+		writer.WriteLine(L"};");
+	}
+
+	void Visit(ParsingDefinitionEnumMemberDefinition* node)override
+	{
+		writer.WriteString(prefix);
+		writer.WriteString(node->name);
+		writer.WriteLine(L",");
+	}
+
+	void Visit(ParsingDefinitionEnumDefinition* node)override
+	{
+		writer.WriteString(prefix);
+		writer.WriteString(L"namespace ");
+		writer.WriteLine(node->name);
+		writer.WriteString(prefix);
+		writer.WriteLine(L"{");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t");
+		writer.WriteLine(L"enum Type");
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t");
+		writer.WriteLine(L"{");
+
+		for(int i=0;i<node->members.Count();i++)
+		{
+			LogInternal(node->members[i].Obj(), prefix+L"\t\t");
+		}
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t");
+		writer.WriteLine(L"};");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"}");
+	}
+};
+
 void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, List<WString>& codeIncludes, List<WString>& codeNamespaces, const WString& codeClassPrefix, StreamWriter& writer)
 {
 	WriteFileComment(name, writer);
 	WString prefix=WriteFileBegin(codeIncludes, codeNamespaces, writer);
+
+	ParsingSymbolManager manager;
+	{
+		List<Ptr<ParsingError>> errors;
+		ValidateDefinition(definition, &manager, errors);
+	}
+	FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, definition->types)
+	{
+		PrintTypeDefinitionVisitor visitor(0, &manager, prefix, writer);
+		type->Accept(&visitor);
+		writer.WriteLine(L"");
+	}
+
 	WriteFileEnd(codeNamespaces, writer);
 }
+
+/***********************************************************************
+Node Conversion Generation
+***********************************************************************/
 
 void WriteCppFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, List<WString>& codeIncludes, List<WString>& codeNamespaces, const WString& codeClassPrefix, StreamWriter& writer)
 {
