@@ -402,6 +402,12 @@
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextGeneralOperations.cpp">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\Parsing.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingState.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -769,6 +775,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextGeneralOperations.h">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\Parsing.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingState.h">
+      <Filter>Common\Parsing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

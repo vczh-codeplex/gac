@@ -105,6 +105,7 @@ namespace vl
 			public:
 				Ptr<ParsingDefinitionType>						type;
 				WString											name;
+				WString											unescapingFunction;
 
 				void											Accept(IVisitor* visitor)override;
 			};
@@ -333,7 +334,7 @@ namespace vl
 				ParsingDefinitionClassDefinitionWriter(const WString& name);
 				ParsingDefinitionClassDefinitionWriter(const WString& name, const ParsingDefinitionTypeWriter& parentType);
 
-				ParsingDefinitionClassDefinitionWriter&			Member(const WString& name, const ParsingDefinitionTypeWriter& type);
+				ParsingDefinitionClassDefinitionWriter&			Member(const WString& name, const ParsingDefinitionTypeWriter& type, const WString& unescapingFunction=L"");
 				ParsingDefinitionClassDefinitionWriter&			SubType(const ParsingDefinitionTypeDefinitionWriter& type);
 
 				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;

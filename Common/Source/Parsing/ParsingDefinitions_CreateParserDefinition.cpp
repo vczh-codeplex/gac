@@ -50,6 +50,7 @@ namespace vl
 						Class(L"ClassMemberDef")
 							.Member(L"type", Type(L"TypeObj"))
 							.Member(L"name", TokenType())
+							.Member(L"unescapingFunction", TokenType())
 						)
 
 					.Type(
@@ -214,7 +215,7 @@ namespace vl
 						.EndRule()
 					.Rule(L"ClassMember", Type(L"ClassMemberDef"))
 						.Imply(
-							(Rule(L"Type")[L"type"] + Rule(L"NAME")[L"name"] + Text(L";"))
+							(Rule(L"Type")[L"type"] + Rule(L"NAME")[L"name"] + Opt(Text(L"(") + Rule(L"NAME")[L"unescapingFunction"] + Text(L")")) + Text(L";"))
 								.As(Type(L"ClassMemberDef"))
 							)
 						.EndRule()
@@ -450,6 +451,7 @@ namespace vl
 					Ptr<ParsingDefinitionClassMemberDefinition> target=new ParsingDefinitionClassMemberDefinition;
 					SetMember(target->type, node->GetMember(L"type"));
 					SetName(target->name, node->GetMember(L"name"));
+					SetName(target->unescapingFunction, node->GetMember(L"unescapingFunction"));
 					return target;
 				}
 				else if(node->GetType()==L"ClassTypeDef")

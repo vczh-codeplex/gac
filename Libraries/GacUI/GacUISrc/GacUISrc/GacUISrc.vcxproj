@@ -156,6 +156,7 @@
     <ClCompile Include="..\..\..\..\Common\Source\Console.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Exception.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\HttpUtility.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\Parsing.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAnalyzer.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton_Closure.cpp" />
@@ -166,6 +167,7 @@
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingDefinitions.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingDefinitions_CreateParserDefinition.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingLogging.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingState.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingTable.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingTree.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.cpp" />
@@ -281,9 +283,11 @@
     <ClInclude Include="..\..\..\..\Common\Source\Exception.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Function.h" />
     <ClInclude Include="..\..\..\..\Common\Source\HttpUtility.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\Parsing.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingAnalyzer.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingDefinitions.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingState.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingTable.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingTree.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Pointer.h" />

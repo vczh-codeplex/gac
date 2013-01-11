@@ -282,6 +282,12 @@ namespace vl
 			ParsingTextRange			codeRange;
 		};
 
+		class ParsingToken : public ParsingTreeCustomBase
+		{
+		public:
+			WString						value;
+		};
+
 		class ParsingError : public Object
 		{
 		public:
