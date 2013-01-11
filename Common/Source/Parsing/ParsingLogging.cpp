@@ -107,6 +107,12 @@ Logger (ParsingDefinitionTypeDefinition)
 					Log(node->type.Obj(), writer);
 					writer.WriteString(L" ");
 					writer.WriteString(node->name);
+					if(node->unescapingFunction!=L"")
+					{
+						writer.WriteString(L" (");
+						writer.WriteString(node->unescapingFunction);
+						writer.WriteString(L")");
+					}
 					writer.WriteLine(L";");
 				}
 

@@ -181,11 +181,12 @@ ParsingDefinitionClassDefinitionWriter
 				definition->parentType=parentType.Type();
 			}
 
-			ParsingDefinitionClassDefinitionWriter& ParsingDefinitionClassDefinitionWriter::Member(const WString& name, const ParsingDefinitionTypeWriter& type)
+			ParsingDefinitionClassDefinitionWriter& ParsingDefinitionClassDefinitionWriter::Member(const WString& name, const ParsingDefinitionTypeWriter& type, const WString& unescapingFunction)
 			{
 				Ptr<ParsingDefinitionClassMemberDefinition> member=new ParsingDefinitionClassMemberDefinition;
 				member->name=name;
 				member->type=type.Type();
+				member->unescapingFunction=unescapingFunction;
 				definition->members.Add(member);
 				return *this;
 			}

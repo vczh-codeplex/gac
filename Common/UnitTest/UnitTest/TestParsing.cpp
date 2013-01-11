@@ -252,7 +252,7 @@ namespace test
 		definitionWriter
 			.Type(
 				Class(L"NameItemExpression")
-					.Member(L"name", TokenType())
+					.Member(L"name", TokenType(), L"UnescapingName")
 				)
 			.Type(
 				Class(L"NameListExpression")
