@@ -31,6 +31,9 @@
     <Filter Include="Common\Stream">
       <UniqueIdentifier>{4b994d19-7bb6-495f-8e09-8f6bda6643b7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GeneratedParser">
+      <UniqueIdentifier>{76accc90-b524-4dc9-a1e6-d95bc5702155}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -128,6 +131,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\Source\Stream\MemoryStream.cpp">
       <Filter>Common\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.cpp">
+      <Filter>GeneratedParser</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -257,10 +263,13 @@
     <ClInclude Include="..\..\..\Source\Stream\MemoryStream.h">
       <Filter>Common\Stream</Filter>
     </ClInclude>
+    <ClInclude Include="Test.h">
+      <Filter>GeneratedParser</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Test.parser.txt">
-      <Filter>Resource Files</Filter>
+      <Filter>GeneratedParser</Filter>
     </Text>
   </ItemGroup>
 </Project>

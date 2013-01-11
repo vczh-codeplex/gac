@@ -1,4 +1,4 @@
-include:..\Parsing.h
+include:"..\..\..\Source\Parsing\Parsing.h"
 namespace:vl.parsing.xml
 classPrefix:Xml
 grammar:
@@ -55,20 +55,18 @@ token COMPLEX_ELEMENT_OPEN = "/<//";
 token SINGLE_ELEMENT_CLOSE = "///>";
 token ELEMENT_OPEN = "/<";
 token ELEMENT_CLOSE = "/>";
-token COLON = ":";
-token QUESTION = "/?";
-token SLASH = "//";
 token EQUAL = "/=";
 
 token NAME = "[a-zA-Z0-9:_/-]+";
-token TEXT = """([^""&]|&[^;]*;)*""";
+token ATTVALUE = """([^""&]|&/l+;)*""";
 token COMMENT = "/</!--[^>]*/>";
 token CDATA = "/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>";
+token TEXT = "([^<>""& /r/n/ta-zA-Z0-9:_/-]|&/l+;)+";
 
 discardtoken SPACE = "/s+";
 
-rule Attribute XAttribute = NAME:name "=" TEXT:value as Attribute;
-rule Text XText = (NAME:content) as Text;
+rule Attribute XAttribute = NAME:name "=" ATTVALUE:value as Attribute;
+rule Text XText = (NAME:content | EQUAL:content | TEXT:content) as Text;
 rule CData XCData = CDATA:content as CData;
 rule Comment XComment = COMMENT:content as Comment;
 rule Element XElement = "<" NAME:name {XAttribute:attributes} ("/>" | ">" {XSubNode:subNodes} "</" NAME:closingName ">") as Element;
