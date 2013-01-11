@@ -122,7 +122,6 @@ WString WriteFileBegin(List<WString>& codeIncludes, List<WString>& codeNamespace
 
 void WriteFileEnd(List<WString>& codeNamespaces, StreamWriter& writer)
 {
-	writer.WriteLine(L"");
 	vint counter=codeNamespaces.Count();
 	FOREACH(WString, ns, codeNamespaces)
 	{
@@ -133,29 +132,34 @@ void WriteFileEnd(List<WString>& codeNamespaces, StreamWriter& writer)
 }
 
 /***********************************************************************
-Syntax Tree Generation
+Syntax Tree Declaration Generation
 ***********************************************************************/
 
-extern void PrintType(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, TextWriter& _writer);
-extern void PrintTypeForValue(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, TextWriter& _writer);
-extern void PrintTypeDefinitions(List<Ptr<ParsingDefinitionTypeDefinition>>& types, const WString& prefix, ParsingSymbol* scope, ParsingSymbolManager* manager, TextWriter& writer);
+extern void PrintType(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _codeClassPrefix, TextWriter& _writer);
+extern void PrintTypeForValue(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _codeClassPrefix, TextWriter& _writer);
+extern void PrintTypeDefinitions(List<Ptr<ParsingDefinitionTypeDefinition>>& types, const WString& prefix, ParsingSymbol* scope, ParsingSymbolManager* manager, const WString& codeClassPrefix, TextWriter& writer);
+extern bool PrintType(ParsingSymbol* type, const WString& codeClassPrefix, TextWriter& writer);
+extern void PrintTypeForValue(ParsingSymbol* type, const WString& codeClassPrefix, TextWriter& writer);
 
 class PrintTypeVisitor : public Object, public ParsingDefinitionType::IVisitor
 {
 public:
 	ParsingSymbol*				scope;
 	ParsingSymbolManager*		manager;
+	WString						codeClassPrefix;
 	TextWriter&					writer;
 
-	PrintTypeVisitor(ParsingSymbol* _scope, ParsingSymbolManager* _manager, TextWriter& _writer)
+	PrintTypeVisitor(ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _codeClassPrefix, TextWriter& _writer)
 		:scope(_scope)
 		,manager(_manager)
+		,codeClassPrefix(_codeClassPrefix)
 		,writer(_writer)
 	{
 	}
 
 	void Visit(ParsingDefinitionPrimitiveType* node)override
 	{
+		writer.WriteString(codeClassPrefix);
 		writer.WriteString(node->name);
 	}
 
@@ -168,41 +172,103 @@ public:
 	{
 		node->parentType->Accept(this);
 		writer.WriteString(L"::");
+		writer.WriteString(codeClassPrefix);
 		writer.WriteString(node->subTypeName);
 	}
 
 	void Visit(ParsingDefinitionArrayType* node)override
 	{
 		writer.WriteString(L"vl::collections::List<");
-		PrintTypeForValue(node->elementType.Obj(), scope, manager, writer);
+		PrintTypeForValue(node->elementType.Obj(), scope, manager, codeClassPrefix, writer);
 		writer.WriteString(L">");
 	}
 };
 
-void PrintType(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, TextWriter& _writer)
+void PrintType(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _codeClassPrefix, TextWriter& _writer)
 {
-	PrintTypeVisitor visitor(_scope, _manager, _writer);
+	PrintTypeVisitor visitor(_scope, _manager, _codeClassPrefix, _writer);
 	_type->Accept(&visitor);
 }
 
-void PrintTypeForValue(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, TextWriter& _writer)
+void PrintTypeForValue(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _codeClassPrefix, TextWriter& _writer)
 {
 	List<Ptr<ParsingError>> errors;
 	ParsingSymbol* type=FindType(_type, _manager, _scope, errors);
 	if(type->GetType()==ParsingSymbol::EnumType)
 	{
-		PrintType(_type, _scope, _manager, _writer);
+		PrintType(_type, _scope, _manager, _codeClassPrefix, _writer);
 		_writer.WriteString(L"::Type");
 	}
 	else if(type->GetType()==ParsingSymbol::ClassType)
 	{
 		_writer.WriteString(L"vl::Ptr<");
-		PrintType(_type, _scope, _manager, _writer);
+		PrintType(_type, _scope, _manager, _codeClassPrefix, _writer);
 		_writer.WriteString(L">");
 	}
 	else
 	{
-		PrintType(_type, _scope, _manager, _writer);
+		PrintType(_type, _scope, _manager, _codeClassPrefix, _writer);
+	}
+}
+
+bool PrintType(ParsingSymbol* type, const WString& codeClassPrefix, TextWriter& writer)
+{
+	if(type->GetType()==ParsingSymbol::ClassType || type->GetType()==ParsingSymbol::EnumType)
+	{
+		if(PrintType(type->GetParentSymbol(), codeClassPrefix, writer))
+		{
+			writer.WriteString(L"::");
+		}
+		writer.WriteString(codeClassPrefix);
+		writer.WriteString(type->GetName());
+		return true;
+	}
+	else if(type->GetType()==ParsingSymbol::TokenType)
+	{
+		writer.WriteString(L"vl::parsing::ParsingToken");
+		return true;
+	}
+	else if(type->GetType()==ParsingSymbol::ArrayType)
+	{
+		writer.WriteString(L"vl::collections::List<");
+		PrintTypeForValue(type->GetDescriptorSymbol(), codeClassPrefix, writer);
+		writer.WriteString(L">");
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void PrintTypeForValue(ParsingSymbol* type, const WString& codeClassPrefix, TextWriter& writer)
+{
+	if(type->GetType()==ParsingSymbol::EnumType)
+	{
+		PrintType(type, codeClassPrefix, writer);
+		writer.WriteString(L"::Type");
+	}
+	else if(type->GetType()==ParsingSymbol::ClassType)
+	{
+		writer.WriteString(L"vl::Ptr<");
+		PrintType(type, codeClassPrefix, writer);
+		writer.WriteString(L">");
+	}
+	else
+	{
+		PrintType(type, codeClassPrefix, writer);
+	}
+}
+
+void SearchChildClasses(ParsingSymbol* parent, ParsingSymbol* scope, ParsingSymbolManager* manager, List<ParsingSymbol*>& children)
+{
+	if(scope->GetType()==ParsingSymbol::ClassType && scope->GetDescriptorSymbol()==parent)
+	{
+		children.Add(scope);
+	}
+	for(vint i=0;i<scope->GetSubSymbolCount();i++)
+	{
+		SearchChildClasses(parent, scope->GetSubSymbol(i), manager, children);
 	}
 }
 
@@ -212,6 +278,7 @@ public:
 	ParsingSymbol*			scope;
 	ParsingSymbolManager*	manager;
 	WString					prefix;
+	WString					codeClassPrefix;
 	TextWriter&				writer;
 
 	void LogInternal(ParsingDefinitionTypeDefinition* _definition, const WString& _prefix)
@@ -228,10 +295,11 @@ public:
 		scope=oldScope;
 	}
 
-	PrintTypeDefinitionVisitor(ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _prefix, TextWriter& _writer)
+	PrintTypeDefinitionVisitor(ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _prefix, const WString& _codeClassPrefix, TextWriter& _writer)
 		:scope(_scope)
 		,manager(_manager)
 		,prefix(_prefix)
+		,codeClassPrefix(_codeClassPrefix)
 		,writer(_writer)
 	{
 	}
@@ -240,7 +308,7 @@ public:
 	{
 		writer.WriteString(prefix);
 		{
-			PrintTypeForValue(node->type.Obj(), scope, manager, writer);
+			PrintTypeForValue(node->type.Obj(), scope, manager, codeClassPrefix, writer);
 		}
 		writer.WriteString(L" ");
 		writer.WriteString(node->name);
@@ -253,26 +321,69 @@ public:
 		writer.WriteString(L"class ");
 		if(node->parentType)
 		{
+			writer.WriteString(codeClassPrefix);
 			writer.WriteString(node->name);
 			writer.WriteString(L" : public ");
 			{
-				PrintType(node->parentType.Obj(), scope, manager, writer);
+				PrintType(node->parentType.Obj(), scope, manager, codeClassPrefix, writer);
 			}
 			writer.WriteLine(L"");
 		}
 		else
 		{
+			writer.WriteString(codeClassPrefix);
 			writer.WriteLine(node->name);
 		}
 
 		writer.WriteString(prefix);
 		writer.WriteLine(L"{");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"public:");
 
-		PrintTypeDefinitions(node->subTypes, prefix+L"\t", scope, manager, writer);
+		List<ParsingSymbol*> children;
+		ParsingSymbol* thisType=(scope?scope:manager->GetGlobal())->GetSubSymbolByName(node->name);
+		SearchChildClasses(thisType, manager->GetGlobal(), manager, children);
+		if(children.Count()>0)
+		{
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\tclass IVisitor : public Interface");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\t{");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\t\tpublic:");
+
+			FOREACH(ParsingSymbol*, child, children)
+			{
+				writer.WriteString(prefix);
+				writer.WriteString(L"\t\tvirtual void Visit(");
+				PrintType(child, codeClassPrefix, writer);
+				writer.WriteLine(L"* node)=0;");
+			}
+
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\t};");
+			writer.WriteLine(L"");
+			writer.WriteString(prefix);
+			writer.WriteString(L"\tvirtual void Accept(");
+			PrintType(thisType, codeClassPrefix, writer);
+			writer.WriteLine(L"::IVisitor* visitor)=0;");
+			writer.WriteLine(L"");
+		}
+
+		PrintTypeDefinitions(node->subTypes, prefix+L"\t", scope, manager, codeClassPrefix, writer);
 
 		for(int i=0;i<node->members.Count();i++)
 		{
 			LogInternal(node->members[i].Obj(), prefix+L"\t");
+		}
+
+		if(node->parentType)
+		{
+			writer.WriteLine(L"");
+			writer.WriteString(prefix);
+			writer.WriteString(L"\tvoid Accept(");
+			PrintType(thisType->GetDescriptorSymbol(), codeClassPrefix, writer);
+			writer.WriteLine(L"::IVisitor* visitor)override;");
 		}
 
 		writer.WriteString(prefix);
@@ -290,6 +401,7 @@ public:
 	{
 		writer.WriteString(prefix);
 		writer.WriteString(L"namespace ");
+		writer.WriteString(codeClassPrefix);
 		writer.WriteLine(node->name);
 		writer.WriteString(prefix);
 		writer.WriteLine(L"{");
@@ -314,11 +426,61 @@ public:
 	}
 };
 
-void PrintTypeDefinitions(List<Ptr<ParsingDefinitionTypeDefinition>>& types, const WString& prefix, ParsingSymbol* scope, ParsingSymbolManager* manager, TextWriter& writer)
+class PrintForwardTypeDefinitionVisitor : public Object, public ParsingDefinitionTypeDefinition::IVisitor
 {
+public:
+	WString					prefix;
+	WString					codeClassPrefix;
+	TextWriter&				writer;
+	bool					exists;
+
+	PrintForwardTypeDefinitionVisitor(const WString& _prefix, const WString& _codeClassPrefix, TextWriter& _writer)
+		:prefix(_prefix)
+		,writer(_writer)
+		,codeClassPrefix(_codeClassPrefix)
+		,exists(false)
+	{
+	}
+
+	void Visit(ParsingDefinitionClassMemberDefinition* node)override
+	{
+	}
+
+	void Visit(ParsingDefinitionClassDefinition* node)override
+	{
+		writer.WriteString(prefix);
+		writer.WriteString(L"class ");
+		writer.WriteString(codeClassPrefix);
+		writer.WriteString(node->name);
+		writer.WriteLine(L";");
+		exists=true;
+	}
+
+	void Visit(ParsingDefinitionEnumMemberDefinition* node)override
+	{
+	}
+
+	void Visit(ParsingDefinitionEnumDefinition* node)override
+	{
+	}
+};
+
+void PrintTypeDefinitions(List<Ptr<ParsingDefinitionTypeDefinition>>& types, const WString& prefix, ParsingSymbol* scope, ParsingSymbolManager* manager, const WString& codeClassPrefix, TextWriter& writer)
+{
+	{
+		PrintForwardTypeDefinitionVisitor visitor(prefix, codeClassPrefix, writer);
+		FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, types)
+		{
+			type->Accept(&visitor);
+		}
+		if(visitor.exists)
+		{
+			writer.WriteLine(L"");
+		}
+	}
 	FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, types)
 	{
-		PrintTypeDefinitionVisitor visitor(scope, manager, prefix, writer);
+		PrintTypeDefinitionVisitor visitor(scope, manager, prefix, codeClassPrefix, writer);
 		type->Accept(&visitor);
 		writer.WriteLine(L"");
 	}
@@ -334,9 +496,121 @@ void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Lis
 		List<Ptr<ParsingError>> errors;
 		ValidateDefinition(definition, &manager, errors);
 	}
-	PrintTypeDefinitions(definition->types, prefix, 0, &manager, writer);
+	PrintTypeDefinitions(definition->types, prefix, 0, &manager, codeClassPrefix, writer);
 
 	WriteFileEnd(codeNamespaces, writer);
+}
+
+/***********************************************************************
+Syntax Tree Implementation Generation
+***********************************************************************/
+
+class CollectUnescapingFunctionVisitor : public Object, public ParsingDefinitionTypeDefinition::IVisitor
+{
+public:
+	ParsingSymbol*								scope;
+	ParsingSymbolManager*						manager;
+	Dictionary<WString, ParsingSymbol*>			functions;
+
+	void LogInternal(ParsingDefinitionTypeDefinition* _definition)
+	{
+		ParsingSymbol* oldScope=scope;
+
+		scope=(scope?scope:manager->GetGlobal())->GetSubSymbolByName(_definition->name);
+		if(!scope) scope=oldScope;
+		_definition->Accept(this);
+
+		scope=oldScope;
+	}
+
+	CollectUnescapingFunctionVisitor(ParsingSymbol* _scope, ParsingSymbolManager* _manager)
+		:scope(_scope)
+		,manager(_manager)
+	{
+	}
+
+	void Visit(ParsingDefinitionClassMemberDefinition* node)override
+	{
+		if(node->unescapingFunction!=L"" && !functions.Keys().Contains(node->unescapingFunction))
+		{
+			List<Ptr<ParsingError>> errors;
+			ParsingSymbol* type=FindType(node->type.Obj(), manager, scope, errors);
+			functions.Add(node->unescapingFunction, type);
+		}
+	}
+
+	void Visit(ParsingDefinitionClassDefinition* node)override
+	{
+		for(int i=0;i<node->subTypes.Count();i++)
+		{
+			LogInternal(node->subTypes[i].Obj());
+		}
+		for(int i=0;i<node->members.Count();i++)
+		{
+			LogInternal(node->members[i].Obj());
+		}
+	}
+
+	void Visit(ParsingDefinitionEnumMemberDefinition* node)override
+	{
+	}
+
+	void Visit(ParsingDefinitionEnumDefinition* node)override
+	{
+	}
+};
+
+void WriteVisitorImpl(ParsingSymbolManager* manager, ParsingSymbol* scope, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
+{
+	if(scope->GetType()==ParsingSymbol::ClassType)
+	{
+		ParsingSymbol* parent=scope->GetDescriptorSymbol();
+		if(parent)
+		{
+			writer.WriteString(prefix);
+			writer.WriteString(L"void ");
+			PrintType(scope, codeClassPrefix, writer);
+			writer.WriteString(L"::Accept(");
+			PrintType(parent, codeClassPrefix, writer);
+			writer.WriteLine(L"::IVisitor* visitor)");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"{");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\tvisitor->Visit(this);");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"}");
+			writer.WriteLine(L"");
+		}
+	}
+	for(vint i=0;i<scope->GetSubSymbolCount();i++)
+	{
+		WriteVisitorImpl(manager, scope->GetSubSymbol(i), prefix, codeClassPrefix, writer);
+	}
+}
+
+void WriteUnescapingFunctionForwardDeclarations(Ptr<ParsingDefinition> definition, ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
+{
+	CollectUnescapingFunctionVisitor visitor(0, manager);
+	FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, definition->types)
+	{
+		type->Accept(&visitor);
+	}
+	if(visitor.functions.Count()>0)
+	{
+		for(vint i=0;i<visitor.functions.Count();i++)
+		{
+			WString name=visitor.functions.Keys().Get(i);
+			ParsingSymbol* type=visitor.functions.Values().Get(i);
+
+			writer.WriteString(prefix);
+			writer.WriteString(L"extern void ");
+			writer.WriteString(name);
+			writer.WriteString(L"(");
+			PrintTypeForValue(type, codeClassPrefix, writer);
+			writer.WriteLine(L"& value, vl::collections::List<vl::regex::RegexToken>& tokens);");
+		}
+		writer.WriteLine(L"");
+	}
 }
 
 /***********************************************************************
@@ -346,6 +620,15 @@ Node Conversion Generation
 void WriteCppFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, List<WString>& codeIncludes, List<WString>& codeNamespaces, const WString& codeClassPrefix, StreamWriter& writer)
 {
 	WString prefix=WriteFileBegin(codeIncludes, codeNamespaces, writer);
+
+	ParsingSymbolManager manager;
+	{
+		List<Ptr<ParsingError>> errors;
+		ValidateDefinition(definition, &manager, errors);
+	}
+	WriteUnescapingFunctionForwardDeclarations(definition, &manager, prefix, codeClassPrefix, writer);
+	WriteVisitorImpl(&manager, manager.GetGlobal(), prefix, codeClassPrefix, writer);
+
 	WriteFileEnd(codeNamespaces, writer);
 }
 

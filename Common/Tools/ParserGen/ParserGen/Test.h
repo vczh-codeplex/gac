@@ -14,52 +14,96 @@ namespace vl
 	{
 		namespace xml
 		{
-			class Node
+			class XmlNode;
+			class XmlText;
+			class XmlCData;
+			class XmlAttribute;
+			class XmlComment;
+			class XmlElement;
+			class XmlInstruction;
+			class XmlDocument;
+
+			class XmlNode
 			{
+			public:
+				class IVisitor : public Interface
+				{
+					public:
+					virtual void Visit(XmlText* node)=0;
+					virtual void Visit(XmlCData* node)=0;
+					virtual void Visit(XmlAttribute* node)=0;
+					virtual void Visit(XmlComment* node)=0;
+					virtual void Visit(XmlElement* node)=0;
+					virtual void Visit(XmlInstruction* node)=0;
+					virtual void Visit(XmlDocument* node)=0;
+				};
+
+				virtual void Accept(XmlNode::IVisitor* visitor)=0;
+
 			};
 
-			class Text : public Node
+			class XmlText : public XmlNode
 			{
+			public:
 				vl::parsing::ParsingToken content;
+
+				void Accept(XmlNode::IVisitor* visitor)override;
 			};
 
-			class CData : public Node
+			class XmlCData : public XmlNode
 			{
+			public:
 				vl::parsing::ParsingToken content;
+
+				void Accept(XmlNode::IVisitor* visitor)override;
 			};
 
-			class Attribute : public Node
+			class XmlAttribute : public XmlNode
 			{
+			public:
 				vl::parsing::ParsingToken name;
 				vl::parsing::ParsingToken value;
+
+				void Accept(XmlNode::IVisitor* visitor)override;
 			};
 
-			class Comment : public Node
+			class XmlComment : public XmlNode
 			{
+			public:
 				vl::parsing::ParsingToken content;
+
+				void Accept(XmlNode::IVisitor* visitor)override;
 			};
 
-			class Element : public Node
+			class XmlElement : public XmlNode
 			{
+			public:
 				vl::parsing::ParsingToken name;
 				vl::parsing::ParsingToken closingName;
-				vl::collections::List<vl::Ptr<Attribute>> attributes;
-				vl::collections::List<vl::Ptr<Node>> subNodes;
+				vl::collections::List<vl::Ptr<XmlAttribute>> attributes;
+				vl::collections::List<vl::Ptr<XmlNode>> subNodes;
+
+				void Accept(XmlNode::IVisitor* visitor)override;
 			};
 
-			class Instruction : public Node
+			class XmlInstruction : public XmlNode
 			{
+			public:
 				vl::parsing::ParsingToken name;
-				vl::collections::List<vl::Ptr<Attribute>> attributes;
+				vl::collections::List<vl::Ptr<XmlAttribute>> attributes;
+
+				void Accept(XmlNode::IVisitor* visitor)override;
 			};
 
-			class Document : public Node
+			class XmlDocument : public XmlNode
 			{
-				vl::collections::List<vl::Ptr<Instruction>> instructions;
-				vl::collections::List<vl::Ptr<Comment>> comments;
-				vl::Ptr<Element> rootElement;
-			};
+			public:
+				vl::collections::List<vl::Ptr<XmlInstruction>> instructions;
+				vl::collections::List<vl::Ptr<XmlComment>> comments;
+				vl::Ptr<XmlElement> rootElement;
 
+				void Accept(XmlNode::IVisitor* visitor)override;
+			};
 
 		}
 	}
