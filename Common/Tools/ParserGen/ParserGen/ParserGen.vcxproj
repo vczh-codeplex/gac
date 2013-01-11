@@ -114,6 +114,7 @@
     <ClCompile Include="..\..\..\Source\Stream\MemoryStream.cpp" />
     <ClCompile Include="..\..\..\Source\String.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\Basic.h" />
@@ -158,6 +159,7 @@
     <ClInclude Include="..\..\..\Source\Stream\Interfaces.h" />
     <ClInclude Include="..\..\..\Source\Stream\MemoryStream.h" />
     <ClInclude Include="..\..\..\Source\String.h" />
+    <ClInclude Include="Test.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Test.parser.txt" />

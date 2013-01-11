@@ -47,15 +47,20 @@ void LogErrors(List<Ptr<ParsingError>>& errors, StreamWriter& writer)
 
 #define CheckError do{ if(errors.Count()>0){ LogErrors(errors, writer); return 0; } }while(0)
 
-Ptr<ParsingTable> CreateTable(Ptr<ParsingStrictParser> parser, const WString& grammar, StreamWriter& writer)
+Ptr<ParsingDefinition> CreateDefinition(Ptr<ParsingStrictParser> parser, const WString& grammar, StreamWriter& writer)
 {
-	ParsingSymbolManager symbolManager;
 	List<Ptr<ParsingError>> errors;
-
 	Ptr<ParsingTreeNode> definitionNode=parser->Parse(grammar, L"ParserDecl", errors);
 	CheckError;
 
 	Ptr<ParsingDefinition> definition=DeserializeDefinition(definitionNode);
+	return definition;
+}
+
+Ptr<ParsingTable> CreateTable(Ptr<ParsingDefinition> definition, StreamWriter& writer)
+{
+	ParsingSymbolManager symbolManager;
+	List<Ptr<ParsingError>> errors;
 	ValidateDefinition(definition, &symbolManager, errors);
 	LogParsingData(definition, L"Grammar Definition", writer);
 	CheckError;
@@ -80,6 +85,64 @@ Ptr<ParsingTable> CreateTable(Ptr<ParsingStrictParser> parser, const WString& gr
 	CheckError;
 
 	return table;
+}
+
+/***********************************************************************
+Code Generation
+***********************************************************************/
+
+void WriteFileComment(const WString& name, StreamWriter& writer)
+{
+	writer.WriteLine(L"/***********************************************************************");
+	writer.WriteLine(L"Vczh Library++ 3.0");
+	writer.WriteLine(L"Developer: 陈梓瀚(vczh)");
+	writer.WriteLine(L"Parser::"+name);
+	writer.WriteLine(L"");
+	writer.WriteLine(L"本文件使用Vczh Functional Macro工具自动生成");
+	writer.WriteLine(L"***********************************************************************/");
+	writer.WriteLine(L"");
+}
+
+WString WriteFileBegin(List<WString>& codeIncludes, List<WString>& codeNamespaces, StreamWriter& writer)
+{
+	FOREACH(WString, include, codeIncludes)
+	{
+		writer.WriteLine(L"#include "+include);
+	}
+	writer.WriteLine(L"");
+	WString prefix;
+	FOREACH(WString, ns, codeNamespaces)
+	{
+		writer.WriteLine(prefix+L"namespace "+ns);
+		writer.WriteLine(prefix+L"{");
+		prefix+=L"\t";
+	}
+	return prefix;
+}
+
+void WriteFileEnd(List<WString>& codeNamespaces, StreamWriter& writer)
+{
+	writer.WriteLine(L"");
+	vint counter=codeNamespaces.Count();
+	FOREACH(WString, ns, codeNamespaces)
+	{
+		counter--;
+		for(vint i=0;i<counter;i++) writer.WriteChar(L'\t');
+		writer.WriteLine(L"}");
+	}
+}
+
+void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, List<WString>& codeIncludes, List<WString>& codeNamespaces, const WString& codeClassPrefix, StreamWriter& writer)
+{
+	WriteFileComment(name, writer);
+	WString prefix=WriteFileBegin(codeIncludes, codeNamespaces, writer);
+	WriteFileEnd(codeNamespaces, writer);
+}
+
+void WriteCppFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, List<WString>& codeIncludes, List<WString>& codeNamespaces, const WString& codeClassPrefix, StreamWriter& writer)
+{
+	WString prefix=WriteFileBegin(codeIncludes, codeNamespaces, writer);
+	WriteFileEnd(codeNamespaces, writer);
 }
 
 /***********************************************************************
@@ -117,6 +180,7 @@ int wmain(int argc, wchar_t* argv[])
 		}
 	}
 
+	Regex regexPathSplitter(L"[///\\]");
 	Regex regexInclude(L"^include:(<path>/.+)$");
 	Regex regexClassPrefix(L"^classPrefix:(<prefix>/.+)$");
 	Regex regexNamespace(L"^namespace:((<namespace>[^.]+)(.(<namespace>[^.]+))*)?$");
@@ -142,6 +206,13 @@ int wmain(int argc, wchar_t* argv[])
 		}
 		else
 		{
+			WString name;
+			{
+				List<Ptr<RegexMatch>> matches;
+				regexPathSplitter.Split(inputPath, true, matches);
+				name=matches[matches.Count()-1]->Result().Value();
+				name=name.Left(name.Length()-11);
+			}
 			WString outputMetaPath=inputPath.Left(inputPath.Length()-11);
 			WString outputHeaderPath=outputMetaPath+L".h";
 			WString outputCppPath=outputMetaPath+L".cpp";
@@ -157,6 +228,7 @@ int wmain(int argc, wchar_t* argv[])
 				if(!fileStream.IsAvailable())
 				{
 					Console::WriteLine(L"error> Cannot open \""+inputPath+L" for read.");
+					goto STOP_PARSING;
 				}
 				BomDecoder decoder;
 				DecoderStream decoderStream(fileStream, decoder);
@@ -195,19 +267,58 @@ int wmain(int argc, wchar_t* argv[])
 				codeGrammar=reader.ReadToEnd();
 			}
 
+			Ptr<ParsingDefinition> definition;
 			Ptr<ParsingTable> table;
 			{
 				FileStream fileStream(logPath, FileStream::WriteOnly);
+				if(!fileStream.IsAvailable())
+				{
+					Console::WriteLine(L"error> Cannot open \""+logPath+L" for write.");
+					goto STOP_PARSING;
+				}
 				BomEncoder encoder(BomEncoder::Utf16);
 				EncoderStream encoderStream(fileStream, encoder);
 				StreamWriter writer(encoderStream);
-				table=CreateTable(parser, codeGrammar, writer);
 
+				definition=CreateDefinition(parser, codeGrammar, writer);
+				if(!definition)
+				{
+					Console::WriteLine(L"error> Error happened. Open \""+logPath+L" for details.");
+					goto STOP_PARSING;
+				}
+
+				table=CreateTable(definition, writer);
 				if(!table)
 				{
 					Console::WriteLine(L"error> Error happened. Open \""+logPath+L" for details.");
 					goto STOP_PARSING;
 				}
+			}
+			{
+				FileStream fileStream(outputHeaderPath, FileStream::WriteOnly);
+				if(!fileStream.IsAvailable())
+				{
+					Console::WriteLine(L"error> Cannot open \""+outputHeaderPath+L" for write.");
+					goto STOP_PARSING;
+				}
+				BomEncoder encoder(BomEncoder::Mbcs);
+				EncoderStream encoderStream(fileStream, encoder);
+				StreamWriter writer(encoderStream);
+				WriteHeaderFile(name, definition, codeIncludes, codeNamespaces, codeClassPrefix, writer);
+			}
+			{
+				FileStream fileStream(outputCppPath, FileStream::WriteOnly);
+				if(!fileStream.IsAvailable())
+				{
+					Console::WriteLine(L"error> Cannot open \""+outputCppPath+L" for write.");
+					goto STOP_PARSING;
+				}
+				BomEncoder encoder(BomEncoder::Mbcs);
+				EncoderStream encoderStream(fileStream, encoder);
+				StreamWriter writer(encoderStream);
+				List<WString> cppIncludes;
+				cppIncludes.Add(L"\""+name+L".h\"");
+				WriteCppFile(name, definition, table, cppIncludes, codeNamespaces, codeClassPrefix, writer);
 			}
 		}
 	STOP_PARSING:;
