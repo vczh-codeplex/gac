@@ -7,15 +7,14 @@ class Node
 {
 }
 
-class Name
+class TextFragment : Node
 {
-	token namespaceName;
-	token localName;
+	token content;
 }
 
 class Text : Node
 {
-	token content (XmlUnescapingText);
+	TextFragment[] fragments (XmlUnescapingText);
 }
 
 class CData : Node
@@ -25,13 +24,14 @@ class CData : Node
 
 class Attribute : Node
 {
-	Name name;
+	token name;
 	token value (XmlUnescapingText);
 }
 
 class Element : Node
 {
-	Name name;
+	token name;
+	token closingName;
 	Attribute[] attributes;
 	Node[] subNodes;
 }
@@ -43,7 +43,7 @@ class Comment : Node
 
 class Instruction : Node
 {
-	Name name;
+	token name;
 	Attribute[] attributes;
 }
 
@@ -53,3 +53,31 @@ class Document : Node
 	Comment[] comments;
 	Element rootElement;
 }
+
+token INSTRUCTION_OPEN = "/</?";
+token INSTRUCTION_CLOSE = "/?/>";
+token COMPLEX_ELEMENT_OPEN = "/<//";
+token SINGLE_ELEMENT_CLOSE = "///>";
+token ELEMENT_OPEN = "/<";
+token ELEMENT_CLOSE = "/>";
+token COLON = ":";
+token QUESTION = "/?";
+token SLASH = "//";
+token EQUAL = "/=";
+
+token NAME = "[a-zA-Z0-9:_/-]+";
+token TEXT = """([^""&]|&[^;]*;)*""";
+token COMMENT = "/</!--[^>]*/>";
+token CDATA = "/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>";
+
+discardtoken SPACE = "/s+";
+
+rule Attribute XAttribute = NAME:name "=" TEXT:value as Attribute;
+rule TextFragment XTextFragment = (NAME:content) as TextFragment;
+rule Text XText = XTextFragment:fragments {XTextFragment:fragments} as Text;
+rule CData XCData = CDATA:content as CData;
+rule Comment XComment = COMMENT:content as Comment;
+rule Element XElement = "<" NAME:name {XAttribute:attributes} ("/>" | ">" {XSubNode:subNodes} "</" NAME:closingName ">") as Element;
+rule Node XSubNode = !XText | !XCData | !XComment | !XElement;
+rule Instruction XInstruction = "<?" NAME:name {XAttribute:attributes} "?>" as Instruction;
+rule Document XDocument = {XInstruction:instructions | XComment:comments} XElement:rootElement as Document;
