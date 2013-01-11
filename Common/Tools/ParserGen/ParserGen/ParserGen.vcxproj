@@ -111,6 +111,7 @@
     <ClCompile Include="..\..\..\Source\Stream\Accessor.cpp" />
     <ClCompile Include="..\..\..\Source\Stream\CharFormat.cpp" />
     <ClCompile Include="..\..\..\Source\Stream\FileStream.cpp" />
+    <ClCompile Include="..\..\..\Source\Stream\MemoryStream.cpp" />
     <ClCompile Include="..\..\..\Source\String.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
@@ -155,7 +156,11 @@
     <ClInclude Include="..\..\..\Source\Stream\CharFormat.h" />
     <ClInclude Include="..\..\..\Source\Stream\FileStream.h" />
     <ClInclude Include="..\..\..\Source\Stream\Interfaces.h" />
+    <ClInclude Include="..\..\..\Source\Stream\MemoryStream.h" />
     <ClInclude Include="..\..\..\Source\String.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Test.parser.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

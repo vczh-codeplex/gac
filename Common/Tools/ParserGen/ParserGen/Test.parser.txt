@@ -1,0 +1,55 @@
+include:..\Parsing.h
+namespace:vl.parsing.xml
+classPrefix:Xml
+grammar:
+
+class Node
+{
+}
+
+class Name
+{
+	token namespaceName;
+	token localName;
+}
+
+class Text : Node
+{
+	token content (XmlUnescapingText);
+}
+
+class CData : Node
+{
+	token content (XmlUnescapingCData);
+}
+
+class Attribute : Node
+{
+	Name name;
+	token value (XmlUnescapingText);
+}
+
+class Element : Node
+{
+	Name name;
+	Attribute[] attributes;
+	Node[] subNodes;
+}
+
+class Comment : Node
+{
+	token content (XmlUnescapingComment);
+}
+
+class Instruction : Node
+{
+	Name name;
+	Attribute[] attributes;
+}
+
+class Document : Node
+{
+	Instruction[] instructions;
+	Comment[] comments;
+	Element rootElement;
+}
