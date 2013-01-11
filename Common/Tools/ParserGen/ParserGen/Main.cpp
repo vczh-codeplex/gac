@@ -319,21 +319,18 @@ public:
 	{
 		writer.WriteString(prefix);
 		writer.WriteString(L"class ");
+		writer.WriteString(codeClassPrefix);
+		writer.WriteString(node->name);
+		writer.WriteString(L" : public ");
 		if(node->parentType)
 		{
-			writer.WriteString(codeClassPrefix);
-			writer.WriteString(node->name);
-			writer.WriteString(L" : public ");
-			{
-				PrintType(node->parentType.Obj(), scope, manager, codeClassPrefix, writer);
-			}
-			writer.WriteLine(L"");
+			PrintType(node->parentType.Obj(), scope, manager, codeClassPrefix, writer);
 		}
 		else
 		{
-			writer.WriteString(codeClassPrefix);
-			writer.WriteLine(node->name);
+			writer.WriteString(L"vl::parsing::ParsingTreeCustomBase");
 		}
+		writer.WriteLine(L"");
 
 		writer.WriteString(prefix);
 		writer.WriteLine(L"{");

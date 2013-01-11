@@ -11,6 +11,19 @@ namespace vl
 
 		namespace analyzing
 		{
+			WString GetTypeName(ParsingSymbol* type)
+			{
+				ParsingSymbol* parent=type->GetParentSymbol();
+				if(parent->GetType()==ParsingSymbol::ClassType)
+				{
+					return GetTypeName(type)+L"."+type->GetName();
+				}
+				else
+				{
+					return type->GetName();
+				}
+			}
+
 			Ptr<tabling::ParsingTable> GenerateTable(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors)
 			{
 				Dictionary<ParsingSymbol*, vint> tokenIds;
@@ -157,7 +170,7 @@ namespace vl
 							case Action::Create:
 								{
 									ins.instructionType=ParsingTable::Instruction::Create;
-									ins.nameParameter=action->actionSource->GetName();
+									ins.nameParameter=GetTypeName(action->actionSource);
 								}
 								break;
 							case Action::Using:
