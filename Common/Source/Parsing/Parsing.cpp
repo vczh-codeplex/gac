@@ -45,7 +45,7 @@ ParsingGeneralParser
 					const RegexToken* token=&state.GetTokens().Get(i);
 					if(token->token==-1)
 					{
-						errors.Add(new ParsingError(token, L"Unrecognizable token."));
+						errors.Add(new ParsingError(token, L"Unrecognizable token: \""+WString(token->reading, token->length)+L"\"."));
 					}
 				}
 

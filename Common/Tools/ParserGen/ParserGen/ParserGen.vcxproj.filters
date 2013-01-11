@@ -126,6 +126,9 @@
     <ClCompile Include="..\..\..\Source\Regex\RegexWriter.cpp">
       <Filter>Common\Regex</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Source\Stream\MemoryStream.cpp">
+      <Filter>Common\Stream</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\Basic.h">
@@ -251,5 +254,13 @@
     <ClInclude Include="..\..\..\Source\Regex\RegexWriter.h">
       <Filter>Common\Regex</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Source\Stream\MemoryStream.h">
+      <Filter>Common\Stream</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Test.parser.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
