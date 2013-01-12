@@ -132,7 +132,7 @@ void WriteFileEnd(List<WString>& codeNamespaces, StreamWriter& writer)
 }
 
 /***********************************************************************
-Syntax Tree Declaration Generation
+Helper Functions
 ***********************************************************************/
 
 extern void PrintType(ParsingDefinitionType* _type, ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _codeClassPrefix, TextWriter& _writer);
@@ -140,6 +140,31 @@ extern void PrintTypeForValue(ParsingDefinitionType* _type, ParsingSymbol* _scop
 extern void PrintTypeDefinitions(List<Ptr<ParsingDefinitionTypeDefinition>>& types, const WString& prefix, ParsingSymbol* scope, ParsingSymbolManager* manager, const WString& codeClassPrefix, TextWriter& writer);
 extern bool PrintType(ParsingSymbol* type, const WString& codeClassPrefix, TextWriter& writer);
 extern void PrintTypeForValue(ParsingSymbol* type, const WString& codeClassPrefix, TextWriter& writer);
+
+void EnumerateAllClass(ParsingSymbolManager* manager, ParsingSymbol* scope, SortedList<ParsingSymbol*>& types)
+{
+	if(scope->GetType()==ParsingSymbol::ClassType)
+	{
+		types.Add(scope);
+	}
+	for(vint i=0;i<scope->GetSubSymbolCount();i++)
+	{
+		EnumerateAllClass(manager, scope->GetSubSymbol(i), types);
+	}
+}
+
+void EnumerateAllLeafClass(ParsingSymbolManager* manager, SortedList<ParsingSymbol*>& types)
+{
+	EnumerateAllClass(manager, manager->GetGlobal(), types);
+	for(vint i=types.Count()-1;i>=0;i--)
+	{
+		types.Remove(types[i]->GetDescriptorSymbol());
+	}
+}
+
+/***********************************************************************
+Syntax Tree Declaration Generation
+***********************************************************************/
 
 class PrintTypeVisitor : public Object, public ParsingDefinitionType::IVisitor
 {
@@ -275,11 +300,12 @@ void SearchChildClasses(ParsingSymbol* parent, ParsingSymbol* scope, ParsingSymb
 class PrintTypeDefinitionVisitor : public Object, public ParsingDefinitionTypeDefinition::IVisitor
 {
 public:
-	ParsingSymbol*			scope;
-	ParsingSymbolManager*	manager;
-	WString					prefix;
-	WString					codeClassPrefix;
-	TextWriter&				writer;
+	ParsingSymbol*					scope;
+	ParsingSymbolManager*			manager;
+	WString							prefix;
+	WString							codeClassPrefix;
+	TextWriter&						writer;
+	SortedList<ParsingSymbol*>		leafClasses;
 
 	void LogInternal(ParsingDefinitionTypeDefinition* _definition, const WString& _prefix)
 	{
@@ -302,6 +328,7 @@ public:
 		,codeClassPrefix(_codeClassPrefix)
 		,writer(_writer)
 	{
+		EnumerateAllLeafClass(manager, leafClasses);
 	}
 
 	void Visit(ParsingDefinitionClassMemberDefinition* node)override
@@ -382,6 +409,7 @@ public:
 			PrintType(thisType->GetDescriptorSymbol(), codeClassPrefix, writer);
 			writer.WriteLine(L"::IVisitor* visitor)override;");
 		}
+		if(leafClasses.Contains(thisType))
 		{
 			writer.WriteLine(L"");
 			writer.WriteString(prefix);
@@ -587,15 +615,17 @@ void WriteUnescapingFunctionForwardDeclarations(Ptr<ParsingDefinition> definitio
 			writer.WriteString(name);
 			writer.WriteString(L"(");
 			PrintTypeForValue(type, codeClassPrefix, writer);
-			writer.WriteLine(L"& value, vl::collections::List<vl::regex::RegexToken>& tokens);");
+			writer.WriteLine(L"& value, const vl::collections::List<vl::regex::RegexToken>& tokens);");
 		}
 		writer.WriteLine(L"");
 	}
 }
 
-void WriteConvertImpl(ParsingSymbolManager* manager, ParsingSymbol* scope, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
+void WriteConvertImpl(ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
 {
-	if(scope->GetType()==ParsingSymbol::ClassType)
+	SortedList<ParsingSymbol*> leafClasses;
+	EnumerateAllLeafClass(manager, leafClasses);
+	FOREACH(ParsingSymbol*, scope, leafClasses)
 	{
 		writer.WriteString(prefix);
 		PrintTypeForValue(scope, codeClassPrefix, writer);
@@ -613,10 +643,6 @@ void WriteConvertImpl(ParsingSymbolManager* manager, ParsingSymbol* scope, const
 		writer.WriteString(prefix);
 		writer.WriteLine(L"}");
 		writer.WriteLine(L"");
-	}
-	for(vint i=0;i<scope->GetSubSymbolCount();i++)
-	{
-		WriteConvertImpl(manager, scope->GetSubSymbol(i), prefix, codeClassPrefix, writer);
 	}
 }
 
@@ -652,7 +678,7 @@ void WriteVisitorImpl(ParsingSymbolManager* manager, ParsingSymbol* scope, const
 Node Conversion Generation
 ***********************************************************************/
 
-class WriteNodeConverterClassImplFragmentVisitor : public Object, public ParsingDefinitionTypeDefinition::IVisitor
+class WriteFillFragmentVisitor : public Object, public ParsingDefinitionTypeDefinition::IVisitor
 {
 public:
 	ParsingSymbol*			scope;
@@ -672,7 +698,7 @@ public:
 		scope=oldScope;
 	}
 
-	WriteNodeConverterClassImplFragmentVisitor(ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _prefix, const WString& _codeClassPrefix, TextWriter& _writer)
+	WriteFillFragmentVisitor(ParsingSymbol* _scope, ParsingSymbolManager* _manager, const WString& _prefix, const WString& _codeClassPrefix, TextWriter& _writer)
 		:scope(_scope)
 		,manager(_manager)
 		,prefix(_prefix)
@@ -683,27 +709,53 @@ public:
 
 	void Visit(ParsingDefinitionClassMemberDefinition* node)override
 	{
+		if(node->unescapingFunction==L"")
+		{
+			writer.WriteString(prefix);
+			writer.WriteString(L"\tSetMember(tree->");
+			writer.WriteString(node->name);
+			writer.WriteString(L", obj->GetMember(L\"");
+			writer.WriteString(node->name);
+			writer.WriteLine(L"\"), tokens);");
+		}
+		else
+		{
+			writer.WriteString(prefix);
+			writer.WriteString(L"\tif(SetMember(tree->");
+			writer.WriteString(node->name);
+			writer.WriteString(L", obj->GetMember(L\"");
+			writer.WriteString(node->name);
+			writer.WriteLine(L"\"), tokens))");
+
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\t{");
+			writer.WriteString(prefix);
+			writer.WriteString(L"\t\t");
+			writer.WriteString(node->unescapingFunction);
+			writer.WriteString(L"(tree->");
+			writer.WriteString(node->name);
+			writer.WriteLine(L", tokens);");
+			writer.WriteString(prefix);
+			writer.WriteLine(L"\t}");
+		}
 	}
 
 	void Visit(ParsingDefinitionClassDefinition* node)override
 	{
 		ParsingSymbol* thisType=(scope?scope:manager->GetGlobal())->GetSubSymbolByName(node->name);
-		if(thisType->GetType()==ParsingSymbol::ClassType)
+		writer.WriteString(prefix);
+		writer.WriteString(L"void Fill(");
+		PrintTypeForValue(thisType, codeClassPrefix, writer);
+		writer.WriteLine(L" tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"{");
+		FOREACH(Ptr<ParsingDefinitionClassMemberDefinition>, member, node->members)
 		{
-			writer.WriteString(L"if(obj->GetType()==L\"");
-			writer.WriteString(GetTypeNameForCreateInstruction(thisType));
-			writer.WriteLine(L"\")");
-			writer.WriteString(prefix);
-			writer.WriteLine(L"{");
-			FOREACH(Ptr<ParsingDefinitionClassMemberDefinition>, member, node->members)
-			{
-				LogInternal(member.Obj());
-			}
-			writer.WriteString(prefix);
-			writer.WriteLine(L"}");
-			writer.WriteString(prefix);
-			writer.WriteString(L"else ");
+			LogInternal(member.Obj());
 		}
+		writer.WriteString(prefix);
+		writer.WriteLine(L"}");
+		writer.WriteLine(L"");
 		FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, node->subTypes)
 		{
 			LogInternal(type.Obj());
@@ -719,12 +771,102 @@ public:
 	}
 };
 
-void WriteNodeConverterClassImplFragment(Ptr<ParsingDefinition> definition, ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
+void WriteNodeConverterClassImplFragment(ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
 {
-	WriteNodeConverterClassImplFragmentVisitor visitor(0, manager, prefix, codeClassPrefix, writer);
-	FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, definition->types)
+	SortedList<ParsingSymbol*> leafClasses;
+	EnumerateAllLeafClass(manager, leafClasses);
+	FOREACH(ParsingSymbol*, scope, leafClasses)
 	{
-		type->Accept(&visitor);
+		writer.WriteString(L"if(obj->GetType()==L\"");
+		writer.WriteString(GetTypeNameForCreateInstruction(scope));
+		writer.WriteLine(L"\")");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"{");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t");
+		PrintTypeForValue(scope, codeClassPrefix, writer);
+		writer.WriteString(L" tree = new ");
+		PrintType(scope, codeClassPrefix, writer);
+		writer.WriteLine(L";");
+
+		ParsingSymbol* currentType=scope;
+		while(currentType)
+		{
+			writer.WriteString(prefix);
+			writer.WriteString(L"\tFill(");
+			if(currentType==scope)
+			{
+				writer.WriteLine(L"tree, obj, tokens);");
+			}
+			else
+			{
+				writer.WriteString(L"tree.Cast<");
+				PrintType(currentType, codeClassPrefix, writer);
+				writer.WriteLine(L">(), obj, tokens);");
+			}
+			currentType=currentType->GetDescriptorSymbol();
+		}
+		
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\treturn tree;");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"}");
+		writer.WriteString(prefix);
+		writer.WriteString(L"else ");
+	}
+}
+
+void WriteSetEnumMemberImpl(ParsingSymbolManager* manager, ParsingSymbol* scope, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
+{
+	if(scope->GetType()==ParsingSymbol::EnumType)
+	{
+		writer.WriteString(prefix);
+		writer.WriteString(L"bool SetMember(");
+		PrintTypeForValue(scope, codeClassPrefix, writer);
+		writer.WriteString(L"& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"{");
+		writer.WriteString(prefix);
+		writer.WriteString(L"\tvl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();");
+		writer.WriteString(prefix);
+		writer.WriteString(L"\tif(token)");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t{");
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\t");
+		for(vint i=0;i<scope->GetSubSymbolCount();i++)
+		{
+			WString name=scope->GetSubSymbol(i)->GetName();
+			writer.WriteString(L"if(token->GetValue()==L\"");
+			writer.WriteString(name);
+			writer.WriteString(L") return ");
+			PrintType(scope, codeClassPrefix, writer);
+			writer.WriteString(L"");
+			writer.WriteString(name);
+			writer.WriteLine(L";");
+			writer.WriteString(prefix);
+			writer.WriteString(L"\t\telse ");
+		}
+		writer.WriteString(L"return ");
+		PrintType(scope, codeClassPrefix, writer);
+		writer.WriteString(L"::");
+		writer.WriteString(scope->GetSubSymbol(0)->GetName());
+		writer.WriteLine(L";");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t}");
+		writer.WriteString(prefix);
+		writer.WriteString(L"\treturn ");
+		PrintType(scope, codeClassPrefix, writer);
+		writer.WriteString(L"::");
+		writer.WriteString(scope->GetSubSymbol(0)->GetName());
+		writer.WriteLine(L";");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"}");
+	}
+	for(vint i=0;i<scope->GetSubSymbolCount();i++)
+	{
+		WriteSetEnumMemberImpl(manager, scope->GetSubSymbol(i), prefix, codeClassPrefix, writer);
 	}
 }
 
@@ -741,13 +883,21 @@ void WriteNodeConverterClassImpl(Ptr<ParsingDefinition> definition, ParsingSymbo
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\tusing vl::parsing::ParsingTreeConverter::SetMember;");
 	writer.WriteLine(L"");
+	WriteSetEnumMemberImpl(manager, manager->GetGlobal(), prefix+L"\t", codeClassPrefix, writer);
+	{
+		WriteFillFragmentVisitor visitor(0, manager, prefix+L"\t", codeClassPrefix, writer);
+		FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, definition->types)
+		{
+			type->Accept(&visitor);
+		}
+	}
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\tPtr<ParsingTreeCustomBase> ConvertClass(Ptr<ParsingTreeObject> obj, const TokenList& tokens)override");
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\t{");
 	writer.WriteString(prefix);
 	writer.WriteString(L"\t\t");
-	WriteNodeConverterClassImplFragment(definition, manager, prefix+L"\t\t", codeClassPrefix, writer);
+	WriteNodeConverterClassImplFragment(manager, prefix+L"\t\t", codeClassPrefix, writer);
 	writer.WriteLine(L"");
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\t\t\treturn 0;");
@@ -810,7 +960,7 @@ void WriteCppFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<Pa
 	writer.WriteLine(L"Parsing Tree Conversion Implementation");
 	writer.WriteLine(L"***********************************************************************/");
 	writer.WriteLine(L"");
-	WriteConvertImpl(&manager, manager.GetGlobal(), prefix, codeClassPrefix, writer);
+	WriteConvertImpl(&manager, prefix, codeClassPrefix, writer);
 
 	writer.WriteLine(L"/***********************************************************************");
 	writer.WriteLine(L"Visitor Pattern Implementation");

@@ -40,8 +40,6 @@ namespace vl
 
 				virtual void Accept(XmlNode::IVisitor* visitor)=0;
 
-
-				static vl::Ptr<XmlNode> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
 			class XmlText : public XmlNode

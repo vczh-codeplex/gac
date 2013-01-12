@@ -135,6 +135,9 @@
     <ClCompile Include="Test.cpp">
       <Filter>GeneratedParser</Filter>
     </ClCompile>
+    <ClCompile Include="Test_Unescaping.cpp">
+      <Filter>GeneratedParser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\Basic.h">
