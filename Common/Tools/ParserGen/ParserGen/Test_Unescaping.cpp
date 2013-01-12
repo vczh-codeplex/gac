@@ -1,10 +1,10 @@
 #include "Test.h"
 
-namespace vl
+namespace vczh
 {
-	namespace parsing
+	namespace whoknows
 	{
-		namespace xml
+		namespace xmlutility
 		{
 /***********************************************************************
 Unescaping Function Foward Declarations

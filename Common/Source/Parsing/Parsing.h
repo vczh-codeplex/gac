@@ -32,8 +32,9 @@ namespace vl
 			public:
 				ParsingGeneralParser(Ptr<ParsingTable> _table);
 				~ParsingGeneralParser();
-
-				virtual Ptr<ParsingTreeNode>				Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors);
+				
+				Ptr<ParsingTreeNode>						Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors);
+				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors);
 			};
 
 /***********************************************************************
