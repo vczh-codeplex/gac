@@ -285,7 +285,10 @@ namespace vl
 		class ParsingToken : public ParsingTreeCustomBase
 		{
 		public:
+			vint						tokenIndex;
 			WString						value;
+
+			ParsingToken():tokenIndex(-1){}
 		};
 
 		class ParsingError : public Object
@@ -301,6 +304,66 @@ namespace vl
 			ParsingError(const regex::RegexToken* _token, const WString& _errorMessage);
 			ParsingError(ParsingTreeCustomBase* _parsingTree, const WString& _errorMessage);
 			~ParsingError();
+		};
+
+/***********************************************************************
+Óï·¨Ê÷¹¹Ôì
+***********************************************************************/
+
+		class ParsingTreeConverter : public Object
+		{
+		public:
+			typedef collections::List<regex::RegexToken>	TokenList;
+
+			virtual Ptr<ParsingTreeCustomBase>				ConvertClass(Ptr<ParsingTreeObject> obj, const TokenList& tokens)=0;
+
+			bool SetMember(ParsingToken& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
+			{
+				Ptr<ParsingTreeToken> token=node.Cast<ParsingTreeToken>();
+				if(token)
+				{
+					member.tokenIndex=token->GetTokenIndex();
+					member.value=token->GetValue();
+					member.codeRange=token->GetCodeRange();
+				}
+				return false;
+			}
+
+			template<typename T>
+			bool SetMember(collections::List<T>& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
+			{
+				Ptr<ParsingTreeArray> arr=node.Cast<ParsingTreeArray>();
+				if(arr)
+				{
+					member.Clear();
+					vint count=arr->Count();
+					for(vint i=0;i<count;i++)
+					{
+						T t;
+						SetMember(t, arr->GetItem(i), tokens);
+						member.Add(t);
+					}
+					return true;
+				}
+				return false;
+			}
+
+			template<typename T>
+			bool SetMember(Ptr<T>& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
+			{
+				Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>();
+				if(obj)
+				{
+					Ptr<ParsingTreeCustomBase> tree=ConvertClass(obj, tokens);
+					if(tree)
+					{
+						tree->codeRange=node->GetCodeRange();
+						member=tree.Cast<T>();
+						return member;
+					}
+				}
+				return false;
+			}
 		};
 	}
 }

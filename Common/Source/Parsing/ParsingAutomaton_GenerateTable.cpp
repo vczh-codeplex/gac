@@ -11,12 +11,12 @@ namespace vl
 
 		namespace analyzing
 		{
-			WString GetTypeName(ParsingSymbol* type)
+			WString GetTypeNameForCreateInstruction(ParsingSymbol* type)
 			{
 				ParsingSymbol* parent=type->GetParentSymbol();
 				if(parent->GetType()==ParsingSymbol::ClassType)
 				{
-					return GetTypeName(type)+L"."+type->GetName();
+					return GetTypeNameForCreateInstruction(type)+L"."+type->GetName();
 				}
 				else
 				{
@@ -170,7 +170,7 @@ namespace vl
 							case Action::Create:
 								{
 									ins.instructionType=ParsingTable::Instruction::Create;
-									ins.nameParameter=GetTypeName(action->actionSource);
+									ins.nameParameter=GetTypeNameForCreateInstruction(action->actionSource);
 								}
 								break;
 							case Action::Using:
