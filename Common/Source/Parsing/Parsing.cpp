@@ -29,14 +29,8 @@ ParsingGeneralParser
 			{
 			}
 
-			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors)
+			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
 			{
-				ParsingState state(input, table);
-				if(state.Reset(rule)==-1)
-				{
-					errors.Add(new ParsingError(L"Rule \""+rule+L"\" does not exist."));
-					return 0;
-				}
 				ParsingTreeBuilder builder;
 				builder.Reset();
 
@@ -84,6 +78,17 @@ ParsingGeneralParser
 					return 0;
 				}
 				return node;
+			}
+
+			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors)
+			{
+				ParsingState state(input, table);
+				if(state.Reset(rule)==-1)
+				{
+					errors.Add(new ParsingError(L"Rule \""+rule+L"\" does not exist."));
+					return 0;
+				}
+				return Parse(state, errors);
 			}
 
 /***********************************************************************
