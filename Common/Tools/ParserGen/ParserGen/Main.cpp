@@ -1008,7 +1008,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 			writer.WriteString(rule->GetName());
 			writer.WriteLine(L"\");");
 			writer.WriteString(prefix);
-			writer.WriteLine(L"\tvl::Ptr<vl::parsing::tabling::ParsingStrictParser> parser=new vl::parsing::tabling::ParsingStrictParser(table);");
+			writer.WriteLine(L"\tvl::Ptr<vl::parsing::tabling::ParsingStrictParser> parser=new vl::parsing::tabling::ParsingStrictParser;");
 			writer.WriteString(prefix);
 			writer.WriteLine(L"\tvl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
 			writer.WriteString(prefix);
