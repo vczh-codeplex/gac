@@ -47,7 +47,7 @@ namespace vl
 
 				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
-				ParsingStrictParser(Ptr<ParsingTable> _table);
+				ParsingStrictParser(Ptr<ParsingTable> _table=0);
 				~ParsingStrictParser();
 			};
 
@@ -59,7 +59,7 @@ namespace vl
 
 				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
-				ParsingAutoRecoverParser(Ptr<ParsingTable> _table);
+				ParsingAutoRecoverParser(Ptr<ParsingTable> _table=0);
 				~ParsingAutoRecoverParser();
 			};
 
