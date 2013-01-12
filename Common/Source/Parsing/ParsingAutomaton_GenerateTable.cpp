@@ -16,7 +16,7 @@ namespace vl
 				ParsingSymbol* parent=type->GetParentSymbol();
 				if(parent->GetType()==ParsingSymbol::ClassType)
 				{
-					return GetTypeNameForCreateInstruction(type)+L"."+type->GetName();
+					return GetTypeNameForCreateInstruction(parent)+L"."+type->GetName();
 				}
 				else
 				{

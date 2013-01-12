@@ -25,6 +25,34 @@ Parsing Tree Conversion Driver Implementation
 			public:
 				using vl::parsing::ParsingTreeConverter::SetMember;
 
+				bool SetMember(XmlDirectEnum::Type& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
+				{
+					vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
+					if(token)
+					{
+						if(token->GetValue()==L"A") { member=XmlDirectEnum::A; return true; }
+						else if(token->GetValue()==L"B") { member=XmlDirectEnum::B; return true; }
+						else if(token->GetValue()==L"C") { member=XmlDirectEnum::C; return true; }
+						else { member=XmlDirectEnum::A; return false; }
+					}
+					member=XmlDirectEnum::A;
+					return false;
+				}
+
+				bool SetMember(XmlFirstClass::XmlIndirectEnum::Type& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
+				{
+					vl::Ptr<vl::parsing::ParsingTreeToken> token=node.Cast<vl::parsing::ParsingTreeToken>();
+					if(token)
+					{
+						if(token->GetValue()==L"D") { member=XmlFirstClass::XmlIndirectEnum::D; return true; }
+						else if(token->GetValue()==L"E") { member=XmlFirstClass::XmlIndirectEnum::E; return true; }
+						else if(token->GetValue()==L"F") { member=XmlFirstClass::XmlIndirectEnum::F; return true; }
+						else { member=XmlFirstClass::XmlIndirectEnum::D; return false; }
+					}
+					member=XmlFirstClass::XmlIndirectEnum::D;
+					return false;
+				}
+
 				void Fill(vl::Ptr<XmlNode> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
 				{
 				}
@@ -86,18 +114,68 @@ Parsing Tree Conversion Driver Implementation
 					SetMember(tree->rootElement, obj->GetMember(L"rootElement"), tokens);
 				}
 
+				void Fill(vl::Ptr<XmlFirstClass> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				{
+					SetMember(tree->field4, obj->GetMember(L"field4"), tokens);
+				}
+
+				void Fill(vl::Ptr<XmlFirstClass::XmlSecondClass> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				{
+				}
+
+				void Fill(vl::Ptr<XmlFirstClass::XmlSecondClass::XmlThirdClass> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				{
+					SetMember(tree->field1, obj->GetMember(L"field1"), tokens);
+				}
+
+				void Fill(vl::Ptr<XmlFirstClass::XmlSecondClassChild> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				{
+					SetMember(tree->field3, obj->GetMember(L"field3"), tokens);
+				}
+
+				void Fill(vl::Ptr<XmlFirstClassChild> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				{
+					SetMember(tree->field2, obj->GetMember(L"field2"), tokens);
+				}
+
+				void Fill(vl::Ptr<XmlThirdClassChild> tree, vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)
+				{
+					SetMember(tree->field5, obj->GetMember(L"field5"), tokens);
+				}
+
 				Ptr<ParsingTreeCustomBase> ConvertClass(Ptr<ParsingTreeObject> obj, const TokenList& tokens)override
 				{
-					if(obj->GetType()==L"Instruction")
+					if(obj->GetType()==L"Document")
 					{
-						vl::Ptr<XmlInstruction> tree = new XmlInstruction;
+						vl::Ptr<XmlDocument> tree = new XmlDocument;
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<XmlNode>(), obj, tokens);
 						return tree;
 					}
-					else if(obj->GetType()==L"Element")
+					else if(obj->GetType()==L"FirstClass.SecondClassChild")
 					{
-						vl::Ptr<XmlElement> tree = new XmlElement;
+						vl::Ptr<XmlFirstClass::XmlSecondClassChild> tree = new XmlFirstClass::XmlSecondClassChild;
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlFirstClass::XmlSecondClass>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"ThirdClassChild")
+					{
+						vl::Ptr<XmlThirdClassChild> tree = new XmlThirdClassChild;
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlFirstClass::XmlSecondClass::XmlThirdClass>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Text")
+					{
+						vl::Ptr<XmlText> tree = new XmlText;
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Comment")
+					{
+						vl::Ptr<XmlComment> tree = new XmlComment;
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<XmlNode>(), obj, tokens);
 						return tree;
@@ -116,23 +194,23 @@ Parsing Tree Conversion Driver Implementation
 						Fill(tree.Cast<XmlNode>(), obj, tokens);
 						return tree;
 					}
-					else if(obj->GetType()==L"Comment")
+					else if(obj->GetType()==L"FirstClassChild")
 					{
-						vl::Ptr<XmlComment> tree = new XmlComment;
+						vl::Ptr<XmlFirstClassChild> tree = new XmlFirstClassChild;
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlFirstClass>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Element")
+					{
+						vl::Ptr<XmlElement> tree = new XmlElement;
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<XmlNode>(), obj, tokens);
 						return tree;
 					}
-					else if(obj->GetType()==L"Text")
+					else if(obj->GetType()==L"Instruction")
 					{
-						vl::Ptr<XmlText> tree = new XmlText;
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"Document")
-					{
-						vl::Ptr<XmlDocument> tree = new XmlDocument;
+						vl::Ptr<XmlInstruction> tree = new XmlInstruction;
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<XmlNode>(), obj, tokens);
 						return tree;
@@ -154,14 +232,29 @@ Parsing Tree Conversion Driver Implementation
 Parsing Tree Conversion Implementation
 ***********************************************************************/
 
-			vl::Ptr<XmlInstruction> XmlInstruction::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<XmlDocument> XmlDocument::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlInstruction>();
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlDocument>();
 			}
 
-			vl::Ptr<XmlElement> XmlElement::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<XmlFirstClass::XmlSecondClassChild> XmlFirstClass::XmlSecondClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlElement>();
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlFirstClass::XmlSecondClassChild>();
+			}
+
+			vl::Ptr<XmlThirdClassChild> XmlThirdClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlThirdClassChild>();
+			}
+
+			vl::Ptr<XmlText> XmlText::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlText>();
+			}
+
+			vl::Ptr<XmlComment> XmlComment::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlComment>();
 			}
 
 			vl::Ptr<XmlAttribute> XmlAttribute::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
@@ -174,19 +267,19 @@ Parsing Tree Conversion Implementation
 				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlCData>();
 			}
 
-			vl::Ptr<XmlComment> XmlComment::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<XmlFirstClassChild> XmlFirstClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlComment>();
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlFirstClassChild>();
 			}
 
-			vl::Ptr<XmlText> XmlText::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<XmlElement> XmlElement::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlText>();
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlElement>();
 			}
 
-			vl::Ptr<XmlDocument> XmlDocument::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<XmlInstruction> XmlInstruction::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlDocument>();
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlInstruction>();
 			}
 
 /***********************************************************************
@@ -224,6 +317,21 @@ Visitor Pattern Implementation
 			}
 
 			void XmlDocument::Accept(XmlNode::IVisitor* visitor)
+			{
+				visitor->Visit(this);
+			}
+
+			void XmlFirstClass::XmlSecondClassChild::Accept(XmlFirstClass::XmlSecondClass::IVisitor* visitor)
+			{
+				visitor->Visit(this);
+			}
+
+			void XmlFirstClassChild::Accept(XmlFirstClass::IVisitor* visitor)
+			{
+				visitor->Visit(this);
+			}
+
+			void XmlThirdClassChild::Accept(XmlFirstClass::XmlSecondClass::XmlThirdClass::IVisitor* visitor)
 			{
 				visitor->Visit(this);
 			}

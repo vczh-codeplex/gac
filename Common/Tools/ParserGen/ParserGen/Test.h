@@ -22,6 +22,9 @@ namespace vl
 			class XmlElement;
 			class XmlInstruction;
 			class XmlDocument;
+			class XmlFirstClass;
+			class XmlFirstClassChild;
+			class XmlThirdClassChild;
 
 			class XmlNode : public vl::parsing::ParsingTreeCustomBase
 			{
@@ -117,6 +120,102 @@ namespace vl
 				void Accept(XmlNode::IVisitor* visitor)override;
 
 				static vl::Ptr<XmlDocument> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			struct XmlDirectEnum abstract
+			{
+				enum Type
+				{
+					A,
+					B,
+					C,
+				};
+			};
+
+			class XmlFirstClass : public vl::parsing::ParsingTreeCustomBase
+			{
+			public:
+				class IVisitor : public Interface
+				{
+					public:
+					virtual void Visit(XmlFirstClassChild* node)=0;
+				};
+
+				virtual void Accept(XmlFirstClass::IVisitor* visitor)=0;
+
+				class XmlSecondClass;
+				class XmlSecondClassChild;
+
+				struct XmlIndirectEnum abstract
+				{
+					enum Type
+					{
+						D,
+						E,
+						F,
+					};
+				};
+
+				class XmlSecondClass : public vl::parsing::ParsingTreeCustomBase
+				{
+				public:
+					class IVisitor : public Interface
+					{
+						public:
+						virtual void Visit(XmlFirstClass::XmlSecondClassChild* node)=0;
+					};
+
+					virtual void Accept(XmlFirstClass::XmlSecondClass::IVisitor* visitor)=0;
+
+					class XmlThirdClass;
+
+					class XmlThirdClass : public vl::parsing::ParsingTreeCustomBase
+					{
+					public:
+						class IVisitor : public Interface
+						{
+							public:
+							virtual void Visit(XmlThirdClassChild* node)=0;
+						};
+
+						virtual void Accept(XmlFirstClass::XmlSecondClass::XmlThirdClass::IVisitor* visitor)=0;
+
+						vl::parsing::ParsingToken field1;
+					};
+
+				};
+
+				class XmlSecondClassChild : public XmlSecondClass
+				{
+				public:
+					vl::parsing::ParsingToken field3;
+
+					void Accept(XmlFirstClass::XmlSecondClass::IVisitor* visitor)override;
+
+					static vl::Ptr<XmlFirstClass::XmlSecondClassChild> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens);
+				};
+
+				vl::parsing::ParsingToken field4;
+			};
+
+			class XmlFirstClassChild : public XmlFirstClass
+			{
+			public:
+				vl::parsing::ParsingToken field2;
+
+				void Accept(XmlFirstClass::IVisitor* visitor)override;
+
+				static vl::Ptr<XmlFirstClassChild> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class XmlThirdClassChild : public XmlFirstClass::XmlSecondClass::XmlThirdClass
+			{
+			public:
+				vl::parsing::ParsingToken field5;
+
+				void Accept(XmlFirstClass::XmlSecondClass::XmlThirdClass::IVisitor* visitor)override;
+
+				static vl::Ptr<XmlThirdClassChild> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
 			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> XmlConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, vl::collections::List<vl::regex::RegexToken>& tokens);
