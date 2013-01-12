@@ -115,6 +115,7 @@
     <ClCompile Include="..\..\..\Source\String.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Test.cpp" />
+    <ClCompile Include="Test_Unescaping.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\Basic.h" />
