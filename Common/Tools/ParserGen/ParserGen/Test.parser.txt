@@ -49,6 +49,44 @@ class Document : Node
 	Element rootElement;
 }
 
+enum DirectEnum
+{
+	A,B,C,
+}
+
+class FirstClass
+{
+	enum IndirectEnum
+	{
+		D,E,F,
+	}
+	
+	class SecondClass
+	{
+		class ThirdClass
+		{
+			token field1;
+		}
+	}
+
+	class SecondClassChild : SecondClass
+	{
+		token field3;
+	}
+
+	token field4;
+}
+
+class FirstClassChild : FirstClass
+{
+	token field2;
+}
+
+class ThirdClassChild : FirstClass.SecondClass.ThirdClass
+{
+	token field5;
+}
+
 token INSTRUCTION_OPEN = "/</?";
 token INSTRUCTION_CLOSE = "/?/>";
 token COMPLEX_ELEMENT_OPEN = "/<//";

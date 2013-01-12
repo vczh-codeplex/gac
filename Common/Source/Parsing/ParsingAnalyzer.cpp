@@ -483,7 +483,7 @@ FindType
 						}
 						else if(subType->IsType())
 						{
-							result=type;
+							result=subType;
 						}
 						else
 						{
