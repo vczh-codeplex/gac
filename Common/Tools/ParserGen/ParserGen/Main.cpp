@@ -1021,114 +1021,56 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 	{
 		const ParsingTable::TokenInfo& info=table->GetTokenInfo(i);
 		writer.WriteString(prefix);
-		writer.WriteLine(L"\t{");
-		writer.WriteString(prefix);
-		writer.WriteLine(L"\t\tvl::parsing::tabling::ParsingTable::TokenInfo info;");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\tinfo.name=");
-		WriteCppString(info.name, writer);
-		writer.WriteLine(L";");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\tinfo.regex=");
-		WriteCppString(info.regex, writer);
-		writer.WriteLine(L";");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\ttable->SetTokenInfo(");
+		writer.WriteString(L"\ttable->SetTokenInfo(");
 		writer.WriteString(itow(i));
-		writer.WriteLine(L", info);");
-		writer.WriteString(prefix);
-		writer.WriteLine(L"\t}");
+		writer.WriteString(L", vl::parsing::tabling::ParsingTable::TokenInfo(");
+		WriteCppString(info.name, writer);
+		writer.WriteString(L", ");
+		WriteCppString(info.regex, writer);
+		writer.WriteLine(L"));");
 	}
 
 	for(vint i=0;i<table->GetDiscardTokenCount();i++)
 	{
 		const ParsingTable::TokenInfo& info=table->GetDiscardTokenInfo(i);
 		writer.WriteString(prefix);
-		writer.WriteLine(L"\t{");
-		writer.WriteString(prefix);
-		writer.WriteLine(L"\t\tvl::parsing::tabling::ParsingTable::TokenInfo info;");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\tinfo.name=");
-		WriteCppString(info.name, writer);
-		writer.WriteLine(L";");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\tinfo.regex=");
-		WriteCppString(info.regex, writer);
-		writer.WriteLine(L";");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\ttable->SetDiscardTokenInfo(");
+		writer.WriteString(L"\ttable->SetDiscardTokenInfo(");
 		writer.WriteString(itow(i));
-		writer.WriteLine(L", info);");
-		writer.WriteString(prefix);
-		writer.WriteLine(L"\t}");
+		writer.WriteString(L", vl::parsing::tabling::ParsingTable::TokenInfo(");
+		WriteCppString(info.name, writer);
+		writer.WriteString(L", ");
+		WriteCppString(info.regex, writer);
+		writer.WriteLine(L"));");
 	}
 
 	for(vint i=0;i<table->GetStateCount();i++)
 	{
 		const ParsingTable::StateInfo& info=table->GetStateInfo(i);
 		writer.WriteString(prefix);
-		writer.WriteLine(L"\t{");
-		writer.WriteString(prefix);
-		writer.WriteLine(L"\t\tvl::parsing::tabling::ParsingTable::StateInfo info;");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\tinfo.ruleName=");
-		WriteCppString(info.ruleName, writer);
-		writer.WriteLine(L";");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\tinfo.stateName=");
-		WriteCppString(info.stateName, writer);
-		writer.WriteLine(L";");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\tinfo.stateExpression=");
-		WriteCppString(info.stateExpression, writer);
-		writer.WriteLine(L";");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\ttable->SetStateInfo(");
+		writer.WriteString(L"\ttable->SetStateInfo(");
 		writer.WriteString(itow(i));
-		writer.WriteLine(L", info);");
-		writer.WriteString(prefix);
-		writer.WriteLine(L"\t}");
+		writer.WriteString(L", vl::parsing::tabling::ParsingTable::StateInfo(");
+		WriteCppString(info.ruleName, writer);
+		writer.WriteString(L", ");
+		WriteCppString(info.stateName, writer);
+		writer.WriteString(L", ");
+		WriteCppString(info.stateExpression, writer);
+		writer.WriteLine(L"));");
 	}
 
 	for(vint i=0;i<table->GetRuleCount();i++)
 	{
 		const ParsingTable::RuleInfo& info=table->GetRuleInfo(i);
 		writer.WriteString(prefix);
-		writer.WriteLine(L"\t{");
-		writer.WriteString(prefix);
-		writer.WriteLine(L"\t\tvl::parsing::tabling::ParsingTable::RuleInfo info;");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\tinfo.name=");
-		WriteCppString(info.name, writer);
-		writer.WriteLine(L";");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\tinfo.type=");
-		WriteCppString(info.type, writer);
-		writer.WriteLine(L";");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\tinfo.rootStartState=");
-		writer.WriteString(itow(info.rootStartState));
-		writer.WriteLine(L";");
-
-		writer.WriteString(prefix);
-		writer.WriteString(L"\t\ttable->SetRuleInfo(");
+		writer.WriteString(L"\ttable->SetRuleInfo(");
 		writer.WriteString(itow(i));
-		writer.WriteLine(L", info);");
-		writer.WriteString(prefix);
-		writer.WriteLine(L"\t}");
+		writer.WriteString(L", vl::parsing::tabling::ParsingTable::RuleInfo(");
+		WriteCppString(info.name, writer);
+		writer.WriteString(L", ");
+		WriteCppString(info.type, writer);
+		writer.WriteString(L", ");
+		writer.WriteString(itow(info.rootStartState));
+		writer.WriteLine(L"));");
 	}
 
 	for(vint i=0;i<table->GetStateCount();i++)
@@ -1148,17 +1090,11 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 					writer.WriteString(prefix);
 					writer.WriteLine(L"\t\t{");
 					writer.WriteString(prefix);
-					writer.WriteLine(L"\t\t\tvl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;");
-
-					writer.WriteString(prefix);
-					writer.WriteString(L"\t\t\titem->token=");
+					writer.WriteString(L"\t\t\tvl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(");
 					writer.WriteString(itow(item->token));
-					writer.WriteLine(L";");
-
-					writer.WriteString(prefix);
-					writer.WriteString(L"\t\t\titem->targetState=");
+					writer.WriteString(L", ");
 					writer.WriteString(itow(item->targetState));
-					writer.WriteLine(L";");
+					writer.WriteLine(L");");
 
 					FOREACH(int, state, item->stackPattern)
 					{
@@ -1171,12 +1107,8 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 					FOREACH(ParsingTable::Instruction, ins, item->instructions)
 					{
 						writer.WriteString(prefix);
-						writer.WriteLine(L"\t\t\t{");
-						writer.WriteString(prefix);
-						writer.WriteLine(L"\t\t\t\tvl::parsing::tabling::ParsingTable::Instruction ins;");
-
-						writer.WriteString(prefix);
-						writer.WriteString(L"\t\t\t\tins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::");
+						writer.WriteString(L"\t\t\titem->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(");
+						writer.WriteString(L"vl::parsing::tabling::ParsingTable::Instruction::InstructionType::");
 						switch(ins.instructionType)
 						{
 						case ParsingTable::Instruction::Create:
@@ -1204,27 +1136,13 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 							writer.WriteString(L"LeftRecursiveReduce");
 							break;
 						}
-						writer.WriteLine(L";");
-
-						writer.WriteString(prefix);
-						writer.WriteString(L"\t\t\t\tins.stateParameter=");
+						writer.WriteString(L", ");
 						writer.WriteString(itow(ins.stateParameter));
-						writer.WriteLine(L";");
-
-						writer.WriteString(prefix);
-						writer.WriteString(L"\t\t\t\tins.nameParameter=");
+						writer.WriteString(L", ");
 						WriteCppString(ins.nameParameter, writer);
-						writer.WriteLine(L";");
-
-						writer.WriteString(prefix);
-						writer.WriteString(L"\t\t\t\tins.value=");
+						writer.WriteString(L", ");
 						WriteCppString(ins.value, writer);
-						writer.WriteLine(L";");
-
-						writer.WriteString(prefix);
-						writer.WriteLine(L"\t\t\t\titem->instructions.Add(ins);");
-						writer.WriteString(prefix);
-						writer.WriteLine(L"\t\t\t}");
+						writer.WriteLine(L"));");
 					}
 
 					writer.WriteString(prefix);

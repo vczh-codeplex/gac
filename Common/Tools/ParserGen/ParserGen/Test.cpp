@@ -145,7 +145,21 @@ Parsing Tree Conversion Driver Implementation
 
 				vl::Ptr<vl::parsing::ParsingTreeCustomBase> ConvertClass(vl::Ptr<vl::parsing::ParsingTreeObject> obj, const TokenList& tokens)override
 				{
-					if(obj->GetType()==L"Comment")
+					if(obj->GetType()==L"FirstClass.SecondClassChild")
+					{
+						vl::Ptr<XmlFirstClass::XmlSecondClassChild> tree = new XmlFirstClass::XmlSecondClassChild;
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlFirstClass::XmlSecondClass>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Instruction")
+					{
+						vl::Ptr<XmlInstruction> tree = new XmlInstruction;
+						Fill(tree, obj, tokens);
+						Fill(tree.Cast<XmlNode>(), obj, tokens);
+						return tree;
+					}
+					else if(obj->GetType()==L"Comment")
 					{
 						vl::Ptr<XmlComment> tree = new XmlComment;
 						Fill(tree, obj, tokens);
@@ -173,11 +187,11 @@ Parsing Tree Conversion Driver Implementation
 						Fill(tree.Cast<XmlNode>(), obj, tokens);
 						return tree;
 					}
-					else if(obj->GetType()==L"FirstClass.SecondClassChild")
+					else if(obj->GetType()==L"Document")
 					{
-						vl::Ptr<XmlFirstClass::XmlSecondClassChild> tree = new XmlFirstClass::XmlSecondClassChild;
+						vl::Ptr<XmlDocument> tree = new XmlDocument;
 						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlFirstClass::XmlSecondClass>(), obj, tokens);
+						Fill(tree.Cast<XmlNode>(), obj, tokens);
 						return tree;
 					}
 					else if(obj->GetType()==L"FirstClassChild")
@@ -185,13 +199,6 @@ Parsing Tree Conversion Driver Implementation
 						vl::Ptr<XmlFirstClassChild> tree = new XmlFirstClassChild;
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<XmlFirstClass>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"Document")
-					{
-						vl::Ptr<XmlDocument> tree = new XmlDocument;
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
 						return tree;
 					}
 					else if(obj->GetType()==L"ThirdClassChild")
@@ -204,13 +211,6 @@ Parsing Tree Conversion Driver Implementation
 					else if(obj->GetType()==L"Element")
 					{
 						vl::Ptr<XmlElement> tree = new XmlElement;
-						Fill(tree, obj, tokens);
-						Fill(tree.Cast<XmlNode>(), obj, tokens);
-						return tree;
-					}
-					else if(obj->GetType()==L"Instruction")
-					{
-						vl::Ptr<XmlInstruction> tree = new XmlInstruction;
 						Fill(tree, obj, tokens);
 						Fill(tree.Cast<XmlNode>(), obj, tokens);
 						return tree;
@@ -232,6 +232,16 @@ Parsing Tree Conversion Driver Implementation
 Parsing Tree Conversion Implementation
 ***********************************************************************/
 
+			vl::Ptr<XmlFirstClass::XmlSecondClassChild> XmlFirstClass::XmlSecondClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlFirstClass::XmlSecondClassChild>();
+			}
+
+			vl::Ptr<XmlInstruction> XmlInstruction::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			{
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlInstruction>();
+			}
+
 			vl::Ptr<XmlComment> XmlComment::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
 				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlComment>();
@@ -252,19 +262,14 @@ Parsing Tree Conversion Implementation
 				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlCData>();
 			}
 
-			vl::Ptr<XmlFirstClass::XmlSecondClassChild> XmlFirstClass::XmlSecondClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
+			vl::Ptr<XmlDocument> XmlDocument::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlFirstClass::XmlSecondClassChild>();
+				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlDocument>();
 			}
 
 			vl::Ptr<XmlFirstClassChild> XmlFirstClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
 				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlFirstClassChild>();
-			}
-
-			vl::Ptr<XmlDocument> XmlDocument::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlDocument>();
 			}
 
 			vl::Ptr<XmlThirdClassChild> XmlThirdClassChild::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
@@ -275,11 +280,6 @@ Parsing Tree Conversion Implementation
 			vl::Ptr<XmlElement> XmlElement::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
 				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlElement>();
-			}
-
-			vl::Ptr<XmlInstruction> XmlInstruction::Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens)
-			{
-				return XmlConvertParsingTreeNode(node, tokens).Cast<XmlInstruction>();
 			}
 
 /***********************************************************************
@@ -375,458 +375,76 @@ Table Generation
 			vl::Ptr<vl::parsing::tabling::ParsingTable> XmlLoadTable()
 			{
 				vl::Ptr<vl::parsing::tabling::ParsingTable> table=new vl::parsing::tabling::ParsingTable(15-vl::parsing::tabling::ParsingTable::UserTokenStart, 1, 42, 8);
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"";
-					info.regex=L"";
-					table->SetTokenInfo(0, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"";
-					info.regex=L"";
-					table->SetTokenInfo(1, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"";
-					info.regex=L"";
-					table->SetTokenInfo(2, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"INSTRUCTION_OPEN";
-					info.regex=L"/</?";
-					table->SetTokenInfo(3, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"INSTRUCTION_CLOSE";
-					info.regex=L"/?/>";
-					table->SetTokenInfo(4, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"COMPLEX_ELEMENT_OPEN";
-					info.regex=L"/<//";
-					table->SetTokenInfo(5, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"SINGLE_ELEMENT_CLOSE";
-					info.regex=L"///>";
-					table->SetTokenInfo(6, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"ELEMENT_OPEN";
-					info.regex=L"/<";
-					table->SetTokenInfo(7, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"ELEMENT_CLOSE";
-					info.regex=L"/>";
-					table->SetTokenInfo(8, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"EQUAL";
-					info.regex=L"/=";
-					table->SetTokenInfo(9, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"NAME";
-					info.regex=L"[a-zA-Z0-9:_/-]+";
-					table->SetTokenInfo(10, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"ATTVALUE";
-					info.regex=L"\"([^\"&]|&/l+;)*\"";
-					table->SetTokenInfo(11, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"COMMENT";
-					info.regex=L"/</!--[^>]*/>";
-					table->SetTokenInfo(12, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"CDATA";
-					info.regex=L"/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>";
-					table->SetTokenInfo(13, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"TEXT";
-					info.regex=L"([^<>\"& /r/n/ta-zA-Z0-9:_/-]|&/l+;)+";
-					table->SetTokenInfo(14, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::TokenInfo info;
-					info.name=L"SPACE";
-					info.regex=L"/s+";
-					table->SetDiscardTokenInfo(0, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XDocument";
-					info.stateName=L"XDocument.RootStart";
-					info.stateExpression=L"¡ñ $<XDocument>";
-					table->SetStateInfo(0, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XDocument";
-					info.stateName=L"XDocument.Start";
-					info.stateExpression=L"¡¤ <XDocument>";
-					table->SetStateInfo(1, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XElement";
-					info.stateName=L"XElement.1";
-					info.stateExpression=L"<XElement>: \"<\"¡ñ NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element";
-					table->SetStateInfo(2, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XInstruction";
-					info.stateName=L"XInstruction.1";
-					info.stateExpression=L"<XInstruction>: \"<?\"¡ñ NAME : name { XAttribute : attributes } \"?>\" as Instruction";
-					table->SetStateInfo(3, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XComment";
-					info.stateName=L"XComment.1";
-					info.stateExpression=L"<XComment>: COMMENT : content as Comment¡ñ";
-					table->SetStateInfo(4, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XElement";
-					info.stateName=L"XElement.4";
-					info.stateExpression=L"<XElement>: \"<\" NAME : name ¡ñ{ XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element\r\n<XElement>: \"<\" NAME : name¡ñ { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element";
-					table->SetStateInfo(5, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XInstruction";
-					info.stateName=L"XInstruction.2";
-					info.stateExpression=L"<XInstruction>: \"<?\" NAME : name¡ñ { XAttribute : attributes } \"?>\" as Instruction\r\n<XInstruction>: \"<?\" NAME : name ¡ñ{ XAttribute : attributes } \"?>\" as Instruction";
-					table->SetStateInfo(6, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XComment";
-					info.stateName=L"XComment.RootEnd";
-					info.stateExpression=L"$<XComment> ¡ñ";
-					table->SetStateInfo(7, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XText";
-					info.stateName=L"XText.1";
-					info.stateExpression=L"<XText>: NAME : content | EQUAL : content | TEXT : content as Text¡ñ";
-					table->SetStateInfo(8, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XCData";
-					info.stateName=L"XCData.1";
-					info.stateExpression=L"<XCData>: CDATA : content as CData¡ñ";
-					table->SetStateInfo(9, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XElement";
-					info.stateName=L"XElement.5";
-					info.stateExpression=L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\"¡ñ NAME : closingName \">\" ) as Element";
-					table->SetStateInfo(10, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XSubNode";
-					info.stateName=L"XSubNode.RootEnd";
-					info.stateExpression=L"$<XSubNode> ¡ñ";
-					table->SetStateInfo(11, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XElement";
-					info.stateName=L"XElement.2";
-					info.stateExpression=L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element¡ñ";
-					table->SetStateInfo(12, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XElement";
-					info.stateName=L"XElement.3";
-					info.stateExpression=L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\"¡ñ { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element\r\n<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" ¡ñ{ XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element";
-					table->SetStateInfo(13, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XAttribute";
-					info.stateName=L"XAttribute.1";
-					info.stateExpression=L"<XAttribute>: NAME : name¡ñ \"=\" ATTVALUE : value as Attribute";
-					table->SetStateInfo(14, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XInstruction";
-					info.stateName=L"XInstruction.3";
-					info.stateExpression=L"<XInstruction>: \"<?\" NAME : name { XAttribute : attributes } \"?>\" as Instruction¡ñ";
-					table->SetStateInfo(15, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XText";
-					info.stateName=L"XText.RootEnd";
-					info.stateExpression=L"$<XText> ¡ñ";
-					table->SetStateInfo(16, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XCData";
-					info.stateName=L"XCData.RootEnd";
-					info.stateExpression=L"$<XCData> ¡ñ";
-					table->SetStateInfo(17, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XElement";
-					info.stateName=L"XElement.6";
-					info.stateExpression=L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName¡ñ \">\" ) as Element";
-					table->SetStateInfo(18, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XElement";
-					info.stateName=L"XElement.RootEnd";
-					info.stateExpression=L"$<XElement> ¡ñ";
-					table->SetStateInfo(19, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XDocument";
-					info.stateName=L"XDocument.RootEnd";
-					info.stateExpression=L"$<XDocument> ¡ñ";
-					table->SetStateInfo(20, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XAttribute";
-					info.stateName=L"XAttribute.2";
-					info.stateExpression=L"<XAttribute>: NAME : name \"=\"¡ñ ATTVALUE : value as Attribute";
-					table->SetStateInfo(21, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XInstruction";
-					info.stateName=L"XInstruction.RootEnd";
-					info.stateExpression=L"$<XInstruction> ¡ñ";
-					table->SetStateInfo(22, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XAttribute";
-					info.stateName=L"XAttribute.3";
-					info.stateExpression=L"<XAttribute>: NAME : name \"=\" ATTVALUE : value as Attribute¡ñ";
-					table->SetStateInfo(23, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XAttribute";
-					info.stateName=L"XAttribute.RootEnd";
-					info.stateExpression=L"$<XAttribute> ¡ñ";
-					table->SetStateInfo(24, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XElement";
-					info.stateName=L"XElement.RootStart";
-					info.stateExpression=L"¡ñ $<XElement>";
-					table->SetStateInfo(25, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XElement";
-					info.stateName=L"XElement.Start";
-					info.stateExpression=L"¡¤ <XElement>";
-					table->SetStateInfo(26, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XCData";
-					info.stateName=L"XCData.RootStart";
-					info.stateExpression=L"¡ñ $<XCData>";
-					table->SetStateInfo(27, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XCData";
-					info.stateName=L"XCData.Start";
-					info.stateExpression=L"¡¤ <XCData>";
-					table->SetStateInfo(28, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XAttribute";
-					info.stateName=L"XAttribute.RootStart";
-					info.stateExpression=L"¡ñ $<XAttribute>";
-					table->SetStateInfo(29, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XAttribute";
-					info.stateName=L"XAttribute.Start";
-					info.stateExpression=L"¡¤ <XAttribute>";
-					table->SetStateInfo(30, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XComment";
-					info.stateName=L"XComment.RootStart";
-					info.stateExpression=L"¡ñ $<XComment>";
-					table->SetStateInfo(31, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XComment";
-					info.stateName=L"XComment.Start";
-					info.stateExpression=L"¡¤ <XComment>";
-					table->SetStateInfo(32, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XInstruction";
-					info.stateName=L"XInstruction.RootStart";
-					info.stateExpression=L"¡ñ $<XInstruction>";
-					table->SetStateInfo(33, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XInstruction";
-					info.stateName=L"XInstruction.Start";
-					info.stateExpression=L"¡¤ <XInstruction>";
-					table->SetStateInfo(34, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XText";
-					info.stateName=L"XText.RootStart";
-					info.stateExpression=L"¡ñ $<XText>";
-					table->SetStateInfo(35, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XText";
-					info.stateName=L"XText.Start";
-					info.stateExpression=L"¡¤ <XText>";
-					table->SetStateInfo(36, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XSubNode";
-					info.stateName=L"XSubNode.RootStart";
-					info.stateExpression=L"¡ñ $<XSubNode>";
-					table->SetStateInfo(37, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XSubNode";
-					info.stateName=L"XSubNode.Start";
-					info.stateExpression=L"¡¤ <XSubNode>";
-					table->SetStateInfo(38, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XDocument";
-					info.stateName=L"XDocument.1";
-					info.stateExpression=L"<XDocument>: { XInstruction : instructions | XComment : comments } XElement : rootElement as Document¡ñ";
-					table->SetStateInfo(39, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XDocument";
-					info.stateName=L"XDocument.2";
-					info.stateExpression=L"<XDocument>: ¡ñ{ XInstruction : instructions | XComment : comments } XElement : rootElement as Document";
-					table->SetStateInfo(40, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::StateInfo info;
-					info.ruleName=L"XSubNode";
-					info.stateName=L"XSubNode.1";
-					info.stateExpression=L"<XSubNode>: !XText | !XCData | !XComment | !XElement¡ñ";
-					table->SetStateInfo(41, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::RuleInfo info;
-					info.name=L"XDocument";
-					info.type=L"Document";
-					info.rootStartState=0;
-					table->SetRuleInfo(0, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::RuleInfo info;
-					info.name=L"XElement";
-					info.type=L"Element";
-					info.rootStartState=25;
-					table->SetRuleInfo(1, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::RuleInfo info;
-					info.name=L"XCData";
-					info.type=L"CData";
-					info.rootStartState=27;
-					table->SetRuleInfo(2, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::RuleInfo info;
-					info.name=L"XAttribute";
-					info.type=L"Attribute";
-					info.rootStartState=29;
-					table->SetRuleInfo(3, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::RuleInfo info;
-					info.name=L"XComment";
-					info.type=L"Comment";
-					info.rootStartState=31;
-					table->SetRuleInfo(4, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::RuleInfo info;
-					info.name=L"XInstruction";
-					info.type=L"Instruction";
-					info.rootStartState=33;
-					table->SetRuleInfo(5, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::RuleInfo info;
-					info.name=L"XText";
-					info.type=L"Text";
-					info.rootStartState=35;
-					table->SetRuleInfo(6, info);
-				}
-				{
-					vl::parsing::tabling::ParsingTable::RuleInfo info;
-					info.name=L"XSubNode";
-					info.type=L"Node";
-					info.rootStartState=37;
-					table->SetRuleInfo(7, info);
-				}
+				table->SetTokenInfo(0, vl::parsing::tabling::ParsingTable::TokenInfo(L"", L""));
+				table->SetTokenInfo(1, vl::parsing::tabling::ParsingTable::TokenInfo(L"", L""));
+				table->SetTokenInfo(2, vl::parsing::tabling::ParsingTable::TokenInfo(L"", L""));
+				table->SetTokenInfo(3, vl::parsing::tabling::ParsingTable::TokenInfo(L"INSTRUCTION_OPEN", L"/</?"));
+				table->SetTokenInfo(4, vl::parsing::tabling::ParsingTable::TokenInfo(L"INSTRUCTION_CLOSE", L"/?/>"));
+				table->SetTokenInfo(5, vl::parsing::tabling::ParsingTable::TokenInfo(L"COMPLEX_ELEMENT_OPEN", L"/<//"));
+				table->SetTokenInfo(6, vl::parsing::tabling::ParsingTable::TokenInfo(L"SINGLE_ELEMENT_CLOSE", L"///>"));
+				table->SetTokenInfo(7, vl::parsing::tabling::ParsingTable::TokenInfo(L"ELEMENT_OPEN", L"/<"));
+				table->SetTokenInfo(8, vl::parsing::tabling::ParsingTable::TokenInfo(L"ELEMENT_CLOSE", L"/>"));
+				table->SetTokenInfo(9, vl::parsing::tabling::ParsingTable::TokenInfo(L"EQUAL", L"/="));
+				table->SetTokenInfo(10, vl::parsing::tabling::ParsingTable::TokenInfo(L"NAME", L"[a-zA-Z0-9:_/-]+"));
+				table->SetTokenInfo(11, vl::parsing::tabling::ParsingTable::TokenInfo(L"ATTVALUE", L"\"([^\"&]|&/l+;)*\""));
+				table->SetTokenInfo(12, vl::parsing::tabling::ParsingTable::TokenInfo(L"COMMENT", L"/</!--[^>]*/>"));
+				table->SetTokenInfo(13, vl::parsing::tabling::ParsingTable::TokenInfo(L"CDATA", L"/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>"));
+				table->SetTokenInfo(14, vl::parsing::tabling::ParsingTable::TokenInfo(L"TEXT", L"([^<>\"& /r/n/ta-zA-Z0-9:_/-]|&/l+;)+"));
+				table->SetDiscardTokenInfo(0, vl::parsing::tabling::ParsingTable::TokenInfo(L"SPACE", L"/s+"));
+				table->SetStateInfo(0, vl::parsing::tabling::ParsingTable::StateInfo(L"XText", L"XText.RootStart", L"¡ñ $<XText>"));
+				table->SetStateInfo(1, vl::parsing::tabling::ParsingTable::StateInfo(L"XText", L"XText.Start", L"¡¤ <XText>"));
+				table->SetStateInfo(2, vl::parsing::tabling::ParsingTable::StateInfo(L"XText", L"XText.1", L"<XText>: NAME : content | EQUAL : content | TEXT : content as Text¡ñ"));
+				table->SetStateInfo(3, vl::parsing::tabling::ParsingTable::StateInfo(L"XText", L"XText.RootEnd", L"$<XText> ¡ñ"));
+				table->SetStateInfo(4, vl::parsing::tabling::ParsingTable::StateInfo(L"XSubNode", L"XSubNode.RootEnd", L"$<XSubNode> ¡ñ"));
+				table->SetStateInfo(5, vl::parsing::tabling::ParsingTable::StateInfo(L"XCData", L"XCData.1", L"<XCData>: CDATA : content as CData¡ñ"));
+				table->SetStateInfo(6, vl::parsing::tabling::ParsingTable::StateInfo(L"XComment", L"XComment.1", L"<XComment>: COMMENT : content as Comment¡ñ"));
+				table->SetStateInfo(7, vl::parsing::tabling::ParsingTable::StateInfo(L"XElement", L"XElement.1", L"<XElement>: \"<\"¡ñ NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element"));
+				table->SetStateInfo(8, vl::parsing::tabling::ParsingTable::StateInfo(L"XElement", L"XElement.5", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\"¡ñ NAME : closingName \">\" ) as Element"));
+				table->SetStateInfo(9, vl::parsing::tabling::ParsingTable::StateInfo(L"XCData", L"XCData.RootEnd", L"$<XCData> ¡ñ"));
+				table->SetStateInfo(10, vl::parsing::tabling::ParsingTable::StateInfo(L"XComment", L"XComment.RootEnd", L"$<XComment> ¡ñ"));
+				table->SetStateInfo(11, vl::parsing::tabling::ParsingTable::StateInfo(L"XInstruction", L"XInstruction.1", L"<XInstruction>: \"<?\"¡ñ NAME : name { XAttribute : attributes } \"?>\" as Instruction"));
+				table->SetStateInfo(12, vl::parsing::tabling::ParsingTable::StateInfo(L"XElement", L"XElement.4", L"<XElement>: \"<\" NAME : name ¡ñ{ XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element\r\n<XElement>: \"<\" NAME : name¡ñ { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element"));
+				table->SetStateInfo(13, vl::parsing::tabling::ParsingTable::StateInfo(L"XElement", L"XElement.6", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName¡ñ \">\" ) as Element"));
+				table->SetStateInfo(14, vl::parsing::tabling::ParsingTable::StateInfo(L"XInstruction", L"XInstruction.3", L"<XInstruction>: \"<?\" NAME : name ¡ñ{ XAttribute : attributes } \"?>\" as Instruction\r\n<XInstruction>: \"<?\" NAME : name¡ñ { XAttribute : attributes } \"?>\" as Instruction"));
+				table->SetStateInfo(15, vl::parsing::tabling::ParsingTable::StateInfo(L"XElement", L"XElement.2", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element¡ñ"));
+				table->SetStateInfo(16, vl::parsing::tabling::ParsingTable::StateInfo(L"XElement", L"XElement.3", L"<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\"¡ñ { XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element\r\n<XElement>: \"<\" NAME : name { XAttribute : attributes } ( \"/>\" | \">\" ¡ñ{ XSubNode : subNodes } \"</\" NAME : closingName \">\" ) as Element"));
+				table->SetStateInfo(17, vl::parsing::tabling::ParsingTable::StateInfo(L"XAttribute", L"XAttribute.1", L"<XAttribute>: NAME : name¡ñ \"=\" ATTVALUE : value as Attribute"));
+				table->SetStateInfo(18, vl::parsing::tabling::ParsingTable::StateInfo(L"XInstruction", L"XInstruction.2", L"<XInstruction>: \"<?\" NAME : name { XAttribute : attributes } \"?>\" as Instruction¡ñ"));
+				table->SetStateInfo(19, vl::parsing::tabling::ParsingTable::StateInfo(L"XElement", L"XElement.RootEnd", L"$<XElement> ¡ñ"));
+				table->SetStateInfo(20, vl::parsing::tabling::ParsingTable::StateInfo(L"XDocument", L"XDocument.RootEnd", L"$<XDocument> ¡ñ"));
+				table->SetStateInfo(21, vl::parsing::tabling::ParsingTable::StateInfo(L"XAttribute", L"XAttribute.2", L"<XAttribute>: NAME : name \"=\"¡ñ ATTVALUE : value as Attribute"));
+				table->SetStateInfo(22, vl::parsing::tabling::ParsingTable::StateInfo(L"XInstruction", L"XInstruction.RootEnd", L"$<XInstruction> ¡ñ"));
+				table->SetStateInfo(23, vl::parsing::tabling::ParsingTable::StateInfo(L"XAttribute", L"XAttribute.3", L"<XAttribute>: NAME : name \"=\" ATTVALUE : value as Attribute¡ñ"));
+				table->SetStateInfo(24, vl::parsing::tabling::ParsingTable::StateInfo(L"XAttribute", L"XAttribute.RootEnd", L"$<XAttribute> ¡ñ"));
+				table->SetStateInfo(25, vl::parsing::tabling::ParsingTable::StateInfo(L"XSubNode", L"XSubNode.RootStart", L"¡ñ $<XSubNode>"));
+				table->SetStateInfo(26, vl::parsing::tabling::ParsingTable::StateInfo(L"XSubNode", L"XSubNode.Start", L"¡¤ <XSubNode>"));
+				table->SetStateInfo(27, vl::parsing::tabling::ParsingTable::StateInfo(L"XDocument", L"XDocument.RootStart", L"¡ñ $<XDocument>"));
+				table->SetStateInfo(28, vl::parsing::tabling::ParsingTable::StateInfo(L"XDocument", L"XDocument.Start", L"¡¤ <XDocument>"));
+				table->SetStateInfo(29, vl::parsing::tabling::ParsingTable::StateInfo(L"XElement", L"XElement.RootStart", L"¡ñ $<XElement>"));
+				table->SetStateInfo(30, vl::parsing::tabling::ParsingTable::StateInfo(L"XElement", L"XElement.Start", L"¡¤ <XElement>"));
+				table->SetStateInfo(31, vl::parsing::tabling::ParsingTable::StateInfo(L"XCData", L"XCData.RootStart", L"¡ñ $<XCData>"));
+				table->SetStateInfo(32, vl::parsing::tabling::ParsingTable::StateInfo(L"XCData", L"XCData.Start", L"¡¤ <XCData>"));
+				table->SetStateInfo(33, vl::parsing::tabling::ParsingTable::StateInfo(L"XAttribute", L"XAttribute.RootStart", L"¡ñ $<XAttribute>"));
+				table->SetStateInfo(34, vl::parsing::tabling::ParsingTable::StateInfo(L"XAttribute", L"XAttribute.Start", L"¡¤ <XAttribute>"));
+				table->SetStateInfo(35, vl::parsing::tabling::ParsingTable::StateInfo(L"XComment", L"XComment.RootStart", L"¡ñ $<XComment>"));
+				table->SetStateInfo(36, vl::parsing::tabling::ParsingTable::StateInfo(L"XComment", L"XComment.Start", L"¡¤ <XComment>"));
+				table->SetStateInfo(37, vl::parsing::tabling::ParsingTable::StateInfo(L"XInstruction", L"XInstruction.RootStart", L"¡ñ $<XInstruction>"));
+				table->SetStateInfo(38, vl::parsing::tabling::ParsingTable::StateInfo(L"XInstruction", L"XInstruction.Start", L"¡¤ <XInstruction>"));
+				table->SetStateInfo(39, vl::parsing::tabling::ParsingTable::StateInfo(L"XSubNode", L"XSubNode.1", L"<XSubNode>: !XText | !XCData | !XComment | !XElement¡ñ"));
+				table->SetStateInfo(40, vl::parsing::tabling::ParsingTable::StateInfo(L"XDocument", L"XDocument.1", L"<XDocument>: { XInstruction : instructions | XComment : comments } XElement : rootElement as Document¡ñ"));
+				table->SetStateInfo(41, vl::parsing::tabling::ParsingTable::StateInfo(L"XDocument", L"XDocument.2", L"<XDocument>: ¡ñ{ XInstruction : instructions | XComment : comments } XElement : rootElement as Document"));
+				table->SetRuleInfo(0, vl::parsing::tabling::ParsingTable::RuleInfo(L"XText", L"Text", 0));
+				table->SetRuleInfo(1, vl::parsing::tabling::ParsingTable::RuleInfo(L"XSubNode", L"Node", 25));
+				table->SetRuleInfo(2, vl::parsing::tabling::ParsingTable::RuleInfo(L"XDocument", L"Document", 27));
+				table->SetRuleInfo(3, vl::parsing::tabling::ParsingTable::RuleInfo(L"XElement", L"Element", 29));
+				table->SetRuleInfo(4, vl::parsing::tabling::ParsingTable::RuleInfo(L"XCData", L"CData", 31));
+				table->SetRuleInfo(5, vl::parsing::tabling::ParsingTable::RuleInfo(L"XAttribute", L"Attribute", 33));
+				table->SetRuleInfo(6, vl::parsing::tabling::ParsingTable::RuleInfo(L"XComment", L"Comment", 35));
+				table->SetRuleInfo(7, vl::parsing::tabling::ParsingTable::RuleInfo(L"XInstruction", L"Instruction", 37));
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=0;
-						item->targetState=1;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(0, 1);
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(0, 0, bag);
@@ -834,87 +452,110 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=3;
-						item->targetState=3;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=1;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(9, 2);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(1, 3, bag);
+					table->SetTransitionBag(1, 9, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=7;
-						item->targetState=2;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=1;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 2);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(1, 7, bag);
+					table->SetTransitionBag(1, 10, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=12;
-						item->targetState=4;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=1;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Comment";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(14, 2);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(1, 12, bag);
+					table->SetTransitionBag(1, 14, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=5;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"name";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(1, 3);
+						bag->transitionItems.Add(item);
+					}
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(1, 4);
+						item->stackPattern.Add(26);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(2, 1, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(5, 8);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(2, 5, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(7, 7);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(2, 7, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(9, 2);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(2, 9, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 2);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(2, 10, bag);
@@ -922,810 +563,134 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=6;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"name";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(12, 6);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Comment", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(3, 10, bag);
+					table->SetTransitionBag(2, 12, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=1;
-						item->targetState=7;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(13, 5);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"CData", L""));
 						bag->transitionItems.Add(item);
 					}
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=1;
-						item->targetState=11;
-						item->stackPattern.Add(38);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(4, 1, bag);
+					table->SetTransitionBag(2, 13, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=3;
-						item->targetState=3;
-						item->stackPattern.Add(40);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"comments";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(14, 2);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
 						bag->transitionItems.Add(item);
 					}
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=3;
-						item->targetState=3;
-						item->stackPattern.Add(1);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=1;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"comments";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(4, 3, bag);
+					table->SetTransitionBag(2, 14, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=5;
-						item->targetState=10;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(1, 9);
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(4, 5, bag);
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(1, 4);
+						item->stackPattern.Add(26);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(5, 1, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=7;
-						item->targetState=2;
-						item->stackPattern.Add(40);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"comments";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(5, 8);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
 						bag->transitionItems.Add(item);
 					}
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=7;
-						item->targetState=2;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=7;
-						item->targetState=2;
-						item->stackPattern.Add(1);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=1;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"comments";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(4, 7, bag);
+					table->SetTransitionBag(5, 5, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=9;
-						item->targetState=8;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(7, 7);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(4, 9, bag);
+					table->SetTransitionBag(5, 7, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=8;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(9, 2);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(4, 10, bag);
+					table->SetTransitionBag(5, 9, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=12;
-						item->targetState=4;
-						item->stackPattern.Add(40);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"comments";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Comment";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=12;
-						item->targetState=4;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Comment";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=12;
-						item->targetState=4;
-						item->stackPattern.Add(1);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=1;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"comments";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Comment";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(4, 12, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=13;
-						item->targetState=9;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"CData";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(4, 13, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=14;
-						item->targetState=8;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(4, 14, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=6;
-						item->targetState=12;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Element";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(5, 6, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=8;
-						item->targetState=13;
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(5, 8, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=14;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=5;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"name";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 2);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(5, 10, bag);
@@ -1733,43 +698,170 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=4;
-						item->targetState=15;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Instruction";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(12, 6);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Comment", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(6, 4, bag);
+					table->SetTransitionBag(5, 12, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=14;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=6;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"name";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(13, 5);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"CData", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(5, 13, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(14, 2);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(5, 14, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(1, 10);
+						bag->transitionItems.Add(item);
+					}
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(1, 4);
+						item->stackPattern.Add(26);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(6, 1, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(3, 11);
+						item->stackPattern.Add(41);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 41, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"comments", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 41, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(3, 11);
+						item->stackPattern.Add(28);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 28, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"comments", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 41, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(6, 3, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(5, 8);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(6, 5, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(7, 7);
+						item->stackPattern.Add(41);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 41, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"comments", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 41, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(7, 7);
+						item->stackPattern.Add(28);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 28, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"comments", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 41, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(7, 7);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(6, 7, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(9, 2);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(6, 9, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 2);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(6, 10, bag);
@@ -1777,288 +869,91 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=1;
-						item->targetState=16;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(12, 6);
+						item->stackPattern.Add(41);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 41, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"comments", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 41, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Comment", L""));
 						bag->transitionItems.Add(item);
 					}
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=1;
-						item->targetState=11;
-						item->stackPattern.Add(38);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(12, 6);
+						item->stackPattern.Add(28);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 28, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"comments", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 41, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Comment", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(8, 1, bag);
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(12, 6);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Comment", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(6, 12, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=5;
-						item->targetState=10;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(13, 5);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"CData", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(8, 5, bag);
+					table->SetTransitionBag(6, 13, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=7;
-						item->targetState=2;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(14, 2);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(8, 7, bag);
+					table->SetTransitionBag(6, 14, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=9;
-						item->targetState=8;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 12);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"name", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(8, 9, bag);
+					table->SetTransitionBag(7, 10, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=8;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 13);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"closingName", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(8, 10, bag);
@@ -2066,1113 +961,35 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=12;
-						item->targetState=4;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Comment";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 14);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"name", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(8, 12, bag);
+					table->SetTransitionBag(11, 10, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=13;
-						item->targetState=9;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"CData";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(6, 15);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Element", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(8, 13, bag);
+					table->SetTransitionBag(12, 6, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=14;
-						item->targetState=8;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(8, 16);
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(8, 14, bag);
+					table->SetTransitionBag(12, 8, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=1;
-						item->targetState=17;
-						bag->transitionItems.Add(item);
-					}
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=1;
-						item->targetState=11;
-						item->stackPattern.Add(38);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(9, 1, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=5;
-						item->targetState=10;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(9, 5, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=7;
-						item->targetState=2;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(9, 7, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=9;
-						item->targetState=8;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(9, 9, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=8;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(9, 10, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=12;
-						item->targetState=4;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Comment";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(9, 12, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=13;
-						item->targetState=9;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"CData";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(9, 13, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=14;
-						item->targetState=8;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(9, 14, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=18;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"closingName";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(10, 10, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=1;
-						item->targetState=19;
-						bag->transitionItems.Add(item);
-					}
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=1;
-						item->targetState=20;
-						item->stackPattern.Add(40);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Document";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"rootElement";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=1;
-						item->targetState=11;
-						item->stackPattern.Add(38);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=1;
-						item->targetState=20;
-						item->stackPattern.Add(1);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=1;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"rootElement";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Document";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(12, 1, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=5;
-						item->targetState=10;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(12, 5, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=7;
-						item->targetState=2;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(12, 7, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=9;
-						item->targetState=8;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(12, 9, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=8;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 17);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 12, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"name", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(12, 10, bag);
@@ -3180,493 +997,58 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=12;
-						item->targetState=4;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Comment";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(8, 15);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Element", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(12, 12, bag);
+					table->SetTransitionBag(13, 8, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=13;
-						item->targetState=9;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"CData";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(4, 18);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Instruction", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(12, 13, bag);
+					table->SetTransitionBag(14, 4, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=14;
-						item->targetState=8;
-						item->stackPattern.Add(38);
-						item->stackPattern.Add(13);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using;
-							ins.stateParameter=0;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"subNodes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 17);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 14, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"name", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(12, 14, bag);
+					table->SetTransitionBag(14, 10, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=5;
-						item->targetState=10;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(1, 19);
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(13, 5, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=7;
-						item->targetState=2;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(1, 20);
+						item->stackPattern.Add(41);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 41, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Document", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"rootElement", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(13, 7, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=9;
-						item->targetState=8;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(1, 20);
+						item->stackPattern.Add(28);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 28, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"rootElement", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Document", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(13, 9, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=8;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(13, 10, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=12;
-						item->targetState=4;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Comment";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(13, 12, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=13;
-						item->targetState=9;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"CData";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(13, 13, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=14;
-						item->targetState=8;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=13;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(13, 14, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=9;
-						item->targetState=21;
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(14, 9, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=1;
-						item->targetState=22;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(1, 4);
+						item->stackPattern.Add(26);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(15, 1, bag);
@@ -3674,131 +1056,29 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=3;
-						item->targetState=3;
-						item->stackPattern.Add(40);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"instructions";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(5, 8);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
 						bag->transitionItems.Add(item);
 					}
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=3;
-						item->targetState=3;
-						item->stackPattern.Add(1);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=1;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"instructions";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(15, 3, bag);
+					table->SetTransitionBag(15, 5, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=7;
-						item->targetState=2;
-						item->stackPattern.Add(40);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"instructions";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=7;
-						item->targetState=2;
-						item->stackPattern.Add(1);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=1;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"instructions";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(7, 7);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(15, 7, bag);
@@ -3806,97 +1086,53 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=12;
-						item->targetState=4;
-						item->stackPattern.Add(40);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"instructions";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Comment";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(9, 2);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
 						bag->transitionItems.Add(item);
 					}
+					table->SetTransitionBag(15, 9, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=12;
-						item->targetState=4;
-						item->stackPattern.Add(1);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=1;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"instructions";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=40;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Comment";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 2);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(15, 10, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(12, 6);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Comment", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(15, 12, bag);
@@ -3904,43 +1140,203 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=8;
-						item->targetState=12;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Element";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(13, 5);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"CData", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(18, 8, bag);
+					table->SetTransitionBag(15, 13, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=11;
-						item->targetState=23;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Attribute";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"value";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(14, 2);
+						item->stackPattern.Add(26);
+						item->stackPattern.Add(16);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Using, 0, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"subNodes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(15, 14, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(5, 8);
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(16, 5, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(7, 7);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(16, 7, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(9, 2);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(16, 9, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 2);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(16, 10, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(12, 6);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Comment", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(16, 12, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(13, 5);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"CData", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(16, 13, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(14, 2);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 16, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(16, 14, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(9, 21);
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(17, 9, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(1, 22);
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(18, 1, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(3, 11);
+						item->stackPattern.Add(41);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 41, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"instructions", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 41, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(3, 11);
+						item->stackPattern.Add(28);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 28, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"instructions", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 41, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(18, 3, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(7, 7);
+						item->stackPattern.Add(41);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 41, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"instructions", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 41, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(7, 7);
+						item->stackPattern.Add(28);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 28, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"instructions", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 41, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(18, 7, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(12, 6);
+						item->stackPattern.Add(41);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 41, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"instructions", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 41, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Comment", L""));
+						bag->transitionItems.Add(item);
+					}
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(12, 6);
+						item->stackPattern.Add(28);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 28, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"instructions", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 41, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Comment", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(18, 12, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(11, 23);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Attribute", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"value", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(21, 11, bag);
@@ -3948,9 +1344,7 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=1;
-						item->targetState=24;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(1, 24);
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(23, 1, bag);
@@ -3958,34 +1352,11 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=4;
-						item->targetState=15;
-						item->stackPattern.Add(6);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=6;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"attributes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Instruction";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(4, 18);
+						item->stackPattern.Add(14);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 14, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"attributes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Instruction", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(23, 4, bag);
@@ -3993,34 +1364,11 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=6;
-						item->targetState=12;
-						item->stackPattern.Add(5);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=5;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"attributes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Element";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(6, 15);
+						item->stackPattern.Add(12);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 12, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"attributes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Element", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(23, 6, bag);
@@ -4028,26 +1376,10 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=8;
-						item->targetState=13;
-						item->stackPattern.Add(5);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=5;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"attributes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(8, 16);
+						item->stackPattern.Add(12);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 12, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"attributes", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(23, 8, bag);
@@ -4055,81 +1387,21 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=14;
-						item->stackPattern.Add(6);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=6;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"attributes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=6;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"name";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 17);
+						item->stackPattern.Add(14);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 14, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"attributes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 14, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"name", L""));
 						bag->transitionItems.Add(item);
 					}
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=14;
-						item->stackPattern.Add(5);
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce;
-							ins.stateParameter=5;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item;
-							ins.stateParameter=0;
-							ins.nameParameter=L"attributes";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=5;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"name";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 17);
+						item->stackPattern.Add(12);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Reduce, 12, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Item, 0, L"attributes", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 12, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"name", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(23, 10, bag);
@@ -4137,9 +1409,7 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=0;
-						item->targetState=26;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(0, 26);
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(25, 0, bag);
@@ -4147,9 +1417,8 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=7;
-						item->targetState=2;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(7, 7);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(26, 7, bag);
@@ -4157,9 +1426,62 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=0;
-						item->targetState=28;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(9, 2);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(26, 9, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 2);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(26, 10, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(12, 6);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Comment", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(26, 12, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(13, 5);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"CData", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(26, 13, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(14, 2);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 26, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Text", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(26, 14, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(0, 28);
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(27, 0, bag);
@@ -4167,35 +1489,36 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=13;
-						item->targetState=9;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"CData";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(3, 11);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 28, L"", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(28, 13, bag);
+					table->SetTransitionBag(28, 3, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=0;
-						item->targetState=30;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(7, 7);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 28, L"", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(28, 7, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(12, 6);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift, 28, L"", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Comment", L""));
+						bag->transitionItems.Add(item);
+					}
+					table->SetTransitionBag(28, 12, bag);
+				}
+				{
+					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
+					{
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(0, 30);
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(29, 0, bag);
@@ -4203,27 +1526,15 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=14;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"name";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(7, 7);
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(30, 10, bag);
+					table->SetTransitionBag(30, 7, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=0;
-						item->targetState=32;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(0, 32);
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(31, 0, bag);
@@ -4231,35 +1542,17 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=12;
-						item->targetState=4;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Comment";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(13, 5);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"CData", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(32, 12, bag);
+					table->SetTransitionBag(32, 13, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=0;
-						item->targetState=34;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(0, 34);
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(33, 0, bag);
@@ -4267,19 +1560,16 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=3;
-						item->targetState=3;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(10, 17);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"name", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(34, 3, bag);
+					table->SetTransitionBag(34, 10, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=0;
-						item->targetState=36;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(0, 36);
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(35, 0, bag);
@@ -4287,87 +1577,17 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=9;
-						item->targetState=8;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(12, 6);
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign, 0, L"content", L""));
+						item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create, 0, L"Comment", L""));
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(36, 9, bag);
+					table->SetTransitionBag(36, 12, bag);
 				}
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=8;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(36, 10, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=14;
-						item->targetState=8;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(36, 14, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=0;
-						item->targetState=38;
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(0, 38);
 						bag->transitionItems.Add(item);
 					}
 					table->SetTransitionBag(37, 0, bag);
@@ -4375,190 +1595,10 @@ Table Generation
 				{
 					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
 					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=7;
-						item->targetState=2;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
+						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(3, 11);
 						bag->transitionItems.Add(item);
 					}
-					table->SetTransitionBag(38, 7, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=9;
-						item->targetState=8;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(38, 9, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=10;
-						item->targetState=8;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(38, 10, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=12;
-						item->targetState=4;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Comment";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(38, 12, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=13;
-						item->targetState=9;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"CData";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(38, 13, bag);
-				}
-				{
-					vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;
-					{
-						vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;
-						item->token=14;
-						item->targetState=8;
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Shift;
-							ins.stateParameter=38;
-							ins.nameParameter=L"";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Assign;
-							ins.stateParameter=0;
-							ins.nameParameter=L"content";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						{
-							vl::parsing::tabling::ParsingTable::Instruction ins;
-							ins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::Create;
-							ins.stateParameter=0;
-							ins.nameParameter=L"Text";
-							ins.value=L"";
-							item->instructions.Add(ins);
-						}
-						bag->transitionItems.Add(item);
-					}
-					table->SetTransitionBag(38, 14, bag);
+					table->SetTransitionBag(38, 3, bag);
 				}
 				return table;
 			}
