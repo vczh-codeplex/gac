@@ -10,7 +10,7 @@ namespace vl
 Unescaping Function Foward Declarations
 ***********************************************************************/
 
-			extern void UnescapingString(vl::parsing::ParsingToken& value, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			extern void JsonUnescapingString(vl::parsing::ParsingToken& value, const vl::collections::List<vl::regex::RegexToken>& tokens);
 
 /***********************************************************************
 Parsing Tree Conversion Driver Implementation
@@ -48,7 +48,7 @@ Parsing Tree Conversion Driver Implementation
 				{
 					if(SetMember(tree->content, obj->GetMember(L"content"), tokens))
 					{
-						UnescapingString(tree->content, tokens);
+						JsonUnescapingString(tree->content, tokens);
 					}
 				}
 
@@ -66,7 +66,7 @@ Parsing Tree Conversion Driver Implementation
 				{
 					if(SetMember(tree->name, obj->GetMember(L"name"), tokens))
 					{
-						UnescapingString(tree->name, tokens);
+						JsonUnescapingString(tree->name, tokens);
 					}
 					SetMember(tree->value, obj->GetMember(L"value"), tokens);
 				}
@@ -225,7 +225,7 @@ Table Generation
 
 			vl::Ptr<vl::parsing::tabling::ParsingTable> JsonLoadTable()
 			{
-				vl::Ptr<vl::parsing::tabling::ParsingTable> table=new vl::parsing::tabling::ParsingTable(14-vl::parsing::tabling::ParsingTable::UserTokenStart, 0, 32, 6);
+				vl::Ptr<vl::parsing::tabling::ParsingTable> table=new vl::parsing::tabling::ParsingTable(14-vl::parsing::tabling::ParsingTable::UserTokenStart, 1, 32, 6);
 				table->SetTokenInfo(0, vl::parsing::tabling::ParsingTable::TokenInfo(L"", L""));
 				table->SetTokenInfo(1, vl::parsing::tabling::ParsingTable::TokenInfo(L"", L""));
 				table->SetTokenInfo(2, vl::parsing::tabling::ParsingTable::TokenInfo(L"", L""));
@@ -240,6 +240,7 @@ Table Generation
 				table->SetTokenInfo(11, vl::parsing::tabling::ParsingTable::TokenInfo(L"COLON", L":"));
 				table->SetTokenInfo(12, vl::parsing::tabling::ParsingTable::TokenInfo(L"NUMBER", L"[\\-]?\\d+.\\d+([eE][+\\-]?\\d+)?"));
 				table->SetTokenInfo(13, vl::parsing::tabling::ParsingTable::TokenInfo(L"STRING", L"\"([^\\\\\"]|\\\\[^u]|\\\\u\\d{4})*\""));
+				table->SetDiscardTokenInfo(0, vl::parsing::tabling::ParsingTable::TokenInfo(L"SPACE", L"\\s+"));
 				table->SetStateInfo(0, vl::parsing::tabling::ParsingTable::StateInfo(L"JLiteral", L"JLiteral.RootStart", L"¡ñ $<JLiteral>"));
 				table->SetStateInfo(1, vl::parsing::tabling::ParsingTable::StateInfo(L"JLiteral", L"JLiteral.Start", L"¡¤ <JLiteral>"));
 				table->SetStateInfo(2, vl::parsing::tabling::ParsingTable::StateInfo(L"JLiteral", L"JLiteral.1", L"<JLiteral>: STRING : content as String¡ñ\r\n<JLiteral>: NUMBER : content as Number¡ñ\r\n<JLiteral>: \"true\" as Literal with { value = \"True\" }¡ñ\r\n<JLiteral>: \"false\" as Literal with { value = \"False\" }¡ñ\r\n<JLiteral>: \"null\" as Literal with { value = \"Null\" }¡ñ"));

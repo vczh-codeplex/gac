@@ -8,6 +8,8 @@
 #include "..\..\Source\Collections\Operation.h"
 #include "..\..\Source\Parsing\ParsingAutomaton.h"
 #include "..\..\Source\Parsing\Parsing.h"
+#include "..\..\Source\Parsing\Xml\ParsingXml.h"
+#include "..\..\Source\Parsing\Json\ParsingJson.h"
 #include "Parser.Calculator\Parser.Calculator.h"
 
 using namespace vl;
@@ -18,6 +20,8 @@ using namespace vl::parsing;
 using namespace vl::parsing::definitions;
 using namespace vl::parsing::analyzing;
 using namespace vl::parsing::tabling;
+using namespace vl::parsing::xml;
+using namespace vl::parsing::json;
 using namespace test::parser;
 
 extern WString GetPath();
@@ -844,4 +848,44 @@ TEST_CASE(TestGeneratedParser_Calculator)
 	CalExpressionEvaluationVisitor visitor;
 	exp->Accept(&visitor);
 	TEST_ASSERT(visitor.result==21);
+}
+
+namespace test
+{
+	template<typename T>
+	void TestGeneratedParser(
+		const wchar_t* input[],
+		const wchar_t* output[],
+		vint count,
+		Ptr<ParsingTable> table,
+		Ptr<T>(*deserializer)(const WString&, Ptr<ParsingTable>),
+		WString(*serializer)(Ptr<T>)
+		)
+	{
+		for(vint i=0;i<count;i++)
+		{
+			Ptr<T> node=deserializer(input[i], table);
+			WString text=serializer(node);
+			TEST_ASSERT(text==output[i]);
+		}
+	}
+}
+using namespace test;
+
+TEST_CASE(TestGeneratedParser_Json)
+{
+	const wchar_t* input[]=
+	{
+		L"{ }",
+	};
+	const wchar_t* output[]=
+	{
+		L"{}",
+	};
+	Ptr<ParsingTable> table=JsonLoadTable();
+	TestGeneratedParser(input, output, sizeof(input)/sizeof(*input), table, &JsonParse, &JsonToString);
+}
+
+TEST_CASE(TestGeneratedParser_Xml)
+{
 }
