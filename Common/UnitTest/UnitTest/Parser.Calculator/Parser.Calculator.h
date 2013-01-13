@@ -22,7 +22,7 @@ namespace test
 		public:
 			class IVisitor : public vl::Interface
 			{
-				public:
+			public:
 				virtual void Visit(CalNumberExpression* node)=0;
 				virtual void Visit(CalBinaryExpression* node)=0;
 				virtual void Visit(CalFunctionExpression* node)=0;

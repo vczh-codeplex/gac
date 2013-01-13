@@ -1,4 +1,5 @@
 #include <string.h>
+#include "..\..\Source\Exception.h"
 #include "..\..\Source\UnitTest\UnitTest.h"
 #include "..\..\Source\Stream\FileStream.h"
 #include "..\..\Source\Stream\MemoryStream.h"
@@ -788,8 +789,59 @@ TEST_CASE(TestAutoRecoverParser)
 	ParseWithAutoRecover(definition, L"Calculator", L"Exp", inputs);
 }
 
+namespace test
+{
+	class CalExpressionEvaluationVisitor : public Object, public CalExpression::IVisitor
+	{
+	public:
+		vint result;
+
+		void Visit(CalNumberExpression* node)override
+		{
+			result=wtoi(node->value.value);
+		}
+
+		void Visit(CalBinaryExpression* node)override
+		{
+			node->firstOperand->Accept(this);
+			vint a=result;
+			node->secondOperand->Accept(this);
+			vint b=result;
+			switch(node->binaryOperator)
+			{
+			case CalBinaryExpression::CalBinaryOperator::Add:
+				result=a+b;
+				break;
+			case CalBinaryExpression::CalBinaryOperator::Sub:
+				result=a-b;
+				break;
+			case CalBinaryExpression::CalBinaryOperator::Mul:
+				result=a*b;
+				break;
+			case CalBinaryExpression::CalBinaryOperator::Div:
+				result=a/b;
+				break;
+			default:
+			throw Exception(L"Unknown operator.");
+			}
+		}
+
+		void Visit(CalFunctionExpression* node)override
+		{
+			throw Exception(L"Function calling is not supported.");
+		}
+	};
+}
+using namespace test;
+
 TEST_CASE(TestGeneratedParser_Calculator)
 {
 	Ptr<ParsingTable> table=CalLoadTable();
+	TEST_ASSERT(table);
 	Ptr<CalExpression> exp=CalParseExpression(L"(1+2)*(3+4)", table);
+	TEST_ASSERT(exp);
+
+	CalExpressionEvaluationVisitor visitor;
+	exp->Accept(&visitor);
+	TEST_ASSERT(visitor.result==21);
 }
