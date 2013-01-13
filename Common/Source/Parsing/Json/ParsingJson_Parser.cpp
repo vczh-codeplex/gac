@@ -238,7 +238,7 @@ Table Generation
 				table->SetTokenInfo(9, vl::parsing::tabling::ParsingTable::TokenInfo(L"ARRCLOSE", L"\\]"));
 				table->SetTokenInfo(10, vl::parsing::tabling::ParsingTable::TokenInfo(L"COMMA", L","));
 				table->SetTokenInfo(11, vl::parsing::tabling::ParsingTable::TokenInfo(L"COLON", L":"));
-				table->SetTokenInfo(12, vl::parsing::tabling::ParsingTable::TokenInfo(L"NUMBER", L"[\\-]?\\d+.\\d+([eE][+\\-]?\\d+)?"));
+				table->SetTokenInfo(12, vl::parsing::tabling::ParsingTable::TokenInfo(L"NUMBER", L"[\\-]?\\d+(.\\d+)?([eE][+\\-]?\\d+)?"));
 				table->SetTokenInfo(13, vl::parsing::tabling::ParsingTable::TokenInfo(L"STRING", L"\"([^\\\\\"]|\\\\[^u]|\\\\u\\d{4})*\""));
 				table->SetDiscardTokenInfo(0, vl::parsing::tabling::ParsingTable::TokenInfo(L"SPACE", L"\\s+"));
 				table->SetStateInfo(0, vl::parsing::tabling::ParsingTable::StateInfo(L"JLiteral", L"JLiteral.RootStart", L"¡ñ $<JLiteral>"));
