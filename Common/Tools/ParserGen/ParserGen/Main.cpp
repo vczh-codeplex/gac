@@ -965,6 +965,38 @@ void WriteNodeConverterClassImpl(Ptr<ParsingDefinition> definition, ParsingSymbo
 Parsing Table Generation
 ***********************************************************************/
 
+void WriteCppString(const WString& text, TextWriter& writer)
+{
+	writer.WriteString(L"L\"");
+	for(vint i=0;i<text.Length();i++)
+	{
+		switch(text[i])
+		{
+		case L'\r':
+			writer.WriteString(L"\\r");
+			break;
+		case L'\n':
+			writer.WriteString(L"\\n");
+			break;
+		case L'\t':
+			writer.WriteString(L"\\t");
+			break;
+		case L'\\':
+			writer.WriteString(L"\\\\");
+			break;
+		case L'\'':
+			writer.WriteString(L"\\\'");
+			break;
+		case L'\"':
+			writer.WriteString(L"\\\"");
+			break;
+		default:
+			writer.WriteChar(text[i]);
+		}
+	}
+	writer.WriteString(L"\"");
+}
+
 void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
 {
 	writer.WriteString(prefix);
@@ -973,8 +1005,135 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 	writer.WriteLine(L"LoadTable()");
 	writer.WriteString(prefix);
 	writer.WriteLine(L"{");
+
 	writer.WriteString(prefix);
-	writer.WriteLine(L"\treturn 0;");
+	writer.WriteString(L"\tvl::Ptr<vl::parsing::tabling::ParsingTable> table=new vl::parsing::tabling::ParsingTable(");
+	writer.WriteString(itow(table->GetTokenCount()));
+	writer.WriteString(L"-vl::parsing::tablingParsingTable::UserTokenStart, ");
+	writer.WriteString(itow(table->GetDiscardTokenCount()));
+	writer.WriteString(L", ");
+	writer.WriteString(itow(table->GetStateCount()));
+	writer.WriteString(L", ");
+	writer.WriteString(itow(table->GetRuleCount()));
+	writer.WriteLine(L");");
+
+	for(vint i=0;i<table->GetTokenCount();i++)
+	{
+		const ParsingTable::TokenInfo& info=table->GetTokenInfo(i);
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t{");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t\tvl::parsing::tabling::ParsingTable::TokenInfo info;");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\tinfo.name=");
+		WriteCppString(info.name, writer);
+		writer.WriteLine(L";");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\tinfo.regex=");
+		WriteCppString(info.regex, writer);
+		writer.WriteLine(L";");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\ttable->SetTokenInfo(");
+		writer.WriteString(itow(i));
+		writer.WriteLine(L", info);");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t}");
+	}
+
+	for(vint i=0;i<table->GetDiscardTokenCount();i++)
+	{
+		const ParsingTable::TokenInfo& info=table->GetDiscardTokenInfo(i);
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t{");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t\tvl::parsing::tabling::ParsingTable::TokenInfo info;");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\tinfo.name=");
+		WriteCppString(info.name, writer);
+		writer.WriteLine(L";");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\tinfo.regex=");
+		WriteCppString(info.regex, writer);
+		writer.WriteLine(L";");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\ttable->SetDiscardTokenInfo(");
+		writer.WriteString(itow(i));
+		writer.WriteLine(L", info);");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t}");
+	}
+
+	for(vint i=0;i<table->GetStateCount();i++)
+	{
+		const ParsingTable::StateInfo& info=table->GetStateInfo(i);
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t{");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t\tvl::parsing::tabling::ParsingTable::StateInfo info;");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\tinfo.ruleName=");
+		WriteCppString(info.ruleName, writer);
+		writer.WriteLine(L";");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\tinfo.stateName=");
+		WriteCppString(info.stateName, writer);
+		writer.WriteLine(L";");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\tinfo.stateExpression=");
+		WriteCppString(info.stateExpression, writer);
+		writer.WriteLine(L";");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\ttable->SetStateInfo(");
+		writer.WriteString(itow(i));
+		writer.WriteLine(L", info);");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t}");
+	}
+
+	for(vint i=0;i<table->GetRuleCount();i++)
+	{
+		const ParsingTable::RuleInfo& info=table->GetRuleInfo(i);
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t{");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t\tvl::parsing::tabling::ParsingTable::RuleInfo info;");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\tinfo.name=");
+		WriteCppString(info.name, writer);
+		writer.WriteLine(L";");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\tinfo.type=");
+		WriteCppString(info.type, writer);
+		writer.WriteLine(L";");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\tinfo.rootStartState=");
+		writer.WriteString(itow(info.rootStartState));
+		writer.WriteLine(L";");
+
+		writer.WriteString(prefix);
+		writer.WriteString(L"\t\ttable->SetRuleInfo(");
+		writer.WriteString(itow(i));
+		writer.WriteLine(L", info);");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"\t}");
+	}
+
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\treturn table;");
+
 	writer.WriteString(prefix);
 	writer.WriteLine(L"}");
 	writer.WriteLine(L"");
@@ -1068,16 +1227,16 @@ void WriteCppFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<Pa
 	WriteVisitorImpl(&manager, manager.GetGlobal(), prefix, codeClassPrefix, writer);
 
 	writer.WriteLine(L"/***********************************************************************");
-	writer.WriteLine(L"Table Generation");
+	writer.WriteLine(L"Parser Function");
 	writer.WriteLine(L"***********************************************************************/");
 	writer.WriteLine(L"");
-	WriteTable(table, prefix, codeClassPrefix, writer);
+	WriteParserFunctions(&manager, prefix, codeClassPrefix, codeParsers, writer);
 
 	writer.WriteLine(L"/***********************************************************************");
 	writer.WriteLine(L"Table Generation");
 	writer.WriteLine(L"***********************************************************************/");
 	writer.WriteLine(L"");
-	WriteParserFunctions(&manager, prefix, codeClassPrefix, codeParsers, writer);
+	WriteTable(table, prefix, codeClassPrefix, writer);
 
 	WriteFileEnd(codeNamespaces, writer);
 }
