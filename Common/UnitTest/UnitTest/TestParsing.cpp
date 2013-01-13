@@ -872,6 +872,11 @@ namespace test
 			TEST_ASSERT(text==output[i]);
 		}
 	}
+
+	WString XmlDocumentToString(Ptr<XmlDocument> doc)
+	{
+		return XmlToString(doc);
+	}
 }
 using namespace test;
 
@@ -903,4 +908,14 @@ TEST_CASE(TestGeneratedParser_Json)
 
 TEST_CASE(TestGeneratedParser_Xml)
 {
+	const wchar_t* input[]=
+	{
+		L"<name />",
+	};
+	const wchar_t* output[]=
+	{
+		L"<name/>",
+	};
+	Ptr<ParsingTable> table=XmlLoadTable();
+	TestGeneratedParser(input, output, sizeof(input)/sizeof(*input), table, L"Xml", L"XDocument", &XmlParseDocument, &XmlDocumentToString);
 }

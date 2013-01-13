@@ -40,7 +40,7 @@ Unescaping Function Foward Declarations
 						vint tokenEnd=value[end].Cast<XmlText>()->content.tokenIndex;
 						while(tokenBegin>0)
 						{
-							if(tokens.Get(tokenBegin).token==XmlParserTokenIndex::SPACE || tokens.Get(tokenBegin).token==-1)
+							if(tokens.Get(tokenBegin-1).token==XmlParserTokenIndex::SPACE || tokens.Get(tokenBegin-1).token==-1)
 							{
 								tokenBegin--;
 							}
@@ -51,7 +51,7 @@ Unescaping Function Foward Declarations
 						}
 						while(tokenEnd<tokens.Count()-1)
 						{
-							if(tokens.Get(tokenEnd).token==XmlParserTokenIndex::SPACE || tokens.Get(tokenEnd).token==-1)
+							if(tokens.Get(tokenEnd+1).token==XmlParserTokenIndex::SPACE || tokens.Get(tokenEnd+1).token==-1)
 							{
 								tokenEnd++;
 							}
