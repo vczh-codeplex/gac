@@ -190,6 +190,7 @@
     <ClCompile Include="..\..\Source\Threading.cpp" />
     <ClCompile Include="..\..\Source\UnitTest\UnitTest.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Parser.Calculator\Parser.Calculator.cpp" />
     <ClCompile Include="TestBasic.cpp" />
     <ClCompile Include="TestCombinator.cpp" />
     <ClCompile Include="TestFunction.cpp" />
@@ -272,6 +273,7 @@
     <ClInclude Include="..\..\Source\Threading.h" />
     <ClInclude Include="..\..\Source\Tuple.h" />
     <ClInclude Include="..\..\Source\UnitTest\UnitTest.h" />
+    <ClInclude Include="Parser.Calculator\Parser.Calculator.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Common.fpm" />
@@ -279,6 +281,10 @@
     <None Include="..\..\Source\Function.h.fpm" />
     <None Include="..\..\Source\GenerateCode.bat" />
     <None Include="..\..\Source\Tuple.h.fpm" />
+    <None Include="Parser.Calculator\Codegen.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Parser.Calculator\Parser.Calculator.parser.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

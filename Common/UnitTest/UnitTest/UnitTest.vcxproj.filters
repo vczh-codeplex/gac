@@ -40,6 +40,9 @@
     <Filter Include="Common\Parsing">
       <UniqueIdentifier>{8aafff42-d00d-4e55-8817-bb4b04359fe0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Parser.Calculator">
+      <UniqueIdentifier>{fa5e8885-6899-4ec0-9aad-edce47642ea7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Basic.cpp">
@@ -200,6 +203,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Parsing\ParsingState.cpp">
       <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser.Calculator\Parser.Calculator.cpp">
+      <Filter>Parser.Calculator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -413,6 +419,9 @@
     <ClInclude Include="..\..\Source\Parsing\ParsingState.h">
       <Filter>Common\Parsing</Filter>
     </ClInclude>
+    <ClInclude Include="Parser.Calculator\Parser.Calculator.h">
+      <Filter>Parser.Calculator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Common.fpm">
@@ -430,5 +439,13 @@
     <None Include="..\..\Source\Tuple.h.fpm">
       <Filter>Common\Basic</Filter>
     </None>
+    <None Include="Parser.Calculator\Codegen.bat">
+      <Filter>Parser.Calculator</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Parser.Calculator\Parser.Calculator.parser.txt">
+      <Filter>Parser.Calculator</Filter>
+    </Text>
   </ItemGroup>
 </Project>
