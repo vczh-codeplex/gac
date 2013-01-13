@@ -885,6 +885,7 @@ TEST_CASE(TestGeneratedParser_Json)
 		L"[ 1 , 2 ]",
 		L"[ true, false, null, 1, \"abc\" ]",
 		L"[ \"\\b\\f\\n\\r\\t\\\\\\\"abc\\u0041\\u0039\" ]",
+		L"{ \"name\" : \"vczh\", \"scores\" : [100, 90, 80, {\"a\":\"b\"}], \"IDE\":{\"VC++\":\"Microsoft\"} }",
 	};
 	const wchar_t* output[]=
 	{
@@ -894,6 +895,7 @@ TEST_CASE(TestGeneratedParser_Json)
 		L"[1,2]",
 		L"[true,false,null,1,\"abc\"]",
 		L"[\"\\b\\f\\n\\r\\t\\\\\\\"abcA9\"]",
+		L"{\"name\":\"vczh\",\"scores\":[100,90,80,{\"a\":\"b\"}],\"IDE\":{\"VC++\":\"Microsoft\"}}",
 	};
 	Ptr<ParsingTable> table=JsonLoadTable();
 	TestGeneratedParser(input, output, sizeof(input)/sizeof(*input), table, L"Json", L"JRoot", &JsonParse, &JsonToString);
