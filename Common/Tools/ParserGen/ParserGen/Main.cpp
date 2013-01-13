@@ -1009,7 +1009,7 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 	writer.WriteString(prefix);
 	writer.WriteString(L"\tvl::Ptr<vl::parsing::tabling::ParsingTable> table=new vl::parsing::tabling::ParsingTable(");
 	writer.WriteString(itow(table->GetTokenCount()));
-	writer.WriteString(L"-vl::parsing::tablingParsingTable::UserTokenStart, ");
+	writer.WriteString(L"-vl::parsing::tabling::ParsingTable::UserTokenStart, ");
 	writer.WriteString(itow(table->GetDiscardTokenCount()));
 	writer.WriteString(L", ");
 	writer.WriteString(itow(table->GetStateCount()));
@@ -1129,6 +1129,119 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 		writer.WriteLine(L", info);");
 		writer.WriteString(prefix);
 		writer.WriteLine(L"\t}");
+	}
+
+	for(vint i=0;i<table->GetStateCount();i++)
+	{
+		for(vint j=0;j<table->GetTokenCount();j++)
+		{
+			Ptr<ParsingTable::TransitionBag> bag=table->GetTransitionBag(i, j);
+			if(bag)
+			{
+				writer.WriteString(prefix);
+				writer.WriteLine(L"\t{");
+				writer.WriteString(prefix);
+				writer.WriteLine(L"\t\tvl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;");
+				for(vint k=0;k<bag->transitionItems.Count();k++)
+				{
+					Ptr<ParsingTable::TransitionItem> item=bag->transitionItems[k];
+					writer.WriteString(prefix);
+					writer.WriteLine(L"\t\t{");
+					writer.WriteString(prefix);
+					writer.WriteLine(L"\t\t\tvl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem;");
+
+					writer.WriteString(prefix);
+					writer.WriteString(L"\t\t\titem->token=");
+					writer.WriteString(itow(item->token));
+					writer.WriteLine(L";");
+
+					writer.WriteString(prefix);
+					writer.WriteString(L"\t\t\titem->targetState=");
+					writer.WriteString(itow(item->targetState));
+					writer.WriteLine(L";");
+
+					FOREACH(int, state, item->stackPattern)
+					{
+						writer.WriteString(prefix);
+						writer.WriteString(L"\t\t\titem->stackPattern.Add(");
+						writer.WriteString(itow(state));
+						writer.WriteLine(L");");
+					}
+
+					FOREACH(ParsingTable::Instruction, ins, item->instructions)
+					{
+						writer.WriteString(prefix);
+						writer.WriteLine(L"\t\t\t{");
+						writer.WriteString(prefix);
+						writer.WriteLine(L"\t\t\t\tvl::parsing::tabling::ParsingTable::Instruction ins;");
+
+						writer.WriteString(prefix);
+						writer.WriteString(L"\t\t\t\tins.instructionType=vl::parsing::tabling::ParsingTable::Instruction::InstructionType::");
+						switch(ins.instructionType)
+						{
+						case ParsingTable::Instruction::Create:
+							writer.WriteString(L"Create");
+							break;
+						case ParsingTable::Instruction::Assign:
+							writer.WriteString(L"Assign");
+							break;
+						case ParsingTable::Instruction::Item:
+							writer.WriteString(L"Item");
+							break;
+						case ParsingTable::Instruction::Using:
+							writer.WriteString(L"Using");
+							break;
+						case ParsingTable::Instruction::Setter:
+							writer.WriteString(L"Setter");
+							break;
+						case ParsingTable::Instruction::Shift:
+							writer.WriteString(L"Shift");
+							break;
+						case ParsingTable::Instruction::Reduce:
+							writer.WriteString(L"Reduce");
+							break;
+						case ParsingTable::Instruction::LeftRecursiveReduce:
+							writer.WriteString(L"LeftRecursiveReduce");
+							break;
+						}
+						writer.WriteLine(L";");
+
+						writer.WriteString(prefix);
+						writer.WriteString(L"\t\t\t\tins.stateParameter=");
+						writer.WriteString(itow(ins.stateParameter));
+						writer.WriteLine(L";");
+
+						writer.WriteString(prefix);
+						writer.WriteString(L"\t\t\t\tins.nameParameter=");
+						WriteCppString(ins.nameParameter, writer);
+						writer.WriteLine(L";");
+
+						writer.WriteString(prefix);
+						writer.WriteString(L"\t\t\t\tins.value=");
+						WriteCppString(ins.value, writer);
+						writer.WriteLine(L";");
+
+						writer.WriteString(prefix);
+						writer.WriteLine(L"\t\t\t\titem->instructions.Add(ins);");
+						writer.WriteString(prefix);
+						writer.WriteLine(L"\t\t\t}");
+					}
+
+					writer.WriteString(prefix);
+					writer.WriteLine(L"\t\t\tbag->transitionItems.Add(item);");
+					writer.WriteString(prefix);
+					writer.WriteLine(L"\t\t}");
+				}
+				writer.WriteString(prefix);
+				writer.WriteString(L"\t\ttable->SetTransitionBag(");
+				writer.WriteString(itow(i));
+				writer.WriteString(L", ");
+				writer.WriteString(itow(j));
+				writer.WriteLine(L", bag);");
+				writer.WriteString(prefix);
+				writer.WriteLine(L"\t}");
+			}
+		}
 	}
 
 	writer.WriteString(prefix);
