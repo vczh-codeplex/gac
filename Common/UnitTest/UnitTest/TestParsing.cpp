@@ -5,9 +5,9 @@
 #include "..\..\Source\Stream\Accessor.h"
 #include "..\..\Source\Stream\CharFormat.h"
 #include "..\..\Source\Collections\Operation.h"
-
 #include "..\..\Source\Parsing\ParsingAutomaton.h"
 #include "..\..\Source\Parsing\Parsing.h"
+#include "Parser.Calculator\Parser.Calculator.h"
 
 using namespace vl;
 using namespace vl::stream;
@@ -17,6 +17,7 @@ using namespace vl::parsing;
 using namespace vl::parsing::definitions;
 using namespace vl::parsing::analyzing;
 using namespace vl::parsing::tabling;
+using namespace test::parser;
 
 extern WString GetPath();
 
@@ -785,4 +786,10 @@ TEST_CASE(TestAutoRecoverParser)
 	inputs.Add(L"(1 2+3");
 	inputs.Add(L"()");
 	ParseWithAutoRecover(definition, L"Calculator", L"Exp", inputs);
+}
+
+TEST_CASE(TestGeneratedParser_Calculator)
+{
+	Ptr<ParsingTable> table=CalLoadTable();
+	Ptr<CalExpression> exp=CalParseExpression(L"(1+2)*(3+4)", table);
 }
