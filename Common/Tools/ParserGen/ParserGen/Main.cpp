@@ -523,7 +523,7 @@ void PrintTypeDefinitions(List<Ptr<ParsingDefinitionTypeDefinition>>& types, con
 	}
 }
 
-void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, List<WString>& codeIncludes, List<WString>& codeNamespaces, const WString& codeClassPrefix, const Dictionary<WString, WString>& codeParsers, StreamWriter& writer)
+void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, List<WString>& codeIncludes, List<WString>& codeNamespaces, const WString& codeClassPrefix, const Dictionary<WString, WString>& codeParsers, StreamWriter& writer)
 {
 	WriteFileComment(name, writer);
 	WString prefix=WriteFileBegin(codeIncludes, codeNamespaces, writer);
@@ -532,6 +532,42 @@ void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Lis
 	{
 		List<Ptr<ParsingError>> errors;
 		ValidateDefinition(definition, &manager, errors);
+	}
+	{
+		writer.WriteString(prefix);
+		writer.WriteString(L"struct ");
+		writer.WriteString(codeClassPrefix);
+		writer.WriteLine(L"ParserTokenIndex abstract");
+		writer.WriteString(prefix);
+		writer.WriteLine(L"{");
+		for(vint i=0;i<table->GetTokenCount();i++)
+		{
+			const ParsingTable::TokenInfo& info=table->GetTokenInfo(i);
+			if(info.regexTokenIndex!=-1)
+			{
+				writer.WriteString(prefix);
+				writer.WriteString(L"\tstatic const vl::vint ");
+				writer.WriteString(info.name);
+				writer.WriteString(L" = ");
+				writer.WriteString(itow(info.regexTokenIndex));
+				writer.WriteLine(L";");
+			}
+		}
+		for(vint i=0;i<table->GetDiscardTokenCount();i++)
+		{
+			const ParsingTable::TokenInfo& info=table->GetDiscardTokenInfo(i);
+			if(info.regexTokenIndex!=-1)
+			{
+				writer.WriteString(prefix);
+				writer.WriteString(L"\tstatic const vl::vint ");
+				writer.WriteString(info.name);
+				writer.WriteString(L" = ");
+				writer.WriteString(itow(info.regexTokenIndex));
+				writer.WriteLine(L";");
+			}
+		}
+		writer.WriteString(prefix);
+		writer.WriteLine(L"};");
 	}
 	PrintTypeDefinitions(definition->types, prefix, 0, &manager, codeClassPrefix, writer);
 
@@ -1446,7 +1482,7 @@ int wmain(int argc, wchar_t* argv[])
 				BomEncoder encoder(BomEncoder::Mbcs);
 				EncoderStream encoderStream(fileStream, encoder);
 				StreamWriter writer(encoderStream);
-				WriteHeaderFile(name, definition, codeIncludes, codeNamespaces, codeClassPrefix, codeParsers, writer);
+				WriteHeaderFile(name, definition, table, codeIncludes, codeNamespaces, codeClassPrefix, codeParsers, writer);
 			}
 			{
 				FileStream fileStream(outputCppPath, FileStream::WriteOnly);

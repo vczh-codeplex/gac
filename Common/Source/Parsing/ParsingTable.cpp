@@ -209,6 +209,16 @@ ParsingTable
 				{
 					tokens.Add(info.regex);
 				}
+
+				vint regexTokenIndex=0;
+				for(vint i=UserTokenStart;i<tokenInfos.Count();i++)
+				{
+					tokenInfos[i].regexTokenIndex=regexTokenIndex++;
+				}
+				for(vint i=0;i<discardTokenInfos.Count();i++)
+				{
+					discardTokenInfos[i].regexTokenIndex=regexTokenIndex++;
+				}
 				lexer=new RegexLexer(tokens);
 			}
 

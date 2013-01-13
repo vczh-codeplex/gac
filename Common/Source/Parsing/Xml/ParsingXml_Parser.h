@@ -14,6 +14,22 @@ namespace vl
 	{
 		namespace xml
 		{
+			struct XmlParserTokenIndex abstract
+			{
+				static const vl::vint INSTRUCTION_OPEN = 0;
+				static const vl::vint INSTRUCTION_CLOSE = 1;
+				static const vl::vint COMPLEX_ELEMENT_OPEN = 2;
+				static const vl::vint SINGLE_ELEMENT_CLOSE = 3;
+				static const vl::vint ELEMENT_OPEN = 4;
+				static const vl::vint ELEMENT_CLOSE = 5;
+				static const vl::vint EQUAL = 6;
+				static const vl::vint NAME = 7;
+				static const vl::vint ATTVALUE = 8;
+				static const vl::vint COMMENT = 9;
+				static const vl::vint CDATA = 10;
+				static const vl::vint TEXT = 11;
+				static const vl::vint SPACE = 12;
+			};
 			class XmlNode;
 			class XmlText;
 			class XmlCData;

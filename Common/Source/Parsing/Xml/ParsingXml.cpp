@@ -10,6 +10,7 @@ namespace vl
 		{
 			using namespace stream;
 			using namespace collections;
+			using namespace regex;
 
 /***********************************************************************
 Unescaping Function Foward Declarations
@@ -17,11 +18,73 @@ Unescaping Function Foward Declarations
 
 			void XmlMergeTextFragment(vl::collections::List<vl::Ptr<XmlNode>>& value, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
+				vint begin=-1;
+				vint end=-1;
+				for(vint i=value.Count()-1;i>=-1;i--)
+				{
+					if(i==-1)
+					{
+						if(end!=-1) begin=0;
+					}
+					else if(value[i].Cast<XmlText>())
+					{
+						if(end==-1) end=i;
+					}
+					else
+					{
+						if(end!=-1) begin=i+1;
+					}
+					if(begin!=-1 && end!=-1)
+					{
+						vint tokenBegin=value[begin].Cast<XmlText>()->content.tokenIndex;
+						vint tokenEnd=value[end].Cast<XmlText>()->content.tokenIndex;
+						while(tokenBegin>0)
+						{
+							if(tokens.Get(tokenBegin).token==XmlParserTokenIndex::SPACE || tokens.Get(tokenBegin).token==-1)
+							{
+								tokenBegin--;
+							}
+							else
+							{
+								break;
+							}
+						}
+						while(tokenEnd<tokens.Count()-1)
+						{
+							if(tokens.Get(tokenEnd).token==XmlParserTokenIndex::SPACE || tokens.Get(tokenEnd).token==-1)
+							{
+								tokenEnd++;
+							}
+							else
+							{
+								break;
+							}
+						}
+
+						const RegexToken& beginToken=tokens.Get(tokenBegin);
+						const RegexToken& endToken=tokens.Get(tokenEnd);
+						const wchar_t* textBegin=beginToken.reading;
+						const wchar_t* textEnd=endToken.reading+endToken.length;
+						WString text(textBegin, textEnd-textBegin);
+						ParsingTextRange range(&beginToken, &endToken);
+
+						Ptr<XmlText> xmlText=new XmlText;
+						xmlText->codeRange=range;
+						xmlText->content.codeRange=range;
+						xmlText->content.value=XmlUnescapeValue(text);
+
+						value.RemoveRange(begin, end-begin+1);
+						value.Insert(begin, xmlText);
+
+						begin=-1;
+						end=-1;
+					}
+				}
 			}
 
 			void XmlUnescapeAttributeValue(vl::parsing::ParsingToken& value, const vl::collections::List<vl::regex::RegexToken>& tokens)
 			{
-				value.value=XmlUnescapeValue(value.value);
+				value.value=XmlUnescapeValue(value.value.Sub(1, value.value.Length()-2));
 			}
 
 			void XmlUnescapeCData(vl::parsing::ParsingToken& value, const vl::collections::List<vl::regex::RegexToken>& tokens)
