@@ -378,7 +378,7 @@ public:
 			writer.WriteString(prefix);
 			writer.WriteLine(L"\t{");
 			writer.WriteString(prefix);
-			writer.WriteLine(L"\t\tpublic:");
+			writer.WriteLine(L"\tpublic:");
 
 			FOREACH(ParsingSymbol*, child, children)
 			{
@@ -1161,7 +1161,9 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 			}
 		}
 	}
-
+	
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\ttable->Initialize();");
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\treturn table;");
 
@@ -1208,7 +1210,9 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 			writer.WriteString(prefix);
 			writer.WriteLine(L"\t{");
 			writer.WriteString(prefix);
-			writer.WriteString(L"\t\treturn XmlConvertParsingTreeNode(node, state.GetTokens()).Cast<");
+			writer.WriteString(L"\t\treturn ");
+			writer.WriteString(codeClassPrefix);
+			writer.WriteString(L"ConvertParsingTreeNode(node, state.GetTokens()).Cast<");
 			PrintType(type, codeClassPrefix, writer);
 			writer.WriteLine(L">();");
 			writer.WriteString(prefix);
