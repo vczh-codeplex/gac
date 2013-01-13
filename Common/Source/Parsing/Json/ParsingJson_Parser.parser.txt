@@ -55,7 +55,7 @@ token ARROPEN = "\[";
 token ARRCLOSE = "\]";
 token COMMA = ",";
 token COLON = ":";
-token NUMBER = "[\-]?\d+.\d+([eE][+\-]?\d+)?";
+token NUMBER = "[\-]?\d+(.\d+)?([eE][+\-]?\d+)?";
 token STRING = """([^\\""]|\\[^u]|\\u\d{4})*""";
 
 discardtoken SPACE = "\s+";

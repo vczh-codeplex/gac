@@ -858,12 +858,15 @@ namespace test
 		const wchar_t* output[],
 		vint count,
 		Ptr<ParsingTable> table,
+		const WString& name,
+		const WString& rule,
 		Ptr<T>(*deserializer)(const WString&, Ptr<ParsingTable>),
 		WString(*serializer)(Ptr<T>)
 		)
 	{
 		for(vint i=0;i<count;i++)
 		{
+			Parse(table, input[i], name, rule, i, true);
 			Ptr<T> node=deserializer(input[i], table);
 			WString text=serializer(node);
 			TEST_ASSERT(text==output[i]);
@@ -877,13 +880,23 @@ TEST_CASE(TestGeneratedParser_Json)
 	const wchar_t* input[]=
 	{
 		L"{ }",
+		L"[ ]",
+		L"[ 1 ]",
+		L"[ 1 , 2 ]",
+		L"[ true, false, null, 1, \"abc\" ]",
+		L"[ \"\\b\\f\\n\\r\\t\\\\\\\"abc\\u0041\\u0039\" ]",
 	};
 	const wchar_t* output[]=
 	{
 		L"{}",
+		L"[]",
+		L"[1]",
+		L"[1,2]",
+		L"[true,false,null,1,\"abc\"]",
+		L"[\"\\b\\f\\n\\r\\t\\\\\\\"abcA9\"]",
 	};
 	Ptr<ParsingTable> table=JsonLoadTable();
-	TestGeneratedParser(input, output, sizeof(input)/sizeof(*input), table, &JsonParse, &JsonToString);
+	TestGeneratedParser(input, output, sizeof(input)/sizeof(*input), table, L"Json", L"JRoot", &JsonParse, &JsonToString);
 }
 
 TEST_CASE(TestGeneratedParser_Xml)

@@ -325,6 +325,7 @@ namespace vl
 					member.tokenIndex=token->GetTokenIndex();
 					member.value=token->GetValue();
 					member.codeRange=token->GetCodeRange();
+					return true;
 				}
 				return false;
 			}
