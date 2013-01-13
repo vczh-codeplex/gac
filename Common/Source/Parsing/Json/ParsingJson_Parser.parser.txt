@@ -22,7 +22,7 @@ class Literal:Node
 
 class String:Node
 {
-	token content(UnescapingString);
+	token content(JsonUnescapingString);
 }
 
 class Number:Node
@@ -37,7 +37,7 @@ class Array:Node
 
 class ObjectField:Node
 {
-	token name(UnescapingString);
+	token name(JsonUnescapingString);
 	Node value;
 }
 
@@ -57,6 +57,8 @@ token COMMA = ",";
 token COLON = ":";
 token NUMBER = "[\-]?\d+.\d+([eE][+\-]?\d+)?";
 token STRING = """([^\\""]|\\[^u]|\\u\d{4})*""";
+
+discardtoken SPACE = "\s+";
 
 rule Node JLiteral
 	= STRING:content as String
