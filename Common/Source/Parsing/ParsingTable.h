@@ -35,6 +35,14 @@ namespace vl
 				public:
 					WString									name;
 					WString									regex;
+
+					TokenInfo(){}
+
+					TokenInfo(const WString& _name, const WString& _regex)
+						:name(_name)
+						,regex(_regex)
+					{
+					}
 				};
 
 				class StateInfo
@@ -43,6 +51,15 @@ namespace vl
 					WString									ruleName;
 					WString									stateName;
 					WString									stateExpression;
+
+					StateInfo(){}
+
+					StateInfo(const WString& _ruleName, const WString& _stateName, const WString& _stateExpression)
+						:ruleName(_ruleName)
+						,stateName(_stateName)
+						,stateExpression(_stateExpression)
+					{
+					}
 				};
 
 				class RuleInfo
@@ -51,6 +68,15 @@ namespace vl
 					WString									name;
 					WString									type;
 					vint									rootStartState;
+
+					RuleInfo(){}
+
+					RuleInfo(const WString& _name, const WString& _type, vint _rootStartState)
+						:name(_name)
+						,type(_type)
+						,rootStartState(_rootStartState)
+					{
+					}
 				};
 
 				class Instruction
@@ -78,6 +104,14 @@ namespace vl
 						,stateParameter(0)
 					{
 					}
+
+					Instruction(InstructionType _instructionType, vint _stateParameter, const WString& _nameParameter, const WString& _value)
+						:instructionType(_instructionType)
+						,stateParameter(_stateParameter)
+						,nameParameter(_nameParameter)
+						,value(_value)
+					{
+					}
 				};
 
 				class TransitionItem
@@ -95,6 +129,14 @@ namespace vl
 						SameOrder,
 						UnknownOrder,
 					};
+
+					TransitionItem(){}
+
+					TransitionItem(vint _token, vint _targetState)
+						:token(_token)
+						,targetState(_targetState)
+					{
+					}
 
 					static OrderResult						CheckOrder(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2, bool forceGivingOrder);
 					static vint								Compare(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2);
