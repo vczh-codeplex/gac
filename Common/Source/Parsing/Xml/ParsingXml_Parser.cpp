@@ -274,7 +274,7 @@ Table Generation
 				table->SetTokenInfo(8, vl::parsing::tabling::ParsingTable::TokenInfo(L"ELEMENT_CLOSE", L"/>"));
 				table->SetTokenInfo(9, vl::parsing::tabling::ParsingTable::TokenInfo(L"EQUAL", L"/="));
 				table->SetTokenInfo(10, vl::parsing::tabling::ParsingTable::TokenInfo(L"NAME", L"[a-zA-Z0-9:_/-]+"));
-				table->SetTokenInfo(11, vl::parsing::tabling::ParsingTable::TokenInfo(L"ATTVALUE", L"\"([^\"&]|&/l+;)*\""));
+				table->SetTokenInfo(11, vl::parsing::tabling::ParsingTable::TokenInfo(L"ATTVALUE", L"\"[^\"]*\""));
 				table->SetTokenInfo(12, vl::parsing::tabling::ParsingTable::TokenInfo(L"COMMENT", L"/</!--([^/->]|-[^/->]|--[^>])*--/>"));
 				table->SetTokenInfo(13, vl::parsing::tabling::ParsingTable::TokenInfo(L"CDATA", L"/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>"));
 				table->SetTokenInfo(14, vl::parsing::tabling::ParsingTable::TokenInfo(L"TEXT", L"([^<>=\" /r/n/ta-zA-Z0-9:_/-])+|\""));
