@@ -11,7 +11,7 @@ class Node
 
 class Text : Node
 {
-	token content (XmlUnescapeTextFragment);
+	token content;
 }
 
 class CData : Node
@@ -61,9 +61,9 @@ token EQUAL = "/=";
 
 token NAME = "[a-zA-Z0-9:_/-]+";
 token ATTVALUE = """([^""&]|&/l+;)*""";
-token COMMENT = "/</!--[^>]*/>";
+token COMMENT = "/</!--([^/->]|-[^/->]|--[^>])*--/>";
 token CDATA = "/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>";
-token TEXT = "([^<>""& /r/n/ta-zA-Z0-9:_/-]|&/l+;)+";
+token TEXT = "([^<>="" /r/n/ta-zA-Z0-9:_/-])+|""";
 
 discardtoken SPACE = "/s+";
 
