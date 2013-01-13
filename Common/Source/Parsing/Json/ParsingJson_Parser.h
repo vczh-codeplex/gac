@@ -14,6 +14,21 @@ namespace vl
 	{
 		namespace json
 		{
+			struct JsonParserTokenIndex abstract
+			{
+				static const vl::vint TRUE = 0;
+				static const vl::vint FALSE = 1;
+				static const vl::vint NULLVALUE = 2;
+				static const vl::vint OBJOPEN = 3;
+				static const vl::vint OBJCLOSE = 4;
+				static const vl::vint ARROPEN = 5;
+				static const vl::vint ARRCLOSE = 6;
+				static const vl::vint COMMA = 7;
+				static const vl::vint COLON = 8;
+				static const vl::vint NUMBER = 9;
+				static const vl::vint STRING = 10;
+				static const vl::vint SPACE = 11;
+			};
 			class JsonNode;
 			class JsonLiteral;
 			class JsonString;

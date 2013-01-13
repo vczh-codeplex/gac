@@ -35,12 +35,14 @@ namespace vl
 				public:
 					WString									name;
 					WString									regex;
+					vint									regexTokenIndex;
 
-					TokenInfo(){}
+					TokenInfo():regexTokenIndex(-1){}
 
 					TokenInfo(const WString& _name, const WString& _regex)
 						:name(_name)
 						,regex(_regex)
+						,regexTokenIndex(-1)
 					{
 					}
 				};

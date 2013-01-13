@@ -48,7 +48,7 @@ class Object:Node
 
 token TRUE = "true";
 token FALSE = "false";
-token NULL = "null";
+token NULLVALUE = "null";
 token OBJOPEN = "\{";
 token OBJCLOSE = "\}";
 token ARROPEN = "\[";
