@@ -154,6 +154,8 @@
     <ClCompile Include="..\..\Source\Console.cpp" />
     <ClCompile Include="..\..\Source\Exception.cpp" />
     <ClCompile Include="..\..\Source\GlobalStorage.cpp" />
+    <ClCompile Include="..\..\Source\Parsing\Json\ParsingJson.cpp" />
+    <ClCompile Include="..\..\Source\Parsing\Json\ParsingJson_Parser.cpp" />
     <ClCompile Include="..\..\Source\Parsing\Parsing.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingAnalyzer.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton.cpp" />
@@ -168,6 +170,8 @@
     <ClCompile Include="..\..\Source\Parsing\ParsingState.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingTable.cpp" />
     <ClCompile Include="..\..\Source\Parsing\ParsingTree.cpp" />
+    <ClCompile Include="..\..\Source\Parsing\Xml\ParsingXml.cpp" />
+    <ClCompile Include="..\..\Source\Parsing\Xml\ParsingXml_Parser.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptor.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder.cpp" />
     <ClCompile Include="..\..\Source\Regex\Regex.cpp" />
@@ -243,6 +247,8 @@
     <ClInclude Include="..\..\Source\Function.h" />
     <ClInclude Include="..\..\Source\GlobalStorage.h" />
     <ClInclude Include="..\..\Source\Lazy.h" />
+    <ClInclude Include="..\..\Source\Parsing\Json\ParsingJson.h" />
+    <ClInclude Include="..\..\Source\Parsing\Json\ParsingJson_Parser.h" />
     <ClInclude Include="..\..\Source\Parsing\Parsing.h" />
     <ClInclude Include="..\..\Source\Parsing\ParsingAnalyzer.h" />
     <ClInclude Include="..\..\Source\Parsing\ParsingAutomaton.h" />
@@ -250,6 +256,8 @@
     <ClInclude Include="..\..\Source\Parsing\ParsingState.h" />
     <ClInclude Include="..\..\Source\Parsing\ParsingTable.h" />
     <ClInclude Include="..\..\Source\Parsing\ParsingTree.h" />
+    <ClInclude Include="..\..\Source\Parsing\Xml\ParsingXml.h" />
+    <ClInclude Include="..\..\Source\Parsing\Xml\ParsingXml_Parser.h" />
     <ClInclude Include="..\..\Source\Pointer.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptor.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder.h" />
@@ -284,6 +292,8 @@
     <None Include="Parser.Calculator\Codegen.bat" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="..\..\Source\Parsing\Json\ParsingJson_Parser.parser.txt" />
+    <Text Include="..\..\Source\Parsing\Xml\ParsingXml_Parser.parser.txt" />
     <Text Include="Parser.Calculator\Parser.Calculator.parser.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

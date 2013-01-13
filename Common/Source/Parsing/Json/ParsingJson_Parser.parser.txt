@@ -1,0 +1,90 @@
+include:"..\Parsing.h"
+namespace:vl.parsing.json
+classPrefix:Json
+parser:Parse(JRoot)
+grammar:
+
+class Node
+{
+}
+
+class Literal:Node
+{
+	enum Value
+	{
+		True,
+		False,
+		Null,
+	}
+
+	Value value;
+}
+
+class String:Node
+{
+	token content(UnescapingString);
+}
+
+class Number:Node
+{
+	token content;
+}
+
+class Array:Node
+{
+	Node[] items;
+}
+
+class ObjectField:Node
+{
+	token name(UnescapingString);
+	Node value;
+}
+
+class Object:Node
+{
+	ObjectField[] fields;
+}
+
+token TRUE = "true";
+token FALSE = "false";
+token NULL = "null";
+token OBJOPEN = "\{";
+token OBJCLOSE = "\}";
+token ARROPEN = "\[";
+token ARRCLOSE = "\]";
+token COMMA = ",";
+token COLON = ":";
+token NUMBER = "[\-]?\d+.\d+([eE][+\-]?\d+)?";
+token STRING = """([^\\""]|\\[^u]|\\u\d{4})*""";
+
+rule Node JLiteral
+	= STRING:content as String
+	= NUMBER:content as Number
+	= "true" as Literal with {value = "True"}
+	= "false" as Literal with {value = "False"}
+	= "null" as Literal with {value = "Null"}
+	;
+
+rule ObjectField JField
+	= STRING:name ":" JValue:value as ObjectField
+	;
+
+rule Object JObject
+	= "{" [JField:fields {"," JField:fields} ] "}" as Object
+	;
+
+rule Array JArray
+	= "[" [JValue:items {"," JValue:items} ] "]" as Array
+	;
+
+rule Node JValue
+	= !JLiteral
+	= !JObject
+	= !JArray
+	;
+
+rule Node JRoot
+	= !JObject
+	= !JArray
+	;

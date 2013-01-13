@@ -43,6 +43,12 @@
     <Filter Include="Parser.Calculator">
       <UniqueIdentifier>{fa5e8885-6899-4ec0-9aad-edce47642ea7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Parsing\Xml">
+      <UniqueIdentifier>{c3320bf1-8595-40df-ba7a-b73bc124bdca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Parsing\Json">
+      <UniqueIdentifier>{c81ce8b0-d506-4471-827a-0aabed45a927}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Basic.cpp">
@@ -206,6 +212,18 @@
     </ClCompile>
     <ClCompile Include="Parser.Calculator\Parser.Calculator.cpp">
       <Filter>Parser.Calculator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\Xml\ParsingXml.cpp">
+      <Filter>Common\Parsing\Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\Xml\ParsingXml_Parser.cpp">
+      <Filter>Common\Parsing\Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\Json\ParsingJson_Parser.cpp">
+      <Filter>Common\Parsing\Json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\Json\ParsingJson.cpp">
+      <Filter>Common\Parsing\Json</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -422,6 +440,18 @@
     <ClInclude Include="Parser.Calculator\Parser.Calculator.h">
       <Filter>Parser.Calculator</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Parsing\Xml\ParsingXml.h">
+      <Filter>Common\Parsing\Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Parsing\Xml\ParsingXml_Parser.h">
+      <Filter>Common\Parsing\Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Parsing\Json\ParsingJson_Parser.h">
+      <Filter>Common\Parsing\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Parsing\Json\ParsingJson.h">
+      <Filter>Common\Parsing\Json</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Common.fpm">
@@ -446,6 +476,12 @@
   <ItemGroup>
     <Text Include="Parser.Calculator\Parser.Calculator.parser.txt">
       <Filter>Parser.Calculator</Filter>
+    </Text>
+    <Text Include="..\..\Source\Parsing\Json\ParsingJson_Parser.parser.txt">
+      <Filter>Common\Parsing\Json</Filter>
+    </Text>
+    <Text Include="..\..\Source\Parsing\Xml\ParsingXml_Parser.parser.txt">
+      <Filter>Common\Parsing\Xml</Filter>
     </Text>
   </ItemGroup>
 </Project>
