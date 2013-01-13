@@ -60,7 +60,7 @@ token ELEMENT_CLOSE = "/>";
 token EQUAL = "/=";
 
 token NAME = "[a-zA-Z0-9:_/-]+";
-token ATTVALUE = """([^""&]|&/l+;)*""";
+token ATTVALUE = """[^""]*""";
 token COMMENT = "/</!--([^/->]|-[^/->]|--[^>])*--/>";
 token CDATA = "/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>";
 token TEXT = "([^<>="" /r/n/ta-zA-Z0-9:_/-])+|""";
