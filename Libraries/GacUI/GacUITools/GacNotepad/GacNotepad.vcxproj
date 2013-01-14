@@ -85,6 +85,8 @@
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h" />
     <ClInclude Include="..\..\Public\Source\Vlpp.h" />
+    <ClInclude Include="..\Source\DocumentFramework.h" />
+    <ClInclude Include="..\Source\SDI.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GacSDI\GacSDI.vcxproj">

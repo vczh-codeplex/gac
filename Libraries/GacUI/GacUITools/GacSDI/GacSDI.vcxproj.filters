@@ -16,6 +16,12 @@
     <Filter Include="Library">
       <UniqueIdentifier>{a08f9539-e110-4c3f-96dc-7aaa7713485a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="API">
+      <UniqueIdentifier>{3807635d-c6a2-4415-8396-137434ce1506}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="API\Implementation">
+      <UniqueIdentifier>{84c68dc4-5973-4d2e-92dc-2c1ada13b6b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Public\Source\GacUI.cpp">
@@ -25,10 +31,31 @@
       <Filter>Library</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\SDI.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>API</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\DocumentFramework.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>API</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Implementation\DocumentManager.cpp">
+      <Filter>API\Implementation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Implementation\DocumentEditorFactory.cpp">
+      <Filter>API\Implementation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Implementation\DocumentEditor.cpp">
+      <Filter>API\Implementation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Implementation\DocumentFileType.cpp">
+      <Filter>API\Implementation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Implementation\DocumentContainer.cpp">
+      <Filter>API\Implementation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Implementation\DocumentFragment.cpp">
+      <Filter>API\Implementation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Implementation\DocumentView.cpp">
+      <Filter>API\Implementation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -41,11 +68,32 @@
     <ClInclude Include="..\..\Public\Source\Vlpp.h">
       <Filter>Library</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\SDI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\DocumentFramework.h">
-      <Filter>Header Files</Filter>
+      <Filter>API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\SDI.h">
+      <Filter>API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Implementation\DocumentManager.h">
+      <Filter>API\Implementation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Implementation\DocumentEditorFactory.h">
+      <Filter>API\Implementation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Implementation\DocumentEditor.h">
+      <Filter>API\Implementation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Implementation\DocumentFileType.h">
+      <Filter>API\Implementation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Implementation\DocumentContainer.h">
+      <Filter>API\Implementation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Implementation\DocumentFragment.h">
+      <Filter>API\Implementation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Implementation\DocumentView.h">
+      <Filter>API\Implementation</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
