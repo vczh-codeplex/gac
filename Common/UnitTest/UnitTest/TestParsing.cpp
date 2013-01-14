@@ -917,9 +917,10 @@ TEST_CASE(TestGeneratedParser_Xml)
 		L"<!--this is a comment-->\r\n"
 		L"<name att1 = \"value1\" att2 = \"value2\" />",
 
-		L"<button name = \"&lt;&gt;&amp;&apos;&quot;\"> <![CDATA[ButtonText]]> <![CDATA[!]!]]!]>!>!]]> </button>",
+		L"<button name = \'&lt;&gt;&amp;&apos;&quot;\'> <![CDATA[ButtonText]]> <![CDATA[!]!]]!]>!>!]]> </button>",
 		L"<text> This is a single line of text </text>",
 		L"<text> normal <b>bold</b> normal <!--comment--> <i>italic</i> normal </text>",
+		L"<text> \"normal\" <b>bold</b> \"normal\' <!--comment--> <i>italic</i> \'normal\" </text>",
 	};
 	const wchar_t* output[]=
 	{
@@ -929,6 +930,7 @@ TEST_CASE(TestGeneratedParser_Xml)
 		L"<button name=\"&lt;&gt;&amp;&apos;&quot;\"><![CDATA[ButtonText]]><![CDATA[!]!]]!]>!>!]]></button>",
 		L"<text> This is a single line of text </text>",
 		L"<text> normal <b>bold</b> normal <!--comment--><i>italic</i> normal </text>",
+		L"<text> &quot;normal&quot; <b>bold</b> &quot;normal&apos; <!--comment--><i>italic</i> &apos;normal&quot; </text>",
 	};
 	Ptr<ParsingTable> table=XmlLoadTable();
 	TestGeneratedParser(input, output, sizeof(input)/sizeof(*input), table, L"Xml", L"XDocument", &XmlParseDocument, &XmlDocumentToString);
