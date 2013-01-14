@@ -78,6 +78,13 @@
     <ClCompile Include="..\..\Public\Source\GacUI.cpp" />
     <ClCompile Include="..\..\Public\Source\Vlpp.cpp" />
     <ClCompile Include="..\Source\DocumentFramework.cpp" />
+    <ClCompile Include="..\Source\Implementation\DocumentContainer.cpp" />
+    <ClCompile Include="..\Source\Implementation\DocumentEditor.cpp" />
+    <ClCompile Include="..\Source\Implementation\DocumentEditorFactory.cpp" />
+    <ClCompile Include="..\Source\Implementation\DocumentFileType.cpp" />
+    <ClCompile Include="..\Source\Implementation\DocumentFragment.cpp" />
+    <ClCompile Include="..\Source\Implementation\DocumentManager.cpp" />
+    <ClCompile Include="..\Source\Implementation\DocumentView.cpp" />
     <ClCompile Include="..\Source\SDI.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +92,13 @@
     <ClInclude Include="..\..\Public\Source\GacUIIncludes.h" />
     <ClInclude Include="..\..\Public\Source\Vlpp.h" />
     <ClInclude Include="..\Source\DocumentFramework.h" />
+    <ClInclude Include="..\Source\Implementation\DocumentContainer.h" />
+    <ClInclude Include="..\Source\Implementation\DocumentEditor.h" />
+    <ClInclude Include="..\Source\Implementation\DocumentEditorFactory.h" />
+    <ClInclude Include="..\Source\Implementation\DocumentFileType.h" />
+    <ClInclude Include="..\Source\Implementation\DocumentFragment.h" />
+    <ClInclude Include="..\Source\Implementation\DocumentManager.h" />
+    <ClInclude Include="..\Source\Implementation\DocumentView.h" />
     <ClInclude Include="..\Source\SDI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
