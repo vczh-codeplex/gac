@@ -17,14 +17,32 @@ DocumentManager
 		{
 		}
 
-		void DocumentManager::AttachCallback(ICallback* callback)
+		bool DocumentManager::AttachCallback(ICallback* callback)
 		{
-			callbacks.Add(callback);
+			if(callbacks.Contains(callback))
+			{
+				return false;
+			}
+			else
+			{
+				callbacks.Add(callback);
+				callback->OnAttach(this);
+				return true;
+			}
 		}
 
-		void DocumentManager::DetachCallback(ICallback* callback)
+		bool DocumentManager::DetachCallback(ICallback* callback)
 		{
-			callbacks.Remove(callback);
+			if(callbacks.Contains(callback))
+			{
+				callback->OnDetach(this);
+				callbacks.Remove(callback);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
 
 		bool DocumentManager::RegisterFileType(Ptr<IDocumentFileType> fileType)
@@ -33,6 +51,10 @@ DocumentManager
 			{
 				editorFileTypesById.Add(fileType->GetFileTypeId(), fileType);
 				editorFileTypesByExt.Add(fileType->GetFileExtension(), fileType);
+				FOREACH(ICallback*, callback, callbacks)
+				{
+					callback->OnFileTypeRegistered(this, fileType.Obj());
+				}
 				return true;
 			}
 			return false;
@@ -65,6 +87,10 @@ DocumentManager
 			if(!editorFactoriesById.Keys().Contains(editorFactory->GetEditorTypeId()))
 			{
 				editorFactoriesById.Add(editorFactory->GetEditorTypeId(), editorFactory);
+				FOREACH(ICallback*, callback, callbacks)
+				{
+					callback->OnEditorFactoryRegistered(this, editorFactory.Obj());
+				}
 				return true;
 			}
 			return false;

@@ -16,18 +16,19 @@ namespace vl
 	{
 		class DocumentManager : public Object, public IDocumentManager
 		{
-		protected:
+		private:
 			Dictionary<WString, Ptr<IDocumentEditorFactory>>		editorFactoriesById;
 			Dictionary<WString, Ptr<IDocumentFileType>>				editorFileTypesById;
 			Dictionary<WString, Ptr<IDocumentFileType>>				editorFileTypesByExt;
 			Dictionary<WString, Ptr<IDocumentEditorFactory>>		defaultEditors;
 			List<ICallback*>										callbacks;
+
 		public:
 			DocumentManager();
 			~DocumentManager();
 
-			void						AttachCallback(ICallback* callback)override;
-			void						DetachCallback(ICallback* callback)override;
+			bool						AttachCallback(ICallback* callback)override;
+			bool						DetachCallback(ICallback* callback)override;
 
 			bool						RegisterFileType(Ptr<IDocumentFileType> fileType)override;
 			vint						GetFileTypeCount()override;
