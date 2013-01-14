@@ -68,6 +68,7 @@ typedef signed __int64	pos_t;
 
 #ifndef _MSC_VER
 #define override
+#define abstract
 #endif
 
 #define VCZH_NO_OLD_OS
@@ -10571,6 +10572,15 @@ namespace vl
 			ParsingTextRange			codeRange;
 		};
 
+		class ParsingToken : public ParsingTreeCustomBase
+		{
+		public:
+			vint						tokenIndex;
+			WString						value;
+
+			ParsingToken():tokenIndex(-1){}
+		};
+
 		class ParsingError : public Object
 		{
 		public:
@@ -10584,6 +10594,724 @@ namespace vl
 			ParsingError(const regex::RegexToken* _token, const WString& _errorMessage);
 			ParsingError(ParsingTreeCustomBase* _parsingTree, const WString& _errorMessage);
 			~ParsingError();
+		};
+
+/***********************************************************************
+语法树构造
+***********************************************************************/
+
+		class ParsingTreeConverter : public Object
+		{
+		public:
+			typedef collections::List<regex::RegexToken>	TokenList;
+
+			virtual Ptr<ParsingTreeCustomBase>				ConvertClass(Ptr<ParsingTreeObject> obj, const TokenList& tokens)=0;
+
+			bool SetMember(ParsingToken& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
+			{
+				Ptr<ParsingTreeToken> token=node.Cast<ParsingTreeToken>();
+				if(token)
+				{
+					member.tokenIndex=token->GetTokenIndex();
+					member.value=token->GetValue();
+					member.codeRange=token->GetCodeRange();
+					return true;
+				}
+				return false;
+			}
+
+			template<typename T>
+			bool SetMember(collections::List<T>& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
+			{
+				Ptr<ParsingTreeArray> arr=node.Cast<ParsingTreeArray>();
+				if(arr)
+				{
+					member.Clear();
+					vint count=arr->Count();
+					for(vint i=0;i<count;i++)
+					{
+						T t;
+						SetMember(t, arr->GetItem(i), tokens);
+						member.Add(t);
+					}
+					return true;
+				}
+				return false;
+			}
+
+			template<typename T>
+			bool SetMember(Ptr<T>& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
+			{
+				Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>();
+				if(obj)
+				{
+					Ptr<ParsingTreeCustomBase> tree=ConvertClass(obj, tokens);
+					if(tree)
+					{
+						tree->codeRange=node->GetCodeRange();
+						member=tree.Cast<T>();
+						return member;
+					}
+				}
+				return false;
+			}
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSINGTABLE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Table
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGTABLE
+#define VCZH_PARSING_PARSINGTABLE
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace tabling
+		{
+
+/***********************************************************************
+跳转表
+***********************************************************************/
+
+			class ParsingTable : public Object
+			{
+			public:
+				static const vint							TokenBegin=0;
+				static const vint							TokenFinish=1;
+				static const vint							TryReduce=2;
+				static const vint							UserTokenStart=3;
+
+				class TokenInfo
+				{
+				public:
+					WString									name;
+					WString									regex;
+					vint									regexTokenIndex;
+
+					TokenInfo():regexTokenIndex(-1){}
+
+					TokenInfo(const WString& _name, const WString& _regex)
+						:name(_name)
+						,regex(_regex)
+						,regexTokenIndex(-1)
+					{
+					}
+				};
+
+				class StateInfo
+				{
+				public:
+					WString									ruleName;
+					WString									stateName;
+					WString									stateExpression;
+
+					StateInfo(){}
+
+					StateInfo(const WString& _ruleName, const WString& _stateName, const WString& _stateExpression)
+						:ruleName(_ruleName)
+						,stateName(_stateName)
+						,stateExpression(_stateExpression)
+					{
+					}
+				};
+
+				class RuleInfo
+				{
+				public:
+					WString									name;
+					WString									type;
+					vint									rootStartState;
+
+					RuleInfo(){}
+
+					RuleInfo(const WString& _name, const WString& _type, vint _rootStartState)
+						:name(_name)
+						,type(_type)
+						,rootStartState(_rootStartState)
+					{
+					}
+				};
+
+				class Instruction
+				{
+				public:
+					enum InstructionType
+					{
+						Create,
+						Assign,
+						Item,
+						Using,
+						Setter,
+						Shift,
+						Reduce,
+						LeftRecursiveReduce,
+					};
+
+					InstructionType							instructionType;
+					vint									stateParameter;
+					WString									nameParameter;
+					WString									value;
+
+					Instruction()
+						:instructionType(Create)
+						,stateParameter(0)
+					{
+					}
+
+					Instruction(InstructionType _instructionType, vint _stateParameter, const WString& _nameParameter, const WString& _value)
+						:instructionType(_instructionType)
+						,stateParameter(_stateParameter)
+						,nameParameter(_nameParameter)
+						,value(_value)
+					{
+					}
+				};
+
+				class TransitionItem
+				{
+				public:
+					vint									token;
+					vint									targetState;
+					collections::List<vint>					stackPattern;
+					collections::List<Instruction>			instructions;
+
+					enum OrderResult
+					{
+						CorrectOrder,
+						WrongOrder,
+						SameOrder,
+						UnknownOrder,
+					};
+
+					TransitionItem(){}
+
+					TransitionItem(vint _token, vint _targetState)
+						:token(_token)
+						,targetState(_targetState)
+					{
+					}
+
+					static OrderResult						CheckOrder(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2, bool forceGivingOrder);
+					static vint								Compare(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2);
+				};
+
+				class TransitionBag
+				{
+				public:
+					collections::List<Ptr<TransitionItem>>	transitionItems;
+				};
+
+			protected:
+				Ptr<regex::RegexLexer>						lexer;
+				collections::Array<Ptr<TransitionBag>>		transitionBags;
+				vint										tokenCount;
+				vint										stateCount;
+				collections::Array<TokenInfo>				tokenInfos;
+				collections::Array<TokenInfo>				discardTokenInfos;
+				collections::Array<StateInfo>				stateInfos;
+				collections::Array<RuleInfo>				ruleInfos;
+
+			public:
+				ParsingTable(vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
+				~ParsingTable();
+
+				vint										GetTokenCount();
+				const TokenInfo&							GetTokenInfo(vint token);
+				void										SetTokenInfo(vint token, const TokenInfo& info);
+
+				vint										GetDiscardTokenCount();
+				const TokenInfo&							GetDiscardTokenInfo(vint token);
+				void										SetDiscardTokenInfo(vint token, const TokenInfo& info);
+
+				vint										GetStateCount();
+				const StateInfo&							GetStateInfo(vint state);
+				void										SetStateInfo(vint state, const StateInfo& info);
+
+				vint										GetRuleCount();
+				const RuleInfo&								GetRuleInfo(vint rule);
+				void										SetRuleInfo(vint rule, const RuleInfo& info);
+
+				const regex::RegexLexer&					GetLexer();
+				Ptr<TransitionBag>							GetTransitionBag(vint state, vint token);
+				void										SetTransitionBag(vint state, vint token, Ptr<TransitionBag> bag);
+				void										Initialize();
+				bool										IsInputToken(vint regexTokenIndex);
+				vint										GetTableTokenIndex(vint regexTokenIndex);
+				vint										GetTableDiscardTokenIndex(vint regexTokenIndex);
+			};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+			extern void										Log(Ptr<ParsingTable> table, stream::TextWriter& writer);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSINGSTATE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::State
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGSTATE
+#define VCZH_PARSING_PARSINGSTATE
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace tabling
+		{
+
+/***********************************************************************
+语法分析器
+***********************************************************************/
+
+			class ParsingState : public Object
+			{
+			public:
+				struct ShiftReduceRange
+				{
+					regex::RegexToken*							shiftToken;
+					regex::RegexToken*							reduceToken;
+
+					ShiftReduceRange()
+						:shiftToken(0)
+						,reduceToken(0)
+					{
+					}
+				};
+
+				struct TransitionResult
+				{
+					vint										tableTokenIndex;
+					vint										tableStateSource;
+					vint										tableStateTarget;
+					vint										tokenIndexInStream;
+					regex::RegexToken*							token;
+					ParsingTable::TransitionItem*				transition;
+					Ptr<collections::List<ShiftReduceRange>>	shiftReduceRanges;
+
+					TransitionResult()
+						:tableTokenIndex(-1)
+						,tableStateSource(-1)
+						,tableStateTarget(-1)
+						,tokenIndexInStream(-1)
+						,token(0)
+						,transition(0)
+					{
+					}
+
+					operator bool()const
+					{
+						return transition!=0;
+					}
+
+					void AddShiftReduceRange(regex::RegexToken* shiftToken, regex::RegexToken* reduceToken)
+					{
+						ShiftReduceRange range;
+						range.shiftToken=shiftToken;
+						range.reduceToken=reduceToken;
+						if(!shiftReduceRanges)
+						{
+							shiftReduceRanges=new collections::List<ShiftReduceRange>();
+						}
+						shiftReduceRanges->Add(range);
+					}
+				};
+
+				struct Future
+				{
+					vint									currentState;
+					vint									reduceStateCount;
+					collections::List<vint>					shiftStates;
+					vint									selectedToken;
+					Future*									previous;
+					Future*									next;
+
+					Future()
+						:currentState(-1)
+						,reduceStateCount(0)
+						,selectedToken(-1)
+						,previous(0)
+						,next(0)
+					{
+					}
+				};
+			private:
+				WString										input;
+				Ptr<ParsingTable>							table;
+				collections::List<regex::RegexToken>		tokens;
+
+				collections::List<vint>						stateStack;
+				vint										currentState;
+				vint										currentToken;
+				vint										tokenSequenceIndex;
+				
+				collections::List<regex::RegexToken*>		shiftTokenStack;
+				regex::RegexToken*							shiftToken;
+				regex::RegexToken*							reduceToken;
+			public:
+				ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex=-1);
+				~ParsingState();
+
+				const WString&								GetInput();
+				Ptr<ParsingTable>							GetTable();
+				const collections::List<regex::RegexToken>&	GetTokens();
+				regex::RegexToken*							GetToken(vint index);
+
+				vint										Reset(const WString& rule);
+				vint										GetCurrentToken();
+				const collections::List<vint>&				GetStateStack();
+				vint										GetCurrentState();
+
+				ParsingTable::TransitionItem*				MatchToken(vint tableTokenIndex);
+				ParsingTable::TransitionItem*				MatchTokenInFuture(vint tableTokenIndex, Future* future);
+				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken);
+				TransitionResult							ReadToken();
+				bool										ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now);
+			};
+
+/***********************************************************************
+语法树生成器
+***********************************************************************/
+
+			class ParsingTreeBuilder : public Object
+			{
+			protected:
+				Ptr<ParsingTreeNode>						createdObject;
+				Ptr<ParsingTreeObject>						operationTarget;
+				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
+			public:
+				ParsingTreeBuilder();
+				~ParsingTreeBuilder();
+
+				void										Reset();
+				bool										Run(const ParsingState::TransitionResult& result);
+				Ptr<ParsingTreeObject>						GetNode();
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSING.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Parser
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSING
+#define VCZH_PARSING_PARSING
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace tabling
+		{
+
+/***********************************************************************
+语法分析器通用策略
+***********************************************************************/
+
+			class ParsingGeneralParser : public Object
+			{
+			protected:
+				Ptr<ParsingTable>							table;
+
+				virtual void								OnReset();
+				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)=0;
+			public:
+				ParsingGeneralParser(Ptr<ParsingTable> _table);
+				~ParsingGeneralParser();
+				
+				Ptr<ParsingTreeNode>						Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors);
+				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors);
+			};
+
+/***********************************************************************
+语法分析器策略
+***********************************************************************/
+
+			class ParsingStrictParser : public ParsingGeneralParser
+			{
+			protected:
+
+				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
+			public:
+				ParsingStrictParser(Ptr<ParsingTable> _table=0);
+				~ParsingStrictParser();
+			};
+
+			class ParsingAutoRecoverParser : public ParsingGeneralParser
+			{
+			protected:
+				collections::Array<ParsingState::Future>	recoverFutures;
+				vint										recoveringFutureIndex;
+
+				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
+			public:
+				ParsingAutoRecoverParser(Ptr<ParsingTable> _table=0);
+				~ParsingAutoRecoverParser();
+			};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+			extern Ptr<ParsingStrictParser>					CreateBootstrapStrictParser();
+			extern Ptr<ParsingAutoRecoverParser>			CreateBootstrapAutoRecoverParser();
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\JSON\PARSINGJSON_PARSER.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parser::ParsingJson_Parser
+
+本文件使用Vczh Functional Macro工具自动生成
+***********************************************************************/
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace json
+		{
+			struct JsonParserTokenIndex abstract
+			{
+				static const vl::vint TRUE = 0;
+				static const vl::vint FALSE = 1;
+				static const vl::vint NULLVALUE = 2;
+				static const vl::vint OBJOPEN = 3;
+				static const vl::vint OBJCLOSE = 4;
+				static const vl::vint ARROPEN = 5;
+				static const vl::vint ARRCLOSE = 6;
+				static const vl::vint COMMA = 7;
+				static const vl::vint COLON = 8;
+				static const vl::vint NUMBER = 9;
+				static const vl::vint STRING = 10;
+				static const vl::vint SPACE = 11;
+			};
+			class JsonNode;
+			class JsonLiteral;
+			class JsonString;
+			class JsonNumber;
+			class JsonArray;
+			class JsonObjectField;
+			class JsonObject;
+
+			class JsonNode abstract : public vl::parsing::ParsingTreeCustomBase
+			{
+			public:
+				class IVisitor : public vl::Interface
+				{
+				public:
+					virtual void Visit(JsonLiteral* node)=0;
+					virtual void Visit(JsonString* node)=0;
+					virtual void Visit(JsonNumber* node)=0;
+					virtual void Visit(JsonArray* node)=0;
+					virtual void Visit(JsonObjectField* node)=0;
+					virtual void Visit(JsonObject* node)=0;
+				};
+
+				virtual void Accept(JsonNode::IVisitor* visitor)=0;
+
+			};
+
+			class JsonLiteral : public JsonNode
+			{
+			public:
+				struct JsonValue abstract
+				{
+					enum Type
+					{
+						True,
+						False,
+						Null,
+					};
+				};
+
+				JsonValue::Type value;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonLiteral> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonString : public JsonNode
+			{
+			public:
+				vl::parsing::ParsingToken content;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonString> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonNumber : public JsonNode
+			{
+			public:
+				vl::parsing::ParsingToken content;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonNumber> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonArray : public JsonNode
+			{
+			public:
+				vl::collections::List<vl::Ptr<JsonNode>> items;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonArray> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonObjectField : public JsonNode
+			{
+			public:
+				vl::parsing::ParsingToken name;
+				vl::Ptr<JsonNode> value;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonObjectField> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonObject : public JsonNode
+			{
+			public:
+				vl::collections::List<vl::Ptr<JsonObjectField>> fields;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonObject> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> JsonConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			extern vl::Ptr<vl::parsing::tabling::ParsingTable> JsonLoadTable();
+
+			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+		}
+	}
+}
+
+/***********************************************************************
+PARSING\JSON\PARSINGJSON.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parser::ParsingJson_Parser
+
+***********************************************************************/
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace json
+		{
+			extern void						JsonEscapeString(const WString& text, stream::TextWriter& writer);
+			extern void						JsonUnescapeString(const WString& text, stream::TextWriter& writer);
+			extern void						JsonPrint(Ptr<JsonNode> node, stream::TextWriter& writer);
+			extern WString					JsonToString(Ptr<JsonNode> node);
+		}
+	}
+}
+
+/***********************************************************************
+STREAM\MEMORYSTREAM.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Stream::MemoryStream
+
+Interfaces:
+	MemoryStream					：内存流
+***********************************************************************/
+
+#ifndef VCZH_STREAM_MEMORYSTREAM
+#define VCZH_STREAM_MEMORYSTREAM
+
+
+namespace vl
+{
+	namespace stream
+	{
+		class MemoryStream : public Object, public virtual IStream
+		{
+		protected:
+			vint					block;
+			char*					buffer;
+			vint					size;
+			vint					position;
+			vint					capacity;
+
+			void					PrepareSpace(vint totalSpace);
+		public:
+			MemoryStream(vint _block=65536);
+			~MemoryStream();
+
+			bool					CanRead()const;
+			bool					CanWrite()const;
+			bool					CanSeek()const;
+			bool					CanPeek()const;
+			bool					IsLimited()const;
+			bool					IsAvailable()const;
+			void					Close();
+			pos_t					Position()const;
+			pos_t					Size()const;
+			void					Seek(pos_t _size);
+			void					SeekFromBegin(pos_t _size);
+			void					SeekFromEnd(pos_t _size);
+			vint					Read(void* _buffer, vint _size);
+			vint					Write(void* _buffer, vint _size);
+			vint					Peek(void* _buffer, vint _size);
+			void*					GetInternalBuffer();
 		};
 	}
 }
@@ -10698,7 +11426,7 @@ namespace vl
 			{
 			public:
 				Ptr<ParsingDefinitionType>						type;
-				WString											name;
+				WString											unescapingFunction;
 
 				void											Accept(IVisitor* visitor)override;
 			};
@@ -10719,7 +11447,6 @@ namespace vl
 			class ParsingDefinitionEnumMemberDefinition : public ParsingDefinitionTypeDefinition
 			{
 			public:
-				WString											name;
 
 				void											Accept(IVisitor* visitor)override;
 			};
@@ -10927,7 +11654,7 @@ namespace vl
 				ParsingDefinitionClassDefinitionWriter(const WString& name);
 				ParsingDefinitionClassDefinitionWriter(const WString& name, const ParsingDefinitionTypeWriter& parentType);
 
-				ParsingDefinitionClassDefinitionWriter&			Member(const WString& name, const ParsingDefinitionTypeWriter& type);
+				ParsingDefinitionClassDefinitionWriter&			Member(const WString& name, const ParsingDefinitionTypeWriter& type, const WString& unescapingFunction=L"");
 				ParsingDefinitionClassDefinitionWriter&			SubType(const ParsingDefinitionTypeDefinitionWriter& type);
 
 				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
@@ -11196,12 +11923,223 @@ namespace vl
 ***********************************************************************/
 
 			extern WString						GetTypeFullName(ParsingSymbol* type);
-			extern ParsingSymbol*				FindType(Ptr<definitions::ParsingDefinitionType> type, ParsingSymbolManager* manager, ParsingSymbol* scope, collections::List<Ptr<ParsingError>>& errors);
+			extern ParsingSymbol*				FindType(definitions::ParsingDefinitionType* type, ParsingSymbolManager* manager, ParsingSymbol* scope, collections::List<Ptr<ParsingError>>& errors);
 			extern void							PrepareSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
 			extern void							ValidateRuleStructure(Ptr<definitions::ParsingDefinition> definition, Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
 			extern void							ResolveRuleSymbols(Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
 			extern void							ResolveSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
 			extern void							ValidateDefinition(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSINGAUTOMATON.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Automaton
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGAUTOMATON
+#define VCZH_PARSING_PARSINGAUTOMATON
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace analyzing
+		{
+
+/***********************************************************************
+状态机
+***********************************************************************/
+
+			class Action;
+			class Transition;
+			class State;
+
+			class Action : public Object
+			{
+			public:
+				enum ActionType
+				{
+					Create, // new source
+					Assign, // source ::= <created symbol>
+					Using,  // use <created symbol>
+					Setter, // source ::= target
+					Shift,
+					Reduce,
+					LeftRecursiveReduce,
+				};
+
+				ActionType											actionType;
+				ParsingSymbol*										actionTarget;
+				ParsingSymbol*										actionSource;
+
+				// the following two fields record which rule symbol transition generate this shift/reduce action
+				State*												shiftReduceSource;
+				State*												shiftReduceTarget;
+
+				Action();
+				~Action();
+			};
+
+			class Transition : public Object
+			{
+			public:
+				enum TransitionType
+				{
+					TokenBegin,		// token stream start
+					TokenFinish,	// token stream end
+					TryReduce,		// rule end
+					Epsilon,		// an epsilon transition
+					Symbol,			// a syntax symbol
+				};
+
+				enum StackOperationType
+				{
+					None,
+					ShiftReduceCompacted,
+					LeftRecursive,
+				};
+
+				State*												source;
+				State*												target;
+				collections::List<Ptr<Action>>						actions;
+				
+				TransitionType										transitionType;
+				StackOperationType									stackOperationType;
+				ParsingSymbol*										transitionSymbol;
+
+				Transition();
+				~Transition();
+
+				static bool											IsEquivalent(Transition* t1, Transition* t2, bool careSourceAndTarget);
+			};
+
+			class State : public Object
+			{
+			public:
+				enum StatePosition
+				{
+					BeforeNode,
+					AfterNode,
+				};
+
+				collections::List<Transition*>						transitions;
+				collections::List<Transition*>						inputs;
+				bool												endState;
+
+				ParsingSymbol*										ownerRuleSymbol;
+				definitions::ParsingDefinitionRuleDefinition*		ownerRule;
+				definitions::ParsingDefinitionGrammar*				grammarNode;
+				definitions::ParsingDefinitionGrammar*				stateNode;
+				StatePosition										statePosition;
+				WString												stateName;
+				WString												stateExpression;
+
+				State();
+				~State();
+			};
+
+			class RuleInfo : public Object
+			{
+			public:
+				State*												rootRuleStartState;
+				State*												rootRuleEndState;
+				State*												startState;
+				collections::List<State*>							endStates;
+				int													stateNameCount;
+
+				RuleInfo();
+				~RuleInfo();
+			};
+
+			class Automaton : public Object
+			{
+				typedef collections::Dictionary<definitions::ParsingDefinitionRuleDefinition*, Ptr<RuleInfo>>		RuleInfoMap;
+			public:
+				ParsingSymbolManager*								symbolManager;
+				collections::List<Ptr<Transition>>					transitions;
+				collections::List<Ptr<State>>						states;
+				RuleInfoMap											ruleInfos;
+
+				Automaton(ParsingSymbolManager* _symbolManager);
+				~Automaton();
+
+				State*												RuleStartState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
+				State*												RootRuleStartState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
+				State*												RootRuleEndState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
+				State*												StartState(definitions::ParsingDefinitionRuleDefinition* ownerRule, definitions::ParsingDefinitionGrammar* grammarNode, definitions::ParsingDefinitionGrammar* stateNode);
+				State*												EndState(definitions::ParsingDefinitionRuleDefinition* ownerRule, definitions::ParsingDefinitionGrammar* grammarNode, definitions::ParsingDefinitionGrammar* stateNode);
+				State*												CopyState(State* oldState);
+
+				Transition*											CreateTransition(State* start, State* end);
+				Transition*											TokenBegin(State* start, State* end);
+				Transition*											TokenFinish(State* start, State* end);
+				Transition*											TryReduce(State* start, State* end);
+				Transition*											Epsilon(State* start, State* end);
+				Transition*											Symbol(State* start, State* end, ParsingSymbol* transitionSymbol);
+				Transition*											CopyTransition(State* start, State* end, Transition* oldTransition);
+
+				void												DeleteTransition(Transition* transition);
+				void												DeleteState(State* state);
+			};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+			namespace closure_searching
+			{
+				struct ClosureItem
+				{
+					State*											state;			// target state of one path of a closure
+					Ptr<collections::List<Transition*>>				transitions;	// path
+					bool											cycle;			// true: invalid closure because there are cycles, and in the middle of the path there will be a transition that targets to the state field.
+
+					ClosureItem()
+						:state(0)
+						,cycle(false)
+					{
+					}
+
+					ClosureItem(State* _state, Ptr<collections::List<Transition*>> _transitions, bool _cycle)
+						:state(_state)
+						,transitions(_transitions)
+						,cycle(_cycle)
+					{
+					}
+				};
+
+				enum ClosureSearchResult
+				{
+					Continue,
+					Hit,
+					Blocked,
+				};
+
+				extern void											SearchClosure(ClosureSearchResult(*closurePredicate)(Transition*), State* startState, collections::List<ClosureItem>& closure);
+			}
+
+			extern Ptr<Automaton>									CreateEpsilonPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager);
+			extern void												RemoveEpsilonTransitions(collections::Dictionary<State*, State*>& oldNewStateMap, collections::List<State*>& scanningStates, Ptr<Automaton> automaton);
+			extern Ptr<Automaton>									CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA);
+			extern Ptr<Automaton>									CreateJointPDAFromNondeterministicPDA(Ptr<Automaton> nondeterministicPDA);
+			extern void												CompactJointPDA(Ptr<Automaton> jointPDA);
+			extern void												MarkLeftRecursiveInJointPDA(Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
+
+			extern WString											GetTypeNameForCreateInstruction(ParsingSymbol* type);
+			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
+			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, collections::List<Ptr<ParsingError>>& errors);
+			extern void												Log(Ptr<Automaton> automaton, stream::TextWriter& writer);
 		}
 	}
 }
@@ -11754,599 +12692,180 @@ namespace vl
 #endif
 
 /***********************************************************************
-PARSING\PARSINGTABLE.H
+PARSING\XML\PARSINGXML_PARSER.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: 陈梓瀚(vczh)
-Parsing::Automaton
+Parser::ParsingXml_Parser
 
-Classes:
+本文件使用Vczh Functional Macro工具自动生成
 ***********************************************************************/
-
-#ifndef VCZH_PARSING_PARSINGTABLE
-#define VCZH_PARSING_PARSINGTABLE
 
 
 namespace vl
 {
 	namespace parsing
 	{
-		namespace tabling
+		namespace xml
 		{
+			struct XmlParserTokenIndex abstract
+			{
+				static const vl::vint INSTRUCTION_OPEN = 0;
+				static const vl::vint INSTRUCTION_CLOSE = 1;
+				static const vl::vint COMPLEX_ELEMENT_OPEN = 2;
+				static const vl::vint SINGLE_ELEMENT_CLOSE = 3;
+				static const vl::vint ELEMENT_OPEN = 4;
+				static const vl::vint ELEMENT_CLOSE = 5;
+				static const vl::vint EQUAL = 6;
+				static const vl::vint NAME = 7;
+				static const vl::vint ATTVALUE = 8;
+				static const vl::vint COMMENT = 9;
+				static const vl::vint CDATA = 10;
+				static const vl::vint TEXT = 11;
+				static const vl::vint SPACE = 12;
+			};
+			class XmlNode;
+			class XmlText;
+			class XmlCData;
+			class XmlAttribute;
+			class XmlComment;
+			class XmlElement;
+			class XmlInstruction;
+			class XmlDocument;
 
-/***********************************************************************
-跳转表
-***********************************************************************/
-
-			class ParsingTable : public Object
+			class XmlNode abstract : public vl::parsing::ParsingTreeCustomBase
 			{
 			public:
-				static const vint							TokenBegin=0;
-				static const vint							TokenFinish=1;
-				static const vint							TryReduce=2;
-				static const vint							UserTokenStart=3;
-
-				class TokenInfo
+				class IVisitor : public vl::Interface
 				{
 				public:
-					WString									name;
-					WString									regex;
+					virtual void Visit(XmlText* node)=0;
+					virtual void Visit(XmlCData* node)=0;
+					virtual void Visit(XmlAttribute* node)=0;
+					virtual void Visit(XmlComment* node)=0;
+					virtual void Visit(XmlElement* node)=0;
+					virtual void Visit(XmlInstruction* node)=0;
+					virtual void Visit(XmlDocument* node)=0;
 				};
 
-				class StateInfo
-				{
-				public:
-					WString									ruleName;
-					WString									stateName;
-					WString									stateExpression;
-				};
+				virtual void Accept(XmlNode::IVisitor* visitor)=0;
 
-				class RuleInfo
-				{
-				public:
-					WString									name;
-					WString									type;
-					vint									rootStartState;
-				};
-
-				class Instruction
-				{
-				public:
-					enum InstructionType
-					{
-						Create,
-						Assign,
-						Item,
-						Using,
-						Setter,
-						Shift,
-						Reduce,
-						LeftRecursiveReduce,
-					};
-
-					InstructionType							instructionType;
-					vint									stateParameter;
-					WString									nameParameter;
-					WString									value;
-
-					Instruction()
-						:instructionType(Create)
-						,stateParameter(0)
-					{
-					}
-				};
-
-				class TransitionItem
-				{
-				public:
-					vint									token;
-					vint									targetState;
-					collections::List<vint>					stackPattern;
-					collections::List<Instruction>			instructions;
-
-					enum OrderResult
-					{
-						CorrectOrder,
-						WrongOrder,
-						SameOrder,
-						UnknownOrder,
-					};
-
-					static OrderResult						CheckOrder(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2, bool forceGivingOrder);
-					static vint								Compare(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2);
-				};
-
-				class TransitionBag
-				{
-				public:
-					collections::List<Ptr<TransitionItem>>	transitionItems;
-				};
-
-			protected:
-				Ptr<regex::RegexLexer>						lexer;
-				collections::Array<Ptr<TransitionBag>>		transitionBags;
-				vint										tokenCount;
-				vint										stateCount;
-				collections::Array<TokenInfo>				tokenInfos;
-				collections::Array<TokenInfo>				discardTokenInfos;
-				collections::Array<StateInfo>				stateInfos;
-				collections::Array<RuleInfo>				ruleInfos;
-
-			public:
-				ParsingTable(vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
-				~ParsingTable();
-
-				vint										GetTokenCount();
-				const TokenInfo&							GetTokenInfo(vint token);
-				void										SetTokenInfo(vint token, const TokenInfo& info);
-
-				vint										GetDiscardTokenCount();
-				const TokenInfo&							GetDiscardTokenInfo(vint token);
-				void										SetDiscardTokenInfo(vint token, const TokenInfo& info);
-
-				vint										GetStateCount();
-				const StateInfo&							GetStateInfo(vint state);
-				void										SetStateInfo(vint state, const StateInfo& info);
-
-				vint										GetRuleCount();
-				const RuleInfo&								GetRuleInfo(vint rule);
-				void										SetRuleInfo(vint rule, const RuleInfo& info);
-
-				const regex::RegexLexer&					GetLexer();
-				Ptr<TransitionBag>							GetTransitionBag(vint state, vint token);
-				void										SetTransitionBag(vint state, vint token, Ptr<TransitionBag> bag);
-				void										Initialize();
-				bool										IsInputToken(vint regexTokenIndex);
-				vint										GetTableTokenIndex(vint regexTokenIndex);
-				vint										GetTableDiscardTokenIndex(vint regexTokenIndex);
 			};
 
-/***********************************************************************
-语法分析器
-***********************************************************************/
-
-			class ParsingState : public Object
+			class XmlText : public XmlNode
 			{
 			public:
-				struct ShiftReduceRange
-				{
-					regex::RegexToken*							shiftToken;
-					regex::RegexToken*							reduceToken;
+				vl::parsing::ParsingToken content;
 
-					ShiftReduceRange()
-						:shiftToken(0)
-						,reduceToken(0)
-					{
-					}
-				};
+				void Accept(XmlNode::IVisitor* visitor)override;
 
-				struct TransitionResult
-				{
-					vint										tableTokenIndex;
-					vint										tableStateSource;
-					vint										tableStateTarget;
-					vint										tokenIndexInStream;
-					regex::RegexToken*							token;
-					ParsingTable::TransitionItem*				transition;
-					Ptr<collections::List<ShiftReduceRange>>	shiftReduceRanges;
-
-					TransitionResult()
-						:tableTokenIndex(-1)
-						,tableStateSource(-1)
-						,tableStateTarget(-1)
-						,tokenIndexInStream(-1)
-						,token(0)
-						,transition(0)
-					{
-					}
-
-					operator bool()const
-					{
-						return transition!=0;
-					}
-
-					void AddShiftReduceRange(regex::RegexToken* shiftToken, regex::RegexToken* reduceToken)
-					{
-						ShiftReduceRange range;
-						range.shiftToken=shiftToken;
-						range.reduceToken=reduceToken;
-						if(!shiftReduceRanges)
-						{
-							shiftReduceRanges=new collections::List<ShiftReduceRange>();
-						}
-						shiftReduceRanges->Add(range);
-					}
-				};
-
-				struct Future
-				{
-					vint									currentState;
-					vint									reduceStateCount;
-					collections::List<vint>					shiftStates;
-					vint									selectedToken;
-					Future*									previous;
-					Future*									next;
-
-					Future()
-						:currentState(-1)
-						,reduceStateCount(0)
-						,selectedToken(-1)
-						,previous(0)
-						,next(0)
-					{
-					}
-				};
-			private:
-				WString										input;
-				Ptr<ParsingTable>							table;
-				collections::List<regex::RegexToken>		tokens;
-
-				collections::List<vint>						stateStack;
-				vint										currentState;
-				vint										currentToken;
-				vint										tokenSequenceIndex;
-				
-				collections::List<regex::RegexToken*>		shiftTokenStack;
-				regex::RegexToken*							shiftToken;
-				regex::RegexToken*							reduceToken;
-			public:
-				ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex=-1);
-				~ParsingState();
-
-				const WString&								GetInput();
-				Ptr<ParsingTable>							GetTable();
-				const collections::List<regex::RegexToken>&	GetTokens();
-				regex::RegexToken*							GetToken(vint index);
-
-				vint										Reset(const WString& rule);
-				vint										GetCurrentToken();
-				const collections::List<vint>&				GetStateStack();
-				vint										GetCurrentState();
-
-				ParsingTable::TransitionItem*				MatchToken(vint tableTokenIndex);
-				ParsingTable::TransitionItem*				MatchTokenInFuture(vint tableTokenIndex, Future* future);
-				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken);
-				TransitionResult							ReadToken();
-				bool										ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now);
+				static vl::Ptr<XmlText> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-/***********************************************************************
-语法树生成器
-***********************************************************************/
-
-			class ParsingTreeBuilder : public Object
+			class XmlCData : public XmlNode
 			{
-			protected:
-				Ptr<ParsingTreeNode>						createdObject;
-				Ptr<ParsingTreeObject>						operationTarget;
-				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
 			public:
-				ParsingTreeBuilder();
-				~ParsingTreeBuilder();
+				vl::parsing::ParsingToken content;
 
-				void										Reset();
-				bool										Run(const ParsingState::TransitionResult& result);
-				Ptr<ParsingTreeObject>						GetNode();
+				void Accept(XmlNode::IVisitor* visitor)override;
+
+				static vl::Ptr<XmlCData> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-/***********************************************************************
-语法分析器驱动器
-***********************************************************************/
-
-			class ParsingGeneralParser : public Object
+			class XmlAttribute : public XmlNode
 			{
-			protected:
-				Ptr<ParsingTable>							table;
-
-				virtual void								OnReset();
-				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)=0;
 			public:
-				ParsingGeneralParser(Ptr<ParsingTable> _table);
-				~ParsingGeneralParser();
+				vl::parsing::ParsingToken name;
+				vl::parsing::ParsingToken value;
 
-				virtual Ptr<ParsingTreeNode>				Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors);
+				void Accept(XmlNode::IVisitor* visitor)override;
+
+				static vl::Ptr<XmlAttribute> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class ParsingStrictParser : public ParsingGeneralParser
+			class XmlComment : public XmlNode
 			{
-			protected:
-
-				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
-				ParsingStrictParser(Ptr<ParsingTable> _table);
-				~ParsingStrictParser();
+				vl::parsing::ParsingToken content;
+
+				void Accept(XmlNode::IVisitor* visitor)override;
+
+				static vl::Ptr<XmlComment> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-			class ParsingAutoRecoverParser : public ParsingGeneralParser
+			class XmlElement : public XmlNode
 			{
-			protected:
-				collections::Array<ParsingState::Future>	recoverFutures;
-				vint										recoveringFutureIndex;
-
-				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
 			public:
-				ParsingAutoRecoverParser(Ptr<ParsingTable> _table);
-				~ParsingAutoRecoverParser();
+				vl::parsing::ParsingToken name;
+				vl::parsing::ParsingToken closingName;
+				vl::collections::List<vl::Ptr<XmlAttribute>> attributes;
+				vl::collections::List<vl::Ptr<XmlNode>> subNodes;
+
+				void Accept(XmlNode::IVisitor* visitor)override;
+
+				static vl::Ptr<XmlElement> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
-/***********************************************************************
-辅助函数
-***********************************************************************/
+			class XmlInstruction : public XmlNode
+			{
+			public:
+				vl::parsing::ParsingToken name;
+				vl::collections::List<vl::Ptr<XmlAttribute>> attributes;
 
-			extern Ptr<ParsingStrictParser>					CreateBootstrapStrictParser();
-			extern Ptr<ParsingAutoRecoverParser>			CreateBootstrapAutoRecoverParser();
-			extern void										Log(Ptr<ParsingTable> table, stream::TextWriter& writer);
+				void Accept(XmlNode::IVisitor* visitor)override;
+
+				static vl::Ptr<XmlInstruction> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class XmlDocument : public XmlNode
+			{
+			public:
+				vl::collections::List<vl::Ptr<XmlNode>> prologs;
+				vl::Ptr<XmlElement> rootElement;
+
+				void Accept(XmlNode::IVisitor* visitor)override;
+
+				static vl::Ptr<XmlDocument> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> XmlConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			extern vl::Ptr<vl::parsing::tabling::ParsingTable> XmlLoadTable();
+
+			extern vl::Ptr<XmlDocument> XmlParseDocument(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			extern vl::Ptr<XmlElement> XmlParseElement(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 		}
 	}
 }
 
-#endif
-
 /***********************************************************************
-PARSING\PARSINGAUTOMATON.H
+PARSING\XML\PARSINGXML.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: 陈梓瀚(vczh)
-Parsing::Automaton
+Parser::ParsingXml
 
-Classes:
 ***********************************************************************/
-
-#ifndef VCZH_PARSING_PARSINGAUTOMATON
-#define VCZH_PARSING_PARSINGAUTOMATON
 
 
 namespace vl
 {
 	namespace parsing
 	{
-		namespace analyzing
+		namespace xml
 		{
-
-/***********************************************************************
-状态机
-***********************************************************************/
-
-			class Action;
-			class Transition;
-			class State;
-
-			class Action : public Object
-			{
-			public:
-				enum ActionType
-				{
-					Create, // new source
-					Assign, // source ::= <created symbol>
-					Using,  // use <created symbol>
-					Setter, // source ::= target
-					Shift,
-					Reduce,
-					LeftRecursiveReduce,
-				};
-
-				ActionType											actionType;
-				ParsingSymbol*										actionTarget;
-				ParsingSymbol*										actionSource;
-
-				// the following two fields record which rule symbol transition generate this shift/reduce action
-				State*												shiftReduceSource;
-				State*												shiftReduceTarget;
-
-				Action();
-				~Action();
-			};
-
-			class Transition : public Object
-			{
-			public:
-				enum TransitionType
-				{
-					TokenBegin,		// token stream start
-					TokenFinish,	// token stream end
-					TryReduce,		// rule end
-					Epsilon,		// an epsilon transition
-					Symbol,			// a syntax symbol
-				};
-
-				enum StackOperationType
-				{
-					None,
-					ShiftReduceCompacted,
-					LeftRecursive,
-				};
-
-				State*												source;
-				State*												target;
-				collections::List<Ptr<Action>>						actions;
-				
-				TransitionType										transitionType;
-				StackOperationType									stackOperationType;
-				ParsingSymbol*										transitionSymbol;
-
-				Transition();
-				~Transition();
-
-				static bool											IsEquivalent(Transition* t1, Transition* t2, bool careSourceAndTarget);
-			};
-
-			class State : public Object
-			{
-			public:
-				enum StatePosition
-				{
-					BeforeNode,
-					AfterNode,
-				};
-
-				collections::List<Transition*>						transitions;
-				collections::List<Transition*>						inputs;
-				bool												endState;
-
-				ParsingSymbol*										ownerRuleSymbol;
-				definitions::ParsingDefinitionRuleDefinition*		ownerRule;
-				definitions::ParsingDefinitionGrammar*				grammarNode;
-				definitions::ParsingDefinitionGrammar*				stateNode;
-				StatePosition										statePosition;
-				WString												stateName;
-				WString												stateExpression;
-
-				State();
-				~State();
-			};
-
-			class RuleInfo : public Object
-			{
-			public:
-				State*												rootRuleStartState;
-				State*												rootRuleEndState;
-				State*												startState;
-				collections::List<State*>							endStates;
-				int													stateNameCount;
-
-				RuleInfo();
-				~RuleInfo();
-			};
-
-			class Automaton : public Object
-			{
-				typedef collections::Dictionary<definitions::ParsingDefinitionRuleDefinition*, Ptr<RuleInfo>>		RuleInfoMap;
-			public:
-				ParsingSymbolManager*								symbolManager;
-				collections::List<Ptr<Transition>>					transitions;
-				collections::List<Ptr<State>>						states;
-				RuleInfoMap											ruleInfos;
-
-				Automaton(ParsingSymbolManager* _symbolManager);
-				~Automaton();
-
-				State*												RuleStartState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
-				State*												RootRuleStartState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
-				State*												RootRuleEndState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
-				State*												StartState(definitions::ParsingDefinitionRuleDefinition* ownerRule, definitions::ParsingDefinitionGrammar* grammarNode, definitions::ParsingDefinitionGrammar* stateNode);
-				State*												EndState(definitions::ParsingDefinitionRuleDefinition* ownerRule, definitions::ParsingDefinitionGrammar* grammarNode, definitions::ParsingDefinitionGrammar* stateNode);
-				State*												CopyState(State* oldState);
-
-				Transition*											CreateTransition(State* start, State* end);
-				Transition*											TokenBegin(State* start, State* end);
-				Transition*											TokenFinish(State* start, State* end);
-				Transition*											TryReduce(State* start, State* end);
-				Transition*											Epsilon(State* start, State* end);
-				Transition*											Symbol(State* start, State* end, ParsingSymbol* transitionSymbol);
-				Transition*											CopyTransition(State* start, State* end, Transition* oldTransition);
-
-				void												DeleteTransition(Transition* transition);
-				void												DeleteState(State* state);
-			};
-
-/***********************************************************************
-辅助函数
-***********************************************************************/
-
-			namespace closure_searching
-			{
-				struct ClosureItem
-				{
-					State*											state;			// target state of one path of a closure
-					Ptr<collections::List<Transition*>>				transitions;	// path
-					bool											cycle;			// true: invalid closure because there are cycles, and in the middle of the path there will be a transition that targets to the state field.
-
-					ClosureItem()
-						:state(0)
-						,cycle(false)
-					{
-					}
-
-					ClosureItem(State* _state, Ptr<collections::List<Transition*>> _transitions, bool _cycle)
-						:state(_state)
-						,transitions(_transitions)
-						,cycle(_cycle)
-					{
-					}
-				};
-
-				enum ClosureSearchResult
-				{
-					Continue,
-					Hit,
-					Blocked,
-				};
-
-				extern void											SearchClosure(ClosureSearchResult(*closurePredicate)(Transition*), State* startState, collections::List<ClosureItem>& closure);
-			}
-
-			extern Ptr<Automaton>									CreateEpsilonPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager);
-			extern void												RemoveEpsilonTransitions(collections::Dictionary<State*, State*>& oldNewStateMap, collections::List<State*>& scanningStates, Ptr<Automaton> automaton);
-			extern Ptr<Automaton>									CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA);
-			extern Ptr<Automaton>									CreateJointPDAFromNondeterministicPDA(Ptr<Automaton> nondeterministicPDA);
-			extern void												CompactJointPDA(Ptr<Automaton> jointPDA);
-			extern void												MarkLeftRecursiveInJointPDA(Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
-			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
-			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, collections::List<Ptr<ParsingError>>& errors);
-			extern void												Log(Ptr<Automaton> automaton, stream::TextWriter& writer);
+			extern WString					XmlEscapeValue(const WString& value);
+			extern WString					XmlUnescapeValue(const WString& value);
+			extern WString					XmlEscapeCData(const WString& value);
+			extern WString					XmlUnescapeCData(const WString& value);
+			extern WString					XmlEscapeComment(const WString& value);
+			extern WString					XmlUnescapeComment(const WString& value);
+			extern void						XmlPrint(Ptr<XmlNode> node, stream::TextWriter& writer);
+			extern WString					XmlToString(Ptr<XmlNode> node);
 		}
 	}
 }
-
-#endif
-
-/***********************************************************************
-STREAM\MEMORYSTREAM.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Stream::MemoryStream
-
-Interfaces:
-	MemoryStream					：内存流
-***********************************************************************/
-
-#ifndef VCZH_STREAM_MEMORYSTREAM
-#define VCZH_STREAM_MEMORYSTREAM
-
-
-namespace vl
-{
-	namespace stream
-	{
-		class MemoryStream : public Object, public virtual IStream
-		{
-		protected:
-			vint					block;
-			char*					buffer;
-			vint					size;
-			vint					position;
-			vint					capacity;
-
-			void					PrepareSpace(vint totalSpace);
-		public:
-			MemoryStream(vint _block=65536);
-			~MemoryStream();
-
-			bool					CanRead()const;
-			bool					CanWrite()const;
-			bool					CanSeek()const;
-			bool					CanPeek()const;
-			bool					IsLimited()const;
-			bool					IsAvailable()const;
-			void					Close();
-			pos_t					Position()const;
-			pos_t					Size()const;
-			void					Seek(pos_t _size);
-			void					SeekFromBegin(pos_t _size);
-			void					SeekFromEnd(pos_t _size);
-			vint					Read(void* _buffer, vint _size);
-			vint					Write(void* _buffer, vint _size);
-			vint					Peek(void* _buffer, vint _size);
-			void*					GetInternalBuffer();
-		};
-	}
-}
-
-#endif
 
 /***********************************************************************
 REFLECTION\GUITYPEDESCRIPTOR.H

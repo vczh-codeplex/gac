@@ -156,6 +156,8 @@
     <ClCompile Include="..\..\..\..\Common\Source\Console.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Exception.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\HttpUtility.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\Json\ParsingJson.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\Json\ParsingJson_Parser.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\Parsing.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAnalyzer.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton.cpp" />
@@ -170,6 +172,8 @@
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingState.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingTable.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingTree.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml_Parser.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Regex\Regex.cpp" />
@@ -283,6 +287,8 @@
     <ClInclude Include="..\..\..\..\Common\Source\Exception.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Function.h" />
     <ClInclude Include="..\..\..\..\Common\Source\HttpUtility.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\Json\ParsingJson.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\Json\ParsingJson_Parser.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\Parsing.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingAnalyzer.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton.h" />
@@ -290,6 +296,8 @@
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingState.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingTable.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingTree.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml_Parser.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Pointer.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.h" />

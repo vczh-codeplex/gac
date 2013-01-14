@@ -68,6 +68,7 @@ typedef signed __int64	pos_t;
 
 #ifndef _MSC_VER
 #define override
+#define abstract
 #endif
 
 #define VCZH_NO_OLD_OS
