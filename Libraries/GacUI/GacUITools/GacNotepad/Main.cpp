@@ -1,6 +1,6 @@
 #include "..\Source\SDI.h"
 
-using namespace vl::sdi;
+using namespace vl::gactools;
 
 /***********************************************************************
 WinMain

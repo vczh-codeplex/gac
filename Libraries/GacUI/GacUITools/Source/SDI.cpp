@@ -2,7 +2,7 @@
 
 namespace vl
 {
-	namespace sdi
+	namespace gactools
 	{
 
 /***********************************************************************
@@ -51,7 +51,7 @@ StartSDI
 GuiMain
 ***********************************************************************/
 
-using namespace vl::sdi;
+using namespace vl::gactools;
 
 void GuiMain()
 {
