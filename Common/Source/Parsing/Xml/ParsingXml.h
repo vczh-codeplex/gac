@@ -5,6 +5,9 @@ Parser::ParsingXml
 
 ***********************************************************************/
 
+#ifndef VCZH_PARSING_XML_PARSINGXML
+#define VCZH_PARSING_XML_PARSINGXML
+
 #include "ParsingXml_Parser.h"
 
 namespace vl
@@ -24,3 +27,5 @@ namespace vl
 		}
 	}
 }
+
+#endif

@@ -10,6 +10,14 @@ Interfaces:
 
 #include "..\..\Public\Source\GacUI.h"
 
+using namespace vl::stream;
+using namespace vl::collections;
+using namespace vl::regex;
+using namespace vl::parsing;
+using namespace vl::parsing::xml;
+using namespace vl::parsing::json;
+using namespace vl::parsing::tabling;
+
 namespace vl
 {
 	namespace gactools
@@ -109,6 +117,7 @@ Document Interfaces
 			public:
 				virtual void					OnAttach(IDocumentContainer* sender)=0;
 				virtual void					OnDetach(IDocumentContainer* sender)=0;
+				virtual void					OnDocumentClosed(IDocumentContainer* sender)=0;
 				virtual void					OnDocumentDestroyed(IDocumentContainer* sender)=0;
 			};
 			virtual void						AttachCallback(ICallback* callback)=0;
@@ -204,13 +213,13 @@ Manager Interfaces
 			virtual void						AttachCallback(ICallback* callback)=0;
 			virtual void						DetachCallback(ICallback* callback)=0;
 
-			virtual bool						RegisterFileType(IDocumentFileType* fileType)=0;
+			virtual bool						RegisterFileType(Ptr<IDocumentFileType> fileType)=0;
 			virtual vint						GetFileTypeCount()=0;
 			virtual IDocumentFileType*			GetFileType(vint index)=0;
 			virtual IDocumentFileType*			FindFileTypeById(const WString& fileTypeId)=0;
 			virtual IDocumentFileType*			FindFileTypeByExtension(const WString& fileExtension)=0;
 
-			virtual bool						RegisterEditorFactory(IDocumentEditorFactory* editorFactory)=0;
+			virtual bool						RegisterEditorFactory(Ptr<IDocumentEditorFactory> editorFactory)=0;
 			virtual vint						GetEditorFactoryCount()=0;
 			virtual IDocumentEditorFactory*		GetEditorFactory(vint index)=0;
 			virtual IDocumentEditorFactory*		FindEditorFactoryById(const WString& editorTypeId)=0;

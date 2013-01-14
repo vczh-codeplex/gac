@@ -5,6 +5,9 @@ Parser::ParsingJson_Parser
 
 ***********************************************************************/
 
+#ifndef VCZH_PARSING_JSON_PARSINGJSON
+#define VCZH_PARSING_JSON_PARSINGJSON
+
 #include "ParsingJson_Parser.h"
 
 namespace vl
@@ -20,3 +23,5 @@ namespace vl
 		}
 	}
 }
+
+#endif

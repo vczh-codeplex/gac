@@ -11110,6 +11110,9 @@ Parser::ParsingJson_Parser
 本文件使用Vczh Functional Macro工具自动生成
 ***********************************************************************/
 
+#ifndef VCZH_PARSING_JSON_PARSINGJSON_PARSER
+#define VCZH_PARSING_JSON_PARSINGJSON_PARSER
+
 
 namespace vl
 {
@@ -11236,6 +11239,7 @@ namespace vl
 		}
 	}
 }
+#endif
 
 /***********************************************************************
 PARSING\JSON\PARSINGJSON.H
@@ -11246,6 +11250,9 @@ Developer: 陈梓瀚(vczh)
 Parser::ParsingJson_Parser
 
 ***********************************************************************/
+
+#ifndef VCZH_PARSING_JSON_PARSINGJSON
+#define VCZH_PARSING_JSON_PARSINGJSON
 
 
 namespace vl
@@ -11261,6 +11268,8 @@ namespace vl
 		}
 	}
 }
+
+#endif
 
 /***********************************************************************
 STREAM\MEMORYSTREAM.H
@@ -12702,6 +12711,9 @@ Parser::ParsingXml_Parser
 本文件使用Vczh Functional Macro工具自动生成
 ***********************************************************************/
 
+#ifndef VCZH_PARSING_XML_PARSINGXML_PARSER
+#define VCZH_PARSING_XML_PARSINGXML_PARSER
+
 
 namespace vl
 {
@@ -12837,6 +12849,7 @@ namespace vl
 		}
 	}
 }
+#endif
 
 /***********************************************************************
 PARSING\XML\PARSINGXML.H
@@ -12847,6 +12860,9 @@ Developer: 陈梓瀚(vczh)
 Parser::ParsingXml
 
 ***********************************************************************/
+
+#ifndef VCZH_PARSING_XML_PARSINGXML
+#define VCZH_PARSING_XML_PARSINGXML
 
 
 namespace vl
@@ -12866,6 +12882,8 @@ namespace vl
 		}
 	}
 }
+
+#endif
 
 /***********************************************************************
 REFLECTION\GUITYPEDESCRIPTOR.H

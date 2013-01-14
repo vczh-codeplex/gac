@@ -523,9 +523,17 @@ void PrintTypeDefinitions(List<Ptr<ParsingDefinitionTypeDefinition>>& types, con
 	}
 }
 
-void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, List<WString>& codeIncludes, List<WString>& codeNamespaces, const WString& codeClassPrefix, const Dictionary<WString, WString>& codeParsers, StreamWriter& writer)
+void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, List<WString>& codeIncludes, List<WString>& codeNamespaces, const WString& codeClassPrefix, const WString& codeGuard, const Dictionary<WString, WString>& codeParsers, StreamWriter& writer)
 {
 	WriteFileComment(name, writer);
+	if(codeGuard!=L"")
+	{
+		writer.WriteString(L"#ifndef ");
+		writer.WriteLine(codeGuard);
+		writer.WriteString(L"#define ");
+		writer.WriteLine(codeGuard);
+		writer.WriteLine(L"");
+	}
 	WString prefix=WriteFileBegin(codeIncludes, codeNamespaces, writer);
 
 	ParsingSymbolManager manager;
@@ -599,6 +607,10 @@ void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr
 	}
 
 	WriteFileEnd(codeNamespaces, writer);
+	if(codeGuard!=L"")
+	{
+		writer.WriteString(L"#endif");
+	}
 }
 
 /***********************************************************************
@@ -1350,6 +1362,7 @@ int wmain(int argc, wchar_t* argv[])
 	Regex regexPathSplitter(L"[///\\]");
 	Regex regexInclude(L"^include:(<path>/.+)$");
 	Regex regexClassPrefix(L"^classPrefix:(<prefix>/.+)$");
+	Regex regexGuard(L"^guard:(<guard>/.+)$");
 	Regex regexNamespace(L"^namespace:((<namespace>[^.]+)(.(<namespace>[^.]+))*)?$");
 	Regex regexParser(L"^parser:(<name>/w+)/((<rule>/w+)/)$");
 	Ptr<ParsingStrictParser> parser=CreateBootstrapStrictParser();
@@ -1391,7 +1404,7 @@ int wmain(int argc, wchar_t* argv[])
 
 			List<WString> codeIncludes, codeNamespaces;
 			Dictionary<WString, WString> codeParsers;
-			WString codeGrammar, codeClassPrefix;
+			WString codeGrammar, codeClassPrefix, codeGuard;
 			{
 				FileStream fileStream(inputPath, FileStream::ReadOnly);
 				if(!fileStream.IsAvailable())
@@ -1414,6 +1427,10 @@ int wmain(int argc, wchar_t* argv[])
 					else if((match=regexClassPrefix.Match(line)) && match->Success())
 					{
 						codeClassPrefix=match->Groups().Get(L"prefix").Get(0).Value();
+					}
+					else if((match=regexGuard.Match(line)) && match->Success())
+					{
+						codeGuard=match->Groups().Get(L"guard").Get(0).Value();
 					}
 					else if((match=regexInclude.Match(line)) && match->Success())
 					{
@@ -1482,7 +1499,7 @@ int wmain(int argc, wchar_t* argv[])
 				BomEncoder encoder(BomEncoder::Mbcs);
 				EncoderStream encoderStream(fileStream, encoder);
 				StreamWriter writer(encoderStream);
-				WriteHeaderFile(name, definition, table, codeIncludes, codeNamespaces, codeClassPrefix, codeParsers, writer);
+				WriteHeaderFile(name, definition, table, codeIncludes, codeNamespaces, codeClassPrefix, codeGuard, codeParsers, writer);
 			}
 			{
 				FileStream fileStream(outputCppPath, FileStream::WriteOnly);
