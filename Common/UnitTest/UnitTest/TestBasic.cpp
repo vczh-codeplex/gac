@@ -2,8 +2,17 @@
 #include "..\..\Source\Pointer.h"
 #include "..\..\Source\Tuple.h"
 #include "..\..\Source\Lazy.h"
+#include "..\..\Source\Locale.h"
+#include "..\..\Source\Stream\Accessor.h"
+#include "..\..\Source\Stream\CharFormat.h"
+#include "..\..\Source\Stream\FileStream.h"
+#include "..\..\Source\Collections\OperationForEach.h"
 
 using namespace vl;
+using namespace vl::collections;
+using namespace vl::stream;
+
+extern WString GetPath();
 
 namespace ObjectsForTestAutoPointer
 {
@@ -137,4 +146,24 @@ TEST_CASE(TestLazy)
 	TEST_ASSERT(a.IsAvailable()==true);
 	a=Lazy<vint>();
 	TEST_ASSERT(a.IsAvailable()==false);
+}
+
+TEST_CASE(TestLocale)
+{
+	FileStream fileStream(GetPath()+L"Locale.txt", FileStream::WriteOnly);
+	BomEncoder encoder(BomEncoder::Utf16);
+	EncoderStream encoderStream(fileStream, encoder);
+	StreamWriter writer(encoderStream);
+
+	writer.WriteLine(L"Invariant locale: "+Locale::Invariant().GetName());
+	writer.WriteLine(L"User default locale: "+Locale::UserDefault().GetName());
+	writer.WriteLine(L"System default locale: "+Locale::SystemDefault().GetName());
+
+	List<Locale> locales;
+	Locale::Enumerate(locales);
+	FOREACH(Locale, locale, locales)
+	{
+		writer.WriteLine(L"========================================");
+		writer.WriteLine(L"Locale: "+locale.GetName());
+	}
 }
