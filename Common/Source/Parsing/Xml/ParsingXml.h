@@ -13,8 +13,6 @@ namespace vl
 	{
 		namespace xml
 		{
-			extern void						XmlEscapeValue(const WString& value, stream::TextWriter& writer);
-			extern void						XmlUnescapeValue(const WString& value, stream::TextWriter& writer);
 			extern WString					XmlEscapeValue(const WString& value);
 			extern WString					XmlUnescapeValue(const WString& value);
 			extern WString					XmlEscapeCData(const WString& value);

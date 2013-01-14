@@ -113,25 +113,25 @@ JsonPrintVisitor
 
 				void Visit(XmlText* node)
 				{
-					XmlEscapeValue(node->content.value);
+					writer.WriteString(XmlEscapeValue(node->content.value));
 				}
 
 				void Visit(XmlCData* node)
 				{
-					XmlEscapeCData(node->content.value);
+					writer.WriteString(XmlEscapeCData(node->content.value));
 				}
 
 				void Visit(XmlAttribute* node)
 				{
 					writer.WriteString(node->name.value);
 					writer.WriteString(L"=\"");
-					XmlEscapeValue(node->value.value);
+					writer.WriteString(XmlEscapeValue(node->value.value));
 					writer.WriteString(L"\"");
 				}
 
 				void Visit(XmlComment* node)
 				{
-					XmlEscapeComment(node->content.value);
+					writer.WriteString(XmlEscapeComment(node->content.value));
 				}
 
 				void Visit(XmlElement* node)
@@ -174,13 +174,9 @@ JsonPrintVisitor
 
 				void Visit(XmlDocument* node)
 				{
-					FOREACH(Ptr<XmlInstruction>, ins, node->instructions)
+					FOREACH(Ptr<XmlNode>, prolog, node->prologs)
 					{
-						ins->Accept(this);
-					}
-					FOREACH(Ptr<XmlComment>, comment, node->comments)
-					{
-						comment->Accept(this);
+						prolog->Accept(this);
 					}
 					node->rootElement->Accept(this);
 				}
@@ -189,71 +185,6 @@ JsonPrintVisitor
 /***********************************************************************
 API
 ***********************************************************************/
-
-			void XmlEscapeValue(const WString& value, stream::TextWriter& writer)
-			{
-				const wchar_t* reading=value.Buffer();
-				while(wchar_t c=*reading++)
-				{
-					switch(c)
-					{
-					case L'<':
-						writer.WriteString(L"&lt;");
-						break;
-					case L'>':
-						writer.WriteString(L"&gt;");
-						break;
-					case L'&':
-						writer.WriteString(L"&amp;");
-						break;
-					case L'\'':
-						writer.WriteString(L"&apos;");
-						break;
-					case L'\"':
-						writer.WriteString(L"&quot;");
-						break;
-					default:
-						writer.WriteChar(c);
-					}
-				}
-			}
-
-			void XmlUnescapeValue(const WString& value, stream::TextWriter& writer)
-			{
-				const wchar_t* reading=value.Buffer();
-				while(*reading)
-				{
-					if(wcsncmp(reading, L"&lt;", 4)==0)
-					{
-						writer.WriteChar(L'<');
-						reading+=4;
-					}
-					else if(wcsncmp(reading, L"&gt;", 4)==0)
-					{
-						writer.WriteChar(L'>');
-						reading+=4;
-					}
-					else if(wcsncmp(reading, L"&amp;", 5)==0)
-					{
-						writer.WriteChar(L'&');
-						reading+=5;
-					}
-					else if(wcsncmp(reading, L"&apos;", 6)==0)
-					{
-						writer.WriteChar(L'\'');
-						reading+=6;
-					}
-					else if(wcsncmp(reading, L"&quot;", 6)==0)
-					{
-						writer.WriteChar(L'\"');
-						reading+=6;
-					}
-					else
-					{
-						writer.WriteChar(*reading++);
-					}
-				}
-			}
 
 			WString XmlEscapeValue(const WString& value)
 			{
