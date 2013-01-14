@@ -10,14 +10,23 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Public\Source\GacUI.cpp" />
+    <ClCompile Include="..\..\Public\Source\Vlpp.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Public\Source\GacUI.h" />
+    <ClInclude Include="..\..\Public\Source\GacUIIncludes.h" />
+    <ClInclude Include="..\..\Public\Source\Vlpp.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B45D4A37-D94C-4CBC-BEAB-D261FE2F647C}</ProjectGuid>
-    <Keyword>Win32Proj</Keyword>
-    <RootNamespace>GacSDI</RootNamespace>
+    <ProjectGuid>{86721540-850B-47C1-BAA5-5810E70CA6EC}</ProjectGuid>
     <SccProjectName>SAK</SccProjectName>
     <SccAuxPath>SAK</SccAuxPath>
     <SccLocalPath>SAK</SccLocalPath>
     <SccProvider>SAK</SccProvider>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>GacUI</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -74,20 +83,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\Source\SDI.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\Source\SDI.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\GacDocument\GacDocument.vcxproj">
-      <Project>{6fa1dde6-28f2-45a7-83b7-3873234a8edf}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\GacUI\GacUI.vcxproj">
-      <Project>{86721540-850b-47c1-baa5-5810e70ca6ec}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
