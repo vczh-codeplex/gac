@@ -59,15 +59,15 @@ token ELEMENT_CLOSE = "/>";
 token EQUAL = "/=";
 
 token NAME = "[a-zA-Z0-9:_/-]+";
-token ATTVALUE = """[^""]*""";
+token ATTVALUE = """[^<>""]*""|'[^<>']*'";
 token COMMENT = "/</!--([^/->]|-[^/->]|--[^>])*--/>";
 token CDATA = "/</!/[CDATA/[([^/]]|/][^/]]|/]/][^>])*/]/]/>";
-token TEXT = "([^<>="" /r/n/ta-zA-Z0-9:_/-])+|""";
+token TEXT = "([^<>="" /r/n/ta-zA-Z0-9:_/-])+|""|'";
 
 discardtoken SPACE = "/s+";
 
 rule Attribute XAttribute = NAME:name "=" ATTVALUE:value as Attribute;
-rule Text XText = (NAME:content | EQUAL:content | TEXT:content) as Text;
+rule Text XText = (NAME:content | EQUAL:content | ATTVALUE:content | TEXT:content) as Text;
 rule CData XCData = CDATA:content as CData;
 rule Comment XComment = COMMENT:content as Comment;
 rule Element XElement = "<" NAME:name {XAttribute:attributes} ("/>" | ">" {XSubNode:subNodes} "</" NAME:closingName ">") as Element;
