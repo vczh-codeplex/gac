@@ -16,9 +16,47 @@ namespace vl
 	{
 		class DocumentEditor : public Object, public IDocumentEditor
 		{
+		private:
+			class DocumentViewCallback : public Object, public IDocumentView::ICallback
+			{
+			private:
+				DocumentEditor*					ownedEditor;
+				IDocumentView*					view;
+			public:
+				DocumentViewCallback(DocumentEditor* _ownedEditor);
+				~DocumentViewCallback();
+
+				void							OnAttach(IDocumentView* sender)override;
+				void							OnDetach(IDocumentView* sender)override;
+				void							OnViewUpdated(IDocumentView* sender)override;
+				void							OnViewDestroyed(IDocumentView* sender)override;
+				void							OnBeginEdit(IDocumentView* sender)override;
+				void							OnFinishEdit(IDocumentView* sender)override;
+			};
+
+			List<ICallback*>					callbacks;
+			Ptr<DocumentViewCallback>			documentViewCallback;
+			IDocumentEditorFactory*				editorFactory;
+			IDocumentView*						editingView;
+			GuiControl*							editorControl;
+
+			void								OnLostActiveView();
+		protected:
+
+			const List<ICallback*>&				GetCallbacks();
+			virtual GuiControl*					CreateEditorControlInternal()=0;
 		public:
-			DocumentEditor();
+			DocumentEditor(IDocumentEditorFactory* _editorFactory, IDocumentView* _editingView);
 			~DocumentEditor();
+
+			bool								AttachCallback(ICallback* callback)override;
+			bool								DetachCallback(ICallback* callback)override;
+
+			IDocumentEditorFactory*				GetOwnedFactory()override;
+			GuiControl*							GetEditorControl()override;
+			IDocumentView*						GetEditingView()override;
+			bool								FinishEdit()override;
+			bool								IsAvailable()override;
 		};
 	}
 }

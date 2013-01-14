@@ -55,8 +55,8 @@ Document Interfaces
 				virtual void					OnBeginEdit(IDocumentView* sender)=0;
 				virtual void					OnFinishEdit(IDocumentView* sender)=0;
 			};
-			virtual void						AttachCallback(ICallback* callback)=0;
-			virtual void						DetachCallback(ICallback* callback)=0;
+			virtual bool						AttachCallback(ICallback* callback)=0;
+			virtual bool						DetachCallback(ICallback* callback)=0;
 
 			virtual IDocumentFragment*			GetOwnedFragment()=0;
 			virtual WString						GetViewTypeId()=0;
@@ -84,8 +84,8 @@ Document Interfaces
 				virtual void					OnFragmentUpdated(IDocumentFragment* sender)=0;
 				virtual void					OnFragmentDestroyed(IDocumentFragment* sender)=0;
 			};
-			virtual void						AttachCallback(ICallback* callback)=0;
-			virtual void						DetachCallback(ICallback* callback)=0;
+			virtual bool						AttachCallback(ICallback* callback)=0;
+			virtual bool						DetachCallback(ICallback* callback)=0;
 
 			virtual IDocumentContainer*			GetOwnedContainer()=0;
 			virtual IDocumentFragment*			GetOwnedFragment()=0;
@@ -120,8 +120,8 @@ Document Interfaces
 				virtual void					OnDocumentClosed(IDocumentContainer* sender)=0;
 				virtual void					OnDocumentDestroyed(IDocumentContainer* sender)=0;
 			};
-			virtual void						AttachCallback(ICallback* callback)=0;
-			virtual void						DetachCallback(ICallback* callback)=0;
+			virtual bool						AttachCallback(ICallback* callback)=0;
+			virtual bool						DetachCallback(ICallback* callback)=0;
 
 			virtual IDocumentFragment*			GetRootFragment()=0;
 			virtual void						Close()=0;
@@ -164,8 +164,8 @@ Editor Interfaces
 				virtual void					OnFinishEdit(IDocumentEditor* sender)=0;
 				virtual void					OnLostActiveView(IDocumentEditor* sender)=0;
 			};
-			virtual void						AttachCallback(ICallback* callback)=0;
-			virtual void						DetachCallback(ICallback* callback)=0;
+			virtual bool						AttachCallback(ICallback* callback)=0;
+			virtual bool						DetachCallback(ICallback* callback)=0;
 
 			virtual IDocumentEditorFactory*		GetOwnedFactory()=0;
 			virtual GuiControl*					GetEditorControl()=0;
@@ -184,8 +184,8 @@ Editor Interfaces
 				virtual void					OnDetach(IDocumentEditorFactory* sender)=0;
 				virtual void					OnEditorCreated(IDocumentEditorFactory* sender, IDocumentEditor* editor)=0;
 			};
-			virtual void						AttachCallback(ICallback* callback)=0;
-			virtual void						DetachCallback(ICallback* callback)=0;
+			virtual bool						AttachCallback(ICallback* callback)=0;
+			virtual bool						DetachCallback(ICallback* callback)=0;
 
 			virtual WString						GetEditorTypeId()=0;
 			virtual WString						GetEditorTypeFriendlyName()=0;
@@ -210,8 +210,8 @@ Manager Interfaces
 				virtual void					OnFileTypeRegistered(IDocumentManager* sender, IDocumentFileType* fileType)=0;
 				virtual void					OnEditorFactoryRegistered(IDocumentManager* sender, IDocumentEditorFactory* editorFactory)=0;
 			};
-			virtual void						AttachCallback(ICallback* callback)=0;
-			virtual void						DetachCallback(ICallback* callback)=0;
+			virtual bool						AttachCallback(ICallback* callback)=0;
+			virtual bool						DetachCallback(ICallback* callback)=0;
 
 			virtual bool						RegisterFileType(Ptr<IDocumentFileType> fileType)=0;
 			virtual vint						GetFileTypeCount()=0;
