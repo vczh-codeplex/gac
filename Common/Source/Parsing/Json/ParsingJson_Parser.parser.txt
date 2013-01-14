@@ -1,6 +1,7 @@
 include:"..\Parsing.h"
 namespace:vl.parsing.json
 classPrefix:Json
+guard:VCZH_PARSING_JSON_PARSINGJSON_PARSER
 parser:Parse(JRoot)
 grammar:
 

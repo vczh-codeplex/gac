@@ -1,6 +1,7 @@
 include:"..\..\..\Source\Parsing\Parsing.h"
 namespace:vczh.whoknows.xmlutility
 classPrefix:Xml
+guard:VCZH_PARSING_XML
 parser:ParseDocument(XDocument)
 parser:ParseElement(XElement)
 grammar:

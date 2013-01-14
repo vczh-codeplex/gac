@@ -6,6 +6,9 @@ Parser::Test
 本文件使用Vczh Functional Macro工具自动生成
 ***********************************************************************/
 
+#ifndef VCZH_PARSING_XML
+#define VCZH_PARSING_XML
+
 #include "..\..\..\Source\Parsing\Parsing.h"
 
 namespace vczh
@@ -242,3 +245,4 @@ namespace vczh
 		}
 	}
 }
+#endif

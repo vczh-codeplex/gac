@@ -6,6 +6,9 @@ Parser::ParsingJson_Parser
 本文件使用Vczh Functional Macro工具自动生成
 ***********************************************************************/
 
+#ifndef VCZH_PARSING_JSON_PARSINGJSON_PARSER
+#define VCZH_PARSING_JSON_PARSINGJSON_PARSER
+
 #include "..\Parsing.h"
 
 namespace vl
@@ -133,3 +136,4 @@ namespace vl
 		}
 	}
 }
+#endif

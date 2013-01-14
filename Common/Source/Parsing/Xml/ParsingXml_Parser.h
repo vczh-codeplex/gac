@@ -6,6 +6,9 @@ Parser::ParsingXml_Parser
 本文件使用Vczh Functional Macro工具自动生成
 ***********************************************************************/
 
+#ifndef VCZH_PARSING_XML_PARSINGXML_PARSER
+#define VCZH_PARSING_XML_PARSINGXML_PARSER
+
 #include "..\Parsing.h"
 
 namespace vl
@@ -142,3 +145,4 @@ namespace vl
 		}
 	}
 }
+#endif
