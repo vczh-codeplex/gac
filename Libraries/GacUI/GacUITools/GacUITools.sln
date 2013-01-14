@@ -8,9 +8,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacNotepad", "GacNotepad\Ga
 		{B45D4A37-D94C-4CBC-BEAB-D261FE2F647C} = {B45D4A37-D94C-4CBC-BEAB-D261FE2F647C}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacDocument", "GacDocument\GacDocument.vcxproj", "{6FA1DDE6-28F2-45A7-83B7-3873234A8EDF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacUI", "GacUI\GacUI.vcxproj", "{86721540-850B-47C1-BAA5-5810E70CA6EC}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
+		SccNumberOfProjects = 5
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
@@ -20,6 +24,12 @@ Global
 		SccProjectUniqueName2 = GacNotepad\\GacNotepad.vcxproj
 		SccProjectName2 = GacNotepad
 		SccLocalPath2 = GacNotepad
+		SccProjectUniqueName3 = GacDocument\\GacDocument.vcxproj
+		SccProjectName3 = GacDocument
+		SccLocalPath3 = GacDocument
+		SccProjectUniqueName4 = GacUI\\GacUI.vcxproj
+		SccProjectName4 = GacUI
+		SccLocalPath4 = GacUI
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -34,6 +44,14 @@ Global
 		{ED121758-9707-4898-9D6B-73B78E18C02E}.Debug|Win32.Build.0 = Debug|Win32
 		{ED121758-9707-4898-9D6B-73B78E18C02E}.Release|Win32.ActiveCfg = Release|Win32
 		{ED121758-9707-4898-9D6B-73B78E18C02E}.Release|Win32.Build.0 = Release|Win32
+		{6FA1DDE6-28F2-45A7-83B7-3873234A8EDF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6FA1DDE6-28F2-45A7-83B7-3873234A8EDF}.Debug|Win32.Build.0 = Debug|Win32
+		{6FA1DDE6-28F2-45A7-83B7-3873234A8EDF}.Release|Win32.ActiveCfg = Release|Win32
+		{6FA1DDE6-28F2-45A7-83B7-3873234A8EDF}.Release|Win32.Build.0 = Release|Win32
+		{86721540-850B-47C1-BAA5-5810E70CA6EC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{86721540-850B-47C1-BAA5-5810E70CA6EC}.Debug|Win32.Build.0 = Debug|Win32
+		{86721540-850B-47C1-BAA5-5810E70CA6EC}.Release|Win32.ActiveCfg = Release|Win32
+		{86721540-850B-47C1-BAA5-5810E70CA6EC}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
