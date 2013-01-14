@@ -426,6 +426,9 @@
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml_Parser.cpp">
       <Filter>Common\Parsing\Xml</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Locale.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -811,6 +814,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml_Parser.h">
       <Filter>Common\Parsing\Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Locale.h">
+      <Filter>Common\Basic</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
