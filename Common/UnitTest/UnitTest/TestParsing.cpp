@@ -852,11 +852,10 @@ TEST_CASE(TestGeneratedParser_Calculator)
 
 namespace test
 {
-	template<typename T>
+	template<typename T, vint Count>
 	void TestGeneratedParser(
-		const wchar_t* input[],
-		const wchar_t* output[],
-		vint count,
+		const wchar_t* (&input)[Count],
+		const wchar_t* (&output)[Count],
 		Ptr<ParsingTable> table,
 		const WString& name,
 		const WString& rule,
@@ -864,7 +863,7 @@ namespace test
 		WString(*serializer)(Ptr<T>)
 		)
 	{
-		for(vint i=0;i<count;i++)
+		for(vint i=0;i<Count;i++)
 		{
 			Parse(table, input[i], name, rule, i, true);
 			Ptr<T> node=deserializer(input[i], table);
@@ -903,7 +902,7 @@ TEST_CASE(TestGeneratedParser_Json)
 		L"{\"name\":\"vczh\",\"scores\":[100,90,80,{\"a\":\"b\"}],\"IDE\":{\"VC++\":\"Microsoft\"}}",
 	};
 	Ptr<ParsingTable> table=JsonLoadTable();
-	TestGeneratedParser(input, output, sizeof(input)/sizeof(*input), table, L"Json", L"JRoot", &JsonParse, &JsonToString);
+	TestGeneratedParser(input, output, table, L"Json", L"JRoot", &JsonParse, &JsonToString);
 }
 
 TEST_CASE(TestGeneratedParser_Xml)
@@ -912,11 +911,7 @@ TEST_CASE(TestGeneratedParser_Xml)
 	{
 		L"<name />",
 		L"<name att1 = \"value1\" att2 = \"value2\" />",
-
-		L"<?xml version = \"1.0\" encoding = \"utf16\" ?>\r\n"
-		L"<!--this is a comment-->\r\n"
-		L"<name att1 = \"value1\" att2 = \"value2\" />",
-
+		L"<?xml version = \"1.0\" encoding = \"utf16\" ?>\r\n<!--this is a comment-->\r\n<name att1 = \"value1\" att2 = \"value2\" />",
 		L"<button name = \'&lt;&gt;&amp;&apos;&quot;\'> <![CDATA[ButtonText]]> <![CDATA[!]!]]!]>!>!]]> </button>",
 		L"<text> This is a single line of text </text>",
 		L"<text> normal <b>bold</b> normal <!--comment--> <i>italic</i> normal </text>",
@@ -933,5 +928,5 @@ TEST_CASE(TestGeneratedParser_Xml)
 		L"<text> &quot;normal&quot; <b>bold</b> &quot;normal&apos; <!--comment--><i>italic</i> &apos;normal&quot; </text>",
 	};
 	Ptr<ParsingTable> table=XmlLoadTable();
-	TestGeneratedParser(input, output, sizeof(input)/sizeof(*input), table, L"Xml", L"XDocument", &XmlParseDocument, &XmlDocumentToString);
+	TestGeneratedParser(input, output, table, L"Xml", L"XDocument", &XmlParseDocument, &XmlDocumentToString);
 }
