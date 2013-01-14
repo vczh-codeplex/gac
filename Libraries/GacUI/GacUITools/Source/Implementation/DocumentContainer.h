@@ -16,9 +16,18 @@ namespace vl
 	{
 		class DocumentContainer : public Object, public IDocumentContainer
 		{
+		private:
+			List<ICallback*>			callbacks;
+			Ptr<IDocumentFragment>		rootFragment;
+
 		public:
-			DocumentContainer();
+			DocumentContainer(Ptr<IDocumentFragment> _rootFragment);
 			~DocumentContainer();
+
+			bool						AttachCallback(ICallback* callback)override;
+			bool						DetachCallback(ICallback* callback)override;
+
+			IDocumentFragment*			GetRootFragment()override;
 		};
 	}
 }
