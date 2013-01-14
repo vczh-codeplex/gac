@@ -117,14 +117,12 @@ Document Interfaces
 			public:
 				virtual void					OnAttach(IDocumentContainer* sender)=0;
 				virtual void					OnDetach(IDocumentContainer* sender)=0;
-				virtual void					OnDocumentClosed(IDocumentContainer* sender)=0;
 				virtual void					OnDocumentDestroyed(IDocumentContainer* sender)=0;
 			};
 			virtual bool						AttachCallback(ICallback* callback)=0;
 			virtual bool						DetachCallback(ICallback* callback)=0;
 
 			virtual IDocumentFragment*			GetRootFragment()=0;
-			virtual void						Close()=0;
 		};
 
 		class IDocumentFileType : public Interface
@@ -137,8 +135,8 @@ Document Interfaces
 				virtual void					OnDetach(IDocumentFileType* sender)=0;
 				virtual void					OnDocumentCreated(IDocumentFileType* sender, IDocumentContainer* document)=0;
 			};
-			virtual void						AttachCallback(ICallback* callback)=0;
-			virtual void						DetachCallback(ICallback* callback)=0;
+			virtual bool						AttachCallback(ICallback* callback)=0;
+			virtual bool						DetachCallback(ICallback* callback)=0;
 
 			virtual WString						GetFileExtension()=0;
 			virtual WString						GetFileTypeId()=0;
