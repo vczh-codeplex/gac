@@ -98,7 +98,7 @@ Unescaping Function Foward Declarations
 			}
 
 /***********************************************************************
-JsonPrintVisitor
+XmlPrintVisitor
 ***********************************************************************/
 
 			class XmlPrintVisitor : public Object, public XmlNode::IVisitor
