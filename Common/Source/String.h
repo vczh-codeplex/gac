@@ -418,8 +418,8 @@ namespace vl
 	extern vint					wtoi(const WString& string);
 	extern __int64				atoi64(const AString& string);
 	extern __int64				wtoi64(const WString& string);
-	extern vuint			atou(const AString& string);
-	extern vuint			wtou(const WString& string);
+	extern vuint				atou(const AString& string);
+	extern vuint				wtou(const WString& string);
 	extern unsigned __int64		atou64(const AString& string);
 	extern unsigned __int64		wtou64(const WString& string);
 	extern double				atof(const AString& string);

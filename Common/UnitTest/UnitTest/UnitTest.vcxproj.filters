@@ -225,6 +225,9 @@
     <ClCompile Include="..\..\Source\Parsing\Json\ParsingJson.cpp">
       <Filter>Common\Parsing\Json</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Locale.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
@@ -451,6 +454,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Parsing\Json\ParsingJson.h">
       <Filter>Common\Parsing\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Locale.h">
+      <Filter>Common\Basic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
