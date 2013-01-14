@@ -46,8 +46,7 @@ class Instruction : Node
 
 class Document : Node
 {
-	Instruction[] instructions;
-	Comment[] comments;
+	Node[] prologs;
 	Element rootElement;
 }
 
@@ -74,4 +73,4 @@ rule Comment XComment = COMMENT:content as Comment;
 rule Element XElement = "<" NAME:name {XAttribute:attributes} ("/>" | ">" {XSubNode:subNodes} "</" NAME:closingName ">") as Element;
 rule Node XSubNode = !XText | !XCData | !XComment | !XElement;
 rule Instruction XInstruction = "<?" NAME:name {XAttribute:attributes} "?>" as Instruction;
-rule Document XDocument = {XInstruction:instructions | XComment:comments} XElement:rootElement as Document;
+rule Document XDocument = {XInstruction:prologs | XComment:prologs} XElement:rootElement as Document;

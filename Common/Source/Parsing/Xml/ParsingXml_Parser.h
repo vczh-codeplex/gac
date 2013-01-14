@@ -126,8 +126,7 @@ namespace vl
 			class XmlDocument : public XmlNode
 			{
 			public:
-				vl::collections::List<vl::Ptr<XmlInstruction>> instructions;
-				vl::collections::List<vl::Ptr<XmlComment>> comments;
+				vl::collections::List<vl::Ptr<XmlNode>> prologs;
 				vl::Ptr<XmlElement> rootElement;
 
 				void Accept(XmlNode::IVisitor* visitor)override;
