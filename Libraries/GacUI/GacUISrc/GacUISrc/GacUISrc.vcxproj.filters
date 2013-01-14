@@ -85,6 +85,12 @@
     <Filter Include="Common\Parsing">
       <UniqueIdentifier>{70f80a42-6e04-474c-9406-d39c857fefca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Parsing\Xml">
+      <UniqueIdentifier>{cc904d09-3972-4daa-828e-970646f39665}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Parsing\Json">
+      <UniqueIdentifier>{38f5e3e8-0dd1-48d1-8c87-72eb91978716}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -407,6 +413,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingState.cpp">
       <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\Json\ParsingJson.cpp">
+      <Filter>Common\Parsing\Json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\Json\ParsingJson_Parser.cpp">
+      <Filter>Common\Parsing\Json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml.cpp">
+      <Filter>Common\Parsing\Xml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml_Parser.cpp">
+      <Filter>Common\Parsing\Xml</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -781,6 +799,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingState.h">
       <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\Json\ParsingJson.h">
+      <Filter>Common\Parsing\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\Json\ParsingJson_Parser.h">
+      <Filter>Common\Parsing\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml.h">
+      <Filter>Common\Parsing\Xml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Parsing\Xml\ParsingXml_Parser.h">
+      <Filter>Common\Parsing\Xml</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
