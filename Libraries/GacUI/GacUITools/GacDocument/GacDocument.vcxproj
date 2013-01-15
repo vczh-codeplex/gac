@@ -30,6 +30,24 @@
     <ClInclude Include="..\Source\Implementation\DocumentManager.h" />
     <ClInclude Include="..\Source\Implementation\DocumentView.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Source\PackageResources\Images\_Copy.png" />
+    <Image Include="..\Source\PackageResources\Images\_Cut.png" />
+    <Image Include="..\Source\PackageResources\Images\_Delete.png" />
+    <Image Include="..\Source\PackageResources\Images\_New.png" />
+    <Image Include="..\Source\PackageResources\Images\_Open.png" />
+    <Image Include="..\Source\PackageResources\Images\_Paste.png" />
+    <Image Include="..\Source\PackageResources\Images\_Print.png" />
+    <Image Include="..\Source\PackageResources\Images\_Redo.png" />
+    <Image Include="..\Source\PackageResources\Images\_Save.png" />
+    <Image Include="..\Source\PackageResources\Images\_SaveAs.png" />
+    <Image Include="..\Source\PackageResources\Images\_Undo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\Source\PackageResources\Images\Folder.xml" />
+    <Xml Include="..\Source\PackageResources\Packages\EditPackage.xml" />
+    <Xml Include="..\Source\PackageResources\Packages\SDIPackage.xml" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6FA1DDE6-28F2-45A7-83B7-3873234A8EDF}</ProjectGuid>
     <SccProjectName>SAK</SccProjectName>
