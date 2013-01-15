@@ -42,12 +42,12 @@ DocumentFragment
 
 		DocumentFragment* DocumentFragment::GetOwnerFragmentInternal()
 		{
-			return ownerFragment;
+			return ownedFragment;
 		}
 
-		DocumentFragment::DocumentFragment(IDocumentContainer* _ownerContainer, DocumentFragment* _ownerFragment, const WString& _friendlyName)
-			:ownerContainer(_ownerContainer)
-			,ownerFragment(_ownerFragment)
+		DocumentFragment::DocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName)
+			:ownedContainer(_ownedContainer)
+			,ownedFragment(_ownedFragment)
 			,friendlyName(_friendlyName)
 		{
 		}
@@ -98,12 +98,12 @@ DocumentFragment
 
 		IDocumentContainer* DocumentFragment::GetOwnedContainer()
 		{
-			return ownerContainer;
+			return ownedContainer;
 		}
 
 		IDocumentFragment* DocumentFragment::GetOwnedFragment()
 		{
-			return ownerFragment;
+			return ownedFragment;
 		}
 
 		vint DocumentFragment::GetSubFragmentCount()
@@ -157,8 +157,8 @@ FileDocumentFragment
 			DocumentFragment::NotifyUpdateFragment();
 		}
 
-		FileDocumentFragment::FileDocumentFragment(IDocumentContainer* _ownerContainer, DocumentFragment* _ownerFragment, const WString& _friendlyName, const WString& _filePath)
-			:DocumentFragment(_ownerContainer, _ownerFragment, _friendlyName)
+		FileDocumentFragment::FileDocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName, const WString& _filePath)
+			:DocumentFragment(_ownedContainer, _ownedFragment, _friendlyName)
 			,currentFilePath(_filePath)
 			,modified(false)
 		{
@@ -225,8 +225,8 @@ VirtualDocumentFragment
 			return GetOwnerFragmentInternal()->NotifyUpdateFragment();
 		}
 
-		VirtualDocumentFragment::VirtualDocumentFragment(IDocumentContainer* _ownerContainer, DocumentFragment* _ownerFragment, const WString& _friendlyName)
-			:DocumentFragment(_ownerContainer, _ownerFragment, _friendlyName)
+		VirtualDocumentFragment::VirtualDocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName)
+			:DocumentFragment(_ownedContainer, _ownedFragment, _friendlyName)
 		{
 		}
 

@@ -90,7 +90,7 @@ DocumentEditorFactory
 			Ptr<IDocumentEditor> editor=CreateEditorInternal(view);
 			if(editor)
 			{
-				view->BeginEdit(editor.Obj());
+				if(!view->BeginEdit(editor.Obj())) return 0;
 				FOREACH(ICallback*, callback, callbacks)
 				{
 					callback->OnEditorCreated(this, editor.Obj());
