@@ -45,9 +45,6 @@
     <ClCompile Include="..\Source\DocumentFramework.cpp">
       <Filter>API</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\PackageResource.cpp">
-      <Filter>API</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Implementation\DocumentContainer.h">
@@ -72,9 +69,6 @@
       <Filter>API\Implementation</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\DocumentFramework.h">
-      <Filter>API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\PackageResource.h">
       <Filter>API</Filter>
     </ClInclude>
   </ItemGroup>
