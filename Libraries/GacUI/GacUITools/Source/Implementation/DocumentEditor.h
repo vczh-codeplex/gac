@@ -49,6 +49,7 @@ namespace vl
 			DocumentEditor(IDocumentEditorFactory* _editorFactory, IDocumentView* _editingView);
 			~DocumentEditor();
 
+			virtual void						NotifyUpdateEditor();
 			bool								AttachCallback(ICallback* callback)override;
 			bool								DetachCallback(ICallback* callback)override;
 

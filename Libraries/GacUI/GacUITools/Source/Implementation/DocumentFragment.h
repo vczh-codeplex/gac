@@ -18,8 +18,8 @@ namespace vl
 		{
 		private:
 			List<ICallback*>							callbacks;
-			IDocumentContainer*							ownerContainer;
-			DocumentFragment*							ownerFragment;
+			IDocumentContainer*							ownedContainer;
+			DocumentFragment*							ownedFragment;
 			WString										friendlyName;
 			List<Ptr<IDocumentFragment>>				subFragments;
 			WString										defaultViewTypeId;
@@ -34,7 +34,7 @@ namespace vl
 			bool										SetDefaultView(Ptr<IDocumentView> view);
 			DocumentFragment*							GetOwnerFragmentInternal();
 		public:
-			DocumentFragment(IDocumentContainer* _ownerContainer, DocumentFragment* _ownerFragment, const WString& _friendlyName);
+			DocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName);
 			~DocumentFragment();
 			
 			virtual void								NotifyUpdateFragment();
@@ -71,7 +71,7 @@ namespace vl
 			virtual bool					LoadDocumentInternal(const WString& filePath)=0;
 			virtual bool					SaveDocumentInternal(const WString& filePath)=0;
 		public:
-			FileDocumentFragment(IDocumentContainer* _ownerContainer, DocumentFragment* _ownerFragment, const WString& _friendlyName, const WString& _filePath);
+			FileDocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName, const WString& _filePath);
 			~FileDocumentFragment();
 
 			bool							IsStoredInSeparatedFile()override;
@@ -89,7 +89,7 @@ namespace vl
 		protected:
 			void							NotifyUpdateFragment()override;
 		public:
-			VirtualDocumentFragment(IDocumentContainer* _ownerContainer, DocumentFragment* _ownerFragment, const WString& _friendlyName);
+			VirtualDocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName);
 			~VirtualDocumentFragment();
 
 			bool							IsStoredInSeparatedFile()override;

@@ -90,6 +90,14 @@ DocumentEditor
 			}
 		}
 
+		void DocumentEditor::NotifyUpdateEditor()
+		{
+			FOREACH(ICallback*, callback, callbacks)
+			{
+				callback->OnEditorUpdated(this);
+			}
+		}
+
 		bool DocumentEditor::AttachCallback(ICallback* callback)
 		{
 			if(callbacks.Contains(callback))
