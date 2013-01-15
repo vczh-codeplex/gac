@@ -44,9 +44,11 @@
     <Image Include="..\Source\PackageResources\Images\_Undo.png" />
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="..\Source\PackageResources\Applications\GacNotepad.xml" />
     <Xml Include="..\Source\PackageResources\Images\Folder.xml" />
     <Xml Include="..\Source\PackageResources\Packages\EditPackage.xml" />
     <Xml Include="..\Source\PackageResources\Packages\SDIPackage.xml" />
+    <Xml Include="..\Source\PackageResources\Packages\TextEditorPackage.xml" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6FA1DDE6-28F2-45A7-83B7-3873234A8EDF}</ProjectGuid>
