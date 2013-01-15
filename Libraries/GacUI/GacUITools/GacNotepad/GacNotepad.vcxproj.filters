@@ -23,21 +23,5 @@
     <ClInclude Include="..\Source\DocumentFramework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="..\Source\GacBasicGUI.xml">
-      <Filter>Resource Files</Filter>
-    </Xml>
-    <Xml Include="..\Source\SDIApplicationGUI.xml">
-      <Filter>Resource Files</Filter>
-    </Xml>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="PackageResources.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
   </ItemGroup>
 </Project>
