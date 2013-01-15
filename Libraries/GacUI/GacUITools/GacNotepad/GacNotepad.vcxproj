@@ -84,19 +84,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\DocumentFramework.h" />
-    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GacSDI\GacSDI.vcxproj">
       <Project>{b45d4a37-d94c-4cbc-beab-d261fe2f647c}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="..\Source\GacBasicGUI.xml" />
-    <Xml Include="..\Source\SDIApplicationGUI.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="PackageResources.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
