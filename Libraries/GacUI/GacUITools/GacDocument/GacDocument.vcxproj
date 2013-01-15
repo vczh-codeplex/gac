@@ -19,7 +19,6 @@
     <ClCompile Include="..\Source\Implementation\DocumentFragment.cpp" />
     <ClCompile Include="..\Source\Implementation\DocumentManager.cpp" />
     <ClCompile Include="..\Source\Implementation\DocumentView.cpp" />
-    <ClCompile Include="..\Source\PackageResource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\DocumentFramework.h" />
@@ -30,7 +29,6 @@
     <ClInclude Include="..\Source\Implementation\DocumentFragment.h" />
     <ClInclude Include="..\Source\Implementation\DocumentManager.h" />
     <ClInclude Include="..\Source\Implementation\DocumentView.h" />
-    <ClInclude Include="..\Source\PackageResource.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6FA1DDE6-28F2-45A7-83B7-3873234A8EDF}</ProjectGuid>
