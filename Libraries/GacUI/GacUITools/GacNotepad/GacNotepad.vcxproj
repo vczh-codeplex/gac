@@ -83,10 +83,8 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Public\Source\GacUI.h" />
-    <ClInclude Include="..\..\Public\Source\Vlpp.h" />
     <ClInclude Include="..\Source\DocumentFramework.h" />
-    <ClInclude Include="..\Source\SDI.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GacSDI\GacSDI.vcxproj">
@@ -98,7 +96,7 @@
     <Xml Include="..\Source\SDIApplicationGUI.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="PackageResources.rct" />
+    <ResourceCompile Include="PackageResources.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
