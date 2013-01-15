@@ -33,4 +33,17 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\Source\GacBasicGUI.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+    <Xml Include="..\Source\SDIApplicationGUI.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PackageResources.rct">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
