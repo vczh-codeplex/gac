@@ -93,6 +93,13 @@
       <Project>{b45d4a37-d94c-4cbc-beab-d261fe2f647c}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\Source\GacBasicGUI.xml" />
+    <Xml Include="..\Source\SDIApplicationGUI.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PackageResources.rct" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

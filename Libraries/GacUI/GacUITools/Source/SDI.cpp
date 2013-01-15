@@ -1,4 +1,6 @@
 #include "SDI.h"
+#include "Implementation\DocumentManager.h"
+#include "PackageResource.h"
 
 namespace vl
 {
@@ -55,6 +57,13 @@ using namespace vl::gactools;
 
 void GuiMain()
 {
+	DocumentManager documentManager;
+	SetDocumentManager(&documentManager);
+
+	List<Ptr<XmlDocument>> packageResources;
+	EnumeratePackageResources(packageResources);
+
 	MainWindow window;
 	GetApplication()->Run(&window);
+	SetDocumentManager(0);
 }
