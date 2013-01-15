@@ -90,7 +90,7 @@ Document Interfaces
 			virtual IDocumentContainer*			GetOwnedContainer()=0;
 			virtual IDocumentFragment*			GetOwnedFragment()=0;
 			virtual vint						GetSubFragmentCount()=0;
-			virtual IDocumentFragment*			GetSubFragment()=0;
+			virtual IDocumentFragment*			GetSubFragment(vint index)=0;
 
 			virtual bool						IsStoredInSeparatedFile()=0;
 			virtual bool						CanSaveSeparately()=0;
@@ -105,7 +105,7 @@ Document Interfaces
 			virtual vint						GetSupportedViewTypeCount()=0;
 			virtual WString						GetSupportedViewTypeId(vint index)=0;
 			virtual bool						IsSupportedViewTypeId(const WString& viewTypeId)=0;
-			virtual WString						GetDefaultViewType()=0;
+			virtual WString						GetDefaultViewTypeId()=0;
 			virtual IDocumentView*				GetView(const WString& viewTypeId)=0;
 		};
 

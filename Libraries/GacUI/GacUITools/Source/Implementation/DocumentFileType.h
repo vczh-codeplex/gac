@@ -22,11 +22,10 @@ namespace vl
 			WString								friendlyName;
 			List<ICallback*>					callbacks;
 
-			Ptr<IDocumentContainer>				CreateDocumentInternal(Ptr<IDocumentFragment> fragment);
 		protected:
 
-			virtual Ptr<IDocumentFragment>		NewDocumentFragment()=0;
-			virtual Ptr<IDocumentFragment>		LoadDocumentFragment(const WString& filePath)=0;
+			virtual Ptr<IDocumentFragment>		NewDocumentFragment(IDocumentContainer* container)=0;
+			virtual Ptr<IDocumentFragment>		LoadDocumentFragment(const WString& filePath, IDocumentContainer* container)=0;
 		public:
 			DocumentFileType(const WString& _extension, const WString& _id, const WString& _friendlyName);
 			~DocumentFileType();

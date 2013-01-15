@@ -9,8 +9,7 @@ namespace vl
 DocumentContainer
 ***********************************************************************/
 
-		DocumentContainer::DocumentContainer(Ptr<IDocumentFragment> _rootFragment)
-			:rootFragment(_rootFragment)
+		DocumentContainer::DocumentContainer()
 		{
 		}
 
@@ -53,6 +52,11 @@ DocumentContainer
 		IDocumentFragment* DocumentContainer::GetRootFragment()
 		{
 			return rootFragment.Obj();
+		}
+
+		void DocumentContainer::SetRootFragment(Ptr<IDocumentFragment> _rootFragment)
+		{
+			rootFragment=_rootFragment;
 		}
 	}
 }

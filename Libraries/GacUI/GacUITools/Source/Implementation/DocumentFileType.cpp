@@ -10,23 +10,6 @@ namespace vl
 DocumentFileType
 ***********************************************************************/
 
-		Ptr<IDocumentContainer> DocumentFileType::CreateDocumentInternal(Ptr<IDocumentFragment> fragment)
-		{
-			if(fragment)
-			{
-				Ptr<DocumentContainer> document=new DocumentContainer(fragment);
-				FOREACH(ICallback*, callback, callbacks)
-				{
-					callback->OnDocumentCreated(this, document.Obj());
-				}
-				return document;
-			}
-			else
-			{
-				return 0;
-			}
-		}
-
 		DocumentFileType::DocumentFileType(const WString& _extension, const WString& _id, const WString& _friendlyName)
 			:extension(_extension)
 			,id(_id)
@@ -83,12 +66,28 @@ DocumentFileType
 
 		Ptr<IDocumentContainer> DocumentFileType::CreateDocument()
 		{
-			return CreateDocumentInternal(NewDocumentFragment());
+			Ptr<DocumentContainer> document=new DocumentContainer();
+			Ptr<IDocumentFragment> fragment=NewDocumentFragment(document.Obj());
+			if(!fragment) return 0;
+			document->SetRootFragment(fragment);
+			FOREACH(ICallback*, callback, callbacks)
+			{
+				callback->OnDocumentCreated(this, document.Obj());
+			}
+			return document;
 		}
 
 		Ptr<IDocumentContainer> DocumentFileType::CreateDocumentFromFile(const WString& filePath)
 		{
-			return CreateDocumentInternal(LoadDocumentFragment(filePath));
+			Ptr<DocumentContainer> document=new DocumentContainer();
+			Ptr<IDocumentFragment> fragment=LoadDocumentFragment(filePath, document.Obj());
+			if(!fragment) return 0;
+			document->SetRootFragment(fragment);
+			FOREACH(ICallback*, callback, callbacks)
+			{
+				callback->OnDocumentCreated(this, document.Obj());
+			}
+			return document;
 		}
 	}
 }
