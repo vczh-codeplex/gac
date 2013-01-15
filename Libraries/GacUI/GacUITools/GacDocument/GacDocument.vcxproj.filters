@@ -1,23 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="API">
       <UniqueIdentifier>{e30a08b2-dee4-402f-ab99-abcf43c50380}</UniqueIdentifier>
     </Filter>
     <Filter Include="API\Implementation">
       <UniqueIdentifier>{e8c5bbee-5fe5-4fe9-80e9-04e4285ea37f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PackageResources">
+      <UniqueIdentifier>{63ddffac-3efb-4639-b21f-b7e3d748912f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PackageResources\Images">
+      <UniqueIdentifier>{70c404cb-6247-49dd-a6d2-a56c4207e409}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PackageResources\Packages">
+      <UniqueIdentifier>{89178897-f45a-4c9f-bf07-b4f04e84c353}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -71,5 +68,51 @@
     <ClInclude Include="..\Source\DocumentFramework.h">
       <Filter>API</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Source\PackageResources\Images\_Copy.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_Cut.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_Delete.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_New.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_Open.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_Paste.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_Print.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_Redo.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_Save.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_SaveAs.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_Undo.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\Source\PackageResources\Images\Folder.xml">
+      <Filter>PackageResources\Images</Filter>
+    </Xml>
+    <Xml Include="..\Source\PackageResources\Packages\SDIPackage.xml">
+      <Filter>PackageResources\Packages</Filter>
+    </Xml>
+    <Xml Include="..\Source\PackageResources\Packages\EditPackage.xml">
+      <Filter>PackageResources\Packages</Filter>
+    </Xml>
   </ItemGroup>
 </Project>
