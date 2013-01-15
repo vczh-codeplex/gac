@@ -16,6 +16,9 @@
     <Filter Include="PackageResources\Packages">
       <UniqueIdentifier>{89178897-f45a-4c9f-bf07-b4f04e84c353}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PackageResources\Applications">
+      <UniqueIdentifier>{d9a7aefd-d531-43cf-a17c-a051d2f592ab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Implementation\DocumentContainer.cpp">
@@ -112,6 +115,12 @@
       <Filter>PackageResources\Packages</Filter>
     </Xml>
     <Xml Include="..\Source\PackageResources\Packages\EditPackage.xml">
+      <Filter>PackageResources\Packages</Filter>
+    </Xml>
+    <Xml Include="..\Source\PackageResources\Applications\GacNotepad.xml">
+      <Filter>PackageResources\Applications</Filter>
+    </Xml>
+    <Xml Include="..\Source\PackageResources\Packages\TextEditorPackage.xml">
       <Filter>PackageResources\Packages</Filter>
     </Xml>
   </ItemGroup>
