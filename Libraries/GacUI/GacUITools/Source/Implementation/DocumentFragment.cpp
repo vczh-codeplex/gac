@@ -37,17 +37,15 @@ DocumentFragment
 		{
 			if(!supportedViews.Keys().Contains(view->GetViewTypeId()) || supportedViews[view->GetViewTypeId()]!=view) return false;
 			defaultViewTypeId=view->GetViewTypeId();
+			return true;
 		}
 
-		void DocumentFragment::NotifyUpdateFragment()
+		DocumentFragment* DocumentFragment::GetOwnerFragmentInternal()
 		{
-			FOREACH(ICallback*, callback, callbacks)
-			{
-				callback->OnFragmentUpdated(this);
-			}
+			return ownerFragment;
 		}
 
-		DocumentFragment::DocumentFragment(IDocumentContainer* _ownerContainer, IDocumentFragment* _ownerFragment, const WString& _friendlyName)
+		DocumentFragment::DocumentFragment(IDocumentContainer* _ownerContainer, DocumentFragment* _ownerFragment, const WString& _friendlyName)
 			:ownerContainer(_ownerContainer)
 			,ownerFragment(_ownerFragment)
 			,friendlyName(_friendlyName)
@@ -59,6 +57,14 @@ DocumentFragment
 			FOREACH(ICallback*, callback, callbacks)
 			{
 				callback->OnFragmentDestroyed(this);
+			}
+		}
+
+		void DocumentFragment::NotifyUpdateFragment()
+		{
+			FOREACH(ICallback*, callback, callbacks)
+			{
+				callback->OnFragmentUpdated(this);
 			}
 		}
 
@@ -139,6 +145,133 @@ DocumentFragment
 		{
 			vint index=supportedViews.Keys().IndexOf(viewTypeId);
 			return index==-1?0:supportedViews.Values().Get(index).Obj();
+		}
+
+/***********************************************************************
+FileDocumentFragment
+***********************************************************************/
+
+		void FileDocumentFragment::NotifyUpdateFragment()
+		{
+			modified=true;
+			DocumentFragment::NotifyUpdateFragment();
+		}
+
+		FileDocumentFragment::FileDocumentFragment(IDocumentContainer* _ownerContainer, DocumentFragment* _ownerFragment, const WString& _friendlyName, const WString& _filePath)
+			:DocumentFragment(_ownerContainer, _ownerFragment, _friendlyName)
+			,currentFilePath(_filePath)
+			,modified(false)
+		{
+		}
+
+		FileDocumentFragment::~FileDocumentFragment()
+		{
+		}
+
+		bool FileDocumentFragment::IsStoredInSeparatedFile()
+		{
+			return true;
+		}
+
+		bool FileDocumentFragment::CanSaveSeparately()
+		{
+			return true;
+		}
+
+		bool FileDocumentFragment::CanSaveToAnotherFile()
+		{
+			return true;
+		}
+
+		WString FileDocumentFragment::GetFilePath()
+		{
+			return currentFilePath;
+		}
+
+		bool FileDocumentFragment::ReloadDocument()
+		{
+			if(currentFilePath==L"") return false;
+			return LoadDocumentInternal(currentFilePath);
+		}
+
+		bool FileDocumentFragment::SaveDocument()
+		{
+			if(currentFilePath==L"") return false;
+			if(!SaveDocumentInternal(currentFilePath)) return false;
+			modified=false;
+			return true;
+		}
+
+		bool FileDocumentFragment::SaveDocumentAs(const WString& filePath)
+		{
+			if(!SaveDocumentInternal(filePath)) return false;
+			currentFilePath=filePath;
+			modified=false;
+			return true;
+		}
+
+		bool FileDocumentFragment::IsModified()
+		{
+			return modified;
+		}
+
+/***********************************************************************
+VirtualDocumentFragment
+***********************************************************************/
+
+		void VirtualDocumentFragment::NotifyUpdateFragment()
+		{
+			DocumentFragment::NotifyUpdateFragment();
+			return GetOwnerFragmentInternal()->NotifyUpdateFragment();
+		}
+
+		VirtualDocumentFragment::VirtualDocumentFragment(IDocumentContainer* _ownerContainer, DocumentFragment* _ownerFragment, const WString& _friendlyName)
+			:DocumentFragment(_ownerContainer, _ownerFragment, _friendlyName)
+		{
+		}
+
+		VirtualDocumentFragment::~VirtualDocumentFragment()
+		{
+		}
+
+		bool VirtualDocumentFragment::IsStoredInSeparatedFile()
+		{
+			return false;
+		}
+
+		bool VirtualDocumentFragment::CanSaveSeparately()
+		{
+			return false;
+		}
+
+		bool VirtualDocumentFragment::CanSaveToAnotherFile()
+		{
+			return false;
+		}
+
+		WString VirtualDocumentFragment::GetFilePath()
+		{
+			return L"";
+		}
+
+		bool VirtualDocumentFragment::ReloadDocument()
+		{
+			return false;
+		}
+
+		bool VirtualDocumentFragment::SaveDocument()
+		{
+			return false;
+		}
+
+		bool VirtualDocumentFragment::SaveDocumentAs(const WString& filePath)
+		{
+			return false;
+		}
+
+		bool VirtualDocumentFragment::IsModified()
+		{
+			return GetOwnerFragmentInternal()->IsModified();
 		}
 	}
 }

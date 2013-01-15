@@ -19,7 +19,7 @@ namespace vl
 		private:
 			List<ICallback*>							callbacks;
 			IDocumentContainer*							ownerContainer;
-			IDocumentFragment*							ownerFragment;
+			DocumentFragment*							ownerFragment;
 			WString										friendlyName;
 			List<Ptr<IDocumentFragment>>				subFragments;
 			WString										defaultViewTypeId;
@@ -32,11 +32,12 @@ namespace vl
 			bool										DeleteSubFragment(IDocumentFragment* fragment);
 			bool										AddSupportedView(Ptr<IDocumentView> view);
 			bool										SetDefaultView(Ptr<IDocumentView> view);
-			void										NotifyUpdateFragment();
+			DocumentFragment*							GetOwnerFragmentInternal();
 		public:
-			DocumentFragment(IDocumentContainer* _ownerContainer, IDocumentFragment* _ownerFragment, const WString& _friendlyName);
+			DocumentFragment(IDocumentContainer* _ownerContainer, DocumentFragment* _ownerFragment, const WString& _friendlyName);
 			~DocumentFragment();
-
+			
+			virtual void								NotifyUpdateFragment();
 			bool										AttachCallback(ICallback* callback)override;
 			bool										DetachCallback(ICallback* callback)override;
 
@@ -61,8 +62,16 @@ namespace vl
 
 		class FileDocumentFragment : public DocumentFragment
 		{
+		private:
+			bool							modified;
+			WString							currentFilePath;
+			
+		protected:
+			void							NotifyUpdateFragment()override;
+			virtual bool					LoadDocumentInternal(const WString& filePath)=0;
+			virtual bool					SaveDocumentInternal(const WString& filePath)=0;
 		public:
-			FileDocumentFragment();
+			FileDocumentFragment(IDocumentContainer* _ownerContainer, DocumentFragment* _ownerFragment, const WString& _friendlyName, const WString& _filePath);
 			~FileDocumentFragment();
 
 			bool							IsStoredInSeparatedFile()override;
@@ -77,8 +86,10 @@ namespace vl
 
 		class VirtualDocumentFragment : public DocumentFragment
 		{
+		protected:
+			void							NotifyUpdateFragment()override;
 		public:
-			VirtualDocumentFragment();
+			VirtualDocumentFragment(IDocumentContainer* _ownerContainer, DocumentFragment* _ownerFragment, const WString& _friendlyName);
 			~VirtualDocumentFragment();
 
 			bool							IsStoredInSeparatedFile()override;
