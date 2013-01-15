@@ -21,13 +21,14 @@ namespace vl
 			Ptr<IDocumentFragment>		rootFragment;
 
 		public:
-			DocumentContainer(Ptr<IDocumentFragment> _rootFragment);
+			DocumentContainer();
 			~DocumentContainer();
 
 			bool						AttachCallback(ICallback* callback)override;
 			bool						DetachCallback(ICallback* callback)override;
 
 			IDocumentFragment*			GetRootFragment()override;
+			void						SetRootFragment(Ptr<IDocumentFragment> _rootFragment);
 		};
 	}
 }
