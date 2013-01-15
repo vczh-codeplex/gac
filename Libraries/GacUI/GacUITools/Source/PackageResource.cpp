@@ -53,9 +53,19 @@ Helper Functions
 			return TRUE;
 		}
 
+		BOOL CALLBACK EnumResTypeProc(
+		  _In_opt_  HMODULE hModule,
+		  _In_      LPTSTR lpszType,
+		  _In_      LONG_PTR lParam
+		)
+		{
+			return TRUE;
+		}
+
 		void EnumeratePackageResources(List<Ptr<XmlDocument>>& packageResources)
 		{
 			EnumeratePackageResourceStruct arguments(packageResources);
+			EnumResourceTypes(NULL, &EnumResTypeProc, NULL);
 			EnumResourceNames(NULL, L"GacUIToolsPackages", &EnumeratePackageResourceProc, (LONG_PTR)&arguments);
 		}
 	}
