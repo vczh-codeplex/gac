@@ -133,6 +133,24 @@ GuiApplication
 				return 0;
 			}
 
+			WString GuiApplication::GetExecutablePath()
+			{
+				return GetCurrentController()->GetExecutablePath();
+			}
+
+			WString GuiApplication::GetExecutableFolder()
+			{
+				WString path=GetExecutablePath();
+				for(vint i=path.Length()-1;i>=0;i--)
+				{
+					if(path[i]==L'\\' || path[i]==L'/')
+					{
+						return path.Sub(0, i+1);
+					}
+				}
+				return L"";
+			}
+
 			bool GuiApplication::IsInMainThread()
 			{
 				return GetCurrentController()->AsyncService()->IsInMainThread();

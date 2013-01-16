@@ -9,6 +9,7 @@ Interfaces:
 #define GACUI_TOOLS_SDI
 
 #include "DocumentFramework.h"
+#include "ResourceManager.h"
 
 namespace vl
 {
@@ -19,12 +20,13 @@ namespace vl
 SDI Application
 ***********************************************************************/
 
-		struct SDIConfiguration
+		class ISDIApplication : public Interface
 		{
-			WString				applicationName;
+		public:
+			virtual Ptr<GuiResource>	GetApplicationResource()=0;
 		};
 
-		extern int				StartSDI(const SDIConfiguration& config);
+		extern int						StartSDI(ISDIApplication* application);
 	}
 }
 

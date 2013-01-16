@@ -1352,6 +1352,11 @@ Native Window Controller
 			/// </summary>
 			/// <returns>The version string. In Windows implementation, the version string formats like "MAIN-VERSION;CSD-VERSION, e.g. "Windows XP;Service Pack 3". The ";" always exists, but the CSD version can be empty.</returns>
 			virtual WString							GetOSVersion()=0;
+			/// <summary>
+			/// Get the file path of the current executable.
+			/// </summary>
+			/// <returns>The file path of the current executable.</returns>
+			virtual WString							GetExecutablePath()=0;
 		};
 		
 		/// <summary>
