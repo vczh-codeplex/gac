@@ -306,15 +306,20 @@ GuiResource
 
 		void GuiResource::LoadResourceXml(const WString& filePath)
 		{
-			Ptr<ParsingTable> table=XmlLoadTable();
+			Ptr<ParsingTable> table;
 			Ptr<XmlDocument> xml;
 			{
 				FileStream fileStream(filePath, FileStream::ReadOnly);
-				BomDecoder decoder;
-				DecoderStream decoderStream(fileStream, decoder);
-				StreamReader reader(decoderStream);
-				WString xmlText=reader.ReadToEnd();
-				xml=XmlParseDocument(xmlText, table);
+				if(fileStream.IsAvailable())
+				{
+					BomDecoder decoder;
+					DecoderStream decoderStream(fileStream, decoder);
+					StreamReader reader(decoderStream);
+					WString xmlText=reader.ReadToEnd();
+
+					table=XmlLoadTable();
+					xml=XmlParseDocument(xmlText, table);
+				}
 			}
 			if(xml)
 			{
