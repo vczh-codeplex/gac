@@ -14357,7 +14357,7 @@ Basic Construction
 				}
 			};
 			
-			class GuiImageData
+			class GuiImageData : public Object
 			{
 			protected:
 				Ptr<INativeImage>				image;

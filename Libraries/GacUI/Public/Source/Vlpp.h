@@ -12958,6 +12958,12 @@ namespace vl
 			extern WString					XmlUnescapeComment(const WString& value);
 			extern void						XmlPrint(Ptr<XmlNode> node, stream::TextWriter& writer);
 			extern WString					XmlToString(Ptr<XmlNode> node);
+
+			extern Ptr<XmlAttribute>		XmlGetAttribute(Ptr<XmlElement> element, const WString& name);
+			extern Ptr<XmlElement>			XmlGetElement(Ptr<XmlElement> element, const WString& name);
+			extern void						XmlGetElements(Ptr<XmlElement> element, collections::List<Ptr<XmlElement>>& elements);
+			extern void						XmlGetElements(Ptr<XmlElement> element, const WString& name, collections::List<Ptr<XmlElement>>& elements);
+			extern WString					XmlGetValue(Ptr<XmlElement> element);
 		}
 	}
 }

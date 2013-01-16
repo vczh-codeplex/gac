@@ -60,7 +60,7 @@ Resource Structure
 			Ptr<Object>								GetContent();
 			void									SetContent(Ptr<Object> value);
 
-			Ptr<INativeImage>						AsImage();
+			Ptr<GuiImageData>						AsImage();
 			Ptr<XmlDocument>						AsXml();
 			Ptr<ObjectBox<WString>>					AsString();
 		};
@@ -85,6 +85,8 @@ Resource Structure
 			bool									AddFolder(const WString& name, Ptr<GuiResourceFolder> folder);
 			Ptr<GuiResourceFolder>					RemoveFolder(const WString& name);
 			void									ClearFolders();
+
+			void									LoadResourceFolderXml(const WString& containingFolder, Ptr<XmlElement> folderXml, Ptr<ParsingTable> xmlParsingTable);
 		};
 
 /***********************************************************************
