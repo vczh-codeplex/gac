@@ -9036,7 +9036,7 @@ API
 			{
 				FOREACH(Ptr<XmlAttribute>, att, element->attributes)
 				{
-					if(att->name.value==L"name")
+					if(att->name.value==name)
 					{
 						return att;
 					}
