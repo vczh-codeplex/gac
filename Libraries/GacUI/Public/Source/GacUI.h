@@ -1140,6 +1140,7 @@ Native Window Controller
 			virtual INativeInputService*			InputService()=0;
 			virtual INativeDialogService*			DialogService()=0;
 			virtual WString							GetOSVersion()=0;
+			virtual WString							GetExecutablePath()=0;
 		};
 		
 		class INativeControllerListener : public Interface
@@ -4368,6 +4369,8 @@ namespace vl
 				void											Run(GuiWindow* _mainWindow);
 				const collections::List<GuiWindow*>&			GetWindows();
 				GuiWindow*										GetWindow(Point location);
+				WString											GetExecutablePath();
+				WString											GetExecutableFolder();
 
 				bool											IsInMainThread();
 				void											InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument);

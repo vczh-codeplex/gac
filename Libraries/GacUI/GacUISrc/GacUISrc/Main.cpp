@@ -437,7 +437,7 @@ namespace test
 		TestWindow()
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 		{
-			SetText(L"GacUISrc Test Application");
+			SetText(GetApplication()->GetExecutableFolder());
 			SetClientSize(Size(640, 480));
 			GetBoundsComposition()->SetPreferredMinSize(Size(320, 240));
 			GetBoundsComposition()->GetEventReceiver()->leftButtonDown.AttachMethod(this, &TestWindow::OnLeftButtonDown);

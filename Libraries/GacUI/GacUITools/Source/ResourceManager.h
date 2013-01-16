@@ -32,41 +32,73 @@ Resource Structure
 		class GuiResourceFolder;
 		class GuiResource;
 
-		class GuiResourceItem : public Object
+		class GuiResourceNodeBase : public Object
 		{
 			friend class GuiResourceFolder;
 		protected:
-			WString						name;
-			Ptr<Object>					content;
-			GuiResourceFolder*			parent;
+			GuiResourceFolder*						parent;
+			WString									name;
+			
+		public:
+			GuiResourceNodeBase();
+			~GuiResourceNodeBase();
+
+			GuiResourceFolder*						GetParent();
+			const WString&							GetName();
+		};
+
+		class GuiResourceItem : public GuiResourceNodeBase
+		{
+			friend class GuiResourceFolder;
+		protected:
+			Ptr<Object>								content;
 			
 		public:
 			GuiResourceItem();
 			~GuiResourceItem();
 
-			GuiResourceFolder*			GetParent();
-			const WString&				GetName();
-			Ptr<Object>					GetContent();
-			void						SetContent(Ptr<Object> value);
+			Ptr<Object>								GetContent();
+			void									SetContent(Ptr<Object> value);
 
-			Ptr<INativeImage>			AsImage();
-			Ptr<XmlDocument>			AsXml();
-			Ptr<ObjectBox<WString>>		AsString();
+			Ptr<INativeImage>						AsImage();
+			Ptr<XmlDocument>						AsXml();
+			Ptr<ObjectBox<WString>>					AsString();
 		};
 
-		class GuiResourceFolder : public Object
+		class GuiResourceFolder : public GuiResourceNodeBase
 		{
 		protected:
+			Dictionary<WString, Ptr<GuiResourceItem>>		items;
+			Dictionary<WString, Ptr<GuiResourceFolder>>		folders;
 		public:
-		};
+			GuiResourceFolder();
+			~GuiResourceFolder();
 
-		class GuiResource : public GuiResourceFolder
-		{
+			const List<Ptr<GuiResourceItem>>&		GetItems();
+			Ptr<GuiResourceItem>					GetItem(const WString& name);
+			bool									AddItem(const WString& name, Ptr<GuiResourceItem> item);
+			Ptr<GuiResourceItem>					RemoveItem(const WString& name);
+			void									ClearItems();
+
+			const List<Ptr<GuiResourceFolder>>&		GetFolders();
+			Ptr<GuiResourceFolder>					GetFolder(const WString& name);
+			bool									AddFolder(const WString& name, Ptr<GuiResourceFolder> folder);
+			Ptr<GuiResourceFolder>					RemoveFolder(const WString& name);
+			void									ClearFolders();
 		};
 
 /***********************************************************************
 Resource Loader
 ***********************************************************************/
+
+		class GuiResource : public GuiResourceFolder
+		{
+		public:
+			GuiResource();
+			~GuiResource();
+
+			void									LoadResourceXml(const WString& filePath);
+		};
 	}
 }
 

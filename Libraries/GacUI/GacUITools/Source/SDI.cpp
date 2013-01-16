@@ -10,7 +10,7 @@ namespace vl
 SDIConfiguration
 ***********************************************************************/
 
-		const SDIConfiguration* sdiConfiguration=0;
+		ISDIApplication* sdiApplication=0;
 
 /***********************************************************************
 MainWindow
@@ -22,7 +22,8 @@ MainWindow
 			MainWindow()
 				:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 			{
-				this->SetText(L"GacUI Tools "+sdiConfiguration->applicationName+L" (www.gaclib.net)");
+				WString applicationName=sdiApplication->GetApplicationResource()->GetFolder(L"Application")->GetItem(L"Name")->AsString()->Unbox();
+				this->SetText(L"GacUI Tools "+applicationName+L" (www.gaclib.net)");
 
 				this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
 				this->ForceCalculateSizeImmediately();
@@ -38,11 +39,11 @@ MainWindow
 StartSDI
 ***********************************************************************/
 
-		int StartSDI(const SDIConfiguration& config)
+		int StartSDI(ISDIApplication* application)
 		{
-			sdiConfiguration=&config;
+			sdiApplication=application;
 			int result=SetupWindowsDirect2DRenderer();
-			sdiConfiguration=0;
+			sdiApplication=0;
 			return result;
 		}
 	}

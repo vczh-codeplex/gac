@@ -1348,6 +1348,13 @@ WindowsController
 					return GetOSVersionMainPart()+L";"+GetOSVersionCSDPart();
 				}
 
+				WString GetExecutablePath()
+				{
+					Array<wchar_t> buffer(65536);
+					GetModuleFileName(NULL, &buffer[0], buffer.Count());
+					return &buffer[0];
+				}
+
 				//=======================================================================
 
 				void InvokeMouseHook(WPARAM message, Point location)

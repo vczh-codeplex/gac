@@ -139,6 +139,24 @@ GuiApplication
 				return 0;
 			}
 
+			WString GuiApplication::GetExecutablePath()
+			{
+				return GetCurrentController()->GetExecutablePath();
+			}
+
+			WString GuiApplication::GetExecutableFolder()
+			{
+				WString path=GetExecutablePath();
+				for(vint i=path.Length()-1;i>=0;i--)
+				{
+					if(path[i]==L'\\' || path[i]==L'/')
+					{
+						return path.Sub(0, i+1);
+					}
+				}
+				return L"";
+			}
+
 			bool GuiApplication::IsInMainThread()
 			{
 				return GetCurrentController()->AsyncService()->IsInMainThread();
@@ -35163,6 +35181,13 @@ WindowsController
 				WString GetOSVersion()
 				{
 					return GetOSVersionMainPart()+L";"+GetOSVersionCSDPart();
+				}
+
+				WString GetExecutablePath()
+				{
+					Array<wchar_t> buffer(65536);
+					GetModuleFileName(NULL, &buffer[0], buffer.Count());
+					return &buffer[0];
 				}
 
 				//=======================================================================
