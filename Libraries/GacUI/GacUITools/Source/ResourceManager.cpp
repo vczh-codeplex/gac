@@ -4,6 +4,29 @@ namespace vl
 {
 	namespace presentation
 	{
+		WString GetFolderPath(const WString& filePath)
+		{
+			for(vint i=filePath.Length()-1;i>=0;i--)
+			{
+				if(filePath[i]==L'\\' || filePath[i]==L'/')
+				{
+					return filePath.Sub(0, i+1);
+				}
+			}
+			return L"";
+		}
+
+		WString GetFileName(const WString& filePath)
+		{
+			for(vint i=filePath.Length()-1;i>=0;i--)
+			{
+				if(filePath[i]==L'\\' || filePath[i]==L'/')
+				{
+					return filePath.Sub(i+1, filePath.Length()-i-1);
+				}
+			}
+			return filePath;
+		}
 
 /***********************************************************************
 GuiResourceNodeBase
@@ -50,9 +73,9 @@ GuiResourceItem
 			content=value;
 		}
 
-		Ptr<INativeImage> GuiResourceItem::AsImage()
+		Ptr<GuiImageData> GuiResourceItem::AsImage()
 		{
-			return content.Cast<INativeImage>();
+			return content.Cast<GuiImageData>();
 		}
 
 		Ptr<XmlDocument> GuiResourceItem::AsXml()
@@ -143,6 +166,132 @@ GuiResourceFolder
 			folders.Clear();
 		}
 
+		void GuiResourceFolder::LoadResourceFolderXml(const WString& containingFolder, Ptr<XmlElement> folderXml, Ptr<ParsingTable> xmlParsingTable)
+		{
+			ClearItems();
+			ClearFolders();
+			FOREACH(Ptr<XmlNode>, node, folderXml->subNodes)
+			{
+				Ptr<XmlElement> element=node.Cast<XmlElement>();
+				if(element)
+				{
+					WString name;
+					if(Ptr<XmlAttribute> nameAtt=XmlGetAttribute(element, L"name"))
+					{
+						name=nameAtt->value.value;
+					}
+					if(element->name.value==L"Folder")
+					{
+						if(name!=L"")
+						{
+							Ptr<GuiResourceFolder> folder=new GuiResourceFolder;
+							if(AddFolder(name, folder))
+							{
+								WString newContainingFolder=containingFolder;
+								Ptr<XmlElement> newFolderXml=element;
+								if(Ptr<XmlAttribute> contentAtt=XmlGetAttribute(element, L"content"))
+								{
+									if(contentAtt->value.value==L"Link")
+									{
+										WString filePath=containingFolder+XmlGetValue(element);
+										FileStream fileStream(filePath, FileStream::ReadOnly);
+										if(fileStream.IsAvailable())
+										{
+											BomDecoder decoder;
+											DecoderStream decoderStream(fileStream, decoder);
+											StreamReader reader(decoderStream);
+											WString text=reader.ReadToEnd();
+											Ptr<XmlDocument> xml=XmlParseDocument(text, xmlParsingTable);
+											if(xml)
+											{
+												newContainingFolder=GetFolderPath(filePath);
+												newFolderXml=xml->rootElement;
+											}
+										}
+									}
+								}
+								folder->LoadResourceFolderXml(newContainingFolder, newFolderXml, xmlParsingTable);
+							}
+						}
+					}
+					else
+					{
+						WString filePath;
+						if(Ptr<XmlAttribute> contentAtt=XmlGetAttribute(element, L"content"))
+						{
+							if(contentAtt->value.value==L"File")
+							{
+								filePath=containingFolder+XmlGetValue(element);
+								if(name==L"")
+								{
+									name=GetFileName(filePath);
+								}
+							}
+						}
+
+						Ptr<GuiResourceItem> item=new GuiResourceItem;
+						if(AddItem(name, item))
+						{
+							if(filePath!=L"")
+							{
+								FileStream fileStream(filePath, FileStream::ReadOnly);
+								if(fileStream.IsAvailable())
+								{
+									if(element->name.value==L"Xml")
+									{
+										BomDecoder decoder;
+										DecoderStream decoderStream(fileStream, decoder);
+										StreamReader reader(decoderStream);
+										WString text=reader.ReadToEnd();
+										Ptr<XmlDocument> xml=XmlParseDocument(text, xmlParsingTable);
+										item->SetContent(xml);
+									}
+									else if(element->name.value==L"Text")
+									{
+										BomDecoder decoder;
+										DecoderStream decoderStream(fileStream, decoder);
+										StreamReader reader(decoderStream);
+										WString text=reader.ReadToEnd();
+										item->SetContent(new ObjectBox<WString>(text));
+									}
+									else if(element->name.value==L"Image")
+									{
+										Ptr<INativeImage> image=GetCurrentController()->ImageService()->CreateImageFromStream(fileStream);
+										if(image)
+										{
+											Ptr<GuiImageData> imageData=new GuiImageData(image, -1);
+											item->SetContent(imageData);
+										}
+									}
+								}
+							}
+							else
+							{
+								if(element->name.value==L"Xml")
+								{
+									WString text=XmlGetValue(element);
+									Ptr<XmlDocument> xml=XmlParseDocument(text, xmlParsingTable);
+									item->SetContent(xml);
+								}
+								else if(element->name.value==L"Text")
+								{
+									WString text=XmlGetValue(element);
+									item->SetContent(new ObjectBox<WString>(text));
+								}
+								else if(element->name.value==L"Image")
+								{
+								}
+							}
+							if(!item->GetContent())
+							{
+								RemoveItem(name);
+							}
+						}
+					}
+				}
+			}
+		}
+
 /***********************************************************************
 GuiResource
 ***********************************************************************/
@@ -157,6 +306,20 @@ GuiResource
 
 		void GuiResource::LoadResourceXml(const WString& filePath)
 		{
+			Ptr<ParsingTable> table=XmlLoadTable();
+			Ptr<XmlDocument> xml;
+			{
+				FileStream fileStream(filePath, FileStream::ReadOnly);
+				BomDecoder decoder;
+				DecoderStream decoderStream(fileStream, decoder);
+				StreamReader reader(decoderStream);
+				WString xmlText=reader.ReadToEnd();
+				xml=XmlParseDocument(xmlText, table);
+			}
+			if(xml)
+			{
+				LoadResourceFolderXml(GetFolderPath(filePath), xml->rootElement, table);
+			}
 		}
 	}
 }

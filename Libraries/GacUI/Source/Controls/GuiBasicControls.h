@@ -257,7 +257,7 @@ Basic Construction
 			/// <summary>
 			/// Represnets an image to display.
 			/// </summary>
-			class GuiImageData
+			class GuiImageData : public Object
 			{
 			protected:
 				Ptr<INativeImage>				image;

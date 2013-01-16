@@ -9031,6 +9031,72 @@ API
 					return reader.ReadToEnd();
 				}
 			}
+
+			Ptr<XmlAttribute> XmlGetAttribute(Ptr<XmlElement> element, const WString& name)
+			{
+				FOREACH(Ptr<XmlAttribute>, att, element->attributes)
+				{
+					if(att->name.value==L"name")
+					{
+						return att;
+					}
+				}
+				return 0;
+			}
+
+			Ptr<XmlElement> XmlGetElement(Ptr<XmlElement> element, const WString& name)
+			{
+				FOREACH(Ptr<XmlNode>, node, element->subNodes)
+				{
+					Ptr<XmlElement> subElement=node.Cast<XmlElement>();
+					if(subElement && subElement->name.value==name)
+					{
+						return subElement;
+					}
+				}
+				return 0;
+			}
+
+			void XmlGetElements(Ptr<XmlElement> element, collections::List<Ptr<XmlElement>>& elements)
+			{
+				FOREACH(Ptr<XmlNode>, node, element->subNodes)
+				{
+					Ptr<XmlElement> subElement=node.Cast<XmlElement>();
+					if(subElement)
+					{
+						elements.Add(subElement);
+					}
+				}
+			}
+
+			void XmlGetElements(Ptr<XmlElement> element, const WString& name, collections::List<Ptr<XmlElement>>& elements)
+			{
+				FOREACH(Ptr<XmlNode>, node, element->subNodes)
+				{
+					Ptr<XmlElement> subElement=node.Cast<XmlElement>();
+					if(subElement && subElement->name.value==name)
+					{
+						elements.Add(subElement);
+					}
+				}
+			}
+
+			WString XmlGetValue(Ptr<XmlElement> element)
+			{
+				WString result;
+				FOREACH(Ptr<XmlNode>, node, element->subNodes)
+				{
+					if(Ptr<XmlText> text=node.Cast<XmlText>())
+					{
+						result+=text->content.value;
+					}
+					else if(Ptr<XmlCData> text=node.Cast<XmlCData>())
+					{
+						result+=text->content.value;
+					}
+				}
+				return result;
+			}
 		}
 	}
 }
