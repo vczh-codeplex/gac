@@ -1,4 +1,5 @@
 #include "..\Source\SDI.h"
+#include <Windows.h>
 
 using namespace vl::gactools;
 
