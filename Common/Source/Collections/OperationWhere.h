@@ -8,11 +8,19 @@ Data Structure::Operations
 #ifndef VCZH_COLLECTIONS_OPERATIONWHERE
 #define VCZH_COLLECTIONS_OPERATIONWHERE
 
-#include "OperationEnumerable.h"
-#include "..\Function.h"
+#include "OperationSelect.h"
 
 namespace vl
 {
+	namespace collections_internal
+	{
+		template<typename T>
+		bool WhereNotNull(Ptr<T> pointer)
+		{
+			return pointer;
+		}
+	}
+
 	namespace collections
 	{
 
@@ -135,6 +143,22 @@ Where
 		WhereProcessor<T> Where(bool(*selector)(T))
 		{
 			return WhereProcessor<T>(selector);
+		}
+
+		template<typename T, typename K>
+		class FindTypeProcessor : public EnumerableProcessor<Ptr<T>, WhereEnumerable<Ptr<K>>>
+		{
+		public:
+			WhereEnumerable<Ptr<K>> operator()(const IEnumerable<Ptr<T>>& enumerable)const
+			{
+				return enumerable>>Cast<T, K>()>>Where<Ptr<K>>(&collections_internal::WhereNotNull);
+			}
+		};
+
+		template<typename T, typename K>
+		FindTypeProcessor<T, K> FindType()
+		{
+			return FindTypeProcessor<T, K>();
 		}
 	}
 }

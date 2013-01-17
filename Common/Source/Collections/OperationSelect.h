@@ -13,6 +13,15 @@ Data Structure::Operations
 
 namespace vl
 {
+	namespace collections_internal
+	{
+		template<typename T, typename K>
+		Ptr<K> CastPointer(Ptr<T> pointer)
+		{
+			return pointer.Cast<K>();
+		}
+	}
+
 	namespace collections
 	{
 
@@ -126,6 +135,12 @@ Select
 		SelectProcessor<T, K> Select(K(*selector)(T))
 		{
 			return SelectProcessor<T, K>(selector);
+		}
+
+		template<typename T, typename K>
+		SelectProcessor<Ptr<T>, Ptr<K>> Cast()
+		{
+			return SelectProcessor<Ptr<T>, Ptr<K>>(&collections_internal::CastPointer<T, K>);
 		}
 	}
 }
