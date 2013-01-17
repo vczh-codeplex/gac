@@ -22,6 +22,7 @@ UI Builder
 
 		extern void			EnumeratePackages(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages);
 		extern void			EnumerateCommands(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands);
+		extern void			BuildMainMenu(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, GuiToolstripMenuBar* mainMenu);
 	}
 }
 

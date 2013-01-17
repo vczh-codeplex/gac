@@ -23,6 +23,8 @@ MainWindow
 			Ptr<GuiResource>									resource;
 			List<Ptr<XmlElement>>								packages;
 			Dictionary<WString, Ptr<GuiToolstripCommand>>		commands;
+
+			GuiToolstripMenuBar*								mainMenu;
 		public:
 			MainWindow()
 				:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -39,8 +41,25 @@ MainWindow
 				this->ForceCalculateSizeImmediately();
 				this->MoveToScreenCenter();
 
+				GuiTableComposition* table=new GuiTableComposition;
+				table->SetRowsAndColumns(2, 1);
+				table->SetRowOption(0, GuiCellOption::MinSizeOption());
+				table->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
+				table->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
+				table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				this->GetContainerComposition()->AddChild(table);
+				{
+					GuiCellComposition* cell=new GuiCellComposition;
+					table->AddChild(cell);
+					cell->SetSite(0, 0, 1, 1);
+
+					mainMenu=g::NewMenuBar();
+					mainMenu->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					cell->AddChild(mainMenu->GetBoundsComposition());
+				}
 				EnumeratePackages(resource, packages);
 				EnumerateCommands(resource, packages, commands);
+				BuildMainMenu(resource, packages, commands, mainMenu);
 			}
 
 			~MainWindow()
