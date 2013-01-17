@@ -19,6 +19,7 @@
     <ClCompile Include="..\Source\Implementation\DocumentFragment.cpp" />
     <ClCompile Include="..\Source\Implementation\DocumentManager.cpp" />
     <ClCompile Include="..\Source\Implementation\DocumentView.cpp" />
+    <ClCompile Include="..\Source\PackageManager.cpp" />
     <ClCompile Include="..\Source\ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -30,6 +31,7 @@
     <ClInclude Include="..\Source\Implementation\DocumentFragment.h" />
     <ClInclude Include="..\Source\Implementation\DocumentManager.h" />
     <ClInclude Include="..\Source\Implementation\DocumentView.h" />
+    <ClInclude Include="..\Source\PackageManager.h" />
     <ClInclude Include="..\Source\ResourceManager.h" />
   </ItemGroup>
   <ItemGroup>

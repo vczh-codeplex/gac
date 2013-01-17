@@ -48,6 +48,9 @@
     <ClCompile Include="..\Source\ResourceManager.cpp">
       <Filter>API</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\PackageManager.cpp">
+      <Filter>API</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Implementation\DocumentContainer.h">
@@ -75,6 +78,9 @@
       <Filter>API</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\ResourceManager.h">
+      <Filter>API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\PackageManager.h">
       <Filter>API</Filter>
     </ClInclude>
   </ItemGroup>
