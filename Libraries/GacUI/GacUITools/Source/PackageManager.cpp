@@ -97,6 +97,34 @@ UI Builder
 			}
 		};
 
+		WString TranslateResourceText(Ptr<GuiResource> resource, WString text, Regex& parameterRegex)
+		{
+			WString result;
+			List<Ptr<RegexMatch>> matches;
+			parameterRegex.Cut(text, false, matches);
+			FOREACH(Ptr<RegexMatch>, match, matches)
+			{
+				if(match->Success())
+				{
+					WString name=match->Groups()[L"name"].Get(0).Value();
+					WString value=match->Groups()[L"value"].Get(0).Value();
+					if(name==L"resource")
+					{
+						auto textResource=resource->GetValueByPath(value).Cast<ObjectBox<WString>>();
+						if(textResource)
+						{
+							result+=textResource->Unbox();
+						}
+					}
+				}
+				else
+				{
+					result+=match->Result().Value();
+				}
+			}
+			return result;
+		}
+
 		void BuildMainMenu(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, GuiToolstripMenuBar* mainMenu)
 		{
 			typedef Pair<vint, Ptr<PackageXmlMenuGroup>> ProprityMenuGroup;
@@ -177,6 +205,12 @@ UI Builder
 				WString currentParentId=L"Menu";
 				GuiToolstripButton* currentMenuButton=0;
 				GuiToolstripBuilder* currentBuilder=mainMenu->GetBuilder();
+				Regex parameterRegex(L"/{(<name>/w+):(<value>[^{}]*)/}");
+				FOREACH(Ptr<GuiToolstripCommand>, command, commands.Values())
+				{
+					command->SetText(TranslateResourceText(resource, command->GetText(), parameterRegex));
+				}
+
 				while(true)
 				{
 					vint index=existingMenuGroups.Keys().IndexOf(currentParentId);
@@ -214,13 +248,15 @@ UI Builder
 							}
 
 							bool needSeparator=false;
+							bool firstGroup=true;
 							FOREACH(Ptr<PackageXmlMenuGroup>, group, orderedGroups)
 							{
-								if(needSeparator || group->hasSeparator)
+								if(!firstGroup && (needSeparator || group->hasSeparator))
 								{
 									currentBuilder->Splitter();
 								}
 								needSeparator=group->hasSeparator;
+								firstGroup=false;
 
 								FOREACH(Ptr<PackageXmlMenuItem>, item, group->menuItems)
 								{
@@ -242,6 +278,7 @@ UI Builder
 										WString text=L"<Empty-Menu-Name>";
 										Ptr<GuiImageData> image;
 										GetMenuButtonAttributes(resource, item->definition, text, image);
+										text=TranslateResourceText(resource, text, parameterRegex);
 										currentBuilder->Button(image, text, &item->menuButton);
 									}
 								}
