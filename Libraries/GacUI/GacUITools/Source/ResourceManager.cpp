@@ -166,6 +166,33 @@ GuiResourceFolder
 			folders.Clear();
 		}
 
+		Ptr<Object> GuiResourceFolder::GetValueByPath(const WString& path)
+		{
+			const wchar_t* buffer=path.Buffer();
+			const wchar_t* index=wcschr(buffer, L'\\');
+			if(!index) index=wcschr(buffer, '/');
+
+			if(index)
+			{
+				WString name=path.Sub(0, index-buffer);
+				Ptr<GuiResourceFolder> folder=GetFolder(name);
+				if(folder)
+				{
+					vint start=index-buffer+1;
+					return folder->GetValueByPath(path.Sub(start, path.Length()-start));
+				}
+			}
+			else
+			{
+				Ptr<GuiResourceItem> item=GetItem(path);
+				if(item)
+				{
+					return item->GetContent();
+				}
+			}
+			return 0;
+		}
+
 		void GuiResourceFolder::LoadResourceFolderXml(const WString& containingFolder, Ptr<XmlElement> folderXml, Ptr<ParsingTable> xmlParsingTable)
 		{
 			ClearItems();
@@ -259,7 +286,7 @@ GuiResourceFolder
 										Ptr<INativeImage> image=GetCurrentController()->ImageService()->CreateImageFromStream(fileStream);
 										if(image)
 										{
-											Ptr<GuiImageData> imageData=new GuiImageData(image, -1);
+											Ptr<GuiImageData> imageData=new GuiImageData(image, 0);
 											item->SetContent(imageData);
 										}
 									}
