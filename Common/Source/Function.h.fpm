@@ -274,6 +274,25 @@ vl::function_combining::Combining<R1($TYPE_LIST($count)), R2($TYPE_LIST($count))
 		};
 $$end
 
+$$define $LAMBDA_TYPE_RETRIVER_DECLARATION($count) $$begin
+$(/)***********************************************************************
+vl::Func<$FUNCTION_TYPE($count,1)>
+***********************************************************************$(/)
+$( )
+		template<typename TObject, $TYPENAME_LIST($count,1)>
+		struct LambdaRetriveType<R (__thiscall TObject::*)($TYPE_LIST($count))const>
+		{
+			typedef Func<R($TYPE_LIST($count))> Type;
+		};
+$( )
+		template<typename TObject, $TYPENAME_LIST($count,1)>
+		struct LambdaRetriveType<R (__thiscall TObject::*)($TYPE_LIST($count))>
+		{
+			typedef Func<R($TYPE_LIST($count))> Type;
+		};
+$( )
+$$end
+
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: ³Âè÷å«(vczh)
@@ -311,6 +330,26 @@ $FUNCTION_DECLARATION($index,0)
 $( )
 $$end
 $loop($MAX_FUNCTION_NUMBER(),0,$FUNCTION_APPLY)
+
+	namespace function_lambda
+	{
+		template<typename T>
+		struct LambdaRetriveType
+		{
+			typedef vint Type;
+		};
+$( )
+$loop($MAX_FUNCTION_NUMBER(),0,$LAMBDA_TYPE_RETRIVER_DECLARATION)
+$( )
+#ifdef VCZH_NO_OLD_OS
+		template<typename T>
+		typename LambdaRetriveType<decltype(&T::operator())>::Type Lambda(T functionObject)
+		{
+			return functionObject;
+		}
+#define LAMBDA vl::function_lambda::Lambda
+#endif
+	}
 
 	namespace function_binding
 	{

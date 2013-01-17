@@ -15,19 +15,16 @@ UI Builder
 				resource
 					->GetFolder(L"Packages")
 					->GetItems()
-					>>Select(Func<Ptr<Object>(Ptr<GuiResourceItem>)>(
-						[](Ptr<GuiResourceItem> item)
+					>>Select(LAMBDA([](Ptr<GuiResourceItem> item)
 						{
 							return item->GetContent();
 						}))
 					>>FindType<Object, XmlDocument>()
-					>>Where(Func<bool(Ptr<XmlDocument>)>(
-						[](Ptr<XmlDocument> document)
+					>>Where(LAMBDA([](Ptr<XmlDocument> document)
 						{
 							return document->rootElement->name.value==L"Package";
 						}))
-					>>Select(Func<Ptr<XmlElement>(Ptr<XmlDocument>)>(
-						[](Ptr<XmlDocument> document)
+					>>Select(LAMBDA([](Ptr<XmlDocument> document)
 						{
 							return document->rootElement;
 						}))

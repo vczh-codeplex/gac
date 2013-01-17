@@ -736,13 +736,13 @@ TEST_CASE(TestCastOperation)
 	List<vint> dst;
 	CopyFrom(dst, src
 		>>Cast<Object, ObjectBox<vint>>()
-		>>Select(Func<vint(Ptr<ObjectBox<vint>>)>([](Ptr<ObjectBox<vint>> o){return o?o->Unbox():-1;}))
+		>>Select(LAMBDA([](Ptr<ObjectBox<vint>> o){return o?o->Unbox():-1;}))
 		);
 	CHECK_LIST_ITEMS(dst, {0 _ 1 _ 2 _ -1 _ -1 _ -1});
 
 	CopyFrom(dst, src
 		>>FindType<Object, ObjectBox<vint>>()
-		>>Select(Func<vint(Ptr<ObjectBox<vint>>)>([](Ptr<ObjectBox<vint>> o){return o?o->Unbox():-1;}))
+		>>Select(LAMBDA([](Ptr<ObjectBox<vint>> o){return o?o->Unbox():-1;}))
 		);
 	CHECK_LIST_ITEMS(dst, {0 _ 1 _ 2});
 }
