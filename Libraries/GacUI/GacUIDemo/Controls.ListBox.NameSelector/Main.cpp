@@ -134,7 +134,7 @@ private:
 			list->GetItems(),
 			FromArray(DataSource)
 				>>OrderBy(_wcsicmp)
-				>>Select(Func<list::TextItem(const wchar_t*)>(
+				>>Select(LAMBDA(
 					[](const wchar_t* name){return list::TextItem(name);}
 				))
 			);

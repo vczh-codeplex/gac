@@ -94,7 +94,11 @@ private:
 		Func<Ptr<list::ListViewItem>(Ptr<FileProperties>)> converter(this, &SortingAndFilteringWindow::CreateFileItem);
 
 		listView->GetItems().Clear();
-		CopyFrom(listView->GetItems(), fileProperties>>Where(filter)>>OrderBy(comparer)>>Select(converter));
+		CopyFrom(listView->GetItems(), 
+			fileProperties
+			>>Where(filter)
+			>>OrderBy(comparer)
+			>>Select(converter));
 	}
 
 	void ShowAllFileType_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
@@ -200,11 +204,11 @@ public:
 			CopyFrom(
 				fileTypes,
 				fileProperties
-				>>Select(Func<WString(Ptr<FileProperties>)>(
+				>>Select(LAMBDA(
 					[](Ptr<FileProperties> file){return file->GetTypeName();}
 				))
 				>>Distinct()
-				>>OrderBy(Func<vint(WString, WString)>(
+				>>OrderBy(LAMBDA(
 					[](WString a, WString b){return _wcsicmp(a.Buffer(), b.Buffer());}
 				))
 				);
