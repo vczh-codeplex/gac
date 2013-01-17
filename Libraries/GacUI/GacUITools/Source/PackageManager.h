@@ -20,9 +20,38 @@ namespace vl
 UI Builder
 ***********************************************************************/
 
+		struct PackageXmlMenuItem
+		{
+			WString							id;
+			Ptr<XmlElement>					definition;
+			GuiToolstripBuilder*			builder;
+			GuiToolstripButton*				menuButton;
+
+			PackageXmlMenuItem()
+				:builder(0)
+				,menuButton(0)
+			{
+			}
+		};
+
+		struct PackageXmlMenuGroup
+		{
+			bool							hasSeparator;
+			List<Ptr<PackageXmlMenuItem>>	menuItems;
+
+			PackageXmlMenuGroup()
+				:hasSeparator(false)
+			{
+			}
+		};
+
+		typedef Pair<vint, Ptr<PackageXmlMenuGroup>> ProprityMenuGroup;
+
 		extern void			EnumeratePackages(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages);
 		extern void			EnumerateCommands(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands);
-		extern void			BuildMainMenu(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, GuiToolstripMenuBar* mainMenu);
+		extern void			EnumerateMenuDefinitions(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, Group<WString, ProprityMenuGroup>& existingMenuGroups);
+		extern void			BuildMenu(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripMenuBar* menu, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups);
+		extern void			BuildToolbar(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripToolbar* toolbar, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups);
 	}
 }
 
