@@ -303,3 +303,12 @@ TEST_CASE(TestCurryingWithLambda)
 	addr_1_2_3_4();
 	TEST_ASSERT(r==6);
 }
+
+/***********************************************************************
+Type Inference
+***********************************************************************/
+
+TEST_CASE(TestTypeInference)
+{
+	const Func<void()>& f=LAMBDA([]()->void{});
+}
