@@ -19,18 +19,28 @@ MainWindow
 
 		class MainWindow : public GuiWindow
 		{
+		protected:
+			Ptr<GuiResource>									resource;
+			List<Ptr<XmlElement>>								packages;
+			Dictionary<WString, Ptr<GuiToolstripCommand>>		commands;
 		public:
 			MainWindow()
 				:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 			{
-				WString applicationName=sdiApplication->GetApplicationResource()->GetFolder(L"Application")->GetItem(L"Name")->AsString()->Unbox();
+				resource=sdiApplication->GetApplicationResource();
+				WString applicationName;
+				if(auto name=resource->GetValueByPath(L"Application\\Name").Cast<ObjectBox<WString>>())
+				{
+					applicationName=name->Unbox();
+				}
+
 				this->SetText(L"GacUI Tools "+applicationName+L" (www.gaclib.net)");
 				this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
 				this->ForceCalculateSizeImmediately();
 				this->MoveToScreenCenter();
 
-				List<Ptr<XmlElement>> packages;
-				EnumeratePackages(sdiApplication->GetApplicationResource(), packages);
+				EnumeratePackages(resource, packages);
+				EnumerateCommands(resource, packages, commands);
 			}
 
 			~MainWindow()

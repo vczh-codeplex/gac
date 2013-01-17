@@ -86,6 +86,8 @@ Resource Structure
 			Ptr<GuiResourceFolder>					RemoveFolder(const WString& name);
 			void									ClearFolders();
 
+			Ptr<Object>								GetValueByPath(const WString& path);
+
 			void									LoadResourceFolderXml(const WString& containingFolder, Ptr<XmlElement> folderXml, Ptr<ParsingTable> xmlParsingTable);
 		};
 
