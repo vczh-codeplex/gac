@@ -723,6 +723,30 @@ TEST_CASE(TestPairOperation)
 	CompareEnumerable(pair, src>>Select(Odd)>>Pairwise(src>>Select(Square)));
 }
 
+TEST_CASE(TestCastOperation)
+{
+	List<Ptr<Object>> src;
+	src.Add(new ObjectBox<vint>(0));
+	src.Add(new ObjectBox<vint>(1));
+	src.Add(new ObjectBox<vint>(2));
+	src.Add(new ObjectBox<vuint>(3));
+	src.Add(new ObjectBox<vuint>(4));
+	src.Add(new ObjectBox<vuint>(5));
+
+	List<vint> dst;
+	CopyFrom(dst, src
+		>>Cast<Object, ObjectBox<vint>>()
+		>>Select(Func<vint(Ptr<ObjectBox<vint>>)>([](Ptr<ObjectBox<vint>> o){return o?o->Unbox():-1;}))
+		);
+	CHECK_LIST_ITEMS(dst, {0 _ 1 _ 2 _ -1 _ -1 _ -1});
+
+	CopyFrom(dst, src
+		>>FindType<Object, ObjectBox<vint>>()
+		>>Select(Func<vint(Ptr<ObjectBox<vint>>)>([](Ptr<ObjectBox<vint>> o){return o?o->Unbox():-1;}))
+		);
+	CHECK_LIST_ITEMS(dst, {0 _ 1 _ 2});
+}
+
 bool dividable(vint a, vint b)
 {
 	return b%a==0;

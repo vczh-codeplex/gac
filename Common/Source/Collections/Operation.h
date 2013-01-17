@@ -30,6 +30,9 @@ Functions:
 	[T] >>	Union([T]) => [T]
 	[T] >>	Except([T]) => [T]
 	[T] >>	Pairwise([K]) => [(T,K)]
+	
+	[Ptr<T>] >> Cast<K>() => [Ptr<K>]
+	[Ptr<T>] >> FindType<K>() => [Ptr<K>]
 
 FOREACH(X, a, XList)
 FOREACH_INDEXER(X, a, index, XList)
