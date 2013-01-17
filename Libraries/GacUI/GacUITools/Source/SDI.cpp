@@ -25,6 +25,7 @@ MainWindow
 			Dictionary<WString, Ptr<GuiToolstripCommand>>		commands;
 
 			GuiToolstripMenuBar*								mainMenu;
+			GuiToolstripToolbar*								mainToolbar;
 		public:
 			MainWindow()
 				:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -42,9 +43,10 @@ MainWindow
 				this->MoveToScreenCenter();
 
 				GuiTableComposition* table=new GuiTableComposition;
-				table->SetRowsAndColumns(2, 1);
+				table->SetRowsAndColumns(3, 1);
 				table->SetRowOption(0, GuiCellOption::MinSizeOption());
-				table->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
+				table->SetRowOption(1, GuiCellOption::MinSizeOption());
+				table->SetRowOption(2, GuiCellOption::PercentageOption(1.0));
 				table->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
 				table->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				this->GetContainerComposition()->AddChild(table);
@@ -57,9 +59,22 @@ MainWindow
 					mainMenu->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 					cell->AddChild(mainMenu->GetBoundsComposition());
 				}
+				{
+					GuiCellComposition* cell=new GuiCellComposition;
+					table->AddChild(cell);
+					cell->SetSite(1, 0, 1, 1);
+
+					mainToolbar=g::NewToolbar();
+					mainToolbar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					cell->AddChild(mainToolbar->GetBoundsComposition());
+				}
+
+				Group<WString, ProprityMenuGroup> existingMenuGroups;
 				EnumeratePackages(resource, packages);
 				EnumerateCommands(resource, packages, commands);
-				BuildMainMenu(resource, packages, commands, mainMenu);
+				EnumerateMenuDefinitions(resource, packages, existingMenuGroups);
+				BuildMenu(resource, packages, mainMenu, L"Menu", commands, existingMenuGroups);
+				BuildToolbar(resource, packages, mainToolbar, L"Toolbar", commands, existingMenuGroups);
 			}
 
 			~MainWindow()
