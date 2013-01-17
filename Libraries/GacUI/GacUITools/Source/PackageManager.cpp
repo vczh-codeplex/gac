@@ -185,7 +185,7 @@ EnumerateMenuDefinitions
 EnumerateMenuDefinitions
 ***********************************************************************/
 
-		void BuildToolstripObject(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripBuilder* rootBuilder, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups)
+		void BuildToolstripObject(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripBuilder* rootBuilder, bool forToolbar, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups)
 		{
 			vint processingMenuItemIndex=-1;
 			WString currentParentId=containerName;
@@ -248,27 +248,60 @@ EnumerateMenuDefinitions
 
 							FOREACH(Ptr<PackageXmlMenuItem>, item, group->menuItems)
 							{
+								Ptr<GuiToolstripCommand> command;
+								WString text=L"<Empty-Menu-Name>";
+								Ptr<GuiImageData> image;
+
 								if(auto commandAttribute=XmlGetAttribute(item->definition, L"command"))
 								{
 									vint index=commands.Keys().IndexOf(commandAttribute->value.value);
 									if(index==-1)
 									{
-										currentBuilder->Button(0, L"<Unknown-Command-Id>:"+commandAttribute->value.value, &item->menuButton);
+										text=L"<Unknown-Command-Id>:"+commandAttribute->value.value;
 									}
 									else
 									{
-										Ptr<GuiToolstripCommand> command=commands.Values().Get(index);
-										currentBuilder->Button(command.Obj(), &item->menuButton);
+										command=commands.Values().Get(index);
 									}
 								}
 								else
 								{
-									WString text=L"<Empty-Menu-Name>";
-									Ptr<GuiImageData> image;
 									GetMenuButtonAttributes(resource, item->definition, text, image);
 									text=TranslateResourceText(resource, text, parameterRegex);
-									currentBuilder->Button(image, text, &item->menuButton);
 								}
+
+								WString appear=L"Button";
+								if(currentBuilder==rootBuilder && forToolbar)
+								{
+									if(auto appearAttribute=XmlGetAttribute(item->definition, L"appear"))
+									{
+										appear=appearAttribute->value.value;
+									}
+								}
+
+								if(appear==L"SplitButton")
+								{
+									if(command)
+									{
+										currentBuilder->SplitButton(command.Obj(), &item->menuButton);
+									}
+									else
+									{
+										currentBuilder->SplitButton(image, text, &item->menuButton);
+									}
+								}
+								else
+								{
+									if(command)
+									{
+										currentBuilder->Button(command.Obj(), &item->menuButton);
+									}
+									else
+									{
+										currentBuilder->Button(image, text, &item->menuButton);
+									}
+								}
+
 								processingMenuItems.Add(item);
 							}
 						}
@@ -287,12 +320,12 @@ EnumerateMenuDefinitions
 
 		void BuildMenu(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripMenuBar* menu, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups)
 		{
-			BuildToolstripObject(resource, packages, menu->GetBuilder(), containerName, commands, existingMenuGroups);
+			BuildToolstripObject(resource, packages, menu->GetBuilder(), false, containerName, commands, existingMenuGroups);
 		}
 
 		void BuildToolbar(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripToolbar* toolbar, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups)
 		{
-			BuildToolstripObject(resource, packages, toolbar->GetBuilder(), containerName, commands, existingMenuGroups);
+			BuildToolstripObject(resource, packages, toolbar->GetBuilder(), true, containerName, commands, existingMenuGroups);
 		}
 	}
 }

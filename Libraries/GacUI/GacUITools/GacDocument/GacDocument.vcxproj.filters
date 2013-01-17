@@ -118,6 +118,15 @@
     <Image Include="..\Source\PackageResources\Images\_Undo.png">
       <Filter>PackageResources\Images</Filter>
     </Image>
+    <Image Include="..\Source\PackageResources\Images\_JsonDocument.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_TextDocument.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_XmlDocument.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\Source\PackageResources\Images\Folder.xml">
