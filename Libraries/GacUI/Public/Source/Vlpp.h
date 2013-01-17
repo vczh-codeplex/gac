@@ -6228,6 +6228,15 @@ Data Structure::Operations
 
 namespace vl
 {
+	namespace collections_internal
+	{
+		template<typename T, typename K>
+		Ptr<K> CastPointer(Ptr<T> pointer)
+		{
+			return pointer.Cast<K>();
+		}
+	}
+
 	namespace collections
 	{
 
@@ -6342,6 +6351,12 @@ Select
 		{
 			return SelectProcessor<T, K>(selector);
 		}
+
+		template<typename T, typename K>
+		SelectProcessor<Ptr<T>, Ptr<K>> Cast()
+		{
+			return SelectProcessor<Ptr<T>, Ptr<K>>(&collections_internal::CastPointer<T, K>);
+		}
 	}
 }
 
@@ -6363,6 +6378,15 @@ Data Structure::Operations
 
 namespace vl
 {
+	namespace collections_internal
+	{
+		template<typename T>
+		bool WhereNotNull(Ptr<T> pointer)
+		{
+			return pointer;
+		}
+	}
+
 	namespace collections
 	{
 
@@ -6485,6 +6509,22 @@ Where
 		WhereProcessor<T> Where(bool(*selector)(T))
 		{
 			return WhereProcessor<T>(selector);
+		}
+
+		template<typename T, typename K>
+		class FindTypeProcessor : public EnumerableProcessor<Ptr<T>, WhereEnumerable<Ptr<K>>>
+		{
+		public:
+			WhereEnumerable<Ptr<K>> operator()(const IEnumerable<Ptr<T>>& enumerable)const
+			{
+				return enumerable>>Cast<T, K>()>>Where<Ptr<K>>(&collections_internal::WhereNotNull);
+			}
+		};
+
+		template<typename T, typename K>
+		FindTypeProcessor<T, K> FindType()
+		{
+			return FindTypeProcessor<T, K>();
 		}
 	}
 }
@@ -9240,6 +9280,9 @@ Functions:
 	[T] >>	Union([T]) => [T]
 	[T] >>	Except([T]) => [T]
 	[T] >>	Pairwise([K]) => [(T,K)]
+	
+	[Ptr<T>] >> Cast<K>() => [Ptr<K>]
+	[Ptr<T>] >> FindType<K>() => [Ptr<K>]
 
 FOREACH(X, a, XList)
 FOREACH_INDEXER(X, a, index, XList)
