@@ -2,735 +2,84 @@
 Types
 ========================================================
 
-Predefined types: (struct)
-	int8			:0
-	int16			:0
-	int32			:0
-	int64			:0
-	uint8			:0
-	uint16			:0
-	uint32			:0
-	uint64			:0
-	float32			:0
-	float64			:0
-	bool			:false
-	char			:'\0'
-	string			:""
-	void			:new void
-	Pair<T, U>		:new Pair<T, U>{first=default(T), second=default(U)}
-	Ref<T>			:empty reference (represent as "ref null")
+sbyte	(Int8)
+short	(Int16)
+int		(Int32)
+long	(Int64)
+byte	(UInt8)
+ushort	(UInt16)
+uint	(UInt32)
+ulong	(UInt64)
+float	(Float32)
+double	(Float64)
 
-Predefined types: (ref struct)
-	T[]				:null
-	object			:null
-	R(params tuple)	:null (concept)
-	Type			:type object for reflection (concept)
+bool			: true, false
+char			: 'a', 'b'
+string			: "a", "b"
 
-Type shortcut:
-	(T0, T1, T2)	:Pair<T0, Pair<T1, Pair<T2, void>>>
-	R(T0, T1, T2)	:R(params (T0, T1, T2)) // Invokable<R, (T0, T1, T2)>
-	ref T			:Ref<T>
+========================================================
+Types Definitions (reference type)
+========================================================
 
-struct Ref<T>		//this is a special type, programmers will not see getter, setter. ref null is a shortcut to new Ref<T>
-{
-	T() getter;
-	void(T) setter;
-}
+type Handle = int
 
-concept T as Invokable<TResult, TParameters>
-{
-	TResult Invoke(TParameters paremters);
-}
+enum Season = Spring | Summer | Autumn | Winter   (e.g. Season.Spring, ...)
 
-reading to and writing from Ref<T> redirect to Ref<T>.Value
+data Point T = { x:T, y:T }
 
-T Ref<T>.Value<T>
-{
-	get
-	{
-		if(this.getter == null) throw new EmptyReferenceException;
-		return this.getter();
-	}
-	set
-	{
-		if(this.setter == null) throw new EmptyReferenceException;
-		this.setter(value);
-	}
-}
+data Expression
+= Nunmber { value:double }
+| Binary { left:Expression, right:Expression, op:BinaryOpeartor }
+
+========================================================
+Type Constructors
+========================================================
+
+array T			: array [a, b, c:xs]
+iterator T		: iterator [a, b, c:xs]
+map T U			: map {a:b, c:d, e:f}
+(T, U, V)		: (a, b, c)
+()				: ()
+
+data			: Point { x:10, y:20 }
+				: new Point int { x:10, y:20 }
 
 ========================================================
 Expressions
 ========================================================
 
-Constant for values:
-	true, false, null
-	123, 123.456, 123.456E-10
-	'a', '\0', '\r', '\n', '\t', '\\', '\'', '\"', '\xFFFF'
-	"a\0\r\n\t\\\'\"\xFFFF"
-	@"	line1
-		line2
-		line3 ""
-	"
+function call	: function argument
+				: argument -> function
+field			: expression . name
+association		: (a b c) d <==> a b c $ d
+				: (a b c) . d <==> a b c $ . d
 
-Type constructors:
-	default(T)		// default value of type T
-	typeof(T)		// get the type object for T
-	(a, b, c)		// create tuple with values for type (Ta, Tb, Tc)
+function		: pattern=>expression
+				: x=>x+1
+				: x=>y=>x+y
 
-	new Type		// create a struct value or ref struct value with all fields set to default values
-					// for predefined struct, it gets its default value for the type
-	new Type		// create a struct value or ref struct value with values for some fields and default values for others
-	{
-		Field=Value,
-		///
-	}
+a <- b			: x=>a $ b x
+(op)			: x=>y=>x op y
+(? op value)	: x=>x ope value
+(value op ?)	: x=>value op x
 
-	new Type(a, b, ...)          // there are Constructable<Type, ParameterTupleType>
-	new Type(params tuple)
-	new Type(a, b, ...){...}
-	new Type(params tuple){...}
-
-	new Type[count]	// create an array with a specified length and all elements set to default values
-	new Type[]		// create an array with element values specified
-	{
-		Value,
-		...
-	}
-	[a, b, c]		// create an array of automatically type inference
-
-	new Concept		// go to concept DefaultImpl<T>, for ref concept T
-
-	ref	a			// create a reference to a left value, a variable of a reference type can be redirected using <refA = ref a;>
-
-Operators: (ordered in preference)
-	+ - ! ~ ++ --
-	<< >>
+operator precedence
+	=>
+	field
+	function call
+	+ - not 
 	* / %
 	+ -
-	< <= > >= == !=
+	<< >>
+	== != < <= > >=
 	&
 	^
 	|
-	&&
-	||
+	and
+	xor
+	or
+	<-
+	->
+	custom operator
+	$
 	?:
-	??
-	a[b]			// this is a property
-	= x=			// = is not overloadable
-
-Implicit conversion:
-	(struct, ref struct, ref concept) -> object
-
-	ref struct From
-	{
-		mixin To;
-	}
-
-	ref concept TThis as From // TThis must be ref struct
-		requires TThis as To
-	{
-	}
-
-	instance From as To
-	{
-	}
-
-	not satisfies then go to custom
-		concept ImplicitConvertable<TSource, TDest>
-
-	Predefined ImplicitConvertable implementation:
-		int8 -> int16 -> int32 -> int64
-		uint8 -> uint16 -> uint32 -> uint64
-		float32 -> float64
-		(int8, int16, uint8, uint16) -> float32
-		(int32, uint32) -> float64
-
-	implicit conversion always search 1 level only
-
-Explicit conversion:
-	(T)expr
-	expr as T // same as (T)expr, except that cast fail returns null, not throw exception
-
-	1. search for implicit conversion rule
-	2. search for Convertable<TSource, TDest>
-	3. read the real type (rtti) and perform implicit conversion rule without invoking ImplicitConvertable<TSource, TDesT>
-	4. throw TypeCastException
-
-	Predefine Convertable implementation:
-		all numberic types <--> all numberic types
-		char <--> all integer types
-
-		instance<TSource, TDest> Convertable<TSource, TDest>
-			requires ImplicitConvertable<TSource, TDest>
-		{
-			TDest Convert(TSource source)
-			{
-				return ImplicitConvertable<TSource, TDest>.Convert(source);
-			}
-		}
-
-Member access:
-	struct.field
-	ref struct.field
-	ref concept.function
-	x.ExtensionProperty
-	x.ExtensionFunction
-	namespace.property/function
-	namespace.type. ...
-
-Reference access:
-	ref a // for variable, argument, field, get-set property, type of ref T (like return values from +=)
-
-Function invoking:
-	Function(arg0, arg1, arg2) is equivalent to Function(params (arg0, arg1, arg2))
-
-	for void f(string a, params int[] arguments) arguments we have
-	f("a", new int[]{1, 2, 3}) is equivalent to f("a", 1, 2, 3);
-
-	for ref T argument we should only pass expressions of ref expr into it
-	like for void f(ref a);
-	we should invoke it like
-		f(ref variable);
-		f(ref a[b]);
-		f(ref a.operator+=(b))
-		etc..
-
-Extension function invoking:
-	expression.Function( ... )
-
-Lambda expression:
-	a=>b
-	(a, ref b)=>b
-	int(int a, int ref b){return b;}
-
-yield as ContinuableType // so it can be used as c=>yield as Enumerable<int>{for(int i=0;i<c;i++)yield c;}
-{
-	a = yield b;
-	yield a;
-	yield return [expression] ;
-}
-
-Others:
-	this // for function and property body representing the receive object
-	mixin(Type) // for the mixin-ed object that mixin-ed in the type of "this" expression
-	typeof(Type) // for the Type object of the specified type
-
-========================================================
-Generic Constraint
-========================================================
-
-requires GenericConstraint, ...
-
-GenericConstraint:
-	params T // T is a tuple
-	struct T
-	ref struct T
-	ref concept T
-	struct | ref struct | ref concept T
-	...
-
-	T as RefConceptType
-	T mixin RefStructType
-	new T // DefaultImpl<T> for ref concept, always accept struct and ref struct
-	...
-
-	ConceptName<T1, T2, T3>
-
-========================================================
-Function Declaration
-========================================================
-
-[Attributes]
-Type [[Attributes] [swtich | case] RecieveType .] Name [<[Attributes] T1, T2, ...>] [GenericConstraint] ([Attributes] Parameter, ...) statement;
-
-[Attributes]
-Type [[Attributes] [switch | case] ReceiveType .] Name [<[Attributes] T1, T2, ...>] [GenericConstraint] ([Attributes] params TupleType Name) statement;
-
-Parameter:
-	Type name
-	ref Type name
-	params ArrayType name // should be the last one]
-	switch Type name // attend multiple dispatching
-	case Type name
-
-Multiple dispatch:
-	if a function declaration contains switch in receive type or any parameter types,
-	this function is a multiple dispatch root declaration, therefore cannot have a body (statement)
-	any implementation for this root declaration should have the same header with "switch" replaced with "case", and type replaced with case type
-
-	example:
-		ref struct Expression
-		{
-		}
-
-		ref struct NumberExpression
-		{
-			mixin Expression;
-			double number;
-		}
-
-		enum BinaryOperator{ Add, Sub, Mul, Div }
-
-		ref struct BinaryExpression
-		{
-			mixin Expression;
-			BinaryOperator op;
-			Expression left;
-			Expression right;
-		}
-
-		double switch Expression.Evaluate();
-
-		double case NumberExpression.Evaluate()
-		{
-			return this.number;
-		}
-
-		double case BinaryExpression.Evaluate()
-		{
-			switch(op)
-			{
-				case BinaryOperator.Add: return left.Evaluate() + right.Evaluate();
-				case BinaryOperator.Sub: return left.Evaluate() - right.Evaluate();
-				case BinaryOperator.Mul: return left.Evaluate() * right.Evaluate();
-				case BinaryOperator.Div: return left.Evaluate() / right.Evaluate();
-			}
-		}
-
-		void Main()
-		{
-			Expression e = new BinaryExpression
-			{
-				op = BinaryOperator.Mul,
-				left = new BinaryExpression
-				{
-					op = BinaryOperator.Add,
-					left = new NumberExpression{ number = 1 }
-					left = new NumberExpression{ number = 2 }
-				},
-				right = new BinaryExpression
-				{
-					op = BinaryOperator.Add,
-					left = new NumberExpression{ number = 3 }
-					left = new NumberExpression{ number = 4 }
-				},
-			}
-
-			Console.WriteLine(e.Evaluate()) // prints "21"
-		}
-
-========================================================
-Property Declaration
-========================================================
-
-[Attributes]
-Type [[Attributes] [switch | case] ReceiveType .] Name [<[Attributes] T1, T2, ...>] [GenericConstraint]
-{
-	[get statement;]
-	[set statement;]
-}
-	
-========================================================
-Type Declaration
-========================================================
-
-[Attributes]
-struct Name [<[Attributes] T1, T2, ...>] [GenericConstraint]
-{
-	[Attributes] Type Name;
-	...
-}
-
-[Attributes]
-ref struct Name [<[Attributes] T1, T2, ...>] [GenericConstraint]
-{
-	[Attributes]
-	mixin Type;
-	...
-
-	[Attributes] Type Name;
-	...
-}
-	
-========================================================
-Concept Declaration
-========================================================
-
-[Attributes]
-concept Name [<[Attributes] T1, T2, ...>] [GenericConstraint]
-{
-	FunctionDeclaration | PropertyDeclaration // cannot have a body
-	...
-}
-
-[Attributes]
-ref concept [Attributes] T as Name [<[Attributes] T1, T2, ...>] [GenericConstraint]
-{
-	FunctionDeclaration | PropertyDeclaration // cannot have a body
-	...
-	// all declarations should have a receiver type T, and T should only appear as a receiver type
-}
-	
-========================================================
-Instance Declaration
-========================================================
-
-[Attributes]
-instance [<[Attributes] T1, T2, ...>] [[Attributes] ImplType as] Concept [<T1, T2, ...>] [GenericConstraint]
-{
-	FunctionDeclaration | PropertyDeclaration // should have a body
-}
-	
-========================================================
-Attribute Declaration
-========================================================
-
-attribute [Att(1, "vczh", a=10, b="genius")] implies
-
-ref struct Att
-{
-	int a;
-	string b;
-	int c;
-	string d;
-}
-
-instance Attributable<Att>
-{
-}
-
-instance Constructable<Att, (int, string)>
-{
-	Att Construct(int c, string d)
-	{
-		return new Att
-		{
-			c=c,
-			d=d,
-		};
-	}
-}
-	
-========================================================
-Namespace Declaration
-========================================================
-
-[public | private(by default)] namespace Name1. ... .Name2
-{
-	[public | private] Declaration // if public or private marked the current namespace, then it becomes the default option.
-	                               // otherwise, private is the default option.
-								   // embedded namespaces always use private by default.
-								   // instance can only use public.
-	...
-}
-
-========================================================
-Statements
-========================================================
-
-{
-	statement; ...
-}
-
-(type | var) variable [ = expression] ;
-
-(variable | pattern) = expression ; // failing to match the pattern will raise a PatternAssignException
-                                    // variables in the pattern can contains not-declared variables. in this case, those variable is declared.
-									// assignment can use function result type to choose a correct overloaded function
-									// like (int a, success) = TryConvert("abc"); will use TryConvertable<string, int>.TryConvert
-
-if (boolean expression)
-	statement;
-[else
-	statement;]
-
-while (boolean expression)
-	statement;
-
-do
-	statement;
-while (boolean expression)
-
-foreach ((type | var) variable in enumerable)
-	statement;
-
-using((type | var) variable = initialization)
-	statement;
-
-try
-	statement;
-[catch (catchable x)
-	statement;]
-[finally
-	statement;]
-
-continue;
-break;
-return [expression];
-
-switch (expression)
-{
-	case pattern1 :
-	case pattern2 :
-		statement;
-		break;
-	default :
-		// falling into a not-explicitly-declared default will raise a SwitchException
-}
-
-Pattern:
-	Type variable // switch only
-	(a, b, c)
-	[a, b, c]
-	([Dog a, Fox b, Cat c : remains], b (c, d))
-	constant
-
-========================================================
-Continuation
-========================================================
-
-FunctionDeclaration yield
-{
-	a = yield b;				// call ContinuationBindable<TC, T, UC>.Bind(xb, a=>remains)
-	yield a;					// call ContinuationYieldable<TC, UC>.Yield(xa, ()=>remains)
-	yield return [expression] ;	// call ContinuationNullable<TC>.Null or ContinuationReturnable<T>.Return
-}
-
-ContinuableType PropertyName
-{
-	get yield
-	{
-		...
-	}
-	set // do not accept yield
-	{
-		...
-	}
-}
-
-========================================================
-Code File
-========================================================
-
-using Namespaces;
-
-using A = int;
-using B<T> = List<T>;
-
-NamespaceDeclaration // there should be one and only up to one namespace declaration for a code file
-
-========================================================
-Predefined Exceptions
-========================================================
-
-NullReferenceException
-EmptyReferenceException
-TypeCastException
-IndexOutOfRangeException
-SwitchException
-PatternAssignException
-
-========================================================
-Predefined Concepts
-========================================================
-
-Concepts for operators
-
-	concept Negatable<T>
-	{
-		T operator +(T value);
-		T operator -(T value);
-	}
-
-	concept Increasable<T>
-	{
-		ref T operator prefix++(ref T value);
-		ref T operator prefix--(ref T value);
-		T operator postfix++(ref T value);
-		T operator postfix--(ref T value);
-	}
-
-	concept Shiftable<T>
-	{
-		T operator <<(T value);
-		T operator >>(T value);
-		ref T operator <<=(ref T dst, T src);
-		ref T operator >>=(ref T dst, T src);
-	}
-
-	concept Multable<T>
-	{
-		T operator *(T value);
-		T operator /(T value);
-		ref T operator *=(ref T dst, T src);
-		ref T operator /=(ref T dst, T src);
-		T One{get;}
-	}
-
-	concept Modulable<T>
-	{
-		T operator %(T value);
-		ref T operator %=(ref T dst, T src);
-	}
-
-	concept Addable<T>
-	{
-		T operator +(T value);
-		T operator -(T value);
-		ref T operator +=(ref T dst, T src);
-		ref T operator -=(ref T dst, T src);
-		T Zero{get;}
-	}
-
-	concept BitOperatable<T>
-	{
-		T operator &(T value);
-		T operator |(T value);
-		T operator ^(T value);
-		ref T operator &=(ref T dst, T src);
-		ref T operator |=(ref T dst, T src);
-		ref T operator ^=(ref T dst, T src);
-	}
-
-	concept Equable<T>
-	{
-		T operator ==(T value);
-		T operator !=(T value);
-	}
-
-	concept Comparable<T>
-	{
-		T operator <(T value);
-		T operator <=(T value);
-		T operator >(T value);
-		T operator >=(T value);
-	}
-
-	concept LogicalOperatable<T>
-	{
-		T operator &&(T value);
-		T operator ||(T value);
-		T operator ^(T value);
-		ref T operator &&=(ref T dst, T src);
-		ref T operator ||=(ref T dst, T src);
-		ref T operator ^=(ref T dst, T src);
-	}
-
-Concepts for predefined types:
-
-	concept T as Invokable<TResult, TParameters>
-		requires params TParameters
-	{
-		TResult Invoke(params TParameters paremters);
-	}
-
-	concept T as Type
-	{
-		...
-	}
-
-Concepts for type conversions:
-
-	concept Convertable<TSource, TDest>
-	{
-		TDest Convert(TSource source);
-	}
-
-	concept ImplicitConvertable<TSource, TDesT>
-	{
-		TDest Convert(TSource source);
-	}
-
-	concept TryConvertable<TSource, TDest>
-	{
-		(TDest, bool) TryConvert(TSource source);
-	}
-
-Concepts for exceptions:
-	
-	ref concept T as Throwable
-	{
-		string T.Message{get;}
-	}
-
-Concepts for attributes:
-
-	concept Attributable<T>
-	{
-	}
-
-Concepts for statements;
-	
-	ref concept T as Disposable
-	{
-		void T.Dispose();
-	}
-
-	ref concept TThis as Enumerable<T>
-	{
-		Enumerator<T> TThis.CreateEnumerator();
-	}
-
-	ref concept TThis as Enumerator<T>
-	{
-		bool TThis.MoveNext();
-		T TThis.Current{get;}
-	}
-
-Concepts for type creations:
-
-	concept DefaultImpl<T>
-		requires ref concept T
-	{
-		T CreateDefaultImpl;
-	}
-
-	concept Constructable<T, TParameters> // TParams is a tuple
-		requires params TParameters
-	{
-		T Construct(params TParameters parameters);
-	}
-
-Concepts for continuations:
-	
-	concept Continuable<TC>
-	{
-	}
-
-	concept ContinuationNullable<TC>
-	{
-		TC Null{get;}
-	}
-
-	concept ContinuationReturnable<T, TC>
-	{
-		TC Return(T t);
-	}
-
-	concept ContinuationBindable<TC, T, UC>
-	{
-		UC Bind(TC closure, UC(T) continuation);
-	}
-
-	concept ContinuationYieldable<TC, UC>
-	{
-		UC Bind(TC closure, UC(T) continuation);
-	}
-
-========================================================
-Predefined Instances
-========================================================
-
-	instance<T> Continuable<Enumerable<T>>
-	instance<T> ContinuationNullable<Enumerable<T>>
-	instance<T> ContinuationYieldable<T, Enumerable<T>>
-	instance<T> ContinuationYieldable<Enumerable<T>, Enumerable<T>>
-
-	instance<T> Continable<Task<T>>
-	instance<T> ContinableReturnable<Task<T>>
-	instance ContinuableNullable<Task<void>>
-	instance<T, U> ContinableBindable<Task<T>, T, Task<U>>
-
-========================================================
-Intermediate Language Definition
-========================================================
