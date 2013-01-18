@@ -13,12 +13,14 @@ ulong	(UInt64)
 float	(Float32)
 double	(Float64)
 
-bool			: true, false
-char			: 'a', 'b'
-string			: "a", "b"
+bool							: true, false
+char							: 'a', 'b'
+string							: "a", "b"
 
-generic type	: Array int
-function type	: argument -> result
+generic type instantiation		: Array int
+function type					: argument -> result
+
+object							: object
 
 ========================================================
 Types Definitions (reference type)
@@ -29,6 +31,9 @@ type Handle = int
 enum Season = Spring | Summer | Autumn | Winter   (e.g. Season.Spring, ...)
 
 data Point T = { x:T, y:T }
+
+data Vector T 
+	where Comparable T = { x:T, y:T }
 
 data Expression
 = Nunmber { value:double }
@@ -71,11 +76,16 @@ shallow copy	: shallow_copy x
 deep copy		: deep_copy x
 
 matching		: ( if condition then expression else expression )
-				: ( match value { whhen pattern : value ... } )
+				: ( match value { when pattern : value ... [default : value]} )
+				   // no default: not matched throws PatternMatchException
 
 specify type	: (value :: type)
 				: (array [] :: array int)
 				: (map {} :: map string int)
+				: (value is T) -> bool
+				: (value as T) -> T
+
+default value	: (default type)
 
 ========================================================
 Operators
@@ -130,7 +140,13 @@ return expression ;
 match value {
 	when pattern : statement
 	...
+	[default : statement] // no default: not matched throws PatternMatchException
 }
+
+throw expression ;
+
+try statement
+catch 
 
 ========================================================
 Definitions
@@ -140,40 +156,101 @@ def readonly_value [ :: type ] = value
 
 var variable [ :: type ] = value
 
-def function_name pattern1 pattern2 ... [ :: type ] 
+def [<GENERIC-ARGUMENT-DEFINITION>] function_name pattern1 pattern2 ... [ :: <TYPE-DEFINITION> ] 
 	= value
 	= do [continuation] statement
 
-property function_name pattern1 pattern2 [ :: type ] = {
+property [<GENERIC-ARGUMENT-DEFINITION>] function_name pattern1 pattern2 [ :: <TYPE-DEFINITION> ] = {
 	get = function_body
 	set pattern1 = function_body
 	set pattern2 = function_body
 }
 
+<GENERIC-ARGUMENT-DEFINITION>	: ( T, U )
+<TYPE-DEFINITION>				: List T -> (T -> List U) -> List U where Comparable T, Comparable U
+
 ========================================================
 Interfaces
 ========================================================
 
-interface Array T :: Enumerable T = {
+interface RandomAccess T :: Enumerable T = {
 	property Length :: int { get }
 	property ([]) (index :: int) :: int { get set }
 	def Resize :: int -> ()
+}
+
+interface Array T :: RandomAccess T = {
+	def Resize :: int -> ()
+}
+
+interface Collection T :: RandomAccess T
+	where Equable T
+{
+	def Add :: T -> int
+	def Remove :: T -> bool
+	def RemoveAt :: int -> T
+	def Clear :: () -> T
+}
+
+interface SortedList T :: Collection T
+	where Comparable T = {
 }
 
 ========================================================
 Interfaces Implementation
 ========================================================
 
-interface instance Array 
+this : expression for interface implementation to reference itself
+
+implementation (T) SortedList xs
+	:: array T -> SortedList T
+	where Comparable T
+	= interface SortedList T
+	inherits ListStorage xs
+{
+	var buffer :: array T
+	def GetLengthInternal () = buffer.Length
+	virtual def CreateItemFirst () = (default T)
+	abstract def CreateItemSecond () :: T
+
+	override def CreateItemThird () = throw NotImplementException
+
+	interface property Length // the only visible member from outside
+	{
+		get = GetLengthInternal ()
+		set value = do {
+			this.Resize value
+		}
+	}
+}
 
 ========================================================
 Concept
 ========================================================
 
+concept Comparable T = {
+	def Compare :: T -> T -> int
+}
+
 ========================================================
 Concept Instance
 ========================================================
 
+instance Compare int = {
+	def Compare a b = ...
+}
+
+instance (T) Comparable Vector T
+	where Comparable T = 
+{
+	def Compare a b = ...
+}
+
 ========================================================
 Continuation
 ========================================================
+
+concept Monad M = {
+	def (T) Return :: T -> M T
+	def (T, U) Bind :: M T -> (T -> M U) -> M U
+}
