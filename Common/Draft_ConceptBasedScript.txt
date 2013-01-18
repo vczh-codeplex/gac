@@ -17,6 +17,9 @@ bool			: true, false
 char			: 'a', 'b'
 string			: "a", "b"
 
+generic type	: Array int
+function type	: argument -> result
+
 ========================================================
 Types Definitions (reference type)
 ========================================================
@@ -42,7 +45,7 @@ map T U			: map {a:b, c:d, e:f}
 ()				: ()
 
 data			: Point { x:10, y:20 }
-				: new Point int { x:10, y:20 }
+				: new { x:10, y:20 }
 
 ========================================================
 Expressions
@@ -50,6 +53,7 @@ Expressions
 
 function call	: function argument
 				: argument -> function
+
 field			: expression . name
 association		: (a b c) d <==> a b c $ d
 				: (a b c) . d <==> a b c $ . d
@@ -63,11 +67,26 @@ a <- b			: x=>a $ b x
 (? op value)	: x=>x ope value
 (value op ?)	: x=>value op x
 
+shallow copy	: shallow_copy x
+deep copy		: deep_copy x
+
+matching		: ( if condition then expression else expression )
+				: ( match value { whhen pattern : value ... } )
+
+specify type	: (value :: type)
+				: (array [] :: array int)
+				: (map {} :: map string int)
+
+========================================================
+Operators
+========================================================
+
 operator precedence
 	=>
 	field
+	a[b]
 	function call
-	+ - not 
+	+ - not
 	* / %
 	+ -
 	<< >>
@@ -82,4 +101,79 @@ operator precedence
 	->
 	custom operator
 	$
-	?:
+
+========================================================
+Statements
+========================================================
+
+function definition ;
+readonly value definition ;
+variable definition ;
+
+expression ;
+pattern = value ;
+pattern <= value ;
+
+{ statements }
+
+if condition then statement else statement
+for a in b statement
+for a in b to c statement
+while condition statement
+do statement while condition ;
+
+break ;
+continue ;
+return ;
+return expression ;
+
+match value {
+	when pattern : statement
+	...
+}
+
+========================================================
+Definitions
+========================================================
+
+def readonly_value [ :: type ] = value
+
+var variable [ :: type ] = value
+
+def function_name pattern1 pattern2 ... [ :: type ] 
+	= value
+	= do [continuation] statement
+
+property function_name pattern1 pattern2 [ :: type ] = {
+	get = function_body
+	set pattern1 = function_body
+	set pattern2 = function_body
+}
+
+========================================================
+Interfaces
+========================================================
+
+interface Array T :: Enumerable T = {
+	property Length :: int { get }
+	property ([]) (index :: int) :: int { get set }
+	def Resize :: int -> ()
+}
+
+========================================================
+Interfaces Implementation
+========================================================
+
+interface instance Array 
+
+========================================================
+Concept
+========================================================
+
+========================================================
+Concept Instance
+========================================================
+
+========================================================
+Continuation
+========================================================
