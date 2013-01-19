@@ -57,6 +57,9 @@
     <ClCompile Include="..\Source\ServiceImpl\EditingDocumentService.cpp">
       <Filter>API\ServiceImpl</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\ServiceImpl\FileDialogService.cpp">
+      <Filter>API\ServiceImpl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Implementation\DocumentContainer.h">
@@ -90,6 +93,9 @@
       <Filter>API</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\ServiceImpl\EditingDocumentService.h">
+      <Filter>API\ServiceImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\ServiceImpl\FileDialogService.h">
       <Filter>API\ServiceImpl</Filter>
     </ClInclude>
   </ItemGroup>
