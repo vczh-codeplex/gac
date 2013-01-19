@@ -1,6 +1,8 @@
 #include "SDI.h"
 #include "Implementation\DocumentManager.h"
 #include "PackageManager.h"
+#include "ServiceImpl\FileDialogService.h"
+#include "ServiceImpl\EditingDocumentService.h"
 
 namespace vl
 {
@@ -20,12 +22,45 @@ MainWindow
 		class MainWindow : public GuiWindow
 		{
 		protected:
+			class SDIEditingDocumentService : public EditingDocumentService
+			{
+			protected:
+				MainWindow*										window;
+
+				bool CanInstallNewEditor()override
+				{
+					return true;
+				}
+
+				bool InstallEditor(IDocumentEditor* editor)override
+				{
+					editor->GetEditorControl()->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					window->editorControlContainer->AddChild(editor->GetEditorControl()->GetBoundsComposition());
+					return true;
+				}
+
+				bool UninstallEditor(IDocumentEditor* editor)override
+				{
+					window->editorControlContainer->RemoveChild(editor->GetEditorControl()->GetBoundsComposition());
+					return true;
+				}
+			public:
+				SDIEditingDocumentService(MainWindow* _window)
+					:window(_window)
+				{
+				}
+			};
+		protected:
 			Ptr<GuiResource>									resource;
 			List<Ptr<XmlElement>>								packages;
 			Dictionary<WString, Ptr<GuiToolstripCommand>>		commands;
 
 			GuiToolstripMenuBar*								mainMenu;
 			GuiToolstripToolbar*								mainToolbar;
+			GuiGraphicsComposition*								editorControlContainer;
+
+			Ptr<FileDialogService>								fileDialogService;
+			Ptr<SDIEditingDocumentService>						editingDocumentService;
 		public:
 			MainWindow()
 				:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -68,6 +103,13 @@ MainWindow
 					mainToolbar->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 					cell->AddChild(mainToolbar->GetBoundsComposition());
 				}
+				{
+					GuiCellComposition* cell=new GuiCellComposition;
+					table->AddChild(cell);
+					cell->SetSite(2, 0, 1, 1);
+
+					editorControlContainer=cell;
+				}
 
 				Group<WString, ProprityMenuGroup> existingMenuGroups;
 				EnumeratePackages(resource, packages);
@@ -75,6 +117,13 @@ MainWindow
 				EnumerateMenuDefinitions(resource, packages, existingMenuGroups);
 				BuildMenu(resource, packages, mainMenu, L"Menu", commands, existingMenuGroups);
 				BuildToolbar(resource, packages, mainToolbar, L"Toolbar", commands, existingMenuGroups);
+
+				fileDialogService=new FileDialogService;
+				editingDocumentService=new SDIEditingDocumentService(this);
+				BuildDialogs(resource, packages, fileDialogService.Obj());
+
+				GetDocumentManager()->RegisterService(fileDialogService);
+				GetDocumentManager()->RegisterService(editingDocumentService);
 			}
 
 			~MainWindow()

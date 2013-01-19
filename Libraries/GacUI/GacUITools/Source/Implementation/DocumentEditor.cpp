@@ -88,6 +88,10 @@ DocumentEditor
 			{
 				callback->OnEditorDestroyed(this);
 			}
+			if(editorControl)
+			{
+				delete editorControl;
+			}
 		}
 
 		void DocumentEditor::NotifyUpdateEditor()
