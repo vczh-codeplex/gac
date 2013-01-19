@@ -53,7 +53,7 @@ array T			: array [a, b, c:xs]
 iterator T		: iterator [a, b, c:xs]
 map T U			: map {a:b, c:d, e:f}
 (T, U, V)		: (a, b, c) == Pair{x:a, Pair{x:b, y:b}}
-()				: ()
+void			: void
 
 data			: Point { x:10, y:20 }
 				: new { x:10, y:20 }
@@ -113,7 +113,7 @@ operator precedence
 	function call
 	+ - not
 	* / %
-	+ -
+	+ - ++
 	<< >>
 	..
 	== != < <= > >=
@@ -151,6 +151,7 @@ do statement while condition ;
 break ;
 continue ;
 return ;
+yield expression ;
 return expression ;
 
 match value {
@@ -192,11 +193,11 @@ Interfaces
 interface RandomAccess T :: Enumerable T = {
 	property Length :: int { get }
 	property ([]) (index :: int) :: int { get set }
-	def Resize :: int -> ()
+	def Resize :: int -> void
 }
 
 interface Array T :: RandomAccess T = {
-	def Resize :: int -> ()
+	def Resize :: int -> void
 }
 
 interface Collection T :: RandomAccess T
@@ -205,7 +206,7 @@ interface Collection T :: RandomAccess T
 	def Add :: T -> int
 	def Remove :: T -> bool
 	def RemoveAt :: int -> T
-	def Clear :: () -> T
+	def Clear :: void -> T
 }
 
 interface SortedList T :: Collection T
@@ -225,15 +226,15 @@ implementation (T) SortedList xs
 	inherits ListStorage xs
 {
 	var buffer :: array T
-	def GetLengthInternal () = buffer.Length
-	virtual def CreateItemFirst () = (default T)
-	abstract def CreateItemSecond () :: T
+	def GetLengthInternal void = buffer.Length
+	virtual def CreateItemFirst void = (default T)
+	abstract def CreateItemSecond void :: T
 
-	override def CreateItemThird () = throw NotImplementException
+	override def CreateItemThird void = throw NotImplementException
 
 	interface property Length // the only visible member from outside
 	{
-		get = GetLengthInternal ()
+		get = GetLengthInternal void
 		set value = do {
 			this.Resize value
 		}
