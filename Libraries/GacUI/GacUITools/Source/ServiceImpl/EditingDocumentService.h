@@ -14,29 +14,39 @@ namespace vl
 {
 	namespace gactools
 	{
-		class EditingDocumentService : public Object, public IEditingDocumentService
+		class EditingDocumentService : public Object, public IEditingDocumentService, private IDocumentEditor::ICallback
 		{
 		private:
-			List<IDocumentEditor*>		activeEditors;
+			List<Ptr<IDocumentEditor>>			activeEditors;
+			List<Ptr<IDocumentContainer>>		activeDocuments;
 
+			void								OnAttach(IDocumentEditor* sender)override;
+			void								OnDetach(IDocumentEditor* sender)override;
+			void								OnEditorUpdated(IDocumentEditor* sender)override;
+			void								OnEditorDestroyed(IDocumentEditor* sender)override;
+			void								OnFinishEdit(IDocumentEditor* sender)override;
+			void								OnLostActiveView(IDocumentEditor* sender)override;
 		protected:
 
-			virtual bool				CanInstallNewEditor()=0;
-			virtual bool				InstallEditor(IDocumentEditor* editor)=0;
-			virtual bool				UninstallEditor(IDocumentEditor* editor)=0;
+			virtual bool						CanInstallNewEditor()=0;
+			virtual bool						InstallEditor(IDocumentEditor* editor)=0;
+			virtual bool						UninstallEditor(IDocumentEditor* editor)=0;
 		public:
 			EditingDocumentService();
 			~EditingDocumentService();
 
-			bool						NewDocument(const WString& fileTypeId, const WString& editorTypeId)override;
-			bool						LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId)override;
-			bool						LoadDocumentFromView(IDocumentView* view, const WString& editorTypeId)override;
-			bool						LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId)override;
+			IDocumentEditor*					NewDocument(const WString& fileTypeId, const WString& editorTypeId)override;
+			IDocumentEditor*					LoadDocumentFromView(IDocumentView* view, const WString& editorTypeId)override;
+			IDocumentEditor*					LoadDocumentFromContainer(Ptr<IDocumentContainer> document, const WString& editorTypeId)override;
+			IDocumentEditor*					LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId)override;
+			IDocumentEditor*					LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId)override;
+			bool								SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId)override;
+			bool								CloseEditor(IDocumentEditor* editor)override;
 
-			vint						GetActiveEditorCount()override;
-			IDocumentEditor*			GetActiveEditor(vint index)override;
-			bool						SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId)override;
-			bool						CloseEditor(IDocumentEditor* editor)override;
+			vint								GetActiveEditorCount()override;
+			IDocumentEditor*					GetActiveEditor(vint index)override;
+			vint								GetActiveDocumentCount()override;
+			IDocumentContainer*					GetActiveDocument(vint index)override;
 		};
 	}
 }

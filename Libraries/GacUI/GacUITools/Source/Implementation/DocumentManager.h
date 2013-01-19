@@ -44,7 +44,7 @@ namespace vl
 
 			bool						BindDefaultEditor(const WString& viewTypeId, IDocumentEditorFactory* editorFactory)override;
 			bool						UnbindDefaultEditor(const WString& viewTypeId)override;
-			WString						GetDefaultEditor(const WString& viewTypeId)override;
+			WString						GetDefaultEditorTypeId(const WString& viewTypeId)override;
 
 			bool						RegisterService(Ptr<IDocumentService> service)override;
 			IDocumentService*			GetService(const WString& serviceTypeId)override;

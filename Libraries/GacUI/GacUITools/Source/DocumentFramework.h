@@ -242,7 +242,7 @@ Manager Interfaces
 
 			virtual bool						BindDefaultEditor(const WString& viewTypeId, IDocumentEditorFactory* editorFactory)=0;
 			virtual bool						UnbindDefaultEditor(const WString& viewTypeId)=0;
-			virtual WString						GetDefaultEditor(const WString& viewTypeId)=0;
+			virtual WString						GetDefaultEditorTypeId(const WString& viewTypeId)=0;
 
 			virtual bool						RegisterService(Ptr<IDocumentService> service)=0;
 			virtual IDocumentService*			GetService(const WString& serviceTypeId)=0;
@@ -261,20 +261,34 @@ Manager Interfaces
 Common Services
 ***********************************************************************/
 
+		class IFileDialogService : public IDocumentService
+		{
+		public:
+			static const wchar_t*				ServiceTypeId;
+			WString								GetServiceTypeId(){return ServiceTypeId;}
+
+			virtual WString						OpenDialogForSingleFile(const WString& dialogId)=0;
+			virtual WString						SaveDialogForSingleFile(const WString& dialogId)=0;
+		};
+
 		class IEditingDocumentService : public IDocumentService
 		{
 		public:
 			static const wchar_t*				ServiceTypeId;
+			WString								GetServiceTypeId(){return ServiceTypeId;}
 
-			virtual bool						NewDocument(const WString& fileTypeId, const WString& editorTypeId)=0;
-			virtual bool						LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId)=0;
-			virtual bool						LoadDocumentFromView(IDocumentView* view, const WString& editorTypeId)=0;
-			virtual bool						LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId)=0;
+			virtual IDocumentEditor*			NewDocument(const WString& fileTypeId, const WString& editorTypeId)=0;
+			virtual IDocumentEditor*			LoadDocumentFromView(IDocumentView* view, const WString& editorTypeId)=0;
+			virtual IDocumentEditor*			LoadDocumentFromContainer(Ptr<IDocumentContainer> document, const WString& editorTypeId)=0;
+			virtual IDocumentEditor*			LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId)=0;
+			virtual IDocumentEditor*			LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId)=0;
+			virtual bool						SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId)=0;
+			virtual bool						CloseEditor(IDocumentEditor* editor)=0;
 
 			virtual vint						GetActiveEditorCount()=0;
 			virtual IDocumentEditor*			GetActiveEditor(vint index)=0;
-			virtual bool						SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId)=0;
-			virtual bool						CloseEditor(IDocumentEditor* editor)=0;
+			virtual vint						GetActiveDocumentCount()=0;
+			virtual IDocumentContainer*			GetActiveDocument(vint index)=0;
 		};
 	}
 }

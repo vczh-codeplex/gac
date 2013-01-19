@@ -50,7 +50,7 @@ DocumentManager
 			if(!editorFileTypesById.Keys().Contains(fileType->GetFileTypeId()) && !editorFileTypesByExt.Keys().Contains(fileType->GetFileExtension()))
 			{
 				editorFileTypesById.Add(fileType->GetFileTypeId(), fileType);
-				editorFileTypesByExt.Add(fileType->GetFileExtension(), fileType);
+				editorFileTypesByExt.Add(Locale::Invariant().ToUpper(fileType->GetFileExtension()), fileType);
 				FOREACH(ICallback*, callback, callbacks)
 				{
 					callback->OnFileTypeRegistered(this, fileType.Obj());
@@ -78,7 +78,7 @@ DocumentManager
 
 		IDocumentFileType* DocumentManager::FindFileTypeByExtension(const WString& fileExtension)
 		{
-			vint index=editorFileTypesByExt.Keys().IndexOf(fileExtension);
+			vint index=editorFileTypesByExt.Keys().IndexOf(Locale::Invariant().ToUpper(fileExtension));
 			return index==-1?0:GetFileType(index);
 		}
 
@@ -137,7 +137,7 @@ DocumentManager
 			return exists;
 		}
 
-		WString DocumentManager::GetDefaultEditor(const WString& viewTypeId)
+		WString DocumentManager::GetDefaultEditorTypeId(const WString& viewTypeId)
 		{
 			vint index=defaultEditors.Keys().IndexOf(viewTypeId);
 			return index==-1?L"":defaultEditors.Values().Get(index)->GetEditorTypeId();
