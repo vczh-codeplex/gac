@@ -182,7 +182,7 @@ EnumerateMenuDefinitions
 		}
 
 /***********************************************************************
-EnumerateMenuDefinitions
+BuildMenu/BuildToolbar
 ***********************************************************************/
 
 		void BuildToolstripObject(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripBuilder* rootBuilder, bool forToolbar, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups)
@@ -326,6 +326,52 @@ EnumerateMenuDefinitions
 		void BuildToolbar(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripToolbar* toolbar, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups)
 		{
 			BuildToolstripObject(resource, packages, toolbar->GetBuilder(), true, containerName, commands, existingMenuGroups);
+		}
+
+/***********************************************************************
+BuildDialogs
+***********************************************************************/
+
+		void BuildDialogs(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, IFileDialogService* service)
+		{
+			FOREACH(Ptr<XmlElement>, package, packages)
+			{
+				Ptr<XmlElement> dialogsElement=XmlGetElement(package, L"Dialogs");
+				List<Ptr<XmlElement>> dialogElements;
+				XmlGetElements(dialogsElement, L"Dialog", dialogElements);
+				FOREACH(Ptr<XmlElement>, dialogElement, dialogElements)
+				{
+					if(auto id=XmlGetAttribute(dialogElement, L"id"))
+					if(auto text=XmlGetElement(dialogElement, L"Text"))
+					{
+						service->CreateFileDialog(id->value.value, XmlGetValue(text));
+					}
+				}
+			}
+
+			FOREACH(Ptr<XmlElement>, package, packages)
+			{
+				Ptr<XmlElement> filtersElement=XmlGetElement(package, L"Filters");
+				List<Ptr<XmlElement>> filterElements;
+				XmlGetElements(filtersElement, L"Filter", filterElements);
+				FOREACH(Ptr<XmlElement>, filterElement, filterElements)
+				{
+					if(auto name=XmlGetElement(filterElement, L"Name"))
+					if(auto pattern=XmlGetElement(filterElement, L"Pattern"))
+					{
+						List<Ptr<XmlElement>> parentElements;
+						XmlGetElements(filterElement, L"Parent", parentElements);
+						FOREACH(Ptr<XmlElement>, parentElement, parentElements)
+						{
+							if(auto id=XmlGetAttribute(parentElement, L"id"))
+							if(auto priority=XmlGetAttribute(parentElement, L"priority"))
+							{
+								service->AddDialogItem(id->value.value, XmlGetValue(name), XmlGetValue(pattern), wtoi(priority->value.value));
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }

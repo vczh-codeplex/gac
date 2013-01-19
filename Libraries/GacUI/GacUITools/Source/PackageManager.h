@@ -52,6 +52,7 @@ UI Builder
 		extern void			EnumerateMenuDefinitions(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, Group<WString, ProprityMenuGroup>& existingMenuGroups);
 		extern void			BuildMenu(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripMenuBar* menu, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups);
 		extern void			BuildToolbar(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripToolbar* toolbar, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups);
+		extern void			BuildDialogs(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, IFileDialogService* service);
 	}
 }
 
