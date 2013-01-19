@@ -52,12 +52,6 @@ namespace vl
 			bool										IsSupportedViewTypeId(const WString& viewTypeId)override;
 			WString										GetDefaultViewTypeId()override;
 			IDocumentView*								GetView(const WString& viewTypeId)override;
-
-			template<typename T>
-			T* GetView()
-			{
-				return dynamic_cast<T*>(GetView(T::ViewTypeId));
-			}
 		};
 
 		class FileDocumentFragment : public DocumentFragment

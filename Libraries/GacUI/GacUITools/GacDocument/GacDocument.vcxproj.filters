@@ -19,6 +19,9 @@
     <Filter Include="PackageResources\Applications">
       <UniqueIdentifier>{d9a7aefd-d531-43cf-a17c-a051d2f592ab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="API\ServiceImpl">
+      <UniqueIdentifier>{3ca83c60-0eca-46d8-98e1-33af54212c41}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Implementation\DocumentContainer.cpp">
@@ -51,6 +54,9 @@
     <ClCompile Include="..\Source\PackageManager.cpp">
       <Filter>API</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\ServiceImpl\EditingDocumentService.cpp">
+      <Filter>API\ServiceImpl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Implementation\DocumentContainer.h">
@@ -82,6 +88,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\PackageManager.h">
       <Filter>API</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\ServiceImpl\EditingDocumentService.h">
+      <Filter>API\ServiceImpl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

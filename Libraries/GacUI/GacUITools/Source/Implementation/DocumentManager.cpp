@@ -137,10 +137,25 @@ DocumentManager
 			return exists;
 		}
 
-		IDocumentEditorFactory* DocumentManager::GetDefaultEditor(const WString& viewTypeId)
+		WString DocumentManager::GetDefaultEditor(const WString& viewTypeId)
 		{
 			vint index=defaultEditors.Keys().IndexOf(viewTypeId);
-			return index==-1?0:defaultEditors.Values().Get(index).Obj();
+			return index==-1?L"":defaultEditors.Values().Get(index)->GetEditorTypeId();
+		}
+
+		bool DocumentManager::RegisterService(Ptr<IDocumentService> service)
+		{
+			if(!services.Keys().Contains(service->GetServiceTypeId()))
+			{
+				services.Add(service->GetServiceTypeId(), service);
+			}
+			return false;
+		}
+
+		IDocumentService* DocumentManager::GetService(const WString& serviceTypeId)
+		{
+			vint index=services.Keys().IndexOf(serviceTypeId);
+			return index==-1?0:services.Values().Get(index).Obj();
 		}
 	}
 }

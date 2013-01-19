@@ -20,5 +20,11 @@ Helper Functions
 		{
 			globalDocumentManagerObject=documentManager;
 		}
+
+/***********************************************************************
+IDs
+***********************************************************************/
+
+		const wchar_t* IEditingDocumentService::ServiceTypeId = L"vl::gactools::IEditingDocumentService";
 	}
 }
