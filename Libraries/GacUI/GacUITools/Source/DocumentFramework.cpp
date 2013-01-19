@@ -24,7 +24,8 @@ Helper Functions
 /***********************************************************************
 IDs
 ***********************************************************************/
-
+		
+		const wchar_t* IFileDialogService::ServiceTypeId = L"vl::gactools::IFileDialogService";
 		const wchar_t* IEditingDocumentService::ServiceTypeId = L"vl::gactools::IEditingDocumentService";
 	}
 }
