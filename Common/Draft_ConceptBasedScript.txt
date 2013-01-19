@@ -39,6 +39,12 @@ data Expression
 = Nunmber { value:double }
 | Binary { left:Expression, right:Expression, op:BinaryOpeartor }
 
+match value
+{
+     when (v::Number): ....;   // pattern can be (pattern :: type)
+     when (v::Binary): ....;
+}
+
 ========================================================
 Type Constructors
 ========================================================
@@ -46,7 +52,7 @@ Type Constructors
 array T			: array [a, b, c:xs]
 iterator T		: iterator [a, b, c:xs]
 map T U			: map {a:b, c:d, e:f}
-(T, U, V)		: (a, b, c)
+(T, U, V)		: (a, b, c) == Pair{x:a, Pair{x:b, y:b}}
 ()				: ()
 
 data			: Point { x:10, y:20 }
@@ -72,8 +78,8 @@ a <- b			: x=>a $ b x
 ? op value		: x=>x ope value
 value op ?		: x=>value op x
 
-shallow copy	: shallow_copy x
-deep copy		: deep_copy x
+shallow copy	: (shallow_copy x)
+deep copy		: (deep_copy x)
 
 matching		: ( if condition then expression else expression )
 				: ( match value { when pattern : value ... [default : value]} )
@@ -86,6 +92,15 @@ specify type	: (value :: type)
 				: (value as T) -> T
 
 default value	: (default type)
+
+range			: a..b	(requires Addable T)
+
+serialize		: (to_tuple struct)
+				: (from_tuple (a,b,c) [:: StructName])
+
+boxing			: (to_object value)
+				: (from_object value [:: Type])
+type cast		: (cast value :: Type)
 
 ========================================================
 Operators
@@ -100,6 +115,7 @@ operator precedence
 	* / %
 	+ -
 	<< >>
+	..
 	== != < <= > >=
 	&
 	^
@@ -166,7 +182,7 @@ property [<GENERIC-ARGUMENT-DEFINITION>] function_name pattern1 pattern2 [ :: <T
 	set pattern2 = function_body
 }
 
-<GENERIC-ARGUMENT-DEFINITION>	: ( T, U )
+<GENERIC-ARGUMENT-DEFINITION>	: ( T, U, V )
 <TYPE-DEFINITION>				: List T -> (T -> List U) -> List U where Comparable T, Comparable U
 
 ========================================================
