@@ -142,7 +142,10 @@ EditingDocumentService
 		{
 			if(!activeEditors.Contains(editor)) return false;
 			editor->FinishEdit();
-			return activeEditors.Remove(editor);
+			IDocumentView* view=editor->GetEditingView();
+			activeEditors.Remove(editor);
+			activeDocuments.Remove(view->GetOwnedFragment()->GetOwnedContainer());
+			return true;
 		}
 
 		vint EditingDocumentService::GetActiveEditorCount()
