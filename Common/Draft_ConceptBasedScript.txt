@@ -69,8 +69,8 @@ function		: pattern=>expression
 
 a <- b			: x=>a $ b x
 (op)			: x=>y=>x op y
-(? op value)	: x=>x ope value
-(value op ?)	: x=>value op x
+? op value		: x=>x ope value
+value op ?		: x=>value op x
 
 shallow copy	: shallow_copy x
 deep copy		: deep_copy x
@@ -127,9 +127,9 @@ pattern <= value ;
 { statements }
 
 if condition then statement else statement
-for a in b statement
-for a in b to c statement
-while condition statement
+for a in b do statement
+for a in b to c do statement
+while condition do statement
 do statement while condition ;
 
 break ;
