@@ -42,6 +42,12 @@ Document Interfaces
 			virtual WString						GetOperationTypeId()=0;
 		};
 
+		class IDocumentService : public Interface
+		{
+		public:
+			virtual WString						GetServiceTypeId()=0;
+		};
+
 		class IDocumentView : public Interface
 		{
 		public:
@@ -67,6 +73,12 @@ Document Interfaces
 			virtual WString						GetSupportedOperationType(vint index)=0;
 			virtual bool						IsSupportedOperationTypeId(const WString& operationTypeId)=0;
 			virtual IDocumentOperation*			GetOperation(const WString& operationTypeId)=0;
+
+			template<typename T>
+			T* GetOperation()
+			{
+				return dynamic_cast<T*>(GetOperation(T::OperationTypeId));
+			}
 
 			virtual bool						BeginEdit(IDocumentEditor* editor)=0;
 			virtual bool						FinishEdit(IDocumentEditor* editor)=0;
@@ -107,6 +119,12 @@ Document Interfaces
 			virtual bool						IsSupportedViewTypeId(const WString& viewTypeId)=0;
 			virtual WString						GetDefaultViewTypeId()=0;
 			virtual IDocumentView*				GetView(const WString& viewTypeId)=0;
+
+			template<typename T>
+			T* GetView()
+			{
+				return dynamic_cast<T*>(GetView(T::ViewTypeId));
+			}
 		};
 
 		class IDocumentContainer : public Interface
@@ -224,11 +242,40 @@ Manager Interfaces
 
 			virtual bool						BindDefaultEditor(const WString& viewTypeId, IDocumentEditorFactory* editorFactory)=0;
 			virtual bool						UnbindDefaultEditor(const WString& viewTypeId)=0;
-			virtual IDocumentEditorFactory*		GetDefaultEditor(const WString& viewTypeId)=0;
+			virtual WString						GetDefaultEditor(const WString& viewTypeId)=0;
+
+			virtual bool						RegisterService(Ptr<IDocumentService> service)=0;
+			virtual IDocumentService*			GetService(const WString& serviceTypeId)=0;
+
+			template<typename T>
+			T* GetService()
+			{
+				return dynamic_cast<T*>(GetService(T::ServiceTypeId));
+			}
 		};
 
 		extern IDocumentManager*				GetDocumentManager();
 		extern void								SetDocumentManager(IDocumentManager* documentManager);
+
+/***********************************************************************
+Common Services
+***********************************************************************/
+
+		class IEditingDocumentService : public IDocumentService
+		{
+		public:
+			static const wchar_t*				ServiceTypeId;
+
+			virtual bool						NewDocument(const WString& fileTypeId, const WString& editorTypeId)=0;
+			virtual bool						LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId)=0;
+			virtual bool						LoadDocumentFromView(IDocumentView* view, const WString& editorTypeId)=0;
+			virtual bool						LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId)=0;
+
+			virtual vint						GetActiveEditorCount()=0;
+			virtual IDocumentEditor*			GetActiveEditor(vint index)=0;
+			virtual bool						SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId)=0;
+			virtual bool						CloseEditor(IDocumentEditor* editor)=0;
+		};
 	}
 }
 

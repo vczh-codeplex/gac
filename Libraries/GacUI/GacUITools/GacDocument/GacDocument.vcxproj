@@ -21,6 +21,7 @@
     <ClCompile Include="..\Source\Implementation\DocumentView.cpp" />
     <ClCompile Include="..\Source\PackageManager.cpp" />
     <ClCompile Include="..\Source\ResourceManager.cpp" />
+    <ClCompile Include="..\Source\ServiceImpl\EditingDocumentService.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\DocumentFramework.h" />
@@ -33,6 +34,7 @@
     <ClInclude Include="..\Source\Implementation\DocumentView.h" />
     <ClInclude Include="..\Source\PackageManager.h" />
     <ClInclude Include="..\Source\ResourceManager.h" />
+    <ClInclude Include="..\Source\ServiceImpl\EditingDocumentService.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Source\PackageResources\Images\_Copy.png" />
