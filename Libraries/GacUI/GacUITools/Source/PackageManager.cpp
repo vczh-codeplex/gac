@@ -1,4 +1,5 @@
 #include "PackageManager.h"
+#include "ServiceImpl\FileDialogService.h"
 
 namespace vl
 {
@@ -403,6 +404,44 @@ BuildDialogs
 					GetDocumentManager()->RegisterPackage(package);
 				}
 			}
+		}
+
+/***********************************************************************
+MainApplicationPackage
+***********************************************************************/
+
+		MainApplicationPackage::MainApplicationPackage()
+		{
+		}
+
+		MainApplicationPackage::~MainApplicationPackage()
+		{
+		}
+
+		void MainApplicationPackage::BeforeInitialization()
+		{
+			resource=LoadPackageResource();
+			EnumeratePackages(resource, packages);
+			EnumerateCommands(resource, packages, commands);
+			EnumerateMenuDefinitions(resource, packages, existingMenuGroups);
+			
+			fileDialogService=new FileDialogService;
+			BuildDialogs(resource, packages, fileDialogService.Obj());
+			GetDocumentManager()->RegisterService(fileDialogService);
+		}
+
+		void MainApplicationPackage::AfterInitialization()
+		{
+		}
+
+		void MainApplicationPackage::BuildApplicationMenu(GuiToolstripMenuBar* menu, const WString& containerName)
+		{
+			BuildMenu(resource, packages, menu, containerName, commands, existingMenuGroups);
+		}
+
+		void MainApplicationPackage::BuildApplicationToolbar(GuiToolstripToolbar* toolbar, const WString& containerName)
+		{
+			BuildToolbar(resource, packages, toolbar, containerName, commands, existingMenuGroups);
 		}
 	}
 }

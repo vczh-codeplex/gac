@@ -16,6 +16,37 @@ SDIConfiguration
 		ISDIApplication* sdiApplication=0;
 
 /***********************************************************************
+SDIApplicationPackage
+***********************************************************************/
+
+		class SDIApplicationPackage : public MainApplicationPackage
+		{
+		protected:
+
+			Ptr<GuiResource> LoadPackageResource()override
+			{
+				return sdiApplication->GetApplicationResource();
+			}
+		public:
+			static const wchar_t*					PackageId;
+
+			SDIApplicationPackage()
+			{
+			}
+
+			~SDIApplicationPackage()
+			{
+			}
+
+			WString GetPackageId()
+			{
+				return PackageId;
+			}
+		};
+		const wchar_t* SDIApplicationPackage::PackageId = L"SDIApplicationPackage";
+		INSTALL_PACKAGE(SDIApplicationPackage);
+
+/***********************************************************************
 MainWindow
 ***********************************************************************/
 
@@ -52,21 +83,36 @@ MainWindow
 			};
 		protected:
 			Ptr<GuiResource>									resource;
-			List<Ptr<XmlElement>>								packages;
-			Dictionary<WString, Ptr<GuiToolstripCommand>>		commands;
+			SDIApplicationPackage*								appPackage;
 
 			GuiToolstripMenuBar*								mainMenu;
 			GuiToolstripToolbar*								mainToolbar;
 			GuiGraphicsComposition*								editorControlContainer;
 
-			Ptr<FileDialogService>								fileDialogService;
 			Ptr<SDIEditingDocumentService>						editingDocumentService;
+
+			void InitializeSDIAppplication()
+			{
+				List<Ptr<XmlElement>> packages;
+				EnumeratePackages(resource, packages);
+				LoadLegalDocumentPackages(resource, packages);
+				
+				editingDocumentService=new SDIEditingDocumentService(this);
+				GetDocumentManager()->RegisterService(editingDocumentService);
+				appPackage=GetDocumentManager()->GetPackage<SDIApplicationPackage>();
+
+				if(appPackage)
+				{
+					appPackage->BuildApplicationMenu(mainMenu, L"Menu");
+					appPackage->BuildApplicationToolbar(mainToolbar, L"Toolbar");
+				}
+			}
 		public:
 			MainWindow()
 				:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 			{
 				resource=sdiApplication->GetApplicationResource();
-				WString applicationName;
+				WString applicationName=L"SDI Application";
 				if(auto name=resource->GetValueByPath(L"Application\\Name").Cast<ObjectBox<WString>>())
 				{
 					applicationName=name->Unbox();
@@ -111,19 +157,7 @@ MainWindow
 					editorControlContainer=cell;
 				}
 
-				Group<WString, ProprityMenuGroup> existingMenuGroups;
-				EnumeratePackages(resource, packages);
-				EnumerateCommands(resource, packages, commands);
-				EnumerateMenuDefinitions(resource, packages, existingMenuGroups);
-				BuildMenu(resource, packages, mainMenu, L"Menu", commands, existingMenuGroups);
-				BuildToolbar(resource, packages, mainToolbar, L"Toolbar", commands, existingMenuGroups);
-
-				fileDialogService=new FileDialogService;
-				editingDocumentService=new SDIEditingDocumentService(this);
-				BuildDialogs(resource, packages, fileDialogService.Obj());
-
-				GetDocumentManager()->RegisterService(fileDialogService);
-				GetDocumentManager()->RegisterService(editingDocumentService);
+				InitializeSDIAppplication();
 			}
 
 			~MainWindow()

@@ -256,9 +256,16 @@ Manager Interfaces
 			virtual bool						UnbindDefaultEditor(const WString& viewTypeId)=0;
 			virtual WString						GetDefaultEditorTypeId(const WString& viewTypeId)=0;
 
-			virtual void						RegisterPackage(Ptr<IDocumentPackage> package)=0;
+			virtual bool						RegisterPackage(Ptr<IDocumentPackage> package)=0;
+			virtual IDocumentPackage*			GetPackage(const WString& packageId)=0;
 			virtual bool						RegisterService(Ptr<IDocumentService> service)=0;
 			virtual IDocumentService*			GetService(const WString& serviceTypeId)=0;
+
+			template<typename T>
+			T* GetPackage()
+			{
+				return dynamic_cast<T*>(GetPackage(T::PackageId));
+			}
 
 			template<typename T>
 			T* GetService()
@@ -289,12 +296,12 @@ Package Loader
 		};
 
 		template<typename T>
-		class StrongTypeDocumentPackageLoader : public DocumentPackageLoaderP
+		class StrongTypeDocumentPackageLoader : public DocumentPackageLoader
 		{
 		public:
 			StrongTypeDocumentPackageLoader()
-				:packageId(T::PackageId)
 			{
+				packageId=T::PackageId;
 			}
 
 			IDocumentPackage* LoadPackage()override
