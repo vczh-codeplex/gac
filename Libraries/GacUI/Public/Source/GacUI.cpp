@@ -34941,6 +34941,7 @@ WindowsController
 				HWND								godWindow;
 				Dictionary<HWND, WindowsForm*>		windows;
 				INativeWindow*						mainWindow;
+				HWND								mainWindowHandle;
 
 				WindowsCallbackService				callbackService;
 				WindowsResourceService				resourceService;
@@ -34957,6 +34958,7 @@ WindowsController
 					,windowClass(L"VczhWindow", false, false, WndProc, _hInstance)
 					,godClass(L"GodWindow", false, false, GodProc, _hInstance)
 					,mainWindow(0)
+					,mainWindowHandle(0)
 					,screenService(&GetHWNDFromNativeWindowHandle)
 					,inputService(&MouseProc)
 					,dialogService(&GetHWNDFromNativeWindowHandle)
@@ -34996,23 +34998,24 @@ WindowsController
 							break;
 						case WM_DESTROY:
 							DestroyNativeWindow(window);
-							if(window==mainWindow)
-							{
-								for(vint i=0;i<windows.Count();i++)
-								{
-									if(windows.Values().Get(i)->IsVisible())
-									{
-										windows.Values().Get(i)->Hide();
-									}
-								}
-								while(windows.Count())
-								{
-									DestroyNativeWindow(windows.Values().Get(0));
-								}
-								PostQuitMessage(0);
-							}
 							break;
 						}
+					}
+
+					if(hwnd==mainWindowHandle && uMsg==WM_DESTROY)
+					{
+						for(vint i=0;i<windows.Count();i++)
+						{
+							if(windows.Values().Get(i)->IsVisible())
+							{
+								windows.Values().Get(i)->Hide();
+							}
+						}
+						while(windows.Count())
+						{
+							DestroyNativeWindow(windows.Values().Get(0));
+						}
+						PostQuitMessage(0);
 					}
 					return skipDefaultProcedure;
 				}
@@ -35048,6 +35051,7 @@ WindowsController
 				void Run(INativeWindow* window)
 				{
 					mainWindow=window;
+					mainWindowHandle=GetWindowsForm(window)->GetWindowHandle();
 					mainWindow->Show();
 					MSG message;
 					while(GetMessage(&message, NULL, 0, 0))
