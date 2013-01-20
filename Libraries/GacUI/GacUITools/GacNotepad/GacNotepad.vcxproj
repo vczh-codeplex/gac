@@ -86,6 +86,9 @@
     <ClInclude Include="..\Source\DocumentFramework.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GacCodeEditorPackage\GacCodeEditorPackage.vcxproj">
+      <Project>{98aa6c38-da75-413e-8d75-7602646900ec}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\GacSDI\GacSDI.vcxproj">
       <Project>{b45d4a37-d94c-4cbc-beab-d261fe2f647c}</Project>
     </ProjectReference>
