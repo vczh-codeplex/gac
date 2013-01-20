@@ -49,8 +49,8 @@ match value
 Type Constructors
 ========================================================
 
-array T			: array [a, b, c:xs]
 iterator T		: iterator [a, b, c:xs]
+array T			: array {a, b, c}
 map T U			: map {a:b, c:d, e:f}
 (T, U, V)		: (a, b, c) == Pair{x:a, Pair{x:b, y:b}}
 void			: void
@@ -102,6 +102,8 @@ boxing			: (to_object value)
 				: (from_object value [:: Type])
 type cast		: (cast value :: Type)
 
+monad's bind	: pull expression
+
 ========================================================
 Operators
 ========================================================
@@ -133,12 +135,11 @@ Statements
 ========================================================
 
 function definition ;
-readonly value definition ;
 variable definition ;
+readonly value definition ;
 
 expression ;
-pattern = value ;
-pattern <= value ;
+push expression;
 
 { statements }
 
