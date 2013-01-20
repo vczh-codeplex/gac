@@ -143,9 +143,19 @@ DocumentManager
 			return index==-1?L"":defaultEditors.Values().Get(index)->GetEditorTypeId();
 		}
 
-		void DocumentManager::RegisterPackage(Ptr<IDocumentPackage> package)
+		bool DocumentManager::RegisterPackage(Ptr<IDocumentPackage> package)
 		{
-			packages.Add(package);
+			if(!packages.Keys().Contains(package->GetPackageId()))
+			{
+				packages.Add(package->GetPackageId(), package);
+			}
+			return false;
+		}
+
+		IDocumentPackage* DocumentManager::GetPackage(const WString& packageId)
+		{
+			vint index=packages.Keys().IndexOf(packageId);
+			return index==-1?0:packages.Values().Get(index).Obj();
 		}
 
 		bool DocumentManager::RegisterService(Ptr<IDocumentService> service)

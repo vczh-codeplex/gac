@@ -22,7 +22,7 @@ namespace vl
 			Dictionary<WString, Ptr<IDocumentFileType>>				editorFileTypesByExt;
 			Dictionary<WString, Ptr<IDocumentEditorFactory>>		defaultEditors;
 			Dictionary<WString, Ptr<IDocumentService>>				services;
-			List<Ptr<IDocumentPackage>>								packages;
+			Dictionary<WString, Ptr<IDocumentPackage>>				packages;
 			List<ICallback*>										callbacks;
 
 		public:
@@ -47,7 +47,8 @@ namespace vl
 			bool						UnbindDefaultEditor(const WString& viewTypeId)override;
 			WString						GetDefaultEditorTypeId(const WString& viewTypeId)override;
 
-			void						RegisterPackage(Ptr<IDocumentPackage> package)override;
+			bool						RegisterPackage(Ptr<IDocumentPackage> package)override;
+			IDocumentPackage*			GetPackage(const WString& packageId)override;
 			bool						RegisterService(Ptr<IDocumentService> service)override;
 			IDocumentService*			GetService(const WString& serviceTypeId)override;
 		};
