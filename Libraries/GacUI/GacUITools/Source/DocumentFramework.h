@@ -209,6 +209,20 @@ Editor Interfaces
 Package Interfaces
 ***********************************************************************/
 
+		class DocumentToolstripCommand : public GuiToolstripCommand
+		{
+		private:
+			WString								packageId;
+			WString								commandId;
+
+		public:
+			DocumentToolstripCommand(const WString& _packageId, const WString& _commandId);
+			~DocumentToolstripCommand();
+
+			const WString&						GetPackageId();
+			const WString&						GetCommandId();
+		};
+
 		class IDocumentService : public Interface
 		{
 		public:
@@ -221,6 +235,7 @@ Package Interfaces
 			virtual WString						GetPackageId()=0;
 			virtual void						BeforeInitialization()=0;
 			virtual void						AfterInitialization()=0;
+			virtual void						InstallToolstripCommand(DocumentToolstripCommand* command)=0;
 		};
 
 /***********************************************************************
@@ -350,13 +365,13 @@ Common Services
 			static const wchar_t*				ServiceTypeId;
 			WString								GetServiceTypeId(){return ServiceTypeId;}
 
-			virtual IDocumentEditor*			NewDocument(const WString& fileTypeId, const WString& editorTypeId)=0;
-			virtual IDocumentEditor*			LoadDocumentFromView(IDocumentView* view, const WString& editorTypeId)=0;
-			virtual IDocumentEditor*			LoadDocumentFromContainer(Ptr<IDocumentContainer> document, const WString& editorTypeId)=0;
-			virtual IDocumentEditor*			LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId)=0;
-			virtual IDocumentEditor*			LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId)=0;
-			virtual bool						SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId)=0;
-			virtual bool						CloseEditor(IDocumentEditor* editor)=0;
+			virtual IDocumentEditor*			NewDocument(const WString& fileTypeId, const WString& editorTypeId, bool promptDialog=true)=0;
+			virtual IDocumentEditor*			LoadDocumentFromView(IDocumentView* view, const WString& editorTypeId, bool promptDialog=true)=0;
+			virtual IDocumentEditor*			LoadDocumentFromContainer(Ptr<IDocumentContainer> document, const WString& editorTypeId, bool promptDialog=true)=0;
+			virtual IDocumentEditor*			LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId, bool promptDialog=true)=0;
+			virtual IDocumentEditor*			LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId, bool promptDialog=true)=0;
+			virtual bool						SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId, bool promptDialog=true)=0;
+			virtual bool						CloseEditor(IDocumentEditor* editor, bool promptDialog=true)=0;
 
 			virtual vint						GetActiveEditorCount()=0;
 			virtual IDocumentEditor*			GetActiveEditor(vint index)=0;

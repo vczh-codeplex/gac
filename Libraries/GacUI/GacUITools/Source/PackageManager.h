@@ -48,10 +48,10 @@ UI Builder
 		typedef Pair<vint, Ptr<PackageXmlMenuGroup>> ProprityMenuGroup;
 
 		extern void			EnumeratePackages(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages);
-		extern void			EnumerateCommands(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands);
+		extern void			EnumerateCommands(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, Dictionary<WString, Ptr<DocumentToolstripCommand>>& commands);
 		extern void			EnumerateMenuDefinitions(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, Group<WString, ProprityMenuGroup>& existingMenuGroups);
-		extern void			BuildMenu(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripMenuBar* menu, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups);
-		extern void			BuildToolbar(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripToolbar* toolbar, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups);
+		extern void			BuildMenu(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripMenuBar* menu, const WString& containerName, Dictionary<WString, Ptr<DocumentToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups);
+		extern void			BuildToolbar(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripToolbar* toolbar, const WString& containerName, Dictionary<WString, Ptr<DocumentToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups);
 		extern void			BuildDialogs(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, IFileDialogService* service);
 		extern void			LoadLegalDocumentPackages(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages);
 
@@ -62,23 +62,23 @@ Main Application Package
 		class MainApplicationPackage : public Object, public IDocumentPackage
 		{
 		private:
-			Ptr<GuiResource>									resource;
-			List<Ptr<XmlElement>>								packages;
-			Dictionary<WString, Ptr<GuiToolstripCommand>>		commands;
-			Group<WString, ProprityMenuGroup>					existingMenuGroups;
-			Ptr<IFileDialogService>								fileDialogService;
+			Ptr<GuiResource>										resource;
+			List<Ptr<XmlElement>>									packages;
+			Dictionary<WString, Ptr<DocumentToolstripCommand>>		commands;
+			Group<WString, ProprityMenuGroup>						existingMenuGroups;
+			Ptr<IFileDialogService>									fileDialogService;
 
 		protected:
 
-			virtual Ptr<GuiResource>							LoadPackageResource()=0;
+			virtual Ptr<GuiResource>								LoadPackageResource()=0;
 		public:
 			MainApplicationPackage();
 			~MainApplicationPackage();
 
-			void												BeforeInitialization()override;
-			void												AfterInitialization()override;
-			void												BuildApplicationMenu(GuiToolstripMenuBar* menu, const WString& containerName);
-			void												BuildApplicationToolbar(GuiToolstripToolbar* toolbar, const WString& containerName);
+			void													BeforeInitialization()override;
+			void													AfterInitialization()override;
+			void													BuildApplicationMenu(GuiToolstripMenuBar* menu, const WString& containerName);
+			void													BuildApplicationToolbar(GuiToolstripToolbar* toolbar, const WString& containerName);
 		};
 	}
 }
