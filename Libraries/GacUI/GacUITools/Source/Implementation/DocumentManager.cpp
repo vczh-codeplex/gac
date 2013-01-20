@@ -143,6 +143,11 @@ DocumentManager
 			return index==-1?L"":defaultEditors.Values().Get(index)->GetEditorTypeId();
 		}
 
+		void DocumentManager::RegisterPackage(Ptr<IDocumentPackage> package)
+		{
+			packages.Add(package);
+		}
+
 		bool DocumentManager::RegisterService(Ptr<IDocumentService> service)
 		{
 			if(!services.Keys().Contains(service->GetServiceTypeId()))

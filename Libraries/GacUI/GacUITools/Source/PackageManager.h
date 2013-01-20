@@ -53,6 +53,16 @@ UI Builder
 		extern void			BuildMenu(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripMenuBar* menu, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups);
 		extern void			BuildToolbar(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripToolbar* toolbar, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups);
 		extern void			BuildDialogs(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, IFileDialogService* service);
+		extern void			LoadLegalDocumentPackages(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages);
+
+/***********************************************************************
+Main Application Package
+***********************************************************************/
+
+		class MainApplicationPackage : public Object, public IDocumentPackage
+		{
+		public:
+		};
 	}
 }
 
