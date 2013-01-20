@@ -42,12 +42,6 @@ Document Interfaces
 			virtual WString						GetOperationTypeId()=0;
 		};
 
-		class IDocumentService : public Interface
-		{
-		public:
-			virtual WString						GetServiceTypeId()=0;
-		};
-
 		class IDocumentView : public Interface
 		{
 		public:
@@ -212,6 +206,24 @@ Editor Interfaces
 		};
 
 /***********************************************************************
+Package Interfaces
+***********************************************************************/
+
+		class IDocumentService : public Interface
+		{
+		public:
+			virtual WString						GetServiceTypeId()=0;
+		};
+
+		class IDocumentPackage : public Interface
+		{
+		public:
+			virtual WString						GetPackageId()=0;
+			virtual void						BeforeInitialization()=0;
+			virtual void						AfterInitialization()=0;
+		};
+
+/***********************************************************************
 Manager Interfaces
 ***********************************************************************/
 
@@ -244,6 +256,7 @@ Manager Interfaces
 			virtual bool						UnbindDefaultEditor(const WString& viewTypeId)=0;
 			virtual WString						GetDefaultEditorTypeId(const WString& viewTypeId)=0;
 
+			virtual void						RegisterPackage(Ptr<IDocumentPackage> package)=0;
 			virtual bool						RegisterService(Ptr<IDocumentService> service)=0;
 			virtual IDocumentService*			GetService(const WString& serviceTypeId)=0;
 
@@ -256,6 +269,55 @@ Manager Interfaces
 
 		extern IDocumentManager*				GetDocumentManager();
 		extern void								SetDocumentManager(IDocumentManager* documentManager);
+
+/***********************************************************************
+Package Loader
+***********************************************************************/
+
+		class DocumentPackageLoader : public Object
+		{
+		public:
+			WString								packageId;
+			DocumentPackageLoader*				nextLoader;
+
+			DocumentPackageLoader()
+				:nextLoader(0)
+			{
+			};
+
+			virtual IDocumentPackage*			LoadPackage()=0;
+		};
+
+		template<typename T>
+		class StrongTypeDocumentPackageLoader : public DocumentPackageLoaderP
+		{
+		public:
+			StrongTypeDocumentPackageLoader()
+				:packageId(T::PackageId)
+			{
+			}
+
+			IDocumentPackage* LoadPackage()override
+			{
+				return new T;
+			};
+		};
+
+		extern void								InstallDocumentPackageLoader(DocumentPackageLoader* loader);
+		extern Ptr<DocumentPackageLoader>		RetriveDocumentPackageLoader();
+
+#define INSTALL_PACKAGE(PACKAGETYPE)\
+		namespace\
+		{\
+			class Initializer\
+			{\
+			public:\
+				Initializer()\
+				{\
+					InstallDocumentPackageLoader(new StrongTypeDocumentPackageLoader<PACKAGETYPE>);\
+				}\
+			} initializer;\
+		}\
 
 /***********************************************************************
 Common Services

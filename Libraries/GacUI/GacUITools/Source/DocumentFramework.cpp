@@ -22,6 +22,44 @@ Helper Functions
 		}
 
 /***********************************************************************
+Package Loader
+***********************************************************************/
+
+		DocumentPackageLoader* globalFirstDocumentPackageLoader=0;
+		DocumentPackageLoader* globalLastDocumentPackageLoader=0;
+
+		void InstallDocumentPackageLoader(DocumentPackageLoader* loader)
+		{
+			if(globalFirstDocumentPackageLoader==0)
+			{
+				globalFirstDocumentPackageLoader=loader;
+				globalLastDocumentPackageLoader=0;
+			}
+			else
+			{
+				globalLastDocumentPackageLoader->nextLoader=loader;
+				globalLastDocumentPackageLoader=loader;
+			}
+		}
+
+		Ptr<DocumentPackageLoader> RetriveDocumentPackageLoader()
+		{
+			DocumentPackageLoader* loader=globalFirstDocumentPackageLoader;
+			if(!loader) return 0;
+			if(globalFirstDocumentPackageLoader==globalLastDocumentPackageLoader)
+			{
+				globalFirstDocumentPackageLoader=0;
+				globalLastDocumentPackageLoader=0;
+			}
+			else
+			{
+				globalFirstDocumentPackageLoader=loader->nextLoader;
+			}
+			loader->nextLoader=0;
+			return loader;
+		}
+
+/***********************************************************************
 IDs
 ***********************************************************************/
 		

@@ -379,5 +379,30 @@ BuildDialogs
 				}
 			}
 		}
+
+/***********************************************************************
+BuildDialogs
+***********************************************************************/
+
+		void LoadLegalDocumentPackages(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages)
+		{
+			SortedList<WString> ids;
+			FOREACH(Ptr<XmlElement>, package, packages)
+			{
+				if(auto id=XmlGetAttribute(package, L"id"))
+				{
+					ids.Add(id->value.value);
+				}
+			}
+
+			while(Ptr<DocumentPackageLoader> loader=RetriveDocumentPackageLoader())
+			{
+				if(ids.Contains(loader->packageId))
+				{
+					Ptr<IDocumentPackage> package=loader->LoadPackage();
+					GetDocumentManager()->RegisterPackage(package);
+				}
+			}
+		}
 	}
 }
