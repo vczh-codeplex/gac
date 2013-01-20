@@ -49,6 +49,8 @@ namespace vl
 
 			bool						RegisterPackage(Ptr<IDocumentPackage> package)override;
 			IDocumentPackage*			GetPackage(const WString& packageId)override;
+			void						RunPackageBeforeInitialization()override;
+			void						RunPackageAfterInitialization()override;
 			bool						RegisterService(Ptr<IDocumentService> service)override;
 			IDocumentService*			GetService(const WString& serviceTypeId)override;
 		};
