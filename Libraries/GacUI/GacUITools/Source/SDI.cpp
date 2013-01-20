@@ -96,6 +96,7 @@ MainWindow
 				List<Ptr<XmlElement>> packages;
 				EnumeratePackages(resource, packages);
 				LoadLegalDocumentPackages(resource, packages);
+				GetDocumentManager()->RunPackageBeforeInitialization();
 				
 				editingDocumentService=new SDIEditingDocumentService(this);
 				GetDocumentManager()->RegisterService(editingDocumentService);
@@ -106,6 +107,7 @@ MainWindow
 					appPackage->BuildApplicationMenu(mainMenu, L"Menu");
 					appPackage->BuildApplicationToolbar(mainToolbar, L"Toolbar");
 				}
+				GetDocumentManager()->RunPackageAfterInitialization();
 			}
 		public:
 			MainWindow()

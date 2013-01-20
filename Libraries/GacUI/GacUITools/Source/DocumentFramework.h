@@ -258,6 +258,8 @@ Manager Interfaces
 
 			virtual bool						RegisterPackage(Ptr<IDocumentPackage> package)=0;
 			virtual IDocumentPackage*			GetPackage(const WString& packageId)=0;
+			virtual void						RunPackageBeforeInitialization()=0;
+			virtual void						RunPackageAfterInitialization()=0;
 			virtual bool						RegisterService(Ptr<IDocumentService> service)=0;
 			virtual IDocumentService*			GetService(const WString& serviceTypeId)=0;
 
