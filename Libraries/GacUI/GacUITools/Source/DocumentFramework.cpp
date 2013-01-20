@@ -6,6 +6,30 @@ namespace vl
 	{
 
 /***********************************************************************
+DocumentToolstripCommand
+***********************************************************************/
+
+		DocumentToolstripCommand::DocumentToolstripCommand(const WString& _packageId, const WString& _commandId)
+			:packageId(_packageId)
+			,commandId(_commandId)
+		{
+		}
+
+		DocumentToolstripCommand::~DocumentToolstripCommand()
+		{
+		}
+
+		const WString& DocumentToolstripCommand::GetPackageId()
+		{
+			return packageId;
+		}
+
+		const WString& DocumentToolstripCommand::GetCommandId()
+		{
+			return commandId;
+		}
+
+/***********************************************************************
 Helper Functions
 ***********************************************************************/
 

@@ -22,15 +22,43 @@ SDIApplicationPackage
 		class SDIApplicationPackage : public MainApplicationPackage
 		{
 		protected:
+			GuiWindow*								mainWindow;
+			IEditingDocumentService*				editingDocumentService;
 
 			Ptr<GuiResource> LoadPackageResource()override
 			{
 				return sdiApplication->GetApplicationResource();
 			}
+
+			void SDIOpenDocument(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+			}
+
+			void SDISaveDocument(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+			}
+
+			void SDISaveDocumentAs(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+			}
+
+			void SDIExitApplication(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				while(editingDocumentService->GetActiveEditorCount()>0)
+				{
+					if(!editingDocumentService->CloseEditor(editingDocumentService->GetActiveEditor(0)))
+					{
+						return;
+					}
+				}
+				mainWindow->Close();
+			}
 		public:
 			static const wchar_t*					PackageId;
 
 			SDIApplicationPackage()
+				:mainWindow(0)
+				,editingDocumentService(0)
 			{
 			}
 
@@ -38,9 +66,40 @@ SDIApplicationPackage
 			{
 			}
 
-			WString GetPackageId()
+			void SetMainWindow(GuiWindow* window)
+			{
+				mainWindow=window;
+			}
+
+			WString GetPackageId()override
 			{
 				return PackageId;
+			}
+
+			void AfterInitialization()override
+			{
+				MainApplicationPackage::AfterInitialization();
+				editingDocumentService=GetDocumentManager()->GetService<IEditingDocumentService>();
+			}
+
+			void InstallToolstripCommand(DocumentToolstripCommand* command)override
+			{
+				if(command->GetCommandId()==L"SDI.OpenDocument")
+				{
+					command->Executed.AttachMethod(this, &SDIApplicationPackage::SDIOpenDocument);
+				}
+				else if(command->GetCommandId()==L"SDI.SaveDocument")
+				{
+					command->Executed.AttachMethod(this, &SDIApplicationPackage::SDISaveDocument);
+				}
+				else if(command->GetCommandId()==L"SDI.SaveDocumentAs")
+				{
+					command->Executed.AttachMethod(this, &SDIApplicationPackage::SDISaveDocumentAs);
+				}
+				else if(command->GetCommandId()==L"SDI.ExitApplication")
+				{
+					command->Executed.AttachMethod(this, &SDIApplicationPackage::SDIExitApplication);
+				}
 			}
 		};
 		const wchar_t* SDIApplicationPackage::PackageId = L"SDIApplicationPackage";
@@ -58,7 +117,12 @@ MainWindow
 			protected:
 				MainWindow*										window;
 
-				bool CanInstallNewEditor()override
+				bool CanInstallNewEditor(bool promptDialog)override
+				{
+					return true;
+				}
+
+				bool CanUninstallEditor(IDocumentEditor* editor, bool promptDialog)
 				{
 					return true;
 				}
@@ -104,6 +168,7 @@ MainWindow
 
 				if(appPackage)
 				{
+					appPackage->SetMainWindow(this);
 					appPackage->BuildApplicationMenu(mainMenu, L"Menu");
 					appPackage->BuildApplicationToolbar(mainToolbar, L"Toolbar");
 				}

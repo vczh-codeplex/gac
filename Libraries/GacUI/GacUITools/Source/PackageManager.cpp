@@ -81,10 +81,15 @@ EnumeratePackages
 EnumerateCommands
 ***********************************************************************/
 
-		void EnumerateCommands(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands)
+		void EnumerateCommands(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, Dictionary<WString, Ptr<DocumentToolstripCommand>>& commands)
 		{
 			FOREACH(Ptr<XmlElement>, package, packages)
 			{
+				WString packageId;
+				if(auto id=XmlGetAttribute(package, L"id"))
+				{
+					packageId=id->value.value;
+				}
 				if(auto commandsElement=XmlGetElement(package, L"Commands"))
 				{
 					FOREACH(Ptr<XmlElement>, commandElement,
@@ -96,13 +101,13 @@ EnumerateCommands
 						if(auto name=XmlGetAttribute(commandElement, L"id"))
 						if(!commands.Keys().Contains(name->value.value))
 						{
-							Ptr<GuiToolstripCommand> command=new GuiToolstripCommand();
+							Ptr<DocumentToolstripCommand> command=new DocumentToolstripCommand(packageId, name->value.value);
 							WString text=L"<Empty-Command-Name>";
 							Ptr<GuiImageData> image;
 							GetMenuButtonAttributes(resource, commandElement, text, image);
 							command->SetText(text);
 							command->SetImage(image);
-							commands.Add(name->value.value, command);
+							commands.Add(command->GetCommandId(), command);
 						}
 					}
 				}
@@ -186,7 +191,7 @@ EnumerateMenuDefinitions
 BuildMenu/BuildToolbar
 ***********************************************************************/
 
-		void BuildToolstripObject(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripBuilder* rootBuilder, bool forToolbar, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups)
+		void BuildToolstripObject(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripBuilder* rootBuilder, bool forToolbar, const WString& containerName, Dictionary<WString, Ptr<DocumentToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups)
 		{
 			vint processingMenuItemIndex=-1;
 			WString currentParentId=containerName;
@@ -195,7 +200,7 @@ BuildMenu/BuildToolbar
 			Regex parameterRegex(L"/{(<name>/w+):(<value>[^{}]*)/}");
 			List<Ptr<PackageXmlMenuItem>> processingMenuItems;
 
-			FOREACH(Ptr<GuiToolstripCommand>, command, commands.Values())
+			FOREACH(Ptr<DocumentToolstripCommand>, command, commands.Values())
 			{
 				command->SetText(TranslateResourceText(resource, command->GetText(), parameterRegex));
 			}
@@ -319,12 +324,12 @@ BuildMenu/BuildToolbar
 			}
 		}
 
-		void BuildMenu(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripMenuBar* menu, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups)
+		void BuildMenu(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripMenuBar* menu, const WString& containerName, Dictionary<WString, Ptr<DocumentToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups)
 		{
 			BuildToolstripObject(resource, packages, menu->GetBuilder(), false, containerName, commands, existingMenuGroups);
 		}
 
-		void BuildToolbar(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripToolbar* toolbar, const WString& containerName, Dictionary<WString, Ptr<GuiToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups)
+		void BuildToolbar(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages, GuiToolstripToolbar* toolbar, const WString& containerName, Dictionary<WString, Ptr<DocumentToolstripCommand>>& commands, Group<WString, ProprityMenuGroup>& existingMenuGroups)
 		{
 			BuildToolstripObject(resource, packages, toolbar->GetBuilder(), true, containerName, commands, existingMenuGroups);
 		}
@@ -432,6 +437,14 @@ MainApplicationPackage
 
 		void MainApplicationPackage::AfterInitialization()
 		{
+			FOREACH(Ptr<DocumentToolstripCommand>, command, commands.Values())
+			{
+				IDocumentPackage* package=GetDocumentManager()->GetPackage(command->GetPackageId());
+				if(package)
+				{
+					package->InstallToolstripCommand(command.Obj());
+				}
+			}
 		}
 
 		void MainApplicationPackage::BuildApplicationMenu(GuiToolstripMenuBar* menu, const WString& containerName)

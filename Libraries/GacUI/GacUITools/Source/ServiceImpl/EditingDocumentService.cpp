@@ -43,21 +43,20 @@ EditingDocumentService
 		{
 		}
 
-		IDocumentEditor* EditingDocumentService::NewDocument(const WString& fileTypeId, const WString& editorTypeId)
+		IDocumentEditor* EditingDocumentService::NewDocument(const WString& fileTypeId, const WString& editorTypeId, bool promptDialog)
 		{
-			if(!CanInstallNewEditor()) return 0;
+			if(!CanInstallNewEditor(promptDialog)) return 0;
 			IDocumentFileType* fileType=GetDocumentManager()->FindFileTypeById(fileTypeId);
 			if(!fileType) return 0;
 
 			Ptr<IDocumentContainer> document=fileType->CreateDocument();
 			if(!document) return 0;
-			return LoadDocumentFromContainer(document, editorTypeId);
+			return LoadDocumentFromContainer(document, editorTypeId, promptDialog);
 		}
 
-		IDocumentEditor* EditingDocumentService::LoadDocumentFromView(IDocumentView* view, const WString& editorTypeId)
+		IDocumentEditor* EditingDocumentService::LoadDocumentFromView(IDocumentView* view, const WString& editorTypeId, bool promptDialog)
 		{
-			if(!CanInstallNewEditor()) return 0;
-
+			if(!CanInstallNewEditor(promptDialog)) return 0;
 			WString selectedEditorTypeId=editorTypeId;
 			if(selectedEditorTypeId==L"")
 			{
@@ -77,14 +76,15 @@ EditingDocumentService
 			return editor.Obj();
 		}
 
-		IDocumentEditor* EditingDocumentService::LoadDocumentFromContainer(Ptr<IDocumentContainer> document, const WString& editorTypeId)
+		IDocumentEditor* EditingDocumentService::LoadDocumentFromContainer(Ptr<IDocumentContainer> document, const WString& editorTypeId, bool promptDialog)
 		{
+			if(!CanInstallNewEditor(promptDialog)) return 0;
 			IDocumentFragment* fragment=document->GetRootFragment();
 			if(!fragment) return 0;
 			IDocumentView* view=fragment->GetView(fragment->GetDefaultViewTypeId());
 			if(!view) return 0;
 
-			IDocumentEditor* editor=LoadDocumentFromView(view, editorTypeId);
+			IDocumentEditor* editor=LoadDocumentFromView(view, editorTypeId, promptDialog);
 			if(editor)
 			{
 				activeDocuments.Add(document);
@@ -92,9 +92,9 @@ EditingDocumentService
 			return editor;
 		}
 
-		IDocumentEditor* EditingDocumentService::LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId)
+		IDocumentEditor* EditingDocumentService::LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId, bool promptDialog)
 		{
-			if(!CanInstallNewEditor()) return 0;
+			if(!CanInstallNewEditor(promptDialog)) return 0;
 			vint index=Locale::Invariant().FindLast(filePath, L".", Locale::None).key;
 			if(index==-1)
 			{
@@ -108,21 +108,21 @@ EditingDocumentService
 
 				Ptr<IDocumentContainer> document=fileType->CreateDocumentFromFile(filePath);
 				if(!document) return 0;
-				return LoadDocumentFromContainer(document, editorTypeId);
+				return LoadDocumentFromContainer(document, editorTypeId, promptDialog);
 			}
 		}
 
-		IDocumentEditor* EditingDocumentService::LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId)
+		IDocumentEditor* EditingDocumentService::LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId, bool promptDialog)
 		{
-			if(!CanInstallNewEditor()) return 0;
+			if(!CanInstallNewEditor(promptDialog)) return 0;
 			IFileDialogService* dialogService=GetDocumentManager()->GetService<IFileDialogService>();
 			if(!dialogService) return 0;
 			WString filePath=dialogService->OpenDialogForSingleFile(dialogId);
 			if(filePath==L"") return 0;
-			return LoadDocumentFromFile(filePath, editorTypeId);
+			return LoadDocumentFromFile(filePath, editorTypeId, promptDialog);
 		}
 
-		bool EditingDocumentService::SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId)
+		bool EditingDocumentService::SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId, bool promptDialog)
 		{
 			IDocumentView* view=editor->GetEditingView();
 			if(!view) return false;
@@ -138,8 +138,9 @@ EditingDocumentService
 			return fragment->SaveDocumentAs(filePath);
 		}
 
-		bool EditingDocumentService::CloseEditor(IDocumentEditor* editor)
+		bool EditingDocumentService::CloseEditor(IDocumentEditor* editor, bool promptDialog)
 		{
+			if(!CanUninstallEditor(editor, promptDialog)) return false;
 			if(!activeEditors.Contains(editor)) return false;
 			editor->FinishEdit();
 			IDocumentView* view=editor->GetEditingView();

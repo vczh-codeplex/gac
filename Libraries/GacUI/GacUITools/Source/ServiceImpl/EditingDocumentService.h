@@ -28,20 +28,21 @@ namespace vl
 			void								OnLostActiveView(IDocumentEditor* sender)override;
 		protected:
 
-			virtual bool						CanInstallNewEditor()=0;
+			virtual bool						CanInstallNewEditor(bool promptDialog)=0;
+			virtual bool						CanUninstallEditor(IDocumentEditor* editor, bool promptDialog)=0;
 			virtual bool						InstallEditor(IDocumentEditor* editor)=0;
 			virtual bool						UninstallEditor(IDocumentEditor* editor)=0;
 		public:
 			EditingDocumentService();
 			~EditingDocumentService();
 
-			IDocumentEditor*					NewDocument(const WString& fileTypeId, const WString& editorTypeId)override;
-			IDocumentEditor*					LoadDocumentFromView(IDocumentView* view, const WString& editorTypeId)override;
-			IDocumentEditor*					LoadDocumentFromContainer(Ptr<IDocumentContainer> document, const WString& editorTypeId)override;
-			IDocumentEditor*					LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId)override;
-			IDocumentEditor*					LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId)override;
-			bool								SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId)override;
-			bool								CloseEditor(IDocumentEditor* editor)override;
+			IDocumentEditor*					NewDocument(const WString& fileTypeId, const WString& editorTypeId, bool promptDialog)override;
+			IDocumentEditor*					LoadDocumentFromView(IDocumentView* view, const WString& editorTypeId, bool promptDialog)override;
+			IDocumentEditor*					LoadDocumentFromContainer(Ptr<IDocumentContainer> document, const WString& editorTypeId, bool promptDialog)override;
+			IDocumentEditor*					LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId, bool promptDialog)override;
+			IDocumentEditor*					LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId, bool promptDialog)override;
+			bool								SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId, bool promptDialog)override;
+			bool								CloseEditor(IDocumentEditor* editor, bool promptDialog)override;
 
 			vint								GetActiveEditorCount()override;
 			IDocumentEditor*					GetActiveEditor(vint index)override;
