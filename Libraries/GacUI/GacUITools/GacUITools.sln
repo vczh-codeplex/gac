@@ -12,9 +12,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacDocument", "GacDocument\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacUI", "GacUI\GacUI.vcxproj", "{86721540-850B-47C1-BAA5-5810E70CA6EC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacCodeEditorPackage", "GacCodeEditorPackage\GacCodeEditorPackage.vcxproj", "{98AA6C38-DA75-413E-8D75-7602646900EC}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 5
+		SccNumberOfProjects = 6
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
@@ -30,6 +32,9 @@ Global
 		SccProjectUniqueName4 = GacUI\\GacUI.vcxproj
 		SccProjectName4 = GacUI
 		SccLocalPath4 = GacUI
+		SccProjectUniqueName5 = GacCodeEditorPackage\\GacCodeEditorPackage.vcxproj
+		SccProjectName5 = GacCodeEditorPackage
+		SccLocalPath5 = GacCodeEditorPackage
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -52,6 +57,10 @@ Global
 		{86721540-850B-47C1-BAA5-5810E70CA6EC}.Debug|Win32.Build.0 = Debug|Win32
 		{86721540-850B-47C1-BAA5-5810E70CA6EC}.Release|Win32.ActiveCfg = Release|Win32
 		{86721540-850B-47C1-BAA5-5810E70CA6EC}.Release|Win32.Build.0 = Release|Win32
+		{98AA6C38-DA75-413E-8D75-7602646900EC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{98AA6C38-DA75-413E-8D75-7602646900EC}.Debug|Win32.Build.0 = Debug|Win32
+		{98AA6C38-DA75-413E-8D75-7602646900EC}.Release|Win32.ActiveCfg = Release|Win32
+		{98AA6C38-DA75-413E-8D75-7602646900EC}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
