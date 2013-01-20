@@ -1,32 +1,31 @@
-#include "..\Source\DocumentFramework.h"
+#include "EditPackage.h"
 
 namespace vl
 {
 	namespace gactools
 	{
-		class EditPackage : public Object, public IDocumentPackage
+
+/***********************************************************************
+EditPackage
+***********************************************************************/
+
+		WString EditPackage::GetPackageId()
 		{
-		public:
-			static const wchar_t*			PackageId;
+			return PackageId;
+		}
 
-			WString GetPackageId()
-			{
-				return PackageId;
-			}
+		void EditPackage::BeforeInitialization()
+		{
+		}
 
-			void BeforeInitialization()
-			{
-			}
+		void EditPackage::AfterInitialization()
+		{
+		}
 
-			void AfterInitialization()
-			{
-			}
+		void EditPackage::InstallToolstripCommand(DocumentToolstripCommand* command)
+		{
+		}
 
-			void InstallToolstripCommand(DocumentToolstripCommand* command)
-			{
-			}
-		};
 		const wchar_t* EditPackage::PackageId = L"EditPackage";
-		INSTALL_PACKAGE(EditPackage);
 	}
 }
