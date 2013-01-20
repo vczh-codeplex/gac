@@ -333,14 +333,14 @@ Package Loader
 #define INSTALL_PACKAGE(PACKAGETYPE)\
 		namespace\
 		{\
-			class Initializer\
+			class PACKAGETYPE##Initializer\
 			{\
 			public:\
-				Initializer()\
+				PACKAGETYPE##Initializer()\
 				{\
 					InstallDocumentPackageLoader(new StrongTypeDocumentPackageLoader<PACKAGETYPE>);\
 				}\
-			} initializer;\
+			} PACKAGETYPE##initializer;\
 		}\
 
 /***********************************************************************

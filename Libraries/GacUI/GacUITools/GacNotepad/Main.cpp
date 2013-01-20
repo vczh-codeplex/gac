@@ -1,7 +1,18 @@
 #include "..\Source\SDI.h"
+#include "..\GacCodeEditorPackage\EditPackage.h"
+#include "..\GacCodeEditorPackage\TextEditorPackage.h"
 #include <Windows.h>
 
 using namespace vl::gactools;
+
+namespace vl
+{
+	namespace gactools
+	{
+		INSTALL_PACKAGE(EditPackage);
+		INSTALL_PACKAGE(TextEditorPackage);
+	}
+}
 
 /***********************************************************************
 WinMain

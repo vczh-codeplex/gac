@@ -1,32 +1,31 @@
-#include "..\Source\DocumentFramework.h"
+#include "TextEditorPackage.h"
 
 namespace vl
 {
 	namespace gactools
 	{
-		class TextEditorPackage : public Object, public IDocumentPackage
+
+/***********************************************************************
+TextEditorPackage
+***********************************************************************/
+
+		WString TextEditorPackage::GetPackageId()
 		{
-		public:
-			static const wchar_t*			PackageId;
+			return PackageId;
+		}
 
-			WString GetPackageId()
-			{
-				return PackageId;
-			}
+		void TextEditorPackage::BeforeInitialization()
+		{
+		}
 
-			void BeforeInitialization()
-			{
-			}
+		void TextEditorPackage::AfterInitialization()
+		{
+		}
 
-			void AfterInitialization()
-			{
-			}
+		void TextEditorPackage::InstallToolstripCommand(DocumentToolstripCommand* command)
+		{
+		}
 
-			void InstallToolstripCommand(DocumentToolstripCommand* command)
-			{
-			}
-		};
 		const wchar_t* TextEditorPackage::PackageId = L"TextEditorPackage";
-		INSTALL_PACKAGE(TextEditorPackage);
 	}
 }

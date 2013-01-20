@@ -57,7 +57,7 @@ Package Loader
 			if(globalFirstDocumentPackageLoader==0)
 			{
 				globalFirstDocumentPackageLoader=loader;
-				globalLastDocumentPackageLoader=0;
+				globalLastDocumentPackageLoader=loader;
 			}
 			else
 			{
