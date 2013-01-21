@@ -21,12 +21,18 @@
     <ClCompile Include="TextEditorPackage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TextDocument.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditPackage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TextEditorPackage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextDocument.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

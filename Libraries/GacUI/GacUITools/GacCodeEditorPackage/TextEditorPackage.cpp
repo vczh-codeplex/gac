@@ -1,4 +1,5 @@
 #include "TextEditorPackage.h"
+#include "TextDocument.h"
 
 namespace vl
 {
@@ -16,6 +17,7 @@ TextEditorPackage
 
 		void TextEditorPackage::BeforeInitialization()
 		{
+			GetDocumentManager()->RegisterFileType(new TextFileType);
 		}
 
 		void TextEditorPackage::AfterInitialization()
