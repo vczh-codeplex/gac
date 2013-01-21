@@ -32,6 +32,7 @@ SDIApplicationPackage
 
 			void SDIOpenDocument(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
+				editingDocumentService->LoadDocumentByDialog(L"Dialog.OpenFile", L"", true);
 			}
 
 			void SDISaveDocument(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
@@ -44,13 +45,6 @@ SDIApplicationPackage
 
 			void SDIExitApplication(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
-				while(editingDocumentService->GetActiveEditorCount()>0)
-				{
-					if(!editingDocumentService->CloseEditor(editingDocumentService->GetActiveEditor(0)))
-					{
-						return;
-					}
-				}
 				mainWindow->Close();
 			}
 		public:
@@ -174,6 +168,18 @@ MainWindow
 				}
 				GetDocumentManager()->RunPackageAfterInitialization();
 			}
+
+			void MainWindow_Closing(GuiGraphicsComposition* sender, GuiRequestEventArgs& arguments)
+			{
+				while(editingDocumentService->GetActiveEditorCount()>0)
+				{
+					if(!editingDocumentService->CloseEditor(editingDocumentService->GetActiveEditor(0), true))
+					{
+						arguments.cancel=true;
+						return;
+					}
+				}
+			}
 		public:
 			MainWindow()
 				:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -189,6 +195,7 @@ MainWindow
 				this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
 				this->ForceCalculateSizeImmediately();
 				this->MoveToScreenCenter();
+				this->WindowClosing.AttachMethod(this, &MainWindow::MainWindow_Closing);
 
 				GuiTableComposition* table=new GuiTableComposition;
 				table->SetRowsAndColumns(3, 1);

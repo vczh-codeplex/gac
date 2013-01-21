@@ -365,13 +365,13 @@ Common Services
 			static const wchar_t*				ServiceTypeId;
 			WString								GetServiceTypeId(){return ServiceTypeId;}
 
-			virtual IDocumentEditor*			NewDocument(const WString& fileTypeId, const WString& editorTypeId, bool promptDialog=true)=0;
-			virtual IDocumentEditor*			LoadDocumentFromView(IDocumentView* view, const WString& editorTypeId, bool promptDialog=true)=0;
-			virtual IDocumentEditor*			LoadDocumentFromContainer(Ptr<IDocumentContainer> document, const WString& editorTypeId, bool promptDialog=true)=0;
-			virtual IDocumentEditor*			LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId, bool promptDialog=true)=0;
-			virtual IDocumentEditor*			LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId, bool promptDialog=true)=0;
-			virtual bool						SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId, bool promptDialog=true)=0;
-			virtual bool						CloseEditor(IDocumentEditor* editor, bool promptDialog=true)=0;
+			virtual IDocumentEditor*			NewDocument(const WString& fileTypeId, const WString& editorTypeId, bool promptDialog)=0;
+			virtual IDocumentEditor*			LoadDocumentFromView(IDocumentView* view, const WString& editorTypeId, bool promptDialog)=0;
+			virtual IDocumentEditor*			LoadDocumentFromContainer(Ptr<IDocumentContainer> document, const WString& editorTypeId, bool promptDialog)=0;
+			virtual IDocumentEditor*			LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId, bool promptDialog)=0;
+			virtual IDocumentEditor*			LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId, bool promptDialog)=0;
+			virtual bool						SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId, bool promptDialog)=0;
+			virtual bool						CloseEditor(IDocumentEditor* editor, bool promptDialog)=0;
 
 			virtual vint						GetActiveEditorCount()=0;
 			virtual IDocumentEditor*			GetActiveEditor(vint index)=0;
