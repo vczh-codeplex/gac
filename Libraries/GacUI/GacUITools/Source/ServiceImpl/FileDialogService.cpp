@@ -49,7 +49,7 @@ EditingDocumentService
 			vint index=dialogDescriptions.Keys().IndexOf(dialogId);
 			if(index==-1) return false;
 			Ptr<DialogDescription> dialog=dialogDescriptions.Values().Get(index);
-			dialog->filters.Add(Pair<vint, WString>(priority, filter+L"|"+text));
+			dialog->filters.Add(Pair<vint, WString>(priority, text+L"|"+filter));
 			return true;
 		}
 

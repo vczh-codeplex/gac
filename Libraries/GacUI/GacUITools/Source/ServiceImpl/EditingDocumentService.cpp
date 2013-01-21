@@ -145,8 +145,8 @@ EditingDocumentService
 		{
 			if(!CanUninstallEditor(editor, promptDialog)) return false;
 			if(!activeEditors.Contains(editor)) return false;
-			editor->FinishEdit();
 			IDocumentView* view=editor->GetEditingView();
+			editor->FinishEdit();
 			activeEditors.Remove(editor);
 			activeDocuments.Remove(view->GetOwnedFragment()->GetOwnedContainer());
 			return true;

@@ -26,12 +26,12 @@ TextDocument
 
 		bool TextDocument::LoadDocumentInternal(const WString& filePath)
 		{
-			return false;
+			return true;
 		}
 
 		bool TextDocument::SaveDocumentInternal(const WString& filePath)
 		{
-			return false;
+			return true;
 		}
 
 		TextDocument::TextDocument(IDocumentContainer* _ownedContainer, const WString& _filePath, DocumentFragment* _ownedFragment, const WString& _friendlyName)
