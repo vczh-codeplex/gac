@@ -1,5 +1,6 @@
 #include "TextEditorPackage.h"
 #include "TextDocument.h"
+#include "TextDocumentEditor.h"
 
 namespace vl
 {
@@ -17,7 +18,12 @@ TextEditorPackage
 
 		void TextEditorPackage::BeforeInitialization()
 		{
-			GetDocumentManager()->RegisterFileType(new TextFileType);
+			{
+				Ptr<TextDocumentEditorFactory> textDocumentEditorFactory=new TextDocumentEditorFactory;
+				GetDocumentManager()->RegisterFileType(new TextFileType);
+				GetDocumentManager()->RegisterEditorFactory(textDocumentEditorFactory);
+				GetDocumentManager()->BindDefaultEditor(PlainTextView::ViewTypeId, textDocumentEditorFactory.Obj());
+			}
 		}
 
 		void TextEditorPackage::AfterInitialization()

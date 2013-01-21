@@ -191,7 +191,12 @@ FileDocumentFragment
 		bool FileDocumentFragment::ReloadDocument()
 		{
 			if(currentFilePath==L"") return false;
-			return LoadDocumentInternal(currentFilePath);
+			if(LoadDocumentInternal(currentFilePath))
+			{
+				NotifyUpdateFragment();
+				return true;
+			}
+			return false;
 		}
 
 		bool FileDocumentFragment::SaveDocument()
