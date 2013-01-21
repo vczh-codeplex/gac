@@ -12,10 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EditPackage.cpp" />
+    <ClCompile Include="TextDocument.cpp" />
     <ClCompile Include="TextEditorPackage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditPackage.h" />
+    <ClInclude Include="TextDocument.h" />
     <ClInclude Include="TextEditorPackage.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

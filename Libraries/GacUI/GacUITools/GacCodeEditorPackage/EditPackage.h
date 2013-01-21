@@ -1,7 +1,7 @@
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: іВиче«(vczh)
-GacUI Tools::Package Manager
+GacUI Tools::Edit Package
 
 Interfaces:
 ***********************************************************************/

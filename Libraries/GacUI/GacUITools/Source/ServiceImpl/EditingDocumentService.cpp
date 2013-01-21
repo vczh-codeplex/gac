@@ -108,6 +108,9 @@ EditingDocumentService
 
 				Ptr<IDocumentContainer> document=fileType->CreateDocumentFromFile(filePath);
 				if(!document) return 0;
+				IDocumentFragment* fragment=document->GetRootFragment();
+				if(!fragment) return 0;
+				if(!fragment->ReloadDocument()) return 0;
 				return LoadDocumentFromContainer(document, editorTypeId, promptDialog);
 			}
 		}
