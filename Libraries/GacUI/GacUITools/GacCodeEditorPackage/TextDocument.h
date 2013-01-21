@@ -20,6 +20,9 @@ namespace vl
 		{
 		public:
 			static const wchar_t*				ViewTypeId;
+
+			PlainTextView(DocumentFragment* _ownedFragment);
+			~PlainTextView();
 		};
 
 		class TextDocument : public FileDocumentFragment
