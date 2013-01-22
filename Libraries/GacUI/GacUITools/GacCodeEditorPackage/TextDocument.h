@@ -69,6 +69,8 @@ namespace vl
 			bool								DeactivateProxy(IPlainTextViewContentProxy* value)override;
 		protected:
 			
+			Ptr<IEncoder>						CreateEncoder();
+			Ptr<IDecoder>						CreateDecoder();
 			bool								LoadDocumentInternal(const WString& filePath)override;
 			bool								SaveDocumentInternal(const WString& filePath)override;
 		public:

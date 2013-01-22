@@ -72,31 +72,20 @@ TextDocument
 			return true;
 		}
 
-		bool TextDocument::LoadDocumentInternal(const WString& filePath)
+		Ptr<IEncoder> TextDocument::CreateEncoder()
 		{
-			return true;
-		}
-
-		bool TextDocument::SaveDocumentInternal(const WString& filePath)
-		{
-			FileStream fileStream(filePath, FileStream::WriteOnly);
-			if(!fileStream.IsAvailable()) return false;
-			Ptr<IEncoder> encoder;
 			if(containsBom)
 			{
 				switch(encoding)
 				{
 				case Utf8:
-					encoder=new BomEncoder(BomEncoder::Utf8);
-					break;
+					return new BomEncoder(BomEncoder::Utf8);
 				case Utf16:
-					encoder=new BomEncoder(BomEncoder::Utf16);
-					break;
+					return new BomEncoder(BomEncoder::Utf16);
 				case Utf16BigEndian:
-					encoder=new BomEncoder(BomEncoder::Utf16BE);
-					break;
+					return new BomEncoder(BomEncoder::Utf16BE);
 				default:
-					encoder=new BomEncoder(BomEncoder::Mbcs);
+					return new BomEncoder(BomEncoder::Mbcs);
 				}
 			}
 			else
@@ -104,18 +93,91 @@ TextDocument
 				switch(encoding)
 				{
 				case Utf8:
-					encoder=new Utf8Encoder;
-					break;
+					return new Utf8Encoder;
 				case Utf16:
-					encoder=new Utf16Encoder;
-					break;
+					return new Utf16Encoder;
 				case Utf16BigEndian:
-					encoder=new Utf16BEEncoder;
-					break;
+					return new Utf16BEEncoder;
 				default:
-					encoder=new MbcsEncoder;
+					return new MbcsEncoder;
 				}
 			}
+		}
+
+		Ptr<IDecoder> TextDocument::CreateDecoder()
+		{
+			if(containsBom)
+			{
+				return new BomDecoder;
+			}
+			else
+			{
+				switch(encoding)
+				{
+				case Utf8:
+					return new Utf8Decoder;
+				case Utf16:
+					return new Utf16Decoder;
+				case Utf16BigEndian:
+					return new Utf16BEDecoder;
+				default:
+					return new MbcsDecoder;
+				}
+			}
+		}
+
+		bool TextDocument::LoadDocumentInternal(const WString& filePath)
+		{
+			Array<char> buffer;
+			{
+				FileStream fileStream(filePath, FileStream::ReadOnly);
+				if(!fileStream.IsAvailable()) return false;
+				vint size=(vint)fileStream.Size();
+				if(size==0)
+				{
+					encoding=Ansi;
+					containsBom=true;
+					cachedContent=L"";
+					return true;
+				}
+				buffer.Resize((vint)fileStream.Size());
+				fileStream.Read(&buffer[0], size);
+			}
+
+			if(buffer.Count()>=3 && strncmp(&buffer[0], "\xEF\xBB\xBF", 3)==0)
+			{
+				encoding=Utf8;
+				containsBom=true;
+			}
+			else if(buffer.Count()>=2 && strncmp(&buffer[0], "\xFF\xFE", 3)==0)
+			{
+				encoding=Utf16;
+				containsBom=true;
+			}
+			else if(buffer.Count()>=2 && strncmp(&buffer[0], "\xFE\xFF", 3)==0)
+			{
+				encoding=Utf16BigEndian;
+				containsBom=true;
+			}
+			else
+			{
+				encoding=Ansi;
+				containsBom=true;
+			}
+
+			MemoryWrapperStream memoryStream(&buffer[0], buffer.Count());
+			Ptr<IDecoder> decoder=CreateDecoder();
+			DecoderStream decoderStream(memoryStream, *decoder.Obj());
+			StreamReader reader(decoderStream);
+			cachedContent=reader.ReadToEnd();
+			return true;
+		}
+
+		bool TextDocument::SaveDocumentInternal(const WString& filePath)
+		{
+			FileStream fileStream(filePath, FileStream::WriteOnly);
+			if(!fileStream.IsAvailable()) return false;
+			Ptr<IEncoder> encoder=CreateEncoder();
 			EncoderStream encoderStream(fileStream, *encoder.Obj());
 			StreamWriter writer(encoderStream);
 			writer.WriteString(GetContent());

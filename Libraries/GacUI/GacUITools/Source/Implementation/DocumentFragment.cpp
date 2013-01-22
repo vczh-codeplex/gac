@@ -205,7 +205,7 @@ FileDocumentFragment
 			if(currentFilePath==L"") return false;
 			if(LoadDocumentInternal(currentFilePath))
 			{
-				NotifyUpdateFragment();
+				NotifyUpdateFragmentAndViews(0);
 				return true;
 			}
 			return false;
