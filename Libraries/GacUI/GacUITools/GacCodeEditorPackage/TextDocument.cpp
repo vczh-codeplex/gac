@@ -149,12 +149,12 @@ TextDocument
 				encoding=Utf8;
 				containsBom=true;
 			}
-			else if(buffer.Count()>=2 && strncmp(&buffer[0], "\xFF\xFE", 3)==0)
+			else if(buffer.Count()>=2 && strncmp(&buffer[0], "\xFF\xFE", 2)==0)
 			{
 				encoding=Utf16;
 				containsBom=true;
 			}
-			else if(buffer.Count()>=2 && strncmp(&buffer[0], "\xFE\xFF", 3)==0)
+			else if(buffer.Count()>=2 && strncmp(&buffer[0], "\xFE\xFF", 2)==0)
 			{
 				encoding=Utf16BigEndian;
 				containsBom=true;
@@ -162,7 +162,85 @@ TextDocument
 			else
 			{
 				encoding=Ansi;
-				containsBom=true;
+				containsBom=false;
+
+				
+				bool notAscii=false;
+				bool notUnicode=false;
+				bool unicode=false;
+				bool reverse=false;
+				bool strictUtf8Test=true;
+				{
+					void* text=&buffer[0];
+					int textSize=(int)buffer.Count();
+					int flag=0;
+
+					flag=IS_TEXT_UNICODE_NOT_ASCII_MASK;
+					notAscii=IsTextUnicode(text, textSize, &flag)!=0;
+					flag=IS_TEXT_UNICODE_NOT_UNICODE_MASK;
+					notUnicode=IsTextUnicode(text, textSize, &flag)!=0;
+					flag=IS_TEXT_UNICODE_UNICODE_MASK;
+					unicode=IsTextUnicode(text, textSize, &flag)!=0;
+					flag=IS_TEXT_UNICODE_REVERSE_MASK;
+					reverse=IsTextUnicode(text, textSize, &flag)!=0;
+				}
+
+				for(vint i=0;strictUtf8Test && i<buffer.Count();i++)
+				{
+					unsigned char c=(unsigned char)buffer[i];
+					if(c==0)
+					{
+						strictUtf8Test=false;
+					}
+					else
+					{
+						vint count10xxxxxx=0;
+						if((c&0x80)==0x00) /* 0x0xxxxxxx */ count10xxxxxx=0;
+						else if((c&0xE0)==0xC0) /* 0x110xxxxx */ count10xxxxxx=1;
+						else if((c&0xF0)==0xE0) /* 0x1110xxxx */ count10xxxxxx=2;
+						else if((c&0xF8)==0xF0) /* 0x11110xxx */ count10xxxxxx=3;
+						else if((c&0xFC)==0xF8) /* 0x111110xx */ count10xxxxxx=4;
+						else if((c&0xFE)==0xFC) /* 0x1111110x */ count10xxxxxx=5;
+
+						if(buffer.Count()<=i+count10xxxxxx)
+						{
+							strictUtf8Test=false;
+						}
+						else
+						{
+							for(vint j=0;strictUtf8Test && j<count10xxxxxx;j++)
+							{
+								c=(unsigned char)buffer[i+j+1];
+								if((c&0xC0)!=0x80) /* 0x10xxxxxx */ strictUtf8Test=false;
+							}
+						}
+						i+=count10xxxxxx;
+					}
+				}
+
+				if(notUnicode)
+				{
+					if(strictUtf8Test || notAscii)
+					{
+						encoding=Utf8;
+					}
+				}
+				else
+				{
+					if(unicode)
+					{
+						encoding=Utf16;
+					}
+					else if(reverse)
+					{
+						encoding=Utf16BigEndian;
+					}
+					else if(strictUtf8Test || notAscii)
+					{
+						encoding=Utf8;
+					}
+				}
+				containsBom=encoding==Ansi;
 			}
 
 			MemoryWrapperStream memoryStream(&buffer[0], buffer.Count());
