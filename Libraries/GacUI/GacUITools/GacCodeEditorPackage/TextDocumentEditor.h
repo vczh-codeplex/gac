@@ -10,15 +10,24 @@ Interfaces:
 
 #include "..\Source\Implementation\DocumentEditor.h"
 #include "..\Source\Implementation\DocumentEditorFactory.h"
+#include "..\GacCodeEditorPackage\TextDocument.h"
 
 namespace vl
 {
 	namespace gactools
 	{
-		class TextDocumentEditor : public DocumentEditor
+		class TextDocumentEditor : public DocumentEditor, private IPlainTextViewContentProxy
 		{
+		private:
+			
+			WString						GetContent()override;
+			void						SetContent(const WString& value)override;
 		protected:
+			GuiMultilineTextBox*		textBox;
 
+			void						textBox_TextChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void						BeforeEditView(IDocumentView* view)override;
+			void						AfterEditView(IDocumentView* view)override;
 			GuiControl*					CreateEditorControlInternal()override;
 		public:
 			TextDocumentEditor(IDocumentEditorFactory* _editorFactory, IDocumentView* _editingView);

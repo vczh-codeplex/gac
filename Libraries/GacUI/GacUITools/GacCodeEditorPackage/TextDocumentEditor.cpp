@@ -10,13 +10,53 @@ namespace vl
 TextDocumentEditor
 ***********************************************************************/
 
+		WString TextDocumentEditor::GetContent()
+		{
+			return textBox->GetText();
+		}
+
+		void TextDocumentEditor::SetContent(const WString& value)
+		{
+			textBox->SetText(value);
+		}
+
+		void TextDocumentEditor::textBox_TextChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			PlainTextView* plainTextView=dynamic_cast<PlainTextView*>(GetEditingView());
+			if(plainTextView)
+			{
+				plainTextView->NotifyUpdateView();
+			}
+		}
+
+		void TextDocumentEditor::BeforeEditView(IDocumentView* view)
+		{
+			PlainTextView* plainTextView=dynamic_cast<PlainTextView*>(view);
+			if(plainTextView)
+			{
+				plainTextView->ActivateProxy(this);
+			}
+		}
+
+		void TextDocumentEditor::AfterEditView(IDocumentView* view)
+		{
+			PlainTextView* plainTextView=dynamic_cast<PlainTextView*>(view);
+			if(plainTextView)
+			{
+				plainTextView->DeactivateProxy(this);
+			}
+		}
+
 		GuiControl* TextDocumentEditor::CreateEditorControlInternal()
 		{
-			return g::NewMultilineTextBox();
+			textBox=g::NewMultilineTextBox();
+			textBox->TextChanged.AttachMethod(this, &TextDocumentEditor::textBox_TextChanged);
+			return textBox;
 		}
 
 		TextDocumentEditor::TextDocumentEditor(IDocumentEditorFactory* _editorFactory, IDocumentView* _editingView)
 			:DocumentEditor(_editorFactory, _editingView)
+			,textBox(0)
 		{
 		}
 
