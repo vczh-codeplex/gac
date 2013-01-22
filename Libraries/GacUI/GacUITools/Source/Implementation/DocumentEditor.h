@@ -44,6 +44,8 @@ namespace vl
 		protected:
 
 			const List<ICallback*>&				GetCallbacks();
+			virtual void						BeforeEditView(IDocumentView* view)=0;
+			virtual void						AfterEditView(IDocumentView* view)=0;
 			virtual GuiControl*					CreateEditorControlInternal()=0;
 		public:
 			DocumentEditor(IDocumentEditorFactory* _editorFactory, IDocumentView* _editingView);

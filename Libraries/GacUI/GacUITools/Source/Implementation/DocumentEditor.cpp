@@ -59,6 +59,7 @@ DocumentEditor
 		{
 			if(editingView)
 			{
+				AfterEditView(editingView);
 				FOREACH(ICallback*, callback, callbacks)
 				{
 					callback->OnLostActiveView(this);
@@ -140,6 +141,7 @@ DocumentEditor
 			if(!editorControl)
 			{
 				editorControl=CreateEditorControlInternal();
+				BeforeEditView(editingView);
 			}
 			return editorControl;
 		}
@@ -153,6 +155,7 @@ DocumentEditor
 		{
 			if(editingView)
 			{
+				AfterEditView(editingView);
 				editingView->DetachCallback(documentViewCallback.Obj());
 				documentViewCallback=0;
 				editingView->FinishEdit(this);

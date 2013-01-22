@@ -16,24 +16,72 @@ namespace vl
 {
 	namespace gactools
 	{
+		class IPlainTextViewContentProxy : public Interface
+		{
+		public:
+			virtual WString						GetContent()=0;
+			virtual void						SetContent(const WString& value)=0;
+		};
+
+		class IPlainTextViewContentProvider : public Interface
+		{
+		public:
+			virtual bool						ActivateProxy(IPlainTextViewContentProxy* value)=0;
+			virtual bool						DeactivateProxy(IPlainTextViewContentProxy* value)=0;
+			virtual WString						GetContent()=0;
+			virtual void						SetContent(const WString& value, DocumentView* senderView)=0;
+		};
+
 		class PlainTextView : public DocumentView
 		{
+		protected:
+			IPlainTextViewContentProvider*		contentProvider;
 		public:
 			static const wchar_t*				ViewTypeId;
 
 			PlainTextView(DocumentFragment* _ownedFragment);
 			~PlainTextView();
+
+			bool								InstallContentProvider(IPlainTextViewContentProvider* value);
+			bool								ActivateProxy(IPlainTextViewContentProxy* value);
+			bool								DeactivateProxy(IPlainTextViewContentProxy* value);
+			WString								GetContent();
+			void								SetContent(const WString& value);
 		};
 
-		class TextDocument : public FileDocumentFragment
+		class TextDocument : public FileDocumentFragment, private IPlainTextViewContentProvider
 		{
+		public:
+			enum Encoding
+			{
+				Ansi,
+				Utf8,
+				Utf16,
+				Utf16BigEndian,
+			};
+		private:
+			Encoding							encoding;
+			bool								containsBom;
+			WString								cachedContent;
+			IPlainTextViewContentProxy*			contentProxy;
+			
+			bool								ActivateProxy(IPlainTextViewContentProxy* value)override;
+			bool								DeactivateProxy(IPlainTextViewContentProxy* value)override;
 		protected:
 			
 			bool								LoadDocumentInternal(const WString& filePath)override;
 			bool								SaveDocumentInternal(const WString& filePath)override;
 		public:
+
 			TextDocument(IDocumentContainer* _ownedContainer, const WString& _filePath=L"", DocumentFragment* _ownedFragment=0, const WString& _friendlyName=L"Text Document");
 			~TextDocument();
+
+			Encoding							GetEncoding();
+			void								SetEncoding(Encoding value);
+			bool								GetContainsBom();
+			void								SetContainsBom(bool value);
+			WString								GetContent()override;
+			void								SetContent(const WString& value, DocumentView* senderView=0)override;
 		};
 
 		class TextFileType : public DocumentFileType

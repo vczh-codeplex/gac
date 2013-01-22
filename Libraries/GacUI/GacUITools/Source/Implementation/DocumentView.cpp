@@ -44,7 +44,7 @@ DocumentView
 			{
 				callback->OnViewUpdated(this);
 			}
-			ownedFragment->NotifyUpdateFragment();
+			ownedFragment->NotifyUpdateFragmentAndViews(this);
 		}
 
 		bool DocumentView::AttachCallback(ICallback* callback)
