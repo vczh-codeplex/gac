@@ -9,6 +9,7 @@ Interfaces:
 #define GACUI_TOOLS_DOCUMENTFRAMEWORK_DOCUMENTFRAGMENT
 
 #include "..\DocumentFramework.h"
+#include "DocumentView.h"
 
 namespace vl
 {
@@ -23,24 +24,26 @@ namespace vl
 			WString										friendlyName;
 			List<Ptr<IDocumentFragment>>				subFragments;
 			WString										defaultViewTypeId;
-			Dictionary<WString, Ptr<IDocumentView>>		supportedViews;
+			Dictionary<WString, Ptr<DocumentView>>		supportedViews;
 
 		protected:
 
 			const List<ICallback*>&						GetCallbacks();
 			bool										AddSubFragment(IDocumentFragment* fragment);
 			bool										DeleteSubFragment(IDocumentFragment* fragment);
-			bool										AddSupportedView(Ptr<IDocumentView> view);
-			bool										SetDefaultView(Ptr<IDocumentView> view);
+			bool										AddSupportedView(Ptr<DocumentView> view);
+			bool										SetDefaultView(Ptr<DocumentView> view);
 			DocumentFragment*							GetOwnerFragmentInternal();
+
 		public:
 			DocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName);
 			~DocumentFragment();
-			
+
 			virtual void								NotifyUpdateFragment();
+			void										NotifyUpdateFragmentAndViews(DocumentView* senderView);
+			
 			bool										AttachCallback(ICallback* callback)override;
 			bool										DetachCallback(ICallback* callback)override;
-
 			IDocumentContainer*							GetOwnedContainer()override;
 			IDocumentFragment*							GetOwnedFragment()override;
 			vint										GetSubFragmentCount()override;
@@ -61,12 +64,13 @@ namespace vl
 			WString							currentFilePath;
 			
 		protected:
-			void							NotifyUpdateFragment()override;
 			virtual bool					LoadDocumentInternal(const WString& filePath)=0;
 			virtual bool					SaveDocumentInternal(const WString& filePath)=0;
 		public:
 			FileDocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName, const WString& _filePath);
 			~FileDocumentFragment();
+
+			void							NotifyUpdateFragment()override;
 
 			bool							IsStoredInSeparatedFile()override;
 			bool							CanSaveSeparately()override;
@@ -80,11 +84,11 @@ namespace vl
 
 		class VirtualDocumentFragment : public DocumentFragment
 		{
-		protected:
-			void							NotifyUpdateFragment()override;
 		public:
 			VirtualDocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName);
 			~VirtualDocumentFragment();
+
+			void							NotifyUpdateFragment()override;
 
 			bool							IsStoredInSeparatedFile()override;
 			bool							CanSaveSeparately()override;

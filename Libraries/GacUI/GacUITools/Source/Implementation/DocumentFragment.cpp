@@ -26,14 +26,14 @@ DocumentFragment
 			return subFragments.Remove(fragment);
 		}
 
-		bool DocumentFragment::AddSupportedView(Ptr<IDocumentView> view)
+		bool DocumentFragment::AddSupportedView(Ptr<DocumentView> view)
 		{
 			if(supportedViews.Keys().Contains(view->GetViewTypeId())) return false;
 			supportedViews.Add(view->GetViewTypeId(), view);
 			return true;
 		}
 
-		bool DocumentFragment::SetDefaultView(Ptr<IDocumentView> view)
+		bool DocumentFragment::SetDefaultView(Ptr<DocumentView> view)
 		{
 			if(!supportedViews.Keys().Contains(view->GetViewTypeId()) || supportedViews[view->GetViewTypeId()]!=view) return false;
 			defaultViewTypeId=view->GetViewTypeId();
@@ -65,6 +65,18 @@ DocumentFragment
 			FOREACH(ICallback*, callback, callbacks)
 			{
 				callback->OnFragmentUpdated(this);
+			}
+		}
+
+		void DocumentFragment::NotifyUpdateFragmentAndViews(DocumentView* senderView)
+		{
+			NotifyUpdateFragment();
+			FOREACH(Ptr<DocumentView>, view, supportedViews.Values())
+			{
+				if(view!=senderView)
+				{
+					view->NotifyUpdateView();
+				}
 			}
 		}
 
@@ -151,12 +163,6 @@ DocumentFragment
 FileDocumentFragment
 ***********************************************************************/
 
-		void FileDocumentFragment::NotifyUpdateFragment()
-		{
-			modified=true;
-			DocumentFragment::NotifyUpdateFragment();
-		}
-
 		FileDocumentFragment::FileDocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName, const WString& _filePath)
 			:DocumentFragment(_ownedContainer, _ownedFragment, _friendlyName)
 			,currentFilePath(_filePath)
@@ -166,6 +172,12 @@ FileDocumentFragment
 
 		FileDocumentFragment::~FileDocumentFragment()
 		{
+		}
+
+		void FileDocumentFragment::NotifyUpdateFragment()
+		{
+			modified=true;
+			DocumentFragment::NotifyUpdateFragment();
 		}
 
 		bool FileDocumentFragment::IsStoredInSeparatedFile()
@@ -224,12 +236,6 @@ FileDocumentFragment
 VirtualDocumentFragment
 ***********************************************************************/
 
-		void VirtualDocumentFragment::NotifyUpdateFragment()
-		{
-			DocumentFragment::NotifyUpdateFragment();
-			return GetOwnerFragmentInternal()->NotifyUpdateFragment();
-		}
-
 		VirtualDocumentFragment::VirtualDocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName)
 			:DocumentFragment(_ownedContainer, _ownedFragment, _friendlyName)
 		{
@@ -237,6 +243,12 @@ VirtualDocumentFragment
 
 		VirtualDocumentFragment::~VirtualDocumentFragment()
 		{
+		}
+
+		void VirtualDocumentFragment::NotifyUpdateFragment()
+		{
+			DocumentFragment::NotifyUpdateFragment();
+			return GetOwnerFragmentInternal()->NotifyUpdateFragment();
 		}
 
 		bool VirtualDocumentFragment::IsStoredInSeparatedFile()
