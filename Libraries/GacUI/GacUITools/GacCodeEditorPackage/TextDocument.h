@@ -51,16 +51,8 @@ namespace vl
 
 		class TextDocument : public FileDocumentFragment, private IPlainTextViewContentProvider
 		{
-		public:
-			enum Encoding
-			{
-				Ansi,
-				Utf8,
-				Utf16,
-				Utf16BigEndian,
-			};
 		private:
-			Encoding							encoding;
+			BomEncoder::Encoding				encoding;
 			bool								containsBom;
 			WString								cachedContent;
 			IPlainTextViewContentProxy*			contentProxy;
@@ -78,8 +70,8 @@ namespace vl
 			TextDocument(IDocumentContainer* _ownedContainer, const WString& _filePath=L"", DocumentFragment* _ownedFragment=0, const WString& _friendlyName=L"Text Document");
 			~TextDocument();
 
-			Encoding							GetEncoding();
-			void								SetEncoding(Encoding value);
+			BomEncoder::Encoding				GetEncoding();
+			void								SetEncoding(BomEncoder::Encoding value);
 			bool								GetContainsBom();
 			void								SetContainsBom(bool value);
 			WString								GetContent()override;
