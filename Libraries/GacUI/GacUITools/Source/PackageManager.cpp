@@ -296,6 +296,17 @@ BuildMenu/BuildToolbar
 										currentBuilder->SplitButton(image, text, &item->menuButton);
 									}
 								}
+								else if(appear==L"DropdownButton")
+								{
+									if(command)
+									{
+										currentBuilder->DropdownButton(command.Obj(), &item->menuButton);
+									}
+									else
+									{
+										currentBuilder->DropdownButton(image, text, &item->menuButton);
+									}
+								}
 								else
 								{
 									if(command)

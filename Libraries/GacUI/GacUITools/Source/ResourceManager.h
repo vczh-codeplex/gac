@@ -103,6 +103,13 @@ Resource Loader
 
 			void									LoadResourceXml(const WString& filePath);
 		};
+
+/***********************************************************************
+Resource Loader
+***********************************************************************/
+
+		extern WString								GetFolderPath(const WString& filePath);
+		extern WString								GetFileName(const WString& filePath);
 	}
 }
 
