@@ -125,12 +125,14 @@ MainWindow
 				{
 					editor->GetEditorControl()->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 					window->editorControlContainer->AddChild(editor->GetEditorControl()->GetBoundsComposition());
+					window->DisplayWindowTitle(editor->GetEditingView()->GetOwnedFragment()->GetFilePath());
 					return true;
 				}
 
 				bool UninstallEditor(IDocumentEditor* editor)override
 				{
 					window->editorControlContainer->RemoveChild(editor->GetEditorControl()->GetBoundsComposition());
+					window->DisplayWindowTitle(L"");
 					return true;
 				}
 			public:
@@ -142,6 +144,7 @@ MainWindow
 		protected:
 			Ptr<GuiResource>									resource;
 			SDIApplicationPackage*								appPackage;
+			WString												appName;
 
 			GuiToolstripMenuBar*								mainMenu;
 			GuiToolstripToolbar*								mainToolbar;
@@ -169,6 +172,18 @@ MainWindow
 				GetDocumentManager()->RunPackageAfterInitialization();
 			}
 
+			void DisplayWindowTitle(const WString& filePath)
+			{
+				if(filePath==L"")
+				{
+					this->SetText(appName+L" (www.gaclib.net)");
+				}
+				else
+				{
+					this->SetText(appName+L" ["+GetFileName(filePath)+L"] (www.gaclib.net)");
+				}
+			}
+
 			void MainWindow_Closing(GuiGraphicsComposition* sender, GuiRequestEventArgs& arguments)
 			{
 				while(editingDocumentService->GetActiveEditorCount()>0)
@@ -183,15 +198,15 @@ MainWindow
 		public:
 			MainWindow()
 				:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+				,appName(L"GacUI Tools")
 			{
 				resource=sdiApplication->GetApplicationResource();
-				WString applicationName=L"SDI Application";
 				if(auto name=resource->GetValueByPath(L"Application\\Name").Cast<ObjectBox<WString>>())
 				{
-					applicationName=name->Unbox();
+					appName=name->Unbox();
 				}
+				DisplayWindowTitle(L"");
 
-				this->SetText(L"GacUI Tools "+applicationName+L" (www.gaclib.net)");
 				this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
 				this->ForceCalculateSizeImmediately();
 				this->MoveToScreenCenter();
