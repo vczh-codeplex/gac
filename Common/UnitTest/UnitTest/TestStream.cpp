@@ -733,31 +733,61 @@ TEST_CASE(TestUtf8EncoderDecoder)
 }
 
 /***********************************************************************
-序列化
+编码测试
 ***********************************************************************/
 
-template<typename T>
-void StreamCompareEnumerable(const IEnumerable<T>& dst, const IEnumerable<T>& src)
+void TestEncodingInternal(IEncoder& encoder, BomEncoder::Encoding encoding, bool containsBom)
 {
-	Ptr<IEnumerator<T>> dstEnum=dst.CreateEnumerator();
-	Ptr<IEnumerator<T>> srcEnum=src.CreateEnumerator();
-	while(dstEnum->Available())
+	MemoryStream memoryStream;
 	{
-		TEST_ASSERT(dstEnum->Available()==srcEnum->Available());
-		TEST_ASSERT(dstEnum->Current()==srcEnum->Current());
-		TEST_ASSERT(dstEnum->Index()==srcEnum->Index());
-		TEST_ASSERT(dstEnum->Next()==srcEnum->Next());
+		EncoderStream encoderStream(memoryStream, encoder);
+		StreamWriter writer(encoderStream);
+		writer.WriteString(L"Vczh is genius!@我是天才");
 	}
-	TEST_ASSERT(dstEnum->Available()==false);
-	TEST_ASSERT(srcEnum->Available()==false);
+	memoryStream.SeekFromBegin(0);
+	Array<unsigned char> buffer;
+	buffer.Resize((vint)memoryStream.Size());
+	memoryStream.Read(&buffer[0], buffer.Count());
+
+	BomEncoder::Encoding resultEncoding;
+	bool resultContainsBom;
+	TestEncoding(&buffer[0], buffer.Count(), resultEncoding, resultContainsBom);
+	TEST_ASSERT(encoding==resultEncoding);
+	TEST_ASSERT(containsBom==resultContainsBom);
 }
 
-WString To3Digits(vint number)
+TEST_CASE(TestEncoding)
 {
-	WString result=itow(number);
-	while(result.Length()<3)
 	{
-		result=L"0"+result;
+		BomEncoder encoder(BomEncoder::Mbcs);
+		TestEncodingInternal(encoder, BomEncoder::Mbcs, true);
 	}
-	return result;
+	{
+		BomEncoder encoder(BomEncoder::Utf8);
+		TestEncodingInternal(encoder, BomEncoder::Utf8, true);
+	}
+	{
+		BomEncoder encoder(BomEncoder::Utf16);
+		TestEncodingInternal(encoder, BomEncoder::Utf16, true);
+	}
+	{
+		BomEncoder encoder(BomEncoder::Utf16BE);
+		TestEncodingInternal(encoder, BomEncoder::Utf16BE, true);
+	}
+	{
+		MbcsEncoder encoder;
+		TestEncodingInternal(encoder, BomEncoder::Mbcs, true);
+	}
+	{
+		Utf8Encoder encoder;
+		TestEncodingInternal(encoder, BomEncoder::Utf8, false);
+	}
+	{
+		Utf16Encoder encoder;
+		TestEncodingInternal(encoder, BomEncoder::Utf16, false);
+	}
+	{
+		Utf16BEEncoder encoder;
+		TestEncodingInternal(encoder, BomEncoder::Utf16BE, false);
+	}
 }
