@@ -191,10 +191,25 @@ property [<GENERIC-ARGUMENT-DEFINITION>] function_name pattern1 pattern2 [ :: <T
 Interfaces
 ========================================================
 
+concept Indexable C I R = 
+{
+	property ([]) :: C -> I -> R {get set}
+}
+
+instance (T) Indexable (RandomAccess T) int T
+{
+	property ([]) r i =
+	{
+		get = C.GetItem i
+		set value = C.SetItem value
+	}
+}
+
 interface RandomAccess T :: Enumerable T = {
-	property Length :: int { get }
-	property ([]) (index :: int) :: int { get set }
+	property Length :: int = { get }
 	def Resize :: int -> void
+	def GetItem (index :: int) :: int
+	def SetItem (index :: int) (value :: T) :: void
 }
 
 interface Array T :: RandomAccess T = {
