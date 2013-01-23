@@ -50,6 +50,7 @@ Type Constructors
 ========================================================
 
 iterator T		: iterator [a, b, c:xs]
+				: iterator [a..b]
 array T			: array {a, b, c}
 map T U			: map {a:b, c:d, e:f}
 (T, U, V)		: (a, b, c) == Pair{x:a, Pair{x:b, y:b}}
@@ -61,6 +62,8 @@ data			: Point { x:10, y:20 }
 ========================================================
 Expressions
 ========================================================
+
+this, base, null
 
 function call	: function argument
 				: argument -> function
@@ -81,10 +84,6 @@ value op ?		: x=>value op x
 shallow copy	: (shallow_copy x)
 deep copy		: (deep_copy x)
 
-matching		: ( if condition then expression else expression )
-				: ( match value { when pattern : value ... [default : value]} )
-				   // no default: not matched throws PatternMatchException
-
 specify type	: (value :: type)
 				: (array [] :: array int)
 				: (map {} :: map string int)
@@ -103,6 +102,9 @@ boxing			: (to_object value)
 type cast		: (cast value :: Type)
 
 monad's bind	: pull expression
+
+block			: do [continuation] { statements ... }
+				// the expresion value is the return value. If nothing returns, it is void
 
 ========================================================
 Operators
@@ -174,11 +176,10 @@ def readonly_value [ :: type ] = value
 
 var variable [ :: type ] = value
 
-def [<GENERIC-ARGUMENT-DEFINITION>] function_name pattern1 pattern2 ... [ :: <TYPE-DEFINITION> ] 
+def [<GENERIC-ARGUMENT-DEFINITION>] [this | (this :: type).]function_name pattern1 pattern2 ... [ :: <TYPE-DEFINITION> ] 
 	= value
-	= do [continuation] statement
 
-property [<GENERIC-ARGUMENT-DEFINITION>] function_name pattern1 pattern2 [ :: <TYPE-DEFINITION> ] = {
+property [<GENERIC-ARGUMENT-DEFINITION>] [this | (this :: type).]function_name pattern1 pattern2 [ :: <TYPE-DEFINITION> ] = {
 	get = function_body
 	set pattern1 = function_body
 	set pattern2 = function_body
@@ -186,6 +187,8 @@ property [<GENERIC-ARGUMENT-DEFINITION>] function_name pattern1 pattern2 [ :: <T
 
 <GENERIC-ARGUMENT-DEFINITION>	: ( T, U, V )
 <TYPE-DEFINITION>				: List T -> (T -> List U) -> List U where Comparable T, Comparable U
+
+this argument can only be used outside of interfaces
 
 ========================================================
 Interfaces
@@ -234,21 +237,22 @@ Interfaces Implementation
 ========================================================
 
 this : expression for interface implementation to reference itself
+base : expression for interface implementation to reference the inherits object
 
-implementation (T) SortedList xs
+implement (T) SortedList xs
 	:: array T -> SortedList T
 	where Comparable T
 	= interface SortedList T
 	inherits ListStorage xs
 {
-	var buffer :: array T
-	def GetLengthInternal void = buffer.Length
+	var (buffer :: array T) = null
+
+	protected def GetLengthInternal void = buffer.Length
 	virtual def CreateItemFirst void = (default T)
 	abstract def CreateItemSecond void :: T
-
 	override def CreateItemThird void = throw NotImplementException
 
-	interface property Length // the only visible member from outside
+	property Length // the only visible member from outside
 	{
 		get = GetLengthInternal void
 		set value = do {
