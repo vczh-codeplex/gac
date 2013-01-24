@@ -89,16 +89,13 @@ private:
 
 	void FillData()
 	{
-		Func<vint(Ptr<FileProperties>, Ptr<FileProperties>)> comparer(this, &SortingAndFilteringWindow::ItemComparer);
-		Func<bool(Ptr<FileProperties>)> filter(this, &SortingAndFilteringWindow::ItemFilter);
-		Func<Ptr<list::ListViewItem>(Ptr<FileProperties>)> converter(this, &SortingAndFilteringWindow::CreateFileItem);
-
 		listView->GetItems().Clear();
 		CopyFrom(listView->GetItems(), 
-			fileProperties
-			>>Where(filter)
-			>>OrderBy(comparer)
-			>>Select(converter));
+			From(fileProperties)
+			.Where([this](Ptr<FileProperties> a){return ItemFilter(a);})
+			.OrderBy([this](Ptr<FileProperties> a, Ptr<FileProperties> b){return ItemComparer(a, b);})
+			.Select([this](Ptr<FileProperties> a){return CreateFileItem(a);})
+			);
 	}
 
 	void ShowAllFileType_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
@@ -183,7 +180,7 @@ public:
 			List<WString> directories;
 			List<WString> files;
 			SearchDirectoriesAndFiles(directory, directories, files);
-			FOREACH(WString, file, directories>>Concat(files))
+			FOREACH(WString, file, From(directories).Concat(files))
 			{
 				fileProperties.Add(new FileProperties(directory+L"\\"+file));
 			}
@@ -203,14 +200,10 @@ public:
 			Array<WString> fileTypes;
 			CopyFrom(
 				fileTypes,
-				fileProperties
-				>>Select(LAMBDA(
-					[](Ptr<FileProperties> file){return file->GetTypeName();}
-				))
-				>>Distinct()
-				>>OrderBy(LAMBDA(
-					[](WString a, WString b){return _wcsicmp(a.Buffer(), b.Buffer());}
-				))
+				From(fileProperties)
+				.Select([](Ptr<FileProperties> file){return file->GetTypeName();})
+				.Distinct()
+				.OrderBy([](WString a, WString b){return _wcsicmp(a.Buffer(), b.Buffer());})
 				);
 			FOREACH(WString, typeName, fileTypes)
 			{

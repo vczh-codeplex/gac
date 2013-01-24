@@ -152,7 +152,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp" />
-    <ClCompile Include="..\..\..\..\Common\Source\Collections\Operation.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Console.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Exception.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\HttpUtility.cpp" />
@@ -270,12 +269,10 @@
     <ClInclude Include="..\..\..\..\Common\Source\Collections\Interfaces.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\List.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\Operation.h" />
-    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationAggregate.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationConcat.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationCopyFrom.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationEnumerable.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationForEach.h" />
-    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationOrderBy.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationPair.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationSelect.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationSequence.h" />

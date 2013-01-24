@@ -210,6 +210,549 @@ typedef signed __int64	pos_t;
 #endif
 
 /***********************************************************************
+STRING.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Data Structure::String
+
+Classes:
+	AString										：Mbcs字符串
+	WString										：Utf-16字符串
+***********************************************************************/
+
+#ifndef VCZH_STRING
+#define VCZH_STRING
+
+#include <memory.h>
+
+namespace vl
+{
+	template<typename T>
+	class ObjectString : public Object
+	{
+	private:
+		static const T	zero=0;
+
+		mutable T*					buffer;
+		mutable vint*				reference;
+		mutable vint				start;
+		mutable vint				length;
+		mutable vint				realLength;
+
+		static vint CalculateLength(const T* buffer)
+		{
+			vint result=0;
+			while(*buffer++)result++;
+			return result;
+		}
+
+		static vint Compare(const T* bufA, const ObjectString<T>& strB)
+		{
+			const T* bufB=strB.buffer+strB.start;
+			const T* bufAOld=bufA;
+			vint length=strB.length;
+			while(length-- && *bufA)
+			{
+				vint diff=*bufA++-*bufB++;
+				if(diff!=0)
+				{
+					return diff;
+				}
+			};
+			return CalculateLength(bufAOld)-strB.length;
+		}
+
+	public:
+
+		static vint Compare(const ObjectString<T>& strA, const ObjectString<T>& strB)
+		{
+			const T* bufA=strA.buffer+strA.start;
+			const T* bufB=strB.buffer+strB.start;
+			vint length=strA.length<strB.length?strA.length:strB.length;
+			while(length--)
+			{
+				vint diff=*bufA++-*bufB++;
+				if(diff!=0)
+				{
+					return diff;
+				}
+			};
+			return strA.length-strB.length;
+		}
+
+	private:
+
+		void Inc()const
+		{
+			if(reference)
+			{
+				(*reference)++;
+			}
+		}
+
+		void Dec()const
+		{
+			if(reference)
+			{
+				if(--(*reference)==0)
+				{
+					delete[] buffer;
+					delete reference;
+				}
+			}
+		}
+
+		ObjectString(const ObjectString<T>& string, vint _start, vint _length)
+		{
+			if(_length==0)
+			{
+				buffer=(T*)&zero;
+				reference=0;
+				start=0;
+				length=0;
+				realLength=0;
+			}
+			else
+			{
+				buffer=string.buffer;
+				reference=string.reference;
+				start=string.start+_start;
+				length=_length;
+				realLength=string.realLength;
+				Inc();
+			}
+		}
+
+		ObjectString(const ObjectString<T>& dest, const ObjectString<T>& source, vint index, vint count)
+		{
+			if(index==0 && count==dest.length && source.length==0)
+			{
+				buffer=(T*)&zero;
+				reference=0;
+				start=0;
+				length=0;
+				realLength=0;
+			}
+			else
+			{
+				reference=new vint(1);
+				start=0;
+				length=dest.length-count+source.length;
+				realLength=length;
+				buffer=new T[length+1];
+				memcpy(buffer, dest.buffer+dest.start, sizeof(T)*index);
+				memcpy(buffer+index, source.buffer+source.start, sizeof(T)*source.length);
+				memcpy(buffer+index+source.length, (dest.buffer+dest.start+index+count), sizeof(T)*(dest.length-index-count));
+				buffer[length]=0;
+			}
+		}
+	public:
+		static ObjectString<T>	Empty;
+
+		ObjectString()
+		{
+			buffer=(T*)&zero;
+			reference=0;
+			start=0;
+			length=0;
+			realLength=0;
+		}
+
+		ObjectString(const T& _char)
+		{
+			reference=new vint(1);
+			start=0;
+			length=1;
+			buffer=new T[2];
+			buffer[0]=_char;
+			buffer[1]=0;
+			realLength=length;
+		}
+
+		ObjectString(const T* _buffer, vint _length)
+		{
+			if(_length==0)
+			{
+				buffer=(T*)&zero;
+				reference=0;
+				start=0;
+				length=0;
+				realLength=0;
+			}
+			else
+			{
+				buffer=new T[_length+1];
+				memcpy(buffer, _buffer, _length*sizeof(T));
+				buffer[_length]=0;
+				reference=new vint(1);
+				start=0;
+				length=_length;
+				realLength=_length;
+			}
+		}
+
+		ObjectString(const T* _buffer, bool copy = true)
+		{
+			CHECK_ERROR(_buffer!=0, L"ObjectString<T>::ObjectString(const T*, bool)#不能用空指针构造字符串。");
+			if(copy)
+			{
+				reference=new vint(1);
+				start=0;
+				length=CalculateLength(_buffer);
+				buffer=new T[length+1];
+				memcpy(buffer, _buffer, sizeof(T)*(length+1));
+				realLength=length;
+			}
+			else
+			{
+				buffer=(T*)_buffer;
+				reference=0;
+				start=0;
+				length=CalculateLength(_buffer);
+				realLength=length;
+			}
+		}
+
+		ObjectString(const ObjectString<T>& string)
+		{
+			buffer=string.buffer;
+			reference=string.reference;
+			start=string.start;
+			length=string.length;
+			realLength=string.realLength;
+			Inc();
+		}
+
+		~ObjectString()
+		{
+			Dec();
+		}
+
+		const T* Buffer()const
+		{
+			if(start+length!=realLength)
+			{
+				T* newBuffer=new T[length+1];
+				memcpy(newBuffer, buffer+start, sizeof(T)*length);
+				newBuffer[length]=0;
+				Dec();
+				buffer=newBuffer;
+				reference=new vint(1);
+				start=0;
+				realLength=length;
+			}
+			return buffer+start;
+		}
+
+		ObjectString<T>& operator=(const ObjectString<T>& string)
+		{
+			if(this!=&string)
+			{
+				Dec();
+				buffer=string.buffer;
+				reference=string.reference;
+				start=string.start;
+				length=string.length;
+				realLength=string.realLength;
+				Inc();
+			}
+			return *this;
+		}
+
+		ObjectString<T>& operator+=(const ObjectString<T>& string)
+		{
+			return *this=*this+string;
+		}
+
+		ObjectString<T> operator+(const ObjectString<T>& string)const
+		{
+			return ObjectString<T>(*this, string, length, 0);
+		}
+
+		bool operator==(const ObjectString<T>& string)const
+		{
+			return Compare(*this, string)==0;
+		}
+
+		bool operator!=(const ObjectString<T>& string)const
+		{
+			return Compare(*this, string)!=0;
+		}
+
+		bool operator>(const ObjectString<T>& string)const
+		{
+			return Compare(*this, string)>0;
+		}
+
+		bool operator>=(const ObjectString<T>& string)const
+		{
+			return Compare(*this, string)>=0;
+		}
+
+		bool operator<(const ObjectString<T>& string)const
+		{
+			return Compare(*this, string)<0;
+		}
+
+		bool operator<=(const ObjectString<T>& string)const
+		{
+			return Compare(*this, string)<=0;
+		}
+
+		bool operator==(const T* buffer)const
+		{
+			return Compare(buffer, *this)==0;
+		}
+
+		bool operator!=(const T* buffer)const
+		{
+			return Compare(buffer, *this)!=0;
+		}
+
+		bool operator>(const T* buffer)const
+		{
+			return Compare(buffer, *this)<0;
+		}
+
+		bool operator>=(const T* buffer)const
+		{
+			return Compare(buffer, *this)<=0;
+		}
+
+		bool operator<(const T* buffer)const
+		{
+			return Compare(buffer, *this)>0;
+		}
+
+		bool operator<=(const T* buffer)const
+		{
+			return Compare(buffer, *this)>=0;
+		}
+
+		T operator[](vint index)const
+		{
+			CHECK_ERROR(index>=0 && index<length, L"ObjectString:<T>:operator[](vint)#参数index越界。");
+			return buffer[start+index];
+		}
+
+		vint Length()const
+		{
+			return length;
+		}
+
+		vint IndexOf(T c)const
+		{
+			const T* reading=buffer+start;
+			for(vint i=0;i<length;i++)
+			{
+				if(reading[i]==c)
+					return i;
+			}
+			return -1;
+		}
+
+		ObjectString<T> Left(vint count)const
+		{
+			CHECK_ERROR(count>=0 && count<=length, L"ObjectString<T>::Left(vint)#参数count越界。");
+			return ObjectString<T>(*this, 0, count);
+		}
+
+		ObjectString<T> Right(vint count)const
+		{
+			CHECK_ERROR(count>=0 && count<=length, L"ObjectString<T>::Right(vint)#参数count越界。");
+			return ObjectString<T>(*this, length-count, count);
+		}
+
+		ObjectString<T> Sub(vint index, vint count)const
+		{
+			CHECK_ERROR(index>=0 && index<length, L"ObjectString<T>::Sub(vint, vint)#参数index越界。");
+			CHECK_ERROR(index+count>=0 && index+count<=length, L"ObjectString<T>::Sub(vint, vint)#参数count越界。");
+			return ObjectString<T>(*this, index, count);
+		}
+
+		ObjectString<T> Remove(vint index, vint count)const
+		{
+			CHECK_ERROR(index>=0 && index<length, L"ObjectString<T>::Remove(vint, vint)#参数index越界。");
+			CHECK_ERROR(index+count>=0 && index+count<=length, L"ObjectString<T>::Remove(vint, vint)#参数count越界。");
+			return ObjectString<T>(*this, ObjectString<T>(), index, count);
+		}
+
+		ObjectString<T> Insert(vint index, const ObjectString<T>& string)const
+		{
+			CHECK_ERROR(index>=0 && index<=length, L"ObjectString<T>::Insert(vint)#参数count越界。");
+			return ObjectString<T>(*this, string, index, 0);
+		}
+
+		friend bool operator<(const T* left, const ObjectString<T>& right)
+		{
+			return Compare(left, right)<0;
+		}
+
+		friend bool operator<=(const T* left, const ObjectString<T>& right)
+		{
+			return Compare(left, right)<=0;
+		}
+
+		friend bool operator>(const T* left, const ObjectString<T>& right)
+		{
+			return Compare(left, right)>0;
+		}
+
+		friend bool operator>=(const T* left, const ObjectString<T>& right)
+		{
+			return Compare(left, right)>=0;
+		}
+
+		friend bool operator==(const T* left, const ObjectString<T>& right)
+		{
+			return Compare(left, right)==0;
+		}
+
+		friend bool operator!=(const T* left, const ObjectString<T>& right)
+		{
+			return Compare(left, right)!=0;
+		}
+
+		friend ObjectString<T> operator+(const T* left, const ObjectString<T>& right)
+		{
+			return WString(left, false)+right;
+		}
+	};
+
+	template<typename T>
+	ObjectString<T> ObjectString<T>::Empty=ObjectString<T>();
+
+	typedef ObjectString<char>		AString;
+	typedef ObjectString<wchar_t>	WString;
+
+	extern vint					atoi(const AString& string);
+	extern vint					wtoi(const WString& string);
+	extern __int64				atoi64(const AString& string);
+	extern __int64				wtoi64(const WString& string);
+	extern vuint				atou(const AString& string);
+	extern vuint				wtou(const WString& string);
+	extern unsigned __int64		atou64(const AString& string);
+	extern unsigned __int64		wtou64(const WString& string);
+	extern double				atof(const AString& string);
+	extern double				wtof(const WString& string);
+	extern AString				itoa(vint number);
+	extern WString				itow(vint number);
+	extern AString				i64toa(__int64 number);
+	extern WString				i64tow(__int64 number);
+	extern AString				utoa(vuint number);
+	extern WString				utow(vuint number);
+	extern AString				u64toa(unsigned __int64 number);
+	extern WString				u64tow(unsigned __int64 number);
+	extern AString				ftoa(double number);
+	extern WString				ftow(double number);
+	extern vint					_wtoa(const wchar_t* w, char* a, vint chars);
+	extern AString				wtoa(const WString& string);
+	extern vint					_atow(const char* a, wchar_t* w, vint chars);
+	extern WString				atow(const AString& string);
+	extern AString				alower(const AString& string);
+	extern WString				wlower(const WString& string);
+	extern AString				aupper(const AString& string);
+	extern WString				wupper(const WString& string);
+}
+
+#endif
+
+/***********************************************************************
+CONSOLE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+UI::Console
+
+***********************************************************************/
+
+#ifndef VCZH_CONSOLE
+#define VCZH_CONSOLE
+
+
+namespace vl
+{
+	namespace console
+	{
+		class Console abstract
+		{
+		public:
+			static void Write(const wchar_t* string, vint length);
+			static void Write(const wchar_t* string);
+			static void Write(const WString& string);
+			static void WriteLine(const WString& string);
+			static WString Read();
+			static void SetColor(bool red, bool green, bool blue, bool light);
+			static void SetTitle(const WString& string);
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+EXCEPTION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Framework::Exception
+
+Classes:
+	Exception									：异常
+	ArgumentException							：预料的的参数错误
+***********************************************************************/
+
+#ifndef VCZH_EXCEPTION
+#define VCZH_EXCEPTION
+
+
+namespace vl
+{
+	class Exception : public Object
+	{
+	protected:
+		WString						message;
+
+	public:
+		Exception(const WString& _message=WString::Empty);
+
+		const WString&				Message()const;
+	};
+
+	class ArgumentException : public Exception
+	{
+	protected:
+		WString						function;
+		WString						name;
+
+	public:
+		ArgumentException(const WString& _message=WString::Empty, const WString& _function=WString::Empty, const WString& _name=WString::Empty);
+
+		const WString&				GetFunction()const;
+		const WString&				GetName()const;
+	};
+
+	class ParsingException : public Exception
+	{
+	protected:
+		vint							position;
+		WString						expression;
+
+	public:
+		ParsingException(const WString& _message, const WString& _expression, vint _position);
+
+		const WString&				GetExpression()const;
+		vint							GetPosition()const;
+	};
+}
+
+#endif
+
+/***********************************************************************
 COLLECTIONS\PAIR.H
 ***********************************************************************/
 /***********************************************************************
@@ -351,7 +894,6 @@ namespace vl
 			virtual const T&							Current()const=0;
 			virtual vint								Index()const=0;
 			virtual bool								Next()=0;
-			virtual bool								Available()const=0;
 			virtual void								Reset()=0;
 		};
 
@@ -412,18 +954,25 @@ namespace vl
 #endif
 
 /***********************************************************************
-COLLECTIONS\OPERATIONCOPYFROM.H
+COLLECTIONS\LIST.H
 ***********************************************************************/
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: 陈梓瀚(vczh)
-Data Structure::Operations
+Data Structure::List
 
+Classes:
+	ListStore<T,PODType>				：列表存储复制算法
+	ListBase<T,K>						：列表基类
+	Array<T,K>							：数组
+	List<T,K>							：列表
+	SortedList<T,K>						：有序列表
 ***********************************************************************/
 
-#ifndef VCZH_COLLECTIONS_OPERATIONCOPYFROM
-#define VCZH_COLLECTIONS_OPERATIONCOPYFROM
+#ifndef VCZH_COLLECTIONS_LIST
+#define VCZH_COLLECTIONS_LIST
 
+#include <string.h>
 
 namespace vl
 {
@@ -431,149 +980,1031 @@ namespace vl
 	{
 
 /***********************************************************************
-容器复制
+储存结构
 ***********************************************************************/
 
-		namespace copyfrom_internal
+		template<typename T, bool PODType>
+		class ListStore abstract : public Object
 		{
-			using namespace randomaccess_internal;
-
-			template<typename Ds, typename Ss, bool DsRA, bool SsRA>
-			struct CopyFromAlgorithm
+		};
+		
+		template<typename T>
+		class ListStore<T, false> abstract : public Object
+		{
+		protected:
+			static void CopyObjects(T* dest, const T* source, vint count)
 			{
-			};
-
-			template<typename Ds, typename Ss>
-			struct CopyFromAlgorithm<Ds, Ss, true, true>
-			{
-				static void Perform(Ds& ds, const Ss& ss, bool append)
+				if(dest<source)
 				{
-					vint copyCount=RandomAccess<Ss>::GetCount(ss);
-					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
-					vint resizeCount=index+copyCount;
-					RandomAccess<Ds>::SetCount(ds, resizeCount);
-					for(vint i=0;i<copyCount;i++)
+					for(vint i=0;i<count;i++)
 					{
-						RandomAccess<Ds>::SetValue(ds, index+i, RandomAccess<Ss>::GetValue(ss, i));
+						dest[i]=source[i];
 					}
 				}
-			};
-
-			template<typename Ds, typename Ss>
-			struct CopyFromAlgorithm<Ds, Ss, false, true>
-			{
-				static void Perform(Ds& ds, const Ss& ss, bool append)
+				else if(dest>source)
 				{
-					if(!append)
+					for(vint i=count-1;i>=0;i--)
 					{
-						ds.Clear();
-					}
-					vint copyCount=RandomAccess<Ss>::GetCount(ss);
-					for(vint i=0;i<copyCount;i++)
-					{
-						RandomAccess<Ds>::AppendValue(ds, RandomAccess<Ss>::GetValue(ss, i));
+						dest[i]=source[i];
 					}
 				}
-			};
+			}
 
-			template<typename Ds, typename Ss>
-			struct CopyFromAlgorithm<Ds, Ss, true, false>
+			static void ClearObjects(T* dest, vint count)
 			{
-				static void Perform(Ds& ds, const Ss& ss, bool append)
+				for(vint i=0;i<count;i++)
 				{
-					Ptr<IEnumerator<typename Ss::ElementType>> enumerator;
-					vint copyCount=0;
+					dest[i]=T();
+				}
+			}
+		public:
+		};
+		
+		template<typename T>
+		class ListStore<T, true> abstract : public Object
+		{
+		protected:
+			static void CopyObjects(T* dest, const T* source, vint count)
+			{
+				if(count)
+				{
+					memmove(dest, source, sizeof(T)*count);
+				}
+			}
 
-					enumerator=ss.CreateEnumerator();
-					while(enumerator->Available())
-					{
-						copyCount++;
-						enumerator->Next();
-					}
+			static void ClearObjects(T* dest, vint count)
+			{
+			}
+		public:
+		};
+		
+		template<typename T>
+		class ArrayBase abstract : public ListStore<T,POD<T>::Result>, public virtual IEnumerable<T>
+		{
+		protected:
+			class Enumerator : public Object, public virtual IEnumerator<T>
+			{
+			private:
+				const ArrayBase<T>*				container;
+				vint							index;
 
-					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
-					vint resizeCount=index+copyCount;
-					RandomAccess<Ds>::SetCount(ds, resizeCount);
+			public:
+				Enumerator(const ArrayBase<T>* _container, vint _index=-1)
+				{
+					container=_container;
+					index=_index;
+				}
 
-					enumerator=ss.CreateEnumerator();
-					for(vint i=0;i<copyCount;i++)
-					{
-						RandomAccess<Ds>::SetValue(ds, index+i, enumerator->Current());
-						enumerator->Next();
-					}
+				IEnumerator<T>* Clone()const
+				{
+					return new Enumerator(container, index);
+				}
+
+				const T& Current()const
+				{
+					return container->Get(index);
+				}
+
+				vint Index()const
+				{
+					return index;
+				}
+
+				bool Next()
+				{
+					index++;
+					return index>=0 && index<container->Count();
+				}
+
+				void Reset()
+				{
+					index=-1;
 				}
 			};
-
-			template<typename Ds, typename Ss>
-			struct CopyFromAlgorithm<Ds, Ss, false, false>
+			
+			T*						buffer;
+			vint					count;
+		public:
+			ArrayBase()
+				:buffer(0)
+				,count(0)
 			{
-				static void Perform(Ds& ds, const Ss& ss, bool append)
+			}
+
+			IEnumerator<T>* CreateEnumerator()const
+			{
+				return new Enumerator(this);
+			}
+
+			vint Count()const
+			{
+				return count;
+			}
+
+			const T& Get(vint index)const
+			{
+				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::Get(vint)#参数越界。");
+				return buffer[index];
+			}
+
+			const T& operator[](vint index)const
+			{
+				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::operator[](vint)#参数index越界。");
+				return buffer[index];
+			}
+		};
+
+		template<typename T, typename K=typename KeyType<T>::Type>
+		class ListBase abstract : public ArrayBase<T>
+		{
+		protected:
+			vint					capacity;
+			bool					lessMemoryMode;
+
+			vint CalculateCapacity(vint expected)
+			{
+				vint result=capacity;
+				while(result<expected)
 				{
-					if(!append)
+					result=result*5/4+1;
+				}
+				return result;
+			}
+
+			void MakeRoom(vint index, vint _count)
+			{
+				vint newCount=count+_count;
+				if(newCount>capacity)
+				{
+					vint newCapacity=CalculateCapacity(newCount);
+					T* newBuffer=new T[newCapacity];
+					CopyObjects(newBuffer, buffer, index);
+					CopyObjects(newBuffer+index+_count, buffer+index, count-index);
+					delete[] buffer;
+					capacity=newCapacity;
+					buffer=newBuffer;
+				}
+				else
+				{
+					CopyObjects(buffer+index+_count, buffer+index, count-index);
+				}
+				count=newCount;
+			}
+
+			void ReleaseUnnecessaryBuffer(vint previousCount)
+			{
+				if(buffer && count<previousCount)
+				{
+					ClearObjects(&buffer[count], previousCount-count);
+				}
+				if(lessMemoryMode && count<=capacity/2)
+				{
+					vint newCapacity=capacity*5/8;
+					if(count<newCapacity)
 					{
-						ds.Clear();
-					}
-					Ptr<IEnumerator<typename Ss::ElementType>> enumerator=ss.CreateEnumerator();
-					while(enumerator->Available())
-					{
-						RandomAccess<Ds>::AppendValue(ds, enumerator->Current());
-						enumerator->Next();
+						T* newBuffer=new T[newCapacity];
+						CopyObjects(newBuffer, buffer, count);
+						delete[] buffer;
+						capacity=newCapacity;
+						buffer=newBuffer;
 					}
 				}
-			};
-
-			template<typename T>
-			struct Slice
+			}
+		public:
+			ListBase()
 			{
-				const T*	items;
-				vint		count;
-			};
-		}
+				count=0;
+				capacity=0;
+				buffer=0;
+				lessMemoryMode=true;
+			}
+
+			~ListBase()
+			{
+				delete[] buffer;
+			}
+
+			void SetLessMemoryMode(bool mode)
+			{
+				lessMemoryMode=mode;
+			}
+
+			bool RemoveAt(vint index)
+			{
+				vint previousCount=count;
+				CHECK_ERROR(index>=0 && index<count, L"ListBase<T, K>::RemoveAt(vint)#参数index越界。");
+				CopyObjects(buffer+index,buffer+index+1,count-index-1);
+				count--;
+				ReleaseUnnecessaryBuffer(previousCount);
+				return true;
+			}
+
+			bool RemoveRange(vint index, vint _count)
+			{
+				vint previousCount=count;
+				CHECK_ERROR(index>=0 && index<=count, L"ListBase<T, K>::RemoveRange(vint, vint)#参数index越界。");
+				CHECK_ERROR(index+_count>=0 && index+_count<=count, L"ListBase<T,K>::RemoveRange(vint, vint)#参数_count越界。");
+				CopyObjects(buffer+index, buffer+index+_count, count-index-_count);
+				count-=_count;
+				ReleaseUnnecessaryBuffer(previousCount);
+				return true;
+			}
+
+			bool Clear()
+			{
+				vint previousCount=count;
+				count=0;
+				if(lessMemoryMode)
+				{
+					capacity=0;
+					delete[] buffer;
+					buffer=0;
+				}
+				else
+				{
+					ReleaseUnnecessaryBuffer(previousCount);
+				}
+				return true;
+			}
+		};
+
+/***********************************************************************
+列表对象
+***********************************************************************/
+
+		template<typename T, typename K=typename KeyType<T>::Type>
+		class Array : public ArrayBase<T>
+		{
+		protected:
+			void Create(vint size)
+			{
+				if(size>0)
+				{
+					count=size;
+					buffer=new T[size];
+				}
+				else
+				{
+					count=0;
+					buffer=0;
+				}
+			}
+
+			void Destroy()
+			{
+				count=0;
+				delete[] buffer;
+				buffer=0;
+			}
+		public:
+			Array(vint size=0)
+			{
+				Create(size);
+			}
+
+			Array(const T* _buffer, vint size)
+			{
+				Create(size);
+				CopyObjects(buffer, _buffer, size);
+			}
+
+			~Array()
+			{
+				Destroy();
+			}
+
+			bool Contains(const K& item)const
+			{
+				return IndexOf(item)!=-1;
+			}
+
+			vint IndexOf(const K& item)const
+			{
+				for(vint i=0;i<count;i++)
+				{
+					if(buffer[i]==item)
+					{
+						return i;
+					}
+				}
+				return -1;
+			}
+
+			void Set(vint index, const T& item)
+			{
+				CHECK_ERROR(index>=0 && index<count, L"Array<T, K>::Set(vint)#参数index越界。");
+				buffer[index]=item;
+			}
+
+			T& operator[](vint index)
+			{
+				CHECK_ERROR(index>=0 && index<count, L"Array<T, K>::operator[](vint)#参数index越界。");
+				return buffer[index];
+			}
+
+			void Resize(vint size)
+			{
+				vint oldCount=count;
+				T* oldBuffer=buffer;
+				Create(size);
+				CopyObjects(buffer, oldBuffer, (count<oldCount?count:oldCount));
+				delete[] oldBuffer;
+			}
+		};
+
+		template<typename T, typename K=typename KeyType<T>::Type>
+		class List : public ListBase<T, K>
+		{
+		public:
+			List()
+			{
+			}
+
+			bool Contains(const K& item)const
+			{
+				return IndexOf(item)!=-1;
+			}
+
+			vint IndexOf(const K& item)const
+			{
+				for(vint i=0;i<count;i++)
+				{
+					if(buffer[i]==item)
+					{
+						return i;
+					}
+				}
+				return -1;
+			}
+
+			vint Add(const T& item)
+			{
+				MakeRoom(count, 1);
+				buffer[count-1]=item;
+				return count-1;
+			}
+
+			vint Insert(vint index, const T& item)
+			{
+				CHECK_ERROR(index>=0 && index<=count, L"List<T, K>::Insert(vint, const T&)#参数index越界。");
+				MakeRoom(index,1);
+				buffer[index]=item;
+				return index;
+			}
+
+			bool Remove(const K& item)
+			{
+				vint index=IndexOf(item);
+				if(index>=0 && index<count)
+				{
+					RemoveAt(index);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Set(vint index, const T& item)
+			{
+				CHECK_ERROR(index>=0 && index<count, L"List<T, K>::Set(vint)#参数index越界。");
+				buffer[index]=item;
+				return true;
+			}
+
+			T& operator[](vint index)
+			{
+				CHECK_ERROR(index>=0 && index<count, L"List<T, K>::operator[](vint)#参数index越界。");
+				return buffer[index];
+			}
+		};
+
+		template<typename T, typename K=typename KeyType<T>::Type>
+		class SortedList : public ListBase<T, K>
+		{
+		public:
+			SortedList()
+			{
+			}
+
+			bool Contains(const K& item)const
+			{
+				return IndexOf(item)!=-1;
+			}
+
+			template<typename Key>
+			vint IndexOf(const Key& item)const
+			{
+				vint start=0;
+				vint end=count-1;
+				while(start<=end)
+				{
+					vint index=(start+end)/2;
+					if(buffer[index]==item)
+					{
+						return index;
+					}
+					else if(buffer[index]>item)
+					{
+						end=index-1;
+					}
+					else
+					{
+						start=index+1;
+					}
+				}
+				return -1;
+			}
+
+			vint IndexOf(const K& item)const
+			{
+				return IndexOf<K>(item);
+			}
+
+			vint Add(const T& item)
+			{
+				if(count==0)
+				{
+					MakeRoom(0, 1);
+					buffer[0]=item;
+					return 0;
+				}
+				else
+				{
+					vint start=0;
+					vint end=count-1;
+					vint index=-1;
+					while(start<=end)
+					{
+						index=(start+end)/2;
+						if(buffer[index]==item)
+						{
+							goto SORTED_LIST_INSERT;
+						}
+						else if(buffer[index]>item)
+						{
+							end=index-1;
+						}
+						else
+						{
+							start=index+1;
+						}
+					}
+					CHECK_ERROR(index>=0 && index<count, L"SortedList<T, K>::Add(const T&)#内部错误，变量index越界");
+					if(buffer[index]<item)
+					{
+						index++;
+					}
+SORTED_LIST_INSERT:
+					MakeRoom(index, 1);
+					buffer[index]=item;
+					return index;
+				}
+			}
+
+			bool Remove(const K& item)
+			{
+				vint index=IndexOf(item);
+				if(index>=0 && index<count)
+				{
+					RemoveAt(index);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		};
+
+/***********************************************************************
+随机访问
+***********************************************************************/
 
 		namespace randomaccess_internal
 		{
-			template<typename T>
-			struct RandomAccessable<copyfrom_internal::Slice<T>>
+			template<typename T, typename K>
+			struct RandomAccessable<Array<T, K>>
 			{
 				static const bool							CanRead = true;
 				static const bool							CanResize = true;
 			};
-		
-			template<typename T>
-			struct RandomAccess<copyfrom_internal::Slice<T>>
+
+			template<typename T, typename K>
+			struct RandomAccessable<List<T, K>>
 			{
-				static vint GetCount(const copyfrom_internal::Slice<T>& t)
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
+
+			template<typename T, typename K>
+			struct RandomAccessable<SortedList<T, K>>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+COLLECTIONS\DICTIONARY.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Data Structure::Dictionary
+
+Classes:
+	Dictionary<KT, VT, KK, VK>					：映射
+	Group<KT, VT, KK, VK>						：多重映射
+***********************************************************************/
+
+#ifndef VCZH_COLLECTIONS_DICTIONARY
+#define VCZH_COLLECTIONS_DICTIONARY
+
+
+namespace vl
+{
+	namespace collections
+	{
+		template<
+			typename KT,
+			typename VT,
+			typename KK=typename KeyType<KT>::Type, 
+			typename VK=typename KeyType<VT>::Type
+		>
+		class Dictionary : public Object, public virtual IEnumerable<Pair<KT, VT>>
+		{
+			typedef SortedList<KT, KK>			KeyContainer;
+			typedef List<VT, VK>				ValueContainer;
+		protected:
+			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
+			{
+			private:
+				const Dictionary<KT, VT, KK, VK>*	container;
+				vint								index;
+				Pair<KT, VT>						current;
+
+				void UpdateCurrent()
 				{
-					return t.count;
+					if(index<container->Count())
+					{
+						current.key=container->Keys().Get(index);
+						current.value=container->Values().Get(index);
+					}
+				}
+			public:
+				Enumerator(const Dictionary<KT, VT, KK, VK>* _container, vint _index=-1)
+				{
+					container=_container;
+					index=_index;
+				}
+				
+				IEnumerator<Pair<KT, VT>>* Clone()const
+				{
+					return new Enumerator(container, index);
 				}
 
-				static const T& GetValue(const copyfrom_internal::Slice<T>& t, vint index)
+				const Pair<KT, VT>& Current()const
 				{
-					return t.items[index];
+					return current;
+				}
+
+				vint Index()const
+				{
+					return index;
+				}
+
+				bool Next()
+				{
+					index++;
+					UpdateCurrent();
+					return index>=0 && index<container->Count();
+				}
+
+				void Reset()
+				{
+					index=-1;
+					UpdateCurrent();
+				}
+			};
+
+			KeyContainer						keys;
+			ValueContainer						values;
+		public:
+			Dictionary()
+			{
+			}
+
+			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
+			{
+				return new Enumerator(this);
+			}
+
+			void SetLessMemoryMode(bool mode)
+			{
+				keys.SetLessMemoryMode(mode);
+				values.SetLessMemoryMode(mode);
+			}
+
+			const KeyContainer& Keys()const
+			{
+				return keys;
+			}
+
+			const ValueContainer& Values()const
+			{
+				return values;
+			}
+
+			vint Count()const
+			{
+				return keys.Count();
+			}
+
+			const VT& Get(const KK& key)const
+			{
+				return values.Get(keys.IndexOf(key));
+			}
+
+			const VT& operator[](const KK& key)const
+			{
+				return values.Get(keys.IndexOf(key));
+			}
+
+			bool Set(const KK& key, const VT& value)
+			{
+				vint index=keys.IndexOf(key);
+				if(index==-1)
+				{
+					index=keys.Add(key);
+					values.Insert(index, value);
+				}
+				else
+				{
+					values[index]=value;
+				}
+				return true;
+			}
+
+			bool Add(const Pair<KT, VT>& value)
+			{
+				return Add(value.key, value.value);
+			}
+
+			bool Add(const KT& key, const VT& value)
+			{
+				CHECK_ERROR(!keys.Contains(key), L"Dictionary<KT, KK, ValueContainer, VT, VK>::Add(const KT&, const VT&)#key已存在。");
+				vint index=keys.Add(key);
+				values.Insert(index, value);
+				return true;
+			}
+
+			bool Remove(const KK& key)
+			{
+				vint index=keys.IndexOf(key);
+				if(index!=-1)
+				{
+					keys.RemoveAt(index);
+					values.RemoveAt(index);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Clear()
+			{
+				keys.Clear();
+				values.Clear();
+				return true;
+			}
+		};
+
+		template<
+			typename KT,
+			typename VT,
+			typename KK=typename KeyType<KT>::Type,
+			typename VK=typename KeyType<VT>::Type
+		>
+		class Group : public Object, public virtual IEnumerable<Pair<KT, VT>>
+		{
+			typedef SortedList<KT, KK>		KeyContainer;
+			typedef List<VT, VK>			ValueContainer;
+		protected:
+			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
+			{
+			private:
+				const Group<KT, VT, KK, VK>*		container;
+				vint								keyIndex;
+				vint								valueIndex;
+				Pair<KT, VT>						current;
+
+				void UpdateCurrent()
+				{
+					if(keyIndex<container->Count())
+					{
+						const ValueContainer& values=container->GetByIndex(keyIndex);
+						if(valueIndex<values.Count())
+						{
+							current.key=container->Keys().Get(keyIndex);
+							current.value=values.Get(valueIndex);
+						}
+					}
+				}
+			public:
+				Enumerator(const Group<KT, VT, KK, VK>* _container, vint _keyIndex=-1, vint _valueIndex=-1)
+				{
+					container=_container;
+					keyIndex=_keyIndex;
+					valueIndex=_valueIndex;
+				}
+				
+				IEnumerator<Pair<KT, VT>>* Clone()const
+				{
+					return new Enumerator(container, keyIndex, valueIndex);
+				}
+
+				const Pair<KT, VT>& Current()const
+				{
+					return current;
+				}
+
+				vint Index()const
+				{
+					if(0<=keyIndex && keyIndex<container->Count())
+					{
+						vint index=0;
+						for(vint i=0;i<keyIndex;i++)
+						{
+							index+=container->GetByIndex(i).Count();
+						}
+						return index+valueIndex;
+					}
+					else
+					{
+						return -1;
+					}
+				}
+
+				bool Next()
+				{
+					if(keyIndex==-1)
+					{
+						keyIndex=0;
+					}
+					while(keyIndex<container->Count())
+					{
+						valueIndex++;
+						const ValueContainer& values=container->GetByIndex(keyIndex);
+						if(valueIndex<values.Count())
+						{
+							UpdateCurrent();
+							return true;
+						}
+						else
+						{
+							keyIndex++;
+							valueIndex=-1;
+						}
+					}
+					return false;
+				}
+
+				void Reset()
+				{
+					keyIndex=-1;
+					valueIndex=-1;
+					UpdateCurrent();
+				}
+			};
+
+			KeyContainer					keys;
+			List<ValueContainer*>			values;
+		public:
+			Group()
+			{
+			}
+
+			~Group()
+			{
+				Clear();
+			}
+
+			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
+			{
+				return new Enumerator(this);
+			}
+
+			const KeyContainer& Keys()const
+			{
+				return keys;
+			}
+
+			vint Count()const
+			{
+				return keys.Count();
+			}
+
+			const ValueContainer& Get(const KK& key)const
+			{
+				return *values.Get(keys.IndexOf(key));
+			}
+
+			const ValueContainer& GetByIndex(vint index)const
+			{
+				return *values.Get(index);
+			}
+
+			const ValueContainer& operator[](const KK& key)const
+			{
+				return *values.Get(keys.IndexOf(key));
+			}
+
+			bool Contains(const KK& key)const
+			{
+				return keys.Contains(key);
+			}
+
+			bool Contains(const KK& key, const VK& value)const
+			{
+				vint index=keys.IndexOf(key);
+				if(index!=-1)
+				{
+					return values.Get(index)->Contains(value);
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Add(const Pair<KT, VT>& value)
+			{
+				return Add(value.key, value.value);
+			}
+
+			bool Add(const KT& key, const VT& value)
+			{
+				ValueContainer* target=0;
+				vint index=keys.IndexOf(key);
+				if(index==-1)
+				{
+					target=new ValueContainer;
+					values.Insert(keys.Add(key), target);
+				}
+				else
+				{
+					target=values[index];
+				}
+				target->Add(value);
+				return true;
+			}
+
+			bool Remove(const KK& key)
+			{
+				vint index=keys.IndexOf(key);
+				if(index!=-1)
+				{
+					keys.RemoveAt(index);
+					List<VT, VK>* target=values[index];
+					values.RemoveAt(index);
+					delete target;
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Remove(const KK& key, const VK& value)
+			{
+				vint index=keys.IndexOf(key);
+				if(index!=-1)
+				{
+					List<VT, VK>* target=values[index];
+					target->Remove(value);
+					if(target->Count()==0)
+					{
+						keys.RemoveAt(index);
+						values.RemoveAt(index);
+						delete target;
+					}
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool Clear()
+			{
+				for(vint i=0;i<values.Count();i++)
+				{
+					delete values[i];
+				}
+				keys.Clear();
+				values.Clear();
+				return true;
+			}
+		};
+
+/***********************************************************************
+随机访问
+***********************************************************************/
+		namespace randomaccess_internal
+		{
+			template<typename KT, typename VT, typename KK, typename VK>
+			struct RandomAccessable<Dictionary<KT, VT, KK, VK>>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = false;
+			};
+		
+			template<typename KT, typename VT, typename KK, typename VK>
+			struct RandomAccess<Dictionary<KT, VT, KK, VK>>
+			{
+				static vint GetCount(const Dictionary<KT, VT, KK, VK>& t)
+				{
+					return t.Count();
+				}
+
+				static Pair<KT, VT> GetValue(const Dictionary<KT, VT, KK, VK>& t, vint index)
+				{
+					return Pair<KT, VT>(t.Keys().Get(index), t.Values().Get(index));
+				}
+
+				static void AppendValue(Dictionary<KT, VT, KK, VK>& t, const Pair<KT, VT>& value)
+				{
+					t.Set(value.key, value.value);
 				}
 			};
 		}
-
-		template<typename Ds, typename Ss>
-		void CopyFrom(Ds& ds, const Ss& ss, bool append=false)
-		{
-			copyfrom_internal::CopyFromAlgorithm<Ds, Ss, randomaccess_internal::RandomAccessable<Ds>::CanResize, randomaccess_internal::RandomAccessable<Ss>::CanRead>::Perform(ds, ss, append);
-		}
-
-		template<typename Ds, typename S>
-		void CopyFrom(Ds& ds, const S* buffer, vint count, bool append=false)
-		{
-			copyfrom_internal::Slice<S> slice={buffer, count};
-			CopyFrom(ds, slice, append);
-		}
-
-		template<typename Ds, typename S>
-		void CopyFrom(Ds& ds, const S* begin, const S* end, bool append=false)
-		{
-			copyfrom_internal::Slice<S> slice={begin, end-begin};
-			CopyFrom(ds, slice, append);
-		}
 	}
+}
+
+#endif
+
+/***********************************************************************
+HTTPUTILITY.H
+***********************************************************************/
+#ifndef VCZH_HTTPUTILITY
+#define VCZH_HTTPUTILITY
+
+
+namespace vl
+{
+
+/***********************************************************************
+HTTP Utility
+***********************************************************************/
+
+	class HttpRequest
+	{
+		typedef collections::Array<char>					BodyBuffer;
+		typedef collections::List<WString>					StringList;
+		typedef collections::Dictionary<WString, WString>	HeaderMap;
+	public:
+		WString				server;
+		vint				port;
+		WString				query;
+		bool				secure;
+		WString				username;
+		WString				password;
+		WString				method;
+		WString				cookie;
+		BodyBuffer			body;
+		WString				contentType;
+		StringList			acceptTypes;
+		HeaderMap			extraHeaders;
+
+		HttpRequest();
+		bool				SetHost(const WString& inputQuery);
+		void				SetBodyUtf8(const WString& bodyString);
+	};
+
+	class HttpResponse
+	{
+		typedef collections::Array<char>		BodyBuffer;
+	public:
+		vint				statusCode;
+		BodyBuffer			body;
+		WString				cookie;
+
+		HttpResponse();
+		WString				GetBodyUtf8();
+	};
+
+	extern bool				HttpQuery(const HttpRequest& request, HttpResponse& response);
+	extern WString			UrlEncodeQuery(const WString& query);
 }
 
 #endif
@@ -1025,6 +2456,3185 @@ namespace vl
 #endif
 
 /***********************************************************************
+COLLECTIONS\OPERATIONFOREACH.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Data Structure::Operations
+
+扩展：
+	实现一个函数重载IteratorType CreateForEachIterator(const CollectionType& collection);
+	CollectionType是所需要的容器类型
+	IteratorType继承自ForEachIterator<T>
+	必须写在vl::collections命名空间里
+***********************************************************************/
+
+#ifndef VCZH_COLLECTIONS_FOREACH
+#define VCZH_COLLECTIONS_FOREACH
+
+namespace vl
+{
+	namespace collections
+	{
+
+/***********************************************************************
+ForEach基础设施
+***********************************************************************/
+
+		template<typename T>
+		class ForEachIterator : public Object
+		{
+		public:
+			virtual bool				Next(T& variable)const=0;
+
+			operator bool()const
+			{
+				return true;
+			}
+		};
+
+/***********************************************************************
+IEnumerable<T>支持
+***********************************************************************/
+
+		template<typename T>
+		class EnumerableForEachIterator : public ForEachIterator<T>
+		{
+		protected:
+			Ptr<IEnumerator<T>>			enumerator;
+		public:
+			EnumerableForEachIterator(const IEnumerable<T>& enumerable)
+				:enumerator(enumerable.CreateEnumerator())
+			{
+			}
+
+			EnumerableForEachIterator(const EnumerableForEachIterator<T>& enumerableIterator)
+				:enumerator(enumerableIterator.iterator)
+			{
+			}
+
+			bool Next(T& variable)const
+			{
+				if(enumerator->Next())
+				{
+					variable=enumerator->Current();
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		};
+
+		template<typename T>
+		EnumerableForEachIterator<T> CreateForEachIterator(const IEnumerable<T>& enumerable)
+		{
+			return enumerable;
+		}
+
+/***********************************************************************
+ForEach宏
+***********************************************************************/
+
+#define SCOPE_VARIABLE(TYPE, VARIABLE, VALUE)\
+		if(bool __scope_variable_flag__=true)\
+			for(TYPE VARIABLE = VALUE;__scope_variable_flag__;__scope_variable_flag__=false)
+
+#define FOREACH(TYPE, VARIABLE, COLLECTION)\
+		SCOPE_VARIABLE(const ForEachIterator<TYPE>&, __foreach_iterator__, CreateForEachIterator(COLLECTION))\
+		for(TYPE VARIABLE;__foreach_iterator__.Next(VARIABLE);)
+
+#define FOREACH_INDEXER(TYPE, VARIABLE, INDEXER, COLLECTION)\
+		SCOPE_VARIABLE(const ForEachIterator<TYPE>&, __foreach_iterator__, CreateForEachIterator(COLLECTION))\
+		SCOPE_VARIABLE(vint, INDEXER, 0)\
+		for(TYPE VARIABLE;__foreach_iterator__.Next(VARIABLE);INDEXER++)
+	}
+}
+
+#endif
+
+/***********************************************************************
+LOCALE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Framework::Locale
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_LOCALE
+#define VCZH_LOCALE
+
+
+namespace vl
+{
+	class Locale : public Object
+	{
+	protected:
+		WString						localeName;
+
+	public:
+		Locale(const WString& _localeName=WString::Empty);
+		~Locale();
+
+		static Locale				Invariant();
+		static Locale				SystemDefault();
+		static Locale				UserDefault();
+		static void					Enumerate(collections::List<Locale>& locales);
+
+		const WString&				GetName()const;
+
+		void						GetShortDateFormats(collections::List<WString>& formats);
+		void						GetLongDateFormats(collections::List<WString>& formats);
+		void						GetYearMonthDateFormats(collections::List<WString>& formats);
+		void						GetLongTimeFormats(collections::List<WString>& formats);
+		void						GetShortTimeFormats(collections::List<WString>& formats);
+		WString						FormatDate(const WString& format, DateTime date);
+		WString						FormatTime(const WString& format, DateTime time);
+		WString						FormatNumber(const WString& number);
+		WString						FormatCurrency(const WString& currency);
+
+		WString						ToFullWidth(const WString& str);
+		WString						ToHalfWidth(const WString& str);
+		WString						ToHiragana(const WString& str);
+		WString						ToKatagana(const WString& str);
+		WString						ToLower(const WString& str);
+		WString						ToUpper(const WString& str);
+		WString						ToLinguisticLower(const WString& str);
+		WString						ToLinguisticUpper(const WString& str);
+		WString						ToSimplifiedChinese(const WString& str);
+		WString						ToTraditionalChinese(const WString& str);
+		WString						ToTileCase(const WString& str);
+
+		enum Normalization
+		{
+			None=0,
+			IgnoreCase=1,
+			IgnoreCaseLinguistic=2,
+			IgnoreKanaType=4,
+			IgnoreNonSpace=8,
+			IgnoreSymbol=16,
+			IgnoreWidth=32,
+			DigitsAsNumbers=64,
+			StringSoft=128,
+		};
+		vint									Compare(const WString& s1, const WString& s2, Normalization normalization);
+		vint									CompareOrdinal(const WString& s1, const WString& s2);
+		vint									CompareOrdinalIgnoreCase(const WString& s1, const WString& s2);
+		collections::Pair<vint, vint>			FindFirst(const WString& text, const WString& find, Normalization normalization);
+		collections::Pair<vint, vint>			FindLast(const WString& text, const WString& find, Normalization normalization);
+		bool									StartsWith(const WString& text, const WString& find, Normalization normalization);
+		bool									EndsWidth(const WString& text, const WString& find, Normalization normalization);
+	};
+}
+
+#endif
+
+/***********************************************************************
+REGEX\REGEX.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Regex::Regular Expression
+
+Classes:
+	RegexString						：字符串匹配结果
+	RegexMatch						：匹配结果
+	Regex							：正则表达式引擎
+	RegexToken						：词法记号
+	RegexTokens						：词法记号表
+	RegexLexer						：词法分析器
+***********************************************************************/
+
+#ifndef VCZH_REGEX_REGEX
+#define VCZH_REGEX_REGEX
+
+
+namespace vl
+{
+	namespace regex_internal
+	{
+		class PureResult;
+		class PureInterpretor;
+		class RichResult;
+		class RichInterpretor;
+	}
+
+	namespace regex
+	{
+
+/***********************************************************************
+正则表达式引擎数据结构
+***********************************************************************/
+
+		class RegexString : public Object
+		{
+		protected:
+			WString										value;
+			vint										start;
+			vint										length;
+
+		public:
+			RegexString(vint _start=0);
+			RegexString(const WString& _string, vint _start, vint _length);
+
+			vint										Start()const;
+			vint										Length()const;
+			const WString&								Value()const;
+			bool										operator==(const RegexString& string)const;
+		};
+
+		class RegexMatch : public Object, private NotCopyable
+		{
+			friend class Regex;
+		public:
+			typedef Ptr<RegexMatch>										Ref;
+			typedef collections::List<Ref>								List;
+			typedef collections::List<RegexString>						CaptureList;
+			typedef collections::Group<WString, RegexString>			CaptureGroup;
+		protected:
+			collections::List<RegexString>				captures;
+			collections::Group<WString, RegexString>	groups;
+			bool										success;
+			RegexString									result;
+
+			RegexMatch(const WString& _string, regex_internal::PureResult* _result);
+			RegexMatch(const WString& _string, regex_internal::RichResult* _result, regex_internal::RichInterpretor* _rich);
+			RegexMatch(const RegexString& _result);
+		public:
+			
+			bool										Success()const;
+			const RegexString&							Result()const;
+			const CaptureList&							Captures()const;
+			const CaptureGroup&							Groups()const;
+		};
+
+/***********************************************************************
+正则表达式引擎
+***********************************************************************/
+
+		class Regex : public Object, private NotCopyable
+		{
+		protected:
+			regex_internal::PureInterpretor*			pure;
+			regex_internal::RichInterpretor*			rich;
+
+			void										Process(const WString& text, bool keepEmpty, bool keepSuccess, bool keepFail, RegexMatch::List& matches)const;
+		public:
+			Regex(const WString& code, bool preferPure=true);
+			~Regex();
+
+			bool										IsPureMatch()const;
+			bool										IsPureTest()const;
+
+			RegexMatch::Ref								MatchHead(const WString& text)const;
+			RegexMatch::Ref								Match(const WString& text)const;
+			bool										TestHead(const WString& text)const;
+			bool										Test(const WString& text)const;
+			void										Search(const WString& text, RegexMatch::List& matches)const;
+			void										Split(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
+			void										Cut(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
+		};
+
+/***********************************************************************
+正则表达式词法分析器
+***********************************************************************/
+
+		class RegexToken
+		{
+		public:
+			vint										start;
+			vint										length;
+			vint										token;
+			const wchar_t*								reading;
+			vint										codeIndex;
+
+			vint										rowStart;
+			vint										columnStart;
+			vint										rowEnd;
+			vint										columnEnd;
+
+			bool										operator==(const RegexToken& _token)const;
+			bool										operator==(const wchar_t* _token)const;
+		};
+
+		class RegexTokens : public Object, public collections::IEnumerable<RegexToken>
+		{
+			friend class RegexLexer;
+		protected:
+			regex_internal::PureInterpretor*			pure;
+			const collections::Array<vint>&				stateTokens;
+			WString										code;
+			vint										codeIndex;
+			
+			RegexTokens(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens, const WString& _code, vint _codeIndex);
+		public:
+
+			collections::IEnumerator<RegexToken>*		CreateEnumerator()const;
+			void										ReadToEnd(collections::List<RegexToken>& tokens, bool(*discard)(vint)=0)const;
+		};
+
+		class RegexLexerWalker : public Object
+		{
+			friend class RegexLexer;
+		protected:
+			regex_internal::PureInterpretor*			pure;
+			const collections::Array<vint>&				stateTokens;
+			
+			RegexLexerWalker(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens);
+		public:
+			RegexLexerWalker(const RegexLexerWalker& walker);
+			~RegexLexerWalker();
+
+			vint										GetStartState()const;
+			vint										GetRelatedToken(vint state)const;
+			void										Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const;
+			vint										Walk(wchar_t input, vint state)const;
+		};
+
+		class RegexLexerColorizer : public Object
+		{
+			friend class RegexLexer;
+		public:
+			typedef void(*TokenProc)(void* argument, vint start, vint length, vint token);
+
+		protected:
+			RegexLexerWalker							walker;
+			vint										currentState;
+
+			RegexLexerColorizer(const RegexLexerWalker& _walker);
+		public:
+			RegexLexerColorizer(const RegexLexerColorizer& colorizer);
+			~RegexLexerColorizer();
+
+			void										Reset(vint state);
+			void										Pass(wchar_t input);
+			vint										GetStartState()const;
+			vint										GetCurrentState()const;
+			void										Colorize(const wchar_t* input, vint length, TokenProc tokenProc, void* tokenProcArgument);
+		};
+
+		class RegexLexer : public Object, private NotCopyable
+		{
+		protected:
+			regex_internal::PureInterpretor*			pure;
+			collections::Array<vint>					ids;
+			collections::Array<vint>					stateTokens;
+		public:
+			RegexLexer(const collections::IEnumerable<WString>& tokens);
+			~RegexLexer();
+
+			RegexTokens									Parse(const WString& code, vint codeIndex=-1)const;
+			RegexLexerWalker							Walk()const;
+			RegexLexerColorizer							Colorize()const;
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+STREAM\INTERFACES.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Stream::Interfaces
+
+Interfaces:
+	IStream							：流
+***********************************************************************/
+
+#ifndef VCZH_STREAM_INTERFACES
+#define VCZH_STREAM_INTERFACES
+
+
+namespace vl
+{
+	namespace stream
+	{
+		class IStream : public virtual Interface
+		{
+		public:
+			virtual bool					CanRead()const=0;
+			virtual bool					CanWrite()const=0;
+			virtual bool					CanSeek()const=0;
+			virtual bool					CanPeek()const=0;
+			virtual bool					IsLimited()const=0;
+			virtual bool					IsAvailable()const=0;
+			virtual void					Close()=0;
+			virtual pos_t					Position()const=0;
+			virtual pos_t					Size()const=0;
+			virtual void					Seek(pos_t _size)=0;
+			virtual void					SeekFromBegin(pos_t _size)=0;
+			virtual void					SeekFromEnd(pos_t _size)=0;
+			virtual vint					Read(void* _buffer, vint _size)=0;
+			virtual vint					Write(void* _buffer, vint _size)=0;
+			virtual vint					Peek(void* _buffer, vint _size)=0;
+		};
+
+		class IEncoder : public Interface
+		{
+		public:
+			virtual void					Setup(IStream* _stream)=0;
+			virtual	void					Close()=0;
+			virtual vint					Write(void* _buffer, vint _size)=0;
+		};
+
+		class IDecoder : public Interface
+		{
+		public:
+			virtual void					Setup(IStream* _stream)=0;
+			virtual	void					Close()=0;
+			virtual vint					Read(void* _buffer, vint _size)=0;
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+STREAM\ACCESSOR.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Stream::Accessor
+
+Classes:
+	TextReader						：字符串阅读器
+	TextWriter						：字符串书写器
+	StreamReader					：流阅读器
+	StreamWriter					：流书写器
+	EncoderStream					：编码流
+	DecoderStream					：解码流
+***********************************************************************/
+
+#ifndef VCZH_STREAM_ACCESSOR
+#define VCZH_STREAM_ACCESSOR
+
+
+namespace vl
+{
+	namespace stream
+	{
+
+/***********************************************************************
+流控制器
+***********************************************************************/
+
+		class TextReader : public Object, private NotCopyable
+		{
+		public:
+			virtual bool				IsEnd()=0;
+			virtual wchar_t				ReadChar()=0;
+			virtual WString				ReadString(vint length);
+			virtual WString				ReadLine();
+			virtual WString				ReadToEnd();
+		};
+
+		class TextWriter : public Object, private NotCopyable
+		{
+		public:
+			virtual void				WriteChar(wchar_t c)=0;
+			virtual void				WriteString(const wchar_t* string, vint charCount);
+			virtual void				WriteString(const wchar_t* string);
+			virtual void				WriteString(const WString& string);
+			virtual void				WriteLine(const wchar_t* string, vint charCount);
+			virtual void				WriteLine(const wchar_t* string);
+			virtual void				WriteLine(const WString& string);
+
+			virtual void				WriteMonospacedEnglishTable(collections::Array<WString>& tableByRow, vint rows, vint columns);
+		};
+
+		class StringReader : public TextReader
+		{
+		protected:
+			WString						string;
+			vint						current;
+			bool						lastCallIsReadLine;
+
+			void						PrepareIfLastCallIsReadLine();
+		public:
+			StringReader(const WString& _string);
+
+			bool						IsEnd();
+			wchar_t						ReadChar();
+			WString						ReadString(vint length);
+			WString						ReadLine();
+			WString						ReadToEnd();
+		};
+
+		class StreamReader : public TextReader
+		{
+		protected:
+			IStream*					stream;
+		public:
+			StreamReader(IStream& _stream);
+
+			bool						IsEnd();
+			wchar_t						ReadChar();
+		};
+
+		class StreamWriter : public TextWriter
+		{
+		protected:
+			IStream*					stream;
+		public:
+			StreamWriter(IStream& _stream);
+			using TextWriter::WriteString;
+
+			void						WriteChar(wchar_t c);
+			void						WriteString(const wchar_t* string, vint charCount);
+		};
+
+/***********************************************************************
+编码解码
+***********************************************************************/
+
+		class EncoderStream : public virtual IStream
+		{
+		protected:
+			IStream*					stream;
+			IEncoder*					encoder;
+			pos_t						position;
+
+		public:
+			EncoderStream(IStream& _stream, IEncoder& _encoder);
+			~EncoderStream();
+
+			bool						CanRead()const;
+			bool						CanWrite()const;
+			bool						CanSeek()const;
+			bool						CanPeek()const;
+			bool						IsLimited()const;
+			bool						IsAvailable()const;
+			void						Close();
+			pos_t						Position()const;
+			pos_t						Size()const;
+			void						Seek(pos_t _size);
+			void						SeekFromBegin(pos_t _size);
+			void						SeekFromEnd(pos_t _size);
+			vint							Read(void* _buffer, vint _size);
+			vint							Write(void* _buffer, vint _size);
+			vint							Peek(void* _buffer, vint _size);
+		};
+
+		class DecoderStream : public virtual IStream
+		{
+		protected:
+			IStream*					stream;
+			IDecoder*					decoder;
+			pos_t						position;
+
+		public:
+			DecoderStream(IStream& _stream, IDecoder& _decoder);
+			~DecoderStream();
+
+			bool						CanRead()const;
+			bool						CanWrite()const;
+			bool						CanSeek()const;
+			bool						CanPeek()const;
+			bool						IsLimited()const;
+			bool						IsAvailable()const;
+			void						Close();
+			pos_t						Position()const;
+			pos_t						Size()const;
+			void						Seek(pos_t _size);
+			void						SeekFromBegin(pos_t _size);
+			void						SeekFromEnd(pos_t _size);
+			vint							Read(void* _buffer, vint _size);
+			vint							Write(void* _buffer, vint _size);
+			vint							Peek(void* _buffer, vint _size);
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSINGTREE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Parsing Tree
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGTREE
+#define VCZH_PARSING_PARSINGTREE
+
+
+namespace vl
+{
+	namespace parsing
+	{
+
+/***********************************************************************
+位置信息
+***********************************************************************/
+
+		struct ParsingTextPos
+		{
+			static const int	UnknownValue=-2;
+			vint				index;
+			vint				row;
+			vint				column;
+
+			ParsingTextPos()
+				:index(UnknownValue)
+				,row(UnknownValue)
+				,column(UnknownValue)
+			{
+			}
+
+			ParsingTextPos(vint _index)
+				:index(_index)
+				,row(UnknownValue)
+				,column(UnknownValue)
+			{
+			}
+
+			ParsingTextPos(vint _row, vint _column)
+				:index(UnknownValue)
+				,row(_row)
+				,column(_column)
+			{
+			}
+
+			ParsingTextPos(vint _index, vint _row, vint _column)
+				:index(_index)
+				,row(_row)
+				,column(_column)
+			{
+			}
+
+			static vint Compare(const ParsingTextPos& a, const ParsingTextPos& b)
+			{
+				if(a.index!=UnknownValue && b.index!=UnknownValue)
+				{
+					return a.index-b.index;
+				}
+				else if(a.row!=UnknownValue && a.column!=UnknownValue && b.row!=UnknownValue && b.column!=UnknownValue)
+				{
+					if(a.row==b.row)
+					{
+						return a.column-b.column;
+					}
+					else
+					{
+						return a.row-b.row;
+					}
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
+			bool operator==(const ParsingTextPos& pos)const{return Compare(*this, pos)==0;}
+			bool operator!=(const ParsingTextPos& pos)const{return Compare(*this, pos)!=0;}
+			bool operator<(const ParsingTextPos& pos)const{return Compare(*this, pos)<0;}
+			bool operator<=(const ParsingTextPos& pos)const{return Compare(*this, pos)<=0;}
+			bool operator>(const ParsingTextPos& pos)const{return Compare(*this, pos)>0;}
+			bool operator>=(const ParsingTextPos& pos)const{return Compare(*this, pos)>=0;}
+		};
+
+		struct ParsingTextRange
+		{
+			ParsingTextPos	start;
+			ParsingTextPos	end;
+
+			ParsingTextRange()
+			{
+				end.index=-1;
+				end.column=-1;
+			}
+
+			ParsingTextRange(const ParsingTextPos& _start, const ParsingTextPos& _end)
+				:start(_start)
+				,end(_end)
+			{
+			}
+
+			ParsingTextRange(const regex::RegexToken* startToken, const regex::RegexToken* endToken)
+			{
+				start.index=startToken->start;
+				start.row=startToken->rowStart;
+				start.column=startToken->columnStart;
+				end.index=endToken->start+endToken->length-1;
+				end.row=endToken->rowEnd;
+				end.column=endToken->columnEnd;
+			}
+
+			bool operator==(const ParsingTextRange& range)const{return start==range.start && end==range.end;}
+			bool operator!=(const ParsingTextRange& range)const{return start!=range.start || end!=range.end;}
+			bool Contains(const ParsingTextPos& pos)const{return start<=pos && pos<=end;}
+			bool Contains(const ParsingTextRange& range)const{return start<=range.start && range.end<=end;}
+		};
+
+/***********************************************************************
+通用语法树
+***********************************************************************/
+
+		class ParsingTreeNode;
+		class ParsingTreeToken;
+		class ParsingTreeObject;
+		class ParsingTreeArray;
+
+		class ParsingTreeNode : public Object
+		{
+		public:
+			class IVisitor : public Interface
+			{
+			public:
+				virtual void			Visit(ParsingTreeToken* node)=0;
+				virtual void			Visit(ParsingTreeObject* node)=0;
+				virtual void			Visit(ParsingTreeArray* node)=0;
+			};
+
+			class TraversalVisitor : public Object, public IVisitor
+			{
+			public:
+				enum TraverseDirection
+				{
+					ByTextPosition,
+					ByStorePosition
+				};
+			protected:
+				TraverseDirection		direction;
+			public:
+				TraversalVisitor(TraverseDirection _direction);
+
+				virtual void			BeforeVisit(ParsingTreeToken* node);
+				virtual void			AfterVisit(ParsingTreeToken* node);
+				virtual void			BeforeVisit(ParsingTreeObject* node);
+				virtual void			AfterVisit(ParsingTreeObject* node);
+				virtual void			BeforeVisit(ParsingTreeArray* node);
+				virtual void			AfterVisit(ParsingTreeArray* node);
+
+				virtual void			Visit(ParsingTreeToken* node)override;
+				virtual void			Visit(ParsingTreeObject* node)override;
+				virtual void			Visit(ParsingTreeArray* node)override;
+			};
+		protected:
+			typedef collections::List<Ptr<ParsingTreeNode>>				NodeList;
+
+			ParsingTextRange			codeRange;
+			ParsingTreeNode*			parent;
+			NodeList					cachedOrderedSubNodes;
+
+			virtual const NodeList&		GetSubNodesInternal()=0;
+			bool						BeforeAddChild(Ptr<ParsingTreeNode> node);
+			void						AfterAddChild(Ptr<ParsingTreeNode> node);
+			bool						BeforeRemoveChild(Ptr<ParsingTreeNode> node);
+			void						AfterRemoveChild(Ptr<ParsingTreeNode> node);
+		public:
+			ParsingTreeNode(const ParsingTextRange& _codeRange);
+			~ParsingTreeNode();
+
+			virtual void				Accept(IVisitor* visitor)=0;
+			ParsingTextRange			GetCodeRange();
+			void						SetCodeRange(const ParsingTextRange& range);
+
+			void						InitializeQueryCache();
+			void						ClearQueryCache();
+			ParsingTreeNode*			GetParent();
+			const NodeList&				GetSubNodes();
+
+			ParsingTreeNode*			FindSubNode(const ParsingTextPos& position);
+			ParsingTreeNode*			FindSubNode(const ParsingTextRange& range);
+			ParsingTreeNode*			FindDeepestNode(const ParsingTextPos& position);
+			ParsingTreeNode*			FindDeepestNode(const ParsingTextRange& range);
+		};
+
+		class ParsingTreeToken : public ParsingTreeNode
+		{
+		protected:
+			WString						value;
+			vint						tokenIndex;
+
+			const NodeList&				GetSubNodesInternal()override;
+		public:
+			ParsingTreeToken(const WString& _value, vint _tokenIndex=-1, const ParsingTextRange& _codeRange=ParsingTextRange());
+			~ParsingTreeToken();
+
+			void						Accept(IVisitor* visitor)override;
+			vint						GetTokenIndex();
+			void						SetTokenIndex(vint _tokenIndex);
+			const WString&				GetValue();
+			void						SetValue(const WString& _value);
+		};
+
+		class ParsingTreeObject : public ParsingTreeNode
+		{
+		protected:
+			typedef collections::Dictionary<WString, Ptr<ParsingTreeNode>>				NodeMap;
+			typedef collections::SortedList<WString>									NameList;
+
+			WString						type;
+			NodeMap						members;
+
+			const NodeList&			GetSubNodesInternal()override;
+		public:
+			ParsingTreeObject(const WString& _type=L"", const ParsingTextRange& _codeRange=ParsingTextRange());
+			~ParsingTreeObject();
+
+			void						Accept(IVisitor* visitor)override;
+			const WString&				GetType();
+			void						SetType(const WString& _type);
+			NodeMap&					GetMembers();
+			Ptr<ParsingTreeNode>		GetMember(const WString& name);
+			bool						SetMember(const WString& name, Ptr<ParsingTreeNode> node);
+			bool						RemoveMember(const WString& name);
+			const NameList&				GetMemberNames();
+		};
+
+		class ParsingTreeArray : public ParsingTreeNode
+		{
+		protected:
+			typedef collections::List<Ptr<ParsingTreeNode>>								NodeArray;
+
+			WString						elementType;
+			NodeArray					items;
+
+			const NodeList&				GetSubNodesInternal()override;
+		public:
+			ParsingTreeArray(const WString& _elementType=L"", const ParsingTextRange& _codeRange=ParsingTextRange());
+			~ParsingTreeArray();
+
+			void						Accept(IVisitor* visitor)override;
+			const WString&				GetElementType();
+			void						SetElementType(const WString& _elementType);
+			NodeArray&					GetItems();
+			Ptr<ParsingTreeNode>		GetItem(vint index);
+			bool						SetItem(vint index, Ptr<ParsingTreeNode> node);
+			bool						AddItem(Ptr<ParsingTreeNode> node);
+			bool						InsertItem(vint index, Ptr<ParsingTreeNode> node);
+			bool						RemoveItem(vint index);
+			bool						RemoveItem(Ptr<ParsingTreeNode> node);
+			vint						IndexOfItem(Ptr<ParsingTreeNode> node);
+			bool						ContainsItem(Ptr<ParsingTreeNode> node);
+			vint						Count();
+			bool						Clear();
+		};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+		extern void						Log(Ptr<ParsingTreeNode> node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix=L"");
+
+/***********************************************************************
+语法树基础设施
+***********************************************************************/
+
+		class ParsingTreeCustomBase : public Object
+		{
+		public:
+			ParsingTextRange			codeRange;
+		};
+
+		class ParsingToken : public ParsingTreeCustomBase
+		{
+		public:
+			vint						tokenIndex;
+			WString						value;
+
+			ParsingToken():tokenIndex(-1){}
+		};
+
+		class ParsingError : public Object
+		{
+		public:
+			ParsingTextRange			codeRange;
+			const regex::RegexToken*	token;
+			ParsingTreeCustomBase*		parsingTree;
+			WString						errorMessage;
+
+			ParsingError();
+			ParsingError(const WString& _errorMessage);
+			ParsingError(const regex::RegexToken* _token, const WString& _errorMessage);
+			ParsingError(ParsingTreeCustomBase* _parsingTree, const WString& _errorMessage);
+			~ParsingError();
+		};
+
+/***********************************************************************
+语法树构造
+***********************************************************************/
+
+		class ParsingTreeConverter : public Object
+		{
+		public:
+			typedef collections::List<regex::RegexToken>	TokenList;
+
+			virtual Ptr<ParsingTreeCustomBase>				ConvertClass(Ptr<ParsingTreeObject> obj, const TokenList& tokens)=0;
+
+			bool SetMember(ParsingToken& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
+			{
+				Ptr<ParsingTreeToken> token=node.Cast<ParsingTreeToken>();
+				if(token)
+				{
+					member.tokenIndex=token->GetTokenIndex();
+					member.value=token->GetValue();
+					member.codeRange=token->GetCodeRange();
+					return true;
+				}
+				return false;
+			}
+
+			template<typename T>
+			bool SetMember(collections::List<T>& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
+			{
+				Ptr<ParsingTreeArray> arr=node.Cast<ParsingTreeArray>();
+				if(arr)
+				{
+					member.Clear();
+					vint count=arr->Count();
+					for(vint i=0;i<count;i++)
+					{
+						T t;
+						SetMember(t, arr->GetItem(i), tokens);
+						member.Add(t);
+					}
+					return true;
+				}
+				return false;
+			}
+
+			template<typename T>
+			bool SetMember(Ptr<T>& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
+			{
+				Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>();
+				if(obj)
+				{
+					Ptr<ParsingTreeCustomBase> tree=ConvertClass(obj, tokens);
+					if(tree)
+					{
+						tree->codeRange=node->GetCodeRange();
+						member=tree.Cast<T>();
+						return member;
+					}
+				}
+				return false;
+			}
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSINGTABLE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Table
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGTABLE
+#define VCZH_PARSING_PARSINGTABLE
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace tabling
+		{
+
+/***********************************************************************
+跳转表
+***********************************************************************/
+
+			class ParsingTable : public Object
+			{
+			public:
+				static const vint							TokenBegin=0;
+				static const vint							TokenFinish=1;
+				static const vint							TryReduce=2;
+				static const vint							UserTokenStart=3;
+
+				class TokenInfo
+				{
+				public:
+					WString									name;
+					WString									regex;
+					vint									regexTokenIndex;
+
+					TokenInfo():regexTokenIndex(-1){}
+
+					TokenInfo(const WString& _name, const WString& _regex)
+						:name(_name)
+						,regex(_regex)
+						,regexTokenIndex(-1)
+					{
+					}
+				};
+
+				class StateInfo
+				{
+				public:
+					WString									ruleName;
+					WString									stateName;
+					WString									stateExpression;
+
+					StateInfo(){}
+
+					StateInfo(const WString& _ruleName, const WString& _stateName, const WString& _stateExpression)
+						:ruleName(_ruleName)
+						,stateName(_stateName)
+						,stateExpression(_stateExpression)
+					{
+					}
+				};
+
+				class RuleInfo
+				{
+				public:
+					WString									name;
+					WString									type;
+					vint									rootStartState;
+
+					RuleInfo(){}
+
+					RuleInfo(const WString& _name, const WString& _type, vint _rootStartState)
+						:name(_name)
+						,type(_type)
+						,rootStartState(_rootStartState)
+					{
+					}
+				};
+
+				class Instruction
+				{
+				public:
+					enum InstructionType
+					{
+						Create,
+						Assign,
+						Item,
+						Using,
+						Setter,
+						Shift,
+						Reduce,
+						LeftRecursiveReduce,
+					};
+
+					InstructionType							instructionType;
+					vint									stateParameter;
+					WString									nameParameter;
+					WString									value;
+
+					Instruction()
+						:instructionType(Create)
+						,stateParameter(0)
+					{
+					}
+
+					Instruction(InstructionType _instructionType, vint _stateParameter, const WString& _nameParameter, const WString& _value)
+						:instructionType(_instructionType)
+						,stateParameter(_stateParameter)
+						,nameParameter(_nameParameter)
+						,value(_value)
+					{
+					}
+				};
+
+				class TransitionItem
+				{
+				public:
+					vint									token;
+					vint									targetState;
+					collections::List<vint>					stackPattern;
+					collections::List<Instruction>			instructions;
+
+					enum OrderResult
+					{
+						CorrectOrder,
+						WrongOrder,
+						SameOrder,
+						UnknownOrder,
+					};
+
+					TransitionItem(){}
+
+					TransitionItem(vint _token, vint _targetState)
+						:token(_token)
+						,targetState(_targetState)
+					{
+					}
+
+					static OrderResult						CheckOrder(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2, bool forceGivingOrder);
+					static vint								Compare(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2);
+				};
+
+				class TransitionBag
+				{
+				public:
+					collections::List<Ptr<TransitionItem>>	transitionItems;
+				};
+
+			protected:
+				Ptr<regex::RegexLexer>						lexer;
+				collections::Array<Ptr<TransitionBag>>		transitionBags;
+				vint										tokenCount;
+				vint										stateCount;
+				collections::Array<TokenInfo>				tokenInfos;
+				collections::Array<TokenInfo>				discardTokenInfos;
+				collections::Array<StateInfo>				stateInfos;
+				collections::Array<RuleInfo>				ruleInfos;
+
+			public:
+				ParsingTable(vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
+				~ParsingTable();
+
+				vint										GetTokenCount();
+				const TokenInfo&							GetTokenInfo(vint token);
+				void										SetTokenInfo(vint token, const TokenInfo& info);
+
+				vint										GetDiscardTokenCount();
+				const TokenInfo&							GetDiscardTokenInfo(vint token);
+				void										SetDiscardTokenInfo(vint token, const TokenInfo& info);
+
+				vint										GetStateCount();
+				const StateInfo&							GetStateInfo(vint state);
+				void										SetStateInfo(vint state, const StateInfo& info);
+
+				vint										GetRuleCount();
+				const RuleInfo&								GetRuleInfo(vint rule);
+				void										SetRuleInfo(vint rule, const RuleInfo& info);
+
+				const regex::RegexLexer&					GetLexer();
+				Ptr<TransitionBag>							GetTransitionBag(vint state, vint token);
+				void										SetTransitionBag(vint state, vint token, Ptr<TransitionBag> bag);
+				void										Initialize();
+				bool										IsInputToken(vint regexTokenIndex);
+				vint										GetTableTokenIndex(vint regexTokenIndex);
+				vint										GetTableDiscardTokenIndex(vint regexTokenIndex);
+			};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+			extern void										Log(Ptr<ParsingTable> table, stream::TextWriter& writer);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSINGSTATE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::State
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGSTATE
+#define VCZH_PARSING_PARSINGSTATE
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace tabling
+		{
+
+/***********************************************************************
+语法分析器
+***********************************************************************/
+
+			class ParsingState : public Object
+			{
+			public:
+				struct ShiftReduceRange
+				{
+					regex::RegexToken*							shiftToken;
+					regex::RegexToken*							reduceToken;
+
+					ShiftReduceRange()
+						:shiftToken(0)
+						,reduceToken(0)
+					{
+					}
+				};
+
+				struct TransitionResult
+				{
+					vint										tableTokenIndex;
+					vint										tableStateSource;
+					vint										tableStateTarget;
+					vint										tokenIndexInStream;
+					regex::RegexToken*							token;
+					ParsingTable::TransitionItem*				transition;
+					Ptr<collections::List<ShiftReduceRange>>	shiftReduceRanges;
+
+					TransitionResult()
+						:tableTokenIndex(-1)
+						,tableStateSource(-1)
+						,tableStateTarget(-1)
+						,tokenIndexInStream(-1)
+						,token(0)
+						,transition(0)
+					{
+					}
+
+					operator bool()const
+					{
+						return transition!=0;
+					}
+
+					void AddShiftReduceRange(regex::RegexToken* shiftToken, regex::RegexToken* reduceToken)
+					{
+						ShiftReduceRange range;
+						range.shiftToken=shiftToken;
+						range.reduceToken=reduceToken;
+						if(!shiftReduceRanges)
+						{
+							shiftReduceRanges=new collections::List<ShiftReduceRange>();
+						}
+						shiftReduceRanges->Add(range);
+					}
+				};
+
+				struct Future
+				{
+					vint									currentState;
+					vint									reduceStateCount;
+					collections::List<vint>					shiftStates;
+					vint									selectedToken;
+					Future*									previous;
+					Future*									next;
+
+					Future()
+						:currentState(-1)
+						,reduceStateCount(0)
+						,selectedToken(-1)
+						,previous(0)
+						,next(0)
+					{
+					}
+				};
+			private:
+				WString										input;
+				Ptr<ParsingTable>							table;
+				collections::List<regex::RegexToken>		tokens;
+
+				collections::List<vint>						stateStack;
+				vint										currentState;
+				vint										currentToken;
+				vint										tokenSequenceIndex;
+				
+				collections::List<regex::RegexToken*>		shiftTokenStack;
+				regex::RegexToken*							shiftToken;
+				regex::RegexToken*							reduceToken;
+			public:
+				ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex=-1);
+				~ParsingState();
+
+				const WString&								GetInput();
+				Ptr<ParsingTable>							GetTable();
+				const collections::List<regex::RegexToken>&	GetTokens();
+				regex::RegexToken*							GetToken(vint index);
+
+				vint										Reset(const WString& rule);
+				vint										GetCurrentToken();
+				const collections::List<vint>&				GetStateStack();
+				vint										GetCurrentState();
+
+				ParsingTable::TransitionItem*				MatchToken(vint tableTokenIndex);
+				ParsingTable::TransitionItem*				MatchTokenInFuture(vint tableTokenIndex, Future* future);
+				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken);
+				TransitionResult							ReadToken();
+				bool										ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now);
+			};
+
+/***********************************************************************
+语法树生成器
+***********************************************************************/
+
+			class ParsingTreeBuilder : public Object
+			{
+			protected:
+				Ptr<ParsingTreeNode>						createdObject;
+				Ptr<ParsingTreeObject>						operationTarget;
+				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
+			public:
+				ParsingTreeBuilder();
+				~ParsingTreeBuilder();
+
+				void										Reset();
+				bool										Run(const ParsingState::TransitionResult& result);
+				Ptr<ParsingTreeObject>						GetNode();
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSING.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Parser
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSING
+#define VCZH_PARSING_PARSING
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace tabling
+		{
+
+/***********************************************************************
+语法分析器通用策略
+***********************************************************************/
+
+			class ParsingGeneralParser : public Object
+			{
+			protected:
+				Ptr<ParsingTable>							table;
+
+				virtual void								OnReset();
+				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)=0;
+			public:
+				ParsingGeneralParser(Ptr<ParsingTable> _table);
+				~ParsingGeneralParser();
+				
+				Ptr<ParsingTreeNode>						Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors);
+				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors);
+			};
+
+/***********************************************************************
+语法分析器策略
+***********************************************************************/
+
+			class ParsingStrictParser : public ParsingGeneralParser
+			{
+			protected:
+
+				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
+			public:
+				ParsingStrictParser(Ptr<ParsingTable> _table=0);
+				~ParsingStrictParser();
+			};
+
+			class ParsingAutoRecoverParser : public ParsingGeneralParser
+			{
+			protected:
+				collections::Array<ParsingState::Future>	recoverFutures;
+				vint										recoveringFutureIndex;
+
+				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
+			public:
+				ParsingAutoRecoverParser(Ptr<ParsingTable> _table=0);
+				~ParsingAutoRecoverParser();
+			};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+			extern Ptr<ParsingStrictParser>					CreateBootstrapStrictParser();
+			extern Ptr<ParsingAutoRecoverParser>			CreateBootstrapAutoRecoverParser();
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\JSON\PARSINGJSON_PARSER.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parser::ParsingJson_Parser
+
+本文件使用Vczh Functional Macro工具自动生成
+***********************************************************************/
+
+#ifndef VCZH_PARSING_JSON_PARSINGJSON_PARSER
+#define VCZH_PARSING_JSON_PARSINGJSON_PARSER
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace json
+		{
+			struct JsonParserTokenIndex abstract
+			{
+				static const vl::vint TRUE = 0;
+				static const vl::vint FALSE = 1;
+				static const vl::vint NULLVALUE = 2;
+				static const vl::vint OBJOPEN = 3;
+				static const vl::vint OBJCLOSE = 4;
+				static const vl::vint ARROPEN = 5;
+				static const vl::vint ARRCLOSE = 6;
+				static const vl::vint COMMA = 7;
+				static const vl::vint COLON = 8;
+				static const vl::vint NUMBER = 9;
+				static const vl::vint STRING = 10;
+				static const vl::vint SPACE = 11;
+			};
+			class JsonNode;
+			class JsonLiteral;
+			class JsonString;
+			class JsonNumber;
+			class JsonArray;
+			class JsonObjectField;
+			class JsonObject;
+
+			class JsonNode abstract : public vl::parsing::ParsingTreeCustomBase
+			{
+			public:
+				class IVisitor : public vl::Interface
+				{
+				public:
+					virtual void Visit(JsonLiteral* node)=0;
+					virtual void Visit(JsonString* node)=0;
+					virtual void Visit(JsonNumber* node)=0;
+					virtual void Visit(JsonArray* node)=0;
+					virtual void Visit(JsonObjectField* node)=0;
+					virtual void Visit(JsonObject* node)=0;
+				};
+
+				virtual void Accept(JsonNode::IVisitor* visitor)=0;
+
+			};
+
+			class JsonLiteral : public JsonNode
+			{
+			public:
+				struct JsonValue abstract
+				{
+					enum Type
+					{
+						True,
+						False,
+						Null,
+					};
+				};
+
+				JsonValue::Type value;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonLiteral> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonString : public JsonNode
+			{
+			public:
+				vl::parsing::ParsingToken content;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonString> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonNumber : public JsonNode
+			{
+			public:
+				vl::parsing::ParsingToken content;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonNumber> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonArray : public JsonNode
+			{
+			public:
+				vl::collections::List<vl::Ptr<JsonNode>> items;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonArray> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonObjectField : public JsonNode
+			{
+			public:
+				vl::parsing::ParsingToken name;
+				vl::Ptr<JsonNode> value;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonObjectField> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			class JsonObject : public JsonNode
+			{
+			public:
+				vl::collections::List<vl::Ptr<JsonObjectField>> fields;
+
+				void Accept(JsonNode::IVisitor* visitor)override;
+
+				static vl::Ptr<JsonObject> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			};
+
+			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> JsonConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
+			extern vl::Ptr<vl::parsing::tabling::ParsingTable> JsonLoadTable();
+
+			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+		}
+	}
+}
+#endif
+
+/***********************************************************************
+PARSING\JSON\PARSINGJSON.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parser::ParsingJson_Parser
+
+***********************************************************************/
+
+#ifndef VCZH_PARSING_JSON_PARSINGJSON
+#define VCZH_PARSING_JSON_PARSINGJSON
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace json
+		{
+			extern void						JsonEscapeString(const WString& text, stream::TextWriter& writer);
+			extern void						JsonUnescapeString(const WString& text, stream::TextWriter& writer);
+			extern void						JsonPrint(Ptr<JsonNode> node, stream::TextWriter& writer);
+			extern WString					JsonToString(Ptr<JsonNode> node);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+STREAM\MEMORYSTREAM.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Stream::MemoryStream
+
+Interfaces:
+	MemoryStream					：内存流
+***********************************************************************/
+
+#ifndef VCZH_STREAM_MEMORYSTREAM
+#define VCZH_STREAM_MEMORYSTREAM
+
+
+namespace vl
+{
+	namespace stream
+	{
+		class MemoryStream : public Object, public virtual IStream
+		{
+		protected:
+			vint					block;
+			char*					buffer;
+			vint					size;
+			vint					position;
+			vint					capacity;
+
+			void					PrepareSpace(vint totalSpace);
+		public:
+			MemoryStream(vint _block=65536);
+			~MemoryStream();
+
+			bool					CanRead()const;
+			bool					CanWrite()const;
+			bool					CanSeek()const;
+			bool					CanPeek()const;
+			bool					IsLimited()const;
+			bool					IsAvailable()const;
+			void					Close();
+			pos_t					Position()const;
+			pos_t					Size()const;
+			void					Seek(pos_t _size);
+			void					SeekFromBegin(pos_t _size);
+			void					SeekFromEnd(pos_t _size);
+			vint					Read(void* _buffer, vint _size);
+			vint					Write(void* _buffer, vint _size);
+			vint					Peek(void* _buffer, vint _size);
+			void*					GetInternalBuffer();
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSINGDEFINITIONS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Definitions
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGDEFINITIONS
+#define VCZH_PARSING_PARSINGDEFINITIONS
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace definitions
+		{
+
+/***********************************************************************
+类型结构
+***********************************************************************/
+
+			class ParsingDefinitionPrimitiveType;
+			class ParsingDefinitionTokenType;
+			class ParsingDefinitionSubType;
+			class ParsingDefinitionArrayType;
+
+			class ParsingDefinitionType : public ParsingTreeCustomBase
+			{
+			public:
+				class IVisitor : public Interface
+				{
+				public:
+					virtual void								Visit(ParsingDefinitionPrimitiveType* node)=0;
+					virtual void								Visit(ParsingDefinitionTokenType* node)=0;
+					virtual void								Visit(ParsingDefinitionSubType* node)=0;
+					virtual void								Visit(ParsingDefinitionArrayType* node)=0;
+				};
+
+				virtual void									Accept(IVisitor* visitor)=0;
+			};
+
+			class ParsingDefinitionPrimitiveType : public ParsingDefinitionType
+			{
+			public:
+				WString											name;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionTokenType : public ParsingDefinitionType
+			{
+			public:
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionSubType : public ParsingDefinitionType
+			{
+			public:
+				Ptr<ParsingDefinitionType>						parentType;
+				WString											subTypeName;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionArrayType : public ParsingDefinitionType
+			{
+			public:
+				Ptr<ParsingDefinitionType>						elementType;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+/***********************************************************************
+数据结构
+***********************************************************************/
+
+			class ParsingDefinitionClassMemberDefinition;
+			class ParsingDefinitionClassDefinition;
+			class ParsingDefinitionEnumMemberDefinition;
+			class ParsingDefinitionEnumDefinition;
+
+			class ParsingDefinitionTypeDefinition : public ParsingTreeCustomBase
+			{
+			public:
+				class IVisitor : public Interface
+				{
+				public:
+					virtual void								Visit(ParsingDefinitionClassMemberDefinition* node)=0;
+					virtual void								Visit(ParsingDefinitionClassDefinition* node)=0;
+					virtual void								Visit(ParsingDefinitionEnumMemberDefinition* node)=0;
+					virtual void								Visit(ParsingDefinitionEnumDefinition* node)=0;
+				};
+
+				virtual void									Accept(IVisitor* visitor)=0;
+			public:
+				WString											name;
+			};
+
+			class ParsingDefinitionClassMemberDefinition : public ParsingDefinitionTypeDefinition
+			{
+			public:
+				Ptr<ParsingDefinitionType>						type;
+				WString											unescapingFunction;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionClassDefinition : public ParsingDefinitionTypeDefinition
+			{
+			public:
+				typedef collections::List<Ptr<ParsingDefinitionClassMemberDefinition>>	MemberList;
+				typedef collections::List<Ptr<ParsingDefinitionTypeDefinition>>			TypeList;
+
+				Ptr<ParsingDefinitionType>						parentType;
+				MemberList										members;
+				TypeList										subTypes;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionEnumMemberDefinition : public ParsingDefinitionTypeDefinition
+			{
+			public:
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionEnumDefinition : public ParsingDefinitionTypeDefinition
+			{
+			public:
+				typedef collections::List<Ptr<ParsingDefinitionEnumMemberDefinition>>	MemberList;
+
+				MemberList										members;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionPrimitiveGrammar;
+			class ParsingDefinitionTextGrammar;
+			class ParsingDefinitionSequenceGrammar;
+			class ParsingDefinitionAlternativeGrammar;
+			class ParsingDefinitionLoopGrammar;
+			class ParsingDefinitionOptionalGrammar;
+			class ParsingDefinitionCreateGrammar;
+			class ParsingDefinitionAssignGrammar;
+			class ParsingDefinitionUseGrammar;
+			class ParsingDefinitionSetterGrammar;
+
+			class ParsingDefinitionGrammar : public ParsingTreeCustomBase
+			{
+			public:
+				class IVisitor : public Interface
+				{
+				public:
+					virtual void								Visit(ParsingDefinitionPrimitiveGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionTextGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionSequenceGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionAlternativeGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionLoopGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionOptionalGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionCreateGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionAssignGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionUseGrammar* node)=0;
+					virtual void								Visit(ParsingDefinitionSetterGrammar* node)=0;
+				};
+
+				virtual void									Accept(IVisitor* visitor)=0;
+			};
+
+/***********************************************************************
+文法规则
+***********************************************************************/
+
+			class ParsingDefinitionPrimitiveGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				WString											name;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionTextGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				WString											text;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionSequenceGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					first;
+				Ptr<ParsingDefinitionGrammar>					second;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionAlternativeGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					first;
+				Ptr<ParsingDefinitionGrammar>					second;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionLoopGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionOptionalGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionCreateGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+				Ptr<ParsingDefinitionType>						type;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionAssignGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+				WString											memberName;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionUseGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+			class ParsingDefinitionSetterGrammar : public ParsingDefinitionGrammar
+			{
+			public:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+				WString											memberName;
+				WString											value;
+
+				void											Accept(IVisitor* visitor)override;
+			};
+
+/***********************************************************************
+文法结构
+***********************************************************************/
+
+			class ParsingDefinitionTokenDefinition : public ParsingTreeCustomBase
+			{
+			public:
+				WString											name;
+				WString											regex;
+				bool											discard;
+			};
+
+			class ParsingDefinitionRuleDefinition : public ParsingTreeCustomBase
+			{
+			public:
+				WString															name;
+				Ptr<ParsingDefinitionType>										type;
+				collections::List<Ptr<ParsingDefinitionGrammar>>				grammars;
+			};
+
+			class ParsingDefinition : public ParsingTreeCustomBase
+			{
+			public:
+				collections::List<Ptr<ParsingDefinitionTypeDefinition>>			types;
+				collections::List<Ptr<ParsingDefinitionTokenDefinition>>		tokens;
+				collections::List<Ptr<ParsingDefinitionRuleDefinition>>			rules;
+			};
+
+/***********************************************************************
+构造器（类型）
+***********************************************************************/
+
+			class ParsingDefinitionTypeWriter : public Object
+			{
+				friend ParsingDefinitionTypeWriter				Type(const WString& name);
+				friend ParsingDefinitionTypeWriter				TokenType();
+			protected:
+				Ptr<ParsingDefinitionType>						type;
+
+				ParsingDefinitionTypeWriter(Ptr<ParsingDefinitionType> internalType);
+				ParsingDefinitionTypeWriter(const WString& name);
+			public:
+				ParsingDefinitionTypeWriter(const ParsingDefinitionTypeWriter& typeWriter);
+
+				ParsingDefinitionTypeWriter						Sub(const WString& subTypeName)const;
+				ParsingDefinitionTypeWriter						Array()const;
+				Ptr<ParsingDefinitionType>						Type()const;
+			};
+
+			extern ParsingDefinitionTypeWriter					Type(const WString& name);
+			extern ParsingDefinitionTypeWriter					TokenType();
+
+/***********************************************************************
+构造器（类型定义）
+***********************************************************************/
+
+			class ParsingDefinitionTypeDefinitionWriter : public Object
+			{
+			public:
+				virtual Ptr<ParsingDefinitionTypeDefinition>	Definition()const=0;
+			};
+
+			class ParsingDefinitionClassDefinitionWriter : public ParsingDefinitionTypeDefinitionWriter
+			{
+			protected:
+				Ptr<ParsingDefinitionClassDefinition>			definition;
+
+			public:
+				ParsingDefinitionClassDefinitionWriter(const WString& name);
+				ParsingDefinitionClassDefinitionWriter(const WString& name, const ParsingDefinitionTypeWriter& parentType);
+
+				ParsingDefinitionClassDefinitionWriter&			Member(const WString& name, const ParsingDefinitionTypeWriter& type, const WString& unescapingFunction=L"");
+				ParsingDefinitionClassDefinitionWriter&			SubType(const ParsingDefinitionTypeDefinitionWriter& type);
+
+				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
+			};
+			
+			extern ParsingDefinitionClassDefinitionWriter		Class(const WString& name);
+			extern ParsingDefinitionClassDefinitionWriter		Class(const WString& name, const ParsingDefinitionTypeWriter& parentType);
+
+			class ParsingDefinitionEnumDefinitionWriter : public ParsingDefinitionTypeDefinitionWriter
+			{
+			protected:
+				Ptr<ParsingDefinitionEnumDefinition>			definition;
+
+			public:
+				ParsingDefinitionEnumDefinitionWriter(const WString& name);
+
+				ParsingDefinitionEnumDefinitionWriter&			Member(const WString& name);
+
+				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
+			};
+
+			extern ParsingDefinitionEnumDefinitionWriter		Enum(const WString& name);
+
+/***********************************************************************
+构造器（文法规则）
+***********************************************************************/
+
+			class ParsingDefinitionGrammarWriter : public Object
+			{
+				friend ParsingDefinitionGrammarWriter			Rule(const WString& name);
+				friend ParsingDefinitionGrammarWriter			Text(const WString& name);
+				friend ParsingDefinitionGrammarWriter			Opt(const ParsingDefinitionGrammarWriter& writer);
+			protected:
+				Ptr<ParsingDefinitionGrammar>					grammar;
+
+				ParsingDefinitionGrammarWriter(Ptr<ParsingDefinitionGrammar> internalGrammar);
+			public:
+				ParsingDefinitionGrammarWriter(const ParsingDefinitionGrammarWriter& grammarWriter);
+
+				ParsingDefinitionGrammarWriter					operator+(const ParsingDefinitionGrammarWriter& next)const;
+				ParsingDefinitionGrammarWriter					operator|(const ParsingDefinitionGrammarWriter& next)const;
+				ParsingDefinitionGrammarWriter					operator*()const;
+				ParsingDefinitionGrammarWriter					As(const ParsingDefinitionTypeWriter& type)const;
+				ParsingDefinitionGrammarWriter					operator[](const WString& memberName)const;
+				ParsingDefinitionGrammarWriter					operator!()const;
+				ParsingDefinitionGrammarWriter					Set(const WString& memberName, const WString& value)const;
+
+				Ptr<ParsingDefinitionGrammar>					Grammar()const;
+			};
+
+			extern ParsingDefinitionGrammarWriter				Rule(const WString& name);
+			extern ParsingDefinitionGrammarWriter				Text(const WString& text);
+			extern ParsingDefinitionGrammarWriter				Opt(const ParsingDefinitionGrammarWriter& writer);
+
+/***********************************************************************
+构造器（文法结构）
+***********************************************************************/
+
+			class ParsingDefinitionWriter;
+
+			class ParsingDefinitionRuleDefinitionWriter : public Object
+			{
+			protected:
+				Ptr<ParsingDefinitionRuleDefinition>			rule;
+				ParsingDefinitionWriter&						owner;
+			public:
+				ParsingDefinitionRuleDefinitionWriter(ParsingDefinitionWriter& _owner, Ptr<ParsingDefinitionRuleDefinition> _rule);
+
+				ParsingDefinitionRuleDefinitionWriter&			Imply(const ParsingDefinitionGrammarWriter& grammar);
+				ParsingDefinitionWriter&						EndRule();
+			};
+
+			class ParsingDefinitionWriter : public Object
+			{
+			protected:
+				Ptr<ParsingDefinition>							definition;
+
+			public:
+				ParsingDefinitionWriter();
+
+				ParsingDefinitionWriter&						Type(const ParsingDefinitionTypeDefinitionWriter& type);
+				ParsingDefinitionWriter&						Token(const WString& name, const WString& regex);
+				ParsingDefinitionWriter&						Discard(const WString& name, const WString& regex);
+				ParsingDefinitionRuleDefinitionWriter			Rule(const WString& name, const ParsingDefinitionTypeWriter& type);
+
+				Ptr<ParsingDefinition>							Definition()const;
+			};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+			extern WString										TypeToString(ParsingDefinitionType* type);
+			extern WString										GrammarToString(ParsingDefinitionGrammar* grammar);
+			extern WString										GrammarStateToString(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
+			extern ParsingDefinitionGrammar*					FindAppropriateGrammarState(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
+			extern void											Log(Ptr<ParsingDefinition> definition, stream::TextWriter& writer);
+
+/***********************************************************************
+自举
+***********************************************************************/
+			
+			extern Ptr<ParsingDefinition>						CreateParserDefinition();
+			extern Ptr<ParsingDefinition>						DeserializeDefinition(Ptr<ParsingTreeNode> node);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSINGANALYZER.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Analyzing
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGANALYZER
+#define VCZH_PARSING_PARSINGANALYZER
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace analyzing
+		{
+
+/***********************************************************************
+符号表关联对象
+***********************************************************************/
+
+			class ParsingSymbol;
+
+			struct DefinitionTypeScopePair
+			{
+				definitions::ParsingDefinitionType*		type;
+				ParsingSymbol*							scope;
+
+				DefinitionTypeScopePair()
+				{
+				}
+
+				DefinitionTypeScopePair(definitions::ParsingDefinitionType* _type, ParsingSymbol* _scope)
+					:type(_type)
+					,scope(_scope)
+				{
+				}
+
+				vint Compare(const DefinitionTypeScopePair& pair)
+				{
+					if(type<pair.type) return -1;
+					if(type>pair.type) return 1;
+					if(scope<pair.scope) return -1;
+					if(scope>pair.scope) return 1;
+					return 0;
+				}
+
+				bool operator==(const DefinitionTypeScopePair& pair){return Compare(pair)==0;}
+				bool operator!=(const DefinitionTypeScopePair& pair){return Compare(pair)!=0;}
+				bool operator>(const DefinitionTypeScopePair& pair){return Compare(pair)>0;}
+				bool operator>=(const DefinitionTypeScopePair& pair){return Compare(pair)>=0;}
+				bool operator<(const DefinitionTypeScopePair& pair){return Compare(pair)<0;}
+				bool operator<=(const DefinitionTypeScopePair& pair){return Compare(pair)<=0;}
+			};
+
+/***********************************************************************
+符号表
+***********************************************************************/
+
+			class ParsingSymbol : public Object
+			{
+				friend class ParsingSymbolManager;
+
+				typedef collections::Dictionary<WString, ParsingSymbol*>		ParsingSymbolMap;
+				typedef collections::List<ParsingSymbol*>						ParsingSymbolList;
+			public:
+				enum SymbolType
+				{
+					Global,
+					EnumType,
+					ClassType,		// descriptor == base type
+					ArrayType,		// descriptor == element type
+					TokenType,
+					EnumItem,		// descriptor == parent
+					ClassField,		// descriptor == field type
+					TokenDef,		// descriptor == token type
+					RuleDef,		// descriptor == rule type
+				};
+
+			protected:
+				ParsingSymbolManager*			manager;
+				SymbolType						type;
+				WString							name;
+				ParsingSymbol*					descriptorSymbol;
+				WString							descriptorString;
+				ParsingSymbol*					parentSymbol;
+				ParsingSymbol*					arrayTypeSymbol;
+				ParsingSymbolList				subSymbolList;
+				ParsingSymbolMap				subSymbolMap;
+
+				bool							AddSubSymbol(ParsingSymbol* subSymbol);
+
+				ParsingSymbol(ParsingSymbolManager* _manager, SymbolType _type, const WString& _name, ParsingSymbol* _descriptorSymbol, const WString& _descriptorString);
+			public:
+				~ParsingSymbol();
+
+				ParsingSymbolManager*			GetManager();
+				SymbolType						GetType();
+				const WString&					GetName();
+				vint							GetSubSymbolCount();
+				ParsingSymbol*					GetSubSymbol(vint index);
+				ParsingSymbol*					GetSubSymbolByName(const WString& name);
+				ParsingSymbol*					GetDescriptorSymbol();
+				WString							GetDescriptorString();
+				ParsingSymbol*					GetParentSymbol();
+				bool							IsType();
+				ParsingSymbol*					SearchClassSubSymbol(const WString& name);
+				ParsingSymbol*					SearchCommonBaseClass(ParsingSymbol* classType);
+			};
+
+			class ParsingSymbolManager : public Object
+			{
+
+				typedef collections::List<Ptr<ParsingSymbol>>												ParsingSymbolList;
+				typedef collections::Dictionary<DefinitionTypeScopePair, ParsingSymbol*>					DefinitionTypeSymbolMap;
+				typedef collections::Dictionary<definitions::ParsingDefinitionGrammar*, ParsingSymbol*>		DefinitionGrammarSymbolMap;
+			protected:
+				ParsingSymbol*					globalSymbol;
+				ParsingSymbol*					tokenTypeSymbol;
+				ParsingSymbolList				createdSymbols;
+				DefinitionTypeSymbolMap			definitionTypeSymbolCache;
+				DefinitionGrammarSymbolMap		definitionGrammarSymbolCache;
+				DefinitionGrammarSymbolMap		definitionGrammarTypeCache;
+
+				ParsingSymbol*					TryAddSubSymbol(Ptr<ParsingSymbol> subSymbol, ParsingSymbol* parentSymbol);
+			public:
+				ParsingSymbolManager();
+				~ParsingSymbolManager();
+
+				ParsingSymbol*					GetGlobal();
+				ParsingSymbol*					GetTokenType();
+				ParsingSymbol*					GetArrayType(ParsingSymbol* elementType);
+
+				ParsingSymbol*					AddClass(const WString& name, ParsingSymbol* baseType, ParsingSymbol* parentType=0);
+				ParsingSymbol*					AddField(const WString& name, ParsingSymbol* classType, ParsingSymbol* fieldType);
+				ParsingSymbol*					AddEnum(const WString& name, ParsingSymbol* parentType=0);
+				ParsingSymbol*					AddEnumItem(const WString& name, ParsingSymbol* enumType);
+				ParsingSymbol*					AddTokenDefinition(const WString& name, const WString& regex);
+				ParsingSymbol*					AddRuleDefinition(const WString& name, ParsingSymbol* ruleType);
+
+				ParsingSymbol*					CacheGetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope);
+				bool							CacheSetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope, ParsingSymbol* symbol);
+				ParsingSymbol*					CacheGetSymbol(definitions::ParsingDefinitionGrammar* grammar);
+				bool							CacheSetSymbol(definitions::ParsingDefinitionGrammar* grammar, ParsingSymbol* symbol);
+				ParsingSymbol*					CacheGetType(definitions::ParsingDefinitionGrammar* grammar);
+				bool							CacheSetType(definitions::ParsingDefinitionGrammar* grammar, ParsingSymbol* type);
+			};
+
+/***********************************************************************
+语义分析
+***********************************************************************/
+
+			extern WString						GetTypeFullName(ParsingSymbol* type);
+			extern ParsingSymbol*				FindType(definitions::ParsingDefinitionType* type, ParsingSymbolManager* manager, ParsingSymbol* scope, collections::List<Ptr<ParsingError>>& errors);
+			extern void							PrepareSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+			extern void							ValidateRuleStructure(Ptr<definitions::ParsingDefinition> definition, Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+			extern void							ResolveRuleSymbols(Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+			extern void							ResolveSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+			extern void							ValidateDefinition(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+PARSING\PARSINGAUTOMATON.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Parsing::Automaton
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_PARSING_PARSINGAUTOMATON
+#define VCZH_PARSING_PARSINGAUTOMATON
+
+
+namespace vl
+{
+	namespace parsing
+	{
+		namespace analyzing
+		{
+
+/***********************************************************************
+状态机
+***********************************************************************/
+
+			class Action;
+			class Transition;
+			class State;
+
+			class Action : public Object
+			{
+			public:
+				enum ActionType
+				{
+					Create, // new source
+					Assign, // source ::= <created symbol>
+					Using,  // use <created symbol>
+					Setter, // source ::= target
+					Shift,
+					Reduce,
+					LeftRecursiveReduce,
+				};
+
+				ActionType											actionType;
+				ParsingSymbol*										actionTarget;
+				ParsingSymbol*										actionSource;
+
+				// the following two fields record which rule symbol transition generate this shift/reduce action
+				State*												shiftReduceSource;
+				State*												shiftReduceTarget;
+
+				Action();
+				~Action();
+			};
+
+			class Transition : public Object
+			{
+			public:
+				enum TransitionType
+				{
+					TokenBegin,		// token stream start
+					TokenFinish,	// token stream end
+					TryReduce,		// rule end
+					Epsilon,		// an epsilon transition
+					Symbol,			// a syntax symbol
+				};
+
+				enum StackOperationType
+				{
+					None,
+					ShiftReduceCompacted,
+					LeftRecursive,
+				};
+
+				State*												source;
+				State*												target;
+				collections::List<Ptr<Action>>						actions;
+				
+				TransitionType										transitionType;
+				StackOperationType									stackOperationType;
+				ParsingSymbol*										transitionSymbol;
+
+				Transition();
+				~Transition();
+
+				static bool											IsEquivalent(Transition* t1, Transition* t2, bool careSourceAndTarget);
+			};
+
+			class State : public Object
+			{
+			public:
+				enum StatePosition
+				{
+					BeforeNode,
+					AfterNode,
+				};
+
+				collections::List<Transition*>						transitions;
+				collections::List<Transition*>						inputs;
+				bool												endState;
+
+				ParsingSymbol*										ownerRuleSymbol;
+				definitions::ParsingDefinitionRuleDefinition*		ownerRule;
+				definitions::ParsingDefinitionGrammar*				grammarNode;
+				definitions::ParsingDefinitionGrammar*				stateNode;
+				StatePosition										statePosition;
+				WString												stateName;
+				WString												stateExpression;
+
+				State();
+				~State();
+			};
+
+			class RuleInfo : public Object
+			{
+			public:
+				State*												rootRuleStartState;
+				State*												rootRuleEndState;
+				State*												startState;
+				collections::List<State*>							endStates;
+				int													stateNameCount;
+
+				RuleInfo();
+				~RuleInfo();
+			};
+
+			class Automaton : public Object
+			{
+				typedef collections::Dictionary<definitions::ParsingDefinitionRuleDefinition*, Ptr<RuleInfo>>		RuleInfoMap;
+			public:
+				ParsingSymbolManager*								symbolManager;
+				collections::List<Ptr<Transition>>					transitions;
+				collections::List<Ptr<State>>						states;
+				RuleInfoMap											ruleInfos;
+
+				Automaton(ParsingSymbolManager* _symbolManager);
+				~Automaton();
+
+				State*												RuleStartState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
+				State*												RootRuleStartState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
+				State*												RootRuleEndState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
+				State*												StartState(definitions::ParsingDefinitionRuleDefinition* ownerRule, definitions::ParsingDefinitionGrammar* grammarNode, definitions::ParsingDefinitionGrammar* stateNode);
+				State*												EndState(definitions::ParsingDefinitionRuleDefinition* ownerRule, definitions::ParsingDefinitionGrammar* grammarNode, definitions::ParsingDefinitionGrammar* stateNode);
+				State*												CopyState(State* oldState);
+
+				Transition*											CreateTransition(State* start, State* end);
+				Transition*											TokenBegin(State* start, State* end);
+				Transition*											TokenFinish(State* start, State* end);
+				Transition*											TryReduce(State* start, State* end);
+				Transition*											Epsilon(State* start, State* end);
+				Transition*											Symbol(State* start, State* end, ParsingSymbol* transitionSymbol);
+				Transition*											CopyTransition(State* start, State* end, Transition* oldTransition);
+
+				void												DeleteTransition(Transition* transition);
+				void												DeleteState(State* state);
+			};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+			namespace closure_searching
+			{
+				struct ClosureItem
+				{
+					State*											state;			// target state of one path of a closure
+					Ptr<collections::List<Transition*>>				transitions;	// path
+					bool											cycle;			// true: invalid closure because there are cycles, and in the middle of the path there will be a transition that targets to the state field.
+
+					ClosureItem()
+						:state(0)
+						,cycle(false)
+					{
+					}
+
+					ClosureItem(State* _state, Ptr<collections::List<Transition*>> _transitions, bool _cycle)
+						:state(_state)
+						,transitions(_transitions)
+						,cycle(_cycle)
+					{
+					}
+				};
+
+				enum ClosureSearchResult
+				{
+					Continue,
+					Hit,
+					Blocked,
+				};
+
+				extern void											SearchClosure(ClosureSearchResult(*closurePredicate)(Transition*), State* startState, collections::List<ClosureItem>& closure);
+			}
+
+			extern Ptr<Automaton>									CreateEpsilonPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager);
+			extern void												RemoveEpsilonTransitions(collections::Dictionary<State*, State*>& oldNewStateMap, collections::List<State*>& scanningStates, Ptr<Automaton> automaton);
+			extern Ptr<Automaton>									CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA);
+			extern Ptr<Automaton>									CreateJointPDAFromNondeterministicPDA(Ptr<Automaton> nondeterministicPDA);
+			extern void												CompactJointPDA(Ptr<Automaton> jointPDA);
+			extern void												MarkLeftRecursiveInJointPDA(Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
+
+			extern WString											GetTypeNameForCreateInstruction(ParsingSymbol* type);
+			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
+			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, collections::List<Ptr<ParsingError>>& errors);
+			extern void												Log(Ptr<Automaton> automaton, stream::TextWriter& writer);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+REGEX\REGEXDATA.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Regex::Basic Data Structure
+
+Classes:
+***********************************************************************/
+
+#ifndef VCZH_REGEX_REGEXDATA
+#define VCZH_REGEX_REGEXDATA
+
+
+namespace vl
+{
+	namespace regex_internal
+	{
+		using namespace vl::collections;
+
+/***********************************************************************
+基础数据结构
+***********************************************************************/
+
+		class CharRange
+		{
+		public:
+			typedef SortedList<CharRange>			List;
+
+			wchar_t					begin;
+			wchar_t					end;
+
+			CharRange();
+			CharRange(wchar_t _begin, wchar_t _end);
+
+			bool					operator<(CharRange item)const;
+			bool					operator<=(CharRange item)const;
+			bool					operator>(CharRange item)const;
+			bool					operator>=(CharRange item)const;
+			bool					operator==(CharRange item)const;
+			bool					operator!=(CharRange item)const;
+
+			bool					operator<(wchar_t item)const;
+			bool					operator<=(wchar_t item)const;
+			bool					operator>(wchar_t item)const;
+			bool					operator>=(wchar_t item)const;
+			bool					operator==(wchar_t item)const;
+			bool					operator!=(wchar_t item)const;
+		};
+	}
+
+	template<>
+	struct POD<regex_internal::CharRange>
+	{
+		static const bool Result=true;
+	};
+}
+
+#endif
+
+/***********************************************************************
+REGEX\REGEXAUTOMATON.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Regex::RegexAutomaton
+
+Classes:
+	State						：状态
+	Transition					：转换
+	Automaton					：状态机
+
+Functions:
+	EpsilonNfaToNfa				：去Epsilon
+	NfaToDfa					：NFA转DFA
+***********************************************************************/
+
+#ifndef VCZH_REGEX_REGEXAUTOMATON
+#define VCZH_REGEX_REGEXAUTOMATON
+
+
+namespace vl
+{
+	namespace regex_internal
+	{
+		class State;
+		class Transition;
+
+		class Transition
+		{
+		public:
+			enum Type
+			{
+				Chars,				//range为字符范围
+				Epsilon,
+				BeginString,
+				EndString,
+				Nop,				//无动作（不可消除epsilon，用来控制优先级）
+				Capture,			//capture为捕获频道
+				Match,				//capture为捕获频道，index为匹配的位置，-1代表匹配频道下面的所有项目
+				Positive,			//正向匹配
+				Negative,			//反向匹配
+				NegativeFail,		//反向匹配失败
+				End					//Capture, Position, Negative
+			};
+
+			State*					source;
+			State*					target;
+			CharRange				range;
+			Type					type;
+			vint						capture;
+			vint						index;
+		};
+
+		class State
+		{
+		public:
+			List<Transition*>		transitions;
+			List<Transition*>		inputs;
+			bool					finalState;
+			void*					userData;
+		};
+
+		class Automaton
+		{
+		public:
+			typedef Ptr<Automaton>		Ref;
+
+			List<Ptr<State>>		states;
+			List<Ptr<Transition>>	transitions;
+			List<WString>			captureNames;
+			State*					startState;
+
+			Automaton();
+
+			State*					NewState();
+			Transition*				NewTransition(State* start, State* end);
+			Transition*				NewChars(State* start, State* end, CharRange range);
+			Transition*				NewEpsilon(State* start, State* end);
+			Transition*				NewBeginString(State* start, State* end);
+			Transition*				NewEndString(State* start, State* end);
+			Transition*				NewNop(State* start, State* end);
+			Transition*				NewCapture(State* start, State* end, vint capture);
+			Transition*				NewMatch(State* start, State* end, vint capture, vint index=-1);
+			Transition*				NewPositive(State* start, State* end);
+			Transition*				NewNegative(State* start, State* end);
+			Transition*				NewNegativeFail(State* start, State* end);
+			Transition*				NewEnd(State* start, State* end);
+		};
+
+		extern bool					PureEpsilonChecker(Transition* transition);
+		extern bool					RichEpsilonChecker(Transition* transition);
+		extern bool					AreEqual(Transition* transA, Transition* transB);
+		extern Automaton::Ref		EpsilonNfaToNfa(Automaton::Ref source, bool(*epsilonChecker)(Transition*), Dictionary<State*, State*>& nfaStateMap);
+		extern Automaton::Ref		NfaToDfa(Automaton::Ref source, Group<State*, State*>& dfaStateMap);
+	}
+}
+
+#endif
+
+/***********************************************************************
+REGEX\REGEXEXPRESSION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Regex::RegexExpression
+
+Classes:
+	Expression						：表达式基类					|
+	CharSetExpression				：字符集表达式				| a, [a-b], [^a-b0_9], \.rnt\/()+*?{}[]<>^$!=SsDdLlWw, [\rnt-[]\/^$]
+	LoopExpression					：循环表达式					| a{3}, a{3,}, a{1,3}, a+, a*, a?, LOOP?
+	SequenceExpression				：顺序表达式					| ab
+	AlternateExpression				：选择表达式					| a|b
+	BeginExpression					：【非纯】字符串起始表达式	| ^
+	EndExpression					：【非纯】字符串末尾表达式	| $
+	CaptureExpression				：【非纯】捕获表达式			| (<name>expr), (?expr)
+	MatchExpression					：【非纯】匹配表达式			| (<$name>), (<$name;i>), (<$i>)
+	PositiveExpression				：【非纯】正向预查表达式		| (=expr)
+	NegativeExpression				：【非纯】反向预查表达式		| (!expr)
+	UsingExpression					：引用表达式					| (<#name1>expr)...(<&name1>)...
+
+	RegexExpression					：正则表达式
+
+Functions:
+	ParseRegexExpression			：将字符串分析为RegexExpression对象，如果语法有问题则抛异常
+***********************************************************************/
+
+#ifndef VCZH_REGEX_REGEXEXPRESSION
+#define VCZH_REGEX_REGEXEXPRESSION
+
+
+namespace vl
+{
+	namespace regex_internal
+	{
+		class IRegexExpressionAlgorithm;
+
+/***********************************************************************
+正则表达式表达式树
+***********************************************************************/
+
+		class Expression : public Object, private NotCopyable
+		{
+		public:
+			typedef Ptr<Expression>								Ref;
+			typedef Dictionary<WString, Expression::Ref>		Map;
+
+			virtual void				Apply(IRegexExpressionAlgorithm& algorithm)=0;
+			bool						IsEqual(Expression* expression);
+			bool						HasNoExtension();
+			bool						CanTreatAsPure();
+			void						NormalizeCharSet(CharRange::List& subsets);
+			void						CollectCharSet(CharRange::List& subsets);
+			void						ApplyCharSet(CharRange::List& subsets);
+			Automaton::Ref				GenerateEpsilonNfa();
+		};
+
+		class CharSetExpression : public Expression
+		{
+		public:
+			CharRange::List				ranges;
+			bool						reverse;
+
+			bool						AddRangeWithConflict(CharRange range);
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class LoopExpression : public Expression
+		{
+		public:
+			Expression::Ref				expression;		//被循环表达式
+			vint							min;			//下限
+			vint							max;			//上限，-1代表无限
+			bool						preferLong;		//长匹配优先
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class SequenceExpression : public Expression
+		{
+		public:
+			Expression::Ref				left;			//左表达式
+			Expression::Ref				right;			//右表达式
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class AlternateExpression : public Expression
+		{
+		public:
+			Expression::Ref				left;			//左表达式
+			Expression::Ref				right;			//右表达式
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class BeginExpression: public Expression
+		{
+		public:
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class EndExpression : public Expression
+		{
+		public:
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class CaptureExpression : public Expression
+		{
+		public:
+			WString						name;			//捕获名，空代表缺省捕获
+			Expression::Ref				expression;		//被捕获表达式
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class MatchExpression : public Expression
+		{
+		public:
+			WString						name;			//捕获名，空代表缺省捕获
+			vint							index;			//捕获序号，-1代表非空捕获的所有项
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class PositiveExpression : public Expression
+		{
+		public:
+			Expression::Ref				expression;		//正向匹配表达式
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class NegativeExpression : public Expression
+		{
+		public:
+			Expression::Ref				expression;		//反向匹配表达式
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class UsingExpression : public Expression
+		{
+		public:
+			WString						name;			//引用名
+
+			void						Apply(IRegexExpressionAlgorithm& algorithm);
+		};
+
+		class RegexExpression : public Object, private NotCopyable
+		{
+		public:
+			typedef Ptr<RegexExpression>						Ref;
+
+			Expression::Map				definitions;	//命名子表达式
+			Expression::Ref				expression;		//主表达式
+
+			Expression::Ref				Merge();
+		};
+
+/***********************************************************************
+算法基类
+***********************************************************************/
+
+		class IRegexExpressionAlgorithm : public Interface
+		{
+		public:
+			virtual void				Visit(CharSetExpression* expression)=0;
+			virtual void				Visit(LoopExpression* expression)=0;
+			virtual void				Visit(SequenceExpression* expression)=0;
+			virtual void				Visit(AlternateExpression* expression)=0;
+			virtual void				Visit(BeginExpression* expression)=0;
+			virtual void				Visit(EndExpression* expression)=0;
+			virtual void				Visit(CaptureExpression* expression)=0;
+			virtual void				Visit(MatchExpression* expression)=0;
+			virtual void				Visit(PositiveExpression* expression)=0;
+			virtual void				Visit(NegativeExpression* expression)=0;
+			virtual void				Visit(UsingExpression* expression)=0;
+		};
+
+		template<typename ReturnType, typename ParameterType=void*>
+		class RegexExpressionAlgorithm : public Object, public IRegexExpressionAlgorithm
+		{
+		private:
+			ReturnType					returnValue;
+			ParameterType*				parameterValue;
+		public:
+
+			ReturnType Invoke(Expression* expression, ParameterType parameter)
+			{
+				parameterValue=&parameter;
+				expression->Apply(*this);
+				return returnValue;
+			}
+
+			ReturnType Invoke(Expression::Ref expression, ParameterType parameter)
+			{
+				parameterValue=&parameter;
+				expression->Apply(*this);
+				return returnValue;
+			}
+
+			virtual ReturnType			Apply(CharSetExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(LoopExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(SequenceExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(AlternateExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(BeginExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(EndExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(CaptureExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(MatchExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(PositiveExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(NegativeExpression* expression, ParameterType parameter)=0;
+			virtual ReturnType			Apply(UsingExpression* expression, ParameterType parameter)=0;
+		public:
+			void Visit(CharSetExpression* expression)
+			{
+				returnValue=Apply(expression, *parameterValue);
+			}
+
+			void Visit(LoopExpression* expression)
+			{
+				returnValue=Apply(expression, *parameterValue);
+			}
+
+			void Visit(SequenceExpression* expression)
+			{
+				returnValue=Apply(expression, *parameterValue);
+			}
+
+			void Visit(AlternateExpression* expression)
+			{
+				returnValue=Apply(expression, *parameterValue);
+			}
+
+			void Visit(BeginExpression* expression)
+			{
+				returnValue=Apply(expression, *parameterValue);
+			}
+
+			void Visit(EndExpression* expression)
+			{
+				returnValue=Apply(expression, *parameterValue);
+			}
+
+			void Visit(CaptureExpression* expression)
+			{
+				returnValue=Apply(expression, *parameterValue);
+			}
+
+			void Visit(MatchExpression* expression)
+			{
+				returnValue=Apply(expression, *parameterValue);
+			}
+
+			void Visit(PositiveExpression* expression)
+			{
+				returnValue=Apply(expression, *parameterValue);
+			}
+
+			void Visit(NegativeExpression* expression)
+			{
+				returnValue=Apply(expression, *parameterValue);
+			}
+
+			void Visit(UsingExpression* expression)
+			{
+				returnValue=Apply(expression, *parameterValue);
+			}
+		};
+
+		template<typename ParameterType>
+		class RegexExpressionAlgorithm<void, ParameterType> : public Object, public IRegexExpressionAlgorithm
+		{
+		private:
+			ParameterType*				parameterValue;
+		public:
+
+			void Invoke(Expression* expression, ParameterType parameter)
+			{
+				parameterValue=&parameter;
+				expression->Apply(*this);
+			}
+
+			void Invoke(Expression::Ref expression, ParameterType parameter)
+			{
+				parameterValue=&parameter;
+				expression->Apply(*this);
+			}
+
+			virtual void				Apply(CharSetExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(LoopExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(SequenceExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(AlternateExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(BeginExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(EndExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(CaptureExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(MatchExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(PositiveExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(NegativeExpression* expression, ParameterType parameter)=0;
+			virtual void				Apply(UsingExpression* expression, ParameterType parameter)=0;
+		public:
+			void Visit(CharSetExpression* expression)
+			{
+				Apply(expression, *parameterValue);
+			}
+
+			void Visit(LoopExpression* expression)
+			{
+				Apply(expression, *parameterValue);
+			}
+
+			void Visit(SequenceExpression* expression)
+			{
+				Apply(expression, *parameterValue);
+			}
+
+			void Visit(AlternateExpression* expression)
+			{
+				Apply(expression, *parameterValue);
+			}
+
+			void Visit(BeginExpression* expression)
+			{
+				Apply(expression, *parameterValue);
+			}
+
+			void Visit(EndExpression* expression)
+			{
+				Apply(expression, *parameterValue);
+			}
+
+			void Visit(CaptureExpression* expression)
+			{
+				Apply(expression, *parameterValue);
+			}
+
+			void Visit(MatchExpression* expression)
+			{
+				Apply(expression, *parameterValue);
+			}
+
+			void Visit(PositiveExpression* expression)
+			{
+				Apply(expression, *parameterValue);
+			}
+
+			void Visit(NegativeExpression* expression)
+			{
+				Apply(expression, *parameterValue);
+			}
+
+			void Visit(UsingExpression* expression)
+			{
+				Apply(expression, *parameterValue);
+			}
+		};
+
+/***********************************************************************
+辅助函数
+***********************************************************************/
+
+		extern Ptr<LoopExpression>		ParseLoop(const wchar_t*& input);
+		extern Ptr<Expression>			ParseCharSet(const wchar_t*& input);
+		extern Ptr<Expression>			ParseFunction(const wchar_t*& input);
+		extern Ptr<Expression>			ParseUnit(const wchar_t*& input);
+		extern Ptr<Expression>			ParseJoin(const wchar_t*& input);
+		extern Ptr<Expression>			ParseAlt(const wchar_t*& input);
+		extern Ptr<Expression>			ParseExpression(const wchar_t*& input);
+		extern RegexExpression::Ref		ParseRegexExpression(const WString& code);
+
+		extern WString					EscapeTextForRegex(const WString& literalString);
+		extern WString					UnescapeTextForRegex(const WString& escapedText);
+		extern WString					NormalizeEscapedTextForRegex(const WString& escapedText);
+		extern bool						IsRegexEscapedListeralString(const WString& regex);
+	}
+}
+
+#endif
+
+/***********************************************************************
+COLLECTIONS\OPERATIONCOPYFROM.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Data Structure::Operations
+
+***********************************************************************/
+
+#ifndef VCZH_COLLECTIONS_OPERATIONCOPYFROM
+#define VCZH_COLLECTIONS_OPERATIONCOPYFROM
+
+
+namespace vl
+{
+	namespace collections
+	{
+
+/***********************************************************************
+容器复制
+***********************************************************************/
+
+		namespace copyfrom_internal
+		{
+			using namespace randomaccess_internal;
+
+			template<typename Ds, typename Ss, bool DsRA, bool SsRA>
+			struct CopyFromAlgorithm
+			{
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, true, true>
+			{
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					vint copyCount=RandomAccess<Ss>::GetCount(ss);
+					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
+					vint resizeCount=index+copyCount;
+					RandomAccess<Ds>::SetCount(ds, resizeCount);
+					for(vint i=0;i<copyCount;i++)
+					{
+						RandomAccess<Ds>::SetValue(ds, index+i, RandomAccess<Ss>::GetValue(ss, i));
+					}
+				}
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, false, true>
+			{
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					if(!append)
+					{
+						ds.Clear();
+					}
+					vint copyCount=RandomAccess<Ss>::GetCount(ss);
+					for(vint i=0;i<copyCount;i++)
+					{
+						RandomAccess<Ds>::AppendValue(ds, RandomAccess<Ss>::GetValue(ss, i));
+					}
+				}
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, true, false>
+			{
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					Ptr<IEnumerator<typename Ss::ElementType>> enumerator;
+					vint copyCount=0;
+
+					enumerator=ss.CreateEnumerator();
+					while(enumerator->Next())
+					{
+						copyCount++;
+					}
+
+					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
+					vint resizeCount=index+copyCount;
+					RandomAccess<Ds>::SetCount(ds, resizeCount);
+
+					enumerator=ss.CreateEnumerator();
+					while(enumerator->Next())
+					{
+						RandomAccess<Ds>::SetValue(ds, index++, enumerator->Current());
+					}
+				}
+			};
+
+			template<typename Ds, typename Ss>
+			struct CopyFromAlgorithm<Ds, Ss, false, false>
+			{
+				static void Perform(Ds& ds, const Ss& ss, bool append)
+				{
+					if(!append)
+					{
+						ds.Clear();
+					}
+					Ptr<IEnumerator<typename Ss::ElementType>> enumerator=ss.CreateEnumerator();
+					while(enumerator->Next())
+					{
+						RandomAccess<Ds>::AppendValue(ds, enumerator->Current());
+					}
+				}
+			};
+
+			template<typename T>
+			struct Slice
+			{
+				const T*	items;
+				vint		count;
+			};
+		}
+
+		namespace randomaccess_internal
+		{
+			template<typename T>
+			struct RandomAccessable<copyfrom_internal::Slice<T>>
+			{
+				static const bool							CanRead = true;
+				static const bool							CanResize = true;
+			};
+		
+			template<typename T>
+			struct RandomAccess<copyfrom_internal::Slice<T>>
+			{
+				static vint GetCount(const copyfrom_internal::Slice<T>& t)
+				{
+					return t.count;
+				}
+
+				static const T& GetValue(const copyfrom_internal::Slice<T>& t, vint index)
+				{
+					return t.items[index];
+				}
+			};
+		}
+
+		template<typename Ds, typename Ss>
+		void CopyFrom(Ds& ds, const Ss& ss, bool append=false)
+		{
+			copyfrom_internal::CopyFromAlgorithm<Ds, Ss, randomaccess_internal::RandomAccessable<Ds>::CanResize, randomaccess_internal::RandomAccessable<Ss>::CanRead>::Perform(ds, ss, append);
+		}
+
+		template<typename Ds, typename S>
+		void CopyFrom(Ds& ds, const S* buffer, vint count, bool append=false)
+		{
+			copyfrom_internal::Slice<S> slice={buffer, count};
+			CopyFrom(ds, slice, append);
+		}
+
+		template<typename Ds, typename S>
+		void CopyFrom(Ds& ds, const S* begin, const S* end, bool append=false)
+		{
+			copyfrom_internal::Slice<S> slice={begin, end-begin};
+			CopyFrom(ds, slice, append);
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
 COLLECTIONS\OPERATIONENUMERABLE.H
 ***********************************************************************/
 /***********************************************************************
@@ -1077,11 +5687,6 @@ namespace vl
 					return false;
 				}
 
-				bool Available()const
-				{
-					return false;
-				}
-
 				void Reset()
 				{
 				}
@@ -1094,119 +5699,47 @@ namespace vl
 		};
 
 /***********************************************************************
-算法串联
+自包含迭代器
 ***********************************************************************/
 
-		template<typename T, typename R>
-		class EnumerableProcessor : public Object
+		template<typename T, typename TContainer>
+		class ContainerEnumerator : public Object, public virtual IEnumerator<T>
 		{
-		public:
-			virtual R operator()(const IEnumerable<T>& enumerable)const=0;
-		};
-
-		template<typename T, typename R>
-		R operator>>(const IEnumerable<T>& enumerable, const EnumerableProcessor<T, R>& processor)
-		{
-			return processor(enumerable);
-		}
-
-		template<template<typename T> class R>
-		class SequenceEnumerableProcessor : public Object
-		{
-		public:
-			template<typename T>
-			struct ResultTypeRetriver
-			{
-				typedef R<T> ResultType;
-			};
-		};
-
-		class AggregateEnumerableProcessor : public Object
-		{
-		public:
-			template<typename T>
-			struct ResultTypeRetriver
-			{
-				typedef T ResultType;
-			};
-		};
-
-		class FreeEnumerableProcessor : public Object
-		{
-		};
-
-		template<typename T, typename P>
-		typename P::template ResultTypeRetriver<T>::ResultType operator>>(const IEnumerable<T>& enumerable, const P& processor)
-		{
-			return processor(enumerable);
-		}
-
-/***********************************************************************
-迭代器存储
-***********************************************************************/
-
-		template<typename T, vint I=0>
-		class EnumerableStore : public virtual Object
-		{
-			friend class Enumerable<T>;
 		private:
-			IEnumerator<T>*			enumerator;
-		protected:
-			IEnumerator<T>* CopyEnumerator()const
-			{
-				return enumerator->Clone();
-			}
+			Ptr<TContainer>					container;
+			vint							index;
+
 		public:
-			EnumerableStore(const IEnumerable<T>& enumerable)
+			ContainerEnumerator(Ptr<TContainer> _container, vint _index=-1)
 			{
-				enumerator=enumerable.CreateEnumerator();
+				container=_container;
+				index=_index;
 			}
 
-			EnumerableStore(const EnumerableStore<T>& store)
+			IEnumerator<T>* Clone()const
 			{
-				enumerator=store->CopyEnumerator();
+				return new ContainerEnumerator(container, index);
 			}
 
-			~EnumerableStore()
+			const T& Current()const
 			{
-				delete enumerator;
+				return container->Get(index);
 			}
 
-			EnumerableStore<T>& operator=(const EnumerableStore<T>& store)
+			vint Index()const
 			{
-				delete enumerator;
-				enumerator=store->CopyEnumerator();
-				return *this;
-			}
-		};
-
-/***********************************************************************
-迭代器副本
-***********************************************************************/
-
-		template<typename T>
-		class Enumerable : public Object, public IEnumerable<T>
-		{
-		protected:
-			Ptr<EnumerableStore<T>>		store;
-		public:
-			Enumerable()
-			{
+				return index;
 			}
 
-			Enumerable(const Enumerable<T>& enumerable)
+			bool Next()
 			{
-				store=enumerable.store;
+				index++;
+				return index>=0 && index<container->Count();
 			}
 
-			Enumerable(const IEnumerable<T>& enumerable)
+			void Reset()
 			{
-				store=new EnumerableStore<T>(enumerable);
-			}
-
-			IEnumerator<T>* CreateEnumerator()const
-			{
-				return store?store->CopyEnumerator():new EmptyEnumerable<T>::Enumerator();
+				index=-1;
 			}
 		};
 
@@ -1219,8 +5752,14 @@ namespace vl
 		{
 			Ptr<IEnumerator<T>> ator=a.CreateEnumerator();
 			Ptr<IEnumerator<U>> btor=b.CreateEnumerator();
-			while(ator->Available() && btor->Available())
+			while()
 			{
+				bool a=ator->Next();
+				bool b=btor->Next();
+				if(a&&!b) return 1;
+				if(!a&&b) return -1;
+				if(!a&&!b) break;
+
 				const T& ac=ator->Current();
 				const U& bc=btor->Current();
 				if(ac<bc)
@@ -1234,18 +5773,7 @@ namespace vl
 				ator->Next();
 				btor->Next();
 			}
-			if(ator->Available())
-			{
-				return 1;
-			}
-			else if(btor->Available())
-			{
-				return -1;
-			}
-			else
-			{
-				return 0;
-			}
+			return 0;
 		}
 	}
 }
@@ -1271,7 +5799,6 @@ Functions:
 ***********************************************************************/
 #ifndef VCZH_FUNCTION
 #define VCZH_FUNCTION
-#include <memory.h>
 namespace vl
 {
 	template<typename T>
@@ -5047,6 +9574,14 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		struct LambdaRetriveType
 		{
 			typedef vint Type;
+			typedef vint ResultType;
+		};
+ 
+		template<typename T>
+		struct FunctionObjectRetriveType
+		{
+			typedef typename LambdaRetriveType<T>::Type Type;
+			typedef typename LambdaRetriveType<T>::ResultType ResultType;
 		};
  
 /***********************************************************************
@@ -5063,6 +9598,14 @@ vl::Func<R()>
 		struct LambdaRetriveType<R (__thiscall TObject::*)()>
 		{
 			typedef Func<R()> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R >
+		struct FunctionObjectRetriveType<R(*)()>
+		{
+			typedef Func<R()> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0)>
@@ -5078,6 +9621,14 @@ vl::Func<R(T0)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0)>
 		{
 			typedef Func<R(T0)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0>
+		struct FunctionObjectRetriveType<R(*)(T0)>
+		{
+			typedef Func<R(T0)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1)>
@@ -5093,6 +9644,14 @@ vl::Func<R(T0,T1)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1)>
 		{
 			typedef Func<R(T0,T1)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1>
+		struct FunctionObjectRetriveType<R(*)(T0,T1)>
+		{
+			typedef Func<R(T0,T1)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2)>
@@ -5108,6 +9667,14 @@ vl::Func<R(T0,T1,T2)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2)>
 		{
 			typedef Func<R(T0,T1,T2)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2)>
+		{
+			typedef Func<R(T0,T1,T2)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3)>
@@ -5123,6 +9690,14 @@ vl::Func<R(T0,T1,T2,T3)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3)>
 		{
 			typedef Func<R(T0,T1,T2,T3)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3)>
+		{
+			typedef Func<R(T0,T1,T2,T3)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4)>
@@ -5138,6 +9713,14 @@ vl::Func<R(T0,T1,T2,T3,T4)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5)>
@@ -5153,6 +9736,14 @@ vl::Func<R(T0,T1,T2,T3,T4,T5)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5,T6)>
@@ -5168,6 +9759,14 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5,T6)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5,T6)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>
@@ -5183,6 +9782,14 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5,T6,T7)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
@@ -5198,6 +9805,14 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
@@ -5213,17 +9828,31 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> Type;
+			typedef R ResultType;
 		};
  
  
-#ifdef VCZH_NO_OLD_OS
 		template<typename T>
 		typename LambdaRetriveType<decltype(&T::operator())>::Type Lambda(T functionObject)
 		{
 			return functionObject;
 		}
+		template<typename T>
+		typename FunctionObjectRetriveType<T>::Type ConvertToFunction(T functionObject)
+		{
+			return functionObject;
+		}
 #define LAMBDA vl::function_lambda::Lambda
-#endif
+#define FUNCTION vl::function_lambda::ConvertToFunction
+#define FUNCTION_TYPE(T) typename vl::function_lambda::FunctionObjectRetriveType<T>::Type
+#define FUNCTION_RESULT_TYPE(T) typename vl::function_lambda::FunctionObjectRetriveType<T>::ResultType
 	}
 	namespace function_binding
 	{
@@ -6412,15 +11041,6 @@ Data Structure::Operations
 
 namespace vl
 {
-	namespace collections_internal
-	{
-		template<typename T, typename K>
-		Ptr<K> CastPointer(Ptr<T> pointer)
-		{
-			return pointer.Cast<K>();
-		}
-	}
-
 	namespace collections
 	{
 
@@ -6429,118 +11049,57 @@ Select
 ***********************************************************************/
 
 		template<typename T, typename K>
-		class SelectEnumerable : public EnumerableStore<T>, public virtual IEnumerable<K>
+		class SelectEnumerator : public virtual IEnumerator<K>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<K>
-			{
-			protected:
-				IEnumerator<T>*		enumerator;
-				Func<K(T)>			selector;
-				K					current;
-			public:
-				Enumerator(IEnumerator<T>* _enumerator, const Func<K(T)>& _selector)
-					:enumerator(_enumerator)
-					,selector(_selector)
-				{
-					if(enumerator->Available())
-					{
-						current=selector(enumerator->Current());
-					}
-				}
-
-				~Enumerator()
-				{
-					delete enumerator;
-				}
-
-				IEnumerator<K>* Clone()const
-				{
-					return new Enumerator(enumerator->Clone(), selector);
-				}
-
-				const K& Current()const
-				{
-					return current;
-				}
-
-				vint Index()const
-				{
-					return enumerator->Index();
-				}
-
-				bool Next()
-				{
-					if(enumerator->Next())
-					{
-						current=selector(enumerator->Current());
-						return true;
-					}
-					else
-					{
-						return false;
-					}
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
-				}
-
-				void Reset()
-				{
-					enumerator->Reset();
-				}
-			};
 		protected:
-			Func<K(T)>				selector;
+			IEnumerator<T>*		enumerator;
+			Func<K(T)>			selector;
+			K					current;
 		public:
-			SelectEnumerable(const IEnumerable<T>& enumerable, const Func<K(T)>& _selector)
-				:EnumerableStore<T>(enumerable)
+			SelectEnumerator(IEnumerator<T>* _enumerator, const Func<K(T)>& _selector)
+				:enumerator(_enumerator)
 				,selector(_selector)
 			{
 			}
 
-			IEnumerator<K>* CreateEnumerator()const
+			~SelectEnumerator()
 			{
-				return new Enumerator(CopyEnumerator(), selector);
+				delete enumerator;
+			}
+
+			IEnumerator<K>* Clone()const
+			{
+				return new SelectEnumerator(enumerator->Clone(), selector);
+			}
+
+			const K& Current()const
+			{
+				return current;
+			}
+
+			vint Index()const
+			{
+				return enumerator->Index();
+			}
+
+			bool Next()
+			{
+				if(enumerator->Next())
+				{
+					current=selector(enumerator->Current());
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void Reset()
+			{
+				enumerator->Reset();
 			}
 		};
-
-		template<typename T, typename K>
-		class SelectProcessor : public EnumerableProcessor<T, SelectEnumerable<T, K>>
-		{
-		protected:
-			Func<K(T)>				selector;
-		public:
-			SelectProcessor(const Func<K(T)>& _selector)
-				:selector(_selector)
-			{
-			}
-
-			SelectEnumerable<T, K> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return SelectEnumerable<T, K>(enumerable, selector);
-			}
-		};
-
-		template<typename T, typename K>
-		SelectProcessor<T, K> Select(const Func<K(T)>& selector)
-		{
-			return SelectProcessor<T, K>(selector);
-		}
-
-		template<typename T, typename K>
-		SelectProcessor<T, K> Select(K(*selector)(T))
-		{
-			return SelectProcessor<T, K>(selector);
-		}
-
-		template<typename T, typename K>
-		SelectProcessor<Ptr<T>, Ptr<K>> Cast()
-		{
-			return SelectProcessor<Ptr<T>, Ptr<K>>(&collections_internal::CastPointer<T, K>);
-		}
 	}
 }
 
@@ -6562,1263 +11121,66 @@ Data Structure::Operations
 
 namespace vl
 {
-	namespace collections_internal
-	{
-		template<typename T>
-		bool WhereNotNull(Ptr<T> pointer)
-		{
-			return pointer;
-		}
-	}
-
 	namespace collections
 	{
-
 /***********************************************************************
 Where
 ***********************************************************************/
 
 		template<typename T>
-		class WhereEnumerable : public EnumerableStore<T>, public virtual IEnumerable<T>
+		class WhereEnumerator : public virtual IEnumerator<T>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<T>
-			{
-			protected:
-				IEnumerator<T>*		enumerator;
-				Func<bool(T)>		selector;
-				vint					index;
-
-				void GoNearest()
-				{
-					while(enumerator->Available())
-					{
-						if(selector(enumerator->Current()))
-						{
-							break;
-						}
-						else
-						{
-							enumerator->Next();
-						}
-					}
-				}
-			public:
-				Enumerator(IEnumerator<T>* _enumerator, const Func<bool(T)>& _selector, vint _index=0)
-					:enumerator(_enumerator)
-					,selector(_selector)
-					,index(_index)
-				{
-					GoNearest();
-				}
-
-				~Enumerator()
-				{
-					delete enumerator;
-				}
-
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(enumerator->Clone(), selector, index);
-				}
-
-				const T& Current()const
-				{
-					return enumerator->Current();
-				}
-
-				vint Index()const
-				{
-					return index;
-				}
-
-				bool Next()
-				{
-					index++;
-					enumerator->Next();
-					GoNearest();
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
-				}
-
-				void Reset()
-				{
-					enumerator->Reset();
-					GoNearest();
-				}
-			};
 		protected:
+			IEnumerator<T>*			enumerator;
 			Func<bool(T)>			selector;
+			vint					index;
+
 		public:
-			WhereEnumerable(const IEnumerable<T>& enumerable, const Func<bool(T)>& _selector)
-				:EnumerableStore<T>(enumerable)
+			WhereEnumerator(IEnumerator<T>* _enumerator, const Func<bool(T)>& _selector, vint _index=-1)
+				:enumerator(_enumerator)
 				,selector(_selector)
+				,index(_index)
 			{
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			~WhereEnumerator()
 			{
-				return new Enumerator(CopyEnumerator(), selector);
-			}
-		};
-
-		template<typename T>
-		class WhereProcessor : public EnumerableProcessor<T, WhereEnumerable<T>>
-		{
-		protected:
-			Func<bool(T)>			selector;
-		public:
-			WhereProcessor(const Func<bool(T)>& _selector)
-				:selector(_selector)
-			{
+				delete enumerator;
 			}
 
-			WhereEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
+			IEnumerator<T>* Clone()const
 			{
-				return WhereEnumerable<T>(enumerable, selector);
-			}
-		};
-
-		template<typename T>
-		WhereProcessor<T> Where(const Func<bool(T)>& selector)
-		{
-			return WhereProcessor<T>(selector);
-		}
-
-		template<typename T>
-		WhereProcessor<T> Where(bool(*selector)(T))
-		{
-			return WhereProcessor<T>(selector);
-		}
-
-		template<typename T, typename K>
-		class FindTypeProcessor : public EnumerableProcessor<Ptr<T>, WhereEnumerable<Ptr<K>>>
-		{
-		public:
-			WhereEnumerable<Ptr<K>> operator()(const IEnumerable<Ptr<T>>& enumerable)const
-			{
-				return enumerable>>Cast<T, K>()>>Where<Ptr<K>>(&collections_internal::WhereNotNull);
-			}
-		};
-
-		template<typename T, typename K>
-		FindTypeProcessor<T, K> FindType()
-		{
-			return FindTypeProcessor<T, K>();
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-COLLECTIONS\LIST.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::List
-
-Classes:
-	ListStore<T,PODType>				：列表存储复制算法
-	ListBase<T,K>						：列表基类
-	Array<T,K>							：数组
-	List<T,K>							：列表
-	SortedList<T,K>						：有序列表
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_LIST
-#define VCZH_COLLECTIONS_LIST
-
-#include <string.h>
-
-namespace vl
-{
-	namespace collections
-	{
-
-/***********************************************************************
-储存结构
-***********************************************************************/
-
-		template<typename T, bool PODType>
-		class ListStore abstract : public Object
-		{
-		};
-		
-		template<typename T>
-		class ListStore<T, false> abstract : public Object
-		{
-		protected:
-			static void CopyObjects(T* dest, const T* source, vint count)
-			{
-				if(dest<source)
-				{
-					for(vint i=0;i<count;i++)
-					{
-						dest[i]=source[i];
-					}
-				}
-				else if(dest>source)
-				{
-					for(vint i=count-1;i>=0;i--)
-					{
-						dest[i]=source[i];
-					}
-				}
+				return new WhereEnumerator(enumerator->Clone(), selector, index);
 			}
 
-			static void ClearObjects(T* dest, vint count)
+			const T& Current()const
 			{
-				for(vint i=0;i<count;i++)
-				{
-					dest[i]=T();
-				}
-			}
-		public:
-		};
-		
-		template<typename T>
-		class ListStore<T, true> abstract : public Object
-		{
-		protected:
-			static void CopyObjects(T* dest, const T* source, vint count)
-			{
-				if(count)
-				{
-					memmove(dest, source, sizeof(T)*count);
-				}
+				return enumerator->Current();
 			}
 
-			static void ClearObjects(T* dest, vint count)
+			vint Index()const
 			{
-			}
-		public:
-		};
-		
-		template<typename T>
-		class ArrayBase abstract : public ListStore<T,POD<T>::Result>, public virtual IEnumerable<T>
-		{
-		protected:
-			class Enumerator : public Object, public virtual IEnumerator<T>
-			{
-			private:
-				const ArrayBase<T>*				container;
-				vint							index;
-			public:
-				Enumerator(const ArrayBase<T>* _container, vint _index)
-				{
-					container=_container;
-					index=_index;
-				}
-
-				Enumerator* Clone()const
-				{
-					return new Enumerator(container, index);
-				}
-
-				const T& Current()const
-				{
-					return container->Get(index);
-				}
-
-				vint Index()const
-				{
-					return index;
-				}
-
-				bool Next()
-				{
-					index++;
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return index>=0 && index<container->Count();
-				}
-
-				void Reset()
-				{
-					index=0;
-				}
-			};
-			
-			T*						buffer;
-			vint					count;
-		public:
-			ArrayBase()
-				:buffer(0)
-				,count(0)
-			{
-			}
-
-			IEnumerator<T>* CreateEnumerator()const
-			{
-				return new Enumerator(this, 0);
-			}
-
-			vint Count()const
-			{
-				return count;
-			}
-
-			const T& Get(vint index)const
-			{
-				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::Get(vint)#参数越界。");
-				return buffer[index];
-			}
-
-			const T& operator[](vint index)const
-			{
-				CHECK_ERROR(index>=0 && index<count, L"ArrayBase<T, K>::operator[](vint)#参数index越界。");
-				return buffer[index];
-			}
-		};
-
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class ListBase abstract : public ArrayBase<T>
-		{
-		protected:
-			vint					capacity;
-			bool					lessMemoryMode;
-
-			vint CalculateCapacity(vint expected)
-			{
-				vint result=capacity;
-				while(result<expected)
-				{
-					result=result*5/4+1;
-				}
-				return result;
-			}
-
-			void MakeRoom(vint index, vint _count)
-			{
-				vint newCount=count+_count;
-				if(newCount>capacity)
-				{
-					vint newCapacity=CalculateCapacity(newCount);
-					T* newBuffer=new T[newCapacity];
-					CopyObjects(newBuffer, buffer, index);
-					CopyObjects(newBuffer+index+_count, buffer+index, count-index);
-					delete[] buffer;
-					capacity=newCapacity;
-					buffer=newBuffer;
-				}
-				else
-				{
-					CopyObjects(buffer+index+_count, buffer+index, count-index);
-				}
-				count=newCount;
-			}
-
-			void ReleaseUnnecessaryBuffer(vint previousCount)
-			{
-				if(buffer && count<previousCount)
-				{
-					ClearObjects(&buffer[count], previousCount-count);
-				}
-				if(lessMemoryMode && count<=capacity/2)
-				{
-					vint newCapacity=capacity*5/8;
-					if(count<newCapacity)
-					{
-						T* newBuffer=new T[newCapacity];
-						CopyObjects(newBuffer, buffer, count);
-						delete[] buffer;
-						capacity=newCapacity;
-						buffer=newBuffer;
-					}
-				}
-			}
-		public:
-			ListBase()
-			{
-				count=0;
-				capacity=0;
-				buffer=0;
-				lessMemoryMode=true;
-			}
-
-			~ListBase()
-			{
-				delete[] buffer;
-			}
-
-			void SetLessMemoryMode(bool mode)
-			{
-				lessMemoryMode=mode;
-			}
-
-			bool RemoveAt(vint index)
-			{
-				vint previousCount=count;
-				CHECK_ERROR(index>=0 && index<count, L"ListBase<T, K>::RemoveAt(vint)#参数index越界。");
-				CopyObjects(buffer+index,buffer+index+1,count-index-1);
-				count--;
-				ReleaseUnnecessaryBuffer(previousCount);
-				return true;
-			}
-
-			bool RemoveRange(vint index, vint _count)
-			{
-				vint previousCount=count;
-				CHECK_ERROR(index>=0 && index<=count, L"ListBase<T, K>::RemoveRange(vint, vint)#参数index越界。");
-				CHECK_ERROR(index+_count>=0 && index+_count<=count, L"ListBase<T,K>::RemoveRange(vint, vint)#参数_count越界。");
-				CopyObjects(buffer+index, buffer+index+_count, count-index-_count);
-				count-=_count;
-				ReleaseUnnecessaryBuffer(previousCount);
-				return true;
-			}
-
-			bool Clear()
-			{
-				vint previousCount=count;
-				count=0;
-				if(lessMemoryMode)
-				{
-					capacity=0;
-					delete[] buffer;
-					buffer=0;
-				}
-				else
-				{
-					ReleaseUnnecessaryBuffer(previousCount);
-				}
-				return true;
-			}
-		};
-
-/***********************************************************************
-列表对象
-***********************************************************************/
-
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class Array : public ArrayBase<T>
-		{
-		protected:
-			void Create(vint size)
-			{
-				if(size>0)
-				{
-					count=size;
-					buffer=new T[size];
-				}
-				else
-				{
-					count=0;
-					buffer=0;
-				}
-			}
-
-			void Destroy()
-			{
-				count=0;
-				delete[] buffer;
-				buffer=0;
-			}
-		public:
-			Array(vint size=0)
-			{
-				Create(size);
-			}
-
-			Array(const T* _buffer, vint size)
-			{
-				Create(size);
-				CopyObjects(buffer, _buffer, size);
-			}
-
-			~Array()
-			{
-				Destroy();
-			}
-
-			bool Contains(const K& item)const
-			{
-				return IndexOf(item)!=-1;
-			}
-
-			vint IndexOf(const K& item)const
-			{
-				for(vint i=0;i<count;i++)
-				{
-					if(buffer[i]==item)
-					{
-						return i;
-					}
-				}
-				return -1;
-			}
-
-			void Set(vint index, const T& item)
-			{
-				CHECK_ERROR(index>=0 && index<count, L"Array<T, K>::Set(vint)#参数index越界。");
-				buffer[index]=item;
-			}
-
-			T& operator[](vint index)
-			{
-				CHECK_ERROR(index>=0 && index<count, L"Array<T, K>::operator[](vint)#参数index越界。");
-				return buffer[index];
-			}
-
-			void Resize(vint size)
-			{
-				vint oldCount=count;
-				T* oldBuffer=buffer;
-				Create(size);
-				CopyObjects(buffer, oldBuffer, (count<oldCount?count:oldCount));
-				delete[] oldBuffer;
-			}
-		};
-
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class List : public ListBase<T, K>
-		{
-		public:
-			List()
-			{
-			}
-
-			bool Contains(const K& item)const
-			{
-				return IndexOf(item)!=-1;
-			}
-
-			vint IndexOf(const K& item)const
-			{
-				for(vint i=0;i<count;i++)
-				{
-					if(buffer[i]==item)
-					{
-						return i;
-					}
-				}
-				return -1;
-			}
-
-			vint Add(const T& item)
-			{
-				MakeRoom(count, 1);
-				buffer[count-1]=item;
-				return count-1;
-			}
-
-			vint Insert(vint index, const T& item)
-			{
-				CHECK_ERROR(index>=0 && index<=count, L"List<T, K>::Insert(vint, const T&)#参数index越界。");
-				MakeRoom(index,1);
-				buffer[index]=item;
 				return index;
 			}
 
-			bool Remove(const K& item)
+			bool Next()
 			{
-				vint index=IndexOf(item);
-				if(index>=0 && index<count)
+				while(enumerator->Next())
 				{
-					RemoveAt(index);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Set(vint index, const T& item)
-			{
-				CHECK_ERROR(index>=0 && index<count, L"List<T, K>::Set(vint)#参数index越界。");
-				buffer[index]=item;
-				return true;
-			}
-
-			T& operator[](vint index)
-			{
-				CHECK_ERROR(index>=0 && index<count, L"List<T, K>::operator[](vint)#参数index越界。");
-				return buffer[index];
-			}
-		};
-
-		template<typename T, typename K=typename KeyType<T>::Type>
-		class SortedList : public ListBase<T, K>
-		{
-		public:
-			SortedList()
-			{
-			}
-
-			bool Contains(const K& item)const
-			{
-				return IndexOf(item)!=-1;
-			}
-
-			template<typename Key>
-			vint IndexOf(const Key& item)const
-			{
-				vint start=0;
-				vint end=count-1;
-				while(start<=end)
-				{
-					vint index=(start+end)/2;
-					if(buffer[index]==item)
-					{
-						return index;
-					}
-					else if(buffer[index]>item)
-					{
-						end=index-1;
-					}
-					else
-					{
-						start=index+1;
-					}
-				}
-				return -1;
-			}
-
-			vint IndexOf(const K& item)const
-			{
-				return IndexOf<K>(item);
-			}
-
-			vint Add(const T& item)
-			{
-				if(count==0)
-				{
-					MakeRoom(0, 1);
-					buffer[0]=item;
-					return 0;
-				}
-				else
-				{
-					vint start=0;
-					vint end=count-1;
-					vint index=-1;
-					while(start<=end)
-					{
-						index=(start+end)/2;
-						if(buffer[index]==item)
-						{
-							goto SORTED_LIST_INSERT;
-						}
-						else if(buffer[index]>item)
-						{
-							end=index-1;
-						}
-						else
-						{
-							start=index+1;
-						}
-					}
-					CHECK_ERROR(index>=0 && index<count, L"SortedList<T, K>::Add(const T&)#内部错误，变量index越界");
-					if(buffer[index]<item)
+					if(selector(enumerator->Current()))
 					{
 						index++;
+						return true;
 					}
-SORTED_LIST_INSERT:
-					MakeRoom(index, 1);
-					buffer[index]=item;
-					return index;
 				}
+				return false;
 			}
 
-			bool Remove(const K& item)
+			void Reset()
 			{
-				vint index=IndexOf(item);
-				if(index>=0 && index<count)
-				{
-					RemoveAt(index);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
+				enumerator->Reset();
 			}
 		};
-
-/***********************************************************************
-随机访问
-***********************************************************************/
-
-		namespace randomaccess_internal
-		{
-			template<typename T, typename K>
-			struct RandomAccessable<Array<T, K>>
-			{
-				static const bool							CanRead = true;
-				static const bool							CanResize = true;
-			};
-
-			template<typename T, typename K>
-			struct RandomAccessable<List<T, K>>
-			{
-				static const bool							CanRead = true;
-				static const bool							CanResize = false;
-			};
-
-			template<typename T, typename K>
-			struct RandomAccessable<SortedList<T, K>>
-			{
-				static const bool							CanRead = true;
-				static const bool							CanResize = false;
-			};
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-COLLECTIONS\OPERATIONORDERBY.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Operations
-
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_OPERATIONORDERBY
-#define VCZH_COLLECTIONS_OPERATIONORDERBY
-
-
-namespace vl
-{
-	namespace collections
-	{
-
-/***********************************************************************
-OrderBy Quick Sort
-***********************************************************************/
-
-		template<typename T>
-		void Sort(T* items, vint length, const Func<vint(T, T)>& orderer)
-		{
-			if(length==0) return;
-			vint pivot=0;
-			vint left=0;
-			vint right=0;
-			bool flag=false;
-
-			while(left+right+1!=length)
-			{
-				vint& mine=(flag?left:right);
-				vint& theirs=(flag?right:left);
-				vint candidate=(flag?left:length-right-1);
-				vint factor=(flag?-1:1);
-
-				if(orderer(items[pivot], items[candidate])*factor<=0)
-				{
-					mine++;
-				}
-				else
-				{
-					theirs++;
-					T temp=items[pivot];
-					items[pivot]=items[candidate];
-					items[candidate]=temp;
-					pivot=candidate;
-					flag=!flag;
-				}
-			}
-
-			Sort(items, left, orderer);
-			Sort(items+left+1, right, orderer);
-		}
-
-/***********************************************************************
-OrderBy
-***********************************************************************/
-
-		template<typename T>
-		class OrderByEnumerable : public virtual IEnumerable<T>
-		{
-		protected:
-			List<T>					values;
-		public:
-			OrderByEnumerable(const IEnumerable<T>& enumerable, const Func<vint(T, T)>& orderer)
-			{
-				CopyFrom(values, enumerable);
-				if(values.Count()>0)
-				{
-					Sort(&values[0], values.Count(), orderer);
-				}
-			}
-
-			IEnumerator<T>* CreateEnumerator()const
-			{
-				return values.CreateEnumerator();
-			}
-		};
-
-		template<typename T>
-		class OrderByProcessor : public EnumerableProcessor<T, OrderByEnumerable<T>>
-		{
-		protected:
-			Func<vint(T, T)>		orderer;
-		public:
-			OrderByProcessor(const Func<vint(T, T)>& _orderer)
-				:orderer(_orderer)
-			{
-			}
-
-			OrderByEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return OrderByEnumerable<T>(enumerable, orderer);
-			}
-		};
-
-		template<typename T>
-		OrderByProcessor<T> OrderBy(const Func<vint(T, T)>& orderer)
-		{
-			return OrderByProcessor<T>(orderer);
-		}
-
-		template<typename T>
-		OrderByProcessor<T> OrderBy(vint(*orderer)(T, T))
-		{
-			return OrderByProcessor<T>(orderer);
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-COLLECTIONS\OPERATIONFOREACH.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Operations
-
-扩展：
-	实现一个函数重载IteratorType CreateForEachIterator(const CollectionType& collection);
-	CollectionType是所需要的容器类型
-	IteratorType继承自ForEachIterator<T>
-	必须写在vl::collections命名空间里
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_FOREACH
-#define VCZH_COLLECTIONS_FOREACH
-
-namespace vl
-{
-	namespace collections
-	{
-
-/***********************************************************************
-ForEach基础设施
-***********************************************************************/
-
-		template<typename T>
-		class ForEachIterator : public Object
-		{
-		public:
-			virtual bool				Available(T& variable)const=0;
-			virtual void				Next()const=0;
-
-			operator bool()const
-			{
-				return true;
-			}
-		};
-
-/***********************************************************************
-IEnumerable<T>支持
-***********************************************************************/
-
-		template<typename T>
-		class EnumerableForEachIterator : public ForEachIterator<T>
-		{
-		protected:
-			Ptr<IEnumerator<T>>			iterator;
-		public:
-			EnumerableForEachIterator(const IEnumerable<T>& enumerable)
-				:iterator(enumerable.CreateEnumerator())
-			{
-			}
-
-			EnumerableForEachIterator(const EnumerableForEachIterator<T>& enumerableIterator)
-				:iterator(enumerableIterator.iterator)
-			{
-			}
-
-			bool Available(T& variable)const
-			{
-				if(iterator->Available())
-				{
-					variable=iterator->Current();
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			void Next()const
-			{
-				iterator->Next();
-			}
-		};
-
-		template<typename T>
-		EnumerableForEachIterator<T> CreateForEachIterator(const IEnumerable<T>& enumerable)
-		{
-			return enumerable;
-		}
-
-/***********************************************************************
-ForEach宏
-***********************************************************************/
-
-#define SCOPE_VARIABLE(TYPE, VARIABLE, VALUE)\
-		if(bool __scope_variable_flag__=true)\
-			for(TYPE VARIABLE = VALUE;__scope_variable_flag__;__scope_variable_flag__=false)
-
-#define FOREACH(TYPE, VARIABLE, COLLECTION)\
-		SCOPE_VARIABLE(const ForEachIterator<TYPE>&, __foreach_iterator__, CreateForEachIterator(COLLECTION))\
-		for(TYPE VARIABLE;__foreach_iterator__.Available(VARIABLE);__foreach_iterator__.Next())
-
-#define FOREACH_INDEXER(TYPE, VARIABLE, INDEXER, COLLECTION)\
-		SCOPE_VARIABLE(const ForEachIterator<TYPE>&, __foreach_iterator__, CreateForEachIterator(COLLECTION))\
-		SCOPE_VARIABLE(vint, INDEXER, 0)\
-		for(TYPE VARIABLE;__foreach_iterator__.Available(VARIABLE);__foreach_iterator__.Next(),INDEXER++)
-	}
-}
-
-#endif
-
-/***********************************************************************
-COLLECTIONS\OPERATIONAGGREGATE.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Operations
-
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_OPERATIONAGGREGATE
-#define VCZH_COLLECTIONS_OPERATIONAGGREGATE
-
-
-namespace vl
-{
-	namespace collections
-	{
-
-/***********************************************************************
-Aggregate
-***********************************************************************/
-
-		template<typename T>
-		class AggregateProcessor : public EnumerableProcessor<T, T>
-		{
-		protected:
-			Func<T(T,T)>				selector;
-			T							initial;
-			bool						hasInitial;
-		public:
-			AggregateProcessor(const Func<T(T,T)>& _selector)
-				:selector(_selector)
-				,hasInitial(false)
-			{
-			}
-
-			AggregateProcessor(const Func<T(T,T)>& _selector, const T& _initial)
-				:selector(_selector)
-				,initial(_initial)
-				,hasInitial(true)
-			{
-			}
-
-			T operator()(const IEnumerable<T>& enumerable)const
-			{
-				T result;
-				IEnumerator<T>* enumerator=enumerable.CreateEnumerator();
-				try
-				{
-					if(hasInitial)
-					{
-						result=initial;
-					}
-					else if(enumerator->Available())
-					{
-						result=enumerator->Current();
-						enumerator->Next();
-					}
-					else
-					{
-						throw Error(L"AggregateProcessor<T>::operator(const IEnumerable<T>&)#容器为空并且没有初始值，Aggregate操作失败。");
-					}
-					while(enumerator->Available())
-					{
-						result=selector(result, enumerator->Current());
-						enumerator->Next();
-					}
-					delete enumerator;
-				}
-				catch(...)
-				{
-					delete enumerator;
-					throw;
-				}
-				return result;
-			}
-		};
-
-		template<typename T>
-		AggregateProcessor<T> Aggregate(const Func<T(T,T)>& selector)
-		{
-			return AggregateProcessor<T>(selector);
-		}
-
-		template<typename T>
-		AggregateProcessor<T> Aggregate(T(*selector)(T,T))
-		{
-			return AggregateProcessor<T>(selector);
-		}
-
-		template<typename T>
-		AggregateProcessor<T> Aggregate(const Func<T(T,T)>& selector, const T& initial)
-		{
-			return AggregateProcessor<T>(selector, initial);
-		}
-
-		template<typename T>
-		AggregateProcessor<T> Aggregate(T(*selector)(T,T), const T& initial)
-		{
-			return AggregateProcessor<T>(selector, initial);
-		}
-
-/***********************************************************************
-All
-***********************************************************************/
-
-		template<typename T>
-		class AllProcessor : public EnumerableProcessor<T, bool>
-		{
-		protected:
-			Func<bool(T)>				selector;
-
-			static bool Op(bool a, bool b)
-			{
-				return a && b;
-			}
-		public:
-			AllProcessor(const Func<bool(T)>& _selector)
-				:selector(_selector)
-			{
-			}
-
-			bool operator()(const IEnumerable<T>& enumerable)const
-			{
-				return enumerable>>Select(selector)>>Aggregate(Op, true);
-			}
-		};
-
-		template<typename T>
-		AllProcessor<T> All(const Func<bool(T)>& selector)
-		{
-			return AllProcessor<T>(selector);
-		}
-
-		template<typename T>
-		AllProcessor<T> All(bool(*selector)(T))
-		{
-			return AllProcessor<T>(selector);
-		}
-
-/***********************************************************************
-Any
-***********************************************************************/
-
-		template<typename T>
-		class AnyProcessor : public EnumerableProcessor<T, bool>
-		{
-		protected:
-			Func<bool(T)>				selector;
-
-			static bool Op(bool a, bool b)
-			{
-				return a || b;
-			}
-		public:
-			AnyProcessor(const Func<bool(T)>& _selector)
-				:selector(_selector)
-			{
-			}
-
-			bool operator()(const IEnumerable<T>& enumerable)const
-			{
-				return enumerable>>Select(selector)>>Aggregate(Op, false);
-			}
-		};
-
-		template<typename T>
-		AnyProcessor<T> Any(const Func<bool(T)>& selector)
-		{
-			return AnyProcessor<T>(selector);
-		}
-
-		template<typename T>
-		AnyProcessor<T> Any(bool(*selector)(T))
-		{
-			return AnyProcessor<T>(selector);
-		}
-
-/***********************************************************************
-Max
-***********************************************************************/
-
-		class MaxProcessor : public AggregateEnumerableProcessor
-		{
-		protected:
-			template<typename T>
-			static T Op(T a, T b)
-			{
-				return a>b?a:b;
-			}
-		public:
-			MaxProcessor()
-			{
-			}
-
-			template<typename T>
-			T operator()(const IEnumerable<T>& enumerable)const
-			{
-				return enumerable>>Aggregate(Op<T>);
-			}
-		};
-
-		extern MaxProcessor Max();
-
-/***********************************************************************
-Min
-***********************************************************************/
-
-		class MinProcessor : public AggregateEnumerableProcessor
-		{
-		protected:
-			template<typename T>
-			static T Op(T a, T b)
-			{
-				return a<b?a:b;
-			}
-		public:
-			MinProcessor()
-			{
-			}
-
-			template<typename T>
-			T operator()(const IEnumerable<T>& enumerable)const
-			{
-				return enumerable>>Aggregate(Op<T>);
-			}
-		};
-
-		extern MinProcessor Min();
-
-/***********************************************************************
-First
-***********************************************************************/
-
-		class FirstProcessor : public FreeEnumerableProcessor
-		{
-		public:
-			template<typename T>
-			struct ResultTypeRetriver
-			{
-				typedef T ResultType;
-			};
-
-			FirstProcessor()
-			{
-			}
-
-			template<typename T>
-			T operator()(const IEnumerable<T>& enumerable)const
-			{
-				FOREACH(T, x, enumerable)
-				{
-					return x;
-				}
-				return T();
-			}
-		};
-
-		extern FirstProcessor First();
-
-/***********************************************************************
-Count
-***********************************************************************/
-
-		class CountProcessor : public FreeEnumerableProcessor
-		{
-		public:
-			template<typename T>
-			struct ResultTypeRetriver
-			{
-				typedef vint ResultType;
-			};
-
-			CountProcessor()
-			{
-			}
-
-			template<typename T>
-			vint operator()(const IEnumerable<T>& enumerable)const
-			{
-				vint count=0;
-				FOREACH(T, x, enumerable)
-				{
-					count++;
-				}
-				return count;
-			}
-		};
-
-		extern CountProcessor Count();
-
-/***********************************************************************
-IsEmpty
-***********************************************************************/
-
-		class IsEmptyProcessor : public FreeEnumerableProcessor
-		{
-		public:
-			template<typename T>
-			struct ResultTypeRetriver
-			{
-				typedef bool ResultType;
-			};
-
-			IsEmptyProcessor()
-			{
-			}
-
-			template<typename T>
-			bool operator()(const IEnumerable<T>& enumerable)const
-			{
-				FOREACH(T, x, enumerable)
-				{
-					return false;
-				}
-				return true;
-			}
-		};
-
-		extern IsEmptyProcessor IsEmpty();
 	}
 }
 
@@ -7848,122 +11210,78 @@ Concat
 ***********************************************************************/
 
 		template<typename T>
-		class ConcatEnumerable : public EnumerableStore<T, 1>, public EnumerableStore<T, 2>, public virtual IEnumerable<T>
+		class ConcatEnumerator : public virtual IEnumerator<T>
 		{
 		protected:
-			class Enumerator : public virtual IEnumerator<T>
+			IEnumerator<T>*					enumerator1;
+			IEnumerator<T>*					enumerator2;
+			vint							index;
+			bool							turned;
+		public:
+			ConcatEnumerator(IEnumerator<T>* _enumerator1, IEnumerator<T>* _enumerator2, vint _index=-1, bool _turned=false)
+				:enumerator1(_enumerator1)
+				,enumerator2(_enumerator2)
+				,index(_index)
+				,turned(_turned)
 			{
-			protected:
-				IEnumerator<T>*					enumerator1;
-				IEnumerator<T>*					enumerator2;
-				vint							index;
-				bool							turned;
-			public:
-				Enumerator(IEnumerator<T>* _enumerator1, IEnumerator<T>* _enumerator2, vint _index=0, bool _turned=false)
-					:enumerator1(_enumerator1)
-					,enumerator2(_enumerator2)
-					,index(_index)
-					,turned(_turned)
-				{
-					if(turned==false && !enumerator1->Available())
-					{
-						turned=true;
-					}
-				}
+			}
 
-				~Enumerator()
-				{
-					delete enumerator1;
-					delete enumerator2;
-				}
+			~ConcatEnumerator()
+			{
+				delete enumerator1;
+				delete enumerator2;
+			}
 
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(enumerator1->Clone(), enumerator2->Clone(), index, turned);
-				}
+			IEnumerator<T>* Clone()const
+			{
+				return new ConcatEnumerator(enumerator1->Clone(), enumerator2->Clone(), index, turned);
+			}
 
-				const T& Current()const
+			const T& Current()const
+			{
+				if(turned)
 				{
-					if(enumerator1->Available())
-					{
-						return enumerator1->Current();
-					}
-					else
-					{
-						return enumerator2->Current();
-					}
+					return enumerator2->Current();
 				}
-
-				vint Index()const
+				else
 				{
-					return index;
+					return enumerator1->Current();
 				}
+			}
 
-				bool Next()
+			vint Index()const
+			{
+				return index;
+			}
+
+			bool Next()
+			{
+				index++;
+				if(turned)
 				{
-					index++;
+					return enumerator2->Next();
+				}
+				else
+				{
 					if(enumerator1->Next())
 					{
 						return true;
 					}
-					else if(turned==false)
-					{
-						turned=true;
-						return enumerator2->Available();
-					}
 					else
 					{
+						turned=true;
 						return enumerator2->Next();
 					}
 				}
-
-				bool Available()const
-				{
-					return enumerator1->Available() || enumerator2->Available();
-				}
-
-				void Reset()
-				{
-					enumerator1->Reset();
-					enumerator2->Reset();
-					index=0;
-				}
-			};
-		public:
-			ConcatEnumerable(const IEnumerable<T>& enumerable1, const IEnumerable<T>& enumerable2)
-				:EnumerableStore<T, 1>(enumerable1)
-				,EnumerableStore<T, 2>(enumerable2)
-			{
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			void Reset()
 			{
-				return new Enumerator(EnumerableStore<T, 1>::CopyEnumerator(), EnumerableStore<T, 2>::CopyEnumerator());
+				enumerator1->Reset();
+				enumerator2->Reset();
+				index=-1;
 			}
 		};
-
-		template<typename T>
-		class ConcatProcessor : public EnumerableProcessor<T, ConcatEnumerable<T>>
-		{
-		protected:
-			const IEnumerable<T>&				second;
-		public:
-			ConcatProcessor(const IEnumerable<T>& _second)
-				:second(_second)
-			{
-			}
-
-			ConcatEnumerable<T> operator()(const IEnumerable<T>& first)const
-			{
-				return ConcatEnumerable<T>(first, second);
-			}
-		};
-
-		template<typename T>
-		ConcatProcessor<T> Concat(const IEnumerable<T>& second)
-		{
-			return ConcatProcessor<T>(second);
-		}
 	}
 }
 
@@ -7993,515 +11311,292 @@ Take
 ***********************************************************************/
 
 		template<typename T>
-		class TakeEnumerable : public EnumerableStore<T>, public virtual IEnumerable<T>
+		class TakeEnumerator : public virtual IEnumerator<T>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<T>
-			{
-			protected:
-				IEnumerator<T>*		enumerator;
-				vint					count;
-			public:
-				Enumerator(IEnumerator<T>* _enumerator, vint _count)
-					:enumerator(_enumerator)
-					,count(_count)
-				{
-				}
-
-				~Enumerator()
-				{
-					delete enumerator;
-				}
-
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(enumerator->Clone(), count);
-				}
-
-				const T& Current()const
-				{
-					return enumerator->Current();
-				}
-
-				vint Index()const
-				{
-					return enumerator->Index();
-				}
-
-				bool Next()
-				{
-					if(enumerator->Index()==count-1)
-					{
-						enumerator->Next();
-						return false;
-					}
-					else if(enumerator->Index()>=count)
-					{
-						return false;
-					}
-					else
-					{
-						return enumerator->Next();
-					}
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available() && enumerator->Index()<count;
-				}
-
-				void Reset()
-				{
-					enumerator->Reset();
-				}
-			};
 		protected:
+			IEnumerator<T>*			enumerator;
 			vint					count;
 		public:
-			TakeEnumerable(const IEnumerable<T>& enumerable, vint _count)
-				:EnumerableStore<T>(enumerable)
+			TakeEnumerator(IEnumerator<T>* _enumerator, vint _count)
+				:enumerator(_enumerator)
 				,count(_count)
 			{
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			~TakeEnumerator()
 			{
-				return new Enumerator(CopyEnumerator(), count);
+				delete enumerator;
+			}
+
+			IEnumerator<T>* Clone()const
+			{
+				return new TakeEnumerator(enumerator->Clone(), count);
+			}
+
+			const T& Current()const
+			{
+				return enumerator->Current();
+			}
+
+			vint Index()const
+			{
+				return enumerator->Index();
+			}
+
+			bool Next()
+			{
+				if(enumerator->Index()>=count-1) return false;
+				return enumerator->Next();
+			}
+
+			void Reset()
+			{
+				enumerator->Reset();
 			}
 		};
-
-		class TakeProcessor : public SequenceEnumerableProcessor<TakeEnumerable>
-		{
-		protected:
-			vint					count;
-		public:
-			TakeProcessor(vint _count)
-				:count(_count)
-			{
-			}
-
-			template<typename T>
-			TakeEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return TakeEnumerable<T>(enumerable, count);
-			}
-		};
-
-		extern TakeProcessor Take(vint count);
 
 /***********************************************************************
 Skip
 ***********************************************************************/
 
 		template<typename T>
-		class SkipEnumerable : public EnumerableStore<T>, public virtual IEnumerable<T>
+		class SkipEnumerator : public virtual IEnumerator<T>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<T>
-			{
-			protected:
-				IEnumerator<T>*		enumerator;
-				vint					count;
-			public:
-				Enumerator(IEnumerator<T>* _enumerator, vint _count)
-					:enumerator(_enumerator)
-					,count(_count)
-				{
-					for(vint i=0;i<count;i++)
-					{
-						enumerator->Next();
-					}
-				}
-
-				~Enumerator()
-				{
-					delete enumerator;
-				}
-
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(enumerator->Clone(), count);
-				}
-
-				const T& Current()const
-				{
-					return enumerator->Current();
-				}
-
-				vint Index()const
-				{
-					return enumerator->Index()-count;
-				}
-
-				bool Next()
-				{
-					return enumerator->Next();
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
-				}
-
-				void Reset()
-				{
-					enumerator->Reset();
-					for(vint i=0;i<count;i++)
-					{
-						enumerator->Next();
-					}
-				}
-			};
 		protected:
+			IEnumerator<T>*			enumerator;
 			vint					count;
 		public:
-			SkipEnumerable(const IEnumerable<T>& enumerable, vint _count)
-				:EnumerableStore<T>(enumerable)
+			SkipEnumerator(IEnumerator<T>* _enumerator, vint _count, bool runSkip=true)
+				:enumerator(_enumerator)
 				,count(_count)
 			{
+				if(runSkip)
+				{
+					for(vint i=0;i<count;i++)
+					{
+						enumerator->Next();
+					}
+				}
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			~SkipEnumerator()
 			{
-				return new Enumerator(CopyEnumerator(), count);
+				delete enumerator;
+			}
+
+			IEnumerator<T>* Clone()const
+			{
+				return new SkipEnumerator(enumerator->Clone(), count, false);
+			}
+
+			const T& Current()const
+			{
+				return enumerator->Current();
+			}
+
+			vint Index()const
+			{
+				return enumerator->Index()-count;
+			}
+
+			bool Next()
+			{
+				return enumerator->Next();
+			}
+
+			void Reset()
+			{
+				enumerator->Reset();
+				for(vint i=0;i<count;i++)
+				{
+					enumerator->Next();
+				}
 			}
 		};
-
-		class SkipProcessor : public SequenceEnumerableProcessor<SkipEnumerable>
-		{
-		protected:
-			vint					count;
-		public:
-			SkipProcessor(vint _count)
-				:count(_count)
-			{
-			}
-
-			template<typename T>
-			SkipEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return SkipEnumerable<T>(enumerable, count);
-			}
-		};
-
-		extern SkipProcessor Skip(vint count);
 
 /***********************************************************************
 Repeat
 ***********************************************************************/
 
 		template<typename T>
-		class RepeatEnumerable : public EnumerableStore<T>, public virtual IEnumerable<T>
+		class RepeatEnumerator : public virtual IEnumerator<T>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<T>
+		protected:
+			IEnumerator<T>*			enumerator;
+			vint					count;
+			vint					index;
+			vint					repeatedCount;
+		public:
+			RepeatEnumerator(IEnumerator<T>* _enumerator, vint _count, vint _index=-1, vint _repeatedCount=0)
+				:enumerator(_enumerator)
+				,count(_count)
+				,index(_index)
+				,repeatedCount(_repeatedCount)
 			{
-			protected:
-				IEnumerator<T>*		enumerator;
-				vint					count;
-				vint					index;
-				vint					repeatedCount;
-			public:
-				Enumerator(IEnumerator<T>* _enumerator, vint _count, vint _index=0, vint _repeatedCount=0)
-					:enumerator(_enumerator)
-					,count(_count)
-					,index(_index)
-					,repeatedCount(_repeatedCount)
-				{
-				}
+			}
 
-				~Enumerator()
-				{
-					delete enumerator;
-				}
+			~RepeatEnumerator()
+			{
+				delete enumerator;
+			}
 
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(enumerator->Clone(), count, index, repeatedCount);
-				}
+			IEnumerator<T>* Clone()const
+			{
+				return new RepeatEnumerator(enumerator->Clone(), count, index, repeatedCount);
+			}
 
-				const T& Current()const
-				{
-					return enumerator->Current();
-				}
+			const T& Current()const
+			{
+				return enumerator->Current();
+			}
 
-				vint Index()const
-				{
-					return index;
-				}
+			vint Index()const
+			{
+				return index;
+			}
 
-				bool Next()
+			bool Next()
+			{
+				while(repeatedCount<count)
 				{
-					if(repeatedCount>=count)
-					{
-						return false;
-					}
-					else if(enumerator->Next())
+					if(enumerator->Next())
 					{
 						index++;
 						return true;
 					}
-					else
-					{
-						repeatedCount++;
-						if(repeatedCount<count)
-						{
-							index++;
-							enumerator->Reset();
-							return enumerator->Available();
-						}
-						else
-						{
-							return false;
-						}
-					}
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available() && repeatedCount<count;
-				}
-
-				void Reset()
-				{
+					repeatedCount++;
 					enumerator->Reset();
-					index=0;
-					repeatedCount=0;
 				}
-			};
-		protected:
-			vint					count;
-		public:
-			RepeatEnumerable(const IEnumerable<T>& enumerable, vint _count)
-				:EnumerableStore<T>(enumerable)
-				,count(_count)
-			{
+				return false;
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			void Reset()
 			{
-				return new Enumerator(CopyEnumerator(), count);
+				enumerator->Reset();
+				index=-1;
+				repeatedCount=0;
 			}
 		};
-
-		class RepeatProcessor : public SequenceEnumerableProcessor<RepeatEnumerable>
-		{
-		protected:
-			vint					count;
-		public:
-			RepeatProcessor(vint _count)
-				:count(_count)
-			{
-			}
-
-			template<typename T>
-			RepeatEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return RepeatEnumerable<T>(enumerable, count);
-			}
-		};
-
-		extern RepeatProcessor Repeat(vint count);
 
 /***********************************************************************
 Distinct
 ***********************************************************************/
 
 		template<typename T>
-		class DistinctEnumerable : public EnumerableStore<T>, public virtual IEnumerable<T>
+		class DistinctEnumerator : public virtual IEnumerator<T>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<T>
-			{
-			protected:
-				IEnumerator<T>*		enumerator;
-				SortedList<T>		distinct;
-				T					lastValue;
+		protected:
+			IEnumerator<T>*		enumerator;
+			SortedList<T>		distinct;
+			T					lastValue;
 
-				void GoNearest()
+		public:
+			DistinctEnumerator(IEnumerator<T>* _enumerator)
+				:enumerator(_enumerator)
+			{
+			}
+
+			DistinctEnumerator(const DistinctEnumerator& _enumerator)
+			{
+				enumerator=_enumerator.enumerator->Clone();
+				CopyFrom(distinct, _enumerator.distinct);
+			}
+
+			~DistinctEnumerator()
+			{
+				delete enumerator;
+			}
+
+			IEnumerator<T>* Clone()const
+			{
+				return new DistinctEnumerator(*this);
+			}
+
+			const T& Current()const
+			{
+				return lastValue;
+			}
+
+			vint Index()const
+			{
+				return distinct.Count()-1;
+			}
+
+			bool Next()
+			{
+				while(enumerator->Next())
 				{
-					while(enumerator->Available())
+					const T& current=enumerator->Current();
+					if(!distinct.Contains(current))
 					{
-						const T& current=enumerator->Current();
-						if(!distinct.Contains(current))
-						{
-							lastValue=current;
-							distinct.Add(current);
-							break;
-						}
-						enumerator->Next();
+						lastValue=current;
+						distinct.Add(current);
+						return true;
 					}
 				}
-			public:
-				Enumerator(IEnumerator<T>* _enumerator)
-					:enumerator(_enumerator)
-				{
-					GoNearest();
-				}
-
-				Enumerator(const Enumerator& _enumerator)
-				{
-					enumerator=_enumerator.enumerator->Clone();
-					CopyFrom(distinct, _enumerator.distinct);
-				}
-
-				~Enumerator()
-				{
-					delete enumerator;
-				}
-
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(*this);
-				}
-
-				const T& Current()const
-				{
-					return lastValue;
-				}
-
-				vint Index()const
-				{
-					return distinct.Count()-1;
-				}
-
-				bool Next()
-				{
-					enumerator->Next();
-					GoNearest();
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
-				}
-
-				void Reset()
-				{
-					enumerator->Reset();
-					distinct.Clear();
-					GoNearest();
-				}
-			};
-		public:
-			DistinctEnumerable(const IEnumerable<T>& enumerable)
-				:EnumerableStore<T>(enumerable)
-			{
+				return false;
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			void Reset()
 			{
-				return new Enumerator(CopyEnumerator());
+				enumerator->Reset();
+				distinct.Clear();
 			}
 		};
-
-		class DistinctProcessor : public SequenceEnumerableProcessor<DistinctEnumerable>
-		{
-		public:
-			DistinctProcessor()
-			{
-			}
-
-			template<typename T>
-			DistinctEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return DistinctEnumerable<T>(enumerable);
-			}
-		};
-
-		extern DistinctProcessor Distinct();
 
 /***********************************************************************
 Reverse
 ***********************************************************************/
 
 		template<typename T>
-		class ReverseEnumerable : public Object, public virtual IEnumerable<T>
+		class ReverseEnumerator : public virtual IEnumerator<T>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<T>
-			{
-			protected:
-				List<T>					cache;
-				vint						index;
-			public:
-				Enumerator(const IEnumerable<T>& enumerable)
-					:index(0)
-				{
-					CopyFrom(cache, enumerable);
-				}
-
-				Enumerator(const Enumerator& _enumerator)
-				{
-					CopyFrom(cache, _enumerator.cache);
-					index=_enumerator.index;
-				}
-
-				~Enumerator()
-				{
-				}
-
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(*this);
-				}
-
-				const T& Current()const
-				{
-					return cache.Get(cache.Count()-1-index);
-				}
-
-				vint Index()const
-				{
-					return index;
-				}
-
-				bool Next()
-				{
-					index++;
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return index<cache.Count();
-				}
-
-				void Reset()
-				{
-					index=0;
-				}
-			};
 		protected:
-			const IEnumerable<T>&		enumerable;
+			List<T>						cache;
+			vint						index;
 		public:
-			ReverseEnumerable(const IEnumerable<T>& _enumerable)
-				:enumerable(_enumerable)
+			ReverseEnumerator(const IEnumerable<T>& enumerable)
+				:index(-1)
+			{
+				CopyFrom(cache, enumerable);
+			}
+
+			ReverseEnumerator(const ReverseEnumerator& _enumerator)
+			{
+				CopyFrom(cache, _enumerator.cache);
+				index=_enumerator.index;
+			}
+
+			~ReverseEnumerator()
 			{
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			IEnumerator<T>* Clone()const
 			{
-				return new Enumerator(enumerable);
+				return new ReverseEnumerator(*this);
+			}
+
+			const T& Current()const
+			{
+				return cache.Get(cache.Count()-1-index);
+			}
+
+			vint Index()const
+			{
+				return index;
+			}
+
+			bool Next()
+			{
+				index++;
+				return index<cache.Count();
+			}
+
+			void Reset()
+			{
+				index=0;
 			}
 		};
-
-		class ReverseProcessor : public SequenceEnumerableProcessor<ReverseEnumerable>
-		{
-		public:
-			ReverseProcessor()
-			{
-			}
-
-			template<typename T>
-			ReverseEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return ReverseEnumerable<T>(enumerable);
-			}
-		};
-
-		extern ReverseProcessor Reverse();
 
 /***********************************************************************
 FromIterator
@@ -8518,20 +11613,18 @@ FromIterator
 				I				begin;
 				I				end;
 				I				current;
-				vint			index;
 
 			public:
-				Enumerator(I _begin, I _end, I _current, vint _index)
+				Enumerator(I _begin, I _end, I _current)
 					:begin(_begin)
 					,end(_end)
 					,current(_current)
-					,index(_index)
 				{
 				}
 
 				IEnumerator<T>* Clone()const
 				{
-					return new Enumerator(begin, end, current, index);
+					return new Enumerator(begin, end, current);
 				}
 
 				const T& Current()const
@@ -8541,36 +11634,18 @@ FromIterator
 
 				vint Index()const
 				{
-					return index;
+					return current-begin;
 				}
 
 				bool Next()
 				{
-					if(current==end)
-					{
-						return false;
-					}
 					current++;
-					if(current==end)
-					{
-						return false;
-					}
-					else
-					{
-						index++;
-						return true;
-					}
-				}
-
-				bool Available()const
-				{
-					return current!=end;
+					return begin<=current && current<end;
 				}
 
 				void Reset()
 				{
-					current=begin;
-					index=0;
+					current=begin-1;
 				}
 			};
 		private:
@@ -8579,7 +11654,7 @@ FromIterator
 		public:
 			IEnumerator<T>* CreateEnumerator()const
 			{
-				return new Enumerator(begin, end, begin, 0);
+				return new Enumerator(begin, end, begin-1);
 			}
 
 			FromIteratorEnumerable(I _begin, I _end)
@@ -8640,156 +11715,67 @@ Intersect/Except
 ***********************************************************************/
 
 		template<typename T, bool Intersect>
-		class IntersectExceptEnumerable : public EnumerableStore<T>, public virtual IEnumerable<T>
+		class IntersectExceptEnumerator : public virtual IEnumerator<T>
 		{
 		protected:
-			class Enumerator : public virtual IEnumerator<T>
-			{
-			protected:
-				IEnumerator<T>*			enumerator;
-				SortedList<T>			reference;
-				vint						index;
+			IEnumerator<T>*				enumerator;
+			SortedList<T>				reference;
+			vint						index;
 
-				void GoNearest()
+		public:
+			IntersectExceptEnumerator(IEnumerator<T>* _enumerator, const IEnumerable<T>& _reference)
+				:enumerator(_enumerator)
+				,index(-1)
+			{
+				CopyFrom(reference, _reference);
+			}
+
+			IntersectExceptEnumerator(const IntersectExceptEnumerator& _enumerator)
+			{
+				enumerator=_enumerator.enumerator->Clone();
+				CopyFrom(reference, _enumerator.reference);
+				index=_enumerator.index;
+			}
+
+			~IntersectExceptEnumerator()
+			{
+				delete enumerator;
+			}
+
+			IEnumerator<T>* Clone()const
+			{
+				return new IntersectExceptEnumerator(*this);
+			}
+
+			const T& Current()const
+			{
+				return enumerator->Current();
+			}
+
+			vint Index()const
+			{
+				return index;
+			}
+
+			bool Next()
+			{
+				while(enumerator->Next())
 				{
-					while(enumerator->Available())
+					if(reference.Contains(enumerator->Current())==Intersect)
 					{
-						if(reference.Contains(enumerator->Current())==Intersect)
-						{
-							break;
-						}
-						else
-						{
-							enumerator->Next();
-						}
+						index++;
+						return true;
 					}
 				}
-			public:
-				Enumerator(IEnumerator<T>* _enumerator, const IEnumerable<T>& _reference)
-					:enumerator(_enumerator)
-					,index(0)
-				{
-					CopyFrom(reference, _reference);
-					GoNearest();
-				}
-
-				Enumerator(const Enumerator& _enumerator)
-				{
-					enumerator=_enumerator.enumerator->Clone();
-					CopyFrom(reference, _enumerator.reference);
-					index=_enumerator.index;
-				}
-
-				~Enumerator()
-				{
-					delete enumerator;
-				}
-
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(*this);
-				}
-
-				const T& Current()const
-				{
-					return enumerator->Current();
-				}
-
-				vint Index()const
-				{
-					return index;
-				}
-
-				bool Next()
-				{
-					index++;
-					enumerator->Next();
-					GoNearest();
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
-				}
-
-				void Reset()
-				{
-					enumerator->Reset();
-					index=0;
-					GoNearest();
-				}
-			};
-		protected:
-			const IEnumerable<T>&				reference;
-		public:
-			IntersectExceptEnumerable(const IEnumerable<T>& enumerable, const IEnumerable<T>& _reference)
-				:EnumerableStore<T>(enumerable)
-				,reference(_reference)
-			{
+				return false;
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			void Reset()
 			{
-				return new Enumerator(CopyEnumerator(), reference);
+				enumerator->Reset();
+				index=0;
 			}
 		};
-
-		template<typename T, bool Intersect>
-		class IntersectExceptProcessor : public EnumerableProcessor<T, IntersectExceptEnumerable<T, Intersect>>
-		{
-		protected:
-			const IEnumerable<T>&				second;
-		public:
-			IntersectExceptProcessor(const IEnumerable<T>& _second)
-				:second(_second)
-			{
-			}
-
-			IntersectExceptEnumerable<T, Intersect> operator()(const IEnumerable<T>& first)const
-			{
-				return IntersectExceptEnumerable<T, Intersect>(first, second);
-			}
-		};
-
-		template<typename T>
-		IntersectExceptProcessor<T, true> Intersect(const IEnumerable<T>& second)
-		{
-			return IntersectExceptProcessor<T, true>(second);
-		}
-
-		template<typename T>
-		IntersectExceptProcessor<T, false> Except(const IEnumerable<T>& second)
-		{
-			return IntersectExceptProcessor<T, false>(second);
-		}
-
-/***********************************************************************
-Union
-***********************************************************************/
-
-		template<typename T>
-		class UnionProcessor : public EnumerableProcessor<T, DistinctEnumerable<T>>
-		{
-		protected:
-			const IEnumerable<T>&				second;
-		public:
-			UnionProcessor(const IEnumerable<T>& _second)
-				:second(_second)
-			{
-			}
-
-			DistinctEnumerable<T> operator()(const IEnumerable<T>& first)const
-			{
-				return first>>Concat(second)>>Distinct();
-			}
-		};
-
-		template<typename T>
-		UnionProcessor<T> Union(const IEnumerable<T>& second)
-		{
-			return UnionProcessor<T>(second);
-		}
 	}
 }
 
@@ -8819,567 +11805,60 @@ Pairwise
 ***********************************************************************/
 
 		template<typename S, typename T>
-		class PairwiseEnumerable : public EnumerableStore<S, 1>, public EnumerableStore<T, 2>, public virtual IEnumerable<Pair<S, T>>
+		class PairwiseEnumerator : public virtual IEnumerator<Pair<S, T>>
 		{
 		protected:
-			class Enumerator : public virtual IEnumerator<Pair<S, T>>
-			{
-			protected:
-				IEnumerator<S>*					enumerator1;
-				IEnumerator<T>*					enumerator2;
-				Pair<S, T>						current;
-			public:
-				Enumerator(IEnumerator<S>* _enumerator1, IEnumerator<T>* _enumerator2, vint _index=0, bool _turned=false)
-					:enumerator1(_enumerator1)
-					,enumerator2(_enumerator2)
-				{
-					if(Available())
-					{
-						current=Pair<S, T>(enumerator1->Current(), enumerator2->Current());
-					}
-				}
-
-				~Enumerator()
-				{
-					delete enumerator1;
-					delete enumerator2;
-				}
-
-				IEnumerator<Pair<S, T>>* Clone()const
-				{
-					return new Enumerator(enumerator1->Clone(), enumerator2->Clone());
-				}
-
-				const Pair<S, T>& Current()const
-				{
-					return current;
-				}
-
-				vint Index()const
-				{
-					return enumerator1->Index();
-				}
-
-				bool Next()
-				{
-					if(enumerator1->Next() && enumerator2->Next())
-					{
-						current=Pair<S, T>(enumerator1->Current(), enumerator2->Current());
-						return true;
-					}
-					else
-					{
-						return false;
-					}
-				}
-
-				bool Available()const
-				{
-					return enumerator1->Available() && enumerator2->Available();
-				}
-
-				void Reset()
-				{
-					enumerator1->Reset();
-					enumerator2->Reset();
-					if(Available())
-					{
-						current=Pair<S, T>(enumerator1->Current(), enumerator2->Current());
-					}
-				}
-			};
+			IEnumerator<S>*					enumerator1;
+			IEnumerator<T>*					enumerator2;
+			Pair<S, T>						current;
 		public:
-			PairwiseEnumerable(const IEnumerable<S>& enumerable1, const IEnumerable<T>& enumerable2)
-				:EnumerableStore<S, 1>(enumerable1)
-				,EnumerableStore<T, 2>(enumerable2)
+			PairwiseEnumerator(IEnumerator<S>* _enumerator1, IEnumerator<T>* _enumerator2)
+				:enumerator1(_enumerator1)
+				,enumerator2(_enumerator2)
 			{
 			}
 
-			IEnumerator<Pair<S, T>>* CreateEnumerator()const
+			~PairwiseEnumerator()
 			{
-				return new Enumerator(EnumerableStore<S, 1>::CopyEnumerator(), EnumerableStore<T, 2>::CopyEnumerator());
+				delete enumerator1;
+				delete enumerator2;
+			}
+
+			IEnumerator<Pair<S, T>>* Clone()const
+			{
+				return new PairwiseEnumerator(enumerator1->Clone(), enumerator2->Clone());
+			}
+
+			const Pair<S, T>& Current()const
+			{
+				return current;
+			}
+
+			vint Index()const
+			{
+				return enumerator1->Index();
+			}
+
+			bool Next()
+			{
+				if(enumerator1->Next() && enumerator2->Next())
+				{
+					current=Pair<S, T>(enumerator1->Current(), enumerator2->Current());
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void Reset()
+			{
+				enumerator1->Reset();
+				enumerator2->Reset();
 			}
 		};
-
-		template<typename T>
-		class PairwiseProcessor : public FreeEnumerableProcessor
-		{
-		protected:
-			const IEnumerable<T>&				second;
-		public:
-			template<typename S>
-			struct ResultTypeRetriver
-			{
-				typedef PairwiseEnumerable<S, T> ResultType;
-			};
-
-			PairwiseProcessor(const IEnumerable<T>& _second)
-				:second(_second)
-			{
-			}
-
-			template<typename S>
-			PairwiseEnumerable<S, T> operator()(const IEnumerable<S>& first)const
-			{
-				return PairwiseEnumerable<S, T>(first, second);
-			}
-		};
-
-		template<typename T>
-		PairwiseProcessor<T> Pairwise(const IEnumerable<T>& second)
-		{
-			return PairwiseProcessor<T>(second);
-		}
 	}
-}
-
-#endif
-
-/***********************************************************************
-STRING.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::String
-
-Classes:
-	AString										：Mbcs字符串
-	WString										：Utf-16字符串
-***********************************************************************/
-
-#ifndef VCZH_STRING
-#define VCZH_STRING
-
-
-namespace vl
-{
-	template<typename T>
-	class ObjectString : public Object
-	{
-	private:
-		static const T	zero=0;
-
-		mutable T*					buffer;
-		mutable vint*				reference;
-		mutable vint				start;
-		mutable vint				length;
-		mutable vint				realLength;
-
-		static vint CalculateLength(const T* buffer)
-		{
-			vint result=0;
-			while(*buffer++)result++;
-			return result;
-		}
-
-		static vint Compare(const T* bufA, const ObjectString<T>& strB)
-		{
-			const T* bufB=strB.buffer+strB.start;
-			const T* bufAOld=bufA;
-			vint length=strB.length;
-			while(length-- && *bufA)
-			{
-				vint diff=*bufA++-*bufB++;
-				if(diff!=0)
-				{
-					return diff;
-				}
-			};
-			return CalculateLength(bufAOld)-strB.length;
-		}
-
-	public:
-
-		static vint Compare(const ObjectString<T>& strA, const ObjectString<T>& strB)
-		{
-			const T* bufA=strA.buffer+strA.start;
-			const T* bufB=strB.buffer+strB.start;
-			vint length=strA.length<strB.length?strA.length:strB.length;
-			while(length--)
-			{
-				vint diff=*bufA++-*bufB++;
-				if(diff!=0)
-				{
-					return diff;
-				}
-			};
-			return strA.length-strB.length;
-		}
-
-	private:
-
-		void Inc()const
-		{
-			if(reference)
-			{
-				(*reference)++;
-			}
-		}
-
-		void Dec()const
-		{
-			if(reference)
-			{
-				if(--(*reference)==0)
-				{
-					delete[] buffer;
-					delete reference;
-				}
-			}
-		}
-
-		ObjectString(const ObjectString<T>& string, vint _start, vint _length)
-		{
-			if(_length==0)
-			{
-				buffer=(T*)&zero;
-				reference=0;
-				start=0;
-				length=0;
-				realLength=0;
-			}
-			else
-			{
-				buffer=string.buffer;
-				reference=string.reference;
-				start=string.start+_start;
-				length=_length;
-				realLength=string.realLength;
-				Inc();
-			}
-		}
-
-		ObjectString(const ObjectString<T>& dest, const ObjectString<T>& source, vint index, vint count)
-		{
-			if(index==0 && count==dest.length && source.length==0)
-			{
-				buffer=(T*)&zero;
-				reference=0;
-				start=0;
-				length=0;
-				realLength=0;
-			}
-			else
-			{
-				reference=new vint(1);
-				start=0;
-				length=dest.length-count+source.length;
-				realLength=length;
-				buffer=new T[length+1];
-				memcpy(buffer, dest.buffer+dest.start, sizeof(T)*index);
-				memcpy(buffer+index, source.buffer+source.start, sizeof(T)*source.length);
-				memcpy(buffer+index+source.length, (dest.buffer+dest.start+index+count), sizeof(T)*(dest.length-index-count));
-				buffer[length]=0;
-			}
-		}
-	public:
-		static ObjectString<T>	Empty;
-
-		ObjectString()
-		{
-			buffer=(T*)&zero;
-			reference=0;
-			start=0;
-			length=0;
-			realLength=0;
-		}
-
-		ObjectString(const T& _char)
-		{
-			reference=new vint(1);
-			start=0;
-			length=1;
-			buffer=new T[2];
-			buffer[0]=_char;
-			buffer[1]=0;
-			realLength=length;
-		}
-
-		ObjectString(const T* _buffer, vint _length)
-		{
-			if(_length==0)
-			{
-				buffer=(T*)&zero;
-				reference=0;
-				start=0;
-				length=0;
-				realLength=0;
-			}
-			else
-			{
-				buffer=new T[_length+1];
-				memcpy(buffer, _buffer, _length*sizeof(T));
-				buffer[_length]=0;
-				reference=new vint(1);
-				start=0;
-				length=_length;
-				realLength=_length;
-			}
-		}
-
-		ObjectString(const T* _buffer, bool copy = true)
-		{
-			CHECK_ERROR(_buffer!=0, L"ObjectString<T>::ObjectString(const T*, bool)#不能用空指针构造字符串。");
-			if(copy)
-			{
-				reference=new vint(1);
-				start=0;
-				length=CalculateLength(_buffer);
-				buffer=new T[length+1];
-				memcpy(buffer, _buffer, sizeof(T)*(length+1));
-				realLength=length;
-			}
-			else
-			{
-				buffer=(T*)_buffer;
-				reference=0;
-				start=0;
-				length=CalculateLength(_buffer);
-				realLength=length;
-			}
-		}
-
-		ObjectString(const ObjectString<T>& string)
-		{
-			buffer=string.buffer;
-			reference=string.reference;
-			start=string.start;
-			length=string.length;
-			realLength=string.realLength;
-			Inc();
-		}
-
-		~ObjectString()
-		{
-			Dec();
-		}
-
-		const T* Buffer()const
-		{
-			if(start+length!=realLength)
-			{
-				T* newBuffer=new T[length+1];
-				memcpy(newBuffer, buffer+start, sizeof(T)*length);
-				newBuffer[length]=0;
-				Dec();
-				buffer=newBuffer;
-				reference=new vint(1);
-				start=0;
-				realLength=length;
-			}
-			return buffer+start;
-		}
-
-		ObjectString<T>& operator=(const ObjectString<T>& string)
-		{
-			if(this!=&string)
-			{
-				Dec();
-				buffer=string.buffer;
-				reference=string.reference;
-				start=string.start;
-				length=string.length;
-				realLength=string.realLength;
-				Inc();
-			}
-			return *this;
-		}
-
-		ObjectString<T>& operator+=(const ObjectString<T>& string)
-		{
-			return *this=*this+string;
-		}
-
-		ObjectString<T> operator+(const ObjectString<T>& string)const
-		{
-			return ObjectString<T>(*this, string, length, 0);
-		}
-
-		bool operator==(const ObjectString<T>& string)const
-		{
-			return Compare(*this, string)==0;
-		}
-
-		bool operator!=(const ObjectString<T>& string)const
-		{
-			return Compare(*this, string)!=0;
-		}
-
-		bool operator>(const ObjectString<T>& string)const
-		{
-			return Compare(*this, string)>0;
-		}
-
-		bool operator>=(const ObjectString<T>& string)const
-		{
-			return Compare(*this, string)>=0;
-		}
-
-		bool operator<(const ObjectString<T>& string)const
-		{
-			return Compare(*this, string)<0;
-		}
-
-		bool operator<=(const ObjectString<T>& string)const
-		{
-			return Compare(*this, string)<=0;
-		}
-
-		bool operator==(const T* buffer)const
-		{
-			return Compare(buffer, *this)==0;
-		}
-
-		bool operator!=(const T* buffer)const
-		{
-			return Compare(buffer, *this)!=0;
-		}
-
-		bool operator>(const T* buffer)const
-		{
-			return Compare(buffer, *this)<0;
-		}
-
-		bool operator>=(const T* buffer)const
-		{
-			return Compare(buffer, *this)<=0;
-		}
-
-		bool operator<(const T* buffer)const
-		{
-			return Compare(buffer, *this)>0;
-		}
-
-		bool operator<=(const T* buffer)const
-		{
-			return Compare(buffer, *this)>=0;
-		}
-
-		T operator[](vint index)const
-		{
-			CHECK_ERROR(index>=0 && index<length, L"ObjectString:<T>:operator[](vint)#参数index越界。");
-			return buffer[start+index];
-		}
-
-		vint Length()const
-		{
-			return length;
-		}
-
-		vint IndexOf(T c)const
-		{
-			const T* reading=buffer+start;
-			for(vint i=0;i<length;i++)
-			{
-				if(reading[i]==c)
-					return i;
-			}
-			return -1;
-		}
-
-		ObjectString<T> Left(vint count)const
-		{
-			CHECK_ERROR(count>=0 && count<=length, L"ObjectString<T>::Left(vint)#参数count越界。");
-			return ObjectString<T>(*this, 0, count);
-		}
-
-		ObjectString<T> Right(vint count)const
-		{
-			CHECK_ERROR(count>=0 && count<=length, L"ObjectString<T>::Right(vint)#参数count越界。");
-			return ObjectString<T>(*this, length-count, count);
-		}
-
-		ObjectString<T> Sub(vint index, vint count)const
-		{
-			CHECK_ERROR(index>=0 && index<length, L"ObjectString<T>::Sub(vint, vint)#参数index越界。");
-			CHECK_ERROR(index+count>=0 && index+count<=length, L"ObjectString<T>::Sub(vint, vint)#参数count越界。");
-			return ObjectString<T>(*this, index, count);
-		}
-
-		ObjectString<T> Remove(vint index, vint count)const
-		{
-			CHECK_ERROR(index>=0 && index<length, L"ObjectString<T>::Remove(vint, vint)#参数index越界。");
-			CHECK_ERROR(index+count>=0 && index+count<=length, L"ObjectString<T>::Remove(vint, vint)#参数count越界。");
-			return ObjectString<T>(*this, ObjectString<T>(), index, count);
-		}
-
-		ObjectString<T> Insert(vint index, const ObjectString<T>& string)const
-		{
-			CHECK_ERROR(index>=0 && index<=length, L"ObjectString<T>::Insert(vint)#参数count越界。");
-			return ObjectString<T>(*this, string, index, 0);
-		}
-
-		friend bool operator<(const T* left, const ObjectString<T>& right)
-		{
-			return Compare(left, right)<0;
-		}
-
-		friend bool operator<=(const T* left, const ObjectString<T>& right)
-		{
-			return Compare(left, right)<=0;
-		}
-
-		friend bool operator>(const T* left, const ObjectString<T>& right)
-		{
-			return Compare(left, right)>0;
-		}
-
-		friend bool operator>=(const T* left, const ObjectString<T>& right)
-		{
-			return Compare(left, right)>=0;
-		}
-
-		friend bool operator==(const T* left, const ObjectString<T>& right)
-		{
-			return Compare(left, right)==0;
-		}
-
-		friend bool operator!=(const T* left, const ObjectString<T>& right)
-		{
-			return Compare(left, right)!=0;
-		}
-
-		friend ObjectString<T> operator+(const T* left, const ObjectString<T>& right)
-		{
-			return WString(left, false)+right;
-		}
-	};
-
-	template<typename T>
-	ObjectString<T> ObjectString<T>::Empty=ObjectString<T>();
-
-	typedef ObjectString<char>		AString;
-	typedef ObjectString<wchar_t>	WString;
-
-	extern vint					atoi(const AString& string);
-	extern vint					wtoi(const WString& string);
-	extern __int64				atoi64(const AString& string);
-	extern __int64				wtoi64(const WString& string);
-	extern vuint				atou(const AString& string);
-	extern vuint				wtou(const WString& string);
-	extern unsigned __int64		atou64(const AString& string);
-	extern unsigned __int64		wtou64(const WString& string);
-	extern double				atof(const AString& string);
-	extern double				wtof(const WString& string);
-	extern AString				itoa(vint number);
-	extern WString				itow(vint number);
-	extern AString				i64toa(__int64 number);
-	extern WString				i64tow(__int64 number);
-	extern AString				utoa(vuint number);
-	extern WString				utow(vuint number);
-	extern AString				u64toa(unsigned __int64 number);
-	extern WString				u64tow(unsigned __int64 number);
-	extern AString				ftoa(double number);
-	extern WString				ftow(double number);
-	extern vint					_wtoa(const wchar_t* w, char* a, vint chars);
-	extern AString				wtoa(const WString& string);
-	extern vint					_atow(const char* a, wchar_t* w, vint chars);
-	extern WString				atow(const AString& string);
-	extern AString				alower(const AString& string);
-	extern WString				wlower(const WString& string);
-	extern AString				aupper(const AString& string);
-	extern WString				wupper(const WString& string);
 }
 
 #endif
@@ -9439,3568 +11918,360 @@ Data Structure::Operations
 
 Functions:
 	CopyFrom(TargetContainer, SourceContainer)
-	[T] >>	Select(T->K) => [K]
-	[T] >>	Where(T->bool) => [T]
-	[T] >>	OrderBy(T->T->int) => [T]
-	[T] >>	Aggregate(T->T->T) => T
-	[T] >>	Aggregate(T->T->T, T) => T
-	[T] >>	All(T->bool) => bool
-	[T] >>	Any(T->bool) => bool
-	[T] >>	Max() => T
-	[T] >>	Min() => T
-	[T] >>	First() => T
-	[T] >>	Count() => vint
-	[T] >>	IsEmpty() => bool
-	[T] >>	Concat([T]) => [T]
-	[T] >>	Repeat(vint) => [T]
-	[T] >>	Take(vint) => [T]
-	[T] >>	Skip(vint) => [T]
-	[T] >>	Distinct() => [T]
-	[T] >>	Reverse() => [T]
-			FromIterator<T>::Wrap(begin, end) => [T]
-			FromPointer<T>(begin, end) => [T]
-			FromArray<T[]>(array) => [T]
-	[T] >>	Intersect([T]) => [T]
-	[T] >>	Union([T]) => [T]
-	[T] >>	Except([T]) => [T]
-	[T] >>	Pairwise([K]) => [(T,K)]
-	
-	[Ptr<T>] >> Cast<K>() => [Ptr<K>]
-	[Ptr<T>] >> FindType<K>() => [Ptr<K>]
+	[T]		.Select(T->K) => [K]
+	[T]		.Where(T->bool) => [T]
+	[Ptr<T>].Cast<K>() => [Ptr<K>]
+	[Ptr<T>].FindType<K>() => [Ptr<K>]
+	[T]		.OrderBy(T->T->int) => [T]
 
-FOREACH(X, a, XList)
-FOREACH_INDEXER(X, a, index, XList)
+	[T]		.Aggregate(T->T->T) => T
+	[T]		.Aggregate(T->T->T, T) => T
+	[T]		.All(T->bool) => bool
+	[T]		.Any(T->bool) => bool
+	[T]		.Max() => T
+	[T]		.Min() => T
+	[T]		.First() => T
+	[T]		.FirstOrDefault(T) => T
+	[T]		.Last() => T
+	[T]		.LastOrDefault(T) => T
+	[T]		.Count() => vint
+	[T]		.IsEmpty() => bool
+
+	[T]		.Concat([T]) => [T]
+	[T]		.Repeat(vint) => [T]
+	[T]		.Take(vint) => [T]
+	[T]		.Skip(vint) => [T]
+	[T]		.Distinct() => [T]
+	[T]		.Reverse() => [T]
+
+	[T]		.Pairwise([K]) => [(T,K)]
+	[T]		.Intersect([T]) => [T]
+	[T]		.Union([T]) => [T]
+	[T]		.Except([T]) => [T]
+
+	From(begin, end) => [T]
+	From(array) => [T]
+
+	FOREACH(X, a, XList)
+	FOREACH_INDEXER(X, a, index, XList)
 ***********************************************************************/
 
 #ifndef VCZH_COLLECTIONS_OPERATION
 #define VCZH_COLLECTIONS_OPERATION
 
 
-#endif
-
-/***********************************************************************
-CONSOLE.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-UI::Console
-
-***********************************************************************/
-
-#ifndef VCZH_CONSOLE
-#define VCZH_CONSOLE
-
-
-namespace vl
-{
-	namespace console
-	{
-		class Console abstract
-		{
-		public:
-			static void Write(const wchar_t* string, vint length);
-			static void Write(const wchar_t* string);
-			static void Write(const WString& string);
-			static void WriteLine(const WString& string);
-			static WString Read();
-			static void SetColor(bool red, bool green, bool blue, bool light);
-			static void SetTitle(const WString& string);
-		};
-	}
-}
-
-#endif
-
-/***********************************************************************
-EXCEPTION.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Framework::Exception
-
-Classes:
-	Exception									：异常
-	ArgumentException							：预料的的参数错误
-***********************************************************************/
-
-#ifndef VCZH_EXCEPTION
-#define VCZH_EXCEPTION
-
-
-namespace vl
-{
-	class Exception : public Object
-	{
-	protected:
-		WString						message;
-
-	public:
-		Exception(const WString& _message=WString::Empty);
-
-		const WString&				Message()const;
-	};
-
-	class ArgumentException : public Exception
-	{
-	protected:
-		WString						function;
-		WString						name;
-
-	public:
-		ArgumentException(const WString& _message=WString::Empty, const WString& _function=WString::Empty, const WString& _name=WString::Empty);
-
-		const WString&				GetFunction()const;
-		const WString&				GetName()const;
-	};
-
-	class ParsingException : public Exception
-	{
-	protected:
-		vint							position;
-		WString						expression;
-
-	public:
-		ParsingException(const WString& _message, const WString& _expression, vint _position);
-
-		const WString&				GetExpression()const;
-		vint							GetPosition()const;
-	};
-}
-
-#endif
-
-/***********************************************************************
-COLLECTIONS\DICTIONARY.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Dictionary
-
-Classes:
-	Dictionary<KT, VT, KK, VK>					：映射
-	Group<KT, VT, KK, VK>						：多重映射
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_DICTIONARY
-#define VCZH_COLLECTIONS_DICTIONARY
-
-
 namespace vl
 {
 	namespace collections
 	{
-		template<
-			typename KT,
-			typename VT,
-			typename KK=typename KeyType<KT>::Type, 
-			typename VK=typename KeyType<VT>::Type
-		>
-		class Dictionary : public Object, public virtual IEnumerable<Pair<KT, VT>>
-		{
-			typedef SortedList<KT, KK>			KeyContainer;
-			typedef List<VT, VK>				ValueContainer;
-		protected:
-			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
-			{
-			private:
-				const Dictionary<KT, VT, KK, VK>*	container;
-				vint								index;
-				Pair<KT, VT>						current;
-
-				void UpdateCurrent()
-				{
-					if(index<container->Count())
-					{
-						current.key=container->Keys().Get(index);
-						current.value=container->Values().Get(index);
-					}
-				}
-			public:
-				Enumerator(const Dictionary<KT, VT, KK, VK>* _container, vint _index=0)
-				{
-					container=_container;
-					index=_index;
-					UpdateCurrent();
-				}
-				
-				IEnumerator<Pair<KT, VT>>* Clone()const
-				{
-					return new Enumerator(container, index);
-				}
-
-				const Pair<KT, VT>& Current()const
-				{
-					return current;
-				}
-
-				vint Index()const
-				{
-					return index;
-				}
-
-				bool Next()
-				{
-					index++;
-					UpdateCurrent();
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return index>=0 && index<container->Count();
-				}
-
-				void Reset()
-				{
-					index=0;
-					UpdateCurrent();
-				}
-			};
-
-			KeyContainer						keys;
-			ValueContainer						values;
-		public:
-			Dictionary()
-			{
-			}
-
-			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
-			{
-				return new Enumerator(this);
-			}
-
-			void SetLessMemoryMode(bool mode)
-			{
-				keys.SetLessMemoryMode(mode);
-				values.SetLessMemoryMode(mode);
-			}
-
-			const KeyContainer& Keys()const
-			{
-				return keys;
-			}
-
-			const ValueContainer& Values()const
-			{
-				return values;
-			}
-
-			vint Count()const
-			{
-				return keys.Count();
-			}
-
-			const VT& Get(const KK& key)const
-			{
-				return values.Get(keys.IndexOf(key));
-			}
-
-			const VT& operator[](const KK& key)const
-			{
-				return values.Get(keys.IndexOf(key));
-			}
-
-			bool Set(const KK& key, const VT& value)
-			{
-				vint index=keys.IndexOf(key);
-				if(index==-1)
-				{
-					index=keys.Add(key);
-					values.Insert(index, value);
-				}
-				else
-				{
-					values[index]=value;
-				}
-				return true;
-			}
-
-			bool Add(const Pair<KT, VT>& value)
-			{
-				return Add(value.key, value.value);
-			}
-
-			bool Add(const KT& key, const VT& value)
-			{
-				CHECK_ERROR(!keys.Contains(key), L"Dictionary<KT, KK, ValueContainer, VT, VK>::Add(const KT&, const VT&)#key已存在。");
-				vint index=keys.Add(key);
-				values.Insert(index, value);
-				return true;
-			}
-
-			bool Remove(const KK& key)
-			{
-				vint index=keys.IndexOf(key);
-				if(index!=-1)
-				{
-					keys.RemoveAt(index);
-					values.RemoveAt(index);
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Clear()
-			{
-				keys.Clear();
-				values.Clear();
-				return true;
-			}
-		};
-
-		template<
-			typename KT,
-			typename VT,
-			typename KK=typename KeyType<KT>::Type,
-			typename VK=typename KeyType<VT>::Type
-		>
-		class Group : public Object, public virtual IEnumerable<Pair<KT, VT>>
-		{
-			typedef SortedList<KT, KK>		KeyContainer;
-			typedef List<VT, VK>			ValueContainer;
-		protected:
-			class Enumerator : public Object, public virtual IEnumerator<Pair<KT, VT>>
-			{
-			private:
-				const Group<KT, VT, KK, VK>*		container;
-				vint											keyIndex;
-				vint											valueIndex;
-				Pair<KT, VT>								current;
-
-				void UpdateCurrent()
-				{
-					if(keyIndex<container->Count())
-					{
-						const ValueContainer& values=container->GetByIndex(keyIndex);
-						if(valueIndex<values.Count())
-						{
-							current.key=container->Keys().Get(keyIndex);
-							current.value=values.Get(valueIndex);
-						}
-					}
-				}
-			public:
-				Enumerator(const Group<KT, VT, KK, VK>* _container, vint _keyIndex=0, vint _valueIndex=0)
-				{
-					container=_container;
-					keyIndex=_keyIndex;
-					valueIndex=_valueIndex;
-					UpdateCurrent();
-				}
-				
-				IEnumerator<Pair<KT, VT>>* Clone()const
-				{
-					return new Enumerator(container, keyIndex, valueIndex);
-				}
-
-				const Pair<KT, VT>& Current()const
-				{
-					return current;
-				}
-
-				vint Index()const
-				{
-					if(Available())
-					{
-						vint index=0;
-						for(vint i=0;i<keyIndex;i++)
-						{
-							index+=container->GetByIndex(i).Count();
-						}
-						return index+valueIndex;
-					}
-					else
-					{
-						return -1;
-					}
-				}
-
-				bool Next()
-				{
-					if(keyIndex<container->Count())
-					{
-						const ValueContainer& values=container->GetByIndex(keyIndex);
-						valueIndex++;
-						if(valueIndex<values.Count())
-						{
-							UpdateCurrent();
-							return true;
-						}
-						else
-						{
-							keyIndex++;
-							valueIndex=0;
-							UpdateCurrent();
-							return keyIndex<container->Count();
-						}
-					}
-					else
-					{
-						return false;
-					}
-				}
-
-				bool Available()const
-				{
-					if(keyIndex<container->Count())
-					{
-						const ValueContainer& values=container->GetByIndex(keyIndex);
-						if(valueIndex<values.Count())
-						{
-							return true;
-						}
-					}
-					return false;
-				}
-
-				void Reset()
-				{
-					keyIndex=0;
-					valueIndex=0;
-					UpdateCurrent();
-				}
-			};
-
-			KeyContainer					keys;
-			List<ValueContainer*>			values;
-		public:
-			Group()
-			{
-			}
-
-			~Group()
-			{
-				Clear();
-			}
-
-			IEnumerator<Pair<KT, VT>>* CreateEnumerator()const
-			{
-				return new Enumerator(this);
-			}
-
-			const KeyContainer& Keys()const
-			{
-				return keys;
-			}
-
-			vint Count()const
-			{
-				return keys.Count();
-			}
-
-			const ValueContainer& Get(const KK& key)const
-			{
-				return *values.Get(keys.IndexOf(key));
-			}
-
-			const ValueContainer& GetByIndex(vint index)const
-			{
-				return *values.Get(index);
-			}
-
-			const ValueContainer& operator[](const KK& key)const
-			{
-				return *values.Get(keys.IndexOf(key));
-			}
-
-			bool Contains(const KK& key)const
-			{
-				return keys.Contains(key);
-			}
-
-			bool Contains(const KK& key, const VK& value)const
-			{
-				vint index=keys.IndexOf(key);
-				if(index!=-1)
-				{
-					return values.Get(index)->Contains(value);
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Add(const Pair<KT, VT>& value)
-			{
-				return Add(value.key, value.value);
-			}
-
-			bool Add(const KT& key, const VT& value)
-			{
-				ValueContainer* target=0;
-				vint index=keys.IndexOf(key);
-				if(index==-1)
-				{
-					target=new ValueContainer;
-					values.Insert(keys.Add(key), target);
-				}
-				else
-				{
-					target=values[index];
-				}
-				target->Add(value);
-				return true;
-			}
-
-			bool Remove(const KK& key)
-			{
-				vint index=keys.IndexOf(key);
-				if(index!=-1)
-				{
-					keys.RemoveAt(index);
-					List<VT, VK>* target=values[index];
-					values.RemoveAt(index);
-					delete target;
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Remove(const KK& key, const VK& value)
-			{
-				vint index=keys.IndexOf(key);
-				if(index!=-1)
-				{
-					List<VT, VK>* target=values[index];
-					target->Remove(value);
-					if(target->Count()==0)
-					{
-						keys.RemoveAt(index);
-						values.RemoveAt(index);
-						delete target;
-					}
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			bool Clear()
-			{
-				for(vint i=0;i<values.Count();i++)
-				{
-					delete values[i];
-				}
-				keys.Clear();
-				values.Clear();
-				return true;
-			}
-		};
 
 /***********************************************************************
-随机访问
+OrderBy Quick Sort
 ***********************************************************************/
-		namespace randomaccess_internal
+
+		template<typename T>
+		void Sort(T* items, vint length, const Func<vint(T, T)>& orderer)
 		{
-			template<typename KT, typename VT, typename KK, typename VK>
-			struct RandomAccessable<Dictionary<KT, VT, KK, VK>>
-			{
-				static const bool							CanRead = true;
-				static const bool							CanResize = false;
-			};
-		
-			template<typename KT, typename VT, typename KK, typename VK>
-			struct RandomAccess<Dictionary<KT, VT, KK, VK>>
-			{
-				static vint GetCount(const Dictionary<KT, VT, KK, VK>& t)
-				{
-					return t.Count();
-				}
+			if(length==0) return;
+			vint pivot=0;
+			vint left=0;
+			vint right=0;
+			bool flag=false;
 
-				static Pair<KT, VT> GetValue(const Dictionary<KT, VT, KK, VK>& t, vint index)
-				{
-					return Pair<KT, VT>(t.Keys().Get(index), t.Values().Get(index));
-				}
+			while(left+right+1!=length)
+			{
+				vint& mine=(flag?left:right);
+				vint& theirs=(flag?right:left);
+				vint candidate=(flag?left:length-right-1);
+				vint factor=(flag?-1:1);
 
-				static void AppendValue(Dictionary<KT, VT, KK, VK>& t, const Pair<KT, VT>& value)
+				if(orderer(items[pivot], items[candidate])*factor<=0)
 				{
-					t.Set(value.key, value.value);
+					mine++;
 				}
-			};
+				else
+				{
+					theirs++;
+					T temp=items[pivot];
+					items[pivot]=items[candidate];
+					items[candidate]=temp;
+					pivot=candidate;
+					flag=!flag;
+				}
+			}
+
+			Sort(items, left, orderer);
+			Sort(items+left+1, right, orderer);
 		}
-	}
-}
-
-#endif
 
 /***********************************************************************
-HTTPUTILITY.H
-***********************************************************************/
-#ifndef VCZH_HTTPUTILITY
-#define VCZH_HTTPUTILITY
-
-
-namespace vl
-{
-
-/***********************************************************************
-HTTP Utility
+LazyList
 ***********************************************************************/
 
-	class HttpRequest
-	{
-		typedef collections::Array<char>					BodyBuffer;
-		typedef collections::List<WString>					StringList;
-		typedef collections::Dictionary<WString, WString>	HeaderMap;
-	public:
-		WString				server;
-		vint				port;
-		WString				query;
-		bool				secure;
-		WString				username;
-		WString				password;
-		WString				method;
-		WString				cookie;
-		BodyBuffer			body;
-		WString				contentType;
-		StringList			acceptTypes;
-		HeaderMap			extraHeaders;
-
-		HttpRequest();
-		bool				SetHost(const WString& inputQuery);
-		void				SetBodyUtf8(const WString& bodyString);
-	};
-
-	class HttpResponse
-	{
-		typedef collections::Array<char>		BodyBuffer;
-	public:
-		vint				statusCode;
-		BodyBuffer			body;
-		WString				cookie;
-
-		HttpResponse();
-		WString				GetBodyUtf8();
-	};
-
-	extern bool				HttpQuery(const HttpRequest& request, HttpResponse& response);
-	extern WString			UrlEncodeQuery(const WString& query);
-}
-
-#endif
-
-/***********************************************************************
-LOCALE.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Framework::Locale
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_LOCALE
-#define VCZH_LOCALE
-
-
-namespace vl
-{
-	class Locale : public Object
-	{
-	protected:
-		WString						localeName;
-
-	public:
-		Locale(const WString& _localeName=WString::Empty);
-		~Locale();
-
-		static Locale				Invariant();
-		static Locale				SystemDefault();
-		static Locale				UserDefault();
-		static void					Enumerate(collections::List<Locale>& locales);
-
-		const WString&				GetName()const;
-
-		void						GetShortDateFormats(collections::List<WString>& formats);
-		void						GetLongDateFormats(collections::List<WString>& formats);
-		void						GetYearMonthDateFormats(collections::List<WString>& formats);
-		void						GetLongTimeFormats(collections::List<WString>& formats);
-		void						GetShortTimeFormats(collections::List<WString>& formats);
-		WString						FormatDate(const WString& format, DateTime date);
-		WString						FormatTime(const WString& format, DateTime time);
-		WString						FormatNumber(const WString& number);
-		WString						FormatCurrency(const WString& currency);
-
-		WString						ToFullWidth(const WString& str);
-		WString						ToHalfWidth(const WString& str);
-		WString						ToHiragana(const WString& str);
-		WString						ToKatagana(const WString& str);
-		WString						ToLower(const WString& str);
-		WString						ToUpper(const WString& str);
-		WString						ToLinguisticLower(const WString& str);
-		WString						ToLinguisticUpper(const WString& str);
-		WString						ToSimplifiedChinese(const WString& str);
-		WString						ToTraditionalChinese(const WString& str);
-		WString						ToTileCase(const WString& str);
-
-		enum Normalization
-		{
-			None=0,
-			IgnoreCase=1,
-			IgnoreCaseLinguistic=2,
-			IgnoreKanaType=4,
-			IgnoreNonSpace=8,
-			IgnoreSymbol=16,
-			IgnoreWidth=32,
-			DigitsAsNumbers=64,
-			StringSoft=128,
-		};
-		vint									Compare(const WString& s1, const WString& s2, Normalization normalization);
-		vint									CompareOrdinal(const WString& s1, const WString& s2);
-		vint									CompareOrdinalIgnoreCase(const WString& s1, const WString& s2);
-		collections::Pair<vint, vint>			FindFirst(const WString& text, const WString& find, Normalization normalization);
-		collections::Pair<vint, vint>			FindLast(const WString& text, const WString& find, Normalization normalization);
-		bool									StartsWith(const WString& text, const WString& find, Normalization normalization);
-		bool									EndsWidth(const WString& text, const WString& find, Normalization normalization);
-	};
-}
-
-#endif
-
-/***********************************************************************
-REGEX\REGEX.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Regex::Regular Expression
-
-Classes:
-	RegexString						：字符串匹配结果
-	RegexMatch						：匹配结果
-	Regex							：正则表达式引擎
-	RegexToken						：词法记号
-	RegexTokens						：词法记号表
-	RegexLexer						：词法分析器
-***********************************************************************/
-
-#ifndef VCZH_REGEX_REGEX
-#define VCZH_REGEX_REGEX
-
-
-namespace vl
-{
-	namespace regex_internal
-	{
-		class PureResult;
-		class PureInterpretor;
-		class RichResult;
-		class RichInterpretor;
-	}
-
-	namespace regex
-	{
-
-/***********************************************************************
-正则表达式引擎数据结构
-***********************************************************************/
-
-		class RegexString : public Object
+		template<typename T>
+		class LazyList : public Object, public IEnumerable<T>
 		{
 		protected:
-			WString										value;
-			vint										start;
-			vint										length;
+			Ptr<IEnumerator<T>>			enumeratorPrototype;
 
+			IEnumerator<T>* xs()
+			{
+				return enumeratorPrototype->Clone();
+			}
 		public:
-			RegexString(vint _start=0);
-			RegexString(const WString& _string, vint _start, vint _length);
+			LazyList(Ptr<IEnumerator<T>> enumerator)
+				:enumeratorPrototype(enumerator)
+			{
+			}
 
-			vint										Start()const;
-			vint										Length()const;
-			const WString&								Value()const;
-			bool										operator==(const RegexString& string)const;
-		};
-
-		class RegexMatch : public Object, private NotCopyable
-		{
-			friend class Regex;
-		public:
-			typedef Ptr<RegexMatch>										Ref;
-			typedef collections::List<Ref>								List;
-			typedef collections::List<RegexString>						CaptureList;
-			typedef collections::Group<WString, RegexString>			CaptureGroup;
-		protected:
-			collections::List<RegexString>				captures;
-			collections::Group<WString, RegexString>	groups;
-			bool										success;
-			RegexString									result;
-
-			RegexMatch(const WString& _string, regex_internal::PureResult* _result);
-			RegexMatch(const WString& _string, regex_internal::RichResult* _result, regex_internal::RichInterpretor* _rich);
-			RegexMatch(const RegexString& _result);
-		public:
+			LazyList(const IEnumerable<T>& enumerable)
+				:enumeratorPrototype(enumerable.CreateEnumerator())
+			{
+			}
 			
-			bool										Success()const;
-			const RegexString&							Result()const;
-			const CaptureList&							Captures()const;
-			const CaptureGroup&							Groups()const;
-		};
+			LazyList()
+				:enumeratorPrototype(EmptyEnumerable<T>().CreateEnumerator())
+			{
+			}
 
-/***********************************************************************
-正则表达式引擎
-***********************************************************************/
+			IEnumerator<T>* CreateEnumerator()const
+			{
+				return enumeratorPrototype->Clone();
+			}
 
-		class Regex : public Object, private NotCopyable
-		{
-		protected:
-			regex_internal::PureInterpretor*			pure;
-			regex_internal::RichInterpretor*			rich;
+			//-------------------------------------------------------
 
-			void										Process(const WString& text, bool keepEmpty, bool keepSuccess, bool keepFail, RegexMatch::List& matches)const;
-		public:
-			Regex(const WString& code, bool preferPure=true);
-			~Regex();
-
-			bool										IsPureMatch()const;
-			bool										IsPureTest()const;
-
-			RegexMatch::Ref								MatchHead(const WString& text)const;
-			RegexMatch::Ref								Match(const WString& text)const;
-			bool										TestHead(const WString& text)const;
-			bool										Test(const WString& text)const;
-			void										Search(const WString& text, RegexMatch::List& matches)const;
-			void										Split(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
-			void										Cut(const WString& text, bool keepEmptyMatch, RegexMatch::List& matches)const;
-		};
-
-/***********************************************************************
-正则表达式词法分析器
-***********************************************************************/
-
-		class RegexToken
-		{
-		public:
-			vint										start;
-			vint										length;
-			vint										token;
-			const wchar_t*								reading;
-			vint										codeIndex;
-
-			vint										rowStart;
-			vint										columnStart;
-			vint										rowEnd;
-			vint										columnEnd;
-
-			bool										operator==(const RegexToken& _token)const;
-			bool										operator==(const wchar_t* _token)const;
-		};
-
-		class RegexTokens : public Object, public collections::IEnumerable<RegexToken>
-		{
-			friend class RegexLexer;
-		protected:
-			regex_internal::PureInterpretor*			pure;
-			const collections::Array<vint>&				stateTokens;
-			WString										code;
-			vint										codeIndex;
+			template<typename F>
+			LazyList<FUNCTION_RESULT_TYPE(F)> Select(F f)
+			{
+				return new SelectEnumerator<T, FUNCTION_RESULT_TYPE(F)>(xs(), f);
+			}
 			
-			RegexTokens(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens, const WString& _code, vint _codeIndex);
-		public:
-
-			collections::IEnumerator<RegexToken>*		CreateEnumerator()const;
-			void										ReadToEnd(collections::List<RegexToken>& tokens, bool(*discard)(vint)=0)const;
-		};
-
-		class RegexLexerWalker : public Object
-		{
-			friend class RegexLexer;
-		protected:
-			regex_internal::PureInterpretor*			pure;
-			const collections::Array<vint>&				stateTokens;
-			
-			RegexLexerWalker(regex_internal::PureInterpretor* _pure, const collections::Array<vint>& _stateTokens);
-		public:
-			RegexLexerWalker(const RegexLexerWalker& walker);
-			~RegexLexerWalker();
-
-			vint										GetStartState()const;
-			vint										GetRelatedToken(vint state)const;
-			void										Walk(wchar_t input, vint& state, vint& token, bool& finalState, bool& previousTokenStop)const;
-			vint										Walk(wchar_t input, vint state)const;
-		};
-
-		class RegexLexerColorizer : public Object
-		{
-			friend class RegexLexer;
-		public:
-			typedef void(*TokenProc)(void* argument, vint start, vint length, vint token);
-
-		protected:
-			RegexLexerWalker							walker;
-			vint										currentState;
-
-			RegexLexerColorizer(const RegexLexerWalker& _walker);
-		public:
-			RegexLexerColorizer(const RegexLexerColorizer& colorizer);
-			~RegexLexerColorizer();
-
-			void										Reset(vint state);
-			void										Pass(wchar_t input);
-			vint										GetStartState()const;
-			vint										GetCurrentState()const;
-			void										Colorize(const wchar_t* input, vint length, TokenProc tokenProc, void* tokenProcArgument);
-		};
-
-		class RegexLexer : public Object, private NotCopyable
-		{
-		protected:
-			regex_internal::PureInterpretor*			pure;
-			collections::Array<vint>					ids;
-			collections::Array<vint>					stateTokens;
-		public:
-			RegexLexer(const collections::IEnumerable<WString>& tokens);
-			~RegexLexer();
-
-			RegexTokens									Parse(const WString& code, vint codeIndex=-1)const;
-			RegexLexerWalker							Walk()const;
-			RegexLexerColorizer							Colorize()const;
-		};
-	}
-}
-
-#endif
-
-/***********************************************************************
-STREAM\INTERFACES.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Stream::Interfaces
-
-Interfaces:
-	IStream							：流
-***********************************************************************/
-
-#ifndef VCZH_STREAM_INTERFACES
-#define VCZH_STREAM_INTERFACES
-
-
-namespace vl
-{
-	namespace stream
-	{
-		class IStream : public virtual Interface
-		{
-		public:
-			virtual bool					CanRead()const=0;
-			virtual bool					CanWrite()const=0;
-			virtual bool					CanSeek()const=0;
-			virtual bool					CanPeek()const=0;
-			virtual bool					IsLimited()const=0;
-			virtual bool					IsAvailable()const=0;
-			virtual void					Close()=0;
-			virtual pos_t					Position()const=0;
-			virtual pos_t					Size()const=0;
-			virtual void					Seek(pos_t _size)=0;
-			virtual void					SeekFromBegin(pos_t _size)=0;
-			virtual void					SeekFromEnd(pos_t _size)=0;
-			virtual vint					Read(void* _buffer, vint _size)=0;
-			virtual vint					Write(void* _buffer, vint _size)=0;
-			virtual vint					Peek(void* _buffer, vint _size)=0;
-		};
-
-		class IEncoder : public Interface
-		{
-		public:
-			virtual void					Setup(IStream* _stream)=0;
-			virtual	void					Close()=0;
-			virtual vint					Write(void* _buffer, vint _size)=0;
-		};
-
-		class IDecoder : public Interface
-		{
-		public:
-			virtual void					Setup(IStream* _stream)=0;
-			virtual	void					Close()=0;
-			virtual vint					Read(void* _buffer, vint _size)=0;
-		};
-	}
-}
-
-#endif
-
-/***********************************************************************
-STREAM\ACCESSOR.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Stream::Accessor
-
-Classes:
-	TextReader						：字符串阅读器
-	TextWriter						：字符串书写器
-	StreamReader					：流阅读器
-	StreamWriter					：流书写器
-	EncoderStream					：编码流
-	DecoderStream					：解码流
-***********************************************************************/
-
-#ifndef VCZH_STREAM_ACCESSOR
-#define VCZH_STREAM_ACCESSOR
-
-
-namespace vl
-{
-	namespace stream
-	{
-
-/***********************************************************************
-流控制器
-***********************************************************************/
-
-		class TextReader : public Object, private NotCopyable
-		{
-		public:
-			virtual bool				IsEnd()=0;
-			virtual wchar_t				ReadChar()=0;
-			virtual WString				ReadString(vint length);
-			virtual WString				ReadLine();
-			virtual WString				ReadToEnd();
-		};
-
-		class TextWriter : public Object, private NotCopyable
-		{
-		public:
-			virtual void				WriteChar(wchar_t c)=0;
-			virtual void				WriteString(const wchar_t* string, vint charCount);
-			virtual void				WriteString(const wchar_t* string);
-			virtual void				WriteString(const WString& string);
-			virtual void				WriteLine(const wchar_t* string, vint charCount);
-			virtual void				WriteLine(const wchar_t* string);
-			virtual void				WriteLine(const WString& string);
-
-			virtual void				WriteMonospacedEnglishTable(collections::Array<WString>& tableByRow, vint rows, vint columns);
-		};
-
-		class StringReader : public TextReader
-		{
-		protected:
-			WString						string;
-			vint						current;
-			bool						lastCallIsReadLine;
-
-			void						PrepareIfLastCallIsReadLine();
-		public:
-			StringReader(const WString& _string);
-
-			bool						IsEnd();
-			wchar_t						ReadChar();
-			WString						ReadString(vint length);
-			WString						ReadLine();
-			WString						ReadToEnd();
-		};
-
-		class StreamReader : public TextReader
-		{
-		protected:
-			IStream*					stream;
-		public:
-			StreamReader(IStream& _stream);
-
-			bool						IsEnd();
-			wchar_t						ReadChar();
-		};
-
-		class StreamWriter : public TextWriter
-		{
-		protected:
-			IStream*					stream;
-		public:
-			StreamWriter(IStream& _stream);
-			using TextWriter::WriteString;
-
-			void						WriteChar(wchar_t c);
-			void						WriteString(const wchar_t* string, vint charCount);
-		};
-
-/***********************************************************************
-编码解码
-***********************************************************************/
-
-		class EncoderStream : public virtual IStream
-		{
-		protected:
-			IStream*					stream;
-			IEncoder*					encoder;
-			pos_t						position;
-
-		public:
-			EncoderStream(IStream& _stream, IEncoder& _encoder);
-			~EncoderStream();
-
-			bool						CanRead()const;
-			bool						CanWrite()const;
-			bool						CanSeek()const;
-			bool						CanPeek()const;
-			bool						IsLimited()const;
-			bool						IsAvailable()const;
-			void						Close();
-			pos_t						Position()const;
-			pos_t						Size()const;
-			void						Seek(pos_t _size);
-			void						SeekFromBegin(pos_t _size);
-			void						SeekFromEnd(pos_t _size);
-			vint							Read(void* _buffer, vint _size);
-			vint							Write(void* _buffer, vint _size);
-			vint							Peek(void* _buffer, vint _size);
-		};
-
-		class DecoderStream : public virtual IStream
-		{
-		protected:
-			IStream*					stream;
-			IDecoder*					decoder;
-			pos_t						position;
-
-		public:
-			DecoderStream(IStream& _stream, IDecoder& _decoder);
-			~DecoderStream();
-
-			bool						CanRead()const;
-			bool						CanWrite()const;
-			bool						CanSeek()const;
-			bool						CanPeek()const;
-			bool						IsLimited()const;
-			bool						IsAvailable()const;
-			void						Close();
-			pos_t						Position()const;
-			pos_t						Size()const;
-			void						Seek(pos_t _size);
-			void						SeekFromBegin(pos_t _size);
-			void						SeekFromEnd(pos_t _size);
-			vint							Read(void* _buffer, vint _size);
-			vint							Write(void* _buffer, vint _size);
-			vint							Peek(void* _buffer, vint _size);
-		};
-	}
-}
-
-#endif
-
-/***********************************************************************
-PARSING\PARSINGTREE.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Parsing::Parsing Tree
-
-Classes:
-***********************************************************************/
-
-#ifndef VCZH_PARSING_PARSINGTREE
-#define VCZH_PARSING_PARSINGTREE
-
-
-namespace vl
-{
-	namespace parsing
-	{
-
-/***********************************************************************
-位置信息
-***********************************************************************/
-
-		struct ParsingTextPos
-		{
-			static const int	UnknownValue=-2;
-			vint				index;
-			vint				row;
-			vint				column;
-
-			ParsingTextPos()
-				:index(UnknownValue)
-				,row(UnknownValue)
-				,column(UnknownValue)
+			template<typename F>
+			LazyList<T> Where(F f)
 			{
+				return new WhereEnumerator<T>(xs(), f);
 			}
 
-			ParsingTextPos(vint _index)
-				:index(_index)
-				,row(UnknownValue)
-				,column(UnknownValue)
+			template<typename U>
+			LazyList<Ptr<U>> Cast()
 			{
+				Func<Ptr<U>(T)> f=[](T t)->Ptr<U>{return t.Cast<U>();};
+				return new SelectEnumerator<T, Ptr<U>>(xs(), f);
 			}
 
-			ParsingTextPos(vint _row, vint _column)
-				:index(UnknownValue)
-				,row(_row)
-				,column(_column)
+			template<typename U>
+			LazyList<Ptr<U>> FindType()
 			{
+				return Cast<U>().Where([](T t){return t;});
 			}
 
-			ParsingTextPos(vint _index, vint _row, vint _column)
-				:index(_index)
-				,row(_row)
-				,column(_column)
+			template<typename F>
+			LazyList<T> OrderBy(F f)
 			{
-			}
-
-			static vint Compare(const ParsingTextPos& a, const ParsingTextPos& b)
-			{
-				if(a.index!=UnknownValue && b.index!=UnknownValue)
+				Ptr<List<T>> sorted=new List<T>;
+				CopyFrom(*sorted.Obj(), *this);
+				if(sorted->Count()>0)
 				{
-					return a.index-b.index;
+					Sort<T>(&sorted->operator[](0), sorted->Count(), f);
 				}
-				else if(a.row!=UnknownValue && a.column!=UnknownValue && b.row!=UnknownValue && b.column!=UnknownValue)
+				return new ContainerEnumerator<T, List<T>>(sorted);
+			}
+
+			//-------------------------------------------------------
+
+			template<typename F>
+			T Aggregate(F f)
+			{
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				if(!enumerator->Next())
 				{
-					if(a.row==b.row)
-					{
-						return a.column-b.column;
-					}
-					else
-					{
-						return a.row-b.row;
-					}
+					throw Error(L"LazyList<T>::Aggregate(F)#容器为空并且没有初始值，Aggregate操作失败。");
+				}
+				T result=enumerator->Current();
+				while(enumerator->Next())
+				{
+					result=f(result, enumerator->Current());
+				}
+				return result;
+			}
+
+			template<typename I, typename F>
+			I Aggregate(I init, F f)
+			{
+				FOREACH(T, t, *this)
+				{
+					init=f(init, t);
+				}
+				return init;
+			}
+
+			template<typename F>
+			bool All(F f)
+			{
+				return Select(f).Aggregate(true, [](bool a, bool b){return a&&b;});
+			}
+
+			template<typename F>
+			bool Any(F f)
+			{
+				return Select(f).Aggregate(false, [](bool a, bool b){return a||b;});
+			}
+
+			T Max()
+			{
+				return Aggregate([](T a, T b){return a>b?a:b;});
+			}
+
+			T Min()
+			{
+				return Aggregate([](T a, T b){return a<b?a:b;});
+			}
+
+			T First()
+			{
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				if(!enumerator->Next())
+				{
+					throw Error(L"LazyList<T>::First(F)#容器为空并且没有初始值，Aggregate操作失败。");
+				}
+				return enumerator->Current();
+			}
+
+			T First(T defaultValue)
+			{
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				if(!enumerator->Next())
+				{
+					return defaultValue;
+				}
+				return enumerator->Current();
+			}
+
+			T Last()
+			{
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				if(!enumerator->Next())
+				{
+					throw Error(L"LazyList<T>::Last(F)#容器为空并且没有初始值，Aggregate操作失败。");
 				}
 				else
 				{
-					return 0;
+					T value=enumerator->Current();
+					while(enumerator->Next())
+					{
+						value=enumerator->Current();
+					}
+					return value;
 				}
 			}
 
-			bool operator==(const ParsingTextPos& pos)const{return Compare(*this, pos)==0;}
-			bool operator!=(const ParsingTextPos& pos)const{return Compare(*this, pos)!=0;}
-			bool operator<(const ParsingTextPos& pos)const{return Compare(*this, pos)<0;}
-			bool operator<=(const ParsingTextPos& pos)const{return Compare(*this, pos)<=0;}
-			bool operator>(const ParsingTextPos& pos)const{return Compare(*this, pos)>0;}
-			bool operator>=(const ParsingTextPos& pos)const{return Compare(*this, pos)>=0;}
-		};
-
-		struct ParsingTextRange
-		{
-			ParsingTextPos	start;
-			ParsingTextPos	end;
-
-			ParsingTextRange()
+			T Last(T defaultValue)
 			{
-				end.index=-1;
-				end.column=-1;
-			}
-
-			ParsingTextRange(const ParsingTextPos& _start, const ParsingTextPos& _end)
-				:start(_start)
-				,end(_end)
-			{
-			}
-
-			ParsingTextRange(const regex::RegexToken* startToken, const regex::RegexToken* endToken)
-			{
-				start.index=startToken->start;
-				start.row=startToken->rowStart;
-				start.column=startToken->columnStart;
-				end.index=endToken->start+endToken->length-1;
-				end.row=endToken->rowEnd;
-				end.column=endToken->columnEnd;
-			}
-
-			bool operator==(const ParsingTextRange& range)const{return start==range.start && end==range.end;}
-			bool operator!=(const ParsingTextRange& range)const{return start!=range.start || end!=range.end;}
-			bool Contains(const ParsingTextPos& pos)const{return start<=pos && pos<=end;}
-			bool Contains(const ParsingTextRange& range)const{return start<=range.start && range.end<=end;}
-		};
-
-/***********************************************************************
-通用语法树
-***********************************************************************/
-
-		class ParsingTreeNode;
-		class ParsingTreeToken;
-		class ParsingTreeObject;
-		class ParsingTreeArray;
-
-		class ParsingTreeNode : public Object
-		{
-		public:
-			class IVisitor : public Interface
-			{
-			public:
-				virtual void			Visit(ParsingTreeToken* node)=0;
-				virtual void			Visit(ParsingTreeObject* node)=0;
-				virtual void			Visit(ParsingTreeArray* node)=0;
-			};
-
-			class TraversalVisitor : public Object, public IVisitor
-			{
-			public:
-				enum TraverseDirection
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				while(enumerator->Next())
 				{
-					ByTextPosition,
-					ByStorePosition
-				};
-			protected:
-				TraverseDirection		direction;
-			public:
-				TraversalVisitor(TraverseDirection _direction);
-
-				virtual void			BeforeVisit(ParsingTreeToken* node);
-				virtual void			AfterVisit(ParsingTreeToken* node);
-				virtual void			BeforeVisit(ParsingTreeObject* node);
-				virtual void			AfterVisit(ParsingTreeObject* node);
-				virtual void			BeforeVisit(ParsingTreeArray* node);
-				virtual void			AfterVisit(ParsingTreeArray* node);
-
-				virtual void			Visit(ParsingTreeToken* node)override;
-				virtual void			Visit(ParsingTreeObject* node)override;
-				virtual void			Visit(ParsingTreeArray* node)override;
-			};
-		protected:
-			typedef collections::List<Ptr<ParsingTreeNode>>				NodeList;
-
-			ParsingTextRange			codeRange;
-			ParsingTreeNode*			parent;
-			NodeList					cachedOrderedSubNodes;
-
-			virtual const NodeList&		GetSubNodesInternal()=0;
-			bool						BeforeAddChild(Ptr<ParsingTreeNode> node);
-			void						AfterAddChild(Ptr<ParsingTreeNode> node);
-			bool						BeforeRemoveChild(Ptr<ParsingTreeNode> node);
-			void						AfterRemoveChild(Ptr<ParsingTreeNode> node);
-		public:
-			ParsingTreeNode(const ParsingTextRange& _codeRange);
-			~ParsingTreeNode();
-
-			virtual void				Accept(IVisitor* visitor)=0;
-			ParsingTextRange			GetCodeRange();
-			void						SetCodeRange(const ParsingTextRange& range);
-
-			void						InitializeQueryCache();
-			void						ClearQueryCache();
-			ParsingTreeNode*			GetParent();
-			const NodeList&				GetSubNodes();
-
-			ParsingTreeNode*			FindSubNode(const ParsingTextPos& position);
-			ParsingTreeNode*			FindSubNode(const ParsingTextRange& range);
-			ParsingTreeNode*			FindDeepestNode(const ParsingTextPos& position);
-			ParsingTreeNode*			FindDeepestNode(const ParsingTextRange& range);
-		};
-
-		class ParsingTreeToken : public ParsingTreeNode
-		{
-		protected:
-			WString						value;
-			vint						tokenIndex;
-
-			const NodeList&				GetSubNodesInternal()override;
-		public:
-			ParsingTreeToken(const WString& _value, vint _tokenIndex=-1, const ParsingTextRange& _codeRange=ParsingTextRange());
-			~ParsingTreeToken();
-
-			void						Accept(IVisitor* visitor)override;
-			vint						GetTokenIndex();
-			void						SetTokenIndex(vint _tokenIndex);
-			const WString&				GetValue();
-			void						SetValue(const WString& _value);
-		};
-
-		class ParsingTreeObject : public ParsingTreeNode
-		{
-		protected:
-			typedef collections::Dictionary<WString, Ptr<ParsingTreeNode>>				NodeMap;
-			typedef collections::SortedList<WString>									NameList;
-
-			WString						type;
-			NodeMap						members;
-
-			const NodeList&			GetSubNodesInternal()override;
-		public:
-			ParsingTreeObject(const WString& _type=L"", const ParsingTextRange& _codeRange=ParsingTextRange());
-			~ParsingTreeObject();
-
-			void						Accept(IVisitor* visitor)override;
-			const WString&				GetType();
-			void						SetType(const WString& _type);
-			NodeMap&					GetMembers();
-			Ptr<ParsingTreeNode>		GetMember(const WString& name);
-			bool						SetMember(const WString& name, Ptr<ParsingTreeNode> node);
-			bool						RemoveMember(const WString& name);
-			const NameList&				GetMemberNames();
-		};
-
-		class ParsingTreeArray : public ParsingTreeNode
-		{
-		protected:
-			typedef collections::List<Ptr<ParsingTreeNode>>								NodeArray;
-
-			WString						elementType;
-			NodeArray					items;
-
-			const NodeList&				GetSubNodesInternal()override;
-		public:
-			ParsingTreeArray(const WString& _elementType=L"", const ParsingTextRange& _codeRange=ParsingTextRange());
-			~ParsingTreeArray();
-
-			void						Accept(IVisitor* visitor)override;
-			const WString&				GetElementType();
-			void						SetElementType(const WString& _elementType);
-			NodeArray&					GetItems();
-			Ptr<ParsingTreeNode>		GetItem(vint index);
-			bool						SetItem(vint index, Ptr<ParsingTreeNode> node);
-			bool						AddItem(Ptr<ParsingTreeNode> node);
-			bool						InsertItem(vint index, Ptr<ParsingTreeNode> node);
-			bool						RemoveItem(vint index);
-			bool						RemoveItem(Ptr<ParsingTreeNode> node);
-			vint						IndexOfItem(Ptr<ParsingTreeNode> node);
-			bool						ContainsItem(Ptr<ParsingTreeNode> node);
-			vint						Count();
-			bool						Clear();
-		};
-
-/***********************************************************************
-辅助函数
-***********************************************************************/
-
-		extern void						Log(Ptr<ParsingTreeNode> node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix=L"");
-
-/***********************************************************************
-语法树基础设施
-***********************************************************************/
-
-		class ParsingTreeCustomBase : public Object
-		{
-		public:
-			ParsingTextRange			codeRange;
-		};
-
-		class ParsingToken : public ParsingTreeCustomBase
-		{
-		public:
-			vint						tokenIndex;
-			WString						value;
-
-			ParsingToken():tokenIndex(-1){}
-		};
-
-		class ParsingError : public Object
-		{
-		public:
-			ParsingTextRange			codeRange;
-			const regex::RegexToken*	token;
-			ParsingTreeCustomBase*		parsingTree;
-			WString						errorMessage;
-
-			ParsingError();
-			ParsingError(const WString& _errorMessage);
-			ParsingError(const regex::RegexToken* _token, const WString& _errorMessage);
-			ParsingError(ParsingTreeCustomBase* _parsingTree, const WString& _errorMessage);
-			~ParsingError();
-		};
-
-/***********************************************************************
-语法树构造
-***********************************************************************/
-
-		class ParsingTreeConverter : public Object
-		{
-		public:
-			typedef collections::List<regex::RegexToken>	TokenList;
-
-			virtual Ptr<ParsingTreeCustomBase>				ConvertClass(Ptr<ParsingTreeObject> obj, const TokenList& tokens)=0;
-
-			bool SetMember(ParsingToken& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
-			{
-				Ptr<ParsingTreeToken> token=node.Cast<ParsingTreeToken>();
-				if(token)
-				{
-					member.tokenIndex=token->GetTokenIndex();
-					member.value=token->GetValue();
-					member.codeRange=token->GetCodeRange();
-					return true;
+					defaultValue=enumerator->Current();
 				}
-				return false;
+				return defaultValue;
 			}
 
-			template<typename T>
-			bool SetMember(collections::List<T>& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
+			vint Count()
 			{
-				Ptr<ParsingTreeArray> arr=node.Cast<ParsingTreeArray>();
-				if(arr)
+				vint result=0;
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				while(enumerator->Next())
 				{
-					member.Clear();
-					vint count=arr->Count();
-					for(vint i=0;i<count;i++)
-					{
-						T t;
-						SetMember(t, arr->GetItem(i), tokens);
-						member.Add(t);
-					}
-					return true;
+					result++;
 				}
-				return false;
+				return result;
 			}
 
-			template<typename T>
-			bool SetMember(Ptr<T>& member, Ptr<ParsingTreeNode> node, const TokenList& tokens)
+			bool IsEmpty()
 			{
-				Ptr<ParsingTreeObject> obj=node.Cast<ParsingTreeObject>();
-				if(obj)
-				{
-					Ptr<ParsingTreeCustomBase> tree=ConvertClass(obj, tokens);
-					if(tree)
-					{
-						tree->codeRange=node->GetCodeRange();
-						member=tree.Cast<T>();
-						return member;
-					}
-				}
-				return false;
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				return enumerator->Next();
+			}
+
+			//-------------------------------------------------------
+
+			LazyList<T> Concat(IEnumerable<T>& remains)
+			{
+				return new ConcatEnumerator<T>(xs(), remains.CreateEnumerator());
+			}
+
+			LazyList<T> Take(vint count)
+			{
+				return new TakeEnumerator<T>(xs(), count);
+			}
+
+			LazyList<T> Skip(vint count)
+			{
+				return new SkipEnumerator<T>(xs(), count);
+			}
+
+			LazyList<T> Repeat(vint count)
+			{
+				return new RepeatEnumerator<T>(xs(), count);
+			}
+
+			LazyList<T> Distinct()
+			{
+				return new DistinctEnumerator<T>(xs());
+			}
+
+			LazyList<T> Reverse()
+			{
+				return new ReverseEnumerator<T>(*this);
+			}
+
+			//-------------------------------------------------------
+
+			template<typename U>
+			LazyList<Pair<T, U>> Pairwise(IEnumerable<U>& remains)
+			{
+				return new PairwiseEnumerator<T, U>(xs(), remains.CreateEnumerator());
+			}
+
+			LazyList<T> Intersect(IEnumerable<T>& remains)
+			{
+				return new IntersectExceptEnumerator<T, true>(xs(), remains);
+			}
+
+			LazyList<T> Except(IEnumerable<T>& remains)
+			{
+				return new IntersectExceptEnumerator<T, false>(xs(), remains);
+			}
+
+			LazyList<T> Union(IEnumerable<T>& remains)
+			{
+				return Concat(remains).Distinct();
 			}
 		};
-	}
-}
 
-#endif
-
-/***********************************************************************
-PARSING\PARSINGTABLE.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Parsing::Table
-
-Classes:
-***********************************************************************/
-
-#ifndef VCZH_PARSING_PARSINGTABLE
-#define VCZH_PARSING_PARSINGTABLE
-
-
-namespace vl
-{
-	namespace parsing
-	{
-		namespace tabling
+		template<typename T>
+		LazyList<T> From(const IEnumerable<T>& enumerable)
 		{
-
-/***********************************************************************
-跳转表
-***********************************************************************/
-
-			class ParsingTable : public Object
-			{
-			public:
-				static const vint							TokenBegin=0;
-				static const vint							TokenFinish=1;
-				static const vint							TryReduce=2;
-				static const vint							UserTokenStart=3;
-
-				class TokenInfo
-				{
-				public:
-					WString									name;
-					WString									regex;
-					vint									regexTokenIndex;
-
-					TokenInfo():regexTokenIndex(-1){}
-
-					TokenInfo(const WString& _name, const WString& _regex)
-						:name(_name)
-						,regex(_regex)
-						,regexTokenIndex(-1)
-					{
-					}
-				};
-
-				class StateInfo
-				{
-				public:
-					WString									ruleName;
-					WString									stateName;
-					WString									stateExpression;
-
-					StateInfo(){}
-
-					StateInfo(const WString& _ruleName, const WString& _stateName, const WString& _stateExpression)
-						:ruleName(_ruleName)
-						,stateName(_stateName)
-						,stateExpression(_stateExpression)
-					{
-					}
-				};
-
-				class RuleInfo
-				{
-				public:
-					WString									name;
-					WString									type;
-					vint									rootStartState;
-
-					RuleInfo(){}
-
-					RuleInfo(const WString& _name, const WString& _type, vint _rootStartState)
-						:name(_name)
-						,type(_type)
-						,rootStartState(_rootStartState)
-					{
-					}
-				};
-
-				class Instruction
-				{
-				public:
-					enum InstructionType
-					{
-						Create,
-						Assign,
-						Item,
-						Using,
-						Setter,
-						Shift,
-						Reduce,
-						LeftRecursiveReduce,
-					};
-
-					InstructionType							instructionType;
-					vint									stateParameter;
-					WString									nameParameter;
-					WString									value;
-
-					Instruction()
-						:instructionType(Create)
-						,stateParameter(0)
-					{
-					}
-
-					Instruction(InstructionType _instructionType, vint _stateParameter, const WString& _nameParameter, const WString& _value)
-						:instructionType(_instructionType)
-						,stateParameter(_stateParameter)
-						,nameParameter(_nameParameter)
-						,value(_value)
-					{
-					}
-				};
-
-				class TransitionItem
-				{
-				public:
-					vint									token;
-					vint									targetState;
-					collections::List<vint>					stackPattern;
-					collections::List<Instruction>			instructions;
-
-					enum OrderResult
-					{
-						CorrectOrder,
-						WrongOrder,
-						SameOrder,
-						UnknownOrder,
-					};
-
-					TransitionItem(){}
-
-					TransitionItem(vint _token, vint _targetState)
-						:token(_token)
-						,targetState(_targetState)
-					{
-					}
-
-					static OrderResult						CheckOrder(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2, bool forceGivingOrder);
-					static vint								Compare(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2);
-				};
-
-				class TransitionBag
-				{
-				public:
-					collections::List<Ptr<TransitionItem>>	transitionItems;
-				};
-
-			protected:
-				Ptr<regex::RegexLexer>						lexer;
-				collections::Array<Ptr<TransitionBag>>		transitionBags;
-				vint										tokenCount;
-				vint										stateCount;
-				collections::Array<TokenInfo>				tokenInfos;
-				collections::Array<TokenInfo>				discardTokenInfos;
-				collections::Array<StateInfo>				stateInfos;
-				collections::Array<RuleInfo>				ruleInfos;
-
-			public:
-				ParsingTable(vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
-				~ParsingTable();
-
-				vint										GetTokenCount();
-				const TokenInfo&							GetTokenInfo(vint token);
-				void										SetTokenInfo(vint token, const TokenInfo& info);
-
-				vint										GetDiscardTokenCount();
-				const TokenInfo&							GetDiscardTokenInfo(vint token);
-				void										SetDiscardTokenInfo(vint token, const TokenInfo& info);
-
-				vint										GetStateCount();
-				const StateInfo&							GetStateInfo(vint state);
-				void										SetStateInfo(vint state, const StateInfo& info);
-
-				vint										GetRuleCount();
-				const RuleInfo&								GetRuleInfo(vint rule);
-				void										SetRuleInfo(vint rule, const RuleInfo& info);
-
-				const regex::RegexLexer&					GetLexer();
-				Ptr<TransitionBag>							GetTransitionBag(vint state, vint token);
-				void										SetTransitionBag(vint state, vint token, Ptr<TransitionBag> bag);
-				void										Initialize();
-				bool										IsInputToken(vint regexTokenIndex);
-				vint										GetTableTokenIndex(vint regexTokenIndex);
-				vint										GetTableDiscardTokenIndex(vint regexTokenIndex);
-			};
-
-/***********************************************************************
-辅助函数
-***********************************************************************/
-
-			extern void										Log(Ptr<ParsingTable> table, stream::TextWriter& writer);
+			return enumerable;
 		}
-	}
-}
 
-#endif
-
-/***********************************************************************
-PARSING\PARSINGSTATE.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Parsing::State
-
-Classes:
-***********************************************************************/
-
-#ifndef VCZH_PARSING_PARSINGSTATE
-#define VCZH_PARSING_PARSINGSTATE
-
-
-namespace vl
-{
-	namespace parsing
-	{
-		namespace tabling
+		template<typename T>
+		LazyList<T> From(const T* begin, const T* end)
 		{
-
-/***********************************************************************
-语法分析器
-***********************************************************************/
-
-			class ParsingState : public Object
-			{
-			public:
-				struct ShiftReduceRange
-				{
-					regex::RegexToken*							shiftToken;
-					regex::RegexToken*							reduceToken;
-
-					ShiftReduceRange()
-						:shiftToken(0)
-						,reduceToken(0)
-					{
-					}
-				};
-
-				struct TransitionResult
-				{
-					vint										tableTokenIndex;
-					vint										tableStateSource;
-					vint										tableStateTarget;
-					vint										tokenIndexInStream;
-					regex::RegexToken*							token;
-					ParsingTable::TransitionItem*				transition;
-					Ptr<collections::List<ShiftReduceRange>>	shiftReduceRanges;
-
-					TransitionResult()
-						:tableTokenIndex(-1)
-						,tableStateSource(-1)
-						,tableStateTarget(-1)
-						,tokenIndexInStream(-1)
-						,token(0)
-						,transition(0)
-					{
-					}
-
-					operator bool()const
-					{
-						return transition!=0;
-					}
-
-					void AddShiftReduceRange(regex::RegexToken* shiftToken, regex::RegexToken* reduceToken)
-					{
-						ShiftReduceRange range;
-						range.shiftToken=shiftToken;
-						range.reduceToken=reduceToken;
-						if(!shiftReduceRanges)
-						{
-							shiftReduceRanges=new collections::List<ShiftReduceRange>();
-						}
-						shiftReduceRanges->Add(range);
-					}
-				};
-
-				struct Future
-				{
-					vint									currentState;
-					vint									reduceStateCount;
-					collections::List<vint>					shiftStates;
-					vint									selectedToken;
-					Future*									previous;
-					Future*									next;
-
-					Future()
-						:currentState(-1)
-						,reduceStateCount(0)
-						,selectedToken(-1)
-						,previous(0)
-						,next(0)
-					{
-					}
-				};
-			private:
-				WString										input;
-				Ptr<ParsingTable>							table;
-				collections::List<regex::RegexToken>		tokens;
-
-				collections::List<vint>						stateStack;
-				vint										currentState;
-				vint										currentToken;
-				vint										tokenSequenceIndex;
-				
-				collections::List<regex::RegexToken*>		shiftTokenStack;
-				regex::RegexToken*							shiftToken;
-				regex::RegexToken*							reduceToken;
-			public:
-				ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex=-1);
-				~ParsingState();
-
-				const WString&								GetInput();
-				Ptr<ParsingTable>							GetTable();
-				const collections::List<regex::RegexToken>&	GetTokens();
-				regex::RegexToken*							GetToken(vint index);
-
-				vint										Reset(const WString& rule);
-				vint										GetCurrentToken();
-				const collections::List<vint>&				GetStateStack();
-				vint										GetCurrentState();
-
-				ParsingTable::TransitionItem*				MatchToken(vint tableTokenIndex);
-				ParsingTable::TransitionItem*				MatchTokenInFuture(vint tableTokenIndex, Future* future);
-				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken);
-				TransitionResult							ReadToken();
-				bool										ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now);
-			};
-
-/***********************************************************************
-语法树生成器
-***********************************************************************/
-
-			class ParsingTreeBuilder : public Object
-			{
-			protected:
-				Ptr<ParsingTreeNode>						createdObject;
-				Ptr<ParsingTreeObject>						operationTarget;
-				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
-			public:
-				ParsingTreeBuilder();
-				~ParsingTreeBuilder();
-
-				void										Reset();
-				bool										Run(const ParsingState::TransitionResult& result);
-				Ptr<ParsingTreeObject>						GetNode();
-			};
+			return FromPointer(begin, end);
 		}
-	}
-}
 
-#endif
-
-/***********************************************************************
-PARSING\PARSING.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Parsing::Parser
-
-Classes:
-***********************************************************************/
-
-#ifndef VCZH_PARSING_PARSING
-#define VCZH_PARSING_PARSING
-
-
-namespace vl
-{
-	namespace parsing
-	{
-		namespace tabling
+		template<typename T, int size>
+		LazyList<T> From(T (&items)[size])
 		{
-
-/***********************************************************************
-语法分析器通用策略
-***********************************************************************/
-
-			class ParsingGeneralParser : public Object
-			{
-			protected:
-				Ptr<ParsingTable>							table;
-
-				virtual void								OnReset();
-				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)=0;
-			public:
-				ParsingGeneralParser(Ptr<ParsingTable> _table);
-				~ParsingGeneralParser();
-				
-				Ptr<ParsingTreeNode>						Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors);
-				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors);
-			};
-
-/***********************************************************************
-语法分析器策略
-***********************************************************************/
-
-			class ParsingStrictParser : public ParsingGeneralParser
-			{
-			protected:
-
-				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
-			public:
-				ParsingStrictParser(Ptr<ParsingTable> _table=0);
-				~ParsingStrictParser();
-			};
-
-			class ParsingAutoRecoverParser : public ParsingGeneralParser
-			{
-			protected:
-				collections::Array<ParsingState::Future>	recoverFutures;
-				vint										recoveringFutureIndex;
-
-				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
-			public:
-				ParsingAutoRecoverParser(Ptr<ParsingTable> _table=0);
-				~ParsingAutoRecoverParser();
-			};
-
-/***********************************************************************
-辅助函数
-***********************************************************************/
-
-			extern Ptr<ParsingStrictParser>					CreateBootstrapStrictParser();
-			extern Ptr<ParsingAutoRecoverParser>			CreateBootstrapAutoRecoverParser();
+			return FromArray(items);
 		}
-	}
-}
 
-#endif
-
-/***********************************************************************
-PARSING\JSON\PARSINGJSON_PARSER.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Parser::ParsingJson_Parser
-
-本文件使用Vczh Functional Macro工具自动生成
-***********************************************************************/
-
-#ifndef VCZH_PARSING_JSON_PARSINGJSON_PARSER
-#define VCZH_PARSING_JSON_PARSINGJSON_PARSER
-
-
-namespace vl
-{
-	namespace parsing
-	{
-		namespace json
+		template<typename T, int size>
+		LazyList<T> From(const T (&items)[size])
 		{
-			struct JsonParserTokenIndex abstract
-			{
-				static const vl::vint TRUE = 0;
-				static const vl::vint FALSE = 1;
-				static const vl::vint NULLVALUE = 2;
-				static const vl::vint OBJOPEN = 3;
-				static const vl::vint OBJCLOSE = 4;
-				static const vl::vint ARROPEN = 5;
-				static const vl::vint ARRCLOSE = 6;
-				static const vl::vint COMMA = 7;
-				static const vl::vint COLON = 8;
-				static const vl::vint NUMBER = 9;
-				static const vl::vint STRING = 10;
-				static const vl::vint SPACE = 11;
-			};
-			class JsonNode;
-			class JsonLiteral;
-			class JsonString;
-			class JsonNumber;
-			class JsonArray;
-			class JsonObjectField;
-			class JsonObject;
-
-			class JsonNode abstract : public vl::parsing::ParsingTreeCustomBase
-			{
-			public:
-				class IVisitor : public vl::Interface
-				{
-				public:
-					virtual void Visit(JsonLiteral* node)=0;
-					virtual void Visit(JsonString* node)=0;
-					virtual void Visit(JsonNumber* node)=0;
-					virtual void Visit(JsonArray* node)=0;
-					virtual void Visit(JsonObjectField* node)=0;
-					virtual void Visit(JsonObject* node)=0;
-				};
-
-				virtual void Accept(JsonNode::IVisitor* visitor)=0;
-
-			};
-
-			class JsonLiteral : public JsonNode
-			{
-			public:
-				struct JsonValue abstract
-				{
-					enum Type
-					{
-						True,
-						False,
-						Null,
-					};
-				};
-
-				JsonValue::Type value;
-
-				void Accept(JsonNode::IVisitor* visitor)override;
-
-				static vl::Ptr<JsonLiteral> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			};
-
-			class JsonString : public JsonNode
-			{
-			public:
-				vl::parsing::ParsingToken content;
-
-				void Accept(JsonNode::IVisitor* visitor)override;
-
-				static vl::Ptr<JsonString> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			};
-
-			class JsonNumber : public JsonNode
-			{
-			public:
-				vl::parsing::ParsingToken content;
-
-				void Accept(JsonNode::IVisitor* visitor)override;
-
-				static vl::Ptr<JsonNumber> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			};
-
-			class JsonArray : public JsonNode
-			{
-			public:
-				vl::collections::List<vl::Ptr<JsonNode>> items;
-
-				void Accept(JsonNode::IVisitor* visitor)override;
-
-				static vl::Ptr<JsonArray> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			};
-
-			class JsonObjectField : public JsonNode
-			{
-			public:
-				vl::parsing::ParsingToken name;
-				vl::Ptr<JsonNode> value;
-
-				void Accept(JsonNode::IVisitor* visitor)override;
-
-				static vl::Ptr<JsonObjectField> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			};
-
-			class JsonObject : public JsonNode
-			{
-			public:
-				vl::collections::List<vl::Ptr<JsonObjectField>> fields;
-
-				void Accept(JsonNode::IVisitor* visitor)override;
-
-				static vl::Ptr<JsonObject> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			};
-
-			extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> JsonConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
-			extern vl::Ptr<vl::parsing::tabling::ParsingTable> JsonLoadTable();
-
-			extern vl::Ptr<JsonNode> JsonParse(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+			return FromArray(items);
 		}
-	}
-}
-#endif
-
-/***********************************************************************
-PARSING\JSON\PARSINGJSON.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Parser::ParsingJson_Parser
-
-***********************************************************************/
-
-#ifndef VCZH_PARSING_JSON_PARSINGJSON
-#define VCZH_PARSING_JSON_PARSINGJSON
-
-
-namespace vl
-{
-	namespace parsing
-	{
-		namespace json
-		{
-			extern void						JsonEscapeString(const WString& text, stream::TextWriter& writer);
-			extern void						JsonUnescapeString(const WString& text, stream::TextWriter& writer);
-			extern void						JsonPrint(Ptr<JsonNode> node, stream::TextWriter& writer);
-			extern WString					JsonToString(Ptr<JsonNode> node);
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-STREAM\MEMORYSTREAM.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Stream::MemoryStream
-
-Interfaces:
-	MemoryStream					：内存流
-***********************************************************************/
-
-#ifndef VCZH_STREAM_MEMORYSTREAM
-#define VCZH_STREAM_MEMORYSTREAM
-
-
-namespace vl
-{
-	namespace stream
-	{
-		class MemoryStream : public Object, public virtual IStream
-		{
-		protected:
-			vint					block;
-			char*					buffer;
-			vint					size;
-			vint					position;
-			vint					capacity;
-
-			void					PrepareSpace(vint totalSpace);
-		public:
-			MemoryStream(vint _block=65536);
-			~MemoryStream();
-
-			bool					CanRead()const;
-			bool					CanWrite()const;
-			bool					CanSeek()const;
-			bool					CanPeek()const;
-			bool					IsLimited()const;
-			bool					IsAvailable()const;
-			void					Close();
-			pos_t					Position()const;
-			pos_t					Size()const;
-			void					Seek(pos_t _size);
-			void					SeekFromBegin(pos_t _size);
-			void					SeekFromEnd(pos_t _size);
-			vint					Read(void* _buffer, vint _size);
-			vint					Write(void* _buffer, vint _size);
-			vint					Peek(void* _buffer, vint _size);
-			void*					GetInternalBuffer();
-		};
-	}
-}
-
-#endif
-
-/***********************************************************************
-PARSING\PARSINGDEFINITIONS.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Parsing::Definitions
-
-Classes:
-***********************************************************************/
-
-#ifndef VCZH_PARSING_PARSINGDEFINITIONS
-#define VCZH_PARSING_PARSINGDEFINITIONS
-
-
-namespace vl
-{
-	namespace parsing
-	{
-		namespace definitions
-		{
-
-/***********************************************************************
-类型结构
-***********************************************************************/
-
-			class ParsingDefinitionPrimitiveType;
-			class ParsingDefinitionTokenType;
-			class ParsingDefinitionSubType;
-			class ParsingDefinitionArrayType;
-
-			class ParsingDefinitionType : public ParsingTreeCustomBase
-			{
-			public:
-				class IVisitor : public Interface
-				{
-				public:
-					virtual void								Visit(ParsingDefinitionPrimitiveType* node)=0;
-					virtual void								Visit(ParsingDefinitionTokenType* node)=0;
-					virtual void								Visit(ParsingDefinitionSubType* node)=0;
-					virtual void								Visit(ParsingDefinitionArrayType* node)=0;
-				};
-
-				virtual void									Accept(IVisitor* visitor)=0;
-			};
-
-			class ParsingDefinitionPrimitiveType : public ParsingDefinitionType
-			{
-			public:
-				WString											name;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionTokenType : public ParsingDefinitionType
-			{
-			public:
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionSubType : public ParsingDefinitionType
-			{
-			public:
-				Ptr<ParsingDefinitionType>						parentType;
-				WString											subTypeName;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionArrayType : public ParsingDefinitionType
-			{
-			public:
-				Ptr<ParsingDefinitionType>						elementType;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-/***********************************************************************
-数据结构
-***********************************************************************/
-
-			class ParsingDefinitionClassMemberDefinition;
-			class ParsingDefinitionClassDefinition;
-			class ParsingDefinitionEnumMemberDefinition;
-			class ParsingDefinitionEnumDefinition;
-
-			class ParsingDefinitionTypeDefinition : public ParsingTreeCustomBase
-			{
-			public:
-				class IVisitor : public Interface
-				{
-				public:
-					virtual void								Visit(ParsingDefinitionClassMemberDefinition* node)=0;
-					virtual void								Visit(ParsingDefinitionClassDefinition* node)=0;
-					virtual void								Visit(ParsingDefinitionEnumMemberDefinition* node)=0;
-					virtual void								Visit(ParsingDefinitionEnumDefinition* node)=0;
-				};
-
-				virtual void									Accept(IVisitor* visitor)=0;
-			public:
-				WString											name;
-			};
-
-			class ParsingDefinitionClassMemberDefinition : public ParsingDefinitionTypeDefinition
-			{
-			public:
-				Ptr<ParsingDefinitionType>						type;
-				WString											unescapingFunction;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionClassDefinition : public ParsingDefinitionTypeDefinition
-			{
-			public:
-				typedef collections::List<Ptr<ParsingDefinitionClassMemberDefinition>>	MemberList;
-				typedef collections::List<Ptr<ParsingDefinitionTypeDefinition>>			TypeList;
-
-				Ptr<ParsingDefinitionType>						parentType;
-				MemberList										members;
-				TypeList										subTypes;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionEnumMemberDefinition : public ParsingDefinitionTypeDefinition
-			{
-			public:
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionEnumDefinition : public ParsingDefinitionTypeDefinition
-			{
-			public:
-				typedef collections::List<Ptr<ParsingDefinitionEnumMemberDefinition>>	MemberList;
-
-				MemberList										members;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionPrimitiveGrammar;
-			class ParsingDefinitionTextGrammar;
-			class ParsingDefinitionSequenceGrammar;
-			class ParsingDefinitionAlternativeGrammar;
-			class ParsingDefinitionLoopGrammar;
-			class ParsingDefinitionOptionalGrammar;
-			class ParsingDefinitionCreateGrammar;
-			class ParsingDefinitionAssignGrammar;
-			class ParsingDefinitionUseGrammar;
-			class ParsingDefinitionSetterGrammar;
-
-			class ParsingDefinitionGrammar : public ParsingTreeCustomBase
-			{
-			public:
-				class IVisitor : public Interface
-				{
-				public:
-					virtual void								Visit(ParsingDefinitionPrimitiveGrammar* node)=0;
-					virtual void								Visit(ParsingDefinitionTextGrammar* node)=0;
-					virtual void								Visit(ParsingDefinitionSequenceGrammar* node)=0;
-					virtual void								Visit(ParsingDefinitionAlternativeGrammar* node)=0;
-					virtual void								Visit(ParsingDefinitionLoopGrammar* node)=0;
-					virtual void								Visit(ParsingDefinitionOptionalGrammar* node)=0;
-					virtual void								Visit(ParsingDefinitionCreateGrammar* node)=0;
-					virtual void								Visit(ParsingDefinitionAssignGrammar* node)=0;
-					virtual void								Visit(ParsingDefinitionUseGrammar* node)=0;
-					virtual void								Visit(ParsingDefinitionSetterGrammar* node)=0;
-				};
-
-				virtual void									Accept(IVisitor* visitor)=0;
-			};
-
-/***********************************************************************
-文法规则
-***********************************************************************/
-
-			class ParsingDefinitionPrimitiveGrammar : public ParsingDefinitionGrammar
-			{
-			public:
-				WString											name;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionTextGrammar : public ParsingDefinitionGrammar
-			{
-			public:
-				WString											text;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionSequenceGrammar : public ParsingDefinitionGrammar
-			{
-			public:
-				Ptr<ParsingDefinitionGrammar>					first;
-				Ptr<ParsingDefinitionGrammar>					second;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionAlternativeGrammar : public ParsingDefinitionGrammar
-			{
-			public:
-				Ptr<ParsingDefinitionGrammar>					first;
-				Ptr<ParsingDefinitionGrammar>					second;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionLoopGrammar : public ParsingDefinitionGrammar
-			{
-			public:
-				Ptr<ParsingDefinitionGrammar>					grammar;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionOptionalGrammar : public ParsingDefinitionGrammar
-			{
-			public:
-				Ptr<ParsingDefinitionGrammar>					grammar;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionCreateGrammar : public ParsingDefinitionGrammar
-			{
-			public:
-				Ptr<ParsingDefinitionGrammar>					grammar;
-				Ptr<ParsingDefinitionType>						type;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionAssignGrammar : public ParsingDefinitionGrammar
-			{
-			public:
-				Ptr<ParsingDefinitionGrammar>					grammar;
-				WString											memberName;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionUseGrammar : public ParsingDefinitionGrammar
-			{
-			public:
-				Ptr<ParsingDefinitionGrammar>					grammar;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-			class ParsingDefinitionSetterGrammar : public ParsingDefinitionGrammar
-			{
-			public:
-				Ptr<ParsingDefinitionGrammar>					grammar;
-				WString											memberName;
-				WString											value;
-
-				void											Accept(IVisitor* visitor)override;
-			};
-
-/***********************************************************************
-文法结构
-***********************************************************************/
-
-			class ParsingDefinitionTokenDefinition : public ParsingTreeCustomBase
-			{
-			public:
-				WString											name;
-				WString											regex;
-				bool											discard;
-			};
-
-			class ParsingDefinitionRuleDefinition : public ParsingTreeCustomBase
-			{
-			public:
-				WString															name;
-				Ptr<ParsingDefinitionType>										type;
-				collections::List<Ptr<ParsingDefinitionGrammar>>				grammars;
-			};
-
-			class ParsingDefinition : public ParsingTreeCustomBase
-			{
-			public:
-				collections::List<Ptr<ParsingDefinitionTypeDefinition>>			types;
-				collections::List<Ptr<ParsingDefinitionTokenDefinition>>		tokens;
-				collections::List<Ptr<ParsingDefinitionRuleDefinition>>			rules;
-			};
-
-/***********************************************************************
-构造器（类型）
-***********************************************************************/
-
-			class ParsingDefinitionTypeWriter : public Object
-			{
-				friend ParsingDefinitionTypeWriter				Type(const WString& name);
-				friend ParsingDefinitionTypeWriter				TokenType();
-			protected:
-				Ptr<ParsingDefinitionType>						type;
-
-				ParsingDefinitionTypeWriter(Ptr<ParsingDefinitionType> internalType);
-				ParsingDefinitionTypeWriter(const WString& name);
-			public:
-				ParsingDefinitionTypeWriter(const ParsingDefinitionTypeWriter& typeWriter);
-
-				ParsingDefinitionTypeWriter						Sub(const WString& subTypeName)const;
-				ParsingDefinitionTypeWriter						Array()const;
-				Ptr<ParsingDefinitionType>						Type()const;
-			};
-
-			extern ParsingDefinitionTypeWriter					Type(const WString& name);
-			extern ParsingDefinitionTypeWriter					TokenType();
-
-/***********************************************************************
-构造器（类型定义）
-***********************************************************************/
-
-			class ParsingDefinitionTypeDefinitionWriter : public Object
-			{
-			public:
-				virtual Ptr<ParsingDefinitionTypeDefinition>	Definition()const=0;
-			};
-
-			class ParsingDefinitionClassDefinitionWriter : public ParsingDefinitionTypeDefinitionWriter
-			{
-			protected:
-				Ptr<ParsingDefinitionClassDefinition>			definition;
-
-			public:
-				ParsingDefinitionClassDefinitionWriter(const WString& name);
-				ParsingDefinitionClassDefinitionWriter(const WString& name, const ParsingDefinitionTypeWriter& parentType);
-
-				ParsingDefinitionClassDefinitionWriter&			Member(const WString& name, const ParsingDefinitionTypeWriter& type, const WString& unescapingFunction=L"");
-				ParsingDefinitionClassDefinitionWriter&			SubType(const ParsingDefinitionTypeDefinitionWriter& type);
-
-				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
-			};
-			
-			extern ParsingDefinitionClassDefinitionWriter		Class(const WString& name);
-			extern ParsingDefinitionClassDefinitionWriter		Class(const WString& name, const ParsingDefinitionTypeWriter& parentType);
-
-			class ParsingDefinitionEnumDefinitionWriter : public ParsingDefinitionTypeDefinitionWriter
-			{
-			protected:
-				Ptr<ParsingDefinitionEnumDefinition>			definition;
-
-			public:
-				ParsingDefinitionEnumDefinitionWriter(const WString& name);
-
-				ParsingDefinitionEnumDefinitionWriter&			Member(const WString& name);
-
-				Ptr<ParsingDefinitionTypeDefinition>			Definition()const override;
-			};
-
-			extern ParsingDefinitionEnumDefinitionWriter		Enum(const WString& name);
-
-/***********************************************************************
-构造器（文法规则）
-***********************************************************************/
-
-			class ParsingDefinitionGrammarWriter : public Object
-			{
-				friend ParsingDefinitionGrammarWriter			Rule(const WString& name);
-				friend ParsingDefinitionGrammarWriter			Text(const WString& name);
-				friend ParsingDefinitionGrammarWriter			Opt(const ParsingDefinitionGrammarWriter& writer);
-			protected:
-				Ptr<ParsingDefinitionGrammar>					grammar;
-
-				ParsingDefinitionGrammarWriter(Ptr<ParsingDefinitionGrammar> internalGrammar);
-			public:
-				ParsingDefinitionGrammarWriter(const ParsingDefinitionGrammarWriter& grammarWriter);
-
-				ParsingDefinitionGrammarWriter					operator+(const ParsingDefinitionGrammarWriter& next)const;
-				ParsingDefinitionGrammarWriter					operator|(const ParsingDefinitionGrammarWriter& next)const;
-				ParsingDefinitionGrammarWriter					operator*()const;
-				ParsingDefinitionGrammarWriter					As(const ParsingDefinitionTypeWriter& type)const;
-				ParsingDefinitionGrammarWriter					operator[](const WString& memberName)const;
-				ParsingDefinitionGrammarWriter					operator!()const;
-				ParsingDefinitionGrammarWriter					Set(const WString& memberName, const WString& value)const;
-
-				Ptr<ParsingDefinitionGrammar>					Grammar()const;
-			};
-
-			extern ParsingDefinitionGrammarWriter				Rule(const WString& name);
-			extern ParsingDefinitionGrammarWriter				Text(const WString& text);
-			extern ParsingDefinitionGrammarWriter				Opt(const ParsingDefinitionGrammarWriter& writer);
-
-/***********************************************************************
-构造器（文法结构）
-***********************************************************************/
-
-			class ParsingDefinitionWriter;
-
-			class ParsingDefinitionRuleDefinitionWriter : public Object
-			{
-			protected:
-				Ptr<ParsingDefinitionRuleDefinition>			rule;
-				ParsingDefinitionWriter&						owner;
-			public:
-				ParsingDefinitionRuleDefinitionWriter(ParsingDefinitionWriter& _owner, Ptr<ParsingDefinitionRuleDefinition> _rule);
-
-				ParsingDefinitionRuleDefinitionWriter&			Imply(const ParsingDefinitionGrammarWriter& grammar);
-				ParsingDefinitionWriter&						EndRule();
-			};
-
-			class ParsingDefinitionWriter : public Object
-			{
-			protected:
-				Ptr<ParsingDefinition>							definition;
-
-			public:
-				ParsingDefinitionWriter();
-
-				ParsingDefinitionWriter&						Type(const ParsingDefinitionTypeDefinitionWriter& type);
-				ParsingDefinitionWriter&						Token(const WString& name, const WString& regex);
-				ParsingDefinitionWriter&						Discard(const WString& name, const WString& regex);
-				ParsingDefinitionRuleDefinitionWriter			Rule(const WString& name, const ParsingDefinitionTypeWriter& type);
-
-				Ptr<ParsingDefinition>							Definition()const;
-			};
-
-/***********************************************************************
-辅助函数
-***********************************************************************/
-
-			extern WString										TypeToString(ParsingDefinitionType* type);
-			extern WString										GrammarToString(ParsingDefinitionGrammar* grammar);
-			extern WString										GrammarStateToString(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
-			extern ParsingDefinitionGrammar*					FindAppropriateGrammarState(ParsingDefinitionGrammar* grammar, ParsingDefinitionGrammar* stateNode, bool beforeNode);
-			extern void											Log(Ptr<ParsingDefinition> definition, stream::TextWriter& writer);
-
-/***********************************************************************
-自举
-***********************************************************************/
-			
-			extern Ptr<ParsingDefinition>						CreateParserDefinition();
-			extern Ptr<ParsingDefinition>						DeserializeDefinition(Ptr<ParsingTreeNode> node);
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-PARSING\PARSINGANALYZER.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Parsing::Analyzing
-
-Classes:
-***********************************************************************/
-
-#ifndef VCZH_PARSING_PARSINGANALYZER
-#define VCZH_PARSING_PARSINGANALYZER
-
-
-namespace vl
-{
-	namespace parsing
-	{
-		namespace analyzing
-		{
-
-/***********************************************************************
-符号表关联对象
-***********************************************************************/
-
-			class ParsingSymbol;
-
-			struct DefinitionTypeScopePair
-			{
-				definitions::ParsingDefinitionType*		type;
-				ParsingSymbol*							scope;
-
-				DefinitionTypeScopePair()
-				{
-				}
-
-				DefinitionTypeScopePair(definitions::ParsingDefinitionType* _type, ParsingSymbol* _scope)
-					:type(_type)
-					,scope(_scope)
-				{
-				}
-
-				vint Compare(const DefinitionTypeScopePair& pair)
-				{
-					if(type<pair.type) return -1;
-					if(type>pair.type) return 1;
-					if(scope<pair.scope) return -1;
-					if(scope>pair.scope) return 1;
-					return 0;
-				}
-
-				bool operator==(const DefinitionTypeScopePair& pair){return Compare(pair)==0;}
-				bool operator!=(const DefinitionTypeScopePair& pair){return Compare(pair)!=0;}
-				bool operator>(const DefinitionTypeScopePair& pair){return Compare(pair)>0;}
-				bool operator>=(const DefinitionTypeScopePair& pair){return Compare(pair)>=0;}
-				bool operator<(const DefinitionTypeScopePair& pair){return Compare(pair)<0;}
-				bool operator<=(const DefinitionTypeScopePair& pair){return Compare(pair)<=0;}
-			};
-
-/***********************************************************************
-符号表
-***********************************************************************/
-
-			class ParsingSymbol : public Object
-			{
-				friend class ParsingSymbolManager;
-
-				typedef collections::Dictionary<WString, ParsingSymbol*>		ParsingSymbolMap;
-				typedef collections::List<ParsingSymbol*>						ParsingSymbolList;
-			public:
-				enum SymbolType
-				{
-					Global,
-					EnumType,
-					ClassType,		// descriptor == base type
-					ArrayType,		// descriptor == element type
-					TokenType,
-					EnumItem,		// descriptor == parent
-					ClassField,		// descriptor == field type
-					TokenDef,		// descriptor == token type
-					RuleDef,		// descriptor == rule type
-				};
-
-			protected:
-				ParsingSymbolManager*			manager;
-				SymbolType						type;
-				WString							name;
-				ParsingSymbol*					descriptorSymbol;
-				WString							descriptorString;
-				ParsingSymbol*					parentSymbol;
-				ParsingSymbol*					arrayTypeSymbol;
-				ParsingSymbolList				subSymbolList;
-				ParsingSymbolMap				subSymbolMap;
-
-				bool							AddSubSymbol(ParsingSymbol* subSymbol);
-
-				ParsingSymbol(ParsingSymbolManager* _manager, SymbolType _type, const WString& _name, ParsingSymbol* _descriptorSymbol, const WString& _descriptorString);
-			public:
-				~ParsingSymbol();
-
-				ParsingSymbolManager*			GetManager();
-				SymbolType						GetType();
-				const WString&					GetName();
-				vint							GetSubSymbolCount();
-				ParsingSymbol*					GetSubSymbol(vint index);
-				ParsingSymbol*					GetSubSymbolByName(const WString& name);
-				ParsingSymbol*					GetDescriptorSymbol();
-				WString							GetDescriptorString();
-				ParsingSymbol*					GetParentSymbol();
-				bool							IsType();
-				ParsingSymbol*					SearchClassSubSymbol(const WString& name);
-				ParsingSymbol*					SearchCommonBaseClass(ParsingSymbol* classType);
-			};
-
-			class ParsingSymbolManager : public Object
-			{
-
-				typedef collections::List<Ptr<ParsingSymbol>>												ParsingSymbolList;
-				typedef collections::Dictionary<DefinitionTypeScopePair, ParsingSymbol*>					DefinitionTypeSymbolMap;
-				typedef collections::Dictionary<definitions::ParsingDefinitionGrammar*, ParsingSymbol*>		DefinitionGrammarSymbolMap;
-			protected:
-				ParsingSymbol*					globalSymbol;
-				ParsingSymbol*					tokenTypeSymbol;
-				ParsingSymbolList				createdSymbols;
-				DefinitionTypeSymbolMap			definitionTypeSymbolCache;
-				DefinitionGrammarSymbolMap		definitionGrammarSymbolCache;
-				DefinitionGrammarSymbolMap		definitionGrammarTypeCache;
-
-				ParsingSymbol*					TryAddSubSymbol(Ptr<ParsingSymbol> subSymbol, ParsingSymbol* parentSymbol);
-			public:
-				ParsingSymbolManager();
-				~ParsingSymbolManager();
-
-				ParsingSymbol*					GetGlobal();
-				ParsingSymbol*					GetTokenType();
-				ParsingSymbol*					GetArrayType(ParsingSymbol* elementType);
-
-				ParsingSymbol*					AddClass(const WString& name, ParsingSymbol* baseType, ParsingSymbol* parentType=0);
-				ParsingSymbol*					AddField(const WString& name, ParsingSymbol* classType, ParsingSymbol* fieldType);
-				ParsingSymbol*					AddEnum(const WString& name, ParsingSymbol* parentType=0);
-				ParsingSymbol*					AddEnumItem(const WString& name, ParsingSymbol* enumType);
-				ParsingSymbol*					AddTokenDefinition(const WString& name, const WString& regex);
-				ParsingSymbol*					AddRuleDefinition(const WString& name, ParsingSymbol* ruleType);
-
-				ParsingSymbol*					CacheGetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope);
-				bool							CacheSetType(definitions::ParsingDefinitionType* type, ParsingSymbol* scope, ParsingSymbol* symbol);
-				ParsingSymbol*					CacheGetSymbol(definitions::ParsingDefinitionGrammar* grammar);
-				bool							CacheSetSymbol(definitions::ParsingDefinitionGrammar* grammar, ParsingSymbol* symbol);
-				ParsingSymbol*					CacheGetType(definitions::ParsingDefinitionGrammar* grammar);
-				bool							CacheSetType(definitions::ParsingDefinitionGrammar* grammar, ParsingSymbol* type);
-			};
-
-/***********************************************************************
-语义分析
-***********************************************************************/
-
-			extern WString						GetTypeFullName(ParsingSymbol* type);
-			extern ParsingSymbol*				FindType(definitions::ParsingDefinitionType* type, ParsingSymbolManager* manager, ParsingSymbol* scope, collections::List<Ptr<ParsingError>>& errors);
-			extern void							PrepareSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
-			extern void							ValidateRuleStructure(Ptr<definitions::ParsingDefinition> definition, Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
-			extern void							ResolveRuleSymbols(Ptr<definitions::ParsingDefinitionRuleDefinition> rule, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
-			extern void							ResolveSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
-			extern void							ValidateDefinition(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors);
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-PARSING\PARSINGAUTOMATON.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Parsing::Automaton
-
-Classes:
-***********************************************************************/
-
-#ifndef VCZH_PARSING_PARSINGAUTOMATON
-#define VCZH_PARSING_PARSINGAUTOMATON
-
-
-namespace vl
-{
-	namespace parsing
-	{
-		namespace analyzing
-		{
-
-/***********************************************************************
-状态机
-***********************************************************************/
-
-			class Action;
-			class Transition;
-			class State;
-
-			class Action : public Object
-			{
-			public:
-				enum ActionType
-				{
-					Create, // new source
-					Assign, // source ::= <created symbol>
-					Using,  // use <created symbol>
-					Setter, // source ::= target
-					Shift,
-					Reduce,
-					LeftRecursiveReduce,
-				};
-
-				ActionType											actionType;
-				ParsingSymbol*										actionTarget;
-				ParsingSymbol*										actionSource;
-
-				// the following two fields record which rule symbol transition generate this shift/reduce action
-				State*												shiftReduceSource;
-				State*												shiftReduceTarget;
-
-				Action();
-				~Action();
-			};
-
-			class Transition : public Object
-			{
-			public:
-				enum TransitionType
-				{
-					TokenBegin,		// token stream start
-					TokenFinish,	// token stream end
-					TryReduce,		// rule end
-					Epsilon,		// an epsilon transition
-					Symbol,			// a syntax symbol
-				};
-
-				enum StackOperationType
-				{
-					None,
-					ShiftReduceCompacted,
-					LeftRecursive,
-				};
-
-				State*												source;
-				State*												target;
-				collections::List<Ptr<Action>>						actions;
-				
-				TransitionType										transitionType;
-				StackOperationType									stackOperationType;
-				ParsingSymbol*										transitionSymbol;
-
-				Transition();
-				~Transition();
-
-				static bool											IsEquivalent(Transition* t1, Transition* t2, bool careSourceAndTarget);
-			};
-
-			class State : public Object
-			{
-			public:
-				enum StatePosition
-				{
-					BeforeNode,
-					AfterNode,
-				};
-
-				collections::List<Transition*>						transitions;
-				collections::List<Transition*>						inputs;
-				bool												endState;
-
-				ParsingSymbol*										ownerRuleSymbol;
-				definitions::ParsingDefinitionRuleDefinition*		ownerRule;
-				definitions::ParsingDefinitionGrammar*				grammarNode;
-				definitions::ParsingDefinitionGrammar*				stateNode;
-				StatePosition										statePosition;
-				WString												stateName;
-				WString												stateExpression;
-
-				State();
-				~State();
-			};
-
-			class RuleInfo : public Object
-			{
-			public:
-				State*												rootRuleStartState;
-				State*												rootRuleEndState;
-				State*												startState;
-				collections::List<State*>							endStates;
-				int													stateNameCount;
-
-				RuleInfo();
-				~RuleInfo();
-			};
-
-			class Automaton : public Object
-			{
-				typedef collections::Dictionary<definitions::ParsingDefinitionRuleDefinition*, Ptr<RuleInfo>>		RuleInfoMap;
-			public:
-				ParsingSymbolManager*								symbolManager;
-				collections::List<Ptr<Transition>>					transitions;
-				collections::List<Ptr<State>>						states;
-				RuleInfoMap											ruleInfos;
-
-				Automaton(ParsingSymbolManager* _symbolManager);
-				~Automaton();
-
-				State*												RuleStartState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
-				State*												RootRuleStartState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
-				State*												RootRuleEndState(definitions::ParsingDefinitionRuleDefinition* ownerRule);
-				State*												StartState(definitions::ParsingDefinitionRuleDefinition* ownerRule, definitions::ParsingDefinitionGrammar* grammarNode, definitions::ParsingDefinitionGrammar* stateNode);
-				State*												EndState(definitions::ParsingDefinitionRuleDefinition* ownerRule, definitions::ParsingDefinitionGrammar* grammarNode, definitions::ParsingDefinitionGrammar* stateNode);
-				State*												CopyState(State* oldState);
-
-				Transition*											CreateTransition(State* start, State* end);
-				Transition*											TokenBegin(State* start, State* end);
-				Transition*											TokenFinish(State* start, State* end);
-				Transition*											TryReduce(State* start, State* end);
-				Transition*											Epsilon(State* start, State* end);
-				Transition*											Symbol(State* start, State* end, ParsingSymbol* transitionSymbol);
-				Transition*											CopyTransition(State* start, State* end, Transition* oldTransition);
-
-				void												DeleteTransition(Transition* transition);
-				void												DeleteState(State* state);
-			};
-
-/***********************************************************************
-辅助函数
-***********************************************************************/
-
-			namespace closure_searching
-			{
-				struct ClosureItem
-				{
-					State*											state;			// target state of one path of a closure
-					Ptr<collections::List<Transition*>>				transitions;	// path
-					bool											cycle;			// true: invalid closure because there are cycles, and in the middle of the path there will be a transition that targets to the state field.
-
-					ClosureItem()
-						:state(0)
-						,cycle(false)
-					{
-					}
-
-					ClosureItem(State* _state, Ptr<collections::List<Transition*>> _transitions, bool _cycle)
-						:state(_state)
-						,transitions(_transitions)
-						,cycle(_cycle)
-					{
-					}
-				};
-
-				enum ClosureSearchResult
-				{
-					Continue,
-					Hit,
-					Blocked,
-				};
-
-				extern void											SearchClosure(ClosureSearchResult(*closurePredicate)(Transition*), State* startState, collections::List<ClosureItem>& closure);
-			}
-
-			extern Ptr<Automaton>									CreateEpsilonPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager);
-			extern void												RemoveEpsilonTransitions(collections::Dictionary<State*, State*>& oldNewStateMap, collections::List<State*>& scanningStates, Ptr<Automaton> automaton);
-			extern Ptr<Automaton>									CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA);
-			extern Ptr<Automaton>									CreateJointPDAFromNondeterministicPDA(Ptr<Automaton> nondeterministicPDA);
-			extern void												CompactJointPDA(Ptr<Automaton> jointPDA);
-			extern void												MarkLeftRecursiveInJointPDA(Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
-
-			extern WString											GetTypeNameForCreateInstruction(ParsingSymbol* type);
-			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
-			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, collections::List<Ptr<ParsingError>>& errors);
-			extern void												Log(Ptr<Automaton> automaton, stream::TextWriter& writer);
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-REGEX\REGEXDATA.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Regex::Basic Data Structure
-
-Classes:
-***********************************************************************/
-
-#ifndef VCZH_REGEX_REGEXDATA
-#define VCZH_REGEX_REGEXDATA
-
-
-namespace vl
-{
-	namespace regex_internal
-	{
-		using namespace vl::collections;
-
-/***********************************************************************
-基础数据结构
-***********************************************************************/
-
-		class CharRange
-		{
-		public:
-			typedef SortedList<CharRange>			List;
-
-			wchar_t					begin;
-			wchar_t					end;
-
-			CharRange();
-			CharRange(wchar_t _begin, wchar_t _end);
-
-			bool					operator<(CharRange item)const;
-			bool					operator<=(CharRange item)const;
-			bool					operator>(CharRange item)const;
-			bool					operator>=(CharRange item)const;
-			bool					operator==(CharRange item)const;
-			bool					operator!=(CharRange item)const;
-
-			bool					operator<(wchar_t item)const;
-			bool					operator<=(wchar_t item)const;
-			bool					operator>(wchar_t item)const;
-			bool					operator>=(wchar_t item)const;
-			bool					operator==(wchar_t item)const;
-			bool					operator!=(wchar_t item)const;
-		};
-	}
-
-	template<>
-	struct POD<regex_internal::CharRange>
-	{
-		static const bool Result=true;
-	};
-}
-
-#endif
-
-/***********************************************************************
-REGEX\REGEXAUTOMATON.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Regex::RegexAutomaton
-
-Classes:
-	State						：状态
-	Transition					：转换
-	Automaton					：状态机
-
-Functions:
-	EpsilonNfaToNfa				：去Epsilon
-	NfaToDfa					：NFA转DFA
-***********************************************************************/
-
-#ifndef VCZH_REGEX_REGEXAUTOMATON
-#define VCZH_REGEX_REGEXAUTOMATON
-
-
-namespace vl
-{
-	namespace regex_internal
-	{
-		class State;
-		class Transition;
-
-		class Transition
-		{
-		public:
-			enum Type
-			{
-				Chars,				//range为字符范围
-				Epsilon,
-				BeginString,
-				EndString,
-				Nop,				//无动作（不可消除epsilon，用来控制优先级）
-				Capture,			//capture为捕获频道
-				Match,				//capture为捕获频道，index为匹配的位置，-1代表匹配频道下面的所有项目
-				Positive,			//正向匹配
-				Negative,			//反向匹配
-				NegativeFail,		//反向匹配失败
-				End					//Capture, Position, Negative
-			};
-
-			State*					source;
-			State*					target;
-			CharRange				range;
-			Type					type;
-			vint						capture;
-			vint						index;
-		};
-
-		class State
-		{
-		public:
-			List<Transition*>		transitions;
-			List<Transition*>		inputs;
-			bool					finalState;
-			void*					userData;
-		};
-
-		class Automaton
-		{
-		public:
-			typedef Ptr<Automaton>		Ref;
-
-			List<Ptr<State>>		states;
-			List<Ptr<Transition>>	transitions;
-			List<WString>			captureNames;
-			State*					startState;
-
-			Automaton();
-
-			State*					NewState();
-			Transition*				NewTransition(State* start, State* end);
-			Transition*				NewChars(State* start, State* end, CharRange range);
-			Transition*				NewEpsilon(State* start, State* end);
-			Transition*				NewBeginString(State* start, State* end);
-			Transition*				NewEndString(State* start, State* end);
-			Transition*				NewNop(State* start, State* end);
-			Transition*				NewCapture(State* start, State* end, vint capture);
-			Transition*				NewMatch(State* start, State* end, vint capture, vint index=-1);
-			Transition*				NewPositive(State* start, State* end);
-			Transition*				NewNegative(State* start, State* end);
-			Transition*				NewNegativeFail(State* start, State* end);
-			Transition*				NewEnd(State* start, State* end);
-		};
-
-		extern bool					PureEpsilonChecker(Transition* transition);
-		extern bool					RichEpsilonChecker(Transition* transition);
-		extern bool					AreEqual(Transition* transA, Transition* transB);
-		extern Automaton::Ref		EpsilonNfaToNfa(Automaton::Ref source, bool(*epsilonChecker)(Transition*), Dictionary<State*, State*>& nfaStateMap);
-		extern Automaton::Ref		NfaToDfa(Automaton::Ref source, Group<State*, State*>& dfaStateMap);
-	}
-}
-
-#endif
-
-/***********************************************************************
-REGEX\REGEXEXPRESSION.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Regex::RegexExpression
-
-Classes:
-	Expression						：表达式基类					|
-	CharSetExpression				：字符集表达式				| a, [a-b], [^a-b0_9], \.rnt\/()+*?{}[]<>^$!=SsDdLlWw, [\rnt-[]\/^$]
-	LoopExpression					：循环表达式					| a{3}, a{3,}, a{1,3}, a+, a*, a?, LOOP?
-	SequenceExpression				：顺序表达式					| ab
-	AlternateExpression				：选择表达式					| a|b
-	BeginExpression					：【非纯】字符串起始表达式	| ^
-	EndExpression					：【非纯】字符串末尾表达式	| $
-	CaptureExpression				：【非纯】捕获表达式			| (<name>expr), (?expr)
-	MatchExpression					：【非纯】匹配表达式			| (<$name>), (<$name;i>), (<$i>)
-	PositiveExpression				：【非纯】正向预查表达式		| (=expr)
-	NegativeExpression				：【非纯】反向预查表达式		| (!expr)
-	UsingExpression					：引用表达式					| (<#name1>expr)...(<&name1>)...
-
-	RegexExpression					：正则表达式
-
-Functions:
-	ParseRegexExpression			：将字符串分析为RegexExpression对象，如果语法有问题则抛异常
-***********************************************************************/
-
-#ifndef VCZH_REGEX_REGEXEXPRESSION
-#define VCZH_REGEX_REGEXEXPRESSION
-
-
-namespace vl
-{
-	namespace regex_internal
-	{
-		class IRegexExpressionAlgorithm;
-
-/***********************************************************************
-正则表达式表达式树
-***********************************************************************/
-
-		class Expression : public Object, private NotCopyable
-		{
-		public:
-			typedef Ptr<Expression>								Ref;
-			typedef Dictionary<WString, Expression::Ref>		Map;
-
-			virtual void				Apply(IRegexExpressionAlgorithm& algorithm)=0;
-			bool						IsEqual(Expression* expression);
-			bool						HasNoExtension();
-			bool						CanTreatAsPure();
-			void						NormalizeCharSet(CharRange::List& subsets);
-			void						CollectCharSet(CharRange::List& subsets);
-			void						ApplyCharSet(CharRange::List& subsets);
-			Automaton::Ref				GenerateEpsilonNfa();
-		};
-
-		class CharSetExpression : public Expression
-		{
-		public:
-			CharRange::List				ranges;
-			bool						reverse;
-
-			bool						AddRangeWithConflict(CharRange range);
-			void						Apply(IRegexExpressionAlgorithm& algorithm);
-		};
-
-		class LoopExpression : public Expression
-		{
-		public:
-			Expression::Ref				expression;		//被循环表达式
-			vint							min;			//下限
-			vint							max;			//上限，-1代表无限
-			bool						preferLong;		//长匹配优先
-
-			void						Apply(IRegexExpressionAlgorithm& algorithm);
-		};
-
-		class SequenceExpression : public Expression
-		{
-		public:
-			Expression::Ref				left;			//左表达式
-			Expression::Ref				right;			//右表达式
-
-			void						Apply(IRegexExpressionAlgorithm& algorithm);
-		};
-
-		class AlternateExpression : public Expression
-		{
-		public:
-			Expression::Ref				left;			//左表达式
-			Expression::Ref				right;			//右表达式
-
-			void						Apply(IRegexExpressionAlgorithm& algorithm);
-		};
-
-		class BeginExpression: public Expression
-		{
-		public:
-
-			void						Apply(IRegexExpressionAlgorithm& algorithm);
-		};
-
-		class EndExpression : public Expression
-		{
-		public:
-
-			void						Apply(IRegexExpressionAlgorithm& algorithm);
-		};
-
-		class CaptureExpression : public Expression
-		{
-		public:
-			WString						name;			//捕获名，空代表缺省捕获
-			Expression::Ref				expression;		//被捕获表达式
-
-			void						Apply(IRegexExpressionAlgorithm& algorithm);
-		};
-
-		class MatchExpression : public Expression
-		{
-		public:
-			WString						name;			//捕获名，空代表缺省捕获
-			vint							index;			//捕获序号，-1代表非空捕获的所有项
-
-			void						Apply(IRegexExpressionAlgorithm& algorithm);
-		};
-
-		class PositiveExpression : public Expression
-		{
-		public:
-			Expression::Ref				expression;		//正向匹配表达式
-
-			void						Apply(IRegexExpressionAlgorithm& algorithm);
-		};
-
-		class NegativeExpression : public Expression
-		{
-		public:
-			Expression::Ref				expression;		//反向匹配表达式
-
-			void						Apply(IRegexExpressionAlgorithm& algorithm);
-		};
-
-		class UsingExpression : public Expression
-		{
-		public:
-			WString						name;			//引用名
-
-			void						Apply(IRegexExpressionAlgorithm& algorithm);
-		};
-
-		class RegexExpression : public Object, private NotCopyable
-		{
-		public:
-			typedef Ptr<RegexExpression>						Ref;
-
-			Expression::Map				definitions;	//命名子表达式
-			Expression::Ref				expression;		//主表达式
-
-			Expression::Ref				Merge();
-		};
-
-/***********************************************************************
-算法基类
-***********************************************************************/
-
-		class IRegexExpressionAlgorithm : public Interface
-		{
-		public:
-			virtual void				Visit(CharSetExpression* expression)=0;
-			virtual void				Visit(LoopExpression* expression)=0;
-			virtual void				Visit(SequenceExpression* expression)=0;
-			virtual void				Visit(AlternateExpression* expression)=0;
-			virtual void				Visit(BeginExpression* expression)=0;
-			virtual void				Visit(EndExpression* expression)=0;
-			virtual void				Visit(CaptureExpression* expression)=0;
-			virtual void				Visit(MatchExpression* expression)=0;
-			virtual void				Visit(PositiveExpression* expression)=0;
-			virtual void				Visit(NegativeExpression* expression)=0;
-			virtual void				Visit(UsingExpression* expression)=0;
-		};
-
-		template<typename ReturnType, typename ParameterType=void*>
-		class RegexExpressionAlgorithm : public Object, public IRegexExpressionAlgorithm
-		{
-		private:
-			ReturnType					returnValue;
-			ParameterType*				parameterValue;
-		public:
-
-			ReturnType Invoke(Expression* expression, ParameterType parameter)
-			{
-				parameterValue=&parameter;
-				expression->Apply(*this);
-				return returnValue;
-			}
-
-			ReturnType Invoke(Expression::Ref expression, ParameterType parameter)
-			{
-				parameterValue=&parameter;
-				expression->Apply(*this);
-				return returnValue;
-			}
-
-			virtual ReturnType			Apply(CharSetExpression* expression, ParameterType parameter)=0;
-			virtual ReturnType			Apply(LoopExpression* expression, ParameterType parameter)=0;
-			virtual ReturnType			Apply(SequenceExpression* expression, ParameterType parameter)=0;
-			virtual ReturnType			Apply(AlternateExpression* expression, ParameterType parameter)=0;
-			virtual ReturnType			Apply(BeginExpression* expression, ParameterType parameter)=0;
-			virtual ReturnType			Apply(EndExpression* expression, ParameterType parameter)=0;
-			virtual ReturnType			Apply(CaptureExpression* expression, ParameterType parameter)=0;
-			virtual ReturnType			Apply(MatchExpression* expression, ParameterType parameter)=0;
-			virtual ReturnType			Apply(PositiveExpression* expression, ParameterType parameter)=0;
-			virtual ReturnType			Apply(NegativeExpression* expression, ParameterType parameter)=0;
-			virtual ReturnType			Apply(UsingExpression* expression, ParameterType parameter)=0;
-		public:
-			void Visit(CharSetExpression* expression)
-			{
-				returnValue=Apply(expression, *parameterValue);
-			}
-
-			void Visit(LoopExpression* expression)
-			{
-				returnValue=Apply(expression, *parameterValue);
-			}
-
-			void Visit(SequenceExpression* expression)
-			{
-				returnValue=Apply(expression, *parameterValue);
-			}
-
-			void Visit(AlternateExpression* expression)
-			{
-				returnValue=Apply(expression, *parameterValue);
-			}
-
-			void Visit(BeginExpression* expression)
-			{
-				returnValue=Apply(expression, *parameterValue);
-			}
-
-			void Visit(EndExpression* expression)
-			{
-				returnValue=Apply(expression, *parameterValue);
-			}
-
-			void Visit(CaptureExpression* expression)
-			{
-				returnValue=Apply(expression, *parameterValue);
-			}
-
-			void Visit(MatchExpression* expression)
-			{
-				returnValue=Apply(expression, *parameterValue);
-			}
-
-			void Visit(PositiveExpression* expression)
-			{
-				returnValue=Apply(expression, *parameterValue);
-			}
-
-			void Visit(NegativeExpression* expression)
-			{
-				returnValue=Apply(expression, *parameterValue);
-			}
-
-			void Visit(UsingExpression* expression)
-			{
-				returnValue=Apply(expression, *parameterValue);
-			}
-		};
-
-		template<typename ParameterType>
-		class RegexExpressionAlgorithm<void, ParameterType> : public Object, public IRegexExpressionAlgorithm
-		{
-		private:
-			ParameterType*				parameterValue;
-		public:
-
-			void Invoke(Expression* expression, ParameterType parameter)
-			{
-				parameterValue=&parameter;
-				expression->Apply(*this);
-			}
-
-			void Invoke(Expression::Ref expression, ParameterType parameter)
-			{
-				parameterValue=&parameter;
-				expression->Apply(*this);
-			}
-
-			virtual void				Apply(CharSetExpression* expression, ParameterType parameter)=0;
-			virtual void				Apply(LoopExpression* expression, ParameterType parameter)=0;
-			virtual void				Apply(SequenceExpression* expression, ParameterType parameter)=0;
-			virtual void				Apply(AlternateExpression* expression, ParameterType parameter)=0;
-			virtual void				Apply(BeginExpression* expression, ParameterType parameter)=0;
-			virtual void				Apply(EndExpression* expression, ParameterType parameter)=0;
-			virtual void				Apply(CaptureExpression* expression, ParameterType parameter)=0;
-			virtual void				Apply(MatchExpression* expression, ParameterType parameter)=0;
-			virtual void				Apply(PositiveExpression* expression, ParameterType parameter)=0;
-			virtual void				Apply(NegativeExpression* expression, ParameterType parameter)=0;
-			virtual void				Apply(UsingExpression* expression, ParameterType parameter)=0;
-		public:
-			void Visit(CharSetExpression* expression)
-			{
-				Apply(expression, *parameterValue);
-			}
-
-			void Visit(LoopExpression* expression)
-			{
-				Apply(expression, *parameterValue);
-			}
-
-			void Visit(SequenceExpression* expression)
-			{
-				Apply(expression, *parameterValue);
-			}
-
-			void Visit(AlternateExpression* expression)
-			{
-				Apply(expression, *parameterValue);
-			}
-
-			void Visit(BeginExpression* expression)
-			{
-				Apply(expression, *parameterValue);
-			}
-
-			void Visit(EndExpression* expression)
-			{
-				Apply(expression, *parameterValue);
-			}
-
-			void Visit(CaptureExpression* expression)
-			{
-				Apply(expression, *parameterValue);
-			}
-
-			void Visit(MatchExpression* expression)
-			{
-				Apply(expression, *parameterValue);
-			}
-
-			void Visit(PositiveExpression* expression)
-			{
-				Apply(expression, *parameterValue);
-			}
-
-			void Visit(NegativeExpression* expression)
-			{
-				Apply(expression, *parameterValue);
-			}
-
-			void Visit(UsingExpression* expression)
-			{
-				Apply(expression, *parameterValue);
-			}
-		};
-
-/***********************************************************************
-辅助函数
-***********************************************************************/
-
-		extern Ptr<LoopExpression>		ParseLoop(const wchar_t*& input);
-		extern Ptr<Expression>			ParseCharSet(const wchar_t*& input);
-		extern Ptr<Expression>			ParseFunction(const wchar_t*& input);
-		extern Ptr<Expression>			ParseUnit(const wchar_t*& input);
-		extern Ptr<Expression>			ParseJoin(const wchar_t*& input);
-		extern Ptr<Expression>			ParseAlt(const wchar_t*& input);
-		extern Ptr<Expression>			ParseExpression(const wchar_t*& input);
-		extern RegexExpression::Ref		ParseRegexExpression(const WString& code);
-
-		extern WString					EscapeTextForRegex(const WString& literalString);
-		extern WString					UnescapeTextForRegex(const WString& escapedText);
-		extern WString					NormalizeEscapedTextForRegex(const WString& escapedText);
-		extern bool						IsRegexEscapedListeralString(const WString& regex);
 	}
 }
 

@@ -131,66 +131,6 @@ Interface
 }
 
 /***********************************************************************
-Collections\Operation.cpp
-***********************************************************************/
-
-namespace vl
-{
-	namespace collections
-	{
-		MaxProcessor Max()
-		{
-			return MaxProcessor();
-		}
-		
-		MinProcessor Min()
-		{
-			return MinProcessor();
-		}
-
-		FirstProcessor First()
-		{
-			return FirstProcessor();
-		}
-
-		CountProcessor Count()
-		{
-			return CountProcessor();
-		}
-
-		IsEmptyProcessor IsEmpty()
-		{
-			return IsEmptyProcessor();
-		}
-
-		TakeProcessor Take(vint count)
-		{
-			return TakeProcessor(count);
-		}
-		
-		SkipProcessor Skip(vint count)
-		{
-			return SkipProcessor(count);
-		}
-
-		RepeatProcessor Repeat(vint count)
-		{
-			return RepeatProcessor(count);
-		}
-
-		DistinctProcessor Distinct()
-		{
-			return DistinctProcessor();
-		}
-
-		ReverseProcessor Reverse()
-		{
-			return ReverseProcessor();
-		}
-	}
-}
-
-/***********************************************************************
 Console.cpp
 ***********************************************************************/
 
@@ -4788,7 +4728,7 @@ namespace vl
 						Ptr<ParsingTable::TransitionBag> bag=table->GetTransitionBag(i, j);
 						if(bag)
 						{
-							CopyFrom(bag->transitionItems, bag->transitionItems>>OrderBy(ParsingTable::TransitionItem::Compare));
+							CopyFrom(bag->transitionItems, From(bag->transitionItems).OrderBy(ParsingTable::TransitionItem::Compare));
 							for(vint k=0;k<bag->transitionItems.Count()-1;k++)
 							{
 								Ptr<ParsingTable::TransitionItem> t1=bag->transitionItems[k];
@@ -5250,9 +5190,9 @@ CreateNondeterministicPDAFromEpsilonPDA::state_clearning
 					{
 						FOREACH(Transition*, transition, state->transitions)
 						{
-							CopyFrom(transition->actions, transition->actions>>OrderBy(&CompareActionForRearranging));
+							CopyFrom(transition->actions, From(transition->actions).OrderBy(&CompareActionForRearranging));
 						}
-						CopyFrom(state->transitions, state->transitions>>OrderBy(&CompareTransitionForRearranging));
+						CopyFrom(state->transitions, From(state->transitions).OrderBy(&CompareTransitionForRearranging));
 						stateContentSorted.Add(state);
 					}
 				}
@@ -8162,7 +8102,7 @@ ParsingTable
 			void ParsingTable::Initialize()
 			{
 				List<WString> tokens;
-				FOREACH(TokenInfo, info, tokenInfos>>Skip(UserTokenStart))
+				FOREACH(TokenInfo, info, From(tokenInfos).Skip(UserTokenStart))
 				{
 					tokens.Add(info.regex);
 				}
@@ -8357,7 +8297,7 @@ ParsingTreeNode
 			ClearQueryCache();
 			if(&subNodes)
 			{
-				CopyFrom(cachedOrderedSubNodes, subNodes>>OrderBy(&CompareTextRange));
+				CopyFrom(cachedOrderedSubNodes, collections::From(subNodes).OrderBy(&CompareTextRange));
 				FOREACH(Ptr<ParsingTreeNode>, node, cachedOrderedSubNodes)
 				{
 					node->InitializeQueryCache();
@@ -12262,7 +12202,6 @@ RegexTokens
 		class RegexTokenEnumerator : public Object, public IEnumerator<RegexToken>
 		{
 		protected:
-			bool					available;
 			RegexToken				token;
 			vint					index;
 
@@ -12277,94 +12216,9 @@ RegexTokens
 			bool					cacheAvailable;
 			RegexToken				cacheToken;
 
-			void Read()
-			{
-				if(cacheAvailable || *reading)
-				{
-					if(cacheAvailable)
-					{
-						token=cacheToken;
-						cacheAvailable=false;
-					}
-					else
-					{
-						token.reading=reading;
-						token.start=0;
-						token.length=0;
-						token.token=-2;
-					}
-					token.rowStart=rowStart;
-					token.columnStart=columnStart;
-					token.rowEnd=rowStart;
-					token.columnEnd=columnStart;
-					token.codeIndex=codeIndex;
-
-					PureResult result;
-					while(*reading)
-					{
-						vint id=-1;
-						if(!pure->MatchHead(reading, start, result))
-						{
-							result.start=reading-start;
-							result.length=1;
-						}
-						else
-						{
-							id=stateTokens.Get(result.finalState);
-						}
-						if(token.token==-2)
-						{
-							token.start=result.start;
-							token.length=result.length;
-							token.token=id;
-						}
-						else if(token.token==id && id==-1)
-						{
-							token.length+=result.length;
-						}
-						else
-						{
-							cacheAvailable=true;
-							cacheToken.reading=reading;
-							cacheToken.start=result.start;
-							cacheToken.length=result.length;
-							cacheToken.codeIndex=codeIndex;
-							cacheToken.token=id;
-						}
-						reading+=result.length;
-						if(cacheAvailable)
-						{
-							break;
-						}
-					}
-
-					index++;
-					available=true;
-
-					for(vint i=0;i<token.length;i++)
-					{
-						token.rowEnd=rowStart;
-						token.columnEnd=columnStart;
-						if(token.reading[i]==L'\n')
-						{
-							rowStart++;
-							columnStart=0;
-						}
-						else
-						{
-							columnStart++;
-						}
-					}
-				}
-				else
-				{
-					available=false;
-				}
-			}
 		public:
 			RegexTokenEnumerator(const RegexTokenEnumerator& enumerator)
-				:available(enumerator.available)
-				,token(enumerator.token)
+				:token(enumerator.token)
 				,index(enumerator.index)
 				,pure(enumerator.pure)
 				,stateTokens(enumerator.stateTokens)
@@ -12379,8 +12233,7 @@ RegexTokens
 			}
 
 			RegexTokenEnumerator(PureInterpretor* _pure, const Array<vint>& _stateTokens, const wchar_t* _start, vint _codeIndex)
-				:available(true)
-				,index(-1)
+				:index(-1)
 				,pure(_pure)
 				,stateTokens(_stateTokens)
 				,reading(_start)
@@ -12390,7 +12243,6 @@ RegexTokens
 				,codeIndex(_codeIndex)
 				,cacheAvailable(false)
 			{
-				Read();
 			}
 
 			IEnumerator<RegexToken>* Clone()const
@@ -12410,13 +12262,81 @@ RegexTokens
 
 			bool Next()
 			{
-				Read();
-				return available;
-			}
+				if(!cacheAvailable && !*reading) return false;
+				if(cacheAvailable)
+				{
+					token=cacheToken;
+					cacheAvailable=false;
+				}
+				else
+				{
+					token.reading=reading;
+					token.start=0;
+					token.length=0;
+					token.token=-2;
+				}
+				token.rowStart=rowStart;
+				token.columnStart=columnStart;
+				token.rowEnd=rowStart;
+				token.columnEnd=columnStart;
+				token.codeIndex=codeIndex;
 
-			bool Available()const
-			{
-				return available;
+				PureResult result;
+				while(*reading)
+				{
+					vint id=-1;
+					if(!pure->MatchHead(reading, start, result))
+					{
+						result.start=reading-start;
+						result.length=1;
+					}
+					else
+					{
+						id=stateTokens.Get(result.finalState);
+					}
+					if(token.token==-2)
+					{
+						token.start=result.start;
+						token.length=result.length;
+						token.token=id;
+					}
+					else if(token.token==id && id==-1)
+					{
+						token.length+=result.length;
+					}
+					else
+					{
+						cacheAvailable=true;
+						cacheToken.reading=reading;
+						cacheToken.start=result.start;
+						cacheToken.length=result.length;
+						cacheToken.codeIndex=codeIndex;
+						cacheToken.token=id;
+					}
+					reading+=result.length;
+					if(cacheAvailable)
+					{
+						break;
+					}
+				}
+
+				index++;
+
+				for(vint i=0;i<token.length;i++)
+				{
+					token.rowEnd=rowStart;
+					token.columnEnd=columnStart;
+					if(token.reading[i]==L'\n')
+					{
+						rowStart++;
+						columnStart=0;
+					}
+					else
+					{
+						columnStart++;
+					}
+				}
+				return true;
 			}
 
 			void Reset()
@@ -12424,18 +12344,16 @@ RegexTokens
 				index=-1;
 				reading=start;
 				cacheAvailable=false;
-				Read();
 			}
 
 			void ReadToEnd(List<RegexToken>& tokens, bool(*discard)(vint))
 			{
-				while(available)
+				while(Next())
 				{
 					if(!discard(token.token))
 					{
 						tokens.Add(token);
 					}
-					Read();
 				}
 			}
 		};
@@ -12661,10 +12579,9 @@ RegexLexer
 			List<Automaton::Ref> dfas;
 			CharRange::List subsets;
 			Ptr<IEnumerator<WString>> enumerator=tokens.CreateEnumerator();
-			while(enumerator->Available())
+			while(enumerator->Next())
 			{
 				const WString& code=enumerator->Current();
-				enumerator->Next();
 
 				RegexExpression::Ref regex=ParseRegexExpression(code);
 				Expression::Ref expression=regex->Merge();
