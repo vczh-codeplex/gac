@@ -108,18 +108,18 @@ private:
 	{
 		CopyFrom(
 			to->GetItems(),
-			to->GetItems()
-				>>Concat(
-					from->GetSelectedItems()>>Select(Curry(GetTextItem)(from))
+			From(to->GetItems())
+				.Concat(
+					From(from->GetSelectedItems()).Select(Curry(GetTextItem)(from))
 					)
-				>>OrderBy(CompareTextItem)
+				.OrderBy(CompareTextItem)
 			);
 
 		List<int> selectedItems;
 		CopyFrom(
 			selectedItems,
-			from->GetSelectedItems()
-				>>OrderBy(ReverseCompareInt)
+			From(from->GetSelectedItems())
+				.OrderBy(ReverseCompareInt)
 			);
 		FOREACH(int, index, selectedItems)
 		{
@@ -132,11 +132,9 @@ private:
 		// Use linq for C++ to create sorted TextItem(s) from DataSource
 		CopyFrom(
 			list->GetItems(),
-			FromArray(DataSource)
-				>>OrderBy(_wcsicmp)
-				>>Select(LAMBDA(
-					[](const wchar_t* name){return list::TextItem(name);}
-				))
+			From(DataSource)
+				.OrderBy(_wcsicmp)
+				.Select([](const wchar_t* name){return list::TextItem(name);})
 			);
 	}
 

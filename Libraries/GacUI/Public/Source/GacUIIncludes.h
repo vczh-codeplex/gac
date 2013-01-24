@@ -4899,6 +4899,14 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		struct LambdaRetriveType
 		{
 			typedef vint Type;
+			typedef vint ResultType;
+		};
+ 
+		template<typename T>
+		struct FunctionObjectRetriveType
+		{
+			typedef typename LambdaRetriveType<T>::Type Type;
+			typedef typename LambdaRetriveType<T>::ResultType ResultType;
 		};
  
 /***********************************************************************
@@ -4915,6 +4923,14 @@ vl::Func<R()>
 		struct LambdaRetriveType<R (__thiscall TObject::*)()>
 		{
 			typedef Func<R()> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R >
+		struct FunctionObjectRetriveType<R(*)()>
+		{
+			typedef Func<R()> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0)>
@@ -4930,6 +4946,14 @@ vl::Func<R(T0)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0)>
 		{
 			typedef Func<R(T0)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0>
+		struct FunctionObjectRetriveType<R(*)(T0)>
+		{
+			typedef Func<R(T0)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1)>
@@ -4945,6 +4969,14 @@ vl::Func<R(T0,T1)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1)>
 		{
 			typedef Func<R(T0,T1)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1>
+		struct FunctionObjectRetriveType<R(*)(T0,T1)>
+		{
+			typedef Func<R(T0,T1)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2)>
@@ -4960,6 +4992,14 @@ vl::Func<R(T0,T1,T2)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2)>
 		{
 			typedef Func<R(T0,T1,T2)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2)>
+		{
+			typedef Func<R(T0,T1,T2)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3)>
@@ -4975,6 +5015,14 @@ vl::Func<R(T0,T1,T2,T3)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3)>
 		{
 			typedef Func<R(T0,T1,T2,T3)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3)>
+		{
+			typedef Func<R(T0,T1,T2,T3)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4)>
@@ -4990,6 +5038,14 @@ vl::Func<R(T0,T1,T2,T3,T4)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5)>
@@ -5005,6 +5061,14 @@ vl::Func<R(T0,T1,T2,T3,T4,T5)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5,T6)>
@@ -5020,6 +5084,14 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5,T6)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5,T6)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>
@@ -5035,6 +5107,14 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5,T6,T7)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
@@ -5050,6 +5130,14 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
@@ -5065,17 +5153,31 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> Type;
+			typedef R ResultType;
 		};
  
  
-#ifdef VCZH_NO_OLD_OS
 		template<typename T>
 		typename LambdaRetriveType<decltype(&T::operator())>::Type Lambda(T functionObject)
 		{
 			return functionObject;
 		}
+		template<typename T>
+		typename FunctionObjectRetriveType<T>::Type ConvertToFunction(T functionObject)
+		{
+			return functionObject;
+		}
 #define LAMBDA vl::function_lambda::Lambda
-#endif
+#define FUNCTION vl::function_lambda::ConvertToFunction
+#define FUNCTION_TYPE(T) typename vl::function_lambda::FunctionObjectRetriveType<T>::Type
+#define FUNCTION_RESULT_TYPE(T) typename vl::function_lambda::FunctionObjectRetriveType<T>::ResultType
 	}
 	namespace function_binding
 	{
@@ -6390,7 +6492,6 @@ namespace vl
 			virtual const T&							Current()const=0;
 			virtual vint								Index()const=0;
 			virtual bool								Next()=0;
-			virtual bool								Available()const=0;
 			virtual void								Reset()=0;
 		};
 
@@ -6544,14 +6645,15 @@ namespace vl
 			private:
 				const ArrayBase<T>*				container;
 				vint							index;
+
 			public:
-				Enumerator(const ArrayBase<T>* _container, vint _index)
+				Enumerator(const ArrayBase<T>* _container, vint _index=-1)
 				{
 					container=_container;
 					index=_index;
 				}
 
-				Enumerator* Clone()const
+				IEnumerator<T>* Clone()const
 				{
 					return new Enumerator(container, index);
 				}
@@ -6569,17 +6671,12 @@ namespace vl
 				bool Next()
 				{
 					index++;
-					return Available();
-				}
-
-				bool Available()const
-				{
 					return index>=0 && index<container->Count();
 				}
 
 				void Reset()
 				{
-					index=0;
+					index=-1;
 				}
 			};
 			
@@ -6594,7 +6691,7 @@ namespace vl
 
 			IEnumerator<T>* CreateEnumerator()const
 			{
-				return new Enumerator(this, 0);
+				return new Enumerator(this);
 			}
 
 			vint Count()const
@@ -7059,11 +7156,10 @@ namespace vl
 					}
 				}
 			public:
-				Enumerator(const Dictionary<KT, VT, KK, VK>* _container, vint _index=0)
+				Enumerator(const Dictionary<KT, VT, KK, VK>* _container, vint _index=-1)
 				{
 					container=_container;
 					index=_index;
-					UpdateCurrent();
 				}
 				
 				IEnumerator<Pair<KT, VT>>* Clone()const
@@ -7085,17 +7181,12 @@ namespace vl
 				{
 					index++;
 					UpdateCurrent();
-					return Available();
-				}
-
-				bool Available()const
-				{
 					return index>=0 && index<container->Count();
 				}
 
 				void Reset()
 				{
-					index=0;
+					index=-1;
 					UpdateCurrent();
 				}
 			};
@@ -7209,9 +7300,9 @@ namespace vl
 			{
 			private:
 				const Group<KT, VT, KK, VK>*		container;
-				vint											keyIndex;
-				vint											valueIndex;
-				Pair<KT, VT>								current;
+				vint								keyIndex;
+				vint								valueIndex;
+				Pair<KT, VT>						current;
 
 				void UpdateCurrent()
 				{
@@ -7226,12 +7317,11 @@ namespace vl
 					}
 				}
 			public:
-				Enumerator(const Group<KT, VT, KK, VK>* _container, vint _keyIndex=0, vint _valueIndex=0)
+				Enumerator(const Group<KT, VT, KK, VK>* _container, vint _keyIndex=-1, vint _valueIndex=-1)
 				{
 					container=_container;
 					keyIndex=_keyIndex;
 					valueIndex=_valueIndex;
-					UpdateCurrent();
 				}
 				
 				IEnumerator<Pair<KT, VT>>* Clone()const
@@ -7246,7 +7336,7 @@ namespace vl
 
 				vint Index()const
 				{
-					if(Available())
+					if(0<=keyIndex && keyIndex<container->Count())
 					{
 						vint index=0;
 						for(vint i=0;i<keyIndex;i++)
@@ -7263,10 +7353,14 @@ namespace vl
 
 				bool Next()
 				{
-					if(keyIndex<container->Count())
+					if(keyIndex==-1)
 					{
-						const ValueContainer& values=container->GetByIndex(keyIndex);
+						keyIndex=0;
+					}
+					while(keyIndex<container->Count())
+					{
 						valueIndex++;
+						const ValueContainer& values=container->GetByIndex(keyIndex);
 						if(valueIndex<values.Count())
 						{
 							UpdateCurrent();
@@ -7275,25 +7369,7 @@ namespace vl
 						else
 						{
 							keyIndex++;
-							valueIndex=0;
-							UpdateCurrent();
-							return keyIndex<container->Count();
-						}
-					}
-					else
-					{
-						return false;
-					}
-				}
-
-				bool Available()const
-				{
-					if(keyIndex<container->Count())
-					{
-						const ValueContainer& values=container->GetByIndex(keyIndex);
-						if(valueIndex<values.Count())
-						{
-							return true;
+							valueIndex=-1;
 						}
 					}
 					return false;
@@ -7301,8 +7377,8 @@ namespace vl
 
 				void Reset()
 				{
-					keyIndex=0;
-					valueIndex=0;
+					keyIndex=-1;
+					valueIndex=-1;
 					UpdateCurrent();
 				}
 			};
@@ -7549,10 +7625,9 @@ namespace vl
 					vint copyCount=0;
 
 					enumerator=ss.CreateEnumerator();
-					while(enumerator->Available())
+					while(enumerator->Next())
 					{
 						copyCount++;
-						enumerator->Next();
 					}
 
 					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
@@ -7560,10 +7635,9 @@ namespace vl
 					RandomAccess<Ds>::SetCount(ds, resizeCount);
 
 					enumerator=ss.CreateEnumerator();
-					for(vint i=0;i<copyCount;i++)
+					while(enumerator->Next())
 					{
-						RandomAccess<Ds>::SetValue(ds, index+i, enumerator->Current());
-						enumerator->Next();
+						RandomAccess<Ds>::SetValue(ds, index++, enumerator->Current());
 					}
 				}
 			};
@@ -7578,10 +7652,9 @@ namespace vl
 						ds.Clear();
 					}
 					Ptr<IEnumerator<typename Ss::ElementType>> enumerator=ss.CreateEnumerator();
-					while(enumerator->Available())
+					while(enumerator->Next())
 					{
 						RandomAccess<Ds>::AppendValue(ds, enumerator->Current());
-						enumerator->Next();
 					}
 				}
 			};
@@ -7695,11 +7768,6 @@ namespace vl
 					return false;
 				}
 
-				bool Available()const
-				{
-					return false;
-				}
-
 				void Reset()
 				{
 				}
@@ -7712,119 +7780,47 @@ namespace vl
 		};
 
 /***********************************************************************
-算法串联
+自包含迭代器
 ***********************************************************************/
 
-		template<typename T, typename R>
-		class EnumerableProcessor : public Object
+		template<typename T, typename TContainer>
+		class ContainerEnumerator : public Object, public virtual IEnumerator<T>
 		{
-		public:
-			virtual R operator()(const IEnumerable<T>& enumerable)const=0;
-		};
-
-		template<typename T, typename R>
-		R operator>>(const IEnumerable<T>& enumerable, const EnumerableProcessor<T, R>& processor)
-		{
-			return processor(enumerable);
-		}
-
-		template<template<typename T> class R>
-		class SequenceEnumerableProcessor : public Object
-		{
-		public:
-			template<typename T>
-			struct ResultTypeRetriver
-			{
-				typedef R<T> ResultType;
-			};
-		};
-
-		class AggregateEnumerableProcessor : public Object
-		{
-		public:
-			template<typename T>
-			struct ResultTypeRetriver
-			{
-				typedef T ResultType;
-			};
-		};
-
-		class FreeEnumerableProcessor : public Object
-		{
-		};
-
-		template<typename T, typename P>
-		typename P::template ResultTypeRetriver<T>::ResultType operator>>(const IEnumerable<T>& enumerable, const P& processor)
-		{
-			return processor(enumerable);
-		}
-
-/***********************************************************************
-迭代器存储
-***********************************************************************/
-
-		template<typename T, vint I=0>
-		class EnumerableStore : public virtual Object
-		{
-			friend class Enumerable<T>;
 		private:
-			IEnumerator<T>*			enumerator;
-		protected:
-			IEnumerator<T>* CopyEnumerator()const
-			{
-				return enumerator->Clone();
-			}
+			Ptr<TContainer>					container;
+			vint							index;
+
 		public:
-			EnumerableStore(const IEnumerable<T>& enumerable)
+			ContainerEnumerator(Ptr<TContainer> _container, vint _index=-1)
 			{
-				enumerator=enumerable.CreateEnumerator();
+				container=_container;
+				index=_index;
 			}
 
-			EnumerableStore(const EnumerableStore<T>& store)
+			IEnumerator<T>* Clone()const
 			{
-				enumerator=store->CopyEnumerator();
+				return new ContainerEnumerator(container, index);
 			}
 
-			~EnumerableStore()
+			const T& Current()const
 			{
-				delete enumerator;
+				return container->Get(index);
 			}
 
-			EnumerableStore<T>& operator=(const EnumerableStore<T>& store)
+			vint Index()const
 			{
-				delete enumerator;
-				enumerator=store->CopyEnumerator();
-				return *this;
-			}
-		};
-
-/***********************************************************************
-迭代器副本
-***********************************************************************/
-
-		template<typename T>
-		class Enumerable : public Object, public IEnumerable<T>
-		{
-		protected:
-			Ptr<EnumerableStore<T>>		store;
-		public:
-			Enumerable()
-			{
+				return index;
 			}
 
-			Enumerable(const Enumerable<T>& enumerable)
+			bool Next()
 			{
-				store=enumerable.store;
+				index++;
+				return index>=0 && index<container->Count();
 			}
 
-			Enumerable(const IEnumerable<T>& enumerable)
+			void Reset()
 			{
-				store=new EnumerableStore<T>(enumerable);
-			}
-
-			IEnumerator<T>* CreateEnumerator()const
-			{
-				return store?store->CopyEnumerator():new EmptyEnumerable<T>::Enumerator();
+				index=-1;
 			}
 		};
 
@@ -7837,8 +7833,14 @@ namespace vl
 		{
 			Ptr<IEnumerator<T>> ator=a.CreateEnumerator();
 			Ptr<IEnumerator<U>> btor=b.CreateEnumerator();
-			while(ator->Available() && btor->Available())
+			while()
 			{
+				bool a=ator->Next();
+				bool b=btor->Next();
+				if(a&&!b) return 1;
+				if(!a&&b) return -1;
+				if(!a&&!b) break;
+
 				const T& ac=ator->Current();
 				const U& bc=btor->Current();
 				if(ac<bc)
@@ -7852,18 +7854,7 @@ namespace vl
 				ator->Next();
 				btor->Next();
 			}
-			if(ator->Available())
-			{
-				return 1;
-			}
-			else if(btor->Available())
-			{
-				return -1;
-			}
-			else
-			{
-				return 0;
-			}
+			return 0;
 		}
 	}
 }
@@ -7886,15 +7877,6 @@ Data Structure::Operations
 
 namespace vl
 {
-	namespace collections_internal
-	{
-		template<typename T, typename K>
-		Ptr<K> CastPointer(Ptr<T> pointer)
-		{
-			return pointer.Cast<K>();
-		}
-	}
-
 	namespace collections
 	{
 
@@ -7903,118 +7885,57 @@ Select
 ***********************************************************************/
 
 		template<typename T, typename K>
-		class SelectEnumerable : public EnumerableStore<T>, public virtual IEnumerable<K>
+		class SelectEnumerator : public virtual IEnumerator<K>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<K>
-			{
-			protected:
-				IEnumerator<T>*		enumerator;
-				Func<K(T)>			selector;
-				K					current;
-			public:
-				Enumerator(IEnumerator<T>* _enumerator, const Func<K(T)>& _selector)
-					:enumerator(_enumerator)
-					,selector(_selector)
-				{
-					if(enumerator->Available())
-					{
-						current=selector(enumerator->Current());
-					}
-				}
-
-				~Enumerator()
-				{
-					delete enumerator;
-				}
-
-				IEnumerator<K>* Clone()const
-				{
-					return new Enumerator(enumerator->Clone(), selector);
-				}
-
-				const K& Current()const
-				{
-					return current;
-				}
-
-				vint Index()const
-				{
-					return enumerator->Index();
-				}
-
-				bool Next()
-				{
-					if(enumerator->Next())
-					{
-						current=selector(enumerator->Current());
-						return true;
-					}
-					else
-					{
-						return false;
-					}
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
-				}
-
-				void Reset()
-				{
-					enumerator->Reset();
-				}
-			};
 		protected:
-			Func<K(T)>				selector;
+			IEnumerator<T>*		enumerator;
+			Func<K(T)>			selector;
+			K					current;
 		public:
-			SelectEnumerable(const IEnumerable<T>& enumerable, const Func<K(T)>& _selector)
-				:EnumerableStore<T>(enumerable)
+			SelectEnumerator(IEnumerator<T>* _enumerator, const Func<K(T)>& _selector)
+				:enumerator(_enumerator)
 				,selector(_selector)
 			{
 			}
 
-			IEnumerator<K>* CreateEnumerator()const
+			~SelectEnumerator()
 			{
-				return new Enumerator(CopyEnumerator(), selector);
+				delete enumerator;
+			}
+
+			IEnumerator<K>* Clone()const
+			{
+				return new SelectEnumerator(enumerator->Clone(), selector);
+			}
+
+			const K& Current()const
+			{
+				return current;
+			}
+
+			vint Index()const
+			{
+				return enumerator->Index();
+			}
+
+			bool Next()
+			{
+				if(enumerator->Next())
+				{
+					current=selector(enumerator->Current());
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void Reset()
+			{
+				enumerator->Reset();
 			}
 		};
-
-		template<typename T, typename K>
-		class SelectProcessor : public EnumerableProcessor<T, SelectEnumerable<T, K>>
-		{
-		protected:
-			Func<K(T)>				selector;
-		public:
-			SelectProcessor(const Func<K(T)>& _selector)
-				:selector(_selector)
-			{
-			}
-
-			SelectEnumerable<T, K> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return SelectEnumerable<T, K>(enumerable, selector);
-			}
-		};
-
-		template<typename T, typename K>
-		SelectProcessor<T, K> Select(const Func<K(T)>& selector)
-		{
-			return SelectProcessor<T, K>(selector);
-		}
-
-		template<typename T, typename K>
-		SelectProcessor<T, K> Select(K(*selector)(T))
-		{
-			return SelectProcessor<T, K>(selector);
-		}
-
-		template<typename T, typename K>
-		SelectProcessor<Ptr<T>, Ptr<K>> Cast()
-		{
-			return SelectProcessor<Ptr<T>, Ptr<K>>(&collections_internal::CastPointer<T, K>);
-		}
 	}
 }
 
@@ -8036,702 +7957,66 @@ Data Structure::Operations
 
 namespace vl
 {
-	namespace collections_internal
-	{
-		template<typename T>
-		bool WhereNotNull(Ptr<T> pointer)
-		{
-			return pointer;
-		}
-	}
-
 	namespace collections
 	{
-
 /***********************************************************************
 Where
 ***********************************************************************/
 
 		template<typename T>
-		class WhereEnumerable : public EnumerableStore<T>, public virtual IEnumerable<T>
+		class WhereEnumerator : public virtual IEnumerator<T>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<T>
-			{
-			protected:
-				IEnumerator<T>*		enumerator;
-				Func<bool(T)>		selector;
-				vint					index;
-
-				void GoNearest()
-				{
-					while(enumerator->Available())
-					{
-						if(selector(enumerator->Current()))
-						{
-							break;
-						}
-						else
-						{
-							enumerator->Next();
-						}
-					}
-				}
-			public:
-				Enumerator(IEnumerator<T>* _enumerator, const Func<bool(T)>& _selector, vint _index=0)
-					:enumerator(_enumerator)
-					,selector(_selector)
-					,index(_index)
-				{
-					GoNearest();
-				}
-
-				~Enumerator()
-				{
-					delete enumerator;
-				}
-
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(enumerator->Clone(), selector, index);
-				}
-
-				const T& Current()const
-				{
-					return enumerator->Current();
-				}
-
-				vint Index()const
-				{
-					return index;
-				}
-
-				bool Next()
-				{
-					index++;
-					enumerator->Next();
-					GoNearest();
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
-				}
-
-				void Reset()
-				{
-					enumerator->Reset();
-					GoNearest();
-				}
-			};
 		protected:
+			IEnumerator<T>*			enumerator;
 			Func<bool(T)>			selector;
+			vint					index;
+
 		public:
-			WhereEnumerable(const IEnumerable<T>& enumerable, const Func<bool(T)>& _selector)
-				:EnumerableStore<T>(enumerable)
+			WhereEnumerator(IEnumerator<T>* _enumerator, const Func<bool(T)>& _selector, vint _index=-1)
+				:enumerator(_enumerator)
 				,selector(_selector)
+				,index(_index)
 			{
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			~WhereEnumerator()
 			{
-				return new Enumerator(CopyEnumerator(), selector);
-			}
-		};
-
-		template<typename T>
-		class WhereProcessor : public EnumerableProcessor<T, WhereEnumerable<T>>
-		{
-		protected:
-			Func<bool(T)>			selector;
-		public:
-			WhereProcessor(const Func<bool(T)>& _selector)
-				:selector(_selector)
-			{
+				delete enumerator;
 			}
 
-			WhereEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
+			IEnumerator<T>* Clone()const
 			{
-				return WhereEnumerable<T>(enumerable, selector);
+				return new WhereEnumerator(enumerator->Clone(), selector, index);
 			}
-		};
 
-		template<typename T>
-		WhereProcessor<T> Where(const Func<bool(T)>& selector)
-		{
-			return WhereProcessor<T>(selector);
-		}
-
-		template<typename T>
-		WhereProcessor<T> Where(bool(*selector)(T))
-		{
-			return WhereProcessor<T>(selector);
-		}
-
-		template<typename T, typename K>
-		class FindTypeProcessor : public EnumerableProcessor<Ptr<T>, WhereEnumerable<Ptr<K>>>
-		{
-		public:
-			WhereEnumerable<Ptr<K>> operator()(const IEnumerable<Ptr<T>>& enumerable)const
+			const T& Current()const
 			{
-				return enumerable>>Cast<T, K>()>>Where<Ptr<K>>(&collections_internal::WhereNotNull);
+				return enumerator->Current();
 			}
-		};
 
-		template<typename T, typename K>
-		FindTypeProcessor<T, K> FindType()
-		{
-			return FindTypeProcessor<T, K>();
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-COMMON\SOURCE\COLLECTIONS\OPERATIONORDERBY.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Operations
-
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_OPERATIONORDERBY
-#define VCZH_COLLECTIONS_OPERATIONORDERBY
-
-
-namespace vl
-{
-	namespace collections
-	{
-
-/***********************************************************************
-OrderBy Quick Sort
-***********************************************************************/
-
-		template<typename T>
-		void Sort(T* items, vint length, const Func<vint(T, T)>& orderer)
-		{
-			if(length==0) return;
-			vint pivot=0;
-			vint left=0;
-			vint right=0;
-			bool flag=false;
-
-			while(left+right+1!=length)
+			vint Index()const
 			{
-				vint& mine=(flag?left:right);
-				vint& theirs=(flag?right:left);
-				vint candidate=(flag?left:length-right-1);
-				vint factor=(flag?-1:1);
+				return index;
+			}
 
-				if(orderer(items[pivot], items[candidate])*factor<=0)
+			bool Next()
+			{
+				while(enumerator->Next())
 				{
-					mine++;
-				}
-				else
-				{
-					theirs++;
-					T temp=items[pivot];
-					items[pivot]=items[candidate];
-					items[candidate]=temp;
-					pivot=candidate;
-					flag=!flag;
-				}
-			}
-
-			Sort(items, left, orderer);
-			Sort(items+left+1, right, orderer);
-		}
-
-/***********************************************************************
-OrderBy
-***********************************************************************/
-
-		template<typename T>
-		class OrderByEnumerable : public virtual IEnumerable<T>
-		{
-		protected:
-			List<T>					values;
-		public:
-			OrderByEnumerable(const IEnumerable<T>& enumerable, const Func<vint(T, T)>& orderer)
-			{
-				CopyFrom(values, enumerable);
-				if(values.Count()>0)
-				{
-					Sort(&values[0], values.Count(), orderer);
-				}
-			}
-
-			IEnumerator<T>* CreateEnumerator()const
-			{
-				return values.CreateEnumerator();
-			}
-		};
-
-		template<typename T>
-		class OrderByProcessor : public EnumerableProcessor<T, OrderByEnumerable<T>>
-		{
-		protected:
-			Func<vint(T, T)>		orderer;
-		public:
-			OrderByProcessor(const Func<vint(T, T)>& _orderer)
-				:orderer(_orderer)
-			{
-			}
-
-			OrderByEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return OrderByEnumerable<T>(enumerable, orderer);
-			}
-		};
-
-		template<typename T>
-		OrderByProcessor<T> OrderBy(const Func<vint(T, T)>& orderer)
-		{
-			return OrderByProcessor<T>(orderer);
-		}
-
-		template<typename T>
-		OrderByProcessor<T> OrderBy(vint(*orderer)(T, T))
-		{
-			return OrderByProcessor<T>(orderer);
-		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-COMMON\SOURCE\COLLECTIONS\OPERATIONFOREACH.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Operations
-
-扩展：
-	实现一个函数重载IteratorType CreateForEachIterator(const CollectionType& collection);
-	CollectionType是所需要的容器类型
-	IteratorType继承自ForEachIterator<T>
-	必须写在vl::collections命名空间里
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_FOREACH
-#define VCZH_COLLECTIONS_FOREACH
-
-namespace vl
-{
-	namespace collections
-	{
-
-/***********************************************************************
-ForEach基础设施
-***********************************************************************/
-
-		template<typename T>
-		class ForEachIterator : public Object
-		{
-		public:
-			virtual bool				Available(T& variable)const=0;
-			virtual void				Next()const=0;
-
-			operator bool()const
-			{
-				return true;
-			}
-		};
-
-/***********************************************************************
-IEnumerable<T>支持
-***********************************************************************/
-
-		template<typename T>
-		class EnumerableForEachIterator : public ForEachIterator<T>
-		{
-		protected:
-			Ptr<IEnumerator<T>>			iterator;
-		public:
-			EnumerableForEachIterator(const IEnumerable<T>& enumerable)
-				:iterator(enumerable.CreateEnumerator())
-			{
-			}
-
-			EnumerableForEachIterator(const EnumerableForEachIterator<T>& enumerableIterator)
-				:iterator(enumerableIterator.iterator)
-			{
-			}
-
-			bool Available(T& variable)const
-			{
-				if(iterator->Available())
-				{
-					variable=iterator->Current();
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-			void Next()const
-			{
-				iterator->Next();
-			}
-		};
-
-		template<typename T>
-		EnumerableForEachIterator<T> CreateForEachIterator(const IEnumerable<T>& enumerable)
-		{
-			return enumerable;
-		}
-
-/***********************************************************************
-ForEach宏
-***********************************************************************/
-
-#define SCOPE_VARIABLE(TYPE, VARIABLE, VALUE)\
-		if(bool __scope_variable_flag__=true)\
-			for(TYPE VARIABLE = VALUE;__scope_variable_flag__;__scope_variable_flag__=false)
-
-#define FOREACH(TYPE, VARIABLE, COLLECTION)\
-		SCOPE_VARIABLE(const ForEachIterator<TYPE>&, __foreach_iterator__, CreateForEachIterator(COLLECTION))\
-		for(TYPE VARIABLE;__foreach_iterator__.Available(VARIABLE);__foreach_iterator__.Next())
-
-#define FOREACH_INDEXER(TYPE, VARIABLE, INDEXER, COLLECTION)\
-		SCOPE_VARIABLE(const ForEachIterator<TYPE>&, __foreach_iterator__, CreateForEachIterator(COLLECTION))\
-		SCOPE_VARIABLE(vint, INDEXER, 0)\
-		for(TYPE VARIABLE;__foreach_iterator__.Available(VARIABLE);__foreach_iterator__.Next(),INDEXER++)
-	}
-}
-
-#endif
-
-/***********************************************************************
-COMMON\SOURCE\COLLECTIONS\OPERATIONAGGREGATE.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-Data Structure::Operations
-
-***********************************************************************/
-
-#ifndef VCZH_COLLECTIONS_OPERATIONAGGREGATE
-#define VCZH_COLLECTIONS_OPERATIONAGGREGATE
-
-
-namespace vl
-{
-	namespace collections
-	{
-
-/***********************************************************************
-Aggregate
-***********************************************************************/
-
-		template<typename T>
-		class AggregateProcessor : public EnumerableProcessor<T, T>
-		{
-		protected:
-			Func<T(T,T)>				selector;
-			T							initial;
-			bool						hasInitial;
-		public:
-			AggregateProcessor(const Func<T(T,T)>& _selector)
-				:selector(_selector)
-				,hasInitial(false)
-			{
-			}
-
-			AggregateProcessor(const Func<T(T,T)>& _selector, const T& _initial)
-				:selector(_selector)
-				,initial(_initial)
-				,hasInitial(true)
-			{
-			}
-
-			T operator()(const IEnumerable<T>& enumerable)const
-			{
-				T result;
-				IEnumerator<T>* enumerator=enumerable.CreateEnumerator();
-				try
-				{
-					if(hasInitial)
+					if(selector(enumerator->Current()))
 					{
-						result=initial;
+						index++;
+						return true;
 					}
-					else if(enumerator->Available())
-					{
-						result=enumerator->Current();
-						enumerator->Next();
-					}
-					else
-					{
-						throw Error(L"AggregateProcessor<T>::operator(const IEnumerable<T>&)#容器为空并且没有初始值，Aggregate操作失败。");
-					}
-					while(enumerator->Available())
-					{
-						result=selector(result, enumerator->Current());
-						enumerator->Next();
-					}
-					delete enumerator;
 				}
-				catch(...)
-				{
-					delete enumerator;
-					throw;
-				}
-				return result;
+				return false;
+			}
+
+			void Reset()
+			{
+				enumerator->Reset();
 			}
 		};
-
-		template<typename T>
-		AggregateProcessor<T> Aggregate(const Func<T(T,T)>& selector)
-		{
-			return AggregateProcessor<T>(selector);
-		}
-
-		template<typename T>
-		AggregateProcessor<T> Aggregate(T(*selector)(T,T))
-		{
-			return AggregateProcessor<T>(selector);
-		}
-
-		template<typename T>
-		AggregateProcessor<T> Aggregate(const Func<T(T,T)>& selector, const T& initial)
-		{
-			return AggregateProcessor<T>(selector, initial);
-		}
-
-		template<typename T>
-		AggregateProcessor<T> Aggregate(T(*selector)(T,T), const T& initial)
-		{
-			return AggregateProcessor<T>(selector, initial);
-		}
-
-/***********************************************************************
-All
-***********************************************************************/
-
-		template<typename T>
-		class AllProcessor : public EnumerableProcessor<T, bool>
-		{
-		protected:
-			Func<bool(T)>				selector;
-
-			static bool Op(bool a, bool b)
-			{
-				return a && b;
-			}
-		public:
-			AllProcessor(const Func<bool(T)>& _selector)
-				:selector(_selector)
-			{
-			}
-
-			bool operator()(const IEnumerable<T>& enumerable)const
-			{
-				return enumerable>>Select(selector)>>Aggregate(Op, true);
-			}
-		};
-
-		template<typename T>
-		AllProcessor<T> All(const Func<bool(T)>& selector)
-		{
-			return AllProcessor<T>(selector);
-		}
-
-		template<typename T>
-		AllProcessor<T> All(bool(*selector)(T))
-		{
-			return AllProcessor<T>(selector);
-		}
-
-/***********************************************************************
-Any
-***********************************************************************/
-
-		template<typename T>
-		class AnyProcessor : public EnumerableProcessor<T, bool>
-		{
-		protected:
-			Func<bool(T)>				selector;
-
-			static bool Op(bool a, bool b)
-			{
-				return a || b;
-			}
-		public:
-			AnyProcessor(const Func<bool(T)>& _selector)
-				:selector(_selector)
-			{
-			}
-
-			bool operator()(const IEnumerable<T>& enumerable)const
-			{
-				return enumerable>>Select(selector)>>Aggregate(Op, false);
-			}
-		};
-
-		template<typename T>
-		AnyProcessor<T> Any(const Func<bool(T)>& selector)
-		{
-			return AnyProcessor<T>(selector);
-		}
-
-		template<typename T>
-		AnyProcessor<T> Any(bool(*selector)(T))
-		{
-			return AnyProcessor<T>(selector);
-		}
-
-/***********************************************************************
-Max
-***********************************************************************/
-
-		class MaxProcessor : public AggregateEnumerableProcessor
-		{
-		protected:
-			template<typename T>
-			static T Op(T a, T b)
-			{
-				return a>b?a:b;
-			}
-		public:
-			MaxProcessor()
-			{
-			}
-
-			template<typename T>
-			T operator()(const IEnumerable<T>& enumerable)const
-			{
-				return enumerable>>Aggregate(Op<T>);
-			}
-		};
-
-		extern MaxProcessor Max();
-
-/***********************************************************************
-Min
-***********************************************************************/
-
-		class MinProcessor : public AggregateEnumerableProcessor
-		{
-		protected:
-			template<typename T>
-			static T Op(T a, T b)
-			{
-				return a<b?a:b;
-			}
-		public:
-			MinProcessor()
-			{
-			}
-
-			template<typename T>
-			T operator()(const IEnumerable<T>& enumerable)const
-			{
-				return enumerable>>Aggregate(Op<T>);
-			}
-		};
-
-		extern MinProcessor Min();
-
-/***********************************************************************
-First
-***********************************************************************/
-
-		class FirstProcessor : public FreeEnumerableProcessor
-		{
-		public:
-			template<typename T>
-			struct ResultTypeRetriver
-			{
-				typedef T ResultType;
-			};
-
-			FirstProcessor()
-			{
-			}
-
-			template<typename T>
-			T operator()(const IEnumerable<T>& enumerable)const
-			{
-				FOREACH(T, x, enumerable)
-				{
-					return x;
-				}
-				return T();
-			}
-		};
-
-		extern FirstProcessor First();
-
-/***********************************************************************
-Count
-***********************************************************************/
-
-		class CountProcessor : public FreeEnumerableProcessor
-		{
-		public:
-			template<typename T>
-			struct ResultTypeRetriver
-			{
-				typedef vint ResultType;
-			};
-
-			CountProcessor()
-			{
-			}
-
-			template<typename T>
-			vint operator()(const IEnumerable<T>& enumerable)const
-			{
-				vint count=0;
-				FOREACH(T, x, enumerable)
-				{
-					count++;
-				}
-				return count;
-			}
-		};
-
-		extern CountProcessor Count();
-
-/***********************************************************************
-IsEmpty
-***********************************************************************/
-
-		class IsEmptyProcessor : public FreeEnumerableProcessor
-		{
-		public:
-			template<typename T>
-			struct ResultTypeRetriver
-			{
-				typedef bool ResultType;
-			};
-
-			IsEmptyProcessor()
-			{
-			}
-
-			template<typename T>
-			bool operator()(const IEnumerable<T>& enumerable)const
-			{
-				FOREACH(T, x, enumerable)
-				{
-					return false;
-				}
-				return true;
-			}
-		};
-
-		extern IsEmptyProcessor IsEmpty();
 	}
 }
 
@@ -8761,122 +8046,78 @@ Concat
 ***********************************************************************/
 
 		template<typename T>
-		class ConcatEnumerable : public EnumerableStore<T, 1>, public EnumerableStore<T, 2>, public virtual IEnumerable<T>
+		class ConcatEnumerator : public virtual IEnumerator<T>
 		{
 		protected:
-			class Enumerator : public virtual IEnumerator<T>
+			IEnumerator<T>*					enumerator1;
+			IEnumerator<T>*					enumerator2;
+			vint							index;
+			bool							turned;
+		public:
+			ConcatEnumerator(IEnumerator<T>* _enumerator1, IEnumerator<T>* _enumerator2, vint _index=-1, bool _turned=false)
+				:enumerator1(_enumerator1)
+				,enumerator2(_enumerator2)
+				,index(_index)
+				,turned(_turned)
 			{
-			protected:
-				IEnumerator<T>*					enumerator1;
-				IEnumerator<T>*					enumerator2;
-				vint							index;
-				bool							turned;
-			public:
-				Enumerator(IEnumerator<T>* _enumerator1, IEnumerator<T>* _enumerator2, vint _index=0, bool _turned=false)
-					:enumerator1(_enumerator1)
-					,enumerator2(_enumerator2)
-					,index(_index)
-					,turned(_turned)
-				{
-					if(turned==false && !enumerator1->Available())
-					{
-						turned=true;
-					}
-				}
+			}
 
-				~Enumerator()
-				{
-					delete enumerator1;
-					delete enumerator2;
-				}
+			~ConcatEnumerator()
+			{
+				delete enumerator1;
+				delete enumerator2;
+			}
 
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(enumerator1->Clone(), enumerator2->Clone(), index, turned);
-				}
+			IEnumerator<T>* Clone()const
+			{
+				return new ConcatEnumerator(enumerator1->Clone(), enumerator2->Clone(), index, turned);
+			}
 
-				const T& Current()const
+			const T& Current()const
+			{
+				if(turned)
 				{
-					if(enumerator1->Available())
-					{
-						return enumerator1->Current();
-					}
-					else
-					{
-						return enumerator2->Current();
-					}
+					return enumerator2->Current();
 				}
-
-				vint Index()const
+				else
 				{
-					return index;
+					return enumerator1->Current();
 				}
+			}
 
-				bool Next()
+			vint Index()const
+			{
+				return index;
+			}
+
+			bool Next()
+			{
+				index++;
+				if(turned)
 				{
-					index++;
+					return enumerator2->Next();
+				}
+				else
+				{
 					if(enumerator1->Next())
 					{
 						return true;
 					}
-					else if(turned==false)
-					{
-						turned=true;
-						return enumerator2->Available();
-					}
 					else
 					{
+						turned=true;
 						return enumerator2->Next();
 					}
 				}
-
-				bool Available()const
-				{
-					return enumerator1->Available() || enumerator2->Available();
-				}
-
-				void Reset()
-				{
-					enumerator1->Reset();
-					enumerator2->Reset();
-					index=0;
-				}
-			};
-		public:
-			ConcatEnumerable(const IEnumerable<T>& enumerable1, const IEnumerable<T>& enumerable2)
-				:EnumerableStore<T, 1>(enumerable1)
-				,EnumerableStore<T, 2>(enumerable2)
-			{
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			void Reset()
 			{
-				return new Enumerator(EnumerableStore<T, 1>::CopyEnumerator(), EnumerableStore<T, 2>::CopyEnumerator());
+				enumerator1->Reset();
+				enumerator2->Reset();
+				index=-1;
 			}
 		};
-
-		template<typename T>
-		class ConcatProcessor : public EnumerableProcessor<T, ConcatEnumerable<T>>
-		{
-		protected:
-			const IEnumerable<T>&				second;
-		public:
-			ConcatProcessor(const IEnumerable<T>& _second)
-				:second(_second)
-			{
-			}
-
-			ConcatEnumerable<T> operator()(const IEnumerable<T>& first)const
-			{
-				return ConcatEnumerable<T>(first, second);
-			}
-		};
-
-		template<typename T>
-		ConcatProcessor<T> Concat(const IEnumerable<T>& second)
-		{
-			return ConcatProcessor<T>(second);
-		}
 	}
 }
 
@@ -8906,515 +8147,292 @@ Take
 ***********************************************************************/
 
 		template<typename T>
-		class TakeEnumerable : public EnumerableStore<T>, public virtual IEnumerable<T>
+		class TakeEnumerator : public virtual IEnumerator<T>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<T>
-			{
-			protected:
-				IEnumerator<T>*		enumerator;
-				vint					count;
-			public:
-				Enumerator(IEnumerator<T>* _enumerator, vint _count)
-					:enumerator(_enumerator)
-					,count(_count)
-				{
-				}
-
-				~Enumerator()
-				{
-					delete enumerator;
-				}
-
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(enumerator->Clone(), count);
-				}
-
-				const T& Current()const
-				{
-					return enumerator->Current();
-				}
-
-				vint Index()const
-				{
-					return enumerator->Index();
-				}
-
-				bool Next()
-				{
-					if(enumerator->Index()==count-1)
-					{
-						enumerator->Next();
-						return false;
-					}
-					else if(enumerator->Index()>=count)
-					{
-						return false;
-					}
-					else
-					{
-						return enumerator->Next();
-					}
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available() && enumerator->Index()<count;
-				}
-
-				void Reset()
-				{
-					enumerator->Reset();
-				}
-			};
 		protected:
+			IEnumerator<T>*			enumerator;
 			vint					count;
 		public:
-			TakeEnumerable(const IEnumerable<T>& enumerable, vint _count)
-				:EnumerableStore<T>(enumerable)
+			TakeEnumerator(IEnumerator<T>* _enumerator, vint _count)
+				:enumerator(_enumerator)
 				,count(_count)
 			{
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			~TakeEnumerator()
 			{
-				return new Enumerator(CopyEnumerator(), count);
+				delete enumerator;
+			}
+
+			IEnumerator<T>* Clone()const
+			{
+				return new TakeEnumerator(enumerator->Clone(), count);
+			}
+
+			const T& Current()const
+			{
+				return enumerator->Current();
+			}
+
+			vint Index()const
+			{
+				return enumerator->Index();
+			}
+
+			bool Next()
+			{
+				if(enumerator->Index()>=count-1) return false;
+				return enumerator->Next();
+			}
+
+			void Reset()
+			{
+				enumerator->Reset();
 			}
 		};
-
-		class TakeProcessor : public SequenceEnumerableProcessor<TakeEnumerable>
-		{
-		protected:
-			vint					count;
-		public:
-			TakeProcessor(vint _count)
-				:count(_count)
-			{
-			}
-
-			template<typename T>
-			TakeEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return TakeEnumerable<T>(enumerable, count);
-			}
-		};
-
-		extern TakeProcessor Take(vint count);
 
 /***********************************************************************
 Skip
 ***********************************************************************/
 
 		template<typename T>
-		class SkipEnumerable : public EnumerableStore<T>, public virtual IEnumerable<T>
+		class SkipEnumerator : public virtual IEnumerator<T>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<T>
-			{
-			protected:
-				IEnumerator<T>*		enumerator;
-				vint					count;
-			public:
-				Enumerator(IEnumerator<T>* _enumerator, vint _count)
-					:enumerator(_enumerator)
-					,count(_count)
-				{
-					for(vint i=0;i<count;i++)
-					{
-						enumerator->Next();
-					}
-				}
-
-				~Enumerator()
-				{
-					delete enumerator;
-				}
-
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(enumerator->Clone(), count);
-				}
-
-				const T& Current()const
-				{
-					return enumerator->Current();
-				}
-
-				vint Index()const
-				{
-					return enumerator->Index()-count;
-				}
-
-				bool Next()
-				{
-					return enumerator->Next();
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
-				}
-
-				void Reset()
-				{
-					enumerator->Reset();
-					for(vint i=0;i<count;i++)
-					{
-						enumerator->Next();
-					}
-				}
-			};
 		protected:
+			IEnumerator<T>*			enumerator;
 			vint					count;
 		public:
-			SkipEnumerable(const IEnumerable<T>& enumerable, vint _count)
-				:EnumerableStore<T>(enumerable)
+			SkipEnumerator(IEnumerator<T>* _enumerator, vint _count, bool runSkip=true)
+				:enumerator(_enumerator)
 				,count(_count)
 			{
+				if(runSkip)
+				{
+					for(vint i=0;i<count;i++)
+					{
+						enumerator->Next();
+					}
+				}
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			~SkipEnumerator()
 			{
-				return new Enumerator(CopyEnumerator(), count);
+				delete enumerator;
+			}
+
+			IEnumerator<T>* Clone()const
+			{
+				return new SkipEnumerator(enumerator->Clone(), count, false);
+			}
+
+			const T& Current()const
+			{
+				return enumerator->Current();
+			}
+
+			vint Index()const
+			{
+				return enumerator->Index()-count;
+			}
+
+			bool Next()
+			{
+				return enumerator->Next();
+			}
+
+			void Reset()
+			{
+				enumerator->Reset();
+				for(vint i=0;i<count;i++)
+				{
+					enumerator->Next();
+				}
 			}
 		};
-
-		class SkipProcessor : public SequenceEnumerableProcessor<SkipEnumerable>
-		{
-		protected:
-			vint					count;
-		public:
-			SkipProcessor(vint _count)
-				:count(_count)
-			{
-			}
-
-			template<typename T>
-			SkipEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return SkipEnumerable<T>(enumerable, count);
-			}
-		};
-
-		extern SkipProcessor Skip(vint count);
 
 /***********************************************************************
 Repeat
 ***********************************************************************/
 
 		template<typename T>
-		class RepeatEnumerable : public EnumerableStore<T>, public virtual IEnumerable<T>
+		class RepeatEnumerator : public virtual IEnumerator<T>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<T>
+		protected:
+			IEnumerator<T>*			enumerator;
+			vint					count;
+			vint					index;
+			vint					repeatedCount;
+		public:
+			RepeatEnumerator(IEnumerator<T>* _enumerator, vint _count, vint _index=-1, vint _repeatedCount=0)
+				:enumerator(_enumerator)
+				,count(_count)
+				,index(_index)
+				,repeatedCount(_repeatedCount)
 			{
-			protected:
-				IEnumerator<T>*		enumerator;
-				vint					count;
-				vint					index;
-				vint					repeatedCount;
-			public:
-				Enumerator(IEnumerator<T>* _enumerator, vint _count, vint _index=0, vint _repeatedCount=0)
-					:enumerator(_enumerator)
-					,count(_count)
-					,index(_index)
-					,repeatedCount(_repeatedCount)
-				{
-				}
+			}
 
-				~Enumerator()
-				{
-					delete enumerator;
-				}
+			~RepeatEnumerator()
+			{
+				delete enumerator;
+			}
 
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(enumerator->Clone(), count, index, repeatedCount);
-				}
+			IEnumerator<T>* Clone()const
+			{
+				return new RepeatEnumerator(enumerator->Clone(), count, index, repeatedCount);
+			}
 
-				const T& Current()const
-				{
-					return enumerator->Current();
-				}
+			const T& Current()const
+			{
+				return enumerator->Current();
+			}
 
-				vint Index()const
-				{
-					return index;
-				}
+			vint Index()const
+			{
+				return index;
+			}
 
-				bool Next()
+			bool Next()
+			{
+				while(repeatedCount<count)
 				{
-					if(repeatedCount>=count)
-					{
-						return false;
-					}
-					else if(enumerator->Next())
+					if(enumerator->Next())
 					{
 						index++;
 						return true;
 					}
-					else
-					{
-						repeatedCount++;
-						if(repeatedCount<count)
-						{
-							index++;
-							enumerator->Reset();
-							return enumerator->Available();
-						}
-						else
-						{
-							return false;
-						}
-					}
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available() && repeatedCount<count;
-				}
-
-				void Reset()
-				{
+					repeatedCount++;
 					enumerator->Reset();
-					index=0;
-					repeatedCount=0;
 				}
-			};
-		protected:
-			vint					count;
-		public:
-			RepeatEnumerable(const IEnumerable<T>& enumerable, vint _count)
-				:EnumerableStore<T>(enumerable)
-				,count(_count)
-			{
+				return false;
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			void Reset()
 			{
-				return new Enumerator(CopyEnumerator(), count);
+				enumerator->Reset();
+				index=-1;
+				repeatedCount=0;
 			}
 		};
-
-		class RepeatProcessor : public SequenceEnumerableProcessor<RepeatEnumerable>
-		{
-		protected:
-			vint					count;
-		public:
-			RepeatProcessor(vint _count)
-				:count(_count)
-			{
-			}
-
-			template<typename T>
-			RepeatEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return RepeatEnumerable<T>(enumerable, count);
-			}
-		};
-
-		extern RepeatProcessor Repeat(vint count);
 
 /***********************************************************************
 Distinct
 ***********************************************************************/
 
 		template<typename T>
-		class DistinctEnumerable : public EnumerableStore<T>, public virtual IEnumerable<T>
+		class DistinctEnumerator : public virtual IEnumerator<T>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<T>
-			{
-			protected:
-				IEnumerator<T>*		enumerator;
-				SortedList<T>		distinct;
-				T					lastValue;
+		protected:
+			IEnumerator<T>*		enumerator;
+			SortedList<T>		distinct;
+			T					lastValue;
 
-				void GoNearest()
+		public:
+			DistinctEnumerator(IEnumerator<T>* _enumerator)
+				:enumerator(_enumerator)
+			{
+			}
+
+			DistinctEnumerator(const DistinctEnumerator& _enumerator)
+			{
+				enumerator=_enumerator.enumerator->Clone();
+				CopyFrom(distinct, _enumerator.distinct);
+			}
+
+			~DistinctEnumerator()
+			{
+				delete enumerator;
+			}
+
+			IEnumerator<T>* Clone()const
+			{
+				return new DistinctEnumerator(*this);
+			}
+
+			const T& Current()const
+			{
+				return lastValue;
+			}
+
+			vint Index()const
+			{
+				return distinct.Count()-1;
+			}
+
+			bool Next()
+			{
+				while(enumerator->Next())
 				{
-					while(enumerator->Available())
+					const T& current=enumerator->Current();
+					if(!distinct.Contains(current))
 					{
-						const T& current=enumerator->Current();
-						if(!distinct.Contains(current))
-						{
-							lastValue=current;
-							distinct.Add(current);
-							break;
-						}
-						enumerator->Next();
+						lastValue=current;
+						distinct.Add(current);
+						return true;
 					}
 				}
-			public:
-				Enumerator(IEnumerator<T>* _enumerator)
-					:enumerator(_enumerator)
-				{
-					GoNearest();
-				}
-
-				Enumerator(const Enumerator& _enumerator)
-				{
-					enumerator=_enumerator.enumerator->Clone();
-					CopyFrom(distinct, _enumerator.distinct);
-				}
-
-				~Enumerator()
-				{
-					delete enumerator;
-				}
-
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(*this);
-				}
-
-				const T& Current()const
-				{
-					return lastValue;
-				}
-
-				vint Index()const
-				{
-					return distinct.Count()-1;
-				}
-
-				bool Next()
-				{
-					enumerator->Next();
-					GoNearest();
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
-				}
-
-				void Reset()
-				{
-					enumerator->Reset();
-					distinct.Clear();
-					GoNearest();
-				}
-			};
-		public:
-			DistinctEnumerable(const IEnumerable<T>& enumerable)
-				:EnumerableStore<T>(enumerable)
-			{
+				return false;
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			void Reset()
 			{
-				return new Enumerator(CopyEnumerator());
+				enumerator->Reset();
+				distinct.Clear();
 			}
 		};
-
-		class DistinctProcessor : public SequenceEnumerableProcessor<DistinctEnumerable>
-		{
-		public:
-			DistinctProcessor()
-			{
-			}
-
-			template<typename T>
-			DistinctEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return DistinctEnumerable<T>(enumerable);
-			}
-		};
-
-		extern DistinctProcessor Distinct();
 
 /***********************************************************************
 Reverse
 ***********************************************************************/
 
 		template<typename T>
-		class ReverseEnumerable : public Object, public virtual IEnumerable<T>
+		class ReverseEnumerator : public virtual IEnumerator<T>
 		{
-		private:
-			class Enumerator : public virtual IEnumerator<T>
-			{
-			protected:
-				List<T>					cache;
-				vint						index;
-			public:
-				Enumerator(const IEnumerable<T>& enumerable)
-					:index(0)
-				{
-					CopyFrom(cache, enumerable);
-				}
-
-				Enumerator(const Enumerator& _enumerator)
-				{
-					CopyFrom(cache, _enumerator.cache);
-					index=_enumerator.index;
-				}
-
-				~Enumerator()
-				{
-				}
-
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(*this);
-				}
-
-				const T& Current()const
-				{
-					return cache.Get(cache.Count()-1-index);
-				}
-
-				vint Index()const
-				{
-					return index;
-				}
-
-				bool Next()
-				{
-					index++;
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return index<cache.Count();
-				}
-
-				void Reset()
-				{
-					index=0;
-				}
-			};
 		protected:
-			const IEnumerable<T>&		enumerable;
+			List<T>						cache;
+			vint						index;
 		public:
-			ReverseEnumerable(const IEnumerable<T>& _enumerable)
-				:enumerable(_enumerable)
+			ReverseEnumerator(const IEnumerable<T>& enumerable)
+				:index(-1)
+			{
+				CopyFrom(cache, enumerable);
+			}
+
+			ReverseEnumerator(const ReverseEnumerator& _enumerator)
+			{
+				CopyFrom(cache, _enumerator.cache);
+				index=_enumerator.index;
+			}
+
+			~ReverseEnumerator()
 			{
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			IEnumerator<T>* Clone()const
 			{
-				return new Enumerator(enumerable);
+				return new ReverseEnumerator(*this);
+			}
+
+			const T& Current()const
+			{
+				return cache.Get(cache.Count()-1-index);
+			}
+
+			vint Index()const
+			{
+				return index;
+			}
+
+			bool Next()
+			{
+				index++;
+				return index<cache.Count();
+			}
+
+			void Reset()
+			{
+				index=0;
 			}
 		};
-
-		class ReverseProcessor : public SequenceEnumerableProcessor<ReverseEnumerable>
-		{
-		public:
-			ReverseProcessor()
-			{
-			}
-
-			template<typename T>
-			ReverseEnumerable<T> operator()(const IEnumerable<T>& enumerable)const
-			{
-				return ReverseEnumerable<T>(enumerable);
-			}
-		};
-
-		extern ReverseProcessor Reverse();
 
 /***********************************************************************
 FromIterator
@@ -9431,20 +8449,18 @@ FromIterator
 				I				begin;
 				I				end;
 				I				current;
-				vint			index;
 
 			public:
-				Enumerator(I _begin, I _end, I _current, vint _index)
+				Enumerator(I _begin, I _end, I _current)
 					:begin(_begin)
 					,end(_end)
 					,current(_current)
-					,index(_index)
 				{
 				}
 
 				IEnumerator<T>* Clone()const
 				{
-					return new Enumerator(begin, end, current, index);
+					return new Enumerator(begin, end, current);
 				}
 
 				const T& Current()const
@@ -9454,36 +8470,18 @@ FromIterator
 
 				vint Index()const
 				{
-					return index;
+					return current-begin;
 				}
 
 				bool Next()
 				{
-					if(current==end)
-					{
-						return false;
-					}
 					current++;
-					if(current==end)
-					{
-						return false;
-					}
-					else
-					{
-						index++;
-						return true;
-					}
-				}
-
-				bool Available()const
-				{
-					return current!=end;
+					return begin<=current && current<end;
 				}
 
 				void Reset()
 				{
-					current=begin;
-					index=0;
+					current=begin-1;
 				}
 			};
 		private:
@@ -9492,7 +8490,7 @@ FromIterator
 		public:
 			IEnumerator<T>* CreateEnumerator()const
 			{
-				return new Enumerator(begin, end, begin, 0);
+				return new Enumerator(begin, end, begin-1);
 			}
 
 			FromIteratorEnumerable(I _begin, I _end)
@@ -9553,156 +8551,67 @@ Intersect/Except
 ***********************************************************************/
 
 		template<typename T, bool Intersect>
-		class IntersectExceptEnumerable : public EnumerableStore<T>, public virtual IEnumerable<T>
+		class IntersectExceptEnumerator : public virtual IEnumerator<T>
 		{
 		protected:
-			class Enumerator : public virtual IEnumerator<T>
-			{
-			protected:
-				IEnumerator<T>*			enumerator;
-				SortedList<T>			reference;
-				vint						index;
+			IEnumerator<T>*				enumerator;
+			SortedList<T>				reference;
+			vint						index;
 
-				void GoNearest()
+		public:
+			IntersectExceptEnumerator(IEnumerator<T>* _enumerator, const IEnumerable<T>& _reference)
+				:enumerator(_enumerator)
+				,index(-1)
+			{
+				CopyFrom(reference, _reference);
+			}
+
+			IntersectExceptEnumerator(const IntersectExceptEnumerator& _enumerator)
+			{
+				enumerator=_enumerator.enumerator->Clone();
+				CopyFrom(reference, _enumerator.reference);
+				index=_enumerator.index;
+			}
+
+			~IntersectExceptEnumerator()
+			{
+				delete enumerator;
+			}
+
+			IEnumerator<T>* Clone()const
+			{
+				return new IntersectExceptEnumerator(*this);
+			}
+
+			const T& Current()const
+			{
+				return enumerator->Current();
+			}
+
+			vint Index()const
+			{
+				return index;
+			}
+
+			bool Next()
+			{
+				while(enumerator->Next())
 				{
-					while(enumerator->Available())
+					if(reference.Contains(enumerator->Current())==Intersect)
 					{
-						if(reference.Contains(enumerator->Current())==Intersect)
-						{
-							break;
-						}
-						else
-						{
-							enumerator->Next();
-						}
+						index++;
+						return true;
 					}
 				}
-			public:
-				Enumerator(IEnumerator<T>* _enumerator, const IEnumerable<T>& _reference)
-					:enumerator(_enumerator)
-					,index(0)
-				{
-					CopyFrom(reference, _reference);
-					GoNearest();
-				}
-
-				Enumerator(const Enumerator& _enumerator)
-				{
-					enumerator=_enumerator.enumerator->Clone();
-					CopyFrom(reference, _enumerator.reference);
-					index=_enumerator.index;
-				}
-
-				~Enumerator()
-				{
-					delete enumerator;
-				}
-
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(*this);
-				}
-
-				const T& Current()const
-				{
-					return enumerator->Current();
-				}
-
-				vint Index()const
-				{
-					return index;
-				}
-
-				bool Next()
-				{
-					index++;
-					enumerator->Next();
-					GoNearest();
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
-				}
-
-				void Reset()
-				{
-					enumerator->Reset();
-					index=0;
-					GoNearest();
-				}
-			};
-		protected:
-			const IEnumerable<T>&				reference;
-		public:
-			IntersectExceptEnumerable(const IEnumerable<T>& enumerable, const IEnumerable<T>& _reference)
-				:EnumerableStore<T>(enumerable)
-				,reference(_reference)
-			{
+				return false;
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			void Reset()
 			{
-				return new Enumerator(CopyEnumerator(), reference);
+				enumerator->Reset();
+				index=0;
 			}
 		};
-
-		template<typename T, bool Intersect>
-		class IntersectExceptProcessor : public EnumerableProcessor<T, IntersectExceptEnumerable<T, Intersect>>
-		{
-		protected:
-			const IEnumerable<T>&				second;
-		public:
-			IntersectExceptProcessor(const IEnumerable<T>& _second)
-				:second(_second)
-			{
-			}
-
-			IntersectExceptEnumerable<T, Intersect> operator()(const IEnumerable<T>& first)const
-			{
-				return IntersectExceptEnumerable<T, Intersect>(first, second);
-			}
-		};
-
-		template<typename T>
-		IntersectExceptProcessor<T, true> Intersect(const IEnumerable<T>& second)
-		{
-			return IntersectExceptProcessor<T, true>(second);
-		}
-
-		template<typename T>
-		IntersectExceptProcessor<T, false> Except(const IEnumerable<T>& second)
-		{
-			return IntersectExceptProcessor<T, false>(second);
-		}
-
-/***********************************************************************
-Union
-***********************************************************************/
-
-		template<typename T>
-		class UnionProcessor : public EnumerableProcessor<T, DistinctEnumerable<T>>
-		{
-		protected:
-			const IEnumerable<T>&				second;
-		public:
-			UnionProcessor(const IEnumerable<T>& _second)
-				:second(_second)
-			{
-			}
-
-			DistinctEnumerable<T> operator()(const IEnumerable<T>& first)const
-			{
-				return first>>Concat(second)>>Distinct();
-			}
-		};
-
-		template<typename T>
-		UnionProcessor<T> Union(const IEnumerable<T>& second)
-		{
-			return UnionProcessor<T>(second);
-		}
 	}
 }
 
@@ -9732,117 +8641,59 @@ Pairwise
 ***********************************************************************/
 
 		template<typename S, typename T>
-		class PairwiseEnumerable : public EnumerableStore<S, 1>, public EnumerableStore<T, 2>, public virtual IEnumerable<Pair<S, T>>
+		class PairwiseEnumerator : public virtual IEnumerator<Pair<S, T>>
 		{
 		protected:
-			class Enumerator : public virtual IEnumerator<Pair<S, T>>
-			{
-			protected:
-				IEnumerator<S>*					enumerator1;
-				IEnumerator<T>*					enumerator2;
-				Pair<S, T>						current;
-			public:
-				Enumerator(IEnumerator<S>* _enumerator1, IEnumerator<T>* _enumerator2, vint _index=0, bool _turned=false)
-					:enumerator1(_enumerator1)
-					,enumerator2(_enumerator2)
-				{
-					if(Available())
-					{
-						current=Pair<S, T>(enumerator1->Current(), enumerator2->Current());
-					}
-				}
-
-				~Enumerator()
-				{
-					delete enumerator1;
-					delete enumerator2;
-				}
-
-				IEnumerator<Pair<S, T>>* Clone()const
-				{
-					return new Enumerator(enumerator1->Clone(), enumerator2->Clone());
-				}
-
-				const Pair<S, T>& Current()const
-				{
-					return current;
-				}
-
-				vint Index()const
-				{
-					return enumerator1->Index();
-				}
-
-				bool Next()
-				{
-					if(enumerator1->Next() && enumerator2->Next())
-					{
-						current=Pair<S, T>(enumerator1->Current(), enumerator2->Current());
-						return true;
-					}
-					else
-					{
-						return false;
-					}
-				}
-
-				bool Available()const
-				{
-					return enumerator1->Available() && enumerator2->Available();
-				}
-
-				void Reset()
-				{
-					enumerator1->Reset();
-					enumerator2->Reset();
-					if(Available())
-					{
-						current=Pair<S, T>(enumerator1->Current(), enumerator2->Current());
-					}
-				}
-			};
+			IEnumerator<S>*					enumerator1;
+			IEnumerator<T>*					enumerator2;
+			Pair<S, T>						current;
 		public:
-			PairwiseEnumerable(const IEnumerable<S>& enumerable1, const IEnumerable<T>& enumerable2)
-				:EnumerableStore<S, 1>(enumerable1)
-				,EnumerableStore<T, 2>(enumerable2)
+			PairwiseEnumerator(IEnumerator<S>* _enumerator1, IEnumerator<T>* _enumerator2)
+				:enumerator1(_enumerator1)
+				,enumerator2(_enumerator2)
 			{
 			}
 
-			IEnumerator<Pair<S, T>>* CreateEnumerator()const
+			~PairwiseEnumerator()
 			{
-				return new Enumerator(EnumerableStore<S, 1>::CopyEnumerator(), EnumerableStore<T, 2>::CopyEnumerator());
+				delete enumerator1;
+				delete enumerator2;
+			}
+
+			IEnumerator<Pair<S, T>>* Clone()const
+			{
+				return new PairwiseEnumerator(enumerator1->Clone(), enumerator2->Clone());
+			}
+
+			const Pair<S, T>& Current()const
+			{
+				return current;
+			}
+
+			vint Index()const
+			{
+				return enumerator1->Index();
+			}
+
+			bool Next()
+			{
+				if(enumerator1->Next() && enumerator2->Next())
+				{
+					current=Pair<S, T>(enumerator1->Current(), enumerator2->Current());
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void Reset()
+			{
+				enumerator1->Reset();
+				enumerator2->Reset();
 			}
 		};
-
-		template<typename T>
-		class PairwiseProcessor : public FreeEnumerableProcessor
-		{
-		protected:
-			const IEnumerable<T>&				second;
-		public:
-			template<typename S>
-			struct ResultTypeRetriver
-			{
-				typedef PairwiseEnumerable<S, T> ResultType;
-			};
-
-			PairwiseProcessor(const IEnumerable<T>& _second)
-				:second(_second)
-			{
-			}
-
-			template<typename S>
-			PairwiseEnumerable<S, T> operator()(const IEnumerable<S>& first)const
-			{
-				return PairwiseEnumerable<S, T>(first, second);
-			}
-		};
-
-		template<typename T>
-		PairwiseProcessor<T> Pairwise(const IEnumerable<T>& second)
-		{
-			return PairwiseProcessor<T>(second);
-		}
 	}
 }
 
@@ -9894,6 +8745,106 @@ namespace vl
 #endif
 
 /***********************************************************************
+COMMON\SOURCE\COLLECTIONS\OPERATIONFOREACH.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+Data Structure::Operations
+
+扩展：
+	实现一个函数重载IteratorType CreateForEachIterator(const CollectionType& collection);
+	CollectionType是所需要的容器类型
+	IteratorType继承自ForEachIterator<T>
+	必须写在vl::collections命名空间里
+***********************************************************************/
+
+#ifndef VCZH_COLLECTIONS_FOREACH
+#define VCZH_COLLECTIONS_FOREACH
+
+namespace vl
+{
+	namespace collections
+	{
+
+/***********************************************************************
+ForEach基础设施
+***********************************************************************/
+
+		template<typename T>
+		class ForEachIterator : public Object
+		{
+		public:
+			virtual bool				Next(T& variable)const=0;
+
+			operator bool()const
+			{
+				return true;
+			}
+		};
+
+/***********************************************************************
+IEnumerable<T>支持
+***********************************************************************/
+
+		template<typename T>
+		class EnumerableForEachIterator : public ForEachIterator<T>
+		{
+		protected:
+			Ptr<IEnumerator<T>>			enumerator;
+		public:
+			EnumerableForEachIterator(const IEnumerable<T>& enumerable)
+				:enumerator(enumerable.CreateEnumerator())
+			{
+			}
+
+			EnumerableForEachIterator(const EnumerableForEachIterator<T>& enumerableIterator)
+				:enumerator(enumerableIterator.iterator)
+			{
+			}
+
+			bool Next(T& variable)const
+			{
+				if(enumerator->Next())
+				{
+					variable=enumerator->Current();
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		};
+
+		template<typename T>
+		EnumerableForEachIterator<T> CreateForEachIterator(const IEnumerable<T>& enumerable)
+		{
+			return enumerable;
+		}
+
+/***********************************************************************
+ForEach宏
+***********************************************************************/
+
+#define SCOPE_VARIABLE(TYPE, VARIABLE, VALUE)\
+		if(bool __scope_variable_flag__=true)\
+			for(TYPE VARIABLE = VALUE;__scope_variable_flag__;__scope_variable_flag__=false)
+
+#define FOREACH(TYPE, VARIABLE, COLLECTION)\
+		SCOPE_VARIABLE(const ForEachIterator<TYPE>&, __foreach_iterator__, CreateForEachIterator(COLLECTION))\
+		for(TYPE VARIABLE;__foreach_iterator__.Next(VARIABLE);)
+
+#define FOREACH_INDEXER(TYPE, VARIABLE, INDEXER, COLLECTION)\
+		SCOPE_VARIABLE(const ForEachIterator<TYPE>&, __foreach_iterator__, CreateForEachIterator(COLLECTION))\
+		SCOPE_VARIABLE(vint, INDEXER, 0)\
+		for(TYPE VARIABLE;__foreach_iterator__.Next(VARIABLE);INDEXER++)
+	}
+}
+
+#endif
+
+/***********************************************************************
 COMMON\SOURCE\COLLECTIONS\OPERATION.H
 ***********************************************************************/
 /***********************************************************************
@@ -9903,42 +8854,362 @@ Data Structure::Operations
 
 Functions:
 	CopyFrom(TargetContainer, SourceContainer)
-	[T] >>	Select(T->K) => [K]
-	[T] >>	Where(T->bool) => [T]
-	[T] >>	OrderBy(T->T->int) => [T]
-	[T] >>	Aggregate(T->T->T) => T
-	[T] >>	Aggregate(T->T->T, T) => T
-	[T] >>	All(T->bool) => bool
-	[T] >>	Any(T->bool) => bool
-	[T] >>	Max() => T
-	[T] >>	Min() => T
-	[T] >>	First() => T
-	[T] >>	Count() => vint
-	[T] >>	IsEmpty() => bool
-	[T] >>	Concat([T]) => [T]
-	[T] >>	Repeat(vint) => [T]
-	[T] >>	Take(vint) => [T]
-	[T] >>	Skip(vint) => [T]
-	[T] >>	Distinct() => [T]
-	[T] >>	Reverse() => [T]
-			FromIterator<T>::Wrap(begin, end) => [T]
-			FromPointer<T>(begin, end) => [T]
-			FromArray<T[]>(array) => [T]
-	[T] >>	Intersect([T]) => [T]
-	[T] >>	Union([T]) => [T]
-	[T] >>	Except([T]) => [T]
-	[T] >>	Pairwise([K]) => [(T,K)]
-	
-	[Ptr<T>] >> Cast<K>() => [Ptr<K>]
-	[Ptr<T>] >> FindType<K>() => [Ptr<K>]
+	[T]		.Select(T->K) => [K]
+	[T]		.Where(T->bool) => [T]
+	[Ptr<T>].Cast<K>() => [Ptr<K>]
+	[Ptr<T>].FindType<K>() => [Ptr<K>]
+	[T]		.OrderBy(T->T->int) => [T]
 
-FOREACH(X, a, XList)
-FOREACH_INDEXER(X, a, index, XList)
+	[T]		.Aggregate(T->T->T) => T
+	[T]		.Aggregate(T->T->T, T) => T
+	[T]		.All(T->bool) => bool
+	[T]		.Any(T->bool) => bool
+	[T]		.Max() => T
+	[T]		.Min() => T
+	[T]		.First() => T
+	[T]		.FirstOrDefault(T) => T
+	[T]		.Last() => T
+	[T]		.LastOrDefault(T) => T
+	[T]		.Count() => vint
+	[T]		.IsEmpty() => bool
+
+	[T]		.Concat([T]) => [T]
+	[T]		.Repeat(vint) => [T]
+	[T]		.Take(vint) => [T]
+	[T]		.Skip(vint) => [T]
+	[T]		.Distinct() => [T]
+	[T]		.Reverse() => [T]
+
+	[T]		.Pairwise([K]) => [(T,K)]
+	[T]		.Intersect([T]) => [T]
+	[T]		.Union([T]) => [T]
+	[T]		.Except([T]) => [T]
+
+	From(begin, end) => [T]
+	From(array) => [T]
+
+	FOREACH(X, a, XList)
+	FOREACH_INDEXER(X, a, index, XList)
 ***********************************************************************/
 
 #ifndef VCZH_COLLECTIONS_OPERATION
 #define VCZH_COLLECTIONS_OPERATION
 
+
+namespace vl
+{
+	namespace collections
+	{
+
+/***********************************************************************
+OrderBy Quick Sort
+***********************************************************************/
+
+		template<typename T>
+		void Sort(T* items, vint length, const Func<vint(T, T)>& orderer)
+		{
+			if(length==0) return;
+			vint pivot=0;
+			vint left=0;
+			vint right=0;
+			bool flag=false;
+
+			while(left+right+1!=length)
+			{
+				vint& mine=(flag?left:right);
+				vint& theirs=(flag?right:left);
+				vint candidate=(flag?left:length-right-1);
+				vint factor=(flag?-1:1);
+
+				if(orderer(items[pivot], items[candidate])*factor<=0)
+				{
+					mine++;
+				}
+				else
+				{
+					theirs++;
+					T temp=items[pivot];
+					items[pivot]=items[candidate];
+					items[candidate]=temp;
+					pivot=candidate;
+					flag=!flag;
+				}
+			}
+
+			Sort(items, left, orderer);
+			Sort(items+left+1, right, orderer);
+		}
+
+/***********************************************************************
+LazyList
+***********************************************************************/
+
+		template<typename T>
+		class LazyList : public Object, public IEnumerable<T>
+		{
+		protected:
+			Ptr<IEnumerator<T>>			enumeratorPrototype;
+
+			IEnumerator<T>* xs()
+			{
+				return enumeratorPrototype->Clone();
+			}
+		public:
+			LazyList(Ptr<IEnumerator<T>> enumerator)
+				:enumeratorPrototype(enumerator)
+			{
+			}
+
+			LazyList(const IEnumerable<T>& enumerable)
+				:enumeratorPrototype(enumerable.CreateEnumerator())
+			{
+			}
+			
+			LazyList()
+				:enumeratorPrototype(EmptyEnumerable<T>().CreateEnumerator())
+			{
+			}
+
+			IEnumerator<T>* CreateEnumerator()const
+			{
+				return enumeratorPrototype->Clone();
+			}
+
+			//-------------------------------------------------------
+
+			template<typename F>
+			LazyList<FUNCTION_RESULT_TYPE(F)> Select(F f)
+			{
+				return new SelectEnumerator<T, FUNCTION_RESULT_TYPE(F)>(xs(), f);
+			}
+			
+			template<typename F>
+			LazyList<T> Where(F f)
+			{
+				return new WhereEnumerator<T>(xs(), f);
+			}
+
+			template<typename U>
+			LazyList<Ptr<U>> Cast()
+			{
+				Func<Ptr<U>(T)> f=[](T t)->Ptr<U>{return t.Cast<U>();};
+				return new SelectEnumerator<T, Ptr<U>>(xs(), f);
+			}
+
+			template<typename U>
+			LazyList<Ptr<U>> FindType()
+			{
+				return Cast<U>().Where([](T t){return t;});
+			}
+
+			template<typename F>
+			LazyList<T> OrderBy(F f)
+			{
+				Ptr<List<T>> sorted=new List<T>;
+				CopyFrom(*sorted.Obj(), *this);
+				if(sorted->Count()>0)
+				{
+					Sort<T>(&sorted->operator[](0), sorted->Count(), f);
+				}
+				return new ContainerEnumerator<T, List<T>>(sorted);
+			}
+
+			//-------------------------------------------------------
+
+			template<typename F>
+			T Aggregate(F f)
+			{
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				if(!enumerator->Next())
+				{
+					throw Error(L"LazyList<T>::Aggregate(F)#容器为空并且没有初始值，Aggregate操作失败。");
+				}
+				T result=enumerator->Current();
+				while(enumerator->Next())
+				{
+					result=f(result, enumerator->Current());
+				}
+				return result;
+			}
+
+			template<typename I, typename F>
+			I Aggregate(I init, F f)
+			{
+				FOREACH(T, t, *this)
+				{
+					init=f(init, t);
+				}
+				return init;
+			}
+
+			template<typename F>
+			bool All(F f)
+			{
+				return Select(f).Aggregate(true, [](bool a, bool b){return a&&b;});
+			}
+
+			template<typename F>
+			bool Any(F f)
+			{
+				return Select(f).Aggregate(false, [](bool a, bool b){return a||b;});
+			}
+
+			T Max()
+			{
+				return Aggregate([](T a, T b){return a>b?a:b;});
+			}
+
+			T Min()
+			{
+				return Aggregate([](T a, T b){return a<b?a:b;});
+			}
+
+			T First()
+			{
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				if(!enumerator->Next())
+				{
+					throw Error(L"LazyList<T>::First(F)#容器为空并且没有初始值，Aggregate操作失败。");
+				}
+				return enumerator->Current();
+			}
+
+			T First(T defaultValue)
+			{
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				if(!enumerator->Next())
+				{
+					return defaultValue;
+				}
+				return enumerator->Current();
+			}
+
+			T Last()
+			{
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				if(!enumerator->Next())
+				{
+					throw Error(L"LazyList<T>::Last(F)#容器为空并且没有初始值，Aggregate操作失败。");
+				}
+				else
+				{
+					T value=enumerator->Current();
+					while(enumerator->Next())
+					{
+						value=enumerator->Current();
+					}
+					return value;
+				}
+			}
+
+			T Last(T defaultValue)
+			{
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				while(enumerator->Next())
+				{
+					defaultValue=enumerator->Current();
+				}
+				return defaultValue;
+			}
+
+			vint Count()
+			{
+				vint result=0;
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				while(enumerator->Next())
+				{
+					result++;
+				}
+				return result;
+			}
+
+			bool IsEmpty()
+			{
+				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
+				return enumerator->Next();
+			}
+
+			//-------------------------------------------------------
+
+			LazyList<T> Concat(IEnumerable<T>& remains)
+			{
+				return new ConcatEnumerator<T>(xs(), remains.CreateEnumerator());
+			}
+
+			LazyList<T> Take(vint count)
+			{
+				return new TakeEnumerator<T>(xs(), count);
+			}
+
+			LazyList<T> Skip(vint count)
+			{
+				return new SkipEnumerator<T>(xs(), count);
+			}
+
+			LazyList<T> Repeat(vint count)
+			{
+				return new RepeatEnumerator<T>(xs(), count);
+			}
+
+			LazyList<T> Distinct()
+			{
+				return new DistinctEnumerator<T>(xs());
+			}
+
+			LazyList<T> Reverse()
+			{
+				return new ReverseEnumerator<T>(*this);
+			}
+
+			//-------------------------------------------------------
+
+			template<typename U>
+			LazyList<Pair<T, U>> Pairwise(IEnumerable<U>& remains)
+			{
+				return new PairwiseEnumerator<T, U>(xs(), remains.CreateEnumerator());
+			}
+
+			LazyList<T> Intersect(IEnumerable<T>& remains)
+			{
+				return new IntersectExceptEnumerator<T, true>(xs(), remains);
+			}
+
+			LazyList<T> Except(IEnumerable<T>& remains)
+			{
+				return new IntersectExceptEnumerator<T, false>(xs(), remains);
+			}
+
+			LazyList<T> Union(IEnumerable<T>& remains)
+			{
+				return Concat(remains).Distinct();
+			}
+		};
+
+		template<typename T>
+		LazyList<T> From(const IEnumerable<T>& enumerable)
+		{
+			return enumerable;
+		}
+
+		template<typename T>
+		LazyList<T> From(const T* begin, const T* end)
+		{
+			return FromPointer(begin, end);
+		}
+
+		template<typename T, int size>
+		LazyList<T> From(T (&items)[size])
+		{
+			return FromArray(items);
+		}
+
+		template<typename T, int size>
+		LazyList<T> From(const T (&items)[size])
+		{
+			return FromArray(items);
+		}
+	}
+}
 
 #endif
 

@@ -105,9 +105,6 @@
     <ClCompile Include="..\..\..\..\Common\Source\Threading.cpp">
       <Filter>Common\Basic</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Common\Source\Collections\Operation.cpp">
-      <Filter>Common\Collections</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\Common\Source\Stream\Accessor.cpp">
       <Filter>Common\Stream</Filter>
     </ClCompile>
@@ -467,9 +464,6 @@
     <ClInclude Include="..\..\..\..\Common\Source\Collections\Operation.h">
       <Filter>Common\Collections</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationAggregate.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationConcat.h">
       <Filter>Common\Collections</Filter>
     </ClInclude>
@@ -613,9 +607,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Regex\RegexWriter.h">
       <Filter>Common\Regex</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\Common\Source\Collections\OperationOrderBy.h">
-      <Filter>Common\Collections</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\NativeWindow\Windows\ServicesImpl\WindowsResourceService.h">
       <Filter>GacUI\NativeWindow\Windows\ServicesImpl</Filter>
