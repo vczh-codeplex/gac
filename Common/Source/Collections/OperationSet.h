@@ -28,31 +28,16 @@ Intersect/Except
 			class Enumerator : public virtual IEnumerator<T>
 			{
 			protected:
-				IEnumerator<T>*			enumerator;
-				SortedList<T>			reference;
+				IEnumerator<T>*				enumerator;
+				SortedList<T>				reference;
 				vint						index;
 
-				void GoNearest()
-				{
-					while(enumerator->Available())
-					{
-						if(reference.Contains(enumerator->Current())==Intersect)
-						{
-							break;
-						}
-						else
-						{
-							enumerator->Next();
-						}
-					}
-				}
 			public:
 				Enumerator(IEnumerator<T>* _enumerator, const IEnumerable<T>& _reference)
 					:enumerator(_enumerator)
-					,index(0)
+					,index(-1)
 				{
 					CopyFrom(reference, _reference);
-					GoNearest();
 				}
 
 				Enumerator(const Enumerator& _enumerator)
@@ -84,22 +69,21 @@ Intersect/Except
 
 				bool Next()
 				{
-					index++;
-					enumerator->Next();
-					GoNearest();
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
+					while(enumerator->Next())
+					{
+						if(reference.Contains(enumerator->Current())==Intersect)
+						{
+							index++;
+							return true;
+						}
+					}
+					return false;
 				}
 
 				void Reset()
 				{
 					enumerator->Reset();
 					index=0;
-					GoNearest();
 				}
 			};
 		protected:

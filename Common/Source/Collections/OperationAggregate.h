@@ -52,19 +52,17 @@ Aggregate
 					{
 						result=initial;
 					}
-					else if(enumerator->Available())
+					else if(enumerator->Next())
 					{
 						result=enumerator->Current();
-						enumerator->Next();
 					}
 					else
 					{
 						throw Error(L"AggregateProcessor<T>::operator(const IEnumerable<T>&)#容器为空并且没有初始值，Aggregate操作失败。");
 					}
-					while(enumerator->Available())
+					while(enumerator->Next())
 					{
 						result=selector(result, enumerator->Current());
-						enumerator->Next();
 					}
 					delete enumerator;
 				}

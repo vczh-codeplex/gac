@@ -28,7 +28,7 @@ Take
 			class Enumerator : public virtual IEnumerator<T>
 			{
 			protected:
-				IEnumerator<T>*		enumerator;
+				IEnumerator<T>*			enumerator;
 				vint					count;
 			public:
 				Enumerator(IEnumerator<T>* _enumerator, vint _count)
@@ -59,24 +59,8 @@ Take
 
 				bool Next()
 				{
-					if(enumerator->Index()==count-1)
-					{
-						enumerator->Next();
-						return false;
-					}
-					else if(enumerator->Index()>=count)
-					{
-						return false;
-					}
-					else
-					{
-						return enumerator->Next();
-					}
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available() && enumerator->Index()<count;
+					if(enumerator->Index()>=count-1) return false;
+					return enumerator->Next();
 				}
 
 				void Reset()
@@ -129,7 +113,7 @@ Skip
 			class Enumerator : public virtual IEnumerator<T>
 			{
 			protected:
-				IEnumerator<T>*		enumerator;
+				IEnumerator<T>*			enumerator;
 				vint					count;
 			public:
 				Enumerator(IEnumerator<T>* _enumerator, vint _count)
@@ -165,11 +149,6 @@ Skip
 				bool Next()
 				{
 					return enumerator->Next();
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
 				}
 
 				void Reset()
@@ -226,12 +205,12 @@ Repeat
 			class Enumerator : public virtual IEnumerator<T>
 			{
 			protected:
-				IEnumerator<T>*		enumerator;
+				IEnumerator<T>*			enumerator;
 				vint					count;
 				vint					index;
 				vint					repeatedCount;
 			public:
-				Enumerator(IEnumerator<T>* _enumerator, vint _count, vint _index=0, vint _repeatedCount=0)
+				Enumerator(IEnumerator<T>* _enumerator, vint _count, vint _index=-1, vint _repeatedCount=0)
 					:enumerator(_enumerator)
 					,count(_count)
 					,index(_index)
@@ -261,40 +240,23 @@ Repeat
 
 				bool Next()
 				{
-					if(repeatedCount>=count)
+					while(repeatedCount<count)
 					{
-						return false;
-					}
-					else if(enumerator->Next())
-					{
-						index++;
-						return true;
-					}
-					else
-					{
-						repeatedCount++;
-						if(repeatedCount<count)
+						if(enumerator->Next())
 						{
 							index++;
-							enumerator->Reset();
-							return enumerator->Available();
+							return true;
 						}
-						else
-						{
-							return false;
-						}
+						repeatedCount++;
+						enumerator->Reset();
 					}
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available() && repeatedCount<count;
+					return false;
 				}
 
 				void Reset()
 				{
 					enumerator->Reset();
-					index=0;
+					index=-1;
 					repeatedCount=0;
 				}
 			};
@@ -347,25 +309,10 @@ Distinct
 				SortedList<T>		distinct;
 				T					lastValue;
 
-				void GoNearest()
-				{
-					while(enumerator->Available())
-					{
-						const T& current=enumerator->Current();
-						if(!distinct.Contains(current))
-						{
-							lastValue=current;
-							distinct.Add(current);
-							break;
-						}
-						enumerator->Next();
-					}
-				}
 			public:
 				Enumerator(IEnumerator<T>* _enumerator)
 					:enumerator(_enumerator)
 				{
-					GoNearest();
 				}
 
 				Enumerator(const Enumerator& _enumerator)
@@ -396,21 +343,23 @@ Distinct
 
 				bool Next()
 				{
-					enumerator->Next();
-					GoNearest();
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
+					while(enumerator->Next())
+					{
+						const T& current=enumerator->Current();
+						if(!distinct.Contains(current))
+						{
+							lastValue=current;
+							distinct.Add(current);
+							return true;
+						}
+					}
+					return false;
 				}
 
 				void Reset()
 				{
 					enumerator->Reset();
 					distinct.Clear();
-					GoNearest();
 				}
 			};
 		public:
@@ -452,11 +401,11 @@ Reverse
 			class Enumerator : public virtual IEnumerator<T>
 			{
 			protected:
-				List<T>					cache;
+				List<T>						cache;
 				vint						index;
 			public:
 				Enumerator(const IEnumerable<T>& enumerable)
-					:index(0)
+					:index(-1)
 				{
 					CopyFrom(cache, enumerable);
 				}
@@ -489,11 +438,6 @@ Reverse
 				bool Next()
 				{
 					index++;
-					return Available();
-				}
-
-				bool Available()const
-				{
 					return index<cache.Count();
 				}
 
@@ -547,20 +491,18 @@ FromIterator
 				I				begin;
 				I				end;
 				I				current;
-				vint			index;
 
 			public:
-				Enumerator(I _begin, I _end, I _current, vint _index)
+				Enumerator(I _begin, I _end, I _current)
 					:begin(_begin)
 					,end(_end)
 					,current(_current)
-					,index(_index)
 				{
 				}
 
 				IEnumerator<T>* Clone()const
 				{
-					return new Enumerator(begin, end, current, index);
+					return new Enumerator(begin, end, current);
 				}
 
 				const T& Current()const
@@ -570,36 +512,18 @@ FromIterator
 
 				vint Index()const
 				{
-					return index;
+					return current-begin;
 				}
 
 				bool Next()
 				{
-					if(current==end)
-					{
-						return false;
-					}
 					current++;
-					if(current==end)
-					{
-						return false;
-					}
-					else
-					{
-						index++;
-						return true;
-					}
-				}
-
-				bool Available()const
-				{
-					return current!=end;
+					return begin<=current && current<end;
 				}
 
 				void Reset()
 				{
-					current=begin;
-					index=0;
+					current=begin-1;
 				}
 			};
 		private:
@@ -608,7 +532,7 @@ FromIterator
 		public:
 			IEnumerator<T>* CreateEnumerator()const
 			{
-				return new Enumerator(begin, end, begin, 0);
+				return new Enumerator(begin, end, begin-1);
 			}
 
 			FromIteratorEnumerable(I _begin, I _end)

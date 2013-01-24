@@ -44,11 +44,10 @@ namespace vl
 					}
 				}
 			public:
-				Enumerator(const Dictionary<KT, VT, KK, VK>* _container, vint _index=0)
+				Enumerator(const Dictionary<KT, VT, KK, VK>* _container, vint _index=-1)
 				{
 					container=_container;
 					index=_index;
-					UpdateCurrent();
 				}
 				
 				IEnumerator<Pair<KT, VT>>* Clone()const
@@ -70,17 +69,12 @@ namespace vl
 				{
 					index++;
 					UpdateCurrent();
-					return Available();
-				}
-
-				bool Available()const
-				{
 					return index>=0 && index<container->Count();
 				}
 
 				void Reset()
 				{
-					index=0;
+					index=-1;
 					UpdateCurrent();
 				}
 			};
@@ -194,9 +188,9 @@ namespace vl
 			{
 			private:
 				const Group<KT, VT, KK, VK>*		container;
-				vint											keyIndex;
-				vint											valueIndex;
-				Pair<KT, VT>								current;
+				vint								keyIndex;
+				vint								valueIndex;
+				Pair<KT, VT>						current;
 
 				void UpdateCurrent()
 				{
@@ -211,12 +205,11 @@ namespace vl
 					}
 				}
 			public:
-				Enumerator(const Group<KT, VT, KK, VK>* _container, vint _keyIndex=0, vint _valueIndex=0)
+				Enumerator(const Group<KT, VT, KK, VK>* _container, vint _keyIndex=-1, vint _valueIndex=-1)
 				{
 					container=_container;
 					keyIndex=_keyIndex;
 					valueIndex=_valueIndex;
-					UpdateCurrent();
 				}
 				
 				IEnumerator<Pair<KT, VT>>* Clone()const
@@ -231,7 +224,7 @@ namespace vl
 
 				vint Index()const
 				{
-					if(Available())
+					if(0<=keyIndex && keyIndex<container->Count())
 					{
 						vint index=0;
 						for(vint i=0;i<keyIndex;i++)
@@ -248,10 +241,14 @@ namespace vl
 
 				bool Next()
 				{
-					if(keyIndex<container->Count())
+					if(keyIndex==-1)
 					{
-						const ValueContainer& values=container->GetByIndex(keyIndex);
+						keyIndex=0;
+					}
+					while(keyIndex<container->Count())
+					{
 						valueIndex++;
+						const ValueContainer& values=container->GetByIndex(keyIndex);
 						if(valueIndex<values.Count())
 						{
 							UpdateCurrent();
@@ -260,25 +257,7 @@ namespace vl
 						else
 						{
 							keyIndex++;
-							valueIndex=0;
-							UpdateCurrent();
-							return keyIndex<container->Count();
-						}
-					}
-					else
-					{
-						return false;
-					}
-				}
-
-				bool Available()const
-				{
-					if(keyIndex<container->Count())
-					{
-						const ValueContainer& values=container->GetByIndex(keyIndex);
-						if(valueIndex<values.Count())
-						{
-							return true;
+							valueIndex=-1;
 						}
 					}
 					return false;
@@ -286,8 +265,8 @@ namespace vl
 
 				void Reset()
 				{
-					keyIndex=0;
-					valueIndex=0;
+					keyIndex=-1;
+					valueIndex=-1;
 					UpdateCurrent();
 				}
 			};

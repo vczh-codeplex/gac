@@ -35,31 +35,16 @@ Where
 			class Enumerator : public virtual IEnumerator<T>
 			{
 			protected:
-				IEnumerator<T>*		enumerator;
-				Func<bool(T)>		selector;
+				IEnumerator<T>*			enumerator;
+				Func<bool(T)>			selector;
 				vint					index;
 
-				void GoNearest()
-				{
-					while(enumerator->Available())
-					{
-						if(selector(enumerator->Current()))
-						{
-							break;
-						}
-						else
-						{
-							enumerator->Next();
-						}
-					}
-				}
 			public:
-				Enumerator(IEnumerator<T>* _enumerator, const Func<bool(T)>& _selector, vint _index=0)
+				Enumerator(IEnumerator<T>* _enumerator, const Func<bool(T)>& _selector, vint _index=-1)
 					:enumerator(_enumerator)
 					,selector(_selector)
 					,index(_index)
 				{
-					GoNearest();
 				}
 
 				~Enumerator()
@@ -84,21 +69,20 @@ Where
 
 				bool Next()
 				{
-					index++;
-					enumerator->Next();
-					GoNearest();
-					return Available();
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
+					while(enumerator->Next())
+					{
+						if(selector(enumerator->Current()))
+						{
+							index++;
+							return true;
+						}
+					}
+					return false;
 				}
 
 				void Reset()
 				{
 					enumerator->Reset();
-					GoNearest();
 				}
 			};
 		protected:

@@ -30,14 +30,10 @@ Pairwise
 				IEnumerator<T>*					enumerator2;
 				Pair<S, T>						current;
 			public:
-				Enumerator(IEnumerator<S>* _enumerator1, IEnumerator<T>* _enumerator2, vint _index=0, bool _turned=false)
+				Enumerator(IEnumerator<S>* _enumerator1, IEnumerator<T>* _enumerator2)
 					:enumerator1(_enumerator1)
 					,enumerator2(_enumerator2)
 				{
-					if(Available())
-					{
-						current=Pair<S, T>(enumerator1->Current(), enumerator2->Current());
-					}
 				}
 
 				~Enumerator()
@@ -74,19 +70,10 @@ Pairwise
 					}
 				}
 
-				bool Available()const
-				{
-					return enumerator1->Available() && enumerator2->Available();
-				}
-
 				void Reset()
 				{
 					enumerator1->Reset();
 					enumerator2->Reset();
-					if(Available())
-					{
-						current=Pair<S, T>(enumerator1->Current(), enumerator2->Current());
-					}
 				}
 			};
 		public:

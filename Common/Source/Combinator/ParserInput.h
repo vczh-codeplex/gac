@@ -173,16 +173,19 @@ namespace vl
 		{
 		public:
 			typedef T		ElementType;
+			bool			available;
 		protected:
 			Ptr<collections::IEnumerator<T>>	enumerator;
 		public:
 			EnumerableInput(const collections::IEnumerable<T>& enumerable)
 				:enumerator(enumerable.CreateEnumerator())
 			{
+				available=enumerator->Next();
 			}
 
 			EnumerableInput(const EnumerableInput<T>& input)
 				:enumerator(input.enumerator->Clone())
+				,available(input.available)
 			{
 			}
 
@@ -193,12 +196,12 @@ namespace vl
 
 			bool Available()const
 			{
-				return enumerator->Available();
+				return available;
 			}
 
 			bool Next()
 			{
-				return enumerator->Next();
+				return available=enumerator->Next();
 			}
 
 			vint Index()const
