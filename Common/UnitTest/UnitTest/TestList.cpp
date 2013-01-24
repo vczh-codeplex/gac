@@ -491,6 +491,12 @@ vint Double(vint a)
 	return a*2;
 }
 
+TEST_CASE(TestGetResultType)
+{
+	LazyList<vint> xs;
+	auto x=xs.Select(&Square);
+}
+
 TEST_CASE(TestSelectOperation)
 {
 	List<vint> src;
@@ -499,9 +505,9 @@ TEST_CASE(TestSelectOperation)
 	{
 		src.Add(i);
 	}
-	CopyFrom(dst, src>>Select(Square)>>Select(Double));
+	CopyFrom(dst, From(src).Select(Square).Select(Double));
 	CHECK_LIST_ITEMS(dst, {2 _ 8 _ 18 _ 32 _ 50 _ 72 _ 98 _ 128 _ 162 _ 200});
-	CompareEnumerable(dst, src>>Select(Square)>>Select(Double));
+	CompareEnumerable(dst, From(src).Select(Square).Select(Double));
 }
 
 bool Odd(vint a)
@@ -517,11 +523,11 @@ TEST_CASE(TestWhereOperation)
 	{
 		src.Add(i);
 	}
-	CopyFrom(dst, src>>Where(Odd)>>Select(Square));
+	CopyFrom(dst, From(src).Where(Odd).Select(Square));
 	CHECK_LIST_ITEMS(dst, {1 _ 9 _ 25 _ 49 _ 81});
-	CopyFrom(dst, src>>Where(Odd));
+	CopyFrom(dst, From(src).Where(Odd));
 	CHECK_LIST_ITEMS(dst, {1 _ 3 _ 5 _ 7 _ 9});
-	CompareEnumerable(dst, src>>Where(Odd));
+	CompareEnumerable(dst, From(src).Where(Odd));
 }
 
 vint Add(vint a, vint b)
@@ -546,11 +552,11 @@ TEST_CASE(TestAggregateOperation)
 	{
 		src.Add(i);
 	}
-	TEST_ASSERT(src>>Aggregate(Add)==55);
-	TEST_ASSERT(src>>All(Odd)==false);
-	TEST_ASSERT(src>>Any(Odd)==true);
-	TEST_ASSERT(src>>Max()==10);
-	TEST_ASSERT(src>>Min()==1);
+	TEST_ASSERT(From(src).Aggregate(Add)==55);
+	TEST_ASSERT(From(src).All(Odd)==false);
+	TEST_ASSERT(From(src).Any(Odd)==true);
+	TEST_ASSERT(From(src).Max()==10);
+	TEST_ASSERT(From(src).Min()==1);
 }
 
 TEST_CASE(TestConcatOperation)
@@ -567,9 +573,9 @@ TEST_CASE(TestConcatOperation)
 		{
 			second.Add(i);
 		}
-		CopyFrom(result, first>>Concat(second));
+		CopyFrom(result, From(first).Concat(second));
 		CHECK_LIST_ITEMS(result, {0 _ 1 _ 2 _ 3 _ 4 _ 5 _ 6 _ 7 _ 8 _ 9});
-		CompareEnumerable(result, first>>Concat(second));
+		CompareEnumerable(result, From(first).Concat(second));
 	}
 	{
 		List<vint> first;
@@ -579,9 +585,9 @@ TEST_CASE(TestConcatOperation)
 		{
 			second.Add(i);
 		}
-		CopyFrom(result, first>>Concat(second));
+		CopyFrom(result, From(first).Concat(second));
 		CHECK_LIST_ITEMS(result, {5 _ 6 _ 7 _ 8 _ 9});
-		CompareEnumerable(result, first>>Concat(second));
+		CompareEnumerable(result, From(first).Concat(second));
 	}
 	{
 		List<vint> first;
@@ -591,17 +597,17 @@ TEST_CASE(TestConcatOperation)
 		{
 			first.Add(i);
 		}
-		CopyFrom(result, first>>Concat(second));
+		CopyFrom(result, From(first).Concat(second));
 		CHECK_LIST_ITEMS(result, {0 _ 1 _ 2 _ 3 _ 4});
-		CompareEnumerable(result, first>>Concat(second));
+		CompareEnumerable(result, From(first).Concat(second));
 	}
 	{
 		List<vint> first;
 		List<vint> second;
 		List<vint> result;
-		CopyFrom(result, first>>Concat(second));
+		CopyFrom(result, From(first).Concat(second));
 		TEST_ASSERT(result.Count()==0);
-		CompareEnumerable(result, first>>Concat(second));
+		CompareEnumerable(result, From(first).Concat(second));
 	}
 }
 
@@ -614,45 +620,45 @@ TEST_CASE(TestSequenceOperation)
 		src.Add(i);
 	}
 
-	CopyFrom(dst, src>>Take(5));
+	CopyFrom(dst, From(src).Take(5));
 	CHECK_LIST_ITEMS(dst, {0 _ 1 _ 2 _ 3 _ 4});
-	CompareEnumerable(dst, src>>Take(5));
-	CopyFrom(dst, src>>Take(15));
+	CompareEnumerable(dst, From(src).Take(5));
+	CopyFrom(dst, From(src).Take(15));
 	CHECK_LIST_ITEMS(dst, {0 _ 1 _ 2 _ 3 _ 4 _ 5 _ 6 _ 7 _ 8 _ 9});
-	CompareEnumerable(dst, src>>Take(15));
+	CompareEnumerable(dst, From(src).Take(15));
 
-	CopyFrom(dst, src>>Skip(5));
+	CopyFrom(dst, From(src).Skip(5));
 	CHECK_LIST_ITEMS(dst, {5 _ 6 _ 7 _ 8 _ 9});
-	CompareEnumerable(dst, src>>Skip(5));
-	CopyFrom(dst, src>>Skip(15));
+	CompareEnumerable(dst, From(src).Skip(5));
+	CopyFrom(dst, From(src).Skip(15));
 	CHECK_EMPTY_LIST(dst);
-	CompareEnumerable(dst, src>>Skip(15));
+	CompareEnumerable(dst, From(src).Skip(15));
 
 	src.Clear();
 	for(vint i=0;i<3;i++)
 	{
 		src.Add(i);
 	}
-	CopyFrom(dst, src>>Repeat(0));
+	CopyFrom(dst, From(src).Repeat(0));
 	CHECK_EMPTY_LIST(dst);
-	CompareEnumerable(dst, src>>Repeat(0));
-	CopyFrom(dst, src>>Repeat(1));
+	CompareEnumerable(dst, From(src).Repeat(0));
+	CopyFrom(dst, From(src).Repeat(1));
 	CHECK_LIST_ITEMS(dst, {0 _ 1 _ 2});
-	CompareEnumerable(dst, src>>Repeat(1));
-	CopyFrom(dst, src>>Repeat(2));
+	CompareEnumerable(dst, From(src).Repeat(1));
+	CopyFrom(dst, From(src).Repeat(2));
 	CHECK_LIST_ITEMS(dst, {0 _ 1 _ 2 _ 0 _ 1 _ 2});
-	CompareEnumerable(dst, src>>Repeat(2));
+	CompareEnumerable(dst, From(src).Repeat(2));
 
 	src.Clear();
-	CopyFrom(dst, src>>Repeat(0));
+	CopyFrom(dst, From(src).Repeat(0));
 	CHECK_EMPTY_LIST(dst);
-	CompareEnumerable(dst, src>>Repeat(0));
-	CopyFrom(dst, src>>Repeat(1));
+	CompareEnumerable(dst, From(src).Repeat(0));
+	CopyFrom(dst, From(src).Repeat(1));
 	CHECK_EMPTY_LIST(dst);
-	CompareEnumerable(dst, src>>Repeat(1));
-	CopyFrom(dst, src>>Repeat(2));
+	CompareEnumerable(dst, From(src).Repeat(1));
+	CopyFrom(dst, From(src).Repeat(2));
 	CHECK_EMPTY_LIST(dst);
-	CompareEnumerable(dst, src>>Repeat(2));
+	CompareEnumerable(dst, From(src).Repeat(2));
 }
 
 TEST_CASE(TestDistinctOperation)
@@ -668,12 +674,12 @@ TEST_CASE(TestDistinctOperation)
 	{
 		second.Add(i);
 	}
-	CopyFrom(result, first>>Concat(second)>>Distinct());
+	CopyFrom(result, From(first).Concat(second).Distinct());
 	CHECK_LIST_ITEMS(result, {0 _ 1 _ 2 _ 3 _ 4 _ 5 _ 6 _ 7 _ 8 _ 9});
-	CompareEnumerable(result, first>>Concat(second)>>Distinct());
-	CopyFrom(result, first>>Concat(second)>>Distinct()>>Reverse());
+	CompareEnumerable(result, From(first).Concat(second).Distinct());
+	CopyFrom(result, From(first).Concat(second).Distinct().Reverse());
 	CHECK_LIST_ITEMS(result, {9 _ 8 _ 7 _ 6 _ 5 _ 4 _ 3 _ 2 _ 1 _ 0});
-	CompareEnumerable(result, first>>Concat(second)>>Distinct()>>Reverse());
+	CompareEnumerable(result, From(first).Concat(second).Distinct().Reverse());
 }
 
 TEST_CASE(TestSetOperation)
@@ -689,15 +695,15 @@ TEST_CASE(TestSetOperation)
 	{
 		second.Add(i);
 	}
-	CopyFrom(result, first>>Intersect(second));
+	CopyFrom(result, From(first).Intersect(second));
 	CHECK_LIST_ITEMS(result, {2 _ 3 _ 4 _ 5 _ 6 _ 7});
-	CompareEnumerable(result, first>>Intersect(second));
-	CopyFrom(result, first>>Except(second));
+	CompareEnumerable(result, From(first).Intersect(second));
+	CopyFrom(result, From(first).Except(second));
 	CHECK_LIST_ITEMS(result, {0 _ 1});
-	CompareEnumerable(result, first>>Except(second));
-	CopyFrom(result, first>>Union(second));
+	CompareEnumerable(result, From(first).Except(second));
+	CopyFrom(result, From(first).Union(second));
 	CHECK_LIST_ITEMS(result, {0 _ 1 _ 2 _ 3 _ 4 _ 5 _ 6 _ 7 _ 8 _ 9});
-	CompareEnumerable(result, first>>Union(second));
+	CompareEnumerable(result, From(first).Union(second));
 }
 
 TEST_CASE(TestPairOperation)
@@ -709,14 +715,14 @@ TEST_CASE(TestPairOperation)
 	{
 		src.Add(i);
 	}
-	CopyFrom(dst, src>>Select(Odd)>>Pairwise(src>>Select(Square)));
+	CopyFrom(dst, From(src).Select(Odd).Pairwise(From(src).Select(Square)));
 	TEST_ASSERT(dst.Count()==2);
 	TEST_ASSERT(dst.Keys()[0]==false);
 	TEST_ASSERT(dst.Keys()[1]==true);
 	CHECK_LIST_ITEMS(dst.Get(true), {1 _ 9 _ 25 _ 49 _ 81});
 	CHECK_LIST_ITEMS(dst.Get(false), {4 _ 16 _ 36 _ 64 _ 100});
-	CopyFrom(pair, src>>Select(Odd)>>Pairwise(src>>Select(Square)));
-	CompareEnumerable(pair, src>>Select(Odd)>>Pairwise(src>>Select(Square)));
+	CopyFrom(pair, From(src).Select(Odd).Pairwise(From(src).Select(Square)));
+	CompareEnumerable(pair, From(src).Select(Odd).Pairwise(From(src).Select(Square)));
 }
 
 TEST_CASE(TestCastOperation)
@@ -730,15 +736,15 @@ TEST_CASE(TestCastOperation)
 	src.Add(new ObjectBox<vuint>(5));
 
 	List<vint> dst;
-	CopyFrom(dst, src
-		>>Cast<Object, ObjectBox<vint>>()
-		>>Select(LAMBDA([](Ptr<ObjectBox<vint>> o){return o?o->Unbox():-1;}))
+	CopyFrom(dst, From(src)
+		.Cast<ObjectBox<vint>>()
+		.Select([](Ptr<ObjectBox<vint>> o){return o?o->Unbox():-1;})
 		);
 	CHECK_LIST_ITEMS(dst, {0 _ 1 _ 2 _ -1 _ -1 _ -1});
 
-	CopyFrom(dst, src
-		>>FindType<Object, ObjectBox<vint>>()
-		>>Select(LAMBDA([](Ptr<ObjectBox<vint>> o){return o?o->Unbox():-1;}))
+	CopyFrom(dst, From(src)
+		.FindType<ObjectBox<vint>>()
+		.Select([](Ptr<ObjectBox<vint>> o){return o?o->Unbox():-1;})
 		);
 	CHECK_LIST_ITEMS(dst, {0 _ 1 _ 2});
 }
@@ -757,9 +763,9 @@ TEST_CASE(TestFunctionCollection)
 {
 	vint divider[]={2,3,5};
 	Func<bool(vint)> selector=
-		Array<vint>(divider, 3)
-		>>Select(dividableConverter)
-		>>Aggregate(Combiner<bool(vint)>(And));
+		From(divider)
+		.Select(dividableConverter)
+		.Aggregate(Combiner<bool(vint)>(And));
 
 	List<vint> src;
 	List<vint> dst;
@@ -767,7 +773,7 @@ TEST_CASE(TestFunctionCollection)
 	{
 		src.Add(i);
 	}
-	CopyFrom(dst, src>>Where(selector));
+	CopyFrom(dst, From(src).Where(selector));
 	CHECK_LIST_ITEMS(dst, {30 _ 60 _ 90});
 }
 
@@ -890,7 +896,7 @@ TEST_CASE(TestOrderBy)
 {
 	vint numbers[]={7, 1, 12, 2, 8, 3, 11, 4, 9, 5, 13, 6, 10};
 	List<vint> list;
-	CopyFrom(list, FromArray(numbers)>>OrderBy(Compare));
+	CopyFrom(list, From(numbers).OrderBy(Compare));
 	CHECK_LIST_ITEMS(list, {1 _ 2 _ 3 _ 4 _ 5 _ 6 _ 7 _ 8 _ 9 _ 10 _ 11 _ 12 _ 13});
 }
 

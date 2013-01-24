@@ -22,140 +22,67 @@ Intersect/Except
 ***********************************************************************/
 
 		template<typename T, bool Intersect>
-		class IntersectExceptEnumerable : public EnumerableStore<T>, public virtual IEnumerable<T>
+		class IntersectExceptEnumerator : public virtual IEnumerator<T>
 		{
 		protected:
-			class Enumerator : public virtual IEnumerator<T>
+			IEnumerator<T>*				enumerator;
+			SortedList<T>				reference;
+			vint						index;
+
+		public:
+			IntersectExceptEnumerator(IEnumerator<T>* _enumerator, const IEnumerable<T>& _reference)
+				:enumerator(_enumerator)
+				,index(-1)
 			{
-			protected:
-				IEnumerator<T>*				enumerator;
-				SortedList<T>				reference;
-				vint						index;
+				CopyFrom(reference, _reference);
+			}
 
-			public:
-				Enumerator(IEnumerator<T>* _enumerator, const IEnumerable<T>& _reference)
-					:enumerator(_enumerator)
-					,index(-1)
-				{
-					CopyFrom(reference, _reference);
-				}
+			IntersectExceptEnumerator(const IntersectExceptEnumerator& _enumerator)
+			{
+				enumerator=_enumerator.enumerator->Clone();
+				CopyFrom(reference, _enumerator.reference);
+				index=_enumerator.index;
+			}
 
-				Enumerator(const Enumerator& _enumerator)
-				{
-					enumerator=_enumerator.enumerator->Clone();
-					CopyFrom(reference, _enumerator.reference);
-					index=_enumerator.index;
-				}
+			~IntersectExceptEnumerator()
+			{
+				delete enumerator;
+			}
 
-				~Enumerator()
-				{
-					delete enumerator;
-				}
+			IEnumerator<T>* Clone()const
+			{
+				return new IntersectExceptEnumerator(*this);
+			}
 
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(*this);
-				}
+			const T& Current()const
+			{
+				return enumerator->Current();
+			}
 
-				const T& Current()const
-				{
-					return enumerator->Current();
-				}
+			vint Index()const
+			{
+				return index;
+			}
 
-				vint Index()const
+			bool Next()
+			{
+				while(enumerator->Next())
 				{
-					return index;
-				}
-
-				bool Next()
-				{
-					while(enumerator->Next())
+					if(reference.Contains(enumerator->Current())==Intersect)
 					{
-						if(reference.Contains(enumerator->Current())==Intersect)
-						{
-							index++;
-							return true;
-						}
+						index++;
+						return true;
 					}
-					return false;
 				}
-
-				void Reset()
-				{
-					enumerator->Reset();
-					index=0;
-				}
-			};
-		protected:
-			const IEnumerable<T>&				reference;
-		public:
-			IntersectExceptEnumerable(const IEnumerable<T>& enumerable, const IEnumerable<T>& _reference)
-				:EnumerableStore<T>(enumerable)
-				,reference(_reference)
-			{
+				return false;
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			void Reset()
 			{
-				return new Enumerator(CopyEnumerator(), reference);
+				enumerator->Reset();
+				index=0;
 			}
 		};
-
-		template<typename T, bool Intersect>
-		class IntersectExceptProcessor : public EnumerableProcessor<T, IntersectExceptEnumerable<T, Intersect>>
-		{
-		protected:
-			const IEnumerable<T>&				second;
-		public:
-			IntersectExceptProcessor(const IEnumerable<T>& _second)
-				:second(_second)
-			{
-			}
-
-			IntersectExceptEnumerable<T, Intersect> operator()(const IEnumerable<T>& first)const
-			{
-				return IntersectExceptEnumerable<T, Intersect>(first, second);
-			}
-		};
-
-		template<typename T>
-		IntersectExceptProcessor<T, true> Intersect(const IEnumerable<T>& second)
-		{
-			return IntersectExceptProcessor<T, true>(second);
-		}
-
-		template<typename T>
-		IntersectExceptProcessor<T, false> Except(const IEnumerable<T>& second)
-		{
-			return IntersectExceptProcessor<T, false>(second);
-		}
-
-/***********************************************************************
-Union
-***********************************************************************/
-
-		template<typename T>
-		class UnionProcessor : public EnumerableProcessor<T, DistinctEnumerable<T>>
-		{
-		protected:
-			const IEnumerable<T>&				second;
-		public:
-			UnionProcessor(const IEnumerable<T>& _second)
-				:second(_second)
-			{
-			}
-
-			DistinctEnumerable<T> operator()(const IEnumerable<T>& first)const
-			{
-				return first>>Concat(second)>>Distinct();
-			}
-		};
-
-		template<typename T>
-		UnionProcessor<T> Union(const IEnumerable<T>& second)
-		{
-			return UnionProcessor<T>(second);
-		}
 	}
 }
 

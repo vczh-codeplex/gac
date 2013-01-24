@@ -62,119 +62,47 @@ namespace vl
 		};
 
 /***********************************************************************
-算法串联
+自包含迭代器
 ***********************************************************************/
 
-		template<typename T, typename R>
-		class EnumerableProcessor : public Object
+		template<typename T, typename TContainer>
+		class ContainerEnumerator : public Object, public virtual IEnumerator<T>
 		{
-		public:
-			virtual R operator()(const IEnumerable<T>& enumerable)const=0;
-		};
-
-		template<typename T, typename R>
-		R operator>>(const IEnumerable<T>& enumerable, const EnumerableProcessor<T, R>& processor)
-		{
-			return processor(enumerable);
-		}
-
-		template<template<typename T> class R>
-		class SequenceEnumerableProcessor : public Object
-		{
-		public:
-			template<typename T>
-			struct ResultTypeRetriver
-			{
-				typedef R<T> ResultType;
-			};
-		};
-
-		class AggregateEnumerableProcessor : public Object
-		{
-		public:
-			template<typename T>
-			struct ResultTypeRetriver
-			{
-				typedef T ResultType;
-			};
-		};
-
-		class FreeEnumerableProcessor : public Object
-		{
-		};
-
-		template<typename T, typename P>
-		typename P::template ResultTypeRetriver<T>::ResultType operator>>(const IEnumerable<T>& enumerable, const P& processor)
-		{
-			return processor(enumerable);
-		}
-
-/***********************************************************************
-迭代器存储
-***********************************************************************/
-
-		template<typename T, vint I=0>
-		class EnumerableStore : public virtual Object
-		{
-			friend class Enumerable<T>;
 		private:
-			IEnumerator<T>*			enumerator;
-		protected:
-			IEnumerator<T>* CopyEnumerator()const
-			{
-				return enumerator->Clone();
-			}
+			Ptr<TContainer>					container;
+			vint							index;
+
 		public:
-			EnumerableStore(const IEnumerable<T>& enumerable)
+			ContainerEnumerator(Ptr<TContainer> _container, vint _index=-1)
 			{
-				enumerator=enumerable.CreateEnumerator();
+				container=_container;
+				index=_index;
 			}
 
-			EnumerableStore(const EnumerableStore<T>& store)
+			IEnumerator<T>* Clone()const
 			{
-				enumerator=store->CopyEnumerator();
+				return new ContainerEnumerator(container, index);
 			}
 
-			~EnumerableStore()
+			const T& Current()const
 			{
-				delete enumerator;
+				return container->Get(index);
 			}
 
-			EnumerableStore<T>& operator=(const EnumerableStore<T>& store)
+			vint Index()const
 			{
-				delete enumerator;
-				enumerator=store->CopyEnumerator();
-				return *this;
-			}
-		};
-
-/***********************************************************************
-迭代器副本
-***********************************************************************/
-
-		template<typename T>
-		class Enumerable : public Object, public IEnumerable<T>
-		{
-		protected:
-			Ptr<EnumerableStore<T>>		store;
-		public:
-			Enumerable()
-			{
+				return index;
 			}
 
-			Enumerable(const Enumerable<T>& enumerable)
+			bool Next()
 			{
-				store=enumerable.store;
+				index++;
+				return index>=0 && index<container->Count();
 			}
 
-			Enumerable(const IEnumerable<T>& enumerable)
+			void Reset()
 			{
-				store=new EnumerableStore<T>(enumerable);
-			}
-
-			IEnumerator<T>* CreateEnumerator()const
-			{
-				return store?store->CopyEnumerator():new EmptyEnumerable<T>::Enumerator();
+				index=-1;
 			}
 		};
 

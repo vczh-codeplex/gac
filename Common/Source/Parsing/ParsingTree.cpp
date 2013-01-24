@@ -153,7 +153,7 @@ ParsingTreeNode
 			ClearQueryCache();
 			if(&subNodes)
 			{
-				CopyFrom(cachedOrderedSubNodes, subNodes>>OrderBy(&CompareTextRange));
+				CopyFrom(cachedOrderedSubNodes, collections::From(subNodes).OrderBy(&CompareTextRange));
 				FOREACH(Ptr<ParsingTreeNode>, node, cachedOrderedSubNodes)
 				{
 					node->InitializeQueryCache();

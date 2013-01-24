@@ -69,9 +69,6 @@
     <ClCompile Include="..\..\Source\Threading.cpp">
       <Filter>Common\Basic</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Collections\Operation.cpp">
-      <Filter>Common\Collections</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Combinator\StringCombinator.cpp">
       <Filter>Common\Combinator</Filter>
     </ClCompile>
@@ -275,9 +272,6 @@
     <ClInclude Include="..\..\Source\Collections\Operation.h">
       <Filter>Common\Collections</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Collections\OperationAggregate.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Collections\OperationConcat.h">
       <Filter>Common\Collections</Filter>
     </ClInclude>
@@ -409,9 +403,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Regex\RegexWriter.h">
       <Filter>Common\Regex</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Collections\OperationOrderBy.h">
-      <Filter>Common\Collections</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptor.h">
       <Filter>Common\Reflection</Filter>

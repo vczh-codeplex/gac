@@ -201,7 +201,7 @@ ParsingTable
 			void ParsingTable::Initialize()
 			{
 				List<WString> tokens;
-				FOREACH(TokenInfo, info, tokenInfos>>Skip(UserTokenStart))
+				FOREACH(TokenInfo, info, From(tokenInfos).Skip(UserTokenStart))
 				{
 					tokens.Add(info.regex);
 				}

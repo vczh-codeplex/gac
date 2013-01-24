@@ -98,7 +98,7 @@ namespace vl
 					index=_index;
 				}
 
-				Enumerator* Clone()const
+				IEnumerator<T>* Clone()const
 				{
 					return new Enumerator(container, index);
 				}

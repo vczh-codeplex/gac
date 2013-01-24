@@ -19,9 +19,7 @@ Classes:
 #include "..\Exception.h"
 #include "..\Pointer.h"
 #include "..\Function.h"
-#include "..\Collections\OperationCopyFrom.h"
-#include "..\Collections\OperationAggregate.h"
-#include "..\Collections\OperationSelect.h"
+#include "..\Collections\Operation.h"
 
 namespace vl
 {
@@ -53,7 +51,7 @@ namespace vl
 
 				vint GetMaxErrorPosition(const ErrorList& errors)
 				{
-					return errors>>collections::Select(GetInputFromError)>>collections::Max();
+					return collections::From(errors).Select(GetInputFromError).Max();
 				}
 			public:
 				typedef Ptr<GlobalInfo>					Ref;

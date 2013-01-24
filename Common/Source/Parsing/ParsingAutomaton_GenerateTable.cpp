@@ -230,7 +230,7 @@ namespace vl
 						Ptr<ParsingTable::TransitionBag> bag=table->GetTransitionBag(i, j);
 						if(bag)
 						{
-							CopyFrom(bag->transitionItems, bag->transitionItems>>OrderBy(ParsingTable::TransitionItem::Compare));
+							CopyFrom(bag->transitionItems, From(bag->transitionItems).OrderBy(ParsingTable::TransitionItem::Compare));
 							for(vint k=0;k<bag->transitionItems.Count()-1;k++)
 							{
 								Ptr<ParsingTable::TransitionItem> t1=bag->transitionItems[k];

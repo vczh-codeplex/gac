@@ -20,116 +20,78 @@ Concat
 ***********************************************************************/
 
 		template<typename T>
-		class ConcatEnumerable : public EnumerableStore<T, 1>, public EnumerableStore<T, 2>, public virtual IEnumerable<T>
+		class ConcatEnumerator : public virtual IEnumerator<T>
 		{
 		protected:
-			class Enumerator : public virtual IEnumerator<T>
+			IEnumerator<T>*					enumerator1;
+			IEnumerator<T>*					enumerator2;
+			vint							index;
+			bool							turned;
+		public:
+			ConcatEnumerator(IEnumerator<T>* _enumerator1, IEnumerator<T>* _enumerator2, vint _index=-1, bool _turned=false)
+				:enumerator1(_enumerator1)
+				,enumerator2(_enumerator2)
+				,index(_index)
+				,turned(_turned)
 			{
-			protected:
-				IEnumerator<T>*					enumerator1;
-				IEnumerator<T>*					enumerator2;
-				vint							index;
-				bool							turned;
-			public:
-				Enumerator(IEnumerator<T>* _enumerator1, IEnumerator<T>* _enumerator2, vint _index=-1, bool _turned=false)
-					:enumerator1(_enumerator1)
-					,enumerator2(_enumerator2)
-					,index(_index)
-					,turned(_turned)
-				{
-				}
+			}
 
-				~Enumerator()
-				{
-					delete enumerator1;
-					delete enumerator2;
-				}
+			~ConcatEnumerator()
+			{
+				delete enumerator1;
+				delete enumerator2;
+			}
 
-				IEnumerator<T>* Clone()const
-				{
-					return new Enumerator(enumerator1->Clone(), enumerator2->Clone(), index, turned);
-				}
+			IEnumerator<T>* Clone()const
+			{
+				return new ConcatEnumerator(enumerator1->Clone(), enumerator2->Clone(), index, turned);
+			}
 
-				const T& Current()const
+			const T& Current()const
+			{
+				if(turned)
 				{
-					if(turned)
+					return enumerator2->Current();
+				}
+				else
+				{
+					return enumerator1->Current();
+				}
+			}
+
+			vint Index()const
+			{
+				return index;
+			}
+
+			bool Next()
+			{
+				index++;
+				if(turned)
+				{
+					return enumerator2->Next();
+				}
+				else
+				{
+					if(enumerator1->Next())
 					{
-						return enumerator2->Current();
+						return true;
 					}
 					else
 					{
-						return enumerator1->Current();
-					}
-				}
-
-				vint Index()const
-				{
-					return index;
-				}
-
-				bool Next()
-				{
-					index++;
-					if(turned)
-					{
+						turned=true;
 						return enumerator2->Next();
 					}
-					else
-					{
-						if(enumerator1->Next())
-						{
-							return true;
-						}
-						else
-						{
-							turned=true;
-							return enumerator2->Next();
-						}
-					}
 				}
-
-				void Reset()
-				{
-					enumerator1->Reset();
-					enumerator2->Reset();
-					index=-1;
-				}
-			};
-		public:
-			ConcatEnumerable(const IEnumerable<T>& enumerable1, const IEnumerable<T>& enumerable2)
-				:EnumerableStore<T, 1>(enumerable1)
-				,EnumerableStore<T, 2>(enumerable2)
-			{
 			}
 
-			IEnumerator<T>* CreateEnumerator()const
+			void Reset()
 			{
-				return new Enumerator(EnumerableStore<T, 1>::CopyEnumerator(), EnumerableStore<T, 2>::CopyEnumerator());
+				enumerator1->Reset();
+				enumerator2->Reset();
+				index=-1;
 			}
 		};
-
-		template<typename T>
-		class ConcatProcessor : public EnumerableProcessor<T, ConcatEnumerable<T>>
-		{
-		protected:
-			const IEnumerable<T>&				second;
-		public:
-			ConcatProcessor(const IEnumerable<T>& _second)
-				:second(_second)
-			{
-			}
-
-			ConcatEnumerable<T> operator()(const IEnumerable<T>& first)const
-			{
-				return ConcatEnumerable<T>(first, second);
-			}
-		};
-
-		template<typename T>
-		ConcatProcessor<T> Concat(const IEnumerable<T>& second)
-		{
-			return ConcatProcessor<T>(second);
-		}
 	}
 }
 
