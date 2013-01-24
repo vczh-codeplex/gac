@@ -70,10 +70,9 @@ namespace vl
 					vint copyCount=0;
 
 					enumerator=ss.CreateEnumerator();
-					while(enumerator->Available())
+					while(enumerator->Next())
 					{
 						copyCount++;
-						enumerator->Next();
 					}
 
 					vint index=(append?RandomAccess<Ds>::GetCount(ds):0);
@@ -81,10 +80,9 @@ namespace vl
 					RandomAccess<Ds>::SetCount(ds, resizeCount);
 
 					enumerator=ss.CreateEnumerator();
-					for(vint i=0;i<copyCount;i++)
+					while(enumerator->Next())
 					{
-						RandomAccess<Ds>::SetValue(ds, index+i, enumerator->Current());
-						enumerator->Next();
+						RandomAccess<Ds>::SetValue(ds, index++, enumerator->Current());
 					}
 				}
 			};
@@ -99,10 +97,9 @@ namespace vl
 						ds.Clear();
 					}
 					Ptr<IEnumerator<typename Ss::ElementType>> enumerator=ss.CreateEnumerator();
-					while(enumerator->Available())
+					while(enumerator->Next())
 					{
 						RandomAccess<Ds>::AppendValue(ds, enumerator->Current());
-						enumerator->Next();
 					}
 				}
 			};

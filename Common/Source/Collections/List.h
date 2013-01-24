@@ -90,8 +90,9 @@ namespace vl
 			private:
 				const ArrayBase<T>*				container;
 				vint							index;
+
 			public:
-				Enumerator(const ArrayBase<T>* _container, vint _index)
+				Enumerator(const ArrayBase<T>* _container, vint _index=-1)
 				{
 					container=_container;
 					index=_index;
@@ -115,17 +116,12 @@ namespace vl
 				bool Next()
 				{
 					index++;
-					return Available();
-				}
-
-				bool Available()const
-				{
 					return index>=0 && index<container->Count();
 				}
 
 				void Reset()
 				{
-					index=0;
+					index=-1;
 				}
 			};
 			
@@ -140,7 +136,7 @@ namespace vl
 
 			IEnumerator<T>* CreateEnumerator()const
 			{
-				return new Enumerator(this, 0);
+				return new Enumerator(this);
 			}
 
 			vint Count()const

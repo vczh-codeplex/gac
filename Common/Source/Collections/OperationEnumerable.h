@@ -50,11 +50,6 @@ namespace vl
 					return false;
 				}
 
-				bool Available()const
-				{
-					return false;
-				}
-
 				void Reset()
 				{
 				}
@@ -192,8 +187,14 @@ namespace vl
 		{
 			Ptr<IEnumerator<T>> ator=a.CreateEnumerator();
 			Ptr<IEnumerator<U>> btor=b.CreateEnumerator();
-			while(ator->Available() && btor->Available())
+			while()
 			{
+				bool a=ator->Next();
+				bool b=btor->Next();
+				if(a&&!b) return 1;
+				if(!a&&b) return -1;
+				if(!a&&!b) break;
+
 				const T& ac=ator->Current();
 				const U& bc=btor->Current();
 				if(ac<bc)
@@ -207,18 +208,7 @@ namespace vl
 				ator->Next();
 				btor->Next();
 			}
-			if(ator->Available())
-			{
-				return 1;
-			}
-			else if(btor->Available())
-			{
-				return -1;
-			}
-			else
-			{
-				return 0;
-			}
+			return 0;
 		}
 	}
 }

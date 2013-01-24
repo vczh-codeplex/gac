@@ -31,7 +31,6 @@ namespace vl
 			virtual const T&							Current()const=0;
 			virtual vint								Index()const=0;
 			virtual bool								Next()=0;
-			virtual bool								Available()const=0;
 			virtual void								Reset()=0;
 		};
 

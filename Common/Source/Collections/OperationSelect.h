@@ -44,10 +44,6 @@ Select
 					:enumerator(_enumerator)
 					,selector(_selector)
 				{
-					if(enumerator->Available())
-					{
-						current=selector(enumerator->Current());
-					}
 				}
 
 				~Enumerator()
@@ -81,11 +77,6 @@ Select
 					{
 						return false;
 					}
-				}
-
-				bool Available()const
-				{
-					return enumerator->Available();
 				}
 
 				void Reset()

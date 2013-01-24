@@ -23,12 +23,11 @@ void TestReadonlyList(const TList& list, vint* items, vint count)
 	{
 		TEST_ASSERT(list.Contains(items[i]));
 		TEST_ASSERT(list.Get(i)==items[i]);
-		TEST_ASSERT(enumerator->Available()==true);
+		TEST_ASSERT(enumerator->Next());
 		TEST_ASSERT(enumerator->Current()==items[i]);
 		TEST_ASSERT(enumerator->Index()==i);
-		TEST_ASSERT(enumerator->Next()==(i!=count-1));
 	}
-	TEST_ASSERT(enumerator->Available()==false);
+	TEST_ASSERT(enumerator->Next()==false);
 	delete enumerator;
 }
 
@@ -37,15 +36,14 @@ void CompareEnumerable(const IEnumerable<T>& dst, const IEnumerable<T>& src)
 {
 	IEnumerator<T>* dstEnum=dst.CreateEnumerator();
 	IEnumerator<T>* srcEnum=src.CreateEnumerator();
-	while(dstEnum->Available())
+	while(dstEnum->Next())
 	{
-		TEST_ASSERT(dstEnum->Available()==srcEnum->Available());
+		TEST_ASSERT(srcEnum->Next());
 		TEST_ASSERT(dstEnum->Current()==srcEnum->Current());
 		TEST_ASSERT(dstEnum->Index()==srcEnum->Index());
-		TEST_ASSERT(dstEnum->Next()==srcEnum->Next());
 	}
-	TEST_ASSERT(dstEnum->Available()==false);
-	TEST_ASSERT(srcEnum->Available()==false);
+	TEST_ASSERT(dstEnum->Next()==false);
+	TEST_ASSERT(srcEnum->Next()==false);
 	delete dstEnum;
 	delete srcEnum;
 }
@@ -192,12 +190,11 @@ void TestReadonlyDictionary(const Dictionary<vint, vint>& dictionary, vint* keys
 	for(vint i=0;i<count;i++)
 	{
 		Pair<vint, vint> pair(keys[i], values[i]);
-		TEST_ASSERT(enumerator->Available()==true);
+		TEST_ASSERT(enumerator->Next());
 		TEST_ASSERT(enumerator->Current()==pair);
 		TEST_ASSERT(enumerator->Index()==i);
-		TEST_ASSERT(enumerator->Next()==(i!=count-1));
 	}
-	TEST_ASSERT(enumerator->Available()==false);
+	TEST_ASSERT(enumerator->Next()==false);
 	delete enumerator;
 }
 
@@ -253,10 +250,9 @@ void TestReadonlyGroup(const Group<vint, vint>& group, vint* keys, vint* values,
 	while(keyIndex<count)
 	{
 		Pair<vint, vint> pair(keys[keyIndex], values[index]);
-		TEST_ASSERT(enumerator->Available()==true);
+		TEST_ASSERT(enumerator->Next());
 		TEST_ASSERT(enumerator->Current()==pair);
 		TEST_ASSERT(enumerator->Index()==index);
-		TEST_ASSERT(enumerator->Next()==!(keyIndex==count-1 && valueIndex==counts[keyIndex]-1));
 
 		valueIndex++;
 		index++;
@@ -266,7 +262,7 @@ void TestReadonlyGroup(const Group<vint, vint>& group, vint* keys, vint* values,
 			valueIndex=0;
 		}
 	}
-	TEST_ASSERT(enumerator->Available()==false);
+	TEST_ASSERT(enumerator->Next()==false);
 	delete enumerator;
 }
 

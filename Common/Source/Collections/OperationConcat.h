@@ -31,16 +31,12 @@ Concat
 				vint							index;
 				bool							turned;
 			public:
-				Enumerator(IEnumerator<T>* _enumerator1, IEnumerator<T>* _enumerator2, vint _index=0, bool _turned=false)
+				Enumerator(IEnumerator<T>* _enumerator1, IEnumerator<T>* _enumerator2, vint _index=-1, bool _turned=false)
 					:enumerator1(_enumerator1)
 					,enumerator2(_enumerator2)
 					,index(_index)
 					,turned(_turned)
 				{
-					if(turned==false && !enumerator1->Available())
-					{
-						turned=true;
-					}
 				}
 
 				~Enumerator()
@@ -56,13 +52,13 @@ Concat
 
 				const T& Current()const
 				{
-					if(enumerator1->Available())
+					if(turned)
 					{
-						return enumerator1->Current();
+						return enumerator2->Current();
 					}
 					else
 					{
-						return enumerator2->Current();
+						return enumerator1->Current();
 					}
 				}
 
@@ -74,31 +70,29 @@ Concat
 				bool Next()
 				{
 					index++;
-					if(enumerator1->Next())
-					{
-						return true;
-					}
-					else if(turned==false)
-					{
-						turned=true;
-						return enumerator2->Available();
-					}
-					else
+					if(turned)
 					{
 						return enumerator2->Next();
 					}
-				}
-
-				bool Available()const
-				{
-					return enumerator1->Available() || enumerator2->Available();
+					else
+					{
+						if(enumerator1->Next())
+						{
+							return true;
+						}
+						else
+						{
+							turned=true;
+							return enumerator2->Next();
+						}
+					}
 				}
 
 				void Reset()
 				{
 					enumerator1->Reset();
 					enumerator2->Reset();
-					index=0;
+					index=-1;
 				}
 			};
 		public:
