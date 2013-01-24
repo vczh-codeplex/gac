@@ -11,19 +11,19 @@ EditingDocumentService
 
 		WString FileDialogService::BuildFilter(Ptr<DialogDescription> dialog)
 		{
-			return dialog->filters
-				>>OrderBy(LAMBDA([](Pair<vint, WString> a, Pair<vint, WString> b)->vint
+			return From(dialog->filters)
+				.OrderBy([](Pair<vint, WString> a, Pair<vint, WString> b)->vint
 				{
 					return a.key-b.key;
-				}))
-				>>Select(LAMBDA([](Pair<vint, WString> input)
+				})
+				.Select([](Pair<vint, WString> input)
 				{
 					return input.value;
-				}))
-				>>Aggregate(LAMBDA([](WString a, WString b)
+				})
+				.Aggregate(WString::Empty, [](WString a, WString b)
 				{
 					return a==L""?b:a+L"|"+b;
-				}), WString::Empty);
+				});
 		}
 
 		FileDialogService::FileDialogService()

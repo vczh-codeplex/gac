@@ -58,22 +58,11 @@ EnumeratePackages
 		void EnumeratePackages(Ptr<GuiResource> resource, List<Ptr<XmlElement>>& packages)
 		{
 			CopyFrom(packages,
-				resource
-					->GetFolder(L"Packages")
-					->GetItems()
-					>>Select(LAMBDA([](Ptr<GuiResourceItem> item)
-						{
-							return item->GetContent();
-						}))
-					>>FindType<Object, XmlDocument>()
-					>>Where(LAMBDA([](Ptr<XmlDocument> document)
-						{
-							return document->rootElement->name.value==L"Package";
-						}))
-					>>Select(LAMBDA([](Ptr<XmlDocument> document)
-						{
-							return document->rootElement;
-						}))
+				From(resource->GetFolder(L"Packages")->GetItems())
+					.Select([](Ptr<GuiResourceItem> item){ return item->GetContent(); })
+					.FindType<XmlDocument>()
+					.Where([](Ptr<XmlDocument> document){ return document->rootElement->name.value==L"Package"; })
+					.Select([](Ptr<XmlDocument> document){ return document->rootElement; })
 					);
 		}
 
@@ -93,10 +82,10 @@ EnumerateCommands
 				if(auto commandsElement=XmlGetElement(package, L"Commands"))
 				{
 					FOREACH(Ptr<XmlElement>, commandElement,
-						(commandsElement->subNodes
-							>>FindType<XmlNode, XmlElement>()
-							>>Where(LAMBDA([](Ptr<XmlElement> e){return e->name.value==L"Command";}))
-							))
+						From(commandsElement->subNodes)
+							.FindType<XmlElement>()
+							.Where([](Ptr<XmlElement> e){return e->name.value==L"Command";})
+							)
 					{
 						if(auto name=XmlGetAttribute(commandElement, L"id"))
 						if(!commands.Keys().Contains(name->value.value))
@@ -125,9 +114,7 @@ EnumerateMenuDefinitions
 				// find all single menu items
 				if(auto menusElement=XmlGetElement(package, L"Menus"))
 				{
-					List<Ptr<XmlElement>> menuElements;
-					XmlGetElements(menusElement, L"Menu", menuElements);
-					FOREACH(Ptr<XmlElement>, menuElement, menuElements)
+					FOREACH(Ptr<XmlElement>, menuElement, XmlGetElements(menusElement, L"Menu"))
 					{
 						if(auto id=XmlGetAttribute(menuElement, L"id"))
 						if(auto parent=XmlGetElement(menuElement, L"Parent"))
@@ -151,16 +138,12 @@ EnumerateMenuDefinitions
 				// find all menu groups
 				if(auto groupsElement=XmlGetElement(package, L"Groups"))
 				{
-					List<Ptr<XmlElement>> panelElements;
-					XmlGetElements(groupsElement, L"Group", panelElements);
-					FOREACH(Ptr<XmlElement>, groupElement, panelElements)
+					FOREACH(Ptr<XmlElement>, groupElement, XmlGetElements(groupsElement, L"Group"))
 					{
 						Ptr<PackageXmlMenuGroup> menuGroup=new PackageXmlMenuGroup;
 						menuGroup->hasSeparator=true;
 
-						List<Ptr<XmlElement>> parentElements;
-						XmlGetElements(groupElement, L"Parent", parentElements);
-						FOREACH(Ptr<XmlElement>, parentElement, parentElements)
+						FOREACH(Ptr<XmlElement>, parentElement, XmlGetElements(groupElement, L"Parent"))
 						{
 							if(auto parentId=XmlGetAttribute(parentElement, L"id"))
 							if(auto priority=XmlGetAttribute(parentElement, L"priority"))
@@ -170,9 +153,7 @@ EnumerateMenuDefinitions
 							}
 						}
 
-						List<Ptr<XmlElement>> menuElements;
-						XmlGetElements(groupElement, L"Menu", menuElements);
-						FOREACH(Ptr<XmlElement>, menuElement, menuElements)
+						FOREACH(Ptr<XmlElement>, menuElement, XmlGetElements(groupElement, L"Menu"))
 						{
 							if(auto id=XmlGetAttribute(menuElement, L"id"))
 							{
@@ -212,20 +193,11 @@ BuildMenu/BuildToolbar
 				{
 					List<Ptr<PackageXmlMenuGroup>> orderedGroups;
 					CopyFrom(orderedGroups,
-						(existingMenuGroups.GetByIndex(index)
-							>>Where(LAMBDA([](ProprityMenuGroup p)
-							{
-								return p.value->menuItems.Count()>0;
-							}))
-							>>OrderBy(LAMBDA([](ProprityMenuGroup p1, ProprityMenuGroup p2)
-							{
-								return p1.key-p2.key;
-							}))
-							>>Select(LAMBDA([](ProprityMenuGroup p)
-							{
-								return p.value;
-							}))
-						));
+						From(existingMenuGroups.GetByIndex(index))
+							.Where([](ProprityMenuGroup p){ return p.value->menuItems.Count()>0; })
+							.OrderBy([](ProprityMenuGroup p1, ProprityMenuGroup p2){ return p1.key-p2.key; })
+							.Select([](ProprityMenuGroup p){ return p.value; })
+						);
 
 					if(orderedGroups.Count()>0)
 					{
@@ -356,9 +328,7 @@ BuildDialogs
 				Ptr<XmlElement> dialogsElement=XmlGetElement(package, L"Dialogs");
 				if(dialogsElement)
 				{
-					List<Ptr<XmlElement>> dialogElements;
-					XmlGetElements(dialogsElement, L"Dialog", dialogElements);
-					FOREACH(Ptr<XmlElement>, dialogElement, dialogElements)
+					FOREACH(Ptr<XmlElement>, dialogElement, XmlGetElements(dialogsElement, L"Dialog"))
 					{
 						if(auto id=XmlGetAttribute(dialogElement, L"id"))
 						if(auto text=XmlGetElement(dialogElement, L"Text"))
@@ -374,16 +344,12 @@ BuildDialogs
 				Ptr<XmlElement> filtersElement=XmlGetElement(package, L"Filters");
 				if(filtersElement)
 				{
-					List<Ptr<XmlElement>> filterElements;
-					XmlGetElements(filtersElement, L"Filter", filterElements);
-					FOREACH(Ptr<XmlElement>, filterElement, filterElements)
+					FOREACH(Ptr<XmlElement>, filterElement, XmlGetElements(filtersElement, L"Filter"))
 					{
 						if(auto name=XmlGetElement(filterElement, L"Name"))
 						if(auto pattern=XmlGetElement(filterElement, L"Pattern"))
 						{
-							List<Ptr<XmlElement>> parentElements;
-							XmlGetElements(filterElement, L"Parent", parentElements);
-							FOREACH(Ptr<XmlElement>, parentElement, parentElements)
+							FOREACH(Ptr<XmlElement>, parentElement, XmlGetElements(filterElement, L"Parent"))
 							{
 								if(auto id=XmlGetAttribute(parentElement, L"id"))
 								if(auto priority=XmlGetAttribute(parentElement, L"priority"))
