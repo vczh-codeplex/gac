@@ -20,7 +20,7 @@ private:
 public:
 	IniColorizer()
 	{
-		text::ColorEntry entry=win7::Win7GetTextBoxTextColor();
+		text::ColorEntry entry=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
 		colors.Resize(5);
 		
 		// text color
@@ -53,7 +53,7 @@ public:
 		return 0;
 	}
 
-	void ColorizeLineWithCRLF(const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override
+	void ColorizeLineWithCRLF(int lineIndex, const wchar_t* text, unsigned __int32* colors, int length, int& lexerState, int& contextState)override
 	{
 		if(length>0)
 		{
@@ -101,7 +101,7 @@ class XmlColorizer : public GuiTextBoxRegexColorizer
 public:
 	XmlColorizer()
 	{
-		text::ColorEntry entry=win7::Win7GetTextBoxTextColor();
+		text::ColorEntry entry=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
 		SetDefaultColor(entry);
 
 		entry.normal.text=Color(0, 128, 0);
@@ -125,7 +125,7 @@ public:
 		Setup();
 	}
 
-	void ColorizeTokenContextSensitive(const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
+	void ColorizeTokenContextSensitive(int lineIndex, const wchar_t* text, vint start, vint length, vint& token, int& contextState)override
 	{
 		// 0 < 1 name 2 att > 0
 		switch(token)
@@ -303,7 +303,7 @@ class CppColorizer : public GuiTextBoxRegexColorizer
 public:
 	CppColorizer()
 	{
-		text::ColorEntry entry=win7::Win7GetTextBoxTextColor();
+		text::ColorEntry entry=GetCurrentTheme()->GetDefaultTextBoxColorEntry();
 		SetDefaultColor(entry);
 
 		entry.normal.text=Color(128, 0, 255);
@@ -343,12 +343,12 @@ private:
 		comboSelector->SetEnabled(false);
 		this->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::LargeWaiting));
 
-		GetApplication()->InvokeAsync(Curry<void(TextBoxColorizerWindow*)>([](TextBoxColorizerWindow* window)
+		GetApplication()->InvokeAsync([=]()
 		{
 			Ptr<GuiTextBoxColorizerBase> colorizer;
 			WString text;
 
-			switch(window->comboSelector->GetSelectedIndex())
+			switch(comboSelector->GetSelectedIndex())
 			{
 			case 0:
 				text=
@@ -390,13 +390,13 @@ private:
 				break;
 			}
 
-			GetApplication()->InvokeInMainThreadAndWait([text, window]()
+			GetApplication()->InvokeInMainThreadAndWait([=]()
 			{
-				window->textBox->SetColorizer(0);
-				window->textBox->SetText(text);
+				textBox->SetColorizer(0);
+				textBox->SetText(text);
 			});
 
-			switch(window->comboSelector->GetSelectedIndex())
+			switch(comboSelector->GetSelectedIndex())
 			{
 			case 0:
 				colorizer=new IniColorizer;
@@ -409,13 +409,13 @@ private:
 				break;
 			}
 
-			GetApplication()->InvokeInMainThreadAndWait([colorizer, window]()
+			GetApplication()->InvokeInMainThreadAndWait([=]()
 			{
-				window->textBox->SetColorizer(colorizer);
-				window->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
-				window->comboSelector->SetEnabled(true);
+				textBox->SetColorizer(colorizer);
+				GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
+				comboSelector->SetEnabled(true);
 			});
-		})(this));
+		});
 	}
 public:
 	TextBoxColorizerWindow()
