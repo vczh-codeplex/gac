@@ -6,6 +6,7 @@ Data Structure::Operations
 Functions:
 	CopyFrom(TargetContainer, SourceContainer)
 	[T]		.Select(T->K) => [K]
+	[T]		.SelectMany(T->[K]) => [K]
 	[T]		.Where(T->bool) => [T]
 	[Ptr<T>].Cast<K>() => [Ptr<K>]
 	[Ptr<T>].FindType<K>() => [Ptr<K>]
@@ -111,7 +112,7 @@ LazyList
 		protected:
 			Ptr<IEnumerator<T>>			enumeratorPrototype;
 
-			IEnumerator<T>* xs()
+			IEnumerator<T>* xs()const
 			{
 				return enumeratorPrototype->Clone();
 			}
@@ -125,10 +126,27 @@ LazyList
 				:enumeratorPrototype(enumerable.CreateEnumerator())
 			{
 			}
+
+			LazyList(const LazyList<T>& lazyList)
+				:enumeratorPrototype(lazyList.enumeratorPrototype)
+			{
+			}
+
+			template<typename TContainer>
+			LazyList(Ptr<TContainer> container)
+				:enumeratorPrototype(new ContainerEnumerator<T, TContainer>(container))
+			{
+			}
 			
 			LazyList()
 				:enumeratorPrototype(EmptyEnumerable<T>().CreateEnumerator())
 			{
+			}
+
+			LazyList<T>& operator=(const LazyList<T>& lazyList)
+			{
+				enumeratorPrototype=lazyList.enumeratorPrototype;
+				return *this;
 			}
 
 			IEnumerator<T>* CreateEnumerator()const
@@ -139,32 +157,39 @@ LazyList
 			//-------------------------------------------------------
 
 			template<typename F>
-			LazyList<FUNCTION_RESULT_TYPE(F)> Select(F f)
+			LazyList<FUNCTION_RESULT_TYPE(F)> Select(F f)const
 			{
 				return new SelectEnumerator<T, FUNCTION_RESULT_TYPE(F)>(xs(), f);
 			}
+
+			template<typename F>
+			auto SelectMany(F f)const -> LazyList<decltype(From(f(T())).First())>
+			{
+				typedef decltype(From(f(T())).First()) U;
+				return Select(f).Aggregate(LazyList<U>(), [](const LazyList<U>& a, const IEnumerable<U>& b){return a.Concat(b);});
+			}
 			
 			template<typename F>
-			LazyList<T> Where(F f)
+			LazyList<T> Where(F f)const
 			{
 				return new WhereEnumerator<T>(xs(), f);
 			}
 
 			template<typename U>
-			LazyList<Ptr<U>> Cast()
+			LazyList<Ptr<U>> Cast()const
 			{
 				Func<Ptr<U>(T)> f=[](T t)->Ptr<U>{return t.Cast<U>();};
 				return new SelectEnumerator<T, Ptr<U>>(xs(), f);
 			}
 
 			template<typename U>
-			LazyList<Ptr<U>> FindType()
+			LazyList<Ptr<U>> FindType()const
 			{
 				return Cast<U>().Where([](T t){return t;});
 			}
 
 			template<typename F>
-			LazyList<T> OrderBy(F f)
+			LazyList<T> OrderBy(F f)const
 			{
 				Ptr<List<T>> sorted=new List<T>;
 				CopyFrom(*sorted.Obj(), *this);
@@ -178,7 +203,7 @@ LazyList
 			//-------------------------------------------------------
 
 			template<typename F>
-			T Aggregate(F f)
+			T Aggregate(F f)const
 			{
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
@@ -194,7 +219,7 @@ LazyList
 			}
 
 			template<typename I, typename F>
-			I Aggregate(I init, F f)
+			I Aggregate(I init, F f)const
 			{
 				FOREACH(T, t, *this)
 				{
@@ -204,28 +229,28 @@ LazyList
 			}
 
 			template<typename F>
-			bool All(F f)
+			bool All(F f)const
 			{
 				return Select(f).Aggregate(true, [](bool a, bool b){return a&&b;});
 			}
 
 			template<typename F>
-			bool Any(F f)
+			bool Any(F f)const
 			{
 				return Select(f).Aggregate(false, [](bool a, bool b){return a||b;});
 			}
 
-			T Max()
+			T Max()const
 			{
 				return Aggregate([](T a, T b){return a>b?a:b;});
 			}
 
-			T Min()
+			T Min()const
 			{
 				return Aggregate([](T a, T b){return a<b?a:b;});
 			}
 
-			T First()
+			T First()const
 			{
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
@@ -235,7 +260,7 @@ LazyList
 				return enumerator->Current();
 			}
 
-			T First(T defaultValue)
+			T First(T defaultValue)const
 			{
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
@@ -245,7 +270,7 @@ LazyList
 				return enumerator->Current();
 			}
 
-			T Last()
+			T Last()const
 			{
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
@@ -263,7 +288,7 @@ LazyList
 				}
 			}
 
-			T Last(T defaultValue)
+			T Last(T defaultValue)const
 			{
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				while(enumerator->Next())
@@ -273,7 +298,7 @@ LazyList
 				return defaultValue;
 			}
 
-			vint Count()
+			vint Count()const
 			{
 				vint result=0;
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
@@ -284,7 +309,7 @@ LazyList
 				return result;
 			}
 
-			bool IsEmpty()
+			bool IsEmpty()const
 			{
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				return enumerator->Next();
@@ -292,32 +317,32 @@ LazyList
 
 			//-------------------------------------------------------
 
-			LazyList<T> Concat(IEnumerable<T>& remains)
+			LazyList<T> Concat(const IEnumerable<T>& remains)const
 			{
 				return new ConcatEnumerator<T>(xs(), remains.CreateEnumerator());
 			}
 
-			LazyList<T> Take(vint count)
+			LazyList<T> Take(vint count)const
 			{
 				return new TakeEnumerator<T>(xs(), count);
 			}
 
-			LazyList<T> Skip(vint count)
+			LazyList<T> Skip(vint count)const
 			{
 				return new SkipEnumerator<T>(xs(), count);
 			}
 
-			LazyList<T> Repeat(vint count)
+			LazyList<T> Repeat(vint count)const
 			{
 				return new RepeatEnumerator<T>(xs(), count);
 			}
 
-			LazyList<T> Distinct()
+			LazyList<T> Distinct()const
 			{
 				return new DistinctEnumerator<T>(xs());
 			}
 
-			LazyList<T> Reverse()
+			LazyList<T> Reverse()const
 			{
 				return new ReverseEnumerator<T>(*this);
 			}
@@ -325,22 +350,22 @@ LazyList
 			//-------------------------------------------------------
 
 			template<typename U>
-			LazyList<Pair<T, U>> Pairwise(IEnumerable<U>& remains)
+			LazyList<Pair<T, U>> Pairwise(const IEnumerable<U>& remains)const
 			{
 				return new PairwiseEnumerator<T, U>(xs(), remains.CreateEnumerator());
 			}
 
-			LazyList<T> Intersect(IEnumerable<T>& remains)
+			LazyList<T> Intersect(const IEnumerable<T>& remains)const
 			{
 				return new IntersectExceptEnumerator<T, true>(xs(), remains);
 			}
 
-			LazyList<T> Except(IEnumerable<T>& remains)
+			LazyList<T> Except(const IEnumerable<T>& remains)const
 			{
 				return new IntersectExceptEnumerator<T, false>(xs(), remains);
 			}
 
-			LazyList<T> Union(IEnumerable<T>& remains)
+			LazyList<T> Union(const IEnumerable<T>& remains)const
 			{
 				return Concat(remains).Distinct();
 			}

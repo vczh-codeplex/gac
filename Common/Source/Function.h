@@ -3798,8 +3798,8 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		template<typename T>
 		struct FunctionObjectRetriveType
 		{
-			typedef typename LambdaRetriveType<T>::Type Type;
-			typedef typename LambdaRetriveType<T>::ResultType ResultType;
+			typedef typename LambdaRetriveType<decltype(&T::operator())>::Type Type;
+			typedef typename LambdaRetriveType<decltype(&T::operator())>::ResultType ResultType;
 		};
  
 /***********************************************************************
@@ -3810,6 +3810,7 @@ vl::Func<R()>
 		struct LambdaRetriveType<R (__thiscall TObject::*)()const>
 		{
 			typedef Func<R()> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R >
@@ -3833,6 +3834,7 @@ vl::Func<R(T0)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0)const>
 		{
 			typedef Func<R(T0)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0>
@@ -3856,6 +3858,7 @@ vl::Func<R(T0,T1)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1)const>
 		{
 			typedef Func<R(T0,T1)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1>
@@ -3879,6 +3882,7 @@ vl::Func<R(T0,T1,T2)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2)const>
 		{
 			typedef Func<R(T0,T1,T2)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2>
@@ -3902,6 +3906,7 @@ vl::Func<R(T0,T1,T2,T3)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3)const>
 		{
 			typedef Func<R(T0,T1,T2,T3)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3>
@@ -3925,6 +3930,7 @@ vl::Func<R(T0,T1,T2,T3,T4)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4)const>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3,typename T4>
@@ -3948,6 +3954,7 @@ vl::Func<R(T0,T1,T2,T3,T4,T5)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5)const>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
@@ -3971,6 +3978,7 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6)const>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
@@ -3994,6 +4002,7 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7)const>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
@@ -4017,6 +4026,7 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7,T8)const>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
@@ -4040,6 +4050,7 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)const>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>

@@ -510,6 +510,22 @@ TEST_CASE(TestSelectOperation)
 	CompareEnumerable(dst, From(src).Select(Square).Select(Double));
 }
 
+TEST_CASE(TestSelectManyOperation)
+{
+	vint src[]={1,2,3};
+	List<vint> dst;
+
+	CopyFrom(dst, From(src).SelectMany([](vint i)
+		{
+			Ptr<List<vint>> xs=new List<vint>();
+			xs->Add(i);
+			xs->Add(i*2);
+			xs->Add(i*3);
+			return LazyList<vint>(xs);
+		}));
+	CHECK_LIST_ITEMS(dst, {1 _ 2 _ 3 _ 2 _ 4 _ 6 _ 3 _ 6 _ 9});
+}
+
 bool Odd(vint a)
 {
 	return a%2==1;
