@@ -9580,8 +9580,8 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		template<typename T>
 		struct FunctionObjectRetriveType
 		{
-			typedef typename LambdaRetriveType<T>::Type Type;
-			typedef typename LambdaRetriveType<T>::ResultType ResultType;
+			typedef typename LambdaRetriveType<decltype(&T::operator())>::Type Type;
+			typedef typename LambdaRetriveType<decltype(&T::operator())>::ResultType ResultType;
 		};
  
 /***********************************************************************
@@ -9592,6 +9592,7 @@ vl::Func<R()>
 		struct LambdaRetriveType<R (__thiscall TObject::*)()const>
 		{
 			typedef Func<R()> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R >
@@ -9615,6 +9616,7 @@ vl::Func<R(T0)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0)const>
 		{
 			typedef Func<R(T0)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0>
@@ -9638,6 +9640,7 @@ vl::Func<R(T0,T1)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1)const>
 		{
 			typedef Func<R(T0,T1)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1>
@@ -9661,6 +9664,7 @@ vl::Func<R(T0,T1,T2)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2)const>
 		{
 			typedef Func<R(T0,T1,T2)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2>
@@ -9684,6 +9688,7 @@ vl::Func<R(T0,T1,T2,T3)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3)const>
 		{
 			typedef Func<R(T0,T1,T2,T3)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3>
@@ -9707,6 +9712,7 @@ vl::Func<R(T0,T1,T2,T3,T4)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4)const>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3,typename T4>
@@ -9730,6 +9736,7 @@ vl::Func<R(T0,T1,T2,T3,T4,T5)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5)const>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
@@ -9753,6 +9760,7 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6)const>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
@@ -9776,6 +9784,7 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7)const>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
@@ -9799,6 +9808,7 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7,T8)const>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
@@ -9822,6 +9832,7 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)const>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> Type;
+			typedef R ResultType;
 		};
  
 		template<typename TObject, typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
@@ -11919,6 +11930,7 @@ Data Structure::Operations
 Functions:
 	CopyFrom(TargetContainer, SourceContainer)
 	[T]		.Select(T->K) => [K]
+	[T]		.SelectMany(T->[K]) => [K]
 	[T]		.Where(T->bool) => [T]
 	[Ptr<T>].Cast<K>() => [Ptr<K>]
 	[Ptr<T>].FindType<K>() => [Ptr<K>]
@@ -12014,7 +12026,7 @@ LazyList
 		protected:
 			Ptr<IEnumerator<T>>			enumeratorPrototype;
 
-			IEnumerator<T>* xs()
+			IEnumerator<T>* xs()const
 			{
 				return enumeratorPrototype->Clone();
 			}
@@ -12028,10 +12040,27 @@ LazyList
 				:enumeratorPrototype(enumerable.CreateEnumerator())
 			{
 			}
+
+			LazyList(const LazyList<T>& lazyList)
+				:enumeratorPrototype(lazyList.enumeratorPrototype)
+			{
+			}
+
+			template<typename TContainer>
+			LazyList(Ptr<TContainer> container)
+				:enumeratorPrototype(new ContainerEnumerator<T, TContainer>(container))
+			{
+			}
 			
 			LazyList()
 				:enumeratorPrototype(EmptyEnumerable<T>().CreateEnumerator())
 			{
+			}
+
+			LazyList<T>& operator=(const LazyList<T>& lazyList)
+			{
+				enumeratorPrototype=lazyList.enumeratorPrototype;
+				return *this;
 			}
 
 			IEnumerator<T>* CreateEnumerator()const
@@ -12042,32 +12071,39 @@ LazyList
 			//-------------------------------------------------------
 
 			template<typename F>
-			LazyList<FUNCTION_RESULT_TYPE(F)> Select(F f)
+			LazyList<FUNCTION_RESULT_TYPE(F)> Select(F f)const
 			{
 				return new SelectEnumerator<T, FUNCTION_RESULT_TYPE(F)>(xs(), f);
 			}
+
+			template<typename F>
+			auto SelectMany(F f)const -> LazyList<decltype(From(f(T())).First())>
+			{
+				typedef decltype(From(f(T())).First()) U;
+				return Select(f).Aggregate(LazyList<U>(), [](const LazyList<U>& a, const IEnumerable<U>& b){return a.Concat(b);});
+			}
 			
 			template<typename F>
-			LazyList<T> Where(F f)
+			LazyList<T> Where(F f)const
 			{
 				return new WhereEnumerator<T>(xs(), f);
 			}
 
 			template<typename U>
-			LazyList<Ptr<U>> Cast()
+			LazyList<Ptr<U>> Cast()const
 			{
 				Func<Ptr<U>(T)> f=[](T t)->Ptr<U>{return t.Cast<U>();};
 				return new SelectEnumerator<T, Ptr<U>>(xs(), f);
 			}
 
 			template<typename U>
-			LazyList<Ptr<U>> FindType()
+			LazyList<Ptr<U>> FindType()const
 			{
 				return Cast<U>().Where([](T t){return t;});
 			}
 
 			template<typename F>
-			LazyList<T> OrderBy(F f)
+			LazyList<T> OrderBy(F f)const
 			{
 				Ptr<List<T>> sorted=new List<T>;
 				CopyFrom(*sorted.Obj(), *this);
@@ -12081,7 +12117,7 @@ LazyList
 			//-------------------------------------------------------
 
 			template<typename F>
-			T Aggregate(F f)
+			T Aggregate(F f)const
 			{
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
@@ -12097,7 +12133,7 @@ LazyList
 			}
 
 			template<typename I, typename F>
-			I Aggregate(I init, F f)
+			I Aggregate(I init, F f)const
 			{
 				FOREACH(T, t, *this)
 				{
@@ -12107,28 +12143,28 @@ LazyList
 			}
 
 			template<typename F>
-			bool All(F f)
+			bool All(F f)const
 			{
 				return Select(f).Aggregate(true, [](bool a, bool b){return a&&b;});
 			}
 
 			template<typename F>
-			bool Any(F f)
+			bool Any(F f)const
 			{
 				return Select(f).Aggregate(false, [](bool a, bool b){return a||b;});
 			}
 
-			T Max()
+			T Max()const
 			{
 				return Aggregate([](T a, T b){return a>b?a:b;});
 			}
 
-			T Min()
+			T Min()const
 			{
 				return Aggregate([](T a, T b){return a<b?a:b;});
 			}
 
-			T First()
+			T First()const
 			{
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
@@ -12138,7 +12174,7 @@ LazyList
 				return enumerator->Current();
 			}
 
-			T First(T defaultValue)
+			T First(T defaultValue)const
 			{
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
@@ -12148,7 +12184,7 @@ LazyList
 				return enumerator->Current();
 			}
 
-			T Last()
+			T Last()const
 			{
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				if(!enumerator->Next())
@@ -12166,7 +12202,7 @@ LazyList
 				}
 			}
 
-			T Last(T defaultValue)
+			T Last(T defaultValue)const
 			{
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				while(enumerator->Next())
@@ -12176,7 +12212,7 @@ LazyList
 				return defaultValue;
 			}
 
-			vint Count()
+			vint Count()const
 			{
 				vint result=0;
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
@@ -12187,7 +12223,7 @@ LazyList
 				return result;
 			}
 
-			bool IsEmpty()
+			bool IsEmpty()const
 			{
 				Ptr<IEnumerator<T>> enumerator=CreateEnumerator();
 				return enumerator->Next();
@@ -12195,32 +12231,32 @@ LazyList
 
 			//-------------------------------------------------------
 
-			LazyList<T> Concat(IEnumerable<T>& remains)
+			LazyList<T> Concat(const IEnumerable<T>& remains)const
 			{
 				return new ConcatEnumerator<T>(xs(), remains.CreateEnumerator());
 			}
 
-			LazyList<T> Take(vint count)
+			LazyList<T> Take(vint count)const
 			{
 				return new TakeEnumerator<T>(xs(), count);
 			}
 
-			LazyList<T> Skip(vint count)
+			LazyList<T> Skip(vint count)const
 			{
 				return new SkipEnumerator<T>(xs(), count);
 			}
 
-			LazyList<T> Repeat(vint count)
+			LazyList<T> Repeat(vint count)const
 			{
 				return new RepeatEnumerator<T>(xs(), count);
 			}
 
-			LazyList<T> Distinct()
+			LazyList<T> Distinct()const
 			{
 				return new DistinctEnumerator<T>(xs());
 			}
 
-			LazyList<T> Reverse()
+			LazyList<T> Reverse()const
 			{
 				return new ReverseEnumerator<T>(*this);
 			}
@@ -12228,22 +12264,22 @@ LazyList
 			//-------------------------------------------------------
 
 			template<typename U>
-			LazyList<Pair<T, U>> Pairwise(IEnumerable<U>& remains)
+			LazyList<Pair<T, U>> Pairwise(const IEnumerable<U>& remains)const
 			{
 				return new PairwiseEnumerator<T, U>(xs(), remains.CreateEnumerator());
 			}
 
-			LazyList<T> Intersect(IEnumerable<T>& remains)
+			LazyList<T> Intersect(const IEnumerable<T>& remains)const
 			{
 				return new IntersectExceptEnumerator<T, true>(xs(), remains);
 			}
 
-			LazyList<T> Except(IEnumerable<T>& remains)
+			LazyList<T> Except(const IEnumerable<T>& remains)const
 			{
 				return new IntersectExceptEnumerator<T, false>(xs(), remains);
 			}
 
-			LazyList<T> Union(IEnumerable<T>& remains)
+			LazyList<T> Union(const IEnumerable<T>& remains)const
 			{
 				return Concat(remains).Distinct();
 			}
@@ -12448,20 +12484,20 @@ namespace vl
 	{
 		namespace xml
 		{
-			extern WString					XmlEscapeValue(const WString& value);
-			extern WString					XmlUnescapeValue(const WString& value);
-			extern WString					XmlEscapeCData(const WString& value);
-			extern WString					XmlUnescapeCData(const WString& value);
-			extern WString					XmlEscapeComment(const WString& value);
-			extern WString					XmlUnescapeComment(const WString& value);
-			extern void						XmlPrint(Ptr<XmlNode> node, stream::TextWriter& writer);
-			extern WString					XmlToString(Ptr<XmlNode> node);
+			extern WString							XmlEscapeValue(const WString& value);
+			extern WString							XmlUnescapeValue(const WString& value);
+			extern WString							XmlEscapeCData(const WString& value);
+			extern WString							XmlUnescapeCData(const WString& value);
+			extern WString							XmlEscapeComment(const WString& value);
+			extern WString							XmlUnescapeComment(const WString& value);
+			extern void								XmlPrint(Ptr<XmlNode> node, stream::TextWriter& writer);
+			extern WString							XmlToString(Ptr<XmlNode> node);
 
-			extern Ptr<XmlAttribute>		XmlGetAttribute(Ptr<XmlElement> element, const WString& name);
-			extern Ptr<XmlElement>			XmlGetElement(Ptr<XmlElement> element, const WString& name);
-			extern void						XmlGetElements(Ptr<XmlElement> element, collections::List<Ptr<XmlElement>>& elements);
-			extern void						XmlGetElements(Ptr<XmlElement> element, const WString& name, collections::List<Ptr<XmlElement>>& elements);
-			extern WString					XmlGetValue(Ptr<XmlElement> element);
+			extern Ptr<XmlAttribute>							XmlGetAttribute(Ptr<XmlElement> element, const WString& name);
+			extern Ptr<XmlElement>								XmlGetElement(Ptr<XmlElement> element, const WString& name);
+			extern collections::LazyList<Ptr<XmlElement>>		XmlGetElements(Ptr<XmlElement> element);
+			extern collections::LazyList<Ptr<XmlElement>>		XmlGetElements(Ptr<XmlElement> element, const WString& name);
+			extern WString										XmlGetValue(Ptr<XmlElement> element);
 		}
 	}
 }

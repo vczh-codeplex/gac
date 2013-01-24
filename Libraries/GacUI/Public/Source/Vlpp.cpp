@@ -8997,28 +8997,17 @@ API
 				return 0;
 			}
 
-			void XmlGetElements(Ptr<XmlElement> element, collections::List<Ptr<XmlElement>>& elements)
+			collections::LazyList<Ptr<XmlElement>> XmlGetElements(Ptr<XmlElement> element)
 			{
-				FOREACH(Ptr<XmlNode>, node, element->subNodes)
-				{
-					Ptr<XmlElement> subElement=node.Cast<XmlElement>();
-					if(subElement)
-					{
-						elements.Add(subElement);
-					}
-				}
+				return From(element->subNodes)
+					.FindType<XmlElement>();
 			}
 
-			void XmlGetElements(Ptr<XmlElement> element, const WString& name, collections::List<Ptr<XmlElement>>& elements)
+			collections::LazyList<Ptr<XmlElement>> XmlGetElements(Ptr<XmlElement> element, const WString& name)
 			{
-				FOREACH(Ptr<XmlNode>, node, element->subNodes)
-				{
-					Ptr<XmlElement> subElement=node.Cast<XmlElement>();
-					if(subElement && subElement->name.value==name)
-					{
-						elements.Add(subElement);
-					}
-				}
+				return From(element->subNodes)
+					.FindType<XmlElement>()
+					.Where([name](Ptr<XmlElement> e){return e->name.value==name;});
 			}
 
 			WString XmlGetValue(Ptr<XmlElement> element)
