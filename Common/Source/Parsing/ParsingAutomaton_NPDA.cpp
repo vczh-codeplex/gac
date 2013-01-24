@@ -74,9 +74,9 @@ CreateNondeterministicPDAFromEpsilonPDA::state_clearning
 					{
 						FOREACH(Transition*, transition, state->transitions)
 						{
-							CopyFrom(transition->actions, transition->actions>>OrderBy(&CompareActionForRearranging));
+							CopyFrom(transition->actions, From(transition->actions).OrderBy(&CompareActionForRearranging));
 						}
-						CopyFrom(state->transitions, state->transitions>>OrderBy(&CompareTransitionForRearranging));
+						CopyFrom(state->transitions, From(state->transitions).OrderBy(&CompareTransitionForRearranging));
 						stateContentSorted.Add(state);
 					}
 				}

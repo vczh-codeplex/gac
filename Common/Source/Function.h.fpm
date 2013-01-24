@@ -289,6 +289,14 @@ $( )
 		struct LambdaRetriveType<R (__thiscall TObject::*)($TYPE_LIST($count))>
 		{
 			typedef Func<R($TYPE_LIST($count))> Type;
+			typedef R ResultType;
+		};
+$( )
+		template<$TYPENAME_LIST($count,1)>
+		struct FunctionObjectRetriveType<R(*)($TYPE_LIST($count))>
+		{
+			typedef Func<R($TYPE_LIST($count))> Type;
+			typedef R ResultType;
 		};
 $( )
 $$end
@@ -337,18 +345,32 @@ $loop($MAX_FUNCTION_NUMBER(),0,$FUNCTION_APPLY)
 		struct LambdaRetriveType
 		{
 			typedef vint Type;
+			typedef vint ResultType;
+		};
+$( )
+		template<typename T>
+		struct FunctionObjectRetriveType
+		{
+			typedef typename LambdaRetriveType<T>::Type Type;
+			typedef typename LambdaRetriveType<T>::ResultType ResultType;
 		};
 $( )
 $loop($MAX_FUNCTION_NUMBER(),0,$LAMBDA_TYPE_RETRIVER_DECLARATION)
 $( )
-#ifdef VCZH_NO_OLD_OS
 		template<typename T>
 		typename LambdaRetriveType<decltype(&T::operator())>::Type Lambda(T functionObject)
 		{
 			return functionObject;
 		}
+		template<typename T>
+		typename FunctionObjectRetriveType<T>::Type ConvertToFunction(T functionObject)
+		{
+			return functionObject;
+		}
 #define LAMBDA vl::function_lambda::Lambda
-#endif
+#define FUNCTION vl::function_lambda::ConvertToFunction
+#define FUNCTION_TYPE(T) typename vl::function_lambda::FunctionObjectRetriveType<T>::Type
+#define FUNCTION_RESULT_TYPE(T) typename vl::function_lambda::FunctionObjectRetriveType<T>::ResultType
 	}
 
 	namespace function_binding

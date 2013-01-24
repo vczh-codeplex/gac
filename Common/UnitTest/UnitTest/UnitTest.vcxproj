@@ -148,7 +148,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Basic.cpp" />
-    <ClCompile Include="..\..\Source\Collections\Operation.cpp" />
     <ClCompile Include="..\..\Source\Combinator\StringCombinator.cpp" />
     <ClCompile Include="..\..\Source\Combinator\TokenCombinator.cpp" />
     <ClCompile Include="..\..\Source\Console.cpp" />
@@ -213,12 +212,10 @@
     <ClInclude Include="..\..\Source\Collections\Interfaces.h" />
     <ClInclude Include="..\..\Source\Collections\List.h" />
     <ClInclude Include="..\..\Source\Collections\Operation.h" />
-    <ClInclude Include="..\..\Source\Collections\OperationAggregate.h" />
     <ClInclude Include="..\..\Source\Collections\OperationConcat.h" />
     <ClInclude Include="..\..\Source\Collections\OperationCopyFrom.h" />
     <ClInclude Include="..\..\Source\Collections\OperationEnumerable.h" />
     <ClInclude Include="..\..\Source\Collections\OperationForEach.h" />
-    <ClInclude Include="..\..\Source\Collections\OperationOrderBy.h" />
     <ClInclude Include="..\..\Source\Collections\OperationPair.h" />
     <ClInclude Include="..\..\Source\Collections\OperationSelect.h" />
     <ClInclude Include="..\..\Source\Collections\OperationSequence.h" />

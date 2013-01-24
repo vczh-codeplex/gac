@@ -3792,6 +3792,14 @@ vl::Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		struct LambdaRetriveType
 		{
 			typedef vint Type;
+			typedef vint ResultType;
+		};
+ 
+		template<typename T>
+		struct FunctionObjectRetriveType
+		{
+			typedef typename LambdaRetriveType<T>::Type Type;
+			typedef typename LambdaRetriveType<T>::ResultType ResultType;
 		};
  
 /***********************************************************************
@@ -3808,6 +3816,14 @@ vl::Func<R()>
 		struct LambdaRetriveType<R (__thiscall TObject::*)()>
 		{
 			typedef Func<R()> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R >
+		struct FunctionObjectRetriveType<R(*)()>
+		{
+			typedef Func<R()> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0)>
@@ -3823,6 +3839,14 @@ vl::Func<R(T0)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0)>
 		{
 			typedef Func<R(T0)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0>
+		struct FunctionObjectRetriveType<R(*)(T0)>
+		{
+			typedef Func<R(T0)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1)>
@@ -3838,6 +3862,14 @@ vl::Func<R(T0,T1)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1)>
 		{
 			typedef Func<R(T0,T1)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1>
+		struct FunctionObjectRetriveType<R(*)(T0,T1)>
+		{
+			typedef Func<R(T0,T1)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2)>
@@ -3853,6 +3885,14 @@ vl::Func<R(T0,T1,T2)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2)>
 		{
 			typedef Func<R(T0,T1,T2)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2)>
+		{
+			typedef Func<R(T0,T1,T2)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3)>
@@ -3868,6 +3908,14 @@ vl::Func<R(T0,T1,T2,T3)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3)>
 		{
 			typedef Func<R(T0,T1,T2,T3)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3)>
+		{
+			typedef Func<R(T0,T1,T2,T3)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4)>
@@ -3883,6 +3931,14 @@ vl::Func<R(T0,T1,T2,T3,T4)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5)>
@@ -3898,6 +3954,14 @@ vl::Func<R(T0,T1,T2,T3,T4,T5)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5,T6)>
@@ -3913,6 +3977,14 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5,T6)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5,T6)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>
@@ -3928,6 +4000,14 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5,T6,T7)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
@@ -3943,6 +4023,14 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)> Type;
+			typedef R ResultType;
 		};
  /***********************************************************************
 vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
@@ -3958,17 +4046,31 @@ vl::Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		struct LambdaRetriveType<R (__thiscall TObject::*)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
 		{
 			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> Type;
+			typedef R ResultType;
+		};
+ 
+		template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
+		struct FunctionObjectRetriveType<R(*)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
+		{
+			typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> Type;
+			typedef R ResultType;
 		};
  
  
-#ifdef VCZH_NO_OLD_OS
 		template<typename T>
 		typename LambdaRetriveType<decltype(&T::operator())>::Type Lambda(T functionObject)
 		{
 			return functionObject;
 		}
+		template<typename T>
+		typename FunctionObjectRetriveType<T>::Type ConvertToFunction(T functionObject)
+		{
+			return functionObject;
+		}
 #define LAMBDA vl::function_lambda::Lambda
-#endif
+#define FUNCTION vl::function_lambda::ConvertToFunction
+#define FUNCTION_TYPE(T) typename vl::function_lambda::FunctionObjectRetriveType<T>::Type
+#define FUNCTION_RESULT_TYPE(T) typename vl::function_lambda::FunctionObjectRetriveType<T>::ResultType
 	}
 	namespace function_binding
 	{
