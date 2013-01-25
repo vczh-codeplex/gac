@@ -63,6 +63,71 @@ namespace vl
 		};
 
 /***********************************************************************
+递增数组迭代器
+***********************************************************************/
+
+		template<typename T>
+		class RangeEnumerator : public Object, public virtual IEnumerator<T>
+		{
+		protected:
+			T			start;
+			T			count;
+			T			current;
+		public:
+			RangeEnumerator(T _start, T _count, T _current)
+				:start(_start)
+				,count(_count)
+				,current(_current)
+			{
+			}
+
+			RangeEnumerator(T _start, T _count)
+				:start(_start)
+				,count(_count)
+				,current(_start-1)
+			{
+			}
+
+			IEnumerator<T>* Clone()const override
+			{
+				return new RangeEnumerator(start, count, current);
+			}
+
+			const T& Current()const override
+			{
+				return current;
+			}
+
+			T Index()const override
+			{
+				return current-start;
+			}
+
+			bool Next()override
+			{
+				if(start-1<=current && current<start+count-1)
+				{
+					current++;
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			void Reset()override
+			{
+				current=start-1;
+			}
+
+			bool Evaluated()const override
+			{
+				return true;
+			}
+		};
+
+/***********************************************************************
 自包含迭代器
 ***********************************************************************/
 

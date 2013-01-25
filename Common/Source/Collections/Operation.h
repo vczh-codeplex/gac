@@ -38,9 +38,11 @@ Functions:
 	[T]		.Except([T]) => [T]
 
 	[T]		.Evaluate() => [T]
+	[T]		.GroupBy(T->K) => [(K, [T])]
 
 	From(begin, end) => [T]
 	From(array) => [T]
+	Range(start, count) => [vint]
 
 	FOREACH(X, a, XList)
 	FOREACH_INDEXER(X, a, index, XList)
@@ -371,7 +373,44 @@ LazyList
 			{
 				return Concat(remains).Distinct();
 			}
+
+			//-------------------------------------------------------
+
+			LazyList<T> Evaluate()const
+			{
+				if(enumeratorPrototype->Evaluated())
+				{
+					return *this;
+				}
+				else
+				{
+					Ptr<List<T>> xs=new List<T>;
+					CopyFrom(*xs.Obj(), *this);
+					return xs;
+				}
+			}
+
+			template<typename F>
+			LazyList<Pair<FUNCTION_RESULT_TYPE(F), LazyList<T>>> GroupBy(F f)const
+			{
+				typedef FUNCTION_RESULT_TYPE(F) K;
+				return Select(f)
+					.Distinct()
+					.Select([=](K k)
+					{
+						return Pair<K, LazyList<T>>(
+							k,
+							Where([=](T t){return k==f(t);})
+							);
+					});
+			}
 		};
+
+		template<typename T>
+		LazyList<T> Range(T start, T count)
+		{
+			return new RangeEnumerator<T>(start, count);
+		}
 
 		template<typename T>
 		LazyList<T> From(const IEnumerable<T>& enumerable)
