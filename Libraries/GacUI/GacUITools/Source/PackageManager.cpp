@@ -81,11 +81,7 @@ EnumerateCommands
 				}
 				if(auto commandsElement=XmlGetElement(package, L"Commands"))
 				{
-					FOREACH(Ptr<XmlElement>, commandElement,
-						From(commandsElement->subNodes)
-							.FindType<XmlElement>()
-							.Where([](Ptr<XmlElement> e){return e->name.value==L"Command";})
-							)
+					FOREACH(Ptr<XmlElement>, commandElement, XmlGetElements(commandsElement, L"Command"))
 					{
 						if(auto name=XmlGetAttribute(commandElement, L"id"))
 						if(!commands.Keys().Contains(name->value.value))
