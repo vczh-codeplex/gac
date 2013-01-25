@@ -916,6 +916,29 @@ TEST_CASE(TestOrderBy)
 	CHECK_LIST_ITEMS(list, {1 _ 2 _ 3 _ 4 _ 5 _ 6 _ 7 _ 8 _ 9 _ 10 _ 11 _ 12 _ 13});
 }
 
+TEST_CASE(TestRange)
+{
+	List<vint> list;
+	CopyFrom(list, Range<vint>(1, 10));
+	CHECK_LIST_ITEMS(list, {1 _ 2 _ 3 _ 4 _ 5 _ 6 _ 7 _ 8 _ 9 _ 10});
+}
+
+TEST_CASE(TestGroupBy)
+{
+	Dictionary<WString, LazyList<vint>> groups;
+	List<vint> keys;
+	CopyFrom(groups, Range<vint>(1, 10).GroupBy([](vint i){return itow(i%3);}));
+
+	CopyFrom(keys, From(groups.Keys()).Select(wtoi));
+	CHECK_LIST_ITEMS(keys, {0 _ 1 _ 2});
+	CopyFrom(keys, groups[L"0"]);
+	CHECK_LIST_ITEMS(keys, {3 _ 6 _ 9});
+	CopyFrom(keys, groups[L"1"]);
+	CHECK_LIST_ITEMS(keys, {1 _ 4 _ 7 _ 10});
+	CopyFrom(keys, groups[L"2"]);
+	CHECK_LIST_ITEMS(keys, {2 _ 5 _ 8});
+}
+
 TEST_CASE(TestFromIterator)
 {
 	vint numbers[]={1, 2, 3, 4, 5};
