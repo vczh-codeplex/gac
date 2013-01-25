@@ -16,9 +16,6 @@ namespace vl
 	namespace collections
 	{
 
-		template<typename T>
-		class Enumerable;
-
 /***********************************************************************
 ¿Õµü´úÆ÷
 ***********************************************************************/
@@ -26,32 +23,36 @@ namespace vl
 		template<typename T>
 		class EmptyEnumerable : public Object, public IEnumerable<T>
 		{
-			friend class Enumerable<T>;
 		private:
-			class Enumerator : public Object, public IEnumerator<T>
+			class Enumerator : public Object, public virtual IEnumerator<T>
 			{
-				IEnumerator<T>* Clone()const
+				IEnumerator<T>* Clone()const override
 				{
 					return new Enumerator;
 				}
 
-				const T& Current()const
+				const T& Current()const override
 				{
 					return *(T*)0;
 				}
 
-				vint Index()const
+				vint Index()const override
 				{
 					return -1;
 				}
 
-				bool Next()
+				bool Next()override
 				{
 					return false;
 				}
 
-				void Reset()
+				void Reset()override
 				{
+				}
+
+				bool Evaluated()const override
+				{
+					return true;
 				}
 			};
 		public:
@@ -79,30 +80,35 @@ namespace vl
 				index=_index;
 			}
 
-			IEnumerator<T>* Clone()const
+			IEnumerator<T>* Clone()const override
 			{
 				return new ContainerEnumerator(container, index);
 			}
 
-			const T& Current()const
+			const T& Current()const override
 			{
 				return container->Get(index);
 			}
 
-			vint Index()const
+			vint Index()const override
 			{
 				return index;
 			}
 
-			bool Next()
+			bool Next()override
 			{
 				index++;
 				return index>=0 && index<container->Count();
 			}
 
-			void Reset()
+			void Reset()override
 			{
 				index=-1;
+			}
+
+			bool Evaluated()const override
+			{
+				return true;
 			}
 		};
 

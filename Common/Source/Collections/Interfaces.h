@@ -32,6 +32,8 @@ namespace vl
 			virtual vint								Index()const=0;
 			virtual bool								Next()=0;
 			virtual void								Reset()=0;
+
+			virtual bool								Evaluated()const{return false;}
 		};
 
 		template<typename T>
