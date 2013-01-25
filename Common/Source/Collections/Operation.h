@@ -37,6 +37,8 @@ Functions:
 	[T]		.Union([T]) => [T]
 	[T]		.Except([T]) => [T]
 
+	[T]		.Evaluate() => [T]
+
 	From(begin, end) => [T]
 	From(array) => [T]
 

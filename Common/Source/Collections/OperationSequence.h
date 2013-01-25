@@ -39,30 +39,35 @@ Take
 				delete enumerator;
 			}
 
-			IEnumerator<T>* Clone()const
+			IEnumerator<T>* Clone()const override
 			{
 				return new TakeEnumerator(enumerator->Clone(), count);
 			}
 
-			const T& Current()const
+			const T& Current()const override
 			{
 				return enumerator->Current();
 			}
 
-			vint Index()const
+			vint Index()const override
 			{
 				return enumerator->Index();
 			}
 
-			bool Next()
+			bool Next()override
 			{
 				if(enumerator->Index()>=count-1) return false;
 				return enumerator->Next();
 			}
 
-			void Reset()
+			void Reset()override
 			{
 				enumerator->Reset();
+			}
+
+			bool Evaluated()const override
+			{
+				return enumerator->Evaluated();
 			}
 		};
 
@@ -76,18 +81,13 @@ Skip
 		protected:
 			IEnumerator<T>*			enumerator;
 			vint					count;
+			bool					skipped;
 		public:
-			SkipEnumerator(IEnumerator<T>* _enumerator, vint _count, bool runSkip=true)
+			SkipEnumerator(IEnumerator<T>* _enumerator, vint _count, bool _skipped=false)
 				:enumerator(_enumerator)
 				,count(_count)
+				,skipped(_skipped)
 			{
-				if(runSkip)
-				{
-					for(vint i=0;i<count;i++)
-					{
-						enumerator->Next();
-					}
-				}
 			}
 
 			~SkipEnumerator()
@@ -95,33 +95,46 @@ Skip
 				delete enumerator;
 			}
 
-			IEnumerator<T>* Clone()const
+			IEnumerator<T>* Clone()const override
 			{
-				return new SkipEnumerator(enumerator->Clone(), count, false);
+				return new SkipEnumerator(enumerator->Clone(), count, skipped);
 			}
 
-			const T& Current()const
+			const T& Current()const override
 			{
 				return enumerator->Current();
 			}
 
-			vint Index()const
+			vint Index()const override
 			{
 				return enumerator->Index()-count;
 			}
 
-			bool Next()
+			bool Next()override
 			{
+				if(!skipped)
+				{
+					skipped=true;
+					for(vint i=0;i<count;i++)
+					{
+						if(!enumerator->Next())
+						{
+							return false;
+						}
+					}
+				}
 				return enumerator->Next();
 			}
 
-			void Reset()
+			void Reset()override
 			{
 				enumerator->Reset();
-				for(vint i=0;i<count;i++)
-				{
-					enumerator->Next();
-				}
+				skipped=false;
+			}
+
+			bool Evaluated()const override
+			{
+				return enumerator->Evaluated();
 			}
 		};
 
@@ -151,22 +164,22 @@ Repeat
 				delete enumerator;
 			}
 
-			IEnumerator<T>* Clone()const
+			IEnumerator<T>* Clone()const override
 			{
 				return new RepeatEnumerator(enumerator->Clone(), count, index, repeatedCount);
 			}
 
-			const T& Current()const
+			const T& Current()const override
 			{
 				return enumerator->Current();
 			}
 
-			vint Index()const
+			vint Index()const override
 			{
 				return index;
 			}
 
-			bool Next()
+			bool Next()override
 			{
 				while(repeatedCount<count)
 				{
@@ -181,11 +194,16 @@ Repeat
 				return false;
 			}
 
-			void Reset()
+			void Reset()override
 			{
 				enumerator->Reset();
 				index=-1;
 				repeatedCount=0;
+			}
+
+			bool Evaluated()const override
+			{
+				return enumerator->Evaluated();
 			}
 		};
 
@@ -208,6 +226,7 @@ Distinct
 			}
 
 			DistinctEnumerator(const DistinctEnumerator& _enumerator)
+				:lastValue(_enumerator.lastValue)
 			{
 				enumerator=_enumerator.enumerator->Clone();
 				CopyFrom(distinct, _enumerator.distinct);
@@ -218,22 +237,22 @@ Distinct
 				delete enumerator;
 			}
 
-			IEnumerator<T>* Clone()const
+			IEnumerator<T>* Clone()const override
 			{
 				return new DistinctEnumerator(*this);
 			}
 
-			const T& Current()const
+			const T& Current()const override
 			{
 				return lastValue;
 			}
 
-			vint Index()const
+			vint Index()const override
 			{
 				return distinct.Count()-1;
 			}
 
-			bool Next()
+			bool Next()override
 			{
 				while(enumerator->Next())
 				{
@@ -248,7 +267,7 @@ Distinct
 				return false;
 			}
 
-			void Reset()
+			void Reset()override
 			{
 				enumerator->Reset();
 				distinct.Clear();
@@ -273,39 +292,44 @@ Reverse
 			}
 
 			ReverseEnumerator(const ReverseEnumerator& _enumerator)
+				:index(_enumerator.index)
 			{
 				CopyFrom(cache, _enumerator.cache);
-				index=_enumerator.index;
 			}
 
 			~ReverseEnumerator()
 			{
 			}
 
-			IEnumerator<T>* Clone()const
+			IEnumerator<T>* Clone()const override
 			{
 				return new ReverseEnumerator(*this);
 			}
 
-			const T& Current()const
+			const T& Current()const override
 			{
 				return cache.Get(cache.Count()-1-index);
 			}
 
-			vint Index()const
+			vint Index()const override
 			{
 				return index;
 			}
 
-			bool Next()
+			bool Next()override
 			{
 				index++;
 				return index<cache.Count();
 			}
 
-			void Reset()
+			void Reset()override
 			{
-				index=0;
+				index=-1;
+			}
+
+			bool Evaluated()const override
+			{
+				return true;
 			}
 		};
 
@@ -316,7 +340,6 @@ FromIterator
 		template<typename T, typename I>
 		class FromIteratorEnumerable : public Object, public IEnumerable<T>
 		{
-			friend class Enumerable<T>;
 		private:
 			class Enumerator : public Object, public IEnumerator<T>
 			{
@@ -333,30 +356,35 @@ FromIterator
 				{
 				}
 
-				IEnumerator<T>* Clone()const
+				IEnumerator<T>* Clone()const override
 				{
 					return new Enumerator(begin, end, current);
 				}
 
-				const T& Current()const
+				const T& Current()const override
 				{
 					return *current;
 				}
 
-				vint Index()const
+				vint Index()const override
 				{
 					return current-begin;
 				}
 
-				bool Next()
+				bool Next()override
 				{
 					current++;
 					return begin<=current && current<end;
 				}
 
-				void Reset()
+				void Reset()override
 				{
 					current=begin-1;
+				}
+
+				bool Evaluated()const override
+				{
+					return true;
 				}
 			};
 		private:

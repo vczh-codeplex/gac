@@ -42,12 +42,12 @@ Concat
 				delete enumerator2;
 			}
 
-			IEnumerator<T>* Clone()const
+			IEnumerator<T>* Clone()const override
 			{
 				return new ConcatEnumerator(enumerator1->Clone(), enumerator2->Clone(), index, turned);
 			}
 
-			const T& Current()const
+			const T& Current()const override
 			{
 				if(turned)
 				{
@@ -59,12 +59,12 @@ Concat
 				}
 			}
 
-			vint Index()const
+			vint Index()const override
 			{
 				return index;
 			}
 
-			bool Next()
+			bool Next()override
 			{
 				index++;
 				if(turned)
@@ -85,11 +85,17 @@ Concat
 				}
 			}
 
-			void Reset()
+			void Reset()override
 			{
 				enumerator1->Reset();
 				enumerator2->Reset();
 				index=-1;
+				turned=false;
+			}
+
+			bool Evaluated()const override
+			{
+				return enumerator1->Evaluated() && enumerator2->Evaluated();
 			}
 		};
 	}

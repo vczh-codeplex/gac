@@ -39,22 +39,22 @@ Where
 				delete enumerator;
 			}
 
-			IEnumerator<T>* Clone()const
+			IEnumerator<T>* Clone()const override
 			{
 				return new WhereEnumerator(enumerator->Clone(), selector, index);
 			}
 
-			const T& Current()const
+			const T& Current()const override
 			{
 				return enumerator->Current();
 			}
 
-			vint Index()const
+			vint Index()const override
 			{
 				return index;
 			}
 
-			bool Next()
+			bool Next()override
 			{
 				while(enumerator->Next())
 				{
@@ -67,9 +67,10 @@ Where
 				return false;
 			}
 
-			void Reset()
+			void Reset()override
 			{
 				enumerator->Reset();
+				index=-1;
 			}
 		};
 	}

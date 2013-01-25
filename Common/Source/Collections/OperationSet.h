@@ -49,22 +49,22 @@ Intersect/Except
 				delete enumerator;
 			}
 
-			IEnumerator<T>* Clone()const
+			IEnumerator<T>* Clone()const override
 			{
 				return new IntersectExceptEnumerator(*this);
 			}
 
-			const T& Current()const
+			const T& Current()const override
 			{
 				return enumerator->Current();
 			}
 
-			vint Index()const
+			vint Index()const override
 			{
 				return index;
 			}
 
-			bool Next()
+			bool Next()override
 			{
 				while(enumerator->Next())
 				{
@@ -77,10 +77,10 @@ Intersect/Except
 				return false;
 			}
 
-			void Reset()
+			void Reset()override
 			{
 				enumerator->Reset();
-				index=0;
+				index=-1;
 			}
 		};
 	}

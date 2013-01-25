@@ -28,9 +28,10 @@ Select
 			Func<K(T)>			selector;
 			K					current;
 		public:
-			SelectEnumerator(IEnumerator<T>* _enumerator, const Func<K(T)>& _selector)
+			SelectEnumerator(IEnumerator<T>* _enumerator, const Func<K(T)>& _selector, K _current=K())
 				:enumerator(_enumerator)
 				,selector(_selector)
+				,current(_current)
 			{
 			}
 
@@ -39,22 +40,22 @@ Select
 				delete enumerator;
 			}
 
-			IEnumerator<K>* Clone()const
+			IEnumerator<K>* Clone()const override
 			{
-				return new SelectEnumerator(enumerator->Clone(), selector);
+				return new SelectEnumerator(enumerator->Clone(), selector, current);
 			}
 
-			const K& Current()const
+			const K& Current()const override
 			{
 				return current;
 			}
 
-			vint Index()const
+			vint Index()const override
 			{
 				return enumerator->Index();
 			}
 
-			bool Next()
+			bool Next()override
 			{
 				if(enumerator->Next())
 				{
@@ -67,7 +68,7 @@ Select
 				}
 			}
 
-			void Reset()
+			void Reset()override
 			{
 				enumerator->Reset();
 			}
