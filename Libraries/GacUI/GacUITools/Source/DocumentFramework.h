@@ -87,6 +87,7 @@ Document Interfaces
 			public:
 				virtual void					OnAttach(IDocumentFragment* sender)=0;
 				virtual void					OnDetach(IDocumentFragment* sender)=0;
+				virtual void					OnFilePathUpdated(IDocumentFragment* sender)=0;
 				virtual void					OnFragmentUpdated(IDocumentFragment* sender)=0;
 				virtual void					OnFragmentDestroyed(IDocumentFragment* sender)=0;
 			};

@@ -4,6 +4,8 @@
 #include "ServiceImpl\FileDialogService.h"
 #include "ServiceImpl\EditingDocumentService.h"
 
+#pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
 namespace vl
 {
 	namespace gactools
@@ -35,12 +37,44 @@ SDIApplicationPackage
 				editingDocumentService->LoadDocumentByDialog(L"Dialog.OpenFile", L"", true);
 			}
 
+			void SDISaveDocumentInternal(bool forceToSaveSeparately)
+			{
+				if(editingDocumentService->GetActiveEditorCount()>0)
+				{
+					IDocumentEditor* editor=editingDocumentService->GetActiveEditor(0);
+					if(!editor) goto FAILED_TO_SAVE;
+					IDocumentView* view=editor->GetEditingView();
+					if(!view) goto FAILED_TO_SAVE;
+					IDocumentFragment* fragment=view->GetOwnedFragment();
+					if(!fragment) goto FAILED_TO_SAVE;
+					if(!fragment->CanSaveSeparately()) goto FAILED_TO_SAVE;
+					if(forceToSaveSeparately || fragment->GetFilePath()==L"")
+					{
+						if(!fragment->CanSaveToAnotherFile()) goto FAILED_TO_SAVE;
+						editingDocumentService->SaveDocumentByDialog(editor, L"Dialog.SaveFile", true);
+					}
+					else
+					{
+						if(!fragment->SaveDocument()) goto FAILED_TO_SAVE;
+					}
+					return;
+				}
+			FAILED_TO_SAVE:
+				GetCurrentController()->DialogService()->ShowMessageBox(
+					mainWindow->GetNativeWindow(),
+					L"Failed to save the current document.",
+					mainWindow->GetText()
+					);
+			}
+
 			void SDISaveDocument(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
+				SDISaveDocumentInternal(false);
 			}
 
 			void SDISaveDocumentAs(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
+				SDISaveDocumentInternal(true);
 			}
 
 			void SDIExitApplication(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
@@ -106,8 +140,32 @@ MainWindow
 		class MainWindow : public GuiWindow
 		{
 		protected:
-			class SDIEditingDocumentService : public EditingDocumentService
+			class SDIEditingDocumentService : public EditingDocumentService, public IDocumentFragment::ICallback
 			{
+			private:
+				void OnAttach(IDocumentFragment* sender)override
+				{
+				}
+
+				void OnDetach(IDocumentFragment* sender)override
+				{
+				}
+
+				void OnFilePathUpdated(IDocumentFragment* sender)override
+				{
+					if(GetActiveDocumentCount()>0 && GetActiveDocument(0)==sender->GetOwnedContainer())
+					{
+						window->DisplayWindowTitle(sender->GetFilePath());
+					}
+				}
+
+				void OnFragmentUpdated(IDocumentFragment* sender)override
+				{
+				}
+
+				void OnFragmentDestroyed(IDocumentFragment* sender)override
+				{
+				}
 			protected:
 				MainWindow*										window;
 
@@ -123,6 +181,7 @@ MainWindow
 
 				bool InstallEditor(IDocumentEditor* editor)override
 				{
+					editor->GetEditingView()->GetOwnedFragment()->AttachCallback(this);
 					editor->GetEditorControl()->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 					window->editorControlContainer->AddChild(editor->GetEditorControl()->GetBoundsComposition());
 					window->DisplayWindowTitle(editor->GetEditingView()->GetOwnedFragment()->GetFilePath());
@@ -133,6 +192,7 @@ MainWindow
 				{
 					window->editorControlContainer->RemoveChild(editor->GetEditorControl()->GetBoundsComposition());
 					window->DisplayWindowTitle(L"");
+					editor->GetEditingView()->GetOwnedFragment()->DetachCallback(this);
 					return true;
 				}
 			public:
