@@ -67,6 +67,7 @@ Main Application Package
 			Dictionary<WString, Ptr<DocumentToolstripCommand>>		commands;
 			Group<WString, ProprityMenuGroup>						existingMenuGroups;
 			Ptr<IFileDialogService>									fileDialogService;
+			GuiWindow*												mainWindow;
 
 		protected:
 
@@ -75,10 +76,15 @@ Main Application Package
 			MainApplicationPackage();
 			~MainApplicationPackage();
 
-			void													BeforeInitialization()override;
-			void													AfterInitialization()override;
+			void													OnBeforeInit()override;
+			void													OnAfterInit()override;
+			GuiWindow*												GetMainWindow();
+			void													SetMainWindow(GuiWindow* window);
 			void													BuildApplicationMenu(GuiToolstripMenuBar* menu, const WString& containerName);
 			void													BuildApplicationToolbar(GuiToolstripToolbar* toolbar, const WString& containerName);
+
+			static MainApplicationPackage*							BeforeInit(Ptr<GuiResource> resource, GuiWindow* mainWindow, const WString& mainApplicationPackageId);
+			static void												AfterInit();
 		};
 	}
 }

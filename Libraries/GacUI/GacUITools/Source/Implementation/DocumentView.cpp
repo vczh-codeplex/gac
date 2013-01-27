@@ -15,13 +15,6 @@ DocumentView
 			return callbacks;
 		}
 
-		bool DocumentView::AddSupportedOperation(Ptr<IDocumentOperation> operation)
-		{
-			if(supportedOperations.Keys().Contains(operation->GetOperationTypeId())) return false;
-			supportedOperations.Add(operation->GetOperationTypeId(), operation);
-			return true;
-		}
-
 		DocumentView::DocumentView(DocumentFragment* _ownedFragment, const WString& _id, const WString& _friendlyName)
 			:ownedFragment(_ownedFragment)
 			,id(_id)
@@ -93,27 +86,6 @@ DocumentView
 		bool DocumentView::IsReadOnlyView()
 		{
 			return false;
-		}
-
-		vint DocumentView::GetSupportedOperationTypeCount()
-		{
-			return supportedOperations.Count();
-		}
-
-		WString DocumentView::GetSupportedOperationType(vint index)
-		{
-			return supportedOperations.Keys().Get(index);
-		}
-
-		bool DocumentView::IsSupportedOperationTypeId(const WString& operationTypeId)
-		{
-			return supportedOperations.Keys().Contains(operationTypeId);
-		}
-
-		IDocumentOperation* DocumentView::GetOperation(const WString& operationTypeId)
-		{
-			vint index=supportedOperations.Keys().IndexOf(operationTypeId);
-			return index==-1?0:supportedOperations.Values().Get(index).Obj();
 		}
 
 		bool DocumentView::BeginEdit(IDocumentEditor* editor)

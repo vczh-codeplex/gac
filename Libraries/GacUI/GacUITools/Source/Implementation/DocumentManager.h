@@ -48,11 +48,11 @@ namespace vl
 			WString						GetDefaultEditorTypeId(const WString& viewTypeId)override;
 
 			bool						RegisterPackage(Ptr<IDocumentPackage> package)override;
-			IDocumentPackage*			GetPackage(const WString& packageId)override;
-			void						RunPackageBeforeInitialization()override;
-			void						RunPackageAfterInitialization()override;
+			vint						GetPackageCount()override;
+			IDocumentPackage*			GetPackage(vint index)override;
+			IDocumentPackage*			GetPackageById(const WString& packageId)override;
 			bool						RegisterService(Ptr<IDocumentService> service)override;
-			IDocumentService*			GetService(const WString& serviceTypeId)override;
+			IDocumentService*			GetServiceById(const WString& serviceTypeId)override;
 		};
 	}
 }

@@ -16,7 +16,7 @@ TextEditorPackage
 			return PackageId;
 		}
 
-		void TextEditorPackage::BeforeInitialization()
+		void TextEditorPackage::OnBeforeInit()
 		{
 			{
 				Ptr<TextDocumentEditorFactory> textDocumentEditorFactory=new TextDocumentEditorFactory;
@@ -24,14 +24,6 @@ TextEditorPackage
 				GetDocumentManager()->RegisterEditorFactory(textDocumentEditorFactory);
 				GetDocumentManager()->BindDefaultEditor(PlainTextView::ViewTypeId, textDocumentEditorFactory.Obj());
 			}
-		}
-
-		void TextEditorPackage::AfterInitialization()
-		{
-		}
-
-		void TextEditorPackage::InstallToolstripCommand(DocumentToolstripCommand* command)
-		{
 		}
 
 		const wchar_t* TextEditorPackage::PackageId = L"TextEditorPackage";

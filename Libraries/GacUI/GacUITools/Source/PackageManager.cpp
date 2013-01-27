@@ -389,6 +389,7 @@ MainApplicationPackage
 ***********************************************************************/
 
 		MainApplicationPackage::MainApplicationPackage()
+			:mainWindow(0)
 		{
 		}
 
@@ -396,7 +397,7 @@ MainApplicationPackage
 		{
 		}
 
-		void MainApplicationPackage::BeforeInitialization()
+		void MainApplicationPackage::OnBeforeInit()
 		{
 			resource=LoadPackageResource();
 			EnumeratePackages(resource, packages);
@@ -408,16 +409,26 @@ MainApplicationPackage
 			GetDocumentManager()->RegisterService(fileDialogService);
 		}
 
-		void MainApplicationPackage::AfterInitialization()
+		void MainApplicationPackage::OnAfterInit()
 		{
 			FOREACH(Ptr<DocumentToolstripCommand>, command, commands.Values())
 			{
-				IDocumentPackage* package=GetDocumentManager()->GetPackage(command->GetPackageId());
+				IDocumentPackage* package=GetDocumentManager()->GetPackageById(command->GetPackageId());
 				if(package)
 				{
-					package->InstallToolstripCommand(command.Obj());
+					package->OnInstallCommand(command.Obj());
 				}
 			}
+		}
+
+		GuiWindow* MainApplicationPackage::GetMainWindow()
+		{
+			return mainWindow;
+		}
+
+		void MainApplicationPackage::SetMainWindow(GuiWindow* window)
+		{
+			mainWindow=window;
 		}
 
 		void MainApplicationPackage::BuildApplicationMenu(GuiToolstripMenuBar* menu, const WString& containerName)
@@ -428,6 +439,33 @@ MainApplicationPackage
 		void MainApplicationPackage::BuildApplicationToolbar(GuiToolstripToolbar* toolbar, const WString& containerName)
 		{
 			BuildToolbar(resource, packages, toolbar, containerName, commands, existingMenuGroups);
+		}
+
+		MainApplicationPackage* MainApplicationPackage::BeforeInit(Ptr<GuiResource> resource, GuiWindow* mainWindow, const WString& mainApplicationPackageId)
+		{
+			List<Ptr<XmlElement>> packages;
+			EnumeratePackages(resource, packages);
+			LoadLegalDocumentPackages(resource, packages);
+
+			MainApplicationPackage* appPackage=dynamic_cast<MainApplicationPackage*>(GetDocumentManager()->GetPackageById(mainApplicationPackageId));
+			if(appPackage)
+			{
+				appPackage->SetMainWindow(mainWindow);
+			}
+			for(vint i=0;i<GetDocumentManager()->GetPackageCount();i++)
+			{
+				GetDocumentManager()->GetPackage(i)->OnBeforeInit();
+			}
+
+			return appPackage;
+		}
+
+		void MainApplicationPackage::AfterInit()
+		{
+			for(vint i=0;i<GetDocumentManager()->GetPackageCount();i++)
+			{
+				GetDocumentManager()->GetPackage(i)->OnAfterInit();
+			}
 		}
 	}
 }

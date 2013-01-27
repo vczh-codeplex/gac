@@ -23,12 +23,10 @@ namespace vl
 			DocumentFragment*								ownedFragment;
 			WString											id;
 			WString											friendlyName;
-			Dictionary<WString, Ptr<IDocumentOperation>>	supportedOperations;
 			IDocumentEditor*								currentEditor;
 
 		protected:
 			const List<ICallback*>&							GetCallbacks();
-			bool											AddSupportedOperation(Ptr<IDocumentOperation> operation);
 		public:
 			DocumentView(DocumentFragment* _ownedFragment, const WString& _id, const WString& _friendlyName);
 			~DocumentView();
@@ -41,11 +39,6 @@ namespace vl
 			WString											GetViewTypeId()override;
 			WString											GetViewTypeFriendlyName()override;
 			bool											IsReadOnlyView()override;
-
-			vint											GetSupportedOperationTypeCount()override;
-			WString											GetSupportedOperationType(vint index)override;
-			bool											IsSupportedOperationTypeId(const WString& operationTypeId)override;
-			IDocumentOperation*								GetOperation(const WString& operationTypeId)override;
 
 			bool											BeginEdit(IDocumentEditor* editor)override;
 			bool											FinishEdit(IDocumentEditor* editor)override;
