@@ -224,6 +224,10 @@ FileDocumentFragment
 			if(!SaveDocumentInternal(filePath)) return false;
 			currentFilePath=filePath;
 			modified=false;
+			FOREACH(ICallback*, callback, GetCallbacks())
+			{
+				callback->OnFilePathUpdated(this);
+			}
 			return true;
 		}
 

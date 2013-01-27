@@ -131,11 +131,12 @@ EditingDocumentService
 			if(!view) return false;
 			IDocumentFragment* fragment=view->GetOwnedFragment();
 			if(!fragment) return false;
+			if(!fragment->CanSaveSeparately()) return false;
 			if(!fragment->CanSaveToAnotherFile()) return false;
 
 			IFileDialogService* dialogService=GetDocumentManager()->GetService<IFileDialogService>();
 			if(!dialogService) return false;
-			WString filePath=dialogService->OpenDialogForSingleFile(dialogId);
+			WString filePath=dialogService->SaveDialogForSingleFile(dialogId);
 			if(filePath==L"") return false;
 
 			return fragment->SaveDocumentAs(filePath);
