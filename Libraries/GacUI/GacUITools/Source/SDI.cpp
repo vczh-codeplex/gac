@@ -293,10 +293,16 @@ SDIApplicationPackage
 			{
 				GetMainWindow()->Close();
 			}
+		protected:
+			DocumentToolstripCommand*				commandSaveDocument;
+			DocumentToolstripCommand*				commandSaveDocumentAs;
+
 		public:
 			static const wchar_t*					PackageId;
 
 			SDIApplicationPackage()
+				:commandSaveDocument(0)
+				,commandSaveDocumentAs(0)
 			{
 			}
 
@@ -316,6 +322,13 @@ SDIApplicationPackage
 				GetDocumentManager()->RegisterService(editingDocumentService);
 			}
 
+			void OnCurrentEditorUpdated(IDocumentEditor* editor)override
+			{
+				MainApplicationPackage::OnCurrentEditorUpdated(editor);
+				commandSaveDocument->SetEnabled(editor!=0);
+				commandSaveDocumentAs->SetEnabled(editor!=0);
+			}
+
 			void OnInstallCommand(DocumentToolstripCommand* command)override
 			{
 				if(command->GetCommandId()==L"SDI.OpenDocument")
@@ -324,11 +337,15 @@ SDIApplicationPackage
 				}
 				else if(command->GetCommandId()==L"SDI.SaveDocument")
 				{
+					commandSaveDocument=command;
 					command->Executed.AttachMethod(this, &SDIApplicationPackage::SDISaveDocument);
+					command->SetEnabled(false);
 				}
 				else if(command->GetCommandId()==L"SDI.SaveDocumentAs")
 				{
+					commandSaveDocumentAs=command;
 					command->Executed.AttachMethod(this, &SDIApplicationPackage::SDISaveDocumentAs);
+					command->SetEnabled(false);
 				}
 				else if(command->GetCommandId()==L"SDI.ExitApplication")
 				{
