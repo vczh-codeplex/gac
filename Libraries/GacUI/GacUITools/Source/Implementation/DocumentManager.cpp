@@ -152,26 +152,20 @@ DocumentManager
 			return false;
 		}
 
-		IDocumentPackage* DocumentManager::GetPackage(const WString& packageId)
+		vint DocumentManager::GetPackageCount()
+		{
+			return packages.Count();
+		}
+
+		IDocumentPackage* DocumentManager::GetPackage(vint index)
+		{
+			return packages.Values().Get(index).Obj();
+		}
+
+		IDocumentPackage* DocumentManager::GetPackageById(const WString& packageId)
 		{
 			vint index=packages.Keys().IndexOf(packageId);
 			return index==-1?0:packages.Values().Get(index).Obj();
-		}
-
-		void DocumentManager::RunPackageBeforeInitialization()
-		{
-			FOREACH(Ptr<IDocumentPackage>, package, packages.Values())
-			{
-				package->BeforeInitialization();
-			}
-		}
-
-		void DocumentManager::RunPackageAfterInitialization()
-		{
-			FOREACH(Ptr<IDocumentPackage>, package, packages.Values())
-			{
-				package->AfterInitialization();
-			}
 		}
 
 		bool DocumentManager::RegisterService(Ptr<IDocumentService> service)
@@ -183,7 +177,7 @@ DocumentManager
 			return false;
 		}
 
-		IDocumentService* DocumentManager::GetService(const WString& serviceTypeId)
+		IDocumentService* DocumentManager::GetServiceById(const WString& serviceTypeId)
 		{
 			vint index=services.Keys().IndexOf(serviceTypeId);
 			return index==-1?0:services.Values().Get(index).Obj();

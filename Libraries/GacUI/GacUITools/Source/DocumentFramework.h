@@ -35,13 +35,6 @@ namespace vl
 Document Interfaces
 ***********************************************************************/
 
-		class IDocumentOperation : public Interface
-		{
-		public:
-			virtual IDocumentView*				GetOwnedView()=0;
-			virtual WString						GetOperationTypeId()=0;
-		};
-
 		class IDocumentView : public Interface
 		{
 		public:
@@ -62,17 +55,6 @@ Document Interfaces
 			virtual WString						GetViewTypeId()=0;
 			virtual WString						GetViewTypeFriendlyName()=0;
 			virtual bool						IsReadOnlyView()=0;
-
-			virtual vint						GetSupportedOperationTypeCount()=0;
-			virtual WString						GetSupportedOperationType(vint index)=0;
-			virtual bool						IsSupportedOperationTypeId(const WString& operationTypeId)=0;
-			virtual IDocumentOperation*			GetOperation(const WString& operationTypeId)=0;
-
-			template<typename T>
-			T* GetOperation()
-			{
-				return dynamic_cast<T*>(GetOperation(T::OperationTypeId));
-			}
 
 			virtual bool						BeginEdit(IDocumentEditor* editor)=0;
 			virtual bool						FinishEdit(IDocumentEditor* editor)=0;
@@ -162,6 +144,13 @@ Document Interfaces
 Editor Interfaces
 ***********************************************************************/
 
+		class IDocumentOperation : public Interface
+		{
+		public:
+			virtual IDocumentView*				GetOwnedView()=0;
+			virtual WString						GetOperationTypeId()=0;
+		};
+
 		class IDocumentEditor : public Interface
 		{
 		public:
@@ -183,6 +172,17 @@ Editor Interfaces
 			virtual IDocumentView*				GetEditingView()=0;
 			virtual bool						FinishEdit()=0;
 			virtual bool						IsAvailable()=0;
+
+			virtual vint						GetSupportedOperationTypeCount()=0;
+			virtual WString						GetSupportedOperationType(vint index)=0;
+			virtual bool						IsSupportedOperationTypeId(const WString& operationTypeId)=0;
+			virtual IDocumentOperation*			GetOperation(const WString& operationTypeId)=0;
+
+			template<typename T>
+			T* GetOperation()
+			{
+				return dynamic_cast<T*>(GetOperation(T::OperationTypeId));
+			}
 		};
 
 		class IDocumentEditorFactory : public Interface
@@ -234,9 +234,10 @@ Package Interfaces
 		{
 		public:
 			virtual WString						GetPackageId()=0;
-			virtual void						BeforeInitialization()=0;
-			virtual void						AfterInitialization()=0;
-			virtual void						InstallToolstripCommand(DocumentToolstripCommand* command)=0;
+			virtual void						OnBeforeInit(){};
+			virtual void						OnAfterInit(){};
+			virtual void						OnCurrentEditorUpdated(IDocumentEditor* editor){};
+			virtual void						OnInstallCommand(DocumentToolstripCommand* command){};
 		};
 
 /***********************************************************************
@@ -273,22 +274,22 @@ Manager Interfaces
 			virtual WString						GetDefaultEditorTypeId(const WString& viewTypeId)=0;
 
 			virtual bool						RegisterPackage(Ptr<IDocumentPackage> package)=0;
-			virtual IDocumentPackage*			GetPackage(const WString& packageId)=0;
-			virtual void						RunPackageBeforeInitialization()=0;
-			virtual void						RunPackageAfterInitialization()=0;
+			virtual vint						GetPackageCount()=0;
+			virtual IDocumentPackage*			GetPackage(vint index)=0;
+			virtual IDocumentPackage*			GetPackageById(const WString& packageId)=0;
 			virtual bool						RegisterService(Ptr<IDocumentService> service)=0;
-			virtual IDocumentService*			GetService(const WString& serviceTypeId)=0;
+			virtual IDocumentService*			GetServiceById(const WString& serviceTypeId)=0;
 
 			template<typename T>
 			T* GetPackage()
 			{
-				return dynamic_cast<T*>(GetPackage(T::PackageId));
+				return dynamic_cast<T*>(GetPackageById(T::PackageId));
 			}
 
 			template<typename T>
 			T* GetService()
 			{
-				return dynamic_cast<T*>(GetService(T::ServiceTypeId));
+				return dynamic_cast<T*>(GetServiceById(T::ServiceTypeId));
 			}
 		};
 
@@ -378,6 +379,7 @@ Common Services
 			virtual IDocumentEditor*			GetActiveEditor(vint index)=0;
 			virtual vint						GetActiveDocumentCount()=0;
 			virtual IDocumentContainer*			GetActiveDocument(vint index)=0;
+			virtual IDocumentEditor*			GetCurrentEditor()=0;
 		};
 	}
 }

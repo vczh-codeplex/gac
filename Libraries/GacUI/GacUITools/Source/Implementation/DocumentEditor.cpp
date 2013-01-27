@@ -73,6 +73,13 @@ DocumentEditor
 			return callbacks;
 		}
 
+		bool DocumentEditor::AddSupportedOperation(Ptr<IDocumentOperation> operation)
+		{
+			if(supportedOperations.Keys().Contains(operation->GetOperationTypeId())) return false;
+			supportedOperations.Add(operation->GetOperationTypeId(), operation);
+			return true;
+		}
+
 		DocumentEditor::DocumentEditor(IDocumentEditorFactory* _editorFactory, IDocumentView* _editingView)
 			:editorFactory(_editorFactory)
 			,editingView(_editingView)
@@ -175,6 +182,27 @@ DocumentEditor
 		bool DocumentEditor::IsAvailable()
 		{
 			return editorControl!=0;
+		}
+
+		vint DocumentEditor::GetSupportedOperationTypeCount()
+		{
+			return supportedOperations.Count();
+		}
+
+		WString DocumentEditor::GetSupportedOperationType(vint index)
+		{
+			return supportedOperations.Keys().Get(index);
+		}
+
+		bool DocumentEditor::IsSupportedOperationTypeId(const WString& operationTypeId)
+		{
+			return supportedOperations.Keys().Contains(operationTypeId);
+		}
+
+		IDocumentOperation* DocumentEditor::GetOperation(const WString& operationTypeId)
+		{
+			vint index=supportedOperations.Keys().IndexOf(operationTypeId);
+			return index==-1?0:supportedOperations.Values().Get(index).Obj();
 		}
 	}
 }

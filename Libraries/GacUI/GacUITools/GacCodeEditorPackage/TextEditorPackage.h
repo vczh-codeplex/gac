@@ -20,9 +20,7 @@ namespace vl
 			static const wchar_t*			PackageId;
 
 			WString							GetPackageId()override;
-			void							BeforeInitialization()override;
-			void							AfterInitialization()override;
-			void							InstallToolstripCommand(DocumentToolstripCommand* command)override;
+			void							OnBeforeInit()override;
 		};
 	}
 }
