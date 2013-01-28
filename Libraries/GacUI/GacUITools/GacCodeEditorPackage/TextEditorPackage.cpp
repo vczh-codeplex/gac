@@ -1,6 +1,10 @@
 #include "TextEditorPackage.h"
 #include "TextDocument.h"
 #include "TextDocumentEditor.h"
+#include "XmlDocument.h"
+#include "XmlDocumentEditor.h"
+#include "JsonDocument.h"
+#include "JsonDocumentEditor.h"
 
 namespace vl
 {
@@ -19,10 +23,22 @@ TextEditorPackage
 		void TextEditorPackage::OnBeforeInit()
 		{
 			{
-				Ptr<TextDocumentEditorFactory> textDocumentEditorFactory=new TextDocumentEditorFactory;
 				GetDocumentManager()->RegisterFileType(new TextFileType);
-				GetDocumentManager()->RegisterEditorFactory(textDocumentEditorFactory);
-				GetDocumentManager()->BindDefaultEditor(PlainTextView::ViewTypeId, textDocumentEditorFactory.Obj());
+				Ptr<TextDocumentEditorFactory> editorFactory=new TextDocumentEditorFactory;
+				GetDocumentManager()->RegisterEditorFactory(editorFactory);
+				GetDocumentManager()->BindDefaultEditor(PlainTextView::ViewTypeId, editorFactory.Obj());
+			}
+			{
+				GetDocumentManager()->RegisterFileType(new XmlTextFileType);
+				Ptr<XmlTextDocumentEditorFactory> editorFactory=new XmlTextDocumentEditorFactory;
+				GetDocumentManager()->RegisterEditorFactory(editorFactory);
+				GetDocumentManager()->BindDefaultEditor(XmlTextView::ViewTypeId, editorFactory.Obj());
+			}
+			{
+				GetDocumentManager()->RegisterFileType(new JsonTextFileType);
+				Ptr<JsonTextDocumentEditorFactory> editorFactory=new JsonTextDocumentEditorFactory;
+				GetDocumentManager()->RegisterEditorFactory(editorFactory);
+				GetDocumentManager()->BindDefaultEditor(JsonTextView::ViewTypeId, editorFactory.Obj());
 			}
 		}
 

@@ -68,6 +68,8 @@ TextDocumentEditor
 TextDocumentEditorFactory
 ***********************************************************************/
 
+		const wchar_t* TextDocumentEditorFactory::EditorTypeId = L"vl::gactools::TextDocumentEditorFactory";
+
 		Ptr<IDocumentEditor> TextDocumentEditorFactory::CreateEditorInternal(IDocumentView* view)
 		{
 			return new TextDocumentEditor(this, view);
@@ -82,7 +84,5 @@ TextDocumentEditorFactory
 		TextDocumentEditorFactory::~TextDocumentEditorFactory()
 		{
 		}
-
-		const wchar_t* TextDocumentEditorFactory::EditorTypeId = L"vl::gactools::TextDocumentEditorFactory";
 	}
 }

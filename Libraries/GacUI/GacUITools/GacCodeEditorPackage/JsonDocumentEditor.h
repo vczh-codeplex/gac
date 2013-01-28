@@ -14,6 +14,27 @@ namespace vl
 {
 	namespace gactools
 	{
+		class JsonTextDocumentEditor : public TextDocumentEditor
+		{
+		protected:
+			GuiControl*					CreateEditorControlInternal()override;
+		public:
+			JsonTextDocumentEditor(IDocumentEditorFactory* _editorFactory, IDocumentView* _editingView);
+			~JsonTextDocumentEditor();
+		};
+
+		class JsonTextDocumentEditorFactory : public DocumentEditorFactory
+		{
+		public:
+			static const wchar_t*		EditorTypeId;
+
+		protected:
+
+			Ptr<IDocumentEditor>		CreateEditorInternal(IDocumentView* view)override;
+		public:
+			JsonTextDocumentEditorFactory();
+			~JsonTextDocumentEditorFactory();
+		};
 	}
 }
 

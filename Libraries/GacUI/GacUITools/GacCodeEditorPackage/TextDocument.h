@@ -49,7 +49,7 @@ namespace vl
 			void								SetContent(const WString& value);
 		};
 
-		class TextDocument : public FileDocumentFragment, private IPlainTextViewContentProvider
+		class TextDocument : public FileDocumentFragment, protected IPlainTextViewContentProvider
 		{
 		private:
 			BomEncoder::Encoding				encoding;
