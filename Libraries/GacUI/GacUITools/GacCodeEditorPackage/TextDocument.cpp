@@ -231,6 +231,8 @@ TextDocument
 TextFileType
 ***********************************************************************/
 
+		const wchar_t* TextFileType::FileTypeId = L"vl::gactools::TextFileType";
+
 		Ptr<IDocumentFragment> TextFileType::NewDocumentFragment(IDocumentContainer* container)
 		{
 			return new TextDocument(container);
@@ -249,7 +251,5 @@ TextFileType
 		TextFileType::~TextFileType()
 		{
 		}
-
-		const wchar_t* TextFileType::FileTypeId = L"vl::gactools::TextFileType";
 	}
 }
