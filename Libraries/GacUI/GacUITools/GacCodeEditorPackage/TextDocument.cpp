@@ -11,8 +11,8 @@ PlainTextView
 
 		const wchar_t* PlainTextView::ViewTypeId = L"vl::gactools::PlainTextView";
 
-		PlainTextView::PlainTextView(DocumentFragment* _ownedFragment)
-			:DocumentView(_ownedFragment, ViewTypeId, L"Plain Text View")
+		PlainTextView::PlainTextView(DocumentFragment* _ownedFragment, const WString& viewTypeId, const WString& friendlyName)
+			:DocumentView(_ownedFragment, viewTypeId, friendlyName)
 			,contentProvider(0)
 		{
 		}

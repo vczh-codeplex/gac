@@ -19,7 +19,7 @@ namespace vl
 		public:
 			static const wchar_t*				ViewTypeId;
 
-			JsonTextView(DocumentFragment* _ownedFragment);
+			JsonTextView(DocumentFragment* _ownedFragment, const WString& viewTypeId=ViewTypeId, const WString& friendlyName=L"Json Text View");
 			~JsonTextView();
 		};
 

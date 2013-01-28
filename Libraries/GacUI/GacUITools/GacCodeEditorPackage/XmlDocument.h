@@ -19,7 +19,7 @@ namespace vl
 		public:
 			static const wchar_t*				ViewTypeId;
 
-			XmlTextView(DocumentFragment* _ownedFragment);
+			XmlTextView(DocumentFragment* _ownedFragment, const WString& viewTypeId=ViewTypeId, const WString& friendlyName=L"Xml Text View");
 			~XmlTextView();
 		};
 

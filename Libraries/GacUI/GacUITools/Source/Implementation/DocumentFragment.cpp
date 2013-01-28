@@ -75,7 +75,7 @@ DocumentFragment
 			{
 				if(view!=senderView)
 				{
-					view->NotifyUpdateView();
+					view->NotifyUpdateView(false);
 				}
 			}
 		}

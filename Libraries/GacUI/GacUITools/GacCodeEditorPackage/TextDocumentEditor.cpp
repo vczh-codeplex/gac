@@ -25,7 +25,7 @@ TextDocumentEditor
 			PlainTextView* plainTextView=dynamic_cast<PlainTextView*>(GetEditingView());
 			if(plainTextView)
 			{
-				plainTextView->NotifyUpdateView();
+				plainTextView->NotifyUpdateView(true);
 			}
 		}
 

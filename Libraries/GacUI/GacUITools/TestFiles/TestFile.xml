@@ -1,0 +1,7 @@
+<books>
+	<!--Comment-->
+	<book name="C++Primer">
+		Content
+	</book>
+	<![CDATA[<xml/>]]>
+</books>

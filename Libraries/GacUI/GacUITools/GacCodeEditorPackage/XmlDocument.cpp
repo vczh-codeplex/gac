@@ -11,8 +11,8 @@ XmlTextView
 
 		const wchar_t* XmlTextView::ViewTypeId = L"vl::gactools::XmlTextView";
 
-		XmlTextView::XmlTextView(DocumentFragment* _ownedFragment)
-			:PlainTextView(_ownedFragment)
+		XmlTextView::XmlTextView(DocumentFragment* _ownedFragment, const WString& viewTypeId, const WString& friendlyName)
+			:PlainTextView(_ownedFragment, viewTypeId, friendlyName)
 		{
 		}
 
