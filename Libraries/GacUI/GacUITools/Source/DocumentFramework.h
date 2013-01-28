@@ -35,6 +35,13 @@ namespace vl
 Document Interfaces
 ***********************************************************************/
 
+		class IDocumentViewOperation : public Interface
+		{
+		public:
+			virtual IDocumentView*				GetOwnedView()=0;
+			virtual WString						GetOperationTypeId()=0;
+		};
+
 		class IDocumentView : public Interface
 		{
 		public:
@@ -59,6 +66,17 @@ Document Interfaces
 			virtual bool						BeginEdit(IDocumentEditor* editor)=0;
 			virtual bool						FinishEdit(IDocumentEditor* editor)=0;
 			virtual IDocumentEditor*			GetEditor()=0;
+
+			virtual vint						GetSupportedOperationTypeCount()=0;
+			virtual WString						GetSupportedOperationType(vint index)=0;
+			virtual bool						IsSupportedOperationTypeId(const WString& operationTypeId)=0;
+			virtual IDocumentViewOperation*		GetOperation(const WString& operationTypeId)=0;
+
+			template<typename T>
+			T* GetOperation()
+			{
+				return dynamic_cast<T*>(GetOperation(T::OperationTypeId));
+			}
 		};
 
 		class IDocumentFragment : public Interface
@@ -144,11 +162,10 @@ Document Interfaces
 Editor Interfaces
 ***********************************************************************/
 
-		class IDocumentOperation : public Interface
+		class IDocumentEditorOperation : public IDocumentViewOperation
 		{
 		public:
-			virtual IDocumentView*				GetOwnedView()=0;
-			virtual WString						GetOperationTypeId()=0;
+			virtual IDocumentEditor*			GetOwnedEditor()=0;
 		};
 
 		class IDocumentEditor : public Interface
@@ -176,7 +193,7 @@ Editor Interfaces
 			virtual vint						GetSupportedOperationTypeCount()=0;
 			virtual WString						GetSupportedOperationType(vint index)=0;
 			virtual bool						IsSupportedOperationTypeId(const WString& operationTypeId)=0;
-			virtual IDocumentOperation*			GetOperation(const WString& operationTypeId)=0;
+			virtual IDocumentEditorOperation*	GetOperation(const WString& operationTypeId)=0;
 
 			template<typename T>
 			T* GetOperation()
