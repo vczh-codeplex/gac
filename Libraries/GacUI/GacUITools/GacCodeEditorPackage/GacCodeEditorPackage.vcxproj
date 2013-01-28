@@ -12,15 +12,23 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EditPackage.cpp" />
+    <ClCompile Include="JsonDocument.cpp" />
+    <ClCompile Include="JsonDocumentEditor.cpp" />
     <ClCompile Include="TextDocument.cpp" />
     <ClCompile Include="TextDocumentEditor.cpp" />
     <ClCompile Include="TextEditorPackage.cpp" />
+    <ClCompile Include="XmlDocument.cpp" />
+    <ClCompile Include="XmlDocumentEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditPackage.h" />
+    <ClInclude Include="JsonDocument.h" />
+    <ClInclude Include="JsonDocumentEditor.h" />
     <ClInclude Include="TextDocument.h" />
     <ClInclude Include="TextDocumentEditor.h" />
     <ClInclude Include="TextEditorPackage.h" />
+    <ClInclude Include="XmlDocument.h" />
+    <ClInclude Include="XmlDocumentEditor.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{98AA6C38-DA75-413E-8D75-7602646900EC}</ProjectGuid>

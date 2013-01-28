@@ -13,33 +13,69 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="TextDocument">
+      <UniqueIdentifier>{340db120-430e-4a92-a43d-bdf7ae2968b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XmlDocument">
+      <UniqueIdentifier>{f7a68c9f-fdaf-431e-be19-d8758b47f5e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JsonDocument">
+      <UniqueIdentifier>{116817dd-2b83-4171-84a2-8ffa50a5f6bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Packages">
+      <UniqueIdentifier>{28e608b4-542f-4a7f-b590-cdd78f7e5692}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="EditPackage.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="JsonDocument.cpp">
+      <Filter>JsonDocument</Filter>
     </ClCompile>
-    <ClCompile Include="TextEditorPackage.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="JsonDocumentEditor.cpp">
+      <Filter>JsonDocument</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlDocument.cpp">
+      <Filter>XmlDocument</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlDocumentEditor.cpp">
+      <Filter>XmlDocument</Filter>
     </ClCompile>
     <ClCompile Include="TextDocument.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>TextDocument</Filter>
     </ClCompile>
     <ClCompile Include="TextDocumentEditor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>TextDocument</Filter>
+    </ClCompile>
+    <ClCompile Include="EditPackage.cpp">
+      <Filter>Packages</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEditorPackage.cpp">
+      <Filter>Packages</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EditPackage.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="JsonDocument.h">
+      <Filter>JsonDocument</Filter>
     </ClInclude>
-    <ClInclude Include="TextEditorPackage.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="JsonDocumentEditor.h">
+      <Filter>JsonDocument</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlDocument.h">
+      <Filter>XmlDocument</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlDocumentEditor.h">
+      <Filter>XmlDocument</Filter>
     </ClInclude>
     <ClInclude Include="TextDocument.h">
-      <Filter>Header Files</Filter>
+      <Filter>TextDocument</Filter>
     </ClInclude>
     <ClInclude Include="TextDocumentEditor.h">
-      <Filter>Header Files</Filter>
+      <Filter>TextDocument</Filter>
+    </ClInclude>
+    <ClInclude Include="EditPackage.h">
+      <Filter>Packages</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEditorPackage.h">
+      <Filter>Packages</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
