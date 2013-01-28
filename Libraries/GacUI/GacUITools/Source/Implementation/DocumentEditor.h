@@ -34,18 +34,18 @@ namespace vl
 				void							OnFinishEdit(IDocumentView* sender)override;
 			};
 
-			List<ICallback*>								callbacks;
-			Ptr<DocumentViewCallback>						documentViewCallback;
-			IDocumentEditorFactory*							editorFactory;
-			IDocumentView*									editingView;
-			GuiControl*										editorControl;
-			Dictionary<WString, Ptr<IDocumentOperation>>	supportedOperations;
+			List<ICallback*>									callbacks;
+			Ptr<DocumentViewCallback>							documentViewCallback;
+			IDocumentEditorFactory*								editorFactory;
+			IDocumentView*										editingView;
+			GuiControl*											editorControl;
+			Dictionary<WString, Ptr<IDocumentEditorOperation>>	supportedOperations;
 
 			void								OnLostActiveView();
 		protected:
 
 			const List<ICallback*>&				GetCallbacks();
-			bool								AddSupportedOperation(Ptr<IDocumentOperation> operation);
+			bool								AddSupportedOperation(Ptr<IDocumentEditorOperation> operation);
 			virtual void						BeforeEditView(IDocumentView* view)=0;
 			virtual void						AfterEditView(IDocumentView* view)=0;
 			virtual GuiControl*					CreateEditorControlInternal()=0;
@@ -66,7 +66,7 @@ namespace vl
 			vint								GetSupportedOperationTypeCount()override;
 			WString								GetSupportedOperationType(vint index)override;
 			bool								IsSupportedOperationTypeId(const WString& operationTypeId)override;
-			IDocumentOperation*					GetOperation(const WString& operationTypeId)override;
+			IDocumentEditorOperation*			GetOperation(const WString& operationTypeId)override;
 		};
 	}
 }

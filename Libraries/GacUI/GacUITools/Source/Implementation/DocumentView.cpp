@@ -15,6 +15,13 @@ DocumentView
 			return callbacks;
 		}
 
+		bool DocumentView::AddSupportedOperation(Ptr<IDocumentViewOperation> operation)
+		{
+			if(supportedOperations.Keys().Contains(operation->GetOperationTypeId())) return false;
+			supportedOperations.Add(operation->GetOperationTypeId(), operation);
+			return true;
+		}
+
 		DocumentView::DocumentView(DocumentFragment* _ownedFragment, const WString& _id, const WString& _friendlyName)
 			:ownedFragment(_ownedFragment)
 			,id(_id)
@@ -125,6 +132,43 @@ DocumentView
 		IDocumentEditor* DocumentView::GetEditor()
 		{
 			return currentEditor;
+		}
+
+		vint DocumentView::GetSupportedOperationTypeCount()
+		{
+			return supportedOperations.Count()+(currentEditor?currentEditor->GetSupportedOperationTypeCount():0);
+		}
+
+		WString DocumentView::GetSupportedOperationType(vint index)
+		{
+			if(0<=index && index<supportedOperations.Count())
+			{
+				return supportedOperations.Keys().Get(index);
+			}
+			else if(currentEditor)
+			{
+				return currentEditor->GetSupportedOperationType(index-supportedOperations.Count());
+			}
+			else
+			{
+				return L"";
+			}
+		}
+
+		bool DocumentView::IsSupportedOperationTypeId(const WString& operationTypeId)
+		{
+			return supportedOperations.Keys().Contains(operationTypeId) || (currentEditor && currentEditor->IsSupportedOperationTypeId(operationTypeId));
+		}
+
+		IDocumentViewOperation* DocumentView::GetOperation(const WString& operationTypeId)
+		{
+			if(currentEditor)
+			{
+				IDocumentEditorOperation* operation=currentEditor->GetOperation(operationTypeId);
+				if(operation) return operation;
+			}
+			vint index=supportedOperations.Keys().IndexOf(operationTypeId);
+			return index==-1?0:supportedOperations.Values().Get(index).Obj();
 		}
 	}
 }

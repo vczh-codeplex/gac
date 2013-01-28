@@ -73,7 +73,7 @@ DocumentEditor
 			return callbacks;
 		}
 
-		bool DocumentEditor::AddSupportedOperation(Ptr<IDocumentOperation> operation)
+		bool DocumentEditor::AddSupportedOperation(Ptr<IDocumentEditorOperation> operation)
 		{
 			if(supportedOperations.Keys().Contains(operation->GetOperationTypeId())) return false;
 			supportedOperations.Add(operation->GetOperationTypeId(), operation);
@@ -199,7 +199,7 @@ DocumentEditor
 			return supportedOperations.Keys().Contains(operationTypeId);
 		}
 
-		IDocumentOperation* DocumentEditor::GetOperation(const WString& operationTypeId)
+		IDocumentEditorOperation* DocumentEditor::GetOperation(const WString& operationTypeId)
 		{
 			vint index=supportedOperations.Keys().IndexOf(operationTypeId);
 			return index==-1?0:supportedOperations.Values().Get(index).Obj();
