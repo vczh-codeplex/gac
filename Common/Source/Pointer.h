@@ -419,6 +419,11 @@ namespace vl
 	struct KeyType<Ptr<T>>
 	{
 		typedef T* Type;
+
+		static T* GetKeyValue(const Ptr<T>& key)
+		{
+			return key.Obj();
+		}
 	};
 
 	template<typename T>
@@ -431,6 +436,11 @@ namespace vl
 	struct KeyType<ComPtr<T>>
 	{
 		typedef T* Type;
+
+		static T* GetKeyValue(const ComPtr<T>& key)
+		{
+			return key.Obj();
+		}
 	};
 
 	template<typename T>

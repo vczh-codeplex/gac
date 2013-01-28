@@ -136,6 +136,11 @@ typedef signed __int64	pos_t;
 	{
 	public:
 		typedef T Type;
+
+		static T GetKeyValue(const T& value)
+		{
+			return value;
+		}
 	};
 
 	template<typename T>
