@@ -144,7 +144,7 @@ namespace vl
 
 			bool Add(const KT& key, const VT& value)
 			{
-				CHECK_ERROR(!keys.Contains(key), L"Dictionary<KT, KK, ValueContainer, VT, VK>::Add(const KT&, const VT&)#key已存在。");
+				CHECK_ERROR(!keys.Contains(KeyType<KT>::GetKeyValue(key)), L"Dictionary<KT, KK, ValueContainer, VT, VK>::Add(const KT&, const VT&)#key已存在。");
 				vint index=keys.Add(key);
 				values.Insert(index, value);
 				return true;
@@ -339,7 +339,7 @@ namespace vl
 			bool Add(const KT& key, const VT& value)
 			{
 				ValueContainer* target=0;
-				vint index=keys.IndexOf(key);
+				vint index=keys.IndexOf(KeyType<KT>::GetKeyValue(key));
 				if(index==-1)
 				{
 					target=new ValueContainer;
