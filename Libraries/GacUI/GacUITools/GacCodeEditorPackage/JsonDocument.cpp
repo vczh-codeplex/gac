@@ -11,8 +11,8 @@ JsonTextView
 
 		const wchar_t* JsonTextView::ViewTypeId = L"vl::gactools::JsonTextView";
 
-		JsonTextView::JsonTextView(DocumentFragment* _ownedFragment)
-			:PlainTextView(_ownedFragment)
+		JsonTextView::JsonTextView(DocumentFragment* _ownedFragment, const WString& viewTypeId, const WString& friendlyName)
+			:PlainTextView(_ownedFragment, viewTypeId, friendlyName)
 		{
 		}
 

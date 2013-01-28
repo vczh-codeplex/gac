@@ -38,13 +38,16 @@ DocumentView
 			}
 		}
 
-		void DocumentView::NotifyUpdateView()
+		void DocumentView::NotifyUpdateView(bool alsoNotifyOwnedFragment)
 		{
 			FOREACH(ICallback*, callback, callbacks)
 			{
 				callback->OnViewUpdated(this);
 			}
-			ownedFragment->NotifyUpdateFragmentAndViews(this);
+			if(alsoNotifyOwnedFragment)
+			{
+				ownedFragment->NotifyUpdateFragmentAndViews(this);
+			}
 		}
 
 		bool DocumentView::AttachCallback(ICallback* callback)
@@ -102,7 +105,7 @@ DocumentView
 			{
 				WString viewTypeId=ownedFragment->GetSupportedViewTypeId(i);
 				IDocumentView* view=ownedFragment->GetView(viewTypeId);
-				if(view && view!=this)
+				if(view && view!=this && view->GetEditor()!=0)
 				{
 					if(!view->IsReadOnlyView() || !this->IsReadOnlyView())
 					{

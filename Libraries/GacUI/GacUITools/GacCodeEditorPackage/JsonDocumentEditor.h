@@ -9,6 +9,7 @@ Interfaces:
 #define GACUI_TOOLS_JSONDOCUMENTEDITOR
 
 #include "TextDocumentEditor.h"
+#include "JsonDocument.h"
 
 namespace vl
 {

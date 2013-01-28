@@ -10,7 +10,7 @@ Interfaces:
 
 #include "..\Source\Implementation\DocumentEditor.h"
 #include "..\Source\Implementation\DocumentEditorFactory.h"
-#include "..\GacCodeEditorPackage\TextDocument.h"
+#include "TextDocument.h"
 
 namespace vl
 {

@@ -1,0 +1,10 @@
+{
+    "$type" : "books[]",
+    "value" : [
+    {
+        "$type" : "book",
+        "name" : "C++Primer",
+        "content" : "Content"
+    }
+    ]
+}

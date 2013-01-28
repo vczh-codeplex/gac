@@ -9,6 +9,7 @@ Interfaces:
 #define GACUI_TOOLS_XMLDOCUMENTEDITOR
 
 #include "TextDocumentEditor.h"
+#include "XmlDocument.h"
 
 namespace vl
 {

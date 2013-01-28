@@ -33,7 +33,7 @@ namespace vl
 			DocumentView(DocumentFragment* _ownedFragment, const WString& _id, const WString& _friendlyName);
 			~DocumentView();
 
-			virtual void						NotifyUpdateView();
+			virtual void						NotifyUpdateView(bool alsoNotifyOwnedFragment);
 			bool								AttachCallback(ICallback* callback)override;
 			bool								DetachCallback(ICallback* callback)override;
 

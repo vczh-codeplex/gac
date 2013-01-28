@@ -39,7 +39,7 @@ namespace vl
 		public:
 			static const wchar_t*				ViewTypeId;
 
-			PlainTextView(DocumentFragment* _ownedFragment);
+			PlainTextView(DocumentFragment* _ownedFragment, const WString& viewTypeId=ViewTypeId, const WString& friendlyName=L"Plain Text View");
 			~PlainTextView();
 
 			bool								InstallContentProvider(IPlainTextViewContentProvider* value);
