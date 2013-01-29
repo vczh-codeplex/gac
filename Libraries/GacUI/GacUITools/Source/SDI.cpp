@@ -201,6 +201,10 @@ SDIEditingDocumentService
 
 			bool InstallEditor(IDocumentEditor* editor)override
 			{
+				while(GetActiveEditorCount()>0)
+				{
+					CloseEditor(GetActiveEditor(0), false);
+				}
 				editor->GetEditingView()->GetOwnedFragment()->AttachCallback(this);
 				editor->GetEditorControl()->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				window->InstallEditorControl(editor->GetEditorControl());

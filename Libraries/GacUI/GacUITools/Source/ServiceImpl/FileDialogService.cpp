@@ -9,9 +9,16 @@ namespace vl
 EditingDocumentService
 ***********************************************************************/
 
-		WString FileDialogService::BuildFilter(Ptr<DialogDescription> dialog)
+		WString FileDialogService::BuildFilter(Ptr<DialogDescription> dialog, const WString& preferredExtension)
 		{
-			return From(dialog->filters)
+			WString result=From(dialog->filters)
+				.Where([preferredExtension](Pair<vint, WString> input)
+				{
+					return preferredExtension==L""
+						|| input.value.Length()>=preferredExtension.Length()
+						&& input.value.Sub(input.value.Length()-preferredExtension.Length(), preferredExtension.Length())==preferredExtension
+						;
+				})
 				.OrderBy([](Pair<vint, WString> a, Pair<vint, WString> b)->vint
 				{
 					return a.key-b.key;
@@ -24,6 +31,11 @@ EditingDocumentService
 				{
 					return a==L""?b:a+L"|"+b;
 				});
+			if(result==L"" && preferredExtension!=L"")
+			{
+				result=BuildFilter(dialog, L"");
+			}
+			return result;
 		}
 
 		FileDialogService::FileDialogService()
@@ -58,7 +70,7 @@ EditingDocumentService
 			vint index=dialogDescriptions.Keys().IndexOf(dialogId);
 			if(index==-1) return L"";
 			Ptr<DialogDescription> dialog=dialogDescriptions.Values().Get(index);
-			WString filter=BuildFilter(dialog);
+			WString filter=BuildFilter(dialog, L"");
 			if(filter==L"") return L"";
 
 			List<WString> selectionFileNames;
@@ -83,12 +95,12 @@ EditingDocumentService
 			return selectionFileNames[0];
 		}
 
-		WString FileDialogService::SaveDialogForSingleFile(const WString& dialogId)
+		WString FileDialogService::SaveDialogForSingleFile(const WString& dialogId, const WString& preferredExtension)
 		{
 			vint index=dialogDescriptions.Keys().IndexOf(dialogId);
 			if(index==-1) return L"";
 			Ptr<DialogDescription> dialog=dialogDescriptions.Values().Get(index);
-			WString filter=BuildFilter(dialog);
+			WString filter=BuildFilter(dialog, preferredExtension);
 			if(filter==L"") return L"";
 
 			List<WString> selectionFileNames;
@@ -101,7 +113,7 @@ EditingDocumentService
 				dialog->text,
 				L"",
 				L"",
-				L"",
+				preferredExtension,
 				filter,
 				(INativeDialogService::FileDialogOptions)
 				( INativeDialogService::FileDialogDereferenceLinks

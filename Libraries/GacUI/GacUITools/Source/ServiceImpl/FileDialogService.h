@@ -29,7 +29,7 @@ namespace vl
 
 		protected:
 
-			WString						BuildFilter(Ptr<DialogDescription> dialog);
+			WString						BuildFilter(Ptr<DialogDescription> dialog, const WString& preferredExtension);
 		public:
 			FileDialogService();
 			~FileDialogService();
@@ -37,7 +37,7 @@ namespace vl
 			bool						CreateFileDialog(const WString& dialogId, const WString& text)override;
 			bool						AddDialogItem(const WString& dialogId, const WString& text, const WString& filter, vint priority)override;
 			WString						OpenDialogForSingleFile(const WString& dialogId)override;
-			WString						SaveDialogForSingleFile(const WString& dialogId)override;
+			WString						SaveDialogForSingleFile(const WString& dialogId, const WString& preferredExtension)override;
 		};
 	}
 }

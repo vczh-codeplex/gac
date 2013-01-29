@@ -376,7 +376,7 @@ Common Services
 			virtual bool						CreateFileDialog(const WString& dialogId, const WString& text)=0;
 			virtual bool						AddDialogItem(const WString& dialogId, const WString& text, const WString& filter, vint priority)=0;
 			virtual WString						OpenDialogForSingleFile(const WString& dialogId)=0;
-			virtual WString						SaveDialogForSingleFile(const WString& dialogId)=0;
+			virtual WString						SaveDialogForSingleFile(const WString& dialogId, const WString& preferredExtension)=0;
 		};
 
 		class IEditingDocumentService : public IDocumentService
