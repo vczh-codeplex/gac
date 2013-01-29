@@ -173,8 +173,8 @@ TextDocument
 			return true;
 		}
 
-		TextDocument::TextDocument(IDocumentContainer* _ownedContainer, const WString& _filePath, DocumentFragment* _ownedFragment, const WString& _friendlyName)
-			:FileDocumentFragment(_ownedContainer, _ownedFragment, _friendlyName, _filePath)
+		TextDocument::TextDocument(IDocumentFileType* _ownedFileType, IDocumentContainer* _ownedContainer, const WString& _filePath, DocumentFragment* _ownedFragment, const WString& _friendlyName)
+			:FileDocumentFragment(_ownedFileType, _ownedContainer, _ownedFragment, _friendlyName, _filePath)
 			,contentProxy(0)
 			,encoding(BomEncoder::Utf16)
 			,containsBom(true)
@@ -235,12 +235,12 @@ TextFileType
 
 		Ptr<IDocumentFragment> TextFileType::NewDocumentFragment(IDocumentContainer* container)
 		{
-			return new TextDocument(container);
+			return new TextDocument(this, container);
 		}
 
 		Ptr<IDocumentFragment> TextFileType::LoadDocumentFragment(const WString& filePath, IDocumentContainer* container)
 		{
-			return new TextDocument(container, filePath);
+			return new TextDocument(this, container, filePath);
 		}
 
 		TextFileType::TextFileType()

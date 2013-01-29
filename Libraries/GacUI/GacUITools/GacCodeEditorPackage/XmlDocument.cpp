@@ -24,8 +24,8 @@ XmlTextView
 XmlTextDocument
 ***********************************************************************/
 
-		XmlTextDocument::XmlTextDocument(IDocumentContainer* _ownedContainer, const WString& _filePath, DocumentFragment* _ownedFragment, const WString& _friendlyName)
-			:TextDocument(_ownedContainer, _filePath, _ownedFragment, _friendlyName)
+		XmlTextDocument::XmlTextDocument(IDocumentFileType* _ownedFileType, IDocumentContainer* _ownedContainer, const WString& _filePath, DocumentFragment* _ownedFragment, const WString& _friendlyName)
+			:TextDocument(_ownedFileType, _ownedContainer, _filePath, _ownedFragment, _friendlyName)
 		{
 			Ptr<XmlTextView> xmlTextView=new XmlTextView(this);
 			xmlTextView->InstallContentProvider(this);
@@ -45,12 +45,12 @@ XmlTextFileType
 
 		Ptr<IDocumentFragment> XmlTextFileType::NewDocumentFragment(IDocumentContainer* container)
 		{
-			return new XmlTextDocument(container);
+			return new XmlTextDocument(this, container);
 		}
 
 		Ptr<IDocumentFragment> XmlTextFileType::LoadDocumentFragment(const WString& filePath, IDocumentContainer* container)
 		{
-			return new XmlTextDocument(container, filePath);
+			return new XmlTextDocument(this, container, filePath);
 		}
 
 		XmlTextFileType::XmlTextFileType()

@@ -24,8 +24,8 @@ JsonTextView
 JsonTextDocument
 ***********************************************************************/
 
-		JsonTextDocument::JsonTextDocument(IDocumentContainer* _ownedContainer, const WString& _filePath, DocumentFragment* _ownedFragment, const WString& _friendlyName)
-			:TextDocument(_ownedContainer, _filePath, _ownedFragment, _friendlyName)
+		JsonTextDocument::JsonTextDocument(IDocumentFileType* _ownedFileType, IDocumentContainer* _ownedContainer, const WString& _filePath, DocumentFragment* _ownedFragment, const WString& _friendlyName)
+			:TextDocument(_ownedFileType, _ownedContainer, _filePath, _ownedFragment, _friendlyName)
 		{
 			Ptr<JsonTextView> jsonTextView=new JsonTextView(this);
 			jsonTextView->InstallContentProvider(this);
@@ -45,12 +45,12 @@ JsonTextFileType
 
 		Ptr<IDocumentFragment> JsonTextFileType::NewDocumentFragment(IDocumentContainer* container)
 		{
-			return new JsonTextDocument(container);
+			return new JsonTextDocument(this, container);
 		}
 
 		Ptr<IDocumentFragment> JsonTextFileType::LoadDocumentFragment(const WString& filePath, IDocumentContainer* container)
 		{
-			return new JsonTextDocument(container, filePath);
+			return new JsonTextDocument(this, container, filePath);
 		}
 
 		JsonTextFileType::JsonTextFileType()

@@ -134,7 +134,7 @@ MainWindow
 				}
 				else if(editingFragment->GetFilePath()==L"")
 				{
-					this->SetText(L"Untitled"+editingFragment->GetOwnedContainer()->GetOwnedFileType()->GetFileExtension()+L" - "+appName+L" (www.gaclib.net)");
+					this->SetText(L"Untitled"+editingFragment->GetOwnedFileType()->GetFileExtension()+L" - "+appName+L" (www.gaclib.net)");
 				}
 				else
 				{

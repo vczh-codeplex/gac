@@ -26,7 +26,7 @@ namespace vl
 		class XmlTextDocument : public TextDocument
 		{
 		public:
-			XmlTextDocument(IDocumentContainer* _ownedContainer, const WString& _filePath=L"", DocumentFragment* _ownedFragment=0, const WString& _friendlyName=L"Xml Document");
+			XmlTextDocument(IDocumentFileType* _ownedFileType, IDocumentContainer* _ownedContainer, const WString& _filePath=L"", DocumentFragment* _ownedFragment=0, const WString& _friendlyName=L"Xml Document");
 			~XmlTextDocument();
 		};
 

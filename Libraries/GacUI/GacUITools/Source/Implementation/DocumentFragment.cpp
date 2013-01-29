@@ -45,8 +45,9 @@ DocumentFragment
 			return ownedFragment;
 		}
 
-		DocumentFragment::DocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName)
-			:ownedContainer(_ownedContainer)
+		DocumentFragment::DocumentFragment(IDocumentFileType* _ownedFileType, IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName)
+			:ownedFileType(_ownedFileType)
+			,ownedContainer(_ownedContainer)
 			,ownedFragment(_ownedFragment)
 			,friendlyName(_friendlyName)
 		{
@@ -108,6 +109,11 @@ DocumentFragment
 			}
 		}
 
+		IDocumentFileType* DocumentFragment::GetOwnedFileType()
+		{
+			return ownedFileType;
+		}
+
 		IDocumentContainer* DocumentFragment::GetOwnedContainer()
 		{
 			return ownedContainer;
@@ -163,8 +169,8 @@ DocumentFragment
 FileDocumentFragment
 ***********************************************************************/
 
-		FileDocumentFragment::FileDocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName, const WString& _filePath)
-			:DocumentFragment(_ownedContainer, _ownedFragment, _friendlyName)
+		FileDocumentFragment::FileDocumentFragment(IDocumentFileType* _ownedFileType, IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName, const WString& _filePath)
+			:DocumentFragment(_ownedFileType, _ownedContainer, _ownedFragment, _friendlyName)
 			,currentFilePath(_filePath)
 			,modified(false)
 		{
@@ -241,7 +247,7 @@ VirtualDocumentFragment
 ***********************************************************************/
 
 		VirtualDocumentFragment::VirtualDocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName)
-			:DocumentFragment(_ownedContainer, _ownedFragment, _friendlyName)
+			:DocumentFragment(0, _ownedContainer, _ownedFragment, _friendlyName)
 		{
 		}
 

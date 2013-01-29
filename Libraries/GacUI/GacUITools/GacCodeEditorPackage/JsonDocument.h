@@ -26,7 +26,7 @@ namespace vl
 		class JsonTextDocument : public TextDocument
 		{
 		public:
-			JsonTextDocument(IDocumentContainer* _ownedContainer, const WString& _filePath=L"", DocumentFragment* _ownedFragment=0, const WString& _friendlyName=L"Json Document");
+			JsonTextDocument(IDocumentFileType* _ownedFileType, IDocumentContainer* _ownedContainer, const WString& _filePath=L"", DocumentFragment* _ownedFragment=0, const WString& _friendlyName=L"Json Document");
 			~JsonTextDocument();
 		};
 

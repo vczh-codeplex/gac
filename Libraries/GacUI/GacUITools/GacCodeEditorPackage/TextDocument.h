@@ -67,7 +67,7 @@ namespace vl
 			bool								SaveDocumentInternal(const WString& filePath)override;
 		public:
 
-			TextDocument(IDocumentContainer* _ownedContainer, const WString& _filePath=L"", DocumentFragment* _ownedFragment=0, const WString& _friendlyName=L"Text Document");
+			TextDocument(IDocumentFileType* _ownedFileType, IDocumentContainer* _ownedContainer, const WString& _filePath=L"", DocumentFragment* _ownedFragment=0, const WString& _friendlyName=L"Text Document");
 			~TextDocument();
 
 			BomEncoder::Encoding				GetEncoding();
