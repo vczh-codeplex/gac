@@ -66,7 +66,7 @@ DocumentFileType
 
 		Ptr<IDocumentContainer> DocumentFileType::CreateDocument()
 		{
-			Ptr<DocumentContainer> document=new DocumentContainer(this);
+			Ptr<DocumentContainer> document=new DocumentContainer();
 			Ptr<IDocumentFragment> fragment=NewDocumentFragment(document.Obj());
 			if(!fragment) return 0;
 			document->SetRootFragment(fragment);
@@ -79,7 +79,7 @@ DocumentFileType
 
 		Ptr<IDocumentContainer> DocumentFileType::CreateDocumentFromFile(const WString& filePath)
 		{
-			Ptr<DocumentContainer> document=new DocumentContainer(this);
+			Ptr<DocumentContainer> document=new DocumentContainer();
 			Ptr<IDocumentFragment> fragment=LoadDocumentFragment(filePath, document.Obj());
 			if(!fragment) return 0;
 			document->SetRootFragment(fragment);

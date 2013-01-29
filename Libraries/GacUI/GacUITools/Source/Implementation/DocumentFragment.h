@@ -19,6 +19,7 @@ namespace vl
 		{
 		private:
 			List<ICallback*>							callbacks;
+			IDocumentFileType*							ownedFileType;
 			IDocumentContainer*							ownedContainer;
 			DocumentFragment*							ownedFragment;
 			WString										friendlyName;
@@ -36,7 +37,7 @@ namespace vl
 			DocumentFragment*							GetOwnerFragmentInternal();
 
 		public:
-			DocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName);
+			DocumentFragment(IDocumentFileType* _ownedFileType, IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName);
 			~DocumentFragment();
 
 			virtual void								NotifyUpdateFragment();
@@ -44,6 +45,7 @@ namespace vl
 			
 			bool										AttachCallback(ICallback* callback)override;
 			bool										DetachCallback(ICallback* callback)override;
+			IDocumentFileType*							GetOwnedFileType()override;
 			IDocumentContainer*							GetOwnedContainer()override;
 			IDocumentFragment*							GetOwnedFragment()override;
 			vint										GetSubFragmentCount()override;
@@ -67,7 +69,7 @@ namespace vl
 			virtual bool					LoadDocumentInternal(const WString& filePath)=0;
 			virtual bool					SaveDocumentInternal(const WString& filePath)=0;
 		public:
-			FileDocumentFragment(IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName, const WString& _filePath);
+			FileDocumentFragment(IDocumentFileType* _ownedFileType, IDocumentContainer* _ownedContainer, DocumentFragment* _ownedFragment, const WString& _friendlyName, const WString& _filePath);
 			~FileDocumentFragment();
 
 			void							NotifyUpdateFragment()override;

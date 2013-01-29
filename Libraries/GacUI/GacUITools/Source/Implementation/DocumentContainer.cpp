@@ -9,8 +9,7 @@ namespace vl
 DocumentContainer
 ***********************************************************************/
 
-		DocumentContainer::DocumentContainer(IDocumentFileType* _ownedFileType)
-			:ownedFileType(_ownedFileType)
+		DocumentContainer::DocumentContainer()
 		{
 		}
 
@@ -48,11 +47,6 @@ DocumentContainer
 			{
 				return false;
 			}
-		}
-
-		IDocumentFileType* DocumentContainer::GetOwnedFileType()
-		{
-			return ownedFileType;
 		}
 
 		IDocumentFragment* DocumentContainer::GetRootFragment()
