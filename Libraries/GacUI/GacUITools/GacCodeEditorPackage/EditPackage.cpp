@@ -9,11 +9,11 @@ namespace vl
 EditPackage
 ***********************************************************************/
 
+		const wchar_t* EditPackage::PackageId = L"EditPackage";
+
 		WString EditPackage::GetPackageId()
 		{
 			return PackageId;
 		}
-
-		const wchar_t* EditPackage::PackageId = L"EditPackage";
 	}
 }

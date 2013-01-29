@@ -19,13 +19,15 @@ namespace vl
 		private:
 			List<ICallback*>			callbacks;
 			Ptr<IDocumentFragment>		rootFragment;
+			IDocumentFileType*			ownedFileType;
 
 		public:
-			DocumentContainer();
+			DocumentContainer(IDocumentFileType* _ownedFileType);
 			~DocumentContainer();
 
 			bool						AttachCallback(ICallback* callback)override;
 			bool						DetachCallback(ICallback* callback)override;
+			IDocumentFileType*			GetOwnedFileType()override;
 
 			IDocumentFragment*			GetRootFragment()override;
 			void						SetRootFragment(Ptr<IDocumentFragment> _rootFragment);
