@@ -23,6 +23,7 @@ namespace vl
 			void							TextEditorNewText(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void							TextEditorNewXml(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void							TextEditorNewJson(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void							TextEditorNewMoe(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 		public:
 			static const wchar_t*			PackageId;
 
