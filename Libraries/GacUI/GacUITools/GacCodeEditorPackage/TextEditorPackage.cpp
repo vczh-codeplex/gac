@@ -5,6 +5,8 @@
 #include "XmlDocumentEditor.h"
 #include "JsonDocument.h"
 #include "JsonDocumentEditor.h"
+#include "MoeDocument.h"
+#include "MoeDocumentEditor.h"
 
 namespace vl
 {
@@ -46,6 +48,11 @@ TextEditorPackage
 			NewDocument(JsonTextFileType::FileTypeId);
 		}
 
+		void TextEditorPackage::TextEditorNewMoe(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			NewDocument(MoeTextFileType::FileTypeId);
+		}
+
 		TextEditorPackage::TextEditorPackage()
 			:editingDocumentService(0)
 		{
@@ -76,6 +83,12 @@ TextEditorPackage
 				GetDocumentManager()->RegisterEditorFactory(editorFactory);
 				GetDocumentManager()->BindDefaultEditor(JsonTextView::ViewTypeId, editorFactory.Obj());
 			}
+			{
+				GetDocumentManager()->RegisterFileType(new MoeTextFileType);
+				Ptr<MoeTextDocumentEditorFactory> editorFactory=new MoeTextDocumentEditorFactory;
+				GetDocumentManager()->RegisterEditorFactory(editorFactory);
+				GetDocumentManager()->BindDefaultEditor(MoeTextView::ViewTypeId, editorFactory.Obj());
+			}
 		}
 
 		void TextEditorPackage::OnAfterInit()
@@ -96,6 +109,10 @@ TextEditorPackage
 			else if(command->GetCommandId()==L"TextEditor.NewJson")
 			{
 				command->Executed.AttachMethod(this, &TextEditorPackage::TextEditorNewJson);
+			}
+			else if(command->GetCommandId()==L"TextEditor.NewMoe")
+			{
+				command->Executed.AttachMethod(this, &TextEditorPackage::TextEditorNewMoe);
 			}
 		}
 	}

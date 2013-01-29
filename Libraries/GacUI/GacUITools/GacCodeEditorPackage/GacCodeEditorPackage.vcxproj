@@ -14,6 +14,8 @@
     <ClCompile Include="EditPackage.cpp" />
     <ClCompile Include="JsonDocument.cpp" />
     <ClCompile Include="JsonDocumentEditor.cpp" />
+    <ClCompile Include="MoeDocument.cpp" />
+    <ClCompile Include="MoeDocumentEditor.cpp" />
     <ClCompile Include="TextDocument.cpp" />
     <ClCompile Include="TextDocumentEditor.cpp" />
     <ClCompile Include="TextEditorPackage.cpp" />
@@ -24,6 +26,8 @@
     <ClInclude Include="EditPackage.h" />
     <ClInclude Include="JsonDocument.h" />
     <ClInclude Include="JsonDocumentEditor.h" />
+    <ClInclude Include="MoeDocument.h" />
+    <ClInclude Include="MoeDocumentEditor.h" />
     <ClInclude Include="TextDocument.h" />
     <ClInclude Include="TextDocumentEditor.h" />
     <ClInclude Include="TextEditorPackage.h" />

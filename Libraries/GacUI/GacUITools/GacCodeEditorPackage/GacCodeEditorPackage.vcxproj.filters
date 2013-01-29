@@ -25,6 +25,9 @@
     <Filter Include="Packages">
       <UniqueIdentifier>{28e608b4-542f-4a7f-b590-cdd78f7e5692}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MoeDocument">
+      <UniqueIdentifier>{b157de86-5833-411b-bad4-e3640c9e7144}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="JsonDocument.cpp">
@@ -51,6 +54,12 @@
     <ClCompile Include="TextEditorPackage.cpp">
       <Filter>Packages</Filter>
     </ClCompile>
+    <ClCompile Include="MoeDocument.cpp">
+      <Filter>MoeDocument</Filter>
+    </ClCompile>
+    <ClCompile Include="MoeDocumentEditor.cpp">
+      <Filter>MoeDocument</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JsonDocument.h">
@@ -76,6 +85,12 @@
     </ClInclude>
     <ClInclude Include="TextEditorPackage.h">
       <Filter>Packages</Filter>
+    </ClInclude>
+    <ClInclude Include="MoeDocument.h">
+      <Filter>MoeDocument</Filter>
+    </ClInclude>
+    <ClInclude Include="MoeDocumentEditor.h">
+      <Filter>MoeDocument</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
