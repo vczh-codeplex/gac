@@ -136,7 +136,7 @@ EditingDocumentService
 
 			IFileDialogService* dialogService=GetDocumentManager()->GetService<IFileDialogService>();
 			if(!dialogService) return false;
-			WString filePath=dialogService->SaveDialogForSingleFile(dialogId);
+			WString filePath=dialogService->SaveDialogForSingleFile(dialogId, fragment->GetOwnedContainer()->GetOwnedFileType()->GetFileExtension());
 			if(filePath==L"") return false;
 
 			return fragment->SaveDocumentAs(filePath);
