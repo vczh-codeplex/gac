@@ -134,6 +134,7 @@ Document Interfaces
 			};
 			virtual bool						AttachCallback(ICallback* callback)=0;
 			virtual bool						DetachCallback(ICallback* callback)=0;
+			virtual IDocumentFileType*			GetOwnedFileType()=0;
 
 			virtual IDocumentFragment*			GetRootFragment()=0;
 		};

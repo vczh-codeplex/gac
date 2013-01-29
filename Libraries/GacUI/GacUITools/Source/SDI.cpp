@@ -74,7 +74,7 @@ MainWindow
 				{
 					appName=name->Unbox();
 				}
-				DisplayWindowTitle(L"");
+				DisplayWindowTitle(0);
 
 				this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
 				this->ForceCalculateSizeImmediately();
@@ -116,21 +116,29 @@ MainWindow
 				}
 
 				InitializeSDIAppplication();
+				if(auto defaultFileType=resource->GetValueByPath(L"Application\\DefaultFileType").Cast<ObjectBox<WString>>())
+				{
+					editingDocumentService->NewDocument(defaultFileType->Unbox(), L"", true);
+				}
 			}
 
 			~MainWindow()
 			{
 			}
 
-			void DisplayWindowTitle(const WString& filePath)
+			void DisplayWindowTitle(IDocumentFragment* editingFragment)
 			{
-				if(filePath==L"")
+				if(!editingFragment)
 				{
 					this->SetText(appName+L" (www.gaclib.net)");
 				}
+				else if(editingFragment->GetFilePath()==L"")
+				{
+					this->SetText(L"Untitled"+editingFragment->GetOwnedContainer()->GetOwnedFileType()->GetFileExtension()+L" - "+appName+L" (www.gaclib.net)");
+				}
 				else
 				{
-					this->SetText(appName+L" ["+GetFileName(filePath)+L"] (www.gaclib.net)");
+					this->SetText(GetFileName(editingFragment->GetFilePath())+L" - "+appName+L" (www.gaclib.net)");
 				}
 			}
 
@@ -165,7 +173,7 @@ SDIEditingDocumentService
 			{
 				if(GetActiveDocumentCount()>0 && GetActiveDocument(0)==sender->GetOwnedContainer())
 				{
-					window->DisplayWindowTitle(sender->GetFilePath());
+					window->DisplayWindowTitle(sender);
 				}
 			}
 
@@ -196,7 +204,7 @@ SDIEditingDocumentService
 				editor->GetEditingView()->GetOwnedFragment()->AttachCallback(this);
 				editor->GetEditorControl()->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				window->InstallEditorControl(editor->GetEditorControl());
-				window->DisplayWindowTitle(editor->GetEditingView()->GetOwnedFragment()->GetFilePath());
+				window->DisplayWindowTitle(editor->GetEditingView()->GetOwnedFragment());
 				currentEditor=editor;
 				for(vint i=0;i<GetDocumentManager()->GetPackageCount();i++)
 				{
@@ -216,7 +224,7 @@ SDIEditingDocumentService
 					}
 				}
 				window->UninstallEditorControl(editor->GetEditorControl());
-				window->DisplayWindowTitle(L"");
+				window->DisplayWindowTitle(0);
 				editor->GetEditingView()->GetOwnedFragment()->DetachCallback(this);
 				return true;
 			}
