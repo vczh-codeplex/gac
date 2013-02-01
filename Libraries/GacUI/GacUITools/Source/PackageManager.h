@@ -67,6 +67,7 @@ Main Application Package
 			Dictionary<WString, Ptr<DocumentToolstripCommand>>		commands;
 			Group<WString, ProprityMenuGroup>						existingMenuGroups;
 			Ptr<IFileDialogService>									fileDialogService;
+			Ptr<IMessageDialogService>								messageDialogService;
 			GuiWindow*												mainWindow;
 
 		protected:

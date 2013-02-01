@@ -23,6 +23,7 @@ namespace vl
 			WString						GetContent()override;
 			void						SetContent(const WString& value)override;
 		protected:
+			bool						loading;
 			GuiMultilineTextBox*		textBox;
 
 			void						textBox_TextChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments);

@@ -22,10 +22,13 @@ TextDocumentEditor
 
 		void TextDocumentEditor::textBox_TextChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
-			PlainTextView* plainTextView=dynamic_cast<PlainTextView*>(GetEditingView());
-			if(plainTextView)
+			if(!loading)
 			{
-				plainTextView->NotifyUpdateView(true);
+				PlainTextView* plainTextView=dynamic_cast<PlainTextView*>(GetEditingView());
+				if(plainTextView)
+				{
+					plainTextView->NotifyUpdateView(true);
+				}
 			}
 		}
 
@@ -34,7 +37,10 @@ TextDocumentEditor
 			PlainTextView* plainTextView=dynamic_cast<PlainTextView*>(view);
 			if(plainTextView)
 			{
+				loading=true;
 				plainTextView->ActivateProxy(this);
+				textBox->NotifyModificationSaved();
+				loading=false;
 			}
 		}
 
@@ -56,6 +62,7 @@ TextDocumentEditor
 
 		TextDocumentEditor::TextDocumentEditor(IDocumentEditorFactory* _editorFactory, IDocumentView* _editingView)
 			:DocumentEditor(_editorFactory, _editingView)
+			,loading(false)
 			,textBox(0)
 		{
 		}

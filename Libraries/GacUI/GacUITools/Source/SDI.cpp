@@ -284,11 +284,7 @@ SDIApplicationPackage
 				}
 				return;
 			FAILED_TO_SAVE:
-				GetCurrentController()->DialogService()->ShowMessageBox(
-					GetMainWindow()->GetNativeWindow(),
-					L"Failed to save the current document.",
-					GetMainWindow()->GetText()
-					);
+				SHOW_ERROR_AND_RETURN(true, L"Failed to save the current document.");
 			}
 
 			void SDISaveDocument(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
