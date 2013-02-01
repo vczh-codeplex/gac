@@ -88,6 +88,17 @@ IDs
 ***********************************************************************/
 		
 		const wchar_t* IFileDialogService::ServiceTypeId = L"vl::gactools::IFileDialogService";
+		const wchar_t* IMessageDialogService::ServiceTypeId = L"vl::gactools::IMessageDialogService";
 		const wchar_t* IEditingDocumentService::ServiceTypeId = L"vl::gactools::IEditingDocumentService";
+
+/***********************************************************************
+IMessageDialogService
+***********************************************************************/
+
+		void IMessageDialogService::Message(const WString& message)
+		{
+			IMessageDialogService* service=GetDocumentManager()->GetService<IMessageDialogService>();
+			service->ShowMessage(message);
+		}
 	}
 }

@@ -379,6 +379,19 @@ Common Services
 			virtual WString						SaveDialogForSingleFile(const WString& dialogId, const WString& preferredExtension)=0;
 		};
 
+		class IMessageDialogService : public IDocumentService
+		{
+		public:
+			static const wchar_t*				ServiceTypeId;
+			WString								GetServiceTypeId(){return ServiceTypeId;}
+
+			virtual void						ShowMessage(const WString& message)=0;
+
+			static void							Message(const WString& message);
+		};
+
+#define SHOW_ERROR_AND_RETURN(c, m, ...) do{if(c)vl::gactools::IMessageDialogService::Message(m); return __VA_ARGS__; }while(0)
+
 		class IEditingDocumentService : public IDocumentService
 		{
 		public:

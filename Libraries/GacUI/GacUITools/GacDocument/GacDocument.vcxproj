@@ -23,6 +23,7 @@
     <ClCompile Include="..\Source\ResourceManager.cpp" />
     <ClCompile Include="..\Source\ServiceImpl\EditingDocumentService.cpp" />
     <ClCompile Include="..\Source\ServiceImpl\FileDialogService.cpp" />
+    <ClCompile Include="..\Source\ServiceImpl\MessageDialogService.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\DocumentFramework.h" />
@@ -37,6 +38,7 @@
     <ClInclude Include="..\Source\ResourceManager.h" />
     <ClInclude Include="..\Source\ServiceImpl\EditingDocumentService.h" />
     <ClInclude Include="..\Source\ServiceImpl\FileDialogService.h" />
+    <ClInclude Include="..\Source\ServiceImpl\MessageDialogService.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Source\PackageResources\Images\_Copy.png" />

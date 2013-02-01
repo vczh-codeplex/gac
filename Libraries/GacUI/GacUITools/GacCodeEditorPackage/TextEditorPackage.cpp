@@ -21,16 +21,11 @@ TextEditorPackage
 
 		void TextEditorPackage::NewDocument(const WString& fileTypeId)
 		{
-			if(!editingDocumentService) goto FAILED_TO_NEW;
-			if(!editingDocumentService->NewDocument(fileTypeId, L"", true)) goto FAILED_TO_NEW;
-			return;
-		FAILED_TO_NEW:
-			INativeWindow* window=GetCurrentController()->WindowService()->GetMainWindow();
-			GetCurrentController()->DialogService()->ShowMessageBox(
-				window,
-				L"Failed to open the document.",
-				window->GetTitle()
-				);
+			if(!editingDocumentService)
+			{
+				SHOW_ERROR_AND_RETURN(true, L"Cannot not find IEditingDocumentService.");
+			}
+			editingDocumentService->NewDocument(fileTypeId, L"", true);
 		}
 
 		void TextEditorPackage::TextEditorNewText(GuiGraphicsComposition* sender, GuiEventArgs& arguments)

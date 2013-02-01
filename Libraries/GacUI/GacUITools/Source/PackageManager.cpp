@@ -1,5 +1,6 @@
 #include "PackageManager.h"
 #include "ServiceImpl\FileDialogService.h"
+#include "ServiceImpl\MessageDialogService.h"
 
 namespace vl
 {
@@ -407,6 +408,9 @@ MainApplicationPackage
 			fileDialogService=new FileDialogService;
 			BuildDialogs(resource, packages, fileDialogService.Obj());
 			GetDocumentManager()->RegisterService(fileDialogService);
+
+			messageDialogService=new MessageDialogService;
+			GetDocumentManager()->RegisterService(messageDialogService);
 		}
 
 		void MainApplicationPackage::OnAfterInit()
