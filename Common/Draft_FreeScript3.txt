@@ -148,11 +148,11 @@ match pattern = expression;
 if(condition) statement [else statement]
 while(condition) statement
 do statement while(condition);
+foreach(x in xs) statement
 
 switch(expression)
 {
 	match pattern: statement
-	match Type: statement
 	case value: statement
 	...
 	default: statement // fall in non-existing default branch throws MatchFailedException
@@ -165,10 +165,7 @@ return [expression];
 try
 {
 }
-catch(Type ex)
-{
-}
-catch()
+catch([pattern])
 {
 }
 finally
@@ -179,10 +176,32 @@ finally
 Continuation
 ========================================================
 
+
+
 ========================================================
 Double Dispatch
 ========================================================
 
+function Intersect(switch obj1, switch obj2);
+
+function Intersect(obj1 of Rectangle, obj2 of Ellipse)
+{
+	...
+}
+
+// switch and match function should appear in the same scope
+// namespaces under the same name is the same scope
+// class and extension class is the same scope
+// class and extension is not the same scope
+
 ========================================================
 Pattern Matching
 ========================================================
+
+(a, 2, c)
+@[x1, x2, x3:xs]
+[x1, "a", "b"]
+((1, x, 3), 4, y)
+name of Type
+typeof Type
+(a of Rectangle, typeof Ellipse)
