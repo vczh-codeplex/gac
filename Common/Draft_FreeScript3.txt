@@ -1,0 +1,113 @@
+Free Script 3.0
+
+========================================================
+Operators
+========================================================
+
+operator precedence
+	: <full expression>
+	a[b]
+	a(b)
+	+ - !
+	* / \ %
+	+ - ++ // ++: join strings or arrays
+	<< >>
+	..
+	== != < <= > >=
+	^
+	&&
+	||
+
+========================================================
+Expressions
+========================================================
+
+a[b]
+a(b)
+x:x+1
+x:y:x+y
+(x, y):x+y
+(x, y):do{statements;}
+a.b
+(a)
+a+b
+
+array:		[1,2,3,4]
+map:		{key1:value1, key2:value2}
+tuple:		(a,b,c,d)
+iterator:	@[x1, x2, x3:xs]
+
+null
+1
+1.1
+"abc"
+`abc``def` // syntax suger for: "abc`def"
+
+value // new value in property setter
+this
+base(BaseClass)
+
+========================================================
+Declarations
+========================================================
+
+var variable [= expression]; // create a variable
+const variable = expression; // create a readonly variable
+
+function name(a,b,c) // syntax suger for: const name=(a,b,c):do{ body };
+{
+	body
+}
+
+property variable4
+{
+	get:expression;
+	get{ body }
+
+	set:expression;
+	set{ body }
+}
+
+struct Point // value class
+{
+   x=0;
+   y=0;
+   z;
+}
+
+class Derived : Base1, Base2
+{
+	function new(parameters)
+		:Base1(arguments1)
+		,Base2(arguments2)
+	{ ... }
+
+	function Method1 ...
+	function Method2 ...
+	fixed variable1 ...
+	var variable2 ...
+	property variable3 ...
+	shared variable4 ... // static and readonly
+}
+
+var d = new Derived(arguments);
+
+========================================================
+Context
+========================================================
+
+__context_current()					// the current context
+__context_parent(context)			// the parent context
+__context_base_count(context)		// the number of base contexts
+__context_base(context, index)		// the specified base context by index
+
+// when searching for context.variable, base contexts will count in
+
+__context_get(context, name)				// get a field in a context
+__context_get_base(context, name)			// including base contexts (in order)
+__context_get_parent(context, name)			// including base contexts (in order) and parent context
+
+__context_handle(context, name)				// get a handle in a context
+__context_handle_base(context, name)		// including base contexts (in order)
+__context_handle_parent(context, name)		// including base contexts (in order) and parent context
+__context_handle_set(handle, value)			// set a new value to the handle
