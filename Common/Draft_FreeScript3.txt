@@ -193,16 +193,17 @@ Statement
 ========================================================
 
 expression;
-match pattern = expression;
+pattern = expression;
+reference = expression;
 
 if(condition) statement [else statement]
 while(condition) statement
 do statement while(condition);
-foreach(x in xs) statement
+foreach(pattern in xs) statement
 
 switch(expression)
 {
-	match pattern: statement
+	case pattern: statement
 	case value: statement
 	...
 	default: statement // fall in non-existing default branch throws MatchFailedException
@@ -226,7 +227,62 @@ finally
 Continuation
 ========================================================
 
+function TakeUntil(xs, p) Enumerator
+{
+	foreach(x in xs)
+	{
+		if(!p(x)) yield break;
+		yield return x;
+	}
+}
 
+function Flatten(tree) Enumerator
+{
+	yield return tree;
+	yield join tree.children.Select(Flatten);
+}
+
+function button1_Click(sender, args) Async
+{
+    button1.Enabled=false;
+	textBox1.Text=yield from DownloadAsync("url");
+	button1.Enabled=true;
+}
+
+function InvokeExpression() Parser
+{
+    var name = yield from Expression();
+	yield from Token("(");
+
+	var arguments=new List;
+	yield try
+	{
+		arguments.Add(yield from Expression());
+		yield while(true)
+		{
+			yield from Token(",");
+			arguments.Add(yield from Expression());
+		}
+	}
+	// else try ...
+
+	yield from Token(")");
+	return new InvokeExpression
+	{
+		Name=name,
+		Arguments=arguments
+	};
+}
+
+yield return expression;
+yield join expression;
+yield break;
+
+yield try statememt {else try statement}
+yield while(condition) statement
+yield do statement while(condition);
+
+yield from expression
 
 ========================================================
 Double Dispatch
@@ -238,6 +294,13 @@ function Intersect(obj1 of Rectangle, obj2 of Ellipse)
 {
 	...
 }
+
+function Intersect(obj1 of Rectangle, obj2 of Rectangle)
+{
+	...
+}
+
+...
 
 // switch and match function should appear in the same scope
 // namespaces under the same name is the same scope
@@ -253,8 +316,9 @@ Pattern Matching
 [x1, "a", "b"]
 ((1, x, 3), 4, y)
 name of Type
-typeof Type
-(a of Rectangle, typeof Ellipse)
+(a of Rectangle, b of Ellipse)
+1
+a.b
 
 ========================================================
 Refactoring
@@ -262,4 +326,5 @@ Refactoring
 
 GetAppDomain().Assemblies.Types
 GetAppDomain().FindType("...")
+typeof(Type)
 ...
