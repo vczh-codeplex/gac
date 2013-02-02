@@ -128,18 +128,27 @@ MainWindow
 
 			void DisplayWindowTitle(IDocumentFragment* editingFragment)
 			{
-				if(!editingFragment)
+				WString prefix;
+				if(editingFragment)
 				{
-					this->SetText(appName+L" (www.gaclib.net)");
+					if(editingFragment->GetFilePath()==L"")
+					{
+						prefix=L"Untitled"+editingFragment->GetOwnedFileType()->GetFileExtension();
+					}
+					else
+					{
+						prefix=GetFileName(editingFragment->GetFilePath());
+					}
+					if(editingFragment->IsModified())
+					{
+						prefix+=L" * - ";
+					}
+					else
+					{
+						prefix+=L" - ";
+					}
 				}
-				else if(editingFragment->GetFilePath()==L"")
-				{
-					this->SetText(L"Untitled"+editingFragment->GetOwnedFileType()->GetFileExtension()+L" - "+appName+L" (www.gaclib.net)");
-				}
-				else
-				{
-					this->SetText(GetFileName(editingFragment->GetFilePath())+L" - "+appName+L" (www.gaclib.net)");
-				}
+				this->SetText(prefix+appName+L" (www.gaclib.net)");
 			}
 
 			void InstallEditorControl(GuiControl* control)
@@ -177,11 +186,23 @@ SDIEditingDocumentService
 				}
 			}
 
+			void OnModifiedFlagUpdated(IDocumentFragment* sender)override
+			{
+				if(GetActiveDocumentCount()>0 && GetActiveDocument(0)==sender->GetOwnedContainer())
+				{
+					window->DisplayWindowTitle(sender);
+				}
+			}
+
 			void OnFragmentUpdated(IDocumentFragment* sender)override
 			{
 			}
 
 			void OnFragmentDestroyed(IDocumentFragment* sender)override
+			{
+			}
+
+			void OnFragmentSaved(IDocumentFragment* sender)override
 			{
 			}
 

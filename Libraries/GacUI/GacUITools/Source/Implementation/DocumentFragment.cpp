@@ -14,6 +14,18 @@ DocumentFragment
 			return callbacks;
 		}
 
+		void DocumentFragment::NotifySaveFragment()
+		{
+			FOREACH(ICallback*, callback, callbacks)
+			{
+				callback->OnFragmentSaved(this);
+			}
+			FOREACH(Ptr<DocumentView>, view, supportedViews.Values())
+			{
+				view->NotifySaveFragment();
+			}
+		}
+
 		bool DocumentFragment::AddSubFragment(IDocumentFragment* fragment)
 		{
 			if(subFragments.Contains(fragment)) return false;
@@ -182,8 +194,8 @@ FileDocumentFragment
 
 		void FileDocumentFragment::NotifyUpdateFragment()
 		{
-			modified=true;
 			DocumentFragment::NotifyUpdateFragment();
+			SetModified(true);
 		}
 
 		bool FileDocumentFragment::IsStoredInSeparatedFile()
@@ -212,6 +224,7 @@ FileDocumentFragment
 			if(LoadDocumentInternal(currentFilePath))
 			{
 				NotifyUpdateFragmentAndViews(0);
+				SetModified(false);
 				return true;
 			}
 			return false;
@@ -221,7 +234,8 @@ FileDocumentFragment
 		{
 			if(currentFilePath==L"") return false;
 			if(!SaveDocumentInternal(currentFilePath)) return false;
-			modified=false;
+			NotifySaveFragment();
+			SetModified(false);
 			return true;
 		}
 
@@ -229,17 +243,30 @@ FileDocumentFragment
 		{
 			if(!SaveDocumentInternal(filePath)) return false;
 			currentFilePath=filePath;
-			modified=false;
 			FOREACH(ICallback*, callback, GetCallbacks())
 			{
 				callback->OnFilePathUpdated(this);
 			}
+			NotifySaveFragment();
+			SetModified(false);
 			return true;
 		}
 
 		bool FileDocumentFragment::IsModified()
 		{
 			return modified;
+		}
+
+		void FileDocumentFragment::SetModified(bool value)
+		{
+			if(modified!=value)
+			{
+				modified=value;
+				FOREACH(ICallback*, callback, GetCallbacks())
+				{
+					callback->OnModifiedFlagUpdated(this);
+				}
+			}
 		}
 
 /***********************************************************************
@@ -299,6 +326,11 @@ VirtualDocumentFragment
 		bool VirtualDocumentFragment::IsModified()
 		{
 			return GetOwnerFragmentInternal()->IsModified();
+		}
+
+		void VirtualDocumentFragment::SetModified(bool value)
+		{
+			GetOwnerFragmentInternal()->SetModified(value);
 		}
 	}
 }

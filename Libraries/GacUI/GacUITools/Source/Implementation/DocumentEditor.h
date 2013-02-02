@@ -32,6 +32,7 @@ namespace vl
 				void							OnViewDestroyed(IDocumentView* sender)override;
 				void							OnBeginEdit(IDocumentView* sender)override;
 				void							OnFinishEdit(IDocumentView* sender)override;
+				void							OnFragmentSaved(IDocumentView* sender)override;
 			};
 
 			List<ICallback*>									callbacks;
@@ -48,6 +49,7 @@ namespace vl
 			bool								AddSupportedOperation(Ptr<IDocumentEditorOperation> operation);
 			virtual void						BeforeEditView(IDocumentView* view)=0;
 			virtual void						AfterEditView(IDocumentView* view)=0;
+			virtual void						OnViewSaved(IDocumentView* view)=0;
 			virtual GuiControl*					CreateEditorControlInternal()=0;
 		public:
 			DocumentEditor(IDocumentEditorFactory* _editorFactory, IDocumentView* _editingView);
