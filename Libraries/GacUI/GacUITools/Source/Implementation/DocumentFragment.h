@@ -30,6 +30,7 @@ namespace vl
 		protected:
 
 			const List<ICallback*>&						GetCallbacks();
+			void										NotifySaveFragment();
 			bool										AddSubFragment(IDocumentFragment* fragment);
 			bool										DeleteSubFragment(IDocumentFragment* fragment);
 			bool										AddSupportedView(Ptr<DocumentView> view);
@@ -82,6 +83,7 @@ namespace vl
 			bool							SaveDocument()override;
 			bool							SaveDocumentAs(const WString& filePath)override;
 			bool							IsModified()override;
+			void							SetModified(bool value)override;
 		};
 
 		class VirtualDocumentFragment : public DocumentFragment
@@ -100,6 +102,7 @@ namespace vl
 			bool							SaveDocument()override;
 			bool							SaveDocumentAs(const WString& filePath)override;
 			bool							IsModified()override;
+			void							SetModified(bool value)override;
 		};
 	}
 }

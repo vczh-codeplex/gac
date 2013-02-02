@@ -50,6 +50,14 @@ DocumentView
 			}
 		}
 
+		void DocumentView::NotifySaveFragment()
+		{
+			FOREACH(ICallback*, callback, callbacks)
+			{
+				callback->OnFragmentSaved(this);
+			}
+		}
+
 		bool DocumentView::AttachCallback(ICallback* callback)
 		{
 			if(callbacks.Contains(callback))

@@ -68,7 +68,6 @@ TextDocument
 		{
 			if(!contentProxy) return false;
 			if(contentProxy!=value) return false;
-			cachedContent=value->GetContent();
 			return true;
 		}
 
@@ -169,7 +168,12 @@ TextDocument
 			Ptr<IEncoder> encoder=CreateEncoder();
 			EncoderStream encoderStream(fileStream, *encoder.Obj());
 			StreamWriter writer(encoderStream);
-			writer.WriteString(GetContent());
+			if(contentProxy)
+			{
+				cachedContent=contentProxy->GetContent();
+			}
+			writer.WriteString(cachedContent);
+			NotifyUpdateFragmentAndViews(0);
 			return true;
 		}
 

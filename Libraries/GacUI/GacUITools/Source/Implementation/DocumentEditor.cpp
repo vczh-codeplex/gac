@@ -51,6 +51,11 @@ DocumentEditor::DocumentViewCallback
 		{
 		}
 
+		void DocumentEditor::DocumentViewCallback::OnFragmentSaved(IDocumentView* sender)
+		{
+			ownedEditor->OnViewSaved(sender);
+		}
+
 /***********************************************************************
 DocumentEditor
 ***********************************************************************/

@@ -28,6 +28,7 @@ TextDocumentEditor
 				if(plainTextView)
 				{
 					plainTextView->NotifyUpdateView(true);
+					plainTextView->GetOwnedFragment()->SetModified(textBox->GetModified());
 				}
 			}
 		}
@@ -39,6 +40,7 @@ TextDocumentEditor
 			{
 				loading=true;
 				plainTextView->ActivateProxy(this);
+				textBox->ClearUndoRedo();
 				textBox->NotifyModificationSaved();
 				loading=false;
 			}
@@ -51,6 +53,11 @@ TextDocumentEditor
 			{
 				plainTextView->DeactivateProxy(this);
 			}
+		}
+
+		void TextDocumentEditor::OnViewSaved(IDocumentView* view)
+		{
+			textBox->NotifyModificationSaved();
 		}
 
 		GuiControl* TextDocumentEditor::CreateEditorControlInternal()

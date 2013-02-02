@@ -29,6 +29,7 @@ namespace vl
 			void						textBox_TextChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void						BeforeEditView(IDocumentView* view)override;
 			void						AfterEditView(IDocumentView* view)override;
+			void						OnViewSaved(IDocumentView* view)override;
 			GuiControl*					CreateEditorControlInternal()override;
 		public:
 			TextDocumentEditor(IDocumentEditorFactory* _editorFactory, IDocumentView* _editingView);

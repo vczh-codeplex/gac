@@ -34,6 +34,7 @@ namespace vl
 			~DocumentView();
 
 			virtual void						NotifyUpdateView(bool alsoNotifyOwnedFragment);
+			virtual void						NotifySaveFragment();
 			bool								AttachCallback(ICallback* callback)override;
 			bool								DetachCallback(ICallback* callback)override;
 

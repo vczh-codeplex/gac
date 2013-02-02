@@ -54,6 +54,7 @@ Document Interfaces
 				virtual void					OnViewDestroyed(IDocumentView* sender)=0;
 				virtual void					OnBeginEdit(IDocumentView* sender)=0;
 				virtual void					OnFinishEdit(IDocumentView* sender)=0;
+				virtual void					OnFragmentSaved(IDocumentView* sender)=0;
 			};
 			virtual bool						AttachCallback(ICallback* callback)=0;
 			virtual bool						DetachCallback(ICallback* callback)=0;
@@ -88,8 +89,10 @@ Document Interfaces
 				virtual void					OnAttach(IDocumentFragment* sender)=0;
 				virtual void					OnDetach(IDocumentFragment* sender)=0;
 				virtual void					OnFilePathUpdated(IDocumentFragment* sender)=0;
+				virtual void					OnModifiedFlagUpdated(IDocumentFragment* sender)=0;
 				virtual void					OnFragmentUpdated(IDocumentFragment* sender)=0;
 				virtual void					OnFragmentDestroyed(IDocumentFragment* sender)=0;
+				virtual void					OnFragmentSaved(IDocumentFragment* sender)=0;
 			};
 			virtual bool						AttachCallback(ICallback* callback)=0;
 			virtual bool						DetachCallback(ICallback* callback)=0;
@@ -108,6 +111,7 @@ Document Interfaces
 			virtual bool						SaveDocument()=0;
 			virtual bool						SaveDocumentAs(const WString& filePath)=0;
 			virtual bool						IsModified()=0;
+			virtual void						SetModified(bool value)=0;
 			virtual WString						GetFriendlyName()=0;
 
 			virtual vint						GetSupportedViewTypeCount()=0;
