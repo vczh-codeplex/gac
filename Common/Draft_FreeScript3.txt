@@ -1,11 +1,11 @@
 Free Script 3.0
 
 ========================================================
-Operators
+Operator
 ========================================================
 
 operator precedence
-	: <full expression>
+	=> <full expression>
 	a[b]
 	a(b)
 	+ - !
@@ -19,15 +19,15 @@ operator precedence
 	||
 
 ========================================================
-Expressions
+Expression
 ========================================================
 
 a[b]
 a(b)
-x:x+1
-x:y:x+y
-(x, y):x+y
-(x, y):do{statements;}
+x=>x+1
+x=>y=>x+y
+(x, y)=>x+y
+function(x, y){statements;}
 a.b
 (a)
 a+b
@@ -48,23 +48,23 @@ this
 base(BaseClass)
 
 ========================================================
-Declarations
+Declaration
 ========================================================
 
 var variable [= expression]; // create a variable
 const variable = expression; // create a readonly variable
 
-function name(a,b,c) // syntax suger for: const name=(a,b,c):do{ body };
+function name(a,b,c) // syntax suger for: const name=function(a,b,c){ body };
 {
 	body
 }
 
 property variable4
 {
-	get:expression;
+	get=>expression;
 	get{ body }
 
-	set:expression;
+	set=>expression;
 	set{ body }
 }
 
@@ -74,6 +74,8 @@ struct Point // value class
    y=0;
    z;
 }
+
+var p = new Point{z=0};
 
 class Derived : Base1, Base2
 {
@@ -90,12 +92,36 @@ class Derived : Base1, Base2
 	shared variable4 ... // static and readonly
 }
 
-var d = new Derived(arguments);
+var d = new Derived(arguments){variable2=null};
+
+namespace System.Collections
+{
+}
+
+using System.Collections;
+
+extension Enumerable
+{
+    function Select(selector){ ... }
+}
+
+class Array
+{
+	extent Enumerable;
+}
+
+extent class Array
+{
+	extent Enumerable;
+}
 
 ========================================================
 Context
 ========================================================
 
+// dynamic context, fixed context
+
+__context_global()					// the globa context
 __context_current()					// the current context
 __context_parent(context)			// the parent context
 __context_base_count(context)		// the number of base contexts
@@ -111,3 +137,52 @@ __context_handle(context, name)				// get a handle in a context
 __context_handle_base(context, name)		// including base contexts (in order)
 __context_handle_parent(context, name)		// including base contexts (in order) and parent context
 __context_handle_set(handle, value)			// set a new value to the handle
+
+========================================================
+Statement
+========================================================
+
+expression;
+match pattern = expression;
+
+if(condition) statement [else statement]
+while(condition) statement
+do statement while(condition);
+
+switch(expression)
+{
+	match pattern: statement
+	match Type: statement
+	case value: statement
+	...
+	default: statement // fall in non-existing default branch throws MatchFailedException
+}
+
+break;
+continue;
+return [expression];
+
+try
+{
+}
+catch(Type ex)
+{
+}
+catch()
+{
+}
+finally
+{
+}
+
+========================================================
+Continuation
+========================================================
+
+========================================================
+Double Dispatch
+========================================================
+
+========================================================
+Pattern Matching
+========================================================
