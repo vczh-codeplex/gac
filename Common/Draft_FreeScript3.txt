@@ -37,6 +37,11 @@ map:		{key1:value1, key2:value2}
 tuple:		(a,b,c,d)
 iterator:	@[x1, x2, x3:xs]
 
+name
+@keyword
+@"complex-name"
+@`complex-name`
+
 null
 1
 1.1
@@ -53,6 +58,14 @@ Declaration
 
 var variable [= expression]; // create a variable
 const variable = expression; // create a readonly variable
+
+enum Season
+{
+	Spring,
+	Summer,
+	Autumn,
+	Winter
+}
 
 function name(a,b,c) // syntax suger for: const name=function(a,b,c){ body };
 {
@@ -113,6 +126,43 @@ class Array
 extent class Array
 {
 	extent Enumerable;
+}
+
+========================================================
+Attributes
+========================================================
+
+/*
+multiple attributes can be put before
+
+declaration
+member
+parameter
+*/
+
+#Class(parameters)	// construct an attribute value for a declaration from type ClassAttribute
+#Class				// syntax suger for: #Class()
+
+#DefaultEntry("http://*:80")
+class Website
+{
+	#Get("/index.htm")
+	function Index()
+	{
+		return `<html> ... </html>`;
+	}
+
+	// /hello/vczh.htm&language=zh-cn
+	#Get("/hello/{name}.htm")
+	function Hello(name, #query language)
+	{
+		...
+	}
+}
+
+function main()
+{
+	new HttpServer(new Website()).Run();
 }
 
 ========================================================
@@ -205,3 +255,11 @@ Pattern Matching
 name of Type
 typeof Type
 (a of Rectangle, typeof Ellipse)
+
+========================================================
+Refactoring
+========================================================
+
+GetAppDomain().Assemblies.Types
+GetAppDomain().FindType("...")
+...
