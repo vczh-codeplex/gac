@@ -18,6 +18,25 @@ operator precedence
 	&&
 	||
 
+// operator prefix + is a function name which will be translated to @`$operator:prefix+`
+function operator prefix +(switch obj);
+
+property opeartor[](switch container, switch index);
+property operator[](container of Array, index of Literal){ ... }
+property operator[](container of Map, index of Object){ ... }
+
+========================================================
+Built-in types
+========================================================
+
+Object
+Function
+Array
+Map
+Enumerable
+Literal
+Null
+
 ========================================================
 Expression
 ========================================================
@@ -34,10 +53,10 @@ a.b
 (a)
 a+b
 
-array:		[1,2,3,4]
-map:		{key1:value1, key2:value2}
-tuple:		(a,b,c,d)
-iterator:	@[x1, x2, x3:xs]
+array:			[1,2,3,4]
+map:			{key1:value1, key2:value2}
+tuple:			(a,b,c,d)
+enumerable:		@[x1, x2, x3:xs]
 
 name
 @keyword
