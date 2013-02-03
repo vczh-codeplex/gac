@@ -27,7 +27,9 @@ a(b)
 x=>x+1
 x=>y=>x+y
 (x, y)=>x+y
+()=>x+y
 function(x, y){statements;}
+function{statement;}
 a.b
 (a)
 a+b
@@ -67,7 +69,7 @@ enum Season
 	Winter
 }
 
-function name(a,b,c) // syntax suger for: const name=function(a,b,c){ body };
+function name[(a,b,c)] // syntax suger for: const name=function(a,b,c){ body };
 {
 	body
 }
@@ -231,42 +233,46 @@ function TakeUntil(xs, p) Enumerator
 {
 	foreach(x in xs)
 	{
-		if(!p(x)) yield break;
-		yield return x;
+		if(!p(x)) return;
+		yield x;
 	}
 }
 
 function Flatten(tree) Enumerator
 {
-	yield return tree;
-	yield join tree.children.Select(Flatten);
+	yield tree;
+	join tree.children.Select(Flatten);
+}
+
+function Flatten(tree)
+{
+	return @[tree : tree.children.Select(Flatten)];
 }
 
 function button1_Click(sender, args) Async
 {
     button1.Enabled=false;
-	textBox1.Text=yield from DownloadAsync("url");
+	textBox1.Text=join DownloadAsync("url");
 	button1.Enabled=true;
 }
 
 function InvokeExpression() Parser
 {
-    var name = yield from Expression();
-	yield from Token("(");
+    var name = join Expression();
+	join Token("(");
 
 	var arguments=new List;
-	yield try
+	Parser.Try() yield
 	{
-		arguments.Add(yield from Expression());
-		yield while(true)
+		arguments.Add(join Expression());
+		Parser.Repeat() yield
 		{
-			yield from Token(",");
-			arguments.Add(yield from Expression());
+			join Token(",");
+			arguments.Add(join Expression());
 		}
 	}
-	// else try ...
 
-	yield from Token(")");
+	join Token(")");
 	return new InvokeExpression
 	{
 		Name=name,
@@ -274,15 +280,11 @@ function InvokeExpression() Parser
 	};
 }
 
-yield return expression;
-yield join expression;
-yield break;
+yield expression;
+return [expression];
+join expression // one expression statement can contains up to one join expression
 
-yield try statememt {else try statement}
-yield while(condition) statement
-yield do statement while(condition);
-
-yield from expression
+expression yield [(arguments)] {...} // syntax suger for: join expression(function (arguments) Continuation{...});
 
 ========================================================
 Double Dispatch
