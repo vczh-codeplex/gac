@@ -152,7 +152,7 @@ class Website
 		return `<html> ... </html>`;
 	}
 
-	// /hello/vczh.htm&language=zh-cn
+	// /hello/vczh.htm?language=zh-cn
 	#Get("/hello/{name}.htm")
 	function Hello(name, #query language)
 	{
