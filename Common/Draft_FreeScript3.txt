@@ -375,8 +375,12 @@ static_symbols_table
 	name,
 	base_count,
 	symbol_count,
-	base_entries ...,
-	symbols ...
+	field_count,
+	index_count,
+	base_tables ...,				// base_count
+	(name, symbols) ...,			// symbol_count
+	field_names ...,				// field_count
+	(name, (table, index)) ...,		// index_count, symbol0 == field0, table==(null: object itself, otherwise: table)
 }
 
 function
