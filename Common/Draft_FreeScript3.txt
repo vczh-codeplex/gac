@@ -299,6 +299,18 @@ function InvokeExpression() Parser
 	};
 }
 
+function InvokeExpression() Parser
+{
+	return new InvokeExpression
+	{
+		Name=join Expression(),
+		Arguments= join
+			Token("(") >>
+				Parser.Repeat(Token(",") >> Expression())
+				<< Token(")"),
+	};
+}
+
 yield expression;
 return [expression];
 join expression // one expression statement can contains up to one join expression
