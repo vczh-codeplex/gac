@@ -31,6 +31,7 @@ Built-in types
 
 Object
 Function
+Property
 Array
 Map
 Enumerable
@@ -73,6 +74,8 @@ value // new value in property setter
 this
 base(BaseClass)
 
+// this should only be there for referencing fields/symbols
+
 ========================================================
 Declaration
 ========================================================
@@ -88,7 +91,7 @@ enum Season
 	Winter
 }
 
-function name[(a,b,c)] // syntax suger for: const name=function(a,b,c){ body };
+function name[(a,b,c)]
 {
 	body
 }
@@ -120,11 +123,13 @@ class Derived : Base1, Base2
 
 	function Method1 ...
 	function Method2 ...
-	fixed variable1 ...
+	const variable1 ...			// readonly
 	var variable2 ...
 	property variable3 ...
-	shared variable4 ... // static and readonly
+	shared variable4 ...		// static and readonly
 }
+
+// class's const and var names cannot be conflict with base classes
 
 var d = new Derived(arguments){variable2=null};
 
@@ -136,6 +141,7 @@ using System.Collections;
 
 extension Enumerable
 {
+	// can only have function, property, shared
     function Select(selector){ ... }
 }
 
@@ -146,6 +152,7 @@ class Array
 
 extent class Array
 {
+	// can only have function, property, shared
 	extent Enumerable;
 }
 
@@ -185,29 +192,6 @@ function main()
 {
 	new HttpServer(new Website()).Run();
 }
-
-========================================================
-Context
-========================================================
-
-// dynamic context, fixed context
-
-__context_global()					// the globa context
-__context_current()					// the current context
-__context_parent(context)			// the parent context
-__context_base_count(context)		// the number of base contexts
-__context_base(context, index)		// the specified base context by index
-
-// when searching for context.variable, base contexts will count in
-
-__context_get(context, name)				// get a field in a context
-__context_get_base(context, name)			// including base contexts (in order)
-__context_get_parent(context, name)			// including base contexts (in order) and parent context
-
-__context_handle(context, name)				// get a handle in a context
-__context_handle_base(context, name)		// including base contexts (in order)
-__context_handle_parent(context, name)		// including base contexts (in order) and parent context
-__context_handle_set(handle, value)			// set a new value to the handle
 
 ========================================================
 Statement
@@ -361,3 +345,49 @@ GetAppDomain().Assemblies.Types
 GetAppDomain().FindType("...")
 typeof(Type)
 ...
+
+========================================================
+Context
+========================================================
+
+structures:
+
+object
+{
+	static_symbols_table,
+	fields ...
+}
+
+array
+{
+	count,
+	items ...
+}
+
+map
+{
+    count,
+	(key, value) ... // ordered
+}
+
+static_symbols_table
+{
+	name,
+	base_count,
+	symbol_count,
+	base_entries ...,
+	symbols ...
+}
+
+function
+{
+	instruction_entry,
+	context,
+	this_object,
+}
+
+property
+{
+	getter_function,
+	setter_function,
+}
