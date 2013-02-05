@@ -42,10 +42,12 @@ Object
 		String
 		Char
 		Boolean
+	Container
+		Map
+		Array
 	Function
-	Map
-	Array
-	Tuple
+	Type
+	Context
 	Null
 
 ========================================================
@@ -400,7 +402,7 @@ static_symbols_table
 	field_count,
 	index_count,
 	base_tables ...,				// base_count
-	(name, symbols) ...,			// symbol_count
+	(name, symbols) ...,			// symbol_count, function, property, shared-variable
 	field_names ...,				// field_count
 	(name, (table, index)) ...,		// index_count, symbol0 == field0, table==(null: object itself, otherwise: table)
 }
@@ -413,6 +415,6 @@ function_symbol
 
 property_symbol
 {
-	getter_function,
-	setter_function,
+	getter_function_index,
+	setter_function_index,
 }
