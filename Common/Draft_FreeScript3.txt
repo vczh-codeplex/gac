@@ -25,18 +25,27 @@ property opeartor[](switch container, switch index);
 property operator[](container of Array, index of Literal){ ... }
 property operator[](container of Map, index of Object){ ... }
 
+Special Names:
+	$operator:xxx
+	$getter:xxx
+	$setter:xxx
+	$parent
+
 ========================================================
 Built-in types
 ========================================================
 
 Object
-Function
-Property
-Array
-Map
-Enumerable
-Literal
-Null
+	Literal
+		Integer
+		Real
+		String
+		Char
+		Boolean
+	Function
+	Array
+	Map
+	Null
 
 ========================================================
 Expression
@@ -358,6 +367,13 @@ object
 	fields ...
 }
 
+context
+{
+	static_symbols_table,
+	parent_context,
+	fields ...
+}
+
 array
 {
 	count,
@@ -370,10 +386,18 @@ map
 	(key, value) ... // ordered
 }
 
+function
+{
+	function_symbol,
+	this_object,
+}
+
+///////////////////////////////////////////
+
 static_symbols_table
 {
 	name,
-	base_count,
+	base_count,						// context: 0
 	symbol_count,
 	field_count,
 	index_count,
@@ -383,14 +407,13 @@ static_symbols_table
 	(name, (table, index)) ...,		// index_count, symbol0 == field0, table==(null: object itself, otherwise: table)
 }
 
-function
+function_symbol
 {
 	instruction_entry,
 	context,
-	this_object,
 }
 
-property
+property_symbol
 {
 	getter_function,
 	setter_function,
