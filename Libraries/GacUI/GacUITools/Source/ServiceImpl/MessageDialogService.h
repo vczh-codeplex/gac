@@ -18,6 +18,9 @@ namespace vl
 		{
 		public:
 			void						ShowMessage(const WString& message)override;
+			MessageResult				ShowRequest(const WString& message)override;
+			MessageResult				ShowQuestion(const WString& message)override;
+			MessageResult				ShowQuestionWithCancel(const WString& message)override;
 		};
 	}
 }

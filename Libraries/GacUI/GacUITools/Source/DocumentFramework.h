@@ -386,12 +386,19 @@ Common Services
 		class IMessageDialogService : public IDocumentService
 		{
 		public:
+			typedef INativeDialogService::MessageBoxButtonsOutput		MessageResult;
 			static const wchar_t*				ServiceTypeId;
 			WString								GetServiceTypeId(){return ServiceTypeId;}
 
 			virtual void						ShowMessage(const WString& message)=0;
+			virtual MessageResult				ShowRequest(const WString& message)=0;
+			virtual MessageResult				ShowQuestion(const WString& message)=0;
+			virtual MessageResult				ShowQuestionWithCancel(const WString& message)=0;
 
 			static void							Message(const WString& message);
+			static MessageResult				Request(const WString& message);
+			static MessageResult				Question(const WString& message);
+			static MessageResult				QuestionWithCancel(const WString& message);
 		};
 
 #define SHOW_ERROR_AND_RETURN(c, m, ...) do{if(c)vl::gactools::IMessageDialogService::Message(m); return __VA_ARGS__; }while(0)
