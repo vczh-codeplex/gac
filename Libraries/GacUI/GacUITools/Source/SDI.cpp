@@ -217,7 +217,54 @@ SDIEditingDocumentService
 
 			bool CanUninstallEditor(IDocumentEditor* editor, bool promptDialog)
 			{
-				return true;
+				IDocumentView* view=editor->GetEditingView();
+				if(!view)
+				{
+					SHOW_ERROR_AND_RETURN(promptDialog, L"Failed to get the document view from the current editor.", false);
+				}
+				IDocumentFragment* fragment=view->GetOwnedFragment();
+				if(!fragment)
+				{
+					SHOW_ERROR_AND_RETURN(promptDialog, L"Failed to get the document fragment from the document view.", false);
+				}
+				if(fragment->IsModified())
+				{
+					if(promptDialog)
+					{
+						switch(IMessageDialogService::QuestionWithCancel(L"Do you want to save the current document?"))
+						{
+						case INativeDialogService::SelectYes:
+							{
+								bool success=false;
+								if(fragment && fragment->CanSaveSeparately())
+								{
+									if(fragment->GetFilePath()==L"")
+									{
+										if(fragment->CanSaveToAnotherFile())
+										{
+											return SaveDocumentByDialog(editor, L"Dialog.SaveFile", true);
+										}
+									}
+									else
+									{
+										success=fragment->SaveDocument();
+									}
+								}
+								if(!success)
+								{
+									SHOW_ERROR_AND_RETURN(promptDialog, L"Failed to save the document.", false);
+								}
+							}
+						case INativeDialogService::SelectNo:
+							return true;
+						}
+					}
+					return false;
+				}
+				else
+				{
+					return true;
+				}
 			}
 
 			bool InstallEditor(IDocumentEditor* editor)override

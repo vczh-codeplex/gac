@@ -107,7 +107,7 @@ EditingDocumentService
 			IDocumentView* view=fragment->GetView(fragment->GetDefaultViewTypeId());
 			if(!view)
 			{
-				SHOW_ERROR_AND_RETURN(promptDialog, L"Failed to get the default view  from the document fragment.", 0);
+				SHOW_ERROR_AND_RETURN(promptDialog, L"Failed to get the default view from the document fragment.", 0);
 			}
 
 			IDocumentEditor* editor=LoadDocumentFromView(view, editorTypeId, promptDialog);

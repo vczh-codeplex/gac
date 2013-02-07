@@ -100,5 +100,23 @@ IMessageDialogService
 			IMessageDialogService* service=GetDocumentManager()->GetService<IMessageDialogService>();
 			service->ShowMessage(message);
 		}
+
+		IMessageDialogService::MessageResult IMessageDialogService::Request(const WString& message)
+		{
+			IMessageDialogService* service=GetDocumentManager()->GetService<IMessageDialogService>();
+			return service->ShowRequest(message);
+		}
+
+		IMessageDialogService::MessageResult IMessageDialogService::Question(const WString& message)
+		{
+			IMessageDialogService* service=GetDocumentManager()->GetService<IMessageDialogService>();
+			return service->ShowQuestion(message);
+		}
+
+		IMessageDialogService::MessageResult IMessageDialogService::QuestionWithCancel(const WString& message)
+		{
+			IMessageDialogService* service=GetDocumentManager()->GetService<IMessageDialogService>();
+			return service->ShowQuestionWithCancel(message);
+		}
 	}
 }
