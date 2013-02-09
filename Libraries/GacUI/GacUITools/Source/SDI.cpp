@@ -258,8 +258,9 @@ SDIEditingDocumentService
 						case INativeDialogService::SelectNo:
 							return true;
 						}
+						return false;
 					}
-					return false;
+					return true;
 				}
 				else
 				{

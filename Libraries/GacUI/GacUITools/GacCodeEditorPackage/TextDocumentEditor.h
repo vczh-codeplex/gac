@@ -25,13 +25,19 @@ namespace vl
 			protected:
 				TextDocumentEditor*				editor;
 				IEditorSelectionCallback*		operationCallback;
+				Ptr<GuiNotifyEvent::IHandler>	clipboardUpdatedHandler;
 
+				void					editor_TextChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+				void					editor_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+				void					editor_ClipboardUpdated(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			public:
 				EditorSelectionOperation(TextDocumentEditor* _editor);
+				~EditorSelectionOperation();
 
 				IDocumentEditor*		GetOwnedEditor()override;
 				bool					Initialize(IEditorSelectionCallback* callback)override;
 				bool					IsInitialized()override;
+				void					Finalize()override;
 
 				bool					CanUndo()override;
 				bool					CanRedo()override;

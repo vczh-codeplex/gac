@@ -32,6 +32,10 @@ DocumentView
 
 		DocumentView::~DocumentView()
 		{
+			FOREACH(Ptr<IDocumentViewOperation>, operation, supportedOperations.Values())
+			{
+				operation->Finalize();
+			}
 			FOREACH(ICallback*, callback, callbacks)
 			{
 				callback->OnViewDestroyed(this);

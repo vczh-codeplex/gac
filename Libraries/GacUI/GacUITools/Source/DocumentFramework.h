@@ -40,6 +40,7 @@ Document Interfaces
 		public:
 			virtual IDocumentView*				GetOwnedView()=0;
 			virtual WString						GetOperationTypeId()=0;
+			virtual void						Finalize()=0;
 		};
 
 		class IDocumentView : public Interface

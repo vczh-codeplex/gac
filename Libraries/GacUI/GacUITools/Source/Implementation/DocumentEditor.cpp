@@ -171,10 +171,16 @@ DocumentEditor
 				editingView->DetachCallback(documentViewCallback.Obj());
 				documentViewCallback=0;
 				editingView->FinishEdit(this);
+
+				FOREACH(Ptr<IDocumentEditorOperation>, operation, supportedOperations.Values())
+				{
+					operation->Finalize();
+				}
 				FOREACH(ICallback*, callback, callbacks)
 				{
 					callback->OnFinishEdit(this);
 				}
+
 				editingView=0;
 				return true;
 			}
