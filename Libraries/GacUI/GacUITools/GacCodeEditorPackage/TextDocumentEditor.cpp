@@ -7,6 +7,118 @@ namespace vl
 	{
 
 /***********************************************************************
+TextDocumentEditor::EditorSelectionOperation
+***********************************************************************/
+
+		TextDocumentEditor::EditorSelectionOperation::EditorSelectionOperation(TextDocumentEditor* _editor)
+			:editor(_editor)
+			,operationCallback(0)
+		{
+		}
+
+		IDocumentEditor* TextDocumentEditor::EditorSelectionOperation::GetOwnedEditor()
+		{
+			return editor;
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::Initialize(IEditorSelectionCallback* callback)
+		{
+			if(!operationCallback)
+			{
+				operationCallback=callback;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::IsInitialized()
+		{
+			return operationCallback!=0;
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::CanUndo()
+		{
+			return !editor->textBox->GetReadonly() && editor->textBox->CanUndo();
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::CanRedo()
+		{
+			return !editor->textBox->GetReadonly() && editor->textBox->CanRedo();
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::CanCut()
+		{
+			return !editor->textBox->GetReadonly() && editor->textBox->CanCut();
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::CanCopy()
+		{
+			return editor->textBox->CanCopy();
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::CanPaste()
+		{
+			return !editor->textBox->GetReadonly() && editor->textBox->CanPaste();
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::CanDelete()
+		{
+			return !editor->textBox->GetReadonly() && editor->textBox->GetCaretBegin()!=editor->textBox->GetCaretEnd();
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::CanSelectAll()
+		{
+			return true;
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::PerformUndo()
+		{
+			if(!CanUndo()) return false;
+			return editor->textBox->Undo();
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::PerformRedo()
+		{
+			if(!CanRedo()) return false;
+			return editor->textBox->Redo();
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::PerformCut()
+		{
+			if(!CanCut()) return false;
+			return editor->textBox->Cut();
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::PerformCopy()
+		{
+			if(!CanCopy()) return false;
+			return editor->textBox->Copy();
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::PerformPaste()
+		{
+			if(!CanPaste()) return false;
+			return editor->textBox->Paste();
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::PerformDelete()
+		{
+			if(!CanDelete()) return false;
+			editor->textBox->SetSelectionText(L"");
+			return true;
+		}
+
+		bool TextDocumentEditor::EditorSelectionOperation::PerformSelectAll()
+		{
+			if(!CanSelectAll()) return false;
+			editor->textBox->SelectAll();
+			return true;
+		}
+
+/***********************************************************************
 TextDocumentEditor
 ***********************************************************************/
 
@@ -72,6 +184,7 @@ TextDocumentEditor
 			,loading(false)
 			,textBox(0)
 		{
+			AddSupportedOperation(new EditorSelectionOperation(this));
 		}
 
 		TextDocumentEditor::~TextDocumentEditor()
