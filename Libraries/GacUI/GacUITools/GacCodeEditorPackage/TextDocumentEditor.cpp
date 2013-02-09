@@ -10,9 +10,37 @@ namespace vl
 TextDocumentEditor::EditorSelectionOperation
 ***********************************************************************/
 
+		void TextDocumentEditor::EditorSelectionOperation::editor_TextChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			if(operationCallback)
+			{
+				operationCallback->OnStateUpdated(this);
+			}
+		}
+
+		void TextDocumentEditor::EditorSelectionOperation::editor_SelectionChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			if(operationCallback)
+			{
+				operationCallback->OnStateUpdated(this);
+			}
+		}
+
+		void TextDocumentEditor::EditorSelectionOperation::editor_ClipboardUpdated(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			if(operationCallback)
+			{
+				operationCallback->OnStateUpdated(this);
+			}
+		}
+
 		TextDocumentEditor::EditorSelectionOperation::EditorSelectionOperation(TextDocumentEditor* _editor)
 			:editor(_editor)
 			,operationCallback(0)
+		{
+		}
+
+		TextDocumentEditor::EditorSelectionOperation::~EditorSelectionOperation()
 		{
 		}
 
@@ -23,8 +51,15 @@ TextDocumentEditor::EditorSelectionOperation
 
 		bool TextDocumentEditor::EditorSelectionOperation::Initialize(IEditorSelectionCallback* callback)
 		{
-			if(!operationCallback)
+			if(!operationCallback && callback)
 			{
+				GuiWindow* window=dynamic_cast<GuiWindow*>(editor->textBox->GetRelatedControlHost());
+				editor->textBox->TextChanged.AttachMethod(this, &EditorSelectionOperation::editor_TextChanged);
+				editor->textBox->SelectionChanged.AttachMethod(this, &EditorSelectionOperation::editor_SelectionChanged);
+				if(window)
+				{
+					clipboardUpdatedHandler=window->ClipboardUpdated.AttachMethod(this, &EditorSelectionOperation::editor_ClipboardUpdated);
+				}
 				operationCallback=callback;
 				return true;
 			}
@@ -37,6 +72,16 @@ TextDocumentEditor::EditorSelectionOperation
 		bool TextDocumentEditor::EditorSelectionOperation::IsInitialized()
 		{
 			return operationCallback!=0;
+		}
+
+		void TextDocumentEditor::EditorSelectionOperation::Finalize()
+		{
+			if(clipboardUpdatedHandler)
+			{
+				GuiWindow* window=dynamic_cast<GuiWindow*>(editor->textBox->GetRelatedControlHost());
+				window->ClipboardUpdated.Detach(clipboardUpdatedHandler);
+				clipboardUpdatedHandler=0;
+			}
 		}
 
 		bool TextDocumentEditor::EditorSelectionOperation::CanUndo()
@@ -77,36 +122,42 @@ TextDocumentEditor::EditorSelectionOperation
 		bool TextDocumentEditor::EditorSelectionOperation::PerformUndo()
 		{
 			if(!CanUndo()) return false;
+			editor->textBox->SetFocus();
 			return editor->textBox->Undo();
 		}
 
 		bool TextDocumentEditor::EditorSelectionOperation::PerformRedo()
 		{
 			if(!CanRedo()) return false;
+			editor->textBox->SetFocus();
 			return editor->textBox->Redo();
 		}
 
 		bool TextDocumentEditor::EditorSelectionOperation::PerformCut()
 		{
 			if(!CanCut()) return false;
+			editor->textBox->SetFocus();
 			return editor->textBox->Cut();
 		}
 
 		bool TextDocumentEditor::EditorSelectionOperation::PerformCopy()
 		{
 			if(!CanCopy()) return false;
+			editor->textBox->SetFocus();
 			return editor->textBox->Copy();
 		}
 
 		bool TextDocumentEditor::EditorSelectionOperation::PerformPaste()
 		{
 			if(!CanPaste()) return false;
+			editor->textBox->SetFocus();
 			return editor->textBox->Paste();
 		}
 
 		bool TextDocumentEditor::EditorSelectionOperation::PerformDelete()
 		{
 			if(!CanDelete()) return false;
+			editor->textBox->SetFocus();
 			editor->textBox->SetSelectionText(L"");
 			return true;
 		}
@@ -114,6 +165,7 @@ TextDocumentEditor::EditorSelectionOperation
 		bool TextDocumentEditor::EditorSelectionOperation::PerformSelectAll()
 		{
 			if(!CanSelectAll()) return false;
+			editor->textBox->SetFocus();
 			editor->textBox->SelectAll();
 			return true;
 		}

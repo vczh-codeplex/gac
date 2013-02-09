@@ -23,6 +23,7 @@ Operations
 
 		class IEditorSelectionCallback : public Interface
 		{
+		public:
 			virtual void					OnStateUpdated(IEditorSelectionOperation* sender)=0;
 		};
 
