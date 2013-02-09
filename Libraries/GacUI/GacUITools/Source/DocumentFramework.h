@@ -418,7 +418,9 @@ Common Services
 			virtual IDocumentEditor*			LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId, bool promptDialog)=0;
 			virtual IDocumentEditor*			LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId, bool promptDialog)=0;
 			virtual bool						SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId, bool promptDialog)=0;
-			virtual bool						CloseEditor(IDocumentEditor* editor, bool promptDialog)=0;
+			virtual bool						QueryAndCloseEditor(IDocumentEditor* editor, bool promptDialog)=0;
+			virtual bool						ForceToCloseEditor(IDocumentEditor* editor)=0;
+			virtual bool						PrepareToAcceptNewEditor(bool promptDialog)=0;
 
 			virtual vint						GetActiveEditorCount()=0;
 			virtual IDocumentEditor*			GetActiveEditor(vint index)=0;

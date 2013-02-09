@@ -56,7 +56,7 @@ MainWindow
 			{
 				while(editingDocumentService->GetActiveEditorCount()>0)
 				{
-					if(!editingDocumentService->CloseEditor(editingDocumentService->GetActiveEditor(0), true))
+					if(!editingDocumentService->QueryAndCloseEditor(editingDocumentService->GetActiveEditor(0), true))
 					{
 						arguments.cancel=true;
 						return;
@@ -258,9 +258,8 @@ SDIEditingDocumentService
 						case INativeDialogService::SelectNo:
 							return true;
 						}
-						return false;
 					}
-					return true;
+					return false;
 				}
 				else
 				{
@@ -272,7 +271,7 @@ SDIEditingDocumentService
 			{
 				while(GetActiveEditorCount()>0)
 				{
-					CloseEditor(GetActiveEditor(0), false);
+					ForceToCloseEditor(GetActiveEditor(0));
 				}
 				editor->GetEditingView()->GetOwnedFragment()->AttachCallback(this);
 				editor->GetEditorControl()->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -312,6 +311,18 @@ SDIEditingDocumentService
 			{
 				return currentEditor;
 			}
+
+			bool PrepareToAcceptNewEditor(bool promptDialog)override
+			{
+				if(currentEditor)
+				{
+					if(!CanUninstallEditor(currentEditor, promptDialog))
+					{
+						return false;
+					}
+				}
+				return true;
+			}
 		};
 
 /***********************************************************************
@@ -330,7 +341,10 @@ SDIApplicationPackage
 
 			void SDIOpenDocument(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
-				editingDocumentService->LoadDocumentByDialog(L"Dialog.OpenFile", L"", true);
+				if(editingDocumentService->PrepareToAcceptNewEditor(true))
+				{
+					editingDocumentService->LoadDocumentByDialog(L"Dialog.OpenFile", L"", true);
+				}
 			}
 
 			void SDISaveDocumentInternal(bool forceToSaveSeparately)

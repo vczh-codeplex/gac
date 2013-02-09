@@ -25,7 +25,10 @@ TextEditorPackage
 			{
 				SHOW_ERROR_AND_RETURN(true, L"Cannot not find IEditingDocumentService.");
 			}
-			editingDocumentService->NewDocument(fileTypeId, L"", true);
+			if(editingDocumentService->PrepareToAcceptNewEditor(true))
+			{
+				editingDocumentService->NewDocument(fileTypeId, L"", true);
+			}
 		}
 
 		void TextEditorPackage::TextEditorNewText(GuiGraphicsComposition* sender, GuiEventArgs& arguments)

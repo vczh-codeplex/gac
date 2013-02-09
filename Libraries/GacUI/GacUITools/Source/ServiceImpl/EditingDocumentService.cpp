@@ -198,13 +198,19 @@ EditingDocumentService
 			return true;
 		}
 
-		bool EditingDocumentService::CloseEditor(IDocumentEditor* editor, bool promptDialog)
+		bool EditingDocumentService::QueryAndCloseEditor(IDocumentEditor* editor, bool promptDialog)
 		{
 			if(!CanUninstallEditor(editor, promptDialog)) return false;
 			if(!activeEditors.Contains(editor))
 			{
 				SHOW_ERROR_AND_RETURN(promptDialog, L"Internal error: this editor is not created using IEditingDocumentService.", false);
 			}
+			return ForceToCloseEditor(editor);
+		}
+
+		bool EditingDocumentService::ForceToCloseEditor(IDocumentEditor* editor)
+		{
+			if(!activeEditors.Contains(editor)) return false;
 			IDocumentView* view=editor->GetEditingView();
 			editor->FinishEdit();
 			activeEditors.Remove(editor);
