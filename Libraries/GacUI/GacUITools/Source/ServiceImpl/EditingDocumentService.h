@@ -42,7 +42,8 @@ namespace vl
 			IDocumentEditor*					LoadDocumentFromFile(const WString& filePath, const WString& editorTypeId, bool promptDialog)override;
 			IDocumentEditor*					LoadDocumentByDialog(const WString& dialogId, const WString& editorTypeId, bool promptDialog)override;
 			bool								SaveDocumentByDialog(IDocumentEditor* editor, const WString& dialogId, bool promptDialog)override;
-			bool								CloseEditor(IDocumentEditor* editor, bool promptDialog)override;
+			bool								QueryAndCloseEditor(IDocumentEditor* editor, bool promptDialog)override;
+			bool								ForceToCloseEditor(IDocumentEditor* editor)override;
 
 			vint								GetActiveEditorCount()override;
 			IDocumentEditor*					GetActiveEditor(vint index)override;
