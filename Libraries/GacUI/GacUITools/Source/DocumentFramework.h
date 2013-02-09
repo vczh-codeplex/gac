@@ -170,6 +170,8 @@ Editor Interfaces
 		class IDocumentEditorOperation : public IDocumentViewOperation
 		{
 		public:
+			IDocumentView*						GetOwnedView()override;
+
 			virtual IDocumentEditor*			GetOwnedEditor()=0;
 		};
 

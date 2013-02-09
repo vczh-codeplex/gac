@@ -9,6 +9,20 @@ namespace vl
 DocumentToolstripCommand
 ***********************************************************************/
 
+		IDocumentView* IDocumentEditorOperation::GetOwnedView()
+		{
+			IDocumentEditor* editor=GetOwnedEditor();
+			if(editor)
+			{
+				return editor->GetEditingView();
+			}
+			return 0;
+		}
+
+/***********************************************************************
+DocumentToolstripCommand
+***********************************************************************/
+
 		DocumentToolstripCommand::DocumentToolstripCommand(const WString& _packageId, const WString& _commandId)
 			:packageId(_packageId)
 			,commandId(_commandId)
