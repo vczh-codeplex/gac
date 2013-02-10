@@ -51,8 +51,29 @@ TextEditorPackage
 			NewDocument(MoeTextFileType::FileTypeId);
 		}
 
+		void TextEditorPackage::TextEditorQuickFind(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+		}
+
+		void TextEditorPackage::TextEditorFindAll(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+		}
+
+		void TextEditorPackage::TextEditorQuickReplace(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+		}
+
+		void TextEditorPackage::TextEditorReplaceAll(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+		}
+
+		void TextEditorPackage::TextEditorGoTo(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+		}
+
 		TextEditorPackage::TextEditorPackage()
 			:editingDocumentService(0)
+			,commandGoto(0)
 		{
 		}
 
@@ -94,6 +115,10 @@ TextEditorPackage
 			editingDocumentService=GetDocumentManager()->GetService<IEditingDocumentService>();
 		}
 
+		void TextEditorPackage::OnCurrentEditorUpdated(IDocumentEditor* editor)
+		{
+		}
+
 		void TextEditorPackage::OnInstallCommand(DocumentToolstripCommand* command)
 		{
 			if(command->GetCommandId()==L"TextEditor.NewText")
@@ -111,6 +136,28 @@ TextEditorPackage
 			else if(command->GetCommandId()==L"TextEditor.NewMoe")
 			{
 				command->Executed.AttachMethod(this, &TextEditorPackage::TextEditorNewMoe);
+			}
+			else if(command->GetCommandId()==L"TextEditor.QuickFind")
+			{
+				command->Executed.AttachMethod(this, &TextEditorPackage::TextEditorQuickFind);
+			}
+			else if(command->GetCommandId()==L"TextEditor.FindAll")
+			{
+				command->Executed.AttachMethod(this, &TextEditorPackage::TextEditorFindAll);
+			}
+			else if(command->GetCommandId()==L"TextEditor.QuickReplace")
+			{
+				command->Executed.AttachMethod(this, &TextEditorPackage::TextEditorQuickReplace);
+			}
+			else if(command->GetCommandId()==L"TextEditor.ReplaceAll")
+			{
+				command->Executed.AttachMethod(this, &TextEditorPackage::TextEditorReplaceAll);
+			}
+			else if(command->GetCommandId()==L"TextEditor.GoTo")
+			{
+				command->Executed.AttachMethod(this, &TextEditorPackage::TextEditorGoTo);
+				commandGoto=command;
+				commandGoto->SetEnabled(false);
 			}
 		}
 	}

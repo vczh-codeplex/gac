@@ -148,6 +148,18 @@
     <Image Include="..\Source\PackageResources\Images\_XmlDocument.png">
       <Filter>PackageResources\Images</Filter>
     </Image>
+    <Image Include="..\Source\PackageResources\Images\_Find.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_FindAll.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_Replace.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
+    <Image Include="..\Source\PackageResources\Images\_ReplaceAll.png">
+      <Filter>PackageResources\Images</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\Source\PackageResources\Images\Folder.xml">
