@@ -18,12 +18,19 @@ namespace vl
 		{
 		protected:
 			IEditingDocumentService*		editingDocumentService;
+			DocumentToolstripCommand*		commandGoto;
 
 			void							NewDocument(const WString& fileTypeId);
 			void							TextEditorNewText(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void							TextEditorNewXml(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void							TextEditorNewJson(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 			void							TextEditorNewMoe(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+
+			void							TextEditorQuickFind(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void							TextEditorFindAll(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void							TextEditorQuickReplace(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void							TextEditorReplaceAll(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
+			void							TextEditorGoTo(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 		public:
 			static const wchar_t*			PackageId;
 
@@ -32,6 +39,7 @@ namespace vl
 			WString							GetPackageId()override;
 			void							OnBeforeInit()override;
 			void							OnAfterInit()override;
+			void							OnCurrentEditorUpdated(IDocumentEditor* editor)override;
 			void							OnInstallCommand(DocumentToolstripCommand* command)override;
 		};
 	}

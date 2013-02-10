@@ -44,12 +44,16 @@
     <Image Include="..\Source\PackageResources\Images\_Copy.png" />
     <Image Include="..\Source\PackageResources\Images\_Cut.png" />
     <Image Include="..\Source\PackageResources\Images\_Delete.png" />
+    <Image Include="..\Source\PackageResources\Images\_Find.png" />
+    <Image Include="..\Source\PackageResources\Images\_FindAll.png" />
     <Image Include="..\Source\PackageResources\Images\_JsonDocument.png" />
     <Image Include="..\Source\PackageResources\Images\_New.png" />
     <Image Include="..\Source\PackageResources\Images\_Open.png" />
     <Image Include="..\Source\PackageResources\Images\_Paste.png" />
     <Image Include="..\Source\PackageResources\Images\_Print.png" />
     <Image Include="..\Source\PackageResources\Images\_Redo.png" />
+    <Image Include="..\Source\PackageResources\Images\_Replace.png" />
+    <Image Include="..\Source\PackageResources\Images\_ReplaceAll.png" />
     <Image Include="..\Source\PackageResources\Images\_Save.png" />
     <Image Include="..\Source\PackageResources\Images\_SaveAs.png" />
     <Image Include="..\Source\PackageResources\Images\_TextDocument.png" />
