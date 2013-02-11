@@ -1343,8 +1343,8 @@ Table Generation
 				table->SetTokenInfo(0, vl::parsing::tabling::ParsingTable::TokenInfo(L"", L""));
 				table->SetTokenInfo(1, vl::parsing::tabling::ParsingTable::TokenInfo(L"", L""));
 				table->SetTokenInfo(2, vl::parsing::tabling::ParsingTable::TokenInfo(L"", L""));
-				table->SetTokenInfo(3, vl::parsing::tabling::ParsingTable::TokenInfo(L"TRUE", L"true"));
-				table->SetTokenInfo(4, vl::parsing::tabling::ParsingTable::TokenInfo(L"FALSE", L"false"));
+				table->SetTokenInfo(3, vl::parsing::tabling::ParsingTable::TokenInfo(L"TRUEVALUE", L"true"));
+				table->SetTokenInfo(4, vl::parsing::tabling::ParsingTable::TokenInfo(L"FALSEVALUE", L"false"));
 				table->SetTokenInfo(5, vl::parsing::tabling::ParsingTable::TokenInfo(L"NULLVALUE", L"null"));
 				table->SetTokenInfo(6, vl::parsing::tabling::ParsingTable::TokenInfo(L"OBJOPEN", L"\\{"));
 				table->SetTokenInfo(7, vl::parsing::tabling::ParsingTable::TokenInfo(L"OBJCLOSE", L"\\}"));
@@ -9025,6 +9025,66 @@ API
 					}
 				}
 				return result;
+			}
+
+/***********************************************************************
+XmlElementWriter
+***********************************************************************/
+
+			XmlElementWriter::XmlElementWriter(Ptr<XmlElement> _element, const XmlElementWriter* _previousWriter)
+				:element(_element)
+				,previousWriter(_previousWriter)
+			{
+			}
+
+			XmlElementWriter::~XmlElementWriter()
+			{
+			}
+
+			const XmlElementWriter& XmlElementWriter::Attribute(const WString& name, const WString& value)const
+			{
+				Ptr<XmlAttribute> node=new XmlAttribute;
+				node->name.value=name;
+				node->value.value=value;
+				element->attributes.Add(node);
+				return *this;
+			}
+
+			XmlElementWriter XmlElementWriter::Element(const WString& name)const
+			{
+				Ptr<XmlElement> node=new XmlElement;
+				node->name.value=name;
+				element->subNodes.Add(node);
+				return XmlElementWriter(node, this);
+			}
+
+			const XmlElementWriter& XmlElementWriter::End()const
+			{
+				return *previousWriter;
+			}
+
+			const XmlElementWriter& XmlElementWriter::Text(const WString& value)const
+			{
+				Ptr<XmlText> node=new XmlText;
+				node->content.value=value;
+				element->subNodes.Add(node);
+				return *this;
+			}
+
+			const XmlElementWriter& XmlElementWriter::CData(const WString& value)const
+			{
+				Ptr<XmlCData> node=new XmlCData;
+				node->content.value=value;
+				element->subNodes.Add(node);
+				return *this;
+			}
+
+			const XmlElementWriter& XmlElementWriter::Comment(const WString& value)const
+			{
+				Ptr<XmlComment> node=new XmlComment;
+				node->content.value=value;
+				element->subNodes.Add(node);
+				return *this;
 			}
 		}
 	}

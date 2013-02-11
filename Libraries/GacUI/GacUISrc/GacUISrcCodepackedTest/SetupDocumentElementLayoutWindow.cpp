@@ -3,9 +3,157 @@
 using namespace vl::stream;
 using namespace vl::regex;
 using namespace vl::collections;
+using namespace vl::parsing::xml;
 
 namespace document
 {
+	using namespace vl::presentation::elements::text;
+
+	class SerializeRunVisitor : public Object, public DocumentRun::IVisitor
+	{
+	protected:
+
+		const XmlElementWriter& Text(DocumentTextRun* run, const XmlElementWriter& writer)
+		{
+			return writer.Text(run->text);
+		}
+
+		const XmlElementWriter& Antialias(DocumentTextRun* run, const XmlElementWriter& writer)
+		{
+			if(!run->style.antialias)
+			{
+				return Text(run, writer.Element(L"na")).End();
+			}
+			else if(!run->style.verticalAntialias)
+			{
+				return Text(run, writer);
+			}
+			else
+			{
+				return Text(run, writer.Element(L"va")).End();
+			}
+		}
+
+		const XmlElementWriter& Strikeline(DocumentTextRun* run, const XmlElementWriter& writer)
+		{
+			if(run->style.strikeline)
+			{
+				return Antialias(run, writer.Element(L"s")).End();
+			}
+			else
+			{
+				return Antialias(run, writer);
+			}
+		}
+
+		const XmlElementWriter& Underline(DocumentTextRun* run, const XmlElementWriter& writer)
+		{
+			if(run->style.underline)
+			{
+				return Strikeline(run, writer.Element(L"u")).End();
+			}
+			else
+			{
+				return Strikeline(run, writer);
+			}
+		}
+
+		const XmlElementWriter& Italic(DocumentTextRun* run, const XmlElementWriter& writer)
+		{
+			if(run->style.italic)
+			{
+				return Underline(run, writer.Element(L"i")).End();
+			}
+			else
+			{
+				return Underline(run, writer);
+			}
+		}
+
+		const XmlElementWriter& Bold(DocumentTextRun* run, const XmlElementWriter& writer)
+		{
+			if(run->style.bold)
+			{
+				return Italic(run, writer.Element(L"b")).End();
+			}
+			else
+			{
+				return Italic(run, writer);
+			}
+		}
+
+		const XmlElementWriter& Font(DocumentTextRun* run, const XmlElementWriter& writer)
+		{
+			const XmlElementWriter& font=writer.Element(L"font");
+			font.Attribute(L"face", run->style.fontFamily);
+			font.Attribute(L"size", itow(run->style.size));
+			font.Attribute(L"color", run->color.ToString());
+			Bold(run, font);
+			return writer;
+		}
+	public:
+		Ptr<XmlElement> container;
+
+		void Visit(DocumentTextRun* run)
+		{
+			if(run->text!=L"")
+			{
+				XmlElementWriter writer(container);
+				Font(run, writer);
+			}
+		}
+
+		void Visit(DocumentImageRun* run)
+		{
+			XmlElementWriter writer(container);
+			writer
+				.Attribute(L"width", itow(run->size.x))
+				.Attribute(L"height", itow(run->size.y))
+				.Attribute(L"baseline", itow(run->baseline))
+				.Attribute(L"frameIndex", itow(run->frameIndex))
+				.Attribute(L"source", run->source)
+				;
+		}
+	};
+
+	Ptr<XmlDocument> Serialize(Ptr<DocumentModel> model)
+	{
+		SerializeRunVisitor visitor;
+
+		Ptr<XmlDocument> xml=new XmlDocument;
+		Ptr<XmlElement> doc=new XmlElement;
+		doc->name.value=L"Doc";
+		xml->rootElement=doc;
+		{
+			Ptr<XmlElement> content=new XmlElement;
+			content->name.value=L"Content";
+			doc->subNodes.Add(content);
+
+			FOREACH(Ptr<DocumentParagraph>, p, model->paragraphs)
+			{
+				Ptr<XmlElement> paragraph=new XmlElement;
+				paragraph->name.value=L"p";
+				content->subNodes.Add(paragraph);
+
+				FOREACH(Ptr<DocumentLine>, l, p->lines)
+				{
+					FOREACH(Ptr<DocumentRun>, r, l->runs)
+					{
+						visitor.container=paragraph;
+						r->Accept(&visitor);
+					}
+					{
+						Ptr<XmlElement> line=new XmlElement;
+						line->name.value=L"br";
+						paragraph->subNodes.Add(line);
+					}
+				}
+			}
+		}
+
+		return xml;
+	}
+
 	int ConvertHex(wchar_t c)
 	{
 		if(L'a'<=c && c<=L'f') return c-L'a'+10;
@@ -88,6 +236,7 @@ namespace document
 				run->baseline=b;
 				run->image=GetCurrentController()->ImageService()->CreateImageFromFile(L"Resources\\"+file);
 				run->frameIndex=0;
+				run->source=L"file://"+file;
 				line->runs.Add(run);
 
 				if(run->image->GetFrameCount()>1)
@@ -199,6 +348,14 @@ void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* c
 	{
 		List<Ptr<GifRun>> animations;
 		Ptr<text::DocumentModel> document=BuildDocumentModel(filename, animations);
+		{
+			Ptr<XmlDocument> xml=Serialize(document);
+			FileStream fileStream(filename+L".xml", FileStream::WriteOnly);
+			BomEncoder encoder(BomEncoder::Utf8);
+			EncoderStream encoderStream(fileStream, encoder);
+			StreamWriter writer(encoderStream);
+			XmlPrint(xml, writer);
+		}
 		GetApplication()->InvokeInMainThreadAndWait([=, &animations]()
 		{
 			scriptDocumentView->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
