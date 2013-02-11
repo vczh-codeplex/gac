@@ -98,7 +98,7 @@ void WriteFileComment(const WString& name, StreamWriter& writer)
 	writer.WriteLine(L"Developer: 陈梓瀚(vczh)");
 	writer.WriteLine(L"Parser::"+name);
 	writer.WriteLine(L"");
-	writer.WriteLine(L"本文件使用Vczh Functional Macro工具自动生成");
+	writer.WriteLine(L"本文件使用Vczh Parsing Generator工具自动生成");
 	writer.WriteLine(L"***********************************************************************/");
 	writer.WriteLine(L"");
 }
@@ -1438,8 +1438,8 @@ int wmain(int argc, wchar_t* argv[])
 					}
 					else if((match=regexNamespace.Match(line)) && match->Success())
 					{
-						CopyFrom(codeNamespaces, match->Groups().Get(L"namespace")
-							>>Select<RegexString, WString>([=](RegexString s)
+						CopyFrom(codeNamespaces, From(match->Groups().Get(L"namespace"))
+							.Select([=](RegexString s)->WString
 							{
 								return s.Value();
 							}));

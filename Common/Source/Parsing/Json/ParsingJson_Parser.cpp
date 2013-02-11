@@ -229,8 +229,8 @@ Table Generation
 				table->SetTokenInfo(0, vl::parsing::tabling::ParsingTable::TokenInfo(L"", L""));
 				table->SetTokenInfo(1, vl::parsing::tabling::ParsingTable::TokenInfo(L"", L""));
 				table->SetTokenInfo(2, vl::parsing::tabling::ParsingTable::TokenInfo(L"", L""));
-				table->SetTokenInfo(3, vl::parsing::tabling::ParsingTable::TokenInfo(L"TRUE", L"true"));
-				table->SetTokenInfo(4, vl::parsing::tabling::ParsingTable::TokenInfo(L"FALSE", L"false"));
+				table->SetTokenInfo(3, vl::parsing::tabling::ParsingTable::TokenInfo(L"TRUEVALUE", L"true"));
+				table->SetTokenInfo(4, vl::parsing::tabling::ParsingTable::TokenInfo(L"FALSEVALUE", L"false"));
 				table->SetTokenInfo(5, vl::parsing::tabling::ParsingTable::TokenInfo(L"NULLVALUE", L"null"));
 				table->SetTokenInfo(6, vl::parsing::tabling::ParsingTable::TokenInfo(L"OBJOPEN", L"\\{"));
 				table->SetTokenInfo(7, vl::parsing::tabling::ParsingTable::TokenInfo(L"OBJCLOSE", L"\\}"));

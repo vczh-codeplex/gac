@@ -3,7 +3,7 @@ Vczh Library++ 3.0
 Developer: 陈梓瀚(vczh)
 Parser::ParsingJson_Parser
 
-本文件使用Vczh Functional Macro工具自动生成
+本文件使用Vczh Parsing Generator工具自动生成
 ***********************************************************************/
 
 #ifndef VCZH_PARSING_JSON_PARSINGJSON_PARSER
@@ -19,8 +19,8 @@ namespace vl
 		{
 			struct JsonParserTokenIndex abstract
 			{
-				static const vl::vint TRUE = 0;
-				static const vl::vint FALSE = 1;
+				static const vl::vint TRUEVALUE = 0;
+				static const vl::vint FALSEVALUE = 1;
 				static const vl::vint NULLVALUE = 2;
 				static const vl::vint OBJOPEN = 3;
 				static const vl::vint OBJCLOSE = 4;

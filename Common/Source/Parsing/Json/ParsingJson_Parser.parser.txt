@@ -47,8 +47,8 @@ class Object:Node
 	ObjectField[] fields;
 }
 
-token TRUE = "true";
-token FALSE = "false";
+token TRUEVALUE = "true";
+token FALSEVALUE = "false";
 token NULLVALUE = "null";
 token OBJOPEN = "\{";
 token OBJCLOSE = "\}";
