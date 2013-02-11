@@ -12078,7 +12078,7 @@ Color
 			static Color Parse(const WString& value)
 			{
 				const wchar_t* code=L"0123456789ABCDEF";
-				if((value.Length()==7 || value.Length()==9) & value[0]==L'#')
+				if((value.Length()==7 || value.Length()==9) && value[0]==L'#')
 				{
 					int index[8]={15, 15, 15, 15, 15, 15, 15, 15};
 					for(vint i=0;i<value.Length()-1;i++)
@@ -12095,6 +12095,7 @@ Color
 					c.g=(unsigned char)(index[2]*16+index[3]);
 					c.b=(unsigned char)(index[4]*16+index[5]);
 					c.a=(unsigned char)(index[6]*16+index[7]);
+					return c;
 				}
 				return Color();
 			}

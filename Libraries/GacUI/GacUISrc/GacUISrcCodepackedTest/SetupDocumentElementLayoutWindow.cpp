@@ -94,7 +94,7 @@ namespace document
 	public:
 		Ptr<XmlElement> container;
 
-		void Visit(DocumentTextRun* run)
+		void Visit(DocumentTextRun* run)override
 		{
 			if(run->text!=L"")
 			{
@@ -103,10 +103,11 @@ namespace document
 			}
 		}
 
-		void Visit(DocumentImageRun* run)
+		void Visit(DocumentImageRun* run)override
 		{
 			XmlElementWriter writer(container);
 			writer
+				.Element(L"img")
 				.Attribute(L"width", itow(run->size.x))
 				.Attribute(L"height", itow(run->size.y))
 				.Attribute(L"baseline", itow(run->baseline))
@@ -119,7 +120,6 @@ namespace document
 	Ptr<XmlDocument> Serialize(Ptr<DocumentModel> model)
 	{
 		SerializeRunVisitor visitor;
-
 		Ptr<XmlDocument> xml=new XmlDocument;
 		Ptr<XmlElement> doc=new XmlElement;
 		doc->name.value=L"Doc";
@@ -150,147 +150,229 @@ namespace document
 				}
 			}
 		}
-
 		return xml;
 	}
 
-	int ConvertHex(wchar_t c)
+	class DeserializeNodeVisitor : public XmlNode::IVisitor
 	{
-		if(L'a'<=c && c<=L'f') return c-L'a'+10;
-		if(L'A'<=c && c<=L'F') return c-L'A'+10;
-		if(L'0'<=c && c<=L'9') return c-L'0';
-		return 0;
-	}
+	public:
+		List<Pair<FontProperties, Color>>	styleStack;
+		Ptr<DocumentParagraph>				paragraph;
+		Ptr<DocumentLine>					line;
+		WString								workingDirectory;
 
-	Color ConvertColor(const WString& colorString)
-	{
-		return Color(
-			ConvertHex(colorString[1])*16+ConvertHex(colorString[2]),
-			ConvertHex(colorString[3])*16+ConvertHex(colorString[4]),
-			ConvertHex(colorString[5])*16+ConvertHex(colorString[6])
-			);
-	}
-
-	struct GifRun
-	{
-		Ptr<text::DocumentImageRun>		imageRun;
-		vint							paragraphIndex;
-	};
-	
-	Ptr<text::DocumentModel> BuildDocumentModel(const WString& fileName, List<Ptr<GifRun>>& animations)
-	{
-		HDC dc=CreateCompatibleDC(NULL);
-		int dpi=GetDeviceCaps(dc, LOGPIXELSY);
-		DeleteDC(dc);
-		Ptr<text::DocumentModel> document=new text::DocumentModel;
-
-		WString rawDocument;
+		DeserializeNodeVisitor(Ptr<DocumentParagraph> _paragraph, const WString& _workingDirectory)
+			:paragraph(_paragraph)
+			,workingDirectory(_workingDirectory)
 		{
-			FileStream fileStream(fileName, FileStream::ReadOnly);
-			BomDecoder decoder;
-			DecoderStream decoderStream(fileStream, decoder);
-			StreamReader reader(decoderStream);
-			rawDocument=reader.ReadToEnd();
+			styleStack.Add(Pair<FontProperties, Color>(GetCurrentController()->ResourceService()->GetDefaultFont(), Color()));
 		}
 
-		WString regexTag_s=L"<(<tag>s)>(<font>[^:]+):(<bold>[^:]+):(<color>[^:]+):(<size>[^:]+):(<text>/.*?)<//s>";
-		WString regexTag_i=L"<(<tag>i)>(<cx>[^:]+),(<cy>[^:]+):(<b>[^:]+):(<file>/.*?)<//i>";
-		WString regexTag_p=L"<(<tag>p)//>";
-		Regex regexTag(regexTag_s+L"|"+regexTag_i+L"|"+regexTag_p);
-		Regex regexLine(L"\r\n");
-		RegexMatch::List matches;
-		regexTag.Search(rawDocument, matches);
-
-		Ptr<text::DocumentParagraph> paragraph=0;
-		Ptr<text::DocumentLine> line=0;
-		
-		for(int i=0;i<matches.Count();i++)
+		void PrintText(const WString& text)
 		{
-			Ptr<RegexMatch> match=matches[i];
-			if(match->Groups()[L"tag"].Get(0).Value()==L"p")
+			if(!line)
 			{
-				paragraph=0;
+				line=new DocumentLine;
+				paragraph->lines.Add(line);
+			}
+			Ptr<DocumentTextRun> run=new DocumentTextRun;
+			run->style=styleStack[styleStack.Count()-1].key;
+			run->color=styleStack[styleStack.Count()-1].value;
+			run->text=text;
+			line->runs.Add(run);
+		}
+
+		void Visit(XmlText* node)override
+		{
+			PrintText(node->content.value);
+		}
+
+		void Visit(XmlCData* node)override
+		{
+			PrintText(node->content.value);
+		}
+
+		void Visit(XmlAttribute* node)override
+		{
+		}
+
+		void Visit(XmlComment* node)override
+		{
+		}
+
+		void Visit(XmlElement* node)override
+		{
+			if(node->name.value==L"br")
+			{
+				if(!line) PrintText(L"");
 				line=0;
 			}
-			else if(match->Groups()[L"tag"].Get(0).Value()==L"i")
+			else if(node->name.value==L"img")
 			{
-				vint cx=wtoi(match->Groups()[L"cx"].Get(0).Value());
-				vint cy=wtoi(match->Groups()[L"cy"].Get(0).Value());
-				vint b=wtoi(match->Groups()[L"b"].Get(0).Value());
-				WString file=match->Groups()[L"file"].Get(0).Value();
-
-				if(!paragraph)
-				{
-					paragraph=new text::DocumentParagraph;
-					document->paragraphs.Add(paragraph);
-					line=0;
-				}
 				if(!line)
 				{
-					line=new text::DocumentLine;
+					line=new DocumentLine;
 					paragraph->lines.Add(line);
 				}
-
-				Ptr<text::DocumentImageRun> run=new text::DocumentImageRun;
-				run->size=Size(cx, cy);
-				run->baseline=b;
-				run->image=GetCurrentController()->ImageService()->CreateImageFromFile(L"Resources\\"+file);
-				run->frameIndex=0;
-				run->source=L"file://"+file;
+				Ptr<DocumentImageRun> run=new DocumentImageRun;
+				FOREACH(Ptr<XmlAttribute>, att, node->attributes)
+				{
+					if(att->name.value==L"width")
+					{
+						run->size.x=wtoi(att->value.value);
+					}
+					else if(att->name.value==L"height")
+					{
+						run->size.y=wtoi(att->value.value);
+					}
+					else if(att->name.value==L"baseline")
+					{
+						run->baseline=wtoi(att->value.value);
+					}
+					else if(att->name.value==L"frameIndex")
+					{
+						run->frameIndex=wtoi(att->value.value);
+					}
+					else if(att->name.value==L"source")
+					{
+						run->source=att->value.value;
+						if(Locale::Invariant().StartsWith(run->source, L"file://", Locale::IgnoreCase))
+						{
+							WString filename=run->source.Sub(7, run->source.Length()-7);
+							if(filename.Length()>=2 && filename[1]!=L':')
+							{
+								filename=workingDirectory+filename;
+							}
+							run->image=GetCurrentController()->ImageService()->CreateImageFromFile(filename);
+						}
+					}
+				}
 				line->runs.Add(run);
-
-				if(run->image->GetFrameCount()>1)
-				{
-					Ptr<GifRun> gifRun=new GifRun;
-					gifRun->imageRun=run;
-					gifRun->paragraphIndex=document->paragraphs.Count()-1;
-					animations.Add(gifRun);
-				}
 			}
-			else if(match->Groups()[L"tag"].Get(0).Value()==L"s")
+			else if(node->name.value==L"font")
 			{
-				FontProperties fontStyle;
-				Color fontColor;
-				RegexMatch::List lines;
+				auto style=styleStack[styleStack.Count()-1];
+				FOREACH(Ptr<XmlAttribute>, att, node->attributes)
 				{
-					WString font=match->Groups()[L"font"].Get(0).Value();
-					WString bold=match->Groups()[L"bold"].Get(0).Value();
-					WString color=match->Groups()[L"color"].Get(0).Value();
-					WString size=match->Groups()[L"size"].Get(0).Value();
-					WString text=match->Groups()[L"text"].Get(0).Value();
-
-					fontStyle.fontFamily=font;
-					fontStyle.bold=bold==L"true";
-					fontStyle.size=(int)(wtof(size)*dpi/72);
-					fontColor=ConvertColor(color);
-					regexLine.Split(text, true, lines);
+					if(att->name.value==L"face")
+					{
+						style.key.fontFamily=att->value.value;
+					}
+					else if(att->name.value==L"size")
+					{
+						style.key.size=wtoi(att->value.value);
+					}
+					else if(att->name.value==L"color")
+					{
+						style.value=Color::Parse(att->value.value);
+					}
 				}
-
-				for(int j=0;j<lines.Count();j++)
+				styleStack.Add(style);
+				FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 				{
-					WString lineText=lines[j]->Result().Value();
-					if(!paragraph)
-					{
-						paragraph=new text::DocumentParagraph;
-						document->paragraphs.Add(paragraph);
-						line=0;
-					}
-					if(!line || j>0)
-					{
-						line=new text::DocumentLine;
-						paragraph->lines.Add(line);
-					}
-
-					Ptr<text::DocumentTextRun> run=new text::DocumentTextRun;
-					run->style=fontStyle;
-					run->color=fontColor;
-					run->text=lineText;
-					line->runs.Add(run);
+					sub->Accept(this);
+				}
+				styleStack.RemoveAt(styleStack.Count()-1);
+			}
+			else if(node->name.value==L"b")
+			{
+				auto style=styleStack[styleStack.Count()-1];
+				style.key.bold=true;
+				styleStack.Add(style);
+				FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+				{
+					sub->Accept(this);
+				}
+				styleStack.RemoveAt(styleStack.Count()-1);
+			}
+			else if(node->name.value==L"i")
+			{
+				auto style=styleStack[styleStack.Count()-1];
+				style.key.italic=true;
+				styleStack.Add(style);
+				FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+				{
+					sub->Accept(this);
+				}
+				styleStack.RemoveAt(styleStack.Count()-1);
+			}
+			else if(node->name.value==L"u")
+			{
+				auto style=styleStack[styleStack.Count()-1];
+				style.key.underline=true;
+				styleStack.Add(style);
+				FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+				{
+					sub->Accept(this);
+				}
+				styleStack.RemoveAt(styleStack.Count()-1);
+			}
+			else if(node->name.value==L"s")
+			{
+				auto style=styleStack[styleStack.Count()-1];
+				style.key.strikeline=true;
+				styleStack.Add(style);
+				FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+				{
+					sub->Accept(this);
+				}
+				styleStack.RemoveAt(styleStack.Count()-1);
+			}
+			else if(node->name.value==L"va")
+			{
+				auto style=styleStack[styleStack.Count()-1];
+				style.key.antialias=true;
+				style.key.verticalAntialias=true;
+				styleStack.Add(style);
+				FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+				{
+					sub->Accept(this);
+				}
+				styleStack.RemoveAt(styleStack.Count()-1);
+			}
+			else if(node->name.value==L"na")
+			{
+				auto style=styleStack[styleStack.Count()-1];
+				style.key.antialias=false;
+				style.key.verticalAntialias=false;
+				styleStack.Add(style);
+				FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+				{
+					sub->Accept(this);
+				}
+				styleStack.RemoveAt(styleStack.Count()-1);
+			}
+			else
+			{
+				FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+				{
+					sub->Accept(this);
 				}
 			}
 		}
 
-		return document;
+		void Visit(XmlInstruction* node)override
+		{
+		}
+
+		void Visit(XmlDocument* node)override
+		{
+		}
+	};
+
+	Ptr<DocumentModel> Deserialize(Ptr<XmlDocument> xml, const WString& workingDirectory)
+	{
+		Ptr<DocumentModel> model=new DocumentModel;
+		if(xml->rootElement->name.value==L"Doc")
+		if(Ptr<XmlElement> content=XmlGetElement(xml->rootElement, L"Content"))
+		FOREACH(Ptr<XmlElement>, p, XmlGetElements(content, L"p"))
+		{
+			Ptr<DocumentParagraph> paragraph=new DocumentParagraph;
+			model->paragraphs.Add(paragraph);
+			DeserializeNodeVisitor visitor(paragraph, workingDirectory);
+			p->Accept(&visitor);
+		}
+		return model;
 	}
 
 	class GifAnimation : public Object, public IGuiGraphicsAnimation
@@ -346,17 +428,21 @@ void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* c
 	
 	GetApplication()->InvokeAsync([=]()
 	{
-		List<Ptr<GifRun>> animations;
-		Ptr<text::DocumentModel> document=BuildDocumentModel(filename, animations);
+		Ptr<text::DocumentModel> document;
 		{
-			Ptr<XmlDocument> xml=Serialize(document);
-			FileStream fileStream(filename+L".xml", FileStream::WriteOnly);
-			BomEncoder encoder(BomEncoder::Utf8);
-			EncoderStream encoderStream(fileStream, encoder);
-			StreamWriter writer(encoderStream);
-			XmlPrint(xml, writer);
+			WString text;
+			{
+				FileStream fileStream(filename, FileStream::ReadOnly);
+				BomDecoder decoder;
+				DecoderStream decoderStream(fileStream, decoder);
+				StreamReader writer(decoderStream);
+				text=writer.ReadToEnd();
+			}
+			auto table=XmlLoadTable();
+			Ptr<XmlDocument> xml=XmlParseDocument(text, table);
+			document=Deserialize(xml, L"Resources\\");
 		}
-		GetApplication()->InvokeInMainThreadAndWait([=, &animations]()
+		GetApplication()->InvokeInMainThreadAndWait([=]()
 		{
 			scriptDocumentView->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
 			GuiDocumentElement* element=GuiDocumentElement::Create();
@@ -368,10 +454,16 @@ void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* c
 			composition->SetAlignmentToParent(Margin(10, 10, 10, 10));
 			scriptDocumentView->GetContainerComposition()->AddChild(composition);
 
-			for(int i=0;i<animations.Count();i++)
+			FOREACH_INDEXER(Ptr<DocumentParagraph>, p, i, document->paragraphs)
+			FOREACH(Ptr<DocumentLine>, l, p->lines)
+			FOREACH(Ptr<DocumentRun>, r, l->runs)
 			{
-				Ptr<GifAnimation> gifAnimation=new GifAnimation(animations[i]->imageRun, animations[i]->paragraphIndex, element);
-				controlHost->GetGraphicsHost()->GetAnimationManager()->AddAnimation(gifAnimation);
+				Ptr<DocumentImageRun> image=r.Cast<DocumentImageRun>();
+				if(image && image->image->GetFrameCount()>1)
+				{
+					Ptr<GifAnimation> gifAnimation=new GifAnimation(image, i, element);
+					controlHost->GetGraphicsHost()->GetAnimationManager()->AddAnimation(gifAnimation);
+				}
 			}
 		});
 	});

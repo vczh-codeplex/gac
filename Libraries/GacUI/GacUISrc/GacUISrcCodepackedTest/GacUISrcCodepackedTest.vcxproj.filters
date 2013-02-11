@@ -154,4 +154,12 @@
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Resources\document.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+    <Xml Include="Resources\document2.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+  </ItemGroup>
 </Project>
