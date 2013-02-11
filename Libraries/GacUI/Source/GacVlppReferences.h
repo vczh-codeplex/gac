@@ -11,6 +11,7 @@ Interfaces:
 
 #include "..\..\..\Common\Source\Basic.h"
 #include "..\..\..\Common\Source\String.h"
+#include "..\..\..\Common\Source\Locale.h"
 #include "..\..\..\Common\Source\Pointer.h"
 #include "..\..\..\Common\Source\Function.h"
 #include "..\..\..\Common\Source\Collections\List.h"

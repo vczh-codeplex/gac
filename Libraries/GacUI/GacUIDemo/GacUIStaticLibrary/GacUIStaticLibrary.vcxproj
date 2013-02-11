@@ -108,7 +108,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Resources\CalculatorDefinition.txt" />
-    <Text Include="..\Resources\document2.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\Resources\document2.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

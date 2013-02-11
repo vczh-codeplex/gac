@@ -681,6 +681,16 @@ Rich Content Document (model)
 				public:
 					/// <summary>All paragraphs in this document.</summary>
 					ParagraphList					paragraphs;
+
+					/// <summary>Load a document model from an xml.</summary>
+					/// <returns>The loaded document model.</returns>
+					/// <param name="xml">The xml document.</param>
+					/// <param name="workingDirectory">The working directory for loading image files.</param>
+					static Ptr<DocumentModel>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory);
+
+					/// <summary>Save a document model to an xml.</summary>
+					/// <returns>The saved xml document.</returns>
+					Ptr<parsing::xml::XmlDocument>	SaveToXml();
 				};
 
 				struct ParagraphCache

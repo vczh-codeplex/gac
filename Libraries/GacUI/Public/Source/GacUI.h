@@ -2245,6 +2245,10 @@ Rich Content Document (model)
 					typedef collections::List<Ptr<DocumentParagraph>>	ParagraphList;
 				public:
 					ParagraphList					paragraphs;
+
+					static Ptr<DocumentModel>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory);
+
+					Ptr<parsing::xml::XmlDocument>	SaveToXml();
 				};
 
 				struct ParagraphCache
