@@ -377,6 +377,52 @@ Color
 				return value-color.value;
 			}
 
+			static Color Parse(const WString& value)
+			{
+				const wchar_t* code=L"0123456789ABCDEF";
+				if((value.Length()==7 || value.Length()==9) && value[0]==L'#')
+				{
+					int index[8]={15, 15, 15, 15, 15, 15, 15, 15};
+					for(vint i=0;i<value.Length()-1;i++)
+					{
+						index[i]=wcschr(code, value[i+1])-code;
+						if(index[i]<0 || index[i]>15)
+						{
+							return Color();
+						}
+					}
+
+					Color c;
+					c.r=(unsigned char)(index[0]*16+index[1]);
+					c.g=(unsigned char)(index[2]*16+index[3]);
+					c.b=(unsigned char)(index[4]*16+index[5]);
+					c.a=(unsigned char)(index[6]*16+index[7]);
+				}
+				return Color();
+			}
+
+			WString ToString()const
+			{
+				const wchar_t* code=L"0123456789ABCDEF";
+				wchar_t result[10]=L"#00000000";
+				result[1]=code[r/16];
+				result[2]=code[r%16];
+				result[3]=code[g/16];
+				result[4]=code[g%16];
+				result[5]=code[b/16];
+				result[6]=code[b%16];
+				if(a==255)
+				{
+					result[7]=L'\0';
+				}
+				else
+				{
+					result[7]=code[a/16];
+					result[8]=code[a%16];
+				}
+				return result;
+			}
+
 			bool operator==(Color color)const {return Compare(color)==0;}
 			bool operator!=(Color color)const {return Compare(color)!=0;}
 			bool operator<(Color color)const {return Compare(color)<0;}
@@ -2160,7 +2206,7 @@ Rich Content Document (model)
 				{
 				public:
 					Size							size;
-					vint								baseline;
+					vint							baseline;
 
 					DocumentInlineObjectRun():baseline(-1){}
 				};
@@ -2169,7 +2215,8 @@ Rich Content Document (model)
 				{
 				public:
 					Ptr<INativeImage>				image;
-					vint								frameIndex;
+					vint							frameIndex;
+					WString							source;
 
 					DocumentImageRun():frameIndex(0){}
 

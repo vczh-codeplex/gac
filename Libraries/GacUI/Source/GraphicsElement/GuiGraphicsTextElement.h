@@ -633,7 +633,7 @@ Rich Content Document (model)
 					/// <summary>Size of the inline object.</summary>
 					Size							size;
 					/// <summary>Baseline of the inline object.</summary>
-					vint								baseline;
+					vint							baseline;
 
 					DocumentInlineObjectRun():baseline(-1){}
 				};
@@ -645,7 +645,9 @@ Rich Content Document (model)
 					/// <summary>The image.</summary>
 					Ptr<INativeImage>				image;
 					/// <summary>The frame index.</summary>
-					vint								frameIndex;
+					vint							frameIndex;
+					/// <summary>The image source string.</summary>
+					WString							source;
 
 					DocumentImageRun():frameIndex(0){}
 
