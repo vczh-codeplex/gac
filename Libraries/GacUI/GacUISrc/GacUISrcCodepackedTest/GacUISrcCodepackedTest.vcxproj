@@ -200,6 +200,10 @@
     <Text Include="Resources\document.txt" />
     <Text Include="Resources\document2.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Resources\document.xml" />
+    <Xml Include="Resources\document2.xml" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
