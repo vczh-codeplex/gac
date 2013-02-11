@@ -1,4 +1,4 @@
-#include <string.h>
+Ôªø#include <string.h>
 #include "..\..\Source\UnitTest\UnitTest.h"
 #include "..\..\Source\Stream\Interfaces.h"
 #include "..\..\Source\Stream\MemoryWrapperStream.h"
@@ -19,7 +19,7 @@ extern WString GetPath();
 const vint BUFFER_SIZE = 1024;
 
 /***********************************************************************
-Õ®”√≤‚ ‘∑Ω∑®
+ÈÄöÁî®ÊµãËØïÊñπÊ≥ï
 ***********************************************************************/
 
 void TestClosedProperty(IStream& stream)
@@ -255,7 +255,7 @@ void TestWriteonlyUnseekableStream(IStream& stream, bool limited)
 }
 
 /***********************************************************************
-∆’Õ®¡˜≤‚ ‘
+ÊôÆÈÄöÊµÅÊµãËØï
 ***********************************************************************/
 
 TEST_CASE(TestMemoryWrapperStream)
@@ -334,7 +334,7 @@ TEST_CASE(TestBroadcastStream)
 }
 
 /***********************************************************************
-ª∫¥Ê¡˜≤‚ ‘
+ÁºìÂ≠òÊµÅÊµãËØï
 ***********************************************************************/
 
 TEST_CASE(TestCacheStreamWithReadonlyUnseekableStream)
@@ -455,7 +455,7 @@ TEST_CASE(TestCacheStream)
 }
 
 /***********************************************************************
-¡˜øÿ÷∆∆˜≤‚ ‘(StringReader)
+ÊµÅÊéßÂà∂Âô®ÊµãËØï(StringReader)
 ***********************************************************************/
 
 TEST_CASE(TestStringReader)
@@ -501,7 +501,7 @@ TEST_CASE(TestStringReaderWithoutCrLf)
 }
 
 /***********************************************************************
-¡˜øÿ÷∆∆˜≤‚ ‘(StreamReader/StreamWriter)
+ÊµÅÊéßÂà∂Âô®ÊµãËØï(StreamReader/StreamWriter)
 ***********************************************************************/
 
 TEST_CASE(TestStreamReader)
@@ -584,210 +584,228 @@ TEST_CASE(TestStreamWriter)
 }
 
 /***********************************************************************
-±‡¬ÎΩ‚¬Î∆˜≤‚ ‘
+ÁºñÁ†ÅËß£Á†ÅÂô®ÊµãËØï
 ***********************************************************************/
 
-const vint MBCS=0;
-const vint UTF16=1;
-const vint UTF16BE=2;
-const vint UTF8=3;
-
-void TestCharEncoderDecoder(IEncoder& encoder, IDecoder& decoder, vint mode)
-{
-	MemoryStream memory;
-	pos_t positions[65536];
-
-	EncoderStream encoderStream(memory, encoder);
-	for(vint i=0;i<65536;i++)
-	{
-		TestWriteonlyUnseekableProperty(encoderStream, i*2, -1, false);
-		wchar_t c=(wchar_t)i;
-		if(i%4<2)
-		{
-			TEST_ASSERT(encoderStream.Write((char*)&c, 1)==1);
-			TEST_ASSERT(encoderStream.Write(((char*)&c)+1, 1)==1);
-		}
-		else
-		{
-			TEST_ASSERT(encoderStream.Write(&c, sizeof(c))==sizeof(c));
-		}
-		positions[i]=memory.Position();
-	}
-	TestWriteonlyUnseekableProperty(encoderStream, 131072, -1, false);
-	encoderStream.Close();
-	TestClosedProperty(encoderStream);
-
-	memory.SeekFromBegin(0);
-	DecoderStream decoderStream(memory, decoder);
-	for(vint i=0;i<65536;i++)
-	{
-		TestReadonlyUnseekableProperty(decoderStream, i*2, -1, false);
-		wchar_t c=0;
-		if(i%4<2)
-		{
-			TEST_ASSERT(decoderStream.Read((char*)&c, 1)==1);
-			TEST_ASSERT(decoderStream.Read(((char*)&c)+1, 1)==1);
-		}
-		else
-		{
-			TEST_ASSERT(decoderStream.Read(&c, sizeof(c))==sizeof(c));
-		}
-		switch(mode)
-		{
-		case MBCS:
-			break;
-		case UTF16:case UTF16BE:
-			TEST_ASSERT(c==i);
-			break;
-		case UTF8:
-			TEST_ASSERT(c==i || c==65533);
-			break;
-		}
-		TEST_ASSERT(positions[i]==memory.Position());
-	}
-	TestReadonlyUnseekableProperty(decoderStream, 131072, -1, false);
-	decoderStream.Close();
-	TestClosedProperty(decoderStream);
-}
-
-template<typename _encoder, typename _decoder>
-void TestCharEncoderDecoderStream(vint mode, wchar_t* name)
-{
-	{
-		_encoder encoder;
-		_decoder decoder;
-		TestCharEncoderDecoder(encoder, decoder, mode);
-	}
-	{
-		WString path=GetPath()+L"TestFile."+name+L".txt";
-		{
-			_encoder encoder;
-			FileStream file(path, FileStream::WriteOnly);
-			EncoderStream stream(file, encoder);
-			StreamWriter writer(stream);
-			writer.WriteString(L"Vczh is genius!@Œ“ «ÃÏ≤≈£°");
-		}
-		{
-			_decoder decoder;
-			FileStream file(path, FileStream::ReadOnly);
-			DecoderStream stream(file, decoder);
-			StreamReader reader(stream);
-			WString content=reader.ReadToEnd();
-			TEST_ASSERT(content==L"Vczh is genius!@Œ“ «ÃÏ≤≈£°");
-		}
-	}
-	{
-		WString path=GetPath()+L"TestFile."+name+L".bom.txt";
-		{
-			BomEncoder::Encoding encoding=BomEncoder::Mbcs;
-			switch(mode)
-			{
-			case MBCS:
-				encoding=BomEncoder::Mbcs;
-				break;
-			case UTF16:
-				encoding=BomEncoder::Utf16;
-				break;
-			case UTF16BE:
-				encoding=BomEncoder::Utf16BE;
-				break;
-			case UTF8:
-				encoding=BomEncoder::Utf8;
-				break;
-			}
-			BomEncoder encoder(encoding);
-			FileStream file(path, FileStream::WriteOnly);
-			EncoderStream stream(file, encoder);
-			StreamWriter writer(stream);
-			writer.WriteString(L"Vczh is genius!@Œ“ «ÃÏ≤≈£°");
-		}
-		{
-			BomDecoder decoder;
-			FileStream file(path, FileStream::ReadOnly);
-			DecoderStream stream(file, decoder);
-			StreamReader reader(stream);
-			WString content=reader.ReadToEnd();
-			TEST_ASSERT(content==L"Vczh is genius!@Œ“ «ÃÏ≤≈£°");
-		}
-	}
-}
-
-TEST_CASE(TestMbcsEncoderDecoder)
-{
-	TestCharEncoderDecoderStream<MbcsEncoder, MbcsDecoder>(MBCS, L"MBCS");
-}
-
-TEST_CASE(TestUtf16EncoderDecoder)
-{
-	TestCharEncoderDecoderStream<Utf16Encoder, Utf16Decoder>(UTF16, L"UTF16");
-}
-
-TEST_CASE(TestUtf16BEEncoderDecoder)
-{
-	TestCharEncoderDecoderStream<Utf16BEEncoder, Utf16BEDecoder>(UTF16BE, L"UTF16BE");
-}
-
-TEST_CASE(TestUtf8EncoderDecoder)
-{
-	TestCharEncoderDecoderStream<Utf8Encoder, Utf8Decoder>(UTF8, L"UTF8");
-}
+//const vint MBCS=0;
+//const vint UTF16=1;
+//const vint UTF16BE=2;
+//const vint UTF8=3;
+//
+//void TestCharEncoderDecoder(IEncoder& encoder, IDecoder& decoder, vint mode)
+//{
+//	MemoryStream memory;
+//	pos_t positions[65536];
+//
+//	EncoderStream encoderStream(memory, encoder);
+//	for(vint i=0;i<65536;i++)
+//	{
+//		TestWriteonlyUnseekableProperty(encoderStream, i*2, -1, false);
+//		wchar_t c=(wchar_t)i;
+//		if(i%4<2)
+//		{
+//			TEST_ASSERT(encoderStream.Write((char*)&c, 1)==1);
+//			TEST_ASSERT(encoderStream.Write(((char*)&c)+1, 1)==1);
+//		}
+//		else
+//		{
+//			TEST_ASSERT(encoderStream.Write(&c, sizeof(c))==sizeof(c));
+//		}
+//		positions[i]=memory.Position();
+//	}
+//	TestWriteonlyUnseekableProperty(encoderStream, 131072, -1, false);
+//	encoderStream.Close();
+//	TestClosedProperty(encoderStream);
+//
+//	memory.SeekFromBegin(0);
+//	DecoderStream decoderStream(memory, decoder);
+//	for(vint i=0;i<65536;i++)
+//	{
+//		TestReadonlyUnseekableProperty(decoderStream, i*2, -1, false);
+//		wchar_t c=0;
+//		if(i%4<2)
+//		{
+//			TEST_ASSERT(decoderStream.Read((char*)&c, 1)==1);
+//			TEST_ASSERT(decoderStream.Read(((char*)&c)+1, 1)==1);
+//		}
+//		else
+//		{
+//			TEST_ASSERT(decoderStream.Read(&c, sizeof(c))==sizeof(c));
+//		}
+//		switch(mode)
+//		{
+//		case MBCS:
+//			break;
+//		case UTF16:case UTF16BE:
+//			TEST_ASSERT(c==i);
+//			break;
+//		case UTF8:
+//			TEST_ASSERT(c==i || c==65533);
+//			break;
+//		}
+//		TEST_ASSERT(positions[i]==memory.Position());
+//	}
+//	TestReadonlyUnseekableProperty(decoderStream, 131072, -1, false);
+//	decoderStream.Close();
+//	TestClosedProperty(decoderStream);
+//}
+//
+//template<typename _encoder, typename _decoder>
+//void TestCharEncoderDecoderStream(vint mode, wchar_t* name)
+//{
+//	{
+//		_encoder encoder;
+//		_decoder decoder;
+//		TestCharEncoderDecoder(encoder, decoder, mode);
+//	}
+//	{
+//		WString path=GetPath()+L"TestFile."+name+L".txt";
+//		{
+//			_encoder encoder;
+//			FileStream file(path, FileStream::WriteOnly);
+//			EncoderStream stream(file, encoder);
+//			StreamWriter writer(stream);
+//			writer.WriteString(L"Vczh is genius!@ÊàëÊòØÂ§©ÊâçÔºÅ");
+//		}
+//		{
+//			_decoder decoder;
+//			FileStream file(path, FileStream::ReadOnly);
+//			DecoderStream stream(file, decoder);
+//			StreamReader reader(stream);
+//			WString content=reader.ReadToEnd();
+//			TEST_ASSERT(content==L"Vczh is genius!@ÊàëÊòØÂ§©ÊâçÔºÅ");
+//		}
+//	}
+//	{
+//		WString path=GetPath()+L"TestFile."+name+L".bom.txt";
+//		{
+//			BomEncoder::Encoding encoding=BomEncoder::Mbcs;
+//			switch(mode)
+//			{
+//			case MBCS:
+//				encoding=BomEncoder::Mbcs;
+//				break;
+//			case UTF16:
+//				encoding=BomEncoder::Utf16;
+//				break;
+//			case UTF16BE:
+//				encoding=BomEncoder::Utf16BE;
+//				break;
+//			case UTF8:
+//				encoding=BomEncoder::Utf8;
+//				break;
+//			}
+//			BomEncoder encoder(encoding);
+//			FileStream file(path, FileStream::WriteOnly);
+//			EncoderStream stream(file, encoder);
+//			StreamWriter writer(stream);
+//			writer.WriteString(L"Vczh is genius!@ÊàëÊòØÂ§©ÊâçÔºÅ");
+//		}
+//		{
+//			BomDecoder decoder;
+//			FileStream file(path, FileStream::ReadOnly);
+//			DecoderStream stream(file, decoder);
+//			StreamReader reader(stream);
+//			WString content=reader.ReadToEnd();
+//			TEST_ASSERT(content==L"Vczh is genius!@ÊàëÊòØÂ§©ÊâçÔºÅ");
+//		}
+//	}
+//}
+//
+//TEST_CASE(TestMbcsEncoderDecoder)
+//{
+//	TestCharEncoderDecoderStream<MbcsEncoder, MbcsDecoder>(MBCS, L"MBCS");
+//}
+//
+//TEST_CASE(TestUtf16EncoderDecoder)
+//{
+//	TestCharEncoderDecoderStream<Utf16Encoder, Utf16Decoder>(UTF16, L"UTF16");
+//}
+//
+//TEST_CASE(TestUtf16BEEncoderDecoder)
+//{
+//	TestCharEncoderDecoderStream<Utf16BEEncoder, Utf16BEDecoder>(UTF16BE, L"UTF16BE");
+//}
+//
+//TEST_CASE(TestUtf8EncoderDecoder)
+//{
+//	TestCharEncoderDecoderStream<Utf8Encoder, Utf8Decoder>(UTF8, L"UTF8");
+//}
 
 /***********************************************************************
-±‡¬Î≤‚ ‘
+ÁºñÁ†ÅÊµãËØï
 ***********************************************************************/
 
-void TestEncodingInternal(IEncoder& encoder, BomEncoder::Encoding encoding, bool containsBom)
+void TestEncodingInternal(IEncoder& encoder, IDecoder& decoder, BomEncoder::Encoding encoding, bool containsBom)
 {
+	const wchar_t* text=L"©∞™„¶≤¶∞ó†Äº £Çï£¥ë£±≥¶Åö Vczh is genius!@ÊàëÊòØÂ§©Êâç";
 	MemoryStream memoryStream;
 	{
 		EncoderStream encoderStream(memoryStream, encoder);
 		StreamWriter writer(encoderStream);
-		writer.WriteString(L"Vczh is genius!@Œ“ «ÃÏ≤≈");
+		writer.WriteString(text);
 	}
 	memoryStream.SeekFromBegin(0);
 	Array<unsigned char> buffer;
 	buffer.Resize((vint)memoryStream.Size());
 	memoryStream.Read(&buffer[0], buffer.Count());
-
+	
 	BomEncoder::Encoding resultEncoding;
 	bool resultContainsBom;
 	TestEncoding(&buffer[0], buffer.Count(), resultEncoding, resultContainsBom);
 	TEST_ASSERT(encoding==resultEncoding);
 	TEST_ASSERT(containsBom==resultContainsBom);
+	
+	if(encoding!=BomEncoder::Mbcs)
+	{
+		memoryStream.SeekFromBegin(0);
+		DecoderStream decoderStream(memoryStream, decoder);
+		StreamReader reader(decoderStream);
+		WString read=reader.ReadToEnd();
+		TEST_ASSERT(read==text);
+	}
 }
 
 TEST_CASE(TestEncoding)
 {
 	{
 		BomEncoder encoder(BomEncoder::Mbcs);
-		TestEncodingInternal(encoder, BomEncoder::Mbcs, true);
+		BomDecoder decoder;
+		TestEncodingInternal(encoder, decoder, BomEncoder::Mbcs, true);
 	}
 	{
 		BomEncoder encoder(BomEncoder::Utf8);
-		TestEncodingInternal(encoder, BomEncoder::Utf8, true);
+		BomDecoder decoder;
+		TestEncodingInternal(encoder, decoder, BomEncoder::Utf8, true);
 	}
 	{
 		BomEncoder encoder(BomEncoder::Utf16);
-		TestEncodingInternal(encoder, BomEncoder::Utf16, true);
+		BomDecoder decoder;
+		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16, true);
 	}
 	{
 		BomEncoder encoder(BomEncoder::Utf16BE);
-		TestEncodingInternal(encoder, BomEncoder::Utf16BE, true);
+		BomDecoder decoder;
+		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16BE, true);
 	}
 	{
 		MbcsEncoder encoder;
-		TestEncodingInternal(encoder, BomEncoder::Mbcs, true);
+		MbcsDecoder decoder;
+		TestEncodingInternal(encoder, decoder, BomEncoder::Mbcs, true);
 	}
 	{
 		Utf8Encoder encoder;
-		TestEncodingInternal(encoder, BomEncoder::Utf8, false);
+		Utf8Decoder decoder;
+		TestEncodingInternal(encoder, decoder, BomEncoder::Utf8, false);
 	}
 	{
 		Utf16Encoder encoder;
-		TestEncodingInternal(encoder, BomEncoder::Utf16, false);
+		Utf16Decoder decoder;
+		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16, false);
 	}
 	{
 		Utf16BEEncoder encoder;
-		TestEncodingInternal(encoder, BomEncoder::Utf16BE, false);
+		Utf16BEDecoder decoder;
+		TestEncodingInternal(encoder, decoder, BomEncoder::Utf16BE, false);
 	}
 }

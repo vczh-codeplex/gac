@@ -169,7 +169,7 @@ Mbcs
 		}
 
 /***********************************************************************
-Utf-16-be
+Utf-16
 ***********************************************************************/
 
 		vint Utf16Encoder::WriteString(wchar_t* _buffer, vint chars)
@@ -245,41 +245,81 @@ Utf8
 			}
 		}
 
+		Utf8Decoder::Utf8Decoder()
+			:cache(0)
+			,cacheAvailable(false)
+		{
+		}
+
 		vint Utf8Decoder::ReadString(wchar_t* _buffer, vint chars)
 		{
-			char* source=new char[chars*3];
-			char* reading=source;
+			char source[4];
+			wchar_t target[2];
+			wchar_t* writing=_buffer;
 			vint readed=0;
+			vint sourceCount=0;
+
 			while(readed<chars)
 			{
-				if(stream->Read(reading, 1)!=1)
+				if(cacheAvailable)
 				{
-					break;
-				}
-				if((*reading & 0xE0) == 0xE0)
-				{
-					if(stream->Read(reading+1, 2)!=2)
-					{
-						break;
-					}
-					reading+=3;
-				}
-				else if((*reading & 0xC0) == 0xC0)
-				{
-					if(stream->Read(reading+1, 1)!=1)
-					{
-						break;
-					}
-					reading+=2;
+					*writing++=cache;
+					cache=0;
+					cacheAvailable=false;
 				}
 				else
 				{
-					reading++;
+					if(stream->Read(source, 1)!=1)
+					{
+						break;
+					}
+					if((*source & 0xF0) == 0xF0)
+					{
+						if(stream->Read(source+1, 3)!=3)
+						{
+							break;
+						}
+						sourceCount=4;
+					}
+					else if((*source & 0xE0) == 0xE0)
+					{
+						if(stream->Read(source+1, 2)!=2)
+						{
+							break;
+						}
+						sourceCount=3;
+					}
+					else if((*source & 0xC0) == 0xC0)
+					{
+						if(stream->Read(source+1, 1)!=1)
+						{
+							break;
+						}
+						sourceCount=2;
+					}
+					else
+					{
+						sourceCount=1;
+					}
+					
+					int targetCount=MultiByteToWideChar(CP_UTF8, 0, source, (int)sourceCount, target, 2);
+					if(targetCount==1)
+					{
+						*writing++=target[0];
+					}
+					else if(targetCount==2)
+					{
+						*writing++=target[0];
+						cache=target[1];
+						cacheAvailable=true;
+					}
+					else
+					{
+						break;
+					}
 				}
 				readed++;
 			}
-			MultiByteToWideChar(CP_UTF8, 0, source, (int)(reading-source), _buffer, (int)chars);
-			delete[] source;
 			return readed;
 		}
 
