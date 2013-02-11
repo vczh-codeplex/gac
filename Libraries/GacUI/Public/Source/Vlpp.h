@@ -13660,7 +13660,12 @@ Utf-8
 		class Utf8Decoder : public CharDecoder
 		{
 		protected:
+			wchar_t							cache;
+			bool							cacheAvailable;
+
 			vint							ReadString(wchar_t* _buffer, vint chars);
+		public:
+			Utf8Decoder();
 		};
 
 /***********************************************************************
