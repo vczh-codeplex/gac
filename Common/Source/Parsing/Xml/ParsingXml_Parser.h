@@ -3,7 +3,7 @@ Vczh Library++ 3.0
 Developer: 陈梓瀚(vczh)
 Parser::ParsingXml_Parser
 
-本文件使用Vczh Functional Macro工具自动生成
+本文件使用Vczh Parsing Generator工具自动生成
 ***********************************************************************/
 
 #ifndef VCZH_PARSING_XML_PARSINGXML_PARSER
