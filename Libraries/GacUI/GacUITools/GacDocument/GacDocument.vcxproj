@@ -20,7 +20,6 @@
     <ClCompile Include="..\Source\Implementation\DocumentManager.cpp" />
     <ClCompile Include="..\Source\Implementation\DocumentView.cpp" />
     <ClCompile Include="..\Source\PackageManager.cpp" />
-    <ClCompile Include="..\Source\ResourceManager.cpp" />
     <ClCompile Include="..\Source\ServiceImpl\EditingDocumentService.cpp" />
     <ClCompile Include="..\Source\ServiceImpl\FileDialogService.cpp" />
     <ClCompile Include="..\Source\ServiceImpl\MessageDialogService.cpp" />
@@ -35,7 +34,6 @@
     <ClInclude Include="..\Source\Implementation\DocumentManager.h" />
     <ClInclude Include="..\Source\Implementation\DocumentView.h" />
     <ClInclude Include="..\Source\PackageManager.h" />
-    <ClInclude Include="..\Source\ResourceManager.h" />
     <ClInclude Include="..\Source\ServiceImpl\EditingDocumentService.h" />
     <ClInclude Include="..\Source\ServiceImpl\FileDialogService.h" />
     <ClInclude Include="..\Source\ServiceImpl\MessageDialogService.h" />

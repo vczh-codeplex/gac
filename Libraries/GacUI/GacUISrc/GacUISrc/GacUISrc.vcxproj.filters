@@ -426,6 +426,9 @@
     <ClCompile Include="..\..\..\..\Common\Source\Locale.cpp">
       <Filter>Common\Basic</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\NativeWindow\GuiResource.cpp">
+      <Filter>GacUI\NativeWindow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -808,6 +811,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Locale.h">
       <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\NativeWindow\GuiResource.h">
+      <Filter>GacUI\NativeWindow</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

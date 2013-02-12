@@ -9,7 +9,6 @@ Interfaces:
 #define GACUI_TOOLS_PACKAGEMANAGER
 
 #include "DocumentFramework.h"
-#include "ResourceManager.h"
 
 namespace vl
 {

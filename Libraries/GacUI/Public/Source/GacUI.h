@@ -4168,6 +4168,121 @@ List interface common implementation
 #endif
 
 /***********************************************************************
+NATIVEWINDOW\GUIRESOURCE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Resource
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_GUIRESOURCE
+#define VCZH_PRESENTATION_GUIRESOURCE
+
+
+namespace vl
+{
+	namespace presentation
+	{
+
+/***********************************************************************
+Resource Structure
+***********************************************************************/
+
+		class GuiResourceItem;
+		class GuiResourceFolder;
+		class GuiResource;
+
+		class GuiResourceNodeBase : public Object
+		{
+			friend class GuiResourceFolder;
+		protected:
+			GuiResourceFolder*						parent;
+			WString									name;
+			
+		public:
+			GuiResourceNodeBase();
+			~GuiResourceNodeBase();
+
+			GuiResourceFolder*						GetParent();
+			const WString&							GetName();
+		};
+		
+		class GuiResourceItem : public GuiResourceNodeBase
+		{
+			friend class GuiResourceFolder;
+		protected:
+			Ptr<Object>								content;
+			
+		public:
+			GuiResourceItem();
+			~GuiResourceItem();
+			
+			Ptr<Object>								GetContent();
+			void									SetContent(Ptr<Object> value);
+
+			Ptr<controls::GuiImageData>				AsImage();
+			Ptr<parsing::xml::XmlDocument>			AsXml();
+			Ptr<ObjectBox<WString>>					AsString();
+		};
+		
+		class GuiResourceFolder : public GuiResourceNodeBase
+		{
+			typedef collections::Dictionary<WString, Ptr<GuiResourceItem>>		ItemMap;
+			typedef collections::Dictionary<WString, Ptr<GuiResourceFolder>>	FolderMap;
+			typedef collections::List<Ptr<GuiResourceItem>>						ItemList;
+			typedef collections::List<Ptr<GuiResourceFolder>>					FolderList;
+		protected:
+			ItemMap									items;
+			FolderMap								folders;
+		public:
+			GuiResourceFolder();
+			~GuiResourceFolder();
+
+			const ItemList&							GetItems();
+			Ptr<GuiResourceItem>					GetItem(const WString& name);
+			bool									AddItem(const WString& name, Ptr<GuiResourceItem> item);
+			Ptr<GuiResourceItem>					RemoveItem(const WString& name);
+			void									ClearItems();
+			
+			const FolderList&						GetFolders();
+			Ptr<GuiResourceFolder>					GetFolder(const WString& name);
+			bool									AddFolder(const WString& name, Ptr<GuiResourceFolder> folder);
+			Ptr<GuiResourceFolder>					RemoveFolder(const WString& name);
+			void									ClearFolders();
+
+			Ptr<Object>								GetValueByPath(const WString& path);
+
+			void									LoadResourceFolderXml(const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable);
+		};
+
+/***********************************************************************
+Resource Loader
+***********************************************************************/
+		
+		class GuiResource : public GuiResourceFolder
+		{
+		public:
+			GuiResource();
+			~GuiResource();
+
+			void									LoadResourceXml(const WString& filePath);
+		};
+
+/***********************************************************************
+Resource Loader
+***********************************************************************/
+
+		extern WString								GetFolderPath(const WString& filePath);
+		extern WString								GetFileName(const WString& filePath);
+	}
+}
+
+#endif
+
+/***********************************************************************
 CONTROLS\GUIWINDOWCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
@@ -5190,7 +5305,7 @@ SinglelineTextBox
 			{
 			public:
 				static const vint							TextMargin=3;
-
+				
 				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
 				{
 				public:

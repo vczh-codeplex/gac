@@ -93,10 +93,14 @@ SinglelineTextBox
 			{
 			public:
 				static const vint							TextMargin=3;
-
+				
+				/// <summary>Style controller interface for <see cref="GuiSinglelineTextBox"/>.</summary>
 				class IStyleProvider : public virtual GuiControl::IStyleProvider, public Description<IStyleProvider>
 				{
 				public:
+					/// <summary>Create a background in the specified background container composition.</summary>
+					/// <returns>The container composition. If the style does not have a inner composition to be the container composition, just return the background argument.</returns>
+					/// <param name="background">The background container composition.</param>
 					virtual compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* background)=0;
 				};
 
