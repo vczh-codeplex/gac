@@ -17,6 +17,13 @@ namespace vl
 	{
 		using namespace reflection;
 
+		class GuiResourceItem;
+		class GuiResourceFolder;
+		class GuiResource;
+
+		class DocumentTextRun;
+		class DocumentImageRun;
+
 /***********************************************************************
 Resource Image
 ***********************************************************************/
@@ -50,9 +57,6 @@ Resource Image
 /***********************************************************************
 Rich Content Document (model)
 ***********************************************************************/
-
-		class DocumentTextRun;
-		class DocumentImageRun;
 
 		/// <summary>Pepresents a logical run of a rich content document.</summary>
 		class DocumentRun : public Object, public Description<DocumentRun>
@@ -149,18 +153,18 @@ Rich Content Document (model)
 
 		protected:
 
-			virtual Ptr<INativeImage>		LoadImageInternal(const WString& protocol, const WString& path)=0;
+			virtual Ptr<INativeImage>		ResolveImageInternal(const WString& protocol, const WString& path)=0;
 		public:
 			/// <summary>Create a document resolver.</summary>
 			/// <param name="_previousResolver">A previous resolver. When loading a resource failed, the resolver will try to invoke the previous resolver for loading the resource.</param>
 			DocumentResolver(Ptr<DocumentResolver> _previousResolver);
 			~DocumentResolver();
 
-			/// <summary>Load an image when the <see cref="vl::presentation::DocumentImageRun::source"/> of <see cref="vl::presentation::DocumentImageRun"/> is something like a protocol-prefixed uri.</summary>
+			/// <summary>Load an image when the [F:vl.presentation.DocumentImageRun.source] of [T:vl.presentation.DocumentImageRun] is something like a protocol-prefixed uri.</summary>
 			/// <returns>The loaded image. Returns null if failed to load.</returns>
 			/// <param name="protocol">The protocol.</param>
 			/// <param name="path">The path.</param>
-			Ptr<INativeImage>				LoadImage(const WString& protocol, const WString& path);
+			Ptr<INativeImage>				ResolveImage(const WString& protocol, const WString& path);
 		};
 
 		/// <summary>Represents a rich content document model.</summary>
@@ -193,26 +197,37 @@ Rich Content Document (model)
 Rich Content Document (resolver)
 ***********************************************************************/
 		
-		/// <summary>Document resolver: image loader for file protocol.</summary>
+		/// <summary>Document resolver: image loader for "file" protocol.</summary>
 		class DocumentFileProtocolResolver : public DocumentResolver
 		{
 		protected:
 			WString							workingDirectory;
 
-			Ptr<INativeImage>				LoadImageInternal(const WString& protocol, const WString& path)override;
+			Ptr<INativeImage>				ResolveImageInternal(const WString& protocol, const WString& path)override;
 		public:
 			/// <summary>Create a document resolver.</summary>
 			/// <param name="_workingDirectory">Specify a working directory when the file path is a relative path.</param>
+			/// <param name="previousResolver">The previous resolver. See <see cref="DocumentResolver"/> for details.</param>
 			DocumentFileProtocolResolver(const WString& _workingDirectory, Ptr<DocumentResolver> previousResolver=0);
+		};
+		
+		/// <summary>Document resolver: image loader for "res" protocol.</summary>
+		class DocumentResProtocolResolver : public DocumentResolver
+		{
+		protected:
+			GuiResource*					resource;
+
+			Ptr<INativeImage>				ResolveImageInternal(const WString& protocol, const WString& path)override;
+		public:
+			/// <summary>Create a document resolver.</summary>
+			/// <param name="_resource">The resource that contains images for retriving by path.</param>
+			/// <param name="previousResolver">The previous resolver. See <see cref="DocumentResolver"/> for details.</param>
+			DocumentResProtocolResolver(GuiResource* _resource, Ptr<DocumentResolver> previousResolver=0);
 		};
 
 /***********************************************************************
 Resource Structure
 ***********************************************************************/
-
-		class GuiResourceItem;
-		class GuiResourceFolder;
-		class GuiResource;
 
 		/// <summary>Resource node base.</summary>
 		class GuiResourceNodeBase : public Object
