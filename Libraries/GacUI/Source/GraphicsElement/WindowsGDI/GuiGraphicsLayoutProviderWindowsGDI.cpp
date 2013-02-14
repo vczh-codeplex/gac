@@ -39,10 +39,16 @@ Uniscribe Operations (UniscribeFragment)
 				Color											fontColor;
 				WString											text;
 				Ptr<WinFont>									fontObject;
+				vint											interactionId;
 
 				Ptr<IGuiGraphicsElement>						element;
 				IGuiGraphicsParagraph::InlineObjectProperties	inlineObjectProperties;
 				List<Ptr<UniscribeFragment>>					cachedTextFragment;
+
+				UniscribeFragment()
+					:interactionId(-1)
+				{
+				}
 
 				WString GetFingerprint()
 				{
@@ -676,7 +682,7 @@ Uniscribe Operations (UniscribeParagraph)
 				bool							built;
 
 				List<Ptr<UniscribeLine>>		lines;
-				vint								lastAvailableWidth;
+				vint							lastAvailableWidth;
 				Rect							bounds;
 
 				UniscribeParagraph()
@@ -1182,6 +1188,25 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 					return 0;
 				}
+
+				bool SetInteractionId(vint start, vint length, vint value)
+				{
+					vint fs, ss, fe, se, f1, f2;
+					SearchFragment(start, length, fs, ss, fe, se);
+					if(CutFragment(fs, ss, fe, se, f1, f2))
+					{
+						for(vint i=f1;i<=f2;i++)
+						{
+							documentFragments[i]->interactionId=value;
+						}
+						built=false;
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
 			};
 
 /***********************************************************************
@@ -1332,6 +1357,19 @@ WindowsGDIParagraph
 						}
 					}
 					return false;
+				}
+
+				bool SetInteractionId(vint start, vint length, vint value)
+				{
+					if(length==0) return true;
+					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
+					{
+						return paragraph->SetInteractionId(start, length, value);
+					}
+					else
+					{
+						return false;
+					}
 				}
 
 				vint GetHeight()override

@@ -871,8 +871,8 @@ Visitors
 				class SetPropertiesVisitor : public Object, public DocumentRun::IVisitor
 				{
 				public:
-					vint							start;
-					vint							length;
+					vint						start;
+					vint						length;
 					IGuiGraphicsParagraph*		paragraph;
 
 					SetPropertiesVisitor(vint _start, IGuiGraphicsParagraph* _paragraph)
@@ -897,6 +897,10 @@ Visitors
 								| (run->style.underline?IGuiGraphicsParagraph::Underline:0)
 								| (run->style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
 								));
+							if(run->hyperlinkId!=DocumentRun::NullHyperlinkId)
+							{
+								paragraph->SetInteractionId(start, length, run->hyperlinkId);
+							}
 							start+=length;
 						}
 					}

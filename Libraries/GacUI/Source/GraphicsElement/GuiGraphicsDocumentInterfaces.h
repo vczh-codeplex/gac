@@ -85,7 +85,7 @@ Layout Engine
 				virtual void								SetWrapLine(bool value)=0;
 				/// <summary>Get the max width for this paragraph. If there is no max width limitation, it returns -1.</summary>
 				/// <returns>The max width for this paragraph.</returns>
-				virtual vint									GetMaxWidth()=0;
+				virtual vint								GetMaxWidth()=0;
 				/// <summary>Set the max width for this paragraph. If the max width is set to -1, the max width limitation will be removed.</summary>
 				/// <param name="value">The max width.</param>
 				virtual void								SetMaxWidth(vint value)=0;
@@ -126,10 +126,16 @@ Layout Engine
 				/// <param name="length">The length of the specified range by character.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				virtual bool								ResetInlineObject(vint start, vint length)=0;
+				/// <summary>Replace the interaction id within the specified range.</summary>
+				/// <param name="start">The position of the first character of the specified range.</param>
+				/// <param name="length">The length of the specified range by character.</param>
+				/// <param name="value">The interaction id.</param>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				virtual bool								SetInteractionId(vint start, vint length, vint value=-1)=0;
 
 				/// <summary>Get the layouted height of the text. The result depends on rich styled text and the two important properties that can be set using <see cref="SetWrapLine"/> and <see cref="SetMaxWidth"/>.</summary>
 				/// <returns>The layouted height.</returns>
-				virtual vint									GetHeight()=0;
+				virtual vint								GetHeight()=0;
 				/// <summary>Render the graphics element using a specified bounds.</summary>
 				/// <param name="bounds">Bounds to decide the size and position of the binded graphics element.</param>
 				virtual void								Render(Rect bounds)=0;
