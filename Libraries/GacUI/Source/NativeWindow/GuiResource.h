@@ -62,6 +62,8 @@ Rich Content Document (model)
 		class DocumentRun : public Object, public Description<DocumentRun>
 		{
 		public:
+			static const vint				NullHyperlinkId = -1;
+
 			/// <summary>A visitor interface for <see cref="DocumentRun"/>.</summary>
 			class IVisitor : public Interface
 			{
@@ -73,8 +75,11 @@ Rich Content Document (model)
 				/// <param name="run">The run object.</param>
 				virtual void				Visit(DocumentImageRun* run)=0;
 			};
+			
+			/// <summary>Id for hyperlink. Set to -1 to make this run not a hyperlink</summary>
+			vint							hyperlinkId;
 
-			DocumentRun(){}
+			DocumentRun():hyperlinkId(NullHyperlinkId){}
 
 			/// <summary>Accept a <see cref="IVisitor"/> and trigger the selected visit operation.</summary>
 			/// <param name="visitor">The visitor.</param>
@@ -202,6 +207,7 @@ Rich Content Document (model)
 			typedef collections::Dictionary<WString, Ptr<DocumentStyle>>				StyleMap;
 			typedef collections::Dictionary<WString, Ptr<parsing::xml::XmlElement>>		TemplateMap;
 			typedef collections::Pair<FontProperties, Color>							RawStylePair;
+			typedef collections::Dictionary<vint, WString>								HyperlinkMap;
 		public:
 
 			/// <summary>All paragraphs in this document.</summary>
@@ -210,6 +216,8 @@ Rich Content Document (model)
 			StyleMap						styles;
 			/// <summary>All available templates. These will not be persistant.</summary>
 			TemplateMap						templates;
+			/// <summary>Link content. This map stores all "href" value for all hyperlinks.</summary>
+			HyperlinkMap					hyperlinkInfos;
 			
 			DocumentModel();
 
