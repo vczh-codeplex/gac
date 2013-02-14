@@ -452,6 +452,27 @@ document_serialization_visitors::DeserializeNodeVisitor
 						}
 						styleStack.RemoveAt(styleStack.Count()-1);
 					}
+					else if(node->name.value==L"a")
+					{
+						auto style=styleStack[styleStack.Count()-1];
+						WString normalStyle=L"#NormalLink";
+						WString activeStyle=L"#ActiveLink";
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"normal"))
+						{
+							normalStyle=att->value.value;
+						}
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"active"))
+						{
+							activeStyle=att->value.value;
+						}
+						style=model->GetStyle(normalStyle, style);
+						styleStack.Add(style);
+						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+						{
+							sub->Accept(this);
+						}
+						styleStack.RemoveAt(styleStack.Count()-1);
+					}
 					else
 					{
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
@@ -535,15 +556,15 @@ DocumentModel
 				if(!result.verticalAntialias && currentStyle->verticalAntialias) result.verticalAntialias=currentStyle->verticalAntialias;
 			}
 
-			if(!result.face && currentStyle->face) result.face=context.key.fontFamily;
-			if(!result.size && currentStyle->size) result.size=context.key.size;
-			if(!result.color && currentStyle->color) result.color=context.value;
-			if(!result.bold && currentStyle->bold) result.bold=context.key.bold;
-			if(!result.italic && currentStyle->italic) result.italic=context.key.italic;
-			if(!result.underline && currentStyle->underline) result.underline=context.key.underline;
-			if(!result.strikeline && currentStyle->strikeline) result.size=context.key.strikeline;
-			if(!result.antialias && currentStyle->antialias) result.antialias=context.key.antialias;
-			if(!result.verticalAntialias && currentStyle->verticalAntialias) result.verticalAntialias=context.key.verticalAntialias;
+			if(!result.face) result.face=context.key.fontFamily;
+			if(!result.size) result.size=context.key.size;
+			if(!result.color) result.color=context.value;
+			if(!result.bold) result.bold=context.key.bold;
+			if(!result.italic) result.italic=context.key.italic;
+			if(!result.underline) result.underline=context.key.underline;
+			if(!result.strikeline) result.strikeline=context.key.strikeline;
+			if(!result.antialias) result.antialias=context.key.antialias;
+			if(!result.verticalAntialias) result.verticalAntialias=context.key.verticalAntialias;
 
 			FontProperties font;
 			font.fontFamily=result.face.Value();
