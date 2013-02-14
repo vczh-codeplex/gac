@@ -77,12 +77,12 @@ DocumentResolver
 		{
 		}
 
-		Ptr<INativeImage> DocumentResolver::LoadImage(const WString& protocol, const WString& path)
+		Ptr<INativeImage> DocumentResolver::ResolveImage(const WString& protocol, const WString& path)
 		{
-			auto result=LoadImageInternal(protocol, path);
+			auto result=ResolveImageInternal(protocol, path);
 			if(!result && previousResolver)
 			{
-				result=previousResolver->LoadImage(protocol, path);
+				result=previousResolver->ResolveImage(protocol, path);
 			}
 			return result;
 		}
@@ -289,7 +289,7 @@ DocumentModel
 								{
 									WString protocol=run->source.Sub(0, index.key);
 									WString path=run->source.Sub(index.key+index.value, run->source.Length()-index.key-index.value);
-									run->image=resolver->LoadImage(protocol, path);
+									run->image=resolver->ResolveImage(protocol, path);
 								}
 							}
 						}
@@ -469,7 +469,7 @@ DocumentModel
 DocumentFileProtocolResolver
 ***********************************************************************/
 
-		Ptr<INativeImage> DocumentFileProtocolResolver::LoadImageInternal(const WString& protocol, const WString& path)
+		Ptr<INativeImage> DocumentFileProtocolResolver::ResolveImageInternal(const WString& protocol, const WString& path)
 		{
 			WString filename=path;
 			if(filename.Length()>=2 && filename[1]!=L':')
@@ -482,6 +482,21 @@ DocumentFileProtocolResolver
 		DocumentFileProtocolResolver::DocumentFileProtocolResolver(const WString& _workingDirectory, Ptr<DocumentResolver> previousResolver)
 			:DocumentResolver(previousResolver)
 			,workingDirectory(_workingDirectory)
+		{
+		}
+
+/***********************************************************************
+DocumentResProtocolResolver
+***********************************************************************/
+
+		Ptr<INativeImage> DocumentResProtocolResolver::ResolveImageInternal(const WString& protocol, const WString& path)
+		{
+			return resource->GetValueByPath(path).Cast<GuiImageData>()->GetImage();
+		}
+
+		DocumentResProtocolResolver::DocumentResProtocolResolver(GuiResource* _resource, Ptr<DocumentResolver> previousResolver)
+			:DocumentResolver(previousResolver)
+			,resource(_resource)
 		{
 		}
 

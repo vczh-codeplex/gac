@@ -1693,6 +1693,265 @@ Helpers
 #endif
 
 /***********************************************************************
+NATIVEWINDOW\GUIRESOURCE.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Resource
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_GUIRESOURCE
+#define VCZH_PRESENTATION_GUIRESOURCE
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		using namespace reflection;
+
+		class GuiResourceItem;
+		class GuiResourceFolder;
+		class GuiResource;
+
+		class DocumentTextRun;
+		class DocumentImageRun;
+
+/***********************************************************************
+Resource Image
+***********************************************************************/
+			
+		class GuiImageData : public Object
+		{
+		protected:
+			Ptr<INativeImage>				image;
+			vint							frameIndex;
+
+		public:
+			GuiImageData();
+			GuiImageData(Ptr<INativeImage> _image, vint _frameIndex);
+			~GuiImageData();
+
+			Ptr<INativeImage>				GetImage();
+			vint							GetFrameIndex();
+		};
+
+/***********************************************************************
+Rich Content Document (model)
+***********************************************************************/
+
+		class DocumentRun : public Object, public Description<DocumentRun>
+		{
+		public:
+			class IVisitor : public Interface
+			{
+			public:
+				virtual void				Visit(DocumentTextRun* run)=0;
+				virtual void				Visit(DocumentImageRun* run)=0;
+			};
+
+			DocumentRun(){}
+
+			virtual void					Accept(IVisitor* visitor)=0;
+		};
+				
+		class DocumentTextRun : public DocumentRun, public Description<DocumentTextRun>
+		{
+		public:
+			FontProperties					style;
+			Color							color;
+			WString							text;
+
+			DocumentTextRun(){}
+
+			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+		};
+				
+		class DocumentInlineObjectRun : public DocumentRun, public Description<DocumentInlineObjectRun>
+		{
+		public:
+			Size							size;
+			vint							baseline;
+
+			DocumentInlineObjectRun():baseline(-1){}
+		};
+				
+		class DocumentImageRun : public DocumentInlineObjectRun, public Description<DocumentImageRun>
+		{
+		public:
+			Ptr<INativeImage>				image;
+			vint							frameIndex;
+			WString							source;
+
+			DocumentImageRun():frameIndex(0){}
+
+			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+		};
+
+		//--------------------------------------------------------------------------
+
+		class DocumentLine : public Object, public Description<DocumentLine>
+		{
+			typedef collections::List<Ptr<DocumentRun>>			RunList;
+		public:
+			RunList							runs;
+		};
+
+		class DocumentParagraph : public Object, public Description<DocumentParagraph>
+		{
+			typedef collections::List<Ptr<DocumentLine>>		LineList;
+		public:
+			LineList						lines;
+		};
+
+		class DocumentResolver : public Object
+		{
+		private:
+			Ptr<DocumentResolver>			previousResolver;
+
+		protected:
+
+			virtual Ptr<INativeImage>		ResolveImageInternal(const WString& protocol, const WString& path)=0;
+		public:
+			DocumentResolver(Ptr<DocumentResolver> _previousResolver);
+			~DocumentResolver();
+
+			Ptr<INativeImage>				ResolveImage(const WString& protocol, const WString& path);
+		};
+
+		class DocumentModel : public Object, public Description<DocumentModel>
+		{
+			typedef collections::List<Ptr<DocumentParagraph>>	ParagraphList;
+		public:
+
+			ParagraphList					paragraphs;
+
+			static Ptr<DocumentModel>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<DocumentResolver> resolver);
+
+			static Ptr<DocumentModel>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory);
+
+			Ptr<parsing::xml::XmlDocument>	SaveToXml();
+		};
+
+/***********************************************************************
+Rich Content Document (resolver)
+***********************************************************************/
+		
+		class DocumentFileProtocolResolver : public DocumentResolver
+		{
+		protected:
+			WString							workingDirectory;
+
+			Ptr<INativeImage>				ResolveImageInternal(const WString& protocol, const WString& path)override;
+		public:
+			DocumentFileProtocolResolver(const WString& _workingDirectory, Ptr<DocumentResolver> previousResolver=0);
+		};
+		
+		class DocumentResProtocolResolver : public DocumentResolver
+		{
+		protected:
+			GuiResource*					resource;
+
+			Ptr<INativeImage>				ResolveImageInternal(const WString& protocol, const WString& path)override;
+		public:
+			DocumentResProtocolResolver(GuiResource* _resource, Ptr<DocumentResolver> previousResolver=0);
+		};
+
+/***********************************************************************
+Resource Structure
+***********************************************************************/
+
+		class GuiResourceNodeBase : public Object
+		{
+			friend class GuiResourceFolder;
+		protected:
+			GuiResourceFolder*						parent;
+			WString									name;
+			
+		public:
+			GuiResourceNodeBase();
+			~GuiResourceNodeBase();
+
+			GuiResourceFolder*						GetParent();
+			const WString&							GetName();
+		};
+		
+		class GuiResourceItem : public GuiResourceNodeBase
+		{
+			friend class GuiResourceFolder;
+		protected:
+			Ptr<Object>								content;
+			
+		public:
+			GuiResourceItem();
+			~GuiResourceItem();
+			
+			Ptr<Object>								GetContent();
+			void									SetContent(Ptr<Object> value);
+
+			Ptr<GuiImageData>						AsImage();
+			Ptr<parsing::xml::XmlDocument>			AsXml();
+			Ptr<ObjectBox<WString>>					AsString();
+		};
+		
+		class GuiResourceFolder : public GuiResourceNodeBase
+		{
+			typedef collections::Dictionary<WString, Ptr<GuiResourceItem>>		ItemMap;
+			typedef collections::Dictionary<WString, Ptr<GuiResourceFolder>>	FolderMap;
+			typedef collections::List<Ptr<GuiResourceItem>>						ItemList;
+			typedef collections::List<Ptr<GuiResourceFolder>>					FolderList;
+		protected:
+			ItemMap									items;
+			FolderMap								folders;
+		public:
+			GuiResourceFolder();
+			~GuiResourceFolder();
+
+			const ItemList&							GetItems();
+			Ptr<GuiResourceItem>					GetItem(const WString& name);
+			bool									AddItem(const WString& name, Ptr<GuiResourceItem> item);
+			Ptr<GuiResourceItem>					RemoveItem(const WString& name);
+			void									ClearItems();
+			
+			const FolderList&						GetFolders();
+			Ptr<GuiResourceFolder>					GetFolder(const WString& name);
+			bool									AddFolder(const WString& name, Ptr<GuiResourceFolder> folder);
+			Ptr<GuiResourceFolder>					RemoveFolder(const WString& name);
+			void									ClearFolders();
+
+			Ptr<Object>								GetValueByPath(const WString& path);
+
+			void									LoadResourceFolderXml(const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable);
+		};
+
+/***********************************************************************
+Resource Loader
+***********************************************************************/
+		
+		class GuiResource : public GuiResourceFolder
+		{
+		public:
+			GuiResource();
+			~GuiResource();
+
+			void									LoadResourceXml(const WString& filePath);
+		};
+
+/***********************************************************************
+Resource Loader
+***********************************************************************/
+
+		extern WString								GetFolderPath(const WString& filePath);
+		extern WString								GetFileName(const WString& filePath);
+	}
+}
+
+#endif
+
+/***********************************************************************
 GRAPHICSELEMENT\GUIGRAPHICSELEMENT.H
 ***********************************************************************/
 /***********************************************************************
@@ -2168,97 +2427,6 @@ Colorized Plain Text (element)
 			};
 
 /***********************************************************************
-Rich Content Document (model)
-***********************************************************************/
-
-			namespace text
-			{
-				class DocumentTextRun;
-				class DocumentImageRun;
-
-				class DocumentRun : public Object, public Description<DocumentRun>
-				{
-				public:
-					class IVisitor : public Interface
-					{
-					public:
-						virtual void				Visit(DocumentTextRun* run)=0;
-						virtual void				Visit(DocumentImageRun* run)=0;
-					};
-
-					DocumentRun(){}
-
-					virtual void					Accept(IVisitor* visitor)=0;
-				};
-				
-				class DocumentTextRun : public DocumentRun, public Description<DocumentTextRun>
-				{
-				public:
-					FontProperties					style;
-					Color							color;
-					WString							text;
-
-					DocumentTextRun(){}
-
-					void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
-				};
-				
-				class DocumentInlineObjectRun : public DocumentRun, public Description<DocumentInlineObjectRun>
-				{
-				public:
-					Size							size;
-					vint							baseline;
-
-					DocumentInlineObjectRun():baseline(-1){}
-				};
-				
-				class DocumentImageRun : public DocumentInlineObjectRun, public Description<DocumentImageRun>
-				{
-				public:
-					Ptr<INativeImage>				image;
-					vint							frameIndex;
-					WString							source;
-
-					DocumentImageRun():frameIndex(0){}
-
-					void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
-				};
-
-				//--------------------------------------------------------------------------
-
-				class DocumentLine : public Object, public Description<DocumentLine>
-				{
-					typedef collections::List<Ptr<DocumentRun>>			RunList;
-				public:
-					RunList							runs;
-				};
-
-				class DocumentParagraph : public Object, public Description<DocumentParagraph>
-				{
-					typedef collections::List<Ptr<DocumentLine>>		LineList;
-				public:
-					LineList						lines;
-				};
-
-				class DocumentModel : public Object, public Description<DocumentModel>
-				{
-					typedef collections::List<Ptr<DocumentParagraph>>	ParagraphList;
-				public:
-					ParagraphList					paragraphs;
-
-					static Ptr<DocumentModel>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory);
-
-					Ptr<parsing::xml::XmlDocument>	SaveToXml();
-				};
-
-				struct ParagraphCache
-				{
-					WString							fullText;
-					Ptr<IGuiGraphicsParagraph>		graphicsParagraph;
-				};
-			}
-
-/***********************************************************************
 Rich Content Document (element)
 ***********************************************************************/
 
@@ -2270,38 +2438,43 @@ Rich Content Document (element)
 				{
 					DEFINE_GUI_GRAPHICS_RENDERER(GuiDocumentElement, GuiDocumentElementRenderer, IGuiGraphicsRenderTarget)
 				protected:
+					struct ParagraphCache
+					{
+						WString							fullText;
+						Ptr<IGuiGraphicsParagraph>		graphicsParagraph;
+					};
 
-					typedef collections::Array<Ptr<text::ParagraphCache>>		ParagraphCacheArray;
+					typedef collections::Array<Ptr<ParagraphCache>>		ParagraphCacheArray;
 				protected:
 					vint									paragraphDistance;
 					vint									lastMaxWidth;
 					vint									cachedTotalHeight;
-					IGuiGraphicsLayoutProvider*			layoutProvider;
-					ParagraphCacheArray					paragraphCaches;
+					IGuiGraphicsLayoutProvider*				layoutProvider;
+					ParagraphCacheArray						paragraphCaches;
 					collections::Array<vint>				paragraphHeights;
 
-					void					InitializeInternal();
-					void					FinalizeInternal();
-					void					RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget);
+					void									InitializeInternal();
+					void									FinalizeInternal();
+					void									RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget);
 				public:
 					GuiDocumentElementRenderer();
 
-					void					Render(Rect bounds)override;
-					void					OnElementStateChanged()override;
+					void									Render(Rect bounds)override;
+					void									OnElementStateChanged()override;
 
-					void					NotifyParagraphUpdated(vint index);
+					void									NotifyParagraphUpdated(vint index);
 				};
 
 			protected:
-				Ptr<text::DocumentModel>	document;
+				Ptr<DocumentModel>							document;
 
 				GuiDocumentElement();
 			public:
 				~GuiDocumentElement();
 				
-				Ptr<text::DocumentModel>	GetDocument();
-				void						SetDocument(Ptr<text::DocumentModel> value);
-				void						NotifyParagraphUpdated(vint index);
+				Ptr<DocumentModel>							GetDocument();
+				void										SetDocument(Ptr<DocumentModel> value);
+				void										NotifyParagraphUpdated(vint index);
 			};
 		}
 	}
@@ -3767,21 +3940,6 @@ Basic Construction
 				{
 				}
 			};
-			
-			class GuiImageData : public Object
-			{
-			protected:
-				Ptr<INativeImage>				image;
-				vint								frameIndex;
-
-			public:
-				GuiImageData();
-				GuiImageData(Ptr<INativeImage> _image, vint _frameIndex);
-				~GuiImageData();
-
-				Ptr<INativeImage>				GetImage();
-				vint								GetFrameIndex();
-			};
 
 /***********************************************************************
 Label
@@ -4162,121 +4320,6 @@ List interface common implementation
 				static const bool							CanResize = false;
 			};
 		}
-	}
-}
-
-#endif
-
-/***********************************************************************
-NATIVEWINDOW\GUIRESOURCE.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-GacUI::Resource
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_GUIRESOURCE
-#define VCZH_PRESENTATION_GUIRESOURCE
-
-
-namespace vl
-{
-	namespace presentation
-	{
-
-/***********************************************************************
-Resource Structure
-***********************************************************************/
-
-		class GuiResourceItem;
-		class GuiResourceFolder;
-		class GuiResource;
-
-		class GuiResourceNodeBase : public Object
-		{
-			friend class GuiResourceFolder;
-		protected:
-			GuiResourceFolder*						parent;
-			WString									name;
-			
-		public:
-			GuiResourceNodeBase();
-			~GuiResourceNodeBase();
-
-			GuiResourceFolder*						GetParent();
-			const WString&							GetName();
-		};
-		
-		class GuiResourceItem : public GuiResourceNodeBase
-		{
-			friend class GuiResourceFolder;
-		protected:
-			Ptr<Object>								content;
-			
-		public:
-			GuiResourceItem();
-			~GuiResourceItem();
-			
-			Ptr<Object>								GetContent();
-			void									SetContent(Ptr<Object> value);
-
-			Ptr<controls::GuiImageData>				AsImage();
-			Ptr<parsing::xml::XmlDocument>			AsXml();
-			Ptr<ObjectBox<WString>>					AsString();
-		};
-		
-		class GuiResourceFolder : public GuiResourceNodeBase
-		{
-			typedef collections::Dictionary<WString, Ptr<GuiResourceItem>>		ItemMap;
-			typedef collections::Dictionary<WString, Ptr<GuiResourceFolder>>	FolderMap;
-			typedef collections::List<Ptr<GuiResourceItem>>						ItemList;
-			typedef collections::List<Ptr<GuiResourceFolder>>					FolderList;
-		protected:
-			ItemMap									items;
-			FolderMap								folders;
-		public:
-			GuiResourceFolder();
-			~GuiResourceFolder();
-
-			const ItemList&							GetItems();
-			Ptr<GuiResourceItem>					GetItem(const WString& name);
-			bool									AddItem(const WString& name, Ptr<GuiResourceItem> item);
-			Ptr<GuiResourceItem>					RemoveItem(const WString& name);
-			void									ClearItems();
-			
-			const FolderList&						GetFolders();
-			Ptr<GuiResourceFolder>					GetFolder(const WString& name);
-			bool									AddFolder(const WString& name, Ptr<GuiResourceFolder> folder);
-			Ptr<GuiResourceFolder>					RemoveFolder(const WString& name);
-			void									ClearFolders();
-
-			Ptr<Object>								GetValueByPath(const WString& path);
-
-			void									LoadResourceFolderXml(const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable);
-		};
-
-/***********************************************************************
-Resource Loader
-***********************************************************************/
-		
-		class GuiResource : public GuiResourceFolder
-		{
-		public:
-			GuiResource();
-			~GuiResource();
-
-			void									LoadResourceXml(const WString& filePath);
-		};
-
-/***********************************************************************
-Resource Loader
-***********************************************************************/
-
-		extern WString								GetFolderPath(const WString& filePath);
-		extern WString								GetFileName(const WString& filePath);
 	}
 }
 
@@ -8746,7 +8789,7 @@ Menu Button
 				void														SetSubMenuExisting(bool value)override;
 				void														SetSubMenuOpening(bool value)override;
 				controls::GuiButton*										GetSubMenuHost()override;
-				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
 				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
@@ -8787,7 +8830,7 @@ Menu Button
 				void														SetSubMenuExisting(bool value)override;
 				void														SetSubMenuOpening(bool value)override;
 				controls::GuiButton*										GetSubMenuHost()override;
-				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
 				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
@@ -8993,7 +9036,7 @@ Toolstrip Button
 				void														SetSubMenuExisting(bool value)override;
 				void														SetSubMenuOpening(bool value)override;
 				controls::GuiButton*										GetSubMenuHost()override;
-				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
 				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
@@ -9322,7 +9365,7 @@ List Control Buttons
 				void														SetSubMenuExisting(bool value)override;
 				void														SetSubMenuOpening(bool value)override;
 				controls::GuiButton*										GetSubMenuHost()override;
-				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
 				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														SetColumnSortingState(controls::GuiListViewColumnHeader::ColumnSortingState value)override;
@@ -9936,7 +9979,7 @@ Menu Button
 				void														SetSubMenuExisting(bool value)override;
 				void														SetSubMenuOpening(bool value)override;
 				controls::GuiButton*										GetSubMenuHost()override;
-				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
 				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
@@ -9977,7 +10020,7 @@ Menu Button
 				void														SetSubMenuExisting(bool value)override;
 				void														SetSubMenuOpening(bool value)override;
 				controls::GuiButton*										GetSubMenuHost()override;
-				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
 				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
@@ -10134,7 +10177,7 @@ Toolstrip Button
 				void														SetSubMenuExisting(bool value)override;
 				void														SetSubMenuOpening(bool value)override;
 				controls::GuiButton*										GetSubMenuHost()override;
-				void														SetImage(Ptr<controls::GuiImageData> value)override;
+				void														SetImage(Ptr<GuiImageData> value)override;
 				void														SetShortcutText(const WString& value)override;
 				compositions::GuiSubComponentMeasurer::IMeasuringSource*	GetMeasuringSource()override;
 				void														Transfer(controls::GuiButton::ControlState value)override;
