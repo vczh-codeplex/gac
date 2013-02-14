@@ -10,6 +10,7 @@ namespace vl
 		using namespace collections;
 		using namespace parsing::tabling;
 		using namespace parsing::xml;
+		using namespace regex;
 
 		WString GetFolderPath(const WString& filePath)
 		{
@@ -231,18 +232,62 @@ document_serialization_visitors::DeserializeNodeVisitor
 			class DeserializeNodeVisitor : public XmlNode::IVisitor
 			{
 			public:
+				struct TemplateInfo
+				{
+					Dictionary<WString, WString>	attributes;
+					XmlElement*						templateElement;
+					XmlElement*						contentElement;
+
+					TemplateInfo()
+						:templateElement(0)
+						,contentElement(0)
+					{
+					}
+				};
+
 				List<Pair<FontProperties, Color>>	styleStack;
 				Ptr<DocumentModel>					model;
 				Ptr<DocumentParagraph>				paragraph;
 				Ptr<DocumentLine>					line;
 				Ptr<DocumentResolver>				resolver;
+				Ptr<TemplateInfo>					templateInfo;
+				Regex								regexAttributeApply;
 
 				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraph> _paragraph, Ptr<DocumentResolver> _resolver)
 					:model(_model)
 					,paragraph(_paragraph)
 					,resolver(_resolver)
+					,regexAttributeApply(L"/{@(<value>[^{}]+)/}")
 				{
 					styleStack.Add(Pair<FontProperties, Color>(GetCurrentController()->ResourceService()->GetDefaultFont(), Color()));
+				}
+
+				WString TranslateAttribute(const WString& value)
+				{
+					if(templateInfo)
+					{
+						WString result;
+						RegexMatch::List matches;
+						regexAttributeApply.Cut(value, false, matches);
+						FOREACH(RegexMatch::Ref, match, matches)
+						{
+							if(match->Success())
+							{
+								WString name=match->Groups()[L"value"].Get(0).Value();
+								vint index=templateInfo->attributes.Keys().IndexOf(name);
+								result+=(index==-1?match->Result().Value():templateInfo->attributes.Values().Get(index));
+							}
+							else
+							{
+								result+=match->Result().Value();
+							}
+						}
+						return result;
+					}
+					else
+					{
+						return value;
+					}
 				}
 
 				void PrintText(const WString& text)
@@ -261,7 +306,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 
 				void Visit(XmlText* node)override
 				{
-					PrintText(node->content.value);
+					PrintText(TranslateAttribute(node->content.value));
 				}
 
 				void Visit(XmlCData* node)override
@@ -294,7 +339,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 						Ptr<DocumentImageRun> run=new DocumentImageRun;
 						if(Ptr<XmlAttribute> source=XmlGetAttribute(node, L"source"))
 						{
-							run->source=source->value.value;
+							run->source=TranslateAttribute(source->value.value);
 							Pair<vint, vint> index=INVLOC.FindFirst(run->source, L"://", Locale::IgnoreCase);
 							if(index.key!=-1)
 							{
@@ -313,19 +358,19 @@ document_serialization_visitors::DeserializeNodeVisitor
 							{
 								if(att->name.value==L"width")
 								{
-									run->size.x=wtoi(att->value.value);
+									run->size.x=wtoi(TranslateAttribute(att->value.value));
 								}
 								else if(att->name.value==L"height")
 								{
-									run->size.y=wtoi(att->value.value);
+									run->size.y=wtoi(TranslateAttribute(att->value.value));
 								}
 								else if(att->name.value==L"baseline")
 								{
-									run->baseline=wtoi(att->value.value);
+									run->baseline=wtoi(TranslateAttribute(att->value.value));
 								}
 								else if(att->name.value==L"frameIndex")
 								{
-									run->frameIndex=wtoi(att->value.value);
+									run->frameIndex=wtoi(TranslateAttribute(att->value.value));
 								}
 							}
 						}
@@ -338,15 +383,15 @@ document_serialization_visitors::DeserializeNodeVisitor
 						{
 							if(att->name.value==L"face")
 							{
-								style.key.fontFamily=att->value.value;
+								style.key.fontFamily=TranslateAttribute(att->value.value);
 							}
 							else if(att->name.value==L"size")
 							{
-								style.key.size=wtoi(att->value.value);
+								style.key.size=wtoi(TranslateAttribute(att->value.value));
 							}
 							else if(att->name.value==L"color")
 							{
-								style.value=Color::Parse(att->value.value);
+								style.value=Color::Parse(TranslateAttribute(att->value.value));
 							}
 						}
 						styleStack.Add(style);
@@ -442,7 +487,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 						WString styleName;
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"style"))
 						{
-							styleName=att->value.value;
+							styleName=TranslateAttribute(att->value.value);
 						}
 						style=model->GetStyle(styleName, style);
 						styleStack.Add(style);
@@ -459,11 +504,11 @@ document_serialization_visitors::DeserializeNodeVisitor
 						WString activeStyle=L"#ActiveLink";
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"normal"))
 						{
-							normalStyle=att->value.value;
+							normalStyle=TranslateAttribute(att->value.value);
 						}
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"active"))
 						{
-							activeStyle=att->value.value;
+							activeStyle=TranslateAttribute(att->value.value);
 						}
 						style=model->GetStyle(normalStyle, style);
 						styleStack.Add(style);
@@ -473,11 +518,46 @@ document_serialization_visitors::DeserializeNodeVisitor
 						}
 						styleStack.RemoveAt(styleStack.Count()-1);
 					}
+					else if(node->name.value==L"template-content")
+					{
+						if(templateInfo && templateInfo->contentElement)
+						{
+							Ptr<TemplateInfo> info=templateInfo;
+							templateInfo=0;
+							FOREACH(Ptr<XmlNode>, sub, info->contentElement->subNodes)
+							{
+								sub->Accept(this);
+							}
+							templateInfo=info;
+						}
+					}
 					else
 					{
-						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+						vint index=model->templates.Keys().IndexOf(node->name.value);
+						if(index==-1)
 						{
-							sub->Accept(this);
+							FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+							{
+								sub->Accept(this);
+							}
+						}
+						else
+						{
+							Ptr<TemplateInfo> newInfo=new TemplateInfo;
+							newInfo->templateElement=model->templates.Values().Get(index).Obj();
+							newInfo->contentElement=node;
+							FOREACH(Ptr<XmlAttribute>, att, newInfo->contentElement->attributes)
+							{
+								newInfo->attributes.Add(att->name.value, TranslateAttribute(att->value.value));
+							}
+
+							Ptr<TemplateInfo> info=templateInfo;
+							templateInfo=newInfo;
+							FOREACH(Ptr<XmlNode>, sub, newInfo->templateElement->subNodes)
+							{
+								sub->Accept(this);
+							}
+							templateInfo=info;
 						}
 					}
 				}
@@ -707,53 +787,6 @@ DocumentModel
 							Ptr<XmlElement> line=new XmlElement;
 							line->name.value=L"br";
 							paragraph->subNodes.Add(line);
-						}
-					}
-				}
-			}
-			{
-				Ptr<XmlElement> stylesElement=new XmlElement;
-				stylesElement->name.value=L"Styles";
-				doc->subNodes.Add(stylesElement);
-
-				for(vint i=0;i<styles.Count();i++)
-				{
-					WString name=styles.Keys()[i];
-					if(name.Length()>0 && name[0]==L'#') continue;
-
-					Ptr<DocumentStyle> style=styles.Values().Get(i);
-					Ptr<XmlElement> styleElement=new XmlElement;
-					styleElement->name.value=L"Style";
-					stylesElement->subNodes.Add(styleElement);
-
-					XmlElementWriter(styleElement).Attribute(L"name", name);
-					if(style->parentStyleName!=L"")
-					{
-						XmlElementWriter(styleElement).Attribute(L"parent", style->parentStyleName);
-					}
-
-					if(style->face) XmlElementWriter(styleElement).Element(L"face").Text(style->face.Value());
-					if(style->size) XmlElementWriter(styleElement).Element(L"size").Text(itow(style->size.Value()));
-					if(style->color) XmlElementWriter(styleElement).Element(L"color").Text(style->color.Value().ToString());
-					if(style->bold) XmlElementWriter(styleElement).Element(L"bold").Text(style->bold.Value()?L"true":L"false");
-					if(style->italic) XmlElementWriter(styleElement).Element(L"italic").Text(style->italic.Value()?L"true":L"false");
-					if(style->underline) XmlElementWriter(styleElement).Element(L"underline").Text(style->underline.Value()?L"true":L"false");
-					if(style->strikeline) XmlElementWriter(styleElement).Element(L"strikeline").Text(style->strikeline.Value()?L"true":L"false");
-					if(style->antialias && style->verticalAntialias)
-					{
-						bool h=style->antialias;
-						bool v=style->verticalAntialias;
-						if(!h)
-						{
-							XmlElementWriter(styleElement).Element(L"antialias").Text(L"no");
-						}
-						else if(!v)
-						{
-							XmlElementWriter(styleElement).Element(L"antialias").Text(L"default");
-						}
-						else
-						{
-							XmlElementWriter(styleElement).Element(L"antialias").Text(L"vertical");
 						}
 					}
 				}
