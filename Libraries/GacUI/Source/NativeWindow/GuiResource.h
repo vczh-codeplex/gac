@@ -167,14 +167,50 @@ Rich Content Document (model)
 			Ptr<INativeImage>				ResolveImage(const WString& protocol, const WString& path);
 		};
 
+		//--------------------------------------------------------------------------
+
+		class DocumentStyle : public Object
+		{
+		public:
+			/// <summary>Parent style name, could be #Default, #Context, #NormalLink, #ActiveLink or style name of others</summary>
+			WString							parentStyleName;
+
+			/// <summary>Font face.</summary>
+			Nullable<WString>				face;
+			/// <summary>Font size.</summary>
+			Nullable<vint>					size;
+			/// <summary>Font color.</summary>
+			Nullable<Color>					color;
+			/// <summary>Bold.</summary>
+			Nullable<bool>					bold;
+			/// <summary>Italic.</summary>
+			Nullable<bool>					italic;
+			/// <summary>Underline.</summary>
+			Nullable<bool>					underline;
+			/// <summary>Strikeline.</summary>
+			Nullable<bool>					strikeline;
+			/// <summary>Antialias.</summary>
+			Nullable<bool>					antialias;
+			/// <summary>Vertical antialias.</summary>
+			Nullable<bool>					verticalAntialias;
+		};
+
 		/// <summary>Represents a rich content document model.</summary>
 		class DocumentModel : public Object, public Description<DocumentModel>
 		{
-			typedef collections::List<Ptr<DocumentParagraph>>	ParagraphList;
+			typedef collections::List<Ptr<DocumentParagraph>>				ParagraphList;
+			typedef collections::Dictionary<WString, Ptr<DocumentStyle>>	StyleMap;
+			typedef collections::Pair<FontProperties, Color>				RawStylePair;
 		public:
 
 			/// <summary>All paragraphs in this document.</summary>
 			ParagraphList					paragraphs;
+			/// <summary>All available styles. All styles whose name begins with # will not be persistant.</summary>
+			StyleMap						styles;
+			
+			DocumentModel();
+
+			RawStylePair					GetStyle(const WString& styleName, const RawStylePair& context);
 
 			/// <summary>Load a document model from an xml.</summary>
 			/// <returns>The loaded document model.</returns>
