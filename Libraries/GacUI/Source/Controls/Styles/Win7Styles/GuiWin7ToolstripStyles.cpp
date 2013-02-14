@@ -273,7 +273,7 @@ Win7ToolstripButtonStyle
 				return subMenuHost;
 			}
 
-			void Win7ToolstripButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
+			void Win7ToolstripButtonStyle::SetImage(Ptr<GuiImageData> value)
 			{
 				if(value)
 				{

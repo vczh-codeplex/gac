@@ -363,7 +363,7 @@ Win7ListViewColumnHeaderStyle
 				return dropdownButton;
 			}
 
-			void Win7ListViewColumnHeaderStyle::SetImage(Ptr<controls::GuiImageData> value)
+			void Win7ListViewColumnHeaderStyle::SetImage(Ptr<GuiImageData> value)
 			{
 			}
 

@@ -9,12 +9,202 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_GUIRESOURCE
 #define VCZH_PRESENTATION_GUIRESOURCE
 
-#include "..\Controls\GuiBasicControls.h"
+#include "GuiNativeWindow.h"
 
 namespace vl
 {
 	namespace presentation
 	{
+		using namespace reflection;
+
+/***********************************************************************
+Resource Image
+***********************************************************************/
+			
+		/// <summary>
+		/// Represnets an image to display.
+		/// </summary>
+		class GuiImageData : public Object
+		{
+		protected:
+			Ptr<INativeImage>				image;
+			vint							frameIndex;
+
+		public:
+			/// <summary>Create an empty image data.</summary>
+			GuiImageData();
+			/// <summary>Create an image data with a specified image and a frame index.</summary>
+			/// <param name="_image">The specified image.</param>
+			/// <param name="_frameIndex">The specified frame index.</param>
+			GuiImageData(Ptr<INativeImage> _image, vint _frameIndex);
+			~GuiImageData();
+
+			/// <summary>Get the specified image.</summary>
+			/// <returns>The specified image.</returns>
+			Ptr<INativeImage>				GetImage();
+			/// <summary>Get the specified frame index.</summary>
+			/// <returns>The specified frame index.</returns>
+			vint							GetFrameIndex();
+		};
+
+/***********************************************************************
+Rich Content Document (model)
+***********************************************************************/
+
+		class DocumentTextRun;
+		class DocumentImageRun;
+
+		/// <summary>Pepresents a logical run of a rich content document.</summary>
+		class DocumentRun : public Object, public Description<DocumentRun>
+		{
+		public:
+			/// <summary>A visitor interface for <see cref="DocumentRun"/>.</summary>
+			class IVisitor : public Interface
+			{
+			public:
+				/// <summary>Visit operation for <see cref="DocumentTextRun"/>.</summary>
+				/// <param name="run">The run object.</param>
+				virtual void				Visit(DocumentTextRun* run)=0;
+				/// <summary>Visit operation for <see cref="DocumentImageRun"/>.</summary>
+				/// <param name="run">The run object.</param>
+				virtual void				Visit(DocumentImageRun* run)=0;
+			};
+
+			DocumentRun(){}
+
+			/// <summary>Accept a <see cref="IVisitor"/> and trigger the selected visit operation.</summary>
+			/// <param name="visitor">The visitor.</param>
+			virtual void					Accept(IVisitor* visitor)=0;
+		};
+				
+		/// <summary>Pepresents a text run.</summary>
+		class DocumentTextRun : public DocumentRun, public Description<DocumentTextRun>
+		{
+		public:
+			/// <summary>Run font and style.</summary>
+			FontProperties					style;
+			/// <summary>Run color.</summary>
+			Color							color;
+			/// <summary>Run text.</summary>
+			WString							text;
+
+			DocumentTextRun(){}
+
+			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+		};
+				
+		/// <summary>Pepresents a inline object run.</summary>
+		class DocumentInlineObjectRun : public DocumentRun, public Description<DocumentInlineObjectRun>
+		{
+		public:
+			/// <summary>Size of the inline object.</summary>
+			Size							size;
+			/// <summary>Baseline of the inline object.</summary>
+			vint							baseline;
+
+			DocumentInlineObjectRun():baseline(-1){}
+		};
+				
+		/// <summary>Pepresents a image run.</summary>
+		class DocumentImageRun : public DocumentInlineObjectRun, public Description<DocumentImageRun>
+		{
+		public:
+			/// <summary>The image.</summary>
+			Ptr<INativeImage>				image;
+			/// <summary>The frame index.</summary>
+			vint							frameIndex;
+			/// <summary>The image source string.</summary>
+			WString							source;
+
+			DocumentImageRun():frameIndex(0){}
+
+			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+		};
+
+		//--------------------------------------------------------------------------
+
+		/// <summary>Represents a logical line of a rich content document.</summary>
+		class DocumentLine : public Object, public Description<DocumentLine>
+		{
+			typedef collections::List<Ptr<DocumentRun>>			RunList;
+		public:
+			/// <summary>All runs in this paragraph.</summary>
+			RunList							runs;
+		};
+
+		/// <summary>Represents a logical paragraph of a rich content document.</summary>
+		class DocumentParagraph : public Object, public Description<DocumentParagraph>
+		{
+			typedef collections::List<Ptr<DocumentLine>>		LineList;
+		public:
+			/// <summary>All lines in this paragraph.</summary>
+			LineList						lines;
+		};
+
+		/// <summary>Represents a symbol resolver for loading a document model.</summary>
+		class DocumentResolver : public Object
+		{
+		private:
+			Ptr<DocumentResolver>			previousResolver;
+
+		protected:
+
+			virtual Ptr<INativeImage>		LoadImageInternal(const WString& protocol, const WString& path)=0;
+		public:
+			/// <summary>Create a document resolver.</summary>
+			/// <param name="_previousResolver">A previous resolver. When loading a resource failed, the resolver will try to invoke the previous resolver for loading the resource.</param>
+			DocumentResolver(Ptr<DocumentResolver> _previousResolver);
+			~DocumentResolver();
+
+			/// <summary>Load an image when the <see cref="vl::presentation::DocumentImageRun::source"/> of <see cref="vl::presentation::DocumentImageRun"/> is something like a protocol-prefixed uri.</summary>
+			/// <returns>The loaded image. Returns null if failed to load.</returns>
+			/// <param name="protocol">The protocol.</param>
+			/// <param name="path">The path.</param>
+			Ptr<INativeImage>				LoadImage(const WString& protocol, const WString& path);
+		};
+
+		/// <summary>Represents a rich content document model.</summary>
+		class DocumentModel : public Object, public Description<DocumentModel>
+		{
+			typedef collections::List<Ptr<DocumentParagraph>>	ParagraphList;
+		public:
+
+			/// <summary>All paragraphs in this document.</summary>
+			ParagraphList					paragraphs;
+
+			/// <summary>Load a document model from an xml.</summary>
+			/// <returns>The loaded document model.</returns>
+			/// <param name="xml">The xml document.</param>
+			/// <param name="resolver">A document resolver to resolve symbols in non-embedded objects like image.</param>
+			static Ptr<DocumentModel>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<DocumentResolver> resolver);
+
+			/// <summary>Load a document model from an xml.</summary>
+			/// <returns>The loaded document model.</returns>
+			/// <param name="xml">The xml document.</param>
+			/// <param name="workingDirectory">The working directory for loading image files.</param>
+			static Ptr<DocumentModel>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory);
+
+			/// <summary>Save a document model to an xml.</summary>
+			/// <returns>The saved xml document.</returns>
+			Ptr<parsing::xml::XmlDocument>	SaveToXml();
+		};
+
+/***********************************************************************
+Rich Content Document (resolver)
+***********************************************************************/
+		
+		/// <summary>Document resolver: image loader for file protocol.</summary>
+		class DocumentFileProtocolResolver : public DocumentResolver
+		{
+		protected:
+			WString							workingDirectory;
+
+			Ptr<INativeImage>				LoadImageInternal(const WString& protocol, const WString& path)override;
+		public:
+			/// <summary>Create a document resolver.</summary>
+			/// <param name="_workingDirectory">Specify a working directory when the file path is a relative path.</param>
+			DocumentFileProtocolResolver(const WString& _workingDirectory, Ptr<DocumentResolver> previousResolver=0);
+		};
 
 /***********************************************************************
 Resource Structure
@@ -65,7 +255,7 @@ Resource Structure
 
 			/// <summary>Get the contained object as an image.</summary>
 			/// <returns>The contained object.</returns>
-			Ptr<controls::GuiImageData>				AsImage();
+			Ptr<GuiImageData>						AsImage();
 			/// <summary>Get the contained object as an xml.</summary>
 			/// <returns>The contained object.</returns>
 			Ptr<parsing::xml::XmlDocument>			AsXml();

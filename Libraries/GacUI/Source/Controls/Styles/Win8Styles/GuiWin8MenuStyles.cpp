@@ -245,7 +245,7 @@ Win8MenuBarButtonStyle
 				return 0;
 			}
 
-			void Win8MenuBarButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
+			void Win8MenuBarButtonStyle::SetImage(Ptr<GuiImageData> value)
 			{
 			}
 
@@ -409,7 +409,7 @@ Win8MenuItemButtonStyle
 				return 0;
 			}
 
-			void Win8MenuItemButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
+			void Win8MenuItemButtonStyle::SetImage(Ptr<GuiImageData> value)
 			{
 				if(value)
 				{
