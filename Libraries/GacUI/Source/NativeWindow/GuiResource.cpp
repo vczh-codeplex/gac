@@ -252,12 +252,14 @@ document_serialization_visitors::DeserializeNodeVisitor
 				Ptr<DocumentResolver>				resolver;
 				Ptr<TemplateInfo>					templateInfo;
 				Regex								regexAttributeApply;
+				vint								currentHyperlinkId;
 
 				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraph> _paragraph, Ptr<DocumentResolver> _resolver)
 					:model(_model)
 					,paragraph(_paragraph)
 					,resolver(_resolver)
 					,regexAttributeApply(L"/{@(<value>[^{}]+)/}")
+					,currentHyperlinkId(DocumentRun::NullHyperlinkId)
 				{
 					styleStack.Add(Pair<FontProperties, Color>(GetCurrentController()->ResourceService()->GetDefaultFont(), Color()));
 				}
@@ -298,6 +300,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 						paragraph->lines.Add(line);
 					}
 					Ptr<DocumentTextRun> run=new DocumentTextRun;
+					run->hyperlinkId=currentHyperlinkId;
 					run->style=styleStack[styleStack.Count()-1].key;
 					run->color=styleStack[styleStack.Count()-1].value;
 					run->text=text;
@@ -339,6 +342,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 						Ptr<DocumentImageRun> run=new DocumentImageRun;
 						if(Ptr<XmlAttribute> source=XmlGetAttribute(node, L"source"))
 						{
+							run->hyperlinkId=currentHyperlinkId;
 							run->source=TranslateAttribute(source->value.value);
 							Pair<vint, vint> index=INVLOC.FindFirst(run->source, L"://", Locale::IgnoreCase);
 							if(index.key!=-1)
@@ -373,8 +377,8 @@ document_serialization_visitors::DeserializeNodeVisitor
 									run->frameIndex=wtoi(TranslateAttribute(att->value.value));
 								}
 							}
+							line->runs.Add(run);
 						}
-						line->runs.Add(run);
 					}
 					else if(node->name.value==L"font")
 					{
@@ -512,10 +516,21 @@ document_serialization_visitors::DeserializeNodeVisitor
 						}
 						style=model->GetStyle(normalStyle, style);
 						styleStack.Add(style);
+
+						vint oldId=currentHyperlinkId;
+						WString href;
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"href"))
+						{
+							href=TranslateAttribute(att->value.value);
+						}
+						currentHyperlinkId=model->hyperlinkInfos.Count();
+						model->hyperlinkInfos.Add(currentHyperlinkId, href);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
 							sub->Accept(this);
 						}
+						currentHyperlinkId=oldId;
+
 						styleStack.RemoveAt(styleStack.Count()-1);
 					}
 					else if(node->name.value==L"template-content")
@@ -787,6 +802,53 @@ DocumentModel
 							Ptr<XmlElement> line=new XmlElement;
 							line->name.value=L"br";
 							paragraph->subNodes.Add(line);
+						}
+					}
+				}
+			}
+			{
+				Ptr<XmlElement> stylesElement=new XmlElement;
+				stylesElement->name.value=L"Styles";
+				doc->subNodes.Add(stylesElement);
+
+				for(vint i=0;i<styles.Count();i++)
+				{
+					WString name=styles.Keys()[i];
+					if(name.Length()>0 && name[0]==L'#') continue;
+
+					Ptr<DocumentStyle> style=styles.Values().Get(i);
+					Ptr<XmlElement> styleElement=new XmlElement;
+					styleElement->name.value=L"Style";
+					stylesElement->subNodes.Add(styleElement);
+
+					XmlElementWriter(styleElement).Attribute(L"name", name);
+					if(style->parentStyleName!=L"")
+					{
+						XmlElementWriter(styleElement).Attribute(L"parent", style->parentStyleName);
+					}
+
+					if(style->face) XmlElementWriter(styleElement).Element(L"face").Text(style->face.Value());
+					if(style->size) XmlElementWriter(styleElement).Element(L"size").Text(itow(style->size.Value()));
+					if(style->color) XmlElementWriter(styleElement).Element(L"color").Text(style->color.Value().ToString());
+					if(style->bold) XmlElementWriter(styleElement).Element(L"bold").Text(style->bold.Value()?L"true":L"false");
+					if(style->italic) XmlElementWriter(styleElement).Element(L"italic").Text(style->italic.Value()?L"true":L"false");
+					if(style->underline) XmlElementWriter(styleElement).Element(L"underline").Text(style->underline.Value()?L"true":L"false");
+					if(style->strikeline) XmlElementWriter(styleElement).Element(L"strikeline").Text(style->strikeline.Value()?L"true":L"false");
+					if(style->antialias && style->verticalAntialias)
+					{
+						bool h=style->antialias;
+						bool v=style->verticalAntialias;
+						if(!h)
+						{
+							XmlElementWriter(styleElement).Element(L"antialias").Text(L"no");
+						}
+						else if(!v)
+						{
+							XmlElementWriter(styleElement).Element(L"antialias").Text(L"default");
+						}
+						else
+						{
+							XmlElementWriter(styleElement).Element(L"antialias").Text(L"vertical");
 						}
 					}
 				}

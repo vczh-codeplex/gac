@@ -21,13 +21,17 @@ void SetupTabPageTextBoxlWindow(GuiControlHost* controlHost, GuiControl* contain
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
-		page->SetText(L"document.txt");
+		page->SetText(L"document.xml");
 		SetupDocumentElementLayoutWindow(controlHost, page->GetContainer(), L"Resources\\document.xml");
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
-		page->SetText(L"document2.txt");
+		page->SetText(L"document2.xml");
 		SetupDocumentElementLayoutWindow(controlHost, page->GetContainer(), L"Resources\\document2.xml");
+	}
+	{
+		GuiTabPage* page=tab->CreatePage();
+		page->SetText(L"XmlResource.xml");
 	}
 	container->GetContainerComposition()->AddChild(tab->GetBoundsComposition());
 }

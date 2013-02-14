@@ -23,7 +23,10 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 #ifdef GUI_GRAPHICS_RENDERER_DIRECT2D
 	int result=SetupWindowsDirect2DRenderer();
 #endif
+
+#if _DEBUG
 	_CrtDumpMemoryLeaks();
+#endif
 	return result;
 }
 
