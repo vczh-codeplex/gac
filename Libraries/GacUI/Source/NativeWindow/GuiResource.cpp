@@ -282,33 +282,40 @@ DocumentModel
 							paragraph->lines.Add(line);
 						}
 						Ptr<DocumentImageRun> run=new DocumentImageRun;
-						FOREACH(Ptr<XmlAttribute>, att, node->attributes)
+						if(Ptr<XmlAttribute> source=XmlGetAttribute(node, L"source"))
 						{
-							if(att->name.value==L"width")
+							run->source=source->value.value;
+							Pair<vint, vint> index=INVLOC.FindFirst(run->source, L"://", Locale::IgnoreCase);
+							if(index.key!=-1)
 							{
-								run->size.x=wtoi(att->value.value);
-							}
-							else if(att->name.value==L"height")
-							{
-								run->size.y=wtoi(att->value.value);
-							}
-							else if(att->name.value==L"baseline")
-							{
-								run->baseline=wtoi(att->value.value);
-							}
-							else if(att->name.value==L"frameIndex")
-							{
-								run->frameIndex=wtoi(att->value.value);
-							}
-							else if(att->name.value==L"source")
-							{
-								run->source=att->value.value;
-								Pair<vint, vint> index=INVLOC.FindFirst(run->source, L"://", Locale::IgnoreCase);
-								if(index.key!=-1)
+								WString protocol=run->source.Sub(0, index.key);
+								WString path=run->source.Sub(index.key+index.value, run->source.Length()-index.key-index.value);
+								run->image=resolver->ResolveImage(protocol, path);
+								if(run->image && run->image->GetFrameCount()>0)
 								{
-									WString protocol=run->source.Sub(0, index.key);
-									WString path=run->source.Sub(index.key+index.value, run->source.Length()-index.key-index.value);
-									run->image=resolver->ResolveImage(protocol, path);
+									run->size=run->image->GetFrame(0)->GetSize();
+									run->baseline=run->size.y;
+									run->frameIndex=0;
+								}
+							}
+
+							FOREACH(Ptr<XmlAttribute>, att, node->attributes)
+							{
+								if(att->name.value==L"width")
+								{
+									run->size.x=wtoi(att->value.value);
+								}
+								else if(att->name.value==L"height")
+								{
+									run->size.y=wtoi(att->value.value);
+								}
+								else if(att->name.value==L"baseline")
+								{
+									run->baseline=wtoi(att->value.value);
+								}
+								else if(att->name.value==L"frameIndex")
+								{
+									run->frameIndex=wtoi(att->value.value);
 								}
 							}
 						}
@@ -512,10 +519,18 @@ DocumentResProtocolResolver
 		Ptr<INativeImage> DocumentResProtocolResolver::ResolveImageInternal(const WString& protocol, const WString& path)
 		{
 			if(INVLOC.ToUpper(protocol)!=L"RES") return 0;
-			return resource->GetValueByPath(path).Cast<GuiImageData>()->GetImage();
+			Ptr<GuiImageData> image=resource->GetValueByPath(path).Cast<GuiImageData>();
+			if(image)
+			{
+				return image->GetImage();
+			}
+			else
+			{
+				return 0;
+			}
 		}
 
-		DocumentResProtocolResolver::DocumentResProtocolResolver(GuiResource* _resource, Ptr<DocumentResolver> previousResolver)
+		DocumentResProtocolResolver::DocumentResProtocolResolver(Ptr<GuiResource> _resource, Ptr<DocumentResolver> previousResolver)
 			:DocumentResolver(previousResolver)
 			,resource(_resource)
 		{
@@ -835,10 +850,11 @@ GuiResource
 		{
 		}
 
-		void GuiResource::LoadResourceXml(const WString& filePath)
+		Ptr<GuiResource> GuiResource::LoadFromXml(const WString& filePath)
 		{
 			Ptr<ParsingTable> table;
 			Ptr<XmlDocument> xml;
+			Ptr<GuiResource> resource;
 			{
 				WString text;
 				if(LoadTextFile(filePath, text))
@@ -849,8 +865,9 @@ GuiResource
 			}
 			if(xml)
 			{
+				resource=new GuiResource;
 				DelayLoading delayLoading;
-				LoadResourceFolderXml(delayLoading, GetFolderPath(filePath), xml->rootElement, table);
+				resource->LoadResourceFolderXml(delayLoading, GetFolderPath(filePath), xml->rootElement, table);
 
 				for(vint i=0;i<delayLoading.documentModelFolders.Count();i++)
 				{
@@ -858,12 +875,13 @@ GuiResource
 					WString folder=delayLoading.documentModelFolders.Values().Get(i);
 					if(Ptr<XmlDocument> xml=item->AsXml())
 					{
-						Ptr<DocumentResolver> resolver=new DocumentResProtocolResolver(this, new DocumentFileProtocolResolver(folder));
+						Ptr<DocumentResolver> resolver=new DocumentResProtocolResolver(resource, new DocumentFileProtocolResolver(folder));
 						Ptr<DocumentModel> model=DocumentModel::LoadFromXml(xml, resolver);
 						item->SetContent(model);
 					}
 				}
 			}
+			return resource;
 		}
 	}
 }

@@ -295,7 +295,36 @@ API
 				}
 			}
 
+/***********************************************************************
+Linq To Xml
+***********************************************************************/
+
 			Ptr<XmlAttribute> XmlGetAttribute(Ptr<XmlElement> element, const WString& name)
+			{
+				return XmlGetAttribute(element.Obj(), name);
+			}
+
+			Ptr<XmlElement> XmlGetElement(Ptr<XmlElement> element, const WString& name)
+			{
+				return XmlGetElement(element.Obj(), name);
+			}
+
+			collections::LazyList<Ptr<XmlElement>> XmlGetElements(Ptr<XmlElement> element)
+			{
+				return XmlGetElements(element.Obj());
+			}
+
+			collections::LazyList<Ptr<XmlElement>> XmlGetElements(Ptr<XmlElement> element, const WString& name)
+			{
+				return XmlGetElements(element.Obj(), name);
+			}
+
+			WString XmlGetValue(Ptr<XmlElement> element)
+			{
+				return XmlGetValue(element.Obj());
+			}
+
+			Ptr<XmlAttribute> XmlGetAttribute(XmlElement* element, const WString& name)
 			{
 				FOREACH(Ptr<XmlAttribute>, att, element->attributes)
 				{
@@ -307,7 +336,7 @@ API
 				return 0;
 			}
 
-			Ptr<XmlElement> XmlGetElement(Ptr<XmlElement> element, const WString& name)
+			Ptr<XmlElement> XmlGetElement(XmlElement* element, const WString& name)
 			{
 				FOREACH(Ptr<XmlNode>, node, element->subNodes)
 				{
@@ -320,20 +349,20 @@ API
 				return 0;
 			}
 
-			collections::LazyList<Ptr<XmlElement>> XmlGetElements(Ptr<XmlElement> element)
+			collections::LazyList<Ptr<XmlElement>> XmlGetElements(XmlElement* element)
 			{
 				return From(element->subNodes)
 					.FindType<XmlElement>();
 			}
 
-			collections::LazyList<Ptr<XmlElement>> XmlGetElements(Ptr<XmlElement> element, const WString& name)
+			collections::LazyList<Ptr<XmlElement>> XmlGetElements(XmlElement* element, const WString& name)
 			{
 				return From(element->subNodes)
 					.FindType<XmlElement>()
 					.Where([name](Ptr<XmlElement> e){return e->name.value==name;});
 			}
 
-			WString XmlGetValue(Ptr<XmlElement> element)
+			WString XmlGetValue(XmlElement* element)
 			{
 				WString result;
 				FOREACH(Ptr<XmlNode>, node, element->subNodes)

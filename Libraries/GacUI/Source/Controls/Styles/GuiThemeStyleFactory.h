@@ -14,6 +14,7 @@ Interfaces:
 #include "..\GuiContainerControls.h"
 
 #include "..\TextEditorPackage\GuiTextControls.h"
+#include "..\TextEditorPackage\GuiDocumentViewer.h"
 
 #include "..\ListControlPackage\GuiListControls.h"
 #include "..\ListControlPackage\GuiTextListControls.h"
@@ -61,6 +62,9 @@ namespace vl
 				/// <summary>Get the default color configuration for text box characters.</summary>
 				/// <returns>The default color configuration.</returns>
 				virtual elements::text::ColorEntry											GetDefaultTextBoxColorEntry()=0;
+				/// <summary>Create a style for document viewer.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiDocumentViewer::IStyleProvider*						CreateDocumentViewerStyle()=0;
 				/// <summary>Create a style for list view.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiListView::IStyleProvider*								CreateListViewStyle()=0;
@@ -129,10 +133,10 @@ namespace vl
 				virtual controls::GuiScroll::IStyleController*								CreateProgressBarStyle()=0;
 				/// <summary>Get the default size for scrolls.</summary>
 				/// <returns>The default size for scrolls.</returns>
-				virtual vint																	GetScrollDefaultSize()=0;
+				virtual vint																GetScrollDefaultSize()=0;
 				/// <summary>Get the default size for trackers.</summary>
 				/// <returns>The default size for trackers.</returns>
-				virtual vint																	GetTrackerDefaultSize()=0;
+				virtual vint																GetTrackerDefaultSize()=0;
 				
 				/// <summary>Create a style for text list.</summary>
 				/// <returns>The created style.</returns>
@@ -182,6 +186,9 @@ namespace vl
 				/// <summary>Create a singline text box.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiSinglelineTextBox*			NewTextBox();
+				/// <summary>Create a document viewer.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiDocumentViewer*				NewDocumentViewer();
 				/// <summary>Create a list view with big icons.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiListView*					NewListViewBigIcon();

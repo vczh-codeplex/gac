@@ -14,12 +14,12 @@ namespace document
 		unsigned __int64				startTime;
 		Ptr<DocumentImageRun>			imageRun;
 		vint							paragraphIndex;
-		GuiDocumentElement*				documentElement;
+		GuiDocumentViewer*				documentViewer;
 	public:
-		GifAnimation(Ptr<DocumentImageRun> _imageRun, vint _paragraphIndex, GuiDocumentElement* _documentElement)
+		GifAnimation(Ptr<DocumentImageRun> _imageRun, vint _paragraphIndex, GuiDocumentViewer* _documentViewer)
 			:imageRun(_imageRun)
 			,paragraphIndex(_paragraphIndex)
-			,documentElement(_documentElement)
+			,documentViewer(_documentViewer)
 			,startTime(DateTime::LocalTime().totalMilliseconds)
 		{
 		}
@@ -39,7 +39,7 @@ namespace document
 			unsigned __int64 ms=DateTime::LocalTime().totalMilliseconds-startTime;
 			vint frameIndex=(ms/100)%imageRun->image->GetFrameCount();
 			imageRun->frameIndex=frameIndex;
-			documentElement->NotifyParagraphUpdated(paragraphIndex);
+			documentViewer->NotifyParagraphUpdated(paragraphIndex);
 		}
 
 		void Stop()
@@ -53,11 +53,9 @@ void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* c
 {
 	container->GetBoundsComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 	
-	GuiScrollContainer* scriptDocumentView=new GuiScrollContainer(GetCurrentTheme()->CreateMultilineTextBoxStyle());
-	scriptDocumentView->SetExtendToFullWidth(true);
-	scriptDocumentView->SetHorizontalAlwaysVisible(false);
-	scriptDocumentView->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-	scriptDocumentView->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::LargeWaiting));
+	GuiDocumentViewer* documentViewer=g::NewDocumentViewer();
+	documentViewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+	documentViewer->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::LargeWaiting));
 	
 	GetApplication()->InvokeAsync([=]()
 	{
@@ -77,15 +75,8 @@ void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* c
 		}
 		GetApplication()->InvokeInMainThreadAndWait([=]()
 		{
-			scriptDocumentView->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
-			GuiDocumentElement* element=GuiDocumentElement::Create();
-			element->SetDocument(document);
-
-			GuiBoundsComposition* composition=new GuiBoundsComposition;
-			composition->SetOwnedElement(element);
-			composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
-			composition->SetAlignmentToParent(Margin(10, 10, 10, 10));
-			scriptDocumentView->GetContainerComposition()->AddChild(composition);
+			documentViewer->SetDocument(document);
+			documentViewer->GetBoundsComposition()->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetDefaultSystemCursor());
 
 			FOREACH_INDEXER(Ptr<DocumentParagraph>, p, i, document->paragraphs)
 			FOREACH(Ptr<DocumentLine>, l, p->lines)
@@ -94,12 +85,12 @@ void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* c
 				Ptr<DocumentImageRun> image=r.Cast<DocumentImageRun>();
 				if(image && image->image->GetFrameCount()>1)
 				{
-					Ptr<GifAnimation> gifAnimation=new GifAnimation(image, i, element);
+					Ptr<GifAnimation> gifAnimation=new GifAnimation(image, i, documentViewer);
 					controlHost->GetGraphicsHost()->GetAnimationManager()->AddAnimation(gifAnimation);
 				}
 			}
 		});
 	});
 
-	container->GetContainerComposition()->AddChild(scriptDocumentView->GetBoundsComposition());
+	container->GetContainerComposition()->AddChild(documentViewer->GetBoundsComposition());
 }

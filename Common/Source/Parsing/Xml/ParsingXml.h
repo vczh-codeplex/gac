@@ -32,6 +32,12 @@ namespace vl
 			extern collections::LazyList<Ptr<XmlElement>>		XmlGetElements(Ptr<XmlElement> element, const WString& name);
 			extern WString										XmlGetValue(Ptr<XmlElement> element);
 
+			extern Ptr<XmlAttribute>							XmlGetAttribute(XmlElement* element, const WString& name);
+			extern Ptr<XmlElement>								XmlGetElement(XmlElement* element, const WString& name);
+			extern collections::LazyList<Ptr<XmlElement>>		XmlGetElements(XmlElement* element);
+			extern collections::LazyList<Ptr<XmlElement>>		XmlGetElements(XmlElement* element, const WString& name);
+			extern WString										XmlGetValue(XmlElement* element);
+
 			class XmlElementWriter : public Object
 			{
 			protected:

@@ -17,6 +17,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 #ifdef GUI_GRAPHICS_RENDERER_DIRECT2D
 	int result=SetupWindowsDirect2DRenderer();
 #endif
+	_CrtDumpMemoryLeaks();
+	return result;
 }
 
 namespace test
@@ -24,7 +26,7 @@ namespace test
 	class TestWindow : public GuiWindow
 	{
 	private:
-		GuiMultilineTextBox*				textBox;
+		GuiDocumentViewer*				documentViewer;
 
 	public:
 		TestWindow()
@@ -35,9 +37,13 @@ namespace test
 			GetBoundsComposition()->SetPreferredMinSize(Size(320, 240));
 			MoveToScreenCenter();
 
-			textBox=g::NewMultilineTextBox();
-			textBox->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			this->AddChild(textBox);
+			documentViewer=g::NewDocumentViewer();
+			documentViewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			AddChild(documentViewer);
+
+			Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml");
+			Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();
+			documentViewer->SetDocument(document);
 		}
 	};
 }
