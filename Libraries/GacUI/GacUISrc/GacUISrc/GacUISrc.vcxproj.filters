@@ -429,6 +429,9 @@
     <ClCompile Include="..\..\Source\NativeWindow\GuiResource.cpp">
       <Filter>GacUI\NativeWindow</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -814,6 +817,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\NativeWindow\GuiResource.h">
       <Filter>GacUI\NativeWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.h">
+      <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

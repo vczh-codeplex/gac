@@ -1499,6 +1499,8 @@ namespace vl
 		bool									StartsWith(const WString& text, const WString& find, Normalization normalization);
 		bool									EndsWidth(const WString& text, const WString& find, Normalization normalization);
 	};
+
+#define INVLOC vl::Locale::Invariant()
 }
 
 #endif
@@ -11200,6 +11202,12 @@ namespace vl
 			extern collections::LazyList<Ptr<XmlElement>>		XmlGetElements(Ptr<XmlElement> element, const WString& name);
 			extern WString										XmlGetValue(Ptr<XmlElement> element);
 
+			extern Ptr<XmlAttribute>							XmlGetAttribute(XmlElement* element, const WString& name);
+			extern Ptr<XmlElement>								XmlGetElement(XmlElement* element, const WString& name);
+			extern collections::LazyList<Ptr<XmlElement>>		XmlGetElements(XmlElement* element);
+			extern collections::LazyList<Ptr<XmlElement>>		XmlGetElements(XmlElement* element, const WString& name);
+			extern WString										XmlGetValue(XmlElement* element);
+
 			class XmlElementWriter : public Object
 			{
 			protected:
@@ -13630,11 +13638,11 @@ Rich Content Document (resolver)
 		class DocumentResProtocolResolver : public DocumentResolver
 		{
 		protected:
-			GuiResource*					resource;
+			Ptr<GuiResource>				resource;
 
 			Ptr<INativeImage>				ResolveImageInternal(const WString& protocol, const WString& path)override;
 		public:
-			DocumentResProtocolResolver(GuiResource* _resource, Ptr<DocumentResolver> previousResolver=0);
+			DocumentResProtocolResolver(Ptr<GuiResource> _resource, Ptr<DocumentResolver> previousResolver=0);
 		};
 
 /***********************************************************************
@@ -13672,17 +13680,26 @@ Resource Structure
 			Ptr<GuiImageData>						AsImage();
 			Ptr<parsing::xml::XmlDocument>			AsXml();
 			Ptr<ObjectBox<WString>>					AsString();
+			Ptr<DocumentModel>						AsDocument();
 		};
 		
 		class GuiResourceFolder : public GuiResourceNodeBase
 		{
+		protected:
 			typedef collections::Dictionary<WString, Ptr<GuiResourceItem>>		ItemMap;
 			typedef collections::Dictionary<WString, Ptr<GuiResourceFolder>>	FolderMap;
 			typedef collections::List<Ptr<GuiResourceItem>>						ItemList;
 			typedef collections::List<Ptr<GuiResourceFolder>>					FolderList;
-		protected:
+
+			struct DelayLoading
+			{
+				collections::Dictionary<Ptr<GuiResourceItem>, WString>			documentModelFolders;
+			};
+
 			ItemMap									items;
 			FolderMap								folders;
+
+			void									LoadResourceFolderXml(DelayLoading& delayLoading, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable);
 		public:
 			GuiResourceFolder();
 			~GuiResourceFolder();
@@ -13700,8 +13717,6 @@ Resource Structure
 			void									ClearFolders();
 
 			Ptr<Object>								GetValueByPath(const WString& path);
-
-			void									LoadResourceFolderXml(const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable);
 		};
 
 /***********************************************************************
@@ -13714,7 +13729,7 @@ Resource Loader
 			GuiResource();
 			~GuiResource();
 
-			void									LoadResourceXml(const WString& filePath);
+			static Ptr<GuiResource>					LoadFromXml(const WString& filePath);
 		};
 
 /***********************************************************************
@@ -13723,6 +13738,8 @@ Resource Loader
 
 		extern WString								GetFolderPath(const WString& filePath);
 		extern WString								GetFileName(const WString& filePath);
+		extern bool									LoadTextFile(const WString& filePath, WString& text);
+		extern bool									LoadTextFromStream(stream::IStream& stream, WString& text);
 	}
 }
 
@@ -17200,6 +17217,51 @@ SinglelineTextBox
 #endif
 
 /***********************************************************************
+LIBRARIES\GACUI\SOURCE\CONTROLS\TEXTEDITORPACKAGE\GUIDOCUMENTVIEWER.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI::Control System
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_CONTROLS_GUIDOCUMENTVIEWER
+#define VCZH_PRESENTATION_CONTROLS_GUIDOCUMENTVIEWER
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		namespace controls
+		{
+
+/***********************************************************************
+GuiDocumentViewer
+***********************************************************************/
+			
+			class GuiDocumentViewer : public GuiScrollContainer, public Description<GuiDocumentViewer>
+			{
+			protected:
+				elements::GuiDocumentElement*				documentElement;
+
+			public:
+				GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider);
+				~GuiDocumentViewer();
+				
+				Ptr<DocumentModel>							GetDocument();
+				void										SetDocument(Ptr<DocumentModel> value);
+				void										NotifyParagraphUpdated(vint index);
+			};
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
 LIBRARIES\GACUI\SOURCE\CONTROLS\LISTCONTROLPACKAGE\GUILISTCONTROLS.H
 ***********************************************************************/
 /***********************************************************************
@@ -19565,6 +19627,7 @@ namespace vl
 				virtual controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()=0;
 				virtual controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()=0;
 				virtual elements::text::ColorEntry											GetDefaultTextBoxColorEntry()=0;
+				virtual controls::GuiDocumentViewer::IStyleProvider*						CreateDocumentViewerStyle()=0;
 				virtual controls::GuiListView::IStyleProvider*								CreateListViewStyle()=0;
 				virtual controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()=0;
 				virtual controls::GuiSelectableButton::IStyleController*					CreateListItemBackgroundStyle()=0;
@@ -19589,8 +19652,8 @@ namespace vl
 				virtual controls::GuiScroll::IStyleController*								CreateHTrackerStyle()=0;
 				virtual controls::GuiScroll::IStyleController*								CreateVTrackerStyle()=0;
 				virtual controls::GuiScroll::IStyleController*								CreateProgressBarStyle()=0;
-				virtual vint																	GetScrollDefaultSize()=0;
-				virtual vint																	GetTrackerDefaultSize()=0;
+				virtual vint																GetScrollDefaultSize()=0;
+				virtual vint																GetTrackerDefaultSize()=0;
 				
 				virtual controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()=0;
 				virtual controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()=0;
@@ -19611,6 +19674,7 @@ namespace vl
 				extern controls::GuiComboBoxListControl*		NewComboBox(controls::GuiSelectableListControl* containedListControl);
 				extern controls::GuiMultilineTextBox*			NewMultilineTextBox();
 				extern controls::GuiSinglelineTextBox*			NewTextBox();
+				extern controls::GuiDocumentViewer*				NewDocumentViewer();
 				extern controls::GuiListView*					NewListViewBigIcon();
 				extern controls::GuiListView*					NewListViewSmallIcon();
 				extern controls::GuiListView*					NewListViewList();
@@ -19691,6 +19755,7 @@ Theme
 				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
 				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
+				controls::GuiDocumentViewer::IStyleProvider*						CreateDocumentViewerStyle()override;
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateListItemBackgroundStyle()override;
@@ -19715,8 +19780,8 @@ Theme
 				controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
 				controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
-				vint																	GetScrollDefaultSize()override;
-				vint																	GetTrackerDefaultSize()override;
+				vint																GetScrollDefaultSize()override;
+				vint																GetTrackerDefaultSize()override;
 
 				controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
 				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;
@@ -19770,6 +19835,7 @@ Theme
 				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
 				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
+				controls::GuiDocumentViewer::IStyleProvider*						CreateDocumentViewerStyle()override;
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateListItemBackgroundStyle()override;

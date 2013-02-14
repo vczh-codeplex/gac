@@ -60,6 +60,11 @@ namespace vl
 					return new controls::GuiSinglelineTextBox(GetCurrentTheme()->CreateTextBoxStyle());
 				}
 
+				controls::GuiDocumentViewer* NewDocumentViewer()
+				{
+					return new controls::GuiDocumentViewer(GetCurrentTheme()->CreateDocumentViewerStyle());
+				}
+
 				controls::GuiListView* NewListViewBigIcon()
 				{
 					controls::GuiListView* listview=new controls::GuiListView(GetCurrentTheme()->CreateListViewStyle());

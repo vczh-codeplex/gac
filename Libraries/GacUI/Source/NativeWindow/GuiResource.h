@@ -215,14 +215,14 @@ Rich Content Document (resolver)
 		class DocumentResProtocolResolver : public DocumentResolver
 		{
 		protected:
-			GuiResource*					resource;
+			Ptr<GuiResource>				resource;
 
 			Ptr<INativeImage>				ResolveImageInternal(const WString& protocol, const WString& path)override;
 		public:
 			/// <summary>Create a document resolver.</summary>
 			/// <param name="_resource">The resource that contains images for retriving by path.</param>
 			/// <param name="previousResolver">The previous resolver. See <see cref="DocumentResolver"/> for details.</param>
-			DocumentResProtocolResolver(GuiResource* _resource, Ptr<DocumentResolver> previousResolver=0);
+			DocumentResProtocolResolver(Ptr<GuiResource> _resource, Ptr<DocumentResolver> previousResolver=0);
 		};
 
 /***********************************************************************
@@ -361,8 +361,9 @@ Resource Loader
 			~GuiResource();
 
 			/// <summary>Load a resource from an xml file. If the xml file refers other files, they will be loaded as well.</summary>
+			/// <returns>The loaded resource.</returns>
 			/// <param name="filepath">The file path of the xml file.</param>
-			void									LoadResourceXml(const WString& filePath);
+			static Ptr<GuiResource>					LoadFromXml(const WString& filePath);
 		};
 
 /***********************************************************************

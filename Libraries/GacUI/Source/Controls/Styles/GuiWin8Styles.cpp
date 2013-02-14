@@ -72,6 +72,16 @@ Win8Theme
 				return new Win8SinglelineTextBoxProvider;
 			}
 
+			elements::text::ColorEntry Win8Theme::GetDefaultTextBoxColorEntry()
+			{
+				return Win8GetTextBoxTextColor();
+			}
+
+			controls::GuiDocumentViewer::IStyleProvider* Win8Theme::CreateDocumentViewerStyle()
+			{
+				return new Win8MultilineTextBoxProvider;
+			}
+
 			controls::GuiListView::IStyleProvider* Win8Theme::CreateListViewStyle()
 			{
 				return new Win8ListViewProvider;
@@ -85,11 +95,6 @@ Win8Theme
 			controls::GuiSelectableButton::IStyleController* Win8Theme::CreateListItemBackgroundStyle()
 			{
 				return new Win8SelectableItemStyle();
-			}
-
-			elements::text::ColorEntry Win8Theme::GetDefaultTextBoxColorEntry()
-			{
-				return Win8GetTextBoxTextColor();
 			}
 
 			controls::GuiToolstripMenu::IStyleController* Win8Theme::CreateMenuStyle()

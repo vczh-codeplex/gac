@@ -73,6 +73,16 @@ Win7Theme
 				return new Win7SinglelineTextBoxProvider;
 			}
 
+			elements::text::ColorEntry Win7Theme::GetDefaultTextBoxColorEntry()
+			{
+				return Win7GetTextBoxTextColor();
+			}
+
+			controls::GuiDocumentViewer::IStyleProvider* Win7Theme::CreateDocumentViewerStyle()
+			{
+				return new Win7MultilineTextBoxProvider;
+			}
+
 			controls::GuiListView::IStyleProvider* Win7Theme::CreateListViewStyle()
 			{
 				return new Win7ListViewProvider;
@@ -86,11 +96,6 @@ Win7Theme
 			controls::GuiSelectableButton::IStyleController* Win7Theme::CreateListItemBackgroundStyle()
 			{
 				return new Win7SelectableItemStyle();
-			}
-
-			elements::text::ColorEntry Win7Theme::GetDefaultTextBoxColorEntry()
-			{
-				return Win7GetTextBoxTextColor();
 			}
 
 			controls::GuiToolstripMenu::IStyleController* Win7Theme::CreateMenuStyle()

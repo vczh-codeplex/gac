@@ -44,9 +44,9 @@ Scrolls
 				compositions::GuiBoundsComposition*					boundsComposition;
 				compositions::GuiBoundsComposition*					containerComposition;
 
-				vint													totalSize;
-				vint													pageSize;
-				vint													position;
+				vint												totalSize;
+				vint												pageSize;
+				vint												position;
 				Point												draggingStartLocation;
 				bool												draggingHandle;
 
@@ -113,9 +113,9 @@ Scrolls
 				controls::GuiButton*								handleButton;
 				compositions::GuiTableComposition*					handleComposition;
 
-				vint													totalSize;
-				vint													pageSize;
-				vint													position;
+				vint												totalSize;
+				vint												pageSize;
+				vint												position;
 				Point												draggingStartLocation;
 				bool												draggingHandle;
 
