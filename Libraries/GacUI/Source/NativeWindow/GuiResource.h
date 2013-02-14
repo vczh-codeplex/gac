@@ -277,18 +277,29 @@ Resource Structure
 			/// <summary>Get the contained object as a string.</summary>
 			/// <returns>The contained object.</returns>
 			Ptr<ObjectBox<WString>>					AsString();
+			/// <summary>Get the contained object as a document model.</summary>
+			/// <returns>The contained object.</returns>
+			Ptr<DocumentModel>						AsDocument();
 		};
 		
 		/// <summary>Resource folder. A resource folder contains many sub folders and sub items.</summary>
 		class GuiResourceFolder : public GuiResourceNodeBase
 		{
+		protected:
 			typedef collections::Dictionary<WString, Ptr<GuiResourceItem>>		ItemMap;
 			typedef collections::Dictionary<WString, Ptr<GuiResourceFolder>>	FolderMap;
 			typedef collections::List<Ptr<GuiResourceItem>>						ItemList;
 			typedef collections::List<Ptr<GuiResourceFolder>>					FolderList;
-		protected:
+
+			struct DelayLoading
+			{
+				collections::Dictionary<Ptr<GuiResourceItem>, WString>			documentModelFolders;
+			};
+
 			ItemMap									items;
 			FolderMap								folders;
+
+			void									LoadResourceFolderXml(DelayLoading& delayLoading, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable);
 		public:
 			/// <summary>Create a resource folder.</summary>
 			GuiResourceFolder();
@@ -335,8 +346,6 @@ Resource Structure
 			/// <summary>Get a contained resource object using a path like "Packages\Application\Name".</summary>
 			/// <returns>The containd resource object.</returns>
 			Ptr<Object>								GetValueByPath(const WString& path);
-
-			void									LoadResourceFolderXml(const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable);
 		};
 
 /***********************************************************************
@@ -368,6 +377,16 @@ Resource Loader
 		/// <returns>The file name.</returns>
 		/// <param name="filePath">The file path.</param>
 		extern WString								GetFileName(const WString& filePath);
+		/// <summary>Load a text file.</summary>
+		/// <returns>Returns true if the operation succeeded.</returns>
+		/// <param name="filePath">The text file path.</param>
+		/// <param name="text">The text file content, if succeeded.</param>
+		extern bool									LoadTextFile(const WString& filePath, WString& text);
+		/// <summary>Load the text from a stream.</summary>
+		/// <returns>Returns true if the operation succeeded.</returns>
+		/// <param name="stream">The stream containing text.</param>
+		/// <param name="text">The text file content, if succeeded.</param>
+		extern bool									LoadTextFromStream(stream::IStream& stream, WString& text);
 	}
 }
 

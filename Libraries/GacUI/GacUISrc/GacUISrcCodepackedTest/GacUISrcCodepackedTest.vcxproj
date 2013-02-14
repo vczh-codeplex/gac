@@ -203,6 +203,8 @@
   <ItemGroup>
     <Xml Include="Resources\document.xml" />
     <Xml Include="Resources\document2.xml" />
+    <Xml Include="Resources\XmlDoc.xml" />
+    <Xml Include="Resources\XmlResource.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

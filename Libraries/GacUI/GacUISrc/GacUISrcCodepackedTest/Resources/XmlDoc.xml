@@ -1,0 +1,11 @@
+<Doc>
+  <Content>
+    <p><b>Buttons</b></p>
+    <p>
+      <img source="res://_New.png"/>: New<br/>
+      <img source="res://_Open.png"/>: Open<br/>
+      <img source="res://_Save.png"/>: Save<br/>
+      <img source="res://_SaveAs.png"/>: Save As<br/>
+    </p>
+  </Content>
+</Doc>

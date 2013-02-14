@@ -1,0 +1,9 @@
+<Resource>
+  <Folder name="Images">
+    <Image content="File">_New.png</Image>
+    <Image content="File">_Open.png</Image>
+    <Image content="File">_Save.png</Image>
+    <Image content="File">_SaveAs.png</Image>
+  </Folder>
+  <Doc content="File">XmlDoc.xml</Doc>
+</Resource>

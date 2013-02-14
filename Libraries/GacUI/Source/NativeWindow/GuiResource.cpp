@@ -35,6 +35,25 @@ namespace vl
 			return filePath;
 		}
 
+		bool LoadTextFile(const WString& filePath, WString& text)
+		{
+			stream::FileStream fileStream(filePath, stream::FileStream::ReadOnly);
+			return LoadTextFromStream(fileStream, text);
+		}
+
+		bool LoadTextFromStream(stream::IStream& stream, WString& text)
+		{
+			if(stream.IsAvailable())
+			{
+				stream::BomDecoder decoder;
+				stream::DecoderStream decoderStream(stream, decoder);
+				stream::StreamReader reader(decoderStream);
+				text=reader.ReadToEnd();
+				return true;
+			}
+			return false;
+		}
+
 /***********************************************************************
 GuiImageData
 ***********************************************************************/
@@ -284,7 +303,7 @@ DocumentModel
 							else if(att->name.value==L"source")
 							{
 								run->source=att->value.value;
-								Pair<vint, vint> index=Locale::Invariant().FindFirst(run->source, L"://", Locale::IgnoreCase);
+								Pair<vint, vint> index=INVLOC.FindFirst(run->source, L"://", Locale::IgnoreCase);
 								if(index.key!=-1)
 								{
 									WString protocol=run->source.Sub(0, index.key);
@@ -471,6 +490,7 @@ DocumentFileProtocolResolver
 
 		Ptr<INativeImage> DocumentFileProtocolResolver::ResolveImageInternal(const WString& protocol, const WString& path)
 		{
+			if(INVLOC.ToUpper(protocol)!=L"FILE") return 0;
 			WString filename=path;
 			if(filename.Length()>=2 && filename[1]!=L':')
 			{
@@ -491,6 +511,7 @@ DocumentResProtocolResolver
 
 		Ptr<INativeImage> DocumentResProtocolResolver::ResolveImageInternal(const WString& protocol, const WString& path)
 		{
+			if(INVLOC.ToUpper(protocol)!=L"RES") return 0;
 			return resource->GetValueByPath(path).Cast<GuiImageData>()->GetImage();
 		}
 
@@ -560,9 +581,146 @@ GuiResourceItem
 			return content.Cast<ObjectBox<WString>>();
 		}
 
+		Ptr<DocumentModel> GuiResourceItem::AsDocument()
+		{
+			return content.Cast<DocumentModel>();
+		}
+
 /***********************************************************************
 GuiResourceFolder
 ***********************************************************************/
+
+		void GuiResourceFolder::LoadResourceFolderXml(DelayLoading& delayLoading, const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable)
+		{
+			ClearItems();
+			ClearFolders();
+			FOREACH(Ptr<XmlElement>, element, XmlGetElements(folderXml))
+			{
+				WString name;
+				if(Ptr<XmlAttribute> nameAtt=XmlGetAttribute(element, L"name"))
+				{
+					name=nameAtt->value.value;
+				}
+				if(element->name.value==L"Folder")
+				{
+					if(name!=L"")
+					{
+						Ptr<GuiResourceFolder> folder=new GuiResourceFolder;
+						if(AddFolder(name, folder))
+						{
+							WString newContainingFolder=containingFolder;
+							Ptr<XmlElement> newFolderXml=element;
+							if(Ptr<XmlAttribute> contentAtt=XmlGetAttribute(element, L"content"))
+							{
+								if(contentAtt->value.value==L"Link")
+								{
+									WString filePath=containingFolder+XmlGetValue(element);
+									WString text;
+									if(LoadTextFile(filePath, text))
+									{
+										Ptr<XmlDocument> xml=XmlParseDocument(text, xmlParsingTable);
+										if(xml)
+										{
+											newContainingFolder=GetFolderPath(filePath);
+											newFolderXml=xml->rootElement;
+										}
+									}
+								}
+							}
+							folder->LoadResourceFolderXml(delayLoading, newContainingFolder, newFolderXml, xmlParsingTable);
+						}
+					}
+				}
+				else
+				{
+					WString filePath;
+					if(Ptr<XmlAttribute> contentAtt=XmlGetAttribute(element, L"content"))
+					{
+						if(contentAtt->value.value==L"File")
+						{
+							filePath=containingFolder+XmlGetValue(element);
+							if(name==L"")
+							{
+								name=GetFileName(filePath);
+							}
+						}
+					}
+
+					Ptr<GuiResourceItem> item=new GuiResourceItem;
+					if(AddItem(name, item))
+					{
+						if(filePath!=L"")
+						{
+							stream::FileStream fileStream(filePath, stream::FileStream::ReadOnly);
+							if(fileStream.IsAvailable())
+							{
+								if(element->name.value==L"Xml" || element->name.value==L"Doc")
+								{
+									WString text;
+									if(LoadTextFromStream(fileStream, text))
+									{
+										Ptr<XmlDocument> xml=XmlParseDocument(text, xmlParsingTable);
+										if(xml)
+										{
+											item->SetContent(xml);
+											if(element->name.value==L"Doc")
+											{
+												delayLoading.documentModelFolders.Add(item, containingFolder);
+											}
+										}
+									}
+								}
+								else if(element->name.value==L"Text")
+								{
+									WString text;
+									if(LoadTextFromStream(fileStream, text))
+									{
+										item->SetContent(new ObjectBox<WString>(text));
+									}
+								}
+								else if(element->name.value==L"Image")
+								{
+									Ptr<INativeImage> image=GetCurrentController()->ImageService()->CreateImageFromStream(fileStream);
+									if(image)
+									{
+										Ptr<GuiImageData> imageData=new GuiImageData(image, 0);
+										item->SetContent(imageData);
+									}
+								}
+							}
+						}
+						else
+						{
+							if(element->name.value==L"Xml" || element->name.value==L"Doc")
+							{
+								WString text=XmlGetValue(element);
+								Ptr<XmlDocument> xml=XmlParseDocument(text, xmlParsingTable);
+								if(xml)
+								{
+									item->SetContent(xml);
+									if(element->name.value==L"Doc")
+									{
+										delayLoading.documentModelFolders.Add(item, containingFolder);
+									}
+								}
+							}
+							else if(element->name.value==L"Text")
+							{
+								WString text=XmlGetValue(element);
+								item->SetContent(new ObjectBox<WString>(text));
+							}
+							else if(element->name.value==L"Image")
+							{
+							}
+						}
+						if(!item->GetContent())
+						{
+							RemoveItem(name);
+						}
+					}
+				}
+			}
+		}
 
 		GuiResourceFolder::GuiResourceFolder()
 		{
@@ -665,132 +823,6 @@ GuiResourceFolder
 			return 0;
 		}
 
-		void GuiResourceFolder::LoadResourceFolderXml(const WString& containingFolder, Ptr<parsing::xml::XmlElement> folderXml, Ptr<parsing::tabling::ParsingTable> xmlParsingTable)
-		{
-			ClearItems();
-			ClearFolders();
-			FOREACH(Ptr<XmlNode>, node, folderXml->subNodes)
-			{
-				Ptr<XmlElement> element=node.Cast<XmlElement>();
-				if(element)
-				{
-					WString name;
-					if(Ptr<XmlAttribute> nameAtt=XmlGetAttribute(element, L"name"))
-					{
-						name=nameAtt->value.value;
-					}
-					if(element->name.value==L"Folder")
-					{
-						if(name!=L"")
-						{
-							Ptr<GuiResourceFolder> folder=new GuiResourceFolder;
-							if(AddFolder(name, folder))
-							{
-								WString newContainingFolder=containingFolder;
-								Ptr<XmlElement> newFolderXml=element;
-								if(Ptr<XmlAttribute> contentAtt=XmlGetAttribute(element, L"content"))
-								{
-									if(contentAtt->value.value==L"Link")
-									{
-										WString filePath=containingFolder+XmlGetValue(element);
-										stream::FileStream fileStream(filePath, stream::FileStream::ReadOnly);
-										if(fileStream.IsAvailable())
-										{
-											stream::BomDecoder decoder;
-											stream::DecoderStream decoderStream(fileStream, decoder);
-											stream::StreamReader reader(decoderStream);
-											WString text=reader.ReadToEnd();
-											Ptr<XmlDocument> xml=XmlParseDocument(text, xmlParsingTable);
-											if(xml)
-											{
-												newContainingFolder=GetFolderPath(filePath);
-												newFolderXml=xml->rootElement;
-											}
-										}
-									}
-								}
-								folder->LoadResourceFolderXml(newContainingFolder, newFolderXml, xmlParsingTable);
-							}
-						}
-					}
-					else
-					{
-						WString filePath;
-						if(Ptr<XmlAttribute> contentAtt=XmlGetAttribute(element, L"content"))
-						{
-							if(contentAtt->value.value==L"File")
-							{
-								filePath=containingFolder+XmlGetValue(element);
-								if(name==L"")
-								{
-									name=GetFileName(filePath);
-								}
-							}
-						}
-
-						Ptr<GuiResourceItem> item=new GuiResourceItem;
-						if(AddItem(name, item))
-						{
-							if(filePath!=L"")
-							{
-								stream::FileStream fileStream(filePath, stream::FileStream::ReadOnly);
-								if(fileStream.IsAvailable())
-								{
-									if(element->name.value==L"Xml")
-									{
-										stream::BomDecoder decoder;
-										stream::DecoderStream decoderStream(fileStream, decoder);
-										stream::StreamReader reader(decoderStream);
-										WString text=reader.ReadToEnd();
-										Ptr<XmlDocument> xml=XmlParseDocument(text, xmlParsingTable);
-										item->SetContent(xml);
-									}
-									else if(element->name.value==L"Text")
-									{
-										stream::BomDecoder decoder;
-										stream::DecoderStream decoderStream(fileStream, decoder);
-										stream::StreamReader reader(decoderStream);
-										WString text=reader.ReadToEnd();
-										item->SetContent(new ObjectBox<WString>(text));
-									}
-									else if(element->name.value==L"Image")
-									{
-										Ptr<INativeImage> image=GetCurrentController()->ImageService()->CreateImageFromStream(fileStream);
-										if(image)
-										{
-											Ptr<GuiImageData> imageData=new GuiImageData(image, 0);
-											item->SetContent(imageData);
-										}
-									}
-								}
-							}
-							else
-							{
-								if(element->name.value==L"Xml")
-								{
-									WString text=XmlGetValue(element);
-									Ptr<XmlDocument> xml=XmlParseDocument(text, xmlParsingTable);
-									item->SetContent(xml);
-								}
-								else if(element->name.value==L"Text")
-								{
-									WString text=XmlGetValue(element);
-									item->SetContent(new ObjectBox<WString>(text));
-								}
-								else if(element->name.value==L"Image")
-								{
-								}
-							}
-							if(!item->GetContent())
-							{
-								RemoveItem(name);
-							}
-						}
-					}
-				}
-			}
-		}
-
 /***********************************************************************
 GuiResource
 ***********************************************************************/
@@ -808,21 +840,29 @@ GuiResource
 			Ptr<ParsingTable> table;
 			Ptr<XmlDocument> xml;
 			{
-				stream::FileStream fileStream(filePath, stream::FileStream::ReadOnly);
-				if(fileStream.IsAvailable())
+				WString text;
+				if(LoadTextFile(filePath, text))
 				{
-					stream::BomDecoder decoder;
-					stream::DecoderStream decoderStream(fileStream, decoder);
-					stream::StreamReader reader(decoderStream);
-					WString xmlText=reader.ReadToEnd();
-
 					table=XmlLoadTable();
-					xml=XmlParseDocument(xmlText, table);
+					xml=XmlParseDocument(text, table);
 				}
 			}
 			if(xml)
 			{
-				LoadResourceFolderXml(GetFolderPath(filePath), xml->rootElement, table);
+				DelayLoading delayLoading;
+				LoadResourceFolderXml(delayLoading, GetFolderPath(filePath), xml->rootElement, table);
+
+				for(vint i=0;i<delayLoading.documentModelFolders.Count();i++)
+				{
+					Ptr<GuiResourceItem> item=delayLoading.documentModelFolders.Keys()[i];
+					WString folder=delayLoading.documentModelFolders.Values().Get(i);
+					if(Ptr<XmlDocument> xml=item->AsXml())
+					{
+						Ptr<DocumentResolver> resolver=new DocumentResProtocolResolver(this, new DocumentFileProtocolResolver(folder));
+						Ptr<DocumentModel> model=DocumentModel::LoadFromXml(xml, resolver);
+						item->SetContent(model);
+					}
+				}
 			}
 		}
 	}
