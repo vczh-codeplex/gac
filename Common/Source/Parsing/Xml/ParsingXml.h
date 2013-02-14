@@ -24,6 +24,7 @@ namespace vl
 			extern WString							XmlEscapeComment(const WString& value);
 			extern WString							XmlUnescapeComment(const WString& value);
 			extern void								XmlPrint(Ptr<XmlNode> node, stream::TextWriter& writer);
+			extern void								XmlPrintContent(Ptr<XmlElement> element, stream::TextWriter& writer);
 			extern WString							XmlToString(Ptr<XmlNode> node);
 
 			extern Ptr<XmlAttribute>							XmlGetAttribute(Ptr<XmlElement> element, const WString& name);
