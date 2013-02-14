@@ -72,6 +72,8 @@ namespace vl
 		bool									StartsWith(const WString& text, const WString& find, Normalization normalization);
 		bool									EndsWidth(const WString& text, const WString& find, Normalization normalization);
 	};
+
+#define INVLOC vl::Locale::Invariant()
 }
 
 #endif
