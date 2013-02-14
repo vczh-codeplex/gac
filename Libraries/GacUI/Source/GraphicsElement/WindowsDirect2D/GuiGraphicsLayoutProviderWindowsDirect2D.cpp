@@ -163,7 +163,7 @@ WindowsDirect2DParagraph
 				IWindowsDirect2DRenderTarget*		renderTarget;
 				ComPtr<IDWriteTextLayout>			textLayout;
 				bool								wrapLine;
-				vint									maxWidth;
+				vint								maxWidth;
 				List<Color>							usedColors;
 				InlineElementMap					inlineElements;
 
@@ -355,6 +355,11 @@ WindowsDirect2DParagraph
 							}
 						}
 					}
+					return false;
+				}
+
+				bool SetInteractionId(vint start, vint length, vint value)
+				{
 					return false;
 				}
 
