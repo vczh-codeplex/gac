@@ -256,7 +256,7 @@ Win7MenuBarButtonStyle
 				return 0;
 			}
 
-			void Win7MenuBarButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
+			void Win7MenuBarButtonStyle::SetImage(Ptr<GuiImageData> value)
 			{
 			}
 
@@ -420,7 +420,7 @@ Win7MenuItemButtonStyle
 				return 0;
 			}
 
-			void Win7MenuItemButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
+			void Win7MenuItemButtonStyle::SetImage(Ptr<GuiImageData> value)
 			{
 				if(value)
 				{

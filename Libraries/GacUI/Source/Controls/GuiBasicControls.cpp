@@ -330,35 +330,6 @@ GuiComponent
 			}
 
 /***********************************************************************
-GuiImageData
-***********************************************************************/
-
-			GuiImageData::GuiImageData()
-				:frameIndex(-1)
-			{
-			}
-
-			GuiImageData::GuiImageData(Ptr<INativeImage> _image, vint _frameIndex)
-				:image(_image)
-				,frameIndex(_frameIndex)
-			{
-			}
-
-			GuiImageData::~GuiImageData()
-			{
-			}
-
-			Ptr<INativeImage> GuiImageData::GetImage()
-			{
-				return image;
-			}
-
-			vint GuiImageData::GetFrameIndex()
-			{
-				return frameIndex;
-			}
-
-/***********************************************************************
 GuiLabel
 ***********************************************************************/
 

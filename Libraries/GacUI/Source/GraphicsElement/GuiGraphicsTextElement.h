@@ -579,128 +579,6 @@ Colorized Plain Text (element)
 			};
 
 /***********************************************************************
-Rich Content Document (model)
-***********************************************************************/
-
-			namespace text
-			{
-				class DocumentTextRun;
-				class DocumentImageRun;
-
-				/// <summary>Pepresents a logical run of a rich content document.</summary>
-				class DocumentRun : public Object, public Description<DocumentRun>
-				{
-				public:
-					/// <summary>A visitor interface for <see cref="DocumentRun"/>.</summary>
-					class IVisitor : public Interface
-					{
-					public:
-						/// <summary>Visit operation for <see cref="DocumentTextRun"/>.</summary>
-						/// <param name="run">The run object.</param>
-						virtual void				Visit(DocumentTextRun* run)=0;
-						/// <summary>Visit operation for <see cref="DocumentImageRun"/>.</summary>
-						/// <param name="run">The run object.</param>
-						virtual void				Visit(DocumentImageRun* run)=0;
-					};
-
-					DocumentRun(){}
-
-					/// <summary>Accept a <see cref="IVisitor"/> and trigger the selected visit operation.</summary>
-					/// <param name="visitor">The visitor.</param>
-					virtual void					Accept(IVisitor* visitor)=0;
-				};
-				
-				/// <summary>Pepresents a text run.</summary>
-				class DocumentTextRun : public DocumentRun, public Description<DocumentTextRun>
-				{
-				public:
-					/// <summary>Run font and style.</summary>
-					FontProperties					style;
-					/// <summary>Run color.</summary>
-					Color							color;
-					/// <summary>Run text.</summary>
-					WString							text;
-
-					DocumentTextRun(){}
-
-					void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
-				};
-				
-				/// <summary>Pepresents a inline object run.</summary>
-				class DocumentInlineObjectRun : public DocumentRun, public Description<DocumentInlineObjectRun>
-				{
-				public:
-					/// <summary>Size of the inline object.</summary>
-					Size							size;
-					/// <summary>Baseline of the inline object.</summary>
-					vint							baseline;
-
-					DocumentInlineObjectRun():baseline(-1){}
-				};
-				
-				/// <summary>Pepresents a image run.</summary>
-				class DocumentImageRun : public DocumentInlineObjectRun, public Description<DocumentImageRun>
-				{
-				public:
-					/// <summary>The image.</summary>
-					Ptr<INativeImage>				image;
-					/// <summary>The frame index.</summary>
-					vint							frameIndex;
-					/// <summary>The image source string.</summary>
-					WString							source;
-
-					DocumentImageRun():frameIndex(0){}
-
-					void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
-				};
-
-				//--------------------------------------------------------------------------
-
-				/// <summary>Represents a logical line of a rich content document.</summary>
-				class DocumentLine : public Object, public Description<DocumentLine>
-				{
-					typedef collections::List<Ptr<DocumentRun>>			RunList;
-				public:
-					/// <summary>All runs in this paragraph.</summary>
-					RunList							runs;
-				};
-
-				/// <summary>Represents a logical paragraph of a rich content document.</summary>
-				class DocumentParagraph : public Object, public Description<DocumentParagraph>
-				{
-					typedef collections::List<Ptr<DocumentLine>>		LineList;
-				public:
-					/// <summary>All lines in this paragraph.</summary>
-					LineList						lines;
-				};
-
-				/// <summary>Represents a rich content document model.</summary>
-				class DocumentModel : public Object, public Description<DocumentModel>
-				{
-					typedef collections::List<Ptr<DocumentParagraph>>	ParagraphList;
-				public:
-					/// <summary>All paragraphs in this document.</summary>
-					ParagraphList					paragraphs;
-
-					/// <summary>Load a document model from an xml.</summary>
-					/// <returns>The loaded document model.</returns>
-					/// <param name="xml">The xml document.</param>
-					/// <param name="workingDirectory">The working directory for loading image files.</param>
-					static Ptr<DocumentModel>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, const WString& workingDirectory);
-
-					/// <summary>Save a document model to an xml.</summary>
-					/// <returns>The saved xml document.</returns>
-					Ptr<parsing::xml::XmlDocument>	SaveToXml();
-				};
-
-				struct ParagraphCache
-				{
-					WString							fullText;
-					Ptr<IGuiGraphicsParagraph>		graphicsParagraph;
-				};
-			}
-
-/***********************************************************************
 Rich Content Document (element)
 ***********************************************************************/
 
@@ -713,30 +591,35 @@ Rich Content Document (element)
 				{
 					DEFINE_GUI_GRAPHICS_RENDERER(GuiDocumentElement, GuiDocumentElementRenderer, IGuiGraphicsRenderTarget)
 				protected:
+					struct ParagraphCache
+					{
+						WString							fullText;
+						Ptr<IGuiGraphicsParagraph>		graphicsParagraph;
+					};
 
-					typedef collections::Array<Ptr<text::ParagraphCache>>		ParagraphCacheArray;
+					typedef collections::Array<Ptr<ParagraphCache>>		ParagraphCacheArray;
 				protected:
 					vint									paragraphDistance;
 					vint									lastMaxWidth;
 					vint									cachedTotalHeight;
-					IGuiGraphicsLayoutProvider*			layoutProvider;
-					ParagraphCacheArray					paragraphCaches;
+					IGuiGraphicsLayoutProvider*				layoutProvider;
+					ParagraphCacheArray						paragraphCaches;
 					collections::Array<vint>				paragraphHeights;
 
-					void					InitializeInternal();
-					void					FinalizeInternal();
-					void					RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget);
+					void									InitializeInternal();
+					void									FinalizeInternal();
+					void									RenderTargetChangedInternal(IGuiGraphicsRenderTarget* oldRenderTarget, IGuiGraphicsRenderTarget* newRenderTarget);
 				public:
 					GuiDocumentElementRenderer();
 
-					void					Render(Rect bounds)override;
-					void					OnElementStateChanged()override;
+					void									Render(Rect bounds)override;
+					void									OnElementStateChanged()override;
 
-					void					NotifyParagraphUpdated(vint index);
+					void									NotifyParagraphUpdated(vint index);
 				};
 
 			protected:
-				Ptr<text::DocumentModel>	document;
+				Ptr<DocumentModel>							document;
 
 				GuiDocumentElement();
 			public:
@@ -744,13 +627,13 @@ Rich Content Document (element)
 				
 				/// <summary>Get the document.</summary>
 				/// <returns>The document.</returns>
-				Ptr<text::DocumentModel>	GetDocument();
+				Ptr<DocumentModel>							GetDocument();
 				/// <summary>Set the document. When a document is set to this element, modifying the document without invoking <see cref="NotifyParagraphUpdated"/> will lead to undefined behavior.</summary>
 				/// <param name="value">The document.</param>
-				void						SetDocument(Ptr<text::DocumentModel> value);
+				void										SetDocument(Ptr<DocumentModel> value);
 				/// <summary>Notify that a specified paragraph is updated.</summary>
 				/// <param name="index">The paragraph index.</param>
-				void						NotifyParagraphUpdated(vint index);
+				void										NotifyParagraphUpdated(vint index);
 			};
 		}
 	}

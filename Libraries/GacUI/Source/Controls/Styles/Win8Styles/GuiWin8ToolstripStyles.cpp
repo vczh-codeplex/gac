@@ -321,7 +321,7 @@ Win8ToolstripButtonStyle
 				return subMenuHost;
 			}
 
-			void Win8ToolstripButtonStyle::SetImage(Ptr<controls::GuiImageData> value)
+			void Win8ToolstripButtonStyle::SetImage(Ptr<GuiImageData> value)
 			{
 				if(value)
 				{
