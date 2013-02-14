@@ -12,11 +12,11 @@ namespace document
 	{
 	protected:
 		unsigned __int64				startTime;
-		Ptr<text::DocumentImageRun>		imageRun;
+		Ptr<DocumentImageRun>		imageRun;
 		int								paragraphIndex;
 		GuiDocumentElement*				documentElement;
 	public:
-		GifAnimation(Ptr<text::DocumentImageRun> _imageRun, int _paragraphIndex, GuiDocumentElement* _documentElement)
+		GifAnimation(Ptr<DocumentImageRun> _imageRun, int _paragraphIndex, GuiDocumentElement* _documentElement)
 			:imageRun(_imageRun)
 			,paragraphIndex(_paragraphIndex)
 			,documentElement(_documentElement)
@@ -75,7 +75,7 @@ public:
 	
 		GetApplication()->InvokeAsync([=]()
 		{
-			Ptr<text::DocumentModel> document;
+			Ptr<DocumentModel> document;
 			{
 				WString text;
 				{
