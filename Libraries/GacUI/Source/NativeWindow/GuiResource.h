@@ -206,7 +206,7 @@ Rich Content Document (model)
 
 			/// <summary>All paragraphs in this document.</summary>
 			ParagraphList					paragraphs;
-			/// <summary>All available styles. All styles whose name begins with # will not be persistant.</summary>
+			/// <summary>All available styles. These will not be persistant.</summary>
 			StyleMap						styles;
 			/// <summary>All available templates. These will not be persistant.</summary>
 			TemplateMap						templates;
