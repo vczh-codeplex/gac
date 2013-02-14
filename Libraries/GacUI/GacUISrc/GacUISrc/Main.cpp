@@ -5,7 +5,13 @@
 #endif
 
 #include "..\..\Source\GacUI.h"
+#include "..\..\..\..\Common\Source\Stream\FileStream.h"
+#include "..\..\..\..\Common\Source\Stream\CharFormat.h"
+#include "..\..\..\..\Common\Source\Stream\Accessor.h"
 #include <Windows.h>
+
+using namespace vl::parsing::xml;
+using namespace vl::stream;
 
 #define GUI_GRAPHICS_RENDERER_DIRECT2D
 
@@ -43,6 +49,14 @@ namespace test
 
 			Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml");
 			Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();
+			{
+				Ptr<XmlDocument> xml=document->SaveToXml();
+				FileStream fileStream(L"XmlDoc.xml", FileStream::WriteOnly);
+				BomEncoder encoder(BomEncoder::Utf8);
+				EncoderStream encoderStream(fileStream, encoder);
+				StreamWriter writer(encoderStream);
+				XmlPrint(xml, writer);
+			}
 			documentViewer->SetDocument(document);
 		}
 	};

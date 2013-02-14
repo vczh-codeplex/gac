@@ -198,15 +198,18 @@ Rich Content Document (model)
 		/// <summary>Represents a rich content document model.</summary>
 		class DocumentModel : public Object, public Description<DocumentModel>
 		{
-			typedef collections::List<Ptr<DocumentParagraph>>				ParagraphList;
-			typedef collections::Dictionary<WString, Ptr<DocumentStyle>>	StyleMap;
-			typedef collections::Pair<FontProperties, Color>				RawStylePair;
+			typedef collections::List<Ptr<DocumentParagraph>>							ParagraphList;
+			typedef collections::Dictionary<WString, Ptr<DocumentStyle>>				StyleMap;
+			typedef collections::Dictionary<WString, Ptr<parsing::xml::XmlElement>>		TemplateMap;
+			typedef collections::Pair<FontProperties, Color>							RawStylePair;
 		public:
 
 			/// <summary>All paragraphs in this document.</summary>
 			ParagraphList					paragraphs;
 			/// <summary>All available styles. All styles whose name begins with # will not be persistant.</summary>
 			StyleMap						styles;
+			/// <summary>All available templates. These will not be persistant.</summary>
+			TemplateMap						templates;
 			
 			DocumentModel();
 

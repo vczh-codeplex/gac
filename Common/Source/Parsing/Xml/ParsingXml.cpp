@@ -281,6 +281,15 @@ API
 				node->Accept(&visitor);
 			}
 
+			void XmlPrintContent(Ptr<XmlElement> element, stream::TextWriter& writer)
+			{
+				XmlPrintVisitor visitor(writer);
+				FOREACH(Ptr<XmlNode>, node, element->subNodes)
+				{
+					node->Accept(&visitor);
+				}
+			}
+
 			WString XmlToString(Ptr<XmlNode> node)
 			{
 				MemoryStream stream;

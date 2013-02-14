@@ -649,6 +649,15 @@ DocumentModel
 						}
 					}
 				}
+				if(Ptr<XmlElement> styles=XmlGetElement(xml->rootElement, L"Templates"))
+				{
+					FOREACH(Ptr<XmlElement>, templateElement, XmlGetElements(styles, L"Template"))
+					if(Ptr<XmlAttribute> name=XmlGetAttribute(templateElement, L"name"))
+					if(!model->styles.Keys().Contains(name->value.value))
+					{
+						model->templates.Add(name->value.value, templateElement);
+					}
+				}
 				if(Ptr<XmlElement> content=XmlGetElement(xml->rootElement, L"Content"))
 				{
 					FOREACH(Ptr<XmlElement>, p, XmlGetElements(content, L"p"))
@@ -698,6 +707,53 @@ DocumentModel
 							Ptr<XmlElement> line=new XmlElement;
 							line->name.value=L"br";
 							paragraph->subNodes.Add(line);
+						}
+					}
+				}
+			}
+			{
+				Ptr<XmlElement> stylesElement=new XmlElement;
+				stylesElement->name.value=L"Styles";
+				doc->subNodes.Add(stylesElement);
+
+				for(vint i=0;i<styles.Count();i++)
+				{
+					WString name=styles.Keys()[i];
+					if(name.Length()>0 && name[0]==L'#') continue;
+
+					Ptr<DocumentStyle> style=styles.Values().Get(i);
+					Ptr<XmlElement> styleElement=new XmlElement;
+					styleElement->name.value=L"Style";
+					stylesElement->subNodes.Add(styleElement);
+
+					XmlElementWriter(styleElement).Attribute(L"name", name);
+					if(style->parentStyleName!=L"")
+					{
+						XmlElementWriter(styleElement).Attribute(L"parent", style->parentStyleName);
+					}
+
+					if(style->face) XmlElementWriter(styleElement).Element(L"face").Text(style->face.Value());
+					if(style->size) XmlElementWriter(styleElement).Element(L"size").Text(itow(style->size.Value()));
+					if(style->color) XmlElementWriter(styleElement).Element(L"color").Text(style->color.Value().ToString());
+					if(style->bold) XmlElementWriter(styleElement).Element(L"bold").Text(style->bold.Value()?L"true":L"false");
+					if(style->italic) XmlElementWriter(styleElement).Element(L"italic").Text(style->italic.Value()?L"true":L"false");
+					if(style->underline) XmlElementWriter(styleElement).Element(L"underline").Text(style->underline.Value()?L"true":L"false");
+					if(style->strikeline) XmlElementWriter(styleElement).Element(L"strikeline").Text(style->strikeline.Value()?L"true":L"false");
+					if(style->antialias && style->verticalAntialias)
+					{
+						bool h=style->antialias;
+						bool v=style->verticalAntialias;
+						if(!h)
+						{
+							XmlElementWriter(styleElement).Element(L"antialias").Text(L"no");
+						}
+						else if(!v)
+						{
+							XmlElementWriter(styleElement).Element(L"antialias").Text(L"default");
+						}
+						else
+						{
+							XmlElementWriter(styleElement).Element(L"antialias").Text(L"vertical");
 						}
 					}
 				}
