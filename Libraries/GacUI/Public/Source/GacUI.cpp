@@ -30190,7 +30190,7 @@ DocumentResolver
 DocumentModel
 ***********************************************************************/
 
-		namespace visitors
+		namespace document_serialization_visitors
 		{
 			class SerializeRunVisitor : public Object, public DocumentRun::IVisitor
 			{
@@ -30505,7 +30505,7 @@ DocumentModel
 				}
 			};
 		}
-		using namespace visitors;
+		using namespace document_serialization_visitors;
 
 		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<DocumentResolver> resolver)
 		{
