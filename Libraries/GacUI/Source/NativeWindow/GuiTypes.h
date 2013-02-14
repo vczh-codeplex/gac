@@ -520,7 +520,7 @@ Resources
 			/// <summary>
 			/// Font size in pixel.
 			/// </summary>
-			vint					size;
+			vint				size;
 			/// <summary>
 			/// True if the font is bold.
 			/// </summary>

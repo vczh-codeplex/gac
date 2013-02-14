@@ -107,7 +107,7 @@ DocumentResolver
 		}
 
 /***********************************************************************
-DocumentModel
+document_serialization_visitors::SerializeRunVisitor
 ***********************************************************************/
 
 		namespace document_serialization_visitors
@@ -219,17 +219,27 @@ DocumentModel
 						;
 				}
 			};
+		}
+		using namespace document_serialization_visitors;
 
+/***********************************************************************
+document_serialization_visitors::DeserializeNodeVisitor
+***********************************************************************/
+
+		namespace document_serialization_visitors
+		{
 			class DeserializeNodeVisitor : public XmlNode::IVisitor
 			{
 			public:
 				List<Pair<FontProperties, Color>>	styleStack;
+				Ptr<DocumentModel>					model;
 				Ptr<DocumentParagraph>				paragraph;
 				Ptr<DocumentLine>					line;
 				Ptr<DocumentResolver>				resolver;
 
-				DeserializeNodeVisitor(Ptr<DocumentParagraph> _paragraph, Ptr<DocumentResolver> _resolver)
-					:paragraph(_paragraph)
+				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraph> _paragraph, Ptr<DocumentResolver> _resolver)
+					:model(_model)
+					,paragraph(_paragraph)
 					,resolver(_resolver)
 				{
 					styleStack.Add(Pair<FontProperties, Color>(GetCurrentController()->ResourceService()->GetDefaultFont(), Color()));
@@ -390,6 +400,18 @@ DocumentModel
 						}
 						styleStack.RemoveAt(styleStack.Count()-1);
 					}
+					else if(node->name.value==L"ha")
+					{
+						auto style=styleStack[styleStack.Count()-1];
+						style.key.antialias=true;
+						style.key.verticalAntialias=false;
+						styleStack.Add(style);
+						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+						{
+							sub->Accept(this);
+						}
+						styleStack.RemoveAt(styleStack.Count()-1);
+					}
 					else if(node->name.value==L"va")
 					{
 						auto style=styleStack[styleStack.Count()-1];
@@ -407,6 +429,22 @@ DocumentModel
 						auto style=styleStack[styleStack.Count()-1];
 						style.key.antialias=false;
 						style.key.verticalAntialias=false;
+						styleStack.Add(style);
+						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+						{
+							sub->Accept(this);
+						}
+						styleStack.RemoveAt(styleStack.Count()-1);
+					}
+					else if(node->name.value==L"div")
+					{
+						auto style=styleStack[styleStack.Count()-1];
+						WString styleName;
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"style"))
+						{
+							styleName=att->value.value;
+						}
+						style=model->GetStyle(styleName, style);
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -434,17 +472,172 @@ DocumentModel
 		}
 		using namespace document_serialization_visitors;
 
+/***********************************************************************
+DocumentModel
+***********************************************************************/
+
+		DocumentModel::DocumentModel()
+		{
+			{
+				FontProperties font=GetCurrentController()->ResourceService()->GetDefaultFont();
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->face=font.fontFamily;
+				style->size=font.size;
+				style->color=Color();
+				style->bold=font.bold;
+				style->italic=font.italic;
+				style->underline=font.underline;
+				style->strikeline=font.strikeline;
+				style->antialias=font.antialias;
+				style->verticalAntialias=font.verticalAntialias;
+				styles.Add(L"#Default", style);
+			}
+			{
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				styles.Add(L"#Context", style);
+			}
+			{
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->parentStyleName=L"#Context";
+				style->color=Color(0, 0, 255);
+				style->underline=true;
+				styles.Add(L"#NormalLink", style);
+			}
+			{
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->parentStyleName=L"#Context";
+				style->color=Color(0, 0, 255);
+				style->underline=true;
+				styles.Add(L"#ActiveLink", style);
+			}
+		}
+
+		DocumentModel::RawStylePair DocumentModel::GetStyle(const WString& styleName, const RawStylePair& context)
+		{
+			DocumentStyle result;
+			Ptr<DocumentStyle> currentStyle;
+			WString currentName=styleName;
+			while(true)
+			{
+				vint index=styles.Keys().IndexOf(currentName);
+				if(index==-1) break;
+				currentStyle=styles.Values().Get(index);
+				currentName=currentStyle->parentStyleName;
+
+				if(!result.face && currentStyle->face) result.face=currentStyle->face;
+				if(!result.size && currentStyle->size) result.size=currentStyle->size;
+				if(!result.color && currentStyle->color) result.color=currentStyle->color;
+				if(!result.bold && currentStyle->bold) result.bold=currentStyle->bold;
+				if(!result.italic && currentStyle->italic) result.italic=currentStyle->italic;
+				if(!result.underline && currentStyle->underline) result.underline=currentStyle->underline;
+				if(!result.strikeline && currentStyle->strikeline) result.strikeline=currentStyle->strikeline;
+				if(!result.antialias && currentStyle->antialias) result.antialias=currentStyle->antialias;
+				if(!result.verticalAntialias && currentStyle->verticalAntialias) result.verticalAntialias=currentStyle->verticalAntialias;
+			}
+
+			if(!result.face && currentStyle->face) result.face=context.key.fontFamily;
+			if(!result.size && currentStyle->size) result.size=context.key.size;
+			if(!result.color && currentStyle->color) result.color=context.value;
+			if(!result.bold && currentStyle->bold) result.bold=context.key.bold;
+			if(!result.italic && currentStyle->italic) result.italic=context.key.italic;
+			if(!result.underline && currentStyle->underline) result.underline=context.key.underline;
+			if(!result.strikeline && currentStyle->strikeline) result.size=context.key.strikeline;
+			if(!result.antialias && currentStyle->antialias) result.antialias=context.key.antialias;
+			if(!result.verticalAntialias && currentStyle->verticalAntialias) result.verticalAntialias=context.key.verticalAntialias;
+
+			FontProperties font;
+			font.fontFamily=result.face.Value();
+			font.size=result.size.Value();
+			font.bold=result.bold.Value();
+			font.italic=result.italic.Value();
+			font.underline=result.underline.Value();
+			font.strikeline=result.strikeline.Value();
+			font.antialias=result.antialias.Value();
+			font.verticalAntialias=result.verticalAntialias.Value();
+			return RawStylePair(font, result.color.Value());
+		}
+
 		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<DocumentResolver> resolver)
 		{
 			Ptr<DocumentModel> model=new DocumentModel;
 			if(xml->rootElement->name.value==L"Doc")
-			if(Ptr<XmlElement> content=XmlGetElement(xml->rootElement, L"Content"))
-			FOREACH(Ptr<XmlElement>, p, XmlGetElements(content, L"p"))
 			{
-				Ptr<DocumentParagraph> paragraph=new DocumentParagraph;
-				model->paragraphs.Add(paragraph);
-				DeserializeNodeVisitor visitor(paragraph, resolver);
-				p->Accept(&visitor);
+				if(Ptr<XmlElement> styles=XmlGetElement(xml->rootElement, L"Styles"))
+				{
+					FOREACH(Ptr<XmlElement>, styleElement, XmlGetElements(styles, L"Style"))
+					if(Ptr<XmlAttribute> name=XmlGetAttribute(styleElement, L"name"))
+					if(!model->styles.Keys().Contains(name->value.value))
+					{
+						Ptr<DocumentStyle> style=new DocumentStyle;
+						model->styles.Add(name->value.value, style);
+
+						if(Ptr<XmlAttribute> parent=XmlGetAttribute(styleElement, L"parent"))
+						{
+							style->parentStyleName=parent->value.value;
+						}
+
+						FOREACH(Ptr<XmlElement>, att, XmlGetElements(styleElement))
+						{
+							if(att->name.value==L"face")
+							{
+								style->face=XmlGetValue(att);
+							}
+							else if(att->name.value==L"size")
+							{
+								style->size=wtoi(XmlGetValue(att));
+							}
+							else if(att->name.value==L"color")
+							{
+								style->color=Color::Parse(XmlGetValue(att));
+							}
+							else if(att->name.value==L"b")
+							{
+								style->bold=XmlGetValue(att)==L"true";
+							}
+							else if(att->name.value==L"i")
+							{
+								style->italic=XmlGetValue(att)==L"true";
+							}
+							else if(att->name.value==L"u")
+							{
+								style->underline=XmlGetValue(att)==L"true";
+							}
+							else if(att->name.value==L"s")
+							{
+								style->strikeline=XmlGetValue(att)==L"true";
+							}
+							else if(att->name.value==L"antialias")
+							{
+								WString value=XmlGetValue(att);
+								if(value==L"horizontal" || value==L"default")
+								{
+									style->antialias=true;
+									style->verticalAntialias=false;
+								}
+								else if(value==L"no")
+								{
+									style->antialias=false;
+									style->verticalAntialias=false;
+								}
+								else if(value==L"vertical")
+								{
+									style->antialias=true;
+									style->verticalAntialias=true;
+								}
+							}
+						}
+					}
+				}
+				if(Ptr<XmlElement> content=XmlGetElement(xml->rootElement, L"Content"))
+				{
+					FOREACH(Ptr<XmlElement>, p, XmlGetElements(content, L"p"))
+					{
+						Ptr<DocumentParagraph> paragraph=new DocumentParagraph;
+						model->paragraphs.Add(paragraph);
+						DeserializeNodeVisitor visitor(model, paragraph, resolver);
+						p->Accept(&visitor);
+					}
+				}
 			}
 			return model;
 		}
