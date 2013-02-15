@@ -443,7 +443,7 @@ namespace vl
 				vint end=count-1;
 				while(start<=end)
 				{
-					vint index=(start+end)/2;
+					vint index=start+(end-start)/2;
 					if(buffer[index]==item)
 					{
 						return index;

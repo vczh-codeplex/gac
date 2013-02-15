@@ -156,6 +156,7 @@ WindowsDirect2DParagraph
 			class WindowsDirect2DParagraph : public Object, public IGuiGraphicsParagraph
 			{
 				typedef Dictionary<IGuiGraphicsElement*, ComPtr<WindowsDirect2DElementInlineObject>>		InlineElementMap;
+				typedef Dictionary<Pair<vint, vint>, vint>													InteractionIdMap;
 			protected:
 				IGuiGraphicsLayoutProvider*			provider;
 				ID2D1SolidColorBrush*				defaultTextColor;
@@ -166,6 +167,7 @@ WindowsDirect2DParagraph
 				vint								maxWidth;
 				List<Color>							usedColors;
 				InlineElementMap					inlineElements;
+				InteractionIdMap					interactionIds;
 
 			public:
 				WindowsDirect2DParagraph(IGuiGraphicsLayoutProvider* _provider, const WString& _text, IGuiGraphicsRenderTarget* _renderTarget)
@@ -194,6 +196,7 @@ WindowsDirect2DParagraph
 						textLayout=rawTextLayout;
 						textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
 					}
+					interactionIds.Add(Pair<vint, vint>(0, _text.Length()), NullInteractionId);
 
 					GetWindowsDirect2DResourceManager()->DestroyDirect2DTextFormat(defaultFont);
 				}
@@ -358,9 +361,69 @@ WindowsDirect2DParagraph
 					return false;
 				}
 
+				vint SearchInInteractionIdMap(vint textPosition)
+				{
+					vint start=0;
+					vint end=interactionIds.Count()-1;
+					while(start<=end)
+					{
+						vint middle=start+(end-start)/2;
+						Pair<vint, vint> p=interactionIds.Keys()[middle];
+						if(textPosition<p.key)
+						{
+							start=middle+1;
+						}
+						else if(p.key+p.value<=textPosition)
+						{
+							end=middle-1;
+						}
+						else
+						{
+							return middle;
+						}
+					}
+					return -1;
+				}
+
+				vint CutInteractionIdMap(vint textPosition, vint index)
+				{
+					Pair<vint, vint> p=interactionIds.Keys()[index];
+					CHECK_ERROR(p.key<=textPosition && textPosition<=p.key+p.value, L"WindowsDirect2DParagraph::CutInteractionIdMap(vint, vint)#textPositionÓëindex²»Æ¥Åä¡£");
+					if(textPosition==p.key || textPosition==p.key+p.value)
+					{
+						return 0;
+					}
+					else
+					{
+						vint id=interactionIds.Values().Get(index);
+						Pair<vint, vint> bp=p;
+						Pair<vint, vint> ep=p;
+						bp.value=textPosition-p.key;
+						ep.key=textPosition;
+						ep.value=p.value-bp.value;
+
+						interactionIds.Remove(p);
+						interactionIds.Add(bp, id);
+						interactionIds.Add(ep, id);
+						return 1;
+					}
+				}
+
 				bool SetInteractionId(vint start, vint length, vint value)
 				{
-					return false;
+					vint begin=SearchInInteractionIdMap(start);
+					vint end=SearchInInteractionIdMap(start+length-1);
+					if(begin==-1 || end==-1) return false;
+
+					vint offset=CutInteractionIdMap(start, begin);
+					begin+=offset;
+					end+=offset;
+					CutInteractionIdMap(start+length, end);
+					for(vint i=begin;i<=end;i++)
+					{
+						interactionIds.Set(interactionIds.Keys()[i], value);
+					}
+					return true;
 				}
 
 				vint GetHeight()override
