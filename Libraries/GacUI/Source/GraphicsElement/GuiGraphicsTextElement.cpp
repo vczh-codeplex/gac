@@ -1094,6 +1094,40 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				}
 			}
 
+			vint GuiDocumentElement::GuiDocumentElementRenderer::GetHyperlinkIdFromPoint(Point point)
+			{
+				vint y=0;
+				for(vint i=0;i<paragraphHeights.Count();i++)
+				{
+					vint paragraphHeight=paragraphHeights[i];
+					if(y+paragraphHeight<=point.y)
+					{
+						y+=paragraphHeight+paragraphDistance;
+						continue;
+					}
+					else if(y>point.y)
+					{
+						break;
+					}
+					else
+					{
+						Ptr<ParagraphCache> cache=paragraphCaches[i];
+						if(cache && cache->graphicsParagraph)
+						{
+							vint start=0;
+							vint length=0;
+							vint id=0;
+							if(cache->graphicsParagraph->HitTestPoint(Point(point.x, point.y-y), start, length, id))
+							{
+								return id;
+							}
+						}
+						return DocumentRun::NullHyperlinkId;
+					}
+				}
+				return DocumentRun::NullHyperlinkId;
+			}
+
 /***********************************************************************
 GuiDocumentElement
 ***********************************************************************/
@@ -1126,6 +1160,19 @@ GuiDocumentElement
 				if(elementRenderer)
 				{
 					elementRenderer->NotifyParagraphUpdated(index);
+				}
+			}
+
+			vint GuiDocumentElement::GetHyperlinkIdFromPoint(Point point)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					return elementRenderer->GetHyperlinkIdFromPoint(point);
+				}
+				else
+				{
+					return DocumentRun::NullHyperlinkId;
 				}
 			}
 		}

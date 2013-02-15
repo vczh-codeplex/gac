@@ -27,7 +27,9 @@ GuiDocumentViewer
 			{
 			protected:
 				elements::GuiDocumentElement*				documentElement;
+				compositions::GuiBoundsComposition*			documentComposition;
 
+				void										OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 			public:
 				/// <summary>Create a control with a specified style provider.</summary>
 				/// <param name="styleProvider">The style provider.</param>
