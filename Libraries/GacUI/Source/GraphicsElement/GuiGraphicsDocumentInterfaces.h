@@ -31,6 +31,8 @@ Layout Engine
 			class IGuiGraphicsParagraph : public Interface
 			{
 			public:
+				static const vint		NullInteractionId = -1;
+
 				/// <summary>Text style. Items in this enumeration type can be combined.</summary>
 				enum TextStyle
 				{
@@ -61,7 +63,7 @@ Layout Engine
 					/// <summary>The size of the inline object.</summary>
 					Size					size;
 					/// <summary>The baseline of the inline object.If the baseline is at the bottom, then set the baseline to -1.</summary>
-					vint						baseline;
+					vint					baseline;
 					/// <summary>The break condition of the inline object.</summary>
 					BreakCondition			breakCondition;
 
@@ -131,7 +133,7 @@ Layout Engine
 				/// <param name="length">The length of the specified range by character.</param>
 				/// <param name="value">The interaction id.</param>
 				/// <returns>Returns true if this operation succeeded.</returns>
-				virtual bool								SetInteractionId(vint start, vint length, vint value=-1)=0;
+				virtual bool								SetInteractionId(vint start, vint length, vint value=NullInteractionId)=0;
 
 				/// <summary>Get the layouted height of the text. The result depends on rich styled text and the two important properties that can be set using <see cref="SetWrapLine"/> and <see cref="SetMaxWidth"/>.</summary>
 				/// <returns>The layouted height.</returns>
