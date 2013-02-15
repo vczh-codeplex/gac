@@ -901,7 +901,6 @@ Visitors
 							{
 								paragraph->SetInteractionId(start, length, run->hyperlinkId);
 							}
-							start+=length;
 						}
 					}
 
@@ -920,6 +919,10 @@ Visitors
 						element->SetStretch(true);
 
 						paragraph->SetInlineObject(start, length, properties, element);
+						if(run->hyperlinkId!=DocumentRun::NullHyperlinkId)
+						{
+							paragraph->SetInteractionId(start, length, run->hyperlinkId);
+						}
 					}
 
 					static vint SetProperty(vint start, IGuiGraphicsParagraph* paragraph, DocumentRun* run)

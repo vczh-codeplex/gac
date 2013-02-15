@@ -262,7 +262,21 @@ Uniscribe Operations (UniscribeRun)
 				virtual vint					SumHeight()=0;
 				virtual void					SearchForLineBreak(vint tempStart, vint maxWidth, bool firstRun, vint& charLength, vint& charAdvances)=0;
 				virtual void					Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY)=0;
-				virtual bool					HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)=0;
+
+				virtual bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)
+				{
+					for(vint i=0;i<fragmentBounds.Count();i++)
+					{
+						if(fragmentBounds[i].bounds.Contains(point))
+						{
+							start=this->start;
+							length=this->length;
+							interactionId=this->documentFragment->interactionId;
+							return true;
+						}
+					}
+					return false;
+				}
 			};
 
 /***********************************************************************
@@ -440,11 +454,6 @@ Uniscribe Operations (UniscribeTextRun)
 						&wholeGlyph.glyphOffsets[cluster]
 						);
 				}
-
-				bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)override
-				{
-					return false;
-				}
 			};
 
 /***********************************************************************
@@ -498,11 +507,6 @@ Uniscribe Operations (UniscribeElementRun)
 					{
 						renderer->Render(bounds);
 					}
-				}
-
-				bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)override
-				{
-					return false;
 				}
 			};
 
@@ -822,7 +826,7 @@ Uniscribe Operations (UniscribeParagraph)
 								run->fragmentBounds.Clear();
 							}
 
-							// render this line into linces with auto line wrapping
+							// render this line into lines with auto line wrapping
 							vint startRun=0;
 							vint startRunOffset=0;
 							vint lastRun=0;
@@ -980,6 +984,22 @@ Uniscribe Operations (UniscribeParagraph)
 				{
 					f1=-1;
 					f2=-1;
+					if(fs==fe)
+					{
+						Ptr<UniscribeFragment> fragment=documentFragments[fs];
+						if(fragment->element)
+						{
+							if(ss==0 && se==fragment->text.Length())
+							{
+								f1=f2=fs;
+								return true;
+							}
+							else
+							{
+								return false;
+							}
+						}
+					}
 					for(vint i=fs;i<=fe;i++)
 					{
 						if(documentFragments[i]->element)
