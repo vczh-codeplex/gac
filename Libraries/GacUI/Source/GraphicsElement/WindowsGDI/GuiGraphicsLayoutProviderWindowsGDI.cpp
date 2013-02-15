@@ -230,8 +230,8 @@ Uniscribe Operations (UniscribeRun)
 			public:
 				struct RunFragmentBounds
 				{
-					vint							start;
-					vint							length;
+					vint						start;
+					vint						length;
 					Rect						bounds;
 
 					bool operator==(const RunFragmentBounds&){return false;}
@@ -240,8 +240,8 @@ Uniscribe Operations (UniscribeRun)
 
 				UniscribeFragment*				documentFragment;
 				SCRIPT_ITEM*					scriptItem;
-				vint								start;
-				vint								length;
+				vint							start;
+				vint							length;
 				const wchar_t*					runText;
 				List<RunFragmentBounds>			fragmentBounds;
 
@@ -258,10 +258,11 @@ Uniscribe Operations (UniscribeRun)
 				}
 
 				virtual bool					BuildUniscribeData(WinDC* dc)=0;
-				virtual vint						SumWidth(vint charStart, vint charLength)=0;
-				virtual vint						SumHeight()=0;
+				virtual vint					SumWidth(vint charStart, vint charLength)=0;
+				virtual vint					SumHeight()=0;
 				virtual void					SearchForLineBreak(vint tempStart, vint maxWidth, bool firstRun, vint& charLength, vint& charAdvances)=0;
 				virtual void					Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY)=0;
+				virtual bool					HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)=0;
 			};
 
 /***********************************************************************
@@ -273,7 +274,7 @@ Uniscribe Operations (UniscribeTextRun)
 			public:
 				SCRIPT_CACHE					scriptCache;
 				Array<SCRIPT_LOGATTR>			charLogattrs;
-				vint								advance;
+				vint							advance;
 				UniscribeGlyphData				wholeGlyph;
 
 				UniscribeTextRun()
@@ -439,6 +440,11 @@ Uniscribe Operations (UniscribeTextRun)
 						&wholeGlyph.glyphOffsets[cluster]
 						);
 				}
+
+				bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)override
+				{
+					return false;
+				}
 			};
 
 /***********************************************************************
@@ -492,6 +498,11 @@ Uniscribe Operations (UniscribeElementRun)
 					{
 						renderer->Render(bounds);
 					}
+				}
+
+				bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)override
+				{
+					return false;
 				}
 			};
 
@@ -1207,6 +1218,39 @@ Uniscribe Operations (UniscribeParagraph)
 						return false;
 					}
 				}
+
+				bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)
+				{
+					start=-1;
+					length=0;
+					interactionId=IGuiGraphicsParagraph::NullInteractionId;
+
+					if(bounds.Contains(point))
+					{
+						FOREACH(Ptr<UniscribeLine>, line, lines)
+						{
+							if(point.y<line->bounds.y1)
+							{
+								continue;
+							}
+							else if(line->bounds.y2<=point.y)
+							{
+								break;
+							}
+							else if(line->bounds.Contains(point))
+							{
+								FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns)
+								{
+									if(run->HitTestPoint(point, start, length, interactionId))
+									{
+										return true;
+									}
+								}
+							}
+						}
+					}
+					return false;
+				}
 			};
 
 /***********************************************************************
@@ -1359,7 +1403,7 @@ WindowsGDIParagraph
 					return false;
 				}
 
-				bool SetInteractionId(vint start, vint length, vint value)
+				bool SetInteractionId(vint start, vint length, vint value)override
 				{
 					if(length==0) return true;
 					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
@@ -1370,6 +1414,11 @@ WindowsGDIParagraph
 					{
 						return false;
 					}
+				}
+
+				bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)override
+				{
+					return paragraph->HitTestPoint(point, start, length, interactionId);
 				}
 
 				vint GetHeight()override

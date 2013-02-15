@@ -13,6 +13,20 @@ namespace vl
 GuiDocumentViewer
 ***********************************************************************/
 
+			void GuiDocumentViewer::OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			{
+				vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
+				if(id==DocumentRun::NullHyperlinkId)
+				{
+					documentComposition->SetAssociatedCursor(0);
+				}
+				else
+				{
+					INativeCursor* cursor=GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand);
+					documentComposition->SetAssociatedCursor(cursor);
+				}
+			}
+
 			GuiDocumentViewer::GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider)
 				:GuiScrollContainer(styleProvider)
 			{
@@ -20,11 +34,13 @@ GuiDocumentViewer
 				SetHorizontalAlwaysVisible(false);
 
 				documentElement=GuiDocumentElement::Create();
-				GuiBoundsComposition* composition=new GuiBoundsComposition;
-				composition->SetOwnedElement(documentElement);
-				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
-				composition->SetAlignmentToParent(Margin(5, 5, 5, 5));
-				GetContainerComposition()->AddChild(composition);
+				documentComposition=new GuiBoundsComposition;
+				documentComposition->SetOwnedElement(documentElement);
+				documentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				documentComposition->SetAlignmentToParent(Margin(5, 5, 5, 5));
+				GetContainerComposition()->AddChild(documentComposition);
+
+				documentComposition->GetEventReceiver()->mouseMove.AttachMethod(this, &GuiDocumentViewer::OnMouseMove);
 			}
 
 			GuiDocumentViewer::~GuiDocumentViewer()

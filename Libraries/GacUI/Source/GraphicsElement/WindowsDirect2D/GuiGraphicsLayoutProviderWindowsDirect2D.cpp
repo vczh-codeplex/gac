@@ -371,11 +371,11 @@ WindowsDirect2DParagraph
 						Pair<vint, vint> p=interactionIds.Keys()[middle];
 						if(textPosition<p.key)
 						{
-							start=middle+1;
+							end=middle-1;
 						}
 						else if(p.key+p.value<=textPosition)
 						{
-							end=middle-1;
+							start=middle+1;
 						}
 						else
 						{
@@ -409,7 +409,7 @@ WindowsDirect2DParagraph
 					}
 				}
 
-				bool SetInteractionId(vint start, vint length, vint value)
+				bool SetInteractionId(vint start, vint length, vint value)override
 				{
 					vint begin=SearchInInteractionIdMap(start);
 					vint end=SearchInInteractionIdMap(start+length-1);
@@ -424,6 +424,25 @@ WindowsDirect2DParagraph
 						interactionIds.Set(interactionIds.Keys()[i], value);
 					}
 					return true;
+				}
+
+				bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)override
+				{
+					DWRITE_HIT_TEST_METRICS metrics={0};
+					BOOL trailingHit=FALSE;
+					BOOL inside=FALSE;
+					start=-1;
+					length=0;
+					interactionId=NullInteractionId;
+					HRESULT hr=textLayout->HitTestPoint((FLOAT)point.x, (FLOAT)point.y, &trailingHit, &inside, &metrics);
+					if(hr!=S_OK) return false;
+
+					start=metrics.textPosition;
+					length=metrics.length;
+					vint index=SearchInInteractionIdMap(start);
+					interactionId=index==-1?NullInteractionId:interactionIds.Values().Get(index);
+
+					return inside==TRUE;
 				}
 
 				vint GetHeight()override

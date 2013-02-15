@@ -616,6 +616,7 @@ Rich Content Document (element)
 					void									OnElementStateChanged()override;
 
 					void									NotifyParagraphUpdated(vint index);
+					vint									GetHyperlinkIdFromPoint(Point point);
 				};
 
 			protected:
@@ -634,6 +635,11 @@ Rich Content Document (element)
 				/// <summary>Notify that a specified paragraph is updated.</summary>
 				/// <param name="index">The paragraph index.</param>
 				void										NotifyParagraphUpdated(vint index);
+
+				/// <summary>Get hyperlink id from point.</summary>
+				/// <returns>Corressponding hyperlink id. Returns -1 indicates that the point is not in a hyperlink.</returns>
+				/// <param name="index">The point to get the hyperlink id.</param>
+				vint										GetHyperlinkIdFromPoint(Point point);
 			};
 		}
 	}
