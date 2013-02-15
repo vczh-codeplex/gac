@@ -122,7 +122,7 @@ GuiDocumentViewer
 				if(!document) return L"";
 				vint index=document->hyperlinkInfos.Keys().IndexOf(activeHyperlinkId);
 				if(index==-1) return L"";
-				return document->hyperlinkInfos.Values().Get(index);
+				return document->hyperlinkInfos.Values().Get(index).reference;
 			}
 		}
 	}

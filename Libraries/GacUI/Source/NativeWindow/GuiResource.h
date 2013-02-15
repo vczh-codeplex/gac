@@ -22,6 +22,7 @@ namespace vl
 		class GuiResource;
 
 		class DocumentTextRun;
+		class DocumentHyperlinkTextRun;
 		class DocumentImageRun;
 
 /***********************************************************************
@@ -71,6 +72,9 @@ Rich Content Document (model)
 				/// <summary>Visit operation for <see cref="DocumentTextRun"/>.</summary>
 				/// <param name="run">The run object.</param>
 				virtual void				Visit(DocumentTextRun* run)=0;
+				/// <summary>Visit operation for <see cref="DocumentHyperlinkTextRun"/>.</summary>
+				/// <param name="run">The run object.</param>
+				virtual void				Visit(DocumentHyperlinkTextRun* run)=0;
 				/// <summary>Visit operation for <see cref="DocumentImageRun"/>.</summary>
 				/// <param name="run">The run object.</param>
 				virtual void				Visit(DocumentImageRun* run)=0;
@@ -98,6 +102,23 @@ Rich Content Document (model)
 			WString							text;
 
 			DocumentTextRun(){}
+
+			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+		};
+
+		class DocumentHyperlinkTextRun : public DocumentTextRun, public Description<DocumentHyperlinkTextRun>
+		{
+		public:
+			/// <summary>Run font and style.</summary>
+			FontProperties					normalStyle;
+			/// <summary>Run color.</summary>
+			Color							normalColor;
+			/// <summary>Run font and style.</summary>
+			FontProperties					activeStyle;
+			/// <summary>Run color.</summary>
+			Color							activeColor;
+
+			DocumentHyperlinkTextRun(){}
 
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
@@ -203,11 +224,24 @@ Rich Content Document (model)
 		/// <summary>Represents a rich content document model.</summary>
 		class DocumentModel : public Object, public Description<DocumentModel>
 		{
+		public:
+
+			struct HyperlinkInfo
+			{
+				WString						reference;
+				vint						paragraphIndex;
+
+				HyperlinkInfo()
+					:paragraphIndex(-1)
+				{
+				}
+			};
+		private:
 			typedef collections::List<Ptr<DocumentParagraph>>							ParagraphList;
 			typedef collections::Dictionary<WString, Ptr<DocumentStyle>>				StyleMap;
 			typedef collections::Dictionary<WString, Ptr<parsing::xml::XmlElement>>		TemplateMap;
 			typedef collections::Pair<FontProperties, Color>							RawStylePair;
-			typedef collections::Dictionary<vint, WString>								HyperlinkMap;
+			typedef collections::Dictionary<vint, HyperlinkInfo>						HyperlinkMap;
 		public:
 
 			/// <summary>All paragraphs in this document.</summary>
