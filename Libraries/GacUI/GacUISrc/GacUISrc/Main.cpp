@@ -37,6 +37,13 @@ namespace test
 	private:
 		GuiDocumentViewer*				documentViewer;
 
+		void documentViewer_ActiveHyperlinkExecuted(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			GetCurrentController()->DialogService()->ShowMessageBox(
+				GetNativeWindow(),
+				documentViewer->GetActiveHyperlinkReference(),
+				GetText());
+		}
 	public:
 		TestWindow()
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
@@ -48,6 +55,7 @@ namespace test
 
 			documentViewer=g::NewDocumentViewer();
 			documentViewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			documentViewer->ActiveHyperlinkExecuted.AttachMethod(this, &TestWindow::documentViewer_ActiveHyperlinkExecuted);
 			AddChild(documentViewer);
 
 			Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml");
