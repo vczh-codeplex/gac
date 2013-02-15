@@ -207,6 +207,11 @@ document_serialization_visitors::SerializeRunVisitor
 					}
 				}
 
+				void Visit(DocumentHyperlinkTextRun* run)override
+				{
+					Visit(static_cast<DocumentTextRun*>(run));
+				}
+
 				void Visit(DocumentImageRun* run)override
 				{
 					XmlElementWriter writer(container);
@@ -245,23 +250,38 @@ document_serialization_visitors::DeserializeNodeVisitor
 					}
 				};
 
-				List<Pair<FontProperties, Color>>	styleStack;
+				struct StyleStackItem
+				{
+					Pair<FontProperties, Color>		normalStyle;
+					Pair<FontProperties, Color>		activeStyle;
+					vint							hyperlinkId;
+
+					StyleStackItem()
+						:hyperlinkId(DocumentRun::NullHyperlinkId)
+					{
+					}
+				};
+
+				List<StyleStackItem>				styleStack;
 				Ptr<DocumentModel>					model;
 				Ptr<DocumentParagraph>				paragraph;
+				vint								paragraphIndex;
 				Ptr<DocumentLine>					line;
 				Ptr<DocumentResolver>				resolver;
 				Ptr<TemplateInfo>					templateInfo;
 				Regex								regexAttributeApply;
-				vint								currentHyperlinkId;
 
-				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraph> _paragraph, Ptr<DocumentResolver> _resolver)
+				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraph> _paragraph, vint _paragraphIndex, Ptr<DocumentResolver> _resolver)
 					:model(_model)
 					,paragraph(_paragraph)
+					,paragraphIndex(_paragraphIndex)
 					,resolver(_resolver)
 					,regexAttributeApply(L"/{@(<value>[^{}]+)/}")
-					,currentHyperlinkId(DocumentRun::NullHyperlinkId)
 				{
-					styleStack.Add(Pair<FontProperties, Color>(GetCurrentController()->ResourceService()->GetDefaultFont(), Color()));
+					StyleStackItem item;
+					item.normalStyle=Pair<FontProperties, Color>(GetCurrentController()->ResourceService()->GetDefaultFont(), Color());
+					item.activeStyle=item.normalStyle;
+					styleStack.Add(item);
 				}
 
 				WString TranslateAttribute(const WString& value)
@@ -299,10 +319,24 @@ document_serialization_visitors::DeserializeNodeVisitor
 						line=new DocumentLine;
 						paragraph->lines.Add(line);
 					}
-					Ptr<DocumentTextRun> run=new DocumentTextRun;
-					run->hyperlinkId=currentHyperlinkId;
-					run->style=styleStack[styleStack.Count()-1].key;
-					run->color=styleStack[styleStack.Count()-1].value;
+					Ptr<DocumentTextRun> run;
+					const StyleStackItem& item=styleStack[styleStack.Count()-1];
+					if(item.hyperlinkId==DocumentRun::NullHyperlinkId || item.normalStyle==item.activeStyle)
+					{
+						run=new DocumentTextRun;
+					}
+					else
+					{
+						Ptr<DocumentHyperlinkTextRun> hyperlink=new DocumentHyperlinkTextRun;
+						hyperlink->normalStyle=item.normalStyle.key;
+						hyperlink->normalColor=item.normalStyle.value;
+						hyperlink->activeStyle=item.activeStyle.key;
+						hyperlink->activeColor=item.activeStyle.value;
+						run=hyperlink;
+					}
+					run->hyperlinkId=item.hyperlinkId;
+					run->style=item.normalStyle.key;
+					run->color=item.normalStyle.value;
 					run->text=text;
 					line->runs.Add(run);
 				}
@@ -342,7 +376,7 @@ document_serialization_visitors::DeserializeNodeVisitor
 						Ptr<DocumentImageRun> run=new DocumentImageRun;
 						if(Ptr<XmlAttribute> source=XmlGetAttribute(node, L"source"))
 						{
-							run->hyperlinkId=currentHyperlinkId;
+							run->hyperlinkId=styleStack[styleStack.Count()-1].hyperlinkId;
 							run->source=TranslateAttribute(source->value.value);
 							Pair<vint, vint> index=INVLOC.FindFirst(run->source, L"://", Locale::IgnoreCase);
 							if(index.key!=-1)
@@ -387,15 +421,18 @@ document_serialization_visitors::DeserializeNodeVisitor
 						{
 							if(att->name.value==L"face")
 							{
-								style.key.fontFamily=TranslateAttribute(att->value.value);
+								style.normalStyle.key.fontFamily=TranslateAttribute(att->value.value);
+								style.activeStyle.key.fontFamily=TranslateAttribute(att->value.value);
 							}
 							else if(att->name.value==L"size")
 							{
-								style.key.size=wtoi(TranslateAttribute(att->value.value));
+								style.normalStyle.key.size=wtoi(TranslateAttribute(att->value.value));
+								style.activeStyle.key.size=wtoi(TranslateAttribute(att->value.value));
 							}
 							else if(att->name.value==L"color")
 							{
-								style.value=Color::Parse(TranslateAttribute(att->value.value));
+								style.normalStyle.value=Color::Parse(TranslateAttribute(att->value.value));
+								style.activeStyle.value=Color::Parse(TranslateAttribute(att->value.value));
 							}
 						}
 						styleStack.Add(style);
@@ -408,7 +445,8 @@ document_serialization_visitors::DeserializeNodeVisitor
 					else if(node->name.value==L"b")
 					{
 						auto style=styleStack[styleStack.Count()-1];
-						style.key.bold=true;
+						style.normalStyle.key.bold=true;
+						style.activeStyle.key.bold=true;
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -419,7 +457,8 @@ document_serialization_visitors::DeserializeNodeVisitor
 					else if(node->name.value==L"i")
 					{
 						auto style=styleStack[styleStack.Count()-1];
-						style.key.italic=true;
+						style.normalStyle.key.italic=true;
+						style.activeStyle.key.italic=true;
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -430,7 +469,8 @@ document_serialization_visitors::DeserializeNodeVisitor
 					else if(node->name.value==L"u")
 					{
 						auto style=styleStack[styleStack.Count()-1];
-						style.key.underline=true;
+						style.normalStyle.key.underline=true;
+						style.activeStyle.key.underline=true;
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -441,7 +481,8 @@ document_serialization_visitors::DeserializeNodeVisitor
 					else if(node->name.value==L"s")
 					{
 						auto style=styleStack[styleStack.Count()-1];
-						style.key.strikeline=true;
+						style.normalStyle.key.strikeline=true;
+						style.activeStyle.key.strikeline=true;
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -452,8 +493,10 @@ document_serialization_visitors::DeserializeNodeVisitor
 					else if(node->name.value==L"ha")
 					{
 						auto style=styleStack[styleStack.Count()-1];
-						style.key.antialias=true;
-						style.key.verticalAntialias=false;
+						style.normalStyle.key.antialias=true;
+						style.normalStyle.key.verticalAntialias=false;
+						style.activeStyle.key.antialias=true;
+						style.activeStyle.key.verticalAntialias=false;
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -464,8 +507,10 @@ document_serialization_visitors::DeserializeNodeVisitor
 					else if(node->name.value==L"va")
 					{
 						auto style=styleStack[styleStack.Count()-1];
-						style.key.antialias=true;
-						style.key.verticalAntialias=true;
+						style.normalStyle.key.antialias=true;
+						style.normalStyle.key.verticalAntialias=true;
+						style.activeStyle.key.antialias=true;
+						style.activeStyle.key.verticalAntialias=true;
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -476,8 +521,10 @@ document_serialization_visitors::DeserializeNodeVisitor
 					else if(node->name.value==L"na")
 					{
 						auto style=styleStack[styleStack.Count()-1];
-						style.key.antialias=false;
-						style.key.verticalAntialias=false;
+						style.normalStyle.key.antialias=false;
+						style.normalStyle.key.verticalAntialias=false;
+						style.activeStyle.key.antialias=false;
+						style.activeStyle.key.verticalAntialias=false;
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -493,7 +540,8 @@ document_serialization_visitors::DeserializeNodeVisitor
 						{
 							styleName=TranslateAttribute(att->value.value);
 						}
-						style=model->GetStyle(styleName, style);
+						style.normalStyle=model->GetStyle(styleName, style.normalStyle);
+						style.activeStyle=model->GetStyle(styleName, style.activeStyle);
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -514,22 +562,26 @@ document_serialization_visitors::DeserializeNodeVisitor
 						{
 							activeStyle=TranslateAttribute(att->value.value);
 						}
-						style=model->GetStyle(normalStyle, style);
+						style.normalStyle=model->GetStyle(normalStyle, style.normalStyle);
+						style.activeStyle=model->GetStyle(activeStyle, style.activeStyle);
+						style.hyperlinkId=model->hyperlinkInfos.Count();
 						styleStack.Add(style);
 
-						vint oldId=currentHyperlinkId;
 						WString href;
 						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"href"))
 						{
 							href=TranslateAttribute(att->value.value);
 						}
-						currentHyperlinkId=model->hyperlinkInfos.Count();
-						model->hyperlinkInfos.Add(currentHyperlinkId, href);
+						{
+							DocumentModel::HyperlinkInfo info;
+							info.paragraphIndex=paragraphIndex;
+							info.reference=href;
+							model->hyperlinkInfos.Add(style.hyperlinkId, info);
+						}
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
 							sub->Accept(this);
 						}
-						currentHyperlinkId=oldId;
 
 						styleStack.RemoveAt(styleStack.Count()-1);
 					}
@@ -755,11 +807,11 @@ DocumentModel
 				}
 				if(Ptr<XmlElement> content=XmlGetElement(xml->rootElement, L"Content"))
 				{
-					FOREACH(Ptr<XmlElement>, p, XmlGetElements(content, L"p"))
+					FOREACH_INDEXER(Ptr<XmlElement>, p, i, XmlGetElements(content, L"p"))
 					{
 						Ptr<DocumentParagraph> paragraph=new DocumentParagraph;
 						model->paragraphs.Add(paragraph);
-						DeserializeNodeVisitor visitor(model, paragraph, resolver);
+						DeserializeNodeVisitor visitor(model, paragraph, i, resolver);
 						p->Accept(&visitor);
 					}
 				}

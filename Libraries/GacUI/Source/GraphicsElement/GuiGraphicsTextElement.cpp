@@ -855,6 +855,11 @@ Visitors
 						text=run->text;
 					}
 
+					void Visit(DocumentHyperlinkTextRun* run)override
+					{
+						Visit(static_cast<DocumentTextRun*>(run));
+					}
+
 					void Visit(DocumentImageRun* run)override
 					{
 						text=L"[Image]";
@@ -902,6 +907,11 @@ Visitors
 								paragraph->SetInteractionId(start, length, run->hyperlinkId);
 							}
 						}
+					}
+
+					void Visit(DocumentHyperlinkTextRun* run)override
+					{
+						Visit(static_cast<DocumentTextRun*>(run));
 					}
 
 					void Visit(DocumentImageRun* run)override
