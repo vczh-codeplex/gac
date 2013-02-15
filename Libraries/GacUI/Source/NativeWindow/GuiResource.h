@@ -256,6 +256,7 @@ Rich Content Document (model)
 			DocumentModel();
 
 			RawStylePair					GetStyle(const WString& styleName, const RawStylePair& context);
+			vint							ActivateHyperlink(vint hyperlinkId, bool active);
 
 			/// <summary>Load a document model from an xml.</summary>
 			/// <returns>The loaded document model.</returns>

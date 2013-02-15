@@ -1188,6 +1188,18 @@ GuiDocumentElement
 					return DocumentRun::NullHyperlinkId;
 				}
 			}
+
+			void GuiDocumentElement::ActivateHyperlink(vint hyperlinkId, bool active)
+			{
+				if(document)
+				{
+					vint paragraphIndex=document->ActivateHyperlink(hyperlinkId, active);
+					if(paragraphIndex!=-1)
+					{
+						NotifyParagraphUpdated(paragraphIndex);
+					}
+				}
+			}
 		}
 	}
 }
