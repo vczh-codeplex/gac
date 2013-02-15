@@ -17,7 +17,9 @@ GuiDocumentViewer
 			{
 				if(activeHyperlinkId!=value)
 				{
+					documentElement->ActivateHyperlink(activeHyperlinkId, false);
 					activeHyperlinkId=value;
+					documentElement->ActivateHyperlink(activeHyperlinkId, true);
 					ActiveHyperlinkChanged.Execute(GetNotifyEventArguments());
 				}
 			}

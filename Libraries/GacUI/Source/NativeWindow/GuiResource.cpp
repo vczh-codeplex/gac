@@ -641,6 +641,52 @@ document_serialization_visitors::DeserializeNodeVisitor
 		using namespace document_serialization_visitors;
 
 /***********************************************************************
+document_serialization_visitors::ActivateHyperlinkVisitor
+***********************************************************************/
+
+		namespace document_serialization_visitors
+		{
+			class ActivateHyperlinkVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				vint			hyperlinkId;
+				bool			active;
+
+				ActivateHyperlinkVisitor(vint _hyperlinkId, bool _active)
+					:hyperlinkId(_hyperlinkId)
+					,active(_active)
+				{
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+				}
+
+				void Visit(DocumentHyperlinkTextRun* run)override
+				{
+					if(run->hyperlinkId==hyperlinkId)
+					{
+						if(active)
+						{
+							run->style=run->activeStyle;
+							run->color=run->activeColor;
+						}
+						else
+						{
+							run->style=run->normalStyle;
+							run->color=run->normalColor;
+						}
+					}
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+				}
+			};
+		}
+		using namespace document_serialization_visitors;
+
+/***********************************************************************
 DocumentModel
 ***********************************************************************/
 
@@ -723,6 +769,29 @@ DocumentModel
 			font.antialias=result.antialias.Value();
 			font.verticalAntialias=result.verticalAntialias.Value();
 			return RawStylePair(font, result.color.Value());
+		}
+
+		vint DocumentModel::ActivateHyperlink(vint hyperlinkId, bool active)
+		{
+			vint index=hyperlinkInfos.Keys().IndexOf(hyperlinkId);
+			if(index!=-1)
+			{
+				vint paragraphIndex=hyperlinkInfos.Values().Get(index).paragraphIndex;
+				if(0<=paragraphIndex && paragraphIndex<paragraphs.Count())
+				{
+					Ptr<DocumentParagraph> paragraph=paragraphs[paragraphIndex];
+					ActivateHyperlinkVisitor visitor(hyperlinkId, active);
+					FOREACH(Ptr<DocumentLine>, line, paragraph->lines)
+					{
+						FOREACH(Ptr<DocumentRun>, run, line->runs)
+						{
+							run->Accept(&visitor);
+						}
+					}
+					return paragraphIndex;
+				}
+			}
+			return  -1;
 		}
 
 		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<DocumentResolver> resolver)
