@@ -94,3 +94,39 @@ void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* c
 
 	container->GetContainerComposition()->AddChild(documentViewer->GetBoundsComposition());
 }
+
+void SetupDocumentViewerLayoutWindow(GuiControlHost* controlHost, GuiControl* container)
+{
+	GuiDocumentViewer* documentControl=g::NewDocumentViewer();
+	documentControl->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+	documentControl->ActiveHyperlinkExecuted.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		GetCurrentController()->DialogService()->ShowMessageBox(
+			controlHost->GetNativeWindow(),
+			documentControl->GetActiveHyperlinkReference(),
+			controlHost->GetText());
+	});
+	container->AddChild(documentControl);
+
+	Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"Resources\\XmlResource.xml");
+	Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();
+	documentControl->SetDocument(document);
+}
+
+void SetupDocumentLabelLayoutWindow(GuiControlHost* controlHost, GuiControl* container)
+{
+	GuiDocumentLabel* documentControl=g::NewDocumentLabel();
+	documentControl->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+	documentControl->ActiveHyperlinkExecuted.AttachLambda([=](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		GetCurrentController()->DialogService()->ShowMessageBox(
+			controlHost->GetNativeWindow(),
+			documentControl->GetActiveHyperlinkReference(),
+			controlHost->GetText());
+	});
+	container->AddChild(documentControl);
+
+	Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"Resources\\XmlResource.xml");
+	Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();
+	documentControl->SetDocument(document);
+}

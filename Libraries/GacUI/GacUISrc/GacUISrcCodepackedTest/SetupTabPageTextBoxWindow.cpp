@@ -3,6 +3,8 @@
 extern void SetupTextBoxWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupSolidLabelElementLayoutWindow(GuiControlHost* controlHost, GuiControl* container);
 extern void SetupDocumentElementLayoutWindow(GuiControlHost* controlHost, GuiControl* container, const WString& filename);
+extern void SetupDocumentViewerLayoutWindow(GuiControlHost* controlHost, GuiControl* container);
+extern void SetupDocumentLabelLayoutWindow(GuiControlHost* controlHost, GuiControl* container);
 
 void SetupTabPageTextBoxlWindow(GuiControlHost* controlHost, GuiControl* container)
 {
@@ -31,7 +33,13 @@ void SetupTabPageTextBoxlWindow(GuiControlHost* controlHost, GuiControl* contain
 	}
 	{
 		GuiTabPage* page=tab->CreatePage();
-		page->SetText(L"XmlResource.xml");
+		page->SetText(L"Document Viewer");
+		SetupDocumentViewerLayoutWindow(controlHost, page->GetContainer());
+	}
+	{
+		GuiTabPage* page=tab->CreatePage();
+		page->SetText(L"Document Label");
+		SetupDocumentLabelLayoutWindow(controlHost, page->GetContainer());
 	}
 	container->GetContainerComposition()->AddChild(tab->GetBoundsComposition());
 }
