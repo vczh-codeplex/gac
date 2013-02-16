@@ -19,11 +19,11 @@ namespace vl
 		{
 
 /***********************************************************************
-GuiDocumentViewer
+GuiDocumentCommonInterface
 ***********************************************************************/
 			
-			/// <summary>Document viewer for displaying <see cref="DocumentModel"/>.</summary>
-			class GuiDocumentViewer : public GuiScrollContainer, public Description<GuiDocumentViewer>
+			/// <summary>Document displayer control common interface for displaying <see cref="DocumentModel"/>.</summary>
+			class GuiDocumentCommonInterface abstract : public Description<GuiDocumentCommonInterface>
 			{
 			protected:
 				elements::GuiDocumentElement*				documentElement;
@@ -31,17 +31,17 @@ GuiDocumentViewer
 				vint										activeHyperlinkId;
 				vint										draggingHyperlinkId;
 				bool										dragging;
+				GuiControl*									senderControl;
 
+				void										InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container);
 				void										SetActiveHyperlinkId(vint value);
 				void										OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void										OnMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void										OnMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void										OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
-				/// <summary>Create a control with a specified style provider.</summary>
-				/// <param name="styleProvider">The style provider.</param>
-				GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider);
-				~GuiDocumentViewer();
+				GuiDocumentCommonInterface();
+				~GuiDocumentCommonInterface();
 
 				/// <summary>Active hyperlink changed event.</summary>
 				compositions::GuiNotifyEvent				ActiveHyperlinkChanged;
@@ -63,6 +63,34 @@ GuiDocumentViewer
 				/// <summary>Get the href attribute of the active hyperlink.</summary>
 				/// <returns>The href attribute of the active hyperlink.</returns>
 				WString										GetActiveHyperlinkReference();
+			};
+
+/***********************************************************************
+GuiDocumentViewer
+***********************************************************************/
+			
+			/// <summary>Scrollable document viewer for displaying <see cref="DocumentModel"/>.</summary>
+			class GuiDocumentViewer : public GuiScrollContainer, public GuiDocumentCommonInterface, public Description<GuiDocumentViewer>
+			{
+			public:
+				/// <summary>Create a control with a specified style provider.</summary>
+				/// <param name="styleProvider">The style provider.</param>
+				GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider);
+				~GuiDocumentViewer();
+			};
+
+/***********************************************************************
+GuiDocumentViewer
+***********************************************************************/
+			
+			/// <summary>Static document viewer for displaying <see cref="DocumentModel"/>.</summary>
+			class GuiDocumentLabel : public GuiControl, public GuiDocumentCommonInterface, public Description<GuiDocumentLabel>
+			{
+			public:
+				/// <summary>Create a control with a specified style controller.</summary>
+				/// <param name="styleController">The style controller.</param>
+				GuiDocumentLabel(GuiDocumentLabel::IStyleController* styleController);
+				~GuiDocumentLabel();
 			};
 		}
 	}

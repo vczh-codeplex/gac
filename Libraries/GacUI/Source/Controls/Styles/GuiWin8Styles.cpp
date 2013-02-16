@@ -82,6 +82,11 @@ Win8Theme
 				return new Win8MultilineTextBoxProvider;
 			}
 
+			controls::GuiDocumentLabel::IStyleController* Win8Theme::CreateDocumentLabelStyle()
+			{
+				return new controls::GuiControl::EmptyStyleController;
+			}
+
 			controls::GuiListView::IStyleProvider* Win8Theme::CreateListViewStyle()
 			{
 				return new Win8ListViewProvider;

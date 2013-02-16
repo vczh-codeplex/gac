@@ -35,13 +35,13 @@ namespace test
 	class TestWindow : public GuiWindow
 	{
 	private:
-		GuiDocumentViewer*				documentViewer;
+		GuiDocumentLabel*				documentControl;
 
 		void documentViewer_ActiveHyperlinkExecuted(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
 			GetCurrentController()->DialogService()->ShowMessageBox(
 				GetNativeWindow(),
-				documentViewer->GetActiveHyperlinkReference(),
+				documentControl->GetActiveHyperlinkReference(),
 				GetText());
 		}
 	public:
@@ -51,12 +51,13 @@ namespace test
 			SetText(GetApplication()->GetExecutableFolder());
 			SetClientSize(Size(640, 480));
 			GetBoundsComposition()->SetPreferredMinSize(Size(320, 240));
+			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			MoveToScreenCenter();
 
-			documentViewer=g::NewDocumentViewer();
-			documentViewer->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			documentViewer->ActiveHyperlinkExecuted.AttachMethod(this, &TestWindow::documentViewer_ActiveHyperlinkExecuted);
-			AddChild(documentViewer);
+			documentControl=g::NewDocumentLabel();
+			documentControl->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			documentControl->ActiveHyperlinkExecuted.AttachMethod(this, &TestWindow::documentViewer_ActiveHyperlinkExecuted);
+			AddChild(documentControl);
 
 			Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml");
 			Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();
@@ -68,7 +69,7 @@ namespace test
 				StreamWriter writer(encoderStream);
 				XmlPrint(xml, writer);
 			}
-			documentViewer->SetDocument(document);
+			documentControl->SetDocument(document);
 		}
 	};
 }

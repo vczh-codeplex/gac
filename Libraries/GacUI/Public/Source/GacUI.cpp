@@ -8904,6 +8904,11 @@ namespace vl
 					return new controls::GuiDocumentViewer(GetCurrentTheme()->CreateDocumentViewerStyle());
 				}
 
+				controls::GuiDocumentLabel* NewDocumentLabel()
+				{
+					return new controls::GuiDocumentLabel(GetCurrentTheme()->CreateDocumentLabelStyle());
+				}
+
 				controls::GuiListView* NewListViewBigIcon()
 				{
 					controls::GuiListView* listview=new controls::GuiListView(GetCurrentTheme()->CreateListViewStyle());
@@ -9144,6 +9149,11 @@ Win7Theme
 				return new Win7MultilineTextBoxProvider;
 			}
 
+			controls::GuiDocumentLabel::IStyleController* Win7Theme::CreateDocumentLabelStyle()
+			{
+				return new controls::GuiControl::EmptyStyleController;
+			}
+
 			controls::GuiListView::IStyleProvider* Win7Theme::CreateListViewStyle()
 			{
 				return new Win7ListViewProvider;
@@ -9357,6 +9367,11 @@ Win8Theme
 			controls::GuiDocumentViewer::IStyleProvider* Win8Theme::CreateDocumentViewerStyle()
 			{
 				return new Win8MultilineTextBoxProvider;
+			}
+
+			controls::GuiDocumentLabel::IStyleController* Win8Theme::CreateDocumentLabelStyle()
+			{
+				return new controls::GuiControl::EmptyStyleController;
 			}
 
 			controls::GuiListView::IStyleProvider* Win8Theme::CreateListViewStyle()
@@ -17037,37 +17052,154 @@ namespace vl
 GuiDocumentViewer
 ***********************************************************************/
 
+			void GuiDocumentCommonInterface::InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container)
+			{
+				senderControl=_sender;
+
+				documentElement=GuiDocumentElement::Create();
+				documentComposition=new GuiBoundsComposition;
+				documentComposition->SetOwnedElement(documentElement);
+				documentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				documentComposition->SetAlignmentToParent(Margin(5, 5, 5, 5));
+				_container->AddChild(documentComposition);
+
+				documentComposition->GetEventReceiver()->mouseMove.AttachMethod(this, &GuiDocumentCommonInterface::OnMouseMove);
+				documentComposition->GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiDocumentCommonInterface::OnMouseDown);
+				documentComposition->GetEventReceiver()->leftButtonUp.AttachMethod(this, &GuiDocumentCommonInterface::OnMouseUp);
+				documentComposition->GetEventReceiver()->mouseLeave.AttachMethod(this, &GuiDocumentCommonInterface::OnMouseLeave);
+
+				ActiveHyperlinkChanged.SetAssociatedComposition(_sender->GetBoundsComposition());
+				ActiveHyperlinkExecuted.SetAssociatedComposition(_sender->GetBoundsComposition());
+			}
+
+			void GuiDocumentCommonInterface::SetActiveHyperlinkId(vint value)
+			{
+				if(activeHyperlinkId!=value)
+				{
+					documentElement->ActivateHyperlink(activeHyperlinkId, false);
+					activeHyperlinkId=value;
+					documentElement->ActivateHyperlink(activeHyperlinkId, true);
+					ActiveHyperlinkChanged.Execute(senderControl->GetNotifyEventArguments());
+				}
+			}
+
+			void GuiDocumentCommonInterface::OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			{
+				vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
+				if(dragging && id!=draggingHyperlinkId)
+				{
+					id=DocumentRun::NullHyperlinkId;
+				}
+				SetActiveHyperlinkId(id);
+				if(id==DocumentRun::NullHyperlinkId)
+				{
+					documentComposition->SetAssociatedCursor(0);
+				}
+				else
+				{
+					INativeCursor* cursor=GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::Hand);
+					documentComposition->SetAssociatedCursor(cursor);
+				}
+			}
+
+			void GuiDocumentCommonInterface::OnMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			{
+				vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
+				draggingHyperlinkId=id;
+				SetActiveHyperlinkId(id);
+				dragging=true;
+			}
+
+			void GuiDocumentCommonInterface::OnMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			{
+				dragging=false;
+				vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
+				if(id==draggingHyperlinkId && id!=DocumentRun::NullHyperlinkId)
+				{
+					ActiveHyperlinkExecuted.Execute(senderControl->GetNotifyEventArguments());
+				}
+				draggingHyperlinkId=DocumentRun::NullHyperlinkId;
+			}
+
+			void GuiDocumentCommonInterface::OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				SetActiveHyperlinkId(DocumentRun::NullHyperlinkId);
+			}
+
+			GuiDocumentCommonInterface::GuiDocumentCommonInterface()
+				:documentElement(0)
+				,documentComposition(0)
+				,activeHyperlinkId(DocumentRun::NullHyperlinkId)
+				,draggingHyperlinkId(DocumentRun::NullHyperlinkId)
+				,dragging(false)
+				,senderControl(0)
+			{
+			}
+
+			GuiDocumentCommonInterface::~GuiDocumentCommonInterface()
+			{
+			}
+
+			Ptr<DocumentModel> GuiDocumentCommonInterface::GetDocument()
+			{
+				return documentElement->GetDocument();
+			}
+
+			void GuiDocumentCommonInterface::SetDocument(Ptr<DocumentModel> value)
+			{
+				SetActiveHyperlinkId(DocumentRun::NullHyperlinkId);
+				documentElement->SetDocument(value);
+			}
+
+			void GuiDocumentCommonInterface::NotifyParagraphUpdated(vint index)
+			{
+				documentElement->NotifyParagraphUpdated(index);
+			}
+
+			vint GuiDocumentCommonInterface::GetActiveHyperlinkId()
+			{
+				return activeHyperlinkId;
+			}
+
+			WString GuiDocumentCommonInterface::GetActiveHyperlinkReference()
+			{
+				if(activeHyperlinkId==DocumentRun::NullHyperlinkId) return L"";
+				Ptr<DocumentModel> document=documentElement->GetDocument();
+				if(!document) return L"";
+				vint index=document->hyperlinkInfos.Keys().IndexOf(activeHyperlinkId);
+				if(index==-1) return L"";
+				return document->hyperlinkInfos.Values().Get(index).reference;
+			}
+
+/***********************************************************************
+GuiDocumentViewer
+***********************************************************************/
+
 			GuiDocumentViewer::GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider)
 				:GuiScrollContainer(styleProvider)
 			{
 				SetExtendToFullWidth(true);
 				SetHorizontalAlwaysVisible(false);
-
-				documentElement=GuiDocumentElement::Create();
-				GuiBoundsComposition* composition=new GuiBoundsComposition;
-				composition->SetOwnedElement(documentElement);
-				composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
-				composition->SetAlignmentToParent(Margin(5, 5, 5, 5));
-				GetContainerComposition()->AddChild(composition);
+				InstallDocumentViewer(this, GetContainerComposition());
 			}
 
 			GuiDocumentViewer::~GuiDocumentViewer()
 			{
 			}
 
-			Ptr<DocumentModel> GuiDocumentViewer::GetDocument()
+/***********************************************************************
+GuiDocumentLabel
+***********************************************************************/
+
+			GuiDocumentLabel::GuiDocumentLabel(GuiDocumentLabel::IStyleController* styleController)
+				:GuiControl(styleController)
 			{
-				return documentElement->GetDocument();
+				GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				InstallDocumentViewer(this, GetContainerComposition());
 			}
 
-			void GuiDocumentViewer::SetDocument(Ptr<DocumentModel> value)
+			GuiDocumentLabel::~GuiDocumentLabel()
 			{
-				documentElement->SetDocument(value);
-			}
-
-			void GuiDocumentViewer::NotifyParagraphUpdated(vint index)
-			{
-				documentElement->NotifyParagraphUpdated(index);
 			}
 		}
 	}
@@ -24490,6 +24622,11 @@ Visitors
 						text=run->text;
 					}
 
+					void Visit(DocumentHyperlinkTextRun* run)override
+					{
+						Visit(static_cast<DocumentTextRun*>(run));
+					}
+
 					void Visit(DocumentImageRun* run)override
 					{
 						text=L"[Image]";
@@ -24506,8 +24643,8 @@ Visitors
 				class SetPropertiesVisitor : public Object, public DocumentRun::IVisitor
 				{
 				public:
-					vint							start;
-					vint							length;
+					vint						start;
+					vint						length;
 					IGuiGraphicsParagraph*		paragraph;
 
 					SetPropertiesVisitor(vint _start, IGuiGraphicsParagraph* _paragraph)
@@ -24532,8 +24669,16 @@ Visitors
 								| (run->style.underline?IGuiGraphicsParagraph::Underline:0)
 								| (run->style.strikeline?IGuiGraphicsParagraph::Strikeline:0)
 								));
-							start+=length;
+							if(run->hyperlinkId!=DocumentRun::NullHyperlinkId)
+							{
+								paragraph->SetInteractionId(start, length, run->hyperlinkId);
+							}
 						}
+					}
+
+					void Visit(DocumentHyperlinkTextRun* run)override
+					{
+						Visit(static_cast<DocumentTextRun*>(run));
 					}
 
 					void Visit(DocumentImageRun* run)override
@@ -24551,6 +24696,10 @@ Visitors
 						element->SetStretch(true);
 
 						paragraph->SetInlineObject(start, length, properties, element);
+						if(run->hyperlinkId!=DocumentRun::NullHyperlinkId)
+						{
+							paragraph->SetInteractionId(start, length, run->hyperlinkId);
+						}
 					}
 
 					static vint SetProperty(vint start, IGuiGraphicsParagraph* paragraph, DocumentRun* run)
@@ -24725,6 +24874,40 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				}
 			}
 
+			vint GuiDocumentElement::GuiDocumentElementRenderer::GetHyperlinkIdFromPoint(Point point)
+			{
+				vint y=0;
+				for(vint i=0;i<paragraphHeights.Count();i++)
+				{
+					vint paragraphHeight=paragraphHeights[i];
+					if(y+paragraphHeight<=point.y)
+					{
+						y+=paragraphHeight+paragraphDistance;
+						continue;
+					}
+					else if(y>point.y)
+					{
+						break;
+					}
+					else
+					{
+						Ptr<ParagraphCache> cache=paragraphCaches[i];
+						if(cache && cache->graphicsParagraph)
+						{
+							vint start=0;
+							vint length=0;
+							vint id=0;
+							if(cache->graphicsParagraph->HitTestPoint(Point(point.x, point.y-y), start, length, id))
+							{
+								return id;
+							}
+						}
+						return DocumentRun::NullHyperlinkId;
+					}
+				}
+				return DocumentRun::NullHyperlinkId;
+			}
+
 /***********************************************************************
 GuiDocumentElement
 ***********************************************************************/
@@ -24757,6 +24940,31 @@ GuiDocumentElement
 				if(elementRenderer)
 				{
 					elementRenderer->NotifyParagraphUpdated(index);
+				}
+			}
+
+			vint GuiDocumentElement::GetHyperlinkIdFromPoint(Point point)
+			{
+				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
+				if(elementRenderer)
+				{
+					return elementRenderer->GetHyperlinkIdFromPoint(point);
+				}
+				else
+				{
+					return DocumentRun::NullHyperlinkId;
+				}
+			}
+
+			void GuiDocumentElement::ActivateHyperlink(vint hyperlinkId, bool active)
+			{
+				if(document)
+				{
+					vint paragraphIndex=document->ActivateHyperlink(hyperlinkId, active);
+					if(paragraphIndex!=-1)
+					{
+						NotifyParagraphUpdated(paragraphIndex);
+					}
 				}
 			}
 		}
@@ -24922,6 +25130,7 @@ WindowsDirect2DParagraph
 			class WindowsDirect2DParagraph : public Object, public IGuiGraphicsParagraph
 			{
 				typedef Dictionary<IGuiGraphicsElement*, ComPtr<WindowsDirect2DElementInlineObject>>		InlineElementMap;
+				typedef Dictionary<Pair<vint, vint>, vint>													InteractionIdMap;
 			protected:
 				IGuiGraphicsLayoutProvider*			provider;
 				ID2D1SolidColorBrush*				defaultTextColor;
@@ -24929,9 +25138,10 @@ WindowsDirect2DParagraph
 				IWindowsDirect2DRenderTarget*		renderTarget;
 				ComPtr<IDWriteTextLayout>			textLayout;
 				bool								wrapLine;
-				vint									maxWidth;
+				vint								maxWidth;
 				List<Color>							usedColors;
 				InlineElementMap					inlineElements;
+				InteractionIdMap					interactionIds;
 
 			public:
 				WindowsDirect2DParagraph(IGuiGraphicsLayoutProvider* _provider, const WString& _text, IGuiGraphicsRenderTarget* _renderTarget)
@@ -24960,6 +25170,7 @@ WindowsDirect2DParagraph
 						textLayout=rawTextLayout;
 						textLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP);
 					}
+					interactionIds.Add(Pair<vint, vint>(0, _text.Length()), NullInteractionId);
 
 					GetWindowsDirect2DResourceManager()->DestroyDirect2DTextFormat(defaultFont);
 				}
@@ -25122,6 +25333,90 @@ WindowsDirect2DParagraph
 						}
 					}
 					return false;
+				}
+
+				vint SearchInInteractionIdMap(vint textPosition)
+				{
+					vint start=0;
+					vint end=interactionIds.Count()-1;
+					while(start<=end)
+					{
+						vint middle=start+(end-start)/2;
+						Pair<vint, vint> p=interactionIds.Keys()[middle];
+						if(textPosition<p.key)
+						{
+							end=middle-1;
+						}
+						else if(p.key+p.value<=textPosition)
+						{
+							start=middle+1;
+						}
+						else
+						{
+							return middle;
+						}
+					}
+					return -1;
+				}
+
+				vint CutInteractionIdMap(vint textPosition, vint index)
+				{
+					Pair<vint, vint> p=interactionIds.Keys()[index];
+					CHECK_ERROR(p.key<=textPosition && textPosition<=p.key+p.value, L"WindowsDirect2DParagraph::CutInteractionIdMap(vint, vint)#textPosition与index不匹配。");
+					if(textPosition==p.key || textPosition==p.key+p.value)
+					{
+						return 0;
+					}
+					else
+					{
+						vint id=interactionIds.Values().Get(index);
+						Pair<vint, vint> bp=p;
+						Pair<vint, vint> ep=p;
+						bp.value=textPosition-p.key;
+						ep.key=textPosition;
+						ep.value=p.value-bp.value;
+
+						interactionIds.Remove(p);
+						interactionIds.Add(bp, id);
+						interactionIds.Add(ep, id);
+						return 1;
+					}
+				}
+
+				bool SetInteractionId(vint start, vint length, vint value)override
+				{
+					vint begin=SearchInInteractionIdMap(start);
+					vint end=SearchInInteractionIdMap(start+length-1);
+					if(begin==-1 || end==-1) return false;
+
+					vint offset=CutInteractionIdMap(start, begin);
+					begin+=offset;
+					end+=offset;
+					CutInteractionIdMap(start+length, end);
+					for(vint i=begin;i<=end;i++)
+					{
+						interactionIds.Set(interactionIds.Keys()[i], value);
+					}
+					return true;
+				}
+
+				bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)override
+				{
+					DWRITE_HIT_TEST_METRICS metrics={0};
+					BOOL trailingHit=FALSE;
+					BOOL inside=FALSE;
+					start=-1;
+					length=0;
+					interactionId=NullInteractionId;
+					HRESULT hr=textLayout->HitTestPoint((FLOAT)point.x, (FLOAT)point.y, &trailingHit, &inside, &metrics);
+					if(hr!=S_OK) return false;
+
+					start=metrics.textPosition;
+					length=metrics.length;
+					vint index=SearchInInteractionIdMap(start);
+					interactionId=index==-1?NullInteractionId:interactionIds.Values().Get(index);
+
+					return inside==TRUE;
 				}
 
 				vint GetHeight()override
@@ -27134,10 +27429,16 @@ Uniscribe Operations (UniscribeFragment)
 				Color											fontColor;
 				WString											text;
 				Ptr<WinFont>									fontObject;
+				vint											interactionId;
 
 				Ptr<IGuiGraphicsElement>						element;
 				IGuiGraphicsParagraph::InlineObjectProperties	inlineObjectProperties;
 				List<Ptr<UniscribeFragment>>					cachedTextFragment;
+
+				UniscribeFragment()
+					:interactionId(-1)
+				{
+				}
 
 				WString GetFingerprint()
 				{
@@ -27319,8 +27620,8 @@ Uniscribe Operations (UniscribeRun)
 			public:
 				struct RunFragmentBounds
 				{
-					vint							start;
-					vint							length;
+					vint						start;
+					vint						length;
 					Rect						bounds;
 
 					bool operator==(const RunFragmentBounds&){return false;}
@@ -27329,8 +27630,8 @@ Uniscribe Operations (UniscribeRun)
 
 				UniscribeFragment*				documentFragment;
 				SCRIPT_ITEM*					scriptItem;
-				vint								start;
-				vint								length;
+				vint							start;
+				vint							length;
 				const wchar_t*					runText;
 				List<RunFragmentBounds>			fragmentBounds;
 
@@ -27347,10 +27648,25 @@ Uniscribe Operations (UniscribeRun)
 				}
 
 				virtual bool					BuildUniscribeData(WinDC* dc)=0;
-				virtual vint						SumWidth(vint charStart, vint charLength)=0;
-				virtual vint						SumHeight()=0;
+				virtual vint					SumWidth(vint charStart, vint charLength)=0;
+				virtual vint					SumHeight()=0;
 				virtual void					SearchForLineBreak(vint tempStart, vint maxWidth, bool firstRun, vint& charLength, vint& charAdvances)=0;
 				virtual void					Render(WinDC* dc, vint fragmentBoundsIndex, vint offsetX, vint offsetY)=0;
+
+				virtual bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)
+				{
+					for(vint i=0;i<fragmentBounds.Count();i++)
+					{
+						if(fragmentBounds[i].bounds.Contains(point))
+						{
+							start=this->start;
+							length=this->length;
+							interactionId=this->documentFragment->interactionId;
+							return true;
+						}
+					}
+					return false;
+				}
 			};
 
 /***********************************************************************
@@ -27362,7 +27678,7 @@ Uniscribe Operations (UniscribeTextRun)
 			public:
 				SCRIPT_CACHE					scriptCache;
 				Array<SCRIPT_LOGATTR>			charLogattrs;
-				vint								advance;
+				vint							advance;
 				UniscribeGlyphData				wholeGlyph;
 
 				UniscribeTextRun()
@@ -27771,7 +28087,7 @@ Uniscribe Operations (UniscribeParagraph)
 				bool							built;
 
 				List<Ptr<UniscribeLine>>		lines;
-				vint								lastAvailableWidth;
+				vint							lastAvailableWidth;
 				Rect							bounds;
 
 				UniscribeParagraph()
@@ -27900,7 +28216,7 @@ Uniscribe Operations (UniscribeParagraph)
 								run->fragmentBounds.Clear();
 							}
 
-							// render this line into linces with auto line wrapping
+							// render this line into lines with auto line wrapping
 							vint startRun=0;
 							vint startRunOffset=0;
 							vint lastRun=0;
@@ -28058,6 +28374,22 @@ Uniscribe Operations (UniscribeParagraph)
 				{
 					f1=-1;
 					f2=-1;
+					if(fs==fe)
+					{
+						Ptr<UniscribeFragment> fragment=documentFragments[fs];
+						if(fragment->element)
+						{
+							if(ss==0 && se==fragment->text.Length())
+							{
+								f1=f2=fs;
+								return true;
+							}
+							else
+							{
+								return false;
+							}
+						}
+					}
 					for(vint i=fs;i<=fe;i++)
 					{
 						if(documentFragments[i]->element)
@@ -28277,6 +28609,58 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 					return 0;
 				}
+
+				bool SetInteractionId(vint start, vint length, vint value)
+				{
+					vint fs, ss, fe, se, f1, f2;
+					SearchFragment(start, length, fs, ss, fe, se);
+					if(CutFragment(fs, ss, fe, se, f1, f2))
+					{
+						for(vint i=f1;i<=f2;i++)
+						{
+							documentFragments[i]->interactionId=value;
+						}
+						built=false;
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+
+				bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)
+				{
+					start=-1;
+					length=0;
+					interactionId=IGuiGraphicsParagraph::NullInteractionId;
+
+					if(bounds.Contains(point))
+					{
+						FOREACH(Ptr<UniscribeLine>, line, lines)
+						{
+							if(point.y<line->bounds.y1)
+							{
+								continue;
+							}
+							else if(line->bounds.y2<=point.y)
+							{
+								break;
+							}
+							else if(line->bounds.Contains(point))
+							{
+								FOREACH(Ptr<UniscribeRun>, run, line->scriptRuns)
+								{
+									if(run->HitTestPoint(point, start, length, interactionId))
+									{
+										return true;
+									}
+								}
+							}
+						}
+					}
+					return false;
+				}
 			};
 
 /***********************************************************************
@@ -28427,6 +28811,24 @@ WindowsGDIParagraph
 						}
 					}
 					return false;
+				}
+
+				bool SetInteractionId(vint start, vint length, vint value)override
+				{
+					if(length==0) return true;
+					if(0<=start && start<text.Length() && length>=0 && 0<=start+length && start+length<=text.Length())
+					{
+						return paragraph->SetInteractionId(start, length, value);
+					}
+					else
+					{
+						return false;
+					}
+				}
+
+				bool HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)override
+				{
+					return paragraph->HitTestPoint(point, start, length, interactionId);
 				}
 
 				vint GetHeight()override
@@ -30177,6 +30579,7 @@ namespace vl
 		using namespace collections;
 		using namespace parsing::tabling;
 		using namespace parsing::xml;
+		using namespace regex;
 
 		WString GetFolderPath(const WString& filePath)
 		{
@@ -30274,7 +30677,7 @@ DocumentResolver
 		}
 
 /***********************************************************************
-DocumentModel
+document_serialization_visitors::SerializeRunVisitor
 ***********************************************************************/
 
 		namespace document_serialization_visitors
@@ -30373,6 +30776,11 @@ DocumentModel
 					}
 				}
 
+				void Visit(DocumentHyperlinkTextRun* run)override
+				{
+					Visit(static_cast<DocumentTextRun*>(run));
+				}
+
 				void Visit(DocumentImageRun* run)override
 				{
 					XmlElementWriter writer(container);
@@ -30386,20 +30794,91 @@ DocumentModel
 						;
 				}
 			};
+		}
+		using namespace document_serialization_visitors;
 
+/***********************************************************************
+document_serialization_visitors::DeserializeNodeVisitor
+***********************************************************************/
+
+		namespace document_serialization_visitors
+		{
 			class DeserializeNodeVisitor : public XmlNode::IVisitor
 			{
 			public:
-				List<Pair<FontProperties, Color>>	styleStack;
+				struct TemplateInfo
+				{
+					Dictionary<WString, WString>	attributes;
+					XmlElement*						templateElement;
+					XmlElement*						contentElement;
+
+					TemplateInfo()
+						:templateElement(0)
+						,contentElement(0)
+					{
+					}
+				};
+
+				struct StyleStackItem
+				{
+					Pair<FontProperties, Color>		normalStyle;
+					Pair<FontProperties, Color>		activeStyle;
+					vint							hyperlinkId;
+
+					StyleStackItem()
+						:hyperlinkId(DocumentRun::NullHyperlinkId)
+					{
+					}
+				};
+
+				List<StyleStackItem>				styleStack;
+				Ptr<DocumentModel>					model;
 				Ptr<DocumentParagraph>				paragraph;
+				vint								paragraphIndex;
 				Ptr<DocumentLine>					line;
 				Ptr<DocumentResolver>				resolver;
+				Ptr<TemplateInfo>					templateInfo;
+				Regex								regexAttributeApply;
 
-				DeserializeNodeVisitor(Ptr<DocumentParagraph> _paragraph, Ptr<DocumentResolver> _resolver)
-					:paragraph(_paragraph)
+				DeserializeNodeVisitor(Ptr<DocumentModel> _model, Ptr<DocumentParagraph> _paragraph, vint _paragraphIndex, Ptr<DocumentResolver> _resolver)
+					:model(_model)
+					,paragraph(_paragraph)
+					,paragraphIndex(_paragraphIndex)
 					,resolver(_resolver)
+					,regexAttributeApply(L"/{@(<value>[^{}]+)/}")
 				{
-					styleStack.Add(Pair<FontProperties, Color>(GetCurrentController()->ResourceService()->GetDefaultFont(), Color()));
+					StyleStackItem item;
+					item.normalStyle=Pair<FontProperties, Color>(GetCurrentController()->ResourceService()->GetDefaultFont(), Color());
+					item.activeStyle=item.normalStyle;
+					styleStack.Add(item);
+				}
+
+				WString TranslateAttribute(const WString& value)
+				{
+					if(templateInfo)
+					{
+						WString result;
+						RegexMatch::List matches;
+						regexAttributeApply.Cut(value, false, matches);
+						FOREACH(RegexMatch::Ref, match, matches)
+						{
+							if(match->Success())
+							{
+								WString name=match->Groups()[L"value"].Get(0).Value();
+								vint index=templateInfo->attributes.Keys().IndexOf(name);
+								result+=(index==-1?match->Result().Value():templateInfo->attributes.Values().Get(index));
+							}
+							else
+							{
+								result+=match->Result().Value();
+							}
+						}
+						return result;
+					}
+					else
+					{
+						return value;
+					}
 				}
 
 				void PrintText(const WString& text)
@@ -30409,16 +30888,31 @@ DocumentModel
 						line=new DocumentLine;
 						paragraph->lines.Add(line);
 					}
-					Ptr<DocumentTextRun> run=new DocumentTextRun;
-					run->style=styleStack[styleStack.Count()-1].key;
-					run->color=styleStack[styleStack.Count()-1].value;
+					Ptr<DocumentTextRun> run;
+					const StyleStackItem& item=styleStack[styleStack.Count()-1];
+					if(item.hyperlinkId==DocumentRun::NullHyperlinkId || item.normalStyle==item.activeStyle)
+					{
+						run=new DocumentTextRun;
+					}
+					else
+					{
+						Ptr<DocumentHyperlinkTextRun> hyperlink=new DocumentHyperlinkTextRun;
+						hyperlink->normalStyle=item.normalStyle.key;
+						hyperlink->normalColor=item.normalStyle.value;
+						hyperlink->activeStyle=item.activeStyle.key;
+						hyperlink->activeColor=item.activeStyle.value;
+						run=hyperlink;
+					}
+					run->hyperlinkId=item.hyperlinkId;
+					run->style=item.normalStyle.key;
+					run->color=item.normalStyle.value;
 					run->text=text;
 					line->runs.Add(run);
 				}
 
 				void Visit(XmlText* node)override
 				{
-					PrintText(node->content.value);
+					PrintText(TranslateAttribute(node->content.value));
 				}
 
 				void Visit(XmlCData* node)override
@@ -30451,7 +30945,8 @@ DocumentModel
 						Ptr<DocumentImageRun> run=new DocumentImageRun;
 						if(Ptr<XmlAttribute> source=XmlGetAttribute(node, L"source"))
 						{
-							run->source=source->value.value;
+							run->hyperlinkId=styleStack[styleStack.Count()-1].hyperlinkId;
+							run->source=TranslateAttribute(source->value.value);
 							Pair<vint, vint> index=INVLOC.FindFirst(run->source, L"://", Locale::IgnoreCase);
 							if(index.key!=-1)
 							{
@@ -30470,23 +30965,23 @@ DocumentModel
 							{
 								if(att->name.value==L"width")
 								{
-									run->size.x=wtoi(att->value.value);
+									run->size.x=wtoi(TranslateAttribute(att->value.value));
 								}
 								else if(att->name.value==L"height")
 								{
-									run->size.y=wtoi(att->value.value);
+									run->size.y=wtoi(TranslateAttribute(att->value.value));
 								}
 								else if(att->name.value==L"baseline")
 								{
-									run->baseline=wtoi(att->value.value);
+									run->baseline=wtoi(TranslateAttribute(att->value.value));
 								}
 								else if(att->name.value==L"frameIndex")
 								{
-									run->frameIndex=wtoi(att->value.value);
+									run->frameIndex=wtoi(TranslateAttribute(att->value.value));
 								}
 							}
+							line->runs.Add(run);
 						}
-						line->runs.Add(run);
 					}
 					else if(node->name.value==L"font")
 					{
@@ -30495,15 +30990,18 @@ DocumentModel
 						{
 							if(att->name.value==L"face")
 							{
-								style.key.fontFamily=att->value.value;
+								style.normalStyle.key.fontFamily=TranslateAttribute(att->value.value);
+								style.activeStyle.key.fontFamily=TranslateAttribute(att->value.value);
 							}
 							else if(att->name.value==L"size")
 							{
-								style.key.size=wtoi(att->value.value);
+								style.normalStyle.key.size=wtoi(TranslateAttribute(att->value.value));
+								style.activeStyle.key.size=wtoi(TranslateAttribute(att->value.value));
 							}
 							else if(att->name.value==L"color")
 							{
-								style.value=Color::Parse(att->value.value);
+								style.normalStyle.value=Color::Parse(TranslateAttribute(att->value.value));
+								style.activeStyle.value=Color::Parse(TranslateAttribute(att->value.value));
 							}
 						}
 						styleStack.Add(style);
@@ -30516,7 +31014,8 @@ DocumentModel
 					else if(node->name.value==L"b")
 					{
 						auto style=styleStack[styleStack.Count()-1];
-						style.key.bold=true;
+						style.normalStyle.key.bold=true;
+						style.activeStyle.key.bold=true;
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -30527,7 +31026,8 @@ DocumentModel
 					else if(node->name.value==L"i")
 					{
 						auto style=styleStack[styleStack.Count()-1];
-						style.key.italic=true;
+						style.normalStyle.key.italic=true;
+						style.activeStyle.key.italic=true;
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -30538,7 +31038,8 @@ DocumentModel
 					else if(node->name.value==L"u")
 					{
 						auto style=styleStack[styleStack.Count()-1];
-						style.key.underline=true;
+						style.normalStyle.key.underline=true;
+						style.activeStyle.key.underline=true;
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -30549,7 +31050,22 @@ DocumentModel
 					else if(node->name.value==L"s")
 					{
 						auto style=styleStack[styleStack.Count()-1];
-						style.key.strikeline=true;
+						style.normalStyle.key.strikeline=true;
+						style.activeStyle.key.strikeline=true;
+						styleStack.Add(style);
+						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+						{
+							sub->Accept(this);
+						}
+						styleStack.RemoveAt(styleStack.Count()-1);
+					}
+					else if(node->name.value==L"ha")
+					{
+						auto style=styleStack[styleStack.Count()-1];
+						style.normalStyle.key.antialias=true;
+						style.normalStyle.key.verticalAntialias=false;
+						style.activeStyle.key.antialias=true;
+						style.activeStyle.key.verticalAntialias=false;
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -30560,8 +31076,10 @@ DocumentModel
 					else if(node->name.value==L"va")
 					{
 						auto style=styleStack[styleStack.Count()-1];
-						style.key.antialias=true;
-						style.key.verticalAntialias=true;
+						style.normalStyle.key.antialias=true;
+						style.normalStyle.key.verticalAntialias=true;
+						style.activeStyle.key.antialias=true;
+						style.activeStyle.key.verticalAntialias=true;
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -30572,8 +31090,10 @@ DocumentModel
 					else if(node->name.value==L"na")
 					{
 						auto style=styleStack[styleStack.Count()-1];
-						style.key.antialias=false;
-						style.key.verticalAntialias=false;
+						style.normalStyle.key.antialias=false;
+						style.normalStyle.key.verticalAntialias=false;
+						style.activeStyle.key.antialias=false;
+						style.activeStyle.key.verticalAntialias=false;
 						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
@@ -30581,11 +31101,99 @@ DocumentModel
 						}
 						styleStack.RemoveAt(styleStack.Count()-1);
 					}
-					else
+					else if(node->name.value==L"div")
 					{
+						auto style=styleStack[styleStack.Count()-1];
+						WString styleName;
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"style"))
+						{
+							styleName=TranslateAttribute(att->value.value);
+						}
+						style.normalStyle=model->GetStyle(styleName, style.normalStyle);
+						style.activeStyle=model->GetStyle(styleName, style.activeStyle);
+						styleStack.Add(style);
 						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
 						{
 							sub->Accept(this);
+						}
+						styleStack.RemoveAt(styleStack.Count()-1);
+					}
+					else if(node->name.value==L"a")
+					{
+						auto style=styleStack[styleStack.Count()-1];
+						WString normalStyle=L"#NormalLink";
+						WString activeStyle=L"#ActiveLink";
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"normal"))
+						{
+							normalStyle=TranslateAttribute(att->value.value);
+						}
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"active"))
+						{
+							activeStyle=TranslateAttribute(att->value.value);
+						}
+						style.normalStyle=model->GetStyle(normalStyle, style.normalStyle);
+						style.activeStyle=model->GetStyle(activeStyle, style.activeStyle);
+						style.hyperlinkId=model->hyperlinkInfos.Count();
+						styleStack.Add(style);
+
+						WString href;
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(node, L"href"))
+						{
+							href=TranslateAttribute(att->value.value);
+						}
+						{
+							DocumentModel::HyperlinkInfo info;
+							info.paragraphIndex=paragraphIndex;
+							info.reference=href;
+							model->hyperlinkInfos.Add(style.hyperlinkId, info);
+						}
+						FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+						{
+							sub->Accept(this);
+						}
+
+						styleStack.RemoveAt(styleStack.Count()-1);
+					}
+					else if(node->name.value==L"template-content")
+					{
+						if(templateInfo && templateInfo->contentElement)
+						{
+							Ptr<TemplateInfo> info=templateInfo;
+							templateInfo=0;
+							FOREACH(Ptr<XmlNode>, sub, info->contentElement->subNodes)
+							{
+								sub->Accept(this);
+							}
+							templateInfo=info;
+						}
+					}
+					else
+					{
+						vint index=model->templates.Keys().IndexOf(node->name.value);
+						if(index==-1)
+						{
+							FOREACH(Ptr<XmlNode>, sub, node->subNodes)
+							{
+								sub->Accept(this);
+							}
+						}
+						else
+						{
+							Ptr<TemplateInfo> newInfo=new TemplateInfo;
+							newInfo->templateElement=model->templates.Values().Get(index).Obj();
+							newInfo->contentElement=node;
+							FOREACH(Ptr<XmlAttribute>, att, newInfo->contentElement->attributes)
+							{
+								newInfo->attributes.Add(att->name.value, TranslateAttribute(att->value.value));
+							}
+
+							Ptr<TemplateInfo> info=templateInfo;
+							templateInfo=newInfo;
+							FOREACH(Ptr<XmlNode>, sub, newInfo->templateElement->subNodes)
+							{
+								sub->Accept(this);
+							}
+							templateInfo=info;
 						}
 					}
 				}
@@ -30601,17 +31209,250 @@ DocumentModel
 		}
 		using namespace document_serialization_visitors;
 
+/***********************************************************************
+document_serialization_visitors::ActivateHyperlinkVisitor
+***********************************************************************/
+
+		namespace document_serialization_visitors
+		{
+			class ActivateHyperlinkVisitor : public Object, public DocumentRun::IVisitor
+			{
+			public:
+				vint			hyperlinkId;
+				bool			active;
+
+				ActivateHyperlinkVisitor(vint _hyperlinkId, bool _active)
+					:hyperlinkId(_hyperlinkId)
+					,active(_active)
+				{
+				}
+
+				void Visit(DocumentTextRun* run)override
+				{
+				}
+
+				void Visit(DocumentHyperlinkTextRun* run)override
+				{
+					if(run->hyperlinkId==hyperlinkId)
+					{
+						if(active)
+						{
+							run->style=run->activeStyle;
+							run->color=run->activeColor;
+						}
+						else
+						{
+							run->style=run->normalStyle;
+							run->color=run->normalColor;
+						}
+					}
+				}
+
+				void Visit(DocumentImageRun* run)override
+				{
+				}
+			};
+		}
+		using namespace document_serialization_visitors;
+
+/***********************************************************************
+DocumentModel
+***********************************************************************/
+
+		DocumentModel::DocumentModel()
+		{
+			{
+				FontProperties font=GetCurrentController()->ResourceService()->GetDefaultFont();
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->face=font.fontFamily;
+				style->size=font.size;
+				style->color=Color();
+				style->bold=font.bold;
+				style->italic=font.italic;
+				style->underline=font.underline;
+				style->strikeline=font.strikeline;
+				style->antialias=font.antialias;
+				style->verticalAntialias=font.verticalAntialias;
+				styles.Add(L"#Default", style);
+			}
+			{
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				styles.Add(L"#Context", style);
+			}
+			{
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->parentStyleName=L"#Context";
+				style->color=Color(0, 0, 255);
+				style->underline=true;
+				styles.Add(L"#NormalLink", style);
+			}
+			{
+				Ptr<DocumentStyle> style=new DocumentStyle;
+				style->parentStyleName=L"#Context";
+				style->color=Color(0, 0, 255);
+				style->underline=true;
+				styles.Add(L"#ActiveLink", style);
+			}
+		}
+
+		DocumentModel::RawStylePair DocumentModel::GetStyle(const WString& styleName, const RawStylePair& context)
+		{
+			DocumentStyle result;
+			Ptr<DocumentStyle> currentStyle;
+			WString currentName=styleName;
+			while(true)
+			{
+				vint index=styles.Keys().IndexOf(currentName);
+				if(index==-1) break;
+				currentStyle=styles.Values().Get(index);
+				currentName=currentStyle->parentStyleName;
+
+				if(!result.face && currentStyle->face) result.face=currentStyle->face;
+				if(!result.size && currentStyle->size) result.size=currentStyle->size;
+				if(!result.color && currentStyle->color) result.color=currentStyle->color;
+				if(!result.bold && currentStyle->bold) result.bold=currentStyle->bold;
+				if(!result.italic && currentStyle->italic) result.italic=currentStyle->italic;
+				if(!result.underline && currentStyle->underline) result.underline=currentStyle->underline;
+				if(!result.strikeline && currentStyle->strikeline) result.strikeline=currentStyle->strikeline;
+				if(!result.antialias && currentStyle->antialias) result.antialias=currentStyle->antialias;
+				if(!result.verticalAntialias && currentStyle->verticalAntialias) result.verticalAntialias=currentStyle->verticalAntialias;
+			}
+
+			if(!result.face) result.face=context.key.fontFamily;
+			if(!result.size) result.size=context.key.size;
+			if(!result.color) result.color=context.value;
+			if(!result.bold) result.bold=context.key.bold;
+			if(!result.italic) result.italic=context.key.italic;
+			if(!result.underline) result.underline=context.key.underline;
+			if(!result.strikeline) result.strikeline=context.key.strikeline;
+			if(!result.antialias) result.antialias=context.key.antialias;
+			if(!result.verticalAntialias) result.verticalAntialias=context.key.verticalAntialias;
+
+			FontProperties font;
+			font.fontFamily=result.face.Value();
+			font.size=result.size.Value();
+			font.bold=result.bold.Value();
+			font.italic=result.italic.Value();
+			font.underline=result.underline.Value();
+			font.strikeline=result.strikeline.Value();
+			font.antialias=result.antialias.Value();
+			font.verticalAntialias=result.verticalAntialias.Value();
+			return RawStylePair(font, result.color.Value());
+		}
+
+		vint DocumentModel::ActivateHyperlink(vint hyperlinkId, bool active)
+		{
+			vint index=hyperlinkInfos.Keys().IndexOf(hyperlinkId);
+			if(index!=-1)
+			{
+				vint paragraphIndex=hyperlinkInfos.Values().Get(index).paragraphIndex;
+				if(0<=paragraphIndex && paragraphIndex<paragraphs.Count())
+				{
+					Ptr<DocumentParagraph> paragraph=paragraphs[paragraphIndex];
+					ActivateHyperlinkVisitor visitor(hyperlinkId, active);
+					FOREACH(Ptr<DocumentLine>, line, paragraph->lines)
+					{
+						FOREACH(Ptr<DocumentRun>, run, line->runs)
+						{
+							run->Accept(&visitor);
+						}
+					}
+					return paragraphIndex;
+				}
+			}
+			return  -1;
+		}
+
 		Ptr<DocumentModel> DocumentModel::LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<DocumentResolver> resolver)
 		{
 			Ptr<DocumentModel> model=new DocumentModel;
 			if(xml->rootElement->name.value==L"Doc")
-			if(Ptr<XmlElement> content=XmlGetElement(xml->rootElement, L"Content"))
-			FOREACH(Ptr<XmlElement>, p, XmlGetElements(content, L"p"))
 			{
-				Ptr<DocumentParagraph> paragraph=new DocumentParagraph;
-				model->paragraphs.Add(paragraph);
-				DeserializeNodeVisitor visitor(paragraph, resolver);
-				p->Accept(&visitor);
+				if(Ptr<XmlElement> styles=XmlGetElement(xml->rootElement, L"Styles"))
+				{
+					FOREACH(Ptr<XmlElement>, styleElement, XmlGetElements(styles, L"Style"))
+					if(Ptr<XmlAttribute> name=XmlGetAttribute(styleElement, L"name"))
+					if(!model->styles.Keys().Contains(name->value.value))
+					{
+						Ptr<DocumentStyle> style=new DocumentStyle;
+						model->styles.Add(name->value.value, style);
+
+						if(Ptr<XmlAttribute> parent=XmlGetAttribute(styleElement, L"parent"))
+						{
+							style->parentStyleName=parent->value.value;
+						}
+
+						FOREACH(Ptr<XmlElement>, att, XmlGetElements(styleElement))
+						{
+							if(att->name.value==L"face")
+							{
+								style->face=XmlGetValue(att);
+							}
+							else if(att->name.value==L"size")
+							{
+								style->size=wtoi(XmlGetValue(att));
+							}
+							else if(att->name.value==L"color")
+							{
+								style->color=Color::Parse(XmlGetValue(att));
+							}
+							else if(att->name.value==L"b")
+							{
+								style->bold=XmlGetValue(att)==L"true";
+							}
+							else if(att->name.value==L"i")
+							{
+								style->italic=XmlGetValue(att)==L"true";
+							}
+							else if(att->name.value==L"u")
+							{
+								style->underline=XmlGetValue(att)==L"true";
+							}
+							else if(att->name.value==L"s")
+							{
+								style->strikeline=XmlGetValue(att)==L"true";
+							}
+							else if(att->name.value==L"antialias")
+							{
+								WString value=XmlGetValue(att);
+								if(value==L"horizontal" || value==L"default")
+								{
+									style->antialias=true;
+									style->verticalAntialias=false;
+								}
+								else if(value==L"no")
+								{
+									style->antialias=false;
+									style->verticalAntialias=false;
+								}
+								else if(value==L"vertical")
+								{
+									style->antialias=true;
+									style->verticalAntialias=true;
+								}
+							}
+						}
+					}
+				}
+				if(Ptr<XmlElement> styles=XmlGetElement(xml->rootElement, L"Templates"))
+				{
+					FOREACH(Ptr<XmlElement>, templateElement, XmlGetElements(styles, L"Template"))
+					if(Ptr<XmlAttribute> name=XmlGetAttribute(templateElement, L"name"))
+					if(!model->styles.Keys().Contains(name->value.value))
+					{
+						model->templates.Add(name->value.value, templateElement);
+					}
+				}
+				if(Ptr<XmlElement> content=XmlGetElement(xml->rootElement, L"Content"))
+				{
+					FOREACH_INDEXER(Ptr<XmlElement>, p, i, XmlGetElements(content, L"p"))
+					{
+						Ptr<DocumentParagraph> paragraph=new DocumentParagraph;
+						model->paragraphs.Add(paragraph);
+						DeserializeNodeVisitor visitor(model, paragraph, i, resolver);
+						p->Accept(&visitor);
+					}
+				}
 			}
 			return model;
 		}
@@ -30651,6 +31492,53 @@ DocumentModel
 							Ptr<XmlElement> line=new XmlElement;
 							line->name.value=L"br";
 							paragraph->subNodes.Add(line);
+						}
+					}
+				}
+			}
+			{
+				Ptr<XmlElement> stylesElement=new XmlElement;
+				stylesElement->name.value=L"Styles";
+				doc->subNodes.Add(stylesElement);
+
+				for(vint i=0;i<styles.Count();i++)
+				{
+					WString name=styles.Keys()[i];
+					if(name.Length()>0 && name[0]==L'#') continue;
+
+					Ptr<DocumentStyle> style=styles.Values().Get(i);
+					Ptr<XmlElement> styleElement=new XmlElement;
+					styleElement->name.value=L"Style";
+					stylesElement->subNodes.Add(styleElement);
+
+					XmlElementWriter(styleElement).Attribute(L"name", name);
+					if(style->parentStyleName!=L"")
+					{
+						XmlElementWriter(styleElement).Attribute(L"parent", style->parentStyleName);
+					}
+
+					if(style->face) XmlElementWriter(styleElement).Element(L"face").Text(style->face.Value());
+					if(style->size) XmlElementWriter(styleElement).Element(L"size").Text(itow(style->size.Value()));
+					if(style->color) XmlElementWriter(styleElement).Element(L"color").Text(style->color.Value().ToString());
+					if(style->bold) XmlElementWriter(styleElement).Element(L"bold").Text(style->bold.Value()?L"true":L"false");
+					if(style->italic) XmlElementWriter(styleElement).Element(L"italic").Text(style->italic.Value()?L"true":L"false");
+					if(style->underline) XmlElementWriter(styleElement).Element(L"underline").Text(style->underline.Value()?L"true":L"false");
+					if(style->strikeline) XmlElementWriter(styleElement).Element(L"strikeline").Text(style->strikeline.Value()?L"true":L"false");
+					if(style->antialias && style->verticalAntialias)
+					{
+						bool h=style->antialias;
+						bool v=style->verticalAntialias;
+						if(!h)
+						{
+							XmlElementWriter(styleElement).Element(L"antialias").Text(L"no");
+						}
+						else if(!v)
+						{
+							XmlElementWriter(styleElement).Element(L"antialias").Text(L"default");
+						}
+						else
+						{
+							XmlElementWriter(styleElement).Element(L"antialias").Text(L"vertical");
 						}
 					}
 				}

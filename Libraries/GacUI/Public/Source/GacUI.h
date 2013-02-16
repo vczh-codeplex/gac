@@ -471,7 +471,7 @@ Resources
 		struct FontProperties
 		{
 			WString				fontFamily;
-			vint					size;
+			vint				size;
 			bool				bold;
 			bool				italic;
 			bool				underline;
@@ -646,6 +646,8 @@ Layout Engine
 			class IGuiGraphicsParagraph : public Interface
 			{
 			public:
+				static const vint		NullInteractionId = -1;
+
 				enum TextStyle
 				{
 					Bold=1,
@@ -664,7 +666,7 @@ Layout Engine
 				struct InlineObjectProperties
 				{
 					Size					size;
-					vint						baseline;
+					vint					baseline;
 					BreakCondition			breakCondition;
 
 					InlineObjectProperties()
@@ -677,7 +679,7 @@ Layout Engine
 				virtual IGuiGraphicsRenderTarget*			GetRenderTarget()=0;
 				virtual bool								GetWrapLine()=0;
 				virtual void								SetWrapLine(bool value)=0;
-				virtual vint									GetMaxWidth()=0;
+				virtual vint								GetMaxWidth()=0;
 				virtual void								SetMaxWidth(vint value)=0;
 
 				virtual bool								SetFont(vint start, vint length, const WString& value)=0;
@@ -686,8 +688,11 @@ Layout Engine
 				virtual bool								SetColor(vint start, vint length, Color value)=0;
 				virtual bool								SetInlineObject(vint start, vint length, const InlineObjectProperties& properties, Ptr<IGuiGraphicsElement> value)=0;
 				virtual bool								ResetInlineObject(vint start, vint length)=0;
+				virtual bool								SetInteractionId(vint start, vint length, vint value=NullInteractionId)=0;
 
-				virtual vint									GetHeight()=0;
+				virtual bool								HitTestPoint(Point point, vint& start, vint& length, vint& interactionId)=0;
+
+				virtual vint								GetHeight()=0;
 				virtual void								Render(Rect bounds)=0;
 			};
 
@@ -1718,6 +1723,7 @@ namespace vl
 		class GuiResource;
 
 		class DocumentTextRun;
+		class DocumentHyperlinkTextRun;
 		class DocumentImageRun;
 
 /***********************************************************************
@@ -1746,14 +1752,19 @@ Rich Content Document (model)
 		class DocumentRun : public Object, public Description<DocumentRun>
 		{
 		public:
+			static const vint				NullHyperlinkId = -1;
+
 			class IVisitor : public Interface
 			{
 			public:
 				virtual void				Visit(DocumentTextRun* run)=0;
+				virtual void				Visit(DocumentHyperlinkTextRun* run)=0;
 				virtual void				Visit(DocumentImageRun* run)=0;
 			};
+			
+			vint							hyperlinkId;
 
-			DocumentRun(){}
+			DocumentRun():hyperlinkId(NullHyperlinkId){}
 
 			virtual void					Accept(IVisitor* visitor)=0;
 		};
@@ -1766,6 +1777,19 @@ Rich Content Document (model)
 			WString							text;
 
 			DocumentTextRun(){}
+
+			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
+		};
+
+		class DocumentHyperlinkTextRun : public DocumentTextRun, public Description<DocumentHyperlinkTextRun>
+		{
+		public:
+			FontProperties					normalStyle;
+			Color							normalColor;
+			FontProperties					activeStyle;
+			Color							activeColor;
+
+			DocumentHyperlinkTextRun(){}
 
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
@@ -1822,12 +1846,55 @@ Rich Content Document (model)
 			Ptr<INativeImage>				ResolveImage(const WString& protocol, const WString& path);
 		};
 
+		//--------------------------------------------------------------------------
+
+		class DocumentStyle : public Object
+		{
+		public:
+			WString							parentStyleName;
+
+			Nullable<WString>				face;
+			Nullable<vint>					size;
+			Nullable<Color>					color;
+			Nullable<bool>					bold;
+			Nullable<bool>					italic;
+			Nullable<bool>					underline;
+			Nullable<bool>					strikeline;
+			Nullable<bool>					antialias;
+			Nullable<bool>					verticalAntialias;
+		};
+
 		class DocumentModel : public Object, public Description<DocumentModel>
 		{
-			typedef collections::List<Ptr<DocumentParagraph>>	ParagraphList;
+		public:
+
+			struct HyperlinkInfo
+			{
+				WString						reference;
+				vint						paragraphIndex;
+
+				HyperlinkInfo()
+					:paragraphIndex(-1)
+				{
+				}
+			};
+		private:
+			typedef collections::List<Ptr<DocumentParagraph>>							ParagraphList;
+			typedef collections::Dictionary<WString, Ptr<DocumentStyle>>				StyleMap;
+			typedef collections::Dictionary<WString, Ptr<parsing::xml::XmlElement>>		TemplateMap;
+			typedef collections::Pair<FontProperties, Color>							RawStylePair;
+			typedef collections::Dictionary<vint, HyperlinkInfo>						HyperlinkMap;
 		public:
 
 			ParagraphList					paragraphs;
+			StyleMap						styles;
+			TemplateMap						templates;
+			HyperlinkMap					hyperlinkInfos;
+			
+			DocumentModel();
+
+			RawStylePair					GetStyle(const WString& styleName, const RawStylePair& context);
+			vint							ActivateHyperlink(vint hyperlinkId, bool active);
 
 			static Ptr<DocumentModel>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, Ptr<DocumentResolver> resolver);
 
@@ -2472,6 +2539,7 @@ Rich Content Document (element)
 					void									OnElementStateChanged()override;
 
 					void									NotifyParagraphUpdated(vint index);
+					vint									GetHyperlinkIdFromPoint(Point point);
 				};
 
 			protected:
@@ -2484,6 +2552,9 @@ Rich Content Document (element)
 				Ptr<DocumentModel>							GetDocument();
 				void										SetDocument(Ptr<DocumentModel> value);
 				void										NotifyParagraphUpdated(vint index);
+
+				vint										GetHyperlinkIdFromPoint(Point point);
+				void										ActivateHyperlink(vint hyperlinkId, bool active);
 			};
 		}
 	}
@@ -5107,7 +5178,7 @@ namespace vl
 Common Interface
 ***********************************************************************/
 
-			class GuiTextBoxCommonInterface : public Description<GuiTextBoxCommonInterface>
+			class GuiTextBoxCommonInterface abstract : public Description<GuiTextBoxCommonInterface>
 			{
 			protected:
 				class ICallback : public virtual IDescriptable, public Description<ICallback>
@@ -5454,21 +5525,59 @@ namespace vl
 		{
 
 /***********************************************************************
-GuiDocumentViewer
+GuiDocumentCommonInterface
 ***********************************************************************/
 			
-			class GuiDocumentViewer : public GuiScrollContainer, public Description<GuiDocumentViewer>
+			class GuiDocumentCommonInterface abstract : public Description<GuiDocumentCommonInterface>
 			{
 			protected:
 				elements::GuiDocumentElement*				documentElement;
+				compositions::GuiBoundsComposition*			documentComposition;
+				vint										activeHyperlinkId;
+				vint										draggingHyperlinkId;
+				bool										dragging;
+				GuiControl*									senderControl;
 
+				void										InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container);
+				void										SetActiveHyperlinkId(vint value);
+				void										OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
+				void										OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
-				GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider);
-				~GuiDocumentViewer();
+				GuiDocumentCommonInterface();
+				~GuiDocumentCommonInterface();
+
+				compositions::GuiNotifyEvent				ActiveHyperlinkChanged;
+				compositions::GuiNotifyEvent				ActiveHyperlinkExecuted;
 				
 				Ptr<DocumentModel>							GetDocument();
 				void										SetDocument(Ptr<DocumentModel> value);
 				void										NotifyParagraphUpdated(vint index);
+				vint										GetActiveHyperlinkId();
+				WString										GetActiveHyperlinkReference();
+			};
+
+/***********************************************************************
+GuiDocumentViewer
+***********************************************************************/
+			
+			class GuiDocumentViewer : public GuiScrollContainer, public GuiDocumentCommonInterface, public Description<GuiDocumentViewer>
+			{
+			public:
+				GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider);
+				~GuiDocumentViewer();
+			};
+
+/***********************************************************************
+GuiDocumentViewer
+***********************************************************************/
+			
+			class GuiDocumentLabel : public GuiControl, public GuiDocumentCommonInterface, public Description<GuiDocumentLabel>
+			{
+			public:
+				GuiDocumentLabel(GuiDocumentLabel::IStyleController* styleController);
+				~GuiDocumentLabel();
 			};
 		}
 	}
@@ -7843,6 +7952,7 @@ namespace vl
 				virtual controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()=0;
 				virtual elements::text::ColorEntry											GetDefaultTextBoxColorEntry()=0;
 				virtual controls::GuiDocumentViewer::IStyleProvider*						CreateDocumentViewerStyle()=0;
+				virtual controls::GuiDocumentLabel::IStyleController*						CreateDocumentLabelStyle()=0;
 				virtual controls::GuiListView::IStyleProvider*								CreateListViewStyle()=0;
 				virtual controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()=0;
 				virtual controls::GuiSelectableButton::IStyleController*					CreateListItemBackgroundStyle()=0;
@@ -7890,6 +8000,7 @@ namespace vl
 				extern controls::GuiMultilineTextBox*			NewMultilineTextBox();
 				extern controls::GuiSinglelineTextBox*			NewTextBox();
 				extern controls::GuiDocumentViewer*				NewDocumentViewer();
+				extern controls::GuiDocumentLabel*				NewDocumentLabel();
 				extern controls::GuiListView*					NewListViewBigIcon();
 				extern controls::GuiListView*					NewListViewSmallIcon();
 				extern controls::GuiListView*					NewListViewList();
@@ -7971,6 +8082,7 @@ Theme
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
 				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
 				controls::GuiDocumentViewer::IStyleProvider*						CreateDocumentViewerStyle()override;
+				controls::GuiDocumentLabel::IStyleController*						CreateDocumentLabelStyle()override;
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateListItemBackgroundStyle()override;
@@ -8051,6 +8163,7 @@ Theme
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
 				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
 				controls::GuiDocumentViewer::IStyleProvider*						CreateDocumentViewerStyle()override;
+				controls::GuiDocumentLabel::IStyleController*						CreateDocumentLabelStyle()override;
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateListItemBackgroundStyle()override;
@@ -8075,8 +8188,8 @@ Theme
 				controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
 				controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
-				vint																	GetScrollDefaultSize()override;
-				vint																	GetTrackerDefaultSize()override;
+				vint																GetScrollDefaultSize()override;
+				vint																GetTrackerDefaultSize()override;
 
 				controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
 				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;

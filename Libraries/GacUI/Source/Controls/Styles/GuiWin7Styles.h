@@ -40,6 +40,7 @@ Theme
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
 				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
 				controls::GuiDocumentViewer::IStyleProvider*						CreateDocumentViewerStyle()override;
+				controls::GuiDocumentLabel::IStyleController*						CreateDocumentLabelStyle()override;
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateListItemBackgroundStyle()override;
