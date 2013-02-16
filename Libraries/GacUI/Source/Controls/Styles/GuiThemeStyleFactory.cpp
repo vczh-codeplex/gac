@@ -65,6 +65,11 @@ namespace vl
 					return new controls::GuiDocumentViewer(GetCurrentTheme()->CreateDocumentViewerStyle());
 				}
 
+				controls::GuiDocumentLabel* NewDocumentLabel()
+				{
+					return new controls::GuiDocumentLabel(GetCurrentTheme()->CreateDocumentLabelStyle());
+				}
+
 				controls::GuiListView* NewListViewBigIcon()
 				{
 					controls::GuiListView* listview=new controls::GuiListView(GetCurrentTheme()->CreateListViewStyle());

@@ -25,7 +25,7 @@ Common Interface
 ***********************************************************************/
 
 			/// <summary>Common interface for text box controls.</summary>
-			class GuiTextBoxCommonInterface : public Description<GuiTextBoxCommonInterface>
+			class GuiTextBoxCommonInterface abstract : public Description<GuiTextBoxCommonInterface>
 			{
 			protected:
 				class ICallback : public virtual IDescriptable, public Description<ICallback>

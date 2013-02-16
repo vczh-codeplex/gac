@@ -13,18 +13,38 @@ namespace vl
 GuiDocumentViewer
 ***********************************************************************/
 
-			void GuiDocumentViewer::SetActiveHyperlinkId(vint value)
+			void GuiDocumentCommonInterface::InstallDocumentViewer(GuiControl* _sender, compositions::GuiGraphicsComposition* _container)
+			{
+				senderControl=_sender;
+
+				documentElement=GuiDocumentElement::Create();
+				documentComposition=new GuiBoundsComposition;
+				documentComposition->SetOwnedElement(documentElement);
+				documentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+				documentComposition->SetAlignmentToParent(Margin(5, 5, 5, 5));
+				_container->AddChild(documentComposition);
+
+				documentComposition->GetEventReceiver()->mouseMove.AttachMethod(this, &GuiDocumentCommonInterface::OnMouseMove);
+				documentComposition->GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiDocumentCommonInterface::OnMouseDown);
+				documentComposition->GetEventReceiver()->leftButtonUp.AttachMethod(this, &GuiDocumentCommonInterface::OnMouseUp);
+				documentComposition->GetEventReceiver()->mouseLeave.AttachMethod(this, &GuiDocumentCommonInterface::OnMouseLeave);
+
+				ActiveHyperlinkChanged.SetAssociatedComposition(_sender->GetBoundsComposition());
+				ActiveHyperlinkExecuted.SetAssociatedComposition(_sender->GetBoundsComposition());
+			}
+
+			void GuiDocumentCommonInterface::SetActiveHyperlinkId(vint value)
 			{
 				if(activeHyperlinkId!=value)
 				{
 					documentElement->ActivateHyperlink(activeHyperlinkId, false);
 					activeHyperlinkId=value;
 					documentElement->ActivateHyperlink(activeHyperlinkId, true);
-					ActiveHyperlinkChanged.Execute(GetNotifyEventArguments());
+					ActiveHyperlinkChanged.Execute(senderControl->GetNotifyEventArguments());
 				}
 			}
 
-			void GuiDocumentViewer::OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			void GuiDocumentCommonInterface::OnMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
 				if(dragging && id!=draggingHyperlinkId)
@@ -43,7 +63,7 @@ GuiDocumentViewer
 				}
 			}
 
-			void GuiDocumentViewer::OnMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			void GuiDocumentCommonInterface::OnMouseDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
 				draggingHyperlinkId=id;
@@ -51,73 +71,58 @@ GuiDocumentViewer
 				dragging=true;
 			}
 
-			void GuiDocumentViewer::OnMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
+			void GuiDocumentCommonInterface::OnMouseUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 			{
 				dragging=false;
 				vint id=documentElement->GetHyperlinkIdFromPoint(Point(arguments.x, arguments.y));
 				if(id==draggingHyperlinkId && id!=DocumentRun::NullHyperlinkId)
 				{
-					ActiveHyperlinkExecuted.Execute(GetNotifyEventArguments());
+					ActiveHyperlinkExecuted.Execute(senderControl->GetNotifyEventArguments());
 				}
 				draggingHyperlinkId=DocumentRun::NullHyperlinkId;
 			}
 
-			void GuiDocumentViewer::OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			void GuiDocumentCommonInterface::OnMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
 				SetActiveHyperlinkId(DocumentRun::NullHyperlinkId);
 			}
 
-			GuiDocumentViewer::GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider)
-				:GuiScrollContainer(styleProvider)
+			GuiDocumentCommonInterface::GuiDocumentCommonInterface()
+				:documentElement(0)
+				,documentComposition(0)
 				,activeHyperlinkId(DocumentRun::NullHyperlinkId)
 				,draggingHyperlinkId(DocumentRun::NullHyperlinkId)
 				,dragging(false)
-			{
-				SetExtendToFullWidth(true);
-				SetHorizontalAlwaysVisible(false);
-
-				documentElement=GuiDocumentElement::Create();
-				documentComposition=new GuiBoundsComposition;
-				documentComposition->SetOwnedElement(documentElement);
-				documentComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
-				documentComposition->SetAlignmentToParent(Margin(5, 5, 5, 5));
-				GetContainerComposition()->AddChild(documentComposition);
-
-				documentComposition->GetEventReceiver()->mouseMove.AttachMethod(this, &GuiDocumentViewer::OnMouseMove);
-				documentComposition->GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiDocumentViewer::OnMouseDown);
-				documentComposition->GetEventReceiver()->leftButtonUp.AttachMethod(this, &GuiDocumentViewer::OnMouseUp);
-				documentComposition->GetEventReceiver()->mouseLeave.AttachMethod(this, &GuiDocumentViewer::OnMouseLeave);
-
-				ActiveHyperlinkChanged.SetAssociatedComposition(GetBoundsComposition());
-				ActiveHyperlinkExecuted.SetAssociatedComposition(GetBoundsComposition());
-			}
-
-			GuiDocumentViewer::~GuiDocumentViewer()
+				,senderControl(0)
 			{
 			}
 
-			Ptr<DocumentModel> GuiDocumentViewer::GetDocument()
+			GuiDocumentCommonInterface::~GuiDocumentCommonInterface()
+			{
+			}
+
+			Ptr<DocumentModel> GuiDocumentCommonInterface::GetDocument()
 			{
 				return documentElement->GetDocument();
 			}
 
-			void GuiDocumentViewer::SetDocument(Ptr<DocumentModel> value)
+			void GuiDocumentCommonInterface::SetDocument(Ptr<DocumentModel> value)
 			{
 				SetActiveHyperlinkId(DocumentRun::NullHyperlinkId);
 				documentElement->SetDocument(value);
 			}
 
-			void GuiDocumentViewer::NotifyParagraphUpdated(vint index)
+			void GuiDocumentCommonInterface::NotifyParagraphUpdated(vint index)
 			{
 				documentElement->NotifyParagraphUpdated(index);
 			}
 
-			vint GuiDocumentViewer::GetActiveHyperlinkId()
+			vint GuiDocumentCommonInterface::GetActiveHyperlinkId()
 			{
 				return activeHyperlinkId;
 			}
 
-			WString GuiDocumentViewer::GetActiveHyperlinkReference()
+			WString GuiDocumentCommonInterface::GetActiveHyperlinkReference()
 			{
 				if(activeHyperlinkId==DocumentRun::NullHyperlinkId) return L"";
 				Ptr<DocumentModel> document=documentElement->GetDocument();
@@ -125,6 +130,37 @@ GuiDocumentViewer
 				vint index=document->hyperlinkInfos.Keys().IndexOf(activeHyperlinkId);
 				if(index==-1) return L"";
 				return document->hyperlinkInfos.Values().Get(index).reference;
+			}
+
+/***********************************************************************
+GuiDocumentViewer
+***********************************************************************/
+
+			GuiDocumentViewer::GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider)
+				:GuiScrollContainer(styleProvider)
+			{
+				SetExtendToFullWidth(true);
+				SetHorizontalAlwaysVisible(false);
+				InstallDocumentViewer(this, GetContainerComposition());
+			}
+
+			GuiDocumentViewer::~GuiDocumentViewer()
+			{
+			}
+
+/***********************************************************************
+GuiDocumentLabel
+***********************************************************************/
+
+			GuiDocumentLabel::GuiDocumentLabel(GuiDocumentLabel::IStyleController* styleController)
+				:GuiControl(styleController)
+			{
+				GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				InstallDocumentViewer(this, GetContainerComposition());
+			}
+
+			GuiDocumentLabel::~GuiDocumentLabel()
+			{
 			}
 		}
 	}

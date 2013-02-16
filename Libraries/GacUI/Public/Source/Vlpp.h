@@ -128,6 +128,144 @@ typedef signed __int64	pos_t;
 		}
 	};
 
+	template<typename T>
+	class Nullable
+	{
+	private:
+		T*					object;
+	public:
+		Nullable()
+			:object(0)
+		{
+		}
+
+		Nullable(const T& value)
+			:object(new T(value))
+		{
+		}
+
+		Nullable(const Nullable<T>& nullable)
+			:object(nullable.object?new T(*nullable.object):0)
+		{
+		}
+
+		Nullable(Nullable<T>&& nullable)
+			:object(nullable.object)
+		{
+			nullable.object=0;
+		}
+
+		~Nullable()
+		{
+			if(object)
+			{
+				delete object;
+				object=0;
+			}
+		}
+
+		Nullable<T>& operator=(const T& value)
+		{
+			if(object)
+			{
+				delete object;
+				object=0;
+			}
+			object=new T(value);
+			return *this;
+		}
+
+		Nullable<T>& operator=(const Nullable<T>& nullable)
+		{
+			if(object)
+			{
+				delete object;
+				object=0;
+			}
+			if(nullable.object)
+			{
+				object=new T(*nullable.object);
+			}
+			return *this;
+		}
+
+		Nullable<T>& operator=(Nullable<T>&& nullable)
+		{
+			if(object)
+			{
+				delete object;
+				object=0;
+			}
+			object=nullable.object;
+			nullable.object=0;
+			return *this;
+		}
+
+		static bool Equals(const Nullable<T>& a, const Nullable<T>& b)
+		{
+			return
+				object
+				?nullable.object
+					?*object==*nullable.object
+					:false
+				:nullable.object
+					?false
+					:true;
+		}
+
+		static vint Compare(const Nullable<T>& a, const Nullable<T>& b)
+		{
+			return
+				object
+				?nullable.object
+					?(*object==*nullable.object?0:*object<*nullable.object?-1:1)
+					:1
+				:nullable.object
+					?-1
+					:0;
+		}
+
+		bool operator==(const Nullable<T>& nullable)const
+		{
+			return Equals(*this, nullable);
+		}
+
+		bool operator!=(const Nullable<T>& nullable)const
+		{
+			return !Equals(*this, nullable);
+		}
+
+		bool operator<(const Nullable<T>& nullable)const
+		{
+			return Compare(*this, nullable)<0;
+		}
+
+		bool operator<=(const Nullable<T>& nullable)const
+		{
+			return Compare(*this, nullable)<=0;
+		}
+
+		bool operator>(const Nullable<T>& nullable)const
+		{
+			return Compare(*this, nullable)>0;
+		}
+
+		bool operator>=(const Nullable<T>& nullable)const
+		{
+			return Compare(*this, nullable)>=0;
+		}
+
+		operator bool()const
+		{
+			return object!=0;
+		}
+
+		const T& Value()const
+		{
+			return *object;
+		}
+	};
+
 	template<typename T, size_t minSize>
 	union BinaryRetriver
 	{
@@ -1407,7 +1545,7 @@ namespace vl
 				vint end=count-1;
 				while(start<=end)
 				{
-					vint index=(start+end)/2;
+					vint index=start+(end-start)/2;
 					if(buffer[index]==item)
 					{
 						return index;
@@ -2034,6 +2172,11 @@ Classes:
 
 namespace vl
 {
+
+/***********************************************************************
+Ptr
+***********************************************************************/
+
 	template<typename T>
 	class Ptr
 	{
@@ -2257,6 +2400,10 @@ namespace vl
 		}
 	};
 
+/***********************************************************************
+ComPtr
+***********************************************************************/
+
 	template<typename T>
 	class ComPtr
 	{
@@ -2434,6 +2581,10 @@ namespace vl
 			return reference;
 		}
 	};
+
+/***********************************************************************
+Traits
+***********************************************************************/
 
 	template<typename T>
 	struct KeyType<Ptr<T>>
@@ -12664,6 +12815,7 @@ namespace vl
 			extern WString							XmlEscapeComment(const WString& value);
 			extern WString							XmlUnescapeComment(const WString& value);
 			extern void								XmlPrint(Ptr<XmlNode> node, stream::TextWriter& writer);
+			extern void								XmlPrintContent(Ptr<XmlElement> element, stream::TextWriter& writer);
 			extern WString							XmlToString(Ptr<XmlNode> node);
 
 			extern Ptr<XmlAttribute>							XmlGetAttribute(Ptr<XmlElement> element, const WString& name);

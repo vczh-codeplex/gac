@@ -83,6 +83,11 @@ Win7Theme
 				return new Win7MultilineTextBoxProvider;
 			}
 
+			controls::GuiDocumentLabel::IStyleController* Win7Theme::CreateDocumentLabelStyle()
+			{
+				return new controls::GuiControl::EmptyStyleController;
+			}
+
 			controls::GuiListView::IStyleProvider* Win7Theme::CreateListViewStyle()
 			{
 				return new Win7ListViewProvider;

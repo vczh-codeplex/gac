@@ -65,6 +65,9 @@ namespace vl
 				/// <summary>Create a style for document viewer.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiDocumentViewer::IStyleProvider*						CreateDocumentViewerStyle()=0;
+				/// <summary>Create a style for document label.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiDocumentLabel::IStyleController*						CreateDocumentLabelStyle()=0;
 				/// <summary>Create a style for list view.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiListView::IStyleProvider*								CreateListViewStyle()=0;
@@ -189,6 +192,9 @@ namespace vl
 				/// <summary>Create a document viewer.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiDocumentViewer*				NewDocumentViewer();
+				/// <summary>Create a document label.</summary>
+				/// <returns>The created control.</returns>
+				extern controls::GuiDocumentLabel*				NewDocumentLabel();
 				/// <summary>Create a list view with big icons.</summary>
 				/// <returns>The created control.</returns>
 				extern controls::GuiListView*					NewListViewBigIcon();

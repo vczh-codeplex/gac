@@ -41,6 +41,7 @@ Theme
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
 				elements::text::ColorEntry											GetDefaultTextBoxColorEntry()override;
 				controls::GuiDocumentViewer::IStyleProvider*						CreateDocumentViewerStyle()override;
+				controls::GuiDocumentLabel::IStyleController*						CreateDocumentLabelStyle()override;
 				controls::GuiListView::IStyleProvider*								CreateListViewStyle()override;
 				controls::GuiTreeView::IStyleProvider*								CreateTreeViewStyle()override;
 				controls::GuiSelectableButton::IStyleController*					CreateListItemBackgroundStyle()override;
@@ -65,8 +66,8 @@ Theme
 				controls::GuiScroll::IStyleController*								CreateHTrackerStyle()override;
 				controls::GuiScroll::IStyleController*								CreateVTrackerStyle()override;
 				controls::GuiScroll::IStyleController*								CreateProgressBarStyle()override;
-				vint																	GetScrollDefaultSize()override;
-				vint																	GetTrackerDefaultSize()override;
+				vint																GetScrollDefaultSize()override;
+				vint																GetTrackerDefaultSize()override;
 
 				controls::GuiScrollView::IStyleProvider*							CreateTextListStyle()override;
 				controls::list::TextItemStyleProvider::ITextItemStyleProvider*		CreateTextListItemStyle()override;
