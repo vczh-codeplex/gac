@@ -24781,14 +24781,17 @@ GuiDocumentElement::GuiDocumentElementRenderer
 								stream::MemoryStream stream;
 								{
 									stream::StreamWriter writer(stream);
-									FOREACH(Ptr<DocumentLine>, line, paragraph->lines)
+									FOREACH_INDEXER(Ptr<DocumentLine>, line, lineIndex, paragraph->lines)
 									{
 										FOREACH(Ptr<DocumentRun>, run, line->runs)
 										{
 											WString text=ExtractTextVisitor::ExtractText(run.Obj());
 											writer.WriteString(text);
 										}
-										writer.WriteString(L"\r\n");
+										if(lineIndex<paragraph->lines.Count()-1)
+										{
+											writer.WriteString(L"\r\n");
+										}
 									}
 								}
 								{
@@ -24801,6 +24804,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							if(!cache->graphicsParagraph)
 							{
 								cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
+								cache->graphicsParagraph->SetParagraphAlignment(paragraph->alignment);
 								vint start=0;
 								FOREACH(Ptr<DocumentLine>, line, paragraph->lines)
 								{
@@ -24840,8 +24844,9 @@ GuiDocumentElement::GuiDocumentElementRenderer
 			{
 				if(element->document && element->document->paragraphs.Count()>0)
 				{
-					paragraphDistance=GetCurrentController()->ResourceService()->GetDefaultFont().size;
-					vint defaultHeight=paragraphDistance;
+					vint defaultSize=GetCurrentController()->ResourceService()->GetDefaultFont().size;
+					paragraphDistance=defaultSize;
+					vint defaultHeight=defaultSize;
 
 					paragraphCaches.Resize(element->document->paragraphs.Count());
 					paragraphHeights.Resize(element->document->paragraphs.Count());
@@ -25218,6 +25223,37 @@ WindowsDirect2DParagraph
 					{
 						maxWidth=value;
 						textLayout->SetMaxWidth(value==-1?65536:(FLOAT)value);
+					}
+				}
+
+				Alignment::Type GetParagraphAlignment()override
+				{
+					switch(textLayout->GetTextAlignment())
+					{
+					case DWRITE_TEXT_ALIGNMENT_LEADING:
+						return Alignment::Left;
+					case DWRITE_TEXT_ALIGNMENT_CENTER:
+						return Alignment::Center;
+					case DWRITE_TEXT_ALIGNMENT_TRAILING:
+						return Alignment::Right;
+					default:
+						return Alignment::Left;
+					}
+				}
+
+				void SetParagraphAlignment(Alignment::Type value)override
+				{
+					switch(value)
+					{
+					case Alignment::Left:
+						textLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+						break;
+					case Alignment::Center:
+						textLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+						break;
+					case Alignment::Right:
+						textLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
+						break;
 					}
 				}
 
@@ -28088,10 +28124,12 @@ Uniscribe Operations (UniscribeParagraph)
 
 				List<Ptr<UniscribeLine>>		lines;
 				vint							lastAvailableWidth;
+				Alignment::Type					paragraphAlignment;
 				Rect							bounds;
 
 				UniscribeParagraph()
 					:lastAvailableWidth(-1)
+					,paragraphAlignment(Alignment::Left)
 					,built(false)
 				{
 				}
@@ -28190,13 +28228,14 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 				}
 
-				void Layout(vint availableWidth)
+				void Layout(vint availableWidth, Alignment::Type alignment)
 				{
-					if(lastAvailableWidth==availableWidth)
+					if(lastAvailableWidth==availableWidth && paragraphAlignment==alignment)
 					{
 						return;
 					}
 					lastAvailableWidth=availableWidth;
+					paragraphAlignment=alignment;
 
 					vint cx=0;
 					vint cy=0;
@@ -28269,12 +28308,18 @@ Uniscribe Operations (UniscribeParagraph)
 									}
 
 									// render all runs inside this range
+									vint startRunFragmentCount=-1;
 									for(vint i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
 									{
 										UniscribeRun* run=line->scriptRuns[line->runVisualToLogical[i]].Obj();
 										vint start=i==startRun?startRunOffset:0;
 										vint end=i==lastRun?lastRunOffset:run->length;
 										vint length=end-start;
+
+										if(startRunFragmentCount==-1)
+										{
+											startRunFragmentCount=run->fragmentBounds.Count();
+										}
 
 										UniscribeRun::RunFragmentBounds fragmentBounds;
 										fragmentBounds.start=start;
@@ -28286,6 +28331,30 @@ Uniscribe Operations (UniscribeParagraph)
 										run->fragmentBounds.Add(fragmentBounds);
 
 										cx+=run->SumWidth(start, length);
+									}
+
+									vint cxOffset=0;
+									switch(alignment)
+									{
+									case Alignment::Center:
+										cxOffset=(availableWidth-cx)/2;
+										break;
+									case Alignment::Right:
+										cxOffset=availableWidth-cx;
+										break;
+									}
+									if(cxOffset!=0)
+									{
+										for(vint i=startRun;i<=lastRun && i<line->scriptRuns.Count();i++)
+										{
+											UniscribeRun* run=line->scriptRuns[line->runVisualToLogical[i]].Obj();
+											for(vint j=(i==startRun?startRunFragmentCount:0);j<run->fragmentBounds.Count();j++)
+											{
+												UniscribeRun::RunFragmentBounds& fragmentBounds=run->fragmentBounds[j];
+												fragmentBounds.bounds.x1+=cxOffset;
+												fragmentBounds.bounds.x2+=cxOffset;
+											}
+										}
 									}
 
 									cx=0;
@@ -28722,7 +28791,18 @@ WindowsGDIParagraph
 				void SetMaxWidth(vint value)override
 				{
 					paragraph->BuildUniscribeData(renderTarget->GetDC());
-					paragraph->Layout(value);
+					paragraph->Layout(value, paragraph->paragraphAlignment);
+				}
+
+				Alignment::Type GetParagraphAlignment()override
+				{
+					return paragraph->paragraphAlignment;
+				}
+
+				void SetParagraphAlignment(Alignment::Type value)override
+				{
+					paragraph->BuildUniscribeData(renderTarget->GetDC());
+					paragraph->Layout(paragraph->lastAvailableWidth, value);
 				}
 
 				bool SetFont(vint start, vint length, const WString& value)override
@@ -28836,7 +28916,7 @@ WindowsGDIParagraph
 					paragraph->BuildUniscribeData(renderTarget->GetDC());
 					if(paragraph->lastAvailableWidth==-1)
 					{
-						paragraph->Layout(65536);
+						paragraph->Layout(65536, paragraph->paragraphAlignment);
 					}
 					return paragraph->bounds.Height();
 				}
@@ -31448,6 +31528,21 @@ DocumentModel
 					FOREACH_INDEXER(Ptr<XmlElement>, p, i, XmlGetElements(content, L"p"))
 					{
 						Ptr<DocumentParagraph> paragraph=new DocumentParagraph;
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(p, L"align"))
+						{
+							if(att->value.value==L"Left")
+							{
+								paragraph->alignment=Alignment::Left;
+							}
+							else if(att->value.value==L"Center")
+							{
+								paragraph->alignment=Alignment::Center;
+							}
+							else if(att->value.value==L"Right")
+							{
+								paragraph->alignment=Alignment::Right;
+							}
+						}
 						model->paragraphs.Add(paragraph);
 						DeserializeNodeVisitor visitor(model, paragraph, i, resolver);
 						p->Accept(&visitor);

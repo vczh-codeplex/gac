@@ -105,7 +105,8 @@ Rich Content Document (model)
 
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
-
+		
+		/// <summary>Pepresents a hyperlink text run.</summary>
 		class DocumentHyperlinkTextRun : public DocumentTextRun, public Description<DocumentHyperlinkTextRun>
 		{
 		public:
@@ -200,6 +201,7 @@ Rich Content Document (model)
 
 		//--------------------------------------------------------------------------
 
+		/// <summary>Represents a text style.</summary>
 		class DocumentStyle : public Object
 		{
 		public:
@@ -231,9 +233,12 @@ Rich Content Document (model)
 		{
 		public:
 
+			/// <summary>Store some necessary internal information for a hyperlink.</summary>
 			struct HyperlinkInfo
 			{
+				/// <summary>The href attribute of the hyperlink.</summary>
 				WString						reference;
+				/// <summary>The index of the paragraph that contains this hyperlink.</summary>
 				vint						paragraphIndex;
 
 				HyperlinkInfo()
