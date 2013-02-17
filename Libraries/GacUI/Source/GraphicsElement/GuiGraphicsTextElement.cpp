@@ -1034,6 +1034,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 							if(!cache->graphicsParagraph)
 							{
 								cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
+								cache->graphicsParagraph->SetParagraphAlignment(paragraph->alignment);
 								vint start=0;
 								FOREACH(Ptr<DocumentLine>, line, paragraph->lines)
 								{
@@ -1073,8 +1074,9 @@ GuiDocumentElement::GuiDocumentElementRenderer
 			{
 				if(element->document && element->document->paragraphs.Count()>0)
 				{
-					paragraphDistance=GetCurrentController()->ResourceService()->GetDefaultFont().size;
-					vint defaultHeight=paragraphDistance;
+					vint defaultSize=GetCurrentController()->ResourceService()->GetDefaultFont().size;
+					paragraphDistance=4;
+					vint defaultHeight=defaultSize;
 
 					paragraphCaches.Resize(element->document->paragraphs.Count());
 					paragraphHeights.Resize(element->document->paragraphs.Count());

@@ -91,6 +91,12 @@ Layout Engine
 				/// <summary>Set the max width for this paragraph. If the max width is set to -1, the max width limitation will be removed.</summary>
 				/// <param name="value">The max width.</param>
 				virtual void								SetMaxWidth(vint value)=0;
+				/// <summary>Get the horizontal alignment for this paragraph.</summary>
+				/// <returns>The alignment.</returns>
+				virtual Alignment::Type						GetParagraphAlignment()=0;
+				/// <summary>Set the horizontal alignment for this paragraph.</summary>
+				/// <param name="value">The alignment.</param>
+				virtual void								SetParagraphAlignment(Alignment::Type value)=0;
 
 				/// <summary>Replace the font within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>

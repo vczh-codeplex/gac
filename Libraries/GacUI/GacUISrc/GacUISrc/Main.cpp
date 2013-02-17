@@ -49,7 +49,7 @@ namespace test
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 		{
 			SetText(GetApplication()->GetExecutableFolder());
-			SetClientSize(Size(640, 480));
+			SetClientSize(Size(800, 600));
 			GetBoundsComposition()->SetPreferredMinSize(Size(320, 240));
 			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			MoveToScreenCenter();

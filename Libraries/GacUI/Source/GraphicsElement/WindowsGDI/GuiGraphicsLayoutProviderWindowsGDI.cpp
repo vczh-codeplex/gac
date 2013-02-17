@@ -1283,12 +1283,14 @@ WindowsGDIParagraph
 				IGuiGraphicsLayoutProvider*			provider;
 				Ptr<UniscribeParagraph>				paragraph;
 				WString								text;
+				Alignment::Type						paragraphAlignment;
 				IWindowsGDIRenderTarget*			renderTarget;
 
 			public:
 				WindowsGDIParagraph(IGuiGraphicsLayoutProvider* _provider, const WString& _text, IGuiGraphicsRenderTarget* _renderTarget)
 					:provider(_provider)
 					,text(_text)
+					,paragraphAlignment(Alignment::Left)
 					,renderTarget(dynamic_cast<IWindowsGDIRenderTarget*>(_renderTarget))
 				{
 					paragraph=new UniscribeParagraph;
@@ -1333,6 +1335,16 @@ WindowsGDIParagraph
 				{
 					paragraph->BuildUniscribeData(renderTarget->GetDC());
 					paragraph->Layout(value);
+				}
+
+				Alignment::Type GetParagraphAlignment()override
+				{
+					return paragraphAlignment;
+				}
+
+				void SetParagraphAlignment(Alignment::Type value)override
+				{
+					paragraphAlignment=value;
 				}
 
 				bool SetFont(vint start, vint length, const WString& value)override
