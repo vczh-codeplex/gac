@@ -681,6 +681,8 @@ Layout Engine
 				virtual void								SetWrapLine(bool value)=0;
 				virtual vint								GetMaxWidth()=0;
 				virtual void								SetMaxWidth(vint value)=0;
+				virtual Alignment::Type						GetParagraphAlignment()=0;
+				virtual void								SetParagraphAlignment(Alignment::Type value)=0;
 
 				virtual bool								SetFont(vint start, vint length, const WString& value)=0;
 				virtual bool								SetSize(vint start, vint length, vint value)=0;
@@ -1780,7 +1782,7 @@ Rich Content Document (model)
 
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 		};
-
+		
 		class DocumentHyperlinkTextRun : public DocumentTextRun, public Description<DocumentHyperlinkTextRun>
 		{
 		public:
@@ -1829,6 +1831,10 @@ Rich Content Document (model)
 			typedef collections::List<Ptr<DocumentLine>>		LineList;
 		public:
 			LineList						lines;
+
+			Alignment::Type					alignment;
+
+			DocumentParagraph():alignment(Alignment::Left){}
 		};
 
 		class DocumentResolver : public Object

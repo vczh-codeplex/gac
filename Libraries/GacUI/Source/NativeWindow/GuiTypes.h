@@ -373,6 +373,7 @@ Rectangle
 Color
 ***********************************************************************/
 		
+		/// <summary>Represents a 32bit RGBA color. Values of separate components can be accessed using fields "r", "g", "b" and "a".</summary>
 		struct Color
 		{
 			union

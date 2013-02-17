@@ -101,9 +101,12 @@ Scrolls
 			class CommonTrackStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<CommonTrackStyle>
 			{
 			public:
+				/// <summary>Track direction.</summary>
 				enum Direction
 				{
+					/// <summary>[T:vl.presentation.common_styles.CommonTrackStyle.Direction]Horizontal scroll.</summary>
 					Horizontal,
+					/// <summary>[T:vl.presentation.common_styles.CommonTrackStyle.Direction]Vertical scroll.</summary>
 					Vertical,
 				};
 			protected:
