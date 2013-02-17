@@ -1014,14 +1014,17 @@ GuiDocumentElement::GuiDocumentElementRenderer
 								stream::MemoryStream stream;
 								{
 									stream::StreamWriter writer(stream);
-									FOREACH(Ptr<DocumentLine>, line, paragraph->lines)
+									FOREACH_INDEXER(Ptr<DocumentLine>, line, lineIndex, paragraph->lines)
 									{
 										FOREACH(Ptr<DocumentRun>, run, line->runs)
 										{
 											WString text=ExtractTextVisitor::ExtractText(run.Obj());
 											writer.WriteString(text);
 										}
-										writer.WriteString(L"\r\n");
+										if(lineIndex<paragraph->lines.Count()-1)
+										{
+											writer.WriteString(L"\r\n");
+										}
 									}
 								}
 								{
@@ -1075,7 +1078,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 				if(element->document && element->document->paragraphs.Count()>0)
 				{
 					vint defaultSize=GetCurrentController()->ResourceService()->GetDefaultFont().size;
-					paragraphDistance=4;
+					paragraphDistance=defaultSize;
 					vint defaultHeight=defaultSize;
 
 					paragraphCaches.Resize(element->document->paragraphs.Count());
