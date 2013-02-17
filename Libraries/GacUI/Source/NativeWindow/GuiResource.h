@@ -169,6 +169,11 @@ Rich Content Document (model)
 		public:
 			/// <summary>All lines in this paragraph.</summary>
 			LineList						lines;
+
+			/// <summary>Horizontal alignment of this paragraph.</summary>
+			Alignment::Type					alignment;
+
+			DocumentParagraph():alignment(Alignment::Left){}
 		};
 
 		/// <summary>Represents a symbol resolver for loading a document model.</summary>

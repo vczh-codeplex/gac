@@ -247,6 +247,37 @@ WindowsDirect2DParagraph
 					}
 				}
 
+				Alignment::Type GetParagraphAlignment()override
+				{
+					switch(textLayout->GetTextAlignment())
+					{
+					case DWRITE_TEXT_ALIGNMENT_LEADING:
+						return Alignment::Left;
+					case DWRITE_TEXT_ALIGNMENT_CENTER:
+						return Alignment::Center;
+					case DWRITE_TEXT_ALIGNMENT_TRAILING:
+						return Alignment::Right;
+					default:
+						return Alignment::Left;
+					}
+				}
+
+				void SetParagraphAlignment(Alignment::Type value)override
+				{
+					switch(value)
+					{
+					case Alignment::Left:
+						textLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+						break;
+					case Alignment::Center:
+						textLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+						break;
+					case Alignment::Right:
+						textLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
+						break;
+					}
+				}
+
 				bool SetFont(vint start, vint length, const WString& value)override
 				{
 					if(length==0) return true;

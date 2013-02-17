@@ -879,6 +879,21 @@ DocumentModel
 					FOREACH_INDEXER(Ptr<XmlElement>, p, i, XmlGetElements(content, L"p"))
 					{
 						Ptr<DocumentParagraph> paragraph=new DocumentParagraph;
+						if(Ptr<XmlAttribute> att=XmlGetAttribute(p, L"align"))
+						{
+							if(att->value.value==L"Left")
+							{
+								paragraph->alignment=Alignment::Left;
+							}
+							else if(att->value.value==L"Center")
+							{
+								paragraph->alignment=Alignment::Center;
+							}
+							else if(att->value.value==L"Right")
+							{
+								paragraph->alignment=Alignment::Right;
+							}
+						}
 						model->paragraphs.Add(paragraph);
 						DeserializeNodeVisitor visitor(model, paragraph, i, resolver);
 						p->Accept(&visitor);
