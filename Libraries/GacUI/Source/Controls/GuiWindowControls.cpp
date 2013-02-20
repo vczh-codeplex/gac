@@ -840,6 +840,31 @@ GuiPopup
 				}
 			}
 
+			void GuiPopup::ShowPopup(GuiControl* control, Point location)
+			{
+				INativeWindow* window=GetNativeWindow();
+				if(window)
+				{
+					Point locations[4];
+					Size size=window->GetBounds().GetSize();
+					Rect controlBounds=control->GetBoundsComposition()->GetGlobalBounds();
+
+					GuiControlHost* controlHost=control->GetBoundsComposition()->GetRelatedControlHost();
+					if(controlHost)
+					{
+						INativeWindow* controlWindow=controlHost->GetNativeWindow();
+						if(controlWindow)
+						{
+							Point controlClientOffset=controlWindow->GetClientBoundsInScreen().LeftTop();
+							vint x=controlBounds.x1+controlClientOffset.x+location.x;
+							vint y=controlBounds.y1+controlClientOffset.y+location.y;
+							window->SetParent(controlWindow);
+							ShowPopup(Point(x, y));
+						}
+					}
+				}
+			}
+
 			void GuiPopup::ShowPopup(GuiControl* control, bool preferredTopBottomSide)
 			{
 				INativeWindow* window=GetNativeWindow();
@@ -898,6 +923,8 @@ GuiPopup
 			GuiTooltip::GuiTooltip(IStyleController* _styleController)
 				:GuiPopup(_styleController)
 			{
+				GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				GetContainerComposition()->SetPreferredMinSize(Size(20, 10));
 			}
 
 			GuiTooltip::~GuiTooltip()

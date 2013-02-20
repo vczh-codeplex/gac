@@ -404,7 +404,12 @@ Window
 				/// <summary>Show the popup window with the left-top position set to a specified value. The position of the popup window will be adjusted to make it totally inside the screen if possible.</summary>
 				/// <param name="location">The specified left-top position.</param>
 				void									ShowPopup(Point location);
+				/// <summary>Show the popup window with the left-top position set to a specified control-relative value. The position of the popup window will be adjusted to make it totally inside the screen if possible.</summary>
+				/// <param name="control">The control that owns this popup temporary. And the location is relative to this control.</param>
+				/// <param name="location">The specified left-top position.</param>
+				void									ShowPopup(GuiControl* control, Point location);
 				/// <summary>Show the popup window aligned with a specified control. The position of the popup window will be adjusted to make it totally inside the screen if possible.</summary>
+				/// <param name="control">The control that owns this popup temporary.</param>
 				/// <param name="preferredTopBottomSide">Set to true if the popup window is expected to be opened at the top or bottom side of that control.</param>
 				void									ShowPopup(GuiControl* control, bool preferredTopBottomSide);
 			};

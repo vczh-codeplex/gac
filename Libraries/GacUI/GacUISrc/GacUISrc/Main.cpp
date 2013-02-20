@@ -35,41 +35,57 @@ namespace test
 	class TestWindow : public GuiWindow
 	{
 	private:
-		GuiDocumentLabel*				documentControl;
+		GuiButton*					tooltipButton;
+		GuiDocumentLabel*			tooltipLabel;
+		Ptr<DocumentModel>			tooltipDocument;
 
-		void documentViewer_ActiveHyperlinkExecuted(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		Point						tooltipLocation;
+		Ptr<GuiTooltip>				tooltip;
+
+		void tooltipLabel_ActiveHyperlinkExecuted(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
 			GetCurrentController()->DialogService()->ShowMessageBox(
 				GetNativeWindow(),
-				documentControl->GetActiveHyperlinkReference(),
+				tooltipLabel->GetActiveHyperlinkReference(),
 				GetText());
+		}
+
+		void tooltipButton_MouseMove(GuiGraphicsComposition* sender, GuiMouseEventArgs& arguments)
+		{
+			tooltipLocation.x=arguments.x+5;
+			tooltipLocation.y=arguments.y+5;
+		}
+
+		void tooltipButton_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			tooltip->ShowPopup(tooltipButton, tooltipLocation);
 		}
 	public:
 		TestWindow()
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 		{
 			SetText(GetApplication()->GetExecutableFolder());
-			SetClientSize(Size(640, 520));
-			GetBoundsComposition()->SetPreferredMinSize(Size(320, 240));
+			SetClientSize(Size(640, 480));
 			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			MoveToScreenCenter();
 
-			documentControl=g::NewDocumentLabel();
-			documentControl->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			documentControl->ActiveHyperlinkExecuted.AttachMethod(this, &TestWindow::documentViewer_ActiveHyperlinkExecuted);
-			AddChild(documentControl);
+			tooltipButton=g::NewButton();
+			tooltipButton->SetText(L"This is a button with tooltip.");
+			tooltipButton->GetBoundsComposition()->SetAlignmentToParent(Margin(200, 200, 200, 200));
+			tooltipButton->GetEventReceiver()->mouseMove.AttachMethod(this, &TestWindow::tooltipButton_MouseMove);
+			tooltipButton->Clicked.AttachMethod(this, &TestWindow::tooltipButton_Clicked);
+			AddChild(tooltipButton);
+
+			tooltip=new GuiTooltip(GetCurrentTheme()->CreateTooltipStyle());
+
+			tooltipLabel=g::NewDocumentLabel();
+			tooltipLabel->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			tooltipLabel->ActiveHyperlinkExecuted.AttachMethod(this, &TestWindow::tooltipLabel_ActiveHyperlinkExecuted);
+			tooltip->AddChild(tooltipLabel);
 
 			Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml");
-			Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();
-			{
-				Ptr<XmlDocument> xml=document->SaveToXml();
-				FileStream fileStream(L"XmlDoc.xml", FileStream::WriteOnly);
-				BomEncoder encoder(BomEncoder::Utf8);
-				EncoderStream encoderStream(fileStream, encoder);
-				StreamWriter writer(encoderStream);
-				XmlPrint(xml, writer);
-			}
-			documentControl->SetDocument(document);
+			tooltipDocument=resource->GetValueByPath(L"TooltipDocument").Cast<DocumentModel>();
+			tooltipLabel->SetDocument(tooltipDocument);
 		}
 	};
 }

@@ -104,6 +104,7 @@ Win7TooltipStyle
 			Win7TooltipStyle::Win7TooltipStyle()
 			{
 				boundsComposition=new GuiBoundsComposition;
+				boundsComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				{
 					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
@@ -112,7 +113,7 @@ Win7TooltipStyle
 				}
 
 				containerComposition=new GuiBoundsComposition;
-				containerComposition->SetMargin(Margin(1, 1, 1, 1));
+				containerComposition->SetAlignmentToParent(Margin(1, 1, 1, 1));
 				containerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				boundsComposition->AddChild(containerComposition);
 				{

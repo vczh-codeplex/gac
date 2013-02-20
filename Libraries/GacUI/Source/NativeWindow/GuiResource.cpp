@@ -366,6 +366,14 @@ document_serialization_visitors::DeserializeNodeVisitor
 						if(!line) PrintText(L"");
 						line=0;
 					}
+					else if(node->name.value==L"sp")
+					{
+						PrintText(L" ");
+					}
+					else if(node->name.value==L"tab")
+					{
+						PrintText(L"\t");
+					}
 					else if(node->name.value==L"img")
 					{
 						if(!line)
@@ -1209,10 +1217,11 @@ GuiResourceFolder
 						{
 							if(element->name.value==L"Xml" || element->name.value==L"Doc")
 							{
-								WString text=XmlGetValue(element);
-								Ptr<XmlDocument> xml=XmlParseDocument(text, xmlParsingTable);
-								if(xml)
+								Ptr<XmlElement> root=XmlGetElements(element).First(0);
+								if(root)
 								{
+									Ptr<XmlDocument> xml=new XmlDocument;
+									xml->rootElement=root;
 									item->SetContent(xml);
 									if(element->name.value==L"Doc")
 									{
