@@ -115,6 +115,8 @@ Basic Construction
 				GuiControl*								parent;
 				ControlList								children;
 				Ptr<Object>								tag;
+				GuiControl*								tooltipControl;
+				vint									tooltipWidth;
 
 				virtual void							OnChildInserted(GuiControl* control);
 				virtual void							OnChildRemoved(GuiControl* control);
@@ -220,6 +222,22 @@ Basic Construction
 				/// <summary>Set the tag object of the control.</summary>
 				/// <param name="value">The tag object of the control.</param>
 				void									SetTag(Ptr<Object> value);
+				/// <summary>Get the tooltip control of the control.</summary>
+				/// <returns>The tooltip control of the control.</returns>
+				GuiControl*								GetTooltipControl();
+				/// <summary>Set the tooltip control of the control. The tooltip control will be released when this control is released. If you set a new tooltip control to replace the old one, the old one will not be owned by this control anymore, therefore user should release the old tooltip control manually.</summary>
+				/// <returns>The old tooltip control.</returns>
+				/// <param name="value">The tooltip control of the control.</param>
+				GuiControl*								SetTooltipControl(GuiControl* value);
+				/// <summary>Get the tooltip width of the control.</summary>
+				/// <returns>The tooltip width of the control.</returns>
+				vint									GetTooltipWidth();
+				/// <summary>Set the tooltip width of the control.</summary>
+				/// <param name="value">The tooltip width of the control.</param>
+				void									SetTooltipWidth(vint value);
+				/// <summary>Display the tooltip.</summary>
+				/// <param name="location">The relative location to specify the left-top position of the tooltip.</param>
+				bool									DisplayTooltip(Point location);
 
 				/// <summary>Query a service using an identifier. If you want to get a service of type IXXX, use IXXX::Identifier as the identifier.</summary>
 				/// <returns>The requested service. If the control doesn't support this service, it will be null.</returns>
