@@ -417,9 +417,12 @@ Window
 			/// <summary>Represents a tooltip window.</summary>
 			class GuiTooltip : public GuiPopup, private INativeControllerListener, public Description<GuiTooltip>
 			{
-			private:
+			protected:
+				GuiControl*								temporaryContentControl;
 
 				void									GlobalTimer()override;
+				void									TooltipOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									TooltipClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
@@ -432,6 +435,13 @@ Window
 				/// <summary>Set the preferred content width.</summary>
 				/// <param name="value">The preferred content width.</param>
 				void									SetPrefferedContentWidth(vint value);
+
+				/// <summary>Get the temporary content control.</summary>
+				/// <returns>The temporary content control.</returns>
+				GuiControl*								GetTemporaryContentControl();
+				/// <summary>Set the temporary content control.</summary>
+				/// <param name="control">The temporary content control.</param>
+				void									SetTemporaryContentControl(GuiControl* control);
 			};
 		}
 	}

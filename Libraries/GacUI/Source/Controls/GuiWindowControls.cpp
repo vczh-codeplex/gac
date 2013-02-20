@@ -925,12 +925,25 @@ GuiPopup
 				SetClientSize(GetClientSize());
 			}
 
+			void GuiTooltip::TooltipOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+			}
+
+			void GuiTooltip::TooltipClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				SetTemporaryContentControl(0);
+			}
+
 			GuiTooltip::GuiTooltip(IStyleController* _styleController)
 				:GuiPopup(_styleController)
+				,temporaryContentControl(0)
 			{
 				GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				GetContainerComposition()->SetPreferredMinSize(Size(20, 10));
 				GetCurrentController()->CallbackService()->InstallListener(this);
+
+				WindowOpened.AttachMethod(this, &GuiTooltip::TooltipOpened);
+				WindowClosed.AttachMethod(this, &GuiTooltip::TooltipClosed);
 			}
 
 			GuiTooltip::~GuiTooltip()
@@ -946,6 +959,22 @@ GuiPopup
 			void GuiTooltip::SetPrefferedContentWidth(vint value)
 			{
 				GetContainerComposition()->SetPreferredMinSize(Size(value, 10));
+			}
+
+			GuiControl* GuiTooltip::GetTemporaryContentControl()
+			{
+				return temporaryContentControl;
+			}
+
+			void GuiTooltip::SetTemporaryContentControl(GuiControl* control)
+			{
+				if(temporaryContentControl && HasChild(temporaryContentControl))
+				{
+					GetContainerComposition()->RemoveChild(temporaryContentControl->GetBoundsComposition());
+					temporaryContentControl=0;
+				}
+				control->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				AddChild(control);
 			}
 		}
 	}

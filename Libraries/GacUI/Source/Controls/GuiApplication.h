@@ -32,6 +32,7 @@ namespace vl
 				void											ClipboardUpdated()override;
 			protected:
 				GuiWindow*										mainWindow;
+				GuiTooltip*										sharedTooltipWindow;
 				collections::List<GuiWindow*>					windows;
 				collections::SortedList<GuiPopup*>				openingPopups;
 
@@ -47,6 +48,9 @@ namespace vl
 				/// <summary>Run a <see cref="GuiWindow"/> as the main window and show it. This function can only be called once in the entry point. When the main window is closed or hiden, the Run function will finished, and the application should prepare for finalization.</summary>
 				/// <param name="_mainWindow">The main window.</param>
 				void											Run(GuiWindow* _mainWindow);
+				/// <summary>Get the main window.</summary>
+				/// <returns>The main window.</returns>
+				GuiWindow*										GetMainWindow();
 				/// <summary>Get all created <see cref="GuiWindow"/> instances. This contains normal windows, popup windows, menus, or other types of windows that inherits from <see cref="GuiWindow"/>.</summary>
 				/// <returns>All created <see cref="GuiWindow"/> instances.</returns>
 				const collections::List<GuiWindow*>&			GetWindows();
@@ -54,6 +58,12 @@ namespace vl
 				/// <returns>The <see cref="GuiWindow"/> instance that the mouse cursor are directly in.</returns>
 				/// <param name="location">The mouse cursor.</param>
 				GuiWindow*										GetWindow(Point location);
+				/// <summary>Show a tooltip.</summary>
+				/// <param name="owner">The control that owns this tooltip temporary.</param>
+				/// <param name="tooltip">The control as the tooltip content. This control is not owned by the tooltip. User should manually release this control if no longer needed (usually when the application exit).</param>
+				/// <param name="preferredContentWidth">The preferred content width for this tooltip.</param>
+				/// <param name="location">The relative location to specify the left-top position of the tooltip.</param>
+				void											ShowTooltip(GuiControl* owner, GuiControl* tooltip, vint preferredContentWidth, Point location);
 				/// <summary>Get the file path of the current executable.</summary>
 				/// <returns>The file path of the current executable.</returns>
 				WString											GetExecutablePath();
