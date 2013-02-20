@@ -98,6 +98,61 @@ Win8WindowStyle
 			}
 
 /***********************************************************************
+Win8TooltipStyle
+***********************************************************************/
+
+			Win8TooltipStyle::Win8TooltipStyle()
+			{
+				boundsComposition=new GuiBoundsComposition;
+				boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					element->SetColor(Color(100, 100, 100));
+					boundsComposition->SetOwnedElement(element);
+				}
+
+				containerComposition=new GuiBoundsComposition;
+				containerComposition->SetMargin(Margin(1, 1, 1, 1));
+				containerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				boundsComposition->AddChild(containerComposition);
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(Color(255, 255, 225));
+					containerComposition->SetOwnedElement(element);
+				}
+			}
+
+			Win8TooltipStyle::~Win8TooltipStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win8TooltipStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win8TooltipStyle::GetContainerComposition()
+			{
+				return containerComposition;
+			}
+
+			void Win8TooltipStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8TooltipStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win8TooltipStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win8TooltipStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+/***********************************************************************
 Win8LabelStyle
 ***********************************************************************/
 

@@ -32,6 +32,7 @@ Theme
 				~Win8Theme();
 
 				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
+				controls::GuiTooltip::IStyleController*								CreateTooltipStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
 				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;

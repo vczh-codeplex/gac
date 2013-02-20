@@ -41,7 +41,7 @@ Container
 				void										SetVisuallyEnabled(bool value)override;
 			};
 
-			/// <summary>Window style (Windows 7). Using the Windows 7 window background color to fill the whold control</summary>
+			/// <summary>Window style (Windows 7). Using the Windows 7 window background color to fill the whole control.</summary>
 			class Win7WindowStyle : public virtual controls::GuiWindow::DefaultBehaviorStyleController, public Description<Win7WindowStyle>
 			{
 			protected:
@@ -50,6 +50,25 @@ Container
 				/// <summary>Create the style.</summary>
 				Win7WindowStyle();
 				~Win7WindowStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+			};
+
+			/// <summary>Tooltip style (Windows 7). Using the Windows 7 tooltip background color to fill the whole control.</summary>
+			class Win7TooltipStyle : public virtual controls::GuiWindow::DefaultBehaviorStyleController, public Description<Win7TooltipStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+			public:
+				/// <summary>Create the style.</summary>
+				Win7TooltipStyle();
+				~Win7TooltipStyle();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
 				compositions::GuiGraphicsComposition*		GetContainerComposition()override;

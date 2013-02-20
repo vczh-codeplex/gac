@@ -38,6 +38,11 @@ Win7Theme
 				return new Win7WindowStyle;
 			}
 
+			controls::GuiTooltip::IStyleController* Win7Theme::CreateTooltipStyle()
+			{
+				return new Win7TooltipStyle;
+			}
+
 			controls::GuiLabel::IStyleController* Win7Theme::CreateLabelStyle()
 			{
 				return new Win7LabelStyle;

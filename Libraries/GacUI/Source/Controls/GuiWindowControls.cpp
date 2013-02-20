@@ -890,6 +890,19 @@ GuiPopup
 					}
 				}
 			}
+
+/***********************************************************************
+GuiPopup
+***********************************************************************/
+
+			GuiTooltip::GuiTooltip(IStyleController* _styleController)
+				:GuiPopup(_styleController)
+			{
+			}
+
+			GuiTooltip::~GuiTooltip()
+			{
+			}
 		}
 	}
 }
