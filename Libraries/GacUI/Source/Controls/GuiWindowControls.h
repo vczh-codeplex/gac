@@ -408,6 +408,16 @@ Window
 				/// <param name="preferredTopBottomSide">Set to true if the popup window is expected to be opened at the top or bottom side of that control.</param>
 				void									ShowPopup(GuiControl* control, bool preferredTopBottomSide);
 			};
+
+			/// <summary>Represents a tooltip window.</summary>
+			class GuiTooltip : public GuiPopup, public Description<GuiTooltip>
+			{
+			public:
+				/// <summary>Create a control with a specified style controller.</summary>
+				/// <param name="_styleController">The style controller.</param>
+				GuiTooltip(IStyleController* _styleController);
+				~GuiTooltip();
+			};
 		}
 	}
 }

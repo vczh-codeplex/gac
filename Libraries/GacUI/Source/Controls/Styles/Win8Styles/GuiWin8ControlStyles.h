@@ -59,6 +59,25 @@ Container
 				void										SetVisuallyEnabled(bool value)override;
 			};
 
+			/// <summary>Tooltip style (Windows 8). Using the Windows 8 tooltip background color to fill the whole control.</summary>
+			class Win8TooltipStyle : public virtual controls::GuiWindow::DefaultBehaviorStyleController, public Description<Win8TooltipStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+			public:
+				/// <summary>Create the style.</summary>
+				Win8TooltipStyle();
+				~Win8TooltipStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+			};
+
 			/// <summary>Label style (Windows 8). A label contains a text, and the label will automatically resize to fit the text.</summary>
 			class Win8LabelStyle : public Object, public virtual controls::GuiLabel::IStyleController, public Description<Win8LabelStyle>
 			{

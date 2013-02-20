@@ -98,6 +98,61 @@ Win7WindowStyle
 			}
 
 /***********************************************************************
+Win7TooltipStyle
+***********************************************************************/
+
+			Win7TooltipStyle::Win7TooltipStyle()
+			{
+				boundsComposition=new GuiBoundsComposition;
+				boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					element->SetColor(Color(100, 100, 100));
+					boundsComposition->SetOwnedElement(element);
+				}
+
+				containerComposition=new GuiBoundsComposition;
+				containerComposition->SetMargin(Margin(1, 1, 1, 1));
+				containerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				boundsComposition->AddChild(containerComposition);
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(Color(255, 255, 225));
+					containerComposition->SetOwnedElement(element);
+				}
+			}
+
+			Win7TooltipStyle::~Win7TooltipStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win7TooltipStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win7TooltipStyle::GetContainerComposition()
+			{
+				return containerComposition;
+			}
+
+			void Win7TooltipStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win7TooltipStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win7TooltipStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win7TooltipStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+/***********************************************************************
 Win7LabelStyle
 ***********************************************************************/
 

@@ -38,6 +38,9 @@ namespace vl
 				/// <summary>Create a style for window.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiWindow::IStyleController*								CreateWindowStyle()=0;
+				/// <summary>Create a style for tooltip.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiTooltip::IStyleController*								CreateTooltipStyle()=0;
 				/// <summary>Create a style for label.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiLabel::IStyleController*								CreateLabelStyle()=0;
