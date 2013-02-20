@@ -19,7 +19,7 @@ namespace vl
 		{
 			class WindowsAsyncService : public INativeAsyncService
 			{
-			public:
+			protected:
 				struct TaskItem
 				{
 					Semaphore*							semaphore;
@@ -28,25 +28,40 @@ namespace vl
 					TaskItem();
 					TaskItem(Semaphore* _semaphore, const Func<void()>& _proc);
 					~TaskItem();
+				};
 
-					bool operator==(const TaskItem& item)const{return false;}
-					bool operator!=(const TaskItem& item)const{return true;}
+				class DelayItem : public Object, public INativeDelay
+				{
+				public:
+					DelayItem(WindowsAsyncService* _service, const Func<void()>& _proc, bool _executeInMainThread, vint milliseconds);
+					~DelayItem();
+
+					WindowsAsyncService*				service;
+					Func<void()>						proc;
+					ExecuteStatus						status;
+					DateTime							executeTime;
+					bool								executeInMainThread;
+
+					ExecuteStatus						GetStatus()override;
+					bool								Delay(vint milliseconds)override;
+					bool								Cancel()override;
 				};
 			protected:
-				vint							mainThreadId;
-				SpinLock						taskListLock;
-				collections::List<TaskItem>		taskItems;
+				vint									mainThreadId;
+				SpinLock								taskListLock;
+				collections::List<TaskItem>				taskItems;
+				collections::List<Ptr<DelayItem>>		delayItems;
 			public:
 				WindowsAsyncService();
 				~WindowsAsyncService();
 
-				void							ExecuteAsyncTasks();
-				bool							IsInMainThread()override;
-				void							InvokeAsync(const Func<void()>& proc)override;
-				void							InvokeInMainThread(const Func<void()>& proc)override;
-				bool							InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds)override;
-				Ptr<INativeDelay>				DelayExecute(const Func<void()>& proc)override;
-				Ptr<INativeDelay>				DelayExecuteInMainThread(const Func<void()>& proc)override;
+				void									ExecuteAsyncTasks();
+				bool									IsInMainThread()override;
+				void									InvokeAsync(const Func<void()>& proc)override;
+				void									InvokeInMainThread(const Func<void()>& proc)override;
+				bool									InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds)override;
+				Ptr<INativeDelay>						DelayExecute(const Func<void()>& proc, vint milliseconds)override;
+				Ptr<INativeDelay>						DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds)override;
 			};
 		}
 	}

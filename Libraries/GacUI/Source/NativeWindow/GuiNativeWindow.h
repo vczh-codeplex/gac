@@ -972,13 +972,15 @@ Native Window Services
 			/// </summary>
 			/// <returns>The delay executation controller for this task.</returns>
 			/// <param name="proc">The specified function.</param>
-			virtual Ptr<INativeDelay>		DelayExecute(const Func<void()>& proc)=0;
+			/// <param name="milliseconds">Time to delay.</param>
+			virtual Ptr<INativeDelay>		DelayExecute(const Func<void()>& proc, vint milliseconds)=0;
 			/// <summary>
 			/// Delay execute a specified function with an specified argument in the main thread.
 			/// </summary>
 			/// <returns>The delay executation controller for this task.</returns>
 			/// <param name="proc">The specified function.</param>
-			virtual Ptr<INativeDelay>		DelayExecuteInMainThread(const Func<void()>& proc)=0;
+			/// <param name="milliseconds">Time to delay.</param>
+			virtual Ptr<INativeDelay>		DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds)=0;
 		};
 		
 		/// <summary>
