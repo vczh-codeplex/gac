@@ -14,15 +14,12 @@ WindowsAsyncService::TaskItem
 
 			WindowsAsyncService::TaskItem::TaskItem()
 				:semaphore(0)
-				,proc(0)
-				,argument(0)
 			{
 			}
 
-			WindowsAsyncService::TaskItem::TaskItem(Semaphore* _semaphore, INativeAsyncService::AsyncTaskProc* _proc, void* _argument)
+			WindowsAsyncService::TaskItem::TaskItem(Semaphore* _semaphore, const Func<void()>& _proc)
 				:semaphore(_semaphore)
 				,proc(_proc)
-				,argument(_argument)
 			{
 			}
 
@@ -54,7 +51,7 @@ WindowsAsyncService
 				for(vint i=0;i<items.Count();i++)
 				{
 					TaskItem taskItem=items[i];
-					taskItem.proc(taskItem.argument);
+					taskItem.proc();
 					if(taskItem.semaphore)
 					{
 						taskItem.semaphore->Release();
@@ -67,25 +64,25 @@ WindowsAsyncService
 				return Thread::GetCurrentThreadId()==mainThreadId;
 			}
 
-			void WindowsAsyncService::InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument)
+			void WindowsAsyncService::InvokeAsync(const Func<void()>& proc)
 			{
-				ThreadPoolLite::Queue(proc, argument);
+				ThreadPoolLite::Queue(proc);
 			}
 
-			void WindowsAsyncService::InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument)
+			void WindowsAsyncService::InvokeInMainThread(const Func<void()>& proc)
 			{
 				SpinLock::Scope scope(taskListLock);
-				TaskItem item(0, proc, argument);
+				TaskItem item(0, proc);
 				taskItems.Add(item);
 			}
 
-			bool WindowsAsyncService::InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, vint milliseconds)
+			bool WindowsAsyncService::InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds)
 			{
 				Semaphore semaphore;
 				semaphore.Create(0, 1);
 				{
 					SpinLock::Scope scope(taskListLock);
-					TaskItem item(&semaphore, proc, argument);
+					TaskItem item(&semaphore, proc);
 					taskItems.Add(item);
 				}
 				if(milliseconds<0)
@@ -96,6 +93,16 @@ WindowsAsyncService
 				{
 					return semaphore.WaitForTime(milliseconds);
 				}
+			}
+
+			Ptr<INativeDelay> WindowsAsyncService::DelayExecute(const Func<void()>& proc)
+			{
+				return 0;
+			}
+
+			Ptr<INativeDelay> WindowsAsyncService::DelayExecuteInMainThread(const Func<void()>& proc)
+			{
+				return 0;
 			}
 		}
 	}

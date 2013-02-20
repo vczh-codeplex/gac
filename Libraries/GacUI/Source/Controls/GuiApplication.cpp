@@ -180,41 +180,19 @@ GuiApplication
 				return GetCurrentController()->AsyncService()->IsInMainThread();
 			}
 
-			void GuiApplication::InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument)
-			{
-				GetCurrentController()->AsyncService()->InvokeAsync(proc, argument);
-			}
-
-			void GuiApplication::InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument)
-			{
-				GetCurrentController()->AsyncService()->InvokeInMainThread(proc, argument);
-			}
-
-			bool GuiApplication::InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, vint milliseconds)
-			{
-				return GetCurrentController()->AsyncService()->InvokeInMainThreadAndWait(proc, argument, milliseconds);
-			}
-
-			void InvokeInMainThreadProc(void* argument)
-			{
-				Func<void()>* proc=(Func<void()>*)argument;
-				(*proc)();
-				delete proc;
-			}
-
 			void GuiApplication::InvokeAsync(const Func<void()>& proc)
 			{
-				InvokeAsync(&InvokeInMainThreadProc, new Func<void()>(proc));
+				GetCurrentController()->AsyncService()->InvokeAsync(proc);
 			}
 
 			void GuiApplication::InvokeInMainThread(const Func<void()>& proc)
 			{
-				InvokeInMainThread(&InvokeInMainThreadProc, new Func<void()>(proc));
+				GetCurrentController()->AsyncService()->InvokeInMainThread(proc);
 			}
 
 			bool GuiApplication::InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds)
 			{
-				return InvokeInMainThreadAndWait(&InvokeInMainThreadProc, new Func<void()>(proc));
+				return GetCurrentController()->AsyncService()->InvokeInMainThreadAndWait(proc, milliseconds);
 			}
 
 /***********************************************************************
