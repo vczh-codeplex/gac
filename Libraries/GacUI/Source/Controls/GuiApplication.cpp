@@ -12,6 +12,7 @@ namespace vl
 		{
 			using namespace collections;
 			using namespace compositions;
+			using namespace theme;
 
 /***********************************************************************
 GuiApplication
@@ -46,12 +47,18 @@ GuiApplication
 
 			GuiApplication::GuiApplication()
 				:mainWindow(0)
+				,sharedTooltipWindow(0)
 			{
 				GetCurrentController()->CallbackService()->InstallListener(this);
 			}
 
 			GuiApplication::~GuiApplication()
 			{
+				if(sharedTooltipWindow)
+				{
+					delete sharedTooltipWindow;
+					sharedTooltipWindow=0;
+				}
 				GetCurrentController()->CallbackService()->UninstallListener(this);
 			}
 
@@ -111,6 +118,11 @@ GuiApplication
 				}
 			}
 
+			GuiWindow* GuiApplication::GetMainWindow()
+			{
+				return mainWindow;
+			}
+
 			const collections::List<GuiWindow*>& GuiApplication::GetWindows()
 			{
 				return windows;
@@ -131,6 +143,18 @@ GuiApplication
 					}
 				}
 				return 0;
+			}
+
+			void GuiApplication::ShowTooltip(GuiControl* owner, GuiControl* tooltip, vint preferredContentWidth, Point location)
+			{
+				if(!sharedTooltipWindow)
+				{
+					sharedTooltipWindow=new GuiTooltip(GetCurrentTheme()->CreateTooltipStyle());
+				}
+				sharedTooltipWindow->SetClientSize(Size(10, 10));
+				sharedTooltipWindow->SetTemporaryContentControl(tooltip);
+				sharedTooltipWindow->SetPrefferedContentWidth(preferredContentWidth);
+				sharedTooltipWindow->ShowPopup(owner, location);
 			}
 
 			WString GuiApplication::GetExecutablePath()

@@ -167,7 +167,7 @@ Basic Construction
 				GuiControl*								GetParent();
 				/// <summary>Get the number of child controls.</summary>
 				/// <returns>The number of child controls.</returns>
-				vint										GetChildrenCount();
+				vint									GetChildrenCount();
 				/// <summary>Get the child control using a specified index.</summary>
 				/// <returns>The child control.</returns>
 				/// <param name="index">The specified index.</param>
@@ -176,6 +176,10 @@ Basic Construction
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="control">The control to put in this control.</param>
 				bool									AddChild(GuiControl* control);
+				/// <summary>Test if a control owned by this control.</summary>
+				/// <returns>Returns true if the control is owned by this control.</returns>
+				/// <param name="control">The control to test.</param>
+				bool									HasChild(GuiControl* control);
 				
 				/// <summary>Get the <see cref="GuiControlHost"/> that contains this control.</summary>
 				/// <returns>The <see cref="GuiControlHost"/> that contains this control.</returns>

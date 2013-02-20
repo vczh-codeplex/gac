@@ -810,18 +810,14 @@ WindowsForm
 
 				void SetParent(INativeWindow* parent)
 				{
-					WindowsForm* window=dynamic_cast<WindowsForm*>(parent);
-					if(window)
+					parentWindow=dynamic_cast<WindowsForm*>(parent);
+					if(parentWindow)
 					{
-						parentWindow=window;
-						if(parentWindow)
-						{
-							SetWindowLongPtr(handle, GWLP_HWNDPARENT, (LONG_PTR)window->handle);
-						}
-						else
-						{
-							SetWindowLongPtr(handle, GWLP_HWNDPARENT, NULL);
-						}
+						SetWindowLongPtr(handle, GWLP_HWNDPARENT, (LONG_PTR)parentWindow->handle);
+					}
+					else
+					{
+						SetWindowLongPtr(handle, GWLP_HWNDPARENT, NULL);
 					}
 				}
 

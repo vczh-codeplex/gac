@@ -213,6 +213,11 @@ GuiControl
 				return GetContainerComposition()->AddChild(control->GetBoundsComposition());
 			}
 
+			bool GuiControl::HasChild(GuiControl* control)
+			{
+				return children.Contains(control);
+			}
+
 			GuiControlHost* GuiControl::GetRelatedControlHost()
 			{
 				return parent?parent->GetRelatedControlHost():0;
