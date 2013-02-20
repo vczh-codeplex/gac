@@ -23,18 +23,17 @@ namespace vl
 				struct TaskItem
 				{
 					Semaphore*							semaphore;
-					INativeAsyncService::AsyncTaskProc*	proc;
-					void*								argument;
+					Func<void()>						proc;
 
 					TaskItem();
-					TaskItem(Semaphore* _semaphore, INativeAsyncService::AsyncTaskProc* _proc, void* _argument);
+					TaskItem(Semaphore* _semaphore, const Func<void()>& _proc);
 					~TaskItem();
 
 					bool operator==(const TaskItem& item)const{return false;}
 					bool operator!=(const TaskItem& item)const{return true;}
 				};
 			protected:
-				vint								mainThreadId;
+				vint							mainThreadId;
 				SpinLock						taskListLock;
 				collections::List<TaskItem>		taskItems;
 			public:
@@ -43,9 +42,11 @@ namespace vl
 
 				void							ExecuteAsyncTasks();
 				bool							IsInMainThread()override;
-				void							InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument)override;
-				void							InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument)override;
-				bool							InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, vint milliseconds)override;
+				void							InvokeAsync(const Func<void()>& proc)override;
+				void							InvokeInMainThread(const Func<void()>& proc)override;
+				bool							InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds)override;
+				Ptr<INativeDelay>				DelayExecute(const Func<void()>& proc)override;
+				Ptr<INativeDelay>				DelayExecuteInMainThread(const Func<void()>& proc)override;
 			};
 		}
 	}

@@ -906,6 +906,37 @@ Native Window Services
 			/// <param name="value">The font configuration to override.</param>
 			virtual void					SetDefaultFont(const FontProperties& value)=0;
 		};
+
+		/// <summary>
+		/// Delay executation controller.
+		/// </summary>
+		class INativeDelay : public Interface
+		{
+		public:
+			/// <summary>Delay executation controller status.</summary>
+			enum ExecuteStatus
+			{
+				/// <summary>[T:vl.presentation.INativeDelay.ExecuteStatus]Pending.</summary>
+				Pending,
+				/// <summary>[T:vl.presentation.INativeDelay.ExecuteStatus]Executing.</summary>
+				Executing,
+				/// <summary>[T:vl.presentation.INativeDelay.ExecuteStatus]Executed.</summary>
+				Executed,
+				/// <summary>[T:vl.presentation.INativeDelay.ExecuteStatus]Canceled.</summary>
+				Canceled,
+			};
+
+			/// <summary>Get the current status.</summary>
+			/// <returns>The current status.</returns>
+			virtual ExecuteStatus			GetStatus()=0;
+			/// <summary>If the current task is pending, execute the task after a specified period.</summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
+			/// <param name="milliseconds">A specified period.</param>
+			virtual bool					Delay(vint milliseconds)=0;
+			/// <summary>If the current task is pending, cancel the task.</summary>
+			/// <returns>Returns true if this operation succeeded.</returns>
+			virtual bool					Cancel()=0;
+		};
 		
 		/// <summary>
 		/// Asynchronized operation service. GacUI is not a thread safe library except for this service. To access this service, use [M:vl.presentation.INativeController.AsyncService].
@@ -913,7 +944,6 @@ Native Window Services
 		class INativeAsyncService : public virtual Interface
 		{
 		public:
-			typedef void (AsyncTaskProc)(void* arguments);
 
 			/// <summary>
 			/// Test is the current thread the main thread.
@@ -924,22 +954,31 @@ Native Window Services
 			/// Invoke a specified function with an specified argument asynchronisly.
 			/// </summary>
 			/// <param name="proc">The specified function.</param>
-			/// <param name="argument">The specified argument.</param>
-			virtual void					InvokeAsync(AsyncTaskProc* proc, void* argument)=0;
+			virtual void					InvokeAsync(const Func<void()>& proc)=0;
 			/// <summary>
 			/// Invoke a specified function with an specified argument in the main thread.
 			/// </summary>
 			/// <param name="proc">The specified function.</param>
-			/// <param name="argument">The specified argument.</param>
-			virtual void					InvokeInMainThread(AsyncTaskProc* proc, void* argument)=0;
+			virtual void					InvokeInMainThread(const Func<void()>& proc)=0;
 			/// <summary>
 			/// Invoke a specified function with an specified argument in the main thread and wait for the function to complete or timeout.
 			/// </summary>
 			/// <returns>Return true if the function complete. Return false if the function has not completed during a specified period of time.</returns>
 			/// <param name="proc">The specified function.</param>
-			/// <param name="argument">The specified argument.</param>
 			/// <param name="milliseconds">The specified period of time to wait. Set to -1 (default value) to wait forever until the function completed.</param>
-			virtual bool					InvokeInMainThreadAndWait(AsyncTaskProc* proc, void* argument, vint milliseconds=-1)=0;
+			virtual bool					InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds=-1)=0;
+			/// <summary>
+			/// Delay execute a specified function with an specified argument asynchronisly.
+			/// </summary>
+			/// <returns>The delay executation controller for this task.</returns>
+			/// <param name="proc">The specified function.</param>
+			virtual Ptr<INativeDelay>		DelayExecute(const Func<void()>& proc)=0;
+			/// <summary>
+			/// Delay execute a specified function with an specified argument in the main thread.
+			/// </summary>
+			/// <returns>The delay executation controller for this task.</returns>
+			/// <param name="proc">The specified function.</param>
+			virtual Ptr<INativeDelay>		DelayExecuteInMainThread(const Func<void()>& proc)=0;
 		};
 		
 		/// <summary>
