@@ -1,4 +1,5 @@
 #include "GuiBasicControls.h"
+#include "GuiApplication.h"
 
 namespace vl
 {
@@ -128,6 +129,8 @@ GuiControl
 				,isVisuallyEnabled(true)
 				,isVisible(true)
 				,parent(0)
+				,tooltipControl(0)
+				,tooltipWidth(50)
 			{
 				boundsComposition->SetAssociatedControl(this);
 				VisibleChanged.SetAssociatedComposition(boundsComposition);
@@ -144,6 +147,15 @@ GuiControl
 
 			GuiControl::~GuiControl()
 			{
+				if(tooltipControl)
+				{
+					// the only legal parent is the GuiApplication::sharedTooltipWindow
+					if(tooltipControl->GetBoundsComposition()->GetParent())
+					{
+						tooltipControl->GetBoundsComposition()->GetParent()->RemoveChild(tooltipControl->GetBoundsComposition());
+					}
+					delete tooltipControl;
+				}
 				if(parent || !styleController)
 				{
 					for(vint i=0;i<children.Count();i++)
@@ -308,6 +320,35 @@ GuiControl
 			void GuiControl::SetTag(Ptr<Object> value)
 			{
 				tag=value;
+			}
+
+			GuiControl* GuiControl::GetTooltipControl()
+			{
+				return tooltipControl;
+			}
+
+			GuiControl* GuiControl::SetTooltipControl(GuiControl* value)
+			{
+				GuiControl* oldTooltipControl=tooltipControl;
+				tooltipControl=value;
+				return oldTooltipControl;
+			}
+
+			vint GuiControl::GetTooltipWidth()
+			{
+				return tooltipWidth;
+			}
+
+			void GuiControl::SetTooltipWidth(vint value)
+			{
+				tooltipWidth=value;
+			}
+
+			bool GuiControl::DisplayTooltip(Point location)
+			{
+				if(!tooltipControl) return false;
+				GetApplication()->ShowTooltip(this, tooltipControl, tooltipWidth, location);
+				return true;
 			}
 
 			IDescriptable* GuiControl::QueryService(const WString& identifier)

@@ -56,7 +56,7 @@ namespace test
 
 		void tooltipButton_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
-			GetApplication()->ShowTooltip(tooltipButton, tooltipLabel, 200, tooltipLocation);
+			tooltipButton->DisplayTooltip(tooltipLocation);
 		}
 	public:
 		TestWindow()
@@ -73,22 +73,20 @@ namespace test
 			tooltipButton->GetEventReceiver()->mouseMove.AttachMethod(this, &TestWindow::tooltipButton_MouseMove);
 			tooltipButton->Clicked.AttachMethod(this, &TestWindow::tooltipButton_Clicked);
 			AddChild(tooltipButton);
+			{
+				tooltipLabel=g::NewDocumentLabel();
+				tooltipLabel->ActiveHyperlinkExecuted.AttachMethod(this, &TestWindow::tooltipLabel_ActiveHyperlinkExecuted);
+				tooltipButton->SetTooltipControl(tooltipLabel);
+				tooltipButton->SetTooltipWidth(200);
 
-			tooltipLabel=g::NewDocumentLabel();
-			tooltipLabel->ActiveHyperlinkExecuted.AttachMethod(this, &TestWindow::tooltipLabel_ActiveHyperlinkExecuted);
-
-			Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml");
-			tooltipDocument=resource->GetValueByPath(L"TooltipDocument").Cast<DocumentModel>();
-			tooltipLabel->SetDocument(tooltipDocument);
+				Ptr<GuiResource> resource=GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlResource.xml");
+				tooltipDocument=resource->GetValueByPath(L"TooltipDocument").Cast<DocumentModel>();
+				tooltipLabel->SetDocument(tooltipDocument);
+			}
 		}
 
 		~TestWindow()
 		{
-			if(tooltipLabel->GetBoundsComposition()->GetParent())
-			{
-				tooltipLabel->GetBoundsComposition()->GetParent()->RemoveChild(tooltipLabel->GetBoundsComposition());
-			}
-			delete tooltipLabel;
 		}
 	};
 }
