@@ -930,6 +930,16 @@ GuiPopup
 			GuiTooltip::~GuiTooltip()
 			{
 			}
+
+			vint GuiTooltip::GetPrefferedContentWidth()
+			{
+				return GetContainerComposition()->GetPreferredMinSize().x;
+			}
+
+			void GuiTooltip::SetPrefferedContentWidth(vint value)
+			{
+				GetContainerComposition()->SetPreferredMinSize(Size(value, 10));
+			}
 		}
 	}
 }

@@ -58,6 +58,7 @@ namespace test
 
 		void tooltipButton_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
+			tooltip->SetClientSize(Size(0, 0));
 			tooltip->ShowPopup(tooltipButton, tooltipLocation);
 		}
 	public:
@@ -77,6 +78,7 @@ namespace test
 			AddChild(tooltipButton);
 
 			tooltip=new GuiTooltip(GetCurrentTheme()->CreateTooltipStyle());
+			tooltip->SetPrefferedContentWidth(200);
 
 			tooltipLabel=g::NewDocumentLabel();
 			tooltipLabel->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));

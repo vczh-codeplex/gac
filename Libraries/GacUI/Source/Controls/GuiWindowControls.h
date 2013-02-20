@@ -422,6 +422,13 @@ Window
 				/// <param name="_styleController">The style controller.</param>
 				GuiTooltip(IStyleController* _styleController);
 				~GuiTooltip();
+
+				/// <summary>Get the preferred content width.</summary>
+				/// <returns>The preferred content width.</returns>
+				vint									GetPrefferedContentWidth();
+				/// <summary>Set the preferred content width.</summary>
+				/// <param name="value">The preferred content width.</param>
+				void									SetPrefferedContentWidth(vint value);
 			};
 		}
 	}
