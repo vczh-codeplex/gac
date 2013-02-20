@@ -415,8 +415,11 @@ Window
 			};
 
 			/// <summary>Represents a tooltip window.</summary>
-			class GuiTooltip : public GuiPopup, public Description<GuiTooltip>
+			class GuiTooltip : public GuiPopup, private INativeControllerListener, public Description<GuiTooltip>
 			{
+			private:
+
+				void									GlobalTimer()override;
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>

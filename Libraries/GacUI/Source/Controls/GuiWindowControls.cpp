@@ -920,15 +920,22 @@ GuiPopup
 GuiPopup
 ***********************************************************************/
 
+			void GuiTooltip::GlobalTimer()
+			{
+				SetClientSize(GetClientSize());
+			}
+
 			GuiTooltip::GuiTooltip(IStyleController* _styleController)
 				:GuiPopup(_styleController)
 			{
 				GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				GetContainerComposition()->SetPreferredMinSize(Size(20, 10));
+				GetCurrentController()->CallbackService()->InstallListener(this);
 			}
 
 			GuiTooltip::~GuiTooltip()
 			{
+				GetCurrentController()->CallbackService()->UninstallListener(this);
 			}
 
 			vint GuiTooltip::GetPrefferedContentWidth()
