@@ -238,6 +238,8 @@ Basic Construction
 				/// <summary>Display the tooltip.</summary>
 				/// <param name="location">The relative location to specify the left-top position of the tooltip.</param>
 				bool									DisplayTooltip(Point location);
+				/// <summary>Close the tooltip that owned by this control.</summary>
+				void									CloseTooltip();
 
 				/// <summary>Query a service using an identifier. If you want to get a service of type IXXX, use IXXX::Identifier as the identifier.</summary>
 				/// <returns>The requested service. If the control doesn't support this service, it will be null.</returns>

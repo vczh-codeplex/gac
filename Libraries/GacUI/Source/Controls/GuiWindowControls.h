@@ -35,7 +35,13 @@ Control Host
 				virtual void							OnNativeWindowChanged();
 				virtual void							OnVisualStatusChanged();
 			private:
+				Ptr<INativeDelay>						tooltipDelay;
+				Point									tooltipLocation;
 				
+				GuiControl*								GetTooltipOwner(Point location);
+				void									MoveIntoTooltipControl(GuiControl* tooltipControl, Point location);
+				void									MouseMoving(const NativeWindowMouseInfo& info)override;
+				void									MouseLeaved()override;
 				void									Moved()override;
 				void									Enabled()override;
 				void									Disabled()override;

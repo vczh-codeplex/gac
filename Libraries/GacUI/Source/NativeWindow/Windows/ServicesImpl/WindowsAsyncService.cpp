@@ -68,13 +68,13 @@ WindowsAsyncService::DelayItem
 				SpinLock::Scope scope(service->taskListLock);
 				if(status==INativeDelay::Pending)
 				{
-					service->delayItems.Remove(this);
-					return true;
+					if(service->delayItems.Remove(this))
+					{
+						status=INativeDelay::Canceled;
+						return true;
+					}
 				}
-				else
-				{
-					return false;
-				}
+				return false;
 			}
 
 /***********************************************************************

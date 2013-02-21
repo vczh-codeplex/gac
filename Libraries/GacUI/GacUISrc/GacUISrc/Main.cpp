@@ -38,7 +38,6 @@ namespace test
 		GuiButton*					tooltipButton;
 		GuiDocumentLabel*			tooltipLabel;
 		Ptr<DocumentModel>			tooltipDocument;
-		Point						tooltipLocation;
 
 		void tooltipLabel_ActiveHyperlinkExecuted(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 		{
@@ -46,17 +45,6 @@ namespace test
 				GetNativeWindow(),
 				tooltipLabel->GetActiveHyperlinkReference(),
 				GetText());
-		}
-
-		void tooltipButton_MouseMove(GuiGraphicsComposition* sender, GuiMouseEventArgs& arguments)
-		{
-			tooltipLocation.x=arguments.x+5;
-			tooltipLocation.y=arguments.y+5;
-		}
-
-		void tooltipButton_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-		{
-			tooltipButton->DisplayTooltip(tooltipLocation);
 		}
 	public:
 		TestWindow()
@@ -70,8 +58,6 @@ namespace test
 			tooltipButton=g::NewButton();
 			tooltipButton->SetText(L"This is a button with tooltip.");
 			tooltipButton->GetBoundsComposition()->SetAlignmentToParent(Margin(200, 200, 200, 200));
-			tooltipButton->GetEventReceiver()->mouseMove.AttachMethod(this, &TestWindow::tooltipButton_MouseMove);
-			tooltipButton->Clicked.AttachMethod(this, &TestWindow::tooltipButton_Clicked);
 			AddChild(tooltipButton);
 			{
 				tooltipLabel=g::NewDocumentLabel();
