@@ -49,27 +49,32 @@ GuiControlHost
 						GuiControl* currentOwner=GetApplication()->GetTooltipOwner();
 						if(currentOwner && currentOwner!=tooltipControl)
 						{
+							if(tooltipCloseDelay)
+							{
+								tooltipCloseDelay->Cancel();
+								tooltipCloseDelay=0;
+							}
 							GetApplication()->DelayExecuteInMainThread([=]()
 							{
 								currentOwner->CloseTooltip();
-							}, 500);
+							}, TooltipDelayCloseTime);
 						}
 					}
 					if(!tooltipControl)
 					{
-						if(tooltipDelay)
+						if(tooltipOpenDelay)
 						{
-							tooltipDelay->Cancel();
-							tooltipDelay=0;
+							tooltipOpenDelay->Cancel();
+							tooltipOpenDelay=0;
 						}
 					}
-					else if(tooltipDelay)
+					else if(tooltipOpenDelay)
 					{
-						tooltipDelay->Delay(500);
+						tooltipOpenDelay->Delay(TooltipDelayOpenTime);
 					}
-					else
+					else if(GetApplication()->GetTooltipOwner()!=tooltipControl)
 					{
-						tooltipDelay=GetApplication()->DelayExecuteInMainThread([this]()
+						tooltipOpenDelay=GetApplication()->DelayExecuteInMainThread([this]()
 						{
 							GuiControl* owner=GetTooltipOwner(tooltipLocation);
 							if(owner)
@@ -77,9 +82,14 @@ GuiControlHost
 								Point offset=owner->GetBoundsComposition()->GetGlobalBounds().LeftTop();
 								Point p(tooltipLocation.x-offset.x, tooltipLocation.y-offset.y+24);
 								owner->DisplayTooltip(p);
-								tooltipDelay=0;
+								tooltipOpenDelay=0;
+
+								tooltipCloseDelay=GetApplication()->DelayExecuteInMainThread([this, owner]()
+								{
+									owner->CloseTooltip();
+								}, TooltipDelayLifeTime);
 							}
-						}, 500);
+						}, TooltipDelayOpenTime);
 					}
 				}
 			}
@@ -1049,6 +1059,7 @@ GuiPopup
 					GetContainerComposition()->RemoveChild(temporaryContentControl->GetBoundsComposition());
 					temporaryContentControl=0;
 				}
+				temporaryContentControl=control;
 				control->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				AddChild(control);
 			}
