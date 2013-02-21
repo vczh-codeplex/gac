@@ -35,7 +35,12 @@ Control Host
 				virtual void							OnNativeWindowChanged();
 				virtual void							OnVisualStatusChanged();
 			private:
-				Ptr<INativeDelay>						tooltipDelay;
+				static const vint						TooltipDelayOpenTime=500;
+				static const vint						TooltipDelayCloseTime=500;
+				static const vint						TooltipDelayLifeTime=5000;
+
+				Ptr<INativeDelay>						tooltipOpenDelay;
+				Ptr<INativeDelay>						tooltipCloseDelay;
 				Point									tooltipLocation;
 				
 				GuiControl*								GetTooltipOwner(Point location);

@@ -102,7 +102,7 @@ WindowsAsyncService
 					for(vint i=delayItems.Count()-1;i>=0;i--)
 					{
 						Ptr<DelayItem> item=delayItems[i];
-						if(now.filetime<=item->executeTime.filetime)
+						if(now.filetime>=item->executeTime.filetime)
 						{
 							item->status=INativeDelay::Executing;
 							executableDelayItems.Add(item);
