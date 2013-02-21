@@ -32,6 +32,7 @@ namespace vl
 				void											ClipboardUpdated()override;
 			protected:
 				GuiWindow*										mainWindow;
+				GuiControl*										sharedTooltipOwner;
 				GuiTooltip*										sharedTooltipWindow;
 				collections::List<GuiWindow*>					windows;
 				collections::SortedList<GuiPopup*>				openingPopups;
@@ -64,6 +65,11 @@ namespace vl
 				/// <param name="preferredContentWidth">The preferred content width for this tooltip.</param>
 				/// <param name="location">The relative location to specify the left-top position of the tooltip.</param>
 				void											ShowTooltip(GuiControl* owner, GuiControl* tooltip, vint preferredContentWidth, Point location);
+				/// <summary>Close the tooltip</summary>
+				void											CloseTooltip();
+				/// <summary>Get the tooltip owner. When the tooltip closed, it returns null.</summary>
+				/// <returns>The tooltip owner.</returns>
+				GuiControl*										GetTooltipOwner();
 				/// <summary>Get the file path of the current executable.</summary>
 				/// <returns>The file path of the current executable.</returns>
 				WString											GetExecutablePath();
@@ -85,6 +91,16 @@ namespace vl
 				/// <param name="proc">The specified function.</param>
 				/// <param name="milliseconds">The specified period of time to wait. Set to -1 (default value) to wait forever until the function completed.</param>
 				bool											InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds=-1);
+				/// <summary>Delay execute a specified function with an specified argument asynchronisly.</summary>
+				/// <returns>The Delay execution controller for this task.</returns>
+				/// <param name="proc">The specified function.</param>
+				/// <param name="milliseconds">Time to delay.</param>
+				Ptr<INativeDelay>								DelayExecute(const Func<void()>& proc, vint milliseconds);
+				/// <summary>Delay execute a specified function with an specified argument in the main thread.</summary>
+				/// <returns>The Delay execution controller for this task.</returns>
+				/// <param name="proc">The specified function.</param>
+				/// <param name="milliseconds">Time to delay.</param>
+				Ptr<INativeDelay>								DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds);
 
 				template<typename T>
 				void InvokeLambdaInMainThread(const T& proc)

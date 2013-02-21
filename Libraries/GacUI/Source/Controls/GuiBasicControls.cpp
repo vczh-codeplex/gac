@@ -351,6 +351,14 @@ GuiControl
 				return true;
 			}
 
+			void GuiControl::CloseTooltip()
+			{
+				if(GetApplication()->GetTooltipOwner()==this)
+				{
+					GetApplication()->CloseTooltip();
+				}
+			}
+
 			IDescriptable* GuiControl::QueryService(const WString& identifier)
 			{
 				if(parent)

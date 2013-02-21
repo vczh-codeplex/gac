@@ -47,6 +47,7 @@ GuiApplication
 
 			GuiApplication::GuiApplication()
 				:mainWindow(0)
+				,sharedTooltipOwner(0)
 				,sharedTooltipWindow(0)
 			{
 				GetCurrentController()->CallbackService()->InstallListener(this);
@@ -151,10 +152,26 @@ GuiApplication
 				{
 					sharedTooltipWindow=new GuiTooltip(GetCurrentTheme()->CreateTooltipStyle());
 				}
+				sharedTooltipOwner=owner;
 				sharedTooltipWindow->SetClientSize(Size(10, 10));
 				sharedTooltipWindow->SetTemporaryContentControl(tooltip);
 				sharedTooltipWindow->SetPrefferedContentWidth(preferredContentWidth);
 				sharedTooltipWindow->ShowPopup(owner, location);
+			}
+
+			void GuiApplication::CloseTooltip()
+			{
+				if(sharedTooltipWindow)
+				{
+					sharedTooltipWindow->Close();
+				}
+			}
+
+			GuiControl* GuiApplication::GetTooltipOwner()
+			{
+				if(!sharedTooltipWindow) return 0;
+				if(!sharedTooltipWindow->GetTemporaryContentControl()) return 0;
+				return sharedTooltipOwner;
 			}
 
 			WString GuiApplication::GetExecutablePath()
@@ -193,6 +210,16 @@ GuiApplication
 			bool GuiApplication::InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds)
 			{
 				return GetCurrentController()->AsyncService()->InvokeInMainThreadAndWait(proc, milliseconds);
+			}
+
+			Ptr<INativeDelay> GuiApplication::DelayExecute(const Func<void()>& proc, vint milliseconds)
+			{
+				return GetCurrentController()->AsyncService()->DelayExecute(proc, milliseconds);
+			}
+
+			Ptr<INativeDelay> GuiApplication::DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds)
+			{
+				return GetCurrentController()->AsyncService()->DelayExecuteInMainThread(proc, milliseconds);
 			}
 
 /***********************************************************************

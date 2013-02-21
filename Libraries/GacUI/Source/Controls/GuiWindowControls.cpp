@@ -22,6 +22,82 @@ GuiControlHost
 			{
 			}
 
+			GuiControl* GuiControlHost::GetTooltipOwner(Point location)
+			{
+				GuiGraphicsComposition* composition=this->GetBoundsComposition()->FindComposition(location);
+				if(composition)
+				{
+					GuiControl* control=composition->GetRelatedControl();
+					while(control)
+					{
+						if(control->GetTooltipControl())
+						{
+							return control;
+						}
+						control=control->GetParent();
+					}
+				}
+				return 0;
+			}
+
+			void GuiControlHost::MoveIntoTooltipControl(GuiControl* tooltipControl, Point location)
+			{
+				if(tooltipLocation!=location)
+				{
+					tooltipLocation=location;
+					{
+						GuiControl* currentOwner=GetApplication()->GetTooltipOwner();
+						if(currentOwner && currentOwner!=tooltipControl)
+						{
+							GetApplication()->DelayExecuteInMainThread([=]()
+							{
+								currentOwner->CloseTooltip();
+							}, 500);
+						}
+					}
+					if(!tooltipControl)
+					{
+						if(tooltipDelay)
+						{
+							tooltipDelay->Cancel();
+							tooltipDelay=0;
+						}
+					}
+					else if(tooltipDelay)
+					{
+						tooltipDelay->Delay(500);
+					}
+					else
+					{
+						tooltipDelay=GetApplication()->DelayExecuteInMainThread([this]()
+						{
+							GuiControl* owner=GetTooltipOwner(tooltipLocation);
+							if(owner)
+							{
+								Point offset=owner->GetBoundsComposition()->GetGlobalBounds().LeftTop();
+								Point p(tooltipLocation.x-offset.x, tooltipLocation.y-offset.y+24);
+								owner->DisplayTooltip(p);
+								tooltipDelay=0;
+							}
+						}, 500);
+					}
+				}
+			}
+
+			void GuiControlHost::MouseMoving(const NativeWindowMouseInfo& info)
+			{
+				if(!info.left && !info.middle && !info.right)
+				{
+					GuiControl* tooltipControl=GetTooltipOwner(tooltipLocation);
+					MoveIntoTooltipControl(tooltipControl, Point(info.x, info.y));
+				}
+			}
+
+			void GuiControlHost::MouseLeaved()
+			{
+				MoveIntoTooltipControl(0, Point(-1, -1));
+			}
+
 			void GuiControlHost::Moved()
 			{
 				OnVisualStatusChanged();
