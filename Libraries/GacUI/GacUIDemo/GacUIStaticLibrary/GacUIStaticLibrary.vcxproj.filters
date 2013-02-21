@@ -92,5 +92,11 @@
     <Xml Include="..\Resources\document2.xml">
       <Filter>Resource Files</Filter>
     </Xml>
+    <Xml Include="..\Resources\XmlDoc.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+    <Xml Include="..\Resources\XmlResource.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
 </Project>
