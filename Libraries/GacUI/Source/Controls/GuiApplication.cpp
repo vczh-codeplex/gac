@@ -170,6 +170,8 @@ GuiApplication
 					sharedTooltipWindow->GetBoundsComposition()->GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiApplication::TooltipMouseEnter);
 					sharedTooltipWindow->GetBoundsComposition()->GetEventReceiver()->mouseLeave.AttachMethod(this, &GuiApplication::TooltipMouseLeave);
 				}
+				sharedTooltipHovering=false;
+				sharedTooltipClosing=false;
 				sharedTooltipOwner=owner;
 				sharedTooltipWindow->SetClientSize(Size(10, 10));
 				sharedTooltipWindow->SetTemporaryContentControl(tooltip);

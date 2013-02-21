@@ -334,9 +334,14 @@ typedef signed __int64	pos_t;
 
 		static DateTime		LocalTime();
 		static DateTime		UtcTime();
+		static DateTime		FromFileTime(unsigned __int64 filetime);
+
+		DateTime();
 
 		DateTime			ToLocalTime();
 		DateTime			ToUtcTime();
+		DateTime			Forward(unsigned __int64 milliseconds);
+		DateTime			Backward(unsigned __int64 milliseconds);
 	};
 
 /***********************************************************************

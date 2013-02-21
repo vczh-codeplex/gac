@@ -105,6 +105,31 @@ DateTime
 		return SystemTimeToDateTime(utcTime);
 	}
 
+	DateTime DateTime::FromFileTime(unsigned __int64 filetime)
+	{
+		ULARGE_INTEGER largeInteger;
+		largeInteger.QuadPart=filetime;
+		FILETIME fileTime;
+		fileTime.dwHighDateTime=largeInteger.HighPart;
+		fileTime.dwLowDateTime=largeInteger.LowPart;
+
+		SYSTEMTIME systemTime;
+		FileTimeToSystemTime(&fileTime, &systemTime);
+		return SystemTimeToDateTime(systemTime);
+	}
+
+	DateTime::DateTime()
+		:year(0)
+		,month(0)
+		,day(0)
+		,hour(0)
+		,minute(0)
+		,second(0)
+		,milliseconds(0)
+		,filetime(0)
+	{
+	}
+
 	DateTime DateTime::ToLocalTime()
 	{
 		SYSTEMTIME utcTime=DateTimeToSystemTime(*this);
@@ -119,6 +144,16 @@ DateTime
 		SYSTEMTIME utcTime;
 		TzSpecificLocalTimeToSystemTime(NULL, &localTime, &utcTime);
 		return SystemTimeToDateTime(utcTime);
+	}
+
+	DateTime DateTime::Forward(unsigned __int64 milliseconds)
+	{
+		return FromFileTime(filetime+milliseconds*10000);
+	}
+
+	DateTime DateTime::Backward(unsigned __int64 milliseconds)
+	{
+		return FromFileTime(filetime-milliseconds*10000);
 	}
 
 /***********************************************************************

@@ -1027,16 +1027,33 @@ Native Window Services
 			virtual FontProperties			GetDefaultFont()=0;
 			virtual void					SetDefaultFont(const FontProperties& value)=0;
 		};
+
+		class INativeDelay : public Interface
+		{
+		public:
+			enum ExecuteStatus
+			{
+				Pending,
+				Executing,
+				Executed,
+				Canceled,
+			};
+
+			virtual ExecuteStatus			GetStatus()=0;
+			virtual bool					Delay(vint milliseconds)=0;
+			virtual bool					Cancel()=0;
+		};
 		
 		class INativeAsyncService : public virtual Interface
 		{
 		public:
-			typedef void (AsyncTaskProc)(void* arguments);
 
 			virtual bool					IsInMainThread()=0;
-			virtual void					InvokeAsync(AsyncTaskProc* proc, void* argument)=0;
-			virtual void					InvokeInMainThread(AsyncTaskProc* proc, void* argument)=0;
-			virtual bool					InvokeInMainThreadAndWait(AsyncTaskProc* proc, void* argument, vint milliseconds=-1)=0;
+			virtual void					InvokeAsync(const Func<void()>& proc)=0;
+			virtual void					InvokeInMainThread(const Func<void()>& proc)=0;
+			virtual bool					InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds=-1)=0;
+			virtual Ptr<INativeDelay>		DelayExecute(const Func<void()>& proc, vint milliseconds)=0;
+			virtual Ptr<INativeDelay>		DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds)=0;
 		};
 		
 		class INativeClipboardService : public virtual Interface
@@ -3950,6 +3967,8 @@ Basic Construction
 				GuiControl*								parent;
 				ControlList								children;
 				Ptr<Object>								tag;
+				GuiControl*								tooltipControl;
+				vint									tooltipWidth;
 
 				virtual void							OnChildInserted(GuiControl* control);
 				virtual void							OnChildRemoved(GuiControl* control);
@@ -3976,9 +3995,10 @@ Basic Construction
 				compositions::GuiGraphicsComposition*	GetFocusableComposition();
 				compositions::GuiGraphicsEventReceiver*	GetEventReceiver();
 				GuiControl*								GetParent();
-				vint										GetChildrenCount();
+				vint									GetChildrenCount();
 				GuiControl*								GetChild(vint index);
 				bool									AddChild(GuiControl* control);
+				bool									HasChild(GuiControl* control);
 				
 				virtual GuiControlHost*					GetRelatedControlHost();
 				virtual bool							GetVisuallyEnabled();
@@ -3994,6 +4014,12 @@ Basic Construction
 
 				Ptr<Object>								GetTag();
 				void									SetTag(Ptr<Object> value);
+				GuiControl*								GetTooltipControl();
+				GuiControl*								SetTooltipControl(GuiControl* value);
+				vint									GetTooltipWidth();
+				void									SetTooltipWidth(vint value);
+				bool									DisplayTooltip(Point location);
+				void									CloseTooltip();
 
 				virtual IDescriptable*					QueryService(const WString& identifier);
 
@@ -4446,7 +4472,18 @@ Control Host
 				virtual void							OnNativeWindowChanged();
 				virtual void							OnVisualStatusChanged();
 			private:
+				static const vint						TooltipDelayOpenTime=500;
+				static const vint						TooltipDelayCloseTime=500;
+				static const vint						TooltipDelayLifeTime=5000;
+
+				Ptr<INativeDelay>						tooltipOpenDelay;
+				Ptr<INativeDelay>						tooltipCloseDelay;
+				Point									tooltipLocation;
 				
+				GuiControl*								GetTooltipOwner(Point location);
+				void									MoveIntoTooltipControl(GuiControl* tooltipControl, Point location);
+				void									MouseMoving(const NativeWindowMouseInfo& info)override;
+				void									MouseLeaved()override;
 				void									Moved()override;
 				void									Enabled()override;
 				void									Disabled()override;
@@ -4607,7 +4644,27 @@ Window
 
 				bool									IsClippedByScreen(Point location);
 				void									ShowPopup(Point location);
+				void									ShowPopup(GuiControl* control, Point location);
 				void									ShowPopup(GuiControl* control, bool preferredTopBottomSide);
+			};
+
+			class GuiTooltip : public GuiPopup, private INativeControllerListener, public Description<GuiTooltip>
+			{
+			protected:
+				GuiControl*								temporaryContentControl;
+
+				void									GlobalTimer()override;
+				void									TooltipOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void									TooltipClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+			public:
+				GuiTooltip(IStyleController* _styleController);
+				~GuiTooltip();
+
+				vint									GetPrefferedContentWidth();
+				void									SetPrefferedContentWidth(vint value);
+
+				GuiControl*								GetTemporaryContentControl();
+				void									SetTemporaryContentControl(GuiControl* control);
 			};
 		}
 	}
@@ -4650,6 +4707,10 @@ namespace vl
 				void											ClipboardUpdated()override;
 			protected:
 				GuiWindow*										mainWindow;
+				GuiControl*										sharedTooltipOwner;
+				GuiTooltip*										sharedTooltipWindow;
+				bool											sharedTooltipHovering;
+				bool											sharedTooltipClosing;
 				collections::List<GuiWindow*>					windows;
 				collections::SortedList<GuiPopup*>				openingPopups;
 
@@ -4661,20 +4722,25 @@ namespace vl
 				void											RegisterPopupOpened(GuiPopup* popup);
 				void											RegisterPopupClosed(GuiPopup* popup);
 				void											OnMouseDown(Point location);
+				void											TooltipMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void											TooltipMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				void											Run(GuiWindow* _mainWindow);
+				GuiWindow*										GetMainWindow();
 				const collections::List<GuiWindow*>&			GetWindows();
 				GuiWindow*										GetWindow(Point location);
+				void											ShowTooltip(GuiControl* owner, GuiControl* tooltip, vint preferredContentWidth, Point location);
+				void											CloseTooltip();
+				GuiControl*										GetTooltipOwner();
 				WString											GetExecutablePath();
 				WString											GetExecutableFolder();
 
 				bool											IsInMainThread();
-				void											InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument);
-				void											InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument);
-				bool											InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, vint milliseconds=-1);
 				void											InvokeAsync(const Func<void()>& proc);
 				void											InvokeInMainThread(const Func<void()>& proc);
 				bool											InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds=-1);
+				Ptr<INativeDelay>								DelayExecute(const Func<void()>& proc, vint milliseconds);
+				Ptr<INativeDelay>								DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds);
 
 				template<typename T>
 				void InvokeLambdaInMainThread(const T& proc)
@@ -7949,6 +8015,7 @@ namespace vl
 			{
 			public:
 				virtual controls::GuiWindow::IStyleController*								CreateWindowStyle()=0;
+				virtual controls::GuiTooltip::IStyleController*								CreateTooltipStyle()=0;
 				virtual controls::GuiLabel::IStyleController*								CreateLabelStyle()=0;
 				virtual controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()=0;
 				virtual controls::GuiControl::IStyleController*								CreateGroupBoxStyle()=0;
@@ -8079,6 +8146,7 @@ Theme
 				~Win7Theme();
 
 				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
+				controls::GuiTooltip::IStyleController*								CreateTooltipStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
 				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
@@ -8160,6 +8228,7 @@ Theme
 				~Win8Theme();
 
 				controls::GuiWindow::IStyleController*								CreateWindowStyle()override;
+				controls::GuiTooltip::IStyleController*								CreateTooltipStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
 				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
@@ -8712,6 +8781,23 @@ Container
 			public:
 				Win7WindowStyle();
 				~Win7WindowStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+			};
+
+			class Win7TooltipStyle : public virtual controls::GuiWindow::DefaultBehaviorStyleController, public Description<Win7TooltipStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+			public:
+				Win7TooltipStyle();
+				~Win7TooltipStyle();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
 				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
@@ -9902,6 +9988,23 @@ Container
 			public:
 				Win8WindowStyle();
 				~Win8WindowStyle();
+
+				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
+				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void										SetText(const WString& value)override;
+				void										SetFont(const FontProperties& value)override;
+				void										SetVisuallyEnabled(bool value)override;
+			};
+
+			class Win8TooltipStyle : public virtual controls::GuiWindow::DefaultBehaviorStyleController, public Description<Win8TooltipStyle>
+			{
+			protected:
+				compositions::GuiBoundsComposition*			boundsComposition;
+				compositions::GuiBoundsComposition*			containerComposition;
+			public:
+				Win8TooltipStyle();
+				~Win8TooltipStyle();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
 				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
@@ -12207,33 +12310,49 @@ namespace vl
 		{
 			class WindowsAsyncService : public INativeAsyncService
 			{
-			public:
+			protected:
 				struct TaskItem
 				{
 					Semaphore*							semaphore;
-					INativeAsyncService::AsyncTaskProc*	proc;
-					void*								argument;
+					Func<void()>						proc;
 
 					TaskItem();
-					TaskItem(Semaphore* _semaphore, INativeAsyncService::AsyncTaskProc* _proc, void* _argument);
+					TaskItem(Semaphore* _semaphore, const Func<void()>& _proc);
 					~TaskItem();
+				};
 
-					bool operator==(const TaskItem& item)const{return false;}
-					bool operator!=(const TaskItem& item)const{return true;}
+				class DelayItem : public Object, public INativeDelay
+				{
+				public:
+					DelayItem(WindowsAsyncService* _service, const Func<void()>& _proc, bool _executeInMainThread, vint milliseconds);
+					~DelayItem();
+
+					WindowsAsyncService*				service;
+					Func<void()>						proc;
+					ExecuteStatus						status;
+					DateTime							executeTime;
+					bool								executeInMainThread;
+
+					ExecuteStatus						GetStatus()override;
+					bool								Delay(vint milliseconds)override;
+					bool								Cancel()override;
 				};
 			protected:
-				vint								mainThreadId;
-				SpinLock						taskListLock;
-				collections::List<TaskItem>		taskItems;
+				vint									mainThreadId;
+				SpinLock								taskListLock;
+				collections::List<TaskItem>				taskItems;
+				collections::List<Ptr<DelayItem>>		delayItems;
 			public:
 				WindowsAsyncService();
 				~WindowsAsyncService();
 
-				void							ExecuteAsyncTasks();
-				bool							IsInMainThread()override;
-				void							InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument)override;
-				void							InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument)override;
-				bool							InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, vint milliseconds)override;
+				void									ExecuteAsyncTasks();
+				bool									IsInMainThread()override;
+				void									InvokeAsync(const Func<void()>& proc)override;
+				void									InvokeInMainThread(const Func<void()>& proc)override;
+				bool									InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds)override;
+				Ptr<INativeDelay>						DelayExecute(const Func<void()>& proc, vint milliseconds)override;
+				Ptr<INativeDelay>						DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds)override;
 			};
 		}
 	}
