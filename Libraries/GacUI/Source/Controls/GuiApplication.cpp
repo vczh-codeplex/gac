@@ -49,6 +49,8 @@ GuiApplication
 				:mainWindow(0)
 				,sharedTooltipOwner(0)
 				,sharedTooltipWindow(0)
+				,sharedTooltipHovering(false)
+				,sharedTooltipClosing(false)
 			{
 				GetCurrentController()->CallbackService()->InstallListener(this);
 			}
@@ -109,6 +111,20 @@ GuiApplication
 				}
 			}
 
+			void GuiApplication::TooltipMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				sharedTooltipHovering=true;
+			}
+
+			void GuiApplication::TooltipMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				sharedTooltipHovering=false;
+				if(sharedTooltipClosing)
+				{
+					CloseTooltip();
+				}
+			}
+
 			void GuiApplication::Run(GuiWindow* _mainWindow)
 			{
 				if(!mainWindow)
@@ -151,6 +167,8 @@ GuiApplication
 				if(!sharedTooltipWindow)
 				{
 					sharedTooltipWindow=new GuiTooltip(GetCurrentTheme()->CreateTooltipStyle());
+					sharedTooltipWindow->GetBoundsComposition()->GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiApplication::TooltipMouseEnter);
+					sharedTooltipWindow->GetBoundsComposition()->GetEventReceiver()->mouseLeave.AttachMethod(this, &GuiApplication::TooltipMouseLeave);
 				}
 				sharedTooltipOwner=owner;
 				sharedTooltipWindow->SetClientSize(Size(10, 10));
@@ -163,7 +181,15 @@ GuiApplication
 			{
 				if(sharedTooltipWindow)
 				{
-					sharedTooltipWindow->Close();
+					if(sharedTooltipHovering)
+					{
+						sharedTooltipClosing=true;
+					}
+					else
+					{
+						sharedTooltipClosing=false;
+						sharedTooltipWindow->Close();
+					}
 				}
 			}
 

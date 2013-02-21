@@ -34,6 +34,8 @@ namespace vl
 				GuiWindow*										mainWindow;
 				GuiControl*										sharedTooltipOwner;
 				GuiTooltip*										sharedTooltipWindow;
+				bool											sharedTooltipHovering;
+				bool											sharedTooltipClosing;
 				collections::List<GuiWindow*>					windows;
 				collections::SortedList<GuiPopup*>				openingPopups;
 
@@ -45,6 +47,8 @@ namespace vl
 				void											RegisterPopupOpened(GuiPopup* popup);
 				void											RegisterPopupClosed(GuiPopup* popup);
 				void											OnMouseDown(Point location);
+				void											TooltipMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void											TooltipMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 			public:
 				/// <summary>Run a <see cref="GuiWindow"/> as the main window and show it. This function can only be called once in the entry point. When the main window is closed or hiden, the Run function will finished, and the application should prepare for finalization.</summary>
 				/// <param name="_mainWindow">The main window.</param>
