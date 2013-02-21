@@ -51,13 +51,13 @@ namespace test
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 		{
 			SetText(GetApplication()->GetExecutableFolder());
-			SetClientSize(Size(640, 480));
+			SetClientSize(Size(440, 280));
 			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			MoveToScreenCenter();
 
 			tooltipButton=g::NewButton();
 			tooltipButton->SetText(L"This is a button with tooltip.");
-			tooltipButton->GetBoundsComposition()->SetAlignmentToParent(Margin(200, 200, 200, 200));
+			tooltipButton->GetBoundsComposition()->SetAlignmentToParent(Margin(100, 100, 100, 100));
 			AddChild(tooltipButton);
 			{
 				tooltipLabel=g::NewDocumentLabel();

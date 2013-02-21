@@ -18,6 +18,7 @@ namespace vl
 		{
 			using namespace collections;
 			using namespace compositions;
+			using namespace theme;
 
 /***********************************************************************
 GuiApplication
@@ -52,12 +53,21 @@ GuiApplication
 
 			GuiApplication::GuiApplication()
 				:mainWindow(0)
+				,sharedTooltipOwner(0)
+				,sharedTooltipWindow(0)
+				,sharedTooltipHovering(false)
+				,sharedTooltipClosing(false)
 			{
 				GetCurrentController()->CallbackService()->InstallListener(this);
 			}
 
 			GuiApplication::~GuiApplication()
 			{
+				if(sharedTooltipWindow)
+				{
+					delete sharedTooltipWindow;
+					sharedTooltipWindow=0;
+				}
 				GetCurrentController()->CallbackService()->UninstallListener(this);
 			}
 
@@ -107,6 +117,20 @@ GuiApplication
 				}
 			}
 
+			void GuiApplication::TooltipMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				sharedTooltipHovering=true;
+			}
+
+			void GuiApplication::TooltipMouseLeave(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				sharedTooltipHovering=false;
+				if(sharedTooltipClosing)
+				{
+					CloseTooltip();
+				}
+			}
+
 			void GuiApplication::Run(GuiWindow* _mainWindow)
 			{
 				if(!mainWindow)
@@ -115,6 +139,11 @@ GuiApplication
 					GetCurrentController()->WindowService()->Run(mainWindow->GetNativeWindow());
 					mainWindow=0;
 				}
+			}
+
+			GuiWindow* GuiApplication::GetMainWindow()
+			{
+				return mainWindow;
 			}
 
 			const collections::List<GuiWindow*>& GuiApplication::GetWindows()
@@ -137,6 +166,46 @@ GuiApplication
 					}
 				}
 				return 0;
+			}
+
+			void GuiApplication::ShowTooltip(GuiControl* owner, GuiControl* tooltip, vint preferredContentWidth, Point location)
+			{
+				if(!sharedTooltipWindow)
+				{
+					sharedTooltipWindow=new GuiTooltip(GetCurrentTheme()->CreateTooltipStyle());
+					sharedTooltipWindow->GetBoundsComposition()->GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiApplication::TooltipMouseEnter);
+					sharedTooltipWindow->GetBoundsComposition()->GetEventReceiver()->mouseLeave.AttachMethod(this, &GuiApplication::TooltipMouseLeave);
+				}
+				sharedTooltipHovering=false;
+				sharedTooltipClosing=false;
+				sharedTooltipOwner=owner;
+				sharedTooltipWindow->SetClientSize(Size(10, 10));
+				sharedTooltipWindow->SetTemporaryContentControl(tooltip);
+				sharedTooltipWindow->SetPrefferedContentWidth(preferredContentWidth);
+				sharedTooltipWindow->ShowPopup(owner, location);
+			}
+
+			void GuiApplication::CloseTooltip()
+			{
+				if(sharedTooltipWindow)
+				{
+					if(sharedTooltipHovering)
+					{
+						sharedTooltipClosing=true;
+					}
+					else
+					{
+						sharedTooltipClosing=false;
+						sharedTooltipWindow->Close();
+					}
+				}
+			}
+
+			GuiControl* GuiApplication::GetTooltipOwner()
+			{
+				if(!sharedTooltipWindow) return 0;
+				if(!sharedTooltipWindow->GetTemporaryContentControl()) return 0;
+				return sharedTooltipOwner;
 			}
 
 			WString GuiApplication::GetExecutablePath()
@@ -162,41 +231,29 @@ GuiApplication
 				return GetCurrentController()->AsyncService()->IsInMainThread();
 			}
 
-			void GuiApplication::InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument)
-			{
-				GetCurrentController()->AsyncService()->InvokeAsync(proc, argument);
-			}
-
-			void GuiApplication::InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument)
-			{
-				GetCurrentController()->AsyncService()->InvokeInMainThread(proc, argument);
-			}
-
-			bool GuiApplication::InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, vint milliseconds)
-			{
-				return GetCurrentController()->AsyncService()->InvokeInMainThreadAndWait(proc, argument, milliseconds);
-			}
-
-			void InvokeInMainThreadProc(void* argument)
-			{
-				Func<void()>* proc=(Func<void()>*)argument;
-				(*proc)();
-				delete proc;
-			}
-
 			void GuiApplication::InvokeAsync(const Func<void()>& proc)
 			{
-				InvokeAsync(&InvokeInMainThreadProc, new Func<void()>(proc));
+				GetCurrentController()->AsyncService()->InvokeAsync(proc);
 			}
 
 			void GuiApplication::InvokeInMainThread(const Func<void()>& proc)
 			{
-				InvokeInMainThread(&InvokeInMainThreadProc, new Func<void()>(proc));
+				GetCurrentController()->AsyncService()->InvokeInMainThread(proc);
 			}
 
 			bool GuiApplication::InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds)
 			{
-				return InvokeInMainThreadAndWait(&InvokeInMainThreadProc, new Func<void()>(proc));
+				return GetCurrentController()->AsyncService()->InvokeInMainThreadAndWait(proc, milliseconds);
+			}
+
+			Ptr<INativeDelay> GuiApplication::DelayExecute(const Func<void()>& proc, vint milliseconds)
+			{
+				return GetCurrentController()->AsyncService()->DelayExecute(proc, milliseconds);
+			}
+
+			Ptr<INativeDelay> GuiApplication::DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds)
+			{
+				return GetCurrentController()->AsyncService()->DelayExecuteInMainThread(proc, milliseconds);
 			}
 
 /***********************************************************************
@@ -377,6 +434,8 @@ GuiControl
 				,isVisuallyEnabled(true)
 				,isVisible(true)
 				,parent(0)
+				,tooltipControl(0)
+				,tooltipWidth(50)
 			{
 				boundsComposition->SetAssociatedControl(this);
 				VisibleChanged.SetAssociatedComposition(boundsComposition);
@@ -393,6 +452,15 @@ GuiControl
 
 			GuiControl::~GuiControl()
 			{
+				if(tooltipControl)
+				{
+					// the only legal parent is the GuiApplication::sharedTooltipWindow
+					if(tooltipControl->GetBoundsComposition()->GetParent())
+					{
+						tooltipControl->GetBoundsComposition()->GetParent()->RemoveChild(tooltipControl->GetBoundsComposition());
+					}
+					delete tooltipControl;
+				}
 				if(parent || !styleController)
 				{
 					for(vint i=0;i<children.Count();i++)
@@ -460,6 +528,11 @@ GuiControl
 			bool GuiControl::AddChild(GuiControl* control)
 			{
 				return GetContainerComposition()->AddChild(control->GetBoundsComposition());
+			}
+
+			bool GuiControl::HasChild(GuiControl* control)
+			{
+				return children.Contains(control);
 			}
 
 			GuiControlHost* GuiControl::GetRelatedControlHost()
@@ -552,6 +625,43 @@ GuiControl
 			void GuiControl::SetTag(Ptr<Object> value)
 			{
 				tag=value;
+			}
+
+			GuiControl* GuiControl::GetTooltipControl()
+			{
+				return tooltipControl;
+			}
+
+			GuiControl* GuiControl::SetTooltipControl(GuiControl* value)
+			{
+				GuiControl* oldTooltipControl=tooltipControl;
+				tooltipControl=value;
+				return oldTooltipControl;
+			}
+
+			vint GuiControl::GetTooltipWidth()
+			{
+				return tooltipWidth;
+			}
+
+			void GuiControl::SetTooltipWidth(vint value)
+			{
+				tooltipWidth=value;
+			}
+
+			bool GuiControl::DisplayTooltip(Point location)
+			{
+				if(!tooltipControl) return false;
+				GetApplication()->ShowTooltip(this, tooltipControl, tooltipWidth, location);
+				return true;
+			}
+
+			void GuiControl::CloseTooltip()
+			{
+				if(GetApplication()->GetTooltipOwner()==this)
+				{
+					GetApplication()->CloseTooltip();
+				}
 			}
 
 			IDescriptable* GuiControl::QueryService(const WString& identifier)
@@ -1765,6 +1875,92 @@ GuiControlHost
 			{
 			}
 
+			GuiControl* GuiControlHost::GetTooltipOwner(Point location)
+			{
+				GuiGraphicsComposition* composition=this->GetBoundsComposition()->FindComposition(location);
+				if(composition)
+				{
+					GuiControl* control=composition->GetRelatedControl();
+					while(control)
+					{
+						if(control->GetTooltipControl())
+						{
+							return control;
+						}
+						control=control->GetParent();
+					}
+				}
+				return 0;
+			}
+
+			void GuiControlHost::MoveIntoTooltipControl(GuiControl* tooltipControl, Point location)
+			{
+				if(tooltipLocation!=location)
+				{
+					tooltipLocation=location;
+					{
+						GuiControl* currentOwner=GetApplication()->GetTooltipOwner();
+						if(currentOwner && currentOwner!=tooltipControl)
+						{
+							if(tooltipCloseDelay)
+							{
+								tooltipCloseDelay->Cancel();
+								tooltipCloseDelay=0;
+							}
+							GetApplication()->DelayExecuteInMainThread([=]()
+							{
+								currentOwner->CloseTooltip();
+							}, TooltipDelayCloseTime);
+						}
+					}
+					if(!tooltipControl)
+					{
+						if(tooltipOpenDelay)
+						{
+							tooltipOpenDelay->Cancel();
+							tooltipOpenDelay=0;
+						}
+					}
+					else if(tooltipOpenDelay)
+					{
+						tooltipOpenDelay->Delay(TooltipDelayOpenTime);
+					}
+					else if(GetApplication()->GetTooltipOwner()!=tooltipControl)
+					{
+						tooltipOpenDelay=GetApplication()->DelayExecuteInMainThread([this]()
+						{
+							GuiControl* owner=GetTooltipOwner(tooltipLocation);
+							if(owner)
+							{
+								Point offset=owner->GetBoundsComposition()->GetGlobalBounds().LeftTop();
+								Point p(tooltipLocation.x-offset.x, tooltipLocation.y-offset.y+24);
+								owner->DisplayTooltip(p);
+								tooltipOpenDelay=0;
+
+								tooltipCloseDelay=GetApplication()->DelayExecuteInMainThread([this, owner]()
+								{
+									owner->CloseTooltip();
+								}, TooltipDelayLifeTime);
+							}
+						}, TooltipDelayOpenTime);
+					}
+				}
+			}
+
+			void GuiControlHost::MouseMoving(const NativeWindowMouseInfo& info)
+			{
+				if(!info.left && !info.middle && !info.right)
+				{
+					GuiControl* tooltipControl=GetTooltipOwner(tooltipLocation);
+					MoveIntoTooltipControl(tooltipControl, Point(info.x, info.y));
+				}
+			}
+
+			void GuiControlHost::MouseLeaved()
+			{
+				MoveIntoTooltipControl(0, Point(-1, -1));
+			}
+
 			void GuiControlHost::Moved()
 			{
 				OnVisualStatusChanged();
@@ -2583,6 +2779,31 @@ GuiPopup
 				}
 			}
 
+			void GuiPopup::ShowPopup(GuiControl* control, Point location)
+			{
+				INativeWindow* window=GetNativeWindow();
+				if(window)
+				{
+					Point locations[4];
+					Size size=window->GetBounds().GetSize();
+					Rect controlBounds=control->GetBoundsComposition()->GetGlobalBounds();
+
+					GuiControlHost* controlHost=control->GetBoundsComposition()->GetRelatedControlHost();
+					if(controlHost)
+					{
+						INativeWindow* controlWindow=controlHost->GetNativeWindow();
+						if(controlWindow)
+						{
+							Point controlClientOffset=controlWindow->GetClientBoundsInScreen().LeftTop();
+							vint x=controlBounds.x1+controlClientOffset.x+location.x;
+							vint y=controlBounds.y1+controlClientOffset.y+location.y;
+							window->SetParent(controlWindow);
+							ShowPopup(Point(x, y));
+						}
+					}
+				}
+			}
+
 			void GuiPopup::ShowPopup(GuiControl* control, bool preferredTopBottomSide)
 			{
 				INativeWindow* window=GetNativeWindow();
@@ -2632,6 +2853,68 @@ GuiPopup
 						}
 					}
 				}
+			}
+
+/***********************************************************************
+GuiPopup
+***********************************************************************/
+
+			void GuiTooltip::GlobalTimer()
+			{
+				SetClientSize(GetClientSize());
+			}
+
+			void GuiTooltip::TooltipOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+			}
+
+			void GuiTooltip::TooltipClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				SetTemporaryContentControl(0);
+			}
+
+			GuiTooltip::GuiTooltip(IStyleController* _styleController)
+				:GuiPopup(_styleController)
+				,temporaryContentControl(0)
+			{
+				GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				GetContainerComposition()->SetPreferredMinSize(Size(20, 10));
+				GetCurrentController()->CallbackService()->InstallListener(this);
+
+				WindowOpened.AttachMethod(this, &GuiTooltip::TooltipOpened);
+				WindowClosed.AttachMethod(this, &GuiTooltip::TooltipClosed);
+			}
+
+			GuiTooltip::~GuiTooltip()
+			{
+				GetCurrentController()->CallbackService()->UninstallListener(this);
+			}
+
+			vint GuiTooltip::GetPrefferedContentWidth()
+			{
+				return GetContainerComposition()->GetPreferredMinSize().x;
+			}
+
+			void GuiTooltip::SetPrefferedContentWidth(vint value)
+			{
+				GetContainerComposition()->SetPreferredMinSize(Size(value, 10));
+			}
+
+			GuiControl* GuiTooltip::GetTemporaryContentControl()
+			{
+				return temporaryContentControl;
+			}
+
+			void GuiTooltip::SetTemporaryContentControl(GuiControl* control)
+			{
+				if(temporaryContentControl && HasChild(temporaryContentControl))
+				{
+					GetContainerComposition()->RemoveChild(temporaryContentControl->GetBoundsComposition());
+					temporaryContentControl=0;
+				}
+				temporaryContentControl=control;
+				control->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				AddChild(control);
 			}
 		}
 	}
@@ -9104,6 +9387,11 @@ Win7Theme
 				return new Win7WindowStyle;
 			}
 
+			controls::GuiTooltip::IStyleController* Win7Theme::CreateTooltipStyle()
+			{
+				return new Win7TooltipStyle;
+			}
+
 			controls::GuiLabel::IStyleController* Win7Theme::CreateLabelStyle()
 			{
 				return new Win7LabelStyle;
@@ -9322,6 +9610,11 @@ Win8Theme
 			controls::GuiWindow::IStyleController* Win8Theme::CreateWindowStyle()
 			{
 				return new Win8WindowStyle;
+			}
+
+			controls::GuiTooltip::IStyleController* Win8Theme::CreateTooltipStyle()
+			{
+				return new Win8TooltipStyle;
 			}
 
 			controls::GuiLabel::IStyleController* Win8Theme::CreateLabelStyle()
@@ -9896,6 +10189,62 @@ Win7WindowStyle
 			}
 
 			void Win7WindowStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+/***********************************************************************
+Win7TooltipStyle
+***********************************************************************/
+
+			Win7TooltipStyle::Win7TooltipStyle()
+			{
+				boundsComposition=new GuiBoundsComposition;
+				boundsComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					element->SetColor(Color(100, 100, 100));
+					boundsComposition->SetOwnedElement(element);
+				}
+
+				containerComposition=new GuiBoundsComposition;
+				containerComposition->SetAlignmentToParent(Margin(1, 1, 1, 1));
+				containerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				boundsComposition->AddChild(containerComposition);
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(Color(255, 255, 225));
+					containerComposition->SetOwnedElement(element);
+				}
+			}
+
+			Win7TooltipStyle::~Win7TooltipStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win7TooltipStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win7TooltipStyle::GetContainerComposition()
+			{
+				return containerComposition;
+			}
+
+			void Win7TooltipStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win7TooltipStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win7TooltipStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win7TooltipStyle::SetVisuallyEnabled(bool value)
 			{
 			}
 
@@ -14127,6 +14476,62 @@ Win8WindowStyle
 			}
 
 			void Win8WindowStyle::SetVisuallyEnabled(bool value)
+			{
+			}
+
+/***********************************************************************
+Win8TooltipStyle
+***********************************************************************/
+
+			Win8TooltipStyle::Win8TooltipStyle()
+			{
+				boundsComposition=new GuiBoundsComposition;
+				boundsComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				boundsComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				{
+					GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+					element->SetColor(Color(100, 100, 100));
+					boundsComposition->SetOwnedElement(element);
+				}
+
+				containerComposition=new GuiBoundsComposition;
+				containerComposition->SetAlignmentToParent(Margin(1, 1, 1, 1));
+				containerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+				boundsComposition->AddChild(containerComposition);
+				{
+					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+					element->SetColor(Color(255, 255, 225));
+					containerComposition->SetOwnedElement(element);
+				}
+			}
+
+			Win8TooltipStyle::~Win8TooltipStyle()
+			{
+			}
+
+			compositions::GuiBoundsComposition* Win8TooltipStyle::GetBoundsComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::GuiGraphicsComposition* Win8TooltipStyle::GetContainerComposition()
+			{
+				return containerComposition;
+			}
+
+			void Win8TooltipStyle::SetFocusableComposition(compositions::GuiGraphicsComposition* value)
+			{
+			}
+
+			void Win8TooltipStyle::SetText(const WString& value)
+			{
+			}
+
+			void Win8TooltipStyle::SetFont(const FontProperties& value)
+			{
+			}
+
+			void Win8TooltipStyle::SetVisuallyEnabled(bool value)
 			{
 			}
 
@@ -31015,6 +31420,14 @@ document_serialization_visitors::DeserializeNodeVisitor
 						if(!line) PrintText(L"");
 						line=0;
 					}
+					else if(node->name.value==L"sp")
+					{
+						PrintText(L" ");
+					}
+					else if(node->name.value==L"tab")
+					{
+						PrintText(L"\t");
+					}
 					else if(node->name.value==L"img")
 					{
 						if(!line)
@@ -31858,10 +32271,11 @@ GuiResourceFolder
 						{
 							if(element->name.value==L"Xml" || element->name.value==L"Doc")
 							{
-								WString text=XmlGetValue(element);
-								Ptr<XmlDocument> xml=XmlParseDocument(text, xmlParsingTable);
-								if(xml)
+								Ptr<XmlElement> root=XmlGetElements(element).First(0);
+								if(root)
 								{
+									Ptr<XmlDocument> xml=new XmlDocument;
+									xml->rootElement=root;
 									item->SetContent(xml);
 									if(element->name.value==L"Doc")
 									{
@@ -34382,20 +34796,67 @@ WindowsAsyncService::TaskItem
 
 			WindowsAsyncService::TaskItem::TaskItem()
 				:semaphore(0)
-				,proc(0)
-				,argument(0)
 			{
 			}
 
-			WindowsAsyncService::TaskItem::TaskItem(Semaphore* _semaphore, INativeAsyncService::AsyncTaskProc* _proc, void* _argument)
+			WindowsAsyncService::TaskItem::TaskItem(Semaphore* _semaphore, const Func<void()>& _proc)
 				:semaphore(_semaphore)
 				,proc(_proc)
-				,argument(_argument)
 			{
 			}
 
 			WindowsAsyncService::TaskItem::~TaskItem()
 			{
+			}
+
+/***********************************************************************
+WindowsAsyncService::DelayItem
+***********************************************************************/
+
+			WindowsAsyncService::DelayItem::DelayItem(WindowsAsyncService* _service, const Func<void()>& _proc, bool _executeInMainThread, vint milliseconds)
+				:service(_service)
+				,proc(_proc)
+				,status(INativeDelay::Pending)
+				,executeTime(DateTime::LocalTime().Forward(milliseconds))
+				,executeInMainThread(_executeInMainThread)
+			{
+			}
+
+			WindowsAsyncService::DelayItem::~DelayItem()
+			{
+			}
+
+			INativeDelay::ExecuteStatus WindowsAsyncService::DelayItem::GetStatus()
+			{
+				return status;
+			}
+
+			bool WindowsAsyncService::DelayItem::Delay(vint milliseconds)
+			{
+				SpinLock::Scope scope(service->taskListLock);
+				if(status==INativeDelay::Pending)
+				{
+					executeTime=DateTime::LocalTime().Forward(milliseconds);
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			bool WindowsAsyncService::DelayItem::Cancel()
+			{
+				SpinLock::Scope scope(service->taskListLock);
+				if(status==INativeDelay::Pending)
+				{
+					if(service->delayItems.Remove(this))
+					{
+						status=INativeDelay::Canceled;
+						return true;
+					}
+				}
+				return false;
 			}
 
 /***********************************************************************
@@ -34413,19 +34874,46 @@ WindowsAsyncService
 
 			void WindowsAsyncService::ExecuteAsyncTasks()
 			{
+				DateTime now=DateTime::LocalTime();
 				Array<TaskItem> items;
+				List<Ptr<DelayItem>> executableDelayItems;
 				{
 					SpinLock::Scope scope(taskListLock);
 					CopyFrom(items, taskItems);
 					taskItems.RemoveRange(0, items.Count());
-				}
-				for(vint i=0;i<items.Count();i++)
-				{
-					TaskItem taskItem=items[i];
-					taskItem.proc(taskItem.argument);
-					if(taskItem.semaphore)
+					for(vint i=delayItems.Count()-1;i>=0;i--)
 					{
-						taskItem.semaphore->Release();
+						Ptr<DelayItem> item=delayItems[i];
+						if(now.filetime>=item->executeTime.filetime)
+						{
+							item->status=INativeDelay::Executing;
+							executableDelayItems.Add(item);
+							delayItems.RemoveAt(i);
+						}
+					}
+				}
+				FOREACH(TaskItem, item, items)
+				{
+					item.proc();
+					if(item.semaphore)
+					{
+						item.semaphore->Release();
+					}
+				}
+				FOREACH(Ptr<DelayItem>, item, executableDelayItems)
+				{
+					if(item->executeInMainThread)
+					{
+						item->proc();
+						item->status=INativeDelay::Executed;
+					}
+					else
+					{
+						InvokeAsync([=]()
+						{
+							item->proc();
+							item->status=INativeDelay::Executed;
+						});
 					}
 				}
 			}
@@ -34435,25 +34923,25 @@ WindowsAsyncService
 				return Thread::GetCurrentThreadId()==mainThreadId;
 			}
 
-			void WindowsAsyncService::InvokeAsync(INativeAsyncService::AsyncTaskProc* proc, void* argument)
+			void WindowsAsyncService::InvokeAsync(const Func<void()>& proc)
 			{
-				ThreadPoolLite::Queue(proc, argument);
+				ThreadPoolLite::Queue(proc);
 			}
 
-			void WindowsAsyncService::InvokeInMainThread(INativeAsyncService::AsyncTaskProc* proc, void* argument)
+			void WindowsAsyncService::InvokeInMainThread(const Func<void()>& proc)
 			{
 				SpinLock::Scope scope(taskListLock);
-				TaskItem item(0, proc, argument);
+				TaskItem item(0, proc);
 				taskItems.Add(item);
 			}
 
-			bool WindowsAsyncService::InvokeInMainThreadAndWait(INativeAsyncService::AsyncTaskProc* proc, void* argument, vint milliseconds)
+			bool WindowsAsyncService::InvokeInMainThreadAndWait(const Func<void()>& proc, vint milliseconds)
 			{
 				Semaphore semaphore;
 				semaphore.Create(0, 1);
 				{
 					SpinLock::Scope scope(taskListLock);
-					TaskItem item(&semaphore, proc, argument);
+					TaskItem item(&semaphore, proc);
 					taskItems.Add(item);
 				}
 				if(milliseconds<0)
@@ -34464,6 +34952,22 @@ WindowsAsyncService
 				{
 					return semaphore.WaitForTime(milliseconds);
 				}
+			}
+
+			Ptr<INativeDelay> WindowsAsyncService::DelayExecute(const Func<void()>& proc, vint milliseconds)
+			{
+				SpinLock::Scope scope(taskListLock);
+				Ptr<DelayItem> delay=new DelayItem(this, proc, false, milliseconds);
+				delayItems.Add(delay);
+				return delay;
+			}
+
+			Ptr<INativeDelay> WindowsAsyncService::DelayExecuteInMainThread(const Func<void()>& proc, vint milliseconds)
+			{
+				SpinLock::Scope scope(taskListLock);
+				Ptr<DelayItem> delay=new DelayItem(this, proc, true, milliseconds);
+				delayItems.Add(delay);
+				return delay;
 			}
 		}
 	}
@@ -36554,18 +37058,14 @@ WindowsForm
 
 				void SetParent(INativeWindow* parent)
 				{
-					WindowsForm* window=dynamic_cast<WindowsForm*>(parent);
-					if(window)
+					parentWindow=dynamic_cast<WindowsForm*>(parent);
+					if(parentWindow)
 					{
-						parentWindow=window;
-						if(parentWindow)
-						{
-							SetWindowLongPtr(handle, GWLP_HWNDPARENT, (LONG_PTR)window->handle);
-						}
-						else
-						{
-							SetWindowLongPtr(handle, GWLP_HWNDPARENT, NULL);
-						}
+						SetWindowLongPtr(handle, GWLP_HWNDPARENT, (LONG_PTR)parentWindow->handle);
+					}
+					else
+					{
+						SetWindowLongPtr(handle, GWLP_HWNDPARENT, NULL);
 					}
 				}
 
