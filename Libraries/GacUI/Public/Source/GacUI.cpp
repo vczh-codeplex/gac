@@ -2913,8 +2913,11 @@ GuiPopup
 					temporaryContentControl=0;
 				}
 				temporaryContentControl=control;
-				control->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				AddChild(control);
+				if(control)
+				{
+					control->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					AddChild(control);
+				}
 			}
 		}
 	}
