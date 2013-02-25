@@ -59,31 +59,18 @@ ParameterInfoImpl
 				IMethodInfo*							ownerMethod;
 				WString									name;
 				ITypeDescriptor*						type;
+				Decorator								decorator;
 				bool									canOutput;
 			public:
-				ParameterInfoImpl(IMethodInfo* _ownerMethod, const WString& _name, ITypeDescriptor* _type, bool _canOutput);
+				ParameterInfoImpl(IMethodInfo* _ownerMethod, const WString& _name, ITypeDescriptor* _type, Decorator _decorator, bool _canOutput);
 				~ParameterInfoImpl();
 
 				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
 				const WString&							GetName()override;
 				ITypeDescriptor*						GetValueTypeDescriptor()override;
 				IMethodInfo*							GetOwnerMethod()override;
+				Decorator								GetDecorator()override;
 				bool									CanOutput()override;
-			};
-
-/***********************************************************************
-MethodReturnImpl
-***********************************************************************/
-
-			class MethodReturnImpl : public Object, public IValueInfo
-			{
-			protected:
-				ITypeDescriptor*						type;
-			public:
-				MethodReturnImpl(ITypeDescriptor* _type);
-				~MethodReturnImpl();
-
-				ITypeDescriptor*						GetValueTypeDescriptor()override;
 			};
 
 /***********************************************************************
@@ -95,9 +82,9 @@ MethodInfoImpl
 			protected:
 				IMethodGroupInfo*						ownerMethodGroup;
 				collections::List<Ptr<IParameterInfo>>	parameters;
-				Ptr<IValueInfo>							returnInfo;
+				Ptr<IParameterInfo>						returnInfo;
 			public:
-				MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType);
+				MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType, IParameterInfo::Decorator _returnDecorator);
 				~MethodInfoImpl();
 
 				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
@@ -105,7 +92,7 @@ MethodInfoImpl
 				IMethodGroupInfo*						GetOwnerMethodGroup()override;
 				vint									GetParameterCount()override;
 				IParameterInfo*							GetParameter(vint index)override;
-				IValueInfo*								GetReturn()override;
+				IParameterInfo*							GetReturn()override;
 				bool									AddParameter(Ptr<IParameterInfo> parameter);
 			};
 
@@ -129,10 +116,6 @@ MethodGroupInfoImpl
 				IMethodInfo*							GetMethod(vint index)override;
 				bool									AddMethod(Ptr<IMethodInfo> _method);
 			};
-
-/***********************************************************************
-EventHandlerImpl
-***********************************************************************/
 
 /***********************************************************************
 EventInfoImpl

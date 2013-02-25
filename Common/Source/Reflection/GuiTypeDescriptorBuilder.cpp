@@ -88,10 +88,11 @@ PropertyInfoImpl
 ParameterInfoImpl
 ***********************************************************************/
 
-			ParameterInfoImpl::ParameterInfoImpl(IMethodInfo* _ownerMethod, const WString& _name, ITypeDescriptor* _type, bool _canOutput)
+			ParameterInfoImpl::ParameterInfoImpl(IMethodInfo* _ownerMethod, const WString& _name, ITypeDescriptor* _type, Decorator _decorator, bool _canOutput)
 				:ownerMethod(_ownerMethod)
 				,name(_name)
 				,type(_type)
+				,decorator(_decorator)
 				,canOutput(_canOutput)
 			{
 			}
@@ -120,37 +121,27 @@ ParameterInfoImpl
 				return ownerMethod;
 			}
 
+			IParameterInfo::Decorator ParameterInfoImpl::GetDecorator()
+			{
+				return decorator;
+			}
+
 			bool ParameterInfoImpl::CanOutput()
 			{
 				return canOutput;
 			}
 
 /***********************************************************************
-MethodReturnImpl
-***********************************************************************/
-
-			MethodReturnImpl::MethodReturnImpl(ITypeDescriptor* _type)
-				:type(_type)
-			{
-			}
-
-			MethodReturnImpl::~MethodReturnImpl()
-			{
-			}
-
-			ITypeDescriptor* MethodReturnImpl::GetValueTypeDescriptor()
-			{
-				return type;
-			}
-
-/***********************************************************************
 MethodInfoImpl
 ***********************************************************************/
 
-			MethodInfoImpl::MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType)
+			MethodInfoImpl::MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType, IParameterInfo::Decorator _returnDecorator)
 				:ownerMethodGroup(_ownerMethodGroup)
-				,returnInfo(_returnType?new MethodReturnImpl(_returnType):0)
 			{
+				if(_returnType)
+				{
+					returnInfo=new ParameterInfoImpl(this, L"", _returnType, _returnDecorator, false);
+				}
 			}
 
 			MethodInfoImpl::~MethodInfoImpl()
@@ -189,7 +180,7 @@ MethodInfoImpl
 				}
 			}
 
-			IValueInfo* MethodInfoImpl::GetReturn()
+			IParameterInfo* MethodInfoImpl::GetReturn()
 			{
 				return returnInfo.Obj();
 			}

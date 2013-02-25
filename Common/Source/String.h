@@ -414,6 +414,17 @@ namespace vl
 	typedef ObjectString<char>		AString;
 	typedef ObjectString<wchar_t>	WString;
 
+	extern vint					atoi_test(const AString& string, bool& success);
+	extern vint					wtoi_test(const WString& string, bool& success);
+	extern __int64				atoi64_test(const AString& string, bool& success);
+	extern __int64				wtoi64_test(const WString& string, bool& success);
+	extern vuint				atou_test(const AString& string, bool& success);
+	extern vuint				wtou_test(const WString& string, bool& success);
+	extern unsigned __int64		atou64_test(const AString& string, bool& success);
+	extern unsigned __int64		wtou64_test(const WString& string, bool& success);
+	extern double				atof_test(const AString& string, bool& success);
+	extern double				wtof_test(const WString& string, bool& success);
+
 	extern vint					atoi(const AString& string);
 	extern vint					wtoi(const WString& string);
 	extern __int64				atoi64(const AString& string);
@@ -424,6 +435,7 @@ namespace vl
 	extern unsigned __int64		wtou64(const WString& string);
 	extern double				atof(const AString& string);
 	extern double				wtof(const WString& string);
+
 	extern AString				itoa(vint number);
 	extern WString				itow(vint number);
 	extern AString				i64toa(__int64 number);
@@ -434,6 +446,7 @@ namespace vl
 	extern WString				u64tow(unsigned __int64 number);
 	extern AString				ftoa(double number);
 	extern WString				ftow(double number);
+
 	extern vint					_wtoa(const wchar_t* w, char* a, vint chars);
 	extern AString				wtoa(const WString& string);
 	extern vint					_atow(const char* a, wchar_t* w, vint chars);
