@@ -21,35 +21,6 @@ namespace vl
 		{
 
 /***********************************************************************
-TypeDescriptorImpl
-***********************************************************************/
-
-			class PropertyInfoImpl : public Object, public IPropertyInfo
-			{
-			protected:
-				ITypeDescriptor*						ownerTypeDescriptor;
-				WString									name;
-				ITypeDescriptor*						type;
-				IMethodInfo*							getter;
-				IMethodInfo*							setter;
-				IEventInfo*								valueChangedEvent;
-			public:
-				PropertyInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, ITypeDescriptor* _type, IMethodInfo* _getter, IMethodInfo* _setter, IEventInfo* _valueChangedEvent);
-				~PropertyInfoImpl();
-
-				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
-				const WString&							GetName()override;
-				ITypeDescriptor*						GetValueTypeDescriptor()override;
-				bool									IsReadable()override;
-				bool									IsWritable()override;
-				IMethodInfo*							GetGetter()=0;
-				IMethodInfo*							GetSetter()=0;
-				IEventInfo*								GetValueChangedEvent()override;
-				Value									GetValue(const Value& thisObject)override;
-				void									SetValue(const Value& thisObject, const Value& newValue)override;
-			};
-
-/***********************************************************************
 ParameterInfoImpl
 ***********************************************************************/
 
@@ -71,6 +42,7 @@ ParameterInfoImpl
 				IMethodInfo*							GetOwnerMethod()override;
 				Decorator								GetDecorator()override;
 				bool									CanOutput()override;
+				WString									GetTypeFriendlyName()override;
 			};
 
 /***********************************************************************
@@ -79,20 +51,26 @@ MethodInfoImpl
 
 			class MethodInfoImpl : public Object, public IMethodInfo
 			{
+				friend class PropertyInfoImpl;
 			protected:
 				IMethodGroupInfo*						ownerMethodGroup;
+				IPropertyInfo*							ownerProperty;
 				collections::List<Ptr<IParameterInfo>>	parameters;
 				Ptr<IParameterInfo>						returnInfo;
+
+				virtual Value							InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			public:
 				MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType, IParameterInfo::Decorator _returnDecorator);
 				~MethodInfoImpl();
 
 				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
+				IPropertyInfo*							GetOwnerProperty()override;
 				const WString&							GetName()override;
 				IMethodGroupInfo*						GetOwnerMethodGroup()override;
 				vint									GetParameterCount()override;
 				IParameterInfo*							GetParameter(vint index)override;
 				IParameterInfo*							GetReturn()override;
+				Value									Invoke(const Value& thisObject, collections::Array<Value>& arguments);
 				bool									AddParameter(Ptr<IParameterInfo> parameter);
 			};
 
@@ -123,6 +101,7 @@ EventInfoImpl
 
 			class EventInfoImpl : public Object, public IEventInfo
 			{
+				friend class PropertyInfoImpl;
 			protected:
 				class EventHandlerImpl : public Object, public IEventHandler
 				{
@@ -144,6 +123,7 @@ EventInfoImpl
 
 			protected:
 				ITypeDescriptor*						ownerTypeDescriptor;
+				IPropertyInfo*							observingProperty;
 				WString									name;
 
 				virtual void							AttachInternal(DescriptableObject* thisObject, Ptr<IEventHandler> eventHandler)=0;
@@ -154,7 +134,37 @@ EventInfoImpl
 
 				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
 				const WString&							GetName()override;
+				IPropertyInfo*							GetObservingProperty()override;
 				Ptr<IEventHandler>						Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)override;
+			};
+
+/***********************************************************************
+TypeDescriptorImpl
+***********************************************************************/
+
+			class PropertyInfoImpl : public Object, public IPropertyInfo
+			{
+			protected:
+				ITypeDescriptor*						ownerTypeDescriptor;
+				WString									name;
+				ITypeDescriptor*						type;
+				MethodInfoImpl*							getter;
+				MethodInfoImpl*							setter;
+				EventInfoImpl*							valueChangedEvent;
+			public:
+				PropertyInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, ITypeDescriptor* _type, MethodInfoImpl* _getter, MethodInfoImpl* _setter, EventInfoImpl* _valueChangedEvent);
+				~PropertyInfoImpl();
+
+				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
+				const WString&							GetName()override;
+				ITypeDescriptor*						GetValueTypeDescriptor()override;
+				bool									IsReadable()override;
+				bool									IsWritable()override;
+				IMethodInfo*							GetGetter()=0;
+				IMethodInfo*							GetSetter()=0;
+				IEventInfo*								GetValueChangedEvent()override;
+				Value									GetValue(const Value& thisObject)override;
+				void									SetValue(const Value& thisObject, const Value& newValue)override;
 			};
 
 /***********************************************************************
@@ -185,6 +195,7 @@ TypeDescriptorImpl
 				IValueSerializer*			GetValueSerializer()override;
 				vint						GetBaseTypeDescriptorCount()override;
 				ITypeDescriptor*			GetBaseTypeDescriptor(vint index)override;
+				bool						CanConvertTo(ITypeDescriptor* targetType)override;
 
 				vint						GetPropertyCount()override;
 				IPropertyInfo*				GetProperty(vint index)override;

@@ -30,6 +30,7 @@ Attribute
 			class ITypeDescriptor;
 			class IEventInfo;
 			class IPropertyInfo;
+			class IParameterInfo;
 			class IMethodInfo;
 			class IMethodGroupInfo;
 		}
@@ -124,6 +125,10 @@ Value
 				Ptr<DescriptableObject>			GetSharedPtr()const;
 				const WString&					GetText()const;
 				ITypeDescriptor*				GetTypeDescriptor()const;
+				WString							GetTypeFriendlyName()const;
+				bool							IsNull()const;
+				bool							CanConvertTo(ITypeDescriptor* targetType, ValueType targetValueType)const;
+				bool							CanConvertTo(IParameterInfo* targetType)const;
 
 				static Value					From(DescriptableObject* value);
 				static Value					From(Ptr<DescriptableObject> value);
@@ -174,6 +179,7 @@ ITypeDescriptor (event)
 			class IEventInfo : public IMemberInfo
 			{
 			public:
+				virtual IPropertyInfo*			GetObservingProperty()=0;
 				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)=0;
 			};
 
@@ -212,12 +218,14 @@ ITypeDescriptor (method)
 				virtual IMethodInfo*			GetOwnerMethod()=0;
 				virtual Decorator				GetDecorator()=0;
 				virtual bool					CanOutput()=0;
+				virtual WString					GetTypeFriendlyName()=0;
 			};
 
 			class IMethodInfo : public IMemberInfo
 			{
 			public:
 				virtual IMethodGroupInfo*		GetOwnerMethodGroup()=0;
+				virtual IPropertyInfo*			GetOwnerProperty()=0;
 				virtual vint					GetParameterCount()=0;
 				virtual IParameterInfo*			GetParameter(vint index)=0;
 				virtual IParameterInfo*			GetReturn()=0;
@@ -242,6 +250,7 @@ ITypeDescriptor
 				virtual IValueSerializer*		GetValueSerializer()=0;
 				virtual vint					GetBaseTypeDescriptorCount()=0;
 				virtual ITypeDescriptor*		GetBaseTypeDescriptor(vint index)=0;
+				virtual bool					CanConvertTo(ITypeDescriptor* targetType)=0;
 
 				virtual vint					GetPropertyCount()=0;
 				virtual IPropertyInfo*			GetProperty(vint index)=0;
@@ -321,6 +330,40 @@ Exceptions
 			public:
 				PropertyIsNotWritableException(IPropertyInfo* propertyInfo)
 					:TypeDescriptorException(L"Cannot write value to a property \""+propertyInfo->GetName()+L"\" that is not writable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\"/")
+				{
+				}
+			};
+
+			class ArgumentNullException : public TypeDescriptorException
+			{
+			public:
+				ArgumentNullException(const WString& name)
+					:TypeDescriptorException(L"Argument \""+name+L"\" cannot be null.")
+				{
+				}
+			};
+
+			class ArgumentTypeMismtatchException : public TypeDescriptorException
+			{
+			public:
+				ArgumentTypeMismtatchException(const WString& name, IParameterInfo* expected, const Value& actual)
+					:TypeDescriptorException(L"Argument \""+name+L"\" cannot convert from \""+actual.GetTypeFriendlyName()+L"\" to \""+expected->GetTypeFriendlyName()+L"\".")
+				{
+				}
+
+				ArgumentTypeMismtatchException(const WString& name, ITypeDescriptor* type, Value::ValueType valueType, const Value& actual)
+					:TypeDescriptorException(L"Argument \""+name+L"\" cannot convert from \""+actual.GetTypeFriendlyName()+L"\" to \""+
+						(valueType==Value::SharedPtr?L"Ptr<":L"")+type->GetTypeName()+(valueType==Value::SharedPtr?L">":valueType==Value::RawPtr?L"*":L"")
+						+L"\".")
+				{
+				}
+			};
+
+			class ArgumentCountMismtatchException : public TypeDescriptorException
+			{
+			public:
+				ArgumentCountMismtatchException()
+					:TypeDescriptorException(L"Argument count does not match the definition.")
 				{
 				}
 			};

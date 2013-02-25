@@ -192,6 +192,11 @@ SerializableTypeDescriptor
 					return 0;
 				}
 
+				bool CanConvertTo(ITypeDescriptor* targetType)override
+				{
+					return this==targetType;
+				}
+
 				vint GetPropertyCount()override
 				{
 					return 0;

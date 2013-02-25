@@ -116,6 +116,62 @@ description::Value
 				return 0;
 			}
 
+			WString Value::GetTypeFriendlyName()const
+			{
+				switch(valueType)
+				{
+				case RawPtr:
+					return GetTypeDescriptor()->GetTypeName()+L"*";
+				case SharedPtr:
+					return L"Ptr<"+GetTypeDescriptor()->GetTypeName()+L">";
+				case Text:
+					return GetTypeDescriptor()->GetTypeName();
+				default:
+					return L"null";
+				}
+			}
+
+			bool Value::IsNull()const
+			{
+				return valueType==Null;
+			}
+
+			bool Value::CanConvertTo(ITypeDescriptor* targetType, ValueType targetValueType)const
+			{
+				switch(valueType)
+				{
+				case Null:
+					return targetValueType!=Text;
+				case RawPtr:
+					if(targetValueType!=RawPtr) return false;
+					break;
+				case SharedPtr:
+					if(targetValueType!=RawPtr && targetValueType!=SharedPtr) return false;
+					break;
+				case Text:
+					return targetValueType==Text && GetTypeDescriptor()==targetType;
+				}
+				return GetTypeDescriptor()->CanConvertTo(targetType);
+			}
+
+			bool Value::CanConvertTo(IParameterInfo* targetType)const
+			{
+				ValueType targetValueType=ValueType::Null;
+				switch(targetType->GetDecorator())
+				{
+				case IParameterInfo::RawPtr:
+					targetValueType=RawPtr;
+					break;
+				case IParameterInfo::SharedPtr:
+					targetValueType=SharedPtr;
+					break;
+				case IParameterInfo::Text:
+					targetValueType=Text;
+					break;
+				}
+				return CanConvertTo(targetType->GetValueTypeDescriptor(), targetValueType);
+			}
+
 			Value Value::From(DescriptableObject* value)
 			{
 				return Value(value);

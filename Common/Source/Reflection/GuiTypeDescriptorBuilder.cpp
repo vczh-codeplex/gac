@@ -10,81 +10,6 @@ namespace vl
 		{
 
 /***********************************************************************
-PropertyInfoImpl
-***********************************************************************/
-
-			PropertyInfoImpl::PropertyInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, ITypeDescriptor* _type, IMethodInfo* _getter, IMethodInfo* _setter, IEventInfo* _valueChangedEvent)
-				:ownerTypeDescriptor(_ownerTypeDescriptor)
-				,name(_name)
-				,type(_type)
-				,getter(_getter)
-				,setter(_setter)
-				,valueChangedEvent(_valueChangedEvent)
-			{
-			}
-
-			PropertyInfoImpl::~PropertyInfoImpl()
-			{
-			}
-
-			ITypeDescriptor* PropertyInfoImpl::GetOwnerTypeDescriptor()
-			{
-				return ownerTypeDescriptor;
-			}
-
-			const WString& PropertyInfoImpl::GetName()
-			{
-				return name;
-			}
-
-			ITypeDescriptor* PropertyInfoImpl::GetValueTypeDescriptor()
-			{
-				return type;
-			}
-
-			bool PropertyInfoImpl::IsReadable()
-			{
-				return getter!=0;
-			}
-
-			bool PropertyInfoImpl::IsWritable()
-			{
-				return setter!=0;
-			}
-
-			IEventInfo* PropertyInfoImpl::GetValueChangedEvent()
-			{
-				return valueChangedEvent;
-			}
-
-			Value PropertyInfoImpl::GetValue(const Value& thisObject)
-			{
-				if(getter)
-				{
-					Array<Value> arguments;
-					return getter->Invoke(thisObject, arguments);
-				}
-				else
-				{
-					throw PropertyIsNotReadableException(this);
-				}
-			}
-
-			void PropertyInfoImpl::SetValue(const Value& thisObject, const Value& newValue)
-			{
-				if(setter)
-				{
-					Array<Value> arguments(1);
-					arguments[0]=newValue;
-					setter->Invoke(thisObject, arguments);
-				}
-				else
-				{
-					throw PropertyIsNotWritableException(this);
-				}
-			}
-
-/***********************************************************************
 ParameterInfoImpl
 ***********************************************************************/
 
@@ -131,12 +56,28 @@ ParameterInfoImpl
 				return canOutput;
 			}
 
+			WString ParameterInfoImpl::GetTypeFriendlyName()
+			{
+				switch(decorator)
+				{
+				case RawPtr:
+					return type->GetTypeName()+L"*"+(canOutput?L"&":L"");
+				case SharedPtr:
+					return L"Ptr<"+type->GetTypeName()+L">"+(canOutput?L"&":L"");
+				case Text:
+					return type->GetTypeName()+(canOutput?L"&":L"");
+				default:
+					return L"";
+				}
+			}
+
 /***********************************************************************
 MethodInfoImpl
 ***********************************************************************/
 
 			MethodInfoImpl::MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType, IParameterInfo::Decorator _returnDecorator)
 				:ownerMethodGroup(_ownerMethodGroup)
+				,ownerProperty(0)
 			{
 				if(_returnType)
 				{
@@ -151,6 +92,11 @@ MethodInfoImpl
 			ITypeDescriptor* MethodInfoImpl::GetOwnerTypeDescriptor()
 			{
 				return ownerMethodGroup->GetOwnerTypeDescriptor();
+			}
+
+			IPropertyInfo* MethodInfoImpl::GetOwnerProperty()
+			{
+				return ownerProperty;
 			}
 
 			const WString& MethodInfoImpl::GetName()
@@ -183,6 +129,30 @@ MethodInfoImpl
 			IParameterInfo* MethodInfoImpl::GetReturn()
 			{
 				return returnInfo.Obj();
+			}
+
+			Value MethodInfoImpl::Invoke(const Value& thisObject, collections::Array<Value>& arguments)
+			{
+				if(thisObject.IsNull())
+				{
+					throw ArgumentNullException(L"thisObject");
+				}
+				else if(!thisObject.CanConvertTo(ownerMethodGroup->GetOwnerTypeDescriptor(), Value::RawPtr))
+				{
+					throw ArgumentTypeMismtatchException(L"thisObject", ownerMethodGroup->GetOwnerTypeDescriptor(), Value::RawPtr, thisObject);
+				}
+				if(arguments.Count()!=parameters.Count())
+				{
+					throw ArgumentCountMismtatchException();
+				}
+				for(vint i=0;i<parameters.Count();i++)
+				{
+					if(!arguments[i].CanConvertTo(parameters[i].Obj()))
+					{
+						throw ArgumentTypeMismtatchException(parameters[i]->GetName(), parameters[i].Obj(), arguments[i]);
+					}
+				}
+				return InvokeInternal(thisObject, arguments);
 			}
 
 			bool MethodInfoImpl::AddParameter(Ptr<IParameterInfo> parameter)
@@ -290,6 +260,14 @@ EventInfoImpl::EventHandlerImpl
 
 			void EventInfoImpl::EventHandlerImpl::Invoke(const Value& thisObject, Value& arguments)
 			{
+				if(thisObject.IsNull())
+				{
+					throw ArgumentNullException(L"thisObject");
+				}
+				else if(!thisObject.CanConvertTo(ownerEvent->GetOwnerTypeDescriptor(), Value::RawPtr))
+				{
+					throw ArgumentTypeMismtatchException(L"thisObject", ownerEvent->GetOwnerTypeDescriptor(), Value::RawPtr, thisObject);
+				}
 				handler(thisObject, arguments);
 			}
 
@@ -299,6 +277,7 @@ EventInfoImpl
 
 			EventInfoImpl::EventInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name)
 				:ownerTypeDescriptor(_ownerTypeDescriptor)
+				,observingProperty(0)
 				,name(_name)
 			{
 			}
@@ -312,6 +291,11 @@ EventInfoImpl
 				return ownerTypeDescriptor;
 			}
 
+			IPropertyInfo* EventInfoImpl::GetObservingProperty()
+			{
+				return observingProperty;
+			}
+
 			const WString& EventInfoImpl::GetName()
 			{
 				return name;
@@ -319,6 +303,14 @@ EventInfoImpl
 
 			Ptr<IEventHandler> EventInfoImpl::Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)
 			{
+				if(thisObject.IsNull())
+				{
+					throw ArgumentNullException(L"thisObject");
+				}
+				else if(!thisObject.CanConvertTo(ownerTypeDescriptor, Value::RawPtr))
+				{
+					throw ArgumentTypeMismtatchException(L"thisObject", ownerTypeDescriptor, Value::RawPtr, thisObject);
+				}
 				DescriptableObject* rawThisObject=thisObject.GetRawPtr();
 				if(rawThisObject)
 				{
@@ -329,6 +321,84 @@ EventInfoImpl
 				else
 				{
 					return 0;
+				}
+			}
+
+/***********************************************************************
+PropertyInfoImpl
+***********************************************************************/
+
+			PropertyInfoImpl::PropertyInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, ITypeDescriptor* _type, MethodInfoImpl* _getter, MethodInfoImpl* _setter, EventInfoImpl* _valueChangedEvent)
+				:ownerTypeDescriptor(_ownerTypeDescriptor)
+				,name(_name)
+				,type(_type)
+				,getter(_getter)
+				,setter(_setter)
+				,valueChangedEvent(_valueChangedEvent)
+			{
+				if(getter) getter->ownerProperty=this;
+				if(setter) setter->ownerProperty=this;
+				if(valueChangedEvent) valueChangedEvent->observingProperty=this;
+			}
+
+			PropertyInfoImpl::~PropertyInfoImpl()
+			{
+			}
+
+			ITypeDescriptor* PropertyInfoImpl::GetOwnerTypeDescriptor()
+			{
+				return ownerTypeDescriptor;
+			}
+
+			const WString& PropertyInfoImpl::GetName()
+			{
+				return name;
+			}
+
+			ITypeDescriptor* PropertyInfoImpl::GetValueTypeDescriptor()
+			{
+				return type;
+			}
+
+			bool PropertyInfoImpl::IsReadable()
+			{
+				return getter!=0;
+			}
+
+			bool PropertyInfoImpl::IsWritable()
+			{
+				return setter!=0;
+			}
+
+			IEventInfo* PropertyInfoImpl::GetValueChangedEvent()
+			{
+				return valueChangedEvent;
+			}
+
+			Value PropertyInfoImpl::GetValue(const Value& thisObject)
+			{
+				if(getter)
+				{
+					Array<Value> arguments;
+					return getter->Invoke(thisObject, arguments);
+				}
+				else
+				{
+					throw PropertyIsNotReadableException(this);
+				}
+			}
+
+			void PropertyInfoImpl::SetValue(const Value& thisObject, const Value& newValue)
+			{
+				if(setter)
+				{
+					Array<Value> arguments(1);
+					arguments[0]=newValue;
+					setter->Invoke(thisObject, arguments);
+				}
+				else
+				{
+					throw PropertyIsNotWritableException(this);
 				}
 			}
 
@@ -384,6 +454,16 @@ TypeDescriptorImpl
 				{
 					return 0;
 				}
+			}
+
+			bool TypeDescriptorImpl::CanConvertTo(ITypeDescriptor* targetType)
+			{
+				if(this==targetType) return true;
+				for(vint i=0;i<baseTypeDescriptors.Count();i++)
+				{
+					if(baseTypeDescriptors[i]->CanConvertTo(targetType)) return true;
+				}
+				return false;
 			}
 
 			vint TypeDescriptorImpl::GetPropertyCount()

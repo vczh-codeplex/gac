@@ -432,6 +432,9 @@
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.cpp">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.cpp">
+      <Filter>Common\Reflection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -820,6 +823,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.h">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.h">
+      <Filter>Common\Reflection</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
