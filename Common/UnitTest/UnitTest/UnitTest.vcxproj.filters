@@ -225,6 +225,9 @@
     <ClCompile Include="..\..\Source\Locale.cpp">
       <Filter>Common\Basic</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptorPredefined.cpp">
+      <Filter>Common\Reflection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
@@ -448,6 +451,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Locale.h">
       <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorPredefined.h">
+      <Filter>Common\Reflection</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

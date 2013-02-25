@@ -138,7 +138,6 @@ description::TypeManager
 			class TypeManager : public Object, public ITypeManager
 			{
 			protected:
-				Dictionary<WString, Ptr<IValueSerializer>>		valueSerializers;
 				Dictionary<WString, Ptr<ITypeDescriptor>>		typeDescriptors;
 				List<Ptr<ITypeLoader>>							typeLoaders;
 				bool											loaded;
@@ -152,43 +151,6 @@ description::TypeManager
 				~TypeManager()
 				{
 					Unload();
-				}
-
-				vint GetValueSerializerCount()
-				{
-					return valueSerializers.Values().Count();
-				}
-
-				IValueSerializer* GetValueSerializer(vint index)
-				{
-					return valueSerializers.Values().Get(index).Obj();
-				}
-
-				IValueSerializer* GetValueSerializer(const WString& name)
-				{
-					vint index=valueSerializers.Keys().IndexOf(name);
-					return index==-1?0:valueSerializers.Values().Get(index).Obj();
-				}
-
-				bool SetValueSerializer(const WString& name, Ptr<IValueSerializer> valueSerializer)
-				{
-					if(valueSerializers.Keys().Contains(name))
-					{
-						if(valueSerializer)
-						{
-							valueSerializers.Add(name, valueSerializer);
-							return true;
-						}
-					}
-					else
-					{
-						if(!valueSerializer)
-						{
-							valueSerializers.Remove(name);
-							return true;
-						}
-					}
-					return false;
 				}
 
 				vint GetTypeDescriptorCount()
@@ -290,7 +252,6 @@ description::TypeManager
 						{
 							typeLoaders[i]->Unload(this);
 						}
-						valueSerializers.Clear();
 						typeDescriptors.Clear();
 						return true;
 					}
@@ -346,15 +307,8 @@ description::TypeManager helper functions
 
 			IValueSerializer* GetValueSerializer(const WString& name)
 			{
-				if(globalTypeManager)
-				{
-					if(!globalTypeManager->IsLoaded())
-					{
-						globalTypeManager->Load();
-					}
-					return globalTypeManager->GetValueSerializer(name);
-				}
-				return 0;
+				ITypeDescriptor* descriptor=GetTypeDescriptor(name);
+				return descriptor?descriptor->GetValueSerializer():0;
 			}
 
 			ITypeDescriptor* GetTypeDescriptor(const WString& name)

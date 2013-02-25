@@ -133,7 +133,6 @@ Value
 			class IValueSerializer : public Interface
 			{
 			public:
-				virtual WString					GetName()=0;
 				virtual ITypeDescriptor*		GetOwnerTypeDescriptor()=0;
 				virtual bool					Validate(const WString& text)=0;
 				virtual bool					Parse(const WString& input, Value& output)=0;
@@ -157,16 +156,9 @@ ITypeDescriptor (basic)
 				virtual const WString&			GetName()=0;
 			};
 
-			class IValueInfo : public virtual Interface
-			{
-			public:
-				virtual ITypeDescriptor*		GetValueTypeDescriptor()=0;
-			};
-
 /***********************************************************************
 ITypeDescriptor (event)
 ***********************************************************************/
-
 
 			class IEventHandler : public Interface
 			{
@@ -188,9 +180,10 @@ ITypeDescriptor (event)
 ITypeDescriptor (property)
 ***********************************************************************/
 
-			class IPropertyInfo : public IMemberInfo, public IValueInfo
+			class IPropertyInfo : public IMemberInfo
 			{
 			public:
+				virtual ITypeDescriptor*		GetValueTypeDescriptor()=0;
 				virtual bool					IsReadable()=0;
 				virtual bool					IsWritable()=0;
 				virtual IMethodInfo*			GetGetter()=0;
@@ -204,11 +197,19 @@ ITypeDescriptor (property)
 ITypeDescriptor (method)
 ***********************************************************************/
 
-
-			class IParameterInfo : public IMemberInfo, public IValueInfo
+			class IParameterInfo : public IMemberInfo
 			{
 			public:
+				enum Decorator
+				{
+					RawPtr,
+					SharedPtr,
+					Text,
+				};
+
+				virtual ITypeDescriptor*		GetValueTypeDescriptor()=0;
 				virtual IMethodInfo*			GetOwnerMethod()=0;
+				virtual Decorator				GetDecorator()=0;
 				virtual bool					CanOutput()=0;
 			};
 
@@ -218,7 +219,7 @@ ITypeDescriptor (method)
 				virtual IMethodGroupInfo*		GetOwnerMethodGroup()=0;
 				virtual vint					GetParameterCount()=0;
 				virtual IParameterInfo*			GetParameter(vint index)=0;
-				virtual IValueInfo*				GetReturn()=0;
+				virtual IParameterInfo*			GetReturn()=0;
 				virtual Value					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			};
 
@@ -274,11 +275,6 @@ ITypeManager
 			class ITypeManager : public Interface
 			{
 			public:
-				virtual vint					GetValueSerializerCount()=0;
-				virtual IValueSerializer*		GetValueSerializer(vint index)=0;
-				virtual IValueSerializer*		GetValueSerializer(const WString& name)=0;
-				virtual bool					SetValueSerializer(const WString& name, Ptr<IValueSerializer> valueSerializer)=0;
-				
 				virtual vint					GetTypeDescriptorCount()=0;
 				virtual ITypeDescriptor*		GetTypeDescriptor(vint index)=0;
 				virtual ITypeDescriptor*		GetTypeDescriptor(const WString& name)=0;
