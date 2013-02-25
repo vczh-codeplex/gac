@@ -21,151 +21,182 @@ namespace vl
 		{
 
 /***********************************************************************
-Exceptions
+TypeDescriptorImpl
 ***********************************************************************/
 
-			class TypeDescriptorBuilderException : public Exception
+			class PropertyInfoImpl : public Object, public IPropertyInfo
 			{
+			protected:
+				ITypeDescriptor*						ownerTypeDescriptor;
+				WString									name;
+				ITypeDescriptor*						type;
+				IMethodInfo*							getter;
+				IMethodInfo*							setter;
+				IEventInfo*								valueChangedEvent;
 			public:
-				TypeDescriptorBuilderException(const WString& message)
-					:Exception(message)
-				{
-				}
-			};
+				PropertyInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, ITypeDescriptor* _type, IMethodInfo* _getter, IMethodInfo* _setter, IEventInfo* _valueChangedEvent);
+				~PropertyInfoImpl();
 
-			class PropertyAlreadyExistsException : public TypeDescriptorBuilderException
-			{
-			public:
-				PropertyAlreadyExistsException(ITypeDescriptor* typeDescriptor, const WString& propertyName)
-					:TypeDescriptorBuilderException(L"Property \""+propertyName+L"\" already exists in type \""+typeDescriptor->GetTypeName()+L"\".")
-				{
-				}
-			};
-
-			class EventAlreadyExistsException : public TypeDescriptorBuilderException
-			{
-			public:
-				EventAlreadyExistsException(ITypeDescriptor* typeDescriptor, const WString& eventName)
-					:TypeDescriptorBuilderException(L"Event \""+eventName+L"\" already exists in type \""+typeDescriptor->GetTypeName()+L"\".")
-				{
-				}
-			};
-
-			class ParameterAlreadyExistsException : public TypeDescriptorBuilderException
-			{
-			public:
-				ParameterAlreadyExistsException(IMethodInfo* method,  const WString& parameterName)
-					:TypeDescriptorBuilderException(L"Parameter \""+parameterName+L"\" already exists in method \""+method->GetName()+L"\" in type \""+method->GetOwnerTypeDescriptor()->GetTypeName()+L"\".")
-				{
-				}
+				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
+				const WString&							GetName()override;
+				ITypeDescriptor*						GetValueTypeDescriptor()override;
+				bool									IsReadable()override;
+				bool									IsWritable()override;
+				IMethodInfo*							GetGetter()=0;
+				IMethodInfo*							GetSetter()=0;
+				IEventInfo*								GetValueChangedEvent()override;
+				Value									GetValue(const Value& thisObject)override;
+				void									SetValue(const Value& thisObject, const Value& newValue)override;
 			};
 
 /***********************************************************************
-GeneralTypeDescriptor
+ParameterInfoImpl
 ***********************************************************************/
 
-			class GeneralTypeDescriptor : public Object, public ITypeDescriptor
+			class ParameterInfoImpl : public Object, public IParameterInfo
 			{
-			public:
-				class PropertyGroup
-				{
-					friend class GeneralTypeDescriptor;
-				protected:
-					bool														loaded;
-					Func<void(PropertyGroup*)>									loaderProcedure;
-					ITypeDescriptor*											ownerTypeDescriptor;
-					
-					WString														typeName;
-					IValueSerializer*											valueSerializer;
-					collections::List<ITypeDescriptor*>							baseTypeDescriptors;
-					collections::Dictionary<WString, Ptr<IPropertyInfo>>		properties;
-					collections::Dictionary<WString, Ptr<IEventInfo>>			events;
-					collections::Dictionary<WString, Ptr<IMethodGroupInfo>>		methodGroups;
-					Ptr<IMethodGroupInfo>										contructorGroup;
-
-				public:
-					PropertyGroup();
-					~PropertyGroup();
-
-					void						Prepare();
-
-					//----------------------------------------------------
-
-					class MethodBuilder
-					{
-					protected:
-						PropertyGroup&			propertyGroup;
-						Ptr<IMethodGroupInfo>	buildingMethodGroup;
-						Ptr<IMethodInfo>		buildingMethod;
-					public:
-						MethodBuilder(PropertyGroup& _propertyGroup, const WString& _name);
-
-						MethodBuilder&			Parameter(
-													const WString&									_name,
-													ITypeDescriptor*								_type,
-													bool											_nullable,
-													bool											_canOutput
-													);
-						MethodBuilder&			Return(
-													ITypeDescriptor*								_type,
-													bool											_nullable
-													);
-						MethodBuilder&			Invoker(
-													const Func<Value(const Value&, collections::Array<Value>&)>&	_invoker
-													);
-						PropertyGroup&			Done();
-					};
-
-					//----------------------------------------------------
-
-					class EventBuilder
-					{
-					protected:
-						PropertyGroup&			propertyGroup;
-						Ptr<IEventInfo>			buildingEvent;
-					public:
-						EventBuilder(PropertyGroup& _propertyGroup, const WString& _name);
-
-						EventBuilder&			Attacher(
-													const Func<void(DescriptableObject*, IEventHandler*)>&	_attacher
-													);
-						EventBuilder&			Detacher(
-													const Func<void(DescriptableObject*, IEventHandler*)>&	_detacher
-													);
-						EventBuilder&			Invoker(
-													const Func<Value(const Value&, Value&)>&		_invoker
-													);
-						PropertyGroup&			Done();
-					};
-
-					//----------------------------------------------------
-
-					PropertyGroup&				TypeName(
-													const WString&									_typeName
-													);
-					PropertyGroup&				Property(
-													const WString&									_name,
-													ITypeDescriptor*								_type,
-													bool											_nullable,
-													const Func<Value(const Value&)>&				_getter,
-													const Func<void(const Value&, const Value&)>&	_setter,
-													const WString&									_valueChangedEventName
-													);
-					MethodBuilder				Method(
-													const WString&									_name
-													);
-					EventBuilder				Event(
-													const WString&									_name
-													);
-				};
 			protected:
-				PropertyGroup				propertyGroup;
-
+				IMethodInfo*							ownerMethod;
+				WString									name;
+				ITypeDescriptor*						type;
+				bool									canOutput;
 			public:
-				GeneralTypeDescriptor(const Func<void(PropertyGroup*)>& loaderProcedure);
-				~GeneralTypeDescriptor();
+				ParameterInfoImpl(IMethodInfo* _ownerMethod, const WString& _name, ITypeDescriptor* _type, bool _canOutput);
+				~ParameterInfoImpl();
 
-				PropertyGroup&				Operations();
+				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
+				const WString&							GetName()override;
+				ITypeDescriptor*						GetValueTypeDescriptor()override;
+				IMethodInfo*							GetOwnerMethod()override;
+				bool									CanOutput()override;
+			};
+
+/***********************************************************************
+MethodReturnImpl
+***********************************************************************/
+
+			class MethodReturnImpl : public Object, public IValueInfo
+			{
+			protected:
+				ITypeDescriptor*						type;
+			public:
+				MethodReturnImpl(ITypeDescriptor* _type);
+				~MethodReturnImpl();
+
+				ITypeDescriptor*						GetValueTypeDescriptor()override;
+			};
+
+/***********************************************************************
+MethodInfoImpl
+***********************************************************************/
+
+			class MethodInfoImpl : public Object, public IMethodInfo
+			{
+			protected:
+				IMethodGroupInfo*						ownerMethodGroup;
+				collections::List<Ptr<IParameterInfo>>	parameters;
+				Ptr<IValueInfo>							returnInfo;
+			public:
+				MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType);
+				~MethodInfoImpl();
+
+				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
+				const WString&							GetName()override;
+				IMethodGroupInfo*						GetOwnerMethodGroup()override;
+				vint									GetParameterCount()override;
+				IParameterInfo*							GetParameter(vint index)override;
+				IValueInfo*								GetReturn()override;
+				bool									AddParameter(Ptr<IParameterInfo> parameter);
+			};
+
+/***********************************************************************
+MethodGroupInfoImpl
+***********************************************************************/
+
+			class MethodGroupInfoImpl : public Object, public IMethodGroupInfo
+			{
+			protected:
+				ITypeDescriptor*						ownerTypeDescriptor;
+				WString									name;
+				collections::List<Ptr<IMethodInfo>>		methods;
+			public:
+				MethodGroupInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name);
+				~MethodGroupInfoImpl();
+
+				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
+				const WString&							GetName()override;
+				vint									GetMethodCount()override;
+				IMethodInfo*							GetMethod(vint index)override;
+				bool									AddMethod(Ptr<IMethodInfo> _method);
+			};
+
+/***********************************************************************
+EventHandlerImpl
+***********************************************************************/
+
+/***********************************************************************
+EventInfoImpl
+***********************************************************************/
+
+			class EventInfoImpl : public Object, public IEventInfo
+			{
+			protected:
+				class EventHandlerImpl : public Object, public IEventHandler
+				{
+				protected:
+					EventInfoImpl*						ownerEvent;
+					DescriptableObject*					ownerObject;
+					Func<void(const Value&, Value&)>	handler;
+					bool								attached;
+				public:
+					EventHandlerImpl(EventInfoImpl* _ownerEvent, DescriptableObject* ownerObject, const Func<void(const Value&, Value&)>& _handler);
+					~EventHandlerImpl();
+
+					IEventInfo*							GetOwnerEvent()override;
+					Value								GetOwnerObject()override;
+					bool								IsAttached()override;
+					bool								Detach()override;
+					void								Invoke(const Value& thisObject, Value& arguments)override;
+				};
+
+			protected:
+				ITypeDescriptor*						ownerTypeDescriptor;
+				WString									name;
+
+				virtual void							AttachInternal(DescriptableObject* thisObject, Ptr<IEventHandler> eventHandler)=0;
+				virtual void							DetachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)=0;
+			public:
+				EventInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name);
+				~EventInfoImpl();
+
+				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
+				const WString&							GetName()override;
+				Ptr<IEventHandler>						Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)override;
+			};
+
+/***********************************************************************
+TypeDescriptorImpl
+***********************************************************************/
+
+			class TypeDescriptorImpl : public Object, public ITypeDescriptor
+			{
+			private:
+				bool														loaded;
+				WString														typeName;
+			protected:
+				ITypeDescriptor*											ownerTypeDescriptor;
+				IValueSerializer*											valueSerializer;
+				collections::List<ITypeDescriptor*>							baseTypeDescriptors;
+				collections::Dictionary<WString, Ptr<IPropertyInfo>>		properties;
+				collections::Dictionary<WString, Ptr<IEventInfo>>			events;
+				collections::Dictionary<WString, Ptr<IMethodGroupInfo>>		methodGroups;
+				Ptr<IMethodGroupInfo>										contructorGroup;
+
+				virtual void				LoadInternal()=0;
+				void						Load();
+			public:
+				TypeDescriptorImpl(const WString& _typeName);
+				~TypeDescriptorImpl();
 
 				const WString&				GetTypeName()override;
 				IValueSerializer*			GetValueSerializer()override;
@@ -188,6 +219,10 @@ GeneralTypeDescriptor
 				IMethodGroupInfo*			GetMethodGroupByName(const WString& name, bool inheritable)override;
 				IMethodGroupInfo*			GetConstructorGroup()override;
 			};
+
+/***********************************************************************
+TypeDescriptorImpl
+***********************************************************************/
 		}
 	}
 }
