@@ -1,4 +1,5 @@
 #include <limits.h>
+#include <float.h>
 #include "GuiTypeDescriptorPredefined.h"
 
 namespace vl
@@ -168,6 +169,7 @@ TypedValueSerializerProvider
 				bool success=false;
 				double result=wtof_test(input, success);
 				if(!success) return false;
+				if(result<FLT_MIN || result>FLT_MAX) return false;
 				output=(float)result;
 				return true;
 			}

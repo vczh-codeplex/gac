@@ -175,7 +175,7 @@ description::TypeManager
 					{
 						return false;
 					}
-					if(typeDescriptors.Keys().Contains(name))
+					if(!typeDescriptors.Keys().Contains(name))
 					{
 						if(typeDescriptor)
 						{

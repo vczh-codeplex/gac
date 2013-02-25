@@ -144,6 +144,7 @@ SerializableTypeDescriptor
 					if(TypedValueSerializerProvider<T>::Serialize(input, text))
 					{
 						output=Value::From(text, ownedTypeDescriptor);
+						return true;
 					}
 					return false;
 				}
