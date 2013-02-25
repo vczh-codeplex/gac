@@ -228,6 +228,9 @@
     <ClCompile Include="..\..\Source\Reflection\GuiTypeDescriptorPredefined.cpp">
       <Filter>Common\Reflection</Filter>
     </ClCompile>
+    <ClCompile Include="TestReflection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
