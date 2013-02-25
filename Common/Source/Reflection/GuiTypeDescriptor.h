@@ -141,6 +141,7 @@ Value
 			template<typename T>
 			class ITypedValueSerializer : public IValueSerializer
 			{
+			public:
 				virtual bool					Serialize(const T& input, Value& output)=0;
 				virtual bool					Deserialize(const Value& input, T& output)=0;
 			};

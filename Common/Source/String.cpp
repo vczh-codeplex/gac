@@ -7,71 +7,81 @@ namespace vl
 	vint atoi_test(const AString& string, bool& success)
 	{
 		char* endptr=0;
+		vint result=strtol(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
-		return strtol(string.Buffer(), &endptr, 10);
+		return result;
 	}
 
 	vint wtoi_test(const WString& string, bool& success)
 	{
 		wchar_t* endptr=0;
+		vint result=wcstol(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
-		return wcstol(string.Buffer(), &endptr, 10);
+		return result;
 	}
 
 	__int64 atoi64_test(const AString& string, bool& success)
 	{
 		char* endptr=0;
+		__int64 result=_strtoi64(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
-		return _strtoi64(string.Buffer(), &endptr, 10);
+		return result;
 	}
 
 	__int64 wtoi64_test(const WString& string, bool& success)
 	{
 		wchar_t* endptr=0;
+		__int64 result=_wcstoi64(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
-		return _wcstoi64(string.Buffer(), &endptr, 10);
+		return result;
 	}
 
 	vuint atou_test(const AString& string, bool& success)
 	{
 		char* endptr=0;
+		vuint result=strtoul(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
-		return strtoul(string.Buffer(), &endptr, 10);
+		return result;
 	}
 
 	vuint wtou_test(const WString& string, bool& success)
 	{
 		wchar_t* endptr=0;
+		vuint result=wcstoul(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
-		return wcstoul(string.Buffer(), &endptr, 10);
+		return result;
 	}
 
 	unsigned __int64 atou64_test(const AString& string, bool& success)
 	{
 		char* endptr=0;
+		unsigned __int64 result=_strtoui64(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
-		return _strtoui64(string.Buffer(), &endptr, 10);
+		return result;
 	}
 
 	unsigned __int64 wtou64_test(const WString& string, bool& success)
 	{
 		wchar_t* endptr=0;
+		unsigned __int64 result=_wcstoui64(string.Buffer(), &endptr, 10);
 		success=endptr==string.Buffer()+string.Length();
-		return _wcstoui64(string.Buffer(), &endptr, 10);
+		return result;
 	}
 
 	double atof_test(const AString& string, bool& success)
 	{
 		char* endptr=0;
+		double result=strtod(string.Buffer(), &endptr);
 		success=endptr==string.Buffer()+string.Length();
-		return strtod(string.Buffer(), &endptr);
+		return result;
 	}
 
 	double wtof_test(const WString& string, bool& success)
 	{
 		wchar_t* endptr=0;
+		double result=wcstod(string.Buffer(), &endptr);
 		success=endptr==string.Buffer()+string.Length();
-		return wcstod(string.Buffer(), &endptr);
+		return result;
 	}
 
 	vint atoi(const AString& string)
