@@ -277,12 +277,14 @@ Helpers
 						theme=new win7::Win7Theme;
 					}
 				}
+				description::LoadPredefinedTypes();
 				theme::SetCurrentTheme(theme.Obj());
 
 				GetCurrentController()->InputService()->StartTimer();
 				GuiApplication app;
 				application=&app;
 
+				description::GetGlobalTypeManager()->Load();
 				GuiMain();
 				theme::SetCurrentTheme(0);
 				description::DestroyGlobalTypeManager();
