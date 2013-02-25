@@ -36,8 +36,7 @@ public:
 	{
 		if(!resource)
 		{
-			resource=new GuiResource;
-			resource->LoadResourceXml(GetApplication()->GetExecutableFolder()+L"..\\Source\\PackageResources\\Applications\\GacNotepad.xml");
+			resource=GuiResource::LoadFromXml(GetApplication()->GetExecutableFolder()+L"..\\Source\\PackageResources\\Applications\\GacNotepad.xml");
 		}
 		return resource;
 	}
