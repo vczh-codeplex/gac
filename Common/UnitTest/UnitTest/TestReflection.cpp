@@ -15,17 +15,14 @@ namespace test
 	template<typename T, typename TValue, int Count, WString(*ToString)(TValue)>
 	void TestNumber(TValue(&values)[Count], TValue min, TValue max)
 	{
+		ITypeDescriptor* type=GetTypeDescriptor<T>();
+		ITypedValueSerializer<T>* serializer=GetValueSerializer<T>();
+		TEST_ASSERT(type);
+		TEST_ASSERT(serializer);
+		TEST_ASSERT(type->GetValueSerializer()==serializer);
+		TEST_ASSERT(serializer->GetOwnerTypeDescriptor()==type);
 		for(auto i:values)
 		{
-			TValue min=std::numeric_limits<T>::min();
-			TValue max=std::numeric_limits<T>::max();
-			ITypeDescriptor* type=GetTypeDescriptor<T>();
-			ITypedValueSerializer<T>* serializer=GetValueSerializer<T>();
-			TEST_ASSERT(type);
-			TEST_ASSERT(serializer);
-			TEST_ASSERT(type->GetValueSerializer()==serializer);
-			TEST_ASSERT(serializer->GetOwnerTypeDescriptor()==type);
-
 			if(min<=i && i<=max)
 			{
 				Value value;
@@ -44,12 +41,12 @@ namespace test
 					TEST_ASSERT(value.GetTypeDescriptor()==type);
 					TEST_ASSERT(value.GetRawPtr()==0);
 					TEST_ASSERT(value.GetSharedPtr().Obj()==0);
-					TEST_ASSERT(value.GetText()==ToString(i));
+					TEST_ASSERT(value.GetText()==ToString((T)i));
 				}
 				{
 					T n=2;
 					TEST_ASSERT(serializer->Deserialize(value, n));
-					TEST_ASSERT(n==i);
+					TEST_ASSERT(n==(T)i);
 				}
 			}
 			else
@@ -69,6 +66,65 @@ namespace test
 					TEST_ASSERT(serializer->Deserialize(value, n)==false);
 					TEST_ASSERT(n==2);
 				}
+			}
+		}
+	}
+
+	template<typename T, int LegalCount, int IllegalCount>
+	void TestLiteral(WString legalsText[], WString illegalsText[], T legals[])
+	{
+		ITypeDescriptor* type=GetTypeDescriptor<T>();
+		ITypedValueSerializer<T>* serializer=GetValueSerializer<T>();
+		TEST_ASSERT(type);
+		TEST_ASSERT(serializer);
+		TEST_ASSERT(type->GetValueSerializer()==serializer);
+		TEST_ASSERT(serializer->GetOwnerTypeDescriptor()==type);
+
+		for(vint x=0;x<LegalCount;x++)
+		{
+			WString i=legalsText[x];
+			T j=legals[x];
+			Value value;
+			TEST_ASSERT(serializer->Validate(i)==true);
+			{
+				TEST_ASSERT(serializer->Parse(i, value));
+				TEST_ASSERT(value.GetValueType()==Value::Text);
+				TEST_ASSERT(value.GetTypeDescriptor()==type);
+				TEST_ASSERT(value.GetRawPtr()==0);
+				TEST_ASSERT(value.GetSharedPtr().Obj()==0);
+				TEST_ASSERT(value.GetText()==i);
+			}
+			{
+				TEST_ASSERT(serializer->Serialize(j, value));
+				TEST_ASSERT(value.GetValueType()==Value::Text);
+				TEST_ASSERT(value.GetTypeDescriptor()==type);
+				TEST_ASSERT(value.GetRawPtr()==0);
+				TEST_ASSERT(value.GetSharedPtr().Obj()==0);
+				TEST_ASSERT(value.GetText()==i);
+			}
+			{
+				T n;
+				TEST_ASSERT(serializer->Deserialize(value, n));
+				TEST_ASSERT(n==j);
+			}
+		}
+		
+		for(vint x=0;x<IllegalCount;x++)
+		{
+			WString i=illegalsText[x];
+			Value value;
+			TEST_ASSERT(serializer->Validate(i)==false);
+			{
+				TEST_ASSERT(serializer->Parse(i, value)==false);
+				TEST_ASSERT(value.GetValueType()==Value::Null);
+				TEST_ASSERT(value.GetTypeDescriptor()==0);
+				TEST_ASSERT(value.GetRawPtr()==0);
+				TEST_ASSERT(value.GetSharedPtr().Obj()==0);
+				TEST_ASSERT(value.GetText()==L"");
+			}
+			{
+				T n;
+				TEST_ASSERT(serializer->Deserialize(value, n)==false);
 			}
 		}
 	}
@@ -125,15 +181,33 @@ namespace test
 	{
 		double values[]=
 		{
-			-DBL_MIN,
+			-DBL_MAX,
+			-FLT_MAX,
 			-FLT_MIN,
+			-DBL_MIN,
 			-1,
 			0,
 			1,
+			DBL_MIN,
+			FLT_MIN,
 			FLT_MAX,
 			DBL_MAX,
 		};
-		TestNumber<T, double, sizeof(values)/sizeof(*values), &ftow>(values, -std::numeric_limits<T>::min(), -std::numeric_limits<T>::max());
+		TestNumber<T, double, sizeof(values)/sizeof(*values), &ftow>(values, -std::numeric_limits<T>::max(), std::numeric_limits<T>::max());
+	}
+
+	void TestBool()
+	{
+		WString legalsText[]={L"true", L"false"};
+		WString illegalsText[]={L"TRUE", L"True", L"FALSE", L"False", L""};
+		bool legals[]={true, false};
+		TestLiteral<bool, sizeof(legalsText)/sizeof(*legalsText), sizeof(illegalsText)/sizeof(*illegalsText)>(legalsText, illegalsText, legals);
+	}
+
+	void TestString()
+	{
+		WString legals[]={L"a", L"b", L"c"};
+		TestLiteral<WString, sizeof(legals)/sizeof(*legals), 0>(legals, 0, legals);
 	}
 }
 using namespace test;
@@ -151,4 +225,6 @@ TEST_CASE(TestReflectionPredefinedType)
 	TestUInt<unsigned __int64>();
 	TestFloat<float>();
 	TestFloat<double>();
+	TestBool();
+	TestString();
 }
