@@ -125,13 +125,12 @@ SerializableTypeDescriptor
 				bool Validate(const WString& text)
 				{
 					T output;
-					return TypedValueSerializerProvider::Deserialize(text, output);
+					return TypedValueSerializerProvider<T>::Deserialize(text, output);
 				}
 
 				bool Parse(const WString& input, Value& output)
 				{
-					T output;
-					if(TypedValueSerializerProvider::Deserialize(text, output))
+					if(Validate(input))
 					{
 						output=Value::From(input, ownedTypeDescriptor);
 						return true;
@@ -141,12 +140,21 @@ SerializableTypeDescriptor
 
 				bool Serialize(const T& input, Value& output)
 				{
-					return TypedValueSerializerProvider::Serialize(input, output);
+					WString text;
+					if(TypedValueSerializerProvider<T>::Serialize(input, text))
+					{
+						output=Value::From(text, ownedTypeDescriptor);
+					}
+					return false;
 				}
 
 				bool Deserialize(const Value& input, T& output)
 				{
-					return TypedValueSerializerProvider::Deserialize(input, output);
+					if(input.GetValueType()!=Value::Text)
+					{
+						return false;
+					}
+					return TypedValueSerializerProvider<T>::Deserialize(input.GetText(), output);
 				}
 			};
 
@@ -154,16 +162,23 @@ SerializableTypeDescriptor
 			class SerializableTypeDescriptor : public Object, public ITypeDescriptor
 			{
 			protected:
-				TypedValueSerializer<T>						serializer;
+				Ptr<IValueSerializer>						serializer;
+				WString										typeName;
 			public:
+				SerializableTypeDescriptor()
+					:typeName(TypeInfo<T>::TypeName)
+				{
+					serializer=new TypedValueSerializer<T>(this);
+				}
+
 				const WString& GetTypeName()override
 				{
-					return TypeInfo<T>::TypeName;
+					return typeName;
 				}
 
 				IValueSerializer* GetValueSerializer()override
 				{
-					return &serializer;
+					return serializer.Obj();
 				}
 
 				vint GetBaseTypeDescriptorCount()override
@@ -342,6 +357,12 @@ Predefined Types
 				static bool Serialize(const WString& input, WString& output);
 				static bool Deserialize(const WString& input, WString& output);
 			};
+
+/***********************************************************************
+LoadPredefinedTypes
+***********************************************************************/
+
+			extern bool										LoadPredefinedTypes();
 		}
 	}
 }

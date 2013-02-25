@@ -171,6 +171,10 @@ description::TypeManager
 
 				bool SetTypeDescriptor(const WString& name, Ptr<ITypeDescriptor> typeDescriptor)
 				{
+					if(typeDescriptor && name!=typeDescriptor->GetTypeName())
+					{
+						return false;
+					}
 					if(typeDescriptors.Keys().Contains(name))
 					{
 						if(typeDescriptor)

@@ -222,6 +222,51 @@ TypedValueSerializerProvider
 				output=input;
 				return true;
 			}
+
+/***********************************************************************
+LoadPredefinedTypes
+***********************************************************************/
+
+			class PredefinedTypeLoader : public Object, public ITypeLoader
+			{
+			public:
+				template<typename T>
+				void AddSerializableType(ITypeManager* manager)
+				{
+					manager->SetTypeDescriptor(TypeInfo<T>::TypeName, new SerializableTypeDescriptor<T>);
+				}
+
+				void Load(ITypeManager* manager)override
+				{
+					AddSerializableType<unsigned __int8>(manager);
+					AddSerializableType<unsigned __int16>(manager);
+					AddSerializableType<unsigned __int32>(manager);
+					AddSerializableType<unsigned __int64>(manager);
+					AddSerializableType<signed __int8>(manager);
+					AddSerializableType<signed __int16>(manager);
+					AddSerializableType<signed __int32>(manager);
+					AddSerializableType<signed __int64>(manager);
+					AddSerializableType<float>(manager);
+					AddSerializableType<double>(manager);
+					AddSerializableType<bool>(manager);
+					AddSerializableType<WString>(manager);
+				}
+
+				void Unload(ITypeManager* manager)override
+				{
+				}
+			};
+
+			bool LoadPredefinedTypes()
+			{
+				ITypeManager* manager=GetGlobalTypeManager();
+				if(manager)
+				{
+					Ptr<ITypeLoader> loader=new PredefinedTypeLoader;
+					return manager->AddTypeLoader(loader);
+				}
+				return false;
+			}
 		}
 	}
 }
