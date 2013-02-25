@@ -28,6 +28,10 @@ Attribute
 		namespace description
 		{
 			class ITypeDescriptor;
+			class IEventInfo;
+			class IPropertyInfo;
+			class IMethodInfo;
+			class IMethodGroupInfo;
 		}
 
 		class DescriptableObject
@@ -96,30 +100,34 @@ Value
 				enum ValueType
 				{
 					Null,
-					DescriptableObjectRef,
-					DescriptableObjectPtr,
+					RawPtr,
+					SharedPtr,
 					Text,
 				};
 			protected:
 				ValueType						valueType;
-				DescriptableObject*				descriptableObjectRef;
-				Ptr<DescriptableObject>			descriptableObjectPtr;
+				DescriptableObject*				rawPtr;
+				Ptr<DescriptableObject>			sharedPtr;
 				WString							text;
 				ITypeDescriptor*				typeDescriptor;
-			public:
-				Value();
+
 				Value(DescriptableObject* value);
 				Value(Ptr<DescriptableObject> value);
 				Value(const WString& value, ITypeDescriptor* associatedTypeDescriptor);
+			public:
+				Value();
 				Value(const Value& value);
-
 				Value&							operator=(const Value& value);
 
 				ValueType						GetValueType()const;
-				DescriptableObject*				GetDescriptableObjectRef()const;
-				Ptr<DescriptableObject>			GetDescriptableObjectPtr()const;
+				DescriptableObject*				GetRawPtr()const;
+				Ptr<DescriptableObject>			GetSharedPtr()const;
 				const WString&					GetText()const;
 				ITypeDescriptor*				GetTypeDescriptor()const;
+
+				static Value					From(DescriptableObject* value);
+				static Value					From(Ptr<DescriptableObject> value);
+				static Value					From(const WString& value, ITypeDescriptor* type);
 			};
 
 			class IValueSerializer : public Interface
@@ -153,14 +161,12 @@ ITypeDescriptor (basic)
 			{
 			public:
 				virtual ITypeDescriptor*		GetValueTypeDescriptor()=0;
-				virtual bool					CanBeNull()=0;
 			};
 
 /***********************************************************************
 ITypeDescriptor (event)
 ***********************************************************************/
 
-			class IEventInfo;
 
 			class IEventHandler : public Interface
 			{
@@ -176,7 +182,6 @@ ITypeDescriptor (event)
 			{
 			public:
 				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)=0;
-				virtual void					Invoke(const Value& thisObject, Value& arguments)=0;
 			};
 
 /***********************************************************************
@@ -188,17 +193,17 @@ ITypeDescriptor (property)
 			public:
 				virtual bool					IsReadable()=0;
 				virtual bool					IsWritable()=0;
+				virtual IMethodInfo*			GetGetter()=0;
+				virtual IMethodInfo*			GetSetter()=0;
 				virtual IEventInfo*				GetValueChangedEvent()=0;
 				virtual Value					GetValue(const Value& thisObject)=0;
-				virtual void					SetValue(const Value& thisObject, Value newValue)=0;
+				virtual void					SetValue(const Value& thisObject, const Value& newValue)=0;
 			};
 
 /***********************************************************************
 ITypeDescriptor (method)
 ***********************************************************************/
 
-			class IMethodInfo;
-			class IMethodGroupInfo;
 
 			class IParameterInfo : public IMemberInfo, public IValueInfo
 			{

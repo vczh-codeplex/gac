@@ -34,40 +34,40 @@ description::Value
 
 		namespace description
 		{
-			Value::Value()
-				:valueType(Null)
-				,descriptableObjectRef(0)
-				,typeDescriptor(0)
-			{
-			}
-
 			Value::Value(DescriptableObject* value)
-				:valueType(DescriptableObjectRef)
-				,descriptableObjectRef(value)
+				:valueType(RawPtr)
+				,rawPtr(value)
 				,typeDescriptor(0)
 			{
 			}
 
 			Value::Value(Ptr<DescriptableObject> value)
-				:valueType(DescriptableObjectPtr)
-				,descriptableObjectRef(value.Obj())
-				,descriptableObjectPtr(value)
+				:valueType(SharedPtr)
+				,rawPtr(value.Obj())
+				,sharedPtr(value)
 				,typeDescriptor(0)
 			{
 			}
 
 			Value::Value(const WString& value, ITypeDescriptor* associatedTypeDescriptor)
-				:valueType(Null)
-				,descriptableObjectRef(0)
+				:valueType(Text)
+				,rawPtr(0)
 				,text(value)
 				,typeDescriptor(associatedTypeDescriptor)
 			{
 			}
 
+			Value::Value()
+				:valueType(Null)
+				,rawPtr(0)
+				,typeDescriptor(0)
+			{
+			}
+
 			Value::Value(const Value& value)
 				:valueType(value.valueType)
-				,descriptableObjectRef(value.descriptableObjectRef)
-				,descriptableObjectPtr(value.descriptableObjectPtr)
+				,rawPtr(value.rawPtr)
+				,sharedPtr(value.sharedPtr)
 				,text(value.text)
 				,typeDescriptor(value.typeDescriptor)
 			{
@@ -76,8 +76,8 @@ description::Value
 			Value& Value::operator=(const Value& value)
 			{
 				valueType=value.valueType;
-				descriptableObjectRef=value.descriptableObjectRef;
-				descriptableObjectPtr=value.descriptableObjectPtr;
+				rawPtr=value.rawPtr;
+				sharedPtr=value.sharedPtr;
 				text=value.text;
 				typeDescriptor=value.typeDescriptor;
 				return *this;
@@ -88,14 +88,14 @@ description::Value
 				return valueType;
 			}
 
-			DescriptableObject* Value::GetDescriptableObjectRef()const
+			DescriptableObject* Value::GetRawPtr()const
 			{
-				return descriptableObjectRef;
+				return rawPtr;
 			}
 
-			Ptr<DescriptableObject> Value::GetDescriptableObjectPtr()const
+			Ptr<DescriptableObject> Value::GetSharedPtr()const
 			{
-				return descriptableObjectPtr;
+				return sharedPtr;
 			}
 
 			const WString& Value::GetText()const
@@ -107,14 +107,28 @@ description::Value
 			{
 				switch(valueType)
 				{
-				case DescriptableObjectRef:
-					return descriptableObjectRef?descriptableObjectRef->GetTypeDescriptor():0;
-				case DescriptableObjectPtr:
-					return descriptableObjectPtr?descriptableObjectPtr->GetTypeDescriptor():0;
+				case RawPtr:
+				case SharedPtr:
+					return rawPtr?rawPtr->GetTypeDescriptor():0;
 				case Text:
 					return typeDescriptor;
 				}
 				return 0;
+			}
+
+			Value Value::From(DescriptableObject* value)
+			{
+				return Value(value);
+			}
+
+			Value Value::From(Ptr<DescriptableObject> value)
+			{
+				return Value(value);
+			}
+
+			Value Value::From(const WString& value, ITypeDescriptor* type)
+			{
+				return Value(value, type);
 			}
 
 /***********************************************************************
