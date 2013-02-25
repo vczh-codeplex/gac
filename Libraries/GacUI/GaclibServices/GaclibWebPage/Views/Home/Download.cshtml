@@ -92,7 +92,7 @@
                     When a zip file is successfully downloaded, extra the zip file, and those <a href="#Introduction">5 source files</a> will be found under <strong>Libraries\GacUI\Public\Source\</strong> directory. Only release provides HTML documents. If you want to build the document yourself, follow the instructions:
                 </p>
                 <ul>
-                    <li>Open <strong>Libraries\GacUI\GacUISrc\GacUISrc.sln</strong> using Visual Studio 2010.</li>
+                    <li>Open <strong>Libraries\GacUI\GacUISrc\GacUISrc.sln</strong> using Visual Studio 2012.</li>
                     <li>Compile the GacUISrc project under <strong>Debug</strong> configuration.</li>
                     <li>Run <strong>Libraries\GacUI\Public\Release.bat</strong> in Windows Explorer.</li>
                 </ul>
@@ -103,7 +103,7 @@
         </ul>
         <h1 id="Demos">Download Demos</h1>
         <p>
-            Source codes of the demos are available in both release and the latest source code. Currently we only have demos in Visual Studio 2010 C++ projects. Lately we will provide Visual Studio 2008 C++ projects for those demos. Before this, Visual Studio 2008 users should create C++ projects, includes source files and build demos by themselves.
+            Source codes of the demos are available in both release and the latest source code. Currently we only have demos in Visual Studio 2012 C++ projects. If you want to use Visual C++ 2010, maybe you will encounter a compiler error in a COM object that shows a macro is not defined, just delete it. GacUI cannot compile with Visual C++ 2008 because the implementation use C++11 features from 0.4.3.0. 
         </p>
         <ul>
             <li>
