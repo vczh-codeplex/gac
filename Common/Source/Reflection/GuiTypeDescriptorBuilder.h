@@ -150,17 +150,15 @@ TypeDescriptorImpl
 			protected:
 				ITypeDescriptor*						ownerTypeDescriptor;
 				WString									name;
-				ITypeDescriptor*						type;
 				MethodInfoImpl*							getter;
 				MethodInfoImpl*							setter;
 				EventInfoImpl*							valueChangedEvent;
 			public:
-				PropertyInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, ITypeDescriptor* _type, MethodInfoImpl* _getter, MethodInfoImpl* _setter, EventInfoImpl* _valueChangedEvent);
+				PropertyInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, MethodInfoImpl* _getter, MethodInfoImpl* _setter, EventInfoImpl* _valueChangedEvent);
 				~PropertyInfoImpl();
 
 				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
 				const WString&							GetName()override;
-				ITypeDescriptor*						GetValueTypeDescriptor()override;
 				bool									IsReadable()override;
 				bool									IsWritable()override;
 				IParameterInfo*							GetReturn()override;
@@ -190,7 +188,6 @@ FieldInfoImpl
 
 				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
 				const WString&							GetName()override;
-				ITypeDescriptor*						GetValueTypeDescriptor()override;
 				bool									IsReadable()override;
 				bool									IsWritable()override;
 				IParameterInfo*							GetReturn()override;
@@ -438,7 +435,7 @@ CustomFieldInfoImpl
 					TClass* object=UnboxValue<TClass*>(thisObject);
 					if(object)
 					{
-						return BoxValue<TField>(object->*FieldRef, GetValueTypeDescriptor());
+						return BoxValue<TField>(object->*FieldRef, GetReturn()->GetValueTypeDescriptor());
 					}
 					return Value();
 				}
@@ -448,7 +445,7 @@ CustomFieldInfoImpl
 					TClass* object=UnboxValue<TClass*>(thisObject);
 					if(object)
 					{
-						object->*FieldRef=UnboxValue<TField>(newValue, GetValueTypeDescriptor(), L"newValue");
+						object->*FieldRef=UnboxValue<TField>(newValue, GetReturn()->GetValueTypeDescriptor(), L"newValue");
 					}
 				}
 			public:

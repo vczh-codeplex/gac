@@ -344,10 +344,9 @@ EventInfoImpl
 PropertyInfoImpl
 ***********************************************************************/
 
-			PropertyInfoImpl::PropertyInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, ITypeDescriptor* _type, MethodInfoImpl* _getter, MethodInfoImpl* _setter, EventInfoImpl* _valueChangedEvent)
+			PropertyInfoImpl::PropertyInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, MethodInfoImpl* _getter, MethodInfoImpl* _setter, EventInfoImpl* _valueChangedEvent)
 				:ownerTypeDescriptor(_ownerTypeDescriptor)
 				,name(_name)
-				,type(_type)
 				,getter(_getter)
 				,setter(_setter)
 				,valueChangedEvent(_valueChangedEvent)
@@ -369,11 +368,6 @@ PropertyInfoImpl
 			const WString& PropertyInfoImpl::GetName()
 			{
 				return name;
-			}
-
-			ITypeDescriptor* PropertyInfoImpl::GetValueTypeDescriptor()
-			{
-				return type;
 			}
 
 			bool PropertyInfoImpl::IsReadable()
@@ -456,11 +450,6 @@ FieldInfoImpl
 			const WString& FieldInfoImpl::GetName()
 			{
 				return name;
-			}
-
-			ITypeDescriptor* FieldInfoImpl::GetValueTypeDescriptor()
-			{
-				return returnInfo->GetValueTypeDescriptor();
 			}
 
 			bool FieldInfoImpl::IsReadable()

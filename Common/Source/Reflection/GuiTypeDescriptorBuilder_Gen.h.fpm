@@ -1,7 +1,7 @@
 $$include:..\Common.fpm
 
 $$define $ADD_PARAMETER($index) $$begin
-					AddParameter(new ParameterInfoImpl(this, parameterNames[$index], GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, ParameterTypeInfo<R>::Output));
+					AddParameter(new ParameterInfoImpl(this, parameterNames[$index], GetTypeDescriptor<typename ParameterTypeInfo<$TYPE_ITEM($index)>::Type>(), ParameterTypeInfo<$TYPE_ITEM($index)>::Decorator, ParameterTypeInfo<$TYPE_ITEM($index)>::Output));
 $( )
 $$end
 
@@ -33,6 +33,28 @@ $loop($count,0,$ADD_PARAMETER)
 			};
 $$end
 
+$$define $METHOD_DECLARATION($count,$function) $$begin
+$(/)***********************************************************************
+Method: $FUNCTION_TYPE($count,$function)
+***********************************************************************$(/)
+			template<$TYPENAME_LIST($count,$function)>
+			class CustomMethodInfoImpl<$FUNCTION_TYPE($count,$function)> : public MethodInfoImpl
+			{
+			protected:
+				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
+				{
+$loop($count,0,$PREPARE_PARAMETER)
+					return Value();
+				}
+			public:
+				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, $if($function,GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(),0), $if($function,ParameterTypeInfo<R>::Decorator,IParameterInfo::Text), _isStatic)
+				{
+$loop($count,0,$ADD_PARAMETER)
+				}
+			};
+$$end
+
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: ³Âè÷å«(vczh)
@@ -54,12 +76,21 @@ namespace vl
 		{
 			template<typename T>
 			class CustomConstructorInfoImpl{};
+			template<typename T>
+			class CustomMethodInfoImpl{};
 $$define $CONSTRUCTOR_APPLY($count) $$begin
 $( )
 $CONSTRUCTOR_DECLARATION($count)
 $( )
 $$end
 $loop($MAX_FUNCTION_NUMBER(),0,$CONSTRUCTOR_APPLY)
+$$define $METHOD_APPLY($count) $$begin
+$( )
+$METHOD_DECLARATION($count,0)
+$METHOD_DECLARATION($count,1)
+$( )
+$$end
+$loop($MAX_FUNCTION_NUMBER(),0,$METHOD_APPLY)
 		}
 	}
 }
