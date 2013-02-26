@@ -1,5 +1,38 @@
 $$include:..\Common.fpm
 
+$$define $ADD_PARAMETER($index) $$begin
+					AddParameter(new ParameterInfoImpl(this, parameterNames[$index], GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, ParameterTypeInfo<R>::Output));
+$( )
+$$end
+
+$$define $PREPARE_PARAMETER($index) $$begin
+					$PARAMETER_ITEM($index) = UnboxValue<$TYPE_ITEM($index)>(arguments[$index], GetParameter($index)->GetValueTypeDescriptor(), L$(")$ARGUMENT_ITEM($index)$("));
+$( )
+$$end
+
+$$define $CONSTRUCTOR_DECLARATION($count) $$begin
+$(/)***********************************************************************
+Constructor: $FUNCTION_TYPE($count,1)
+***********************************************************************$(/)
+			template<$TYPENAME_LIST($count,1)>
+			class CustomConstructorInfoImpl<$FUNCTION_TYPE($count,1)> : public MethodInfoImpl
+			{
+			protected:
+				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
+				{
+$loop($count,0,$PREPARE_PARAMETER)
+					R result = new typename ParameterTypeInfo<R>::Type($ARGUMENT_LIST($count));
+					return BoxValue<R>(result, GetOwnerTypeDescriptor());
+				}
+			public:
+				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, true)
+				{
+$loop($count,0,$ADD_PARAMETER)
+				}
+			};
+$$end
+
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: ³Âè÷å«(vczh)
@@ -19,6 +52,14 @@ namespace vl
 	{
 		namespace description
 		{
+			template<typename T>
+			class CustomConstructorInfoImpl{};
+$$define $CONSTRUCTOR_APPLY($count) $$begin
+$( )
+$CONSTRUCTOR_DECLARATION($count)
+$( )
+$$end
+$loop($MAX_FUNCTION_NUMBER(),0,$CONSTRUCTOR_APPLY)
 		}
 	}
 }

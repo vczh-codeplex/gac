@@ -558,7 +558,7 @@ TypeDescriptorImpl
 			{
 				if(!constructorGroup)
 				{
-					constructorGroup=new MethodGroupInfoImpl(this, L"$CONSTRUCTOR");
+					constructorGroup=new MethodGroupInfoImpl(this, L"");
 				}
 				return constructorGroup.Obj();
 			}
@@ -617,7 +617,6 @@ TypeDescriptorImpl
 
 			const WString& TypeDescriptorImpl::GetTypeName()
 			{
-				Load();
 				return typeName;
 			}
 
