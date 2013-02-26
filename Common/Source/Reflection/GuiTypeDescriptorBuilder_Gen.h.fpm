@@ -33,9 +33,9 @@ $loop($count,0,$ADD_PARAMETER)
 			};
 $$end
 
-$$define $METHOD_DECLARATION($count,$function) $$begin
+$$define $MEMBER_METHOD_DECLARATION($count,$function) $$begin
 $(/)***********************************************************************
-Method: $FUNCTION_TYPE($count,$function)
+Member Method: $FUNCTION_TYPE($count,$function)
 ***********************************************************************$(/)
 			template<typename TClass$if($add($count,$function),$(,),$( ))$TYPENAME_LIST($count,$function)>
 			struct CustomMethodInfoImplSelector<TClass, $FUNCTION_TYPE($count,$function)>
@@ -46,12 +46,41 @@ Method: $FUNCTION_TYPE($count,$function)
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
+					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
 $loop($count,0,$PREPARE_PARAMETER)
-					return Value();
+					$if($function,R result = ,$( )) (object->*Method)($ARGUMENT_LIST($count));
+					return $if($function,BoxValue(result, GetReturn()->GetValueTypeDescriptor()),Value());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[])
 					:MethodInfoImpl(0, $if($function,GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(),0), $if($function,ParameterTypeInfo<R>::Decorator,IParameterInfo::Text), false)
+				{
+$loop($count,0,$ADD_PARAMETER)
+				}
+			};
+			};
+$$end
+
+$$define $STATIC_METHOD_DECLARATION($count,$function) $$begin
+$(/)***********************************************************************
+Static Method: $FUNCTION_TYPE($count,$function)
+***********************************************************************$(/)
+			template<$TYPENAME_LIST($count,$function)>
+			struct CustomMethodInfoImplSelector<void, $FUNCTION_TYPE($count,$function)>
+			{
+			template<$FUNCTION_DECL($count,$function,* Method)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
+			{
+			protected:
+				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
+				{
+$loop($count,0,$PREPARE_PARAMETER)
+					$if($function,R result = ,$( )) Method($ARGUMENT_LIST($count));
+					return $if($function,BoxValue(result, GetReturn()->GetValueTypeDescriptor()),Value());
+				}
+			public:
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, $if($function,GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(),0), $if($function,ParameterTypeInfo<R>::Decorator,IParameterInfo::Text), true)
 				{
 $loop($count,0,$ADD_PARAMETER)
 				}
@@ -88,13 +117,22 @@ $CONSTRUCTOR_DECLARATION($count)
 $( )
 $$end
 $loop($MAX_FUNCTION_NUMBER(),0,$CONSTRUCTOR_APPLY)
-$$define $METHOD_APPLY($count) $$begin
+
+$$define $MEMBER_METHOD_APPLY($count) $$begin
 $( )
-$METHOD_DECLARATION($count,0)
-$METHOD_DECLARATION($count,1)
+$MEMBER_METHOD_DECLARATION($count,0)
+$MEMBER_METHOD_DECLARATION($count,1)
 $( )
 $$end
-$loop($MAX_FUNCTION_NUMBER(),0,$METHOD_APPLY)
+$loop($MAX_FUNCTION_NUMBER(),0,$MEMBER_METHOD_APPLY)
+
+$$define $STATIC_METHOD_APPLY($count) $$begin
+$( )
+$STATIC_METHOD_DECLARATION($count,0)
+$STATIC_METHOD_DECLARATION($count,1)
+$( )
+$$end
+$loop($MAX_FUNCTION_NUMBER(),0,$STATIC_METHOD_APPLY)
 		}
 	}
 }

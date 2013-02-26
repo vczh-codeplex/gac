@@ -251,8 +251,13 @@ namespace test
 	public:
 		Derived():b(0){}
 		Derived(int _a, int _b):Base(_a),b(_b){}
+		static Ptr<Derived> Create(){return new Derived();}
+		static Ptr<Derived> Create(int _a, int _b){return new Derived(_a, _b);}
+
 		int GetB(){return b;}
 		void SetB(int value){b=value;}
+		void Reset(){a=0; b=0;}
+		void Reset(int _a, int _b){a=_a; b=_b;}
 	};
 }
 using namespace test;
@@ -270,17 +275,24 @@ BEGIN_TYPE_INFO_NAMESPACE
 
 	BEGIN_TYPE_MEMBER(test::Base)
 		TYPE_MEMBER_FIELD(a)
-		TYPE_MEMBER_CONSTRUCTOR(Ptr<Base>(), EMPTY_PARAMETER_NAMES)
+		TYPE_MEMBER_CONSTRUCTOR(Ptr<Base>(), NO_PARAMETER)
 		TYPE_MEMBER_CONSTRUCTOR(Ptr<Base>(int), {L"_a"})
 	END_TYPE_MEMBER(test::Base)
 
 	BEGIN_TYPE_MEMBER(test::Derived)
 		TYPE_MEMBER_BASE(Base)
-		TYPE_MEMBER_CONSTRUCTOR(Ptr<Derived>(), EMPTY_PARAMETER_NAMES)
+		TYPE_MEMBER_CONSTRUCTOR(Ptr<Derived>(), NO_PARAMETER)
 		TYPE_MEMBER_CONSTRUCTOR(Ptr<Derived>(int _ int), {L"_a" _ L"_b"})
-		TYPE_MEMBER_METHOD(GetB, EMPTY_PARAMETER_NAMES)
+
+		TYPE_MEMBER_STATIC_METHOD_OVERLOAD(Create, NO_PARAMETER, Ptr<Derived>(*)())
+		TYPE_MEMBER_STATIC_METHOD_OVERLOAD(Create, {L"_a" _ L"_b"}, Ptr<Derived>(*)(int _ int))
+
+		TYPE_MEMBER_METHOD(GetB, NO_PARAMETER)
 		TYPE_MEMBER_METHOD(SetB, {L"value"})
 		TYPE_MEMBER_PROPERTY(B, GetB, SetB)
+
+		TYPE_MEMBER_METHOD_OVERLOAD(Reset, NO_PARAMETER, void(Derived::*)())
+		TYPE_MEMBER_METHOD_OVERLOAD(Reset, {L"_a" _ L"_b"}, void(Derived::*)(int _ int))
 	END_TYPE_MEMBER(test::Derived)
 
 	class TestTypeLoader : public Object, public ITypeLoader
