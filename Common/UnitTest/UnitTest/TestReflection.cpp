@@ -289,7 +289,7 @@ BEGIN_TYPE_INFO_NAMESPACE
 
 		TYPE_MEMBER_METHOD(GetB, NO_PARAMETER)
 		TYPE_MEMBER_METHOD(SetB, {L"value"})
-		TYPE_MEMBER_PROPERTY(B, GetB, SetB)
+		TYPE_MEMBER_PROPERTY(b, GetB, SetB)
 
 		TYPE_MEMBER_METHOD_OVERLOAD(Reset, NO_PARAMETER, void(Derived::*)())
 		TYPE_MEMBER_METHOD_OVERLOAD(Reset, {L"_a" _ L"_b"}, void(Derived::*)(int _ int))
@@ -323,6 +323,59 @@ TEST_CASE(TestReflectionBuilder)
 		EncoderStream encoderStream(fileStream, encoder);
 		StreamWriter writer(encoderStream);
 		LogTypeManager(writer);
+	}
+	TEST_ASSERT(ResetGlobalTypeManager());
+}
+
+TEST_CASE(TestReflectionInvoke)
+{
+	TEST_ASSERT(LoadPredefinedTypes());
+	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
+	TEST_ASSERT(GetGlobalTypeManager()->Load());
+	{
+		Value base=Value::Create(L"test::Base");
+		TEST_ASSERT(base.GetTypeDescriptor());
+		TEST_ASSERT(base.GetTypeDescriptor()->GetTypeName()==L"test::Base");
+		TEST_ASSERT(UnboxValue<int>(base.GetProperty(L"a"))==0);
+
+		base.SetProperty(L"a", BoxValue<vint>(100));
+		TEST_ASSERT(UnboxValue<int>(base.GetProperty(L"a"))==100);
+
+		Value base2=Value::Create(L"test::Base", (Value::xs(), 200));
+		TEST_ASSERT(base2.GetTypeDescriptor());
+		TEST_ASSERT(base2.GetTypeDescriptor()->GetTypeName()==L"test::Base");
+		TEST_ASSERT(UnboxValue<int>(base2.GetProperty(L"a"))==200);
+	}
+	{
+		Value derived=Value::Create(L"test::Derived");
+		TEST_ASSERT(derived.GetTypeDescriptor());
+		TEST_ASSERT(derived.GetTypeDescriptor()->GetTypeName()==L"test::Derived");
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"a"))==0);
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"b"))==0);
+
+		derived.SetProperty(L"a", BoxValue<vint>(100));
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"a"))==100);
+		derived.SetProperty(L"b", BoxValue<vint>(200));
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"b"))==200);
+	}
+	{
+		Value derived=Value::Create(L"test::Derived", (Value::xs(), 10, 20));
+		TEST_ASSERT(derived.GetTypeDescriptor());
+		TEST_ASSERT(derived.GetTypeDescriptor()->GetTypeName()==L"test::Derived");
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"a"))==10);
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"b"))==20);
+
+		derived.Invoke(L"Reset");
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"a"))==0);
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"b"))==0);
+
+		derived.Invoke(L"Reset", (Value::xs(), 30, 40));
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"a"))==30);
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"b"))==40);
+
+		Ptr<Derived> d=UnboxValue<Ptr<Derived>>(derived);
+		TEST_ASSERT(d->a==30);
+		TEST_ASSERT(d->GetB()==40);
 	}
 	TEST_ASSERT(ResetGlobalTypeManager());
 }
