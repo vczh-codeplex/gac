@@ -15,18 +15,18 @@ namespace vl
 TypeName
 ***********************************************************************/
 
-			const wchar_t* TypeInfo<unsigned __int8>::TypeName	= L"UInt8";
-			const wchar_t* TypeInfo<unsigned __int16>::TypeName	= L"UInt16";
-			const wchar_t* TypeInfo<unsigned __int32>::TypeName	= L"UInt32";
-			const wchar_t* TypeInfo<unsigned __int64>::TypeName	= L"UInt64";
-			const wchar_t* TypeInfo<signed __int8>::TypeName	= L"Int8";
-			const wchar_t* TypeInfo<signed __int16>::TypeName	= L"Int16";
-			const wchar_t* TypeInfo<signed __int32>::TypeName	= L"Int32";
-			const wchar_t* TypeInfo<signed __int64>::TypeName	= L"Int64";
-			const wchar_t* TypeInfo<float>::TypeName			= L"Float32";
-			const wchar_t* TypeInfo<double>::TypeName			= L"Float64";
-			const wchar_t* TypeInfo<bool>::TypeName				= L"Boolean";
-			const wchar_t* TypeInfo<WString>::TypeName			= L"String";
+			const wchar_t* TypeInfo<unsigned __int8>::TypeName	= L"unsigned __int8";
+			const wchar_t* TypeInfo<unsigned __int16>::TypeName	= L"unsigned __int16";
+			const wchar_t* TypeInfo<unsigned __int32>::TypeName	= L"unsigned __int32";
+			const wchar_t* TypeInfo<unsigned __int64>::TypeName	= L"unsigned __int64";
+			const wchar_t* TypeInfo<signed __int8>::TypeName	= L"signed __int8";
+			const wchar_t* TypeInfo<signed __int16>::TypeName	= L"signed __int16";
+			const wchar_t* TypeInfo<signed __int32>::TypeName	= L"signed __int32";
+			const wchar_t* TypeInfo<signed __int64>::TypeName	= L"signed __int64";
+			const wchar_t* TypeInfo<float>::TypeName			= L"float";
+			const wchar_t* TypeInfo<double>::TypeName			= L"double";
+			const wchar_t* TypeInfo<bool>::TypeName				= L"bool";
+			const wchar_t* TypeInfo<WString>::TypeName			= L"vl::WString";
 
 /***********************************************************************
 TypedValueSerializerProvider

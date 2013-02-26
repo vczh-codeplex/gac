@@ -15,6 +15,7 @@ XML Representation for Code Generation:
 #include "..\Exception.h"
 #include "..\Function.h"
 #include "..\Collections\List.h"
+#include "..\Stream\Accessor.h"
 
 namespace vl
 {
@@ -305,6 +306,7 @@ ITypeManager
 			extern bool							ResetGlobalTypeManager();
 			extern IValueSerializer*			GetValueSerializer(const WString& name);
 			extern ITypeDescriptor*				GetTypeDescriptor(const WString& name);
+			extern void							LogTypeManager(stream::TextWriter& writer);
 
 /***********************************************************************
 Exceptions
