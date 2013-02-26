@@ -236,15 +236,19 @@ namespace test
 	{
 	public:
 		int a;
+		Base():a(0){}
+		Base(int _a):a(_a){}
 	};
 
 	class Derived : public Base, public Description<Derived>
 	{
 	private:
-		int c;
+		int b;
 	public:
-		int GetC(){return c;}
-		void SetC(int value){c=value;}
+		Derived():b(0){}
+		Derived(int _a, int _b):Base(_a),b(_b){}
+		int GetB(){return b;}
+		void SetB(int value){b=value;}
 	};
 }
 using namespace test;
@@ -259,6 +263,7 @@ BEGIN_TYPE_INFO_NAMESPACE
 	TYPE_LIST(IMPL_TYPE_INFO)
 
 	BEGIN_TYPE_MEMBER(test::Base)
+		TYPE_MEMBER_FIELD(a)
 	END_TYPE_MEMBER(test::Base)
 
 	BEGIN_TYPE_MEMBER(test::Derived)

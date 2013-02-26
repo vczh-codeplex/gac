@@ -386,6 +386,21 @@ PropertyInfoImpl
 				return setter!=0;
 			}
 
+			IParameterInfo* PropertyInfoImpl::GetReturn()
+			{
+				return getter?getter->GetReturn():0;
+			}
+
+			IMethodInfo* PropertyInfoImpl::GetGetter()
+			{
+				return getter;
+			}
+
+			IMethodInfo* PropertyInfoImpl::GetSetter()
+			{
+				return setter;
+			}
+
 			IEventInfo* PropertyInfoImpl::GetValueChangedEvent()
 			{
 				return valueChangedEvent;
@@ -419,6 +434,108 @@ PropertyInfoImpl
 			}
 
 /***********************************************************************
+FieldInfoImpl
+***********************************************************************/
+
+			FieldInfoImpl::FieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, Ptr<IParameterInfo> _returnInfo)
+				:ownerTypeDescriptor(_ownerTypeDescriptor)
+				,name(_name)
+				,returnInfo(_returnInfo)
+			{
+			}
+
+			FieldInfoImpl::~FieldInfoImpl()
+			{
+			}
+
+			ITypeDescriptor* FieldInfoImpl::GetOwnerTypeDescriptor()
+			{
+				return ownerTypeDescriptor;
+			}
+
+			const WString& FieldInfoImpl::GetName()
+			{
+				return name;
+			}
+
+			ITypeDescriptor* FieldInfoImpl::GetValueTypeDescriptor()
+			{
+				return returnInfo->GetValueTypeDescriptor();
+			}
+
+			bool FieldInfoImpl::IsReadable()
+			{
+				return true;
+			}
+
+			bool FieldInfoImpl::IsWritable()
+			{
+				return true;
+			}
+
+			IParameterInfo* FieldInfoImpl::GetReturn()
+			{
+				return returnInfo.Obj();
+			}
+
+			IMethodInfo* FieldInfoImpl::GetGetter()
+			{
+				return 0;
+			}
+
+			IMethodInfo* FieldInfoImpl::GetSetter()
+			{
+				return 0;
+			}
+
+			IEventInfo* FieldInfoImpl::GetValueChangedEvent()
+			{
+				return 0;
+			}
+
+			Value FieldInfoImpl::GetValue(const Value& thisObject)
+			{
+				if(thisObject.IsNull())
+				{
+					throw ArgumentNullException(L"thisObject");
+				}
+				else if(!thisObject.CanConvertTo(ownerTypeDescriptor, Value::RawPtr))
+				{
+					throw ArgumentTypeMismtatchException(L"thisObject", ownerTypeDescriptor, Value::RawPtr, thisObject);
+				}
+				DescriptableObject* rawThisObject=thisObject.GetRawPtr();
+				if(rawThisObject)
+				{
+					return GetValueInternal(thisObject);
+				}
+				else
+				{
+					return Value();
+				}
+			}
+
+			void FieldInfoImpl::SetValue(const Value& thisObject, const Value& newValue)
+			{
+				if(thisObject.IsNull())
+				{
+					throw ArgumentNullException(L"thisObject");
+				}
+				else if(!thisObject.CanConvertTo(ownerTypeDescriptor, Value::RawPtr))
+				{
+					throw ArgumentTypeMismtatchException(L"thisObject", ownerTypeDescriptor, Value::RawPtr, thisObject);
+				}
+				if(!newValue.CanConvertTo(returnInfo.Obj()))
+				{
+					throw ArgumentTypeMismtatchException(L"newValue", returnInfo.Obj(), newValue);
+				}
+				DescriptableObject* rawThisObject=thisObject.GetRawPtr();
+				if(rawThisObject)
+				{
+					SetValueInternal(thisObject, newValue);
+				}
+			}
+
+/***********************************************************************
 TypeDescriptorImpl
 ***********************************************************************/
 
@@ -446,13 +563,13 @@ TypeDescriptorImpl
 				return constructorGroup.Obj();
 			}
 
-			IPropertyInfo* TypeDescriptorImpl::AddProperty(Ptr<PropertyInfoImpl> value)
+			IPropertyInfo* TypeDescriptorImpl::AddProperty(Ptr<IPropertyInfo> value)
 			{
 				properties.Add(value->GetName(), value);
 				return value.Obj();
 			}
 
-			IEventInfo* TypeDescriptorImpl::AddEvent(Ptr<EventInfoImpl> value)
+			IEventInfo* TypeDescriptorImpl::AddEvent(Ptr<IEventInfo> value)
 			{
 				events.Add(value->GetName(), value);
 				return value.Obj();
