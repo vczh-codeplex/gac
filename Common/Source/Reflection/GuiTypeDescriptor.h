@@ -144,6 +144,36 @@ Value
 				void							SetProperty(const WString& name, const Value& newValue);
 				Value							Invoke(const WString& name);
 				Value							Invoke(const WString& name, collections::Array<Value>& arguments);
+
+				class xs
+				{
+				protected:
+					collections::Array<Value>	arguments;
+				public:
+					xs()
+					{
+					}
+
+					template<typename T>
+					xs& operator,(const T& value)
+					{
+						arguments.Resize(arguments.Count()+1);
+						arguments[arguments.Count()-1]=BoxValue<T>(value);
+						return *this;
+					}
+
+					xs& operator,(const Value& value)
+					{
+						arguments.Resize(arguments.Count()+1);
+						arguments[arguments.Count()-1]=value;
+						return *this;
+					}
+
+					operator collections::Array<Value>&()
+					{
+						return arguments;
+					}
+				};
 			};
 
 			class IValueSerializer : public Interface

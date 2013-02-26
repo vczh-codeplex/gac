@@ -303,7 +303,7 @@ description::Value
 				if(!methodGroup) throw MemberNotExistsException(name);
 
 				IMethodInfo* method=SelectMethod(methodGroup, arguments);
-				return method->Invoke(Value(), arguments);
+				return method->Invoke(*this, arguments);
 			}
 
 /***********************************************************************

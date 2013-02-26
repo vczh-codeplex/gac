@@ -34,7 +34,12 @@ Type
 #define END_TYPE_INFO_NAMESPACE }}}
 #define DECL_TYPE_INFO(TYPENAME) template<>struct TypeInfo<TYPENAME>{static const wchar_t* TypeName;};
 #define IMPL_TYPE_INFO(TYPENAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L#TYPENAME;
-#define ADD_TYPE_INFO(TYPENAME) manager->SetTypeDescriptor(TypeInfo<TYPENAME>::TypeName, new CustomTypeDescriptorImpl<TYPENAME>);
+#define ADD_TYPE_INFO(TYPENAME)\
+			{\
+				Ptr<ITypeDescriptor> type=new CustomTypeDescriptorImpl<TYPENAME>();\
+				Description<TYPENAME>::SetAssociatedTypeDescroptor(type.Obj());\
+				manager->SetTypeDescriptor(TypeInfo<TYPENAME>::TypeName, type);\
+			}
 
 #define BEGIN_TYPE_MEMBER(TYPENAME)\
 			template<>\
