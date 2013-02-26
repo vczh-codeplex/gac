@@ -409,7 +409,8 @@ LogTypeManager
 						writer.WriteString(L"class "+type->GetTypeName());
 						for(vint j=0;j<type->GetBaseTypeDescriptorCount();j++)
 						{
-							writer.WriteString(L" "+type->GetBaseTypeDescriptor(j)->GetTypeName());
+							writer.WriteString(j==0?L" : ":L", ");
+							writer.WriteString(type->GetBaseTypeDescriptor(j)->GetTypeName());
 						}
 						writer.WriteLine(L"");
 						writer.WriteLine(L"{");

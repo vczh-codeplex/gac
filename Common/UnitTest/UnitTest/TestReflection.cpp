@@ -1,7 +1,5 @@
 #include "..\..\Source\UnitTest\UnitTest.h"
-#include "..\..\Source\Reflection\GuiTypeDescriptor.h"
-#include "..\..\Source\Reflection\GuiTypeDescriptorPredefined.h"
-#include "..\..\Source\Reflection\GuiTypeDescriptorBuilder.h"
+#include "..\..\Source\Reflection\GuiTypeDescriptorMacros.h"
 #include "..\..\Source\Stream\FileStream.h"
 #include "..\..\Source\Stream\Accessor.h"
 #include "..\..\Source\Stream\CharFormat.h"
@@ -273,6 +271,7 @@ BEGIN_TYPE_INFO_NAMESPACE
 	END_TYPE_MEMBER(test::Base)
 
 	BEGIN_TYPE_MEMBER(test::Derived)
+		TYPE_MEMBER_BASE(test::Base)
 	END_TYPE_MEMBER(test::Derived)
 
 	class TestTypeLoader : public Object, public ITypeLoader

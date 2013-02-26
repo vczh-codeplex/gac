@@ -83,7 +83,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Source\Basic.cpp" />
-    <ClCompile Include="..\..\..\Source\Collections\Operation.cpp" />
     <ClCompile Include="..\..\..\Source\Combinator\StringCombinator.cpp" />
     <ClCompile Include="..\..\..\Source\Combinator\TokenCombinator.cpp" />
     <ClCompile Include="..\..\..\Source\Console.cpp" />
@@ -105,12 +104,9 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\Basic.h" />
     <ClInclude Include="..\..\..\Source\Collections\Dictionary.h" />
-    <ClInclude Include="..\..\..\Source\Collections\DictionaryWrappers.h" />
     <ClInclude Include="..\..\..\Source\Collections\Interfaces.h" />
     <ClInclude Include="..\..\..\Source\Collections\List.h" />
-    <ClInclude Include="..\..\..\Source\Collections\ListWrappers.h" />
     <ClInclude Include="..\..\..\Source\Collections\Operation.h" />
-    <ClInclude Include="..\..\..\Source\Collections\OperationAggregate.h" />
     <ClInclude Include="..\..\..\Source\Collections\OperationConcat.h" />
     <ClInclude Include="..\..\..\Source\Collections\OperationCopyFrom.h" />
     <ClInclude Include="..\..\..\Source\Collections\OperationEnumerable.h" />
@@ -155,6 +151,9 @@
     <ClInclude Include="..\..\..\Source\Stream\Interfaces.h" />
     <ClInclude Include="..\..\..\Source\String.h" />
     <ClInclude Include="..\..\..\Source\Tuple.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Test.h.fpm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

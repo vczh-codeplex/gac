@@ -591,6 +591,11 @@ TypeDescriptorImpl
 				return value.Obj();
 			}
 
+			void TypeDescriptorImpl::AddBaseType(ITypeDescriptor* value)
+			{
+				baseTypeDescriptors.Add(value);
+			}
+
 			void TypeDescriptorImpl::Load()
 			{
 				if(!loaded)

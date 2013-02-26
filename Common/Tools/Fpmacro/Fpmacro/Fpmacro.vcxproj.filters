@@ -48,9 +48,6 @@
     <ClCompile Include="..\..\..\Source\String.cpp">
       <Filter>Common\Basic</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Source\Collections\Operation.cpp">
-      <Filter>Common\Collections</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\Source\Combinator\StringCombinator.cpp">
       <Filter>Common\Combinator</Filter>
     </ClCompile>
@@ -116,22 +113,13 @@
     <ClInclude Include="..\..\..\Source\Collections\Dictionary.h">
       <Filter>Common\Collections</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\DictionaryWrappers.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\Source\Collections\Interfaces.h">
       <Filter>Common\Collections</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Source\Collections\List.h">
       <Filter>Common\Collections</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\ListWrappers.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\Source\Collections\Operation.h">
-      <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Collections\OperationAggregate.h">
       <Filter>Common\Collections</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Source\Collections\OperationConcat.h">
@@ -248,5 +236,8 @@
     <ClInclude Include="..\..\..\Source\Regex\RegexWriter.h">
       <Filter>Common\Regex</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Test.h.fpm" />
   </ItemGroup>
 </Project>

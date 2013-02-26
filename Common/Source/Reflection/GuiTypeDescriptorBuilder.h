@@ -224,6 +224,7 @@ TypeDescriptorImpl
 				IEventInfo*					AddEvent(Ptr<IEventInfo> value);
 				IMethodInfo*				AddMethod(const WString& name, Ptr<MethodInfoImpl> value);
 				IMethodInfo*				AddConstructor(Ptr<MethodInfoImpl> value);
+				void						AddBaseType(ITypeDescriptor* value);
 
 				virtual void				LoadInternal()=0;
 				void						Load();
@@ -456,40 +457,6 @@ CustomFieldInfoImpl
 				{
 				}
 			};
-
-/***********************************************************************
-Macros
-***********************************************************************/
-
-			template<typename T>
-			class CustomTypeDescriptorImpl{};
-
-#define BEGIN_TYPE_INFO_NAMESPACE namespace vl{namespace reflection{namespace description{
-#define END_TYPE_INFO_NAMESPACE }}}
-#define DECL_TYPE_INFO(TYPENAME) template<>struct TypeInfo<TYPENAME>{static const wchar_t* TypeName;};
-#define IMPL_TYPE_INFO(TYPENAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L#TYPENAME;
-#define ADD_TYPE_INFO(TYPENAME) manager->SetTypeDescriptor(TypeInfo<TYPENAME>::TypeName, new CustomTypeDescriptorImpl<TYPENAME>);
-
-#define BEGIN_TYPE_MEMBER(TYPENAME)\
-			template<>\
-			class CustomTypeDescriptorImpl<TYPENAME> : public TypeDescriptorImpl\
-			{\
-				typedef TYPENAME ClassType;\
-			public:\
-				CustomTypeDescriptorImpl()\
-					:TypeDescriptorImpl(TypeInfo<TYPENAME>::TypeName)\
-				{\
-				}\
-			protected:\
-				void LoadInternal()override\
-				{\
-
-#define END_TYPE_MEMBER(TYPENAME)\
-				}\
-			};\
-
-#define TYPE_MEMBER_FIELD(FIELDNAME) AddProperty(new CustomFieldInfoImpl<ClassType, decltype(((ClassType*)0)->FIELDNAME), &ClassType::FIELDNAME>(this, L#FIELDNAME));
-
 		}
 	}
 }
