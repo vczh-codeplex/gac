@@ -26,6 +26,10 @@ namespace vl
 			template<typename T>
 			class CustomTypeDescriptorImpl{};
 
+/***********************************************************************
+Type
+***********************************************************************/
+
 #define BEGIN_TYPE_INFO_NAMESPACE namespace vl{namespace reflection{namespace description{
 #define END_TYPE_INFO_NAMESPACE }}}
 #define DECL_TYPE_INFO(TYPENAME) template<>struct TypeInfo<TYPENAME>{static const wchar_t* TypeName;};
@@ -53,6 +57,10 @@ namespace vl
 #define TYPE_MEMBER_BASE(TYPENAME)\
 			AddBaseType(GetTypeDescriptor<TYPENAME>());
 
+/***********************************************************************
+Field
+***********************************************************************/
+
 #define TYPE_MEMBER_FIELD(FIELDNAME)\
 			AddProperty(\
 				new CustomFieldInfoImpl<\
@@ -61,12 +69,20 @@ namespace vl
 					(this, L#FIELDNAME)\
 				);
 
-#define EMPTY_PARAMETER_NAMES {L""}
+/***********************************************************************
+Constructor
+***********************************************************************/
+
+#define NO_PARAMETER {L""}
 #define TYPE_MEMBER_CONSTRUCTOR(FUNCTIONTYPE, PARAMETERNAMES)\
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddConstructor(new CustomConstructorInfoImpl<FUNCTIONTYPE>(parameterNames));\
 			}
+
+/***********************************************************************
+Method
+***********************************************************************/
 
 #define TYPE_MEMBER_METHOD(FUNCTIONNAME, PARAMETERNAMES)\
 			{\
@@ -80,6 +96,53 @@ namespace vl
 						::CustomMethodInfoImpl<&ClassType::FUNCTIONNAME>(parameterNames)\
 					);\
 			}
+
+#define TYPE_MEMBER_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE)\
+			{\
+				const wchar_t* parameterNames[]=PARAMETERNAMES;\
+				AddMethod(\
+					L#FUNCTIONNAME,\
+					new CustomMethodInfoImplSelector<\
+						ClassType,\
+						vl::function_lambda::LambdaRetriveType<FUNCTIONTYPE>::FunctionType\
+						>\
+						::CustomMethodInfoImpl<(FUNCTIONTYPE)&ClassType::FUNCTIONNAME>(parameterNames)\
+					);\
+			}
+
+/***********************************************************************
+Static Method
+***********************************************************************/
+
+#define TYPE_MEMBER_STATIC_METHOD(FUNCTIONNAME, PARAMETERNAMES)\
+			{\
+				const wchar_t* parameterNames[]=PARAMETERNAMES;\
+				AddMethod(\
+					L#FUNCTIONNAME,\
+					new CustomMethodInfoImplSelector<\
+						void,\
+						vl::function_lambda::FunctionObjectRetriveType<decltype(&ClassType::FUNCTIONNAME)>::FunctionType\
+						>\
+						::CustomMethodInfoImpl<&ClassType::FUNCTIONNAME>(parameterNames)\
+					);\
+			}
+
+#define TYPE_MEMBER_STATIC_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE)\
+			{\
+				const wchar_t* parameterNames[]=PARAMETERNAMES;\
+				AddMethod(\
+					L#FUNCTIONNAME,\
+					new CustomMethodInfoImplSelector<\
+						void,\
+						vl::function_lambda::FunctionObjectRetriveType<FUNCTIONTYPE>::FunctionType\
+						>\
+						::CustomMethodInfoImpl<(FUNCTIONTYPE)&ClassType::FUNCTIONNAME>(parameterNames)\
+					);\
+			}
+
+/***********************************************************************
+Property
+***********************************************************************/
 
 #define TYPE_MEMBER_PROPERTY_READONLY(PROPERTYNAME, GETTER)\
 			AddProperty(\

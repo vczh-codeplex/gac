@@ -453,11 +453,11 @@ LogTypeManager
 								IMethodInfo* info=group->GetMethod(k);
 								if(info->GetReturn())
 								{
-									writer.WriteString(L"    function "+info->GetReturn()->GetTypeFriendlyName());
+									writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+L"function "+info->GetReturn()->GetTypeFriendlyName());
 								}
 								else
 								{
-									writer.WriteString(L"    void");
+									writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+L"void");
 								}
 								writer.WriteString(L" "+info->GetName()+L"(");
 								for(vint l=0;l<info->GetParameterCount();l++)
