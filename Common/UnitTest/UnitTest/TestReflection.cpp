@@ -227,4 +227,64 @@ TEST_CASE(TestReflectionPredefinedType)
 	TestFloat<double>();
 	TestBool();
 	TestString();
+	TEST_ASSERT(ResetGlobalTypeManager());
+}
+
+namespace test
+{
+	class Base : public Description<Base>
+	{
+	public:
+		int a;
+	};
+
+	class Derived : public Base, public Description<Derived>
+	{
+	private:
+		int c;
+	public:
+		int GetC(){return c;}
+		void SetC(int value){c=value;}
+	};
+}
+using namespace test;
+
+#define TYPE_LIST(F)\
+	F(test::Base)\
+	F(test::Derived)\
+
+BEGIN_TYPE_INFO_NAMESPACE
+
+	TYPE_LIST(DECL_TYPE_INFO)
+	TYPE_LIST(IMPL_TYPE_INFO)
+
+	BEGIN_TYPE_MEMBER(test::Base)
+	END_TYPE_MEMBER(test::Base)
+
+	BEGIN_TYPE_MEMBER(test::Derived)
+	END_TYPE_MEMBER(test::Derived)
+
+	class TestTypeLoader : public Object, public ITypeLoader
+	{
+	public:
+		void Load(ITypeManager* manager)override
+		{
+			TYPE_LIST(ADD_TYPE_INFO)
+		}
+		
+		void Unload(ITypeManager* manager)override
+		{
+		}
+	};
+
+END_TYPE_INFO_NAMESPACE
+
+#undef TYPE_LIST
+
+TEST_CASE(TestReflectionBuilder)
+{
+	TEST_ASSERT(LoadPredefinedTypes());
+	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
+	TEST_ASSERT(GetGlobalTypeManager()->Load());
+	TEST_ASSERT(ResetGlobalTypeManager());
 }

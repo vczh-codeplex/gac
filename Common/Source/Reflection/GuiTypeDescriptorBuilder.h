@@ -57,10 +57,11 @@ MethodInfoImpl
 				IPropertyInfo*							ownerProperty;
 				collections::List<Ptr<IParameterInfo>>	parameters;
 				Ptr<IParameterInfo>						returnInfo;
+				bool									isStatic;
 
 				virtual Value							InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			public:
-				MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType, IParameterInfo::Decorator _returnDecorator);
+				MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType, IParameterInfo::Decorator _returnDecorator, bool _isStatic);
 				~MethodInfoImpl();
 
 				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
@@ -70,8 +71,10 @@ MethodInfoImpl
 				vint									GetParameterCount()override;
 				IParameterInfo*							GetParameter(vint index)override;
 				IParameterInfo*							GetReturn()override;
+				bool									IsStatic()override;
 				Value									Invoke(const Value& thisObject, collections::Array<Value>& arguments);
 				bool									AddParameter(Ptr<IParameterInfo> parameter);
+				bool									SetOwnerMethodgroup(IMethodGroupInfo* _ownerMethodGroup);
 			};
 
 /***********************************************************************
@@ -176,14 +179,20 @@ TypeDescriptorImpl
 			private:
 				bool														loaded;
 				WString														typeName;
-			protected:
-				ITypeDescriptor*											ownerTypeDescriptor;
-				IValueSerializer*											valueSerializer;
+				Ptr<IValueSerializer>										valueSerializer;
 				collections::List<ITypeDescriptor*>							baseTypeDescriptors;
-				collections::Dictionary<WString, Ptr<IPropertyInfo>>		properties;
-				collections::Dictionary<WString, Ptr<IEventInfo>>			events;
-				collections::Dictionary<WString, Ptr<IMethodGroupInfo>>		methodGroups;
-				Ptr<IMethodGroupInfo>										contructorGroup;
+				collections::Dictionary<WString, Ptr<PropertyInfoImpl>>		properties;
+				collections::Dictionary<WString, Ptr<EventInfoImpl>>		events;
+				collections::Dictionary<WString, Ptr<MethodGroupInfoImpl>>	methodGroups;
+				Ptr<MethodGroupInfoImpl>									constructorGroup;
+
+			protected:
+				MethodGroupInfoImpl*		PrepareMethodGroup(const WString& name);
+				MethodGroupInfoImpl*		PrepareConstructorGroup();
+				IPropertyInfo*				AddProperty(Ptr<PropertyInfoImpl> value);
+				IEventInfo*					AddEvent(Ptr<EventInfoImpl> value);
+				IMethodInfo*				AddMethod(const WString& name, Ptr<MethodInfoImpl> value);
+				IMethodInfo*				AddConstructor(Ptr<MethodInfoImpl> value);
 
 				virtual void				LoadInternal()=0;
 				void						Load();
@@ -215,8 +224,36 @@ TypeDescriptorImpl
 			};
 
 /***********************************************************************
-TypeDescriptorImpl
+Macros
 ***********************************************************************/
+
+			template<typename T>
+			class ClassTypeDescriptorImpl{};
+
+#define BEGIN_TYPE_INFO_NAMESPACE namespace vl{namespace reflection{namespace description{
+#define END_TYPE_INFO_NAMESPACE }}}
+#define DECL_TYPE_INFO(TYPENAME) template<>struct TypeInfo<TYPENAME>{static const wchar_t* TypeName;};
+#define IMPL_TYPE_INFO(TYPENAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L#TYPENAME;
+#define ADD_TYPE_INFO(TYPENAME) manager->SetTypeDescriptor(TypeInfo<TYPENAME>::TypeName, new ClassTypeDescriptorImpl<TYPENAME>);
+
+#define BEGIN_TYPE_MEMBER(TYPENAME)\
+			template<>\
+			class ClassTypeDescriptorImpl<TYPENAME> : public TypeDescriptorImpl\
+			{\
+				typedef TYPENAME ClassType;\
+			public:\
+				ClassTypeDescriptorImpl()\
+					:TypeDescriptorImpl(TypeInfo<TYPENAME>::TypeName)\
+				{\
+				}\
+			protected:\
+				void LoadInternal()override\
+				{\
+
+#define END_TYPE_MEMBER(TYPENAME)\
+				}\
+			};\
+
 		}
 	}
 }

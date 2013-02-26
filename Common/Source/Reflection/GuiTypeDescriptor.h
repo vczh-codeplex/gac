@@ -229,6 +229,7 @@ ITypeDescriptor (method)
 				virtual vint					GetParameterCount()=0;
 				virtual IParameterInfo*			GetParameter(vint index)=0;
 				virtual IParameterInfo*			GetReturn()=0;
+				virtual bool					IsStatic()=0;
 				virtual Value					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			};
 
@@ -300,6 +301,7 @@ ITypeManager
 
 			extern ITypeManager*				GetGlobalTypeManager();
 			extern bool							DestroyGlobalTypeManager();
+			extern bool							ResetGlobalTypeManager();
 			extern IValueSerializer*			GetValueSerializer(const WString& name);
 			extern ITypeDescriptor*				GetTypeDescriptor(const WString& name);
 
