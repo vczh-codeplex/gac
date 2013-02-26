@@ -257,6 +257,8 @@ namespace test
 }
 using namespace test;
 
+#define _ ,
+
 #define TYPE_LIST(F)\
 	F(test::Base)\
 	F(test::Derived)\
@@ -274,6 +276,8 @@ BEGIN_TYPE_INFO_NAMESPACE
 
 	BEGIN_TYPE_MEMBER(test::Derived)
 		TYPE_MEMBER_BASE(Base)
+		TYPE_MEMBER_CONSTRUCTOR(Ptr<Derived>(), EMPTY_PARAMETER_NAMES)
+		TYPE_MEMBER_CONSTRUCTOR(Ptr<Derived>(int _ int), {L"_a" _ L"_b"})
 		TYPE_MEMBER_METHOD(GetB, EMPTY_PARAMETER_NAMES)
 		TYPE_MEMBER_METHOD(SetB, {L"value"})
 		TYPE_MEMBER_PROPERTY(B, GetB, SetB)
