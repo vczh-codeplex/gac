@@ -57,9 +57,9 @@ namespace vl
 #define TYPE_MEMBER_CONSTRUCTOR(FUNCTIONTYPE, PARAMETERNAMES) {const wchar_t* parameterNames[]=PARAMETERNAMES; AddConstructor(new CustomConstructorInfoImpl<FUNCTIONTYPE>(parameterNames));}
 #define TYPE_MEMBER_METHOD(FUNCTIONNAME, PARAMETERNAMES) {const wchar_t* parameterNames[]=PARAMETERNAMES; AddMethod(L#FUNCTIONNAME, new CustomMethodInfoImpl<vl::function_lambda::LambdaRetriveType<decltype(&ClassType::FUNCTIONNAME)>::FunctionType>(false, parameterNames));}
 
-#define TYPE_MEMBER_PROPERTY_READONLY(PROPERTYNAME, GETTER) AddProperty(new PropertyInfoImpl(this, L#PROPERTYNAME, GETTER, 0, 0));
-#define TYPE_MEMBER_PROPERTY(PROPERTYNAME, GETTER, SETTER) AddProperty(new PropertyInfoImpl(this, L#PROPERTYNAME, GETTER, SETTER, 0));
-#define TYPE_MEMBER_PROPERTY_EVENT(PROPERTYNAME, GETTER, SETTER, EVENT) AddProperty(new PropertyInfoImpl(this, L#PROPERTYNAME, GETTER, SETTER, EVENT));
+#define TYPE_MEMBER_PROPERTY_READONLY(PROPERTYNAME, GETTER) AddProperty(new PropertyInfoImpl(this, L#PROPERTYNAME, dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, false)->GetMethod(0)), 0, 0));
+#define TYPE_MEMBER_PROPERTY(PROPERTYNAME, GETTER, SETTER) AddProperty(new PropertyInfoImpl(this, L#PROPERTYNAME, dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, false)->GetMethod(0)), dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#SETTER, false)->GetMethod(0)), 0));
+#define TYPE_MEMBER_PROPERTY_EVENT(PROPERTYNAME, GETTER, SETTER, EVENT) AddProperty(new PropertyInfoImpl(this, L#PROPERTYNAME, dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, false)->GetMethod(0)), dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#SETTER, false)->GetMethod(0)), dynamic_cast<EventInfoImpl*>(GetEventByName(L#EVENT))));
 		}
 	}
 }

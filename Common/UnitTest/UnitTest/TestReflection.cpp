@@ -276,6 +276,7 @@ BEGIN_TYPE_INFO_NAMESPACE
 		TYPE_MEMBER_BASE(Base)
 		TYPE_MEMBER_METHOD(GetB, EMPTY_PARAMETER_NAMES)
 		TYPE_MEMBER_METHOD(SetB, {L"value"})
+		TYPE_MEMBER_PROPERTY(B, GetB, SetB)
 	END_TYPE_MEMBER(test::Derived)
 
 	class TestTypeLoader : public Object, public ITypeLoader
