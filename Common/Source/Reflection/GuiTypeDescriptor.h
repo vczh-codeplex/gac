@@ -191,7 +191,6 @@ ITypeDescriptor (property)
 			class IPropertyInfo : public IMemberInfo
 			{
 			public:
-				virtual ITypeDescriptor*		GetValueTypeDescriptor()=0;
 				virtual bool					IsReadable()=0;
 				virtual bool					IsWritable()=0;
 				virtual IParameterInfo*			GetReturn()=0;

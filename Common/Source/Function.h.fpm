@@ -283,6 +283,7 @@ $( )
 		struct LambdaRetriveType<R (__thiscall TObject::*)($TYPE_LIST($count))const>
 		{
 			typedef Func<R($TYPE_LIST($count))> Type;
+			typedef $FUNCTION_DECL($count,1,FunctionType);
 			typedef R ResultType;
 		};
 $( )
@@ -290,6 +291,7 @@ $( )
 		struct LambdaRetriveType<R (__thiscall TObject::*)($TYPE_LIST($count))>
 		{
 			typedef Func<R($TYPE_LIST($count))> Type;
+			typedef $FUNCTION_DECL($count,1,FunctionType);
 			typedef R ResultType;
 		};
 $( )
@@ -297,6 +299,7 @@ $( )
 		struct FunctionObjectRetriveType<R(*)($TYPE_LIST($count))>
 		{
 			typedef Func<R($TYPE_LIST($count))> Type;
+			typedef $FUNCTION_DECL($count,1,FunctionType);
 			typedef R ResultType;
 		};
 $( )
@@ -346,6 +349,7 @@ $loop($MAX_FUNCTION_NUMBER(),0,$FUNCTION_APPLY)
 		struct LambdaRetriveType
 		{
 			typedef vint Type;
+			typedef vint FunctionType;
 			typedef vint ResultType;
 		};
 $( )
@@ -353,6 +357,7 @@ $( )
 		struct FunctionObjectRetriveType
 		{
 			typedef typename LambdaRetriveType<decltype(&T::operator())>::Type Type;
+			typedef typename LambdaRetriveType<decltype(&T::operator())>::FunctionType FunctionType;
 			typedef typename LambdaRetriveType<decltype(&T::operator())>::ResultType ResultType;
 		};
 $( )

@@ -55,7 +55,11 @@ namespace vl
 
 #define EMPTY_PARAMETER_NAMES {L""}
 #define TYPE_MEMBER_CONSTRUCTOR(FUNCTIONTYPE, PARAMETERNAMES) {const wchar_t* parameterNames[]=PARAMETERNAMES; AddConstructor(new CustomConstructorInfoImpl<FUNCTIONTYPE>(parameterNames));}
+#define TYPE_MEMBER_METHOD(FUNCTIONNAME, PARAMETERNAMES) {const wchar_t* parameterNames[]=PARAMETERNAMES; AddMethod(L#FUNCTIONNAME, new CustomMethodInfoImpl<vl::function_lambda::LambdaRetriveType<decltype(&ClassType::FUNCTIONNAME)>::FunctionType>(false, parameterNames));}
 
+#define TYPE_MEMBER_PROPERTY_READONLY(PROPERTYNAME, GETTER) AddProperty(new PropertyInfoImpl(this, L#PROPERTYNAME, GETTER, 0, 0));
+#define TYPE_MEMBER_PROPERTY(PROPERTYNAME, GETTER, SETTER) AddProperty(new PropertyInfoImpl(this, L#PROPERTYNAME, GETTER, SETTER, 0));
+#define TYPE_MEMBER_PROPERTY_EVENT(PROPERTYNAME, GETTER, SETTER, EVENT) AddProperty(new PropertyInfoImpl(this, L#PROPERTYNAME, GETTER, SETTER, EVENT));
 		}
 	}
 }
