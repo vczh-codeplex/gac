@@ -2,6 +2,9 @@
 #include "..\..\Source\Reflection\GuiTypeDescriptor.h"
 #include "..\..\Source\Reflection\GuiTypeDescriptorPredefined.h"
 #include "..\..\Source\Reflection\GuiTypeDescriptorBuilder.h"
+#include "..\..\Source\Stream\FileStream.h"
+#include "..\..\Source\Stream\Accessor.h"
+#include "..\..\Source\Stream\CharFormat.h"
 
 #include <limits>
 
@@ -9,6 +12,9 @@ using namespace vl;
 using namespace vl::collections;
 using namespace vl::reflection;
 using namespace vl::reflection::description;
+using namespace vl::stream;
+
+extern WString GetPath();
 
 namespace test
 {
@@ -291,5 +297,12 @@ TEST_CASE(TestReflectionBuilder)
 	TEST_ASSERT(LoadPredefinedTypes());
 	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
 	TEST_ASSERT(GetGlobalTypeManager()->Load());
+	{
+		FileStream fileStream(GetPath()+L"Reflection.txt", FileStream::WriteOnly);
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+		LogTypeManager(writer);
+	}
 	TEST_ASSERT(ResetGlobalTypeManager());
 }

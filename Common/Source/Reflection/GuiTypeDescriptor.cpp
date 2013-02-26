@@ -390,6 +390,90 @@ description::TypeManager helper functions
 				}
 				return 0;
 			}
+
+/***********************************************************************
+LogTypeManager
+***********************************************************************/
+
+			void LogTypeManager(stream::TextWriter& writer)
+			{
+				for(vint i=0;i<globalTypeManager->GetTypeDescriptorCount();i++)
+				{
+					ITypeDescriptor* type=globalTypeManager->GetTypeDescriptor(i);
+					if(type->GetValueSerializer())
+					{
+						writer.WriteLine(L"struct "+type->GetTypeName()+L";");
+					}
+					else
+					{
+						writer.WriteString(L"class "+type->GetTypeName());
+						for(vint j=0;j<type->GetBaseTypeDescriptorCount();j++)
+						{
+							writer.WriteString(L" "+type->GetBaseTypeDescriptor(j)->GetTypeName());
+						}
+						writer.WriteLine(L"");
+						writer.WriteLine(L"{");
+
+						for(vint j=0;j<type->GetEventCount();j++)
+						{
+							IEventInfo* info=type->GetEvent(j);
+							writer.WriteString(L"    event "+info->GetName());
+							if(info->GetObservingProperty())
+							{
+								writer.WriteString(L" observing "+info->GetObservingProperty()->GetName());
+							}
+							writer.WriteLine(L";");
+						}
+
+						for(vint j=0;j<type->GetPropertyCount();j++)
+						{
+							IPropertyInfo* info=type->GetProperty(j);
+							writer.WriteString(L"    "+info->GetReturn()->GetTypeFriendlyName()+L" "+info->GetName());
+							if(info->GetGetter())
+							{
+								writer.WriteString(L" getter "+info->GetGetter()->GetName());
+							}
+							if(info->GetSetter())
+							{
+								writer.WriteString(L" setter "+info->GetSetter()->GetName());
+							}
+							if(info->GetValueChangedEvent())
+							{
+								writer.WriteString(L" raising "+info->GetValueChangedEvent()->GetName());
+							}
+							writer.WriteLine(L";");
+						}
+
+						for(vint j=0;j<type->GetMethodGroupCount();j++)
+						{
+							IMethodGroupInfo* group=type->GetMethodGroup(j);
+							for(vint k=0;k<group->GetMethodCount();k++)
+							{
+								IMethodInfo* info=group->GetMethod(k);
+								if(info->GetReturn())
+								{
+									writer.WriteString(L"    "+info->GetReturn()->GetTypeFriendlyName());
+								}
+								else
+								{
+									writer.WriteString(L"    void");
+								}
+								writer.WriteString(L" "+info->GetName()+L"(");
+								for(vint l=0;l<info->GetParameterCount();l++)
+								{
+									if(l>0) writer.WriteString(L", ");
+									IParameterInfo* parameter=info->GetParameter(l);
+									writer.WriteString(parameter->GetTypeFriendlyName()+L" "+parameter->GetName());
+								}
+								writer.WriteLine(L");");
+							}
+						}
+
+						writer.WriteLine(L"}");
+					}
+					writer.WriteLine(L"");
+				}
+			}
 		}
 	}
 }
