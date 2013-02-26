@@ -40,64 +40,6 @@ TypeInfo
 			}
 
 /***********************************************************************
-ParameterTypeInfo
-***********************************************************************/
-
-			template<typename T>
-			struct ParameterTypeInfo
-			{
-				static const IParameterInfo::Decorator		Decorator=IParameterInfo::Text;
-				static const bool							Output=false;
-				static const bool							OutputFromRef=true;
-				typedef T									Type;
-			};
-
-			template<typename T>
-			struct ParameterTypeInfo<const T>
-			{
-				static const IParameterInfo::Decorator		Decorator=ParameterTypeInfo<T>::Decorator;
-				static const bool							Output=false;
-				static const bool							OutputFromRef=false;
-				typedef typename ParameterTypeInfo<T>::Type	Type;
-			};
-
-			template<typename T>
-			struct ParameterTypeInfo<volatile T>
-			{
-				static const IParameterInfo::Decorator		Decorator=ParameterTypeInfo<T>::Decorator;
-				static const bool							Output=false;
-				static const bool							OutputFromRef=true;
-				typedef typename ParameterTypeInfo<T>::Type	Type;
-			};
-
-			template<typename T>
-			struct ParameterTypeInfo<T*>
-			{
-				static const IParameterInfo::Decorator		Decorator=IParameterInfo::RawPtr;
-				static const bool							Output=false;
-				static const bool							OutputFromRef=true;
-				typedef typename ParameterTypeInfo<T>::Type	Type;
-			};
-
-			template<typename T>
-			struct ParameterTypeInfo<Ptr<T>>
-			{
-				static const IParameterInfo::Decorator		Decorator=IParameterInfo::SharedPtr;
-				static const bool							Output=false;
-				static const bool							OutputFromRef=true;
-				typedef typename ParameterTypeInfo<T>::Type	Type;
-			};
-
-			template<typename T>
-			struct ParameterTypeInfo<T&>
-			{
-				static const IParameterInfo::Decorator		Decorator=ParameterTypeInfo<T>::Decorator;
-				static const bool							Output=ParameterTypeInfo<T>::OutputFromRef;
-				static const bool							OutputFromRef=true;
-				typedef typename ParameterTypeInfo<T>::Type	Type;
-			};
-
-/***********************************************************************
 SerializableTypeDescriptor
 ***********************************************************************/
 

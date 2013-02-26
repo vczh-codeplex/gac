@@ -193,6 +193,7 @@ ITypeDescriptor (property)
 				virtual ITypeDescriptor*		GetValueTypeDescriptor()=0;
 				virtual bool					IsReadable()=0;
 				virtual bool					IsWritable()=0;
+				virtual IParameterInfo*			GetReturn()=0;
 				virtual IMethodInfo*			GetGetter()=0;
 				virtual IMethodInfo*			GetSetter()=0;
 				virtual IEventInfo*				GetValueChangedEvent()=0;

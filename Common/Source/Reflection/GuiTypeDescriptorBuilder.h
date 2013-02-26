@@ -163,8 +163,39 @@ TypeDescriptorImpl
 				ITypeDescriptor*						GetValueTypeDescriptor()override;
 				bool									IsReadable()override;
 				bool									IsWritable()override;
-				IMethodInfo*							GetGetter()=0;
-				IMethodInfo*							GetSetter()=0;
+				IParameterInfo*							GetReturn()override;
+				IMethodInfo*							GetGetter()override;
+				IMethodInfo*							GetSetter()override;
+				IEventInfo*								GetValueChangedEvent()override;
+				Value									GetValue(const Value& thisObject)override;
+				void									SetValue(const Value& thisObject, const Value& newValue)override;
+			};
+
+/***********************************************************************
+FieldInfoImpl
+***********************************************************************/
+
+			class FieldInfoImpl : public Object, public IPropertyInfo
+			{
+			protected:
+				ITypeDescriptor*						ownerTypeDescriptor;
+				Ptr<IParameterInfo>						returnInfo;
+				WString									name;
+
+				virtual Value							GetValueInternal(const Value& thisObject)=0;
+				virtual void							SetValueInternal(const Value& thisObject, const Value& newValue)=0;
+			public:
+				FieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, Ptr<IParameterInfo> _returnInfo);
+				~FieldInfoImpl();
+
+				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
+				const WString&							GetName()override;
+				ITypeDescriptor*						GetValueTypeDescriptor()override;
+				bool									IsReadable()override;
+				bool									IsWritable()override;
+				IParameterInfo*							GetReturn()override;
+				IMethodInfo*							GetGetter()override;
+				IMethodInfo*							GetSetter()override;
 				IEventInfo*								GetValueChangedEvent()override;
 				Value									GetValue(const Value& thisObject)override;
 				void									SetValue(const Value& thisObject, const Value& newValue)override;
@@ -181,16 +212,16 @@ TypeDescriptorImpl
 				WString														typeName;
 				Ptr<IValueSerializer>										valueSerializer;
 				collections::List<ITypeDescriptor*>							baseTypeDescriptors;
-				collections::Dictionary<WString, Ptr<PropertyInfoImpl>>		properties;
-				collections::Dictionary<WString, Ptr<EventInfoImpl>>		events;
+				collections::Dictionary<WString, Ptr<IPropertyInfo>>		properties;
+				collections::Dictionary<WString, Ptr<IEventInfo>>			events;
 				collections::Dictionary<WString, Ptr<MethodGroupInfoImpl>>	methodGroups;
 				Ptr<MethodGroupInfoImpl>									constructorGroup;
 
 			protected:
 				MethodGroupInfoImpl*		PrepareMethodGroup(const WString& name);
 				MethodGroupInfoImpl*		PrepareConstructorGroup();
-				IPropertyInfo*				AddProperty(Ptr<PropertyInfoImpl> value);
-				IEventInfo*					AddEvent(Ptr<EventInfoImpl> value);
+				IPropertyInfo*				AddProperty(Ptr<IPropertyInfo> value);
+				IEventInfo*					AddEvent(Ptr<IEventInfo> value);
 				IMethodInfo*				AddMethod(const WString& name, Ptr<MethodInfoImpl> value);
 				IMethodInfo*				AddConstructor(Ptr<MethodInfoImpl> value);
 
@@ -224,25 +255,228 @@ TypeDescriptorImpl
 			};
 
 /***********************************************************************
+ParameterTypeInfo
+***********************************************************************/
+
+			template<typename T>
+			struct ParameterTypeInfo
+			{
+				static const IParameterInfo::Decorator		Decorator=IParameterInfo::Text;
+				static const bool							Output=false;
+				static const bool							OutputFromRef=true;
+				typedef T									Type;
+			};
+
+			template<typename T>
+			struct ParameterTypeInfo<const T>
+			{
+				static const IParameterInfo::Decorator		Decorator=ParameterTypeInfo<T>::Decorator;
+				static const bool							Output=false;
+				static const bool							OutputFromRef=false;
+				typedef typename ParameterTypeInfo<T>::Type	Type;
+			};
+
+			template<typename T>
+			struct ParameterTypeInfo<volatile T>
+			{
+				static const IParameterInfo::Decorator		Decorator=ParameterTypeInfo<T>::Decorator;
+				static const bool							Output=false;
+				static const bool							OutputFromRef=true;
+				typedef typename ParameterTypeInfo<T>::Type	Type;
+			};
+
+			template<typename T>
+			struct ParameterTypeInfo<T*>
+			{
+				static const IParameterInfo::Decorator		Decorator=IParameterInfo::RawPtr;
+				static const bool							Output=false;
+				static const bool							OutputFromRef=true;
+				typedef typename ParameterTypeInfo<T>::Type	Type;
+			};
+
+			template<typename T>
+			struct ParameterTypeInfo<Ptr<T>>
+			{
+				static const IParameterInfo::Decorator		Decorator=IParameterInfo::SharedPtr;
+				static const bool							Output=false;
+				static const bool							OutputFromRef=true;
+				typedef typename ParameterTypeInfo<T>::Type	Type;
+			};
+
+			template<typename T>
+			struct ParameterTypeInfo<T&>
+			{
+				static const IParameterInfo::Decorator		Decorator=ParameterTypeInfo<T>::Decorator;
+				static const bool							Output=ParameterTypeInfo<T>::OutputFromRef;
+				static const bool							OutputFromRef=true;
+				typedef typename ParameterTypeInfo<T>::Type	Type;
+			};
+
+/***********************************************************************
+ParameterTypeInfo Helper Functions
+***********************************************************************/
+
+			template<typename T>
+			IParameterInfo* CreateParameterInfo(IMethodInfo* ownerMethod, const WString& name)
+			{
+				return new ParameterInfoImpl(
+					0,
+					L"",
+					GetTypeDescriptor<typename ParameterTypeInfo<T>::Type>(),
+					ParameterTypeInfo<T>::Decorator,
+					ParameterTypeInfo<T>::Output
+					);
+			}
+
+			template<typename T, IParameterInfo::Decorator Decorator>
+			struct ValueAccessor
+			{
+			};
+
+			template<typename T>
+			struct ValueAccessor<T*, IParameterInfo::RawPtr>
+			{
+				static Value BoxValue(T* object, ITypeDescriptor* typeDescriptor)
+				{
+					return Value::From(object);
+				}
+
+				static T* UnboxValue(const Value& value, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					if(value.IsNull()) return 0;
+					T* result=dynamic_cast<T*>(value.GetRawPtr());
+					if(!result)
+					{
+						if(!typeDescriptor)
+						{
+							typeDescriptor=GetTypeDescriptor<T>();
+						}
+						throw ArgumentTypeMismtatchException(valueName, typeDescriptor, Value::RawPtr, value);
+					}
+					return result;
+				}
+			};
+
+			template<typename T>
+			struct ValueAccessor<Ptr<T>, IParameterInfo::SharedPtr>
+			{
+				static Value BoxValue(Ptr<T> object, ITypeDescriptor* typeDescriptor)
+				{
+					return Value::From(object);
+				}
+
+				static Ptr<T> UnboxValue(const Value& value, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					if(value.IsNull()) return 0;
+					Ptr<T> result=value.GetSharedPtr().Cast<T>();
+					if(!result)
+					{
+						if(!typeDescriptor)
+						{
+							typeDescriptor=GetTypeDescriptor<T>();
+						}
+						throw ArgumentTypeMismtatchException(valueName, typeDescriptor, Value::SharedPtr, value);
+					}
+					return result;
+				}
+			};
+
+			template<typename T>
+			struct ValueAccessor<T, IParameterInfo::Text>
+			{
+				static Value BoxValue(const T& object, ITypeDescriptor* typeDescriptor)
+				{
+					if(!typeDescriptor)
+					{
+						typeDescriptor=GetTypeDescriptor<T>();
+					}
+					ITypedValueSerializer<T>* serializer=dynamic_cast<ITypedValueSerializer<T>*>(typeDescriptor->GetValueSerializer());
+					Value result;
+					serializer->Serialize(object, result);
+					return result;
+				}
+
+				static T UnboxValue(const Value& value, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					ITypedValueSerializer<T>* serializer=dynamic_cast<ITypedValueSerializer<T>*>(value.GetTypeDescriptor()->GetValueSerializer());
+					T result;
+					if(!serializer->Deserialize(value, result))
+					{
+						if(!typeDescriptor)
+						{
+							typeDescriptor=GetTypeDescriptor<T>();
+						}
+						throw ArgumentTypeMismtatchException(valueName, typeDescriptor, Value::Text, value);
+					}
+					return result;
+				}
+			};
+
+			template<typename T>
+			Value BoxValue(const T& object, ITypeDescriptor* typeDescriptor=0)
+			{
+				return ValueAccessor<T, ParameterTypeInfo<T>::Decorator>::BoxValue(object, typeDescriptor);
+			}
+
+			template<typename T>
+			T UnboxValue(const Value& value, ITypeDescriptor* typeDescriptor=0, const WString& valueName=L"value")
+			{
+				return ValueAccessor<T, ParameterTypeInfo<T>::Decorator>::UnboxValue(value, typeDescriptor, valueName);
+			}
+
+/***********************************************************************
+CustomFieldInfoImpl
+***********************************************************************/
+
+			template<typename TClass, typename TField, TField TClass::* FieldRef>
+			class CustomFieldInfoImpl : public FieldInfoImpl
+			{
+			protected:
+				Value GetValueInternal(const Value& thisObject)override
+				{
+					TClass* object=UnboxValue<TClass*>(thisObject);
+					if(object)
+					{
+						return BoxValue<TField>(object->*FieldRef, GetValueTypeDescriptor());
+					}
+					return Value();
+				}
+
+				void SetValueInternal(const Value& thisObject, const Value& newValue)override
+				{
+					TClass* object=UnboxValue<TClass*>(thisObject);
+					if(object)
+					{
+						object->*FieldRef=UnboxValue<TField>(newValue, GetValueTypeDescriptor(), L"newValue");
+					}
+				}
+			public:
+				CustomFieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name)
+					:FieldInfoImpl(_ownerTypeDescriptor, _name, CreateParameterInfo<TField>(0, L""))
+				{
+				}
+			};
+
+/***********************************************************************
 Macros
 ***********************************************************************/
 
 			template<typename T>
-			class ClassTypeDescriptorImpl{};
+			class CustomTypeDescriptorImpl{};
 
 #define BEGIN_TYPE_INFO_NAMESPACE namespace vl{namespace reflection{namespace description{
 #define END_TYPE_INFO_NAMESPACE }}}
 #define DECL_TYPE_INFO(TYPENAME) template<>struct TypeInfo<TYPENAME>{static const wchar_t* TypeName;};
 #define IMPL_TYPE_INFO(TYPENAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L#TYPENAME;
-#define ADD_TYPE_INFO(TYPENAME) manager->SetTypeDescriptor(TypeInfo<TYPENAME>::TypeName, new ClassTypeDescriptorImpl<TYPENAME>);
+#define ADD_TYPE_INFO(TYPENAME) manager->SetTypeDescriptor(TypeInfo<TYPENAME>::TypeName, new CustomTypeDescriptorImpl<TYPENAME>);
 
 #define BEGIN_TYPE_MEMBER(TYPENAME)\
 			template<>\
-			class ClassTypeDescriptorImpl<TYPENAME> : public TypeDescriptorImpl\
+			class CustomTypeDescriptorImpl<TYPENAME> : public TypeDescriptorImpl\
 			{\
 				typedef TYPENAME ClassType;\
 			public:\
-				ClassTypeDescriptorImpl()\
+				CustomTypeDescriptorImpl()\
 					:TypeDescriptorImpl(TypeInfo<TYPENAME>::TypeName)\
 				{\
 				}\
@@ -253,6 +487,8 @@ Macros
 #define END_TYPE_MEMBER(TYPENAME)\
 				}\
 			};\
+
+#define TYPE_MEMBER_FIELD(FIELDNAME) AddProperty(new CustomFieldInfoImpl<ClassType, decltype(((ClassType*)0)->FIELDNAME), &ClassType::FIELDNAME>(this, L#FIELDNAME));
 
 		}
 	}
