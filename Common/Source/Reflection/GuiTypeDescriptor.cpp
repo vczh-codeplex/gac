@@ -429,7 +429,7 @@ LogTypeManager
 						for(vint j=0;j<type->GetPropertyCount();j++)
 						{
 							IPropertyInfo* info=type->GetProperty(j);
-							writer.WriteString(L"    "+info->GetReturn()->GetTypeFriendlyName()+L" "+info->GetName());
+							writer.WriteString(L"    property "+info->GetReturn()->GetTypeFriendlyName()+L" "+info->GetName());
 							if(info->GetGetter())
 							{
 								writer.WriteString(L" getter "+info->GetGetter()->GetName());
@@ -453,7 +453,31 @@ LogTypeManager
 								IMethodInfo* info=group->GetMethod(k);
 								if(info->GetReturn())
 								{
-									writer.WriteString(L"    "+info->GetReturn()->GetTypeFriendlyName());
+									writer.WriteString(L"    function "+info->GetReturn()->GetTypeFriendlyName());
+								}
+								else
+								{
+									writer.WriteString(L"    void");
+								}
+								writer.WriteString(L" "+info->GetName()+L"(");
+								for(vint l=0;l<info->GetParameterCount();l++)
+								{
+									if(l>0) writer.WriteString(L", ");
+									IParameterInfo* parameter=info->GetParameter(l);
+									writer.WriteString(parameter->GetTypeFriendlyName()+L" "+parameter->GetName());
+								}
+								writer.WriteLine(L");");
+							}
+						}
+
+						if(IMethodGroupInfo* group=type->GetConstructorGroup())
+						{
+							for(vint k=0;k<group->GetMethodCount();k++)
+							{
+								IMethodInfo* info=group->GetMethod(k);
+								if(info->GetReturn())
+								{
+									writer.WriteString(L"    constructor "+info->GetReturn()->GetTypeFriendlyName());
 								}
 								else
 								{

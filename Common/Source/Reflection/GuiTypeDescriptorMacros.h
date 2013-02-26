@@ -53,6 +53,9 @@ namespace vl
 #define TYPE_MEMBER_BASE(TYPENAME) AddBaseType(GetTypeDescriptor<TYPENAME>());
 #define TYPE_MEMBER_FIELD(FIELDNAME) AddProperty(new CustomFieldInfoImpl<ClassType, decltype(((ClassType*)0)->FIELDNAME), &ClassType::FIELDNAME>(this, L#FIELDNAME));
 
+#define EMPTY_PARAMETER_NAMES {L""}
+#define TYPE_MEMBER_CONSTRUCTOR(FUNCTIONTYPE, PARAMETERNAMES) {const wchar_t* parameterNames[]=PARAMETERNAMES; AddConstructor(new CustomConstructorInfoImpl<FUNCTIONTYPE>(parameterNames));}
+
 		}
 	}
 }

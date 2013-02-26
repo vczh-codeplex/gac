@@ -268,10 +268,12 @@ BEGIN_TYPE_INFO_NAMESPACE
 
 	BEGIN_TYPE_MEMBER(test::Base)
 		TYPE_MEMBER_FIELD(a)
+		TYPE_MEMBER_CONSTRUCTOR(Ptr<Base>(), EMPTY_PARAMETER_NAMES)
+		TYPE_MEMBER_CONSTRUCTOR(Ptr<Base>(int), {L"_a"})
 	END_TYPE_MEMBER(test::Base)
 
 	BEGIN_TYPE_MEMBER(test::Derived)
-		TYPE_MEMBER_BASE(test::Base)
+		TYPE_MEMBER_BASE(Base)
 	END_TYPE_MEMBER(test::Derived)
 
 	class TestTypeLoader : public Object, public ITypeLoader
