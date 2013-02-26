@@ -137,6 +137,21 @@ MethodInfoImpl
 				return isStatic;
 			}
 
+			void MethodInfoImpl::CheckArguments(collections::Array<Value>& arguments)
+			{
+				if(arguments.Count()!=parameters.Count())
+				{
+					throw ArgumentCountMismtatchException();
+				}
+				for(vint i=0;i<parameters.Count();i++)
+				{
+					if(!arguments[i].CanConvertTo(parameters[i].Obj()))
+					{
+						throw ArgumentTypeMismtatchException(parameters[i]->GetName(), parameters[i].Obj(), arguments[i]);
+					}
+				}
+			}
+
 			Value MethodInfoImpl::Invoke(const Value& thisObject, collections::Array<Value>& arguments)
 			{
 				if(thisObject.IsNull())
@@ -150,17 +165,7 @@ MethodInfoImpl
 				{
 					throw ArgumentTypeMismtatchException(L"thisObject", ownerMethodGroup->GetOwnerTypeDescriptor(), Value::RawPtr, thisObject);
 				}
-				if(arguments.Count()!=parameters.Count())
-				{
-					throw ArgumentCountMismtatchException();
-				}
-				for(vint i=0;i<parameters.Count();i++)
-				{
-					if(!arguments[i].CanConvertTo(parameters[i].Obj()))
-					{
-						throw ArgumentTypeMismtatchException(parameters[i]->GetName(), parameters[i].Obj(), arguments[i]);
-					}
-				}
+				CheckArguments(arguments);
 				return InvokeInternal(thisObject, arguments);
 			}
 

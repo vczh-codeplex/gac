@@ -134,6 +134,16 @@ Value
 				static Value					From(DescriptableObject* value);
 				static Value					From(Ptr<DescriptableObject> value);
 				static Value					From(const WString& value, ITypeDescriptor* type);
+
+				static IMethodInfo*				SelectMethod(IMethodGroupInfo* methodGroup, collections::Array<Value>& arguments);
+				static Value					Create(const WString& typeName);
+				static Value					Create(const WString& typeName, collections::Array<Value>& arguments);
+				static Value					InvokeStatic(const WString& typeName, const WString& name);
+				static Value					InvokeStatic(const WString& typeName, const WString& name, collections::Array<Value>& arguments);
+				Value							GetProperty(const WString& name);
+				void							SetProperty(const WString& name, const Value& newValue);
+				Value							Invoke(const WString& name);
+				Value							Invoke(const WString& name, collections::Array<Value>& arguments);
 			};
 
 			class IValueSerializer : public Interface
@@ -231,6 +241,7 @@ ITypeDescriptor (method)
 				virtual IParameterInfo*			GetParameter(vint index)=0;
 				virtual IParameterInfo*			GetReturn()=0;
 				virtual bool					IsStatic()=0;
+				virtual void					CheckArguments(collections::Array<Value>& arguments)=0;
 				virtual Value					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			};
 
@@ -320,11 +331,38 @@ Exceptions
 				}
 			};
 
+			class TypeNotExistsException : public TypeDescriptorException
+			{
+			public:
+				TypeNotExistsException(const WString& name)
+					:TypeDescriptorException(L"Cannot find the type \""+name+L"\".")
+				{
+				}
+			};
+
+			class ConstructorNotExistsException : public TypeDescriptorException
+			{
+			public:
+				ConstructorNotExistsException()
+					:TypeDescriptorException(L"Cannot find any constructor.")
+				{
+				}
+			};
+
+			class MemberNotExistsException : public TypeDescriptorException
+			{
+			public:
+				MemberNotExistsException(const WString& name)
+					:TypeDescriptorException(L"Cannot find the member \""+name+L"\".")
+				{
+				}
+			};
+
 			class PropertyIsNotReadableException : public TypeDescriptorException
 			{
 			public:
 				PropertyIsNotReadableException(IPropertyInfo* propertyInfo)
-					:TypeDescriptorException(L"Cannot read value from a property \""+propertyInfo->GetName()+L"\" that is not readable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\"/")
+					:TypeDescriptorException(L"Cannot read value from a property \""+propertyInfo->GetName()+L"\" that is not readable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\".")
 				{
 				}
 			};
@@ -333,7 +371,7 @@ Exceptions
 			{
 			public:
 				PropertyIsNotWritableException(IPropertyInfo* propertyInfo)
-					:TypeDescriptorException(L"Cannot write value to a property \""+propertyInfo->GetName()+L"\" that is not writable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\"/")
+					:TypeDescriptorException(L"Cannot write value to a property \""+propertyInfo->GetName()+L"\" that is not writable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\".")
 				{
 				}
 			};

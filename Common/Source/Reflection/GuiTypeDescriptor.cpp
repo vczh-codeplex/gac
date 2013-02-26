@@ -187,6 +187,125 @@ description::Value
 				return Value(value, type);
 			}
 
+			IMethodInfo* Value::SelectMethod(IMethodGroupInfo* methodGroup, collections::Array<Value>& arguments)
+			{
+				if(methodGroup->GetMethodCount()==1)
+				{
+					return methodGroup->GetMethod(0);
+				}
+
+				List<IMethodInfo*> methods;
+				for(vint i=0;i<methodGroup->GetMethodCount();i++)
+				{
+					IMethodInfo* method=methodGroup->GetMethod(i);
+					if(method->GetParameterCount()==arguments.Count())
+					{
+						methods.Add(method);
+					}
+				}
+
+				if(methods.Count()==0)
+				{
+					throw ArgumentCountMismtatchException();
+				}
+				else if(methods.Count()==1)
+				{
+					return methods[0];
+				}
+				else
+				{
+					for(vint i=0;i<methods.Count();i++)
+					{
+						IMethodInfo* method=methods[i];
+						try
+						{
+							method->CheckArguments(arguments);
+							return method;
+						}
+						catch(const TypeDescriptorException&)
+						{
+						}
+					}
+					return methods[0];
+				}
+			}
+
+			Value Value::Create(const WString& typeName)
+			{
+				Array<Value> arguments;
+				return Create(typeName, arguments);
+			}
+
+			Value Value::Create(const WString& typeName, collections::Array<Value>& arguments)
+			{
+				ITypeDescriptor* type=vl::reflection::description::GetTypeDescriptor(typeName);
+				if(!type) throw TypeNotExistsException(typeName);
+
+				IMethodGroupInfo* methodGroup=type->GetConstructorGroup();
+				if(!methodGroup) throw ConstructorNotExistsException();
+
+				IMethodInfo* method=SelectMethod(methodGroup, arguments);
+				return method->Invoke(Value(), arguments);
+			}
+
+			Value Value::InvokeStatic(const WString& typeName, const WString& name)
+			{
+				Array<Value> arguments;
+				return InvokeStatic(typeName, name, arguments);
+			}
+
+			Value Value::InvokeStatic(const WString& typeName, const WString& name, collections::Array<Value>& arguments)
+			{
+				ITypeDescriptor* type=vl::reflection::description::GetTypeDescriptor(typeName);
+				if(!type) throw TypeNotExistsException(typeName);
+
+				IMethodGroupInfo* methodGroup=type->GetMethodGroupByName(name, true);
+				if(!methodGroup) throw MemberNotExistsException(name);
+
+				IMethodInfo* method=SelectMethod(methodGroup, arguments);
+				return method->Invoke(Value(), arguments);
+			}
+
+			Value Value::GetProperty(const WString& name)
+			{
+				ITypeDescriptor* type=GetTypeDescriptor();
+				if(!type) throw ArgumentNullException(L"thisObject");
+
+				IPropertyInfo* prop=type->GetPropertyByName(name, true);
+				if(!prop) throw MemberNotExistsException(name);
+
+				return prop->GetValue(*this);
+			}
+
+			void Value::SetProperty(const WString& name, const Value& newValue)
+			{
+				ITypeDescriptor* type=GetTypeDescriptor();
+				if(!type) throw ArgumentNullException(L"thisObject");
+
+				IPropertyInfo* prop=type->GetPropertyByName(name, true);
+				if(!prop) throw MemberNotExistsException(name);
+
+				prop->SetValue(*this, newValue);
+			}
+
+			Value Value::Invoke(const WString& name)
+			{
+				Array<Value> arguments;
+				return Invoke(name, arguments);
+			}
+
+			Value Value::Invoke(const WString& name, collections::Array<Value>& arguments)
+			{
+				ITypeDescriptor* type=GetTypeDescriptor();
+				if(!type) throw ArgumentNullException(L"thisObject");
+
+				IMethodGroupInfo* methodGroup=type->GetMethodGroupByName(name, true);
+				if(!methodGroup) throw MemberNotExistsException(name);
+
+				IMethodInfo* method=SelectMethod(methodGroup, arguments);
+				return method->Invoke(Value(), arguments);
+			}
+
 /***********************************************************************
 description::TypeManager
 ***********************************************************************/
