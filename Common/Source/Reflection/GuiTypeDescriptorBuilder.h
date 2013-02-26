@@ -72,7 +72,8 @@ MethodInfoImpl
 				IParameterInfo*							GetParameter(vint index)override;
 				IParameterInfo*							GetReturn()override;
 				bool									IsStatic()override;
-				Value									Invoke(const Value& thisObject, collections::Array<Value>& arguments);
+				void									CheckArguments(collections::Array<Value>& arguments)override;
+				Value									Invoke(const Value& thisObject, collections::Array<Value>& arguments)override;
 				bool									AddParameter(Ptr<IParameterInfo> parameter);
 				bool									SetOwnerMethodgroup(IMethodGroupInfo* _ownerMethodGroup);
 			};
