@@ -365,6 +365,13 @@ description::TypeManager helper functions
 				}
 			}
 
+			bool ResetGlobalTypeManager()
+			{
+				if(!DestroyGlobalTypeManager()) return false;
+				initializedGlobalTypeManager=false;
+				return true;
+			}
+
 			IValueSerializer* GetValueSerializer(const WString& name)
 			{
 				ITypeDescriptor* descriptor=GetTypeDescriptor(name);

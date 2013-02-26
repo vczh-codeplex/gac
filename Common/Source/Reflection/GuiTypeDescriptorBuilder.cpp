@@ -75,9 +75,10 @@ ParameterInfoImpl
 MethodInfoImpl
 ***********************************************************************/
 
-			MethodInfoImpl::MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType, IParameterInfo::Decorator _returnDecorator)
+			MethodInfoImpl::MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType, IParameterInfo::Decorator _returnDecorator, bool _isStatic)
 				:ownerMethodGroup(_ownerMethodGroup)
 				,ownerProperty(0)
+				,isStatic(_isStatic)
 			{
 				if(_returnType)
 				{
@@ -131,11 +132,19 @@ MethodInfoImpl
 				return returnInfo.Obj();
 			}
 
+			bool MethodInfoImpl::IsStatic()
+			{
+				return isStatic;
+			}
+
 			Value MethodInfoImpl::Invoke(const Value& thisObject, collections::Array<Value>& arguments)
 			{
 				if(thisObject.IsNull())
 				{
-					throw ArgumentNullException(L"thisObject");
+					if(!isStatic)
+					{
+						throw ArgumentNullException(L"thisObject");
+					}
 				}
 				else if(!thisObject.CanConvertTo(ownerMethodGroup->GetOwnerTypeDescriptor(), Value::RawPtr))
 				{
@@ -165,6 +174,13 @@ MethodInfoImpl
 					}
 				}
 				parameters.Add(parameter);
+				return true;
+			}
+
+			bool MethodInfoImpl::SetOwnerMethodgroup(IMethodGroupInfo* _ownerMethodGroup)
+			{
+				if(ownerMethodGroup) return false;
+				ownerMethodGroup=_ownerMethodGroup;
 				return true;
 			}
 
@@ -406,6 +422,58 @@ PropertyInfoImpl
 TypeDescriptorImpl
 ***********************************************************************/
 
+			MethodGroupInfoImpl* TypeDescriptorImpl::PrepareMethodGroup(const WString& name)
+			{
+				vint index=methodGroups.Keys().IndexOf(name);
+				if(index==-1)
+				{
+					Ptr<MethodGroupInfoImpl> methodGroup=new MethodGroupInfoImpl(this, name);
+					methodGroups.Add(name, methodGroup);
+					return methodGroup.Obj();
+				}
+				else
+				{
+					return methodGroups.Values().Get(index).Obj();
+				}
+			}
+
+			MethodGroupInfoImpl* TypeDescriptorImpl::PrepareConstructorGroup()
+			{
+				if(!constructorGroup)
+				{
+					constructorGroup=new MethodGroupInfoImpl(this, L"$CONSTRUCTOR");
+				}
+				return constructorGroup.Obj();
+			}
+
+			IPropertyInfo* TypeDescriptorImpl::AddProperty(Ptr<PropertyInfoImpl> value)
+			{
+				properties.Add(value->GetName(), value);
+				return value.Obj();
+			}
+
+			IEventInfo* TypeDescriptorImpl::AddEvent(Ptr<EventInfoImpl> value)
+			{
+				events.Add(value->GetName(), value);
+				return value.Obj();
+			}
+
+			IMethodInfo* TypeDescriptorImpl::AddMethod(const WString& name, Ptr<MethodInfoImpl> value)
+			{
+				MethodGroupInfoImpl* methodGroup=PrepareMethodGroup(name);
+				value->SetOwnerMethodgroup(methodGroup);
+				methodGroup->AddMethod(value);
+				return value.Obj();
+			}
+
+			IMethodInfo* TypeDescriptorImpl::AddConstructor(Ptr<MethodInfoImpl> value)
+			{
+				MethodGroupInfoImpl* methodGroup=PrepareConstructorGroup();
+				value->SetOwnerMethodgroup(methodGroup);
+				methodGroup->AddMethod(value);
+				return value.Obj();
+			}
+
 			void TypeDescriptorImpl::Load()
 			{
 				if(!loaded)
@@ -434,7 +502,7 @@ TypeDescriptorImpl
 			IValueSerializer* TypeDescriptorImpl::GetValueSerializer()
 			{
 				Load();
-				return valueSerializer;
+				return valueSerializer.Obj();
 			}
 
 			vint TypeDescriptorImpl::GetBaseTypeDescriptorCount()
@@ -652,7 +720,7 @@ TypeDescriptorImpl
 			IMethodGroupInfo* TypeDescriptorImpl::GetConstructorGroup()
 			{
 				Load();
-				return contructorGroup.Obj();
+				return constructorGroup.Obj();
 			}
 		}
 	}
