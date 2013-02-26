@@ -262,6 +262,8 @@
     <ClInclude Include="..\..\Source\Pointer.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptor.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder.h" />
+    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h" />
+    <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorMacros.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorPredefined.h" />
     <ClInclude Include="..\..\Source\Regex\Regex.h" />
     <ClInclude Include="..\..\Source\Regex\RegexAutomaton.h" />
@@ -290,6 +292,7 @@
     <None Include="..\..\Source\Event.h.fpm" />
     <None Include="..\..\Source\Function.h.fpm" />
     <None Include="..\..\Source\GenerateCode.bat" />
+    <None Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h.fpm" />
     <None Include="..\..\Source\Tuple.h.fpm" />
     <None Include="Parser.Calculator\Codegen.bat" />
   </ItemGroup>
