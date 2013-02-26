@@ -19,8 +19,8 @@ namespace vl
 		{
 			template<typename T>
 			class CustomConstructorInfoImpl{};
-			template<typename T>
-			class CustomMethodInfoImpl{};
+			template<typename TClass, typename T>
+			struct CustomMethodInfoImplSelector{};
  
 /***********************************************************************
 Constructor: R()
@@ -367,8 +367,11 @@ Constructor: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 /***********************************************************************
 Method: void()
 ***********************************************************************/
-			template< >
-			class CustomMethodInfoImpl<void()> : public MethodInfoImpl
+			template<typename TClass  >
+			struct CustomMethodInfoImplSelector<TClass, void()>
+			{
+			template<void(__thiscall TClass::* Method)()>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -377,17 +380,21 @@ Method: void()
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, 0, IParameterInfo::Text, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, 0, IParameterInfo::Text, false)
 				{
 
 				}
 			};
+			};
 /***********************************************************************
 Method: R()
 ***********************************************************************/
-			template<typename R >
-			class CustomMethodInfoImpl<R()> : public MethodInfoImpl
+			template<typename TClass,typename R >
+			struct CustomMethodInfoImplSelector<TClass, R()>
+			{
+			template<R(__thiscall TClass::* Method)()>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -396,18 +403,22 @@ Method: R()
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, false)
 				{
 
 				}
+			};
 			};
   
 /***********************************************************************
 Method: void(T0)
 ***********************************************************************/
-			template< typename T0>
-			class CustomMethodInfoImpl<void(T0)> : public MethodInfoImpl
+			template<typename TClass, typename T0>
+			struct CustomMethodInfoImplSelector<TClass, void(T0)>
+			{
+			template<void(__thiscall TClass::* Method)(T0)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -417,18 +428,22 @@ Method: void(T0)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, 0, IParameterInfo::Text, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, 0, IParameterInfo::Text, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  
 				}
 			};
+			};
 /***********************************************************************
 Method: R(T0)
 ***********************************************************************/
-			template<typename R,typename T0>
-			class CustomMethodInfoImpl<R(T0)> : public MethodInfoImpl
+			template<typename TClass,typename R,typename T0>
+			struct CustomMethodInfoImplSelector<TClass, R(T0)>
+			{
+			template<R(__thiscall TClass::* Method)(T0)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -438,19 +453,23 @@ Method: R(T0)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  
 				}
+			};
 			};
   
 /***********************************************************************
 Method: void(T0,T1)
 ***********************************************************************/
-			template< typename T0,typename T1>
-			class CustomMethodInfoImpl<void(T0,T1)> : public MethodInfoImpl
+			template<typename TClass, typename T0,typename T1>
+			struct CustomMethodInfoImplSelector<TClass, void(T0,T1)>
+			{
+			template<void(__thiscall TClass::* Method)(T0,T1)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -461,19 +480,23 @@ Method: void(T0,T1)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, 0, IParameterInfo::Text, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, 0, IParameterInfo::Text, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
  
 				}
 			};
+			};
 /***********************************************************************
 Method: R(T0,T1)
 ***********************************************************************/
-			template<typename R,typename T0,typename T1>
-			class CustomMethodInfoImpl<R(T0,T1)> : public MethodInfoImpl
+			template<typename TClass,typename R,typename T0,typename T1>
+			struct CustomMethodInfoImplSelector<TClass, R(T0,T1)>
+			{
+			template<R(__thiscall TClass::* Method)(T0,T1)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -484,20 +507,24 @@ Method: R(T0,T1)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
  
 				}
+			};
 			};
   
 /***********************************************************************
 Method: void(T0,T1,T2)
 ***********************************************************************/
-			template< typename T0,typename T1,typename T2>
-			class CustomMethodInfoImpl<void(T0,T1,T2)> : public MethodInfoImpl
+			template<typename TClass, typename T0,typename T1,typename T2>
+			struct CustomMethodInfoImplSelector<TClass, void(T0,T1,T2)>
+			{
+			template<void(__thiscall TClass::* Method)(T0,T1,T2)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -509,8 +536,8 @@ Method: void(T0,T1,T2)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, 0, IParameterInfo::Text, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, 0, IParameterInfo::Text, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -518,11 +545,15 @@ Method: void(T0,T1,T2)
  
 				}
 			};
+			};
 /***********************************************************************
 Method: R(T0,T1,T2)
 ***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2>
-			class CustomMethodInfoImpl<R(T0,T1,T2)> : public MethodInfoImpl
+			template<typename TClass,typename R,typename T0,typename T1,typename T2>
+			struct CustomMethodInfoImplSelector<TClass, R(T0,T1,T2)>
+			{
+			template<R(__thiscall TClass::* Method)(T0,T1,T2)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -534,21 +565,25 @@ Method: R(T0,T1,T2)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[2], GetTypeDescriptor<typename ParameterTypeInfo<T2>::Type>(), ParameterTypeInfo<T2>::Decorator, ParameterTypeInfo<T2>::Output));
  
 				}
+			};
 			};
   
 /***********************************************************************
 Method: void(T0,T1,T2,T3)
 ***********************************************************************/
-			template< typename T0,typename T1,typename T2,typename T3>
-			class CustomMethodInfoImpl<void(T0,T1,T2,T3)> : public MethodInfoImpl
+			template<typename TClass, typename T0,typename T1,typename T2,typename T3>
+			struct CustomMethodInfoImplSelector<TClass, void(T0,T1,T2,T3)>
+			{
+			template<void(__thiscall TClass::* Method)(T0,T1,T2,T3)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -561,8 +596,8 @@ Method: void(T0,T1,T2,T3)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, 0, IParameterInfo::Text, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, 0, IParameterInfo::Text, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -571,11 +606,15 @@ Method: void(T0,T1,T2,T3)
  
 				}
 			};
+			};
 /***********************************************************************
 Method: R(T0,T1,T2,T3)
 ***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3>
-			class CustomMethodInfoImpl<R(T0,T1,T2,T3)> : public MethodInfoImpl
+			template<typename TClass,typename R,typename T0,typename T1,typename T2,typename T3>
+			struct CustomMethodInfoImplSelector<TClass, R(T0,T1,T2,T3)>
+			{
+			template<R(__thiscall TClass::* Method)(T0,T1,T2,T3)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -588,8 +627,8 @@ Method: R(T0,T1,T2,T3)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -597,13 +636,17 @@ Method: R(T0,T1,T2,T3)
  					AddParameter(new ParameterInfoImpl(this, parameterNames[3], GetTypeDescriptor<typename ParameterTypeInfo<T3>::Type>(), ParameterTypeInfo<T3>::Decorator, ParameterTypeInfo<T3>::Output));
  
 				}
+			};
 			};
   
 /***********************************************************************
 Method: void(T0,T1,T2,T3,T4)
 ***********************************************************************/
-			template< typename T0,typename T1,typename T2,typename T3,typename T4>
-			class CustomMethodInfoImpl<void(T0,T1,T2,T3,T4)> : public MethodInfoImpl
+			template<typename TClass, typename T0,typename T1,typename T2,typename T3,typename T4>
+			struct CustomMethodInfoImplSelector<TClass, void(T0,T1,T2,T3,T4)>
+			{
+			template<void(__thiscall TClass::* Method)(T0,T1,T2,T3,T4)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -617,8 +660,8 @@ Method: void(T0,T1,T2,T3,T4)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, 0, IParameterInfo::Text, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, 0, IParameterInfo::Text, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -628,11 +671,15 @@ Method: void(T0,T1,T2,T3,T4)
  
 				}
 			};
+			};
 /***********************************************************************
 Method: R(T0,T1,T2,T3,T4)
 ***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4>
-			class CustomMethodInfoImpl<R(T0,T1,T2,T3,T4)> : public MethodInfoImpl
+			template<typename TClass,typename R,typename T0,typename T1,typename T2,typename T3,typename T4>
+			struct CustomMethodInfoImplSelector<TClass, R(T0,T1,T2,T3,T4)>
+			{
+			template<R(__thiscall TClass::* Method)(T0,T1,T2,T3,T4)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -646,8 +693,8 @@ Method: R(T0,T1,T2,T3,T4)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -656,13 +703,17 @@ Method: R(T0,T1,T2,T3,T4)
  					AddParameter(new ParameterInfoImpl(this, parameterNames[4], GetTypeDescriptor<typename ParameterTypeInfo<T4>::Type>(), ParameterTypeInfo<T4>::Decorator, ParameterTypeInfo<T4>::Output));
  
 				}
+			};
 			};
   
 /***********************************************************************
 Method: void(T0,T1,T2,T3,T4,T5)
 ***********************************************************************/
-			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
-			class CustomMethodInfoImpl<void(T0,T1,T2,T3,T4,T5)> : public MethodInfoImpl
+			template<typename TClass, typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
+			struct CustomMethodInfoImplSelector<TClass, void(T0,T1,T2,T3,T4,T5)>
+			{
+			template<void(__thiscall TClass::* Method)(T0,T1,T2,T3,T4,T5)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -677,8 +728,8 @@ Method: void(T0,T1,T2,T3,T4,T5)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, 0, IParameterInfo::Text, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, 0, IParameterInfo::Text, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -689,11 +740,15 @@ Method: void(T0,T1,T2,T3,T4,T5)
  
 				}
 			};
+			};
 /***********************************************************************
 Method: R(T0,T1,T2,T3,T4,T5)
 ***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
-			class CustomMethodInfoImpl<R(T0,T1,T2,T3,T4,T5)> : public MethodInfoImpl
+			template<typename TClass,typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
+			struct CustomMethodInfoImplSelector<TClass, R(T0,T1,T2,T3,T4,T5)>
+			{
+			template<R(__thiscall TClass::* Method)(T0,T1,T2,T3,T4,T5)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -708,8 +763,8 @@ Method: R(T0,T1,T2,T3,T4,T5)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -719,13 +774,17 @@ Method: R(T0,T1,T2,T3,T4,T5)
  					AddParameter(new ParameterInfoImpl(this, parameterNames[5], GetTypeDescriptor<typename ParameterTypeInfo<T5>::Type>(), ParameterTypeInfo<T5>::Decorator, ParameterTypeInfo<T5>::Output));
  
 				}
+			};
 			};
   
 /***********************************************************************
 Method: void(T0,T1,T2,T3,T4,T5,T6)
 ***********************************************************************/
-			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
-			class CustomMethodInfoImpl<void(T0,T1,T2,T3,T4,T5,T6)> : public MethodInfoImpl
+			template<typename TClass, typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
+			struct CustomMethodInfoImplSelector<TClass, void(T0,T1,T2,T3,T4,T5,T6)>
+			{
+			template<void(__thiscall TClass::* Method)(T0,T1,T2,T3,T4,T5,T6)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -741,8 +800,8 @@ Method: void(T0,T1,T2,T3,T4,T5,T6)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, 0, IParameterInfo::Text, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, 0, IParameterInfo::Text, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -754,11 +813,15 @@ Method: void(T0,T1,T2,T3,T4,T5,T6)
  
 				}
 			};
+			};
 /***********************************************************************
 Method: R(T0,T1,T2,T3,T4,T5,T6)
 ***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
-			class CustomMethodInfoImpl<R(T0,T1,T2,T3,T4,T5,T6)> : public MethodInfoImpl
+			template<typename TClass,typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
+			struct CustomMethodInfoImplSelector<TClass, R(T0,T1,T2,T3,T4,T5,T6)>
+			{
+			template<R(__thiscall TClass::* Method)(T0,T1,T2,T3,T4,T5,T6)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -774,8 +837,8 @@ Method: R(T0,T1,T2,T3,T4,T5,T6)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -786,13 +849,17 @@ Method: R(T0,T1,T2,T3,T4,T5,T6)
  					AddParameter(new ParameterInfoImpl(this, parameterNames[6], GetTypeDescriptor<typename ParameterTypeInfo<T6>::Type>(), ParameterTypeInfo<T6>::Decorator, ParameterTypeInfo<T6>::Output));
  
 				}
+			};
 			};
   
 /***********************************************************************
 Method: void(T0,T1,T2,T3,T4,T5,T6,T7)
 ***********************************************************************/
-			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
-			class CustomMethodInfoImpl<void(T0,T1,T2,T3,T4,T5,T6,T7)> : public MethodInfoImpl
+			template<typename TClass, typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
+			struct CustomMethodInfoImplSelector<TClass, void(T0,T1,T2,T3,T4,T5,T6,T7)>
+			{
+			template<void(__thiscall TClass::* Method)(T0,T1,T2,T3,T4,T5,T6,T7)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -809,8 +876,8 @@ Method: void(T0,T1,T2,T3,T4,T5,T6,T7)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, 0, IParameterInfo::Text, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, 0, IParameterInfo::Text, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -823,11 +890,15 @@ Method: void(T0,T1,T2,T3,T4,T5,T6,T7)
  
 				}
 			};
+			};
 /***********************************************************************
 Method: R(T0,T1,T2,T3,T4,T5,T6,T7)
 ***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
-			class CustomMethodInfoImpl<R(T0,T1,T2,T3,T4,T5,T6,T7)> : public MethodInfoImpl
+			template<typename TClass,typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
+			struct CustomMethodInfoImplSelector<TClass, R(T0,T1,T2,T3,T4,T5,T6,T7)>
+			{
+			template<R(__thiscall TClass::* Method)(T0,T1,T2,T3,T4,T5,T6,T7)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -844,8 +915,8 @@ Method: R(T0,T1,T2,T3,T4,T5,T6,T7)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -857,13 +928,17 @@ Method: R(T0,T1,T2,T3,T4,T5,T6,T7)
  					AddParameter(new ParameterInfoImpl(this, parameterNames[7], GetTypeDescriptor<typename ParameterTypeInfo<T7>::Type>(), ParameterTypeInfo<T7>::Decorator, ParameterTypeInfo<T7>::Output));
  
 				}
+			};
 			};
   
 /***********************************************************************
 Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 ***********************************************************************/
-			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
-			class CustomMethodInfoImpl<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)> : public MethodInfoImpl
+			template<typename TClass, typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
+			struct CustomMethodInfoImplSelector<TClass, void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
+			{
+			template<void(__thiscall TClass::* Method)(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -881,8 +956,8 @@ Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, 0, IParameterInfo::Text, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, 0, IParameterInfo::Text, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -896,11 +971,15 @@ Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8)
  
 				}
 			};
+			};
 /***********************************************************************
 Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 ***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
-			class CustomMethodInfoImpl<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)> : public MethodInfoImpl
+			template<typename TClass,typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
+			struct CustomMethodInfoImplSelector<TClass, R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
+			{
+			template<R(__thiscall TClass::* Method)(T0,T1,T2,T3,T4,T5,T6,T7,T8)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -918,8 +997,8 @@ Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -932,13 +1011,17 @@ Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
  					AddParameter(new ParameterInfoImpl(this, parameterNames[8], GetTypeDescriptor<typename ParameterTypeInfo<T8>::Type>(), ParameterTypeInfo<T8>::Decorator, ParameterTypeInfo<T8>::Output));
  
 				}
+			};
 			};
   
 /***********************************************************************
 Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 ***********************************************************************/
-			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
-			class CustomMethodInfoImpl<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> : public MethodInfoImpl
+			template<typename TClass, typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
+			struct CustomMethodInfoImplSelector<TClass, void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
+			{
+			template<void(__thiscall TClass::* Method)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -957,8 +1040,8 @@ Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, 0, IParameterInfo::Text, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, 0, IParameterInfo::Text, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -973,11 +1056,15 @@ Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
  
 				}
 			};
+			};
 /***********************************************************************
 Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 ***********************************************************************/
-			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
-			class CustomMethodInfoImpl<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> : public MethodInfoImpl
+			template<typename TClass,typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
+			struct CustomMethodInfoImplSelector<TClass, R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
+			{
+			template<R(__thiscall TClass::* Method)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>
+			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
@@ -996,8 +1083,8 @@ Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 					return Value();
 				}
 			public:
-				CustomMethodInfoImpl(bool _isStatic, const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, _isStatic)
+				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, false)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], GetTypeDescriptor<typename ParameterTypeInfo<T0>::Type>(), ParameterTypeInfo<T0>::Decorator, ParameterTypeInfo<T0>::Output));
  					AddParameter(new ParameterInfoImpl(this, parameterNames[1], GetTypeDescriptor<typename ParameterTypeInfo<T1>::Type>(), ParameterTypeInfo<T1>::Decorator, ParameterTypeInfo<T1>::Output));
@@ -1011,6 +1098,7 @@ Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
  					AddParameter(new ParameterInfoImpl(this, parameterNames[9], GetTypeDescriptor<typename ParameterTypeInfo<T9>::Type>(), ParameterTypeInfo<T9>::Decorator, ParameterTypeInfo<T9>::Output));
  
 				}
+			};
 			};
  
 		}
