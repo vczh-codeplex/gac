@@ -519,9 +519,23 @@ LogTypeManager
 				for(vint i=0;i<globalTypeManager->GetTypeDescriptorCount();i++)
 				{
 					ITypeDescriptor* type=globalTypeManager->GetTypeDescriptor(i);
-					if(type->GetValueSerializer())
+					IValueSerializer* serializer=type->GetValueSerializer();
+					if(serializer)
 					{
-						writer.WriteLine(L"struct "+type->GetTypeName()+L";");
+						if(serializer->HasCandidate())
+						{
+							writer.WriteLine(L"enum "+type->GetTypeName()+(serializer->CanMergeCandidate()?L" flag":L""));
+							writer.WriteLine(L"{");
+							for(vint j=0;j<serializer->GetCandidateCount();j++)
+							{
+								writer.WriteLine(L"    "+serializer->GetCandidate(j)+L",");
+							}
+							writer.WriteLine(L"}");
+						}
+						else
+						{
+							writer.WriteLine(L"struct "+type->GetTypeName()+L";");
+						}
 					}
 					else
 					{
@@ -548,20 +562,20 @@ LogTypeManager
 						for(vint j=0;j<type->GetPropertyCount();j++)
 						{
 							IPropertyInfo* info=type->GetProperty(j);
-							writer.WriteString(L"    property "+info->GetReturn()->GetTypeFriendlyName()+L" "+info->GetName());
+							writer.WriteString(L"    property "+info->GetReturn()->GetTypeFriendlyName()+L" "+info->GetName()+L"{");
 							if(info->GetGetter())
 							{
-								writer.WriteString(L" getter "+info->GetGetter()->GetName());
+								writer.WriteString(L" getter "+info->GetGetter()->GetName()+L";");
 							}
 							if(info->GetSetter())
 							{
-								writer.WriteString(L" setter "+info->GetSetter()->GetName());
+								writer.WriteString(L" setter "+info->GetSetter()->GetName()+L";");
 							}
 							if(info->GetValueChangedEvent())
 							{
-								writer.WriteString(L" raising "+info->GetValueChangedEvent()->GetName());
+								writer.WriteString(L" raising "+info->GetValueChangedEvent()->GetName()+L";");
 							}
-							writer.WriteLine(L";");
+							writer.WriteLine(L"}");
 						}
 
 						for(vint j=0;j<type->GetMethodGroupCount();j++)
