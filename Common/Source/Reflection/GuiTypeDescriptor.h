@@ -15,6 +15,7 @@ XML Representation for Code Generation:
 #include "..\Exception.h"
 #include "..\Function.h"
 #include "..\Collections\List.h"
+#include "..\Collections\Dictionary.h"
 #include "..\Stream\Accessor.h"
 
 namespace vl
@@ -182,6 +183,11 @@ Value
 				virtual ITypeDescriptor*		GetOwnerTypeDescriptor()=0;
 				virtual bool					Validate(const WString& text)=0;
 				virtual bool					Parse(const WString& input, Value& output)=0;
+
+				virtual bool					HasCandidate()=0;
+				virtual vint					GetCandidateCount()=0;
+				virtual WString					GetCandidate(vint index)=0;
+				virtual bool					CanMergeCandidate()=0;
 			};
 
 			template<typename T>
