@@ -40,7 +40,7 @@ TypeInfo
 			}
 
 /***********************************************************************
-SerializableTypeDescriptor
+TypedValueSerializer
 ***********************************************************************/
 
 			template<typename T>
@@ -80,6 +80,26 @@ SerializableTypeDescriptor
 					return false;
 				}
 
+				bool HasCandidate()override
+				{
+					return false;
+				}
+
+				vint GetCandidateCount()override
+				{
+					return 0;
+				}
+
+				WString GetCandidate(vint index)override
+				{
+					return L"";
+				}
+
+				bool CanMergeCandidate()override
+				{
+					return false;
+				}
+
 				bool Serialize(const T& input, Value& output)
 				{
 					WString text;
@@ -101,107 +121,175 @@ SerializableTypeDescriptor
 				}
 			};
 
+/***********************************************************************
+EnumValueSeriaizer
+***********************************************************************/
+
 			template<typename T>
-			class SerializableTypeDescriptor : public Object, public ITypeDescriptor
+			class EnumValueSeriaizer : public Object, public ITypedValueSerializer<T>
+			{
+			protected:
+				ITypeDescriptor*							ownedTypeDescriptor;
+				bool										canMergeCandidate;
+				collections::Dictionary<WString, T>			candidates;
+
+				bool Serialize(const T& input, WString& output)
+				{
+					if(canMergeCandidate)
+					{
+						return false;
+					}
+					else
+					{
+						for(vint i=0;i<candidates.Count();i++)
+						{
+							if(candidates.Values().Get(i)==input)
+							{
+								output=candidates.Keys()[i];
+								return true;
+							}
+						}
+						return false;
+					}
+				}
+
+				bool Deserialize(const WString& input, T& output)
+				{
+					if(canMergeCandidate)
+					{
+						return false;
+					}
+					else
+					{
+						vint index=candidates.Keys().IndexOf(input);
+						if(index==-1) return false;
+						output=candidates.Values().Get(index);
+						return true;
+					}
+				}
+			public:
+				typedef T EnumItemType;
+
+				EnumValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor, bool _canMergeCandidate)
+					:ownedTypeDescriptor(_ownedTypeDescriptor)
+					,canMergeCandidate(_canMergeCandidate)
+				{
+				}
+
+				ITypeDescriptor* GetOwnerTypeDescriptor()
+				{
+					return ownedTypeDescriptor;
+				}
+
+				bool Validate(const WString& text)
+				{
+					T output;
+					return Deserialize(text, output);
+				}
+
+				bool Parse(const WString& input, Value& output)
+				{
+					if(Validate(input))
+					{
+						output=Value::From(input, ownedTypeDescriptor);
+						return true;
+					}
+					return false;
+				}
+
+				bool HasCandidate()override
+				{
+					return true;
+				}
+
+				vint GetCandidateCount()override
+				{
+					return candidates.Count();
+				}
+
+				WString GetCandidate(vint index)override
+				{
+					return candidates.Keys()[index];
+				}
+
+				bool CanMergeCandidate()override
+				{
+					return canMergeCandidate;
+				}
+
+				bool Serialize(const T& input, Value& output)
+				{
+					WString text;
+					if(Serialize(input, text))
+					{
+						output=Value::From(text, ownedTypeDescriptor);
+						return true;
+					}
+					return false;
+				}
+
+				bool Deserialize(const Value& input, T& output)
+				{
+					if(input.GetValueType()!=Value::Text)
+					{
+						return false;
+					}
+					return Deserialize(input.GetText(), output);
+				}
+			};
+
+/***********************************************************************
+SerializableTypeDescriptor
+***********************************************************************/
+
+			class SerializableTypeDescriptorBase : public Object, public ITypeDescriptor
 			{
 			protected:
 				Ptr<IValueSerializer>						serializer;
 				WString										typeName;
 			public:
+				SerializableTypeDescriptorBase(const WString& _typeName, Ptr<IValueSerializer> _serializer);
+				~SerializableTypeDescriptorBase();
+
+				const WString&								GetTypeName()override;
+				IValueSerializer*							GetValueSerializer()override;
+				vint										GetBaseTypeDescriptorCount()override;
+				ITypeDescriptor*							GetBaseTypeDescriptor(vint index)override;
+				bool										CanConvertTo(ITypeDescriptor* targetType)override;
+				vint										GetPropertyCount()override;
+				IPropertyInfo*								GetProperty(vint index)override;
+				bool										IsPropertyExists(const WString& name, bool inheritable)override;
+				IPropertyInfo*								GetPropertyByName(const WString& name, bool inheritable)override;
+				vint										GetEventCount()override;
+				IEventInfo*									GetEvent(vint index)override;
+				bool										IsEventExists(const WString& name, bool inheritable)override;
+				IEventInfo*									GetEventByName(const WString& name, bool inheritable)override;
+				vint										GetMethodGroupCount()override;
+				IMethodGroupInfo*							GetMethodGroup(vint index)override;
+				bool										IsMethodGroupExists(const WString& name, bool inheritable)override;
+				IMethodGroupInfo*							GetMethodGroupByName(const WString& name, bool inheritable)override;
+				IMethodGroupInfo*							GetConstructorGroup()override;
+			};
+
+			template<typename T>
+			class SerializableTypeDescriptor : public SerializableTypeDescriptorBase
+			{
+			public:
 				SerializableTypeDescriptor()
-					:typeName(TypeInfo<T>::TypeName)
+					:SerializableTypeDescriptorBase(TypeInfo<T>::TypeName, 0)
 				{
 					serializer=new TypedValueSerializer<T>(this);
 				}
+			};
 
-				const WString& GetTypeName()override
+			template<typename TSerializer>
+			class EnumTypeDescriptor : public SerializableTypeDescriptorBase
+			{
+			public:
+				EnumTypeDescriptor()
+					:SerializableTypeDescriptorBase(TypeInfo<typename TSerializer::EnumItemType>::TypeName, 0)
 				{
-					return typeName;
-				}
-
-				IValueSerializer* GetValueSerializer()override
-				{
-					return serializer.Obj();
-				}
-
-				vint GetBaseTypeDescriptorCount()override
-				{
-					return 0;
-				}
-
-				ITypeDescriptor* GetBaseTypeDescriptor(vint index)override
-				{
-					return 0;
-				}
-
-				bool CanConvertTo(ITypeDescriptor* targetType)override
-				{
-					return this==targetType;
-				}
-
-				vint GetPropertyCount()override
-				{
-					return 0;
-				}
-
-				IPropertyInfo* GetProperty(vint index)override
-				{
-					return 0;
-				}
-
-				bool IsPropertyExists(const WString& name, bool inheritable)override
-				{
-					return false;
-				}
-
-				IPropertyInfo* GetPropertyByName(const WString& name, bool inheritable)override
-				{
-					return 0;
-				}
-
-				vint GetEventCount()override
-				{
-					return 0;
-				}
-
-				IEventInfo* GetEvent(vint index)override
-				{
-					return 0;
-				}
-
-				bool IsEventExists(const WString& name, bool inheritable)override
-				{
-					return false;
-				}
-
-				IEventInfo* GetEventByName(const WString& name, bool inheritable)override
-				{
-					return 0;
-				}
-
-				vint GetMethodGroupCount()override
-				{
-					return 0;
-				}
-
-				IMethodGroupInfo* GetMethodGroup(vint index)override
-				{
-					return 0;
-				}
-
-				bool IsMethodGroupExists(const WString& name, bool inheritable)override
-				{
-					return false;
-				}
-
-				IMethodGroupInfo* GetMethodGroupByName(const WString& name, bool inheritable)override
-				{
-					return 0;
-				}
-
-				IMethodGroupInfo* GetConstructorGroup()override
-				{
-					return 0;
+					serializer=new TSerializer(this);
 				}
 			};
 
@@ -290,13 +378,6 @@ Predefined Types
 			{
 				static bool Serialize(const double& input, WString& output);
 				static bool Deserialize(const WString& input, double& output);
-			};
-
-			template<>
-			struct TypedValueSerializerProvider<bool>
-			{
-				static bool Serialize(const bool& input, WString& output);
-				static bool Deserialize(const WString& input, bool& output);
 			};
 
 			template<>

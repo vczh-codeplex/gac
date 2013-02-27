@@ -303,6 +303,8 @@
     <ClInclude Include="..\..\..\..\Common\Source\Pointer.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptor.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorMacros.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Regex\Regex.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Regex\RegexAutomaton.h" />

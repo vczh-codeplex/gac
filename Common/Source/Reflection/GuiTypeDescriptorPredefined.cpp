@@ -12,6 +12,110 @@ namespace vl
 		{
 
 /***********************************************************************
+SerializableTypeDescriptorBase
+***********************************************************************/
+
+			SerializableTypeDescriptorBase::SerializableTypeDescriptorBase(const WString& _typeName, Ptr<IValueSerializer> _serializer)
+				:typeName(_typeName)
+				,serializer(_serializer)
+			{
+			}
+
+			SerializableTypeDescriptorBase::~SerializableTypeDescriptorBase()
+			{
+			}
+
+			const WString& SerializableTypeDescriptorBase::GetTypeName()
+			{
+				return typeName;
+			}
+
+			IValueSerializer* SerializableTypeDescriptorBase::GetValueSerializer()
+			{
+				return serializer.Obj();
+			}
+
+			vint SerializableTypeDescriptorBase::GetBaseTypeDescriptorCount()
+			{
+				return 0;
+			}
+
+			ITypeDescriptor* SerializableTypeDescriptorBase::GetBaseTypeDescriptor(vint index)
+			{
+				return 0;
+			}
+
+			bool SerializableTypeDescriptorBase::CanConvertTo(ITypeDescriptor* targetType)
+			{
+				return this==targetType;
+			}
+
+			vint SerializableTypeDescriptorBase::GetPropertyCount()
+			{
+				return 0;
+			}
+
+			IPropertyInfo* SerializableTypeDescriptorBase::GetProperty(vint index)
+			{
+				return 0;
+			}
+
+			bool SerializableTypeDescriptorBase::IsPropertyExists(const WString& name, bool inheritable)
+			{
+				return false;
+			}
+
+			IPropertyInfo* SerializableTypeDescriptorBase::GetPropertyByName(const WString& name, bool inheritable)
+			{
+				return 0;
+			}
+
+			vint SerializableTypeDescriptorBase::GetEventCount()
+			{
+				return 0;
+			}
+
+			IEventInfo* SerializableTypeDescriptorBase::GetEvent(vint index)
+			{
+				return 0;
+			}
+
+			bool SerializableTypeDescriptorBase::IsEventExists(const WString& name, bool inheritable)
+			{
+				return false;
+			}
+
+			IEventInfo* SerializableTypeDescriptorBase::GetEventByName(const WString& name, bool inheritable)
+			{
+				return 0;
+			}
+
+			vint SerializableTypeDescriptorBase::GetMethodGroupCount()
+			{
+				return 0;
+			}
+
+			IMethodGroupInfo* SerializableTypeDescriptorBase::GetMethodGroup(vint index)
+			{
+				return 0;
+			}
+
+			bool SerializableTypeDescriptorBase::IsMethodGroupExists(const WString& name, bool inheritable)
+			{
+				return false;
+			}
+
+			IMethodGroupInfo* SerializableTypeDescriptorBase::GetMethodGroupByName(const WString& name, bool inheritable)
+			{
+				return 0;
+			}
+
+			IMethodGroupInfo* SerializableTypeDescriptorBase::GetConstructorGroup()
+			{
+				return 0;
+			}
+
+/***********************************************************************
 TypeName
 ***********************************************************************/
 
@@ -189,30 +293,6 @@ TypedValueSerializerProvider
 				return true;
 			}
 
-			bool TypedValueSerializerProvider<bool>::Serialize(const bool& input, WString& output)
-			{
-				output=input?L"true":L"false";
-				return true;
-			}
-
-			bool TypedValueSerializerProvider<bool>::Deserialize(const WString& input, bool& output)
-			{
-				if(input==L"true")
-				{
-					output=true;
-					return true;
-				}
-				else if(input==L"false")
-				{
-					output=false;
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
 			bool TypedValueSerializerProvider<WString>::Serialize(const WString& input, WString& output)
 			{
 				output=input;
@@ -224,6 +304,21 @@ TypedValueSerializerProvider
 				output=input;
 				return true;
 			}
+
+/***********************************************************************
+BoolValueSerializer
+***********************************************************************/
+
+			class BoolValueSeriaizer : public EnumValueSeriaizer<bool>
+			{
+			public:
+				BoolValueSeriaizer(ITypeDescriptor* _ownerTypeDescriptor)
+					:EnumValueSeriaizer(_ownerTypeDescriptor, false)
+				{
+					candidates.Add(L"true", true);
+					candidates.Add(L"false", false);
+				}
+			};
 
 /***********************************************************************
 LoadPredefinedTypes
@@ -250,7 +345,7 @@ LoadPredefinedTypes
 					AddSerializableType<signed __int64>(manager);
 					AddSerializableType<float>(manager);
 					AddSerializableType<double>(manager);
-					AddSerializableType<bool>(manager);
+					manager->SetTypeDescriptor(TypeInfo<bool>::TypeName, new EnumTypeDescriptor<BoolValueSeriaizer>);
 					AddSerializableType<WString>(manager);
 				}
 
