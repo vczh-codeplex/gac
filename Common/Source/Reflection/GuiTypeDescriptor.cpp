@@ -608,14 +608,7 @@ LogTypeManager
 							for(vint k=0;k<group->GetMethodCount();k++)
 							{
 								IMethodInfo* info=group->GetMethod(k);
-								if(info->GetReturn())
-								{
-									writer.WriteString(L"    constructor "+info->GetReturn()->GetTypeFriendlyName());
-								}
-								else
-								{
-									writer.WriteString(L"    void");
-								}
+								writer.WriteString(L"    constructor "+info->GetReturn()->GetTypeFriendlyName());
 								writer.WriteString(L" "+info->GetName()+L"(");
 								for(vint l=0;l<info->GetParameterCount();l++)
 								{
