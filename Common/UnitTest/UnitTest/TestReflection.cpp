@@ -236,11 +236,27 @@ TEST_CASE(TestReflectionPredefinedType)
 
 namespace test
 {
+	enum Season
+	{
+		Spring,
+		Summer,
+		Autumn,
+		Winter,
+	};
+
+	enum ResetOption
+	{
+		ResetNone=0,
+		ResetA=1,
+		ResetB=2,
+	};
+
 	class Base : public Description<Base>
 	{
 	public:
 		int a;
-		Base():a(0){}
+		Season season;
+		Base():a(0), season(Spring){}
 		Base(int _a):a(_a){}
 	};
 
@@ -258,6 +274,7 @@ namespace test
 		void SetB(int value){b=value;}
 		void Reset(){a=0; b=0;}
 		void Reset(int _a, int _b){a=_a; b=_b;}
+		void Reset(ResetOption opt){if(opt&ResetA) a=0; if(opt&ResetB) b=0;}
 	};
 }
 using namespace test;
@@ -265,6 +282,8 @@ using namespace test;
 #define _ ,
 
 #define TYPE_LIST(F)\
+	F(test::Season)\
+	F(test::ResetOption)\
 	F(test::Base)\
 	F(test::Derived)\
 
@@ -273,8 +292,22 @@ BEGIN_TYPE_INFO_NAMESPACE
 	TYPE_LIST(DECL_TYPE_INFO)
 	TYPE_LIST(IMPL_TYPE_INFO)
 
+	BEGIN_ENUM_ITEM(test::Season)
+		ENUM_ITEM(Spring)
+		ENUM_ITEM(Summer)
+		ENUM_ITEM(Autumn)
+		ENUM_ITEM(Winter)
+	END_ENUM_ITEM(test::Season)
+
+	BEGIN_ENUM_ITEM_MERGABLE(test::ResetOption)
+		ENUM_ITEM(ResetNone)
+		ENUM_ITEM(ResetA)
+		ENUM_ITEM(ResetB)
+	END_ENUM_ITEM(test::ResetOption)
+
 	BEGIN_TYPE_MEMBER(test::Base)
 		TYPE_MEMBER_FIELD(a)
+		TYPE_MEMBER_FIELD(season)
 		TYPE_MEMBER_CONSTRUCTOR(Ptr<Base>(), NO_PARAMETER)
 		TYPE_MEMBER_CONSTRUCTOR(Ptr<Base>(int), {L"_a"})
 	END_TYPE_MEMBER(test::Base)
@@ -293,6 +326,7 @@ BEGIN_TYPE_INFO_NAMESPACE
 
 		TYPE_MEMBER_METHOD_OVERLOAD(Reset, NO_PARAMETER, void(Derived::*)())
 		TYPE_MEMBER_METHOD_OVERLOAD(Reset, {L"_a" _ L"_b"}, void(Derived::*)(int _ int))
+		TYPE_MEMBER_METHOD_OVERLOAD(Reset, {L"opt"}, void(Derived::*)(ResetOption))
 	END_TYPE_MEMBER(test::Derived)
 
 	class TestTypeLoader : public Object, public ITypeLoader
@@ -376,6 +410,57 @@ TEST_CASE(TestReflectionInvoke)
 		Ptr<Derived> d=UnboxValue<Ptr<Derived>>(derived);
 		TEST_ASSERT(d->a==30);
 		TEST_ASSERT(d->GetB()==40);
+	}
+	TEST_ASSERT(ResetGlobalTypeManager());
+}
+
+TEST_CASE(TestReflectionEnum)
+{
+	TEST_ASSERT(LoadPredefinedTypes());
+	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
+	TEST_ASSERT(GetGlobalTypeManager()->Load());
+	{
+		Value base=Value::Create(L"test::Base");
+		TEST_ASSERT(UnboxValue<Season>(base.GetProperty(L"season"))==Spring);
+
+		base.SetProperty(L"season", BoxValue<Season>(Winter));
+		TEST_ASSERT(UnboxValue<Season>(base.GetProperty(L"season"))==Winter);
+	}
+	{
+		Value derived=Value::Create(L"test::Derived", (Value::xs(), 10, 20));
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"a"))==10);
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"b"))==20);
+
+		derived.Invoke(L"Reset", (Value::xs(), ResetNone));
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"a"))==10);
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"b"))==20);
+	}
+	{
+		Value derived=Value::Create(L"test::Derived", (Value::xs(), 10, 20));
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"a"))==10);
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"b"))==20);
+
+		derived.Invoke(L"Reset", (Value::xs(), ResetA));
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"a"))==0);
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"b"))==20);
+	}
+	{
+		Value derived=Value::Create(L"test::Derived", (Value::xs(), 10, 20));
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"a"))==10);
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"b"))==20);
+
+		derived.Invoke(L"Reset", (Value::xs(), ResetB));
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"a"))==10);
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"b"))==0);
+	}
+	{
+		Value derived=Value::Create(L"test::Derived", (Value::xs(), 10, 20));
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"a"))==10);
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"b"))==20);
+
+		derived.Invoke(L"Reset", (Value::xs(), (ResetOption)(ResetA|ResetB)));
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"a"))==0);
+		TEST_ASSERT(UnboxValue<int>(derived.GetProperty(L"b"))==0);
 	}
 	TEST_ASSERT(ResetGlobalTypeManager());
 }
