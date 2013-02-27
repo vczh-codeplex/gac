@@ -24,7 +24,7 @@ namespace vl
 		namespace description
 		{
 			template<typename T>
-			class CustomTypeDescriptorImpl{};
+			struct CustomTypeDescriptorSelector{};
 
 /***********************************************************************
 Type
@@ -36,27 +36,62 @@ Type
 #define IMPL_TYPE_INFO(TYPENAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L#TYPENAME;
 #define ADD_TYPE_INFO(TYPENAME)\
 			{\
-				Ptr<ITypeDescriptor> type=new CustomTypeDescriptorImpl<TYPENAME>();\
+				Ptr<ITypeDescriptor> type=new CustomTypeDescriptorSelector<TYPENAME>::CustomTypeDescriptorImpl();\
 				Description<TYPENAME>::SetAssociatedTypeDescroptor(type.Obj());\
 				manager->SetTypeDescriptor(TypeInfo<TYPENAME>::TypeName, type);\
 			}
 
+/***********************************************************************
+Enum
+***********************************************************************/
+
+#define BEGIN_ENUM_ITEM_FLAG(TYPENAME, FLAG)\
+			template<>\
+			struct CustomTypeDescriptorSelector<TYPENAME>\
+			{\
+			public:\
+				class CustomEnumValueSerializer : public EnumValueSeriaizer<TYPENAME, FLAG>\
+				{\
+				public:\
+					CustomEnumValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)\
+						:EnumValueSeriaizer(_ownerTypeDescriptor)\
+					{\
+
+#define BEGIN_ENUM_ITEM(TYPENAME) BEGIN_ENUM_ITEM_FLAG(TYPENAME, false)
+#define BEGIN_ENUM_ITEM_MERGABLE(TYPENAME) BEGIN_ENUM_ITEM_FLAG(TYPENAME, true)
+
+#define END_ENUM_ITEM(TYPENAME)\
+					}\
+				};\
+				typedef EnumTypeDescriptor<CustomEnumValueSerializer> CustomTypeDescriptorImpl;\
+			};\
+
+#define ENUM_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, ITEMNAME);
+
+/***********************************************************************
+Class
+***********************************************************************/
+
 #define BEGIN_TYPE_MEMBER(TYPENAME)\
 			template<>\
-			class CustomTypeDescriptorImpl<TYPENAME> : public TypeDescriptorImpl\
+			struct CustomTypeDescriptorSelector<TYPENAME>\
 			{\
-				typedef TYPENAME ClassType;\
 			public:\
-				CustomTypeDescriptorImpl()\
-					:TypeDescriptorImpl(TypeInfo<TYPENAME>::TypeName)\
+				class CustomTypeDescriptorImpl : public TypeDescriptorImpl\
 				{\
-				}\
-			protected:\
-				void LoadInternal()override\
-				{\
+					typedef TYPENAME ClassType;\
+				public:\
+					CustomTypeDescriptorImpl()\
+						:TypeDescriptorImpl(TypeInfo<TYPENAME>::TypeName)\
+					{\
+					}\
+				protected:\
+					void LoadInternal()override\
+					{\
 
 #define END_TYPE_MEMBER(TYPENAME)\
-				}\
+					}\
+				};\
 			};\
 
 #define TYPE_MEMBER_BASE(TYPENAME)\

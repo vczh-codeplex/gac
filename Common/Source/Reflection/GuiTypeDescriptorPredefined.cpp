@@ -309,11 +309,11 @@ TypedValueSerializerProvider
 BoolValueSerializer
 ***********************************************************************/
 
-			class BoolValueSeriaizer : public EnumValueSeriaizer<bool>
+			class BoolValueSeriaizer : public EnumValueSeriaizer<bool, false>
 			{
 			public:
 				BoolValueSeriaizer(ITypeDescriptor* _ownerTypeDescriptor)
-					:EnumValueSeriaizer(_ownerTypeDescriptor, false)
+					:EnumValueSeriaizer(_ownerTypeDescriptor)
 				{
 					candidates.Add(L"true", true);
 					candidates.Add(L"false", false);

@@ -125,54 +125,95 @@ TypedValueSerializer
 EnumValueSeriaizer
 ***********************************************************************/
 
+			template<typename T, bool CanMerge>
+			struct EnumValueSerializerProvider
+			{
+			};
+
 			template<typename T>
+			struct EnumValueSerializerProvider<T, true>
+			{
+				static bool Serialize(collections::Dictionary<WString, T>& candidates, const T& input, WString& output)
+				{
+					WString result;
+					for(vint i=0;i<candidates.Count();i++)
+					{
+						if(candidates.Values().Get(i)&input)
+						{
+							if(result!=L"") result+=L"|";
+							result+=candidates.Keys()[i];
+						}
+					}
+					output=result;
+					return true;
+				}
+
+				static bool Deserialize(collections::Dictionary<WString, T>& candidates, const WString& input, T& output)
+				{
+					T result=(T)0;
+					const wchar_t* reading=input.Buffer();
+					while(*reading)
+					{
+						const wchar_t* sep=wcschr(reading, L'|');
+						if(!sep) sep=reading+wcslen(reading);
+						WString item(reading, sep-reading);
+						reading=*sep?sep+1:sep;
+
+						vint index=candidates.Keys().IndexOf(item);
+						if(index==-1) return false;
+						result=(T)(result|candidates.Values().Get(index));
+					}
+					output=result;
+					return true;
+				}
+			};
+
+			template<typename T>
+			struct EnumValueSerializerProvider<T, false>
+			{
+				static bool Serialize(collections::Dictionary<WString, T>& candidates, const T& input, WString& output)
+				{
+					for(vint i=0;i<candidates.Count();i++)
+					{
+						if(candidates.Values().Get(i)==input)
+						{
+							output=candidates.Keys()[i];
+							return true;
+						}
+					}
+					return false;
+				}
+
+				static bool Deserialize(collections::Dictionary<WString, T>& candidates, const WString& input, T& output)
+				{
+					vint index=candidates.Keys().IndexOf(input);
+					if(index==-1) return false;
+					output=candidates.Values().Get(index);
+					return true;
+				}
+			};
+
+			template<typename T, bool CanMerge>
 			class EnumValueSeriaizer : public Object, public ITypedValueSerializer<T>
 			{
 			protected:
 				ITypeDescriptor*							ownedTypeDescriptor;
-				bool										canMergeCandidate;
 				collections::Dictionary<WString, T>			candidates;
 
 				bool Serialize(const T& input, WString& output)
 				{
-					if(canMergeCandidate)
-					{
-						return false;
-					}
-					else
-					{
-						for(vint i=0;i<candidates.Count();i++)
-						{
-							if(candidates.Values().Get(i)==input)
-							{
-								output=candidates.Keys()[i];
-								return true;
-							}
-						}
-						return false;
-					}
+					return EnumValueSerializerProvider<T, CanMerge>::Serialize(candidates, input, output);
 				}
 
 				bool Deserialize(const WString& input, T& output)
 				{
-					if(canMergeCandidate)
-					{
-						return false;
-					}
-					else
-					{
-						vint index=candidates.Keys().IndexOf(input);
-						if(index==-1) return false;
-						output=candidates.Values().Get(index);
-						return true;
-					}
+					return EnumValueSerializerProvider<T, CanMerge>::Deserialize(candidates, input, output);
 				}
 			public:
 				typedef T EnumItemType;
 
-				EnumValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor, bool _canMergeCandidate)
+				EnumValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor)
 					:ownedTypeDescriptor(_ownedTypeDescriptor)
-					,canMergeCandidate(_canMergeCandidate)
 				{
 				}
 
@@ -214,7 +255,7 @@ EnumValueSeriaizer
 
 				bool CanMergeCandidate()override
 				{
-					return canMergeCandidate;
+					return CanMerge;
 				}
 
 				bool Serialize(const T& input, Value& output)
