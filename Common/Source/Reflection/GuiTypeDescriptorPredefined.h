@@ -292,21 +292,139 @@ StructValueSeriaizer
 
 					bool SerializeField(const T& input, WString& output)override
 					{
+						ITypedValueSerializer<TField>* serializer=GetValueSerializer<TField>();
+						if(!serializer) return false;
+						Value result;
+						if(!serializer->Serialize(input.*field, result)) return false;
+						output=result.GetText();
+						return true;
 					}
 
 					bool DeserializeField(WString& input, T& output)override
 					{
+						ITypedValueSerializer<TField>* serializer=GetValueSerializer<TField>();
+						if(!serializer) return false;
+						Value value=Value::From(input, serializer->GetOwnerTypeDescriptor());
+						return serializer->Deserialize(value, output.*field);
 					}
 				};
 
 			protected:
+				collections::Dictionary<WString, Ptr<FieldSerializerBase>>		fieldSerializers;
+
+				WString Escape(const WString& text)
+				{
+					const wchar_t* reading=text.Buffer();
+					if(wcschr(reading, L' ')==0 && wcschr(reading, L'{')==0 && wcschr(reading, L'}')==0)
+					{
+						return text;
+					}
+
+					WString result;
+					while(wchar_t c=*reading++)
+					{
+						switch(c)
+						{
+						case L'{':
+							result+=L"{{";
+						case L'}':
+							result+=L"}}";
+							break;
+						default:
+							result+=c;
+						}
+					}
+					return L"{"+result+L"}";
+				}
+
+				bool Unescape(const wchar_t*& reading, WString& field)
+				{
+					if(*reading==L'{')
+					{
+						const wchar_t* start=reading+1;
+						const wchar_t* end=start;
+						bool stop=false;
+						while(!stop)
+						{
+							switch(*end)
+							{
+							case L'\0':
+								return false;
+							case L'{':
+								if(end[1]==L'{') return false;
+								end+=2;
+								field+=L'{';
+								break;
+							case L'}':
+								if(end[1]==L'}')
+								{
+									end+=2;
+									field+=L'}';
+								}
+								else
+								{
+									stop=true;
+								}
+								break;
+							default:
+								field+=*end;
+								end++;
+							}
+						}
+						reading=end+1;
+					}
+					else
+					{
+						const wchar_t* space=wcschr(reading, L' ');
+						if(space)
+						{
+							field=WString(reading, space-reading);
+							reading=space+1;
+						}
+						else
+						{
+							field=reading;
+							reading+=field.Length();
+						}
+					}
+					return true;
+				}
 
 				bool Serialize(const T& input, WString& output)override
 				{
+					WString result, field;
+					for(vint i=0;i<fieldSerializers.Count();i++)
+					{
+						if(result!=L"") result+=L" ";
+						result+=fieldSerializers.Keys()[i]+L":";
+
+						Ptr<FieldSerializerBase> fieldSerializer=fieldSerializers.Values().Get(i);
+						if(!fieldSerializer->SerializeField(input, field)) return false;
+						result+=field;
+					}
+					output=result;
+					return true;
 				}
 
 				bool Deserialize(const WString& input, T& output)override
 				{
+					const wchar_t* reading=input.Buffer();
+					while(true)
+					{
+						while(*reading==L' ') reading++;
+						const wchar_t* comma=wcschr(reading, L':');
+						if(!comma) return false;
+						reading=comma+1;
+
+						vint index=fieldSerializers.Keys().IndexOf(WString(reading, comma-reading));
+						if(index==-1) return false;
+
+						WString field;
+						if(!Unescape(reading, field)) return false;
+						Ptr<FieldSerializerBase> fieldSerializer=fieldSerializers.Values().Get(index);
+						if(!fieldSerializer->DeserializeField(field, output)) return false;
+					}
+					return true;
 				}
 			public:
 				StructValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor)

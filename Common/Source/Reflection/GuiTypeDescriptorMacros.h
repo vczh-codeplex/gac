@@ -55,7 +55,7 @@ Enum
 				public:\
 					CustomEnumValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)\
 						:EnumValueSeriaizer(_ownerTypeDescriptor)\
-					{\
+					{
 
 #define BEGIN_ENUM_ITEM(TYPENAME) BEGIN_ENUM_ITEM_FLAG(TYPENAME, false)
 #define BEGIN_ENUM_ITEM_MERGABLE(TYPENAME) BEGIN_ENUM_ITEM_FLAG(TYPENAME, true)
@@ -64,15 +64,41 @@ Enum
 					}\
 				};\
 				typedef SerializableTypeDescriptor<CustomEnumValueSerializer> CustomTypeDescriptorImpl;\
-			};\
+			};
 
 #define ENUM_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, ITEMNAME);
+
+/***********************************************************************
+Struct
+***********************************************************************/
+
+#define BEGIN_STRUCT_MEMBER(TYPENAME)\
+			template<>\
+			struct CustomTypeDescriptorSelector<TYPENAME>\
+			{\
+			public:\
+				class CustomStructValueSerializer : public StructValueSeriaizer<TYPENAME>\
+				{\
+					typedef TYPENAME StructType;\
+				public:\
+					CustomStructValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)\
+						:StructValueSeriaizer(_ownerTypeDescriptor)\
+					{
+
+#define END_STRUCT_MEMBER(TYPENAME)\
+					}\
+				};\
+				typedef SerializableTypeDescriptor<CustomStructValueSerializer> CustomTypeDescriptorImpl;\
+			};
+
+#define STRUCT_MEMBER(FIELDNAME)\
+						fieldSerializers.Add(L#FIELDNAME, new FieldSerializer<decltype(((StructType*)0)->FIELDNAME)>(&StructType::FIELDNAME));
 
 /***********************************************************************
 Class
 ***********************************************************************/
 
-#define BEGIN_TYPE_MEMBER(TYPENAME)\
+#define BEGIN_CLASS_MEMBER(TYPENAME)\
 			template<>\
 			struct CustomTypeDescriptorSelector<TYPENAME>\
 			{\
@@ -87,21 +113,21 @@ Class
 					}\
 				protected:\
 					void LoadInternal()override\
-					{\
+					{
 
-#define END_TYPE_MEMBER(TYPENAME)\
+#define END_CLASS_MEMBER(TYPENAME)\
 					}\
 				};\
-			};\
+			};
 
-#define TYPE_MEMBER_BASE(TYPENAME)\
+#define CLASS_MEMBER_BASE(TYPENAME)\
 			AddBaseType(GetTypeDescriptor<TYPENAME>());
 
 /***********************************************************************
 Field
 ***********************************************************************/
 
-#define TYPE_MEMBER_FIELD(FIELDNAME)\
+#define CLASS_MEMBER_FIELD(FIELDNAME)\
 			AddProperty(\
 				new CustomFieldInfoImpl<\
 					ClassType,\
@@ -114,7 +140,7 @@ Constructor
 ***********************************************************************/
 
 #define NO_PARAMETER {L""}
-#define TYPE_MEMBER_CONSTRUCTOR(FUNCTIONTYPE, PARAMETERNAMES)\
+#define CLASS_MEMBER_CONSTRUCTOR(FUNCTIONTYPE, PARAMETERNAMES)\
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddConstructor(new CustomConstructorInfoImpl<FUNCTIONTYPE>(parameterNames));\
@@ -124,7 +150,7 @@ Constructor
 Method
 ***********************************************************************/
 
-#define TYPE_MEMBER_METHOD(FUNCTIONNAME, PARAMETERNAMES)\
+#define CLASS_MEMBER_METHOD(FUNCTIONNAME, PARAMETERNAMES)\
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
@@ -137,7 +163,7 @@ Method
 					);\
 			}
 
-#define TYPE_MEMBER_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE)\
+#define CLASS_MEMBER_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE)\
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
@@ -154,7 +180,7 @@ Method
 Static Method
 ***********************************************************************/
 
-#define TYPE_MEMBER_STATIC_METHOD(FUNCTIONNAME, PARAMETERNAMES)\
+#define CLASS_MEMBER_STATIC_METHOD(FUNCTIONNAME, PARAMETERNAMES)\
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
@@ -167,7 +193,7 @@ Static Method
 					);\
 			}
 
-#define TYPE_MEMBER_STATIC_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE)\
+#define CLASS_MEMBER_STATIC_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE)\
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
@@ -184,7 +210,7 @@ Static Method
 Property
 ***********************************************************************/
 
-#define TYPE_MEMBER_PROPERTY_READONLY(PROPERTYNAME, GETTER)\
+#define CLASS_MEMBER_PROPERTY_READONLY(PROPERTYNAME, GETTER)\
 			AddProperty(\
 				new PropertyInfoImpl(\
 					this,\
@@ -195,7 +221,7 @@ Property
 					)\
 				);
 
-#define TYPE_MEMBER_PROPERTY(PROPERTYNAME, GETTER, SETTER)\
+#define CLASS_MEMBER_PROPERTY(PROPERTYNAME, GETTER, SETTER)\
 			AddProperty(\
 				new PropertyInfoImpl(\
 					this,\
@@ -206,7 +232,7 @@ Property
 					)\
 				);
 
-#define TYPE_MEMBER_PROPERTY_EVENT(PROPERTYNAME, GETTER, SETTER, EVENT)\
+#define CLASS_MEMBER_PROPERTY_EVENT(PROPERTYNAME, GETTER, SETTER, EVENT)\
 			AddProperty(\
 				new PropertyInfoImpl(\
 					this,\
