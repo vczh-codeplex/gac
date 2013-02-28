@@ -500,3 +500,40 @@ TEST_CASE(TestReflectionEnum)
 	}
 	TEST_ASSERT(ResetGlobalTypeManager());
 }
+
+TEST_CASE(TestReflectionStruct)
+{
+	TEST_ASSERT(LoadPredefinedTypes());
+	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
+	TEST_ASSERT(GetGlobalTypeManager()->Load());
+	{
+		Point point={10, 20};
+		Value value=BoxValue<Point>(point);
+		TEST_ASSERT(value.GetText()==L"x:10 y:20");
+
+		point=UnboxValue<Point>(value);
+		TEST_ASSERT(point.x==10);
+		TEST_ASSERT(point.y==20);
+	}
+	{
+		Size size={10, 20};
+		Value value=BoxValue<Size>(size);
+		TEST_ASSERT(value.GetText()==L"cx:10 cy:20");
+
+		size=UnboxValue<Size>(value);
+		TEST_ASSERT(size.cx==10);
+		TEST_ASSERT(size.cy==20);
+	}
+	{
+		Rect rect={{10, 20}, {30, 40}};
+		Value value=BoxValue<Rect>(rect);
+		TEST_ASSERT(value.GetText()==L"point:{x:10 y:20} size:{cx:30 cy:40}");
+
+		rect=UnboxValue<Rect>(value);
+		TEST_ASSERT(rect.point.x==10);
+		TEST_ASSERT(rect.point.y==20);
+		TEST_ASSERT(rect.size.cx==30);
+		TEST_ASSERT(rect.size.cy==40);
+	}
+	TEST_ASSERT(ResetGlobalTypeManager());
+}

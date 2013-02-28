@@ -400,7 +400,7 @@ StructValueSeriaizer
 
 						Ptr<FieldSerializerBase> fieldSerializer=fieldSerializers.Values().Get(i);
 						if(!fieldSerializer->SerializeField(input, field)) return false;
-						result+=field;
+						result+=Escape(field);
 					}
 					output=result;
 					return true;
@@ -412,12 +412,13 @@ StructValueSeriaizer
 					while(true)
 					{
 						while(*reading==L' ') reading++;
+						if(*reading==0) break;
 						const wchar_t* comma=wcschr(reading, L':');
 						if(!comma) return false;
-						reading=comma+1;
 
 						vint index=fieldSerializers.Keys().IndexOf(WString(reading, comma-reading));
 						if(index==-1) return false;
+						reading=comma+1;
 
 						WString field;
 						if(!Unescape(reading, field)) return false;
