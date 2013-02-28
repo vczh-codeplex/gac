@@ -40,21 +40,21 @@ TypeInfo
 			}
 
 /***********************************************************************
-TypedValueSerializer
+GeneralValueSeriaizer
 ***********************************************************************/
 
 			template<typename T>
-			struct TypedValueSerializerProvider
-			{
-			};
-
-			template<typename T>
-			class TypedValueSerializer : public Object, public ITypedValueSerializer<T>
+			class GeneralValueSeriaizer : public Object, public ITypedValueSerializer<T>
 			{
 			protected:
 				ITypeDescriptor*							ownedTypeDescriptor;
+
+				virtual bool								Serialize(const T& input, WString& output)=0;
+				virtual bool								Deserialize(const WString& input, T& output)=0;
 			public:
-				TypedValueSerializer(ITypeDescriptor* _ownedTypeDescriptor)
+				typedef T ValueType;
+
+				GeneralValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor)
 					:ownedTypeDescriptor(_ownedTypeDescriptor)
 				{
 				}
@@ -67,7 +67,7 @@ TypedValueSerializer
 				bool Validate(const WString& text)
 				{
 					T output;
-					return TypedValueSerializerProvider<T>::Deserialize(text, output);
+					return Deserialize(text, output);
 				}
 
 				bool Parse(const WString& input, Value& output)
@@ -103,7 +103,7 @@ TypedValueSerializer
 				bool Serialize(const T& input, Value& output)
 				{
 					WString text;
-					if(TypedValueSerializerProvider<T>::Serialize(input, text))
+					if(Serialize(input, text))
 					{
 						output=Value::From(text, ownedTypeDescriptor);
 						return true;
@@ -117,7 +117,36 @@ TypedValueSerializer
 					{
 						return false;
 					}
-					return TypedValueSerializerProvider<T>::Deserialize(input.GetText(), output);
+					return Deserialize(input.GetText(), output);
+				}
+			};
+
+/***********************************************************************
+TypedValueSerializer
+***********************************************************************/
+
+			template<typename T>
+			struct TypedValueSerializerProvider
+			{
+			};
+
+			template<typename T>
+			class TypedValueSerializer : public GeneralValueSeriaizer<T>
+			{
+			protected:
+				bool Serialize(const T& input, WString& output)override
+				{
+					return TypedValueSerializerProvider<T>::Serialize(input, output);
+				}
+
+				bool Deserialize(const WString& input, T& output)override
+				{
+					return TypedValueSerializerProvider<T>::Deserialize(input, output);
+				}
+			public:
+				TypedValueSerializer(ITypeDescriptor* _ownedTypeDescriptor)
+					:GeneralValueSeriaizer(_ownedTypeDescriptor)
+				{
 				}
 			};
 
@@ -194,48 +223,24 @@ EnumValueSeriaizer
 			};
 
 			template<typename T, bool CanMerge>
-			class EnumValueSeriaizer : public Object, public ITypedValueSerializer<T>
+			class EnumValueSeriaizer : public GeneralValueSeriaizer<T>
 			{
 			protected:
-				ITypeDescriptor*							ownedTypeDescriptor;
 				collections::Dictionary<WString, T>			candidates;
 
-				bool Serialize(const T& input, WString& output)
+				bool Serialize(const T& input, WString& output)override
 				{
 					return EnumValueSerializerProvider<T, CanMerge>::Serialize(candidates, input, output);
 				}
 
-				bool Deserialize(const WString& input, T& output)
+				bool Deserialize(const WString& input, T& output)override
 				{
 					return EnumValueSerializerProvider<T, CanMerge>::Deserialize(candidates, input, output);
 				}
 			public:
-				typedef T EnumItemType;
-
 				EnumValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor)
-					:ownedTypeDescriptor(_ownedTypeDescriptor)
+					:GeneralValueSeriaizer(_ownedTypeDescriptor)
 				{
-				}
-
-				ITypeDescriptor* GetOwnerTypeDescriptor()
-				{
-					return ownedTypeDescriptor;
-				}
-
-				bool Validate(const WString& text)
-				{
-					T output;
-					return Deserialize(text, output);
-				}
-
-				bool Parse(const WString& input, Value& output)
-				{
-					if(Validate(input))
-					{
-						output=Value::From(input, ownedTypeDescriptor);
-						return true;
-					}
-					return false;
 				}
 
 				bool HasCandidate()override
@@ -257,25 +262,28 @@ EnumValueSeriaizer
 				{
 					return CanMerge;
 				}
+			};
 
-				bool Serialize(const T& input, Value& output)
+/***********************************************************************
+StructValueSeriaizer
+***********************************************************************/
+
+			template<typename T>
+			class StructValueSeriaizer : public GeneralValueSeriaizer<T>
+			{
+			protected:
+
+				bool Serialize(const T& input, WString& output)override
 				{
-					WString text;
-					if(Serialize(input, text))
-					{
-						output=Value::From(text, ownedTypeDescriptor);
-						return true;
-					}
-					return false;
 				}
 
-				bool Deserialize(const Value& input, T& output)
+				bool Deserialize(const WString& input, T& output)override
 				{
-					if(input.GetValueType()!=Value::Text)
-					{
-						return false;
-					}
-					return Deserialize(input.GetText(), output);
+				}
+			public:
+				StructValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor)
+					:GeneralValueSeriaizer(_ownedTypeDescriptor)
+				{
 				}
 			};
 
@@ -312,23 +320,12 @@ SerializableTypeDescriptor
 				IMethodGroupInfo*							GetConstructorGroup()override;
 			};
 
-			template<typename T>
+			template<typename TSerializer>
 			class SerializableTypeDescriptor : public SerializableTypeDescriptorBase
 			{
 			public:
 				SerializableTypeDescriptor()
-					:SerializableTypeDescriptorBase(TypeInfo<T>::TypeName, 0)
-				{
-					serializer=new TypedValueSerializer<T>(this);
-				}
-			};
-
-			template<typename TSerializer>
-			class EnumTypeDescriptor : public SerializableTypeDescriptorBase
-			{
-			public:
-				EnumTypeDescriptor()
-					:SerializableTypeDescriptorBase(TypeInfo<typename TSerializer::EnumItemType>::TypeName, 0)
+					:SerializableTypeDescriptorBase(TypeInfo<typename TSerializer::ValueType>::TypeName, 0)
 				{
 					serializer=new TSerializer(this);
 				}

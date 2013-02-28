@@ -63,7 +63,7 @@ Enum
 #define END_ENUM_ITEM(TYPENAME)\
 					}\
 				};\
-				typedef EnumTypeDescriptor<CustomEnumValueSerializer> CustomTypeDescriptorImpl;\
+				typedef SerializableTypeDescriptor<CustomEnumValueSerializer> CustomTypeDescriptorImpl;\
 			};\
 
 #define ENUM_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, ITEMNAME);
