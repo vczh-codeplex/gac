@@ -251,6 +251,24 @@ namespace test
 		ResetB=2,
 	};
 
+	struct Point
+	{
+		int x;
+		int y;
+	};
+
+	struct Size
+	{
+		int cx;
+		int cy;
+	};
+
+	struct Rect
+	{
+		Point point;
+		Size size;
+	};
+
 	class Base : public Description<Base>
 	{
 	public:
@@ -286,6 +304,9 @@ using namespace test;
 	F(test::ResetOption)\
 	F(test::Base)\
 	F(test::Derived)\
+	F(test::Point)\
+	F(test::Size)\
+	F(test::Rect)\
 
 BEGIN_TYPE_INFO_NAMESPACE
 
@@ -305,29 +326,44 @@ BEGIN_TYPE_INFO_NAMESPACE
 		ENUM_ITEM(ResetB)
 	END_ENUM_ITEM(test::ResetOption)
 
-	BEGIN_TYPE_MEMBER(test::Base)
-		TYPE_MEMBER_FIELD(a)
-		TYPE_MEMBER_FIELD(season)
-		TYPE_MEMBER_CONSTRUCTOR(Ptr<Base>(), NO_PARAMETER)
-		TYPE_MEMBER_CONSTRUCTOR(Ptr<Base>(int), {L"_a"})
-	END_TYPE_MEMBER(test::Base)
+	BEGIN_CLASS_MEMBER(test::Base)
+		CLASS_MEMBER_FIELD(a)
+		CLASS_MEMBER_FIELD(season)
+		CLASS_MEMBER_CONSTRUCTOR(Ptr<Base>(), NO_PARAMETER)
+		CLASS_MEMBER_CONSTRUCTOR(Ptr<Base>(int), {L"_a"})
+	END_CLASS_MEMBER(test::Base)
 
-	BEGIN_TYPE_MEMBER(test::Derived)
-		TYPE_MEMBER_BASE(Base)
-		TYPE_MEMBER_CONSTRUCTOR(Ptr<Derived>(), NO_PARAMETER)
-		TYPE_MEMBER_CONSTRUCTOR(Ptr<Derived>(int _ int), {L"_a" _ L"_b"})
+	BEGIN_CLASS_MEMBER(test::Derived)
+		CLASS_MEMBER_BASE(Base)
+		CLASS_MEMBER_CONSTRUCTOR(Ptr<Derived>(), NO_PARAMETER)
+		CLASS_MEMBER_CONSTRUCTOR(Ptr<Derived>(int _ int), {L"_a" _ L"_b"})
 
-		TYPE_MEMBER_STATIC_METHOD_OVERLOAD(Create, NO_PARAMETER, Ptr<Derived>(*)())
-		TYPE_MEMBER_STATIC_METHOD_OVERLOAD(Create, {L"_a" _ L"_b"}, Ptr<Derived>(*)(int _ int))
+		CLASS_MEMBER_STATIC_METHOD_OVERLOAD(Create, NO_PARAMETER, Ptr<Derived>(*)())
+		CLASS_MEMBER_STATIC_METHOD_OVERLOAD(Create, {L"_a" _ L"_b"}, Ptr<Derived>(*)(int _ int))
 
-		TYPE_MEMBER_METHOD(GetB, NO_PARAMETER)
-		TYPE_MEMBER_METHOD(SetB, {L"value"})
-		TYPE_MEMBER_PROPERTY(b, GetB, SetB)
+		CLASS_MEMBER_METHOD(GetB, NO_PARAMETER)
+		CLASS_MEMBER_METHOD(SetB, {L"value"})
+		CLASS_MEMBER_PROPERTY(b, GetB, SetB)
 
-		TYPE_MEMBER_METHOD_OVERLOAD(Reset, NO_PARAMETER, void(Derived::*)())
-		TYPE_MEMBER_METHOD_OVERLOAD(Reset, {L"_a" _ L"_b"}, void(Derived::*)(int _ int))
-		TYPE_MEMBER_METHOD_OVERLOAD(Reset, {L"opt"}, void(Derived::*)(ResetOption))
-	END_TYPE_MEMBER(test::Derived)
+		CLASS_MEMBER_METHOD_OVERLOAD(Reset, NO_PARAMETER, void(Derived::*)())
+		CLASS_MEMBER_METHOD_OVERLOAD(Reset, {L"_a" _ L"_b"}, void(Derived::*)(int _ int))
+		CLASS_MEMBER_METHOD_OVERLOAD(Reset, {L"opt"}, void(Derived::*)(ResetOption))
+	END_CLASS_MEMBER(test::Derived)
+
+	BEGIN_STRUCT_MEMBER(test::Point)
+		STRUCT_MEMBER(x)
+		STRUCT_MEMBER(y)
+	END_STRUCT_MEMBER(test::Point)
+
+	BEGIN_STRUCT_MEMBER(test::Size)
+		STRUCT_MEMBER(cx)
+		STRUCT_MEMBER(cy)
+	END_STRUCT_MEMBER(test::Size)
+
+	BEGIN_STRUCT_MEMBER(test::Rect)
+		STRUCT_MEMBER(point)
+		STRUCT_MEMBER(size)
+	END_STRUCT_MEMBER(test::Rect)
 
 	class TestTypeLoader : public Object, public ITypeLoader
 	{
