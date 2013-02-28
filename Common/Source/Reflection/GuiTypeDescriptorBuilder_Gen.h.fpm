@@ -40,20 +40,22 @@ Member Method: $FUNCTION_TYPE($count,$function)
 			template<typename TClass$if($add($count,$function),$(,),$( ))$TYPENAME_LIST($count,$function)>
 			struct CustomMethodInfoImplSelector<TClass, $FUNCTION_TYPE($count,$function)>
 			{
-			template<$FUNCTION_DECL($count,$function,__thiscall TClass::* Method)>
 			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
+				$FUNCTION_DECL($count,$function,__thiscall TClass::* method);
+$( )
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
 $loop($count,0,$PREPARE_PARAMETER)
-					$if($function,R result = ,$( )) (object->*Method)($ARGUMENT_LIST($count));
+					$if($function,R result = ,$( )) (object->*method)($ARGUMENT_LIST($count));
 					return $if($function,BoxValue(result, GetReturn()->GetValueTypeDescriptor()),Value());
 				}
 			public:
-				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+				CustomMethodInfoImpl(const wchar_t* parameterNames[], $FUNCTION_DECL($count,$function,__thiscall TClass::* _method))
 					:MethodInfoImpl(0, $if($function,GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(),0), $if($function,ParameterTypeInfo<R>::Decorator,IParameterInfo::Text), false)
+					,method(_method)
 				{
 $loop($count,0,$ADD_PARAMETER)
 				}
@@ -68,19 +70,21 @@ Static Method: $FUNCTION_TYPE($count,$function)
 			template<$TYPENAME_LIST($count,$function)>
 			struct CustomMethodInfoImplSelector<void, $FUNCTION_TYPE($count,$function)>
 			{
-			template<$FUNCTION_DECL($count,$function,* Method)>
 			class CustomMethodInfoImpl : public MethodInfoImpl
 			{
 			protected:
+				$FUNCTION_DECL($count,$function,* method);
+$( )
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 $loop($count,0,$PREPARE_PARAMETER)
-					$if($function,R result = ,$( )) Method($ARGUMENT_LIST($count));
+					$if($function,R result = ,$( )) method($ARGUMENT_LIST($count));
 					return $if($function,BoxValue(result, GetReturn()->GetValueTypeDescriptor()),Value());
 				}
 			public:
-				CustomMethodInfoImpl(const wchar_t* parameterNames[])
+				CustomMethodInfoImpl(const wchar_t* parameterNames[], $FUNCTION_DECL($count,$function,* _method))
 					:MethodInfoImpl(0, $if($function,GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(),0), $if($function,ParameterTypeInfo<R>::Decorator,IParameterInfo::Text), true)
+					,method(_method)
 				{
 $loop($count,0,$ADD_PARAMETER)
 				}

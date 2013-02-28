@@ -271,6 +271,34 @@ StructValueSeriaizer
 			template<typename T>
 			class StructValueSeriaizer : public GeneralValueSeriaizer<T>
 			{
+			public:
+				class FieldSerializerBase : public Object
+				{
+				public:
+					virtual bool				SerializeField(const T& input, WString& output)=0;
+					virtual bool				DeserializeField(WString& input, T& output)=0;
+				};
+
+				template<typename TField>
+				class FieldSerializer : public FieldSerializerBase
+				{
+				protected:
+					TField T::*					field;
+				public:
+					FieldSerializer(TField T::* _field)
+						:field(_field)
+					{
+					}
+
+					bool SerializeField(const T& input, WString& output)override
+					{
+					}
+
+					bool DeserializeField(WString& input, T& output)override
+					{
+					}
+				};
+
 			protected:
 
 				bool Serialize(const T& input, WString& output)override

@@ -133,7 +133,7 @@ Method
 						ClassType,\
 						vl::function_lambda::LambdaRetriveType<decltype(&ClassType::FUNCTIONNAME)>::FunctionType\
 						>\
-						::CustomMethodInfoImpl<&ClassType::FUNCTIONNAME>(parameterNames)\
+						::CustomMethodInfoImpl(parameterNames, &ClassType::FUNCTIONNAME)\
 					);\
 			}
 
@@ -146,7 +146,7 @@ Method
 						ClassType,\
 						vl::function_lambda::LambdaRetriveType<FUNCTIONTYPE>::FunctionType\
 						>\
-						::CustomMethodInfoImpl<(FUNCTIONTYPE)&ClassType::FUNCTIONNAME>(parameterNames)\
+						::CustomMethodInfoImpl(parameterNames, (FUNCTIONTYPE)&ClassType::FUNCTIONNAME)\
 					);\
 			}
 
@@ -163,7 +163,7 @@ Static Method
 						void,\
 						vl::function_lambda::FunctionObjectRetriveType<decltype(&ClassType::FUNCTIONNAME)>::FunctionType\
 						>\
-						::CustomMethodInfoImpl<&ClassType::FUNCTIONNAME>(parameterNames)\
+						::CustomMethodInfoImpl(parameterNames, &ClassType::FUNCTIONNAME)\
 					);\
 			}
 
@@ -176,7 +176,7 @@ Static Method
 						void,\
 						vl::function_lambda::FunctionObjectRetriveType<FUNCTIONTYPE>::FunctionType\
 						>\
-						::CustomMethodInfoImpl<(FUNCTIONTYPE)&ClassType::FUNCTIONNAME>(parameterNames)\
+						::CustomMethodInfoImpl(parameterNames, (FUNCTIONTYPE)&ClassType::FUNCTIONNAME)\
 					);\
 			}
 
