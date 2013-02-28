@@ -327,26 +327,26 @@ LoadPredefinedTypes
 			class PredefinedTypeLoader : public Object, public ITypeLoader
 			{
 			public:
-				template<typename T>
+				template<typename TSerializer>
 				void AddSerializableType(ITypeManager* manager)
 				{
-					manager->SetTypeDescriptor(TypeInfo<T>::TypeName, new SerializableTypeDescriptor<T>);
+					manager->SetTypeDescriptor(TypeInfo<TSerializer::ValueType>::TypeName, new SerializableTypeDescriptor<TSerializer>);
 				}
 
 				void Load(ITypeManager* manager)override
 				{
-					AddSerializableType<unsigned __int8>(manager);
-					AddSerializableType<unsigned __int16>(manager);
-					AddSerializableType<unsigned __int32>(manager);
-					AddSerializableType<unsigned __int64>(manager);
-					AddSerializableType<signed __int8>(manager);
-					AddSerializableType<signed __int16>(manager);
-					AddSerializableType<signed __int32>(manager);
-					AddSerializableType<signed __int64>(manager);
-					AddSerializableType<float>(manager);
-					AddSerializableType<double>(manager);
-					manager->SetTypeDescriptor(TypeInfo<bool>::TypeName, new EnumTypeDescriptor<BoolValueSeriaizer>);
-					AddSerializableType<WString>(manager);
+					AddSerializableType<TypedValueSerializer<unsigned __int8>>(manager);
+					AddSerializableType<TypedValueSerializer<unsigned __int16>>(manager);
+					AddSerializableType<TypedValueSerializer<unsigned __int32>>(manager);
+					AddSerializableType<TypedValueSerializer<unsigned __int64>>(manager);
+					AddSerializableType<TypedValueSerializer<signed __int8>>(manager);
+					AddSerializableType<TypedValueSerializer<signed __int16>>(manager);
+					AddSerializableType<TypedValueSerializer<signed __int32>>(manager);
+					AddSerializableType<TypedValueSerializer<signed __int64>>(manager);
+					AddSerializableType<TypedValueSerializer<float>>(manager);
+					AddSerializableType<TypedValueSerializer<double>>(manager);
+					AddSerializableType<BoolValueSeriaizer>(manager);
+					AddSerializableType<TypedValueSerializer<WString>>(manager);
 				}
 
 				void Unload(ITypeManager* manager)override
