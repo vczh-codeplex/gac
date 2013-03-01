@@ -1,7 +1,7 @@
+#include <Windows.h>
 #include "..\Source\SDI.h"
 #include "..\GacCodeEditorPackage\EditPackage.h"
 #include "..\GacCodeEditorPackage\TextEditorPackage.h"
-#include <Windows.h>
 
 using namespace vl::gactools;
 

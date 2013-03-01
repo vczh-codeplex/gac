@@ -29,14 +29,21 @@ namespace Codepack
             {
                 string name = e.Attribute("name").Value;
                 string pattern = e.Attribute("pattern").Value.ToUpper();
-                string[] exceptions = e.Elements("except").Select(x => x.Attribute("filename").Value.ToUpper()).ToArray();
-                categorizedFiles.Add(
-                    name,
-                    files
-                        .Where(f => f.ToUpper().Contains(pattern))
-                        .Where(f => !exceptions.Contains(Path.GetFileName(f).ToUpper()))
-                        .ToArray()
-                        );
+                string[] exceptions = e.Elements("except").Select(x => x.Attribute("pattern").Value.ToUpper()).ToArray();
+                string[] filteredFiles = files
+                        .Where(f =>
+                            {
+                                string path = f.ToUpper();
+                                return path.Contains(pattern) && exceptions.All(ex => !path.Contains(ex));
+                            })
+                        .ToArray();
+                string[] previousFiles = null;
+                if (categorizedFiles.TryGetValue(name, out previousFiles))
+                {
+                    filteredFiles = filteredFiles.Concat(previousFiles).ToArray();
+                    categorizedFiles.Remove(name);
+                }
+                categorizedFiles.Add(name, filteredFiles);
             }
             foreach (var a in categorizedFiles.Keys)
             {

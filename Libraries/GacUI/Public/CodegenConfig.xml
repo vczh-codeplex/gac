@@ -6,14 +6,18 @@
   <categories>
     <category name="vlpp" pattern="\Common\Source\"/>
     <category name="gacui" pattern="\GacUI\Source\">
-      <except filename="GacUI_WinMain.cpp" />
-      <except filename="GuiTypeDescriptorImpHelper.cpp" />
-      <except filename="GuiTypeDescriptorImpProvider_codegen.cpp" />
+      <except pattern="GacUI_WinMain.cpp" />
+      <except pattern="\Windows\" />
+      <except pattern="\WindowsDirect2D\" />
+      <except pattern="\WindowsGDI\" />
     </category>
+    <category name="windows" pattern="\GacUI\Source\GraphicsElement\WindowsDirect2D\" />
+    <category name="windows" pattern="\GacUI\Source\GraphicsElement\WindowsGDI\" />
+    <category name="windows" pattern="\GacUI\Source\NativeWindow\Windows\" />
   </categories>
   <output path="Source\">
     <codepair category="vlpp" filename="Vlpp" />
     <codepair category="gacui" filename="GacUI" />
-    <header source="..\Source\GacUI.h" filename="GacUIIncludes" />
+    <codepair category="windows" filename="GacUIWindows" />
   </output>
 </codegen>

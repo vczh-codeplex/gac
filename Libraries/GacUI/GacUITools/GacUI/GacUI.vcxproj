@@ -12,11 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Public\Source\GacUI.cpp" />
+    <ClCompile Include="..\..\Public\Source\GacUIWindows.cpp" />
     <ClCompile Include="..\..\Public\Source\Vlpp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h" />
-    <ClInclude Include="..\..\Public\Source\GacUIIncludes.h" />
+    <ClInclude Include="..\..\Public\Source\GacUIWindows.h" />
     <ClInclude Include="..\..\Public\Source\Vlpp.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

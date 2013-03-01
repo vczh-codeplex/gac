@@ -78,15 +78,18 @@
     <ClCompile Include="SetupDocumentElementLayoutWindow.cpp">
       <Filter>TabPages\TextBoxGroup</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Public\Source\GacUIWindows.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Public\Source\GacUIIncludes.h">
+    <ClInclude Include="..\..\Public\Source\Vlpp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Public\Source\Vlpp.h">
+    <ClInclude Include="..\..\Public\Source\GacUIWindows.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -18,7 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{695AA4
 	ProjectSection(SolutionItems) = preProject
 		..\Public\Source\GacUI.cpp = ..\Public\Source\GacUI.cpp
 		..\Public\Source\GacUI.h = ..\Public\Source\GacUI.h
-		..\Public\Source\GacUIIncludes.h = ..\Public\Source\GacUIIncludes.h
+		..\Public\Source\GacUIWindows.cpp = ..\Public\Source\GacUIWindows.cpp
+		..\Public\Source\GacUIWindows.h = ..\Public\Source\GacUIWindows.h
 		..\Public\Source\Vlpp.cpp = ..\Public\Source\Vlpp.cpp
 		..\Public\Source\Vlpp.h = ..\Public\Source\Vlpp.h
 	EndProjectSection

@@ -153,6 +153,7 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="..\..\Public\Source\GacUIWindows.cpp" />
     <ClCompile Include="..\..\Public\Source\Vlpp.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="SetupBasicWindow.cpp" />
@@ -173,7 +174,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h" />
-    <ClInclude Include="..\..\Public\Source\GacUIIncludes.h" />
+    <ClInclude Include="..\..\Public\Source\GacUIWindows.h" />
     <ClInclude Include="..\..\Public\Source\Vlpp.h" />
   </ItemGroup>
   <ItemGroup>
