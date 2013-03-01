@@ -418,7 +418,7 @@ PropertyInfoImpl
 				}
 			}
 
-			void PropertyInfoImpl::SetValue(const Value& thisObject, const Value& newValue)
+			void PropertyInfoImpl::SetValue(Value& thisObject, const Value& newValue)
 			{
 				if(setter)
 				{
@@ -508,7 +508,7 @@ FieldInfoImpl
 				}
 			}
 
-			void FieldInfoImpl::SetValue(const Value& thisObject, const Value& newValue)
+			void FieldInfoImpl::SetValue(Value& thisObject, const Value& newValue)
 			{
 				if(thisObject.IsNull())
 				{

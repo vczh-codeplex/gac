@@ -88,11 +88,11 @@ Struct
 #define END_STRUCT_MEMBER(TYPENAME)\
 					}\
 				};\
-				typedef SerializableTypeDescriptor<CustomStructValueSerializer> CustomTypeDescriptorImpl;\
+				typedef StructTypeDescriptor<CustomStructValueSerializer> CustomTypeDescriptorImpl;\
 			};
 
 #define STRUCT_MEMBER(FIELDNAME)\
-						fieldSerializers.Add(L#FIELDNAME, new FieldSerializer<decltype(((StructType*)0)->FIELDNAME)>(&StructType::FIELDNAME));
+	fieldSerializers.Add(L#FIELDNAME, new FieldSerializer<decltype(((StructType*)0)->FIELDNAME)>(GetOwnerTypeDescriptor(), &StructType::FIELDNAME, L#FIELDNAME));
 
 /***********************************************************************
 Class

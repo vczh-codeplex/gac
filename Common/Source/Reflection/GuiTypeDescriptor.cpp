@@ -266,7 +266,7 @@ description::Value
 				return method->Invoke(Value(), arguments);
 			}
 
-			Value Value::GetProperty(const WString& name)
+			Value Value::GetProperty(const WString& name)const
 			{
 				ITypeDescriptor* type=GetTypeDescriptor();
 				if(!type) throw ArgumentNullException(L"thisObject");
@@ -288,13 +288,13 @@ description::Value
 				prop->SetValue(*this, newValue);
 			}
 
-			Value Value::Invoke(const WString& name)
+			Value Value::Invoke(const WString& name)const
 			{
 				Array<Value> arguments;
 				return Invoke(name, arguments);
 			}
 
-			Value Value::Invoke(const WString& name, collections::Array<Value>& arguments)
+			Value Value::Invoke(const WString& name, collections::Array<Value>& arguments)const
 			{
 				ITypeDescriptor* type=GetTypeDescriptor();
 				if(!type) throw ArgumentNullException(L"thisObject");
@@ -529,6 +529,17 @@ LogTypeManager
 							for(vint j=0;j<serializer->GetCandidateCount();j++)
 							{
 								writer.WriteLine(L"    "+serializer->GetCandidate(j)+L",");
+							}
+							writer.WriteLine(L"}");
+						}
+						else if(type->GetPropertyCount()>0)
+						{
+							writer.WriteLine(L"struct "+type->GetTypeName());
+							writer.WriteLine(L"{");
+							for(vint j=0;j<type->GetPropertyCount();j++)
+							{
+								IPropertyInfo* info=type->GetProperty(j);
+								writer.WriteLine(L"    "+info->GetReturn()->GetTypeFriendlyName()+L" "+info->GetName()+L";");
 							}
 							writer.WriteLine(L"}");
 						}

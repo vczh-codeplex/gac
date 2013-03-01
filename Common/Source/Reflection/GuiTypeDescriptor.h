@@ -141,10 +141,10 @@ Value
 				static Value					Create(const WString& typeName, collections::Array<Value>& arguments);
 				static Value					InvokeStatic(const WString& typeName, const WString& name);
 				static Value					InvokeStatic(const WString& typeName, const WString& name, collections::Array<Value>& arguments);
-				Value							GetProperty(const WString& name);
+				Value							GetProperty(const WString& name)const;
 				void							SetProperty(const WString& name, const Value& newValue);
-				Value							Invoke(const WString& name);
-				Value							Invoke(const WString& name, collections::Array<Value>& arguments);
+				Value							Invoke(const WString& name)const;
+				Value							Invoke(const WString& name, collections::Array<Value>& arguments)const;
 
 				class xs
 				{
@@ -244,7 +244,7 @@ ITypeDescriptor (property)
 				virtual IMethodInfo*			GetSetter()=0;
 				virtual IEventInfo*				GetValueChangedEvent()=0;
 				virtual Value					GetValue(const Value& thisObject)=0;
-				virtual void					SetValue(const Value& thisObject, const Value& newValue)=0;
+				virtual void					SetValue(Value& thisObject, const Value& newValue)=0;
 			};
 
 /***********************************************************************
