@@ -93,7 +93,7 @@ namespace vl
 
 		ObjectString(const ObjectString<T>& string, vint _start, vint _length)
 		{
-			if(_length==0)
+			if(_length<=0)
 			{
 				buffer=(T*)&zero;
 				reference=0;
@@ -160,7 +160,7 @@ namespace vl
 
 		ObjectString(const T* _buffer, vint _length)
 		{
-			if(_length==0)
+			if(_length<=0)
 			{
 				buffer=(T*)&zero;
 				reference=0;
