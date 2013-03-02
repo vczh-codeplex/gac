@@ -52,6 +52,7 @@ Enum
 			public:\
 				class CustomEnumValueSerializer : public EnumValueSeriaizer<TYPENAME, FLAG>\
 				{\
+					typedef TYPENAME EnumType;\
 				public:\
 					CustomEnumValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)\
 						:EnumValueSeriaizer(_ownerTypeDescriptor)\
@@ -67,6 +68,7 @@ Enum
 			};
 
 #define ENUM_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, ITEMNAME);
+#define ENUM_CLASS_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, EnumType::ITEMNAME);
 
 /***********************************************************************
 Struct

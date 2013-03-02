@@ -130,7 +130,7 @@ TypeName
 			const wchar_t* TypeInfo<float>::TypeName			= L"float";
 			const wchar_t* TypeInfo<double>::TypeName			= L"double";
 			const wchar_t* TypeInfo<bool>::TypeName				= L"bool";
-			const wchar_t* TypeInfo<WString>::TypeName			= L"vl::WString";
+			const wchar_t* TypeInfo<WString>::TypeName			= L"WString";
 
 /***********************************************************************
 TypedValueSerializerProvider
