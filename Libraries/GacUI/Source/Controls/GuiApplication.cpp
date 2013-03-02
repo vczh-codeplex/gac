@@ -2,6 +2,7 @@
 #include "Styles\GuiWin7Styles.h"
 #include "Styles\GuiWin8Styles.h"
 #include "..\Reflection\GuiReflectionBasic.h"
+#include "..\Reflection\GuiReflectionElements.h"
 
 extern void GuiMain();
 
@@ -278,8 +279,10 @@ Helpers
 						theme=new win7::Win7Theme;
 					}
 				}
+
 				description::LoadPredefinedTypes();
 				description::LoadGuiBasicTypes();
+				description::LoadGuiElementTypes();
 				theme::SetCurrentTheme(theme.Obj());
 
 				GetCurrentController()->InputService()->StartTimer();

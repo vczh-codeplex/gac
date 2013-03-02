@@ -121,7 +121,7 @@ Button Configuration
 				compositions::GuiBoundsComposition*			textComposition;
 				compositions::GuiBoundsComposition*			mainComposition;
 
-				static Win7CheckedButtonElements			Create(elements::ElementShape::Type shape, bool backgroundVisible);
+				static Win7CheckedButtonElements			Create(elements::ElementShape shape, bool backgroundVisible);
 				void										Apply(const Win7ButtonColors& colors);
 			};
 

@@ -40,12 +40,12 @@ GuiSolidBorderElement
 				}
 			}
 			
-			ElementShape::Type GuiSolidBorderElement::GetShape()
+			ElementShape GuiSolidBorderElement::GetShape()
 			{
 				return shape;
 			}
 
-			void GuiSolidBorderElement::SetShape(ElementShape::Type value)
+			void GuiSolidBorderElement::SetShape(ElementShape value)
 			{
 				shape=value;
 			}
@@ -117,9 +117,19 @@ Gui3DBorderElement
 				return color1;
 			}
 
+			void Gui3DBorderElement::SetColor1(Color value)
+			{
+				SetColors(value, color2);
+			}
+
 			Color Gui3DBorderElement::GetColor2()
 			{
 				return color2;
+			}
+
+			void Gui3DBorderElement::SetColor2(Color value)
+			{
+				SetColors(color1, value);
 			}
 
 			void Gui3DBorderElement::SetColors(Color value1, Color value2)
@@ -154,9 +164,19 @@ Gui3DSplitterElement
 				return color1;
 			}
 
+			void Gui3DSplitterElement::SetColor1(Color value)
+			{
+				SetColors(value, color2);
+			}
+
 			Color Gui3DSplitterElement::GetColor2()
 			{
 				return color2;
+			}
+
+			void Gui3DSplitterElement::SetColor2(Color value)
+			{
+				SetColors(color1, value);
 			}
 
 			void Gui3DSplitterElement::SetColors(Color value1, Color value2)
@@ -221,12 +241,12 @@ GuiSolidBackgroundElement
 				}
 			}
 			
-			ElementShape::Type GuiSolidBackgroundElement::GetShape()
+			ElementShape GuiSolidBackgroundElement::GetShape()
 			{
 				return shape;
 			}
 
-			void GuiSolidBackgroundElement::SetShape(ElementShape::Type value)
+			void GuiSolidBackgroundElement::SetShape(ElementShape value)
 			{
 				shape=value;
 			}
@@ -251,9 +271,19 @@ GuiGradientBackgroundElement
 				return color1;
 			}
 
+			void GuiGradientBackgroundElement::SetColor1(Color value)
+			{
+				SetColors(value, color2);
+			}
+
 			Color GuiGradientBackgroundElement::GetColor2()
 			{
 				return color2;
+			}
+
+			void GuiGradientBackgroundElement::SetColor2(Color value)
+			{
+				SetColors(color1, value);
 			}
 
 			void GuiGradientBackgroundElement::SetColors(Color value1, Color value2)
@@ -286,12 +316,12 @@ GuiGradientBackgroundElement
 				}
 			}
 			
-			ElementShape::Type GuiGradientBackgroundElement::GetShape()
+			ElementShape GuiGradientBackgroundElement::GetShape()
 			{
 				return shape;
 			}
 
-			void GuiGradientBackgroundElement::SetShape(ElementShape::Type value)
+			void GuiGradientBackgroundElement::SetShape(ElementShape value)
 			{
 				shape=value;
 			}
@@ -377,6 +407,16 @@ GuiSolidLabelElement
 			Alignment GuiSolidLabelElement::GetVerticalAlignment()
 			{
 				return vAlignment;
+			}
+
+			void GuiSolidLabelElement::SetHorizontalAlignment(Alignment value)
+			{
+				SetAlignments(value, vAlignment);
+			}
+
+			void GuiSolidLabelElement::SetVerticalAlignment(Alignment value)
+			{
+				SetAlignments(hAlignment, value);
 			}
 
 			void GuiSolidLabelElement::SetAlignments(Alignment horizontal, Alignment vertical)
@@ -488,6 +528,16 @@ GuiImageFrameElement
 				return frameIndex;
 			}
 
+			void GuiImageFrameElement::SetImage(Ptr<INativeImage> value)
+			{
+				SetImage(value, frameIndex);
+			}
+
+			void GuiImageFrameElement::SetFrameIndex(vint value)
+			{
+				SetImage(image, value);
+			}
+
 			void GuiImageFrameElement::SetImage(Ptr<INativeImage> _image, vint _frameIndex)
 			{
 				if(image!=_image || frameIndex!=_frameIndex)
@@ -517,6 +567,16 @@ GuiImageFrameElement
 			Alignment GuiImageFrameElement::GetVerticalAlignment()
 			{
 				return vAlignment;
+			}
+
+			void GuiImageFrameElement::SetHorizontalAlignment(Alignment value)
+			{
+				SetAlignments(value, vAlignment);
+			}
+
+			void GuiImageFrameElement::SetVerticalAlignment(Alignment value)
+			{
+				SetAlignments(hAlignment, value);
 			}
 
 			void GuiImageFrameElement::SetAlignments(Alignment horizontal, Alignment vertical)
