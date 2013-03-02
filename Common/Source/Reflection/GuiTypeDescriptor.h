@@ -146,6 +146,12 @@ Value
 				Value							Invoke(const WString& name)const;
 				Value							Invoke(const WString& name, collections::Array<Value>& arguments)const;
 
+				template<typename T>
+				Value SetProperty(const WString& name, const T& newValue)
+				{
+					return SetProperty(name, BoxValue<T>(newValue));
+				}
+
 				class xs
 				{
 				protected:

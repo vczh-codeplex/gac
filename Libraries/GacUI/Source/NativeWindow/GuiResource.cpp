@@ -1393,5 +1393,33 @@ GuiResource
 			}
 			return resource;
 		}
+
+		Ptr<DocumentModel> GuiResource::GetDocumentByPath(const WString& path)
+		{
+			Ptr<DocumentModel> result=GetValueByPath(path).Cast<DocumentModel>();
+			if(!result) throw ArgumentException(L"Path not exists.", L"GuiResource::GetDocumentByPath", L"path");
+			return result;
+		}
+
+		Ptr<GuiImageData> GuiResource::GetImageByPath(const WString& path)
+		{
+			Ptr<GuiImageData> result=GetValueByPath(path).Cast<GuiImageData>();
+			if(!result) throw ArgumentException(L"Path not exists.", L"GuiResource::GetImageByPath", L"path");
+			return result;
+		}
+
+		Ptr<parsing::xml::XmlDocument> GuiResource::GetXmlByPath(const WString& path)
+		{
+			Ptr<XmlDocument> result=GetValueByPath(path).Cast<XmlDocument>();
+			if(!result) throw ArgumentException(L"Path not exists.", L"GuiResource::GetXmlByPath", L"path");
+			return result;
+		}
+
+		WString GuiResource::GetStringByPath(const WString& path)
+		{
+			Ptr<ObjectBox<WString>> result=GetValueByPath(path).Cast<ObjectBox<WString>>();
+			if(!result) throw ArgumentException(L"Path not exists.", L"GuiResource::GetStringByPath", L"path");
+			return result->Unbox();
+		}
 	}
 }

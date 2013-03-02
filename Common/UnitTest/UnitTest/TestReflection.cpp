@@ -276,6 +276,7 @@ namespace test
 		Season season;
 		Base():a(0), season(Spring){}
 		Base(int _a):a(_a){}
+		static Ptr<Base> Create(int _a, int _b){return new Base(_a+_b);}
 	};
 
 	class Derived : public Base, public Description<Derived>
@@ -293,6 +294,7 @@ namespace test
 		void Reset(){a=0; b=0;}
 		void Reset(int _a, int _b){a=_a; b=_b;}
 		void Reset(ResetOption opt){if(opt&ResetA) a=0; if(opt&ResetB) b=0;}
+		void Reset(Derived* derived){a=derived->a; b=derived->b;}
 	};
 }
 using namespace test;
@@ -331,6 +333,7 @@ BEGIN_TYPE_INFO_NAMESPACE
 		CLASS_MEMBER_FIELD(season)
 		CLASS_MEMBER_CONSTRUCTOR(Ptr<Base>(), NO_PARAMETER)
 		CLASS_MEMBER_CONSTRUCTOR(Ptr<Base>(int), {L"_a"})
+		CLASS_MEMBER_EXTERNALCTOR(Ptr<Base>(int, int), {L"_a"_ L"_b"}, &Base::Create)
 	END_CLASS_MEMBER(test::Base)
 
 	BEGIN_CLASS_MEMBER(test::Derived)
@@ -348,6 +351,7 @@ BEGIN_TYPE_INFO_NAMESPACE
 		CLASS_MEMBER_METHOD_OVERLOAD(Reset, NO_PARAMETER, void(Derived::*)())
 		CLASS_MEMBER_METHOD_OVERLOAD(Reset, {L"_a" _ L"_b"}, void(Derived::*)(int _ int))
 		CLASS_MEMBER_METHOD_OVERLOAD(Reset, {L"opt"}, void(Derived::*)(ResetOption))
+		CLASS_MEMBER_METHOD_OVERLOAD(Reset, {L"derived"}, void(Derived::*)(Derived*))
 	END_CLASS_MEMBER(test::Derived)
 
 	BEGIN_STRUCT_MEMBER(test::Point)
@@ -415,6 +419,11 @@ TEST_CASE(TestReflectionInvoke)
 		TEST_ASSERT(base2.GetTypeDescriptor());
 		TEST_ASSERT(base2.GetTypeDescriptor()->GetTypeName()==L"test::Base");
 		TEST_ASSERT(UnboxValue<int>(base2.GetProperty(L"a"))==200);
+
+		Value base3=Value::Create(L"test::Base", (Value::xs(), 100, 200));
+		TEST_ASSERT(base3.GetTypeDescriptor());
+		TEST_ASSERT(base3.GetTypeDescriptor()->GetTypeName()==L"test::Base");
+		TEST_ASSERT(UnboxValue<int>(base3.GetProperty(L"a"))==300);
 	}
 	{
 		Value derived=Value::Create(L"test::Derived");
@@ -446,6 +455,11 @@ TEST_CASE(TestReflectionInvoke)
 		Ptr<Derived> d=UnboxValue<Ptr<Derived>>(derived);
 		TEST_ASSERT(d->a==30);
 		TEST_ASSERT(d->GetB()==40);
+		
+		Value derived2=Value::Create(L"test::Derived", (Value::xs(), 10, 20));
+		derived2.Invoke(L"Reset", (Value::xs(), derived));
+		TEST_ASSERT(UnboxValue<int>(derived2.GetProperty(L"a"))==30);
+		TEST_ASSERT(UnboxValue<int>(derived2.GetProperty(L"b"))==40);
 	}
 	TEST_ASSERT(ResetGlobalTypeManager());
 }

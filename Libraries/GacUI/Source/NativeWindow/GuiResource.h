@@ -32,7 +32,7 @@ Resource Image
 		/// <summary>
 		/// Represnets an image to display.
 		/// </summary>
-		class GuiImageData : public Object
+		class GuiImageData : public Object, public Description<GuiImageData>
 		{
 		protected:
 			Ptr<INativeImage>				image;
@@ -437,6 +437,7 @@ Resource Structure
 
 			/// <summary>Get a contained resource object using a path like "Packages\Application\Name".</summary>
 			/// <returns>The containd resource object.</returns>
+			/// <param name="path">The path.</param>
 			Ptr<Object>								GetValueByPath(const WString& path);
 		};
 
@@ -445,7 +446,7 @@ Resource Loader
 ***********************************************************************/
 		
 		/// <summary>Resource. A resource is a root resource folder that does not have a name.</summary>
-		class GuiResource : public GuiResourceFolder
+		class GuiResource : public GuiResourceFolder, public Description<GuiResource>
 		{
 		public:
 			/// <summary>Create a resource.</summary>
@@ -456,6 +457,23 @@ Resource Loader
 			/// <returns>The loaded resource.</returns>
 			/// <param name="filepath">The file path of the xml file.</param>
 			static Ptr<GuiResource>					LoadFromXml(const WString& filePath);
+			
+			/// <summary>Get a contained document model using a path like "Packages\Application\Name". If the path does not exists or the type does not match, an exception will be thrown.</summary>
+			/// <returns>The containd resource object.</returns>
+			/// <param name="path">The path.</param>
+			Ptr<DocumentModel>						GetDocumentByPath(const WString& path);
+			/// <summary>Get a contained image using a path like "Packages\Application\Name". If the path does not exists or the type does not match, an exception will be thrown.</summary>
+			/// <returns>The containd resource object.</returns>
+			/// <param name="path">The path.</param>
+			Ptr<GuiImageData>						GetImageByPath(const WString& path);
+			/// <summary>Get a contained xml using a path like "Packages\Application\Name". If the path does not exists or the type does not match, an exception will be thrown.</summary>
+			/// <returns>The containd resource object.</returns>
+			/// <param name="path">The path.</param>
+			Ptr<parsing::xml::XmlDocument>			GetXmlByPath(const WString& path);
+			/// <summary>Get a contained string object using a path like "Packages\Application\Name". If the path does not exists or the type does not match, an exception will be thrown.</summary>
+			/// <returns>The containd resource object.</returns>
+			/// <param name="path">The path.</param>
+			WString									GetStringByPath(const WString& path);
 		};
 
 /***********************************************************************

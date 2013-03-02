@@ -6,7 +6,7 @@ $( )
 $$end
 
 $$define $PREPARE_PARAMETER($index) $$begin
-					$PARAMETER_ITEM($index) = UnboxValue<$TYPE_ITEM($index)>(arguments[$index], GetParameter($index)->GetValueTypeDescriptor(), L$(")$ARGUMENT_ITEM($index)$("));
+					typename ParameterTypeInfo<$TYPE_ITEM($index)>::TempValueType $ARGUMENT_ITEM($index) = UnboxValue<typename ParameterTypeInfo<$TYPE_ITEM($index)>::TempValueType>(arguments[$index], GetParameter($index)->GetValueTypeDescriptor(), L$(")$ARGUMENT_ITEM($index)$("));
 $( )
 $$end
 

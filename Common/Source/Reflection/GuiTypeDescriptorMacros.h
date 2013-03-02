@@ -67,7 +67,9 @@ Enum
 				typedef SerializableTypeDescriptor<CustomEnumValueSerializer> CustomTypeDescriptorImpl;\
 			};
 
+#define ENUM_ITEM_NAMESPACE(TYPENAME) typedef TYPENAME EnumItemNamespace;
 #define ENUM_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, ITEMNAME);
+#define ENUM_NAMESPACE_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, EnumItemNamespace::ITEMNAME);
 #define ENUM_CLASS_ITEM(ITEMNAME) candidates.Add(L#ITEMNAME, EnumType::ITEMNAME);
 
 /***********************************************************************
@@ -142,10 +144,23 @@ Constructor
 ***********************************************************************/
 
 #define NO_PARAMETER {L""}
+
 #define CLASS_MEMBER_CONSTRUCTOR(FUNCTIONTYPE, PARAMETERNAMES)\
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddConstructor(new CustomConstructorInfoImpl<FUNCTIONTYPE>(parameterNames));\
+			}
+
+#define CLASS_MEMBER_EXTERNALCTOR(FUNCTIONTYPE, PARAMETERNAMES, SOURCE)\
+			{\
+				const wchar_t* parameterNames[]=PARAMETERNAMES;\
+				AddConstructor(\
+					new CustomMethodInfoImplSelector<\
+						void,\
+						FUNCTIONTYPE\
+						>\
+						::CustomMethodInfoImpl(parameterNames, SOURCE)\
+					);\
 			}
 
 /***********************************************************************
