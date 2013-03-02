@@ -507,7 +507,7 @@ Win8ButtonElements
 Win8CheckedButtonElements
 ***********************************************************************/
 
-			Win8CheckedButtonElements Win8CheckedButtonElements::Create(elements::ElementShape::Type shape, bool backgroundVisible)
+			Win8CheckedButtonElements Win8CheckedButtonElements::Create(elements::ElementShape shape, bool backgroundVisible)
 			{
 				const vint checkSize=13;
 				const vint checkPadding=2;

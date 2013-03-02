@@ -186,6 +186,9 @@ Type Declaration
 				CLASS_MEMBER_METHOD(GetStringByPath, {L"path"})
 			END_CLASS_MEMBER(GuiResource)
 
+			BEGIN_CLASS_MEMBER(IGuiGraphicsElement)
+			END_CLASS_MEMBER(IGuiGraphicsElement)
+
 #undef _
 
 /***********************************************************************

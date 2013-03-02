@@ -622,7 +622,7 @@ Win7ButtonElements
 Win7CheckedButtonElements
 ***********************************************************************/
 
-			Win7CheckedButtonElements Win7CheckedButtonElements::Create(elements::ElementShape::Type shape, bool backgroundVisible)
+			Win7CheckedButtonElements Win7CheckedButtonElements::Create(elements::ElementShape shape, bool backgroundVisible)
 			{
 				const vint checkSize=13;
 				const vint checkPadding=2;

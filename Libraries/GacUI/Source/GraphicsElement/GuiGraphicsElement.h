@@ -22,19 +22,16 @@ namespace vl
 /***********************************************************************
 Elements
 ***********************************************************************/
-
-			namespace ElementShape
+			
+			/// <summary>
+			/// Defines an shape for some <see cref="IGuiGraphicsElement"></see>.
+			/// </summary>
+			enum class ElementShape
 			{
-				/// <summary>
-				/// Defines an shape for some <see cref="IGuiGraphicsElement"></see>.
-				/// </summary>
-				enum Type
-				{
-					/// <summary>[T:vl.presentation.elements.ElementShape.Type]Rectangle shape.</summary>
-					Rectangle,
-					/// <summary>[T:vl.presentation.elements.ElementShape.Type]Ellipse shape.</summary>
-					Ellipse,
-				};
+				/// <summary>[T:vl.presentation.elements.ElementShape]Rectangle shape.</summary>
+				Rectangle,
+				/// <summary>[T:vl.presentation.elements.ElementShape]Ellipse shape.</summary>
+				Ellipse,
 			};
 
 			/// <summary>
@@ -45,7 +42,7 @@ Elements
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiSolidBorderElement, L"SolidBorder")
 			protected:
 				Color					color;
-				ElementShape::Type		shape;
+				ElementShape			shape;
 
 				GuiSolidBorderElement();
 			public:
@@ -65,12 +62,12 @@ Elements
 				/// Get the shape.
 				/// </summary>
 				/// <returns>The shape.</returns>
-				ElementShape::Type		GetShape();
+				ElementShape			GetShape();
 				/// <summary>
 				/// Set the shape.
 				/// </summary>
 				/// <param name="value">The new shape.</param>
-				void					SetShape(ElementShape::Type value);
+				void					SetShape(ElementShape value);
 			};
 			
 			/// <summary>
@@ -81,7 +78,7 @@ Elements
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiRoundBorderElement, L"RoundBorder")
 			protected:
 				Color					color;
-				vint						radius;
+				vint					radius;
 
 				GuiRoundBorderElement();
 			public:
@@ -102,7 +99,7 @@ Elements
 				/// Get the radius of round corners.
 				/// </summary>
 				/// <returns>The radius.</returns>
-				vint						GetRadius();
+				vint					GetRadius();
 				/// <summary>
 				/// Set the radius of round corners.
 				/// </summary>
@@ -130,10 +127,20 @@ Elements
 				/// <returns>The left-top color.</returns>
 				Color					GetColor1();
 				/// <summary>
+				/// Set the border color.
+				/// </summary>
+				/// <param name="value">The new left-top color.</param>
+				void					SetColor1(Color value);
+				/// <summary>
 				/// Get the right-bottom color.
 				/// </summary>
 				/// <returns>The right-bottom color.</returns>
 				Color					GetColor2();
+				/// <summary>
+				/// Set the border color.
+				/// </summary>
+				/// <param name="value">The new right-bottom color.</param>
+				void					SetColor2(Color value);
 				/// <summary>
 				/// Set colors of the element.
 				/// </summary>
@@ -174,10 +181,20 @@ Elements
 				/// <returns>The left-top color.</returns>
 				Color					GetColor1();
 				/// <summary>
+				/// Set the border color.
+				/// </summary>
+				/// <param name="value">The new left-top color.</param>
+				void					SetColor1(Color value);
+				/// <summary>
 				/// Get the right-bottom color.
 				/// </summary>
 				/// <returns>The right-bottom color.</returns>
 				Color					GetColor2();
+				/// <summary>
+				/// Set the border color.
+				/// </summary>
+				/// <param name="value">The new right-bottom color.</param>
+				void					SetColor2(Color value);
 				/// <summary>
 				/// Set colors of the element.
 				/// </summary>
@@ -205,7 +222,7 @@ Elements
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiSolidBackgroundElement, L"SolidBackground")
 			protected:
 				Color					color;
-				ElementShape::Type		shape;
+				ElementShape			shape;
 
 				GuiSolidBackgroundElement();
 			public:
@@ -225,12 +242,12 @@ Elements
 				/// Get the shape.
 				/// </summary>
 				/// <returns>The shape.</returns>
-				ElementShape::Type		GetShape();
+				ElementShape			GetShape();
 				/// <summary>
 				/// Set the shape.
 				/// </summary>
 				/// <param name="value">The new shape.</param>
-				void					SetShape(ElementShape::Type value);
+				void					SetShape(ElementShape value);
 			};
 			
 			/// <summary>
@@ -257,7 +274,7 @@ Elements
 			protected:
 				Color					color1, color2;
 				Direction				direction;
-				ElementShape::Type		shape;
+				ElementShape			shape;
 
 				GuiGradientBackgroundElement();
 			public:
@@ -269,10 +286,20 @@ Elements
 				/// <returns>The left-top color.</returns>
 				Color					GetColor1();
 				/// <summary>
+				/// Set the border color.
+				/// </summary>
+				/// <param name="value">The new left-top color.</param>
+				void					SetColor1(Color value);
+				/// <summary>
 				/// Get the right bottom color.
 				/// </summary>
 				/// <returns>The right-bottom color.</returns>
 				Color					GetColor2();
+				/// <summary>
+				/// Set the border color.
+				/// </summary>
+				/// <param name="value">The new right-bottom color.</param>
+				void					SetColor2(Color value);
 				/// <summary>
 				/// Set colors of the element.
 				/// </summary>
@@ -294,12 +321,12 @@ Elements
 				/// Get the shape.
 				/// </summary>
 				/// <returns>The shape.</returns>
-				ElementShape::Type		GetShape();
+				ElementShape			GetShape();
 				/// <summary>
 				/// Set the shape.
 				/// </summary>
 				/// <param name="value">The new shape.</param>
-				void					SetShape(ElementShape::Type value);
+				void					SetShape(ElementShape value);
 			};
 			
 			/// <summary>
@@ -312,8 +339,8 @@ Elements
 				Color					color;
 				FontProperties			fontProperties;
 				WString					text;
-				Alignment			hAlignment;
-				Alignment			vAlignment;
+				Alignment				hAlignment;
+				Alignment				vAlignment;
 				bool					wrapLine;
 				bool					ellipse;
 				bool					multiline;
@@ -360,12 +387,22 @@ Elements
 				/// Get the horizontal alignment of the text.
 				/// </summary>
 				/// <returns>The horizontal alignment of the text.</returns>
-				Alignment			GetHorizontalAlignment();
+				Alignment				GetHorizontalAlignment();
 				/// <summary>
 				/// Get the vertical alignment of the text.
 				/// </summary>
 				/// <returns>The vertical alignment of the text.</returns>
-				Alignment			GetVerticalAlignment();
+				Alignment				GetVerticalAlignment();
+				/// <summary>
+				/// Set the horizontal alignment of the text.
+				/// </summary>
+				/// <param name="value">The new horizontal alignment of the text.</param>
+				void					SetHorizontalAlignment(Alignment value);
+				/// <summary>
+				/// Set the vertical alignment of the text.
+				/// </summary>
+				/// <param name="value">The vertical alignment of the text.</param>
+				void					SetVerticalAlignment(Alignment value);
 				/// <summary>
 				/// Set alignments in both directions of the text.
 				/// </summary>
@@ -426,9 +463,9 @@ Elements
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiImageFrameElement, L"ImageFrame");
 			protected:
 				Ptr<INativeImage>		image;
-				vint						frameIndex;
-				Alignment			hAlignment;
-				Alignment			vAlignment;
+				vint					frameIndex;
+				Alignment				hAlignment;
+				Alignment				vAlignment;
 				bool					stretch;
 				bool					enabled;
 
@@ -445,24 +482,44 @@ Elements
 				/// Get the index of the frame in the containing image.
 				/// </summary>
 				/// <returns>The index of the frame in the containing image</returns>
-				vint						GetFrameIndex();
+				vint					GetFrameIndex();
+				/// <summary>
+				/// Set the containing image.
+				/// </summary>
+				/// <param name="value">The new containing image.</param>
+				void					SetImage(Ptr<INativeImage> value);
+				/// <summary>
+				/// Set  the frame index.
+				/// </summary>
+				/// <param name="value">The new frameIndex.</param>
+				void					SetFrameIndex(vint value);
 				/// <summary>
 				/// Set the containing image and the frame index.
 				/// </summary>
 				/// <param name="_image">The new containing image.</param>
 				/// <param name="_frameIndex">The new frameIndex.</param>
-				void					SetImage(Ptr<INativeImage> _image, vint _frameIndex=0);
+				void					SetImage(Ptr<INativeImage> _image, vint _frameIndex);
 				
 				/// <summary>
 				/// Get the horizontal alignment of the image.
 				/// </summary>
 				/// <returns>The horizontal alignment of the image.</returns>
-				Alignment			GetHorizontalAlignment();
+				Alignment				GetHorizontalAlignment();
 				/// <summary>
 				/// Get the vertical alignment of the image.
 				/// </summary>
 				/// <returns>The vertical alignment of the image.</returns>
-				Alignment			GetVerticalAlignment();
+				Alignment				GetVerticalAlignment();
+				/// <summary>
+				/// Set the horizontal alignment of the text.
+				/// </summary>
+				/// <param name="value">The new horizontal alignment of the text.</param>
+				void					SetHorizontalAlignment(Alignment value);
+				/// <summary>
+				/// Set the vertical alignment of the text.
+				/// </summary>
+				/// <param name="value">The vertical alignment of the text.</param>
+				void					SetVerticalAlignment(Alignment value);
 				/// <summary>
 				/// Set alignments in both directions of the image.
 				/// </summary>
@@ -530,7 +587,7 @@ Elements
 				/// Get the number of points
 				/// </summary>
 				/// <returns>The number of points.</returns>
-				vint						GetPointCount();
+				vint					GetPointCount();
 				/// <summary>
 				/// Set all points to the polygon element.
 				/// </summary>

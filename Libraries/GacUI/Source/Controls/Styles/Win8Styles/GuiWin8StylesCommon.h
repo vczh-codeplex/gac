@@ -112,7 +112,7 @@ Button Configuration
 				compositions::GuiBoundsComposition*			textComposition;
 				compositions::GuiBoundsComposition*			mainComposition;
 
-				static Win8CheckedButtonElements			Create(elements::ElementShape::Type shape, bool backgroundVisible);
+				static Win8CheckedButtonElements			Create(elements::ElementShape shape, bool backgroundVisible);
 				void										Apply(const Win8ButtonColors& colors);
 			};
 

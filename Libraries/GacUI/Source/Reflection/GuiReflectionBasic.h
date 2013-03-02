@@ -39,6 +39,7 @@ Type List
 			F(GuiImageData)\
 			F(DocumentModel)\
 			F(GuiResource)\
+			F(IGuiGraphicsElement)\
 
 			GUIREFLECTIONBASIC_TYPELIST(DECL_TYPE_INFO)
 
