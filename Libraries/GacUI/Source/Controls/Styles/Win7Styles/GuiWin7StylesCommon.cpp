@@ -494,7 +494,7 @@ Win7ButtonColors
 Win7ButtonElements
 ***********************************************************************/
 
-			Win7ButtonElements Win7ButtonElements::Create(bool verticalGradient, bool roundBorder, Alignment::Type horizontal, Alignment::Type vertical)
+			Win7ButtonElements Win7ButtonElements::Create(bool verticalGradient, bool roundBorder, Alignment horizontal, Alignment vertical)
 			{
 				Win7ButtonElements button;
 				button.rectBorderElement=0;
@@ -1004,7 +1004,7 @@ Helpers
 				composition->SetMargin(Margin(margin, margin, margin, margin));
 			}
 
-			void Win7CreateSolidLabelElement(GuiSolidLabelElement*& element, GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical)
+			void Win7CreateSolidLabelElement(GuiSolidLabelElement*& element, GuiBoundsComposition*& composition, Alignment horizontal, Alignment vertical)
 			{
 				element=GuiSolidLabelElement::Create();
 				element->SetAlignments(horizontal, vertical);

@@ -43,7 +43,7 @@ Button
 				/// <param name="initialColor">Set to true to set the initial colors of all components for a button.</param>
 				/// <param name="horizontal">Horizontal alignment for text.</param>
 				/// <param name="vertical">Vertical alignment for text.</param>
-				Win8ButtonStyleBase(const Win8ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical);
+				Win8ButtonStyleBase(const Win8ButtonColors& initialColor, Alignment horizontal, Alignment vertical);
 				~Win8ButtonStyleBase();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;

@@ -6,7 +6,6 @@
   <categories>
     <category name="vlpp" pattern="\Common\Source\"/>
     <category name="gacui" pattern="\GacUI\Source\">
-      <except pattern="GacUI_WinMain.cpp" />
       <except pattern="\Windows\" />
       <except pattern="\WindowsDirect2D\" />
       <except pattern="\WindowsGDI\" />

@@ -26,7 +26,7 @@ Win7ButtonStyleBase
 			{
 			}
 
-			Win7ButtonStyleBase::Win7ButtonStyleBase(bool verticalGradient, bool roundBorder, const Win7ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical)
+			Win7ButtonStyleBase::Win7ButtonStyleBase(bool verticalGradient, bool roundBorder, const Win7ButtonColors& initialColor, Alignment horizontal, Alignment vertical)
 				:controlStyle(GuiButton::Normal)
 				,isVisuallyEnabled(true)
 				,isSelected(false)

@@ -26,7 +26,7 @@ Win8ButtonStyleBase
 			{
 			}
 
-			Win8ButtonStyleBase::Win8ButtonStyleBase(const Win8ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical)
+			Win8ButtonStyleBase::Win8ButtonStyleBase(const Win8ButtonColors& initialColor, Alignment horizontal, Alignment vertical)
 				:controlStyle(GuiButton::Normal)
 				,isVisuallyEnabled(true)
 				,isSelected(false)

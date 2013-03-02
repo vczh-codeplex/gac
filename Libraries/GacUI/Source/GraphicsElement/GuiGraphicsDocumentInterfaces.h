@@ -93,10 +93,10 @@ Layout Engine
 				virtual void								SetMaxWidth(vint value)=0;
 				/// <summary>Get the horizontal alignment for this paragraph.</summary>
 				/// <returns>The alignment.</returns>
-				virtual Alignment::Type						GetParagraphAlignment()=0;
+				virtual Alignment						GetParagraphAlignment()=0;
 				/// <summary>Set the horizontal alignment for this paragraph.</summary>
 				/// <param name="value">The alignment.</param>
-				virtual void								SetParagraphAlignment(Alignment::Type value)=0;
+				virtual void								SetParagraphAlignment(Alignment value)=0;
 
 				/// <summary>Replace the font within the specified range.</summary>
 				/// <param name="start">The position of the first character of the specified range.</param>

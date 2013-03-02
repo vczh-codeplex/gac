@@ -105,7 +105,7 @@ Button Configuration
 				compositions::GuiBoundsComposition*			backgroundComposition;
 				compositions::GuiTableComposition*			gradientComposition;
 
-				static Win7ButtonElements					Create(bool verticalGradient, bool roundBorder, Alignment::Type horizontal=Alignment::Center, Alignment::Type vertical=Alignment::Center);
+				static Win7ButtonElements					Create(bool verticalGradient, bool roundBorder, Alignment horizontal=Alignment::Center, Alignment vertical=Alignment::Center);
 				void										Apply(const Win7ButtonColors& colors);
 			};
 
@@ -183,7 +183,7 @@ Helper Functions
 			extern Color									Win7GetSystemBorderRaiseColor();
 			extern Color									Win7GetSystemTextColor(bool enabled);
 			extern void										Win7SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
-			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
+			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment horizontal, Alignment vertical);
 			extern elements::text::ColorEntry				Win7GetTextBoxTextColor();
 		}
 	}
