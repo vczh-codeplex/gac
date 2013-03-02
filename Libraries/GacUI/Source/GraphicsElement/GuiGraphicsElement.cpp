@@ -369,17 +369,17 @@ GuiSolidLabelElement
 				}
 			}
 
-			Alignment::Type GuiSolidLabelElement::GetHorizontalAlignment()
+			Alignment GuiSolidLabelElement::GetHorizontalAlignment()
 			{
 				return hAlignment;
 			}
 
-			Alignment::Type GuiSolidLabelElement::GetVerticalAlignment()
+			Alignment GuiSolidLabelElement::GetVerticalAlignment()
 			{
 				return vAlignment;
 			}
 
-			void GuiSolidLabelElement::SetAlignments(Alignment::Type horizontal, Alignment::Type vertical)
+			void GuiSolidLabelElement::SetAlignments(Alignment horizontal, Alignment vertical)
 			{
 				if(hAlignment!=horizontal || vAlignment!=vertical)
 				{
@@ -509,17 +509,17 @@ GuiImageFrameElement
 				}
 			}
 
-			Alignment::Type GuiImageFrameElement::GetHorizontalAlignment()
+			Alignment GuiImageFrameElement::GetHorizontalAlignment()
 			{
 				return hAlignment;
 			}
 
-			Alignment::Type GuiImageFrameElement::GetVerticalAlignment()
+			Alignment GuiImageFrameElement::GetVerticalAlignment()
 			{
 				return vAlignment;
 			}
 
-			void GuiImageFrameElement::SetAlignments(Alignment::Type horizontal, Alignment::Type vertical)
+			void GuiImageFrameElement::SetAlignments(Alignment horizontal, Alignment vertical)
 			{
 				if(hAlignment!=horizontal || vAlignment!=vertical)
 				{

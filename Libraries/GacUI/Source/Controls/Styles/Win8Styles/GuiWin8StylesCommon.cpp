@@ -458,7 +458,7 @@ Win8ButtonColors
 Win8ButtonElements
 ***********************************************************************/
 
-			Win8ButtonElements Win8ButtonElements::Create(Alignment::Type horizontal, Alignment::Type vertical)
+			Win8ButtonElements Win8ButtonElements::Create(Alignment horizontal, Alignment vertical)
 			{
 				Win8ButtonElements button;
 				{
@@ -854,7 +854,7 @@ Helpers
 				composition->SetMargin(Margin(margin, margin, margin, margin));
 			}
 
-			void Win8CreateSolidLabelElement(GuiSolidLabelElement*& element, GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical)
+			void Win8CreateSolidLabelElement(GuiSolidLabelElement*& element, GuiBoundsComposition*& composition, Alignment horizontal, Alignment vertical)
 			{
 				element=GuiSolidLabelElement::Create();
 				element->SetAlignments(horizontal, vertical);

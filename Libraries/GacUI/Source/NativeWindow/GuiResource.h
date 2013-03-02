@@ -172,7 +172,7 @@ Rich Content Document (model)
 			LineList						lines;
 
 			/// <summary>Horizontal alignment of this paragraph.</summary>
-			Alignment::Type					alignment;
+			Alignment					alignment;
 
 			DocumentParagraph():alignment(Alignment::Left){}
 		};

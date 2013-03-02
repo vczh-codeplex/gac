@@ -698,7 +698,7 @@ Uniscribe Operations (UniscribeParagraph)
 
 				List<Ptr<UniscribeLine>>		lines;
 				vint							lastAvailableWidth;
-				Alignment::Type					paragraphAlignment;
+				Alignment					paragraphAlignment;
 				Rect							bounds;
 
 				UniscribeParagraph()
@@ -802,7 +802,7 @@ Uniscribe Operations (UniscribeParagraph)
 					}
 				}
 
-				void Layout(vint availableWidth, Alignment::Type alignment)
+				void Layout(vint availableWidth, Alignment alignment)
 				{
 					if(lastAvailableWidth==availableWidth && paragraphAlignment==alignment)
 					{
@@ -1368,12 +1368,12 @@ WindowsGDIParagraph
 					paragraph->Layout(value, paragraph->paragraphAlignment);
 				}
 
-				Alignment::Type GetParagraphAlignment()override
+				Alignment GetParagraphAlignment()override
 				{
 					return paragraph->paragraphAlignment;
 				}
 
-				void SetParagraphAlignment(Alignment::Type value)override
+				void SetParagraphAlignment(Alignment value)override
 				{
 					paragraph->BuildUniscribeData(renderTarget->GetDC());
 					paragraph->Layout(paragraph->lastAvailableWidth, value);

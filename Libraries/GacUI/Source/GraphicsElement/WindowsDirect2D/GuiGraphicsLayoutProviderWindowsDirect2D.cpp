@@ -247,7 +247,7 @@ WindowsDirect2DParagraph
 					}
 				}
 
-				Alignment::Type GetParagraphAlignment()override
+				Alignment GetParagraphAlignment()override
 				{
 					switch(textLayout->GetTextAlignment())
 					{
@@ -262,7 +262,7 @@ WindowsDirect2DParagraph
 					}
 				}
 
-				void SetParagraphAlignment(Alignment::Type value)override
+				void SetParagraphAlignment(Alignment value)override
 				{
 					switch(value)
 					{

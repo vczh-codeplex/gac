@@ -91,6 +91,9 @@
     <Filter Include="Common\Parsing\Json">
       <UniqueIdentifier>{38f5e3e8-0dd1-48d1-8c87-72eb91978716}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GacUI\Reflection">
+      <UniqueIdentifier>{9fcd500b-d608-436c-b21e-158a049341d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -434,6 +437,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.cpp">
       <Filter>Common\Reflection</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\GuiReflectionBasic.cpp">
+      <Filter>GacUI\Reflection</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -832,6 +838,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Reflection\GuiTypeDescriptorMacros.h">
       <Filter>Common\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\GuiReflectionBasic.h">
+      <Filter>GacUI\Reflection</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

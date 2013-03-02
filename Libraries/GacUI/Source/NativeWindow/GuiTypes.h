@@ -20,25 +20,22 @@ namespace vl
 Enumerations
 ***********************************************************************/
 		
-		namespace Alignment
+		/// <summary>
+		/// Defines an alignment direction.
+		/// </summary>
+		enum class Alignment
 		{
-			/// <summary>
-			/// Defines an alignment direction.
-			/// </summary>
-			enum Type
-			{
-				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the left side.</summary>
-				Left=0,
-				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the top side.</summary>
-				Top=0,
-				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the center.</summary>
-				Center=1,
-				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the right side.</summary>
-				Right=2,
-				/// <summary>[T:vl.presentation.Alignment.Type]Aligned to the bottom side.</summary>
-				Bottom=2,
-			};
-		}
+			/// <summary>[T:vl.presentation.Alignment]Aligned to the left side.</summary>
+			Left=0,
+			/// <summary>[T:vl.presentation.Alignment]Aligned to the top side.</summary>
+			Top=0,
+			/// <summary>[T:vl.presentation.Alignment]Aligned to the center.</summary>
+			Center=1,
+			/// <summary>[T:vl.presentation.Alignment]Aligned to the right side.</summary>
+			Right=2,
+			/// <summary>[T:vl.presentation.Alignment]Aligned to the bottom side.</summary>
+			Bottom=2,
+		};
 
 /***********************************************************************
 TextPos

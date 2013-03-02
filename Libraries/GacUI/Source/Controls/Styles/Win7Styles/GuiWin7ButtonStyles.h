@@ -45,7 +45,7 @@ Button
 				/// <param name="initialColor">Set to true to set the initial colors of all components for a button.</param>
 				/// <param name="horizontal">Horizontal alignment for text.</param>
 				/// <param name="vertical">Vertical alignment for text.</param>
-				Win7ButtonStyleBase(bool verticalGradient, bool roundBorder, const Win7ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical);
+				Win7ButtonStyleBase(bool verticalGradient, bool roundBorder, const Win7ButtonColors& initialColor, Alignment horizontal, Alignment vertical);
 				~Win7ButtonStyleBase();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;

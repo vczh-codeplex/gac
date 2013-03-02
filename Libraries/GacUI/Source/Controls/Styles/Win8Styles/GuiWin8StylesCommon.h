@@ -98,7 +98,7 @@ Button Configuration
 				compositions::GuiBoundsComposition*			mainComposition;
 				compositions::GuiBoundsComposition*			backgroundComposition;
 
-				static Win8ButtonElements					Create(Alignment::Type horizontal=Alignment::Center, Alignment::Type vertical=Alignment::Center);
+				static Win8ButtonElements					Create(Alignment horizontal=Alignment::Center, Alignment vertical=Alignment::Center);
 				void										Apply(const Win8ButtonColors& colors);
 			};
 
@@ -172,7 +172,7 @@ Helper Functions
 			extern Color									Win8GetMenuBorderColor();
 			extern Color									Win8GetMenuSplitterColor();
 			extern void										Win8SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
-			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
+			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment horizontal, Alignment vertical);
 			extern elements::text::ColorEntry				Win8GetTextBoxTextColor();
 		}
 	}

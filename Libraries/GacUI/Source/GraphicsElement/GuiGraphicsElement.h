@@ -312,8 +312,8 @@ Elements
 				Color					color;
 				FontProperties			fontProperties;
 				WString					text;
-				Alignment::Type			hAlignment;
-				Alignment::Type			vAlignment;
+				Alignment			hAlignment;
+				Alignment			vAlignment;
 				bool					wrapLine;
 				bool					ellipse;
 				bool					multiline;
@@ -360,18 +360,18 @@ Elements
 				/// Get the horizontal alignment of the text.
 				/// </summary>
 				/// <returns>The horizontal alignment of the text.</returns>
-				Alignment::Type			GetHorizontalAlignment();
+				Alignment			GetHorizontalAlignment();
 				/// <summary>
 				/// Get the vertical alignment of the text.
 				/// </summary>
 				/// <returns>The vertical alignment of the text.</returns>
-				Alignment::Type			GetVerticalAlignment();
+				Alignment			GetVerticalAlignment();
 				/// <summary>
 				/// Set alignments in both directions of the text.
 				/// </summary>
 				/// <param name="horizontal">The new horizontal alignment of the text.</param>
 				/// <param name="vertical">The vertical alignment of the text.</param>
-				void					SetAlignments(Alignment::Type horizontal, Alignment::Type vertical);
+				void					SetAlignments(Alignment horizontal, Alignment vertical);
 				
 				/// <summary>
 				/// Get if line auto-wrapping is enabled for this text.
@@ -427,8 +427,8 @@ Elements
 			protected:
 				Ptr<INativeImage>		image;
 				vint						frameIndex;
-				Alignment::Type			hAlignment;
-				Alignment::Type			vAlignment;
+				Alignment			hAlignment;
+				Alignment			vAlignment;
 				bool					stretch;
 				bool					enabled;
 
@@ -457,18 +457,18 @@ Elements
 				/// Get the horizontal alignment of the image.
 				/// </summary>
 				/// <returns>The horizontal alignment of the image.</returns>
-				Alignment::Type			GetHorizontalAlignment();
+				Alignment			GetHorizontalAlignment();
 				/// <summary>
 				/// Get the vertical alignment of the image.
 				/// </summary>
 				/// <returns>The vertical alignment of the image.</returns>
-				Alignment::Type			GetVerticalAlignment();
+				Alignment			GetVerticalAlignment();
 				/// <summary>
 				/// Set alignments in both directions of the image.
 				/// </summary>
 				/// <param name="horizontal">The new horizontal alignment of the image.</param>
 				/// <param name="vertical">The vertical alignment of the image.</param>
-				void					SetAlignments(Alignment::Type horizontal, Alignment::Type vertical);
+				void					SetAlignments(Alignment horizontal, Alignment vertical);
 
 				/// <summary>
 				/// Get if stretching is enabled for this image.
