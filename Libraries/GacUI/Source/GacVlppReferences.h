@@ -22,6 +22,5 @@ Interfaces:
 #include "..\..\..\Common\Source\Stream\Interfaces.h"
 #include "..\..\..\Common\Source\Parsing\Xml\ParsingXml.h"
 #include "..\..\..\Common\Source\Parsing\Json\ParsingJson.h"
-#include "..\..\..\Common\Source\Reflection\GuiTypeDescriptor.h"
-#include "..\..\..\Common\Source\Reflection\GuiTypeDescriptorPredefined.h"
+#include "..\..\..\Common\Source\Reflection\GuiTypeDescriptorMacros.h"
 #endif

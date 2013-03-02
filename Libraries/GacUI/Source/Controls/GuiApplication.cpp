@@ -1,6 +1,7 @@
 #include "GuiApplication.h"
 #include "Styles\GuiWin7Styles.h"
 #include "Styles\GuiWin8Styles.h"
+#include "..\Reflection\GuiReflectionBasic.h"
 
 extern void GuiMain();
 
@@ -278,6 +279,7 @@ Helpers
 					}
 				}
 				description::LoadPredefinedTypes();
+				description::LoadGuiBasicTypes();
 				theme::SetCurrentTheme(theme.Obj());
 
 				GetCurrentController()->InputService()->StartTimer();
