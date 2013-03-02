@@ -31,6 +31,14 @@ Type List
 			F(Rect)\
 			F(Margin)\
 			F(FontProperties)\
+			F(INativeImageFrame)\
+			F(INativeImage)\
+			F(INativeImage::FormatType)\
+			F(INativeCursor)\
+			F(INativeCursor::SystemCursorType)\
+			F(GuiImageData)\
+			F(DocumentModel)\
+			F(GuiResource)\
 
 			GUIREFLECTIONBASIC_TYPELIST(DECL_TYPE_INFO)
 

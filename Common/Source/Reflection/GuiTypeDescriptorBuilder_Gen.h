@@ -52,7 +52,7 @@ Constructor: R(T0)
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
  
 					R result = new typename ParameterTypeInfo<R>::Type(p0);
 					return BoxValue<R>(result, GetOwnerTypeDescriptor());
@@ -75,8 +75,8 @@ Constructor: R(T0,T1)
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
  
 					R result = new typename ParameterTypeInfo<R>::Type(p0,p1);
 					return BoxValue<R>(result, GetOwnerTypeDescriptor());
@@ -100,9 +100,9 @@ Constructor: R(T0,T1,T2)
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
  
 					R result = new typename ParameterTypeInfo<R>::Type(p0,p1,p2);
 					return BoxValue<R>(result, GetOwnerTypeDescriptor());
@@ -127,10 +127,10 @@ Constructor: R(T0,T1,T2,T3)
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
  
 					R result = new typename ParameterTypeInfo<R>::Type(p0,p1,p2,p3);
 					return BoxValue<R>(result, GetOwnerTypeDescriptor());
@@ -156,11 +156,11 @@ Constructor: R(T0,T1,T2,T3,T4)
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
  
 					R result = new typename ParameterTypeInfo<R>::Type(p0,p1,p2,p3,p4);
 					return BoxValue<R>(result, GetOwnerTypeDescriptor());
@@ -187,12 +187,12 @@ Constructor: R(T0,T1,T2,T3,T4,T5)
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
  
 					R result = new typename ParameterTypeInfo<R>::Type(p0,p1,p2,p3,p4,p5);
 					return BoxValue<R>(result, GetOwnerTypeDescriptor());
@@ -220,13 +220,13 @@ Constructor: R(T0,T1,T2,T3,T4,T5,T6)
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
  
 					R result = new typename ParameterTypeInfo<R>::Type(p0,p1,p2,p3,p4,p5,p6);
 					return BoxValue<R>(result, GetOwnerTypeDescriptor());
@@ -255,14 +255,14 @@ Constructor: R(T0,T1,T2,T3,T4,T5,T6,T7)
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
  
 					R result = new typename ParameterTypeInfo<R>::Type(p0,p1,p2,p3,p4,p5,p6,p7);
 					return BoxValue<R>(result, GetOwnerTypeDescriptor());
@@ -292,15 +292,15 @@ Constructor: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
- 					T8 p8 = UnboxValue<T8>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+ 					typename ParameterTypeInfo<T8>::TempValueType p8 = UnboxValue<typename ParameterTypeInfo<T8>::TempValueType>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
  
 					R result = new typename ParameterTypeInfo<R>::Type(p0,p1,p2,p3,p4,p5,p6,p7,p8);
 					return BoxValue<R>(result, GetOwnerTypeDescriptor());
@@ -331,16 +331,16 @@ Constructor: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 			protected:
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
- 					T8 p8 = UnboxValue<T8>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
- 					T9 p9 = UnboxValue<T9>(arguments[9], GetParameter(9)->GetValueTypeDescriptor(), L"p9");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+ 					typename ParameterTypeInfo<T8>::TempValueType p8 = UnboxValue<typename ParameterTypeInfo<T8>::TempValueType>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
+ 					typename ParameterTypeInfo<T9>::TempValueType p9 = UnboxValue<typename ParameterTypeInfo<T9>::TempValueType>(arguments[9], GetParameter(9)->GetValueTypeDescriptor(), L"p9");
  
 					R result = new typename ParameterTypeInfo<R>::Type(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
 					return BoxValue<R>(result, GetOwnerTypeDescriptor());
@@ -433,7 +433,7 @@ Member Method: void(T0)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
  
 					  (object->*method)(p0);
 					return Value();
@@ -462,7 +462,7 @@ Member Method: R(T0)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
  
 					R result =  (object->*method)(p0);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -492,8 +492,8 @@ Member Method: void(T0,T1)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
  
 					  (object->*method)(p0,p1);
 					return Value();
@@ -523,8 +523,8 @@ Member Method: R(T0,T1)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
  
 					R result =  (object->*method)(p0,p1);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -555,9 +555,9 @@ Member Method: void(T0,T1,T2)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
  
 					  (object->*method)(p0,p1,p2);
 					return Value();
@@ -588,9 +588,9 @@ Member Method: R(T0,T1,T2)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
  
 					R result =  (object->*method)(p0,p1,p2);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -622,10 +622,10 @@ Member Method: void(T0,T1,T2,T3)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
  
 					  (object->*method)(p0,p1,p2,p3);
 					return Value();
@@ -657,10 +657,10 @@ Member Method: R(T0,T1,T2,T3)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
  
 					R result =  (object->*method)(p0,p1,p2,p3);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -693,11 +693,11 @@ Member Method: void(T0,T1,T2,T3,T4)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
  
 					  (object->*method)(p0,p1,p2,p3,p4);
 					return Value();
@@ -730,11 +730,11 @@ Member Method: R(T0,T1,T2,T3,T4)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
  
 					R result =  (object->*method)(p0,p1,p2,p3,p4);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -768,12 +768,12 @@ Member Method: void(T0,T1,T2,T3,T4,T5)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
  
 					  (object->*method)(p0,p1,p2,p3,p4,p5);
 					return Value();
@@ -807,12 +807,12 @@ Member Method: R(T0,T1,T2,T3,T4,T5)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
  
 					R result =  (object->*method)(p0,p1,p2,p3,p4,p5);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -847,13 +847,13 @@ Member Method: void(T0,T1,T2,T3,T4,T5,T6)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
  
 					  (object->*method)(p0,p1,p2,p3,p4,p5,p6);
 					return Value();
@@ -888,13 +888,13 @@ Member Method: R(T0,T1,T2,T3,T4,T5,T6)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
  
 					R result =  (object->*method)(p0,p1,p2,p3,p4,p5,p6);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -930,14 +930,14 @@ Member Method: void(T0,T1,T2,T3,T4,T5,T6,T7)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
  
 					  (object->*method)(p0,p1,p2,p3,p4,p5,p6,p7);
 					return Value();
@@ -973,14 +973,14 @@ Member Method: R(T0,T1,T2,T3,T4,T5,T6,T7)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
  
 					R result =  (object->*method)(p0,p1,p2,p3,p4,p5,p6,p7);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -1017,15 +1017,15 @@ Member Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
- 					T8 p8 = UnboxValue<T8>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+ 					typename ParameterTypeInfo<T8>::TempValueType p8 = UnboxValue<typename ParameterTypeInfo<T8>::TempValueType>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
  
 					  (object->*method)(p0,p1,p2,p3,p4,p5,p6,p7,p8);
 					return Value();
@@ -1062,15 +1062,15 @@ Member Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
- 					T8 p8 = UnboxValue<T8>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+ 					typename ParameterTypeInfo<T8>::TempValueType p8 = UnboxValue<typename ParameterTypeInfo<T8>::TempValueType>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
  
 					R result =  (object->*method)(p0,p1,p2,p3,p4,p5,p6,p7,p8);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -1108,16 +1108,16 @@ Member Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
- 					T8 p8 = UnboxValue<T8>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
- 					T9 p9 = UnboxValue<T9>(arguments[9], GetParameter(9)->GetValueTypeDescriptor(), L"p9");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+ 					typename ParameterTypeInfo<T8>::TempValueType p8 = UnboxValue<typename ParameterTypeInfo<T8>::TempValueType>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
+ 					typename ParameterTypeInfo<T9>::TempValueType p9 = UnboxValue<typename ParameterTypeInfo<T9>::TempValueType>(arguments[9], GetParameter(9)->GetValueTypeDescriptor(), L"p9");
  
 					  (object->*method)(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
 					return Value();
@@ -1155,16 +1155,16 @@ Member Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
- 					T8 p8 = UnboxValue<T8>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
- 					T9 p9 = UnboxValue<T9>(arguments[9], GetParameter(9)->GetValueTypeDescriptor(), L"p9");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+ 					typename ParameterTypeInfo<T8>::TempValueType p8 = UnboxValue<typename ParameterTypeInfo<T8>::TempValueType>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
+ 					typename ParameterTypeInfo<T9>::TempValueType p9 = UnboxValue<typename ParameterTypeInfo<T9>::TempValueType>(arguments[9], GetParameter(9)->GetValueTypeDescriptor(), L"p9");
  
 					R result =  (object->*method)(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -1256,7 +1256,7 @@ Static Method: void(T0)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
  
 					  method(p0);
 					return Value();
@@ -1284,7 +1284,7 @@ Static Method: R(T0)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
  
 					R result =  method(p0);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -1313,8 +1313,8 @@ Static Method: void(T0,T1)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
  
 					  method(p0,p1);
 					return Value();
@@ -1343,8 +1343,8 @@ Static Method: R(T0,T1)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
  
 					R result =  method(p0,p1);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -1374,9 +1374,9 @@ Static Method: void(T0,T1,T2)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
  
 					  method(p0,p1,p2);
 					return Value();
@@ -1406,9 +1406,9 @@ Static Method: R(T0,T1,T2)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
  
 					R result =  method(p0,p1,p2);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -1439,10 +1439,10 @@ Static Method: void(T0,T1,T2,T3)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
  
 					  method(p0,p1,p2,p3);
 					return Value();
@@ -1473,10 +1473,10 @@ Static Method: R(T0,T1,T2,T3)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
  
 					R result =  method(p0,p1,p2,p3);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -1508,11 +1508,11 @@ Static Method: void(T0,T1,T2,T3,T4)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
  
 					  method(p0,p1,p2,p3,p4);
 					return Value();
@@ -1544,11 +1544,11 @@ Static Method: R(T0,T1,T2,T3,T4)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
  
 					R result =  method(p0,p1,p2,p3,p4);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -1581,12 +1581,12 @@ Static Method: void(T0,T1,T2,T3,T4,T5)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
  
 					  method(p0,p1,p2,p3,p4,p5);
 					return Value();
@@ -1619,12 +1619,12 @@ Static Method: R(T0,T1,T2,T3,T4,T5)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
  
 					R result =  method(p0,p1,p2,p3,p4,p5);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -1658,13 +1658,13 @@ Static Method: void(T0,T1,T2,T3,T4,T5,T6)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
  
 					  method(p0,p1,p2,p3,p4,p5,p6);
 					return Value();
@@ -1698,13 +1698,13 @@ Static Method: R(T0,T1,T2,T3,T4,T5,T6)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
  
 					R result =  method(p0,p1,p2,p3,p4,p5,p6);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -1739,14 +1739,14 @@ Static Method: void(T0,T1,T2,T3,T4,T5,T6,T7)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
  
 					  method(p0,p1,p2,p3,p4,p5,p6,p7);
 					return Value();
@@ -1781,14 +1781,14 @@ Static Method: R(T0,T1,T2,T3,T4,T5,T6,T7)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
  
 					R result =  method(p0,p1,p2,p3,p4,p5,p6,p7);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -1824,15 +1824,15 @@ Static Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
- 					T8 p8 = UnboxValue<T8>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+ 					typename ParameterTypeInfo<T8>::TempValueType p8 = UnboxValue<typename ParameterTypeInfo<T8>::TempValueType>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
  
 					  method(p0,p1,p2,p3,p4,p5,p6,p7,p8);
 					return Value();
@@ -1868,15 +1868,15 @@ Static Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
- 					T8 p8 = UnboxValue<T8>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+ 					typename ParameterTypeInfo<T8>::TempValueType p8 = UnboxValue<typename ParameterTypeInfo<T8>::TempValueType>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
  
 					R result =  method(p0,p1,p2,p3,p4,p5,p6,p7,p8);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());
@@ -1913,16 +1913,16 @@ Static Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
- 					T8 p8 = UnboxValue<T8>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
- 					T9 p9 = UnboxValue<T9>(arguments[9], GetParameter(9)->GetValueTypeDescriptor(), L"p9");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+ 					typename ParameterTypeInfo<T8>::TempValueType p8 = UnboxValue<typename ParameterTypeInfo<T8>::TempValueType>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
+ 					typename ParameterTypeInfo<T9>::TempValueType p9 = UnboxValue<typename ParameterTypeInfo<T9>::TempValueType>(arguments[9], GetParameter(9)->GetValueTypeDescriptor(), L"p9");
  
 					  method(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
 					return Value();
@@ -1959,16 +1959,16 @@ Static Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
  
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
-					T0 p0 = UnboxValue<T0>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
- 					T1 p1 = UnboxValue<T1>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
- 					T2 p2 = UnboxValue<T2>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
- 					T3 p3 = UnboxValue<T3>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
- 					T4 p4 = UnboxValue<T4>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
- 					T5 p5 = UnboxValue<T5>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
- 					T6 p6 = UnboxValue<T6>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
- 					T7 p7 = UnboxValue<T7>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
- 					T8 p8 = UnboxValue<T8>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
- 					T9 p9 = UnboxValue<T9>(arguments[9], GetParameter(9)->GetValueTypeDescriptor(), L"p9");
+					typename ParameterTypeInfo<T0>::TempValueType p0 = UnboxValue<typename ParameterTypeInfo<T0>::TempValueType>(arguments[0], GetParameter(0)->GetValueTypeDescriptor(), L"p0");
+ 					typename ParameterTypeInfo<T1>::TempValueType p1 = UnboxValue<typename ParameterTypeInfo<T1>::TempValueType>(arguments[1], GetParameter(1)->GetValueTypeDescriptor(), L"p1");
+ 					typename ParameterTypeInfo<T2>::TempValueType p2 = UnboxValue<typename ParameterTypeInfo<T2>::TempValueType>(arguments[2], GetParameter(2)->GetValueTypeDescriptor(), L"p2");
+ 					typename ParameterTypeInfo<T3>::TempValueType p3 = UnboxValue<typename ParameterTypeInfo<T3>::TempValueType>(arguments[3], GetParameter(3)->GetValueTypeDescriptor(), L"p3");
+ 					typename ParameterTypeInfo<T4>::TempValueType p4 = UnboxValue<typename ParameterTypeInfo<T4>::TempValueType>(arguments[4], GetParameter(4)->GetValueTypeDescriptor(), L"p4");
+ 					typename ParameterTypeInfo<T5>::TempValueType p5 = UnboxValue<typename ParameterTypeInfo<T5>::TempValueType>(arguments[5], GetParameter(5)->GetValueTypeDescriptor(), L"p5");
+ 					typename ParameterTypeInfo<T6>::TempValueType p6 = UnboxValue<typename ParameterTypeInfo<T6>::TempValueType>(arguments[6], GetParameter(6)->GetValueTypeDescriptor(), L"p6");
+ 					typename ParameterTypeInfo<T7>::TempValueType p7 = UnboxValue<typename ParameterTypeInfo<T7>::TempValueType>(arguments[7], GetParameter(7)->GetValueTypeDescriptor(), L"p7");
+ 					typename ParameterTypeInfo<T8>::TempValueType p8 = UnboxValue<typename ParameterTypeInfo<T8>::TempValueType>(arguments[8], GetParameter(8)->GetValueTypeDescriptor(), L"p8");
+ 					typename ParameterTypeInfo<T9>::TempValueType p9 = UnboxValue<typename ParameterTypeInfo<T9>::TempValueType>(arguments[9], GetParameter(9)->GetValueTypeDescriptor(), L"p9");
  
 					R result =  method(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
 					return BoxValue(result, GetReturn()->GetValueTypeDescriptor());

@@ -23,6 +23,8 @@ namespace vl
 {
 	namespace presentation
 	{
+		using namespace reflection;
+
 		class INativeWindow;
 		class INativeWindowListener;
 		class INativeController;
@@ -63,7 +65,7 @@ System Object
 		/// <summary>
 		/// Represents a cursor.
 		/// </summary>
-		class INativeCursor : public Interface
+		class INativeCursor : public IDescriptable, Description<INativeCursor>
 		{
 		public:
 			/// <summary>
@@ -165,7 +167,7 @@ Image Object
 		/// <summary>
 		/// Represents an image frame.
 		/// </summary>
-		class INativeImageFrame : public Interface
+		class INativeImageFrame : public IDescriptable, public Description<INativeImageFrame>
 		{
 		public:
 			/// <summary>
@@ -203,7 +205,7 @@ Image Object
 		/// <summary>
 		/// Represents an image.
 		/// </summary>
-		class INativeImage : public Interface
+		class INativeImage : public IDescriptable, public Description<INativeImage>
 		{
 		public:
 			/// <summary>
@@ -259,7 +261,7 @@ Image Object
 			/// Get the number of frames in this image.
 			/// </summary>
 			/// <returns>The number of frames in this image.</returns>
-			virtual vint							GetFrameCount()=0;
+			virtual vint						GetFrameCount()=0;
 			/// <summary>
 			/// Get the frame in this image by a specified frame index.
 			/// </summary>
@@ -627,11 +629,11 @@ Native Window
 			/// <summary>True if the right mouse button is pressed.</summary>
 			bool						right;
 			/// <summary>The mouse position of x dimension.</summary>
-			vint							x;
+			vint						x;
 			/// <summary>The mouse position of y dimension.</summary>
-			vint							y;
+			vint						y;
 			/// <summary>The delta of the wheel.</summary>
-			vint							wheel;
+			vint						wheel;
 		};
 		
 		/// <summary>
@@ -640,7 +642,7 @@ Native Window
 		struct NativeWindowKeyInfo
 		{
 			/// <summary>Key code of the key that sends this message.</summary>
-			vint							code;
+			vint						code;
 			/// <summary>True if the control button is pressed.</summary>
 			bool						ctrl;
 			/// <summary>True if the shift button is pressed.</summary>
