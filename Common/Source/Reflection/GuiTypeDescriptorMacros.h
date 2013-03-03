@@ -41,6 +41,18 @@ Type
 				manager->SetTypeDescriptor(TypeInfo<TYPENAME>::TypeName, type);\
 			}
 
+#define INVOKE_INTERFACE_PROXY(METHODNAME, ...)\
+	proxy->Invoke(L#METHODNAME, IValueList::Create(collections::From((collections::Array<Value>&)(Value::xs(), __VA_ARGS__))))
+
+#define INVOKE_INTERFACE_PROXY_NOPARAM(METHODNAME, ...)\
+	proxy->Invoke(L#METHODNAME, IValueList::Create())
+
+#define INVOKEGET_INTERFACE_PROXY(RETURNTYPE, METHODNAME)\
+	UnboxValue<RETURNTYPE>(proxy->Invoke(L#METHODNAME, IValueList::Create(collections::From((collections::Array<Value>&)(Value::xs(), __VA_ARGS__)))))
+
+#define INVOKEGET_INTERFACE_PROXY_NOPARAMS(RETURNTYPE, METHODNAME)\
+	UnboxValue<RETURNTYPE>(proxy->Invoke(L#METHODNAME, IValueList::Create()))
+
 /***********************************************************************
 Enum
 ***********************************************************************/
