@@ -485,6 +485,10 @@ Collections
 				virtual bool					Remove(const Value& value)=0;
 				virtual bool					RemoveAt(vint index)=0;
 				virtual void					Clear()=0;
+
+				static Ptr<IValueList>			Create();
+				static Ptr<IValueList>			Create(Ptr<IValueReadonlyList> values);
+				static Ptr<IValueList>			Create(collections::LazyList<Value> values);
 			};
 
 			namespace trait_helper
@@ -616,6 +620,16 @@ Collections
 				{
 					wrapperPointer->Clear();
 				}
+			};
+
+/***********************************************************************
+Interface Implementation Proxy
+***********************************************************************/
+
+			class IValueInterfaceProxy : public IDescriptable, public Description<IValueReadonlyList>
+			{
+			public:
+				virtual Value					Invoke(const WString& methodName, Ptr<IValueList> arguments)=0;
 			};
 		}
 	}
