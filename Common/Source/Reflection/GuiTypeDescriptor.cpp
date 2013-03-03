@@ -1,6 +1,4 @@
-#include "GuiTypeDescriptor.h"
-#include "..\Collections\List.h"
-#include "..\Collections\Dictionary.h"
+#include "GuiTypeDescriptorBuilder.h"
 
 namespace vl
 {
@@ -138,6 +136,10 @@ description::Value
 
 			bool Value::CanConvertTo(ITypeDescriptor* targetType, ValueType targetValueType)const
 			{
+				if(targetType==GetGlobalTypeManager()->GetRootType())
+				{
+					return true;
+				}
 				switch(valueType)
 				{
 				case Null:
@@ -315,11 +317,13 @@ description::TypeManager
 			protected:
 				Dictionary<WString, Ptr<ITypeDescriptor>>		typeDescriptors;
 				List<Ptr<ITypeLoader>>							typeLoaders;
+				ITypeDescriptor*								rootType;
 				bool											loaded;
 
 			public:
 				TypeManager()
-					:loaded(false)
+					:rootType(0)
+					,loaded(false)
 				{
 				}
 
@@ -328,23 +332,23 @@ description::TypeManager
 					Unload();
 				}
 
-				vint GetTypeDescriptorCount()
+				vint GetTypeDescriptorCount()override
 				{
 					return typeDescriptors.Values().Count();
 				}
 
-				ITypeDescriptor* GetTypeDescriptor(vint index)
+				ITypeDescriptor* GetTypeDescriptor(vint index)override
 				{
 					return typeDescriptors.Values().Get(index).Obj();
 				}
 
-				ITypeDescriptor* GetTypeDescriptor(const WString& name)
+				ITypeDescriptor* GetTypeDescriptor(const WString& name)override
 				{
 					vint index=typeDescriptors.Keys().IndexOf(name);
 					return index==-1?0:typeDescriptors.Values().Get(index).Obj();
 				}
 
-				bool SetTypeDescriptor(const WString& name, Ptr<ITypeDescriptor> typeDescriptor)
+				bool SetTypeDescriptor(const WString& name, Ptr<ITypeDescriptor> typeDescriptor)override
 				{
 					if(typeDescriptor && name!=typeDescriptor->GetTypeName())
 					{
@@ -369,7 +373,7 @@ description::TypeManager
 					return false;
 				}
 
-				bool AddTypeLoader(Ptr<ITypeLoader> typeLoader)
+				bool AddTypeLoader(Ptr<ITypeLoader> typeLoader)override
 				{
 					vint index=typeLoaders.IndexOf(typeLoader.Obj());
 					if(index==-1)
@@ -387,7 +391,7 @@ description::TypeManager
 					}
 				}
 
-				bool RemoveTypeLoader(Ptr<ITypeLoader> typeLoader)
+				bool RemoveTypeLoader(Ptr<ITypeLoader> typeLoader)override
 				{
 					vint index=typeLoaders.IndexOf(typeLoader.Obj());
 					if(index!=-1)
@@ -405,7 +409,7 @@ description::TypeManager
 					}
 				}
 
-				bool Load()
+				bool Load()override
 				{
 					if(!loaded)
 					{
@@ -414,6 +418,7 @@ description::TypeManager
 						{
 							typeLoaders[i]->Load(this);
 						}
+						rootType=description::GetTypeDescriptor<Value>();
 						return true;
 					}
 					else
@@ -422,11 +427,12 @@ description::TypeManager
 					}
 				}
 
-				bool Unload()
+				bool Unload()override
 				{
 					if(loaded)
 					{
 						loaded=false;
+						rootType=0;
 						for(vint i=0;i<typeLoaders.Count();i++)
 						{
 							typeLoaders[i]->Unload(this);
@@ -440,16 +446,21 @@ description::TypeManager
 					}
 				}
 
-				bool Reload()
+				bool Reload()override
 				{
 					Unload();
 					Load();
 					return true;
 				}
 
-				bool IsLoaded()
+				bool IsLoaded()override
 				{
 					return loaded;
+				}
+
+				ITypeDescriptor* GetRootType()override
+				{
+					return rootType;
 				}
 			};
 

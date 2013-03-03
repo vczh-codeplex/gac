@@ -351,6 +351,7 @@ ITypeManager
 				virtual bool					Unload()=0;
 				virtual bool					Reload()=0;
 				virtual bool					IsLoaded()=0;
+				virtual ITypeDescriptor*		GetRootType()=0;
 			};
 
 			extern ITypeManager*				GetGlobalTypeManager();

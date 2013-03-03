@@ -415,6 +415,20 @@ ParameterTypeInfo Helper Functions
 				}
 			};
 
+			template<>
+			struct ValueAccessor<Value, IParameterInfo::Text>
+			{
+				static Value BoxValue(const Value& object, ITypeDescriptor* typeDescriptor)
+				{
+					return object;
+				}
+
+				static Value UnboxValue(const Value& value, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					return value;
+				}
+			};
+
 			template<typename T>
 			Value BoxValue(const T& object, ITypeDescriptor* typeDescriptor=0)
 			{
