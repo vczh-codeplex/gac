@@ -121,6 +121,8 @@ Value
 				Value();
 				Value(const Value& value);
 				Value&							operator=(const Value& value);
+				bool							operator==(const Value& value)const;
+				bool							operator!=(const Value& value)const;
 
 				ValueType						GetValueType()const;
 				DescriptableObject*				GetRawPtr()const;
@@ -450,6 +452,159 @@ Exceptions
 				ArgumentCountMismtatchException()
 					:TypeDescriptorException(L"Argument count does not match the definition.")
 				{
+				}
+			};
+
+/***********************************************************************
+Collections
+***********************************************************************/
+
+			class IValueReadonlyList : public IDescriptable, public Description<IValueReadonlyList>
+			{
+			public:
+				virtual vint					Count()=0;
+				virtual Value					Get(vint index)=0;
+				virtual bool					Contains(const Value& value)=0;
+				virtual vint					IndexOf(const Value& value)=0;
+			};
+
+			class IValueList : public IValueReadonlyList, public Description<IValueList>
+			{
+			public:
+				virtual void					Set(vint index, const Value& value)=0;
+				virtual vint					Add(const Value& value)=0;
+				virtual vint					Insert(vint index, const Value& value)=0;
+				virtual bool					Remove(const Value& value)=0;
+				virtual bool					RemoveAt(vint index)=0;
+				virtual void					Clear()=0;
+			};
+
+			namespace trait_helper
+			{
+				template<typename T>
+				struct RemovePtr
+				{
+					typedef T					Type;
+				};
+				
+				template<typename T>
+				struct RemovePtr<T*>
+				{
+					typedef T					Type;
+				};
+				
+				template<typename T>
+				struct RemovePtr<Ptr<T>>
+				{
+					typedef T					Type;
+				};
+			}
+
+			template<typename T>
+			class ValueRreadonlyListWrapper : public Object, public IValueReadonlyList
+			{
+			protected:
+				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
+				typedef typename ContainerType::ElementType				ElementType;
+
+				T								wrapperPointer;
+			public:
+				ValueRreadonlyListWrapper(const T& _wrapperPointer)
+					:wrapperPointer(_wrapperPointer)
+				{
+				}
+
+				vint Count()override
+				{
+					return wrapperPointer->Count();
+				}
+
+				Value Get(vint index)override
+				{
+					BoxValue<ElementType>(wrapperPointer->Get(index));
+				}
+
+				bool Contains(const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					return wrapperPointer->Contains(item);
+				}
+
+				vint IndexOf(const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					return wrapperPointer->IndexOf(item);
+				}
+			};
+
+			template<typename T>
+			class ValueListWrapper : public Object, public IValueList
+			{
+			protected:
+				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
+				typedef typename ContainerType::ElementType				ElementType;
+
+				T								wrapperPointer;
+			public:
+				ValueListWrapper(const T& _wrapperPointer)
+					:wrapperPointer(_wrapperPointer)
+				{
+				}
+
+				vint Count()override
+				{
+					return wrapperPointer->Count();
+				}
+
+				Value Get(vint index)override
+				{
+					return BoxValue<ElementType>(wrapperPointer->Get(index));
+				}
+
+				bool Contains(const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					return wrapperPointer->Contains(item);
+				}
+
+				vint IndexOf(const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					return wrapperPointer->IndexOf(item);
+				}
+
+				void Set(vint index, const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					wrapperPointer->Set(index, item);
+				}
+
+				vint Add(const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					return wrapperPointer->Add(item);
+				}
+
+				vint Insert(vint index, const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					return wrapperPointer->Insert(index, item);
+				}
+
+				bool Remove(const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					return wrapperPointer->Remove(item);
+				}
+
+				bool RemoveAt(vint index)override
+				{
+					return wrapperPointer->RemoveAt(index);
+				}
+
+				void Clear()override
+				{
+					wrapperPointer->Clear();
 				}
 			};
 		}

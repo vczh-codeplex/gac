@@ -1,6 +1,6 @@
 #include <limits.h>
 #include <float.h>
-#include "GuiTypeDescriptorPredefined.h"
+#include "GuiTypeDescriptorMacros.h"
 
 namespace vl
 {
@@ -119,19 +119,21 @@ SerializableTypeDescriptorBase
 TypeName
 ***********************************************************************/
 			
-			const wchar_t* TypeInfo<Value>::TypeName			= L"object";
-			const wchar_t* TypeInfo<unsigned __int8>::TypeName	= L"byte";
-			const wchar_t* TypeInfo<unsigned __int16>::TypeName	= L"ushort";
-			const wchar_t* TypeInfo<unsigned __int32>::TypeName	= L"uint";
-			const wchar_t* TypeInfo<unsigned __int64>::TypeName	= L"ulong";
-			const wchar_t* TypeInfo<signed __int8>::TypeName	= L"sbyte";
-			const wchar_t* TypeInfo<signed __int16>::TypeName	= L"short";
-			const wchar_t* TypeInfo<signed __int32>::TypeName	= L"int";
-			const wchar_t* TypeInfo<signed __int64>::TypeName	= L"long";
-			const wchar_t* TypeInfo<float>::TypeName			= L"float";
-			const wchar_t* TypeInfo<double>::TypeName			= L"double";
-			const wchar_t* TypeInfo<bool>::TypeName				= L"bool";
-			const wchar_t* TypeInfo<WString>::TypeName			= L"string";
+			const wchar_t* TypeInfo<Value>::TypeName				= L"object";
+			const wchar_t* TypeInfo<unsigned __int8>::TypeName		= L"byte";
+			const wchar_t* TypeInfo<unsigned __int16>::TypeName		= L"ushort";
+			const wchar_t* TypeInfo<unsigned __int32>::TypeName		= L"uint";
+			const wchar_t* TypeInfo<unsigned __int64>::TypeName		= L"ulong";
+			const wchar_t* TypeInfo<signed __int8>::TypeName		= L"sbyte";
+			const wchar_t* TypeInfo<signed __int16>::TypeName		= L"short";
+			const wchar_t* TypeInfo<signed __int32>::TypeName		= L"int";
+			const wchar_t* TypeInfo<signed __int64>::TypeName		= L"long";
+			const wchar_t* TypeInfo<float>::TypeName				= L"float";
+			const wchar_t* TypeInfo<double>::TypeName				= L"double";
+			const wchar_t* TypeInfo<bool>::TypeName					= L"bool";
+			const wchar_t* TypeInfo<WString>::TypeName				= L"string";
+			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName	= L"ReadonlyList";
+			const wchar_t* TypeInfo<IValueList>::TypeName			= L"List";
 
 /***********************************************************************
 TypedValueSerializerProvider
@@ -335,6 +337,37 @@ BoolValueSerializer
 			};
 
 /***********************************************************************
+Collections
+***********************************************************************/
+
+			Ptr<IValueList> IValueList_Constructor()
+			{
+				return new ValueListWrapper<Ptr<List<Value>>>(new List<Value>);
+			}
+
+#define _ ,
+
+			BEGIN_CLASS_MEMBER(IValueReadonlyList)
+				CLASS_MEMBER_METHOD(Count, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Get, {L"index"})
+				CLASS_MEMBER_METHOD(Contains, {L"value"})
+				CLASS_MEMBER_METHOD(IndexOf, {L"value"})
+			END_CLASS_MEMBER(IValueReadonlyList)
+
+			BEGIN_CLASS_MEMBER(IValueList)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueList>(), NO_PARAMETER, &IValueList_Constructor)
+
+				CLASS_MEMBER_METHOD(Set, {L"index" _ L"value"})
+				CLASS_MEMBER_METHOD(Add, {L"value"})
+				CLASS_MEMBER_METHOD(Insert, {L"index" _ L"value"})
+				CLASS_MEMBER_METHOD(Remove, {L"value"})
+				CLASS_MEMBER_METHOD(RemoveAt, {L"index"})
+				CLASS_MEMBER_METHOD(Clear, NO_PARAMETER)
+			END_CLASS_MEMBER(IValueList)
+
+#undef _
+
+/***********************************************************************
 LoadPredefinedTypes
 ***********************************************************************/
 
@@ -362,6 +395,8 @@ LoadPredefinedTypes
 					AddSerializableType<TypedValueSerializer<double>>(manager);
 					AddSerializableType<BoolValueSeriaizer>(manager);
 					AddSerializableType<TypedValueSerializer<WString>>(manager);
+					ADD_TYPE_INFO(IValueReadonlyList)
+					ADD_TYPE_INFO(IValueList)
 				}
 
 				void Unload(ITypeManager* manager)override

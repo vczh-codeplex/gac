@@ -81,6 +81,26 @@ description::Value
 				return *this;
 			}
 
+			bool Value::operator==(const Value& value)const
+			{
+				switch(valueType)
+				{
+				case Null:
+					return value.IsNull();
+				case Text:
+					return GetTypeDescriptor()==value.GetTypeDescriptor() && GetText()==value.GetText();
+				case RawPtr:
+				case SharedPtr:
+					return GetRawPtr()==value.GetRawPtr();
+				}
+				return false;
+			}
+
+			bool Value::operator!=(const Value& value)const
+			{
+				return !(*this==value);
+			}
+
 			Value::ValueType Value::GetValueType()const
 			{
 				return valueType;
@@ -580,6 +600,10 @@ LogTypeManager
 							}
 							writer.WriteLine(L";");
 						}
+						if(type->GetEventCount()>0)
+						{
+							writer.WriteLine(L"");
+						}
 
 						for(vint j=0;j<type->GetPropertyCount();j++)
 						{
@@ -599,6 +623,10 @@ LogTypeManager
 							}
 							writer.WriteLine(L"}");
 						}
+						if(type->GetPropertyCount()>0)
+						{
+							writer.WriteLine(L"");
+						}
 
 						for(vint j=0;j<type->GetMethodGroupCount();j++)
 						{
@@ -612,7 +640,7 @@ LogTypeManager
 								}
 								else
 								{
-									writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+L"void");
+									writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+L"function void");
 								}
 								writer.WriteString(L" "+info->GetName()+L"(");
 								for(vint l=0;l<info->GetParameterCount();l++)
@@ -623,6 +651,10 @@ LogTypeManager
 								}
 								writer.WriteLine(L");");
 							}
+						}
+						if(type->GetMethodGroupCount()>0)
+						{
+							writer.WriteLine(L"");
 						}
 
 						if(IMethodGroupInfo* group=type->GetConstructorGroup())
