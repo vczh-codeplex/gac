@@ -119,23 +119,24 @@ SerializableTypeDescriptorBase
 TypeName
 ***********************************************************************/
 			
-			const wchar_t* TypeInfo<IDescriptable>::TypeName		= L"object";
-			const wchar_t* TypeInfo<Value>::TypeName				= L"object";
-			const wchar_t* TypeInfo<unsigned __int8>::TypeName		= L"byte";
-			const wchar_t* TypeInfo<unsigned __int16>::TypeName		= L"ushort";
-			const wchar_t* TypeInfo<unsigned __int32>::TypeName		= L"uint";
-			const wchar_t* TypeInfo<unsigned __int64>::TypeName		= L"ulong";
-			const wchar_t* TypeInfo<signed __int8>::TypeName		= L"sbyte";
-			const wchar_t* TypeInfo<signed __int16>::TypeName		= L"short";
-			const wchar_t* TypeInfo<signed __int32>::TypeName		= L"int";
-			const wchar_t* TypeInfo<signed __int64>::TypeName		= L"long";
-			const wchar_t* TypeInfo<float>::TypeName				= L"float";
-			const wchar_t* TypeInfo<double>::TypeName				= L"double";
-			const wchar_t* TypeInfo<bool>::TypeName					= L"bool";
-			const wchar_t* TypeInfo<wchar_t>::TypeName				= L"char";
-			const wchar_t* TypeInfo<WString>::TypeName				= L"string";
-			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName	= L"ReadonlyList";
-			const wchar_t* TypeInfo<IValueList>::TypeName			= L"List";
+			const wchar_t* TypeInfo<IDescriptable>::TypeName			= L"object";
+			const wchar_t* TypeInfo<Value>::TypeName					= L"object";
+			const wchar_t* TypeInfo<unsigned __int8>::TypeName			= L"byte";
+			const wchar_t* TypeInfo<unsigned __int16>::TypeName			= L"ushort";
+			const wchar_t* TypeInfo<unsigned __int32>::TypeName			= L"uint";
+			const wchar_t* TypeInfo<unsigned __int64>::TypeName			= L"ulong";
+			const wchar_t* TypeInfo<signed __int8>::TypeName			= L"sbyte";
+			const wchar_t* TypeInfo<signed __int16>::TypeName			= L"short";
+			const wchar_t* TypeInfo<signed __int32>::TypeName			= L"int";
+			const wchar_t* TypeInfo<signed __int64>::TypeName			= L"long";
+			const wchar_t* TypeInfo<float>::TypeName					= L"float";
+			const wchar_t* TypeInfo<double>::TypeName					= L"double";
+			const wchar_t* TypeInfo<bool>::TypeName						= L"bool";
+			const wchar_t* TypeInfo<wchar_t>::TypeName					= L"char";
+			const wchar_t* TypeInfo<WString>::TypeName					= L"string";
+			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"ReadableList";
+			const wchar_t* TypeInfo<IValueList>::TypeName				= L"List";
+			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"InterfaceProxy";
 
 /***********************************************************************
 TypedValueSerializerProvider
@@ -355,11 +356,6 @@ BoolValueSerializer
 Collections
 ***********************************************************************/
 
-			Ptr<IValueList> IValueList_Constructor()
-			{
-				return new ValueListWrapper<Ptr<List<Value>>>(new List<Value>);
-			}
-
 #define _ ,
 
 			BEGIN_CLASS_MEMBER(IValueReadonlyList)
@@ -371,7 +367,8 @@ Collections
 
 			BEGIN_CLASS_MEMBER(IValueList)
 				CLASS_MEMBER_BASE(IValueReadonlyList)
-				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueList>(), NO_PARAMETER, &IValueList_Constructor)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueList>(), NO_PARAMETER, (Ptr<IValueList>(*)())&IValueList::Create)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueList>(Ptr<IValueReadonlyList>), {L"values"}, (Ptr<IValueList>(*)(Ptr<IValueReadonlyList>))&IValueList::Create)
 
 				CLASS_MEMBER_METHOD(Set, {L"index" _ L"value"})
 				CLASS_MEMBER_METHOD(Add, {L"value"})
@@ -380,6 +377,10 @@ Collections
 				CLASS_MEMBER_METHOD(RemoveAt, {L"index"})
 				CLASS_MEMBER_METHOD(Clear, NO_PARAMETER)
 			END_CLASS_MEMBER(IValueList)
+
+			BEGIN_CLASS_MEMBER(IValueInterfaceProxy)
+				CLASS_MEMBER_METHOD(Invoke, {L"name" _ L"arguments"})
+			END_CLASS_MEMBER(IValueInterfaceProxy)
 
 #undef _
 
@@ -414,6 +415,7 @@ LoadPredefinedTypes
 					AddSerializableType<TypedValueSerializer<WString>>(manager);
 					ADD_TYPE_INFO(IValueReadonlyList)
 					ADD_TYPE_INFO(IValueList)
+					ADD_TYPE_INFO(IValueInterfaceProxy)
 				}
 
 				void Unload(ITypeManager* manager)override
