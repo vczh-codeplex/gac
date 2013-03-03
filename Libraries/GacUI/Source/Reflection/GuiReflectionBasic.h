@@ -40,6 +40,17 @@ Type List
 			F(DocumentModel)\
 			F(GuiResource)\
 			F(IGuiGraphicsElement)\
+			F(GuiGraphicsComposition)\
+			F(GuiGraphicsComposition::MinSizeLimitation)\
+			F(INativeWindowListener::HitTestResult)\
+			F(GuiGraphicsSite)\
+			F(GuiWindowComposition)\
+			F(GuiBoundsComposition)\
+			F(GuiControl)\
+			F(GuiControl::IStyleController)\
+			F(GuiControl::IStyleProvider)\
+			F(GuiComponent)\
+			F(GuiControlHost)\
 
 			GUIREFLECTIONBASIC_TYPELIST(DECL_TYPE_INFO)
 
