@@ -118,19 +118,20 @@ SerializableTypeDescriptorBase
 /***********************************************************************
 TypeName
 ***********************************************************************/
-
-			const wchar_t* TypeInfo<unsigned __int8>::TypeName	= L"unsigned __int8";
-			const wchar_t* TypeInfo<unsigned __int16>::TypeName	= L"unsigned __int16";
-			const wchar_t* TypeInfo<unsigned __int32>::TypeName	= L"unsigned __int32";
-			const wchar_t* TypeInfo<unsigned __int64>::TypeName	= L"unsigned __int64";
-			const wchar_t* TypeInfo<signed __int8>::TypeName	= L"signed __int8";
-			const wchar_t* TypeInfo<signed __int16>::TypeName	= L"signed __int16";
-			const wchar_t* TypeInfo<signed __int32>::TypeName	= L"signed __int32";
-			const wchar_t* TypeInfo<signed __int64>::TypeName	= L"signed __int64";
+			
+			const wchar_t* TypeInfo<Value>::TypeName			= L"object";
+			const wchar_t* TypeInfo<unsigned __int8>::TypeName	= L"byte";
+			const wchar_t* TypeInfo<unsigned __int16>::TypeName	= L"ushort";
+			const wchar_t* TypeInfo<unsigned __int32>::TypeName	= L"uint";
+			const wchar_t* TypeInfo<unsigned __int64>::TypeName	= L"ulong";
+			const wchar_t* TypeInfo<signed __int8>::TypeName	= L"sbyte";
+			const wchar_t* TypeInfo<signed __int16>::TypeName	= L"short";
+			const wchar_t* TypeInfo<signed __int32>::TypeName	= L"int";
+			const wchar_t* TypeInfo<signed __int64>::TypeName	= L"long";
 			const wchar_t* TypeInfo<float>::TypeName			= L"float";
 			const wchar_t* TypeInfo<double>::TypeName			= L"double";
 			const wchar_t* TypeInfo<bool>::TypeName				= L"bool";
-			const wchar_t* TypeInfo<WString>::TypeName			= L"WString";
+			const wchar_t* TypeInfo<WString>::TypeName			= L"string";
 
 /***********************************************************************
 TypedValueSerializerProvider
@@ -306,6 +307,19 @@ TypedValueSerializerProvider
 			}
 
 /***********************************************************************
+ObjectTypeDescriptor
+***********************************************************************/
+
+			class ObjectTypeDescriptor : public SerializableTypeDescriptorBase
+			{
+			public:
+				ObjectTypeDescriptor()
+					:SerializableTypeDescriptorBase(TypeInfo<Value>::TypeName, 0)
+				{
+				}
+			};
+
+/***********************************************************************
 BoolValueSerializer
 ***********************************************************************/
 
@@ -335,6 +349,7 @@ LoadPredefinedTypes
 
 				void Load(ITypeManager* manager)override
 				{
+					manager->SetTypeDescriptor(TypeInfo<Value>::TypeName, new ObjectTypeDescriptor);
 					AddSerializableType<TypedValueSerializer<unsigned __int8>>(manager);
 					AddSerializableType<TypedValueSerializer<unsigned __int16>>(manager);
 					AddSerializableType<TypedValueSerializer<unsigned __int32>>(manager);
