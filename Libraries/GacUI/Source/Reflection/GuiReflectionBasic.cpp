@@ -303,6 +303,8 @@ Type Declaration
 			END_CLASS_MEMBER(GuiControl)
 
 			BEGIN_CLASS_MEMBER(GuiControl::IStyleController)
+				CLASS_MEMBER_EXTERNALCTOR(GuiControl::IStyleController*(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::GuiControl_IStyleController::Create)
+
 				CLASS_MEMBER_METHOD(GetBoundsComposition, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(GetContainerComposition, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(SetFocusableComposition, {L"value"})
@@ -312,6 +314,8 @@ Type Declaration
 			END_CLASS_MEMBER(GuiControl::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiControl::IStyleProvider)
+				CLASS_MEMBER_EXTERNALCTOR(GuiControl::IStyleProvider*(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::GuiControl_IStyleProvider::Create)
+
 				CLASS_MEMBER_METHOD(AssociateStyleController, {L"controller"})
 				CLASS_MEMBER_METHOD(SetFocusableComposition, {L"value"})
 				CLASS_MEMBER_METHOD(SetText, {L"value"})

@@ -73,6 +73,102 @@ Type Declaration
 			};
 
 /***********************************************************************
+Interface Proxy
+***********************************************************************/
+
+			namespace interface_proxy
+			{
+				class GuiControl_IStyleController : public Object, public GuiControl::IStyleController
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>		proxy;
+
+				public:
+					GuiControl_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static GuiControl::IStyleController* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiControl_IStyleController(_proxy);
+					}
+
+					compositions::GuiBoundsComposition* GetBoundsComposition()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GuiBoundsComposition*, GetBoundsComposition);
+					}
+
+					compositions::GuiGraphicsComposition* GetContainerComposition()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GuiGraphicsComposition*, GetContainerComposition);
+					}
+
+					void SetFocusableComposition(compositions::GuiGraphicsComposition* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetFocusableComposition, value);
+					}
+
+					void SetText(const WString& value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetText, value);
+					}
+
+					void SetFont(const FontProperties& value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetFont, value);
+					}
+
+					void SetVisuallyEnabled(bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetVisuallyEnabled, value);
+					}
+				};
+				
+				class GuiControl_IStyleProvider : public Object, public GuiControl::IStyleProvider
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>		proxy;
+
+				public:
+					GuiControl_IStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static GuiControl::IStyleProvider* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiControl_IStyleProvider(_proxy);
+					}
+
+					void AssociateStyleController(GuiControl::IStyleController* controller)override
+					{
+						INVOKE_INTERFACE_PROXY(AssociateStyleController, controller);
+					}
+
+					void SetFocusableComposition(compositions::GuiGraphicsComposition* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetFocusableComposition, value);
+					}
+
+					void SetText(const WString& value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetText, value);
+					}
+
+					void SetFont(const FontProperties& value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetFont, value);
+					}
+
+					void SetVisuallyEnabled(bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetVisuallyEnabled, value);
+					}
+				};
+			}
+
+/***********************************************************************
 Type Loader
 ***********************************************************************/
 
