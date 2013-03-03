@@ -396,7 +396,7 @@ BEGIN_TYPE_INFO_NAMESPACE
 
 	Ptr<IValueReadonlyList> BaseSummer_GetBases(BaseSummer* thisObject)
 	{
-		return new ValueRreadonlyListWrapper<const Array<Ptr<Base>>*>(&thisObject->GetBases());
+		return new ValueReadonlyListWrapper<const Array<Ptr<Base>>*>(&thisObject->GetBases());
 	}
 
 	void BaseSummer_SetBases(BaseSummer* thisObject, Ptr<IValueReadonlyList> bases)

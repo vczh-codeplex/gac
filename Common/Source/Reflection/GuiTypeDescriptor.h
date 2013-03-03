@@ -509,7 +509,7 @@ Collections
 			}
 
 			template<typename T>
-			class ValueRreadonlyListWrapper : public Object, public IValueReadonlyList
+			class ValueReadonlyListWrapper : public Object, public IValueReadonlyList
 			{
 			protected:
 				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
@@ -518,7 +518,7 @@ Collections
 
 				T								wrapperPointer;
 			public:
-				ValueRreadonlyListWrapper(const T& _wrapperPointer)
+				ValueReadonlyListWrapper(const T& _wrapperPointer)
 					:wrapperPointer(_wrapperPointer)
 				{
 				}
