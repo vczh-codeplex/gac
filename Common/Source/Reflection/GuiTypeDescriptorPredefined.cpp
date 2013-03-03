@@ -355,6 +355,7 @@ Collections
 			END_CLASS_MEMBER(IValueReadonlyList)
 
 			BEGIN_CLASS_MEMBER(IValueList)
+				CLASS_MEMBER_BASE(IValueReadonlyList)
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueList>(), NO_PARAMETER, &IValueList_Constructor)
 
 				CLASS_MEMBER_METHOD(Set, {L"index" _ L"value"})
