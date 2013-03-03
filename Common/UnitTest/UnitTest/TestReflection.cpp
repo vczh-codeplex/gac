@@ -3,6 +3,7 @@
 #include "..\..\Source\Stream\FileStream.h"
 #include "..\..\Source\Stream\Accessor.h"
 #include "..\..\Source\Stream\CharFormat.h"
+#include "..\..\Source\Collections\Operation.h"
 
 #include <limits>
 
@@ -296,6 +297,29 @@ namespace test
 		void Reset(ResetOption opt){if(opt&ResetA) a=0; if(opt&ResetB) b=0;}
 		void Reset(Derived* derived){a=derived->a; b=derived->b;}
 	};
+
+	class BaseSummer : public Description<BaseSummer>
+	{
+	protected:
+		Array<Ptr<Base>>		bases;
+	public:
+		const Array<Ptr<Base>>& GetBases()
+		{
+			return bases;
+		}
+
+		void SetBases(const Array<Ptr<Base>>& _bases)
+		{
+			CopyFrom(bases, _bases);
+		}
+
+		int Sum()
+		{
+			return From(bases)
+				.Select([](const Ptr<Base>& base){return base->a;})
+				.Aggregate(0, [](int a, int b){return a+b;});
+		}
+	};
 }
 using namespace test;
 
@@ -306,6 +330,7 @@ using namespace test;
 	F(test::ResetOption)\
 	F(test::Base)\
 	F(test::Derived)\
+	F(test::BaseSummer)\
 	F(test::Point)\
 	F(test::Size)\
 	F(test::Rect)\
@@ -368,6 +393,25 @@ BEGIN_TYPE_INFO_NAMESPACE
 		STRUCT_MEMBER(point)
 		STRUCT_MEMBER(size)
 	END_STRUCT_MEMBER(test::Rect)
+
+	Ptr<IValueReadonlyList> BaseSummer_GetBases(BaseSummer* thisObject)
+	{
+		return new ValueRreadonlyListWrapper<const Array<Ptr<Base>>*>(&thisObject->GetBases());
+	}
+
+	void BaseSummer_SetBases(BaseSummer* thisObject, Ptr<IValueReadonlyList> bases)
+	{
+		Array<Ptr<Base>> baseArray;
+		CopyFrom(baseArray, bases->GetLazyList<Ptr<Base>>());
+		thisObject->SetBases(baseArray);
+	}
+
+	BEGIN_CLASS_MEMBER(BaseSummer)
+		CLASS_MEMBER_CONSTRUCTOR(Ptr<BaseSummer>(), NO_PARAMETER)
+		CLASS_MEMBER_METHOD(Sum, NO_PARAMETER)
+		CLASS_MEMBER_EXTERNALMETHOD(GetBases, NO_PARAMETER, Ptr<IValueReadonlyList>(BaseSummer::*)(), &BaseSummer_GetBases)
+		CLASS_MEMBER_EXTERNALMETHOD(SetBases, {L"bases"}, void(BaseSummer::*)(Ptr<IValueReadonlyList>), &BaseSummer_SetBases)
+	END_CLASS_MEMBER(BaseSummer)
 
 	class TestTypeLoader : public Object, public ITypeLoader
 	{
@@ -549,5 +593,13 @@ TEST_CASE(TestReflectionStruct)
 		TEST_ASSERT(rect.size.cx==30);
 		TEST_ASSERT(rect.size.cy==40);
 	}
+	TEST_ASSERT(ResetGlobalTypeManager());
+}
+
+TEST_CASE(TestReflectionList)
+{
+	TEST_ASSERT(LoadPredefinedTypes());
+	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
+	TEST_ASSERT(GetGlobalTypeManager()->Load());
 	TEST_ASSERT(ResetGlobalTypeManager());
 }

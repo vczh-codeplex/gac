@@ -33,6 +33,9 @@ $loop($count,0,$ADD_PARAMETER)
 			};
 $$end
 
+$$define $EXTERNAL_TYPE_ITEM($index) $(,) $TYPE_ITEM($index)
+$$define $EXTERNAL_ARGUMENT_ITEM($index) $(,) $ARGUMENT_ITEM($index)
+
 $$define $MEMBER_METHOD_DECLARATION($count,$function) $$begin
 $(/)***********************************************************************
 Member Method: $FUNCTION_TYPE($count,$function)
@@ -54,6 +57,27 @@ $loop($count,0,$PREPARE_PARAMETER)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], $FUNCTION_DECL($count,$function,__thiscall TClass::* _method))
+					:MethodInfoImpl(0, $if($function,GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(),0), $if($function,ParameterTypeInfo<R>::Decorator,IParameterInfo::Text), false)
+					,method(_method)
+				{
+$loop($count,0,$ADD_PARAMETER)
+				}
+			};
+$( )
+			class ExternalMethodInfoImpl : public MethodInfoImpl
+			{
+			protected:
+				$if($function,R,void)(*method)(TClass*$loop($count,0,$EXTERNAL_TYPE_ITEM));
+$( )
+				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
+				{
+					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
+$loop($count,0,$PREPARE_PARAMETER)
+					$if($function,R result = ,$( )) method(object$loop($count,0,$EXTERNAL_ARGUMENT_ITEM));
+					return $if($function,BoxValue(result, GetReturn()->GetValueTypeDescriptor()),Value());
+				}
+			public:
+				ExternalMethodInfoImpl(const wchar_t* parameterNames[], $if($function,R,void)(*_method)(TClass*$loop($count,0,$EXTERNAL_TYPE_ITEM)))
 					:MethodInfoImpl(0, $if($function,GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(),0), $if($function,ParameterTypeInfo<R>::Decorator,IParameterInfo::Text), false)
 					,method(_method)
 				{

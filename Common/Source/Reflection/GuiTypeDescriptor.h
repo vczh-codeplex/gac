@@ -16,6 +16,7 @@ XML Representation for Code Generation:
 #include "..\Function.h"
 #include "..\Collections\List.h"
 #include "..\Collections\Dictionary.h"
+#include "..\Collections\Operation.h"
 #include "..\Stream\Accessor.h"
 
 namespace vl
@@ -466,6 +467,13 @@ Collections
 				virtual Value					Get(vint index)=0;
 				virtual bool					Contains(const Value& value)=0;
 				virtual vint					IndexOf(const Value& value)=0;
+
+				template<typename T>
+				collections::LazyList<T> GetLazyList()
+				{
+					return collections::Range(0, Count())
+						.Select([this](int i){return UnboxValue<T>(Get(i));});
+				}
 			};
 
 			class IValueList : public IValueReadonlyList, public Description<IValueList>
@@ -506,6 +514,7 @@ Collections
 			protected:
 				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
 				typedef typename ContainerType::ElementType				ElementType;
+				typedef typename KeyType<ElementType>::Type				ElementKeyType;
 
 				T								wrapperPointer;
 			public:
@@ -521,18 +530,18 @@ Collections
 
 				Value Get(vint index)override
 				{
-					BoxValue<ElementType>(wrapperPointer->Get(index));
+					return BoxValue<ElementType>(wrapperPointer->Get(index));
 				}
 
 				bool Contains(const Value& value)override
 				{
-					ElementType item=UnboxValue<ElementType>(value);
+					ElementKeyType item=UnboxValue<ElementKeyType>(value);
 					return wrapperPointer->Contains(item);
 				}
 
 				vint IndexOf(const Value& value)override
 				{
-					ElementType item=UnboxValue<ElementType>(value);
+					ElementKeyType item=UnboxValue<ElementKeyType>(value);
 					return wrapperPointer->IndexOf(item);
 				}
 			};
@@ -543,6 +552,7 @@ Collections
 			protected:
 				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
 				typedef typename ContainerType::ElementType				ElementType;
+				typedef typename KeyType<ElementType>::Type				ElementKeyType;
 
 				T								wrapperPointer;
 			public:
@@ -563,13 +573,13 @@ Collections
 
 				bool Contains(const Value& value)override
 				{
-					ElementType item=UnboxValue<ElementType>(value);
+					ElementKeyType item=UnboxValue<ElementKeyType>(value);
 					return wrapperPointer->Contains(item);
 				}
 
 				vint IndexOf(const Value& value)override
 				{
-					ElementType item=UnboxValue<ElementType>(value);
+					ElementKeyType item=UnboxValue<ElementKeyType>(value);
 					return wrapperPointer->IndexOf(item);
 				}
 
@@ -593,7 +603,7 @@ Collections
 
 				bool Remove(const Value& value)override
 				{
-					ElementType item=UnboxValue<ElementType>(value);
+					ElementKeyType item=UnboxValue<ElementKeyType>(value);
 					return wrapperPointer->Remove(item);
 				}
 
