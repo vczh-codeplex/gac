@@ -601,5 +601,23 @@ TEST_CASE(TestReflectionList)
 	TEST_ASSERT(LoadPredefinedTypes());
 	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
 	TEST_ASSERT(GetGlobalTypeManager()->Load());
+	{
+		Value bases=Value::Create(L"List");
+		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 1))));
+		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 2))));
+		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 3))));
+		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 4))));
+
+		Value baseSummer=Value::Create(L"test::BaseSummer");
+		baseSummer.Invoke(L"SetBases", (Value::xs(), bases));
+		TEST_ASSERT(UnboxValue<int>(baseSummer.Invoke(L"Sum"))==10);
+
+		Value baseArray=baseSummer.Invoke(L"GetBases");
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Count"))==4);
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 0)).GetProperty(L"a"))==1);
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 1)).GetProperty(L"a"))==2);
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 2)).GetProperty(L"a"))==3);
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 3)).GetProperty(L"a"))==4);
+	}
 	TEST_ASSERT(ResetGlobalTypeManager());
 }
