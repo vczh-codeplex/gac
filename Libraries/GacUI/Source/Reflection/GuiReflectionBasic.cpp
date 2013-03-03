@@ -6,6 +6,7 @@ namespace vl
 	{
 		namespace description
 		{
+			using namespace collections;
 			using namespace parsing;
 			using namespace parsing::tabling;
 			using namespace parsing::xml;
@@ -26,7 +27,7 @@ namespace vl
 			}
 
 /***********************************************************************
-Type Constructors
+External Functions
 ***********************************************************************/
 
 			Ptr<INativeImage> INativeImage_Constructor(const WString& path)
@@ -59,6 +60,11 @@ Type Constructors
 				if(!xml) return 0;
 
 				return DocumentModel::LoadFromXml(xml, GetFolderPath(path));
+			}
+
+			Ptr<IValueReadonlyList> GuiGraphicsComposition_Children(GuiGraphicsComposition* thisObject)
+			{
+				return new ValueReadonlyListWrapper<const List<GuiGraphicsComposition*>*>(&thisObject->Children());
 			}
 
 /***********************************************************************
@@ -188,6 +194,163 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(IGuiGraphicsElement)
 			END_CLASS_MEMBER(IGuiGraphicsElement)
+
+			BEGIN_CLASS_MEMBER(GuiGraphicsComposition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Parent)
+				CLASS_MEMBER_PROPERTY_FAST(OwnedElement)
+				CLASS_MEMBER_PROPERTY_FAST(Visible)
+				CLASS_MEMBER_PROPERTY_FAST(MinSizeLimitation)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(GlobalBounds)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(AssociatedControl)
+				CLASS_MEMBER_PROPERTY_FAST(AssociatedCursor)
+				CLASS_MEMBER_PROPERTY_FAST(AssociatedHitTestResult)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RelatedControl)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RelatedControlHost)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RelatedCursor)
+				CLASS_MEMBER_PROPERTY_FAST(Margin)
+				CLASS_MEMBER_PROPERTY_FAST(InternalMargin)
+				CLASS_MEMBER_PROPERTY_FAST(PreferredMinSize)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ClientArea)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MinPreferredClientSize)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(PreferredBounds)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Bounds)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetChildren, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiGraphicsComposition::*)(), &GuiGraphicsComposition_Children)
+				CLASS_MEMBER_PROPERTY_READONLY(Children, GetChildren)
+
+				CLASS_MEMBER_METHOD(AddChild, {L"child"})
+				CLASS_MEMBER_METHOD(InsertChild, {L"index" _ L"child"})
+				CLASS_MEMBER_METHOD(RemoveChild, {L"child"})
+				CLASS_MEMBER_METHOD(MoveChild, {L"child" _ L"newIndex"})
+				CLASS_MEMBER_METHOD(Render, {L"size"})
+				CLASS_MEMBER_METHOD(FindComposition, {L"location"})
+				CLASS_MEMBER_METHOD(ForceCalculateSizeImmediately, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsSizeAffectParent, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiGraphicsComposition)
+
+			BEGIN_ENUM_ITEM(GuiGraphicsComposition::MinSizeLimitation)
+				ENUM_ITEM_NAMESPACE(GuiGraphicsComposition)
+				ENUM_NAMESPACE_ITEM(NoLimit)
+				ENUM_NAMESPACE_ITEM(LimitToElement)
+				ENUM_NAMESPACE_ITEM(LimitToElementAndChildren)
+			END_ENUM_ITEM(GuiGraphicsComposition::MinSizeLimitation)
+
+			BEGIN_ENUM_ITEM(INativeWindowListener::HitTestResult)
+				ENUM_ITEM_NAMESPACE(INativeWindowListener)
+				ENUM_NAMESPACE_ITEM(BorderNoSizing)
+				ENUM_NAMESPACE_ITEM(BorderLeft)
+				ENUM_NAMESPACE_ITEM(BorderRight)
+				ENUM_NAMESPACE_ITEM(BorderTop)
+				ENUM_NAMESPACE_ITEM(BorderBottom)
+				ENUM_NAMESPACE_ITEM(BorderLeftTop)
+				ENUM_NAMESPACE_ITEM(BorderRightTop)
+				ENUM_NAMESPACE_ITEM(BorderLeftBottom)
+				ENUM_NAMESPACE_ITEM(BorderRightBottom)
+				ENUM_NAMESPACE_ITEM(Title)
+				ENUM_NAMESPACE_ITEM(ButtonMinimum)
+				ENUM_NAMESPACE_ITEM(ButtonMaximum)
+				ENUM_NAMESPACE_ITEM(ButtonClose)
+				ENUM_NAMESPACE_ITEM(Client)
+				ENUM_NAMESPACE_ITEM(Icon)
+				ENUM_NAMESPACE_ITEM(NoDecision)
+			END_ENUM_ITEM(INativeWindowListener::HitTestResult)
+
+			BEGIN_CLASS_MEMBER(GuiGraphicsSite)
+				CLASS_MEMBER_BASE(GuiGraphicsComposition)
+			END_CLASS_MEMBER(GuiGraphicsSite)
+
+			BEGIN_CLASS_MEMBER(GuiWindowComposition)
+				CLASS_MEMBER_BASE(GuiGraphicsSite)
+				CLASS_MEMBER_CONSTRUCTOR(GuiWindowComposition*(), NO_PARAMETER)
+			END_CLASS_MEMBER(GuiWindowComposition)
+
+			BEGIN_CLASS_MEMBER(GuiBoundsComposition)
+				CLASS_MEMBER_BASE(GuiGraphicsSite)
+
+				CLASS_MEMBER_PROPERTY_FAST(Bounds)
+				
+				CLASS_MEMBER_METHOD(ClearAlignmentToParent, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetAlignmentToParent, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetAlignmentToParent, {L"value"})
+				CLASS_MEMBER_METHOD(IsAlignedToParent, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiBoundsComposition)
+
+			BEGIN_CLASS_MEMBER(GuiControl)
+				CLASS_MEMBER_CONSTRUCTOR(GuiControl*(GuiControl::IStyleController*), {L"styleController"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(StyleController)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BoundsComposition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContainerComposition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(FocusableComposition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Parent)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ChildrenCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RelatedControlHost)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(VisuallyEnabled)
+				CLASS_MEMBER_PROPERTY_FAST(Enabled)
+				CLASS_MEMBER_PROPERTY_FAST(Visible)
+				CLASS_MEMBER_PROPERTY_FAST(Text)
+				CLASS_MEMBER_PROPERTY_FAST(Font)
+				CLASS_MEMBER_PROPERTY_FAST(TooltipControl)
+				CLASS_MEMBER_PROPERTY_FAST(TooltipWidth)
+
+				CLASS_MEMBER_METHOD(GetChild, {L"index"})
+				CLASS_MEMBER_METHOD(AddChild, {L"control"})
+				CLASS_MEMBER_METHOD(HasChild, {L"control"})
+				CLASS_MEMBER_METHOD(SetFocus, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(DisplayTooltip, {L"location"})
+				CLASS_MEMBER_METHOD(CloseTooltip, NO_PARAMETER)
+				CLASS_MEMBER_METHOD_OVERLOAD(QueryService, {L"identifier"}, IDescriptable*(GuiControl::*)(const WString&))
+			END_CLASS_MEMBER(GuiControl)
+
+			BEGIN_CLASS_MEMBER(GuiControl::IStyleController)
+				CLASS_MEMBER_METHOD(GetBoundsComposition, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetContainerComposition, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetFocusableComposition, {L"value"})
+				CLASS_MEMBER_METHOD(SetText, {L"value"})
+				CLASS_MEMBER_METHOD(SetFont, {L"value"})
+				CLASS_MEMBER_METHOD(SetVisuallyEnabled, {L"value"})
+			END_CLASS_MEMBER(GuiControl::IStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiControl::IStyleProvider)
+				CLASS_MEMBER_METHOD(AssociateStyleController, {L"controller"})
+				CLASS_MEMBER_METHOD(SetFocusableComposition, {L"value"})
+				CLASS_MEMBER_METHOD(SetText, {L"value"})
+				CLASS_MEMBER_METHOD(SetFont, {L"value"})
+				CLASS_MEMBER_METHOD(SetVisuallyEnabled, {L"value"})
+			END_CLASS_MEMBER(GuiControl::IStyleProvider)
+
+			BEGIN_CLASS_MEMBER(GuiComponent)
+			END_CLASS_MEMBER(GuiComponent)
+
+			BEGIN_CLASS_MEMBER(GuiControlHost)
+				CLASS_MEMBER_BASE(GuiControl)
+				CLASS_MEMBER_CONSTRUCTOR(GuiControlHost*(GuiControl::IStyleController*), {L"styleController"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MainComposition)
+				CLASS_MEMBER_PROPERTY_FAST(ShowInTaskBar)
+				CLASS_MEMBER_PROPERTY_FAST(EnabledActivate)
+				CLASS_MEMBER_PROPERTY_FAST(TopMost)
+				CLASS_MEMBER_PROPERTY_FAST(ClientSize)
+				CLASS_MEMBER_PROPERTY_FAST(Bounds)
+
+				CLASS_MEMBER_METHOD(ForceCalculateSizeImmediately, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Render, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetFocused, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetFocused, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetActivated, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetActivated, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(AddComponent, {L"component"})
+				CLASS_MEMBER_METHOD(RemoveComponent, {L"component"})
+				CLASS_MEMBER_METHOD(ContainsComponent, {L"component"})
+				CLASS_MEMBER_METHOD(Show, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ShowDeactivated, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ShowRestored, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ShowMaximized, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ShowMinimized, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Hide, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Close, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetOpening, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiControlHost)
 
 #undef _
 

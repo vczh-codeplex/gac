@@ -311,7 +311,8 @@ SerializableTypeDescriptor
 /***********************************************************************
 Predefined Types
 ***********************************************************************/
-
+			
+			template<>struct TypeInfo<IDescriptable>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<Value>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<unsigned __int8>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<unsigned __int16>{static const wchar_t* TypeName;};

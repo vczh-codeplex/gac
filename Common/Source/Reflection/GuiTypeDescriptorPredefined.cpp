@@ -119,6 +119,7 @@ SerializableTypeDescriptorBase
 TypeName
 ***********************************************************************/
 			
+			const wchar_t* TypeInfo<IDescriptable>::TypeName		= L"object";
 			const wchar_t* TypeInfo<Value>::TypeName				= L"object";
 			const wchar_t* TypeInfo<unsigned __int8>::TypeName		= L"byte";
 			const wchar_t* TypeInfo<unsigned __int16>::TypeName		= L"ushort";
