@@ -325,6 +325,8 @@ Predefined Types
 			template<>struct TypeInfo<double>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<bool>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<WString>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IValueReadonlyList>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IValueList>{static const wchar_t* TypeName;};
 
 			template<>
 			struct TypedValueSerializerProvider<unsigned __int8>
