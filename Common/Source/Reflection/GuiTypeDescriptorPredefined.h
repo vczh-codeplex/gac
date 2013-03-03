@@ -324,6 +324,7 @@ Predefined Types
 			template<>struct TypeInfo<float>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<double>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<bool>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<wchar_t>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<WString>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueReadonlyList>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueList>{static const wchar_t* TypeName;};
@@ -396,6 +397,13 @@ Predefined Types
 			{
 				static bool Serialize(const double& input, WString& output);
 				static bool Deserialize(const WString& input, double& output);
+			};
+
+			template<>
+			struct TypedValueSerializerProvider<wchar_t>
+			{
+				static bool Serialize(const wchar_t& input, WString& output);
+				static bool Deserialize(const WString& input, wchar_t& output);
 			};
 
 			template<>

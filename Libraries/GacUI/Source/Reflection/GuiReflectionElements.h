@@ -35,6 +35,11 @@ Type List
 			F(GuiSolidLabelElement)\
 			F(GuiImageFrameElement)\
 			F(GuiPolygonElement)\
+			F(text::TextLines)\
+			F(text::ColorItem)\
+			F(text::ColorEntry)\
+			F(GuiColorizedTextElement)\
+			F(GuiDocumentElement)\
 
 			GUIREFLECTIONELEMENT_TYPELIST(DECL_TYPE_INFO)
 

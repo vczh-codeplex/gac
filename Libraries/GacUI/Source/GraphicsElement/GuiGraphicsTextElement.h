@@ -171,16 +171,15 @@ Colorized Plain Text (model)
 				/// <summary>
 				/// A class to maintain multiple lines of text buffer.
 				/// </summary>
-				struct TextLines
+				class TextLines : public Object, public Description<TextLines>
 				{
 					typedef collections::List<TextLine>		TextLineList;
 				protected:
 					TextLineList					lines;
 					CharMeasurer*					charMeasurer;
 					IGuiGraphicsRenderTarget*		renderTarget;
-					vint								tabWidth;
-					vint								tabSpaceCount;
-					vint								availableColorizedLines;
+					vint							tabWidth;
+					vint							tabSpaceCount;
 					wchar_t							passwordChar;
 				public:
 					TextLines();
@@ -190,23 +189,13 @@ Colorized Plain Text (model)
 					/// Returns the number of text lines.
 					/// </summary>
 					/// <returns>The number of text lines.</returns>
-					vint								GetCount();
+					vint							GetCount();
 					/// <summary>
 					/// Returns the text line of a specified row number.
 					/// </summary>
 					/// <returns>The related text line object.</returns>
 					/// <param name="row">The specified row number.</param>
 					TextLine&						GetLine(vint row);
-					/// <summary>
-					/// Returns the number of lines that are colorized.
-					/// </summary>
-					/// <returns>The number of lines that are colorized.</returns>
-					vint								GetAvailableColorizedLines();
-					/// <summary>
-					/// Set the number of lines that are colorized.
-					/// </summary>
-					/// <param name="value">The number of lines that are colorized.</param>
-					void							SetAvailableColorizedLines(vint value);
 					/// <summary>
 					/// Returns the binded <see cref="CharMeasurer"/>.
 					/// </summary>
@@ -312,7 +301,7 @@ Colorized Plain Text (model)
 					/// Returns the number of spaces to replace a tab character for rendering.
 					/// </summary>
 					/// <returns>The number of spaces to replace a tab character for rendering.</returns>
-					vint								GetTabSpaceCount();
+					vint							GetTabSpaceCount();
 					/// <summary>
 					/// Set the number of spaces to replace a tab character for rendering.
 					/// </summary>
@@ -328,22 +317,22 @@ Colorized Plain Text (model)
 					/// </summary>
 					/// <returns>The width of a specified row, in pixel.</returns>
 					/// <param name="row">The specified row number.</param>
-					vint								GetRowWidth(vint row);
+					vint							GetRowWidth(vint row);
 					/// <summary>
 					/// Returns the height of a row.
 					/// </summary>
 					/// <returns>The height of a row, in pixel.</returns>
-					vint								GetRowHeight();
+					vint							GetRowHeight();
 					/// <summary>
 					/// Returns the total width of the text lines.
 					/// </summary>
 					/// <returns>The width of the text lines, in pixel.</returns>
-					vint								GetMaxWidth();
+					vint							GetMaxWidth();
 					/// <summary>
 					/// Returns the total height of the text lines.
 					/// </summary>
 					/// <returns>The height of the text lines, in pixel.</returns>
-					vint								GetMaxHeight();
+					vint							GetMaxHeight();
 					/// <summary>
 					/// Get the text position near to specified point.
 					/// </summary>

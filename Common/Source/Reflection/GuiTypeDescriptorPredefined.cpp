@@ -131,6 +131,7 @@ TypeName
 			const wchar_t* TypeInfo<float>::TypeName				= L"float";
 			const wchar_t* TypeInfo<double>::TypeName				= L"double";
 			const wchar_t* TypeInfo<bool>::TypeName					= L"bool";
+			const wchar_t* TypeInfo<wchar_t>::TypeName				= L"char";
 			const wchar_t* TypeInfo<WString>::TypeName				= L"string";
 			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName	= L"ReadonlyList";
 			const wchar_t* TypeInfo<IValueList>::TypeName			= L"List";
@@ -296,6 +297,19 @@ TypedValueSerializerProvider
 				return true;
 			}
 
+			bool TypedValueSerializerProvider<wchar_t>::Serialize(const wchar_t& input, WString& output)
+			{
+				output=input;
+				return true;
+			}
+
+			bool TypedValueSerializerProvider<wchar_t>::Deserialize(const WString& input, wchar_t& output)
+			{
+				if(input.Length()>1) return false;
+				output=input.Length()==0?0:input[0];
+				return true;
+			}
+
 			bool TypedValueSerializerProvider<WString>::Serialize(const WString& input, WString& output)
 			{
 				output=input;
@@ -395,6 +409,7 @@ LoadPredefinedTypes
 					AddSerializableType<TypedValueSerializer<float>>(manager);
 					AddSerializableType<TypedValueSerializer<double>>(manager);
 					AddSerializableType<BoolValueSeriaizer>(manager);
+					AddSerializableType<TypedValueSerializer<wchar_t>>(manager);
 					AddSerializableType<TypedValueSerializer<WString>>(manager);
 					ADD_TYPE_INFO(IValueReadonlyList)
 					ADD_TYPE_INFO(IValueList)
