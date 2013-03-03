@@ -167,16 +167,16 @@ Constructor
 Method
 ***********************************************************************/
 
-#define CLASS_MEMBER_METHOD(FUNCTIONNAME, PARAMETERNAMES)\
+#define CLASS_MEMBER_EXTERNALMETHOD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE, SOURCE)\
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
 					L#FUNCTIONNAME,\
 					new CustomMethodInfoImplSelector<\
 						ClassType,\
-						vl::function_lambda::LambdaRetriveType<decltype(&ClassType::FUNCTIONNAME)>::FunctionType\
+						vl::function_lambda::LambdaRetriveType<FUNCTIONTYPE>::FunctionType\
 						>\
-						::CustomMethodInfoImpl(parameterNames, &ClassType::FUNCTIONNAME)\
+						::ExternalMethodInfoImpl(parameterNames, SOURCE)\
 					);\
 			}
 
@@ -193,24 +193,14 @@ Method
 					);\
 			}
 
+#define CLASS_MEMBER_METHOD(FUNCTIONNAME, PARAMETERNAMES)\
+			CLASS_MEMBER_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, decltype(&ClassType::FUNCTIONNAME))
+
 /***********************************************************************
 Static Method
 ***********************************************************************/
 
-#define CLASS_MEMBER_STATIC_METHOD(FUNCTIONNAME, PARAMETERNAMES)\
-			{\
-				const wchar_t* parameterNames[]=PARAMETERNAMES;\
-				AddMethod(\
-					L#FUNCTIONNAME,\
-					new CustomMethodInfoImplSelector<\
-						void,\
-						vl::function_lambda::FunctionObjectRetriveType<decltype(&ClassType::FUNCTIONNAME)>::FunctionType\
-						>\
-						::CustomMethodInfoImpl(parameterNames, &ClassType::FUNCTIONNAME)\
-					);\
-			}
-
-#define CLASS_MEMBER_STATIC_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE)\
+#define CLASS_MEMBER_STATIC_EXTERNALMETHOD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE, SOURCE)\
 			{\
 				const wchar_t* parameterNames[]=PARAMETERNAMES;\
 				AddMethod(\
@@ -219,9 +209,15 @@ Static Method
 						void,\
 						vl::function_lambda::FunctionObjectRetriveType<FUNCTIONTYPE>::FunctionType\
 						>\
-						::CustomMethodInfoImpl(parameterNames, (FUNCTIONTYPE)&ClassType::FUNCTIONNAME)\
+						::CustomMethodInfoImpl(parameterNames, SOURCE)\
 					);\
 			}
+
+#define CLASS_MEMBER_STATIC_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE)\
+			CLASS_MEMBER_STATIC_EXTERNALMETHOD(FUNCTIONNAME, PARAMETERNAMES, FUNCTIONTYPE, (FUNCTIONTYPE)&ClassType::FUNCTIONNAME)
+
+#define CLASS_MEMBER_STATIC_METHOD(FUNCTIONNAME, PARAMETERNAMES)\
+			CLASS_MEMBER_STATIC_METHOD_OVERLOAD(FUNCTIONNAME, PARAMETERNAMES, decltype(&ClassType::FUNCTIONNAME))
 
 /***********************************************************************
 Property
