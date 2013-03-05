@@ -44,10 +44,10 @@ Type
 #define INVOKE_INTERFACE_PROXY(METHODNAME, ...)\
 	proxy->Invoke(L#METHODNAME, IValueList::Create(collections::From((collections::Array<Value>&)(Value::xs(), __VA_ARGS__))))
 
-#define INVOKE_INTERFACE_PROXY_NOPARAM(METHODNAME, ...)\
+#define INVOKE_INTERFACE_PROXY_NOPARAM(METHODNAME)\
 	proxy->Invoke(L#METHODNAME, IValueList::Create())
 
-#define INVOKEGET_INTERFACE_PROXY(RETURNTYPE, METHODNAME)\
+#define INVOKEGET_INTERFACE_PROXY(RETURNTYPE, METHODNAME, ...)\
 	UnboxValue<RETURNTYPE>(proxy->Invoke(L#METHODNAME, IValueList::Create(collections::From((collections::Array<Value>&)(Value::xs(), __VA_ARGS__)))))
 
 #define INVOKEGET_INTERFACE_PROXY_NOPARAMS(RETURNTYPE, METHODNAME)\
@@ -99,6 +99,10 @@ Struct
 				public:\
 					CustomStructValueSerializer(ITypeDescriptor* _ownerTypeDescriptor)\
 						:StructValueSeriaizer(_ownerTypeDescriptor)\
+					{\
+					}\
+				protected:\
+					void LoadInternal()override\
 					{
 
 #define END_STRUCT_MEMBER(TYPENAME)\

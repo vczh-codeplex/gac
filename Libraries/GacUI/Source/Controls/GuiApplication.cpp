@@ -3,6 +3,7 @@
 #include "Styles\GuiWin8Styles.h"
 #include "..\Reflection\GuiReflectionBasic.h"
 #include "..\Reflection\GuiReflectionElements.h"
+#include "..\Reflection\GuiReflectionCompositions.h"
 
 extern void GuiMain();
 
@@ -283,6 +284,7 @@ Helpers
 				description::LoadPredefinedTypes();
 				description::LoadGuiBasicTypes();
 				description::LoadGuiElementTypes();
+				description::LoadGuiCompositionTypes();
 				theme::SetCurrentTheme(theme.Obj());
 
 				GetCurrentController()->InputService()->StartTimer();
