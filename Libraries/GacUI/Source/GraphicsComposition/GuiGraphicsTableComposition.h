@@ -97,11 +97,11 @@ Table Compositions
 			{
 				friend class GuiCellComposition;
 			protected:
-				vint											rows;
-				vint											columns;
-				vint											cellPadding;
-				vint											rowExtending;
-				vint											columnExtending;
+				vint										rows;
+				vint										columns;
+				vint										cellPadding;
+				vint										rowExtending;
+				vint										columnExtending;
 				collections::Array<GuiCellOption>			rowOptions;
 				collections::Array<GuiCellOption>			columnOptions;
 				collections::Array<GuiCellComposition*>		cellCompositions;
@@ -149,10 +149,10 @@ Table Compositions
 
 				/// <summary>Get the number of rows.</summary>
 				/// <returns>The number of rows.</returns>
-				vint									GetRows();
+				vint								GetRows();
 				/// <summary>Get the number of columns.</summary>
 				/// <returns>The number of columns.</returns>
-				vint									GetColumns();
+				vint								GetColumns();
 				/// <summary>Change the number of rows and columns.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="_rows">The number of rows.</param>
@@ -183,7 +183,7 @@ Table Compositions
 
 				/// <summary>Get the cell padding. A cell padding is the distance between a table client area and a cell, or between two cells.</summary>
 				/// <returns>The cell padding.</returns>
-				vint									GetCellPadding();
+				vint								GetCellPadding();
 				/// <summary>Set the cell padding. A cell padding is the distance between a table client area and a cell, or between two cells.</summary>
 				/// <param name="_column">The cell padding.</param>
 				void								SetCellPadding(vint value);
@@ -205,10 +205,10 @@ Table Compositions
 			{
 				friend class GuiTableComposition;
 			protected:
-				vint									row;
-				vint									rowSpan;
-				vint									column;
-				vint									columnSpan;
+				vint								row;
+				vint								rowSpan;
+				vint								column;
+				vint								columnSpan;
 				GuiTableComposition*				tableParent;
 				Size								lastPreferredSize;
 				
@@ -228,16 +228,16 @@ Table Compositions
 
 				/// <summary>Get the row number for this cell composition.</summary>
 				/// <returns>The row number for this cell composition.</returns>
-				vint									GetRow();
+				vint								GetRow();
 				/// <summary>Get the total numbers of acrossed rows for this cell composition.</summary>
 				/// <returns>The total numbers of acrossed rows for this cell composition.</returns>
-				vint									GetRowSpan();
+				vint								GetRowSpan();
 				/// <summary>Get the column number for this cell composition.</summary>
 				/// <returns>The column number for this cell composition.</returns>
-				vint									GetColumn();
+				vint								GetColumn();
 				/// <summary>Get the total numbers of acrossed columns for this cell composition.</summary>
 				/// <returns>The total numbers of acrossed columns for this cell composition.</returns>
-				vint									GetColumnSpan();
+				vint								GetColumnSpan();
 				/// <summary>Set the position for this cell composition in the table.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="_row">The row number for this cell composition.</param>

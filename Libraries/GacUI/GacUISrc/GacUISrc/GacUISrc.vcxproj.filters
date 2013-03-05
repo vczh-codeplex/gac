@@ -444,6 +444,9 @@
     <ClCompile Include="..\..\Source\Reflection\GuiReflectionElements.cpp">
       <Filter>GacUI\Reflection</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Reflection\GuiReflectionCompositions.cpp">
+      <Filter>GacUI\Reflection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -846,6 +849,9 @@
       <Filter>GacUI\Reflection</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\GuiReflectionElements.h">
+      <Filter>GacUI\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Reflection\GuiReflectionCompositions.h">
       <Filter>GacUI\Reflection</Filter>
     </ClInclude>
   </ItemGroup>

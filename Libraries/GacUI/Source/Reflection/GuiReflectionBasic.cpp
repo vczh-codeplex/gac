@@ -266,6 +266,7 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(GuiBoundsComposition)
 				CLASS_MEMBER_BASE(GuiGraphicsSite)
+				CLASS_MEMBER_CONSTRUCTOR(GuiBoundsComposition*(), NO_PARAMETER)
 
 				CLASS_MEMBER_PROPERTY_FAST(Bounds)
 				
