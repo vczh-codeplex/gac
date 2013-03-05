@@ -266,6 +266,7 @@
     <ClCompile Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiReflectionBasic.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiReflectionCompositions.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\GuiReflectionControls.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiReflectionElements.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
@@ -404,6 +405,7 @@
     <ClInclude Include="..\..\Source\NativeWindow\Windows\WinNativeWindow.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiReflectionBasic.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiReflectionCompositions.h" />
+    <ClInclude Include="..\..\Source\Reflection\GuiReflectionControls.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiReflectionElements.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

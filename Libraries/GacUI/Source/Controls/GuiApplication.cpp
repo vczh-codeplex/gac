@@ -4,6 +4,7 @@
 #include "..\Reflection\GuiReflectionBasic.h"
 #include "..\Reflection\GuiReflectionElements.h"
 #include "..\Reflection\GuiReflectionCompositions.h"
+#include "..\Reflection\GuiReflectionControls.h"
 
 extern void GuiMain();
 
@@ -285,6 +286,7 @@ Helpers
 				description::LoadGuiBasicTypes();
 				description::LoadGuiElementTypes();
 				description::LoadGuiCompositionTypes();
+				description::LoadGuiControlsTypes();
 				theme::SetCurrentTheme(theme.Obj());
 
 				GetCurrentController()->InputService()->StartTimer();
