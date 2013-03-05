@@ -60,7 +60,7 @@ WindowsDirect2DElementInlineObject
 
 				HRESULT STDMETHODCALLTYPE QueryInterface( 
 					REFIID riid,
-					_COM_Outptr_ void __RPC_FAR *__RPC_FAR *ppvObject
+					void __RPC_FAR *__RPC_FAR *ppvObject
 					)
 				{
 					if(ppvObject)
@@ -86,13 +86,13 @@ WindowsDirect2DElementInlineObject
 				}
 
 				STDMETHOD(Draw)(
-					_In_opt_ void* clientDrawingContext,
+					void* clientDrawingContext,
 					IDWriteTextRenderer* renderer,
 					FLOAT originX,
 					FLOAT originY,
 					BOOL isSideways,
 					BOOL isRightToLeft,
-					_In_opt_ IUnknown* clientDrawingEffect
+					IUnknown* clientDrawingEffect
 					)override
 				{
 					IGuiGraphicsRenderer* graphicsRenderer=element->GetRenderer();
@@ -105,7 +105,7 @@ WindowsDirect2DElementInlineObject
 				}
 
 				STDMETHOD(GetMetrics)(
-					_Out_ DWRITE_INLINE_OBJECT_METRICS* metrics
+					DWRITE_INLINE_OBJECT_METRICS* metrics
 					)override
 				{
 					metrics->width=(FLOAT)properties.size.x;
@@ -116,7 +116,7 @@ WindowsDirect2DElementInlineObject
 				}
 
 				STDMETHOD(GetOverhangMetrics)(
-					_Out_ DWRITE_OVERHANG_METRICS* overhangs
+					DWRITE_OVERHANG_METRICS* overhangs
 					)override
 				{
 					overhangs->left=0;
@@ -127,8 +127,8 @@ WindowsDirect2DElementInlineObject
 				}
 
 				STDMETHOD(GetBreakConditions)(
-					_Out_ DWRITE_BREAK_CONDITION* breakConditionBefore,
-					_Out_ DWRITE_BREAK_CONDITION* breakConditionAfter
+					DWRITE_BREAK_CONDITION* breakConditionBefore,
+					DWRITE_BREAK_CONDITION* breakConditionAfter
 					)override
 				{
 					switch(properties.breakCondition)

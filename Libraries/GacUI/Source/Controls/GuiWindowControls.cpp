@@ -84,6 +84,14 @@ GuiControlHost
 								owner->DisplayTooltip(p);
 								tooltipOpenDelay=0;
 
+								/*
+								When you use VS2010 to compiler this code,
+								you will see there is an error here.
+								This is due to VS2010's bug about processing [this] capture.
+								I don't want to do workaround in my code, but I can tell you how to do that:
+
+								Use a variable to save the value of "this", and capture [theThisValue, owner] instead of [this, owner].
+								*/
 								tooltipCloseDelay=GetApplication()->DelayExecuteInMainThread([this, owner]()
 								{
 									owner->CloseTooltip();

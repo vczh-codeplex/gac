@@ -537,6 +537,18 @@ StructValueSeriaizer
 
 			protected:
 				collections::Dictionary<WString, Ptr<FieldSerializerBase>>		fieldSerializers;
+				bool															loaded;
+
+				virtual void													LoadInternal()=0;
+
+				void Load()
+				{
+					if(!loaded)
+					{
+						loaded=true;
+						LoadInternal();
+					}
+				}
 
 				WString Escape(const WString& text)
 				{
@@ -618,6 +630,7 @@ StructValueSeriaizer
 
 				bool Serialize(const T& input, WString& output)override
 				{
+					Load();
 					WString result, field;
 					for(vint i=0;i<fieldSerializers.Count();i++)
 					{
@@ -634,6 +647,7 @@ StructValueSeriaizer
 
 				bool Deserialize(const WString& input, T& output)override
 				{
+					Load();
 					const wchar_t* reading=input.Buffer();
 					while(true)
 					{
@@ -656,11 +670,13 @@ StructValueSeriaizer
 			public:
 				StructValueSeriaizer(ITypeDescriptor* _ownedTypeDescriptor)
 					:GeneralValueSeriaizer(_ownedTypeDescriptor)
+					,loaded(false)
 				{
 				}
 
 				const collections::Dictionary<WString, Ptr<FieldSerializerBase>>& GetFieldSerializers()
 				{
+					Load();
 					return fieldSerializers;
 				}
 			};
@@ -670,6 +686,7 @@ StructValueSeriaizer
 			{
 			protected:
 				Ptr<TSerializer>				typedSerializer;
+
 			public:
 				StructTypeDescriptor()
 				{

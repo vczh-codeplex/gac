@@ -47,7 +47,7 @@ Stack Compositions
 				ItemCompositionList					stackItems;
 				collections::Array<Rect>			stackItemBounds;
 				Size								stackItemTotalSize;
-				vint									padding;
+				vint								padding;
 				Rect								previousBounds;
 				Margin								extraMargin;
 
@@ -76,7 +76,7 @@ Stack Compositions
 				void								SetDirection(Direction value);
 				/// <summary>Get the stack item padding.</summary>
 				/// <returns>The stack item padding.</returns>
-				vint									GetPadding();
+				vint								GetPadding();
 				/// <summary>Set the stack item padding.</summary>
 				/// <param name="value">The stack item padding.</param>
 				void								SetPadding(vint value);

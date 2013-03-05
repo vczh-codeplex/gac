@@ -44,7 +44,7 @@ Table Compositions
 				/// <summary>Sizing algorithm</summary>
 				ComposeType		composeType;
 				/// <summary>The absolute size when <see cref="GuiCellOption::composeType"/> is <see cref="ComposeType"/>::Absolute.</summary>
-				vint				absolute;
+				vint			absolute;
 				/// <summary>The percentage number when <see cref="GuiCellOption::composeType"/> is <see cref="ComposeType"/>::Percentage.</summary>
 				double			percentage;
 
