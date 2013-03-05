@@ -39,18 +39,18 @@ Type List
 			F(GuiImageData)\
 			F(DocumentModel)\
 			F(GuiResource)\
-			F(IGuiGraphicsElement)\
-			F(GuiGraphicsComposition)\
-			F(GuiGraphicsComposition::MinSizeLimitation)\
+			F(elements::IGuiGraphicsElement)\
+			F(compositions::GuiGraphicsComposition)\
+			F(compositions::GuiGraphicsComposition::MinSizeLimitation)\
 			F(INativeWindowListener::HitTestResult)\
-			F(GuiGraphicsSite)\
-			F(GuiWindowComposition)\
-			F(GuiBoundsComposition)\
-			F(GuiControl)\
-			F(GuiControl::IStyleController)\
-			F(GuiControl::IStyleProvider)\
-			F(GuiComponent)\
-			F(GuiControlHost)\
+			F(compositions::GuiGraphicsSite)\
+			F(compositions::GuiWindowComposition)\
+			F(compositions::GuiBoundsComposition)\
+			F(controls::GuiControl)\
+			F(controls::GuiControl::IStyleController)\
+			F(controls::GuiControl::IStyleProvider)\
+			F(controls::GuiComponent)\
+			F(controls::GuiControlHost)\
 
 			GUIREFLECTIONBASIC_TYPELIST(DECL_TYPE_INFO)
 

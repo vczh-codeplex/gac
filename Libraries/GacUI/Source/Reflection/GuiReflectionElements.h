@@ -23,23 +23,23 @@ Type List
 ***********************************************************************/
 
 #define GUIREFLECTIONELEMENT_TYPELIST(F)\
-			F(ElementShape)\
-			F(GuiSolidBorderElement)\
-			F(GuiRoundBorderElement)\
-			F(Gui3DBorderElement)\
-			F(Gui3DSplitterElement)\
-			F(Gui3DSplitterElement::Direction)\
-			F(GuiSolidBackgroundElement)\
-			F(GuiGradientBackgroundElement)\
-			F(GuiGradientBackgroundElement::Direction)\
-			F(GuiSolidLabelElement)\
-			F(GuiImageFrameElement)\
-			F(GuiPolygonElement)\
-			F(text::TextLines)\
-			F(text::ColorItem)\
-			F(text::ColorEntry)\
-			F(GuiColorizedTextElement)\
-			F(GuiDocumentElement)\
+			F(elements::ElementShape)\
+			F(elements::GuiSolidBorderElement)\
+			F(elements::GuiRoundBorderElement)\
+			F(elements::Gui3DBorderElement)\
+			F(elements::Gui3DSplitterElement)\
+			F(elements::Gui3DSplitterElement::Direction)\
+			F(elements::GuiSolidBackgroundElement)\
+			F(elements::GuiGradientBackgroundElement)\
+			F(elements::GuiGradientBackgroundElement::Direction)\
+			F(elements::GuiSolidLabelElement)\
+			F(elements::GuiImageFrameElement)\
+			F(elements::GuiPolygonElement)\
+			F(elements::text::TextLines)\
+			F(elements::text::ColorItem)\
+			F(elements::text::ColorEntry)\
+			F(elements::GuiColorizedTextElement)\
+			F(elements::GuiDocumentElement)\
 
 			GUIREFLECTIONELEMENT_TYPELIST(DECL_TYPE_INFO)
 
