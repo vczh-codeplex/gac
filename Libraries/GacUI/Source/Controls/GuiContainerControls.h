@@ -183,7 +183,7 @@ Scroll View
 					virtual GuiScroll::IStyleController*			CreateVerticalScrollStyle()=0;
 					/// <summary>Get the default scroll size for scroll bars, width for vertical, height for horizontal.</summary>
 					/// <returns>The default scroll size.</returns>
-					virtual vint										GetDefaultScrollSize()=0;
+					virtual vint									GetDefaultScrollSize()=0;
 					/// <summary>Called when the control begins to initialize. The control pass the bounds composition, and the style provider can put background compositions and elements on it, and return a container composition to contain content and scroll bars.</summary>
 					/// <returns>A container composition to contain content and scroll bars</returns>
 					/// <param name="boundsComposition">The bounds composition to install background.</param>
