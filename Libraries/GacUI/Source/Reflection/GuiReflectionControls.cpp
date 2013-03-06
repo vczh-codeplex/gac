@@ -18,6 +18,11 @@ namespace vl
 External Functions
 ***********************************************************************/
 
+			Ptr<IValueReadonlyList> GuiTab_GetPages(GuiTab* thisObject)
+			{
+				return new ValueReadonlyListWrapper<const List<GuiTabPage*>*>(&thisObject->GetPages());
+			}
+
 /***********************************************************************
 Type Declaration
 ***********************************************************************/
@@ -130,6 +135,73 @@ Type Declaration
 				CLASS_MEMBER_METHOD(SetPageSize, {L"value"})
 				CLASS_MEMBER_METHOD(SetPosition, {L"value"})
 			END_CLASS_MEMBER(GuiScroll::IStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiTabPage)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Container)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerTab)
+				CLASS_MEMBER_PROPERTY_FAST(Text)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Selected)
+			END_CLASS_MEMBER(GuiTabPage)
+
+			BEGIN_CLASS_MEMBER(GuiTab)
+				CLASS_MEMBER_BASE(GuiControl)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiTab)
+
+				CLASS_MEMBER_PROPERTY_FAST(SelectedPage)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(CreatePage, {L"index"}, GuiTabPage*(GuiTab::*)(vint))
+				CLASS_MEMBER_METHOD_OVERLOAD(CreatePage, {L"page" _ L"index"}, bool(GuiTab::*)(GuiTabPage* _ vint))
+				CLASS_MEMBER_METHOD(RemovePage, {L"value"})
+				CLASS_MEMBER_METHOD(MovePage, {L"page" _ L"newIndex"})
+				CLASS_MEMBER_EXTERNALMETHOD(GetPages, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiTab::*)(), &GuiTab_GetPages)
+			END_CLASS_MEMBER(GuiTab)
+
+			BEGIN_CLASS_MEMBER(GuiTab::ICommandExecutor)
+				CLASS_MEMBER_METHOD(ShowTab, {L"index"})
+			END_CLASS_MEMBER(GuiTab::ICommandExecutor)
+
+			BEGIN_CLASS_MEMBER(GuiTab::IStyleController)
+				CLASS_MEMBER_BASE(GuiControl::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiTab, IStyleController)
+
+				CLASS_MEMBER_METHOD(SetCommandExecutor, {L"value"})
+				CLASS_MEMBER_METHOD(InsertTab, {L"index"})
+				CLASS_MEMBER_METHOD(SetTabText, {L"index" _ L"value"})
+				CLASS_MEMBER_METHOD(RemoveTab, {L"index"})
+				CLASS_MEMBER_METHOD(MoveTab, {L"oldIndex" _ L"newIndex"})
+				CLASS_MEMBER_METHOD(SetSelectedTab, {L"index"})
+				CLASS_MEMBER_METHOD(CreateTabPageStyleController, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiTab::IStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiScrollView)
+				CLASS_MEMBER_BASE(GuiControl)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewSize)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewBounds)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(HorizontalScroll)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(VerticalScroll)
+				CLASS_MEMBER_PROPERTY_FAST(HorizontalAlwaysVisible)
+				CLASS_MEMBER_PROPERTY_FAST(VerticalAlwaysVisible)
+
+				CLASS_MEMBER_METHOD(CalculateView, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiScrollView)
+
+			BEGIN_CLASS_MEMBER(GuiScrollView::IStyleProvider)
+				CLASS_MEMBER_BASE(GuiControl::IStyleProvider)
+				INTERFACE_EXTERNALCTOR(GuiScrollView, IStyleProvider)
+
+				CLASS_MEMBER_METHOD(CreateHorizontalScrollStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateVerticalScrollStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetDefaultScrollSize, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(InstallBackground, {L"boundsComposition"})
+			END_CLASS_MEMBER(GuiScrollView::IStyleProvider)
+
+			BEGIN_CLASS_MEMBER(GuiScrollContainer)
+				CLASS_MEMBER_BASE(GuiScrollView)
+				CONTROL_CONSTRUCTOR_PROVIDER(GuiScrollContainer)
+
+				CLASS_MEMBER_PROPERTY_FAST(ExtendToFullWidth)
+			END_CLASS_MEMBER(GuiScrollContainer)
 
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
 #undef INTERFACE_EXTERNALCTOR

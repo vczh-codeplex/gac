@@ -35,6 +35,13 @@ Type List
 			F(controls::GuiScroll)\
 			F(controls::GuiScroll::ICommandExecutor)\
 			F(controls::GuiScroll::IStyleController)\
+			F(controls::GuiTabPage)\
+			F(controls::GuiTab)\
+			F(controls::GuiTab::ICommandExecutor)\
+			F(controls::GuiTab::IStyleController)\
+			F(controls::GuiScrollView)\
+			F(controls::GuiScrollView::IStyleProvider)\
+			F(controls::GuiScrollContainer)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
@@ -140,6 +147,89 @@ Interface Proxy
 					void SetPosition(vint value)override
 					{
 						INVOKE_INTERFACE_PROXY(SetPosition, value);
+					}
+				};
+
+				class GuiTab_IStyleController : public virtual GuiControl_IStyleController, public virtual GuiTab::IStyleController
+				{
+				public:
+					GuiTab_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleController(_proxy)
+					{
+					}
+
+					static GuiTab::IStyleController* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiTab_IStyleController(_proxy);
+					}
+
+					void SetCommandExecutor(GuiTab::ICommandExecutor* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetCommandExecutor, value);
+					}
+
+					void InsertTab(vint index)override
+					{
+						INVOKE_INTERFACE_PROXY(InsertTab, index);
+					}
+
+					void SetTabText(vint index, const WString& value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetTabText, index, value);
+					}
+
+					void RemoveTab(vint index)override
+					{
+						INVOKE_INTERFACE_PROXY(RemoveTab, index);
+					}
+
+					void MoveTab(vint oldIndex, vint newIndex)override
+					{
+						INVOKE_INTERFACE_PROXY(MoveTab, oldIndex, newIndex);
+					}
+
+					void SetSelectedTab(vint index)override
+					{
+						INVOKE_INTERFACE_PROXY(SetSelectedTab, index);
+					}
+
+					GuiControl::IStyleController* CreateTabPageStyleController()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GuiControl::IStyleController*, CreateTabPageStyleController);
+					}
+				};
+
+				class GuiScrollView_IStyleProvider : public virtual GuiControl_IStyleProvider, public virtual GuiScrollView::IStyleProvider
+				{
+				public:
+					GuiScrollView_IStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleProvider(_proxy)
+					{
+					}
+
+					static GuiScrollView::IStyleProvider* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiScrollView_IStyleProvider(_proxy);
+					}
+
+					GuiScroll::IStyleController* CreateHorizontalScrollStyle()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GuiScroll::IStyleController*, CreateHorizontalScrollStyle);
+					}
+
+					GuiScroll::IStyleController* CreateVerticalScrollStyle()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GuiScroll::IStyleController*, CreateVerticalScrollStyle);
+					}
+
+					vint GetDefaultScrollSize()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(vint, GetDefaultScrollSize);
+					}
+
+					compositions::GuiGraphicsComposition* InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GuiGraphicsComposition*, InstallBackground, boundsComposition);
 					}
 				};
 			}
