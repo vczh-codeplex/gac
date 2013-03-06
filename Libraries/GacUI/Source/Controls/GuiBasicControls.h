@@ -525,11 +525,11 @@ Scrolls
 
 				IStyleController*						styleController;
 				Ptr<CommandExecutor>					commandExecutor;
-				vint										totalSize;
-				vint										pageSize;
-				vint										position;
-				vint										smallMove;
-				vint										bigMove;
+				vint									totalSize;
+				vint									pageSize;
+				vint									position;
+				vint									smallMove;
+				vint									bigMove;
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
@@ -549,41 +549,41 @@ Scrolls
 				
 				/// <summary>Get the total size.</summary>
 				/// <returns>The total size.</returns>
-				virtual vint								GetTotalSize();
+				virtual vint							GetTotalSize();
 				/// <summary>Set the total size.</summary>
 				/// <param name="value">The total size.</param>
 				virtual void							SetTotalSize(vint value);
 				/// <summary>Get the page size.</summary>
 				/// <returns>The page size.</returns>
-				virtual vint								GetPageSize();
+				virtual vint							GetPageSize();
 				/// <summary>Set the page size.</summary>
 				/// <param name="value">The page size.</param>
 				virtual void							SetPageSize(vint value);
 				/// <summary>Get the position.</summary>
 				/// <returns>The position.</returns>
-				virtual vint								GetPosition();
+				virtual vint							GetPosition();
 				/// <summary>Set the position.</summary>
 				/// <param name="value">The position.</param>
 				virtual void							SetPosition(vint value);
 				/// <summary>Get the small move.</summary>
 				/// <returns>The small move.</returns>
-				virtual vint								GetSmallMove();
+				virtual vint							GetSmallMove();
 				/// <summary>Set the small move.</summary>
 				/// <param name="value">The small move.</param>
 				virtual void							SetSmallMove(vint value);
 				/// <summary>Get the big move.</summary>
 				/// <returns>The big move.</returns>
-				virtual vint								GetBigMove();
+				virtual vint							GetBigMove();
 				/// <summary>Set the big move.</summary>
 				/// <param name="value">The big move.</param>
 				virtual void							SetBigMove(vint value);
 				
 				/// <summary>Get the minimum possible position.</summary>
 				/// <returns>The minimum possible position.</returns>
-				vint										GetMinPosition();
+				vint									GetMinPosition();
 				/// <summary>Get the maximum possible position.</summary>
 				/// <returns>The maximum possible position.</returns>
-				vint										GetMaxPosition();
+				vint									GetMaxPosition();
 			};
 			
 			namespace list
