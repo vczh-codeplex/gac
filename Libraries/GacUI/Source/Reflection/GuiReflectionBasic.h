@@ -78,7 +78,7 @@ Interface Proxy
 
 			namespace interface_proxy
 			{
-				class GuiControl_IStyleController : public Object, public GuiControl::IStyleController
+				class GuiControl_IStyleController : public Object, public virtual GuiControl::IStyleController
 				{
 				protected:
 					Ptr<IValueInterfaceProxy>		proxy;
@@ -125,7 +125,7 @@ Interface Proxy
 					}
 				};
 				
-				class GuiControl_IStyleProvider : public Object, public GuiControl::IStyleProvider
+				class GuiControl_IStyleProvider : public Object, public virtual GuiControl::IStyleProvider
 				{
 				protected:
 					Ptr<IValueInterfaceProxy>		proxy;
