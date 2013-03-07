@@ -14,7 +14,7 @@ void SetupListControlWindow(GuiControlHost* controlHost, GuiControl* container)
 
 		for(int i=0;i<30;i++)
 		{
-			listControl->GetItems().Add(L"Text Item "+itow(i+1));
+			listControl->GetItems().Add(new list::TextItem(L"Text Item "+itow(i+1)));
 			listControl->GetItems().SetChecked(i, i%2==0);
 		}
 	}
@@ -25,9 +25,9 @@ void SetupListControlWindow(GuiControlHost* controlHost, GuiControl* container)
 		typeList->SetHorizontalAlwaysVisible(false);
 		container->GetBoundsComposition()->AddChild(typeList->GetBoundsComposition());
 
-		typeList->GetItems().Add(L"Text List");
-		typeList->GetItems().Add(L"Check List");
-		typeList->GetItems().Add(L"Radio List");
+		typeList->GetItems().Add(new list::TextItem(L"Text List"));
+		typeList->GetItems().Add(new list::TextItem(L"Check List"));
+		typeList->GetItems().Add(new list::TextItem(L"Radio List"));
 		typeList->SetSelected(0, true);
 
 		typeList->SelectionChanged.AttachLambda([listControl, typeList](GuiGraphicsComposition* sender, GuiEventArgs& arguments)

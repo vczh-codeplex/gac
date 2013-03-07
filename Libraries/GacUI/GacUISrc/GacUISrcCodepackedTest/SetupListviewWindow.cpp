@@ -49,12 +49,12 @@ void SetupListviewWindow(GuiControlHost* controlHost, GuiControl* container)
 		typeList->SetHorizontalAlwaysVisible(false);
 		container->GetBoundsComposition()->AddChild(typeList->GetBoundsComposition());
 
-		typeList->GetItems().Add(L"Big Icon");
-		typeList->GetItems().Add(L"Small Icon");
-		typeList->GetItems().Add(L"List");
-		typeList->GetItems().Add(L"Detail");
-		typeList->GetItems().Add(L"Tile");
-		typeList->GetItems().Add(L"Information");
+		typeList->GetItems().Add(new list::TextItem(L"Big Icon"));
+		typeList->GetItems().Add(new list::TextItem(L"Small Icon"));
+		typeList->GetItems().Add(new list::TextItem(L"List"));
+		typeList->GetItems().Add(new list::TextItem(L"Detail"));
+		typeList->GetItems().Add(new list::TextItem(L"Tile"));
+		typeList->GetItems().Add(new list::TextItem(L"Information"));
 		typeList->SetSelected(0, true);
 
 		typeList->SelectionChanged.AttachLambda([listControl, typeList](GuiGraphicsComposition* sender, GuiEventArgs& arguments)

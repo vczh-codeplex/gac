@@ -180,7 +180,7 @@ GuiApplication
 				sharedTooltipClosing=false;
 				sharedTooltipOwner=owner;
 				sharedTooltipWindow->SetTemporaryContentControl(tooltip);
-				sharedTooltipWindow->SetPrefferedContentWidth(preferredContentWidth);
+				sharedTooltipWindow->SetPreferredContentWidth(preferredContentWidth);
 				sharedTooltipWindow->SetClientSize(Size(10, 10));
 				sharedTooltipWindow->ShowPopup(owner, location);
 			}
@@ -283,7 +283,12 @@ Helpers
 						theme=new win7::Win7Theme;
 					}
 				}
+
 				description::LoadPredefinedTypes();
+				description::LoadGuiBasicTypes();
+				description::LoadGuiElementTypes();
+				description::LoadGuiCompositionTypes();
+				description::LoadGuiControlsTypes();
 				theme::SetCurrentTheme(theme.Obj());
 
 				GetCurrentController()->InputService()->StartTimer();
@@ -1939,6 +1944,14 @@ GuiControlHost
 								owner->DisplayTooltip(p);
 								tooltipOpenDelay=0;
 
+								/*
+								When you use VS2010 to compiler this code,
+								you will see there is an error here.
+								This is due to VS2010's bug about processing [this] capture.
+								I don't want to do workaround in my code, but I can tell you how to do that:
+
+								Use a variable to save the value of "this", and capture [theThisValue, owner] instead of [this, owner].
+								*/
 								tooltipCloseDelay=GetApplication()->DelayExecuteInMainThread([this, owner]()
 								{
 									owner->CloseTooltip();
@@ -2892,12 +2905,12 @@ GuiPopup
 				GetCurrentController()->CallbackService()->UninstallListener(this);
 			}
 
-			vint GuiTooltip::GetPrefferedContentWidth()
+			vint GuiTooltip::GetPreferredContentWidth()
 			{
 				return GetContainerComposition()->GetPreferredMinSize().x;
 			}
 
-			void GuiTooltip::SetPrefferedContentWidth(vint value)
+			void GuiTooltip::SetPreferredContentWidth(vint value)
 			{
 				GetContainerComposition()->SetPreferredMinSize(Size(value, 10));
 			}
@@ -7037,22 +7050,22 @@ TextItemProvider
 
 				WString TextItemProvider::GetPrimaryTextViewText(vint itemIndex)
 				{
-					return Get(itemIndex).GetText();
+					return Get(itemIndex)->GetText();
 				}
 				
 				WString TextItemProvider::GetText(vint itemIndex)
 				{
-					return Get(itemIndex).GetText();
+					return Get(itemIndex)->GetText();
 				}
 
 				bool TextItemProvider::GetChecked(vint itemIndex)
 				{
-					return Get(itemIndex).GetChecked();
+					return Get(itemIndex)->GetChecked();
 				}
 
 				void TextItemProvider::SetCheckedSilently(vint itemIndex, bool value)
 				{
-					items[itemIndex].checked=value;
+					items[itemIndex]->checked=value;
 				}
 
 				TextItemProvider::TextItemProvider()
@@ -7065,7 +7078,7 @@ TextItemProvider
 					
 				void TextItemProvider::SetText(vint itemIndex, const WString& value)
 				{
-					items[itemIndex].text=value;
+					items[itemIndex]->text=value;
 					InvokeOnItemModified(itemIndex, 1, 1);
 				}
 
@@ -9840,7 +9853,7 @@ Win7ButtonStyleBase
 			{
 			}
 
-			Win7ButtonStyleBase::Win7ButtonStyleBase(bool verticalGradient, bool roundBorder, const Win7ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical)
+			Win7ButtonStyleBase::Win7ButtonStyleBase(bool verticalGradient, bool roundBorder, const Win7ButtonColors& initialColor, Alignment horizontal, Alignment vertical)
 				:controlStyle(GuiButton::Normal)
 				,isVisuallyEnabled(true)
 				,isSelected(false)
@@ -12865,7 +12878,7 @@ Win7ButtonColors
 Win7ButtonElements
 ***********************************************************************/
 
-			Win7ButtonElements Win7ButtonElements::Create(bool verticalGradient, bool roundBorder, Alignment::Type horizontal, Alignment::Type vertical)
+			Win7ButtonElements Win7ButtonElements::Create(bool verticalGradient, bool roundBorder, Alignment horizontal, Alignment vertical)
 			{
 				Win7ButtonElements button;
 				button.rectBorderElement=0;
@@ -12993,7 +13006,7 @@ Win7ButtonElements
 Win7CheckedButtonElements
 ***********************************************************************/
 
-			Win7CheckedButtonElements Win7CheckedButtonElements::Create(elements::ElementShape::Type shape, bool backgroundVisible)
+			Win7CheckedButtonElements Win7CheckedButtonElements::Create(elements::ElementShape shape, bool backgroundVisible)
 			{
 				const vint checkSize=13;
 				const vint checkPadding=2;
@@ -13375,7 +13388,7 @@ Helpers
 				composition->SetMargin(Margin(margin, margin, margin, margin));
 			}
 
-			void Win7CreateSolidLabelElement(GuiSolidLabelElement*& element, GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical)
+			void Win7CreateSolidLabelElement(GuiSolidLabelElement*& element, GuiBoundsComposition*& composition, Alignment horizontal, Alignment vertical)
 			{
 				element=GuiSolidLabelElement::Create();
 				element->SetAlignments(horizontal, vertical);
@@ -14127,7 +14140,7 @@ Win8ButtonStyleBase
 			{
 			}
 
-			Win8ButtonStyleBase::Win8ButtonStyleBase(const Win8ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical)
+			Win8ButtonStyleBase::Win8ButtonStyleBase(const Win8ButtonColors& initialColor, Alignment horizontal, Alignment vertical)
 				:controlStyle(GuiButton::Normal)
 				,isVisuallyEnabled(true)
 				,isSelected(false)
@@ -16596,7 +16609,7 @@ Win8ButtonColors
 Win8ButtonElements
 ***********************************************************************/
 
-			Win8ButtonElements Win8ButtonElements::Create(Alignment::Type horizontal, Alignment::Type vertical)
+			Win8ButtonElements Win8ButtonElements::Create(Alignment horizontal, Alignment vertical)
 			{
 				Win8ButtonElements button;
 				{
@@ -16645,7 +16658,7 @@ Win8ButtonElements
 Win8CheckedButtonElements
 ***********************************************************************/
 
-			Win8CheckedButtonElements Win8CheckedButtonElements::Create(elements::ElementShape::Type shape, bool backgroundVisible)
+			Win8CheckedButtonElements Win8CheckedButtonElements::Create(elements::ElementShape shape, bool backgroundVisible)
 			{
 				const vint checkSize=13;
 				const vint checkPadding=2;
@@ -16992,7 +17005,7 @@ Helpers
 				composition->SetMargin(Margin(margin, margin, margin, margin));
 			}
 
-			void Win8CreateSolidLabelElement(GuiSolidLabelElement*& element, GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical)
+			void Win8CreateSolidLabelElement(GuiSolidLabelElement*& element, GuiBoundsComposition*& composition, Alignment horizontal, Alignment vertical)
 			{
 				element=GuiSolidLabelElement::Create();
 				element->SetAlignments(horizontal, vertical);
@@ -22660,12 +22673,12 @@ GuiSolidBorderElement
 				}
 			}
 			
-			ElementShape::Type GuiSolidBorderElement::GetShape()
+			ElementShape GuiSolidBorderElement::GetShape()
 			{
 				return shape;
 			}
 
-			void GuiSolidBorderElement::SetShape(ElementShape::Type value)
+			void GuiSolidBorderElement::SetShape(ElementShape value)
 			{
 				shape=value;
 			}
@@ -22737,9 +22750,19 @@ Gui3DBorderElement
 				return color1;
 			}
 
+			void Gui3DBorderElement::SetColor1(Color value)
+			{
+				SetColors(value, color2);
+			}
+
 			Color Gui3DBorderElement::GetColor2()
 			{
 				return color2;
+			}
+
+			void Gui3DBorderElement::SetColor2(Color value)
+			{
+				SetColors(color1, value);
 			}
 
 			void Gui3DBorderElement::SetColors(Color value1, Color value2)
@@ -22774,9 +22797,19 @@ Gui3DSplitterElement
 				return color1;
 			}
 
+			void Gui3DSplitterElement::SetColor1(Color value)
+			{
+				SetColors(value, color2);
+			}
+
 			Color Gui3DSplitterElement::GetColor2()
 			{
 				return color2;
+			}
+
+			void Gui3DSplitterElement::SetColor2(Color value)
+			{
+				SetColors(color1, value);
 			}
 
 			void Gui3DSplitterElement::SetColors(Color value1, Color value2)
@@ -22841,12 +22874,12 @@ GuiSolidBackgroundElement
 				}
 			}
 			
-			ElementShape::Type GuiSolidBackgroundElement::GetShape()
+			ElementShape GuiSolidBackgroundElement::GetShape()
 			{
 				return shape;
 			}
 
-			void GuiSolidBackgroundElement::SetShape(ElementShape::Type value)
+			void GuiSolidBackgroundElement::SetShape(ElementShape value)
 			{
 				shape=value;
 			}
@@ -22871,9 +22904,19 @@ GuiGradientBackgroundElement
 				return color1;
 			}
 
+			void GuiGradientBackgroundElement::SetColor1(Color value)
+			{
+				SetColors(value, color2);
+			}
+
 			Color GuiGradientBackgroundElement::GetColor2()
 			{
 				return color2;
+			}
+
+			void GuiGradientBackgroundElement::SetColor2(Color value)
+			{
+				SetColors(color1, value);
 			}
 
 			void GuiGradientBackgroundElement::SetColors(Color value1, Color value2)
@@ -22906,12 +22949,12 @@ GuiGradientBackgroundElement
 				}
 			}
 			
-			ElementShape::Type GuiGradientBackgroundElement::GetShape()
+			ElementShape GuiGradientBackgroundElement::GetShape()
 			{
 				return shape;
 			}
 
-			void GuiGradientBackgroundElement::SetShape(ElementShape::Type value)
+			void GuiGradientBackgroundElement::SetShape(ElementShape value)
 			{
 				shape=value;
 			}
@@ -22989,17 +23032,27 @@ GuiSolidLabelElement
 				}
 			}
 
-			Alignment::Type GuiSolidLabelElement::GetHorizontalAlignment()
+			Alignment GuiSolidLabelElement::GetHorizontalAlignment()
 			{
 				return hAlignment;
 			}
 
-			Alignment::Type GuiSolidLabelElement::GetVerticalAlignment()
+			Alignment GuiSolidLabelElement::GetVerticalAlignment()
 			{
 				return vAlignment;
 			}
 
-			void GuiSolidLabelElement::SetAlignments(Alignment::Type horizontal, Alignment::Type vertical)
+			void GuiSolidLabelElement::SetHorizontalAlignment(Alignment value)
+			{
+				SetAlignments(value, vAlignment);
+			}
+
+			void GuiSolidLabelElement::SetVerticalAlignment(Alignment value)
+			{
+				SetAlignments(hAlignment, value);
+			}
+
+			void GuiSolidLabelElement::SetAlignments(Alignment horizontal, Alignment vertical)
 			{
 				if(hAlignment!=horizontal || vAlignment!=vertical)
 				{
@@ -23108,6 +23161,16 @@ GuiImageFrameElement
 				return frameIndex;
 			}
 
+			void GuiImageFrameElement::SetImage(Ptr<INativeImage> value)
+			{
+				SetImage(value, frameIndex);
+			}
+
+			void GuiImageFrameElement::SetFrameIndex(vint value)
+			{
+				SetImage(image, value);
+			}
+
 			void GuiImageFrameElement::SetImage(Ptr<INativeImage> _image, vint _frameIndex)
 			{
 				if(image!=_image || frameIndex!=_frameIndex)
@@ -23129,17 +23192,27 @@ GuiImageFrameElement
 				}
 			}
 
-			Alignment::Type GuiImageFrameElement::GetHorizontalAlignment()
+			Alignment GuiImageFrameElement::GetHorizontalAlignment()
 			{
 				return hAlignment;
 			}
 
-			Alignment::Type GuiImageFrameElement::GetVerticalAlignment()
+			Alignment GuiImageFrameElement::GetVerticalAlignment()
 			{
 				return vAlignment;
 			}
 
-			void GuiImageFrameElement::SetAlignments(Alignment::Type horizontal, Alignment::Type vertical)
+			void GuiImageFrameElement::SetHorizontalAlignment(Alignment value)
+			{
+				SetAlignments(value, vAlignment);
+			}
+
+			void GuiImageFrameElement::SetVerticalAlignment(Alignment value)
+			{
+				SetAlignments(hAlignment, value);
+			}
+
+			void GuiImageFrameElement::SetAlignments(Alignment horizontal, Alignment vertical)
 			{
 				if(hAlignment!=horizontal || vAlignment!=vertical)
 				{
@@ -26987,6 +27060,1549 @@ GuiResource
 				}
 			}
 			return resource;
+		}
+
+		Ptr<DocumentModel> GuiResource::GetDocumentByPath(const WString& path)
+		{
+			Ptr<DocumentModel> result=GetValueByPath(path).Cast<DocumentModel>();
+			if(!result) throw ArgumentException(L"Path not exists.", L"GuiResource::GetDocumentByPath", L"path");
+			return result;
+		}
+
+		Ptr<GuiImageData> GuiResource::GetImageByPath(const WString& path)
+		{
+			Ptr<GuiImageData> result=GetValueByPath(path).Cast<GuiImageData>();
+			if(!result) throw ArgumentException(L"Path not exists.", L"GuiResource::GetImageByPath", L"path");
+			return result;
+		}
+
+		Ptr<parsing::xml::XmlDocument> GuiResource::GetXmlByPath(const WString& path)
+		{
+			Ptr<XmlDocument> result=GetValueByPath(path).Cast<XmlDocument>();
+			if(!result) throw ArgumentException(L"Path not exists.", L"GuiResource::GetXmlByPath", L"path");
+			return result;
+		}
+
+		WString GuiResource::GetStringByPath(const WString& path)
+		{
+			Ptr<ObjectBox<WString>> result=GetValueByPath(path).Cast<ObjectBox<WString>>();
+			if(!result) throw ArgumentException(L"Path not exists.", L"GuiResource::GetStringByPath", L"path");
+			return result->Unbox();
+		}
+	}
+}
+
+/***********************************************************************
+Reflection\GuiReflectionBasic.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			using namespace collections;
+			using namespace parsing;
+			using namespace parsing::tabling;
+			using namespace parsing::xml;
+			using namespace stream;
+
+			GUIREFLECTIONBASIC_TYPELIST(IMPL_TYPE_INFO)
+
+			bool TypedValueSerializerProvider<Color>::Serialize(const Color& input, WString& output)
+			{
+				output=input.ToString();
+				return true;
+			}
+
+			bool TypedValueSerializerProvider<Color>::Deserialize(const WString& input, Color& output)
+			{
+				output=Color::Parse(input);
+				return true;
+			}
+
+/***********************************************************************
+External Functions
+***********************************************************************/
+
+			Ptr<INativeImage> INativeImage_Constructor(const WString& path)
+			{
+				return GetCurrentController()->ImageService()->CreateImageFromFile(path);
+			}
+
+			INativeCursor* INativeCursor_Constructor1()
+			{
+				return GetCurrentController()->ResourceService()->GetDefaultSystemCursor();
+			}
+
+			INativeCursor* INativeCursor_Constructor2(INativeCursor::SystemCursorType type)
+			{
+				return GetCurrentController()->ResourceService()->GetSystemCursor(type);
+			}
+
+			Ptr<DocumentModel> DocumentModel_Constructor(const WString& path)
+			{
+				FileStream fileStream(path, FileStream::ReadOnly);
+				if(!fileStream.IsAvailable()) return 0;
+
+				BomDecoder decoder;
+				DecoderStream decoderStream(fileStream, decoder);
+				StreamReader reader(decoderStream);
+				WString xmlText=reader.ReadToEnd();
+
+				Ptr<ParsingTable> table=XmlLoadTable();
+				Ptr<XmlDocument> xml=XmlParseDocument(xmlText, table);
+				if(!xml) return 0;
+
+				return DocumentModel::LoadFromXml(xml, GetFolderPath(path));
+			}
+
+			Ptr<IValueReadonlyList> GuiGraphicsComposition_Children(GuiGraphicsComposition* thisObject)
+			{
+				return new ValueReadonlyListWrapper<const List<GuiGraphicsComposition*>*>(&thisObject->Children());
+			}
+
+/***********************************************************************
+Type Declaration
+***********************************************************************/
+
+#define _ ,
+
+			BEGIN_ENUM_ITEM(Alignment)
+				ENUM_CLASS_ITEM(Left)
+				ENUM_CLASS_ITEM(Top)
+				ENUM_CLASS_ITEM(Center)
+				ENUM_CLASS_ITEM(Right)
+				ENUM_CLASS_ITEM(Bottom)
+			END_ENUM_ITEM(Alignment)
+
+			BEGIN_STRUCT_MEMBER(TextPos)
+				STRUCT_MEMBER(row)
+				STRUCT_MEMBER(column)
+			END_STRUCT_MEMBER(TextPos)
+
+			BEGIN_STRUCT_MEMBER(Point)
+				STRUCT_MEMBER(x)
+				STRUCT_MEMBER(y)
+			END_STRUCT_MEMBER(Point)
+
+			BEGIN_STRUCT_MEMBER(Size)
+				STRUCT_MEMBER(x)
+				STRUCT_MEMBER(y)
+			END_STRUCT_MEMBER(Size)
+
+			BEGIN_STRUCT_MEMBER(Rect)
+				STRUCT_MEMBER(x1)
+				STRUCT_MEMBER(y1)
+				STRUCT_MEMBER(x2)
+				STRUCT_MEMBER(y2)
+			END_STRUCT_MEMBER(Rect)
+
+			BEGIN_STRUCT_MEMBER(Margin)
+				STRUCT_MEMBER(left)
+				STRUCT_MEMBER(top)
+				STRUCT_MEMBER(right)
+				STRUCT_MEMBER(bottom)
+			END_STRUCT_MEMBER(Margin)
+
+			BEGIN_STRUCT_MEMBER(FontProperties)
+				STRUCT_MEMBER(fontFamily)
+				STRUCT_MEMBER(size)
+				STRUCT_MEMBER(bold)
+				STRUCT_MEMBER(italic)
+				STRUCT_MEMBER(underline)
+				STRUCT_MEMBER(strikeline)
+				STRUCT_MEMBER(antialias)
+				STRUCT_MEMBER(verticalAntialias)
+			END_STRUCT_MEMBER(FontProperties)
+
+			BEGIN_CLASS_MEMBER(INativeImageFrame)
+				CLASS_MEMBER_METHOD(GetImage, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetSize, NO_PARAMETER)
+			END_CLASS_MEMBER(INativeImageFrame)
+
+			BEGIN_CLASS_MEMBER(INativeImage)
+				CLASS_MEMBER_METHOD(GetFormat, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetFrameCount, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetFrame, {L"index"})
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<INativeImage>(const WString&), {L"filePath"}, &INativeImage_Constructor)
+			END_CLASS_MEMBER(INativeImage)
+
+			BEGIN_ENUM_ITEM(INativeImage::FormatType)
+				ENUM_ITEM_NAMESPACE(INativeImage)
+				ENUM_NAMESPACE_ITEM(Bmp)
+				ENUM_NAMESPACE_ITEM(Gif)
+				ENUM_NAMESPACE_ITEM(Icon)
+				ENUM_NAMESPACE_ITEM(Jpeg)
+				ENUM_NAMESPACE_ITEM(Png)
+				ENUM_NAMESPACE_ITEM(Tiff)
+				ENUM_NAMESPACE_ITEM(Wmp)
+				ENUM_NAMESPACE_ITEM(Unknown)
+			END_ENUM_ITEM(INativeImage::FormatType)
+
+			BEGIN_CLASS_MEMBER(INativeCursor)
+				CLASS_MEMBER_METHOD(IsSystemCursor, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetSystemCursorType, NO_PARAMETER)
+				CLASS_MEMBER_EXTERNALCTOR(INativeCursor*(), NO_PARAMETER, &INativeCursor_Constructor1)
+				CLASS_MEMBER_EXTERNALCTOR(INativeCursor*(INativeCursor::SystemCursorType), NO_PARAMETER, &INativeCursor_Constructor2)
+			END_CLASS_MEMBER(INativeCursor)
+
+			BEGIN_ENUM_ITEM(INativeCursor::SystemCursorType)
+				ENUM_ITEM_NAMESPACE(INativeCursor)
+				ENUM_NAMESPACE_ITEM(SmallWaiting)
+				ENUM_NAMESPACE_ITEM(LargeWaiting)
+				ENUM_NAMESPACE_ITEM(Arrow)
+				ENUM_NAMESPACE_ITEM(Cross)
+				ENUM_NAMESPACE_ITEM(Hand)
+				ENUM_NAMESPACE_ITEM(Help)
+				ENUM_NAMESPACE_ITEM(IBeam)
+				ENUM_NAMESPACE_ITEM(SizeAll)
+				ENUM_NAMESPACE_ITEM(SizeNESW)
+				ENUM_NAMESPACE_ITEM(SizeNS)
+				ENUM_NAMESPACE_ITEM(SizeNWSE)
+				ENUM_NAMESPACE_ITEM(SizeWE)
+			END_ENUM_ITEM(INativeCursor::SystemCursorType)
+
+			BEGIN_CLASS_MEMBER(INativeWindow)
+				CLASS_MEMBER_PROPERTY_FAST(Bounds)
+				CLASS_MEMBER_PROPERTY_FAST(ClientSize)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ClientBoundsInScreen)
+				CLASS_MEMBER_PROPERTY_FAST(Title)
+				CLASS_MEMBER_PROPERTY_FAST(WindowCursor)
+				CLASS_MEMBER_PROPERTY_FAST(CaretPoint)
+				CLASS_MEMBER_PROPERTY_FAST(Parent)
+				CLASS_MEMBER_PROPERTY_FAST(AlwaysPassFocusToParent)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SizeState)
+				CLASS_MEMBER_PROPERTY_FAST(MinimizedBox)
+				CLASS_MEMBER_PROPERTY_FAST(MaximizedBox)
+				CLASS_MEMBER_PROPERTY_FAST(Border)
+				CLASS_MEMBER_PROPERTY_FAST(SizeBox)
+				CLASS_MEMBER_PROPERTY_FAST(IconVisible)
+				CLASS_MEMBER_PROPERTY_FAST(TitleBar)
+				CLASS_MEMBER_PROPERTY_FAST(TopMost)
+
+				CLASS_MEMBER_METHOD(EnableCustomFrameMode, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(DisableCustomFrameMode, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsCustomFrameModeEnabled, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Show, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ShowDeactivated, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ShowRestored, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ShowMaximized, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ShowMinimized, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Hide, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsVisible, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Enable, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Disable, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsEnabled, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetFocus, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsFocused, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetActivate, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsActivated, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ShowInTaskBar, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(HideInTaskBar, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsAppearedInTaskBar, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(EnableActivate, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(DisableActivate, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsEnabledActivate, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(RequireCapture, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ReleaseCapture, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsCapturing, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(RedrawContent, NO_PARAMETER)
+			END_CLASS_MEMBER(INativeWindow)
+
+			BEGIN_ENUM_ITEM(INativeWindow::WindowSizeState)
+				ENUM_ITEM_NAMESPACE(INativeWindow)
+				ENUM_NAMESPACE_ITEM(Minimized)
+				ENUM_NAMESPACE_ITEM(Restored)
+				ENUM_NAMESPACE_ITEM(Maximized)
+			END_ENUM_ITEM(INativeWindow::WindowSizeState)
+
+			BEGIN_CLASS_MEMBER(INativeDelay)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Status)
+
+				CLASS_MEMBER_METHOD(Delay, {L"milliseconds"})
+				CLASS_MEMBER_METHOD(Cancel, NO_PARAMETER)
+			END_CLASS_MEMBER(INativeDelay)
+
+			BEGIN_ENUM_ITEM(INativeDelay::ExecuteStatus)
+				ENUM_ITEM_NAMESPACE(INativeDelay)
+				ENUM_NAMESPACE_ITEM(Pending)
+				ENUM_NAMESPACE_ITEM(Executing)
+				ENUM_NAMESPACE_ITEM(Executed)
+				ENUM_NAMESPACE_ITEM(Canceled)
+			END_ENUM_ITEM(INativeDelay::ExecuteStatus)
+
+			BEGIN_CLASS_MEMBER(GuiImageData)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiImageData>(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiImageData>(Ptr<INativeImage>, vint), {L"image" _ L"frameIndex"})
+
+				CLASS_MEMBER_METHOD(GetImage, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetFrameIndex, NO_PARAMETER)
+
+				CLASS_MEMBER_PROPERTY_READONLY(Image, GetImage)
+				CLASS_MEMBER_PROPERTY_READONLY(FrameIndex, GetFrameIndex)
+			END_CLASS_MEMBER(GuiImageData)
+
+			BEGIN_CLASS_MEMBER(DocumentModel)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<DocumentModel>(const WString&), {L"filePath"}, &DocumentModel_Constructor)
+			END_CLASS_MEMBER(DocumentModel)
+
+			BEGIN_CLASS_MEMBER(GuiResource)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiResource>(), NO_PARAMETER)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiResource>(const WString&), {L"filePath"}, &GuiResource::LoadFromXml);
+
+				CLASS_MEMBER_METHOD(GetDocumentByPath, {L"path"})
+				CLASS_MEMBER_METHOD(GetImageByPath, {L"path"})
+				CLASS_MEMBER_METHOD(GetStringByPath, {L"path"})
+			END_CLASS_MEMBER(GuiResource)
+
+			BEGIN_CLASS_MEMBER(IGuiGraphicsElement)
+			END_CLASS_MEMBER(IGuiGraphicsElement)
+
+			BEGIN_CLASS_MEMBER(GuiGraphicsComposition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Parent)
+				CLASS_MEMBER_PROPERTY_FAST(OwnedElement)
+				CLASS_MEMBER_PROPERTY_FAST(Visible)
+				CLASS_MEMBER_PROPERTY_FAST(MinSizeLimitation)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(GlobalBounds)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(AssociatedControl)
+				CLASS_MEMBER_PROPERTY_FAST(AssociatedCursor)
+				CLASS_MEMBER_PROPERTY_FAST(AssociatedHitTestResult)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RelatedControl)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RelatedControlHost)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RelatedCursor)
+				CLASS_MEMBER_PROPERTY_FAST(Margin)
+				CLASS_MEMBER_PROPERTY_FAST(InternalMargin)
+				CLASS_MEMBER_PROPERTY_FAST(PreferredMinSize)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ClientArea)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MinPreferredClientSize)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(PreferredBounds)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Bounds)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetChildren, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiGraphicsComposition::*)(), &GuiGraphicsComposition_Children)
+				CLASS_MEMBER_PROPERTY_READONLY(Children, GetChildren)
+
+				CLASS_MEMBER_METHOD(AddChild, {L"child"})
+				CLASS_MEMBER_METHOD(InsertChild, {L"index" _ L"child"})
+				CLASS_MEMBER_METHOD(RemoveChild, {L"child"})
+				CLASS_MEMBER_METHOD(MoveChild, {L"child" _ L"newIndex"})
+				CLASS_MEMBER_METHOD(Render, {L"size"})
+				CLASS_MEMBER_METHOD(FindComposition, {L"location"})
+				CLASS_MEMBER_METHOD(ForceCalculateSizeImmediately, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsSizeAffectParent, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiGraphicsComposition)
+
+			BEGIN_ENUM_ITEM(GuiGraphicsComposition::MinSizeLimitation)
+				ENUM_ITEM_NAMESPACE(GuiGraphicsComposition)
+				ENUM_NAMESPACE_ITEM(NoLimit)
+				ENUM_NAMESPACE_ITEM(LimitToElement)
+				ENUM_NAMESPACE_ITEM(LimitToElementAndChildren)
+			END_ENUM_ITEM(GuiGraphicsComposition::MinSizeLimitation)
+
+			BEGIN_ENUM_ITEM(INativeWindowListener::HitTestResult)
+				ENUM_ITEM_NAMESPACE(INativeWindowListener)
+				ENUM_NAMESPACE_ITEM(BorderNoSizing)
+				ENUM_NAMESPACE_ITEM(BorderLeft)
+				ENUM_NAMESPACE_ITEM(BorderRight)
+				ENUM_NAMESPACE_ITEM(BorderTop)
+				ENUM_NAMESPACE_ITEM(BorderBottom)
+				ENUM_NAMESPACE_ITEM(BorderLeftTop)
+				ENUM_NAMESPACE_ITEM(BorderRightTop)
+				ENUM_NAMESPACE_ITEM(BorderLeftBottom)
+				ENUM_NAMESPACE_ITEM(BorderRightBottom)
+				ENUM_NAMESPACE_ITEM(Title)
+				ENUM_NAMESPACE_ITEM(ButtonMinimum)
+				ENUM_NAMESPACE_ITEM(ButtonMaximum)
+				ENUM_NAMESPACE_ITEM(ButtonClose)
+				ENUM_NAMESPACE_ITEM(Client)
+				ENUM_NAMESPACE_ITEM(Icon)
+				ENUM_NAMESPACE_ITEM(NoDecision)
+			END_ENUM_ITEM(INativeWindowListener::HitTestResult)
+
+			BEGIN_CLASS_MEMBER(GuiGraphicsSite)
+				CLASS_MEMBER_BASE(GuiGraphicsComposition)
+			END_CLASS_MEMBER(GuiGraphicsSite)
+
+			BEGIN_CLASS_MEMBER(GuiWindowComposition)
+				CLASS_MEMBER_BASE(GuiGraphicsSite)
+				CLASS_MEMBER_CONSTRUCTOR(GuiWindowComposition*(), NO_PARAMETER)
+			END_CLASS_MEMBER(GuiWindowComposition)
+
+			BEGIN_CLASS_MEMBER(GuiBoundsComposition)
+				CLASS_MEMBER_BASE(GuiGraphicsSite)
+				CLASS_MEMBER_CONSTRUCTOR(GuiBoundsComposition*(), NO_PARAMETER)
+
+				CLASS_MEMBER_PROPERTY_FAST(Bounds)
+				
+				CLASS_MEMBER_METHOD(ClearAlignmentToParent, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetAlignmentToParent, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetAlignmentToParent, {L"value"})
+				CLASS_MEMBER_METHOD(IsAlignedToParent, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiBoundsComposition)
+
+			BEGIN_CLASS_MEMBER(GuiControl)
+				CLASS_MEMBER_CONSTRUCTOR(GuiControl*(GuiControl::IStyleController*), {L"styleController"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(StyleController)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BoundsComposition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContainerComposition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(FocusableComposition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Parent)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ChildrenCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RelatedControlHost)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(VisuallyEnabled)
+				CLASS_MEMBER_PROPERTY_FAST(Enabled)
+				CLASS_MEMBER_PROPERTY_FAST(Visible)
+				CLASS_MEMBER_PROPERTY_FAST(Text)
+				CLASS_MEMBER_PROPERTY_FAST(Font)
+				CLASS_MEMBER_PROPERTY_FAST(TooltipControl)
+				CLASS_MEMBER_PROPERTY_FAST(TooltipWidth)
+
+				CLASS_MEMBER_METHOD(GetChild, {L"index"})
+				CLASS_MEMBER_METHOD(AddChild, {L"control"})
+				CLASS_MEMBER_METHOD(HasChild, {L"control"})
+				CLASS_MEMBER_METHOD(SetFocus, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(DisplayTooltip, {L"location"})
+				CLASS_MEMBER_METHOD(CloseTooltip, NO_PARAMETER)
+				CLASS_MEMBER_METHOD_OVERLOAD(QueryService, {L"identifier"}, IDescriptable*(GuiControl::*)(const WString&))
+			END_CLASS_MEMBER(GuiControl)
+
+			BEGIN_CLASS_MEMBER(GuiControl::IStyleController)
+				CLASS_MEMBER_EXTERNALCTOR(GuiControl::IStyleController*(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::GuiControl_IStyleController::Create)
+
+				CLASS_MEMBER_METHOD(GetBoundsComposition, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetContainerComposition, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetFocusableComposition, {L"value"})
+				CLASS_MEMBER_METHOD(SetText, {L"value"})
+				CLASS_MEMBER_METHOD(SetFont, {L"value"})
+				CLASS_MEMBER_METHOD(SetVisuallyEnabled, {L"value"})
+			END_CLASS_MEMBER(GuiControl::IStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiControl::IStyleProvider)
+				CLASS_MEMBER_EXTERNALCTOR(GuiControl::IStyleProvider*(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::GuiControl_IStyleProvider::Create)
+
+				CLASS_MEMBER_METHOD(AssociateStyleController, {L"controller"})
+				CLASS_MEMBER_METHOD(SetFocusableComposition, {L"value"})
+				CLASS_MEMBER_METHOD(SetText, {L"value"})
+				CLASS_MEMBER_METHOD(SetFont, {L"value"})
+				CLASS_MEMBER_METHOD(SetVisuallyEnabled, {L"value"})
+			END_CLASS_MEMBER(GuiControl::IStyleProvider)
+
+			BEGIN_CLASS_MEMBER(GuiComponent)
+			END_CLASS_MEMBER(GuiComponent)
+
+			BEGIN_CLASS_MEMBER(GuiControlHost)
+				CLASS_MEMBER_BASE(GuiControl)
+				CLASS_MEMBER_CONSTRUCTOR(GuiControlHost*(GuiControl::IStyleController*), {L"styleController"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MainComposition)
+				CLASS_MEMBER_PROPERTY_FAST(ShowInTaskBar)
+				CLASS_MEMBER_PROPERTY_FAST(EnabledActivate)
+				CLASS_MEMBER_PROPERTY_FAST(TopMost)
+				CLASS_MEMBER_PROPERTY_FAST(ClientSize)
+				CLASS_MEMBER_PROPERTY_FAST(Bounds)
+
+				CLASS_MEMBER_METHOD(ForceCalculateSizeImmediately, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Render, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetFocused, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetFocused, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetActivated, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetActivated, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(AddComponent, {L"component"})
+				CLASS_MEMBER_METHOD(RemoveComponent, {L"component"})
+				CLASS_MEMBER_METHOD(ContainsComponent, {L"component"})
+				CLASS_MEMBER_METHOD(Show, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ShowDeactivated, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ShowRestored, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ShowMaximized, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ShowMinimized, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Hide, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Close, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetOpening, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiControlHost)
+
+#undef _
+
+/***********************************************************************
+Type Loader
+***********************************************************************/
+
+			class GuiBasicTypeLoader : public Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					GUIREFLECTIONBASIC_TYPELIST(ADD_TYPE_INFO)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+
+			bool LoadGuiBasicTypes()
+			{
+				ITypeManager* manager=GetGlobalTypeManager();
+				if(manager)
+				{
+					Ptr<ITypeLoader> loader=new GuiBasicTypeLoader;
+					return manager->AddTypeLoader(loader);
+				}
+				return false;
+			}
+		}
+	}
+}
+
+/***********************************************************************
+Reflection\GuiReflectionCompositions.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			using namespace collections;
+			using namespace parsing;
+			using namespace parsing::tabling;
+			using namespace parsing::xml;
+			using namespace stream;
+
+			GUIREFLECTIONCOMPOSITION_TYPELIST(IMPL_TYPE_INFO)
+
+/***********************************************************************
+External Functions
+***********************************************************************/
+
+			Ptr<IValueReadonlyList> GuiStackComposition_GetStackItems(GuiStackComposition* thisObject)
+			{
+				return new ValueReadonlyListWrapper<const List<GuiStackItemComposition*>*>(&thisObject->GetStackItems());
+			}
+
+			void GuiTableComposition_SetRows(GuiTableComposition* thisObject, vint value)
+			{
+				int columns=thisObject->GetColumns();
+				if(columns<=0) columns=1;
+				thisObject->SetRowsAndColumns(value, columns);
+			}
+
+			void GuiTableComposition_SetColumns(GuiTableComposition* thisObject, vint value)
+			{
+				int row=thisObject->GetRows();
+				if(row<=0) row=1;
+				thisObject->SetRowsAndColumns(row, value);
+			}
+
+/***********************************************************************
+Type Declaration
+***********************************************************************/
+
+#define _ ,
+
+			BEGIN_CLASS_MEMBER(GuiStackComposition)
+				CLASS_MEMBER_BASE(GuiBoundsComposition)
+				CLASS_MEMBER_CONSTRUCTOR(GuiStackComposition*(), NO_PARAMETER)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetStackItems, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiStackComposition::*)(), &GuiStackComposition_GetStackItems)
+				CLASS_MEMBER_PROPERTY_READONLY(StackItems, GetStackItems)
+
+				CLASS_MEMBER_PROPERTY_FAST(Direction)
+				CLASS_MEMBER_PROPERTY_FAST(Padding)
+				CLASS_MEMBER_PROPERTY_FAST(ExtraMargin)
+
+				CLASS_MEMBER_METHOD(InsertStackItem, {L"index" _ L"item"})
+				CLASS_MEMBER_METHOD(IsStackItemClipped, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiStackComposition)
+
+			BEGIN_ENUM_ITEM(GuiStackComposition::Direction)
+				ENUM_ITEM_NAMESPACE(GuiStackComposition)
+				ENUM_NAMESPACE_ITEM(Horizontal)
+				ENUM_NAMESPACE_ITEM(Vertical)
+			END_ENUM_ITEM(GuiStackComposition::Direction)
+
+			BEGIN_CLASS_MEMBER(GuiStackItemComposition)
+				CLASS_MEMBER_BASE(GuiGraphicsSite)
+				CLASS_MEMBER_CONSTRUCTOR(GuiStackItemComposition*(), NO_PARAMETER)
+
+				CLASS_MEMBER_PROPERTY_FAST(Bounds)
+				CLASS_MEMBER_PROPERTY_FAST(ExtraMargin)
+			END_CLASS_MEMBER(GuiStackItemComposition)
+
+			BEGIN_STRUCT_MEMBER(GuiCellOption)
+				STRUCT_MEMBER(composeType)
+				STRUCT_MEMBER(absolute)
+				STRUCT_MEMBER(percentage)
+			END_STRUCT_MEMBER(GuiCellOption)
+
+			BEGIN_ENUM_ITEM(GuiCellOption::ComposeType)
+				ENUM_ITEM_NAMESPACE(GuiCellOption)
+				ENUM_NAMESPACE_ITEM(Absolute)
+				ENUM_NAMESPACE_ITEM(Percentage)
+				ENUM_NAMESPACE_ITEM(MinSize)
+			END_ENUM_ITEM(GuiCellOption::ComposeType)
+
+			BEGIN_CLASS_MEMBER(GuiTableComposition)
+				CLASS_MEMBER_BASE(GuiBoundsComposition)
+				CLASS_MEMBER_CONSTRUCTOR(GuiTableComposition*(), NO_PARAMETER)
+
+				CLASS_MEMBER_PROPERTY_FAST(CellPadding)
+
+				CLASS_MEMBER_METHOD(GetRows, NO_PARAMETER)
+				CLASS_MEMBER_EXTERNALMETHOD(SetRows, {L"value"}, void(GuiTableComposition::*)(vint), &GuiTableComposition_SetRows)
+				CLASS_MEMBER_PROPERTY(Rows, GetRows, SetRows)
+				CLASS_MEMBER_METHOD(GetColumns, NO_PARAMETER)
+				CLASS_MEMBER_EXTERNALMETHOD(SetColumns, {L"value"}, void(GuiTableComposition::*)(vint), &GuiTableComposition_SetColumns)
+				CLASS_MEMBER_PROPERTY(Columns, GetColumns, SetColumns)
+				CLASS_MEMBER_METHOD(SetRowsAndColumns, {L"rows" _ L"columns"})
+
+				CLASS_MEMBER_METHOD(GetSitedCell, {L"rows" _ L"columns"})
+				CLASS_MEMBER_METHOD(GetRowOption, {L"row"})
+				CLASS_MEMBER_METHOD(SetRowOption, {L"row" _ L"option"})
+				CLASS_MEMBER_METHOD(GetColumnOption, {L"column"})
+				CLASS_MEMBER_METHOD(SetColumnOption, {L"column" _ L"option"})
+				CLASS_MEMBER_METHOD(GetCellArea, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(UpdateCellBounds, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiTableComposition)
+
+			BEGIN_CLASS_MEMBER(GuiCellComposition)
+				CLASS_MEMBER_BASE(GuiGraphicsSite)
+				CLASS_MEMBER_CONSTRUCTOR(GuiCellComposition*(), NO_PARAMETER)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TableParent)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Row)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RowSpan)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Column)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ColumnSpan)
+
+				CLASS_MEMBER_METHOD(SetSite, {L"row" _ L"column" _ L"rowSpan" _ L"columnSpan"})
+			END_CLASS_MEMBER(GuiCellComposition)
+
+			BEGIN_CLASS_MEMBER(GuiSideAlignedComposition)
+				CLASS_MEMBER_BASE(GuiGraphicsSite)
+				CLASS_MEMBER_CONSTRUCTOR(GuiSideAlignedComposition*(), NO_PARAMETER)
+				
+				CLASS_MEMBER_PROPERTY_FAST(Direction)
+				CLASS_MEMBER_PROPERTY_FAST(MaxLength)
+				CLASS_MEMBER_PROPERTY_FAST(MaxRatio)
+			END_CLASS_MEMBER(GuiSideAlignedComposition)
+
+			BEGIN_ENUM_ITEM(GuiSideAlignedComposition::Direction)
+				ENUM_ITEM_NAMESPACE(GuiSideAlignedComposition)
+				ENUM_NAMESPACE_ITEM(Left)
+				ENUM_NAMESPACE_ITEM(Top)
+				ENUM_NAMESPACE_ITEM(Right)
+				ENUM_NAMESPACE_ITEM(Bottom)
+			END_ENUM_ITEM(GuiSideAlignedComposition::Direction)
+
+			BEGIN_CLASS_MEMBER(GuiPartialViewComposition)
+				CLASS_MEMBER_BASE(GuiGraphicsSite)
+				CLASS_MEMBER_CONSTRUCTOR(GuiPartialViewComposition*(), NO_PARAMETER)
+				
+				CLASS_MEMBER_PROPERTY_FAST(WidthRatio)
+				CLASS_MEMBER_PROPERTY_FAST(WidthPageSize)
+				CLASS_MEMBER_PROPERTY_FAST(HeightRatio)
+				CLASS_MEMBER_PROPERTY_FAST(HeightPageSize)
+			END_CLASS_MEMBER(GuiPartialViewComposition)
+
+#undef _
+
+/***********************************************************************
+Type Loader
+***********************************************************************/
+
+			class GuiCompositionTypeLoader : public Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					GUIREFLECTIONCOMPOSITION_TYPELIST(ADD_TYPE_INFO)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+
+			bool LoadGuiCompositionTypes()
+			{
+				ITypeManager* manager=GetGlobalTypeManager();
+				if(manager)
+				{
+					Ptr<ITypeLoader> loader=new GuiCompositionTypeLoader;
+					return manager->AddTypeLoader(loader);
+				}
+				return false;
+			}
+		}
+	}
+}
+
+/***********************************************************************
+Reflection\GuiReflectionControls.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			using namespace collections;
+			using namespace parsing;
+			using namespace parsing::tabling;
+			using namespace parsing::xml;
+			using namespace stream;
+			using namespace list;
+
+			GUIREFLECTIONCONTROLS_TYPELIST(IMPL_TYPE_INFO)
+
+/***********************************************************************
+External Functions
+***********************************************************************/
+
+			Ptr<IValueReadonlyList> GuiTab_GetPages(GuiTab* thisObject)
+			{
+				return new ValueReadonlyListWrapper<const List<GuiTabPage*>*>(&thisObject->GetPages());
+			}
+
+			Ptr<IValueReadonlyList> GuiApplication_GetWindows(GuiApplication* thisObject)
+			{
+				return new ValueReadonlyListWrapper<const List<GuiWindow*>*>(&thisObject->GetWindows());
+			}
+
+			void GuiApplication_InvokeAsync(GuiApplication* thisObject, Ptr<IValueFunctionProxy> proc)
+			{
+				thisObject->InvokeAsync([=]()
+				{
+					proc->Invoke(IValueList::Create());
+				});
+			}
+
+			void GuiApplication_InvokeInMainThread(GuiApplication* thisObject, Ptr<IValueFunctionProxy> proc)
+			{
+				thisObject->InvokeInMainThread([=]()
+				{
+					proc->Invoke(IValueList::Create());
+				});
+			}
+
+			void GuiApplication_InvokeInMainThreadAndWait(GuiApplication* thisObject, Ptr<IValueFunctionProxy> proc)
+			{
+				thisObject->InvokeInMainThreadAndWait([=]()
+				{
+					proc->Invoke(IValueList::Create());
+				});
+			}
+
+			Ptr<INativeDelay> GuiApplication_DelayExecute(GuiApplication* thisObject, Ptr<IValueFunctionProxy> proc, vint milliseconds)
+			{
+				return thisObject->DelayExecute([=]()
+				{
+					proc->Invoke(IValueList::Create());
+				}, milliseconds);
+			}
+
+			Ptr<INativeDelay> GuiApplication_DelayExecuteInMainThread(GuiApplication* thisObject, Ptr<IValueFunctionProxy> proc, vint milliseconds)
+			{
+				return thisObject->DelayExecuteInMainThread([=]()
+				{
+					proc->Invoke(IValueList::Create());
+				}, milliseconds);
+			}
+
+			Ptr<IValueReadonlyList> GuiSelectableListControl_GetSelectedItem(GuiSelectableListControl* thisObject)
+			{
+				return new ValueReadonlyListWrapper<const SortedList<vint>*>(&thisObject->GetSelectedItems());
+			}
+
+/***********************************************************************
+Type Declaration
+***********************************************************************/
+
+#define _ ,
+
+#define CONTROL_CONSTRUCTOR_CONTROLLER(CONTROL)\
+	CLASS_MEMBER_CONSTRUCTOR(CONTROL*(CONTROL::IStyleController*), {L"styleController"})
+
+#define CONTROL_CONSTRUCTOR_PROVIDER(CONTROL)\
+	CLASS_MEMBER_CONSTRUCTOR(CONTROL*(CONTROL::IStyleProvider*), {L"styleProvider"})
+
+#define INTERFACE_EXTERNALCTOR(CONTROL, INTERFACE)\
+	CLASS_MEMBER_EXTERNALCTOR(decltype(interface_proxy::CONTROL##_##INTERFACE::Create(0))(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::CONTROL##_##INTERFACE::Create)
+
+#define INTERFACE_IDENTIFIER(INTERFACE)\
+	CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetIdentifier, NO_PARAMETER, WString(*)(), []()->WString{return INTERFACE::Identifier;})
+
+			BEGIN_CLASS_MEMBER(GuiApplication)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetApplication, NO_PARAMETER, GuiApplication*(*)(), &GetApplication)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MainWindow)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TooltipOwner)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ExecutablePath)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ExecutableFolder)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetWindows, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiApplication::*)(), &GuiApplication_GetWindows)
+				CLASS_MEMBER_METHOD(ShowTooltip, {L"owner" _ L"tooltip" _ L"preferredContentWidth" _ L"location"})
+				CLASS_MEMBER_METHOD(CloseTooltip, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsInMainThread, NO_PARAMETER)
+				CLASS_MEMBER_EXTERNALMETHOD(InvokeAsync, {L"proc"}, void(GuiApplication::*)(Ptr<IValueFunctionProxy>), &GuiApplication_InvokeAsync)
+				CLASS_MEMBER_EXTERNALMETHOD(InvokeInMainThread, {L"proc"}, void(GuiApplication::*)(Ptr<IValueFunctionProxy>), &GuiApplication_InvokeInMainThread)
+				CLASS_MEMBER_EXTERNALMETHOD(InvokeInMainThreadAndWait, {L"proc"}, void(GuiApplication::*)(Ptr<IValueFunctionProxy>), &GuiApplication_InvokeInMainThreadAndWait)
+				CLASS_MEMBER_EXTERNALMETHOD(DelayExecute, {L"proc" _ L"milliseconds"}, Ptr<INativeDelay>(GuiApplication::*)(Ptr<IValueFunctionProxy>, vint), &GuiApplication_DelayExecute)
+				CLASS_MEMBER_EXTERNALMETHOD(DelayExecuteInMainThread, {L"proc" _ L"milliseconds"}, Ptr<INativeDelay>(GuiApplication::*)(Ptr<IValueFunctionProxy>, vint), &GuiApplication_DelayExecuteInMainThread)
+			END_CLASS_MEMBER(GuiApplication)
+
+			BEGIN_CLASS_MEMBER(GuiLabel)
+				CLASS_MEMBER_BASE(GuiControl)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiLabel)
+
+				CLASS_MEMBER_PROPERTY_FAST(TextColor)
+			END_CLASS_MEMBER(GuiLabel)
+
+			BEGIN_CLASS_MEMBER(GuiLabel::IStyleController)
+				CLASS_MEMBER_BASE(GuiControl::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiLabel, IStyleController)
+
+				CLASS_MEMBER_METHOD(GetDefaultTextColor, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetTextColor, {L"value"})
+			END_CLASS_MEMBER(GuiLabel::IStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiButton)
+				CLASS_MEMBER_BASE(GuiControl)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiButton)
+
+				CLASS_MEMBER_PROPERTY_FAST(ClickOnMouseUp)
+			END_CLASS_MEMBER(GuiButton)
+
+			BEGIN_ENUM_ITEM(GuiButton::ControlState)
+				ENUM_ITEM_NAMESPACE(GuiButton)
+				ENUM_NAMESPACE_ITEM(Normal)
+				ENUM_NAMESPACE_ITEM(Active)
+				ENUM_NAMESPACE_ITEM(Pressed)
+			END_ENUM_ITEM(GuiButton::ControlState)
+
+			BEGIN_CLASS_MEMBER(GuiButton::IStyleController)
+				CLASS_MEMBER_BASE(GuiControl::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiButton, IStyleController)
+
+				CLASS_MEMBER_METHOD(Transfer, {L"value"})
+			END_CLASS_MEMBER(GuiButton::IStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiSelectableButton)
+				CLASS_MEMBER_BASE(GuiButton)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiSelectableButton)
+
+				CLASS_MEMBER_PROPERTY_FAST(GroupController)
+				CLASS_MEMBER_PROPERTY_FAST(AutoSelection)
+				CLASS_MEMBER_PROPERTY_FAST(Selected)
+			END_CLASS_MEMBER(GuiSelectableButton)
+
+			BEGIN_CLASS_MEMBER(GuiSelectableButton::IStyleController)
+				CLASS_MEMBER_BASE(GuiButton::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiSelectableButton, IStyleController)
+
+				CLASS_MEMBER_METHOD(SetSelected, {L"value"})
+			END_CLASS_MEMBER(GuiSelectableButton::IStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiSelectableButton::GroupController)
+				CLASS_MEMBER_BASE(GuiComponent)
+
+				CLASS_MEMBER_METHOD(Attach, {L"button"})
+				CLASS_MEMBER_METHOD(Detach, {L"button"})
+				CLASS_MEMBER_METHOD(OnSelectedChanged, {L"button"})
+			END_CLASS_MEMBER(GuiSelectableButton::GroupController)
+
+			BEGIN_CLASS_MEMBER(GuiSelectableButton::MutexGroupController)
+				CLASS_MEMBER_BASE(GuiSelectableButton::GroupController)
+				CLASS_MEMBER_CONSTRUCTOR(GuiSelectableButton::MutexGroupController*(), NO_PARAMETER)
+			END_CLASS_MEMBER(GuiSelectableButton::MutexGroupController)
+
+			BEGIN_CLASS_MEMBER(GuiScroll)
+				CLASS_MEMBER_BASE(GuiControl)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiScroll)
+
+				CLASS_MEMBER_PROPERTY_FAST(TotalSize)
+				CLASS_MEMBER_PROPERTY_FAST(PageSize)
+				CLASS_MEMBER_PROPERTY_FAST(Position)
+				CLASS_MEMBER_PROPERTY_FAST(SmallMove)
+				CLASS_MEMBER_PROPERTY_FAST(BigMove)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MinPosition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxPosition)
+			END_CLASS_MEMBER(GuiScroll)
+
+			BEGIN_CLASS_MEMBER(GuiScroll::ICommandExecutor)
+				CLASS_MEMBER_METHOD(SmallDecrease, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SmallIncrease, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(BigDecrease, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(BigIncrease, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetTotalSize, {L"value"})
+				CLASS_MEMBER_METHOD(SetPageSize, {L"value"})
+				CLASS_MEMBER_METHOD(SetPosition, {L"value"})
+			END_CLASS_MEMBER(GuiScroll::ICommandExecutor)
+
+			BEGIN_CLASS_MEMBER(GuiScroll::IStyleController)
+				CLASS_MEMBER_BASE(GuiControl::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiScroll, IStyleController)
+
+				CLASS_MEMBER_METHOD(SetCommandExecutor, {L"value"})
+				CLASS_MEMBER_METHOD(SetTotalSize, {L"value"})
+				CLASS_MEMBER_METHOD(SetPageSize, {L"value"})
+				CLASS_MEMBER_METHOD(SetPosition, {L"value"})
+			END_CLASS_MEMBER(GuiScroll::IStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiTabPage)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Container)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerTab)
+				CLASS_MEMBER_PROPERTY_FAST(Text)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Selected)
+			END_CLASS_MEMBER(GuiTabPage)
+
+			BEGIN_CLASS_MEMBER(GuiTab)
+				CLASS_MEMBER_BASE(GuiControl)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiTab)
+
+				CLASS_MEMBER_PROPERTY_FAST(SelectedPage)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(CreatePage, {L"index"}, GuiTabPage*(GuiTab::*)(vint))
+				CLASS_MEMBER_METHOD_OVERLOAD(CreatePage, {L"page" _ L"index"}, bool(GuiTab::*)(GuiTabPage* _ vint))
+				CLASS_MEMBER_METHOD(RemovePage, {L"value"})
+				CLASS_MEMBER_METHOD(MovePage, {L"page" _ L"newIndex"})
+				CLASS_MEMBER_EXTERNALMETHOD(GetPages, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiTab::*)(), &GuiTab_GetPages)
+			END_CLASS_MEMBER(GuiTab)
+
+			BEGIN_CLASS_MEMBER(GuiTab::ICommandExecutor)
+				CLASS_MEMBER_METHOD(ShowTab, {L"index"})
+			END_CLASS_MEMBER(GuiTab::ICommandExecutor)
+
+			BEGIN_CLASS_MEMBER(GuiTab::IStyleController)
+				CLASS_MEMBER_BASE(GuiControl::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiTab, IStyleController)
+
+				CLASS_MEMBER_METHOD(SetCommandExecutor, {L"value"})
+				CLASS_MEMBER_METHOD(InsertTab, {L"index"})
+				CLASS_MEMBER_METHOD(SetTabText, {L"index" _ L"value"})
+				CLASS_MEMBER_METHOD(RemoveTab, {L"index"})
+				CLASS_MEMBER_METHOD(MoveTab, {L"oldIndex" _ L"newIndex"})
+				CLASS_MEMBER_METHOD(SetSelectedTab, {L"index"})
+				CLASS_MEMBER_METHOD(CreateTabPageStyleController, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiTab::IStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiScrollView)
+				CLASS_MEMBER_BASE(GuiControl)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewSize)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewBounds)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(HorizontalScroll)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(VerticalScroll)
+				CLASS_MEMBER_PROPERTY_FAST(HorizontalAlwaysVisible)
+				CLASS_MEMBER_PROPERTY_FAST(VerticalAlwaysVisible)
+
+				CLASS_MEMBER_METHOD(CalculateView, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiScrollView)
+
+			BEGIN_CLASS_MEMBER(GuiScrollView::IStyleProvider)
+				CLASS_MEMBER_BASE(GuiControl::IStyleProvider)
+				INTERFACE_EXTERNALCTOR(GuiScrollView, IStyleProvider)
+
+				CLASS_MEMBER_METHOD(CreateHorizontalScrollStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateVerticalScrollStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetDefaultScrollSize, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(InstallBackground, {L"boundsComposition"})
+			END_CLASS_MEMBER(GuiScrollView::IStyleProvider)
+
+			BEGIN_CLASS_MEMBER(GuiScrollContainer)
+				CLASS_MEMBER_BASE(GuiScrollView)
+				CONTROL_CONSTRUCTOR_PROVIDER(GuiScrollContainer)
+
+				CLASS_MEMBER_PROPERTY_FAST(ExtendToFullWidth)
+			END_CLASS_MEMBER(GuiScrollContainer)
+
+			BEGIN_CLASS_MEMBER(GuiWindow)
+				CLASS_MEMBER_BASE(GuiControlHost)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiWindow)
+
+				CLASS_MEMBER_PROPERTY_FAST(MaximizedBox)
+				CLASS_MEMBER_PROPERTY_FAST(MinimizedBox)
+				CLASS_MEMBER_PROPERTY_FAST(Border)
+				CLASS_MEMBER_PROPERTY_FAST(SizeBox)
+				CLASS_MEMBER_PROPERTY_FAST(IconVisible)
+				CLASS_MEMBER_PROPERTY_FAST(TitleBar)
+
+				CLASS_MEMBER_METHOD(MoveToScreenCenter, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiWindow)
+
+			BEGIN_CLASS_MEMBER(GuiWindow::IStyleController)
+				CLASS_MEMBER_BASE(GuiControl::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiWindow, IStyleController)
+
+				CLASS_MEMBER_PROPERTY_FAST(MaximizedBox)
+				CLASS_MEMBER_PROPERTY_FAST(MinimizedBox)
+				CLASS_MEMBER_PROPERTY_FAST(Border)
+				CLASS_MEMBER_PROPERTY_FAST(SizeBox)
+				CLASS_MEMBER_PROPERTY_FAST(IconVisible)
+				CLASS_MEMBER_PROPERTY_FAST(TitleBar)
+			END_CLASS_MEMBER(GuiWindow::IStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiPopup)
+				CLASS_MEMBER_BASE(GuiWindow)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiPopup)
+
+				CLASS_MEMBER_METHOD(IsClippedByScreen, {L"location"})
+				CLASS_MEMBER_METHOD_OVERLOAD(ShowPopup, {L"location"}, void(GuiPopup::*)(Point))
+				CLASS_MEMBER_METHOD_OVERLOAD(ShowPopup, {L"control" _ L"location"}, void(GuiPopup::*)(GuiControl* _ Point))
+				CLASS_MEMBER_METHOD_OVERLOAD(ShowPopup, {L"control" _ L"preferredTopBottomSide"}, void(GuiPopup::*)(GuiControl* _ bool))
+			END_CLASS_MEMBER(GuiPopup)
+
+			BEGIN_CLASS_MEMBER(GuiTooltip)
+				CLASS_MEMBER_BASE(GuiPopup)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiPopup)
+				
+				CLASS_MEMBER_PROPERTY_FAST(PreferredContentWidth)
+				CLASS_MEMBER_PROPERTY_FAST(TemporaryContentControl)
+			END_CLASS_MEMBER(GuiTooltip)
+
+			BEGIN_CLASS_MEMBER(GuiListControl)
+				CLASS_MEMBER_BASE(GuiScrollView)
+				CLASS_MEMBER_CONSTRUCTOR(GuiListControl*(GuiListControl::IStyleProvider* _ GuiListControl::IItemProvider* _ bool), {L"styleProvider" _ L"itemProvider" _ L"acceptFocus"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ItemProvider)
+				CLASS_MEMBER_PROPERTY_FAST(StyleProvider)
+				CLASS_MEMBER_PROPERTY_FAST(Arranger)
+				CLASS_MEMBER_PROPERTY_FAST(CoordinateTransformer)
+
+				CLASS_MEMBER_METHOD(EnsureItemVisible, {L"itemIndex"})
+			END_CLASS_MEMBER(GuiListControl)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemProviderCallback)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemProviderCallback)
+
+				CLASS_MEMBER_METHOD(OnAttached, {L"provider"})
+				CLASS_MEMBER_METHOD(OnItemModified, {L"start" _ L"count" _ L"newCount"})
+			END_CLASS_MEMBER(GuiListControl::IItemProviderCallback)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemArrangerCallback)
+				CLASS_MEMBER_METHOD(RequestItem, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(ReleaseItem, {L"style"})
+				CLASS_MEMBER_METHOD(SetViewLocation, {L"value"})
+				CLASS_MEMBER_METHOD(GetStylePreferredSize, {L"style"})
+				CLASS_MEMBER_METHOD(SetStyleAlignmentToParent, {L"style" _ L"margin"})
+				CLASS_MEMBER_METHOD(GetStyleBounds, {L"style"})
+				CLASS_MEMBER_METHOD(SetStyleBounds, {L"style" _ L"bounds"})
+				CLASS_MEMBER_METHOD(GetContainerComposition, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OnTotalSizeChanged, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiListControl::IItemArrangerCallback)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemPrimaryTextView)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemPrimaryTextView)
+				INTERFACE_IDENTIFIER(GuiListControl::IItemPrimaryTextView)
+
+				CLASS_MEMBER_METHOD(GetPrimaryTextViewText, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(ContainsPrimaryText, {L"itemIndex"})
+			END_CLASS_MEMBER(GuiListControl::IItemPrimaryTextView)
+
+			BEGIN_ENUM_ITEM(GuiListControl::KeyDirection)
+				ENUM_ITEM_NAMESPACE(GuiListControl)
+				ENUM_NAMESPACE_ITEM(Up)
+				ENUM_NAMESPACE_ITEM(Down)
+				ENUM_NAMESPACE_ITEM(Left)
+				ENUM_NAMESPACE_ITEM(Right)
+				ENUM_NAMESPACE_ITEM(Home)
+				ENUM_NAMESPACE_ITEM(End)
+				ENUM_NAMESPACE_ITEM(PageUp)
+				ENUM_NAMESPACE_ITEM(PageDown)
+				ENUM_NAMESPACE_ITEM(PageLeft)
+				ENUM_NAMESPACE_ITEM(PageRight)
+			END_ENUM_ITEM(GuiListControl::KeyDirection)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemProvider)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemProvider)
+
+				CLASS_MEMBER_METHOD(AttachCallback, {L"value"})
+				CLASS_MEMBER_METHOD(DetachCallback, {L"value"})
+				CLASS_MEMBER_METHOD(Count, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(RequestView, {L"identifier"})
+				CLASS_MEMBER_METHOD(ReleaseView, {L"view"})
+			END_CLASS_MEMBER(GuiListControl::IItemProvider)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemStyleController)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(StyleProvider)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ItemStyleId)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BoundsComposition)
+
+				CLASS_MEMBER_METHOD(IsCacheable, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsInstalled, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OnInstalled, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OnUninstalled, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiListControl::IItemStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemStyleProvider)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemStyleProvider)
+
+				CLASS_MEMBER_METHOD(AttachListControl, {L"value"})
+				CLASS_MEMBER_METHOD(DetachListControl, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetItemStyleId, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(CreateItemStyle, {L"styleId"})
+				CLASS_MEMBER_METHOD(DestroyItemStyle, {L"style"})
+				CLASS_MEMBER_METHOD(Install, {L"style" _ L"itemIndex"})
+			END_CLASS_MEMBER(GuiListControl::IItemStyleProvider)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemArranger)
+				CLASS_MEMBER_BASE(GuiListControl::IItemProviderCallback)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemArranger)
+
+				CLASS_MEMBER_PROPERTY_FAST(Callback)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TotalSize)
+				
+				CLASS_MEMBER_METHOD(AttachListControl, {L"value"})
+				CLASS_MEMBER_METHOD(DetachListControl, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetVisibleStyle, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(GetVisibleIndex, {L"style"})
+				CLASS_MEMBER_METHOD(OnViewChanged, {L"bounds"})
+				CLASS_MEMBER_METHOD(FindItem, {L"itemIndex" _ L"key"})
+				CLASS_MEMBER_METHOD(EnsureItemVisible, {L"itemIndex"})
+			END_CLASS_MEMBER(GuiListControl::IItemArranger)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemCoordinateTransformer)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemCoordinateTransformer)
+
+				CLASS_MEMBER_METHOD(RealSizeToVirtualSize, {L"size"})
+				CLASS_MEMBER_METHOD(VirtualSizeToRealSize, {L"size"})
+				CLASS_MEMBER_METHOD(RealPointToVirtualPoint, {L"realFullSize" _ L"point"})
+				CLASS_MEMBER_METHOD(VirtualPointToRealPoint, {L"realFullSize" _ L"point"})
+				CLASS_MEMBER_METHOD(RealRectToVirtualRect, {L"realFullSize" _ L"rect"})
+				CLASS_MEMBER_METHOD(VirtualRectToRealRect, {L"realFullSize" _ L"rect"})
+				CLASS_MEMBER_METHOD(RealMarginToVirtualMargin, {L"margin"})
+				CLASS_MEMBER_METHOD(VirtualMarginToRealMargin, {L"margin"})
+				CLASS_MEMBER_METHOD(RealKeyDirectionToVirtualKeyDirection, {L"key"})
+			END_CLASS_MEMBER(GuiListControl::IItemCoordinateTransformer)
+
+			BEGIN_CLASS_MEMBER(GuiSelectableListControl)
+				CLASS_MEMBER_BASE(GuiListControl)
+				CLASS_MEMBER_CONSTRUCTOR(GuiSelectableListControl*(GuiSelectableListControl::IStyleProvider* _ GuiSelectableListControl::IItemProvider*), {L"styleProvider" _ L"itemProvider"})
+
+				CLASS_MEMBER_PROPERTY_FAST(MultiSelect)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetSelectedItems, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiSelectableListControl::*)(), &GuiSelectableListControl_GetSelectedItem)
+				CLASS_MEMBER_METHOD(GetSelected, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(SetSelected, {L"itemIndex" _ L"value"})
+				CLASS_MEMBER_METHOD(SelectItemsByClick, {L"itemIndex" _ L"ctrl" _ L"shift"})
+				CLASS_MEMBER_METHOD(SelectItemsByKey, {L"code" _ L"ctrl" _ L"shift"})
+				CLASS_MEMBER_METHOD(ClearSelection, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiSelectableListControl)
+
+			BEGIN_CLASS_MEMBER(GuiSelectableListControl::IItemStyleProvider)
+				CLASS_MEMBER_BASE(GuiListControl::IItemStyleProvider)
+				INTERFACE_EXTERNALCTOR(GuiSelectableListControl, IItemStyleProvider)
+
+				CLASS_MEMBER_METHOD(SetStyleSelected, {L"style" _ L"value"})
+			END_CLASS_MEMBER(GuiSelectableListControl::IItemStyleProvider)
+
+			BEGIN_CLASS_MEMBER(DefaultItemCoordinateTransformer)
+				CLASS_MEMBER_BASE(GuiListControl::IItemCoordinateTransformer)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DefaultItemCoordinateTransformer>(), NO_PARAMETER)
+			END_CLASS_MEMBER(DefaultItemCoordinateTransformer)
+
+			BEGIN_CLASS_MEMBER(AxisAlignedItemCoordinateTransformer)
+				CLASS_MEMBER_BASE(GuiListControl::IItemCoordinateTransformer)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<AxisAlignedItemCoordinateTransformer>(AxisAlignedItemCoordinateTransformer::Alignment), {L"alignment"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Alignment)
+			END_CLASS_MEMBER(AxisAlignedItemCoordinateTransformer)
+
+			BEGIN_ENUM_ITEM(AxisAlignedItemCoordinateTransformer::Alignment)
+				ENUM_ITEM_NAMESPACE(AxisAlignedItemCoordinateTransformer)
+				ENUM_NAMESPACE_ITEM(LeftDown)
+				ENUM_NAMESPACE_ITEM(RightDown)
+				ENUM_NAMESPACE_ITEM(LeftUp)
+				ENUM_NAMESPACE_ITEM(RightUp)
+				ENUM_NAMESPACE_ITEM(DownLeft)
+				ENUM_NAMESPACE_ITEM(DownRight)
+				ENUM_NAMESPACE_ITEM(UpLeft)
+				ENUM_NAMESPACE_ITEM(UpRight)
+			END_ENUM_ITEM(AxisAlignedItemCoordinateTransformer::Alignment)
+
+			BEGIN_CLASS_MEMBER(RangedItemArrangerBase)
+				CLASS_MEMBER_BASE(GuiListControl::IItemArranger)
+			END_CLASS_MEMBER(RangedItemArrangerBase)
+
+			BEGIN_CLASS_MEMBER(FixedHeightItemArranger)
+				CLASS_MEMBER_BASE(RangedItemArrangerBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<FixedHeightItemArranger>(), NO_PARAMETER)
+			END_CLASS_MEMBER(FixedHeightItemArranger)
+
+			BEGIN_CLASS_MEMBER(FixedSizeMultiColumnItemArranger)
+				CLASS_MEMBER_BASE(RangedItemArrangerBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<FixedSizeMultiColumnItemArranger>(), NO_PARAMETER)
+			END_CLASS_MEMBER(FixedSizeMultiColumnItemArranger)
+
+			BEGIN_CLASS_MEMBER(FixedHeightMultiColumnItemArranger)
+				CLASS_MEMBER_BASE(RangedItemArrangerBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<FixedHeightMultiColumnItemArranger>(), NO_PARAMETER)
+			END_CLASS_MEMBER(FixedHeightMultiColumnItemArranger)
+
+			BEGIN_CLASS_MEMBER(ItemStyleControllerBase)
+				CLASS_MEMBER_BASE(GuiListControl::IItemStyleController)
+			END_CLASS_MEMBER(ItemStyleControllerBase)
+
+			BEGIN_CLASS_MEMBER(TextItemStyleProvider)
+				CLASS_MEMBER_BASE(GuiSelectableListControl::IItemStyleProvider)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<TextItemStyleProvider>(TextItemStyleProvider::ITextItemStyleProvider*), {L"textItemStyleProvider"})
+			END_CLASS_MEMBER(TextItemStyleProvider)
+
+			BEGIN_CLASS_MEMBER(TextItemStyleProvider::ITextItemStyleProvider)
+				INTERFACE_EXTERNALCTOR(TextItemStyleProvider, ITextItemStyleProvider)
+
+				CLASS_MEMBER_METHOD(CreateBackgroundStyleController, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateBulletStyleController, NO_PARAMETER)
+			END_CLASS_MEMBER(TextItemStyleProvider::ITextItemStyleProvider)
+
+			BEGIN_CLASS_MEMBER(TextItemStyleProvider::ITextItemView)
+				CLASS_MEMBER_BASE(GuiListControl::IItemPrimaryTextView)
+				INTERFACE_EXTERNALCTOR(TextItemStyleProvider, ITextItemView)
+				INTERFACE_IDENTIFIER(TextItemStyleProvider::ITextItemView)
+
+				CLASS_MEMBER_METHOD(GetText, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(GetChecked, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(SetCheckedSilently, {L"itemIndex" _ L"value"})
+			END_CLASS_MEMBER(TextItemStyleProvider::ITextItemView)
+
+			BEGIN_CLASS_MEMBER(TextItemStyleProvider::TextItemStyleController)
+				CLASS_MEMBER_BASE(ItemStyleControllerBase)
+				CLASS_MEMBER_CONSTRUCTOR(TextItemStyleProvider::TextItemStyleController*(TextItemStyleProvider*), {L"provider"})
+
+				CLASS_MEMBER_PROPERTY_FAST(Selected)
+				CLASS_MEMBER_PROPERTY_FAST(Checked)
+				CLASS_MEMBER_PROPERTY_FAST(Text)
+			END_CLASS_MEMBER(TextItemStyleProvider::TextItemStyleController)
+
+#undef INTERFACE_IDENTIFIER
+#undef CONTROL_CONSTRUCTOR_CONTROLLER
+#undef INTERFACE_EXTERNALCTOR
+#undef _
+
+/***********************************************************************
+Type Loader
+***********************************************************************/
+
+			class GuiControlsTypeLoader : public Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					GUIREFLECTIONCONTROLS_TYPELIST(ADD_TYPE_INFO)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+
+			bool LoadGuiControlsTypes()
+			{
+				ITypeManager* manager=GetGlobalTypeManager();
+				if(manager)
+				{
+					Ptr<ITypeLoader> loader=new GuiControlsTypeLoader;
+					return manager->AddTypeLoader(loader);
+				}
+				return false;
+			}
+		}
+	}
+}
+
+/***********************************************************************
+Reflection\GuiReflectionElements.cpp
+***********************************************************************/
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			using namespace collections;
+
+			GUIREFLECTIONELEMENT_TYPELIST(IMPL_TYPE_INFO)
+
+/***********************************************************************
+External Functions
+***********************************************************************/
+
+			template<typename T>
+			Ptr<T> Element_Constructor()
+			{
+				return T::Create();
+			}
+
+			Ptr<IValueReadonlyList> GuiPolygonElement_GetPoints(GuiPolygonElement* thisObject)
+			{
+				Ptr<Array<Point>> points=new Array<Point>;
+				CopyFrom(
+					*points.Obj(),
+					Range(0, thisObject->GetPointCount())
+						.Select([=](vint i)->Point{return thisObject->GetPoint(i);})
+					);
+				return new ValueReadonlyListWrapper<Ptr<Array<Point>>>(points);
+			}
+
+			void GuiPolygonElement_SetPoints(GuiPolygonElement* thisObject, Ptr<IValueReadonlyList> value)
+			{
+				Array<Point> points;
+				CopyFrom(points, value->GetLazyList<Point>());
+				if(points.Count()==0)
+				{
+					thisObject->SetPoints(0, 0);
+				}
+				else
+				{
+					thisObject->SetPoints(&points[0], points.Count());
+				}
+			}
+
+			Ptr<IValueReadonlyList> GuiColorizedTextElement_GetColors(GuiColorizedTextElement* thisObject)
+			{
+				return new ValueReadonlyListWrapper<const Array<text::ColorEntry>*>(&thisObject->GetColors());
+			}
+
+			void GuiColorizedTextElement_SetColors(GuiColorizedTextElement* thisObject, Ptr<IValueReadonlyList> value)
+			{
+				Array<text::ColorEntry> colors;
+				CopyFrom(colors, value->GetLazyList<text::ColorEntry>());
+				thisObject->SetColors(colors);
+			}
+
+			text::TextLines* GuiColorizedTextElement_GetLines(GuiColorizedTextElement* thisObject)
+			{
+				return &thisObject->GetLines();
+			}
+
+/***********************************************************************
+Type Declaration
+***********************************************************************/
+
+#define _ ,
+
+			BEGIN_ENUM_ITEM(ElementShape)
+				ENUM_CLASS_ITEM(Rectangle)
+				ENUM_CLASS_ITEM(Ellipse)
+			END_ENUM_ITEM(ElementShape)
+
+			BEGIN_CLASS_MEMBER(GuiSolidBorderElement)
+				CLASS_MEMBER_BASE(IGuiGraphicsElement)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiSolidBorderElement>(), NO_PARAMETER, &Element_Constructor<GuiSolidBorderElement>)
+
+				CLASS_MEMBER_PROPERTY_FAST(Color)
+				CLASS_MEMBER_PROPERTY_FAST(Shape)
+			END_CLASS_MEMBER(GuiSolidBorderElement)
+
+			BEGIN_CLASS_MEMBER(GuiRoundBorderElement)
+				CLASS_MEMBER_BASE(IGuiGraphicsElement)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiRoundBorderElement>(), NO_PARAMETER, &Element_Constructor<GuiRoundBorderElement>)
+				
+				CLASS_MEMBER_PROPERTY_FAST(Color)
+				CLASS_MEMBER_PROPERTY_FAST(Radius)
+			END_CLASS_MEMBER(GuiRoundBorderElement)
+
+			BEGIN_CLASS_MEMBER(Gui3DBorderElement)
+				CLASS_MEMBER_BASE(IGuiGraphicsElement)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<Gui3DBorderElement>(), NO_PARAMETER, &Element_Constructor<Gui3DBorderElement>)
+				
+				CLASS_MEMBER_METHOD(SetColors, {L"value1" _ L"value2"})
+
+				CLASS_MEMBER_PROPERTY_FAST(Color1)
+				CLASS_MEMBER_PROPERTY_FAST(Color2)
+			END_CLASS_MEMBER(Gui3DBorderElement)
+
+			BEGIN_CLASS_MEMBER(Gui3DSplitterElement)
+				CLASS_MEMBER_BASE(IGuiGraphicsElement)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<Gui3DSplitterElement>(), NO_PARAMETER, &Element_Constructor<Gui3DSplitterElement>)
+				
+				CLASS_MEMBER_METHOD(SetColors, {L"value1" _ L"value2"})
+
+				CLASS_MEMBER_PROPERTY_FAST(Color1)
+				CLASS_MEMBER_PROPERTY_FAST(Color2)
+				CLASS_MEMBER_PROPERTY_FAST(Direction)
+			END_CLASS_MEMBER(Gui3DSplitterElement)
+
+			BEGIN_ENUM_ITEM(Gui3DSplitterElement::Direction)
+				ENUM_ITEM_NAMESPACE(Gui3DSplitterElement)
+				ENUM_NAMESPACE_ITEM(Horizontal)
+				ENUM_NAMESPACE_ITEM(Vertical)
+			END_ENUM_ITEM(Gui3DSplitterElement::Direction)
+
+			BEGIN_CLASS_MEMBER(GuiSolidBackgroundElement)
+				CLASS_MEMBER_BASE(IGuiGraphicsElement)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiSolidBackgroundElement>(), NO_PARAMETER, &Element_Constructor<GuiSolidBackgroundElement>)
+				
+				CLASS_MEMBER_PROPERTY_FAST(Color)
+				CLASS_MEMBER_PROPERTY_FAST(Shape)
+			END_CLASS_MEMBER(GuiSolidBackgroundElement)
+
+			BEGIN_CLASS_MEMBER(GuiGradientBackgroundElement)
+				CLASS_MEMBER_BASE(IGuiGraphicsElement)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiGradientBackgroundElement>(), NO_PARAMETER, &Element_Constructor<GuiGradientBackgroundElement>)
+				
+				CLASS_MEMBER_METHOD(SetColors, {L"value1" _ L"value2"})
+
+				CLASS_MEMBER_PROPERTY_FAST(Color1)
+				CLASS_MEMBER_PROPERTY_FAST(Color2)
+				CLASS_MEMBER_PROPERTY_FAST(Direction)
+				CLASS_MEMBER_PROPERTY_FAST(Shape)
+			END_CLASS_MEMBER(GuiGradientBackgroundElement)
+
+			BEGIN_ENUM_ITEM(GuiGradientBackgroundElement::Direction)
+				ENUM_ITEM_NAMESPACE(GuiGradientBackgroundElement)
+				ENUM_NAMESPACE_ITEM(Horizontal)
+				ENUM_NAMESPACE_ITEM(Vertical)
+			END_ENUM_ITEM(GuiGradientBackgroundElement::Direction)
+
+			BEGIN_CLASS_MEMBER(GuiSolidLabelElement)
+				CLASS_MEMBER_BASE(IGuiGraphicsElement)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiSolidLabelElement>(), NO_PARAMETER, &Element_Constructor<GuiSolidLabelElement>)
+				
+				CLASS_MEMBER_METHOD(SetAlignments, {L"horizontal" _ L"vertical"})
+
+				CLASS_MEMBER_PROPERTY_FAST(Color)
+				CLASS_MEMBER_PROPERTY_FAST(Font)
+				CLASS_MEMBER_PROPERTY_FAST(Text)
+				CLASS_MEMBER_PROPERTY_FAST(HorizontalAlignment)
+				CLASS_MEMBER_PROPERTY_FAST(VerticalAlignment)
+				CLASS_MEMBER_PROPERTY_FAST(WrapLine)
+				CLASS_MEMBER_PROPERTY_FAST(Ellipse)
+				CLASS_MEMBER_PROPERTY_FAST(Multiline)
+				CLASS_MEMBER_PROPERTY_FAST(WrapLineHeightCalculation)
+			END_CLASS_MEMBER(GuiSolidLabelElement)
+
+			BEGIN_CLASS_MEMBER(GuiImageFrameElement)
+				CLASS_MEMBER_BASE(IGuiGraphicsElement)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiImageFrameElement>(), NO_PARAMETER, &Element_Constructor<GuiImageFrameElement>)
+
+				CLASS_MEMBER_METHOD(GetImage, NO_PARAMETER)
+				CLASS_MEMBER_METHOD_OVERLOAD(SetImage, {L"value"}, void(GuiImageFrameElement::*)(Ptr<INativeImage>))
+				CLASS_MEMBER_METHOD_OVERLOAD(SetImage, {L"image" _  L"frameIndex"}, void(GuiImageFrameElement::*)(Ptr<INativeImage> _ vint))
+				CLASS_MEMBER_PROPERTY(Image, GetImage, SetImage)
+
+				CLASS_MEMBER_PROPERTY_FAST(FrameIndex)
+				CLASS_MEMBER_PROPERTY_FAST(HorizontalAlignment)
+				CLASS_MEMBER_PROPERTY_FAST(VerticalAlignment)
+				CLASS_MEMBER_PROPERTY_FAST(Stretch)
+				CLASS_MEMBER_PROPERTY_FAST(Enabled)
+			END_CLASS_MEMBER(GuiImageFrameElement)
+
+			BEGIN_CLASS_MEMBER(GuiPolygonElement)
+				CLASS_MEMBER_BASE(IGuiGraphicsElement)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiPolygonElement>(), NO_PARAMETER, &Element_Constructor<GuiPolygonElement>)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetPoints, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiPolygonElement::*)(), &GuiPolygonElement_GetPoints);
+				CLASS_MEMBER_EXTERNALMETHOD(SetPoints, {L"points"}, void(GuiPolygonElement::*)(Ptr<IValueReadonlyList>), &GuiPolygonElement_SetPoints);
+
+				CLASS_MEMBER_PROPERTY(Points, GetPoints, SetPoints);
+				CLASS_MEMBER_PROPERTY_FAST(Size)
+				CLASS_MEMBER_PROPERTY_FAST(BorderColor)
+				CLASS_MEMBER_PROPERTY_FAST(BackgroundColor)
+			END_CLASS_MEMBER(GuiPolygonElement)
+
+			BEGIN_CLASS_MEMBER(text::TextLines)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Count)
+				CLASS_MEMBER_PROPERTY_FAST(TabSpaceCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RowHeight)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxWidth)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxHeight)
+				CLASS_MEMBER_PROPERTY_FAST(PasswordChar)
+
+				CLASS_MEMBER_METHOD_OVERLOAD(GetText, NO_PARAMETER, WString(text::TextLines::*)())
+				CLASS_MEMBER_METHOD_OVERLOAD(GetText, {L"start" _ L"end"}, WString(text::TextLines::*)(TextPos _ TextPos))
+				CLASS_MEMBER_METHOD(SetText, {L"value"})
+				CLASS_MEMBER_METHOD(RemoveLines, {L"start" _ L"end"})
+				CLASS_MEMBER_METHOD(IsAvailable, {L"pos"})
+				CLASS_MEMBER_METHOD(Normalize, {L"pos"})
+				CLASS_MEMBER_METHOD_OVERLOAD(Modify, {L"start"_ L"end"_ L"input"}, TextPos(text::TextLines::*)(TextPos _ TextPos _ const WString&))
+				CLASS_MEMBER_METHOD(Clear, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ClearMeasurement, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(MeasureRow, {L"row"})
+				CLASS_MEMBER_METHOD(GetRowWidth, {L"row"})
+				CLASS_MEMBER_METHOD(GetTextPosFromPoint, {L"point"})
+				CLASS_MEMBER_METHOD(GetPointFromTextPos, {L"pos"})
+				CLASS_MEMBER_METHOD(GetRectFromTextPos, {L"pos"})
+			END_CLASS_MEMBER(text::TextLines)
+
+			BEGIN_STRUCT_MEMBER(text::ColorItem)
+				STRUCT_MEMBER(text)
+				STRUCT_MEMBER(background)
+			END_STRUCT_MEMBER(text::ColorItem)
+
+			BEGIN_STRUCT_MEMBER(text::ColorEntry)
+				STRUCT_MEMBER(normal)
+				STRUCT_MEMBER(selectedFocused)
+				STRUCT_MEMBER(selectedUnfocused)
+			END_STRUCT_MEMBER(text::ColorEntry)
+
+			BEGIN_CLASS_MEMBER(GuiColorizedTextElement)
+				CLASS_MEMBER_BASE(IGuiGraphicsElement)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiColorizedTextElement>(), NO_PARAMETER, &Element_Constructor<GuiColorizedTextElement>)
+
+				CLASS_MEMBER_PROPERTY_FAST(Font)
+				CLASS_MEMBER_PROPERTY_FAST(PasswordChar)
+				CLASS_MEMBER_PROPERTY_FAST(ViewPosition)
+				CLASS_MEMBER_PROPERTY_FAST(VisuallyEnabled)
+				CLASS_MEMBER_PROPERTY_FAST(Focused)
+				CLASS_MEMBER_PROPERTY_FAST(CaretBegin)
+				CLASS_MEMBER_PROPERTY_FAST(CaretEnd)
+				CLASS_MEMBER_PROPERTY_FAST(CaretVisible)
+				CLASS_MEMBER_PROPERTY_FAST(CaretColor)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetLines, NO_PARAMETER, text::TextLines*(GuiColorizedTextElement::*)(), &GuiColorizedTextElement_GetLines)
+				CLASS_MEMBER_EXTERNALMETHOD(GetColors, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiColorizedTextElement::*)(), &GuiColorizedTextElement_GetColors)
+				CLASS_MEMBER_EXTERNALMETHOD(SetColors, {L"value"}, void(GuiColorizedTextElement::*)(Ptr<IValueReadonlyList>), &GuiColorizedTextElement_SetColors)
+				CLASS_MEMBER_PROPERTY_READONLY(Lines, GetLines)
+				CLASS_MEMBER_PROPERTY(Colors, GetColors, SetColors)
+			END_CLASS_MEMBER(GuiColorizedTextElement)
+
+			BEGIN_CLASS_MEMBER(GuiDocumentElement)
+				CLASS_MEMBER_BASE(IGuiGraphicsElement)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiDocumentElement>(), NO_PARAMETER, &Element_Constructor<GuiDocumentElement>)
+
+				CLASS_MEMBER_PROPERTY_FAST(Document)
+				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index"})
+				CLASS_MEMBER_METHOD(GetHyperlinkIdFromPoint, {L"point"})
+				CLASS_MEMBER_METHOD(ActivateHyperlink, {L"hyperlinkId" _ L"active"})
+			END_CLASS_MEMBER(GuiDocumentElement)
+
+#undef _
+
+/***********************************************************************
+Type Loader
+***********************************************************************/
+
+			class GuiElementTypeLoader : public Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					GUIREFLECTIONELEMENT_TYPELIST(ADD_TYPE_INFO)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+
+			bool LoadGuiElementTypes()
+			{
+				ITypeManager* manager=GetGlobalTypeManager();
+				if(manager)
+				{
+					Ptr<ITypeLoader> loader=new GuiElementTypeLoader;
+					return manager->AddTypeLoader(loader);
+				}
+				return false;
+			}
 		}
 	}
 }

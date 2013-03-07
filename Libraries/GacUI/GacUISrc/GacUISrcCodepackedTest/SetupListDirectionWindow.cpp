@@ -33,14 +33,14 @@ void SetupListDirectionWindow(GuiControlHost* controlHost, GuiControl* container
 		typeList->SetHorizontalAlwaysVisible(false);
 		container->GetBoundsComposition()->AddChild(typeList->GetBoundsComposition());
 
-		typeList->GetItems().Add(L"Right Down");
-		typeList->GetItems().Add(L"Left Down");
-		typeList->GetItems().Add(L"Right Up");
-		typeList->GetItems().Add(L"Left Up");
-		typeList->GetItems().Add(L"Down Right");
-		typeList->GetItems().Add(L"Down Left");
-		typeList->GetItems().Add(L"Up Right");
-		typeList->GetItems().Add(L"Up Left");
+		typeList->GetItems().Add(new list::TextItem(L"Right Down"));
+		typeList->GetItems().Add(new list::TextItem(L"Left Down"));
+		typeList->GetItems().Add(new list::TextItem(L"Right Up"));
+		typeList->GetItems().Add(new list::TextItem(L"Left Up"));
+		typeList->GetItems().Add(new list::TextItem(L"Down Right"));
+		typeList->GetItems().Add(new list::TextItem(L"Down Left"));
+		typeList->GetItems().Add(new list::TextItem(L"Up Right"));
+		typeList->GetItems().Add(new list::TextItem(L"Up Left"));
 		typeList->SetSelected(0, true);
 
 		typeList->SelectionChanged.AttachLambda([listControl, typeList](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
@@ -84,8 +84,8 @@ void SetupListDirectionWindow(GuiControlHost* controlHost, GuiControl* container
 		typeList->SetHorizontalAlwaysVisible(false);
 		container->GetBoundsComposition()->AddChild(typeList->GetBoundsComposition());
 
-		typeList->GetItems().Add(L"Block");
-		typeList->GetItems().Add(L"Item");
+		typeList->GetItems().Add(new list::TextItem(L"Block"));
+		typeList->GetItems().Add(new list::TextItem(L"Item"));
 		typeList->SetSelected(0, true);
 
 		typeList->SelectionChanged.AttachLambda([listControl, typeList](GuiGraphicsComposition* sender, GuiEventArgs& arguments)

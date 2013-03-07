@@ -125,7 +125,7 @@ TextList Data Source
 ***********************************************************************/
 
 				/// <summary>Text item. This is the item data structure for [T:vl.presentation.controls.list.TextItemProvider].</summary>
-				class TextItem
+				class TextItem : public Object, public Description<TextItem>
 				{
 					friend class TextItemProvider;
 				protected:
@@ -159,7 +159,7 @@ TextList Data Source
 				};
 
 				/// <summary>Item provider for <see cref="GuiVirtualTextList"/> or <see cref="GuiSelectableListControl"/>.</summary>
-				class TextItemProvider : public ListProvider<TextItem>, protected TextItemStyleProvider::ITextItemView, public Description<TextItemProvider>
+				class TextItemProvider : public ListProvider<Ptr<TextItem>>, protected TextItemStyleProvider::ITextItemView, public Description<TextItemProvider>
 				{
 				protected:
 					bool										ContainsPrimaryText(vint itemIndex)override;

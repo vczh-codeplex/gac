@@ -240,22 +240,22 @@ TextItemProvider
 
 				WString TextItemProvider::GetPrimaryTextViewText(vint itemIndex)
 				{
-					return Get(itemIndex).GetText();
+					return Get(itemIndex)->GetText();
 				}
 				
 				WString TextItemProvider::GetText(vint itemIndex)
 				{
-					return Get(itemIndex).GetText();
+					return Get(itemIndex)->GetText();
 				}
 
 				bool TextItemProvider::GetChecked(vint itemIndex)
 				{
-					return Get(itemIndex).GetChecked();
+					return Get(itemIndex)->GetChecked();
 				}
 
 				void TextItemProvider::SetCheckedSilently(vint itemIndex, bool value)
 				{
-					items[itemIndex].checked=value;
+					items[itemIndex]->checked=value;
 				}
 
 				TextItemProvider::TextItemProvider()
@@ -268,7 +268,7 @@ TextItemProvider
 					
 				void TextItemProvider::SetText(vint itemIndex, const WString& value)
 				{
-					items[itemIndex].text=value;
+					items[itemIndex]->text=value;
 					InvokeOnItemModified(itemIndex, 1, 1);
 				}
 
