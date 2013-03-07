@@ -23,16 +23,16 @@ Type List
 ***********************************************************************/
 
 #define GUIREFLECTIONCOMPOSITION_TYPELIST(F)\
-			F(compositions::GuiStackComposition)\
-			F(compositions::GuiStackComposition::Direction)\
-			F(compositions::GuiStackItemComposition)\
-			F(compositions::GuiCellOption)\
-			F(compositions::GuiCellOption::ComposeType)\
-			F(compositions::GuiTableComposition)\
-			F(compositions::GuiCellComposition)\
-			F(compositions::GuiSideAlignedComposition)\
-			F(compositions::GuiSideAlignedComposition::Direction)\
-			F(compositions::GuiPartialViewComposition)\
+			F(presentation::compositions::GuiStackComposition)\
+			F(presentation::compositions::GuiStackComposition::Direction)\
+			F(presentation::compositions::GuiStackItemComposition)\
+			F(presentation::compositions::GuiCellOption)\
+			F(presentation::compositions::GuiCellOption::ComposeType)\
+			F(presentation::compositions::GuiTableComposition)\
+			F(presentation::compositions::GuiCellComposition)\
+			F(presentation::compositions::GuiSideAlignedComposition)\
+			F(presentation::compositions::GuiSideAlignedComposition::Direction)\
+			F(presentation::compositions::GuiPartialViewComposition)\
 
 			GUIREFLECTIONCOMPOSITION_TYPELIST(DECL_TYPE_INFO)
 

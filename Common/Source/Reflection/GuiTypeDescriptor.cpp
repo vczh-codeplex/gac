@@ -329,6 +329,30 @@ description::Value
 			}
 
 /***********************************************************************
+IValueList
+***********************************************************************/
+
+			Ptr<IValueList> IValueList::Create()
+			{
+				Ptr<List<Value>> list=new List<Value>;
+				return new ValueListWrapper<Ptr<List<Value>>>(list);
+			}
+
+			Ptr<IValueList> IValueList::Create(Ptr<IValueReadonlyList> values)
+			{
+				Ptr<List<Value>> list=new List<Value>;
+				CopyFrom(*list.Obj(), values->GetLazyList<Value>());
+				return new ValueListWrapper<Ptr<List<Value>>>(list);
+			}
+
+			Ptr<IValueList> IValueList::Create(collections::LazyList<Value> values)
+			{
+				Ptr<List<Value>> list=new List<Value>;
+				CopyFrom(*list.Obj(), values);
+				return new ValueListWrapper<Ptr<List<Value>>>(list);
+			}
+
+/***********************************************************************
 description::TypeManager
 ***********************************************************************/
 
@@ -764,30 +788,6 @@ LogTypeManager
 					}
 					writer.WriteLine(L"");
 				}
-			}
-
-/***********************************************************************
-IValueList
-***********************************************************************/
-
-			Ptr<IValueList> IValueList::Create()
-			{
-				Ptr<List<Value>> list=new List<Value>;
-				return new ValueListWrapper<Ptr<List<Value>>>(list);
-			}
-
-			Ptr<IValueList> IValueList::Create(Ptr<IValueReadonlyList> values)
-			{
-				Ptr<List<Value>> list=new List<Value>;
-				CopyFrom(*list.Obj(), values->GetLazyList<Value>());
-				return new ValueListWrapper<Ptr<List<Value>>>(list);
-			}
-
-			Ptr<IValueList> IValueList::Create(collections::LazyList<Value> values)
-			{
-				Ptr<List<Value>> list=new List<Value>;
-				CopyFrom(*list.Obj(), values);
-				return new ValueListWrapper<Ptr<List<Value>>>(list);
 			}
 		}
 	}

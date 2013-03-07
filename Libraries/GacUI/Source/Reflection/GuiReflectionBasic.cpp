@@ -222,6 +222,21 @@ Type Declaration
 				ENUM_NAMESPACE_ITEM(Maximized)
 			END_ENUM_ITEM(INativeWindow::WindowSizeState)
 
+			BEGIN_CLASS_MEMBER(INativeDelay)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Status)
+
+				CLASS_MEMBER_METHOD(Delay, {L"milliseconds"})
+				CLASS_MEMBER_METHOD(Cancel, NO_PARAMETER)
+			END_CLASS_MEMBER(INativeDelay)
+
+			BEGIN_ENUM_ITEM(INativeDelay::ExecuteStatus)
+				ENUM_ITEM_NAMESPACE(INativeDelay)
+				ENUM_NAMESPACE_ITEM(Pending)
+				ENUM_NAMESPACE_ITEM(Executing)
+				ENUM_NAMESPACE_ITEM(Executed)
+				ENUM_NAMESPACE_ITEM(Canceled)
+			END_ENUM_ITEM(INativeDelay::ExecuteStatus)
+
 			BEGIN_CLASS_MEMBER(GuiImageData)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiImageData>(), NO_PARAMETER)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiImageData>(Ptr<INativeImage>, vint), {L"image" _ L"frameIndex"})
