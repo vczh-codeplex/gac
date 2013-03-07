@@ -23,6 +23,51 @@ External Functions
 				return new ValueReadonlyListWrapper<const List<GuiTabPage*>*>(&thisObject->GetPages());
 			}
 
+			Ptr<IValueReadonlyList> GuiApplication_GetWindows(GuiApplication* thisObject)
+			{
+				return new ValueReadonlyListWrapper<const List<GuiWindow*>*>(&thisObject->GetWindows());
+			}
+
+			void GuiApplication_InvokeAsync(GuiApplication* thisObject, Ptr<IValueFunctionProxy> proc)
+			{
+				thisObject->InvokeAsync([=]()
+				{
+					proc->Invoke(IValueList::Create());
+				});
+			}
+
+			void GuiApplication_InvokeInMainThread(GuiApplication* thisObject, Ptr<IValueFunctionProxy> proc)
+			{
+				thisObject->InvokeInMainThread([=]()
+				{
+					proc->Invoke(IValueList::Create());
+				});
+			}
+
+			void GuiApplication_InvokeInMainThreadAndWait(GuiApplication* thisObject, Ptr<IValueFunctionProxy> proc)
+			{
+				thisObject->InvokeInMainThreadAndWait([=]()
+				{
+					proc->Invoke(IValueList::Create());
+				});
+			}
+
+			Ptr<INativeDelay> GuiApplication_DelayExecute(GuiApplication* thisObject, Ptr<IValueFunctionProxy> proc, vint milliseconds)
+			{
+				return thisObject->DelayExecute([=]()
+				{
+					proc->Invoke(IValueList::Create());
+				}, milliseconds);
+			}
+
+			Ptr<INativeDelay> GuiApplication_DelayExecuteInMainThread(GuiApplication* thisObject, Ptr<IValueFunctionProxy> proc, vint milliseconds)
+			{
+				return thisObject->DelayExecuteInMainThread([=]()
+				{
+					proc->Invoke(IValueList::Create());
+				}, milliseconds);
+			}
+
 /***********************************************************************
 Type Declaration
 ***********************************************************************/
@@ -37,6 +82,25 @@ Type Declaration
 
 #define INTERFACE_EXTERNALCTOR(CONTROL, INTERFACE)\
 	CLASS_MEMBER_EXTERNALCTOR(CONTROL::INTERFACE*(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::CONTROL##_##INTERFACE::Create)
+
+			BEGIN_CLASS_MEMBER(GuiApplication)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetApplication, NO_PARAMETER, GuiApplication*(*)(), &GetApplication)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MainWindow)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TooltipOwner)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ExecutablePath)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ExecutableFolder)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetWindows, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiApplication::*)(), &GuiApplication_GetWindows)
+				CLASS_MEMBER_METHOD(ShowTooltip, {L"owner" _ L"tooltip" _ L"preferredContentWidth" _ L"location"})
+				CLASS_MEMBER_METHOD(CloseTooltip, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsInMainThread, NO_PARAMETER)
+				CLASS_MEMBER_EXTERNALMETHOD(InvokeAsync, {L"proc"}, void(GuiApplication::*)(Ptr<IValueFunctionProxy>), &GuiApplication_InvokeAsync)
+				CLASS_MEMBER_EXTERNALMETHOD(InvokeInMainThread, {L"proc"}, void(GuiApplication::*)(Ptr<IValueFunctionProxy>), &GuiApplication_InvokeInMainThread)
+				CLASS_MEMBER_EXTERNALMETHOD(InvokeInMainThreadAndWait, {L"proc"}, void(GuiApplication::*)(Ptr<IValueFunctionProxy>), &GuiApplication_InvokeInMainThreadAndWait)
+				CLASS_MEMBER_EXTERNALMETHOD(DelayExecute, {L"proc" _ L"milliseconds"}, Ptr<INativeDelay>(GuiApplication::*)(Ptr<IValueFunctionProxy>, vint), &GuiApplication_DelayExecute)
+				CLASS_MEMBER_EXTERNALMETHOD(DelayExecuteInMainThread, {L"proc" _ L"milliseconds"}, Ptr<INativeDelay>(GuiApplication::*)(Ptr<IValueFunctionProxy>, vint), &GuiApplication_DelayExecuteInMainThread)
+			END_CLASS_MEMBER(GuiApplication)
 
 			BEGIN_CLASS_MEMBER(GuiLabel)
 				CLASS_MEMBER_BASE(GuiControl)

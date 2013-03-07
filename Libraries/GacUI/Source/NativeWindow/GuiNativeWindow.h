@@ -912,7 +912,7 @@ Native Window Services
 		/// <summary>
 		/// Delay execution controller.
 		/// </summary>
-		class INativeDelay : public Interface
+		class INativeDelay : public Interface, public Description<INativeDelay>
 		{
 		public:
 			/// <summary>Delay execution controller status.</summary>

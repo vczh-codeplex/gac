@@ -208,6 +208,188 @@ Value
 			};
 
 /***********************************************************************
+Collections
+***********************************************************************/
+
+			class IValueReadonlyList : public IDescriptable, public Description<IValueReadonlyList>
+			{
+			public:
+				virtual vint					Count()=0;
+				virtual Value					Get(vint index)=0;
+				virtual bool					Contains(const Value& value)=0;
+				virtual vint					IndexOf(const Value& value)=0;
+
+				template<typename T>
+				collections::LazyList<T> GetLazyList()
+				{
+					return collections::Range(0, Count())
+						.Select([this](int i){return UnboxValue<T>(Get(i));});
+				}
+			};
+
+			class IValueList : public IValueReadonlyList, public Description<IValueList>
+			{
+			public:
+				virtual void					Set(vint index, const Value& value)=0;
+				virtual vint					Add(const Value& value)=0;
+				virtual vint					Insert(vint index, const Value& value)=0;
+				virtual bool					Remove(const Value& value)=0;
+				virtual bool					RemoveAt(vint index)=0;
+				virtual void					Clear()=0;
+
+				static Ptr<IValueList>			Create();
+				static Ptr<IValueList>			Create(Ptr<IValueReadonlyList> values);
+				static Ptr<IValueList>			Create(collections::LazyList<Value> values);
+			};
+
+			namespace trait_helper
+			{
+				template<typename T>
+				struct RemovePtr
+				{
+					typedef T					Type;
+				};
+				
+				template<typename T>
+				struct RemovePtr<T*>
+				{
+					typedef T					Type;
+				};
+				
+				template<typename T>
+				struct RemovePtr<Ptr<T>>
+				{
+					typedef T					Type;
+				};
+			}
+
+			template<typename T>
+			class ValueReadonlyListWrapper : public Object, public IValueReadonlyList
+			{
+			protected:
+				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
+				typedef typename ContainerType::ElementType				ElementType;
+				typedef typename KeyType<ElementType>::Type				ElementKeyType;
+
+				T								wrapperPointer;
+			public:
+				ValueReadonlyListWrapper(const T& _wrapperPointer)
+					:wrapperPointer(_wrapperPointer)
+				{
+				}
+
+				vint Count()override
+				{
+					return wrapperPointer->Count();
+				}
+
+				Value Get(vint index)override
+				{
+					return BoxValue<ElementType>(wrapperPointer->Get(index));
+				}
+
+				bool Contains(const Value& value)override
+				{
+					ElementKeyType item=UnboxValue<ElementKeyType>(value);
+					return wrapperPointer->Contains(item);
+				}
+
+				vint IndexOf(const Value& value)override
+				{
+					ElementKeyType item=UnboxValue<ElementKeyType>(value);
+					return wrapperPointer->IndexOf(item);
+				}
+			};
+
+			template<typename T>
+			class ValueListWrapper : public Object, public IValueList
+			{
+			protected:
+				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
+				typedef typename ContainerType::ElementType				ElementType;
+				typedef typename KeyType<ElementType>::Type				ElementKeyType;
+
+				T								wrapperPointer;
+			public:
+				ValueListWrapper(const T& _wrapperPointer)
+					:wrapperPointer(_wrapperPointer)
+				{
+				}
+
+				vint Count()override
+				{
+					return wrapperPointer->Count();
+				}
+
+				Value Get(vint index)override
+				{
+					return BoxValue<ElementType>(wrapperPointer->Get(index));
+				}
+
+				bool Contains(const Value& value)override
+				{
+					ElementKeyType item=UnboxValue<ElementKeyType>(value);
+					return wrapperPointer->Contains(item);
+				}
+
+				vint IndexOf(const Value& value)override
+				{
+					ElementKeyType item=UnboxValue<ElementKeyType>(value);
+					return wrapperPointer->IndexOf(item);
+				}
+
+				void Set(vint index, const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					wrapperPointer->Set(index, item);
+				}
+
+				vint Add(const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					return wrapperPointer->Add(item);
+				}
+
+				vint Insert(vint index, const Value& value)override
+				{
+					ElementType item=UnboxValue<ElementType>(value);
+					return wrapperPointer->Insert(index, item);
+				}
+
+				bool Remove(const Value& value)override
+				{
+					ElementKeyType item=UnboxValue<ElementKeyType>(value);
+					return wrapperPointer->Remove(item);
+				}
+
+				bool RemoveAt(vint index)override
+				{
+					return wrapperPointer->RemoveAt(index);
+				}
+
+				void Clear()override
+				{
+					wrapperPointer->Clear();
+				}
+			};
+
+/***********************************************************************
+Interface Implementation Proxy
+***********************************************************************/
+
+			class IValueInterfaceProxy : public IDescriptable, public Description<IValueReadonlyList>
+			{
+			public:
+				virtual Value					Invoke(const WString& methodName, Ptr<IValueList> arguments)=0;
+			};
+
+			class IValueFunctionProxy : public IDescriptable, public Description<IValueFunctionProxy>
+			{
+			public:
+				virtual Value					Invoke(Ptr<IValueList> arguments)=0;
+			};
+
+/***********************************************************************
 ITypeDescriptor (basic)
 ***********************************************************************/
 
@@ -454,182 +636,6 @@ Exceptions
 					:TypeDescriptorException(L"Argument count does not match the definition.")
 				{
 				}
-			};
-
-/***********************************************************************
-Collections
-***********************************************************************/
-
-			class IValueReadonlyList : public IDescriptable, public Description<IValueReadonlyList>
-			{
-			public:
-				virtual vint					Count()=0;
-				virtual Value					Get(vint index)=0;
-				virtual bool					Contains(const Value& value)=0;
-				virtual vint					IndexOf(const Value& value)=0;
-
-				template<typename T>
-				collections::LazyList<T> GetLazyList()
-				{
-					return collections::Range(0, Count())
-						.Select([this](int i){return UnboxValue<T>(Get(i));});
-				}
-			};
-
-			class IValueList : public IValueReadonlyList, public Description<IValueList>
-			{
-			public:
-				virtual void					Set(vint index, const Value& value)=0;
-				virtual vint					Add(const Value& value)=0;
-				virtual vint					Insert(vint index, const Value& value)=0;
-				virtual bool					Remove(const Value& value)=0;
-				virtual bool					RemoveAt(vint index)=0;
-				virtual void					Clear()=0;
-
-				static Ptr<IValueList>			Create();
-				static Ptr<IValueList>			Create(Ptr<IValueReadonlyList> values);
-				static Ptr<IValueList>			Create(collections::LazyList<Value> values);
-			};
-
-			namespace trait_helper
-			{
-				template<typename T>
-				struct RemovePtr
-				{
-					typedef T					Type;
-				};
-				
-				template<typename T>
-				struct RemovePtr<T*>
-				{
-					typedef T					Type;
-				};
-				
-				template<typename T>
-				struct RemovePtr<Ptr<T>>
-				{
-					typedef T					Type;
-				};
-			}
-
-			template<typename T>
-			class ValueReadonlyListWrapper : public Object, public IValueReadonlyList
-			{
-			protected:
-				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
-				typedef typename ContainerType::ElementType				ElementType;
-				typedef typename KeyType<ElementType>::Type				ElementKeyType;
-
-				T								wrapperPointer;
-			public:
-				ValueReadonlyListWrapper(const T& _wrapperPointer)
-					:wrapperPointer(_wrapperPointer)
-				{
-				}
-
-				vint Count()override
-				{
-					return wrapperPointer->Count();
-				}
-
-				Value Get(vint index)override
-				{
-					return BoxValue<ElementType>(wrapperPointer->Get(index));
-				}
-
-				bool Contains(const Value& value)override
-				{
-					ElementKeyType item=UnboxValue<ElementKeyType>(value);
-					return wrapperPointer->Contains(item);
-				}
-
-				vint IndexOf(const Value& value)override
-				{
-					ElementKeyType item=UnboxValue<ElementKeyType>(value);
-					return wrapperPointer->IndexOf(item);
-				}
-			};
-
-			template<typename T>
-			class ValueListWrapper : public Object, public IValueList
-			{
-			protected:
-				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
-				typedef typename ContainerType::ElementType				ElementType;
-				typedef typename KeyType<ElementType>::Type				ElementKeyType;
-
-				T								wrapperPointer;
-			public:
-				ValueListWrapper(const T& _wrapperPointer)
-					:wrapperPointer(_wrapperPointer)
-				{
-				}
-
-				vint Count()override
-				{
-					return wrapperPointer->Count();
-				}
-
-				Value Get(vint index)override
-				{
-					return BoxValue<ElementType>(wrapperPointer->Get(index));
-				}
-
-				bool Contains(const Value& value)override
-				{
-					ElementKeyType item=UnboxValue<ElementKeyType>(value);
-					return wrapperPointer->Contains(item);
-				}
-
-				vint IndexOf(const Value& value)override
-				{
-					ElementKeyType item=UnboxValue<ElementKeyType>(value);
-					return wrapperPointer->IndexOf(item);
-				}
-
-				void Set(vint index, const Value& value)override
-				{
-					ElementType item=UnboxValue<ElementType>(value);
-					wrapperPointer->Set(index, item);
-				}
-
-				vint Add(const Value& value)override
-				{
-					ElementType item=UnboxValue<ElementType>(value);
-					return wrapperPointer->Add(item);
-				}
-
-				vint Insert(vint index, const Value& value)override
-				{
-					ElementType item=UnboxValue<ElementType>(value);
-					return wrapperPointer->Insert(index, item);
-				}
-
-				bool Remove(const Value& value)override
-				{
-					ElementKeyType item=UnboxValue<ElementKeyType>(value);
-					return wrapperPointer->Remove(item);
-				}
-
-				bool RemoveAt(vint index)override
-				{
-					return wrapperPointer->RemoveAt(index);
-				}
-
-				void Clear()override
-				{
-					wrapperPointer->Clear();
-				}
-			};
-
-/***********************************************************************
-Interface Implementation Proxy
-***********************************************************************/
-
-			class IValueInterfaceProxy : public IDescriptable, public Description<IValueReadonlyList>
-			{
-			public:
-				virtual Value					Invoke(const WString& methodName, Ptr<IValueList> arguments)=0;
 			};
 		}
 	}

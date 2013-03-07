@@ -18,7 +18,7 @@ namespace vl
 		namespace controls
 		{
 			/// <summary>Represents an GacUI application, for window management and asynchronized operation supporting. Use [M:vl.presentation.controls.GetApplication] to access the instance of this class.</summary>
-			class GuiApplication : public Object, private INativeControllerListener
+			class GuiApplication : public Object, private INativeControllerListener, public Description<GuiApplication>
 			{
 				friend void GuiApplicationInitialize();
 				friend class GuiWindow;

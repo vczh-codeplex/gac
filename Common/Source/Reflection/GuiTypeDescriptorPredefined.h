@@ -330,6 +330,7 @@ Predefined Types
 			template<>struct TypeInfo<IValueReadonlyList>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueList>{static const wchar_t* TypeName;};
 			template<>struct TypeInfo<IValueInterfaceProxy>{static const wchar_t* TypeName;};
+			template<>struct TypeInfo<IValueFunctionProxy>{static const wchar_t* TypeName;};
 
 			template<>
 			struct TypedValueSerializerProvider<unsigned __int8>

@@ -23,29 +23,30 @@ Type List
 ***********************************************************************/
 
 #define GUIREFLECTIONCONTROLS_TYPELIST(F)\
-			F(controls::GuiLabel)\
-			F(controls::GuiLabel::IStyleController)\
-			F(controls::GuiButton)\
-			F(controls::GuiButton::ControlState)\
-			F(controls::GuiButton::IStyleController)\
-			F(controls::GuiSelectableButton)\
-			F(controls::GuiSelectableButton::IStyleController)\
-			F(controls::GuiSelectableButton::GroupController)\
-			F(controls::GuiSelectableButton::MutexGroupController)\
-			F(controls::GuiScroll)\
-			F(controls::GuiScroll::ICommandExecutor)\
-			F(controls::GuiScroll::IStyleController)\
-			F(controls::GuiTabPage)\
-			F(controls::GuiTab)\
-			F(controls::GuiTab::ICommandExecutor)\
-			F(controls::GuiTab::IStyleController)\
-			F(controls::GuiScrollView)\
-			F(controls::GuiScrollView::IStyleProvider)\
-			F(controls::GuiScrollContainer)\
-			F(controls::GuiWindow)\
-			F(controls::GuiWindow::IStyleController)\
-			F(controls::GuiPopup)\
-			F(controls::GuiTooltip)\
+			F(presentation::controls::GuiApplication)\
+			F(presentation::controls::GuiLabel)\
+			F(presentation::controls::GuiLabel::IStyleController)\
+			F(presentation::controls::GuiButton)\
+			F(presentation::controls::GuiButton::ControlState)\
+			F(presentation::controls::GuiButton::IStyleController)\
+			F(presentation::controls::GuiSelectableButton)\
+			F(presentation::controls::GuiSelectableButton::IStyleController)\
+			F(presentation::controls::GuiSelectableButton::GroupController)\
+			F(presentation::controls::GuiSelectableButton::MutexGroupController)\
+			F(presentation::controls::GuiScroll)\
+			F(presentation::controls::GuiScroll::ICommandExecutor)\
+			F(presentation::controls::GuiScroll::IStyleController)\
+			F(presentation::controls::GuiTabPage)\
+			F(presentation::controls::GuiTab)\
+			F(presentation::controls::GuiTab::ICommandExecutor)\
+			F(presentation::controls::GuiTab::IStyleController)\
+			F(presentation::controls::GuiScrollView)\
+			F(presentation::controls::GuiScrollView::IStyleProvider)\
+			F(presentation::controls::GuiScrollContainer)\
+			F(presentation::controls::GuiWindow)\
+			F(presentation::controls::GuiWindow::IStyleController)\
+			F(presentation::controls::GuiPopup)\
+			F(presentation::controls::GuiTooltip)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
