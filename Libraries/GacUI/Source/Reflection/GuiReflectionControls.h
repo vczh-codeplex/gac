@@ -92,7 +92,7 @@ Interface Proxy
 
 					Color GetDefaultTextColor()override
 					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(Color, GetDefaultTextColor);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetDefaultTextColor);
 					}
 
 					void SetTextColor(Color value)override
@@ -219,7 +219,7 @@ Interface Proxy
 
 					GuiControl::IStyleController* CreateTabPageStyleController()override
 					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GuiControl::IStyleController*, CreateTabPageStyleController);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateTabPageStyleController);
 					}
 				};
 
@@ -238,22 +238,22 @@ Interface Proxy
 
 					GuiScroll::IStyleController* CreateHorizontalScrollStyle()override
 					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GuiScroll::IStyleController*, CreateHorizontalScrollStyle);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateHorizontalScrollStyle);
 					}
 
 					GuiScroll::IStyleController* CreateVerticalScrollStyle()override
 					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GuiScroll::IStyleController*, CreateVerticalScrollStyle);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateVerticalScrollStyle);
 					}
 
 					vint GetDefaultScrollSize()override
 					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(vint, GetDefaultScrollSize);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetDefaultScrollSize);
 					}
 
 					compositions::GuiGraphicsComposition* InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override
 					{
-						return INVOKEGET_INTERFACE_PROXY(GuiGraphicsComposition*, InstallBackground, boundsComposition);
+						return INVOKEGET_INTERFACE_PROXY(InstallBackground, boundsComposition);
 					}
 				};
 
@@ -282,7 +282,7 @@ Interface Proxy
 
 					bool GetMaximizedBox()override
 					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(bool, GetMaximizedBox);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetMaximizedBox);
 					}
 
 					void SetMaximizedBox(bool visible)override
@@ -292,7 +292,7 @@ Interface Proxy
 
 					bool GetMinimizedBox()override
 					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(bool, GetMinimizedBox);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetMinimizedBox);
 					}
 
 					void SetMinimizedBox(bool visible)override
@@ -302,7 +302,7 @@ Interface Proxy
 
 					bool GetBorder()override
 					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(bool, GetBorder);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBorder);
 					}
 
 					void SetBorder(bool visible)override
@@ -312,7 +312,7 @@ Interface Proxy
 
 					bool GetSizeBox()override
 					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(bool, GetSizeBox);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSizeBox);
 					}
 
 					void SetSizeBox(bool visible)override
@@ -322,7 +322,7 @@ Interface Proxy
 
 					bool GetIconVisible()override
 					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(bool, GetIconVisible);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetIconVisible);
 					}
 
 					void SetIconVisible(bool visible)override
@@ -332,12 +332,346 @@ Interface Proxy
 
 					bool GetTitleBar()override
 					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(bool, GetTitleBar);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetTitleBar);
 					}
 
 					void SetTitleBar(bool visible)override
 					{
 						INVOKE_INTERFACE_PROXY(SetTitleBar, visible);
+					}
+				};
+
+				class GuiListControl_IItemProviderCallback : public Object, public virtual GuiListControl::IItemProviderCallback
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					GuiListControl_IItemProviderCallback(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static Ptr<GuiListControl::IItemProviderCallback> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemProviderCallback(proxy);
+					}
+
+					void OnAttached(GuiListControl::IItemProvider* provider)override
+					{
+						INVOKE_INTERFACE_PROXY(OnAttached, provider);
+					}
+
+					void OnItemModified(vint start, vint count, vint newCount)override
+					{
+						INVOKE_INTERFACE_PROXY(OnItemModified, start, count, newCount);
+					}
+				};
+
+				class GuiListControl_IItemPrimaryTextView : public Object, public virtual GuiListControl::IItemPrimaryTextView
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					GuiListControl_IItemPrimaryTextView(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static Ptr<GuiListControl::IItemPrimaryTextView> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemPrimaryTextView(proxy);
+					}
+
+					WString GetPrimaryTextViewText(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetPrimaryTextViewText, itemIndex);
+					}
+
+					bool ContainsPrimaryText(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(ContainsPrimaryText, itemIndex);
+					}
+				};
+
+				class GuiListControl_IItemProvider : public Object, public virtual GuiListControl::IItemProvider
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					GuiListControl_IItemProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static GuiListControl::IItemProvider* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemProvider(proxy);
+					}
+
+					bool AttachCallback(GuiListControl::IItemProviderCallback* value)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(AttachCallback, value);
+					}
+
+					bool DetachCallback(GuiListControl::IItemProviderCallback* value)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(DetachCallback, value);
+					}
+
+					vint Count()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(Count);
+					}
+
+					IDescriptable* RequestView(const WString& identifier)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RequestView, identifier);
+					}
+
+					void ReleaseView(IDescriptable* view)override
+					{
+						INVOKE_INTERFACE_PROXY(ReleaseView, view);
+					}
+				};
+
+				class GuiListControl_IItemStyleController : public Object, public virtual GuiListControl::IItemStyleController
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					GuiListControl_IItemStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static GuiListControl::IItemStyleController* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemStyleController(proxy);
+					}
+
+					GuiListControl::IItemStyleProvider* GetStyleProvider()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetStyleProvider);
+					}
+
+					vint GetItemStyleId()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetItemStyleId);
+					}
+
+					compositions::GuiBoundsComposition* GetBoundsComposition()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBoundsComposition);
+					}
+
+					bool IsCacheable()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(IsCacheable);
+					}
+
+					bool IsInstalled()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(IsInstalled);
+					}
+
+					void OnInstalled()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(OnInstalled);
+					}
+
+					void OnUninstalled()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(OnUninstalled);
+					}
+				};
+
+				class GuiListControl_IItemStyleProvider : public Object, public virtual GuiListControl::IItemStyleProvider
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					GuiListControl_IItemStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static Ptr<GuiListControl::IItemStyleProvider> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemStyleProvider(proxy);
+					}
+
+					void AttachListControl(GuiListControl* value)override
+					{
+						INVOKE_INTERFACE_PROXY(AttachListControl, value);
+					}
+
+					void DetachListControl()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(DetachListControl);
+					}
+
+					vint GetItemStyleId(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetItemStyleId, itemIndex);
+					}
+
+					GuiListControl::IItemStyleController* CreateItemStyle(vint styleId)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(CreateItemStyle, styleId);
+					}
+
+					void DestroyItemStyle(GuiListControl::IItemStyleController* style)override
+					{
+						INVOKE_INTERFACE_PROXY(DestroyItemStyle, style);
+					}
+
+					void Install(GuiListControl::IItemStyleController* style, vint itemIndex)override
+					{
+						INVOKE_INTERFACE_PROXY(Install, style, itemIndex);
+					}
+				};
+
+				class GuiListControl_IItemArranger : public virtual GuiListControl_IItemProviderCallback, public virtual GuiListControl::IItemArranger
+				{
+				public:
+					GuiListControl_IItemArranger(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiListControl_IItemProviderCallback(_proxy)
+					{
+					}
+
+					static Ptr<GuiListControl::IItemArranger> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemArranger(proxy);
+					}
+
+					void AttachListControl(GuiListControl* value)override
+					{
+						INVOKE_INTERFACE_PROXY(AttachListControl, value);
+					}
+
+					void DetachListControl()override
+					{
+						INVOKE_INTERFACE_PROXY(DetachListControl);
+					}
+
+					GuiListControl::IItemArrangerCallback* GetCallback()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetCallback);
+					}
+
+					void SetCallback(GuiListControl::IItemArrangerCallback* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetCallback, value);
+					}
+
+					Size GetTotalSize()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetTotalSize);
+					}
+
+					GuiListControl::IItemStyleController* GetVisibleStyle(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetVisibleStyle, itemIndex);
+					}
+
+					vint GetVisibleIndex(GuiListControl::IItemStyleController* style)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetVisibleIndex, style);
+					}
+
+					void OnViewChanged(Rect bounds)override
+					{
+						INVOKE_INTERFACE_PROXY(OnViewChanged, bounds);
+					}
+
+					vint FindItem(vint itemIndex, GuiListControl::KeyDirection key)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(FindItem, itemIndex, key);
+					}
+
+					bool EnsureItemVisible(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(EnsureItemVisible, itemIndex);
+					}
+				};
+
+				class GuiListControl_IItemCoordinateTransformer : public Object, public virtual GuiListControl::IItemCoordinateTransformer
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					GuiListControl_IItemCoordinateTransformer(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static Ptr<GuiListControl::IItemCoordinateTransformer> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemCoordinateTransformer(proxy);
+					}
+
+					Size RealSizeToVirtualSize(Size size)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RealSizeToVirtualSize, size);
+					}
+
+					Size VirtualSizeToRealSize(Size size)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(VirtualSizeToRealSize, size);
+					}
+
+					Point RealPointToVirtualPoint(Size realFullSize, Point point)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RealPointToVirtualPoint, realFullSize, point);
+					}
+
+					Point VirtualPointToRealPoint(Size realFullSize, Point point)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(VirtualPointToRealPoint, realFullSize, point);
+					}
+
+					Rect RealRectToVirtualRect(Size realFullSize, Rect rect)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RealRectToVirtualRect, realFullSize, rect);
+					}
+
+					Rect VirtualRectToRealRect(Size realFullSize, Rect rect)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(VirtualRectToRealRect, realFullSize, rect);
+					}
+
+					Margin RealMarginToVirtualMargin(Margin margin)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RealMarginToVirtualMargin, margin);
+					}
+
+					Margin VirtualMarginToRealMargin(Margin margin)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(VirtualMarginToRealMargin, margin);
+					}
+
+					GuiListControl::KeyDirection RealKeyDirectionToVirtualKeyDirection(GuiListControl::KeyDirection key)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RealKeyDirectionToVirtualKeyDirection, key);
+					}
+				};
+
+				class GuiSelectableListControl_IItemStyleProvider : public virtual GuiListControl_IItemStyleProvider, public virtual GuiSelectableListControl::IItemStyleProvider
+				{
+				public:
+					GuiSelectableListControl_IItemStyleProvider(Ptr<IValueInterfaceProxy> proxy)
+						:GuiListControl_IItemStyleProvider(proxy)
+					{
+					}
+
+					static GuiSelectableListControl::IItemStyleProvider* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiSelectableListControl_IItemStyleProvider(proxy);
+					}
+
+					void SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetStyleSelected, style, value);
 					}
 				};
 			}
