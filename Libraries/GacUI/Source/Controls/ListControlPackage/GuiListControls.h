@@ -506,7 +506,7 @@ Selectable List Control
 				
 				/// <summary>Get indices of all selected items.</summary>
 				/// <returns>Indices of all selected items.</returns>
-				const collections::SortedList<vint>&				GetSelectedItems();
+				const collections::SortedList<vint>&			GetSelectedItems();
 				/// <summary>Get the selection status of an item.</summary>
 				/// <returns>The selection status of an item.</returns>
 				/// <param name="itemIndex">The index of the item.</param>
