@@ -47,6 +47,25 @@ Type List
 			F(presentation::controls::GuiWindow::IStyleController)\
 			F(presentation::controls::GuiPopup)\
 			F(presentation::controls::GuiTooltip)\
+			F(presentation::controls::GuiListControl)\
+			F(presentation::controls::GuiListControl::IItemProviderCallback)\
+			F(presentation::controls::GuiListControl::IItemArrangerCallback)\
+			F(presentation::controls::GuiListControl::IItemPrimaryTextView)\
+			F(presentation::controls::GuiListControl::KeyDirection)\
+			F(presentation::controls::GuiListControl::IItemProvider)\
+			F(presentation::controls::GuiListControl::IItemStyleController)\
+			F(presentation::controls::GuiListControl::IItemStyleProvider)\
+			F(presentation::controls::GuiListControl::IItemArranger)\
+			F(presentation::controls::GuiListControl::IItemCoordinateTransformer)\
+			F(presentation::controls::GuiSelectableListControl)\
+			F(presentation::controls::GuiSelectableListControl::IItemStyleProvider)\
+			F(presentation::controls::list::DefaultItemCoordinateTransformer)\
+			F(presentation::controls::list::AxisAlignedItemCoordinateTransformer)\
+			F(presentation::controls::list::AxisAlignedItemCoordinateTransformer::Alignment)\
+			F(presentation::controls::list::RangedItemArrangerBase)\
+			F(presentation::controls::list::FixedHeightItemArranger)\
+			F(presentation::controls::list::FixedSizeMultiColumnItemArranger)\
+			F(presentation::controls::list::FixedHeightMultiColumnItemArranger)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
