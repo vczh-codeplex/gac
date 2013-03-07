@@ -66,6 +66,11 @@ Type List
 			F(presentation::controls::list::FixedHeightItemArranger)\
 			F(presentation::controls::list::FixedSizeMultiColumnItemArranger)\
 			F(presentation::controls::list::FixedHeightMultiColumnItemArranger)\
+			F(presentation::controls::list::ItemStyleControllerBase)\
+			F(presentation::controls::list::TextItemStyleProvider)\
+			F(presentation::controls::list::TextItemStyleProvider::ITextItemStyleProvider)\
+			F(presentation::controls::list::TextItemStyleProvider::ITextItemView)\
+			F(presentation::controls::list::TextItemStyleProvider::TextItemStyleController)
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
@@ -664,7 +669,7 @@ Interface Proxy
 					{
 					}
 
-					static GuiSelectableListControl::IItemStyleProvider* Create(Ptr<IValueInterfaceProxy> proxy)
+					static Ptr<GuiSelectableListControl::IItemStyleProvider> Create(Ptr<IValueInterfaceProxy> proxy)
 					{
 						return new GuiSelectableListControl_IItemStyleProvider(proxy);
 					}
@@ -672,6 +677,61 @@ Interface Proxy
 					void SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)override
 					{
 						INVOKE_INTERFACE_PROXY(SetStyleSelected, style, value);
+					}
+				};
+
+				class TextItemStyleProvider_ITextItemStyleProvider : public Object, public virtual list::TextItemStyleProvider::ITextItemStyleProvider
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					TextItemStyleProvider_ITextItemStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static list::TextItemStyleProvider::ITextItemStyleProvider* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new TextItemStyleProvider_ITextItemStyleProvider(proxy);
+					}
+
+					GuiSelectableButton::IStyleController* CreateBackgroundStyleController()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateBackgroundStyleController);
+					}
+
+					GuiSelectableButton::IStyleController* CreateBulletStyleController()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateBulletStyleController);
+					}
+				};
+
+				class TextItemStyleProvider_ITextItemView : public virtual GuiListControl_IItemPrimaryTextView, public virtual list::TextItemStyleProvider::ITextItemView
+				{
+				public:
+					TextItemStyleProvider_ITextItemView(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiListControl_IItemPrimaryTextView(_proxy)
+					{
+					}
+
+					static Ptr<list::TextItemStyleProvider::ITextItemView> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new TextItemStyleProvider_ITextItemView(proxy);
+					}
+
+					WString GetText(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetText, itemIndex);
+					}
+
+					bool GetChecked(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetChecked, itemIndex);
+					}
+
+					void SetCheckedSilently(vint itemIndex, bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetCheckedSilently, itemIndex, value);
 					}
 				};
 			}

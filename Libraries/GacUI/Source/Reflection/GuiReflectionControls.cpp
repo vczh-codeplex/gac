@@ -501,6 +501,41 @@ Type Declaration
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<FixedHeightMultiColumnItemArranger>(), NO_PARAMETER)
 			END_CLASS_MEMBER(FixedHeightMultiColumnItemArranger)
 
+			BEGIN_CLASS_MEMBER(ItemStyleControllerBase)
+				CLASS_MEMBER_BASE(GuiListControl::IItemStyleController)
+			END_CLASS_MEMBER(ItemStyleControllerBase)
+
+			BEGIN_CLASS_MEMBER(TextItemStyleProvider)
+				CLASS_MEMBER_BASE(GuiSelectableListControl::IItemStyleProvider)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<TextItemStyleProvider>(TextItemStyleProvider::ITextItemStyleProvider*), {L"textItemStyleProvider"})
+			END_CLASS_MEMBER(TextItemStyleProvider)
+
+			BEGIN_CLASS_MEMBER(TextItemStyleProvider::ITextItemStyleProvider)
+				INTERFACE_EXTERNALCTOR(TextItemStyleProvider, ITextItemStyleProvider)
+
+				CLASS_MEMBER_METHOD(CreateBackgroundStyleController, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateBulletStyleController, NO_PARAMETER)
+			END_CLASS_MEMBER(TextItemStyleProvider::ITextItemStyleProvider)
+
+			BEGIN_CLASS_MEMBER(TextItemStyleProvider::ITextItemView)
+				CLASS_MEMBER_BASE(GuiListControl::IItemPrimaryTextView)
+				INTERFACE_EXTERNALCTOR(TextItemStyleProvider, ITextItemView)
+				INTERFACE_IDENTIFIER(TextItemStyleProvider::ITextItemView)
+
+				CLASS_MEMBER_METHOD(GetText, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(GetChecked, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(SetCheckedSilently, {L"itemIndex" _ L"value"})
+			END_CLASS_MEMBER(TextItemStyleProvider::ITextItemView)
+
+			BEGIN_CLASS_MEMBER(TextItemStyleProvider::TextItemStyleController)
+				CLASS_MEMBER_BASE(ItemStyleControllerBase)
+				CLASS_MEMBER_CONSTRUCTOR(TextItemStyleProvider::TextItemStyleController*(TextItemStyleProvider*), {L"provider"})
+
+				CLASS_MEMBER_PROPERTY_FAST(Selected)
+				CLASS_MEMBER_PROPERTY_FAST(Checked)
+				CLASS_MEMBER_PROPERTY_FAST(Text)
+			END_CLASS_MEMBER(TextItemStyleProvider::TextItemStyleController)
+
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
 #undef INTERFACE_EXTERNALCTOR

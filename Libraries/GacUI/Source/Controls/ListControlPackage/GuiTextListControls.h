@@ -113,7 +113,7 @@ TextList Style Provider
 
 					void										AttachListControl(GuiListControl* value)override;
 					void										DetachListControl()override;
-					vint											GetItemStyleId(vint itemIndex)override;
+					vint										GetItemStyleId(vint itemIndex)override;
 					GuiListControl::IItemStyleController*		CreateItemStyle(vint styleId)override;
 					void										DestroyItemStyle(GuiListControl::IItemStyleController* style)override;
 					void										Install(GuiListControl::IItemStyleController* style, vint itemIndex)override;
