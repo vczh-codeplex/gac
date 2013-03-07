@@ -203,6 +203,50 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_FAST(ExtendToFullWidth)
 			END_CLASS_MEMBER(GuiScrollContainer)
 
+			BEGIN_CLASS_MEMBER(GuiWindow)
+				CLASS_MEMBER_BASE(GuiControlHost)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiWindow)
+
+				CLASS_MEMBER_PROPERTY_FAST(MaximizedBox)
+				CLASS_MEMBER_PROPERTY_FAST(MinimizedBox)
+				CLASS_MEMBER_PROPERTY_FAST(Border)
+				CLASS_MEMBER_PROPERTY_FAST(SizeBox)
+				CLASS_MEMBER_PROPERTY_FAST(IconVisible)
+				CLASS_MEMBER_PROPERTY_FAST(TitleBar)
+
+				CLASS_MEMBER_METHOD(MoveToScreenCenter, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiWindow)
+
+			BEGIN_CLASS_MEMBER(GuiWindow::IStyleController)
+				CLASS_MEMBER_BASE(GuiControl::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiWindow, IStyleController)
+
+				CLASS_MEMBER_PROPERTY_FAST(MaximizedBox)
+				CLASS_MEMBER_PROPERTY_FAST(MinimizedBox)
+				CLASS_MEMBER_PROPERTY_FAST(Border)
+				CLASS_MEMBER_PROPERTY_FAST(SizeBox)
+				CLASS_MEMBER_PROPERTY_FAST(IconVisible)
+				CLASS_MEMBER_PROPERTY_FAST(TitleBar)
+			END_CLASS_MEMBER(GuiWindow::IStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiPopup)
+				CLASS_MEMBER_BASE(GuiWindow)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiPopup)
+
+				CLASS_MEMBER_METHOD(IsClippedByScreen, {L"location"})
+				CLASS_MEMBER_METHOD_OVERLOAD(ShowPopup, {L"location"}, void(GuiPopup::*)(Point))
+				CLASS_MEMBER_METHOD_OVERLOAD(ShowPopup, {L"control" _ L"location"}, void(GuiPopup::*)(GuiControl* _ Point))
+				CLASS_MEMBER_METHOD_OVERLOAD(ShowPopup, {L"control" _ L"preferredTopBottomSide"}, void(GuiPopup::*)(GuiControl* _ bool))
+			END_CLASS_MEMBER(GuiPopup)
+
+			BEGIN_CLASS_MEMBER(GuiTooltip)
+				CLASS_MEMBER_BASE(GuiPopup)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiPopup)
+				
+				CLASS_MEMBER_PROPERTY_FAST(PreferredContentWidth)
+				CLASS_MEMBER_PROPERTY_FAST(TemporaryContentControl)
+			END_CLASS_MEMBER(GuiTooltip)
+
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
 #undef INTERFACE_EXTERNALCTOR
 #undef _

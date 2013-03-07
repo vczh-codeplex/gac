@@ -178,7 +178,7 @@ GuiApplication
 				sharedTooltipClosing=false;
 				sharedTooltipOwner=owner;
 				sharedTooltipWindow->SetTemporaryContentControl(tooltip);
-				sharedTooltipWindow->SetPrefferedContentWidth(preferredContentWidth);
+				sharedTooltipWindow->SetPreferredContentWidth(preferredContentWidth);
 				sharedTooltipWindow->SetClientSize(Size(10, 10));
 				sharedTooltipWindow->ShowPopup(owner, location);
 			}

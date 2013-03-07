@@ -306,7 +306,7 @@ Native Window
 		/// <summary>
 		/// Represents a window.
 		/// </summary>
-		class INativeWindow : public Interface
+		class INativeWindow : public Interface, public Description<INativeWindow>
 		{
 		public:
 			/// <summary>

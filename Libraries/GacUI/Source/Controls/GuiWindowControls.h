@@ -442,10 +442,10 @@ Window
 
 				/// <summary>Get the preferred content width.</summary>
 				/// <returns>The preferred content width.</returns>
-				vint									GetPrefferedContentWidth();
+				vint									GetPreferredContentWidth();
 				/// <summary>Set the preferred content width.</summary>
 				/// <param name="value">The preferred content width.</param>
-				void									SetPrefferedContentWidth(vint value);
+				void									SetPreferredContentWidth(vint value);
 
 				/// <summary>Get the temporary content control.</summary>
 				/// <returns>The temporary content control.</returns>
