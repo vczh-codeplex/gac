@@ -325,6 +325,17 @@ Type Declaration
 			END_CLASS_MEMBER(GuiListControl::IItemPrimaryTextView)
 
 			BEGIN_ENUM_ITEM(GuiListControl::KeyDirection)
+				ENUM_ITEM_NAMESPACE(GuiListControl)
+				ENUM_NAMESPACE_ITEM(Up)
+				ENUM_NAMESPACE_ITEM(Down)
+				ENUM_NAMESPACE_ITEM(Left)
+				ENUM_NAMESPACE_ITEM(Right)
+				ENUM_NAMESPACE_ITEM(Home)
+				ENUM_NAMESPACE_ITEM(End)
+				ENUM_NAMESPACE_ITEM(PageUp)
+				ENUM_NAMESPACE_ITEM(PageDown)
+				ENUM_NAMESPACE_ITEM(PageLeft)
+				ENUM_NAMESPACE_ITEM(PageRight)
 			END_ENUM_ITEM(GuiListControl::KeyDirection)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemProvider)
@@ -355,6 +366,15 @@ Type Declaration
 			END_CLASS_MEMBER(AxisAlignedItemCoordinateTransformer)
 
 			BEGIN_ENUM_ITEM(AxisAlignedItemCoordinateTransformer::Alignment)
+				ENUM_ITEM_NAMESPACE(AxisAlignedItemCoordinateTransformer)
+				ENUM_NAMESPACE_ITEM(LeftDown)
+				ENUM_NAMESPACE_ITEM(RightDown)
+				ENUM_NAMESPACE_ITEM(LeftUp)
+				ENUM_NAMESPACE_ITEM(RightUp)
+				ENUM_NAMESPACE_ITEM(DownLeft)
+				ENUM_NAMESPACE_ITEM(DownRight)
+				ENUM_NAMESPACE_ITEM(UpLeft)
+				ENUM_NAMESPACE_ITEM(UpRight)
 			END_ENUM_ITEM(AxisAlignedItemCoordinateTransformer::Alignment)
 
 			BEGIN_CLASS_MEMBER(RangedItemArrangerBase)

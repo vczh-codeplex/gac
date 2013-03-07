@@ -100,12 +100,12 @@ Interface Proxy
 
 					compositions::GuiBoundsComposition* GetBoundsComposition()override
 					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GuiBoundsComposition*, GetBoundsComposition);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBoundsComposition);
 					}
 
 					compositions::GuiGraphicsComposition* GetContainerComposition()override
 					{
-						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GuiGraphicsComposition*, GetContainerComposition);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetContainerComposition);
 					}
 
 					void SetFocusableComposition(compositions::GuiGraphicsComposition* value)override
