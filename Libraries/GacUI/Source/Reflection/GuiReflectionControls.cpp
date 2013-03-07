@@ -69,6 +69,11 @@ External Functions
 				}, milliseconds);
 			}
 
+			Ptr<IValueReadonlyList> GuiSelectableListControl_GetSelectedItem(GuiSelectableListControl* thisObject)
+			{
+				return new ValueReadonlyListWrapper<const SortedList<vint>*>(&thisObject->GetSelectedItems());
+			}
+
 /***********************************************************************
 Type Declaration
 ***********************************************************************/
@@ -82,7 +87,10 @@ Type Declaration
 	CLASS_MEMBER_CONSTRUCTOR(CONTROL*(CONTROL::IStyleProvider*), {L"styleProvider"})
 
 #define INTERFACE_EXTERNALCTOR(CONTROL, INTERFACE)\
-	CLASS_MEMBER_EXTERNALCTOR(CONTROL::INTERFACE*(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::CONTROL##_##INTERFACE::Create)
+	CLASS_MEMBER_EXTERNALCTOR(decltype(interface_proxy::CONTROL##_##INTERFACE::Create(0))(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::CONTROL##_##INTERFACE::Create)
+
+#define INTERFACE_IDENTIFIER(INTERFACE)\
+	CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetIdentifier, NO_PARAMETER, WString(*)(), []()->WString{return INTERFACE::Identifier;})
 
 			BEGIN_CLASS_MEMBER(GuiApplication)
 				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetApplication, NO_PARAMETER, GuiApplication*(*)(), &GetApplication)
@@ -313,15 +321,42 @@ Type Declaration
 			END_CLASS_MEMBER(GuiTooltip)
 
 			BEGIN_CLASS_MEMBER(GuiListControl)
+				CLASS_MEMBER_BASE(GuiScrollView)
+				CLASS_MEMBER_CONSTRUCTOR(GuiListControl*(GuiListControl::IStyleProvider* _ GuiListControl::IItemProvider* _ bool), {L"styleProvider" _ L"itemProvider" _ L"acceptFocus"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ItemProvider)
+				CLASS_MEMBER_PROPERTY_FAST(StyleProvider)
+				CLASS_MEMBER_PROPERTY_FAST(Arranger)
+				CLASS_MEMBER_PROPERTY_FAST(CoordinateTransformer)
+
+				CLASS_MEMBER_METHOD(EnsureItemVisible, {L"itemIndex"})
 			END_CLASS_MEMBER(GuiListControl)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemProviderCallback)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemProviderCallback)
+
+				CLASS_MEMBER_METHOD(OnAttached, {L"provider"})
+				CLASS_MEMBER_METHOD(OnItemModified, {L"start" _ L"count" _ L"newCount"})
 			END_CLASS_MEMBER(GuiListControl::IItemProviderCallback)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemArrangerCallback)
+				CLASS_MEMBER_METHOD(RequestItem, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(ReleaseItem, {L"style"})
+				CLASS_MEMBER_METHOD(SetViewLocation, {L"value"})
+				CLASS_MEMBER_METHOD(GetStylePreferredSize, {L"style"})
+				CLASS_MEMBER_METHOD(SetStyleAlignmentToParent, {L"style" _ L"margin"})
+				CLASS_MEMBER_METHOD(GetStyleBounds, {L"style"})
+				CLASS_MEMBER_METHOD(SetStyleBounds, {L"style" _ L"bounds"})
+				CLASS_MEMBER_METHOD(GetContainerComposition, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OnTotalSizeChanged, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiListControl::IItemArrangerCallback)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemPrimaryTextView)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemPrimaryTextView)
+				INTERFACE_IDENTIFIER(GuiListControl::IItemPrimaryTextView)
+
+				CLASS_MEMBER_METHOD(GetPrimaryTextViewText, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(ContainsPrimaryText, {L"itemIndex"})
 			END_CLASS_MEMBER(GuiListControl::IItemPrimaryTextView)
 
 			BEGIN_ENUM_ITEM(GuiListControl::KeyDirection)
@@ -339,30 +374,100 @@ Type Declaration
 			END_ENUM_ITEM(GuiListControl::KeyDirection)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemProvider)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemProvider)
+
+				CLASS_MEMBER_METHOD(AttachCallback, {L"value"})
+				CLASS_MEMBER_METHOD(DetachCallback, {L"value"})
+				CLASS_MEMBER_METHOD(Count, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(RequestView, {L"identifier"})
+				CLASS_MEMBER_METHOD(ReleaseView, {L"view"})
 			END_CLASS_MEMBER(GuiListControl::IItemProvider)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemStyleController)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(StyleProvider)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ItemStyleId)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BoundsComposition)
+
+				CLASS_MEMBER_METHOD(IsCacheable, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsInstalled, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OnInstalled, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OnUninstalled, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiListControl::IItemStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemStyleProvider)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemStyleProvider)
+
+				CLASS_MEMBER_METHOD(AttachListControl, {L"value"})
+				CLASS_MEMBER_METHOD(DetachListControl, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetItemStyleId, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(CreateItemStyle, {L"styleId"})
+				CLASS_MEMBER_METHOD(DestroyItemStyle, {L"style"})
+				CLASS_MEMBER_METHOD(Install, {L"style" _ L"itemIndex"})
 			END_CLASS_MEMBER(GuiListControl::IItemStyleProvider)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemArranger)
+				CLASS_MEMBER_BASE(GuiListControl::IItemProviderCallback)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemArranger)
+
+				CLASS_MEMBER_PROPERTY_FAST(Callback)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TotalSize)
+				
+				CLASS_MEMBER_METHOD(AttachListControl, {L"value"})
+				CLASS_MEMBER_METHOD(DetachListControl, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetVisibleStyle, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(GetVisibleIndex, {L"style"})
+				CLASS_MEMBER_METHOD(OnViewChanged, {L"bounds"})
+				CLASS_MEMBER_METHOD(FindItem, {L"itemIndex" _ L"key"})
+				CLASS_MEMBER_METHOD(EnsureItemVisible, {L"itemIndex"})
 			END_CLASS_MEMBER(GuiListControl::IItemArranger)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemCoordinateTransformer)
+				INTERFACE_EXTERNALCTOR(GuiListControl, IItemCoordinateTransformer)
+
+				CLASS_MEMBER_METHOD(RealSizeToVirtualSize, {L"size"})
+				CLASS_MEMBER_METHOD(VirtualSizeToRealSize, {L"size"})
+				CLASS_MEMBER_METHOD(RealPointToVirtualPoint, {L"realFullSize" _ L"point"})
+				CLASS_MEMBER_METHOD(VirtualPointToRealPoint, {L"realFullSize" _ L"point"})
+				CLASS_MEMBER_METHOD(RealRectToVirtualRect, {L"realFullSize" _ L"rect"})
+				CLASS_MEMBER_METHOD(VirtualRectToRealRect, {L"realFullSize" _ L"rect"})
+				CLASS_MEMBER_METHOD(RealMarginToVirtualMargin, {L"margin"})
+				CLASS_MEMBER_METHOD(VirtualMarginToRealMargin, {L"margin"})
+				CLASS_MEMBER_METHOD(RealKeyDirectionToVirtualKeyDirection, {L"key"})
 			END_CLASS_MEMBER(GuiListControl::IItemCoordinateTransformer)
 
 			BEGIN_CLASS_MEMBER(GuiSelectableListControl)
+				CLASS_MEMBER_BASE(GuiListControl)
+				CLASS_MEMBER_CONSTRUCTOR(GuiSelectableListControl*(GuiSelectableListControl::IStyleProvider* _ GuiSelectableListControl::IItemProvider*), {L"styleProvider" _ L"itemProvider"})
+
+				CLASS_MEMBER_PROPERTY_FAST(MultiSelect)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetSelectedItems, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiSelectableListControl::*)(), &GuiSelectableListControl_GetSelectedItem)
+				CLASS_MEMBER_METHOD(GetSelected, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(SetSelected, {L"itemIndex" _ L"value"})
+				CLASS_MEMBER_METHOD(SelectItemsByClick, {L"itemIndex" _ L"ctrl" _ L"shift"})
+				CLASS_MEMBER_METHOD(SelectItemsByKey, {L"code" _ L"ctrl" _ L"shift"})
+				CLASS_MEMBER_METHOD(ClearSelection, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiSelectableListControl)
 
 			BEGIN_CLASS_MEMBER(GuiSelectableListControl::IItemStyleProvider)
+				CLASS_MEMBER_BASE(GuiListControl::IItemStyleProvider)
+				INTERFACE_EXTERNALCTOR(GuiSelectableListControl, IItemStyleProvider)
+
+				CLASS_MEMBER_METHOD(SetStyleSelected, {L"style" _ L"value"})
 			END_CLASS_MEMBER(GuiSelectableListControl::IItemStyleProvider)
 
 			BEGIN_CLASS_MEMBER(DefaultItemCoordinateTransformer)
+				CLASS_MEMBER_BASE(GuiListControl::IItemCoordinateTransformer)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<DefaultItemCoordinateTransformer>(), NO_PARAMETER)
 			END_CLASS_MEMBER(DefaultItemCoordinateTransformer)
 
 			BEGIN_CLASS_MEMBER(AxisAlignedItemCoordinateTransformer)
+				CLASS_MEMBER_BASE(GuiListControl::IItemCoordinateTransformer)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<AxisAlignedItemCoordinateTransformer>(AxisAlignedItemCoordinateTransformer::Alignment), {L"alignment"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Alignment)
 			END_CLASS_MEMBER(AxisAlignedItemCoordinateTransformer)
 
 			BEGIN_ENUM_ITEM(AxisAlignedItemCoordinateTransformer::Alignment)
@@ -378,17 +483,25 @@ Type Declaration
 			END_ENUM_ITEM(AxisAlignedItemCoordinateTransformer::Alignment)
 
 			BEGIN_CLASS_MEMBER(RangedItemArrangerBase)
+				CLASS_MEMBER_BASE(GuiListControl::IItemArranger)
 			END_CLASS_MEMBER(RangedItemArrangerBase)
 
 			BEGIN_CLASS_MEMBER(FixedHeightItemArranger)
+				CLASS_MEMBER_BASE(RangedItemArrangerBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<FixedHeightItemArranger>(), NO_PARAMETER)
 			END_CLASS_MEMBER(FixedHeightItemArranger)
 
 			BEGIN_CLASS_MEMBER(FixedSizeMultiColumnItemArranger)
+				CLASS_MEMBER_BASE(RangedItemArrangerBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<FixedSizeMultiColumnItemArranger>(), NO_PARAMETER)
 			END_CLASS_MEMBER(FixedSizeMultiColumnItemArranger)
 
 			BEGIN_CLASS_MEMBER(FixedHeightMultiColumnItemArranger)
+				CLASS_MEMBER_BASE(RangedItemArrangerBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<FixedHeightMultiColumnItemArranger>(), NO_PARAMETER)
 			END_CLASS_MEMBER(FixedHeightMultiColumnItemArranger)
 
+#undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
 #undef INTERFACE_EXTERNALCTOR
 #undef _
