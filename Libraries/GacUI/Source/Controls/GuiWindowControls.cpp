@@ -1045,12 +1045,12 @@ GuiPopup
 				GetCurrentController()->CallbackService()->UninstallListener(this);
 			}
 
-			vint GuiTooltip::GetPrefferedContentWidth()
+			vint GuiTooltip::GetPreferredContentWidth()
 			{
 				return GetContainerComposition()->GetPreferredMinSize().x;
 			}
 
-			void GuiTooltip::SetPrefferedContentWidth(vint value)
+			void GuiTooltip::SetPreferredContentWidth(vint value)
 			{
 				GetContainerComposition()->SetPreferredMinSize(Size(value, 10));
 			}

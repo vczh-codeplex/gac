@@ -42,6 +42,10 @@ Type List
 			F(controls::GuiScrollView)\
 			F(controls::GuiScrollView::IStyleProvider)\
 			F(controls::GuiScrollContainer)\
+			F(controls::GuiWindow)\
+			F(controls::GuiWindow::IStyleController)\
+			F(controls::GuiPopup)\
+			F(controls::GuiTooltip)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
@@ -230,6 +234,90 @@ Interface Proxy
 					compositions::GuiGraphicsComposition* InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(GuiGraphicsComposition*, InstallBackground, boundsComposition);
+					}
+				};
+
+				class GuiWindow_IStyleController : public virtual GuiControl_IStyleController, public virtual GuiWindow::IStyleController
+				{
+				public:
+					GuiWindow_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleController(_proxy)
+					{
+					}
+
+					static GuiWindow::IStyleController* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiWindow_IStyleController(_proxy);
+					}
+
+					void AttachWindow(GuiWindow* _window)override
+					{
+						INVOKE_INTERFACE_PROXY(ActiveWindow, _window);
+					}
+
+					void InitializeNativeWindowProperties()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(InitializeNativeWindowProperties);
+					}
+
+					bool GetMaximizedBox()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(bool, GetMaximizedBox);
+					}
+
+					void SetMaximizedBox(bool visible)override
+					{
+						INVOKE_INTERFACE_PROXY(SetMaximizedBox, visible);
+					}
+
+					bool GetMinimizedBox()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(bool, GetMinimizedBox);
+					}
+
+					void SetMinimizedBox(bool visible)override
+					{
+						INVOKE_INTERFACE_PROXY(SetMinimizedBox, visible);
+					}
+
+					bool GetBorder()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(bool, GetBorder);
+					}
+
+					void SetBorder(bool visible)override
+					{
+						INVOKE_INTERFACE_PROXY(SetBorder, visible);
+					}
+
+					bool GetSizeBox()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(bool, GetSizeBox);
+					}
+
+					void SetSizeBox(bool visible)override
+					{
+						INVOKE_INTERFACE_PROXY(SetSizeBox, visible);
+					}
+
+					bool GetIconVisible()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(bool, GetIconVisible);
+					}
+
+					void SetIconVisible(bool visible)override
+					{
+						INVOKE_INTERFACE_PROXY(SetIconVisible, visible);
+					}
+
+					bool GetTitleBar()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(bool, GetTitleBar);
+					}
+
+					void SetTitleBar(bool visible)override
+					{
+						INVOKE_INTERFACE_PROXY(SetTitleBar, visible);
 					}
 				};
 			}

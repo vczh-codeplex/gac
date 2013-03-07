@@ -36,6 +36,8 @@ Type List
 			F(INativeImage::FormatType)\
 			F(INativeCursor)\
 			F(INativeCursor::SystemCursorType)\
+			F(INativeWindow)\
+			F(INativeWindow::WindowSizeState)\
 			F(GuiImageData)\
 			F(DocumentModel)\
 			F(GuiResource)\
