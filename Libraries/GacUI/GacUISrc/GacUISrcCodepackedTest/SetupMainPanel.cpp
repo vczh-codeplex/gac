@@ -224,7 +224,7 @@ void SetupMainPanel(GuiControlHost* controlHost, GuiControl* container, GuiCellC
 
 				for(int i=0;i<30;i++)
 				{
-					listControl->GetItems().Add(L"Text Item "+itow(i+1));
+					listControl->GetItems().Add(new list::TextItem(L"Text Item "+itow(i+1)));
 					listControl->GetItems().SetChecked(i, i%2==0);
 				}
 			}

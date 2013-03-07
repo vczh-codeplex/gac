@@ -11,7 +11,7 @@ namespace SetupDialogWindowHelper
 		listControl->SetVerticalAlwaysVisible(true);
 		for(int i=0;i<count;i++)
 		{
-			listControl->GetItems().Add(list::TextItem(items[i]));
+			listControl->GetItems().Add(new list::TextItem(items[i]));
 		}
 
 		GuiComboBoxListControl* comboBox=g::NewComboBox(listControl);

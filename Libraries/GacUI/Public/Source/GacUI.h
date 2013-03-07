@@ -44,17 +44,14 @@ namespace vl
 Enumerations
 ***********************************************************************/
 		
-		namespace Alignment
+		enum class Alignment
 		{
-			enum Type
-			{
-				Left=0,
-				Top=0,
-				Center=1,
-				Right=2,
-				Bottom=2,
-			};
-		}
+			Left=0,
+			Top=0,
+			Center=1,
+			Right=2,
+			Bottom=2,
+		};
 
 /***********************************************************************
 TextPos
@@ -680,8 +677,8 @@ Layout Engine
 				virtual void								SetWrapLine(bool value)=0;
 				virtual vint								GetMaxWidth()=0;
 				virtual void								SetMaxWidth(vint value)=0;
-				virtual Alignment::Type						GetParagraphAlignment()=0;
-				virtual void								SetParagraphAlignment(Alignment::Type value)=0;
+				virtual Alignment						GetParagraphAlignment()=0;
+				virtual void								SetParagraphAlignment(Alignment value)=0;
 
 				virtual bool								SetFont(vint start, vint length, const WString& value)=0;
 				virtual bool								SetSize(vint start, vint length, vint value)=0;
@@ -735,6 +732,8 @@ namespace vl
 {
 	namespace presentation
 	{
+		using namespace reflection;
+
 		class INativeWindow;
 		class INativeWindowListener;
 		class INativeController;
@@ -753,7 +752,7 @@ System Object
 			virtual bool				IsPrimary()=0;
 		};
 		
-		class INativeCursor : public Interface
+		class INativeCursor : public IDescriptable, Description<INativeCursor>
 		{
 		public:
 			enum SystemCursorType
@@ -794,7 +793,7 @@ Image Object
 			virtual void						OnDetach(INativeImageFrame* frame)=0;
 		};
 
-		class INativeImageFrame : public Interface
+		class INativeImageFrame : public IDescriptable, public Description<INativeImageFrame>
 		{
 		public:
 			virtual INativeImage*				GetImage()=0;
@@ -805,7 +804,7 @@ Image Object
 			virtual Ptr<INativeImageFrameCache>	RemoveCache(void* key)=0;
 		};
 		
-		class INativeImage : public Interface
+		class INativeImage : public IDescriptable, public Description<INativeImage>
 		{
 		public:
 			enum FormatType
@@ -822,7 +821,7 @@ Image Object
 			
 			virtual INativeImageService*		GetImageService()=0;
 			virtual FormatType					GetFormat()=0;
-			virtual vint							GetFrameCount()=0;
+			virtual vint						GetFrameCount()=0;
 			virtual INativeImageFrame*			GetFrame(vint index)=0;
 		};
 		
@@ -840,7 +839,7 @@ Image Object
 Native Window
 ***********************************************************************/
 		
-		class INativeWindow : public Interface
+		class INativeWindow : public Interface, public Description<INativeWindow>
 		{
 		public:
 			virtual Rect				GetBounds()=0;
@@ -929,14 +928,14 @@ Native Window
 			bool						left;
 			bool						middle;
 			bool						right;
-			vint							x;
-			vint							y;
-			vint							wheel;
+			vint						x;
+			vint						y;
+			vint						wheel;
 		};
 		
 		struct NativeWindowKeyInfo
 		{
-			vint							code;
+			vint						code;
 			bool						ctrl;
 			bool						shift;
 			bool						alt;
@@ -1027,7 +1026,7 @@ Native Window Services
 			virtual void					SetDefaultFont(const FontProperties& value)=0;
 		};
 
-		class INativeDelay : public Interface
+		class INativeDelay : public Interface, public Description<INativeDelay>
 		{
 		public:
 			enum ExecuteStatus
@@ -1748,7 +1747,7 @@ namespace vl
 Resource Image
 ***********************************************************************/
 			
-		class GuiImageData : public Object
+		class GuiImageData : public Object, public Description<GuiImageData>
 		{
 		protected:
 			Ptr<INativeImage>				image;
@@ -1848,7 +1847,7 @@ Rich Content Document (model)
 		public:
 			LineList						lines;
 
-			Alignment::Type					alignment;
+			Alignment					alignment;
 
 			DocumentParagraph():alignment(Alignment::Left){}
 		};
@@ -2027,13 +2026,18 @@ Resource Structure
 Resource Loader
 ***********************************************************************/
 		
-		class GuiResource : public GuiResourceFolder
+		class GuiResource : public GuiResourceFolder, public Description<GuiResource>
 		{
 		public:
 			GuiResource();
 			~GuiResource();
 
 			static Ptr<GuiResource>					LoadFromXml(const WString& filePath);
+			
+			Ptr<DocumentModel>						GetDocumentByPath(const WString& path);
+			Ptr<GuiImageData>						GetImageByPath(const WString& path);
+			Ptr<parsing::xml::XmlDocument>			GetXmlByPath(const WString& path);
+			WString									GetStringByPath(const WString& path);
 		};
 
 /***********************************************************************
@@ -2074,14 +2078,11 @@ namespace vl
 /***********************************************************************
 Elements
 ***********************************************************************/
-
-			namespace ElementShape
+			
+			enum class ElementShape
 			{
-				enum Type
-				{
-					Rectangle,
-					Ellipse,
-				};
+				Rectangle,
+				Ellipse,
 			};
 
 			class GuiSolidBorderElement : public Object, public IGuiGraphicsElement, public Description<GuiSolidBorderElement>
@@ -2089,7 +2090,7 @@ Elements
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiSolidBorderElement, L"SolidBorder")
 			protected:
 				Color					color;
-				ElementShape::Type		shape;
+				ElementShape			shape;
 
 				GuiSolidBorderElement();
 			public:
@@ -2097,8 +2098,8 @@ Elements
 
 				Color					GetColor();
 				void					SetColor(Color value);
-				ElementShape::Type		GetShape();
-				void					SetShape(ElementShape::Type value);
+				ElementShape			GetShape();
+				void					SetShape(ElementShape value);
 			};
 			
 			class GuiRoundBorderElement : public Object, public IGuiGraphicsElement, public Description<GuiRoundBorderElement>
@@ -2106,7 +2107,7 @@ Elements
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiRoundBorderElement, L"RoundBorder")
 			protected:
 				Color					color;
-				vint						radius;
+				vint					radius;
 
 				GuiRoundBorderElement();
 			public:
@@ -2115,7 +2116,7 @@ Elements
 				Color					GetColor();
 				void					SetColor(Color value);
 				
-				vint						GetRadius();
+				vint					GetRadius();
 				void					SetRadius(vint value);
 			};
 			
@@ -2131,7 +2132,9 @@ Elements
 				~Gui3DBorderElement();
 				
 				Color					GetColor1();
+				void					SetColor1(Color value);
 				Color					GetColor2();
+				void					SetColor2(Color value);
 				void					SetColors(Color value1, Color value2);
 			};
 			
@@ -2154,7 +2157,9 @@ Elements
 				~Gui3DSplitterElement();
 				
 				Color					GetColor1();
+				void					SetColor1(Color value);
 				Color					GetColor2();
+				void					SetColor2(Color value);
 				void					SetColors(Color value1, Color value2);
 				
 				Direction				GetDirection();
@@ -2166,7 +2171,7 @@ Elements
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiSolidBackgroundElement, L"SolidBackground")
 			protected:
 				Color					color;
-				ElementShape::Type		shape;
+				ElementShape			shape;
 
 				GuiSolidBackgroundElement();
 			public:
@@ -2174,8 +2179,8 @@ Elements
 				
 				Color					GetColor();
 				void					SetColor(Color value);
-				ElementShape::Type		GetShape();
-				void					SetShape(ElementShape::Type value);
+				ElementShape			GetShape();
+				void					SetShape(ElementShape value);
 			};
 			
 			class GuiGradientBackgroundElement : public Object, public IGuiGraphicsElement, public Description<GuiGradientBackgroundElement>
@@ -2192,20 +2197,22 @@ Elements
 			protected:
 				Color					color1, color2;
 				Direction				direction;
-				ElementShape::Type		shape;
+				ElementShape			shape;
 
 				GuiGradientBackgroundElement();
 			public:
 				~GuiGradientBackgroundElement();
 				
 				Color					GetColor1();
+				void					SetColor1(Color value);
 				Color					GetColor2();
+				void					SetColor2(Color value);
 				void					SetColors(Color value1, Color value2);
 				
 				Direction				GetDirection();
 				void					SetDirection(Direction value);
-				ElementShape::Type		GetShape();
-				void					SetShape(ElementShape::Type value);
+				ElementShape			GetShape();
+				void					SetShape(ElementShape value);
 			};
 			
 			class GuiSolidLabelElement : public Object, public IGuiGraphicsElement, public Description<GuiSolidLabelElement>
@@ -2215,8 +2222,8 @@ Elements
 				Color					color;
 				FontProperties			fontProperties;
 				WString					text;
-				Alignment::Type			hAlignment;
-				Alignment::Type			vAlignment;
+				Alignment				hAlignment;
+				Alignment				vAlignment;
 				bool					wrapLine;
 				bool					ellipse;
 				bool					multiline;
@@ -2235,9 +2242,11 @@ Elements
 				const WString&			GetText();
 				void					SetText(const WString& value);
 				
-				Alignment::Type			GetHorizontalAlignment();
-				Alignment::Type			GetVerticalAlignment();
-				void					SetAlignments(Alignment::Type horizontal, Alignment::Type vertical);
+				Alignment				GetHorizontalAlignment();
+				Alignment				GetVerticalAlignment();
+				void					SetHorizontalAlignment(Alignment value);
+				void					SetVerticalAlignment(Alignment value);
+				void					SetAlignments(Alignment horizontal, Alignment vertical);
 				
 				bool					GetWrapLine();
 				void					SetWrapLine(bool value);
@@ -2257,9 +2266,9 @@ Elements
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiImageFrameElement, L"ImageFrame");
 			protected:
 				Ptr<INativeImage>		image;
-				vint						frameIndex;
-				Alignment::Type			hAlignment;
-				Alignment::Type			vAlignment;
+				vint					frameIndex;
+				Alignment				hAlignment;
+				Alignment				vAlignment;
 				bool					stretch;
 				bool					enabled;
 
@@ -2268,12 +2277,16 @@ Elements
 				~GuiImageFrameElement();
 
 				Ptr<INativeImage>		GetImage();
-				vint						GetFrameIndex();
-				void					SetImage(Ptr<INativeImage> _image, vint _frameIndex=0);
+				vint					GetFrameIndex();
+				void					SetImage(Ptr<INativeImage> value);
+				void					SetFrameIndex(vint value);
+				void					SetImage(Ptr<INativeImage> _image, vint _frameIndex);
 				
-				Alignment::Type			GetHorizontalAlignment();
-				Alignment::Type			GetVerticalAlignment();
-				void					SetAlignments(Alignment::Type horizontal, Alignment::Type vertical);
+				Alignment				GetHorizontalAlignment();
+				Alignment				GetVerticalAlignment();
+				void					SetHorizontalAlignment(Alignment value);
+				void					SetVerticalAlignment(Alignment value);
+				void					SetAlignments(Alignment horizontal, Alignment vertical);
 
 				bool					GetStretch();
 				void					SetStretch(bool value);
@@ -2299,7 +2312,7 @@ Elements
 				void					SetSize(Size value);
 
 				const Point&			GetPoint(vint index);
-				vint						GetPointCount();
+				vint					GetPointCount();
 				void					SetPoints(const Point* p, vint count);
 				
 				Color					GetBorderColor();
@@ -2394,25 +2407,22 @@ Colorized Plain Text (model)
 					vint								GetRowHeight();
 				};
 
-				struct TextLines
+				class TextLines : public Object, public Description<TextLines>
 				{
 					typedef collections::List<TextLine>		TextLineList;
 				protected:
 					TextLineList					lines;
 					CharMeasurer*					charMeasurer;
 					IGuiGraphicsRenderTarget*		renderTarget;
-					vint								tabWidth;
-					vint								tabSpaceCount;
-					vint								availableColorizedLines;
+					vint							tabWidth;
+					vint							tabSpaceCount;
 					wchar_t							passwordChar;
 				public:
 					TextLines();
 					~TextLines();
 
-					vint								GetCount();
+					vint							GetCount();
 					TextLine&						GetLine(vint row);
-					vint								GetAvailableColorizedLines();
-					void							SetAvailableColorizedLines(vint value);
 					CharMeasurer*					GetCharMeasurer();
 					void							SetCharMeasurer(CharMeasurer* value);
 					IGuiGraphicsRenderTarget*		GetRenderTarget();
@@ -2431,13 +2441,13 @@ Colorized Plain Text (model)
 					void							Clear();
 					
 					void							ClearMeasurement();
-					vint								GetTabSpaceCount();
+					vint							GetTabSpaceCount();
 					void							SetTabSpaceCount(vint value);
 					void							MeasureRow(vint row);
-					vint								GetRowWidth(vint row);
-					vint								GetRowHeight();
-					vint								GetMaxWidth();
-					vint								GetMaxHeight();
+					vint							GetRowWidth(vint row);
+					vint							GetRowHeight();
+					vint							GetMaxWidth();
+					vint							GetMaxHeight();
 					TextPos							GetTextPosFromPoint(Point point);
 					Point							GetPointFromTextPos(TextPos pos);
 					Rect							GetRectFromTextPos(TextPos pos);
@@ -3243,7 +3253,7 @@ Table Compositions
 				};
 
 				ComposeType		composeType;
-				vint				absolute;
+				vint			absolute;
 				double			percentage;
 
 				GuiCellOption()
@@ -3284,11 +3294,11 @@ Table Compositions
 			{
 				friend class GuiCellComposition;
 			protected:
-				vint											rows;
-				vint											columns;
-				vint											cellPadding;
-				vint											rowExtending;
-				vint											columnExtending;
+				vint										rows;
+				vint										columns;
+				vint										cellPadding;
+				vint										rowExtending;
+				vint										columnExtending;
 				collections::Array<GuiCellOption>			rowOptions;
 				collections::Array<GuiCellOption>			columnOptions;
 				collections::Array<GuiCellComposition*>		cellCompositions;
@@ -3334,8 +3344,8 @@ Table Compositions
 				GuiTableComposition();
 				~GuiTableComposition();
 
-				vint									GetRows();
-				vint									GetColumns();
+				vint								GetRows();
+				vint								GetColumns();
 				bool								SetRowsAndColumns(vint _rows, vint _columns);
 				GuiCellComposition*					GetSitedCell(vint _row, vint _column);
 
@@ -3344,7 +3354,7 @@ Table Compositions
 				GuiCellOption						GetColumnOption(vint _column);
 				void								SetColumnOption(vint _column, GuiCellOption option);
 
-				vint									GetCellPadding();
+				vint								GetCellPadding();
 				void								SetCellPadding(vint value);
 				Rect								GetCellArea();
 				void								UpdateCellBounds();
@@ -3358,10 +3368,10 @@ Table Compositions
 			{
 				friend class GuiTableComposition;
 			protected:
-				vint									row;
-				vint									rowSpan;
-				vint									column;
-				vint									columnSpan;
+				vint								row;
+				vint								rowSpan;
+				vint								column;
+				vint								columnSpan;
 				GuiTableComposition*				tableParent;
 				Size								lastPreferredSize;
 				
@@ -3377,10 +3387,10 @@ Table Compositions
 
 				GuiTableComposition*				GetTableParent();
 
-				vint									GetRow();
-				vint									GetRowSpan();
-				vint									GetColumn();
-				vint									GetColumnSpan();
+				vint								GetRow();
+				vint								GetRowSpan();
+				vint								GetColumn();
+				vint								GetColumnSpan();
 				bool								SetSite(vint _row, vint _column, vint _rowSpan, vint _columnSpan);
 
 				Rect								GetBounds()override;
@@ -3436,7 +3446,7 @@ Stack Compositions
 				ItemCompositionList					stackItems;
 				collections::Array<Rect>			stackItemBounds;
 				Size								stackItemTotalSize;
-				vint									padding;
+				vint								padding;
 				Rect								previousBounds;
 				Margin								extraMargin;
 
@@ -3453,7 +3463,7 @@ Stack Compositions
 				
 				Direction							GetDirection();
 				void								SetDirection(Direction value);
-				vint									GetPadding();
+				vint								GetPadding();
 				void								SetPadding(vint value);
 
 				Size								GetMinPreferredClientSize()override;
@@ -3529,7 +3539,7 @@ Specialized Compositions
 				};
 			protected:
 				Direction							direction;
-				vint									maxLength;
+				vint								maxLength;
 				double								maxRatio;
 			public:
 				GuiSideAlignedComposition();
@@ -3537,7 +3547,7 @@ Specialized Compositions
 				
 				Direction							GetDirection();
 				void								SetDirection(Direction value);
-				vint									GetMaxLength();
+				vint								GetMaxLength();
 				void								SetMaxLength(vint value);
 				double								GetMaxRatio();
 				void								SetMaxRatio(double value);
@@ -4225,11 +4235,11 @@ Scrolls
 
 				IStyleController*						styleController;
 				Ptr<CommandExecutor>					commandExecutor;
-				vint										totalSize;
-				vint										pageSize;
-				vint										position;
-				vint										smallMove;
-				vint										bigMove;
+				vint									totalSize;
+				vint									pageSize;
+				vint									position;
+				vint									smallMove;
+				vint									bigMove;
 			public:
 				GuiScroll(IStyleController* _styleController);
 				~GuiScroll();
@@ -4240,19 +4250,19 @@ Scrolls
 				compositions::GuiNotifyEvent			SmallMoveChanged;
 				compositions::GuiNotifyEvent			BigMoveChanged;
 				
-				virtual vint								GetTotalSize();
+				virtual vint							GetTotalSize();
 				virtual void							SetTotalSize(vint value);
-				virtual vint								GetPageSize();
+				virtual vint							GetPageSize();
 				virtual void							SetPageSize(vint value);
-				virtual vint								GetPosition();
+				virtual vint							GetPosition();
 				virtual void							SetPosition(vint value);
-				virtual vint								GetSmallMove();
+				virtual vint							GetSmallMove();
 				virtual void							SetSmallMove(vint value);
-				virtual vint								GetBigMove();
+				virtual vint							GetBigMove();
 				virtual void							SetBigMove(vint value);
 				
-				vint										GetMinPosition();
-				vint										GetMaxPosition();
+				vint									GetMinPosition();
+				vint									GetMaxPosition();
 			};
 			
 			namespace list
@@ -4659,8 +4669,8 @@ Window
 				GuiTooltip(IStyleController* _styleController);
 				~GuiTooltip();
 
-				vint									GetPrefferedContentWidth();
-				void									SetPrefferedContentWidth(vint value);
+				vint									GetPreferredContentWidth();
+				void									SetPreferredContentWidth(vint value);
 
 				GuiControl*								GetTemporaryContentControl();
 				void									SetTemporaryContentControl(GuiControl* control);
@@ -4692,7 +4702,7 @@ namespace vl
 	{
 		namespace controls
 		{
-			class GuiApplication : public Object, private INativeControllerListener
+			class GuiApplication : public Object, private INativeControllerListener, public Description<GuiApplication>
 			{
 				friend void GuiApplicationInitialize();
 				friend class GuiWindow;
@@ -4882,7 +4892,7 @@ Scroll View
 				public:
 					virtual GuiScroll::IStyleController*			CreateHorizontalScrollStyle()=0;
 					virtual GuiScroll::IStyleController*			CreateVerticalScrollStyle()=0;
-					virtual vint										GetDefaultScrollSize()=0;
+					virtual vint									GetDefaultScrollSize()=0;
 					virtual compositions::GuiGraphicsComposition*	InstallBackground(compositions::GuiBoundsComposition* boundsComposition)=0;
 				};
 				
@@ -5750,7 +5760,7 @@ List Control
 				public:
 					virtual bool								AttachCallback(IItemProviderCallback* value)=0;
 					virtual bool								DetachCallback(IItemProviderCallback* value)=0;
-					virtual vint									Count()=0;
+					virtual vint								Count()=0;
 					virtual IDescriptable*						RequestView(const WString& identifier)=0;
 					virtual void								ReleaseView(IDescriptable* view)=0;
 				};
@@ -5759,7 +5769,7 @@ List Control
 				{
 				public:
 					virtual IItemStyleProvider*					GetStyleProvider()=0;
-					virtual vint									GetItemStyleId()=0;
+					virtual vint								GetItemStyleId()=0;
 					virtual compositions::GuiBoundsComposition*	GetBoundsComposition()=0;
 					virtual bool								IsCacheable()=0;
 					virtual bool								IsInstalled()=0;
@@ -5772,7 +5782,7 @@ List Control
 				public:
 					virtual void								AttachListControl(GuiListControl* value)=0;
 					virtual void								DetachListControl()=0;
-					virtual vint									GetItemStyleId(vint itemIndex)=0;
+					virtual vint								GetItemStyleId(vint itemIndex)=0;
 					virtual IItemStyleController*				CreateItemStyle(vint styleId)=0;
 					virtual void								DestroyItemStyle(IItemStyleController* style)=0;
 					virtual void								Install(IItemStyleController* style, vint itemIndex)=0;
@@ -5787,9 +5797,9 @@ List Control
 					virtual void								SetCallback(IItemArrangerCallback* value)=0;
 					virtual Size								GetTotalSize()=0;
 					virtual IItemStyleController*				GetVisibleStyle(vint itemIndex)=0;
-					virtual vint									GetVisibleIndex(IItemStyleController* style)=0;
+					virtual vint								GetVisibleIndex(IItemStyleController* style)=0;
 					virtual void								OnViewChanged(Rect bounds)=0;
-					virtual vint									FindItem(vint itemIndex, KeyDirection key)=0;
+					virtual vint								FindItem(vint itemIndex, KeyDirection key)=0;
 					virtual bool								EnsureItemVisible(vint itemIndex)=0;
 				};
 				
@@ -5940,8 +5950,8 @@ Selectable List Control
 				Ptr<IItemStyleProvider>							selectableStyleProvider;
 				collections::SortedList<vint>					selectedItems;
 				bool											multiSelect;
-				vint												selectedItemIndexStart;
-				vint												selectedItemIndexEnd;
+				vint											selectedItemIndexStart;
+				vint											selectedItemIndexEnd;
 
 				void											OnItemModified(vint start, vint count, vint newCount)override;
 				void											OnStyleInstalled(vint itemIndex, IItemStyleController* style)override;
@@ -5964,7 +5974,7 @@ Selectable List Control
 				bool											GetMultiSelect();
 				void											SetMultiSelect(bool value);
 				
-				const collections::SortedList<vint>&				GetSelectedItems();
+				const collections::SortedList<vint>&			GetSelectedItems();
 				bool											GetSelected(vint itemIndex);
 				void											SetSelected(vint itemIndex, bool value);
 				bool											SelectItemsByClick(vint itemIndex, bool ctrl, bool shift);
@@ -6042,7 +6052,7 @@ Predefined ItemArranger
 					GuiListControl::IItemArrangerCallback*		callback;
 					GuiListControl::IItemProvider*				itemProvider;
 					Rect										viewBounds;
-					vint											startIndex;
+					vint										startIndex;
 					StyleList									visibleStyles;
 
 					virtual void								ClearStyles();
@@ -6061,19 +6071,19 @@ Predefined ItemArranger
 					void										SetCallback(GuiListControl::IItemArrangerCallback* value)override;
 					Size										GetTotalSize()override;
 					GuiListControl::IItemStyleController*		GetVisibleStyle(vint itemIndex)override;
-					vint											GetVisibleIndex(GuiListControl::IItemStyleController* style)override;
+					vint										GetVisibleIndex(GuiListControl::IItemStyleController* style)override;
 					void										OnViewChanged(Rect bounds)override;
 				};
 				
 				class FixedHeightItemArranger : public RangedItemArrangerBase, public Description<FixedHeightItemArranger>
 				{
 				protected:
-					vint											rowHeight;
+					vint										rowHeight;
 					bool										suppressOnViewChanged;
 
 					virtual void								RearrangeItemBounds();
-					virtual vint									GetWidth();
-					virtual vint									GetYOffset();
+					virtual vint								GetWidth();
+					virtual vint								GetYOffset();
 					void										OnStylesCleared()override;
 					Size										OnCalculateTotalSize()override;
 					void										OnViewChangedInternal(Rect oldBounds, Rect newBounds)override;
@@ -6081,7 +6091,7 @@ Predefined ItemArranger
 					FixedHeightItemArranger();
 					~FixedHeightItemArranger();
 
-					vint											FindItem(vint itemIndex, GuiListControl::KeyDirection key)override;
+					vint										FindItem(vint itemIndex, GuiListControl::KeyDirection key)override;
 					bool										EnsureItemVisible(vint itemIndex)override;
 				};
 
@@ -6100,14 +6110,14 @@ Predefined ItemArranger
 					FixedSizeMultiColumnItemArranger();
 					~FixedSizeMultiColumnItemArranger();
 
-					vint											FindItem(vint itemIndex, GuiListControl::KeyDirection key)override;
+					vint										FindItem(vint itemIndex, GuiListControl::KeyDirection key)override;
 					bool										EnsureItemVisible(vint itemIndex)override;
 				};
 				
 				class FixedHeightMultiColumnItemArranger : public RangedItemArrangerBase, public Description<FixedHeightMultiColumnItemArranger>
 				{
 				protected:
-					vint											itemHeight;
+					vint										itemHeight;
 					bool										suppressOnViewChanged;
 
 					virtual void								RearrangeItemBounds();
@@ -6119,7 +6129,7 @@ Predefined ItemArranger
 					FixedHeightMultiColumnItemArranger();
 					~FixedHeightMultiColumnItemArranger();
 
-					vint											FindItem(vint itemIndex, GuiListControl::KeyDirection key)override;
+					vint										FindItem(vint itemIndex, GuiListControl::KeyDirection key)override;
 					bool										EnsureItemVisible(vint itemIndex)override;
 				};
 			}
@@ -6134,7 +6144,7 @@ Predefined ItemStyleController
 				{
 				protected:
 					GuiListControl::IItemStyleProvider*			provider;
-					vint											styleId;
+					vint										styleId;
 					compositions::GuiBoundsComposition*			boundsComposition;
 					GuiControl*									associatedControl;
 					bool										isInstalled;
@@ -6147,7 +6157,7 @@ Predefined ItemStyleController
 					~ItemStyleControllerBase();
 					
 					GuiListControl::IItemStyleProvider*			GetStyleProvider()override;
-					vint											GetItemStyleId()override;
+					vint										GetItemStyleId()override;
 					compositions::GuiBoundsComposition*			GetBoundsComposition()override;
 					bool										IsCacheable()override;
 					bool										IsInstalled()override;
@@ -6280,7 +6290,7 @@ TextList Style Provider
 
 					void										AttachListControl(GuiListControl* value)override;
 					void										DetachListControl()override;
-					vint											GetItemStyleId(vint itemIndex)override;
+					vint										GetItemStyleId(vint itemIndex)override;
 					GuiListControl::IItemStyleController*		CreateItemStyle(vint styleId)override;
 					void										DestroyItemStyle(GuiListControl::IItemStyleController* style)override;
 					void										Install(GuiListControl::IItemStyleController* style, vint itemIndex)override;
@@ -6291,7 +6301,7 @@ TextList Style Provider
 TextList Data Source
 ***********************************************************************/
 
-				class TextItem
+				class TextItem : public Object, public Description<TextItem>
 				{
 					friend class TextItemProvider;
 				protected:
@@ -6311,7 +6321,7 @@ TextList Data Source
 					bool										GetChecked()const;
 				};
 
-				class TextItemProvider : public ListProvider<TextItem>, protected TextItemStyleProvider::ITextItemView, public Description<TextItemProvider>
+				class TextItemProvider : public ListProvider<Ptr<TextItem>>, protected TextItemStyleProvider::ITextItemView, public Description<TextItemProvider>
 				{
 				protected:
 					bool										ContainsPrimaryText(vint itemIndex)override;
@@ -8277,6 +8287,1081 @@ Theme
 #endif
 
 /***********************************************************************
+GACUI.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI Header Files and Common Namespaces
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_GACUI
+#define VCZH_PRESENTATION_GACUI
+
+
+using namespace vl;
+using namespace vl::presentation;
+using namespace vl::presentation::elements;
+using namespace vl::presentation::compositions;
+using namespace vl::presentation::controls;
+using namespace vl::presentation::theme;
+
+extern int SetupWindowsGDIRenderer();
+extern int SetupWindowsDirect2DRenderer();
+
+#endif
+
+/***********************************************************************
+REFLECTION\GUIREFLECTIONBASIC.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI Reflection: Basic
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONBASIC
+#define VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONBASIC
+
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+
+/***********************************************************************
+Type List
+***********************************************************************/
+
+#define GUIREFLECTIONBASIC_TYPELIST(F)\
+			F(presentation::Color)\
+			F(presentation::Alignment)\
+			F(presentation::TextPos)\
+			F(presentation::Point)\
+			F(presentation::Size)\
+			F(presentation::Rect)\
+			F(presentation::Margin)\
+			F(presentation::FontProperties)\
+			F(presentation::INativeImageFrame)\
+			F(presentation::INativeImage)\
+			F(presentation::INativeImage::FormatType)\
+			F(presentation::INativeCursor)\
+			F(presentation::INativeCursor::SystemCursorType)\
+			F(presentation::INativeWindow)\
+			F(presentation::INativeWindow::WindowSizeState)\
+			F(presentation::INativeDelay)\
+			F(presentation::INativeDelay::ExecuteStatus)\
+			F(presentation::GuiImageData)\
+			F(presentation::DocumentModel)\
+			F(presentation::GuiResource)\
+			F(presentation::elements::IGuiGraphicsElement)\
+			F(presentation::compositions::GuiGraphicsComposition)\
+			F(presentation::compositions::GuiGraphicsComposition::MinSizeLimitation)\
+			F(presentation::INativeWindowListener::HitTestResult)\
+			F(presentation::compositions::GuiGraphicsSite)\
+			F(presentation::compositions::GuiWindowComposition)\
+			F(presentation::compositions::GuiBoundsComposition)\
+			F(presentation::controls::GuiControl)\
+			F(presentation::controls::GuiControl::IStyleController)\
+			F(presentation::controls::GuiControl::IStyleProvider)\
+			F(presentation::controls::GuiComponent)\
+			F(presentation::controls::GuiControlHost)\
+
+			GUIREFLECTIONBASIC_TYPELIST(DECL_TYPE_INFO)
+
+/***********************************************************************
+Type Declaration
+***********************************************************************/
+
+			template<>
+			struct TypedValueSerializerProvider<Color>
+			{
+				static bool Serialize(const Color& input, WString& output);
+				static bool Deserialize(const WString& input, Color& output);
+			};
+
+			template<>
+			struct CustomTypeDescriptorSelector<Color>
+			{
+			public:
+				typedef SerializableTypeDescriptor<TypedValueSerializer<Color>> CustomTypeDescriptorImpl;
+			};
+
+/***********************************************************************
+Interface Proxy
+***********************************************************************/
+
+			namespace interface_proxy
+			{
+				class GuiControl_IStyleController : public Object, public virtual GuiControl::IStyleController
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>		proxy;
+
+				public:
+					GuiControl_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static GuiControl::IStyleController* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiControl_IStyleController(_proxy);
+					}
+
+					compositions::GuiBoundsComposition* GetBoundsComposition()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBoundsComposition);
+					}
+
+					compositions::GuiGraphicsComposition* GetContainerComposition()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetContainerComposition);
+					}
+
+					void SetFocusableComposition(compositions::GuiGraphicsComposition* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetFocusableComposition, value);
+					}
+
+					void SetText(const WString& value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetText, value);
+					}
+
+					void SetFont(const FontProperties& value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetFont, value);
+					}
+
+					void SetVisuallyEnabled(bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetVisuallyEnabled, value);
+					}
+				};
+				
+				class GuiControl_IStyleProvider : public Object, public virtual GuiControl::IStyleProvider
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>		proxy;
+
+				public:
+					GuiControl_IStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static GuiControl::IStyleProvider* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiControl_IStyleProvider(_proxy);
+					}
+
+					void AssociateStyleController(GuiControl::IStyleController* controller)override
+					{
+						INVOKE_INTERFACE_PROXY(AssociateStyleController, controller);
+					}
+
+					void SetFocusableComposition(compositions::GuiGraphicsComposition* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetFocusableComposition, value);
+					}
+
+					void SetText(const WString& value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetText, value);
+					}
+
+					void SetFont(const FontProperties& value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetFont, value);
+					}
+
+					void SetVisuallyEnabled(bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetVisuallyEnabled, value);
+					}
+				};
+			}
+
+/***********************************************************************
+Type Loader
+***********************************************************************/
+
+			extern bool						LoadGuiBasicTypes();
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+REFLECTION\GUIREFLECTIONELEMENTS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI Reflection: Elements
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONELEMENTS
+#define VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONELEMENTS
+
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+
+/***********************************************************************
+Type List
+***********************************************************************/
+
+#define GUIREFLECTIONELEMENT_TYPELIST(F)\
+			F(presentation::elements::ElementShape)\
+			F(presentation::elements::GuiSolidBorderElement)\
+			F(presentation::elements::GuiRoundBorderElement)\
+			F(presentation::elements::Gui3DBorderElement)\
+			F(presentation::elements::Gui3DSplitterElement)\
+			F(presentation::elements::Gui3DSplitterElement::Direction)\
+			F(presentation::elements::GuiSolidBackgroundElement)\
+			F(presentation::elements::GuiGradientBackgroundElement)\
+			F(presentation::elements::GuiGradientBackgroundElement::Direction)\
+			F(presentation::elements::GuiSolidLabelElement)\
+			F(presentation::elements::GuiImageFrameElement)\
+			F(presentation::elements::GuiPolygonElement)\
+			F(presentation::elements::text::TextLines)\
+			F(presentation::elements::text::ColorItem)\
+			F(presentation::elements::text::ColorEntry)\
+			F(presentation::elements::GuiColorizedTextElement)\
+			F(presentation::elements::GuiDocumentElement)\
+
+			GUIREFLECTIONELEMENT_TYPELIST(DECL_TYPE_INFO)
+
+/***********************************************************************
+Type Loader
+***********************************************************************/
+
+			extern bool						LoadGuiElementTypes();
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+REFLECTION\GUIREFLECTIONCOMPOSITIONS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI Reflection: Compositions
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONCOMPOSITIONS
+#define VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONCOMPOSITIONS
+
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+
+/***********************************************************************
+Type List
+***********************************************************************/
+
+#define GUIREFLECTIONCOMPOSITION_TYPELIST(F)\
+			F(presentation::compositions::GuiStackComposition)\
+			F(presentation::compositions::GuiStackComposition::Direction)\
+			F(presentation::compositions::GuiStackItemComposition)\
+			F(presentation::compositions::GuiCellOption)\
+			F(presentation::compositions::GuiCellOption::ComposeType)\
+			F(presentation::compositions::GuiTableComposition)\
+			F(presentation::compositions::GuiCellComposition)\
+			F(presentation::compositions::GuiSideAlignedComposition)\
+			F(presentation::compositions::GuiSideAlignedComposition::Direction)\
+			F(presentation::compositions::GuiPartialViewComposition)\
+
+			GUIREFLECTIONCOMPOSITION_TYPELIST(DECL_TYPE_INFO)
+
+/***********************************************************************
+Type Loader
+***********************************************************************/
+
+			extern bool						LoadGuiCompositionTypes();
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
+REFLECTION\GUIREFLECTIONCONTROLS.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: 陈梓瀚(vczh)
+GacUI Reflection: Basic
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONCONTROLS
+#define VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONCONTROLS
+
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+
+/***********************************************************************
+Type List
+***********************************************************************/
+
+#define GUIREFLECTIONCONTROLS_TYPELIST(F)\
+			F(presentation::controls::GuiApplication)\
+			F(presentation::controls::GuiLabel)\
+			F(presentation::controls::GuiLabel::IStyleController)\
+			F(presentation::controls::GuiButton)\
+			F(presentation::controls::GuiButton::ControlState)\
+			F(presentation::controls::GuiButton::IStyleController)\
+			F(presentation::controls::GuiSelectableButton)\
+			F(presentation::controls::GuiSelectableButton::IStyleController)\
+			F(presentation::controls::GuiSelectableButton::GroupController)\
+			F(presentation::controls::GuiSelectableButton::MutexGroupController)\
+			F(presentation::controls::GuiScroll)\
+			F(presentation::controls::GuiScroll::ICommandExecutor)\
+			F(presentation::controls::GuiScroll::IStyleController)\
+			F(presentation::controls::GuiTabPage)\
+			F(presentation::controls::GuiTab)\
+			F(presentation::controls::GuiTab::ICommandExecutor)\
+			F(presentation::controls::GuiTab::IStyleController)\
+			F(presentation::controls::GuiScrollView)\
+			F(presentation::controls::GuiScrollView::IStyleProvider)\
+			F(presentation::controls::GuiScrollContainer)\
+			F(presentation::controls::GuiWindow)\
+			F(presentation::controls::GuiWindow::IStyleController)\
+			F(presentation::controls::GuiPopup)\
+			F(presentation::controls::GuiTooltip)\
+			F(presentation::controls::GuiListControl)\
+			F(presentation::controls::GuiListControl::IItemProviderCallback)\
+			F(presentation::controls::GuiListControl::IItemArrangerCallback)\
+			F(presentation::controls::GuiListControl::IItemPrimaryTextView)\
+			F(presentation::controls::GuiListControl::KeyDirection)\
+			F(presentation::controls::GuiListControl::IItemProvider)\
+			F(presentation::controls::GuiListControl::IItemStyleController)\
+			F(presentation::controls::GuiListControl::IItemStyleProvider)\
+			F(presentation::controls::GuiListControl::IItemArranger)\
+			F(presentation::controls::GuiListControl::IItemCoordinateTransformer)\
+			F(presentation::controls::GuiSelectableListControl)\
+			F(presentation::controls::GuiSelectableListControl::IItemStyleProvider)\
+			F(presentation::controls::list::DefaultItemCoordinateTransformer)\
+			F(presentation::controls::list::AxisAlignedItemCoordinateTransformer)\
+			F(presentation::controls::list::AxisAlignedItemCoordinateTransformer::Alignment)\
+			F(presentation::controls::list::RangedItemArrangerBase)\
+			F(presentation::controls::list::FixedHeightItemArranger)\
+			F(presentation::controls::list::FixedSizeMultiColumnItemArranger)\
+			F(presentation::controls::list::FixedHeightMultiColumnItemArranger)\
+			F(presentation::controls::list::ItemStyleControllerBase)\
+			F(presentation::controls::list::TextItemStyleProvider)\
+			F(presentation::controls::list::TextItemStyleProvider::ITextItemStyleProvider)\
+			F(presentation::controls::list::TextItemStyleProvider::ITextItemView)\
+			F(presentation::controls::list::TextItemStyleProvider::TextItemStyleController)
+
+			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
+
+/***********************************************************************
+Interface Proxy
+***********************************************************************/
+
+#pragma warning(push)
+#pragma warning(disable:4250)
+			namespace interface_proxy
+			{
+				class GuiLabel_IStyleController : public virtual GuiControl_IStyleController, public virtual GuiLabel::IStyleController
+				{
+				public:
+					GuiLabel_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleController(_proxy)
+					{
+					}
+
+					static GuiLabel::IStyleController* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiLabel_IStyleController(_proxy);
+					}
+
+					Color GetDefaultTextColor()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetDefaultTextColor);
+					}
+
+					void SetTextColor(Color value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetTextColor, value);
+					}
+				};
+
+				class GuiButton_IStyleController : public virtual GuiControl_IStyleController, public virtual GuiButton::IStyleController
+				{
+				public:
+					GuiButton_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleController(_proxy)
+					{
+					}
+
+					static GuiButton::IStyleController* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiButton_IStyleController(_proxy);
+					}
+
+					void Transfer(GuiButton::ControlState value)override
+					{
+						INVOKE_INTERFACE_PROXY(Transfer, value);
+					}
+				};
+
+				class GuiSelectableButton_IStyleController : public virtual GuiButton_IStyleController, public virtual GuiSelectableButton::IStyleController
+				{
+				public:
+					GuiSelectableButton_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleController(_proxy)
+						,GuiButton_IStyleController(_proxy)
+					{
+					}
+
+					static GuiSelectableButton::IStyleController* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiSelectableButton_IStyleController(_proxy);
+					}
+
+					void SetSelected(bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetSelected, value);
+					}
+				};
+
+				class GuiScroll_IStyleController : public virtual GuiControl_IStyleController, public virtual GuiScroll::IStyleController
+				{
+				public:
+					GuiScroll_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleController(_proxy)
+					{
+					}
+
+					static GuiScroll::IStyleController* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiScroll_IStyleController(_proxy);
+					}
+
+					void SetCommandExecutor(GuiScroll::ICommandExecutor* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetCommandExecutor, value);
+					}
+
+					void SetTotalSize(vint value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetTotalSize, value);
+					}
+
+					void SetPageSize(vint value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetPageSize, value);
+					}
+
+					void SetPosition(vint value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetPosition, value);
+					}
+				};
+
+				class GuiTab_IStyleController : public virtual GuiControl_IStyleController, public virtual GuiTab::IStyleController
+				{
+				public:
+					GuiTab_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleController(_proxy)
+					{
+					}
+
+					static GuiTab::IStyleController* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiTab_IStyleController(_proxy);
+					}
+
+					void SetCommandExecutor(GuiTab::ICommandExecutor* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetCommandExecutor, value);
+					}
+
+					void InsertTab(vint index)override
+					{
+						INVOKE_INTERFACE_PROXY(InsertTab, index);
+					}
+
+					void SetTabText(vint index, const WString& value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetTabText, index, value);
+					}
+
+					void RemoveTab(vint index)override
+					{
+						INVOKE_INTERFACE_PROXY(RemoveTab, index);
+					}
+
+					void MoveTab(vint oldIndex, vint newIndex)override
+					{
+						INVOKE_INTERFACE_PROXY(MoveTab, oldIndex, newIndex);
+					}
+
+					void SetSelectedTab(vint index)override
+					{
+						INVOKE_INTERFACE_PROXY(SetSelectedTab, index);
+					}
+
+					GuiControl::IStyleController* CreateTabPageStyleController()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateTabPageStyleController);
+					}
+				};
+
+				class GuiScrollView_IStyleProvider : public virtual GuiControl_IStyleProvider, public virtual GuiScrollView::IStyleProvider
+				{
+				public:
+					GuiScrollView_IStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleProvider(_proxy)
+					{
+					}
+
+					static GuiScrollView::IStyleProvider* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiScrollView_IStyleProvider(_proxy);
+					}
+
+					GuiScroll::IStyleController* CreateHorizontalScrollStyle()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateHorizontalScrollStyle);
+					}
+
+					GuiScroll::IStyleController* CreateVerticalScrollStyle()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateVerticalScrollStyle);
+					}
+
+					vint GetDefaultScrollSize()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetDefaultScrollSize);
+					}
+
+					compositions::GuiGraphicsComposition* InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(InstallBackground, boundsComposition);
+					}
+				};
+
+				class GuiWindow_IStyleController : public virtual GuiControl_IStyleController, public virtual GuiWindow::IStyleController
+				{
+				public:
+					GuiWindow_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleController(_proxy)
+					{
+					}
+
+					static GuiWindow::IStyleController* Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiWindow_IStyleController(_proxy);
+					}
+
+					void AttachWindow(GuiWindow* _window)override
+					{
+						INVOKE_INTERFACE_PROXY(ActiveWindow, _window);
+					}
+
+					void InitializeNativeWindowProperties()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(InitializeNativeWindowProperties);
+					}
+
+					bool GetMaximizedBox()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetMaximizedBox);
+					}
+
+					void SetMaximizedBox(bool visible)override
+					{
+						INVOKE_INTERFACE_PROXY(SetMaximizedBox, visible);
+					}
+
+					bool GetMinimizedBox()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetMinimizedBox);
+					}
+
+					void SetMinimizedBox(bool visible)override
+					{
+						INVOKE_INTERFACE_PROXY(SetMinimizedBox, visible);
+					}
+
+					bool GetBorder()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBorder);
+					}
+
+					void SetBorder(bool visible)override
+					{
+						INVOKE_INTERFACE_PROXY(SetBorder, visible);
+					}
+
+					bool GetSizeBox()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSizeBox);
+					}
+
+					void SetSizeBox(bool visible)override
+					{
+						INVOKE_INTERFACE_PROXY(SetSizeBox, visible);
+					}
+
+					bool GetIconVisible()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetIconVisible);
+					}
+
+					void SetIconVisible(bool visible)override
+					{
+						INVOKE_INTERFACE_PROXY(SetIconVisible, visible);
+					}
+
+					bool GetTitleBar()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetTitleBar);
+					}
+
+					void SetTitleBar(bool visible)override
+					{
+						INVOKE_INTERFACE_PROXY(SetTitleBar, visible);
+					}
+				};
+
+				class GuiListControl_IItemProviderCallback : public Object, public virtual GuiListControl::IItemProviderCallback
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					GuiListControl_IItemProviderCallback(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static Ptr<GuiListControl::IItemProviderCallback> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemProviderCallback(proxy);
+					}
+
+					void OnAttached(GuiListControl::IItemProvider* provider)override
+					{
+						INVOKE_INTERFACE_PROXY(OnAttached, provider);
+					}
+
+					void OnItemModified(vint start, vint count, vint newCount)override
+					{
+						INVOKE_INTERFACE_PROXY(OnItemModified, start, count, newCount);
+					}
+				};
+
+				class GuiListControl_IItemPrimaryTextView : public Object, public virtual GuiListControl::IItemPrimaryTextView
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					GuiListControl_IItemPrimaryTextView(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static Ptr<GuiListControl::IItemPrimaryTextView> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemPrimaryTextView(proxy);
+					}
+
+					WString GetPrimaryTextViewText(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetPrimaryTextViewText, itemIndex);
+					}
+
+					bool ContainsPrimaryText(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(ContainsPrimaryText, itemIndex);
+					}
+				};
+
+				class GuiListControl_IItemProvider : public Object, public virtual GuiListControl::IItemProvider
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					GuiListControl_IItemProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static GuiListControl::IItemProvider* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemProvider(proxy);
+					}
+
+					bool AttachCallback(GuiListControl::IItemProviderCallback* value)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(AttachCallback, value);
+					}
+
+					bool DetachCallback(GuiListControl::IItemProviderCallback* value)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(DetachCallback, value);
+					}
+
+					vint Count()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(Count);
+					}
+
+					IDescriptable* RequestView(const WString& identifier)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RequestView, identifier);
+					}
+
+					void ReleaseView(IDescriptable* view)override
+					{
+						INVOKE_INTERFACE_PROXY(ReleaseView, view);
+					}
+				};
+
+				class GuiListControl_IItemStyleController : public Object, public virtual GuiListControl::IItemStyleController
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					GuiListControl_IItemStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static GuiListControl::IItemStyleController* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemStyleController(proxy);
+					}
+
+					GuiListControl::IItemStyleProvider* GetStyleProvider()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetStyleProvider);
+					}
+
+					vint GetItemStyleId()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetItemStyleId);
+					}
+
+					compositions::GuiBoundsComposition* GetBoundsComposition()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBoundsComposition);
+					}
+
+					bool IsCacheable()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(IsCacheable);
+					}
+
+					bool IsInstalled()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(IsInstalled);
+					}
+
+					void OnInstalled()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(OnInstalled);
+					}
+
+					void OnUninstalled()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(OnUninstalled);
+					}
+				};
+
+				class GuiListControl_IItemStyleProvider : public Object, public virtual GuiListControl::IItemStyleProvider
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					GuiListControl_IItemStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static Ptr<GuiListControl::IItemStyleProvider> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemStyleProvider(proxy);
+					}
+
+					void AttachListControl(GuiListControl* value)override
+					{
+						INVOKE_INTERFACE_PROXY(AttachListControl, value);
+					}
+
+					void DetachListControl()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(DetachListControl);
+					}
+
+					vint GetItemStyleId(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetItemStyleId, itemIndex);
+					}
+
+					GuiListControl::IItemStyleController* CreateItemStyle(vint styleId)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(CreateItemStyle, styleId);
+					}
+
+					void DestroyItemStyle(GuiListControl::IItemStyleController* style)override
+					{
+						INVOKE_INTERFACE_PROXY(DestroyItemStyle, style);
+					}
+
+					void Install(GuiListControl::IItemStyleController* style, vint itemIndex)override
+					{
+						INVOKE_INTERFACE_PROXY(Install, style, itemIndex);
+					}
+				};
+
+				class GuiListControl_IItemArranger : public virtual GuiListControl_IItemProviderCallback, public virtual GuiListControl::IItemArranger
+				{
+				public:
+					GuiListControl_IItemArranger(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiListControl_IItemProviderCallback(_proxy)
+					{
+					}
+
+					static Ptr<GuiListControl::IItemArranger> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemArranger(proxy);
+					}
+
+					void AttachListControl(GuiListControl* value)override
+					{
+						INVOKE_INTERFACE_PROXY(AttachListControl, value);
+					}
+
+					void DetachListControl()override
+					{
+						INVOKE_INTERFACE_PROXY(DetachListControl);
+					}
+
+					GuiListControl::IItemArrangerCallback* GetCallback()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetCallback);
+					}
+
+					void SetCallback(GuiListControl::IItemArrangerCallback* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetCallback, value);
+					}
+
+					Size GetTotalSize()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetTotalSize);
+					}
+
+					GuiListControl::IItemStyleController* GetVisibleStyle(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetVisibleStyle, itemIndex);
+					}
+
+					vint GetVisibleIndex(GuiListControl::IItemStyleController* style)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetVisibleIndex, style);
+					}
+
+					void OnViewChanged(Rect bounds)override
+					{
+						INVOKE_INTERFACE_PROXY(OnViewChanged, bounds);
+					}
+
+					vint FindItem(vint itemIndex, GuiListControl::KeyDirection key)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(FindItem, itemIndex, key);
+					}
+
+					bool EnsureItemVisible(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(EnsureItemVisible, itemIndex);
+					}
+				};
+
+				class GuiListControl_IItemCoordinateTransformer : public Object, public virtual GuiListControl::IItemCoordinateTransformer
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					GuiListControl_IItemCoordinateTransformer(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static Ptr<GuiListControl::IItemCoordinateTransformer> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListControl_IItemCoordinateTransformer(proxy);
+					}
+
+					Size RealSizeToVirtualSize(Size size)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RealSizeToVirtualSize, size);
+					}
+
+					Size VirtualSizeToRealSize(Size size)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(VirtualSizeToRealSize, size);
+					}
+
+					Point RealPointToVirtualPoint(Size realFullSize, Point point)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RealPointToVirtualPoint, realFullSize, point);
+					}
+
+					Point VirtualPointToRealPoint(Size realFullSize, Point point)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(VirtualPointToRealPoint, realFullSize, point);
+					}
+
+					Rect RealRectToVirtualRect(Size realFullSize, Rect rect)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RealRectToVirtualRect, realFullSize, rect);
+					}
+
+					Rect VirtualRectToRealRect(Size realFullSize, Rect rect)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(VirtualRectToRealRect, realFullSize, rect);
+					}
+
+					Margin RealMarginToVirtualMargin(Margin margin)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RealMarginToVirtualMargin, margin);
+					}
+
+					Margin VirtualMarginToRealMargin(Margin margin)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(VirtualMarginToRealMargin, margin);
+					}
+
+					GuiListControl::KeyDirection RealKeyDirectionToVirtualKeyDirection(GuiListControl::KeyDirection key)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RealKeyDirectionToVirtualKeyDirection, key);
+					}
+				};
+
+				class GuiSelectableListControl_IItemStyleProvider : public virtual GuiListControl_IItemStyleProvider, public virtual GuiSelectableListControl::IItemStyleProvider
+				{
+				public:
+					GuiSelectableListControl_IItemStyleProvider(Ptr<IValueInterfaceProxy> proxy)
+						:GuiListControl_IItemStyleProvider(proxy)
+					{
+					}
+
+					static Ptr<GuiSelectableListControl::IItemStyleProvider> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiSelectableListControl_IItemStyleProvider(proxy);
+					}
+
+					void SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetStyleSelected, style, value);
+					}
+				};
+
+				class TextItemStyleProvider_ITextItemStyleProvider : public Object, public virtual list::TextItemStyleProvider::ITextItemStyleProvider
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					TextItemStyleProvider_ITextItemStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static list::TextItemStyleProvider::ITextItemStyleProvider* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new TextItemStyleProvider_ITextItemStyleProvider(proxy);
+					}
+
+					GuiSelectableButton::IStyleController* CreateBackgroundStyleController()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateBackgroundStyleController);
+					}
+
+					GuiSelectableButton::IStyleController* CreateBulletStyleController()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateBulletStyleController);
+					}
+				};
+
+				class TextItemStyleProvider_ITextItemView : public virtual GuiListControl_IItemPrimaryTextView, public virtual list::TextItemStyleProvider::ITextItemView
+				{
+				public:
+					TextItemStyleProvider_ITextItemView(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiListControl_IItemPrimaryTextView(_proxy)
+					{
+					}
+
+					static Ptr<list::TextItemStyleProvider::ITextItemView> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new TextItemStyleProvider_ITextItemView(proxy);
+					}
+
+					WString GetText(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetText, itemIndex);
+					}
+
+					bool GetChecked(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetChecked, itemIndex);
+					}
+
+					void SetCheckedSilently(vint itemIndex, bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetCheckedSilently, itemIndex, value);
+					}
+				};
+			}
+#pragma warning(pop)
+
+/***********************************************************************
+Type Loader
+***********************************************************************/
+
+			extern bool						LoadGuiControlsTypes();
+		}
+	}
+}
+
+#endif
+
+/***********************************************************************
 CONTROLS\STYLES\GUICOMMONSTYLES.H
 ***********************************************************************/
 /***********************************************************************
@@ -8645,7 +9730,7 @@ Button Configuration
 				compositions::GuiBoundsComposition*			backgroundComposition;
 				compositions::GuiTableComposition*			gradientComposition;
 
-				static Win7ButtonElements					Create(bool verticalGradient, bool roundBorder, Alignment::Type horizontal=Alignment::Center, Alignment::Type vertical=Alignment::Center);
+				static Win7ButtonElements					Create(bool verticalGradient, bool roundBorder, Alignment horizontal=Alignment::Center, Alignment vertical=Alignment::Center);
 				void										Apply(const Win7ButtonColors& colors);
 			};
 
@@ -8661,7 +9746,7 @@ Button Configuration
 				compositions::GuiBoundsComposition*			textComposition;
 				compositions::GuiBoundsComposition*			mainComposition;
 
-				static Win7CheckedButtonElements			Create(elements::ElementShape::Type shape, bool backgroundVisible);
+				static Win7CheckedButtonElements			Create(elements::ElementShape shape, bool backgroundVisible);
 				void										Apply(const Win7ButtonColors& colors);
 			};
 
@@ -8723,7 +9808,7 @@ Helper Functions
 			extern Color									Win7GetSystemBorderRaiseColor();
 			extern Color									Win7GetSystemTextColor(bool enabled);
 			extern void										Win7SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
-			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
+			extern void										Win7CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment horizontal, Alignment vertical);
 			extern elements::text::ColorEntry				Win7GetTextBoxTextColor();
 		}
 	}
@@ -8899,7 +9984,7 @@ Button
 				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)=0;
 				virtual void								AfterApplyColors(const Win7ButtonColors& colors);
 			public:
-				Win7ButtonStyleBase(bool verticalGradient, bool roundBorder, const Win7ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical);
+				Win7ButtonStyleBase(bool verticalGradient, bool roundBorder, const Win7ButtonColors& initialColor, Alignment horizontal, Alignment vertical);
 				~Win7ButtonStyleBase();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
@@ -9856,7 +10941,7 @@ Button Configuration
 				compositions::GuiBoundsComposition*			mainComposition;
 				compositions::GuiBoundsComposition*			backgroundComposition;
 
-				static Win8ButtonElements					Create(Alignment::Type horizontal=Alignment::Center, Alignment::Type vertical=Alignment::Center);
+				static Win8ButtonElements					Create(Alignment horizontal=Alignment::Center, Alignment vertical=Alignment::Center);
 				void										Apply(const Win8ButtonColors& colors);
 			};
 
@@ -9870,7 +10955,7 @@ Button Configuration
 				compositions::GuiBoundsComposition*			textComposition;
 				compositions::GuiBoundsComposition*			mainComposition;
 
-				static Win8CheckedButtonElements			Create(elements::ElementShape::Type shape, bool backgroundVisible);
+				static Win8CheckedButtonElements			Create(elements::ElementShape shape, bool backgroundVisible);
 				void										Apply(const Win8ButtonColors& colors);
 			};
 
@@ -9930,7 +11015,7 @@ Helper Functions
 			extern Color									Win8GetMenuBorderColor();
 			extern Color									Win8GetMenuSplitterColor();
 			extern void										Win8SetFont(elements::GuiSolidLabelElement* element, compositions::GuiBoundsComposition* composition, const FontProperties& fontProperties);
-			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment::Type horizontal, Alignment::Type vertical);
+			extern void										Win8CreateSolidLabelElement(elements::GuiSolidLabelElement*& element, compositions::GuiBoundsComposition*& composition, Alignment horizontal, Alignment vertical);
 			extern elements::text::ColorEntry				Win8GetTextBoxTextColor();
 		}
 	}
@@ -10105,7 +11190,7 @@ Button
 				virtual void								TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)=0;
 				virtual void								AfterApplyColors(const Win8ButtonColors& colors);
 			public:
-				Win8ButtonStyleBase(const Win8ButtonColors& initialColor, Alignment::Type horizontal, Alignment::Type vertical);
+				Win8ButtonStyleBase(const Win8ButtonColors& initialColor, Alignment horizontal, Alignment vertical);
 				~Win8ButtonStyleBase();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
@@ -10813,32 +11898,5 @@ List
 		}
 	}
 }
-
-#endif
-
-/***********************************************************************
-GACUI.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: 陈梓瀚(vczh)
-GacUI Header Files and Common Namespaces
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_GACUI
-#define VCZH_PRESENTATION_GACUI
-
-
-using namespace vl;
-using namespace vl::presentation;
-using namespace vl::presentation::elements;
-using namespace vl::presentation::compositions;
-using namespace vl::presentation::controls;
-using namespace vl::presentation::theme;
-
-extern int SetupWindowsGDIRenderer();
-extern int SetupWindowsDirect2DRenderer();
 
 #endif

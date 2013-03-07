@@ -456,9 +456,9 @@ public:
 			// create a text list control.
 			GuiTextList* listContent=g::NewTextList();
 			// insert text items.
-			listContent->GetItems().Add(L"INI colorizer");
-			listContent->GetItems().Add(L"XML colorizer");
-			listContent->GetItems().Add(L"C++ colorizer");
+			listContent->GetItems().Add(new list::TextItem(L"INI colorizer"));
+			listContent->GetItems().Add(new list::TextItem(L"XML colorizer"));
+			listContent->GetItems().Add(new list::TextItem(L"C++ colorizer"));
 
 			// use the text list control to create a combo box.
 			// items in the text list control will be the data source.

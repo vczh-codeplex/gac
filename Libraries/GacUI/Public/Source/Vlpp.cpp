@@ -10852,6 +10852,26 @@ description::Value
 				return *this;
 			}
 
+			bool Value::operator==(const Value& value)const
+			{
+				switch(valueType)
+				{
+				case Null:
+					return value.IsNull();
+				case Text:
+					return GetTypeDescriptor()==value.GetTypeDescriptor() && GetText()==value.GetText();
+				case RawPtr:
+				case SharedPtr:
+					return GetRawPtr()==value.GetRawPtr();
+				}
+				return false;
+			}
+
+			bool Value::operator!=(const Value& value)const
+			{
+				return !(*this==value);
+			}
+
 			Value::ValueType Value::GetValueType()const
 			{
 				return valueType;
@@ -10907,6 +10927,10 @@ description::Value
 
 			bool Value::CanConvertTo(ITypeDescriptor* targetType, ValueType targetValueType)const
 			{
+				if(targetType==GetGlobalTypeManager()->GetRootType())
+				{
+					return true;
+				}
 				switch(valueType)
 				{
 				case Null:
@@ -11076,6 +11100,30 @@ description::Value
 			}
 
 /***********************************************************************
+IValueList
+***********************************************************************/
+
+			Ptr<IValueList> IValueList::Create()
+			{
+				Ptr<List<Value>> list=new List<Value>;
+				return new ValueListWrapper<Ptr<List<Value>>>(list);
+			}
+
+			Ptr<IValueList> IValueList::Create(Ptr<IValueReadonlyList> values)
+			{
+				Ptr<List<Value>> list=new List<Value>;
+				CopyFrom(*list.Obj(), values->GetLazyList<Value>());
+				return new ValueListWrapper<Ptr<List<Value>>>(list);
+			}
+
+			Ptr<IValueList> IValueList::Create(collections::LazyList<Value> values)
+			{
+				Ptr<List<Value>> list=new List<Value>;
+				CopyFrom(*list.Obj(), values);
+				return new ValueListWrapper<Ptr<List<Value>>>(list);
+			}
+
+/***********************************************************************
 description::TypeManager
 ***********************************************************************/
 
@@ -11084,11 +11132,13 @@ description::TypeManager
 			protected:
 				Dictionary<WString, Ptr<ITypeDescriptor>>		typeDescriptors;
 				List<Ptr<ITypeLoader>>							typeLoaders;
+				ITypeDescriptor*								rootType;
 				bool											loaded;
 
 			public:
 				TypeManager()
-					:loaded(false)
+					:rootType(0)
+					,loaded(false)
 				{
 				}
 
@@ -11097,23 +11147,23 @@ description::TypeManager
 					Unload();
 				}
 
-				vint GetTypeDescriptorCount()
+				vint GetTypeDescriptorCount()override
 				{
 					return typeDescriptors.Values().Count();
 				}
 
-				ITypeDescriptor* GetTypeDescriptor(vint index)
+				ITypeDescriptor* GetTypeDescriptor(vint index)override
 				{
 					return typeDescriptors.Values().Get(index).Obj();
 				}
 
-				ITypeDescriptor* GetTypeDescriptor(const WString& name)
+				ITypeDescriptor* GetTypeDescriptor(const WString& name)override
 				{
 					vint index=typeDescriptors.Keys().IndexOf(name);
 					return index==-1?0:typeDescriptors.Values().Get(index).Obj();
 				}
 
-				bool SetTypeDescriptor(const WString& name, Ptr<ITypeDescriptor> typeDescriptor)
+				bool SetTypeDescriptor(const WString& name, Ptr<ITypeDescriptor> typeDescriptor)override
 				{
 					if(typeDescriptor && name!=typeDescriptor->GetTypeName())
 					{
@@ -11138,7 +11188,7 @@ description::TypeManager
 					return false;
 				}
 
-				bool AddTypeLoader(Ptr<ITypeLoader> typeLoader)
+				bool AddTypeLoader(Ptr<ITypeLoader> typeLoader)override
 				{
 					vint index=typeLoaders.IndexOf(typeLoader.Obj());
 					if(index==-1)
@@ -11156,7 +11206,7 @@ description::TypeManager
 					}
 				}
 
-				bool RemoveTypeLoader(Ptr<ITypeLoader> typeLoader)
+				bool RemoveTypeLoader(Ptr<ITypeLoader> typeLoader)override
 				{
 					vint index=typeLoaders.IndexOf(typeLoader.Obj());
 					if(index!=-1)
@@ -11174,7 +11224,7 @@ description::TypeManager
 					}
 				}
 
-				bool Load()
+				bool Load()override
 				{
 					if(!loaded)
 					{
@@ -11183,6 +11233,7 @@ description::TypeManager
 						{
 							typeLoaders[i]->Load(this);
 						}
+						rootType=description::GetTypeDescriptor<Value>();
 						return true;
 					}
 					else
@@ -11191,11 +11242,12 @@ description::TypeManager
 					}
 				}
 
-				bool Unload()
+				bool Unload()override
 				{
 					if(loaded)
 					{
 						loaded=false;
+						rootType=0;
 						for(vint i=0;i<typeLoaders.Count();i++)
 						{
 							typeLoaders[i]->Unload(this);
@@ -11209,16 +11261,21 @@ description::TypeManager
 					}
 				}
 
-				bool Reload()
+				bool Reload()override
 				{
 					Unload();
 					Load();
 					return true;
 				}
 
-				bool IsLoaded()
+				bool IsLoaded()override
 				{
 					return loaded;
+				}
+
+				ITypeDescriptor* GetRootType()override
+				{
+					return rootType;
 				}
 			};
 
@@ -11280,6 +11337,198 @@ description::TypeManager helper functions
 			}
 
 /***********************************************************************
+LogTypeManager (enum)
+***********************************************************************/
+
+			void LogTypeManager_Enum(stream::TextWriter& writer, ITypeDescriptor* type, IValueSerializer* serializer)
+			{
+				writer.WriteLine(L"enum "+type->GetTypeName()+(serializer->CanMergeCandidate()?L" flag":L""));
+				writer.WriteLine(L"{");
+				for(vint j=0;j<serializer->GetCandidateCount();j++)
+				{
+					writer.WriteLine(L"    "+serializer->GetCandidate(j)+L",");
+				}
+				writer.WriteLine(L"}");
+			}
+
+/***********************************************************************
+LogTypeManager (struct)
+***********************************************************************/
+
+			void LogTypeManager_Struct(stream::TextWriter& writer, ITypeDescriptor* type)
+			{
+				writer.WriteLine(L"struct "+type->GetTypeName());
+				writer.WriteLine(L"{");
+				for(vint j=0;j<type->GetPropertyCount();j++)
+				{
+					IPropertyInfo* info=type->GetProperty(j);
+					writer.WriteLine(L"    "+info->GetReturn()->GetTypeFriendlyName()+L" "+info->GetName()+L";");
+				}
+				writer.WriteLine(L"}");
+			}
+
+/***********************************************************************
+LogTypeManager (data)
+***********************************************************************/
+
+			void LogTypeManager_Data(stream::TextWriter& writer, ITypeDescriptor* type)
+			{
+				writer.WriteLine(L"data "+type->GetTypeName()+L";");
+			}
+
+/***********************************************************************
+LogTypeManager (class)
+***********************************************************************/
+
+			bool LogTypeManager_IsInterface(ITypeDescriptor* type)
+			{
+				if(IMethodGroupInfo* group=type->GetConstructorGroup())
+				{
+					if(group->GetMethodCount()==1)
+					{
+						if(IMethodInfo* info=group->GetMethod(0))
+						{
+							if(info->GetParameterCount()==1 && info->GetParameter(0)->GetValueTypeDescriptor()->GetTypeName()==L"InterfaceProxy")
+							{
+								return true;
+							}
+						}
+					}
+				}
+				return false;
+			}
+
+			void LogTypeManager_PrintEvents(stream::TextWriter& writer, ITypeDescriptor* type)
+			{
+				bool printed=false;
+				for(vint j=0;j<type->GetEventCount();j++)
+				{
+					printed=true;
+					IEventInfo* info=type->GetEvent(j);
+					writer.WriteString(L"    event "+info->GetName());
+					if(info->GetObservingProperty())
+					{
+						writer.WriteString(L" observing "+info->GetObservingProperty()->GetName());
+					}
+					writer.WriteLine(L";");
+				}
+				if(printed)
+				{
+					writer.WriteLine(L"");
+				}
+			}
+
+			void LogTypeManager_PrintProperties(stream::TextWriter& writer, ITypeDescriptor* type, List<IMethodInfo*>& propertyAccessors)
+			{
+				bool printed=false;
+				for(vint j=0;j<type->GetPropertyCount();j++)
+				{
+					printed=true;
+					IPropertyInfo* info=type->GetProperty(j);
+					writer.WriteString(L"    property "+info->GetReturn()->GetTypeFriendlyName()+L" "+info->GetName()+L"{");
+					if(info->GetGetter())
+					{
+						propertyAccessors.Add(info->GetGetter());
+						writer.WriteString(L" getter "+info->GetGetter()->GetName()+L";");
+					}
+					if(info->GetSetter())
+					{
+						propertyAccessors.Add(info->GetSetter());
+						writer.WriteString(L" setter "+info->GetSetter()->GetName()+L";");
+					}
+					if(info->GetValueChangedEvent())
+					{
+						writer.WriteString(L" raising "+info->GetValueChangedEvent()->GetName()+L";");
+					}
+					writer.WriteLine(L"}");
+				}
+				if(printed)
+				{
+					writer.WriteLine(L"");
+				}
+			}
+
+			void LogTypeManager_PrintMethods(stream::TextWriter& writer, ITypeDescriptor* type, const List<IMethodInfo*>& propertyAccessors, bool isPropertyAccessor)
+			{
+				bool printed=false;
+				for(vint j=0;j<type->GetMethodGroupCount();j++)
+				{
+					IMethodGroupInfo* group=type->GetMethodGroup(j);
+					for(vint k=0;k<group->GetMethodCount();k++)
+					{
+						IMethodInfo* info=group->GetMethod(k);
+						if(propertyAccessors.Contains(info)==isPropertyAccessor)
+						{
+							printed=true;
+							if(info->GetReturn())
+							{
+								writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+(isPropertyAccessor?L"accessor ":L"function ")+info->GetReturn()->GetTypeFriendlyName());
+							}
+							else
+							{
+								writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+(isPropertyAccessor?L"accessor void":L"function void"));
+							}
+							writer.WriteString(L" "+info->GetName()+L"(");
+							for(vint l=0;l<info->GetParameterCount();l++)
+							{
+								if(l>0) writer.WriteString(L", ");
+								IParameterInfo* parameter=info->GetParameter(l);
+								writer.WriteString(parameter->GetTypeFriendlyName()+L" "+parameter->GetName());
+							}
+							writer.WriteLine(L");");
+						}
+					}
+				}
+				if(printed)
+				{
+					writer.WriteLine(L"");
+				}
+			}
+
+			void LogTypeManager_PrintConstructors(stream::TextWriter& writer, ITypeDescriptor* type)
+			{
+				if(IMethodGroupInfo* group=type->GetConstructorGroup())
+				{
+					for(vint k=0;k<group->GetMethodCount();k++)
+					{
+						IMethodInfo* info=group->GetMethod(k);
+						writer.WriteString(L"    constructor "+info->GetReturn()->GetTypeFriendlyName());
+						writer.WriteString(L" "+info->GetName()+L"(");
+						for(vint l=0;l<info->GetParameterCount();l++)
+						{
+							if(l>0) writer.WriteString(L", ");
+							IParameterInfo* parameter=info->GetParameter(l);
+							writer.WriteString(parameter->GetTypeFriendlyName()+L" "+parameter->GetName());
+						}
+						writer.WriteLine(L");");
+					}
+				}
+			}
+
+			void LogTypeManager_Class(stream::TextWriter& writer, ITypeDescriptor* type)
+			{
+				bool isInterface=false;
+
+				writer.WriteString((isInterface?L"interface ":L"class ")+type->GetTypeName());
+				for(vint j=0;j<type->GetBaseTypeDescriptorCount();j++)
+				{
+					writer.WriteString(j==0?L" : ":L", ");
+					writer.WriteString(type->GetBaseTypeDescriptor(j)->GetTypeName());
+				}
+				writer.WriteLine(L"");
+				writer.WriteLine(L"{");
+				
+				List<IMethodInfo*> propertyAccessors;
+				LogTypeManager_PrintEvents(writer, type);
+				LogTypeManager_PrintProperties(writer, type, propertyAccessors);
+				LogTypeManager_PrintMethods(writer, type, propertyAccessors, false);
+				LogTypeManager_PrintMethods(writer, type, propertyAccessors, true);
+				LogTypeManager_PrintConstructors(writer, type);
+
+				writer.WriteLine(L"}");
+			}
+
+/***********************************************************************
 LogTypeManager
 ***********************************************************************/
 
@@ -11293,114 +11542,20 @@ LogTypeManager
 					{
 						if(serializer->HasCandidate())
 						{
-							writer.WriteLine(L"enum "+type->GetTypeName()+(serializer->CanMergeCandidate()?L" flag":L""));
-							writer.WriteLine(L"{");
-							for(vint j=0;j<serializer->GetCandidateCount();j++)
-							{
-								writer.WriteLine(L"    "+serializer->GetCandidate(j)+L",");
-							}
-							writer.WriteLine(L"}");
+							LogTypeManager_Enum(writer, type, serializer);
 						}
 						else if(type->GetPropertyCount()>0)
 						{
-							writer.WriteLine(L"struct "+type->GetTypeName());
-							writer.WriteLine(L"{");
-							for(vint j=0;j<type->GetPropertyCount();j++)
-							{
-								IPropertyInfo* info=type->GetProperty(j);
-								writer.WriteLine(L"    "+info->GetReturn()->GetTypeFriendlyName()+L" "+info->GetName()+L";");
-							}
-							writer.WriteLine(L"}");
+							LogTypeManager_Struct(writer, type);
 						}
 						else
 						{
-							writer.WriteLine(L"struct "+type->GetTypeName()+L";");
+							LogTypeManager_Data(writer, type);
 						}
 					}
 					else
 					{
-						writer.WriteString(L"class "+type->GetTypeName());
-						for(vint j=0;j<type->GetBaseTypeDescriptorCount();j++)
-						{
-							writer.WriteString(j==0?L" : ":L", ");
-							writer.WriteString(type->GetBaseTypeDescriptor(j)->GetTypeName());
-						}
-						writer.WriteLine(L"");
-						writer.WriteLine(L"{");
-
-						for(vint j=0;j<type->GetEventCount();j++)
-						{
-							IEventInfo* info=type->GetEvent(j);
-							writer.WriteString(L"    event "+info->GetName());
-							if(info->GetObservingProperty())
-							{
-								writer.WriteString(L" observing "+info->GetObservingProperty()->GetName());
-							}
-							writer.WriteLine(L";");
-						}
-
-						for(vint j=0;j<type->GetPropertyCount();j++)
-						{
-							IPropertyInfo* info=type->GetProperty(j);
-							writer.WriteString(L"    property "+info->GetReturn()->GetTypeFriendlyName()+L" "+info->GetName()+L"{");
-							if(info->GetGetter())
-							{
-								writer.WriteString(L" getter "+info->GetGetter()->GetName()+L";");
-							}
-							if(info->GetSetter())
-							{
-								writer.WriteString(L" setter "+info->GetSetter()->GetName()+L";");
-							}
-							if(info->GetValueChangedEvent())
-							{
-								writer.WriteString(L" raising "+info->GetValueChangedEvent()->GetName()+L";");
-							}
-							writer.WriteLine(L"}");
-						}
-
-						for(vint j=0;j<type->GetMethodGroupCount();j++)
-						{
-							IMethodGroupInfo* group=type->GetMethodGroup(j);
-							for(vint k=0;k<group->GetMethodCount();k++)
-							{
-								IMethodInfo* info=group->GetMethod(k);
-								if(info->GetReturn())
-								{
-									writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+L"function "+info->GetReturn()->GetTypeFriendlyName());
-								}
-								else
-								{
-									writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+L"void");
-								}
-								writer.WriteString(L" "+info->GetName()+L"(");
-								for(vint l=0;l<info->GetParameterCount();l++)
-								{
-									if(l>0) writer.WriteString(L", ");
-									IParameterInfo* parameter=info->GetParameter(l);
-									writer.WriteString(parameter->GetTypeFriendlyName()+L" "+parameter->GetName());
-								}
-								writer.WriteLine(L");");
-							}
-						}
-
-						if(IMethodGroupInfo* group=type->GetConstructorGroup())
-						{
-							for(vint k=0;k<group->GetMethodCount();k++)
-							{
-								IMethodInfo* info=group->GetMethod(k);
-								writer.WriteString(L"    constructor "+info->GetReturn()->GetTypeFriendlyName());
-								writer.WriteString(L" "+info->GetName()+L"(");
-								for(vint l=0;l<info->GetParameterCount();l++)
-								{
-									if(l>0) writer.WriteString(L", ");
-									IParameterInfo* parameter=info->GetParameter(l);
-									writer.WriteString(parameter->GetTypeFriendlyName()+L" "+parameter->GetName());
-								}
-								writer.WriteLine(L");");
-							}
-						}
-
-						writer.WriteLine(L"}");
+						LogTypeManager_Class(writer, type);
 					}
 					writer.WriteLine(L"");
 				}
@@ -12376,19 +12531,26 @@ SerializableTypeDescriptorBase
 /***********************************************************************
 TypeName
 ***********************************************************************/
-
-			const wchar_t* TypeInfo<unsigned __int8>::TypeName	= L"unsigned __int8";
-			const wchar_t* TypeInfo<unsigned __int16>::TypeName	= L"unsigned __int16";
-			const wchar_t* TypeInfo<unsigned __int32>::TypeName	= L"unsigned __int32";
-			const wchar_t* TypeInfo<unsigned __int64>::TypeName	= L"unsigned __int64";
-			const wchar_t* TypeInfo<signed __int8>::TypeName	= L"signed __int8";
-			const wchar_t* TypeInfo<signed __int16>::TypeName	= L"signed __int16";
-			const wchar_t* TypeInfo<signed __int32>::TypeName	= L"signed __int32";
-			const wchar_t* TypeInfo<signed __int64>::TypeName	= L"signed __int64";
-			const wchar_t* TypeInfo<float>::TypeName			= L"float";
-			const wchar_t* TypeInfo<double>::TypeName			= L"double";
-			const wchar_t* TypeInfo<bool>::TypeName				= L"bool";
-			const wchar_t* TypeInfo<WString>::TypeName			= L"vl::WString";
+			
+			const wchar_t* TypeInfo<IDescriptable>::TypeName			= L"system::object";
+			const wchar_t* TypeInfo<Value>::TypeName					= L"system::object";
+			const wchar_t* TypeInfo<unsigned __int8>::TypeName			= L"system::byte";
+			const wchar_t* TypeInfo<unsigned __int16>::TypeName			= L"system::ushort";
+			const wchar_t* TypeInfo<unsigned __int32>::TypeName			= L"system::uint";
+			const wchar_t* TypeInfo<unsigned __int64>::TypeName			= L"system::ulong";
+			const wchar_t* TypeInfo<signed __int8>::TypeName			= L"system::sbyte";
+			const wchar_t* TypeInfo<signed __int16>::TypeName			= L"system::short";
+			const wchar_t* TypeInfo<signed __int32>::TypeName			= L"system::int";
+			const wchar_t* TypeInfo<signed __int64>::TypeName			= L"system::long";
+			const wchar_t* TypeInfo<float>::TypeName					= L"system::float";
+			const wchar_t* TypeInfo<double>::TypeName					= L"system::double";
+			const wchar_t* TypeInfo<bool>::TypeName						= L"system::bool";
+			const wchar_t* TypeInfo<wchar_t>::TypeName					= L"system::char";
+			const wchar_t* TypeInfo<WString>::TypeName					= L"system::string";
+			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::ReadableList";
+			const wchar_t* TypeInfo<IValueList>::TypeName				= L"system::List";
+			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"system::InterfaceProxy";
+			const wchar_t* TypeInfo<IValueFunctionProxy>::TypeName		= L"system::Function";
 
 /***********************************************************************
 TypedValueSerializerProvider
@@ -12551,6 +12713,19 @@ TypedValueSerializerProvider
 				return true;
 			}
 
+			bool TypedValueSerializerProvider<wchar_t>::Serialize(const wchar_t& input, WString& output)
+			{
+				output=input;
+				return true;
+			}
+
+			bool TypedValueSerializerProvider<wchar_t>::Deserialize(const WString& input, wchar_t& output)
+			{
+				if(input.Length()>1) return false;
+				output=input.Length()==0?0:input[0];
+				return true;
+			}
+
 			bool TypedValueSerializerProvider<WString>::Serialize(const WString& input, WString& output)
 			{
 				output=input;
@@ -12562,6 +12737,19 @@ TypedValueSerializerProvider
 				output=input;
 				return true;
 			}
+
+/***********************************************************************
+ObjectTypeDescriptor
+***********************************************************************/
+
+			class ObjectTypeDescriptor : public SerializableTypeDescriptorBase
+			{
+			public:
+				ObjectTypeDescriptor()
+					:SerializableTypeDescriptorBase(TypeInfo<Value>::TypeName, 0)
+				{
+				}
+			};
 
 /***********************************************************************
 BoolValueSerializer
@@ -12579,6 +12767,42 @@ BoolValueSerializer
 			};
 
 /***********************************************************************
+Collections
+***********************************************************************/
+
+#define _ ,
+
+			BEGIN_CLASS_MEMBER(IValueReadonlyList)
+				CLASS_MEMBER_METHOD(Count, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Get, {L"index"})
+				CLASS_MEMBER_METHOD(Contains, {L"value"})
+				CLASS_MEMBER_METHOD(IndexOf, {L"value"})
+			END_CLASS_MEMBER(IValueReadonlyList)
+
+			BEGIN_CLASS_MEMBER(IValueList)
+				CLASS_MEMBER_BASE(IValueReadonlyList)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueList>(), NO_PARAMETER, (Ptr<IValueList>(*)())&IValueList::Create)
+				CLASS_MEMBER_EXTERNALCTOR(Ptr<IValueList>(Ptr<IValueReadonlyList>), {L"values"}, (Ptr<IValueList>(*)(Ptr<IValueReadonlyList>))&IValueList::Create)
+
+				CLASS_MEMBER_METHOD(Set, {L"index" _ L"value"})
+				CLASS_MEMBER_METHOD(Add, {L"value"})
+				CLASS_MEMBER_METHOD(Insert, {L"index" _ L"value"})
+				CLASS_MEMBER_METHOD(Remove, {L"value"})
+				CLASS_MEMBER_METHOD(RemoveAt, {L"index"})
+				CLASS_MEMBER_METHOD(Clear, NO_PARAMETER)
+			END_CLASS_MEMBER(IValueList)
+
+			BEGIN_CLASS_MEMBER(IValueInterfaceProxy)
+				CLASS_MEMBER_METHOD(Invoke, {L"name" _ L"arguments"})
+			END_CLASS_MEMBER(IValueInterfaceProxy)
+
+			BEGIN_CLASS_MEMBER(IValueFunctionProxy)
+			CLASS_MEMBER_METHOD(Invoke, {L"arguments"})
+			END_CLASS_MEMBER(IValueFunctionProxy)
+
+#undef _
+
+/***********************************************************************
 LoadPredefinedTypes
 ***********************************************************************/
 
@@ -12593,6 +12817,7 @@ LoadPredefinedTypes
 
 				void Load(ITypeManager* manager)override
 				{
+					manager->SetTypeDescriptor(TypeInfo<Value>::TypeName, new ObjectTypeDescriptor);
 					AddSerializableType<TypedValueSerializer<unsigned __int8>>(manager);
 					AddSerializableType<TypedValueSerializer<unsigned __int16>>(manager);
 					AddSerializableType<TypedValueSerializer<unsigned __int32>>(manager);
@@ -12604,7 +12829,12 @@ LoadPredefinedTypes
 					AddSerializableType<TypedValueSerializer<float>>(manager);
 					AddSerializableType<TypedValueSerializer<double>>(manager);
 					AddSerializableType<BoolValueSeriaizer>(manager);
+					AddSerializableType<TypedValueSerializer<wchar_t>>(manager);
 					AddSerializableType<TypedValueSerializer<WString>>(manager);
+					ADD_TYPE_INFO(IValueReadonlyList)
+					ADD_TYPE_INFO(IValueList)
+					ADD_TYPE_INFO(IValueInterfaceProxy)
+					ADD_TYPE_INFO(IValueFunctionProxy)
 				}
 
 				void Unload(ITypeManager* manager)override
