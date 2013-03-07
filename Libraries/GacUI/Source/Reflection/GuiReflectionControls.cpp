@@ -11,6 +11,7 @@ namespace vl
 			using namespace parsing::tabling;
 			using namespace parsing::xml;
 			using namespace stream;
+			using namespace list;
 
 			GUIREFLECTIONCONTROLS_TYPELIST(IMPL_TYPE_INFO)
 
@@ -310,6 +311,63 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_FAST(PreferredContentWidth)
 				CLASS_MEMBER_PROPERTY_FAST(TemporaryContentControl)
 			END_CLASS_MEMBER(GuiTooltip)
+
+			BEGIN_CLASS_MEMBER(GuiListControl)
+			END_CLASS_MEMBER(GuiListControl)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemProviderCallback)
+			END_CLASS_MEMBER(GuiListControl::IItemProviderCallback)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemArrangerCallback)
+			END_CLASS_MEMBER(GuiListControl::IItemArrangerCallback)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemPrimaryTextView)
+			END_CLASS_MEMBER(GuiListControl::IItemPrimaryTextView)
+
+			BEGIN_ENUM_ITEM(GuiListControl::KeyDirection)
+			END_ENUM_ITEM(GuiListControl::KeyDirection)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemProvider)
+			END_CLASS_MEMBER(GuiListControl::IItemProvider)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemStyleController)
+			END_CLASS_MEMBER(GuiListControl::IItemStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemStyleProvider)
+			END_CLASS_MEMBER(GuiListControl::IItemStyleProvider)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemArranger)
+			END_CLASS_MEMBER(GuiListControl::IItemArranger)
+
+			BEGIN_CLASS_MEMBER(GuiListControl::IItemCoordinateTransformer)
+			END_CLASS_MEMBER(GuiListControl::IItemCoordinateTransformer)
+
+			BEGIN_CLASS_MEMBER(GuiSelectableListControl)
+			END_CLASS_MEMBER(GuiSelectableListControl)
+
+			BEGIN_CLASS_MEMBER(GuiSelectableListControl::IItemStyleProvider)
+			END_CLASS_MEMBER(GuiSelectableListControl::IItemStyleProvider)
+
+			BEGIN_CLASS_MEMBER(DefaultItemCoordinateTransformer)
+			END_CLASS_MEMBER(DefaultItemCoordinateTransformer)
+
+			BEGIN_CLASS_MEMBER(AxisAlignedItemCoordinateTransformer)
+			END_CLASS_MEMBER(AxisAlignedItemCoordinateTransformer)
+
+			BEGIN_ENUM_ITEM(AxisAlignedItemCoordinateTransformer::Alignment)
+			END_ENUM_ITEM(AxisAlignedItemCoordinateTransformer::Alignment)
+
+			BEGIN_CLASS_MEMBER(RangedItemArrangerBase)
+			END_CLASS_MEMBER(RangedItemArrangerBase)
+
+			BEGIN_CLASS_MEMBER(FixedHeightItemArranger)
+			END_CLASS_MEMBER(FixedHeightItemArranger)
+
+			BEGIN_CLASS_MEMBER(FixedSizeMultiColumnItemArranger)
+			END_CLASS_MEMBER(FixedSizeMultiColumnItemArranger)
+
+			BEGIN_CLASS_MEMBER(FixedHeightMultiColumnItemArranger)
+			END_CLASS_MEMBER(FixedHeightMultiColumnItemArranger)
 
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
 #undef INTERFACE_EXTERNALCTOR
