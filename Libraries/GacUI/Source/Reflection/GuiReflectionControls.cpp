@@ -646,16 +646,65 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiListView)
 			END_CLASS_MEMBER(GuiListView)
 
+			BEGIN_CLASS_MEMBER(IGuiMenuService)
+				INTERFACE_IDENTIFIER(IGuiMenuService)
+
+				CLASS_MEMBER_METHOD(GetParentMenuService, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetPreferredDirection, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsActiveState, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsSubMenuActivatedByMouseDown, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(MenuItemExecuted, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetOpeningMenu, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(MenuOpened, {L"menu"})
+				CLASS_MEMBER_METHOD(MenuClosed, {L"menu"})
+			END_CLASS_MEMBER(IGuiMenuService)
+
+			BEGIN_ENUM_ITEM(IGuiMenuService::Direction)
+				ENUM_ITEM_NAMESPACE(IGuiMenuService)
+				ENUM_NAMESPACE_ITEM(Horizontal)
+				ENUM_NAMESPACE_ITEM(Vertical)
+			END_ENUM_ITEM(IGuiMenuService::Direction)
+
 			BEGIN_CLASS_MEMBER(GuiMenu)
+				CLASS_MEMBER_BASE(GuiPopup)
+				CLASS_MEMBER_CONSTRUCTOR(GuiMenu*(GuiMenu::IStyleController* _ GuiControl*), {L"styleController" _ L"owner"})
+
+				CLASS_MEMBER_METHOD(UpdateMenuService, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(QueryService, {L"identifier"})
 			END_CLASS_MEMBER(GuiMenu)
 
 			BEGIN_CLASS_MEMBER(GuiMenuBar)
+				CLASS_MEMBER_BASE(GuiControl)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiMenuBar)
 			END_CLASS_MEMBER(GuiMenuBar)
 
 			BEGIN_CLASS_MEMBER(GuiMenuButton)
+				CLASS_MEMBER_BASE(GuiButton)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiMenuButton)
+
+				CLASS_MEMBER_PROPERTY_FAST(Image)
+				CLASS_MEMBER_PROPERTY_FAST(ShortcutText)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SubMenu)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnedSubMenu)
+				CLASS_MEMBER_PROPERTY_FAST(SubMenuOpening)
+				CLASS_MEMBER_PROPERTY_FAST(PreferredMenuClientSize)
+
+				CLASS_MEMBER_METHOD(IsSubMenuExists, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateSubMenu, {L"subMenuStyleController"})
+				CLASS_MEMBER_METHOD(SetSubMenu, {L"value" _ L"owned"})
 			END_CLASS_MEMBER(GuiMenuButton)
 
 			BEGIN_CLASS_MEMBER(GuiMenuButton::IStyleController)
+				CLASS_MEMBER_BASE(GuiButton::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiMenuButton, IStyleController)
+
+				CLASS_MEMBER_METHOD(CreateSubMenuStyleController, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetSubMenuExisting, {L"value"})
+				CLASS_MEMBER_METHOD(SetSubMenuOpening, {L"value"})
+				CLASS_MEMBER_METHOD(GetSubMenuHost, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SetImage, {L"value"})
+				CLASS_MEMBER_METHOD(SetShortcutText, {L"value"})
+				CLASS_MEMBER_METHOD(GetMeasuringSource, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiMenuButton::IStyleController)
 
 #undef INTERFACE_IDENTIFIER
