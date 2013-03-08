@@ -26,7 +26,7 @@ namespace vl
 			{
 			public:
 				/// <summary>Measuring source for <see cref="GuiSubComponentMeasurer"/>.</summary>
-				class IMeasuringSource : public Interface
+				class IMeasuringSource : public IDescriptable, public Description<IMeasuringSource>
 				{
 				public:
 					/// <summary>Called when a this measuring source is attached to a <see cref="GuiSubComponentMeasurer"/>.</summary>
@@ -73,7 +73,7 @@ namespace vl
 				};
 
 				/// <summary>The default implementation for <see cref="IMeasuringSource"/>.</summary>
-				class MeasuringSource : public Object, public IMeasuringSource
+				class MeasuringSource : public Object, public IMeasuringSource, public Description<MeasuringSource>
 				{
 					typedef collections::Dictionary<WString, GuiGraphicsComposition*>	SubComponentMap;
 				protected:
