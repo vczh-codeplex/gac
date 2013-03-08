@@ -84,6 +84,36 @@ External Functions
 				return new ValueListWrapper<ListProvider<Ptr<TextItem>>*>(&thisObject->GetItems());
 			}
 
+			Ptr<IValueReadonlyList> ListViewItemStyleProvider_GetCreatedItemStyles(ListViewItemStyleProvider* thisObject)
+			{
+				return new ValueReadonlyListWrapper<const List<GuiListControl::IItemStyleController*>*>(&thisObject->GetCreatedItemStyles());
+			}
+
+			ListViewItemStyleProvider::IListViewItemContent* ListViewItemStyleProvider_GetItemContent(ListViewItemStyleProvider* thisObject, GuiListControl::IItemStyleController* itemStyleController)
+			{
+				return thisObject->GetItemContent<ListViewItemStyleProvider::IListViewItemContent>(itemStyleController);
+			}
+
+			Ptr<IValueList> ListViewItem_GetSubItems(ListViewItem* thisObject)
+			{
+				return new ValueListWrapper<List<WString>*>(&thisObject->subItems);
+			}
+
+			Ptr<IValueList> GuiListView_GetDataColumns(GuiListView* thisObject)
+			{
+				return new ValueListWrapper<ListViewDataColumns*>(&thisObject->GetItems().GetDataColumns());
+			}
+
+			Ptr<IValueList> GuiListView_GetColumns(GuiListView* thisObject)
+			{
+				return new ValueListWrapper<ListViewColumns*>(&thisObject->GetItems().GetColumns());
+			}
+
+			Ptr<IValueList> GuiListView_GetItems(GuiListView* thisObject)
+			{
+				return new ValueListWrapper<ListViewItemProvider*>(&thisObject->GetItems());
+			}
+
 /***********************************************************************
 Type Declaration
 ***********************************************************************/
@@ -578,72 +608,199 @@ Type Declaration
 			END_CLASS_MEMBER(GuiTextList)
 
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProviderBase)
+				CLASS_MEMBER_BASE(GuiSelectableListControl::IItemStyleProvider)
 			END_CLASS_MEMBER(ListViewItemStyleProviderBase)
 
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProviderBase::ListViewItemStyleController)
+				CLASS_MEMBER_BASE(ItemStyleControllerBase)
+				CLASS_MEMBER_CONSTRUCTOR(ListViewItemStyleProviderBase::ListViewItemStyleController*(ListViewItemStyleProviderBase*), {L"provider"})
+
+				CLASS_MEMBER_PROPERTY_FAST(Selected)
 			END_CLASS_MEMBER(ListViewItemStyleProviderBase::ListViewItemStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiListViewColumnHeader)
+				CLASS_MEMBER_BASE(GuiMenuButton)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiListViewColumnHeader)
+
+				CLASS_MEMBER_PROPERTY_FAST(ColumnSortingState)
 			END_CLASS_MEMBER(GuiListViewColumnHeader)
 
 			BEGIN_ENUM_ITEM(GuiListViewColumnHeader::ColumnSortingState)
+				ENUM_ITEM_NAMESPACE(GuiListViewColumnHeader)
+				ENUM_NAMESPACE_ITEM(NotSorted)
+				ENUM_NAMESPACE_ITEM(Ascending)
+				ENUM_NAMESPACE_ITEM(Descending)
 			END_ENUM_ITEM(GuiListViewColumnHeader::ColumnSortingState)
 
 			BEGIN_CLASS_MEMBER(GuiListViewColumnHeader::IStyleController)
+				CLASS_MEMBER_BASE(GuiMenuButton::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiListViewColumnHeader, IStyleController)
+
+				CLASS_MEMBER_METHOD(SetColumnSortingState, {L"value"})
 			END_CLASS_MEMBER(GuiListViewColumnHeader::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiListViewBase)
+				CLASS_MEMBER_BASE(GuiSelectableListControl)
+				CLASS_MEMBER_CONSTRUCTOR(GuiListViewBase*(GuiListViewBase::IStyleProvider* _ GuiListControl::IItemProvider*), {L"styleProvider" _ L"itemProvider"})
+
+				CLASS_MEMBER_METHOD(GetListViewStyleProvider, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiListViewBase)
 
+			BEGIN_CLASS_MEMBER(GuiListViewBase::IStyleProvider)
+				CLASS_MEMBER_BASE(GuiSelectableListControl::IStyleProvider)
+				INTERFACE_EXTERNALCTOR(GuiListViewBase, IStyleProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(PrimaryTextColor)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SecondaryTextColor)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ItemSeparatorColor)
+
+				CLASS_MEMBER_METHOD(CreateItemBackground, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateColumnStyle, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiListViewBase::IStyleProvider)
+
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProvider)
+				CLASS_MEMBER_BASE(ListViewItemStyleProviderBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewItemStyleProvider>(ListViewItemStyleProvider::IListViewItemContentProvider*), {L"itemContentProvider"})
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetCreatedItemStyles, NO_PARAMETER, Ptr<IValueReadonlyList>(ListViewItemStyleProvider::*)(), &ListViewItemStyleProvider_GetCreatedItemStyles)
+				CLASS_MEMBER_PROPERTY_READONLY(CreatedItemStyles, GetCreatedItemStyles)
+				CLASS_MEMBER_METHOD(IsItemStyleAttachedToListView, {L"itemStyle"})
+				CLASS_MEMBER_EXTERNALMETHOD(GetItemContent, {L"itemStyleController"}, ListViewItemStyleProvider::IListViewItemContent*(ListViewItemStyleProvider::*)(GuiListControl::IItemStyleController*), &ListViewItemStyleProvider_GetItemContent)
 			END_CLASS_MEMBER(ListViewItemStyleProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemView)
+				CLASS_MEMBER_BASE(GuiListControl::IItemPrimaryTextView)
+				INTERFACE_EXTERNALCTOR(ListViewItemStyleProvider, IListViewItemView)
+				INTERFACE_IDENTIFIER(ListViewItemStyleProvider::IListViewItemView)
+
+				CLASS_MEMBER_METHOD(GetSmallImage, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(GetLargeImage, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(GetText, {L"itemIndex"})
+				CLASS_MEMBER_METHOD(GetSubItem, {L"itemIndex" _ L"index"})
+				CLASS_MEMBER_METHOD(GetDataColumnCount, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetDataColumn, {L"index"})
+				CLASS_MEMBER_METHOD(GetColumnCount, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetColumnText, {L"index"})
 			END_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemView)
 
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemContent)
+				INTERFACE_EXTERNALCTOR(ListViewItemStyleProvider, IListViewItemContent)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContentComposition)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BackgroundDecorator)
+				
+				CLASS_MEMBER_METHOD(Install, {L"styleProvider" _ L"view" _ L"itemIndex"})
 			END_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemContent)
 
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemContentProvider)
+				INTERFACE_EXTERNALCTOR(ListViewItemStyleProvider, IListViewItemContentProvider)
+
+				CLASS_MEMBER_METHOD(CreatePreferredCoordinateTransformer, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreatePreferredArranger, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateItemContent, {L"font"})
+				CLASS_MEMBER_METHOD(AttachListControl, {L"value"})
+				CLASS_MEMBER_METHOD(DetachListControl, NO_PARAMETER)
 			END_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProvider::ListViewContentItemStyleController)
+				CLASS_MEMBER_BASE(ListViewItemStyleProviderBase::ListViewItemStyleController)
+				CLASS_MEMBER_CONSTRUCTOR(ListViewItemStyleProvider::ListViewContentItemStyleController*(ListViewItemStyleProvider*), {L"provider"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ItemContent)
+
+				CLASS_MEMBER_METHOD(Install, {L"view" _ L"itemIndex"})
 			END_CLASS_MEMBER(ListViewItemStyleProvider::ListViewContentItemStyleController)
 
 			BEGIN_CLASS_MEMBER(ListViewBigIconContentProvider)
+				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(ListViewBigIconContentProvider*(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewBigIconContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewSmallIconContentProvider)
+				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(ListViewSmallIconContentProvider*(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewSmallIconContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewListContentProvider)
+				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(ListViewListContentProvider*(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewListContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewTileContentProvider)
+				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(ListViewTileContentProvider*(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewTileContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewInformationContentProvider)
+				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(ListViewInformationContentProvider*(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewInformationContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewColumnItemArranger)
+				CLASS_MEMBER_BASE(FixedHeightItemArranger)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewColumnItemArranger>(), NO_PARAMETER)
 			END_CLASS_MEMBER(ListViewColumnItemArranger)
 
+			BEGIN_CLASS_MEMBER(ListViewColumnItemArranger::IColumnItemViewCallback)
+				CLASS_MEMBER_METHOD(OnColumnChanged, NO_PARAMETER)
+			END_CLASS_MEMBER(ListViewColumnItemArranger::IColumnItemViewCallback)
+
+			BEGIN_CLASS_MEMBER(ListViewColumnItemArranger::IColumnItemView)
+				INTERFACE_EXTERNALCTOR(ListViewColumnItemArranger, IColumnItemView)
+				INTERFACE_IDENTIFIER(ListViewColumnItemArranger::IColumnItemView)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ColumnCount)
+
+				CLASS_MEMBER_METHOD(AttachCallback, {L"value"})
+				CLASS_MEMBER_METHOD(DetachCallback, {L"value"})
+				CLASS_MEMBER_METHOD(GetColumnText, {L"index"})
+				CLASS_MEMBER_METHOD(GetColumnSize, {L"index"})
+				CLASS_MEMBER_METHOD(SetColumnSize, {L"index" _ L"value"})
+				CLASS_MEMBER_METHOD(GetDropdownPopup, {L"index"})
+				CLASS_MEMBER_METHOD(GetSortingState, {L"index"})
+			END_CLASS_MEMBER(ListViewColumnItemArranger::IColumnItemView)
+
 			BEGIN_CLASS_MEMBER(ListViewDetailContentProvider)
+				CLASS_MEMBER_BASE(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_CONSTRUCTOR(ListViewDetailContentProvider*(Size), {L"iconSize"})
 			END_CLASS_MEMBER(ListViewDetailContentProvider)
 
 			BEGIN_CLASS_MEMBER(ListViewItem)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewItem>(), NO_PARAMETER)
+
+				CLASS_MEMBER_FIELD(smallImage)
+				CLASS_MEMBER_FIELD(largeImage)
+				CLASS_MEMBER_FIELD(text)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetSubItems, NO_PARAMETER, Ptr<IValueList>(ListViewItem::*)(), &ListViewItem_GetSubItems)
+				CLASS_MEMBER_PROPERTY_READONLY(subItems, GetSubItems)
 			END_CLASS_MEMBER(ListViewItem)
 
 			BEGIN_CLASS_MEMBER(ListViewColumn)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewColumn>(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewColumn>(const WString&), {L"text"})
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewColumn>(const WString&, vint), {L"text" _ L"size"})
+
+				CLASS_MEMBER_FIELD(text)
+				CLASS_MEMBER_FIELD(size)
+				CLASS_MEMBER_FIELD(dropdownPopup)
+				CLASS_MEMBER_FIELD(sortingState)
 			END_CLASS_MEMBER(ListViewColumn)
 
-			BEGIN_CLASS_MEMBER(ListViewItemProvider)
-			END_CLASS_MEMBER(ListViewItemProvider)
-
 			BEGIN_CLASS_MEMBER(GuiVirtualListView)
+				CLASS_MEMBER_BASE(GuiListViewBase)
+				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualListView*(GuiVirtualListView::IStyleProvider* _ GuiListControl::IItemProvider*), {L"styleProvider" _ L"itemProvider"})
+
+				CLASS_MEMBER_METHOD(ChangeItemStyle, {L"contentProvider"})
 			END_CLASS_MEMBER(GuiVirtualListView)
 
 			BEGIN_CLASS_MEMBER(GuiListView)
+				CLASS_MEMBER_BASE(GuiVirtualListView)
+				CONTROL_CONSTRUCTOR_PROVIDER(GuiListView)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetDataColumns, NO_PARAMETER, Ptr<IValueList>(GuiListView::*)(), &GuiListView_GetDataColumns)
+				CLASS_MEMBER_EXTERNALMETHOD(GetColumns, NO_PARAMETER, Ptr<IValueList>(GuiListView::*)(), &GuiListView_GetColumns)
+				CLASS_MEMBER_EXTERNALMETHOD(GetItems, NO_PARAMETER, Ptr<IValueList>(GuiListView::*)(), &GuiListView_GetItems)
 			END_CLASS_MEMBER(GuiListView)
 
 			BEGIN_CLASS_MEMBER(IGuiMenuService)

@@ -81,6 +81,7 @@ Type List
 			F(presentation::controls::GuiListViewColumnHeader::ColumnSortingState)\
 			F(presentation::controls::GuiListViewColumnHeader::IStyleController)\
 			F(presentation::controls::GuiListViewBase)\
+			F(presentation::controls::GuiListViewBase::IStyleProvider)\
 			F(presentation::controls::list::ListViewItemStyleProvider)\
 			F(presentation::controls::list::ListViewItemStyleProvider::IListViewItemView)\
 			F(presentation::controls::list::ListViewItemStyleProvider::IListViewItemContent)\
@@ -92,10 +93,11 @@ Type List
 			F(presentation::controls::list::ListViewTileContentProvider)\
 			F(presentation::controls::list::ListViewInformationContentProvider)\
 			F(presentation::controls::list::ListViewColumnItemArranger)\
+			F(presentation::controls::list::ListViewColumnItemArranger::IColumnItemViewCallback)\
+			F(presentation::controls::list::ListViewColumnItemArranger::IColumnItemView)\
 			F(presentation::controls::list::ListViewDetailContentProvider)\
 			F(presentation::controls::list::ListViewItem)\
 			F(presentation::controls::list::ListViewColumn)\
-			F(presentation::controls::list::ListViewItemProvider)\
 			F(presentation::controls::GuiVirtualListView)\
 			F(presentation::controls::GuiListView)\
 			F(presentation::controls::IGuiMenuService)\
@@ -931,6 +933,62 @@ Interface Proxy
 					void DetachListControl()override
 					{
 						INVOKE_INTERFACE_PROXY_NOPARAM(DetachListControl);
+					}
+				};
+
+				class ListViewColumnItemArranger_IColumnItemView : public Object, public virtual list::ListViewColumnItemArranger::IColumnItemView
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					ListViewColumnItemArranger_IColumnItemView(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static Ptr<list::ListViewColumnItemArranger::IColumnItemView> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new ListViewColumnItemArranger_IColumnItemView(proxy);
+					}
+
+					bool AttachCallback(list::ListViewColumnItemArranger::IColumnItemViewCallback* value)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(AttachCallback, value);
+					}
+
+					bool DetachCallback(list::ListViewColumnItemArranger::IColumnItemViewCallback* value)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(DetachCallback, value);
+					}
+
+					vint GetColumnCount()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetColumnCount);
+					}
+
+					WString GetColumnText(vint index)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetColumnText, index);
+					}
+
+					vint GetColumnSize(vint index)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetColumnSize, index);
+					}
+
+					void SetColumnSize(vint index, vint value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetColumnSize, index, value);
+					}
+
+					GuiMenu* GetDropdownPopup(vint index)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetDropdownPopup, index);
+					}
+
+					GuiListViewColumnHeader::ColumnSortingState GetSortingState(vint index)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetSortingState, index);
 					}
 				};
 
