@@ -134,17 +134,10 @@ TextList Data Source
 				public:
 					/// <summary>Create an empty text item.</summary>
 					TextItem();
-					/// <summary>Copy a text item.</summary>
-					/// <param name="item">The source text item.</param>
-					TextItem(const TextItem& item);
 					/// <summary>Create a text item with specified text and check state.</summary>
 					/// <param name="_text">The text.</param>
 					/// <param name="_checked">The check state.</param>
 					TextItem(const WString& _text, bool _checked=false);
-					/// <summary>Create a text item with specified text and check state.</summary>
-					/// <param name="_text">The text.</param>
-					/// <param name="_checked">The check state.</param>
-					TextItem(const wchar_t* _text, bool _checked=false);
 					~TextItem();
 
 					bool										operator==(const TextItem& value)const;
@@ -152,10 +145,10 @@ TextList Data Source
 					
 					/// <summary>Get the text of this item.</summary>
 					/// <returns>The text of this item.</returns>
-					const WString&								GetText()const;
+					const WString&								GetText();
 					/// <summary>Get the check state of this item.</summary>
 					/// <returns>The check state of this item.</returns>
-					bool										GetChecked()const;
+					bool										GetChecked();
 				};
 
 				/// <summary>Item provider for <see cref="GuiVirtualTextList"/> or <see cref="GuiSelectableListControl"/>.</summary>

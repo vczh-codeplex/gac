@@ -74,6 +74,16 @@ External Functions
 				return new ValueReadonlyListWrapper<const SortedList<vint>*>(&thisObject->GetSelectedItems());
 			}
 
+			TextItemProvider* GuiTextList_GetItemProvider(GuiTextList* thisObject)
+			{
+				return &thisObject->GetItems();
+			}
+
+			Ptr<IValueList> GuiTextList_GetItems(GuiTextList* thisObject)
+			{
+				return new ValueListWrapper<ListProvider<Ptr<TextItem>>*>(&thisObject->GetItems());
+			}
+
 /***********************************************************************
 Type Declaration
 ***********************************************************************/
@@ -535,6 +545,37 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_FAST(Checked)
 				CLASS_MEMBER_PROPERTY_FAST(Text)
 			END_CLASS_MEMBER(TextItemStyleProvider::TextItemStyleController)
+
+			BEGIN_CLASS_MEMBER(TextItem)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<TextItem>(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<TextItem>(const WString&), {L"text"})
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<TextItem>(const WString&, bool), {L"text" _ L"checked"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Text)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Checked)
+			END_CLASS_MEMBER(TextItem)
+
+			BEGIN_CLASS_MEMBER(TextItemProvider)
+				CLASS_MEMBER_BASE(GuiListControl::IItemProvider)
+
+				CLASS_MEMBER_METHOD(SetText, {L"itemIndex" _ L"value"})
+				CLASS_MEMBER_METHOD(SetChecked, {L"itemIndex" _ L"value"})
+			END_CLASS_MEMBER(TextItemProvider)
+
+			BEGIN_CLASS_MEMBER(GuiVirtualTextList)
+				CLASS_MEMBER_BASE(GuiSelectableListControl)
+				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualTextList*(GuiSelectableListControl::IStyleProvider* _ TextItemStyleProvider::ITextItemStyleProvider* _ GuiListControl::IItemProvider*), {L"styleProvider" _ L"itemStyleProvider" _ L"itemProvider"})
+
+				CLASS_MEMBER_METHOD(ChangeItemStyle, {L"itemStyleProvider"})
+			END_CLASS_MEMBER(GuiVirtualTextList)
+
+			BEGIN_CLASS_MEMBER(GuiTextList)
+				CLASS_MEMBER_BASE(GuiVirtualTextList)
+				CLASS_MEMBER_CONSTRUCTOR(GuiTextList*(GuiSelectableListControl::IStyleProvider* _ TextItemStyleProvider::ITextItemStyleProvider*), {L"styleProvider" _ L"itemStyleProvider"})
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetItemProvider, NO_PARAMETER, TextItemProvider*(GuiTextList::*)(), &GuiTextList_GetItemProvider)
+				CLASS_MEMBER_EXTERNALMETHOD(GetItems, NO_PARAMETER, Ptr<IValueList>(GuiTextList::*)(), &GuiTextList_GetItems)
+			END_CLASS_MEMBER(GuiTextList)
 
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER

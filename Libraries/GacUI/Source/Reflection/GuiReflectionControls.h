@@ -70,7 +70,11 @@ Type List
 			F(presentation::controls::list::TextItemStyleProvider)\
 			F(presentation::controls::list::TextItemStyleProvider::ITextItemStyleProvider)\
 			F(presentation::controls::list::TextItemStyleProvider::ITextItemView)\
-			F(presentation::controls::list::TextItemStyleProvider::TextItemStyleController)
+			F(presentation::controls::list::TextItemStyleProvider::TextItemStyleController)\
+			F(presentation::controls::list::TextItem)\
+			F(presentation::controls::list::TextItemProvider)\
+			F(presentation::controls::GuiVirtualTextList)\
+			F(presentation::controls::GuiTextList)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 

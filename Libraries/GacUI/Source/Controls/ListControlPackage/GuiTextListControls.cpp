@@ -187,19 +187,7 @@ TextItem
 				{
 				}
 
-				TextItem::TextItem(const TextItem& item)
-					:text(item.text)
-					,checked(item.checked)
-				{
-				}
-
 				TextItem::TextItem(const WString& _text, bool _checked)
-					:text(_text)
-					,checked(_checked)
-				{
-				}
-
-				TextItem::TextItem(const wchar_t* _text, bool _checked)
 					:text(_text)
 					,checked(_checked)
 				{
@@ -219,12 +207,12 @@ TextItem
 					return text!=value.text;
 				}
 
-				const WString& TextItem::GetText()const
+				const WString& TextItem::GetText()
 				{
 					return text;
 				}
 
-				bool TextItem::GetChecked()const
+				bool TextItem::GetChecked()
 				{
 					return checked;
 				}
