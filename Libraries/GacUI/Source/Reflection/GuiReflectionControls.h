@@ -98,6 +98,8 @@ Type List
 			F(presentation::controls::list::ListViewItemProvider)\
 			F(presentation::controls::GuiVirtualListView)\
 			F(presentation::controls::GuiListView)\
+			F(presentation::controls::IGuiMenuService)\
+			F(presentation::controls::IGuiMenuService::Direction)\
 			F(presentation::controls::GuiMenu)\
 			F(presentation::controls::GuiMenuBar)\
 			F(presentation::controls::GuiMenuButton)\
