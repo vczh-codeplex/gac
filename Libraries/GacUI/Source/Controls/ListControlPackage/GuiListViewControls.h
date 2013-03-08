@@ -60,7 +60,7 @@ ListView Base
 
 					void										AttachListControl(GuiListControl* value)override;
 					void										DetachListControl()override;
-					vint											GetItemStyleId(vint itemIndex)override;
+					vint										GetItemStyleId(vint itemIndex)override;
 					void										SetStyleSelected(GuiListControl::IItemStyleController* style, bool value)override;
 				};
 			}
@@ -188,15 +188,15 @@ ListView ItemStyleProvider
 
 						/// <summary>Get the number of data columns.</summary>
 						/// <returns>The number of data columns.</returns>
-						virtual vint								GetDataColumnCount()=0;
+						virtual vint							GetDataColumnCount()=0;
 						/// <summary>Get the column index of the index-th data column.</summary>
 						/// <returns>The column index.</returns>
 						/// <param name="index">The order of the data column.</param>
-						virtual vint								GetDataColumn(vint index)=0;
+						virtual vint							GetDataColumn(vint index)=0;
 
 						/// <summary>Get the number of columns.</summary>
 						/// <returns>The number of columns.</returns>
-						virtual vint								GetColumnCount()=0;
+						virtual vint							GetColumnCount()=0;
 						/// <summary>Get the text of a column.</summary>
 						/// <returns>The text.</returns>
 						/// <param name="itemIndex">The index of the column.</param>
@@ -651,7 +651,7 @@ ListView
 			namespace list
 			{
 				/// <summary>List view item.</summary>
-				class ListViewItem
+				class ListViewItem : public Object, public Description<ListViewItem>
 				{
 				public:
 					/// <summary>Small image.</summary>
@@ -667,13 +667,13 @@ ListView
 				};
 				
 				/// <summary>List view column.</summary>
-				class ListViewColumn
+				class ListViewColumn : public Object, public Description<ListViewColumn>
 				{
 				public:
 					/// <summary>Column text.</summary>
 					WString											text;
 					/// <summary>Column size.</summary>
-					vint												size;
+					vint											size;
 					/// <summary>Column dropdown popup.</summary>
 					GuiMenu*										dropdownPopup;
 					/// <summary>Column sorting state.</summary>
@@ -734,14 +734,14 @@ ListView
 					Ptr<GuiImageData>									GetLargeImage(vint itemIndex)override;
 					WString												GetText(vint itemIndex)override;
 					WString												GetSubItem(vint itemIndex, vint index)override;
-					vint													GetDataColumnCount()override;
-					vint													GetDataColumn(vint index)override;
+					vint												GetDataColumnCount()override;
+					vint												GetDataColumn(vint index)override;
 
 					bool												AttachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)override;
 					bool												DetachCallback(ListViewColumnItemArranger::IColumnItemViewCallback* value)override;
-					vint													GetColumnCount()override;
+					vint												GetColumnCount()override;
 					WString												GetColumnText(vint index)override;
-					vint													GetColumnSize(vint index)override;
+					vint												GetColumnSize(vint index)override;
 					void												SetColumnSize(vint index, vint value)override;
 					GuiMenu*											GetDropdownPopup(vint index)override;
 					GuiListViewColumnHeader::ColumnSortingState			GetSortingState(vint index)override;

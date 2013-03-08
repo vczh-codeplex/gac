@@ -43,7 +43,7 @@ namespace vl
 					virtual WString						GetMeasuringCategory()=0;
 					/// <summary>Get the sub component count.</summary>
 					/// <returns>The sub component count.</returns>
-					virtual vint							GetSubComponentCount()=0;
+					virtual vint						GetSubComponentCount()=0;
 					/// <summary>Get the name of the specified sub component.</summary>
 					/// <returns>The name of the specified sub component.</returns>
 					/// <param name="index">The index of the specified sub component.</param>
@@ -98,7 +98,7 @@ namespace vl
 					void								DetachMeasurer(GuiSubComponentMeasurer* value)override;
 					GuiSubComponentMeasurer*			GetAttachedMeasurer()override;
 					WString								GetMeasuringCategory()override;
-					vint									GetSubComponentCount()override;
+					vint								GetSubComponentCount()override;
 					WString								GetSubComponentName(vint index)override;
 					GuiGraphicsComposition*				GetSubComponentComposition(vint index)override;
 					GuiGraphicsComposition*				GetSubComponentComposition(const WString& name)override;

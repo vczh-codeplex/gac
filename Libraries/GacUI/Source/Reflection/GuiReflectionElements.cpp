@@ -253,7 +253,6 @@ Type Declaration
 				CLASS_MEMBER_METHOD(GetHyperlinkIdFromPoint, {L"point"})
 				CLASS_MEMBER_METHOD(ActivateHyperlink, {L"hyperlinkId" _ L"active"})
 			END_CLASS_MEMBER(GuiDocumentElement)
-
 #undef _
 
 /***********************************************************************

@@ -130,7 +130,7 @@ MenuButton
 			public:
 				static const wchar_t* const				MenuItemSubComponentMeasuringCategoryName;
 				/// <summary>Style controller interface for <see cref="GuiMenuButton"/>.</summary>
-				class IStyleController : public GuiButton::IStyleController, public Description<IStyleController>
+				class IStyleController : public virtual GuiButton::IStyleController, public Description<IStyleController>
 				{
 				public:
 					/// <summary>Create a style controller for the sub menu.</summary>
