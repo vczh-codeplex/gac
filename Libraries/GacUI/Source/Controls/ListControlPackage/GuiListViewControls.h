@@ -530,7 +530,7 @@ ListView ItemContentProvider(Detailed)
 						virtual bool											DetachCallback(IColumnItemViewCallback* value)=0;
 						/// <summary>Get the number of all columns.</summary>
 						/// <returns>The number of all columns.</returns>
-						virtual vint												GetColumnCount()=0;
+						virtual vint											GetColumnCount()=0;
 						/// <summary>Get the text of the column.</summary>
 						/// <returns>The text of the column.</returns>
 						/// <param name="index">The index of the column.</param>
@@ -538,7 +538,7 @@ ListView ItemContentProvider(Detailed)
 						/// <summary>Get the size of the column.</summary>
 						/// <returns>The size of the column.</returns>
 						/// <param name="index">The index of the column.</param>
-						virtual vint												GetColumnSize(vint index)=0;
+						virtual vint											GetColumnSize(vint index)=0;
 						/// <summary>Set the size of the column.</summary>
 						/// <param name="index">The index of the column.</param>
 						/// <param name="value">The new size of the column.</param>
@@ -572,7 +572,7 @@ ListView ItemContentProvider(Detailed)
 					ColumnHeaderButtonList						columnHeaderButtons;
 					ColumnHeaderSplitterList					columnHeaderSplitters;
 					bool										splitterDragging;
-					vint											splitterLatestX;
+					vint										splitterLatestX;
 
 					void										ColumnClicked(vint index, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 					void										ColumnHeaderSplitterLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
@@ -580,8 +580,8 @@ ListView ItemContentProvider(Detailed)
 					void										ColumnHeaderSplitterMouseMove(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 
 					void										RearrangeItemBounds()override;
-					vint											GetWidth()override;
-					vint											GetYOffset()override;
+					vint										GetWidth()override;
+					vint										GetYOffset()override;
 					Size										OnCalculateTotalSize()override;
 					void										DeleteColumnButtons();
 					void										RebuildColumns();
