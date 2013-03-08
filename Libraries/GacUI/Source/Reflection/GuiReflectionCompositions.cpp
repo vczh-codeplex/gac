@@ -151,17 +151,42 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_FAST(HeightPageSize)
 			END_CLASS_MEMBER(GuiPartialViewComposition)
 
-			BEGIN_CLASS_MEMBER(presentation::compositions::GuiSubComponentMeasurer)
-			END_CLASS_MEMBER(presentation::compositions::GuiSubComponentMeasurer)
+			BEGIN_CLASS_MEMBER(GuiSubComponentMeasurer)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiSubComponentMeasurer>(), NO_PARAMETER)
 
-			BEGIN_ENUM_ITEM(presentation::compositions::GuiSubComponentMeasurer::Direction)
-			END_ENUM_ITEM(presentation::compositions::GuiSubComponentMeasurer::Direction)
+				CLASS_MEMBER_METHOD(AttachMeasuringSource, {L"value"})
+				CLASS_MEMBER_METHOD(DetachMeasuringSource, {L"value"})
+				CLASS_MEMBER_METHOD(MeasureAndUpdate, {L"measuringCategory" _ L"direction"})
+			END_CLASS_MEMBER(GuiSubComponentMeasurer)
 
-			BEGIN_CLASS_MEMBER(presentation::compositions::GuiSubComponentMeasurer::IMeasuringSource)
-			END_CLASS_MEMBER(presentation::compositions::GuiSubComponentMeasurer::IMeasuringSource)
+			BEGIN_ENUM_ITEM(GuiSubComponentMeasurer::Direction)
+				ENUM_ITEM_NAMESPACE(GuiSubComponentMeasurer)
+				ENUM_NAMESPACE_ITEM(Horizontal)
+				ENUM_NAMESPACE_ITEM(Vertical)
+			END_ENUM_ITEM(GuiSubComponentMeasurer::Direction)
 
-			BEGIN_CLASS_MEMBER(presentation::compositions::GuiSubComponentMeasurer::MeasuringSource)
-			END_CLASS_MEMBER(presentation::compositions::GuiSubComponentMeasurer::MeasuringSource)
+			BEGIN_CLASS_MEMBER(GuiSubComponentMeasurer::IMeasuringSource)
+				INTERFACE_EXTERNALCTOR(GuiSubComponentMeasurer, IMeasuringSource)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(AttachedMeasurer)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MeasuringCategory)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SubComponentCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MainComposition)
+
+				CLASS_MEMBER_METHOD(AttachMeasurer, {L"value"})
+				CLASS_MEMBER_METHOD(DetachMeasurer, {L"value"})
+				CLASS_MEMBER_METHOD(GetSubComponentName, {L"index"})
+				CLASS_MEMBER_METHOD_OVERLOAD(GetSubComponentComposition, {L"index"}, GuiGraphicsComposition*(GuiSubComponentMeasurer::IMeasuringSource::*)(vint))
+				CLASS_MEMBER_METHOD_OVERLOAD(GetSubComponentComposition, {L"name"}, GuiGraphicsComposition*(GuiSubComponentMeasurer::IMeasuringSource::*)(const WString&))
+				CLASS_MEMBER_METHOD(SubComponentPreferredMinSizeUpdated, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiSubComponentMeasurer::IMeasuringSource)
+
+			BEGIN_CLASS_MEMBER(GuiSubComponentMeasurer::MeasuringSource)
+				CLASS_MEMBER_BASE(GuiSubComponentMeasurer::IMeasuringSource)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiSubComponentMeasurer::MeasuringSource>(const WString& _ GuiGraphicsComposition*), {L"measuringCategory" _ L"mainComposition"})
+
+				CLASS_MEMBER_METHOD(AddSubComponent, {L"name" _ L"composition"})
+			END_CLASS_MEMBER(GuiSubComponentMeasurer::MeasuringSource)
 
 #undef INTERFACE_EXTERNALCTOR
 #undef _
