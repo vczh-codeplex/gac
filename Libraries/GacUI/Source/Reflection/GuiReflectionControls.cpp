@@ -577,6 +577,87 @@ Type Declaration
 				CLASS_MEMBER_EXTERNALMETHOD(GetItems, NO_PARAMETER, Ptr<IValueList>(GuiTextList::*)(), &GuiTextList_GetItems)
 			END_CLASS_MEMBER(GuiTextList)
 
+			BEGIN_CLASS_MEMBER(ListViewItemStyleProviderBase)
+			END_CLASS_MEMBER(ListViewItemStyleProviderBase)
+
+			BEGIN_CLASS_MEMBER(ListViewItemStyleProviderBase::ListViewItemStyleController)
+			END_CLASS_MEMBER(ListViewItemStyleProviderBase::ListViewItemStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiListViewColumnHeader)
+			END_CLASS_MEMBER(GuiListViewColumnHeader)
+
+			BEGIN_ENUM_ITEM(GuiListViewColumnHeader::ColumnSortingState)
+			END_ENUM_ITEM(GuiListViewColumnHeader::ColumnSortingState)
+
+			BEGIN_CLASS_MEMBER(GuiListViewColumnHeader::IStyleController)
+			END_CLASS_MEMBER(GuiListViewColumnHeader::IStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiListViewBase)
+			END_CLASS_MEMBER(GuiListViewBase)
+
+			BEGIN_CLASS_MEMBER(ListViewItemStyleProvider)
+			END_CLASS_MEMBER(ListViewItemStyleProvider)
+
+			BEGIN_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemView)
+			END_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemView)
+
+			BEGIN_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemContent)
+			END_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemContent)
+
+			BEGIN_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemContentProvider)
+			END_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemContentProvider)
+
+			BEGIN_CLASS_MEMBER(ListViewItemStyleProvider::ListViewContentItemStyleController)
+			END_CLASS_MEMBER(ListViewItemStyleProvider::ListViewContentItemStyleController)
+
+			BEGIN_CLASS_MEMBER(ListViewBigIconContentProvider)
+			END_CLASS_MEMBER(ListViewBigIconContentProvider)
+
+			BEGIN_CLASS_MEMBER(ListViewSmallIconContentProvider)
+			END_CLASS_MEMBER(ListViewSmallIconContentProvider)
+
+			BEGIN_CLASS_MEMBER(ListViewListContentProvider)
+			END_CLASS_MEMBER(ListViewListContentProvider)
+
+			BEGIN_CLASS_MEMBER(ListViewTileContentProvider)
+			END_CLASS_MEMBER(ListViewTileContentProvider)
+
+			BEGIN_CLASS_MEMBER(ListViewInformationContentProvider)
+			END_CLASS_MEMBER(ListViewInformationContentProvider)
+
+			BEGIN_CLASS_MEMBER(ListViewColumnItemArranger)
+			END_CLASS_MEMBER(ListViewColumnItemArranger)
+
+			BEGIN_CLASS_MEMBER(ListViewDetailContentProvider)
+			END_CLASS_MEMBER(ListViewDetailContentProvider)
+
+			BEGIN_CLASS_MEMBER(ListViewItem)
+			END_CLASS_MEMBER(ListViewItem)
+
+			BEGIN_CLASS_MEMBER(ListViewColumn)
+			END_CLASS_MEMBER(ListViewColumn)
+
+			BEGIN_CLASS_MEMBER(ListViewItemProvider)
+			END_CLASS_MEMBER(ListViewItemProvider)
+
+			BEGIN_CLASS_MEMBER(GuiVirtualListView)
+			END_CLASS_MEMBER(GuiVirtualListView)
+
+			BEGIN_CLASS_MEMBER(GuiListView)
+			END_CLASS_MEMBER(GuiListView)
+
+			BEGIN_CLASS_MEMBER(GuiMenu)
+			END_CLASS_MEMBER(GuiMenu)
+
+			BEGIN_CLASS_MEMBER(GuiMenuBar)
+			END_CLASS_MEMBER(GuiMenuBar)
+
+			BEGIN_CLASS_MEMBER(GuiMenuButton)
+			END_CLASS_MEMBER(GuiMenuButton)
+
+			BEGIN_CLASS_MEMBER(GuiMenuButton::IStyleController)
+			END_CLASS_MEMBER(GuiMenuButton::IStyleController)
+
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
 #undef INTERFACE_EXTERNALCTOR

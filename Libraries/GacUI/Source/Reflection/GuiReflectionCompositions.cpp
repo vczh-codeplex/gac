@@ -43,6 +43,9 @@ Type Declaration
 
 #define _ ,
 
+#define INTERFACE_EXTERNALCTOR(CONTROL, INTERFACE)\
+	CLASS_MEMBER_EXTERNALCTOR(decltype(interface_proxy::CONTROL##_##INTERFACE::Create(0))(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::CONTROL##_##INTERFACE::Create)
+
 			BEGIN_CLASS_MEMBER(GuiStackComposition)
 				CLASS_MEMBER_BASE(GuiBoundsComposition)
 				CLASS_MEMBER_CONSTRUCTOR(GuiStackComposition*(), NO_PARAMETER)
@@ -148,6 +151,19 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_FAST(HeightPageSize)
 			END_CLASS_MEMBER(GuiPartialViewComposition)
 
+			BEGIN_CLASS_MEMBER(presentation::compositions::GuiSubComponentMeasurer)
+			END_CLASS_MEMBER(presentation::compositions::GuiSubComponentMeasurer)
+
+			BEGIN_ENUM_ITEM(presentation::compositions::GuiSubComponentMeasurer::Direction)
+			END_ENUM_ITEM(presentation::compositions::GuiSubComponentMeasurer::Direction)
+
+			BEGIN_CLASS_MEMBER(presentation::compositions::GuiSubComponentMeasurer::IMeasuringSource)
+			END_CLASS_MEMBER(presentation::compositions::GuiSubComponentMeasurer::IMeasuringSource)
+
+			BEGIN_CLASS_MEMBER(presentation::compositions::GuiSubComponentMeasurer::MeasuringSource)
+			END_CLASS_MEMBER(presentation::compositions::GuiSubComponentMeasurer::MeasuringSource)
+
+#undef INTERFACE_EXTERNALCTOR
 #undef _
 
 /***********************************************************************

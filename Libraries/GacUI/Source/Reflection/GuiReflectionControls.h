@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONCONTROLS
 #define VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONCONTROLS
 
-#include "GuiReflectionBasic.h"
+#include "GuiReflectionCompositions.h"
 
 namespace vl
 {
@@ -75,6 +75,33 @@ Type List
 			F(presentation::controls::list::TextItemProvider)\
 			F(presentation::controls::GuiVirtualTextList)\
 			F(presentation::controls::GuiTextList)\
+			F(presentation::controls::list::ListViewItemStyleProviderBase)\
+			F(presentation::controls::list::ListViewItemStyleProviderBase::ListViewItemStyleController)\
+			F(presentation::controls::GuiListViewColumnHeader)\
+			F(presentation::controls::GuiListViewColumnHeader::ColumnSortingState)\
+			F(presentation::controls::GuiListViewColumnHeader::IStyleController)\
+			F(presentation::controls::GuiListViewBase)\
+			F(presentation::controls::list::ListViewItemStyleProvider)\
+			F(presentation::controls::list::ListViewItemStyleProvider::IListViewItemView)\
+			F(presentation::controls::list::ListViewItemStyleProvider::IListViewItemContent)\
+			F(presentation::controls::list::ListViewItemStyleProvider::IListViewItemContentProvider)\
+			F(presentation::controls::list::ListViewItemStyleProvider::ListViewContentItemStyleController)\
+			F(presentation::controls::list::ListViewBigIconContentProvider)\
+			F(presentation::controls::list::ListViewSmallIconContentProvider)\
+			F(presentation::controls::list::ListViewListContentProvider)\
+			F(presentation::controls::list::ListViewTileContentProvider)\
+			F(presentation::controls::list::ListViewInformationContentProvider)\
+			F(presentation::controls::list::ListViewColumnItemArranger)\
+			F(presentation::controls::list::ListViewDetailContentProvider)\
+			F(presentation::controls::list::ListViewItem)\
+			F(presentation::controls::list::ListViewColumn)\
+			F(presentation::controls::list::ListViewItemProvider)\
+			F(presentation::controls::GuiVirtualListView)\
+			F(presentation::controls::GuiListView)\
+			F(presentation::controls::GuiMenu)\
+			F(presentation::controls::GuiMenuBar)\
+			F(presentation::controls::GuiMenuButton)\
+			F(presentation::controls::GuiMenuButton::IStyleController)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
@@ -736,6 +763,243 @@ Interface Proxy
 					void SetCheckedSilently(vint itemIndex, bool value)override
 					{
 						INVOKE_INTERFACE_PROXY(SetCheckedSilently, itemIndex, value);
+					}
+				};
+
+				class GuiListViewBase_IStyleProvider : public virtual GuiScrollView_IStyleProvider, public virtual GuiListViewBase::IStyleProvider
+				{
+				public:
+					GuiListViewBase_IStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleProvider(_proxy)
+						,GuiScrollView_IStyleProvider(_proxy)
+					{
+					}
+
+					static GuiListViewBase::IStyleProvider* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListViewBase_IStyleProvider(proxy);
+					}
+
+					GuiSelectableButton::IStyleController* CreateItemBackground()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateItemBackground);
+					}
+
+					GuiListViewColumnHeader::IStyleController* CreateColumnStyle()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateColumnStyle);
+					}
+
+					Color GetPrimaryTextColor()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetPrimaryTextColor);
+					}
+
+					Color GetSecondaryTextColor()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSecondaryTextColor);
+					}
+
+					Color GetItemSeparatorColor()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetItemSeparatorColor);
+					}
+				};
+
+				class ListViewItemStyleProvider_IListViewItemView : public virtual GuiListControl_IItemPrimaryTextView, public virtual list::ListViewItemStyleProvider::IListViewItemView
+				{
+				public:
+					ListViewItemStyleProvider_IListViewItemView(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiListControl_IItemPrimaryTextView(_proxy)
+					{
+					}
+
+					static Ptr<list::ListViewItemStyleProvider::IListViewItemView> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new ListViewItemStyleProvider_IListViewItemView(proxy);
+					}
+
+					Ptr<GuiImageData> GetSmallImage(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetSmallImage, itemIndex);
+					}
+
+					Ptr<GuiImageData> GetLargeImage(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetLargeImage, itemIndex);
+					}
+
+					WString GetText(vint itemIndex)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetText, itemIndex);
+					}
+
+					WString GetSubItem(vint itemIndex, vint index)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetSubItem, itemIndex, index);
+					}
+
+					vint GetDataColumnCount()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetDataColumnCount);
+					}
+
+					vint GetDataColumn(vint index)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetDataColumn, index);
+					}
+
+					vint GetColumnCount()override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetColumnCount);
+					}
+
+					WString GetColumnText(vint index)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetColumnText, index);
+					}
+				};
+
+				class ListViewItemStyleProvider_IListViewItemContent : public Object, public virtual list::ListViewItemStyleProvider::IListViewItemContent
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					ListViewItemStyleProvider_IListViewItemContent(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static list::ListViewItemStyleProvider::IListViewItemContent* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new ListViewItemStyleProvider_IListViewItemContent(proxy);
+					}
+
+					compositions::GuiBoundsComposition* GetContentComposition()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetContentComposition);
+					}
+
+					compositions::GuiBoundsComposition* GetBackgroundDecorator()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBackgroundDecorator);
+					}
+
+					void Install(GuiListViewBase::IStyleProvider* styleProvider, list::ListViewItemStyleProvider::IListViewItemView* view, vint itemIndex)override
+					{
+						INVOKE_INTERFACE_PROXY(Install, styleProvider, view, itemIndex);
+					}
+				};
+
+				class ListViewItemStyleProvider_IListViewItemContentProvider : public Object, public virtual list::ListViewItemStyleProvider::IListViewItemContentProvider
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					ListViewItemStyleProvider_IListViewItemContentProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static list::ListViewItemStyleProvider::IListViewItemContentProvider* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new ListViewItemStyleProvider_IListViewItemContentProvider(proxy);
+					}
+
+					GuiListControl::IItemCoordinateTransformer* CreatePreferredCoordinateTransformer()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreatePreferredCoordinateTransformer);
+					}
+
+					GuiListControl::IItemArranger* CreatePreferredArranger()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreatePreferredArranger);
+					}
+
+					list::ListViewItemStyleProvider::IListViewItemContent* CreateItemContent(const FontProperties& font)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(CreateItemContent, font);
+					}
+
+					void AttachListControl(GuiListControl* value)override
+					{
+						INVOKE_INTERFACE_PROXY(AttachListControl, value);
+					}
+
+					void DetachListControl()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(DetachListControl);
+					}
+				};
+
+				class GuiMenuButton_IStyleController : public virtual GuiButton_IStyleController, public virtual GuiMenuButton::IStyleController
+				{
+				public:
+					GuiMenuButton_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleController(_proxy)
+						,GuiButton_IStyleController(_proxy)
+					{
+					}
+
+					static GuiMenuButton::IStyleController* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiMenuButton_IStyleController(proxy);
+					}
+
+					GuiMenu::IStyleController* CreateSubMenuStyleController()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateSubMenuStyleController);
+					}
+
+					void SetSubMenuExisting(bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetSubMenuExisting, value);
+					}
+
+					void SetSubMenuOpening(bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetSubMenuOpening, value);
+					}
+
+					GuiButton* GetSubMenuHost()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetSubMenuHost);
+					}
+
+					void SetImage(Ptr<GuiImageData> value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetImage, value);
+					}
+
+					void SetShortcutText(const WString& value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetShortcutText, value);
+					}
+
+					compositions::GuiSubComponentMeasurer::IMeasuringSource* GetMeasuringSource()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetMeasuringSource);
+					}
+				};
+
+				class GuiListViewColumnHeader_IStyleController : public virtual GuiMenuButton_IStyleController, public virtual GuiListViewColumnHeader::IStyleController
+				{
+				public:
+					GuiListViewColumnHeader_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleController(_proxy)
+						,GuiButton_IStyleController(_proxy)
+						,GuiMenuButton_IStyleController(_proxy)
+					{
+					}
+
+					static GuiListViewColumnHeader::IStyleController* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiListViewColumnHeader_IStyleController(proxy);
+					}
+
+					void SetColumnSortingState(GuiListViewColumnHeader::ColumnSortingState value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetColumnSortingState, value);
 					}
 				};
 			}
