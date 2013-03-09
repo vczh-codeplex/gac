@@ -248,6 +248,8 @@ GuiGraphicsHost
 			{
 				Rect oldBounds=nativeWindow->GetBounds();
 				minSize=windowComposition->GetPreferredBounds().GetSize();
+				if(minSize.x<1) minSize.x=1;
+				if(minSize.y<1) minSize.y=1;
 				Size minWindowSize=minSize+(oldBounds.GetSize()-nativeWindow->GetClientSize());
 				if(bounds.Width()<minWindowSize.x)
 				{
