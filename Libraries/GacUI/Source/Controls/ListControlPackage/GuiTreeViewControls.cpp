@@ -229,7 +229,7 @@ NodeItemProvider
 					}
 				}
 
-				NodeItemProvider::NodeItemProvider(INodeRootProvider* _root)
+				NodeItemProvider::NodeItemProvider(Ptr<INodeRootProvider> _root)
 					:root(_root)
 				{
 					root->AttachCallback(this);
