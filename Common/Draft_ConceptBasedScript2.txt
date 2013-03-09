@@ -1,3 +1,107 @@
 ========================================================
 Types
 ========================================================
+
+Root Type:
+	object	(Object)	: null(default)
+
+Literal Types: (all value types)
+	sbyte	(Int8)		: 0(default)
+	short	(Int16)		: 0(default)
+	int		(Int32)		: 0(default)
+	long	(Int64)		: 0(default)
+	byte	(UInt8)		: 0(default)
+	ushort	(UInt16)	: 0(default)
+	uint	(UInt32)	: 0(default)
+	ulong	(UInt64)	: 0(default)
+	float	(Float32)	: 0(default)
+	double	(Float64)	: 0(default)
+	bool	(Boolean)	: true, false(default)
+	char	(Char)		: 'a', 'b', '\0'(default)
+	string	(String)	: "abc", ""(default)
+	void	(Void)		: void(default)
+
+Composited Types: (all reference types)
+	[T]					: array [1,2,3]
+	{T}					: set {1,2,3}
+	{T:U}				: map {1:1, 2:4, 3:9}
+	(T..U)				: pair (1..2)
+
+	(T)					: tuple (1..void), equivalent to (T..void)
+	(T, U, V, W)		: tuple (1,2,3), equivalent to (T..(U..(V..(W..void))))
+	T=>U				: function x=>x+1, (a,b)=>a+b, null(default)
+
+	T*					: raw pointer, for [ManuallyDisposable] interoperating types
+	T^					: shared pointer, for [ManuallyDisposable] interoperating types
+
+Structured Types:
+
+	struct Point<T>
+	{
+		T x;
+		T y;
+	}
+
+	reference Node<T>
+	{
+		T data;
+		Node<T> next;
+	}
+
+Virtual Types:
+
+	[ManuallyDisposable]
+	interface IPrimaryTextView
+	{
+		static string GetIdentifier();
+
+		string GetText(int index);
+	}
+
+	[ManuallyDisposable]
+	[SealedType]
+	interface IListItem : IPrimaryTextView
+	{
+		Ptr<Image> GetImage(int index);
+	}
+	
+	[ManuallyDisposable] // class should always be [ManuallyDisposable], and should be sealed
+	[SealedType]
+	class GuiListControl : GuiScrollView
+	{
+		GuiListControl(IStyleProvider* styleProvider);
+		IItemStyleProvider^ SetStyleProvider(IItemStyleProvider^ value);
+	}
+
+	[ManuallyDisposable]
+	instance InfiniteTextView((int)=>string f) : IPrimaryTextView^
+	{
+		string GetText(int index)
+		{
+			return f(index);
+		}
+	}
+
+Concepts:
+
+	concept ImplicitlyConvertable<TSrc, TDst>
+	{
+		TDst ConvertImplicitly(TSrc source);
+	}
+
+	concept Convertable<TSrc, TDst>
+	{
+		TDst Convert(TSrc source);
+	}
+
+Concept Instances:
+
+	instance <TSrc, TDst> : ExplicitConvertable
+		where ImplicitlyConvertable<TSrc, TDst>
+	{
+		TDst Convert(TSrc source)
+		{
+			return ConvertImplicitly(source);
+			return ImplicitlyConvertable<TSrc, TDst>.ConvertImplicitly(source);
+		}
+	}
