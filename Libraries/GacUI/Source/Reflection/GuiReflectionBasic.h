@@ -82,14 +82,11 @@ Interface Proxy
 
 			namespace interface_proxy
 			{
-				class GuiControl_IStyleController : public Object, public virtual GuiControl::IStyleController
+				class GuiControl_IStyleController : public ValueInterfaceRoot, public virtual GuiControl::IStyleController
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>		proxy;
-
 				public:
 					GuiControl_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -129,14 +126,11 @@ Interface Proxy
 					}
 				};
 				
-				class GuiControl_IStyleProvider : public Object, public virtual GuiControl::IStyleProvider
+				class GuiControl_IStyleProvider : public ValueInterfaceRoot, public virtual GuiControl::IStyleProvider
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>		proxy;
-
 				public:
 					GuiControl_IStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 

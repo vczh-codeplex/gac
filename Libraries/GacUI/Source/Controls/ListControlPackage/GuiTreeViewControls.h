@@ -419,7 +419,7 @@ GuiVirtualTreeListControl
 				/// <summary>Create a tree list control in virtual mode.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
 				/// <param name="_nodeRootProvider">The node root provider for this control.</param>
-				GuiVirtualTreeListControl(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider);
+				GuiVirtualTreeListControl(IStyleProvider* _styleProvider, Ptr<tree::INodeRootProvider> _nodeRootProvider);
 				~GuiVirtualTreeListControl();
 
 				/// <summary>Node left mouse button down event.</summary>
@@ -564,7 +564,7 @@ TreeView
 				/// <summary>Create a tree view control in virtual mode. A [T:vl.presentation.controls.tree.TreeViewNodeItemStyleProvider] is created as a node item style provider by default.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
 				/// <param name="_nodeRootProvider">The node root provider for this control.</param>
-				GuiVirtualTreeView(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider);
+				GuiVirtualTreeView(IStyleProvider* _styleProvider, Ptr<tree::INodeRootProvider> _nodeRootProvider);
 				~GuiVirtualTreeView();
 
 				/// <summary>Get the style provider for this control.</summary>

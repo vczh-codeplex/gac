@@ -115,6 +115,11 @@ External Functions
 				return new ValueListWrapper<ListViewItemProvider*>(&thisObject->GetItems());
 			}
 
+			Ptr<IValueList> MemoryNodeProvider_GetChildren(MemoryNodeProvider* thisObject)
+			{
+				return new ValueListWrapper<MemoryNodeProvider::NodeCollection*>(&thisObject->Children());
+			}
+
 /***********************************************************************
 Type Declaration
 ***********************************************************************/
@@ -944,36 +949,97 @@ Type Declaration
 			END_CLASS_MEMBER(NodeItemProvider)
 
 			BEGIN_CLASS_MEMBER(INodeItemStyleController)
+				CLASS_MEMBER_BASE(GuiListControl::IItemStyleController)
+				INTERFACE_EXTERNALCTOR(tree, INodeItemStyleController)
+
+				CLASS_MEMBER_METHOD(GetNodeStyleProvider, NO_PARAMETER)
 			END_CLASS_MEMBER(INodeItemStyleController)
 
 			BEGIN_CLASS_MEMBER(INodeItemStyleProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(tree, INodeItemStyleProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BindedItemStyleProvider)
+
+				CLASS_MEMBER_METHOD(BindItemStyleProvider, {L"styleProvider"})
+				CLASS_MEMBER_METHOD(AttachListControl, {L"value"})
+				CLASS_MEMBER_METHOD(DetachListControl, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetItemStyleId, {L"node"})
+				CLASS_MEMBER_METHOD(CreateItemStyle, {L"styleId"})
+				CLASS_MEMBER_METHOD(DestroyItemStyle, {L"style"})
+				CLASS_MEMBER_METHOD(Install, {L"style" _ L"node"})
+				CLASS_MEMBER_METHOD(SetStyleSelected, {L"style" _ L"value"})
 			END_CLASS_MEMBER(INodeItemStyleProvider)
 
 			BEGIN_CLASS_MEMBER(NodeItemStyleProvider)
+				CLASS_MEMBER_BASE(GuiSelectableListControl::IItemStyleProvider)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<NodeItemStyleProvider>(Ptr<INodeItemStyleProvider>), {L"provider"})
 			END_CLASS_MEMBER(NodeItemStyleProvider)
 
 			BEGIN_CLASS_MEMBER(IMemoryNodeData)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(tree, IMemoryNodeData)
 			END_CLASS_MEMBER(IMemoryNodeData)
 
 			BEGIN_CLASS_MEMBER(MemoryNodeProvider)
+				CLASS_MEMBER_BASE(INodeProvider)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<MemoryNodeProvider>(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<MemoryNodeProvider>(Ptr<IMemoryNodeData>), {L"data"})
+
+				CLASS_MEMBER_PROPERTY_FAST(Data);
+
+				CLASS_MEMBER_METHOD(NotifyDataModified, NO_PARAMETER)
+				CLASS_MEMBER_EXTERNALMETHOD(GetChildren, NO_PARAMETER, Ptr<IValueList>(MemoryNodeProvider::*)(), &MemoryNodeProvider_GetChildren)
+				CLASS_MEMBER_PROPERTY_READONLY(Children, GetChildren)
 			END_CLASS_MEMBER(MemoryNodeProvider)
 
 			BEGIN_CLASS_MEMBER(NodeRootProviderBase)
+				CLASS_MEMBER_BASE(INodeRootProvider)
 			END_CLASS_MEMBER(NodeRootProviderBase)
 
 			BEGIN_CLASS_MEMBER(MemoryNodeRootProvider)
+				CLASS_MEMBER_BASE(NodeRootProviderBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<MemoryNodeRootProvider>(), NO_PARAMETER)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RootNode)
+
+				CLASS_MEMBER_METHOD(GetMemoryNode, {L"node"})
 			END_CLASS_MEMBER(MemoryNodeRootProvider)
 
 			BEGIN_CLASS_MEMBER(GuiVirtualTreeListControl)
+				CLASS_MEMBER_BASE(GuiSelectableListControl)
+				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualTreeListControl*(GuiVirtualTreeListControl::IStyleProvider* _ Ptr<INodeRootProvider>), {L"styleProvider" _ L"rootNodeProvider"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(NodeItemView)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(NodeRootProvider)
+				CLASS_MEMBER_PROPERTY_FAST(NodeStyleProvider)
 			END_CLASS_MEMBER(GuiVirtualTreeListControl)
 
 			BEGIN_CLASS_MEMBER(ITreeViewItemView)
+				CLASS_MEMBER_BASE(INodeItemPrimaryTextView)
+				INTERFACE_EXTERNALCTOR(tree, ITreeViewItemView)
+				INTERFACE_IDENTIFIER(ITreeViewItemView)
+
+				CLASS_MEMBER_METHOD(GetNodeImage, {L"node"})
+				CLASS_MEMBER_METHOD(GetNodeText, {L"node"})
 			END_CLASS_MEMBER(ITreeViewItemView)
 
 			BEGIN_CLASS_MEMBER(TreeViewItem)
+				CLASS_MEMBER_BASE(IMemoryNodeData)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<TreeViewItem>(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<TreeViewItem>(const Ptr<GuiImageData>&, const WString&), {L"image" _ L"text"})
+
+				CLASS_MEMBER_FIELD(image)
+				CLASS_MEMBER_FIELD(text)
 			END_CLASS_MEMBER(TreeViewItem)
 
 			BEGIN_CLASS_MEMBER(TreeViewItemRootProvider)
+				CLASS_MEMBER_BASE(MemoryNodeRootProvider)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<TreeViewItemRootProvider>(), NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD(GetTreeViewData, {L"node"})
+				CLASS_MEMBER_METHOD(SetTreeViewData, {L"node" _ L"value"})
+				CLASS_MEMBER_METHOD(UpdateTreeViewData, {L"node"})
 			END_CLASS_MEMBER(TreeViewItemRootProvider)
 
 			BEGIN_CLASS_MEMBER(GuiVirtualTreeView)
