@@ -106,6 +106,26 @@ Type List
 			F(presentation::controls::GuiMenuBar)\
 			F(presentation::controls::GuiMenuButton)\
 			F(presentation::controls::GuiMenuButton::IStyleController)\
+			F(presentation::controls::tree::INodeProviderCallback)\
+			F(presentation::controls::tree::INodeProvider)\
+			F(presentation::controls::tree::INodeRootProvider)\
+			F(presentation::controls::tree::INodeItemView)\
+			F(presentation::controls::tree::INodeItemPrimaryTextView)\
+			F(presentation::controls::tree::NodeItemProvider)\
+			F(presentation::controls::tree::INodeItemStyleController)\
+			F(presentation::controls::tree::INodeItemStyleProvider)\
+			F(presentation::controls::tree::NodeItemStyleProvider)\
+			F(presentation::controls::tree::IMemoryNodeData)\
+			F(presentation::controls::tree::MemoryNodeProvider)\
+			F(presentation::controls::tree::NodeRootProviderBase)\
+			F(presentation::controls::tree::MemoryNodeRootProvider)\
+			F(presentation::controls::GuiVirtualTreeListControl)\
+			F(presentation::controls::tree::ITreeViewItemView)\
+			F(presentation::controls::tree::TreeViewItem)\
+			F(presentation::controls::tree::TreeViewItemRootProvider)\
+			F(presentation::controls::GuiVirtualTreeView)\
+			F(presentation::controls::GuiTreeView)\
+			F(presentation::controls::tree::TreeViewNodeItemStyleProvider)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
