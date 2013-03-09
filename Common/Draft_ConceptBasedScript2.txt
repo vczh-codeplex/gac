@@ -31,8 +31,8 @@ Composited Types: (all reference types)
 	(T, U, V, W)		: tuple (1,2,3), equivalent to (T..(U..(V..(W..void))))
 	T=>U				: function x=>x+1, (a,b)=>a+b, null(default)
 
-	T*					: raw pointer, for [ManuallyDisposable] interoperating types
-	T^					: shared pointer, for [ManuallyDisposable] interoperating types
+	rawptr T				: raw pointer, for [ManuallyDisposable] interoperating types
+	managed T				: shared pointer, for [ManuallyDisposable] interoperating types
 
 Structured Types:
 
@@ -62,19 +62,20 @@ Virtual Types:
 	[SealedType]
 	interface IListItem : IPrimaryTextView
 	{
-		Ptr<Image> GetImage(int index);
+		managed Image GetImage(int index);
 	}
 	
 	[ManuallyDisposable] // class should always be [ManuallyDisposable], and should be sealed
 	[SealedType]
 	class GuiListControl : GuiScrollView
 	{
-		GuiListControl(IStyleProvider* styleProvider);
-		IItemStyleProvider^ SetStyleProvider(IItemStyleProvider^ value);
+		rawptr GuiListControl(rawptr IStyleProvider styleProvider);
+
+		managed IItemStyleProvider SetStyleProvider(managed IItemStyleProvider value);
 	}
 
 	[ManuallyDisposable]
-	instance InfiniteTextView((int)=>string f) : IPrimaryTextView^
+	instance InfiniteTextView((int)=>string f) : managed IPrimaryTextView
 	{
 		string GetText(int index)
 		{
