@@ -190,7 +190,7 @@ GuiVirtualTreeListControl NodeProvider
 				public:
 					/// <summary>Create an item provider using a node root provider.</summary>
 					/// <param name="_root">The node root provider.</param>
-					NodeItemProvider(INodeRootProvider* _root);
+					NodeItemProvider(Ptr<INodeRootProvider> _root);
 					~NodeItemProvider();
 					
 					/// <summary>Get the owned node root provider.</summary>

@@ -67,6 +67,7 @@ Type List
 			F(presentation::controls::list::FixedSizeMultiColumnItemArranger)\
 			F(presentation::controls::list::FixedHeightMultiColumnItemArranger)\
 			F(presentation::controls::list::ItemStyleControllerBase)\
+			F(presentation::controls::list::ItemProviderBase)\
 			F(presentation::controls::list::TextItemStyleProvider)\
 			F(presentation::controls::list::TextItemStyleProvider::ITextItemStyleProvider)\
 			F(presentation::controls::list::TextItemStyleProvider::ITextItemView)\
@@ -1080,6 +1081,163 @@ Interface Proxy
 					void SetColumnSortingState(GuiListViewColumnHeader::ColumnSortingState value)override
 					{
 						INVOKE_INTERFACE_PROXY(SetColumnSortingState, value);
+					}
+				};
+
+				class tree_INodeProvider : public Object, public virtual tree::INodeProvider
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					tree_INodeProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static Ptr<tree::INodeProvider> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new tree_INodeProvider(proxy);
+					}
+
+					bool GetExpanding()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetExpanding);
+					}
+
+					void SetExpanding(bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetExpanding, value);
+					}
+
+					vint CalculateTotalVisibleNodes()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CalculateTotalVisibleNodes);
+					}
+
+					vint GetChildCount()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetChildCount);
+					}
+
+					INodeProvider* GetParent()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetParent);
+					}
+
+					INodeProvider* GetChild(vint index)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetChild, index);
+					}
+
+					void Increase()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(Increase);
+					}
+
+					void Release()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(Release);
+					}
+				};
+
+				class tree_INodeRootProvider : public Object, public virtual tree::INodeRootProvider
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					tree_INodeRootProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static Ptr<tree::INodeRootProvider> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new tree_INodeRootProvider(proxy);
+					}
+
+					tree::INodeProvider* GetRootNode()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetRootNode);
+					}
+
+					bool CanGetNodeByVisibleIndex()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CanGetNodeByVisibleIndex);
+					}
+
+					tree::INodeProvider* GetNodeByVisibleIndex(vint index)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetNodeByVisibleIndex, index);
+					}
+
+					bool AttachCallback(tree::INodeProviderCallback* value)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(AttachCallback, value);
+					}
+
+					bool DetachCallback(tree::INodeProviderCallback* value)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(DetachCallback, value);
+					}
+
+					IDescriptable* RequestView(const WString& identifier)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RequestView, identifier);
+					}
+
+					void ReleaseView(IDescriptable* view)override
+					{
+						INVOKE_INTERFACE_PROXY(ReleaseView, view);
+					}
+				};
+
+				class tree_INodeItemView : public virtual GuiListControl_IItemPrimaryTextView, public virtual tree::INodeItemView
+				{
+				public:
+					tree_INodeItemView(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiListControl_IItemPrimaryTextView(_proxy)
+					{
+					}
+
+					static Ptr<tree::INodeItemView> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new tree_INodeItemView(proxy);
+					}
+
+					tree::INodeProvider* RequestNode(vint index)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(RequestNode, index);
+					}
+
+					void ReleaseNode(tree::INodeProvider* node)override
+					{
+						INVOKE_INTERFACE_PROXY(ReleaseNode, node);
+					}
+
+					vint CalculateNodeVisibilityIndex(tree::INodeProvider* node)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(CalculateNodeVisibilityIndex, node);
+					}
+				};
+
+				class tree_INodeItemPrimaryTextView : public Object, public virtual tree::INodeItemPrimaryTextView
+				{
+				protected:
+					Ptr<IValueInterfaceProxy>			proxy;
+				public:
+					tree_INodeItemPrimaryTextView(Ptr<IValueInterfaceProxy> _proxy)
+						:proxy(_proxy)
+					{
+					}
+
+					static Ptr<tree::INodeItemPrimaryTextView> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new tree_INodeItemPrimaryTextView(proxy);
+					}
+
+					WString GetPrimaryTextViewText(tree::INodeProvider* node)
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetPrimaryTextViewText, node);
 					}
 				};
 			}

@@ -554,6 +554,10 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiListControl::IItemStyleController)
 			END_CLASS_MEMBER(ItemStyleControllerBase)
 
+			BEGIN_CLASS_MEMBER(ItemProviderBase)
+				CLASS_MEMBER_BASE(GuiListControl::IItemProvider)
+			END_CLASS_MEMBER(ItemProviderBase)
+
 			BEGIN_CLASS_MEMBER(TextItemStyleProvider)
 				CLASS_MEMBER_BASE(GuiSelectableListControl::IItemStyleProvider)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<TextItemStyleProvider>(TextItemStyleProvider::ITextItemStyleProvider*), {L"textItemStyleProvider"})
@@ -595,7 +599,7 @@ Type Declaration
 			END_CLASS_MEMBER(TextItem)
 
 			BEGIN_CLASS_MEMBER(TextItemProvider)
-				CLASS_MEMBER_BASE(GuiListControl::IItemProvider)
+				CLASS_MEMBER_BASE(ItemProviderBase)
 
 				CLASS_MEMBER_METHOD(SetText, {L"itemIndex" _ L"value"})
 				CLASS_MEMBER_METHOD(SetChecked, {L"itemIndex" _ L"value"})
@@ -877,21 +881,66 @@ Type Declaration
 			END_CLASS_MEMBER(GuiMenuButton::IStyleController)
 
 			BEGIN_CLASS_MEMBER(INodeProviderCallback)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_METHOD(OnAttached, {L"provider"})
+				CLASS_MEMBER_METHOD(OnBeforeItemModified, {L"parentNode" _ L"start" _ L"count" _ L"newCount"})
+				CLASS_MEMBER_METHOD(OnAfterItemModified, {L"parentNode" _ L"start" _ L"count" _ L"newCount"})
+				CLASS_MEMBER_METHOD(OnItemExpanded, {L"node"})
+				CLASS_MEMBER_METHOD(OnItemCollapsed, {L"node"})
 			END_CLASS_MEMBER(INodeProviderCallback)
 
 			BEGIN_CLASS_MEMBER(INodeProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(tree, INodeProvider)
+
+				CLASS_MEMBER_PROPERTY_FAST(Expanding)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ChildCount)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Parent)
+
+				CLASS_MEMBER_METHOD(CalculateTotalVisibleNodes, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetChild, {L"index"})
+				CLASS_MEMBER_METHOD(Increase, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Release, NO_PARAMETER)
 			END_CLASS_MEMBER(INodeProvider)
 
 			BEGIN_CLASS_MEMBER(INodeRootProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(tree, INodeRootProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RootNode)
+
+				CLASS_MEMBER_METHOD(CanGetNodeByVisibleIndex, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetNodeByVisibleIndex, {L"index"})
+				CLASS_MEMBER_METHOD(AttachCallback, {L"value"})
+				CLASS_MEMBER_METHOD(DetachCallback, {L"value"})
+				CLASS_MEMBER_METHOD(RequestView, {L"identifier"})
+				CLASS_MEMBER_METHOD(ReleaseView, {L"value"})
 			END_CLASS_MEMBER(INodeRootProvider)
 
 			BEGIN_CLASS_MEMBER(INodeItemView)
+				CLASS_MEMBER_BASE(GuiListControl::IItemPrimaryTextView)
+				INTERFACE_EXTERNALCTOR(tree, INodeItemView)
+				INTERFACE_IDENTIFIER(INodeItemView)
+
+				CLASS_MEMBER_METHOD(RequestNode, {L"index"})
+				CLASS_MEMBER_METHOD(ReleaseNode, {L"node"})
+				CLASS_MEMBER_METHOD(CalculateNodeVisibilityIndex, {L"node"})
 			END_CLASS_MEMBER(INodeItemView)
 
 			BEGIN_CLASS_MEMBER(INodeItemPrimaryTextView)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(tree, INodeItemPrimaryTextView)
+				INTERFACE_IDENTIFIER(INodeItemPrimaryTextView)
+
+				CLASS_MEMBER_METHOD(GetPrimaryTextViewText, {L"node"})
 			END_CLASS_MEMBER(INodeItemPrimaryTextView)
 
 			BEGIN_CLASS_MEMBER(NodeItemProvider)
+				CLASS_MEMBER_BASE(ItemProviderBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<NodeItemProvider>(Ptr<INodeRootProvider>), {L"root"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Root)
 			END_CLASS_MEMBER(NodeItemProvider)
 
 			BEGIN_CLASS_MEMBER(INodeItemStyleController)
