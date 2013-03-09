@@ -166,6 +166,7 @@ Type Declaration
 			END_ENUM_ITEM(GuiSubComponentMeasurer::Direction)
 
 			BEGIN_CLASS_MEMBER(GuiSubComponentMeasurer::IMeasuringSource)
+				CLASS_MEMBER_BASE(IDescriptable)
 				INTERFACE_EXTERNALCTOR(GuiSubComponentMeasurer, IMeasuringSource)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(AttachedMeasurer)

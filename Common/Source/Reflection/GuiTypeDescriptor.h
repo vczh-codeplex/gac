@@ -53,12 +53,6 @@ Attribute
 
 			description::ITypeDescriptor*			GetTypeDescriptor();
 		};
-
-		class IDescriptable : public virtual Interface, public virtual DescriptableObject
-		{
-		public:
-			~IDescriptable(){}
-		};
 		
 		template<typename T>
 		class Description : public virtual DescriptableObject
@@ -91,6 +85,12 @@ Attribute
 
 		template<typename T>
 		description::ITypeDescriptor* Description<T>::associatedTypeDescriptor=0;
+
+		class IDescriptable : public virtual Interface, public Description<IDescriptable>
+		{
+		public:
+			~IDescriptable(){}
+		};
 
 /***********************************************************************
 Value
@@ -211,7 +211,7 @@ Value
 Collections
 ***********************************************************************/
 
-			class IValueReadonlyList : public IDescriptable, public Description<IValueReadonlyList>
+			class IValueReadonlyList : public virtual IDescriptable, public Description<IValueReadonlyList>
 			{
 			public:
 				virtual vint					Count()=0;
@@ -377,13 +377,13 @@ Collections
 Interface Implementation Proxy
 ***********************************************************************/
 
-			class IValueInterfaceProxy : public IDescriptable, public Description<IValueReadonlyList>
+			class IValueInterfaceProxy : public virtual IDescriptable, public Description<IValueReadonlyList>
 			{
 			public:
 				virtual Value					Invoke(const WString& methodName, Ptr<IValueList> arguments)=0;
 			};
 
-			class IValueFunctionProxy : public IDescriptable, public Description<IValueFunctionProxy>
+			class IValueFunctionProxy : public virtual IDescriptable, public Description<IValueFunctionProxy>
 			{
 			public:
 				virtual Value					Invoke(Ptr<IValueList> arguments)=0;

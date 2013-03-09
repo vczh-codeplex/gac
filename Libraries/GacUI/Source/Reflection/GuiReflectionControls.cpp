@@ -270,6 +270,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiTab)
 
 			BEGIN_CLASS_MEMBER(GuiTab::ICommandExecutor)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_METHOD(ShowTab, {L"index"})
 			END_CLASS_MEMBER(GuiTab::ICommandExecutor)
 
@@ -373,6 +374,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiListControl)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemProviderCallback)
+				CLASS_MEMBER_BASE(IDescriptable)
 				INTERFACE_EXTERNALCTOR(GuiListControl, IItemProviderCallback)
 
 				CLASS_MEMBER_METHOD(OnAttached, {L"provider"})
@@ -380,6 +382,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiListControl::IItemProviderCallback)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemArrangerCallback)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_METHOD(RequestItem, {L"itemIndex"})
 				CLASS_MEMBER_METHOD(ReleaseItem, {L"style"})
 				CLASS_MEMBER_METHOD(SetViewLocation, {L"value"})
@@ -392,6 +395,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiListControl::IItemArrangerCallback)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemPrimaryTextView)
+				CLASS_MEMBER_BASE(IDescriptable)
 				INTERFACE_EXTERNALCTOR(GuiListControl, IItemPrimaryTextView)
 				INTERFACE_IDENTIFIER(GuiListControl::IItemPrimaryTextView)
 
@@ -414,6 +418,7 @@ Type Declaration
 			END_ENUM_ITEM(GuiListControl::KeyDirection)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
 				INTERFACE_EXTERNALCTOR(GuiListControl, IItemProvider)
 
 				CLASS_MEMBER_METHOD(AttachCallback, {L"value"})
@@ -424,6 +429,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiListControl::IItemProvider)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemStyleController)
+				CLASS_MEMBER_BASE(IDescriptable)
 				INTERFACE_EXTERNALCTOR(GuiListControl, IItemProvider)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(StyleProvider)
@@ -437,6 +443,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiListControl::IItemStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemStyleProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
 				INTERFACE_EXTERNALCTOR(GuiListControl, IItemStyleProvider)
 
 				CLASS_MEMBER_METHOD(AttachListControl, {L"value"})
@@ -464,6 +471,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiListControl::IItemArranger)
 
 			BEGIN_CLASS_MEMBER(GuiListControl::IItemCoordinateTransformer)
+				CLASS_MEMBER_BASE(IDescriptable)
 				INTERFACE_EXTERNALCTOR(GuiListControl, IItemCoordinateTransformer)
 
 				CLASS_MEMBER_METHOD(RealSizeToVirtualSize, {L"size"})
@@ -684,6 +692,7 @@ Type Declaration
 			END_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemView)
 
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemContent)
+				CLASS_MEMBER_BASE(IDescriptable)
 				INTERFACE_EXTERNALCTOR(ListViewItemStyleProvider, IListViewItemContent)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContentComposition)
@@ -693,6 +702,7 @@ Type Declaration
 			END_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemContent)
 
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProvider::IListViewItemContentProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
 				INTERFACE_EXTERNALCTOR(ListViewItemStyleProvider, IListViewItemContentProvider)
 
 				CLASS_MEMBER_METHOD(CreatePreferredCoordinateTransformer, NO_PARAMETER)
@@ -746,6 +756,7 @@ Type Declaration
 			END_CLASS_MEMBER(ListViewColumnItemArranger::IColumnItemViewCallback)
 
 			BEGIN_CLASS_MEMBER(ListViewColumnItemArranger::IColumnItemView)
+				CLASS_MEMBER_BASE(IDescriptable)
 				INTERFACE_EXTERNALCTOR(ListViewColumnItemArranger, IColumnItemView)
 				INTERFACE_IDENTIFIER(ListViewColumnItemArranger::IColumnItemView)
 

@@ -65,7 +65,7 @@ System Object
 		/// <summary>
 		/// Represents a cursor.
 		/// </summary>
-		class INativeCursor : public IDescriptable, Description<INativeCursor>
+		class INativeCursor : public virtual IDescriptable, Description<INativeCursor>
 		{
 		public:
 			/// <summary>
@@ -167,7 +167,7 @@ Image Object
 		/// <summary>
 		/// Represents an image frame.
 		/// </summary>
-		class INativeImageFrame : public IDescriptable, public Description<INativeImageFrame>
+		class INativeImageFrame : public virtual IDescriptable, public Description<INativeImageFrame>
 		{
 		public:
 			/// <summary>
@@ -205,7 +205,7 @@ Image Object
 		/// <summary>
 		/// Represents an image.
 		/// </summary>
-		class INativeImage : public IDescriptable, public Description<INativeImage>
+		class INativeImage : public virtual IDescriptable, public Description<INativeImage>
 		{
 		public:
 			/// <summary>

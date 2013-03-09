@@ -26,7 +26,7 @@ namespace vl
 			{
 			public:
 				/// <summary>Measuring source for <see cref="GuiSubComponentMeasurer"/>.</summary>
-				class IMeasuringSource : public IDescriptable, public Description<IMeasuringSource>
+				class IMeasuringSource : public virtual IDescriptable, public Description<IMeasuringSource>
 				{
 				public:
 					/// <summary>Called when a this measuring source is attached to a <see cref="GuiSubComponentMeasurer"/>.</summary>
