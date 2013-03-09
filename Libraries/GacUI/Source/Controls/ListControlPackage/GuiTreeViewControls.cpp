@@ -785,7 +785,7 @@ GuiVirtualTreeListControl
 						ITEMEVENTNAME.AttachFunction(Curry(func)(NODEEVENTNAME));\
 					}\
 
-			GuiVirtualTreeListControl::GuiVirtualTreeListControl(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider)
+			GuiVirtualTreeListControl::GuiVirtualTreeListControl(IStyleProvider* _styleProvider, Ptr<tree::INodeRootProvider> _nodeRootProvider)
 				:GuiSelectableListControl(_styleProvider, new tree::NodeItemProvider(_nodeRootProvider))
 			{
 				nodeItemProvider=dynamic_cast<tree::NodeItemProvider*>(GetItemProvider());
@@ -1257,7 +1257,7 @@ TreeViewNodeItemStyleProvider
 GuiVirtualTreeView
 ***********************************************************************/
 
-			GuiVirtualTreeView::GuiVirtualTreeView(IStyleProvider* _styleProvider, tree::INodeRootProvider* _nodeRootProvider)
+			GuiVirtualTreeView::GuiVirtualTreeView(IStyleProvider* _styleProvider, Ptr<tree::INodeRootProvider> _nodeRootProvider)
 				:GuiVirtualTreeListControl(_styleProvider, _nodeRootProvider)
 			{
 				styleProvider=dynamic_cast<IStyleProvider*>(styleController->GetStyleProvider());

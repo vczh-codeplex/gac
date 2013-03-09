@@ -402,13 +402,11 @@ Interface Proxy
 					}
 				};
 
-				class GuiListControl_IItemProviderCallback : public Object, public virtual GuiListControl::IItemProviderCallback
+				class GuiListControl_IItemProviderCallback : public ValueInterfaceRoot, public virtual GuiListControl::IItemProviderCallback
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					GuiListControl_IItemProviderCallback(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -428,13 +426,11 @@ Interface Proxy
 					}
 				};
 
-				class GuiListControl_IItemPrimaryTextView : public Object, public virtual GuiListControl::IItemPrimaryTextView
+				class GuiListControl_IItemPrimaryTextView : public ValueInterfaceRoot, public virtual GuiListControl::IItemPrimaryTextView
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					GuiListControl_IItemPrimaryTextView(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -454,13 +450,11 @@ Interface Proxy
 					}
 				};
 
-				class GuiListControl_IItemProvider : public Object, public virtual GuiListControl::IItemProvider
+				class GuiListControl_IItemProvider : public ValueInterfaceRoot, public virtual GuiListControl::IItemProvider
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					GuiListControl_IItemProvider(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -495,13 +489,11 @@ Interface Proxy
 					}
 				};
 
-				class GuiListControl_IItemStyleController : public Object, public virtual GuiListControl::IItemStyleController
+				class GuiListControl_IItemStyleController : public ValueInterfaceRoot, public virtual GuiListControl::IItemStyleController
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					GuiListControl_IItemStyleController(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -546,13 +538,11 @@ Interface Proxy
 					}
 				};
 
-				class GuiListControl_IItemStyleProvider : public Object, public virtual GuiListControl::IItemStyleProvider
+				class GuiListControl_IItemStyleProvider : public ValueInterfaceRoot, public virtual GuiListControl::IItemStyleProvider
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					GuiListControl_IItemStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -656,13 +646,11 @@ Interface Proxy
 					}
 				};
 
-				class GuiListControl_IItemCoordinateTransformer : public Object, public virtual GuiListControl::IItemCoordinateTransformer
+				class GuiListControl_IItemCoordinateTransformer : public ValueInterfaceRoot, public virtual GuiListControl::IItemCoordinateTransformer
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					GuiListControl_IItemCoordinateTransformer(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -736,13 +724,11 @@ Interface Proxy
 					}
 				};
 
-				class TextItemStyleProvider_ITextItemStyleProvider : public Object, public virtual list::TextItemStyleProvider::ITextItemStyleProvider
+				class TextItemStyleProvider_ITextItemStyleProvider : public ValueInterfaceRoot, public virtual list::TextItemStyleProvider::ITextItemStyleProvider
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					TextItemStyleProvider_ITextItemStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -885,13 +871,11 @@ Interface Proxy
 					}
 				};
 
-				class ListViewItemStyleProvider_IListViewItemContent : public Object, public virtual list::ListViewItemStyleProvider::IListViewItemContent
+				class ListViewItemStyleProvider_IListViewItemContent : public ValueInterfaceRoot, public virtual list::ListViewItemStyleProvider::IListViewItemContent
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					ListViewItemStyleProvider_IListViewItemContent(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -916,13 +900,11 @@ Interface Proxy
 					}
 				};
 
-				class ListViewItemStyleProvider_IListViewItemContentProvider : public Object, public virtual list::ListViewItemStyleProvider::IListViewItemContentProvider
+				class ListViewItemStyleProvider_IListViewItemContentProvider : public ValueInterfaceRoot, public virtual list::ListViewItemStyleProvider::IListViewItemContentProvider
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					ListViewItemStyleProvider_IListViewItemContentProvider(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -957,13 +939,11 @@ Interface Proxy
 					}
 				};
 
-				class ListViewColumnItemArranger_IColumnItemView : public Object, public virtual list::ListViewColumnItemArranger::IColumnItemView
+				class ListViewColumnItemArranger_IColumnItemView : public ValueInterfaceRoot, public virtual list::ListViewColumnItemArranger::IColumnItemView
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					ListViewColumnItemArranger_IColumnItemView(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -1084,13 +1064,11 @@ Interface Proxy
 					}
 				};
 
-				class tree_INodeProvider : public Object, public virtual tree::INodeProvider
+				class tree_INodeProvider : public ValueInterfaceRoot, public virtual tree::INodeProvider
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					tree_INodeProvider(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -1140,13 +1118,11 @@ Interface Proxy
 					}
 				};
 
-				class tree_INodeRootProvider : public Object, public virtual tree::INodeRootProvider
+				class tree_INodeRootProvider : public ValueInterfaceRoot, public virtual tree::INodeRootProvider
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					tree_INodeRootProvider(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -1220,13 +1196,11 @@ Interface Proxy
 					}
 				};
 
-				class tree_INodeItemPrimaryTextView : public Object, public virtual tree::INodeItemPrimaryTextView
+				class tree_INodeItemPrimaryTextView : public ValueInterfaceRoot, public virtual tree::INodeItemPrimaryTextView
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					tree_INodeItemPrimaryTextView(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
@@ -1235,9 +1209,125 @@ Interface Proxy
 						return new tree_INodeItemPrimaryTextView(proxy);
 					}
 
-					WString GetPrimaryTextViewText(tree::INodeProvider* node)
+					WString GetPrimaryTextViewText(tree::INodeProvider* node)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(GetPrimaryTextViewText, node);
+					}
+				};
+
+				class tree_INodeItemStyleController: public virtual GuiListControl_IItemStyleController, public virtual tree::INodeItemStyleController
+				{
+				public:
+					tree_INodeItemStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiListControl_IItemStyleController(_proxy)
+					{
+					}
+
+					static tree::INodeItemStyleController* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new tree_INodeItemStyleController(proxy);
+					}
+
+					tree::INodeItemStyleProvider* GetNodeStyleProvider()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetNodeStyleProvider);
+					}
+				};
+
+				class tree_INodeItemStyleProvider : public ValueInterfaceRoot, public virtual tree::INodeItemStyleProvider
+				{
+				public:
+					tree_INodeItemStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<tree::INodeItemStyleProvider> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new tree_INodeItemStyleProvider(proxy);
+					}
+
+					void BindItemStyleProvider(GuiListControl::IItemStyleProvider* styleProvider)override
+					{
+						INVOKE_INTERFACE_PROXY(BindItemStyleProvider, styleProvider);
+					}
+
+					GuiListControl::IItemStyleProvider* GetBindedItemStyleProvider()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBindedItemStyleProvider);
+					}
+
+					void AttachListControl(GuiListControl* value)override
+					{
+						INVOKE_INTERFACE_PROXY(AttachListControl, value);
+					}
+
+					void DetachListControl()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(DetachListControl);
+					}
+
+					vint GetItemStyleId(tree::INodeProvider* node)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetItemStyleId, node);
+					}
+
+					tree::INodeItemStyleController* CreateItemStyle(vint styleId)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(CreateItemStyle, styleId);
+					}
+
+					void DestroyItemStyle(tree::INodeItemStyleController* style)override
+					{
+						INVOKE_INTERFACE_PROXY(DestroyItemStyle, style);
+					}
+
+					void Install(tree::INodeItemStyleController* style, tree::INodeProvider* node)override
+					{
+						INVOKE_INTERFACE_PROXY(Install, style, node);
+					}
+
+					void SetStyleSelected(tree::INodeItemStyleController* style, bool value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetStyleSelected, style, value);
+					}
+				};
+
+				class tree_IMemoryNodeData : public ValueInterfaceRoot, public virtual tree::IMemoryNodeData
+				{
+				public:
+					tree_IMemoryNodeData(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<tree::IMemoryNodeData> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new tree_IMemoryNodeData(proxy);
+					}
+				};
+
+				class tree_ITreeViewItemView : public virtual tree_INodeItemPrimaryTextView, public virtual tree::ITreeViewItemView
+				{
+				public:
+					tree_ITreeViewItemView(Ptr<IValueInterfaceProxy> proxy)
+						:tree_INodeItemPrimaryTextView(proxy)
+					{
+					}
+
+					static Ptr<tree::ITreeViewItemView> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new tree_ITreeViewItemView(proxy);
+					}
+
+					Ptr<GuiImageData> GetNodeImage(tree::INodeProvider* node)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetNodeImage, node);
+					}
+
+					WString GetNodeText(tree::INodeProvider* node)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetNodeText, node);
 					}
 				};
 			}

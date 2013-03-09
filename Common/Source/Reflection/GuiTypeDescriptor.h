@@ -389,6 +389,22 @@ Interface Implementation Proxy
 				virtual Value					Invoke(Ptr<IValueList> arguments)=0;
 			};
 
+			class ValueInterfaceRoot : public virtual IDescriptable
+			{
+			protected:
+				Ptr<IValueInterfaceProxy>		proxy;
+			public:
+				ValueInterfaceRoot(Ptr<IValueInterfaceProxy> _proxy)
+					:proxy(_proxy)
+				{
+				}
+
+				Ptr<IValueInterfaceProxy> GetProxy()
+				{
+					return proxy;
+				}
+			};
+
 /***********************************************************************
 ITypeDescriptor (basic)
 ***********************************************************************/

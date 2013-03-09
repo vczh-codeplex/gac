@@ -48,13 +48,11 @@ Interface Proxy
 #pragma warning(disable:4250)
 			namespace interface_proxy
 			{
-				class GuiSubComponentMeasurer_IMeasuringSource : public Object, public virtual GuiSubComponentMeasurer::IMeasuringSource
+				class GuiSubComponentMeasurer_IMeasuringSource : public ValueInterfaceRoot, public virtual GuiSubComponentMeasurer::IMeasuringSource
 				{
-				protected:
-					Ptr<IValueInterfaceProxy>			proxy;
 				public:
 					GuiSubComponentMeasurer_IMeasuringSource(Ptr<IValueInterfaceProxy> _proxy)
-						:proxy(_proxy)
+						:ValueInterfaceRoot(_proxy)
 					{
 					}
 
