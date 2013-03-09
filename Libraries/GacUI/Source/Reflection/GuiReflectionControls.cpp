@@ -120,6 +120,11 @@ External Functions
 				return new ValueListWrapper<MemoryNodeProvider::NodeCollection*>(&thisObject->Children());
 			}
 
+			Ptr<TreeViewItemRootProvider> GuiTreeView_GetNodes(GuiTreeView* thisObject)
+			{
+				return thisObject->Nodes();
+			}
+
 /***********************************************************************
 Type Declaration
 ***********************************************************************/
@@ -1043,12 +1048,33 @@ Type Declaration
 			END_CLASS_MEMBER(TreeViewItemRootProvider)
 
 			BEGIN_CLASS_MEMBER(GuiVirtualTreeView)
+				CLASS_MEMBER_BASE(GuiVirtualTreeListControl)
+				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualTreeView*(GuiVirtualTreeView::IStyleProvider* _ Ptr<INodeRootProvider>), {L"styleProvider" _ L"rootNodeProvider"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TreeViewStyleProvider)
 			END_CLASS_MEMBER(GuiVirtualTreeView)
 
+			BEGIN_CLASS_MEMBER(GuiVirtualTreeView::IStyleProvider)
+				CLASS_MEMBER_BASE(GuiVirtualTreeListControl::IStyleProvider)
+				INTERFACE_EXTERNALCTOR(GuiVirtualTreeView, IStyleProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TextColor)
+
+				CLASS_MEMBER_METHOD(CreateItemBackground, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateItemExpandingDecorator, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiVirtualTreeView::IStyleProvider)
+
 			BEGIN_CLASS_MEMBER(GuiTreeView)
+				CLASS_MEMBER_BASE(GuiVirtualTreeView)
+				CONTROL_CONSTRUCTOR_PROVIDER(GuiTreeView)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetNodes, NO_PARAMETER, Ptr<TreeViewItemRootProvider>(GuiTreeView::*)(), &GuiTreeView_GetNodes)
+				CLASS_MEMBER_PROPERTY_READONLY(Nodes, GetNodes)
 			END_CLASS_MEMBER(GuiTreeView)
 
 			BEGIN_CLASS_MEMBER(TreeViewNodeItemStyleProvider)
+				CLASS_MEMBER_BASE(INodeItemStyleProvider)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<TreeViewNodeItemStyleProvider>(), NO_PARAMETER)
 			END_CLASS_MEMBER(TreeViewNodeItemStyleProvider)
 
 #undef INTERFACE_IDENTIFIER

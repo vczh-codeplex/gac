@@ -125,6 +125,7 @@ Type List
 			F(presentation::controls::tree::TreeViewItem)\
 			F(presentation::controls::tree::TreeViewItemRootProvider)\
 			F(presentation::controls::GuiVirtualTreeView)\
+			F(presentation::controls::GuiVirtualTreeView::IStyleProvider)\
 			F(presentation::controls::GuiTreeView)\
 			F(presentation::controls::tree::TreeViewNodeItemStyleProvider)\
 
@@ -1328,6 +1329,36 @@ Interface Proxy
 					WString GetNodeText(tree::INodeProvider* node)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(GetNodeText, node);
+					}
+				};
+
+				class GuiVirtualTreeView_IStyleProvider : public virtual GuiScrollView_IStyleProvider, public virtual GuiVirtualTreeView::IStyleProvider
+				{
+				public:
+					GuiVirtualTreeView_IStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleProvider(_proxy)
+						,GuiScrollView_IStyleProvider(_proxy)
+					{
+					}
+
+					static GuiVirtualTreeView::IStyleProvider* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiVirtualTreeView_IStyleProvider(proxy);
+					}
+
+					GuiSelectableButton::IStyleController* CreateItemBackground()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateItemBackground);
+					}
+
+					GuiSelectableButton::IStyleController* CreateItemExpandingDecorator()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateItemExpandingDecorator);
+					}
+
+					Color GetTextColor()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetTextColor);
 					}
 				};
 			}
