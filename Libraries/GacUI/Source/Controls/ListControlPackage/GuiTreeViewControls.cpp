@@ -476,7 +476,7 @@ MemoryNodeProvider
 					children.ownerProvider=this;
 				}
 
-				MemoryNodeProvider::MemoryNodeProvider(const Ptr<DescriptableObject>& _data)
+				MemoryNodeProvider::MemoryNodeProvider(const Ptr<IMemoryNodeData>& _data)
 					:parent(0)
 					,expanding(false)
 					,childCount(0)
@@ -491,12 +491,12 @@ MemoryNodeProvider
 				{
 				}
 
-				Ptr<DescriptableObject> MemoryNodeProvider::GetData()
+				Ptr<IMemoryNodeData> MemoryNodeProvider::GetData()
 				{
 					return data;
 				}
 
-				void MemoryNodeProvider::SetData(const Ptr<DescriptableObject>& value)
+				void MemoryNodeProvider::SetData(const Ptr<IMemoryNodeData>& value)
 				{
 					data=value;
 					NotifyDataModified();

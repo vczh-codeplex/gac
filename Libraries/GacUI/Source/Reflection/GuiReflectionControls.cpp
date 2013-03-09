@@ -12,6 +12,7 @@ namespace vl
 			using namespace parsing::xml;
 			using namespace stream;
 			using namespace list;
+			using namespace tree;
 
 			GUIREFLECTIONCONTROLS_TYPELIST(IMPL_TYPE_INFO)
 
@@ -874,6 +875,66 @@ Type Declaration
 				CLASS_MEMBER_METHOD(SetShortcutText, {L"value"})
 				CLASS_MEMBER_METHOD(GetMeasuringSource, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiMenuButton::IStyleController)
+
+			BEGIN_CLASS_MEMBER(INodeProviderCallback)
+			END_CLASS_MEMBER(INodeProviderCallback)
+
+			BEGIN_CLASS_MEMBER(INodeProvider)
+			END_CLASS_MEMBER(INodeProvider)
+
+			BEGIN_CLASS_MEMBER(INodeRootProvider)
+			END_CLASS_MEMBER(INodeRootProvider)
+
+			BEGIN_CLASS_MEMBER(INodeItemView)
+			END_CLASS_MEMBER(INodeItemView)
+
+			BEGIN_CLASS_MEMBER(INodeItemPrimaryTextView)
+			END_CLASS_MEMBER(INodeItemPrimaryTextView)
+
+			BEGIN_CLASS_MEMBER(NodeItemProvider)
+			END_CLASS_MEMBER(NodeItemProvider)
+
+			BEGIN_CLASS_MEMBER(INodeItemStyleController)
+			END_CLASS_MEMBER(INodeItemStyleController)
+
+			BEGIN_CLASS_MEMBER(INodeItemStyleProvider)
+			END_CLASS_MEMBER(INodeItemStyleProvider)
+
+			BEGIN_CLASS_MEMBER(NodeItemStyleProvider)
+			END_CLASS_MEMBER(NodeItemStyleProvider)
+
+			BEGIN_CLASS_MEMBER(IMemoryNodeData)
+			END_CLASS_MEMBER(IMemoryNodeData)
+
+			BEGIN_CLASS_MEMBER(MemoryNodeProvider)
+			END_CLASS_MEMBER(MemoryNodeProvider)
+
+			BEGIN_CLASS_MEMBER(NodeRootProviderBase)
+			END_CLASS_MEMBER(NodeRootProviderBase)
+
+			BEGIN_CLASS_MEMBER(MemoryNodeRootProvider)
+			END_CLASS_MEMBER(MemoryNodeRootProvider)
+
+			BEGIN_CLASS_MEMBER(GuiVirtualTreeListControl)
+			END_CLASS_MEMBER(GuiVirtualTreeListControl)
+
+			BEGIN_CLASS_MEMBER(ITreeViewItemView)
+			END_CLASS_MEMBER(ITreeViewItemView)
+
+			BEGIN_CLASS_MEMBER(TreeViewItem)
+			END_CLASS_MEMBER(TreeViewItem)
+
+			BEGIN_CLASS_MEMBER(TreeViewItemRootProvider)
+			END_CLASS_MEMBER(TreeViewItemRootProvider)
+
+			BEGIN_CLASS_MEMBER(GuiVirtualTreeView)
+			END_CLASS_MEMBER(GuiVirtualTreeView)
+
+			BEGIN_CLASS_MEMBER(GuiTreeView)
+			END_CLASS_MEMBER(GuiTreeView)
+
+			BEGIN_CLASS_MEMBER(TreeViewNodeItemStyleProvider)
+			END_CLASS_MEMBER(TreeViewNodeItemStyleProvider)
 
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER

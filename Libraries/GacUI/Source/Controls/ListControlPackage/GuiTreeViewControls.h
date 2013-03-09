@@ -74,11 +74,11 @@ GuiVirtualTreeListControl NodeProvider
 					virtual void					SetExpanding(bool value)=0;
 					/// <summary>Calculate the number of total visible nodes of this node. The number of total visible nodes includes the node itself, and all total visible nodes of all visible sub nodes. If this node is collapsed, this number will be 1.</summary>
 					/// <returns>The number of total visible nodes.</returns>
-					virtual vint						CalculateTotalVisibleNodes()=0;
+					virtual vint					CalculateTotalVisibleNodes()=0;
 
 					/// <summary>Get the number of all sub nodes.</summary>
 					/// <returns>The number of all sub nodes.</returns>
-					virtual vint						GetChildCount()=0;
+					virtual vint					GetChildCount()=0;
 					/// <summary>Get the parent node. This function increases the reference counter to the result node. If the sub node is not longer needed, a call to [M:vl.presentation.controls.tree.INodeProvider.Release] is required.</summary>
 					/// <returns>The parent node.</returns>
 					virtual INodeProvider*			GetParent()=0;
@@ -146,7 +146,7 @@ GuiVirtualTreeListControl NodeProvider
 					/// <summary>Get the index in all visible nodes of a node.</summary>
 					/// <returns>The index in all visible nodes of a node.</returns>
 					/// <param name="node">The node to calculate the index.</param>
-					virtual vint						CalculateNodeVisibilityIndex(INodeProvider* node)=0;
+					virtual vint					CalculateNodeVisibilityIndex(INodeProvider* node)=0;
 				};
 
 				/// <summary>The required <see cref="INodeRootProvider"/> view for [T:vl.presentation.controls.tree.NodeItemProvider]. This view is always needed to create any customized <see cref="INodeRootProvider"/> implementation.</summary>
@@ -172,7 +172,7 @@ GuiVirtualTreeListControl NodeProvider
 				protected:
 					Ptr<INodeRootProvider>			root;
 					INodeItemPrimaryTextView*		nodeItemPrimaryTextView;
-					vint								offsetBeforeChildModified;
+					vint							offsetBeforeChildModified;
 
 					INodeProvider*					GetNodeByOffset(INodeProvider* provider, vint offset);
 					void							OnAttached(INodeRootProvider* provider)override;
@@ -180,8 +180,8 @@ GuiVirtualTreeListControl NodeProvider
 					void							OnAfterItemModified(INodeProvider* parentNode, vint start, vint count, vint newCount)override;
 					void							OnItemExpanded(INodeProvider* node)override;
 					void							OnItemCollapsed(INodeProvider* node)override;
-					vint								CalculateNodeVisibilityIndexInternal(INodeProvider* node);
-					vint								CalculateNodeVisibilityIndex(INodeProvider* node)override;
+					vint							CalculateNodeVisibilityIndexInternal(INodeProvider* node);
+					vint							CalculateNodeVisibilityIndex(INodeProvider* node)override;
 					
 					bool							ContainsPrimaryText(vint itemIndex)override;
 					WString							GetPrimaryTextViewText(vint itemIndex)override;
@@ -196,7 +196,7 @@ GuiVirtualTreeListControl NodeProvider
 					/// <summary>Get the owned node root provider.</summary>
 					/// <returns>The node root provider.</returns>
 					Ptr<INodeRootProvider>			GetRoot();
-					vint								Count()override;
+					vint							Count()override;
 					IDescriptable*					RequestView(const WString& identifier)override;
 					void							ReleaseView(IDescriptable* view)override;
 				};
@@ -234,7 +234,7 @@ GuiVirtualTreeListControl NodeProvider
 					/// <summary>Get a node item style id from a node.</summary>
 					/// <returns>The node item style id.</returns>
 					/// <param name="node">The node.</param>
-					virtual vint										GetItemStyleId(INodeProvider* node)=0;
+					virtual vint									GetItemStyleId(INodeProvider* node)=0;
 					/// <summary>Create a node item style controller from a node item style id.</summary>
 					/// <returns>The created node item style controller.</returns>
 					/// <param name="styleId">The node item style id.</param>
@@ -267,7 +267,7 @@ GuiVirtualTreeListControl NodeProvider
 
 					void											AttachListControl(GuiListControl* value)override;
 					void											DetachListControl()override;
-					vint												GetItemStyleId(vint itemIndex)override;
+					vint											GetItemStyleId(vint itemIndex)override;
 					GuiListControl::IItemStyleController*			CreateItemStyle(vint styleId)override;
 					void											DestroyItemStyle(GuiListControl::IItemStyleController* style)override;
 					void											Install(GuiListControl::IItemStyleController* style, vint itemIndex)override;
@@ -281,6 +281,10 @@ GuiVirtualTreeListControl Predefined NodeProvider
 
 			namespace tree
 			{
+				class IMemoryNodeData : public virtual IDescriptable, public Description<IMemoryNodeData>
+				{
+				};
+
 				/// <summary>An in-memory <see cref="INodeProvider"/> implementation.</summary>
 				class MemoryNodeProvider
 					: public Object
@@ -309,10 +313,10 @@ GuiVirtualTreeListControl Predefined NodeProvider
 				protected:
 					MemoryNodeProvider*				parent;
 					bool							expanding;
-					vint								childCount;
-					vint								totalVisibleNodeCount;
-					vint								offsetBeforeChildModified;
-					Ptr<DescriptableObject>			data;
+					vint							childCount;
+					vint							totalVisibleNodeCount;
+					vint							offsetBeforeChildModified;
+					Ptr<IMemoryNodeData>			data;
 					NodeCollection					children;
 
 					virtual INodeProviderCallback*	GetCallbackProxyInternal();
@@ -322,15 +326,15 @@ GuiVirtualTreeListControl Predefined NodeProvider
 					MemoryNodeProvider();
 					/// <summary>Create a node provider with a data object.</summary>
 					/// <param name="_data">The data object.</param>
-					MemoryNodeProvider(const Ptr<DescriptableObject>& _data);
+					MemoryNodeProvider(const Ptr<IMemoryNodeData>& _data);
 					~MemoryNodeProvider();
 
 					/// <summary>Get the data object.</summary>
 					/// <returns>The data object.</returns>
-					Ptr<DescriptableObject>			GetData();
+					Ptr<IMemoryNodeData>			GetData();
 					/// <summary>Set the data object.</summary>
 					/// <param name="value">The data object.</param>
-					void							SetData(const Ptr<DescriptableObject>& value);
+					void							SetData(const Ptr<IMemoryNodeData>& value);
 					/// <summary>Notify that the state in the binded data object is modified.</summary>
 					void							NotifyDataModified();
 					/// <summary>Get all sub nodes.</summary>
@@ -339,9 +343,9 @@ GuiVirtualTreeListControl Predefined NodeProvider
 
 					bool							GetExpanding()override;
 					void							SetExpanding(bool value)override;
-					vint								CalculateTotalVisibleNodes()override;
+					vint							CalculateTotalVisibleNodes()override;
 
-					vint								GetChildCount()override;
+					vint							GetChildCount()override;
 					INodeProvider*					GetParent()override;
 					INodeProvider*					GetChild(vint index)override;
 					void							Increase()override;
@@ -486,7 +490,7 @@ TreeView
 				};
 
 				/// <summary>A tree view item. This data structure is used in [T:vl.presentation.controls.tree.TreeViewItemRootProvider].</summary>
-				class TreeViewItem : public Object, public Description<TreeViewItem>
+				class TreeViewItem : public Object, public virtual IMemoryNodeData, public Description<TreeViewItem>
 				{
 				public:
 					/// <summary>The image of this item.</summary>
@@ -643,7 +647,7 @@ TreeView
 					GuiListControl::IItemStyleProvider*		GetBindedItemStyleProvider()override;
 					void									AttachListControl(GuiListControl* value)override;
 					void									DetachListControl()override;
-					vint										GetItemStyleId(INodeProvider* node)override;
+					vint									GetItemStyleId(INodeProvider* node)override;
 					INodeItemStyleController*				CreateItemStyle(vint styleId)override;
 					void									DestroyItemStyle(INodeItemStyleController* style)override;
 					void									Install(INodeItemStyleController* style, INodeProvider* node)override;
