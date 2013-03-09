@@ -119,7 +119,7 @@ SerializableTypeDescriptorBase
 TypeName
 ***********************************************************************/
 			
-			const wchar_t* TypeInfo<IDescriptable>::TypeName			= L"system::object";
+			const wchar_t* TypeInfo<IDescriptable>::TypeName			= L"system::interface";
 			const wchar_t* TypeInfo<Value>::TypeName					= L"system::object";
 			const wchar_t* TypeInfo<unsigned __int8>::TypeName			= L"system::byte";
 			const wchar_t* TypeInfo<unsigned __int16>::TypeName			= L"system::ushort";
@@ -359,7 +359,11 @@ Collections
 
 #define _ ,
 
+			BEGIN_CLASS_MEMBER(IDescriptable)
+			END_CLASS_MEMBER(IDescriptable)
+
 			BEGIN_CLASS_MEMBER(IValueReadonlyList)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_METHOD(Count, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(Get, {L"index"})
 				CLASS_MEMBER_METHOD(Contains, {L"value"})
@@ -380,11 +384,13 @@ Collections
 			END_CLASS_MEMBER(IValueList)
 
 			BEGIN_CLASS_MEMBER(IValueInterfaceProxy)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_METHOD(Invoke, {L"name" _ L"arguments"})
 			END_CLASS_MEMBER(IValueInterfaceProxy)
 
 			BEGIN_CLASS_MEMBER(IValueFunctionProxy)
-			CLASS_MEMBER_METHOD(Invoke, {L"arguments"})
+				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_METHOD(Invoke, {L"arguments"})
 			END_CLASS_MEMBER(IValueFunctionProxy)
 
 #undef _
@@ -418,6 +424,7 @@ LoadPredefinedTypes
 					AddSerializableType<BoolValueSeriaizer>(manager);
 					AddSerializableType<TypedValueSerializer<wchar_t>>(manager);
 					AddSerializableType<TypedValueSerializer<WString>>(manager);
+					ADD_TYPE_INFO(IDescriptable)
 					ADD_TYPE_INFO(IValueReadonlyList)
 					ADD_TYPE_INFO(IValueList)
 					ADD_TYPE_INFO(IValueInterfaceProxy)

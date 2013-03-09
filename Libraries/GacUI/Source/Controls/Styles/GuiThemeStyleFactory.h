@@ -32,7 +32,7 @@ namespace vl
 		namespace theme
 		{
 			/// <summary>Theme interface. A theme creates appropriate style controllers or style providers for default controls. Call [M:vl.presentation.theme.GetCurrentTheme] to access this interface.</summary>
-			class ITheme : public IDescriptable, public Description<ITheme>
+			class ITheme : public virtual IDescriptable, public Description<ITheme>
 			{
 			public:
 				/// <summary>Create a style for window.</summary>

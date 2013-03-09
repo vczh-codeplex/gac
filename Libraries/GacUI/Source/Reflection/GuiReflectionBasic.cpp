@@ -122,11 +122,13 @@ Type Declaration
 			END_STRUCT_MEMBER(FontProperties)
 
 			BEGIN_CLASS_MEMBER(INativeImageFrame)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_METHOD(GetImage, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(GetSize, NO_PARAMETER)
 			END_CLASS_MEMBER(INativeImageFrame)
 
 			BEGIN_CLASS_MEMBER(INativeImage)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_METHOD(GetFormat, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(GetFrameCount, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(GetFrame, {L"index"})
@@ -146,6 +148,7 @@ Type Declaration
 			END_ENUM_ITEM(INativeImage::FormatType)
 
 			BEGIN_CLASS_MEMBER(INativeCursor)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_METHOD(IsSystemCursor, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(GetSystemCursorType, NO_PARAMETER)
 				CLASS_MEMBER_EXTERNALCTOR(INativeCursor*(), NO_PARAMETER, &INativeCursor_Constructor1)
@@ -169,6 +172,7 @@ Type Declaration
 			END_ENUM_ITEM(INativeCursor::SystemCursorType)
 
 			BEGIN_CLASS_MEMBER(INativeWindow)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_PROPERTY_FAST(Bounds)
 				CLASS_MEMBER_PROPERTY_FAST(ClientSize)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ClientBoundsInScreen)
@@ -262,6 +266,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiResource)
 
 			BEGIN_CLASS_MEMBER(IGuiGraphicsElement)
+				CLASS_MEMBER_BASE(IDescriptable)
 			END_CLASS_MEMBER(IGuiGraphicsElement)
 
 			BEGIN_CLASS_MEMBER(GuiGraphicsComposition)
@@ -373,6 +378,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiControl)
 
 			BEGIN_CLASS_MEMBER(GuiControl::IStyleController)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_EXTERNALCTOR(GuiControl::IStyleController*(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::GuiControl_IStyleController::Create)
 
 				CLASS_MEMBER_METHOD(GetBoundsComposition, NO_PARAMETER)
@@ -384,6 +390,7 @@ Type Declaration
 			END_CLASS_MEMBER(GuiControl::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiControl::IStyleProvider)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_EXTERNALCTOR(GuiControl::IStyleProvider*(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::GuiControl_IStyleProvider::Create)
 
 				CLASS_MEMBER_METHOD(AssociateStyleController, {L"controller"})
