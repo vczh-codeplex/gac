@@ -83,127 +83,130 @@ Control Host
 
 				/// <summary>Get the internal <see cref="compositions::GuiGraphicsHost"/> object to host the window content.</summary>
 				/// <returns>The internal <see cref="compositions::GuiGraphicsHost"/> object to host the window content.</returns>
-				compositions::GuiGraphicsHost*			GetGraphicsHost();
+				compositions::GuiGraphicsHost*					GetGraphicsHost();
 				/// <summary>Get the main composition to host the window content.</summary>
 				/// <returns>The main composition to host the window content.</returns>
-				compositions::GuiGraphicsComposition*	GetMainComposition();
+				compositions::GuiGraphicsComposition*			GetMainComposition();
 				/// <summary>Get the internal <see cref="INativeWindow"/> object to host the content.</summary>
 				/// <returns>The the internal <see cref="INativeWindow"/> object to host the content.</returns>
-				INativeWindow*							GetNativeWindow();
+				INativeWindow*									GetNativeWindow();
 				/// <summary>Set the internal <see cref="INativeWindow"/> object to host the content.</summary>
 				/// <param name="window">The the internal <see cref="INativeWindow"/> object to host the content.</param>
-				void									SetNativeWindow(INativeWindow* window);
+				void											SetNativeWindow(INativeWindow* window);
 				/// <summary>Force to calculate layout and size immediately</summary>
-				void									ForceCalculateSizeImmediately();
+				void											ForceCalculateSizeImmediately();
 				/// <summary>Render the window content.</summary>
-				void									Render();
+				void											Render();
 				
 				/// <summary>Test is the window enabled.</summary>
 				/// <returns>Returns true if the window is enabled.</returns>
-				bool									GetEnabled()override;
+				bool											GetEnabled()override;
 				/// <summary>Enable or disable the window.</summary>
 				/// <param name="value">Set to true to enable the window.</param>
-				void									SetEnabled(bool value)override;
+				void											SetEnabled(bool value)override;
 				/// <summary>Test is the window focused.</summary>
 				/// <returns>Returns true if the window is focused.</returns>
-				bool									GetFocused();
+				bool											GetFocused();
 				/// <summary>Focus the window.</summary>
-				void									SetFocused();
+				void											SetFocused();
 				/// <summary>Test is the window activated.</summary>
 				/// <returns>Returns true if the window is activated.</returns>
-				bool									GetActivated();
+				bool											GetActivated();
 				/// <summary>Activate the window.</summary>
-				void									SetActivated();
+				void											SetActivated();
 				/// <summary>Test is the window icon shown in the task bar.</summary>
 				/// <returns>Returns true if the window is icon shown in the task bar.</returns>
-				bool									GetShowInTaskBar();
+				bool											GetShowInTaskBar();
 				/// <summary>Show or hide the window icon in the task bar.</summary>
 				/// <param name="value">Set to true to show the window icon in the task bar.</param>
-				void									SetShowInTaskBar(bool value);
+				void											SetShowInTaskBar(bool value);
 				/// <summary>Test is the window allowed to be activated.</summary>
 				/// <returns>Returns true if the window is allowed to be activated.</returns>
-				bool									GetEnabledActivate();
+				bool											GetEnabledActivate();
 				/// <summary>Allow or forbid the window to be activated.</summary>
 				/// <param name="value">Set to true to allow the window to be activated.</param>
-				void									SetEnabledActivate(bool value);
+				void											SetEnabledActivate(bool value);
 				/// <summary>
 				/// Test is the window always on top of the desktop.
 				/// </summary>
 				/// <returns>Returns true if the window is always on top of the desktop.</returns>
-				bool									GetTopMost();
+				bool											GetTopMost();
 				/// <summary>
 				/// Make the window always or never on top of the desktop.
 				/// </summary>
 				/// <param name="topmost">True to make the window always  on top of the desktop.</param>
-				void									SetTopMost(bool topmost);
+				void											SetTopMost(bool topmost);
 
 				/// <summary>Add a component. When this control host is disposing, all attached components will be deleted.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
-				bool									AddComponent(GuiComponent* component);
+				bool											AddComponent(GuiComponent* component);
 				/// <summary>Remove a component.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
-				bool									RemoveComponent(GuiComponent* component);
+				bool											RemoveComponent(GuiComponent* component);
 				/// <summary>Test does the window contain the component.</summary>
 				/// <returns>Returns true if the window contains the component.</returns>
 				/// <param name="component">The component to test.</param>
-				bool									ContainsComponent(GuiComponent* component);
+				bool											ContainsComponent(GuiComponent* component);
 				/// <summary>Get the <see cref="compositions::IGuiShortcutKeyManager"/> attached with this control host.</summary>
 				/// <returns>The shortcut key manager.</returns>
-				compositions::IGuiShortcutKeyManager*	GetShortcutKeyManager();
+				compositions::IGuiShortcutKeyManager*			GetShortcutKeyManager();
 				/// <summary>Attach or detach the <see cref="compositions::IGuiShortcutKeyManager"/> associated with this control host. When this control host is disposing, the associated shortcut key manager will be deleted if exists.</summary>
 				/// <param name="value">The shortcut key manager. Set to null to detach the previous shortcut key manager from this control host.</param>
-				void									SetShortcutKeyManager(compositions::IGuiShortcutKeyManager* value);
+				void											SetShortcutKeyManager(compositions::IGuiShortcutKeyManager* value);
+				/// <summary>Get the animation manager.</summary>
+				/// <returns>The animation manager.</returns>
+				compositions::GuiGraphicsAnimationManager*		GetAnimationManager();
 
 				/// <summary>Get the client size of the window.</summary>
 				/// <returns>The client size of the window.</returns>
-				Size									GetClientSize();
+				Size											GetClientSize();
 				/// <summary>Set the client size of the window.</summary>
 				/// <param name="value">The client size of the window.</param>
-				void									SetClientSize(Size value);
+				void											SetClientSize(Size value);
 				/// <summary>Get the bounds of the window in screen space.</summary>
 				/// <returns>The bounds of the window.</returns>
-				Rect									GetBounds();
+				Rect											GetBounds();
 				/// <summary>Set the bounds of the window in screen space.</summary>
 				/// <param name="value">The bounds of the window.</param>
-				void									SetBounds(Rect value);
-				GuiControlHost*							GetRelatedControlHost()override;
-				const WString&							GetText()override;
-				void									SetText(const WString& value)override;
+				void											SetBounds(Rect value);
+				GuiControlHost*									GetRelatedControlHost()override;
+				const WString&									GetText()override;
+				void											SetText(const WString& value)override;
 
 				/// <summary>Get the screen that contains the window.</summary>
 				/// <returns>The screen that contains the window.</returns>
-				INativeScreen*							GetRelatedScreen();
+				INativeScreen*									GetRelatedScreen();
 				/// <summary>
 				/// Show the window.
 				/// </summary>
-				void									Show();
+				void											Show();
 				/// <summary>
 				/// Show the window without activation.
 				/// </summary>
-				void									ShowDeactivated();
+				void											ShowDeactivated();
 				/// <summary>
 				/// Restore the window.
 				/// </summary>
-				void									ShowRestored();
+				void											ShowRestored();
 				/// <summary>
 				/// Maximize the window.
 				/// </summary>
-				void									ShowMaximized();
+				void											ShowMaximized();
 				/// <summary>
 				/// Minimize the window.
 				/// </summary>
-				void									ShowMinimized();
+				void											ShowMinimized();
 				/// <summary>
 				/// Hide the window.
 				/// </summary>
-				void									Hide();
+				void											Hide();
 				/// <summary>
 				/// Close the window and destroy the internal <see cref="INativeWindow"/> object.
 				/// </summary>
-				void									Close();
+				void											Close();
 				/// <summary>Test is the window opened.</summary>
 				/// <returns>Returns true if the window is opened.</returns>
-				bool									GetOpening();
+				bool											GetOpening();
 			};
 
 /***********************************************************************
