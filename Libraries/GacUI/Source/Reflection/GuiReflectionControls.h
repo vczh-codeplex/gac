@@ -9,6 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONCONTROLS
 #define VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONCONTROLS
 
+#include "GuiReflectionElements.h"
 #include "GuiReflectionCompositions.h"
 
 namespace vl
@@ -140,6 +141,9 @@ Type List
 			F(presentation::controls::GuiDocumentCommonInterface)\
 			F(presentation::controls::GuiDocumentViewer)\
 			F(presentation::controls::GuiDocumentLabel)\
+			F(presentation::controls::GuiTextBoxCommonInterface)\
+			F(presentation::controls::GuiTextBoxColorizerBase)\
+			F(presentation::controls::GuiTextBoxRegexColorizer)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
