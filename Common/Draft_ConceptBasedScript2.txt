@@ -31,8 +31,8 @@ Composited Types: (all reference types)
 	(T, U, V, W)		: tuple (1,2,3), equivalent to (T..(U..(V..(W..void))))
 	T=>U				: function x=>x+1, (a,b)=>a+b, null(default)
 
-	rawptr T				: raw pointer, for [ManuallyDisposable] interoperating types
-	managed T				: shared pointer, for [ManuallyDisposable] interoperating types
+	T*					: raw interface pointer
+	T^					: shared interface pointer with reference counter
 
 Structured Types:
 
@@ -48,39 +48,47 @@ Structured Types:
 		Node<T> next;
 	}
 
-Virtual Types:
-
-	[ManuallyDisposable]
-	interface IPrimaryTextView
+	enum BinaryOperator
 	{
-		static string GetIdentifier();
-
-		string GetText(int index);
+		Add,
+		Sub,
+		Mul,
+		Div,
 	}
 
-	[ManuallyDisposable]
-	[SealedType]
-	interface IListItem : IPrimaryTextView
-	{
-		managed Image GetImage(int index);
-	}
-	
-	[ManuallyDisposable] // class should always be [ManuallyDisposable], and should be sealed
-	[SealedType]
-	class GuiListControl : GuiScrollView
-	{
-		rawptr GuiListControl(rawptr IStyleProvider styleProvider);
+Interface Types:
 
-		managed IItemStyleProvider SetStyleProvider(managed IItemStyleProvider value);
+	interface ExpressionVisitor
+	{
+		void Visit(ConstantExpression exp);
+		void Visit(VariableExpression exp);
+		void Visit(BinaryExpression exp);
 	}
 
-	[ManuallyDisposable]
-	instance InfiniteTextView((int)=>string f) : managed IPrimaryTextView
+	interface Expression __foreign("presentation::scripting::Expression")
 	{
-		string GetText(int index)
-		{
-			return f(index);
-		}
+		double Evaluate();
+		double Evaluate({string:double} variables);
+		void Accept(ExpressionVisitor visitor);
+
+		Expression^ new(string expressionCode) __extern;
+		Expression^ new() __inherit;
+	}
+
+	interface ConstantExpression : Expression
+	{
+	}
+
+	interface VariableExpression : Expression
+	{
+		string Variable{get;set;}
+	}
+
+	interface BinaryExpression : Expression
+	{
+		Expression First{get;set;}
+		Expression Second{get;set;}
+		BinaryOperator Operator{get;set;}
 	}
 
 Concepts:
@@ -97,7 +105,7 @@ Concepts:
 
 Concept Instances:
 
-	instance <TSrc, TDst> : ExplicitConvertable
+	instance <TSrc, TDst> : ExplicitConvertable<TSrc, TDst>
 		where ImplicitlyConvertable<TSrc, TDst>
 	{
 		TDst Convert(TSrc source)
@@ -105,4 +113,10 @@ Concept Instances:
 			return ConvertImplicitly(source);
 			return ImplicitlyConvertable<TSrc, TDst>.ConvertImplicitly(source);
 		}
+	}
+
+	instance <T> : ImplicitlyConvertable<T^, T*>
+		where interface T
+	{
+		T* ConvertImplicitly(T^ source) __instruction("shared_ptr_to_raw_ptr");
 	}
