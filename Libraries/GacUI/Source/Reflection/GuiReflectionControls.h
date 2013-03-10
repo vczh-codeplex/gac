@@ -128,6 +128,10 @@ Type List
 			F(presentation::controls::GuiVirtualTreeView::IStyleProvider)\
 			F(presentation::controls::GuiTreeView)\
 			F(presentation::controls::tree::TreeViewNodeItemStyleProvider)\
+			F(presentation::controls::GuiComboBoxBase)\
+			F(presentation::controls::GuiComboBoxBase::ICommandExecutor)\
+			F(presentation::controls::GuiComboBoxBase::IStyleController)\
+			F(presentation::controls::GuiComboBoxListControl)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
@@ -1359,6 +1363,51 @@ Interface Proxy
 					Color GetTextColor()override
 					{
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetTextColor);
+					}
+				};
+
+				class GuiComboBoxBase_IStyleController : public virtual GuiButton_IStyleController, public virtual GuiComboBoxBase::IStyleController
+				{
+				public:
+					GuiComboBoxBase_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleController(_proxy)
+						,GuiButton_IStyleController(_proxy)
+					{
+					}
+
+					static GuiComboBoxBase::IStyleController* Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new GuiComboBoxBase_IStyleController(proxy);
+					}
+
+					void SetCommandExecutor(GuiComboBoxBase::ICommandExecutor* value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetCommandExecutor, value);
+					}
+
+					void OnClicked()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(OnClicked);
+					}
+
+					void OnPopupOpened()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(OnPopupOpened);
+					}
+
+					void OnPopupClosed()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(OnPopupClosed);
+					}
+
+					void OnItemSelected()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(OnItemSelected);
+					}
+
+					GuiWindow::IStyleController* CreatePopupStyle()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreatePopupStyle);
 					}
 				};
 			}

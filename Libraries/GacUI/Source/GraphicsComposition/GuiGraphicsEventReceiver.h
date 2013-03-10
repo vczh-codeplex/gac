@@ -185,7 +185,7 @@ Event
 					Ptr<HandlerNode>* currentHandler=&handlers;
 					while(*currentHandler)
 					{
-									(*currentHandler)->handler->Execute(newSender?newSender:sender, argument);
+						(*currentHandler)->handler->Execute(newSender?newSender:sender, argument);
 						currentHandler=&(*currentHandler)->next;
 					}
 				}

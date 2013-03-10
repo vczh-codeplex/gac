@@ -1077,6 +1077,44 @@ Type Declaration
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<TreeViewNodeItemStyleProvider>(), NO_PARAMETER)
 			END_CLASS_MEMBER(TreeViewNodeItemStyleProvider)
 
+			BEGIN_CLASS_MEMBER(GuiComboBoxBase)
+				CLASS_MEMBER_BASE(GuiButton)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiComboBoxBase)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Popup)
+
+				CLASS_MEMBER_METHOD(ShowPopup, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiComboBoxBase)
+
+			BEGIN_CLASS_MEMBER(GuiComboBoxBase::ICommandExecutor)
+				CLASS_MEMBER_BASE(IDescriptable)
+				
+				CLASS_MEMBER_METHOD(ShowPopup, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SelectItem, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiComboBoxBase::ICommandExecutor)
+
+			BEGIN_CLASS_MEMBER(GuiComboBoxBase::IStyleController)
+				CLASS_MEMBER_BASE(GuiButton::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiComboBoxBase, IStyleController)
+				
+				CLASS_MEMBER_METHOD(SetCommandExecutor, {L"value"})
+				CLASS_MEMBER_METHOD(OnClicked, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OnPopupOpened, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OnPopupClosed, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OnItemSelected, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreatePopupStyle, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiComboBoxBase::IStyleController)
+
+			BEGIN_CLASS_MEMBER(GuiComboBoxListControl)
+				CLASS_MEMBER_BASE(GuiComboBoxBase)
+				CLASS_MEMBER_CONSTRUCTOR(GuiComboBoxListControl*(GuiComboBoxListControl::IStyleController* _ GuiSelectableListControl*), {L"styleController" _ L"containedListControl"})
+
+				CLASS_MEMBER_PROPERTY_FAST(Font)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContainedListControl)
+				CLASS_MEMBER_PROPERTY_FAST(SelectedIndex)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ItemProvider)
+			END_CLASS_MEMBER(GuiComboBoxListControl)
+
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
 #undef INTERFACE_EXTERNALCTOR
