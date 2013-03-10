@@ -52,6 +52,7 @@ MultilineTextBox
 					void									SetVisuallyEnabled(bool value)override;
 				};
 
+			protected:
 				class TextElementOperatorCallback : public GuiTextBoxCommonInterface::DefaultCallback, public Description<TextElementOperatorCallback>
 				{
 				protected:
@@ -136,7 +137,8 @@ SinglelineTextBox
 					compositions::GuiGraphicsComposition*	GetTextComposition();
 					void									SetViewPosition(Point value);
 				};
-
+				
+			protected:
 				class TextElementOperatorCallback : public GuiTextBoxCommonInterface::DefaultCallback, public Description<TextElementOperatorCallback>
 				{
 				protected:
