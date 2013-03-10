@@ -133,7 +133,7 @@ ComboBox with GuiListControl
 				
 				/// <summary>Get the selected index.</summary>
 				/// <returns>The selected index.</returns>
-				vint											GetSelectedIndex();
+				vint										GetSelectedIndex();
 				/// <summary>Set the selected index.</summary>
 				/// <param name="value">The selected index.</param>
 				void										SetSelectedIndex(vint value);
