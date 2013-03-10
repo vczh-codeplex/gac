@@ -133,6 +133,10 @@ Type List
 			F(presentation::controls::GuiComboBoxBase::IStyleController)\
 			F(presentation::controls::GuiComboBoxListControl)\
 			F(presentation::controls::GuiToolstripCommand)\
+			F(presentation::controls::GuiToolstripMenu)\
+			F(presentation::controls::GuiToolstripMenuBar)\
+			F(presentation::controls::GuiToolstripToolbar)\
+			F(presentation::controls::GuiToolstripButton)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 

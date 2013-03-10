@@ -125,6 +125,21 @@ External Functions
 				return thisObject->Nodes();
 			}
 
+			Ptr<IValueList> GuiToolstripMenu_GetToolstripItems(GuiToolstripMenu* thisObject)
+			{
+				return new ValueListWrapper<GuiToolstripCollection*>(&thisObject->GetToolstripItems());
+			}
+
+			Ptr<IValueList> GuiToolstripMenuBar_GetToolstripItems(GuiToolstripMenuBar* thisObject)
+			{
+				return new ValueListWrapper<GuiToolstripCollection*>(&thisObject->GetToolstripItems());
+			}
+
+			Ptr<IValueList> GuiToolstripToolbar_GetToolstripItems(GuiToolstripToolbar* thisObject)
+			{
+				return new ValueListWrapper<GuiToolstripCollection*>(&thisObject->GetToolstripItems());
+			}
+
 /***********************************************************************
 Type Declaration
 ***********************************************************************/
@@ -1124,6 +1139,40 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_FAST(Shortcut)
 				CLASS_MEMBER_PROPERTY_FAST(Enabled)
 			END_CLASS_MEMBER(GuiToolstripCommand)
+
+			BEGIN_CLASS_MEMBER(GuiToolstripMenu)
+				CLASS_MEMBER_BASE(GuiMenu)
+				CLASS_MEMBER_CONSTRUCTOR(GuiToolstripMenu*(GuiToolstripMenu::IStyleController* _ GuiControl*), {L"styleController" _ L"owner"})
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetToolstripItems, NO_PARAMETER, Ptr<IValueList>(GuiToolstripMenu::*)(), &GuiToolstripMenu_GetToolstripItems)
+				CLASS_MEMBER_PROPERTY_READONLY(ToolstripItems, GetToolstripItems)
+			END_CLASS_MEMBER(GuiToolstripMenu)
+
+			BEGIN_CLASS_MEMBER(GuiToolstripMenuBar)
+				CLASS_MEMBER_BASE(GuiMenuBar)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiToolstripMenuBar)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetToolstripItems, NO_PARAMETER, Ptr<IValueList>(GuiToolstripMenuBar::*)(), &GuiToolstripMenuBar_GetToolstripItems)
+				CLASS_MEMBER_PROPERTY_READONLY(ToolstripItems, GetToolstripItems)
+			END_CLASS_MEMBER(GuiToolstripMenuBar)
+
+			BEGIN_CLASS_MEMBER(GuiToolstripToolbar)
+				CLASS_MEMBER_BASE(GuiControl)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiToolstripToolbar)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetToolstripItems, NO_PARAMETER, Ptr<IValueList>(GuiToolstripToolbar::*)(), &GuiToolstripToolbar_GetToolstripItems)
+				CLASS_MEMBER_PROPERTY_READONLY(ToolstripItems, GetToolstripItems)
+			END_CLASS_MEMBER(GuiToolstripToolbar)
+
+			BEGIN_CLASS_MEMBER(GuiToolstripButton)
+				CLASS_MEMBER_BASE(GuiMenuButton)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiToolstripToolbar)
+
+				CLASS_MEMBER_PROPERTY_FAST(Command)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ToolstripSubMenu)
+
+				CLASS_MEMBER_METHOD(CreateToolstripSubMenu, {L"subMenuStyleController"})
+			END_CLASS_MEMBER(GuiToolstripButton)
 
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
