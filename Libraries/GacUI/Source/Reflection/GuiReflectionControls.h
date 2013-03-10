@@ -144,6 +144,9 @@ Type List
 			F(presentation::controls::GuiTextBoxCommonInterface)\
 			F(presentation::controls::GuiTextBoxColorizerBase)\
 			F(presentation::controls::GuiTextBoxRegexColorizer)\
+			F(presentation::controls::GuiMultilineTextBox)\
+			F(presentation::controls::GuiSinglelineTextBox)\
+			F(presentation::controls::GuiSinglelineTextBox::IStyleProvider)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
@@ -1420,6 +1423,20 @@ Interface Proxy
 					GuiWindow::IStyleController* CreatePopupStyle()override
 					{
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreatePopupStyle);
+					}
+				};
+
+				class GuiSinglelineTextBox_IStyleProvider : public virtual GuiControl_IStyleProvider, public virtual GuiSinglelineTextBox::IStyleProvider
+				{
+				public:
+					GuiSinglelineTextBox_IStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleProvider(_proxy)
+					{
+					}
+
+					compositions::GuiGraphicsComposition* InstallBackground(compositions::GuiBoundsComposition* background)override
+					{
+						return INVOKEGET_INTERFACE_PROXY(InstallBackground, background);
 					}
 				};
 			}

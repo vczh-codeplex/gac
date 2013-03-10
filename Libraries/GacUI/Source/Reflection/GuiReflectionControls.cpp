@@ -1278,6 +1278,27 @@ Type Declaration
 				CLASS_MEMBER_METHOD(Setup, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTextBoxRegexColorizer)
 
+			BEGIN_CLASS_MEMBER(GuiMultilineTextBox)
+				CLASS_MEMBER_BASE(GuiScrollView)
+				CLASS_MEMBER_BASE(GuiTextBoxCommonInterface)
+				CONTROL_CONSTRUCTOR_PROVIDER(GuiMultilineTextBox)
+			END_CLASS_MEMBER(GuiMultilineTextBox)
+
+			BEGIN_CLASS_MEMBER(GuiSinglelineTextBox)
+				CLASS_MEMBER_BASE(GuiControl)
+				CLASS_MEMBER_BASE(GuiTextBoxCommonInterface)
+				CONTROL_CONSTRUCTOR_PROVIDER(GuiSinglelineTextBox)
+
+				CLASS_MEMBER_PROPERTY_FAST(PasswordChar)
+			END_CLASS_MEMBER(GuiSinglelineTextBox)
+
+			BEGIN_CLASS_MEMBER(GuiSinglelineTextBox::IStyleProvider)
+				CLASS_MEMBER_BASE(GuiControl::IStyleProvider)
+				INTERFACE_EXTERNALCTOR(GuiSinglelineTextBox, IStyleProvider)
+
+				CLASS_MEMBER_METHOD(InstallBackground, {L"background"})
+			END_CLASS_MEMBER(GuiSinglelineTextBox::IStyleProvider)
+
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
 #undef INTERFACE_EXTERNALCTOR
