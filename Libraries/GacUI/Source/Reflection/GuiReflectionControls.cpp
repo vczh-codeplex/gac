@@ -1174,6 +1174,26 @@ Type Declaration
 				CLASS_MEMBER_METHOD(CreateToolstripSubMenu, {L"subMenuStyleController"})
 			END_CLASS_MEMBER(GuiToolstripButton)
 
+			BEGIN_CLASS_MEMBER(GuiDocumentCommonInterface)
+				CLASS_MEMBER_PROPERTY_FAST(Document)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ActiveHyperlinkId)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ActiveHyperlinkReference)
+
+				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index"})
+			END_CLASS_MEMBER(GuiDocumentCommonInterface)
+
+			BEGIN_CLASS_MEMBER(GuiDocumentViewer)
+				CLASS_MEMBER_BASE(GuiScrollContainer)
+				CLASS_MEMBER_BASE(GuiDocumentCommonInterface)
+				CONTROL_CONSTRUCTOR_PROVIDER(GuiDocumentViewer)
+			END_CLASS_MEMBER(GuiDocumentViewer)
+
+			BEGIN_CLASS_MEMBER(GuiDocumentLabel)
+				CLASS_MEMBER_BASE(GuiControl)
+				CLASS_MEMBER_BASE(GuiDocumentCommonInterface)
+				CONTROL_CONSTRUCTOR_CONTROLLER(GuiDocumentLabel)
+			END_CLASS_MEMBER(GuiDocumentLabel)
+
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
 #undef INTERFACE_EXTERNALCTOR

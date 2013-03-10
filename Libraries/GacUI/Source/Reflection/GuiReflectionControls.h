@@ -137,6 +137,9 @@ Type List
 			F(presentation::controls::GuiToolstripMenuBar)\
 			F(presentation::controls::GuiToolstripToolbar)\
 			F(presentation::controls::GuiToolstripButton)\
+			F(presentation::controls::GuiDocumentCommonInterface)\
+			F(presentation::controls::GuiDocumentViewer)\
+			F(presentation::controls::GuiDocumentLabel)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
 
