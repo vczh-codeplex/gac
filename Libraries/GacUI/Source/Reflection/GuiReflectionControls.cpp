@@ -13,6 +13,7 @@ namespace vl
 			using namespace stream;
 			using namespace list;
 			using namespace tree;
+			using namespace text;
 
 			GUIREFLECTIONCONTROLS_TYPELIST(IMPL_TYPE_INFO)
 
@@ -138,6 +139,26 @@ External Functions
 			Ptr<IValueList> GuiToolstripToolbar_GetToolstripItems(GuiToolstripToolbar* thisObject)
 			{
 				return new ValueListWrapper<GuiToolstripCollection*>(&thisObject->GetToolstripItems());
+			}
+
+			Ptr<IValueReadonlyList> GuiTextBoxColorizerBase_GetColors(GuiTextBoxColorizerBase* thisObject)
+			{
+				return new ValueReadonlyListWrapper<const Array<ColorEntry>*>(&thisObject->GetColors());
+			}
+
+			Ptr<IValueList> GuiTextBoxRegexColorizer_GetTokenRegexes(GuiTextBoxRegexColorizer* thisObject)
+			{
+				return new ValueListWrapper<List<WString>*>(&thisObject->GetTokenRegexes());
+			}
+
+			Ptr<IValueList> GuiTextBoxRegexColorizer_GetTokenColors(GuiTextBoxRegexColorizer* thisObject)
+			{
+				return new ValueListWrapper<List<ColorEntry>*>(&thisObject->GetTokenColors());
+			}
+
+			Ptr<IValueList> GuiTextBoxRegexColorizer_GetExtraTokenColors(GuiTextBoxRegexColorizer* thisObject)
+			{
+				return new ValueListWrapper<List<ColorEntry>*>(&thisObject->GetExtraTokenColors());
 			}
 
 /***********************************************************************
@@ -1193,6 +1214,69 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiDocumentCommonInterface)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiDocumentLabel)
 			END_CLASS_MEMBER(GuiDocumentLabel)
+
+			BEGIN_CLASS_MEMBER(GuiTextBoxCommonInterface)
+				CLASS_MEMBER_PROPERTY_FAST(Readonly)
+				CLASS_MEMBER_PROPERTY_FAST(SelectionText)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretBegin)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretEnd)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretSmall)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretLarge)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RowHeight)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxWidth)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxHeight)
+				CLASS_MEMBER_PROPERTY_FAST(Colorizer)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Modified)
+
+				CLASS_MEMBER_METHOD(CanCut, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CanCopy, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CanPaste, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Cut, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Copy, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Paste, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(SelectAll, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Select, {L"begin" _ L"end"})
+				CLASS_MEMBER_METHOD(GetRowText, {L"row"})
+				CLASS_MEMBER_METHOD(GetFragmentText, {L"start" _ L"end"})
+				CLASS_MEMBER_METHOD(GetRowWidth, {L"row"})
+				CLASS_MEMBER_METHOD(GetTextPosFromPoint, {L"point"})
+				CLASS_MEMBER_METHOD(GetPointFromTextPos, {L"pos"})
+				CLASS_MEMBER_METHOD(GetRectFromTextPos, {L"pos"})
+				CLASS_MEMBER_METHOD(GetNearestTextPos, {L"point"})
+				CLASS_MEMBER_METHOD(CanUndo, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CanRedo, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(ClearUndoRedo, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(NotifyModificationSaved, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Undo, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Redo, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiTextBoxCommonInterface)
+
+			BEGIN_CLASS_MEMBER(GuiTextBoxColorizerBase)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(LexerStartState)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContextStartState)
+
+				CLASS_MEMBER_METHOD(RestartColorizer, NO_PARAMETER)
+				CLASS_MEMBER_EXTERNALMETHOD(GetColors, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiTextBoxColorizerBase::*)(), &GuiTextBoxColorizerBase_GetColors)
+				CLASS_MEMBER_PROPERTY_READONLY(Colors, GetColors)
+			END_CLASS_MEMBER(GuiTextBoxColorizerBase)
+
+			BEGIN_CLASS_MEMBER(GuiTextBoxRegexColorizer)
+				CLASS_MEMBER_BASE(GuiTextBoxColorizerBase)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiTextBoxRegexColorizer>(), NO_PARAMETER)
+
+				CLASS_MEMBER_PROPERTY_FAST(DefaultColor)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ExtraTokenIndexStart)
+
+				CLASS_MEMBER_EXTERNALMETHOD(GetTokenRegexes, NO_PARAMETER, Ptr<IValueList>(GuiTextBoxRegexColorizer::*)(), &GuiTextBoxRegexColorizer_GetTokenRegexes)
+				CLASS_MEMBER_PROPERTY_READONLY(TokenRegexes, GetTokenRegexes)
+				CLASS_MEMBER_EXTERNALMETHOD(GetTokenColors, NO_PARAMETER, Ptr<IValueList>(GuiTextBoxRegexColorizer::*)(), &GuiTextBoxRegexColorizer_GetTokenColors)
+				CLASS_MEMBER_PROPERTY_READONLY(TokenColors, GetTokenColors)
+				CLASS_MEMBER_EXTERNALMETHOD(GetExtraTokenColors, NO_PARAMETER, Ptr<IValueList>(GuiTextBoxRegexColorizer::*)(), &GuiTextBoxRegexColorizer_GetExtraTokenColors)
+				CLASS_MEMBER_PROPERTY_READONLY(ExtraTokenColors, GetExtraTokenColors)
+				CLASS_MEMBER_METHOD(AddToken, {L"regex" _ L"color"})
+				CLASS_MEMBER_METHOD(AddExtraToken, {L"color"})
+				CLASS_MEMBER_METHOD(Setup, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiTextBoxRegexColorizer)
 
 #undef INTERFACE_IDENTIFIER
 #undef CONTROL_CONSTRUCTOR_CONTROLLER
