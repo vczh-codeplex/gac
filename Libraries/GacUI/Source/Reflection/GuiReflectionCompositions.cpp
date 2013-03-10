@@ -189,6 +189,47 @@ Type Declaration
 				CLASS_MEMBER_METHOD(AddSubComponent, {L"name" _ L"composition"})
 			END_CLASS_MEMBER(GuiSubComponentMeasurer::MeasuringSource)
 
+			BEGIN_CLASS_MEMBER(IGuiGraphicsAnimation)
+				CLASS_MEMBER_BASE(IDescriptable)
+				INTERFACE_EXTERNALCTOR(composition, IGuiGraphicsAnimation)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TotalLength)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CurrentPosition)
+
+				CLASS_MEMBER_METHOD(Play, {L"currentPosition" _ L"totalLength"})
+				CLASS_MEMBER_METHOD(Stop, NO_PARAMETER)
+			END_CLASS_MEMBER(IGuiGraphicsAnimation)
+
+			BEGIN_CLASS_MEMBER(GuiGraphicsAnimationManager)
+				CLASS_MEMBER_METHOD(AddAnimation, {L"animation"})
+				CLASS_MEMBER_METHOD(HasAnimation, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(Play, NO_PARAMETER)
+			END_CLASS_MEMBER(GuiGraphicsAnimationManager)
+
+			BEGIN_CLASS_MEMBER(IGuiShortcutKeyItem)
+				CLASS_MEMBER_BASE(IDescriptable)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Manager)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
+			END_CLASS_MEMBER(IGuiShortcutKeyItem)
+
+			BEGIN_CLASS_MEMBER(IGuiShortcutKeyManager)
+				CLASS_MEMBER_BASE(IDescriptable)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ItemCount)
+
+				CLASS_MEMBER_METHOD(GetItem, {L"index"})
+			END_CLASS_MEMBER(IGuiShortcutKeyManager)
+
+			BEGIN_CLASS_MEMBER(GuiShortcutKeyManager)
+				CLASS_MEMBER_BASE(IGuiShortcutKeyManager)
+				CLASS_MEMBER_CONSTRUCTOR(GuiShortcutKeyManager*(), NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD(CreateShortcut, {L"ctrl" _ L"shift" _ L"alt" _ L"ket"})
+				CLASS_MEMBER_METHOD(DestroyShortcut, {L"ctrl" _ L"shift" _ L"alt" _ L"ket"})
+				CLASS_MEMBER_METHOD(TryGetShortcut, {L"ctrl" _ L"shift" _ L"alt" _ L"ket"})
+			END_CLASS_MEMBER(GuiShortcutKeyManager)
+
 #undef INTERFACE_EXTERNALCTOR
 #undef _
 

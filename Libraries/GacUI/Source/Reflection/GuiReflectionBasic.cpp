@@ -1,4 +1,4 @@
-#include "GuiReflectionBasic.h"
+#include "GuiReflectionCompositions.h"
 
 namespace vl
 {
@@ -24,6 +24,11 @@ namespace vl
 			{
 				output=Color::Parse(input);
 				return true;
+			}
+
+			GuiGraphicsAnimationManager* GuiControlHost_GetAnimationManager(GuiControlHost* thisObject)
+			{
+				return thisObject->GetGraphicsHost()->GetAnimationManager();
 			}
 
 /***********************************************************************
@@ -413,6 +418,8 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_FAST(TopMost)
 				CLASS_MEMBER_PROPERTY_FAST(ClientSize)
 				CLASS_MEMBER_PROPERTY_FAST(Bounds)
+				CLASS_MEMBER_PROPERTY_FAST(ShortcutKeyManager)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(AnimationManager)
 
 				CLASS_MEMBER_METHOD(ForceCalculateSizeImmediately, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(Render, NO_PARAMETER)

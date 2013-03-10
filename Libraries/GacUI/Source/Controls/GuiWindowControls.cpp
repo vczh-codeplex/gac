@@ -427,6 +427,11 @@ GuiControlHost
 				host->SetShortcutKeyManager(value);
 			}
 
+			compositions::GuiGraphicsAnimationManager* GuiControlHost::GetAnimationManager()
+			{
+				return host->GetAnimationManager();
+			}
+
 			Size GuiControlHost::GetClientSize()
 			{
 				if(host->GetNativeWindow())

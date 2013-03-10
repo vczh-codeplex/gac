@@ -37,6 +37,11 @@ Type List
 			F(presentation::compositions::GuiSubComponentMeasurer::Direction)\
 			F(presentation::compositions::GuiSubComponentMeasurer::IMeasuringSource)\
 			F(presentation::compositions::GuiSubComponentMeasurer::MeasuringSource)\
+			F(presentation::compositions::IGuiGraphicsAnimation)\
+			F(presentation::compositions::GuiGraphicsAnimationManager)\
+			F(presentation::compositions::IGuiShortcutKeyItem)\
+			F(presentation::compositions::IGuiShortcutKeyManager)\
+			F(presentation::compositions::GuiShortcutKeyManager)\
 
 			GUIREFLECTIONCOMPOSITION_TYPELIST(DECL_TYPE_INFO)
 
@@ -109,6 +114,40 @@ Interface Proxy
 					void SubComponentPreferredMinSizeUpdated()override
 					{
 						INVOKE_INTERFACE_PROXY_NOPARAM(SubComponentPreferredMinSizeUpdated);
+					}
+				};
+
+				class composition_IGuiGraphicsAnimation : public ValueInterfaceRoot, public virtual IGuiGraphicsAnimation
+				{
+				public:
+					composition_IGuiGraphicsAnimation(Ptr<IValueInterfaceProxy> _proxy)
+						:ValueInterfaceRoot(_proxy)
+					{
+					}
+
+					static Ptr<IGuiGraphicsAnimation> Create(Ptr<IValueInterfaceProxy> proxy)
+					{
+						return new composition_IGuiGraphicsAnimation(proxy);
+					}
+
+					vint GetTotalLength()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetTotalLength);
+					}
+
+					vint GetCurrentPosition()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetCurrentPosition);
+					}
+
+					void Play(vint currentPosition, vint totalLength)override
+					{
+						INVOKE_INTERFACE_PROXY(Play, currentPosition, totalLength);
+					}
+
+					void Stop()override
+					{
+						INVOKE_INTERFACE_PROXY_NOPARAM(Stop);
 					}
 				};
 			}

@@ -30,10 +30,10 @@ Animation
 			public:
 				/// <summary>Get the total length.</summary>
 				/// <returns>The total length.</returns>
-				virtual vint						GetTotalLength()=0;
+				virtual vint					GetTotalLength()=0;
 				/// <summary>Get the current position. Value in [0, TotalLength-1]. This function doesn't return a internal state. It return the suggested current position at the moment this function is called.</summary>
 				/// <returns>The current position.</returns>
-				virtual vint						GetCurrentPosition()=0;
+				virtual vint					GetCurrentPosition()=0;
 				/// <summary>Display a state in the animation with the specified current position and the specified total length.</summary>
 				/// <param name="currentPosition">The current position. When this function is called by [T:vl.presentation.compositions.GuiGraphicsAnimationManager], this value comes from <see cref="IGuiGraphicsAnimation::GetCurrentPosition"/>.</param>
 				/// <param name="totalLength">The total length. When this function is called by [T:vl.presentation.compositions.GuiGraphicsAnimationManager], this value comes from <see cref="IGuiGraphicsAnimation::GetTotalLength"/>.</param>
@@ -45,7 +45,7 @@ Animation
 			/// <summary>
 			/// Animation manager.
 			/// </summary>
-			class GuiGraphicsAnimationManager : public Object
+			class GuiGraphicsAnimationManager : public Object, public Description<GuiGraphicsAnimationManager>
 			{
 				typedef collections::List<Ptr<IGuiGraphicsAnimation>>		AnimationList;
 			protected:
@@ -71,7 +71,7 @@ Shortcut Key Manager
 			class IGuiShortcutKeyManager;
 
 			/// <summary>Shortcut key item.</summary>
-			class IGuiShortcutKeyItem : public Interface, public Description<IGuiShortcutKeyItem>
+			class IGuiShortcutKeyItem : public virtual IDescriptable, public Description<IGuiShortcutKeyItem>
 			{
 			public:
 				/// <summary>Shortcut key executed event.</summary>
@@ -86,12 +86,12 @@ Shortcut Key Manager
 			};
 			
 			/// <summary>Shortcut key manager item.</summary>
-			class IGuiShortcutKeyManager : public Interface, public Description<IGuiShortcutKeyManager>
+			class IGuiShortcutKeyManager : public virtual IDescriptable, public Description<IGuiShortcutKeyManager>
 			{
 			public:
 				/// <summary>Get the number of shortcut key items that already attached to the manager.</summary>
 				/// <returns>T number of shortcut key items that already attached to the manager.</returns>
-				virtual vint								GetItemCount()=0;
+				virtual vint							GetItemCount()=0;
 				/// <summary>Get the <see cref="IGuiShortcutKeyItem"/> associated with the index.</summary>
 				/// <returns>The shortcut key item.</returns>
 				/// <param name="index">The index.</param>
@@ -220,7 +220,7 @@ Animation Helpers
 			{
 			protected:
 				unsigned __int64				startTime;
-				vint								length;
+				vint							length;
 			public:
 				/// <summary>Create an animation with a specified length in milliseconds.</summary>
 				/// <param name="totalMilliseconds">The specified length in milliseconds.</param>
@@ -230,8 +230,8 @@ Animation Helpers
 				/// <summary>Restart an animation with a specified length in milliseconds.</summary>
 				/// <param name="totalMilliseconds">The specified length in milliseconds. If the value is -1, it will use the previous length.</param>
 				void							Restart(vint totalMilliseconds=-1);
-				vint								GetTotalLength()override;
-				vint								GetCurrentPosition()override;
+				vint							GetTotalLength()override;
+				vint							GetCurrentPosition()override;
 			};
 
 /***********************************************************************
@@ -247,7 +247,7 @@ Shortcut Key Manager Helpers
 				bool							ctrl;
 				bool							shift;
 				bool							alt;
-				vint								key;
+				vint							key;
 
 				void							AttachManager(GuiShortcutKeyManager* manager);
 				void							DetachManager(GuiShortcutKeyManager* manager);
@@ -273,7 +273,7 @@ Shortcut Key Manager Helpers
 				GuiShortcutKeyManager();
 				~GuiShortcutKeyManager();
 
-				vint								GetItemCount()override;
+				vint							GetItemCount()override;
 				IGuiShortcutKeyItem*			GetItem(vint index)override;
 				bool							Execute(const NativeWindowKeyInfo& info)override;
 
