@@ -602,7 +602,7 @@ TEST_CASE(TestReflectionList)
 	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
 	TEST_ASSERT(GetGlobalTypeManager()->Load());
 	{
-		Value bases=Value::Create(L"List");
+		Value bases=Value::Create(L"system::List");
 		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 1))));
 		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 2))));
 		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 3))));

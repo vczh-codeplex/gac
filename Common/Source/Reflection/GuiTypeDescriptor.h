@@ -31,6 +31,7 @@ Attribute
 		namespace description
 		{
 			class ITypeDescriptor;
+			class ITypeInfo;
 			class IEventInfo;
 			class IPropertyInfo;
 			class IParameterInfo;
@@ -137,7 +138,7 @@ Value
 				WString							GetTypeFriendlyName()const;
 				bool							IsNull()const;
 				bool							CanConvertTo(ITypeDescriptor* targetType, ValueType targetValueType)const;
-				bool							CanConvertTo(IParameterInfo* targetType)const;
+				bool							CanConvertTo(ITypeInfo* targetType)const;
 
 				static Value					From(DescriptableObject* value);
 				static Value					From(Ptr<DescriptableObject> value);
@@ -410,6 +411,29 @@ Interface Implementation Proxy
 			};
 
 /***********************************************************************
+ITypeDescriptor (type)
+***********************************************************************/
+
+			class ITypeInfo : public virtual Interface
+			{
+			public:
+				enum Decorator
+				{
+					RawPtr,
+					SharedPtr,
+					TypeDescriptor,
+					Generic,
+				};
+
+				virtual Decorator				GetDecorator()=0;
+				virtual ITypeInfo*				GetElementType()=0;
+				virtual ITypeDescriptor*		GetTypeDescriptor()=0;
+				virtual vint					GetGenericArgumentCount()=0;
+				virtual ITypeInfo*				GetGenericArgument(vint index)=0;
+				virtual WString					GetTypeFriendlyName()=0;
+			};
+
+/***********************************************************************
 ITypeDescriptor (basic)
 ***********************************************************************/
 
@@ -424,7 +448,7 @@ ITypeDescriptor (basic)
 ITypeDescriptor (event)
 ***********************************************************************/
 
-			class IEventHandler : public Interface
+			class IEventHandler : public virtual Interface
 			{
 			public:
 				virtual IEventInfo*				GetOwnerEvent()=0;
@@ -451,7 +475,7 @@ ITypeDescriptor (property)
 			public:
 				virtual bool					IsReadable()=0;
 				virtual bool					IsWritable()=0;
-				virtual IParameterInfo*			GetReturn()=0;
+				virtual ITypeInfo*				GetReturn()=0;
 				virtual IMethodInfo*			GetGetter()=0;
 				virtual IMethodInfo*			GetSetter()=0;
 				virtual IEventInfo*				GetValueChangedEvent()=0;
@@ -466,18 +490,8 @@ ITypeDescriptor (method)
 			class IParameterInfo : public IMemberInfo
 			{
 			public:
-				enum Decorator
-				{
-					RawPtr,
-					SharedPtr,
-					Text,
-				};
-
-				virtual ITypeDescriptor*		GetValueTypeDescriptor()=0;
+				virtual ITypeInfo*				GetType()=0;
 				virtual IMethodInfo*			GetOwnerMethod()=0;
-				virtual Decorator				GetDecorator()=0;
-				virtual bool					CanOutput()=0;
-				virtual WString					GetTypeFriendlyName()=0;
 			};
 
 			class IMethodInfo : public IMemberInfo
@@ -487,7 +501,7 @@ ITypeDescriptor (method)
 				virtual IPropertyInfo*			GetOwnerProperty()=0;
 				virtual vint					GetParameterCount()=0;
 				virtual IParameterInfo*			GetParameter(vint index)=0;
-				virtual IParameterInfo*			GetReturn()=0;
+				virtual ITypeInfo*				GetReturn()=0;
 				virtual bool					IsStatic()=0;
 				virtual void					CheckArguments(collections::Array<Value>& arguments)=0;
 				virtual Value					Invoke(const Value& thisObject, collections::Array<Value>& arguments)=0;
@@ -504,7 +518,7 @@ ITypeDescriptor (method)
 ITypeDescriptor
 ***********************************************************************/
 
-			class ITypeDescriptor : public Interface
+			class ITypeDescriptor : public virtual Interface
 			{
 			public:
 				virtual const WString&			GetTypeName()=0;
@@ -536,14 +550,14 @@ ITypeManager
 
 			class ITypeManager;
 
-			class ITypeLoader : public Interface
+			class ITypeLoader : public virtual Interface
 			{
 			public:
 				virtual void					Load(ITypeManager* manager)=0;
 				virtual void					Unload(ITypeManager* manager)=0;
 			};
 
-			class ITypeManager : public Interface
+			class ITypeManager : public virtual Interface
 			{
 			public:
 				virtual vint					GetTypeDescriptorCount()=0;
@@ -637,7 +651,7 @@ Exceptions
 			class ArgumentTypeMismtatchException : public TypeDescriptorException
 			{
 			public:
-				ArgumentTypeMismtatchException(const WString& name, IParameterInfo* expected, const Value& actual)
+				ArgumentTypeMismtatchException(const WString& name, ITypeInfo* expected, const Value& actual)
 					:TypeDescriptorException(L"Argument \""+name+L"\" cannot convert from \""+actual.GetTypeFriendlyName()+L"\" to \""+expected->GetTypeFriendlyName()+L"\".")
 				{
 				}
