@@ -23,6 +23,18 @@ namespace vl
 GuiApplication
 ***********************************************************************/
 
+			void GuiApplication::InvokeClipboardNotify(compositions::GuiGraphicsComposition* composition, compositions::GuiEventArgs& arguments)
+			{
+				if(composition->HasEventReceiver())
+				{
+					composition->GetEventReceiver()->clipboardNotify.Execute(arguments);
+				}
+				FOREACH(GuiGraphicsComposition*, subComposition, composition->Children())
+				{
+					InvokeClipboardNotify(subComposition, arguments);
+				}
+			}
+
 			void GuiApplication::LeftButtonDown(Point position)
 			{
 				OnMouseDown(position);
@@ -46,7 +58,7 @@ GuiApplication
 				for(vint i=0;i<windows.Count();i++)
 				{
 					GuiEventArgs arguments=windows[i]->GetNotifyEventArguments();
-					windows[i]->ClipboardUpdated.Execute(arguments);
+					InvokeClipboardNotify(windows[i]->GetBoundsComposition(), arguments);
 				}
 			}
 

@@ -25,6 +25,7 @@ namespace vl
 				friend class GuiPopup;
 				friend class Ptr<GuiApplication>;
 			private:
+				void											InvokeClipboardNotify(compositions::GuiGraphicsComposition* composition, compositions::GuiEventArgs& arguments);
 				void											LeftButtonDown(Point position)override;
 				void											LeftButtonUp(Point position)override;
 				void											RightButtonDown(Point position)override;
