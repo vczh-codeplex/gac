@@ -217,6 +217,8 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiButton)
 
+				CLASS_MEMBER_GUIEVENT(Clicked)
+
 				CLASS_MEMBER_PROPERTY_FAST(ClickOnMouseUp)
 			END_CLASS_MEMBER(GuiButton)
 
@@ -238,9 +240,9 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiButton)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiSelectableButton)
 
-				CLASS_MEMBER_PROPERTY_FAST(GroupController)
-				CLASS_MEMBER_PROPERTY_FAST(AutoSelection)
-				CLASS_MEMBER_PROPERTY_FAST(Selected)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(GroupController)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(AutoSelection)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Selected)
 			END_CLASS_MEMBER(GuiSelectableButton)
 
 			BEGIN_CLASS_MEMBER(GuiSelectableButton::IStyleController)
@@ -267,11 +269,11 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiScroll)
 
-				CLASS_MEMBER_PROPERTY_FAST(TotalSize)
-				CLASS_MEMBER_PROPERTY_FAST(PageSize)
-				CLASS_MEMBER_PROPERTY_FAST(Position)
-				CLASS_MEMBER_PROPERTY_FAST(SmallMove)
-				CLASS_MEMBER_PROPERTY_FAST(BigMove)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(TotalSize)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(PageSize)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Position)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(SmallMove)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(BigMove)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(MinPosition)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxPosition)
 			END_CLASS_MEMBER(GuiScroll)
@@ -297,9 +299,13 @@ Type Declaration
 			END_CLASS_MEMBER(GuiScroll::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiTabPage)
+				CLASS_MEMBER_GUIEVENT(PageInstalled)
+				CLASS_MEMBER_GUIEVENT(PageUninstalled)
+				CLASS_MEMBER_GUIEVENT(PageContainerReady)
+
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Container)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerTab)
-				CLASS_MEMBER_PROPERTY_FAST(Text)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Text)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Selected)
 			END_CLASS_MEMBER(GuiTabPage)
 
@@ -307,7 +313,7 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiTab)
 
-				CLASS_MEMBER_PROPERTY_FAST(SelectedPage)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(SelectedPage)
 
 				CLASS_MEMBER_METHOD_OVERLOAD(CreatePage, {L"index"}, GuiTabPage*(GuiTab::*)(vint))
 				CLASS_MEMBER_METHOD_OVERLOAD(CreatePage, {L"page" _ L"index"}, bool(GuiTab::*)(GuiTabPage* _ vint))
@@ -412,10 +418,23 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiScrollView)
 				CLASS_MEMBER_CONSTRUCTOR(GuiListControl*(GuiListControl::IStyleProvider* _ GuiListControl::IItemProvider* _ bool), {L"styleProvider" _ L"itemProvider" _ L"acceptFocus"})
 
+				CLASS_MEMBER_GUIEVENT(ItemLeftButtonDown)
+				CLASS_MEMBER_GUIEVENT(ItemLeftButtonUp)
+				CLASS_MEMBER_GUIEVENT(ItemLeftButtonDoubleClick)
+				CLASS_MEMBER_GUIEVENT(ItemMiddleButtonDown)
+				CLASS_MEMBER_GUIEVENT(ItemMiddleButtonUp)
+				CLASS_MEMBER_GUIEVENT(ItemMiddleButtonDoubleClick)
+				CLASS_MEMBER_GUIEVENT(ItemRightButtonDown)
+				CLASS_MEMBER_GUIEVENT(ItemRightButtonUp)
+				CLASS_MEMBER_GUIEVENT(ItemRightButtonDoubleClick)
+				CLASS_MEMBER_GUIEVENT(ItemMouseMove)
+				CLASS_MEMBER_GUIEVENT(ItemMouseEnter)
+				CLASS_MEMBER_GUIEVENT(ItemMouseLeave)
+
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ItemProvider)
-				CLASS_MEMBER_PROPERTY_FAST(StyleProvider)
-				CLASS_MEMBER_PROPERTY_FAST(Arranger)
-				CLASS_MEMBER_PROPERTY_FAST(CoordinateTransformer)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(StyleProvider)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Arranger)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(CoordinateTransformer)
 
 				CLASS_MEMBER_METHOD(EnsureItemVisible, {L"itemIndex"})
 			END_CLASS_MEMBER(GuiListControl)
@@ -536,9 +555,13 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiListControl)
 				CLASS_MEMBER_CONSTRUCTOR(GuiSelectableListControl*(GuiSelectableListControl::IStyleProvider* _ GuiSelectableListControl::IItemProvider*), {L"styleProvider" _ L"itemProvider"})
 
+				CLASS_MEMBER_GUIEVENT(SelectionChanged)
+
 				CLASS_MEMBER_PROPERTY_FAST(MultiSelect)
 
 				CLASS_MEMBER_EXTERNALMETHOD(GetSelectedItems, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiSelectableListControl::*)(), &GuiSelectableListControl_GetSelectedItem)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY(SelectedItems, GetSelectedItems, SelectionChanged)
+
 				CLASS_MEMBER_METHOD(GetSelected, {L"itemIndex"})
 				CLASS_MEMBER_METHOD(SetSelected, {L"itemIndex" _ L"value"})
 				CLASS_MEMBER_METHOD(SelectItemsByClick, {L"itemIndex" _ L"ctrl" _ L"shift"})
@@ -701,6 +724,8 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiListViewBase)
 				CLASS_MEMBER_BASE(GuiSelectableListControl)
 				CLASS_MEMBER_CONSTRUCTOR(GuiListViewBase*(GuiListViewBase::IStyleProvider* _ GuiListControl::IItemProvider*), {L"styleProvider" _ L"itemProvider"})
+
+				CLASS_MEMBER_GUIEVENT(ColumnClicked)
 
 				CLASS_MEMBER_METHOD(GetListViewStyleProvider, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiListViewBase)
@@ -901,11 +926,11 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiButton)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiMenuButton)
 
-				CLASS_MEMBER_PROPERTY_FAST(Image)
-				CLASS_MEMBER_PROPERTY_FAST(ShortcutText)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Image)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(ShortcutText)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(SubMenu)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnedSubMenu)
-				CLASS_MEMBER_PROPERTY_FAST(SubMenuOpening)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(SubMenuOpening)
 				CLASS_MEMBER_PROPERTY_FAST(PreferredMenuClientSize)
 
 				CLASS_MEMBER_METHOD(IsSubMenuExists, NO_PARAMETER)
@@ -1051,6 +1076,21 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiSelectableListControl)
 				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualTreeListControl*(GuiVirtualTreeListControl::IStyleProvider* _ Ptr<INodeRootProvider>), {L"styleProvider" _ L"rootNodeProvider"})
 
+				CLASS_MEMBER_GUIEVENT(NodeLeftButtonDown)
+				CLASS_MEMBER_GUIEVENT(NodeLeftButtonUp)
+				CLASS_MEMBER_GUIEVENT(NodeLeftButtonDoubleClick)
+				CLASS_MEMBER_GUIEVENT(NodeMiddleButtonDown)
+				CLASS_MEMBER_GUIEVENT(NodeMiddleButtonUp)
+				CLASS_MEMBER_GUIEVENT(NodeMiddleButtonDoubleClick)
+				CLASS_MEMBER_GUIEVENT(NodeRightButtonDown)
+				CLASS_MEMBER_GUIEVENT(NodeRightButtonUp)
+				CLASS_MEMBER_GUIEVENT(NodeRightButtonDoubleClick)
+				CLASS_MEMBER_GUIEVENT(NodeMouseMove)
+				CLASS_MEMBER_GUIEVENT(NodeMouseEnter)
+				CLASS_MEMBER_GUIEVENT(NodeMouseLeave)
+				CLASS_MEMBER_GUIEVENT(NodeExpanded)
+				CLASS_MEMBER_GUIEVENT(NodeCollapsed)
+
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(NodeItemView)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(NodeRootProvider)
 				CLASS_MEMBER_PROPERTY_FAST(NodeStyleProvider)
@@ -1117,6 +1157,11 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiButton)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiComboBoxBase)
 
+				CLASS_MEMBER_GUIEVENT(PopupOpened)
+				CLASS_MEMBER_GUIEVENT(PopupClosed)
+				CLASS_MEMBER_GUIEVENT(ItemSelecting)
+				CLASS_MEMBER_GUIEVENT(ItemSelected)
+
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Popup)
 
 				CLASS_MEMBER_METHOD(ShowPopup, NO_PARAMETER)
@@ -1147,7 +1192,7 @@ Type Declaration
 
 				CLASS_MEMBER_PROPERTY_FAST(Font)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContainedListControl)
-				CLASS_MEMBER_PROPERTY_FAST(SelectedIndex)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(SelectedIndex)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ItemProvider)
 			END_CLASS_MEMBER(GuiComboBoxListControl)
 
@@ -1155,10 +1200,13 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiComponent)
 				CLASS_MEMBER_CONSTRUCTOR(GuiToolstripCommand*(), NO_PARAMETER)
 
-				CLASS_MEMBER_PROPERTY_FAST(Image)
-				CLASS_MEMBER_PROPERTY_FAST(Text)
-				CLASS_MEMBER_PROPERTY_FAST(Shortcut)
-				CLASS_MEMBER_PROPERTY_FAST(Enabled)
+				CLASS_MEMBER_GUIEVENT(Executed)
+				CLASS_MEMBER_GUIEVENT(DescriptionChanged)
+
+				CLASS_MEMBER_PROPERTY_EVENT_FAST(Image, DescriptionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_FAST(Text, DescriptionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_FAST(Shortcut, DescriptionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_FAST(Enabled, DescriptionChanged)
 			END_CLASS_MEMBER(GuiToolstripCommand)
 
 			BEGIN_CLASS_MEMBER(GuiToolstripMenu)
@@ -1197,8 +1245,12 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(GuiDocumentCommonInterface)
 				CLASS_MEMBER_PROPERTY_FAST(Document)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(ActiveHyperlinkId)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(ActiveHyperlinkReference)
+
+				CLASS_MEMBER_GUIEVENT(ActiveHyperlinkChanged)
+				CLASS_MEMBER_GUIEVENT(ActiveHyperlinkExecuted)
+
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(ActiveHyperlinkId, ActiveHyperlinkChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(ActiveHyperlinkReference, ActiveHyperlinkChanged)
 
 				CLASS_MEMBER_METHOD(NotifyParagraphUpdated, {L"index"})
 			END_CLASS_MEMBER(GuiDocumentCommonInterface)
@@ -1216,12 +1268,14 @@ Type Declaration
 			END_CLASS_MEMBER(GuiDocumentLabel)
 
 			BEGIN_CLASS_MEMBER(GuiTextBoxCommonInterface)
+				CLASS_MEMBER_GUIEVENT(SelectionChanged)
+				
 				CLASS_MEMBER_PROPERTY_FAST(Readonly)
-				CLASS_MEMBER_PROPERTY_FAST(SelectionText)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretBegin)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretEnd)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretSmall)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(CaretLarge)
+				CLASS_MEMBER_PROPERTY_EVENT_FAST(SelectionText, SelectionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(CaretBegin, SelectionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(CaretEnd, SelectionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(CaretSmall, SelectionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(CaretLarge, SelectionChanged)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(RowHeight)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxWidth)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(MaxHeight)
