@@ -43,7 +43,7 @@ GuiEventInfoImpl
 			class GuiEventInfoImpl : public EventInfoImpl
 			{
 			protected:
-				typedef Func<GuiGraphicsEvent<T>*(DescriptableObject*)>		EventRetriverFunction;
+				typedef Func<GuiGraphicsEvent<T>*(DescriptableObject*, bool)>		EventRetriverFunction;
 
 				EventRetriverFunction				eventRetriver;
 
@@ -53,7 +53,7 @@ GuiEventInfoImpl
 					{
 						if(EventHandlerImpl* handlerImpl=dynamic_cast<EventHandlerImpl*>(eventHandler))
 						{
-							GuiGraphicsEvent<T>* eventObject=eventRetriver(thisObject);
+							GuiGraphicsEvent<T>* eventObject=eventRetriver(thisObject, true);
 							if(eventObject)
 							{
 								Ptr<GuiGraphicsEvent<T>::IHandler> handler=eventObject->AttachLambda(
@@ -75,7 +75,7 @@ GuiEventInfoImpl
 					{
 						if(EventHandlerImpl* handlerImpl=dynamic_cast<EventHandlerImpl*>(eventHandler))
 						{
-							GuiGraphicsEvent<T>* eventObject=eventRetriver(thisObject);
+							GuiGraphicsEvent<T>* eventObject=eventRetriver(thisObject, false);
 							if(eventObject)
 							{
 								Ptr<GuiGraphicsEvent<T>::IHandler> handler=handlerImpl->GetTag().Cast<GuiGraphicsEvent<T>::IHandler>();
@@ -120,8 +120,24 @@ Macros
 				new GuiEventInfoImpl<GuiEventArgumentTypeRetriver<decltype(&ClassType::EVENTNAME)>::Type>(\
 					this,\
 					L#EVENTNAME,\
-					[](DescriptableObject* thisObject){\
+					[](DescriptableObject* thisObject, bool addEventHandler){\
 						return &dynamic_cast<ClassType*>(thisObject)->EVENTNAME;\
+					}\
+				)\
+			);\
+
+#define CLASS_MEMBER_GUIEVENT_COMPOSITION(EVENTNAME)\
+			AddEvent(\
+				new GuiEventInfoImpl<GuiEventArgumentTypeRetriver<decltype(&GuiGraphicsEventReceiver::EVENTNAME)>::Type>(\
+					this,\
+					L#EVENTNAME,\
+					[](DescriptableObject* thisObject, bool addEventHandler){\
+						GuiGraphicsComposition* composition=dynamic_cast<GuiGraphicsComposition*>(thisObject);\
+						if(!addEventHandler && !composition->HasEventReceiver())\
+						{\
+							return (GuiGraphicsEvent<GuiEventArgumentTypeRetriver<decltype(&GuiGraphicsEventReceiver::EVENTNAME)>::Type>*)0;\
+						}\
+						return &composition->GetEventReceiver()->EVENTNAME;\
 					}\
 				)\
 			);\

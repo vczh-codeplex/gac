@@ -752,7 +752,6 @@ GuiWindow
 				:GuiControlHost(_styleController)
 				,styleController(_styleController)
 			{
-				ClipboardUpdated.SetAssociatedComposition(GetStyleController()->GetBoundsComposition());
 				INativeWindow* window=GetCurrentController()->WindowService()->CreateNativeWindow();
 				styleController->AttachWindow(this);
 				SetNativeWindow(window);

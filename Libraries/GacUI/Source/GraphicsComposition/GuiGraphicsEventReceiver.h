@@ -448,6 +448,8 @@ Event Receiver
 				GuiNotifyEvent					lostFocus;
 				/// <summary>Caret notify event. This event is raised when a caret graph need to change the visibility state.</summary>
 				GuiNotifyEvent					caretNotify;
+				/// <summary>Clipboard notify event. This event is raised when the content in the system clipboard is changed.</summary>
+				GuiNotifyEvent					clipboardNotify;
 			};
 		}
 	}
