@@ -146,6 +146,10 @@ Macros
 			CLASS_MEMBER_GUIEVENT(PROPERTYNAME##Changed)\
 			CLASS_MEMBER_PROPERTY_EVENT_FAST(PROPERTYNAME, PROPERTYNAME##Changed)\
 
+#define CLASS_MEMBER_PROPERTY_GUIEVENT_READONLY_FAST(PROPERTYNAME)\
+			CLASS_MEMBER_GUIEVENT(PROPERTYNAME##Changed)\
+			CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(PROPERTYNAME, PROPERTYNAME##Changed)\
+
 /***********************************************************************
 Type Loader
 ***********************************************************************/
