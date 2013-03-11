@@ -303,6 +303,7 @@ namespace test
 	protected:
 		Array<Ptr<Base>>		bases;
 	public:
+
 		const Array<Ptr<Base>>& GetBases()
 		{
 			return bases;
@@ -316,6 +317,25 @@ namespace test
 		int Sum()
 		{
 			return From(bases)
+				.Select([](const Ptr<Base>& base){return base->a;})
+				.Aggregate(0, [](int a, int b){return a+b;});
+		}
+
+		List<Ptr<Base>>			bases3;
+
+		List<Ptr<Base>>& GetBases2()
+		{
+			return bases3;
+		}
+
+		void SetBases2(List<Ptr<Base>>& _bases)
+		{
+			CopyFrom(bases3, _bases);
+		}
+
+		int Sum2()
+		{
+			return From(bases3)
 				.Select([](const Ptr<Base>& base){return base->a;})
 				.Aggregate(0, [](int a, int b){return a+b;});
 		}
@@ -409,8 +429,11 @@ BEGIN_TYPE_INFO_NAMESPACE
 	BEGIN_CLASS_MEMBER(BaseSummer)
 		CLASS_MEMBER_CONSTRUCTOR(Ptr<BaseSummer>(), NO_PARAMETER)
 		CLASS_MEMBER_METHOD(Sum, NO_PARAMETER)
-		CLASS_MEMBER_EXTERNALMETHOD(GetBases, NO_PARAMETER, Ptr<IValueReadonlyList>(BaseSummer::*)(), &BaseSummer_GetBases)
-		CLASS_MEMBER_EXTERNALMETHOD(SetBases, {L"bases"}, void(BaseSummer::*)(Ptr<IValueReadonlyList>), &BaseSummer_SetBases)
+		CLASS_MEMBER_METHOD(Sum2, NO_PARAMETER)
+		CLASS_MEMBER_METHOD(GetBases, NO_PARAMETER)
+		CLASS_MEMBER_METHOD(SetBases, {L"bases"})
+		CLASS_MEMBER_METHOD(GetBases2, NO_PARAMETER)
+		CLASS_MEMBER_METHOD(SetBases2, {L"bases"})
 	END_CLASS_MEMBER(BaseSummer)
 
 	class TestTypeLoader : public Object, public ITypeLoader
@@ -613,6 +636,24 @@ TEST_CASE(TestReflectionList)
 		TEST_ASSERT(UnboxValue<int>(baseSummer.Invoke(L"Sum"))==10);
 
 		Value baseArray=baseSummer.Invoke(L"GetBases");
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Count"))==4);
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 0)).GetProperty(L"a"))==1);
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 1)).GetProperty(L"a"))==2);
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 2)).GetProperty(L"a"))==3);
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 3)).GetProperty(L"a"))==4);
+	}
+	{
+		Value bases=Value::Create(L"system::List");
+		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 1))));
+		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 2))));
+		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 3))));
+		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 4))));
+
+		Value baseSummer=Value::Create(L"test::BaseSummer");
+		baseSummer.Invoke(L"SetBases2", (Value::xs(), bases));
+		TEST_ASSERT(UnboxValue<int>(baseSummer.Invoke(L"Sum2"))==10);
+
+		Value baseArray=baseSummer.Invoke(L"GetBases2");
 		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Count"))==4);
 		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 0)).GetProperty(L"a"))==1);
 		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 1)).GetProperty(L"a"))==2);

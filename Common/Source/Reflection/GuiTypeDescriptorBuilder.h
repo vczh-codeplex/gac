@@ -285,7 +285,7 @@ TypeDescriptorImpl
 			};
 
 /***********************************************************************
-ParameterTypeInfo
+TypeFlagSelector
 ***********************************************************************/
 
 			struct TypeFlags
@@ -295,12 +295,114 @@ ParameterTypeInfo
 				struct NonGenericType{};
 			};
 
-			template<typename T, typename TTypeFlag=TypeFlags::NonGenericType>
+			template<typename T>
+			struct ValueRetriver
+			{
+				T* pointer;
+			};
+
+			template<typename T>
+			struct ValueRetriver<T&>
+			{
+				T* pointer;
+			};
+
+			template<typename TDerived>
+			struct IsInheritsFromEnumerable
+			{
+				template<typename T>
+				static void* Inherit(collections::IEnumerable<T>* source){}
+				static char Inherit(void* source){}
+				static char Inherit(const void* source){}
+
+				static const bool										Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*);
+			};
+
+			template<typename TDerived>
+			struct IsInheritsFromConstEnumerable
+			{
+				template<typename T>
+				static void* Inherit(const collections::IEnumerable<T>* source){}
+				static char Inherit(void* source){}
+				static char Inherit(const void* source){}
+
+				static const bool										Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*);
+			};
+
+			template<typename T, bool IsEnumerable, bool IsConstEnumerable>
+			struct TypeFlagSelectorCase
+			{
+				typedef int												TypeFlag;
+			};
+
+			template<typename T>
+			struct TypeFlagSelectorCase<T, true, true>
+			{
+				typedef TypeFlags::ListType								TypeFlag;
+			};
+
+			template<typename T>
+			struct TypeFlagSelectorCase<T, false, true>
+			{
+				typedef TypeFlags::ReadonlyListType						TypeFlag;
+			};
+
+			template<typename T>
+			struct TypeFlagSelectorCase<T, false, false>
+			{
+				typedef TypeFlags::NonGenericType						TypeFlag;
+			};
+
+			template<typename T>
+			struct TypeFlagSelector
+			{
+				typedef typename TypeFlagSelectorCase<
+					T,
+					IsInheritsFromEnumerable<T>::Result,
+					IsInheritsFromConstEnumerable<T>::Result
+					>::TypeFlag											TypeFlag;
+			};
+
+/***********************************************************************
+TypeInfoRetriver
+***********************************************************************/
+
+			template<typename T, typename TTypeFlag>
 			struct DetailTypeInfoRetriver
+			{
+				static const ITypeInfo::Decorator						Decorator=ITypeInfo::TypeDescriptor;
+				typedef void											Type;
+				typedef void											TempValueType;
+				typedef void											ResultReferenceType;
+				typedef void											ResultNonReferenceType;
+			};
+
+			template<typename T>
+			struct TypeInfoRetriver
+			{
+				typedef typename TypeFlagSelector<T>::TypeFlag									TypeFlag;
+
+				static const ITypeInfo::Decorator												Decorator=DetailTypeInfoRetriver<T, TypeFlag>::Decorator;
+
+				typedef typename DetailTypeInfoRetriver<T, TypeFlag>::Type						Type;
+				typedef typename DetailTypeInfoRetriver<T, TypeFlag>::TempValueType				TempValueType;
+				typedef typename DetailTypeInfoRetriver<T, TypeFlag>::ResultReferenceType		ResultReferenceType;
+				typedef typename DetailTypeInfoRetriver<T, TypeFlag>::ResultNonReferenceType	ResultNonReferenceType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					return DetailTypeInfoRetriver<T, TypeFlag>::CreateTypeInfo();
+				}
+			};
+
+			template<typename T>
+			struct DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>
 			{
 				static const ITypeInfo::Decorator						Decorator=ITypeInfo::TypeDescriptor;
 				typedef T												Type;
 				typedef T												TempValueType;
+				typedef T&												ResultReferenceType;
+				typedef T												ResultNonReferenceType;
 
 				static Ptr<ITypeInfo> CreateTypeInfo()
 				{
@@ -311,73 +413,53 @@ ParameterTypeInfo
 			};
 
 			template<typename T>
-			struct TypeInfoRetriver
+			struct DetailTypeInfoRetriver<const T, TypeFlags::NonGenericType>
 			{
+				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
 
-				template<typename U>
-				static TypeFlags::ReadonlyListType GetTypeFlag(const collections::IEnumerable<U>& value);
-
-				template<typename U>
-				static TypeFlags::ListType GetTypeFlag(collections::IEnumerable<U>& value);
-
-				template<typename U>
-				static TypeFlags::NonGenericType GetTypeFlag(const U& value);
-
-				template<typename T>
-				struct ValueRetriver
-				{
-					T value;
-				};
-
-				typedef decltype(GetTypeFlag(((ValueRetriver<T>*)0)->value))			TypeFlag;
-
-				static const ITypeInfo::Decorator										Decorator=DetailTypeInfoRetriver<T, TypeFlag>::Decorator;
-
-				typedef typename DetailTypeInfoRetriver<T, TypeFlag>::Type				Type;
-				typedef typename DetailTypeInfoRetriver<T, TypeFlag>::TempValueType		TempValueType;
-
-				static Ptr<ITypeInfo> CreateTypeInfo()
-				{
-					return DetailTypeInfoRetriver<T, TypeFlag>::CreateTypeInfo();
-				}
-			};
-
-			template<typename T>
-			struct DetailTypeInfoRetriver<const T>
-			{
-				static const ITypeInfo::Decorator								Decorator=DetailTypeInfoRetriver<T>::Decorator;
-				typedef typename DetailTypeInfoRetriver<T>::Type				Type;
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef typename UpLevelRetriver::Type							Type;
 				typedef T														TempValueType;
+				typedef const T&												ResultReferenceType;
+				typedef const T													ResultNonReferenceType;
 
 				static Ptr<ITypeInfo> CreateTypeInfo()
 				{
-					return DetailTypeInfoRetriver<T>::CreateTypeInfo();
+					return TypeInfoRetriver<T>::CreateTypeInfo();
 				}
 			};
 
 			template<typename T>
-			struct DetailTypeInfoRetriver<volatile T>
+			struct DetailTypeInfoRetriver<volatile T, TypeFlags::NonGenericType>
 			{
-				static const ITypeInfo::Decorator								Decorator=DetailTypeInfoRetriver<T>::Decorator;
-				typedef typename DetailTypeInfoRetriver<T>::Type				Type;
+				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
+
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef typename UpLevelRetriver::Type							Type;
 				typedef T														TempValueType;
+				typedef T&														ResultReferenceType;
+				typedef T														ResultNonReferenceType;
 
 				static Ptr<ITypeInfo> CreateTypeInfo()
 				{
-					return DetailTypeInfoRetriver<T>::CreateTypeInfo();
+					return TypeInfoRetriver<T>::CreateTypeInfo();
 				}
 			};
 
 			template<typename T>
-			struct DetailTypeInfoRetriver<T*>
+			struct DetailTypeInfoRetriver<T*, TypeFlags::NonGenericType>
 			{
+				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
+
 				static const ITypeInfo::Decorator								Decorator=ITypeInfo::RawPtr;
-				typedef typename DetailTypeInfoRetriver<T>::Type				Type;
+				typedef typename UpLevelRetriver::Type							Type;
 				typedef T*														TempValueType;
+				typedef T*&														ResultReferenceType;
+				typedef T														ResultNonReferenceType;
 
 				static Ptr<ITypeInfo> CreateTypeInfo()
 				{
-					Ptr<ITypeInfo> elementType=DetailTypeInfoRetriver<T>::CreateTypeInfo();
+					Ptr<ITypeInfo> elementType=TypeInfoRetriver<T>::CreateTypeInfo();
 					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::RawPtr);
 					type->SetElementType(elementType);
 					return type;
@@ -385,15 +467,19 @@ ParameterTypeInfo
 			};
 
 			template<typename T>
-			struct DetailTypeInfoRetriver<Ptr<T>>
+			struct DetailTypeInfoRetriver<Ptr<T>, TypeFlags::NonGenericType>
 			{
+				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
+
 				static const ITypeInfo::Decorator								Decorator=ITypeInfo::SharedPtr;
-				typedef typename DetailTypeInfoRetriver<T>::Type				Type;
+				typedef typename UpLevelRetriver::Type							Type;
 				typedef Ptr<T>													TempValueType;
+				typedef Ptr<T>&													ResultReferenceType;
+				typedef Ptr<T>													ResultNonReferenceType;
 
 				static Ptr<ITypeInfo> CreateTypeInfo()
 				{
-					Ptr<ITypeInfo> elementType=DetailTypeInfoRetriver<T>::CreateTypeInfo();
+					Ptr<ITypeInfo> elementType=TypeInfoRetriver<T>::CreateTypeInfo();
 					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
 					type->SetElementType(elementType);
 					return type;
@@ -401,15 +487,77 @@ ParameterTypeInfo
 			};
 
 			template<typename T>
-			struct DetailTypeInfoRetriver<T&>
+			struct DetailTypeInfoRetriver<T&, TypeFlags::NonGenericType>
 			{
-				static const ITypeInfo::Decorator								Decorator=DetailTypeInfoRetriver<T>::Decorator;
-				typedef typename DetailTypeInfoRetriver<T>::Type				Type;
-				typedef typename DetailTypeInfoRetriver<T>::TempValueType		TempValueType;
+				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
+
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef typename UpLevelRetriver::Type							Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef T&														ResultReferenceType;
+				typedef T														ResultNonReferenceType;
 
 				static Ptr<ITypeInfo> CreateTypeInfo()
 				{
-					return DetailTypeInfoRetriver<T>::CreateTypeInfo();
+					return TypeInfoRetriver<T>::CreateTypeInfo();
+				}
+			};
+
+			template<typename T>
+			struct DetailTypeInfoRetriver<T, TypeFlags::ReadonlyListType>
+			{
+				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
+
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueReadonlyList										Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					typedef typename DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>::Type		ContainerType;
+					typedef typename ContainerType::ElementType										ElementType;
+
+					Ptr<TypeInfoImpl> arrayType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					arrayType->SetTypeDescriptor(Description<IValueReadonlyList>::GetAssociatedTypeDescriptor());
+
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(arrayType);
+					genericType->AddGenericArgument(TypeInfoRetriver<ElementType>::CreateTypeInfo());
+
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+
+			template<typename T>
+			struct DetailTypeInfoRetriver<T, TypeFlags::ListType>
+			{
+				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
+
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueList												Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					typedef typename DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>::Type		ContainerType;
+					typedef typename ContainerType::ElementType										ElementType;
+
+					Ptr<TypeInfoImpl> arrayType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					arrayType->SetTypeDescriptor(Description<IValueList>::GetAssociatedTypeDescriptor());
+
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(arrayType);
+					genericType->AddGenericArgument(TypeInfoRetriver<ElementType>::CreateTypeInfo());
+
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
 				}
 			};
 
@@ -534,11 +682,58 @@ TypeInfoRetriver Helper Functions (UnboxParameter)
 			template<typename T, typename TTypeFlag=TypeFlags::NonGenericType>
 			struct ParameterAccessor
 			{
+				static Value BoxParameter(T& object, ITypeDescriptor* typeDescriptor)
+				{
+					return BoxValue<T>(object, typeDescriptor);
+				}
+
 				static void UnboxParameter(const Value& value, T& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
 				{
 					result=UnboxValue<T>(value, typeDescriptor, valueName);
 				}
 			};
+
+			template<typename T>
+			struct ParameterAccessor<T, TypeFlags::ReadonlyListType>
+			{
+				static Value BoxParameter(T& object, ITypeDescriptor* typeDescriptor)
+				{
+					Ptr<IValueReadonlyList> result=new ValueReadonlyListWrapper<T*>(&object);
+					return BoxValue<Ptr<IValueReadonlyList>>(result, Description<IValueReadonlyList>::GetAssociatedTypeDescriptor());
+				}
+
+				static void UnboxParameter(const Value& value, T& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef typename T::ElementType ElementType;
+					Ptr<IValueReadonlyList> listProxy=UnboxValue<Ptr<IValueReadonlyList>>(value, typeDescriptor, valueName);
+					LazyList<ElementType> lazyList=listProxy->GetLazyList<ElementType>();
+					collections::CopyFrom(result, lazyList);
+				}
+			};
+
+			template<typename T>
+			struct ParameterAccessor<T, TypeFlags::ListType>
+			{
+				static Value BoxParameter(T& object, ITypeDescriptor* typeDescriptor)
+				{
+					Ptr<IValueList> result=new ValueListWrapper<T*>(&object);
+					return BoxValue<Ptr<IValueList>>(result, Description<IValueList>::GetAssociatedTypeDescriptor());
+				}
+
+				static void UnboxParameter(const Value& value, T& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef typename T::ElementType ElementType;
+					Ptr<IValueList> listProxy=UnboxValue<Ptr<IValueList>>(value, typeDescriptor, valueName);
+					LazyList<ElementType> lazyList=listProxy->GetLazyList<ElementType>();
+					collections::CopyFrom(result, lazyList);
+				}
+			};
+
+			template<typename T>
+			Value BoxParameter(typename TypeInfoRetriver<T>::ResultReferenceType object, ITypeDescriptor* typeDescriptor=0)
+			{
+				return ParameterAccessor<typename TypeInfoRetriver<T>::ResultNonReferenceType, typename TypeInfoRetriver<T>::TypeFlag>::BoxParameter(object, typeDescriptor);
+			}
 
 			template<typename T>
 			void UnboxParameter(const Value& value, T& result, ITypeDescriptor* typeDescriptor=0, const WString& valueName=L"value")
