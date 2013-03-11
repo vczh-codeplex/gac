@@ -268,6 +268,7 @@
     <ClCompile Include="..\..\Source\Reflection\GuiReflectionCompositions.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiReflectionControls.cpp" />
     <ClCompile Include="..\..\Source\Reflection\GuiReflectionElements.cpp" />
+    <ClCompile Include="..\..\Source\Reflection\GuiReflectionEvents.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -407,6 +408,7 @@
     <ClInclude Include="..\..\Source\Reflection\GuiReflectionCompositions.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiReflectionControls.h" />
     <ClInclude Include="..\..\Source\Reflection\GuiReflectionElements.h" />
+    <ClInclude Include="..\..\Source\Reflection\GuiReflectionEvents.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

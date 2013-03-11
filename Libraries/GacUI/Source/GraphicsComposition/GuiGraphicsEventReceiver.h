@@ -76,7 +76,6 @@ Event
 
 				GuiGraphicsComposition*									sender;
 				Ptr<HandlerNode>										handlers;
-				collections::List<Ptr<description::IEventHandler>>		reflectionEventHandlers;
 			public:
 				GuiGraphicsEvent(GuiGraphicsComposition* _sender=0)
 					:sender(_sender)
@@ -85,21 +84,6 @@ Event
 
 				~GuiGraphicsEvent()
 				{
-					for(vint i=reflectionEventHandlers.Count()-1;i>=0;i--)
-					{
-						Ptr<description::IEventHandler> eventHandler=reflectionEventHandlers[i];
-						eventHandler->Detach();
-					}
-				}
-
-				void ReflectionAddEventHandler(Ptr<description::IEventHandler> eventHandler)
-				{
-					reflectionEventHandlers.Add(eventHandler);
-				}
-
-				void ReflectionRemoveEventHandler(description::IEventHandler* eventHandler)
-				{
-					reflectionEventHandlers.Remove(eventHandler);
 				}
 
 				GuiGraphicsComposition* GetAssociatedComposition()
@@ -201,7 +185,7 @@ Predefined Events
 ***********************************************************************/
 
 			/// <summary>Notify event arguments.</summary>
-			struct GuiEventArgs
+			struct GuiEventArgs : public Object, public Description<GuiEventArgs>
 			{
 				/// <summary>The event raiser composition.</summary>
 				GuiGraphicsComposition*		compositionSource;
@@ -229,7 +213,7 @@ Predefined Events
 			};
 			
 			/// <summary>Request event arguments.</summary>
-			struct GuiRequestEventArgs : public GuiEventArgs
+			struct GuiRequestEventArgs : public GuiEventArgs, public Description<GuiRequestEventArgs>
 			{
 				/// <summary>Set this field to false in event handlers will stop the corresponding action.</summary>
 				bool		cancel;
@@ -250,7 +234,7 @@ Predefined Events
 			};
 			
 			/// <summary>Keyboard event arguments.</summary>
-			struct GuiKeyEventArgs : public GuiEventArgs, public NativeWindowKeyInfo
+			struct GuiKeyEventArgs : public GuiEventArgs, public NativeWindowKeyInfo, public Description<GuiKeyEventArgs>
 			{
 				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to null.</summary>
 				GuiKeyEventArgs()
@@ -266,7 +250,7 @@ Predefined Events
 			};
 			
 			/// <summary>Char input event arguments.</summary>
-			struct GuiCharEventArgs : public GuiEventArgs, public NativeWindowCharInfo
+			struct GuiCharEventArgs : public GuiEventArgs, public NativeWindowCharInfo, public Description<GuiCharEventArgs>
 			{
 				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to null.</summary>
 				GuiCharEventArgs()
@@ -282,7 +266,7 @@ Predefined Events
 			};
 			
 			/// <summary>Mouse event arguments.</summary>
-			struct GuiMouseEventArgs : public GuiEventArgs, public NativeWindowMouseInfo
+			struct GuiMouseEventArgs : public GuiEventArgs, public NativeWindowMouseInfo, public Description<GuiMouseEventArgs>
 			{
 				/// <summary>Create an event arguments with <see cref="compositionSource"/> and <see cref="eventSource"/> set to null.</summary>
 				GuiMouseEventArgs()
@@ -308,7 +292,7 @@ Predefined Item Events
 ***********************************************************************/
 			
 			/// <summary>Item event arguments.</summary>
-			struct GuiItemEventArgs : public GuiEventArgs
+			struct GuiItemEventArgs : public GuiEventArgs, public Description<GuiItemEventArgs>
 			{
 				/// <summary>Item index.</summary>
 				vint			itemIndex;
@@ -328,7 +312,7 @@ Predefined Item Events
 			};
 			
 			/// <summary>Item mouse event arguments.</summary>
-			struct GuiItemMouseEventArgs : public GuiMouseEventArgs
+			struct GuiItemMouseEventArgs : public GuiMouseEventArgs, public Description<GuiItemMouseEventArgs>
 			{
 				/// <summary>Item index.</summary>
 				vint			itemIndex;
@@ -355,7 +339,7 @@ Predefined Node Events
 ***********************************************************************/
 			
 			/// <summary>Node event arguments.</summary>
-			struct GuiNodeEventArgs : public GuiEventArgs
+			struct GuiNodeEventArgs : public GuiEventArgs, public Description<GuiNodeEventArgs>
 			{
 				/// <summary>Tree node.</summary>
 				controls::tree::INodeProvider*		node;
@@ -375,7 +359,7 @@ Predefined Node Events
 			};
 			
 			/// <summary>Node mouse event arguments.</summary>
-			struct GuiNodeMouseEventArgs : public GuiMouseEventArgs
+			struct GuiNodeMouseEventArgs : public GuiMouseEventArgs, public Description<GuiNodeMouseEventArgs>
 			{
 				/// <summary>Tree node.</summary>
 				controls::tree::INodeProvider*		node;
