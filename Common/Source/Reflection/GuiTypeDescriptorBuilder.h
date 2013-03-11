@@ -754,7 +754,7 @@ CustomFieldInfoImpl
 					TClass* object=UnboxValue<TClass*>(thisObject);
 					if(object)
 					{
-						return BoxValue<TField>(object->*FieldRef, GetReturn()->GetTypeDescriptor());
+						return BoxParameter<TField>(object->*FieldRef, GetReturn()->GetTypeDescriptor());
 					}
 					return Value();
 				}
@@ -764,7 +764,7 @@ CustomFieldInfoImpl
 					TClass* object=UnboxValue<TClass*>(thisObject);
 					if(object)
 					{
-						object->*FieldRef=UnboxValue<TField>(newValue, GetReturn()->GetTypeDescriptor(), L"newValue");
+						UnboxParameter<TField>(newValue, object->*FieldRef, GetReturn()->GetTypeDescriptor(), L"newValue");
 					}
 				}
 			public:

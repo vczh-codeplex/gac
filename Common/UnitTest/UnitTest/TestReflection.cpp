@@ -434,6 +434,7 @@ BEGIN_TYPE_INFO_NAMESPACE
 		CLASS_MEMBER_METHOD(SetBases, {L"bases"})
 		CLASS_MEMBER_METHOD(GetBases2, NO_PARAMETER)
 		CLASS_MEMBER_METHOD(SetBases2, {L"bases"})
+		CLASS_MEMBER_FIELD(bases3)
 	END_CLASS_MEMBER(BaseSummer)
 
 	class TestTypeLoader : public Object, public ITypeLoader
@@ -654,6 +655,24 @@ TEST_CASE(TestReflectionList)
 		TEST_ASSERT(UnboxValue<int>(baseSummer.Invoke(L"Sum2"))==10);
 
 		Value baseArray=baseSummer.Invoke(L"GetBases2");
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Count"))==4);
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 0)).GetProperty(L"a"))==1);
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 1)).GetProperty(L"a"))==2);
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 2)).GetProperty(L"a"))==3);
+		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 3)).GetProperty(L"a"))==4);
+	}
+	{
+		Value bases=Value::Create(L"system::List");
+		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 1))));
+		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 2))));
+		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 3))));
+		bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 4))));
+
+		Value baseSummer=Value::Create(L"test::BaseSummer");
+		baseSummer.SetProperty(L"bases3", bases);
+		TEST_ASSERT(UnboxValue<int>(baseSummer.Invoke(L"Sum2"))==10);
+
+		Value baseArray=baseSummer.GetProperty(L"bases3");
 		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Count"))==4);
 		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 0)).GetProperty(L"a"))==1);
 		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 1)).GetProperty(L"a"))==2);
