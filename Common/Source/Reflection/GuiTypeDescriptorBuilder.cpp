@@ -345,7 +345,6 @@ EventInfoImpl
 
 			EventInfoImpl::EventInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name)
 				:ownerTypeDescriptor(_ownerTypeDescriptor)
-				,observingProperty(0)
 				,name(_name)
 			{
 			}
@@ -359,9 +358,14 @@ EventInfoImpl
 				return ownerTypeDescriptor;
 			}
 
-			IPropertyInfo* EventInfoImpl::GetObservingProperty()
+			vint EventInfoImpl::GetObservingPropertyCount()
 			{
-				return observingProperty;
+				return observingProperties.Count();
+			}
+
+			IPropertyInfo* EventInfoImpl::GetObservingProperty(vint index)
+			{
+				return observingProperties[index];
 			}
 
 			const WString& EventInfoImpl::GetName()
@@ -406,7 +410,10 @@ PropertyInfoImpl
 			{
 				if(getter) getter->ownerProperty=this;
 				if(setter) setter->ownerProperty=this;
-				if(valueChangedEvent) valueChangedEvent->observingProperty=this;
+				if(valueChangedEvent)
+				{
+					valueChangedEvent->observingProperties.Add(this);
+				}
 			}
 
 			PropertyInfoImpl::~PropertyInfoImpl()

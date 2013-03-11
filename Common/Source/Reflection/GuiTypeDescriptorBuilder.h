@@ -132,7 +132,7 @@ EventInfoImpl
 
 			protected:
 				ITypeDescriptor*						ownerTypeDescriptor;
-				IPropertyInfo*							observingProperty;
+				collections::List<IPropertyInfo*>		observingProperties;
 				WString									name;
 
 				virtual void							AttachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)=0;
@@ -146,7 +146,8 @@ EventInfoImpl
 
 				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
 				const WString&							GetName()override;
-				IPropertyInfo*							GetObservingProperty()override;
+				vint									GetObservingPropertyCount()override;
+				IPropertyInfo*							GetObservingProperty(vint index)override;
 				Ptr<IEventHandler>						Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)override;
 			};
 

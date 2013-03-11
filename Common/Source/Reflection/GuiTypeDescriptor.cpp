@@ -707,9 +707,16 @@ LogTypeManager (class)
 					printed=true;
 					IEventInfo* info=type->GetEvent(j);
 					writer.WriteString(L"    event "+info->GetName()+L"{");
-					if(info->GetObservingProperty())
+					if(info->GetObservingPropertyCount()>0)
 					{
-						writer.WriteString(L" observing "+info->GetObservingProperty()->GetName()+L";");
+						writer.WriteString(L" observing ");
+						vint count=+info->GetObservingPropertyCount();
+						for(vint i=0;i<count;i++)
+						{
+							if(i>0) writer.WriteString(L", ");
+							writer.WriteString(info->GetObservingProperty(i)->GetName());
+						}
+						writer.WriteString(L";");
 					}
 					writer.WriteLine(L"};");
 				}
