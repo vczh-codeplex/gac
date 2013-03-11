@@ -455,7 +455,7 @@ TypeInfoRetriver
 				typedef typename UpLevelRetriver::Type							Type;
 				typedef T*														TempValueType;
 				typedef T*&														ResultReferenceType;
-				typedef T														ResultNonReferenceType;
+				typedef T*														ResultNonReferenceType;
 
 				static Ptr<ITypeInfo> CreateTypeInfo()
 				{
@@ -625,7 +625,7 @@ TypeInfoRetriver Helper Functions (BoxValue, UnboxValue)
 				{
 					if(!typeDescriptor)
 					{
-						typeDescriptor=GetTypeDescriptor<T>();
+						typeDescriptor=GetTypeDescriptor<typename TypeInfoRetriver<T>::Type>();
 					}
 					ITypedValueSerializer<T>* serializer=dynamic_cast<ITypedValueSerializer<T>*>(typeDescriptor->GetValueSerializer());
 					Value result;
@@ -641,7 +641,7 @@ TypeInfoRetriver Helper Functions (BoxValue, UnboxValue)
 					{
 						if(!typeDescriptor)
 						{
-							typeDescriptor=GetTypeDescriptor<T>();
+							typeDescriptor=GetTypeDescriptor<typename TypeInfoRetriver<T>::Type>();
 						}
 						throw ArgumentTypeMismtatchException(valueName, typeDescriptor, Value::Text, value);
 					}
@@ -679,8 +679,13 @@ TypeInfoRetriver Helper Functions (BoxValue, UnboxValue)
 TypeInfoRetriver Helper Functions (UnboxParameter)
 ***********************************************************************/
 
-			template<typename T, typename TTypeFlag=TypeFlags::NonGenericType>
+			template<typename T, typename TTypeFlag>
 			struct ParameterAccessor
+			{
+			};
+
+			template<typename T>
+			struct ParameterAccessor<T, TypeFlags::NonGenericType>
 			{
 				static Value BoxParameter(T& object, ITypeDescriptor* typeDescriptor)
 				{
