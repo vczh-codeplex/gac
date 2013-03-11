@@ -706,12 +706,12 @@ LogTypeManager (class)
 				{
 					printed=true;
 					IEventInfo* info=type->GetEvent(j);
-					writer.WriteString(L"    event "+info->GetName());
+					writer.WriteString(L"    event "+info->GetName()+L"{");
 					if(info->GetObservingProperty())
 					{
-						writer.WriteString(L" observing "+info->GetObservingProperty()->GetName());
+						writer.WriteString(L" observing "+info->GetObservingProperty()->GetName()+L";");
 					}
-					writer.WriteLine(L";");
+					writer.WriteLine(L"};");
 				}
 				if(printed)
 				{

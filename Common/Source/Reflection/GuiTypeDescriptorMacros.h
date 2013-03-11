@@ -244,7 +244,7 @@ Property
 				new PropertyInfoImpl(\
 					this,\
 					L#PROPERTYNAME,\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, false)->GetMethod(0)),\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, true)->GetMethod(0)),\
 					0,\
 					0\
 					)\
@@ -255,8 +255,8 @@ Property
 				new PropertyInfoImpl(\
 					this,\
 					L#PROPERTYNAME,\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, false)->GetMethod(0)),\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#SETTER, false)->GetMethod(0)),\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, true)->GetMethod(0)),\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#SETTER, true)->GetMethod(0)),\
 					0\
 					)\
 				);
@@ -266,9 +266,9 @@ Property
 				new PropertyInfoImpl(\
 					this,\
 					L#PROPERTYNAME,\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, false)->GetMethod(0)),\
-					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#SETTER, false)->GetMethod(0)),\
-					dynamic_cast<EventInfoImpl*>(GetEventByName(L#EVENT))\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#GETTER, true)->GetMethod(0)),\
+					dynamic_cast<MethodInfoImpl*>(GetMethodGroupByName(L#SETTER, true)->GetMethod(0)),\
+					dynamic_cast<EventInfoImpl*>(GetEventByName(L#EVENT, true))\
 					)\
 				);
 
@@ -280,6 +280,11 @@ Property
 			CLASS_MEMBER_METHOD(Get##PROPERTYNAME, NO_PARAMETER)\
 			CLASS_MEMBER_METHOD(Set##PROPERTYNAME, {L"value"})\
 			CLASS_MEMBER_PROPERTY(PROPERTYNAME, Get##PROPERTYNAME, Set##PROPERTYNAME)\
+
+#define CLASS_MEMBER_PROPERTY_EVENT_FAST(PROPERTYNAME, EVENTNAME)\
+			CLASS_MEMBER_METHOD(Get##PROPERTYNAME, NO_PARAMETER)\
+			CLASS_MEMBER_METHOD(Set##PROPERTYNAME, {L"value"})\
+			CLASS_MEMBER_PROPERTY_EVENT(PROPERTYNAME, Get##PROPERTYNAME, Set##PROPERTYNAME, EVENTNAME)\
 
 		}
 	}

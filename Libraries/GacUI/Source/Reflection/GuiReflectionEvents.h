@@ -99,9 +99,36 @@ GuiEventInfoImpl
 				}
 			};
 
+			template<typename T>
+			struct GuiEventArgumentTypeRetriver
+			{
+				typedef vint								Type;
+			};
+
+			template<typename TClass, typename TEvent>
+			struct GuiEventArgumentTypeRetriver<TEvent TClass::*>
+			{
+				typedef typename TEvent::ArgumentType		Type;
+			};
+
 /***********************************************************************
 Macros
 ***********************************************************************/
+
+#define CLASS_MEMBER_GUIEVENT(EVENTNAME)\
+			AddEvent(\
+				new GuiEventInfoImpl<GuiEventArgumentTypeRetriver<decltype(&ClassType::EVENTNAME)>::Type>(\
+					this,\
+					L#EVENTNAME,\
+					[](DescriptableObject* thisObject){\
+						return &dynamic_cast<ClassType*>(thisObject)->EVENTNAME;\
+					}\
+				)\
+			);\
+
+#define CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(PROPERTYNAME)\
+			CLASS_MEMBER_GUIEVENT(PROPERTYNAME##Changed)\
+			CLASS_MEMBER_PROPERTY_EVENT_FAST(PROPERTYNAME, PROPERTYNAME##Changed)\
 
 /***********************************************************************
 Type Loader

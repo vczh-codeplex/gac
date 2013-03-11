@@ -114,7 +114,7 @@ EventInfoImpl
 					EventInfoImpl*						ownerEvent;
 					DescriptableObject*					ownerObject;
 					Ptr<IValueFunctionProxy>			handler;
-					Ptr<Object>							tag;
+					Ptr<DescriptableObject>				tag;
 					bool								attached;
 				public:
 					EventHandlerImpl(EventInfoImpl* _ownerEvent, DescriptableObject* _ownerObject, Ptr<IValueFunctionProxy> _handler);
@@ -126,8 +126,8 @@ EventInfoImpl
 					bool								Detach()override;
 					void								Invoke(const Value& thisObject, Value& arguments)override;
 
-					Ptr<Object>							GetTag();
-					void								SetTag(Ptr<Object> _tag);
+					Ptr<DescriptableObject>				GetTag();
+					void								SetTag(Ptr<DescriptableObject> _tag);
 				};
 
 			protected:

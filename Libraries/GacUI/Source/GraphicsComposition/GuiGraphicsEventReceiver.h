@@ -45,6 +45,7 @@ Event
 			public:
 				typedef void(RawFunctionType)(GuiGraphicsComposition*, T&);
 				typedef Func<RawFunctionType>						FunctionType;
+				typedef T											ArgumentType;
 
 				class IHandler : public virtual IDescriptable, public Description<IHandler>
 				{

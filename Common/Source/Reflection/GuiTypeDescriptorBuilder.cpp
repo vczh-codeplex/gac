@@ -301,12 +301,12 @@ EventInfoImpl::EventHandlerImpl
 				}
 			}
 
-			Ptr<Object> EventInfoImpl::EventHandlerImpl::GetTag()
+			Ptr<DescriptableObject> EventInfoImpl::EventHandlerImpl::GetTag()
 			{
 				return tag;
 			}
 
-			void EventInfoImpl::EventHandlerImpl::SetTag(Ptr<Object> _tag)
+			void EventInfoImpl::EventHandlerImpl::SetTag(Ptr<DescriptableObject> _tag)
 			{
 				tag=_tag;
 			}
