@@ -36,6 +36,74 @@ Type List
 			GUIREFLECTIONEVENT_TYPELIST(DECL_TYPE_INFO)
 
 /***********************************************************************
+GuiEventInfoImpl
+***********************************************************************/
+
+			template<typename T>
+			class GuiEventInfoImpl : public EventInfoImpl
+			{
+			protected:
+				typedef Func<GuiGraphicsEvent<T>*(DescriptableObject*)>		EventRetriverFunction;
+
+				EventRetriverFunction				eventRetriver;
+
+				void AttachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)
+				{
+					if(thisObject)
+					{
+						if(EventHandlerImpl* handlerImpl=dynamic_cast<EventHandlerImpl*>(eventHandler))
+						{
+							GuiGraphicsEvent<T>* eventObject=eventRetriver(thisObject);
+							if(eventObject)
+							{
+								Ptr<GuiGraphicsEvent<T>::IHandler> handler=eventObject->AttachLambda(
+									[=](GuiGraphicsComposition* sender, T& arguments)
+									{
+										Value thisObject=BoxValue<GuiGraphicsComposition*>(sender, Description<GuiGraphicsComposition>::GetAssociatedTypeDescriptor());
+										Value argumentsObject=BoxValue<T*>(&arguments, Description<T>::GetAssociatedTypeDescriptor());
+										eventHandler->Invoke(thisObject, argumentsObject);
+									});
+								handlerImpl->SetTag(handler);
+							}
+						}
+					}
+				}
+
+				void DetachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)
+				{
+					if(thisObject)
+					{
+						if(EventHandlerImpl* handlerImpl=dynamic_cast<EventHandlerImpl*>(eventHandler))
+						{
+							GuiGraphicsEvent<T>* eventObject=eventRetriver(thisObject);
+							if(eventObject)
+							{
+								Ptr<GuiGraphicsEvent<T>::IHandler> handler=handlerImpl->GetTag().Cast<GuiGraphicsEvent<T>::IHandler>();
+								if(handler)
+								{
+									eventObject->Detach(handler);
+								}
+							}
+						}
+					}
+				}
+			public:
+				GuiEventInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, const EventRetriverFunction& _eventRetriver)
+					:EventInfoImpl(_ownerTypeDescriptor, _name)
+					,eventRetriver(_eventRetriver)
+				{
+				}
+
+				~GuiEventInfoImpl()
+				{
+				}
+			};
+
+/***********************************************************************
+Macros
+***********************************************************************/
+
+/***********************************************************************
 Type Loader
 ***********************************************************************/
 
