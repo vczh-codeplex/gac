@@ -33,7 +33,7 @@ Constructor: R()
 				{
 
 					R result = new typename TypeInfoRetriver<R>::Type();
-					return BoxValue<R>(result, GetOwnerTypeDescriptor());
+					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
 				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
@@ -56,7 +56,7 @@ Constructor: R(T0)
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
  
 					R result = new typename TypeInfoRetriver<R>::Type(p0);
-					return BoxValue<R>(result, GetOwnerTypeDescriptor());
+					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
 				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
@@ -82,7 +82,7 @@ Constructor: R(T0,T1)
 					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments[1], p1, GetParameter(1)->GetType()->GetTypeDescriptor(), L"p1");
  
 					R result = new typename TypeInfoRetriver<R>::Type(p0,p1);
-					return BoxValue<R>(result, GetOwnerTypeDescriptor());
+					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
 				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
@@ -111,7 +111,7 @@ Constructor: R(T0,T1,T2)
 					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments[2], p2, GetParameter(2)->GetType()->GetTypeDescriptor(), L"p2");
  
 					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2);
-					return BoxValue<R>(result, GetOwnerTypeDescriptor());
+					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
 				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
@@ -143,7 +143,7 @@ Constructor: R(T0,T1,T2,T3)
 					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments[3], p3, GetParameter(3)->GetType()->GetTypeDescriptor(), L"p3");
  
 					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3);
-					return BoxValue<R>(result, GetOwnerTypeDescriptor());
+					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
 				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
@@ -178,7 +178,7 @@ Constructor: R(T0,T1,T2,T3,T4)
 					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments[4], p4, GetParameter(4)->GetType()->GetTypeDescriptor(), L"p4");
  
 					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4);
-					return BoxValue<R>(result, GetOwnerTypeDescriptor());
+					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
 				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
@@ -216,7 +216,7 @@ Constructor: R(T0,T1,T2,T3,T4,T5)
 					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments[5], p5, GetParameter(5)->GetType()->GetTypeDescriptor(), L"p5");
  
 					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5);
-					return BoxValue<R>(result, GetOwnerTypeDescriptor());
+					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
 				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
@@ -257,7 +257,7 @@ Constructor: R(T0,T1,T2,T3,T4,T5,T6)
 					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments[6], p6, GetParameter(6)->GetType()->GetTypeDescriptor(), L"p6");
  
 					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5,p6);
-					return BoxValue<R>(result, GetOwnerTypeDescriptor());
+					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
 				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
@@ -301,7 +301,7 @@ Constructor: R(T0,T1,T2,T3,T4,T5,T6,T7)
 					UnboxParameter<typename TypeInfoRetriver<T7>::TempValueType>(arguments[7], p7, GetParameter(7)->GetType()->GetTypeDescriptor(), L"p7");
  
 					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5,p6,p7);
-					return BoxValue<R>(result, GetOwnerTypeDescriptor());
+					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
 				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
@@ -348,7 +348,7 @@ Constructor: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 					UnboxParameter<typename TypeInfoRetriver<T8>::TempValueType>(arguments[8], p8, GetParameter(8)->GetType()->GetTypeDescriptor(), L"p8");
  
 					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5,p6,p7,p8);
-					return BoxValue<R>(result, GetOwnerTypeDescriptor());
+					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
 				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
@@ -398,7 +398,7 @@ Constructor: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 					UnboxParameter<typename TypeInfoRetriver<T9>::TempValueType>(arguments[9], p9, GetParameter(9)->GetType()->GetTypeDescriptor(), L"p9");
  
 					R result = new typename TypeInfoRetriver<R>::Type(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
-					return BoxValue<R>(result, GetOwnerTypeDescriptor());
+					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
 				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
@@ -483,7 +483,7 @@ Member Method: R()
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
 
 					R result =  (object->*method)();
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)())
@@ -504,7 +504,7 @@ Member Method: R()
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
 
 					R result =  method(object);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*))
@@ -588,7 +588,7 @@ Member Method: R(T0)
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
  
 					R result =  (object->*method)(p0);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(T0))
@@ -612,7 +612,7 @@ Member Method: R(T0)
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
  
 					R result =  method(object, p0);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, T0))
@@ -705,7 +705,7 @@ Member Method: R(T0,T1)
 					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments[1], p1, GetParameter(1)->GetType()->GetTypeDescriptor(), L"p1");
  
 					R result =  (object->*method)(p0,p1);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(T0,T1))
@@ -732,7 +732,7 @@ Member Method: R(T0,T1)
 					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments[1], p1, GetParameter(1)->GetType()->GetTypeDescriptor(), L"p1");
  
 					R result =  method(object, p0, p1);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, T0, T1))
@@ -834,7 +834,7 @@ Member Method: R(T0,T1,T2)
 					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments[2], p2, GetParameter(2)->GetType()->GetTypeDescriptor(), L"p2");
  
 					R result =  (object->*method)(p0,p1,p2);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(T0,T1,T2))
@@ -864,7 +864,7 @@ Member Method: R(T0,T1,T2)
 					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments[2], p2, GetParameter(2)->GetType()->GetTypeDescriptor(), L"p2");
  
 					R result =  method(object, p0, p1, p2);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, T0, T1, T2))
@@ -975,7 +975,7 @@ Member Method: R(T0,T1,T2,T3)
 					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments[3], p3, GetParameter(3)->GetType()->GetTypeDescriptor(), L"p3");
  
 					R result =  (object->*method)(p0,p1,p2,p3);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(T0,T1,T2,T3))
@@ -1008,7 +1008,7 @@ Member Method: R(T0,T1,T2,T3)
 					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments[3], p3, GetParameter(3)->GetType()->GetTypeDescriptor(), L"p3");
  
 					R result =  method(object, p0, p1, p2, p3);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, T0, T1, T2, T3))
@@ -1128,7 +1128,7 @@ Member Method: R(T0,T1,T2,T3,T4)
 					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments[4], p4, GetParameter(4)->GetType()->GetTypeDescriptor(), L"p4");
  
 					R result =  (object->*method)(p0,p1,p2,p3,p4);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(T0,T1,T2,T3,T4))
@@ -1164,7 +1164,7 @@ Member Method: R(T0,T1,T2,T3,T4)
 					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments[4], p4, GetParameter(4)->GetType()->GetTypeDescriptor(), L"p4");
  
 					R result =  method(object, p0, p1, p2, p3, p4);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, T0, T1, T2, T3, T4))
@@ -1293,7 +1293,7 @@ Member Method: R(T0,T1,T2,T3,T4,T5)
 					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments[5], p5, GetParameter(5)->GetType()->GetTypeDescriptor(), L"p5");
  
 					R result =  (object->*method)(p0,p1,p2,p3,p4,p5);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(T0,T1,T2,T3,T4,T5))
@@ -1332,7 +1332,7 @@ Member Method: R(T0,T1,T2,T3,T4,T5)
 					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments[5], p5, GetParameter(5)->GetType()->GetTypeDescriptor(), L"p5");
  
 					R result =  method(object, p0, p1, p2, p3, p4, p5);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, T0, T1, T2, T3, T4, T5))
@@ -1470,7 +1470,7 @@ Member Method: R(T0,T1,T2,T3,T4,T5,T6)
 					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments[6], p6, GetParameter(6)->GetType()->GetTypeDescriptor(), L"p6");
  
 					R result =  (object->*method)(p0,p1,p2,p3,p4,p5,p6);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(T0,T1,T2,T3,T4,T5,T6))
@@ -1512,7 +1512,7 @@ Member Method: R(T0,T1,T2,T3,T4,T5,T6)
 					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments[6], p6, GetParameter(6)->GetType()->GetTypeDescriptor(), L"p6");
  
 					R result =  method(object, p0, p1, p2, p3, p4, p5, p6);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, T0, T1, T2, T3, T4, T5, T6))
@@ -1659,7 +1659,7 @@ Member Method: R(T0,T1,T2,T3,T4,T5,T6,T7)
 					UnboxParameter<typename TypeInfoRetriver<T7>::TempValueType>(arguments[7], p7, GetParameter(7)->GetType()->GetTypeDescriptor(), L"p7");
  
 					R result =  (object->*method)(p0,p1,p2,p3,p4,p5,p6,p7);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(T0,T1,T2,T3,T4,T5,T6,T7))
@@ -1704,7 +1704,7 @@ Member Method: R(T0,T1,T2,T3,T4,T5,T6,T7)
 					UnboxParameter<typename TypeInfoRetriver<T7>::TempValueType>(arguments[7], p7, GetParameter(7)->GetType()->GetTypeDescriptor(), L"p7");
  
 					R result =  method(object, p0, p1, p2, p3, p4, p5, p6, p7);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, T0, T1, T2, T3, T4, T5, T6, T7))
@@ -1860,7 +1860,7 @@ Member Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 					UnboxParameter<typename TypeInfoRetriver<T8>::TempValueType>(arguments[8], p8, GetParameter(8)->GetType()->GetTypeDescriptor(), L"p8");
  
 					R result =  (object->*method)(p0,p1,p2,p3,p4,p5,p6,p7,p8);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(T0,T1,T2,T3,T4,T5,T6,T7,T8))
@@ -1908,7 +1908,7 @@ Member Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 					UnboxParameter<typename TypeInfoRetriver<T8>::TempValueType>(arguments[8], p8, GetParameter(8)->GetType()->GetTypeDescriptor(), L"p8");
  
 					R result =  method(object, p0, p1, p2, p3, p4, p5, p6, p7, p8);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, T0, T1, T2, T3, T4, T5, T6, T7, T8))
@@ -2073,7 +2073,7 @@ Member Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 					UnboxParameter<typename TypeInfoRetriver<T9>::TempValueType>(arguments[9], p9, GetParameter(9)->GetType()->GetTypeDescriptor(), L"p9");
  
 					R result =  (object->*method)(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(__thiscall TClass::* _method)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9))
@@ -2124,7 +2124,7 @@ Member Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 					UnboxParameter<typename TypeInfoRetriver<T9>::TempValueType>(arguments[9], p9, GetParameter(9)->GetType()->GetTypeDescriptor(), L"p9");
  
 					R result =  method(object, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], R(*_method)(TClass*, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9))
@@ -2188,7 +2188,7 @@ Static Method: R()
 				{
 
 					R result =  method();
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)())
@@ -2246,7 +2246,7 @@ Static Method: R(T0)
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments[0], p0, GetParameter(0)->GetType()->GetTypeDescriptor(), L"p0");
  
 					R result =  method(p0);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(T0))
@@ -2310,7 +2310,7 @@ Static Method: R(T0,T1)
 					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments[1], p1, GetParameter(1)->GetType()->GetTypeDescriptor(), L"p1");
  
 					R result =  method(p0,p1);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(T0,T1))
@@ -2380,7 +2380,7 @@ Static Method: R(T0,T1,T2)
 					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments[2], p2, GetParameter(2)->GetType()->GetTypeDescriptor(), L"p2");
  
 					R result =  method(p0,p1,p2);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(T0,T1,T2))
@@ -2456,7 +2456,7 @@ Static Method: R(T0,T1,T2,T3)
 					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments[3], p3, GetParameter(3)->GetType()->GetTypeDescriptor(), L"p3");
  
 					R result =  method(p0,p1,p2,p3);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(T0,T1,T2,T3))
@@ -2538,7 +2538,7 @@ Static Method: R(T0,T1,T2,T3,T4)
 					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments[4], p4, GetParameter(4)->GetType()->GetTypeDescriptor(), L"p4");
  
 					R result =  method(p0,p1,p2,p3,p4);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(T0,T1,T2,T3,T4))
@@ -2626,7 +2626,7 @@ Static Method: R(T0,T1,T2,T3,T4,T5)
 					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments[5], p5, GetParameter(5)->GetType()->GetTypeDescriptor(), L"p5");
  
 					R result =  method(p0,p1,p2,p3,p4,p5);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(T0,T1,T2,T3,T4,T5))
@@ -2720,7 +2720,7 @@ Static Method: R(T0,T1,T2,T3,T4,T5,T6)
 					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments[6], p6, GetParameter(6)->GetType()->GetTypeDescriptor(), L"p6");
  
 					R result =  method(p0,p1,p2,p3,p4,p5,p6);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(T0,T1,T2,T3,T4,T5,T6))
@@ -2820,7 +2820,7 @@ Static Method: R(T0,T1,T2,T3,T4,T5,T6,T7)
 					UnboxParameter<typename TypeInfoRetriver<T7>::TempValueType>(arguments[7], p7, GetParameter(7)->GetType()->GetTypeDescriptor(), L"p7");
  
 					R result =  method(p0,p1,p2,p3,p4,p5,p6,p7);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(T0,T1,T2,T3,T4,T5,T6,T7))
@@ -2926,7 +2926,7 @@ Static Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 					UnboxParameter<typename TypeInfoRetriver<T8>::TempValueType>(arguments[8], p8, GetParameter(8)->GetType()->GetTypeDescriptor(), L"p8");
  
 					R result =  method(p0,p1,p2,p3,p4,p5,p6,p7,p8);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(T0,T1,T2,T3,T4,T5,T6,T7,T8))
@@ -3038,7 +3038,7 @@ Static Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 					UnboxParameter<typename TypeInfoRetriver<T9>::TempValueType>(arguments[9], p9, GetParameter(9)->GetType()->GetTypeDescriptor(), L"p9");
  
 					R result =  method(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
-					return BoxValue(result, GetReturn()->GetTypeDescriptor());
+					return BoxParameter<R>(result, GetReturn()->GetTypeDescriptor());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], R(* _method)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9))

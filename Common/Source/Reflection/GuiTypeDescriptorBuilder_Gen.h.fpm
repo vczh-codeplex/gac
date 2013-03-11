@@ -23,7 +23,7 @@ Constructor: $FUNCTION_TYPE($count,1)
 				{
 $loop($count,0,$PREPARE_PARAMETER)
 					R result = new typename TypeInfoRetriver<R>::Type($ARGUMENT_LIST($count));
-					return BoxValue<R>(result, GetOwnerTypeDescriptor());
+					return BoxParameter<R>(result, GetOwnerTypeDescriptor());
 				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
@@ -54,7 +54,7 @@ $( )
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
 $loop($count,0,$PREPARE_PARAMETER)
 					$if($function,R result = ,$( )) (object->*method)($ARGUMENT_LIST($count));
-					return $if($function,BoxValue(result, GetReturn()->GetTypeDescriptor()),Value());
+					return $if($function,BoxParameter<R>(result, GetReturn()->GetTypeDescriptor()),Value());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], $FUNCTION_DECL($count,$function,__thiscall TClass::* _method))
@@ -75,7 +75,7 @@ $( )
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
 $loop($count,0,$PREPARE_PARAMETER)
 					$if($function,R result = ,$( )) method(object$loop($count,0,$EXTERNAL_ARGUMENT_ITEM));
-					return $if($function,BoxValue(result, GetReturn()->GetTypeDescriptor()),Value());
+					return $if($function,BoxParameter<R>(result, GetReturn()->GetTypeDescriptor()),Value());
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], $if($function,R,void)(*_method)(TClass*$loop($count,0,$EXTERNAL_TYPE_ITEM)))
@@ -104,7 +104,7 @@ $( )
 				{
 $loop($count,0,$PREPARE_PARAMETER)
 					$if($function,R result = ,$( )) method($ARGUMENT_LIST($count));
-					return $if($function,BoxValue(result, GetReturn()->GetTypeDescriptor()),Value());
+					return $if($function,BoxParameter<R>(result, GetReturn()->GetTypeDescriptor()),Value());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], $FUNCTION_DECL($count,$function,* _method))
