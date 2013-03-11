@@ -19,6 +19,33 @@ namespace vl
 		{
 
 /***********************************************************************
+TypeInfoImp;
+***********************************************************************/
+
+			class TypeInfoImpl : public Object, public ITypeInfo
+			{
+			protected:
+				Decorator								decorator;
+				ITypeDescriptor*						typeDescriptor;
+				collections::List<Ptr<ITypeInfo>>		genericArguments;
+				Ptr<ITypeInfo>							elementType;
+			public:
+				TypeInfoImpl(Decorator _decorator);
+				~TypeInfoImpl();
+
+				Decorator								GetDecorator()override;
+				ITypeInfo*								GetElementType()override;
+				ITypeDescriptor*						GetTypeDescriptor()override;
+				vint									GetGenericArgumentCount()override;
+				ITypeInfo*								GetGenericArgument(vint index)override;
+				WString									GetTypeFriendlyName()override;
+
+				void									SetTypeDescriptor(ITypeDescriptor* value);
+				void									AddGenericArgument(Ptr<ITypeInfo> value);
+				void									SetElementType(Ptr<ITypeInfo> value);
+			};
+
+/***********************************************************************
 ParameterInfoImpl
 ***********************************************************************/
 
@@ -27,20 +54,15 @@ ParameterInfoImpl
 			protected:
 				IMethodInfo*							ownerMethod;
 				WString									name;
-				ITypeDescriptor*						type;
-				Decorator								decorator;
-				bool									canOutput;
+				Ptr<ITypeInfo>							type;
 			public:
-				ParameterInfoImpl(IMethodInfo* _ownerMethod, const WString& _name, ITypeDescriptor* _type, Decorator _decorator, bool _canOutput);
+				ParameterInfoImpl(IMethodInfo* _ownerMethod, const WString& _name, Ptr<ITypeInfo> _type);
 				~ParameterInfoImpl();
 
 				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
 				const WString&							GetName()override;
-				ITypeDescriptor*						GetValueTypeDescriptor()override;
+				ITypeInfo*								GetType()override;
 				IMethodInfo*							GetOwnerMethod()override;
-				Decorator								GetDecorator()override;
-				bool									CanOutput()override;
-				WString									GetTypeFriendlyName()override;
 			};
 
 /***********************************************************************
@@ -54,12 +76,12 @@ MethodInfoImpl
 				IMethodGroupInfo*						ownerMethodGroup;
 				IPropertyInfo*							ownerProperty;
 				collections::List<Ptr<IParameterInfo>>	parameters;
-				Ptr<IParameterInfo>						returnInfo;
+				Ptr<ITypeInfo>							returnInfo;
 				bool									isStatic;
 
 				virtual Value							InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)=0;
 			public:
-				MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType, IParameterInfo::Decorator _returnDecorator, bool _isStatic);
+				MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, Ptr<ITypeInfo> _return, bool _isStatic);
 				~MethodInfoImpl();
 
 				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
@@ -68,7 +90,7 @@ MethodInfoImpl
 				IMethodGroupInfo*						GetOwnerMethodGroup()override;
 				vint									GetParameterCount()override;
 				IParameterInfo*							GetParameter(vint index)override;
-				IParameterInfo*							GetReturn()override;
+				ITypeInfo*								GetReturn()override;
 				bool									IsStatic()override;
 				void									CheckArguments(collections::Array<Value>& arguments)override;
 				Value									Invoke(const Value& thisObject, collections::Array<Value>& arguments)override;
@@ -171,7 +193,7 @@ TypeDescriptorImpl
 				const WString&							GetName()override;
 				bool									IsReadable()override;
 				bool									IsWritable()override;
-				IParameterInfo*							GetReturn()override;
+				ITypeInfo*								GetReturn()override;
 				IMethodInfo*							GetGetter()override;
 				IMethodInfo*							GetSetter()override;
 				IEventInfo*								GetValueChangedEvent()override;
@@ -187,20 +209,20 @@ FieldInfoImpl
 			{
 			protected:
 				ITypeDescriptor*						ownerTypeDescriptor;
-				Ptr<IParameterInfo>						returnInfo;
+				Ptr<ITypeInfo>							returnInfo;
 				WString									name;
 
 				virtual Value							GetValueInternal(const Value& thisObject)=0;
 				virtual void							SetValueInternal(Value& thisObject, const Value& newValue)=0;
 			public:
-				FieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, Ptr<IParameterInfo> _returnInfo);
+				FieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, Ptr<ITypeInfo> _returnInfo);
 				~FieldInfoImpl();
 
 				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
 				const WString&							GetName()override;
 				bool									IsReadable()override;
 				bool									IsWritable()override;
-				IParameterInfo*							GetReturn()override;
+				ITypeInfo*								GetReturn()override;
 				IMethodInfo*							GetGetter()override;
 				IMethodInfo*							GetSetter()override;
 				IEventInfo*								GetValueChangedEvent()override;
@@ -266,89 +288,142 @@ TypeDescriptorImpl
 ParameterTypeInfo
 ***********************************************************************/
 
-			template<typename T>
-			struct ParameterTypeInfo
+			struct TypeFlags
 			{
-				static const IParameterInfo::Decorator					Decorator=IParameterInfo::Text;
-				static const bool										Output=false;
-				static const bool										OutputFromRef=true;
+				struct ReadonlyListType{};
+				struct ListType{};
+				struct NonGenericType{};
+			};
+
+			template<typename T, typename TTypeFlag=TypeFlags::NonGenericType>
+			struct DetailTypeInfoRetriver
+			{
+				static const ITypeInfo::Decorator						Decorator=ITypeInfo::TypeDescriptor;
 				typedef T												Type;
 				typedef T												TempValueType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					type->SetTypeDescriptor(GetTypeDescriptor<Type>());
+					return type;
+				}
 			};
 
 			template<typename T>
-			struct ParameterTypeInfo<const T>
+			struct TypeInfoRetriver
 			{
-				static const IParameterInfo::Decorator					Decorator=ParameterTypeInfo<T>::Decorator;
-				static const bool										Output=false;
-				static const bool										OutputFromRef=false;
-				typedef typename ParameterTypeInfo<T>::Type				Type;
-				typedef T												TempValueType;
+
+				template<typename U>
+				static TypeFlags::ReadonlyListType GetTypeFlag(const collections::IEnumerable<U>& value);
+
+				template<typename U>
+				static TypeFlags::ListType GetTypeFlag(collections::IEnumerable<U>& value);
+
+				template<typename U>
+				static TypeFlags::NonGenericType GetTypeFlag(const U& value);
+
+				template<typename T>
+				struct ValueRetriver
+				{
+					T value;
+				};
+
+				typedef decltype(GetTypeFlag(((ValueRetriver<T>*)0)->value))			TypeFlag;
+
+				static const ITypeInfo::Decorator										Decorator=DetailTypeInfoRetriver<T, TypeFlag>::Decorator;
+
+				typedef typename DetailTypeInfoRetriver<T, TypeFlag>::Type				Type;
+				typedef typename DetailTypeInfoRetriver<T, TypeFlag>::TempValueType		TempValueType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					return DetailTypeInfoRetriver<T, TypeFlag>::CreateTypeInfo();
+				}
 			};
 
 			template<typename T>
-			struct ParameterTypeInfo<volatile T>
+			struct DetailTypeInfoRetriver<const T>
 			{
-				static const IParameterInfo::Decorator					Decorator=ParameterTypeInfo<T>::Decorator;
-				static const bool										Output=false;
-				static const bool										OutputFromRef=true;
-				typedef typename ParameterTypeInfo<T>::Type				Type;
-				typedef T												TempValueType;
+				static const ITypeInfo::Decorator								Decorator=DetailTypeInfoRetriver<T>::Decorator;
+				typedef typename DetailTypeInfoRetriver<T>::Type				Type;
+				typedef T														TempValueType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					return DetailTypeInfoRetriver<T>::CreateTypeInfo();
+				}
 			};
 
 			template<typename T>
-			struct ParameterTypeInfo<T*>
+			struct DetailTypeInfoRetriver<volatile T>
 			{
-				static const IParameterInfo::Decorator					Decorator=IParameterInfo::RawPtr;
-				static const bool										Output=false;
-				static const bool										OutputFromRef=true;
-				typedef typename ParameterTypeInfo<T>::Type				Type;
-				typedef T*												TempValueType;
+				static const ITypeInfo::Decorator								Decorator=DetailTypeInfoRetriver<T>::Decorator;
+				typedef typename DetailTypeInfoRetriver<T>::Type				Type;
+				typedef T														TempValueType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					return DetailTypeInfoRetriver<T>::CreateTypeInfo();
+				}
 			};
 
 			template<typename T>
-			struct ParameterTypeInfo<Ptr<T>>
+			struct DetailTypeInfoRetriver<T*>
 			{
-				static const IParameterInfo::Decorator					Decorator=IParameterInfo::SharedPtr;
-				static const bool										Output=false;
-				static const bool										OutputFromRef=true;
-				typedef typename ParameterTypeInfo<T>::Type				Type;
-				typedef Ptr<T>											TempValueType;
+				static const ITypeInfo::Decorator								Decorator=ITypeInfo::RawPtr;
+				typedef typename DetailTypeInfoRetriver<T>::Type				Type;
+				typedef T*														TempValueType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<ITypeInfo> elementType=DetailTypeInfoRetriver<T>::CreateTypeInfo();
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::RawPtr);
+					type->SetElementType(elementType);
+					return type;
+				}
 			};
 
 			template<typename T>
-			struct ParameterTypeInfo<T&>
+			struct DetailTypeInfoRetriver<Ptr<T>>
 			{
-				static const IParameterInfo::Decorator					Decorator=ParameterTypeInfo<T>::Decorator;
-				static const bool										Output=ParameterTypeInfo<T>::OutputFromRef;
-				static const bool										OutputFromRef=true;
-				typedef typename ParameterTypeInfo<T>::Type				Type;
-				typedef typename ParameterTypeInfo<T>::TempValueType	TempValueType;
+				static const ITypeInfo::Decorator								Decorator=ITypeInfo::SharedPtr;
+				typedef typename DetailTypeInfoRetriver<T>::Type				Type;
+				typedef Ptr<T>													TempValueType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<ITypeInfo> elementType=DetailTypeInfoRetriver<T>::CreateTypeInfo();
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(elementType);
+					return type;
+				}
+			};
+
+			template<typename T>
+			struct DetailTypeInfoRetriver<T&>
+			{
+				static const ITypeInfo::Decorator								Decorator=DetailTypeInfoRetriver<T>::Decorator;
+				typedef typename DetailTypeInfoRetriver<T>::Type				Type;
+				typedef typename DetailTypeInfoRetriver<T>::TempValueType		TempValueType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					return DetailTypeInfoRetriver<T>::CreateTypeInfo();
+				}
 			};
 
 /***********************************************************************
-ParameterTypeInfo Helper Functions
+TypeInfoRetriver Helper Functions (BoxValue, UnboxValue)
 ***********************************************************************/
 
-			template<typename T>
-			IParameterInfo* CreateParameterInfo(IMethodInfo* ownerMethod, const WString& name)
-			{
-				return new ParameterInfoImpl(
-					0,
-					L"",
-					GetTypeDescriptor<typename ParameterTypeInfo<T>::Type>(),
-					ParameterTypeInfo<T>::Decorator,
-					ParameterTypeInfo<T>::Output
-					);
-			}
-
-			template<typename T, IParameterInfo::Decorator Decorator>
+			template<typename T, ITypeInfo::Decorator Decorator>
 			struct ValueAccessor
 			{
 			};
 
 			template<typename T>
-			struct ValueAccessor<T*, IParameterInfo::RawPtr>
+			struct ValueAccessor<T*, ITypeInfo::RawPtr>
 			{
 				static Value BoxValue(T* object, ITypeDescriptor* typeDescriptor)
 				{
@@ -372,7 +447,7 @@ ParameterTypeInfo Helper Functions
 			};
 
 			template<typename T>
-			struct ValueAccessor<Ptr<T>, IParameterInfo::SharedPtr>
+			struct ValueAccessor<Ptr<T>, ITypeInfo::SharedPtr>
 			{
 				static Value BoxValue(Ptr<T> object, ITypeDescriptor* typeDescriptor)
 				{
@@ -396,7 +471,7 @@ ParameterTypeInfo Helper Functions
 			};
 
 			template<typename T>
-			struct ValueAccessor<T, IParameterInfo::Text>
+			struct ValueAccessor<T, ITypeInfo::TypeDescriptor>
 			{
 				static Value BoxValue(const T& object, ITypeDescriptor* typeDescriptor)
 				{
@@ -427,7 +502,7 @@ ParameterTypeInfo Helper Functions
 			};
 
 			template<>
-			struct ValueAccessor<Value, IParameterInfo::Text>
+			struct ValueAccessor<Value, ITypeInfo::TypeDescriptor>
 			{
 				static Value BoxValue(const Value& object, ITypeDescriptor* typeDescriptor)
 				{
@@ -443,13 +518,32 @@ ParameterTypeInfo Helper Functions
 			template<typename T>
 			Value BoxValue(const T& object, ITypeDescriptor* typeDescriptor=0)
 			{
-				return ValueAccessor<T, ParameterTypeInfo<T>::Decorator>::BoxValue(object, typeDescriptor);
+				return ValueAccessor<T, TypeInfoRetriver<T>::Decorator>::BoxValue(object, typeDescriptor);
 			}
 
 			template<typename T>
 			T UnboxValue(const Value& value, ITypeDescriptor* typeDescriptor=0, const WString& valueName=L"value")
 			{
-				return ValueAccessor<T, ParameterTypeInfo<T>::Decorator>::UnboxValue(value, typeDescriptor, valueName);
+				return ValueAccessor<T, TypeInfoRetriver<T>::Decorator>::UnboxValue(value, typeDescriptor, valueName);
+			}
+
+/***********************************************************************
+TypeInfoRetriver Helper Functions (UnboxParameter)
+***********************************************************************/
+
+			template<typename T, typename TTypeFlag=TypeFlags::NonGenericType>
+			struct ParameterAccessor
+			{
+				static void UnboxParameter(const Value& value, T& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					result=UnboxValue<T>(value, typeDescriptor, valueName);
+				}
+			};
+
+			template<typename T>
+			void UnboxParameter(const Value& value, T& result, ITypeDescriptor* typeDescriptor=0, const WString& valueName=L"value")
+			{
+				ParameterAccessor<T, typename TypeInfoRetriver<T>::TypeFlag>::UnboxParameter(value, result, typeDescriptor, valueName);
 			}
 
 /***********************************************************************
@@ -465,7 +559,7 @@ CustomFieldInfoImpl
 					TClass* object=UnboxValue<TClass*>(thisObject);
 					if(object)
 					{
-						return BoxValue<TField>(object->*FieldRef, GetReturn()->GetValueTypeDescriptor());
+						return BoxValue<TField>(object->*FieldRef, GetReturn()->GetTypeDescriptor());
 					}
 					return Value();
 				}
@@ -475,12 +569,12 @@ CustomFieldInfoImpl
 					TClass* object=UnboxValue<TClass*>(thisObject);
 					if(object)
 					{
-						object->*FieldRef=UnboxValue<TField>(newValue, GetReturn()->GetValueTypeDescriptor(), L"newValue");
+						object->*FieldRef=UnboxValue<TField>(newValue, GetReturn()->GetTypeDescriptor(), L"newValue");
 					}
 				}
 			public:
 				CustomFieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name)
-					:FieldInfoImpl(_ownerTypeDescriptor, _name, CreateParameterInfo<TField>(0, L""))
+					:FieldInfoImpl(_ownerTypeDescriptor, _name, TypeInfoRetriver<TField>::CreateTypeInfo())
 				{
 				}
 			};
@@ -510,20 +604,20 @@ StructValueSeriaizer
 					{
 						T structValue=UnboxValue<T>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
 						TField fieldValue=structValue.*field;
-						return BoxValue<TField>(fieldValue, GetReturn()->GetValueTypeDescriptor());
+						return BoxValue<TField>(fieldValue, GetReturn()->GetTypeDescriptor());
 					}
 
 					void SetValueInternal(Value& thisObject, const Value& newValue)override
 					{
 						T structValue=UnboxValue<T>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
-						TField fieldValue=UnboxValue<TField>(newValue, GetReturn()->GetValueTypeDescriptor(), L"newValue");
+						TField fieldValue=UnboxValue<TField>(newValue, GetReturn()->GetTypeDescriptor(), L"newValue");
 						structValue.*field=fieldValue;
 						thisObject=BoxValue<T>(structValue, GetOwnerTypeDescriptor());
 					}
 				public:
 					FieldSerializer(ITypeDescriptor* _ownerTypeDescriptor, TField T::* _field, const WString& _name)
 						:field(_field)
-						,FieldInfoImpl(_ownerTypeDescriptor, _name, CreateParameterInfo<TField>(0, L""))
+						,FieldInfoImpl(_ownerTypeDescriptor, _name, TypeInfoRetriver<TField>::CreateTypeInfo())
 					{
 					}
 

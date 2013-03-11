@@ -10,15 +10,96 @@ namespace vl
 		{
 
 /***********************************************************************
+TypeInfoImpl
+***********************************************************************/
+
+			TypeInfoImpl::TypeInfoImpl(Decorator _decorator)
+				:decorator(_decorator)
+				,typeDescriptor(0)
+			{
+			}
+
+			TypeInfoImpl::~TypeInfoImpl()
+			{
+			}
+
+			TypeInfoImpl::Decorator TypeInfoImpl::GetDecorator()
+			{
+				return decorator;
+			}
+
+			ITypeInfo* TypeInfoImpl::GetElementType()
+			{
+				return elementType.Obj();
+			}
+
+			ITypeDescriptor* TypeInfoImpl::GetTypeDescriptor()
+			{
+				return
+					typeDescriptor?typeDescriptor:
+					elementType?elementType->GetTypeDescriptor():
+					0;
+			}
+
+			vint TypeInfoImpl::GetGenericArgumentCount()
+			{
+				return genericArguments.Count();
+			}
+
+			ITypeInfo* TypeInfoImpl::GetGenericArgument(vint index)
+			{
+				return genericArguments[index].Obj();
+			}
+
+			WString TypeInfoImpl::GetTypeFriendlyName()
+			{
+				switch(decorator)
+				{
+				case RawPtr:
+					return elementType->GetTypeFriendlyName()+L"*";
+				case SharedPtr:
+					return elementType->GetTypeFriendlyName()+L"^";
+				case TypeDescriptor:
+					return typeDescriptor->GetTypeName();
+				case Generic:
+					{
+						WString result=elementType->GetTypeFriendlyName()+L"<";
+						FOREACH_INDEXER(Ptr<ITypeInfo>, type, i, genericArguments)
+						{
+							if(i>0) result+=L", ";
+							result+=type->GetTypeFriendlyName();
+						}
+						result+=L">";
+						return result;
+					}
+				default:
+					return L"";
+				}
+			}
+
+			void TypeInfoImpl::SetTypeDescriptor(ITypeDescriptor* value)
+			{
+				typeDescriptor=value;
+			}
+
+			void TypeInfoImpl::AddGenericArgument(Ptr<ITypeInfo> value)
+			{
+				genericArguments.Add(value);
+			}
+
+			void TypeInfoImpl::SetElementType(Ptr<ITypeInfo> value)
+			{
+				elementType=value;
+			}
+
+/***********************************************************************
 ParameterInfoImpl
 ***********************************************************************/
 
-			ParameterInfoImpl::ParameterInfoImpl(IMethodInfo* _ownerMethod, const WString& _name, ITypeDescriptor* _type, Decorator _decorator, bool _canOutput)
+			ParameterInfoImpl::ParameterInfoImpl(IMethodInfo* _ownerMethod, const WString& _name, Ptr<ITypeInfo> _type)
 				:ownerMethod(_ownerMethod)
 				,name(_name)
 				,type(_type)
-				,decorator(_decorator)
-				,canOutput(_canOutput)
 			{
 			}
 
@@ -36,9 +117,9 @@ ParameterInfoImpl
 				return name;
 			}
 
-			ITypeDescriptor* ParameterInfoImpl::GetValueTypeDescriptor()
+			ITypeInfo* ParameterInfoImpl::GetType()
 			{
-				return type;
+				return type.Obj();
 			}
 
 			IMethodInfo* ParameterInfoImpl::GetOwnerMethod()
@@ -46,44 +127,16 @@ ParameterInfoImpl
 				return ownerMethod;
 			}
 
-			IParameterInfo::Decorator ParameterInfoImpl::GetDecorator()
-			{
-				return decorator;
-			}
-
-			bool ParameterInfoImpl::CanOutput()
-			{
-				return canOutput;
-			}
-
-			WString ParameterInfoImpl::GetTypeFriendlyName()
-			{
-				switch(decorator)
-				{
-				case RawPtr:
-					return type->GetTypeName()+L"*"+(canOutput?L"&":L"");
-				case SharedPtr:
-					return L"Ptr<"+type->GetTypeName()+L">"+(canOutput?L"&":L"");
-				case Text:
-					return type->GetTypeName()+(canOutput?L"&":L"");
-				default:
-					return L"";
-				}
-			}
-
 /***********************************************************************
 MethodInfoImpl
 ***********************************************************************/
 
-			MethodInfoImpl::MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType, IParameterInfo::Decorator _returnDecorator, bool _isStatic)
+			MethodInfoImpl::MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, Ptr<ITypeInfo> _return, bool _isStatic)
 				:ownerMethodGroup(_ownerMethodGroup)
 				,ownerProperty(0)
+				,returnInfo(_return)
 				,isStatic(_isStatic)
 			{
-				if(_returnType)
-				{
-					returnInfo=new ParameterInfoImpl(this, L"", _returnType, _returnDecorator, false);
-				}
 			}
 
 			MethodInfoImpl::~MethodInfoImpl()
@@ -127,7 +180,7 @@ MethodInfoImpl
 				}
 			}
 
-			IParameterInfo* MethodInfoImpl::GetReturn()
+			ITypeInfo* MethodInfoImpl::GetReturn()
 			{
 				return returnInfo.Obj();
 			}
@@ -145,9 +198,9 @@ MethodInfoImpl
 				}
 				for(vint i=0;i<parameters.Count();i++)
 				{
-					if(!arguments[i].CanConvertTo(parameters[i].Obj()))
+					if(!arguments[i].CanConvertTo(parameters[i]->GetType()))
 					{
-						throw ArgumentTypeMismtatchException(parameters[i]->GetName(), parameters[i].Obj(), arguments[i]);
+						throw ArgumentTypeMismtatchException(parameters[i]->GetName(), parameters[i]->GetType(), arguments[i]);
 					}
 				}
 			}
@@ -440,7 +493,7 @@ PropertyInfoImpl
 				return setter!=0;
 			}
 
-			IParameterInfo* PropertyInfoImpl::GetReturn()
+			ITypeInfo* PropertyInfoImpl::GetReturn()
 			{
 				return getter?getter->GetReturn():0;
 			}
@@ -491,7 +544,7 @@ PropertyInfoImpl
 FieldInfoImpl
 ***********************************************************************/
 
-			FieldInfoImpl::FieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, Ptr<IParameterInfo> _returnInfo)
+			FieldInfoImpl::FieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, Ptr<ITypeInfo> _returnInfo)
 				:ownerTypeDescriptor(_ownerTypeDescriptor)
 				,name(_name)
 				,returnInfo(_returnInfo)
@@ -522,7 +575,7 @@ FieldInfoImpl
 				return true;
 			}
 
-			IParameterInfo* FieldInfoImpl::GetReturn()
+			ITypeInfo* FieldInfoImpl::GetReturn()
 			{
 				return returnInfo.Obj();
 			}

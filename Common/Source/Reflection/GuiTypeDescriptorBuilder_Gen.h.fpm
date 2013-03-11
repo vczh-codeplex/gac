@@ -1,12 +1,13 @@
 $$include:..\Common.fpm
 
 $$define $ADD_PARAMETER($index) $$begin
-					AddParameter(new ParameterInfoImpl(this, parameterNames[$index], GetTypeDescriptor<typename ParameterTypeInfo<$TYPE_ITEM($index)>::Type>(), ParameterTypeInfo<$TYPE_ITEM($index)>::Decorator, ParameterTypeInfo<$TYPE_ITEM($index)>::Output));
+					AddParameter(new ParameterInfoImpl(this, parameterNames[$index], TypeInfoRetriver<$TYPE_ITEM($index)>::CreateTypeInfo()));
 $( )
 $$end
 
 $$define $PREPARE_PARAMETER($index) $$begin
-					typename ParameterTypeInfo<$TYPE_ITEM($index)>::TempValueType $ARGUMENT_ITEM($index) = UnboxValue<typename ParameterTypeInfo<$TYPE_ITEM($index)>::TempValueType>(arguments[$index], GetParameter($index)->GetValueTypeDescriptor(), L$(")$ARGUMENT_ITEM($index)$("));
+					typename TypeInfoRetriver<$TYPE_ITEM($index)>::TempValueType $ARGUMENT_ITEM($index);
+					UnboxParameter<typename TypeInfoRetriver<$TYPE_ITEM($index)>::TempValueType>(arguments[$index], $ARGUMENT_ITEM($index), GetParameter($index)->GetType()->GetTypeDescriptor(), L$(")$ARGUMENT_ITEM($index)$("));
 $( )
 $$end
 
@@ -21,12 +22,12 @@ Constructor: $FUNCTION_TYPE($count,1)
 				Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 				{
 $loop($count,0,$PREPARE_PARAMETER)
-					R result = new typename ParameterTypeInfo<R>::Type($ARGUMENT_LIST($count));
+					R result = new typename TypeInfoRetriver<R>::Type($ARGUMENT_LIST($count));
 					return BoxValue<R>(result, GetOwnerTypeDescriptor());
 				}
 			public:
 				CustomConstructorInfoImpl(const wchar_t* parameterNames[])
-					:MethodInfoImpl(0, GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(), ParameterTypeInfo<R>::Decorator, true)
+					:MethodInfoImpl(0, TypeInfoRetriver<R>::CreateTypeInfo(), true)
 				{
 $loop($count,0,$ADD_PARAMETER)
 				}
@@ -53,11 +54,11 @@ $( )
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
 $loop($count,0,$PREPARE_PARAMETER)
 					$if($function,R result = ,$( )) (object->*method)($ARGUMENT_LIST($count));
-					return $if($function,BoxValue(result, GetReturn()->GetValueTypeDescriptor()),Value());
+					return $if($function,BoxValue(result, GetReturn()->GetTypeDescriptor()),Value());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], $FUNCTION_DECL($count,$function,__thiscall TClass::* _method))
-					:MethodInfoImpl(0, $if($function,GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(),0), $if($function,ParameterTypeInfo<R>::Decorator,IParameterInfo::Text), false)
+					:MethodInfoImpl(0, $if($function,TypeInfoRetriver<R>::CreateTypeInfo(),0), false)
 					,method(_method)
 				{
 $loop($count,0,$ADD_PARAMETER)
@@ -74,11 +75,11 @@ $( )
 					TClass* object=UnboxValue<TClass*>(thisObject, GetOwnerTypeDescriptor(), L"thisObject");
 $loop($count,0,$PREPARE_PARAMETER)
 					$if($function,R result = ,$( )) method(object$loop($count,0,$EXTERNAL_ARGUMENT_ITEM));
-					return $if($function,BoxValue(result, GetReturn()->GetValueTypeDescriptor()),Value());
+					return $if($function,BoxValue(result, GetReturn()->GetTypeDescriptor()),Value());
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], $if($function,R,void)(*_method)(TClass*$loop($count,0,$EXTERNAL_TYPE_ITEM)))
-					:MethodInfoImpl(0, $if($function,GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(),0), $if($function,ParameterTypeInfo<R>::Decorator,IParameterInfo::Text), false)
+					:MethodInfoImpl(0, $if($function,TypeInfoRetriver<R>::CreateTypeInfo(),0), false)
 					,method(_method)
 				{
 $loop($count,0,$ADD_PARAMETER)
@@ -103,11 +104,11 @@ $( )
 				{
 $loop($count,0,$PREPARE_PARAMETER)
 					$if($function,R result = ,$( )) method($ARGUMENT_LIST($count));
-					return $if($function,BoxValue(result, GetReturn()->GetValueTypeDescriptor()),Value());
+					return $if($function,BoxValue(result, GetReturn()->GetTypeDescriptor()),Value());
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], $FUNCTION_DECL($count,$function,* _method))
-					:MethodInfoImpl(0, $if($function,GetTypeDescriptor<typename ParameterTypeInfo<R>::Type>(),0), $if($function,ParameterTypeInfo<R>::Decorator,IParameterInfo::Text), true)
+					:MethodInfoImpl(0, $if($function,TypeInfoRetriver<R>::CreateTypeInfo(),0), true)
 					,method(_method)
 				{
 $loop($count,0,$ADD_PARAMETER)

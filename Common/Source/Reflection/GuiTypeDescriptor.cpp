@@ -222,22 +222,33 @@ description::Value
 				return GetTypeDescriptor()->CanConvertTo(targetType);
 			}
 
-			bool Value::CanConvertTo(IParameterInfo* targetType)const
+			bool Value::CanConvertTo(ITypeInfo* targetType)const
 			{
 				ValueType targetValueType=ValueType::Null;
-				switch(targetType->GetDecorator())
 				{
-				case IParameterInfo::RawPtr:
-					targetValueType=RawPtr;
-					break;
-				case IParameterInfo::SharedPtr:
-					targetValueType=SharedPtr;
-					break;
-				case IParameterInfo::Text:
-					targetValueType=Text;
-					break;
+					ITypeInfo* currentType=targetType;
+					while(currentType)
+					{
+						switch(targetType->GetDecorator())
+						{
+						case ITypeInfo::RawPtr:
+							targetValueType=RawPtr;
+							currentType=0;
+							break;
+						case ITypeInfo::SharedPtr:
+							targetValueType=SharedPtr;
+							currentType=0;
+							break;
+						case ITypeInfo::TypeDescriptor:
+							targetValueType=Text;
+							currentType=0;
+							break;
+						default:
+							currentType=currentType->GetElementType();
+						}
+					}
 				}
-				return CanConvertTo(targetType->GetValueTypeDescriptor(), targetValueType);
+				return CanConvertTo(targetType->GetTypeDescriptor(), targetValueType);
 			}
 
 			Value Value::From(DescriptableObject* value)
@@ -665,7 +676,7 @@ LogTypeManager (class)
 					{
 						if(IMethodInfo* info=group->GetMethod(0))
 						{
-							if(info->GetParameterCount()==1 && info->GetParameter(0)->GetValueTypeDescriptor()->GetTypeName()==TypeInfo<IValueInterfaceProxy>::TypeName)
+							if(info->GetParameterCount()==1 && info->GetParameter(0)->GetType()->GetTypeDescriptor()->GetTypeName()==TypeInfo<IValueInterfaceProxy>::TypeName)
 							{
 								return true;
 							}
@@ -781,7 +792,7 @@ LogTypeManager (class)
 							{
 								if(l>0) writer.WriteString(L", ");
 								IParameterInfo* parameter=info->GetParameter(l);
-								writer.WriteString(parameter->GetTypeFriendlyName()+L" "+parameter->GetName());
+								writer.WriteString(parameter->GetType()->GetTypeFriendlyName()+L" "+parameter->GetName());
 							}
 							writer.WriteLine(L");");
 						}
@@ -806,7 +817,7 @@ LogTypeManager (class)
 						{
 							if(l>0) writer.WriteString(L", ");
 							IParameterInfo* parameter=info->GetParameter(l);
-							writer.WriteString(parameter->GetTypeFriendlyName()+L" "+parameter->GetName());
+							writer.WriteString(parameter->GetType()->GetTypeFriendlyName()+L" "+parameter->GetName());
 						}
 						writer.WriteLine(L");");
 					}
