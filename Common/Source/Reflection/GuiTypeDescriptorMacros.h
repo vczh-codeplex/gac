@@ -151,7 +151,7 @@ Field
 			AddProperty(\
 				new CustomFieldInfoImpl<\
 					ClassType,\
-					decltype(((ClassType*)0)->FIELDNAME), &ClassType::FIELDNAME>\
+					decltype(((ClassType*)0)->FIELDNAME), (decltype(((ClassType*)0)->FIELDNAME) ClassType::*)&ClassType::FIELDNAME>\
 					(this, L#FIELDNAME)\
 				);
 
