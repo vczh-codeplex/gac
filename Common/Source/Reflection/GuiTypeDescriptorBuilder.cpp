@@ -301,6 +301,16 @@ EventInfoImpl::EventHandlerImpl
 				}
 			}
 
+			Ptr<Object> EventInfoImpl::EventHandlerImpl::GetTag()
+			{
+				return tag;
+			}
+
+			void EventInfoImpl::EventHandlerImpl::SetTag(Ptr<Object> _tag)
+			{
+				tag=_tag;
+			}
+
 /***********************************************************************
 EventInfoImpl
 ***********************************************************************/
