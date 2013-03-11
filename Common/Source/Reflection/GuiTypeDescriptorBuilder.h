@@ -105,15 +105,18 @@ EventInfoImpl
 			{
 				friend class PropertyInfoImpl;
 			protected:
+				typedef collections::List<Ptr<IEventHandler>>		EventHandlerList;
+				static const wchar_t*								EventHandlerListInternalPropertyName;
+
 				class EventHandlerImpl : public Object, public IEventHandler
 				{
 				protected:
 					EventInfoImpl*						ownerEvent;
 					DescriptableObject*					ownerObject;
-					Func<void(const Value&, Value&)>	handler;
+					Ptr<IValueFunctionProxy>			handler;
 					bool								attached;
 				public:
-					EventHandlerImpl(EventInfoImpl* _ownerEvent, DescriptableObject* ownerObject, const Func<void(const Value&, Value&)>& _handler);
+					EventHandlerImpl(EventInfoImpl* _ownerEvent, DescriptableObject* _ownerObject, Ptr<IValueFunctionProxy> _handler);
 					~EventHandlerImpl();
 
 					IEventInfo*							GetOwnerEvent()override;
@@ -128,8 +131,11 @@ EventInfoImpl
 				IPropertyInfo*							observingProperty;
 				WString									name;
 
-				virtual void							AttachInternal(DescriptableObject* thisObject, Ptr<IEventHandler> eventHandler)=0;
+				virtual void							AttachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)=0;
 				virtual void							DetachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)=0;
+
+				void									AddEventHandler(DescriptableObject* thisObject, Ptr<IEventHandler> eventHandler);
+				void									RemoveEventHandler(DescriptableObject* thisObject, IEventHandler* eventHandler);
 			public:
 				EventInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name);
 				~EventInfoImpl();
@@ -137,7 +143,7 @@ EventInfoImpl
 				ITypeDescriptor*						GetOwnerTypeDescriptor()override;
 				const WString&							GetName()override;
 				IPropertyInfo*							GetObservingProperty()override;
-				Ptr<IEventHandler>						Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)override;
+				Ptr<IEventHandler>						Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)override;
 			};
 
 /***********************************************************************
