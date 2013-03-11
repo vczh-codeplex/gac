@@ -26,6 +26,52 @@ DescriptableObject
 			return typeDescriptor?*typeDescriptor:0;
 		}
 
+		Ptr<Object> DescriptableObject::GetInternalProperty(const WString& name)
+		{
+			if(!internalProperties) return 0;
+			vint index=internalProperties->Keys().IndexOf(name);
+			if(index==-1) return 0;
+			return internalProperties->Values().Get(index);
+		}
+
+		void DescriptableObject::SetInternalProperty(const WString& name, Ptr<Object> value)
+		{
+			if(internalProperties)
+			{
+				vint index=internalProperties->Keys().IndexOf(name);
+				if(index==-1)
+				{
+					if(value)
+					{
+						internalProperties->Add(name, value);
+					}
+				}
+				else
+				{
+					if(value)
+					{
+						internalProperties->Set(name, value);
+					}
+					else
+					{
+						internalProperties->Remove(name);
+						if(internalProperties->Count()==0)
+						{
+							internalProperties=0;
+						}
+					}
+				}
+			}
+			else
+			{
+				if(value)
+				{
+					internalProperties=new InternalPropertyMap;
+					internalProperties->Add(name, value);
+				}
+			}
+		}
+
 /***********************************************************************
 description::Value
 ***********************************************************************/

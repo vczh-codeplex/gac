@@ -42,16 +42,20 @@ Attribute
 		{
 			template<typename T>
 			friend class Description;
-
 			friend class DescriptableValue;
+
+			typedef collections::Dictionary<WString, Ptr<Object>>		InternalPropertyMap;
 		protected:
 			size_t									objectSize;
 			description::ITypeDescriptor**			typeDescriptor;
+			Ptr<InternalPropertyMap>				internalProperties;
 		public:
 			DescriptableObject();
 			virtual ~DescriptableObject();
 
 			description::ITypeDescriptor*			GetTypeDescriptor();
+			Ptr<Object>								GetInternalProperty(const WString& name);
+			void									SetInternalProperty(const WString& name, Ptr<Object> value);
 		};
 		
 		template<typename T>
@@ -434,7 +438,7 @@ ITypeDescriptor (event)
 			{
 			public:
 				virtual IPropertyInfo*			GetObservingProperty()=0;
-				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)=0;
+				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)=0;
 			};
 
 /***********************************************************************

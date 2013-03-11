@@ -240,8 +240,9 @@ MethodGroupInfoImpl
 EventInfoImpl::EventHandlerImpl
 ***********************************************************************/
 
-			EventInfoImpl::EventHandlerImpl::EventHandlerImpl(EventInfoImpl* _ownerEvent, DescriptableObject* ownerObject, const Func<void(const Value&, Value&)>& _handler)
+			EventInfoImpl::EventHandlerImpl::EventHandlerImpl(EventInfoImpl* _ownerEvent, DescriptableObject* _ownerObject, Ptr<IValueFunctionProxy> _handler)
 				:ownerEvent(_ownerEvent)
+				,ownerObject(_ownerObject)
 				,handler(_handler)
 			{
 			}
@@ -271,6 +272,7 @@ EventInfoImpl::EventHandlerImpl
 				{
 					attached=false;
 					ownerEvent->DetachInternal(ownerObject, this);
+					ownerEvent->RemoveEventHandler(ownerObject, this);
 					return true;
 				}
 				else
@@ -289,12 +291,47 @@ EventInfoImpl::EventHandlerImpl
 				{
 					throw ArgumentTypeMismtatchException(L"thisObject", ownerEvent->GetOwnerTypeDescriptor(), Value::RawPtr, thisObject);
 				}
-				handler(thisObject, arguments);
+				Ptr<IValueList> eventArgs=IValueList::Create();
+				eventArgs->Add(thisObject);
+				eventArgs->Add(arguments);
+				handler->Invoke(eventArgs);
+				if(eventArgs->Count()>=2)
+				{
+					arguments=eventArgs->Get(1);
+				}
 			}
 
 /***********************************************************************
 EventInfoImpl
 ***********************************************************************/
+
+			const wchar_t* EventInfoImpl::EventHandlerListInternalPropertyName = L"List<EventInfoImpl::EventHandlerImpl>";
+
+			void EventInfoImpl::AddEventHandler(DescriptableObject* thisObject, Ptr<IEventHandler> eventHandler)
+			{
+				WString key=EventHandlerListInternalPropertyName;
+				Ptr<EventHandlerList> value=thisObject->GetInternalProperty(key).Cast<EventHandlerList>();
+				if(!value)
+				{
+					value=new EventHandlerList;
+					thisObject->SetInternalProperty(key, value);
+				}
+				value->Add(eventHandler);
+			}
+			
+			void EventInfoImpl::RemoveEventHandler(DescriptableObject* thisObject, IEventHandler* eventHandler)
+			{
+				WString key=EventHandlerListInternalPropertyName;
+				Ptr<EventHandlerList> value=thisObject->GetInternalProperty(key).Cast<EventHandlerList>();
+				if(value)
+				{
+					value->Remove(eventHandler);
+					if(value->Count()==0)
+					{
+						thisObject->SetInternalProperty(key, 0);
+					}
+				}
+			}
 
 			EventInfoImpl::EventInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name)
 				:ownerTypeDescriptor(_ownerTypeDescriptor)
@@ -322,7 +359,7 @@ EventInfoImpl
 				return name;
 			}
 
-			Ptr<IEventHandler> EventInfoImpl::Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)
+			Ptr<IEventHandler> EventInfoImpl::Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)
 			{
 				if(thisObject.IsNull())
 				{
@@ -336,7 +373,8 @@ EventInfoImpl
 				if(rawThisObject)
 				{
 					Ptr<EventHandlerImpl> eventHandler=new EventHandlerImpl(this, rawThisObject, handler);
-					AttachInternal(rawThisObject, eventHandler);
+					AddEventHandler(rawThisObject, eventHandler);
+					AttachInternal(rawThisObject, eventHandler.Obj());
 					return eventHandler;
 				}
 				else
