@@ -412,6 +412,11 @@ TypeInfoRetriver
 				}
 			};
 
+			template<>
+			struct TypeInfoRetriver<void> : public TypeInfoRetriver<VoidValue>
+			{
+			};
+
 			template<typename T>
 			struct DetailTypeInfoRetriver<const T, TypeFlags::NonGenericType>
 			{

@@ -779,14 +779,7 @@ LogTypeManager (class)
 						if(propertyAccessors.Contains(info)==isPropertyAccessor)
 						{
 							printed=true;
-							if(info->GetReturn())
-							{
-								writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+(isPropertyAccessor?L"accessor ":L"function ")+info->GetReturn()->GetTypeFriendlyName());
-							}
-							else
-							{
-								writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+(isPropertyAccessor?L"accessor void":L"function void"));
-							}
+							writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+(isPropertyAccessor?L"accessor ":L"function ")+info->GetReturn()->GetTypeFriendlyName());
 							writer.WriteString(L" "+info->GetName()+L"(");
 							for(vint l=0;l<info->GetParameterCount();l++)
 							{

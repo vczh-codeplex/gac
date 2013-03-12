@@ -119,21 +119,23 @@ SerializableTypeDescriptorBase
 TypeName
 ***********************************************************************/
 			
-			const wchar_t* TypeInfo<IDescriptable>::TypeName			= L"system::interface";
-			const wchar_t* TypeInfo<Value>::TypeName					= L"system::object";
-			const wchar_t* TypeInfo<unsigned __int8>::TypeName			= L"system::byte";
-			const wchar_t* TypeInfo<unsigned __int16>::TypeName			= L"system::ushort";
-			const wchar_t* TypeInfo<unsigned __int32>::TypeName			= L"system::uint";
-			const wchar_t* TypeInfo<unsigned __int64>::TypeName			= L"system::ulong";
-			const wchar_t* TypeInfo<signed __int8>::TypeName			= L"system::sbyte";
-			const wchar_t* TypeInfo<signed __int16>::TypeName			= L"system::short";
-			const wchar_t* TypeInfo<signed __int32>::TypeName			= L"system::int";
-			const wchar_t* TypeInfo<signed __int64>::TypeName			= L"system::long";
-			const wchar_t* TypeInfo<float>::TypeName					= L"system::float";
-			const wchar_t* TypeInfo<double>::TypeName					= L"system::double";
-			const wchar_t* TypeInfo<bool>::TypeName						= L"system::bool";
-			const wchar_t* TypeInfo<wchar_t>::TypeName					= L"system::char";
-			const wchar_t* TypeInfo<WString>::TypeName					= L"system::string";
+			const wchar_t* TypeInfo<void>::TypeName						= L"system::Void";
+			const wchar_t* TypeInfo<VoidValue>::TypeName				= L"system::Void";
+			const wchar_t* TypeInfo<IDescriptable>::TypeName			= L"system::Interface";
+			const wchar_t* TypeInfo<Value>::TypeName					= L"system::Object";
+			const wchar_t* TypeInfo<unsigned __int8>::TypeName			= L"system::UInt8";
+			const wchar_t* TypeInfo<unsigned __int16>::TypeName			= L"system::UInt16";
+			const wchar_t* TypeInfo<unsigned __int32>::TypeName			= L"system::UInt32";
+			const wchar_t* TypeInfo<unsigned __int64>::TypeName			= L"system::UInt64";
+			const wchar_t* TypeInfo<signed __int8>::TypeName			= L"system::Int8";
+			const wchar_t* TypeInfo<signed __int16>::TypeName			= L"system::Int16";
+			const wchar_t* TypeInfo<signed __int32>::TypeName			= L"system::Int32";
+			const wchar_t* TypeInfo<signed __int64>::TypeName			= L"system::Int64";
+			const wchar_t* TypeInfo<float>::TypeName					= L"system::Single";
+			const wchar_t* TypeInfo<double>::TypeName					= L"system::Double";
+			const wchar_t* TypeInfo<bool>::TypeName						= L"system::Boolean";
+			const wchar_t* TypeInfo<wchar_t>::TypeName					= L"system::Char";
+			const wchar_t* TypeInfo<WString>::TypeName					= L"system::String";
 			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::ReadableList";
 			const wchar_t* TypeInfo<IValueList>::TypeName				= L"system::List";
 			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"system::InterfaceProxy";
@@ -359,6 +361,9 @@ Collections
 
 #define _ ,
 
+			BEGIN_STRUCT_MEMBER(VoidValue)
+			END_STRUCT_MEMBER(VoidValue)
+
 			BEGIN_CLASS_MEMBER(IDescriptable)
 			END_CLASS_MEMBER(IDescriptable)
 
@@ -424,6 +429,7 @@ LoadPredefinedTypes
 					AddSerializableType<BoolValueSeriaizer>(manager);
 					AddSerializableType<TypedValueSerializer<wchar_t>>(manager);
 					AddSerializableType<TypedValueSerializer<WString>>(manager);
+					ADD_TYPE_INFO(VoidValue)
 					ADD_TYPE_INFO(IDescriptable)
 					ADD_TYPE_INFO(IValueReadonlyList)
 					ADD_TYPE_INFO(IValueList)
