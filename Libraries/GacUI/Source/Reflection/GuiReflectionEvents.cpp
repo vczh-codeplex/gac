@@ -8,6 +8,8 @@ namespace vl
 		{
 			using namespace collections;
 
+#ifndef VCZH_DEBUG_NO_REFLECTION
+
 			GUIREFLECTIONEVENT_TYPELIST(IMPL_TYPE_INFO)
 
 /***********************************************************************
@@ -119,14 +121,18 @@ Type Loader
 				}
 			};
 
+#endif
+
 			bool LoadGuiEventTypes()
 			{
+#ifndef VCZH_DEBUG_NO_REFLECTION
 				ITypeManager* manager=GetGlobalTypeManager();
 				if(manager)
 				{
 					Ptr<ITypeLoader> loader=new GuiEventTypeLoader;
 					return manager->AddTypeLoader(loader);
 				}
+#endif
 				return false;
 			}
 		}

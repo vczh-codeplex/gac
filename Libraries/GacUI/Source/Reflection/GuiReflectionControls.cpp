@@ -16,6 +16,8 @@ namespace vl
 			using namespace text;
 			using namespace theme;
 
+#ifndef VCZH_DEBUG_NO_REFLECTION
+
 			GUIREFLECTIONCONTROLS_TYPELIST(IMPL_TYPE_INFO)
 
 /***********************************************************************
@@ -317,6 +319,8 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiWindow)
 				CLASS_MEMBER_BASE(GuiControlHost)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiWindow)
+
+				CLASS_MEMBER_GUIEVENT(ClipboardUpdated)
 
 				CLASS_MEMBER_PROPERTY_FAST(MaximizedBox)
 				CLASS_MEMBER_PROPERTY_FAST(MinimizedBox)
@@ -1313,14 +1317,18 @@ Type Loader
 				}
 			};
 
+#endif
+
 			bool LoadGuiControlsTypes()
 			{
+#ifndef VCZH_DEBUG_NO_REFLECTION
 				ITypeManager* manager=GetGlobalTypeManager();
 				if(manager)
 				{
 					Ptr<ITypeLoader> loader=new GuiControlsTypeLoader;
 					return manager->AddTypeLoader(loader);
 				}
+#endif
 				return false;
 			}
 		}

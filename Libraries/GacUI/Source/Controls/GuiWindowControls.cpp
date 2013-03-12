@@ -756,6 +756,7 @@ GuiWindow
 				styleController->AttachWindow(this);
 				SetNativeWindow(window);
 				GetApplication()->RegisterWindow(this);
+				ClipboardUpdated.SetAssociatedComposition(GetBoundsComposition());
 			}
 
 			GuiWindow::~GuiWindow()
