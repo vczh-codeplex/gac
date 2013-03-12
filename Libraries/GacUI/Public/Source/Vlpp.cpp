@@ -10797,6 +10797,52 @@ DescriptableObject
 			return typeDescriptor?*typeDescriptor:0;
 		}
 
+		Ptr<Object> DescriptableObject::GetInternalProperty(const WString& name)
+		{
+			if(!internalProperties) return 0;
+			vint index=internalProperties->Keys().IndexOf(name);
+			if(index==-1) return 0;
+			return internalProperties->Values().Get(index);
+		}
+
+		void DescriptableObject::SetInternalProperty(const WString& name, Ptr<Object> value)
+		{
+			if(internalProperties)
+			{
+				vint index=internalProperties->Keys().IndexOf(name);
+				if(index==-1)
+				{
+					if(value)
+					{
+						internalProperties->Add(name, value);
+					}
+				}
+				else
+				{
+					if(value)
+					{
+						internalProperties->Set(name, value);
+					}
+					else
+					{
+						internalProperties->Remove(name);
+						if(internalProperties->Count()==0)
+						{
+							internalProperties=0;
+						}
+					}
+				}
+			}
+			else
+			{
+				if(value)
+				{
+					internalProperties=new InternalPropertyMap;
+					internalProperties->Add(name, value);
+				}
+			}
+		}
+
 /***********************************************************************
 description::Value
 ***********************************************************************/
@@ -10947,22 +10993,33 @@ description::Value
 				return GetTypeDescriptor()->CanConvertTo(targetType);
 			}
 
-			bool Value::CanConvertTo(IParameterInfo* targetType)const
+			bool Value::CanConvertTo(ITypeInfo* targetType)const
 			{
 				ValueType targetValueType=ValueType::Null;
-				switch(targetType->GetDecorator())
 				{
-				case IParameterInfo::RawPtr:
-					targetValueType=RawPtr;
-					break;
-				case IParameterInfo::SharedPtr:
-					targetValueType=SharedPtr;
-					break;
-				case IParameterInfo::Text:
-					targetValueType=Text;
-					break;
+					ITypeInfo* currentType=targetType;
+					while(currentType)
+					{
+						switch(targetType->GetDecorator())
+						{
+						case ITypeInfo::RawPtr:
+							targetValueType=RawPtr;
+							currentType=0;
+							break;
+						case ITypeInfo::SharedPtr:
+							targetValueType=SharedPtr;
+							currentType=0;
+							break;
+						case ITypeInfo::TypeDescriptor:
+							targetValueType=Text;
+							currentType=0;
+							break;
+						default:
+							currentType=currentType->GetElementType();
+						}
+					}
 				}
-				return CanConvertTo(targetType->GetValueTypeDescriptor(), targetValueType);
+				return CanConvertTo(targetType->GetTypeDescriptor(), targetValueType);
 			}
 
 			Value Value::From(DescriptableObject* value)
@@ -11097,6 +11154,15 @@ description::Value
 
 				IMethodInfo* method=SelectMethod(methodGroup, arguments);
 				return method->Invoke(*this, arguments);
+			}
+
+			bool Value::DeleteRawPtr()
+			{
+				if(valueType!=RawPtr) return false;
+				if(!rawPtr) return false;
+				delete rawPtr;
+				*this=Value();
+				return true;
 			}
 
 /***********************************************************************
@@ -11382,17 +11448,43 @@ LogTypeManager (class)
 
 			bool LogTypeManager_IsInterface(ITypeDescriptor* type)
 			{
+				bool containsConstructor=false;
 				if(IMethodGroupInfo* group=type->GetConstructorGroup())
 				{
+					containsConstructor=group->GetMethodCount()>0;
 					if(group->GetMethodCount()==1)
 					{
 						if(IMethodInfo* info=group->GetMethod(0))
 						{
-							if(info->GetParameterCount()==1 && info->GetParameter(0)->GetValueTypeDescriptor()->GetTypeName()==L"InterfaceProxy")
+							if(info->GetParameterCount()==1 && info->GetParameter(0)->GetType()->GetTypeDescriptor()->GetTypeName()==TypeInfo<IValueInterfaceProxy>::TypeName)
 							{
 								return true;
 							}
 						}
+					}
+				}
+
+				if(!containsConstructor)
+				{
+					if(type->GetTypeName()==TypeInfo<IDescriptable>::TypeName)
+					{
+						return true;
+					}
+					else
+					{
+						for(vint i=0;i<type->GetBaseTypeDescriptorCount();i++)
+						{
+							if(!LogTypeManager_IsInterface(type->GetBaseTypeDescriptor(i)))
+							{
+								return false;
+							}
+						}
+						const wchar_t* name=type->GetTypeName().Buffer();
+						while(const wchar_t* next=wcschr(name, L':'))
+						{
+							name=next+1;
+						}
+						return name[0]==L'I' && (L'A'<=name[1] && name[1]<=L'Z');
 					}
 				}
 				return false;
@@ -11405,12 +11497,19 @@ LogTypeManager (class)
 				{
 					printed=true;
 					IEventInfo* info=type->GetEvent(j);
-					writer.WriteString(L"    event "+info->GetName());
-					if(info->GetObservingProperty())
+					writer.WriteString(L"    event "+info->GetHandlerType()->GetTypeFriendlyName()+L" "+info->GetName()+L"{");
+					if(info->GetObservingPropertyCount()>0)
 					{
-						writer.WriteString(L" observing "+info->GetObservingProperty()->GetName());
+						writer.WriteString(L" observing ");
+						vint count=+info->GetObservingPropertyCount();
+						for(vint i=0;i<count;i++)
+						{
+							if(i>0) writer.WriteString(L", ");
+							writer.WriteString(info->GetObservingProperty(i)->GetName());
+						}
+						writer.WriteString(L";");
 					}
-					writer.WriteLine(L";");
+					writer.WriteLine(L"};");
 				}
 				if(printed)
 				{
@@ -11460,20 +11559,13 @@ LogTypeManager (class)
 						if(propertyAccessors.Contains(info)==isPropertyAccessor)
 						{
 							printed=true;
-							if(info->GetReturn())
-							{
-								writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+(isPropertyAccessor?L"accessor ":L"function ")+info->GetReturn()->GetTypeFriendlyName());
-							}
-							else
-							{
-								writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+(isPropertyAccessor?L"accessor void":L"function void"));
-							}
+							writer.WriteString(WString(L"    ")+(info->IsStatic()?L"static ":L"")+(isPropertyAccessor?L"accessor ":L"function ")+info->GetReturn()->GetTypeFriendlyName());
 							writer.WriteString(L" "+info->GetName()+L"(");
 							for(vint l=0;l<info->GetParameterCount();l++)
 							{
 								if(l>0) writer.WriteString(L", ");
 								IParameterInfo* parameter=info->GetParameter(l);
-								writer.WriteString(parameter->GetTypeFriendlyName()+L" "+parameter->GetName());
+								writer.WriteString(parameter->GetType()->GetTypeFriendlyName()+L" "+parameter->GetName());
 							}
 							writer.WriteLine(L");");
 						}
@@ -11498,7 +11590,7 @@ LogTypeManager (class)
 						{
 							if(l>0) writer.WriteString(L", ");
 							IParameterInfo* parameter=info->GetParameter(l);
-							writer.WriteString(parameter->GetTypeFriendlyName()+L" "+parameter->GetName());
+							writer.WriteString(parameter->GetType()->GetTypeFriendlyName()+L" "+parameter->GetName());
 						}
 						writer.WriteLine(L");");
 					}
@@ -11507,8 +11599,7 @@ LogTypeManager (class)
 
 			void LogTypeManager_Class(stream::TextWriter& writer, ITypeDescriptor* type)
 			{
-				bool isInterface=false;
-
+				bool isInterface=LogTypeManager_IsInterface(type);
 				writer.WriteString((isInterface?L"interface ":L"class ")+type->GetTypeName());
 				for(vint j=0;j<type->GetBaseTypeDescriptorCount();j++)
 				{
@@ -11578,15 +11669,96 @@ namespace vl
 		{
 
 /***********************************************************************
+TypeInfoImpl
+***********************************************************************/
+
+			TypeInfoImpl::TypeInfoImpl(Decorator _decorator)
+				:decorator(_decorator)
+				,typeDescriptor(0)
+			{
+			}
+
+			TypeInfoImpl::~TypeInfoImpl()
+			{
+			}
+
+			TypeInfoImpl::Decorator TypeInfoImpl::GetDecorator()
+			{
+				return decorator;
+			}
+
+			ITypeInfo* TypeInfoImpl::GetElementType()
+			{
+				return elementType.Obj();
+			}
+
+			ITypeDescriptor* TypeInfoImpl::GetTypeDescriptor()
+			{
+				return
+					typeDescriptor?typeDescriptor:
+					elementType?elementType->GetTypeDescriptor():
+					0;
+			}
+
+			vint TypeInfoImpl::GetGenericArgumentCount()
+			{
+				return genericArguments.Count();
+			}
+
+			ITypeInfo* TypeInfoImpl::GetGenericArgument(vint index)
+			{
+				return genericArguments[index].Obj();
+			}
+
+			WString TypeInfoImpl::GetTypeFriendlyName()
+			{
+				switch(decorator)
+				{
+				case RawPtr:
+					return elementType->GetTypeFriendlyName()+L"*";
+				case SharedPtr:
+					return elementType->GetTypeFriendlyName()+L"^";
+				case TypeDescriptor:
+					return typeDescriptor->GetTypeName();
+				case Generic:
+					{
+						WString result=elementType->GetTypeFriendlyName()+L"<";
+						FOREACH_INDEXER(Ptr<ITypeInfo>, type, i, genericArguments)
+						{
+							if(i>0) result+=L", ";
+							result+=type->GetTypeFriendlyName();
+						}
+						result+=L">";
+						return result;
+					}
+				default:
+					return L"";
+				}
+			}
+
+			void TypeInfoImpl::SetTypeDescriptor(ITypeDescriptor* value)
+			{
+				typeDescriptor=value;
+			}
+
+			void TypeInfoImpl::AddGenericArgument(Ptr<ITypeInfo> value)
+			{
+				genericArguments.Add(value);
+			}
+
+			void TypeInfoImpl::SetElementType(Ptr<ITypeInfo> value)
+			{
+				elementType=value;
+			}
+
+/***********************************************************************
 ParameterInfoImpl
 ***********************************************************************/
 
-			ParameterInfoImpl::ParameterInfoImpl(IMethodInfo* _ownerMethod, const WString& _name, ITypeDescriptor* _type, Decorator _decorator, bool _canOutput)
+			ParameterInfoImpl::ParameterInfoImpl(IMethodInfo* _ownerMethod, const WString& _name, Ptr<ITypeInfo> _type)
 				:ownerMethod(_ownerMethod)
 				,name(_name)
 				,type(_type)
-				,decorator(_decorator)
-				,canOutput(_canOutput)
 			{
 			}
 
@@ -11604,9 +11776,9 @@ ParameterInfoImpl
 				return name;
 			}
 
-			ITypeDescriptor* ParameterInfoImpl::GetValueTypeDescriptor()
+			ITypeInfo* ParameterInfoImpl::GetType()
 			{
-				return type;
+				return type.Obj();
 			}
 
 			IMethodInfo* ParameterInfoImpl::GetOwnerMethod()
@@ -11614,44 +11786,16 @@ ParameterInfoImpl
 				return ownerMethod;
 			}
 
-			IParameterInfo::Decorator ParameterInfoImpl::GetDecorator()
-			{
-				return decorator;
-			}
-
-			bool ParameterInfoImpl::CanOutput()
-			{
-				return canOutput;
-			}
-
-			WString ParameterInfoImpl::GetTypeFriendlyName()
-			{
-				switch(decorator)
-				{
-				case RawPtr:
-					return type->GetTypeName()+L"*"+(canOutput?L"&":L"");
-				case SharedPtr:
-					return L"Ptr<"+type->GetTypeName()+L">"+(canOutput?L"&":L"");
-				case Text:
-					return type->GetTypeName()+(canOutput?L"&":L"");
-				default:
-					return L"";
-				}
-			}
-
 /***********************************************************************
 MethodInfoImpl
 ***********************************************************************/
 
-			MethodInfoImpl::MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, ITypeDescriptor* _returnType, IParameterInfo::Decorator _returnDecorator, bool _isStatic)
+			MethodInfoImpl::MethodInfoImpl(IMethodGroupInfo* _ownerMethodGroup, Ptr<ITypeInfo> _return, bool _isStatic)
 				:ownerMethodGroup(_ownerMethodGroup)
 				,ownerProperty(0)
+				,returnInfo(_return)
 				,isStatic(_isStatic)
 			{
-				if(_returnType)
-				{
-					returnInfo=new ParameterInfoImpl(this, L"", _returnType, _returnDecorator, false);
-				}
 			}
 
 			MethodInfoImpl::~MethodInfoImpl()
@@ -11695,7 +11839,7 @@ MethodInfoImpl
 				}
 			}
 
-			IParameterInfo* MethodInfoImpl::GetReturn()
+			ITypeInfo* MethodInfoImpl::GetReturn()
 			{
 				return returnInfo.Obj();
 			}
@@ -11713,9 +11857,9 @@ MethodInfoImpl
 				}
 				for(vint i=0;i<parameters.Count();i++)
 				{
-					if(!arguments[i].CanConvertTo(parameters[i].Obj()))
+					if(!arguments[i].CanConvertTo(parameters[i]->GetType()))
 					{
-						throw ArgumentTypeMismtatchException(parameters[i]->GetName(), parameters[i].Obj(), arguments[i]);
+						throw ArgumentTypeMismtatchException(parameters[i]->GetName(), parameters[i]->GetType(), arguments[i]);
 					}
 				}
 			}
@@ -11808,8 +11952,9 @@ MethodGroupInfoImpl
 EventInfoImpl::EventHandlerImpl
 ***********************************************************************/
 
-			EventInfoImpl::EventHandlerImpl::EventHandlerImpl(EventInfoImpl* _ownerEvent, DescriptableObject* ownerObject, const Func<void(const Value&, Value&)>& _handler)
+			EventInfoImpl::EventHandlerImpl::EventHandlerImpl(EventInfoImpl* _ownerEvent, DescriptableObject* _ownerObject, Ptr<IValueFunctionProxy> _handler)
 				:ownerEvent(_ownerEvent)
+				,ownerObject(_ownerObject)
 				,handler(_handler)
 			{
 			}
@@ -11839,6 +11984,7 @@ EventInfoImpl::EventHandlerImpl
 				{
 					attached=false;
 					ownerEvent->DetachInternal(ownerObject, this);
+					ownerEvent->RemoveEventHandler(ownerObject, this);
 					return true;
 				}
 				else
@@ -11857,16 +12003,60 @@ EventInfoImpl::EventHandlerImpl
 				{
 					throw ArgumentTypeMismtatchException(L"thisObject", ownerEvent->GetOwnerTypeDescriptor(), Value::RawPtr, thisObject);
 				}
-				handler(thisObject, arguments);
+				Ptr<IValueList> eventArgs=IValueList::Create();
+				eventArgs->Add(thisObject);
+				eventArgs->Add(arguments);
+				handler->Invoke(eventArgs);
+				if(eventArgs->Count()>=2)
+				{
+					arguments=eventArgs->Get(1);
+				}
+			}
+
+			Ptr<DescriptableObject> EventInfoImpl::EventHandlerImpl::GetTag()
+			{
+				return tag;
+			}
+
+			void EventInfoImpl::EventHandlerImpl::SetTag(Ptr<DescriptableObject> _tag)
+			{
+				tag=_tag;
 			}
 
 /***********************************************************************
 EventInfoImpl
 ***********************************************************************/
 
+			const wchar_t* EventInfoImpl::EventHandlerListInternalPropertyName = L"List<EventInfoImpl::EventHandlerImpl>";
+
+			void EventInfoImpl::AddEventHandler(DescriptableObject* thisObject, Ptr<IEventHandler> eventHandler)
+			{
+				WString key=EventHandlerListInternalPropertyName;
+				Ptr<EventHandlerList> value=thisObject->GetInternalProperty(key).Cast<EventHandlerList>();
+				if(!value)
+				{
+					value=new EventHandlerList;
+					thisObject->SetInternalProperty(key, value);
+				}
+				value->Add(eventHandler);
+			}
+			
+			void EventInfoImpl::RemoveEventHandler(DescriptableObject* thisObject, IEventHandler* eventHandler)
+			{
+				WString key=EventHandlerListInternalPropertyName;
+				Ptr<EventHandlerList> value=thisObject->GetInternalProperty(key).Cast<EventHandlerList>();
+				if(value)
+				{
+					value->Remove(eventHandler);
+					if(value->Count()==0)
+					{
+						thisObject->SetInternalProperty(key, 0);
+					}
+				}
+			}
+
 			EventInfoImpl::EventInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name)
 				:ownerTypeDescriptor(_ownerTypeDescriptor)
-				,observingProperty(0)
 				,name(_name)
 			{
 			}
@@ -11880,9 +12070,23 @@ EventInfoImpl
 				return ownerTypeDescriptor;
 			}
 
-			IPropertyInfo* EventInfoImpl::GetObservingProperty()
+			ITypeInfo* EventInfoImpl::GetHandlerType()
 			{
-				return observingProperty;
+				if(!handlerType)
+				{
+					handlerType=GetHandlerTypeInternal();
+				}
+				return handlerType.Obj();
+			}
+
+			vint EventInfoImpl::GetObservingPropertyCount()
+			{
+				return observingProperties.Count();
+			}
+
+			IPropertyInfo* EventInfoImpl::GetObservingProperty(vint index)
+			{
+				return observingProperties[index];
 			}
 
 			const WString& EventInfoImpl::GetName()
@@ -11890,7 +12094,7 @@ EventInfoImpl
 				return name;
 			}
 
-			Ptr<IEventHandler> EventInfoImpl::Attach(const Value& thisObject, const Func<void(const Value&, Value&)>& handler)
+			Ptr<IEventHandler> EventInfoImpl::Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)
 			{
 				if(thisObject.IsNull())
 				{
@@ -11904,7 +12108,8 @@ EventInfoImpl
 				if(rawThisObject)
 				{
 					Ptr<EventHandlerImpl> eventHandler=new EventHandlerImpl(this, rawThisObject, handler);
-					AttachInternal(rawThisObject, eventHandler);
+					AddEventHandler(rawThisObject, eventHandler);
+					AttachInternal(rawThisObject, eventHandler.Obj());
 					return eventHandler;
 				}
 				else
@@ -11926,7 +12131,10 @@ PropertyInfoImpl
 			{
 				if(getter) getter->ownerProperty=this;
 				if(setter) setter->ownerProperty=this;
-				if(valueChangedEvent) valueChangedEvent->observingProperty=this;
+				if(valueChangedEvent)
+				{
+					valueChangedEvent->observingProperties.Add(this);
+				}
 			}
 
 			PropertyInfoImpl::~PropertyInfoImpl()
@@ -11953,7 +12161,7 @@ PropertyInfoImpl
 				return setter!=0;
 			}
 
-			IParameterInfo* PropertyInfoImpl::GetReturn()
+			ITypeInfo* PropertyInfoImpl::GetReturn()
 			{
 				return getter?getter->GetReturn():0;
 			}
@@ -12004,7 +12212,7 @@ PropertyInfoImpl
 FieldInfoImpl
 ***********************************************************************/
 
-			FieldInfoImpl::FieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, Ptr<IParameterInfo> _returnInfo)
+			FieldInfoImpl::FieldInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, Ptr<ITypeInfo> _returnInfo)
 				:ownerTypeDescriptor(_ownerTypeDescriptor)
 				,name(_name)
 				,returnInfo(_returnInfo)
@@ -12035,7 +12243,7 @@ FieldInfoImpl
 				return true;
 			}
 
-			IParameterInfo* FieldInfoImpl::GetReturn()
+			ITypeInfo* FieldInfoImpl::GetReturn()
 			{
 				return returnInfo.Obj();
 			}
@@ -12532,21 +12740,23 @@ SerializableTypeDescriptorBase
 TypeName
 ***********************************************************************/
 			
-			const wchar_t* TypeInfo<IDescriptable>::TypeName			= L"system::object";
-			const wchar_t* TypeInfo<Value>::TypeName					= L"system::object";
-			const wchar_t* TypeInfo<unsigned __int8>::TypeName			= L"system::byte";
-			const wchar_t* TypeInfo<unsigned __int16>::TypeName			= L"system::ushort";
-			const wchar_t* TypeInfo<unsigned __int32>::TypeName			= L"system::uint";
-			const wchar_t* TypeInfo<unsigned __int64>::TypeName			= L"system::ulong";
-			const wchar_t* TypeInfo<signed __int8>::TypeName			= L"system::sbyte";
-			const wchar_t* TypeInfo<signed __int16>::TypeName			= L"system::short";
-			const wchar_t* TypeInfo<signed __int32>::TypeName			= L"system::int";
-			const wchar_t* TypeInfo<signed __int64>::TypeName			= L"system::long";
-			const wchar_t* TypeInfo<float>::TypeName					= L"system::float";
-			const wchar_t* TypeInfo<double>::TypeName					= L"system::double";
-			const wchar_t* TypeInfo<bool>::TypeName						= L"system::bool";
-			const wchar_t* TypeInfo<wchar_t>::TypeName					= L"system::char";
-			const wchar_t* TypeInfo<WString>::TypeName					= L"system::string";
+			const wchar_t* TypeInfo<void>::TypeName						= L"system::Void";
+			const wchar_t* TypeInfo<VoidValue>::TypeName				= L"system::Void";
+			const wchar_t* TypeInfo<IDescriptable>::TypeName			= L"system::Interface";
+			const wchar_t* TypeInfo<Value>::TypeName					= L"system::Object";
+			const wchar_t* TypeInfo<unsigned __int8>::TypeName			= L"system::UInt8";
+			const wchar_t* TypeInfo<unsigned __int16>::TypeName			= L"system::UInt16";
+			const wchar_t* TypeInfo<unsigned __int32>::TypeName			= L"system::UInt32";
+			const wchar_t* TypeInfo<unsigned __int64>::TypeName			= L"system::UInt64";
+			const wchar_t* TypeInfo<signed __int8>::TypeName			= L"system::Int8";
+			const wchar_t* TypeInfo<signed __int16>::TypeName			= L"system::Int16";
+			const wchar_t* TypeInfo<signed __int32>::TypeName			= L"system::Int32";
+			const wchar_t* TypeInfo<signed __int64>::TypeName			= L"system::Int64";
+			const wchar_t* TypeInfo<float>::TypeName					= L"system::Single";
+			const wchar_t* TypeInfo<double>::TypeName					= L"system::Double";
+			const wchar_t* TypeInfo<bool>::TypeName						= L"system::Boolean";
+			const wchar_t* TypeInfo<wchar_t>::TypeName					= L"system::Char";
+			const wchar_t* TypeInfo<WString>::TypeName					= L"system::String";
 			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::ReadableList";
 			const wchar_t* TypeInfo<IValueList>::TypeName				= L"system::List";
 			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"system::InterfaceProxy";
@@ -12772,7 +12982,14 @@ Collections
 
 #define _ ,
 
+			BEGIN_STRUCT_MEMBER(VoidValue)
+			END_STRUCT_MEMBER(VoidValue)
+
+			BEGIN_CLASS_MEMBER(IDescriptable)
+			END_CLASS_MEMBER(IDescriptable)
+
 			BEGIN_CLASS_MEMBER(IValueReadonlyList)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_METHOD(Count, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(Get, {L"index"})
 				CLASS_MEMBER_METHOD(Contains, {L"value"})
@@ -12793,11 +13010,13 @@ Collections
 			END_CLASS_MEMBER(IValueList)
 
 			BEGIN_CLASS_MEMBER(IValueInterfaceProxy)
+				CLASS_MEMBER_BASE(IDescriptable)
 				CLASS_MEMBER_METHOD(Invoke, {L"name" _ L"arguments"})
 			END_CLASS_MEMBER(IValueInterfaceProxy)
 
 			BEGIN_CLASS_MEMBER(IValueFunctionProxy)
-			CLASS_MEMBER_METHOD(Invoke, {L"arguments"})
+				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_METHOD(Invoke, {L"arguments"})
 			END_CLASS_MEMBER(IValueFunctionProxy)
 
 #undef _
@@ -12831,6 +13050,8 @@ LoadPredefinedTypes
 					AddSerializableType<BoolValueSeriaizer>(manager);
 					AddSerializableType<TypedValueSerializer<wchar_t>>(manager);
 					AddSerializableType<TypedValueSerializer<WString>>(manager);
+					ADD_TYPE_INFO(VoidValue)
+					ADD_TYPE_INFO(IDescriptable)
 					ADD_TYPE_INFO(IValueReadonlyList)
 					ADD_TYPE_INFO(IValueList)
 					ADD_TYPE_INFO(IValueInterfaceProxy)

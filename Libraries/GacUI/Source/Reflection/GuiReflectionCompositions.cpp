@@ -12,6 +12,8 @@ namespace vl
 			using namespace parsing::xml;
 			using namespace stream;
 
+#ifndef VCZH_DEBUG_NO_REFLECTION
+
 			GUIREFLECTIONCOMPOSITION_TYPELIST(IMPL_TYPE_INFO)
 
 /***********************************************************************
@@ -244,14 +246,18 @@ Type Loader
 				}
 			};
 
+#endif
+
 			bool LoadGuiCompositionTypes()
 			{
+#ifndef VCZH_DEBUG_NO_REFLECTION
 				ITypeManager* manager=GetGlobalTypeManager();
 				if(manager)
 				{
 					Ptr<ITypeLoader> loader=new GuiCompositionTypeLoader;
 					return manager->AddTypeLoader(loader);
 				}
+#endif
 				return false;
 			}
 		}

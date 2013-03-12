@@ -58,6 +58,7 @@ GuiApplication
 				for(vint i=0;i<windows.Count();i++)
 				{
 					GuiEventArgs arguments=windows[i]->GetNotifyEventArguments();
+					windows[i]->ClipboardUpdated.Execute(arguments);
 					InvokeClipboardNotify(windows[i]->GetBoundsComposition(), arguments);
 				}
 			}

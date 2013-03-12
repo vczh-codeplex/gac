@@ -12,6 +12,8 @@ namespace vl
 			using namespace parsing::xml;
 			using namespace stream;
 
+#ifndef VCZH_DEBUG_NO_REFLECTION
+
 			GUIREFLECTIONBASIC_TYPELIST(IMPL_TYPE_INFO)
 
 			bool TypedValueSerializerProvider<Color>::Serialize(const Color& input, WString& output)
@@ -490,14 +492,18 @@ Type Loader
 				}
 			};
 
+#endif
+
 			bool LoadGuiBasicTypes()
 			{
+#ifndef VCZH_DEBUG_NO_REFLECTION
 				ITypeManager* manager=GetGlobalTypeManager();
 				if(manager)
 				{
 					Ptr<ITypeLoader> loader=new GuiBasicTypeLoader;
 					return manager->AddTypeLoader(loader);
 				}
+#endif
 				return false;
 			}
 		}

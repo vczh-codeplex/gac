@@ -62,8 +62,10 @@ namespace test
 }
 using namespace test;
 
-void GuiMain()
+void GuiMainReflection()
 {
+	LogReflection();
+
 	Value currentTheme=Value::InvokeStatic(L"presentation::theme::ITheme", L"GetCurrentTheme");
 	Value windowStyle=currentTheme.Invoke(L"CreateWindowStyle");
 	Value window=Value::Create(L"presentation::controls::GuiWindow", (Value::xs(), windowStyle));
@@ -77,4 +79,10 @@ void GuiMain()
 	Value application=Value::InvokeStatic(L"presentation::controls::GuiApplication", L"GetApplication");
 	application.Invoke(L"Run", (Value::xs(), window));
 	window.DeleteRawPtr();
+}
+
+void GuiMain()
+{
+	TestWindow window;
+	GetApplication()->Run(&window);
 }

@@ -8,6 +8,8 @@ namespace vl
 		{
 			using namespace collections;
 
+#ifndef VCZH_DEBUG_NO_REFLECTION
+
 			GUIREFLECTIONELEMENT_TYPELIST(IMPL_TYPE_INFO)
 
 /***********************************************************************
@@ -232,14 +234,18 @@ Type Loader
 				}
 			};
 
+#endif
+
 			bool LoadGuiElementTypes()
 			{
+#ifndef VCZH_DEBUG_NO_REFLECTION
 				ITypeManager* manager=GetGlobalTypeManager();
 				if(manager)
 				{
 					Ptr<ITypeLoader> loader=new GuiElementTypeLoader;
 					return manager->AddTypeLoader(loader);
 				}
+#endif
 				return false;
 			}
 		}
