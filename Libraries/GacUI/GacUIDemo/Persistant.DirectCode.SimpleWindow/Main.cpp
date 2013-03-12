@@ -22,9 +22,16 @@ void GuiMain()
 
 	Value buttonStyle=currentTheme.Invoke(L"CreateButtonStyle");
 	Value button=Value::Create(L"presentation::controls::GuiButton", (Value::xs(), buttonStyle));
-	button.GetProperty(L"BoundsComposition").SetProperty(L"AlignmentToParent", Value::From(L"left:100 top:100 right:100 bottom:100", GetTypeDescriptor(L"presentation::Margin")));
+	button.GetProperty(L"BoundsComposition").SetProperty(L"AlignmentToParent", Value::From(L"left:60 top:60 right:60 bottom:60", GetTypeDescriptor(L"presentation::Margin")));
 	button.SetProperty(L"Text", WString(L"Click Me!"));
 	window.Invoke(L"AddChild", (Value::xs(), button));
+
+	Value handler=BoxParameter<Func<void(GuiGraphicsComposition*, GuiEventArgs*)>>(
+		LAMBDA([&button](GuiGraphicsComposition*, GuiEventArgs*)
+		{
+			button.SetProperty(L"Text", WString(L"You clicked the button!"));
+		}));
+	button.AttachEvent(L"Clicked", handler);
 
 	Value application=Value::InvokeStatic(L"presentation::controls::GuiApplication", L"GetApplication");
 	application.Invoke(L"Run", (Value::xs(), window));

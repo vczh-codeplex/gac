@@ -340,10 +340,6 @@ EventInfoImpl::EventHandlerImpl
 				{
 					throw ArgumentNullException(L"thisObject");
 				}
-				else if(!thisObject.CanConvertTo(ownerEvent->GetOwnerTypeDescriptor(), Value::RawPtr))
-				{
-					throw ArgumentTypeMismtatchException(L"thisObject", ownerEvent->GetOwnerTypeDescriptor(), Value::RawPtr, thisObject);
-				}
 				Ptr<IValueList> eventArgs=IValueList::Create();
 				eventArgs->Add(thisObject);
 				eventArgs->Add(arguments);

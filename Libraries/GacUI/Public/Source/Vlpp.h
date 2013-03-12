@@ -12934,6 +12934,7 @@ Attribute
 		{
 			class ITypeDescriptor;
 			class ITypeInfo;
+			class IEventHandler;
 			class IEventInfo;
 			class IPropertyInfo;
 			class IParameterInfo;
@@ -13058,6 +13059,7 @@ Value
 				void							SetProperty(const WString& name, const Value& newValue);
 				Value							Invoke(const WString& name)const;
 				Value							Invoke(const WString& name, collections::Array<Value>& arguments)const;
+				Ptr<IEventHandler>				AttachEvent(const WString& name, const Value& function)const;
 				bool							DeleteRawPtr();
 
 				template<typename T>
