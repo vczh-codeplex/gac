@@ -3060,6 +3060,2134 @@ Static Method: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 			};
 			};
  
+ 
+/***********************************************************************
+DetailTypeInfoRetriver: R()
+***********************************************************************/
+			template<typename R >
+			struct DetailTypeInfoRetriver<Func<R()>, TypeFlags::FunctionType>
+			{
+				typedef DetailTypeInfoRetriver<Func<R()>, TypeFlags::NonGenericType>	UpLevelRetriver;
+ 
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueList												Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+ 
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<TypeInfoImpl> functionType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					functionType->SetTypeDescriptor(Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+ 
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(functionType);
+					genericType->AddGenericArgument(TypeInfoRetriver<R>::CreateTypeInfo());
+
+ 
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+  
+/***********************************************************************
+DetailTypeInfoRetriver: R(T0)
+***********************************************************************/
+			template<typename R,typename T0>
+			struct DetailTypeInfoRetriver<Func<R(T0)>, TypeFlags::FunctionType>
+			{
+				typedef DetailTypeInfoRetriver<Func<R(T0)>, TypeFlags::NonGenericType>	UpLevelRetriver;
+ 
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueList												Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+ 
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<TypeInfoImpl> functionType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					functionType->SetTypeDescriptor(Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+ 
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(functionType);
+					genericType->AddGenericArgument(TypeInfoRetriver<R>::CreateTypeInfo());
+					genericType->AddGenericArgument(TypeInfoRetriver<T0>::CreateTypeInfo());
+ 
+ 
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+  
+/***********************************************************************
+DetailTypeInfoRetriver: R(T0,T1)
+***********************************************************************/
+			template<typename R,typename T0,typename T1>
+			struct DetailTypeInfoRetriver<Func<R(T0,T1)>, TypeFlags::FunctionType>
+			{
+				typedef DetailTypeInfoRetriver<Func<R(T0,T1)>, TypeFlags::NonGenericType>	UpLevelRetriver;
+ 
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueList												Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+ 
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<TypeInfoImpl> functionType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					functionType->SetTypeDescriptor(Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+ 
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(functionType);
+					genericType->AddGenericArgument(TypeInfoRetriver<R>::CreateTypeInfo());
+					genericType->AddGenericArgument(TypeInfoRetriver<T0>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T1>::CreateTypeInfo());
+ 
+ 
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+  
+/***********************************************************************
+DetailTypeInfoRetriver: R(T0,T1,T2)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2>
+			struct DetailTypeInfoRetriver<Func<R(T0,T1,T2)>, TypeFlags::FunctionType>
+			{
+				typedef DetailTypeInfoRetriver<Func<R(T0,T1,T2)>, TypeFlags::NonGenericType>	UpLevelRetriver;
+ 
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueList												Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+ 
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<TypeInfoImpl> functionType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					functionType->SetTypeDescriptor(Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+ 
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(functionType);
+					genericType->AddGenericArgument(TypeInfoRetriver<R>::CreateTypeInfo());
+					genericType->AddGenericArgument(TypeInfoRetriver<T0>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T1>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T2>::CreateTypeInfo());
+ 
+ 
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+  
+/***********************************************************************
+DetailTypeInfoRetriver: R(T0,T1,T2,T3)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3>
+			struct DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3)>, TypeFlags::FunctionType>
+			{
+				typedef DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3)>, TypeFlags::NonGenericType>	UpLevelRetriver;
+ 
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueList												Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+ 
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<TypeInfoImpl> functionType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					functionType->SetTypeDescriptor(Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+ 
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(functionType);
+					genericType->AddGenericArgument(TypeInfoRetriver<R>::CreateTypeInfo());
+					genericType->AddGenericArgument(TypeInfoRetriver<T0>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T1>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T2>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T3>::CreateTypeInfo());
+ 
+ 
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+  
+/***********************************************************************
+DetailTypeInfoRetriver: R(T0,T1,T2,T3,T4)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4>
+			struct DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3,T4)>, TypeFlags::FunctionType>
+			{
+				typedef DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3,T4)>, TypeFlags::NonGenericType>	UpLevelRetriver;
+ 
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueList												Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+ 
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<TypeInfoImpl> functionType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					functionType->SetTypeDescriptor(Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+ 
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(functionType);
+					genericType->AddGenericArgument(TypeInfoRetriver<R>::CreateTypeInfo());
+					genericType->AddGenericArgument(TypeInfoRetriver<T0>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T1>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T2>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T3>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T4>::CreateTypeInfo());
+ 
+ 
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+  
+/***********************************************************************
+DetailTypeInfoRetriver: R(T0,T1,T2,T3,T4,T5)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
+			struct DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3,T4,T5)>, TypeFlags::FunctionType>
+			{
+				typedef DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3,T4,T5)>, TypeFlags::NonGenericType>	UpLevelRetriver;
+ 
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueList												Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+ 
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<TypeInfoImpl> functionType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					functionType->SetTypeDescriptor(Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+ 
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(functionType);
+					genericType->AddGenericArgument(TypeInfoRetriver<R>::CreateTypeInfo());
+					genericType->AddGenericArgument(TypeInfoRetriver<T0>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T1>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T2>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T3>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T4>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T5>::CreateTypeInfo());
+ 
+ 
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+  
+/***********************************************************************
+DetailTypeInfoRetriver: R(T0,T1,T2,T3,T4,T5,T6)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
+			struct DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3,T4,T5,T6)>, TypeFlags::FunctionType>
+			{
+				typedef DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3,T4,T5,T6)>, TypeFlags::NonGenericType>	UpLevelRetriver;
+ 
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueList												Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+ 
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<TypeInfoImpl> functionType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					functionType->SetTypeDescriptor(Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+ 
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(functionType);
+					genericType->AddGenericArgument(TypeInfoRetriver<R>::CreateTypeInfo());
+					genericType->AddGenericArgument(TypeInfoRetriver<T0>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T1>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T2>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T3>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T4>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T5>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T6>::CreateTypeInfo());
+ 
+ 
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+  
+/***********************************************************************
+DetailTypeInfoRetriver: R(T0,T1,T2,T3,T4,T5,T6,T7)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
+			struct DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>, TypeFlags::FunctionType>
+			{
+				typedef DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>, TypeFlags::NonGenericType>	UpLevelRetriver;
+ 
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueList												Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+ 
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<TypeInfoImpl> functionType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					functionType->SetTypeDescriptor(Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+ 
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(functionType);
+					genericType->AddGenericArgument(TypeInfoRetriver<R>::CreateTypeInfo());
+					genericType->AddGenericArgument(TypeInfoRetriver<T0>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T1>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T2>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T3>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T4>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T5>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T6>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T7>::CreateTypeInfo());
+ 
+ 
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+  
+/***********************************************************************
+DetailTypeInfoRetriver: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
+			struct DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>, TypeFlags::FunctionType>
+			{
+				typedef DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>, TypeFlags::NonGenericType>	UpLevelRetriver;
+ 
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueList												Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+ 
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<TypeInfoImpl> functionType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					functionType->SetTypeDescriptor(Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+ 
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(functionType);
+					genericType->AddGenericArgument(TypeInfoRetriver<R>::CreateTypeInfo());
+					genericType->AddGenericArgument(TypeInfoRetriver<T0>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T1>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T2>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T3>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T4>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T5>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T6>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T7>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T8>::CreateTypeInfo());
+ 
+ 
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+  
+/***********************************************************************
+DetailTypeInfoRetriver: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
+			struct DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>, TypeFlags::FunctionType>
+			{
+				typedef DetailTypeInfoRetriver<Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>, TypeFlags::NonGenericType>	UpLevelRetriver;
+ 
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueList												Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+ 
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					Ptr<TypeInfoImpl> functionType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					functionType->SetTypeDescriptor(Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+ 
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(functionType);
+					genericType->AddGenericArgument(TypeInfoRetriver<R>::CreateTypeInfo());
+					genericType->AddGenericArgument(TypeInfoRetriver<T0>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T1>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T2>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T3>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T4>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T5>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T6>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T7>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T8>::CreateTypeInfo());
+ 					genericType->AddGenericArgument(TypeInfoRetriver<T9>::CreateTypeInfo());
+ 
+ 
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+ 
+ 
+			template<typename T>
+			class ValueFunctionProxyWrapper
+			{
+			};
+ 
+ 
+/***********************************************************************
+Parameter Accessor: void()
+***********************************************************************/
+			template< >
+			class ValueFunctionProxyWrapper<void()> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<void()>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(arguments && arguments->Count()!=0) throw ArgumentCountMismtatchException();
+
+					  function();
+					return Value();
+				}
+			};
+ 
+			template< >
+			struct ParameterAccessor<Func<void()>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<void()>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef void(RawFunctionType)();
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<void()>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef void(RawFunctionType)();
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy]()
+							{
+								functionProxy->Invoke(0);
+								 
+
+								 
+							};
+						}
+					}
+				}
+			};
+/***********************************************************************
+Parameter Accessor: R()
+***********************************************************************/
+			template<typename R >
+			class ValueFunctionProxyWrapper<R()> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<R()>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(arguments && arguments->Count()!=0) throw ArgumentCountMismtatchException();
+
+					R result =  function();
+					return BoxParameter<R>(result);
+				}
+			};
+ 
+			template<typename R >
+			struct ParameterAccessor<Func<R()>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<R()>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef R(RawFunctionType)();
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<R()>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef R(RawFunctionType)();
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy]()
+							{
+								TypeInfoRetriver<R>::TempValueType proxyResult;description::UnboxParameter<R>(functionProxy->Invoke(0),proxyResult);return proxyResult;
+								 
+
+								 
+							};
+						}
+					}
+				}
+			};
+  
+/***********************************************************************
+Parameter Accessor: void(T0)
+***********************************************************************/
+			template< typename T0>
+			class ValueFunctionProxyWrapper<void(T0)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<void(T0)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=1) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 
+					  function(p0);
+					return Value();
+				}
+			};
+ 
+			template< typename T0>
+			struct ParameterAccessor<Func<void(T0)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<void(T0)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef void(RawFunctionType)(T0);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<void(T0)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef void(RawFunctionType)(T0);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 
+								functionProxy->Invoke(arguments);
+							};
+						}
+					}
+				}
+			};
+/***********************************************************************
+Parameter Accessor: R(T0)
+***********************************************************************/
+			template<typename R,typename T0>
+			class ValueFunctionProxyWrapper<R(T0)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<R(T0)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=1) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 
+					R result =  function(p0);
+					return BoxParameter<R>(result);
+				}
+			};
+ 
+			template<typename R,typename T0>
+			struct ParameterAccessor<Func<R(T0)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<R(T0)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef R(RawFunctionType)(T0);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<R(T0)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef R(RawFunctionType)(T0);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 
+								TypeInfoRetriver<R>::TempValueType proxyResult;description::UnboxParameter<R>(functionProxy->Invoke(arguments),proxyResult);return proxyResult;
+							};
+						}
+					}
+				}
+			};
+  
+/***********************************************************************
+Parameter Accessor: void(T0,T1)
+***********************************************************************/
+			template< typename T0,typename T1>
+			class ValueFunctionProxyWrapper<void(T0,T1)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<void(T0,T1)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=2) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 
+					  function(p0,p1);
+					return Value();
+				}
+			};
+ 
+			template< typename T0,typename T1>
+			struct ParameterAccessor<Func<void(T0,T1)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<void(T0,T1)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef void(RawFunctionType)(T0,T1);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<void(T0,T1)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef void(RawFunctionType)(T0,T1);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 
+								functionProxy->Invoke(arguments);
+							};
+						}
+					}
+				}
+			};
+/***********************************************************************
+Parameter Accessor: R(T0,T1)
+***********************************************************************/
+			template<typename R,typename T0,typename T1>
+			class ValueFunctionProxyWrapper<R(T0,T1)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<R(T0,T1)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=2) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 
+					R result =  function(p0,p1);
+					return BoxParameter<R>(result);
+				}
+			};
+ 
+			template<typename R,typename T0,typename T1>
+			struct ParameterAccessor<Func<R(T0,T1)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<R(T0,T1)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef R(RawFunctionType)(T0,T1);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<R(T0,T1)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef R(RawFunctionType)(T0,T1);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 
+								TypeInfoRetriver<R>::TempValueType proxyResult;description::UnboxParameter<R>(functionProxy->Invoke(arguments),proxyResult);return proxyResult;
+							};
+						}
+					}
+				}
+			};
+  
+/***********************************************************************
+Parameter Accessor: void(T0,T1,T2)
+***********************************************************************/
+			template< typename T0,typename T1,typename T2>
+			class ValueFunctionProxyWrapper<void(T0,T1,T2)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<void(T0,T1,T2)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=3) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 
+					  function(p0,p1,p2);
+					return Value();
+				}
+			};
+ 
+			template< typename T0,typename T1,typename T2>
+			struct ParameterAccessor<Func<void(T0,T1,T2)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<void(T0,T1,T2)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<void(T0,T1,T2)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 
+								functionProxy->Invoke(arguments);
+							};
+						}
+					}
+				}
+			};
+/***********************************************************************
+Parameter Accessor: R(T0,T1,T2)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2>
+			class ValueFunctionProxyWrapper<R(T0,T1,T2)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<R(T0,T1,T2)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=3) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 
+					R result =  function(p0,p1,p2);
+					return BoxParameter<R>(result);
+				}
+			};
+ 
+			template<typename R,typename T0,typename T1,typename T2>
+			struct ParameterAccessor<Func<R(T0,T1,T2)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<R(T0,T1,T2)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<R(T0,T1,T2)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 
+								TypeInfoRetriver<R>::TempValueType proxyResult;description::UnboxParameter<R>(functionProxy->Invoke(arguments),proxyResult);return proxyResult;
+							};
+						}
+					}
+				}
+			};
+  
+/***********************************************************************
+Parameter Accessor: void(T0,T1,T2,T3)
+***********************************************************************/
+			template< typename T0,typename T1,typename T2,typename T3>
+			class ValueFunctionProxyWrapper<void(T0,T1,T2,T3)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<void(T0,T1,T2,T3)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=4) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 
+					  function(p0,p1,p2,p3);
+					return Value();
+				}
+			};
+ 
+			template< typename T0,typename T1,typename T2,typename T3>
+			struct ParameterAccessor<Func<void(T0,T1,T2,T3)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<void(T0,T1,T2,T3)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<void(T0,T1,T2,T3)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 
+								functionProxy->Invoke(arguments);
+							};
+						}
+					}
+				}
+			};
+/***********************************************************************
+Parameter Accessor: R(T0,T1,T2,T3)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3>
+			class ValueFunctionProxyWrapper<R(T0,T1,T2,T3)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<R(T0,T1,T2,T3)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=4) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 
+					R result =  function(p0,p1,p2,p3);
+					return BoxParameter<R>(result);
+				}
+			};
+ 
+			template<typename R,typename T0,typename T1,typename T2,typename T3>
+			struct ParameterAccessor<Func<R(T0,T1,T2,T3)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<R(T0,T1,T2,T3)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<R(T0,T1,T2,T3)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 
+								TypeInfoRetriver<R>::TempValueType proxyResult;description::UnboxParameter<R>(functionProxy->Invoke(arguments),proxyResult);return proxyResult;
+							};
+						}
+					}
+				}
+			};
+  
+/***********************************************************************
+Parameter Accessor: void(T0,T1,T2,T3,T4)
+***********************************************************************/
+			template< typename T0,typename T1,typename T2,typename T3,typename T4>
+			class ValueFunctionProxyWrapper<void(T0,T1,T2,T3,T4)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<void(T0,T1,T2,T3,T4)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=5) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 					typename TypeInfoRetriver<T4>::TempValueType p4;
+					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments->Get(4), p4, 0, L"p4");
+ 
+					  function(p0,p1,p2,p3,p4);
+					return Value();
+				}
+			};
+ 
+			template< typename T0,typename T1,typename T2,typename T3,typename T4>
+			struct ParameterAccessor<Func<void(T0,T1,T2,T3,T4)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<void(T0,T1,T2,T3,T4)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3,T4);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<void(T0,T1,T2,T3,T4)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3,T4);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 								arguments->Add(description::BoxParameter<T4>(p4));
+ 
+								functionProxy->Invoke(arguments);
+							};
+						}
+					}
+				}
+			};
+/***********************************************************************
+Parameter Accessor: R(T0,T1,T2,T3,T4)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4>
+			class ValueFunctionProxyWrapper<R(T0,T1,T2,T3,T4)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<R(T0,T1,T2,T3,T4)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=5) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 					typename TypeInfoRetriver<T4>::TempValueType p4;
+					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments->Get(4), p4, 0, L"p4");
+ 
+					R result =  function(p0,p1,p2,p3,p4);
+					return BoxParameter<R>(result);
+				}
+			};
+ 
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4>
+			struct ParameterAccessor<Func<R(T0,T1,T2,T3,T4)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<R(T0,T1,T2,T3,T4)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3,T4);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<R(T0,T1,T2,T3,T4)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3,T4);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 								arguments->Add(description::BoxParameter<T4>(p4));
+ 
+								TypeInfoRetriver<R>::TempValueType proxyResult;description::UnboxParameter<R>(functionProxy->Invoke(arguments),proxyResult);return proxyResult;
+							};
+						}
+					}
+				}
+			};
+  
+/***********************************************************************
+Parameter Accessor: void(T0,T1,T2,T3,T4,T5)
+***********************************************************************/
+			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
+			class ValueFunctionProxyWrapper<void(T0,T1,T2,T3,T4,T5)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<void(T0,T1,T2,T3,T4,T5)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=6) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 					typename TypeInfoRetriver<T4>::TempValueType p4;
+					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments->Get(4), p4, 0, L"p4");
+ 					typename TypeInfoRetriver<T5>::TempValueType p5;
+					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments->Get(5), p5, 0, L"p5");
+ 
+					  function(p0,p1,p2,p3,p4,p5);
+					return Value();
+				}
+			};
+ 
+			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
+			struct ParameterAccessor<Func<void(T0,T1,T2,T3,T4,T5)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<void(T0,T1,T2,T3,T4,T5)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3,T4,T5);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<void(T0,T1,T2,T3,T4,T5)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3,T4,T5);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 								arguments->Add(description::BoxParameter<T4>(p4));
+ 								arguments->Add(description::BoxParameter<T5>(p5));
+ 
+								functionProxy->Invoke(arguments);
+							};
+						}
+					}
+				}
+			};
+/***********************************************************************
+Parameter Accessor: R(T0,T1,T2,T3,T4,T5)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
+			class ValueFunctionProxyWrapper<R(T0,T1,T2,T3,T4,T5)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<R(T0,T1,T2,T3,T4,T5)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=6) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 					typename TypeInfoRetriver<T4>::TempValueType p4;
+					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments->Get(4), p4, 0, L"p4");
+ 					typename TypeInfoRetriver<T5>::TempValueType p5;
+					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments->Get(5), p5, 0, L"p5");
+ 
+					R result =  function(p0,p1,p2,p3,p4,p5);
+					return BoxParameter<R>(result);
+				}
+			};
+ 
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5>
+			struct ParameterAccessor<Func<R(T0,T1,T2,T3,T4,T5)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<R(T0,T1,T2,T3,T4,T5)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3,T4,T5);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<R(T0,T1,T2,T3,T4,T5)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3,T4,T5);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 								arguments->Add(description::BoxParameter<T4>(p4));
+ 								arguments->Add(description::BoxParameter<T5>(p5));
+ 
+								TypeInfoRetriver<R>::TempValueType proxyResult;description::UnboxParameter<R>(functionProxy->Invoke(arguments),proxyResult);return proxyResult;
+							};
+						}
+					}
+				}
+			};
+  
+/***********************************************************************
+Parameter Accessor: void(T0,T1,T2,T3,T4,T5,T6)
+***********************************************************************/
+			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
+			class ValueFunctionProxyWrapper<void(T0,T1,T2,T3,T4,T5,T6)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<void(T0,T1,T2,T3,T4,T5,T6)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=7) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 					typename TypeInfoRetriver<T4>::TempValueType p4;
+					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments->Get(4), p4, 0, L"p4");
+ 					typename TypeInfoRetriver<T5>::TempValueType p5;
+					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments->Get(5), p5, 0, L"p5");
+ 					typename TypeInfoRetriver<T6>::TempValueType p6;
+					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments->Get(6), p6, 0, L"p6");
+ 
+					  function(p0,p1,p2,p3,p4,p5,p6);
+					return Value();
+				}
+			};
+ 
+			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
+			struct ParameterAccessor<Func<void(T0,T1,T2,T3,T4,T5,T6)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<void(T0,T1,T2,T3,T4,T5,T6)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<void(T0,T1,T2,T3,T4,T5,T6)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 								arguments->Add(description::BoxParameter<T4>(p4));
+ 								arguments->Add(description::BoxParameter<T5>(p5));
+ 								arguments->Add(description::BoxParameter<T6>(p6));
+ 
+								functionProxy->Invoke(arguments);
+							};
+						}
+					}
+				}
+			};
+/***********************************************************************
+Parameter Accessor: R(T0,T1,T2,T3,T4,T5,T6)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
+			class ValueFunctionProxyWrapper<R(T0,T1,T2,T3,T4,T5,T6)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<R(T0,T1,T2,T3,T4,T5,T6)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=7) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 					typename TypeInfoRetriver<T4>::TempValueType p4;
+					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments->Get(4), p4, 0, L"p4");
+ 					typename TypeInfoRetriver<T5>::TempValueType p5;
+					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments->Get(5), p5, 0, L"p5");
+ 					typename TypeInfoRetriver<T6>::TempValueType p6;
+					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments->Get(6), p6, 0, L"p6");
+ 
+					R result =  function(p0,p1,p2,p3,p4,p5,p6);
+					return BoxParameter<R>(result);
+				}
+			};
+ 
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
+			struct ParameterAccessor<Func<R(T0,T1,T2,T3,T4,T5,T6)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<R(T0,T1,T2,T3,T4,T5,T6)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<R(T0,T1,T2,T3,T4,T5,T6)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 								arguments->Add(description::BoxParameter<T4>(p4));
+ 								arguments->Add(description::BoxParameter<T5>(p5));
+ 								arguments->Add(description::BoxParameter<T6>(p6));
+ 
+								TypeInfoRetriver<R>::TempValueType proxyResult;description::UnboxParameter<R>(functionProxy->Invoke(arguments),proxyResult);return proxyResult;
+							};
+						}
+					}
+				}
+			};
+  
+/***********************************************************************
+Parameter Accessor: void(T0,T1,T2,T3,T4,T5,T6,T7)
+***********************************************************************/
+			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
+			class ValueFunctionProxyWrapper<void(T0,T1,T2,T3,T4,T5,T6,T7)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=8) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 					typename TypeInfoRetriver<T4>::TempValueType p4;
+					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments->Get(4), p4, 0, L"p4");
+ 					typename TypeInfoRetriver<T5>::TempValueType p5;
+					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments->Get(5), p5, 0, L"p5");
+ 					typename TypeInfoRetriver<T6>::TempValueType p6;
+					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments->Get(6), p6, 0, L"p6");
+ 					typename TypeInfoRetriver<T7>::TempValueType p7;
+					UnboxParameter<typename TypeInfoRetriver<T7>::TempValueType>(arguments->Get(7), p7, 0, L"p7");
+ 
+					  function(p0,p1,p2,p3,p4,p5,p6,p7);
+					return Value();
+				}
+			};
+ 
+			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
+			struct ParameterAccessor<Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6,T7);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<void(T0,T1,T2,T3,T4,T5,T6,T7)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6,T7);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 								arguments->Add(description::BoxParameter<T4>(p4));
+ 								arguments->Add(description::BoxParameter<T5>(p5));
+ 								arguments->Add(description::BoxParameter<T6>(p6));
+ 								arguments->Add(description::BoxParameter<T7>(p7));
+ 
+								functionProxy->Invoke(arguments);
+							};
+						}
+					}
+				}
+			};
+/***********************************************************************
+Parameter Accessor: R(T0,T1,T2,T3,T4,T5,T6,T7)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
+			class ValueFunctionProxyWrapper<R(T0,T1,T2,T3,T4,T5,T6,T7)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=8) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 					typename TypeInfoRetriver<T4>::TempValueType p4;
+					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments->Get(4), p4, 0, L"p4");
+ 					typename TypeInfoRetriver<T5>::TempValueType p5;
+					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments->Get(5), p5, 0, L"p5");
+ 					typename TypeInfoRetriver<T6>::TempValueType p6;
+					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments->Get(6), p6, 0, L"p6");
+ 					typename TypeInfoRetriver<T7>::TempValueType p7;
+					UnboxParameter<typename TypeInfoRetriver<T7>::TempValueType>(arguments->Get(7), p7, 0, L"p7");
+ 
+					R result =  function(p0,p1,p2,p3,p4,p5,p6,p7);
+					return BoxParameter<R>(result);
+				}
+			};
+ 
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7>
+			struct ParameterAccessor<Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6,T7);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<R(T0,T1,T2,T3,T4,T5,T6,T7)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6,T7);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 								arguments->Add(description::BoxParameter<T4>(p4));
+ 								arguments->Add(description::BoxParameter<T5>(p5));
+ 								arguments->Add(description::BoxParameter<T6>(p6));
+ 								arguments->Add(description::BoxParameter<T7>(p7));
+ 
+								TypeInfoRetriver<R>::TempValueType proxyResult;description::UnboxParameter<R>(functionProxy->Invoke(arguments),proxyResult);return proxyResult;
+							};
+						}
+					}
+				}
+			};
+  
+/***********************************************************************
+Parameter Accessor: void(T0,T1,T2,T3,T4,T5,T6,T7,T8)
+***********************************************************************/
+			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
+			class ValueFunctionProxyWrapper<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=9) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 					typename TypeInfoRetriver<T4>::TempValueType p4;
+					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments->Get(4), p4, 0, L"p4");
+ 					typename TypeInfoRetriver<T5>::TempValueType p5;
+					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments->Get(5), p5, 0, L"p5");
+ 					typename TypeInfoRetriver<T6>::TempValueType p6;
+					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments->Get(6), p6, 0, L"p6");
+ 					typename TypeInfoRetriver<T7>::TempValueType p7;
+					UnboxParameter<typename TypeInfoRetriver<T7>::TempValueType>(arguments->Get(7), p7, 0, L"p7");
+ 					typename TypeInfoRetriver<T8>::TempValueType p8;
+					UnboxParameter<typename TypeInfoRetriver<T8>::TempValueType>(arguments->Get(8), p8, 0, L"p8");
+ 
+					  function(p0,p1,p2,p3,p4,p5,p6,p7,p8);
+					return Value();
+				}
+			};
+ 
+			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
+			struct ParameterAccessor<Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 								arguments->Add(description::BoxParameter<T4>(p4));
+ 								arguments->Add(description::BoxParameter<T5>(p5));
+ 								arguments->Add(description::BoxParameter<T6>(p6));
+ 								arguments->Add(description::BoxParameter<T7>(p7));
+ 								arguments->Add(description::BoxParameter<T8>(p8));
+ 
+								functionProxy->Invoke(arguments);
+							};
+						}
+					}
+				}
+			};
+/***********************************************************************
+Parameter Accessor: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
+			class ValueFunctionProxyWrapper<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=9) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 					typename TypeInfoRetriver<T4>::TempValueType p4;
+					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments->Get(4), p4, 0, L"p4");
+ 					typename TypeInfoRetriver<T5>::TempValueType p5;
+					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments->Get(5), p5, 0, L"p5");
+ 					typename TypeInfoRetriver<T6>::TempValueType p6;
+					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments->Get(6), p6, 0, L"p6");
+ 					typename TypeInfoRetriver<T7>::TempValueType p7;
+					UnboxParameter<typename TypeInfoRetriver<T7>::TempValueType>(arguments->Get(7), p7, 0, L"p7");
+ 					typename TypeInfoRetriver<T8>::TempValueType p8;
+					UnboxParameter<typename TypeInfoRetriver<T8>::TempValueType>(arguments->Get(8), p8, 0, L"p8");
+ 
+					R result =  function(p0,p1,p2,p3,p4,p5,p6,p7,p8);
+					return BoxParameter<R>(result);
+				}
+			};
+ 
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8>
+			struct ParameterAccessor<Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6,T7,T8);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 								arguments->Add(description::BoxParameter<T4>(p4));
+ 								arguments->Add(description::BoxParameter<T5>(p5));
+ 								arguments->Add(description::BoxParameter<T6>(p6));
+ 								arguments->Add(description::BoxParameter<T7>(p7));
+ 								arguments->Add(description::BoxParameter<T8>(p8));
+ 
+								TypeInfoRetriver<R>::TempValueType proxyResult;description::UnboxParameter<R>(functionProxy->Invoke(arguments),proxyResult);return proxyResult;
+							};
+						}
+					}
+				}
+			};
+  
+/***********************************************************************
+Parameter Accessor: void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
+***********************************************************************/
+			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
+			class ValueFunctionProxyWrapper<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=10) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 					typename TypeInfoRetriver<T4>::TempValueType p4;
+					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments->Get(4), p4, 0, L"p4");
+ 					typename TypeInfoRetriver<T5>::TempValueType p5;
+					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments->Get(5), p5, 0, L"p5");
+ 					typename TypeInfoRetriver<T6>::TempValueType p6;
+					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments->Get(6), p6, 0, L"p6");
+ 					typename TypeInfoRetriver<T7>::TempValueType p7;
+					UnboxParameter<typename TypeInfoRetriver<T7>::TempValueType>(arguments->Get(7), p7, 0, L"p7");
+ 					typename TypeInfoRetriver<T8>::TempValueType p8;
+					UnboxParameter<typename TypeInfoRetriver<T8>::TempValueType>(arguments->Get(8), p8, 0, L"p8");
+ 					typename TypeInfoRetriver<T9>::TempValueType p9;
+					UnboxParameter<typename TypeInfoRetriver<T9>::TempValueType>(arguments->Get(9), p9, 0, L"p9");
+ 
+					  function(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
+					return Value();
+				}
+			};
+ 
+			template< typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
+			struct ParameterAccessor<Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef void(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8,T9 p9)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 								arguments->Add(description::BoxParameter<T4>(p4));
+ 								arguments->Add(description::BoxParameter<T5>(p5));
+ 								arguments->Add(description::BoxParameter<T6>(p6));
+ 								arguments->Add(description::BoxParameter<T7>(p7));
+ 								arguments->Add(description::BoxParameter<T8>(p8));
+ 								arguments->Add(description::BoxParameter<T9>(p9));
+ 
+								functionProxy->Invoke(arguments);
+							};
+						}
+					}
+				}
+			};
+/***********************************************************************
+Parameter Accessor: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
+***********************************************************************/
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
+			class ValueFunctionProxyWrapper<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)> : public Object, public virtual IValueFunctionProxy
+			{
+				typedef Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>					FunctionType;
+			protected:
+				FunctionType			function;
+			public:
+				ValueFunctionProxyWrapper(const FunctionType& _function)
+					:function(_function)
+				{
+				}
+ 
+				FunctionType GetFunction()
+				{
+					return function;
+				}
+ 
+				Value Invoke(Ptr<IValueList> arguments)override
+				{
+					if(!arguments || arguments->Count()!=10) throw ArgumentCountMismtatchException();
+					typename TypeInfoRetriver<T0>::TempValueType p0;
+					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
+ 					typename TypeInfoRetriver<T1>::TempValueType p1;
+					UnboxParameter<typename TypeInfoRetriver<T1>::TempValueType>(arguments->Get(1), p1, 0, L"p1");
+ 					typename TypeInfoRetriver<T2>::TempValueType p2;
+					UnboxParameter<typename TypeInfoRetriver<T2>::TempValueType>(arguments->Get(2), p2, 0, L"p2");
+ 					typename TypeInfoRetriver<T3>::TempValueType p3;
+					UnboxParameter<typename TypeInfoRetriver<T3>::TempValueType>(arguments->Get(3), p3, 0, L"p3");
+ 					typename TypeInfoRetriver<T4>::TempValueType p4;
+					UnboxParameter<typename TypeInfoRetriver<T4>::TempValueType>(arguments->Get(4), p4, 0, L"p4");
+ 					typename TypeInfoRetriver<T5>::TempValueType p5;
+					UnboxParameter<typename TypeInfoRetriver<T5>::TempValueType>(arguments->Get(5), p5, 0, L"p5");
+ 					typename TypeInfoRetriver<T6>::TempValueType p6;
+					UnboxParameter<typename TypeInfoRetriver<T6>::TempValueType>(arguments->Get(6), p6, 0, L"p6");
+ 					typename TypeInfoRetriver<T7>::TempValueType p7;
+					UnboxParameter<typename TypeInfoRetriver<T7>::TempValueType>(arguments->Get(7), p7, 0, L"p7");
+ 					typename TypeInfoRetriver<T8>::TempValueType p8;
+					UnboxParameter<typename TypeInfoRetriver<T8>::TempValueType>(arguments->Get(8), p8, 0, L"p8");
+ 					typename TypeInfoRetriver<T9>::TempValueType p9;
+					UnboxParameter<typename TypeInfoRetriver<T9>::TempValueType>(arguments->Get(9), p9, 0, L"p9");
+ 
+					R result =  function(p0,p1,p2,p3,p4,p5,p6,p7,p8,p9);
+					return BoxParameter<R>(result);
+				}
+			};
+ 
+			template<typename R,typename T0,typename T1,typename T2,typename T3,typename T4,typename T5,typename T6,typename T7,typename T8,typename T9>
+			struct ParameterAccessor<Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>, TypeFlags::FunctionType>
+			{
+				static Value BoxParameter(const Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>& object, ITypeDescriptor* typeDescriptor)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
+					Ptr<IValueFunctionProxy> result=new ValueFunctionProxyWrapper<RawFunctionType>(object);
+					return BoxValue<Ptr<IValueFunctionProxy>>(result, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor());
+				}
+ 
+				static void UnboxParameter(const Value& value, Func<R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef R(RawFunctionType)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9);
+					typedef ValueFunctionProxyWrapper<RawFunctionType> ProxyType;
+					Ptr<IValueFunctionProxy> functionProxy=UnboxValue<Ptr<IValueFunctionProxy>>(value, typeDescriptor, valueName);
+					if(functionProxy)
+					{
+						if(Ptr<ProxyType> proxy=functionProxy.Cast<ProxyType>())
+						{
+							result=proxy->GetFunction();
+						}
+						else
+						{
+							result=[functionProxy](T0 p0,T1 p1,T2 p2,T3 p3,T4 p4,T5 p5,T6 p6,T7 p7,T8 p8,T9 p9)
+							{
+								 
+								Ptr<IValueList> arguments=IValueList::Create();
+								arguments->Add(description::BoxParameter<T0>(p0));
+ 								arguments->Add(description::BoxParameter<T1>(p1));
+ 								arguments->Add(description::BoxParameter<T2>(p2));
+ 								arguments->Add(description::BoxParameter<T3>(p3));
+ 								arguments->Add(description::BoxParameter<T4>(p4));
+ 								arguments->Add(description::BoxParameter<T5>(p5));
+ 								arguments->Add(description::BoxParameter<T6>(p6));
+ 								arguments->Add(description::BoxParameter<T7>(p7));
+ 								arguments->Add(description::BoxParameter<T8>(p8));
+ 								arguments->Add(description::BoxParameter<T9>(p9));
+ 
+								TypeInfoRetriver<R>::TempValueType proxyResult;description::UnboxParameter<R>(functionProxy->Invoke(arguments),proxyResult);return proxyResult;
+							};
+						}
+					}
+				}
+			};
+ 
+ 
+/***********************************************************************
+Parameter Accessor: const function
+***********************************************************************/
+			template<typename T>
+			struct ParameterAccessor<const T, TypeFlags::ListType> : public ParameterAccessor<T, TypeFlags::ListType>
+			{
+			};
 		}
 	}
 }
