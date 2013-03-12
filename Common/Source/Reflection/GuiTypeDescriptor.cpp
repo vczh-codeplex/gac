@@ -717,7 +717,7 @@ LogTypeManager (class)
 				{
 					printed=true;
 					IEventInfo* info=type->GetEvent(j);
-					writer.WriteString(L"    event "+info->GetName()+L"{");
+					writer.WriteString(L"    event "+info->GetHandlerType()->GetTypeFriendlyName()+L" "+info->GetName()+L"{");
 					if(info->GetObservingPropertyCount()>0)
 					{
 						writer.WriteString(L" observing ");

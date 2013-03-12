@@ -461,6 +461,7 @@ ITypeDescriptor (event)
 			class IEventInfo : public IMemberInfo
 			{
 			public:
+				virtual ITypeInfo*				GetHandlerType()=0;
 				virtual vint					GetObservingPropertyCount()=0;
 				virtual IPropertyInfo*			GetObservingProperty(vint index)=0;
 				virtual Ptr<IEventHandler>		Attach(const Value& thisObject, Ptr<IValueFunctionProxy> handler)=0;
