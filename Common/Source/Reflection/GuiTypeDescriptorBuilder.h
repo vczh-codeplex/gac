@@ -292,6 +292,7 @@ TypeFlagSelector
 			{
 				struct ReadonlyListType{};
 				struct ListType{};
+				struct FunctionType{};
 				struct NonGenericType{};
 			};
 
@@ -329,26 +330,43 @@ TypeFlagSelector
 				static const bool										Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*);
 			};
 
-			template<typename T, bool IsEnumerable, bool IsConstEnumerable>
+			template<typename TDerived>
+			struct IsInheritsFromFunction
+			{
+				template<typename T>
+				static void* Inherit(Func<T>* source){}
+				static char Inherit(void* source){}
+				static char Inherit(const void* source){}
+
+				static const bool										Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*);
+			};
+
+			template<typename T, bool IsEnumerable, bool IsConstEnumerable, bool IsFunction>
 			struct TypeFlagSelectorCase
 			{
 				typedef int												TypeFlag;
 			};
 
 			template<typename T>
-			struct TypeFlagSelectorCase<T, true, true>
+			struct TypeFlagSelectorCase<T, true, true, false>
 			{
 				typedef TypeFlags::ListType								TypeFlag;
 			};
 
 			template<typename T>
-			struct TypeFlagSelectorCase<T, false, true>
+			struct TypeFlagSelectorCase<T, false, true, false>
 			{
 				typedef TypeFlags::ReadonlyListType						TypeFlag;
 			};
 
 			template<typename T>
-			struct TypeFlagSelectorCase<T, false, false>
+			struct TypeFlagSelectorCase<T, false, false, true>
+			{
+				typedef TypeFlags::FunctionType							TypeFlag;
+			};
+
+			template<typename T>
+			struct TypeFlagSelectorCase<T, false, false, false>
 			{
 				typedef TypeFlags::NonGenericType						TypeFlag;
 			};
@@ -359,7 +377,8 @@ TypeFlagSelector
 				typedef typename TypeFlagSelectorCase<
 					T,
 					IsInheritsFromEnumerable<T>::Result,
-					IsInheritsFromConstEnumerable<T>::Result
+					IsInheritsFromConstEnumerable<T>::Result,
+					IsInheritsFromFunction<T>::Result
 					>::TypeFlag											TypeFlag;
 			};
 
@@ -692,7 +711,7 @@ TypeInfoRetriver Helper Functions (UnboxParameter)
 			template<typename T>
 			struct ParameterAccessor<T, TypeFlags::NonGenericType>
 			{
-				static Value BoxParameter(T& object, ITypeDescriptor* typeDescriptor)
+				static Value BoxParameter(const T& object, ITypeDescriptor* typeDescriptor)
 				{
 					return BoxValue<T>(object, typeDescriptor);
 				}

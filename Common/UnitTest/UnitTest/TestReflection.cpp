@@ -339,6 +339,11 @@ namespace test
 				.Select([](const Ptr<Base>& base){return base->a;})
 				.Aggregate(0, [](int a, int b){return a+b;});
 		}
+
+		Func<int(int)> Sum3(Func<int(int)> f1, Func<int(int)> f2)
+		{
+			return [=](int i){return f1(i)+f2(i);};
+		}
 	};
 }
 using namespace test;
@@ -430,6 +435,7 @@ BEGIN_TYPE_INFO_NAMESPACE
 		CLASS_MEMBER_CONSTRUCTOR(Ptr<BaseSummer>(), NO_PARAMETER)
 		CLASS_MEMBER_METHOD(Sum, NO_PARAMETER)
 		CLASS_MEMBER_METHOD(Sum2, NO_PARAMETER)
+		CLASS_MEMBER_METHOD(Sum3, {L"f1" _ L"f2"})
 		CLASS_MEMBER_METHOD(GetBases, NO_PARAMETER)
 		CLASS_MEMBER_METHOD(SetBases, {L"bases"})
 		CLASS_MEMBER_METHOD(GetBases2, NO_PARAMETER)
@@ -678,6 +684,15 @@ TEST_CASE(TestReflectionList)
 		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 1)).GetProperty(L"a"))==2);
 		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 2)).GetProperty(L"a"))==3);
 		TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 3)).GetProperty(L"a"))==4);
+	}
+	{
+		Value baseSummer=Value::Create(L"test::BaseSummer");
+		Value f1=BoxParameter<Func<int(int)>>(LAMBDA([](int i){return i+1;}));
+		Value f2=BoxParameter<Func<int(int)>>(LAMBDA([](int i){return i+2;}));
+		Value f=baseSummer.Invoke(L"Sum3", (Value::xs(), f1, f2));
+		Func<int(int)> fx;
+		UnboxParameter<Func<int(int)>>(f, fx);
+		TEST_ASSERT(fx(10)==23);
 	}
 	TEST_ASSERT(ResetGlobalTypeManager());
 }
