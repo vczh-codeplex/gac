@@ -64,4 +64,17 @@ using namespace test;
 
 void GuiMain()
 {
+	Value currentTheme=Value::InvokeStatic(L"presentation::theme::ITheme", L"GetCurrentTheme");
+	Value windowStyle=currentTheme.Invoke(L"CreateWindowStyle");
+	Value window=Value::Create(L"presentation::controls::GuiWindow", (Value::xs(), windowStyle));
+
+	Value clientSize=Value::From(L"x:320 y:240", GetTypeDescriptor(L"presentation::Size"));
+	window.SetProperty(L"Text", WString(L"Window By Reflection!"));
+	window.SetProperty(L"ClientSize", clientSize);
+	window.GetProperty(L"ContainerComposition").SetProperty(L"PreferredMinSize", clientSize);
+	window.Invoke(L"MoveToScreenCenter");
+
+	Value application=Value::InvokeStatic(L"presentation::controls::GuiApplication", L"GetApplication");
+	application.Invoke(L"Run", (Value::xs(), window));
+	window.DeleteRawPtr();
 }
