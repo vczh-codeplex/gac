@@ -439,7 +439,7 @@ Member Method: void()
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(__thiscall TClass::* _method)())
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 
@@ -460,7 +460,7 @@ Member Method: void()
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], void(*_method)(TClass*))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 
@@ -538,7 +538,7 @@ Member Method: void(T0)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(__thiscall TClass::* _method)(T0))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -562,7 +562,7 @@ Member Method: void(T0)
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], void(*_method)(TClass*, T0))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -649,7 +649,7 @@ Member Method: void(T0,T1)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(__thiscall TClass::* _method)(T0,T1))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -676,7 +676,7 @@ Member Method: void(T0,T1)
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], void(*_method)(TClass*, T0, T1))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -772,7 +772,7 @@ Member Method: void(T0,T1,T2)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(__thiscall TClass::* _method)(T0,T1,T2))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -802,7 +802,7 @@ Member Method: void(T0,T1,T2)
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], void(*_method)(TClass*, T0, T1, T2))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -907,7 +907,7 @@ Member Method: void(T0,T1,T2,T3)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(__thiscall TClass::* _method)(T0,T1,T2,T3))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -940,7 +940,7 @@ Member Method: void(T0,T1,T2,T3)
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], void(*_method)(TClass*, T0, T1, T2, T3))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -1054,7 +1054,7 @@ Member Method: void(T0,T1,T2,T3,T4)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(__thiscall TClass::* _method)(T0,T1,T2,T3,T4))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -1090,7 +1090,7 @@ Member Method: void(T0,T1,T2,T3,T4)
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], void(*_method)(TClass*, T0, T1, T2, T3, T4))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -1213,7 +1213,7 @@ Member Method: void(T0,T1,T2,T3,T4,T5)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(__thiscall TClass::* _method)(T0,T1,T2,T3,T4,T5))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -1252,7 +1252,7 @@ Member Method: void(T0,T1,T2,T3,T4,T5)
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], void(*_method)(TClass*, T0, T1, T2, T3, T4, T5))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -1384,7 +1384,7 @@ Member Method: void(T0,T1,T2,T3,T4,T5,T6)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(__thiscall TClass::* _method)(T0,T1,T2,T3,T4,T5,T6))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -1426,7 +1426,7 @@ Member Method: void(T0,T1,T2,T3,T4,T5,T6)
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], void(*_method)(TClass*, T0, T1, T2, T3, T4, T5, T6))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -1567,7 +1567,7 @@ Member Method: void(T0,T1,T2,T3,T4,T5,T6,T7)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(__thiscall TClass::* _method)(T0,T1,T2,T3,T4,T5,T6,T7))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -1612,7 +1612,7 @@ Member Method: void(T0,T1,T2,T3,T4,T5,T6,T7)
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], void(*_method)(TClass*, T0, T1, T2, T3, T4, T5, T6, T7))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -1762,7 +1762,7 @@ Member Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(__thiscall TClass::* _method)(T0,T1,T2,T3,T4,T5,T6,T7,T8))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -1810,7 +1810,7 @@ Member Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], void(*_method)(TClass*, T0, T1, T2, T3, T4, T5, T6, T7, T8))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -1969,7 +1969,7 @@ Member Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(__thiscall TClass::* _method)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -2020,7 +2020,7 @@ Member Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], void(*_method)(TClass*, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9))
-					:MethodInfoImpl(0, 0, false)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), false)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -2166,7 +2166,7 @@ Static Method: void()
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(* _method)())
-					:MethodInfoImpl(0, 0, true)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), true)
 					,method(_method)
 				{
 
@@ -2221,7 +2221,7 @@ Static Method: void(T0)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(* _method)(T0))
-					:MethodInfoImpl(0, 0, true)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), true)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -2282,7 +2282,7 @@ Static Method: void(T0,T1)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(* _method)(T0,T1))
-					:MethodInfoImpl(0, 0, true)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), true)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -2349,7 +2349,7 @@ Static Method: void(T0,T1,T2)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(* _method)(T0,T1,T2))
-					:MethodInfoImpl(0, 0, true)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), true)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -2422,7 +2422,7 @@ Static Method: void(T0,T1,T2,T3)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(* _method)(T0,T1,T2,T3))
-					:MethodInfoImpl(0, 0, true)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), true)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -2501,7 +2501,7 @@ Static Method: void(T0,T1,T2,T3,T4)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(* _method)(T0,T1,T2,T3,T4))
-					:MethodInfoImpl(0, 0, true)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), true)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -2586,7 +2586,7 @@ Static Method: void(T0,T1,T2,T3,T4,T5)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(* _method)(T0,T1,T2,T3,T4,T5))
-					:MethodInfoImpl(0, 0, true)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), true)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -2677,7 +2677,7 @@ Static Method: void(T0,T1,T2,T3,T4,T5,T6)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(* _method)(T0,T1,T2,T3,T4,T5,T6))
-					:MethodInfoImpl(0, 0, true)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), true)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -2774,7 +2774,7 @@ Static Method: void(T0,T1,T2,T3,T4,T5,T6,T7)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(* _method)(T0,T1,T2,T3,T4,T5,T6,T7))
-					:MethodInfoImpl(0, 0, true)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), true)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -2877,7 +2877,7 @@ Static Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(* _method)(T0,T1,T2,T3,T4,T5,T6,T7,T8))
-					:MethodInfoImpl(0, 0, true)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), true)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));
@@ -2986,7 +2986,7 @@ Static Method: void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], void(* _method)(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9))
-					:MethodInfoImpl(0, 0, true)
+					:MethodInfoImpl(0, TypeInfoRetriver<void>::CreateTypeInfo(), true)
 					,method(_method)
 				{
 					AddParameter(new ParameterInfoImpl(this, parameterNames[0], TypeInfoRetriver<T0>::CreateTypeInfo()));

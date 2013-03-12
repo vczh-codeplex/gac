@@ -58,7 +58,7 @@ $loop($count,0,$PREPARE_PARAMETER)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], $FUNCTION_DECL($count,$function,__thiscall TClass::* _method))
-					:MethodInfoImpl(0, $if($function,TypeInfoRetriver<R>::CreateTypeInfo(),0), false)
+					:MethodInfoImpl(0, $if($function,TypeInfoRetriver<R>::CreateTypeInfo(),TypeInfoRetriver<void>::CreateTypeInfo()), false)
 					,method(_method)
 				{
 $loop($count,0,$ADD_PARAMETER)
@@ -79,7 +79,7 @@ $loop($count,0,$PREPARE_PARAMETER)
 				}
 			public:
 				ExternalMethodInfoImpl(const wchar_t* parameterNames[], $if($function,R,void)(*_method)(TClass*$loop($count,0,$EXTERNAL_TYPE_ITEM)))
-					:MethodInfoImpl(0, $if($function,TypeInfoRetriver<R>::CreateTypeInfo(),0), false)
+					:MethodInfoImpl(0, $if($function,TypeInfoRetriver<R>::CreateTypeInfo(),TypeInfoRetriver<void>::CreateTypeInfo()), false)
 					,method(_method)
 				{
 $loop($count,0,$ADD_PARAMETER)
@@ -108,7 +108,7 @@ $loop($count,0,$PREPARE_PARAMETER)
 				}
 			public:
 				CustomMethodInfoImpl(const wchar_t* parameterNames[], $FUNCTION_DECL($count,$function,* _method))
-					:MethodInfoImpl(0, $if($function,TypeInfoRetriver<R>::CreateTypeInfo(),0), true)
+					:MethodInfoImpl(0, $if($function,TypeInfoRetriver<R>::CreateTypeInfo(),TypeInfoRetriver<void>::CreateTypeInfo()), true)
 					,method(_method)
 				{
 $loop($count,0,$ADD_PARAMETER)
