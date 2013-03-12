@@ -73,7 +73,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD(IsInMainThread, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(InvokeAsync, {L"proc"})
 				CLASS_MEMBER_METHOD(InvokeInMainThread, {L"proc"})
-				CLASS_MEMBER_METHOD(InvokeInMainThreadAndWait, {L"proc"})
+				CLASS_MEMBER_METHOD(InvokeInMainThreadAndWait, {L"proc" _ L"milliseconds"})
 				CLASS_MEMBER_METHOD(DelayExecute, {L"proc" _ L"milliseconds"})
 				CLASS_MEMBER_METHOD(DelayExecuteInMainThread, {L"proc" _ L"milliseconds"})
 			END_CLASS_MEMBER(GuiApplication)
