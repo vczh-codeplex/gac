@@ -385,6 +385,18 @@ description::Value
 				return method->Invoke(*this, arguments);
 			}
 
+			Ptr<IEventHandler> Value::AttachEvent(const WString& name, const Value& function)const
+			{
+				ITypeDescriptor* type=GetTypeDescriptor();
+				if(!type) throw ArgumentNullException(L"thisObject");
+
+				IEventInfo* eventInfo=type->GetEventByName(name, true);
+				if(!eventInfo) throw MemberNotExistsException(name);
+
+				Ptr<IValueFunctionProxy> proxy=UnboxValue<Ptr<IValueFunctionProxy>>(function, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor(), L"function");
+				return eventInfo->Attach(*this, proxy);
+			}
+
 			bool Value::DeleteRawPtr()
 			{
 				if(valueType!=RawPtr) return false;
