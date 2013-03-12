@@ -678,6 +678,16 @@ GuiPolygonElement
 				}
 			}
 
+			const GuiPolygonElement::PointArray& GuiPolygonElement::GetPointsArray()
+			{
+				return points;
+			}
+
+			void GuiPolygonElement::SetPointsArray(const PointArray& value)
+			{
+				CopyFrom(points, value);
+			}
+
 			Color GuiPolygonElement::GetBorderColor()
 			{
 				return borderColor;

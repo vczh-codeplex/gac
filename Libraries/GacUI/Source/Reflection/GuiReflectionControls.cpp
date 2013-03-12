@@ -21,16 +21,6 @@ namespace vl
 External Functions
 ***********************************************************************/
 
-			Ptr<IValueReadonlyList> GuiTab_GetPages(GuiTab* thisObject)
-			{
-				return new ValueReadonlyListWrapper<const List<GuiTabPage*>*>(&thisObject->GetPages());
-			}
-
-			Ptr<IValueReadonlyList> GuiApplication_GetWindows(GuiApplication* thisObject)
-			{
-				return new ValueReadonlyListWrapper<const List<GuiWindow*>*>(&thisObject->GetWindows());
-			}
-
 			void GuiApplication_InvokeAsync(GuiApplication* thisObject, Ptr<IValueFunctionProxy> proc)
 			{
 				thisObject->InvokeAsync([=]()
@@ -71,24 +61,9 @@ External Functions
 				}, milliseconds);
 			}
 
-			Ptr<IValueReadonlyList> GuiSelectableListControl_GetSelectedItem(GuiSelectableListControl* thisObject)
-			{
-				return new ValueReadonlyListWrapper<const SortedList<vint>*>(&thisObject->GetSelectedItems());
-			}
-
 			TextItemProvider* GuiTextList_GetItemProvider(GuiTextList* thisObject)
 			{
 				return &thisObject->GetItems();
-			}
-
-			Ptr<IValueList> GuiTextList_GetItems(GuiTextList* thisObject)
-			{
-				return new ValueListWrapper<ListProvider<Ptr<TextItem>>*>(&thisObject->GetItems());
-			}
-
-			Ptr<IValueReadonlyList> ListViewItemStyleProvider_GetCreatedItemStyles(ListViewItemStyleProvider* thisObject)
-			{
-				return new ValueReadonlyListWrapper<const List<GuiListControl::IItemStyleController*>*>(&thisObject->GetCreatedItemStyles());
 			}
 
 			ListViewItemStyleProvider::IListViewItemContent* ListViewItemStyleProvider_GetItemContent(ListViewItemStyleProvider* thisObject, GuiListControl::IItemStyleController* itemStyleController)
@@ -96,69 +71,14 @@ External Functions
 				return thisObject->GetItemContent<ListViewItemStyleProvider::IListViewItemContent>(itemStyleController);
 			}
 
-			Ptr<IValueList> ListViewItem_GetSubItems(ListViewItem* thisObject)
+			ListViewDataColumns& GuiListView_GetDataColumns(GuiListView* thisObject)
 			{
-				return new ValueListWrapper<List<WString>*>(&thisObject->subItems);
+				return thisObject->GetItems().GetDataColumns();
 			}
 
-			Ptr<IValueList> GuiListView_GetDataColumns(GuiListView* thisObject)
+			ListViewColumns& GuiListView_GetColumns(GuiListView* thisObject)
 			{
-				return new ValueListWrapper<ListViewDataColumns*>(&thisObject->GetItems().GetDataColumns());
-			}
-
-			Ptr<IValueList> GuiListView_GetColumns(GuiListView* thisObject)
-			{
-				return new ValueListWrapper<ListViewColumns*>(&thisObject->GetItems().GetColumns());
-			}
-
-			Ptr<IValueList> GuiListView_GetItems(GuiListView* thisObject)
-			{
-				return new ValueListWrapper<ListViewItemProvider*>(&thisObject->GetItems());
-			}
-
-			Ptr<IValueList> MemoryNodeProvider_GetChildren(MemoryNodeProvider* thisObject)
-			{
-				return new ValueListWrapper<MemoryNodeProvider::NodeCollection*>(&thisObject->Children());
-			}
-
-			Ptr<TreeViewItemRootProvider> GuiTreeView_GetNodes(GuiTreeView* thisObject)
-			{
-				return thisObject->Nodes();
-			}
-
-			Ptr<IValueList> GuiToolstripMenu_GetToolstripItems(GuiToolstripMenu* thisObject)
-			{
-				return new ValueListWrapper<GuiToolstripCollection*>(&thisObject->GetToolstripItems());
-			}
-
-			Ptr<IValueList> GuiToolstripMenuBar_GetToolstripItems(GuiToolstripMenuBar* thisObject)
-			{
-				return new ValueListWrapper<GuiToolstripCollection*>(&thisObject->GetToolstripItems());
-			}
-
-			Ptr<IValueList> GuiToolstripToolbar_GetToolstripItems(GuiToolstripToolbar* thisObject)
-			{
-				return new ValueListWrapper<GuiToolstripCollection*>(&thisObject->GetToolstripItems());
-			}
-
-			Ptr<IValueReadonlyList> GuiTextBoxColorizerBase_GetColors(GuiTextBoxColorizerBase* thisObject)
-			{
-				return new ValueReadonlyListWrapper<const Array<ColorEntry>*>(&thisObject->GetColors());
-			}
-
-			Ptr<IValueList> GuiTextBoxRegexColorizer_GetTokenRegexes(GuiTextBoxRegexColorizer* thisObject)
-			{
-				return new ValueListWrapper<List<WString>*>(&thisObject->GetTokenRegexes());
-			}
-
-			Ptr<IValueList> GuiTextBoxRegexColorizer_GetTokenColors(GuiTextBoxRegexColorizer* thisObject)
-			{
-				return new ValueListWrapper<List<ColorEntry>*>(&thisObject->GetTokenColors());
-			}
-
-			Ptr<IValueList> GuiTextBoxRegexColorizer_GetExtraTokenColors(GuiTextBoxRegexColorizer* thisObject)
-			{
-				return new ValueListWrapper<List<ColorEntry>*>(&thisObject->GetExtraTokenColors());
+				return thisObject->GetItems().GetColumns();
 			}
 
 /***********************************************************************
@@ -186,8 +106,8 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(TooltipOwner)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ExecutablePath)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ExecutableFolder)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Windows)
 
-				CLASS_MEMBER_EXTERNALMETHOD(GetWindows, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiApplication::*)(), &GuiApplication_GetWindows)
 				CLASS_MEMBER_METHOD(ShowTooltip, {L"owner" _ L"tooltip" _ L"preferredContentWidth" _ L"location"})
 				CLASS_MEMBER_METHOD(CloseTooltip, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(IsInMainThread, NO_PARAMETER)
@@ -319,7 +239,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD_OVERLOAD(CreatePage, {L"page" _ L"index"}, bool(GuiTab::*)(GuiTabPage* _ vint))
 				CLASS_MEMBER_METHOD(RemovePage, {L"value"})
 				CLASS_MEMBER_METHOD(MovePage, {L"page" _ L"newIndex"})
-				CLASS_MEMBER_EXTERNALMETHOD(GetPages, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiTab::*)(), &GuiTab_GetPages)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Pages)
 			END_CLASS_MEMBER(GuiTab)
 
 			BEGIN_CLASS_MEMBER(GuiTab::ICommandExecutor)
@@ -558,9 +478,7 @@ Type Declaration
 				CLASS_MEMBER_GUIEVENT(SelectionChanged)
 
 				CLASS_MEMBER_PROPERTY_FAST(MultiSelect)
-
-				CLASS_MEMBER_EXTERNALMETHOD(GetSelectedItems, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiSelectableListControl::*)(), &GuiSelectableListControl_GetSelectedItem)
-				CLASS_MEMBER_PROPERTY_EVENT_READONLY(SelectedItems, GetSelectedItems, SelectionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItems, SelectionChanged)
 
 				CLASS_MEMBER_METHOD(GetSelected, {L"itemIndex"})
 				CLASS_MEMBER_METHOD(SetSelected, {L"itemIndex" _ L"value"})
@@ -685,8 +603,10 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiVirtualTextList)
 				CLASS_MEMBER_CONSTRUCTOR(GuiTextList*(GuiSelectableListControl::IStyleProvider* _ TextItemStyleProvider::ITextItemStyleProvider*), {L"styleProvider" _ L"itemStyleProvider"})
 
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Items)
+
 				CLASS_MEMBER_EXTERNALMETHOD(GetItemProvider, NO_PARAMETER, TextItemProvider*(GuiTextList::*)(), &GuiTextList_GetItemProvider)
-				CLASS_MEMBER_EXTERNALMETHOD(GetItems, NO_PARAMETER, Ptr<IValueList>(GuiTextList::*)(), &GuiTextList_GetItems)
+				CLASS_MEMBER_PROPERTY_READONLY(ItemProvider, GetItemProvider)
 			END_CLASS_MEMBER(GuiTextList)
 
 			BEGIN_CLASS_MEMBER(ListViewItemStyleProviderBase)
@@ -746,8 +666,8 @@ Type Declaration
 				CLASS_MEMBER_BASE(ListViewItemStyleProviderBase)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<ListViewItemStyleProvider>(ListViewItemStyleProvider::IListViewItemContentProvider*), {L"itemContentProvider"})
 
-				CLASS_MEMBER_EXTERNALMETHOD(GetCreatedItemStyles, NO_PARAMETER, Ptr<IValueReadonlyList>(ListViewItemStyleProvider::*)(), &ListViewItemStyleProvider_GetCreatedItemStyles)
-				CLASS_MEMBER_PROPERTY_READONLY(CreatedItemStyles, GetCreatedItemStyles)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CreatedItemStyles)
+
 				CLASS_MEMBER_METHOD(IsItemStyleAttachedToListView, {L"itemStyle"})
 				CLASS_MEMBER_EXTERNALMETHOD(GetItemContent, {L"itemStyleController"}, ListViewItemStyleProvider::IListViewItemContent*(ListViewItemStyleProvider::*)(GuiListControl::IItemStyleController*), &ListViewItemStyleProvider_GetItemContent)
 			END_CLASS_MEMBER(ListViewItemStyleProvider)
@@ -858,9 +778,7 @@ Type Declaration
 				CLASS_MEMBER_FIELD(smallImage)
 				CLASS_MEMBER_FIELD(largeImage)
 				CLASS_MEMBER_FIELD(text)
-
-				CLASS_MEMBER_EXTERNALMETHOD(GetSubItems, NO_PARAMETER, Ptr<IValueList>(ListViewItem::*)(), &ListViewItem_GetSubItems)
-				CLASS_MEMBER_PROPERTY_READONLY(subItems, GetSubItems)
+				CLASS_MEMBER_FIELD(subItems)
 			END_CLASS_MEMBER(ListViewItem)
 
 			BEGIN_CLASS_MEMBER(ListViewColumn)
@@ -885,9 +803,12 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiVirtualListView)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiListView)
 
-				CLASS_MEMBER_EXTERNALMETHOD(GetDataColumns, NO_PARAMETER, Ptr<IValueList>(GuiListView::*)(), &GuiListView_GetDataColumns)
-				CLASS_MEMBER_EXTERNALMETHOD(GetColumns, NO_PARAMETER, Ptr<IValueList>(GuiListView::*)(), &GuiListView_GetColumns)
-				CLASS_MEMBER_EXTERNALMETHOD(GetItems, NO_PARAMETER, Ptr<IValueList>(GuiListView::*)(), &GuiListView_GetItems)
+				CLASS_MEMBER_EXTERNALMETHOD(GetDataColumns, NO_PARAMETER, ListViewDataColumns&(GuiListView::*)(), &GuiListView_GetDataColumns)
+				CLASS_MEMBER_EXTERNALMETHOD(GetColumns, NO_PARAMETER, ListViewColumns&(GuiListView::*)(), &GuiListView_GetColumns)
+
+				CLASS_MEMBER_PROPERTY_READONLY(DataColumns, GetDataColumns)
+				CLASS_MEMBER_PROPERTY_READONLY(Columns, GetColumns)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Items)
 			END_CLASS_MEMBER(GuiListView)
 
 			BEGIN_CLASS_MEMBER(IGuiMenuService)
@@ -1052,10 +973,10 @@ Type Declaration
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<MemoryNodeProvider>(), NO_PARAMETER)
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<MemoryNodeProvider>(Ptr<IMemoryNodeData>), {L"data"})
 
-				CLASS_MEMBER_PROPERTY_FAST(Data);
+				CLASS_MEMBER_PROPERTY_FAST(Data)
 
 				CLASS_MEMBER_METHOD(NotifyDataModified, NO_PARAMETER)
-				CLASS_MEMBER_EXTERNALMETHOD(GetChildren, NO_PARAMETER, Ptr<IValueList>(MemoryNodeProvider::*)(), &MemoryNodeProvider_GetChildren)
+				CLASS_MEMBER_METHOD_RENAME(GetChildren, Children, NO_PARAMETER)
 				CLASS_MEMBER_PROPERTY_READONLY(Children, GetChildren)
 			END_CLASS_MEMBER(MemoryNodeProvider)
 
@@ -1144,7 +1065,7 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiVirtualTreeView)
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiTreeView)
 
-				CLASS_MEMBER_EXTERNALMETHOD(GetNodes, NO_PARAMETER, Ptr<TreeViewItemRootProvider>(GuiTreeView::*)(), &GuiTreeView_GetNodes)
+				CLASS_MEMBER_METHOD_RENAME(GetNodes, Nodes, NO_PARAMETER)
 				CLASS_MEMBER_PROPERTY_READONLY(Nodes, GetNodes)
 			END_CLASS_MEMBER(GuiTreeView)
 
@@ -1213,24 +1134,21 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiMenu)
 				CLASS_MEMBER_CONSTRUCTOR(GuiToolstripMenu*(GuiToolstripMenu::IStyleController* _ GuiControl*), {L"styleController" _ L"owner"})
 
-				CLASS_MEMBER_EXTERNALMETHOD(GetToolstripItems, NO_PARAMETER, Ptr<IValueList>(GuiToolstripMenu::*)(), &GuiToolstripMenu_GetToolstripItems)
-				CLASS_MEMBER_PROPERTY_READONLY(ToolstripItems, GetToolstripItems)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ToolstripItems)
 			END_CLASS_MEMBER(GuiToolstripMenu)
 
 			BEGIN_CLASS_MEMBER(GuiToolstripMenuBar)
 				CLASS_MEMBER_BASE(GuiMenuBar)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiToolstripMenuBar)
-
-				CLASS_MEMBER_EXTERNALMETHOD(GetToolstripItems, NO_PARAMETER, Ptr<IValueList>(GuiToolstripMenuBar::*)(), &GuiToolstripMenuBar_GetToolstripItems)
-				CLASS_MEMBER_PROPERTY_READONLY(ToolstripItems, GetToolstripItems)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ToolstripItems)
 			END_CLASS_MEMBER(GuiToolstripMenuBar)
 
 			BEGIN_CLASS_MEMBER(GuiToolstripToolbar)
 				CLASS_MEMBER_BASE(GuiControl)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiToolstripToolbar)
-
-				CLASS_MEMBER_EXTERNALMETHOD(GetToolstripItems, NO_PARAMETER, Ptr<IValueList>(GuiToolstripToolbar::*)(), &GuiToolstripToolbar_GetToolstripItems)
-				CLASS_MEMBER_PROPERTY_READONLY(ToolstripItems, GetToolstripItems)
+				
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ToolstripItems)
 			END_CLASS_MEMBER(GuiToolstripToolbar)
 
 			BEGIN_CLASS_MEMBER(GuiToolstripButton)
@@ -1308,10 +1226,9 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiTextBoxColorizerBase)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(LexerStartState)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContextStartState)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Colors)
 
 				CLASS_MEMBER_METHOD(RestartColorizer, NO_PARAMETER)
-				CLASS_MEMBER_EXTERNALMETHOD(GetColors, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiTextBoxColorizerBase::*)(), &GuiTextBoxColorizerBase_GetColors)
-				CLASS_MEMBER_PROPERTY_READONLY(Colors, GetColors)
 			END_CLASS_MEMBER(GuiTextBoxColorizerBase)
 
 			BEGIN_CLASS_MEMBER(GuiTextBoxRegexColorizer)
@@ -1320,13 +1237,10 @@ Type Declaration
 
 				CLASS_MEMBER_PROPERTY_FAST(DefaultColor)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ExtraTokenIndexStart)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TokenRegexes)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TokenColors)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ExtraTokenColors)
 
-				CLASS_MEMBER_EXTERNALMETHOD(GetTokenRegexes, NO_PARAMETER, Ptr<IValueList>(GuiTextBoxRegexColorizer::*)(), &GuiTextBoxRegexColorizer_GetTokenRegexes)
-				CLASS_MEMBER_PROPERTY_READONLY(TokenRegexes, GetTokenRegexes)
-				CLASS_MEMBER_EXTERNALMETHOD(GetTokenColors, NO_PARAMETER, Ptr<IValueList>(GuiTextBoxRegexColorizer::*)(), &GuiTextBoxRegexColorizer_GetTokenColors)
-				CLASS_MEMBER_PROPERTY_READONLY(TokenColors, GetTokenColors)
-				CLASS_MEMBER_EXTERNALMETHOD(GetExtraTokenColors, NO_PARAMETER, Ptr<IValueList>(GuiTextBoxRegexColorizer::*)(), &GuiTextBoxRegexColorizer_GetExtraTokenColors)
-				CLASS_MEMBER_PROPERTY_READONLY(ExtraTokenColors, GetExtraTokenColors)
 				CLASS_MEMBER_METHOD(AddToken, {L"regex" _ L"color"})
 				CLASS_MEMBER_METHOD(AddExtraToken, {L"color"})
 				CLASS_MEMBER_METHOD(Setup, NO_PARAMETER)

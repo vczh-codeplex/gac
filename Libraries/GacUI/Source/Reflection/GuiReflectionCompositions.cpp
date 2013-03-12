@@ -18,11 +18,6 @@ namespace vl
 External Functions
 ***********************************************************************/
 
-			Ptr<IValueReadonlyList> GuiStackComposition_GetStackItems(GuiStackComposition* thisObject)
-			{
-				return new ValueReadonlyListWrapper<const List<GuiStackItemComposition*>*>(&thisObject->GetStackItems());
-			}
-
 			void GuiTableComposition_SetRows(GuiTableComposition* thisObject, vint value)
 			{
 				int columns=thisObject->GetColumns();
@@ -50,8 +45,7 @@ Type Declaration
 				CLASS_MEMBER_BASE(GuiBoundsComposition)
 				CLASS_MEMBER_CONSTRUCTOR(GuiStackComposition*(), NO_PARAMETER)
 
-				CLASS_MEMBER_EXTERNALMETHOD(GetStackItems, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiStackComposition::*)(), &GuiStackComposition_GetStackItems)
-				CLASS_MEMBER_PROPERTY_READONLY(StackItems, GetStackItems)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(StackItems)
 
 				CLASS_MEMBER_PROPERTY_FAST(Direction)
 				CLASS_MEMBER_PROPERTY_FAST(Padding)
