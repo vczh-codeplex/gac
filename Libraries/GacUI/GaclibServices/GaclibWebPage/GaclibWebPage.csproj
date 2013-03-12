@@ -169,6 +169,7 @@
     <Content Include="Content\Demos\Controls.TreeView.FileExplorer\Main.cpp" />
     <Content Include="Content\Demos\Demos.Controls.TextBox.AdvancedColorizer.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Tooltip.RichTextAndResource.jpg" />
+    <Content Include="Content\Demos\Demos.Persistant.DirectCode.SimpleWindow.jpg" />
     <Content Include="Content\Demos\Demos.Rendering.TextLayout.RichText.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Button.CheckAndRadio.jpg" />
     <Content Include="Content\Demos\Demos.Controls.Button.EnableDisable.jpg" />
@@ -189,6 +190,9 @@
     <Content Include="Content\Demos\Demos.Rendering.RawAPI.GDI.jpg" />
     <Content Include="Content\Demos\Demos.Template.Window.CustomizedBorder.jpg" />
     <Content Include="Content\Demos\Index.xml" />
+    <Content Include="Content\Demos\Persistant.DirectCode.SimpleWindow\DXGUI_62.jpg" />
+    <Content Include="Content\Demos\Persistant.DirectCode.SimpleWindow\DXGUI_63.jpg" />
+    <Content Include="Content\Demos\Persistant.DirectCode.SimpleWindow\Main.cpp" />
     <Content Include="Content\Demos\Rendering.RawAPI.Direct2D\DXGUI_58.jpg" />
     <Content Include="Content\Demos\Rendering.RawAPI.Direct2D\Main.cpp" />
     <Content Include="Content\Demos\Rendering.RawAPI.GDI\DXGUI_59.jpg" />

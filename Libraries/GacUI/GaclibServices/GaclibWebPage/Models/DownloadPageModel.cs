@@ -12,6 +12,7 @@ namespace GaclibWebPage.Models
         public DownloadPageModel()
         {
             this.Versions = new DownloadVersionUrls[] { 
+                new DownloadVersionUrls{ Version="0.5.0.0", Url="http://gac.codeplex.com/releases/view/103284" },
                 new DownloadVersionUrls{ Version="0.4.3.0", Url="http://gac.codeplex.com/releases/view/100843" },
                 new DownloadVersionUrls{ Version="0.4.2.0", Url="http://gac.codeplex.com/releases/view/100843" },
                 new DownloadVersionUrls{ Version="0.4.1.0", Url="http://gac.codeplex.com/releases/view/98192" },

@@ -28,7 +28,7 @@
         </p>
         <h1 id="CreateProject">Create a Visual C++ Project.</h1>
         <p>
-            We recommend Visual Studio 2012 as the IDE to create a GacUI project. Visual Studio 2010 is ok, maybe you will encounter a compiler error in a COM object that shows a macro is not defined, just delete it.
+            We recommend Visual Studio 2012 as the IDE to create a GacUI project. If you want to use a Visual Studio whose version is lower than 2012, please download Windows SDK 8.0, and use it to compile your GacUI projects.
         </p>
         <p>
             If you don't know how to create a Visual C++ project, please read <a href="http://msdn.microsoft.com/en-us/library/4457htyc.aspx" target="_blank">this MSDN article</a>.
@@ -37,14 +37,15 @@
             After a Visual C++ project is created, add these 5 source files to your project. If you still have trouble getting these files, please read the <a href="@Url.Action("Download")">DOWNLOAD</a> page again.
         </p>
         <ul>
-            <li>GacUIIncludes.h</li>
             <li>GacUI.h</li>
             <li>GacUI.cpp</li>
+            <li>GacUIWindows.h</li>
+            <li>GacUIWindows.cpp</li>
             <li>Vlpp.h</li>
             <li>Vlpp.cpp</li>
         </ul>
         <p>
-            Precompiled headers are recommended to use for a GacUI project. Adding GacUIIncludes.h or GacUI.h to your precompiled headers will speed up the compiling, especially for big projects. Remember disable precompiled headers for GacUI.cpp and Vlpp.cpp, or you have to add #include "stdafx.h" to these 2 cpp files yourself.
+            Precompiled headers are recommended to use for a GacUI project. Adding these header files to your precompiled headers will speed up the compiling, especially for big projects. Remember disable precompiled headers for these cpp files, or you have to add #include "stdafx.h" to these cpp files yourself.
         </p>
         <h1 id="WriteProgram">Write your first GacUI program.</h1>
         <p>
