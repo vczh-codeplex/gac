@@ -556,9 +556,11 @@ Elements
 			class GuiPolygonElement : public Object, public IGuiGraphicsElement, public Description<GuiPolygonElement>
 			{
 				DEFINE_GUI_GRAPHICS_ELEMENT(GuiPolygonElement, L"Polygon");
+
+				typedef collections::Array<Point>			PointArray;
 			protected:
 				Size							size;
-				collections::Array<Point>		points;
+				PointArray						points;
 				Color							borderColor;
 				Color							backgroundColor;
 
@@ -594,6 +596,18 @@ Elements
 				/// <param name="p">A pointer to a buffer that stores all points.</param>
 				/// <param name="index">The number of points.</param>
 				void					SetPoints(const Point* p, vint count);
+
+
+				/// <summary>
+				/// Get all points.
+				/// </summary>
+				/// <returns>All points</returns>
+				const PointArray&		GetPointsArray();
+				/// <summary>
+				/// Set all points.
+				/// </summary>
+				/// <param name="value">All points</param>
+				void					SetPointsArray(const PointArray& value);
 				
 				/// <summary>
 				/// Get the border color.

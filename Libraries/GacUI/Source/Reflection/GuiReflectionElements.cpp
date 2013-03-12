@@ -20,43 +20,6 @@ External Functions
 				return T::Create();
 			}
 
-			Ptr<IValueReadonlyList> GuiPolygonElement_GetPoints(GuiPolygonElement* thisObject)
-			{
-				Ptr<Array<Point>> points=new Array<Point>;
-				CopyFrom(
-					*points.Obj(),
-					Range(0, thisObject->GetPointCount())
-						.Select([=](vint i)->Point{return thisObject->GetPoint(i);})
-					);
-				return new ValueReadonlyListWrapper<Ptr<Array<Point>>>(points);
-			}
-
-			void GuiPolygonElement_SetPoints(GuiPolygonElement* thisObject, Ptr<IValueReadonlyList> value)
-			{
-				Array<Point> points;
-				CopyFrom(points, value->GetLazyList<Point>());
-				if(points.Count()==0)
-				{
-					thisObject->SetPoints(0, 0);
-				}
-				else
-				{
-					thisObject->SetPoints(&points[0], points.Count());
-				}
-			}
-
-			Ptr<IValueReadonlyList> GuiColorizedTextElement_GetColors(GuiColorizedTextElement* thisObject)
-			{
-				return new ValueReadonlyListWrapper<const Array<text::ColorEntry>*>(&thisObject->GetColors());
-			}
-
-			void GuiColorizedTextElement_SetColors(GuiColorizedTextElement* thisObject, Ptr<IValueReadonlyList> value)
-			{
-				Array<text::ColorEntry> colors;
-				CopyFrom(colors, value->GetLazyList<text::ColorEntry>());
-				thisObject->SetColors(colors);
-			}
-
 			text::TextLines* GuiColorizedTextElement_GetLines(GuiColorizedTextElement* thisObject)
 			{
 				return &thisObject->GetLines();
@@ -179,9 +142,8 @@ Type Declaration
 				CLASS_MEMBER_BASE(IGuiGraphicsElement)
 				CLASS_MEMBER_EXTERNALCTOR(Ptr<GuiPolygonElement>(), NO_PARAMETER, &Element_Constructor<GuiPolygonElement>)
 
-				CLASS_MEMBER_EXTERNALMETHOD(GetPoints, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiPolygonElement::*)(), &GuiPolygonElement_GetPoints);
-				CLASS_MEMBER_EXTERNALMETHOD(SetPoints, {L"points"}, void(GuiPolygonElement::*)(Ptr<IValueReadonlyList>), &GuiPolygonElement_SetPoints);
-
+				CLASS_MEMBER_METHOD_RENAME(GetPoints, GetPointsArray, NO_PARAMETER);
+				CLASS_MEMBER_METHOD_RENAME(SetPoints, SetPointsArray, {L"points"});
 				CLASS_MEMBER_PROPERTY(Points, GetPoints, SetPoints);
 				CLASS_MEMBER_PROPERTY_FAST(Size)
 				CLASS_MEMBER_PROPERTY_FAST(BorderColor)
@@ -238,10 +200,8 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_FAST(CaretColor)
 
 				CLASS_MEMBER_EXTERNALMETHOD(GetLines, NO_PARAMETER, text::TextLines*(GuiColorizedTextElement::*)(), &GuiColorizedTextElement_GetLines)
-				CLASS_MEMBER_EXTERNALMETHOD(GetColors, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiColorizedTextElement::*)(), &GuiColorizedTextElement_GetColors)
-				CLASS_MEMBER_EXTERNALMETHOD(SetColors, {L"value"}, void(GuiColorizedTextElement::*)(Ptr<IValueReadonlyList>), &GuiColorizedTextElement_SetColors)
 				CLASS_MEMBER_PROPERTY_READONLY(Lines, GetLines)
-				CLASS_MEMBER_PROPERTY(Colors, GetColors, SetColors)
+				CLASS_MEMBER_PROPERTY_FAST(Colors)
 			END_CLASS_MEMBER(GuiColorizedTextElement)
 
 			BEGIN_CLASS_MEMBER(GuiDocumentElement)

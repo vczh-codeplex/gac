@@ -67,11 +67,6 @@ External Functions
 				return DocumentModel::LoadFromXml(xml, GetFolderPath(path));
 			}
 
-			Ptr<IValueReadonlyList> GuiGraphicsComposition_Children(GuiGraphicsComposition* thisObject)
-			{
-				return new ValueReadonlyListWrapper<const List<GuiGraphicsComposition*>*>(&thisObject->Children());
-			}
-
 /***********************************************************************
 Type Declaration
 ***********************************************************************/
@@ -321,7 +316,7 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(PreferredBounds)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Bounds)
 
-				CLASS_MEMBER_EXTERNALMETHOD(GetChildren, NO_PARAMETER, Ptr<IValueReadonlyList>(GuiGraphicsComposition::*)(), &GuiGraphicsComposition_Children)
+				CLASS_MEMBER_METHOD_RENAME(GetChildren, Children, NO_PARAMETER)
 				CLASS_MEMBER_PROPERTY_READONLY(Children, GetChildren)
 
 				CLASS_MEMBER_METHOD(AddChild, {L"child"})
