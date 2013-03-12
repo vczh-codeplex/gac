@@ -39,27 +39,21 @@
         </p>
         <ul>
             <li>
-                <strong>GacUIIncludes.h (includes memory.h and string.h)</strong>
+                <strong>GacUI.h and GacUI.cpp</strong>
                 <p>
-                    This is the recommended header file to include. This file contains all necessary content to use GacUI. All controls and necessary basic constructions are all in this file.
+                    GacUI.h is the recommended header file to include. This file contains all necessary content to use GacUI. All controls and necessary basic constructions are all in this file.
                 </p>
             </li>
             <li>
-                <strong>GacUI.h (includes Vlpp.h, Windows.h and Direct2D components)</strong>
+                <strong>GacUIWindows.h and GacUIWindows.cpp (includes Windows.h and Direct2D components)</strong>
                 <p>
-                    This is the full featured GacUI header files. The differece between GacUI.h and GacUIIncludes.h is that, GacUI.h contains some extra interfaces that required Windows.h. If GacUI.h is included, Windows.h is included as well. Besides Windows.h, GacUI.h also provides interfaces for accessing internal Direct2D or GDI objects for any GacUI window.
-                </p>
-            </li>
-            <li>
-                <strong>GacUI.cpp</strong>
-                <p>
-                    Implements of GacUI library.
+                    GacUIWindows.h is the full featured GacUI header files. The differece between GacUI.h and GacUIWindows.h is that, GacUIWindows.h contains some extra interfaces that required Windows.h. If GacUIWindows.h is included, Windows.h is included as well. Besides Windows.h, GacUIWindows.h also provides interfaces for accessing internal Direct2D or GDI objects for any GacUI window.
                 </p>
             </li>
             <li>
                 <strong>Vlpp.h and Vlpp.cpp</strong>
                 <p>
-                    This file comes from <a href="http://vlpp.codeplex.com/" target="_blank">http://vlpp.codeplex.com/</a> project, which constructions that encapsulated strings, containers, regex, threading, synchronization and other tools for making C++ development easier.
+                    These files comes from <a href="http://vlpp.codeplex.com/" target="_blank">http://vlpp.codeplex.com/</a> project, which constructions that encapsulated strings, containers, regex, threading, synchronization and other tools for making C++ development easier.
                 </p>
             </li>
         </ul>
@@ -103,7 +97,7 @@
         </ul>
         <h1 id="Demos">Download Demos</h1>
         <p>
-            Source codes of the demos are available in both release and the latest source code. Currently we only have demos in Visual Studio 2012 C++ projects. If you want to use Visual C++ 2010, maybe you will encounter a compiler error in a COM object that shows a macro is not defined, just delete it. GacUI cannot compile with Visual C++ 2008 because the implementation use C++11 features from 0.4.3.0. 
+            Source codes of the demos are available in both release and the latest source code. Currently we only have demos in Visual Studio 2012 C++ projects. If you want to use a Visual Studio whose version is lower than 2012, please download Windows SDK 8.0, and use it to compile your GacUI projects.
         </p>
         <ul>
             <li>

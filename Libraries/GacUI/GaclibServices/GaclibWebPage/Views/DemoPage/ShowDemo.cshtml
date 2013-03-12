@@ -31,6 +31,10 @@
             string fileName = Path.GetFileName(cppName);
             string anchorName = fileName.ToUpper().Replace('.', '_');
             string ext = Path.GetExtension(fileName).Substring(1);
+            if (ext == "h")
+            {
+                ext = "cpp";
+            }
             <strong><a name="@anchorName">@fileName</a></strong>
             <div class="CppCode"><pre class="brush: @ext; gutter: false;">@Model.CppCodes[cppName]</pre></div>
         }
