@@ -12425,6 +12425,7 @@ TypeDescriptorImpl
 
 			bool TypeDescriptorImpl::CanConvertTo(ITypeDescriptor* targetType)
 			{
+				Load();
 				if(this==targetType) return true;
 				for(vint i=0;i<baseTypeDescriptors.Count();i++)
 				{
