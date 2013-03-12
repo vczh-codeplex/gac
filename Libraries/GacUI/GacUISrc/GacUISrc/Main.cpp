@@ -44,24 +44,24 @@ namespace test
 			SetClientSize(Size(440, 280));
 			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			MoveToScreenCenter();
-			{
-				FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
-				BomEncoder encoder(BomEncoder::Utf16);
-				EncoderStream encoderStream(fileStream, encoder);
-				StreamWriter writer(encoderStream);
-				LogTypeManager(writer);
-			}
 		}
 
 		~TestWindow()
 		{
 		}
 	};
+
+	void LogReflection()
+	{
+		FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+		LogTypeManager(writer);
+	}
 }
 using namespace test;
 
 void GuiMain()
 {
-	TestWindow window;
-	GetApplication()->Run(&window);
 }

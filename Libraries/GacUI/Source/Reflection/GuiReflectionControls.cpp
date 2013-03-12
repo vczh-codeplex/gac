@@ -14,12 +14,23 @@ namespace vl
 			using namespace list;
 			using namespace tree;
 			using namespace text;
+			using namespace theme;
 
 			GUIREFLECTIONCONTROLS_TYPELIST(IMPL_TYPE_INFO)
 
 /***********************************************************************
 External Functions
 ***********************************************************************/
+
+			Ptr<ITheme> CreateWin7Theme()
+			{
+				return new win7::Win7Theme();
+			}
+
+			Ptr<ITheme> CreateWin8Theme()
+			{
+				return new win8::Win8Theme();
+			}
 
 			TextItemProvider* GuiTextList_GetItemProvider(GuiTextList* thisObject)
 			{
@@ -67,7 +78,8 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ExecutablePath)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ExecutableFolder)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Windows)
-
+				
+				CLASS_MEMBER_METHOD(Run, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(ShowTooltip, {L"owner" _ L"tooltip" _ L"preferredContentWidth" _ L"location"})
 				CLASS_MEMBER_METHOD(CloseTooltip, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(IsInMainThread, NO_PARAMETER)
@@ -77,6 +89,58 @@ Type Declaration
 				CLASS_MEMBER_METHOD(DelayExecute, {L"proc" _ L"milliseconds"})
 				CLASS_MEMBER_METHOD(DelayExecuteInMainThread, {L"proc" _ L"milliseconds"})
 			END_CLASS_MEMBER(GuiApplication)
+
+			BEGIN_CLASS_MEMBER(ITheme)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetCurrentTheme, NO_PARAMETER, ITheme*(*)(), &GetCurrentTheme)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(SetCurrentTheme, {L"theme"}, void(*)(ITheme*), &SetCurrentTheme)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(CreateWin7Theme, NO_PARAMETER, Ptr<ITheme>(*)(), &CreateWin7Theme)
+				CLASS_MEMBER_STATIC_EXTERNALMETHOD(CreateWin8Theme, NO_PARAMETER, Ptr<ITheme>(*)(), &CreateWin8Theme)
+
+				CLASS_MEMBER_METHOD(CreateWindowStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateTooltipStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateLabelStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateScrollContainerStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateGroupBoxStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateTabStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateComboBoxStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateMultilineTextBoxStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateTextBoxStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetDefaultTextBoxColorEntry, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateDocumentViewerStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateDocumentLabelStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateListViewStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateTreeViewStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateListItemBackgroundStyle, NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD(CreateMenuStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateMenuBarStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateMenuSplitterStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateMenuBarButtonStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateMenuItemButtonStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateToolbarStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateToolbarButtonStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateToolbarDropdownButtonStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateToolbarSplitButtonStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateToolbarSplitterStyle, NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD(CreateButtonStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateCheckBoxStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateRadioButtonStyle, NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD(CreateHScrollStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateVScrollStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateHTrackerStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateVTrackerStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateProgressBarStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetScrollDefaultSize, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateWindowStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetTrackerDefaultSize, NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD(CreateTextListStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateTextListItemStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateCheckTextListItemStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateRadioTextListItemStyle, NO_PARAMETER)
+			END_CLASS_MEMBER(ITheme)
 
 			BEGIN_CLASS_MEMBER(GuiLabel)
 				CLASS_MEMBER_BASE(GuiControl)
