@@ -70,7 +70,10 @@ Attribute
 				if(objectSize<sizeof(T))
 				{
 					objectSize=sizeof(T);
-					typeDescriptor=&associatedTypeDescriptor;
+					if(!typeDescriptor || !*typeDescriptor || associatedTypeDescriptor)
+					{
+						typeDescriptor=&associatedTypeDescriptor;
+					}
 				}
 			}
 
@@ -156,7 +159,7 @@ Value
 				bool							DeleteRawPtr();
 
 				template<typename T>
-				Value SetProperty(const WString& name, const T& newValue)
+				void SetProperty(const WString& name, const T& newValue)
 				{
 					return SetProperty(name, BoxValue<T>(newValue));
 				}
