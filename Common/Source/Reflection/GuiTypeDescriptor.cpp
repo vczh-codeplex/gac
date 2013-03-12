@@ -385,6 +385,15 @@ description::Value
 				return method->Invoke(*this, arguments);
 			}
 
+			bool Value::DeleteRawPtr()
+			{
+				if(valueType!=RawPtr) return false;
+				if(!rawPtr) return false;
+				delete rawPtr;
+				*this=Value();
+				return true;
+			}
+
 /***********************************************************************
 IValueList
 ***********************************************************************/

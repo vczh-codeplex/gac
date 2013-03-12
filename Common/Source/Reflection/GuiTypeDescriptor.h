@@ -153,6 +153,7 @@ Value
 				void							SetProperty(const WString& name, const Value& newValue);
 				Value							Invoke(const WString& name)const;
 				Value							Invoke(const WString& name, collections::Array<Value>& arguments)const;
+				bool							DeleteRawPtr();
 
 				template<typename T>
 				Value SetProperty(const WString& name, const T& newValue)

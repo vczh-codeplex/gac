@@ -25,6 +25,7 @@ Type List
 
 #define GUIREFLECTIONCONTROLS_TYPELIST(F)\
 			F(presentation::controls::GuiApplication)\
+			F(presentation::theme::ITheme)\
 			F(presentation::controls::GuiLabel)\
 			F(presentation::controls::GuiLabel::IStyleController)\
 			F(presentation::controls::GuiButton)\
