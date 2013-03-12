@@ -411,6 +411,15 @@ EventInfoImpl
 				return ownerTypeDescriptor;
 			}
 
+			ITypeInfo* EventInfoImpl::GetHandlerType()
+			{
+				if(!handlerType)
+				{
+					handlerType=GetHandlerTypeInternal();
+				}
+				return handlerType.Obj();
+			}
+
 			vint EventInfoImpl::GetObservingPropertyCount()
 			{
 				return observingProperties.Count();

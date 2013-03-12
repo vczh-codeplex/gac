@@ -47,7 +47,7 @@ GuiEventInfoImpl
 
 				EventRetriverFunction				eventRetriver;
 
-				void AttachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)
+				void AttachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)override
 				{
 					if(thisObject)
 					{
@@ -69,7 +69,7 @@ GuiEventInfoImpl
 					}
 				}
 
-				void DetachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)
+				void DetachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)override
 				{
 					if(thisObject)
 					{
@@ -86,6 +86,11 @@ GuiEventInfoImpl
 							}
 						}
 					}
+				}
+
+				Ptr<ITypeInfo> GetHandlerTypeInternal()override
+				{
+					return TypeInfoRetriver<Func<void(GuiGraphicsComposition*, T*)>>::CreateTypeInfo();
 				}
 			public:
 				GuiEventInfoImpl(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, const EventRetriverFunction& _eventRetriver)
