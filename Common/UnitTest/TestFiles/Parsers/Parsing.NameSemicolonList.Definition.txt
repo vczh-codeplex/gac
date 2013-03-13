@@ -1,0 +1,30 @@
+class NameItemExpression
+{
+    token name (UnescapingName);
+}
+
+class NameMapExpression
+{
+	token key;
+    NameItemExpression[] names;
+}
+
+class NameTableExpression
+{
+	NameMapExpression maps;
+}
+
+token NAME = "[a-zA-Z_]/w*";
+token DEFINE = "=";
+token SEMICOLON = ";";
+discardtoken SPACE = "/s+";
+
+rule NameItemExpression Name
+        = NAME : name as NameItemExpression
+        ;
+rule NameMapExpression NameMap
+        = NAME : key { Name : names ";" } as NameMapExpression
+        ;
+rule NameTableExpression NameTable
+		= NameMap : maps { NameMap : maps } as NameTableExpression
+		;

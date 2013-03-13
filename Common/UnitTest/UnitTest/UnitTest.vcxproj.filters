@@ -591,5 +591,8 @@
     <Text Include="..\TestFiles\Parsers\Parsing.Xml.Definition.txt">
       <Filter>Resource Files\Parsers</Filter>
     </Text>
+    <Text Include="..\TestFiles\Parsers\Parsing.NameSemicolonList.Definition.txt">
+      <Filter>Resource Files\Parsers</Filter>
+    </Text>
   </ItemGroup>
 </Project>
