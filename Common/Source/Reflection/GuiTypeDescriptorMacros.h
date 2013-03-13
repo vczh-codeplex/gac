@@ -37,7 +37,6 @@ Type
 #define ADD_TYPE_INFO(TYPENAME)\
 			{\
 				Ptr<ITypeDescriptor> type=new CustomTypeDescriptorSelector<TYPENAME>::CustomTypeDescriptorImpl();\
-				Description<TYPENAME>::SetAssociatedTypeDescroptor(type.Obj());\
 				manager->SetTypeDescriptor(TypeInfo<TYPENAME>::TypeName, type);\
 			}
 
@@ -130,6 +129,11 @@ Class
 					CustomTypeDescriptorImpl()\
 						:TypeDescriptorImpl(TypeInfo<TYPENAME>::TypeName)\
 					{\
+						Description<TYPENAME>::SetAssociatedTypeDescroptor(this);\
+					}\
+					~CustomTypeDescriptorImpl()\
+					{\
+						Description<TYPENAME>::SetAssociatedTypeDescroptor(0);\
 					}\
 				protected:\
 					void LoadInternal()override\
