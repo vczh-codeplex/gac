@@ -687,9 +687,49 @@ TEST_CASE(TestReflection)
 	TEST_ASSERT(GetGlobalTypeManager()->Load());
 	{
 		TestReflectionBuilder();
+	}
+	TEST_ASSERT(ResetGlobalTypeManager());
+}
+
+TEST_CASE(TestReflectionInvoke)
+{
+	TEST_ASSERT(LoadPredefinedTypes());
+	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
+	TEST_ASSERT(GetGlobalTypeManager()->Load());
+	{
 		TestReflectionInvoke();
+	}
+	TEST_ASSERT(ResetGlobalTypeManager());
+}
+
+TEST_CASE(TestReflectionEnum)
+{
+	TEST_ASSERT(LoadPredefinedTypes());
+	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
+	TEST_ASSERT(GetGlobalTypeManager()->Load());
+	{
 		TestReflectionEnum();
+	}
+	TEST_ASSERT(ResetGlobalTypeManager());
+}
+
+TEST_CASE(TestReflectionStruct)
+{
+	TEST_ASSERT(LoadPredefinedTypes());
+	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
+	TEST_ASSERT(GetGlobalTypeManager()->Load());
+	{
 		TestReflectionStruct();
+	}
+	TEST_ASSERT(ResetGlobalTypeManager());
+}
+
+TEST_CASE(TestReflectionList)
+{
+	TEST_ASSERT(LoadPredefinedTypes());
+	TEST_ASSERT(GetGlobalTypeManager()->AddTypeLoader(new TestTypeLoader));
+	TEST_ASSERT(GetGlobalTypeManager()->Load());
+	{
 		TestReflectionList();
 	}
 	TEST_ASSERT(ResetGlobalTypeManager());
