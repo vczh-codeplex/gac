@@ -49,6 +49,12 @@
     <Filter Include="Common\Parsing\Json">
       <UniqueIdentifier>{c81ce8b0-d506-4471-827a-0aabed45a927}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Baseline">
+      <UniqueIdentifier>{83f6ed23-d1a3-4053-a352-a08219b0c4cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Parsers">
+      <UniqueIdentifier>{88a4d592-d2fb-49b1-8808-d56cb94e5c69}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Basic.cpp">
@@ -497,6 +503,93 @@
     </Text>
     <Text Include="..\..\Source\Parsing\Xml\ParsingXml_Parser.parser.txt">
       <Filter>Common\Parsing\Xml</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexComment.Dfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexComment.eNfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexComment.Nfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexDuplicate.Dfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexDuplicate.eNfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexDuplicate.Nfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexFloat.Dfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexFloat.eNfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexFloat.Nfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexFullint.Dfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexFullint.eNfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexFullint.Nfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexInteger.Dfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexInteger.eNfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexInteger.Nfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexIP.Dfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexIP.eNfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexIP.Nfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexPrescan.Dfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexPrescan.eNfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexPrescan.Nfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexString.Dfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexString.eNfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Baseline\RegexString.Nfa.txt">
+      <Filter>Resource Files\Baseline</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Parsers\Parsing.Calculator.Definition.txt">
+      <Filter>Resource Files\Parsers</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Parsers\Parsing.NameList.Definition.txt">
+      <Filter>Resource Files\Parsers</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Parsers\Parsing.Statement.Definition.txt">
+      <Filter>Resource Files\Parsers</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Parsers\Parsing.Json.Definition.txt">
+      <Filter>Resource Files\Parsers</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Parsers\Parsing.Xml.Definition.txt">
+      <Filter>Resource Files\Parsers</Filter>
     </Text>
   </ItemGroup>
 </Project>

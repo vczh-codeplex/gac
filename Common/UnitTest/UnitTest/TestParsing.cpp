@@ -246,52 +246,35 @@ namespace test
 		TEST_ASSERT(node);
 		return node;
 	}
-}
-using namespace test;
 
-namespace test
-{
-	Ptr<ParsingDefinition> CreateNameListDefinition()
+	Ptr<ParsingDefinition> LoadDefinition(const WString& parserName)
 	{
-		ParsingDefinitionWriter definitionWriter;
+		WString fileName=GetPath()+L"\\Parsers\\Parsing."+parserName+L".Definition.txt";
+		WString text;
+		{
+			FileStream fileStream(fileName, FileStream::ReadOnly);
+			BomDecoder decoder;
+			DecoderStream decoderStream(fileStream, decoder);
+			StreamReader reader(decoderStream);
+			text=reader.ReadToEnd();
+		}
 
-		definitionWriter
-			.Type(
-				Class(L"NameItemExpression")
-					.Member(L"name", TokenType(), L"UnescapingName")
-				)
-			.Type(
-				Class(L"NameListExpression")
-					.Member(L"names", Type(L"NameItemExpression").Array())
-				)
+		Ptr<ParsingStrictParser> parser=CreateBootstrapStrictParser();
+		TEST_ASSERT(parser);
 
-			.Token(L"NAME", L"[a-zA-Z_]/w*")
-			.Token(L"COMMA", L",")
-			.Discard(L"SPACE", L"/s+")
+		List<Ptr<ParsingError>> errors;
+		Ptr<ParsingTreeNode> node=parser->Parse(text, L"ParserDecl", errors);
+		TEST_ASSERT(errors.Count()==0);
 
-			.Rule(L"Name", Type(L"NameItemExpression"))
-				.Imply(
-					(Rule(L"NAME")[L"name"])
-						.As(Type(L"NameItemExpression"))
-					)
-				.EndRule()
-
-			.Rule(L"NameList", Type(L"NameListExpression"))
-				.Imply(
-					(Rule(L"Name")[L"names"] + *(Text(L",") + Rule(L"Name")[L"names"]))
-						.As(Type(L"NameListExpression"))
-					)
-				.EndRule()
-			;
-
-		return definitionWriter.Definition();
+		Ptr<ParsingDefinition> definition=DeserializeDefinition(node);
+		return definition;
 	}
 }
 using namespace test;
 
 TEST_CASE(TestParseNameList)
 {
-	Ptr<ParsingDefinition> definition=CreateNameListDefinition();
+	Ptr<ParsingDefinition> definition=LoadDefinition(L"NameList");
 	Ptr<ParsingTable> table=CreateTable(definition, L"NameList");
 	const wchar_t* inputs[]=
 	{
@@ -305,106 +288,9 @@ TEST_CASE(TestParseNameList)
 	}
 }
 
-namespace test
-{
-	Ptr<ParsingDefinition> CreateExpressionDefinition()
-	{
-		ParsingDefinitionWriter definitionWriter;
-
-		definitionWriter
-			.Type(
-				Class(L"Expression")
-			)
-			.Type(
-				Class(L"NumberExpression", Type(L"Expression"))
-					.Member(L"value", TokenType())
-			)
-			.Type(
-				Class(L"BinaryExpression", Type(L"Expression"))
-					.SubType(
-						Enum(L"BinaryOperator")
-							.Member(L"Add")
-							.Member(L"Sub")
-							.Member(L"Mul")
-							.Member(L"Div")
-					)
-					.Member(L"firstOperand", Type(L"Expression"))
-					.Member(L"secondOperand", Type(L"Expression"))
-					.Member(L"binaryOperator", Type(L"BinaryOperator"))
-				)
-			.Type(
-				Class(L"FunctionExpression", Type(L"Expression"))
-					.Member(L"functionName", TokenType())
-					.Member(L"arguments", Type(L"Expression").Array())
-			)
-
-			.Token(L"NAME",		L"[a-zA-Z_]/w*")
-			.Token(L"NUMBER",	L"/d+(./d+)?")
-			.Token(L"ADD",		L"/+")
-			.Token(L"SUB",		L"-")
-			.Token(L"MUL",		L"/*")
-			.Token(L"DIV",		L"//")
-			.Token(L"LEFT",		L"/(")
-			.Token(L"RIGHT",	L"/)")
-			.Token(L"COMMA",	L",")
-			.Discard(L"SPACE", L"/s+")
-
-			.Rule(L"Number", Type(L"NumberExpression"))
-				.Imply(
-					Rule(L"NUMBER")[L"value"]
-						.As(Type(L"NumberExpression"))
-					)
-				.EndRule()
-
-			.Rule(L"Call", Type(L"FunctionExpression"))
-				.Imply(
-					(Rule(L"NAME")[L"functionName"] + Text(L"(") + Opt(Rule(L"Exp")[L"arguments"] + *(Text(L",") + Rule(L"Exp")[L"arguments"])) + Text(L")"))
-						.As(Type(L"FunctionExpression"))
-					)
-				.EndRule()
-
-			.Rule(L"Factor", Type(L"Expression"))
-				.Imply(!Rule(L"Number") | !Rule(L"Call"))
-				.Imply(Text(L"(") + !Rule(L"Exp") + Text(L")"))
-				.EndRule()
-
-			.Rule(L"Term", Type(L"Expression"))
-				.Imply(!Rule(L"Factor"))
-				.Imply(
-					(Rule(L"Term")[L"firstOperand"] + Text(L"*") + Rule(L"Factor")[L"secondOperand"])
-						.As(Type(L"BinaryExpression"))
-						.Set(L"binaryOperator", L"Mul")
-					)
-				.Imply(
-					(Rule(L"Term")[L"firstOperand"] + Text(L"/") + Rule(L"Factor")[L"secondOperand"])
-						.As(Type(L"BinaryExpression"))
-						.Set(L"binaryOperator", L"Div")
-					)
-				.EndRule()
-
-			.Rule(L"Exp", Type(L"Expression"))
-				.Imply(!Rule(L"Term"))
-				.Imply(
-					(Rule(L"Exp")[L"firstOperand"] + Text(L"+") + Rule(L"Term")[L"secondOperand"])
-						.As(Type(L"BinaryExpression"))
-						.Set(L"binaryOperator", L"Add")
-					)
-				.Imply(
-					(Rule(L"Exp")[L"firstOperand"] + Text(L"-") + Rule(L"Term")[L"secondOperand"])
-						.As(Type(L"BinaryExpression"))
-						.Set(L"binaryOperator", L"Sub")
-					)
-				.EndRule()
-			;
-
-		return definitionWriter.Definition();
-	}
-}
-using namespace test;
-
 TEST_CASE(TestParsingExpression)
 {
-	Ptr<ParsingDefinition> definition=CreateExpressionDefinition();
+	Ptr<ParsingDefinition> definition=LoadDefinition(L"Calculator");
 	Ptr<ParsingTable> table=CreateTable(definition, L"Calculator");
 	const wchar_t* inputs[]=
 	{
@@ -421,149 +307,9 @@ TEST_CASE(TestParsingExpression)
 	}
 }
 
-namespace test
-{
-	Ptr<ParsingDefinition> CreateStatementDefinition()
-	{
-		ParsingDefinitionWriter definitionWriter;
-
-		definitionWriter
-			.Type(
-				Class(L"ValueExpression")
-					.Member(L"content", TokenType())
-				)
-			.Type(
-				Class(L"ConditionExpression")
-					.SubType(
-						Enum(L"ConditionOperator")
-							.Member(L"LT")
-							.Member(L"LE")
-							.Member(L"GT")
-							.Member(L"GE")
-							.Member(L"EQ")
-							.Member(L"NE")
-						)
-					.Member(L"leftOperand", Type(L"ValueExpression"))
-					.Member(L"rightOperand", Type(L"ValueExpression"))
-					.Member(L"conditionOperator", Type(L"ConditionOperator"))
-				)
-			.Type(
-				Class(L"Statement")
-				)
-			.Type(
-				Class(L"IfElseStatement", Type(L"Statement"))
-					.Member(L"condition", Type(L"ConditionExpression"))
-					.Member(L"trueStatement", Type(L"Statement"))
-					.Member(L"falseStatement", Type(L"Statement"))
-				)
-			.Type(
-				Class(L"AssignStatement", Type(L"Statement"))
-					.Member(L"leftOperand", Type(L"ValueExpression"))
-					.Member(L"rightOperand", Type(L"ValueExpression"))
-				)
-			.Type(
-				Class(L"ReturnStatement", Type(L"Statement"))
-					.Member(L"result", Type(L"ValueExpression"))
-				)
-			.Type(
-				Class(L"BlockStatement", Type(L"Statement"))
-					.Member(L"statements", Type(L"Statement").Array())
-				)
-
-			.Token(L"IF",		L"if")
-			.Token(L"THEN",		L"then")
-			.Token(L"ELSE",		L"else")
-			.Token(L"RETURN",	L"return")
-			.Token(L"OPEN",		L"/{")
-			.Token(L"CLOSE",	L"/}")
-			.Token(L"LT",		L"/<")
-			.Token(L"LE",		L"/</=")
-			.Token(L"GT",		L"/>")
-			.Token(L"GE",		L"/>/=")
-			.Token(L"EQ",		L"/=/=")
-			.Token(L"NE",		L"/!/=")
-			.Token(L"ASSIGN",	L"/=")
-			.Token(L"VALUE",	L"[a-zA-Z_]/w*")
-			.Discard(L"SPACE",	L"/s+")
-
-			.Rule(L"Value", Type(L"ValueExpression"))
-				.Imply(
-					(Rule(L"VALUE")[L"content"]).As(Type(L"ValueExpression"))
-					)
-				.EndRule()
-
-			.Rule(L"Condition", Type(L"ConditionExpression"))
-				.Imply(
-					(Rule(L"Value")[L"leftOperand"] + Text(L"<") + Rule(L"Value")[L"rightOperand"])
-						.As(Type(L"ConditionExpression")).Set(L"conditionOperator", L"LT")
-					)
-				.Imply(
-					(Rule(L"Value")[L"leftOperand"] + Text(L"<=") + Rule(L"Value")[L"rightOperand"])
-						.As(Type(L"ConditionExpression")).Set(L"conditionOperator", L"LE")
-					)
-				.Imply(
-					(Rule(L"Value")[L"leftOperand"] + Text(L">") + Rule(L"Value")[L"rightOperand"])
-						.As(Type(L"ConditionExpression")).Set(L"conditionOperator", L"GT")
-					)
-				.Imply(
-					(Rule(L"Value")[L"leftOperand"] + Text(L">=") + Rule(L"Value")[L"rightOperand"])
-						.As(Type(L"ConditionExpression")).Set(L"conditionOperator", L"GE")
-					)
-				.Imply(
-					(Rule(L"Value")[L"leftOperand"] + Text(L"==") + Rule(L"Value")[L"rightOperand"])
-						.As(Type(L"ConditionExpression")).Set(L"conditionOperator", L"EQ")
-					)
-				.Imply(
-					(Rule(L"Value")[L"leftOperand"] + Text(L"!=") + Rule(L"Value")[L"rightOperand"])
-						.As(Type(L"ConditionExpression")).Set(L"conditionOperator", L"NE")
-					)
-				.EndRule()
-
-			.Rule(L"Assign", Type(L"AssignStatement"))
-				.Imply(
-					(Rule(L"Value")[L"leftOperand"] + Text(L"=") + Rule(L"Value")[L"rightOperand"])
-						.As(Type(L"AssignStatement"))
-					)
-				.EndRule()
-
-			.Rule(L"Return", Type(L"ReturnStatement"))
-				.Imply(
-					(Text(L"return") + Rule(L"Value")[L"result"])
-						.As(Type(L"ReturnStatement"))
-					)
-				.EndRule()
-
-			.Rule(L"Block", Type(L"BlockStatement"))
-				.Imply(
-					(Text(L"{") + *Rule(L"Stat")[L"statements"] + Text(L"}"))
-						.As(Type(L"BlockStatement"))
-					)
-				.EndRule()
-
-			.Rule(L"IfElse", Type(L"IfElseStatement"))
-				.Imply(
-					(
-						Text(L"if") + Rule(L"Condition")[L"condition"] +
-						Text(L"then") + Rule(L"Stat")[L"trueStatement"] +
-						Opt(Text(L"else") + Rule(L"Stat")[L"falseStatement"])
-						)
-						.As(Type(L"IfElseStatement"))
-					)
-				.EndRule()
-
-			.Rule(L"Stat", Type(L"Statement"))
-				.Imply(!Rule(L"Assign") | !Rule(L"Return") | !Rule(L"Block") | !Rule(L"IfElse"))
-				.EndRule()
-			;
-
-		return definitionWriter.Definition();
-	}
-}
-using namespace test;
-
 TEST_CASE(TestParsingStatement)
 {
-	Ptr<ParsingDefinition> definition=CreateStatementDefinition();
+	Ptr<ParsingDefinition> definition=LoadDefinition(L"Statement");
 	Ptr<ParsingTable> table=CreateTable(definition, L"Statement");
 	const wchar_t* inputs[]=
 	{
@@ -605,9 +351,9 @@ TEST_CASE(TestParsingGrammar)
 	Ptr<ParsingDefinition> definition;
 	Ptr<ParsingDefinition> inputDefs[]=
 	{
-		CreateNameListDefinition(),
-		CreateExpressionDefinition(),
-		CreateStatementDefinition(),
+		LoadDefinition(L"NameList"),
+		LoadDefinition(L"Calculator"),
+		LoadDefinition(L"Statement"),
 		definition=CreateParserDefinition(),
 	};
 	const wchar_t* inputTexts[][2]=
@@ -658,9 +404,9 @@ TEST_CASE(TestParsingBootstrap)
 
 	Ptr<ParsingDefinition> inputDefs[]=
 	{
-		CreateNameListDefinition(),
-		CreateExpressionDefinition(),
-		CreateStatementDefinition(),
+		LoadDefinition(L"NameList"),
+		LoadDefinition(L"Calculator"),
+		LoadDefinition(L"Statement"),
 		CreateParserDefinition(),
 	};
 
@@ -682,7 +428,7 @@ TEST_CASE(TestParsingTreeCharacterPosition)
 	Ptr<ParsingStrictParser> parser;
 	{
 		List<Ptr<ParsingError>> errors;
-		Ptr<ParsingDefinition> definition=CreateExpressionDefinition();
+		Ptr<ParsingDefinition> definition=LoadDefinition(L"Calculator");
 		Ptr<ParsingTable> table=GenerateTable(definition, errors);
 		TEST_ASSERT(table);
 		parser=new ParsingStrictParser(table);
@@ -779,7 +525,7 @@ using namespace test;
 
 TEST_CASE(TestAutoRecoverParser)
 {
-	Ptr<ParsingDefinition> definition=CreateExpressionDefinition();
+	Ptr<ParsingDefinition> definition=LoadDefinition(L"Calculator");
 	List<WString> inputs;
 	inputs.Add(L"");
 	inputs.Add(L"+");
@@ -901,8 +647,18 @@ TEST_CASE(TestGeneratedParser_Json)
 		L"[\"\\b\\f\\n\\r\\t\\\\\\\"abcA9\"]",
 		L"{\"name\":\"vczh\",\"scores\":[100,90,80,{\"a\":\"b\"}],\"IDE\":{\"VC++\":\"Microsoft\"}}",
 	};
-	Ptr<ParsingTable> table=JsonLoadTable();
-	TestGeneratedParser(input, output, table, L"Json", L"JRoot", &JsonParse, &JsonToString);
+	{
+		Ptr<ParsingTable> table=JsonLoadTable();
+		TestGeneratedParser(input, output, table, L"Json-Generated", L"JRoot", &JsonParse, &JsonToString);
+	}
+	{
+		Ptr<ParsingDefinition> definition=LoadDefinition(L"Json");
+		Ptr<ParsingTable> table=CreateTable(definition, L"Json");
+		for(vint i=0;i<sizeof(input)/sizeof(*input);i++)
+		{
+			Parse(table, input[i], L"Json", L"JRoot", i, true);
+		}
+	}
 }
 
 TEST_CASE(TestGeneratedParser_Xml)
@@ -927,6 +683,16 @@ TEST_CASE(TestGeneratedParser_Xml)
 		L"<text> normal <b>bold</b> normal <!--comment--><i>italic</i> normal </text>",
 		L"<text> &quot;normal&quot; <b>bold</b> &quot;normal&apos; <!--comment--><i>italic</i> &apos;normal&quot; </text>",
 	};
-	Ptr<ParsingTable> table=XmlLoadTable();
-	TestGeneratedParser(input, output, table, L"Xml", L"XDocument", &XmlParseDocument, &XmlDocumentToString);
+	{
+		Ptr<ParsingTable> table=XmlLoadTable();
+		TestGeneratedParser(input, output, table, L"Xml-Generated", L"XDocument", &XmlParseDocument, &XmlDocumentToString);
+	}
+	{
+		Ptr<ParsingDefinition> definition=LoadDefinition(L"Xml");
+		Ptr<ParsingTable> table=CreateTable(definition, L"Xml");
+		for(vint i=0;i<sizeof(input)/sizeof(*input);i++)
+		{
+			Parse(table, input[i], L"Xml", L"XDocument", i, true);
+		}
+	}
 }
