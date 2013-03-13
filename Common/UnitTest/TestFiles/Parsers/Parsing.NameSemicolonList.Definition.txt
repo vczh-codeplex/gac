@@ -1,12 +1,7 @@
-class NameItemExpression
-{
-    token name (UnescapingName);
-}
-
 class NameMapExpression
 {
 	token key;
-    NameItemExpression[] names;
+    token[] names;
 }
 
 class NameTableExpression
@@ -15,15 +10,12 @@ class NameTableExpression
 }
 
 token NAME = "[a-zA-Z_]/w*";
-token DEFINE = "=";
+token DEFINE = "/=";
 token SEMICOLON = ";";
 discardtoken SPACE = "/s+";
 
-rule NameItemExpression Name
-        = NAME : name as NameItemExpression
-        ;
 rule NameMapExpression NameMap
-        = NAME : key { Name : names ";" } as NameMapExpression
+        = NAME : key "=" { NAME : names ";" } as NameMapExpression
         ;
 rule NameTableExpression NameTable
 		= NameMap : maps { NameMap : maps } as NameTableExpression
