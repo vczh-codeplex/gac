@@ -330,22 +330,22 @@ TEST_CASE(TestParsingStatement)
 	}
 }
 
-TEST_CASE(TestParsingNameSemicolonList)
-{
-	Ptr<ParsingDefinition> definition=LoadDefinition(L"NameSemicolonList");
-	Ptr<ParsingTable> table=CreateTable(definition, L"NameSemicolonList");
-	const wchar_t* inputs[]=
-	{
-		L"nothong =",
-		L"author = vczh",
-		L"languages = cpp ; csharp ; ",
-		L"languages = cpp ; csharp ; vbdotnet ; ides = visualstudio ; eclipse ; xcode ;",
-	};
-	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
-	{
-		Parse(table, inputs[i], L"NameSemicolonList", L"NameTable", i, true);
-	}
-}
+//TEST_CASE(TestParsingNameSemicolonList)
+//{
+//	Ptr<ParsingDefinition> definition=LoadDefinition(L"NameSemicolonList");
+//	Ptr<ParsingTable> table=CreateTable(definition, L"NameSemicolonList");
+//	const wchar_t* inputs[]=
+//	{
+//		L"nothong =",
+//		L"author = vczh",
+//		L"languages = cpp ; csharp ; ",
+//		L"languages = cpp ; csharp ; vbdotnet ; ides = visualstudio ; eclipse ; xcode ;",
+//	};
+//	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
+//	{
+//		Parse(table, inputs[i], L"NameSemicolonList", L"NameTable", i, true);
+//	}
+//}
 
 namespace test
 {

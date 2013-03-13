@@ -156,47 +156,62 @@ namespace vl
 			};
 
 /***********************************************************************
-¸¨Öúº¯Êý
+¸¨Öúº¯Êý£¨ËÑË÷±Õ°ü£©
 ***********************************************************************/
 
-			namespace closure_searching
+			struct ClosureItem
 			{
-				struct ClosureItem
-				{
-					State*											state;			// target state of one path of a closure
-					Ptr<collections::List<Transition*>>				transitions;	// path
-					bool											cycle;			// true: invalid closure because there are cycles, and in the middle of the path there will be a transition that targets to the state field.
-
-					ClosureItem()
-						:state(0)
-						,cycle(false)
-					{
-					}
-
-					ClosureItem(State* _state, Ptr<collections::List<Transition*>> _transitions, bool _cycle)
-						:state(_state)
-						,transitions(_transitions)
-						,cycle(_cycle)
-					{
-					}
-				};
-
-				enum ClosureSearchResult
+				enum SearchResult
 				{
 					Continue,
 					Hit,
 					Blocked,
 				};
 
-				extern void											SearchClosure(ClosureSearchResult(*closurePredicate)(Transition*), State* startState, collections::List<ClosureItem>& closure);
-			}
+				State*											state;			// target state of one path of a closure
+				Ptr<collections::List<Transition*>>				transitions;	// path
+				bool											cycle;			// true: invalid closure because there are cycles, and in the middle of the path there will be a transition that targets to the state field.
 
-			extern Ptr<Automaton>									CreateEpsilonPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager);
+				ClosureItem()
+					:state(0)
+					,cycle(false)
+				{
+				}
+
+				ClosureItem(State* _state, Ptr<collections::List<Transition*>> _transitions, bool _cycle)
+					:state(_state)
+					,transitions(_transitions)
+					,cycle(_cycle)
+				{
+				}
+			};
+
+			extern void												SearchClosure(ClosureItem::SearchResult(*closurePredicate)(Transition*), State* startState, collections::List<ClosureItem>& closure);
 			extern void												RemoveEpsilonTransitions(collections::Dictionary<State*, State*>& oldNewStateMap, collections::List<State*>& scanningStates, Ptr<Automaton> automaton);
+
+/***********************************************************************
+¸¨Öúº¯Êý£¨ºÏ²¢×´Ì¬£©
+***********************************************************************/
+			
+			extern void												DeleteUnnecessaryStates(Ptr<Automaton> automaton, collections::List<Ptr<RuleInfo>>& ruleInfos, collections::List<State*>& newStates);
+			extern void												DeleteUnnecessaryStates(Ptr<Automaton> automaton, Ptr<RuleInfo> ruleInfo, collections::List<State*>& newStates);
+
+			extern void												MergeStates(Ptr<Automaton> automaton, collections::List<Ptr<RuleInfo>>& ruleInfos, collections::List<State*>& newStates);
+			extern void												MergeStates(Ptr<Automaton> automaton, Ptr<RuleInfo> ruleInfo, collections::List<State*>& newStates);
+
+/***********************************************************************
+¸¨Öúº¯Êý£¨´´½¨×´Ì¬»ú£©
+***********************************************************************/
+			
+			extern Ptr<Automaton>									CreateEpsilonPDA(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager);
 			extern Ptr<Automaton>									CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA);
 			extern Ptr<Automaton>									CreateJointPDAFromNondeterministicPDA(Ptr<Automaton> nondeterministicPDA);
 			extern void												CompactJointPDA(Ptr<Automaton> jointPDA);
 			extern void												MarkLeftRecursiveInJointPDA(Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
+
+/***********************************************************************
+¸¨Öúº¯Êý£¨Êä³öÌø×ª±í£©
+***********************************************************************/
 
 			extern WString											GetTypeNameForCreateInstruction(ParsingSymbol* type);
 			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);

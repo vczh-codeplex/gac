@@ -237,6 +237,9 @@
     <ClCompile Include="TestReflection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton_MergeStates.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
