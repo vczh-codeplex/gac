@@ -85,10 +85,7 @@ Attribute
 
 			static void SetAssociatedTypeDescroptor(description::ITypeDescriptor* typeDescroptor)
 			{
-				if(!associatedTypeDescriptor)
-				{
-					associatedTypeDescriptor=typeDescroptor;
-				}
+				associatedTypeDescriptor=typeDescroptor;
 			}
 		};
 
