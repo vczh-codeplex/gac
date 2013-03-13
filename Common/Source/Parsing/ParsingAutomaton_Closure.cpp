@@ -15,94 +15,90 @@ namespace vl
 CreateNondeterministicPDAFromEpsilonPDA::closure_searching
 ***********************************************************************/
 
-			namespace closure_searching
+			// closure function for searching <epsilon* symbol> reachable states
+			ClosureItem::SearchResult EpsilonClosure(Transition* transition)
 			{
-				// closure function for searching <epsilon* symbol> reachable states
-				ClosureSearchResult EpsilonClosure(Transition* transition)
-				{
-					return
-						transition->transitionType!=Transition::Epsilon?Hit:
-						transition->target->endState?Blocked:
-						Continue;
-				}
+				return
+					transition->transitionType!=Transition::Epsilon?ClosureItem::Hit:
+					transition->target->endState?ClosureItem::Blocked:
+					ClosureItem::Continue;
+			}
 
-				// closure function for searching <epsilon*> reachable end states
-				ClosureSearchResult EndStateClosure(Transition* transition)
-				{
-					return
-						transition->transitionType!=Transition::Epsilon?Blocked:
-						transition->target->endState?Hit:
-						Continue;
-				}
+			// closure function for searching <epsilon*> reachable end states
+			ClosureItem::SearchResult EndStateClosure(Transition* transition)
+			{
+				return
+					transition->transitionType!=Transition::Epsilon?ClosureItem::Blocked:
+					transition->target->endState?ClosureItem::Hit:
+					ClosureItem::Continue;
+			}
 
-				// closure searching function
-				void SearchClosureInternal(ClosureSearchResult(*closurePredicate)(Transition*), List<Transition*>& transitionPath, Transition* transition, State* state, List<ClosureItem>& closure)
+			// closure searching function
+			void SearchClosureInternal(ClosureItem::SearchResult(*closurePredicate)(Transition*), List<Transition*>& transitionPath, Transition* transition, State* state, List<ClosureItem>& closure)
+			{
+				FOREACH(Transition*, singleTransitionPath, transitionPath)
 				{
-					FOREACH(Transition*, singleTransitionPath, transitionPath)
+					if(singleTransitionPath->source==state && closurePredicate(singleTransitionPath)!=ClosureItem::Blocked)
 					{
-						if(singleTransitionPath->source==state && closurePredicate(singleTransitionPath)!=Blocked)
-						{
-							Ptr<List<Transition*>> path=new List<Transition*>;
-							CopyFrom(*path.Obj(), transitionPath);
-							closure.Add(ClosureItem(state, path, true));
-							return;
-						}
+						Ptr<List<Transition*>> path=new List<Transition*>;
+						CopyFrom(*path.Obj(), transitionPath);
+						closure.Add(ClosureItem(state, path, true));
+						return;
 					}
+				}
 
-					ClosureSearchResult result=transition?closurePredicate(transition):Continue;
-					switch(result)
+				ClosureItem::SearchResult result=transition?closurePredicate(transition):ClosureItem::Continue;
+				switch(result)
+				{
+				case ClosureItem::Continue:
 					{
-					case Continue:
+						FOREACH(Transition*, newTransition, state->transitions)
 						{
-							FOREACH(Transition*, newTransition, state->transitions)
+							if(!transitionPath.Contains(newTransition))
 							{
-								if(!transitionPath.Contains(newTransition))
-								{
-									transitionPath.Add(newTransition);
-									SearchClosureInternal(closurePredicate, transitionPath, newTransition, newTransition->target, closure);
-									transitionPath.RemoveAt(transitionPath.Count()-1);
-								}
+								transitionPath.Add(newTransition);
+								SearchClosureInternal(closurePredicate, transitionPath, newTransition, newTransition->target, closure);
+								transitionPath.RemoveAt(transitionPath.Count()-1);
 							}
 						}
-						break;
-					case Hit:
-						{
-							Ptr<List<Transition*>> path=new List<Transition*>;
-							CopyFrom(*path.Obj(), transitionPath);
-							closure.Add(ClosureItem(state, path, false));
-						}
-						break;
 					}
-				}
-
-				void SearchClosure(ClosureSearchResult(*closurePredicate)(Transition*), State* startState, List<ClosureItem>& closure)
-				{
-					List<Transition*> transitionPath;
-					SearchClosureInternal(closurePredicate, transitionPath, 0, startState, closure);
-				}
-
-				// map old state to new state and track all states that are not visited yet
-				State* GetMappedState(Ptr<Automaton> newAutomaton, State* oldState, List<State*>& scanningStates, Dictionary<State*, State*>& oldNewStateMap)
-				{
-					State* newState=0;
-					vint mapIndex=oldNewStateMap.Keys().IndexOf(oldState);
-					if(mapIndex==-1)
+					break;
+				case ClosureItem::Hit:
 					{
-						newState=newAutomaton->CopyState(oldState);
-						oldNewStateMap.Add(oldState, newState);
+						Ptr<List<Transition*>> path=new List<Transition*>;
+						CopyFrom(*path.Obj(), transitionPath);
+						closure.Add(ClosureItem(state, path, false));
 					}
-					else
-					{
-						newState=oldNewStateMap.Values().Get(mapIndex);
-					}
-					if(!scanningStates.Contains(oldState))
-					{
-						scanningStates.Add(oldState);
-					}
-					return newState;
+					break;
 				}
 			}
-			using namespace closure_searching;
+
+			void SearchClosure(ClosureItem::SearchResult(*closurePredicate)(Transition*), State* startState, List<ClosureItem>& closure)
+			{
+				List<Transition*> transitionPath;
+				SearchClosureInternal(closurePredicate, transitionPath, 0, startState, closure);
+			}
+
+			// map old state to new state and track all states that are not visited yet
+			State* GetMappedState(Ptr<Automaton> newAutomaton, State* oldState, List<State*>& scanningStates, Dictionary<State*, State*>& oldNewStateMap)
+			{
+				State* newState=0;
+				vint mapIndex=oldNewStateMap.Keys().IndexOf(oldState);
+				if(mapIndex==-1)
+				{
+					newState=newAutomaton->CopyState(oldState);
+					oldNewStateMap.Add(oldState, newState);
+				}
+				else
+				{
+					newState=oldNewStateMap.Values().Get(mapIndex);
+				}
+				if(!scanningStates.Contains(oldState))
+				{
+					scanningStates.Add(oldState);
+				}
+				return newState;
+			}
 
 /***********************************************************************
 RemoveEpsilonTransitions

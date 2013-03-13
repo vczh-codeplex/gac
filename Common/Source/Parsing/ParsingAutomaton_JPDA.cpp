@@ -126,16 +126,14 @@ CreateJointPDAFromNondeterministicPDA
 /***********************************************************************
 CompactJointPDA
 ***********************************************************************/
-
-			using namespace closure_searching;
 			
 			// closure function for searching shift-reduce-compact transition
-			ClosureSearchResult ShiftReduceCompactClosure(Transition* transition)
+			ClosureItem::SearchResult ShiftReduceCompactClosure(Transition* transition)
 			{
 				return
-					transition->stackOperationType!=Transition::None?Blocked:
-					transition->transitionType!=Transition::Epsilon?Hit:
-					Continue;
+					transition->stackOperationType!=Transition::None?ClosureItem::Blocked:
+					transition->transitionType!=Transition::Epsilon?ClosureItem::Hit:
+					ClosureItem::Continue;
 			}
 
 			void CompactJointPDA(Ptr<Automaton> jointPDA)
