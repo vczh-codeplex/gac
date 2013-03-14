@@ -228,27 +228,7 @@ CompactJointPDA
 				}
 
 				// merge states
-				List<Ptr<RuleInfo>> ruleInfos;
-				while(true)
-				{
-					for(vint i=0;i<jointPDA->states.Count();i++)
-					{
-						State* state1=jointPDA->states[i].Obj();
-						if(IsMergableCandidate(state1, jointPDA->ruleInfos.Values()))
-						{
-							for(vint j=i+1;j<jointPDA->states.Count();j++)
-							{
-								State* state2=jointPDA->states[j].Obj();
-								if(state1!=state2 && IsMergableCandidate(state2, ruleInfos))
-								{
-								}
-							}
-						}
-					}
-					break;
-				MERGED_STATES_PAIR:
-					continue;
-				}
+				MergeStatesForJointPDA(jointPDA);
 			}
 
 /***********************************************************************
