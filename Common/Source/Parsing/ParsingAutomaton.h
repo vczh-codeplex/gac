@@ -199,6 +199,7 @@ namespace vl
 			extern bool												IsMergableCandidate(State* state, const collections::List<Ptr<RuleInfo>>& ruleInfos);
 			extern void												MergeStates(Ptr<Automaton> automaton, const collections::List<Ptr<RuleInfo>>& ruleInfos, collections::List<State*>& newStates);
 			extern void												MergeStates(Ptr<Automaton> automaton, Ptr<RuleInfo> ruleInfo, collections::List<State*>& newStates);
+			extern void												MergeStatesForJointPDA(Ptr<Automaton> jointPDA);
 
 /***********************************************************************
 辅助函数（创建状态机）
