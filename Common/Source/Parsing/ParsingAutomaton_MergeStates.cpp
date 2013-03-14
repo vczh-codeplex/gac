@@ -15,7 +15,7 @@ namespace vl
 DeleteUnnecessaryStates
 ***********************************************************************/
 
-			void DeleteUnnecessaryStates(Ptr<Automaton> automaton, List<Ptr<RuleInfo>>& ruleInfos, List<State*>& newStates)
+			void DeleteUnnecessaryStates(Ptr<Automaton> automaton, const List<Ptr<RuleInfo>>& ruleInfos, List<State*>& newStates)
 			{
 				// delete all states that are not reachable to the end state
 				while(true)
@@ -61,7 +61,7 @@ DeleteUnnecessaryStates
 IsMergableCandidate
 ***********************************************************************/
 
-			bool IsMergableCandidate(State* state, List<Ptr<RuleInfo>>& ruleInfos)
+			bool IsMergableCandidate(State* state, const List<Ptr<RuleInfo>>& ruleInfos)
 			{
 				FOREACH(Ptr<RuleInfo>, ruleInfo, ruleInfos)
 				{
@@ -249,12 +249,11 @@ MergeState2ToState1Because(Transitions|Input)
 MergeStates(Transitions|Input)
 ***********************************************************************/
 
-			void MergeStates(Ptr<Automaton> automaton, List<Ptr<RuleInfo>>& ruleInfos, List<State*>& newStates)
+			void MergeStates(Ptr<Automaton> automaton, const List<Ptr<RuleInfo>>& ruleInfos, List<State*>& newStates)
 			{
 				SortedList<State*> stateContentSorted;
 				while(true)
 				{
-					vint mergeCount=0;
 					for(vint i=0;i<newStates.Count();i++)
 					{
 						State* state1=newStates[i];
