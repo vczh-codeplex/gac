@@ -55,6 +55,9 @@
     <Filter Include="Resource Files\Parsers">
       <UniqueIdentifier>{88a4d592-d2fb-49b1-8808-d56cb94e5c69}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Parsing\Bootstrap">
+      <UniqueIdentifier>{92887523-7c45-4787-a4f5-4c6489e1ae47}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Basic.cpp">
@@ -239,6 +242,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Parsing\ParsingAutomaton_MergeStates.cpp">
       <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.cpp">
+      <Filter>Common\Parsing\Bootstrap</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -473,6 +479,9 @@
     <ClInclude Include="..\..\Source\Reflection\GuiTypeDescriptorBuilder_Gen.h">
       <Filter>Common\Reflection</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.h">
+      <Filter>Common\Parsing\Bootstrap</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Common.fpm">
@@ -596,6 +605,9 @@
     </Text>
     <Text Include="..\TestFiles\Parsers\Parsing.NameSemicolonList.Definition.txt">
       <Filter>Resource Files\Parsers</Filter>
+    </Text>
+    <Text Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.parser.txt">
+      <Filter>Common\Parsing\Bootstrap</Filter>
     </Text>
   </ItemGroup>
 </Project>

@@ -154,6 +154,7 @@
     <ClCompile Include="..\..\Source\Exception.cpp" />
     <ClCompile Include="..\..\Source\GlobalStorage.cpp" />
     <ClCompile Include="..\..\Source\Locale.cpp" />
+    <ClCompile Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.cpp" />
     <ClCompile Include="..\..\Source\Parsing\Json\ParsingJson.cpp" />
     <ClCompile Include="..\..\Source\Parsing\Json\ParsingJson_Parser.cpp" />
     <ClCompile Include="..\..\Source\Parsing\Parsing.cpp" />
@@ -249,6 +250,7 @@
     <ClInclude Include="..\..\Source\GlobalStorage.h" />
     <ClInclude Include="..\..\Source\Lazy.h" />
     <ClInclude Include="..\..\Source\Locale.h" />
+    <ClInclude Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.h" />
     <ClInclude Include="..\..\Source\Parsing\Json\ParsingJson.h" />
     <ClInclude Include="..\..\Source\Parsing\Json\ParsingJson_Parser.h" />
     <ClInclude Include="..\..\Source\Parsing\Parsing.h" />
@@ -298,6 +300,7 @@
     <None Include="Parser.Calculator\Codegen.bat" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.parser.txt" />
     <Text Include="..\..\Source\Parsing\Json\ParsingJson_Parser.parser.txt" />
     <Text Include="..\..\Source\Parsing\Xml\ParsingXml_Parser.parser.txt" />
     <Text Include="..\TestFiles\Baseline\RegexComment.Dfa.txt" />
