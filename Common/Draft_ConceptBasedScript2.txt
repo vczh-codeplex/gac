@@ -1,3 +1,31 @@
+
+ViewContext GetViewContext(Control control)
+{
+	return
+		try (control as ViewPage).ViewContext
+		then GetViewContext(control.Parent)
+		then null;
+}
+
+ViewContext GetViewContext(Control control)
+{
+	try
+	{
+		return (control as ViewPage).ViewContext;
+	}
+	catch(Exception)
+	{
+		try
+		{
+			return GetViewContext(control.Parent);
+		}
+		catch(Exception)
+		{
+			return null;
+		}
+	}
+}
+
 ========================================================
 Types
 ========================================================
