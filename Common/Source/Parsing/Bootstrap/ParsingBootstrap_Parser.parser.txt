@@ -1,0 +1,8 @@
+include:"..\Parsing.h"
+namespace:vl.parsing.bootstrap
+classPrefix:Bootstrap
+guard:VCZH_PARSING_BOOTSTRAP_PARSINGBOOTSTRAP_PARSER
+parser:ParseDeclaration(ParserDecl)
+parsingtree:disabled
+grammar:
+<bootstrap-grammar>
