@@ -15,7 +15,7 @@ namespace vl
 DeleteUnnecessaryStates
 ***********************************************************************/
 
-			void DeleteUnnecessaryStates(Ptr<Automaton> automaton, const List<Ptr<RuleInfo>>& ruleInfos, List<State*>& newStates)
+			void DeleteUnnecessaryStates(Ptr<Automaton> automaton, Ptr<RuleInfo> ruleInfo, List<State*>& newStates)
 			{
 				// delete all states that are not reachable to the end state
 				while(true)
@@ -27,16 +27,7 @@ DeleteUnnecessaryStates
 						State* newState=newStates[i];
 						if(newState->transitions.Count()==0)
 						{
-							bool deleteState=true;
-							FOREACH(Ptr<RuleInfo>, ruleInfo, ruleInfos)
-							{
-								if(newState==ruleInfo->rootRuleEndState || newState->endState)
-								{
-									deleteState=false;
-									break;
-								}
-							}
-							if(deleteState)
+							if(newState!=ruleInfo->rootRuleEndState && !newState->endState)
 							{
 								automaton->DeleteState(newState);
 								newStates.RemoveAt(i);
@@ -50,25 +41,15 @@ DeleteUnnecessaryStates
 				}
 			}
 
-			void DeleteUnnecessaryStates(Ptr<Automaton> automaton, Ptr<RuleInfo> ruleInfo, List<State*>& newStates)
-			{
-				List<Ptr<RuleInfo>> ruleInfos;
-				ruleInfos.Add(ruleInfo);
-				DeleteUnnecessaryStates(automaton, ruleInfos, newStates);
-			}
-
 /***********************************************************************
 IsMergableCandidate
 ***********************************************************************/
 
-			bool IsMergableCandidate(State* state, const List<Ptr<RuleInfo>>& ruleInfos)
+			bool IsMergableCandidate(State* state, Ptr<RuleInfo> ruleInfo)
 			{
-				FOREACH(Ptr<RuleInfo>, ruleInfo, ruleInfos)
+				if(state==ruleInfo->rootRuleStartState || state==ruleInfo->rootRuleEndState || state==ruleInfo->startState)
 				{
-					if(state==ruleInfo->rootRuleStartState || state==ruleInfo->rootRuleEndState || state==ruleInfo->startState)
-					{
-						return false;
-					}
+					return false;
 				}
 				return true;
 			}
@@ -249,7 +230,7 @@ MergeState2ToState1Because(Transitions|Input)
 MergeStates
 ***********************************************************************/
 
-			void MergeStates(Ptr<Automaton> automaton, const List<Ptr<RuleInfo>>& ruleInfos, List<State*>& newStates)
+			void MergeStates(Ptr<Automaton> automaton, Ptr<RuleInfo> ruleInfo, List<State*>& newStates)
 			{
 				SortedList<State*> stateContentSorted;
 				while(true)
@@ -257,12 +238,12 @@ MergeStates
 					for(vint i=0;i<newStates.Count();i++)
 					{
 						State* state1=newStates[i];
-						if(IsMergableCandidate(state1, ruleInfos))
+						if(IsMergableCandidate(state1, ruleInfo))
 						{
 							for(vint j=i+1;j<newStates.Count();j++)
 							{
 								State* state2=newStates[j];
-								if(state1!=state2 && IsMergableCandidate(state2, ruleInfos))
+								if(state1!=state2 && IsMergableCandidate(state2, ruleInfo))
 								{
 									RearrangeState(state1, stateContentSorted);
 									RearrangeState(state2, stateContentSorted);
@@ -288,57 +269,12 @@ MergeStates
 				}
 			}
 
-			void MergeStates(Ptr<Automaton> automaton, Ptr<RuleInfo> ruleInfo, List<State*>& newStates)
-			{
-				List<Ptr<RuleInfo>> ruleInfos;
-				ruleInfos.Add(ruleInfo);
-				MergeStates(automaton, ruleInfos, newStates);
-			}
-
 /***********************************************************************
 MergeStatesForJointPDA
 ***********************************************************************/
 
-			bool IsMergableForPDA(State* state1, State* state2)
-			{
-				// test input
-				// test output
-				return false;
-			}
-
-			void MergeStatesForPDA(State* state1, State* state2, Ptr<Automaton> jointPDA)
-			{
-			}
-
 			void MergeStatesForJointPDA(Ptr<Automaton> jointPDA)
 			{
-				// merge states
-				List<Ptr<RuleInfo>> ruleInfos;
-				while(true)
-				{
-					for(vint i=0;i<jointPDA->states.Count();i++)
-					{
-						State* state1=jointPDA->states[i].Obj();
-						if(IsMergableCandidate(state1, jointPDA->ruleInfos.Values()))
-						{
-							for(vint j=i+1;j<jointPDA->states.Count();j++)
-							{
-								State* state2=jointPDA->states[j].Obj();
-								if(state1!=state2 && IsMergableCandidate(state2, ruleInfos))
-								{
-									if(IsMergableForPDA(state1, state2))
-									{
-										MergeStatesForPDA(state1, state2, jointPDA);
-										goto MERGED_STATES_PAIR;
-									}
-								}
-							}
-						}
-					}
-					break;
-				MERGED_STATES_PAIR:
-					continue;
-				}
 			}
 		}
 	}
