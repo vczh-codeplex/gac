@@ -193,11 +193,7 @@ namespace vl
 ¸¨Öúº¯Êý£¨ºÏ²¢×´Ì¬£©
 ***********************************************************************/
 			
-			extern void												DeleteUnnecessaryStates(Ptr<Automaton> automaton,const  collections::List<Ptr<RuleInfo>>& ruleInfos, collections::List<State*>& newStates);
 			extern void												DeleteUnnecessaryStates(Ptr<Automaton> automaton, Ptr<RuleInfo> ruleInfo, collections::List<State*>& newStates);
-
-			extern bool												IsMergableCandidate(State* state, const collections::List<Ptr<RuleInfo>>& ruleInfos);
-			extern void												MergeStates(Ptr<Automaton> automaton, const collections::List<Ptr<RuleInfo>>& ruleInfos, collections::List<State*>& newStates);
 			extern void												MergeStates(Ptr<Automaton> automaton, Ptr<RuleInfo> ruleInfo, collections::List<State*>& newStates);
 			extern void												MergeStatesForJointPDA(Ptr<Automaton> jointPDA);
 
