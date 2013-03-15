@@ -226,10 +226,15 @@ CompactJointPDA
 						jointPDA->DeleteTransition(transition);
 					}
 				}
-
-				// merge states
-				MergeStatesForJointPDA(jointPDA);
 			}
+
+/***********************************************************************
+MergeJointPDAStates
+***********************************************************************/
+
+			 void MergeJointPDAStates(Ptr<Automaton> jointPDA)
+			 {
+			 }
 
 /***********************************************************************
 MarkLeftRecursiveInJointPDA

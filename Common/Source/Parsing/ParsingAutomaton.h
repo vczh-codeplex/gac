@@ -195,7 +195,6 @@ namespace vl
 			
 			extern void												DeleteUnnecessaryStates(Ptr<Automaton> automaton, Ptr<RuleInfo> ruleInfo, collections::List<State*>& newStates);
 			extern void												MergeStates(Ptr<Automaton> automaton, Ptr<RuleInfo> ruleInfo, collections::List<State*>& newStates);
-			extern void												MergeStatesForJointPDA(Ptr<Automaton> jointPDA);
 
 /***********************************************************************
 辅助函数（创建状态机）
@@ -205,6 +204,7 @@ namespace vl
 			extern Ptr<Automaton>									CreateNondeterministicPDAFromEpsilonPDA(Ptr<Automaton> epsilonPDA);
 			extern Ptr<Automaton>									CreateJointPDAFromNondeterministicPDA(Ptr<Automaton> nondeterministicPDA);
 			extern void												CompactJointPDA(Ptr<Automaton> jointPDA);
+			extern void												MergeJointPDAStates(Ptr<Automaton> jointPDA);
 			extern void												MarkLeftRecursiveInJointPDA(Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
 
 /***********************************************************************

@@ -268,14 +268,6 @@ MergeStates
 					continue;
 				}
 			}
-
-/***********************************************************************
-MergeStatesForJointPDA
-***********************************************************************/
-
-			void MergeStatesForJointPDA(Ptr<Automaton> jointPDA)
-			{
-			}
 		}
 	}
 }
