@@ -47,10 +47,13 @@ ParsingTable::TransitionItem
 			ParsingTable::TransitionItem::OrderResult ParsingTable::TransitionItem::CheckOrder(Ptr<TransitionItem> t1, Ptr<TransitionItem> t2, bool forceGivingOrder)
 			{
 				if(t1->token!=t2->token) return UnknownOrder;
-				TransitionLevel level1=GetTransitionLevel(t1);
-				TransitionLevel level2=GetTransitionLevel(t2);
-				if(level1>level2) return CorrectOrder;
-				if(level1<level2) return WrongOrder;
+				if(forceGivingOrder)
+				{
+					TransitionLevel level1=GetTransitionLevel(t1);
+					TransitionLevel level2=GetTransitionLevel(t2);
+					if(level1>level2) return CorrectOrder;
+					if(level1<level2) return WrongOrder;
+				}
 
 				vint ic1=t1->stackPattern.Count();
 				vint ic2=t2->stackPattern.Count();
