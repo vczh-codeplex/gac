@@ -11,6 +11,53 @@ namespace vl
 			using namespace regex;
 
 /***********************************************************************
+ParsingTable::LookAheadInfo
+***********************************************************************/
+
+			bool ParsingTable::LookAheadInfo::IsPrefixOf(Ptr<LookAheadInfo> a, Ptr<LookAheadInfo> b)
+			{
+				if(a->tokens.Count()>b->tokens.Count())
+				{
+					return false;
+				}
+				for(vint i=0;i<a->tokens.Count();i++)
+				{
+					if(a->tokens[i]!=b->tokens[i])
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+
+			void ParsingTable::LookAheadInfo::Walk(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::List<Ptr<LookAheadInfo>>& newInfos)
+			{
+				for(vint i=0;i<table->GetTokenCount();i++)
+				{
+					Ptr<TransitionBag> bag=table->GetTransitionBag(state, i);
+					if(bag)
+					{
+						SortedList<vint> newStates;
+						FOREACH(Ptr<TransitionItem>, item, bag->transitionItems)
+						{
+							if(!newStates.Contains(item->targetState))
+							{
+								newStates.Add(item->targetState);
+								Ptr<LookAheadInfo> info=new LookAheadInfo;
+								info->state=item->targetState;
+								if(previous)
+								{
+									CopyFrom(info->tokens, previous->tokens);
+								}
+								info->tokens.Add(i);
+								newInfos.Add(info);
+							}
+						}
+					}
+				}
+			}
+
+/***********************************************************************
 ParsingTable::TransitionItem
 ***********************************************************************/
 

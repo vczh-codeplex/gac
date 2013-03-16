@@ -116,11 +116,27 @@ namespace vl
 					}
 				};
 
+				class LookAheadInfo
+				{
+				public:
+					collections::List<vint>					tokens;
+					vint									state;
+
+					LookAheadInfo()
+						:state(-1)
+					{
+					}
+
+					static bool								IsPrefixOf(Ptr<LookAheadInfo> a, Ptr<LookAheadInfo> b);
+					static void								Walk(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::List<Ptr<LookAheadInfo>>& newInfos);
+				};
+
 				class TransitionItem
 				{
 				public:
 					vint									token;
 					vint									targetState;
+					collections::List<Ptr<LookAheadInfo>>	lookAheads;
 					collections::List<vint>					stackPattern;
 					collections::List<Instruction>			instructions;
 

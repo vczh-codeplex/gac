@@ -766,7 +766,20 @@ Logger (ParsingTable)
 									content+=(index==0?L" : ":L", ");
 									content+=itow(state);
 								}
-								content+=L"\r\n  ";
+								content+=L"\r\n";
+
+								FOREACH(Ptr<ParsingTable::LookAheadInfo>, lookAhead, item->lookAheads)
+								{
+									content+=L"  ";
+									FOREACH_INDEXER(vint, token, index, lookAhead->tokens)
+									{
+										content+=(index==0?L"> ":L", ");
+										content+=itow(token);
+									}
+									content+=L"\r\n";
+								}
+
+								content+=L"  ";
 								FOREACH(ParsingTable::Instruction, ins, item->instructions)
 								{
 									switch(ins.instructionType)
@@ -802,7 +815,9 @@ Logger (ParsingTable)
 						}
 					}
 				}
-
+				
+				writer.WriteLine(L"Target-State : Stack-Pattern ...");
+				writer.WriteLine(L"> Look-Ahead ...");
 				writer.WriteLine(L"C: Create");
 				writer.WriteLine(L"U: Using");
 				writer.WriteLine(L"A: Assign");

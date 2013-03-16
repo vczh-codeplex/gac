@@ -11,6 +11,11 @@ namespace vl
 
 		namespace analyzing
 		{
+
+/***********************************************************************
+GetTypeNameForCreateInstruction
+***********************************************************************/
+
 			WString GetTypeNameForCreateInstruction(ParsingSymbol* type)
 			{
 				ParsingSymbol* parent=type->GetParentSymbol();
@@ -23,6 +28,91 @@ namespace vl
 					return type->GetName();
 				}
 			}
+
+/***********************************************************************
+CreateLookAhead
+***********************************************************************/
+
+			void CopyStableLookAheads(List<Ptr<ParsingTable::LookAheadInfo>>& la, List<Ptr<ParsingTable::LookAheadInfo>>& sla, const List<Ptr<ParsingTable::LookAheadInfo>>& la2)
+			{
+				CopyFrom(sla, From(la)
+					.Where([&](Ptr<ParsingTable::LookAheadInfo> lai)
+					{
+						return From(la2).All([&](Ptr<ParsingTable::LookAheadInfo> lai2)
+						{
+							return !ParsingTable::LookAheadInfo::IsPrefixOf(lai, lai2);
+						});
+					}),
+					true);
+			}
+
+			void RemoveStableLookAheads(List<Ptr<ParsingTable::LookAheadInfo>>& la, const List<Ptr<ParsingTable::LookAheadInfo>>& sla)
+			{
+				for(vint i=la.Count()-1;i>=0;i--)
+				{
+					if(sla.Contains(la[i].Obj()))
+					{
+						la.RemoveAt(i);
+					}
+				}
+			}
+
+			bool WalkLookAheads(Ptr<ParsingTable> table, List<Ptr<ParsingTable::LookAheadInfo>>& la, vint maxTokenCount)
+			{
+				vint count=la.Count();
+				for(vint i=0;i<count;i++)
+				{
+					Ptr<ParsingTable::LookAheadInfo> lai=la[i];
+					if(lai->tokens.Count()==maxTokenCount)
+					{
+						return false;
+					}
+					ParsingTable::LookAheadInfo::Walk(table, lai, lai->state, la);
+				}
+				return true;
+			}
+
+			void CompactLookAheads(Ptr<ParsingTable::TransitionItem> t, List<Ptr<ParsingTable::LookAheadInfo>>& sla)
+			{
+				CopyFrom(sla, t->lookAheads, true);
+				CopyFrom(t->lookAheads, From(sla)
+					.Where([&](Ptr<ParsingTable::LookAheadInfo> lai)
+					{
+						return From(sla).All([&](Ptr<ParsingTable::LookAheadInfo> lai2)
+						{
+							return lai==lai2 || !ParsingTable::LookAheadInfo::IsPrefixOf(lai, lai2);
+						});
+					}));
+			}
+
+			bool CreateLookAhead(Ptr<ParsingTable> table, Ptr<ParsingTable::TransitionItem> t1, Ptr<ParsingTable::TransitionItem> t2, vint maxTokenCount)
+			{
+				List<Ptr<ParsingTable::LookAheadInfo>> la1, la2, sla1, sla2; // look-ahead and stable-look-ahead
+				ParsingTable::LookAheadInfo::Walk(table, 0, t1->targetState, la1);
+				ParsingTable::LookAheadInfo::Walk(table, 0, t2->targetState, la2);
+
+				do
+				{
+					CopyStableLookAheads(la1, sla1, la2);
+					CopyStableLookAheads(la2, sla2, la1);
+					RemoveStableLookAheads(la1, sla1);
+					RemoveStableLookAheads(la2, sla2);
+
+					if(!WalkLookAheads(table, la1, maxTokenCount) || !WalkLookAheads(table, la2, maxTokenCount))
+					{
+						return false;
+					}
+				}
+				while(la1.Count()>0 || la2.Count()>0);
+
+				CompactLookAheads(t1, sla1);
+				CompactLookAheads(t2, sla2);
+				return true;
+			}
+
+/***********************************************************************
+GenerateTable
+***********************************************************************/
 
 			Ptr<tabling::ParsingTable> GenerateTable(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors)
 			{
@@ -39,7 +129,7 @@ namespace vl
 						{
 							scanningStates.Add(ruleInfo->rootRuleStartState);
 						}
-						
+
 						while(currentState<scanningStates.Count())
 						{
 							State* state=scanningStates[currentState++];
@@ -231,19 +321,23 @@ namespace vl
 						if(bag)
 						{
 							CopyFrom(bag->transitionItems, From(bag->transitionItems).OrderBy(ParsingTable::TransitionItem::Compare));
-							for(vint k=0;k<bag->transitionItems.Count()-1;k++)
+							for(vint k1=0;k1<bag->transitionItems.Count()-1;k1++)
+							for(vint k2=k1+1;k2<bag->transitionItems.Count();k2++)
 							{
-								Ptr<ParsingTable::TransitionItem> t1=bag->transitionItems[k];
-								Ptr<ParsingTable::TransitionItem> t2=bag->transitionItems[k+1];
+								Ptr<ParsingTable::TransitionItem> t1=bag->transitionItems[k1];
+								Ptr<ParsingTable::TransitionItem> t2=bag->transitionItems[k2];
 								if(ParsingTable::TransitionItem::CheckOrder(t1, t2, false)==ParsingTable::TransitionItem::UnknownOrder)
 								{
-									WString stateName=itow(i)+L"["+table->GetStateInfo(i).stateName+L"]";
-									WString tokenName=
-										j==ParsingTable::TokenBegin?WString(L"$TokenBegin"):
-										j==ParsingTable::TokenFinish?WString(L"$TokenFinish"):
-										j==ParsingTable::TryReduce?WString(L"$TryReduce"):
-										table->GetTokenInfo(j).name;
-									errors.Add(new ParsingError(stateIds[i]->ownerRule, L"Conflict happened in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
+									if(!CreateLookAhead(table, t1, t2, 16))
+									{
+										WString stateName=itow(i)+L"["+table->GetStateInfo(i).stateName+L"]";
+										WString tokenName=
+											j==ParsingTable::TokenBegin?WString(L"$TokenBegin"):
+											j==ParsingTable::TokenFinish?WString(L"$TokenFinish"):
+											j==ParsingTable::TryReduce?WString(L"$TryReduce"):
+											table->GetTokenInfo(j).name;
+										errors.Add(new ParsingError(stateIds[i]->ownerRule, L"Conflict happened in transition of \""+tokenName+L"\" of state \""+stateName+L"\"."));
+									}
 								}
 							}
 						}
