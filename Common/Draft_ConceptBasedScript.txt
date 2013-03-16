@@ -1,3 +1,19 @@
+fib = {
+    fib_ x y = {
+        yield y;
+        join fib_ y (x+y);
+    }
+    yield 1;
+    join fib_ 1 1;
+}
+
+main = {
+    N = int.Parse readln;
+    xs = take N fib;
+    ave = xs / len xs;
+    print $ sum $ map {sqrt (?-ave)} xs;
+}
+
 ========================================================
 Types
 ========================================================
