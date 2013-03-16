@@ -10,9 +10,12 @@ fib = {
 main = {
     N = int.Parse readln;
     xs = take N fib;
-    ave = xs / len xs;
+    ave = sum xs / len xs;
     print $ sum $ map {sqrt (?-ave)} xs;
 }
+
+operator use: and or xor bitand bitor bitxor ...
+              & for list concatination
 
 ========================================================
 Types
