@@ -14,20 +14,20 @@ namespace vl
 ParsingTable::LookAheadInfo
 ***********************************************************************/
 
-			bool ParsingTable::LookAheadInfo::IsPrefixOf(Ptr<LookAheadInfo> a, Ptr<LookAheadInfo> b)
+			ParsingTable::LookAheadInfo::PrefixResult ParsingTable::LookAheadInfo::TestPrefix(Ptr<LookAheadInfo> a, Ptr<LookAheadInfo> b)
 			{
 				if(a->tokens.Count()>b->tokens.Count())
 				{
-					return false;
+					return ParsingTable::LookAheadInfo::NotPrefix;
 				}
 				for(vint i=0;i<a->tokens.Count();i++)
 				{
 					if(a->tokens[i]!=b->tokens[i])
 					{
-						return false;
+						return ParsingTable::LookAheadInfo::NotPrefix;
 					}
 				}
-				return true;
+				return a->tokens.Count()<b->tokens.Count()?ParsingTable::LookAheadInfo::Prefix:ParsingTable::LookAheadInfo::Equal;
 			}
 
 			void ParsingTable::LookAheadInfo::Walk(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::List<Ptr<LookAheadInfo>>& newInfos)

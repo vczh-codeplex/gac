@@ -6,7 +6,7 @@ class NameMapExpression
 
 class NameTableExpression
 {
-	NameMapExpression maps;
+	NameMapExpression[] maps;
 }
 
 token NAME = "[a-zA-Z_]/w*";

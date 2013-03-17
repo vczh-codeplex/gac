@@ -40,7 +40,7 @@ CreateLookAhead
 					{
 						return From(la2).All([&](Ptr<ParsingTable::LookAheadInfo> lai2)
 						{
-							return !ParsingTable::LookAheadInfo::IsPrefixOf(lai, lai2);
+							return ParsingTable::LookAheadInfo::TestPrefix(lai, lai2)==ParsingTable::LookAheadInfo::NotPrefix;
 						});
 					}),
 					true);
@@ -80,7 +80,17 @@ CreateLookAhead
 					{
 						return From(sla).All([&](Ptr<ParsingTable::LookAheadInfo> lai2)
 						{
-							return lai==lai2 || !ParsingTable::LookAheadInfo::IsPrefixOf(lai, lai2);
+							if(lai==lai2) return true;
+							ParsingTable::LookAheadInfo::PrefixResult result=ParsingTable::LookAheadInfo::TestPrefix(lai, lai2);
+							switch(result)
+							{
+							case ParsingTable::LookAheadInfo::Prefix:
+								return false;
+							case ParsingTable::LookAheadInfo::Equal:
+								return lai<lai2;
+							default:
+								return true;
+							}
 						});
 					}));
 			}

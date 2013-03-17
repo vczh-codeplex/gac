@@ -127,7 +127,14 @@ namespace vl
 					{
 					}
 
-					static bool								IsPrefixOf(Ptr<LookAheadInfo> a, Ptr<LookAheadInfo> b);
+					enum PrefixResult
+					{
+						Prefix,
+						Equal,
+						NotPrefix,
+					};
+
+					static PrefixResult						TestPrefix(Ptr<LookAheadInfo> a, Ptr<LookAheadInfo> b);
 					static void								Walk(Ptr<ParsingTable> table, Ptr<LookAheadInfo> previous, vint state, collections::List<Ptr<LookAheadInfo>>& newInfos);
 				};
 
