@@ -49,10 +49,11 @@ ParsingTokenWalker::LookAheadEnumerator
 
 			bool ParsingTokenWalker::LookAheadEnumerator::Next()
 			{
-				vint newIndex=walker->GetNextIndex(index);
-				if(newIndex==-3) return false;
-				index=newIndex;
-				currentValue=walker->GetTableTokenIndex(index);
+				vint newToken=walker->GetNextIndex(currentToken);
+				if(newToken==-3) return false;
+				currentToken=newToken;
+				index++;
+				currentValue=walker->GetTableTokenIndex(currentToken);
 				return true;
 			}
 
@@ -268,6 +269,37 @@ ParsingState
 					for(vint i=0;i<bag->transitionItems.Count();i++)
 					{
 						ParsingTable::TransitionItem* item=bag->transitionItems[i].Obj();
+						bool passLookAheadTest=true;
+						if(item->lookAheads.Count()>0 && lookAheadTokens)
+						{
+							passLookAheadTest=false;
+							FOREACH(Ptr<ParsingTable::LookAheadInfo>, info, item->lookAheads)
+							{
+								vint index=0;
+								FOREACH(vint, token, *lookAheadTokens)
+								{
+									if(info->tokens[index]!=token)
+									{
+										break;
+									}
+									index++;
+									if(index>=info->tokens.Count())
+									{
+										break;
+									}
+								}
+								if(index==info->tokens.Count())
+								{
+									passLookAheadTest=true;
+									break;
+								}
+							}
+						}
+						if(!passLookAheadTest)
+						{
+							continue;
+						}
+
 						vint availableStackDepth=stateStack.Count()-future->reduceStateCount;
 						vint totalStackDepth=stateStack.Count()-future->reduceStateCount+future->shiftStates.Count();
 						if(item->stackPattern.Count()<=totalStackDepth)
