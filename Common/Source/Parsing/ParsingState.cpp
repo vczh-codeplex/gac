@@ -11,10 +11,63 @@ namespace vl
 			using namespace regex;
 
 /***********************************************************************
+ParsingTokenWalker::LookAheadEnumerator
+***********************************************************************/
+
+			ParsingTokenWalker::LookAheadEnumerator::LookAheadEnumerator(const ParsingTokenWalker* _walker, vint _currentToken)
+				:walker(_walker)
+				,firstToken(_currentToken)
+				,currentToken(_currentToken)
+				,currentValue(-1)
+				,index(-1)
+			{
+			}
+
+			ParsingTokenWalker::LookAheadEnumerator::LookAheadEnumerator(const LookAheadEnumerator& _enumerator)
+				:walker(_enumerator.walker)
+				,firstToken(_enumerator.firstToken)
+				,currentToken(_enumerator.currentToken)
+				,currentValue(_enumerator.currentValue)
+				,index(_enumerator.index)
+			{
+			}
+
+			IEnumerator<vint>* ParsingTokenWalker::LookAheadEnumerator::Clone()const
+			{
+				return new LookAheadEnumerator(*this);
+			}
+
+			const vint& ParsingTokenWalker::LookAheadEnumerator::Current()const
+			{
+				return currentValue;
+			}
+
+			vint ParsingTokenWalker::LookAheadEnumerator::Index()const
+			{
+				return index;
+			}
+
+			bool ParsingTokenWalker::LookAheadEnumerator::Next()
+			{
+				vint newIndex=walker->GetNextIndex(index);
+				if(newIndex==-3) return false;
+				index=newIndex;
+				currentValue=walker->GetTableTokenIndex(index);
+				return true;
+			}
+
+			void ParsingTokenWalker::LookAheadEnumerator::Reset()
+			{
+				currentToken=firstToken;
+				currentValue=-1;
+				index=-1;
+			}
+
+/***********************************************************************
 ParsingTokenWalker
 ***********************************************************************/
 
-			vint ParsingTokenWalker::GetNextIndex(vint index)
+			vint ParsingTokenWalker::GetNextIndex(vint index)const
 			{
 				if(index==-2)
 				{
@@ -46,6 +99,31 @@ ParsingTokenWalker
 				}
 			}
 
+			vint ParsingTokenWalker::GetTableTokenIndex(vint index)const
+			{
+				if(index==-1)
+				{
+					return ParsingTable::TokenBegin;
+				}
+				else if(index==tokens.Count())
+				{
+					return ParsingTable::TokenFinish;
+				}
+				else if(0<=index && index<tokens.Count())
+				{
+					return table->GetTableTokenIndex(tokens[index].token);
+				}
+				else
+				{
+					return -1;
+				}
+			}
+
+			collections::IEnumerator<vint>* ParsingTokenWalker::CreateEnumerator()const
+			{
+				return new LookAheadEnumerator(this, currentToken);
+			}
+
 			ParsingTokenWalker::ParsingTokenWalker(collections::List<regex::RegexToken>& _tokens, Ptr<ParsingTable> _table)
 				:tokens(_tokens)
 				,table(_table)
@@ -57,9 +135,9 @@ ParsingTokenWalker
 			{
 			}
 
-			collections::IEnumerator<vint>* ParsingTokenWalker::CreateEnumerator()const
+			const collections::IEnumerable<vint>& ParsingTokenWalker::GetLookahead()const
 			{
-				return 0;
+				return *this;
 			}
 
 			void ParsingTokenWalker::Reset()
@@ -73,33 +151,18 @@ ParsingTokenWalker
 				return currentToken!=-3;
 			}
 
-			vint ParsingTokenWalker::GetTableTokenIndex()
+			vint ParsingTokenWalker::GetTableTokenIndex()const
 			{
-				if(currentToken==-1)
-				{
-					return ParsingTable::TokenBegin;
-				}
-				else if(currentToken==tokens.Count())
-				{
-					return ParsingTable::TokenFinish;
-				}
-				else if(0<=currentToken && currentToken<tokens.Count())
-				{
-					return table->GetTableTokenIndex(tokens[currentToken].token);
-				}
-				else
-				{
-					return -1;
-				}
+				return GetTableTokenIndex(currentToken);
 			}
 
-			regex::RegexToken* ParsingTokenWalker::GetRegexToken()
+			regex::RegexToken* ParsingTokenWalker::GetRegexToken()const
 			{
 				vint index=GetTokenIndexInStream();
 				return index==-1?0:&tokens[index];
 			}
 
-			vint ParsingTokenWalker::GetTokenIndexInStream()
+			vint ParsingTokenWalker::GetTokenIndexInStream()const
 			{
 				if(0<=currentToken && currentToken<tokens.Count())
 				{
@@ -197,7 +260,7 @@ ParsingState
 				return currentState;
 			}
 
-			ParsingTable::TransitionItem* ParsingState::MatchTokenInFuture(vint tableTokenIndex, Future* future, collections::IEnumerable<vint>* lookAheadTokens)
+			ParsingTable::TransitionItem* ParsingState::MatchTokenInFuture(vint tableTokenIndex, Future* future, const collections::IEnumerable<vint>* lookAheadTokens)
 			{
 				ParsingTable::TransitionBag* bag=table->GetTransitionBag(future->currentState, tableTokenIndex).Obj();
 				if(bag)
@@ -235,7 +298,7 @@ ParsingState
 				return 0;
 			}
 
-			ParsingTable::TransitionItem* ParsingState::MatchToken(vint tableTokenIndex, collections::IEnumerable<vint>* lookAheadTokens)
+			ParsingTable::TransitionItem* ParsingState::MatchToken(vint tableTokenIndex, const collections::IEnumerable<vint>* lookAheadTokens)
 			{
 				Future future;
 				future.currentState=currentState;
@@ -363,7 +426,7 @@ ParsingState
 				return result;
 			}
 
-			bool ParsingState::ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now, collections::IEnumerable<vint>* lookAheadTokens)
+			bool ParsingState::ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now, const collections::IEnumerable<vint>* lookAheadTokens)
 			{
 				ParsingTable::TransitionItem* selectedItem=0;
 				if(previous)
@@ -383,7 +446,7 @@ ParsingState
 				return true;
 			}
 
-			ParsingState::TransitionResult ParsingState::ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken, collections::IEnumerable<vint>* lookAheadTokens)
+			ParsingState::TransitionResult ParsingState::ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken, const collections::IEnumerable<vint>* lookAheadTokens)
 			{
 				ParsingTable::TransitionItem* item=MatchToken(tableTokenIndex, lookAheadTokens);
 				if(item)
@@ -403,7 +466,7 @@ ParsingState
 				RegexToken* regexToken=walker->GetRegexToken();
 
 				bool tryReduce=false;
-				TransitionResult result=ReadToken(token, regexToken, walker.Obj());
+				TransitionResult result=ReadToken(token, regexToken, &walker->GetLookahead());
 				if(!result)
 				{
 					result=ReadToken(ParsingTable::TryReduce, 0, 0);
