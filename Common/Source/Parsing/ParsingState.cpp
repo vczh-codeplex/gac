@@ -11,6 +11,107 @@ namespace vl
 			using namespace regex;
 
 /***********************************************************************
+ParsingTokenWalker
+***********************************************************************/
+
+			vint ParsingTokenWalker::GetNextIndex(vint index)
+			{
+				if(index==-2)
+				{
+					return -1;
+				}
+				else if(index==-1)
+				{
+					return 0;
+				}
+				else if(0<=index && index<tokens.Count())
+				{
+					index++;
+					while(0<=index && index<tokens.Count())
+					{
+						if(table->IsInputToken(tokens[index].token))
+						{
+							break;
+						}
+						else
+						{
+							index++;
+						}
+					}
+					return index;
+				}
+				else
+				{
+					return -3;
+				}
+			}
+
+			ParsingTokenWalker::ParsingTokenWalker(collections::List<regex::RegexToken>& _tokens, Ptr<ParsingTable> _table)
+				:tokens(_tokens)
+				,table(_table)
+				,currentToken(-2)
+			{
+			}
+
+			ParsingTokenWalker::~ParsingTokenWalker()
+			{
+			}
+
+			collections::IEnumerator<vint>* ParsingTokenWalker::CreateEnumerator()const
+			{
+				return 0;
+			}
+
+			void ParsingTokenWalker::Reset()
+			{
+				currentToken=-2;
+			}
+
+			bool ParsingTokenWalker::Move()
+			{
+				currentToken=GetNextIndex(currentToken);
+				return currentToken!=-3;
+			}
+
+			vint ParsingTokenWalker::GetTableTokenIndex()
+			{
+				if(currentToken==-1)
+				{
+					return ParsingTable::TokenBegin;
+				}
+				else if(currentToken==tokens.Count())
+				{
+					return ParsingTable::TokenFinish;
+				}
+				else if(0<=currentToken && currentToken<tokens.Count())
+				{
+					return table->GetTableTokenIndex(tokens[currentToken].token);
+				}
+				else
+				{
+					return -1;
+				}
+			}
+
+			regex::RegexToken* ParsingTokenWalker::GetRegexToken()
+			{
+				vint index=GetTokenIndexInStream();
+				return index==-1?0:&tokens[index];
+			}
+
+			vint ParsingTokenWalker::GetTokenIndexInStream()
+			{
+				if(0<=currentToken && currentToken<tokens.Count())
+				{
+					return currentToken;
+				}
+				else
+				{
+					return -1;
+				}
+			}
+
+/***********************************************************************
 ParsingState
 ***********************************************************************/
 
@@ -18,12 +119,12 @@ ParsingState
 				:input(_input)
 				,table(_table)
 				,currentState(-1)
-				,currentToken(-1)
 				,tokenSequenceIndex(0)
 				,shiftToken(0)
 				,reduceToken(0)
 			{
 				CopyFrom(tokens, table->GetLexer().Parse(input, codeIndex));
+				walker=new ParsingTokenWalker(tokens, table);
 			}
 
 			ParsingState::~ParsingState()
@@ -66,9 +167,10 @@ ParsingState
 					const ParsingTable::RuleInfo& info=table->GetRuleInfo(i);
 					if(info.name==rule)
 					{
+						walker->Reset();
+						walker->Move();
 						stateStack.Clear();
 						currentState=info.rootStartState;
-						currentToken=-1;
 						tokenSequenceIndex=0;
 						shiftToken=0;
 						reduceToken=0;
@@ -80,7 +182,9 @@ ParsingState
 
 			vint ParsingState::GetCurrentToken()
 			{
-				return currentToken;
+				return walker->GetTableTokenIndex()==ParsingTable::TokenFinish
+					?tokens.Count()
+					:walker->GetTokenIndexInStream();
 			}
 
 			const collections::List<vint>& ParsingState::GetStateStack()
@@ -93,14 +197,7 @@ ParsingState
 				return currentState;
 			}
 
-			ParsingTable::TransitionItem* ParsingState::MatchToken(vint tableTokenIndex)
-			{
-				Future future;
-				future.currentState=currentState;
-				return MatchTokenInFuture(tableTokenIndex, &future);
-			}
-
-			ParsingTable::TransitionItem* ParsingState::MatchTokenInFuture(vint tableTokenIndex, Future* future)
+			ParsingTable::TransitionItem* ParsingState::MatchTokenInFuture(vint tableTokenIndex, Future* future, collections::IEnumerable<vint>* lookAheadTokens)
 			{
 				ParsingTable::TransitionBag* bag=table->GetTransitionBag(future->currentState, tableTokenIndex).Obj();
 				if(bag)
@@ -138,197 +235,186 @@ ParsingState
 				return 0;
 			}
 
-			ParsingState::TransitionResult ParsingState::ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken)
+			ParsingTable::TransitionItem* ParsingState::MatchToken(vint tableTokenIndex, collections::IEnumerable<vint>* lookAheadTokens)
 			{
-				ParsingTable::TransitionItem* item=MatchToken(tableTokenIndex);
-				if(item)
+				Future future;
+				future.currentState=currentState;
+				return MatchTokenInFuture(tableTokenIndex, &future, lookAheadTokens);
+			}
+
+			void ParsingState::RunTransitionInFuture(ParsingTable::TransitionItem* transition, Future* previous, Future* now)
+			{
+				if(previous)
 				{
-					if(regexToken)
+					now->reduceStateCount=previous->reduceStateCount;
+					CopyFrom(now->shiftStates, previous->shiftStates);
+				}
+				else
+				{
+					now->reduceStateCount=0;
+					now->shiftStates.Clear();
+				}
+				now->currentState=transition->targetState;
+				now->selectedToken=transition->token;
+				now->previous=previous;
+				now->next=0;
+
+				for(vint j=0;j<transition->instructions.Count();j++)
+				{
+					ParsingTable::Instruction& ins=transition->instructions[j];
+					switch(ins.instructionType)
 					{
-						if(!shiftToken)
+					case ParsingTable::Instruction::Shift:
 						{
+							now->shiftStates.Add(ins.stateParameter);
+						}
+						break;
+					case ParsingTable::Instruction::Reduce:
+						{
+							if(now->shiftStates.Count()==0)
+							{
+								now->reduceStateCount++;
+							}
+							else
+							{
+								now->shiftStates.RemoveAt(now->shiftStates.Count()-1);
+							}
+						}
+						break;
+					}
+				}
+			}
+
+			ParsingState::TransitionResult ParsingState::RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken)
+			{
+				if(regexToken)
+				{
+					if(!shiftToken)
+					{
+						shiftToken=regexToken;
+						reduceToken=regexToken;
+					}
+				}
+				if(transition->token>=ParsingTable::UserTokenStart)
+				{
+					if(tokenSequenceIndex==0)
+					{
+						shiftTokenStack.Add(shiftToken);
+					}
+					tokenSequenceIndex++;
+				}
+
+				TransitionResult result;
+				result.tableTokenIndex=transition->token;
+				result.token=regexToken;
+				result.tokenIndexInStream=regexToken?walker->GetTokenIndexInStream():-1;
+				result.tableStateSource=currentState;
+				result.tableStateTarget=transition->targetState;
+				result.transition=transition;
+
+				for(vint j=0;j<transition->instructions.Count();j++)
+				{
+					ParsingTable::Instruction& ins=transition->instructions[j];
+					switch(ins.instructionType)
+					{
+					case ParsingTable::Instruction::Shift:
+						{
+							stateStack.Add(ins.stateParameter);
+
+							shiftTokenStack.Add(shiftToken);
 							shiftToken=regexToken;
 							reduceToken=regexToken;
 						}
-					}
-					if(tableTokenIndex>=ParsingTable::UserTokenStart)
-					{
-						if(tokenSequenceIndex==0)
+						break;
+					case ParsingTable::Instruction::Reduce:
 						{
-							shiftTokenStack.Add(shiftToken);
+							stateStack.RemoveAt(stateStack.Count()-1);
+
+							result.AddShiftReduceRange(shiftToken, reduceToken);
+							shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
+							shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
 						}
-						tokenSequenceIndex++;
-					}
-
-					TransitionResult result;
-					result.tableTokenIndex=tableTokenIndex;
-					result.token=regexToken;
-					result.tokenIndexInStream=regexToken?currentToken:-1;
-					result.tableStateSource=currentState;
-					result.tableStateTarget=item->targetState;
-					result.transition=item;
-
-					for(vint j=0;j<item->instructions.Count();j++)
-					{
-						ParsingTable::Instruction& ins=item->instructions[j];
-						switch(ins.instructionType)
+						break;
+					case ParsingTable::Instruction::LeftRecursiveReduce:
 						{
-						case ParsingTable::Instruction::Shift:
+							result.AddShiftReduceRange(shiftToken, reduceToken);
+							if(regexToken)
 							{
-								stateStack.Add(ins.stateParameter);
-
-								shiftTokenStack.Add(shiftToken);
-								shiftToken=regexToken;
 								reduceToken=regexToken;
 							}
-							break;
-						case ParsingTable::Instruction::Reduce:
-							{
-								stateStack.RemoveAt(stateStack.Count()-1);
-
-								result.AddShiftReduceRange(shiftToken, reduceToken);
-								shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
-								shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
-							}
-							break;
-						case ParsingTable::Instruction::LeftRecursiveReduce:
-							{
-								result.AddShiftReduceRange(shiftToken, reduceToken);
-								if(regexToken)
-								{
-									reduceToken=regexToken;
-								}
-							}
-							break;
 						}
+						break;
 					}
+				}
 
-					if(regexToken)
-					{
-						reduceToken=regexToken;
-					}
+				if(regexToken)
+				{
+					reduceToken=regexToken;
+				}
 
-					if(tableTokenIndex==ParsingTable::TokenFinish)
-					{
-						shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
-						shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
-						result.AddShiftReduceRange(shiftToken, reduceToken);
-					}
+				if(transition->token==ParsingTable::TokenFinish)
+				{
+					shiftToken=shiftTokenStack[shiftTokenStack.Count()-1];
+					shiftTokenStack.RemoveAt(shiftTokenStack.Count()-1);
+					result.AddShiftReduceRange(shiftToken, reduceToken);
+				}
 
-					currentState=item->targetState;
-					return result;
+				currentState=transition->targetState;
+				return result;
+			}
+
+			bool ParsingState::ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now, collections::IEnumerable<vint>* lookAheadTokens)
+			{
+				ParsingTable::TransitionItem* selectedItem=0;
+				if(previous)
+				{
+					selectedItem=MatchTokenInFuture(tableTokenIndex, previous, lookAheadTokens);
+				}
+				else
+				{
+					selectedItem=MatchToken(tableTokenIndex, lookAheadTokens);
+				}
+
+				if(!selectedItem)
+				{
+					return false;
+				}
+				RunTransitionInFuture(selectedItem, previous, now);
+				return true;
+			}
+
+			ParsingState::TransitionResult ParsingState::ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken, collections::IEnumerable<vint>* lookAheadTokens)
+			{
+				ParsingTable::TransitionItem* item=MatchToken(tableTokenIndex, lookAheadTokens);
+				if(item)
+				{
+					return RunTransition(item, regexToken);
 				}
 				return TransitionResult();
 			}
 
 			ParsingState::TransitionResult ParsingState::ReadToken()
 			{
-				vint token=-1;
-				RegexToken* regexToken=0;
-				while(0<=currentToken && currentToken<tokens.Count())
-				{
-					if(table->IsInputToken((regexToken=&tokens[currentToken])->token))
-					{
-						break;
-					}
-					else
-					{
-						regexToken=0;
-						currentToken++;
-					}
-				}
-				if(currentToken==-1)
-				{
-					token=ParsingTable::TokenBegin;
-				}
-				else if(currentToken==tokens.Count())
-				{
-					token=ParsingTable::TokenFinish;
-				}
-				else if(0<=currentToken && currentToken<tokens.Count())
-				{
-					token=table->GetTableTokenIndex(regexToken->token);
-				}
-				else
+				if(walker->GetTableTokenIndex()==-1)
 				{
 					return TransitionResult();
 				}
+				vint token=walker->GetTableTokenIndex();
+				RegexToken* regexToken=walker->GetRegexToken();
 
 				bool tryReduce=false;
-				TransitionResult result=ReadToken(token, regexToken);
+				TransitionResult result=ReadToken(token, regexToken, walker.Obj());
 				if(!result)
 				{
-					result=ReadToken(ParsingTable::TryReduce, 0);
+					result=ReadToken(ParsingTable::TryReduce, 0, 0);
 					tryReduce=true;
 				}
 
 				if(result && !tryReduce)
 				{
-					currentToken++;
+					walker->Move();
 				}
 				return result;
-			}
-
-			bool ParsingState::ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now)
-			{
-				ParsingTable::TransitionItem* selectedItem=0;
-				if(previous)
-				{
-					selectedItem=MatchTokenInFuture(tableTokenIndex, previous);
-				}
-				else
-				{
-					selectedItem=MatchToken(tableTokenIndex);
-				}
-
-				if(selectedItem)
-				{
-					if(previous)
-					{
-						now->reduceStateCount=previous->reduceStateCount;
-						CopyFrom(now->shiftStates, previous->shiftStates);
-					}
-					else
-					{
-						now->reduceStateCount=0;
-						now->shiftStates.Clear();
-					}
-					now->currentState=selectedItem->targetState;
-					now->selectedToken=tableTokenIndex;
-					now->previous=previous;
-					now->next=0;
-
-					for(vint j=0;j<selectedItem->instructions.Count();j++)
-					{
-						ParsingTable::Instruction& ins=selectedItem->instructions[j];
-						switch(ins.instructionType)
-						{
-						case ParsingTable::Instruction::Shift:
-							{
-								now->shiftStates.Add(ins.stateParameter);
-							}
-							break;
-						case ParsingTable::Instruction::Reduce:
-							{
-								if(now->shiftStates.Count()==0)
-								{
-									now->reduceStateCount++;
-								}
-								else
-								{
-									now->shiftStates.RemoveAt(now->shiftStates.Count()-1);
-								}
-							}
-							break;
-						}
-					}
-
-					return true;
-				}
-				else
-				{
-					return false;
-				}
 			}
 
 /***********************************************************************
