@@ -137,7 +137,7 @@ ParsingAutoRecoverParser
 						while(currentTableTokenIndex<table->GetTokenCount() && usedFutureCount<recoverFutures.Count())
 						{
 							ParsingState::Future* now=&recoverFutures[usedFutureCount];
-							if(state.ReadTokenInFuture(currentTableTokenIndex, previous, now))
+							if(state.ReadTokenInFuture(currentTableTokenIndex, previous, now, 0))
 							{
 								if(currentTableTokenIndex==targetTableTokenIndex)
 								{
@@ -181,7 +181,7 @@ ParsingAutoRecoverParser
 				}
 				else
 				{
-					return state.ReadToken(selectedTableTokenIndex, 0);
+					return state.ReadToken(selectedTableTokenIndex, 0, 0);
 				}
 			}
 
