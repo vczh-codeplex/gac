@@ -57,7 +57,7 @@ Ptr<ParsingDefinition> CreateDefinition(Ptr<ParsingStrictParser> parser, const W
 	return definition;
 }
 
-Ptr<ParsingTable> CreateTable(Ptr<ParsingDefinition> definition, StreamWriter& writer)
+Ptr<ParsingTable> CreateTable(Ptr<ParsingDefinition> definition, StreamWriter& writer, bool ambiguity)
 {
 	ParsingSymbolManager symbolManager;
 	List<Ptr<ParsingError>> errors;
@@ -82,7 +82,7 @@ Ptr<ParsingTable> CreateTable(Ptr<ParsingDefinition> definition, StreamWriter& w
 
 	Ptr<ParsingTable> table=GenerateTable(definition, jointPDA, errors);
 	LogParsingData(table, L"Table", writer);
-	CheckError;
+	if(!ambiguity) CheckError;
 
 	return table;
 }
@@ -1081,61 +1081,93 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 	writer.WriteString(itow(table->GetRuleCount()));
 	writer.WriteLine(L");");
 
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define SET_TOKEN_INFO(INDEX, NAME, REGEX) table->SetTokenInfo(INDEX, vl::parsing::tabling::ParsingTable::TokenInfo(NAME, REGEX));");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define SET_DISCARD_TOKEN_INFO(INDEX, NAME, REGEX) table->SetDiscardTokenInfo(INDEX, vl::parsing::tabling::ParsingTable::TokenInfo(NAME, REGEX));");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define SET_STATE_INFO(INDEX, RULE, STATE, EXPR) table->SetStateInfo(INDEX, vl::parsing::tabling::ParsingTable::StateInfo(RULE, STATE, EXPR));");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define SET_RULE_INFO(INDEX, NAME, TYPE, STARTSTATE) table->SetRuleInfo(INDEX, vl::parsing::tabling::ParsingTable::RuleInfo(NAME, TYPE, STARTSTATE));");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define BEGIN_TRANSITION_BAG(STATE, TOKEN) {vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag; table->SetTransitionBag(STATE, TOKEN, bag);");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define BEGIN_TRANSITION_ITEM(TOKEN, TARGETSTATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(TOKEN, TARGETSTATE); bag->transitionItems.Add(item);");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define END_TRANSITION_ITEM }");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define END_TRANSITION_BAG }");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define ITEM_STACK_PATTERN(STATE) item->stackPattern.Add(STATE);");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define ITEM_INSTRUCTION(TYPE, STATE, NAME, VALUE) item->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(vl::parsing::tabling::ParsingTable::Instruction::InstructionType::TYPE, STATE, NAME, VALUE));");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define BEGIN_LOOK_AHEAD(STATE) {vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo> lookAheadInfo=new vl::Ptr<vl::parsing::tabling::ParsingTable::LookAheadInfo; item->lookAheads.Add(lookAheadInfo); lookAheadInfo->state=STATE;");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define LOOK_AHEAD(TOKEN) lookAheadInfo->tokens.Add(TOKEN);");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define END_LOOK_AHEAD }");
+	writer.WriteLine(L"");
+
 	for(vint i=0;i<table->GetTokenCount();i++)
 	{
 		const ParsingTable::TokenInfo& info=table->GetTokenInfo(i);
 		writer.WriteString(prefix);
-		writer.WriteString(L"\ttable->SetTokenInfo(");
+		writer.WriteString(L"\tSET_TOKEN_INFO(");
 		writer.WriteString(itow(i));
-		writer.WriteString(L", vl::parsing::tabling::ParsingTable::TokenInfo(");
+		writer.WriteString(L", ");
 		WriteCppString(info.name, writer);
 		writer.WriteString(L", ");
 		WriteCppString(info.regex, writer);
-		writer.WriteLine(L"));");
+		writer.WriteLine(L")");
 	}
+	writer.WriteLine(L"");
 
 	for(vint i=0;i<table->GetDiscardTokenCount();i++)
 	{
 		const ParsingTable::TokenInfo& info=table->GetDiscardTokenInfo(i);
 		writer.WriteString(prefix);
-		writer.WriteString(L"\ttable->SetDiscardTokenInfo(");
+		writer.WriteString(L"\tSET_DISCARD_TOKEN_INFO(");
 		writer.WriteString(itow(i));
-		writer.WriteString(L", vl::parsing::tabling::ParsingTable::TokenInfo(");
+		writer.WriteString(L", ");
 		WriteCppString(info.name, writer);
 		writer.WriteString(L", ");
 		WriteCppString(info.regex, writer);
-		writer.WriteLine(L"));");
+		writer.WriteLine(L")");
 	}
+	writer.WriteLine(L"");
 
 	for(vint i=0;i<table->GetStateCount();i++)
 	{
 		const ParsingTable::StateInfo& info=table->GetStateInfo(i);
 		writer.WriteString(prefix);
-		writer.WriteString(L"\ttable->SetStateInfo(");
+		writer.WriteString(L"\tSET_STATE_INFO(");
 		writer.WriteString(itow(i));
-		writer.WriteString(L", vl::parsing::tabling::ParsingTable::StateInfo(");
+		writer.WriteString(L", ");
 		WriteCppString(info.ruleName, writer);
 		writer.WriteString(L", ");
 		WriteCppString(info.stateName, writer);
 		writer.WriteString(L", ");
 		WriteCppString(info.stateExpression, writer);
-		writer.WriteLine(L"));");
+		writer.WriteLine(L")");
 	}
+	writer.WriteLine(L"");
 
 	for(vint i=0;i<table->GetRuleCount();i++)
 	{
 		const ParsingTable::RuleInfo& info=table->GetRuleInfo(i);
 		writer.WriteString(prefix);
-		writer.WriteString(L"\ttable->SetRuleInfo(");
+		writer.WriteString(L"\tSET_RULE_INFO(");
 		writer.WriteString(itow(i));
-		writer.WriteString(L", vl::parsing::tabling::ParsingTable::RuleInfo(");
+		writer.WriteString(L", ");
 		WriteCppString(info.name, writer);
 		writer.WriteString(L", ");
 		WriteCppString(info.type, writer);
 		writer.WriteString(L", ");
 		writer.WriteString(itow(info.rootStartState));
-		writer.WriteLine(L"));");
+		writer.WriteLine(L")");
 	}
+	writer.WriteLine(L"");
 
 	for(vint i=0;i<table->GetStateCount();i++)
 	{
@@ -1145,34 +1177,50 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 			if(bag)
 			{
 				writer.WriteString(prefix);
-				writer.WriteLine(L"\t{");
-				writer.WriteString(prefix);
-				writer.WriteLine(L"\t\tvl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag;");
+				writer.WriteString(L"\tBEGIN_TRANSITION_BAG(");
+				writer.WriteString(itow(i));
+				writer.WriteString(L", ");
+				writer.WriteString(itow(j));
+				writer.WriteLine(L")");
+				writer.WriteLine(L"");
 				for(vint k=0;k<bag->transitionItems.Count();k++)
 				{
 					Ptr<ParsingTable::TransitionItem> item=bag->transitionItems[k];
 					writer.WriteString(prefix);
-					writer.WriteLine(L"\t\t{");
-					writer.WriteString(prefix);
-					writer.WriteString(L"\t\t\tvl::Ptr<vl::parsing::tabling::ParsingTable::TransitionItem> item=new vl::parsing::tabling::ParsingTable::TransitionItem(");
+					writer.WriteString(L"\t\tBEGIN_TRANSITION_ITEM(");
 					writer.WriteString(itow(item->token));
 					writer.WriteString(L", ");
 					writer.WriteString(itow(item->targetState));
-					writer.WriteLine(L");");
+					writer.WriteLine(L")");
 
-					FOREACH(int, state, item->stackPattern)
+					FOREACH(Ptr<ParsingTable::LookAheadInfo>, lookAheadInfo, item->lookAheads)
 					{
 						writer.WriteString(prefix);
-						writer.WriteString(L"\t\t\titem->stackPattern.Add(");
+						writer.WriteString(L"\t\tBEGIN_LOOK_AHEAD(");
+						writer.WriteString(itow(lookAheadInfo->state));
+						writer.WriteString(L" ");
+
+						FOREACH(vint, token, lookAheadInfo->tokens)
+						{
+							writer.WriteString(L"LOOK_AHEAD(");
+							writer.WriteString(itow(token));
+							writer.WriteString(L" ");
+						}
+						writer.WriteLine(L"END_LOOK_AHEAD");
+					}
+
+					FOREACH(vint, state, item->stackPattern)
+					{
+						writer.WriteString(prefix);
+						writer.WriteString(L"\t\tITEM_STACK_PATTERN(");
 						writer.WriteString(itow(state));
-						writer.WriteLine(L");");
+						writer.WriteLine(L")");
 					}
 
 					FOREACH(ParsingTable::Instruction, ins, item->instructions)
 					{
 						writer.WriteString(prefix);
-						writer.WriteString(L"\t\t\titem->instructions.Add(vl::parsing::tabling::ParsingTable::Instruction(");
-						writer.WriteString(L"vl::parsing::tabling::ParsingTable::Instruction::InstructionType::");
+						writer.WriteString(L"\t\tITEM_INSTRUCTION(");
 						switch(ins.instructionType)
 						{
 						case ParsingTable::Instruction::Create:
@@ -1206,22 +1254,16 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 						WriteCppString(ins.nameParameter, writer);
 						writer.WriteString(L", ");
 						WriteCppString(ins.value, writer);
-						writer.WriteLine(L"));");
+						writer.WriteLine(L");");
 					}
 
 					writer.WriteString(prefix);
-					writer.WriteLine(L"\t\t\tbag->transitionItems.Add(item);");
-					writer.WriteString(prefix);
-					writer.WriteLine(L"\t\t}");
+					writer.WriteLine(L"\t\tEND_TRANSITION_ITEM");
+					writer.WriteLine(L"");
 				}
 				writer.WriteString(prefix);
-				writer.WriteString(L"\t\ttable->SetTransitionBag(");
-				writer.WriteString(itow(i));
-				writer.WriteString(L", ");
-				writer.WriteString(itow(j));
-				writer.WriteLine(L", bag);");
-				writer.WriteString(prefix);
-				writer.WriteLine(L"\t}");
+				writer.WriteLine(L"\tEND_TRANSITION_BAG");
+				writer.WriteLine(L"");
 			}
 		}
 	}
@@ -1230,6 +1272,34 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 	writer.WriteLine(L"\ttable->Initialize();");
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\treturn table;");
+
+	writer.WriteLine(L"");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef SET_TOKEN_INFO");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef SET_DISCARD_TOKEN_INFO");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef SET_STATE_INFO");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef SET_RULE_INFO");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef BEGIN_TRANSITION_BAG");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef BEGIN_TRANSITION_ITEM");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef END_TRANSITION_ITEM");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef END_TRANSITION_BAG");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef ITEM_STACK_PATTERN");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef ITEM_INSTRUCTION");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef BEGIN_LOOK_AHEAD");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef LOOK_AHEAD");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef END_LOOK_AHEAD");
 
 	writer.WriteString(prefix);
 	writer.WriteLine(L"}");
@@ -1417,6 +1487,7 @@ int wmain(int argc, wchar_t* argv[])
 	Regex regexNamespace(L"^namespace:((<namespace>[^.]+)(.(<namespace>[^.]+))*)?$");
 	Regex regexParser(L"^parser:(<name>/w+)/((<rule>/w+)/)$");
 	Regex regexParsingTree(L"^parsingtree:(<value>enabled|disabled)$");
+	Regex regexAmbiguity(L"^ambiguity:(<value>enabled|disabled)$");
 	Ptr<ParsingStrictParser> parser=CreateBootstrapStrictParser();
 
 	Console::SetTitle(L"Vczh Parser Generator for C++");
@@ -1458,6 +1529,7 @@ int wmain(int argc, wchar_t* argv[])
 			Dictionary<WString, WString> codeParsers;
 			WString codeGrammar, codeClassPrefix, codeGuard;
 			bool parsingTree=true;
+			bool ambiguity=false;
 			{
 				FileStream fileStream(inputPath, FileStream::ReadOnly);
 				if(!fileStream.IsAvailable())
@@ -1511,6 +1583,11 @@ int wmain(int argc, wchar_t* argv[])
 						WString value=match->Groups().Get(L"value").Get(0).Value();
 						parsingTree=value==L"enabled";
 					}
+					else if((match=regexAmbiguity.Match(line)) && match->Success())
+					{
+						WString value=match->Groups().Get(L"value").Get(0).Value();
+						ambiguity=value==L"enabled";
+					}
 					else
 					{
 						Console::WriteLine(L"error> Unknown property \""+line+L".");
@@ -1547,7 +1624,7 @@ int wmain(int argc, wchar_t* argv[])
 					goto STOP_PARSING;
 				}
 
-				table=CreateTable(definition, writer);
+				table=CreateTable(definition, writer, ambiguity);
 				if(!table)
 				{
 					Console::WriteLine(L"error> Error happened. Open \""+logPath+L" for details.");
