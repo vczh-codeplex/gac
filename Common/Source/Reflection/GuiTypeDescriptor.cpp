@@ -217,7 +217,7 @@ description::Value
 					if(targetValueType!=RawPtr && targetValueType!=SharedPtr) return false;
 					break;
 				case Text:
-					return targetValueType==Text && GetTypeDescriptor()==targetType;
+					return targetValueType==Text;
 				}
 				return GetTypeDescriptor()->CanConvertTo(targetType);
 			}

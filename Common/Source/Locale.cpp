@@ -38,9 +38,9 @@ namespace vl
 
 	WString Transform(const WString& localeName, const WString& input, DWORD flag)
 	{
-		int length=LCMapStringEx(localeName.Buffer(), flag, input.Buffer(), input.Length()+1, NULL, 0, NULL, NULL, NULL);
+		int length=LCMapStringEx(localeName.Buffer(), flag, input.Buffer(), (int)input.Length()+1, NULL, 0, NULL, NULL, NULL);
 		Array<wchar_t> buffer(length);
-		LCMapStringEx(localeName.Buffer(), flag, input.Buffer(), input.Length()+1, &buffer[0], buffer.Count(), NULL, NULL, NULL);
+		LCMapStringEx(localeName.Buffer(), flag, input.Buffer(), (int)input.Length()+1, &buffer[0], (int)buffer.Count(), NULL, NULL, NULL);
 		return &buffer[0];
 	}
 
@@ -130,7 +130,7 @@ Locale
 		SYSTEMTIME st=DateTimeToSystemTime(date);
 		int length=GetDateFormatEx(localeName.Buffer(), 0, &st, format.Buffer(), NULL, 0, NULL);
 		Array<wchar_t> buffer(length);
-		GetDateFormatEx(localeName.Buffer(), 0, &st, format.Buffer(), &buffer[0], buffer.Count(), NULL);
+		GetDateFormatEx(localeName.Buffer(), 0, &st, format.Buffer(), &buffer[0], (int)buffer.Count(), NULL);
 		return &buffer[0];
 	}
 
@@ -139,7 +139,7 @@ Locale
 		SYSTEMTIME st=DateTimeToSystemTime(time);
 		int length=GetTimeFormatEx(localeName.Buffer(), 0, &st, format.Buffer(), NULL, 0);
 		Array<wchar_t> buffer(length);
-		GetTimeFormatEx(localeName.Buffer(), 0, &st, format.Buffer(),&buffer[0], buffer.Count());
+		GetTimeFormatEx(localeName.Buffer(), 0, &st, format.Buffer(),&buffer[0], (int)buffer.Count());
 		return &buffer[0];
 	}
 
@@ -147,7 +147,7 @@ Locale
 	{
 		int length=GetNumberFormatEx(localeName.Buffer(), 0, number.Buffer(), NULL, NULL, 0);
 		Array<wchar_t> buffer(length);
-		GetNumberFormatEx(localeName.Buffer(), 0, number.Buffer(), NULL, &buffer[0], buffer.Count());
+		GetNumberFormatEx(localeName.Buffer(), 0, number.Buffer(), NULL, &buffer[0], (int)buffer.Count());
 		return &buffer[0];
 	}
 
@@ -155,7 +155,7 @@ Locale
 	{
 		int length=GetCurrencyFormatEx(localeName.Buffer(), 0, currency.Buffer(), NULL, NULL, 0);
 		Array<wchar_t> buffer(length);
-		GetCurrencyFormatEx(localeName.Buffer(), 0, currency.Buffer(), NULL, &buffer[0], buffer.Count());
+		GetCurrencyFormatEx(localeName.Buffer(), 0, currency.Buffer(), NULL, &buffer[0], (int)buffer.Count());
 		return &buffer[0];
 	}
 
@@ -216,7 +216,7 @@ Locale
 
 	vint Locale::Compare(const WString& s1, const WString& s2, Normalization normalization)
 	{
-		switch(CompareStringEx(localeName.Buffer(), TranslateNormalization(normalization), s1.Buffer(), s1.Length(), s2.Buffer(), s2.Length(), NULL, NULL, NULL))
+		switch(CompareStringEx(localeName.Buffer(), TranslateNormalization(normalization), s1.Buffer(), (int)s1.Length(), s2.Buffer(), (int)s2.Length(), NULL, NULL, NULL))
 		{
 		case CSTR_LESS_THAN: return -1;
 		case CSTR_GREATER_THAN: return 1;
@@ -226,7 +226,7 @@ Locale
 
 	vint Locale::CompareOrdinal(const WString& s1, const WString& s2)
 	{
-		switch(CompareStringOrdinal(s1.Buffer(), s1.Length(), s2.Buffer(), s2.Length(), FALSE))
+		switch(CompareStringOrdinal(s1.Buffer(), (int)s1.Length(), s2.Buffer(), (int)s2.Length(), FALSE))
 		{
 		case CSTR_LESS_THAN: return -1;
 		case CSTR_GREATER_THAN: return 1;
@@ -236,7 +236,7 @@ Locale
 
 	vint Locale::CompareOrdinalIgnoreCase(const WString& s1, const WString& s2)
 	{
-		switch(CompareStringOrdinal(s1.Buffer(), s1.Length(), s2.Buffer(), s2.Length(), TRUE))
+		switch(CompareStringOrdinal(s1.Buffer(), (int)s1.Length(), s2.Buffer(), (int)s2.Length(), TRUE))
 		{
 		case CSTR_LESS_THAN: return -1;
 		case CSTR_GREATER_THAN: return 1;
@@ -247,26 +247,26 @@ Locale
 	collections::Pair<vint, vint> Locale::FindFirst(const WString& text, const WString& find, Normalization normalization)
 	{
 		int length=0;
-		int result=FindNLSStringEx(localeName.Buffer(), FIND_FROMSTART | TranslateNormalization(normalization), text.Buffer(), text.Length(), find.Buffer(), find.Length(), &length, NULL, NULL, NULL);
+		int result=FindNLSStringEx(localeName.Buffer(), FIND_FROMSTART | TranslateNormalization(normalization), text.Buffer(), (int)text.Length(), find.Buffer(), (int)find.Length(), &length, NULL, NULL, NULL);
 		return result==-1?Pair<vint, vint>(-1, 0):Pair<vint, vint>(result, length);
 	}
 
 	collections::Pair<vint, vint> Locale::FindLast(const WString& text, const WString& find, Normalization normalization)
 	{
 		int length=0;
-		int result=FindNLSStringEx(localeName.Buffer(), FIND_FROMEND | TranslateNormalization(normalization), text.Buffer(), text.Length(), find.Buffer(), find.Length(), &length, NULL, NULL, NULL);
+		int result=FindNLSStringEx(localeName.Buffer(), FIND_FROMEND | TranslateNormalization(normalization), text.Buffer(), (int)text.Length(), find.Buffer(), (int)find.Length(), &length, NULL, NULL, NULL);
 		return result==-1?Pair<vint, vint>(-1, 0):Pair<vint, vint>(result, length);
 	}
 
 	bool Locale::StartsWith(const WString& text, const WString& find, Normalization normalization)
 	{
-		int result=FindNLSStringEx(localeName.Buffer(), FIND_STARTSWITH | TranslateNormalization(normalization), text.Buffer(), text.Length(), find.Buffer(), find.Length(), NULL, NULL, NULL, NULL);
+		int result=FindNLSStringEx(localeName.Buffer(), FIND_STARTSWITH | TranslateNormalization(normalization), text.Buffer(), (int)text.Length(), find.Buffer(), (int)find.Length(), NULL, NULL, NULL, NULL);
 		return result!=-1;
 	}
 
 	bool Locale::EndsWidth(const WString& text, const WString& find, Normalization normalization)
 	{
-		int result=FindNLSStringEx(localeName.Buffer(), FIND_ENDSWITH | TranslateNormalization(normalization), text.Buffer(), text.Length(), find.Buffer(), find.Length(), NULL, NULL, NULL, NULL);
+		int result=FindNLSStringEx(localeName.Buffer(), FIND_ENDSWITH | TranslateNormalization(normalization), text.Buffer(), (int)text.Length(), find.Buffer(), (int)find.Length(), NULL, NULL, NULL, NULL);
 		return result!=-1;
 	}
 }
