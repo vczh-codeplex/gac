@@ -747,7 +747,7 @@ CharEncoder
 					for(vint i=0;i<TestCount;i++)
 					{
 						int test=tests[i];
-						results[i]=IsTextUnicode(buffer, size, &test)!=0;
+						results[i]=IsTextUnicode(buffer, (int)size, &test)!=0;
 					}
 
 					if(size%2==0
@@ -766,7 +766,7 @@ CharEncoder
 						for(vint i=0;i<3;i++)
 						{
 							int test=tests[i+3];
-							results[i]=IsTextUnicode(buffer, size, &test)!=0;
+							results[i]=IsTextUnicode(buffer, (int)size, &test)!=0;
 						}
 						for(vint i=0;i<size;i+=2)
 						{

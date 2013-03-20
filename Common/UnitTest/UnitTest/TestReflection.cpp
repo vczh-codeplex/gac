@@ -318,7 +318,7 @@ namespace test
 		{
 			return From(bases)
 				.Select([](const Ptr<Base>& base){return base->a;})
-				.Aggregate(0, [](vint a, vint b){return a+b;});
+				.Aggregate((vint)0, [](vint a, vint b){return a+b;});
 		}
 
 		List<Ptr<Base>>			bases3;
@@ -337,7 +337,7 @@ namespace test
 		{
 			return From(bases3)
 				.Select([](const Ptr<Base>& base){return base->a;})
-				.Aggregate(0, [](vint a, vint b){return a+b;});
+				.Aggregate((vint)0, [](vint a, vint b){return a+b;});
 		}
 
 		Func<vint(vint)> Sum3(Func<vint(vint)> f1, Func<vint(vint)> f2)

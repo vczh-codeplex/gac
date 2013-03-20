@@ -417,7 +417,7 @@ Collections
 				template<typename T>
 				collections::LazyList<T> GetLazyList()
 				{
-					return collections::Range(0, GetCount())
+					return collections::Range<vint>(0, GetCount())
 						.Select([this](vint i)
 						{
 							return UnboxValue<T>(Get(i));
@@ -451,7 +451,7 @@ Collections
 				template<typename K, typename V>
 				collections::LazyList<collections::Pair<K, V>> GetLazyList()
 				{
-					return collections::Range(0, GetCount())
+					return collections::Range<vint>(0, GetCount())
 						.Select([this](vint i)
 						{
 							return collections::Pair<K, V>(UnboxValue<K>(GetKeys()->Get(i)), UnboxValue<V>(GetValues()->Get(i)));

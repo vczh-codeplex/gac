@@ -773,6 +773,14 @@ TypeInfoRetriver Helper Functions (BoxValue, UnboxValue)
 				static T UnboxValue(const Value& value, ITypeDescriptor* typeDescriptor, const WString& valueName)
 				{
 					ITypedValueSerializer<T>* serializer=dynamic_cast<ITypedValueSerializer<T>*>(value.GetTypeDescriptor()->GetValueSerializer());
+					if(!serializer)
+					{
+						if(!typeDescriptor)
+						{
+							typeDescriptor=GetTypeDescriptor<typename TypeInfoRetriver<T>::Type>();
+						}
+						serializer=dynamic_cast<ITypedValueSerializer<T>*>(typeDescriptor->GetValueSerializer());
+					}
 					T result;
 					if(!serializer->Deserialize(value, result))
 					{
