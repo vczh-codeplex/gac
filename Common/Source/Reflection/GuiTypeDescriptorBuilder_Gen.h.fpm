@@ -188,7 +188,7 @@ $( )
 $( )
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					$if($eq($count,0),if(arguments && arguments->Count()!=0) throw ArgumentCountMismtatchException();,if(!arguments || arguments->Count()!=$count) throw ArgumentCountMismtatchException();)
+					$if($eq($count,0),if(arguments && arguments->GetCount()!=0) throw ArgumentCountMismtatchException();,if(!arguments || arguments->GetCount()!=$count) throw ArgumentCountMismtatchException();)
 $loop($count,0,$FUNCTION_PREPARE_PARAMETER)
 					$if($function,R result = ,$( )) function($ARGUMENT_LIST($count));
 					return $if($function,BoxParameter<R>(result),Value());

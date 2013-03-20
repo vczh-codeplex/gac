@@ -288,15 +288,17 @@ TypeDescriptorImpl
 			};
 
 /***********************************************************************
-TypeFlagSelector
+TypeFlagTester
 ***********************************************************************/
 
-			struct TypeFlags
+			enum class TypeFlags
 			{
-				struct ReadonlyListType{};
-				struct ListType{};
-				struct FunctionType{};
-				struct NonGenericType{};
+				NonGenericType			=0,
+				FunctionType			=1<<0,
+				ReadonlyListType		=1<<1,
+				ListType				=1<<2,
+				ReadonlyDictionaryType	=1<<3,
+				DictionaryType			=1<<4,
 			};
 
 			template<typename T>
@@ -311,85 +313,128 @@ TypeFlagSelector
 				T* pointer;
 			};
 
-			template<typename TDerived>
-			struct IsInheritsFromEnumerable
+			template<typename TDerived, TypeFlags Flag>
+			struct TypeFlagTester
 			{
-				template<typename T>
-				static void* Inherit(collections::IEnumerable<T>* source){}
-				static char Inherit(void* source){}
-				static char Inherit(const void* source){}
-
-				static const bool										Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*);
+				static const TypeFlags									Result=TypeFlags::NonGenericType;
 			};
 
 			template<typename TDerived>
-			struct IsInheritsFromConstEnumerable
-			{
-				template<typename T>
-				static void* Inherit(const collections::IEnumerable<T>* source){}
-				static char Inherit(void* source){}
-				static char Inherit(const void* source){}
-
-				static const bool										Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*);
-			};
-
-			template<typename TDerived>
-			struct IsInheritsFromFunction
+			struct TypeFlagTester<TDerived, TypeFlags::FunctionType>
 			{
 				template<typename T>
 				static void* Inherit(Func<T>* source){}
 				static char Inherit(void* source){}
 				static char Inherit(const void* source){}
 
-				static const bool										Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*);
+				static const TypeFlags									Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*)?TypeFlags::FunctionType:TypeFlags::NonGenericType;
 			};
 
-			template<typename T, bool IsEnumerable, bool IsConstEnumerable, bool IsFunction>
+			template<typename TDerived>
+			struct TypeFlagTester<TDerived, TypeFlags::ReadonlyListType>
+			{
+				template<typename T>
+				static void* Inherit(const collections::IEnumerable<T>* source){}
+				static char Inherit(void* source){}
+				static char Inherit(const void* source){}
+
+				static const TypeFlags									Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*)?TypeFlags::ReadonlyListType:TypeFlags::NonGenericType;
+			};
+
+			template<typename TDerived>
+			struct TypeFlagTester<TDerived, TypeFlags::ListType>
+			{
+				template<typename T>
+				static void* Inherit(collections::IEnumerable<T>* source){}
+				static char Inherit(void* source){}
+				static char Inherit(const void* source){}
+
+				static const TypeFlags									Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*)?TypeFlags::ListType:TypeFlags::NonGenericType;
+			};
+
+			template<typename TDerived>
+			struct TypeFlagTester<TDerived, TypeFlags::ReadonlyDictionaryType>
+			{
+				template<typename K, typename V>
+				static void* Inherit(const collections::Dictionary<K, V>* source){}
+				static char Inherit(void* source){}
+				static char Inherit(const void* source){}
+
+				static const TypeFlags									Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*)?TypeFlags::ReadonlyDictionaryType:TypeFlags::NonGenericType;
+			};
+
+			template<typename TDerived>
+			struct TypeFlagTester<TDerived, TypeFlags::DictionaryType>
+			{
+				template<typename K, typename V>
+				static void* Inherit(collections::Dictionary<K, V>* source){}
+				static char Inherit(void* source){}
+				static char Inherit(const void* source){}
+
+				static const TypeFlags									Result=sizeof(Inherit(((ValueRetriver<TDerived>*)0)->pointer))==sizeof(void*)?TypeFlags::DictionaryType:TypeFlags::NonGenericType;
+			};
+
+/***********************************************************************
+TypeFlagSelector
+***********************************************************************/
+
+			template<typename T, TypeFlags Flag>
 			struct TypeFlagSelectorCase
 			{
-				typedef int												TypeFlag;
+				static const  TypeFlags									Result=TypeFlags::NonGenericType;
 			};
 
 			template<typename T>
-			struct TypeFlagSelectorCase<T, true, true, false>
+			struct TypeFlagSelectorCase<T, (TypeFlags)((vint)TypeFlags::FunctionType)>
 			{
-				typedef TypeFlags::ListType								TypeFlag;
+				static const  TypeFlags									Result=TypeFlags::FunctionType;
 			};
 
 			template<typename T>
-			struct TypeFlagSelectorCase<T, false, true, false>
+			struct TypeFlagSelectorCase<T, (TypeFlags)((vint)TypeFlags::ListType|(vint)TypeFlags::ReadonlyListType)>
 			{
-				typedef TypeFlags::ReadonlyListType						TypeFlag;
+				static const  TypeFlags									Result=TypeFlags::ListType;
 			};
 
 			template<typename T>
-			struct TypeFlagSelectorCase<T, false, false, true>
+			struct TypeFlagSelectorCase<T, (TypeFlags)((vint)TypeFlags::ReadonlyListType)>
 			{
-				typedef TypeFlags::FunctionType							TypeFlag;
+				static const  TypeFlags									Result=TypeFlags::ReadonlyListType;
 			};
 
 			template<typename T>
-			struct TypeFlagSelectorCase<T, false, false, false>
+			struct TypeFlagSelectorCase<T, (TypeFlags)((vint)TypeFlags::ListType|(vint)TypeFlags::ReadonlyListType|(vint)TypeFlags::DictionaryType|(vint)TypeFlags::ReadonlyDictionaryType)>
 			{
-				typedef TypeFlags::NonGenericType						TypeFlag;
+				static const  TypeFlags									Result=TypeFlags::DictionaryType;
+			};
+
+			template<typename T>
+			struct TypeFlagSelectorCase<T, (TypeFlags)((vint)TypeFlags::ReadonlyListType|(vint)TypeFlags::ReadonlyDictionaryType)>
+			{
+				static const  TypeFlags									Result=TypeFlags::ReadonlyDictionaryType;
 			};
 
 			template<typename T>
 			struct TypeFlagSelector
 			{
-				typedef typename TypeFlagSelectorCase<
-					T,
-					IsInheritsFromEnumerable<T>::Result,
-					IsInheritsFromConstEnumerable<T>::Result,
-					IsInheritsFromFunction<T>::Result
-					>::TypeFlag											TypeFlag;
+				static const TypeFlags									Result =
+					TypeFlagSelectorCase<
+					T, 
+					(TypeFlags)
+					( (vint)TypeFlagTester<T, TypeFlags::FunctionType>::Result
+					| (vint)TypeFlagTester<T, TypeFlags::ReadonlyListType>::Result
+					| (vint)TypeFlagTester<T, TypeFlags::ListType>::Result
+					| (vint)TypeFlagTester<T, TypeFlags::ReadonlyDictionaryType>::Result
+					| (vint)TypeFlagTester<T, TypeFlags::DictionaryType>::Result
+					)
+					>::Result;
 			};
 
 /***********************************************************************
 TypeInfoRetriver
 ***********************************************************************/
 
-			template<typename T, typename TTypeFlag>
+			template<typename T, TypeFlags Flag>
 			struct DetailTypeInfoRetriver
 			{
 				static const ITypeInfo::Decorator						Decorator=ITypeInfo::TypeDescriptor;
@@ -402,8 +447,7 @@ TypeInfoRetriver
 			template<typename T>
 			struct TypeInfoRetriver
 			{
-				typedef typename TypeFlagSelector<T>::TypeFlag									TypeFlag;
-
+				static const TypeFlags															TypeFlag=TypeFlagSelector<T>::Result;
 				static const ITypeInfo::Decorator												Decorator=DetailTypeInfoRetriver<T, TypeFlag>::Decorator;
 
 				typedef typename DetailTypeInfoRetriver<T, TypeFlag>::Type						Type;
@@ -588,6 +632,72 @@ TypeInfoRetriver
 				}
 			};
 
+			template<typename T>
+			struct DetailTypeInfoRetriver<T, TypeFlags::ReadonlyDictionaryType>
+			{
+				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
+
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueReadonlyList										Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					typedef typename DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>::Type		ContainerType;
+					typedef typename ContainerType::KeyContainer									KeyContainer;
+					typedef typename ContainerType::ValueContainer									ValueContainer;
+					typedef typename KeyContainer::ElementType										KeyType;
+					typedef typename ValueContainer::ElementType									ValueType;
+
+					Ptr<TypeInfoImpl> arrayType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					arrayType->SetTypeDescriptor(Description<IValueReadonlyDictionary>::GetAssociatedTypeDescriptor());
+
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(arrayType);
+					genericType->AddGenericArgument(TypeInfoRetriver<KeyType>::CreateTypeInfo());
+					genericType->AddGenericArgument(TypeInfoRetriver<ValueType>::CreateTypeInfo());
+
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+
+			template<typename T>
+			struct DetailTypeInfoRetriver<T, TypeFlags::DictionaryType>
+			{
+				typedef DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>	UpLevelRetriver;
+
+				static const ITypeInfo::Decorator								Decorator=UpLevelRetriver::Decorator;
+				typedef IValueReadonlyList										Type;
+				typedef typename UpLevelRetriver::TempValueType					TempValueType;
+				typedef typename UpLevelRetriver::ResultReferenceType			ResultReferenceType;
+				typedef typename UpLevelRetriver::ResultNonReferenceType		ResultNonReferenceType;
+
+				static Ptr<ITypeInfo> CreateTypeInfo()
+				{
+					typedef typename DetailTypeInfoRetriver<T, TypeFlags::NonGenericType>::Type		ContainerType;
+					typedef typename ContainerType::KeyContainer									KeyContainer;
+					typedef typename ContainerType::ValueContainer									ValueContainer;
+					typedef typename KeyContainer::ElementType										KeyType;
+					typedef typename ValueContainer::ElementType									ValueType;
+
+					Ptr<TypeInfoImpl> arrayType=new TypeInfoImpl(ITypeInfo::TypeDescriptor);
+					arrayType->SetTypeDescriptor(Description<IValueDictionary>::GetAssociatedTypeDescriptor());
+
+					Ptr<TypeInfoImpl> genericType=new TypeInfoImpl(ITypeInfo::Generic);
+					genericType->SetElementType(arrayType);
+					genericType->AddGenericArgument(TypeInfoRetriver<KeyType>::CreateTypeInfo());
+					genericType->AddGenericArgument(TypeInfoRetriver<ValueType>::CreateTypeInfo());
+
+					Ptr<TypeInfoImpl> type=new TypeInfoImpl(ITypeInfo::SharedPtr);
+					type->SetElementType(genericType);
+					return type;
+				}
+			};
+
 /***********************************************************************
 TypeInfoRetriver Helper Functions (BoxValue, UnboxValue)
 ***********************************************************************/
@@ -706,7 +816,7 @@ TypeInfoRetriver Helper Functions (BoxValue, UnboxValue)
 TypeInfoRetriver Helper Functions (UnboxParameter)
 ***********************************************************************/
 
-			template<typename T, typename TTypeFlag>
+			template<typename T, TypeFlags Flag>
 			struct ParameterAccessor
 			{
 			};
@@ -762,15 +872,59 @@ TypeInfoRetriver Helper Functions (UnboxParameter)
 			};
 
 			template<typename T>
+			struct ParameterAccessor<T, TypeFlags::ReadonlyDictionaryType>
+			{
+				static Value BoxParameter(T& object, ITypeDescriptor* typeDescriptor)
+				{
+					Ptr<IValueReadonlyDictionary> result=new ValueReadonlyDictionaryWrapper<T*>(&object);
+					return BoxValue<Ptr<IValueReadonlyDictionary>>(result, Description<IValueReadonlyList>::GetAssociatedTypeDescriptor());
+				}
+
+				static void UnboxParameter(const Value& value, T& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef typename T::KeyContainer					KeyContainer;
+					typedef typename T::ValueContainer					ValueContainer;
+					typedef typename KeyContainer::ElementType			KeyType;
+					typedef typename ValueContainer::ElementType		ValueType;
+
+					Ptr<IValueReadonlyDictionary> dictionaryProxy=UnboxValue<Ptr<IValueReadonlyDictionary>>(value, typeDescriptor, valueName);
+					LazyList<Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
+					collections::CopyFrom(result, lazyList);
+				}
+			};
+
+			template<typename T>
+			struct ParameterAccessor<T, TypeFlags::DictionaryType>
+			{
+				static Value BoxParameter(T& object, ITypeDescriptor* typeDescriptor)
+				{
+					Ptr<IValueDictionary> result=new ValueDictionaryWrapper<T*>(&object);
+					return BoxValue<Ptr<IValueDictionary>>(result, Description<IValueList>::GetAssociatedTypeDescriptor());
+				}
+
+				static void UnboxParameter(const Value& value, T& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
+				{
+					typedef typename T::KeyContainer					KeyContainer;
+					typedef typename T::ValueContainer					ValueContainer;
+					typedef typename KeyContainer::ElementType			KeyType;
+					typedef typename ValueContainer::ElementType		ValueType;
+
+					Ptr<IValueDictionary> dictionaryProxy=UnboxValue<Ptr<IValueDictionary>>(value, typeDescriptor, valueName);
+					LazyList<Pair<KeyType, ValueType>> lazyList=dictionaryProxy->GetLazyList<KeyType, ValueType>();
+					collections::CopyFrom(result, lazyList);
+				}
+			};
+
+			template<typename T>
 			Value BoxParameter(typename TypeInfoRetriver<T>::ResultReferenceType object, ITypeDescriptor* typeDescriptor=0)
 			{
-				return ParameterAccessor<typename TypeInfoRetriver<T>::ResultNonReferenceType, typename TypeInfoRetriver<T>::TypeFlag>::BoxParameter(object, typeDescriptor);
+				return ParameterAccessor<typename TypeInfoRetriver<T>::ResultNonReferenceType, TypeInfoRetriver<T>::TypeFlag>::BoxParameter(object, typeDescriptor);
 			}
 
 			template<typename T>
 			void UnboxParameter(const Value& value, T& result, ITypeDescriptor* typeDescriptor=0, const WString& valueName=L"value")
 			{
-				ParameterAccessor<T, typename TypeInfoRetriver<T>::TypeFlag>::UnboxParameter(value, result, typeDescriptor, valueName);
+				ParameterAccessor<T, TypeInfoRetriver<T>::TypeFlag>::UnboxParameter(value, result, typeDescriptor, valueName);
 			}
 
 /***********************************************************************

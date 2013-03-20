@@ -344,7 +344,7 @@ EventInfoImpl::EventHandlerImpl
 				eventArgs->Add(thisObject);
 				eventArgs->Add(arguments);
 				handler->Invoke(eventArgs);
-				if(eventArgs->Count()>=2)
+				if(eventArgs->GetCount()>=2)
 				{
 					arguments=eventArgs->Get(1);
 				}

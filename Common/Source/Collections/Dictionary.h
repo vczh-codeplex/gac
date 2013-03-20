@@ -25,6 +25,7 @@ namespace vl
 		>
 		class Dictionary : public Object, public virtual IEnumerable<Pair<KT, VT>>
 		{
+		public:
 			typedef SortedList<KT, KK>			KeyContainer;
 			typedef List<VT, VK>				ValueContainer;
 		protected:
@@ -122,9 +123,9 @@ namespace vl
 				return values.Get(keys.IndexOf(key));
 			}
 
-			bool Set(const KK& key, const VT& value)
+			bool Set(const KT& key, const VT& value)
 			{
-				vint index=keys.IndexOf(key);
+				vint index=keys.IndexOf(KeyType<KT>::GetKeyValue(key));
 				if(index==-1)
 				{
 					index=keys.Add(key);
