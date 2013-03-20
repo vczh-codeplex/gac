@@ -136,10 +136,12 @@ TypeName
 			const wchar_t* TypeInfo<bool>::TypeName						= L"system::Boolean";
 			const wchar_t* TypeInfo<wchar_t>::TypeName					= L"system::Char";
 			const wchar_t* TypeInfo<WString>::TypeName					= L"system::String";
-			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::ReadableList";
-			const wchar_t* TypeInfo<IValueList>::TypeName				= L"system::List";
-			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"system::InterfaceProxy";
-			const wchar_t* TypeInfo<IValueFunctionProxy>::TypeName		= L"system::Function";
+			const wchar_t* TypeInfo<IValueEnumerator>::TypeName			= L"system::IEnumerator";
+			const wchar_t* TypeInfo<IValueEnumerable>::TypeName			= L"system::IEnumerable";
+			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::IReadableList";
+			const wchar_t* TypeInfo<IValueList>::TypeName				= L"system::IList";
+			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"system::IInterfaceProxy";
+			const wchar_t* TypeInfo<IValueFunctionProxy>::TypeName		= L"system::IFunction";
 
 /***********************************************************************
 TypedValueSerializerProvider
@@ -367,8 +369,20 @@ Collections
 			BEGIN_CLASS_MEMBER(IDescriptable)
 			END_CLASS_MEMBER(IDescriptable)
 
-			BEGIN_CLASS_MEMBER(IValueReadonlyList)
+			BEGIN_CLASS_MEMBER(IValueEnumerator)
 				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Current)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Index)
+				CLASS_MEMBER_METHOD(Next, NO_PARAMETER)
+			END_CLASS_MEMBER(IValueEnumerator)
+
+			BEGIN_CLASS_MEMBER(IValueEnumerable)
+				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_METHOD(CreateEnumerator, NO_PARAMETER)
+			END_CLASS_MEMBER(IValueEnumerable)
+
+			BEGIN_CLASS_MEMBER(IValueReadonlyList)
+				CLASS_MEMBER_BASE(IValueEnumerable)
 				CLASS_MEMBER_METHOD(Count, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(Get, {L"index"})
 				CLASS_MEMBER_METHOD(Contains, {L"value"})
@@ -431,6 +445,8 @@ LoadPredefinedTypes
 					AddSerializableType<TypedValueSerializer<WString>>(manager);
 					ADD_TYPE_INFO(VoidValue)
 					ADD_TYPE_INFO(IDescriptable)
+					ADD_TYPE_INFO(IValueEnumerator)
+					ADD_TYPE_INFO(IValueEnumerable)
 					ADD_TYPE_INFO(IValueReadonlyList)
 					ADD_TYPE_INFO(IValueList)
 					ADD_TYPE_INFO(IValueInterfaceProxy)

@@ -27,6 +27,8 @@ namespace vl
 		class IEnumerator : public virtual Interface
 		{
 		public:
+			typedef T									ElementType;
+
 			virtual IEnumerator<T>*						Clone()const=0;
 			virtual const T&							Current()const=0;
 			virtual vint								Index()const=0;
