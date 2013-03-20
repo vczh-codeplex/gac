@@ -74,11 +74,7 @@ ParsingTokenWalker
 				{
 					return -1;
 				}
-				else if(index==-1)
-				{
-					return 0;
-				}
-				else if(0<=index && index<tokens.Count())
+				else if(-1<=index && index<tokens.Count())
 				{
 					index++;
 					while(0<=index && index<tokens.Count())
