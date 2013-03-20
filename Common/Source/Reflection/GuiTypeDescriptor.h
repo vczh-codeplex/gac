@@ -437,6 +437,23 @@ Collections
 				static Ptr<IValueList>			Create(collections::LazyList<Value> values);
 			};
 
+			class IValueReadonlyDictionary : public virtual IDescriptable, public Description<IValueReadonlyDictionary>
+			{
+			public:
+				virtual IValueReadonlyList*		GetKeys()=0;
+				virtual IValueReadonlyList*		GetValues()=0;
+				virtual vint					GetCount()=0;
+				virtual Value					Get(const Value& key)=0;
+			};
+
+			class IValueDictionary : public virtual IValueReadonlyDictionary, public Description<IValueDictionary>
+			{
+			public:
+				virtual void					Set(const Value& key, const Value& value)=0;
+				virtual bool					Remove(const Value& key)=0;
+				virtual void					Clear()=0;
+			};
+
 /***********************************************************************
 Collection Wrappers
 ***********************************************************************/
@@ -584,6 +601,62 @@ Collection Wrappers
 				void Clear()override
 				{
 					wrapperPointer->Clear();
+				}
+			};
+
+			template<typename T>
+			class ValueReadonlyDictionaryWrapper : public virtual Object, public virtual IValueReadonlyDictionary
+			{
+			protected:
+				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
+				typedef typename ContainerType::KeyContainer			KeyContainer;
+				typedef typename ContainerType::ValueContainer			ValueContainer;
+				typedef typename KeyContainer::ElementType				KeyType;
+				typedef typename ValueContainer::ElementType			ValueType;
+
+				T								wrapperPointer;
+			public:
+				ValueReadonlyDictionaryWrapper(const T& _wrapperPointer)
+					:wrapperPointer(_wrapperPointer)
+				{
+				}
+
+				IValueReadonlyList* GetKeys()override
+				{
+				}
+
+				IValueReadonlyList* GetValues()override
+				{
+				}
+
+				vint GetCount()override
+				{
+				}
+
+				Value Get(const Value& key)override
+				{
+				}
+			};
+			
+			template<typename T>
+			class ValueDictionaryWrapper : public virtual ValueReadonlyDictionaryWrapper<T>, public virtual IValueDictionary
+			{
+			public:
+				ValueDictionaryWrapper(const T& _wrapperPointer)
+					:ValueReadonlyDictionaryWrapper(_wrapperPointer)
+				{
+				}
+
+				void Set(const Value& key, const Value& value)override
+				{
+				}
+
+				bool Remove(const Value& key)override
+				{
+				}
+
+				void Clear()override
+				{
 				}
 			};
 #pragma warning(pop)
