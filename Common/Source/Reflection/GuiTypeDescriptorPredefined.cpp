@@ -136,12 +136,12 @@ TypeName
 			const wchar_t* TypeInfo<bool>::TypeName						= L"system::Boolean";
 			const wchar_t* TypeInfo<wchar_t>::TypeName					= L"system::Char";
 			const wchar_t* TypeInfo<WString>::TypeName					= L"system::String";
-			const wchar_t* TypeInfo<IValueEnumerator>::TypeName			= L"system::IEnumerator";
-			const wchar_t* TypeInfo<IValueEnumerable>::TypeName			= L"system::IEnumerable";
-			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::IReadableList";
-			const wchar_t* TypeInfo<IValueList>::TypeName				= L"system::IList";
-			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"system::IInterfaceProxy";
-			const wchar_t* TypeInfo<IValueFunctionProxy>::TypeName		= L"system::IFunction";
+			const wchar_t* TypeInfo<IValueEnumerator>::TypeName			= L"system::Enumerator";
+			const wchar_t* TypeInfo<IValueEnumerable>::TypeName			= L"system::Enumerable";
+			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::ReadableList";
+			const wchar_t* TypeInfo<IValueList>::TypeName				= L"system::List";
+			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"system::InterfaceProxy";
+			const wchar_t* TypeInfo<IValueFunctionProxy>::TypeName		= L"system::Function";
 
 /***********************************************************************
 TypedValueSerializerProvider

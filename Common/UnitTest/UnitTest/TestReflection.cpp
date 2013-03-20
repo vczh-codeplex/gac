@@ -614,7 +614,7 @@ namespace reflection_test
 	void TestReflectionList()
 	{
 		{
-			Value bases=Value::Create(L"system::IList");
+			Value bases=Value::Create(L"system::List");
 			bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 1))));
 			bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 2))));
 			bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 3))));
@@ -632,7 +632,7 @@ namespace reflection_test
 			TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 3)).GetProperty(L"a"))==4);
 		}
 		{
-			Value bases=Value::Create(L"system::IList");
+			Value bases=Value::Create(L"system::List");
 			bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 1))));
 			bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 2))));
 			bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 3))));
@@ -650,7 +650,7 @@ namespace reflection_test
 			TEST_ASSERT(UnboxValue<int>(baseArray.Invoke(L"Get", (Value::xs(), 3)).GetProperty(L"a"))==4);
 		}
 		{
-			Value bases=Value::Create(L"system::IList");
+			Value bases=Value::Create(L"system::List");
 			bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 1))));
 			bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 2))));
 			bases.Invoke(L"Add", (Value::xs(), Value::Create(L"test::Base", (Value::xs(), 3))));
