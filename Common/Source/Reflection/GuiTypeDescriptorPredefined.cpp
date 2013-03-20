@@ -140,6 +140,8 @@ TypeName
 			const wchar_t* TypeInfo<IValueEnumerable>::TypeName			= L"system::Enumerable";
 			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::ReadableList";
 			const wchar_t* TypeInfo<IValueList>::TypeName				= L"system::List";
+			const wchar_t* TypeInfo<IValueReadonlyDictionary>::TypeName	= L"system::ReadonlyDictionary";
+			const wchar_t* TypeInfo<IValueDictionary>::TypeName			= L"system::Dictionary";
 			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"system::InterfaceProxy";
 			const wchar_t* TypeInfo<IValueFunctionProxy>::TypeName		= L"system::Function";
 
@@ -383,7 +385,7 @@ Collections
 
 			BEGIN_CLASS_MEMBER(IValueReadonlyList)
 				CLASS_MEMBER_BASE(IValueEnumerable)
-				CLASS_MEMBER_METHOD(Count, NO_PARAMETER)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Count)
 				CLASS_MEMBER_METHOD(Get, {L"index"})
 				CLASS_MEMBER_METHOD(Contains, {L"value"})
 				CLASS_MEMBER_METHOD(IndexOf, {L"value"})
@@ -401,6 +403,21 @@ Collections
 				CLASS_MEMBER_METHOD(RemoveAt, {L"index"})
 				CLASS_MEMBER_METHOD(Clear, NO_PARAMETER)
 			END_CLASS_MEMBER(IValueList)
+
+			BEGIN_CLASS_MEMBER(IValueReadonlyDictionary)
+				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Keys)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Values)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Count)
+				CLASS_MEMBER_METHOD(Get, {L"key"})
+			END_CLASS_MEMBER(IValueReadonlyDictionary)
+
+			BEGIN_CLASS_MEMBER(IValueDictionary)
+				CLASS_MEMBER_BASE(IValueReadonlyDictionary)
+				CLASS_MEMBER_METHOD(Set, {L"key" _ L"value"})
+				CLASS_MEMBER_METHOD(Remove, {L"key"})
+				CLASS_MEMBER_METHOD(Clear, NO_PARAMETER)
+			END_CLASS_MEMBER(IValueDictionary)
 
 			BEGIN_CLASS_MEMBER(IValueInterfaceProxy)
 				CLASS_MEMBER_BASE(IDescriptable)
@@ -449,6 +466,8 @@ LoadPredefinedTypes
 					ADD_TYPE_INFO(IValueEnumerable)
 					ADD_TYPE_INFO(IValueReadonlyList)
 					ADD_TYPE_INFO(IValueList)
+					ADD_TYPE_INFO(IValueReadonlyDictionary)
+					ADD_TYPE_INFO(IValueDictionary)
 					ADD_TYPE_INFO(IValueInterfaceProxy)
 					ADD_TYPE_INFO(IValueFunctionProxy)
 				}

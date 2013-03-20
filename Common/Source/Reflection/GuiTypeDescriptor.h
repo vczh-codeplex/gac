@@ -409,7 +409,7 @@ Collections
 			class IValueReadonlyList : public virtual IValueEnumerable, public Description<IValueReadonlyList>
 			{
 			public:
-				virtual vint					Count()=0;
+				virtual vint					GetCount()=0;
 				virtual Value					Get(vint index)=0;
 				virtual bool					Contains(const Value& value)=0;
 				virtual vint					IndexOf(const Value& value)=0;
@@ -417,8 +417,11 @@ Collections
 				template<typename T>
 				collections::LazyList<T> GetLazyList()
 				{
-					return collections::Range(0, Count())
-						.Select([this](int i){return UnboxValue<T>(Get(i));});
+					return collections::Range(0, GetCount())
+						.Select([this](vint i)
+						{
+							return UnboxValue<T>(Get(i));
+						});
 				}
 			};
 
@@ -444,6 +447,16 @@ Collections
 				virtual IValueReadonlyList*		GetValues()=0;
 				virtual vint					GetCount()=0;
 				virtual Value					Get(const Value& key)=0;
+
+				template<typename K, typename V>
+				collections::LazyList<collections::Pair<K, V>> GetLazyList()
+				{
+					return collections::Range(0, GetCount())
+						.Select([this](vint i)
+						{
+							return collections::Pair<K, V>(UnboxValue<K>(GetKeys()->Get(i)), UnboxValue<V>(GetValues()->Get(i)));
+						});
+				}
 			};
 
 			class IValueDictionary : public virtual IValueReadonlyDictionary, public Description<IValueDictionary>
@@ -532,7 +545,7 @@ Collection Wrappers
 					return new ValueEnumeratorWrapper<Ptr<IEnumerator<ElementType>>>(wrapperPointer->CreateEnumerator());
 				}
 
-				vint Count()override
+				vint GetCount()override
 				{
 					return wrapperPointer->Count();
 				}
@@ -611,10 +624,13 @@ Collection Wrappers
 				typedef typename trait_helper::RemovePtr<T>::Type		ContainerType;
 				typedef typename ContainerType::KeyContainer			KeyContainer;
 				typedef typename ContainerType::ValueContainer			ValueContainer;
-				typedef typename KeyContainer::ElementType				KeyType;
+				typedef typename KeyContainer::ElementType				KeyValueType;
+				typedef typename KeyType<KeyValueType>::Type			KeyKeyType;
 				typedef typename ValueContainer::ElementType			ValueType;
 
 				T								wrapperPointer;
+				Ptr<IValueReadonlyList>			keys;
+				Ptr<IValueReadonlyList>			values;
 			public:
 				ValueReadonlyDictionaryWrapper(const T& _wrapperPointer)
 					:wrapperPointer(_wrapperPointer)
@@ -623,18 +639,32 @@ Collection Wrappers
 
 				IValueReadonlyList* GetKeys()override
 				{
+					if(!keys)
+					{
+						keys=new ValueReadonlyListWrapper<const KeyContainer*>(&wrapperPointer->Keys());
+					}
+					return keys.Obj();
 				}
 
 				IValueReadonlyList* GetValues()override
 				{
+					if(!values)
+					{
+						values=new ValueReadonlyListWrapper<const ValueContainer*>(&wrapperPointer->Values());
+					}
+					return values.Obj();
 				}
 
 				vint GetCount()override
 				{
+					return wrapperPointer->Count();
 				}
 
 				Value Get(const Value& key)override
 				{
+					KeyKeyType item=UnboxValue<KeyKeyType>(key);
+					ValueType result=wrapperPointer->Get(item);
+					return BoxValue<ValueType>(result);
 				}
 			};
 			
@@ -649,14 +679,20 @@ Collection Wrappers
 
 				void Set(const Value& key, const Value& value)override
 				{
+					KeyValueType item=UnboxValue<KeyValueType>(key);
+					ValueType result=UnboxValue<ValueType>(value);
+					wrapperPointer->Set(item, result);
 				}
 
 				bool Remove(const Value& key)override
 				{
+					KeyKeyType item=UnboxValue<KeyKeyType>(key);
+					return wrapperPointer->Remove(item);
 				}
 
 				void Clear()override
 				{
+					wrapperPointer->Clear();
 				}
 			};
 #pragma warning(pop)

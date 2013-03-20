@@ -3475,7 +3475,7 @@ Parameter Accessor: void()
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(arguments && arguments->Count()!=0) throw ArgumentCountMismtatchException();
+					if(arguments && arguments->GetCount()!=0) throw ArgumentCountMismtatchException();
 
 					  function();
 					return Value();
@@ -3538,7 +3538,7 @@ Parameter Accessor: R()
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(arguments && arguments->Count()!=0) throw ArgumentCountMismtatchException();
+					if(arguments && arguments->GetCount()!=0) throw ArgumentCountMismtatchException();
 
 					R result =  function();
 					return BoxParameter<R>(result);
@@ -3602,7 +3602,7 @@ Parameter Accessor: void(T0)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=1) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=1) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  
@@ -3668,7 +3668,7 @@ Parameter Accessor: R(T0)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=1) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=1) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  
@@ -3735,7 +3735,7 @@ Parameter Accessor: void(T0,T1)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=2) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=2) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -3804,7 +3804,7 @@ Parameter Accessor: R(T0,T1)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=2) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=2) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -3874,7 +3874,7 @@ Parameter Accessor: void(T0,T1,T2)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=3) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=3) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -3946,7 +3946,7 @@ Parameter Accessor: R(T0,T1,T2)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=3) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=3) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -4019,7 +4019,7 @@ Parameter Accessor: void(T0,T1,T2,T3)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=4) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=4) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -4094,7 +4094,7 @@ Parameter Accessor: R(T0,T1,T2,T3)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=4) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=4) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -4170,7 +4170,7 @@ Parameter Accessor: void(T0,T1,T2,T3,T4)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=5) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=5) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -4248,7 +4248,7 @@ Parameter Accessor: R(T0,T1,T2,T3,T4)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=5) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=5) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -4327,7 +4327,7 @@ Parameter Accessor: void(T0,T1,T2,T3,T4,T5)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=6) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=6) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -4408,7 +4408,7 @@ Parameter Accessor: R(T0,T1,T2,T3,T4,T5)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=6) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=6) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -4490,7 +4490,7 @@ Parameter Accessor: void(T0,T1,T2,T3,T4,T5,T6)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=7) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=7) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -4574,7 +4574,7 @@ Parameter Accessor: R(T0,T1,T2,T3,T4,T5,T6)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=7) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=7) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -4659,7 +4659,7 @@ Parameter Accessor: void(T0,T1,T2,T3,T4,T5,T6,T7)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=8) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=8) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -4746,7 +4746,7 @@ Parameter Accessor: R(T0,T1,T2,T3,T4,T5,T6,T7)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=8) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=8) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -4834,7 +4834,7 @@ Parameter Accessor: void(T0,T1,T2,T3,T4,T5,T6,T7,T8)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=9) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=9) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -4924,7 +4924,7 @@ Parameter Accessor: R(T0,T1,T2,T3,T4,T5,T6,T7,T8)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=9) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=9) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -5015,7 +5015,7 @@ Parameter Accessor: void(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=10) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=10) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
@@ -5108,7 +5108,7 @@ Parameter Accessor: R(T0,T1,T2,T3,T4,T5,T6,T7,T8,T9)
  
 				Value Invoke(Ptr<IValueList> arguments)override
 				{
-					if(!arguments || arguments->Count()!=10) throw ArgumentCountMismtatchException();
+					if(!arguments || arguments->GetCount()!=10) throw ArgumentCountMismtatchException();
 					typename TypeInfoRetriver<T0>::TempValueType p0;
 					UnboxParameter<typename TypeInfoRetriver<T0>::TempValueType>(arguments->Get(0), p0, 0, L"p0");
  					typename TypeInfoRetriver<T1>::TempValueType p1;
