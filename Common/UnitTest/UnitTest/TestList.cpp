@@ -765,6 +765,28 @@ TEST_CASE(TestCastOperation)
 	CHECK_LIST_ITEMS(dst, {0 _ 1 _ 2});
 }
 
+TEST_CASE(TestNullableCollection)
+{
+	List<Nullable<vint>> src;
+	src.Add(1);
+	src.Add(Nullable<vint>());
+	src.Add(2);
+	src.Add(Nullable<vint>());
+	src.Add(3);
+
+	List<vint> dst;
+	CopyFrom(dst, From(src)
+		.Select([](Nullable<vint> i){return i?i.Value():-1;})
+		);
+	CHECK_LIST_ITEMS(dst, {1 _ -1 _ 2 _ -1 _ 3});
+
+	CopyFrom(dst, From(src)
+		.Where([](Nullable<vint> i){return i;})
+		.Select([](Nullable<vint> i){return i.Value();})
+		);
+	CHECK_LIST_ITEMS(dst, {1 _ 2 _ 3});
+}
+
 bool dividable(vint a, vint b)
 {
 	return b%a==0;
