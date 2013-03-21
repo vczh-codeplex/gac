@@ -53,7 +53,7 @@
     <DisplayString Condition="reference == 0">[empty]</DisplayString>
     <DisplayString Condition="reference != 0">{*reference}</DisplayString>
     <Expand>
-      <Item Condition="reference != 0" Name="[ptr]">reference</Item>
+      <ExpandedItem Condition="reference != 0">reference</ExpandedItem>
     </Expand>
   </Type>
 
@@ -62,7 +62,7 @@
     <DisplayString Condition="internalValue.reference != 0 &amp;&amp; internalValue.reference->evaluated == false">[not evaluated]</DisplayString>
     <DisplayString Condition="internalValue.reference != 0 &amp;&amp; internalValue.reference->evaluated == true">{internalValue.reference->value}</DisplayString>
     <Expand>
-      <Item Condition="internalValue.reference != 0 &amp;&amp; internalValue.reference->evaluated == true" Name="[value]">internalValue.reference->value</Item>
+      <ExpandedItem Condition="internalValue.reference != 0 &amp;&amp; internalValue.reference->evaluated == true">internalValue.reference->value</ExpandedItem>
     </Expand>
   </Type>
 
