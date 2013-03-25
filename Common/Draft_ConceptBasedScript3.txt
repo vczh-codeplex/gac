@@ -111,36 +111,6 @@ int CompareDouble(double a, double b)
 	return a-b;
 }
 
-int ComparePoint<T>(Point<T> a, Point<T> b)
-	embedded int CompareT(T a, T b);	// different embedded value tuples creates different function instances.
-{
-	int r=CompareT(a.x, b.x);
-	if(r!=0) return r;
-	return CompareT(a.y, b.y);
-}
-
-int ComparePair<T, U>(Pair<T, U> a, Pair<T, U> b)
-	embedded int CompareT(T a, T b);
-	embedded int CompareU(U a, U b);
-{
-	int r=CompareT(a.first, b.first);
-	if(r!=0) return r;
-	return CompareU(a.second, b.second);
-}
-
-Pair<Point<int>, Point<double>> a, b;
-int result=ComparePair<Pair<Point<int>, Point<double>>>
-	{
-		CompareT = ComparePoint<int>
-		{
-			CompareT = CompareInt
-		},
-		CompareU = ComparePoint<double>
-		{
-			CompareT = CompareDouble
-		},
-	}(a, b);
-
 ========================================================
 Expressions
 ========================================================
@@ -162,3 +132,60 @@ continue;
 return [expression];
 try statement { catch(ExceptionType^ [var]) statement } [finally statement]
 throw handle;
+
+========================================================
+Concepts
+========================================================
+
+int ComparePoint<T>(Point<T> a, Point<T> b)
+	requires Comparable<T>;
+{
+	int r=Compare(a.x, b.x);
+	if(r!=0) return r;
+	return Compare(a.y, b.y);
+}
+
+int ComparePair<T, U>(Pair<T, U> a, Pair<T, U> b)
+	requires Comparable<T>;
+	requires Comparable<U>;
+{
+	int r=Compare(a.first, b.first);
+	if(r!=0) return r;
+	return Compare(a.second, b.second);
+}
+
+concept Comparable<T>
+{
+	int Compare(T a, T b);
+}
+
+instance Comparable<int>
+{
+	Compare = CompareInt;
+}
+
+instance Comparable<double>
+{
+	Compare = CompareDouble;
+}
+
+instance<T> Comparable<Point<T>>
+{
+	Compare = ComparePoint<T>;
+}
+
+instance<T, U> Comparable<Pair<T, U>>
+{
+	Compare = ComparePair<T, U>;
+}
+
+Pair<Point<int>, Point<double>> a, b;
+int result=ComparePair<Pair<Point<int>, Point<double>>>(a, b);
+
+========================================================
+Storage
+========================================================
+
+Type name;				// global variable
+Type name<T>;			// global variable template. &name<int> != &name<double>
+thread Type name;		// thread local variable
