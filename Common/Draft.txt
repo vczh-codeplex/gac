@@ -1,13 +1,3 @@
-A library like the old Syngram in VL++1.0 that receives code to generate parser in memory or in C++.
-
-Parser Syntax
-In-Memory Parser
-In-Memory Data Structure
-
-Generated C++ Recursive Descent Parser
-Generated C++ Data Structure + Visitor Pattern <--> In-Memory Data Structure
-
-XML/JSON in-memory parser / C++ parser
 ========================================================
 parse intel manual 2A and 2B to get binary code table
 x86 and x64 assembler
@@ -15,13 +5,3 @@ intermediate code
 enriched C language
 design a language for Calculation, AsyncIO, Server and GUI programming
 ========================================================
-<gacdoc>
-	<content>
-		<paragraph>
-			<text xxx>text</text>
-			<object:image xxx />
-			<linebreak />
-		</paragraph>
-	</content>
-	<resources><resource name=".."></resources></resouces>
-</gacdoc>
