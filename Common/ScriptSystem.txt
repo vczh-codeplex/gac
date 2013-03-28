@@ -1,0 +1,86 @@
+==================================================
+Primitive Types
+==================================================
+sbyte		(Int8)
+short		(Int16)
+int			(Int32)
+long		(Int64)
+byte		(UInt8)
+ushort		(UInt16)
+uint		(UInt32)
+ulong		(UInt64)
+float		(Single)
+double		(Double)
+char		(Char)
+bool		(Bool)
+string		(String)
+void		(Void)
+
+==================================================
+Composition Types
+==================================================
+[T]							// Array<T>
+{T:U}						// Map<T, U>
+(T..U)						// Pair<T, U>
+(T, U, V)					// (T..(U..(V..void)))
+T(U, V)						// Function<T, (U, V)>
+T(params U)					// Function<T, U>
+
+using ComparablePair<T, U> = Pair<T, U>
+	requires Comparable<T>, Comparable<U>;
+
+==================================================
+Structure Types
+==================================================
+
+struct Point
+{
+	int x;
+	int y;
+}
+
+class Point<T>
+{
+	T x;
+	T y;
+}
+
+==================================================
+Functions
+==================================================
+
+int Compare(int a, int b)
+{
+	return a-b;
+}
+
+int Compare<T>(Point<T> a, Point<T> b)
+	requires Comparable<T>
+{
+	int result;
+	result=Compare(a.x, b.x);
+	if(result!=0) return result;
+	result=Compare(a.y, b.y);
+	if(result!=0) return result;
+	return 0;
+}
+
+==================================================
+Concepts
+==================================================
+
+==================================================
+Interfaces
+==================================================
+
+==================================================
+Expressions
+==================================================
+
+==================================================
+Statements
+==================================================
+
+==================================================
+Continuation
+==================================================
