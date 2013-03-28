@@ -149,11 +149,11 @@ concept New<T, U> requires
 Interfaces
 ==================================================
 
-concept this.IReadableArray<T>
+concept this.IReadableArray<out T>
 	requires this.IEnumerable<T>
 {
 	int Length{get;}
-	T this[int index]{get;set;}
+	T this[int index]{get;}
 }
 
 ==================================================
@@ -169,13 +169,14 @@ instance Comparable<int>
 }
 
 isntance<T> Comparable<Point<T>>
+	requires Comparable<T>
 {
 	int Compare(Point<T> a, Point<T> b)
 	{
 		int result;
 		result=Compare(a.x, b.x);
 		if(result!=0) return result;
-		result=Compare(a.y, b.y);
+		result=Comparable<T>.Compare(a.y, b.y);
 		if(result!=0) return result;
 		return 0;
 	}
@@ -184,7 +185,7 @@ isntance<T> Comparable<Point<T>>
 instance<T> T[].IReadableArray<T>
 {
 	int Length{get return this.Length;}
-	int this[int index]{get return this[index]; set this[index]=value;}
+	int this[int index]{get return this[index];}
 }
 
 instance TupleParameter<void>
