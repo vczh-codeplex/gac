@@ -23,6 +23,7 @@ Composition Types
 {T:U}						// Map<T, U>
 (T..U)						// Pair<T, U>
 (T, U, V)					// (T..(U..(V..void)))
+()							// void
 T(U, V)						// Function<T, (U, V)>
 T(.. U)						// Function<T, U>
 
@@ -75,20 +76,125 @@ void Point.Move(Size s)
 }
 
 // Point<T>.Move: void(Point<T>, Size<T>)
-void Point<T>.Move(Size<T> s)
-	// All requirements to T in Point<T> are copied
+void Point<T>.Move<T>(Size<T> s)
+	// all requirements to T in Point<T> are copied
 {
 	this.x+=s.x;	// this is const, but it is a reference type. so this.x is assignable.
 	this.y+=s.y;
+}
+
+// T[].IsLongerThan<U>: bool(T[], U[])
+bool T[].IsLongerThan<T, U>(U[] arr)
+	// all type arguments that used in typeof(this) should appear before others
+{
+	return this.Length>arr.Length;
+}
+
+==================================================
+Properties
+==================================================
+
+// getter(Console): IConsole()
+// setter(Console): void(IConsole)
+IConsole Console
+{
+	get
+	{
+		return consoleInstance;
+	}
+	set
+	{
+		throw new NotImplementedException();
+	}
+}
+
+// getter(IEnumerable<IEnumerable<T>>.Flattern): IEnumerable<T>
+IEnumerable<T> IEnumerable<IEnumrable<T>>.Flatten<T>
+{
+	get
+	{
+		foreach(var xs in this)
+			foreach(var x in xs)
+				yield return x;
+	}
 }
 
 ==================================================
 Concepts
 ==================================================
 
+concept Comparable<T>
+{
+	int Compare(T a, T b);
+}
+
+concept Monad<M<>>
+{
+	M<T> Return<T>(T t);
+	M<U> Bind<T, U>(M<T> t, M<U>(t) binder);
+}
+
+concept TupleParameter<T>
+{
+}
+
+concept New<T, U> requires
+	interface T, //struct, class, interface
+	TupleParameter<T>
+{
+	T Create(..U parameters);
+}
+
 ==================================================
 Interfaces
 ==================================================
+
+concept this.IReadableArray<T>
+	requires this.IEnumerable<T>
+{
+	int Length{get;}
+	T this[int index]{get;set;}
+}
+
+==================================================
+Instances
+==================================================
+
+instance Comparable<int>
+{
+	int Compare(int a, int b)
+	{
+		return a-b;
+	}
+}
+
+isntance<T> Comparable<Point<T>>
+{
+	int Compare(Point<T> a, Point<T> b)
+	{
+		int result;
+		result=Compare(a.x, b.x);
+		if(result!=0) return result;
+		result=Compare(a.y, b.y);
+		if(result!=0) return result;
+		return 0;
+	}
+}
+
+instance<T> T[].IReadableArray<T>
+{
+	int Length{get return this.Length;}
+	int this[int index]{get return this[index]; set this[index]=value;}
+}
+
+instance TupleParameter<void>
+{
+}
+
+instance<T, U> TupleParameter<(T..U)>
+	requires TupleParameter<T>
+{
+}
 
 ==================================================
 Expressions
