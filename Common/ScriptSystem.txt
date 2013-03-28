@@ -24,7 +24,7 @@ Composition Types
 (T..U)						// Pair<T, U>
 (T, U, V)					// (T..(U..(V..void)))
 T(U, V)						// Function<T, (U, V)>
-T(params U)					// Function<T, U>
+T(.. U)						// Function<T, U>
 
 using ComparablePair<T, U> = Pair<T, U>
 	requires Comparable<T>, Comparable<U>;
@@ -49,11 +49,13 @@ class Point<T>
 Functions
 ==================================================
 
+// Compare: int(int, int)
 int Compare(int a, int b)
 {
 	return a-b;
 }
 
+// Compare<T>: int(Point<T>, Point<T>)
 int Compare<T>(Point<T> a, Point<T> b)
 	requires Comparable<T>
 {
@@ -63,6 +65,21 @@ int Compare<T>(Point<T> a, Point<T> b)
 	result=Compare(a.y, b.y);
 	if(result!=0) return result;
 	return 0;
+}
+
+// Point.Move: void(Point, Size)
+void Point.Move(Size s)
+{
+	this.x=1;	// this is const, and it is a struct, so this.x is not assignable
+	s.x=1;		// parameter is const
+}
+
+// Point<T>.Move: void(Point<T>, Size<T>)
+void Point<T>.Move(Size<T> s)
+	// All requirements to T in Point<T> are copied
+{
+	this.x+=s.x;	// this is const, but it is a reference type. so this.x is assignable.
+	this.y+=s.y;
 }
 
 ==================================================
@@ -83,4 +100,8 @@ Statements
 
 ==================================================
 Continuation
+==================================================
+
+==================================================
+Namespace
 ==================================================
