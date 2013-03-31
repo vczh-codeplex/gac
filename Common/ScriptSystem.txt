@@ -68,23 +68,23 @@ int Compare<T>(Point<T> a, Point<T> b)
 	return 0;
 }
 
-// Point.Move: void(Point, Size)
-void Point.Move(Size s)
+// Point.Move or Move: void(Point, Size)
+void Move(Point this, Size s)
 {
 	this.x=1;	// this is const, and it is a struct, so this.x is not assignable
 	s.x=1;		// parameter is const
 }
 
-// Point<T>.Move: void(Point<T>, Size<T>)
-void Point<T>.Move<T>(Size<T> s)
+// Point<T>.Move or Move<T>: void(Point<T>, Size<T>)
+void Move<T>(Point<T> this, Size<T> s)
 	// all requirements to T in Point<T> are copied
 {
 	this.x+=s.x;	// this is const, but it is a reference type. so this.x is assignable.
 	this.y+=s.y;
 }
 
-// T[].IsLongerThan<U>: bool(T[], U[])
-bool T[].IsLongerThan<T, U>(U[] arr)
+// T[].IsLongerThan<U> or IsLongerThan<T, U>: bool(T[], U[])
+bool IsLongerThan<T, U>(T[] this, U[] arr)
 	// all type arguments that used in typeof(this) should appear before others
 {
 	return this.Length>arr.Length;
@@ -168,7 +168,7 @@ instance Comparable<int>
 	}
 }
 
-isntance<T> Comparable<Point<T>>
+instance<T> Comparable<Point<T>>
 	requires Comparable<T>
 {
 	int Compare(Point<T> a, Point<T> b)
@@ -201,7 +201,7 @@ instance<T, U> TupleParameter<(T..U)>
 Expressions
 ==================================================
 operator precedence
-	+ - ! ++ -- a[b] a(b) a(..b)
+	+ - ! a[b] a(b) a(..b)
 	* / %
 	+ -
 	<< >>
@@ -225,10 +225,44 @@ new InterfaceType	// New<Type>.GetValue()
 
 value as Type		// Convertable<TFrom, TTo>.Convert(value)	(implicit)
 					// Castable<TFrom, TTo>.Convert(value)		(explicit)
+value of Type		// Select one of the ambigious "value" expressions that has the type Type
 
 ==================================================
 Statements
 ==================================================
+
+Type name [= expression] {, name [= expression]} ;
+var name = expression;
+match <pattern> = expression;	// match fail throws exception
+expression (= | += | -= | *= | /= | %= | <<= | >>= | &= | ^= | |= | &&= | ||=) expression;
+expression ;
+if(expression) statement [else statement]
+foreach((Type|var) name in expression) statement		// Enumerable<T>
+while(condition) statement
+do statement while(condition);
+break;
+continue;
+return [expression] ;
+
+switch(condition)
+{
+match value: statement			// don't need break
+match <pattern>: statement
+default: statement				// when failed with all matches, missing default throws exception
+}
+
+try statement
+{ catch(Type [name]) statement }
+[ finally statement ]
+
+==================================================
+Pattern
+==================================================
+
+value of Type
+(a {, b})
+[a, b, c [: d]]					// d will be an IEnumerable
+<constant>
 
 ==================================================
 Continuation
