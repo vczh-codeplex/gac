@@ -223,7 +223,8 @@ new {int:int}{1:2, 3:4}
 new ClassType/StructType [ {a:b, c:d} ]
 new InterfaceType	// New<Type>.GetValue()
 
-value as Type		// Convertable<TFrom, TTo>.Convert(value)
+value as Type		// Convertable<TFrom, TTo>.Convert(value)	(implicit)
+					// Castable<TFrom, TTo>.Convert(value)		(explicit)
 
 ==================================================
 Statements
