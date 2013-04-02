@@ -212,8 +212,8 @@ namespace vl
 ***********************************************************************/
 
 			extern WString											GetTypeNameForCreateInstruction(ParsingSymbol* type);
-			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors);
-			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, collections::List<Ptr<ParsingError>>& errors);
+			extern Ptr<tabling::ParsingTable>						GenerateTableFromPDA(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors);
+			extern Ptr<tabling::ParsingTable>						GenerateTable(Ptr<definitions::ParsingDefinition> definition, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors);
 			extern void												Log(Ptr<Automaton> automaton, stream::TextWriter& writer);
 		}
 	}

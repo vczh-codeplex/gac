@@ -124,7 +124,7 @@ CreateLookAhead
 GenerateTable
 ***********************************************************************/
 
-			Ptr<tabling::ParsingTable> GenerateTable(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, collections::List<Ptr<ParsingError>>& errors)
+			Ptr<tabling::ParsingTable> GenerateTableFromPDA(Ptr<definitions::ParsingDefinition> definition, Ptr<Automaton> jointPDA, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors)
 			{
 				Dictionary<ParsingSymbol*, vint> tokenIds;
 				List<WString> discardTokens;
@@ -338,7 +338,7 @@ GenerateTable
 								Ptr<ParsingTable::TransitionItem> t2=bag->transitionItems[k2];
 								if(ParsingTable::TransitionItem::CheckOrder(t1, t2, false)==ParsingTable::TransitionItem::UnknownOrder)
 								{
-									if(!CreateLookAhead(table, t1, t2, 16))
+									if(enableAmbiguity || !CreateLookAhead(table, t1, t2, 16))
 									{
 										WString stateName=itow(i)+L"["+table->GetStateInfo(i).stateName+L"]";
 										WString tokenName=
@@ -362,7 +362,7 @@ GenerateTable
 				return table;
 			}
 
-			Ptr<tabling::ParsingTable> GenerateTable(Ptr<definitions::ParsingDefinition> definition, collections::List<Ptr<ParsingError>>& errors)
+			Ptr<tabling::ParsingTable> GenerateTable(Ptr<definitions::ParsingDefinition> definition, bool enableAmbiguity, collections::List<Ptr<ParsingError>>& errors)
 			{
 				errors.Clear();
 				ParsingSymbolManager symbolManager;
@@ -377,7 +377,7 @@ GenerateTable
 					MarkLeftRecursiveInJointPDA(jointPDA, errors);
 					if(errors.Count()==0)
 					{
-						Ptr<ParsingTable> table=GenerateTable(definition, jointPDA, errors);
+						Ptr<ParsingTable> table=GenerateTableFromPDA(definition, jointPDA, enableAmbiguity, errors);
 						if(errors.Count()==0)
 						{
 							return table;

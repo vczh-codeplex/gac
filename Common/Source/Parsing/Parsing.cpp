@@ -204,7 +204,7 @@ ParsingAutoRecoverParser
 			{
 				List<Ptr<ParsingError>> errors;
 				Ptr<ParsingDefinition> definition=CreateParserDefinition();
-				Ptr<ParsingTable> table=GenerateTable(definition, errors);
+				Ptr<ParsingTable> table=GenerateTable(definition, false, errors);
 				if(table)
 				{
 					return new ParsingStrictParser(table);
@@ -216,7 +216,7 @@ ParsingAutoRecoverParser
 			{
 				List<Ptr<ParsingError>> errors;
 				Ptr<ParsingDefinition> definition=CreateParserDefinition();
-				Ptr<ParsingTable> table=GenerateTable(definition, errors);
+				Ptr<ParsingTable> table=GenerateTable(definition, false, errors);
 				if(table)
 				{
 					return new ParsingAutoRecoverParser(table);
