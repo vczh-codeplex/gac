@@ -88,6 +88,94 @@ Ptr<ParsingTable> CreateTable(Ptr<ParsingDefinition> definition, StreamWriter& w
 }
 
 /***********************************************************************
+Code Config
+***********************************************************************/
+
+class CodegenConfig
+{
+public:
+	List<WString>					codeIncludes;
+	List<WString>					codeNamespaces;
+	Dictionary<WString, WString>	codeParsers;
+	WString							codeClassPrefix;
+	WString							codeGuard;
+	bool							parsingTree;
+	bool							ambiguity;
+
+	CodegenConfig()
+		:parsingTree(true)
+		,ambiguity(false)
+	{
+	}
+
+	bool ReadConfig(StreamReader& reader)
+	{
+		Regex regexInclude(L"^include:(<path>/.+)$");
+		Regex regexClassPrefix(L"^classPrefix:(<prefix>/.+)$");
+		Regex regexGuard(L"^guard:(<guard>/.+)$");
+		Regex regexNamespace(L"^namespace:((<namespace>[^.]+)(.(<namespace>[^.]+))*)?$");
+		Regex regexParser(L"^parser:(<name>/w+)/((<rule>/w+)/)$");
+		Regex regexParsingTree(L"^parsingtree:(<value>enabled|disabled)$");
+		Regex regexAmbiguity(L"^ambiguity:(<value>enabled|disabled)$");
+
+		while(!reader.IsEnd())
+		{
+			WString line=reader.ReadLine();
+			Ptr<RegexMatch> match;
+			if(line==L"grammar:")
+			{
+				break;
+			}
+			else if((match=regexClassPrefix.Match(line)) && match->Success())
+			{
+				codeClassPrefix=match->Groups().Get(L"prefix").Get(0).Value();
+			}
+			else if((match=regexGuard.Match(line)) && match->Success())
+			{
+				codeGuard=match->Groups().Get(L"guard").Get(0).Value();
+			}
+			else if((match=regexInclude.Match(line)) && match->Success())
+			{
+				codeIncludes.Add(match->Groups().Get(L"path").Get(0).Value());
+			}
+			else if((match=regexNamespace.Match(line)) && match->Success())
+			{
+				CopyFrom(codeNamespaces, From(match->Groups().Get(L"namespace"))
+					.Select([=](RegexString s)->WString
+					{
+						return s.Value();
+					}));
+			}
+			else if((match=regexParser.Match(line)) && match->Success())
+			{
+				WString name=match->Groups().Get(L"name").Get(0).Value();
+				WString rule=match->Groups().Get(L"rule").Get(0).Value();
+				if(!codeParsers.Keys().Contains(name))
+				{
+					codeParsers.Add(name, rule);
+				}
+			}
+			else if((match=regexParsingTree.Match(line)) && match->Success())
+			{
+				WString value=match->Groups().Get(L"value").Get(0).Value();
+				parsingTree=value==L"enabled";
+			}
+			else if((match=regexAmbiguity.Match(line)) && match->Success())
+			{
+				WString value=match->Groups().Get(L"value").Get(0).Value();
+				ambiguity=value==L"enabled";
+			}
+			else
+			{
+				Console::WriteLine(L"error> Unknown property \""+line+L".");
+				return false;
+			}
+		}
+		return true;
+	}
+};
+
+/***********************************************************************
 Code Generation
 ***********************************************************************/
 
@@ -103,15 +191,15 @@ void WriteFileComment(const WString& name, StreamWriter& writer)
 	writer.WriteLine(L"");
 }
 
-WString WriteFileBegin(List<WString>& codeIncludes, List<WString>& codeNamespaces, StreamWriter& writer)
+WString WriteFileBegin(const CodegenConfig& config, StreamWriter& writer)
 {
-	FOREACH(WString, include, codeIncludes)
+	FOREACH(WString, include, config.codeIncludes)
 	{
 		writer.WriteLine(L"#include "+include);
 	}
 	writer.WriteLine(L"");
 	WString prefix;
-	FOREACH(WString, ns, codeNamespaces)
+	FOREACH(WString, ns, config.codeNamespaces)
 	{
 		writer.WriteLine(prefix+L"namespace "+ns);
 		writer.WriteLine(prefix+L"{");
@@ -120,10 +208,10 @@ WString WriteFileBegin(List<WString>& codeIncludes, List<WString>& codeNamespace
 	return prefix;
 }
 
-void WriteFileEnd(List<WString>& codeNamespaces, StreamWriter& writer)
+void WriteFileEnd(const CodegenConfig& config, StreamWriter& writer)
 {
-	vint counter=codeNamespaces.Count();
-	FOREACH(WString, ns, codeNamespaces)
+	vint counter=config.codeNamespaces.Count();
+	FOREACH(WString, ns, config.codeNamespaces)
 	{
 		counter--;
 		for(vint i=0;i<counter;i++) writer.WriteChar(L'\t');
@@ -523,29 +611,29 @@ void PrintTypeDefinitions(List<Ptr<ParsingDefinitionTypeDefinition>>& types, con
 	}
 }
 
-void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, List<WString>& codeIncludes, List<WString>& codeNamespaces, const WString& codeClassPrefix, const WString& codeGuard, const Dictionary<WString, WString>& codeParsers, bool parsingTree, StreamWriter& writer)
+void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, const CodegenConfig& config, StreamWriter& writer)
 {
 	WriteFileComment(name, writer);
-	if(codeGuard!=L"")
+	if(config.codeGuard!=L"")
 	{
 		writer.WriteString(L"#ifndef ");
-		writer.WriteLine(codeGuard);
+		writer.WriteLine(config.codeGuard);
 		writer.WriteString(L"#define ");
-		writer.WriteLine(codeGuard);
+		writer.WriteLine(config.codeGuard);
 		writer.WriteLine(L"");
 	}
-	WString prefix=WriteFileBegin(codeIncludes, codeNamespaces, writer);
+	WString prefix=WriteFileBegin(config, writer);
 
 	ParsingSymbolManager manager;
 	{
 		List<Ptr<ParsingError>> errors;
 		ValidateDefinition(definition, &manager, errors);
 	}
-	if(parsingTree)
+	if(config.parsingTree)
 	{
 		writer.WriteString(prefix);
 		writer.WriteString(L"struct ");
-		writer.WriteString(codeClassPrefix);
+		writer.WriteString(config.codeClassPrefix);
 		writer.WriteLine(L"ParserTokenIndex abstract");
 		writer.WriteString(prefix);
 		writer.WriteLine(L"{");
@@ -578,43 +666,43 @@ void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr
 		writer.WriteString(prefix);
 		writer.WriteLine(L"};");
 		
-		PrintTypeDefinitions(definition->types, prefix, 0, &manager, codeClassPrefix, writer);
+		PrintTypeDefinitions(definition->types, prefix, 0, &manager, config.codeClassPrefix, writer);
 	}
 
-	if(parsingTree)
+	if(config.parsingTree)
 	{
 		writer.WriteString(prefix);
 		writer.WriteString(L"extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> ");
-		writer.WriteString(codeClassPrefix);
+		writer.WriteString(config.codeClassPrefix);
 		writer.WriteLine(L"ConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);");
 	}
 
 	writer.WriteString(prefix);
 	writer.WriteString(L"extern vl::Ptr<vl::parsing::tabling::ParsingTable> ");
-	writer.WriteString(codeClassPrefix);
+	writer.WriteString(config.codeClassPrefix);
 	writer.WriteLine(L"LoadTable();");
 
 	writer.WriteLine(L"");
-	FOREACH(WString, name, codeParsers.Keys())
+	FOREACH(WString, name, config.codeParsers.Keys())
 	{
-		ParsingSymbol* rule=manager.GetGlobal()->GetSubSymbolByName(codeParsers[name]);
+		ParsingSymbol* rule=manager.GetGlobal()->GetSubSymbolByName(config.codeParsers[name]);
 		if(rule)
 		{
 			{
 				writer.WriteString(prefix);
 				writer.WriteString(L"extern vl::Ptr<vl::parsing::ParsingTreeNode> ");
-				writer.WriteString(codeClassPrefix);
+				writer.WriteString(config.codeClassPrefix);
 				writer.WriteString(name);
 				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);");
 			}
-			if(parsingTree)
+			if(config.parsingTree)
 			{
 				ParsingSymbol* type=rule->GetDescriptorSymbol();
 				writer.WriteString(prefix);
 				writer.WriteString(L"extern ");
-				PrintTypeForValue(type, codeClassPrefix, writer);
+				PrintTypeForValue(type, config.codeClassPrefix, writer);
 				writer.WriteString(L" ");
-				writer.WriteString(codeClassPrefix);
+				writer.WriteString(config.codeClassPrefix);
 				writer.WriteString(name);
 				writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);");
 			}
@@ -622,8 +710,8 @@ void WriteHeaderFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr
 		}
 	}
 
-	WriteFileEnd(codeNamespaces, writer);
-	if(codeGuard!=L"")
+	WriteFileEnd(config, writer);
+	if(config.codeGuard!=L"")
 	{
 		writer.WriteString(L"#endif");
 	}
@@ -1310,17 +1398,17 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 Parser Function Generation
 ***********************************************************************/
 
-void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, const WString& codeClassPrefix, const Dictionary<WString, WString>& codeParsers, bool parsingTree, TextWriter& writer)
+void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, const CodegenConfig& config, TextWriter& writer)
 {
-	FOREACH(WString, name, codeParsers.Keys())
+	FOREACH(WString, name, config.codeParsers.Keys())
 	{
-		ParsingSymbol* rule=manager->GetGlobal()->GetSubSymbolByName(codeParsers[name]);
+		ParsingSymbol* rule=manager->GetGlobal()->GetSubSymbolByName(config.codeParsers[name]);
 		if(rule)
 		{
 			{
 				writer.WriteString(prefix);
 				writer.WriteString(L"vl::Ptr<vl::parsing::ParsingTreeNode> ");
-				writer.WriteString(codeClassPrefix);
+				writer.WriteString(config.codeClassPrefix);
 				writer.WriteString(name);
 				writer.WriteLine(L"AsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)");
 				writer.WriteString(prefix);
@@ -1345,13 +1433,13 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				writer.WriteLine(L"}");
 				writer.WriteLine(L"");
 			}
-			if(parsingTree)
+			if(config.parsingTree)
 			{
 				ParsingSymbol* type=rule->GetDescriptorSymbol();
 				writer.WriteString(prefix);
-				PrintTypeForValue(type, codeClassPrefix, writer);
+				PrintTypeForValue(type, config.codeClassPrefix, writer);
 				writer.WriteString(L" ");
-				writer.WriteString(codeClassPrefix);
+				writer.WriteString(config.codeClassPrefix);
 				writer.WriteString(name);
 				writer.WriteLine(L"(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table)");
 				writer.WriteString(prefix);
@@ -1376,9 +1464,9 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				writer.WriteLine(L"\t{");
 				writer.WriteString(prefix);
 				writer.WriteString(L"\t\treturn ");
-				writer.WriteString(codeClassPrefix);
+				writer.WriteString(config.codeClassPrefix);
 				writer.WriteString(L"ConvertParsingTreeNode(node, state.GetTokens()).Cast<");
-				PrintType(type, codeClassPrefix, writer);
+				PrintType(type, config.codeClassPrefix, writer);
 				writer.WriteLine(L">();");
 				writer.WriteString(prefix);
 				writer.WriteLine(L"\t}");
@@ -1393,9 +1481,9 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 	}
 }
 
-void WriteCppFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, List<WString>& codeIncludes, List<WString>& codeNamespaces, const WString& codeClassPrefix, const Dictionary<WString, WString>& codeParsers, bool parsingTree, StreamWriter& writer)
+void WriteCppFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, const CodegenConfig& config, StreamWriter& writer)
 {
-	WString prefix=WriteFileBegin(codeIncludes, codeNamespaces, writer);
+	WString prefix=WriteFileBegin(config, writer);
 
 	ParsingSymbolManager manager;
 	{
@@ -1403,46 +1491,46 @@ void WriteCppFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<Pa
 		ValidateDefinition(definition, &manager, errors);
 	}
 
-	if(parsingTree)
+	if(config.parsingTree)
 	{
 		writer.WriteLine(L"/***********************************************************************");
 		writer.WriteLine(L"Unescaping Function Foward Declarations");
 		writer.WriteLine(L"***********************************************************************/");
 		writer.WriteLine(L"");
-		WriteUnescapingFunctionForwardDeclarations(definition, &manager, prefix, codeClassPrefix, writer);
+		WriteUnescapingFunctionForwardDeclarations(definition, &manager, prefix, config.codeClassPrefix, writer);
 
 		writer.WriteLine(L"/***********************************************************************");
 		writer.WriteLine(L"Parsing Tree Conversion Driver Implementation");
 		writer.WriteLine(L"***********************************************************************/");
 		writer.WriteLine(L"");
-		WriteNodeConverterClassImpl(definition, &manager, prefix, codeClassPrefix, writer);
+		WriteNodeConverterClassImpl(definition, &manager, prefix, config.codeClassPrefix, writer);
 
 		writer.WriteLine(L"/***********************************************************************");
 		writer.WriteLine(L"Parsing Tree Conversion Implementation");
 		writer.WriteLine(L"***********************************************************************/");
 		writer.WriteLine(L"");
-		WriteConvertImpl(&manager, prefix, codeClassPrefix, writer);
+		WriteConvertImpl(&manager, prefix, config.codeClassPrefix, writer);
 
 		writer.WriteLine(L"/***********************************************************************");
 		writer.WriteLine(L"Visitor Pattern Implementation");
 		writer.WriteLine(L"***********************************************************************/");
 		writer.WriteLine(L"");
-		WriteVisitorImpl(&manager, manager.GetGlobal(), prefix, codeClassPrefix, writer);
+		WriteVisitorImpl(&manager, manager.GetGlobal(), prefix, config.codeClassPrefix, writer);
 	}
 
 	writer.WriteLine(L"/***********************************************************************");
 	writer.WriteLine(L"Parser Function");
 	writer.WriteLine(L"***********************************************************************/");
 	writer.WriteLine(L"");
-	WriteParserFunctions(&manager, prefix, codeClassPrefix, codeParsers, parsingTree, writer);
+	WriteParserFunctions(&manager, prefix, config, writer);
 
 	writer.WriteLine(L"/***********************************************************************");
 	writer.WriteLine(L"Table Generation");
 	writer.WriteLine(L"***********************************************************************/");
 	writer.WriteLine(L"");
-	WriteTable(table, prefix, codeClassPrefix, writer);
+	WriteTable(table, prefix, config.codeClassPrefix, writer);
 
-	WriteFileEnd(codeNamespaces, writer);
+	WriteFileEnd(config, writer);
 }
 
 /***********************************************************************
@@ -1480,14 +1568,8 @@ int wmain(int argc, wchar_t* argv[])
 		}
 	}
 
+
 	Regex regexPathSplitter(L"[///\\]");
-	Regex regexInclude(L"^include:(<path>/.+)$");
-	Regex regexClassPrefix(L"^classPrefix:(<prefix>/.+)$");
-	Regex regexGuard(L"^guard:(<guard>/.+)$");
-	Regex regexNamespace(L"^namespace:((<namespace>[^.]+)(.(<namespace>[^.]+))*)?$");
-	Regex regexParser(L"^parser:(<name>/w+)/((<rule>/w+)/)$");
-	Regex regexParsingTree(L"^parsingtree:(<value>enabled|disabled)$");
-	Regex regexAmbiguity(L"^ambiguity:(<value>enabled|disabled)$");
 	Ptr<ParsingStrictParser> parser=CreateBootstrapStrictParser();
 
 	Console::SetTitle(L"Vczh Parser Generator for C++");
@@ -1525,11 +1607,8 @@ int wmain(int argc, wchar_t* argv[])
 			Console::WriteLine(L"parsing>Output cpp path : "+outputCppPath);
 			Console::WriteLine(L"parsing>Log path : "+logPath);
 
-			List<WString> codeIncludes, codeNamespaces;
-			Dictionary<WString, WString> codeParsers;
-			WString codeGrammar, codeClassPrefix, codeGuard;
-			bool parsingTree=true;
-			bool ambiguity=false;
+			CodegenConfig config;
+			WString codeGrammar;
 			{
 				FileStream fileStream(inputPath, FileStream::ReadOnly);
 				if(!fileStream.IsAvailable())
@@ -1541,58 +1620,9 @@ int wmain(int argc, wchar_t* argv[])
 				DecoderStream decoderStream(fileStream, decoder);
 				StreamReader reader(decoderStream);
 
-				while(!reader.IsEnd())
+				if(!config.ReadConfig(reader))
 				{
-					WString line=reader.ReadLine();
-					Ptr<RegexMatch> match;
-					if(line==L"grammar:")
-					{
-						break;
-					}
-					else if((match=regexClassPrefix.Match(line)) && match->Success())
-					{
-						codeClassPrefix=match->Groups().Get(L"prefix").Get(0).Value();
-					}
-					else if((match=regexGuard.Match(line)) && match->Success())
-					{
-						codeGuard=match->Groups().Get(L"guard").Get(0).Value();
-					}
-					else if((match=regexInclude.Match(line)) && match->Success())
-					{
-						codeIncludes.Add(match->Groups().Get(L"path").Get(0).Value());
-					}
-					else if((match=regexNamespace.Match(line)) && match->Success())
-					{
-						CopyFrom(codeNamespaces, From(match->Groups().Get(L"namespace"))
-							.Select([=](RegexString s)->WString
-							{
-								return s.Value();
-							}));
-					}
-					else if((match=regexParser.Match(line)) && match->Success())
-					{
-						WString name=match->Groups().Get(L"name").Get(0).Value();
-						WString rule=match->Groups().Get(L"rule").Get(0).Value();
-						if(!codeParsers.Keys().Contains(name))
-						{
-							codeParsers.Add(name, rule);
-						}
-					}
-					else if((match=regexParsingTree.Match(line)) && match->Success())
-					{
-						WString value=match->Groups().Get(L"value").Get(0).Value();
-						parsingTree=value==L"enabled";
-					}
-					else if((match=regexAmbiguity.Match(line)) && match->Success())
-					{
-						WString value=match->Groups().Get(L"value").Get(0).Value();
-						ambiguity=value==L"enabled";
-					}
-					else
-					{
-						Console::WriteLine(L"error> Unknown property \""+line+L".");
-						goto STOP_PARSING;
-					}
+					goto STOP_PARSING;
 				}
 				codeGrammar=reader.ReadToEnd();
 			}
@@ -1624,7 +1654,7 @@ int wmain(int argc, wchar_t* argv[])
 					goto STOP_PARSING;
 				}
 
-				table=CreateTable(definition, writer, ambiguity);
+				table=CreateTable(definition, writer, config.ambiguity);
 				if(!table)
 				{
 					Console::WriteLine(L"error> Error happened. Open \""+logPath+L" for details.");
@@ -1641,7 +1671,7 @@ int wmain(int argc, wchar_t* argv[])
 				BomEncoder encoder(BomEncoder::Mbcs);
 				EncoderStream encoderStream(fileStream, encoder);
 				StreamWriter writer(encoderStream);
-				WriteHeaderFile(name, definition, table, codeIncludes, codeNamespaces, codeClassPrefix, codeGuard, codeParsers, parsingTree, writer);
+				WriteHeaderFile(name, definition, table, config, writer);
 			}
 			{
 				FileStream fileStream(outputCppPath, FileStream::WriteOnly);
@@ -1653,9 +1683,10 @@ int wmain(int argc, wchar_t* argv[])
 				BomEncoder encoder(BomEncoder::Mbcs);
 				EncoderStream encoderStream(fileStream, encoder);
 				StreamWriter writer(encoderStream);
-				List<WString> cppIncludes;
-				cppIncludes.Add(L"\""+name+L".h\"");
-				WriteCppFile(name, definition, table, cppIncludes, codeNamespaces, codeClassPrefix, codeParsers, parsingTree, writer);
+				
+				config.codeIncludes.Clear();
+				config.codeIncludes.Add(L"\""+name+L".h\"");
+				WriteCppFile(name, definition, table, config, writer);
 			}
 		}
 	STOP_PARSING:;
