@@ -257,6 +257,67 @@ ParsingState
 				return currentState;
 			}
 
+			bool ParsingState::TestTransitionItemInFuture(vint tableTokenIndex, Future* future, ParsingTable::TransitionItem* item, const collections::IEnumerable<vint>* lookAheadTokens)
+			{
+				bool passLookAheadTest=true;
+				if(item->lookAheads.Count()>0 && lookAheadTokens)
+				{
+					passLookAheadTest=false;
+					FOREACH(Ptr<ParsingTable::LookAheadInfo>, info, item->lookAheads)
+					{
+						vint index=0;
+						FOREACH(vint, token, *lookAheadTokens)
+						{
+							if(info->tokens[index]!=token)
+							{
+								break;
+							}
+							index++;
+							if(index>=info->tokens.Count())
+							{
+								break;
+							}
+						}
+						if(index==info->tokens.Count())
+						{
+							passLookAheadTest=true;
+							break;
+						}
+					}
+				}
+				if(!passLookAheadTest)
+				{
+					return false;
+				}
+
+				vint availableStackDepth=stateStack.Count()-future->reduceStateCount;
+				vint totalStackDepth=stateStack.Count()-future->reduceStateCount+future->shiftStates.Count();
+				if(item->stackPattern.Count()<=totalStackDepth)
+				{
+					if(tableTokenIndex!=ParsingTable::TokenFinish || item->stackPattern.Count()==totalStackDepth)
+					{
+						bool match=true;
+						for(vint j=0;j<item->stackPattern.Count();j++)
+						{
+							vint state=
+								j<future->shiftStates.Count()
+								?future->shiftStates[future->shiftStates.Count()-1-j]
+								:stateStack[availableStackDepth-1-(j-future->shiftStates.Count())]
+								;
+							if(item->stackPattern[j]!=state)
+							{
+								match=false;
+							}
+						}
+						if(match)
+						{
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+
 			ParsingTable::TransitionItem* ParsingState::MatchTokenInFuture(vint tableTokenIndex, Future* future, const collections::IEnumerable<vint>* lookAheadTokens)
 			{
 				ParsingTable::TransitionBag* bag=table->GetTransitionBag(future->currentState, tableTokenIndex).Obj();
@@ -265,61 +326,9 @@ ParsingState
 					for(vint i=0;i<bag->transitionItems.Count();i++)
 					{
 						ParsingTable::TransitionItem* item=bag->transitionItems[i].Obj();
-						bool passLookAheadTest=true;
-						if(item->lookAheads.Count()>0 && lookAheadTokens)
+						if(TestTransitionItemInFuture(tableTokenIndex, future, item, lookAheadTokens))
 						{
-							passLookAheadTest=false;
-							FOREACH(Ptr<ParsingTable::LookAheadInfo>, info, item->lookAheads)
-							{
-								vint index=0;
-								FOREACH(vint, token, *lookAheadTokens)
-								{
-									if(info->tokens[index]!=token)
-									{
-										break;
-									}
-									index++;
-									if(index>=info->tokens.Count())
-									{
-										break;
-									}
-								}
-								if(index==info->tokens.Count())
-								{
-									passLookAheadTest=true;
-									break;
-								}
-							}
-						}
-						if(!passLookAheadTest)
-						{
-							continue;
-						}
-
-						vint availableStackDepth=stateStack.Count()-future->reduceStateCount;
-						vint totalStackDepth=stateStack.Count()-future->reduceStateCount+future->shiftStates.Count();
-						if(item->stackPattern.Count()<=totalStackDepth)
-						{
-							if(tableTokenIndex!=ParsingTable::TokenFinish || item->stackPattern.Count()==totalStackDepth)
-							{
-								bool match=true;
-								for(vint j=0;j<item->stackPattern.Count();j++)
-								{
-									vint state=
-										j<future->shiftStates.Count()
-										?future->shiftStates[future->shiftStates.Count()-1-j]
-										:stateStack[availableStackDepth-1-(j-future->shiftStates.Count())]
-										;
-									if(item->stackPattern[j]!=state)
-									{
-										match=false;
-									}
-								}
-								if(match)
-								{
-									return item;
-								}
-							}
+							return item;
 						}
 					}
 				}
@@ -347,6 +356,7 @@ ParsingState
 				}
 				now->currentState=transition->targetState;
 				now->selectedToken=transition->token;
+				now->selectedItem=transition;
 				now->previous=previous;
 				now->next=0;
 
@@ -452,6 +462,28 @@ ParsingState
 
 				currentState=transition->targetState;
 				return result;
+			}
+
+			void ParsingState::Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities)
+			{
+				Future fakePrevious;
+				fakePrevious.currentState=currentState;
+				Future* realPrevious=previous?previous:&fakePrevious;
+
+				ParsingTable::TransitionBag* bag=table->GetTransitionBag(realPrevious->currentState, tableTokenIndex).Obj();
+				if(bag)
+				{
+					for(vint i=0;i<bag->transitionItems.Count();i++)
+					{
+						ParsingTable::TransitionItem* item=bag->transitionItems[i].Obj();
+						if(TestTransitionItemInFuture(tableTokenIndex, realPrevious, item, 0))
+						{
+							Future* now=new Future;
+							RunTransitionInFuture(item, previous, now);
+							possibilities.Add(now);
+						}
+					}
+				}
 			}
 
 			bool ParsingState::ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now, const collections::IEnumerable<vint>* lookAheadTokens)
