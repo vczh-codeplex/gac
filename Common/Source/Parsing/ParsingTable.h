@@ -174,6 +174,7 @@ namespace vl
 				};
 
 			protected:
+				bool										ambiguity;
 				Ptr<regex::RegexLexer>						lexer;
 				collections::Array<Ptr<TransitionBag>>		transitionBags;
 				vint										tokenCount;
@@ -186,6 +187,9 @@ namespace vl
 			public:
 				ParsingTable(vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
 				~ParsingTable();
+
+				bool										GetAmbiguity();
+				void										SetAmbiguity(bool value);
 
 				vint										GetTokenCount();
 				const TokenInfo&							GetTokenInfo(vint token);

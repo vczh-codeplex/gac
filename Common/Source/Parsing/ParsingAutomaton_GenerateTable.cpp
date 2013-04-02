@@ -353,7 +353,11 @@ GenerateTable
 						}
 					}
 				}
-
+				
+				if(errors.Count()>0)
+				{
+					table->SetAmbiguity(true);
+				}
 				table->Initialize();
 				return table;
 			}
