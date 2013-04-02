@@ -123,6 +123,7 @@ namespace vl
 					vint									reduceStateCount;
 					collections::List<vint>					shiftStates;
 					vint									selectedToken;
+					ParsingTable::TransitionItem*			selectedItem;
 					Future*									previous;
 					Future*									next;
 
@@ -130,6 +131,7 @@ namespace vl
 						:currentState(-1)
 						,reduceStateCount(0)
 						,selectedToken(-1)
+						,selectedItem(0)
 						,previous(0)
 						,next(0)
 					{
@@ -162,11 +164,13 @@ namespace vl
 				const collections::List<vint>&				GetStateStack();
 				vint										GetCurrentState();
 
+				bool										TestTransitionItemInFuture(vint tableTokenIndex, Future* future, ParsingTable::TransitionItem* item, const collections::IEnumerable<vint>* lookAheadTokens);
 				ParsingTable::TransitionItem*				MatchTokenInFuture(vint tableTokenIndex, Future* future, const collections::IEnumerable<vint>* lookAheadTokens);
 				ParsingTable::TransitionItem*				MatchToken(vint tableTokenIndex, const collections::IEnumerable<vint>* lookAheadTokens);
 				void										RunTransitionInFuture(ParsingTable::TransitionItem* transition, Future* previous, Future* now);
 				ParsingState::TransitionResult				RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken);
 
+				void										Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities);
 				bool										ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now, const collections::IEnumerable<vint>* lookAheadTokens);
 				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken, const collections::IEnumerable<vint>* lookAheadTokens);
 				TransitionResult							ReadToken();
