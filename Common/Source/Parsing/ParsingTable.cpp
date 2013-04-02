@@ -159,7 +159,8 @@ ParsingTable
 ***********************************************************************/
 
 			ParsingTable::ParsingTable(vint _tokenCount, vint discardTokenCount, vint _stateCount, vint _ruleCount)
-				:tokenCount(_tokenCount+UserTokenStart)
+				:ambiguity(false)
+				,tokenCount(_tokenCount+UserTokenStart)
 				,stateCount(_stateCount)
 				,tokenInfos(_tokenCount+UserTokenStart)
 				,discardTokenInfos(discardTokenCount)
@@ -171,6 +172,16 @@ ParsingTable
 
 			ParsingTable::~ParsingTable()
 			{
+			}
+
+			bool ParsingTable::GetAmbiguity()
+			{
+				return ambiguity;
+			}
+
+			void ParsingTable::SetAmbiguity(bool value)
+			{
+				ambiguity=value;
 			}
 
 			vint ParsingTable::GetTokenCount()
