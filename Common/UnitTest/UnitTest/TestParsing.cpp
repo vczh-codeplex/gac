@@ -82,7 +82,7 @@ namespace test
 		LogParsingData(jointPDA, L"Parsing."+name+L".JPDA-Marked.txt", L"Compacted Joint PDA", errors);
 		TEST_ASSERT(errors.Count()==0);
 
-		Ptr<ParsingTable> table=GenerateTable(definition, jointPDA, errors);
+		Ptr<ParsingTable> table=GenerateTableFromPDA(definition, jointPDA, false, errors);
 		LogParsingData(table, L"Parsing."+name+L".Table.txt", L"Table", errors);
 		TEST_ASSERT(errors.Count()==0);
 
@@ -452,7 +452,7 @@ TEST_CASE(TestParsingTreeCharacterPosition)
 	{
 		List<Ptr<ParsingError>> errors;
 		Ptr<ParsingDefinition> definition=LoadDefinition(L"Calculator");
-		Ptr<ParsingTable> table=GenerateTable(definition, errors);
+		Ptr<ParsingTable> table=GenerateTable(definition, false, errors);
 		TEST_ASSERT(table);
 		parser=new ParsingStrictParser(table);
 	}
@@ -518,7 +518,7 @@ namespace test
 	void ParseWithAutoRecover(Ptr<ParsingDefinition> definition, const WString& name, const WString& rule, List<WString>& inputs)
 	{
 		List<Ptr<ParsingError>> errors;
-		Ptr<ParsingTable> table=GenerateTable(definition, errors);
+		Ptr<ParsingTable> table=GenerateTable(definition, false, errors);
 		TEST_ASSERT(table);
 		Ptr<ParsingAutoRecoverParser> parser=new ParsingAutoRecoverParser(table);
 
