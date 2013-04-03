@@ -5,15 +5,9 @@
 #endif
 
 #include "..\..\Source\GacUI.h"
-#include "..\..\Source\Reflection\GuiReflectionEvents.h"
-#include "..\..\..\..\Common\Source\Stream\FileStream.h"
-#include "..\..\..\..\Common\Source\Stream\CharFormat.h"
-#include "..\..\..\..\Common\Source\Stream\Accessor.h"
+#include "..\..\Source\NativeWindow\Windows\WinNativeWindow.h"
 #include <Windows.h>
-
-using namespace vl::parsing::xml;
-using namespace vl::stream;
-using namespace vl::reflection::description;
+#include <msctf.h>
 
 #define GUI_GRAPHICS_RENDERER_DIRECT2D
 
@@ -34,64 +28,156 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 namespace test
 {
-	class TestWindow : public GuiWindow
+	class TestWindow : public GuiWindow, private ITfThreadMgrEventSink, private ITfContextOwnerCompositionSink
 	{
 	private:
+		ComPtr<ITfThreadMgr>				threadManager;
+		ComPtr<ITfSource>					threadManagerSource;
+		ComPtr<ITfDocumentMgr>				documentManager;
+		ComPtr<ITfContext>					editContext;
+		TfClientId							clientId;
+		TfEditCookie						editCookie;
+
+		IUnknown* GetUnknown()
+		{
+			return static_cast<IUnknown*>(static_cast<ITfThreadMgrEventSink*>(this));
+		}
+
+		HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject)
+		{
+			if(!ppvObject)
+			{
+				return E_POINTER;
+			}
+			if(riid==IID_IUnknown)
+			{
+				*ppvObject=GetUnknown();
+			}
+			else if(riid==IID_ITfThreadMgrEventSink)
+			{
+				*ppvObject=static_cast<ITfThreadMgrEventSink*>(this);
+			}
+			else if(riid==IID_ITfContextOwnerCompositionSink)
+			{
+				*ppvObject=static_cast<ITfContextOwnerCompositionSink*>(this);
+			}
+			else
+			{
+				*ppvObject=NULL;
+				return E_NOINTERFACE;
+			}
+			return S_OK;
+		}
+
+		ULONG STDMETHODCALLTYPE AddRef(void)
+		{
+			return 1;
+		}
+
+		ULONG STDMETHODCALLTYPE Release(void)
+		{
+			return 1;
+		}
+
+		HRESULT STDMETHODCALLTYPE OnInitDocumentMgr(ITfDocumentMgr *pdim)
+		{
+			return S_OK;
+		}
+        
+		HRESULT STDMETHODCALLTYPE OnUninitDocumentMgr(ITfDocumentMgr *pdim)
+		{
+			return S_OK;
+		}
+        
+		HRESULT STDMETHODCALLTYPE OnSetFocus(ITfDocumentMgr *pdimFocus, ITfDocumentMgr *pdimPrevFocus)
+		{
+			return S_OK;
+		}
+        
+		HRESULT STDMETHODCALLTYPE OnPushContext(ITfContext *pic)
+		{
+			return S_OK;
+		}
+        
+		HRESULT STDMETHODCALLTYPE OnPopContext(ITfContext *pic)
+		{
+			return S_OK;
+		}
+
+		HRESULT STDMETHODCALLTYPE OnStartComposition(ITfCompositionView *pComposition, BOOL *pfOk)
+		{
+			return S_OK;
+		}
+        
+		HRESULT STDMETHODCALLTYPE OnUpdateComposition(ITfCompositionView *pComposition, ITfRange *pRangeNew)
+		{
+			return S_OK;
+		}
+        
+		HRESULT STDMETHODCALLTYPE OnEndComposition(ITfCompositionView *pComposition)
+		{
+			return S_OK;
+		}
 	public:
 		TestWindow()
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+			,clientId(0)
 		{
 			SetText(GetApplication()->GetExecutableFolder());
-			SetClientSize(Size(440, 280));
 			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+			GetContainerComposition()->SetPreferredMinSize(Size(640, 480));
+			ForceCalculateSizeImmediately();
 			MoveToScreenCenter();
+
+			Initialize();
 		}
 
 		~TestWindow()
 		{
 		}
-	};
 
-	void LogReflection()
-	{
-		FileStream fileStream(L"Reflection.txt", FileStream::WriteOnly);
-		BomEncoder encoder(BomEncoder::Utf16);
-		EncoderStream encoderStream(fileStream, encoder);
-		StreamWriter writer(encoderStream);
-		LogTypeManager(writer);
-	}
+		void Initialize()
+		{
+			ITfThreadMgr*		pThreadMgr=0;
+			ITfSource*			pSource=0;
+			ITfDocumentMgr*		pDocumentMgr=0;
+			ITfContext*			pContext=0;
+
+			HRESULT hr=CoCreateInstance(
+				CLSID_TF_ThreadMgr, 
+                NULL, 
+                CLSCTX_INPROC_SERVER, 
+                IID_ITfThreadMgr, 
+                (void**)&pThreadMgr
+				);
+			hr=pThreadMgr->QueryInterface(IID_ITfSource, (void**)&pSource);
+			DWORD cookie=0;
+			hr=pSource->AdviseSink(IID_ITfThreadMgrEventSink, static_cast<ITfThreadMgrEventSink*>(this), &cookie);
+			hr=pThreadMgr->Activate(&clientId);
+			hr=pThreadMgr->CreateDocumentMgr(&pDocumentMgr);
+			hr=pDocumentMgr->CreateContext(clientId, 0, GetUnknown(), &pContext, &editCookie);
+			hr=pDocumentMgr->Push(pContext);
+			{
+				HWND hwnd=windows::GetWindowsForm(GetNativeWindow())->GetWindowHandle();
+				ITfDocumentMgr* pPrevious=0;
+				hr=pThreadMgr->AssociateFocus(hwnd, pDocumentMgr, &pPrevious);
+				if(pPrevious)
+				{
+					pPrevious->Release();
+				}
+			}
+
+			threadManager=pThreadMgr;
+			threadManagerSource=pSource;
+			documentManager=pDocumentMgr;
+			editContext=pContext;
+		}
+	};
 }
 using namespace test;
 
 void GuiMain()
 {
-	LogReflection();
-#ifndef VCZH_DEBUG_NO_REFLECTION
-	Value currentTheme=Value::InvokeStatic(L"presentation::theme::ITheme", L"GetCurrentTheme");
-	Value windowStyle=currentTheme.Invoke(L"CreateWindowStyle");
-	Value window=Value::Create(L"presentation::controls::GuiWindow", (Value::xs(), windowStyle));
-
-	Value clientSize=Value::From(L"x:320 y:240", GetTypeDescriptor(L"presentation::Size"));
-	window.SetProperty(L"Text", WString(L"Window By Reflection!"));
-	window.SetProperty(L"ClientSize", clientSize);
-	window.GetProperty(L"ContainerComposition").SetProperty(L"PreferredMinSize", clientSize);
-	window.Invoke(L"MoveToScreenCenter");
-
-	Value buttonStyle=currentTheme.Invoke(L"CreateButtonStyle");
-	Value button=Value::Create(L"presentation::controls::GuiButton", (Value::xs(), buttonStyle));
-	button.GetProperty(L"BoundsComposition").SetProperty(L"AlignmentToParent", Value::From(L"left:60 top:60 right:60 bottom:60", GetTypeDescriptor(L"presentation::Margin")));
-	button.SetProperty(L"Text", WString(L"Click Me!"));
-	window.Invoke(L"AddChild", (Value::xs(), button));
-
-	Value handler=BoxParameter<Func<void(GuiGraphicsComposition*, GuiEventArgs*)>>(
-		LAMBDA([&button](GuiGraphicsComposition*, GuiEventArgs*)
-		{
-			button.SetProperty(L"Text", WString(L"You clicked the button!"));
-		}));
-	button.AttachEvent(L"Clicked", handler);
-
-	Value application=Value::InvokeStatic(L"presentation::controls::GuiApplication", L"GetApplication");
-	application.Invoke(L"Run", (Value::xs(), window));
-	window.DeleteRawPtr();
-#endif
+	TestWindow window;
+	GetApplication()->Run(&window);
 }

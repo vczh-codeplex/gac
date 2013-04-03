@@ -453,6 +453,9 @@
     <ClCompile Include="..\..\Source\Reflection\GuiReflectionEvents.cpp">
       <Filter>GacUI\Reflection</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton_MergeStates.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">

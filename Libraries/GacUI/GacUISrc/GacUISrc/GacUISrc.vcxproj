@@ -227,6 +227,7 @@
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton_EPDA.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton_GenerateTable.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton_JPDA.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton_MergeStates.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingAutomaton_NPDA.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingDefinitions.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingDefinitions_CreateParserDefinition.cpp" />
