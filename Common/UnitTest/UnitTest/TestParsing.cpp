@@ -56,7 +56,7 @@ namespace test
 		}
 	}
 
-	Ptr<ParsingTable> CreateTable(Ptr<ParsingDefinition> definition, const WString& name)
+	Ptr<ParsingTable> CreateTable(Ptr<ParsingDefinition> definition, const WString& name, bool enableAmbiguity=false)
 	{
 		ParsingSymbolManager symbolManager;
 		List<Ptr<ParsingError>> errors;
@@ -82,9 +82,12 @@ namespace test
 		LogParsingData(jointPDA, L"Parsing."+name+L".JPDA-Marked.txt", L"Compacted Joint PDA", errors);
 		TEST_ASSERT(errors.Count()==0);
 
-		Ptr<ParsingTable> table=GenerateTableFromPDA(definition, jointPDA, false, errors);
+		Ptr<ParsingTable> table=GenerateTableFromPDA(definition, jointPDA, enableAmbiguity, errors);
 		LogParsingData(table, L"Parsing."+name+L".Table.txt", L"Table", errors);
-		TEST_ASSERT(errors.Count()==0);
+		if(!enableAmbiguity)
+		{
+			TEST_ASSERT(errors.Count()==0);
+		}
 
 		return table;
 	}
@@ -350,6 +353,20 @@ TEST_CASE(TestParsingNameSemicolonList)
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
 		Parse(table, inputs[i], L"NameSemicolonList", L"NameTable", i, true);
+	}
+}
+
+TEST_CASE(TestParsingAmbigiousExpression)
+{
+	Ptr<ParsingDefinition> definition=LoadDefinition(L"AmbiguousExpression");
+	Ptr<ParsingTable> table=CreateTable(definition, L"AmbiguousExpression", true);
+	const wchar_t* inputs[]=
+	{
+		L"a",
+	};
+	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
+	{
+		Parse(table, inputs[i], L"AmbiguousExpression", L"Exp", i, true);
 	}
 }
 

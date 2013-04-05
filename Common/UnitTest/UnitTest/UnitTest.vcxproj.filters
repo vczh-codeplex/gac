@@ -609,5 +609,8 @@
     <Text Include="..\..\Source\Parsing\Bootstrap\ParsingBootstrap_Parser.parser.txt">
       <Filter>Common\Parsing\Bootstrap</Filter>
     </Text>
+    <Text Include="..\TestFiles\Parsers\Parsing.AmbiguousExpression.Definition.txt">
+      <Filter>Resource Files\Parsers</Filter>
+    </Text>
   </ItemGroup>
 </Project>
