@@ -327,6 +327,7 @@
     <Text Include="..\TestFiles\Baseline\RegexString.Dfa.txt" />
     <Text Include="..\TestFiles\Baseline\RegexString.eNfa.txt" />
     <Text Include="..\TestFiles\Baseline\RegexString.Nfa.txt" />
+    <Text Include="..\TestFiles\Parsers\Parsing.AmbiguousExpression.Definition.txt" />
     <Text Include="..\TestFiles\Parsers\Parsing.Calculator.Definition.txt" />
     <Text Include="..\TestFiles\Parsers\Parsing.Json.Definition.txt" />
     <Text Include="..\TestFiles\Parsers\Parsing.NameList.Definition.txt" />
