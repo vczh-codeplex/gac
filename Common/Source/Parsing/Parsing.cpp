@@ -16,10 +16,6 @@ namespace vl
 ParsingGeneralParser
 ***********************************************************************/
 
-			void ParsingGeneralParser::OnReset()
-			{
-			}
-
 			ParsingGeneralParser::ParsingGeneralParser(Ptr<ParsingTable> _table)
 				:table(_table)
 			{
@@ -29,7 +25,38 @@ ParsingGeneralParser
 			{
 			}
 
-			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
+			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors)
+			{
+				ParsingState state(input, table);
+				if(state.Reset(rule)==-1)
+				{
+					errors.Add(new ParsingError(L"Rule \""+rule+L"\" does not exist."));
+					return 0;
+				}
+				return Parse(state, errors);
+			}
+
+/***********************************************************************
+ParsingStrictParser
+***********************************************************************/
+
+			ParsingState::TransitionResult ParsingStrictParser::OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
+			{
+				const RegexToken* token=state.GetToken(state.GetCurrentToken());
+				errors.Add(new ParsingError(token, (token==0?L"Error happened during parsing when reaching to the end of the input.":L"Error happened during parsing.")));
+				return ParsingState::TransitionResult();
+			}
+
+			ParsingStrictParser::ParsingStrictParser(Ptr<ParsingTable> _table)
+				:ParsingGeneralParser(_table)
+			{
+			}
+
+			ParsingStrictParser::~ParsingStrictParser()
+			{
+			}
+
+			Ptr<ParsingTreeNode> ParsingStrictParser::Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
 			{
 				ParsingTreeBuilder builder;
 				builder.Reset();
@@ -80,37 +107,6 @@ ParsingGeneralParser
 				return node;
 			}
 
-			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors)
-			{
-				ParsingState state(input, table);
-				if(state.Reset(rule)==-1)
-				{
-					errors.Add(new ParsingError(L"Rule \""+rule+L"\" does not exist."));
-					return 0;
-				}
-				return Parse(state, errors);
-			}
-
-/***********************************************************************
-ParsingStrictParser
-***********************************************************************/
-
-			ParsingState::TransitionResult ParsingStrictParser::OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
-			{
-				const RegexToken* token=state.GetToken(state.GetCurrentToken());
-				errors.Add(new ParsingError(token, (token==0?L"Error happened during parsing when reaching to the end of the input.":L"Error happened during parsing.")));
-				return ParsingState::TransitionResult();
-			}
-
-			ParsingStrictParser::ParsingStrictParser(Ptr<ParsingTable> _table)
-				:ParsingGeneralParser(_table)
-			{
-			}
-
-			ParsingStrictParser::~ParsingStrictParser()
-			{
-			}
-
 /***********************************************************************
 ParsingAutoRecoverParser
 ***********************************************************************/
@@ -118,8 +114,6 @@ ParsingAutoRecoverParser
 			ParsingState::TransitionResult ParsingAutoRecoverParser::OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)
 			{
 				vint targetTableTokenIndex=(currentToken?table->GetTableTokenIndex(currentToken->token):ParsingTable::TokenFinish);
-
-				vint selectedTableTokenIndex=-1;
 				if(recoveringFutureIndex==-1)
 				{
 					vint processingFutureIndex=-1;
@@ -161,13 +155,13 @@ ParsingAutoRecoverParser
 				}
 			FOUND_ERROR_RECOVER_SOLUTION:
 
+				ParsingState::Future* selectedFuture=0;
 				if(recoveringFutureIndex!=-1)
 				{
-					ParsingState::Future* future=&recoverFutures[recoveringFutureIndex];
-					selectedTableTokenIndex=future->selectedToken;
-					if(future->next)
+					selectedFuture=&recoverFutures[recoveringFutureIndex];
+					if(selectedFuture->next)
 					{
-						recoveringFutureIndex+=future->next-future;
+						recoveringFutureIndex+=selectedFuture->next-selectedFuture;
 					}
 					else
 					{
@@ -175,18 +169,18 @@ ParsingAutoRecoverParser
 					}
 				}
 
-				if(selectedTableTokenIndex==-1)
+				if(selectedFuture)
 				{
-					return ParsingState::TransitionResult();
+					return state.RunTransition(selectedFuture->selectedItem, 0);
 				}
 				else
 				{
-					return state.ReadToken(selectedTableTokenIndex, 0, 0);
+					return ParsingState::TransitionResult();
 				}
 			}
 
 			ParsingAutoRecoverParser::ParsingAutoRecoverParser(Ptr<ParsingTable> _table)
-				:ParsingGeneralParser(_table)
+				:ParsingStrictParser(_table)
 				,recoverFutures(65536)
 				,recoveringFutureIndex(-1)
 			{
