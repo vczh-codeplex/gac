@@ -26,14 +26,12 @@ namespace vl
 			{
 			protected:
 				Ptr<ParsingTable>							table;
+				
+				virtual Ptr<ParsingTreeNode>				Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)=0;
 
-				virtual void								OnReset();
-				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)=0;
 			public:
 				ParsingGeneralParser(Ptr<ParsingTable> _table);
 				~ParsingGeneralParser();
-				
-				Ptr<ParsingTreeNode>						Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors);
 				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors);
 			};
 
@@ -45,13 +43,17 @@ namespace vl
 			{
 			protected:
 
-				ParsingState::TransitionResult				OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors)override;
+				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors);
 			public:
+				using ParsingGeneralParser::Parse;
+
 				ParsingStrictParser(Ptr<ParsingTable> _table=0);
 				~ParsingStrictParser();
+				
+				Ptr<ParsingTreeNode>						Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)override;
 			};
 
-			class ParsingAutoRecoverParser : public ParsingGeneralParser
+			class ParsingAutoRecoverParser : public ParsingStrictParser
 			{
 			protected:
 				collections::Array<ParsingState::Future>	recoverFutures;
