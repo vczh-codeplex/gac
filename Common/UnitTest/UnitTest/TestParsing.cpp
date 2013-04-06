@@ -106,7 +106,9 @@ namespace test
 			EncoderStream encoderStream(fileStream, encoder);
 			StreamWriter writer(encoderStream);
 
+			Ptr<ParsingGeneralParser> parser=CreateStrictParser(table);
 			ParsingState state(input, table);
+			List<Ptr<ParsingError>> errors;
 			ParsingTreeBuilder builder;
 			builder.Reset();
 
@@ -118,19 +120,21 @@ namespace test
 			writer.WriteLine(L"=============================================================");
 			writer.WriteLine(L"Tokens");
 			writer.WriteLine(L"=============================================================");
-			FOREACH(RegexToken, token, state.GetTokens())
 			{
-				WString tokenName;
-				TEST_ASSERT(token.token!=-1);
-				if(table->IsInputToken(token.token))
+				FOREACH(RegexToken, token, state.GetTokens())
 				{
-					tokenName=table->GetTokenInfo(table->GetTableTokenIndex(token.token)).name;
+					WString tokenName;
+					TEST_ASSERT(token.token!=-1);
+					if(table->IsInputToken(token.token))
+					{
+						tokenName=table->GetTokenInfo(table->GetTableTokenIndex(token.token)).name;
+					}
+					else
+					{
+						tokenName=table->GetDiscardTokenInfo(table->GetTableDiscardTokenIndex(token.token)).name;
+					}
+					writer.WriteLine(tokenName+L": "+WString(token.reading, token.length));
 				}
-				else
-				{
-					tokenName=table->GetDiscardTokenInfo(table->GetTableDiscardTokenIndex(token.token)).name;
-				}
-				writer.WriteLine(tokenName+L": "+WString(token.reading, token.length));
 			}
 
 			writer.WriteLine(L"=============================================================");
@@ -142,7 +146,7 @@ namespace test
 
 			while(!meetTokenFinish)
 			{
-				ParsingState::TransitionResult result=state.ReadToken();
+				ParsingState::TransitionResult result=parser->ParseStep(state, errors);
 				if(result)
 				{
 					TEST_ASSERT(!meetTokenFinish);
@@ -165,14 +169,6 @@ namespace test
 						writer.WriteString(L"] => ");
 					}
 					writer.WriteLine(itow(result.tableStateTarget)+L"["+table->GetStateInfo(result.tableStateTarget).stateName+L"]");
-
-					writer.WriteString(L"    State Stack: ");
-					FOREACH_INDEXER(vint, stateIndex, i, state.GetStateStack())
-					{
-						if(i!=0) writer.WriteString(L", ");
-						writer.WriteString(itow(stateIndex)+L"["+table->GetStateInfo(stateIndex).stateName+L"]");
-					}
-					writer.WriteLine(L"");
 
 					vint shiftReduceRangeIndex=0;
 					FOREACH(ParsingTable::Instruction, ins, result.transition->instructions)
@@ -204,7 +200,7 @@ namespace test
 								ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
 								vint start=range.shiftToken->start;
 								vint end=range.reduceToken->start+range.reduceToken->length;
-								writer.WriteString(L"        ¡¾");
+								writer.WriteString(L"    ¡¾");
 								writer.WriteString(input.Sub(start, end-start));
 								writer.WriteLine(L"¡¿");
 							}
@@ -214,6 +210,7 @@ namespace test
 							break;
 						}
 					}
+					writer.WriteLine(L"");
 
 					if(result.tableTokenIndex==ParsingTable::TokenFinish)
 					{
@@ -222,7 +219,7 @@ namespace test
 							ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
 							vint start=range.shiftToken->start;
 							vint end=range.reduceToken->start+range.reduceToken->length;
-							writer.WriteString(L"        ¡¾");
+							writer.WriteString(L"¡¾");
 							writer.WriteString(input.Sub(start, end-start));
 							writer.WriteLine(L"¡¿");
 						}
@@ -366,7 +363,7 @@ TEST_CASE(TestParsingAmbigiousExpression)
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
-		Parse(table, inputs[i], L"AmbiguousExpression", L"Exp", i, true);
+		//Parse(table, inputs[i], L"AmbiguousExpression", L"Exp", i, true);
 	}
 }
 
@@ -439,7 +436,7 @@ TEST_CASE(TestParsingGrammar)
 
 TEST_CASE(TestParsingBootstrap)
 {
-	Ptr<ParsingStrictParser> parser=CreateBootstrapStrictParser();
+	Ptr<ParsingGeneralParser> parser=CreateBootstrapStrictParser();
 	TEST_ASSERT(parser);
 
 	Ptr<ParsingDefinition> inputDefs[]=

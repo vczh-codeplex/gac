@@ -25,6 +25,51 @@ ParsingGeneralParser
 			{
 			}
 
+			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
+			{
+				ParsingTreeBuilder builder;
+				builder.Reset();
+
+				for(vint i=0;i<state.GetTokens().Count();i++)
+				{
+					const RegexToken* token=&state.GetTokens().Get(i);
+					if(token->token==-1)
+					{
+						errors.Add(new ParsingError(token, L"Unrecognizable token: \""+WString(token->reading, token->length)+L"\"."));
+					}
+				}
+
+				ParsingState::TransitionResult result;
+				while(true)
+				{
+					ParsingState::TransitionResult result=ParseStep(state, errors);
+					if(!result)
+					{
+						const RegexToken* token=state.GetToken(state.GetCurrentToken());
+						errors.Add(new ParsingError(token, L"Internal error when parsing."));
+						return 0;
+					}
+					if(!builder.Run(result))
+					{
+						const RegexToken* token=state.GetToken(state.GetCurrentToken());
+						errors.Add(new ParsingError(token, L"Internal error when building the parsing tree."));
+						return 0;
+					}
+					if(result.tableTokenIndex==ParsingTable::TokenFinish)
+					{
+						break;
+					}
+				}
+
+				Ptr<ParsingTreeNode> node=builder.GetNode();
+				if(!node)
+				{
+					errors.Add(new ParsingError(L"Internal error when building the parsing tree after a succeeded parsing process."));
+					return 0;
+				}
+				return node;
+			}
+
 			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors)
 			{
 				ParsingState state(input, table);
@@ -55,56 +100,16 @@ ParsingStrictParser
 			ParsingStrictParser::~ParsingStrictParser()
 			{
 			}
-
-			Ptr<ParsingTreeNode> ParsingStrictParser::Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
+			
+			ParsingState::TransitionResult ParsingStrictParser::ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
 			{
-				ParsingTreeBuilder builder;
-				builder.Reset();
-
-				for(vint i=0;i<state.GetTokens().Count();i++)
+				ParsingState::TransitionResult result=state.ReadToken();
+				if(!result)
 				{
-					const RegexToken* token=&state.GetTokens().Get(i);
-					if(token->token==-1)
-					{
-						errors.Add(new ParsingError(token, L"Unrecognizable token: \""+WString(token->reading, token->length)+L"\"."));
-					}
+					const RegexToken* token=state.GetToken(state.GetCurrentToken());
+					result=OnErrorRecover(state, token, errors);
 				}
-
-				ParsingState::TransitionResult result;
-				while(true)
-				{
-					result=state.ReadToken();
-					if(!result)
-					{
-						const RegexToken* token=state.GetToken(state.GetCurrentToken());
-						result=OnErrorRecover(state, token, errors);
-						if(!result)
-						{
-							return 0;
-						}
-					}
-					if(result)
-					{
-						if(!builder.Run(result))
-						{
-							const RegexToken* token=state.GetToken(state.GetCurrentToken());
-							errors.Add(new ParsingError(token, L"Internal error when building the parsing tree."));
-							return 0;
-						}
-						else if(result.tableTokenIndex==ParsingTable::TokenFinish)
-						{
-							break;
-						}
-					}
-				}
-
-				Ptr<ParsingTreeNode> node=builder.GetNode();
-				if(!node)
-				{
-					errors.Add(new ParsingError(L"Internal error when building the parsing tree after a succeeded parsing process."));
-					return 0;
-				}
-				return node;
+				return result;
 			}
 
 /***********************************************************************
@@ -191,31 +196,72 @@ ParsingAutoRecoverParser
 			}
 
 /***********************************************************************
+ParsingStrictParser
+***********************************************************************/
+
+			ParsingAmbiguousParser::ParsingAmbiguousParser(Ptr<ParsingTable> _table)
+				:ParsingGeneralParser(_table)
+			{
+			}
+
+			ParsingAmbiguousParser::~ParsingAmbiguousParser()
+			{
+			}
+			
+			ParsingState::TransitionResult ParsingAmbiguousParser::ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
+			{
+				return ParsingState::TransitionResult();
+			}
+
+/***********************************************************************
 ¸¨Öúº¯Êý
 ***********************************************************************/
 
-			Ptr<ParsingStrictParser> CreateBootstrapStrictParser()
+			Ptr<ParsingGeneralParser> CreateStrictParser(Ptr<ParsingTable> table)
 			{
-				List<Ptr<ParsingError>> errors;
-				Ptr<ParsingDefinition> definition=CreateParserDefinition();
-				Ptr<ParsingTable> table=GenerateTable(definition, false, errors);
 				if(table)
 				{
-					return new ParsingStrictParser(table);
+					if(table->GetAmbiguity())
+					{
+						return new ParsingAmbiguousParser(table);
+					}
+					else
+					{
+						return new ParsingStrictParser(table);
+					}
 				}
-				return 0;
+				else
+				{
+					return 0;
+				}
 			}
 
-			Ptr<ParsingAutoRecoverParser> CreateBootstrapAutoRecoverParser()
+			Ptr<ParsingGeneralParser> CreateAutoRecoverParser(Ptr<ParsingTable> table)
 			{
-				List<Ptr<ParsingError>> errors;
-				Ptr<ParsingDefinition> definition=CreateParserDefinition();
-				Ptr<ParsingTable> table=GenerateTable(definition, false, errors);
 				if(table)
 				{
 					return new ParsingAutoRecoverParser(table);
 				}
-				return 0;
+				else
+				{
+					return 0;
+				}
+			}
+
+			Ptr<ParsingGeneralParser> CreateBootstrapStrictParser()
+			{
+				List<Ptr<ParsingError>> errors;
+				Ptr<ParsingDefinition> definition=CreateParserDefinition();
+				Ptr<ParsingTable> table=GenerateTable(definition, false, errors);
+				return CreateStrictParser(table);
+			}
+
+			Ptr<ParsingGeneralParser> CreateBootstrapAutoRecoverParser()
+			{
+				List<Ptr<ParsingError>> errors;
+				Ptr<ParsingDefinition> definition=CreateParserDefinition();
+				Ptr<ParsingTable> table=GenerateTable(definition, false, errors);
+				return CreateAutoRecoverParser(table);
 			}
 		}
 	}
