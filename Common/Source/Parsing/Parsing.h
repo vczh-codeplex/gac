@@ -27,11 +27,11 @@ namespace vl
 			protected:
 				Ptr<ParsingTable>							table;
 				
-				virtual Ptr<ParsingTreeNode>				Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)=0;
-
 			public:
 				ParsingGeneralParser(Ptr<ParsingTable> _table);
 				~ParsingGeneralParser();
+
+				virtual Ptr<ParsingTreeNode>				Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)=0;
 				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors);
 			};
 
