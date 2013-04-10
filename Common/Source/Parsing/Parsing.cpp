@@ -1,5 +1,7 @@
 #include "Parsing.h"
 #include "ParsingAutomaton.h"
+#include "..\Collections\OperationForEach.h"
+#include "..\Collections\OperationCopyFrom.h"
 
 namespace vl
 {
@@ -210,7 +212,74 @@ ParsingStrictParser
 			
 			ParsingState::TransitionResult ParsingAmbiguousParser::ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
 			{
-				return ParsingState::TransitionResult();
+				if(decision.Count()==0)
+				{
+					List<ParsingState::Future*> allocatedFutures;
+					List<regex::RegexToken*> tokens;
+					List<ParsingState::Future*> firstFutureList;
+					List<ParsingState::Future*> secondFutureList;
+					List<ParsingState::Future*>* previousFutures=&firstFutureList;
+					List<ParsingState::Future*>* possibilities=&secondFutureList;
+					{
+						ParsingState::Future* rootFuture=state.ExploreCreateRootFuture();
+						previousFutures->Add(rootFuture);
+						allocatedFutures.Add(rootFuture);
+					}
+
+					do
+					{
+						regex::RegexToken* token=state.ExploreStep(*previousFutures, *possibilities);
+						if(possibilities->Count()==0)
+						{
+							state.ExploreTryReduce(*previousFutures, *possibilities);
+						}
+
+						if(possibilities->Count()>0)
+						{
+							if(token)
+							{
+								tokens.Add(token);
+							}
+							CopyFrom(allocatedFutures, *possibilities, true);
+						}
+
+						List<ParsingState::Future*>* temp=previousFutures;
+						previousFutures=possibilities;
+						possibilities=temp;
+					}while(previousFutures->Count()>=2);
+
+					if(previousFutures->Count()==1)
+					{
+						ParsingState::Future* currentFuture=previousFutures->Get(0);
+						vint currentRegexToken=tokens.Count()-1;
+						while(currentFuture && currentFuture->selectedToken!=-1)
+						{
+							regex::RegexToken* token=0;
+							if(currentFuture->selectedToken>=ParsingTable::UserTokenStart)
+							{
+								token=tokens[currentRegexToken--];
+							}
+							decision.Add(DecisionStep(currentFuture->selectedItem, token));
+							currentFuture=currentFuture->previous;
+						}
+					}
+
+					FOREACH(ParsingState::Future*, future, allocatedFutures)
+					{
+						delete future;
+					}
+				}
+
+				if(decision.Count()>0)
+				{
+					DecisionStep step=decision[decision.Count()-1];
+					decision.RemoveAt(decision.Count()-1);
+					return state.RunTransition(step.transitionItem, step.token);
+				}
+				else
+				{
+					return ParsingState::TransitionResult();
+				}
 			}
 
 /***********************************************************************
