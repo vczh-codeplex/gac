@@ -170,10 +170,14 @@ namespace vl
 				void										RunTransitionInFuture(ParsingTable::TransitionItem* transition, Future* previous, Future* now);
 				ParsingState::TransitionResult				RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken);
 
-				void										Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities);
 				bool										ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now, const collections::IEnumerable<vint>* lookAheadTokens);
 				TransitionResult							ReadToken(vint tableTokenIndex, regex::RegexToken* regexToken, const collections::IEnumerable<vint>* lookAheadTokens);
 				TransitionResult							ReadToken();
+
+				void										Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities);
+				regex::RegexToken*							ExploreStep(collections::List<Future*>& previousFutures, collections::List<Future*>& possibilities);
+				void										ExploreTryReduce(collections::List<Future*>& previousFutures, collections::List<Future*>& possibilities);
+				Future*										ExploreCreateRootFuture();
 			};
 
 /***********************************************************************

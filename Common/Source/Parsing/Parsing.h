@@ -46,8 +46,6 @@ namespace vl
 
 				virtual ParsingState::TransitionResult		OnErrorRecover(ParsingState& state, const regex::RegexToken* currentToken, collections::List<Ptr<ParsingError>>& errors);
 			public:
-				using ParsingGeneralParser::Parse;
-
 				ParsingStrictParser(Ptr<ParsingTable> _table=0);
 				~ParsingStrictParser();
 				
@@ -68,9 +66,28 @@ namespace vl
 
 			class ParsingAmbiguousParser : public ParsingGeneralParser
 			{
-			public:
-				using ParsingGeneralParser::Parse;
+			protected:
+				struct DecisionStep
+				{
+					ParsingTable::TransitionItem*			transitionItem;
+					regex::RegexToken*						token;
 
+					DecisionStep()
+						:transitionItem(0)
+						,token(0)
+					{
+					}
+
+					DecisionStep(ParsingTable::TransitionItem* _transitionItem, regex::RegexToken* _token)
+						:transitionItem(_transitionItem)
+						,token(_token)
+					{
+					}
+				};
+
+				collections::List<DecisionStep>				decision;
+
+			public:
 				ParsingAmbiguousParser(Ptr<ParsingTable> _table=0);
 				~ParsingAmbiguousParser();
 				

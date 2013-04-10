@@ -363,7 +363,7 @@ TEST_CASE(TestParsingAmbigiousExpression)
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{
-		//Parse(table, inputs[i], L"AmbiguousExpression", L"Exp", i, true);
+		Parse(table, inputs[i], L"AmbiguousExpression", L"Exp", i, true);
 	}
 }
 
