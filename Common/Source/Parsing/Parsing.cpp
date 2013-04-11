@@ -278,6 +278,44 @@ ParsingStrictParser
 				}
 				else
 				{
+					vint conflictReduceCount=-1;
+					if(end-begin>1)
+					{
+						vint count=0;
+						for(vint i=begin;i<end-1;i++)
+						{
+							ParsingState::Future* first=futures[i];
+							ParsingState::Future* second=futures[i+1];
+							vint firstIndex=first->selectedItem->instructions.Count();
+							vint secondIndex=second->selectedItem->instructions.Count();
+							while(--firstIndex>=0 && --secondIndex>=0)
+							{
+								ParsingTable::Instruction* firstIns=&first->selectedItem->instructions[firstIndex];
+								ParsingTable::Instruction* secondIns=&second->selectedItem->instructions[secondIndex];
+								if(firstIns && secondIns)
+								{
+									if(firstIns->instructionType==secondIns->instructionType
+										&& firstIns->nameParameter==secondIns->nameParameter
+										&& firstIns->stateParameter==secondIns->stateParameter
+										&& firstIns->value==secondIns->value
+										)
+									{
+										if(firstIns->instructionType==ParsingTable::Instruction::Reduce || firstIns->instructionType==ParsingTable::Instruction::LeftRecursiveReduce)
+										{
+											count++;
+										}
+										continue;
+									}
+								}
+								break;
+							}
+						}
+						if(conflictReduceCount==-1 || conflictReduceCount>count)
+						{
+							conflictReduceCount=count;
+						}
+					}
+
 					ParsingState::Future* currentFuture=futures[begin];
 					vint currentRegexToken=tokens.Count()-1;
 					while(currentFuture && currentFuture->selectedToken!=-1)
