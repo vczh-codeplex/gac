@@ -175,8 +175,8 @@ namespace vl
 				TransitionResult							ReadToken();
 
 				void										Explore(vint tableTokenIndex, Future* previous, collections::List<Future*>& possibilities);
-				regex::RegexToken*							ExploreStep(collections::List<Future*>& previousFutures, collections::List<Future*>& possibilities);
-				void										ExploreTryReduce(collections::List<Future*>& previousFutures, collections::List<Future*>& possibilities);
+				regex::RegexToken*							ExploreStep(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
+				void										ExploreTryReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
 				Future*										ExploreCreateRootFuture();
 			};
 
