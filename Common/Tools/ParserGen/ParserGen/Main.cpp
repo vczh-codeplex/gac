@@ -47,7 +47,7 @@ void LogErrors(List<Ptr<ParsingError>>& errors, StreamWriter& writer)
 
 #define CheckError do{ if(errors.Count()>0){ LogErrors(errors, writer); return 0; } }while(0)
 
-Ptr<ParsingDefinition> CreateDefinition(Ptr<ParsingStrictParser> parser, const WString& grammar, StreamWriter& writer)
+Ptr<ParsingDefinition> CreateDefinition(Ptr<ParsingGeneralParser> parser, const WString& grammar, StreamWriter& writer)
 {
 	List<Ptr<ParsingError>> errors;
 	Ptr<ParsingTreeNode> definitionNode=parser->Parse(grammar, L"ParserDecl", errors);
@@ -1176,7 +1176,9 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\t#define SET_STATE_INFO(INDEX, RULE, STATE, EXPR) table->SetStateInfo(INDEX, vl::parsing::tabling::ParsingTable::StateInfo(RULE, STATE, EXPR));");
 	writer.WriteString(prefix);
-	writer.WriteLine(L"\t#define SET_RULE_INFO(INDEX, NAME, TYPE, STARTSTATE) table->SetRuleInfo(INDEX, vl::parsing::tabling::ParsingTable::RuleInfo(NAME, TYPE, STARTSTATE));");
+	writer.WriteLine(L"\t#define SET_RULE_INFO(INDEX, NAME, TYPE, STARTSTATE) table->SetRuleInfo(INDEX, vl::parsing::tabling::ParsingTable::RuleInfo(NAME, TYPE, L\"\", STARTSTATE));");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#define SET_AMBIGUOUS_RULE_INFO(INDEX, NAME, TYPE, AMBIGUOUSTYPE, STARTSTATE) table->SetRuleInfo(INDEX, vl::parsing::tabling::ParsingTable::RuleInfo(NAME, TYPE, AMBIGUOUSTYPE, STARTSTATE));");
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\t#define BEGIN_TRANSITION_BAG(STATE, TOKEN) {vl::Ptr<vl::parsing::tabling::ParsingTable::TransitionBag> bag=new vl::parsing::tabling::ParsingTable::TransitionBag; table->SetTransitionBag(STATE, TOKEN, bag);");
 	writer.WriteString(prefix);
@@ -1244,16 +1246,34 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 	for(vint i=0;i<table->GetRuleCount();i++)
 	{
 		const ParsingTable::RuleInfo& info=table->GetRuleInfo(i);
-		writer.WriteString(prefix);
-		writer.WriteString(L"\tSET_RULE_INFO(");
-		writer.WriteString(itow(i));
-		writer.WriteString(L", ");
-		WriteCppString(info.name, writer);
-		writer.WriteString(L", ");
-		WriteCppString(info.type, writer);
-		writer.WriteString(L", ");
-		writer.WriteString(itow(info.rootStartState));
-		writer.WriteLine(L")");
+		if(info.ambiguousType==L"")
+		{
+			writer.WriteString(prefix);
+			writer.WriteString(L"\tSET_RULE_INFO(");
+			writer.WriteString(itow(i));
+			writer.WriteString(L", ");
+			WriteCppString(info.name, writer);
+			writer.WriteString(L", ");
+			WriteCppString(info.type, writer);
+			writer.WriteString(L", ");
+			writer.WriteString(itow(info.rootStartState));
+			writer.WriteLine(L")");
+		}
+		else
+		{
+			writer.WriteString(prefix);
+			writer.WriteString(L"\tSET_AMBIGUOUS_RULE_INFO(");
+			writer.WriteString(itow(i));
+			writer.WriteString(L", ");
+			WriteCppString(info.name, writer);
+			writer.WriteString(L", ");
+			WriteCppString(info.type, writer);
+			writer.WriteString(L", ");
+			WriteCppString(info.ambiguousType, writer);
+			writer.WriteString(L", ");
+			writer.WriteString(itow(info.rootStartState));
+			writer.WriteLine(L")");
+		}
 	}
 	writer.WriteLine(L"");
 
@@ -1370,6 +1390,8 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 	writer.WriteLine(L"\t#undef SET_STATE_INFO");
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\t#undef SET_RULE_INFO");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"\t#undef SET_AMBIGUOUS_RULE_INFO");
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\t#undef BEGIN_TRANSITION_BAG");
 	writer.WriteString(prefix);
@@ -1570,7 +1592,7 @@ int wmain(int argc, wchar_t* argv[])
 
 
 	Regex regexPathSplitter(L"[///\\]");
-	Ptr<ParsingStrictParser> parser=CreateBootstrapStrictParser();
+	Ptr<ParsingGeneralParser> parser=CreateBootstrapStrictParser();
 
 	Console::SetTitle(L"Vczh Parser Generator for C++");
 	Console::SetColor(false, true, false, true);

@@ -69,13 +69,15 @@ namespace vl
 				public:
 					WString									name;
 					WString									type;
+					WString									ambiguousType;
 					vint									rootStartState;
 
 					RuleInfo(){}
 
-					RuleInfo(const WString& _name, const WString& _type, vint _rootStartState)
+					RuleInfo(const WString& _name, const WString& _type, const WString& _ambiguousType, vint _rootStartState)
 						:name(_name)
 						,type(_type)
+						,ambiguousType(_ambiguousType)
 						,rootStartState(_rootStartState)
 					{
 					}

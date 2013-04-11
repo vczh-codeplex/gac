@@ -54,7 +54,8 @@ namespace vl
 						)
 
 					.Type(
-						Class(L"ClassTypeDef", Type(L"TypeDef"))
+						Class(L"ClassTypeDef", Type(L"TypeDef"))								
+							.Member(L"ambiguousType", TokenType())
 							.Member(L"parentType", Type(L"TypeObj"))
 							.Member(L"members", Type(L"ClassMemberDef").Array())
 							.Member(L"subTypes", Type(L"TypeDef").Array())
@@ -157,6 +158,7 @@ namespace vl
 						)
 					//-------------------------------------
 					.Token(L"CLASS",		L"class")
+					.Token(L"AMBIGUOUS",	L"ambiguous")
 					.Token(L"ENUM",			L"enum")
 					.Token(L"TOKEN",		L"token")
 					.Token(L"DISCARDTOKEN",	L"discardtoken")
@@ -222,7 +224,9 @@ namespace vl
 					.Rule(L"Class", Type(L"ClassTypeDef"))
 						.Imply(
 							(
-								Text(L"class") + Rule(L"NAME")[L"name"] + Opt(Text(L":") + Rule(L"Type")[L"parentType"]) + Text(L"{")
+								Text(L"class") + Rule(L"NAME")[L"name"]
+								+ Opt(Text(L"ambiguous") + Text(L"(") + Rule(L"NAME")[L"ambiguousType"] + Text(L")"))
+								+ Opt(Text(L":") + Rule(L"Type")[L"parentType"]) + Text(L"{")
 								+ *(Rule(L"ClassMember")[L"members"] | Rule(L"TypeDecl")[L"subTypes"])
 								+ Text(L"}")
 								)
@@ -457,6 +461,7 @@ namespace vl
 				else if(node->GetType()==L"ClassTypeDef")
 				{
 					Ptr<ParsingDefinitionClassDefinition> target=new ParsingDefinitionClassDefinition;
+					SetName(target->ambiguousType, node->GetMember(L"ambiguousType"));
 					SetMember(target->parentType, node->GetMember(L"parentType"));
 					SetName(target->name, node->GetMember(L"name"));
 					SetArray(target->members, node->GetMember(L"members"));

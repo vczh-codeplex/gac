@@ -120,17 +120,19 @@ Logger (ParsingDefinitionTypeDefinition)
 				{
 					writer.WriteString(prefix);
 					writer.WriteString(L"class ");
+					writer.WriteString(node->name);
+					if(node->ambiguousType!=L"")
+					{
+						writer.WriteString(L" ambiguous(");
+						writer.WriteString(node->ambiguousType);
+						writer.WriteString(L")");
+					}
 					if(node->parentType)
 					{
-						writer.WriteString(node->name);
 						writer.WriteString(L" : ");
 						Log(node->parentType.Obj(), writer);
-						writer.WriteLine(L"");
 					}
-					else
-					{
-						writer.WriteLine(node->name);
-					}
+					writer.WriteLine(L"");
 
 					writer.WriteString(prefix);
 					writer.WriteLine(L"{");
@@ -834,6 +836,11 @@ Logger (ParsingTable)
 					writer.WriteString(ruleInfo.name);
 					writer.WriteChar(L'<');
 					writer.WriteString(ruleInfo.type);
+					if(ruleInfo.ambiguousType!=L"")
+					{
+						writer.WriteString(L", ");
+						writer.WriteString(ruleInfo.ambiguousType);
+					}
 					writer.WriteString(L">: ");
 					writer.WriteString(itow(ruleInfo.rootStartState));
 					writer.WriteChar(L'[');

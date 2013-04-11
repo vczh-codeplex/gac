@@ -1,5 +1,10 @@
-class Expression
+class Expression ambiguous(AmbiguousExpression)
 {
+}
+
+class AmbiguousExpression : Expression
+{
+	Expression[] items;
 }
 
 class NameExpression : Expression

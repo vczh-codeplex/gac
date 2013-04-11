@@ -115,6 +115,7 @@ namespace vl
 				typedef collections::List<Ptr<ParsingDefinitionClassMemberDefinition>>	MemberList;
 				typedef collections::List<Ptr<ParsingDefinitionTypeDefinition>>			TypeList;
 
+				WString											ambiguousType;
 				Ptr<ParsingDefinitionType>						parentType;
 				MemberList										members;
 				TypeList										subTypes;

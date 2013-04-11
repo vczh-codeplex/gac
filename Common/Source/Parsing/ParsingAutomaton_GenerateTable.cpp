@@ -214,6 +214,22 @@ GenerateTable
 					info.name=rule->name;
 					info.type=TypeToString(rule->type.Obj());
 					info.rootStartState=stateIds.IndexOf(pdaRuleInfo->rootRuleStartState);
+					
+					if(Ptr<ParsingDefinitionPrimitiveType> classType=rule->type.Cast<ParsingDefinitionPrimitiveType>())
+					{
+						FOREACH(Ptr<ParsingDefinitionTypeDefinition>, typeDef, definition->types)
+						{
+							if(typeDef->name==classType->name)
+							{
+								Ptr<ParsingDefinitionClassDefinition> classDef=typeDef.Cast<ParsingDefinitionClassDefinition>();
+								if(classDef->ambiguousType!=L"")
+								{
+									info.ambiguousType=classDef->ambiguousType;
+									break;
+								}
+							}
+						}
+					}
 					table->SetRuleInfo(i, info);
 				}
 
