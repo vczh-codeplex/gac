@@ -209,6 +209,51 @@ ParsingStrictParser
 			ParsingAmbiguousParser::~ParsingAmbiguousParser()
 			{
 			}
+
+			void ParsingAmbiguousParser::SearchPath(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end)
+			{
+				futures.Add(state.ExploreCreateRootFuture());
+				vint previousBegin=0;
+				vint previousEnd=1;
+
+				do
+				{
+					regex::RegexToken* token=state.ExploreStep(futures, previousBegin, previousEnd-previousBegin, futures);
+					if(futures.Count()==previousEnd)
+					{
+						state.ExploreTryReduce(futures, previousBegin, previousEnd-previousBegin, futures);
+					}
+
+					if(futures.Count()>previousEnd && token)
+					{
+						tokens.Add(token);
+					}
+					previousBegin=previousEnd;
+					previousEnd=futures.Count();
+				}while(previousEnd-previousBegin>1);
+
+				begin=previousBegin;
+				end=previousEnd;
+			}
+
+			void ParsingAmbiguousParser::BuildDecision(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end)
+			{
+				if(end-begin==1)
+				{
+					ParsingState::Future* currentFuture=futures[begin];
+					vint currentRegexToken=tokens.Count()-1;
+					while(currentFuture && currentFuture->selectedToken!=-1)
+					{
+						regex::RegexToken* token=0;
+						if(currentFuture->selectedToken>=ParsingTable::UserTokenStart)
+						{
+							token=tokens[currentRegexToken--];
+						}
+						decision.Add(DecisionStep(currentFuture->selectedItem, token));
+						currentFuture=currentFuture->previous;
+					}
+				}
+			}
 			
 			ParsingState::TransitionResult ParsingAmbiguousParser::ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
 			{
@@ -216,42 +261,11 @@ ParsingStrictParser
 				{
 					List<ParsingState::Future*> futures;
 					List<regex::RegexToken*> tokens;
+					vint resultBegin=0;
+					vint resultEnd=0;
 
-					futures.Add(state.ExploreCreateRootFuture());
-					vint previousBegin=0;
-					vint previousEnd=1;
-
-					do
-					{
-						regex::RegexToken* token=state.ExploreStep(futures, previousBegin, previousEnd-previousBegin, futures);
-						if(futures.Count()==previousEnd)
-						{
-							state.ExploreTryReduce(futures, previousBegin, previousEnd-previousBegin, futures);
-						}
-
-						if(futures.Count()>previousEnd && token)
-						{
-							tokens.Add(token);
-						}
-						previousBegin=previousEnd;
-						previousEnd=futures.Count();
-					}while(previousEnd-previousBegin>1);
-
-					if(previousEnd-previousBegin==1)
-					{
-						ParsingState::Future* currentFuture=futures[previousBegin];
-						vint currentRegexToken=tokens.Count()-1;
-						while(currentFuture && currentFuture->selectedToken!=-1)
-						{
-							regex::RegexToken* token=0;
-							if(currentFuture->selectedToken>=ParsingTable::UserTokenStart)
-							{
-								token=tokens[currentRegexToken--];
-							}
-							decision.Add(DecisionStep(currentFuture->selectedItem, token));
-							currentFuture=currentFuture->previous;
-						}
-					}
+					SearchPath(state, futures, tokens, resultBegin, resultEnd);
+					BuildDecision(state, futures, tokens, resultBegin, resultEnd);
 
 					FOREACH(ParsingState::Future*, future, futures)
 					{
