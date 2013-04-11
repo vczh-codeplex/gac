@@ -214,43 +214,32 @@ ParsingStrictParser
 			{
 				if(decision.Count()==0)
 				{
-					List<ParsingState::Future*> allocatedFutures;
+					List<ParsingState::Future*> futures;
 					List<regex::RegexToken*> tokens;
-					List<ParsingState::Future*> firstFutureList;
-					List<ParsingState::Future*> secondFutureList;
-					List<ParsingState::Future*>* previousFutures=&firstFutureList;
-					List<ParsingState::Future*>* possibilities=&secondFutureList;
-					{
-						ParsingState::Future* rootFuture=state.ExploreCreateRootFuture();
-						previousFutures->Add(rootFuture);
-						allocatedFutures.Add(rootFuture);
-					}
+
+					futures.Add(state.ExploreCreateRootFuture());
+					vint previousBegin=0;
+					vint previousEnd=1;
 
 					do
 					{
-						regex::RegexToken* token=state.ExploreStep(*previousFutures, *possibilities);
-						if(possibilities->Count()==0)
+						regex::RegexToken* token=state.ExploreStep(futures, previousBegin, previousEnd-previousBegin, futures);
+						if(futures.Count()==previousEnd)
 						{
-							state.ExploreTryReduce(*previousFutures, *possibilities);
+							state.ExploreTryReduce(futures, previousBegin, previousEnd-previousBegin, futures);
 						}
 
-						if(possibilities->Count()>0)
+						if(futures.Count()>previousEnd && token)
 						{
-							if(token)
-							{
-								tokens.Add(token);
-							}
-							CopyFrom(allocatedFutures, *possibilities, true);
+							tokens.Add(token);
 						}
+						previousBegin=previousEnd;
+						previousEnd=futures.Count();
+					}while(previousEnd-previousBegin>1);
 
-						List<ParsingState::Future*>* temp=previousFutures;
-						previousFutures=possibilities;
-						possibilities=temp;
-					}while(previousFutures->Count()>=2);
-
-					if(previousFutures->Count()==1)
+					if(previousEnd-previousBegin==1)
 					{
-						ParsingState::Future* currentFuture=previousFutures->Get(0);
+						ParsingState::Future* currentFuture=futures[previousBegin];
 						vint currentRegexToken=tokens.Count()-1;
 						while(currentFuture && currentFuture->selectedToken!=-1)
 						{
@@ -264,7 +253,7 @@ ParsingStrictParser
 						}
 					}
 
-					FOREACH(ParsingState::Future*, future, allocatedFutures)
+					FOREACH(ParsingState::Future*, future, futures)
 					{
 						delete future;
 					}

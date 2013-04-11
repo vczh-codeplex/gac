@@ -540,35 +540,36 @@ ParsingState
 				}
 			}
 
-			regex::RegexToken* ParsingState::ExploreStep(collections::List<Future*>& previousFutures, collections::List<Future*>& possibilities)
+			regex::RegexToken* ParsingState::ExploreStep(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
 			{
-				possibilities.Clear();
 				if(walker->GetTableTokenIndex()==-1)
 				{
 					return 0;
 				}
 				vint token=walker->GetTableTokenIndex();
 				RegexToken* regexToken=walker->GetRegexToken();
-				FOREACH(Future*, previous, previousFutures)
+				vint oldPossibilitiesCount=possibilities.Count();
+				for(vint i=0;i<count;i++)
 				{
+					Future* previous=previousFutures[start+i];
 					Explore(token, previous, possibilities);
 				}
-				if(possibilities.Count()>0)
+				if(possibilities.Count()>oldPossibilitiesCount)
 				{
 					walker->Move();
 				}
 				return regexToken;
 			}
 
-			void ParsingState::ExploreTryReduce(collections::List<Future*>& previousFutures, collections::List<Future*>& possibilities)
+			void ParsingState::ExploreTryReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities)
 			{
-				possibilities.Clear();
 				if(walker->GetTableTokenIndex()==-1)
 				{
 					return;
 				}
-				FOREACH(Future*, previous, previousFutures)
+				for(vint i=0;i<count;i++)
 				{
+					Future* previous=previousFutures[start+i];
 					Explore(ParsingTable::TryReduce, previous, possibilities);
 				}
 			}
