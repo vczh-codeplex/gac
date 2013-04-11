@@ -210,6 +210,34 @@ ParsingStrictParser
 			{
 			}
 
+			bool ParsingAmbiguousParser::IsAmbiguityResolvable(collections::List<ParsingState::Future*>& futures, vint begin, vint end)
+			{
+				for(vint i=begin;i<end-1;i++)
+				{
+					ParsingState::Future* first=futures[i];
+					ParsingState::Future* second=futures[i+1];
+
+					if(first->currentState!=second->currentState
+						|| first->reduceStateCount!=second->reduceStateCount
+						|| first->shiftStates.Count()!=second->shiftStates.Count()
+						)
+					{
+						return false;
+					}
+					else
+					{
+						for(vint j=0;j<first->shiftStates.Count();j++)
+						{
+							if(first->shiftStates[j]!=second->shiftStates[j])
+							{
+								return false;
+							}
+						}
+					}
+				}
+				return true;
+			}
+
 			void ParsingAmbiguousParser::SearchPath(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
 			{
 				futures.Add(state.ExploreCreateRootFuture());
@@ -231,31 +259,7 @@ ParsingStrictParser
 					previousBegin=previousEnd;
 					previousEnd=futures.Count();
 					
-					bool resolved=true;
-					for(vint i=previousBegin;resolved&&i<previousEnd-1;i++)
-					{
-						ParsingState::Future* first=futures[i];
-						ParsingState::Future* second=futures[i+1];
-
-						if(first->currentState!=second->currentState
-							|| first->reduceStateCount!=second->reduceStateCount
-							|| first->shiftStates.Count()!=second->shiftStates.Count()
-							)
-						{
-							resolved=false;
-						}
-						else
-						{
-							for(vint j=0;resolved&&j<first->shiftStates.Count();j++)
-							{
-								if(first->shiftStates[j]!=second->shiftStates[j])
-								{
-									resolved=false;
-								}
-							}
-						}
-					}
-					if(resolved)
+					if(IsAmbiguityResolvable(futures, previousBegin, previousEnd))
 					{
 						break;
 					}
