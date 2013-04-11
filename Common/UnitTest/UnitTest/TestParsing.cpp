@@ -360,14 +360,18 @@ TEST_CASE(TestParsingAmbigiousExpression)
 	const wchar_t* inputs[]=
 	{
 		L"a",
+		L"a b",
+		L"a b c",
 		L"a.b",
+		L"a.b.c",
 		L"a<b",
 		L"a>b",
 		L"a<b>c",
 		L"a<b>.c",
 		L"a<b,c>.d",
 		L"a<b,c<d>>.e",
-		L"a<b,c<d>e>.f",
+		L"a<b,c d>.e",
+		L"a<b,c<d>e>.f g",
 	};
 	for(vint i=0;i<sizeof(inputs)/sizeof(*inputs);i++)
 	{

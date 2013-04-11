@@ -26,6 +26,12 @@ class MemberExpression : Expression
 	token name;
 }
 
+class InvokeExpression : Expression
+{
+	Expression function;
+	Expression argument;
+}
+
 class GenericExpression : Expression
 {
 	Expression expression;
@@ -44,8 +50,12 @@ rule Expression Primitive
 	= Primitive : expression "<" [Exp : arguments {"," Exp : arguments}] ">" as GenericExpression
 	= Primitive : expression "." NAME : name as MemberExpression
 	;
-rule Expression Exp
+rule Expression Invoke
 	= !Primitive
-	= Exp : firstOperand "<" Primitive : secondOperand as BinaryExpression with {binaryOperator = "LT"}
-	= Exp : firstOperand ">" Primitive : secondOperand as BinaryExpression with {binaryOperator = "GT"}
+	= Invoke : function Primitive : argument as InvokeExpression
+	;
+rule Expression Exp
+	= !Invoke
+	= Exp : firstOperand "<" Invoke : secondOperand as BinaryExpression with {binaryOperator = "LT"}
+	= Exp : firstOperand ">" Invoke : secondOperand as BinaryExpression with {binaryOperator = "GT"}
 	;

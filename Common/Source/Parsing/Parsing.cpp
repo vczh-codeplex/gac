@@ -210,13 +210,13 @@ ParsingStrictParser
 			{
 			}
 
-			void ParsingAmbiguousParser::SearchPath(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end)
+			void ParsingAmbiguousParser::SearchPath(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
 			{
 				futures.Add(state.ExploreCreateRootFuture());
 				vint previousBegin=0;
 				vint previousEnd=1;
 
-				do
+				while(true)
 				{
 					regex::RegexToken* token=state.ExploreStep(futures, previousBegin, previousEnd-previousBegin, futures);
 					if(futures.Count()==previousEnd)
@@ -230,15 +230,49 @@ ParsingStrictParser
 					}
 					previousBegin=previousEnd;
 					previousEnd=futures.Count();
-				}while(previousEnd-previousBegin>1);
+					
+					bool resolved=true;
+					for(vint i=previousBegin;resolved&&i<previousEnd-1;i++)
+					{
+						ParsingState::Future* first=futures[i];
+						ParsingState::Future* second=futures[i+1];
+
+						if(first->currentState!=second->currentState
+							|| first->reduceStateCount!=second->reduceStateCount
+							|| first->shiftStates.Count()!=second->shiftStates.Count()
+							)
+						{
+							resolved=false;
+						}
+						else
+						{
+							for(vint j=0;resolved&&j<first->shiftStates.Count();j++)
+							{
+								if(first->shiftStates[j]!=second->shiftStates[j])
+								{
+									resolved=false;
+								}
+							}
+						}
+					}
+					if(resolved)
+					{
+						break;
+					}
+				}
 
 				begin=previousBegin;
 				end=previousEnd;
 			}
 
-			void ParsingAmbiguousParser::BuildDecision(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end)
+			void ParsingAmbiguousParser::BuildDecision(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors)
 			{
-				if(end-begin==1)
+				if(end-begin==0)
+				{
+					const RegexToken* token=state.GetToken(state.GetCurrentToken());
+					errors.Add(new ParsingError(token, (token==0?L"Error happened during parsing when reaching to the end of the input.":L"Error happened during parsing.")));
+				}
+				else
 				{
 					ParsingState::Future* currentFuture=futures[begin];
 					vint currentRegexToken=tokens.Count()-1;
@@ -264,8 +298,8 @@ ParsingStrictParser
 					vint resultBegin=0;
 					vint resultEnd=0;
 
-					SearchPath(state, futures, tokens, resultBegin, resultEnd);
-					BuildDecision(state, futures, tokens, resultBegin, resultEnd);
+					SearchPath(state, futures, tokens, resultBegin, resultEnd, errors);
+					BuildDecision(state, futures, tokens, resultBegin, resultEnd, errors);
 
 					FOREACH(ParsingState::Future*, future, futures)
 					{
