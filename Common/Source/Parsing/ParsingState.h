@@ -137,19 +137,27 @@ namespace vl
 					{
 					}
 				};
+
+				struct StateGroup
+				{
+					collections::List<vint>						stateStack;
+					vint										currentState;
+					vint										tokenSequenceIndex;
+
+					collections::List<regex::RegexToken*>		shiftTokenStack;
+					regex::RegexToken*							shiftToken;
+					regex::RegexToken*							reduceToken;
+
+					StateGroup();
+					StateGroup(const ParsingTable::RuleInfo& info);
+					StateGroup(const StateGroup& group);
+				};
 			private:
 				WString										input;
 				Ptr<ParsingTable>							table;
 				collections::List<regex::RegexToken>		tokens;
 				Ptr<ParsingTokenWalker>						walker;
-
-				collections::List<vint>						stateStack;
-				vint										currentState;
-				vint										tokenSequenceIndex;
-				
-				collections::List<regex::RegexToken*>		shiftTokenStack;
-				regex::RegexToken*							shiftToken;
-				regex::RegexToken*							reduceToken;
+				Ptr<StateGroup>								stateGroup;
 			public:
 				ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex=-1);
 				~ParsingState();
@@ -178,6 +186,9 @@ namespace vl
 				regex::RegexToken*							ExploreStep(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
 				void										ExploreTryReduce(collections::List<Future*>& previousFutures, vint start, vint count, collections::List<Future*>& possibilities);
 				Future*										ExploreCreateRootFuture();
+
+				Ptr<StateGroup>								TakeSnapshot();
+				void										RestoreSnapshot(Ptr<StateGroup> group);
 			};
 
 /***********************************************************************
