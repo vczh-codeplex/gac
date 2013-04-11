@@ -34,6 +34,7 @@ namespace vczh
 				static const vl::vint SPACE = 12;
 			};
 			class XmlNode;
+			class XmlAmbiguousNode;
 			class XmlText;
 			class XmlCData;
 			class XmlAttribute;
@@ -51,6 +52,7 @@ namespace vczh
 				class IVisitor : public vl::Interface
 				{
 				public:
+					virtual void Visit(XmlAmbiguousNode* node)=0;
 					virtual void Visit(XmlText* node)=0;
 					virtual void Visit(XmlCData* node)=0;
 					virtual void Visit(XmlAttribute* node)=0;
@@ -62,6 +64,16 @@ namespace vczh
 
 				virtual void Accept(XmlNode::IVisitor* visitor)=0;
 
+			};
+
+			class XmlAmbiguousNode : public XmlNode
+			{
+			public:
+				vl::collections::List<vl::Ptr<XmlNode>> items;
+
+				void Accept(XmlNode::IVisitor* visitor)override;
+
+				static vl::Ptr<XmlAmbiguousNode> Convert(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 			};
 
 			class XmlText : public XmlNode

@@ -3,7 +3,7 @@ Vczh Library++ 3.0
 Developer: 陈梓瀚(vczh)
 Parser::Parser.Calculator
 
-本文件使用Vczh Functional Macro工具自动生成
+本文件使用Vczh Parsing Generator工具自动生成
 ***********************************************************************/
 
 #include "..\..\..\Source\Parsing\Parsing.h"
@@ -12,6 +12,19 @@ namespace test
 {
 	namespace parser
 	{
+		struct CalParserTokenIndex abstract
+		{
+			static const vl::vint NAME = 0;
+			static const vl::vint NUMBER = 1;
+			static const vl::vint ADD = 2;
+			static const vl::vint SUB = 3;
+			static const vl::vint MUL = 4;
+			static const vl::vint DIV = 5;
+			static const vl::vint LEFT = 6;
+			static const vl::vint RIGHT = 7;
+			static const vl::vint COMMA = 8;
+			static const vl::vint SPACE = 9;
+		};
 		class CalExpression;
 		class CalNumberExpression;
 		class CalBinaryExpression;
@@ -79,6 +92,8 @@ namespace test
 		extern vl::Ptr<vl::parsing::ParsingTreeCustomBase> CalConvertParsingTreeNode(vl::Ptr<vl::parsing::ParsingTreeNode> node, const vl::collections::List<vl::regex::RegexToken>& tokens);
 		extern vl::Ptr<vl::parsing::tabling::ParsingTable> CalLoadTable();
 
+		extern vl::Ptr<vl::parsing::ParsingTreeNode> CalParseExpressionAsParsingTreeNode(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
 		extern vl::Ptr<CalExpression> CalParseExpression(const vl::WString& input, vl::Ptr<vl::parsing::tabling::ParsingTable> table);
+
 	}
 }

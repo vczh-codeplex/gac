@@ -6,8 +6,13 @@ parser:ParseDocument(XDocument)
 parser:ParseElement(XElement)
 grammar:
 
-class Node
+class Node ambiguous(AmbiguousNode)
 {
+}
+
+class AmbiguousNode : Node
+{
+	Node[] items;
 }
 
 class Text : Node

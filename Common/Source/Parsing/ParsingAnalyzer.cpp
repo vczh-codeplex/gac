@@ -1267,6 +1267,49 @@ ResolveSymbols
 
 			void ResolveSymbols(Ptr<definitions::ParsingDefinition> definition, ParsingSymbolManager* manager, collections::List<Ptr<ParsingError>>& errors)
 			{
+				FOREACH(Ptr<ParsingDefinitionTypeDefinition>, type, definition->types)
+				{
+					if(Ptr<ParsingDefinitionClassDefinition> node=type.Cast<ParsingDefinitionClassDefinition>())
+					{
+						if(node->ambiguousType!=L"")
+						{
+							ParsingSymbol* ambigiousType=manager->GetGlobal()->GetSubSymbolByName(node->ambiguousType);
+							if(!ambigiousType)
+							{
+								errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+node->ambiguousType+L"\" for type \""+node->name+L"\" does not exist."));
+							}
+							else if(ambigiousType->GetType()!=ParsingSymbol::ClassType)
+							{
+								errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+node->ambiguousType+L"\" for type \""+node->name+L"\" is not a type."));
+							}
+							else if(ambigiousType->GetDescriptorSymbol()!=manager->GetGlobal()->GetSubSymbolByName(node->name))
+							{
+								errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+node->ambiguousType+L"\" for type \""+node->name+L"\" does not inherit from \""+node->name+L"\"."));
+							}
+							else
+							{
+								bool correct=false;
+								if(ambigiousType->GetSubSymbolCount()==1)
+								{
+									ParsingSymbol* field=ambigiousType->GetSubSymbol(0);
+									if(field->GetName()==L"items" && field->GetType()==ParsingSymbol::ClassField)
+									{
+										ParsingSymbol* fieldType=field->GetDescriptorSymbol();
+										if(fieldType->GetType()==ParsingSymbol::ArrayType && fieldType->GetDescriptorSymbol()==ambigiousType->GetDescriptorSymbol())
+										{
+											correct=true;
+										}
+									}
+								}
+								if(!correct)
+								{
+									errors.Add(new ParsingError(node.Obj(), L"Ambiguous type \""+node->ambiguousType+L"\" for type \""+node->name+L"\" can only contains one field called \"item\" which should be an array of \""+node->name+L"\"."));
+								}
+							}
+						}
+					}
+				}
+
 				FOREACH(Ptr<ParsingDefinitionRuleDefinition>, rule, definition->rules)
 				{
 					vint errorCount=errors.Count();
