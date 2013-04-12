@@ -275,7 +275,67 @@ ParsingStrictParser
 				end=previousEnd;
 			}
 
-			void ParsingAmbiguousParser::BuildDecision(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAmbiguousParser::CheckAmbiguousFutures(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors)
+			{
+				vint conflictReduceCount=-1;
+				for(vint i=begin;i<end-1;i++)
+				{
+					vint count=0;
+					ParsingState::Future* first=futures[i];
+					ParsingState::Future* second=futures[i+1];
+					vint firstIndex=first->selectedItem->instructions.Count();
+					vint secondIndex=second->selectedItem->instructions.Count();
+					while(--firstIndex>=0 && --secondIndex>=0)
+					{
+						ParsingTable::Instruction* firstIns=&first->selectedItem->instructions[firstIndex];
+						ParsingTable::Instruction* secondIns=&second->selectedItem->instructions[secondIndex];
+						if(firstIns && secondIns)
+						{
+							if(firstIns->instructionType==secondIns->instructionType
+								&& firstIns->nameParameter==secondIns->nameParameter
+								&& firstIns->stateParameter==secondIns->stateParameter
+								&& firstIns->value==secondIns->value
+								)
+							{
+								if(firstIns->instructionType==ParsingTable::Instruction::Reduce || firstIns->instructionType==ParsingTable::Instruction::LeftRecursiveReduce)
+								{
+									count++;
+								}
+								continue;
+							}
+						}
+						break;
+					}
+					if(conflictReduceCount==-1 || conflictReduceCount>count)
+					{
+						conflictReduceCount=count;
+					}
+				}
+			}
+
+			void ParsingAmbiguousParser::BuildDeterministicDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors)
+			{
+				ParsingState::Future* currentFuture=futures[begin];
+				vint currentRegexToken=tokens.Count()-1;
+				List<Pair<ParsingTable::TransitionItem*, regex::RegexToken*>> path;
+				while(currentFuture && currentFuture->selectedToken!=-1)
+				{
+					regex::RegexToken* token=0;
+					if(currentFuture->selectedToken>=ParsingTable::UserTokenStart)
+					{
+						token=tokens[currentRegexToken--];
+					}
+					path.Add(Pair<ParsingTable::TransitionItem*, regex::RegexToken*>(currentFuture->selectedItem, token));
+					currentFuture=currentFuture->previous;
+				}
+
+				for(vint i=path.Count()-1;i>=0;i--)
+				{
+					decisions.Add(state.RunTransition(path[i].key, path[i].value));
+				}
+			}
+
+			void ParsingAmbiguousParser::BuildDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors)
 			{
 				if(end-begin==0)
 				{
@@ -284,62 +344,12 @@ ParsingStrictParser
 				}
 				else
 				{
-					vint conflictReduceCount=-1;
 					if(end-begin>1)
 					{
-						vint count=0;
-						for(vint i=begin;i<end-1;i++)
-						{
-							ParsingState::Future* first=futures[i];
-							ParsingState::Future* second=futures[i+1];
-							vint firstIndex=first->selectedItem->instructions.Count();
-							vint secondIndex=second->selectedItem->instructions.Count();
-							while(--firstIndex>=0 && --secondIndex>=0)
-							{
-								ParsingTable::Instruction* firstIns=&first->selectedItem->instructions[firstIndex];
-								ParsingTable::Instruction* secondIns=&second->selectedItem->instructions[secondIndex];
-								if(firstIns && secondIns)
-								{
-									if(firstIns->instructionType==secondIns->instructionType
-										&& firstIns->nameParameter==secondIns->nameParameter
-										&& firstIns->stateParameter==secondIns->stateParameter
-										&& firstIns->value==secondIns->value
-										)
-									{
-										if(firstIns->instructionType==ParsingTable::Instruction::Reduce || firstIns->instructionType==ParsingTable::Instruction::LeftRecursiveReduce)
-										{
-											count++;
-										}
-										continue;
-									}
-								}
-								break;
-							}
-						}
-						if(conflictReduceCount==-1 || conflictReduceCount>count)
-						{
-							conflictReduceCount=count;
-						}
+						CheckAmbiguousFutures(state, futures, tokens, begin, end, errors);
 					}
 
-					ParsingState::Future* currentFuture=futures[begin];
-					vint currentRegexToken=tokens.Count()-1;
-					List<Pair<ParsingTable::TransitionItem*, regex::RegexToken*>> path;
-					while(currentFuture && currentFuture->selectedToken!=-1)
-					{
-						regex::RegexToken* token=0;
-						if(currentFuture->selectedToken>=ParsingTable::UserTokenStart)
-						{
-							token=tokens[currentRegexToken--];
-						}
-						path.Add(Pair<ParsingTable::TransitionItem*, regex::RegexToken*>(currentFuture->selectedItem, token));
-						currentFuture=currentFuture->previous;
-					}
-
-					for(vint i=path.Count()-1;i>=0;i--)
-					{
-						decisions.Add(state.RunTransition(path[i].key, path[i].value));
-					}
+					BuildDeterministicDecisions(state, futures, tokens, begin, end, errors);
 				}
 			}
 			
@@ -353,7 +363,7 @@ ParsingStrictParser
 					vint resultEnd=0;
 
 					SearchPath(state, futures, tokens, resultBegin, resultEnd, errors);
-					BuildDecision(state, futures, tokens, resultBegin, resultEnd, errors);
+					BuildDecisions(state, futures, tokens, resultBegin, resultEnd, errors);
 
 					FOREACH(ParsingState::Future*, future, futures)
 					{
