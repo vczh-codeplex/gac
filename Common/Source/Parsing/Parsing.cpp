@@ -27,8 +27,13 @@ ParsingGeneralParser
 			{
 			}
 
+			void ParsingGeneralParser::BeginParse()
+			{
+			}
+
 			Ptr<ParsingTreeNode> ParsingGeneralParser::Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
 			{
+				BeginParse();
 				ParsingTreeBuilder builder;
 				builder.Reset();
 
@@ -203,6 +208,7 @@ ParsingStrictParser
 
 			ParsingAmbiguousParser::ParsingAmbiguousParser(Ptr<ParsingTable> _table)
 				:ParsingGeneralParser(_table)
+				,consumedDecisionCount(0)
 			{
 			}
 
@@ -318,6 +324,7 @@ ParsingStrictParser
 
 					ParsingState::Future* currentFuture=futures[begin];
 					vint currentRegexToken=tokens.Count()-1;
+					List<Pair<ParsingTable::TransitionItem*, regex::RegexToken*>> path;
 					while(currentFuture && currentFuture->selectedToken!=-1)
 					{
 						regex::RegexToken* token=0;
@@ -325,15 +332,20 @@ ParsingStrictParser
 						{
 							token=tokens[currentRegexToken--];
 						}
-						decision.Add(DecisionStep(currentFuture->selectedItem, token));
+						path.Add(Pair<ParsingTable::TransitionItem*, regex::RegexToken*>(currentFuture->selectedItem, token));
 						currentFuture=currentFuture->previous;
+					}
+
+					for(vint i=path.Count()-1;i>=0;i--)
+					{
+						decisions.Add(state.RunTransition(path[i].key, path[i].value));
 					}
 				}
 			}
 			
 			ParsingState::TransitionResult ParsingAmbiguousParser::ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)
 			{
-				if(decision.Count()==0)
+				if(decisions.Count()==consumedDecisionCount)
 				{
 					List<ParsingState::Future*> futures;
 					List<regex::RegexToken*> tokens;
@@ -349,16 +361,26 @@ ParsingStrictParser
 					}
 				}
 
-				if(decision.Count()>0)
+				if(decisions.Count()>consumedDecisionCount)
 				{
-					DecisionStep step=decision[decision.Count()-1];
-					decision.RemoveAt(decision.Count()-1);
-					return state.RunTransition(step.transitionItem, step.token);
+					ParsingState::TransitionResult result=decisions[consumedDecisionCount++];
+					if(consumedDecisionCount==decisions.Count())
+					{
+						decisions.Clear();
+						consumedDecisionCount=0;
+					}
+					return result;
 				}
 				else
 				{
 					return ParsingState::TransitionResult();
 				}
+			}
+
+			void ParsingAmbiguousParser::BeginParse()
+			{
+				decisions.Clear();
+				consumedDecisionCount=0;
 			}
 
 /***********************************************************************
