@@ -92,13 +92,20 @@ namespace test
 		return table;
 	}
 
+	enum TokenStreamStatus
+	{
+		Normal,
+		ResolvingAmbiguity,
+		Closed,
+	};
+
 	Ptr<ParsingTreeNode> Parse(Ptr<ParsingTable> table, const WString& input, const WString& name, const WString& rule, vint index, bool showInput)
 	{
 		if(showInput)
 		{
 			unittest::UnitTest::PrintInfo(L"Parsing: "+input);
 		}
-		bool meetTokenFinish=false;
+		TokenStreamStatus status=Normal;
 		Ptr<ParsingTreeNode> node;
 		{
 			FileStream fileStream(GetPath()+L"Parsing."+name+L".["+itow(index)+L"].txt", FileStream::WriteOnly);
@@ -145,86 +152,112 @@ namespace test
 			TEST_ASSERT(startState!=-1);
 			writer.WriteLine(L"StartState: "+itow(startState)+L"["+table->GetStateInfo(startState).stateName+L"]");
 
-			while(!meetTokenFinish)
+			while(true)
 			{
 				ParsingState::TransitionResult result=parser->ParseStep(state, errors);
 				if(result)
 				{
-					TEST_ASSERT(!meetTokenFinish);
-					switch(result.tableTokenIndex)
+					switch(result.transitionType)
 					{
-					case ParsingTable::TokenBegin:
-						writer.WriteString(L"$TokenBegin => ");
+					case ParsingState::TransitionResult::AmbiguityBegin:
+						TEST_ASSERT(status==Normal);
+						status=ResolvingAmbiguity;
+						writer.WriteLine(L"<AmbiguityBegin> AffectedStackNodeCount="+itow(result.ambiguityAffectedStackNodeCount));
 						break;
-					case ParsingTable::TokenFinish:
-						writer.WriteString(L"$TokenFinish => ");
-						meetTokenFinish=true;
+					case ParsingState::TransitionResult::AmbiguityBranch:
+						TEST_ASSERT(status==ResolvingAmbiguity);
+						writer.WriteLine(L"<AmbiguityBranch>");
 						break;
-					case ParsingTable::TryReduce:
-						writer.WriteString(L"TryReduce => ");
+					case ParsingState::TransitionResult::AmbiguityEnd:
+						TEST_ASSERT(status==ResolvingAmbiguity);
+						status=Normal;
+						writer.WriteLine(L"<AmbiguityBranch>");
 						break;
-					default:
-						writer.WriteString(table->GetTokenInfo(result.tableTokenIndex).name);
-						writer.WriteString(L"[");
-						writer.WriteString(WString(result.token->reading, result.token->length));
-						writer.WriteString(L"] => ");
-					}
-					writer.WriteLine(itow(result.tableStateTarget)+L"["+table->GetStateInfo(result.tableStateTarget).stateName+L"]");
-
-					vint shiftReduceRangeIndex=0;
-					FOREACH(ParsingTable::Instruction, ins, result.transition->instructions)
-					{
-						switch(ins.instructionType)
+					case ParsingState::TransitionResult::ExecuteInstructions:
 						{
-						case ParsingTable::Instruction::Create:
-							writer.WriteLine(L"    Create "+ins.nameParameter);
-							break;
-						case ParsingTable::Instruction::Using:
-							writer.WriteLine(L"    Using");
-							break;
-						case ParsingTable::Instruction::Assign:
-							writer.WriteLine(L"    Assign "+ins.nameParameter);
-							break;
-						case ParsingTable::Instruction::Item:
-							writer.WriteLine(L"    Item "+ins.nameParameter);
-							break;
-						case ParsingTable::Instruction::Setter:
-							writer.WriteLine(L"    Setter "+ins.nameParameter+L" = "+ins.value);
-							break;
-						case ParsingTable::Instruction::Shift:
-							writer.WriteLine(L"    Shift "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
-							break;
-						case ParsingTable::Instruction::Reduce:
-							writer.WriteLine(L"    Reduce "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
-							if(result.shiftReduceRanges && showInput)
+							writer.WriteLine(L"<ExecuteInstructions>");
+							switch(result.tableTokenIndex)
 							{
-								ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
-								vint start=range.shiftToken->start;
-								vint end=range.reduceToken->start+range.reduceToken->length;
-								writer.WriteString(L"    ¡¾");
-								writer.WriteString(input.Sub(start, end-start));
-								writer.WriteLine(L"¡¿");
+							case ParsingTable::TokenBegin:
+								writer.WriteString(L"$TokenBegin => ");
+								break;
+							case ParsingTable::TokenFinish:
+								writer.WriteString(L"$TokenFinish => ");
+								TEST_ASSERT(status!=Closed);
+								if(status==Normal)
+								{
+									status=Closed;
+								}
+								break;
+							case ParsingTable::TryReduce:
+								writer.WriteString(L"TryReduce => ");
+								break;
+							default:
+								writer.WriteString(table->GetTokenInfo(result.tableTokenIndex).name);
+								writer.WriteString(L"[");
+								writer.WriteString(WString(result.token->reading, result.token->length));
+								writer.WriteString(L"] => ");
 							}
-							break;
-						case ParsingTable::Instruction::LeftRecursiveReduce:
-							writer.WriteLine(L"    LR-Reduce "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
-							break;
+							writer.WriteLine(itow(result.tableStateTarget)+L"["+table->GetStateInfo(result.tableStateTarget).stateName+L"]");
+
+							vint shiftReduceRangeIndex=0;
+							FOREACH(ParsingTable::Instruction, ins, From(result.transition->instructions).Skip(result.instructionBegin).Take(result.instructionCount))
+							{
+								switch(ins.instructionType)
+								{
+								case ParsingTable::Instruction::Create:
+									writer.WriteLine(L"    Create "+ins.nameParameter);
+									break;
+								case ParsingTable::Instruction::Using:
+									writer.WriteLine(L"    Using");
+									break;
+								case ParsingTable::Instruction::Assign:
+									writer.WriteLine(L"    Assign "+ins.nameParameter);
+									break;
+								case ParsingTable::Instruction::Item:
+									writer.WriteLine(L"    Item "+ins.nameParameter);
+									break;
+								case ParsingTable::Instruction::Setter:
+									writer.WriteLine(L"    Setter "+ins.nameParameter+L" = "+ins.value);
+									break;
+								case ParsingTable::Instruction::Shift:
+									writer.WriteLine(L"    Shift "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
+									break;
+								case ParsingTable::Instruction::Reduce:
+									writer.WriteLine(L"    Reduce "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
+									if(result.shiftReduceRanges && showInput)
+									{
+										ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
+										vint start=range.shiftToken->start;
+										vint end=range.reduceToken->start+range.reduceToken->length;
+										writer.WriteString(L"    ¡¾");
+										writer.WriteString(input.Sub(start, end-start));
+										writer.WriteLine(L"¡¿");
+									}
+									break;
+								case ParsingTable::Instruction::LeftRecursiveReduce:
+									writer.WriteLine(L"    LR-Reduce "+itow(ins.stateParameter)+L"["+table->GetStateInfo(ins.stateParameter).ruleName+L"]");
+									break;
+								}
+							}
+
+							if(result.tableTokenIndex==ParsingTable::TokenFinish)
+							{
+								writer.WriteLine(L"");
+								if(result.shiftReduceRanges && showInput)
+								{
+									ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
+									vint start=range.shiftToken->start;
+									vint end=range.reduceToken->start+range.reduceToken->length;
+									writer.WriteString(L"¡¾");
+									writer.WriteString(input.Sub(start, end-start));
+									writer.WriteLine(L"¡¿");
+								}
+							}
 						}
+						break;
 					}
 					writer.WriteLine(L"");
-
-					if(result.tableTokenIndex==ParsingTable::TokenFinish)
-					{
-						if(result.shiftReduceRanges && showInput)
-						{
-							ParsingState::ShiftReduceRange range=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
-							vint start=range.shiftToken->start;
-							vint end=range.reduceToken->start+range.reduceToken->length;
-							writer.WriteString(L"¡¾");
-							writer.WriteString(input.Sub(start, end-start));
-							writer.WriteLine(L"¡¿");
-						}
-					}
 
 					TEST_ASSERT(builder.Run(result));
 				}
@@ -248,7 +281,7 @@ namespace test
 				Log(node, originalInput, writer);
 			}
 		}
-		TEST_ASSERT(meetTokenFinish);
+		TEST_ASSERT(status==Closed);
 		TEST_ASSERT(node);
 		return node;
 	}

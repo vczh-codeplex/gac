@@ -408,7 +408,7 @@ ParsingState
 				}
 			}
 
-			ParsingState::TransitionResult ParsingState::RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken)
+			ParsingState::TransitionResult ParsingState::RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken, vint instructionBegin, vint instructionCount)
 			{
 				if(regexToken)
 				{
@@ -434,8 +434,10 @@ ParsingState
 				result.tableStateSource=stateGroup->currentState;
 				result.tableStateTarget=transition->targetState;
 				result.transition=transition;
+				result.instructionBegin=instructionBegin;
+				result.instructionCount=instructionCount;
 
-				for(vint j=0;j<transition->instructions.Count();j++)
+				for(vint j=instructionBegin;j<instructionBegin+instructionCount;j++)
 				{
 					ParsingTable::Instruction& ins=transition->instructions[j];
 					switch(ins.instructionType)
@@ -484,6 +486,11 @@ ParsingState
 
 				stateGroup->currentState=transition->targetState;
 				return result;
+			}
+
+			ParsingState::TransitionResult ParsingState::RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken)
+			{
+				return RunTransition(transition, regexToken, 0, transition->instructions.Count());
 			}
 
 			bool ParsingState::ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now, const collections::IEnumerable<vint>* lookAheadTokens)
@@ -618,6 +625,7 @@ ParsingTreeBuilder
 ***********************************************************************/
 
 			ParsingTreeBuilder::ParsingTreeBuilder()
+				:skip(false)
 			{
 			}
 
@@ -630,6 +638,7 @@ ParsingTreeBuilder
 				createdObject=0;
 				operationTarget=new ParsingTreeObject();
 				nodeStack.Clear();
+				skip=false;
 			}
 
 			bool ParsingTreeBuilder::Run(const ParsingState::TransitionResult& result)
@@ -638,8 +647,20 @@ ParsingTreeBuilder
 				{
 					return false;
 				}
+
+				switch(result.transitionType)
+				{
+				case ParsingState::TransitionResult::AmbiguityBranch:
+					skip=true;
+					break;
+				case ParsingState::TransitionResult::AmbiguityEnd:
+					skip=true;
+					break;
+				}
+				if(skip) return true;
+
 				vint shiftReduceRangeIndex=0;
-				for(vint j=0;j<result.transition->instructions.Count();j++)
+				for(vint j=result.instructionBegin;j<result.instructionBegin+result.instructionCount;j++)
 				{
 					ParsingTable::Instruction& ins=result.transition->instructions[j];
 					switch(ins.instructionType)

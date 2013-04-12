@@ -335,7 +335,7 @@ ParsingStrictParser
 					conflictReduceIndices[i-begin]=index;
 				}
 
-				vint effectStackNodes=-1;
+				vint affectedStackNodeCount=-1;
 				for(vint i=begin;i<end;i++)
 				{
 					ParsingState::Future* future=futures[i];
@@ -358,11 +358,11 @@ ParsingStrictParser
 						future=future->previous;
 					}
 
-					if(effectStackNodes==-1)
+					if(affectedStackNodeCount==-1)
 					{
-						effectStackNodes=count;
+						affectedStackNodeCount=count;
 					}
-					else if(effectStackNodes!=count)
+					else if(affectedStackNodeCount!=count)
 					{
 						goto FAIL_TO_CHECK;
 					}
