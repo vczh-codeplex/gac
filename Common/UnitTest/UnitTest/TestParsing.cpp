@@ -107,6 +107,7 @@ namespace test
 			StreamWriter writer(encoderStream);
 
 			Ptr<ParsingGeneralParser> parser=CreateStrictParser(table);
+			parser->BeginParse();
 			ParsingState state(input, table);
 			List<Ptr<ParsingError>> errors;
 			ParsingTreeBuilder builder;

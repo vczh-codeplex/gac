@@ -30,8 +30,9 @@ namespace vl
 			public:
 				ParsingGeneralParser(Ptr<ParsingTable> _table);
 				~ParsingGeneralParser();
-
+				
 				virtual ParsingState::TransitionResult		ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)=0;
+				virtual void								BeginParse();
 				Ptr<ParsingTreeNode>						Parse(ParsingState& state, collections::List<Ptr<ParsingError>>& errors);
 				Ptr<ParsingTreeNode>						Parse(const WString& input, const WString& rule, collections::List<Ptr<ParsingError>>& errors);
 			};
@@ -66,26 +67,11 @@ namespace vl
 
 			class ParsingAmbiguousParser : public ParsingGeneralParser
 			{
+				typedef collections::List<ParsingState::TransitionResult>		DecisionList;
 			protected:
-				struct DecisionStep
-				{
-					ParsingTable::TransitionItem*			transitionItem;
-					regex::RegexToken*						token;
 
-					DecisionStep()
-						:transitionItem(0)
-						,token(0)
-					{
-					}
-
-					DecisionStep(ParsingTable::TransitionItem* _transitionItem, regex::RegexToken* _token)
-						:transitionItem(_transitionItem)
-						,token(_token)
-					{
-					}
-				};
-
-				collections::List<DecisionStep>				decision;
+				DecisionList								decisions;
+				vint										consumedDecisionCount;
 
 				bool										IsAmbiguityResolvable(collections::List<ParsingState::Future*>& futures, vint begin, vint end);
 				void										SearchPath(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors);
@@ -95,6 +81,7 @@ namespace vl
 				~ParsingAmbiguousParser();
 				
 				ParsingState::TransitionResult				ParseStep(ParsingState& state, collections::List<Ptr<ParsingError>>& errors)override;
+				void										BeginParse()override;
 			};
 
 /***********************************************************************
