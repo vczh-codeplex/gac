@@ -250,6 +250,12 @@ ParsingTreeToken
 			visitor->Visit(this);
 		}
 
+		Ptr<ParsingTreeNode> ParsingTreeToken::Clone()
+		{
+			Ptr<ParsingTreeToken> clone=new ParsingTreeToken(value, tokenIndex, codeRange);
+			return clone;
+		}
+
 		vint ParsingTreeToken::GetTokenIndex()
 		{
 			return tokenIndex;
@@ -292,6 +298,18 @@ ParsingTreeObject
 		void ParsingTreeObject::Accept(IVisitor* visitor)
 		{
 			visitor->Visit(this);
+		}
+
+		Ptr<ParsingTreeNode> ParsingTreeObject::Clone()
+		{
+			Ptr<ParsingTreeObject> clone=new ParsingTreeObject(type, codeRange);
+			for(vint i=0;i<members.Count();i++)
+			{
+				WString name=members.Keys().Get(i);
+				Ptr<ParsingTreeNode> node=members.Values().Get(i)->Clone();
+				clone->SetMember(name, node);
+			}
+			return clone;
 		}
 
 		const WString& ParsingTreeObject::GetType()
@@ -374,6 +392,17 @@ ParsingTreeArray
 		void ParsingTreeArray::Accept(IVisitor* visitor)
 		{
 			visitor->Visit(this);
+		}
+
+		Ptr<ParsingTreeNode> ParsingTreeArray::Clone()
+		{
+			Ptr<ParsingTreeArray> clone=new ParsingTreeArray(elementType, codeRange);
+			for(vint i=0;i<items.Count();i++)
+			{
+				Ptr<ParsingTreeNode> node=items.Get(i)->Clone();
+				clone->AddItem(node);
+			}
+			return clone;
 		}
 
 		const WString& ParsingTreeArray::GetElementType()
