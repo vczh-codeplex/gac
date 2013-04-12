@@ -1,6 +1,13 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B03B7B16-8C61-440D-8133-C83AE1D8CA02}"
+	ProjectSection(SolutionItems) = preProject
+		GaclibServices.vsmdi = GaclibServices.vsmdi
+		Local.testsettings = Local.testsettings
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
+EndProject
 Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "GaclibServices", "GaclibServices\GaclibServices.ccproj", "{0EA681C6-412C-44E0-B9DB-FC9D9C763600}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GaclibWebPage", "GaclibWebPage\GaclibWebPage.csproj", "{4629481D-EB9E-43DB-B0D7-6C3F4265D002}"
@@ -12,13 +19,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureStorageFacadeLibrary", "AzureStorageFacadeLibrary\AzureStorageFacadeLibrary.csproj", "{17116ED4-93B7-436F-8A99-B70627E2097A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureStorageFacadeLibraryTest", "AzureStorageFacadeLibraryTest\AzureStorageFacadeLibraryTest.csproj", "{E63078B5-5CD6-4460-9416-859AF348DFAF}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B03B7B16-8C61-440D-8133-C83AE1D8CA02}"
-	ProjectSection(SolutionItems) = preProject
-		GaclibServices.vsmdi = GaclibServices.vsmdi
-		Local.testsettings = Local.testsettings
-		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
