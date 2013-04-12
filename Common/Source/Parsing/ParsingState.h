@@ -81,21 +81,40 @@ namespace vl
 
 				struct TransitionResult
 				{
+					enum TransitionType
+					{
+						ExecuteInstructions,
+						AmbiguityBegin,
+						AmbiguityBranch,
+						AmbiguityEnd,
+					};
+
+					TransitionType								transitionType;
+					vint										ambiguityAffectedStackNodeCount;
+					WString										ambiguityNodeType;
+
 					vint										tableTokenIndex;
 					vint										tableStateSource;
 					vint										tableStateTarget;
 					vint										tokenIndexInStream;
 					regex::RegexToken*							token;
+
 					ParsingTable::TransitionItem*				transition;
+					vint										instructionBegin;
+					vint										instructionCount;
 					Ptr<collections::List<ShiftReduceRange>>	shiftReduceRanges;
 
 					TransitionResult()
-						:tableTokenIndex(-1)
+						:transitionType(ExecuteInstructions)
+						,ambiguityAffectedStackNodeCount(0)
+						,tableTokenIndex(-1)
 						,tableStateSource(-1)
 						,tableStateTarget(-1)
 						,tokenIndexInStream(-1)
 						,token(0)
 						,transition(0)
+						,instructionBegin(-1)
+						,instructionCount(-1)
 					{
 					}
 
@@ -176,6 +195,7 @@ namespace vl
 				ParsingTable::TransitionItem*				MatchTokenInFuture(vint tableTokenIndex, Future* future, const collections::IEnumerable<vint>* lookAheadTokens);
 				ParsingTable::TransitionItem*				MatchToken(vint tableTokenIndex, const collections::IEnumerable<vint>* lookAheadTokens);
 				void										RunTransitionInFuture(ParsingTable::TransitionItem* transition, Future* previous, Future* now);
+				ParsingState::TransitionResult				RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken, vint instructionBegin, vint instructionCount);
 				ParsingState::TransitionResult				RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken);
 
 				bool										ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now, const collections::IEnumerable<vint>* lookAheadTokens);
@@ -201,6 +221,7 @@ namespace vl
 				Ptr<ParsingTreeNode>						createdObject;
 				Ptr<ParsingTreeObject>						operationTarget;
 				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
+				bool										skip;
 			public:
 				ParsingTreeBuilder();
 				~ParsingTreeBuilder();
