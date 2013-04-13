@@ -1,0 +1,143 @@
+include:"..\..\..\Source\Parsing\Parsing.h"
+namespace:fpmacro.parser
+classPrefix:Fpm
+guard:FPMACRO_PARSER
+parser:ParseFpmacroCode(macro_start)
+ambiguity:enabled
+grammar:
+
+class Expression
+{
+}
+
+class ConcatExpression : Expression
+{
+	Expression[] expressions;
+}
+
+class ArrayExpression : Expression
+{
+	Expression[] elements;
+}
+
+class InvokeExpression : Expression
+{
+	Expression function;
+	Expression[] arguments;
+}
+
+class ReferenceExpression : Expression
+{
+	token name;
+}
+
+class TextExpression : Expression
+{
+	token text;
+}
+
+class Definition
+{
+}
+
+class ExpressionDefinition : Definition
+{
+	Expression expression;
+}
+
+class ReferenceDefinition : Definition
+{
+	token name;
+	ReferenceExpression[] parameters;
+	Definition[] definitions;
+}
+
+class Macro
+{
+	Definition[] definitions;
+}
+
+token BRACKET_OPEN = "/(";
+token BRACKET_CLOSE = "/)";
+token ARRAY = "/$array";
+token DEFINE = "/$/$define";
+token BEGIN = "/$/$begin";
+token END = "/$/$end";
+token COMMA = ",";
+token NAME = "/$[a-zA-Z_]/w*";
+token NEW_LINE = "/r/n";
+
+token COMMENT = "(////[^/r/n]*|///*([^*]|/*+[^*//])*/*+//)";
+token STRING = """([^\\""]|\\\.)*""";
+token PLAIN_TEXT = "[^/$(), /t/r/n""]+";
+token ESCAPE = "/$/(/./)";
+token SPACE = "[ /t]+";
+token BRACKET = "/(/)";
+token OTHERS = "[//""]";
+
+rule ArrayExpression array_exp
+	= "$array" "(" [exp_nc : elements {"," exp_nc : elements}] ")" as ArrayExpression
+	;
+
+rule InvokeExpression invoke_exp
+	= reference_exp : function "(" [exp_nc : arguments {"," exp_nc : arguments}] ")" as InvokeExpression
+	;
+
+rule ReferenceExpression reference_exp
+	= NAME : name as ReferenceExpression
+	;
+	
+rule Expression unit_exp_nc
+	= !array_exp
+	= !invoke_exp
+	= !reference_exp
+	= COMMENT : text as TextExpression
+	= STRING : text as TextExpression
+	= PLAIN_TEXT : text as TextExpression
+	= ESCAPE : text as TextExpression
+	= SPACE : text as TextExpression
+	= BRACKET : text as TextExpression
+	= OTHERS : text as TextExpression
+	= "(" !exp ")"
+	;
+
+rule Expression unit_exp
+	= !unit_exp_nc
+	= "," : text as TextExpression
+	;
+
+rule ConcatExpression concat_exp_nc
+	= unit_exp_nc : expressions {unit_exp_nc : expressions} as ConcatExpression
+	;
+
+rule ConcatExpression concat_exp
+	= unit_exp : expressions {unit_exp : expressions} as ConcatExpression
+	;
+
+rule Expression exp_nc
+	= !concat_exp_nc
+	;
+
+rule Expression exp
+	= !concat_exp
+	;
+
+rule ExpressionDefinition exp_def
+	= exp : expression as ExpressionDefinition
+	;
+
+rule ReferenceDefinition ref_def
+	= "$$define" [SPACE] NAME : name [SPACE] "(" [reference_exp : parameters {[SPACE] "," [SPACE] reference_exp : parameters}] ")"
+		( { exp_def : definitions }
+		| "$$begin" {[NEW_LINE] def : definitions} [NEW_LINE] "$$end"
+		) as ReferenceDefinition
+	;
+
+rule Definition def
+	= !exp_def
+	= !ref_def
+	;
+
+rule Macro macro_start
+	= [SPACE] def : definitions {[SPACE] def : definitions} [SPACE] as Macro
+	;

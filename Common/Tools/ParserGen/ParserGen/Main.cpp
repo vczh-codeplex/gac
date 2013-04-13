@@ -31,7 +31,10 @@ void LogParsingData(TLoggable loggable, const WString& name, StreamWriter& write
 	writer.WriteLine(L"=============================================================");
 	writer.WriteLine(name);
 	writer.WriteLine(L"=============================================================");
-	Log(loggable, writer);
+	if(loggable)
+	{
+		Log(loggable, writer);
+	}
 }
 
 void LogErrors(List<Ptr<ParsingError>>& errors, StreamWriter& writer)
@@ -77,12 +80,19 @@ Ptr<ParsingTable> CreateTable(Ptr<ParsingDefinition> definition, StreamWriter& w
 	LogParsingData(jointPDA, L"Compacted Joint PDA", writer);
 
 	MarkLeftRecursiveInJointPDA(jointPDA, errors);
-	LogParsingData(jointPDA, L"Compacted Joint PDA", writer);
+	LogParsingData(jointPDA, L"Marked Joint PDA", writer);
 	CheckError;
 
-	Ptr<ParsingTable> table=GenerateTable(definition, jointPDA, errors);
+	Ptr<ParsingTable> table=GenerateTableFromPDA(definition, jointPDA, ambiguity, errors);
 	LogParsingData(table, L"Table", writer);
-	if(!ambiguity) CheckError;
+	if(!ambiguity)
+	{
+		CheckError;
+	}
+	else if(errors.Count()>0)
+	{
+		LogErrors(errors, writer);
+	}
 
 	return table;
 }

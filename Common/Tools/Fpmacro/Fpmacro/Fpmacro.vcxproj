@@ -180,7 +180,11 @@
     <ClInclude Include="FpmacroRuntime.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Codegen.bat" />
     <None Include="Test.h.fpm" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="FpmacroParser.parser.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
