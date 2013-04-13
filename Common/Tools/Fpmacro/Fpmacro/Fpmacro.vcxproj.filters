@@ -138,6 +138,12 @@
     <ClCompile Include="..\..\..\Source\Stream\MemoryStream.cpp">
       <Filter>Common\Stream</Filter>
     </ClCompile>
+    <ClCompile Include="FpmacroRuntime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\Basic.h">
@@ -310,6 +316,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\Source\Stream\MemoryStream.h">
       <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="FpmacroRuntime.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

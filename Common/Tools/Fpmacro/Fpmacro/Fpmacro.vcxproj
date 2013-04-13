@@ -115,7 +115,9 @@
     <ClCompile Include="..\..\..\Source\Stream\FileStream.cpp" />
     <ClCompile Include="..\..\..\Source\Stream\MemoryStream.cpp" />
     <ClCompile Include="..\..\..\Source\String.cpp" />
+    <ClCompile Include="FpmacroRuntime.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\Basic.h" />
@@ -175,6 +177,7 @@
     <ClInclude Include="..\..\..\Source\Stream\MemoryStream.h" />
     <ClInclude Include="..\..\..\Source\String.h" />
     <ClInclude Include="..\..\..\Source\Tuple.h" />
+    <ClInclude Include="FpmacroRuntime.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Test.h.fpm" />
