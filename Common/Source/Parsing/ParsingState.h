@@ -120,7 +120,7 @@ namespace vl
 
 					operator bool()const
 					{
-						return transition!=0;
+						return transitionType!=ExecuteInstructions || transition!=0;
 					}
 
 					void AddShiftReduceRange(regex::RegexToken* shiftToken, regex::RegexToken* reduceToken)
@@ -195,7 +195,7 @@ namespace vl
 				ParsingTable::TransitionItem*				MatchTokenInFuture(vint tableTokenIndex, Future* future, const collections::IEnumerable<vint>* lookAheadTokens);
 				ParsingTable::TransitionItem*				MatchToken(vint tableTokenIndex, const collections::IEnumerable<vint>* lookAheadTokens);
 				void										RunTransitionInFuture(ParsingTable::TransitionItem* transition, Future* previous, Future* now);
-				ParsingState::TransitionResult				RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken, vint instructionBegin, vint instructionCount);
+				ParsingState::TransitionResult				RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken, vint instructionBegin, vint instructionCount, bool lastPart);
 				ParsingState::TransitionResult				RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken);
 
 				bool										ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now, const collections::IEnumerable<vint>* lookAheadTokens);
@@ -221,6 +221,7 @@ namespace vl
 				Ptr<ParsingTreeNode>						createdObject;
 				Ptr<ParsingTreeObject>						operationTarget;
 				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
+				bool										branch;
 				bool										skip;
 			public:
 				ParsingTreeBuilder();

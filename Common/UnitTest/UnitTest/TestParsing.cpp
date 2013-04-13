@@ -241,7 +241,7 @@ namespace test
 								}
 							}
 
-							if(result.tableTokenIndex==ParsingTable::TokenFinish)
+							if(result.tableTokenIndex==ParsingTable::TokenFinish && status==Normal)
 							{
 								writer.WriteLine(L"");
 								if(result.shiftReduceRanges && showInput)
