@@ -31,6 +31,9 @@
     <Filter Include="Common\Regex">
       <UniqueIdentifier>{299d54c3-8e76-4a39-b406-988068cbd3e2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Parsing">
+      <UniqueIdentifier>{7a4a232d-bc63-4f2e-897f-42eb8890ad77}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -86,6 +89,54 @@
     </ClCompile>
     <ClCompile Include="..\..\..\Source\Regex\RegexWriter.cpp">
       <Filter>Common\Regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\Parsing.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAnalyzer.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton_Closure.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton_EPDA.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton_GenerateTable.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton_JPDA.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton_MergeStates.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton_NPDA.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingDefinitions.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingDefinitions_CreateParserDefinition.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingLogging.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingState.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingTable.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingTree.cpp">
+      <Filter>Common\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Stream\MemoryStream.cpp">
+      <Filter>Common\Stream</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -235,6 +286,30 @@
     </ClInclude>
     <ClInclude Include="..\..\..\Source\Regex\RegexWriter.h">
       <Filter>Common\Regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Parsing\Parsing.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Parsing\ParsingAnalyzer.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Parsing\ParsingAutomaton.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Parsing\ParsingDefinitions.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Parsing\ParsingState.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Parsing\ParsingTable.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Parsing\ParsingTree.h">
+      <Filter>Common\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Stream\MemoryStream.h">
+      <Filter>Common\Stream</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
