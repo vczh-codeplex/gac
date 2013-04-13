@@ -408,7 +408,7 @@ ParsingState
 				}
 			}
 
-			ParsingState::TransitionResult ParsingState::RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken, vint instructionBegin, vint instructionCount)
+			ParsingState::TransitionResult ParsingState::RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken, vint instructionBegin, vint instructionCount, bool lastPart)
 			{
 				if(regexToken)
 				{
@@ -477,7 +477,7 @@ ParsingState
 					stateGroup->reduceToken=regexToken;
 				}
 
-				if(transition->token==ParsingTable::TokenFinish)
+				if(transition->token==ParsingTable::TokenFinish && lastPart)
 				{
 					stateGroup->shiftToken=stateGroup->shiftTokenStack[stateGroup->shiftTokenStack.Count()-1];
 					stateGroup->shiftTokenStack.RemoveAt(stateGroup->shiftTokenStack.Count()-1);
@@ -490,7 +490,7 @@ ParsingState
 
 			ParsingState::TransitionResult ParsingState::RunTransition(ParsingTable::TransitionItem* transition, regex::RegexToken* regexToken)
 			{
-				return RunTransition(transition, regexToken, 0, transition->instructions.Count());
+				return RunTransition(transition, regexToken, 0, transition->instructions.Count(), true);
 			}
 
 			bool ParsingState::ReadTokenInFuture(vint tableTokenIndex, Future* previous, Future* now, const collections::IEnumerable<vint>* lookAheadTokens)
@@ -625,7 +625,8 @@ ParsingTreeBuilder
 ***********************************************************************/
 
 			ParsingTreeBuilder::ParsingTreeBuilder()
-				:skip(false)
+				:branch(false)
+				,skip(false)
 			{
 			}
 
@@ -638,6 +639,7 @@ ParsingTreeBuilder
 				createdObject=0;
 				operationTarget=new ParsingTreeObject();
 				nodeStack.Clear();
+				branch=false;
 				skip=false;
 			}
 
@@ -650,11 +652,15 @@ ParsingTreeBuilder
 
 				switch(result.transitionType)
 				{
+				case ParsingState::TransitionResult::AmbiguityBegin:
+					branch=true;
+					break;
 				case ParsingState::TransitionResult::AmbiguityBranch:
 					skip=true;
 					break;
 				case ParsingState::TransitionResult::AmbiguityEnd:
-					skip=true;
+					branch=false;
+					skip=false;
 					break;
 				}
 				if(skip) return true;
@@ -816,7 +822,7 @@ ParsingTreeBuilder
 					}
 				}
 
-				if(result.tableTokenIndex==ParsingTable::TokenFinish)
+				if(result.tableTokenIndex==ParsingTable::TokenFinish && !branch)
 				{
 					if(result.shiftReduceRanges)
 					{

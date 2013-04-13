@@ -275,7 +275,7 @@ ParsingStrictParser
 				end=previousEnd;
 			}
 
-			void ParsingAmbiguousParser::BuildAmbiguousDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors)
+			vint ParsingAmbiguousParser::GetConflictReduceCount(collections::List<ParsingState::Future*>& futures, vint begin, vint end)
 			{
 				vint conflictReduceCount=-1;
 				for(vint i=begin;i<end-1;i++)
@@ -315,8 +315,12 @@ ParsingStrictParser
 				{
 					conflictReduceCount=0;
 				}
+				return conflictReduceCount;
+			}
 
-				Array<vint> conflictReduceIndices(end-begin);
+			void ParsingAmbiguousParser::GetConflictReduceIndices(collections::List<ParsingState::Future*>& futures, vint begin, vint end, vint conflictReduceCount, collections::Array<vint>& conflictReduceIndices)
+			{
+				conflictReduceIndices.Resize(end-begin);
 				for(vint i=begin;i<end;i++)
 				{
 					ParsingState::Future* future=futures[i];
@@ -334,7 +338,9 @@ ParsingStrictParser
 					}
 					conflictReduceIndices[i-begin]=index;
 				}
-
+			}
+			vint ParsingAmbiguousParser::GetAffectedStackNodeCount(collections::List<ParsingState::Future*>& futures, vint begin, vint end, collections::Array<vint>& conflictReduceIndices)
+			{
 				vint affectedStackNodeCount=-1;
 				for(vint i=begin;i<end;i++)
 				{
@@ -364,36 +370,98 @@ ParsingStrictParser
 					}
 					else if(affectedStackNodeCount!=count)
 					{
-						goto FAIL_TO_CHECK;
+						return -1;
 					}
 				}
+				return affectedStackNodeCount;
+			}
 
-				BuildDeterministicDecisions(state, futures, tokens, begin, end, errors);
-			FAIL_TO_CHECK:
-				const RegexToken* token=state.GetToken(state.GetCurrentToken());
-				errors.Add(new ParsingError(token, (token==0?L"Failed to pass ambiguity checking during parsing when reaching to the end of the input.":L"Failed to pass ambiguity checking during parsing.")));
+			void ParsingAmbiguousParser::BuildSingleDecisionPath(ParsingState& state, ParsingState::Future* future, collections::List<regex::RegexToken*>& tokens, vint lastAvailableInstructionCount)
+			{
+				vint currentRegexToken=tokens.Count()-1;
+				List<Pair<ParsingTable::TransitionItem*, regex::RegexToken*>> path;
+				while(future && future->selectedToken!=-1)
+				{
+					regex::RegexToken* token=0;
+					if(future->selectedToken>=ParsingTable::UserTokenStart)
+					{
+						token=tokens[currentRegexToken--];
+					}
+					path.Add(Pair<ParsingTable::TransitionItem*, regex::RegexToken*>(future->selectedItem, token));
+					future=future->previous;
+				}
+
+				for(vint j=path.Count()-1;j>=0;j--)
+				{
+					if(j==0 && lastAvailableInstructionCount!=-1)
+					{
+						decisions.Add(state.RunTransition(path[j].key, path[j].value, 0, lastAvailableInstructionCount, false));
+					}
+					else
+					{
+						decisions.Add(state.RunTransition(path[j].key, path[j].value));
+					}
+				}
+			}
+
+			void ParsingAmbiguousParser::BuildAmbiguousDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors)
+			{
+				Array<vint> conflictReduceIndices;
+				vint conflictReduceCount=GetConflictReduceCount(futures, begin, end);
+				GetConflictReduceIndices(futures, begin, end, conflictReduceCount, conflictReduceIndices);
+
+				vint affectedStackNodeCount=GetAffectedStackNodeCount(futures, begin, end, conflictReduceIndices);
+				if(affectedStackNodeCount==-1)
+				{
+					const RegexToken* token=state.GetToken(state.GetCurrentToken());
+					errors.Add(new ParsingError(token, (token==0?L"Failed to pass ambiguity checking during parsing when reaching to the end of the input.":L"Failed to pass ambiguity checking during parsing.")));
+					return;
+				}
+
+				Ptr<ParsingState::StateGroup> stateGroup;
+				for(vint i=begin;i<end;i++)
+				{
+					if(stateGroup)
+					{
+						state.RestoreSnapshot(stateGroup);
+					}
+					else
+					{
+						stateGroup=state.TakeSnapshot();;
+					}
+					{
+						ParsingState::TransitionResult result;
+						if(i==begin)
+						{
+							result.transitionType=ParsingState::TransitionResult::AmbiguityBegin;
+							result.ambiguityAffectedStackNodeCount=affectedStackNodeCount;
+						}
+						else
+						{
+							result.transitionType=ParsingState::TransitionResult::AmbiguityBranch;
+						}
+						decisions.Add(result);
+					}
+					{
+						BuildSingleDecisionPath(state, futures[i], tokens, conflictReduceIndices[i-begin]);
+
+						if(i==end-1)
+						{
+							ParsingState::TransitionResult result;
+							result.transitionType=ParsingState::TransitionResult::AmbiguityEnd;
+							decisions.Add(result);
+
+							vint start=conflictReduceIndices[i-begin];
+							ParsingState::TransitionResult lastDecision=decisions[decisions.Count()-2];
+							decisions.Add(state.RunTransition(lastDecision.transition, lastDecision.token, start, lastDecision.transition->instructions.Count()-start, true));
+						}
+					}
+				}
 			}
 
 			void ParsingAmbiguousParser::BuildDeterministicDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors)
 			{
-				ParsingState::Future* currentFuture=futures[begin];
-				vint currentRegexToken=tokens.Count()-1;
-				List<Pair<ParsingTable::TransitionItem*, regex::RegexToken*>> path;
-				while(currentFuture && currentFuture->selectedToken!=-1)
-				{
-					regex::RegexToken* token=0;
-					if(currentFuture->selectedToken>=ParsingTable::UserTokenStart)
-					{
-						token=tokens[currentRegexToken--];
-					}
-					path.Add(Pair<ParsingTable::TransitionItem*, regex::RegexToken*>(currentFuture->selectedItem, token));
-					currentFuture=currentFuture->previous;
-				}
-
-				for(vint i=path.Count()-1;i>=0;i--)
-				{
-					decisions.Add(state.RunTransition(path[i].key, path[i].value));
-				}
+				BuildSingleDecisionPath(state, futures[begin], tokens, -1);
 			}
 
 			void ParsingAmbiguousParser::BuildDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors)
