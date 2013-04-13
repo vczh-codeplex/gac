@@ -234,6 +234,13 @@ ParsingTable
 				return ruleInfos.Count();
 			}
 
+			const ParsingTable::RuleInfo& ParsingTable::GetRuleInfo(const WString& ruleName)
+			{
+				vint index=ruleMap.Keys().IndexOf(ruleName);
+				if(index==-1) return *(const RuleInfo*)0;
+				return ruleInfos[ruleMap.Values().Get(index)];
+			}
+
 			const ParsingTable::RuleInfo& ParsingTable::GetRuleInfo(vint rule)
 			{
 				return ruleInfos[rule];
@@ -281,6 +288,17 @@ ParsingTable
 					discardTokenInfos[i].regexTokenIndex=regexTokenIndex++;
 				}
 				lexer=new RegexLexer(tokens);
+
+				ruleMap.Clear();
+				FOREACH_INDEXER(RuleInfo, rule, index, ruleInfos)
+				{
+					ruleMap.Add(rule.name, index);
+				}
+				for(vint i=0;i<stateInfos.Count();i++)
+				{
+					StateInfo& info=stateInfos[i];
+					info.ruleAmbiguousType=ruleInfos[ruleMap[info.ruleName]].ambiguousType;
+				}
 			}
 
 			bool ParsingTable::IsInputToken(vint regexTokenIndex)

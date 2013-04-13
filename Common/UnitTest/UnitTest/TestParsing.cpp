@@ -171,7 +171,7 @@ namespace test
 					case ParsingState::TransitionResult::AmbiguityEnd:
 						TEST_ASSERT(status==ResolvingAmbiguity);
 						status=Normal;
-						writer.WriteLine(L"<AmbiguityEnd>");
+						writer.WriteLine(L"<AmbiguityEnd> AmbiguityNodeType="+result.ambiguityNodeType);
 						break;
 					case ParsingState::TransitionResult::ExecuteInstructions:
 						{
