@@ -73,15 +73,14 @@ namespace vl
 				DecisionList								decisions;
 				vint										consumedDecisionCount;
 
-				bool										IsAmbiguityResolvable(collections::List<ParsingState::Future*>& futures, vint begin, vint end);
-				void										SearchPath(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors);
+				vint										GetResolvableFutureLevels(collections::List<ParsingState::Future*>& futures, vint begin, vint end);
+				vint										SearchPath(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors);
 				vint										GetConflictReduceCount(collections::List<ParsingState::Future*>& futures, vint begin, vint end);
 				void										GetConflictReduceIndices(collections::List<ParsingState::Future*>& futures, vint begin, vint end, vint conflictReduceCount, collections::Array<vint>& conflictReduceIndices);
 				vint										GetAffectedStackNodeCount(collections::List<ParsingState::Future*>& futures, vint begin, vint end, collections::Array<vint>& conflictReduceIndices);
 				void										BuildSingleDecisionPath(ParsingState& state, ParsingState::Future* future, collections::List<regex::RegexToken*>& tokens, vint lastAvailableInstructionCount);
-				void										BuildAmbiguousDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors);
-				void										BuildDeterministicDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors);
-				void										BuildDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors);
+				void										BuildAmbiguousDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors);
+				void										BuildDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors);
 			public:
 				ParsingAmbiguousParser(Ptr<ParsingTable> _table=0);
 				~ParsingAmbiguousParser();
