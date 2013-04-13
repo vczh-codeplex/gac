@@ -635,8 +635,8 @@ ParsingTreeBuilder
 ***********************************************************************/
 
 			ParsingTreeBuilder::ParsingTreeBuilder()
-				:branch(false)
-				,skip(false)
+				:processingAmbiguityBranch(false)
+				,ambiguityBranchSharedNodeCount(0)
 			{
 			}
 
@@ -649,8 +649,13 @@ ParsingTreeBuilder
 				createdObject=0;
 				operationTarget=new ParsingTreeObject();
 				nodeStack.Clear();
-				branch=false;
-				skip=false;
+
+				processingAmbiguityBranch=false;
+				ambiguityBranchCreatedObject=0;
+				ambiguityBranchOperationTarget=0;
+				ambiguityBranchSharedNodeCount=0;
+				ambiguityBranchNodeStack.Clear();
+				ambiguityNodes.Clear();
 			}
 
 			bool ParsingTreeBuilder::Run(const ParsingState::TransitionResult& result)
@@ -663,187 +668,234 @@ ParsingTreeBuilder
 				switch(result.transitionType)
 				{
 				case ParsingState::TransitionResult::AmbiguityBegin:
-					branch=true;
+					{
+						if(processingAmbiguityBranch) return false;
+						processingAmbiguityBranch=true;
+						ambiguityBranchCreatedObject=createdObject?createdObject->Clone():0;
+						ambiguityBranchOperationTarget=operationTarget->Clone().Cast<ParsingTreeObject>();
+						ambiguityBranchNodeStack.Clear();
+						ambiguityBranchSharedNodeCount=nodeStack.Count()-result.ambiguityAffectedStackNodeCount+1;
+						for(vint i=ambiguityBranchSharedNodeCount;i<nodeStack.Count();i++)
+						{
+							ambiguityBranchNodeStack.Add(nodeStack[i]->Clone().Cast<ParsingTreeObject>());
+						}
+						ambiguityNodes.Clear();
+					}
 					break;
 				case ParsingState::TransitionResult::AmbiguityBranch:
-					skip=true;
+					{
+						if(!processingAmbiguityBranch) return false;
+						if(nodeStack.Count()!=ambiguityBranchSharedNodeCount) return false;
+						ambiguityNodes.Add(operationTarget);
+						createdObject=ambiguityBranchCreatedObject?ambiguityBranchCreatedObject->Clone():0;
+						operationTarget=ambiguityBranchOperationTarget->Clone().Cast<ParsingTreeObject>();
+						for(vint i=0;i<ambiguityBranchNodeStack.Count();i++)
+						{
+							nodeStack.Add(ambiguityBranchNodeStack[i]->Clone().Cast<ParsingTreeObject>());
+						}
+					}
 					break;
 				case ParsingState::TransitionResult::AmbiguityEnd:
-					branch=false;
-					skip=false;
+					{
+						if(!processingAmbiguityBranch) return false;
+						if(nodeStack.Count()!=ambiguityBranchSharedNodeCount) return false;
+						ambiguityNodes.Add(operationTarget);
+
+						processingAmbiguityBranch=false;
+						createdObject=0;
+						ambiguityBranchCreatedObject=0;
+						ambiguityBranchOperationTarget=0;
+						ambiguityBranchSharedNodeCount=0;
+						ambiguityBranchNodeStack.Clear();
+
+						{
+							Ptr<ParsingTreeObject> ambiguousNode=new ParsingTreeObject(result.ambiguityNodeType, operationTarget->GetCodeRange());
+							Ptr<ParsingTreeArray> items=new ParsingTreeArray(L"", operationTarget->GetCodeRange());
+							FOREACH(Ptr<ParsingTreeObject>, node, ambiguityNodes)
+							{
+								items->AddItem(node);
+							}
+							ambiguousNode->SetMember(L"items", items);
+							operationTarget=ambiguousNode;
+						}
+						ambiguityNodes.Clear();
+					}
+					break;
+				case ParsingState::TransitionResult::ExecuteInstructions:
+					{
+						vint shiftReduceRangeIndex=0;
+						for(vint j=result.instructionBegin;j<result.instructionBegin+result.instructionCount;j++)
+						{
+							ParsingTable::Instruction& ins=result.transition->instructions[j];
+							switch(ins.instructionType)
+							{
+							case ParsingTable::Instruction::Create:
+								{
+									if(operationTarget->GetType()!=L"")
+									{
+										return false;
+									}
+									operationTarget->SetType(ins.nameParameter);
+								}
+								break;
+							case ParsingTable::Instruction::Using:
+								{
+									if(operationTarget->GetType()!=L"" || !createdObject)
+									{
+										return false;
+									}
+									Ptr<ParsingTreeObject> obj=createdObject.Cast<ParsingTreeObject>();
+									if(!obj)
+									{
+										return false;
+									}
+									for(vint i=0;i<operationTarget->GetMembers().Count();i++)
+									{
+										WString name=operationTarget->GetMembers().Keys().Get(i);
+										Ptr<ParsingTreeNode> value=operationTarget->GetMembers().Values().Get(i);
+										obj->SetMember(name, value);
+									}
+									operationTarget=obj;
+									createdObject=0;
+								}
+								break;
+							case ParsingTable::Instruction::Assign:
+								{
+									if(!createdObject)
+									{
+										Ptr<ParsingTreeToken> value;
+										if(result.token==0)
+										{
+											value=new ParsingTreeToken(L"", result.tokenIndexInStream);
+										}
+										else
+										{
+											value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
+											value->SetCodeRange(ParsingTextRange(result.token, result.token));
+										}
+										operationTarget->SetMember(ins.nameParameter, value);
+									}
+									else
+									{
+										operationTarget->SetMember(ins.nameParameter, createdObject);
+										createdObject=0;
+									}
+								}
+								break;
+							case ParsingTable::Instruction::Item:
+								{
+									Ptr<ParsingTreeArray> arr=operationTarget->GetMember(ins.nameParameter).Cast<ParsingTreeArray>();;
+									if(!arr)
+									{
+										arr=new ParsingTreeArray();
+										operationTarget->SetMember(ins.nameParameter, arr);
+									}
+									ParsingTextRange arrRange=arr->GetCodeRange();
+									ParsingTextRange itemRange;
+									if(!createdObject)
+									{
+										Ptr<ParsingTreeToken> value;
+										if(result.token==0)
+										{
+											value=new ParsingTreeToken(L"", result.tokenIndexInStream);
+										}
+										else
+										{
+											value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
+											value->SetCodeRange(ParsingTextRange(result.token, result.token));
+											itemRange=value->GetCodeRange();
+										}
+										arr->AddItem(value);
+									}
+									else
+									{
+										arr->AddItem(createdObject);
+										itemRange=createdObject->GetCodeRange();
+										createdObject=0;
+									}
+
+									if(arrRange.start.index==ParsingTextPos::UnknownValue || itemRange.start<arrRange.start)
+									{
+										arrRange.start=itemRange.start;
+									}
+									if(arrRange.end.index==ParsingTextPos::UnknownValue || itemRange.end>arrRange.end)
+									{
+										arrRange.end=itemRange.end;
+									}
+									arr->SetCodeRange(arrRange);
+								}
+								break;
+							case ParsingTable::Instruction::Setter:
+								{
+									Ptr<ParsingTreeToken> value=new ParsingTreeToken(ins.value, -1);
+									operationTarget->SetMember(ins.nameParameter, value);
+								}
+								break;
+							case ParsingTable::Instruction::Shift:
+								{
+									nodeStack.Add(operationTarget);
+									operationTarget=new ParsingTreeObject();
+									createdObject=0;
+								}
+								break;
+							case ParsingTable::Instruction::Reduce:
+								{
+									if(nodeStack.Count()==0)
+									{
+										return false;
+									}
+									createdObject=operationTarget;
+									operationTarget=nodeStack[nodeStack.Count()-1];
+									nodeStack.RemoveAt(nodeStack.Count()-1);
+
+									if(result.shiftReduceRanges)
+									{
+										ParsingState::ShiftReduceRange tokenRange=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
+										if(tokenRange.shiftToken && tokenRange.reduceToken)
+										{
+											ParsingTextRange codeRange(tokenRange.shiftToken, tokenRange.reduceToken);
+											createdObject->SetCodeRange(codeRange);
+										}
+									}
+								}
+								break;
+							case ParsingTable::Instruction::LeftRecursiveReduce:
+								{
+									createdObject=operationTarget;
+									operationTarget=new ParsingTreeObject();
+
+									if(result.shiftReduceRanges)
+									{
+										ParsingState::ShiftReduceRange tokenRange=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
+										if(tokenRange.shiftToken && tokenRange.reduceToken)
+										{
+											ParsingTextRange codeRange(tokenRange.shiftToken, tokenRange.reduceToken);
+											createdObject->SetCodeRange(codeRange);
+										}
+									}
+								}
+								break;
+							default:
+								return false;
+							}
+						}
+
+						if(result.tableTokenIndex==ParsingTable::TokenFinish && !processingAmbiguityBranch)
+						{
+							if(result.shiftReduceRanges)
+							{
+								ParsingState::ShiftReduceRange tokenRange=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
+								if(tokenRange.shiftToken && tokenRange.reduceToken)
+								{
+									ParsingTextRange codeRange(tokenRange.shiftToken, tokenRange.reduceToken);
+									operationTarget->SetCodeRange(codeRange);
+								}
+							}
+						}
+					}
 					break;
 				}
-				if(skip) return true;
-
-				vint shiftReduceRangeIndex=0;
-				for(vint j=result.instructionBegin;j<result.instructionBegin+result.instructionCount;j++)
-				{
-					ParsingTable::Instruction& ins=result.transition->instructions[j];
-					switch(ins.instructionType)
-					{
-					case ParsingTable::Instruction::Create:
-						{
-							if(operationTarget->GetType()!=L"")
-							{
-								return false;
-							}
-							operationTarget->SetType(ins.nameParameter);
-						}
-						break;
-					case ParsingTable::Instruction::Using:
-						{
-							if(operationTarget->GetType()!=L"" || !createdObject)
-							{
-								return false;
-							}
-							Ptr<ParsingTreeObject> obj=createdObject.Cast<ParsingTreeObject>();
-							if(!obj)
-							{
-								return false;
-							}
-							for(vint i=0;i<operationTarget->GetMembers().Count();i++)
-							{
-								WString name=operationTarget->GetMembers().Keys().Get(i);
-								Ptr<ParsingTreeNode> value=operationTarget->GetMembers().Values().Get(i);
-								obj->SetMember(name, value);
-							}
-							operationTarget=obj;
-							createdObject=0;
-						}
-						break;
-					case ParsingTable::Instruction::Assign:
-						{
-							if(!createdObject)
-							{
-								Ptr<ParsingTreeToken> value;
-								if(result.token==0)
-								{
-									value=new ParsingTreeToken(L"", result.tokenIndexInStream);
-								}
-								else
-								{
-									value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
-									value->SetCodeRange(ParsingTextRange(result.token, result.token));
-								}
-								operationTarget->SetMember(ins.nameParameter, value);
-							}
-							else
-							{
-								operationTarget->SetMember(ins.nameParameter, createdObject);
-								createdObject=0;
-							}
-						}
-						break;
-					case ParsingTable::Instruction::Item:
-						{
-							Ptr<ParsingTreeArray> arr=operationTarget->GetMember(ins.nameParameter).Cast<ParsingTreeArray>();;
-							if(!arr)
-							{
-								arr=new ParsingTreeArray();
-								operationTarget->SetMember(ins.nameParameter, arr);
-							}
-							ParsingTextRange arrRange=arr->GetCodeRange();
-							ParsingTextRange itemRange;
-							if(!createdObject)
-							{
-								Ptr<ParsingTreeToken> value;
-								if(result.token==0)
-								{
-									value=new ParsingTreeToken(L"", result.tokenIndexInStream);
-								}
-								else
-								{
-									value=new ParsingTreeToken(WString(result.token->reading, result.token->length), result.tokenIndexInStream);
-									value->SetCodeRange(ParsingTextRange(result.token, result.token));
-									itemRange=value->GetCodeRange();
-								}
-								arr->AddItem(value);
-							}
-							else
-							{
-								arr->AddItem(createdObject);
-								itemRange=createdObject->GetCodeRange();
-								createdObject=0;
-							}
-
-							if(arrRange.start.index==ParsingTextPos::UnknownValue || itemRange.start<arrRange.start)
-							{
-								arrRange.start=itemRange.start;
-							}
-							if(arrRange.end.index==ParsingTextPos::UnknownValue || itemRange.end>arrRange.end)
-							{
-								arrRange.end=itemRange.end;
-							}
-							arr->SetCodeRange(arrRange);
-						}
-						break;
-					case ParsingTable::Instruction::Setter:
-						{
-							Ptr<ParsingTreeToken> value=new ParsingTreeToken(ins.value, -1);
-							operationTarget->SetMember(ins.nameParameter, value);
-						}
-						break;
-					case ParsingTable::Instruction::Shift:
-						{
-							nodeStack.Add(operationTarget);
-							operationTarget=new ParsingTreeObject();
-							createdObject=0;
-						}
-						break;
-					case ParsingTable::Instruction::Reduce:
-						{
-							if(nodeStack.Count()==0)
-							{
-								return false;
-							}
-							createdObject=operationTarget;
-							operationTarget=nodeStack[nodeStack.Count()-1];
-							nodeStack.RemoveAt(nodeStack.Count()-1);
-
-							if(result.shiftReduceRanges)
-							{
-								ParsingState::ShiftReduceRange tokenRange=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
-								if(tokenRange.shiftToken && tokenRange.reduceToken)
-								{
-									ParsingTextRange codeRange(tokenRange.shiftToken, tokenRange.reduceToken);
-									createdObject->SetCodeRange(codeRange);
-								}
-							}
-						}
-						break;
-					case ParsingTable::Instruction::LeftRecursiveReduce:
-						{
-							createdObject=operationTarget;
-							operationTarget=new ParsingTreeObject();
-
-							if(result.shiftReduceRanges)
-							{
-								ParsingState::ShiftReduceRange tokenRange=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
-								if(tokenRange.shiftToken && tokenRange.reduceToken)
-								{
-									ParsingTextRange codeRange(tokenRange.shiftToken, tokenRange.reduceToken);
-									createdObject->SetCodeRange(codeRange);
-								}
-							}
-						}
-						break;
-					default:
-						return false;
-					}
-				}
-
-				if(result.tableTokenIndex==ParsingTable::TokenFinish && !branch)
-				{
-					if(result.shiftReduceRanges)
-					{
-						ParsingState::ShiftReduceRange tokenRange=result.shiftReduceRanges->Get(shiftReduceRangeIndex++);
-						if(tokenRange.shiftToken && tokenRange.reduceToken)
-						{
-							ParsingTextRange codeRange(tokenRange.shiftToken, tokenRange.reduceToken);
-							operationTarget->SetCodeRange(codeRange);
-						}
-					}
-				}
+				
 				return true;
 			}
 
