@@ -87,6 +87,21 @@
     <ClCompile Include="..\..\..\Source\Combinator\TokenCombinator.cpp" />
     <ClCompile Include="..\..\..\Source\Console.cpp" />
     <ClCompile Include="..\..\..\Source\Exception.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\Parsing.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAnalyzer.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton_Closure.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton_EPDA.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton_GenerateTable.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton_JPDA.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton_MergeStates.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingAutomaton_NPDA.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingDefinitions.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingDefinitions_CreateParserDefinition.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingLogging.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingState.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingTable.cpp" />
+    <ClCompile Include="..\..\..\Source\Parsing\ParsingTree.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\Regex.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\RegexAutomaton.cpp" />
     <ClCompile Include="..\..\..\Source\Regex\RegexData.cpp" />
@@ -98,6 +113,7 @@
     <ClCompile Include="..\..\..\Source\Stream\Accessor.cpp" />
     <ClCompile Include="..\..\..\Source\Stream\CharFormat.cpp" />
     <ClCompile Include="..\..\..\Source\Stream\FileStream.cpp" />
+    <ClCompile Include="..\..\..\Source\Stream\MemoryStream.cpp" />
     <ClCompile Include="..\..\..\Source\String.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
@@ -137,6 +153,13 @@
     <ClInclude Include="..\..\..\Source\Console.h" />
     <ClInclude Include="..\..\..\Source\Exception.h" />
     <ClInclude Include="..\..\..\Source\Function.h" />
+    <ClInclude Include="..\..\..\Source\Parsing\Parsing.h" />
+    <ClInclude Include="..\..\..\Source\Parsing\ParsingAnalyzer.h" />
+    <ClInclude Include="..\..\..\Source\Parsing\ParsingAutomaton.h" />
+    <ClInclude Include="..\..\..\Source\Parsing\ParsingDefinitions.h" />
+    <ClInclude Include="..\..\..\Source\Parsing\ParsingState.h" />
+    <ClInclude Include="..\..\..\Source\Parsing\ParsingTable.h" />
+    <ClInclude Include="..\..\..\Source\Parsing\ParsingTree.h" />
     <ClInclude Include="..\..\..\Source\Pointer.h" />
     <ClInclude Include="..\..\..\Source\Regex\Regex.h" />
     <ClInclude Include="..\..\..\Source\Regex\RegexAutomaton.h" />
@@ -149,6 +172,7 @@
     <ClInclude Include="..\..\..\Source\Stream\CharFormat.h" />
     <ClInclude Include="..\..\..\Source\Stream\FileStream.h" />
     <ClInclude Include="..\..\..\Source\Stream\Interfaces.h" />
+    <ClInclude Include="..\..\..\Source\Stream\MemoryStream.h" />
     <ClInclude Include="..\..\..\Source\String.h" />
     <ClInclude Include="..\..\..\Source\Tuple.h" />
   </ItemGroup>
