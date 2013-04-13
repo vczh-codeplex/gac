@@ -300,10 +300,10 @@ ParsingStrictParser
 				return resolvableFutureLevels;
 			}
 
-			vint ParsingAmbiguousParser::GetConflictReduceCount(collections::List<ParsingState::Future*>& futures, vint begin, vint end)
+			vint ParsingAmbiguousParser::GetConflictReduceCount(collections::List<ParsingState::Future*>& futures)
 			{
 				vint conflictReduceCount=-1;
-				for(vint i=begin;i<end-1;i++)
+				for(vint i=0;i<futures.Count()-1;i++)
 				{
 					vint count=0;
 					ParsingState::Future* first=futures[i];
@@ -343,10 +343,10 @@ ParsingStrictParser
 				return conflictReduceCount;
 			}
 
-			void ParsingAmbiguousParser::GetConflictReduceIndices(collections::List<ParsingState::Future*>& futures, vint begin, vint end, vint conflictReduceCount, collections::Array<vint>& conflictReduceIndices)
+			void ParsingAmbiguousParser::GetConflictReduceIndices(collections::List<ParsingState::Future*>& futures, vint conflictReduceCount, collections::Array<vint>& conflictReduceIndices)
 			{
-				conflictReduceIndices.Resize(end-begin);
-				for(vint i=begin;i<end;i++)
+				conflictReduceIndices.Resize(futures.Count());
+				for(vint i=0;i<futures.Count();i++)
 				{
 					ParsingState::Future* future=futures[i];
 					vint index=future->selectedItem->instructions.Count();
@@ -361,19 +361,19 @@ ParsingStrictParser
 							break;
 						}
 					}
-					conflictReduceIndices[i-begin]=index;
+					conflictReduceIndices[i]=index;
 				}
 			}
-			vint ParsingAmbiguousParser::GetAffectedStackNodeCount(collections::List<ParsingState::Future*>& futures, vint begin, vint end, collections::Array<vint>& conflictReduceIndices)
+			vint ParsingAmbiguousParser::GetAffectedStackNodeCount(collections::List<ParsingState::Future*>& futures, collections::Array<vint>& conflictReduceIndices)
 			{
 				vint affectedStackNodeCount=-1;
-				for(vint i=begin;i<end;i++)
+				for(vint i=0;i<futures.Count();i++)
 				{
 					ParsingState::Future* future=futures[i];
 					vint count=1;
 					while(future && future->selectedItem)
 					{
-						vint start=(future==futures[i]?conflictReduceIndices[i-begin]:future->selectedItem->instructions.Count())-1;
+						vint start=(future==futures[i]?conflictReduceIndices[i]:future->selectedItem->instructions.Count())-1;
 						for(vint j=start;j>=0;j--)
 						{
 							switch(future->selectedItem->instructions[j].instructionType)
@@ -401,9 +401,9 @@ ParsingStrictParser
 				return affectedStackNodeCount;
 			}
 
-			void ParsingAmbiguousParser::BuildSingleDecisionPath(ParsingState& state, ParsingState::Future* future, collections::List<regex::RegexToken*>& tokens, vint lastAvailableInstructionCount)
+			void ParsingAmbiguousParser::BuildSingleDecisionPath(ParsingState& state, ParsingState::Future* future, collections::List<regex::RegexToken*>& tokens, vint availableTokenCount, vint lastAvailableInstructionCount)
 			{
-				vint currentRegexToken=tokens.Count()-1;
+				vint currentRegexToken=availableTokenCount-1;
 				List<Pair<ParsingTable::TransitionItem*, regex::RegexToken*>> path;
 				while(future && future->selectedToken!=-1)
 				{
@@ -431,11 +431,29 @@ ParsingStrictParser
 
 			void ParsingAmbiguousParser::BuildAmbiguousDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors)
 			{
-				Array<vint> conflictReduceIndices;
-				vint conflictReduceCount=GetConflictReduceCount(futures, begin, end);
-				GetConflictReduceIndices(futures, begin, end, conflictReduceCount, conflictReduceIndices);
+				vint availableTokenCount=tokens.Count();
+				List<ParsingState::Future*> resolvingFutures;
+				for(vint i=begin;i<end;i++)
+				{
+					resolvingFutures.Add(futures[i]);
+				}
+				for(vint i=1;i<resolvableFutureLevels;i++)
+				{
+					if(resolvingFutures[0]->selectedToken>=ParsingTable::UserTokenStart)
+					{
+						availableTokenCount--;
+					}
+					for(vint j=0;j<resolvingFutures.Count();j++)
+					{
+						resolvingFutures[j]=resolvingFutures[j]->previous;
+					}
+				}
 
-				vint affectedStackNodeCount=GetAffectedStackNodeCount(futures, begin, end, conflictReduceIndices);
+				Array<vint> conflictReduceIndices;
+				vint conflictReduceCount=GetConflictReduceCount(resolvingFutures);
+				GetConflictReduceIndices(resolvingFutures, conflictReduceCount, conflictReduceIndices);
+
+				vint affectedStackNodeCount=GetAffectedStackNodeCount(resolvingFutures, conflictReduceIndices);
 				if(affectedStackNodeCount==-1)
 				{
 					const RegexToken* token=state.GetToken(state.GetCurrentToken());
@@ -444,7 +462,7 @@ ParsingStrictParser
 				}
 
 				Ptr<ParsingState::StateGroup> stateGroup;
-				for(vint i=begin;i<end;i++)
+				for(vint i=0;i<resolvingFutures.Count();i++)
 				{
 					if(stateGroup)
 					{
@@ -452,11 +470,11 @@ ParsingStrictParser
 					}
 					else
 					{
-						stateGroup=state.TakeSnapshot();;
+						stateGroup=state.TakeSnapshot();
 					}
 					{
 						ParsingState::TransitionResult result;
-						if(i==begin)
+						if(i==0)
 						{
 							result.transitionType=ParsingState::TransitionResult::AmbiguityBegin;
 							result.ambiguityAffectedStackNodeCount=affectedStackNodeCount;
@@ -468,19 +486,32 @@ ParsingStrictParser
 						decisions.Add(result);
 					}
 					{
-						BuildSingleDecisionPath(state, futures[i], tokens, conflictReduceIndices[i-begin]);
+						BuildSingleDecisionPath(state, resolvingFutures[i], tokens, availableTokenCount, conflictReduceIndices[i]);
 
-						if(i==end-1)
+						if(i==resolvingFutures.Count()-1)
 						{
 							ParsingState::TransitionResult result;
 							result.transitionType=ParsingState::TransitionResult::AmbiguityEnd;
 							decisions.Add(result);
 
-							vint start=conflictReduceIndices[i-begin];
+							vint start=conflictReduceIndices[i];
 							ParsingState::TransitionResult lastDecision=decisions[decisions.Count()-2];
 							decisions.Add(state.RunTransition(lastDecision.transition, lastDecision.token, start, lastDecision.transition->instructions.Count()-start, true));
 						}
 					}
+				}
+
+				ParsingState::Future* lastFuture=futures[end-1];
+				ParsingState::Future** futureCleaner=&lastFuture;
+				for(int i=1;i<resolvableFutureLevels;i++)
+				{
+					futureCleaner=&(*futureCleaner)->previous;
+				}
+				*futureCleaner=0;
+
+				if(lastFuture)
+				{
+					BuildSingleDecisionPath(state, lastFuture, tokens, tokens.Count(), -1);
 				}
 			}
 
@@ -493,7 +524,7 @@ ParsingStrictParser
 				}
 				else if(end-begin==1)
 				{
-					BuildSingleDecisionPath(state, futures[begin], tokens, -1);
+					BuildSingleDecisionPath(state, futures[begin], tokens, tokens.Count(), -1);
 				}
 				else
 				{
