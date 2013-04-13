@@ -323,5 +323,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Test.h.fpm" />
+    <None Include="Codegen.bat">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="FpmacroParser.parser.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

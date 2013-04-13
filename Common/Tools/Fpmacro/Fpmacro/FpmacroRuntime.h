@@ -1,3 +1,6 @@
+#ifndef FPMACRO_RUNTIME
+#define FPMACRO_RUNTIME
+
 #include "..\..\..\Source\Basic.h"
 #include "..\..\..\Source\String.h"
 #include "..\..\..\Source\Pointer.h"
@@ -139,3 +142,5 @@ namespace fpmacro
 		RunningObject::Ref					InvokeInternal(RunningObject::Ref self, Environment::Ref environment, const List<RunningObject::Ref>& arguments)override;
 	};
 }
+
+#endif
