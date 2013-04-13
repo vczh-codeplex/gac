@@ -453,6 +453,26 @@ ParsingStrictParser
 				vint conflictReduceCount=GetConflictReduceCount(resolvingFutures);
 				GetConflictReduceIndices(resolvingFutures, conflictReduceCount, conflictReduceIndices);
 
+				WString ambiguityNodeType, ambiguityRuleName;
+				if(resolvingFutures[0]->selectedItem->instructions.Count()==conflictReduceIndices[0])
+				{
+					vint rootStartState=state.GetParsingRuleStartState();
+					ambiguityNodeType=state.GetTable()->GetStateInfo(rootStartState).ruleAmbiguousType;
+					ambiguityRuleName=state.GetParsingRule();
+				}
+				else
+				{
+					ParsingTable::Instruction& ins=resolvingFutures[0]->selectedItem->instructions[conflictReduceIndices[0]];
+					ambiguityNodeType=state.GetTable()->GetStateInfo(ins.stateParameter).ruleAmbiguousType;
+					ambiguityRuleName=state.GetTable()->GetStateInfo(ins.stateParameter).ruleName;
+				}
+				if(ambiguityNodeType==L"")
+				{
+					const RegexToken* token=state.GetToken(state.GetCurrentToken());
+					errors.Add(new ParsingError(token, L"Ambiguity happens when reducing rule \""+ambiguityRuleName+L"\" but this rule does not have an associated ambiguous node type."));
+					return;
+				}
+
 				vint affectedStackNodeCount=GetAffectedStackNodeCount(resolvingFutures, conflictReduceIndices);
 				if(affectedStackNodeCount==-1)
 				{
@@ -492,18 +512,7 @@ ParsingStrictParser
 						{
 							ParsingState::TransitionResult result;
 							result.transitionType=ParsingState::TransitionResult::AmbiguityEnd;
-							{
-								if(resolvingFutures[i]->selectedItem->instructions.Count()==conflictReduceIndices[i])
-								{
-									vint rootStartState=state.GetParsingRuleStartState();
-									result.ambiguityNodeType=state.GetTable()->GetStateInfo(rootStartState).ruleAmbiguousType;
-								}
-								else
-								{
-									ParsingTable::Instruction& ins=resolvingFutures[i]->selectedItem->instructions[conflictReduceIndices[i]];
-									result.ambiguityNodeType=state.GetTable()->GetStateInfo(ins.stateParameter).ruleAmbiguousType;
-								}
-							}
+							result.ambiguityNodeType=ambiguityNodeType;
 							decisions.Add(result);
 
 							vint start=conflictReduceIndices[i];
