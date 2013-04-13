@@ -226,8 +226,13 @@ namespace vl
 				Ptr<ParsingTreeNode>						createdObject;
 				Ptr<ParsingTreeObject>						operationTarget;
 				collections::List<Ptr<ParsingTreeObject>>	nodeStack;
-				bool										branch;
-				bool										skip;
+
+				bool										processingAmbiguityBranch;
+				Ptr<ParsingTreeNode>						ambiguityBranchCreatedObject;
+				Ptr<ParsingTreeNode>						ambiguityBranchOperationTarget;
+				vint										ambiguityBranchSharedNodeCount;
+				collections::List<Ptr<ParsingTreeObject>>	ambiguityBranchNodeStack;
+				collections::List<Ptr<ParsingTreeObject>>	ambiguityNodes;
 			public:
 				ParsingTreeBuilder();
 				~ParsingTreeBuilder();
