@@ -216,39 +216,62 @@ ParsingStrictParser
 			{
 			}
 
-			bool ParsingAmbiguousParser::IsAmbiguityResolvable(collections::List<ParsingState::Future*>& futures, vint begin, vint end)
+			vint ParsingAmbiguousParser::GetResolvableFutureLevels(collections::List<ParsingState::Future*>& futures, vint begin, vint end)
 			{
-				for(vint i=begin;i<end-1;i++)
+				if(end-begin<2)
 				{
-					ParsingState::Future* first=futures[i];
-					ParsingState::Future* second=futures[i+1];
+					return 1;
+				}
+				List<ParsingState::Future*> resolvingFutures;
+				for(vint i=begin;i<end;i++)
+				{
+					resolvingFutures.Add(futures[i]);
+				}
 
-					if(first->currentState!=second->currentState
-						|| first->reduceStateCount!=second->reduceStateCount
-						|| first->shiftStates.Count()!=second->shiftStates.Count()
-						)
+				vint level=0;
+				while(true)
+				{
+					for(vint i=0;i<resolvingFutures.Count()-1;i++)
 					{
-						return false;
-					}
-					else
-					{
-						for(vint j=0;j<first->shiftStates.Count();j++)
+						ParsingState::Future* first=resolvingFutures[i];
+						ParsingState::Future* second=resolvingFutures[i+1];
+
+						if(first->currentState!=second->currentState
+							|| first->reduceStateCount!=second->reduceStateCount
+							|| first->shiftStates.Count()!=second->shiftStates.Count()
+							)
 						{
-							if(first->shiftStates[j]!=second->shiftStates[j])
+							return level;
+						}
+						else
+						{
+							for(vint j=0;j<first->shiftStates.Count();j++)
 							{
-								return false;
+								if(first->shiftStates[j]!=second->shiftStates[j])
+								{
+									return level;
+								}
 							}
 						}
 					}
+					level++;
+
+					for(vint i=0;i<resolvingFutures.Count();i++)
+					{
+						if(!(resolvingFutures[i]=resolvingFutures[i]->previous))
+						{
+							return level;
+						}
+					}
 				}
-				return true;
 			}
 
-			void ParsingAmbiguousParser::SearchPath(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
+			vint ParsingAmbiguousParser::SearchPath(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
 			{
 				futures.Add(state.ExploreCreateRootFuture());
 				vint previousBegin=0;
 				vint previousEnd=1;
+				vint resolvableFutureLevels=0;
 
 				while(true)
 				{
@@ -265,7 +288,8 @@ ParsingStrictParser
 					previousBegin=previousEnd;
 					previousEnd=futures.Count();
 					
-					if(IsAmbiguityResolvable(futures, previousBegin, previousEnd))
+					resolvableFutureLevels=GetResolvableFutureLevels(futures, previousBegin, previousEnd);
+					if(resolvableFutureLevels!=0)
 					{
 						break;
 					}
@@ -273,6 +297,7 @@ ParsingStrictParser
 
 				begin=previousBegin;
 				end=previousEnd;
+				return resolvableFutureLevels;
 			}
 
 			vint ParsingAmbiguousParser::GetConflictReduceCount(collections::List<ParsingState::Future*>& futures, vint begin, vint end)
@@ -404,7 +429,7 @@ ParsingStrictParser
 				}
 			}
 
-			void ParsingAmbiguousParser::BuildAmbiguousDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAmbiguousParser::BuildAmbiguousDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors)
 			{
 				Array<vint> conflictReduceIndices;
 				vint conflictReduceCount=GetConflictReduceCount(futures, begin, end);
@@ -459,12 +484,7 @@ ParsingStrictParser
 				}
 			}
 
-			void ParsingAmbiguousParser::BuildDeterministicDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors)
-			{
-				BuildSingleDecisionPath(state, futures[begin], tokens, -1);
-			}
-
-			void ParsingAmbiguousParser::BuildDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, collections::List<Ptr<ParsingError>>& errors)
+			void ParsingAmbiguousParser::BuildDecisions(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint begin, vint end, vint resolvableFutureLevels, collections::List<Ptr<ParsingError>>& errors)
 			{
 				if(end-begin==0)
 				{
@@ -473,11 +493,11 @@ ParsingStrictParser
 				}
 				else if(end-begin==1)
 				{
-					BuildDeterministicDecisions(state, futures, tokens, begin, end, errors);
+					BuildSingleDecisionPath(state, futures[begin], tokens, -1);
 				}
 				else
 				{
-					BuildAmbiguousDecisions(state, futures, tokens, begin, end, errors);
+					BuildAmbiguousDecisions(state, futures, tokens, begin, end, resolvableFutureLevels, errors);
 				}
 			}
 			
@@ -490,8 +510,8 @@ ParsingStrictParser
 					vint resultBegin=0;
 					vint resultEnd=0;
 
-					SearchPath(state, futures, tokens, resultBegin, resultEnd, errors);
-					BuildDecisions(state, futures, tokens, resultBegin, resultEnd, errors);
+					vint resolvableFutureLevels=SearchPath(state, futures, tokens, resultBegin, resultEnd, errors);
+					BuildDecisions(state, futures, tokens, resultBegin, resultEnd, resolvableFutureLevels, errors);
 
 					FOREACH(ParsingState::Future*, future, futures)
 					{
