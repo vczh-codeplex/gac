@@ -176,6 +176,9 @@ namespace vl
 				Ptr<ParsingTable>							table;
 				collections::List<regex::RegexToken>		tokens;
 				Ptr<ParsingTokenWalker>						walker;
+				
+				WString										parsingRule;
+				vint										parsingRuleStartState;
 				Ptr<StateGroup>								stateGroup;
 			public:
 				ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex=-1);
@@ -187,6 +190,8 @@ namespace vl
 				regex::RegexToken*							GetToken(vint index);
 
 				vint										Reset(const WString& rule);
+				WString										GetParsingRule();
+				vint										GetParsingRuleStartState();
 				vint										GetCurrentToken();
 				const collections::List<vint>&				GetStateStack();
 				vint										GetCurrentState();

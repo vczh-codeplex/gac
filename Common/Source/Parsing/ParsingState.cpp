@@ -208,6 +208,7 @@ ParsingState
 			ParsingState::ParsingState(const WString& _input, Ptr<ParsingTable> _table, vint codeIndex)
 				:input(_input)
 				,table(_table)
+				,parsingRuleStartState(-1)
 			{
 				CopyFrom(tokens, table->GetLexer().Parse(input, codeIndex));
 				walker=new ParsingTokenWalker(tokens, table);
@@ -248,18 +249,27 @@ ParsingState
 
 			vint ParsingState::Reset(const WString& rule)
 			{
-				for(vint i=0;i<table->GetRuleCount();i++)
+				const ParsingTable::RuleInfo& info=table->GetRuleInfo(rule);
+				if(&info)
 				{
-					const ParsingTable::RuleInfo& info=table->GetRuleInfo(i);
-					if(info.name==rule)
-					{
-						walker->Reset();
-						walker->Move();
-						stateGroup=new StateGroup(info);
-						return stateGroup->currentState;
-					}
+					walker->Reset();
+					walker->Move();
+					stateGroup=new StateGroup(info);
+					parsingRule=rule;
+					parsingRuleStartState=info.rootStartState;
+					return stateGroup->currentState;
 				}
 				return -1;
+			}
+
+			WString ParsingState::GetParsingRule()
+			{
+				return parsingRule;
+			}
+
+			vint ParsingState::GetParsingRuleStartState()
+			{
+				return parsingRuleStartState;
 			}
 
 			vint ParsingState::GetCurrentToken()

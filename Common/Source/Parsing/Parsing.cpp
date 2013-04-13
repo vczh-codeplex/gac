@@ -492,6 +492,18 @@ ParsingStrictParser
 						{
 							ParsingState::TransitionResult result;
 							result.transitionType=ParsingState::TransitionResult::AmbiguityEnd;
+							{
+								if(resolvingFutures[i]->selectedItem->instructions.Count()==conflictReduceIndices[i])
+								{
+									vint rootStartState=state.GetParsingRuleStartState();
+									result.ambiguityNodeType=state.GetTable()->GetStateInfo(rootStartState).ruleAmbiguousType;
+								}
+								else
+								{
+									ParsingTable::Instruction& ins=resolvingFutures[i]->selectedItem->instructions[conflictReduceIndices[i]];
+									result.ambiguityNodeType=state.GetTable()->GetStateInfo(ins.stateParameter).ruleAmbiguousType;
+								}
+							}
 							decisions.Add(result);
 
 							vint start=conflictReduceIndices[i];

@@ -54,6 +54,8 @@ namespace vl
 					WString									stateName;
 					WString									stateExpression;
 
+					WString									ruleAmbiguousType;		// filled in Initialize()
+
 					StateInfo(){}
 
 					StateInfo(const WString& _ruleName, const WString& _stateName, const WString& _stateExpression)
@@ -185,6 +187,7 @@ namespace vl
 				collections::Array<TokenInfo>				discardTokenInfos;
 				collections::Array<StateInfo>				stateInfos;
 				collections::Array<RuleInfo>				ruleInfos;
+				collections::Dictionary<WString, vint>		ruleMap;
 
 			public:
 				ParsingTable(vint _tokenCount, vint _discardTokenCount, vint _stateCount, vint _ruleCount);
@@ -206,6 +209,7 @@ namespace vl
 				void										SetStateInfo(vint state, const StateInfo& info);
 
 				vint										GetRuleCount();
+				const RuleInfo&								GetRuleInfo(const WString& ruleName);
 				const RuleInfo&								GetRuleInfo(vint rule);
 				void										SetRuleInfo(vint rule, const RuleInfo& info);
 
