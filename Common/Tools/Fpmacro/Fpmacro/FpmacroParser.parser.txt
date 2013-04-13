@@ -108,7 +108,7 @@ rule ExpressionDefinition exp_def
 rule ReferenceDefinition ref_def
 	= "$$define" [SPACE] NAME : name "(" [NAME : parameters {"," NAME : parameters}] ")"
 		( { exp_def : definitions }
-		| "$$begin" [NEW_LINE] {def : definitions [NEW_LINE] } "$$end"
+		| "$$begin" NEW_LINE {def : definitions NEW_LINE } "$$end"
 		) as ReferenceDefinition
 	;
 
@@ -118,5 +118,5 @@ rule Definition def
 	;
 
 rule Macro macro_start
-	= [NEW_LINE] def : definitions {[NEW_LINE] def : definitions} [NEW_LINE] as Macro
+	= [NEW_LINE] def : definitions {NEW_LINE def : definitions} [NEW_LINE] as Macro
 	;
