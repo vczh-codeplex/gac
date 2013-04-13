@@ -53,7 +53,7 @@ class ExpressionDefinition : Definition
 class ReferenceDefinition : Definition
 {
 	token name;
-	ReferenceExpression[] parameters;
+	token[] parameters;
 	Definition[] definitions;
 }
 
@@ -70,7 +70,7 @@ token BEGIN = "/$/$begin";
 token END = "/$/$end";
 token COMMA = ",";
 token NAME = "/$[a-zA-Z_]/w*";
-token NEW_LINE = "/r/n";
+token NEW_LINE = "[/r/n]+";
 token SPACE = "[ /t]+";
 
 token TEXT_FRAGMENT = "(////[^/r/n]*|///*([^*]|/*+[^*//])*/*+//)|""([^\\""]|\\\.)*""|[^/$(), /t/r/n""]+|/$/(/./)|/(/)|[//""]";
@@ -106,9 +106,9 @@ rule ExpressionDefinition exp_def
 	;
 
 rule ReferenceDefinition ref_def
-	= "$$define" [SPACE] NAME : name [SPACE] "(" [reference_exp : parameters {[SPACE] "," [SPACE] reference_exp : parameters}] ")"
+	= "$$define" [SPACE] NAME : name "(" [NAME : parameters {"," NAME : parameters}] ")"
 		( { exp_def : definitions }
-		| "$$begin" {[NEW_LINE] def : definitions} [NEW_LINE] "$$end"
+		| "$$begin" [NEW_LINE] {def : definitions [NEW_LINE] } "$$end"
 		) as ReferenceDefinition
 	;
 
@@ -118,5 +118,5 @@ rule Definition def
 	;
 
 rule Macro macro_start
-	= [SPACE] def : definitions {[SPACE] def : definitions} [SPACE] as Macro
+	= [NEW_LINE] def : definitions {[NEW_LINE] def : definitions} [NEW_LINE] as Macro
 	;
