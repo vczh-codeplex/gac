@@ -277,7 +277,7 @@ Table Generation
 
 		vl::Ptr<vl::parsing::tabling::ParsingTable> FpmLoadTable()
 		{
-			vl::Ptr<vl::parsing::tabling::ParsingTable> table=new vl::parsing::tabling::ParsingTable(14-vl::parsing::tabling::ParsingTable::UserTokenStart, 0, 89, 11);
+			vl::Ptr<vl::parsing::tabling::ParsingTable> table=new vl::parsing::tabling::ParsingTable(15-vl::parsing::tabling::ParsingTable::UserTokenStart, 0, 89, 11);
 			#define SET_TOKEN_INFO(INDEX, NAME, REGEX) table->SetTokenInfo(INDEX, vl::parsing::tabling::ParsingTable::TokenInfo(NAME, REGEX));
 			#define SET_DISCARD_TOKEN_INFO(INDEX, NAME, REGEX) table->SetDiscardTokenInfo(INDEX, vl::parsing::tabling::ParsingTable::TokenInfo(NAME, REGEX));
 			#define SET_STATE_INFO(INDEX, RULE, STATE, EXPR) table->SetStateInfo(INDEX, vl::parsing::tabling::ParsingTable::StateInfo(RULE, STATE, EXPR));
@@ -306,7 +306,8 @@ Table Generation
 			SET_TOKEN_INFO(10, L"NAME", L"/$[a-zA-Z_]/w*")
 			SET_TOKEN_INFO(11, L"NEW_LINE", L"[/r/n]+")
 			SET_TOKEN_INFO(12, L"SPACE", L"[ /t]+")
-			SET_TOKEN_INFO(13, L"TEXT_FRAGMENT", L"(////[^/r/n]*|///*([^*]|/*+[^*//])*/*+//)|\"([^\\\\\"]|\\\\\\.)*\"|[^/$(), /t/r/n\"]+|/$/(/./)|/(/)|[//\"]")
+			SET_TOKEN_INFO(13, L"TEXT_FRAGMENT", L"(////[^/r/n]*|///*([^*]|/*+[^*//])*/*+//)|\"([^\\\\\"]|\\\\\\.)*\"|[^/$(), /t/r/n\"]+|/$/(/./)|[//\"]")
+			SET_TOKEN_INFO(14, L"BRACKET", L"/(/)")
 
 
 			SET_STATE_INFO(0, L"reference_exp", L"reference_exp.RootStart", L"¡ñ $<reference_exp>")
@@ -314,42 +315,42 @@ Table Generation
 			SET_STATE_INFO(2, L"reference_exp", L"reference_exp.1", L"<reference_exp>: NAME : name as ReferenceExpression¡ñ")
 			SET_STATE_INFO(3, L"reference_exp", L"reference_exp.RootEnd", L"$<reference_exp> ¡ñ")
 			SET_STATE_INFO(4, L"unit_exp_nc_nb", L"unit_exp_nc_nb.5", L"<unit_exp_nc_nb>: reference_exp : function \"(\"¡ñ [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression")
-			SET_STATE_INFO(5, L"unit_exp_nc_nb", L"unit_exp_nc_nb.1", L"<unit_exp_nc_nb>: \"$array\"¡ñ \"(\" [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression")
-			SET_STATE_INFO(6, L"unit_exp_nc_nb", L"unit_exp_nc_nb.7", L"<unit_exp_nc_nb>: \"$array\" \"(\" [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression¡ñ\r\n<unit_exp_nc_nb>: reference_exp : function \"(\" [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression¡ñ\r\n<unit_exp_nc_nb>: reference_exp : expressions unit_exp_nc_nb : expressions as ConcatExpression¡ñ\r\n<unit_exp_nc_nb>: TEXT_FRAGMENT : text as TextExpression¡ñ\r\n<unit_exp_nc_nb>: SPACE : text as TextExpression¡ñ")
+			SET_STATE_INFO(5, L"unit_exp_nc_nb", L"unit_exp_nc_nb.7", L"<unit_exp_nc_nb>: \"$array\" \"(\" [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression¡ñ\r\n<unit_exp_nc_nb>: reference_exp : function \"(\" [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression¡ñ\r\n<unit_exp_nc_nb>: reference_exp : function \"()\" as InvokeExpression¡ñ\r\n<unit_exp_nc_nb>: reference_exp : expressions unit_exp_nc_nb : expressions as ConcatExpression¡ñ\r\n<unit_exp_nc_nb>: TEXT_FRAGMENT : text as TextExpression¡ñ\r\n<unit_exp_nc_nb>: SPACE : text as TextExpression¡ñ")
+			SET_STATE_INFO(6, L"unit_exp_nc_nb", L"unit_exp_nc_nb.1", L"<unit_exp_nc_nb>: \"$array\"¡ñ \"(\" [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression")
 			SET_STATE_INFO(7, L"unit_exp_nc_nb", L"unit_exp_nc_nb.9", L"<unit_exp_nc_nb>: \"$array\" \"(\" [ exp_nc : elements { \",\"¡ñ exp_nc : elements } ] \")\" as ArrayExpression")
 			SET_STATE_INFO(8, L"unit_exp_nc_nb", L"unit_exp_nc_nb.11", L"<unit_exp_nc_nb>: reference_exp : function \"(\" [ exp_nc : arguments { \",\"¡ñ exp_nc : arguments } ] \")\" as InvokeExpression")
 			SET_STATE_INFO(9, L"exp_nc", L"exp_nc.RootEnd", L"$<exp_nc> ¡ñ")
-			SET_STATE_INFO(10, L"unit_exp_nb", L"unit_exp_nb.7", L"<unit_exp_nb>: \"$array\" \"(\" [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression¡ñ\r\n<unit_exp_nb>: reference_exp : function \"(\" [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression¡ñ\r\n<unit_exp_nb>: reference_exp : expressions unit_exp_nb : expressions as ConcatExpression¡ñ\r\n<unit_exp_nb>: TEXT_FRAGMENT : text as TextExpression¡ñ\r\n<unit_exp_nb>: SPACE : text as TextExpression¡ñ\r\n<unit_exp_nb>: \",\" : text as TextExpression¡ñ")
+			SET_STATE_INFO(10, L"unit_exp_nb", L"unit_exp_nb.7", L"<unit_exp_nb>: \"$array\" \"(\" [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression¡ñ\r\n<unit_exp_nb>: reference_exp : function \"(\" [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression¡ñ\r\n<unit_exp_nb>: reference_exp : function \"()\" as InvokeExpression¡ñ\r\n<unit_exp_nb>: reference_exp : expressions unit_exp_nb : expressions as ConcatExpression¡ñ\r\n<unit_exp_nb>: TEXT_FRAGMENT : text as TextExpression¡ñ\r\n<unit_exp_nb>: SPACE : text as TextExpression¡ñ\r\n<unit_exp_nb>: \",\" : text as TextExpression¡ñ")
 			SET_STATE_INFO(11, L"unit_exp_nb", L"unit_exp_nb.9", L"<unit_exp_nb>: \"$array\" \"(\" [ exp_nc : elements { \",\"¡ñ exp_nc : elements } ] \")\" as ArrayExpression")
 			SET_STATE_INFO(12, L"unit_exp_nb", L"unit_exp_nb.11", L"<unit_exp_nb>: reference_exp : function \"(\" [ exp_nc : arguments { \",\"¡ñ exp_nc : arguments } ] \")\" as InvokeExpression")
 			SET_STATE_INFO(13, L"unit_exp_nb", L"unit_exp_nb.5", L"<unit_exp_nb>: reference_exp : function \"(\"¡ñ [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression")
 			SET_STATE_INFO(14, L"unit_exp_nb", L"unit_exp_nb.1", L"<unit_exp_nb>: \"$array\"¡ñ \"(\" [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression")
-			SET_STATE_INFO(15, L"unit_exp_nc", L"unit_exp_nc.4", L"<unit_exp_nc>: \"(\" exp : expression \")\" as BracketExpression¡ñ")
-			SET_STATE_INFO(16, L"unit_exp", L"unit_exp.4", L"<unit_exp>: \"(\" exp : expression \")\" as BracketExpression¡ñ")
+			SET_STATE_INFO(15, L"unit_exp_nc", L"unit_exp_nc.2", L"<unit_exp_nc>: BRACKET : text as TextExpression¡ñ\r\n<unit_exp_nc>: \"(\" exp : expression \")\" as BracketExpression¡ñ")
+			SET_STATE_INFO(16, L"unit_exp", L"unit_exp.2", L"<unit_exp>: BRACKET : text as TextExpression¡ñ\r\n<unit_exp>: \"(\" exp : expression \")\" as BracketExpression¡ñ")
 			SET_STATE_INFO(17, L"exp", L"exp.RootEnd", L"$<exp> ¡ñ")
 			SET_STATE_INFO(18, L"exp_def", L"exp_def.RootEnd", L"$<exp_def> ¡ñ")
 			SET_STATE_INFO(19, L"ref_def", L"ref_def.RootEnd", L"$<ref_def> ¡ñ")
-			SET_STATE_INFO(20, L"ref_def", L"ref_def.11", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" ( exp_def : definitions | \"$$begin\" NEW_LINE¡ñ { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition\r\n<ref_def>: \"$$define\" [ SPACE ] NAME : name \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" ( exp_def : definitions | \"$$begin\" NEW_LINE ¡ñ{ def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
+			SET_STATE_INFO(20, L"ref_def", L"ref_def.11", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name ( \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" | \"()\" ) ( exp_def : definitions | \"$$begin\" NEW_LINE¡ñ { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition\r\n<ref_def>: \"$$define\" [ SPACE ] NAME : name ( \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" | \"()\" ) ( exp_def : definitions | \"$$begin\" NEW_LINE ¡ñ{ def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
 			SET_STATE_INFO(21, L"def", L"def.RootEnd", L"$<def> ¡ñ")
 			SET_STATE_INFO(22, L"macro_start", L"macro_start.RootEnd", L"$<macro_start> ¡ñ")
 			SET_STATE_INFO(23, L"macro_start", L"macro_start.3", L"<macro_start>: [ NEW_LINE ] def : definitions { NEW_LINE def : definitions } [ NEW_LINE ] as Macro¡ñ\r\n<macro_start>: [ NEW_LINE ] def : definitions { NEW_LINE¡ñ def : definitions } [ NEW_LINE ] as Macro")
-			SET_STATE_INFO(24, L"unit_exp_nc", L"unit_exp_nc.2", L"<unit_exp_nc>: \"(\"¡ñ exp : expression \")\" as BracketExpression")
-			SET_STATE_INFO(25, L"unit_exp_nc_nb", L"unit_exp_nc_nb.4", L"<unit_exp_nc_nb>: \"$array\" \"(\"¡ñ [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression")
-			SET_STATE_INFO(26, L"unit_exp_nc_nb", L"unit_exp_nc_nb.RootEnd", L"$<unit_exp_nc_nb> ¡ñ")
-			SET_STATE_INFO(27, L"unit_exp_nc", L"unit_exp_nc.RootEnd", L"$<unit_exp_nc> ¡ñ")
+			SET_STATE_INFO(24, L"unit_exp_nc", L"unit_exp_nc.3", L"<unit_exp_nc>: \"(\"¡ñ exp : expression \")\" as BracketExpression")
+			SET_STATE_INFO(25, L"unit_exp_nc_nb", L"unit_exp_nc_nb.RootEnd", L"$<unit_exp_nc_nb> ¡ñ")
+			SET_STATE_INFO(26, L"unit_exp_nc", L"unit_exp_nc.RootEnd", L"$<unit_exp_nc> ¡ñ")
+			SET_STATE_INFO(27, L"unit_exp_nc_nb", L"unit_exp_nc_nb.4", L"<unit_exp_nc_nb>: \"$array\" \"(\"¡ñ [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression")
 			SET_STATE_INFO(28, L"unit_exp_nb", L"unit_exp_nb.RootEnd", L"$<unit_exp_nb> ¡ñ")
 			SET_STATE_INFO(29, L"unit_exp", L"unit_exp.RootEnd", L"$<unit_exp> ¡ñ")
-			SET_STATE_INFO(30, L"unit_exp", L"unit_exp.2", L"<unit_exp>: \"(\"¡ñ exp : expression \")\" as BracketExpression")
+			SET_STATE_INFO(30, L"unit_exp", L"unit_exp.3", L"<unit_exp>: \"(\"¡ñ exp : expression \")\" as BracketExpression")
 			SET_STATE_INFO(31, L"unit_exp_nb", L"unit_exp_nb.4", L"<unit_exp_nb>: \"$array\" \"(\"¡ñ [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression")
-			SET_STATE_INFO(32, L"ref_def", L"ref_def.8", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition¡ñ")
-			SET_STATE_INFO(33, L"ref_def", L"ref_def.1", L"<ref_def>: \"$$define\"¡ñ [ SPACE ] NAME : name \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
-			SET_STATE_INFO(34, L"ref_def", L"ref_def.2", L"<ref_def>: \"$$define\" [ SPACE ]¡ñ NAME : name \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
-			SET_STATE_INFO(35, L"ref_def", L"ref_def.3", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name¡ñ \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
-			SET_STATE_INFO(36, L"ref_def", L"ref_def.4", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name \"(\"¡ñ [ NAME : parameters { \",\" NAME : parameters } ] \")\" ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
-			SET_STATE_INFO(37, L"ref_def", L"ref_def.6", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\"¡ñ ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
-			SET_STATE_INFO(38, L"ref_def", L"ref_def.5", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name \"(\" [ NAME : parameters¡ñ { \",\" NAME : parameters } ] \")\" ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition\r\n<ref_def>: \"$$define\" [ SPACE ] NAME : name \"(\" [ NAME : parameters ¡ñ{ \",\" NAME : parameters } ] \")\" ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
-			SET_STATE_INFO(39, L"ref_def", L"ref_def.9", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" ( exp_def : definitions | \"$$begin\"¡ñ NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition\r\n<ref_def>: \"$$define\" [ SPACE ] NAME : name \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions¡ñ NEW_LINE } \"$$end\" ) as ReferenceDefinition")
-			SET_STATE_INFO(40, L"ref_def", L"ref_def.7", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name \"(\" [ NAME : parameters { \",\"¡ñ NAME : parameters } ] \")\" ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
+			SET_STATE_INFO(32, L"ref_def", L"ref_def.7", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name ( \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" | \"()\" ) ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition¡ñ")
+			SET_STATE_INFO(33, L"ref_def", L"ref_def.1", L"<ref_def>: \"$$define\"¡ñ [ SPACE ] NAME : name ( \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" | \"()\" ) ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
+			SET_STATE_INFO(34, L"ref_def", L"ref_def.2", L"<ref_def>: \"$$define\" [ SPACE ]¡ñ NAME : name ( \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" | \"()\" ) ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
+			SET_STATE_INFO(35, L"ref_def", L"ref_def.3", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name¡ñ ( \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" | \"()\" ) ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
+			SET_STATE_INFO(36, L"ref_def", L"ref_def.5", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name ( \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" | \"()\" )¡ñ ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
+			SET_STATE_INFO(37, L"ref_def", L"ref_def.4", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name ( \"(\"¡ñ [ NAME : parameters { \",\" NAME : parameters } ] \")\" | \"()\" ) ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
+			SET_STATE_INFO(38, L"ref_def", L"ref_def.8", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name ( \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" | \"()\" ) ( exp_def : definitions | \"$$begin\"¡ñ NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition\r\n<ref_def>: \"$$define\" [ SPACE ] NAME : name ( \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" | \"()\" ) ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions¡ñ NEW_LINE } \"$$end\" ) as ReferenceDefinition")
+			SET_STATE_INFO(39, L"ref_def", L"ref_def.6", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name ( \"(\" [ NAME : parameters¡ñ { \",\" NAME : parameters } ] \")\" | \"()\" ) ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition\r\n<ref_def>: \"$$define\" [ SPACE ] NAME : name ( \"(\" [ NAME : parameters ¡ñ{ \",\" NAME : parameters } ] \")\" | \"()\" ) ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
+			SET_STATE_INFO(40, L"ref_def", L"ref_def.9", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name ( \"(\" [ NAME : parameters { \",\"¡ñ NAME : parameters } ] \")\" | \"()\" ) ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition")
 			SET_STATE_INFO(41, L"unit_exp_nc_nb", L"unit_exp_nc_nb.RootStart", L"¡ñ $<unit_exp_nc_nb>")
 			SET_STATE_INFO(42, L"unit_exp_nc_nb", L"unit_exp_nc_nb.Start", L"¡¤ <unit_exp_nc_nb>")
 			SET_STATE_INFO(43, L"unit_exp_nc", L"unit_exp_nc.RootStart", L"¡ñ $<unit_exp_nc>")
@@ -372,29 +373,29 @@ Table Generation
 			SET_STATE_INFO(60, L"macro_start", L"macro_start.Start", L"¡¤ <macro_start>")
 			SET_STATE_INFO(61, L"macro_start", L"macro_start.1", L"<macro_start>: [ NEW_LINE ]¡ñ def : definitions { NEW_LINE def : definitions } [ NEW_LINE ] as Macro")
 			SET_STATE_INFO(62, L"reference_exp", L"reference_exp.2", L"<reference_exp>: NAME : name as ReferenceExpression¡ñ")
-			SET_STATE_INFO(63, L"unit_exp_nc_nb", L"unit_exp_nc_nb.2", L"<unit_exp_nc_nb>: reference_exp : function¡ñ \"(\" [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression")
+			SET_STATE_INFO(63, L"unit_exp_nc_nb", L"unit_exp_nc_nb.2", L"<unit_exp_nc_nb>: reference_exp : function¡ñ \"(\" [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression\r\n<unit_exp_nc_nb>: reference_exp : function¡ñ \"()\" as InvokeExpression")
 			SET_STATE_INFO(64, L"unit_exp_nc_nb", L"unit_exp_nc_nb.3", L"<unit_exp_nc_nb>: reference_exp : expressions¡ñ unit_exp_nc_nb : expressions as ConcatExpression")
 			SET_STATE_INFO(65, L"unit_exp_nc_nb", L"unit_exp_nc_nb.6", L"<unit_exp_nc_nb>: \"$array\" \"(\" [ exp_nc : elements¡ñ { \",\" exp_nc : elements } ] \")\" as ArrayExpression\r\n<unit_exp_nc_nb>: \"$array\" \"(\" [ exp_nc : elements ¡ñ{ \",\" exp_nc : elements } ] \")\" as ArrayExpression")
 			SET_STATE_INFO(66, L"unit_exp_nc_nb", L"unit_exp_nc_nb.8", L"<unit_exp_nc_nb>: reference_exp : function \"(\" [ exp_nc : arguments¡ñ { \",\" exp_nc : arguments } ] \")\" as InvokeExpression\r\n<unit_exp_nc_nb>: reference_exp : function \"(\" [ exp_nc : arguments ¡ñ{ \",\" exp_nc : arguments } ] \")\" as InvokeExpression")
-			SET_STATE_INFO(67, L"unit_exp_nc_nb", L"unit_exp_nc_nb.10", L"<unit_exp_nc_nb>: \"$array\" \"(\" [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression¡ñ\r\n<unit_exp_nc_nb>: reference_exp : function \"(\" [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression¡ñ\r\n<unit_exp_nc_nb>: reference_exp : expressions unit_exp_nc_nb : expressions as ConcatExpression¡ñ\r\n<unit_exp_nc_nb>: TEXT_FRAGMENT : text as TextExpression¡ñ\r\n<unit_exp_nc_nb>: SPACE : text as TextExpression¡ñ")
-			SET_STATE_INFO(68, L"unit_exp_nc", L"unit_exp_nc.1", L"<unit_exp_nc>: !unit_exp_nc_nb¡ñ\r\n<unit_exp_nc>: \"(\" exp : expression \")\" as BracketExpression¡ñ")
-			SET_STATE_INFO(69, L"unit_exp_nc", L"unit_exp_nc.3", L"<unit_exp_nc>: \"(\" exp : expression¡ñ \")\" as BracketExpression")
-			SET_STATE_INFO(70, L"exp_nc", L"exp_nc.1", L"<exp_nc>: unit_exp_nc : expressions¡ñ { unit_exp_nc : expressions } [ reference_exp : expressions ] as ConcatExpression\r\n<exp_nc>: unit_exp_nc : expressions ¡ñ{ unit_exp_nc : expressions } [ reference_exp : expressions ] as ConcatExpression")
-			SET_STATE_INFO(71, L"exp_nc", L"exp_nc.2", L"<exp_nc>: unit_exp_nc : expressions { unit_exp_nc : expressions } [ reference_exp : expressions ] as ConcatExpression¡ñ")
+			SET_STATE_INFO(67, L"unit_exp_nc_nb", L"unit_exp_nc_nb.10", L"<unit_exp_nc_nb>: \"$array\" \"(\" [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression¡ñ\r\n<unit_exp_nc_nb>: reference_exp : function \"(\" [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression¡ñ\r\n<unit_exp_nc_nb>: reference_exp : function \"()\" as InvokeExpression¡ñ\r\n<unit_exp_nc_nb>: reference_exp : expressions unit_exp_nc_nb : expressions as ConcatExpression¡ñ\r\n<unit_exp_nc_nb>: TEXT_FRAGMENT : text as TextExpression¡ñ\r\n<unit_exp_nc_nb>: SPACE : text as TextExpression¡ñ")
+			SET_STATE_INFO(68, L"unit_exp_nc", L"unit_exp_nc.1", L"<unit_exp_nc>: !unit_exp_nc_nb¡ñ\r\n<unit_exp_nc>: BRACKET : text as TextExpression¡ñ\r\n<unit_exp_nc>: \"(\" exp : expression \")\" as BracketExpression¡ñ")
+			SET_STATE_INFO(69, L"unit_exp_nc", L"unit_exp_nc.4", L"<unit_exp_nc>: \"(\" exp : expression¡ñ \")\" as BracketExpression")
+			SET_STATE_INFO(70, L"exp_nc", L"exp_nc.1", L"<exp_nc>: !reference_exp¡ñ\r\n<exp_nc>: unit_exp_nc : expressions { unit_exp_nc : expressions } [ reference_exp : expressions ] as ConcatExpression¡ñ")
+			SET_STATE_INFO(71, L"exp_nc", L"exp_nc.2", L"<exp_nc>: unit_exp_nc : expressions¡ñ { unit_exp_nc : expressions } [ reference_exp : expressions ] as ConcatExpression\r\n<exp_nc>: unit_exp_nc : expressions ¡ñ{ unit_exp_nc : expressions } [ reference_exp : expressions ] as ConcatExpression")
 			SET_STATE_INFO(72, L"exp_nc", L"exp_nc.3", L"<exp_nc>: unit_exp_nc : expressions { unit_exp_nc : expressions } [ reference_exp : expressions ] as ConcatExpression¡ñ")
-			SET_STATE_INFO(73, L"unit_exp_nb", L"unit_exp_nb.2", L"<unit_exp_nb>: reference_exp : function¡ñ \"(\" [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression")
+			SET_STATE_INFO(73, L"unit_exp_nb", L"unit_exp_nb.2", L"<unit_exp_nb>: reference_exp : function¡ñ \"(\" [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression\r\n<unit_exp_nb>: reference_exp : function¡ñ \"()\" as InvokeExpression")
 			SET_STATE_INFO(74, L"unit_exp_nb", L"unit_exp_nb.3", L"<unit_exp_nb>: reference_exp : expressions¡ñ unit_exp_nb : expressions as ConcatExpression")
 			SET_STATE_INFO(75, L"unit_exp_nb", L"unit_exp_nb.6", L"<unit_exp_nb>: \"$array\" \"(\" [ exp_nc : elements¡ñ { \",\" exp_nc : elements } ] \")\" as ArrayExpression\r\n<unit_exp_nb>: \"$array\" \"(\" [ exp_nc : elements ¡ñ{ \",\" exp_nc : elements } ] \")\" as ArrayExpression")
 			SET_STATE_INFO(76, L"unit_exp_nb", L"unit_exp_nb.8", L"<unit_exp_nb>: reference_exp : function \"(\" [ exp_nc : arguments¡ñ { \",\" exp_nc : arguments } ] \")\" as InvokeExpression\r\n<unit_exp_nb>: reference_exp : function \"(\" [ exp_nc : arguments ¡ñ{ \",\" exp_nc : arguments } ] \")\" as InvokeExpression")
-			SET_STATE_INFO(77, L"unit_exp_nb", L"unit_exp_nb.10", L"<unit_exp_nb>: \"$array\" \"(\" [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression¡ñ\r\n<unit_exp_nb>: reference_exp : function \"(\" [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression¡ñ\r\n<unit_exp_nb>: reference_exp : expressions unit_exp_nb : expressions as ConcatExpression¡ñ\r\n<unit_exp_nb>: TEXT_FRAGMENT : text as TextExpression¡ñ\r\n<unit_exp_nb>: SPACE : text as TextExpression¡ñ\r\n<unit_exp_nb>: \",\" : text as TextExpression¡ñ")
-			SET_STATE_INFO(78, L"unit_exp", L"unit_exp.1", L"<unit_exp>: !unit_exp_nb¡ñ\r\n<unit_exp>: \"(\" exp : expression \")\" as BracketExpression¡ñ")
-			SET_STATE_INFO(79, L"unit_exp", L"unit_exp.3", L"<unit_exp>: \"(\" exp : expression¡ñ \")\" as BracketExpression")
-			SET_STATE_INFO(80, L"exp", L"exp.1", L"<exp>: unit_exp : expressions¡ñ { unit_exp : expressions } [ reference_exp : expressions ] as ConcatExpression\r\n<exp>: unit_exp : expressions ¡ñ{ unit_exp : expressions } [ reference_exp : expressions ] as ConcatExpression")
-			SET_STATE_INFO(81, L"exp", L"exp.2", L"<exp>: unit_exp : expressions { unit_exp : expressions } [ reference_exp : expressions ] as ConcatExpression¡ñ")
+			SET_STATE_INFO(77, L"unit_exp_nb", L"unit_exp_nb.10", L"<unit_exp_nb>: \"$array\" \"(\" [ exp_nc : elements { \",\" exp_nc : elements } ] \")\" as ArrayExpression¡ñ\r\n<unit_exp_nb>: reference_exp : function \"(\" [ exp_nc : arguments { \",\" exp_nc : arguments } ] \")\" as InvokeExpression¡ñ\r\n<unit_exp_nb>: reference_exp : function \"()\" as InvokeExpression¡ñ\r\n<unit_exp_nb>: reference_exp : expressions unit_exp_nb : expressions as ConcatExpression¡ñ\r\n<unit_exp_nb>: TEXT_FRAGMENT : text as TextExpression¡ñ\r\n<unit_exp_nb>: SPACE : text as TextExpression¡ñ\r\n<unit_exp_nb>: \",\" : text as TextExpression¡ñ")
+			SET_STATE_INFO(78, L"unit_exp", L"unit_exp.1", L"<unit_exp>: !unit_exp_nb¡ñ\r\n<unit_exp>: BRACKET : text as TextExpression¡ñ\r\n<unit_exp>: \"(\" exp : expression \")\" as BracketExpression¡ñ")
+			SET_STATE_INFO(79, L"unit_exp", L"unit_exp.4", L"<unit_exp>: \"(\" exp : expression¡ñ \")\" as BracketExpression")
+			SET_STATE_INFO(80, L"exp", L"exp.1", L"<exp>: !reference_exp¡ñ\r\n<exp>: unit_exp : expressions { unit_exp : expressions } [ reference_exp : expressions ] as ConcatExpression¡ñ")
+			SET_STATE_INFO(81, L"exp", L"exp.2", L"<exp>: unit_exp : expressions¡ñ { unit_exp : expressions } [ reference_exp : expressions ] as ConcatExpression\r\n<exp>: unit_exp : expressions ¡ñ{ unit_exp : expressions } [ reference_exp : expressions ] as ConcatExpression")
 			SET_STATE_INFO(82, L"exp", L"exp.3", L"<exp>: unit_exp : expressions { unit_exp : expressions } [ reference_exp : expressions ] as ConcatExpression¡ñ")
 			SET_STATE_INFO(83, L"exp_def", L"exp_def.1", L"<exp_def>: exp : expression as ExpressionDefinition¡ñ")
 			SET_STATE_INFO(84, L"exp_def", L"exp_def.2", L"<exp_def>: exp : expression as ExpressionDefinition¡ñ")
-			SET_STATE_INFO(85, L"ref_def", L"ref_def.10", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition¡ñ")
+			SET_STATE_INFO(85, L"ref_def", L"ref_def.10", L"<ref_def>: \"$$define\" [ SPACE ] NAME : name ( \"(\" [ NAME : parameters { \",\" NAME : parameters } ] \")\" | \"()\" ) ( exp_def : definitions | \"$$begin\" NEW_LINE { def : definitions NEW_LINE } \"$$end\" ) as ReferenceDefinition¡ñ")
 			SET_STATE_INFO(86, L"def", L"def.1", L"<def>: !exp_def¡ñ\r\n<def>: !ref_def¡ñ")
 			SET_STATE_INFO(87, L"macro_start", L"macro_start.2", L"<macro_start>: [ NEW_LINE ] def : definitions¡ñ { NEW_LINE def : definitions } [ NEW_LINE ] as Macro\r\n<macro_start>: [ NEW_LINE ] def : definitions ¡ñ{ NEW_LINE def : definitions } [ NEW_LINE ] as Macro")
 			SET_STATE_INFO(88, L"macro_start", L"macro_start.4", L"<macro_start>: [ NEW_LINE ] def : definitions { NEW_LINE def : definitions } [ NEW_LINE ] as Macro¡ñ")
@@ -433,12 +434,12 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 22)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -452,12 +453,12 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 22)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -471,12 +472,12 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 22)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -490,11 +491,11 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 21)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -505,19 +506,19 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 22)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -528,19 +529,19 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 22)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -551,19 +552,19 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 22)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -574,18 +575,18 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 21)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -593,26 +594,26 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 19)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 18)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -621,19 +622,211 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 17)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 9)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(1, 22)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(61)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 61, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"Macro", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(1, 22)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(60)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 60, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"Macro", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(1, 22)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(23)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"Macro", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(1, 21)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(58)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(1, 22)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(36)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(61)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 61, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"Macro", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(1, 22)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(36)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(60)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 60, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"Macro", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(1, 22)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(36)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(23)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"Macro", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(1, 21)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(36)
+				ITEM_STACK_PATTERN(58)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(1, 19)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(36)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(1, 18)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(1, 17)
+				ITEM_STACK_PATTERN(52)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(1, 9)
+				ITEM_STACK_PATTERN(46)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -659,32 +852,34 @@ Table Generation
 			BEGIN_TRANSITION_BAG(2, 4)
 
 				BEGIN_TRANSITION_ITEM(4, 16)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(30)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 30, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 15)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(24)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 24, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(31)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
@@ -692,23 +887,23 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(25)
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(27)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 25, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 27, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(13)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
@@ -717,10 +912,10 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(12)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
@@ -729,10 +924,10 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(11)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
@@ -740,11 +935,11 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(70)
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(8)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
@@ -752,11 +947,11 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(70)
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(7)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -764,13 +959,123 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(70)
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(4)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 16)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(30)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 30, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 15)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(24)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 24, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 10)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(31)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(27)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 27, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 10)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(13)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 10)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(12)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 10)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(11)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(8)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(7)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(4)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
 				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
 				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
@@ -788,7 +1093,7 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 74, L"", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(5, 5)
+				BEGIN_TRANSITION_ITEM(5, 6)
 				ITEM_STACK_PATTERN(42)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 42, L"", L"");
@@ -801,10 +1106,10 @@ Table Generation
 			BEGIN_TRANSITION_BAG(2, 9)
 
 				BEGIN_TRANSITION_ITEM(9, 11)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(31)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
@@ -812,21 +1117,21 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 7)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(25)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(27)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 25, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 27, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 12)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(13)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
@@ -834,10 +1139,10 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 12)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(12)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
@@ -845,10 +1150,10 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 11)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(11)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
@@ -856,10 +1161,10 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 8)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(8)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
@@ -867,10 +1172,10 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 7)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(7)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -878,10 +1183,10 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 8)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(4)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
@@ -896,6 +1201,86 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 74, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 11)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(31)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 7)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(27)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 27, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 12)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(13)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 12)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(12)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 11)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(11)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 8)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(8)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 7)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(7)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 8)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(4)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -927,12 +1312,12 @@ Table Generation
 			BEGIN_TRANSITION_BAG(2, 11)
 
 				BEGIN_TRANSITION_ITEM(11, 23)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -945,12 +1330,12 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 23)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -963,12 +1348,12 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 23)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -981,12 +1366,12 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 20)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(20)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -999,19 +1384,19 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 23)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -1021,19 +1406,19 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 23)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -1043,19 +1428,19 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 23)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -1065,19 +1450,171 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 20)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(20)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 20, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(11, 23)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(61)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 61, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(11, 23)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(60)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 60, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(11, 23)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(23)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(11, 20)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(20)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 20, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(11, 23)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(36)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(61)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 61, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(11, 23)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(36)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(60)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 60, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(11, 23)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(36)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(23)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 23, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(11, 20)
+				ITEM_STACK_PATTERN(52)
+				ITEM_STACK_PATTERN(54)
+				ITEM_STACK_PATTERN(36)
+				ITEM_STACK_PATTERN(58)
+				ITEM_STACK_PATTERN(20)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -1100,7 +1637,7 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(12, 6)
+				BEGIN_TRANSITION_ITEM(12, 5)
 				ITEM_STACK_PATTERN(42)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 42, L"", L"");
@@ -1124,7 +1661,7 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(13, 6)
+				BEGIN_TRANSITION_ITEM(13, 5)
 				ITEM_STACK_PATTERN(42)
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 42, L"", L"");
@@ -1132,6 +1669,26 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 64, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(2, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 10)
+				ITEM_STACK_PATTERN(48)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 48, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"function", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(14, 5)
+				ITEM_STACK_PATTERN(42)
+				ITEM_INSTRUCTION(Create, 0, L"ReferenceExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 42, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"function", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1147,7 +1704,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(4, 4)
 
-				BEGIN_TRANSITION_ITEM(4, 6)
+				BEGIN_TRANSITION_ITEM(4, 5)
 				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
 				END_TRANSITION_ITEM
 
@@ -1155,7 +1712,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(4, 5)
 
-				BEGIN_TRANSITION_ITEM(5, 5)
+				BEGIN_TRANSITION_ITEM(5, 6)
 				ITEM_INSTRUCTION(Shift, 4, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -1164,6 +1721,12 @@ Table Generation
 			END_TRANSITION_BAG
 
 			BEGIN_TRANSITION_BAG(4, 10)
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 4, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_INSTRUCTION(Shift, 4, L"", L"");
@@ -1177,7 +1740,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(4, 12)
 
-				BEGIN_TRANSITION_ITEM(12, 6)
+				BEGIN_TRANSITION_ITEM(12, 5)
 				ITEM_INSTRUCTION(Shift, 4, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -1189,7 +1752,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(4, 13)
 
-				BEGIN_TRANSITION_ITEM(13, 6)
+				BEGIN_TRANSITION_ITEM(13, 5)
 				ITEM_INSTRUCTION(Shift, 4, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -1199,24 +1762,28 @@ Table Generation
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(5, 3)
+			BEGIN_TRANSITION_BAG(4, 14)
 
-				BEGIN_TRANSITION_ITEM(3, 25)
+				BEGIN_TRANSITION_ITEM(14, 15)
+				ITEM_INSTRUCTION(Shift, 4, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(6, 1)
+			BEGIN_TRANSITION_BAG(5, 1)
 
-				BEGIN_TRANSITION_ITEM(1, 26)
+				BEGIN_TRANSITION_ITEM(1, 25)
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 9)
 				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				END_TRANSITION_ITEM
@@ -1231,7 +1798,7 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(1, 27)
+				BEGIN_TRANSITION_ITEM(1, 26)
 				ITEM_STACK_PATTERN(44)
 				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
@@ -1239,9 +1806,9 @@ Table Generation
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(6, 2)
+			BEGIN_TRANSITION_BAG(5, 2)
 
-				BEGIN_TRANSITION_ITEM(2, 6)
+				BEGIN_TRANSITION_ITEM(2, 5)
 				ITEM_STACK_PATTERN(64)
 				ITEM_INSTRUCTION(Reduce, 64, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
@@ -1250,604 +1817,639 @@ Table Generation
 
 			END_TRANSITION_BAG
 
+			BEGIN_TRANSITION_BAG(5, 3)
+
+				BEGIN_TRANSITION_ITEM(3, 24)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(3, 24)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(5, 4)
+
+				BEGIN_TRANSITION_ITEM(4, 10)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(31)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(27)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 27, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 10)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(13)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 10)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(12)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 10)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(11)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(8)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(7)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(4)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 10)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(31)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(27)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 27, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 10)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(13)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 10)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(12)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 10)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(11)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(8)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(7)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(4)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(5, 5)
+
+				BEGIN_TRANSITION_ITEM(5, 6)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(5, 6)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(5, 9)
+
+				BEGIN_TRANSITION_ITEM(9, 11)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(31)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 7)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(27)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 27, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 12)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(13)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 12)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(12)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 11)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(11)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 8)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(8)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 7)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(7)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 8)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(4)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 11)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(31)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 7)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(27)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 27, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 12)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(13)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 12)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(12)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 11)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(11)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 8)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(8)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 7)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(7)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(9, 8)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_STACK_PATTERN(4)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
+				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(5, 10)
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Shift, 42, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Shift, 42, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(5, 12)
+
+				BEGIN_TRANSITION_ITEM(12, 5)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(12, 5)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(5, 13)
+
+				BEGIN_TRANSITION_ITEM(13, 5)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(13, 5)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(5, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 15)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(14, 15)
+				ITEM_STACK_PATTERN(44)
+				ITEM_STACK_PATTERN(46)
+				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
 			BEGIN_TRANSITION_BAG(6, 3)
 
-				BEGIN_TRANSITION_ITEM(3, 24)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(3, 24)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
-				END_TRANSITION_ITEM
-
-			END_TRANSITION_BAG
-
-			BEGIN_TRANSITION_BAG(6, 4)
-
-				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(31)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(25)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 25, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(12)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(11)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(7)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(4)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(31)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(25)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 25, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(12)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(11)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(7)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(4)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
-				END_TRANSITION_ITEM
-
-			END_TRANSITION_BAG
-
-			BEGIN_TRANSITION_BAG(6, 5)
-
-				BEGIN_TRANSITION_ITEM(5, 5)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
-				ITEM_INSTRUCTION(Shift, 44, L"", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(5, 5)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
-				ITEM_INSTRUCTION(Shift, 44, L"", L"");
-				END_TRANSITION_ITEM
-
-			END_TRANSITION_BAG
-
-			BEGIN_TRANSITION_BAG(6, 9)
-
-				BEGIN_TRANSITION_ITEM(9, 11)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(31)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 7)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(25)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 25, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 12)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 12)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(12)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 11)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(11)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 8)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 7)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(7)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 8)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(4)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 11)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(31)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 7)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(25)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 25, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 12)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 12)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(12)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 11)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(11)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 8)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 7)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(7)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(9, 8)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(4)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"arguments", L"");
-				END_TRANSITION_ITEM
-
-			END_TRANSITION_BAG
-
-			BEGIN_TRANSITION_BAG(6, 10)
-
-				BEGIN_TRANSITION_ITEM(10, 2)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
-				ITEM_INSTRUCTION(Shift, 44, L"", L"");
-				ITEM_INSTRUCTION(Shift, 42, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(10, 2)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(10, 2)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
-				ITEM_INSTRUCTION(Shift, 44, L"", L"");
-				ITEM_INSTRUCTION(Shift, 42, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(10, 2)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
-				END_TRANSITION_ITEM
-
-			END_TRANSITION_BAG
-
-			BEGIN_TRANSITION_BAG(6, 12)
-
-				BEGIN_TRANSITION_ITEM(12, 6)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
-				ITEM_INSTRUCTION(Shift, 44, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
-				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(12, 6)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
-				ITEM_INSTRUCTION(Shift, 44, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
-				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
-				END_TRANSITION_ITEM
-
-			END_TRANSITION_BAG
-
-			BEGIN_TRANSITION_BAG(6, 13)
-
-				BEGIN_TRANSITION_ITEM(13, 6)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(70)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
-				ITEM_INSTRUCTION(Shift, 44, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
-				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
-				END_TRANSITION_ITEM
-
-				BEGIN_TRANSITION_ITEM(13, 6)
-				ITEM_STACK_PATTERN(44)
-				ITEM_STACK_PATTERN(46)
-				ITEM_INSTRUCTION(Reduce, 44, L"", L"");
-				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
-				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
-				ITEM_INSTRUCTION(Shift, 44, L"", L"");
-				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
-				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				BEGIN_TRANSITION_ITEM(3, 27)
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -1863,7 +2465,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(7, 5)
 
-				BEGIN_TRANSITION_ITEM(5, 5)
+				BEGIN_TRANSITION_ITEM(5, 6)
 				ITEM_INSTRUCTION(Shift, 7, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -1872,6 +2474,12 @@ Table Generation
 			END_TRANSITION_BAG
 
 			BEGIN_TRANSITION_BAG(7, 10)
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 7, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_INSTRUCTION(Shift, 7, L"", L"");
@@ -1885,7 +2493,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(7, 12)
 
-				BEGIN_TRANSITION_ITEM(12, 6)
+				BEGIN_TRANSITION_ITEM(12, 5)
 				ITEM_INSTRUCTION(Shift, 7, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -1897,10 +2505,21 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(7, 13)
 
-				BEGIN_TRANSITION_ITEM(13, 6)
+				BEGIN_TRANSITION_ITEM(13, 5)
 				ITEM_INSTRUCTION(Shift, 7, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(7, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 15)
+				ITEM_INSTRUCTION(Shift, 7, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -1918,7 +2537,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(8, 5)
 
-				BEGIN_TRANSITION_ITEM(5, 5)
+				BEGIN_TRANSITION_ITEM(5, 6)
 				ITEM_INSTRUCTION(Shift, 8, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -1927,6 +2546,12 @@ Table Generation
 			END_TRANSITION_BAG
 
 			BEGIN_TRANSITION_BAG(8, 10)
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 8, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_INSTRUCTION(Shift, 8, L"", L"");
@@ -1940,7 +2565,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(8, 12)
 
-				BEGIN_TRANSITION_ITEM(12, 6)
+				BEGIN_TRANSITION_ITEM(12, 5)
 				ITEM_INSTRUCTION(Shift, 8, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -1952,10 +2577,21 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(8, 13)
 
-				BEGIN_TRANSITION_ITEM(13, 6)
+				BEGIN_TRANSITION_ITEM(13, 5)
 				ITEM_INSTRUCTION(Shift, 8, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(8, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 15)
+				ITEM_INSTRUCTION(Shift, 8, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -1969,13 +2605,13 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(1, 22)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -1990,13 +2626,13 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(1, 22)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -2011,13 +2647,13 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(1, 22)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -2032,12 +2668,12 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(1, 21)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -2049,20 +2685,20 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(1, 22)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2074,20 +2710,20 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(1, 22)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2099,20 +2735,20 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(1, 22)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2124,19 +2760,19 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(1, 21)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2145,29 +2781,29 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(1, 19)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 18)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -2177,10 +2813,10 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(1, 17)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				END_TRANSITION_ITEM
@@ -2269,7 +2905,7 @@ Table Generation
 				ITEM_STACK_PATTERN(50)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
@@ -2280,7 +2916,7 @@ Table Generation
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2294,7 +2930,7 @@ Table Generation
 				ITEM_STACK_PATTERN(50)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
@@ -2305,7 +2941,7 @@ Table Generation
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2319,7 +2955,7 @@ Table Generation
 				ITEM_STACK_PATTERN(50)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
@@ -2330,7 +2966,7 @@ Table Generation
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2344,7 +2980,7 @@ Table Generation
 				ITEM_STACK_PATTERN(50)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
@@ -2354,7 +2990,7 @@ Table Generation
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2365,7 +3001,7 @@ Table Generation
 				ITEM_STACK_PATTERN(50)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
@@ -2374,7 +3010,7 @@ Table Generation
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				END_TRANSITION_ITEM
@@ -2426,12 +3062,12 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(3, 30)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(3, 30)
@@ -2441,7 +3077,7 @@ Table Generation
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2450,28 +3086,30 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(4, 16)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(30)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 30, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 15)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(24)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 24, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 16)
@@ -2485,6 +3123,7 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 30, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 15)
@@ -2498,6 +3137,7 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 24, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -2506,12 +3146,12 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(5, 14)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				END_TRANSITION_ITEM
 
@@ -2522,7 +3162,7 @@ Table Generation
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				END_TRANSITION_ITEM
 
@@ -2532,12 +3172,12 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(9, 10)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
@@ -2550,7 +3190,7 @@ Table Generation
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
@@ -2562,12 +3202,12 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Shift, 48, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
@@ -2575,12 +3215,12 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
 				END_TRANSITION_ITEM
 
@@ -2591,7 +3231,7 @@ Table Generation
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Shift, 48, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
@@ -2604,7 +3244,7 @@ Table Generation
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
 				END_TRANSITION_ITEM
 
@@ -2614,13 +3254,13 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(11, 23)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -2634,13 +3274,13 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(11, 23)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -2654,13 +3294,13 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(11, 23)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -2674,13 +3314,13 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(11, 20)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(20)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -2694,20 +3334,20 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(11, 23)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2718,20 +3358,20 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(11, 23)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2742,20 +3382,20 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(11, 23)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2766,20 +3406,20 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(11, 20)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(20)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2872,7 +3512,7 @@ Table Generation
 				ITEM_STACK_PATTERN(50)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
@@ -2883,7 +3523,7 @@ Table Generation
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2896,7 +3536,7 @@ Table Generation
 				ITEM_STACK_PATTERN(50)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
@@ -2907,7 +3547,7 @@ Table Generation
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2920,7 +3560,7 @@ Table Generation
 				ITEM_STACK_PATTERN(50)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
@@ -2931,7 +3571,7 @@ Table Generation
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2944,7 +3584,7 @@ Table Generation
 				ITEM_STACK_PATTERN(50)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(20)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
@@ -2955,7 +3595,7 @@ Table Generation
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -2970,12 +3610,12 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(12, 10)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
@@ -2988,7 +3628,7 @@ Table Generation
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
@@ -3000,12 +3640,12 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(13, 10)
 				ITEM_STACK_PATTERN(50)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
@@ -3018,8 +3658,36 @@ Table Generation
 				ITEM_INSTRUCTION(Using, 0, L"", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(10, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_STACK_PATTERN(50)
+				ITEM_STACK_PATTERN(81)
+				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_STACK_PATTERN(50)
+				ITEM_STACK_PATTERN(52)
+				ITEM_INSTRUCTION(Reduce, 50, L"", L"");
+				ITEM_INSTRUCTION(Using, 0, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -3037,7 +3705,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(11, 5)
 
-				BEGIN_TRANSITION_ITEM(5, 5)
+				BEGIN_TRANSITION_ITEM(5, 6)
 				ITEM_INSTRUCTION(Shift, 11, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -3046,6 +3714,12 @@ Table Generation
 			END_TRANSITION_BAG
 
 			BEGIN_TRANSITION_BAG(11, 10)
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 11, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_INSTRUCTION(Shift, 11, L"", L"");
@@ -3059,7 +3733,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(11, 12)
 
-				BEGIN_TRANSITION_ITEM(12, 6)
+				BEGIN_TRANSITION_ITEM(12, 5)
 				ITEM_INSTRUCTION(Shift, 11, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -3071,10 +3745,21 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(11, 13)
 
-				BEGIN_TRANSITION_ITEM(13, 6)
+				BEGIN_TRANSITION_ITEM(13, 5)
 				ITEM_INSTRUCTION(Shift, 11, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(11, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 15)
+				ITEM_INSTRUCTION(Shift, 11, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -3092,7 +3777,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(12, 5)
 
-				BEGIN_TRANSITION_ITEM(5, 5)
+				BEGIN_TRANSITION_ITEM(5, 6)
 				ITEM_INSTRUCTION(Shift, 12, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -3101,6 +3786,12 @@ Table Generation
 			END_TRANSITION_BAG
 
 			BEGIN_TRANSITION_BAG(12, 10)
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 12, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_INSTRUCTION(Shift, 12, L"", L"");
@@ -3114,7 +3805,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(12, 12)
 
-				BEGIN_TRANSITION_ITEM(12, 6)
+				BEGIN_TRANSITION_ITEM(12, 5)
 				ITEM_INSTRUCTION(Shift, 12, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -3126,10 +3817,21 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(12, 13)
 
-				BEGIN_TRANSITION_ITEM(13, 6)
+				BEGIN_TRANSITION_ITEM(13, 5)
 				ITEM_INSTRUCTION(Shift, 12, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(12, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 15)
+				ITEM_INSTRUCTION(Shift, 12, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -3155,7 +3857,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(13, 5)
 
-				BEGIN_TRANSITION_ITEM(5, 5)
+				BEGIN_TRANSITION_ITEM(5, 6)
 				ITEM_INSTRUCTION(Shift, 13, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -3164,6 +3866,12 @@ Table Generation
 			END_TRANSITION_BAG
 
 			BEGIN_TRANSITION_BAG(13, 10)
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 13, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_INSTRUCTION(Shift, 13, L"", L"");
@@ -3177,7 +3885,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(13, 12)
 
-				BEGIN_TRANSITION_ITEM(12, 6)
+				BEGIN_TRANSITION_ITEM(12, 5)
 				ITEM_INSTRUCTION(Shift, 13, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -3189,10 +3897,21 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(13, 13)
 
-				BEGIN_TRANSITION_ITEM(13, 6)
+				BEGIN_TRANSITION_ITEM(13, 5)
 				ITEM_INSTRUCTION(Shift, 13, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(13, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 15)
+				ITEM_INSTRUCTION(Shift, 13, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -3208,21 +3927,18 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(15, 1)
 
-				BEGIN_TRANSITION_ITEM(1, 27)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
+				BEGIN_TRANSITION_ITEM(1, 26)
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 9)
-				ITEM_STACK_PATTERN(70)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 9)
 				ITEM_STACK_PATTERN(46)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3233,19 +3949,17 @@ Table Generation
 			BEGIN_TRANSITION_BAG(15, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 24)
-				ITEM_STACK_PATTERN(70)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(3, 24)
 				ITEM_STACK_PATTERN(46)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -3253,10 +3967,9 @@ Table Generation
 			BEGIN_TRANSITION_BAG(15, 4)
 
 				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(31)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
@@ -3264,23 +3977,21 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(25)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(27)
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 25, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 27, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
@@ -3289,10 +4000,9 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(12)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
@@ -3301,10 +4011,9 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 10)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(11)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
@@ -3312,11 +4021,10 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(70)
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
@@ -3324,11 +4032,10 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(70)
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(7)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -3336,11 +4043,10 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(4, 6)
-				ITEM_STACK_PATTERN(70)
+				BEGIN_TRANSITION_ITEM(4, 5)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(4)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
@@ -3351,7 +4057,6 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(4, 10)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(31)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3360,14 +4065,13 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(4, 6)
+				BEGIN_TRANSITION_ITEM(4, 5)
 				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(25)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
+				ITEM_STACK_PATTERN(27)
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 25, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 27, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
 				END_TRANSITION_ITEM
@@ -3375,7 +4079,6 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(4, 10)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3387,7 +4090,6 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(4, 10)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(12)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3399,7 +4101,6 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(4, 10)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(11)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3408,10 +4109,9 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(4, 6)
+				BEGIN_TRANSITION_ITEM(4, 5)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3420,10 +4120,9 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"InvokeExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(4, 6)
+				BEGIN_TRANSITION_ITEM(4, 5)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(7)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3432,10 +4131,9 @@ Table Generation
 				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(4, 6)
+				BEGIN_TRANSITION_ITEM(4, 5)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(4)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3448,21 +4146,19 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(15, 5)
 
-				BEGIN_TRANSITION_ITEM(5, 5)
-				ITEM_STACK_PATTERN(70)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				BEGIN_TRANSITION_ITEM(5, 6)
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(5, 5)
+				BEGIN_TRANSITION_ITEM(5, 6)
 				ITEM_STACK_PATTERN(46)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				END_TRANSITION_ITEM
 
@@ -3471,10 +4167,9 @@ Table Generation
 			BEGIN_TRANSITION_BAG(15, 9)
 
 				BEGIN_TRANSITION_ITEM(9, 11)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(31)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 31, L"", L"");
@@ -3482,21 +4177,19 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 7)
-				ITEM_STACK_PATTERN(70)
-				ITEM_STACK_PATTERN(25)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_STACK_PATTERN(71)
+				ITEM_STACK_PATTERN(27)
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 25, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 27, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 12)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 13, L"", L"");
@@ -3504,10 +4197,9 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 12)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(12)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 12, L"", L"");
@@ -3515,10 +4207,9 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 11)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(11)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 11, L"", L"");
@@ -3526,10 +4217,9 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 8)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 8, L"", L"");
@@ -3537,10 +4227,9 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 7)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(7)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 7, L"", L"");
@@ -3548,10 +4237,9 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 8)
-				ITEM_STACK_PATTERN(70)
+				ITEM_STACK_PATTERN(71)
 				ITEM_STACK_PATTERN(4)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 4, L"", L"");
@@ -3561,7 +4249,6 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(9, 11)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(31)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3571,19 +4258,17 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(9, 7)
 				ITEM_STACK_PATTERN(46)
-				ITEM_STACK_PATTERN(25)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
+				ITEM_STACK_PATTERN(27)
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 25, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 27, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"elements", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(9, 12)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(13)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3594,7 +4279,6 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(9, 12)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(12)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3605,7 +4289,6 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(9, 11)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(11)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3616,7 +4299,6 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(9, 8)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(8)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3627,7 +4309,6 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(9, 7)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(7)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3638,7 +4319,6 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(9, 8)
 				ITEM_STACK_PATTERN(46)
 				ITEM_STACK_PATTERN(4)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3651,31 +4331,28 @@ Table Generation
 			BEGIN_TRANSITION_BAG(15, 10)
 
 				BEGIN_TRANSITION_ITEM(10, 2)
-				ITEM_STACK_PATTERN(70)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				ITEM_INSTRUCTION(Shift, 42, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 2)
-				ITEM_STACK_PATTERN(70)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_STACK_PATTERN(46)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				ITEM_INSTRUCTION(Shift, 42, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
@@ -3683,10 +4360,9 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_STACK_PATTERN(46)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
 				END_TRANSITION_ITEM
 
@@ -3694,23 +4370,21 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(15, 12)
 
-				BEGIN_TRANSITION_ITEM(12, 6)
-				ITEM_STACK_PATTERN(70)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				BEGIN_TRANSITION_ITEM(12, 5)
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(12, 6)
+				BEGIN_TRANSITION_ITEM(12, 5)
 				ITEM_STACK_PATTERN(46)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
@@ -3720,24 +4394,44 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(15, 13)
 
-				BEGIN_TRANSITION_ITEM(13, 6)
-				ITEM_STACK_PATTERN(70)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 70, L"", L"");
+				BEGIN_TRANSITION_ITEM(13, 5)
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
 
-				BEGIN_TRANSITION_ITEM(13, 6)
+				BEGIN_TRANSITION_ITEM(13, 5)
 				ITEM_STACK_PATTERN(46)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 70, L"", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(15, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 15)
+				ITEM_STACK_PATTERN(71)
+				ITEM_INSTRUCTION(Reduce, 71, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(14, 15)
+				ITEM_STACK_PATTERN(46)
+				ITEM_INSTRUCTION(Reduce, 46, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 71, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -3747,16 +4441,14 @@ Table Generation
 			BEGIN_TRANSITION_BAG(16, 1)
 
 				BEGIN_TRANSITION_ITEM(1, 29)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 22)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -3770,12 +4462,11 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 22)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -3789,12 +4480,11 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 22)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -3808,11 +4498,10 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 21)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -3823,19 +4512,18 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 22)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -3846,19 +4534,18 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 22)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -3869,19 +4556,18 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 22)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -3892,18 +4578,17 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 21)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -3911,26 +4596,24 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 19)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_STACK_PATTERN(36)
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 18)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -3939,9 +4622,8 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(1, 17)
-				ITEM_STACK_PATTERN(80)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_STACK_PATTERN(81)
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				END_TRANSITION_ITEM
@@ -3951,7 +4633,6 @@ Table Generation
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3970,7 +4651,6 @@ Table Generation
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -3989,7 +4669,6 @@ Table Generation
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -4007,7 +4686,6 @@ Table Generation
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -4021,17 +4699,16 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(1, 22)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -4044,17 +4721,16 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(1, 22)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -4067,17 +4743,16 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(1, 22)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -4090,16 +4765,15 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(1, 21)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -4109,15 +4783,14 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(1, 19)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
+				ITEM_STACK_PATTERN(36)
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				END_TRANSITION_ITEM
@@ -4125,7 +4798,6 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(1, 18)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -4136,7 +4808,6 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(1, 17)
 				ITEM_STACK_PATTERN(52)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -4147,19 +4818,17 @@ Table Generation
 			BEGIN_TRANSITION_BAG(16, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 30)
-				ITEM_STACK_PATTERN(80)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_STACK_PATTERN(81)
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(3, 30)
 				ITEM_STACK_PATTERN(52)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -4167,47 +4836,47 @@ Table Generation
 			BEGIN_TRANSITION_BAG(16, 4)
 
 				BEGIN_TRANSITION_ITEM(4, 16)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(30)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 30, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 15)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(24)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 24, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 16)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(30)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 30, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(4, 15)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(24)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 24, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
+				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -4215,20 +4884,18 @@ Table Generation
 			BEGIN_TRANSITION_BAG(16, 5)
 
 				BEGIN_TRANSITION_ITEM(5, 14)
-				ITEM_STACK_PATTERN(80)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_STACK_PATTERN(81)
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(5, 14)
 				ITEM_STACK_PATTERN(52)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				END_TRANSITION_ITEM
 
@@ -4237,11 +4904,10 @@ Table Generation
 			BEGIN_TRANSITION_BAG(16, 9)
 
 				BEGIN_TRANSITION_ITEM(9, 10)
-				ITEM_STACK_PATTERN(80)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_STACK_PATTERN(81)
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
@@ -4249,10 +4915,9 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(9, 10)
 				ITEM_STACK_PATTERN(52)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
@@ -4263,31 +4928,28 @@ Table Generation
 			BEGIN_TRANSITION_BAG(16, 10)
 
 				BEGIN_TRANSITION_ITEM(10, 2)
-				ITEM_STACK_PATTERN(80)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_STACK_PATTERN(81)
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Shift, 48, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 2)
-				ITEM_STACK_PATTERN(80)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_STACK_PATTERN(81)
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_STACK_PATTERN(52)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Shift, 48, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
@@ -4295,10 +4957,9 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_STACK_PATTERN(52)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
 				END_TRANSITION_ITEM
 
@@ -4307,12 +4968,11 @@ Table Generation
 			BEGIN_TRANSITION_BAG(16, 11)
 
 				BEGIN_TRANSITION_ITEM(11, 23)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -4325,12 +4985,11 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 23)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -4343,12 +5002,11 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 23)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -4361,12 +5019,11 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 20)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(20)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
@@ -4379,19 +5036,18 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 23)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -4401,19 +5057,18 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 23)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -4423,19 +5078,18 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 23)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -4445,19 +5099,18 @@ Table Generation
 				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(11, 20)
-				ITEM_STACK_PATTERN(80)
+				ITEM_STACK_PATTERN(81)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(20)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -4471,7 +5124,6 @@ Table Generation
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -4489,7 +5141,6 @@ Table Generation
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -4507,7 +5158,6 @@ Table Generation
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -4525,7 +5175,6 @@ Table Generation
 				ITEM_STACK_PATTERN(54)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(20)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
@@ -4541,17 +5190,16 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(11, 23)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(61)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -4563,17 +5211,16 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(11, 23)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(60)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -4585,17 +5232,16 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(11, 23)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(23)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -4607,17 +5253,16 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(11, 20)
 				ITEM_STACK_PATTERN(52)
 				ITEM_STACK_PATTERN(54)
-				ITEM_STACK_PATTERN(37)
+				ITEM_STACK_PATTERN(36)
 				ITEM_STACK_PATTERN(58)
 				ITEM_STACK_PATTERN(20)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ConcatExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 54, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"expression", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ExpressionDefinition", L"");
-				ITEM_INSTRUCTION(Reduce, 37, L"", L"");
+				ITEM_INSTRUCTION(Reduce, 36, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"definitions", L"");
 				ITEM_INSTRUCTION(Create, 0, L"ReferenceDefinition", L"");
 				ITEM_INSTRUCTION(Reduce, 58, L"", L"");
@@ -4631,11 +5276,10 @@ Table Generation
 			BEGIN_TRANSITION_BAG(16, 12)
 
 				BEGIN_TRANSITION_ITEM(12, 10)
-				ITEM_STACK_PATTERN(80)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_STACK_PATTERN(81)
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
@@ -4643,10 +5287,9 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(12, 10)
 				ITEM_STACK_PATTERN(52)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
@@ -4657,11 +5300,10 @@ Table Generation
 			BEGIN_TRANSITION_BAG(16, 13)
 
 				BEGIN_TRANSITION_ITEM(13, 10)
-				ITEM_STACK_PATTERN(80)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
-				ITEM_INSTRUCTION(Reduce, 80, L"", L"");
+				ITEM_STACK_PATTERN(81)
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
@@ -4669,11 +5311,32 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(13, 10)
 				ITEM_STACK_PATTERN(52)
-				ITEM_INSTRUCTION(Create, 0, L"BracketExpression", L"");
 				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
 				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
-				ITEM_INSTRUCTION(Shift, 80, L"", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(16, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_STACK_PATTERN(81)
+				ITEM_INSTRUCTION(Reduce, 81, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_STACK_PATTERN(52)
+				ITEM_INSTRUCTION(Reduce, 52, L"", L"");
+				ITEM_INSTRUCTION(Item, 0, L"expressions", L"");
+				ITEM_INSTRUCTION(Shift, 81, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -4740,6 +5403,14 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 58, L"", L"");
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 20, L"", L"");
+				ITEM_INSTRUCTION(Shift, 58, L"", L"");
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Shift, 48, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
@@ -4769,6 +5440,19 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(20, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_INSTRUCTION(Shift, 20, L"", L"");
+				ITEM_INSTRUCTION(Shift, 58, L"", L"");
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -4836,6 +5520,14 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 58, L"", L"");
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 23, L"", L"");
+				ITEM_INSTRUCTION(Shift, 58, L"", L"");
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Shift, 48, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
@@ -4865,6 +5557,19 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(23, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_INSTRUCTION(Shift, 23, L"", L"");
+				ITEM_INSTRUCTION(Shift, 58, L"", L"");
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -4907,6 +5612,12 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_INSTRUCTION(Shift, 24, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 24, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Shift, 48, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
@@ -4938,37 +5649,54 @@ Table Generation
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(25, 3)
+			BEGIN_TRANSITION_BAG(24, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_INSTRUCTION(Shift, 24, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(27, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 24)
-				ITEM_INSTRUCTION(Shift, 25, L"", L"");
+				ITEM_INSTRUCTION(Shift, 27, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(25, 4)
+			BEGIN_TRANSITION_BAG(27, 4)
 
-				BEGIN_TRANSITION_ITEM(4, 6)
+				BEGIN_TRANSITION_ITEM(4, 5)
 				ITEM_INSTRUCTION(Create, 0, L"ArrayExpression", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(25, 5)
+			BEGIN_TRANSITION_BAG(27, 5)
 
-				BEGIN_TRANSITION_ITEM(5, 5)
-				ITEM_INSTRUCTION(Shift, 25, L"", L"");
+				BEGIN_TRANSITION_ITEM(5, 6)
+				ITEM_INSTRUCTION(Shift, 27, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(25, 10)
+			BEGIN_TRANSITION_BAG(27, 10)
 
 				BEGIN_TRANSITION_ITEM(10, 2)
-				ITEM_INSTRUCTION(Shift, 25, L"", L"");
+				ITEM_INSTRUCTION(Shift, 27, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 27, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				ITEM_INSTRUCTION(Shift, 42, L"", L"");
@@ -4977,10 +5705,10 @@ Table Generation
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(25, 12)
+			BEGIN_TRANSITION_BAG(27, 12)
 
-				BEGIN_TRANSITION_ITEM(12, 6)
-				ITEM_INSTRUCTION(Shift, 25, L"", L"");
+				BEGIN_TRANSITION_ITEM(12, 5)
+				ITEM_INSTRUCTION(Shift, 27, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
@@ -4989,12 +5717,23 @@ Table Generation
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(25, 13)
+			BEGIN_TRANSITION_BAG(27, 13)
 
-				BEGIN_TRANSITION_ITEM(13, 6)
-				ITEM_INSTRUCTION(Shift, 25, L"", L"");
+				BEGIN_TRANSITION_ITEM(13, 5)
+				ITEM_INSTRUCTION(Shift, 27, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(27, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 15)
+				ITEM_INSTRUCTION(Shift, 27, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -5037,6 +5776,12 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_INSTRUCTION(Shift, 30, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 30, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Shift, 48, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
@@ -5068,6 +5813,17 @@ Table Generation
 
 			END_TRANSITION_BAG
 
+			BEGIN_TRANSITION_BAG(30, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_INSTRUCTION(Shift, 30, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
 			BEGIN_TRANSITION_BAG(31, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 24)
@@ -5087,7 +5843,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(31, 5)
 
-				BEGIN_TRANSITION_ITEM(5, 5)
+				BEGIN_TRANSITION_ITEM(5, 6)
 				ITEM_INSTRUCTION(Shift, 31, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -5096,6 +5852,12 @@ Table Generation
 			END_TRANSITION_BAG
 
 			BEGIN_TRANSITION_BAG(31, 10)
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 31, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_INSTRUCTION(Shift, 31, L"", L"");
@@ -5109,7 +5871,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(31, 12)
 
-				BEGIN_TRANSITION_ITEM(12, 6)
+				BEGIN_TRANSITION_ITEM(12, 5)
 				ITEM_INSTRUCTION(Shift, 31, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
@@ -5121,10 +5883,21 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(31, 13)
 
-				BEGIN_TRANSITION_ITEM(13, 6)
+				BEGIN_TRANSITION_ITEM(13, 5)
 				ITEM_INSTRUCTION(Shift, 31, L"", L"");
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(31, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 15)
+				ITEM_INSTRUCTION(Shift, 31, L"", L"");
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -5248,40 +6021,32 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(35, 3)
 
-				BEGIN_TRANSITION_ITEM(3, 36)
+				BEGIN_TRANSITION_ITEM(3, 37)
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(36, 4)
+			BEGIN_TRANSITION_BAG(35, 14)
 
-				BEGIN_TRANSITION_ITEM(4, 37)
+				BEGIN_TRANSITION_ITEM(14, 36)
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(36, 10)
-
-				BEGIN_TRANSITION_ITEM(10, 38)
-				ITEM_INSTRUCTION(Item, 0, L"parameters", L"");
-				END_TRANSITION_ITEM
-
-			END_TRANSITION_BAG
-
-			BEGIN_TRANSITION_BAG(37, 3)
+			BEGIN_TRANSITION_BAG(36, 3)
 
 				BEGIN_TRANSITION_ITEM(3, 30)
-				ITEM_INSTRUCTION(Shift, 37, L"", L"");
+				ITEM_INSTRUCTION(Shift, 36, L"", L"");
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(37, 5)
+			BEGIN_TRANSITION_BAG(36, 5)
 
 				BEGIN_TRANSITION_ITEM(5, 14)
-				ITEM_INSTRUCTION(Shift, 37, L"", L"");
+				ITEM_INSTRUCTION(Shift, 36, L"", L"");
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
@@ -5289,17 +6054,17 @@ Table Generation
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(37, 7)
+			BEGIN_TRANSITION_BAG(36, 7)
 
-				BEGIN_TRANSITION_ITEM(7, 39)
+				BEGIN_TRANSITION_ITEM(7, 38)
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(37, 9)
+			BEGIN_TRANSITION_BAG(36, 9)
 
 				BEGIN_TRANSITION_ITEM(9, 10)
-				ITEM_INSTRUCTION(Shift, 37, L"", L"");
+				ITEM_INSTRUCTION(Shift, 36, L"", L"");
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
@@ -5309,10 +6074,17 @@ Table Generation
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(37, 10)
+			BEGIN_TRANSITION_BAG(36, 10)
 
 				BEGIN_TRANSITION_ITEM(10, 2)
-				ITEM_INSTRUCTION(Shift, 37, L"", L"");
+				ITEM_INSTRUCTION(Shift, 36, L"", L"");
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 36, L"", L"");
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
@@ -5322,10 +6094,10 @@ Table Generation
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(37, 12)
+			BEGIN_TRANSITION_BAG(36, 12)
 
 				BEGIN_TRANSITION_ITEM(12, 10)
-				ITEM_INSTRUCTION(Shift, 37, L"", L"");
+				ITEM_INSTRUCTION(Shift, 36, L"", L"");
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
@@ -5335,10 +6107,10 @@ Table Generation
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(37, 13)
+			BEGIN_TRANSITION_BAG(36, 13)
 
 				BEGIN_TRANSITION_ITEM(13, 10)
-				ITEM_INSTRUCTION(Shift, 37, L"", L"");
+				ITEM_INSTRUCTION(Shift, 36, L"", L"");
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
@@ -5348,30 +6120,57 @@ Table Generation
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(38, 4)
+			BEGIN_TRANSITION_BAG(36, 14)
 
-				BEGIN_TRANSITION_ITEM(4, 37)
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_INSTRUCTION(Shift, 36, L"", L"");
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(38, 9)
+			BEGIN_TRANSITION_BAG(37, 4)
 
-				BEGIN_TRANSITION_ITEM(9, 40)
+				BEGIN_TRANSITION_ITEM(4, 36)
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
 
-			BEGIN_TRANSITION_BAG(39, 11)
+			BEGIN_TRANSITION_BAG(37, 10)
+
+				BEGIN_TRANSITION_ITEM(10, 39)
+				ITEM_INSTRUCTION(Item, 0, L"parameters", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(38, 11)
 
 				BEGIN_TRANSITION_ITEM(11, 20)
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
 
+			BEGIN_TRANSITION_BAG(39, 4)
+
+				BEGIN_TRANSITION_ITEM(4, 36)
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(39, 9)
+
+				BEGIN_TRANSITION_ITEM(9, 40)
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
 			BEGIN_TRANSITION_BAG(40, 10)
 
-				BEGIN_TRANSITION_ITEM(10, 38)
+				BEGIN_TRANSITION_ITEM(10, 39)
 				ITEM_INSTRUCTION(Item, 0, L"parameters", L"");
 				END_TRANSITION_ITEM
 
@@ -5386,7 +6185,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(42, 5)
 
-				BEGIN_TRANSITION_ITEM(5, 5)
+				BEGIN_TRANSITION_ITEM(5, 6)
 				END_TRANSITION_ITEM
 
 			END_TRANSITION_BAG
@@ -5402,7 +6201,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(42, 12)
 
-				BEGIN_TRANSITION_ITEM(12, 6)
+				BEGIN_TRANSITION_ITEM(12, 5)
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -5411,7 +6210,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(42, 13)
 
-				BEGIN_TRANSITION_ITEM(13, 6)
+				BEGIN_TRANSITION_ITEM(13, 5)
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -5434,7 +6233,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(44, 5)
 
-				BEGIN_TRANSITION_ITEM(5, 5)
+				BEGIN_TRANSITION_ITEM(5, 6)
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				END_TRANSITION_ITEM
 
@@ -5452,7 +6251,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(44, 12)
 
-				BEGIN_TRANSITION_ITEM(12, 6)
+				BEGIN_TRANSITION_ITEM(12, 5)
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
@@ -5462,8 +6261,17 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(44, 13)
 
-				BEGIN_TRANSITION_ITEM(13, 6)
+				BEGIN_TRANSITION_ITEM(13, 5)
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(44, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 15)
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -5487,7 +6295,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(46, 5)
 
-				BEGIN_TRANSITION_ITEM(5, 5)
+				BEGIN_TRANSITION_ITEM(5, 6)
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				END_TRANSITION_ITEM
@@ -5495,6 +6303,11 @@ Table Generation
 			END_TRANSITION_BAG
 
 			BEGIN_TRANSITION_BAG(46, 10)
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
@@ -5507,7 +6320,7 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(46, 12)
 
-				BEGIN_TRANSITION_ITEM(12, 6)
+				BEGIN_TRANSITION_ITEM(12, 5)
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
@@ -5518,9 +6331,19 @@ Table Generation
 
 			BEGIN_TRANSITION_BAG(46, 13)
 
-				BEGIN_TRANSITION_ITEM(13, 6)
+				BEGIN_TRANSITION_ITEM(13, 5)
 				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Shift, 44, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(46, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 15)
+				ITEM_INSTRUCTION(Shift, 46, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -5639,6 +6462,15 @@ Table Generation
 
 			END_TRANSITION_BAG
 
+			BEGIN_TRANSITION_BAG(50, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
 			BEGIN_TRANSITION_BAG(51, 0)
 
 				BEGIN_TRANSITION_ITEM(0, 52)
@@ -5678,6 +6510,11 @@ Table Generation
 
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Shift, 48, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
@@ -5701,6 +6538,16 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(13, 10)
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(52, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -5750,6 +6597,12 @@ Table Generation
 				BEGIN_TRANSITION_ITEM(10, 2)
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Shift, 48, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
@@ -5775,6 +6628,17 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(54, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -5850,6 +6714,13 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 58, L"", L"");
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 58, L"", L"");
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Shift, 48, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
@@ -5877,6 +6748,18 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(58, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_INSTRUCTION(Shift, 58, L"", L"");
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -5943,6 +6826,14 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 58, L"", L"");
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 60, L"", L"");
+				ITEM_INSTRUCTION(Shift, 58, L"", L"");
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Shift, 48, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
@@ -5979,6 +6870,19 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(60, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_INSTRUCTION(Shift, 60, L"", L"");
+				ITEM_INSTRUCTION(Shift, 58, L"", L"");
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM
@@ -6038,6 +6942,14 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 58, L"", L"");
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
+				END_TRANSITION_ITEM
+
+				BEGIN_TRANSITION_ITEM(10, 2)
+				ITEM_INSTRUCTION(Shift, 61, L"", L"");
+				ITEM_INSTRUCTION(Shift, 58, L"", L"");
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
 				ITEM_INSTRUCTION(Shift, 48, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"name", L"");
@@ -6067,6 +6979,19 @@ Table Generation
 				ITEM_INSTRUCTION(Shift, 54, L"", L"");
 				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Shift, 50, L"", L"");
+				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
+				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
+				END_TRANSITION_ITEM
+
+			END_TRANSITION_BAG
+
+			BEGIN_TRANSITION_BAG(61, 14)
+
+				BEGIN_TRANSITION_ITEM(14, 16)
+				ITEM_INSTRUCTION(Shift, 61, L"", L"");
+				ITEM_INSTRUCTION(Shift, 58, L"", L"");
+				ITEM_INSTRUCTION(Shift, 54, L"", L"");
+				ITEM_INSTRUCTION(Shift, 52, L"", L"");
 				ITEM_INSTRUCTION(Assign, 0, L"text", L"");
 				ITEM_INSTRUCTION(Create, 0, L"TextExpression", L"");
 				END_TRANSITION_ITEM

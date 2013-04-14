@@ -73,7 +73,8 @@ token NAME = "/$[a-zA-Z_]/w*";
 token NEW_LINE = "[/r/n]+";
 token SPACE = "[ /t]+";
 
-token TEXT_FRAGMENT = "(////[^/r/n]*|///*([^*]|/*+[^*//])*/*+//)|""([^\\""]|\\\.)*""|[^/$(), /t/r/n""]+|/$/(/./)|/(/)|[//""]";
+token TEXT_FRAGMENT = "(////[^/r/n]*|///*([^*]|/*+[^*//])*/*+//)|""([^\\""]|\\\.)*""|[^/$(), /t/r/n""]+|/$/(/./)|[//""]";
+token BRACKET = "/(/)";
 
 rule ReferenceExpression reference_exp
 	= NAME : name as ReferenceExpression
@@ -82,6 +83,7 @@ rule ReferenceExpression reference_exp
 rule Expression unit_exp_nc_nb
 	= "$array" "(" [exp_nc : elements {"," exp_nc : elements}] ")" as ArrayExpression
 	= reference_exp : function "(" [exp_nc : arguments {"," exp_nc : arguments}] ")" as InvokeExpression
+	= reference_exp : function "()" as InvokeExpression
 	= reference_exp : expressions unit_exp_nc_nb : expressions as ConcatExpression
 	= TEXT_FRAGMENT : text as TextExpression
 	= SPACE : text as TextExpression
@@ -89,16 +91,19 @@ rule Expression unit_exp_nc_nb
 	
 rule Expression unit_exp_nc
 	= !unit_exp_nc_nb
+	= BRACKET : text as TextExpression
 	= "(" exp : expression  ")" as BracketExpression
 	;
 
 rule Expression exp_nc
+	= !reference_exp
 	= unit_exp_nc : expressions {unit_exp_nc : expressions} [reference_exp : expressions] as ConcatExpression
 	;
 
 rule Expression unit_exp_nb
 	= "$array" "(" [exp_nc : elements {"," exp_nc : elements}] ")" as ArrayExpression
 	= reference_exp : function "(" [exp_nc : arguments {"," exp_nc : arguments}] ")" as InvokeExpression
+	= reference_exp : function "()" as InvokeExpression
 	= reference_exp : expressions unit_exp_nb : expressions as ConcatExpression
 	= TEXT_FRAGMENT : text as TextExpression
 	= SPACE : text as TextExpression
@@ -107,10 +112,12 @@ rule Expression unit_exp_nb
 
 rule Expression unit_exp
 	= !unit_exp_nb
+	= BRACKET : text as TextExpression
 	= "(" exp : expression  ")" as BracketExpression
 	;
 
 rule Expression exp
+	= !reference_exp
 	= unit_exp : expressions {unit_exp : expressions} [reference_exp : expressions] as ConcatExpression
 	;
 
@@ -119,7 +126,7 @@ rule ExpressionDefinition exp_def
 	;
 
 rule ReferenceDefinition ref_def
-	= "$$define" [SPACE] NAME : name "(" [NAME : parameters {"," NAME : parameters}] ")"
+	= "$$define" [SPACE] NAME : name ("(" [NAME : parameters {"," NAME : parameters}] ")" | "()")
 		( exp_def : definitions
 		| "$$begin" NEW_LINE {def : definitions NEW_LINE } "$$end"
 		) as ReferenceDefinition

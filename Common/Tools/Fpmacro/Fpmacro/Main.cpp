@@ -531,7 +531,12 @@ int wmain(int argc, wchar_t* argv[])
 			EncoderStream logStream(logFileStream, logEncoder);
 			StreamWriter logWriter(logStream);
 
-			RunMacro(DereferenceMacroFile(inputPath), outputWriter, logWriter, table);
+			WString dereference=DereferenceMacroFile(inputPath);
+			logWriter.WriteLine(L"==============================================================================================");
+			logWriter.WriteLine(L"Dereferenced");
+			logWriter.WriteLine(L"==============================================================================================");
+			logWriter.WriteLine(dereference);
+			RunMacro(dereference, outputWriter, logWriter, table);
 		}
 	}
 	Console::WriteLine(L"Finished!");
