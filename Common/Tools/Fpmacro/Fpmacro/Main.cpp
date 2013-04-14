@@ -153,10 +153,35 @@ public:
 
 	void Visit(FpmExpressionDefinition* node)
 	{
+		runningObject=ExpressionCreateObjectVisitor::Do(node->expression);
 	}
 
 	void Visit(FpmReferenceDefinition* node)
 	{
+		ExecutableObject* result=new ExecutableObject;
+		result->name=node->name.value;
+		result->predefinedEnvironment=new RunningObject::Environment;
+		FOREACH(vl::parsing::ParsingToken, parameter, node->parameters)
+		{
+			result->parameters.Add(parameter.value);
+		}
+		ConcatObject* concat=new ConcatObject;
+		FOREACH(Ptr<FpmDefinition>, definition, node->definitions)
+		{
+			RunningObject::Ref item=Do(definition, result->predefinedEnvironment);
+			if(item)
+			{
+				if(concat->objects.Count())
+				{
+					TextObject* newLine=new TextObject;
+					newLine->text=L"\r\n";
+					concat->objects.Add(newLine);
+				}
+				concat->objects.Add(item);
+			}
+		}
+		result->runningObject=concat;
+		environment->objects.Add(node->name.value, result);
 	}
 };
 
@@ -286,10 +311,29 @@ public:
 
 	void Visit(FpmExpressionDefinition* node)
 	{
+		ExpressionToStringVisitor::Do(node->expression, prefix, writer);
 	}
 
 	void Visit(FpmReferenceDefinition* node)
 	{
+		writer.WriteString(prefix);
+		writer.WriteLine(L"REFERENCE {");
+		writer.WriteString(prefix);
+		writer.WriteString(L"    ");
+		writer.WriteString(node->name.value);
+		writer.WriteString(L" : ");
+		FOREACH_INDEXER(vl::parsing::ParsingToken, parameter, i, node->parameters)
+		{
+			if(i)writer.WriteString(L" , ");
+			writer.WriteString(parameter.value);
+		}
+		writer.WriteLine(L"");
+		FOREACH(Ptr<FpmDefinition>, definition, node->definitions)
+		{
+			Do(definition, prefix+L"    ", writer);
+		}
+		writer.WriteString(prefix);
+		writer.WriteLine(L"}");
 	}
 };
 
