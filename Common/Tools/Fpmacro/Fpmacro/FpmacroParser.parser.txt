@@ -126,7 +126,7 @@ rule ExpressionDefinition exp_def
 	;
 
 rule ReferenceDefinition ref_def
-	= "$$define" [SPACE] NAME : name ("(" [NAME : parameters {"," NAME : parameters}] ")" | "()")
+	= "$$define" [SPACE] NAME : name ("(" [NAME : parameters {"," NAME : parameters}] ")" | "()") SPACE
 		( exp_def : definitions
 		| "$$begin" NEW_LINE {def : definitions NEW_LINE } "$$end"
 		) as ReferenceDefinition
