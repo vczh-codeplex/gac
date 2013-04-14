@@ -266,7 +266,7 @@ ParsingStrictParser
 				}
 			}
 
-			vint ParsingAmbiguousParser::SearchPath(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
+			vint ParsingAmbiguousParser::SearchPathForOneStep(ParsingState& state, collections::List<ParsingState::Future*>& futures, collections::List<regex::RegexToken*>& tokens, vint& begin, vint& end, collections::List<Ptr<ParsingError>>& errors)
 			{
 				futures.Add(state.ExploreCreateRootFuture());
 				vint previousBegin=0;
@@ -562,7 +562,7 @@ ParsingStrictParser
 					vint resultBegin=0;
 					vint resultEnd=0;
 
-					vint resolvableFutureLevels=SearchPath(state, futures, tokens, resultBegin, resultEnd, errors);
+					vint resolvableFutureLevels=SearchPathForOneStep(state, futures, tokens, resultBegin, resultEnd, errors);
 					BuildDecisions(state, futures, tokens, resultBegin, resultEnd, resolvableFutureLevels, errors);
 
 					FOREACH(ParsingState::Future*, future, futures)
