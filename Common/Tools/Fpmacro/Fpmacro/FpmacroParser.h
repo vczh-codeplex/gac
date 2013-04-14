@@ -28,6 +28,7 @@ namespace fpmacro
 			static const vl::vint NEW_LINE = 8;
 			static const vl::vint SPACE = 9;
 			static const vl::vint TEXT_FRAGMENT = 10;
+			static const vl::vint BRACKET = 11;
 		};
 		class FpmExpression;
 		class FpmConcatExpression;
