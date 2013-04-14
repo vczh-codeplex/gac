@@ -110,10 +110,12 @@ public:
 	WString							codeClassPrefix;
 	WString							codeGuard;
 	bool							parsingTree;
+	bool							parserText;
 	bool							ambiguity;
 
 	CodegenConfig()
 		:parsingTree(true)
+		,parserText(false)
 		,ambiguity(false)
 	{
 	}
@@ -126,6 +128,7 @@ public:
 		Regex regexNamespace(L"^namespace:((<namespace>[^.]+)(.(<namespace>[^.]+))*)?$");
 		Regex regexParser(L"^parser:(<name>/w+)/((<rule>/w+)/)$");
 		Regex regexParsingTree(L"^parsingtree:(<value>enabled|disabled)$");
+		Regex regexParserText(L"^parsertext:(<value>enabled|disabled)$");
 		Regex regexAmbiguity(L"^ambiguity:(<value>enabled|disabled)$");
 
 		while(!reader.IsEnd())
@@ -169,6 +172,11 @@ public:
 			{
 				WString value=match->Groups().Get(L"value").Get(0).Value();
 				parsingTree=value==L"enabled";
+			}
+			else if((match=regexParserText.Match(line)) && match->Success())
+			{
+				WString value=match->Groups().Get(L"value").Get(0).Value();
+				parserText=value==L"enabled";
 			}
 			else if((match=regexAmbiguity.Match(line)) && match->Success())
 			{
@@ -1178,6 +1186,11 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 	writer.WriteString(L", ");
 	writer.WriteString(itow(table->GetRuleCount()));
 	writer.WriteLine(L");");
+	if(table->GetAmbiguity())
+	{
+		writer.WriteString(prefix);
+		writer.WriteLine(L"table->SetAmbiguity(true);");
+	}
 
 	writer.WriteString(prefix);
 	writer.WriteLine(L"\t#define SET_TOKEN_INFO(INDEX, NAME, REGEX) table->SetTokenInfo(INDEX, vl::parsing::tabling::ParsingTable::TokenInfo(NAME, REGEX));");
@@ -1426,6 +1439,47 @@ void WriteTable(Ptr<ParsingTable> table, const WString& prefix, const WString& c
 	writer.WriteLine(L"");
 }
 
+void WriteTable(const WString& parserCode, bool enableAmbiguity, const WString& prefix, const WString& codeClassPrefix, TextWriter& writer)
+{
+	writer.WriteString(prefix);
+	writer.WriteString(L"vl::Ptr<vl::parsing::tabling::ParsingTable> ");
+	writer.WriteString(codeClassPrefix);
+	writer.WriteLine(L"LoadTable()");
+	writer.WriteString(prefix);
+	writer.WriteLine(L"{");
+
+	writer.WriteString(prefix+L"    ");
+	writer.WriteLine(L"vl::WString grammar = ");
+	{
+		StringReader reader(parserCode);
+		while(!reader.IsEnd())
+		{
+			writer.WriteString(L"L\"\\r\\n\"");
+			WString line=reader.ReadLine();
+			WriteCppString(line, writer);
+			writer.WriteLine(L"");
+		}
+	}
+	writer.WriteLine(L";");
+
+	writer.WriteString(prefix+L"    ");
+	writer.WriteLine(L"vl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateBootstrapStrictParser();");
+	writer.WriteString(prefix+L"    ");
+	writer.WriteLine(L"vl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
+	writer.WriteString(prefix+L"    ");
+	writer.WriteLine(L"vl::Ptr<vl::parsing::ParsingTreeNode> definitionNode=parser->Parse(grammar, L\"ParserDecl\", errors);");
+	writer.WriteString(prefix+L"    ");
+	writer.WriteLine(L"vl::Ptr<vl::parsing::definitions::ParsingDefinition> definition=vl::parsing::definitions::DeserializeDefinition(definitionNode);");
+	writer.WriteString(prefix+L"    ");
+	writer.WriteLine(L"vl::Ptr<vl::parsing::tabling::ParsingTable> table=vl::parsing::analyzing::GenerateTable(definition, "+WString(enableAmbiguity?L"true":L"false")+L", errors);");
+	writer.WriteString(prefix+L"    ");
+	writer.WriteLine(L"return table;");
+
+	writer.WriteString(prefix);
+	writer.WriteLine(L"}");
+	writer.WriteLine(L"");
+}
+
 /***********************************************************************
 Parser Function Generation
 ***********************************************************************/
@@ -1453,7 +1507,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				writer.WriteString(rule->GetName());
 				writer.WriteLine(L"\");");
 				writer.WriteString(prefix);
-				writer.WriteLine(L"\tvl::Ptr<vl::parsing::tabling::ParsingStrictParser> parser=new vl::parsing::tabling::ParsingStrictParser;");
+				writer.WriteLine(L"\tvl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);");
 				writer.WriteString(prefix);
 				writer.WriteLine(L"\tvl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
 				writer.WriteString(prefix);
@@ -1484,7 +1538,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 				writer.WriteString(rule->GetName());
 				writer.WriteLine(L"\");");
 				writer.WriteString(prefix);
-				writer.WriteLine(L"\tvl::Ptr<vl::parsing::tabling::ParsingStrictParser> parser=new vl::parsing::tabling::ParsingStrictParser;");
+				writer.WriteLine(L"\tvl::Ptr<vl::parsing::tabling::ParsingGeneralParser> parser=vl::parsing::tabling::CreateStrictParser(table);");
 				writer.WriteString(prefix);
 				writer.WriteLine(L"\tvl::collections::List<vl::Ptr<vl::parsing::ParsingError>> errors;");
 				writer.WriteString(prefix);
@@ -1513,7 +1567,7 @@ void WriteParserFunctions(ParsingSymbolManager* manager, const WString& prefix, 
 	}
 }
 
-void WriteCppFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, const CodegenConfig& config, StreamWriter& writer)
+void WriteCppFile(const WString& name, const WString& parserCode, Ptr<ParsingDefinition> definition, Ptr<ParsingTable> table, const CodegenConfig& config, StreamWriter& writer)
 {
 	WString prefix=WriteFileBegin(config, writer);
 
@@ -1560,7 +1614,14 @@ void WriteCppFile(const WString& name, Ptr<ParsingDefinition> definition, Ptr<Pa
 	writer.WriteLine(L"Table Generation");
 	writer.WriteLine(L"***********************************************************************/");
 	writer.WriteLine(L"");
-	WriteTable(table, prefix, config.codeClassPrefix, writer);
+	if(config.parserText)
+	{
+		WriteTable(parserCode, config.ambiguity, prefix, config.codeClassPrefix, writer);
+	}
+	else
+	{
+		WriteTable(table, prefix, config.codeClassPrefix, writer);
+	}
 
 	WriteFileEnd(config, writer);
 }
@@ -1718,7 +1779,7 @@ int wmain(int argc, wchar_t* argv[])
 				
 				config.codeIncludes.Clear();
 				config.codeIncludes.Add(L"\""+name+L".h\"");
-				WriteCppFile(name, definition, table, config, writer);
+				WriteCppFile(name, codeGrammar, definition, table, config, writer);
 			}
 		}
 	STOP_PARSING:;

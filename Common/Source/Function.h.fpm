@@ -1,6 +1,6 @@
 $$include:Common.fpm
 
-$$define $FUNCTION_DECLARATION($count, $function) $$begin
+$$define $FUNCTION_DECLARATION($count,$function) $$begin
 $(/)***********************************************************************
 vl::Func<$FUNCTION_TYPE($count,$function)>
 ***********************************************************************$(/)

@@ -394,7 +394,7 @@ GenerateTable
 					if(errors.Count()==0)
 					{
 						Ptr<ParsingTable> table=GenerateTableFromPDA(definition, jointPDA, enableAmbiguity, errors);
-						if(errors.Count()==0)
+						if(enableAmbiguity || errors.Count()==0)
 						{
 							return table;
 						}

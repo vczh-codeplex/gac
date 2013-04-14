@@ -10,6 +10,7 @@ Parser::Test
 #define VCZH_PARSING_XML
 
 #include "..\..\..\Source\Parsing\Parsing.h"
+#include "..\..\..\Source\Parsing\ParsingAutomaton.h"
 
 namespace vczh
 {
