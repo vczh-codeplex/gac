@@ -79,26 +79,39 @@ rule ReferenceExpression reference_exp
 	= NAME : name as ReferenceExpression
 	;
 	
-rule Expression unit_exp_nc
+rule Expression unit_exp_nc_nb
 	= "$array" "(" [exp_nc : elements {"," exp_nc : elements}] ")" as ArrayExpression
 	= reference_exp : function "(" [exp_nc : arguments {"," exp_nc : arguments}] ")" as InvokeExpression
-	= !reference_exp
+	= reference_exp : expressions unit_exp_nc_nb : expressions as ConcatExpression
 	= TEXT_FRAGMENT : text as TextExpression
 	= SPACE : text as TextExpression
+	;
+	
+rule Expression unit_exp_nc
+	= !unit_exp_nc_nb
 	= "(" exp : expression  ")" as BracketExpression
 	;
 
-rule Expression unit_exp
-	= !unit_exp_nc
+rule Expression exp_nc
+	= unit_exp_nc : expressions {unit_exp_nc : expressions} [reference_exp : expressions] as ConcatExpression
+	;
+
+rule Expression unit_exp_nb
+	= "$array" "(" [exp_nc : elements {"," exp_nc : elements}] ")" as ArrayExpression
+	= reference_exp : function "(" [exp_nc : arguments {"," exp_nc : arguments}] ")" as InvokeExpression
+	= reference_exp : expressions unit_exp_nb : expressions as ConcatExpression
+	= TEXT_FRAGMENT : text as TextExpression
+	= SPACE : text as TextExpression
 	= "," : text as TextExpression
 	;
 
-rule Expression exp_nc
-	= unit_exp_nc : expressions {unit_exp_nc : expressions} as ConcatExpression
+rule Expression unit_exp
+	= !unit_exp_nb
+	= "(" exp : expression  ")" as BracketExpression
 	;
 
 rule Expression exp
-	= unit_exp : expressions {unit_exp : expressions} as ConcatExpression
+	= unit_exp : expressions {unit_exp : expressions} [reference_exp : expressions] as ConcatExpression
 	;
 
 rule ExpressionDefinition exp_def
@@ -107,7 +120,7 @@ rule ExpressionDefinition exp_def
 
 rule ReferenceDefinition ref_def
 	= "$$define" [SPACE] NAME : name "(" [NAME : parameters {"," NAME : parameters}] ")"
-		( { exp_def : definitions }
+		( exp_def : definitions
 		| "$$begin" NEW_LINE {def : definitions NEW_LINE } "$$end"
 		) as ReferenceDefinition
 	;
