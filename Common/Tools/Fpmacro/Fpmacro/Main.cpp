@@ -3,6 +3,7 @@
 #include "..\..\..\Source\Stream\CharFormat.h"
 #include "..\..\..\Source\Combinator\StringCombinator.h"
 #include "FpmacroRuntime.h"
+#include "FpmacroParser.h"
 
 using namespace vl;
 using namespace vl::console;
@@ -10,6 +11,287 @@ using namespace vl::stream;
 using namespace vl::collections;
 using namespace vl::combinator;
 using namespace fpmacro;
+using namespace fpmacro::parser;
+
+/***********************************************************************
+ExpressionCreateObjectVisitor
+***********************************************************************/
+
+class ExpressionCreateObjectVisitor : public Object, public FpmExpression::IVisitor
+{
+public:
+	RunningObject::Ref			runningObject;
+
+	static RunningObject::Ref Do(Ptr<FpmExpression> node)
+	{
+		ExpressionCreateObjectVisitor visitor;
+		node->Accept(&visitor);
+		return visitor.runningObject;
+	}
+
+	void Visit(FpmConcatExpression* node)
+	{
+		ConcatObject* result=new ConcatObject;
+		FOREACH(Ptr<FpmExpression>, expression, node->expressions)
+		{
+			result->objects.Add(Do(expression));
+		}
+		runningObject=result;
+	}
+
+	void Visit(FpmArrayExpression* node)
+	{
+		ArrayObject* result=new ArrayObject;
+		FOREACH(Ptr<FpmExpression>, expression, node->elements)
+		{
+			result->objects.Add(Do(expression));
+		}
+		runningObject=result;
+	}
+
+	void Visit(FpmInvokeExpression* node)
+	{
+		InvokeObject* result=new InvokeObject;
+		result->target=Do(node->function);
+		FOREACH(Ptr<FpmExpression>, expression, node->arguments)
+		{
+			result->arguments.Add(Do(expression));
+		}
+		runningObject=result;
+	}
+
+	void Visit(FpmBracketExpression* node)
+	{
+		ConcatObject* result=new ConcatObject;
+		{
+			TextObject* bracket=new TextObject;
+			bracket->text=L"(";
+			result->objects.Add(bracket);
+		}
+		result->objects.Add(Do(node->expression));
+		{
+			TextObject* bracket=new TextObject;
+			bracket->text=L")";
+			result->objects.Add(bracket);
+		}
+		runningObject=result;
+	}
+
+	void Visit(FpmReferenceExpression* node)
+	{
+		PredefinedObject::Type type=PredefinedObject::Unknown;
+		bool found=true;
+		if(node->name.value==L"$add")type=PredefinedObject::Add;
+		else if(node->name.value==L"$sub")type=PredefinedObject::Sub;
+		else if(node->name.value==L"$mul")type=PredefinedObject::Mul;
+		else if(node->name.value==L"$div")type=PredefinedObject::Div;
+		else if(node->name.value==L"$mod")type=PredefinedObject::Mod;
+		else if(node->name.value==L"$lt")type=PredefinedObject::LT;
+		else if(node->name.value==L"$le")type=PredefinedObject::LE;
+		else if(node->name.value==L"$gt")type=PredefinedObject::GT;
+		else if(node->name.value==L"$ge")type=PredefinedObject::GE;
+		else if(node->name.value==L"$eq")type=PredefinedObject::EQ;
+		else if(node->name.value==L"$ne")type=PredefinedObject::NE;
+		else if(node->name.value==L"$if")type=PredefinedObject::If;
+		else if(node->name.value==L"$loop")type=PredefinedObject::Loop;
+		else if(node->name.value==L"$loopsep")type=PredefinedObject::LoopSep;
+		else if(node->name.value==L"$head")type=PredefinedObject::Head;
+		else if(node->name.value==L"$tail")type=PredefinedObject::Tail;
+		else if(node->name.value==L"$length")type=PredefinedObject::Length;
+		else if(node->name.value==L"$get")type=PredefinedObject::Get;
+		else found=false;
+		if(found)
+		{
+			PredefinedObject* result=new PredefinedObject;
+			result->type=type;
+			runningObject=result;
+		}
+		else
+		{
+			ReferenceObject* result=new ReferenceObject;
+			result->name=node->name.value;
+			runningObject=result;
+		}
+	}
+
+	void Visit(FpmTextExpression* node)
+	{
+		TextObject* result=new TextObject;
+		if(node->text.value.Length()==4 && node->text.value.Sub(0, 2)==L"$(")
+		{
+			result->text=node->text.value[2];
+		}
+		else
+		{
+			result->text=node->text.value;
+		}
+		runningObject=result;
+	}
+};
+
+/***********************************************************************
+DefinitionCreateObjectVisitor
+***********************************************************************/
+
+class DefinitionCreateObjectVisitor : public Object, public FpmDefinition::IVisitor
+{
+public:
+	RunningObject::Environment::Ref		environment;
+	RunningObject::Ref					runningObject;
+
+	DefinitionCreateObjectVisitor(RunningObject::Environment::Ref _environment)
+		:environment(_environment)
+	{
+	}
+
+	static RunningObject::Ref Do(Ptr<FpmDefinition> node, RunningObject::Environment::Ref environment)
+	{
+		DefinitionCreateObjectVisitor visitor(environment);
+		node->Accept(&visitor);
+		return visitor.runningObject;
+	}
+
+	void Visit(FpmExpressionDefinition* node)
+	{
+	}
+
+	void Visit(FpmReferenceDefinition* node)
+	{
+	}
+};
+
+/***********************************************************************
+ExpressionToStringVisitor
+***********************************************************************/
+
+class ExpressionToStringVisitor : public Object, public FpmExpression::IVisitor
+{
+public:
+	WString						prefix;
+	TextWriter&					writer;
+
+	ExpressionToStringVisitor(const WString& _prefix, TextWriter& _writer)
+		:prefix(_prefix)
+		,writer(_writer)
+	{
+	}
+
+	static void Do(Ptr<FpmExpression> node, WString prefix, TextWriter& writer)
+	{
+		ExpressionToStringVisitor visitor(prefix, writer);
+		node->Accept(&visitor);
+	}
+
+	void Visit(FpmConcatExpression* node)
+	{
+		writer.WriteString(prefix);
+		writer.WriteLine(L"CONCAT {");
+		FOREACH(Ptr<FpmExpression>, expression, node->expressions)
+		{
+			Do(expression, prefix+L"    ", writer);
+		}
+		writer.WriteString(prefix);
+		writer.WriteLine(L"}");
+	}
+
+	void Visit(FpmArrayExpression* node)
+	{
+		writer.WriteString(prefix);
+		writer.WriteLine(L"ARRAY {");
+		FOREACH(Ptr<FpmExpression>, expression, node->elements)
+		{
+			Do(expression, prefix+L"    ", writer);
+		}
+		writer.WriteString(prefix);
+		writer.WriteLine(L"}");
+	}
+
+	void Visit(FpmInvokeExpression* node)
+	{
+		writer.WriteString(prefix);
+		writer.WriteLine(L"INVOKE {");
+		Do(node->function, prefix+L"    ", writer);
+
+		writer.WriteString(prefix+L"    ");
+		writer.WriteLine(L"ARGUMENTS {");
+		FOREACH(Ptr<FpmExpression>, expression, node->arguments)
+		{
+			Do(expression, prefix+L"        ", writer);
+		}
+		writer.WriteString(prefix+L"    ");
+		writer.WriteLine(L"}");
+
+		writer.WriteString(prefix);
+		writer.WriteLine(L"}");
+	}
+
+	void Visit(FpmBracketExpression* node)
+	{
+		writer.WriteString(prefix);
+		writer.WriteLine(L"CONCAT {");
+
+		writer.WriteLine(prefix);
+		writer.WriteLine(L"    TEXT: (");
+		Do(node->expression, prefix+L"    ", writer);
+		writer.WriteLine(prefix);
+		writer.WriteLine(L"    TEXT: )");
+
+		writer.WriteString(prefix);
+		writer.WriteLine(L"}");
+	}
+
+	void Visit(FpmReferenceExpression* node)
+	{
+		writer.WriteString(prefix);
+		writer.WriteString(L"NAME : ");
+		writer.WriteLine(node->name.value);
+	}
+
+	void Visit(FpmTextExpression* node)
+	{
+		writer.WriteString(prefix);
+		writer.WriteString(L"TEXT : ");
+		if(node->text.value.Length()==4 && node->text.value.Sub(0, 2)==L"$(")
+		{
+			writer.WriteLine(node->text.value[2]);
+		}
+		else
+		{
+			writer.WriteLine(node->text.value);
+		}
+	}
+};
+
+/***********************************************************************
+DefinitionToStringVisitor
+***********************************************************************/
+
+class DefinitionToStringVisitor : public Object, public FpmDefinition::IVisitor
+{
+public:
+	WString						prefix;
+	TextWriter&					writer;
+
+	DefinitionToStringVisitor(const WString& _prefix, TextWriter& _writer)
+		:prefix(_prefix)
+		,writer(_writer)
+	{
+	}
+
+	static void Do(Ptr<FpmDefinition> node, WString prefix, TextWriter& writer)
+	{
+		DefinitionToStringVisitor visitor(prefix, writer);
+		node->Accept(&visitor);
+	}
+
+	void Visit(FpmExpressionDefinition* node)
+	{
+	}
+
+	void Visit(FpmReferenceDefinition* node)
+	{
+	}
+};
 
 /***********************************************************************
 Functional Macro Code Tree
