@@ -25,9 +25,6 @@
     <Filter Include="Common\Stream">
       <UniqueIdentifier>{cdce2be9-6c56-4a95-bba2-46430e45aca8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\Combinator">
-      <UniqueIdentifier>{deec04e8-6821-4007-ae75-33ed70a1e8e8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Common\Regex">
       <UniqueIdentifier>{299d54c3-8e76-4a39-b406-988068cbd3e2}</UniqueIdentifier>
     </Filter>
@@ -50,12 +47,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\Source\String.cpp">
       <Filter>Common\Basic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Combinator\StringCombinator.cpp">
-      <Filter>Common\Combinator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Combinator\TokenCombinator.cpp">
-      <Filter>Common\Combinator</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\Source\Stream\Accessor.cpp">
       <Filter>Common\Stream</Filter>
@@ -214,54 +205,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\Source\Collections\Pair.h">
       <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\_Alt.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\_Binop.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\_Def.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\_Error.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\_Loop.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\_Pred.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\_Ref.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\_Seq.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\_Unit.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\_Using.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\Combinator.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\Expression.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\ParserInput.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\StringCombinator.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\TokenCombinator.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Combinator\TupleProcessor.h">
-      <Filter>Common\Combinator</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Source\Stream\Accessor.h">
       <Filter>Common\Stream</Filter>

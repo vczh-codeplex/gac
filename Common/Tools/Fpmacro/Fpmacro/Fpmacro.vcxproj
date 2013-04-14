@@ -83,8 +83,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Source\Basic.cpp" />
-    <ClCompile Include="..\..\..\Source\Combinator\StringCombinator.cpp" />
-    <ClCompile Include="..\..\..\Source\Combinator\TokenCombinator.cpp" />
     <ClCompile Include="..\..\..\Source\Console.cpp" />
     <ClCompile Include="..\..\..\Source\Exception.cpp" />
     <ClCompile Include="..\..\..\Source\Parsing\Parsing.cpp" />
@@ -137,22 +135,6 @@
     <ClInclude Include="..\..\..\Source\Collections\OperationString.h" />
     <ClInclude Include="..\..\..\Source\Collections\OperationWhere.h" />
     <ClInclude Include="..\..\..\Source\Collections\Pair.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\Combinator.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\Expression.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\ParserInput.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\StringCombinator.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\TokenCombinator.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\TupleProcessor.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Alt.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Binop.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Def.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Error.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Loop.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Pred.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Ref.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Seq.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Unit.h" />
-    <ClInclude Include="..\..\..\Source\Combinator\_Using.h" />
     <ClInclude Include="..\..\..\Source\Console.h" />
     <ClInclude Include="..\..\..\Source\Exception.h" />
     <ClInclude Include="..\..\..\Source\Function.h" />
