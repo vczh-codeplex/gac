@@ -22,9 +22,6 @@
     <Filter Include="Common\Collections">
       <UniqueIdentifier>{04f34fd9-11ee-4e9b-92ae-13a0ee6bb4e4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\Combinator">
-      <UniqueIdentifier>{d9b25c89-6b57-4978-927f-23c9d08b6fcf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Common\Regex">
       <UniqueIdentifier>{4523f76a-a088-44c2-8446-3cd21c07ecb0}</UniqueIdentifier>
     </Filter>
@@ -77,12 +74,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Threading.cpp">
       <Filter>Common\Basic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Combinator\StringCombinator.cpp">
-      <Filter>Common\Combinator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Combinator\TokenCombinator.cpp">
-      <Filter>Common\Combinator</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\UnitTest\UnitTest.cpp">
       <Filter>Common\UnitTest</Filter>
@@ -139,9 +130,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestBasic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TestCombinator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestFunction.cpp">
@@ -325,54 +313,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Collections\Pair.h">
       <Filter>Common\Collections</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\_Alt.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\_Binop.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\_Def.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\_Error.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\_Loop.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\_Pred.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\_Ref.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\_Seq.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\_Unit.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\_Using.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\Combinator.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\Expression.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\ParserInput.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\StringCombinator.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\TokenCombinator.h">
-      <Filter>Common\Combinator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Combinator\TupleProcessor.h">
-      <Filter>Common\Combinator</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\UnitTest\UnitTest.h">
       <Filter>Common\UnitTest</Filter>
