@@ -10,6 +10,7 @@ Parser::FpmacroParser
 #define FPMACRO_PARSER
 
 #include "..\..\..\Source\Parsing\Parsing.h"
+#include "..\..\..\Source\Parsing\ParsingAutomaton.h"
 
 namespace fpmacro
 {

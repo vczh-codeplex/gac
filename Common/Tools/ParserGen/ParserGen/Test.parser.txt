@@ -1,9 +1,11 @@
 include:"..\..\..\Source\Parsing\Parsing.h"
+include:"..\..\..\Source\Parsing\ParsingAutomaton.h"
 namespace:vczh.whoknows.xmlutility
 classPrefix:Xml
 guard:VCZH_PARSING_XML
 parser:ParseDocument(XDocument)
 parser:ParseElement(XElement)
+parsertext:enabled
 grammar:
 
 class Node ambiguous(AmbiguousNode)

@@ -1,9 +1,11 @@
 include:"..\..\..\Source\Parsing\Parsing.h"
+include:"..\..\..\Source\Parsing\ParsingAutomaton.h"
 namespace:fpmacro.parser
 classPrefix:Fpm
 guard:FPMACRO_PARSER
 parser:ParseFpmacroCode(macro_start)
 ambiguity:enabled
+parsertext:enabled
 grammar:
 
 class Expression
