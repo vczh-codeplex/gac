@@ -188,6 +188,7 @@ using namespace vl::presentation::elements_windows_d2d;
 
 int WinMainDirect2D(HINSTANCE hInstance, void(*RendererMain)())
 {
+	EnableCrossKernelCrashing();
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	// create controller
 	INativeController* controller=CreateWindowsNativeController(hInstance);

@@ -160,6 +160,7 @@ using namespace vl::presentation::elements_windows_gdi;
 
 int WinMainGDI(HINSTANCE hInstance, void(*RendererMain)())
 {
+	EnableCrossKernelCrashing();
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	// create controller
 	INativeController* controller=CreateWindowsNativeController(hInstance);
