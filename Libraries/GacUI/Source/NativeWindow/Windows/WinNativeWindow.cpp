@@ -1439,6 +1439,26 @@ Windows Platform Native Controller
 			{
 				delete controller;
 			}
+
+			void EnableCrossKernelCrashing()
+			{
+				typedef BOOL (WINAPI *tGetPolicy)(LPDWORD lpFlags); 
+				typedef BOOL (WINAPI *tSetPolicy)(DWORD dwFlags); 
+				const DWORD EXCEPTION_SWALLOWING = 0x1;
+ 
+				HMODULE kernel32 = LoadLibrary(L"kernel32.dll"); 
+				tGetPolicy pGetPolicy = (tGetPolicy)GetProcAddress(kernel32, "GetProcessUserModeExceptionPolicy"); 
+				tSetPolicy pSetPolicy = (tSetPolicy)GetProcAddress(kernel32, "SetProcessUserModeExceptionPolicy"); 
+				if (pGetPolicy && pSetPolicy) 
+				{ 
+					DWORD dwFlags; 
+					if (pGetPolicy(&dwFlags)) 
+					{ 
+						// Turn off the filter 
+						pSetPolicy(dwFlags & ~EXCEPTION_SWALLOWING);
+					} 
+				} 
+			}
 		}
 	}
 }
