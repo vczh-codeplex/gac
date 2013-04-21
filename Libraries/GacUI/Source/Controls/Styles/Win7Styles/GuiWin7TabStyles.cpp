@@ -131,7 +131,10 @@ Win7TabStyle
 						item->SetExtraMargin(Margin(0, 0, 0, 0));
 					}
 				}
-				tabHeaderComposition->MoveChild(tabContentTopLineComposition, childCount-2);
+				if(childCount>1)
+				{
+					tabHeaderComposition->MoveChild(tabContentTopLineComposition, childCount-2);
+				}
 			}
 
 			void Win7TabStyle::UpdateHeaderVisibilityIndex()
