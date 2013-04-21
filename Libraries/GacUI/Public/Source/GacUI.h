@@ -3441,9 +3441,11 @@ Stack Compositions
 				vint								padding;
 				Rect								previousBounds;
 				Margin								extraMargin;
+				GuiStackItemComposition*			ensuringVisibleStackItem;
 
 				void								UpdateStackItemBounds();
 				void								FixStackItemSizes();
+				void								OnBoundsChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 				void								OnChildInserted(GuiGraphicsComposition* child)override;
 				void								OnChildRemoved(GuiGraphicsComposition* child)override;
 			public:
@@ -3464,6 +3466,7 @@ Stack Compositions
 				Margin								GetExtraMargin();
 				void								SetExtraMargin(Margin value);
 				bool								IsStackItemClipped();
+				bool								EnsureVisible(vint index);
 			};
 			
 			class GuiStackItemComposition : public GuiGraphicsSite, public Description<GuiStackItemComposition>
@@ -4802,13 +4805,13 @@ Tab Control
 				GuiControl*										container;
 				GuiTab*											owner;
 				WString											text;
-				
-				GuiTabPage();
-				~GuiTabPage();
 
 				bool											AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController);
 				bool											DeassociateTab(GuiTab* _owner);
 			public:
+				GuiTabPage();
+				~GuiTabPage();
+
 				compositions::GuiNotifyEvent					TextChanged;
 				compositions::GuiNotifyEvent					PageInstalled;
 				compositions::GuiNotifyEvent					PageUninstalled;
@@ -8146,7 +8149,7 @@ namespace vl
 Theme
 ***********************************************************************/
 
-			class Win7Theme : public theme::ITheme
+			class Win7Theme : public Object, public theme::ITheme
 			{
 			public:
 				Win7Theme();
@@ -8228,7 +8231,7 @@ namespace vl
 Theme
 ***********************************************************************/
 
-			class Win8Theme : public /*theme::ITheme*/ win7::Win7Theme
+			class Win8Theme : public Object, public theme::ITheme
 			{
 			public:
 				Win8Theme();
@@ -8239,7 +8242,7 @@ Theme
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
 				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
-				//controls::GuiTab::IStyleController*									CreateTabStyle()override;
+				controls::GuiTab::IStyleController*									CreateTabStyle()override;
 				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
 				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;
@@ -10388,7 +10391,7 @@ namespace vl
 		{
 
 /***********************************************************************
-Scrolls
+CommonScrollStyle
 ***********************************************************************/
 
 			class CommonScrollStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<CommonScrollStyle>
@@ -10443,6 +10446,10 @@ Scrolls
 				void												SetPageSize(vint value)override;
 				void												SetPosition(vint value)override;
 			};
+
+/***********************************************************************
+CommonTrackStyle
+***********************************************************************/
 			
 			class CommonTrackStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<CommonTrackStyle>
 			{
@@ -10489,6 +10496,10 @@ Scrolls
 				void												SetPageSize(vint value)override;
 				void												SetPosition(vint value)override;
 			};
+
+/***********************************************************************
+CommonFragmentBuilder
+***********************************************************************/
 
 			class CommonFragmentBuilder
 			{
@@ -11237,56 +11248,67 @@ Tab
 			class Win7TabPageHeaderStyle : public Win7ButtonStyleBase, public Description<Win7TabPageHeaderStyle>
 			{
 			protected:
-				void										TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+				void														TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
 			public:
 				Win7TabPageHeaderStyle();
 				~Win7TabPageHeaderStyle();
 
-				void										SetFont(const FontProperties& value)override;
+				void														SetFont(const FontProperties& value)override;
 			};
 			
 			class Win7TabStyle : public Object, public virtual controls::GuiTab::IStyleController, public Description<Win7TabStyle>
 			{
 			protected:
-				compositions::GuiTableComposition*			boundsComposition;
-				compositions::GuiBoundsComposition*			containerComposition;
-				compositions::GuiStackComposition*			tabHeaderComposition;
-				compositions::GuiBoundsComposition*			tabContentTopLineComposition;
-				FontProperties								headerFont;
-				controls::GuiTab::ICommandExecutor*			commandExecutor;
+				compositions::GuiTableComposition*							boundsComposition;
+				compositions::GuiBoundsComposition*							containerComposition;
+				compositions::GuiStackComposition*							tabHeaderComposition;
+				compositions::GuiBoundsComposition*							tabContentTopLineComposition;
+				FontProperties												headerFont;
+				controls::GuiTab::ICommandExecutor*							commandExecutor;
 
 				Ptr<controls::GuiSelectableButton::MutexGroupController>	headerController;
 				collections::List<controls::GuiSelectableButton*>			headerButtons;
 				elements::GuiPolygonElement*								headerOverflowArrowElement;
 				controls::GuiButton*										headerOverflowButton;
-				controls::GuiMenu*											headerOverflowMenu;
-				compositions::GuiStackComposition*							headerOverflowMenuStack;
+				controls::GuiToolstripMenu*									headerOverflowMenu;
 
-				void										OnHeaderButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void										OnTabHeaderBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void										OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
-				void										OnHeaderOverflowMenuButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void														OnHeaderButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void														OnTabHeaderBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void														OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+				void														OnHeaderOverflowMenuButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 
-				void										UpdateHeaderOverflowButtonVisibility();
-				void										UpdateHeaderZOrder();
+				void														UpdateHeaderOverflowButtonVisibility();
+				void														UpdateHeaderZOrder();
+				void														UpdateHeaderVisibilityIndex();
+				void														UpdateHeaderLayout();
+
+				void														Initialize();
+			protected:
+				
+				virtual controls::GuiSelectableButton::IStyleController*	CreateHeaderStyleController();
+				virtual controls::GuiButton::IStyleController*				CreateMenuButtonStyleController();
+				virtual controls::GuiToolstripMenu::IStyleController*		CreateMenuStyleController();
+				virtual controls::GuiToolstripButton::IStyleController*		CreateMenuItemStyleController();
+				virtual Color												GetBorderColor();
+				virtual Color												GetBackgroundColor();
 			public:
-				Win7TabStyle();
+				Win7TabStyle(bool initialize=true);
 				~Win7TabStyle();
 
-				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
-				compositions::GuiGraphicsComposition*		GetContainerComposition()override;
-				void										SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
-				void										SetText(const WString& value)override;
-				void										SetFont(const FontProperties& value)override;
-				void										SetVisuallyEnabled(bool value)override;
+				compositions::GuiBoundsComposition*							GetBoundsComposition()override;
+				compositions::GuiGraphicsComposition*						GetContainerComposition()override;
+				void														SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+				void														SetText(const WString& value)override;
+				void														SetFont(const FontProperties& value)override;
+				void														SetVisuallyEnabled(bool value)override;
 
-				void										SetCommandExecutor(controls::GuiTab::ICommandExecutor* value)override;
-				void										InsertTab(vint index)override;
-				void										SetTabText(vint index, const WString& value)override;
-				void										RemoveTab(vint index)override;
-				void										MoveTab(vint oldIndex, vint newIndex)override;
-				void										SetSelectedTab(vint index)override;
-				controls::GuiControl::IStyleController*		CreateTabPageStyleController()override;
+				void														SetCommandExecutor(controls::GuiTab::ICommandExecutor* value)override;
+				void														InsertTab(vint index)override;
+				void														SetTabText(vint index, const WString& value)override;
+				void														RemoveTab(vint index)override;
+				void														MoveTab(vint oldIndex, vint newIndex)override;
+				void														SetSelectedTab(vint index)override;
+				controls::GuiControl::IStyleController*						CreateTabPageStyleController()override;
 			};
 		}
 	}
@@ -11934,6 +11956,10 @@ Button Configuration
 				static Win8ButtonColors						MenuItemButtonNormalActive();
 				static Win8ButtonColors						MenuItemButtonDisabled();
 				static Win8ButtonColors						MenuItemButtonDisabledActive();
+
+				static Win8ButtonColors						TabPageHeaderNormal();
+				static Win8ButtonColors						TabPageHeaderActive();
+				static Win8ButtonColors						TabPageHeaderSelected();
 			};
 
 			struct Win8ButtonElements
@@ -12014,6 +12040,7 @@ Helper Functions
 ***********************************************************************/
 			
 			extern Color									Win8GetSystemWindowColor();
+			extern Color									Win8GetSystemTabContentColor();
 			extern Color									Win8GetSystemBorderColor();
 			extern Color									Win8GetSystemTextColor(bool enabled);
 			extern Color									Win8GetMenuBorderColor();
@@ -12436,6 +12463,36 @@ namespace vl
 	{
 		namespace win8
 		{
+
+/***********************************************************************
+Tab
+***********************************************************************/
+
+			class Win8TabPageHeaderStyle : public Win8ButtonStyleBase, public Description<Win8TabPageHeaderStyle>
+			{
+			protected:
+				void														TransferInternal(controls::GuiButton::ControlState value, bool enabled, bool selected)override;
+			public:
+				Win8TabPageHeaderStyle();
+				~Win8TabPageHeaderStyle();
+
+				void														SetFont(const FontProperties& value)override;
+			};
+
+			class Win8TabStyle : public win7::Win7TabStyle, public Description<Win8TabStyle>
+			{
+			protected:
+				
+				controls::GuiSelectableButton::IStyleController*			CreateHeaderStyleController()override;
+				controls::GuiButton::IStyleController*						CreateMenuButtonStyleController()override;
+				controls::GuiToolstripMenu::IStyleController*				CreateMenuStyleController()override;
+				controls::GuiToolstripButton::IStyleController*				CreateMenuItemStyleController()override;
+				Color														GetBorderColor()override;
+				Color														GetBackgroundColor()override;
+			public:
+				Win8TabStyle();
+				~Win8TabStyle();
+			};
 		}
 	}
 }
