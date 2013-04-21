@@ -19,7 +19,7 @@ namespace vl
 		{
 
 /***********************************************************************
-Scrolls
+CommonScrollStyle
 ***********************************************************************/
 
 			/// <summary>A general implementation for <see cref="controls::GuiScroll::IStyleController"/> to make a scroll control.</summary>
@@ -96,6 +96,10 @@ Scrolls
 				void												SetPageSize(vint value)override;
 				void												SetPosition(vint value)override;
 			};
+
+/***********************************************************************
+CommonTrackStyle
+***********************************************************************/
 			
 			/// <summary>A general implementation for <see cref="controls::GuiScroll::IStyleController"/> to make a tracker control (or a slide bar).</summary>
 			class CommonTrackStyle : public Object, public virtual controls::GuiScroll::IStyleController, public Description<CommonTrackStyle>
@@ -162,6 +166,10 @@ Scrolls
 				void												SetPageSize(vint value)override;
 				void												SetPosition(vint value)override;
 			};
+
+/***********************************************************************
+CommonFragmentBuilder
+***********************************************************************/
 
 			class CommonFragmentBuilder
 			{
