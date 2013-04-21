@@ -459,8 +459,8 @@ Win8ButtonColors
 				Win8ButtonColors colors=
 				{
 					Color(172, 172, 172),
-					Color(255, 255, 255),
-					Color(255, 255, 255),
+					Color(239, 239, 239),
+					Color(229, 229, 229),
 					Win8GetSystemTextColor(true),
 				};
 				return colors;
@@ -483,8 +483,8 @@ Win8ButtonColors
 				Win8ButtonColors colors=
 				{
 					Color(172, 172, 172),
-					Color(239, 239, 239),
-					Color(229, 229, 229),
+					Color(255, 255, 255),
+					Color(255, 255, 255),
 					Win8GetSystemTextColor(true),
 				};
 				return colors;

@@ -64,6 +64,7 @@ Tab
 				void														UpdateHeaderVisibilityIndex();
 				void														UpdateHeaderLayout();
 
+				void														Initialize();
 			protected:
 				
 				virtual controls::GuiSelectableButton::IStyleController*	CreateHeaderStyleController();
@@ -74,7 +75,7 @@ Tab
 				virtual Color												GetBackgroundColor();
 			public:
 				/// <summary>Create the style.</summary>
-				Win7TabStyle();
+				Win7TabStyle(bool initialize=true);
 				~Win7TabStyle();
 
 				compositions::GuiBoundsComposition*							GetBoundsComposition()override;

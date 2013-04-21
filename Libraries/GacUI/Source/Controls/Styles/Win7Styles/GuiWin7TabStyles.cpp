@@ -161,39 +161,8 @@ Win7TabStyle
 				UpdateHeaderVisibilityIndex();
 				UpdateHeaderOverflowButtonVisibility();
 			}
-			
-			controls::GuiSelectableButton::IStyleController* Win7TabStyle::CreateHeaderStyleController()
-			{
-				return new Win7TabPageHeaderStyle;
-			}
 
-			controls::GuiButton::IStyleController* Win7TabStyle::CreateMenuButtonStyleController()
-			{
-				return new Win7ButtonStyle;
-			}
-
-			controls::GuiToolstripMenu::IStyleController* Win7TabStyle::CreateMenuStyleController()
-			{
-				return new Win7MenuStyle;
-			}
-
-			controls::GuiToolstripButton::IStyleController* Win7TabStyle::CreateMenuItemStyleController()
-			{
-				return new Win7MenuItemButtonStyle;
-			}
-
-			Color Win7TabStyle::GetBorderColor()
-			{
-				return Win7ButtonColors::TabPageHeaderNormal().borderColor;
-			}
-
-			Color Win7TabStyle::GetBackgroundColor()
-			{
-				return Win7GetSystemTabContentColor();
-			}
-
-			Win7TabStyle::Win7TabStyle()
-				:commandExecutor(0)
+			void Win7TabStyle::Initialize()
 			{
 				boundsComposition=new GuiTableComposition;
 				boundsComposition->SetRowsAndColumns(2, 2);
@@ -258,6 +227,52 @@ Win7TabStyle
 
 				headerOverflowMenu=new GuiToolstripMenu(CreateMenuStyleController(), 0);
 				headerController=new GuiSelectableButton::MutexGroupController;
+			}
+			
+			controls::GuiSelectableButton::IStyleController* Win7TabStyle::CreateHeaderStyleController()
+			{
+				return new Win7TabPageHeaderStyle;
+			}
+
+			controls::GuiButton::IStyleController* Win7TabStyle::CreateMenuButtonStyleController()
+			{
+				return new Win7ButtonStyle;
+			}
+
+			controls::GuiToolstripMenu::IStyleController* Win7TabStyle::CreateMenuStyleController()
+			{
+				return new Win7MenuStyle;
+			}
+
+			controls::GuiToolstripButton::IStyleController* Win7TabStyle::CreateMenuItemStyleController()
+			{
+				return new Win7MenuItemButtonStyle;
+			}
+
+			Color Win7TabStyle::GetBorderColor()
+			{
+				return Win7ButtonColors::TabPageHeaderNormal().borderColor;
+			}
+
+			Color Win7TabStyle::GetBackgroundColor()
+			{
+				return Win7GetSystemTabContentColor();
+			}
+
+			Win7TabStyle::Win7TabStyle(bool initialize)
+				:boundsComposition(0)
+				,containerComposition(0)
+				,tabHeaderComposition(0)
+				,tabContentTopLineComposition(0)
+				,commandExecutor(0)
+				,headerOverflowArrowElement(0)
+				,headerOverflowButton(0)
+				,headerOverflowMenu(0)
+			{
+				if(initialize)
+				{
+					Initialize();
+				}
 			}
 
 			Win7TabStyle::~Win7TabStyle()
