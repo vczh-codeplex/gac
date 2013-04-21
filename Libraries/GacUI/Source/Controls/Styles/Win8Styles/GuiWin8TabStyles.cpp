@@ -92,7 +92,9 @@ Win8TabStyle
 			}
 
 			Win8TabStyle::Win8TabStyle()
+				:Win7TabStyle(false)
 			{
+				Initialize();
 			}
 
 			Win8TabStyle::~Win8TabStyle()
