@@ -161,6 +161,36 @@ Win7TabStyle
 				UpdateHeaderVisibilityIndex();
 				UpdateHeaderOverflowButtonVisibility();
 			}
+			
+			controls::GuiSelectableButton::IStyleController* Win7TabStyle::CreateHeaderStyleController()
+			{
+				return new Win7TabPageHeaderStyle;
+			}
+
+			controls::GuiButton::IStyleController* Win7TabStyle::CreateMenuButtonStyleController()
+			{
+				return new Win7ButtonStyle;
+			}
+
+			controls::GuiToolstripMenu::IStyleController* Win7TabStyle::CreateMenuStyleController()
+			{
+				return new Win7MenuStyle;
+			}
+
+			controls::GuiToolstripButton::IStyleController* Win7TabStyle::CreateMenuItemStyleController()
+			{
+				return new Win7MenuItemButtonStyle;
+			}
+
+			Color Win7TabStyle::GetBorderColor()
+			{
+				return Win7ButtonColors::TabPageHeaderNormal().borderColor;
+			}
+
+			Color Win7TabStyle::GetBackgroundColor()
+			{
+				return Win7GetSystemTabContentColor();
+			}
 
 			Win7TabStyle::Win7TabStyle()
 				:commandExecutor(0)
@@ -188,7 +218,7 @@ Win7TabStyle
 					boundsComposition->AddChild(cell);
 					cell->SetSite(0, 1, 1, 1);
 
-					headerOverflowButton=new GuiButton(new Win7ButtonStyle);
+					headerOverflowButton=new GuiButton(CreateMenuButtonStyleController());
 					headerOverflowButton->GetContainerComposition()->AddChild(common_styles::CommonFragmentBuilder::BuildDownArrow(headerOverflowArrowElement));
 					headerOverflowButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, 0, 0, 0));
 					headerOverflowButton->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowButtonClicked);
@@ -196,7 +226,7 @@ Win7TabStyle
 				}
 				{
 					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
-					element->SetColor(Win7ButtonColors::TabPageHeaderNormal().borderColor);
+					element->SetColor(GetBorderColor());
 
 					tabContentTopLineComposition=new GuiBoundsComposition;
 					tabContentTopLineComposition->SetOwnedElement(element);
@@ -216,7 +246,7 @@ Win7TabStyle
 
 					{
 						GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
-						element->SetColor(Win7ButtonColors::TabPageHeaderNormal().borderColor);
+						element->SetColor(GetBorderColor());
 						cell->SetOwnedElement(element);
 					}
 					{
@@ -226,7 +256,7 @@ Win7TabStyle
 					}
 				}
 
-				headerOverflowMenu=new GuiToolstripMenu(new Win7MenuStyle, 0);
+				headerOverflowMenu=new GuiToolstripMenu(CreateMenuStyleController(), 0);
 				headerController=new GuiSelectableButton::MutexGroupController;
 			}
 
@@ -269,7 +299,7 @@ Win7TabStyle
 
 			void Win7TabStyle::InsertTab(vint index)
 			{
-				GuiSelectableButton* button=new GuiSelectableButton(new Win7TabPageHeaderStyle);
+				GuiSelectableButton* button=new GuiSelectableButton(CreateHeaderStyleController());
 				button->SetAutoSelection(false);
 				button->SetFont(headerFont);
 				button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -281,7 +311,7 @@ Win7TabStyle
 				tabHeaderComposition->InsertStackItem(index, item);
 				headerButtons.Insert(index, button);
 
-				GuiToolstripButton* menuItem=new GuiToolstripButton(new Win7MenuItemButtonStyle);
+				GuiToolstripButton* menuItem=new GuiToolstripButton(CreateMenuItemStyleController());
 				menuItem->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowMenuButtonClicked);
 				headerOverflowMenu->GetToolstripItems().Insert(index, menuItem);
 
@@ -334,7 +364,7 @@ Win7TabStyle
 
 			controls::GuiControl::IStyleController* Win7TabStyle::CreateTabPageStyleController()
 			{
-				GuiControl::IStyleController* style=new Win7EmptyStyle(Win7GetSystemTabContentColor());
+				GuiControl::IStyleController* style=new Win7EmptyStyle(GetBackgroundColor());
 				style->GetBoundsComposition()->SetAlignmentToParent(Margin(2, 2, 2, 2));
 				return style;
 			}

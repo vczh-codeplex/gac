@@ -454,6 +454,42 @@ Win8ButtonColors
 				return colors;
 			}
 
+			Win8ButtonColors Win8ButtonColors::TabPageHeaderNormal()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(172, 172, 172),
+					Color(255, 255, 255),
+					Color(255, 255, 255),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::TabPageHeaderActive()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(126, 180, 234),
+					Color(236, 244, 252),
+					Color(221, 237, 252),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::TabPageHeaderSelected()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(172, 172, 172),
+					Color(239, 239, 239),
+					Color(229, 229, 229),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
 /***********************************************************************
 Win8ButtonElements
 ***********************************************************************/
@@ -825,6 +861,11 @@ Helpers
 			Color Win8GetSystemWindowColor()
 			{
 				return Color(240, 240, 240);
+			}
+			
+			Color Win8GetSystemTabContentColor()
+			{
+				return Color(255, 255, 255);
 			}
 
 			Color Win8GetSystemBorderColor()

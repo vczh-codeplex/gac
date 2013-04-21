@@ -87,6 +87,10 @@ Button Configuration
 				static Win8ButtonColors						MenuItemButtonNormalActive();
 				static Win8ButtonColors						MenuItemButtonDisabled();
 				static Win8ButtonColors						MenuItemButtonDisabledActive();
+
+				static Win8ButtonColors						TabPageHeaderNormal();
+				static Win8ButtonColors						TabPageHeaderActive();
+				static Win8ButtonColors						TabPageHeaderSelected();
 			};
 
 			struct Win8ButtonElements
@@ -167,6 +171,7 @@ Helper Functions
 ***********************************************************************/
 			
 			extern Color									Win8GetSystemWindowColor();
+			extern Color									Win8GetSystemTabContentColor();
 			extern Color									Win8GetSystemBorderColor();
 			extern Color									Win8GetSystemTextColor(bool enabled);
 			extern Color									Win8GetMenuBorderColor();
