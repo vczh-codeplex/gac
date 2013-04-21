@@ -102,7 +102,14 @@ Win7TabStyle
 
 			void Win7TabStyle::UpdateHeaderOverflowButtonVisibility()
 			{
-				headerOverflowButton->SetVisible(tabHeaderComposition->IsStackItemClipped());
+				if(tabHeaderComposition->IsStackItemClipped())
+				{
+					boundsComposition->SetColumnOption(1, GuiCellOption::MinSizeOption());
+				}
+				else
+				{
+					boundsComposition->SetColumnOption(1, GuiCellOption::AbsoluteOption(0));
+				}
 			}
 
 			void Win7TabStyle::UpdateHeaderZOrder()
@@ -154,10 +161,11 @@ Win7TabStyle
 				:commandExecutor(0)
 			{
 				boundsComposition=new GuiTableComposition;
-				boundsComposition->SetRowsAndColumns(2, 1);
+				boundsComposition->SetRowsAndColumns(2, 2);
 				boundsComposition->SetRowOption(0, GuiCellOption::MinSizeOption());
 				boundsComposition->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
 				boundsComposition->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
+				boundsComposition->SetColumnOption(1, GuiCellOption::AbsoluteOption(0));
 				{
 					GuiCellComposition* cell=new GuiCellComposition;
 					boundsComposition->AddChild(cell);
@@ -169,10 +177,14 @@ Win7TabStyle
 					tabHeaderComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 					tabHeaderComposition->BoundsChanged.AttachMethod(this, &Win7TabStyle::OnTabHeaderBoundsChanged);
 					cell->AddChild(tabHeaderComposition);
+				}
+				{
+					GuiCellComposition* cell=new GuiCellComposition;
+					boundsComposition->AddChild(cell);
+					cell->SetSite(0, 1, 1, 1);
 
 					headerOverflowButton=new GuiButton(new Win7ButtonStyle);
 					headerOverflowButton->GetContainerComposition()->AddChild(common_styles::CommonFragmentBuilder::BuildDownArrow(headerOverflowArrowElement));
-					headerOverflowButton->SetVisible(false);
 					headerOverflowButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, 0, 0, 0));
 					headerOverflowButton->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowButtonClicked);
 					cell->AddChild(headerOverflowButton->GetBoundsComposition());
@@ -190,7 +202,7 @@ Win7TabStyle
 				{
 					GuiCellComposition* cell=new GuiCellComposition;
 					boundsComposition->AddChild(cell);
-					cell->SetSite(1, 0, 1, 1);
+					cell->SetSite(1, 0, 1, 2);
 
 					containerComposition=new GuiBoundsComposition;
 					containerComposition->SetAlignmentToParent(Margin(1, 0, 1, 1));
@@ -208,10 +220,8 @@ Win7TabStyle
 						containerComposition->SetOwnedElement(element);
 					}
 				}
-				{
-					headerOverflowMenu=new GuiToolstripMenu(new Win7MenuStyle, 0);
-				}
 
+				headerOverflowMenu=new GuiToolstripMenu(new Win7MenuStyle, 0);
 				headerController=new GuiSelectableButton::MutexGroupController;
 			}
 
