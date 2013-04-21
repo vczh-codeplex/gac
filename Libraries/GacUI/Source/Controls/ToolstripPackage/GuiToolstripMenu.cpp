@@ -29,7 +29,6 @@ GuiToolstripCollection
 
 			bool GuiToolstripCollection::RemoveAtInternal(vint index, GuiControl* const& control)
 			{
-				items.RemoveAt(index);
 				GuiStackItemComposition* stackItem=stackComposition->GetStackItems().Get(index);
 
 				stackComposition->RemoveChild(stackItem);
@@ -52,6 +51,7 @@ GuiToolstripCollection
 					}
 				}
 				delete control;
+				items.RemoveAt(index);
 				InvokeUpdateLayout();
 				return true;
 			}

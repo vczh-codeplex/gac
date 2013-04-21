@@ -129,7 +129,7 @@ namespace test
 		{
 			buttonRemove->SetEnabled(true);
 			GuiTabPage* page=tab->CreatePage();
-			page->SetText(L"Page "+itow(++counter));
+			page->SetText(L"TestWindow::GuiTabPage "+itow(++counter));
 		}
 
 		void buttonRemove_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
