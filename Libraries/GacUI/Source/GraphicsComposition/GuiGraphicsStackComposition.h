@@ -54,7 +54,6 @@ Stack Compositions
 
 				void								UpdateStackItemBounds();
 				void								FixStackItemSizes();
-				void								EnsureSpecifiedItemVisible();
 				void								OnBoundsChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 				void								OnChildInserted(GuiGraphicsComposition* child)override;
 				void								OnChildRemoved(GuiGraphicsComposition* child)override;

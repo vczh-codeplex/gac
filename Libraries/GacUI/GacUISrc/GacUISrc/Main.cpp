@@ -189,6 +189,7 @@ namespace test
 			{
 				GuiCellComposition* cell=new GuiCellComposition;
 				table->AddChild(cell);
+				cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
 				cell->SetSite(1, 0, 1, 3);
 
 				tab=g::NewTab();
