@@ -81,15 +81,53 @@ GuiStackComposition
 					}
 					break;
 				}
-			}
 
-			void GuiStackComposition::EnsureSpecifiedItemVisible()
-			{
+				vint index=stackItems.IndexOf(ensuringVisibleStackItem);
+				if(index!=-1)
+				{
+					Rect itemBounds=stackItemBounds[index];
+					Size size=previousBounds.GetSize();
+					Size offset;
+					switch(direction)
+					{
+					case Horizontal:
+						{
+							if(itemBounds.Left()<=0)
+							{
+								offset.x=-itemBounds.Left();
+							}
+							else if(itemBounds.Right()>=size.x)
+							{
+								offset.x=size.x-itemBounds.Right();
+							}
+						}
+						break;
+					case Vertical:
+						{
+							if(itemBounds.Top()<=0)
+							{
+								offset.y=-itemBounds.Top();
+							}
+							else if(itemBounds.Bottom()>=size.y)
+							{
+								offset.y=size.y-itemBounds.Bottom();
+							}
+						}
+						break;
+					}
+					for(vint i=0;i<stackItemBounds.Count();i++)
+					{
+						stackItemBounds[i].x1+=offset.x;
+						stackItemBounds[i].y1+=offset.y;
+						stackItemBounds[i].x2+=offset.x;
+						stackItemBounds[i].y2+=offset.y;
+					}
+				}
 			}
 
 			void GuiStackComposition::OnBoundsChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 			{
-				EnsureSpecifiedItemVisible();
+				UpdateStackItemBounds();
 			}
 
 			void GuiStackComposition::OnChildInserted(GuiGraphicsComposition* child)
@@ -109,6 +147,11 @@ GuiStackComposition
 				if(item)
 				{
 					stackItems.Remove(item);
+					if(item==ensuringVisibleStackItem)
+					{
+						ensuringVisibleStackItem=0;
+						UpdateStackItemBounds();
+					}
 				}
 			}
 
@@ -233,7 +276,7 @@ GuiStackComposition
 				if(0<=index && index<stackItems.Count())
 				{
 					ensuringVisibleStackItem=stackItems[index];
-					EnsureSpecifiedItemVisible();
+					UpdateStackItemBounds();
 					return true;
 				}
 				else
