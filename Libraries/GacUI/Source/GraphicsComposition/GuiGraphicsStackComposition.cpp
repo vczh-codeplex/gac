@@ -83,6 +83,15 @@ GuiStackComposition
 				}
 			}
 
+			void GuiStackComposition::EnsureSpecifiedItemVisible()
+			{
+			}
+
+			void GuiStackComposition::OnBoundsChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				EnsureSpecifiedItemVisible();
+			}
+
 			void GuiStackComposition::OnChildInserted(GuiGraphicsComposition* child)
 			{
 				GuiBoundsComposition::OnChildInserted(child);
@@ -106,7 +115,9 @@ GuiStackComposition
 			GuiStackComposition::GuiStackComposition()
 				:direction(Horizontal)
 				,padding(0)
+				,ensuringVisibleStackItem(0)
 			{
+				BoundsChanged.AttachMethod(this, &GuiStackComposition::OnBoundsChanged);
 			}
 
 			GuiStackComposition::~GuiStackComposition()
@@ -215,6 +226,20 @@ GuiStackComposition
 					}
 				}
 				return false;
+			}
+
+			bool GuiStackComposition::EnsureVisible(vint index)
+			{
+				if(0<=index && index<stackItems.Count())
+				{
+					ensuringVisibleStackItem=stackItems[index];
+					EnsureSpecifiedItemVisible();
+					return true;
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 /***********************************************************************

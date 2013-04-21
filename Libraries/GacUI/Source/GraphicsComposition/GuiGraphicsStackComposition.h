@@ -50,9 +50,12 @@ Stack Compositions
 				vint								padding;
 				Rect								previousBounds;
 				Margin								extraMargin;
+				GuiStackItemComposition*			ensuringVisibleStackItem;
 
 				void								UpdateStackItemBounds();
 				void								FixStackItemSizes();
+				void								EnsureSpecifiedItemVisible();
+				void								OnBoundsChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments);
 				void								OnChildInserted(GuiGraphicsComposition* child)override;
 				void								OnChildRemoved(GuiGraphicsComposition* child)override;
 			public:
@@ -93,6 +96,10 @@ Stack Compositions
 				/// <summary>Test is any stack item clipped in the stack direction.</summary>
 				/// <returns>Returns true if any stack item is clipped.</returns>
 				bool								IsStackItemClipped();
+				/// <summary>Make an item visible as complete as possible.</summary>
+				/// <returns>Returns true if this operation succeeded.</returns>
+				/// <param name="index">The index of the item.</param>
+				bool								EnsureVisible(vint index);
 			};
 			
 			/// <summary>
