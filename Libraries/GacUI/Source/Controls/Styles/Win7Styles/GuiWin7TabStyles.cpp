@@ -90,40 +90,14 @@ Win7TabStyle
 
 			void Win7TabStyle::OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				for(vint i=headerOverflowMenuStack->GetStackItems().Count()-1;i>=0;i--)
-				{
-					GuiStackItemComposition* item=headerOverflowMenuStack->GetStackItems().Get(i);
-					GuiControl* button=item->Children().Get(0)->GetAssociatedControl();
-
-					headerOverflowMenuStack->RemoveChild(item);
-					item->RemoveChild(button->GetBoundsComposition());
-					delete button;
-					delete item;
-				}
-
-				for(vint i=0;i<headerButtons.Count();i++)
-				{
-					GuiStackItemComposition* item=new GuiStackItemComposition;
-					headerOverflowMenuStack->AddChild(item);
-
-					GuiMenuButton* button=new GuiMenuButton(new Win7MenuItemButtonStyle);
-					button->SetText(headerButtons[i]->GetText());
-					button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-					button->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowMenuButtonClicked);
-					item->AddChild(button->GetBoundsComposition());
-				}
-
 				headerOverflowMenu->SetClientSize(Size(0, 0));
 				headerOverflowMenu->ShowPopup(headerOverflowButton, true);
 			}
 
 			void Win7TabStyle::OnHeaderOverflowMenuButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				vint index=headerOverflowMenuStack->GetStackItems().IndexOf(dynamic_cast<GuiStackItemComposition*>(sender->GetParent()));
-				if(index!=-1)
-				{
-					commandExecutor->ShowTab(index);
-				}
+				vint index=headerOverflowMenu->GetToolstripItems().IndexOf(sender->GetRelatedControl());
+				commandExecutor->ShowTab(index);
 			}
 
 			void Win7TabStyle::UpdateHeaderOverflowButtonVisibility()
@@ -210,12 +184,7 @@ Win7TabStyle
 					}
 				}
 				{
-					headerOverflowMenu=new GuiMenu(new Win7MenuStyle, 0);
-					headerOverflowMenuStack=new GuiStackComposition;
-					headerOverflowMenuStack->SetDirection(GuiStackComposition::Vertical);
-					headerOverflowMenuStack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-					headerOverflowMenuStack->SetAlignmentToParent(Margin(0, 0, 0, 0));
-					headerOverflowMenu->GetContainerComposition()->AddChild(headerOverflowMenuStack);
+					headerOverflowMenu=new GuiToolstripMenu(new Win7MenuStyle, 0);
 				}
 
 				headerController=new GuiSelectableButton::MutexGroupController;
@@ -272,11 +241,16 @@ Win7TabStyle
 				tabHeaderComposition->InsertStackItem(index, item);
 				headerButtons.Insert(index, button);
 				UpdateHeaderZOrder();
+
+				GuiToolstripButton* menuItem=new GuiToolstripButton(new Win7MenuItemButtonStyle);
+				menuItem->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowMenuButtonClicked);
+				headerOverflowMenu->GetToolstripItems().Insert(index, menuItem);
 			}
 
 			void Win7TabStyle::SetTabText(vint index, const WString& value)
 			{
 				headerButtons[index]->SetText(value);
+				headerOverflowMenu->GetToolstripItems().Get(index)->SetText(value);
 				UpdateHeaderOverflowButtonVisibility();
 			}
 
@@ -289,6 +263,7 @@ Win7TabStyle
 				item->RemoveChild(button->GetBoundsComposition());
 				headerButtons.RemoveAt(index);
 
+				headerOverflowMenu->GetToolstripItems().RemoveAt(index);
 				delete item;
 				delete button;
 				UpdateHeaderOverflowButtonVisibility();

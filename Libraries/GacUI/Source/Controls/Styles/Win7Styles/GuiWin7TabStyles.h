@@ -41,19 +41,18 @@ Tab
 			class Win7TabStyle : public Object, public virtual controls::GuiTab::IStyleController, public Description<Win7TabStyle>
 			{
 			protected:
-				compositions::GuiTableComposition*			boundsComposition;
-				compositions::GuiBoundsComposition*			containerComposition;
-				compositions::GuiStackComposition*			tabHeaderComposition;
-				compositions::GuiBoundsComposition*			tabContentTopLineComposition;
-				FontProperties								headerFont;
-				controls::GuiTab::ICommandExecutor*			commandExecutor;
+				compositions::GuiTableComposition*							boundsComposition;
+				compositions::GuiBoundsComposition*							containerComposition;
+				compositions::GuiStackComposition*							tabHeaderComposition;
+				compositions::GuiBoundsComposition*							tabContentTopLineComposition;
+				FontProperties												headerFont;
+				controls::GuiTab::ICommandExecutor*							commandExecutor;
 
 				Ptr<controls::GuiSelectableButton::MutexGroupController>	headerController;
 				collections::List<controls::GuiSelectableButton*>			headerButtons;
 				elements::GuiPolygonElement*								headerOverflowArrowElement;
 				controls::GuiButton*										headerOverflowButton;
-				controls::GuiMenu*											headerOverflowMenu;
-				compositions::GuiStackComposition*							headerOverflowMenuStack;
+				controls::GuiToolstripMenu*									headerOverflowMenu;
 
 				void										OnHeaderButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void										OnTabHeaderBoundsChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
