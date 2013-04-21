@@ -1206,20 +1206,6 @@ namespace vl
 GuiTabPage
 ***********************************************************************/
 
-			GuiTabPage::GuiTabPage()
-				:container(0)
-				,owner(0)
-			{
-			}
-
-			GuiTabPage::~GuiTabPage()
-			{
-				if(!container->GetParent())
-				{
-					delete container;
-				}
-			}
-
 			bool GuiTabPage::AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController)
 			{
 				if(owner)
@@ -1255,6 +1241,20 @@ GuiTabPage
 				else
 				{
 					return false;
+				}
+			}
+
+			GuiTabPage::GuiTabPage()
+				:container(0)
+				,owner(0)
+			{
+			}
+
+			GuiTabPage::~GuiTabPage()
+			{
+				if(!container->GetParent())
+				{
+					delete container;
 				}
 			}
 
@@ -1428,7 +1428,14 @@ GuiTab
 
 			bool GuiTab::SetSelectedPage(GuiTabPage* value)
 			{
-				if(value->GetOwnerTab()==this)
+				if(!value)
+				{
+					if(tabPages.Count()==0)
+					{
+						selectedPage=0;
+					}
+				}
+				else if(value->GetOwnerTab()==this)
 				{
 					if(selectedPage!=value)
 					{
@@ -1444,12 +1451,8 @@ GuiTab
 						}
 						SelectedPageChanged.Execute(GetNotifyEventArguments());
 					}
-					return true;
 				}
-				else
-				{
-					return false;
-				}
+				return selectedPage==value;
 			}
 
 /***********************************************************************
@@ -9657,10 +9660,10 @@ Win8Theme
 				return new Win8GroupBoxStyle;
 			}
 
-			//controls::GuiTab::IStyleController* Win8Theme::CreateTabStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiTab::IStyleController* Win8Theme::CreateTabStyle()
+			{
+				return new Win8TabStyle;
+			}
 
 			controls::GuiComboBoxBase::IStyleController* Win8Theme::CreateComboBoxStyle()
 			{
@@ -13511,50 +13514,33 @@ Win7TabStyle
 			{
 				vint height=headerOverflowButton->GetBoundsComposition()->GetBounds().Height();
 				headerOverflowButton->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(height, 0)));
-				UpdateHeaderOverflowButtonVisibility();
+
+				UpdateHeaderLayout();
 			}
 
 			void Win7TabStyle::OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				for(vint i=headerOverflowMenuStack->GetStackItems().Count()-1;i>=0;i--)
-				{
-					GuiStackItemComposition* item=headerOverflowMenuStack->GetStackItems().Get(i);
-					GuiControl* button=item->Children().Get(0)->GetAssociatedControl();
-
-					headerOverflowMenuStack->RemoveChild(item);
-					item->RemoveChild(button->GetBoundsComposition());
-					delete button;
-					delete item;
-				}
-
-				for(vint i=0;i<headerButtons.Count();i++)
-				{
-					GuiStackItemComposition* item=new GuiStackItemComposition;
-					headerOverflowMenuStack->AddChild(item);
-
-					GuiMenuButton* button=new GuiMenuButton(new Win7MenuItemButtonStyle);
-					button->SetText(headerButtons[i]->GetText());
-					button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-					button->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowMenuButtonClicked);
-					item->AddChild(button->GetBoundsComposition());
-				}
-
 				headerOverflowMenu->SetClientSize(Size(0, 0));
 				headerOverflowMenu->ShowPopup(headerOverflowButton, true);
 			}
 
 			void Win7TabStyle::OnHeaderOverflowMenuButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
 			{
-				vint index=headerOverflowMenuStack->GetStackItems().IndexOf(dynamic_cast<GuiStackItemComposition*>(sender->GetParent()));
-				if(index!=-1)
-				{
-					commandExecutor->ShowTab(index);
-				}
+				vint index=headerOverflowMenu->GetToolstripItems().IndexOf(sender->GetRelatedControl());
+				commandExecutor->ShowTab(index);
 			}
 
 			void Win7TabStyle::UpdateHeaderOverflowButtonVisibility()
 			{
-				headerOverflowButton->SetVisible(tabHeaderComposition->IsStackItemClipped());
+				if(tabHeaderComposition->IsStackItemClipped())
+				{
+					boundsComposition->SetColumnOption(1, GuiCellOption::MinSizeOption());
+				}
+				else
+				{
+					boundsComposition->SetColumnOption(1, GuiCellOption::AbsoluteOption(0));
+				}
+				boundsComposition->ForceCalculateSizeImmediately();
 			}
 
 			void Win7TabStyle::UpdateHeaderZOrder()
@@ -13574,17 +13560,45 @@ Win7TabStyle
 						item->SetExtraMargin(Margin(0, 0, 0, 0));
 					}
 				}
-				tabHeaderComposition->MoveChild(tabContentTopLineComposition, childCount-2);
+				if(childCount>1)
+				{
+					tabHeaderComposition->MoveChild(tabContentTopLineComposition, childCount-2);
+				}
 			}
 
-			Win7TabStyle::Win7TabStyle()
-				:commandExecutor(0)
+			void Win7TabStyle::UpdateHeaderVisibilityIndex()
+			{
+				vint itemCount=tabHeaderComposition->GetStackItems().Count();
+				vint selectedItem=-1;
+				for(vint i=0;i<itemCount;i++)
+				{
+					if(headerButtons[i]->GetSelected())
+					{
+						selectedItem=i;
+					}
+				}
+
+				if(selectedItem!=-1)
+				{
+					tabHeaderComposition->EnsureVisible(selectedItem);
+				}
+			}
+
+			void Win7TabStyle::UpdateHeaderLayout()
+			{
+				UpdateHeaderZOrder();
+				UpdateHeaderVisibilityIndex();
+				UpdateHeaderOverflowButtonVisibility();
+			}
+
+			void Win7TabStyle::Initialize()
 			{
 				boundsComposition=new GuiTableComposition;
-				boundsComposition->SetRowsAndColumns(2, 1);
+				boundsComposition->SetRowsAndColumns(2, 2);
 				boundsComposition->SetRowOption(0, GuiCellOption::MinSizeOption());
 				boundsComposition->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
 				boundsComposition->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
+				boundsComposition->SetColumnOption(1, GuiCellOption::AbsoluteOption(0));
 				{
 					GuiCellComposition* cell=new GuiCellComposition;
 					boundsComposition->AddChild(cell);
@@ -13596,17 +13610,21 @@ Win7TabStyle
 					tabHeaderComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 					tabHeaderComposition->BoundsChanged.AttachMethod(this, &Win7TabStyle::OnTabHeaderBoundsChanged);
 					cell->AddChild(tabHeaderComposition);
+				}
+				{
+					GuiCellComposition* cell=new GuiCellComposition;
+					boundsComposition->AddChild(cell);
+					cell->SetSite(0, 1, 1, 1);
 
-					headerOverflowButton=new GuiButton(new Win7ButtonStyle);
+					headerOverflowButton=new GuiButton(CreateMenuButtonStyleController());
 					headerOverflowButton->GetContainerComposition()->AddChild(common_styles::CommonFragmentBuilder::BuildDownArrow(headerOverflowArrowElement));
-					headerOverflowButton->SetVisible(false);
 					headerOverflowButton->GetBoundsComposition()->SetAlignmentToParent(Margin(-1, 0, 0, 0));
 					headerOverflowButton->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowButtonClicked);
 					cell->AddChild(headerOverflowButton->GetBoundsComposition());
 				}
 				{
 					GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
-					element->SetColor(Win7ButtonColors::TabPageHeaderNormal().borderColor);
+					element->SetColor(GetBorderColor());
 
 					tabContentTopLineComposition=new GuiBoundsComposition;
 					tabContentTopLineComposition->SetOwnedElement(element);
@@ -13617,7 +13635,7 @@ Win7TabStyle
 				{
 					GuiCellComposition* cell=new GuiCellComposition;
 					boundsComposition->AddChild(cell);
-					cell->SetSite(1, 0, 1, 1);
+					cell->SetSite(1, 0, 1, 2);
 
 					containerComposition=new GuiBoundsComposition;
 					containerComposition->SetAlignmentToParent(Margin(1, 0, 1, 1));
@@ -13626,7 +13644,7 @@ Win7TabStyle
 
 					{
 						GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
-						element->SetColor(Win7ButtonColors::TabPageHeaderNormal().borderColor);
+						element->SetColor(GetBorderColor());
 						cell->SetOwnedElement(element);
 					}
 					{
@@ -13635,16 +13653,55 @@ Win7TabStyle
 						containerComposition->SetOwnedElement(element);
 					}
 				}
-				{
-					headerOverflowMenu=new GuiMenu(new Win7MenuStyle, 0);
-					headerOverflowMenuStack=new GuiStackComposition;
-					headerOverflowMenuStack->SetDirection(GuiStackComposition::Vertical);
-					headerOverflowMenuStack->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
-					headerOverflowMenuStack->SetAlignmentToParent(Margin(0, 0, 0, 0));
-					headerOverflowMenu->GetContainerComposition()->AddChild(headerOverflowMenuStack);
-				}
 
+				headerOverflowMenu=new GuiToolstripMenu(CreateMenuStyleController(), 0);
 				headerController=new GuiSelectableButton::MutexGroupController;
+			}
+			
+			controls::GuiSelectableButton::IStyleController* Win7TabStyle::CreateHeaderStyleController()
+			{
+				return new Win7TabPageHeaderStyle;
+			}
+
+			controls::GuiButton::IStyleController* Win7TabStyle::CreateMenuButtonStyleController()
+			{
+				return new Win7ButtonStyle;
+			}
+
+			controls::GuiToolstripMenu::IStyleController* Win7TabStyle::CreateMenuStyleController()
+			{
+				return new Win7MenuStyle;
+			}
+
+			controls::GuiToolstripButton::IStyleController* Win7TabStyle::CreateMenuItemStyleController()
+			{
+				return new Win7MenuItemButtonStyle;
+			}
+
+			Color Win7TabStyle::GetBorderColor()
+			{
+				return Win7ButtonColors::TabPageHeaderNormal().borderColor;
+			}
+
+			Color Win7TabStyle::GetBackgroundColor()
+			{
+				return Win7GetSystemTabContentColor();
+			}
+
+			Win7TabStyle::Win7TabStyle(bool initialize)
+				:boundsComposition(0)
+				,containerComposition(0)
+				,tabHeaderComposition(0)
+				,tabContentTopLineComposition(0)
+				,commandExecutor(0)
+				,headerOverflowArrowElement(0)
+				,headerOverflowButton(0)
+				,headerOverflowMenu(0)
+			{
+				if(initialize)
+				{
+					Initialize();
+				}
 			}
 
 			Win7TabStyle::~Win7TabStyle()
@@ -13686,7 +13743,7 @@ Win7TabStyle
 
 			void Win7TabStyle::InsertTab(vint index)
 			{
-				GuiSelectableButton* button=new GuiSelectableButton(new Win7TabPageHeaderStyle);
+				GuiSelectableButton* button=new GuiSelectableButton(CreateHeaderStyleController());
 				button->SetAutoSelection(false);
 				button->SetFont(headerFont);
 				button->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
@@ -13697,13 +13754,20 @@ Win7TabStyle
 				item->AddChild(button->GetBoundsComposition());
 				tabHeaderComposition->InsertStackItem(index, item);
 				headerButtons.Insert(index, button);
-				UpdateHeaderZOrder();
+
+				GuiToolstripButton* menuItem=new GuiToolstripButton(CreateMenuItemStyleController());
+				menuItem->Clicked.AttachMethod(this, &Win7TabStyle::OnHeaderOverflowMenuButtonClicked);
+				headerOverflowMenu->GetToolstripItems().Insert(index, menuItem);
+
+				UpdateHeaderLayout();
 			}
 
 			void Win7TabStyle::SetTabText(vint index, const WString& value)
 			{
 				headerButtons[index]->SetText(value);
-				UpdateHeaderOverflowButtonVisibility();
+				headerOverflowMenu->GetToolstripItems().Get(index)->SetText(value);
+				
+				UpdateHeaderLayout();
 			}
 
 			void Win7TabStyle::RemoveTab(vint index)
@@ -13715,9 +13779,11 @@ Win7TabStyle
 				item->RemoveChild(button->GetBoundsComposition());
 				headerButtons.RemoveAt(index);
 
+				headerOverflowMenu->GetToolstripItems().RemoveAt(index);
 				delete item;
 				delete button;
-				UpdateHeaderOverflowButtonVisibility();
+				
+				UpdateHeaderLayout();
 			}
 
 			void Win7TabStyle::MoveTab(vint oldIndex, vint newIndex)
@@ -13729,20 +13795,20 @@ Win7TabStyle
 				GuiSelectableButton* button=headerButtons[oldIndex];
 				headerButtons.RemoveAt(oldIndex);
 				headerButtons.Insert(newIndex, button);
-				UpdateHeaderZOrder();
-				UpdateHeaderOverflowButtonVisibility();
+				
+				UpdateHeaderLayout();
 			}
 
 			void Win7TabStyle::SetSelectedTab(vint index)
 			{
 				headerButtons[index]->SetSelected(true);
-				UpdateHeaderZOrder();
-				UpdateHeaderOverflowButtonVisibility();
+				
+				UpdateHeaderLayout();
 			}
 
 			controls::GuiControl::IStyleController* Win7TabStyle::CreateTabPageStyleController()
 			{
-				GuiControl::IStyleController* style=new Win7EmptyStyle(Win7GetSystemTabContentColor());
+				GuiControl::IStyleController* style=new Win7EmptyStyle(GetBackgroundColor());
 				style->GetBoundsComposition()->SetAlignmentToParent(Margin(2, 2, 2, 2));
 				return style;
 			}
@@ -16612,6 +16678,42 @@ Win8ButtonColors
 				return colors;
 			}
 
+			Win8ButtonColors Win8ButtonColors::TabPageHeaderNormal()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(172, 172, 172),
+					Color(239, 239, 239),
+					Color(229, 229, 229),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::TabPageHeaderActive()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(126, 180, 234),
+					Color(236, 244, 252),
+					Color(221, 237, 252),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
+			Win8ButtonColors Win8ButtonColors::TabPageHeaderSelected()
+			{
+				Win8ButtonColors colors=
+				{
+					Color(172, 172, 172),
+					Color(255, 255, 255),
+					Color(255, 255, 255),
+					Win8GetSystemTextColor(true),
+				};
+				return colors;
+			}
+
 /***********************************************************************
 Win8ButtonElements
 ***********************************************************************/
@@ -16984,6 +17086,11 @@ Helpers
 			{
 				return Color(240, 240, 240);
 			}
+			
+			Color Win8GetSystemTabContentColor()
+			{
+				return Color(255, 255, 255);
+			}
 
 			Color Win8GetSystemBorderColor()
 			{
@@ -17049,6 +17156,100 @@ namespace vl
 	{
 		namespace win8
 		{
+			using namespace controls;
+
+/***********************************************************************
+Win8TabPageHeaderStyle
+***********************************************************************/
+
+			void Win8TabPageHeaderStyle::TransferInternal(GuiButton::ControlState value, bool enabled, bool selected)
+			{
+				if(selected)
+				{
+					transferringAnimation->Transfer(Win8ButtonColors::TabPageHeaderSelected());
+				}
+				else
+				{
+					switch(value)
+					{
+					case GuiButton::Normal:
+						transferringAnimation->Transfer(Win8ButtonColors::TabPageHeaderNormal());
+						break;
+					case GuiButton::Active:
+					case GuiButton::Pressed:
+						transferringAnimation->Transfer(Win8ButtonColors::TabPageHeaderActive());
+						break;
+					}
+				}
+			}
+
+			Win8TabPageHeaderStyle::Win8TabPageHeaderStyle()
+				:Win8ButtonStyleBase(Win8ButtonColors::TabPageHeaderNormal(), Alignment::Left, Alignment::Center)
+			{
+				transferringAnimation->SetEnableAnimation(false);
+				{
+					Margin margin=elements.backgroundComposition->GetAlignmentToParent();
+					margin.bottom=0;
+					elements.backgroundComposition->SetAlignmentToParent(margin);
+				}
+			}
+
+			Win8TabPageHeaderStyle::~Win8TabPageHeaderStyle()
+			{
+			}
+
+			void Win8TabPageHeaderStyle::SetFont(const FontProperties& value)
+			{
+				Win8ButtonStyleBase::SetFont(value);
+				Margin margin=elements.textComposition->GetMargin();
+				margin.left*=2;
+				margin.right*=2;
+				elements.textComposition->SetMargin(margin);
+			}
+
+/***********************************************************************
+Win8TabStyle
+***********************************************************************/
+
+			controls::GuiSelectableButton::IStyleController* Win8TabStyle::CreateHeaderStyleController()
+			{
+				return new Win8TabPageHeaderStyle;
+			}
+
+			controls::GuiButton::IStyleController* Win8TabStyle::CreateMenuButtonStyleController()
+			{
+				return new Win8ButtonStyle;
+			}
+
+			controls::GuiToolstripMenu::IStyleController* Win8TabStyle::CreateMenuStyleController()
+			{
+				return new Win8MenuStyle;
+			}
+
+			controls::GuiToolstripButton::IStyleController* Win8TabStyle::CreateMenuItemStyleController()
+			{
+				return new Win8MenuItemButtonStyle;
+			}
+
+			Color Win8TabStyle::GetBorderColor()
+			{
+				return Win8ButtonColors::TabPageHeaderNormal().borderColor;
+			}
+
+			Color Win8TabStyle::GetBackgroundColor()
+			{
+				return Win8GetSystemTabContentColor();
+			}
+
+			Win8TabStyle::Win8TabStyle()
+				:Win7TabStyle(false)
+			{
+				Initialize();
+			}
+
+			Win8TabStyle::~Win8TabStyle()
+			{
+			}
 		}
 	}
 }
@@ -19975,7 +20176,6 @@ GuiToolstripCollection
 
 			bool GuiToolstripCollection::RemoveAtInternal(vint index, GuiControl* const& control)
 			{
-				items.RemoveAt(index);
 				GuiStackItemComposition* stackItem=stackComposition->GetStackItems().Get(index);
 
 				stackComposition->RemoveChild(stackItem);
@@ -19998,6 +20198,7 @@ GuiToolstripCollection
 					}
 				}
 				delete control;
+				items.RemoveAt(index);
 				InvokeUpdateLayout();
 				return true;
 			}
@@ -21680,6 +21881,53 @@ GuiStackComposition
 					}
 					break;
 				}
+
+				vint index=stackItems.IndexOf(ensuringVisibleStackItem);
+				if(index!=-1)
+				{
+					Rect itemBounds=stackItemBounds[index];
+					Size size=previousBounds.GetSize();
+					Size offset;
+					switch(direction)
+					{
+					case Horizontal:
+						{
+							if(itemBounds.Left()<=0)
+							{
+								offset.x=-itemBounds.Left();
+							}
+							else if(itemBounds.Right()>=size.x)
+							{
+								offset.x=size.x-itemBounds.Right();
+							}
+						}
+						break;
+					case Vertical:
+						{
+							if(itemBounds.Top()<=0)
+							{
+								offset.y=-itemBounds.Top();
+							}
+							else if(itemBounds.Bottom()>=size.y)
+							{
+								offset.y=size.y-itemBounds.Bottom();
+							}
+						}
+						break;
+					}
+					for(vint i=0;i<stackItemBounds.Count();i++)
+					{
+						stackItemBounds[i].x1+=offset.x;
+						stackItemBounds[i].y1+=offset.y;
+						stackItemBounds[i].x2+=offset.x;
+						stackItemBounds[i].y2+=offset.y;
+					}
+				}
+			}
+
+			void GuiStackComposition::OnBoundsChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+			{
+				UpdateStackItemBounds();
 			}
 
 			void GuiStackComposition::OnChildInserted(GuiGraphicsComposition* child)
@@ -21699,13 +21947,20 @@ GuiStackComposition
 				if(item)
 				{
 					stackItems.Remove(item);
+					if(item==ensuringVisibleStackItem)
+					{
+						ensuringVisibleStackItem=0;
+						UpdateStackItemBounds();
+					}
 				}
 			}
 
 			GuiStackComposition::GuiStackComposition()
 				:direction(Horizontal)
 				,padding(0)
+				,ensuringVisibleStackItem(0)
 			{
+				BoundsChanged.AttachMethod(this, &GuiStackComposition::OnBoundsChanged);
 			}
 
 			GuiStackComposition::~GuiStackComposition()
@@ -21814,6 +22069,20 @@ GuiStackComposition
 					}
 				}
 				return false;
+			}
+
+			bool GuiStackComposition::EnsureVisible(vint index)
+			{
+				if(0<=index && index<stackItems.Count())
+				{
+					ensuringVisibleStackItem=stackItems[index];
+					UpdateStackItemBounds();
+					return true;
+				}
+				else
+				{
+					return false;
+				}
 			}
 
 /***********************************************************************
@@ -22418,6 +22687,7 @@ GuiTableComposition
 			void GuiTableComposition::ForceCalculateSizeImmediately()
 			{
 				GuiBoundsComposition::ForceCalculateSizeImmediately();
+				UpdateCellBounds();
 				UpdateCellBounds();
 			}
 
