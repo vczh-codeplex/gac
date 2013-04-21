@@ -24,7 +24,7 @@ Theme
 ***********************************************************************/
 
 			/// <summary>Windows 8 theme.</summary>
-			class Win8Theme : public /*theme::ITheme*/ win7::Win7Theme
+			class Win8Theme : public Object, public theme::ITheme
 			{
 			public:
 				/// <summary>Create the theme.</summary>
@@ -36,7 +36,7 @@ Theme
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
 				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
-				//controls::GuiTab::IStyleController*									CreateTabStyle()override;
+				controls::GuiTab::IStyleController*									CreateTabStyle()override;
 				controls::GuiComboBoxBase::IStyleController*						CreateComboBoxStyle()override;
 				controls::GuiScrollView::IStyleProvider*							CreateMultilineTextBoxStyle()override;
 				controls::GuiSinglelineTextBox::IStyleProvider*						CreateTextBoxStyle()override;

@@ -8,6 +8,7 @@
 #include "Win8Styles\GuiWin8ToolstripStyles.h"
 #include "Win8Styles\GuiWin8ScrollableStyles.h"
 #include "Win8Styles\GuiWin8ListStyles.h"
+#include "..\Styles\Win7Styles\GuiWin7TabStyles.h"
 
 namespace vl
 {
@@ -57,10 +58,10 @@ Win8Theme
 				return new Win8GroupBoxStyle;
 			}
 
-			//controls::GuiTab::IStyleController* Win8Theme::CreateTabStyle()
-			//{
-			//	throw 0;
-			//}
+			controls::GuiTab::IStyleController* Win8Theme::CreateTabStyle()
+			{
+				return new win7::Win7TabStyle;
+			}
 
 			controls::GuiComboBoxBase::IStyleController* Win8Theme::CreateComboBoxStyle()
 			{

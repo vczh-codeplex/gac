@@ -23,7 +23,7 @@ Theme
 ***********************************************************************/
 
 			/// <summary>Windows 7 theme.</summary>
-			class Win7Theme : public theme::ITheme
+			class Win7Theme : public Object, public theme::ITheme
 			{
 			public:
 				/// <summary>Create the theme.</summary>
