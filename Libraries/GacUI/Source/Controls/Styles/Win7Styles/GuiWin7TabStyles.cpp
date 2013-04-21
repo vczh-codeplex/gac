@@ -85,7 +85,8 @@ Win7TabStyle
 			{
 				vint height=headerOverflowButton->GetBoundsComposition()->GetBounds().Height();
 				headerOverflowButton->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(height, 0)));
-				UpdateHeaderOverflowButtonVisibility();
+
+				UpdateHeaderLayout();
 			}
 
 			void Win7TabStyle::OnHeaderOverflowButtonClicked(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
@@ -110,6 +111,7 @@ Win7TabStyle
 				{
 					boundsComposition->SetColumnOption(1, GuiCellOption::AbsoluteOption(0));
 				}
+				boundsComposition->ForceCalculateSizeImmediately();
 			}
 
 			void Win7TabStyle::UpdateHeaderZOrder()

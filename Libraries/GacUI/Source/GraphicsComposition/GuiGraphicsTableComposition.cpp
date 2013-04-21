@@ -530,6 +530,7 @@ GuiTableComposition
 			{
 				GuiBoundsComposition::ForceCalculateSizeImmediately();
 				UpdateCellBounds();
+				UpdateCellBounds();
 			}
 
 			Size GuiTableComposition::GetMinPreferredClientSize()
