@@ -61,6 +61,8 @@ Tab
 
 				void										UpdateHeaderOverflowButtonVisibility();
 				void										UpdateHeaderZOrder();
+				void										UpdateHeaderVisibilityIndex();
+				void										UpdateHeaderLayout();
 			public:
 				/// <summary>Create the style.</summary>
 				Win7TabStyle();
