@@ -118,16 +118,88 @@ namespace test
 		{
 			return S_OK;
 		}
+
+	private:
+		GuiTab*					tab;
+		GuiButton*				buttonAdd;
+		GuiButton*				buttonRemove;
+		vint					counter;
+
+		void buttonAdd_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			buttonRemove->SetEnabled(true);
+			GuiTabPage* page=tab->CreatePage();
+			page->SetText(L"Page "+itow(++counter));
+		}
+
+		void buttonRemove_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			GuiTabPage* page=tab->GetSelectedPage();
+			tab->RemovePage(page);
+			if(tab->GetPages().Count()==0)
+			{
+				buttonRemove->SetEnabled(false);
+			}
+			delete page;
+		}
 	public:
 		TestWindow()
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 			,clientId(0)
+			,counter(0)
 		{
 			SetText(GetApplication()->GetExecutableFolder());
 			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 			GetContainerComposition()->SetPreferredMinSize(Size(640, 480));
 			ForceCalculateSizeImmediately();
 			MoveToScreenCenter();
+
+			GuiTableComposition* table=new GuiTableComposition;
+			this->GetContainerComposition()->AddChild(table);
+			table->SetAlignmentToParent(Margin(0, 0, 0, 0));
+			table->SetRowsAndColumns(2, 3);
+			table->SetCellPadding(5);
+			table->SetRowOption(0, GuiCellOption::MinSizeOption());
+			table->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
+			table->SetColumnOption(0, GuiCellOption::MinSizeOption());
+			table->SetColumnOption(1, GuiCellOption::MinSizeOption());
+			table->SetColumnOption(2, GuiCellOption::PercentageOption(1.0));
+			{
+				GuiCellComposition* cell=new GuiCellComposition;
+				table->AddChild(cell);
+				cell->SetSite(0, 0, 1, 1);
+
+				buttonAdd=g::NewButton();
+				buttonAdd->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				buttonAdd->SetText(L"Add Tab Page");
+				buttonAdd->Clicked.AttachMethod(this, &TestWindow::buttonAdd_Clicked);
+				cell->AddChild(buttonAdd->GetBoundsComposition());
+			}
+			{
+				GuiCellComposition* cell=new GuiCellComposition;
+				table->AddChild(cell);
+				cell->SetSite(0, 1, 1, 1);
+
+				buttonRemove=g::NewButton();
+				buttonRemove->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				buttonRemove->SetText(L"Remove Current Tab Page");
+				buttonRemove->Clicked.AttachMethod(this, &TestWindow::buttonRemove_Clicked);
+				cell->AddChild(buttonRemove->GetBoundsComposition());
+			}
+			{
+				GuiCellComposition* cell=new GuiCellComposition;
+				table->AddChild(cell);
+				cell->SetSite(1, 0, 1, 3);
+
+				tab=g::NewTab();
+				tab->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
+				cell->AddChild(tab->GetBoundsComposition());
+			}
+			for(vint i=0;i<3;i++)
+			{
+				GuiEventArgs arguments=buttonAdd->GetNotifyEventArguments();
+				buttonAdd->Clicked.Execute(arguments);
+			}
 
 			Initialize();
 		}

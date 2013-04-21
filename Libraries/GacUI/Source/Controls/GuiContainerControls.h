@@ -32,13 +32,14 @@ Tab Control
 				GuiControl*										container;
 				GuiTab*											owner;
 				WString											text;
-				
-				GuiTabPage();
-				~GuiTabPage();
 
 				bool											AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController);
 				bool											DeassociateTab(GuiTab* _owner);
 			public:
+				/// <summary>Create a tab page.</summary>
+				GuiTabPage();
+				~GuiTabPage();
+
 				/// <summary>Text changed event.</summary>
 				compositions::GuiNotifyEvent					TextChanged;
 				/// <summary>Page installed event.</summary>

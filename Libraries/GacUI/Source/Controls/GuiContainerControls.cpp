@@ -12,20 +12,6 @@ namespace vl
 GuiTabPage
 ***********************************************************************/
 
-			GuiTabPage::GuiTabPage()
-				:container(0)
-				,owner(0)
-			{
-			}
-
-			GuiTabPage::~GuiTabPage()
-			{
-				if(!container->GetParent())
-				{
-					delete container;
-				}
-			}
-
 			bool GuiTabPage::AssociateTab(GuiTab* _owner, GuiControl::IStyleController* _styleController)
 			{
 				if(owner)
@@ -61,6 +47,20 @@ GuiTabPage
 				else
 				{
 					return false;
+				}
+			}
+
+			GuiTabPage::GuiTabPage()
+				:container(0)
+				,owner(0)
+			{
+			}
+
+			GuiTabPage::~GuiTabPage()
+			{
+				if(!container->GetParent())
+				{
+					delete container;
 				}
 			}
 
@@ -234,7 +234,14 @@ GuiTab
 
 			bool GuiTab::SetSelectedPage(GuiTabPage* value)
 			{
-				if(value->GetOwnerTab()==this)
+				if(!value)
+				{
+					if(tabPages.Count()==0)
+					{
+						selectedPage=0;
+					}
+				}
+				else if(value->GetOwnerTab()==this)
 				{
 					if(selectedPage!=value)
 					{
@@ -250,12 +257,8 @@ GuiTab
 						}
 						SelectedPageChanged.Execute(GetNotifyEventArguments());
 					}
-					return true;
 				}
-				else
-				{
-					return false;
-				}
+				return selectedPage==value;
 			}
 
 /***********************************************************************
