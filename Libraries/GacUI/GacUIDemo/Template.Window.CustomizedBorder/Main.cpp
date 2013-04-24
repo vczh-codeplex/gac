@@ -340,11 +340,22 @@ CustomTemplateWindow
 class CustomTemplateWindow : public GuiWindow
 {
 private:
+	GuiButton*						colorButton;
 public:
 	CustomTemplateWindow()
 		:GuiWindow(new CustomTemplateWindowStyle)
 	{
 		this->SetText(L"Template.Window.CustomizedBorder");
+
+		colorButton=g::NewButton();
+		colorButton->GetBoundsComposition()->SetMargin(Margin(10, 10, 10, 10));
+		colorButton->SetText(L"Show Color Dialog");
+		this->AddChild(colorButton);
+		colorButton->Clicked.AttachLambda([this](GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+		{
+			Color color(255, 0, 0);
+			GetCurrentController()->DialogService()->ShowColorDialog(this->GetNativeWindow(), color);
+		});
 
 		// set the preferred minimum client size
 		this->GetBoundsComposition()->SetPreferredMinSize(Size(640, 480));
