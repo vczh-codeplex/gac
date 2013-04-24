@@ -4410,7 +4410,14 @@ WindowsForm
 					case WM_NCACTIVATE:
 						if(customFrameMode)
 						{
-							result=FALSE;
+							if(wParam==TRUE)
+							{
+								result=FALSE;
+							}
+							else
+							{
+								result=TRUE;
+							}
 							return true;
 						}
 						break;
