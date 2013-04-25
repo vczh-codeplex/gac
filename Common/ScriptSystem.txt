@@ -27,7 +27,7 @@ Composition Types
 T(U, V)						// Function<T, (U, V)>
 T(.. U)						// Function<T, U>
 
-using ComparablePair<T, U> = Pair<T, U>
+using<T, U> ComparablePair = Pair<T, U>
 	requires Comparable<T>, Comparable<U>;
 
 ==================================================
@@ -40,7 +40,7 @@ struct Point
 	int y;
 }
 
-class Point<T>
+class<T> Point
 {
 	T x;
 	T y;
@@ -51,13 +51,13 @@ Functions
 ==================================================
 
 // Compare: int(int, int)
-int Compare(int a, int b)
+func int Compare(int a, int b)
 {
 	return a-b;
 }
 
 // Compare<T>: int(Point<T>, Point<T>)
-int Compare<T>(Point<T> a, Point<T> b)
+func<T> int Compare(Point<T> a, Point<T> b)
 	requires Comparable<T>
 {
 	int result;
@@ -69,22 +69,22 @@ int Compare<T>(Point<T> a, Point<T> b)
 }
 
 // Point.Move or Move: void(Point, Size)
-void Move(Point this, Size s)
+func void Point.Move(Size s)
 {
 	this.x=1;	// this is const, and it is a struct, so this.x is not assignable
 	s.x=1;		// parameter is const
 }
 
 // Point<T>.Move or Move<T>: void(Point<T>, Size<T>)
-void Move<T>(Point<T> this, Size<T> s)
+func<T> void Move(Point<T> this, Size<T> s)
 	// all requirements to T in Point<T> are copied
 {
 	this.x+=s.x;	// this is const, but it is a reference type. so this.x is assignable.
 	this.y+=s.y;
 }
 
-// T[].IsLongerThan<U> or IsLongerThan<T, U>: bool(T[], U[])
-bool IsLongerThan<T, U>(T[] this, U[] arr)
+// T[].IsLongerThan<T, U> or IsLongerThan<T, U>: bool(T[], U[])
+func<T, U> bool T[].IsLongerThan(U[] arr)
 	// all type arguments that used in typeof(this) should appear before others
 {
 	return this.Length>arr.Length;
@@ -96,7 +96,7 @@ Properties
 
 // getter(Console): IConsole()
 // setter(Console): void(IConsole)
-IConsole Console
+property IConsole Console
 {
 	get
 	{
@@ -109,7 +109,7 @@ IConsole Console
 }
 
 // getter(IEnumerable<IEnumerable<T>>.Flattern): IEnumerable<T>
-IEnumerable<T> IEnumerable<IEnumrable<T>>.Flatten<T>
+property<T> IEnumerable<T> IEnumerable<IEnumrable<T>>.Flatten
 {
 	get
 	{
@@ -123,22 +123,22 @@ IEnumerable<T> IEnumerable<IEnumrable<T>>.Flatten<T>
 Concepts
 ==================================================
 
-concept Comparable<T>
+concept<T> Comparable
 {
 	int Compare(T a, T b);
 }
 
-concept Monad<M<>>
+concept<M<>> Monad
 {
 	M<T> Return<T>(T t);
 	M<U> Bind<T, U>(M<T> t, M<U>(t) binder);
 }
 
-concept TupleParameter<T>
+concept<T> TupleParameter
 {
 }
 
-concept New<T, U> requires
+concept<T, U> New requires
 	interface T, //struct, class, interface
 	TupleParameter<T>
 {
@@ -149,7 +149,7 @@ concept New<T, U> requires
 Interfaces
 ==================================================
 
-concept this.IReadableArray<out T>
+concept<out T> this.IReadableArray
 	requires this.IEnumerable<T>
 {
 	int Length{get;}
