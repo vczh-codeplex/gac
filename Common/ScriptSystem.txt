@@ -1,273 +1,141 @@
-==================================================
+========================================================
 Primitive Types
-==================================================
-sbyte		(Int8)
-short		(Int16)
-int			(Int32)
-long		(Int64)
-byte		(UInt8)
-ushort		(UInt16)
-uint		(UInt32)
-ulong		(UInt64)
-float		(Single)
-double		(Double)
-char		(Char)
-bool		(Bool)
-string		(String)
-void		(Void)
+========================================================
 
-==================================================
-Composition Types
-==================================================
-[T]							// Array<T>
-{T:U}						// Map<T, U>
-(T..U)						// Pair<T, U>
-(T, U, V)					// (T..(U..(V..void)))
-()							// void
-T(U, V)						// Function<T, (U, V)>
-T(.. U)						// Function<T, U>
+Int8		sbyte		0
+Int16		short		0
+Int32		int			0
+Int64		long		0
+UInt8		byte		0
+UInt16		ushort		0
+UInt32		uint		0
+UInt64		ulong		0
+Boolean		bool		false
+Char		char		'\0'
+String		string		""
+Float32		float		0.0f
+Float64		double		0.0
+Void		void		void
+Object		object		null
 
-using<T, U> ComparablePair = Pair<T, U>
-	requires Comparable<T>, Comparable<U>;
+========================================================
+Composite Types
+========================================================
 
-==================================================
-Structure Types
-==================================================
+Pair<T, U>							(T..U)					(default(T)..default(U))
+Pair<T, Pair<U, Pair<V, void>>>		(T, U, V)				(default(T), default(U), default(V))
 
-struct Point
+IDelegate<R, (T, U, V)>				func R(T, U, V)
+									func R(..(T, U, V))
+
+IMap<TKey, TValue>					{TKey : TValue}
+	: IDelegate<TValue, (TKey)>
+	: IEnumerable<(TKey, TValue)>
+
+IArray<T>							[T]
+	: IDelegate<int, (T)>
+	: IEnumerable<T>
+
+IEnumerable<T>
+IReadableArray<T>
+IArray<T>
+IList<T>
+IMap<TKey, TValue>
+
+========================================================
+Composite Type Constructors
+========================================================
+
+default(T)
+
+x=>x+1
+(x,y)=>x+y
+func int(int x, int y){ return x+y; }
+
+// IArray
+int[10]
+[]
+[1, 2, 3]
+
+// IEnumerable
+[1, 2, 3] ++ [4, 5, 6]
+[1, 2, 3 : [4, 5, 6]]
+
+// IMap
+{}
+{1:"a", 2:"b"}
+{1, 2, 3}
+
+========================================================
+Custom Types
+========================================================
+
+type Link
+{
+	object value;
+	Link next;
+}
+
+type<T> Link
+{
+	T value;
+	Link<T> next;
+}
+
+struct Point	// struct members are immutable
 {
 	int x;
 	int y;
 }
 
-class<T> Point
+struct<T> Point
+	where Numeric<T>
 {
 	T x;
 	T y;
 }
 
-==================================================
-Functions
-==================================================
+type Box = {int : string};
+type<T> Box = {int : T};
 
-// Compare: int(int, int)
-func int Compare(int a, int b)
+========================================================
+Custom Type Constructors
+========================================================
+
+Point{ x=1, y=2 }
+Point{}
+
+========================================================
+Declarations
+========================================================
+
+int a[ = default(int)];
+int a = 0;
+var a = 0;
+
+func int Add(int a, int b) [inline] = a+b ;
+func int Add(int a, int b)
 {
-	return a-b;
+	return a+b;
 }
+func Add(a, b) = a+b ;
 
-// Compare<T>: int(Point<T>, Point<T>)
-func<T> int Compare(Point<T> a, Point<T> b)
-	requires Comparable<T>
-{
-	int result;
-	result=Compare(a.x, b.x);
-	if(result!=0) return result;
-	result=Compare(a.y, b.y);
-	if(result!=0) return result;
-	return 0;
-}
-
-// Point.Move or Move: void(Point, Size)
-func void Point.Move(Size s)
-{
-	this.x=1;	// this is const, and it is a struct, so this.x is not assignable
-	s.x=1;		// parameter is const
-}
-
-// Point<T>.Move or Move<T>: void(Point<T>, Size<T>)
-func<T> void Move(Point<T> this, Size<T> s)
-	// all requirements to T in Point<T> are copied
-{
-	this.x+=s.x;	// this is const, but it is a reference type. so this.x is assignable.
-	this.y+=s.y;
-}
-
-// T[].IsLongerThan<T, U> or IsLongerThan<T, U>: bool(T[], U[])
-func<T, U> bool T[].IsLongerThan(U[] arr)
-	// all type arguments that used in typeof(this) should appear before others
-{
-	return this.Length>arr.Length;
-}
-
-==================================================
-Properties
-==================================================
-
-// getter(Console): IConsole()
-// setter(Console): void(IConsole)
-property IConsole Console
-{
-	get
-	{
-		return consoleInstance;
-	}
-	set
-	{
-		throw new NotImplementedException();
-	}
-}
-
-// getter(IEnumerable<IEnumerable<T>>.Flattern): IEnumerable<T>
-property<T> IEnumerable<T> IEnumerable<IEnumrable<T>>.Flatten
-{
-	get
-	{
-		foreach(var xs in this)
-			foreach(var x in xs)
-				yield return x;
-	}
-}
-
-==================================================
+========================================================
 Concepts
-==================================================
+========================================================
 
-concept<T> Comparable
-{
-	int Compare(T a, T b);
-}
+========================================================
+Statments
+========================================================
 
-concept<M<>> Monad
-{
-	M<T> Return<T>(T t);
-	M<U> Bind<T, U>(M<T> t, M<U>(t) binder);
-}
-
-concept<T> TupleParameter
-{
-}
-
-concept<T, U> New requires
-	interface T, //struct, class, interface
-	TupleParameter<T>
-{
-	T Create(..U parameters);
-}
-
-==================================================
-Interfaces
-==================================================
-
-concept<out T> this.IReadableArray
-	requires this.IEnumerable<T>
-{
-	int Length{get;}
-	T this[int index]{get;}
-}
-
-==================================================
-Instances
-==================================================
-
-instance Comparable<int>
-{
-	int Compare(int a, int b)
-	{
-		return a-b;
-	}
-}
-
-instance<T> Comparable<Point<T>>
-	requires Comparable<T>
-{
-	int Compare(Point<T> a, Point<T> b)
-	{
-		int result;
-		result=Compare(a.x, b.x);
-		if(result!=0) return result;
-		result=Comparable<T>.Compare(a.y, b.y);
-		if(result!=0) return result;
-		return 0;
-	}
-}
-
-instance<T> T[].IReadableArray<T>
-{
-	int Length{get return this.Length;}
-	int this[int index]{get return this[index];}
-}
-
-instance TupleParameter<void>
-{
-}
-
-instance<T, U> TupleParameter<(T..U)>
-	requires TupleParameter<T>
-{
-}
-
-==================================================
+========================================================
 Expressions
-==================================================
-operator precedence
-	+ - ! a[b] a(b) a(..b)
-	* / %
-	+ -
-	<< >>
-	== != < <= > >=
-	&
-	^
-	|
-	&&
-	||
+========================================================
 
-default(Type)		// DefaultValue<Type>.GetValue()
-typeof(Type)		// TypeOf<Type>.GetValue()
+========================================================
+Exceptions
+========================================================
 
-[1, 2, 3]
-{1:2, 3:4}
-new [int]{1, 2, 3}
-new [int](10)
-new {int:int}{1:2, 3:4}
-new ClassType/StructType [ {a:b, c:d} ]
-new InterfaceType	// New<Type>.GetValue()
-
-value as Type		// Convertable<TFrom, TTo>.Convert(value)	(implicit)
-					// Castable<TFrom, TTo>.Convert(value)		(explicit)
-value of Type		// Select one of the ambigious "value" expressions that has the type Type
-
-==================================================
-Statements
-==================================================
-
-Type name [= expression] {, name [= expression]} ;
-var name = expression;
-match <pattern> = expression;	// match fail throws exception
-expression (= | += | -= | *= | /= | %= | <<= | >>= | &= | ^= | |= | &&= | ||=) expression;
-expression ;
-if(expression) statement [else statement]
-foreach((Type|var) name in expression) statement		// Enumerable<T>
-while(condition) statement
-do statement while(condition);
-break;
-continue;
-return [expression] ;
-
-switch(condition)
-{
-match value: statement			// don't need break
-match <pattern>: statement
-default: statement				// when failed with all matches, missing default throws exception
-}
-
-try statement
-{ catch(Type [name]) statement }
-[ finally statement ]
-
-==================================================
-Pattern
-==================================================
-
-value of Type
-(a {, b})
-[a, b, c [: d]]					// d will be an IEnumerable
-<constant>
-
-==================================================
-Continuation
-==================================================
-
-==================================================
-Namespace
-==================================================
+========================================================
+Continuations
+========================================================
