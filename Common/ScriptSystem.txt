@@ -58,12 +58,12 @@ int[10]
 
 // IEnumerable
 [1, 2, 3] ++ [4, 5, 6]
-[1, 2, 3 : [4, 5, 6]]		// each expression will be evaluated in MoveNext function
+{1, 2, 3}
+{1, 2, 3 : [4, 5, 6]}		// each expression will be evaluated in MoveNext function
 
 // IMap
 {}
 {1=>"a", 2=>"b"}
-{1, 2, 3}
 
 ========================================================
 Custom Types
@@ -446,7 +446,7 @@ Pattern Matching
 
 Patterns:
 (a, b, c)
-[a, b, c: d]
+{a, b, c: d}
 Point{x, y}
 {x, y}
 {x=a, y=b}
@@ -466,6 +466,7 @@ Statments
 <variable-declaration>
 <pattern> = expression;
 <variable> = expression;
+<invoke-expression>;
 
 return [expression];
 break;
