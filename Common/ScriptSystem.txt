@@ -519,5 +519,24 @@ type Exception // base type for all exceptions
 };
 
 ========================================================
+Multiple Dispatching
+========================================================
+
+func DealWith(switch object x) // switch only for reference type
+{
+	Console.WriteLine("x is an object");
+}
+
+func DealWith(case {object} x)
+{
+	Console.WriteLine("x is an enumerable");
+}
+
+func DealWith(case string x)
+{
+	Console.WriteLine("x is a string");
+}
+
+========================================================
 Continuations
 ========================================================
