@@ -47,6 +47,7 @@ Composite Type Constructors
 ========================================================
 
 default(T)
+create(T)
 
 x=>x+1
 (x,y)=>x+y
@@ -106,22 +107,96 @@ Point{ x=1, y=2 }
 Point{}
 
 ========================================================
-Declarations
+Variables
 ========================================================
 
 int a[ = default(int)];
 int a = 0;
 var a = 0;
 
-func int Add(int a, int b) [inline] = a+b ;
+========================================================
+Functions
+========================================================
+
+func int Add(int a, int b) inline = a+b ;
 func int Add(int a, int b)
 {
 	return a+b;
 }
+
 func Add(a, b) = a+b ;
+func<T> T Add(T a, T b)
+	where Numeric<T>
+{
+	return a+b;
+}
+
+func<T> bool IsLastNode(Link<T> node)
+{
+	return node.next==null;
+}
+
+prop<T> Config
+	where Creatable<T>
+{
+	get
+	{
+		(config, exists)=globalConfigs.Find(typeof(T));
+		if(!exists)
+		{
+			config=create(T);
+			globalConfigs[typeof(T)]=config;
+		}
+		return config;
+	}
+	set
+	{
+		globalCOnfigs[typeof(T)]=value;
+	}
+}
+
+========================================================
+Extension Functions
+========================================================
+
+func<T> bool Link<T>.IsLastNode() inline
+{
+	return this.next==null;
+}
+
+prop<T> bool Link<T>.IsLastNode inline
+{
+	return this.next==null;
+}
 
 ========================================================
 Concepts
+========================================================
+
+concept<T> Equlable
+{
+	func bool AreEqual(T a, T b);
+	func operator==(T a, T b) inline = AreEqual(a, b);
+	func operator!=(T a, T b) inline = !AreEqual(a, b);
+}
+
+concept<T> Comparable
+{
+	func int Compare(T a, T b);
+	func operator<(T a, T b) inline = Compare(a, b)<0;
+	func operator<=(T a, T b) inline = Compare(a, b)<=0;
+	func operator>(T a, T b) inline = Compare(a, b)>0;
+	func operator>=(T a, T b) inline = Compare(a, b)>=0;
+}
+
+instance<T> Equlable<T>
+	where Comparable<T>
+{
+	func bool AreEqual(T a, T b) inline = Compare(a, b)==0;
+}
+
+========================================================
+Pattern Matching
 ========================================================
 
 ========================================================
