@@ -27,12 +27,12 @@ Composite Types
 Pair<T, U>							(T..U)					(default(T)..default(U))
 Pair<T, Pair<U, Pair<V, void>>>		(T, U, V)				(default(T), default(U), default(V))
 
-IDelegate<R, (T, U, V)>				func R(T, U, V)
-									func R(..(T, U, V))
+IDelegate<R, (T, U, V)>				func (T, U, V):R
+									func (..(T, U, V)):R
 
 IEnumerable<T>						{T}
 
-IMap<TKey, TValue>					{TKey : TValue}
+IMap<TKey, TValue>					{TKey => TValue}
 	: IDelegate<TValue, (TKey)>
 	: IEnumerable<(TKey, TValue)>
 
@@ -47,9 +47,9 @@ Composite Type Constructors
 default(T)
 create(T)
 
-x=>x+1
-(x,y)=>x+y
-func int(int x, int y){ return x+y; }
+x:x+1
+(x,y):x+y
+func (int x, int y):int{ return x+y; }
 
 // IArray
 int[10]
@@ -58,18 +58,18 @@ int[10]
 
 // IEnumerable
 [1, 2, 3] ++ [4, 5, 6]
-[1, 2, 3 : [4, 5, 6]]
+[1, 2, 3 : [4, 5, 6]]		// each expression will be evaluated in MoveNext function
 
 // IMap
 {}
-{1:"a", 2:"b"}
+{1=>"a", 2=>"b"}
 {1, 2, 3}
 
 ========================================================
 Custom Types
 ========================================================
 
-type Link
+type Link [ : base1, base2, ... ]
 {
 	object value;
 	Link next;
@@ -102,15 +102,18 @@ enum Season
 	Winter,
 }
 
-type Box = {int : string};
-type<T> Box = {int : T};
+type Box = {int => string};
+type<T> Box = {int => T};
 
 ========================================================
 Custom Type Constructors
 ========================================================
 
-Point{ x=1, y=2 }
+Point{1, 2}
+Point{x=1, y=2}
 Point{}
+Point x = {x=1, y=2};
+DealWithPoint({x=1, y=2});
 
 ========================================================
 Variables
@@ -124,20 +127,20 @@ var a = 0;
 Functions
 ========================================================
 
-func int Add(int a, int b) inline = a+b ;
-func int Add(int a, int b)
+func Add(int a, int b):int inline = a+b ;
+func Add(int a, int b):int
 {
 	return a+b;
 }
 
 func Add(a, b) = a+b ;
-func<T> T Add(T a, T b)
+func<T> Add(T a, T b):T
 	where Numeric<T>
 {
 	return a+b;
 }
 
-func<T> bool IsLastNode(Link<T> node)
+func<T> IsLastNode(Link<T> node):bool
 {
 	return node.next==null;
 }
@@ -175,34 +178,34 @@ prop<T> bool Link<T>.IsLastNode inline
 	return this.next==null;
 }
 
-func<T, U> {U} {T}.Map(func U(T));
-func<T> operator++({T}, {T});
-func<T> {T} {T}.Filter(func bool(T));
-func<T> T {T}.First();
-func<T> T {T}.Last(;
-func<T> T {T}.Empty();
+func<T, U> {T}.Map(func U(T)):{U};
+func<T> operator++({T}, {T}):{T};
+func<T> {T}.Filter(func bool(T)):{T};
+func<T> {T}.First():T;
+func<T> {T}.Last():T;
+func<T> {T}.Empty():T;
 
-func<T> {T} {T}.Take(int);
-func<T> {T} {T}.TakeWhile(int, func bool(T));
-func<T> {T} {T}.Drop(int);
-func<T> {T} {T}.DropWhile(int, func bool(T));
-func<T> {T} {T}.Reverse();
-func<T, U> T {U}.Fold(T, func T(T, U));
-func<T, U> {T} {U}.Scan(T, func T(T, U));
-func<T> bool {T}.All(func bool(T));
-func<T> bool {T}.Any(func bool(T));
-func<T> ({T}, {T}) {T}.SplitAt(int count);
-func<T> ({T}, {T}) {T}.Span(func bool(T));
-func<T> ({T}, {T}) {T}.Break(func bool(T));
-func<T, U> {(T, U)} {U}.GroupBy(func T(U));
-func<T, U> {U} {U}.OrderBy(func T(U));
+func<T> {T}.Take(int):{T};
+func<T> {T}.TakeWhile(int, func bool(T)):{T};
+func<T> {T}.Drop(int):{T};
+func<T> {T}.DropWhile(int, func bool(T)):{T};
+func<T> {T}.Reverse():{T};
+func<T, U> {U}.Fold(T, func T(T, U)):T;
+func<T, U> {U}.Scan(T, func T(T, U)):{T};
+func<T> {T}.All(func bool(T)):bool;
+func<T> {T}.Any(func bool(T)):bool;
+func<T> {T}.SplitAt(int count):({T}, {T});
+func<T> {T}.Span(func bool(T)):({T}, {T});
+func<T> {T}.Break(func bool(T)):({T}, {T});
+func<T, U> {U}.GroupBy(func T(U)):{(T, U)};
+func<T, U> {U}.OrderBy(func T(U)):{U};
 
-func<T> T {T}.Sum();
-func<T> T {T}.Product();
-func<T> T {T}.Min();
-func<T> T {T}.Max();
-func<T> {T} {{T}}.Flatten();
-func<T, U> {(T, U)} {T}.Zip({U});
+func<T> {T}.Sum():T;
+func<T> {T}.Product():T;
+func<T> {T}.Min():T;
+func<T> {T}.Max():T;
+func<T> {{T}}.Flatten():{T};
+func<T, U> {T}.Zip({U}):{(T, U)};
 
 ========================================================
 Concepts
@@ -210,74 +213,74 @@ Concepts
 
 concept<T> Equlable
 {
-	func bool AreEqual(T a, T b);
-	func operator==(T a, T b) inline = AreEqual(a, b);
-	func operator!=(T a, T b) inline = !AreEqual(a, b);
+	func AreEqual(T a, T b):bool;
+	func operator==(T a, T b):bool inline = AreEqual(a, b);
+	func operator!=(T a, T b):bool inline = !AreEqual(a, b);
 }
 
 concept<T> Comparable
 {
-	func int Compare(T a, T b);
-	func T operator<(T a, T b) inline = Compare(a, b)<0;
-	func T operator<=(T a, T b) inline = Compare(a, b)<=0;
-	func T operator>(T a, T b) inline = Compare(a, b)>0;
-	func T operator>=(T a, T b) inline = Compare(a, b)>=0;
-	func T Min(a, b) inline = (if (Compare(a, b)<0) a else b);
-	func T Max(a, b) inline = (if (Compare(a, b)>0) a else b);
+	func Compare(T a, T b):int;
+	func operator<(T a, T b):bool inline = Compare(a, b)<0;
+	func operator<=(T a, T b):bool inline = Compare(a, b)<=0;
+	func operator>(T a, T b):bool inline = Compare(a, b)>0;
+	func operator>=(T a, T b):bool inline = Compare(a, b)>=0;
+	func Min(a, b):T inline = (if (Compare(a, b)<0) a else b);
+	func Max(a, b):T inline = (if (Compare(a, b)>0) a else b);
 }
 
 concept<T> Enumerable
 	where Comparable<T>
 {
-	func T Next(T a);
-	func T Prev(T a);
+	func Next(T a):T;
+	func Prev(T a):T;
 	prop T LowerBound{get;}
 	prop T UpperBound{get;}
-	func IEnumerable<T> EnumFrom(T a, T b);
-	func IEnumerable<T> EnumFrom(T a, T b, int step);
-	func IEnumerable<T> ReverseEnumFrom(T a, T b);
-	func IEnumerable<T> ReverseEnumFrom(T a, T b, int step);
+	func EnumFrom(T a, T b):IEnumerable<T>;
+	func EnumFrom(T a, T b, int step):IEnumerable<T>;
+	func ReverseEnumFrom(T a, T b):IEnumerable<T>;
+	func ReverseEnumFrom(T a, T b, int step):IEnumerable<T>;
 }
 
 concept<T> Bitwise
 	where Comparable<T>
 {
-	func T operator &&(T a, T b);
-	func T operator ||(T a, T b);
-	func T operator !(T a, T b);
+	func operator &&(T a, T b):T;
+	func operator ||(T a, T b):T;
+	func operator !(T a, T b):T;
 }
 
 concept<T> Numeric
 	where Comparable<T>
 {
 	prop T Zero{get;}
-	func T operator+(T a, T b);
-	func T operator+(T a);
-	func T operator-(T a, T b);
-	func T operator-(T a);
-	func T operator*(T a, T b);
-	func T operator/(T a, T b);
-	func T Abs(T a);
-	func T Sign(T a);
+	func operator+(T a, T b):T;
+	func operator+(T a):T;
+	func operator-(T a, T b):T;
+	func operator-(T a):T;
+	func operator*(T a, T b):T;
+	func operator/(T a, T b):T;
+	func Abs(T a):T;
+	func Sign(T a):T;
 }
 
 concept<T> Integral
 	where Numeric<T>
 {
-	func T operator%(T a, T b);
-	func bool Even(T a);
-	func bool Odd(T a);
-	func bool Gcd(T a);
-	func bool Lcm(T a);
+	func operator%(T a, T b):T;
+	func Even(T a):bool;
+	func Odd(T a):bool;
+	func Gcd(T a):bool;
+	func Lcm(T a):bool;
 }
 
 concept<T> Fractional
 	where Numeric<T>
 {
-	func T Truncate(T a);
-	func T Round(T a);
-	func T Floor(T a);
-	func T Ceiling(T a);
+	func Truncate(T a):T;
+	func Round(T a):T;
+	func Floor(T a):T;
+	func Ceiling(T a):T;
 }
 
 concept<T> Floating
@@ -286,26 +289,26 @@ concept<T> Floating
 	prop T Pi{get;}
 	prop bool T.IsNan{get;}
 	prop bool T.IsInfinite{get;}
-	func T Exp(T a);
-	func T Sqrt(T a);
-	func T Log(T a);
-	func T Sin(T a);
-	func T Cos(T a);
-	func T Tan(T a);
-	func T ASin(T a);
-	func T ACos(T a);
-	func T ATan(T a);
-	func T Sinh(T a);
-	func T Cosh(T a);
-	func T Tanh(T a);
-	func T ASinh(T a);
-	func T ACosh(T a);
-	func T ATanh(T a);
+	func Exp(T a):T;
+	func Sqrt(T a):T;
+	func Log(T a):T;
+	func Sin(T a):T;
+	func Cos(T a):T;
+	func Tan(T a):T;
+	func ASin(T a):T;
+	func ACos(T a):T;
+	func ATan(T a):T;
+	func Sinh(T a):T;
+	func Cosh(T a):T;
+	func Tanh(T a):T;
+	func ASinh(T a):T;
+	func ACosh(T a):T;
+	func ATanh(T a):T;
 }
 
 concept<T, U> Convertable
 {
-	func U Convert(T a);
+	func Convert(T a):U;
 }
 
 concept<T, U> ImplicitlyConvertable
@@ -315,12 +318,12 @@ concept<T, U> ImplicitlyConvertable
 
 concept<T> Printable
 {
-	func string T.ToString();
+	func T.ToString():string;
 }
 
 concept<T> Parsable
 {
-	func T Parse(string s);
+	func Parse(string s):T;
 }
 
 concept<T> Tuple // predefined
@@ -330,19 +333,19 @@ concept<T> Tuple // predefined
 concept<T=>U> Tuplizable // predefined
 	where Tuple<U>
 {
-	func U ToTuple(T value);
-	func T FromTuple(U tuple);
+	func ToTuple(T value):U;
+	func FromTuple(U tuple):T;
 }
 
 instance<T> Equlable<T>
 	where Comparable<T>
 {
-	func bool AreEqual(T a, T b) inline = Compare(a, b)==0;
+	func AreEqual(T a, T b):bool inline = Compare(a, b)==0;
 }
 
 instance<T, U> Comparable<(T..U)>
 {
-	func int Compare((T..U) a, (T..U) b)
+	func Compare((T..U) a, (T..U) b):int
 	{
 		int result=Compare(a.first, b.first);
 		if(result==0)
@@ -359,13 +362,13 @@ instance<T, U> Comparable<(T..U)>
 instance<T> Printable
 	where Convertable<T, string>
 {
-	func string T.ToString() inline = Convert(this);
+	func T.ToString():string inline = Convert(this);
 }
 
 instance<T> Parsable
 	where Convertable<string, T>
 {
-	func T Parse(string s) inline = Convert(s);
+	func Parse(string s):T inline = Convert(s);
 }
 
 ========================================================
@@ -374,20 +377,20 @@ Interfaces
 
 concept<out T> this.IEnumerator
 {
-	func bool MoveNext();
+	func MoveNext():bool;
 	prop T Current{get;}
 }
 
 concept<out T> this.IEnumerable
 {
-	func IEnumerator<T> CreateEnumerator();
+	func CreateEnumerator():IEnumerator<T>;
 }
 
 concept<T> this.IReadonlyCollection
 	where this.IEnumerable<T>
 {
 	prop int Count{get;}
-	func bool Contains(T value);
+	func Contains(T value):bool;
 }
 
 concept<T> this.IReadonlyArray
@@ -395,7 +398,7 @@ concept<T> this.IReadonlyArray
 	where this.IDelegate<T, (int)>
 {
 	prop T operator[](int index){get;}
-	func int IndexOf(T value);
+	func IndexOf(T value):int;
 }
 
 concept<T> this.IArray
@@ -408,16 +411,16 @@ concept<T> this.ICollection
 	where this.IReadonlyCollection<T>
 {
 	func void Clear();
-	func bool Add(T value);
-	func bool Remove(T value);
+	func Add(T value):bool;
+	func Remove(T value):bool;
 }
 
 concept<T> this.IList
 	where this.ICollection<T>
 	where this.IArray<T>
 {
-	func int Insert(T value, int index);
-	func T RemoveAt(int index);
+	func Insert(T value, int index):int;
+	func RemoveAt(int index):T;
 }
 
 concept<TKey, TValue> this.IReadonlyMap
@@ -426,15 +429,15 @@ concept<TKey, TValue> this.IReadonlyMap
 {
 	prop IReadonlyCollection<TKey> Keys{get;}
 	prop IReadonlyCollection<TValue> Values{get;}
-	func (TValue, bool) Find(TKey key);
+	func Find(TKey key):(TValue, bool);
 }
 
 concept<TKey, TValue> this.IMap
 	where this.ICollection<(TKey, TValue)>
 	where this.IReadonlyMap<TKey, TValue>
 {
-	func bool Set(TKey key, TValue value);
-	func bool Remove(TKey key);
+	func Set(TKey key, TValue value):bool;
+	func Remove(TKey key):bool;
 }
 
 ========================================================
@@ -445,19 +448,75 @@ Patterns:
 (a, b, c)
 [a, b, c: d]
 Point{x, y}
-a as Type
+{x, y}
+{x=a, y=b}
+a :: Type
+
+<pattern> = expression;
+
+switch(value)
+{
+	case <pattern> : ....
+}
 
 ========================================================
 Statments
 ========================================================
 
+<variable-declaration>
+<pattern> = expression;
+<variable> = expression;
+
+return [expression];
+break;
+continue;
+throw expression;
+
+if (condition) statement [else statement]
+while (condition) statement
+do statement while (condition);
+foreach(([type x] | <pattern>) in xs) statement
+
+try statement { catch (Type [ex]) statement } [ finally statement ]
+using (x = T where T.IDisposable) statement
+lock (object) statement
+
+switch(value)
+{
+	{ case <pattern> : statement }
+	[ default : statement ]
+}
+
 ========================================================
 Expressions
 ========================================================
 
+a op b
+op a
+a op
+
+f(a, b, c)
+f(.. t)
+a.b
+
+<constructors>
+<patterns>
+
+(if (condition) value else value)
+(switch (value) { case <pattern> : value } [default : value]) // PatternMatchingFailedException
+(using (x = T where T.IDisposable) value)
+(lock (object) value)
+
 ========================================================
 Exceptions
 ========================================================
+
+type Exception // base type for all exceptions
+{
+	string message;
+	CallstackSnapshot callstack;
+	Exception innerException;
+};
 
 ========================================================
 Continuations
