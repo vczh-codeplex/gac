@@ -4,12 +4,12 @@ Primitive Types
 
 Int8		sbyte		0
 Int16		short		0
-Int32		int			0
-Int64		long		0
+Int32		dshort		0
+Int64		long		0	(int)
 UInt8		byte		0
-UInt16		ushort		0
-UInt32		uint		0
-UInt64		ulong		0
+UInt16		word		0
+UInt32		dword		0
+UInt64		ulong		0	(uint)
 Boolean		bool		false
 Char		char		'\0'
 String		string		""
@@ -49,6 +49,7 @@ create(T)
 
 x:x+1
 (x,y):x+y
+func (int x, int y):int = x+y
 func (int x, int y):int{ return x+y; }
 
 // IArray
@@ -194,10 +195,10 @@ func<T, U> {U}.Fold(T, func T(T, U)):T;
 func<T, U> {U}.Scan(T, func T(T, U)):{T};
 func<T> {T}.All(func bool(T)):bool;
 func<T> {T}.Any(func bool(T)):bool;
-func<T> {T}.SplitAt(int count):({T}, {T});
-func<T> {T}.Span(func bool(T)):({T}, {T});
-func<T> {T}.Break(func bool(T)):({T}, {T});
-func<T, U> {U}.GroupBy(func T(U)):{(T, U)};
+func<T> {T}.SplitAt(int count):({T} .. {T});
+func<T> {T}.Span(func bool(T)):({T} .. {T});
+func<T> {T}.Break(func bool(T)):({T} .. {T});
+func<T, U> {U}.GroupBy(func T(U)):{(T .. U)};
 func<T, U> {U}.OrderBy(func T(U)):{U};
 
 func<T> {T}.Sum():T;
@@ -272,6 +273,8 @@ concept<T> Integral
 	func Odd(T a):bool;
 	func Gcd(T a):bool;
 	func Lcm(T a):bool;
+	func operator<<(T a, T b):T;
+	func operator>>(T a, T b):T;
 }
 
 concept<T> Fractional
@@ -450,7 +453,7 @@ Patterns:
 Point{x, y}
 {x, y}
 {x=a, y=b}
-a :: Type
+a :: Type		// infer a as type Type
 
 <pattern> = expression;
 
@@ -499,6 +502,7 @@ a op
 f(a, b, c)
 f(.. t)
 a.b
+a as Type		// explicit type conversion, invoking Convertable
 
 <constructors>
 <patterns>
@@ -537,6 +541,33 @@ func DealWith(case string x)
 {
 	Console.WriteLine("x is a string");
 }
+
+========================================================
+Type
+========================================================
+
+var one = 1;
+// one :: int
+
+var inc = x:x+1;
+// inc :: func(int):int
+
+var pinc = x:x+Convert(1);
+// pinc :: type<T> where Numeric<T>, Convertable<int, T> func(T):T
+
+func Apply(f, x, c)
+{
+	foreach(var i in (1..c))
+		x=f(x);
+	return x;
+}
+// Apply :: type<T> func(func(T):T, T, int):T
+
+var x = Apply(inc, 1, 100);
+// x = 100
+
+var x = Apply(pinc, 1.0, 100);
+// x = 100.0
 
 ========================================================
 Continuations
