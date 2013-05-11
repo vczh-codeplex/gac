@@ -479,10 +479,10 @@ throw expression;
 if (condition) statement [else statement]
 while (condition) statement
 do statement while (condition);
-foreach(([type x] | <pattern>) in xs) statement
+foreach(([type] x | <pattern>) in xs) statement
 
 try statement { catch (Type [ex]) statement } [ finally statement ]
-using (x = T where T.IDisposable) statement
+using ([type] x = T where T.IDisposable) statement
 lock (object) statement
 
 switch(value)
@@ -557,7 +557,7 @@ var pinc = x:x+Convert(1);
 
 func Apply(f, x, c)
 {
-	foreach(var i in (1..c))
+	foreach(i in (1..c))
 		x=f(x);
 	return x;
 }
