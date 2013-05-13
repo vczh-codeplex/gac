@@ -45,7 +45,7 @@ Composite Type Constructors
 ========================================================
 
 default(T)
-create(T)
+new(T)
 
 x:x+1
 (x,y):x+y
@@ -152,7 +152,7 @@ prop<T> Config
 		(config, exists)=globalConfigs.Find(typeof(T));
 		if(!exists)
 		{
-			config=create(T);
+			config=new(T);
 			globalConfigs[typeof(T)]=config;
 		}
 		return config;
@@ -566,6 +566,22 @@ var x = Apply(inc, 1, 100);
 
 var x = Apply(pinc, 1.0, 100);
 // x = 100.0
+
+func Filter(xs, p) yield
+{
+	foreach(x in xs)
+	    if (p) yield x;
+}
+// Filter :: type<T> func({T}, func (T):bool):{T}
+
+func Concat(urls, cont) async
+{
+    var xs = new(IList<string>);
+	foreach(url in urls)
+		xs.Add(await DownloadTextAsync(url))
+	cont(xs);
+}
+// Concat :: func({string}, func(IList<string>):void):Task<void>
 
 ========================================================
 Continuations
