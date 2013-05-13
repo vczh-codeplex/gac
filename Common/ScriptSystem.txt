@@ -522,6 +522,41 @@ type Exception // base type for all exceptions
 };
 
 ========================================================
+Attributes
+========================================================
+
+type Attribute // base type for all attributes
+{
+};
+
+@STAThread{}
+func ThreadProc(){}
+
+attribute marks
+	function
+	variable
+	type
+	concept
+	instance
+	field
+	argument
+	return
+	property
+
+@Attribute{}
+func Function(@Attribute{} int a, @Attribute{} int b) : @Attribute{} c;
+
+@ThreadLocal{}
+int a;
+
+@Serializable{}
+type Class
+{
+	@Item{name="Name"}
+	string name;
+}
+
+========================================================
 Multiple Dispatching
 ========================================================
 
