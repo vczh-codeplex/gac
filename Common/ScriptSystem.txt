@@ -110,11 +110,9 @@ type<T> Box = {int => T};
 Custom Type Constructors
 ========================================================
 
-Point{1, 2}
 Point{x=1, y=2}
 Point{}
-Point x = {x=1, y=2};
-DealWithPoint({x=1, y=2});
+DealWithPoint(Point{x=1, y=2});
 
 ========================================================
 Variables
