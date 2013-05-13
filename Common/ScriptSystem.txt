@@ -126,7 +126,8 @@ var a = 0;
 Functions
 ========================================================
 
-func Add(int a, int b):int inline = a+b ;
+@Inline
+func Add(int a, int b):int = a+b ;
 func Add(int a, int b):int
 {
 	return a+b;
@@ -167,12 +168,14 @@ prop<T> Config
 Extension Functions
 ========================================================
 
-func<T> bool Link<T>.IsLastNode() inline
+@Inline
+func<T> bool Link<T>.IsLastNode()
 {
 	return this.next==null;
 }
 
-prop<T> bool Link<T>.IsLastNode inline
+@Inline
+prop<T> bool Link<T>.IsLastNode
 {
 	return this.next==null;
 }
@@ -213,19 +216,27 @@ Concepts
 concept<T> Equlable
 {
 	func AreEqual(T a, T b):bool;
-	func operator==(T a, T b):bool inline = AreEqual(a, b);
-	func operator!=(T a, T b):bool inline = !AreEqual(a, b);
+	@Inline
+	func operator==(T a, T b):bool = AreEqual(a, b);
+	@Inline
+	func operator!=(T a, T b):bool = !AreEqual(a, b);
 }
 
 concept<T> Comparable
 {
 	func Compare(T a, T b):int;
-	func operator<(T a, T b):bool inline = Compare(a, b)<0;
-	func operator<=(T a, T b):bool inline = Compare(a, b)<=0;
-	func operator>(T a, T b):bool inline = Compare(a, b)>0;
-	func operator>=(T a, T b):bool inline = Compare(a, b)>=0;
-	func Min(a, b):T inline = (if (Compare(a, b)<0) a else b);
-	func Max(a, b):T inline = (if (Compare(a, b)>0) a else b);
+	@Inline
+	func operator<(T a, T b):bool = Compare(a, b)<0;
+	@Inline
+	func operator<=(T a, T b):bool = Compare(a, b)<=0;
+	@Inline
+	func operator>(T a, T b):bool = Compare(a, b)>0;
+	@Inline
+	func operator>=(T a, T b):bool = Compare(a, b)>=0;
+	@Inline
+	func Min(a, b):T = (if (Compare(a, b)<0) a else b);
+	@Inline
+	func Max(a, b):T = (if (Compare(a, b)>0) a else b);
 }
 
 concept<T> Enumerable
@@ -341,7 +352,8 @@ concept<T=>U> Tuplizable // predefined
 instance<T> Equlable<T>
 	where Comparable<T>
 {
-	func AreEqual(T a, T b):bool inline = Compare(a, b)==0;
+	@Inline
+	func AreEqual(T a, T b):bool = Compare(a, b)==0;
 }
 
 instance<T, U> Comparable<(T..U)>
@@ -363,13 +375,15 @@ instance<T, U> Comparable<(T..U)>
 instance<T> Printable
 	where Convertable<T, string>
 {
-	func T.ToString():string inline = Convert(this);
+	@Inline
+	func T.ToString():string = Convert(this);
 }
 
 instance<T> Parsable
 	where Convertable<string, T>
 {
-	func Parse(string s):T inline = Convert(s);
+	@Inline
+	func Parse(string s):T = Convert(s);
 }
 
 ========================================================
@@ -502,6 +516,8 @@ f(.. t)
 a.b
 a as Type		// explicit type conversion, invoking Convertable
 
+<continuation-control-flow> expression
+
 <constructors>
 <patterns>
 
@@ -529,7 +545,7 @@ type Attribute // base type for all attributes
 {
 };
 
-@STAThread{}
+@STAThread
 func ThreadProc(){}
 
 attribute marks
@@ -543,13 +559,13 @@ attribute marks
 	return
 	property
 
-@Attribute{}
-func Function(@Attribute{} int a, @Attribute{} int b) : @Attribute{} c;
+@Attribute
+func Function(@Attribute int a, @Attribute int b) : @Attribute c;
 
-@ThreadLocal{}
+@ThreadLocal
 int a;
 
-@Serializable{}
+@Serializable
 type Class
 {
 	@Item{name="Name"}
@@ -602,7 +618,7 @@ var x = Apply(inc, 1, 100);
 var x = Apply(pinc, 1.0, 100);
 // x = 100.0
 
-func Filter(xs, p) yield
+func Filter(xs, p) seq
 {
 	foreach(x in xs)
 	    if (p) yield x;
@@ -621,3 +637,43 @@ func Concat(urls, cont) async
 ========================================================
 Continuations
 ========================================================
+
+concept<M<>> this.Continuation
+{
+	func<T> Nop() : M<T>;
+	func<T> Delay(func ():M<T> body) : M<T>;
+	func<T, U> Combine(M<T> source, M<U> next) : M<U>;
+	func<T> Return(T value) : M<T>;
+	func<T, U> Bind(M<T> source, func (T):M<U> bind) : M<U>;
+	func<T> Yield(T value) : M<T>;
+	func<T> YieldFrom(M<T> source) : M<T>;
+	func<T> Try(M<T> source, func (Exception):M<T> bind) : M<T>;
+}
+
+---------------------------------------
+
+type seq
+{
+}
+
+instance<T> seq.Continuation<{T}>
+{
+}
+
+@ContinuationControlFlow
+@Inline
+func seq.yield(T value) = this.Yield(value);
+
+---------------------------------------
+
+type async
+{
+}
+
+instance<T> async.Continuation<Task<T>>
+{
+}
+
+@ContinuationControlFlow
+@Inline
+func async.await(source, bind) = this.Bind(source, bind);
