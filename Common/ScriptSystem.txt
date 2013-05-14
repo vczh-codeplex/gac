@@ -516,7 +516,7 @@ f(.. t)
 a.b
 a as Type		// explicit type conversion, invoking Convertable
 
-<continuation-control-flow> expression
+<continuation-control-flow>! expression
 
 <constructors>
 <patterns>
@@ -621,7 +621,7 @@ var x = Apply(pinc, 1.0, 100);
 func Filter(xs, p) seq
 {
 	foreach(x in xs)
-	    if (p) yield x;
+	    if (p) yield! x;
 }
 // Filter :: type<T> func({T}, func (T):bool):{T}
 
@@ -629,7 +629,7 @@ func Concat(urls, cont) async
 {
     var xs = new(IList<string>);
 	foreach(url in urls)
-		xs.Add(await DownloadTextAsync(url))
+		xs.Add(await! DownloadTextAsync(url))
 	cont(xs);
 }
 // Concat :: func({string}, func(IList<string>):void):Task<void>
