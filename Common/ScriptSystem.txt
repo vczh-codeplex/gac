@@ -503,6 +503,9 @@ switch(value)
 	[ default : statement ]
 }
 
+if (x = y) --> (x, success) = y; if(success)
+while the same
+
 ========================================================
 Expressions
 ========================================================
