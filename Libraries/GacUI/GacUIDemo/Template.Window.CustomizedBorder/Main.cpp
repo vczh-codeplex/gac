@@ -342,8 +342,17 @@ extern void FillData(GuiListView* listView);
 class CustomTemplateWindow : public GuiWindow
 {
 private:
+	List<Ptr<GuiWindow>>			newWindows;
+	GuiButton*						buttonNewWindow;
 	GuiListView*					listView;
 	GuiComboBoxListControl*			comboView;
+
+	void buttonNewWindow_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
+	{
+		GuiWindow* newWindow=new CustomTemplateWindow;
+		newWindows.Add(newWindow);
+		newWindow->Show();
+	}
 
 	void comboView_SelectedIndexChanged(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
 	{
@@ -378,14 +387,27 @@ public:
 		GuiTableComposition* table=new GuiTableComposition;
 		table->SetCellPadding(4);
 		table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-		table->SetRowsAndColumns(2, 1);
+		table->SetRowsAndColumns(2, 3);
 		table->SetRowOption(0, GuiCellOption::MinSizeOption());
 		table->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
-		table->SetColumnOption(0, GuiCellOption::PercentageOption(1.0));
+		table->SetColumnOption(0, GuiCellOption::MinSizeOption());
+		table->SetColumnOption(1, GuiCellOption::MinSizeOption());
+		table->SetColumnOption(2, GuiCellOption::PercentageOption(1.0));
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
 			cell->SetSite(0, 0, 1, 1);
+
+			buttonNewWindow=g::NewButton();
+			buttonNewWindow->SetText(L"New Window ...");
+			buttonNewWindow->Clicked.AttachMethod(this, &CustomTemplateWindow::buttonNewWindow_Clicked);
+
+			cell->AddChild(buttonNewWindow->GetBoundsComposition());
+		}
+		{
+			GuiCellComposition* cell=new GuiCellComposition;
+			table->AddChild(cell);
+			cell->SetSite(0, 1, 1, 1);
 
 			GuiTextList* comboSource=g::NewTextList();
 			comboSource->GetItems().Add(new list::TextItem(L"Big Icon"));
@@ -406,7 +428,7 @@ public:
 		{
 			GuiCellComposition* cell=new GuiCellComposition;
 			table->AddChild(cell);
-			cell->SetSite(1, 0, 1, 1);
+			cell->SetSite(1, 0, 1, 3);
 
 			listView=g::NewListViewBigIcon();
 			listView->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
