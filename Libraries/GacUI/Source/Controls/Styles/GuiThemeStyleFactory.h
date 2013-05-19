@@ -21,6 +21,7 @@ Interfaces:
 #include "..\ListControlPackage\GuiListViewControls.h"
 #include "..\ListControlPackage\GuiTreeViewControls.h"
 #include "..\ListControlPackage\GuiComboControls.h"
+#include "..\ListControlPackage\GuiDataGridControls.h"
 
 #include "..\ToolstripPackage\GuiMenuControls.h"
 #include "..\ToolstripPackage\GuiToolstripMenu.h"
