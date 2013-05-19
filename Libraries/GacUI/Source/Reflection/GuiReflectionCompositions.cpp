@@ -55,6 +55,7 @@ Type Declaration
 
 				CLASS_MEMBER_METHOD(InsertStackItem, {L"index" _ L"item"})
 				CLASS_MEMBER_METHOD(IsStackItemClipped, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(EnsureVisible, {L"index"})
 			END_CLASS_MEMBER(GuiStackComposition)
 
 			BEGIN_ENUM_ITEM(GuiStackComposition::Direction)
