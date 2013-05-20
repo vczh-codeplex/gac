@@ -60,8 +60,7 @@ DataGridItemProvider
 
 				vint DataGridItemProvider::Count()
 				{
-					//////////////////////////////////////
-					throw 0;
+					return dataProvider->GetRowCount();
 				}
 
 				IDescriptable* DataGridItemProvider::RequestView(const WString& identifier)
@@ -118,14 +117,12 @@ DataGridItemProvider
 
 				WString DataGridItemProvider::GetText(vint itemIndex)
 				{
-					//////////////////////////////////////
-					throw 0;
+					return dataProvider->GetCellText(itemIndex, 0);
 				}
 
 				WString DataGridItemProvider::GetSubItem(vint itemIndex, vint index)
 				{
-					//////////////////////////////////////
-					throw 0;
+					return dataProvider->GetCellText(itemIndex, index+1);
 				}
 
 				vint DataGridItemProvider::GetDataColumnCount()
@@ -169,26 +166,26 @@ DataGridItemProvider
 
 				vint DataGridItemProvider::GetColumnCount()
 				{
-					//////////////////////////////////////
-					throw 0;
+					return dataProvider->GetColumnCount();
 				}
 
 				WString DataGridItemProvider::GetColumnText(vint index)
 				{
-					//////////////////////////////////////
-					throw 0;
+					return dataProvider->GetColumnText(index);
 				}
 
 				vint DataGridItemProvider::GetColumnSize(vint index)
 				{
-					//////////////////////////////////////
-					throw 0;
+					return dataProvider->GetColumnSize(index);
 				}
 
 				void DataGridItemProvider::SetColumnSize(vint index, vint value)
 				{
-					//////////////////////////////////////
-					throw 0;
+					dataProvider->SetColumnSize(index, value);
+					for(vint i=0;i<columnItemViewCallbacks.Count();i++)
+					{
+						columnItemViewCallbacks[i]->OnColumnChanged();
+					}
 				}
 
 				GuiMenu* DataGridItemProvider::GetDropdownPopup(vint index)
@@ -347,7 +344,7 @@ GuiVirtualDataGrid
 				:GuiVirtualListView(_styleProvider, new DataGridItemProvider(_dataProvider))
 				,dataProvider(_dataProvider)
 			{
-				ChangeItemStyle(new ListViewDetailContentProvider);
+				ChangeItemStyle(new DatagridContentProvider);
 			}
 
 			GuiVirtualDataGrid::~GuiVirtualDataGrid()
