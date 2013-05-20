@@ -773,14 +773,14 @@ ListView
 				
 				/// <summary>Set the item content provider.</summary>
 				/// <param name="itemStyleProvider">The new item content provider.</param>
-				void											ChangeItemStyle(list::ListViewItemStyleProvider::IListViewItemContentProvider* contentProvider);
+				void													ChangeItemStyle(list::ListViewItemStyleProvider::IListViewItemContentProvider* contentProvider);
 			};
 			
 			/// <summary>List view control in virtual mode.</summary>
 			class GuiListView : public GuiVirtualListView, public Description<GuiListView>
 			{
 			protected:
-				list::ListViewItemProvider*						items;
+				list::ListViewItemProvider*								items;
 			public:
 				/// <summary>Create a list view control.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
@@ -789,7 +789,7 @@ ListView
 				
 				/// <summary>Get all list view items.</summary>
 				/// <returns>All list view items.</returns>
-				list::ListViewItemProvider&						GetItems();
+				list::ListViewItemProvider&								GetItems();
 			};
 		}
 	}
