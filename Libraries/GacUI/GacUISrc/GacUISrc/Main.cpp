@@ -9,6 +9,8 @@
 #include <Windows.h>
 #include <msctf.h>
 
+using namespace vl::collections;
+
 #define GUI_GRAPHICS_RENDERER_DIRECT2D
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int CmdShow)
@@ -28,7 +30,12 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 namespace test
 {
-	class TestWindow : public GuiWindow, private ITfThreadMgrEventSink, private ITfContextOwnerCompositionSink
+
+/***********************************************************************
+TsfTestWindow
+***********************************************************************/
+
+	class TsfTestWindow : public GuiWindow, private ITfThreadMgrEventSink, private ITfContextOwnerCompositionSink
 	{
 	private:
 		ComPtr<ITfThreadMgr>				threadManager;
@@ -119,34 +126,10 @@ namespace test
 			return S_OK;
 		}
 
-	private:
-		GuiTab*					tab;
-		GuiButton*				buttonAdd;
-		GuiButton*				buttonRemove;
-		vint					counter;
-
-		void buttonAdd_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-		{
-			buttonRemove->SetEnabled(true);
-			GuiTabPage* page=tab->CreatePage();
-			page->SetText(L"TestWindow::GuiTabPage "+itow(++counter));
-		}
-
-		void buttonRemove_Clicked(GuiGraphicsComposition* sender, GuiEventArgs& arguments)
-		{
-			GuiTabPage* page=tab->GetSelectedPage();
-			tab->RemovePage(page);
-			if(tab->GetPages().Count()==0)
-			{
-				buttonRemove->SetEnabled(false);
-			}
-			delete page;
-		}
 	public:
-		TestWindow()
+		TsfTestWindow()
 			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
 			,clientId(0)
-			,counter(0)
 		{
 			SetText(GetApplication()->GetExecutableFolder());
 			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
@@ -154,58 +137,10 @@ namespace test
 			ForceCalculateSizeImmediately();
 			MoveToScreenCenter();
 
-			GuiTableComposition* table=new GuiTableComposition;
-			this->GetContainerComposition()->AddChild(table);
-			table->SetAlignmentToParent(Margin(0, 0, 0, 0));
-			table->SetRowsAndColumns(2, 3);
-			table->SetCellPadding(5);
-			table->SetRowOption(0, GuiCellOption::MinSizeOption());
-			table->SetRowOption(1, GuiCellOption::PercentageOption(1.0));
-			table->SetColumnOption(0, GuiCellOption::MinSizeOption());
-			table->SetColumnOption(1, GuiCellOption::MinSizeOption());
-			table->SetColumnOption(2, GuiCellOption::PercentageOption(1.0));
-			{
-				GuiCellComposition* cell=new GuiCellComposition;
-				table->AddChild(cell);
-				cell->SetSite(0, 0, 1, 1);
-
-				buttonAdd=g::NewButton();
-				buttonAdd->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				buttonAdd->SetText(L"Add Tab Page");
-				buttonAdd->Clicked.AttachMethod(this, &TestWindow::buttonAdd_Clicked);
-				cell->AddChild(buttonAdd->GetBoundsComposition());
-			}
-			{
-				GuiCellComposition* cell=new GuiCellComposition;
-				table->AddChild(cell);
-				cell->SetSite(0, 1, 1, 1);
-
-				buttonRemove=g::NewButton();
-				buttonRemove->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				buttonRemove->SetText(L"Remove Current Tab Page");
-				buttonRemove->Clicked.AttachMethod(this, &TestWindow::buttonRemove_Clicked);
-				cell->AddChild(buttonRemove->GetBoundsComposition());
-			}
-			{
-				GuiCellComposition* cell=new GuiCellComposition;
-				table->AddChild(cell);
-				cell->SetMinSizeLimitation(GuiGraphicsComposition::NoLimit);
-				cell->SetSite(1, 0, 1, 3);
-
-				tab=g::NewTab();
-				tab->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				cell->AddChild(tab->GetBoundsComposition());
-			}
-			for(vint i=0;i<3;i++)
-			{
-				GuiEventArgs arguments=buttonAdd->GetNotifyEventArguments();
-				buttonAdd->Clicked.Execute(arguments);
-			}
-
 			Initialize();
 		}
 
-		~TestWindow()
+		~TsfTestWindow()
 		{
 		}
 
@@ -244,6 +179,95 @@ namespace test
 			threadManagerSource=pSource;
 			documentManager=pDocumentMgr;
 			editContext=pContext;
+		}
+	};
+
+/***********************************************************************
+TestWindow
+***********************************************************************/
+
+	class DataProvider : public Object, public virtual list::IDataProvider
+	{
+	protected:
+		Array<vint>			columnSizes;
+	public:
+		DataProvider()
+			:columnSizes(10)
+		{
+			for(vint i=0;i<10;i++)
+			{
+				columnSizes[i]=80;
+			}
+		}
+
+		vint GetColumnCount()override
+		{
+			return 10;
+		}
+
+		WString GetColumnText(vint column)override
+		{
+			if(column==0)
+			{
+				return L"";
+			}
+			else
+			{
+				return itow(column);
+			}
+		}
+
+		vint GetColumnSize(vint column)override
+		{
+			return columnSizes[column];
+		}
+
+		void SetColumnSize(vint column, vint value)override
+		{
+			columnSizes[column]=value;
+		}
+
+		vint GetRowCount()override
+		{
+			return 9;
+		}
+
+		WString GetCellText(vint row, vint column)override
+		{
+			if(column==0)
+			{
+				return itow(row+1);
+			}
+			else
+			{
+				return itow(row+1)+L" * "+itow(column)+L" = "+itow((row+1)*column);
+			}
+		}
+	};
+
+	class TestWindow : public GuiWindow
+	{
+	private:
+		GuiVirtualDataGrid*					dataGrid;
+	public:
+		TestWindow()
+			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+		{
+			SetText(GetApplication()->GetExecutableFolder());
+			GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+			GetContainerComposition()->SetPreferredMinSize(Size(900, 400));
+			ForceCalculateSizeImmediately();
+			MoveToScreenCenter();
+
+			dataGrid=new GuiVirtualDataGrid(GetCurrentTheme()->CreateListViewStyle(), new DataProvider);
+			dataGrid->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
+			AddChild(dataGrid);
+
+			dataGrid->ChangeItemStyle(new list::ListViewDetailContentProvider);
+		}
+
+		~TestWindow()
+		{
 		}
 	};
 }

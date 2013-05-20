@@ -30,6 +30,31 @@ Datagrid Interfaces
 				public:
 					/// <summary>The identifier for this view.</summary>
 					static const wchar_t* const				Identifier;
+					
+					/// <summary>Get the number of all columns.</summary>
+					/// <returns>The number of all columns.</returns>
+					virtual vint							GetColumnCount()=0;
+					/// <summary>Get the text of the column.</summary>
+					/// <returns>The text of the column.</returns>
+					/// <param name="column">The index of the column.</param>
+					virtual WString							GetColumnText(vint column)=0;
+					/// <summary>Get the size of the column.</summary>
+					/// <returns>The size of the column.</returns>
+					/// <param name="column">The index of the column.</param>
+					virtual vint							GetColumnSize(vint column)=0;
+					/// <summary>Set the size of the column.</summary>
+					/// <param name="column">The index of the column.</param>
+					/// <param name="value">The new size of the column.</param>
+					virtual void							SetColumnSize(vint column, vint value)=0;
+					
+					/// <summary>Get the number of all rows.</summary>
+					/// <returns>The number of all rows.</returns>
+					virtual vint							GetRowCount()=0;
+					/// <summary>Get the text of the cell.</summary>
+					/// <returns>The text of the cell.</returns>
+					/// <param name="row">The row number of the cell.</param>
+					/// <param name="column">The column number of the cell.</param>
+					virtual WString							GetCellText(vint row, vint column)=0;
 				};
 
 /***********************************************************************
