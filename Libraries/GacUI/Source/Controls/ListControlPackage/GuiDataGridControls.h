@@ -22,6 +22,24 @@ namespace vl
 DataGrid Control
 ***********************************************************************/
 
+			/// <summary>Data grid control in virtual mode.</summary>
+			class GuiVirtualDataGrid : public GuiVirtualListView, public Description<GuiVirtualDataGrid>
+			{
+			public:
+				class IDataProvider : public virtual IDescriptable, public Description<IDataProvider>
+				{
+				};
+
+			protected:
+				Ptr<IDataProvider>						dataProvider;
+			public:
+				/// <summary>Create a data grid control in virtual mode.</summary>
+				/// <param name="_styleProvider">The style provider for this control.</param>
+				/// <param name="_dataProvider">The data provider for this control.</param>
+				GuiVirtualDataGrid(IStyleProvider* _styleProvider, IDataProvider* _dataProvider);
+				~GuiVirtualDataGrid();
+			};
+
 /***********************************************************************
 DataSource Extensions
 ***********************************************************************/
