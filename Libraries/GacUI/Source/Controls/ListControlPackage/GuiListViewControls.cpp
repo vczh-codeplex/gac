@@ -923,6 +923,16 @@ ListViewColumnItemArranger
 					listView->ColumnClicked.Execute(args);
 				}
 
+				void ListViewColumnItemArranger::ColumnBoundsChanged(vint index, compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+				{
+					GuiBoundsComposition* buttonBounds=columnHeaderButtons[index]->GetBoundsComposition();
+					vint size=buttonBounds->GetBounds().Width();
+					if(size>columnItemView->GetColumnSize(index))
+					{
+						columnItemView->SetColumnSize(index, size);
+					}
+				}
+
 				void ListViewColumnItemArranger::ColumnHeaderSplitterLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments)
 				{
 					if(listView->GetVisuallyEnabled())
@@ -1050,6 +1060,7 @@ ListViewColumnItemArranger
 								button->SetColumnSortingState(columnItemView->GetSortingState(i));
 								button->GetBoundsComposition()->SetBounds(Rect(Point(0, 0), Size(columnItemView->GetColumnSize(i), 0)));
 								button->Clicked.AttachLambda(Curry(Func<void(vint, GuiGraphicsComposition*, GuiEventArgs&)>(this, &ListViewColumnItemArranger::ColumnClicked))(i));
+								button->GetBoundsComposition()->BoundsChanged.AttachLambda(Curry(Func<void(vint, GuiGraphicsComposition*, GuiEventArgs&)>(this, &ListViewColumnItemArranger::ColumnBoundsChanged))(i));
 								columnHeaderButtons.Add(button);
 								if(i>0)
 								{
